@@ -717,6 +717,11 @@ void StarSystem::ProcessPendingJumps() {
  	if( Network==NULL || playernum<0 || Network!=NULL && playernum>=0 &&  Network[playernum].readyToJump())
 	{
 	    Unit * un=pendingjump[kk]->un.GetUnit();
+
+	    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+		// Download client descriptions of the new zone (has to be blocking)
+ 		if( Network!=NULL)
+ 			Network[playernum].downloadZoneInfo();
  
 	    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig))
 		{
@@ -728,7 +733,6 @@ void StarSystem::ProcessPendingJumps() {
 	      kk--;
 	      continue;
 	    }
-	    StarSystem * savedStarSystem = _Universe->activeStarSystem();
 	    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
 	    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
 	    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);

@@ -108,6 +108,7 @@ namespace VSFileSystem
 			CASE( VSFileSystem::BSPFile)
 			CASE( VSFileSystem::MusicFile)
 			CASE( VSFileSystem::AccountFile)
+			CASE( VSFileSystem::ZoneBuffer)
 			CASE( VSFileSystem::Unknown)
 			default: ostr << "VSFileSystem::<undefined VSFileType>"; break;
 		}
@@ -1013,6 +1014,7 @@ namespace VSFileSystem
 				UseVolumes[AiFile] = 1;
 				cout<<"Using volume file "<<(datadir+"/ai")<<".pk3"<<endl;
 			}
+			UseVolumes[ZoneBuffer] = 0;
 		}
 	}
 
@@ -1319,6 +1321,25 @@ namespace VSFileSystem
 				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype);
 			}
 		}
+		if( curtype==CockpitFile)
+		{
+			for( i=0; found<0 && i<Rootdir.size(); i++)
+			{
+				curpath = Rootdir[i];
+				subdir = "";
+				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type);
+
+				for( j=0; found<0 && j<SubDirectories[curtype].size(); j++)
+				{
+					curpath = Rootdir[i];
+					subdir = SubDirectories[curtype][j];
+					if( extra!="")
+						subdir += extra;
+	
+					found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype);
+				}
+			}
+		}
 
 	#ifdef VSFS_DEBUG
 		//cerr<<failed<<" - VOLUME TYPE="<<isin_bigvolumes<<endl;
@@ -1376,6 +1397,19 @@ namespace VSFileSystem
     {
         private_init( );
     }
+
+	VSFile::VSFile( const char * buffer, long bufsize, VSFileType type, VSFileMode mode)
+	{
+        private_init( );
+		this->size = bufsize;
+		this->pk3_extracted_file = new char[bufsize+1];
+		memcpy( this->pk3_extracted_file, buffer, bufsize);
+		pk3_extracted_file[bufsize]=0;
+		this->file_type = this->alt_type = ZoneBuffer;
+		this->file_mode = mode;
+		// To say we want to read in volume even if it is not the case then it will read in pk3_extracted_file
+		this->volume_type = Big;
+	}
 
 	VSFile::VSFile( const char * filename, VSFileType type, VSFileMode mode)
 	{
@@ -1456,6 +1490,8 @@ namespace VSFileSystem
 		VSError err = Ok;
 
 		cerr<<"Loading a " << type << " :"<<endl;
+	if( type < ZoneBuffer || type==Unknown) // It is a "classic file"
+	{
 		if( !UseVolumes[type])
 		{
 			if( type==Unknown)
@@ -1558,13 +1594,25 @@ namespace VSFileSystem
 		#endif
 			}
 		}
-		return err;
+	}
+	else	// This is a "buffer file"
+	{
+		if( !this->pk3_extracted_file)
+			err = FileNotFound;
+		else
+			err = Ok;
+	}
+
+	return err;
 	}
 
 	// We will always write in homedir+Directories[FileType][0]
 	// Open a standard file read/write
 	VSError VSFile::OpenReadWrite( const char * filename, VSFileType type)
 	{
+		if( type >= ZoneBuffer && type != Unknown)
+			return FileNotFound;
+
 		this->file_type = this->alt_type = type;
 		this->file_mode = ReadWrite;
 
@@ -1575,6 +1623,9 @@ namespace VSFileSystem
 	// Open (truncate) or create a standard file read/write
 	VSError VSFile::OpenCreateWrite( const char * filename, VSFileType type)
 	{
+		if( type >= ZoneBuffer && type != Unknown)
+			return FileNotFound;
+
 		this->file_type = this->alt_type = type;
 		this->file_mode = CreateWrite;
 
@@ -1976,6 +2027,13 @@ namespace VSFileSystem
 
 	void  VSFile::Close()
 	{
+		if( this->file_type >= ZoneBuffer && this->file_type!=Unknown && this->pk3_extracted_file)
+		{
+			delete this->pk3_extracted_file;
+			this->pk3_extracted_file = NULL;
+			return;
+		}
+
 		if( this->valid && this->file_mode==ReadOnly && (file_type==UnitFile || file_type==AnimFile || file_type==SpriteFile || file_type==CockpitFile))
 		{
 			assert( current_path.size()>1);
@@ -2141,6 +2199,8 @@ std::string   nameof( VSFileSystem::VSFileType type )
 		CASE( VSFileSystem::MissionFile)
 		CASE( VSFileSystem::BSPFile)
 		CASE( VSFileSystem::MusicFile)
+		CASE( VSFileSystem::AccountFile)
+		CASE( VSFileSystem::ZoneBuffer)
 		CASE( VSFileSystem::Unknown)
 		default : return "VSFileSystem::<undefined VSFileType>"; break;
 	}

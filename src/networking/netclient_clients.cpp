@@ -1,3 +1,4 @@
+#include "lin_time.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/client.h"
 #include "networking/netclient.h"
@@ -10,6 +11,8 @@
 #include "cmd/unit_factory.h"
 #include "networking/prediction.h"
 #include "networking/fileutil.h"
+#include "networking/lowlevel/vsnet_notify.h"
+#include "networking/lowlevel/vsnet_dloadmgr.h"
 
 /*************************************************************/
 /**** Adds an entering client in the actual zone          ****/
@@ -17,7 +20,13 @@
 
 void	NetClient::addClient( const Packet* packet )
 {
-	ObjSerial cltserial = packet->getSerial();
+	//Packet ptmp = packet;
+	NetBuffer netbuf( packet->getData(), packet->getDataLength());
+	this->AddClientObject( netbuf, packet->getSerial());
+}
+
+void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
+{
 	ClientPtr clt;
 	// NOTE : in splitscreen mode we may receive info about us so we comment the following test
 	/*
@@ -41,21 +50,15 @@ void	NetClient::addClient( const Packet* packet )
 		nbclients++;
 		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	}
-
-
-	//Packet ptmp = packet;
-	NetBuffer netbuf( packet->getData(), packet->getDataLength());
 	// Should receive the name
 	clt->name = netbuf.getString();
+	string savestr = netbuf.getString();
+	string xmlstr = netbuf.getString();
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
 		// The save buffer and XML buffer come after the ClientState
 		//COUT<<"GETTING SAVES FOR NEW CLIENT"<<endl;
-		vector<string> saves;
-		saves.push_back( netbuf.getString());
-		saves.push_back( netbuf.getString());
-		//saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
 		//COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		// We will ignore - starsys as if a client enters he is in the same system
@@ -67,7 +70,7 @@ void	NetClient::addClient( const Packet* packet )
 		bool update=true;
 		vector<string> savedships;
 		// Parse the save buffer
-		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, saves[0], false);
+		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
 
 		string PLAYER_FACTION_STRING( save.GetPlayerFaction());
 
@@ -81,7 +84,7 @@ void	NetClient::addClient( const Packet* packet )
 							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-							 0, &saves[1]);
+							 0, &xmlstr);
 		clt->game_unit.SetUnit( un);
 		// Set all weapons to inactive
 		vector <Mount>
@@ -105,6 +108,47 @@ void	NetClient::addClient( const Packet* packet )
 	{
 		clt->game_unit.SetUnit( getNetworkUnit( cltserial));
 		assert( clt->game_unit.GetUnit() != NULL);
+	}
+}
+
+/*************************************************************/
+/**** Ask the server for the entering zone info           ****/
+/*************************************************************/
+
+void	NetClient::downloadZoneInfo()
+{
+	char tbuf[1024];
+	sscanf( tbuf, "%d", this->zone);
+	VsnetDownload::Client::Buffer buf( this->clt_sock, tbuf, VSFileSystem::ZoneBuffer);
+	_downloadManagerClient->addItem( &buf);
+	while( !buf.done())
+	{
+		checkMsg( NULL);
+		micro_sleep( 40000);
+	}
+	const char * tmp = (char *) buf.getBuffer().get();
+	NetBuffer netbuf( tmp, buf.getSize());
+	this->AddObjects( netbuf);
+}
+
+void	NetClient::AddObjects( NetBuffer & netbuf)
+{
+	char subcmd;
+
+	// Loop until the end of the buffer
+	while( (subcmd=netbuf.getChar())!=ZoneMgr::End)
+	{
+		switch( subcmd)
+		{
+			case ZoneMgr::AddClient :
+			{
+				ObjSerial serial = netbuf.getSerial();
+				this->AddClientObject( netbuf, serial);
+			}
+			break;
+			default :
+				cerr<<"WARNING : Unknown sub command in AddObjects"<<endl;
+		}
 	}
 }
 

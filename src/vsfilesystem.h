@@ -40,7 +40,9 @@ namespace VSFileSystem
 	enum VSFileMode {	ReadOnly, ReadWrite, CreateWrite };
 
 	// Different file type we have to deal with
-	enum VSFileType { 	UniverseFile,	// Loaded from universe subdir
+	enum VSFileType { 	
+						// File types
+						UniverseFile,	// Loaded from universe subdir
 						SystemFile,		// Loaded from sectors subdir written in homedir/sectors/universename
 						CockpitFile,	// Loaded from cockpits subdir
 						UnitFile,		// Loaded from units subdir
@@ -57,6 +59,9 @@ namespace VSFileSystem
 						BSPFile,		// Loaded from homedir/generatedbsp and written in homedir/generatedbsp
 						MusicFile,		// Loaded from homedir
 						AccountFile,	// Loaded from datadir/accounts and written in datadir/accounts
+						// Buffer types
+						ZoneBuffer,		// Indicates a ZoneInfo buffer coming from server
+						// Unknown
 						Unknown			// Loaded from homedir or datadir and written in homedir
 					};
 
@@ -275,11 +280,13 @@ namespace VSFileSystem
 
 		public:
 			VSFile();
+			VSFile( const char * buffer, long size, VSFileType type=ZoneBuffer, VSFileMode=ReadOnly);
 			VSFile( const char * filename, VSFileType type=Unknown, VSFileMode=ReadOnly);
 			VSFile( string filename, VSFileType type=Unknown) { VSFile::VSFile( filename.c_str(), type); }
   			~VSFile();
 
 			FILE *	GetFP() { return this->fp; } // This is still needed for special cases (when loading PNG files)
+			char *	GetFileBuffer() { return this->pk3_extracted_file; }
 
 			/********************************** OPEN A FILE *********************************/
 			// Open an existing file read only

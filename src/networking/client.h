@@ -65,6 +65,7 @@ public:
 	char			webcam;
 	char			portaudio;
 	char			secured;
+	char			jumpok;
 	string			jumpfile;
 	float			comm_freq;
 

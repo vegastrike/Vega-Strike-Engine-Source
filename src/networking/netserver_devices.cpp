@@ -4,6 +4,8 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "lin_time.h"
 
+extern StarSystem * GetLoadedStarSystem( const char * system);
+
 // WEAPON STUFF
 
 void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone)
@@ -95,21 +97,25 @@ void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 	// And remove the player from its old starsystem and set it out of game
 	//this->removeClient( clt );
 	// Have to set new starsystem here
-	// ??????
+	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	cp->savegame->SetStarSystem( clt->jumpfile);
+	StarSystem* sts = GetLoadedStarSystem( clt->jumpfile.c_str());
+	unsigned short zoneid = _Universe->StarSystemIndex( sts);
+	netbuf.addShort( zoneid);
 
 	// Test whether the jump was accepted or not by server
 	if( ok)
 	{
 		// If jumpfile is empty the hash was correct
-		if( clt->jumpfile=="" )
+		if( clt->jumpok==1 )
 			p2.bc_create( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 		// New system file HASH is wrong tell the client with serial != player serial so he can ask for a new download
-		else
+		else if( clt->jumpok==2)
 			p2.bc_create( CMD_JUMP, serial+1, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 		zonemgr->broadcast( clt, &p2);
 	}
 
-	// Should broadcast JUMP so other client display jump anim too
+	// Should broadcast JUMP so other client display jump anim too ?
 }
 
 void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int docknum, unsigned short zone)

@@ -280,7 +280,7 @@ void	NetworkCommunication::AddToSession( ClientPtr clt)
 	this->commClients.push_back( clt);
 	// If the client has a webcam enabled and we don't have one selected yet
 	// FIND A FIX FOR THAT TEST
-	//if( this->webcamClient && clt->webcam)
+	if( *(this->webcamClient) && clt->webcam)
 	{
 		CltPtrIterator cltit = commClients.end();
 		assert( (*cltit)==clt);
@@ -561,6 +561,11 @@ if( use_pa)
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
 		this->Webcam->EndCapture();
+	if( bufitem)
+	{
+		delete bufitem;
+		bufitem==NULL;
+	}
 #endif /* NETCOMM_NOWEBCAM */
 
 	return 0;
@@ -591,6 +596,8 @@ if( use_pa)
 		delete this->Webcam;
 		this->Webcam = NULL;
 	}
+	if( bufitem)
+		delete bufitem;
 
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
@@ -606,12 +613,37 @@ char *	NetworkCommunication::GetWebcamCapture()
 	return NULL; // We have no choice :-/
 }
 
+char *	NetworkCommunication::GetWebcamFromNetwork()
+{
+	char * wshot=NULL;
+	if( (*webcamClient) && bufitem)
+	{
+		if( !bufitem->done())
+			return NULL;
+		else
+		{
+			// Re add the buf to get another webcam shot
+			wshot = new char[bufitem->getSize()+1];
+			memcpy( wshot, bufitem->getBuffer().get(), bufitem->getSize());
+			wshot[bufitem->getSize()]=0;
+			_downloader->addItem( bufitem);
+		}
+	}
+	return wshot;
+}
+
 void	NetworkCommunication::SwitchWebcam()
 {
 	bool found = false;
 	CltPtrIterator it;
+	if( bufitem)
+		delete bufitem;
 	// Go through listClients from current client to the end in order to find the next webcam client
-	for( it=++webcamClient; it!=commClients.end() && !found; it++)
+	if( (*this->webcamClient))
+		it=++webcamClient;
+	else
+		it=commClients.begin();
+	for( ; it!=commClients.end() && !found; it++)
 	{
 		if( (*it)->webcam)
 			found = true;
@@ -627,6 +659,14 @@ void	NetworkCommunication::SwitchWebcam()
 		// If we found another client supporting webcam
 		if( found)
 			webcamClient = it;
+	}
+	if( found)
+	{
+		// Should init transfer and buf with right values
+		// 1. Create a socket to the interested client
+		// 2. Init the bufitem
+		//bufitem = new VsnetDownload::Client::Buffer(...);
+		_downloader->addItem( bufitem);
 	}
 }
 

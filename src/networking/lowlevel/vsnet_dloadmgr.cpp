@@ -1,14 +1,16 @@
 #include <config.h>
 
 #include "vsfilesystem.h"
+#include "vs_globals.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "networking/lowlevel/vsnet_notify.h"
 #include "networking/lowlevel/vsnet_cmd.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/packet.h"
-#include "vsfilesystem.h"
 
 using namespace std;
+
+extern void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf);
 
 #ifndef HAVE_ACCESS
     #ifdef R_OK
@@ -519,7 +521,15 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
                 bool   ok;
 				ft = buffer.getChar();
                 file = buffer.getString( );
-                ok   = private_test_access( file , (VSFileSystem::VSFileType) ft );
+				// If we want to download a memory buffer from server access is considered ok
+				if( ft==VSFileSystem::ZoneBuffer)
+				{
+					// We receive a filename containing a zone id so we test it exists
+					int zoneid = atoi( file.c_str());
+					ok = true;
+				}
+				else
+                	ok = private_test_access( file , (VSFileSystem::VSFileType) ft );
                 respbuffer.addString( file );
                 respbuffer.addChar( ok ? 1 : 0 );
                 num--;
@@ -544,7 +554,16 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
 					char            ft = buffer.getChar();
                     string          file = buffer.getString( );
                     string          path = file;
-                    VSFileSystem::VSFile * f = private_access( path , (VSFileSystem::VSFileType) ft );
+					VSFileSystem::VSFile * f;
+					// If a request for ZoneBuffer we create a VSFile based on a memory buffer
+					if( ft==VSFileSystem::ZoneBuffer)
+					{
+						NetBuffer netbuf;
+						getZoneInfoBuffer( atoi( file.c_str()), netbuf);
+						f = new VSFile( netbuf.getData(), netbuf.getDataLength());
+					}
+					else
+                    	f = private_access( path , (VSFileSystem::VSFileType) ft );
                     if( f )
                     {
                         size_t bytes = f->Size();

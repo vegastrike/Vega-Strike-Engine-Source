@@ -31,18 +31,18 @@ LeakVector<Mission *> active_missions;
 
 void	VSExit( int code)
 {
-	Server->closeAllSockets();
+	VSServer->closeAllSockets();
 	exit(1);
 }
 
 int main( int argc, char **argv)
 {
-	Server = new NetServer;
+	VSServer = new NetServer;
 	// Fake forcefeedback
     forcefeedback=new ForceFeedback();
 
-	Server->start( argc, argv);
+	VSServer->start( argc, argv);
 
-	delete Server;
+	delete VSServer;
 	return 0;
 }

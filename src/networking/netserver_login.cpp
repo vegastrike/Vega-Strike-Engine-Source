@@ -207,7 +207,8 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 		netbuf.addString( relsys);
 
 		// Generate the starsystem before addclient so that it already contains serials
-		zonemgr->addZone( cp->savegame->GetStarSystem());
+		StarSystem * sts = zonemgr->addZone( cp->savegame->GetStarSystem());
+		int zoneid = _Universe->StarSystemIndex(sts);
 #ifdef CRYPTO
 		string sysxml;
 		if( (sysxml=zonemgr->getSystem( relsys))!="")
@@ -217,6 +218,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, ch
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 		delete digest;
 #endif
+		netbuf.addShort( zoneid);
 		/*
 		cerr<<endl<<"BEGIN FULL BUFFER -------------------------------------------"<<endl<<endl;
 		cerr<<netbuf.getData()<<endl;

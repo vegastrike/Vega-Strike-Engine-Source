@@ -215,6 +215,7 @@ void	NetClient::loginAccept( Packet & p1)
          <<_Universe->current_stardate.GetFullTrekDate() << endl;
 	globalsaves.push_back( netbuf.getString());
 	globalsaves.push_back( netbuf.getString());
+	// Set the zone number
 	// Get the galaxy file from buffer with relative path to datadir !
 	string univfile = netbuf.getString();
 	unsigned char * digest;
@@ -252,6 +253,7 @@ void	NetClient::loginAccept( Packet & p1)
 			micro_sleep( 40000);
 		}
 	}
+    this->zone = netbuf.getShort();
 }
 
 /*************************************************************/

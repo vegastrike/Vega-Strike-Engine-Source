@@ -291,6 +291,7 @@ public:
     virtual ~Buffer( );
 
     boost::shared_array<uchar> getBuffer( ) const;
+	int                        getSize() { return this->_len; }
 
 protected:
     virtual void childSetSize( int len );

@@ -894,7 +894,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
 					// Including the one who fires to make sure it stops
 					if( SERVER)
-						Server->BroadcastUnfire( this->serial, nm, this->activeStarSystem->GetZone());
+						VSServer->BroadcastUnfire( this->serial, nm, this->activeStarSystem->GetZone());
 					// NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
 					// if( !SERVER && Network==NULL)
 						(*i).UnFire();
@@ -936,7 +936,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 								else
 									serid = 0;
 								if( SERVER)
-									Server->BroadcastFire( this->serial, nm, serid, this->activeStarSystem->GetZone());
+									VSServer->BroadcastFire( this->serial, nm, serid, this->activeStarSystem->GetZone());
 								// We could only refresh energy on server side or in non-networking mode, on client side it is done with
 								// info the server sends with ack for fire
 								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
@@ -1948,14 +1948,14 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 		Unit * jumppoint = this;
 		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
 		if( SERVER)
-			Server->sendJump( smalle->GetSerial(), this->serial, true);
+			VSServer->sendJump( smalle->GetSerial(), this->serial, true);
 		return true;
     }
 	/* NOT NECESSARY ANYMORE SINCE THE CLIENT ONLY ASK FOR AUTH WITHOUT EXPECTING AN ANSWER
 	else
 	{
 		if( SERVER)
-			Server->sendJump( this->serial, false);
+			VSServer->sendJump( this->serial, false);
 	}
 	*/
     return true;
@@ -1973,20 +1973,20 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
       Unit * jumppoint = smalle;
       _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
 		if( SERVER)
-			Server->sendJump( smalle->GetSerial(), this->serial, true);
+			VSServer->sendJump( smalle->GetSerial(), this->serial, true);
       return true;
     }
 	else
 	{
 		if( SERVER)
-			Server->sendJump( this->serial, smalle->GetSerial(), false);
+			VSServer->sendJump( this->serial, smalle->GetSerial(), false);
 	}
     return true;
   }
   else
   {
 	if( SERVER)
-		Server->sendJump( this->serial, smalle->GetSerial(), false);
+		VSServer->sendJump( this->serial, smalle->GetSerial(), false);
   }
   return false;
 }
@@ -2685,9 +2685,9 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  Vector netpnt = pnt;
 	  Vector netnormal = normal;
 	  GFXColor col( color.r, color.g, color.b, color.a);
-	  Server->sendDamages( this->serial, this->activeStarSystem->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
+	  VSServer->sendDamages( this->serial, this->activeStarSystem->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
-	  //Server->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
+	  //VSServer->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
 #else
 		// SECOND METHOD : we just put a flag on the unit telling its shield/armor data has changed
 		if( spercentage)
@@ -3805,7 +3805,7 @@ void Unit::Destroy() {
 	{
   		// The server send a kill notification to all concerned clients but not if it is an upgrade
   		if( SERVER)
-  			Server->sendKill( this->serial, this->activeStarSystem->GetZone());
+  			VSServer->sendKill( this->serial, this->activeStarSystem->GetZone());
   
         Kill();
  	}

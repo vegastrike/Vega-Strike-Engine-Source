@@ -53,8 +53,10 @@ class ZoneMgr
                        // data sent to server for position update
                        // On client side (recv) : receive minimal update
                        // data for a ship
-            FullUpdate // On client side (recv) : receive full update
+            FullUpdate,// On client side (recv) : receive full update
                        // info for a ship
+			AddClient, // On client side (recv) : receive an order to add a client
+			End		   /// On client side (recv) : tells the buffer ends
         };
 
     private:
@@ -105,7 +107,9 @@ class ZoneMgr
 		void	broadcastDamage();
 		int		getZoneClients( ClientWeakPtr clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
+		ClientWeakList * getZoneList( unsigned int id) { assert( id<zone_list.size()); return zone_list[id]; }
 		void	sendZoneClients( ClientWeakPtr clt );
+		int		getZoneNumber() { return zone_list.size(); }
 
 		void	displayStats();
 		int		displayMemory();

@@ -15,6 +15,10 @@ using namespace VSFileSystem;
 VegaConfig * vs_config;
 string acctdir;
 
+void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
+{
+}
+
 AccountServer::AccountServer()
     : _sock_set( true )
 {

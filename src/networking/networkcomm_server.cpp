@@ -16,6 +16,7 @@ void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypt
 void	NetworkCommunication::RecvMessage( string message, bool encrypted) {}
 
 char *	NetworkCommunication::GetWebcamCapture() { return NULL;}
+char *	NetworkCommunication::GetWebcamFromNetwork() { return NULL; }
 char	NetworkCommunication::HasWebcam() { return 0;}
 char	NetworkCommunication::HasPortaudio() { return 0;}
 void	NetworkCommunication::SwitchWebcam() {}

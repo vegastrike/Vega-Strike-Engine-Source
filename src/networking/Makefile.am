@@ -17,7 +17,6 @@ INCLUDES= $(incl) $(incl2)	\
 	 -I$(top_srcdir)/src/boost129
 endif
 
-# noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
 
@@ -84,7 +83,7 @@ libnetclient = $(libnetclientserver) \
 
 libnetclient_a_SOURCES = $(libnetclient)
 
-libnetacct_a_SOURCES = $(libacctserver) $(liblowlevel) \
+libnetacct_a_SOURCES = $(libacctserver) \
 	acctserver.cpp \
 	acctserver.h
 

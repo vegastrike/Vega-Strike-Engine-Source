@@ -527,7 +527,7 @@ bool CPK3::ReadFile(int i, void *pBuf)
 
   // Setup the inflate stream.
   z_stream stream;
-  int err;
+  int err, err2;
 
   stream.next_in = (Bytef*)pcData;
   stream.avail_in = (uInt)h.cSize;
@@ -541,11 +541,29 @@ bool CPK3::ReadFile(int i, void *pBuf)
   if (err == Z_OK)
   {
     err = inflate(&stream, Z_FINISH);
-    inflateEnd(&stream);
     if (err == Z_STREAM_END)
       err = Z_OK;
-    inflateEnd(&stream);
+	else if( err==Z_NEED_DICT)
+		cerr<<"PK3ERROR : Needed a dictionary"<<endl;
+	else if( err==Z_DATA_ERROR)
+		cerr<<"PK3ERROR : Bad data buffer"<<endl;
+	else if( err==Z_STREAM_ERROR)
+		cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+    err2 = inflateEnd(&stream);
+	if( err2==Z_STREAM_ERROR)
+		cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+    err2 = inflateEnd(&stream);
+	if( err2==Z_STREAM_ERROR)
+		cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
   }
+  else
+  {
+  	if( err==Z_STREAM_ERROR)
+		cerr<<"PK3ERROR : Bad parameter, stream error"<<endl;
+	else if( err==Z_MEM_ERROR)
+		cerr<<"PK3ERROR : Memory error"<<endl;
+  }
+
   if (err != Z_OK)
   {
     cerr<<"PK3ERROR : Bad decompression return code"<<endl;

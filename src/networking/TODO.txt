@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- Add a test in the process of downloading webcam from other client to ensure we are in WEBCAM mode on left VDU
 - Replace the string from Systems map with a string *
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
 - Add a ranking system for each faction in factions.xml
@@ -10,7 +11,6 @@ LOPRI - Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuf
 - Switch to the usage of the ZoneMgr::Systems map instead of reading file on demand and then send a buffer to buffer download
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
                how can I compute positions between 2 updates with interpolation ?
-- Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
 - Use crypto++ lib to implement comms encryption
   - TO TEST with RSA
   - with blowfish
@@ -63,6 +63,7 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 === GENERAL STUFF =======================================================
 
 DONE through VSFileSystem - Vsnet_dloadmgr -> save starsystems in homedir !!!
+DONE - Implement NetClient::downloadZoneInfo() but need a buffer to buffer download
 TO TEST - Possibility of specifying a mod
 TO TEST - Add the command line datapath if supplied !
 DONE - Fix the generated BSP save path

@@ -11,7 +11,7 @@ bool cleanexit=false;
 bool run_only_player_starsystem=true;
 
 NetClient * Network=NULL;
-NetServer * Server=NULL;
+NetServer * VSServer=NULL;
 
 FILE * fpread=NULL;
 

@@ -146,6 +146,8 @@ class NetServer
 		void	sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone);
 
 		void	addSystem( string & sysname, string & system);
+		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);
+		int		getZoneNumber()	{ return zonemgr->getZoneNumber(); }
 		friend class ZoneMgr;
 
 		void			closeAllSockets();				// Disconnect all clients for shutdown

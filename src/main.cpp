@@ -668,9 +668,13 @@ void bootstrap_main_loop () {
 			DockToSavedBases(i);
 		}
 	}
-	cout<<"Loading completed"<<endl;
+	cout<<"Loading completed, now network init"<<endl;
 	// Send a network msg saying we are ready and also send position info
 	if( Network!=NULL) {
+		for( int l=0; l<_Universe->numPlayers(); l++)
+		{
+			Network[l].downloadZoneInfo();
+		}
 		for( int l=0; l<_Universe->numPlayers(); l++)
 		{
 			Network[l].inGame();

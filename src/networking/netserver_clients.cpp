@@ -79,8 +79,10 @@ void	NetServer::addClient( ClientPtr clt)
 
 	if( sts)
 	{
+		// DO NOT DO THAT HERE ANYMORE (VERY BLOCKING ON SERVER SIDE) -> CLIENT ASKS FOR THE NEW SYSTEM UNITS
+		// AND DOWNLOADS INFO
 		// Send info about other ships in the system to "clt"
-		zonemgr->sendZoneClients( clt);
+		//zonemgr->sendZoneClients( clt);
 
 		// Send savebuffers and name
 		netbuf.addString( clt->callsign);
@@ -98,7 +100,7 @@ void	NetServer::addClient( ClientPtr clt)
 	un->activeStarSystem->SetZone( zoneid);
 	Packet pp;
 	netbuf.Reset();
-	netbuf.addShort( zoneid);
+	//netbuf.addShort( zoneid);
 	//netbuf.addString( _Universe->current_stardate.GetFullTrekDate());
 	un->BackupState();
 	// Add initial position to make sure the client is starting from where we tell him
@@ -299,3 +301,47 @@ void	NetServer::logout( ClientPtr clt )
 	nbclients--;
 }
 
+/************************************************************************************************/
+/**** getZoneClients : returns a buffer containing zone info                                *****/
+/************************************************************************************************/
+
+// Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
+void  NetServer::getZoneInfo( unsigned short zoneid, NetBuffer & netbuf)
+{
+	CWLI k;
+	int nbclients=0;
+	Packet packet2;
+	string savestr, xmlstr;
+
+	// Loop through client in the same zone to send their current_state and save and xml to "clt"
+
+    ClientWeakList* lst = zonemgr->getZoneList(zoneid);
+    if( lst == NULL )
+    {
+	    COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships because of empty (inconsistent?) zone" << endl;
+        return;
+    }
+
+	for( k=lst->begin(); k!=lst->end(); k++)
+	{
+        if( (*k).expired() ) continue;
+        ClientPtr kp( *k );
+
+		// Test if *k is the same as clt in which case we don't need to send info
+		if( kp->ingame)
+		{
+			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr);
+			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
+			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
+			// Add the callsign and save and xml strings
+			netbuf.addChar( ZoneMgr::AddClient);
+			netbuf.addSerial( kp->game_unit.GetUnit()->GetSerial());
+			netbuf.addString( kp->callsign);
+			netbuf.addString( savestr);
+			netbuf.addString( xmlstr);
+			nbclients++;
+		}
+	}
+	netbuf.addChar( ZoneMgr::End);
+	COUT<<"\t>>> GOT INFO ABOUT "<<nbclients<<" OTHER SHIPS"<<endl;
+}

@@ -173,6 +173,10 @@ class	NetClient
 		void	fireRequest( ObjSerial serial, int mount_index, char mis);
 		void	unfireRequest( ObjSerial serial, int mount_index);
 
+		void	downloadZoneInfo();
+		void	AddObjects( NetBuffer & netbuf);
+		void	AddClientObject( NetBuffer & netbuf, ObjSerial cltserial);
+
 		bool	jumpRequest( string newsystem, ObjSerial jumpserial);
 		bool	readyToJump();
 		void	unreadyToJump();
@@ -190,12 +194,14 @@ class	NetClient
 		void	stopCommunication();
 		void	sendWebcamPicture();
 		char *	getWebcamCapture();
+		char *	getWebcamFromNetwork();
 		void	increaseFrequency();
 		void	decreaseFrequency();
 		float	getSelectedFrequency();
 		float	getCurrentFrequency();
 		void	switchSecured();
 		void	switchWebcam();
+		bool	hasWebcam();
 
 		void	sendTextMessage( string message);
 		bool	IsNetcommActive() const;

@@ -236,6 +236,13 @@ char *	NetClient::getWebcamCapture()
 	return NULL; // We have no choice...
 }
 
+char *	NetClient::getWebcamFromNetwork()
+{
+	if( NetComm != NULL)
+		return NetComm->GetWebcamFromNetwork();
+	return NULL; // We have no choice...
+}
+
 bool NetClient::IsNetcommActive() const
 {
     return ( this->NetComm==NULL ? false : this->NetComm->IsActive() );
@@ -260,4 +267,6 @@ void	NetClient::switchWebcam()
 	if( NetComm!=NULL)
 		NetComm->SwitchWebcam();
 }
+bool	NetClient::hasWebcam()
+{ return NetComm->HasWebcam(); }
 

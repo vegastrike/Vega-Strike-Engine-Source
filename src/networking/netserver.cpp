@@ -69,6 +69,11 @@ string	universe_path;
 
 using namespace VSFileSystem;
 
+void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
+{
+	VSServer->getZoneInfo( zoneid, netbuf);
+}
+
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
 /**************************************************************/
@@ -764,15 +769,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						// but that's no big deal since they all will be loaded finally
 						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
 							zonemgr->addZone( newsystem);
-						cp->savegame->SetStarSystem( newsystem);
 
+						clt->jumpfile = newsystem;
 						if( FileUtil::HashCompare( newsystem, client_hash, SystemFile) )
-							clt->jumpfile = "";
+							clt->jumpok = 1;
 						else
-						{
-							// Store he system the client has to download
-							clt->jumpfile = newsystem;
-						}
+							clt->jumpok = 2;
 					}
 			}	
 #ifdef CRYPTO

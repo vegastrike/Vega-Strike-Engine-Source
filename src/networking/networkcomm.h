@@ -31,17 +31,10 @@ class JVOIPRTPTransmissionParams;
 // (MAX_PA_CPU_LOAD*100)% CPU LOAD
 #endif
 
+#include "networking/lowlevel/vsnet_dloadmgr.h"
+#include "networking/lowlevel/vsnet_notify.h"
+
 typedef list<ClientPtr>::iterator CltPtrIterator;
-namespace VsnetDownload {
-  namespace Server {
-    class Manager;
-  };
-};
-namespace VsnetDownload {
-  namespace Client {
-    class Manager;
-  };
-};
 
 class WebcamSupport;
 
@@ -54,7 +47,7 @@ class NetworkCommunication
 		list<ClientPtr>			commClients;			// List of client communicating on the same frequency
 		CltPtrIterator			webcamClient;			// The client we are watching the webcam
 
-		char	crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
+		char				crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
 		float				min_freq, max_freq;
 		float				freq;			// Current communication frequency
 		bool				active;			// Tell wether the communication system is active
@@ -65,8 +58,9 @@ class NetworkCommunication
 		WebcamSupport *		Webcam;
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloader;
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadServer;
-        SocketSet           _sock_set;      // Encapsulates select()
+        SocketSet                                         _sock_set;
 #endif
+		VsnetDownload::Client::Buffer *					  bufitem;
 #ifdef NETCOMM_JVOIP
 		JVOIPSession *				session;
 		JVOIPSessionParams *		params;
@@ -124,6 +118,7 @@ class NetworkCommunication
 
 		bool	IsActive()	{ return active;}
 		char *	GetWebcamCapture();
+		char *	GetWebcamFromNetwork();
 
 		char	HasWebcam();
 		char	HasPortaudio();

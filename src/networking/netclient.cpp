@@ -490,10 +490,13 @@ int NetClient::recvMsg( Packet* outpacket )
                 }
                 break;
             case CMD_ENTERCLIENT :
+			{
                 COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
-                this->addClient( &p1 );
-                break;
+				NetBuffer netbuf( p1.getData(), p1.getDataLength());
+                this->AddClientObject( netbuf, p1.getSerial());
+			}
+            break;
             case CMD_EXITCLIENT :
                 COUT << ">>> " << local_serial << " >>> EXITING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
@@ -504,7 +507,7 @@ int NetClient::recvMsg( Packet* outpacket )
                     COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
                          << packet_serial << " )= --------------------------------------" << endl;
 				    // Get the zone id in the packet
-				    this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
+				    //this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
 				    //_Universe->current_stardate.InitTrek( netbuf.getString());
                     //COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
 					this->game_unit.GetUnit()->SetCurPosition( netbuf.getQVector());
@@ -753,6 +756,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				string newsystem = netbuf.getString();
 				ObjSerial unserial = netbuf.getSerial();
 				ObjSerial jumpserial = netbuf.getSerial();
+				unsigned short zoneid = netbuf.getShort();
 				un = this->game_unit.GetUnit();
 				// Get the pointer to the new star system sent by server
 				if( !(sts=star_system_table.Get( newsystem)))
@@ -764,7 +768,8 @@ int NetClient::recvMsg( Packet* outpacket )
 				// If unserial == un->GetSerial() -> then we are jumping otherwise it is another unit/player
 				if( unserial == un->GetSerial())
 				{
-					// If we received a CMD_JUMP with serial==player serial jump is refused because of energy
+					this->zone = zoneid;
+					// If we received a CMD_JUMP with serial==player serial jump is granted
 					if( packet_serial==un->GetSerial())
 					{
 						this->jumpok = true;
@@ -773,7 +778,7 @@ int NetClient::recvMsg( Packet* outpacket )
 					// The jump has been allowed but we don't have the good system file
 					else
 					{
-						// Here do the jump function
+						// Here really do the jump function
 						Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
 						sts->JumpTo( un, jumpun, newsystem, true);
 						string sysfile( newsystem+".system");

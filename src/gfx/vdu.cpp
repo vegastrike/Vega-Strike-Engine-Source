@@ -898,6 +898,25 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 	}
   }
   break;
+  case WEBCAM:
+  {
+  	if( Network!=NULL)
+	{
+		char * netcam;
+		int playernum = _Universe->whichPlayerStarship( parent);
+		if( Network[playernum].hasWebcam())
+		{
+			netcam = Network[playernum].getWebcamFromNetwork();
+			if( netcam)
+			{
+				// Now display the JPEG buffer in the VDU
+				// HOW ? ;)
+
+				delete netcam;
+			}
+		}
+	}
+  }
   case SCANNING:
 		if( !got_target_info)
 			DrawScanningMessage();
