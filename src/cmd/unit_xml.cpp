@@ -369,6 +369,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     ///handling taken care of above;
     assert (xml->unitlevel>=2);
     xml->unitlevel++;
+    carg.category = xml->cargo_category;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case QUANTITY:
