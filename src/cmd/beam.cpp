@@ -386,29 +386,33 @@ bool Beam::Collide (Unit * target) {
       //tractor beam!
       target->ApplyForce (direction*appldam);
       if ((center-target->Position()).Magnitude()<phasdam) {
+
 	un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
 	Unit *un;
 	for (;(un=*ui)!=NULL;++ui) {
 	  if (((void *)un)==owner) {
-	    //we have our man!
-	    //lets add our cargo to him
-	    Cargo *c = GetMasterPartList (target->name.c_str());
-	    Cargo tmp;
-	    if (c==NULL) {
-	      c=&tmp;
-	      tmp.content="spacejunk";
-	      tmp.category="misc";
-	      tmp.price=200;
-	      tmp.quantity=1;
-	      tmp.mass=.001;
-	      tmp.volume=1;
-	    }
-	    if (c!=NULL) {
-	      Cargo adder = *c;
-	      adder.quantity=1;
-	      if (un->CanAddCargo(adder)) {
-		un->AddCargo(adder);
-		target->Kill();
+	    static float nbig = .1;
+	    if (target->faction==_Universe->GetFaction("upgrades")||un->rSize()>nbig*target->rSize()) {
+	      //we have our man!
+	      //lets add our cargo to him
+	      Cargo *c = GetMasterPartList (target->name.c_str());
+	      Cargo tmp;
+	      if (c==NULL) {
+		c=&tmp;
+		tmp.content="spacejunk";
+		tmp.category="misc";
+		tmp.price=200;
+		tmp.quantity=1;
+		tmp.mass=.001;
+		tmp.volume=1;
+	      }
+	      if (c!=NULL) {
+		Cargo adder = *c;
+		adder.quantity=1;
+		if (un->CanAddCargo(adder)) {
+		  un->AddCargo(adder);
+		  target->Kill();
+		}
 	      }
 	    }
 	  }
