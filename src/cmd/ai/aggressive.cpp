@@ -91,6 +91,9 @@ bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
 
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   float value;
+
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+  static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   switch (abs(item.type)) {
   case DISTANCE:
     value = distance;
@@ -103,6 +106,7 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
       }else {
 	value = 10000; 
       }
+      value/=game_speed*game_accel;
     }
     break;
   case THREAT:
