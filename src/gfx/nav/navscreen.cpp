@@ -129,7 +129,7 @@ void NavigationSystem::Setup()
 
 
 	buttonstates = 0;
-	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
+	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
 		whattodraw=0;
 	} else {
 		whattodraw = (1|2);

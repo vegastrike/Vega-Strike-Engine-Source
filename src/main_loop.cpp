@@ -493,8 +493,9 @@ void IncrementStartupVariable () {
 		var=getSaveData(0,"436457r1K3574r7uP71m35",0);
 		putSaveData(0,"436457r1K3574r7uP71m35",0,var+1);
 	}
-	if (var<XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
-		GameCockpit::NavScreen(0,PRESS);
+	if (var<=XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
+		GameCockpit::NavScreen(1,PRESS);
+		
 	}
 }
 
