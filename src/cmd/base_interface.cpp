@@ -6,6 +6,7 @@
 #include "planet.h"
 #include <Python.h>
 #include <algorithm>
+#include "base_util.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -192,14 +193,14 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 	 				fscanf(fp,"%d",&rmtyp);
 					switch(rmtyp) {
 					case 1:
-						links.push_back(new Goto());
+						links.push_back(new Goto("link"));
 						fscanf(fp,"%d",&((Goto*)links.back())->index);
 						break;
 					case 2:
-						links.push_back(new Launch());
+						links.push_back(new Launch("launch"));
 						break;
 					case 3:
-						links.push_back(new Comp());
+						links.push_back(new Comp("comp"));
 						fscanf(fp,"%d",&index);
 						for (int i=0;i<index&&(!feof(fp));i++) {
 							fscanf(fp,"%d",&ret);
@@ -216,7 +217,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 				}
 				if (button==WS_RIGHT_BUTTON) {
 					input[200]=input[199]='\0';
-					objs.push_back(new BaseSprite(input));
+					objs.push_back(new BaseSprite("tex",input));
 					((BaseSprite*)objs.back())->texfile=string(input);
 					((BaseSprite*)objs.back())->spr.SetPosition(x,y);
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
@@ -408,6 +409,7 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
   return "sunset";
 }
 Base::Base (const char *basefile, Unit *base, Unit*un) {
+	CurrentBase=this;
 	caller=un;
 	curlinkindex=0;
 	this->baseun=base;
@@ -419,15 +421,13 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 	othtext.SetSize(.75,-.75);
 	Load(basefile, compute_time_of_day(base,un));
 	if (!rooms.size()) {
-		fprintf(stderr,"\nERROR: there are no rooms...");
-		assert(0);
+		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
-		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75),"default room"));
-		rooms.back()->links.push_back(new Room::Launch ("default room"));
-		rooms.back()->links.back()->x=rooms.back()->links.back()->y=-1;
-		rooms.back()->links.back()->wid=rooms.back()->links.back()->hei=2;
 		rooms.back()->deftext="ERROR: No rooms specified...";
-		rooms.back()->links.back()->text="ERROR: No rooms specified...";
+		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75),"default room"));
+		BaseUtil::Launch(0,"default room",-1,-1,1,2,"ERROR: No rooms specified... - Launch");
+		BaseUtil::Comp(0,"default room",0,-1,1,2,"ERROR: No rooms specified... - Computer",
+				"BUYMODE SELLMODE UPGRADEMODE DOWNGRADEMODE NEWSMODE SHIPMODE MISSIONMODE BRIEFINGMODE");
 	}
 	GotoLink(0);
 }

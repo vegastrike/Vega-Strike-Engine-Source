@@ -60,7 +60,6 @@ void Base::Load(const char * filename,const char * time_of_day_hint) {
 	}
       }
     }
-    assert(inFile);
 	if (!inFile)
       return;
   }

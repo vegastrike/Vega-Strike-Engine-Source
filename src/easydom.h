@@ -118,7 +118,7 @@ template<class domNodeType> class easyDomFactory {
 domNodeType *LoadXML(const char *filename) {
 
   const int chunk_size = 16384;
-
+  topnode=NULL;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
     //cout << "warning: could not open file: " << filename << endl;

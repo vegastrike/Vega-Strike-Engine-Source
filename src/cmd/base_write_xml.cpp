@@ -1,5 +1,6 @@
 #include "base.h"
 #ifdef BASE_MAKER
+#ifdef BASE_XML
 #include <stdio.h>
 
 void begintag(FILE * Fp,const char *tag,int indent) {
@@ -58,6 +59,13 @@ void Base::Room::Link::EndXML (FILE *fp) {
 	midxmltag(fp,"y",y);
 	midxmltag(fp,"wid",wid);
 	midxmltag(fp,"hei",hei);
+}
+
+void Base::Room::Python::EndXML (FILE *fp) {
+	begintag(fp,"Python",2);
+	Link::EndXML(fp);
+	midxmlchar(fp,"pythonfile",file.c_str());
+	endtag(fp,true);
 }
 
 void Base::Room::Goto::EndXML (FILE *fp) {
@@ -181,5 +189,5 @@ void Base::EndXML (FILE *fp) {
 	endtag(fp,false);
 }
 
-
+#endif
 #endif

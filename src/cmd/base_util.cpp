@@ -52,7 +52,8 @@ namespace BaseUtil {
 	void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes) { 
 		Base::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Comp (index));
+		Base::Room::Comp *newcomp=new Base::Room::Comp (index);
+		newroom->links.push_back(newcomp);
 		BaseLink(newroom,x,y,wid,hei,text);
 		static const EnumMap::Pair modelist [UpgradingInfo::MAXMODE+1] = {
 			EnumMap::Pair ("NewsMode", UpgradingInfo::NEWSMODE), 
@@ -76,14 +77,21 @@ namespace BaseUtil {
 			for (j=0;newmode[i]!=' '&&newmode[i]!='\0';i++,j++) {
 				curmode[j]=newmode[i];
 			}
+			while(newmode[i]==' ')
+				i++;
+			if (j==0)
+				continue;
+			//in otherwords, if j is 0 then the 0th index will become null
+			//EnumMap crashes if the string is empty.
 			curmode[j]='\0';
 			int modearg = modemap.lookup(curmode);
 			if (modearg<UpgradingInfo::MAXMODE) {
-				((Base::Room::Comp*)newroom->links.back())->modes.push_back((UpgradingInfo::BaseMode)(i));
+				newcomp->modes.push_back((UpgradingInfo::BaseMode)(modearg));
 			} else {
 				fprintf(stderr,"WARNING: Computer mode %s not found in python script...\n",curmode);
 			}
 		}
+		delete [] curmode;
 	}
 	void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string pythonfile) {
 		//instead of "Talk"/"Say" tags

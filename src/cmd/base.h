@@ -6,7 +6,8 @@
 #include "gfx/hud.h"
 #include <stdio.h>
 
-//#define BASE_MAKER
+#define BASE_MAKER
+//#define BASE_XML //in case you want to write out XML instead...
 
 #define BASE_EXTENSION ".py"
 
@@ -78,6 +79,9 @@ public:
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			Python(std::string pythonfile,std::string ind);
 			virtual ~Python () {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
 		};
 		class BaseObj {
 		public:
