@@ -17,7 +17,7 @@ using std::map;
 using std::string;
 using std::pair;
 using std::set;
-
+map<string,int> numfactions;
 set<string> allnames;
 std::string readfiledata(const char * name) {
 	FILE * fp = fopen (name,"r");
@@ -930,6 +930,13 @@ void processsystems (std::vector <System> & s){
 	if (1) {
 		for (unsigned int i=0;i<s.size();++i) {
 			reName(s,s[i],getNameForFaction(s[i]["faction"]));
+			numfactions["faction"]+=1;
+		}
+	}
+	if (1) {
+		fprintf(stderr,"\nOwnership\n");
+		for (map<string,int>::iterator i = numfactions.begin();i!=numfactions.end();++i) {
+			fprintf (stderr,"%s owns %d systems\n",(*i).first.c_str(),(*i).second);
 		}
 	}
 }
