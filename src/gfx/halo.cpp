@@ -40,12 +40,22 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   pos=  position.Transform(m);
   offset = (_Universe->AccessCamera()->GetPosition()-pos);
   //Matrix HACK  pos = -offset;
-  offset.Normalize();
-  offset*=HaloOffset*(sizex>sizey?sizex:sizey);
+  float offmag = offset.Magnitude();
+  float wid = sizex;
+  float hei = sizey;
+  float rad =(wid>hei?wid:hei);
+  offset*=1./offmag;
+  if (offmag<.5*g_game.zfar) {
+    offset*=HaloOffset*rad;
+  }else {
+    offset *= (offmag-.5*g_game.zfar);
+    wid/=((offmag-rad)/(.5*g_game.zfar));
+    hei/=((offmag-rad)/(.5*g_game.zfar));
+  }
   _Universe->AccessCamera()->GetPQR(p,q,r);
-  p=p*sizex;
+  p=p*wid;
   r =-r;
-  q=q*sizey;
+  q=q*hei;
   //  offset = r*(sizex>sizey?sizex:sizey); //screws up cus of perspective
   GFXVertex tmp[4] = {GFXVertex(pos-p-q+offset,r,0,1),
 		       GFXVertex(pos+p-q+offset,r,1,1),
