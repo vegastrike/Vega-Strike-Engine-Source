@@ -122,11 +122,11 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 //FIXME 062201
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
-  if (Res.i>fabs(limits.yaw))
+  if (amt1.i>fabs(limits.yaw))
     Res.i=amt1.i>0?fabs(limits.yaw):-fabs(limits.yaw);
   if (amt1.j>fabs(limits.pitch))
     Res.j=amt1.j>0?fabs(limits.pitch):-fabs(limits.pitch);
-  if (amt1.j>fabs(limits.roll))
+  if (amt1.k>fabs(limits.roll))
     Res.k=amt1.k>0?fabs(limits.roll):-fabs(limits.roll);
   return Res;
 }
@@ -153,11 +153,11 @@ Vector Unit::ClampThrust(const Vector &amt1){
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 Vector Unit::ClampThrust (const Vector &amt1) {
   Vector Res=amt1;
-  if (Res.i>fabs(limits.lateral))
+  if (amt1.i>fabs(limits.lateral))
     Res.i=amt1.i>0?fabs(limits.lateral):-fabs(limits.lateral);
   if (amt1.j>fabs(limits.vertical))
     Res.j=amt1.j>0?fabs(limits.vertical):-fabs(limits.vertical);
-  if (amt1.j>fabs(limits.longitudinal))
+  if (amt1.k>fabs(limits.longitudinal))
     Res.k=amt1.k>0?fabs(limits.longitudinal):-fabs(limits.longitudinal);
   return Res;
 }

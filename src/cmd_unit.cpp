@@ -106,9 +106,9 @@ void Unit::Init()
   selected = false;
   selectionBox = NULL;
 
-  limits.yaw = 2.55;
-  limits.pitch = 2.55;
-  limits.roll = 2.5;
+  limits.yaw = 25.5;
+  limits.pitch = 25.5;
+  limits.roll = 25.5;
 	
   limits.lateral = 0.1;
   limits.vertical = 0.1;
