@@ -181,6 +181,12 @@ BOOL GFXInit (int argc, char ** argv){
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
       glPixelStorei(GL_UNPACK_SWAP_BYTES, 0);
       glPixelStorei(GL_PACK_ROW_LENGTH, 256);
+
+      // Spherical texture coordinate generation
+      glTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
+      glTexGenf(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
+      glEnable(GL_TEXTURE_GEN_S);
+      glEnable(GL_TEXTURE_GEN_T);
     }
     glClearDepth(1);
     glEnable (GL_BLEND);

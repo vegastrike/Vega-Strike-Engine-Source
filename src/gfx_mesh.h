@@ -92,6 +92,8 @@ public:
 	virtual void Draw();
 	virtual void Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
 
+	void setEnvMap(BOOL newValue) {envMap = newValue;}
+
 	void SetOrientation(Vector &p, Vector &q, Vector &r);
 	void SetOrientation();
 

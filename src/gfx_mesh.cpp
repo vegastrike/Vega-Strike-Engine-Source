@@ -607,6 +607,7 @@ float const ooPI = 1.00F/3.1415926535F;
 
 void Mesh::Reflect()
 {
+  return; // Using OGL reflection coordinate generator
 	Vector pnt;
 	Vector nml [4];
 	Vector CamPos;
