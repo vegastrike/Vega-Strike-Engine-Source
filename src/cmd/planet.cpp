@@ -106,6 +106,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   nummesh = 1;
 
   calculate_extent();
+  UpdateCollideQueue();
   /*stupid Sphere BSP when intersection should do
   string tmpname ("sphere");
   char temp [64];
