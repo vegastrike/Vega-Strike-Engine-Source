@@ -1077,7 +1077,7 @@ string Unit::WriteUnitString () {
         unit["Cloak_Energy"]=tos(image->cloakenergy);
         unit["Cloak_Glass"]=tos(image->cloakglass);
         unit["Repair_Droid"]=tos(image->repair_droid);
-        unit["ECM"]=tos(image->ecm>0?image->ecm:-image->ecm);
+        unit["ECM_Rating"]=tos(image->ecm>0?image->ecm:-image->ecm);
         unit["Hud_Functionality"]=WriteHudDamage(this);
         unit["Max_Hud_Functionality"]=WriteHudDamageFunc(this);
         unit["Heat_Sink_Rating"]=tos(this->HeatSink);
