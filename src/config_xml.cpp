@@ -223,9 +223,9 @@ void GameVegaConfig::initCommandMap(){
   command_map["MusicVolumeInc"]=incmusicvol;
   command_map["MusicVolumeDec"]=decmusicvol;
 #endif
-  command_map["SwitchControl"]=Cockpit::SwitchControl;
-  command_map["Respawn"]=Cockpit::Respawn;
-  command_map["TurretControl"]=Cockpit::TurretControl;
+  command_map["SwitchControl"]=GameCockpit::SwitchControl;
+  command_map["Respawn"]=GameCockpit::Respawn;
+  command_map["TurretControl"]=GameCockpit::TurretControl;
 
   command_map["TimeInc"]=inc_time_compression;
   command_map["TimeDec"]=dec_time_compression;
