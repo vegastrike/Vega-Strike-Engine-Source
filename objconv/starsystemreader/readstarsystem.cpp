@@ -212,7 +212,7 @@ public:
 		}
 		(*this)["sun_radius"]=ftostr(rad);
 		(*this)["data"]=itostr(rand());
-		(*this)["faction"]="neutral";
+		(*this)["faction"]="unknown";
 		lifeprob*=1;
 		habitable=false;
 		for (int i=0;i<homeworlds.size();i++) {
@@ -447,7 +447,7 @@ public:
 				System *jump=System::findSystem(s,*iter);
 				if (jump!=NULL&&systems.find(jump)==systems.end()) {
 					// not in our territory! and it is valid.
-					if (((*jump)["faction"]=="neutral"
+					if (((*jump)["faction"]=="unknown"
 							&& (((float)rand())/RAND_MAX)<takeneutralprob)
 							|| ((((float)rand())/RAND_MAX)<takeoverprob&&allowTakeover)) {
 						(*jump)["faction"]=name;
@@ -492,7 +492,8 @@ std::vector<FactionInfo> readFactions(vector<System> &s) {
 
 void simulateFactionTurns (vector<System> &s) {
 	std::vector<FactionInfo> factions=readFactions(s);
-	for (unsigned turn=0;;turn++) {
+	unsigned turn;
+	for (turn=0;;turn++) {
 		int num_inactive=0;
 		for (unsigned i=0;i<factions.size();i++) {
 			if (factions[i].active()) {
@@ -654,6 +655,7 @@ vector<System> readfile (const char * name) {
 			}else if (keys[i].find("DECLINATION")!=string::npos) { 
 				in.declination = atof (content[i].c_str());
 			}else if (keys[i].find("LUMIN")!=string::npos) {
+				in["lunminosity"]=content[i];  				
 				in.luminosity = atof(content[i].c_str());
 			}else if (keys[i].find("SPECTRUM")!=string::npos||keys[i].find("TYPE")!=string::npos) {
 				in.type = atoi(content[i].c_str());
@@ -706,7 +708,7 @@ vector<System> readfile (const char * name) {
 				factionsdata=factionsdata.substr(n+1);
 				if (vec.size()>=4) {
 					int slash=vec[3].find("/");
-					if (slash!=std::string.npos) {
+					if (slash!=std::string::npos) {
 						homeworlds.push_back(vec[3].substr(slash+1));
 					}
 				}
