@@ -1390,6 +1390,11 @@ void GameCockpit::Draw() {
     if (Pit[view]) 
       Pit[view]->Draw();
   }
+  static bool blend_panels=XMLSupport::parse_bool(vs_config->getVariable("graphics","blend_panels","false"));
+  if (blend_panels) {
+    GFXAlphaTest (ALWAYS,0);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  }
   GFXColor4f(1,1,1,1);
   for (unsigned int j=1;j<Panel.size();j++) {
     Panel[j]->Draw();
