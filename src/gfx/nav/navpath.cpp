@@ -214,11 +214,12 @@ unsigned NavPath::getAbsoluteDestination() const {
   return path.back();
 }
 
-std::vector<unsigned> NavPath::getAllPoints() const {
-  std::vector<unsigned> temp;
-  for(list<unsigned>::const_iterator i=path.begin(); i != path.end(); ++i)
-    temp.push_back(*i);
-  return temp;
+const std::list<unsigned> *NavPath::getAllPoints() const {
+  return &path;
+}
+
+std::list<unsigned> *NavPath::getAllPoints() {
+  return &path;
 }
 
 void NavPath::addDependant(NavPath * dependant) {
@@ -235,8 +236,12 @@ void NavPath::removeDependant(NavPath * dependant) {
   dependants.erase(dependant);
 }  
 
-std::vector<NavPath *> NavPath::getDependants() const {
-  return std::vector<NavPath *>(dependants.begin(), dependants.end());
+const std::set<NavPath *> *NavPath::getDependants() const {
+  return &dependants;
+}
+
+std::set<NavPath *> *NavPath::getDependants() {
+  return &dependants;
 }
 
 std::vector<NavPath *> NavPath::getRequiredPaths() const {
@@ -471,16 +476,16 @@ void NavPath::addNewPath() {
    //*************************
   
   list<unsigned>::iterator prev, next;
-  for(list<unsigned>::iterator i=path.begin(); i!=path.end(); ++i) {
-    prev = next = i;
+  for(list<unsigned>::iterator iter=path.begin(); iter!=path.end(); ++iter) {
+    prev = next = iter;
     --prev;
     ++next;
-    if((*i)!=path.front())
-      pathNeighbors[(*i)].first=(*prev);
-    if((*i)!=path.back())
-      pathNeighbors[(*i)].second=(*next);
-    systemIter[*i].part_of_path=true;
-    systemIter[*i].paths.insert(this);
+    if((*iter)!=path.front())
+      pathNeighbors[(*iter)].first=(*prev);
+    if((*iter)!=path.back())
+      pathNeighbors[(*iter)].second=(*next);
+    systemIter[*iter].part_of_path=true;
+    systemIter[*iter].paths.insert(this);
   }
 }
 
@@ -536,8 +541,8 @@ NavPath::~NavPath() {
     source = NULL;
   }
 
-  vector<NavPath *> depList = getDependants();
-  for(std::vector<NavPath *>::iterator i = depList.begin(); i < depList.end(); ++i) {
+  set<NavPath *> *depList = getDependants();
+  for(std::set<NavPath *>::iterator i = depList->begin(); i != depList->end(); ++i) {
     if((*i)->source->getRequiredPath()==this) {
       delete (*i)->source;
       (*i)->source = NULL;
@@ -622,8 +627,8 @@ void PathManager::updatePaths(UpdateType type) {
 }
 
 void PathManager::updateDependants(NavPath * parent) {
-  vector<NavPath *> dependants = parent->getDependants();
-  for(std::vector<NavPath *>::iterator i = dependants.begin(); i<dependants.end(); ++i)
+  set<NavPath *> *dependants = parent->getDependants();
+  for(std::set<NavPath *>::iterator i = dependants->begin(); i != dependants->end(); ++i)
     updateSpecificPath(*i);
 } 
 
@@ -643,8 +648,8 @@ void PathManager::DFS() {
 void PathManager::dfsVisit(NavPath * path) {
   path->topoColor=TOPO_GRAY;
 
-  std::vector<NavPath *> dependants = path->getDependants();
-  for(std::vector<NavPath *>::iterator v = dependants.begin(); v<dependants.end(); ++v)
+  std::set<NavPath *> *dependants = path->getDependants();
+  for(std::set<NavPath *>::iterator v = dependants->begin(); v != dependants->end(); ++v)
     if((*v)->topoColor==TOPO_WHITE)
       dfsVisit(*v);
 
@@ -780,9 +785,9 @@ std::deque<unsigned> ChainPathNode::initSearchQueue() const {
   else if(type==DESTINATION)
     systemDeque.push_back(supplierPath->getAbsoluteDestination());
   else {
-    vector<unsigned> systems=supplierPath->getAllPoints();
-    for(unsigned i=0; i<systems.size(); ++i)
-      systemDeque.push_back(systems[i]);
+    const list<unsigned> *systems=supplierPath->getAllPoints();
+    for(list<unsigned>::const_iterator i=systems->begin(); i != systems->end(); ++i)
+      systemDeque.push_back(*i);
   }
 
   return systemDeque;
@@ -794,9 +799,9 @@ bool ChainPathNode::isDestination(unsigned index) const {
   else if(type==DESTINATION)
     return supplierPath->getAbsoluteDestination()==index;
   else {
-    vector<unsigned> systems=supplierPath->getAllPoints();
-    for(unsigned i=0; i<systems.size(); ++i)
-      if(systems[i]==index)
+    const list<unsigned> *systems=supplierPath->getAllPoints();
+    for(list<unsigned>::const_iterator i=systems->begin(); i != systems->end(); ++i)
+      if((*i)==index)
 	return true;
     return false;
   }

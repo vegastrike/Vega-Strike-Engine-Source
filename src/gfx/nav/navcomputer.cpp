@@ -137,18 +137,19 @@ NavComputer::NavComputer(NavigationSystem *navsystem)
   m_currentDisplay(NULL_DISPLAY),
   m_currentSelector(NULL_SELECTOR)
 {
+  int i;
   pathman=navsystem->pathman;
   currentPath=NULL;
   currentNode=NULL;
   criteria=false;
 
   // Initialize display mode group controls array.
-  for(int i=0; i<DISPLAY_MODE_COUNT; i++) {
+  for(i=0; i<DISPLAY_MODE_COUNT; i++) {
     m_displayModeGroups[i] = NULL;
   }
 
   // Initialize selector mode group controls array.
-  for(int i=0; i<SELECTOR_MODE_COUNT; i++) {
+  for(i=0; i<SELECTOR_MODE_COUNT; i++) {
     m_selectorModeGroups[i] = NULL;
   }
 
@@ -164,14 +165,15 @@ NavComputer::NavComputer(NavigationSystem *navsystem)
 
 // Destructor.
 NavComputer::~NavComputer(void) {
+  int i;
   // Delete any group controls that the window doesn't "own".
-  for(int i=0; i<DISPLAY_MODE_COUNT; i++) {
+  for(i=0; i<DISPLAY_MODE_COUNT; i++) {
     if(m_displayModeGroups[i] != NULL) {
       delete m_displayModeGroups[i];
     }
   }
     
-  for(int i=0; i<SELECTOR_MODE_COUNT; i++) {
+  for(i=0; i<SELECTOR_MODE_COUNT; i++) {
     if(m_selectorModeGroups[i] != NULL) {
       delete m_selectorModeGroups[i];
     }
@@ -200,6 +202,7 @@ void NavComputer::init(void) {
 
 // Create the controls that will be used for this window.
 void NavComputer::createControls(void) {
+  int i;
   // Set up the window.
   window()->setFullScreen();
   window()->setColor(GUI_CLEAR);
@@ -209,7 +212,7 @@ void NavComputer::createControls(void) {
   constructControls();
 
   // Take the mode group controls out of the window.
-  for(int i=0; i<DISPLAY_MODE_COUNT; i++) {
+  for(i=0; i<DISPLAY_MODE_COUNT; i++) {
     Control* group = window()->findControlById(displayModeInfo[i].groupId);
     if(group) {
       window()->removeControlFromWindow(group);
@@ -218,7 +221,7 @@ void NavComputer::createControls(void) {
   }
 
   // Take the mode group controls out of the window.
-  for(int i=0; i<SELECTOR_MODE_COUNT; i++) {
+  for(i=0; i<SELECTOR_MODE_COUNT; i++) {
     Control* group = window()->findControlById(selectorModeInfo[i].groupId);
     if(group) {
       window()->removeControlFromWindow(group);

@@ -70,11 +70,13 @@ class NavPath {
   const PathNode * getDestinationNode() const {return destination;}
   unsigned getAbsoluteSource() const;
   unsigned getAbsoluteDestination() const;
-  std::vector<unsigned> getAllPoints() const;
+  const std::list<unsigned> *getAllPoints() const;
+  std::list<unsigned> *getAllPoints();
 
   void addDependant(NavPath * dependant);
   void removeDependant(NavPath * dependant);
-  std::vector<NavPath *> getDependants() const;
+  const std::set<NavPath *> *getDependants() const;
+  std::set<NavPath *> *getDependants();
 
   std::vector<NavPath *> getRequiredPaths() const;
   bool checkForCycles() const;
