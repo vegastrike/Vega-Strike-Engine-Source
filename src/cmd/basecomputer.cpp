@@ -3321,7 +3321,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	PRETTY_ADDU("  aft - ",playerUnit->armor.back*VSDM,0,"MJ"); 
 	PRETTY_ADDU("  port - ",playerUnit->armor.left*VSDM,0,"MJ");
 	PRETTY_ADDU("  starboard - ",playerUnit->armor.right*VSDM,0,"MJ");
-	PRETTY_ADDU("Sustainable Hull Damage: ",playerUnit->GetHull()*VSDM,0,"MJ");
+	PRETTY_ADDU("Sustainable Hull Damage: ",playerUnit->GetHull()/(playerUnit->GetHullPercent())*VSDM,0,"MJ");
 	if (1!=playerUnit->GetHullPercent()) {
 		PRETTY_ADD("  Current condition: ",playerUnit->GetHullPercent()*100,2);
 		text+="% of normal";
