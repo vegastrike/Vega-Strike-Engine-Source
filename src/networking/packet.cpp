@@ -109,7 +109,11 @@ Packet::Packet( const void* buffer, size_t sz )
             COUT << "Packet not correctly received, not enough data for buffer" << endl
 	         << "    should be still " << h.data_length
                  << " but buffer has only " << sz << endl;
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+	    display( __FILE__, 0 );
+#else
 	    display( __FILE__, __LINE__ );
+#endif
         }
 	else if( h.flags & COMPRESSED )
 	{
@@ -119,11 +123,19 @@ Packet::Packet( const void* buffer, size_t sz )
 			           h.data_length,
 			           h ) == false )
 	    {
-	        display( __FILE__, __LINE__ );
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+		    display( __FILE__, 0 );
+#else
+		    display( __FILE__, __LINE__ );
+#endif
 	    }
 #else /* HAVE_ZLIB */
             COUT << "Received compressed packet, but compiled without zlib" << endl;
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+	    display( __FILE__, 0 );
+#else
 	    display( __FILE__, __LINE__ );
+#endif
 #endif /* HAVE_ZLIB */
 	}
 	else
@@ -159,7 +171,13 @@ Packet::Packet( PacketMem& buffer )
         {
             COUT << "Packet not correctly received, not enough data for buffer" << endl
 	         << "    should be still " << h.data_length << " but buffer has only " << sz << endl;
-	    display( __FILE__, __LINE__ );
+	    display( __FILE__, 
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+			0
+#else
+			__LINE__ 
+#endif
+			);
         }
 	else if( h.flags & COMPRESSED )
 	{
@@ -169,11 +187,23 @@ Packet::Packet( PacketMem& buffer )
 			           h.data_length,
 			           h ) == false )
 	    {
-	        display( __FILE__, __LINE__ );
+	        display( __FILE__,
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+				0
+#else
+				__LINE__ 
+#endif
+				);
 	    }
 #else /* HAVE_ZLIB */
             COUT << "Received compressed packet, but compiled without zlib" << endl;
-	    display( __FILE__, __LINE__ );
+            display( __FILE__,
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+			0
+#else
+			__LINE__ 
+#endif
+				);
 #endif /* HAVE_ZLIB */
 	}
 	else

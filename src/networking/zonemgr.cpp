@@ -252,7 +252,13 @@ void	ZoneMgr::broadcastSnapshots( )
 				if( offset > 0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.send( CMD_SNAPSHOT, nbclients, buffer, offset, SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__, __LINE__ );
+					pckt.send( CMD_SNAPSHOT, nbclients, buffer, offset, SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__, 
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+						0
+#else
+						__LINE__ 
+#endif
+						);
 				}
 				//delete buffer;
 				offset = 0;
@@ -299,7 +305,13 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short)+savelen, &nxmllen, sizeof( unsigned int));
 			memcpy( savebuf+sizeof( ClientState)+2*sizeof(unsigned short)+savelen, xmlstr.c_str(), xmllen);
 			*/
-			packet2.send( CMD_ENTERCLIENT, clt->serial, savebuf, buflen+sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+			packet2.send( CMD_ENTERCLIENT, clt->serial, savebuf, buflen+sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+				0
+#else
+				__LINE__ 
+#endif
+				);
 			nbclients++;
 		}
 	}

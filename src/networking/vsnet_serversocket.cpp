@@ -32,8 +32,7 @@ void ServerSocket::disconnect( const char *s, bool fexit )
     {
         close_socket( _fd );
     }
-    cout << __FILE__ << ":" << __LINE__ << " "
-         << s << " :\tWarning: disconnected" << strerror(errno) << endl;
+    COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
     if( fexit )
         exit(1);
 }
@@ -47,13 +46,13 @@ void ServerSocket::disconnect( const char *s, bool fexit )
 
 void ServerSocketTCP::watchForNewConn( SocketSet& set, int )
 {
-    cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
+    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
     set.setRead( _fd );
 }
 
 SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
 {
-    cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
+    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
     struct sockaddr_in remote_ip;
     socklen_t  len = sizeof( struct sockaddr_in );

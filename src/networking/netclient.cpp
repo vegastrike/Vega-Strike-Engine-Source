@@ -94,7 +94,11 @@ NetClient::~NetClient()
 
 int		NetClient::authenticate()
 {
-	cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
+	cout << __FILE__ << ":" 
+#if !(defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129)) //wierd error in MSVC
+	     << __LINE__
+#endif
+	     << " enter " << __PRETTY_FUNCTION__ << endl;
 
 	Packet	packet2;
 	int tmplen = NAMELEN*2;
@@ -121,7 +125,13 @@ int		NetClient::authenticate()
 		memcpy( buffer+NAMELEN, passwd, str_passwd.length());
 		buffer[tmplen] = '\0';
 
-		packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
+		packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+			0
+#else
+			__LINE__ 
+#endif
+			);
 		delete buffer;
 		COUT << "Send login for player <" << str_name << ">:< "<< str_passwd
 		     << "> - buffer length : " << packet2.getDataLength()
@@ -162,7 +172,13 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 	PacketMem m( buffer, tmplen, PacketMem::LeaveOwnership );
 	m.dump( cout, 3 );
 
-	packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
+	packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+			0
+#else
+			__LINE__ 
+#endif
+		);
 	COUT << "Sent login for player <" << str_name << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
@@ -213,7 +229,7 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 
 SOCKETALT	NetClient::init( char * addr, unsigned short port)
 {
-    cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__
+    COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
 
 	string strnetatom;
@@ -254,7 +270,7 @@ SOCKETALT	NetClient::init( char * addr, unsigned short port)
 
 void	NetClient::start( char * addr, unsigned short port)
 {
-    cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__
+    COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
 
 	keeprun = 1;
@@ -702,7 +718,13 @@ void	NetClient::sendPosition( const ClientState* cs )
 	cout<<"Sending position == ";
 	cstmp.display();
 	cstmp.tosend();
-	pckt.send( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__ );
+	pckt.send( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+		0
+#else
+		__LINE__ 
+#endif
+		);
 }
 
 /**************************************************************/
@@ -808,7 +830,13 @@ void	NetClient::inGame()
 
 	ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
-	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
+	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+		0
+#else
+		__LINE__ 
+#endif
+		);
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
@@ -821,7 +849,13 @@ void	NetClient::sendAlive()
     if( clt_sock.isTcp() == false )
     {
 	Packet	p;
-	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__ );
+	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__,
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+		0
+#else
+		__LINE__ 
+#endif
+		);
     }
 }
 
@@ -883,7 +917,13 @@ void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
+	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__,
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+		0
+#else
+		__LINE__ 
+#endif
+		);
 	clt_sock.disconnect( "Closing connection to server", false );
 }
 

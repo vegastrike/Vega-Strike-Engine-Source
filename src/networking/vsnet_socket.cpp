@@ -356,8 +356,7 @@ int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
     }
     else if( ret == 0 )
     {
-        cout << __FILE__ << ":" << __LINE__;
-        cout << " Received " << ret << " bytes : " << buffer << " (UDP socket closed, strange)" << endl;
+        COUT << " Received " << ret << " bytes : " << buffer << " (UDP socket closed, strange)" << endl;
         ret = -1;
     }
     else
@@ -512,8 +511,7 @@ void VsnetTCPSocket::disconnect( const char *s, bool fexit )
         close_socket( fd );
         fd = -1;
     }
-    cout << __FILE__ << ":" << __LINE__ << " "
-         << s << " :\tWarning: disconnected" << strerror(errno) << endl;
+    COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
     if( fexit )
     {
         exit(1);
