@@ -25,7 +25,6 @@ NetBuffer::NetBuffer( char * buf, int bufsize)
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
 			memcpy( buffer, buf, bufsize);
-			this->buffer[size] = 0;
 		}
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
@@ -34,7 +33,6 @@ NetBuffer::NetBuffer( const char * buf, int bufsize)
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
 			memcpy( buffer, buf, bufsize);
-			this->buffer[size] = 0;
 		}
 NetBuffer::~NetBuffer()
 		{
