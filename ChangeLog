@@ -1,10 +1,17 @@
+2002-03-07 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* ai_orderlist now basically working
+	* had to add gui to src/Makefile.am
+
+	
 2002-03-06 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* homepage/docu
 	  added bugs/todo section
 	* exporer-missions: fixed? nan-velocity/position bug
 	* ordered the missions dir new
-
+	* ai_orderlist (still experimental)
+	
 
 2002-03-06 Corey O'Connor <zoldar256@users.sourceforge.net>
         * A few small changes to OS X target
