@@ -235,7 +235,7 @@ FaceTargetITTS::~FaceTargetITTS () {
 
 void FaceTargetITTS::Execute() {
   Unit * target = parent->Target();
-  if (target==NULL){
+  if (target==NULL&&finish){
     done = GFXTRUE;
     return;
   }
@@ -260,7 +260,7 @@ FaceTarget::FaceTarget (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),acc
 
 void FaceTarget::Execute() {
   Unit * target = parent->Target();
-  if (target==NULL){
+  if (target==NULL&&finish){
     done = GFXTRUE;
     return;
   }
