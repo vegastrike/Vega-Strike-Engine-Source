@@ -4,9 +4,16 @@
 #include "vs_globals.h"
 
 #ifdef HAVE_AL
+#ifdef __APPLE__
+#include <al.h>
+#include <alc.h>
+#include <alut.h>
+
+#else
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include "al_globals.h"

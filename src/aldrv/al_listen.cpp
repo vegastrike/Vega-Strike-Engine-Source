@@ -1,6 +1,10 @@
 #include "audiolib.h"
 #ifdef HAVE_AL
+#ifdef __APPLE__
+#include <al.h>
+#else
 #include <AL/al.h>
+#endif
 #endif
 #include <stdio.h>
 #include <vector>

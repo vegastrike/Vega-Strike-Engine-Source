@@ -6,10 +6,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_AL
+#ifdef __APPLE__
+#include <al.h>
+#include <alc.h>
+#include <alut.h>
+#else
 #include <AL/al.h>
 #include <AL/alc.h>
-//#include <AL/alext.h>
 #include <AL/alut.h>
+#endif
+//#include <AL/alext.h>
 #endif
 #include <vector>
 #include "vs_globals.h"

@@ -1,8 +1,11 @@
 #ifndef AL_GLOBALS_H_
 #define AL_GLOBALS_H_
 #ifdef HAVE_AL
+#ifdef __APPLE__
+#include <al.h>
+#else
 #include <AL/al.h>
-
+#endif
 #include <string>
 #include <vector>
 class Vector;
