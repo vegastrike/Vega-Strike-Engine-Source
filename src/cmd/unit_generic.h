@@ -215,6 +215,7 @@ protected:
   bool FaceCamera;
 public:
   bool isSubUnit() {return SubUnit;}
+  void setFaceCamera(){FaceCamera=true;}
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   unsigned char RecomputeRole();//changes own role

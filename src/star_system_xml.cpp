@@ -97,7 +97,13 @@ namespace StarXML {
     RING,
 	SPACEELEVATOR,
     WRAPX,
-    WRAPY
+    WRAPY,
+	FOG,
+	FOCUS,
+	CONCAVITY,
+	TAILMODESTART,
+	TAILMODEEND
+	
   };
 
   const EnumMap::Pair element_names[] = {
@@ -121,7 +127,8 @@ namespace StarXML {
     EnumMap::Pair ("Asteroid",ASTEROID),
     EnumMap::Pair ("RING",RING),
     EnumMap::Pair ("citylights",CITYLIGHTS),
-    EnumMap::Pair ("SpaceElevator",SPACEELEVATOR)	
+    EnumMap::Pair ("SpaceElevator",SPACEELEVATOR),
+    EnumMap::Pair ("Fog",FOG)	
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -171,12 +178,16 @@ namespace StarXML {
     EnumMap::Pair ("InnerRadius",INNERRADIUS),
     EnumMap::Pair ("OuterRadius",OUTERRADIUS),
     EnumMap::Pair ("WrapX",WRAPX),
-    EnumMap::Pair ("WrapY",WRAPY)
+    EnumMap::Pair ("WrapY",WRAPY),
+    EnumMap::Pair ("Focus",FOCUS),
+    EnumMap::Pair ("Concavity",CONCAVITY),
+    EnumMap::Pair ("TailModeStart",TAILMODESTART),
+    EnumMap::Pair ("TailModeEnd",TAILMODEEND)
     
   };
 
-  const EnumMap element_map(element_names, 21);
-  const EnumMap attribute_map(attribute_names, 48);
+  const EnumMap element_map(element_names, 22);
+  const EnumMap attribute_map(attribute_names, 52);
 }
 
 using XMLSupport::EnumMap;
@@ -473,7 +484,58 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
       break;
     }
 
+  case FOG:
+  {
+     xml->unitlevel++;
+      std::string myfile("elevator");
 
+      blendSrc=SRCALPHA;
+      blendDst=INVSRCALPHA;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL){
+		  if (p->isUnit()==PLANETPTR) {	  
+	  
+	  int tail_mode_start=-1;
+	  int tail_mode_end=-1;
+	  double concavity=0;
+	  double focus=.5;
+	  GFXColor col(1,1,1,1);
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+		case EMRED:
+			col.r=XMLSupport::parse_float (iter->value);
+			break;
+		case EMGREEN:
+			col.g=XMLSupport::parse_float (iter->value);			
+			break;
+		case EMBLUE:
+			col.b=XMLSupport::parse_float (iter->value);			
+			break;
+		case EMALPHA:
+			col.a=XMLSupport::parse_float (iter->value);
+			break;
+		case CONCAVITY:
+			concavity=XMLSupport::parse_float(iter->value);
+			break;
+		case FOCUS:
+			focus=XMLSupport::parse_float(iter->value);			
+			break;
+		case TAILMODESTART:
+			tail_mode_start=XMLSupport::parse_float(iter->value);
+			break;
+		case TAILMODEEND:
+			tail_mode_end=XMLSupport::parse_float(iter->value);
+			break;
+		default:
+			break;
+		}
+	  }
+	  ((Planet *)p)->AddFog(col,focus,concavity,tail_mode_start,tail_mode_end);
+		  }
+	  }
+	  
+  }
+  break;
   case CITYLIGHTS:
     {
       std::string myfile("planets/Dirt_light.png");
@@ -515,7 +577,7 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
 	}
       break;
     }
-    
+	break;    
   case ATMOSPHERE:
     {
       std::string myfile("sol/earthcloudmaptrans.png");

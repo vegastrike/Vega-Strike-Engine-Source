@@ -46,12 +46,21 @@ public:
 };
 void GamePlanet::AddFog (const GFXColor & colror, double focus, double concavity, int tail_mode_start, int tail_mode_end) {
 	if(meshdata.empty()) meshdata.push_back(NULL);
+#ifdef MESHONLY
 	Mesh *shield = meshdata.back(); meshdata.pop_back();
+#endif
+	std::vector <Mesh * > fogs;
 	for (unsigned int i=1;i<=5;++i) {
 		Mesh *fog=new FogMesh (string("sphereatm")+XMLSupport::tostring(i)+".xmesh",colror,rSize(),focus,concavity,tail_mode_start,tail_mode_end);
-		meshdata.push_back(fog);
+		fogs.push_back(fog);
 	}
+	Unit* fawg=UnitFactory::createUnit(fogs,true,0);
+	fawg->setFaceCamera();
+	getSubUnits().preinsert (fawg);
+	fawg->hull/=fawg->GetHullPercent();
+#ifdef MESHONLY	
 	meshdata.push_back(shield);
+#endif
 	
 }
 void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out, bool reverse_normals){
