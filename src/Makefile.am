@@ -2,43 +2,43 @@ bin_PROGRAMS = vegastrike vegaserver accountserver
 
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
 
-vegastrike_LDADD =  \
-networking/netserver.o \
-aldrv/libaldrv.a \
-common/libvscommon.a \
-networking/libnetclient.a \
-cmd/script/script_call_briefing.o \
-cmd/script/libscript.a \
-cmd/script/c_alike/libc_alike.a \
-python/briefing_wrapper.o \
-cmd/libcmd.a \
-cmd/base_init.o \
-python/libpython.a \
-gfx/libgfx.a \
-cmd/ai/libai.a \
-gldrv/libgldrv.a \
-gui/libgui.a \
-networking/libnet.a \
-cmd/collide/libcollide.a \
+vegastrike_LDADD =  				\
+networking/netserver.o 				\
+aldrv/libaldrv.a 					\
+common/libvscommon.a 				\
+networking/libnetclient.a 			\
+cmd/script/script_call_briefing.o 	\
+cmd/script/libscript.a 				\
+cmd/script/c_alike/libc_alike.a 	\
+python/briefing_wrapper.o 			\
+cmd/libcmd.a 						\
+cmd/base_init.o 					\
+python/libpython.a 					\
+gfx/libgfx.a 						\
+cmd/ai/libai.a 						\
+gldrv/libgldrv.a 					\
+gui/libgui.a 						\
+networking/libnet.a 				\
+cmd/collide/libcollide.a 			\
 boost129/libboost_python.a boost/libboost_python.a \
-gfx/nav/libnav.a \
+gfx/nav/libnav.a 					\
 -lpthread 
 
-vegaserver_LDADD =  \
-cmd/script/director_server.o \
-cmd/unit_util_generic.o \
-cmd/unit_util_server.o \
-networking/netclient.o \
-common/libvscommon.a \
-networking/libnetserver.a \
-cmd/libcmdserver.a \
-cmd/script/libscriptserver.a \
-cmd/ai/libaiserver.a \
+vegaserver_LDADD =  			\
+cmd/script/director_server.o 	\
+cmd/unit_util_generic.o 		\
+cmd/unit_util_server.o 			\
+networking/netclient.o 			\
+common/libvscommon.a 			\
+networking/libnetserver.a 		\
+cmd/libcmdserver.a 				\
+cmd/script/libscriptserver.a 	\
+cmd/ai/libaiserver.a 			\
 cmd/script/c_alike/libc_alike.a \
-python/libpythonserver.a \
-gfx/libgfxserver.a \
-gldrv/libgldrvserver.a \
-cmd/collide/libcollide.a \
+python/libpythonserver.a 		\
+gfx/libgfxserver.a 				\
+gldrv/libgldrvserver.a 			\
+cmd/collide/libcollide.a 		\
 boost129/libboost_python.a boost/libboost_python.a
 
 accountserver_LDADD =  \
@@ -88,7 +88,9 @@ libroot =		\
     macosx_math.h			\
 	cg_global.cpp
 
-librootgeneric =			\
+librootgeneric =				\
+	md5.cpp						\
+	md5.h						\
 	star_system_generic.cpp 	\
 	star_system_generic.h 		\
 	universe_generic.cpp		\
@@ -108,23 +110,23 @@ librootgeneric =			\
 	configxml.h					\
 	easydom.cpp					\
 	easydom.h					\
-	xml_serializer.cpp		\
-	xml_serializer.h		\
-	xml_support.h  			\
-	xml_support.cpp			\
+	xml_serializer.cpp			\
+	xml_serializer.h			\
+	xml_support.h  				\
+	xml_support.cpp				\
 	lin_time.cpp				\
 	lin_time.h					\
-	endianness.cpp			\
-	endianness.h			\
-	file_main.h				\
-	in.h					\
+	endianness.cpp				\
+	endianness.h				\
+	file_main.h					\
+	in.h						\
 	faction_util_generic.cpp	\
-	load_mission.cpp		\
-	savegame.cpp			\
-	savegame.h				\
-	vegastrike.h			\
-	vs_globals.cpp			\
-	vs_path.cpp				\
+	load_mission.cpp			\
+	savegame.cpp				\
+	savegame.h					\
+	vegastrike.h				\
+	vs_globals.cpp				\
+	vs_path.cpp					\
 	vs_path.h
 
 librootserver =					\
@@ -140,21 +142,23 @@ vegaserver_SOURCES =			\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
-	libserver.cpp		\
-	configxml.cpp				\
-	configxml.h					\
-	easydom.cpp					\
-	easydom.h					\
+	libserver.cpp			\
+	configxml.cpp			\
+	configxml.h				\
+	easydom.cpp				\
+	easydom.h				\
 	xml_support.h  			\
 	xml_support.cpp			\
-	lin_time.cpp				\
-	lin_time.h					\
-	endianness.cpp				\
-	endianness.h				\
+	lin_time.cpp			\
+	lin_time.h				\
+	endianness.cpp			\
+	endianness.h			\
 	vs_path.cpp				\
 	vs_path.h				\
-	galaxy_gen.cpp				\
-	galaxy_gen.h				\
+	galaxy_gen.cpp			\
+	galaxy_gen.h			\
+	md5.cpp					\
+	md5.h					\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\

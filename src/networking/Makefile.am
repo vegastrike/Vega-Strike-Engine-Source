@@ -7,19 +7,19 @@ soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
 
 libnetgeneric = \
-	accountsxml.cpp	\
-	accountsxml.h	\
-	client.h		\
-	clientstructs.cpp	\
-	const.h			\
-	netui.cpp		\
-	netui.h			\
-	netbuffer.h		\
-	netbuffer.cpp	\
-	packetmem.cpp	\
-	packetmem.h		\
-	packet.cpp		\
-	packet.h		\
+	accountsxml.cpp			\
+	accountsxml.h			\
+	client.h				\
+	clientstructs.cpp		\
+	const.h					\
+	netui.cpp				\
+	netui.h					\
+	netbuffer.h				\
+	netbuffer.cpp			\
+	packetmem.cpp			\
+	packetmem.h				\
+	packet.cpp				\
+	packet.h				\
 	vsnet_address.cpp		\
 	vsnet_address.h			\
 	vsnet_socket.cpp		\
@@ -31,17 +31,17 @@ libnetgeneric = \
 	vsnet_clientstate.h		\
 	vsnet_serversocket.cpp	\
 	vsnet_serversocket.h	\
-	savenet_util.cpp	\
+	savenet_util.cpp		\
 	savenet_util.h
 
 libnetclientserver =	$(libnetgeneric) \
-	netserver.cpp	\
-	netserver.h	\
-	netclient.cpp	\
-	netclient.h	\
+	netserver.cpp		\
+	netserver.h			\
+	netclient.cpp		\
+	netclient.h			\
 	cubicsplines.cpp	\
 	cubicsplines.h		\
-	zonemgr.cpp	\
+	zonemgr.cpp			\
 	zonemgr.h
 
 libnet_a_SOURCES =	\

@@ -15,7 +15,7 @@
 *** GAME SERVER ********************************************************
 
 - Turn mount_num into a char ?
-- Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
+- Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
 
 - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 - Think about transfering config data such as difficulty, physics...
@@ -77,6 +77,7 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
 DONE - Add position stuff transmission for other units than clients (ai, missiles)
 DONE - Make the difference between ships/ai and planets/bases that move really slowly so updates are not required that often
 DONE - In UpdatePhysics : do not modify physical_state for a client ! only for server side units (SHOULD BE OK IN UpdatePhysics2)

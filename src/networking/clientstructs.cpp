@@ -4,6 +4,28 @@
 #include "cmd/unit_generic.h"
 #include "packet.h"
 #include "client.h"
+#include "md5.h"
+
+int		md5sum_file( char * filename, unsigned char * digest)
+{
+	FILE * fp = fopen( filename, "r");
+	if( !fp)
+		return -1;
+
+	unsigned char buffer[1024];
+	MD5_CTX	ctx;
+	int nb=0;
+
+	MD5Init( &ctx);
+
+	while( (nb = fread( buffer, sizeof( unsigned char), 1024, fp)) > 0)
+		MD5Update( &ctx, buffer, nb);
+
+	MD5Final( digest, &ctx);
+	fclose( fp);
+
+	return 0;
+}
 
 using std::string;
 
