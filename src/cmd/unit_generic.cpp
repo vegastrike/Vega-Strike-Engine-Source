@@ -4525,12 +4525,14 @@ bool Unit::EndRequestClearance(Unit *targ) {
 }
 
 bool Unit::RequestClearance (Unit * dockingunit) {
+#if 0
     static float clearencetime=(XMLSupport::parse_float (vs_config->getVariable ("general","dockingtime","20")));
     EnqueueAIFirst (new ExecuteFor (new Orders::MatchVelocity (Vector(0,0,0),
 							       Vector(0,0,0),
 							       true,
 							       false,
 							       true),clearencetime));
+#endif
     if (std::find (image->clearedunits.begin(),image->clearedunits.end(),dockingunit)==image->clearedunits.end())
       image->clearedunits.push_back (dockingunit);
     return true;

@@ -936,67 +936,104 @@ static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
 }
-
-static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
-  bool nodockwithclear=NoDockWithClear();
-  bool wasdock=vectorOfKeyboardInput[playa].doc;
-    if (vectorOfKeyboardInput[playa].doc) {
-     if (targ->isUnit()==PLANETPTR) {
-      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
-	targ = getAtmospheric (targ);
-	if (!targ) {
-	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-	  abletodock(2);
-	  return;
-	}
-	parent->Target(targ);
-      }
-      }
-      CommunicationMessage c(targ,parent,NULL,0);
-
-      bool hasDock = parent->Dock(targ);
-      if (hasDock) {
-	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
-	  abletodock(3);
-	  vectorOfKeyboardInput[playa].req=true;
-      }else {
-        if (UnDockNow(parent,targ)) {
-	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-	  abletodock(5);
-        }else {
-          //docking is unsuccess
-	  abletodock(2);
-	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+static bool SuperDock(Unit * parent, Unit* target) {
+  if (UnitUtil::getSignificantDistance(parent,target)<parent->rSize()) {
+    if (UnitUtil::isDockableUnit(target)) {
+      for (unsigned int i=0;i<target->GetImageInformation().dockingports.size();++i) {
+        if (target->GetImageInformation().dockingports[i].used==false) {
+          return parent->ForceDock(target,i)!=0;
         }
       }
-      parent->getAIState()->Communicate (c);
-      vectorOfKeyboardInput[playa].doc=false;
-
     }
-    if (vectorOfKeyboardInput[playa].req) {
-      bool request=RequestClearence(parent,targ,sex);
-      if (!request) {
-        mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-        abletodock(0);
-        return;
-      } else if (!wasdock) {
-        abletodock(1);
+  }
+  return false;
+}
+static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severity) {
+  bool hasDock = severity==0?parent->Dock(targ):SuperDock(parent,targ);
+  bool isDone=false;
+  CommunicationMessage c(targ,parent,NULL,0);    
+  if (hasDock) {
+    isDone=true;
+    c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
+    abletodock(3);
+    vectorOfKeyboardInput[playa].req=true;
+    parent->getAIState()->Communicate (c);
+  }else {
+    if (UnDockNow(parent,targ)) {
+      isDone=true;
+      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      parent->getAIState()->Communicate (c);
+      abletodock(5);
+    }
+  }
+  return isDone;
+}
+static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
+  static int maxseverity=XMLSupport::parse_bool(vs_config->getVariable("AI","dock_to_area","false"))?2:1;
+  bool nodockwithclear=NoDockWithClear();
+  bool wasdock=vectorOfKeyboardInput[playa].doc;
+  if (vectorOfKeyboardInput[playa].doc) {
+    bool isDone=false;
+    if (targ) {
+      for (int severity=0;severity<maxseverity;++severity) { 
+        targ->RequestClearance(parent);
+        if ((isDone=TryDock(parent,targ,playa,0))!=false){
+          break;
+        }else {
+            //if (targ!=parent->Target())
+          parent->EndRequestClearance(targ);
+        }
       }
-      vectorOfKeyboardInput[playa].req=false;
     }
-
-    if (vectorOfKeyboardInput[playa].und) {
-      CommunicationMessage c(targ,parent,NULL,0);
-      if (UnDockNow(parent,targ)) {
-	c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-	abletodock(5);
-      }else {
-	c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
- 	abletodock(4);
-     }
-      parent->getAIState()->Communicate (c);
-      vectorOfKeyboardInput[playa].und=0;
+    if (!isDone) {
+      for (int severity=0;severity<maxseverity;++severity) {
+      for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();
+           (targ=*u)!=NULL;
+           ++u) {
+        if (targ!=parent) {
+          targ->RequestClearance(parent);
+          if (TryDock(parent,targ,playa,severity)) {
+            parent->Target(targ);
+            isDone=true;
+            break;
+          }else {
+            //if (targ!=parent->Target())
+            parent->EndRequestClearance(targ);
+          }
+        }
+      }
+      }
     }
+    if (!isDone) {
+      abletodock(0);
+    }
+    vectorOfKeyboardInput[playa].doc=false;
+    
+  }
+  if (vectorOfKeyboardInput[playa].req) {
+    bool request=RequestClearence(parent,targ,sex);
+    if (!request) {
+      mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantidisabal object, target another object and retry.");
+      abletodock(0);
+      return;
+    } else if (!wasdock) {
+      abletodock(1);
+    }
+    vectorOfKeyboardInput[playa].req=false;
+  }
+  
+  if (vectorOfKeyboardInput[playa].und) {
+    CommunicationMessage c(targ,parent,NULL,0);
+    if (UnDockNow(parent,targ)) {
+      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      abletodock(5);
+    }else {
+      c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+      abletodock(4);
+    }
+    parent->getAIState()->Communicate (c);
+    vectorOfKeyboardInput[playa].und=0;
+  }
 }
 using std::list;
 unsigned int FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
