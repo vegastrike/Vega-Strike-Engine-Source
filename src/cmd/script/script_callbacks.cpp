@@ -913,11 +913,15 @@ void Mission::initCallbackMaps(){
   module_unit_map["getUnitFromContainer"]=CMT_UNIT_getUnitFromContainer ;
   module_unit_map["deleteContainer"]=CMT_UNIT_deleteContainer ;
   module_unit_map["getUnit"]=CMT_UNIT_getUnit ;
+  module_unit_map["getTurret"]=CMT_UNIT_getTurret ;
   module_unit_map["getCredits"]=CMT_UNIT_getCredits ;
   module_unit_map["getRandCargo"]=CMT_UNIT_getRandCargo ;
   module_unit_map["addCredits"]=CMT_UNIT_addCredits ;
   module_unit_map["getPlayer"]=CMT_UNIT_getPlayer ;
   module_unit_map["launch"]=CMT_UNIT_launch ;
+  module_unit_map["launchNebula"]=CMT_UNIT_launchPlanet ;
+  module_unit_map["launchPlanet"]=CMT_UNIT_launchNebula ;
+  module_unit_map["launchJumppoint"]=CMT_UNIT_launchJumppoint ;
     module_unit_map["getPosition"]=CMT_UNIT_getPosition ;
     module_unit_map["getFaction"]=CMT_UNIT_getFaction ;
     module_unit_map["getVelocity"]=CMT_UNIT_getVelocity ;

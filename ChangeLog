@@ -1,7 +1,19 @@
+2002-04-07 Daniel Horn <hellcatv@hotmail.com>
+	* Changed collide table to use UnitCollection (should be reasonably fast and certainly safer)
+	
+2002-04-06 Daniel Horn <hellcatv@hotmail.com>
+
+	* Added activeStarSystem to unit so it knows which system to clean its collide table from (could fix a bug)
+	* Removed beams from collide table...now they only query it (removes lots of clutter)
+	* Fixed collections so multiple collections can run through the queue at any given time
+	* Only allowed units to target starships in their star system (target jump point if starship is in adjacent star system)
+	
+
 2002-03-22 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* hopefully fixed _unit.getName
 	
+
 
 2002-03-24 Daniel Horn <hellcatv@hotmail.com>
 	* Added sounds to comms (electricity.wav playes when someone hates you

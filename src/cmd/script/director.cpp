@@ -435,7 +435,7 @@ void Mission::DirectorShipDestroyed(Unit *unit){
 	fg->orderlist=order->getOrderList();
       }
 
-      call_unit_launch(fg);
+      call_unit_launch(fg,UNITPTR,string(""));
     }
     else{
       mission->msgcenter->add("game","all","Flightgroup "+fg->name+" destroyed");

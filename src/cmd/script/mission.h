@@ -196,12 +196,16 @@ enum callback_module_unit_type {
   CMT_UNIT_getUnitFromContainer,
   CMT_UNIT_deleteContainer,
   CMT_UNIT_getUnit ,
+  CMT_UNIT_getTurret ,
   CMT_UNIT_getPlayer ,
   CMT_UNIT_getRandCargo ,
   CMT_UNIT_getCredits ,
   CMT_UNIT_getSaveData ,//gets saved data for this unit
   CMT_UNIT_addCredits ,
   CMT_UNIT_launch ,
+  CMT_UNIT_launchNebula,
+  CMT_UNIT_launchPlanet,
+  CMT_UNIT_launchJumppoint,
     CMT_UNIT_getPosition ,
     CMT_UNIT_getFaction ,
     CMT_UNIT_getVelocity ,
@@ -644,7 +648,7 @@ varInst * call_unit(missionNode *node,int mode);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
- Unit * call_unit_launch(Flightgroup *fg);
+ Unit * call_unit_launch(Flightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
  void call_unit_toxml(missionNode *node,int mode,varInst *ovi);
 
  varInst *call_string(missionNode *node,int mode);

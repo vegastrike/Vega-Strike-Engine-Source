@@ -54,8 +54,9 @@
 #include "gfx/cockpit.h"
 #include "cmd/images.h"
 #include "savegame.h"
+#include "cmd/nebula.h"
 //#include "vegastrike.h"
-
+extern vector <char *> ParseDestinations (const string &value);
 /* *********************************************************** */
 
 extern Unit& GetUnitMasterPartList ();
@@ -71,6 +72,8 @@ extern UnitContainer player_unit;
 Best:
 _Universe->AccessCockpit()->GetParent();
 #endif
+
+static Unit * getIthUnit (un_iter uiter, int i);
 
 varInst *Mission::call_unit(missionNode *node,int mode){
 #ifdef ORDERDEBUG
@@ -98,19 +101,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       StarSystem *ssystem=_Universe->scriptStarSystem();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
       un_iter uiter=ssystem->getUnitList().createIterator();
-
-      int i=0;
-      Unit *unit=uiter.current();
-      while(unit!=NULL){
-	if(i==unit_nr){
-	  my_unit=uiter.current();
-	  unit=NULL;
-	}
-	else{
-	  unit=++(uiter);
-	  i++;
-	}
-      }
+      my_unit=getIthUnit (uiter,unit_nr);
     }
 
     viret=newVarInst(VI_TEMP);
@@ -144,7 +135,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     return viret;
 
   }
-  else if(method_id==CMT_UNIT_launch){
+  else if(method_id==CMT_UNIT_launch||method_id==CMT_UNIT_launchNebula||method_id==CMT_UNIT_launchPlanet||method_id==CMT_UNIT_launchJumppoint){
     missionNode *name_node=getArgument(node,mode,0);
     varInst *name_vi=checkObjectExpr(name_node,mode);
     
@@ -162,7 +153,15 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     missionNode *nrw_node=getArgument(node,mode,5);
     int nr_of_waves=checkIntExpr(nrw_node,mode);
-
+    varInst *destination_vi;
+    string destinations;
+    if (method_id==CMT_UNIT_launchJumppoint) {
+      missionNode *destination_node=getArgument(node,mode,6);
+      destination_vi=checkObjectExpr(faction_node,mode);
+      if (mode==SCRIPT_RUN) {
+	destinations = *((string*)destination_vi->object);
+      }
+    }
     missionNode *pos_node[3];
     float pos[3];
     for(int i=0;i<3;i++){
@@ -172,11 +171,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
 	Unit * my_unit=NULL;
     if(mode==SCRIPT_RUN){
+      clsptr clstyp=UNITPTR;
+      if (method_id==CMT_UNIT_launchJumppoint||method_id==CMT_UNIT_launchPlanet) {
+	clstyp=PLANETPTR;
+      }else if (method_id==CMT_UNIT_launchNebula){
+	clstyp=NEBULAPTR;
+      }
       string name_string=*((string *)name_vi->object);
       string faction_string=*((string *)faction_vi->object);
       string type_string=*((string *)type_vi->object);
       string ai_string=*((string *)ai_vi->object);
-
+     
       Flightgroup *fg=new Flightgroup;
 
       fg->name=name_string;
@@ -200,7 +205,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
   fprintf (stderr,"cunl%x",this);
   fflush (stderr);
 #endif
-	  Unit *tmp= call_unit_launch(fg);
+	  Unit *tmp= call_unit_launch(fg,clstyp,destinations);
 	  if (!my_unit) {
 		my_unit=tmp;
 	  }
@@ -806,6 +811,25 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_FLOAT;
       viret->float_val=ret;
     }
+    else if(method_id==CMT_UNIT_getTurret){
+      missionNode *nr_node=getArgument(node,mode,1);
+      int unit_nr=doIntVar(nr_node,mode);
+      Unit *turret_unit=NULL;
+      
+      if(mode==SCRIPT_RUN){
+	un_iter uiter=my_unit->getSubUnits();
+	turret_unit=getIthUnit(uiter,unit_nr);
+      }
+      
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      
+      viret->object=(void *)turret_unit;
+      
+      debug(3,node,mode,"unit getUnit: ");
+      printVarInst(3,viret);
+    }
     else if(method_id==CMT_UNIT_getFgId){
       if(mode==SCRIPT_RUN){
 	
@@ -971,14 +995,31 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
 
-Unit * Mission::call_unit_launch(Flightgroup *fg){
+Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destinations){
 
    int faction_nr=_Universe->GetFaction(fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit *units[20];
    int u;
    for(u=0;u<fg->nr_ships;u++){
-     Unit *my_unit=new Unit(fg->type.c_str(),false,faction_nr,string(""),fg,u);
+     Unit * my_unit;
+     if (type==PLANETPTR) {
+       float radius;
+       char * blah = strdup (fg->type.c_str());
+       char * blooh = strdup (fg->type.c_str());
+       blooh[0]='\0';//have at least 1 char
+       blah[0]='\0';
+       sscanf (fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
+       GFXMaterial mat;
+       GFXGetMaterial (0,mat);
+       my_unit = new Planet (Vector(0,0,0),Vector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),Vector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
+       free (blah);
+       free (blooh);
+     }else if (type==NEBULAPTR) {
+       my_unit=new Nebula (fg->type.c_str(),false,faction_nr,fg,u);
+     } else {
+       my_unit=new Unit(fg->type.c_str(),false,faction_nr,string(""),fg,u);
+     }
      units[u]=my_unit;
    }
 
@@ -1071,7 +1112,22 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
       return;
 }
 
-
+static Unit * getIthUnit (un_iter uiter, int unit_nr) {
+  int i=0;
+  Unit * my_unit=NULL;
+  Unit *unit=uiter.current();
+  while(unit!=NULL){
+    if(i==unit_nr){
+      my_unit=uiter.current();
+      unit=NULL;
+    }
+    else{
+      unit=++(uiter);
+      i++;
+    }
+  }
+  return my_unit;
+}
 void Mission::call_unit_toxml(missionNode *node,int mode,varInst *ovi){
   Unit *my_object=getUnitObject(node,mode,ovi);
 
