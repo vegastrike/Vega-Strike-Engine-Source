@@ -147,6 +147,9 @@ public:
 	void ApplyLocalTorque (Vector Vforce, Vector Location);
 	void ApplyBalancedLocalTorque (Vector Vforce, Vector Location); //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
 	void ResolveForces ();
+        Vector &P(){return p;};
+        Vector &Q(){return q;};
+        Vector &R(){return r;};
 };
 
 class AI{

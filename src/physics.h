@@ -24,6 +24,9 @@
 
 #include "gfx_transform_vector.h"
 #include "quanternion.h"
+
+#define SIMULATION_ATOM 1.0/30.0F
+
 struct Force {
 	Vector F;
 	float t;

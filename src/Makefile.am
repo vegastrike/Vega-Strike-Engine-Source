@@ -60,8 +60,6 @@ vegastrike_SOURCES =				\
 	gfx_bsp.h				\
 	gfx_camera.cpp				\
 	gfx_camera.h				\
-	gfx_click_list.h			\
-	gfx_click_list.cpp			\
 	gfx_hud.cpp				\
 	gfx_hud.h				\
 	gfx_location_select.cpp			\
@@ -77,6 +75,8 @@ vegastrike_SOURCES =				\
 	gfx_transform_matrix.h			\
 	gfx_transform_matrix.cpp		\
 	gfx_vertex.h				\
+	gfx_sphere.h				\
+	gfx_sphere.cpp				\
 	gfxlib.h				\
 	gfxlib_struct.h				\
 	gl_globals.cpp				\
@@ -90,6 +90,7 @@ vegastrike_SOURCES =				\
 	gl_state.cpp				\
 	gl_texture.cpp				\
 	gl_vertex_list.cpp			\
+	gl_quadstrip.cpp			\
 	hash.c					\
 	hash.h					\
 	hashtable.h				\
@@ -127,3 +128,10 @@ vegastrike_SOURCES =				\
 	wrapgfx.cpp				\
 	wrapgfx.h				\
 	vegastrike.h				\
+	star_system.cpp 			\
+	star_system.h 				\
+	planet.h 				\
+	planet.cpp 				
+
+#	gfx_click_list.h			\
+#	gfx_click_list.cpp			\

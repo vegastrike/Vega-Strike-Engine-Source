@@ -60,6 +60,7 @@ Unit::Unit(char *filename):Mesh()
 {
 	Init();
 
+	debugName = strdup((filename + string(" - Unit")).c_str());
 	/*Insert file loading stuff here*/
 	LoadFile(filename);
 
@@ -254,10 +255,13 @@ void Unit::Draw()
 		nq = Transform(pp,pq,pr,q),
 		nr = Transform(pp,pq,pr,r),
 		npos = ppos+pos;
-	 
+
+	Matrix currentMatrix;
+	GFXGetMatrix(MODEL, currentMatrix);
 	for (int i=0;i<nummesh;i++) {
-	  GFXLoadMatrix(MODEL, transformation); // not a problem with overhead if the mesh count is kept down
-	  meshdata[i]->Draw(np, nq, nr, npos);
+	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
+	  //meshdata[i]->Draw(np, nq, nr, npos);
+	  meshdata[i]->Draw();
 	}
 	for(int subcount = 0; subcount < numsubunit; subcount++)
 		subunits[subcount]->Draw(tmatrix, np, nq, nr, npos);
@@ -297,12 +301,14 @@ void Unit::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector
 	this->pr = pr;
 	this->ppos = ppos;
 
-	VectorToMatrix(orientation, pp,pq,pr);
-	Translate(translation, ppos.i,ppos.j,ppos.k);
-
-	MultMatrix(tmatrix, translation, orientation);
+	/*
+	  VectorToMatrix(orientation, pp,pq,pr);
+	  Translate(translation, ppos.i,ppos.j,ppos.k);
+	  
+	  MultMatrix(tmatrix, translation, orientation);
 	
-	CopyMatrix(this->tmatrix, tmatrix);
+	  CopyMatrix(this->tmatrix, tmatrix);
+	*/
 	Draw();
 }
 

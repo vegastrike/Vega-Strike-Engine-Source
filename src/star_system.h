@@ -8,17 +8,18 @@
 #define _SYSTEM_H_
 
 #define NUM_CAM 10
-#define SIMULATION_ATOM = 0.1F
 
 #include "gfx_camera.h"
 
+class Planet;
 class UnitCollection;
 class ClickList;
+class Unit;
 
 class StarSystem {
  private:
-  UnitCollection *primaries; // Stars, planets, etc. Orbital mechanics
-                             // pre-calculated
+  Planet *primaries; // Stars, planets, etc. Orbital mechanics
+                   // pre-calculated. Cannot be 
 
   UnitCollection *units;    // Objects subject to global physics
   UnitCollection *missiles; // no physics modelling, not searched
@@ -28,9 +29,7 @@ class StarSystem {
   int active_camera;
 
  public:
-  StarSystem(UnitCollection *primaries) : primaries(primaries), 
-    units(new UnitCollection()), 
-    missiles(new UnitCollection()) { }
+  StarSystem(Planet *primaries);
 
   ClickList *getClickList(); // returns xy sorted bounding spheres of 
                              // all units in current view

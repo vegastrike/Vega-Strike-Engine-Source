@@ -38,7 +38,6 @@ inline Vector operator* (const float obj, const Vector &rval);
 
 inline Vector operator+= (Vector &lval, const Vector &obj);
 
-
 class Vector {
 	private:
 		

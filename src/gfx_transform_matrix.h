@@ -99,6 +99,7 @@ inline void Identity(float matrix[])
 }
 /** Computes a Translation matrix based on x,y,z translation
  */
+
 inline void Translate(float matrix[], float x, float y, float z)
 {
 	matrix[0] = 1;
@@ -121,6 +122,11 @@ inline void Translate(float matrix[], float x, float y, float z)
 	matrix[14] = z;
 	matrix[15] = 1;
 }
+
+inline void Translate(float matrix[], const Vector &v) {
+  Translate(matrix, v.i, v.j, v.k);
+}
+
 /** Multiplies m1 and m2 and pops the result into dest;
  *  dest != m1, dest !=m2
  */

@@ -15,6 +15,9 @@
 #include "gfx_location_select.h"
 #include <string>
 
+#include "star_system.h"
+#include "planet.h"
+
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -53,7 +56,7 @@ public:
 	AI *Execute()
 	{
 		//parent->Position(); // query the position
-		parent->ZSlide(0.100F);
+	        parent->ZSlide(0.100F);
 		parent->Pitch(PI/180);
 		count ++;
 		if(30 == count)
@@ -303,6 +306,65 @@ static void Quit(KBSTATE newState) {
 	}
 }
 
+Unit *carrier=NULL;
+Unit *fighter = NULL;
+Unit *fighter2=NULL;
+
+LocationSelect *locSel=NULL;
+
+Background * bg = NULL;
+TextPlane *textplane = NULL;
+
+StarSystem *star_system = NULL;
+
+static void FighterPitchDown(KBSTATE newState) {
+	static Vector Q = fighter->Q();
+	static Vector R = fighter->R();
+	if(newState==PRESS) {
+	  fighter->Pitch(PI/8);
+	  //fighter->ApplyBalancedLocalTorque(-Q, R);
+	}
+	else if(_Slew&&newState==RELEASE) {
+		//a=0;
+	}
+}
+
+static void FighterPitchUp(KBSTATE newState) {
+	
+	static Vector Q = fighter->P();
+	static Vector R = fighter->R();
+
+	if(newState==PRESS) {
+	  fighter->ApplyBalancedLocalTorque(Q, R);
+	}
+	else if(_Slew&&newState==RELEASE) {
+	}
+}
+
+static void FighterYawLeft(KBSTATE newState) {
+	
+	static Vector P = fighter->P();
+	static Vector R = fighter->R();
+
+	if(newState==PRESS) {
+	  fighter->ApplyBalancedLocalTorque(-P, R);
+	}
+	else if(_Slew&&newState==RELEASE) {
+	}
+}
+
+static void FighterYawRight(KBSTATE newState) {
+	
+	static Vector P = fighter->P();
+	static Vector R = fighter->R();
+	if(newState==PRESS) {
+	  fighter->ApplyBalancedLocalTorque(P, R);
+	  fighter->ApplyForce(P*10);
+	}
+	else if(_Slew&&newState==RELEASE) {
+	}
+}
+
 void InitializeInput() {
 	BindKey(GLUT_KEY_F1, Slew);
 	BindKey(GLUT_KEY_F12,Stop);
@@ -319,15 +381,13 @@ void InitializeInput() {
 	BindKey(',', SlideLeft);
 	BindKey('.',SlideRight);
 	BindKey('q', Quit);
+
+	/*	BindKey('a', FighterYawLeft);
+	BindKey('d', FighterYawRight);
+	BindKey('w', FighterPitchDown);
+	BindKey('s', FighterPitchUp);*/
 }
-Unit *carrier=NULL;
-Unit *fighter = NULL;
-Unit *fighter2=NULL;
 
-LocationSelect *locSel=NULL;
-
-Background * bg = NULL;
-TextPlane *textplane = NULL;
 void createObjects() {
 
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -349,11 +409,11 @@ void createObjects() {
 			       Vector (1,0,0),
 			       Vector (0,-.35,-1));
   //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
-  fighter->SetPosition(Vector(0.0, 0.0, 15.0));
+  fighter->SetPosition(Vector(0.0, 0.0, 5.0));
   fighter->SetAI(new Orbit);
   fighter->Roll(PI/4);
   carrier->SetPosition(Vector(0.0, 5.0, 10.0));
-  carrier->Pitch(PI/2);
+  carrier->Pitch(-PI/2);
   //t->SetPosition(Vector(0.5, 0.5, 15.0));
   //t->Pitch(PI/2);
   
@@ -389,6 +449,8 @@ void createObjects() {
     //fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,25.0F);
     //fighters[a]->Pitch(PI/2);
   //}
+
+  star_system = new StarSystem(new Planet("test_system.dat"));
 }
 
 void destroyObjects() {  
@@ -406,6 +468,7 @@ void destroyObjects() {
 
 void main_loop() {
   static int state = 0;
+
   _GFX->StartDraw();
   
   //GFXDisable(TEXTURE0);
@@ -427,11 +490,26 @@ void main_loop() {
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);
-  GFXEnable(TEXTURE1);
+  //GFXEnable(TEXTURE1);
+  GFXDisable(TEXTURE1);
+
+  GFXMaterial mat;
+  GFXGetMaterial(0, mat);
+  mat.ar = 1.0;
+  mat.ag = 1.0;
+  mat.ab = 1.0;
+  mat.er = 1.0;
+  mat.eg = 1.0;
+  mat.eb = 1.0;
+  GFXSetMaterial(0, mat);
+  GFXSelectMaterial(0);
+  star_system->Draw();
   
-  carrier->TDraw();
-  fighter->TDraw();
-  fighter2->Draw();
+  GFXEnable(TEXTURE1);  
+    carrier->TDraw();
+    fighter->TDraw();
+  GFXLoadIdentity(MODEL);
+    fighter2->Draw();
   
   //for(a = 0; a < numf; a++) {
   //fighters[a]->TDraw();
@@ -451,7 +529,7 @@ void main_loop() {
   //s->Yaw(PI/180);
   locSel->Draw();
   _GFX->EndDraw();
-  carrier->Rotate(Vector(0.010F,0.010F,0.000F));
+  /*carrier->Rotate(Vector(0.010F,0.010F,0.000F));
   
   if(state<50)
     textplane->Scale(Vector(((float)state)/50.000F,0.100F,1.000F));
@@ -461,7 +539,7 @@ void main_loop() {
     textplane->Scale(Vector(1.000F,1.000F,1.000F));
   state++;
   if(state > 100)
-    state = 100;
+    state = 100;*/
   ProcessKB();
   
   //fighter->Roll(PI/180);

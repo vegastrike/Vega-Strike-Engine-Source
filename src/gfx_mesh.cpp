@@ -58,6 +58,8 @@ void Mesh::InitUnit()
 	GFXVertex *alphalist;
 
 	vertexlist = NULL;
+	quadstrips = NULL;
+	numQuadstrips = 0;
 	stcoords = NULL;
 	Decal = NULL;
 	alphalist = NULL;
@@ -74,6 +76,8 @@ void Mesh::InitUnit()
 	scale = Vector(1.0,1.0,1.0);
 	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
+	
+	debugName = NULL;
 }
 
 Mesh::Mesh():Primitive()
@@ -107,6 +111,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	//InitPrimitive();
 
 	InitUnit();
+
+	debugName = strdup(filename);
+
 	Mesh *oldmesh;
 	if(oldmesh = meshHashTable.Get(string(filename)))//h4w h4s#t4bl3 1z 1337
 	{
@@ -560,6 +567,10 @@ Mesh::~Mesh()
 	{
 		if(vlist!=NULL)
 			delete vlist;
+		if(quadstrips!=NULL) {
+		  for(int a=0; a<numQuadstrips; a++) delete quadstrips[a];
+		  delete [] quadstrips;
+		}
 		//if(vertexlist != NULL)
 		//	delete [] vertexlist;
 		if(stcoords != NULL)
@@ -682,8 +693,14 @@ void Mesh::Draw()
 	GFXSelectTexcoordSet(0, 0);
 	GFXSelectTexcoordSet(1, 1);
 	vlist->Draw();
-	forcelogos->Draw();
-	squadlogos->Draw();
+	if(quadstrips!=NULL) {
+	  for(int a=0; a<numQuadstrips; a++)
+	    quadstrips[a]->Draw();
+	}
+	if(0!=forcelogos) {
+	  forcelogos->Draw();
+	  squadlogos->Draw();
+	}
 	
 	//GFXSelectTexcoordSet(1, 0);
 
@@ -744,11 +761,22 @@ void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vect
 	Draw();
 }
 
+inline ostream &operator<<(ostream &os, const Vector &obj) {
+  os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
+}
+
 void Mesh::UpdateMatrix()
 {
 	if(changed)
 	{
-		MultMatrix(transformation, translation, orientation);
+	  //MultMatrix(transformation, translation, orientation);
+	  cerr << "Update matrix on " << debugName << endl;
+	  cerr << "P: " << p << endl;
+	  cerr << "Q: " << q << endl;
+	  cerr << "R: " << r << endl;
+	  cerr << "Translation vector: " << p * pos.i + q * pos.j + r * pos.k << endl;
+	  Translate(translation, pos);
+	  MultMatrix(transformation, translation, orientation);
 		//glGetFloatv(GL_MODELVIEW_MATRIX, stackstate);
 		GFXGetMatrix(MODEL, stackstate);
 		changed = FALSE;
@@ -900,7 +928,7 @@ void Mesh::SetPosition(const Vector &origin)
 }
 void Mesh::SetPosition()
 {
-	Translate(translation, pos.i,pos.j,pos.k);
+  //Translate(translation, pos.i,pos.j,pos.k);
 	changed = TRUE;
 }
 void Mesh::XSlide(float factor)

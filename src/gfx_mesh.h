@@ -29,8 +29,13 @@
 /*TODO: Stick in local translation stuff and the restrictions, etc*/
 
 #include "gfx_aux_logo.h"
+
+class Planet;
 class Mesh:public Primitive
 {
+protected:
+  char *debugName;
+  
 	int refcount;
 	float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
 	float radialSize;
@@ -43,6 +48,9 @@ class Mesh:public Primitive
 	GFXVertex *vertexlist;
 
 	GFXVertexList *vlist;
+	
+	GFXQuadstrip **quadstrips;
+	int numQuadstrips;
 	
 	GFXMaterial myMat;
 	int myMatNum;
@@ -72,7 +80,7 @@ class Mesh:public Primitive
 	void SetOrientation2();
 	
 	void Reflect ();
-protected:
+
 	Vector p,q,r;
 	Vector pp, pq, pr, ppos;
 public:

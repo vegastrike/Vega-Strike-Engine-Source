@@ -100,6 +100,28 @@ public:
 	BOOL SwapTransformed();
 };
 
+class GFXQuadstrip {
+
+
+	GFXVertex *myVertices;
+	int numVertices;
+
+public:
+	GFXQuadstrip() : myVertices(0), numVertices(0) { }
+	GFXQuadstrip(int numVertices, GFXVertex *vertices);
+	~GFXQuadstrip();
+
+	GFXTVertex *LockTransformed(); // Stuff to support environment mapping
+	void UnlockTransformed();
+
+	GFXVertex *LockUntransformed(); // Stuff to support environment mapping
+	void UnlockUntransformed();
+
+	BOOL Draw();
+	BOOL SwapUntransformed();
+	BOOL SwapTransformed();
+};
+
 struct GFXMaterial
 {
 	float ar; // ambient rgba, if you don't like these things, ask me to rename them

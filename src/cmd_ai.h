@@ -21,6 +21,9 @@
 
 /* This should REALLY be "basic behavior"... oh well */
 
+#ifndef _CMD_AI_H
+#define _CMD_AI_H
+
 #include "cmd_unit.h"
 
 class FlyStraight:public AI{
@@ -45,3 +48,4 @@ public:
 		}
 	}
 };
+#endif
