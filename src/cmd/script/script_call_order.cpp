@@ -47,7 +47,7 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/tactics.h"
 #include "cmd/ai/missionscript.h"
-
+#include "gfx/cockpit.h"
 #include "mission.h"
 #include "easydom.h"
 
