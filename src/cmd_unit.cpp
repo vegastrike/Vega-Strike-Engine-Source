@@ -79,7 +79,7 @@ void Unit::Init()
   energy=10000;
   explosion=NULL;
   timeexplode=0;
- killed=false;
+  killed=false;
   ucref=0;
   meshdata = NULL;
   subunits = NULL;
