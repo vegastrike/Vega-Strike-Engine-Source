@@ -576,7 +576,7 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    //and 2 the cube map orientation in world coordinates.
    //the axis is the cross product of these two vectors...teh angle is arcsin
    //of the dot of these two vectors
-	glActiveTextureARB (GL_TEXTURE1_ARB);
+	GFXActiveTexture (1);
 	glMatrixMode (GL_TEXTURE);	
 	glLoadIdentity();
 	
@@ -591,7 +591,7 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    axis = axis.Cross (axis.Cross(cubemapincamspace));
    glRotatef (theta,axis.i,axis.j,axis.k);
    //ok do matrix math to rotate by theta on axis  those ..
-   glActiveTextureARB (GL_TEXTURE0_ARB);
+   GFXActiveTexture (0);
 
 #else
    /*	glTranslatef(.5f,.5f,.4994f);

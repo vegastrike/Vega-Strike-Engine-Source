@@ -26,7 +26,7 @@
 #include <stack>
 GFXBOOL bTex0 = GFXTRUE;
 GFXBOOL bTex1 = GFXTRUE;
-int activeTextureStage=0;
+int activeTextureStage=-1;
 extern GFXBOOL GFXLIGHTING;
 void /*GFXDRVAPI*/ GFXEnable (STATE state)
 {
@@ -58,7 +58,7 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 #else
 		glEnable (GL_TEXTURE_2D);		
 #endif
-		GFXActiveTexture (0);
+		//		GFXActiveTexture(GL_TEXTURE0_ARB);
 		break;
 	case CULLFACE:
 	  glEnable(GL_CULL_FACE);
@@ -87,8 +87,7 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 		glDisable (GL_TEXTURE_2D);		
 		break;
 	case TEXTURE1:
-	  if (Multitexture)
-	    return;
+		bTex1 = FALSE;
 		bTex1 = TRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
@@ -96,7 +95,7 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 #else
 		glDisable (GL_TEXTURE_2D);		
 #endif
-		GFXActiveTexture(0);
+		//		GFXActiveTexture(GL_TEXTURE0_ARB);
 		
 		break;
 	case CULLFACE:
@@ -272,7 +271,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 }
 
 void GFXActiveTexture (int stage) {
-  if (Multitexture&&stage!=activeTextureStage) {
+  if (g_game.Multiplayer&&stage!=activeTextureStage) {
     glActiveTextureARB(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
