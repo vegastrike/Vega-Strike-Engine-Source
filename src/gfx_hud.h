@@ -25,7 +25,6 @@
 class HUDElement: public Unit {
 public:
 	HUDElement(char *filename);
-        void UpdateHudMatrix();
 	void Draw();
 };
 using namespace std ;

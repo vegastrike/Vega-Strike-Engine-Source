@@ -92,37 +92,44 @@ void Animation:: Draw()
 			GFXDisable (LIGHTING);
 			//glMatrixMode(GL_MODELVIEW);
 			Vector p1,q1,r1;
+			Vector camp,camq,camr;
 			Camera* TempCam = _GFX ->AccessCamera();
+			
+			_GFX->AccessCamera()->GetPQR(camp,camq,camr);
+			q1.i = orientation[1];
+			q1.j = orientation[5];
+			q1.k = orientation[9];
+			
+			p1 = (q1.Dot(camq))*camq;
+			q1 = (q1.Dot(camp))*camp+p1;			
 			Vector posit;
 			TempCam->GetPosition (posit);
 			r1.i = -pos.i+posit.i;
 			r1.j = -pos.j+posit.j;
 			r1.k = -pos.k+posit.k;
 			Normalize (r1);
-			q1.i = 0;
-			q1.j = 1;
-			q1.k = 0;
-			ScaledCrossProduct (q1,r1,p1); 
-			ScaledCrossProduct (r1,p1,q1);		
+
+
+			ScaledCrossProduct (q1,r1,p1);		
+			ScaledCrossProduct (r1,p1,q1); 
 			//if the vectors are linearly dependant we're phucked :) fun fun fun
 			static float ShipMat [16];
 			VectorToMatrix (ShipMat,p1,q1,r1);
 			Translate(translation, pos.i, pos.j, pos.k);
 			MultMatrix(transformation, translation, ShipMat);
 
-			GFXLoadIdentity(MODEL);
 			GFXLoadMatrix (MODEL, transformation);
 			//glDisable(GL_TEXTURE_2D);
 			//Decal[framenum]->Transfer();//frame stuff needs to be done
 			Decal[framenum]->MakeActive();
 			GFXBegin (QUADS);
-				GFXTexCoord2f (0.00F,0.00F);
-				GFXVertex3f (-width,-height,0.00F);  //lower left
 				GFXTexCoord2f (0.00F,1.00F);
-				GFXVertex3f (width,-height,0.00F);  //upper left
+				GFXVertex3f (-width,-height,0.00F);  //lower left
 				GFXTexCoord2f (1.00F,1.00F);
-				GFXVertex3f (width,height,0.00F);  //upper right
+				GFXVertex3f (width,-height,0.00F);  //upper left
 				GFXTexCoord2f (1.00F,0.00F);
+				GFXVertex3f (width,height,0.00F);  //upper right
+				GFXTexCoord2f (0.00F,0.00F);
 				GFXVertex3f (-width,height,0.00F);  //lower right
 			GFXEnd ();
 			//glEnable(GL_TEXTURE_2D);

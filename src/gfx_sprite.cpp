@@ -29,49 +29,41 @@ static float *mview = NULL;
 
 Sprite::Sprite(char *file):Mesh()
 {
-	static Matrix mat;
-	if(!mview) {
-		mview=mat;
-		GFXLoadIdentity(VIEW);
-		GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
-		GFXGetMatrix(VIEW, mview);
-	}
+  pos.i = 0;
+  pos.j = 0;
+  pos.k = 1.0;
+  Mesh::SetPosition();
 
-		pos.i = 0;
-	pos.j = 0;
-	pos.k = 1.0;
-	Mesh::SetPosition();
-
-	xcenter = 0;
-	ycenter = 0;
-	width = 0;
-	height = 0;
-	rotation = 0;
-	surface = NULL;
-	//changed = TRUE;
-	//vlist = NULL;
-
-	FILE *fp = fopen(file, "r");
-	char texture[64];
-	fscanf(fp, "%s", texture);
-	fscanf(fp, "%f %f", &width, &height);
-	fscanf(fp, "%f %f", &xcenter, &ycenter);
-	fclose(fp);
-	left = -xcenter;
-	right = width - xcenter;
-	top = -ycenter;
-	bottom = height - ycenter;
-
-	surface = new Texture(texture);
-	/*
-	GFXVertex vertices[4] = { 
-		GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
-		GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
-		GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),
-		GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
-	vlist = new GFXVertexList(4, vertices);
-	*/
-}
+  xcenter = 0;
+  ycenter = 0;
+  width = 0;
+  height = 0;
+  rotation = 0;
+  surface = NULL;
+  //changed = TRUE;
+  //vlist = NULL;
+  
+  FILE *fp = fopen(file, "r");
+  char texture[64];
+  fscanf(fp, "%s", texture);
+  fscanf(fp, "%f %f", &width, &height);
+  fscanf(fp, "%f %f", &xcenter, &ycenter);
+  fclose(fp);
+  left = -xcenter;
+  right = width - xcenter;
+  top = -ycenter;
+  bottom = height - ycenter;
+  
+  surface = new Texture(texture);
+  /*
+    GFXVertex vertices[4] = { 
+    GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
+    GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
+    GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),
+    GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
+    vlist = new GFXVertexList(4, vertices);
+  */
+}	
 
 Sprite::~Sprite()
 {
@@ -85,6 +77,8 @@ void Sprite::Draw()
 {
 	if(surface!=NULL)
 	{
+
+	  /************************************FIXME VEGAStRIKE
 	  /////////////Matrix model;
 		Matrix view;
 		Matrix project;
@@ -96,6 +90,9 @@ void Sprite::Draw()
 		
 		//GFXLoadIdentity(VIEW);
 		GFXLoadMatrix(VIEW, mview);
+	  *********************************/
+
+
 		/***********FIXME VEGASTRIKE
 		Matrix parallel = {
 			1, 0, 0, 0, 
@@ -111,8 +108,8 @@ void Sprite::Draw()
 		GFXDisable(DEPTHWRITE);
 		GFXDisable(DEPTHTEST);
 
-		GFXLoadIdentity(MODEL);
-		UpdateMatrix();
+		///////		GFXLoadIdentity(MODEL); ///FIXME VEGASTRIKE
+		UpdateHudMatrix();
 		surface->MakeActive();
 
 		//GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
@@ -138,8 +135,8 @@ void Sprite::Draw()
 		GFXEnable(DEPTHTEST);
 
 		//GFXLoadMatrix(MODEL, model);
-		GFXLoadMatrix(VIEW, view);
-		GFXLoadMatrix(PROJECTION, project);
+		//FIXME VEGASTRIKE		GFXLoadMatrix(VIEW, view);
+		//FIXME VEGASTRIKE		GFXLoadMatrix(PROJECTION, project);
 	}
 }
 

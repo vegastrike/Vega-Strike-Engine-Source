@@ -793,6 +793,22 @@ void Mesh::UpdateMatrix()
 	GFXMultMatrix(MODEL, transformation);
 }
 
+void Mesh::UpdateHudMatrix() {
+
+  Matrix tmatrix;
+  Vector camp,camq,camr;
+  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+  
+	//GFXIdentity(MODEL);
+	//Identity (tmatrix);
+	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
+	//	GFXLoadMatrix(MODEL,tmatrix);
+  VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.1*camr);//FIXME!!! WHY 1.1 
+  GFXLoadMatrix(MODEL,tmatrix);
+  UpdateMatrix();
+}
+
+
 void Mesh::SetOrientation2()
 {
 	static Vector y = Vector(0,1,0);

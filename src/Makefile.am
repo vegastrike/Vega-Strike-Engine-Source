@@ -39,6 +39,7 @@ vegastrike_SOURCES =				\
 	file_util.h				\
 	gauss.c					\
 	gauss.h					\
+	gfx_animation.cpp			\
 	gfx_aux.h				\
 	gfx_aux_logo.cpp			\
 	gfx_aux_logo.h				\

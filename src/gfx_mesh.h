@@ -107,7 +107,7 @@ public:
 	void Destroy();
 
 	void UpdateMatrix();
-
+  void UpdateHudMatrix();//puts an object on the hud with the matrix
 	void SetPosition(float x,float y,float z);
 	void SetPosition(const Vector &origin);
 	void SetPosition();

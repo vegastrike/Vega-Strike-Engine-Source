@@ -30,24 +30,10 @@ HUDElement::HUDElement(char *filename):Unit(filename) {
 	//myMesh = mesh;
 }
 
-void HUDElement::UpdateHudMatrix() {
-
-  Matrix tmatrix;
-  Vector camp,camq,camr;
-  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
-  
-	//GFXIdentity(MODEL);
-	//Identity (tmatrix);
-	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
-	//	GFXLoadMatrix(MODEL,tmatrix);
-  VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.1*camr);//FIXME!!! WHY 1.1 
-  GFXLoadMatrix(MODEL,tmatrix);
-  UpdateMatrix();
-}
 
 
 void HUDElement::Draw() {
-  UpdateHudMatrix();
+  UpdateHudMatrix();//FIXME1.1  UpdateHudMatrix (in gfx_mesh.cpp) uses 1.1
 	
 	Unit::Draw();
 }
@@ -95,7 +81,7 @@ TextPlane::~TextPlane()
 void TextPlane::Draw()
 {
 	time += GetElapsedTime();
-	UpdateHudMatrix();
+	UpdateHudMatrix();//FIXME  UpdateHudMatrix (in gfx_mesh.cpp) uses 1.1
 	Matrix tmatrix;
 
 	for (int i=0;i<nummesh;i++) {
