@@ -6,6 +6,9 @@ template <class ITEM> class Resizable {
   Resizable() {num=0;alloc=16;q=(ITEM*)malloc (sizeof (ITEM)*16);}
   Resizable (const Resizable<ITEM> &c) {num = c.num; alloc = c.alloc;q = (ITEM*)malloc (sizeof (ITEM)*alloc);memcpy (q,c.q,sizeof(ITEM)*num);}
   ~Resizable () {free (q); q=NULL;}
+  void assert_free (unsigned int n) {while(n+num>alloc) {alloc*=2;q=(ITEM *)realloc (q,sizeof (ITEM)*alloc);}}
+  void push_back_nocheck (const ITEM &a) {q[num]=a;num++;}
+  void inc_num (unsigned int n) {num+=n;}
   void push_back (const ITEM &a) {
     if (alloc<num+1) {
       alloc*=2;
