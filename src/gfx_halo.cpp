@@ -55,7 +55,7 @@ void Halo::Draw (const Transformation &quat, const Matrix m) {
   GFXVertex tmp[4] = {GFXVertex(pos-p-q,r,0,1),
 		       GFXVertex(pos+p-q,r,1,1),
 		       GFXVertex(pos+p+q,r,1,0),
-		       GFXVertex(pos-p+q,r,1,1)};
+		       GFXVertex(pos-p+q,r,0,0)};
   halodrawqueue[decal]->ModQuad(quadnum,tmp,NULL);
 }
 void Halo::SetColor (const GFXColor &col){
@@ -65,15 +65,15 @@ void Halo::SetColor (const GFXColor &col){
 
 void Halo::ProcessDrawQueue() {
   GFXDisable (LIGHTING);
-  GFXDisable (CULLFACE);//don't want lighting on this baby
   GFXEnable (DEPTHWRITE);
   GFXPushBlendMode();
-  GFXBlendMode(ONE,ZERO);
+  GFXBlendMode(ONE,ONE);
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
   for (unsigned int decal = 0;decal < halodrawqueue.size();decal++) {	
     HaloDecal[decal]->MakeActive();
+    
     halodrawqueue[decal]->Draw();    
   }
 
