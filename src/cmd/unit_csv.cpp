@@ -179,7 +179,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       Q.Normalize();
       //Transformation(Quaternion (from_vectors (P,Q,R),pos);
       unsigned int indx = xml.mountz.size();
-      xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale,func,maxfunc));
+      xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xml.unitscale*xyscale,xml.unitscale*zscale,func,maxfunc));
       xml.mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
       xml.mountz[indx]->SetMountPosition(xml.unitscale*pos.Cast());
       int mntsiz=weapon_info::NOWEAP;
@@ -871,8 +871,8 @@ string Unit::WriteUnitString () {
                     m.p.i/unitScale,
                     m.p.j/unitScale,
                     m.p.k/unitScale,
-                    (double)mounts[j].xyscale,
-                    (double)mounts[j].zscale,
+                    (double)mounts[j].xyscale/unitScale,
+                    (double)mounts[j].zscale/unitScale,
                     (double)m.getR().i,
                     (double)m.getR().j,
                     (double)m.getR().k,
