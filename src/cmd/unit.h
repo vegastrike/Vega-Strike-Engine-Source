@@ -430,7 +430,7 @@ public:
   void SetFg (Flightgroup * fg, int fg_snumber);
   UnitImages &GetImageInformation();
   Cargo & GetCargo (unsigned int i);
-  void GetCargoCat (const std::string &cat, vector <Cargo> &cat);
+  void GetCargoCat (const std::string &category, vector <Cargo> &cat);
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);
   unsigned int numCargo ()const;
