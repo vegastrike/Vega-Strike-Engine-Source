@@ -43,7 +43,7 @@ namespace UniverseUtil {
 	
 	Unit * GetUnitFromSerial( ObjSerial serial)
 	{
-		Unit * un;
+		Unit* un = NULL;
 		un_iter it = UniverseUtil::getUnitList();
 		// Find the unit
 		do
