@@ -11,6 +11,12 @@ struct Quaternion {
   //  inline Quaternion(float s, Vector v) {this->s = s; this->v = v;};
   inline Quaternion Conjugate() const {return Quaternion(s, Vector(-v.i, -v.j, -v.k));};
 
+  inline void netswap()
+  {
+  	s = VSSwapHostFloatToLittle( s);
+	v.netswap();
+  }
+
   inline float Magnitude() const {return sqrtf(s*s+v.i*v.i+v.j*v.j+v.k*v.k);};
   inline Quaternion operator* (const Quaternion &rval) const { 
 	  return Quaternion(s*rval.s - DotProduct(v, rval.v), 
@@ -81,6 +87,12 @@ struct Transformation {
   inline Transformation():orientation(identity_quaternion), position(0,0,0) { }
   inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) { }
   //  inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) { }
+
+  inline void netswap()
+  {
+  	orientation.netswap();
+	position.netswap();
+  }
  
   inline void to_matrix(Matrix &m) const {
     orientation.to_matrix(m);

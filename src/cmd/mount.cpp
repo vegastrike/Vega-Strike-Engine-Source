@@ -195,7 +195,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			Network->FireBolt( *type, mat, velocity);
 		break;
 		case weapon_info::PROJECTILE :
-			Network->FireProjectile( *type);
+			// HAVE TO SEND THE m MATRIX TO THE FUNCTION BELOW
+			Network->FireProjectile( *type, target, m, velocity, tmp);
 		break;
 		}
 

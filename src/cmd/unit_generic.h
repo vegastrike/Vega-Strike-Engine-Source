@@ -46,6 +46,7 @@ void UncheckUnit (class Unit * un);
 #include "script/flightgroup.h"
 #include "faction.h"
 #include "star_system_generic.h"
+#include "networking/const.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -249,8 +250,11 @@ public:
 protected:
   // Tell if networked unit
   bool networked;
+  ObjSerial	serial;
 public:
   void SetNetworkMode( bool mode=true) {this->networked = mode;}
+  ObjSerial GetSerial() { return this->serial;}
+  void		SetSerial( ObjSerial ser) { this->serial = ser;}
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/

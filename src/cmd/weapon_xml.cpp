@@ -24,6 +24,69 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
 }
 */
 
+weapon_info	getWeaponInfoFromBuffer( char * netbuf, int & size)
+{
+		weapon_info wi(weapon_info::UNKNOWN);
+		unsigned short file_len = 0, weap_len = 0;
+		int offset=0;
+
+		// Get the weapon_info structure
+		memcpy( &wi, netbuf+offset, sizeof( wi));
+		offset += sizeof( wi);
+		memcpy( &file_len, netbuf+offset, sizeof( file_len));
+		offset += sizeof( file_len);
+		file_len = VSSwapHostShortToLittle( file_len);
+		char * filename = new char[file_len];
+		memcpy( filename, netbuf, file_len);
+		offset += file_len;
+		memcpy( &weap_len, netbuf+offset, sizeof( weap_len));
+		offset += sizeof( weap_len);
+		weap_len = VSSwapHostShortToLittle( weap_len);
+		char * weapname = new char[weap_len];
+		memcpy( weapname, netbuf, weap_len);
+		wi.file = string( filename);
+		wi.weapon_name = string( weapname);
+		delete filename;
+		delete weapname;
+
+		return wi;
+}
+
+void		setWeaponInfoToBuffer( weapon_info wi, char * netbuf, int & bufsize)
+{
+	bufsize = sizeof( wi)+sizeof( wi.file)+sizeof( wi.weapon_name);
+	netbuf = new char [bufsize+1];
+	netbuf[bufsize]=0;
+	int offset = 0;
+
+	unsigned short file_len = wi.file.length();
+	unsigned short weap_len = wi.weapon_name.length();
+	char * file = new char[file_len+1];
+	char * weapon_name = new char[weap_len+1];
+	memcpy( file, wi.file.c_str(), file_len);
+	file[file_len] = 0;
+	memcpy( weapon_name, wi.weapon_name.c_str(), weap_len);
+	weapon_name[weap_len] = 0;
+
+	// Copy the struct weapon_info in the buffer
+	memcpy( netbuf+offset, &wi, sizeof( wi));
+	offset += sizeof( wi);
+	// Copy the size of filename in the buffer
+	memcpy( netbuf+offset, &file_len, sizeof( file_len));
+	offset += sizeof( file_len);
+	// Copy the filename in the buffer because in weapon_info, it is a string
+	memcpy( netbuf+offset, file, file_len);
+	offset += file_len;
+	// Copy the size of filename in the buffer
+	memcpy( netbuf+offset, &weap_len, sizeof( weap_len));
+	offset += sizeof( weap_len);
+	// Copy the weapon_name in the buffer because in weapon_info, it is a string
+	memcpy( netbuf+offset, weapon_name, weap_len);
+
+	delete file;
+	delete weapon_name;
+}
+
 void	weapon_info::netswap()
 {
 	// Enum elements are the size of an int

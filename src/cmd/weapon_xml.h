@@ -35,6 +35,9 @@ struct weapon_info {
   //  weapon_info& operator = (const weapon_info &tmp);
   void netswap();
 };
+weapon_info	getWeaponInfoFromBuffer( char * netbuf, int & size);
+void		setWeaponInfoToBuffer( weapon_info wi, char * netbuf, int & bufsize); // WARNING : ALLOCATES A CHAR * BUFFER SO IT MUST BE DELETED AFTER THAT CALL
+
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);
 std::string lookupMountSize (int size);
 void LoadWeapons(const char *filename);
