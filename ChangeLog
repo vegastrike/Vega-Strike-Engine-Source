@@ -1,4 +1,7 @@
 2001-10-25 Daniel Horn <hellcatv@hotmail.com>
+	* added ability to delete playing sounds
+	* added ability to have explosions without alpha (GL_ONE,GL_ONE)
+	* changed GFXPickLights's checking if object was too large to work with to use floats so it won't over flow
 	* fixed GFXPickLights () to actually work! (now lights are picked out of a 3d hash table)
 	* added the option to put star system lights into the 3d hash table light="0 1l"  means 0 is on globally and 1 is on for starships "near enough" Now we only have 1 global light and 1 attenuated light for starships "close enough" Framerates should skyrocket for GeForce cards
 	* learned not to debug with fastmath on
