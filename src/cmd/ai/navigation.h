@@ -109,7 +109,7 @@ public:
  };
  class FaceDirection: public ChangeHeading {
   bool finish;
-  bool dist;
+  float dist;
 public:
   FaceDirection (float distToMatchFacing, bool fini=false, int accuracy = 3);
   virtual void SetParent (Unit * parent1);

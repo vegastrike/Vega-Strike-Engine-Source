@@ -327,10 +327,11 @@ void FaceDirection::Execute() {
   }
   Vector face (target->GetTransformation()[8],  target->GetTransformation()[9], target->GetTransformation()[10]);
 
-  if ((parent->Position()-target->Position()).Magnitude()>dist) {
+  if ((parent->Position()-target->Position()).Magnitude()-parent->rSize()-target->rSize()>dist) {
     SetDest (target->Position());
   }else {
     SetDest(parent->Position()+face);
+    //fprintf (stderr,"facing...cool");
   }
   ChangeHeading::Execute();
   if (!finish) {

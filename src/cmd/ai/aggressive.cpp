@@ -221,7 +221,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
 										      "Targetting",
 										      "TurnLeaderDist",
-										      "2.0"));
+										      "5.0"));
 
 	    float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
 	    Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
