@@ -307,7 +307,7 @@ void GFXVertexList::Draw()
     }
     }
   if (myColors!=NULL) {
-    glColor4f(1,1,1,1);
+    GFXColor4f(1,1,1,1);
   }
 }
 
