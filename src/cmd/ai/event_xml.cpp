@@ -33,7 +33,7 @@ namespace AIEvents {
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
-    string aiscriptname ("default_behavior.xml");
+    string aiscriptname ("");
     float min= -FLT_MAX; float max=FLT_MAX;
     ElemAttrMap * eam = ((ElemAttrMap *)userData);
     int elem = eam->element_map.lookup(name);

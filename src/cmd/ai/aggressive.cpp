@@ -30,9 +30,15 @@ AggressiveAI::AggressiveAI (const char * filename, Unit * target=NULL):FireAt(.2
   AIEvents::LoadAI (filename,logic);
 }
 
-void AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
-  Order * tmp = new AIScript (item.script.c_str());	
-  parent->EnqueueAI (tmp);
+bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
+  
+  if (item.script.length()!=0) {
+    Order * tmp = new AIScript (item.script.c_str());	
+    parent->EnqueueAI (tmp);
+    return true;
+  }else {
+    return false;
+  }
 }
 
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
@@ -82,12 +88,18 @@ void AggressiveAI::ProcessLogic () {
 	break;
       }
     }
-    if (j==i->end()&&(!i->empty())) {
+    if (j==i->end()) {
       //do it
-      ExecuteLogicItem (i->front());
-      AIEvents::AIEvresult tmp = i->front();
-      i->erase(i->begin());
-      i->push_back (tmp);
+      j = i->begin();
+      while (j!=i->end()) {
+	if (ExecuteLogicItem (*j)) {
+	  AIEvents::AIEvresult tmp = *j;
+	  i->erase(j);
+	  i->push_back (tmp);
+	}else {
+	  j++;
+	}
+      }
     }
   }
 }
