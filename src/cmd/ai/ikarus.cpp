@@ -45,9 +45,10 @@ void Ikarus::ExecuteStrategy (Unit * target) {
 }
 
 void Ikarus::WillFire (Unit * target) {
+	float mrange;
     bool missilelockp=false;
     if (gunspeed==float(.0001)) {
-        parent->getAverageGunSpeed (gunspeed,gunrange);
+        parent->getAverageGunSpeed (gunspeed,gunrange,mrange);
     }
     if (ShouldFire (target,missilelockp)) {//this is a function from fire.cpp  you probably want to write a better one
         parent->Fire (false);
