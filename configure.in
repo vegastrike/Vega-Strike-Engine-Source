@@ -64,13 +64,6 @@ case $target in
 	AC_DEFINE(BSD, 1)
 ;;
 *)
-	AC_DEFINE(BSD, 0)
-	AC_DEFINE(LINUX, 0)
-	AC_DEFINE(MACOSX, 0)
-	AC_DEFINE(POSIX, 0)
-	AC_DEFINE(UNIX, 0)
-	AC_DEFINE(WIN32, 0)
-	AC_DEFINE(WIN32_POSIX, 0)
 	slabcheck=no;
 ;;
 esac                                             
