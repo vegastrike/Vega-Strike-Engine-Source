@@ -145,6 +145,8 @@ public: \
 #define __LINE__ "<Unknown>"
 
 #define PSEUDO__LINE__(x) x
+#else
+#define PSEUDO__LINE__(x) __LINE__
 #endif
 
 #endif

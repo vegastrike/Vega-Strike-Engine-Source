@@ -43,8 +43,6 @@ using std::string;
 extern vector<ObjSerial>	localSerials;
 extern bool isLocalSerial( ObjSerial sernum);
 
-typedef vector<Client *>::iterator VC;
-
 class	NetClient
 {
 		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client

@@ -310,7 +310,7 @@ Client* NetServer::newConnection_udp( const AddressIP& ipadr )
     return ret;
 }
 
-Client* NetServer::newConnection_tcp( SocketSet& set )
+Client* NetServer::newConnection_tcp( SocketSet& sets )
 {
     SOCKETALT	sock;
     Client*		ret = NULL;
@@ -318,10 +318,10 @@ Client* NetServer::newConnection_tcp( SocketSet& set )
     // Just ignore the client for now
 
     // Get new connections if there are - do nothing in standard UDP mode
-    if( tcpNetwork->isActive( set ) )
+    if( tcpNetwork->isActive( sets ) )
     {
         COUT << " enter " << "newConnection_tcp" << endl;
-        sock = tcpNetwork->acceptNewConn( set, true );
+        sock = tcpNetwork->acceptNewConn( sets, true );
         if( sock.valid() )
         {
             ret = this->addNewClient( sock, true );
@@ -627,12 +627,12 @@ void	NetServer::start(int argc, char **argv)
 /**************************************************************/
 
 
-void	NetServer::checkKey( SocketSet & set)
+void	NetServer::checkKey( SocketSet & sets)
 {
 	int		memory_use=0;
 	char	c;
 
-	if( set.is_set( 0))
+	if( sets.is_set( 0))
 	{
 		if( read( 0, &c, 1)==-1)
 			cerr<<"Error reading char on std input "<<endl;
@@ -691,7 +691,7 @@ void	NetServer::checkKey( SocketSet & set)
 /**** Check account server activity                        ****/
 /**************************************************************/
 
-void	NetServer::checkAcctMsg( SocketSet& set )
+void	NetServer::checkAcctMsg( SocketSet& sets )
 {
 	int len=0;
 	AddressIP	ipadr, ip2;
@@ -700,7 +700,7 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock.isActive( set ))
+	if( acct_sock.isActive( sets ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
@@ -776,7 +776,7 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 /**** Check which clients are sending data to the server   ****/
 /**************************************************************/
 
-void	NetServer::prepareCheckMsg( SocketSet& set )
+void	NetServer::prepareCheckMsg( SocketSet& sets )
 {
 #if 0
 // 	// First add all clients to be watched
@@ -788,16 +788,16 @@ void	NetServer::prepareCheckMsg( SocketSet& set )
 #endif
 }
 
-void	NetServer::checkMsg( SocketSet& set )
+void	NetServer::checkMsg( SocketSet& sets )
 {
 	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
 	{
-		if( (*i)->sock.isActive( set ) )
+		if( (*i)->sock.isActive( sets ) )
 		{
 			this->recvMsg_tcp( (*i));
 		}
 	}
-	if( udpNetwork->isActive( set ) )
+	if( udpNetwork->isActive( sets ) )
 	{
 	    recvMsg_udp( );
 	}

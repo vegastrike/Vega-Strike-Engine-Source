@@ -59,6 +59,7 @@ extern vector<unorigdest *> pendingjump;
 extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
 string serverip;
 string serverport;
+typedef vector<Client *>::iterator VC;
 
 /*************************************************************/
 /**** Tool funcitons                                      ****/
@@ -229,7 +230,7 @@ bool	NetClient::PacketLoop( Cmd command)
 /**** Login loop                                          ****/
 /*************************************************************/
 
-int		NetClient::checkAcctMsg( SocketSet & set)
+int		NetClient::checkAcctMsg( SocketSet & sets)
 {
 	int len=0;
 	AddressIP	ip2;
@@ -238,7 +239,7 @@ int		NetClient::checkAcctMsg( SocketSet & set)
 
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock.isActive( set ))
+	if( acct_sock.isActive( sets ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
@@ -348,8 +349,8 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	{
 		this->callsign = str_callsign;
 	}
-	cout<<"GLOBALSAVES[0] : "<<globalsaves[0]<<endl;
-	cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
+	//cout<<"GLOBALSAVES[0] : "<<globalsaves[0]<<endl;
+	//cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
 	return globalsaves;
 }
 

@@ -63,8 +63,8 @@ VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip )
     , _connection_closed( false )
 { }
 
-VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet* set )
-    : VsnetSocket( sock, remote_ip, set )
+VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet* sets )
+    : VsnetSocket( sock, remote_ip, sets )
     , _incomplete_packet( 0 )
     , _incomplete_len_field( 0 )
     , _connection_closed( false )
@@ -213,7 +213,7 @@ ostream& operator<<( ostream& ostr, const VsnetSocket& s )
     return ostr;
 }
 
-void VsnetTCPSocket::child_watch( SocketSet& set )
+void VsnetTCPSocket::child_watch( SocketSet& sets )
 {
 #ifdef FIND_WIN_NBIO
         COUT << "Wait for data on socket " << (*this) << " ("
@@ -225,7 +225,7 @@ void VsnetTCPSocket::child_watch( SocketSet& set )
 #ifdef FIND_WIN_NBIO
         COUT << "Socket " << (*this) << " has completed packets" << endl;
 #endif
-        set.setReadAlwaysTrue( _fd );
+        sets.setReadAlwaysTrue( _fd );
     }
 }
 
@@ -234,7 +234,7 @@ bool VsnetTCPSocket::needReadAlwaysTrue( ) const
     return ( !_complete_packets.empty() );
 }
 
-bool VsnetTCPSocket::isActive( SocketSet& set )
+bool VsnetTCPSocket::isActive( SocketSet& sets )
 {
     COUT << "enter " << "isActive" << endl;
 
@@ -248,7 +248,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
         return true;
     }
 
-    if( set.is_setRead(_fd) == false )
+    if( sets.is_setRead(_fd) == false )
     {
         if( _complete_packets.empty() == false )
         {
