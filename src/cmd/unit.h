@@ -229,7 +229,7 @@ public:
 	};
 	*/
 	inline Matrix WarpMatrix ( const Matrix& ctm) const{
-		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"));
+		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 		static float cutoffcutoff=  cutoff*cutoff;
 		
 		if (GetVelocity().MagnitudeSquared()<cutoffcutoff) {
@@ -241,7 +241,7 @@ public:
 			//Matrix scalar=identity_matrix;
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
-			static float maxspeed = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max_speed","1000000"));
+			static float maxspeed = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max_speed","1000000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 			float stretchlength = maxstretch*(speed-cutoff)/(maxspeed-cutoff);
 			
 			if (stretchlength>maxstretch)

@@ -2430,8 +2430,8 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     Velocity += temp;
   }
   float newmagsquared = Velocity.MagnitudeSquared();
-  static float warpstretchcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"));
-  static float warpstretchoutcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_decel_cutoff","500000"));
+  static float warpstretchcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+  static float warpstretchoutcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_decel_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
   static float cutsqr = warpstretchcutoff*warpstretchcutoff;
   static float outcutsqr = warpstretchoutcutoff*warpstretchoutcutoff;
   bool oldbig = oldmagsquared>cutsqr;
@@ -2450,8 +2450,8 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
       Vector v(GetVelocity());
       v.Normalize();
       Vector p,q,r;GetOrientation(p,q,r);
-	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","4"));
-	  static float endsec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead_end",".03"));
+	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","4"))/(XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1")));
+	  static float endsec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead_end",".03"))/(XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1")));
 	  float tmpsec = oldbig?endsec:sec;
       UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+Velocity*tmpsec+v*rSize(),rSize()*8,1);
 //      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+GetVelocity()*sec+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
