@@ -252,14 +252,7 @@ AC_SUBST(PYTHON_LIBS)
 dnl --------------------------------------------------------------------------
 dnl Check for car sim
 dnl --------------------------------------------------------------------------
-
-AC_ARG_ENABLE(car,[  --enable-car      Use Car Simulation (this is default)],  [car=no])
-if test "x$car" = "xno" ; then
-   echo "building space sim"
-else
-   echo "making car sim"
-    TR_CPPFLAGS="$TR_CPPFLAGS -DCAR_SIM"
-fi
+AC_ARG_ENABLE(car,     [  --enable-car          Produce an executable for car simulation], [TR_CPPFLAGS="$TR_CPPFLAGS -DCAR_SIM "; echo "making car simulator"])
 dnl --------------------------------------------------------------------------
 dnl Check for network protocol
 dnl --------------------------------------------------------------------------
