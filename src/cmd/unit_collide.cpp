@@ -89,6 +89,10 @@ void Unit::CollideAll() {
   UnitCollection * colQ [tablehuge+1];
   bool usehuge = usehuge_table()||GetJumpStatus().drive>=0;
   int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ,usehuge);
+  if (CollideInfo.hhuge&&GetJumpStatus().drive>=0) {
+    _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(this);
+  }
+
   int j = 0;
   for (;j<sizecolq;j++) {
     Unit *un;

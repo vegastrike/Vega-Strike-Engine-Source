@@ -617,7 +617,7 @@ void Unit::Init()
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
 }
-void Unit::Fire (unsigned int weapon_type_bitmask) {
+void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     if (cloaking>=0)
         return;
     vector<Mount *>::const_iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
@@ -644,8 +644,8 @@ void Unit::Fire (unsigned int weapon_type_bitmask) {
             if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i)->type->role_bits)
                 ||(*i)->type->role_bits==0) {
                 if ((locked_on&&missile_and_want_to_fire_missiles)
-                    ||gun_and_want_to_fire_guns) {
-                    if ((*i)->Fire(owner==NULL?this:owner,mis)) {
+                    ||gun_and_want_to_fire_guns) { 
+                    if ((*i)->Fire(owner==NULL?this:owner,mis,listen_to_owner)) {
                         energy -=apply_float_to_short((*i)->type->type==weapon_info::BEAM?(*i)->type->EnergyRate*SIMULATION_ATOM:(*i)->type->EnergyRate);
                         if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
                     }

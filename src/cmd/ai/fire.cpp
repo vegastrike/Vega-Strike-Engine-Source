@@ -258,7 +258,7 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     }else if (!shouldfire) {
         delay=0;
     }
-     parent->Fire(FireBitmask(parent,shouldfire,  missileprobability));
+     parent->Fire(FireBitmask(parent,shouldfire,  missileprobability),true);
 }
 
 bool FireAt::isJumpablePlanet(Unit * targ) {

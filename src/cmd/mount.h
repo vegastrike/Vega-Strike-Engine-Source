@@ -33,7 +33,7 @@ class GameMount: public Mount {
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
 	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
-	bool Fire (Unit *owner, bool Missile=false);
+	bool Fire (Unit *owner, bool Missile=false, bool beams_target_owner=false);
 };
 
 #endif

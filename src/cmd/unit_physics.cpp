@@ -300,7 +300,7 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
     }
     if (mounts[i]->type->type==weapon_info::BEAM) {
       if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone);
+	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone,target);
       }
     } else {
       mounts[i]->ref.refire+=SIMULATION_ATOM;

@@ -42,14 +42,15 @@ private:
     IMPACTANDUNSTABLE=3
   };//is it right now blowing the enemy to smitheri
   unsigned char impact;
+  bool listen_to_owner;
   void * owner;//may be a dead pointer...never dereferenced
   QVector center;//in world coordinates as of last physics frame...
   Vector direction;
   
   void RecalculateVertices();
-  void CollideHuge(const LineCollide &);
+  void CollideHuge(const LineCollide &, Unit * targetToCollideWith);
 public:
-  
+  void ListenToOwner(bool listen){listen_to_owner=listen;}
   Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound);
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
@@ -57,7 +58,7 @@ public:
   QVector GetPosition() const {return local_transformation.position;}
   void SetPosition (const QVector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
-  void UpdatePhysics(const Transformation & , const Matrix & , class Unit * target, float trackingcone);
+  void UpdatePhysics(const Transformation & , const Matrix & , class Unit * target, float trackingcone, Unit * targetToCollideWith/*prevent AI friendly fire--speed up app*/);
   void Draw(const Transformation & , const Matrix & ,class  Unit * target, float trackingcone);
   void Destabilize () {impact=UNSTABLE;}
   bool Dissolved () {return curthick==0;} 

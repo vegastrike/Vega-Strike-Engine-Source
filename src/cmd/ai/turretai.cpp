@@ -41,7 +41,7 @@ void TurretAI::Execute () {
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
       bool shouldfire = (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff);
-      parent->Fire(FireBitmask(parent,shouldfire,missile_prob));
+      parent->Fire(FireBitmask(parent,shouldfire,missile_prob),true);
       if (!shouldfire)
 	parent->UnFire();
       

@@ -98,7 +98,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
   return false;
 }
 
-bool Mount::Fire (Unit * owner, bool Missile) {
+bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -107,14 +107,15 @@ bool Mount::Fire (Unit * owner, bool Missile) {
   if (type->type==weapon_info::BEAM) {
     if (ref.gun==NULL) {
       if (ammo>0)
-	ammo--;
+	ammo--;//do we want beams to have amo
       processed=FIRED;
       ref.gun = new Beam (LocalPosition,*type,owner,sound);
+      ref.gun->ListenToOwner(listen_to_owner);
       return true;
     } else {
       if (ref.gun->Ready()) {
 	if (ammo>0)
-	  ammo--;
+	  ammo--;//ditto about beams ahving ammo
 	processed=FIRED;
 	ref.gun->Init (LocalPosition,*type,owner);
 	return true;

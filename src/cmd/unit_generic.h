@@ -729,7 +729,7 @@ public:
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
   ///Fires all active guns that are or arent Missiles
   // if bitmask is (1<<31) then fire off autotracking of that type;
-  virtual void Fire(unsigned int bitmask);
+  virtual void Fire(unsigned int bitmask, bool beams_target_owner=false);
   ///Stops all active guns from firing
   void UnFire();
   ///reduces shields to X percentage and reduces shield recharge to Y percentage
@@ -1173,7 +1173,7 @@ class Mount {
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
 	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);
-	bool Fire (Unit *owner, bool Missile=false);
+	bool Fire (Unit *owner, bool Missile=false, bool collide_only_with_target=false);
 };
 
 inline void UnitCollection::UnitIterator::GetNextValidUnit () {

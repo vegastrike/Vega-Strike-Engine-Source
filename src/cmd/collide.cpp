@@ -112,7 +112,7 @@ bool Bolt::Collide () {
   return false;
 }
 
-void Beam::CollideHuge (const LineCollide & lc) {
+void Beam::CollideHuge (const LineCollide & lc, Unit * targetToCollideWith) {
   UnitCollection *colQ [tablehuge+1];
   bool use_huge_list = usehuge_table();
   if (!lc.hhuge) {
@@ -131,11 +131,18 @@ void Beam::CollideHuge (const LineCollide & lc) {
       }
     }
   }else {
-    un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-    Unit *un;
-    for (;(un=*i)!=NULL;++i) {
-      if (lcwithin (lc,(un)->GetCollideInfo())) {
-	this->Collide(un);
+    if (targetToCollideWith&&(!use_huge_list)) {
+      this->Collide(targetToCollideWith);
+    }else {
+      un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+      Unit *un;
+      for (;(un=*i)!=NULL;++i) {
+	if (lcwithin (lc,(un)->GetCollideInfo())) {
+	  this->Collide(un);
+	  if ((un!=targetToCollideWith)&&targetToCollideWith!=NULL) {
+	    ListenToOwner(false);
+	  }
+	}
       }
     }
   }

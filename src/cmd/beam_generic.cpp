@@ -191,7 +191,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #endif
 #endif
 }
-void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone) {
+void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
     curlength=0;
@@ -234,7 +234,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
 #endif    
   } else {
 
-    CollideHuge(CollideInfo);
+    CollideHuge(CollideInfo,listen_to_owner?targetToCollideWith:NULL);
     
     if (!(curlength<range&&curlength>0)) {//if curlength just happens to be nan
       if (curlength>range)

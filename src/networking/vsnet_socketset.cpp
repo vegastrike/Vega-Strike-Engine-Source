@@ -66,7 +66,7 @@ int SocketSet::select( timeval* timeout )
     }
 
     int ret = ::select( _max_sock_select, &_read_set_select, 0, 0, timeout );
-	if( ret == SOCKET_ERROR )
+	if( ret == -1 )
 	{
 #if defined(_WIN32) && !defined(__CYGWIN__)
 		if( WSAGetLastError()!=WSAEINVAL)
