@@ -344,6 +344,8 @@ public:
   unsigned int numFX () {return LocalFX.size();}
   ///Turns on SpecialFX
   void EnableSpecialFX();
+  unsigned int numTextures() {return Decal.size();}
+  Texture * texture (int i) {return Decal[i];}
   void SetBlendMode (BLENDFUNC src, BLENDFUNC dst);
   ///Gets all polygons in this mesh for BSP computation
   void GetPolys(vector <bsp_polygon> &);

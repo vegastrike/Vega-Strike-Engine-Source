@@ -62,11 +62,14 @@ void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, 
   meshdata.pop_back();
   GFXMaterial m;
   m.ar=m.ag=m.ab=m.aa=0.0;
-  m.dr=m.dg=m.db=m.da=1.0;
+  static float materialweight=XMLSupport::parse_float (vs_config->getVariable("graphics","city_light_strength","10"));
+  static float daymaterialweight=XMLSupport::parse_float (vs_config->getVariable("graphics","day_city_light_strength","0"));
+  m.dr=m.dg=m.db=m.da=materialweight;
   m.sr=m.sg=m.sb=m.sa=0.0;
-  m.er=m.eg=m.eb=m.ea=m.power=0.0;
+  m.er=m.eg=m.eb=m.ea=daymaterialweight;
+  m.power=0.0;
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE,reverse_normals));
+  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE,false,0,M_PI,0.0,2*M_PI,reverse_normals));
   meshdata.back()->setEnvMap (GFXFALSE);
   meshdata.back()->SetMaterial (m);
 

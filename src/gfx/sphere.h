@@ -13,12 +13,12 @@ class SphereMesh : public Mesh {
   virtual float GetT ( float rho, float rho_min, float rho_max);
   virtual float GetS (float theta,  float theta_min, float theta_max);
   virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace (int num) {return new SphereMesh[num];}
-  void InitSphere (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP);
+  void InitSphere (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP, bool reverse_normals=false);
  public:
   SphereMesh () :Mesh(){}
   virtual int MeshType() {return 1;}
-  SphereMesh(float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP){
-    InitSphere (radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,mipmap);
+  SphereMesh(float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP,bool reverse_normals=false){
+    InitSphere (radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,mipmap,reverse_normals);
   }
   void Draw(float lod, bool centered =false, const Matrix &m=identity_matrix);
   virtual void ProcessDrawQueue(int whichpass,int which);
@@ -37,7 +37,7 @@ class CityLights : public SphereMesh {
   virtual void RestoreCullFace (int whichdrawqueue);
 
   CityLights () : SphereMesh () {}
-  CityLights (float radius, int stacks, int slices, const char *texture, int texturewrapx, int texturewrapy, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI);
+  CityLights (float radius, int stacks, int slices, const char *texture, int texturewrapx, int texturewrapy, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, bool inside_out=true);
   virtual void ProcessDrawQueue(int whichpass,int which);
 
 };

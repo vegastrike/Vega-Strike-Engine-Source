@@ -40,7 +40,7 @@ string truncateByPipe (string & input) {
   input="";
   return tmp;
 }
-void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap){
+void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap, bool reverse_normals){
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
     numspheres =1;
@@ -84,6 +84,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
     float s, t, ds, dt;
     int i, j, imin, imax;
     float nsign = Insideout?-1.0:1.0;
+	float normalscale=reverse_normals?-1.0:1.0;
     int fir=0;//Insideout?1:0;
     int sec=1;//Insideout?0:1;
     vlist = NULL;
@@ -124,9 +125,9 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);
 	
-	  vertexlist[j*2+fir].i = x ;
-	  vertexlist[j*2+fir].k = -y;
-	  vertexlist[j*2+fir].j = z;
+	  vertexlist[j*2+fir].i = x *normalscale;
+	  vertexlist[j*2+fir].k = -y*normalscale;
+	  vertexlist[j*2+fir].j = z*normalscale;
 	  vertexlist[j*2+fir].s = GetS(theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
 	  vertexlist[j*2+fir].t = GetT(rho,rho_min,rho_max);//t;
 	  vertexlist[j*2+fir].x = x * radius;
@@ -138,9 +139,9 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	  y = cos(theta) * sin(rho + drho);
 	  z = nsign * cos(rho + drho);
 
-	  vertexlist[j*2+sec].i = x ;
-	  vertexlist[j*2+sec].k = -y;
-	  vertexlist[j*2+sec].j = z;//double negative 
+	  vertexlist[j*2+sec].i = x *normalscale;
+	  vertexlist[j*2+sec].k = -y*normalscale;
+	  vertexlist[j*2+sec].j = z*normalscale;//double negative 
 	  vertexlist[j*2+sec].s = GetS (theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
 	  vertexlist[j*2+sec].t = GetT(rho+drho,rho_min,rho_max);//t - dt;
 	  vertexlist[j*2+sec].x = x * radius;
@@ -223,7 +224,7 @@ void CityLights::RestoreCullFace (int whichdrawqueue) {
 float CityLights::wrapx=1;
 float CityLights::wrapy=1;
 
-CityLights::CityLights (float radius, int stacks, int slices, const char *texture, int zzwrapx, int zzwrapy,  bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max):SphereMesh() { 
+CityLights::CityLights (float radius, int stacks, int slices, const char *texture, int zzwrapx, int zzwrapy,  bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max,bool reversed_normals):SphereMesh() { 
   wrapx = zzwrapx;
   wrapy = zzwrapy;
   /*    if (texture!=NULL) {
@@ -240,6 +241,6 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
       }
     }*/
     FILTER filter = (FILTER)XMLSupport::parse_int(vs_config->getVariable ("graphics","CityLightFilter",XMLSupport::tostring(((int)TRILINEAR))));    
-    InitSphere(radius,stacks,slices,texture,NULL,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter);
+    InitSphere(radius,stacks,slices,texture,NULL,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter,reversed_normals);
 
 }
