@@ -8,8 +8,8 @@ UnitContainer::UnitContainer(Unit * un):unit (NULL) {
   SetUnit (un);
 }
 UnitContainer::~UnitContainer() {
-  //  if (unit)
-  //    unit->UnRef();
+  if (unit)
+    unit->UnRef();
   //bad idea...arrgh!
 }
 void UnitContainer::SetUnit (Unit * un) {
