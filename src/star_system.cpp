@@ -241,7 +241,8 @@ void GameStarSystem::SwapIn () {
 }
 
 void GameStarSystem::SwapOut () {
-
+	AUDStopAllSounds();
+	printf ("stopping all sounds\n");
   /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapOutHalos();

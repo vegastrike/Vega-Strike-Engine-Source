@@ -3952,7 +3952,7 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
     
 
     bool foundthis=false;
-    if (turSize == getTurretSize (addtome->name)&&addtome->rSize()) {//if the new turret has any size at all
+    if (turSize == getTurretSize (addtome->name)&&addtome->rSize()&&(turSize+"_blank"!=addtome->name)) {//if the new turret has any size at all
       if (!downgrade||addtome->name==giveAway->name) {
 	found=true;
 	foundthis=true;

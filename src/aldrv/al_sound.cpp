@@ -13,7 +13,9 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <cmd/unit_generic.h>
 //their LoadWav is b0rken seriously!!!!!!
+
 bool MacFixedLoadWAVFile(const char * fname,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
     int fp = open (fname, O_RDONLY);
     if (fp <0) {
@@ -297,7 +299,19 @@ void AUDSoundGain (const int sound, const float gain) {
   }
 #endif
 }
+bool starSystemOK( ) {
+	Unit * playa = _Universe->AccessCockpit(0)->GetParent();
+	if (!playa)
+		return false;
+	return playa->getStarSystem()==_Universe->activeStarSystem();
 
+}
+void AUDStopAllSounds () {
+	for (unsigned int i=0;i<sounds.size();++i) {
+		if (AUDIsPlaying(i))
+			AUDStopPlaying(i);
+	}
+}
 bool AUDIsPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
@@ -343,6 +357,7 @@ static bool AUDReclaimSource (const int sound) {
 void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
+	  if (starSystemOK())
     if (AUDReclaimSource (sound)) {
 	  AUDAdjustSound (sound, sounds[sound].pos, sounds[sound].vel);
 
@@ -360,6 +375,8 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
   if (sounds[sound].buffer==0) {
 	return;
   }
+  if (!starSystemOK())
+	  return;
   if ((tmp=AUDQueryAudability (sound,pos.Cast(),vel,gain))!=0) {
     if (AUDReclaimSource (sound)) {
       //ALfloat p [3] = {pos.i,pos.j,pos.k};

@@ -82,8 +82,11 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       if (this==_Universe->AccessCockpit()->GetParent()) {
 	fprintf (stderr,"Unit is the active player character...changing scene graph\n");
 	savedStarSystem->SwapOut();
+	
 	savedStarSystem = pendingjump[kk]->dest;
 	pendingjump[kk]->dest->SwapIn();
+
+	
       }
       
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
