@@ -1,5 +1,10 @@
 2001-11-09 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* added #ifdef HAVE_AL to the volume callbacks
+	
+
+2001-11-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
 	* modified config_xml to have variable subsections
 	* modified missions to have a settings section
 	* modified missions to have an origin inside settings

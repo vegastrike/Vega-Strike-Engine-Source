@@ -88,31 +88,43 @@ for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; 
 #if 1
 const float volinc = 1;
 const float dopinc = .1;
+
 void incvol (int i, KBSTATE a) {
+#ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeVolume (AUDGetVolume()+volinc);
 	}
+#endif
 }
+
 void decvol (int i, KBSTATE a) {
+#ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeVolume (AUDGetVolume()-volinc);
 	}
+#endif
 }
 void mute (int i, KBSTATE a) { 
+#ifdef HAVE_AL
 //	if (a==PRESS)
 //		AUDChangeVolume (0);broken
+#endif
 }
 
 void incdop (int i, KBSTATE a) {
+#ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeDoppler (AUDGetDoppler()+dopinc);
 	}
 
+#endif
 }
 void decdop (int i, KBSTATE a) {
+#ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeDoppler (AUDGetDoppler()-dopinc);
 	}
+#endif
 }
 #endif
 
