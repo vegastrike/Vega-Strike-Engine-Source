@@ -341,6 +341,7 @@ void Kickstop(Order * aisc, Unit * un) {
 void MatchVelocity(Order * aisc, Unit * un) {
   KickstopBase(aisc,un,false);
 }
+
 static Vector VectorThrustHelper(Order * aisc, Unit * un, bool ab=false) {
   Vector vec (0,0,0);
   Vector retval(0,0,0);
@@ -350,7 +351,7 @@ static Vector VectorThrustHelper(Order * aisc, Unit * un, bool ab=false) {
     CrossProduct(relpos,Vector(1,0,0),vec);
     retval+=tpos;
   }
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,ab),true,ab,true);
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,ab),false,ab,true);
   AddOrd (aisc,un,ord);
   return retval;
 }
@@ -364,14 +365,31 @@ void VeerAwayITTS(Order * aisc, Unit * un) {
   Order *ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);  
 }
-void VeerAndTurnAway(Order * aisc, Unit * un) {
+void VeerAndVectorAway(Order * aisc, Unit * un) {
   Vector retval=VectorThrustHelper (aisc,un);
   Order *ord = new Orders::ChangeHeading(retval,3,1);
   AddOrd (aisc,un,ord);  
 }
-void AfterburnVeerAndTurnAway(Order * aisc, Unit * un) {
+void AfterburnVeerAndVectorAway(Order * aisc, Unit * un) {
   Vector retval=VectorThrustHelper (aisc,un,true);
   Order *ord = new Orders::ChangeHeading(retval,3,1);
+  AddOrd (aisc,un,ord);  
+}
+void AfterburnVeerAndTurnAway(Order * aisc, Unit * un) {
+  Vector vec=Vector(0,0,1);
+  bool ab=true;
+  Vector tpos=un->Position().Cast();
+  if (un->Target()) {
+    tpos=un->Target()->Position().Cast();
+    Vector relpos=tpos-un->Position().Cast();
+    CrossProduct(relpos,Vector(1,0,0),vec);
+  }
+  Order * ord = new ExecuteFor(new Orders::MatchLinearVelocity(Vector(0,0,0),true,ab,true),.5);  
+  
+  AddOrd (aisc,un,ord);  
+  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector(0,0,100000),ab),true,ab,true);  
+  aisc->EnqueueOrder (ord);   
+  ord = new Orders::ChangeHeading(tpos+vec,3,1);
   AddOrd (aisc,un,ord);  
 }
 static void SetupVAndTargetV (QVector & targetv, QVector &targetpos, Unit* un) {

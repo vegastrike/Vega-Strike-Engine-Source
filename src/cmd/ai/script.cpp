@@ -25,8 +25,10 @@ static HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("barrel roll",&BarrelRoll));
   tmp.insert (MyPair ("veer away",&VeerAway));
   tmp.insert (MyPair ("veer away itts",&VeerAwayITTS));
-  tmp.insert (MyPair ("veer and turn away",&VeerAndTurnAway));
+  tmp.insert (MyPair ("veer and turn away",&VeerAndVectorAway));
+  tmp.insert (MyPair ("veer and vector away",&VeerAndVectorAway));
   tmp.insert (MyPair ("afterburn veer away",&AfterburnVeerAndTurnAway));
+  tmp.insert (MyPair ("afterburn vector away",&AfterburnVeerAndVectorAway));
   tmp.insert (MyPair ("match velocity",&MatchVelocity));
   tmp.insert (MyPair ("fly straight",&FlyStraight));
   tmp.insert (MyPair ("fly straight afterburner",&FlyStraightAfterburner));
