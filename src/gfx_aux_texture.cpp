@@ -331,11 +331,13 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	    for (unsigned int j=0; j<sizeX;j++)
 	      {
 		fread (&index,sizeof (unsigned char),1,fp);
-		data [4*(i*sizeX+j)] = palette[((short)index)*3];	
-		data [4*(i*sizeX+j)+1] = palette[((short)index)*3+1];
-		data [4*(i*sizeX+j)+2] = palette[((short)index)*3+2];
+		data [4*(i*sizeX+j)] = palette[((short)index)*4];	
+		data [4*(i*sizeX+j)+1] = palette[((short)index)*4+1];
+		data [4*(i*sizeX+j)+2] = palette[((short)index)*4+2];
 	      }
 	  }
+	  delete [] palette;
+	  palette = NULL;
 	  if (FileNameA)
 	    {
 	      for (int i=sizeY-1; i>=0;i--)
