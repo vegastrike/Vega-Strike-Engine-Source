@@ -35,7 +35,7 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT),
   EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
 };
-const EnumMap AggressiveAIel_map(element_names, 12);
+const EnumMap AggressiveAIel_map(element_names, 13);
 using std::pair;
 std::map<string,AIEvents::ElemAttrMap *> logic;
 std::map<string,AIEvents::ElemAttrMap *> interrupts;
