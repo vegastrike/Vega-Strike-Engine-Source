@@ -1,3 +1,4 @@
+#ifdef HAVE_PYTHON
 #include <stdio.h>
 #include <Python.h>
 #include "init.h"
@@ -151,3 +152,5 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 	fflush(stderr);
 	fflush(stdout);
 }
+
+#endif
