@@ -1,7 +1,7 @@
 #include "cmd_unit.h"
 #include "cmd_beam.h"
 #include "gfx_mesh.h"
-
+#include "cmd_collide.h"
 vector <LineCollide> collidequeue;
 
 
@@ -17,6 +17,7 @@ void Unit::CollideAll() {
 	Position().k-radial_size<collidequeue[i].Maxi.k) {
       switch (collidequeue[i].type) {
       case LineCollide::UNIT://other units!!!
+	((Unit*)collidequeue[i].object)->Collide(this);
 	return;
       case LineCollide::BEAM:
 	((Beam*)collidequeue[i].object)->Collide(this);
@@ -30,11 +31,37 @@ void Unit::CollideAll() {
       }
     }
   }
+
+
     //add self to the queue??? using prev and cur physical state as an UNKNOWN
+  collidequeue.push_back (LineCollide(this,LineCollide::UNIT,Vector (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size),Vector (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size)));
 }
 
 bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat) {
+  Transformation cumulative_transformation = local_transformation;
+  cumulative_transformation.Compose(cumtrans, cumtransmat);
+  //cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  //cumulative_transformation.position//rSize()
+  if (target->querySphere (cumulative_transformation.position,rSize())&&
+      target->queryBoundingBox (cumulative_transformation.position,rSize())
+      //&&IntersectBSP (cumulative_transformation.position,rSize())//bsp
+      )
+    return true;
+  //
+  return false;
+}
 
+bool Unit::OneWayCollide (Unit * target) {//do each of these bubbled subunits collide with the other unit?
+  int i;
+  for (i=0;i<nummesh;i++) {
+    if (meshdata[i]->Collide(target,cumulative_transformation,cumulative_transformation_matrix))
+      return true;
+  }
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->OneWayCollide(target))
+      return true;
+  }
+  return false;
 }
 
 bool Unit::Collide (Unit * target) {
@@ -45,10 +72,16 @@ bool Unit::Collide (Unit * target) {
   if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
     return false;
   //now do some serious checks
-  //each subunit with each other subunit
-  //each mesh with each mesh
+  if (radial_size>target->radial_size) {
+    if ((!target->OneWayCollide(this))||(!OneWayCollide(target)))
+      return false;
+  }else {
+    if ((!OneWayCollide(target))||(!target->OneWayCollide(this)))
+      return false;
+  }
+  //deal damage similarly to beam damage!!  Apply some sort of repel force
 
-  //blah
+  //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
 

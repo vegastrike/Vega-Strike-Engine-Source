@@ -214,7 +214,7 @@ protected:
   void InitUnit();
   
   void Reflect ();
-  bool Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat);
+
   string *hash_name;
   // Support for reorganized rendering
   bool will_be_drawn;
@@ -227,6 +227,7 @@ protected:
   vector<MeshDrawContext> *draw_queue;
   int draw_sequence;
 public:
+  bool Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat);
   Mesh();
   Mesh(const char *filename,  bool xml=false);
   ~Mesh();

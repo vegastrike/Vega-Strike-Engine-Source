@@ -3,7 +3,7 @@
 #include <vector>
 #include "cmd_beam.h"
 #include "cmd_unit.h"
-
+#include "cmd_collide.h"
 //using std::vector;
 
 

@@ -153,14 +153,6 @@ struct DrawContext {
   DrawContext(float  a[16], GFXVertexList *vl) { memcpy(m, a, sizeof(float[16])); vlist = vl;}
 };
 
-struct LineCollide {
-  void * object;
-  enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
-  Vector Mini;
-  Vector Maxi;
-  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {object=objec;type=typ;Mini=st;Maxi=en;}	       
-};
-
 struct GFXMaterial
 {
 	float ar; // ambient rgba, if you don't like these things, ask me to rename them
