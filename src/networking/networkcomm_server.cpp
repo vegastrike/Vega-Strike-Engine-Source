@@ -1,3 +1,5 @@
+#ifdef NETCOMM
+
 #include "networking/networkcomm.h"
 
 NetworkCommunication::NetworkCommunication()
@@ -35,4 +37,6 @@ int		NetworkCommunication::DestroySession()
 NetworkCommunication::~NetworkCommunication()
 {
 }
+
+#endif
 

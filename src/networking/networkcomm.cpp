@@ -1,3 +1,5 @@
+#ifdef NETCOMM
+
 #include <config.h>
 
 #ifndef NETCOMM_NOWEBCAM
@@ -283,4 +285,6 @@ NetworkCommunication::~NetworkCommunication()
 
 #endif /* NETCOMM_NOWEBCAM */
 }
+
+#endif /* NETCOMM */
 

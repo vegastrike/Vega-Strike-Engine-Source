@@ -107,37 +107,18 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
-if NETCOMM_NOWEBCAM
-cam_files =
-else
-cam_files = webcam_support.cpp	\
-				webcam_support.h
-endif
-
-if NETCOMM
-libnetclient = $(libnetclientserver) $(cam_files) \
+libnetclient = $(libnetclientserver) \
 	networkcomm.cpp		\
-	networkcomm.h
-else
-libnetclient = $(libnetclientserver)
-endif
+	networkcomm.h		\
+	webcam_support.cpp	\
+	webcam_support.h
 
-if LINUX
-libnetclient_a_SOURCES = $(libnetclient) \
-	bgrab.c				\
-	bgrab.h
-else
 libnetclient_a_SOURCES = $(libnetclient)
-endif
 
 libnetacct_a_SOURCES = $(libnetgeneric) \
 	acctserver.cpp \
 	acctserver.h
 
-if NETCOMM
 libnetserver_a_SOURCES = $(libnetclientserver) \
 	networkcomm_server.cpp
-else
-libnetserver_a_SOURCES = $(libnetclientserver)
-endif
 
