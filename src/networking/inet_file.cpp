@@ -23,7 +23,13 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-#include "lin_time.h"
+
+#define micro_sleep(n) do { \
+	struct timeval tv; \
+	tv.tv_usec = n%1000000; \
+	tv.tv_sec=n/1000000; \
+	select(0, NULL, NULL, NULL, &tv); \
+} while (0)
 
 bool fNET_BytesToRead (int socket) {
   /*

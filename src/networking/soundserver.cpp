@@ -38,6 +38,7 @@ typedef int Mix_Music;
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/file.h>
 #endif
 int fadeout=0, fadein=0;
 float volume=0;
@@ -279,8 +280,10 @@ int main(int argc, char **argv) {
 
 	// load the song
         if (fnet) {
-          mysocket_write = open (argv[2],O_WRONLY|O_SHLOCK|O_CREAT,0xffffffff);
-          mysocket = open (argv[1],O_RDONLY|O_SHLOCK|O_CREAT,0xffffffff);        
+          mysocket_write = open (argv[2],O_WRONLY|O_CREAT,0xffffffff);
+		  flock(mysocket_write,LOCK_SH);
+          mysocket = open (argv[1],O_RDONLY|O_CREAT,0xffffffff);
+		  flock(mysocket,LOCK_SH);
         }else {
           for (int i=0;i<10&&mysocket==-1;i++) {
             int port = argc==2?atoi(argv[1]):4364;
