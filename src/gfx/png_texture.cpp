@@ -1,3 +1,4 @@
+#include "endianness.h"
 #include <png.h>
 #include <stdlib.h>
 #include "png_texture.h"
@@ -156,14 +157,40 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    }
    png_init_io(png_ptr, fp);
    png_set_sig_bytes(png_ptr, 8);
-   //   png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
-
-   png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
-row_pointers = png_get_rows(png_ptr, info_ptr);
+   png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+# if __BYTE_ORDER != __BIG_ENDIAN
+
+   if (bpp==16)
+     png_set_swap (png_ptr);
+#endif
+   png_set_expand (png_ptr);
+   png_read_update_info (png_ptr,info_ptr);
+   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+   row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) *height);
+   int numchan=1;
+   if (color_type&PNG_COLOR_MASK_COLOR)
+     numchan =3;
+   if (color_type &PNG_COLOR_MASK_PALETTE)
+     numchan =1;
+   if (color_type&PNG_COLOR_MASK_ALPHA)
+     numchan++;
+   unsigned long stride = numchan*sizeof (unsigned char)*bpp/8;
+   unsigned char * image = (unsigned char *) malloc (stride*width*height);
+   for (unsigned int i=0;i<height;i++) {
+     row_pointers[i] = &image[i*stride*width];
+   }
+   png_read_image (png_ptr,row_pointers);
+   //   png_read_image(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
+   //row_pointers = png_get_rows(png_ptr, info_ptr);
+
 
    unsigned char * result = (*tt) (bpp,color_type,width,height,row_pointers);
-   png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+   free (row_pointers);
+   free (image);
+   png_infop end_info;
+   png_read_end(png_ptr, info_ptr);
+   png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
    /* close the file */
    fclose(fp);

@@ -155,7 +155,8 @@ public:
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
-    T *retval=NULL;
+    bool ret=false;
+    T retval;
     std::vector <T>::iterator removal= hugeobjects.begin();
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -175,7 +176,8 @@ public:
 	    while (removal!=table[x][y][z].end()) {
 	      removal = std::find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
 	      if (removal!=table[x][y][z].end()) {
-		retval = removal;
+		ret = true;
+		retval = *removal;
 		table[x][y][z].erase(removal);
 	      }
 	    }
@@ -183,24 +185,22 @@ public:
 	}
       }
     }
-    if (!retval&&!target->hhuge)
+    if (!ret&&!target->hhuge)
       {
 	fprintf (stderr, "bad things");
       }
-    if (!retval||target->hhuge) {
+    if (!ret||target->hhuge) {
       while (removal!=hugeobjects.end()) {
-		  removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
+	removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
 	if (removal!=hugeobjects.end()) {
-	  retval = removal;
+	  ret = true;
+	  retval = *removal;
 	  hugeobjects.erase(removal);
 	}
       }
     }
 
-    if (retval)
-      return *retval;
-    else 
-      return T();
+    return retval;
   }
 };
 

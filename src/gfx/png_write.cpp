@@ -53,7 +53,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
 	       PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
   
   png_write_info(png_ptr, info_ptr);
-  //  png_set_swap(png_ptr);
+  png_set_swap(png_ptr);
   png_byte *row_pointers[height];
   for (unsigned int i=0;i<height;i++) {
     row_pointers[i]= (png_byte *)&data[i*width];
