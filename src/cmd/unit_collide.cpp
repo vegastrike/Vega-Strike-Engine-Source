@@ -222,7 +222,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	smalltransform.SetOrigin(smallorig.Cast());
       }
 #endif
-      if (smaller->colTrees->colTree(smaller)->Collide (*bigger->colTrees->colTree(bigger),
+      if (smaller->colTrees->colTree(smaller,bigger->GetVelocity())->Collide (*bigger->colTrees->colTree(bigger,smaller->GetVelocity()),
 													 &smalltransform,
 													 &bigtransform)) {
 	//static int crashcount=0;
@@ -295,7 +295,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
     bool temp=true;
     if (this->colTrees==NULL) {
       temp=true;
-    }else if (this->colTrees->colTree(this)==NULL) {
+    }else if (this->colTrees->colTree(this,Vector(0,0,0))==NULL) {
       temp=true;
     }
     if (temp) {
@@ -324,7 +324,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
   vector <bsp_polygon> mesh;
   mesh.push_back(tri);
   csRapidCollider smallColTree(mesh);
-  if (smallColTree.Collide (*(this->colTrees)->colTree(this),
+  if (smallColTree.Collide (*(this->colTrees)->colTree(this,Vector(0,0,0)),
 							&smalltransform,
 							&bigtransform)) {
       static int crashcount=0;
@@ -418,7 +418,7 @@ bool Unit::Collide (Unit * target) {
     smaller = target;
   }
   bool usecoltree =(this->colTrees&&target->colTrees)
-	  ?this->colTrees->colTree(this)&&target->colTrees->colTree(this)
+	  ?this->colTrees->colTree(this,Vector(0,0,0))&&target->colTrees->colTree(this,Vector(0,0,0))
     : false;
   if (usecoltree) {
     QVector bigpos,smallpos;

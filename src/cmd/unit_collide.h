@@ -284,7 +284,7 @@ struct collideTrees {
   BSPTree *bspShield;	
   csRapidCollider *rapidColliders[collideTreesMaxTrees];
   bool usingColTree()const {return rapidColliders[0]!=NULL;}
-  csRapidCollider *colTree(Unit *un);//gets the appropriately scaled unit collide tree
+  csRapidCollider *colTree(Unit *un, const Vector & othervelocity);//gets the appropriately scaled unit collide tree
   ///The bsp tree of the shields of this unit (used for beams)
   csRapidCollider *colShield;
   int refcount;

@@ -25,9 +25,10 @@ collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csR
 	unitColliders.Put (hash_key,this);
 }
 float loge2 = log(2.f);
-csRapidCollider * collideTrees::colTree(Unit * un) {
+csRapidCollider * collideTrees::colTree(Unit * un, const Vector & othervelocity) {
 	const float const_factor=1;
-	float speedsquared =const_factor*const_factor*un->GetVelocity().MagnitudeSquared(); 
+	Vector vel = un->GetVelocity()-othervelocity;
+	float speedsquared =const_factor*const_factor*vel.MagnitudeSquared(); 
 	if (un->rSize()*un->rSize()>SIMULATION_ATOM*SIMULATION_ATOM*speedsquared) {
 		return rapidColliders[0];
 	}

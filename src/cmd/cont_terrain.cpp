@@ -307,8 +307,8 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       }
       if (md[i].collider) {
 	if (un->colTrees)
-        if (un->colTrees->colTree(un))
-	if (un->colTrees->colTree(un)->Collide (*md[i].collider,
+        if (un->colTrees->colTree(un,Vector(0,0,0)))
+	if (un->colTrees->colTree(un,Vector(0,0,0))->Collide (*md[i].collider,
 					    &smalltransform,
 					    &bigtransform)) {
 	  csCollisionPair * mycollide = csRapidCollider::GetCollisions();
