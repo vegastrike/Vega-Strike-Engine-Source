@@ -104,13 +104,21 @@ FIREKEYBOARDTYPE &FireKeyboard::j() {
   return vectorOfKeyboardInput[whichjoystick];
 }
 void FireKeyboard::SetShieldsOneThird(int,KBSTATE k) {
-  if (k==DOWN) {
-    g().shieldpowerstate=1./3;
+  if (k==PRESS) {
+    float pow=1./3;
+    if (g().shieldpowerstate!=pow)
+      g().shieldpowerstate=pow;
+    else
+      g().shieldpowerstate=1;
   }
 }
 void FireKeyboard::SetShieldsTwoThird(int,KBSTATE k) {
-  if (k==DOWN) {
-    g().shieldpowerstate=2./3;
+  if (k==PRESS) {
+    float pow=2./3;
+    if (g().shieldpowerstate!=pow)
+      g().shieldpowerstate=pow;
+    else
+      g().shieldpowerstate=1;
   }
 }
 void FireKeyboard::ToggleGlow (int,KBSTATE k) {
@@ -1182,7 +1190,7 @@ void FireKeyboard::Execute () {
   if (f().shieldpowerstate!=1) {
     Shield  * shield = &parent->shield;
     PowerDownShield(shield,f().shieldpowerstate);
-    f().shieldpowerstate=1;
+    //f().shieldpowerstate=1;
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
