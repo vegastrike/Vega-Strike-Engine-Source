@@ -18,7 +18,7 @@
 #include "text_area.h"
 
 // Array of textures for the text area
-Texture *Images;
+GUITexture *Images;
 
 // List of images to load. Last element must always be NULL
 char *LoadImages[] = {  TEXT_AREA_00, TEXT_AREA_01, TEXT_AREA_02, TEXT_AREA_03, TEXT_AREA_04,
@@ -403,7 +403,7 @@ void TextArea::LoadTextures(void) {
 
         max = 0;
         while (LoadImages[max] != NULL) { max++; }
-        Images = new Texture [max];
+        Images = new GUITexture [max];
 	#ifdef DEBUG
         cout << "Loading " << max << " images\n";
 	#endif

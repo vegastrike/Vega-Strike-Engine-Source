@@ -33,11 +33,11 @@
 #include <vector.h>
 #include "gfx/png_texture.h"
 
-struct Texture {
+struct GUITexture {
         unsigned int name;
         unsigned int wid, hei;
-        Texture () {name=wid=hei=0;}
-        Texture (unsigned int wid,unsigned int hei,unsigned int name) {this->wid=wid;this->hei=hei;this->name=name;}
+        GUITexture () {name=wid=hei=0;}
+        GUITexture (unsigned int wid,unsigned int hei,unsigned int name) {this->wid=wid;this->hei=hei;this->name=name;}
 };
 
 Texture ReadTex(char *texfile);

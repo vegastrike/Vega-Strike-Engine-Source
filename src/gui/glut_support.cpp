@@ -19,10 +19,10 @@
 
 float colors[] = {1, 1, 1, 1};
 
-Texture ReadTex(char *texfile) {
+GUITexture ReadTex(char *texfile) {
         FILE* file=0;
 	int PNG_HAS_ALPHA=4;
-        Texture tex;
+        GUITexture tex;
         if (texfile)
         	if (texfile[0])
                 	file=fopen(texfile,"rb");
@@ -186,7 +186,7 @@ void ShowColor(float x, float y, float wid, float hei, float red, float green, f
         glEnable(GL_TEXTURE_2D);
 }
 
-void ShowImage(float x, float y, float wid, float hei, Texture image, int tile_h, int tile_w) {
+void ShowImage(float x, float y, float wid, float hei, GUITexture image, int tile_h, int tile_w) {
 	#ifdef DEBUG
         cout << "Displaying image at " << x << "," << y << "\n";
         cout << "In area with dimensions of " << wid << "," << hei << "\n";
