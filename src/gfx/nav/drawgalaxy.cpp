@@ -151,7 +151,7 @@ bool testandset (bool &b,bool val) {
 
 float screensmash=1;//arbitrary constant used in calculating position below
 
-NavigationSystem::SystemIterator::SystemIterator (string current_system, unsigned int max =2){
+NavigationSystem::SystemIterator::SystemIterator (string current_system, unsigned int max){
 	count=0;
 	maxcount=max;
 	vstack.push_back(current_system);
@@ -224,7 +224,7 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 
 
 
-void NavigationSystem::CachedSystemIterator::init (string current_system, unsigned max_systems = 2) {
+void NavigationSystem::CachedSystemIterator::init (string current_system, unsigned max_systems) {
 	systems.clear();
 	NavigationSystem::SystemIterator iter (current_system, max_systems);
 	for (;!iter.done();++iter) {
@@ -234,7 +234,7 @@ void NavigationSystem::CachedSystemIterator::init (string current_system, unsign
 
 NavigationSystem::CachedSystemIterator::CachedSystemIterator () {}
 
-NavigationSystem::CachedSystemIterator::CachedSystemIterator (string current_system, unsigned max_systems = 2) {
+NavigationSystem::CachedSystemIterator::CachedSystemIterator (string current_system, unsigned max_systems) {
 	init(current_system, max_systems);
 }
 NavigationSystem::CachedSystemIterator::CachedSystemIterator(const CachedSystemIterator &other)

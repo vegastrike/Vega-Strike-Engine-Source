@@ -39,7 +39,7 @@ cmd/collide/libcollide.a 			\
 boost129/libboost_python.a          \
 boost/libboost_python.a             \
 gfx/nav/libnav.a 					\
--lpthread -lz $(extra_ldadd)
+-lpthread -lz $(extraldadd)
 
 vegaserver_LDADD =  			\
 cmd/script/director_server.o 	\

@@ -5,21 +5,25 @@ incl2 = \
 endif
 
 incl = \
-	 -I$(top_srcdir)/src \
-     -I$(top_srcdir)/src/jvoiplib \
-	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
-	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
-	 -I$(top_srcdir)/src/jvoiplib/componentframework	\
-	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
-	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
-	 -I$(top_srcdir)/src/jthread \
-	 -I$(top_srcdir)/src/jrtplib
+	-I/usr/local/include/jvoiplib	\
+	-I/usr/local/include/jrtplib	\
+	-I/usr/local/include/jthread
+#    -I$(top_srcdir)/src/jvoiplib \
+#	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
+#	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
+#	 -I$(top_srcdir)/src/jvoiplib/componentframework	\
+#	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
+#	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
+#	 -I$(top_srcdir)/src/jthread \
+#	 -I$(top_srcdir)/src/jrtplib
 
 if USEBOOST128
-INCLUDES= $(incl) $(incl2) \
+INCLUDES= $(incl) $(incl2)	\
+	 -I$(top_srcdir)/src	\
 	 -I$(top_srcdir)/src/boost
 else
-INCLUDES= $(incl) $(incl2) \
+INCLUDES= $(incl) $(incl2)	\
+	 -I$(top_srcdir)/src	\
 	 -I$(top_srcdir)/src/boost129
 endif
 

@@ -13,6 +13,7 @@
 #define VOIP_PORT	5000
 extern bool cleanexit;
 
+#include "gldrv/winsys.h"
 #include "networkcomm.h"
 
 #ifdef NETCOMM_JVOIP
