@@ -151,6 +151,8 @@ bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal
     Unit * bigger =this;
     const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
     const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
+    if (smaller->colTree==NULL||colTree==NULL)
+      return false;
     if (smaller->colTree->Collide (*bigger->colTree,
 				  &smalltransform,
 				  &bigtransform)) {
