@@ -1,466 +1,815 @@
-"SystemIDNum";"SystemName";"QuadrantName";"SectorName";"XCoordinates";"YCoordinates";"ZCoordinates";"Influence";"StarColorType";"Ne;bulaColor"
-1;"Carloss";"Williams";"Avalon";174.00;956.00;425.00;"Terran Confederation";"M3 IV";"None"
-2;"El Dorado";"Williams";"Avalon";525.00;837.00;330.00;"Terran Confederation";"K1 V";"None"
-3;"Giunta";"Williams";"Avalon";364.00;770.00;382.00;"Terran Confederation";"F7 IV";"None"
-4;"Grajeda";"Williams";"Avalon";160.00;768.00;373.00;"Terran Confederation";"M8 V";"None"
-5;"Hermann";"Williams";"Avalon";358.00;905.00;180.00;"Terran Confederation";"K6 V";"None"
-6;"Kier";"Williams";"Avalon";288.00;1044.00;167.00;"Terran Confederation";"K5 III";"None"
-7;"Leon";"Williams";"Avalon";412.00;1076.00;332.00;"Terran Confederation";"G0 III";"None"
-8;"McCall";"Williams";"Avalon";513.00;1133.00;258.00;"Terran Confederation";"F5 V";"None"
-10;"Paylode";"Williams";"Avalon";508.00;1011.00;199.00;"Terran Confederation";"F4 V";"None"
-11;"TCSC1569";"Williams";"Avalon";160.00;1142.00;491.00;"Unexplored System";"M5 I";"None"
-13;"?";"Challenger";"Avalon";921.00;784.00;159.00;"Unexplored System";"M1 V";"None"
-14;"Avalon";"Challenger";"Avalon";662.00;1082.00;301.00;"Terran Confederation";"O8 V";"None"
-15;"Babel";"Challenger";"Avalon";967.00;1011.00;353.00;"Terran Confederation";"M2 III";"None"
-16;"Baroda";"Challenger";"Avalon";904.00;926.00;409.00;"Terran Confederation";"M8 V";"None"
-17;"Britannia";"Challenger";"Avalon";840.00;1106.00;398.00;"Terran Confederation";"G8 III";"None"
-18;"Cibola";"Challenger";"Avalon";909.00;686.00;207.00;"Terran Confederation";"G8 I";"None"
-20;"Dis";"Challenger";"Avalon";811.00;776.00;148.00;"Terran Confederation";"A3 V";"None"
-22;"Gomorrah";"Challenger";"Avalon";1120.00;736.00;352.00;"Terran Confederation";"M6 V";"None"
-23;"Haven";"Challenger";"Avalon";1125.00;906.00;196.00;"Terran Confederation";"O9 V";"None"
-24;"Jericho";"Challenger";"Avalon";1050.00;1156.00;270.00;"Terran Confederation";"A3 III";"None"
-25;"New Atlantis";"Challenger";"Avalon";857.00;1000.00;353.00;"Terran Confederation";"G7 V";"None"
-27;"Sheol";"Challenger";"Avalon";819.00;882.00;342.00;"Terran Confederation";"A6 VI";"None"
-29;"Tanis";"Challenger";"Avalon";944.00;850.00;209.00;"Terran Confederation";"K8 III";"None"
-30;"Ubar";"Challenger";"Avalon";684.00;854.00;340.00;"Terran Confederation";"K5 II";"None"
-31;"Xualla";"Challenger";"Avalon";672.00;722.00;221.00;"Terran Confederation";"F5 V";"None"
-32;"Agea";"Foshko";"Avalon";1125.00;1265.00;359.00;"Terran Confederation";"M7 III";"None"
-33;"Alexandria";"Foshko";"Avalon";975.00;1379.00;426.00;"Terran Confederation";"M5 V";"None"
-34;"Aphrodite";"Foshko";"Avalon";934.00;1711.00;327.00;"Terran Confederation";"G0 V";"None"
-35;"Aries";"Foshko";"Avalon";738.00;1607.00;250.00;"Terran Confederation";"A5 IV";"None"
-36;"Athena";"Foshko";"Avalon";835.00;1787.00;266.00;"Terran Confederation";"M6 III";"None"
-37;"Callisto";"Foshko";"Avalon";1062.00;1325.00;93.00;"Terran Confederation";"G2 V";"None"
-39;"Forge";"Foshko";"Avalon";648.00;1404.00;190.00;"Terran Confederation";"A6 II";"None"
-40;"Hades";"Foshko";"Avalon";696.00;1757.00;226.00;"Terran Confederation";"K3 V";"None"
-41;"Hephestus";"Foshko";"Avalon";823.00;1364.00;333.00;"Terran Confederation";"B2 III";"None"
-44;"Poseidon";"Foshko";"Avalon";1063.00;1667.00;456.00;"Terran Confederation";"A0 V";"None"
-45;"Pugh";"Foshko";"Avalon";623.00;1654.00;346.00;"Terran Confederation";"F4 V";"None"
-47;"Tethys";"Foshko";"Avalon";1146.00;1717.00;441.00;"Terran Confederation";"G7 I";"None"
-48;"Pietzsch";"Bing";"Avalon";460.00;1526.00;492.00;"Terran Confederation";"A4 III";"None"
-49;"Russ";"Bing";"Avalon";468.00;1724.00;436.00;"Terran Confederation";"K2 V";"None"
-54;"Beta";"Farris";"Gemini";1624.00;642.00;159.00;"Terran Confederation";"M1 V";"None"
-55;"Capella";"Farris";"Gemini";1485.00;839.00;261.00;"Terran Confederation";"A7 V";"None"
-56;"Castor";"Farris";"Gemini";1593.00;1140.00;338.00;"Terran Confederation";"F6 V";"None"
-57;"Crab-12";"Farris";"Gemini";1419.00;783.00;225.00;"Terran Confederation";"A7 V";"None"
-58;"Death";"Farris";"Gemini";1453.00;955.00;426.00;"Terran Confederation";"M6 IV";"None"
-59;"Delta";"Farris";"Gemini";1496.00;680.00;278.00;"Terran Confederation";"K1 III";"None"
-61;"Eden";"Farris";"Gemini";1669.00;956.00;439.00;"Terran Confederation";"K1 V";"None"
-63;"Gamma";"Farris";"Gemini";1411.00;633.00;413.00;"Terran Confederation";"K5 III";"None"
-64;"J900";"Farris";"Gemini";1227.00;1117.00;221.00;"Terran Confederation";"G6 V";"None"
-65;"KM-252";"Farris";"Gemini";1732.00;1144.00;398.00;"Terran Confederation";"F4 V";"None"
-66;"New Caledonia";"Farris";"Gemini";1351.00;720.00;287.00;"Terran Confederation";"A8 V";"None"
-67;"Nexus";"Farris";"Gemini";1731.00;1143.00;374.00;"Terran Confederation";"B5 V";"None"
-68;"Palan";"Farris";"Gemini";1711.00;843.00;256.00;"Terran Confederation";"K5 V";"None"
-70;"Regallis";"Farris";"Gemini";1298.00;1026.00;244.00;"Terran Confederation";"O7 V";"None"
-71;"Rygannon";"Farris";"Gemini";1558.00;731.00;362.00;"Terran Confederation";"G2 V";"None"
-72;"Sherwood";"Farris";"Gemini";1313.00;873.00;372.00;"Terran Confederation";"A1 V";"None"
-73;"Telar";"Farris";"Gemini";1220.00;925.00;347.00;"Terran Confederation";"G3 V";"None"
-74;"Valhalla";"Farris";"Gemini";1445.00;1054.00;284.00;"Terran Confederation";"G5 V";"None"
-75;"War";"Farris";"Gemini";1494.00;1146.00;122.00;"Terran Confederation";"A2 V";"None"
-76;"Xytani";"Farris";"Gemini";1663.00;760.00;320.00;"Terran Confederation";"A8 III";"None"
-78;"Blockade Point Charlie";"Clarke";"Gemini";2176.00;967.00;297.00;"Terran Confederation";"M6 III";"None"
-79;"Blockade Point Tango";"Clarke";"Gemini";2241.00;892.00;338.00;"Terran Confederation";"A3 VI";"None"
-80;"CMF-A";"Clarke";"Gemini";1975.00;846.00;295.00;"Terran Confederation";"M6 V";"None"
-81;"Hyades";"Clarke";"Gemini";2205.00;755.00;247.00;"Terran Confederation";"A9 VI";"None"
-82;"Lisacc";"Clarke";"Gemini";2313.00;1092.00;358.00;"Terran Confederation";"B4 V";"None"
-83;"Mah'Rahn";"Clarke";"Gemini";2323.00;782.00;345.00;"Terran Confederation";"G8 V";"None"
-84;"Midguard";"Clarke";"Gemini";1933.00;1091.00;271.00;"Terran Confederation";"K2 V";"None"
-86;"Perry";"Clarke";"Gemini";2042.00;1022.00;427.00;"Terran Confederation";"K3 V";"None"
-87;"Ragnarok";"Clarke";"Gemini";1860.00;832.00;346.00;"Terran Confederation";"F5 V";"None"
-88;"Rikel";"Clarke";"Gemini";1836.00;1149.00;270.00;"Terran Confederation";"K2 III";"None"
-89;"Sumn-Kp'ta";"Clarke";"Gemini";2309.00;699.00;420.00;"Terran Confederation";"M1 V";"None"
-90;"Surtur";"Clarke";"Gemini";2137.00;1102.00;275.00;"Terran Confederation";"M2 V";"None"
-91;"Tingerhoff";"Clarke";"Gemini";1858.00;968.00;520.00;"Terran Confederation";"M4 V";"None"
-92;"Tr'Pakh";"Clarke";"Gemini";2241.00;639.00;205.00;"Terran Confederation";"O8 I";"None"
-95;"Aldebran";"Potter";"Gemini";1833.00;1774.00;468.00;"Terran Confederation";"F8 V";"None"
-98;"Hind's Variable N.";"Potter";"Gemini";2012.00;1695.00;286.00;"Terran Confederation";"K0 V";"None"
-102;"New Constantinople";"Potter";"Gemini";1900.00;1284.00;138.00;"Terran Confederation";"M2 V";"None"
-103;"New Detroit";"Potter";"Gemini";2114.00;1460.00;315.00;"Terran Confederation";"G8 III";"None"
-104;"Newcastle";"Potter";"Gemini";1848.00;1444.00;386.00;"Terran Confederation";"G1 V";"None"
-105;"Oxford";"Potter";"Gemini";2253.00;1776.00;265.00;"Terran Confederation";"G6 I";"None"
-110;"119CE";"Humboldt";"Gemini";1683.00;1646.00;300.00;"Terran Confederation";"B1 IV";"None"
-113;"Gemini";"Humboldt";"Gemini";1618.00;1319.00;329.00;"Terran Confederation";"M4 V";"None"
-114;"Junction";"Humboldt";"Gemini";1452.00;1675.00;420.00;"Terran Confederation";"M3 III";"None"
-120;"Pyrenees";"Humboldt";"Gemini";1267.00;1514.00;224.00;"Terran Confederation";"K8 II";"None"
-121;"Troy";"Humboldt";"Gemini";1455.00;1417.00;292.00;"Terran Confederation";"A6 II";"None"
-122;"Varnus";"Humboldt";"Gemini";1681.00;1380.00;343.00;"Terran Confederation";"M4 V";"None"
-123;"Karing";"S'kh'haral";"Trk'Pahn";2869.00;908.00;141.00;"Kilrathi Assembly of Clans";"G9 V";"None"
-125;"S'kha Rissth";"S'kh'haral";"Trk'Pahn";2702.00;1043.00;427.00;"Kilrathi Assembly of Clans";"M5 V";"None"
-127;"S'kh'haral (2)";"S'kh'haral";"Trk'Pahn";2854.00;719.00;91.00;"Kilrathi Assembly of Clans";"F2 IV";"None"
-131;"Sum'nH'hra";"S'kh'haral";"Trk'Pahn";2580.00;722.00;326.00;"Kilrathi Assembly of Clans";"F5 V";"None"
-132;"Sum'Tlor";"S'kh'haral";"Trk'Pahn";2549.00;802.00;125.00;"Kilrathi Assembly of Clans";"F5 V";"None"
-133;"T'K Tarak";"S'kh'haral";"Trk'Pahn";2503.00;1163.00;237.00;"Kilrathi Assembly of Clans";"B2 I";"None"
-134;"T'K Urel";"S'kh'haral";"Trk'Pahn";2763.00;1162.00;92.00;"Kilrathi Assembly of Clans";"K5 V";"None"
-135;"Zarnobian";"S'kh'haral";"Trk'Pahn";2922.00;1165.00;408.00;"Kilrathi Assembly of Clans";"K9 III";"None"
-136;"Bordrav";"Tr'l H'mass";"Trk'Pahn";3278.00;1166.00;361.00;"Kilrathi Assembly of Clans";"G1 VI";"None"
-139;"Tr'l H'mass (10)";"Tr'l H'mass";"Trk'Pahn";3491.00;1014.00;258.00;"Kilrathi Assembly of Clans";"K1 III";"None"
-140;"Tr'l H'mass (11)";"Tr'l H'mass";"Trk'Pahn";3472.00;1172.00;430.00;"Kilrathi Assembly of Clans";"K2 II";"None"
-144;"Tr'l H'mass (5)";"Tr'l H'mass";"Trk'Pahn";3486.00;681.00;403.00;"Kilrathi Assembly of Clans";"F2 III";"None"
-145;"Tr'l H'mass (6)";"Tr'l H'mass";"Trk'Pahn";3071.00;915.00;322.00;"Kilrathi Assembly of Clans";"K9 V";"None"
-147;"Tr'l H'mass (8)";"Tr'l H'mass";"Trk'Pahn";3382.00;897.00;355.00;"Kilrathi Assembly of Clans";"M2 V";"None"
-149;"Varni";"Tr'l H'mass";"Trk'Pahn";3090.00;1115.00;104.00;"Kilrathi Assembly of Clans";"F6 V";"None"
-150;"B'osc'Au";"H'hriss";"Trk'Pahn";3280.00;1565.00;279.00;"Kilrathi Assembly of Clans";"K4 V";"None"
-151;"Bukrag";"H'hriss";"Trk'Pahn";3289.00;1697.00;404.00;"Kilrathi Assembly of Clans";"K8 I";"None"
-153;"H'hri Som";"H'hriss";"Trk'Pahn";3511.00;1751.00;137.00;"Kilrathi Assembly of Clans";"B5 V";"None"
-155;"K'Mh'han";"H'hriss";"Trk'Pahn";3227.00;1774.00;248.00;"Kilrathi Assembly of Clans";"G3 I";"None"
-157;"Oargth";"H'hriss";"Trk'Pahn";3461.00;1344.00;87.00;"Kilrathi Assembly of Clans";"M3 V";"None"
-158;"Sakah Trk'";"H'hriss";"Trk'Pahn";3030.00;1772.00;379.00;"Kilrathi Assembly of Clans";"K4 IV";"None"
-159;"Trak'mar";"H'hriss";"Trk'Pahn";3469.00;1507.00;215.00;"Kilrathi Assembly of Clans";"F7 V";"None"
-160;"Trik'Kha";"H'hriss";"Trk'Pahn";3057.00;1637.00;189.00;"Kilrathi Assembly of Clans";"K5 V";"None"
-161;"Trik'Tsek";"H'hriss";"Trk'Pahn";3441.00;1658.00;350.00;"Kilrathi Assembly of Clans";"K2 VI";"None"
-163;"T'set mehr / T'set Mehr";"H'hriss";"Trk'Pahn";3415.00;1759.00;292.00;"Kilrathi Assembly of Clans";"B8 III";"None"
-166;"Draga";"Tr'k H'hra";"Trk'Pahn";2714.00;1444.00;316.00;"Kilrathi Assembly of Clans";"K4 V";"None"
-168;"Grovsner";"Tr'k H'hra";"Trk'Pahn";2524.00;1575.00;506.00;"Grovsner Colonies";"A6 II";"None"
-169;"Hilo Base";"Tr'k H'hra";"Trk'Pahn";2743.00;1744.00;290.00;"Terran Confederation";"M6 IV";"None"
-170;"Khar Sum'n";"Tr'k H'hra";"Trk'Pahn";2668.00;1602.00;278.00;"Kilrathi Assembly of Clans";"A8 V";"None"
-172;"K'n'T'mer";"Tr'k H'hra";"Trk'Pahn";2932.00;1460.00;344.00;"Kilrathi Assembly of Clans";"M2 V";"None"
-173;"K'n'Trell";"Tr'k H'hra";"Trk'Pahn";2866.00;1641.00;389.00;"Kilrathi Assembly of Clans";"M4 V";"None"
-175;"Maginot";"Tr'k H'hra";"Trk'Pahn";2446.00;1754.00;548.00;"Terran Confederation";"F7 V";"None"
-176;"N'Der Pak";"Tr'k H'hra";"Trk'Pahn";2477.00;1337.00;307.00;"Kilrathi Assembly of Clans";"G7 V";"None"
-178;"Roche";"Tr'k H'hra";"Trk'Pahn";2608.00;1749.00;356.00;"Terran Confederation";"B4 V";"None"
-180;"Tr'k t'lon";"Tr'k H'hra";"Trk'Pahn";2413.00;1620.00;460.00;"Kilrathi Assembly of Clans";"G6 V";"None"
-182;"K'vt Karh (1)";"K'vt Karh";"Vukar Tag";3641.00;690.00;293.00;"Kilrathi Assembly of Clans";"F5 V";"None"
-183;"K'vt Karh (10)";"K'vt Karh";"Vukar Tag";3941.00;1081.00;212.00;"Kilrathi Assembly of Clans";"K2 III";"None"
-185;"K'vt Karh (12)";"K'vt Karh";"Vukar Tag";3662.00;1107.00;407.00;"Kilrathi Assembly of Clans";"F8 VI";"None"
-186;"K'vt Karh (13)";"K'vt Karh";"Vukar Tag";3802.00;1122.00;257.00;"Kilrathi Assembly of Clans";"B2 IV";"None"
-187;"K'vt Karh (14)";"K'vt Karh";"Vukar Tag";4007.00;1171.00;275.00;"Kilrathi Assembly of Clans";"G4 V";"None"
-188;"K'vt Karh (2)";"K'vt Karh";"Vukar Tag";3779.00;779.00;267.00;"Kilrathi Assembly of Clans";"A3 V";"None"
-194;"K'vt Karh (8)";"K'vt Karh";"Vukar Tag";3970.00;923.00;226.00;"Kilrathi Assembly of Clans";"K8 V";"None"
-196;"S'kur (1)";"S'kur";"Vukar Tag";4227.00;745.00;372.00;"Kilrathi Assembly of Clans";"K2 III";"None"
-198;"S'kur (3)";"S'kur";"Vukar Tag";4389.00;776.00;290.00;"Kilrathi Assembly of Clans";"F7 V";"None"
-199;"S'kur (4)";"S'kur";"Vukar Tag";4638.00;812.00;236.00;"Kilrathi Assembly of Clans";"F1 III";"None"
-200;"S'kur (5)";"S'kur";"Vukar Tag";4513.00;852.00;369.00;"Kilrathi Assembly of Clans";"M5 V";"None"
-201;"S'kur (6)";"S'kur";"Vukar Tag";4199.00;946.00;507.00;"Kilrathi Assembly of Clans";"B5 V";"None"
-204;"S'kur (9)";"S'kur";"Vukar Tag";4457.00;1120.00;350.00;"Kilrathi Assembly of Clans";"A0 V";"None"
-205;"Lushkag";"S'kur Tql";"Vukar Tag";4207.00;1757.00;228.00;"Kilrathi Assembly of Clans";"K0 III";"None"
-208;"S'kur Tql (10)";"S'kur Tql";"Vukar Tag";4488.00;1675.00;283.00;"Kilrathi Assembly of Clans";"K8 V";"None"
-210;"S'kur Tql (12)";"S'kur Tql";"Vukar Tag";4670.00;1759.00;422.00;"Kilrathi Assembly of Clans";"K8 V";"None"
-211;"S'kur Tql (2)";"S'kur Tql";"Vukar Tag";4462.00;1263.00;250.00;"Kilrathi Assembly of Clans";"F3 VI";"None"
-214;"S'kur Tql (5)";"S'kur Tql";"Vukar Tag";4456.00;1480.00;244.00;"Kilrathi Assembly of Clans";"K0 III";"None"
-215;"S'kur Tql (6)";"S'kur Tql";"Vukar Tag";4656.00;1535.00;110.00;"Kilrathi Assembly of Clans";"K0 V";"None"
-218;"S'kur Tql (9)";"S'kur Tql";"Vukar Tag";4348.00;1737.00;116.00;"Kilrathi Assembly of Clans";"O8 V";"None"
-220;"Baragh";"K'vt Tag";"Vukar Tag";4116.00;1385.00;400.00;"Kilrathi Assembly of Clans";"K4 V";"None"
-222;"Jugara";"K'vt Tag";"Vukar Tag";4010.00;1572.00;273.00;"Kilrathi Assembly of Clans";"A4 I";"None"
-224;"K'vt Tag (2)";"K'vt Tag";"Vukar Tag";3847.00;1358.00;294.00;"Kilrathi Assembly of Clans";"B6 V";"None"
-226;"K'vt Tag (4)";"K'vt Tag";"Vukar Tag";4038.00;1331.00;231.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-230;"T'ql H'hass";"K'vt Tag";"Vukar Tag";3805.00;1725.00;261.00;"Kilrathi Assembly of Clans";"F5 V";"None"
-232;"Vukar Tag";"K'vt Tag";"Vukar Tag";3815.00;1555.00;113.00;"Kilrathi Assembly of Clans";"M5 V";"None"
-233;"Gmarktu";"Quadrant 4";"Gmarktu";4878.00;1641.00;484.00;"Kilrathi Assembly of Clans";"M6 I";"None"
-234;"Barns";"Saab";"Hawking";531.00;2296.00;281.00;"Terran Confederation";"O9 V";"None"
-235;"Brown";"Saab";"Hawking";343.00;2366.00;304.00;"Terran Confederation";"K7 V";"None"
-236;"Brunet";"Saab";"Hawking";420.00;2149.00;331.00;"Terran Confederation";"A8 VI";"None"
-237;"Priest";"Saab";"Hawking";311.00;2160.00;473.00;"Terran Confederation";"A9 V";"None"
-241;"Waldrip";"Saab";"Hawking";548.00;2046.00;289.00;"Terran Confederation";"G6 V";"None"
-244;"Gilmore";"Gegarin";"Hawking";934.00;1905.00;307.00;"Terran Confederation";"A3 VI";"None"
-251;"Korolyov";"Gegarin";"Hawking";795.00;2154.00;261.00;"Terran Confederation";"F7 V";"None"
-252;"Leonov";"Gegarin";"Hawking";683.00;2034.00;114.00;"Terran Confederation";"A8 V";"None"
-253;"Marie";"Gegarin";"Hawking";1050.00;1966.00;478.00;"Terran Confederation";"K4 V";"None"
-254;"New Baikal";"Gegarin";"Hawking";634.00;2241.00;407.00;"Terran Confederation";"K1 III";"None"
-255;"Titov";"Gegarin";"Hawking";862.00;2282.00;246.00;"Terran Confederation";"K4 III";"None"
-260;"Armstrong";"Hubble";"Hawking";647.00;2862.00;371.00;"Terran Confederation";"A0 V";"None"
-261;"Chandley";"Hubble";"Hawking";984.00;2978.00;75.00;"Terran Confederation";"F4 V";"None"
-263;"Eagle Base";"Hubble";"Hawking";983.00;2865.00;188.00;"Terran Confederation";"G4 V";"None"
-266;"Grissom";"Hubble";"Hawking";798.00;2969.00;176.00;"Terran Confederation";"A9 V";"None"
-267;"Hawking";"Hubble";"Hawking";979.00;2757.00;234.00;"Terran Confederation";"K8 III";"None"
-268;"Ivan's Folly";"Hubble";"Hawking";1067.00;2489.00;183.00;"Terran Confederation";"A3 III";"None"
-270;"Newton";"Hubble";"Hawking";831.00;2629.00;406.00;"Terran Confederation";"G7 I";"None"
-271;"Outreach";"Hubble";"Hawking";644.00;2609.00;272.00;"Terran Confederation";"M7 III";"None"
-273;"Sagan";"Hubble";"Hawking";861.00;2487.00;354.00;"Terran Confederation";"M4 V";"None"
-274;"Shepard";"Hubble";"Hawking";1079.00;2950.00;250.00;"Terran Confederation";"M8 VI";"None"
-278;"David";"Ladyman";"Hawking";345.00;2844.00;258.00;"Terran Confederation";"K8 V";"None"
-279;"Manhavier";"Ladyman";"Hawking";521.00;2617.00;331.00;"Terran Confederation";"A7 V";"None"
-283;"Sommers";"Ladyman";"Hawking";432.00;2964.00;330.00;"Terran Confederation";"F7 V";"None"
-285;"Aquila";"Petrov";"Sol";1459.00;1876.00;448.00;"Terran Confederation";"B4 V";"None"
-286;"Bernard's Star / Barnard's Star";"Petrov";"Sol";1456.00;2365.00;300.00;"Terran Confederation";"M8 V";"None"
-290;"Grimstad";"Petrov";"Sol";1350.00;2006.00;415.00;"Terran Confederation";"O9 V";"None"
-293;"Lenin";"Petrov";"Sol";1234.00;1991.00;141.00;"Terran Confederation";"A2 V";"None"
-294;"Minsk";"Petrov";"Sol";1221.00;2169.00;86.00;"Terran Confederation";"M6 I";"None"
-295;"Morone";"Petrov";"Sol";1361.00;2255.00;299.00;"Terran Confederation";"K9 V";"None"
-297;"Procyon";"Petrov";"Sol";1677.00;2191.00;307.00;"Terran Confederation";"B9 V";"None"
-298;"Ross 154";"Petrov";"Sol";1519.00;2249.00;363.00;"Terran Confederation";"K4 V";"None"
-299;"Zeta Orionis";"Petrov";"Sol";1681.00;2319.00;229.00;"Terran Confederation";"G4 V";"None"
-300;"Alpha Centauri";"Terra";"Sol";1920.00;2292.00;301.00;"Terran Confederation";"M6 I";"None"
-301;"Arcturus";"Terra";"Sol";2008.00;2101.00;245.00;"Terran Confederation";"K6 III";"None"
-303;"Camelot";"Terra";"Sol";1860.00;1887.00;479.00;"Terran Confederation";"B4 V";"None"
-304;"Celeste";"Terra";"Sol";1995.00;1985.00;324.00;"Terran Confederation";"K6 IV";"None"
-306;"Mastif";"Terra";"Sol";2214.00;1964.00;125.00;"Terran Confederation";"F8 V";"None"
-307;"Mauer";"Terra";"Sol";2150.00;2092.00;435.00;"Terran Confederation";"O8 III";"None"
-309;"Proxima Centauri";"Terra";"Sol";1981.00;2254.00;331.00;"Terran Confederation";"F8 V";"None"
-310;"Ross 248";"Terra";"Sol";1814.00;2107.00;434.00;"Terran Confederation";"G6 V";"None"
-311;"Sirius";"Terra";"Sol";2080.00;2336.00;222.00;"Terran Confederation";"G2 V";"None"
-312;"Sol";"Terra";"Sol";1827.00;2341.00;90.00;"Terran Confederation";"M3 III";"None"
-315;"Weslyn";"Terra";"Sol";2285.00;2313.00;310.00;"Terran Confederation";"F2 III";"None"
-316;"Beacon";"Vearrier";"Sol";2305.00;2840.00;166.00;"Terran Confederation";"K3 III";"None"
-319;"Canarus";"Vearrier";"Sol";2160.00;2911.00;269.00;"Terran Confederation";"B8 V";"None"
-321;"Cygnus";"Vearrier";"Sol";2037.00;2517.00;239.00;"Terran Confederation";"M9 III";"None"
-322;"E-Erandi";"Vearrier";"Sol";1984.00;2824.00;404.00;"Terran Confederation";"K7 V";"None"
-324;"Ella";"Vearrier";"Sol";1929.00;2944.00;391.00;"Terran Confederation";"A3 V";"None"
-326;"Frase";"Vearrier";"Sol";2037.00;2678.00;454.00;"Terran Confederation";"G1 V";"None"
-331;"61 Cygni";"Roan";"Sol";1307.00;2963.00;458.00;"Terran Confederation";"K6 V";"None"
-332;"Agder";"Roan";"Sol";1602.00;2829.00;261.00;"Terran Confederation";"B9 V";"None"
-333;"Alpha Tauri";"Roan";"Sol";1392.00;2662.00;328.00;"Terran Confederation";"K7 V";"None"
-341;"Polaris";"Roan";"Sol";1686.00;2506.00;367.00;"Terran Confederation";"F7 IV";"None"
-343;"Ross 51G";"Roan";"Sol";1276.00;2481.00;223.00;"Terran Confederation";"A6 V";"None"
-344;"Tingvallir";"Roan";"Sol";1718.00;2681.00;358.00;"Terran Confederation";"G3 V";"None"
-345;"Todd";"Roan";"Sol";1296.00;2793.00;446.00;"Terran Confederation";"K4 V";"None"
-347;"Wolf 119";"Roan";"Sol";1230.00;2908.00;286.00;"Terran Confederation";"B1 V";"None"
-349;"Able";"Douglas";"Vega";2424.00;1881.00;329.00;"Terran Confederation";"B5 V";"None"
-351;"Chengdu / Cheng-Du";"Douglas";"Vega";2880.00;2243.00;245.00;"Terran Confederation";"F2 V";"None"
-352;"Eddings";"Douglas";"Vega";2537.00;2301.00;305.00;"Terran Confederation";"M0 III";"None"
-353;"Gateway";"Douglas";"Vega";2671.00;2219.00;385.00;"Terran Confederation";"G6 V";"None"
-354;"Hubble's Star";"Douglas";"Vega";2751.00;2166.00;533.00;"Terran Confederation";"B1 V";"None"
-360;"Plummer";"Douglas";"Vega";2552.00;2017.00;369.00;"Terran Confederation";"O5 III";"None"
-361;"Port Hedland";"Douglas";"Vega";2961.00;1938.00;419.00;"Terran Confederation";"M1 V";"None"
-362;"Proxima";"Douglas";"Vega";2457.00;2372.00;407.00;"Terran Confederation";"M7 V";"None"
-363;"Vega / Krat'na";"Douglas";"Vega";2873.00;2317.00;367.00;"Terran Confederation";"F9 V";"None"
-364;"Warsaw";"Douglas";"Vega";2817.00;2031.00;272.00;"Terran Confederation";"K7 V";"None"
-365;"Xanadu";"Douglas";"Vega";2522.00;2102.00;314.00;"Terran Confederation";"K7 V";"None"
-366;"Alcor";"Roberts";"Vega";3053.00;2308.00;218.00;"Terran Confederation";"M3 V";"None"
-370;"Brimstone";"Roberts";"Vega";3060.00;2229.00;249.00;"Terran Confederation";"F2 V";"None"
-371;"Cairo";"Roberts";"Vega";2245.00;2303.00;431.00;"Terran Confederation";"K4 II";"None"
-372;"Chang-Cu";"Roberts";"Vega";3107.00;2118.00;524.00;"Terran Confederation";"K6 V";"None"
-373;"Dakota";"Roberts";"Vega";3251.00;2063.00;223.00;"Union of Border Worlds";"K7 VI";"None"
-374;"Freya";"Roberts";"Vega";3498.00;2112.00;206.00;"Kilrathi Assembly of Clans";"B6 V";"None"
-376;"Hellespont";"Roberts";"Vega";3453.00;2206.00;494.00;"Union of Border Worlds";"K7 V";"None"
-377;"K'rissth";"Roberts";"Vega";3477.00;1984.00;108.00;"Kilrathi Assembly of Clans";"M1 II";"None"
-379;"Tartarus";"Roberts";"Vega";3420.00;1920.00;307.00;"Union of Border Worlds";"F7 III";"None"
-380;"Trimble";"Roberts";"Vega";3018.00;2363.00;133.00;"Terran Confederation";"K7 IV";"None"
-381;"Warhammer";"Roberts";"Vega";3487.00;2363.00;135.00;"Kilrathi Assembly of Clans";"M4 III";"None"
-382;"Elohim";"Downing";"Vega";3162.00;2978.00;396.00;"Union of Border Worlds";"M7 V";"None"
-383;"Gimle";"Downing";"Vega";3224.00;2627.00;265.00;"Terran Confederation";"K5 III";"None"
-384;"G'wrikath";"Downing";"Vega";3519.00;2624.00;427.00;"Kilrathi Assembly of Clans";"F7 V";"None"
-385;"Hawkins";"Downing";"Vega";3455.00;2928.00;179.00;"Kilrathi Assembly of Clans";"M0 IV";"None"
-386;"Hyperion";"Downing";"Vega";3518.00;2483.00;190.00;"Kilrathi Assembly of Clans";"F9 V";"None"
-387;"K'n'Meth";"Downing";"Vega";3517.00;2757.00;490.00;"Kilrathi Assembly of Clans";"B5 V";"None"
-388;"K'n'Rek";"Downing";"Vega";3432.00;2827.00;308.00;"Kilrathi Assembly of Clans";"O8 I";"None"
-389;"Kurasawa / Warach Tha";"Downing";"Vega";3357.00;2507.00;229.00;"Union of Border Worlds";"K4 V";"None"
-390;"Loki VI / Loki";"Downing";"Vega";3193.00;2751.00;254.00;"Union of Border Worlds";"K9 V";"None"
-392;"N'Dele";"Downing";"Vega";3512.00;2977.00;354.00;"Kilrathi Assembly of Clans";"O4 II";"None"
-393;"Nephele";"Downing";"Vega";3353.00;2657.00;306.00;"Union of Border Worlds";"F3 V";"None"
-394;"Nifelheim";"Downing";"Vega";3230.00;2911.00;41.00;"Union of Border Worlds";"M5 III";"None"
-395;"Rostov";"Downing";"Vega";3018.00;2640.00;171.00;"Terran Confederation";"M7 V";"None"
-396;"Segallion";"Downing";"Vega";3035.00;2881.00;423.00;"Union of Border Worlds";"M6 III";"None"
-397;"Tyr";"Downing";"Vega";3436.00;2523.00;298.00;"Union of Border Worlds";"F0 V";"None"
-398;"Venice / Kharak Tar";"Downing";"Vega";3280.00;2471.00;290.00;"Terran Confederation";"M7 V";"None"
-399;"Ymir";"Downing";"Vega";3287.00;2834.00;169.00;"Union of Border Worlds";"F8 III";"None"
-401;"Alliance";"Day";"Vega";2528.00;2756.00;235.00;"Terran Confederation";"F4 V";"None"
-402;"Ariel";"Day";"Vega";2802.00;2952.00;165.00;"Terran Confederation";"A9 III";"None"
-403;"Blackmane";"Day";"Vega";2664.00;2639.00;121.00;"Terran Confederation";"A1 V";"None"
-404;"Blytheheart";"Day";"Vega";2523.00;2848.00;343.00;"Terran Confederation";"B6 I";"None"
-405;"Caliban";"Day";"Vega";2890.00;2978.00;185.00;"Terran Confederation";"B8 III";"None"
-406;"Cambria";"Day";"Vega";2527.00;2590.00;465.00;"Terran Confederation";"M9 III";"None"
-408;"Delius";"Day";"Vega";2898.00;2835.00;147.00;"Terran Confederation";"F2 V";"None"
-410;"Enyo";"Day";"Vega";2702.00;2491.00;297.00;"Terran Confederation";"K1 III";"None"
-411;"Hell's Kitchen / Apocalyse";"Day";"Vega";2703.00;2574.00;505.00;"Terran Confederation";"B9 V";"None"
-412;"Krieger";"Day";"Vega";2437.00;2490.00;342.00;"Terran Confederation";"M5 V";"None"
-415;"McDaniel's World";"Day";"Vega";2406.00;2895.00;372.00;"Terran Confederation";"B7 V";"None"
-416;"Midpoint";"Day";"Vega";2592.00;2912.00;128.00;"Terran Confederation";"K7 I";"None"
-417;"Montrose";"Day";"Vega";2782.00;2756.00;357.00;"Terran Confederation";"G8 IV";"None"
-418;"Pephedro";"Day";"Vega";2897.00;2657.00;470.00;"Terran Confederation";"G5 V";"None"
-419;"Tali";"Day";"Vega";2603.00;2815.00;261.00;"Terran Confederation";"F8 V";"None"
-420;"Tamayo";"Day";"Vega";2495.00;2968.00;468.00;"Terran Confederation";"G4 III";"None"
-421;"Gmar / G'mar";"Kur'u-Pak";"Kilrah";3854.00;2333.00;335.00;"Kilrathi Assembly of Clans";"M4 V";"None"
-425;"Khark-Pa";"Kur'u-Pak";"Kilrah";4018.00;1932.00;359.00;"Kilrathi Assembly of Clans";"B7 V";"None"
-426;"K'hrissak";"Kur'u-Pak";"Kilrah";3843.00;1943.00;522.00;"Kilrathi Assembly of Clans";"K7 VI";"None"
-430;"K'n'Kir";"Kur'u-Pak";"Kilrah";3625.00;2076.00;421.00;"Kilrathi Assembly of Clans";"F8 V";"None"
-432;"K'ssak";"Kur'u-Pak";"Kilrah";3758.00;2019.00;228.00;"Kilrathi Assembly of Clans";"B1 V";"None"
-434;"K'Tkhur M'etrh'Kuru";"Kur'u-Pak";"Kilrah";3625.00;1874.00;180.00;"Kilrathi Assembly of Clans";"M2 V";"None"
-436;"T'Agg A'Bren";"Kur'u-Pak";"Kilrah";3842.00;2130.00;201.00;"Kilrathi Assembly of Clans";"B3 V";"None"
-437;"T'lan Meth";"Kur'u-Pak";"Kilrah";3699.00;2235.00;304.00;"Kilrathi Assembly of Clans";"G6 V";"None"
-439;"Kilrah";"Kur'u'khag";"Kilrah";4238.00;2308.00;435.00;"Kilrathi Assembly of Clans";"B4 V";"None"
-441;"Kur'u'khag (10)";"Kur'u'khag";"Kilrah";4422.00;2315.00;168.00;"Kilrathi Assembly of Clans";"F2 III";"None"
-443;"Kur'u'khag (3)";"Kur'u'khag";"Kilrah";4656.00;1853.00;443.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-444;"Kur'u'khag (4)";"Kur'u'khag";"Kilrah";4309.00;1949.00;221.00;"Kilrathi Assembly of Clans";"K9 III";"None"
-445;"Kur'u'khag (5)";"Kur'u'khag";"Kilrah";4541.00;1998.00;212.00;"Kilrathi Assembly of Clans";"M1 III";"None"
-447;"Kur'u'khag (7)";"Kur'u'khag";"Kilrah";4576.00;2247.00;261.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-448;"Kur'u'khag (8)";"Kur'u'khag";"Kilrah";4691.00;2224.00;335.00;"Kilrathi Assembly of Clans";"K8 V";"None"
-450;"Tr'Kpa";"Kur'u'khag";"Kilrah";4379.00;2238.00;391.00;"Kilrathi Assembly of Clans";"M6 V";"None"
-452;"Eyoka";"Kur'U'Tak";"Kilrah";4603.00;2824.00;353.00;"Kilrathi Assembly of Clans";"M2 V";"None"
-453;"Ja'targk";"Kur'U'Tak";"Kilrah";4567.00;2629.00;128.00;"Kilrathi Assembly of Clans";"K5 III";"None"
-455;"Ka";"Kur'U'Tak";"Kilrah";4352.00;2863.00;342.00;"Kilrathi Assembly of Clans";"M1 III";"None"
-457;"Kur'U'Tak (2)";"Kur'U'Tak";"Kilrah";4702.00;2492.00;342.00;"Kilrathi Assembly of Clans";"K5 V";"None"
-460;"Kur'U'Tak (5)";"Kur'U'Tak";"Kilrah";4406.00;2960.00;429.00;"Kilrathi Assembly of Clans";"A4 V";"None"
-461;"Kur'U'Tak (6)";"Kur'U'Tak";"Kilrah";4622.00;2963.00;247.00;"Kilrathi Assembly of Clans";"K6 V";"None"
-463;"Kur'U'Tak (8)";"Kur'U'Tak";"Kilrah";4357.00;2666.00;153.00;"Kilrathi Assembly of Clans";"B1 III";"None"
-465;"Som'mers";"Kur'U'Tak";"Kilrah";4537.00;2966.00;317.00;"Kilrathi Assembly of Clans";"K8 I";"None"
-467;"Dhollas";"Kur'u Caxki";"Kilrah";3777.00;2946.00;339.00;"Kilrathi Assembly of Clans";"G0 VI";"None"
-469;"Ghoran";"Kur'u Caxki";"Kilrah";3935.00;2546.00;229.00;"Kilrathi Assembly of Clans";"F4 IV";"None"
-470;"G'wriss / Kr'azna";"Kur'u Caxki";"Kilrah";3657.00;2575.00;207.00;"Kilrathi Assembly of Clans";"B5 V";"None"
-471;"Hhrass / H'hrass";"Kur'u Caxki";"Kilrah";3664.00;2490.00;286.00;"Kilrathi Assembly of Clans";"K9 II";"None"
-472;"Hhrass T'Ghor";"Kur'u Caxki";"Kilrah";3630.00;2822.00;181.00;"Kilrathi Assembly of Clans";"K4 III";"None"
-473;"H'rekkah";"Kur'u Caxki";"Kilrah";3612.00;2746.00;453.00;"Kilrathi Assembly of Clans";"M7 V";"None"
-474;"Kher-za";"Kur'u Caxki";"Kilrah";3920.00;2688.00;234.00;"Kilrathi Assembly of Clans";"K2 V";"None"
-475;"Khirg";"Kur'u Caxki";"Kilrah";4109.00;2750.00;190.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-480;"K'za-Ha'duhm";"Kur'u Caxki";"Kilrah";4004.00;2887.00;266.00;"Kilrathi Assembly of Clans";"O4 V";"None"
-481;"M'hriss";"Kur'u Caxki";"Kilrah";4031.00;2452.00;77.00;"Kilrathi Assembly of Clans";"K5 VI";"None"
-482;"M'shren";"Kur'u Caxki";"Kilrah";3918.00;2451.00;328.00;"Kilrathi Assembly of Clans";"A4 V";"None"
-483;"N'Ryllis";"Kur'u Caxki";"Kilrah";3907.00;2796.00;275.00;"Kilrathi Assembly of Clans";"K5 V";"None"
-485;"Tal'q";"Kur'u Caxki";"Kilrah";4099.00;2539.00;424.00;"Kilrathi Assembly of Clans";"F8 III";"None"
-486;"Tsahl";"Kur'u Caxki";"Kilrah";4104.00;2884.00;335.00;"Kilrathi Assembly of Clans";"G6 III";"None"
-490;"Hari 1 (1)";"Quadrant 1";"Hari";4821.00;2364.00;438.00;"Kilrathi Assembly of Clans";"A2 I";"None"
-491;"Hari 1 (2)";"Quadrant 1";"Hari";4949.00;2307.00;221.00;"Kilrathi Assembly of Clans";"A7 IV";"None"
-493;"Hari 1 (4)";"Quadrant 1";"Hari";5115.00;2291.00;91.00;"Kilrathi Assembly of Clans";"M0 V";"None"
-495;"Hari 1 (6)";"Quadrant 1";"Hari";5214.00;2363.00;277.00;"Kilrathi Assembly of Clans";"B8 I";"None"
-497;"Hari 2 (1)";"Quadrant 2";"Hari";5411.00;2031.00;329.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-499;"Hari";"Quadrant 3";"Hari";5873.00;2487.00;380.00;"Kilrathi Assembly of Clans";"K2 III";"None"
-500;"Hari 3 (1)";"Quadrant 3";"Hari";5447.00;2698.00;215.00;"Kilrathi Assembly of Clans";"M8 III";"None"
-502;"Hari 3 (3)";"Quadrant 3";"Hari";5657.00;2757.00;202.00;"Kilrathi Assembly of Clans";"A8 III";"None"
-505;"Hari 3 (6)";"Quadrant 3";"Hari";5869.00;2711.00;88.00;"Kilrathi Assembly of Clans";"M0 I";"None"
-507;"Hari 4 (1)";"Quadrant 4";"Hari";5252.00;2508.00;409.00;"Kilrathi Assembly of Clans";"G7 V";"None"
-509;"Hari 4 (3)";"Quadrant 4";"Hari";5001.00;2619.00;242.00;"Kilrathi Assembly of Clans";"B1 III";"None"
-511;"Hari 4 (5)";"Quadrant 4";"Hari";5006.00;2823.00;482.00;"Kilrathi Assembly of Clans";"M3 V";"None"
-513;"Hari 4 (7)";"Quadrant 4";"Hari";5225.00;2937.00;251.00;"Kilrathi Assembly of Clans";"K8 II";"None"
-515;"Hari 4 (9)";"Quadrant 4";"Hari";4806.00;2981.00;122.00;"Kilrathi Assembly of Clans";"K3 III";"None"
-518;"Prem";"Savage";"Argent";250.00;3512.00;155.00;"Terran Confederation";"F7 IV";"None"
-519;"Ray";"Savage";"Argent";412.00;3286.00;305.00;"Terran Confederation";"K1 I";"None"
-524;"Brookes";"Shelus";"Argent";1021.00;3442.00;346.00;"Terran Confederation";"F5 V";"None"
-525;"Coppock";"Shelus";"Argent";694.00;3594.00;169.00;"Terran Confederation";"O8 V";"None"
-527;"Destiny";"Shelus";"Argent";817.00;3167.00;544.00;"Terran Confederation";"K8 V";"None"
-528;"Gobeski";"Shelus";"Argent";787.00;3549.00;214.00;"Terran Confederation";"M8 III";"None"
-529;"Hardwicke";"Shelus";"Argent";718.00;3262.00;265.00;"Terran Confederation";"K4 IV";"None"
-530;"Kebie";"Shelus";"Argent";1030.00;3585.00;293.00;"Terran Confederation";"A8 V";"None"
-531;"Lesnick";"Shelus";"Argent";650.00;3364.00;173.00;"Terran Confederation";"K0 I";"None"
-540;"Alderson";"Hughes";"Argent";736.00;4085.00;194.00;"Terran Confederation";"G2 V";"None"
-542;"Argent";"Hughes";"Argent";845.00;3716.00;325.00;"Terran Confederation";"G7 V";"None"
-543;"Benford";"Hughes";"Argent";1010.00;4054.00;393.00;"Terran Confederation";"G9 III";"None"
-548;"Hidebeidel";"Hughes";"Argent";850.00;4079.00;297.00;"Terran Confederation";"M2 V";"None"
-556;"Tucanae";"Hughes";"Argent";742.00;3800.00;431.00;"Terran Confederation";"K3 V";"None"
-557;"Everett";"Rod";"Argent";476.00;3847.00;276.00;"Terran Confederation";"F6 III";"None"
-558;"Karpiak";"Rod";"Argent";181.00;4026.00;490.00;"Terran Confederation";"M7 V";"None"
-560;"New Hope";"Rod";"Argent";408.00;4106.00;565.00;"Terran Confederation";"K1 V";"None"
-564;"Venture";"Rod";"Argent";487.00;4183.00;268.00;"Terran Confederation";"G5 V";"None"
-566;"Brin";"Asimov";"Enigma";1544.00;3098.00;408.00;"Terran Confederation";"M0 V";"None"
-574;"Gibson";"Asimov";"Enigma";1435.00;3369.00;67.00;"Terran Confederation";"K1 III";"None"
-576;"Midian";"Asimov";"Enigma";1615.00;3175.00;259.00;"Terran Confederation";"A0 V";"None"
-577;"Piper";"Asimov";"Enigma";1401.00;3153.00;218.00;"Terran Confederation";"M1 V";"None"
-578;"Pohl";"Asimov";"Enigma";1226.00;3104.00;382.00;"Terran Confederation";"F0 V";"None"
-579;"Pournelle";"Asimov";"Enigma";1261.00;3186.00;256.00;"Terran Confederation";"M8 III";"None"
-581;"Salayna";"Asimov";"Enigma";1603.00;3427.00;340.00;"Terran Confederation";"G7 V";"None"
-582;"Sterling";"Asimov";"Enigma";1712.00;3576.00;324.00;"Terran Confederation";"K4 V";"None"
-583;"Vonnegut";"Asimov";"Enigma";1450.00;3505.00;226.00;"Terran Confederation";"M7 V";"None"
-585;"Axius / Axis";"Grills";"Enigma";2050.00;3322.00;223.00;"Terran Confederation";"K0 V";"None"
-587;"Callimachus / Callmachius";"Grills";"Enigma";1820.00;3339.00;240.00;"Terran Confederation";"O7 V";"None"
-591;"Heaven's Gate";"Grills";"Enigma";1873.00;3457.00;179.00;"Terran Confederation";"K8 I";"None"
-592;"Hilleman";"Grills";"Enigma";1930.00;3225.00;107.00;"Terran Confederation";"K7 V";"None"
-594;"Niffleheim";"Grills";"Enigma";2027.00;3420.00;495.00;"Terran Confederation";"M6 III";"None"
-595;"Novaya Kiev";"Grills";"Enigma";2170.00;3472.00;146.00;"Terran Confederation";"K6 I";"None"
-596;"Pembroke";"Grills";"Enigma";2222.00;3255.00;328.00;"Terran Confederation";"G6 V";"None"
-597;"Speradon / Speardon";"Grills";"Enigma";2265.00;3357.00;433.00;"Terran Confederation";"G5 V";"None"
-599;"Vespus";"Grills";"Enigma";2108.00;3155.00;380.00;"Terran Confederation";"K4 V";"None"
-600;"Bradbury";"Isaac";"Enigma";1949.00;4147.00;183.00;"Union of Border Worlds";"M6 VI";"None"
-601;"Enigma";"Isaac";"Enigma";1840.00;3922.00;425.00;"Terran Confederation";"M7 III";"None"
-602;"Ghorah Khar";"Isaac";"Enigma";2261.00;3832.00;451.00;"Kilrathi Assembly of Clans";"K6 V";"None"
-603;"Gwynedd";"Isaac";"Enigma";2091.00;3894.00;312.00;"Terran Confederation";"K6 V";"None"
-605;"K'arakh";"Isaac";"Enigma";2331.00;4012.00;287.00;"Kilrathi Assembly of Clans";"A1 VI";"None"
-606;"K'tithrak Mang / K'Tithrak Mang";"Isaac";"Enigma";2289.00;4112.00;343.00;"Kilrathi Assembly of Clans";"G2 V";"None"
-608;"Niven";"Isaac";"Enigma";1962.00;3724.00;144.00;"Terran Confederation";"A6 III";"None"
-609;"Racene";"Isaac";"Enigma";2305.00;3945.00;225.00;"Union of Border Worlds";"K3 V";"None"
-611;"Repleetah";"Isaac";"Enigma";2057.00;4193.00;332.00;"Union of Border Worlds";"K1 III";"None"
-617;"Zelanzny";"Isaac";"Enigma";2045.00;3947.00;465.00;"Terran Confederation";"A1 IV";"None"
-620;"Blake";"Roddenberry";"Enigma";1629.00;3826.00;62.00;"Terran Confederation";"O7 I";"None"
-621;"Drake";"Roddenberry";"Enigma";1333.00;4043.00;284.00;"Terran Confederation";"F8 V";"None"
-622;"Dyson";"Roddenberry";"Enigma";1414.00;3749.00;182.00;"Terran Confederation";"M4 I";"None"
-625;"Halderman";"Roddenberry";"Enigma";1233.00;3806.00;341.00;"Terran Confederation";"K3 V";"None"
-626;"Heinlein";"Roddenberry";"Enigma";1577.00;3915.00;313.00;"Terran Confederation";"O8 V";"None"
-629;"Lucas";"Roddenberry";"Enigma";1564.00;4079.00;278.00;"Terran Confederation";"F6 III";"None"
-630;"McCaffrey";"Roddenberry";"Enigma";1694.00;4193.00;287.00;"Union of Border Worlds";"K4 V";"None"
-633;"Steakly";"Roddenberry";"Enigma";1385.00;4127.00;372.00;"Terran Confederation";"F7 III";"None"
-635;"Wetland";"Roddenberry";"Enigma";1699.00;4108.00;376.00;"Union of Border Worlds";"B3 I";"None"
-636;"Ayers";"Deneb";"Epsilon";2877.00;3569.00;211.00;"Union of Border Worlds";"F8 V";"None"
-637;"Canewdon";"Deneb";"Epsilon";2770.00;3352.00;37.00;"Union of Border Worlds";"K6 V";"None"
-638;"Chanel";"Deneb";"Epsilon";2456.00;3451.00;242.00;"Union of Border Worlds";"K4 V";"None"
-639;"Deneb";"Deneb";"Epsilon";2740.00;3150.00;473.00;"Union of Border Worlds";"M7 V";"None"
-640;"Epsilon Prime / Epsilon Prima";"Deneb";"Epsilon";2564.00;3547.00;254.00;"Union of Border Worlds";"G6 V";"None"
-641;"Goddard";"Deneb";"Epsilon";2587.00;3247.00;240.00;"Terran Confederation";"F9 IV";"None"
-645;"Morpheus";"Deneb";"Epsilon";2470.00;3263.00;106.00;"Terran Confederation";"B1 III";"None"
-646;"Orestes";"Deneb";"Epsilon";2834.00;3422.00;323.00;"Union of Border Worlds";"K7 III";"None"
-647;"Orsini / Orsine";"Deneb";"Epsilon";2497.00;3137.00;204.00;"Terran Confederation";"K5 V";"None"
-648;"Peleus";"Deneb";"Epsilon";2540.00;3379.00;427.00;"Union of Border Worlds";"A3 V";"None"
-651;"Ross 34F";"Deneb";"Epsilon";2729.00;3546.00;234.00;"Union of Border Worlds";"K7 III";"None"
-652;"Tangier";"Deneb";"Epsilon";2548.00;3195.00;384.00;"Terran Confederation";"M0 III";"None"
-653;"Torgo / Ko'Bar Yagar";"Deneb";"Epsilon";2792.00;3215.00;326.00;"Union of Border Worlds";"M6 V";"None"
-656;"Cephid 17";"Sa'Kahn";"Epsilon";3462.00;3536.00;370.00;"Kilrathi Assembly of Clans";"B8 V";"None"
-659;"Masa";"Sa'Kahn";"Epsilon";3352.00;3117.00;164.00;"Union of Border Worlds";"G6 V";"None"
-660;"Pasqual";"Sa'Kahn";"Epsilon";3188.00;3420.00;352.00;"Kilrathi Assembly of Clans";"M6 V";"None"
-661;"Qual'lat";"Sa'Kahn";"Epsilon";3525.00;3204.00;234.00;"Kilrathi Assembly of Clans";"F4 V";"None"
-664;"T'kon";"Sa'Kahn";"Epsilon";3331.00;3351.00;375.00;"Kilrathi Assembly of Clans";"A4 IV";"None"
-667;"T'Rel Meh";"Sa'Kahn";"Epsilon";3050.00;3481.00;219.00;"Kilrathi Assembly of Clans";"F4 V";"None"
-668;"Ulsima";"Sa'Kahn";"Epsilon";3259.00;3144.00;262.00;"Union of Border Worlds";"F2 V";"None"
-669;"Valgard";"Sa'Kahn";"Epsilon";3232.00;3566.00;186.00;"Kilrathi Assembly of Clans";"B8 III";"None"
-670;"Verula";"Sa'Kahn";"Epsilon";3105.00;3083.00;540.00;"Union of Border Worlds";"F5 V";"None"
-674;"Bifrost";"Tr'L Rass";"Epsilon";3434.00;3889.00;305.00;"Kilrathi Assembly of Clans";"F9 VI";"None"
-677;"Jakal";"Tr'L Rass";"Epsilon";3464.00;4129.00;292.00;"Kilrathi Assembly of Clans";"M5 VI";"None"
-678;"Jakarta";"Tr'L Rass";"Epsilon";3400.00;3996.00;300.00;"Kilrathi Assembly of Clans";"F7 III";"None"
-679;"Jotunheim";"Tr'L Rass";"Epsilon";3259.00;3840.00;213.00;"Kilrathi Assembly of Clans";"M5 II";"None"
-680;"Kabla Meth";"Tr'L Rass";"Epsilon";3040.00;3741.00;381.00;"Kilrathi Assembly of Clans";"K6 V";"None"
-684;"Tr'L Rass (2)";"Tr'L Rass";"Epsilon";3515.00;3713.00;171.00;"Kilrathi Assembly of Clans";"F8 V";"None"
-686;"Antares";"Antares";"Epsilon";2620.00;3893.00;149.00;"Union of Border Worlds";"K8 V";"None"
-687;"Bistangio / Bistango";"Antares";"Epsilon";2436.00;3835.00;519.00;"Union of Border Worlds";"F4 V";"None"
-688;"Charon";"Antares";"Epsilon";2858.00;3688.00;287.00;"Kilrathi Assembly of Clans";"B7 V";"None"
-689;"Circe";"Antares";"Epsilon";2420.00;3669.00;396.00;"Union of Border Worlds";"K4 V";"None"
-690;"Corsair";"Antares";"Epsilon";2897.00;3884.00;409.00;"Kilrathi Assembly of Clans";"M5 V";"None"
-691;"D'vd tang";"Antares";"Epsilon";2820.00;4051.00;399.00;"Kilrathi Assembly of Clans";"K1 V";"None"
-692;"Firekka";"Antares";"Epsilon";2708.00;3892.00;203.00;"Firekkan Planetary Alliance";"G4 III";"None"
-693;"Granita";"Antares";"Epsilon";2556.00;3705.00;389.00;"Union of Border Worlds";"G8 V";"None"
-695;"Khar-Sa";"Antares";"Epsilon";2634.00;4137.00;391.00;"Kilrathi Assembly of Clans";"G2 III";"None"
-696;"K'k Than";"Antares";"Epsilon";2611.00;4043.00;204.00;"Kilrathi Assembly of Clans";"F2 III";"None"
-697;"K'ta Mek";"Antares";"Epsilon";2692.00;3754.00;183.00;"Kilrathi Assembly of Clans";"B4 V";"None"
-699;"Natanya / N'Tanya";"Antares";"Epsilon";2649.00;3973.00;256.00;"Kilrathi Assembly of Clans";"A7 V";"None"
-700;"Shariha";"Antares";"Epsilon";2423.00;4023.00;278.00;"Kilrathi Assembly of Clans";"A0 III";"None"
-701;"Sharm";"Antares";"Epsilon";2451.00;3768.00;274.00;"Kilrathi Assembly of Clans";"M2 V";"None"
-703;"Tau Ceti";"Antares";"Epsilon";2746.00;3703.00;440.00;"Terran Confederation";"K6 V";"None"
-705;"Trafalgar";"Antares";"Epsilon";2428.00;3941.00;294.00;"Union of Border Worlds";"B6 III";"None"
-706;"Tv'x Aq";"Antares";"Epsilon";2432.00;4190.00;253.00;"Kilrathi Assembly of Clans";"G7 V";"None"
-707;"Veratek";"Antares";"Epsilon";2577.00;3789.00;196.00;"Terran Confederation";"B4 V";"None"
-708;"Veronica";"Antares";"Epsilon";2546.00;3840.00;301.00;"Union of Border Worlds";"A8 V";"None"
-710;"Gorth";"Tr'K H'hra ?";"M'Shrak";3714.00;3347.00;261.00;"Kilrathi Assembly of Clans";"A4 I";"None"
-711;"Hhallas";"Tr'K H'hra ?";"M'Shrak";4065.00;3082.00;276.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-713;"Tr'K H'hra (2)";"Tr'K H'hra ?";"M'Shrak";3865.00;3113.00;279.00;"Kilrathi Assembly of Clans";"G3 III";"None"
-725;"Kur'u Som'Mers (5)";"Kur'u Som'Mers";"M'Shrak";4515.00;3434.00;297.00;"Kilrathi Assembly of Clans";"M9 II";"None"
-726;"Kur'u Som'Mers (6)";"Kur'u Som'Mers";"M'Shrak";4681.00;3401.00;303.00;"Kilrathi Assembly of Clans";"B2 V";"None"
-728;"Shata";"Kur'u Som'Mers";"M'Shrak";4359.00;3486.00;275.00;"Kilrathi Assembly of Clans";"G5 V";"None"
-729;"Sorn";"Kur'u Som'Mers";"M'Shrak";4238.00;3497.00;373.00;"Kilrathi Assembly of Clans";"K8 I";"None"
-730;"K'sath'que (1)";"K'sath'que";"M'Shrak";4249.00;3700.00;171.00;"Kilrathi Assembly of Clans";"F2 III";"None"
-731;"K'sath'que (10)";"K'sath'que";"M'Shrak";4688.00;4046.00;414.00;"Kilrathi Assembly of Clans";"F9 I";"None"
-732;"K'sath'que (11)";"K'sath'que";"M'Shrak";4267.00;4162.00;297.00;"Kilrathi Assembly of Clans";"G2 V";"None"
-733;"K'sath'que (12)";"K'sath'que";"M'Shrak";4417.00;4148.00;175.00;"Kilrathi Assembly of Clans";"K8 V";"None"
-736;"K'sath'que (3)";"K'sath'que";"M'Shrak";4534.00;3674.00;246.00;"Kilrathi Assembly of Clans";"B7 II";"None"
-737;"K'sath'que (4)";"K'sath'que";"M'Shrak";4605.00;3772.00;147.00;"Kilrathi Assembly of Clans";"F7 V";"None"
-739;"K'sath'que (6)";"K'sath'que";"M'Shrak";4420.00;3852.00;276.00;"Kilrathi Assembly of Clans";"G6 III";"None"
-743;"Utara";"K'sath'que";"M'Shrak";4263.00;3892.00;339.00;"Kilrathi Assembly of Clans";"K4 VI";"None"
-746;"Dath'que (11)";"Dath'que";"M'Shrak";3896.00;4160.00;217.00;"Kilrathi Assembly of Clans";"O5 V";"None"
-747;"Dath'que (12)";"Dath'que";"M'Shrak";4035.00;4162.00;309.00;"Kilrathi Assembly of Clans";"K8 III";"None"
-748;"Dath'que (2)";"Dath'que";"M'Shrak";3965.00;3725.00;506.00;"Kilrathi Assembly of Clans";"K6 VI";"None"
-750;"Dath'que (4)";"Dath'que";"M'Shrak";3609.00;3780.00;244.00;"Kilrathi Assembly of Clans";"O8 V";"None"
-756;"Evian";"Dath'que";"M'Shrak";3801.00;4016.00;333.00;"Kilrathi Assembly of Clans";"A1 V";"None"
-757;"M'shrak";"Dath'que";"M'Shrak";4087.00;3740.00;292.00;"Kilrathi Assembly of Clans";"M3 IV";"None"
-758;"Paghk";"Dath'que";"M'Shrak";3692.00;3676.00;250.00;"Kilrathi Assembly of Clans";"G8 VI";"None"
-759;"Terragon";"Dath'que";"M'Shrak";3655.00;4016.00;495.00;"Kilrathi Assembly of Clans";"F1 V";"None"
-760;"Buford's World";"Quadrant 1";"Landreich";1697.00;4690.00;351.00;"Free Republic of the Landreich";"G1 III";"None"
-761;"Gainer's World";"Quadrant 1";"Landreich";1513.00;4293.00;231.00;"Terran Confederation";"F8 I";"None"
-764;"Greenhouse";"Quadrant 1";"Landreich";1434.00;4762.00;160.00;"Free Republic of the Landreich";"M5 VI";"None"
-765;"Ilios";"Quadrant 1";"Landreich";1603.00;4795.00;371.00;"Free Republic of the Landreich";"A1 V";"None"
-767;"Landreich 1 (1)";"Quadrant 1";"Landreich";1744.00;4611.00;70.00;"Kilrathi Assembly of Clans";"A0 III";"None"
-768;"Landreich 1 (2)";"Quadrant 1";"Landreich";1337.00;4616.00;381.00;"Free Republic of the Landreich";"A6 III";"None"
-769;"New Plains";"Quadrant 1";"Landreich";1310.00;4300.00;217.00;"Union of Border Worlds";"G1 I";"None"
-773;"Oecumene";"Quadrant 1";"Landreich";1600.00;4544.00;267.00;"Free Republic of the Landreich";"G5 VI";"None"
-774;"Orleans";"Quadrant 1";"Landreich";1443.00;4500.00;180.00;"Free Republic of the Landreich";"F5 V";"None"
-775;"Vaku";"Quadrant 1";"Landreich";1710.00;4413.00;153.00;"Kilrathi Assembly of Clans";"K9 V";"None"
-777;"Dharkyll";"Halgkrak";"Landreich";2051.00;4758.00;311.00;"Kilrathi Assembly of Clans";"M1 V";"None"
-778;"Dioscuri";"Halgkrak";"Landreich";1808.00;4488.00;490.00;"Kilrathi Assembly of Clans";"M9 II";"None"
-780;"Fawcett's World";"Halgkrak";"Landreich";1881.00;4499.00;223.00;"Kilrathi Assembly of Clans";"F1 V";"None"
-781;"Halgkrak (1)";"Halgkrak";"Landreich";2098.00;4609.00;449.00;"Kilrathi Assembly of Clans";"F7 VI";"None"
-782;"Halgkrak (10)";"Halgkrak";"Landreich";2318.00;4797.00;289.00;"Kilrathi Assembly of Clans";"K3 V";"None"
-785;"Halgkrak (3)";"Halgkrak";"Landreich";2125.00;4358.00;314.00;"Kilrathi Assembly of Clans";"K8 VI";"None"
-788;"Halgkrak (6)";"Halgkrak";"Landreich";2274.00;4555.00;136.00;"Kilrathi Assembly of Clans";"G4 V";"None"
-789;"Halgkrak (7)";"Halgkrak";"Landreich";2296.00;4679.00;229.00;"Kilrathi Assembly of Clans";"B3 V";"None"
-792;"Hallin";"Halgkrak";"Landreich";1833.00;4594.00;313.00;"Kilrathi Assembly of Clans";"G7 V";"None"
-794;"Pisoes";"Halgkrak";"Landreich";1824.00;4384.00;274.00;"Kilrathi Assembly of Clans";"F5 I";"None"
-795;"Preesg";"Halgkrak";"Landreich";1841.00;4804.00;247.00;"Kilrathi Assembly of Clans";"O9 II";"None"
-796;"Vordran";"Halgkrak";"Landreich";1908.00;4696.00;212.00;"Kilrathi Assembly of Clans";"F2 VI";"None"
-798;"Black Hole system 299";"Quadrant 3";"Landreich";1902.00;4989.00;254.00;"Kilrathi Assembly of Clans";"A6 IV";"None"
-799;"Jigada";"Quadrant 3";"Landreich";2092.00;4940.00;423.00;"Kilrathi Assembly of Clans";"K4 V";"None"
-800;"Landreich 3 (1)";"Quadrant 3";"Landreich";2223.00;4881.00;295.00;"Kilrathi Assembly of Clans";"B2 V";"None"
-806;"Seti Beta";"Quadrant 3";"Landreich";1874.00;4895.00;378.00;"Kilrathi Assembly of Clans";"G4 III";"None"
-807;"Balthazar";"Quadrant 4";"Landreich";1650.00;4956.00;317.00;"Free Republic of the Landreich";"K9 II";"None"
-810;"Siva";"Quadrant 4";"Landreich";1720.00;4886.00;274.00;"Free Republic of the Landreich";"M2 V";"None"
+;SystemName;QuadrantName;SectorName;XCoordinates;YCoordinates;ZCoordinates;Influence;StarColorType;NebulaColor
+1;Carloss;Williams;Avalon;174;956;425;Terran Confederation;M3 IV;None
+2;El Dorado;Williams;Avalon;525;837;330;Terran Confederation;K1 V;None
+3;Giunta;Williams;Avalon;364;770;382;Terran Confederation;F7 IV;None
+4;Grajeda;Williams;Avalon;160;768;373;Terran Confederation;M8 V;None
+5;Hermann;Williams;Avalon;358;905;180;Terran Confederation;K6 V;None
+6;Kier;Williams;Avalon;288;1044;167;Terran Confederation;K5 III;None
+7;Leon;Williams;Avalon;412;1076;332;Terran Confederation;G0 III;None
+8;McCall;Williams;Avalon;513;1133;258;Terran Confederation;F5 V;None
+9;Mira;Williams;Avalon;90;1028;316;Terran Confederation;A4 V;None
+10;Paylode;Williams;Avalon;508;1011;199;Terran Confederation;F4 V;None
+11;TCSC1569;Williams;Avalon;160;1142;491;Unexplored System;M5 I;None
+12;TCSC3102;Williams;Avalon;405;655;326;Unexplored System;G3 V;None
+13;?;Challenger;Avalon;921;784;159;Unexplored System;M1 V;None
+14;Avalon;Challenger;Avalon;662;1082;301;Terran Confederation;O8 V;None
+15;Babel;Challenger;Avalon;967;1011;353;Terran Confederation;M2 III;None
+16;Baroda;Challenger;Avalon;904;926;409;Terran Confederation;M8 V;None
+17;Britannia;Challenger;Avalon;840;1106;398;Terran Confederation;G8 III;None
+18;Cibola;Challenger;Avalon;909;686;207;Terran Confederation;G8 I;None
+19;Dallas;Challenger;Avalon;1105;639;174;Terran Confederation;M8 V;None
+20;Dis;Challenger;Avalon;811;776;148;Terran Confederation;A3 V;None
+21;Elena;Challenger;Avalon;958;1113;182;Terran Confederation;F9 V;None
+22;Gomorrah;Challenger;Avalon;1120;736;352;Terran Confederation;M6 V;None
+23;Haven;Challenger;Avalon;1125;906;196;Terran Confederation;O9 V;None
+24;Jericho;Challenger;Avalon;1050;1156;270;Terran Confederation;A3 III;None
+25;New Atlantis;Challenger;Avalon;857;1000;353;Terran Confederation;G7 V;None
+26;Panama;Challenger;Avalon;724;964;268;Terran Confederation;A1 II;None
+27;Sheol;Challenger;Avalon;819;882;342;Terran Confederation;A6 VI;None
+28;Sodom;Challenger;Avalon;1026;796;254;Terran Confederation;F2 III;None
+29;Tanis;Challenger;Avalon;944;850;209;Terran Confederation;K8 III;None
+30;Ubar;Challenger;Avalon;684;854;340;Terran Confederation;K5 II;None
+31;Xualla;Challenger;Avalon;672;722;221;Terran Confederation;F5 V;None
+32;Agea;Foshko;Avalon;1125;1265;359;Terran Confederation;M7 III;None
+33;Alexandria;Foshko;Avalon;975;1379;426;Terran Confederation;M5 V;None
+34;Aphrodite;Foshko;Avalon;934;1711;327;Terran Confederation;G0 V;None
+35;Aries;Foshko;Avalon;738;1607;250;Terran Confederation;A5 IV;None
+36;Athena;Foshko;Avalon;835;1787;266;Terran Confederation;M6 III;None
+37;Callisto;Foshko;Avalon;1062;1325;93;Terran Confederation;G2 V;None
+38;Deimos;Foshko;Avalon;653;1487;291;Terran Confederation;K5 III;None
+39;Forge;Foshko;Avalon;648;1404;190;Terran Confederation;A6 II;None
+40;Hades;Foshko;Avalon;696;1757;226;Terran Confederation;K3 V;None
+41;Hephestus;Foshko;Avalon;823;1364;333;Terran Confederation;B2 III;None
+42;Perseus;Foshko;Avalon;628;1293;97;Terran Confederation;F8 V;None
+43;Phobos;Foshko;Avalon;847;1617;332;Terran Confederation;B5 V;None
+44;Poseidon;Foshko;Avalon;1063;1667;456;Terran Confederation;A0 V;None
+45;Pugh;Foshko;Avalon;623;1654;346;Terran Confederation;F4 V;None
+46;Roma;Foshko;Avalon;1135;1475;358;Terran Confederation;G9 V;None
+47;Tethys;Foshko;Avalon;1146;1717;441;Terran Confederation;G7 I;None
+48;Pietzsch;Bing;Avalon;460;1526;492;Terran Confederation;A4 III;None
+49;Russ;Bing;Avalon;468;1724;436;Terran Confederation;K2 V;None
+50;TCSC2025;Bing;Avalon;334;1411;304;Unexplored System;F7 III;None
+51;TCST2195;Bing;Avalon;329;1725;454;Unexplored System;K8 V;None
+52;Theta'C Orionis;Bing;Avalon;340;1528;478;Terran Confederation;K4 V;None
+53;17-AR;Farris;Gemini;1249;802;395;Terran Confederation;M2 V;None
+54;Beta;Farris;Gemini;1624;642;159;Terran Confederation;M1 V;None
+55;Capella;Farris;Gemini;1485;839;261;Terran Confederation;A7 V;None
+56;Castor;Farris;Gemini;1593;1140;338;Terran Confederation;F6 V;None
+57;Crab-12;Farris;Gemini;1419;783;225;Terran Confederation;A7 V;None
+58;Death;Farris;Gemini;1453;955;426;Terran Confederation;M6 IV;None
+59;Delta;Farris;Gemini;1496;680;278;Terran Confederation;K1 III;None
+60;Delta Prime;Farris;Gemini;1296;650;261;Terran Confederation;M3 III;None
+61;Eden;Farris;Gemini;1669;956;439;Terran Confederation;K1 V;None
+62;Famine;Farris;Gemini;1406;903;193;Terran Confederation;O9 V;None
+63;Gamma;Farris;Gemini;1411;633;413;Terran Confederation;K5 III;None
+64;J900;Farris;Gemini;1227;1117;221;Terran Confederation;G6 V;None
+65;KM-252;Farris;Gemini;1732;1144;398;Terran Confederation;F4 V;None
+66;New Caledonia;Farris;Gemini;1351;720;287;Terran Confederation;A8 V;None
+67;Nexus;Farris;Gemini;1731;1143;374;Terran Confederation;B5 V;None
+68;Palan;Farris;Gemini;1711;843;256;Terran Confederation;K5 V;None
+69;Pestilence;Farris;Gemini;1575;1038;460;Terran Confederation;K6 V;None
+70;Regallis;Farris;Gemini;1298;1026;244;Terran Confederation;O7 V;None
+71;Rygannon;Farris;Gemini;1558;731;362;Terran Confederation;G2 V;None
+72;Sherwood;Farris;Gemini;1313;873;372;Terran Confederation;A1 V;None
+73;Telar;Farris;Gemini;1220;925;347;Terran Confederation;G3 V;None
+74;Valhalla;Farris;Gemini;1445;1054;284;Terran Confederation;G5 V;None
+75;War;Farris;Gemini;1494;1146;122;Terran Confederation;A2 V;None
+76;Xytani;Farris;Gemini;1663;760;320;Terran Confederation;A8 III;None
+77;Blockade Pint Alpha;Clarke;Gemini;1969;716;143;Terran Confederation;B2 V;None
+78;Blockade Point Charlie;Clarke;Gemini;2176;967;297;Terran Confederation;M6 III;None
+79;Blockade Point Tango;Clarke;Gemini;2241;892;338;Terran Confederation;A3 VI;None
+80;CMF-A;Clarke;Gemini;1975;846;295;Terran Confederation;M6 V;None
+81;Hyades;Clarke;Gemini;2205;755;247;Terran Confederation;A9 VI;None
+82;Lisacc;Clarke;Gemini;2313;1092;358;Terran Confederation;B4 V;None
+83;Mah'Rahn;Clarke;Gemini;2323;782;345;Terran Confederation;G8 V;None
+84;Midguard;Clarke;Gemini;1933;1091;271;Terran Confederation;K2 V;None
+85;Nitir;Clarke;Gemini;2066;864;112;Terran Confederation;M1 V;None
+86;Perry;Clarke;Gemini;2042;1022;427;Terran Confederation;K3 V;None
+87;Ragnarok;Clarke;Gemini;1860;832;346;Terran Confederation;F5 V;None
+88;Rikel;Clarke;Gemini;1836;1149;270;Terran Confederation;K2 III;None
+89;Sumn-Kp'ta;Clarke;Gemini;2309;699;420;Terran Confederation;M1 V;None
+90;Surtur;Clarke;Gemini;2137;1102;275;Terran Confederation;M2 V;None
+91;Tingerhoff;Clarke;Gemini;1858;968;520;Terran Confederation;M4 V;None
+92;Tr'Pakh;Clarke;Gemini;2241;639;205;Terran Confederation;O8 I;None
+93;41-GS;Potter;Gemini;2326;1321;260;Terran Confederation;K8 III;None
+94;44-P-1M;Potter;Gemini;2134;1266;359;Terran Confederation;G4 V;None
+95;Aldebran;Potter;Gemini;1833;1774;468;Terran Confederation;F8 V;None
+96;Auriga;Potter;Gemini;2210;1573;339;Terran Confederation;K4 V;None
+97;DN-N1912;Potter;Gemini;2322;1626;242;Terran Confederation;O5 V;None
+98;Hind's Variable N.;Potter;Gemini;2012;1695;286;Terran Confederation;K0 V;None
+99;Manchester;Potter;Gemini;1891;1623;394;Terran Confederation;K4 VI;None
+100;Metsor;Potter;Gemini;2083;1615;367;Terran Confederation;O4 II;None
+101;ND-57;Potter;Gemini;2190;1363;477;Terran Confederation;M2 V;None
+102;New Constantinople;Potter;Gemini;1900;1284;138;Terran Confederation;M2 V;None
+103;New Detroit;Potter;Gemini;2114;1460;315;Terran Confederation;G8 III;None
+104;Newcastle;Potter;Gemini;1848;1444;386;Terran Confederation;G1 V;None
+105;Oxford;Potter;Gemini;2253;1776;265;Terran Confederation;G6 I;None
+106;Raxis;Potter;Gemini;2267;1446;348;Terran Confederation;F3 IV;None
+107;Saxtogue;Potter;Gemini;2280;1530;179;Terran Confederation;F9 III;None
+108;Shangri La / Shangrila;Potter;Gemini;2337;1722;267;Terran Confederation;G4 V;None
+109;XXN-1927;Potter;Gemini;2149;1779;406;Terran Confederation;K0 III;None
+110;119CE;Humboldt;Gemini;1683;1646;300;Terran Confederation;B1 IV;None
+111;CM-N1054;Humboldt;Gemini;1278;1705;524;Terran Confederation;K7 V;None
+112;Fryja;Humboldt;Gemini;1240;1377;191;Terran Confederation;M5 I;None
+113;Gemini;Humboldt;Gemini;1618;1319;329;Terran Confederation;M4 V;None
+114;Junction;Humboldt;Gemini;1452;1675;420;Terran Confederation;M3 III;None
+115;Padre;Humboldt;Gemini;1713;1503;466;Terran Confederation;K5 III;None
+116;Pender's Star;Humboldt;Gemini;1387;1623;75;Terran Confederation;K8 V;None
+117;Pentonville;Humboldt;Gemini;1579;1782;240;Terran Confederation;F3 V;None
+118;Pollux;Humboldt;Gemini;1456;1264;250;Terran Confederation;A7 V;None
+119;Prasepe / Prospect;Humboldt;Gemini;1360;1308;263;Terran Confederation;M3 V;None
+120;Pyrenees;Humboldt;Gemini;1267;1514;224;Terran Confederation;K8 II;None
+121;Troy;Humboldt;Gemini;1455;1417;292;Terran Confederation;A6 II;None
+122;Varnus;Humboldt;Gemini;1681;1380;343;Terran Confederation;M4 V;None
+123;Karing;S'kh'haral;Trk'Pahn;2869;908;141;Kilrathi Assembly of Clans;G9 V;None
+124;K'n'Pakh;S'kh'haral;Trk'Pahn;2501;650;115;Kilrathi Assembly of Clans;M3 III;None
+125;S'kha Rissth;S'kh'haral;Trk'Pahn;2702;1043;427;Kilrathi Assembly of Clans;M5 V;None
+126;S'kh'haral (1);S'kh'haral;Trk'Pahn;2760;652;303;Kilrathi Assembly of Clans;K8 VI;None
+127;S'kh'haral (2);S'kh'haral;Trk'Pahn;2854;719;91;Kilrathi Assembly of Clans;F2 IV;None
+128;S'kh'haral (3);S'kh'haral;Trk'Pahn;2898;1028;142;Kilrathi Assembly of Clans;F3 V;None
+129;Sum'n L'kor;S'kh'haral;Trk'Pahn;2442;1036;387;Kilrathi Assembly of Clans;K1 I;None
+130;Sum'n Shriss;S'kh'haral;Trk'Pahn;2644;819;258;Kilrathi Assembly of Clans;G5 III;None
+131;Sum'nH'hra;S'kh'haral;Trk'Pahn;2580;722;326;Kilrathi Assembly of Clans;F5 V;None
+132;Sum'Tlor;S'kh'haral;Trk'Pahn;2549;802;125;Kilrathi Assembly of Clans;F5 V;None
+133;T'K Tarak;S'kh'haral;Trk'Pahn;2503;1163;237;Kilrathi Assembly of Clans;B2 I;None
+134;T'K Urel;S'kh'haral;Trk'Pahn;2763;1162;92;Kilrathi Assembly of Clans;K5 V;None
+135;Zarnobian;S'kh'haral;Trk'Pahn;2922;1165;408;Kilrathi Assembly of Clans;K9 III;None
+136;Bordrav;Tr'l H'mass;Trk'Pahn;3278;1166;361;Kilrathi Assembly of Clans;G1 VI;None
+137;Omega;Tr'l H'mass;Trk'Pahn;3199;1115;264;Kilrathi Assembly of Clans;F4 V;None
+138;Tr'l H'mass (1);Tr'l H'mass;Trk'Pahn;3000;782;246;Kilrathi Assembly of Clans;O6 III;None
+139;Tr'l H'mass (10);Tr'l H'mass;Trk'Pahn;3491;1014;258;Kilrathi Assembly of Clans;K1 III;None
+140;Tr'l H'mass (11);Tr'l H'mass;Trk'Pahn;3472;1172;430;Kilrathi Assembly of Clans;K2 II;None
+141;Tr'l H'mass (2);Tr'l H'mass;Trk'Pahn;3127;721;298;Kilrathi Assembly of Clans;M2 IV;None
+142;Tr'l H'mass (3);Tr'l H'mass;Trk'Pahn;3232;746;504;Kilrathi Assembly of Clans;F4 V;None
+143;Tr'l H'mass (4);Tr'l H'mass;Trk'Pahn;3364;752;160;Kilrathi Assembly of Clans;G1 V;None
+144;Tr'l H'mass (5);Tr'l H'mass;Trk'Pahn;3486;681;403;Kilrathi Assembly of Clans;F2 III;None
+145;Tr'l H'mass (6);Tr'l H'mass;Trk'Pahn;3071;915;322;Kilrathi Assembly of Clans;K9 V;None
+146;Tr'l H'mass (7);Tr'l H'mass;Trk'Pahn;3257;914;284;Kilrathi Assembly of Clans;F5 III;None
+147;Tr'l H'mass (8);Tr'l H'mass;Trk'Pahn;3382;897;355;Kilrathi Assembly of Clans;M2 V;None
+148;Tr'l H'mass (9);Tr'l H'mass;Trk'Pahn;3002;1034;388;Kilrathi Assembly of Clans;K1 I;None
+149;Varni;Tr'l H'mass;Trk'Pahn;3090;1115;104;Kilrathi Assembly of Clans;F6 V;None
+150;B'osc'Au;H'hriss;Trk'Pahn;3280;1565;279;Kilrathi Assembly of Clans;K4 V;None
+151;Bukrag;H'hriss;Trk'Pahn;3289;1697;404;Kilrathi Assembly of Clans;K8 I;None
+152;Gorath;H'hriss;Trk'Pahn;3159;1487;293;Kilrathi Assembly of Clans;M5 V;None
+153;H'hri Som;H'hriss;Trk'Pahn;3511;1751;137;Kilrathi Assembly of Clans;B5 V;None
+154;K'cha Tsek;H'hriss;Trk'Pahn;3325;1732;499;Kilrathi Assembly of Clans;B1 II;None
+155;K'Mh'han;H'hriss;Trk'Pahn;3227;1774;248;Kilrathi Assembly of Clans;G3 I;None
+156;K'M'tlee;H'hriss;Trk'Pahn;3182;1654;207;Kilrathi Assembly of Clans;K3 V;None
+157;Oargth;H'hriss;Trk'Pahn;3461;1344;87;Kilrathi Assembly of Clans;M3 V;None
+158;Sakah Trk';H'hriss;Trk'Pahn;3030;1772;379;Kilrathi Assembly of Clans;K4 IV;None
+159;Trak'mar;H'hriss;Trk'Pahn;3469;1507;215;Kilrathi Assembly of Clans;F7 V;None
+160;Trik'Kha;H'hriss;Trk'Pahn;3057;1637;189;Kilrathi Assembly of Clans;K5 V;None
+161;Trik'Tsek;H'hriss;Trk'Pahn;3441;1658;350;Kilrathi Assembly of Clans;K2 VI;None
+162;Trk'Phan;H'hriss;Trk'Pahn;3130;1308;328;Kilrathi Assembly of Clans;G6 V;None
+163;T'set mehr / T'set Mehr;H'hriss;Trk'Pahn;3415;1759;292;Kilrathi Assembly of Clans;B8 III;None
+164;Turing;H'hriss;Trk'Pahn;3361;1253;175;Kilrathi Assembly of Clans;K8 V;None
+165;Astoria;Tr'k H'hra;Trk'Pahn;2503;1651;299;Terran Confederation;M4 V;None
+166;Draga;Tr'k H'hra;Trk'Pahn;2714;1444;316;Kilrathi Assembly of Clans;K4 V;None
+167;Etruria;Tr'k H'hra;Trk'Pahn;2604;1664;246;Grovsner Colonies;K9 III;None
+168;Grovsner;Tr'k H'hra;Trk'Pahn;2524;1575;506;Grovsner Colonies;A6 II;None
+169;Hilo Base;Tr'k H'hra;Trk'Pahn;2743;1744;290;Terran Confederation;M6 IV;None
+170;Khar Sum'n;Tr'k H'hra;Trk'Pahn;2668;1602;278;Kilrathi Assembly of Clans;A8 V;None
+171;Kher't'zu;Tr'k H'hra;Trk'Pahn;2762;1546;307;Kilrathi Assembly of Clans;M7 V;None
+172;K'n'T'mer;Tr'k H'hra;Trk'Pahn;2932;1460;344;Kilrathi Assembly of Clans;M2 V;None
+173;K'n'Trell;Tr'k H'hra;Trk'Pahn;2866;1641;389;Kilrathi Assembly of Clans;M4 V;None
+174;K'th H'ran;Tr'k H'hra;Trk'Pahn;2622;1305;298;Kilrathi Assembly of Clans;G6 V;None
+175;Maginot;Tr'k H'hra;Trk'Pahn;2446;1754;548;Terran Confederation;F7 V;None
+176;N'Der Pak;Tr'k H'hra;Trk'Pahn;2477;1337;307;Kilrathi Assembly of Clans;G7 V;None
+177;N'd'lon;Tr'k H'hra;Trk'Pahn;2415;1495;342;Kilrathi Assembly of Clans;A8 V;None
+178;Roche;Tr'k H'hra;Trk'Pahn;2608;1749;356;Terran Confederation;B4 V;None
+179;Tr 'k H'hra (1);Tr'k H'hra;Trk'Pahn;2859;1287;182;Kilrathi Assembly of Clans;M5 III;None
+180;Tr'k t'lon;Tr'k H'hra;Trk'Pahn;2413;1620;460;Kilrathi Assembly of Clans;G6 V;None
+181;Uruk;Tr'k H'hra;Trk'Pahn;2761;1639;274;Terran Confederation;M4 V;None
+182;K'vt Karh (1);K'vt Karh;Vukar Tag;3641;690;293;Kilrathi Assembly of Clans;F5 V;None
+183;K'vt Karh (10);K'vt Karh;Vukar Tag;3941;1081;212;Kilrathi Assembly of Clans;K2 III;None
+184;K'vt Karh (11);K'vt Karh;Vukar Tag;4108;1087;391;Kilrathi Assembly of Clans;M2 VI;None
+185;K'vt Karh (12);K'vt Karh;Vukar Tag;3662;1107;407;Kilrathi Assembly of Clans;F8 VI;None
+186;K'vt Karh (13);K'vt Karh;Vukar Tag;3802;1122;257;Kilrathi Assembly of Clans;B2 IV;None
+187;K'vt Karh (14);K'vt Karh;Vukar Tag;4007;1171;275;Kilrathi Assembly of Clans;G4 V;None
+188;K'vt Karh (2);K'vt Karh;Vukar Tag;3779;779;267;Kilrathi Assembly of Clans;A3 V;None
+189;K'vt Karh (3);K'vt Karh;Vukar Tag;3878;698;308;Kilrathi Assembly of Clans;M0 II;None
+190;K'vt Karh (4);K'vt Karh;Vukar Tag;3905;787;221;Kilrathi Assembly of Clans;M0 I;None
+191;K'vt Karh (5);K'vt Karh;Vukar Tag;4090;705;288;Kilrathi Assembly of Clans;M8 V;None
+192;K'vt Karh (6);K'vt Karh;Vukar Tag;3632;919;482;Kilrathi Assembly of Clans;A5 I;None
+193;K'vt Karh (7);K'vt Karh;Vukar Tag;3806;973;201;Kilrathi Assembly of Clans;K7 V;None
+194;K'vt Karh (8);K'vt Karh;Vukar Tag;3970;923;226;Kilrathi Assembly of Clans;K8 V;None
+195;K'vt Karh (9);K'vt Karh;Vukar Tag;4067;697;281;Kilrathi Assembly of Clans;M6 III;None
+196;S'kur (1);S'kur;Vukar Tag;4227;745;372;Kilrathi Assembly of Clans;K2 III;None
+197;S'kur (2);S'kur;Vukar Tag;4602;669;156;Kilrathi Assembly of Clans;K3 III;None
+198;S'kur (3);S'kur;Vukar Tag;4389;776;290;Kilrathi Assembly of Clans;F7 V;None
+199;S'kur (4);S'kur;Vukar Tag;4638;812;236;Kilrathi Assembly of Clans;F1 III;None
+200;S'kur (5);S'kur;Vukar Tag;4513;852;369;Kilrathi Assembly of Clans;M5 V;None
+201;S'kur (6);S'kur;Vukar Tag;4199;946;507;Kilrathi Assembly of Clans;B5 V;None
+202;S'kur (7);S'kur;Vukar Tag;4635;947;298;Kilrathi Assembly of Clans;F4 V;None
+203;S'kur (8);S'kur;Vukar Tag;4324;1034;282;Kilrathi Assembly of Clans;B0 V;None
+204;S'kur (9);S'kur;Vukar Tag;4457;1120;350;Kilrathi Assembly of Clans;A0 V;None
+205;Lushkag;S'kur Tql;Vukar Tag;4207;1757;228;Kilrathi Assembly of Clans;K0 III;None
+206;Rushta;S'kur Tql;Vukar Tag;4324;1492;346;Kilrathi Assembly of Clans;G6 III;None
+207;S'kur Tql (1);S'kur Tql;Vukar Tag;4597;1215;297;Kilrathi Assembly of Clans;F0 III;None
+208;S'kur Tql (10);S'kur Tql;Vukar Tag;4488;1675;283;Kilrathi Assembly of Clans;K8 V;None
+209;S'kur Tql (11);S'kur Tql;Vukar Tag;4642;1662;327;Kilrathi Assembly of Clans;K4 V;None
+210;S'kur Tql (12);S'kur Tql;Vukar Tag;4670;1759;422;Kilrathi Assembly of Clans;K8 V;None
+211;S'kur Tql (2);S'kur Tql;Vukar Tag;4462;1263;250;Kilrathi Assembly of Clans;F3 VI;None
+212;S'kur Tql (3);S'kur Tql;Vukar Tag;4392;1321;219;Kilrathi Assembly of Clans;A8 V;None
+213;S'kur Tql (4);S'kur Tql;Vukar Tag;4663;1304;304;Kilrathi Assembly of Clans;B6 V;None
+214;S'kur Tql (5);S'kur Tql;Vukar Tag;4456;1480;244;Kilrathi Assembly of Clans;K0 III;None
+215;S'kur Tql (6);S'kur Tql;Vukar Tag;4656;1535;110;Kilrathi Assembly of Clans;K0 V;None
+216;S'kur Tql (7);S'kur Tql;Vukar Tag;4242;1548;236;Kilrathi Assembly of Clans;B6 V;None
+217;S'kur Tql (8);S'kur Tql;Vukar Tag;4290;1648;394;Kilrathi Assembly of Clans;B1 V;None
+218;S'kur Tql (9);S'kur Tql;Vukar Tag;4348;1737;116;Kilrathi Assembly of Clans;O8 V;None
+219;Xsar;S'kur Tql;Vukar Tag;4220;1276;264;Kilrathi Assembly of Clans;K3 III;None
+220;Baragh;K'vt Tag;Vukar Tag;4116;1385;400;Kilrathi Assembly of Clans;K4 V;None
+221;H'hral V'kass;K'vt Tag;Vukar Tag;3636;1549;177;Kilrathi Assembly of Clans;K9 I;None
+222;Jugara;K'vt Tag;Vukar Tag;4010;1572;273;Kilrathi Assembly of Clans;A4 I;None
+223;K'vt Tag (1);K'vt Tag;Vukar Tag;3712;1310;349;Kilrathi Assembly of Clans;M4 III;None
+224;K'vt Tag (2);K'vt Tag;Vukar Tag;3847;1358;294;Kilrathi Assembly of Clans;B6 V;None
+225;K'vt Tag (3);K'vt Tag;Vukar Tag;3926;1267;178;Kilrathi Assembly of Clans;G6 IV;None
+226;K'vt Tag (4);K'vt Tag;Vukar Tag;4038;1331;231;Kilrathi Assembly of Clans;K3 V;None
+227;K'vt Tag (5);K'vt Tag;Vukar Tag;3977;1445;249;Kilrathi Assembly of Clans;F8 V;None
+228;K'vt Tag (6);K'vt Tag;Vukar Tag;4102;1677;107;Kilrathi Assembly of Clans;K1 V;None
+229;T'K'H'hral;K'vt Tag;Vukar Tag;3624;1716;151;Kilrathi Assembly of Clans;K0 III;None
+230;T'ql H'hass;K'vt Tag;Vukar Tag;3805;1725;261;Kilrathi Assembly of Clans;F5 V;None
+231;Ujarka;K'vt Tag;Vukar Tag;3971;1745;364;Kilrathi Assembly of Clans;M6 III;None
+232;Vukar Tag;K'vt Tag;Vukar Tag;3815;1555;113;Kilrathi Assembly of Clans;M5 V;None
+233;Gmarktu;Quadrant 4;Gmarktu;4878;1641;484;Kilrathi Assembly of Clans;M6 I;None
+234;Barns;Saab;Hawking;531;2296;281;Terran Confederation;O9 V;None
+235;Brown;Saab;Hawking;343;2366;304;Terran Confederation;K7 V;None
+236;Brunet;Saab;Hawking;420;2149;331;Terran Confederation;A8 VI;None
+237;Priest;Saab;Hawking;311;2160;473;Terran Confederation;A9 V;None
+238;TCSC0725;Saab;Hawking;100;1950;284;Unexplored System;M1 III;None
+239;TCSC0730;Saab;Hawking;103;2260;220;Unexplored System;K8 V;None
+240;TCSC1860;Saab;Hawking;196;2349;301;Unexplored System;F4 VI;None
+241;Waldrip;Saab;Hawking;548;2046;289;Terran Confederation;G6 V;None
+242;Chemla;Gegarin;Hawking;919;2129;407;Terran Confederation;K1 V;None
+243;Cherenkov;Gegarin;Hawking;1052;2294;275;Terran Confederation;F0 V;None
+244;Gilmore;Gegarin;Hawking;934;1905;307;Terran Confederation;A3 VI;None
+245;Glushko;Gegarin;Hawking;731;2338;100;Terran Confederation;M9 V;None
+246;Illiyoy's Star;Gegarin;Hawking;636;2364;155;Terran Confederation;K2 V;None
+247;Ivan's Joy;Gegarin;Hawking;963;2377;244;Terran Confederation;M6 III;None
+248;Jeni;Gegarin;Hawking;1047;2101;395;Terran Confederation;A1 V;None
+249;Kasparov;Gegarin;Hawking;640;1924;218;Terran Confederation;K7 I;None
+250;Komarov;Gegarin;Hawking;1091;1877;489;Terran Confederation;M2 III;None
+251;Korolyov;Gegarin;Hawking;795;2154;261;Terran Confederation;F7 V;None
+252;Leonov;Gegarin;Hawking;683;2034;114;Terran Confederation;A8 V;None
+253;Marie;Gegarin;Hawking;1050;1966;478;Terran Confederation;K4 V;None
+254;New Baikal;Gegarin;Hawking;634;2241;407;Terran Confederation;K1 III;None
+255;Titov;Gegarin;Hawking;862;2282;246;Terran Confederation;K4 III;None
+256;Vostock;Gegarin;Hawking;783;1953;350;Terran Confederation;M8 V;None
+257;Yorin;Gegarin;Hawking;909;2196;377;Terran Confederation;B5 III;None
+258;Aldrin;Hubble;Hawking;672;2973;328;Terran Confederation;M8 VI;None
+259;Apollo;Hubble;Hawking;814;2753;338;Terran Confederation;B4 V;None
+260;Armstrong;Hubble;Hawking;647;2862;371;Terran Confederation;A0 V;None
+261;Chandley;Hubble;Hawking;984;2978;75;Terran Confederation;F4 V;None
+262;Collins;Hubble;Hawking;699;2745;439;Terran Confederation;A7 V;None
+263;Eagle Base;Hubble;Hawking;983;2865;188;Terran Confederation;G4 V;None
+264;Galileo;Hubble;Hawking;1127;2664;288;Terran Confederation;M4 V;None
+265;Gauss;Hubble;Hawking;1115;2869;443;Terran Confederation;B2 III;None
+266;Grissom;Hubble;Hawking;798;2969;176;Terran Confederation;A9 V;None
+267;Hawking;Hubble;Hawking;979;2757;234;Terran Confederation;K8 III;None
+268;Ivan's Folly;Hubble;Hawking;1067;2489;183;Terran Confederation;A3 III;None
+269;Mercury;Hubble;Hawking;1027;2601;326;Terran Confederation;K0 V;None
+270;Newton;Hubble;Hawking;831;2629;406;Terran Confederation;G7 I;None
+271;Outreach;Hubble;Hawking;644;2609;272;Terran Confederation;M7 III;None
+272;Petunia;Hubble;Hawking;709;2671;259;Terran Confederation;M3 II;None
+273;Sagan;Hubble;Hawking;861;2487;354;Terran Confederation;M4 V;None
+274;Shepard;Hubble;Hawking;1079;2950;250;Terran Confederation;M8 VI;None
+275;STS-51L;Hubble;Hawking;831;2854;318;Terran Confederation;M1 III;None
+276;Wasteland;Hubble;Hawking;755;2541;418;Terran Confederation;O5 V;None
+277;White;Hubble;Hawking;895;2917;291;Terran Confederation;B9 V;None
+278;David;Ladyman;Hawking;345;2844;258;Terran Confederation;K8 V;None
+279;Manhavier;Ladyman;Hawking;521;2617;331;Terran Confederation;A7 V;None
+280;Merrell;Ladyman;Hawking;462;2491;479;Terran Confederation;F9 V;None
+281;Mu Cephei;Ladyman;Hawking;318;2984;348;Terran Confederation;K6 I;None
+282;Oldziey;Ladyman;Hawking;371;2593;183;Terran Confederation;F3 III;None
+283;Sommers;Ladyman;Hawking;432;2964;330;Terran Confederation;F7 V;None
+284;TCSC1575;Ladyman;Hawking;92;2962;296;Unexplored System;B2 V;None
+285;Aquila;Petrov;Sol;1459;1876;448;Terran Confederation;B4 V;None
+286;Bernard's Star / Barnard's Star;Petrov;Sol;1456;2365;300;Terran Confederation;M8 V;None
+287;Ceti;Petrov;Sol;1306;1880;516;Terran Confederation;M1 II;None
+288;Ceti Prime;Petrov;Sol;1533;2112;210;Terran Confederation;G8 III;None
+289;Eta Carinae;Petrov;Sol;1716;1937;376;Terran Confederation;K1 I;None
+290;Grimstad;Petrov;Sol;1350;2006;415;Terran Confederation;O9 V;None
+291;Hilthros;Petrov;Sol;1723;2249;505;Terran Confederation;K5 V;None
+292;Kirov;Petrov;Sol;1264;2317;349;Terran Confederation;A1 V;None
+293;Lenin;Petrov;Sol;1234;1991;141;Terran Confederation;A2 V;None
+294;Minsk;Petrov;Sol;1221;2169;86;Terran Confederation;M6 I;None
+295;Morone;Petrov;Sol;1361;2255;299;Terran Confederation;K9 V;None
+296;Neubauer;Petrov;Sol;1431;2016;357;Terran Confederation;F4 III;None
+297;Procyon;Petrov;Sol;1677;2191;307;Terran Confederation;B9 V;None
+298;Ross 154;Petrov;Sol;1519;2249;363;Terran Confederation;K4 V;None
+299;Zeta Orionis;Petrov;Sol;1681;2319;229;Terran Confederation;G4 V;None
+300;Alpha Centauri;Terra;Sol;1920;2292;301;Terran Confederation;M6 I;None
+301;Arcturus;Terra;Sol;2008;2101;245;Terran Confederation;K6 III;None
+302;Asylum;Terra;Sol;2325;2079;286;Terran Confederation;K0 III;None
+303;Camelot;Terra;Sol;1860;1887;479;Terran Confederation;B4 V;None
+304;Celeste;Terra;Sol;1995;1985;324;Terran Confederation;K6 IV;None
+305;Forcke;Terra;Sol;1832;2249;186;Terran Confederation;F1 V;None
+306;Mastif;Terra;Sol;2214;1964;125;Terran Confederation;F8 V;None
+307;Mauer;Terra;Sol;2150;2092;435;Terran Confederation;O8 III;None
+308;Murphy;Terra;Sol;2082;2206;249;Terran Confederation;A8 V;None
+309;Proxima Centauri;Terra;Sol;1981;2254;331;Terran Confederation;F8 V;None
+310;Ross 248;Terra;Sol;1814;2107;434;Terran Confederation;G6 V;None
+311;Sirius;Terra;Sol;2080;2336;222;Terran Confederation;G2 V;None
+312;Sol;Terra;Sol;1827;2341;90;Terran Confederation;M3 III;None
+313;Timonen;Terra;Sol;1875;1993;252;Terran Confederation;M0 III;None
+314;Wattenbarger;Terra;Sol;2038;1895;226;Terran Confederation;M0 II;None
+315;Weslyn;Terra;Sol;2285;2313;310;Terran Confederation;F2 III;None
+316;Beacon;Vearrier;Sol;2305;2840;166;Terran Confederation;K3 III;None
+317;Beta Canarus;Vearrier;Sol;2170;2815;224;Terran Confederation;M8 II;None
+318;Bradshaw;Vearrier;Sol;2133;2630;283;Terran Confederation;K5 V;None
+319;Canarus;Vearrier;Sol;2160;2911;269;Terran Confederation;B8 V;None
+320;Courage;Vearrier;Sol;1811;2955;153;Terran Confederation;B1 V;None
+321;Cygnus;Vearrier;Sol;2037;2517;239;Terran Confederation;M9 III;None
+322;E-Erandi;Vearrier;Sol;1984;2824;404;Terran Confederation;K7 V;None
+323;E-Indi;Vearrier;Sol;1817;2801;220;Terran Confederation;M5 II;None
+324;Ella;Vearrier;Sol;1929;2944;391;Terran Confederation;A3 V;None
+325;Faith;Vearrier;Sol;2332;2681;303;Terran Confederation;B8 V;None
+326;Frase;Vearrier;Sol;2037;2678;454;Terran Confederation;G1 V;None
+327;Luyten;Vearrier;Sol;2220;2513;456;Terran Confederation;O8 V;None
+328;Promise;Vearrier;Sol;2311;2956;156;Terran Confederation;F5 V;None
+329;Talos;Vearrier;Sol;1856;2690;256;Terran Confederation;A8 V;None
+330;Tikopal;Vearrier;Sol;1884;2508;502;Terran Confederation;A2 V;None
+331;61 Cygni;Roan;Sol;1307;2963;458;Terran Confederation;K6 V;None
+332;Agder;Roan;Sol;1602;2829;261;Terran Confederation;B9 V;None
+333;Alpha Tauri;Roan;Sol;1392;2662;328;Terran Confederation;K7 V;None
+334;Altair;Roan;Sol;1466;2962;85;Terran Confederation;K6 V;None
+335;Beta Tauri;Roan;Sol;1258;2707;381;Terran Confederation;A5 VI;None
+336;Gjovik;Roan;Sol;1522;2976;336;Terran Confederation;F5 V;None
+337;Huff;Roan;Sol;1236;2591;315;Terran Confederation;O7 I;None
+338;Leonis;Roan;Sol;1437;2528;441;Terran Confederation;K0 V;None
+339;Miyahira;Roan;Sol;1550;2470;95;Terran Confederation;K7 V;None
+340;Mollerhaug;Roan;Sol;1420;2839;201;Terran Confederation;F7 V;None
+341;Polaris;Roan;Sol;1686;2506;367;Terran Confederation;F7 IV;None
+342;Prentice;Roan;Sol;1660;2973;248;Terran Confederation;K0 VI;None
+343;Ross 51G;Roan;Sol;1276;2481;223;Terran Confederation;A6 V;None
+344;Tingvallir;Roan;Sol;1718;2681;358;Terran Confederation;G3 V;None
+345;Todd;Roan;Sol;1296;2793;446;Terran Confederation;K4 V;None
+346;Vainio;Roan;Sol;1508;2743;459;Terran Confederation;G2 III;None
+347;Wolf 119;Roan;Sol;1230;2908;286;Terran Confederation;B1 V;None
+348;Wolf 359;Roan;Sol;1547;2622;371;Terran Confederation;K0 V;None
+349;Able;Douglas;Vega;2424;1881;329;Terran Confederation;B5 V;None
+350;Cain;Douglas;Vega;2528;1933;97;Terran Confederation;K2 III;None
+351;Chengdu / Cheng-Du;Douglas;Vega;2880;2243;245;Terran Confederation;F2 V;None
+352;Eddings;Douglas;Vega;2537;2301;305;Terran Confederation;M0 III;None
+353;Gateway;Douglas;Vega;2671;2219;385;Terran Confederation;G6 V;None
+354;Hubble's Star;Douglas;Vega;2751;2166;533;Terran Confederation;B1 V;None
+355;Munro;Douglas;Vega;2880;2243;430;Terran Confederation;M4 V;None
+356;Nanking;Douglas;Vega;2662;2007;388;Terran Confederation;K7 IV;None
+357;Nemo;Douglas;Vega;2605;1881;236;Terran Confederation;A1 V;None
+358;Oberan;Douglas;Vega;2429;2185;120;Terran Confederation;B2 V;None
+359;Planck's Star;Douglas;Vega;2755;1907;429;Terran Confederation;B3 III;None
+360;Plummer;Douglas;Vega;2552;2017;369;Terran Confederation;O5 III;None
+361;Port Hedland;Douglas;Vega;2961;1938;419;Terran Confederation;M1 V;None
+362;Proxima;Douglas;Vega;2457;2372;407;Terran Confederation;M7 V;None
+363;Vega / Krat'na;Douglas;Vega;2873;2317;367;Terran Confederation;F9 V;None
+364;Warsaw;Douglas;Vega;2817;2031;272;Terran Confederation;K7 V;None
+365;Xanadu;Douglas;Vega;2522;2102;314;Terran Confederation;K7 V;None
+366;Alcor;Roberts;Vega;3053;2308;218;Terran Confederation;M3 V;None
+367;Aloysius;Roberts;Vega;3339;2037;179;Kilrathi Assembly of Clans;M7 V;None
+368;Ardai;Roberts;Vega;3490;1863;174;Kilrathi Assembly of Clans;A8 V;None
+369;Baird's Star;Roberts;Vega;3238;1906;386;Union of Border Worlds;B3 IV;None
+370;Brimstone;Roberts;Vega;3060;2229;249;Terran Confederation;F2 V;None
+371;Cairo;Roberts;Vega;2245;2303;431;Terran Confederation;K4 II;None
+372;Chang-Cu;Roberts;Vega;3107;2118;524;Terran Confederation;K6 V;None
+373;Dakota;Roberts;Vega;3251;2063;223;Union of Border Worlds;K7 VI;None
+374;Freya;Roberts;Vega;3498;2112;206;Kilrathi Assembly of Clans;B6 V;None
+375;Hammer;Roberts;Vega;3152;2384;216;Terran Confederation;F6 V;None
+376;Hellespont;Roberts;Vega;3453;2206;494;Union of Border Worlds;K7 V;None
+377;K'rissth;Roberts;Vega;3477;1984;108;Kilrathi Assembly of Clans;M1 II;None
+378;Megaron;Roberts;Vega;3302;2158;256;Terran Confederation;K0 V;None
+379;Tartarus;Roberts;Vega;3420;1920;307;Union of Border Worlds;F7 III;None
+380;Trimble;Roberts;Vega;3018;2363;133;Terran Confederation;K7 IV;None
+381;Warhammer;Roberts;Vega;3487;2363;135;Kilrathi Assembly of Clans;M4 III;None
+382;Elohim;Downing;Vega;3162;2978;396;Union of Border Worlds;M7 V;None
+383;Gimle;Downing;Vega;3224;2627;265;Terran Confederation;K5 III;None
+384;G'wrikath;Downing;Vega;3519;2624;427;Kilrathi Assembly of Clans;F7 V;None
+385;Hawkins;Downing;Vega;3455;2928;179;Kilrathi Assembly of Clans;M0 IV;None
+386;Hyperion;Downing;Vega;3518;2483;190;Kilrathi Assembly of Clans;F9 V;None
+387;K'n'Meth;Downing;Vega;3517;2757;490;Kilrathi Assembly of Clans;B5 V;None
+388;K'n'Rek;Downing;Vega;3432;2827;308;Kilrathi Assembly of Clans;O8 I;None
+389;Kurasawa / Warach Tha;Downing;Vega;3357;2507;229;Union of Border Worlds;K4 V;None
+390;Loki VI / Loki;Downing;Vega;3193;2751;254;Union of Border Worlds;K9 V;None
+391;Mylon;Downing;Vega;3360;2794;187;Union of Border Worlds;B5 III;None
+392;N'Dele;Downing;Vega;3512;2977;354;Kilrathi Assembly of Clans;O4 II;None
+393;Nephele;Downing;Vega;3353;2657;306;Union of Border Worlds;F3 V;None
+394;Nifelheim;Downing;Vega;3230;2911;41;Union of Border Worlds;M5 III;None
+395;Rostov;Downing;Vega;3018;2640;171;Terran Confederation;M7 V;None
+396;Segallion;Downing;Vega;3035;2881;423;Union of Border Worlds;M6 III;None
+397;Tyr;Downing;Vega;3436;2523;298;Union of Border Worlds;F0 V;None
+398;Venice / Kharak Tar;Downing;Vega;3280;2471;290;Terran Confederation;M7 V;None
+399;Ymir;Downing;Vega;3287;2834;169;Union of Border Worlds;F8 III;None
+400;Acrus;Day;Vega;2424;2692;286;Terran Confederation;M2 V;None
+401;Alliance;Day;Vega;2528;2756;235;Terran Confederation;F4 V;None
+402;Ariel;Day;Vega;2802;2952;165;Terran Confederation;A9 III;None
+403;Blackmane;Day;Vega;2664;2639;121;Terran Confederation;A1 V;None
+404;Blytheheart;Day;Vega;2523;2848;343;Terran Confederation;B6 I;None
+405;Caliban;Day;Vega;2890;2978;185;Terran Confederation;B8 III;None
+406;Cambria;Day;Vega;2527;2590;465;Terran Confederation;M9 III;None
+407;Carlin;Day;Vega;2899;2574;266;Terran Confederation;M3 III;None
+408;Delius;Day;Vega;2898;2835;147;Terran Confederation;F2 V;None
+409;Dieno;Day;Vega;2775;2504;213;Terran Confederation;A6 V;None
+410;Enyo;Day;Vega;2702;2491;297;Terran Confederation;K1 III;None
+411;Hell's Kitchen / Apocalyse;Day;Vega;2703;2574;505;Terran Confederation;B9 V;None
+412;Krieger;Day;Vega;2437;2490;342;Terran Confederation;M5 V;None
+413;Lafayette;Day;Vega;2734;2865;252;Terran Confederation;M8 V;None
+414;McAuliffe / Vikyah;Day;Vega;2854;2482;340;Terran Confederation;G9 V;None
+415;McDaniel's World;Day;Vega;2406;2895;372;Terran Confederation;B7 V;None
+416;Midpoint;Day;Vega;2592;2912;128;Terran Confederation;K7 I;None
+417;Montrose;Day;Vega;2782;2756;357;Terran Confederation;G8 IV;None
+418;Pephedro;Day;Vega;2897;2657;470;Terran Confederation;G5 V;None
+419;Tali;Day;Vega;2603;2815;261;Terran Confederation;F8 V;None
+420;Tamayo;Day;Vega;2495;2968;468;Terran Confederation;G4 III;None
+421;Gmar / G'mar;Kur'u-Pak;Kilrah;3854;2333;335;Kilrathi Assembly of Clans;M4 V;None
+422;Goran-Pak;Kur'u-Pak;Kilrah;4007;2087;213;Kilrathi Assembly of Clans;K5 V;None
+423;H'rissth / H'rissith;Kur'u-Pak;Kilrah;3952;2204;224;Kilrathi Assembly of Clans;M4 V;None
+424;K'Cris;Kur'u-Pak;Kilrah;3914;2354;213;Kilrathi Assembly of Clans;F1 VI;None
+425;Khark-Pa;Kur'u-Pak;Kilrah;4018;1932;359;Kilrathi Assembly of Clans;B7 V;None
+426;K'hrissak;Kur'u-Pak;Kilrah;3843;1943;522;Kilrathi Assembly of Clans;K7 VI;None
+427;K'n'Bren;Kur'u-Pak;Kilrah;3732;2368;325;Kilrathi Assembly of Clans;B7 V;None
+428;K'njKuru;Kur'u-Pak;Kilrah;3697;1947;186;Kilrathi Assembly of Clans;M0 V;None
+429;K'n'Khur;Kur'u-Pak;Kilrah;3644;2320;274;Kilrathi Assembly of Clans;G4 I;None
+430;K'n'Kir;Kur'u-Pak;Kilrah;3625;2076;421;Kilrathi Assembly of Clans;F8 V;None
+431;K'sK'taq;Kur'u-Pak;Kilrah;3808;2236;413;Kilrathi Assembly of Clans;M5 V;None
+432;K'ssak;Kur'u-Pak;Kilrah;3758;2019;228;Kilrathi Assembly of Clans;B1 V;None
+433;K'sthak;Kur'u-Pak;Kilrah;4036;2312;329;Kilrathi Assembly of Clans;B4 V;None
+434;K'Tkhur M'etrh'Kuru;Kur'u-Pak;Kilrah;3625;1874;180;Kilrathi Assembly of Clans;M2 V;None
+435;Pak Ma'hran;Kur'u-Pak;Kilrah;3907;2077;450;Kilrathi Assembly of Clans;K6 VI;None
+436;T'Agg A'Bren;Kur'u-Pak;Kilrah;3842;2130;201;Kilrathi Assembly of Clans;B3 V;None
+437;T'lan Meth;Kur'u-Pak;Kilrah;3699;2235;304;Kilrathi Assembly of Clans;G6 V;None
+438;Vuwarg;Kur'u-Pak;Kilrah;4101;2000;130;Kilrathi Assembly of Clans;K5 V;None
+439;Kilrah;Kur'u'khag;Kilrah;4238;2308;435;Kilrathi Assembly of Clans;B4 V;None
+440;Kur'u'khag (1);Kur'u'khag;Kilrah;4199;2046;217;Kilrathi Assembly of Clans;K7 I;None
+441;Kur'u'khag (10);Kur'u'khag;Kilrah;4422;2315;168;Kilrathi Assembly of Clans;F2 III;None
+442;Kur'u'khag (2);Kur'u'khag;Kilrah;4315;2062;371;Kilrathi Assembly of Clans;B0 V;None
+443;Kur'u'khag (3);Kur'u'khag;Kilrah;4656;1853;443;Kilrathi Assembly of Clans;K3 V;None
+444;Kur'u'khag (4);Kur'u'khag;Kilrah;4309;1949;221;Kilrathi Assembly of Clans;K9 III;None
+445;Kur'u'khag (5);Kur'u'khag;Kilrah;4541;1998;212;Kilrathi Assembly of Clans;M1 III;None
+446;Kur'u'khag (6);Kur'u'khag;Kilrah;4467;2082;372;Kilrathi Assembly of Clans;M2 V;None
+447;Kur'u'khag (7);Kur'u'khag;Kilrah;4576;2247;261;Kilrathi Assembly of Clans;K3 V;None
+448;Kur'u'khag (8);Kur'u'khag;Kilrah;4691;2224;335;Kilrathi Assembly of Clans;K8 V;None
+449;Kur'u'khag (9);Kur'u'khag;Kilrah;4524;2357;329;Kilrathi Assembly of Clans;K9 V;None
+450;Tr'Kpa;Kur'u'khag;Kilrah;4379;2238;391;Kilrathi Assembly of Clans;M6 V;None
+451;Wu;Kur'u'khag;Kilrah;4447;1862;279;Kilrathi Assembly of Clans;M7 V;None
+452;Eyoka;Kur'U'Tak;Kilrah;4603;2824;353;Kilrathi Assembly of Clans;M2 V;None
+453;Ja'targk;Kur'U'Tak;Kilrah;4567;2629;128;Kilrathi Assembly of Clans;K5 III;None
+454;Jubara;Kur'U'Tak;Kilrah;4367;2519;342;Kilrathi Assembly of Clans;A4 III;None
+455;Ka;Kur'U'Tak;Kilrah;4352;2863;342;Kilrathi Assembly of Clans;M1 III;None
+456;Kur'U'Tak (1);Kur'U'Tak;Kilrah;4612;2492;268;Kilrathi Assembly of Clans;G5 I;None
+457;Kur'U'Tak (2);Kur'U'Tak;Kilrah;4702;2492;342;Kilrathi Assembly of Clans;K5 V;None
+458;Kur'U'Tak (3);Kur'U'Tak;Kilrah;4677;2710;155;Kilrathi Assembly of Clans;M7 IV;None
+459;Kur'U'Tak (4);Kur'U'Tak;Kilrah;4276;2791;302;Kilrathi Assembly of Clans;A9 V;None
+460;Kur'U'Tak (5);Kur'U'Tak;Kilrah;4406;2960;429;Kilrathi Assembly of Clans;A4 V;None
+461;Kur'U'Tak (6);Kur'U'Tak;Kilrah;4622;2963;247;Kilrathi Assembly of Clans;K6 V;None
+462;Kur'U'Tak (7);Kur'U'Tak;Kilrah;4710;2924;270;Kilrathi Assembly of Clans;G3 III;None
+463;Kur'U'Tak (8);Kur'U'Tak;Kilrah;4357;2666;153;Kilrathi Assembly of Clans;B1 III;None
+464;Poghath;Kur'U'Tak;Kilrah;4197;2583;243;Kilrathi Assembly of Clans;A1 V;None
+465;Som'mers;Kur'U'Tak;Kilrah;4537;2966;317;Kilrathi Assembly of Clans;K8 I;None
+466;Tr'p-Khar;Kur'U'Tak;Kilrah;4261;2464;365;Kilrathi Assembly of Clans;G9 VI;None
+467;Dhollas;Kur'u Caxki;Kilrah;3777;2946;339;Kilrathi Assembly of Clans;G0 VI;None
+468;Dhores;Kur'u Caxki;Kilrah;3785;2577;262;Kilrathi Assembly of Clans;G3 V;None
+469;Ghoran;Kur'u Caxki;Kilrah;3935;2546;229;Kilrathi Assembly of Clans;F4 IV;None
+470;G'wriss / Kr'azna;Kur'u Caxki;Kilrah;3657;2575;207;Kilrathi Assembly of Clans;B5 V;None
+471;Hhrass / H'hrass;Kur'u Caxki;Kilrah;3664;2490;286;Kilrathi Assembly of Clans;K9 II;None
+472;Hhrass T'Ghor;Kur'u Caxki;Kilrah;3630;2822;181;Kilrathi Assembly of Clans;K4 III;None
+473;H'rekkah;Kur'u Caxki;Kilrah;3612;2746;453;Kilrathi Assembly of Clans;M7 V;None
+474;Kher-za;Kur'u Caxki;Kilrah;3920;2688;234;Kilrathi Assembly of Clans;K2 V;None
+475;Khirg;Kur'u Caxki;Kilrah;4109;2750;190;Kilrathi Assembly of Clans;K3 V;None
+476;K'n T'qal;Kur'u Caxki;Kilrah;3621;2937;272;Kilrathi Assembly of Clans;B5 IV;None
+477;K'n'Hhra;Kur'u Caxki;Kilrah;3588;2526;153;Kilrathi Assembly of Clans;B4 V;None
+478;Kulrag;Kur'u Caxki;Kilrah;4057;2641;382;Kilrathi Assembly of Clans;G8 V;None
+479;K'za T'qal;Kur'u Caxki;Kilrah;3885;2886;237;Kilrathi Assembly of Clans;B6 V;None
+480;K'za-Ha'duhm;Kur'u Caxki;Kilrah;4004;2887;266;Kilrathi Assembly of Clans;O4 V;None
+481;M'hriss;Kur'u Caxki;Kilrah;4031;2452;77;Kilrathi Assembly of Clans;K5 VI;None
+482;M'shren;Kur'u Caxki;Kilrah;3918;2451;328;Kilrathi Assembly of Clans;A4 V;None
+483;N'Ryllis;Kur'u Caxki;Kilrah;3907;2796;275;Kilrathi Assembly of Clans;K5 V;None
+484;Ta'hal;Kur'u Caxki;Kilrah;3973;2980;143;Kilrathi Assembly of Clans;K1 III;None
+485;Tal'q;Kur'u Caxki;Kilrah;4099;2539;424;Kilrathi Assembly of Clans;F8 III;None
+486;Tsahl;Kur'u Caxki;Kilrah;4104;2884;335;Kilrathi Assembly of Clans;G6 III;None
+487;Val;Kur'u Caxki;Kilrah;4051;2792;441;Kilrathi Assembly of Clans;O4 V;None
+488;Vharr;Kur'u Caxki;Kilrah;4008;2705;571;Kilrathi Assembly of Clans;B3 IV;None
+489;Volles;Kur'u Caxki;Kilrah;3841;2751;412;Kilrathi Assembly of Clans;G7 V;None
+490;Hari 1 (1);Quadrant 1;Hari;4821;2364;438;Kilrathi Assembly of Clans;A2 I;None
+491;Hari 1 (2);Quadrant 1;Hari;4949;2307;221;Kilrathi Assembly of Clans;A7 IV;None
+492;Hari 1 (3);Quadrant 1;Hari;5018;2173;174;Kilrathi Assembly of Clans;A3 III;None
+493;Hari 1 (4);Quadrant 1;Hari;5115;2291;91;Kilrathi Assembly of Clans;M0 V;None
+494;Hari 1 (5);Quadrant 1;Hari;5208;2194;532;Kilrathi Assembly of Clans;M3 V;None
+495;Hari 1 (6);Quadrant 1;Hari;5214;2363;277;Kilrathi Assembly of Clans;B8 I;None
+496;Hari 1 (7) ?;Quadrant 1;Hari;5296;2097;349;Kilrathi Assembly of Clans;M2 III;None
+497;Hari 2 (1);Quadrant 2;Hari;5411;2031;329;Kilrathi Assembly of Clans;K3 V;None
+498;Hari 2 (2);Quadrant 2;Hari;5414;2363;381;Kilrathi Assembly of Clans;M0 III;None
+499;Hari;Quadrant 3;Hari;5873;2487;380;Kilrathi Assembly of Clans;K2 III;None
+500;Hari 3 (1);Quadrant 3;Hari;5447;2698;215;Kilrathi Assembly of Clans;M8 III;None
+501;Hari 3 (2);Quadrant 3;Hari;5602;2651;138;Kilrathi Assembly of Clans;F6 V;None
+502;Hari 3 (3);Quadrant 3;Hari;5657;2757;202;Kilrathi Assembly of Clans;A8 III;None
+503;Hari 3 (4);Quadrant 3;Hari;5488;2921;302;Kilrathi Assembly of Clans;A2 V;None
+504;Hari 3 (5);Quadrant 3;Hari;5794;2855;92;Kilrathi Assembly of Clans;K1 IV;None
+505;Hari 3 (6);Quadrant 3;Hari;5869;2711;88;Kilrathi Assembly of Clans;M0 I;None
+506;Hari 3 (7);Quadrant 3;Hari;5752;2668;78;Kilrathi Assembly of Clans;K4 V;None
+507;Hari 4 (1);Quadrant 4;Hari;5252;2508;409;Kilrathi Assembly of Clans;G7 V;None
+508;Hari 4 (2);Quadrant 4;Hari;5085;2560;287;Kilrathi Assembly of Clans;G8 V;None
+509;Hari 4 (3);Quadrant 4;Hari;5001;2619;242;Kilrathi Assembly of Clans;B1 III;None
+510;Hari 4 (4);Quadrant 4;Hari;4880;2707;458;Kilrathi Assembly of Clans;A4 V;None
+511;Hari 4 (5);Quadrant 4;Hari;5006;2823;482;Kilrathi Assembly of Clans;M3 V;None
+512;Hari 4 (6);Quadrant 4;Hari;5201;2764;361;Kilrathi Assembly of Clans;M7 V;None
+513;Hari 4 (7);Quadrant 4;Hari;5225;2937;251;Kilrathi Assembly of Clans;K8 II;None
+514;Hari 4 (8);Quadrant 4;Hari;4921;2941;302;Kilrathi Assembly of Clans;B7 V;None
+515;Hari 4 (9);Quadrant 4;Hari;4806;2981;122;Kilrathi Assembly of Clans;K3 III;None
+516;BCP0728;Savage;Argent;129;3368;392;Terran Confederation;A8 V;None
+517;Galway;Savage;Argent;427;3553;147;Terran Confederation;K8 III;None
+518;Prem;Savage;Argent;250;3512;155;Terran Confederation;F7 IV;None
+519;Ray;Savage;Argent;412;3286;305;Terran Confederation;K1 I;None
+520;TCSC1602;Savage;Argent;420;3094;400;Unexplored System;A3 III;None
+521;TCSC1613;Savage;Argent;55;3550;406;Unexplored System;G4 III;None
+522;Baker;Shelus;Argent;118;3365;111;Terran Confederation;M5 V;None
+523;Brack;Shelus;Argent;1114;3519;256;Terran Confederation;F7 V;None
+524;Brookes;Shelus;Argent;1021;3442;346;Terran Confederation;F5 V;None
+525;Coppock;Shelus;Argent;694;3594;169;Terran Confederation;O8 V;None
+526;Dano;Shelus;Argent;644;3537;280;Terran Confederation;F5 VI;None
+527;Destiny;Shelus;Argent;817;3167;544;Terran Confederation;K8 V;None
+528;Gobeski;Shelus;Argent;787;3549;214;Terran Confederation;M8 III;None
+529;Hardwicke;Shelus;Argent;718;3262;265;Terran Confederation;K4 IV;None
+530;Kebie;Shelus;Argent;1030;3585;293;Terran Confederation;A8 V;None
+531;Lesnick;Shelus;Argent;650;3364;173;Terran Confederation;K0 I;None
+532;Mathis;Shelus;Argent;1093;3186;473;Terran Confederation;F5 V;None
+533;Miller;Shelus;Argent;686;3466;157;Terran Confederation;K5 V;None
+534;Miniyar;Shelus;Argent;904;3468;286;Terran Confederation;M7 V;None
+535;Ogawa;Shelus;Argent;952;3198;280;Terran Confederation;A4 V;None
+536;Phoenix;Shelus;Argent;733;3096;272;Terran Confederation;G5 III;None
+537;Reid;Shelus;Argent;655;3177;290;Terran Confederation;M2 V;None
+538;Yeager;Shelus;Argent;1073;3092;424;Terran Confederation;K6 V;None
+539;Akis;Hughes;Argent;987;3698;504;Terran Confederation;F1 V;None
+540;Alderson;Hughes;Argent;736;4085;194;Terran Confederation;G2 V;None
+541;Arcadia;Hughes;Argent;941;3803;272;Terran Confederation;K7 V;None
+542;Argent;Hughes;Argent;845;3716;325;Terran Confederation;G7 V;None
+543;Benford;Hughes;Argent;1010;4054;393;Terran Confederation;G9 III;None
+544;Beta Tucanae;Hughes;Argent;821;3821;507;Terran Confederation;M9 V;None
+545;Centauri;Hughes;Argent;877;3963;466;Terran Confederation;K4 V;None
+546;Fujimori;Hughes;Argent;1094;4180;389;Terran Confederation;A4 V;None
+547;Hentrich;Hughes;Argent;766;4197;352;Terran Confederation;F4 V;None
+548;Hidebeidel;Hughes;Argent;850;4079;297;Terran Confederation;M2 V;None
+549;Marcelais;Hughes;Argent;718;3723;499;Terran Confederation;G7 IV;None
+550;Pandey;Hughes;Argent;1001;4190;299;Terran Confederation;M1 V;None
+551;Portilla;Hughes;Argent;1104;3995;470;Terran Confederation;M5 V;None
+552;Roaz;Hughes;Argent;1092;3693;448;Terran Confederation;B5 V;None
+553;Schmidt;Hughes;Argent;886;4189;326;Terran Confederation;K9 III;None
+554;Solomon;Hughes;Argent;633;3795;222;Terran Confederation;K7 V;None
+555;Torres;Hughes;Argent;634;4064;281;Terran Confederation;B4 V;None
+556;Tucanae;Hughes;Argent;742;3800;431;Terran Confederation;K3 V;None
+557;Everett;Rod;Argent;476;3847;276;Terran Confederation;F6 III;None
+558;Karpiak;Rod;Argent;181;4026;490;Terran Confederation;M7 V;None
+559;McLean;Rod;Argent;58;3909;395;Terran Confederation;K5 I;None
+560;New Hope;Rod;Argent;408;4106;565;Terran Confederation;K1 V;None
+561;Olivia;Rod;Argent;265;4181;346;Terran Confederation;F1 V;None
+562;TCSC1701;Rod;Argent;194;3813;433;Unexplored System;M8 V;None
+563;TCST1593;Rod;Argent;403;3763;165;Unexplored System;A2 II;None
+564;Venture;Rod;Argent;487;4183;268;Terran Confederation;G5 V;None
+565;Blish;Asimov;Enigma;1337;3264;266;Terran Confederation;M1 V;None
+566;Brin;Asimov;Enigma;1544;3098;408;Terran Confederation;M0 V;None
+567;Card;Asimov;Enigma;1348;3551;276;Terran Confederation;K3 II;None
+568;Clarke;Asimov;Enigma;1550;3314;405;Terran Confederation;B4 V;None
+569;Crichton;Asimov;Enigma;1682;3224;174;Terran Confederation;M7 V;None
+570;Defiance;Asimov;Enigma;1601;3552;181;Terran Confederation;K2 V;None
+571;Ellison;Asimov;Enigma;1676;3083;205;Terran Confederation;K3 V;None
+572;Facin;Asimov;Enigma;1435;3078;177;Terran Confederation;K7 V;None
+573;Foster;Asimov;Enigma;1233;3539;408;Terran Confederation;M2 V;None
+574;Gibson;Asimov;Enigma;1435;3369;67;Terran Confederation;K1 III;None
+575;Kalvan;Asimov;Enigma;1314;3409;270;Terran Confederation;G9 V;None
+576;Midian;Asimov;Enigma;1615;3175;259;Terran Confederation;A0 V;None
+577;Piper;Asimov;Enigma;1401;3153;218;Terran Confederation;M1 V;None
+578;Pohl;Asimov;Enigma;1226;3104;382;Terran Confederation;F0 V;None
+579;Pournelle;Asimov;Enigma;1261;3186;256;Terran Confederation;M8 III;None
+580;Robinson;Asimov;Enigma;1713;3426;338;Terran Confederation;G6 III;None
+581;Salayna;Asimov;Enigma;1603;3427;340;Terran Confederation;G7 V;None
+582;Sterling;Asimov;Enigma;1712;3576;324;Terran Confederation;K4 V;None
+583;Vonnegut;Asimov;Enigma;1450;3505;226;Terran Confederation;M7 V;None
+584;Argarrio;Grills;Enigma;2015;3596;205;Terran Confederation;M7 V;None
+585;Axius / Axis;Grills;Enigma;2050;3322;223;Terran Confederation;K0 V;None
+586;Cabrea;Grills;Enigma;2315;3440;271;Union of Border Worlds;K1 I;None
+587;Callimachus / Callmachius;Grills;Enigma;1820;3339;240;Terran Confederation;O7 V;None
+588;Cardell / Gardel;Grills;Enigma;2271;3100;264;Terran Confederation;F4 IV;None
+589;Damioyn;Grills;Enigma;2015;3105;520;Terran Confederation;A9 V;None
+590;Fiddler's Green;Grills;Enigma;1881;3289;262;Terran Confederation;M4 V;None
+591;Heaven's Gate;Grills;Enigma;1873;3457;179;Terran Confederation;K8 I;None
+592;Hilleman;Grills;Enigma;1930;3225;107;Terran Confederation;K7 V;None
+593;Irving;Grills;Enigma;1931;3101;383;Terran Confederation;G2 V;None
+594;Niffleheim;Grills;Enigma;2027;3420;495;Terran Confederation;M6 III;None
+595;Novaya Kiev;Grills;Enigma;2170;3472;146;Terran Confederation;K6 I;None
+596;Pembroke;Grills;Enigma;2222;3255;328;Terran Confederation;G6 V;None
+597;Speradon / Speardon;Grills;Enigma;2265;3357;433;Terran Confederation;G5 V;None
+598;Talbot;Grills;Enigma;1993;3509;403;Terran Confederation;M0 V;None
+599;Vespus;Grills;Enigma;2108;3155;380;Terran Confederation;K4 V;None
+600;Bradbury;Isaac;Enigma;1949;4147;183;Union of Border Worlds;M6 VI;None
+601;Enigma;Isaac;Enigma;1840;3922;425;Terran Confederation;M7 III;None
+602;Ghorah Khar;Isaac;Enigma;2261;3832;451;Kilrathi Assembly of Clans;K6 V;None
+603;Gwynedd;Isaac;Enigma;2091;3894;312;Terran Confederation;K6 V;None
+604;Harrison;Isaac;Enigma;2072;4059;473;Union of Border Worlds;G8 V;None
+605;K'arakh;Isaac;Enigma;2331;4012;287;Kilrathi Assembly of Clans;A1 VI;None
+606;K'tithrak Mang / K'Tithrak Mang;Isaac;Enigma;2289;4112;343;Kilrathi Assembly of Clans;G2 V;None
+607;Muspelheim;Isaac;Enigma;2054;3790;431;Terran Confederation;B9 II;None
+608;Niven;Isaac;Enigma;1962;3724;144;Terran Confederation;A6 III;None
+609;Racene;Isaac;Enigma;2305;3945;225;Union of Border Worlds;K3 V;None
+610;Rarkath;Isaac;Enigma;2178;4030;238;Kilrathi Assembly of Clans;K0 V;None
+611;Repleetah;Isaac;Enigma;2057;4193;332;Union of Border Worlds;K1 III;None
+612;Rigel;Isaac;Enigma;2176;3738;380;Terran Confederation;F3 III;None
+613;Shelton;Isaac;Enigma;1816;4124;415;Union of Border Worlds;M6 IV;None
+614;Talamon;Isaac;Enigma;2286;3696;210;Union of Border Worlds;G9 V;None
+615;Tesla;Isaac;Enigma;1942;3843;246;Terran Confederation;B1 II;None
+616;Trk'Harna;Isaac;Enigma;2184;4186;278;Kilrathi Assembly of Clans;B5 III;None
+617;Zelanzny;Isaac;Enigma;2045;3947;465;Terran Confederation;A1 IV;None
+618;Adams;Roddenberry;Enigma;1716;3739;133;Terran Confederation;G7 V;None
+619;Arraman;Roddenberry;Enigma;1667;4017;214;Terran Confederation;G5 III;None
+620;Blake;Roddenberry;Enigma;1629;3826;62;Terran Confederation;O7 I;None
+621;Drake;Roddenberry;Enigma;1333;4043;284;Terran Confederation;F8 V;None
+622;Dyson;Roddenberry;Enigma;1414;3749;182;Terran Confederation;M4 I;None
+623;Exile;Roddenberry;Enigma;1645;3948;302;Terran Confederation;B5 V;None
+624;Gerrold;Roddenberry;Enigma;1274;3923;133;Terran Confederation;F8 VI;None
+625;Halderman;Roddenberry;Enigma;1233;3806;341;Terran Confederation;K3 V;None
+626;Heinlein;Roddenberry;Enigma;1577;3915;313;Terran Confederation;O8 V;None
+627;Herbert;Roddenberry;Enigma;1229;4082;361;Terran Confederation;M6 V;None
+628;Langston;Roddenberry;Enigma;1431;4012;404;Terran Confederation;B1 III;None
+629;Lucas;Roddenberry;Enigma;1564;4079;278;Terran Confederation;F6 III;None
+630;McCaffrey;Roddenberry;Enigma;1694;4193;287;Union of Border Worlds;K4 V;None
+631;Mustakas;Roddenberry;Enigma;1463;4106;75;Terran Confederation;G5 V;None
+632;Spielburg;Roddenberry;Enigma;1266;4170;241;Terran Confederation;G1 V;None
+633;Steakly;Roddenberry;Enigma;1385;4127;372;Terran Confederation;F7 III;None
+634;Stirling;Roddenberry;Enigma;1523;3773;320;Terran Confederation;F2 V;None
+635;Wetland;Roddenberry;Enigma;1699;4108;376;Union of Border Worlds;B3 I;None
+636;Ayers;Deneb;Epsilon;2877;3569;211;Union of Border Worlds;F8 V;None
+637;Canewdon;Deneb;Epsilon;2770;3352;37;Union of Border Worlds;K6 V;None
+638;Chanel;Deneb;Epsilon;2456;3451;242;Union of Border Worlds;K4 V;None
+639;Deneb;Deneb;Epsilon;2740;3150;473;Union of Border Worlds;M7 V;None
+640;Epsilon Prime / Epsilon Prima;Deneb;Epsilon;2564;3547;254;Union of Border Worlds;G6 V;None
+641;Goddard;Deneb;Epsilon;2587;3247;240;Terran Confederation;F9 IV;None
+642;Leyton;Deneb;Epsilon;2690;3340;224;Union of Border Worlds;M5 V;None
+643;Locanda;Deneb;Epsilon;2632;3145;476;Terran Confederation;F4 V;None
+644;Logo;Deneb;Epsilon;2653;3204;241;Terran Confederation;F5 V;None
+645;Morpheus;Deneb;Epsilon;2470;3263;106;Terran Confederation;B1 III;None
+646;Orestes;Deneb;Epsilon;2834;3422;323;Union of Border Worlds;K7 III;None
+647;Orsini / Orsine;Deneb;Epsilon;2497;3137;204;Terran Confederation;K5 V;None
+648;Peleus;Deneb;Epsilon;2540;3379;427;Union of Border Worlds;A3 V;None
+649;Perillia;Deneb;Epsilon;2885;3325;228;Union of Border Worlds;K5 V;None
+650;Primus;Deneb;Epsilon;2636;3454;292;Terran Confederation;K8 III;None
+651;Ross 34F;Deneb;Epsilon;2729;3546;234;Union of Border Worlds;K7 III;None
+652;Tangier;Deneb;Epsilon;2548;3195;384;Terran Confederation;M0 III;None
+653;Torgo / Ko'Bar Yagar;Deneb;Epsilon;2792;3215;326;Union of Border Worlds;M6 V;None
+654;Anatic Prime;Sa'Kahn;Epsilon;3192;3070;416;Union of Border Worlds;A3 I;None
+655;Border Zone;Sa'Kahn;Epsilon;3517;3305;372;Kilrathi Assembly of Clans;K4 III;None
+656;Cephid 17;Sa'Kahn;Epsilon;3462;3536;370;Kilrathi Assembly of Clans;B8 V;None
+657;K'hotan;Sa'Kahn;Epsilon;3407;3138;249;Kilrathi Assembly of Clans;G1 V;None
+658;Lennox;Sa'Kahn;Epsilon;3046;3134;368;Union of Border Worlds;F1 V;None
+659;Masa;Sa'Kahn;Epsilon;3352;3117;164;Union of Border Worlds;G6 V;None
+660;Pasqual;Sa'Kahn;Epsilon;3188;3420;352;Kilrathi Assembly of Clans;M6 V;None
+661;Qual'lat;Sa'Kahn;Epsilon;3525;3204;234;Kilrathi Assembly of Clans;F4 V;None
+662;Silenos;Sa'Kahn;Epsilon;3043;3307;340;Union of Border Worlds;K2 V;None
+663;Tas Mahran;Sa'Kahn;Epsilon;3416;3462;221;Kilrathi Assembly of Clans;K5 III;None
+664;T'kon;Sa'Kahn;Epsilon;3331;3351;375;Kilrathi Assembly of Clans;A4 IV;None
+665;T'kon H'hra;Sa'Kahn;Epsilon;3458;3382;310;Kilrathi Assembly of Clans;G8 V;None
+666;T'kon Meth;Sa'Kahn;Epsilon;3231;3257;280;Kilrathi Assembly of Clans;M2 III;None
+667;T'Rel Meh;Sa'Kahn;Epsilon;3050;3481;219;Kilrathi Assembly of Clans;F4 V;None
+668;Ulsima;Sa'Kahn;Epsilon;3259;3144;262;Union of Border Worlds;F2 V;None
+669;Valgard;Sa'Kahn;Epsilon;3232;3566;186;Kilrathi Assembly of Clans;B8 III;None
+670;Verula;Sa'Kahn;Epsilon;3105;3083;540;Union of Border Worlds;F5 V;None
+671;Vigrid;Sa'Kahn;Epsilon;3025;3591;165;Kilrathi Assembly of Clans;A2 V;None
+672;Anchorage;Tr'L Rass;Epsilon;3276;3978;292;Kilrathi Assembly of Clans;F4 V;None
+673;Asgard;Tr'L Rass;Epsilon;3186;4111;326;Kilrathi Assembly of Clans;M3 V;None
+674;Bifrost;Tr'L Rass;Epsilon;3434;3889;305;Kilrathi Assembly of Clans;F9 VI;None
+675;B'shriss;Tr'L Rass;Epsilon;3118;3914;383;Kilrathi Assembly of Clans;K0 VI;None
+676;Ingraya;Tr'L Rass;Epsilon;3523;3985;378;Kilrathi Assembly of Clans;B7 I;None
+677;Jakal;Tr'L Rass;Epsilon;3464;4129;292;Kilrathi Assembly of Clans;M5 VI;None
+678;Jakarta;Tr'L Rass;Epsilon;3400;3996;300;Kilrathi Assembly of Clans;F7 III;None
+679;Jotunheim;Tr'L Rass;Epsilon;3259;3840;213;Kilrathi Assembly of Clans;M5 II;None
+680;Kabla Meth;Tr'L Rass;Epsilon;3040;3741;381;Kilrathi Assembly of Clans;K6 V;None
+681;K'nag Rahl;Tr'L Rass;Epsilon;3372;3728;412;Kilrathi Assembly of Clans;K3 V;None
+682;K'nag Rha;Tr'L Rass;Epsilon;3209;3699;367;Kilrathi Assembly of Clans;M4 V;None
+683;Tr'L Rass (1);Tr'L Rass;Epsilon;3419;3668;81;Kilrathi Assembly of Clans;K8 V;None
+684;Tr'L Rass (2);Tr'L Rass;Epsilon;3515;3713;171;Kilrathi Assembly of Clans;F8 V;None
+685;Tr'L Rass (3);Tr'L Rass;Epsilon;3342;4057;316;Kilrathi Assembly of Clans;F2 I;None
+686;Antares;Antares;Epsilon;2620;3893;149;Union of Border Worlds;K8 V;None
+687;Bistangio / Bistango;Antares;Epsilon;2436;3835;519;Union of Border Worlds;F4 V;None
+688;Charon;Antares;Epsilon;2858;3688;287;Kilrathi Assembly of Clans;B7 V;None
+689;Circe;Antares;Epsilon;2420;3669;396;Union of Border Worlds;K4 V;None
+690;Corsair;Antares;Epsilon;2897;3884;409;Kilrathi Assembly of Clans;M5 V;None
+691;D'vd tang;Antares;Epsilon;2820;4051;399;Kilrathi Assembly of Clans;K1 V;None
+692;Firekka;Antares;Epsilon;2708;3892;203;Firekkan Planetary Alliance;G4 III;None
+693;Granita;Antares;Epsilon;2556;3705;389;Union of Border Worlds;G8 V;None
+694;Khar Tahk;Antares;Epsilon;2794;4164;223;Kilrathi Assembly of Clans;F6 V;None
+695;Khar-Sa;Antares;Epsilon;2634;4137;391;Kilrathi Assembly of Clans;G2 III;None
+696;K'k Than;Antares;Epsilon;2611;4043;204;Kilrathi Assembly of Clans;F2 III;None
+697;K'ta Mek;Antares;Epsilon;2692;3754;183;Kilrathi Assembly of Clans;B4 V;None
+698;Midguard;Antares;Epsilon;2802;3787;207;Kilrathi Assembly of Clans;K9 II;None
+699;Natanya / N'Tanya;Antares;Epsilon;2649;3973;256;Kilrathi Assembly of Clans;A7 V;None
+700;Shariha;Antares;Epsilon;2423;4023;278;Kilrathi Assembly of Clans;A0 III;None
+701;Sharm;Antares;Epsilon;2451;3768;274;Kilrathi Assembly of Clans;M2 V;None
+702;S'thran-Pak;Antares;Epsilon;2893;3994;434;Kilrathi Assembly of Clans;M4 III;None
+703;Tau Ceti;Antares;Epsilon;2746;3703;440;Terran Confederation;K6 V;None
+704;T'Kirsa;Antares;Epsilon;2696;3820;366;Firekkan Planetary Alliance;K8 V;None
+705;Trafalgar;Antares;Epsilon;2428;3941;294;Union of Border Worlds;B6 III;None
+706;Tv'x Aq;Antares;Epsilon;2432;4190;253;Kilrathi Assembly of Clans;G7 V;None
+707;Veratek;Antares;Epsilon;2577;3789;196;Terran Confederation;B4 V;None
+708;Veronica;Antares;Epsilon;2546;3840;301;Union of Border Worlds;A8 V;None
+709;Yarin;Antares;Epsilon;2652;3675;228;Terran Confederation;F9 IV;None
+710;Gorth;Tr'K H'hra ?;M'Shrak;3714;3347;261;Kilrathi Assembly of Clans;A4 I;None
+711;Hhallas;Tr'K H'hra ?;M'Shrak;4065;3082;276;Kilrathi Assembly of Clans;K3 V;None
+712;Tr'K H'hra (1);Tr'K H'hra ?;M'Shrak;3642;3104;177;Kilrathi Assembly of Clans;G7 IV;None
+713;Tr'K H'hra (2);Tr'K H'hra ?;M'Shrak;3865;3113;279;Kilrathi Assembly of Clans;G3 III;None
+714;Tr'K H'hra (3);Tr'K H'hra ?;M'Shrak;4089;3190;239;Kilrathi Assembly of Clans;K6 V;None
+715;Tr'K H'hra (4);Tr'K H'hra ?;M'Shrak;3823;3299;270;Kilrathi Assembly of Clans;K6 III;None
+716;Tr'K H'hra (5);Tr'K H'hra ?;M'Shrak;3650;3307;283;Kilrathi Assembly of Clans;M6 V;None
+717;Tr'K H'hra (6);Tr'K H'hra ?;M'Shrak;4072;3375;337;Kilrathi Assembly of Clans;K6 I;None
+718;Tr'K H'hra (7);Tr'K H'hra ?;M'Shrak;3996;3583;271;Kilrathi Assembly of Clans;K1 V;None
+719;Tr'K H'hra (8);Tr'K H'hra ?;M'Shrak;3883;3499;212;Kilrathi Assembly of Clans;M3 V;None
+720;Tr'K H'hra (9);Tr'K H'hra ?;M'Shrak;3750;3481;342;Kilrathi Assembly of Clans;A7 V;None
+721;Kur'u Som'Mers (1);Kur'u Som'Mers;M'Shrak;4242;3116;409;Kilrathi Assembly of Clans;F8 V;None
+722;Kur'u Som'Mers (2);Kur'u Som'Mers;M'Shrak;4653;3177;307;Kilrathi Assembly of Clans;F7 III;None
+723;Kur'u Som'Mers (3);Kur'u Som'Mers;M'Shrak;4534;3209;356;Kilrathi Assembly of Clans;K6 V;None
+724;Kur'u Som'Mers (4);Kur'u Som'Mers;M'Shrak;4352;3451;378;Kilrathi Assembly of Clans;G2 III;None
+725;Kur'u Som'Mers (5);Kur'u Som'Mers;M'Shrak;4515;3434;297;Kilrathi Assembly of Clans;M9 II;None
+726;Kur'u Som'Mers (6);Kur'u Som'Mers;M'Shrak;4681;3401;303;Kilrathi Assembly of Clans;B2 V;None
+727;Kur'u Som'Mers (7);Kur'u Som'Mers;M'Shrak;4665;3542;456;Kilrathi Assembly of Clans;K7 V;None
+728;Shata;Kur'u Som'Mers;M'Shrak;4359;3486;275;Kilrathi Assembly of Clans;G5 V;None
+729;Sorn;Kur'u Som'Mers;M'Shrak;4238;3497;373;Kilrathi Assembly of Clans;K8 I;None
+730;K'sath'que (1);K'sath'que;M'Shrak;4249;3700;171;Kilrathi Assembly of Clans;F2 III;None
+731;K'sath'que (10);K'sath'que;M'Shrak;4688;4046;414;Kilrathi Assembly of Clans;F9 I;None
+732;K'sath'que (11);K'sath'que;M'Shrak;4267;4162;297;Kilrathi Assembly of Clans;G2 V;None
+733;K'sath'que (12);K'sath'que;M'Shrak;4417;4148;175;Kilrathi Assembly of Clans;K8 V;None
+734;K'sath'que (13);K'sath'que;M'Shrak;4675;4162;96;Kilrathi Assembly of Clans;M3 III;None
+735;K'sath'que (2);K'sath'que;M'Shrak;4380;3701;121;Kilrathi Assembly of Clans;K5 V;None
+736;K'sath'que (3);K'sath'que;M'Shrak;4534;3674;246;Kilrathi Assembly of Clans;B7 II;None
+737;K'sath'que (4);K'sath'que;M'Shrak;4605;3772;147;Kilrathi Assembly of Clans;F7 V;None
+738;K'sath'que (5);K'sath'que;M'Shrak;4692;3866;64;Kilrathi Assembly of Clans;M2 V;None
+739;K'sath'que (6);K'sath'que;M'Shrak;4420;3852;276;Kilrathi Assembly of Clans;G6 III;None
+740;K'sath'que (7);K'sath'que;M'Shrak;4540;3903;355;Kilrathi Assembly of Clans;G0 V;None
+741;K'sath'que (8);K'sath'que;M'Shrak;4368;4011;280;Kilrathi Assembly of Clans;G2 I;None
+742;K'sath'que (9);K'sath'que;M'Shrak;4499;4019;411;Kilrathi Assembly of Clans;G6 V;None
+743;Utara;K'sath'que;M'Shrak;4263;3892;339;Kilrathi Assembly of Clans;K4 VI;None
+744;Dath'que (1);Dath'que;M'Shrak;3824;3671;320;Kilrathi Assembly of Clans;K4 V;None
+745;Dath'que (10);Dath'que;M'Shrak;3777;4199;404;Kilrathi Assembly of Clans;B6 V;None
+746;Dath'que (11);Dath'que;M'Shrak;3896;4160;217;Kilrathi Assembly of Clans;O5 V;None
+747;Dath'que (12);Dath'que;M'Shrak;4035;4162;309;Kilrathi Assembly of Clans;K8 III;None
+748;Dath'que (2);Dath'que;M'Shrak;3965;3725;506;Kilrathi Assembly of Clans;K6 VI;None
+749;Dath'que (3);Dath'que;M'Shrak;3908;3816;421;Kilrathi Assembly of Clans;M7 III;None
+750;Dath'que (4);Dath'que;M'Shrak;3609;3780;244;Kilrathi Assembly of Clans;O8 V;None
+751;Dath'que (5);Dath'que;M'Shrak;3735;3931;194;Kilrathi Assembly of Clans;K9 V;None
+752;Dath'que (6);Dath'que;M'Shrak;3925;3970;240;Kilrathi Assembly of Clans;K3 IV;None
+753;Dath'que (7);Dath'que;M'Shrak;4086;3978;116;Kilrathi Assembly of Clans;M4 V;None
+754;Dath'que (8);Dath'que;M'Shrak;3657;4181;402;Kilrathi Assembly of Clans;O0 IV;None
+755;Dath'que (9);Dath'que;M'Shrak;3814;4106;423;Kilrathi Assembly of Clans;M5 V;None
+756;Evian;Dath'que;M'Shrak;3801;4016;333;Kilrathi Assembly of Clans;A1 V;None
+757;M'shrak;Dath'que;M'Shrak;4087;3740;292;Kilrathi Assembly of Clans;M3 IV;None
+758;Paghk;Dath'que;M'Shrak;3692;3676;250;Kilrathi Assembly of Clans;G8 VI;None
+759;Terragon;Dath'que;M'Shrak;3655;4016;495;Kilrathi Assembly of Clans;F1 V;None
+760;Buford's World;Quadrant 1;Landreich;1697;4690;351;Free Republic of the Landreich;G1 III;None
+761;Gainer's World;Quadrant 1;Landreich;1513;4293;231;Terran Confederation;F8 I;None
+762;Ghorkos;Quadrant 1;Landreich;1727;4804;498;Kilrathi Assembly of Clans;B8 III;None
+763;Gonwyn's Glory;Quadrant 1;Landreich;1278;4406;320;Free Republic of the Landreich;F3 IV;None
+764;Greenhouse;Quadrant 1;Landreich;1434;4762;160;Free Republic of the Landreich;M5 VI;None
+765;Ilios;Quadrant 1;Landreich;1603;4795;371;Free Republic of the Landreich;A1 V;None
+766;Landreich;Quadrant 1;Landreich;1571;4686;259;Free Republic of the Landreich;A8 V;None
+767;Landreich 1 (1);Quadrant 1;Landreich;1744;4611;70;Kilrathi Assembly of Clans;A0 III;None
+768;Landreich 1 (2);Quadrant 1;Landreich;1337;4616;381;Free Republic of the Landreich;A6 III;None
+769;New Plains;Quadrant 1;Landreich;1310;4300;217;Union of Border Worlds;G1 I;None
+770;New Samarkand;Quadrant 1;Landreich;1460;4628;292;Free Republic of the Landreich;B5 V;None
+771;New Sydney;Quadrant 1;Landreich;1472;4354;235;Free Republic of the Landreich;A2 III;None
+772;Oasis;Quadrant 1;Landreich;1553;4621;366;Oasian Neutral System;M6 VI;None
+773;Oecumene;Quadrant 1;Landreich;1600;4544;267;Free Republic of the Landreich;G5 VI;None
+774;Orleans;Quadrant 1;Landreich;1443;4500;180;Free Republic of the Landreich;F5 V;None
+775;Vaku;Quadrant 1;Landreich;1710;4413;153;Kilrathi Assembly of Clans;K9 V;None
+776;Baka Kar;Halgkrak;Landreich;2066;4657;217;Kilrathi Assembly of Clans;M4 V;None
+777;Dharkyll;Halgkrak;Landreich;2051;4758;311;Kilrathi Assembly of Clans;M1 V;None
+778;Dioscuri;Halgkrak;Landreich;1808;4488;490;Kilrathi Assembly of Clans;M9 II;None
+779;Dolos;Halgkrak;Landreich;1985;4450;250;Kilrathi Assembly of Clans;K6 V;None
+780;Fawcett's World;Halgkrak;Landreich;1881;4499;223;Kilrathi Assembly of Clans;F1 V;None
+781;Halgkrak (1);Halgkrak;Landreich;2098;4609;449;Kilrathi Assembly of Clans;F7 VI;None
+782;Halgkrak (10);Halgkrak;Landreich;2318;4797;289;Kilrathi Assembly of Clans;K3 V;None
+783;Halgkrak (11) ?;Halgkrak;Landreich;1923;4581;345;Kilrathi Assembly of Clans;K3 III;None
+784;Halgkrak (2);Halgkrak;Landreich;1983;4322;459;Kilrathi Assembly of Clans;M8 I;None
+785;Halgkrak (3);Halgkrak;Landreich;2125;4358;314;Kilrathi Assembly of Clans;K8 VI;None
+786;Halgkrak (4);Halgkrak;Landreich;2245;4405;205;Kilrathi Assembly of Clans;F7 V;None
+787;Halgkrak (5);Halgkrak;Landreich;2136;4545;357;Kilrathi Assembly of Clans;B2 V;None
+788;Halgkrak (6);Halgkrak;Landreich;2274;4555;136;Kilrathi Assembly of Clans;G4 V;None
+789;Halgkrak (7);Halgkrak;Landreich;2296;4679;229;Kilrathi Assembly of Clans;B3 V;None
+790;Halgkrak (8);Halgkrak;Landreich;2196;4717;383;Kilrathi Assembly of Clans;F3 V;None
+791;Halgkrak (9);Halgkrak;Landreich;2200;4772;535;Kilrathi Assembly of Clans;G6 I;None
+792;Hallin;Halgkrak;Landreich;1833;4594;313;Kilrathi Assembly of Clans;G7 V;None
+793;Khrovat;Halgkrak;Landreich;1938;4806;139;Kilrathi Assembly of Clans;K2 V;None
+794;Pisoes;Halgkrak;Landreich;1824;4384;274;Kilrathi Assembly of Clans;F5 I;None
+795;Preesg;Halgkrak;Landreich;1841;4804;247;Kilrathi Assembly of Clans;O9 II;None
+796;Vordran;Halgkrak;Landreich;1908;4696;212;Kilrathi Assembly of Clans;F2 VI;None
+797;42-33 Beta;Quadrant 3;Landreich;1959;5147;237;Unexplored System;M6 III;None
+798;Black Hole system 299;Quadrant 3;Landreich;1902;4989;254;Kilrathi Assembly of Clans;A6 IV;None
+799;Jigada;Quadrant 3;Landreich;2092;4940;423;Kilrathi Assembly of Clans;K4 V;None
+800;Landreich 3 (1);Quadrant 3;Landreich;2223;4881;295;Kilrathi Assembly of Clans;B2 V;None
+801;Landreich 3 (2);Quadrant 3;Landreich;2312;4926;161;Kilrathi Assembly of Clans;F0 V;None
+802;Landreich 3 (3);Quadrant 3;Landreich;2184;5090;347;Unexplored System;G4 V;None
+803;Landreich 3 (4);Quadrant 3;Landreich;2074;5121;106;Unexplored System;G3 VI;None
+804;Landreich 3 (5);Quadrant 3;Landreich;1856;5146;198;Unexplored System;O5 V;None
+805;M421A;Quadrant 3;Landreich;1991;4879;203;Kilrathi Assembly of Clans;F2 V;None
+806;Seti Beta;Quadrant 3;Landreich;1874;4895;378;Kilrathi Assembly of Clans;G4 III;None
+807;Balthazar;Quadrant 4;Landreich;1650;4956;317;Free Republic of the Landreich;K9 II;None
+808;Jab;Quadrant 4;Landreich;1694;5051;299;Free Republic of the Landreich;B8 III;None
+809;Landreich 4 (1);Quadrant 4;Landreich;1737;5125;238;Unexplored System;M6 III;None
+810;Siva;Quadrant 4;Landreich;1720;4886;274;Free Republic of the Landreich;M2 V;None
+811;Tara;Quadrant 4;Landreich;1573;4886;293;Free Republic of the Landreich;M5 III;None
+812;Hom;Tri-System;Tri-System;2205;546;356;Tri-System Confederacy;B7 III;None
+813;Irrulan;Tri-System;Tri-System;2220;429;353;Tri-System Confederacy;F3 III;None
+814;Issac;Tri-System;Tri-System;2311;468;293;Tri-System Confederacy;F1 V;None

@@ -68,6 +68,14 @@ def numToSize(type,size):
 			elif (size==2):
 				rad = 150000;		
 		return rad
+def RemoveStr(st, typ):
+	where=st.find(typ)
+	while (where!=-1):
+		st = st[0:where]+st[where+1:]
+		where=st.find(typ)
+	return st
+def Prettify (st):	
+	return RemoveStr(RemoveStr(RemoveStr(RemoveStr(RemoveStr(st,'"'),"'")," "),"/"),"\\");
 def TypToChar(ch):
 	ch.capitalize()
 	if (ch=='O'):
@@ -120,12 +128,12 @@ if 1:
 	f = open (arg)
 	lis = f.readlines();
 	olist=[]
-	lis.sort()
+#	lis.sort()
 	for l in lis:
 		if (len(olist)!=0):
 			if (l==olist[len(olist)-1]):
 				continue
-		olist=olist+[l];
+		olist=olist+[l];	
 	f.close()
 #	f = open (arg,"w")
 #	f.writelines(olist);
@@ -138,22 +146,24 @@ if 1:
 			jumps[m[0]]=[]
 		if not m[2] in jumps:
 			jumps[m[2]]=[]
-		jumps[m[0]].append(m[2])
-		jumps[m[2]].append(m[0])
+		if (not m[2] in jumps[m[0]]):
+			jumps[m[0]].append(m[2])
+		if (not m[0] in jumps[m[2]]):
+			jumps[m[2]].append(m[0])
 #now to read this sucker
 	for i in range(len(olist)):
 		olist[i]=csv.semiColonSeparatedList(olist[i],';')
-	
 	tab = csv.makeTable(olist );
 	secs={}
 	for i in tab:
 		sys=tab[i]
 		h={}
-		sec=sys["SectorName"]
-		name = sys["SystemName"]
+#		print i + str(sys)
+		sec=Prettify(sys["SectorName"])
+		name = Prettify(sys["SystemName"])
 		h["sun_radius"]=str(codeToSize(sys["StarColorType"]))
 		h["xyz"]=sys["XCoordinates"]+" "+sys["YCoordinates"]+" "+sys["ZCoordinates"];
-		h["quadrant"]=sys["QuadrantName"]
+		h["quadrant"]=Prettify(sys["QuadrantName"])
 		h["faction"]=InfluenceToFaction(sys["Influence"])
 		jamp=""
 		if (i in jumps):
@@ -163,7 +173,7 @@ if 1:
 					continue
 				if (jamp!=""):
 					jamp+=" "
-				jamp+=tab[k]["SystemName"]
+				jamp+=Prettify(tab[k]["SectorName"])+"/"+Prettify(tab[k]["SystemName"])
 			h["jumps"]=jamp
 		else:
 			print "no jumps for "+i+" "+name

@@ -72,6 +72,7 @@ def semiColonSeparatedList(s, delim):
 def makeTable(llist, keynum=0):
 	keylist = llist[0];
 	ret={}
+	print "lust" +str(keylist)
 	for l in llist[1:]:
 		key=l[keynum]
 		mhash={}
