@@ -245,7 +245,7 @@ void Mission::DirectorEnd(){
 #else
   struct passwd *pwent;
   pwent=getpwuid(getuid());
-  printf("home save dir: %s\n",pwent->pw_dir);
+  //  printf("home save dir: %s\n",pwent->pw_dir);
 
   string var_file=string(pwent->pw_dir)+string(DELIMSTR)+string(HOMESUBDIR)+string(DELIMSTR)+string("default-player.variables");
   //var_out.open("/tmp/default-player.variables");

@@ -1,3 +1,8 @@
+2002-02-18 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* little improvements to random_launch.c
+
+	
 2002-02-17 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added omap object type to scripting (sort of struct)
