@@ -149,6 +149,8 @@ dnl If the console annoys you then remove "-luser32 -lgdi32" and replace
 dnl with "-mwindows"
 if test "x$is_win32" = "xyes" ; then
     TR_LIBS="$TR_LIBS -luser32 -lgdi32"
+	TR_CFLAGS="$TR_CFLAGS -DNOMINMAX"
+	TR_CXXFLAGS="$TR_CXXFLAGS -DNOMINMAX"
 fi
 
 dnl --------------------------------------------------------------------------
