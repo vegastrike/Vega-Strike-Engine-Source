@@ -515,17 +515,18 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
 	    if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
 	      if (!AUDIsPlaying(LockedSound)) {
 		AUDStartPlaying(LockedSound);
-		AUDAdjustSound (LockedSound,Position(),GetVelocity());
 		AUDStopPlaying(LockingSound);	      
 	      }
+	      AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
 	    }else if (mounts[i].time_to_lock>0)  {
 	      locking=true;
 	      if (!AUDIsPlaying(LockingSound)) {
 
 		AUDStartPlaying(LockingSound);	      
-		AUDAdjustSound (LockingSound,Position(),GetVelocity());
+		
 
 	      }
+	      AUDAdjustSound (LockingSound,Position(),GetVelocity());
 
 	    }
 	  }
