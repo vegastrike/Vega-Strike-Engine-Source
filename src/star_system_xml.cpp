@@ -88,7 +88,8 @@ namespace StarXML {
     TERRAIN,
     CONTTERRAIN,
     MASS,
-    BUILDING
+    BUILDING,
+    VEHICLE
   };
 
   const EnumMap::Pair element_names[] = {
@@ -104,7 +105,8 @@ namespace StarXML {
     EnumMap::Pair ("Ambient",AMB),
     EnumMap::Pair ("Terrain",TERRAIN),
     EnumMap::Pair ("ContinuousTerrain",CONTTERRAIN),
-    EnumMap::Pair ("Building",BUILDING)
+    EnumMap::Pair ("Building",BUILDING),
+    EnumMap::Pair ("Vehicle",VEHICLE)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -143,7 +145,7 @@ namespace StarXML {
     EnumMap::Pair ("Mass", MASS)
   };
 
-  const EnumMap element_map(element_names, 13);
+  const EnumMap element_map(element_names, 14);
   const EnumMap attribute_map(attribute_names, 34);
 }
 
@@ -481,6 +483,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     break;
   case UNIT:
   case BUILDING:
+  case VEHICLE:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
     S = Vector (0,1,0);
@@ -548,11 +551,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-1,ourmat,curlights,true,faction);
     } else {
       if (xml->parentterrain!=NULL) {
-	xml->moons.push_back ((Planet *)new Building (xml->parentterrain,filename,true,false,faction));
+	xml->moons.push_back ((Planet *)new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction));
 	xml->moons.back()->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	xml->moons.back()->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
       }else if (xml->ct!=NULL) {
-	xml->moons.push_back ((Planet *)new Building (xml->ct,filename,true,false,faction));
+	xml->moons.push_back ((Planet *)new Building (xml->ct,elem==VEHICLE,filename,true,false,faction));
 	xml->moons.back()->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	xml->moons.back()->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
       }else {

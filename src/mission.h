@@ -45,6 +45,7 @@ class Flightgroup {
   string type; // unit type
   string ainame; // .agg.xml and .int.xml get appended to this
   int terrain_nr;// which terrain to use. -1 for normal unit -2 for mission ter
+  enum {UNIT,VEHICLE, BUILDING} unittype;
   int waves,nr_ships; // number of waves, number of ships per wave
   float pos[3];
   float rot[3];

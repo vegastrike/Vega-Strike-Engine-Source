@@ -96,6 +96,9 @@ bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float TotalTerrain
   float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,  norm);
   if (tmp>-FLT_MAX) {
     Location = Transform (transformation,nonlinear_transform->Transform (Vector (Loc.i,tmp,Loc.k)));
+    norm = TransformNormal (transformation,nonlinear_transform->TransformNormal (Location, norm));
+    norm.Normalize();
+
     return true;
   }
   return false;
