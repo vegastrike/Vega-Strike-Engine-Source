@@ -190,23 +190,6 @@ olist_t *Mission::getOListObject(missionNode *node,int mode,varInst *ovi){
 	return(my_object);
 }
 
-string Mission::method_str(missionNode *node){
-  return  node->attr_value("module")+"."+node->attr_value("name");
-}
-
-missionNode *Mission::getArgument(missionNode *node,int mode,int arg_nr){
-      if(node->subnodes.size() < arg_nr+1){
-	char buf[200];
-	sprintf(buf," needs at least %d arguments",arg_nr+1);
-	fatalError(node,mode,method_str(node)+buf);
-	assert(0);
-      }
-
-      missionNode *snode=(missionNode *)node->subnodes[arg_nr];
-
-      return snode;
-}
-
 varInst *Mission::call_olist_at(missionNode *node,int mode,varInst *ovi,int index){
   olist_t *olist=getOListObject(node,mode,ovi);
   	if(index>=olist->size()){
@@ -237,20 +220,6 @@ void Mission::call_olist_push_back(missionNode *node,int mode,varInst *ovi,varIn
 
 }
 
-varInst *Mission::getObjectArg(missionNode *node,int mode){
-      if(node->subnodes.size()<1){
-	fatalError(node,mode,method_str(node)+" needs an object as first  argument");
-	assert(0);
-      }
-
-      missionNode *snode=(missionNode *)node->subnodes[0];
-      varInst *ovi=doObjectVar(snode,mode);
-
-      debug(3,node,mode,node->attr_value("module")+"."+node->attr_value("name")+" object: ");
-      printVarInst(3,ovi);
-
-      return ovi;
-}
 
 varInst *Mission::call_olist_new(missionNode *node,int mode){
   varInst *viret=new varInst;

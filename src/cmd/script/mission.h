@@ -309,7 +309,8 @@ void printNode(missionNode *node,int mode);
  varInst * callRnd(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
-
+varInst *  call_isNull(missionNode *node,int mode);
+varInst * call_io_printf(missionNode *node,int mode);
 
 string method_str(missionNode *node);
  missionNode *getArgument(missionNode *node,int mode,int arg_nr);
@@ -326,6 +327,9 @@ varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 
 varInst * call_unit(missionNode *node,int mode);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
+
+ // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
+ void call_unit_launch(Flightgroup *fg);
 
  varInst *call_string(missionNode *node,int mode);
 void  call_string_print(missionNode *node,int mode,varInst *ovi);

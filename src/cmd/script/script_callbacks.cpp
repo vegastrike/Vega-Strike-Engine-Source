@@ -91,6 +91,9 @@ varInst *Mission::doCall(missionNode *node,int mode){
     if(node->script.name=="PrintFloats"){
       vi=callPrintFloats(node,mode);
     }
+    else if(node->script.name=="printf"){
+      vi=call_io_printf(node,mode);
+    }
   }
   else if(module=="_std"){
     if(node->script.name=="Rnd"){
@@ -98,6 +101,9 @@ varInst *Mission::doCall(missionNode *node,int mode){
     }
     else if(node->script.name=="getGameTime"){
       vi=callGetGameTime(node,mode);
+    }
+    else if(node->script.name=="isNull"){
+      vi=call_isNull(node,mode);
     }
   }
   else if(module=="_olist"){
@@ -121,6 +127,17 @@ varInst *Mission::doCall(missionNode *node,int mode){
 
 extern double gametime;
 
+varInst *Mission::call_isNull(missionNode *node,int mode){
+  varInst *ovi=getObjectArg(node,mode);
+
+  varInst *viret=new varInst;
+  
+  viret->type=VAR_BOOL;
+  viret->bool_val=(ovi->object==NULL);
+
+  return viret;
+}
+
 varInst *Mission::callGetGameTime(missionNode *node,int mode){
   varInst *vi=new varInst;
 
@@ -131,7 +148,66 @@ varInst *Mission::callGetGameTime(missionNode *node,int mode){
   return vi;
 }
 
+varInst *Mission::call_io_printf(missionNode *node,int mode){
+  return NULL;
+#if 0
+  missionNode *stringnode=getArgument(node,mode,0);
+  varInst *str_vi=checkObjectExpr(stringnode,mode);
+  if(str_vi->type!=VAR_OBJECT || (str_vi->type==VAR_OBJECT && str_vi->objectname!="string")){
+    fatalError(node,mode,"io.printf needs string object as first arg");
+    assert(0);
+  }
 
+  int nr_of_args=node->subnodes.size();
+  int current_arg=1;
+  string * fullstringptr;
+  string fullstring;
+
+  if(mode==SCRIPT_RUN){
+    fullstringptr=(string *)str_vi->object;
+    fullstring=*fullstringptr;
+
+  string endstring=fullstring;
+
+  while(current_arg<nr_of_args){
+
+  int breakpos=endstring.find("%",0);
+
+  string beforestring=endstring.substr(0,breakpos);
+
+  printf("-%s-",beforestring.c_str());
+
+  string breakstring=endstring.substr(breakpos,breakpos+1);
+
+  if(breakstring[1]=='f'){
+    missionNode *anode=getArgument(node,mode,current_arg);
+    float res=checkFloatExpr(anode,mode);
+
+    printf("%f",res);
+  }
+  else if(breakstring[1]=='s'){
+    missionNode *anode=getArgument(node,mode,current_arg);
+    varInst *res_vi=doObjectVar(anode,mode);
+    if(res_vi->type!=VAR_OBJECT || (res_vi->type==VAR_OBJECT && res_vi->objectname!="string")){
+      fatalError(node,mode,"io.printf needs string object as some arg");
+      assert(0);
+    }
+    
+    string * strptr=(string *)res_vi->object;
+
+    printf("%s",strptr->c_str());
+  }
+
+  endstring=endstring.substr(breakpos+2,endstring.size()-1);
+  current_arg++;
+  }
+  }
+
+  varInst *viret=new varInst;
+  viret->type=VAR_VOID;
+  return viret;
+#endif
+}
 
 varInst *Mission::callPrintFloats(missionNode *node,int mode){
   string s1=node->attr_value("s1");
@@ -170,4 +246,37 @@ varInst *Mission::callRnd(missionNode *node,int mode){
   debug(7,node,mode,buffer);
 
   return vi;
+}
+
+varInst *Mission::getObjectArg(missionNode *node,int mode){
+      if(node->subnodes.size()<1){
+	fatalError(node,mode,method_str(node)+" needs an object as first  argument");
+	assert(0);
+      }
+
+      missionNode *snode=(missionNode *)node->subnodes[0];
+      varInst *ovi=doObjectVar(snode,mode);
+
+      debug(3,node,mode,node->attr_value("module")+"."+node->attr_value("name")+" object: ");
+      printVarInst(3,ovi);
+
+      return ovi;
+}
+
+
+string Mission::method_str(missionNode *node){
+  return  node->attr_value("module")+"."+node->attr_value("name");
+}
+
+missionNode *Mission::getArgument(missionNode *node,int mode,int arg_nr){
+      if(node->subnodes.size() < arg_nr+1){
+	char buf[200];
+	sprintf(buf," needs at least %d arguments",arg_nr+1);
+	fatalError(node,mode,method_str(node)+buf);
+	assert(0);
+      }
+
+      missionNode *snode=(missionNode *)node->subnodes[arg_nr];
+
+      return snode;
 }

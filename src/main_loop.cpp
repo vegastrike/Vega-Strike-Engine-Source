@@ -315,7 +315,10 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-static void SetTurretAI (Unit * fighter) {
+
+extern void SetTurretAI (Unit * fighter);
+
+ void SetTurretAI (Unit * fighter) {
   
   for (int kk=0;kk<fighter->getNumSubUnits();kk++) {
     fighter->EnqueueAI (new Orders::FireAt(.2,15),kk);

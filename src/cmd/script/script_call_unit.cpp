@@ -41,6 +41,8 @@
 #include "collection.h"
 #include "iterator.h"
 #include "unit.h"
+#include "ai/order.h"
+#include "ai/aggressive.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -52,6 +54,7 @@
 
 /* *********************************************************** */
 
+extern void SetTurretAI (Unit * fighter);
 
 varInst *Mission::call_unit(missionNode *node,int mode){
 
@@ -62,7 +65,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
   if(cmd=="getUnit"){
     missionNode *nr_node=getArgument(node,mode,0);
     int unit_nr=(int)doFloatVar(nr_node,mode);
-      Unit *my_unit=NULL;
+    Unit *my_unit=NULL;
 
     if(mode==SCRIPT_RUN){
       StarSystem *ssystem=_Universe->activeStarSystem();
@@ -83,13 +86,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	  i++;
 	}
       }
-
-      if(my_unit==NULL){
-	fatalError(node,mode,"no such high unit nr");
-	assert(0);
-      }
     }
-    
+
     viret=new varInst;
     viret->type=VAR_OBJECT;
     viret->objectname="unit";
@@ -100,6 +98,59 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     printVarInst(3,viret);
 
     return viret;
+  }
+  else if(cmd=="launch"){
+    missionNode *name_node=getArgument(node,mode,0);
+    varInst *name_vi=checkObjectExpr(name_node,mode);
+    
+    missionNode *faction_node=getArgument(node,mode,1);
+    varInst *faction_vi=checkObjectExpr(faction_node,mode);
+    
+    missionNode *type_node=getArgument(node,mode,2);
+    varInst *type_vi=checkObjectExpr(type_node,mode);
+    
+    missionNode *ai_node=getArgument(node,mode,3);
+    varInst *ai_vi=checkObjectExpr(ai_node,mode);
+    
+    missionNode *nr_node=getArgument(node,mode,4);
+    int nr_of_ships=(int)checkFloatExpr(nr_node,mode);
+
+    missionNode *pos_node[3];
+    float pos[3];
+    for(int i=0;i<3;i++){
+      pos_node[i]=getArgument(node,mode,5+i);
+      pos[i]=checkFloatExpr(pos_node[i],mode);
+    }
+
+    if(mode==SCRIPT_RUN){
+      string name_string=*((string *)name_vi->object);
+      string faction_string=*((string *)faction_vi->object);
+      string type_string=*((string *)type_vi->object);
+      string ai_string=*((string *)ai_vi->object);
+
+
+      Flightgroup *fg=new Flightgroup;
+
+      fg->name=name_string;
+      fg->type=type_string;
+      fg->ainame=ai_string;
+      fg->unittype=Flightgroup::UNIT;
+      fg->terrain_nr=-1;
+      fg->waves=1; // not yet
+      fg->nr_ships=nr_of_ships;
+      fg->pos[0]=pos[0];
+      fg->pos[1]=pos[1];
+      fg->pos[2]=pos[2];
+      for(int i=0;i<3;i++){
+	fg->rot[i]=0.0;
+      }
+      
+      call_unit_launch(fg);
+    }
+
+      viret=new varInst;
+      viret->type=VAR_VOID;
+      return viret;
   }
   else{
     varInst *ovi=getObjectArg(node,mode);
@@ -144,10 +195,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	
 	Flightgroup *fg=my_unit->getFlightgroup();
-	int fgnum=my_unit->getFgSubnumber();
+	  char buffer[100];
+	  int fgnum=0;
 
-	char buffer[100];
-	sprintf(buffer,"%s-%d",fg->name.c_str(),fgnum);
+	if(fg){
+	  fgnum=my_unit->getFgSubnumber();
+	  sprintf(buffer,"%s-%d",fg->name.c_str(),fgnum);
+	}
+	else{
+	  sprintf(buffer,"unknown");
+	}
+
 
 	varInst *str_vi=call_string_new(node,mode,buffer);
 
@@ -181,3 +239,48 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 
 	return(my_object);
 }
+
+// void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
+
+void Mission::call_unit_launch(Flightgroup *fg){
+
+   int faction_nr=_Universe->GetFaction(fg->faction.c_str());
+
+   Unit *units[20];
+
+   for(int u=0;u<fg->nr_ships;u++){
+     Unit *my_unit=new Unit(fg->type.c_str(),true,false,faction_nr,fg,u);
+     units[u]=my_unit;
+   }
+
+   float fg_radius=units[0]->rSize();
+
+   for(int u=0;u<fg->nr_ships;u++){
+     Unit *my_unit=units[u];
+
+     Vector pox;
+
+     pox.i=fg->pos[0]+u*fg_radius*3;
+     pox.j=fg->pos[1]+u*fg_radius*3;
+     pox.k=fg->pos[2]+u*fg_radius*3;
+
+     my_unit->SetPosAndCumPos(pox);
+
+     string ai_agg=fg->ainame+".agg.xml";
+     string ai_int=fg->ainame+".int.xml";
+
+     char ai_agg_c[1024];
+     char ai_int_c[1024];
+     strcpy(ai_agg_c,ai_agg.c_str());
+     strcpy(ai_int_c,ai_int.c_str());
+     //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+
+     my_unit->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
+	    
+     SetTurretAI (my_unit);
+
+     _Universe->activeStarSystem()->AddUnit(my_unit);
+   }
+
+
+ }

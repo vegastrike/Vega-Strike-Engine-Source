@@ -183,6 +183,9 @@ void Unit::Init()
   computer.radar.error=0;
   computer.radar.color=true;
   //  Fire();
+
+  flightgroup=NULL;
+  flightgroup_subnumber=0;
 }
 
 void Unit::SetVisible(bool invis) {

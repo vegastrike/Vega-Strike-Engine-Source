@@ -159,7 +159,7 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
     }
     else if(node->tag==DTAG_CONST){
       varInst *vi=doConst(node,mode);
-      if(vi->type==VAR_FLOAT){
+      if(vi && vi->type==VAR_FLOAT){
 	res=vi->float_val;
       }
       else{
