@@ -145,6 +145,7 @@ void Planet::AddSatellite (Unit * orbiter) {
 	satellites.prepend (orbiter);
 	orbiter->SetOwner (this);
 }
+extern float ScaleJumpRadius(float);
 extern Flightgroup * getStaticBaseFlightgroup(int faction);
 Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
   //this function is OBSOLETE
@@ -169,6 +170,9 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
       satiterator.current()->SetOwner (this);
     }else {
       Planet * p;
+      if (dest.size()!=0) {
+	radius = ScaleJumpRadius(radius);
+      }
       satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,blendSrc,blendDst,dest, QVector (0,0,0), this, ourmat, ligh, faction,fullname,inside_out));
       un = p;
       p->SetOwner (this);
