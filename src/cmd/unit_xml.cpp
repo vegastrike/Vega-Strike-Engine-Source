@@ -354,8 +354,8 @@ using namespace UnitXML;
   QVector Q;
   QVector R;
   QVector pos;
-  float xyscale=0;
-  float zscale=0;
+  float xyscale=-1;
+  float zscale=-1;
   bool tempbool;
   float fbrltb[6];
   AttributeList::const_iterator iter;
@@ -1358,6 +1358,7 @@ using namespace UnitXML;
 	RecurseIntoSubUnitsOnCollision= XMLSupport::parse_bool (iter->value);
 	break;
 	  case FACECAMERA:
+		  ADDDEFAULT;
 		  FaceCamera=XMLSupport::parse_bool(iter->value);
 		  break;
       case COMBATROLE:

@@ -15,7 +15,7 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
-void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
+void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,float particle_size,int faction) {
   percent = 1-percent;
   int i=rand();
   static float scale = XMLSupport::parse_float (vs_config->getVariable("graphics",
@@ -44,7 +44,8 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
       pp.col.i=col[0];
       pp.col.j=col[1];
       pp.col.k=col[2];
-      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed);
+	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
+      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed,particle_size*sciz);
     }
 }
   
@@ -58,7 +59,8 @@ void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, M
 			unsigned int whichvert = seed%numvert;
 			QVector v (mush->GetVertex(whichvert).Cast());
 			v=Transform(mat,v);
-			DoParticles (v,hull,vel,0,faction);
+			static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
+			DoParticles (v,hull,vel,0,mush->rSize()*sciz,faction);
 		}
 	}
 	}
@@ -167,7 +169,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       m.p = Transform (trans,i->loc);
       mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);    
       if (hullpercent<.99) {
-	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,faction);
+	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,mesh->rSize()*scale.i,faction);
       }
     }
   }

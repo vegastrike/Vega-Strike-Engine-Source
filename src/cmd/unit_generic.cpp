@@ -4201,6 +4201,7 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
     if (un->mounts[i]->volume!=-1) {
       result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i]->volume);
     }
+	result+=string("\" xyscale=\"")+XMLSupport::tostring(un->mounts[i]->xyscale)+string("\" zscale=\"")+XMLSupport::tostring(un->mounts[i]->zscale);
     Matrix m;
     Transformation(un->mounts[i]->GetMountOrientation(),un->mounts[i]->GetMountLocation().Cast()).to_matrix(m);
     result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));

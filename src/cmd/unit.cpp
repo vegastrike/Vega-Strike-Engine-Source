@@ -602,17 +602,20 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     if (draw_mounts&&On_Screen) {
 		
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
       Mesh * gun = mahnt->type->gun;	  
       if (gun) {
 		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
 		  mountLocation.Compose (*ct,*ctm);
 		  Matrix mat;
 		  mountLocation.to_matrix(mat);
+
 		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
 		  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
 		  
       }
-    }
+	 }
+	}
     if (mounts[i]->type->type==weapon_info::BEAM) {
       if (mounts[i]->ref.gun) {
 	mounts[i]->ref.gun->Draw(*ct,*ctm,((mounts[i]->size&weapon_info::AUTOTRACKING)&&mounts[i]->time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);

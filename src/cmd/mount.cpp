@@ -172,9 +172,9 @@ Mount::Mount(const string& filename, short am,short vol, float xyscale, float zs
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
   
-  if (xyscale==0)
+  if (xyscale==-1)
 	  xyscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
-  if (zscale==0)
+  if (zscale==-1)
 	  zscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
   this->zscale=zscale;
     this->xyscale=xyscale;

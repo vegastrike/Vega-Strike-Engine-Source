@@ -26,7 +26,9 @@ static bool colorOK(Vector &col, const double time) {
   return !(col.i==0&&col.j==0&&col.k==0);
 }
 
-bool ParticlePoint::Draw(const Vector & vel,const double time, const Vector &p, const Vector &q) {
+bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector q) {
+  q*=size;
+  p*=size;
   loc+=(vel*time).Cast();
   GFXColor4f(col.i,col.j,col.k,1);
 #ifdef USE_POINTS
@@ -55,7 +57,7 @@ void ParticleTrail::DrawAndUpdate (){
   {
 	  Vector R;
 	  _Universe->AccessCamera()->GetPQR(P,Q,R);
-  	  static float particlesize = XMLSupport::parse_float (vs_config->getVariable("graphics","sparksize",".5"));
+  	  static float particlesize = XMLSupport::parse_float (vs_config->getVariable("graphics","sparksize","1"));
 	  P*=particlesize;
 	  Q*=particlesize;
   }
@@ -115,8 +117,10 @@ void ParticleTrail::DrawAndUpdate (){
 
 }
 
-void ParticleTrail::AddParticle (const ParticlePoint &P, const Vector &V) {
+void ParticleTrail::AddParticle (const ParticlePoint &P, const Vector &V,float size) {
+	
   particle.push_back (P);
+  particle.back().size=size;
   particleVel.push_back (V);
   if (particle.size()>maxparticles) {
     PopParticle();

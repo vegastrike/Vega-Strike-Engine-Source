@@ -8,8 +8,9 @@ class ParticlePoint {
  public:
   QVector loc;
   Vector col;
+  float size;
   //draw and change color...if too dark kill
-  bool Draw (const Vector& delta, const double time, const Vector &p, const Vector &q);
+  bool Draw (const Vector& delta, const double time, Vector p, Vector q);
 };
 
 class ParticleTrail {
@@ -21,7 +22,7 @@ class ParticleTrail {
     ChangeMax (max);
   }
   void DrawAndUpdate();
-  void AddParticle (const ParticlePoint &,  const Vector &);
+  void AddParticle (const ParticlePoint &,  const Vector &, float size);
   void PopParticle();
   void ChangeMax (unsigned int max);
 };

@@ -68,12 +68,12 @@ namespace UniverseUtil {
 	static const int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
 		return max_missions;
 	}
-       	void addParticle (QVector loc, Vector velocity, Vector color)
+       	void addParticle (QVector loc, Vector velocity, Vector color, float size)
 	{
 	  ParticlePoint p;
 	  p.loc = loc;
 	  p.col = color;
-	  particleTrail.AddParticle (p,velocity);
+	  particleTrail.AddParticle (p,velocity,size);
 	}
 
 }
