@@ -68,6 +68,9 @@ if (stardata):
 				newchild.setAttribute('value',stardata[k][0])
 				s.insertBefore(newchild,s.firstChild)
 				break;
+
+#################fixme Insert code to do probability distribution and add planets##################
+
 			
 fil = open (sys.argv[2],"w")
 fil.write(g.toxml())
