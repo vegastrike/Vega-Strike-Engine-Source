@@ -20,7 +20,7 @@ void CacheJumpStar (bool destroy) {
   if (destroy)
     delete cachedani;
 }
-std::vector <unorigdest *> pendingjump;
+extern std::vector <unorigdest *>pendingjump;
 static std::vector <unsigned int> AnimationNulls;
 class ResizeAni {
 public:
