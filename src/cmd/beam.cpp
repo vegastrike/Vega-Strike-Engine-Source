@@ -318,7 +318,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m) {
       else
 	curlength=0;
     }
-    QVector tmpvec (center + direction.Cast()*curlength);
+    QVector tmpvec (center + direction.Cast().Scale(curlength));
     QVector tmpMini = center.Min(tmpvec);
 
 
@@ -349,7 +349,7 @@ bool Beam::Collide (Unit * target) {
   }
   float distance;
   Vector normal;//apply shields
-  QVector end (center+direction.Cast()*curlength);
+  QVector end (center+direction.Cast().Scale(curlength));
   enum clsptr type = target->isUnit();
   if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) 
     return false;
