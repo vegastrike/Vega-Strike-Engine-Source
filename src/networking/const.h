@@ -25,9 +25,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#define SERVERCONFIGFILE	"vegaserver.config"
-#define ACCTCONFIGFILE		"accountserver.config"
-
 #define MAXCLIENTS	512
 #define SERVER_PORT 6777
 #define CLIENT_PORT	6778

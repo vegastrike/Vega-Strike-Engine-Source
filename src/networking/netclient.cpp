@@ -190,10 +190,14 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 
 	Packet packet;
 
+	double initial = getNewTime();
+	double newtime=0;
 	while( !timeout && !recv)
 	{
 		// If we have no response in 10 seconds -> fails
-		if( GetElapsedTime() > 10)
+		UpdateTime();
+		newtime = getNewTime();
+		if( newtime-initial > 10)
 		{
 			cout<<"Timed out"<<endl;
 			timeout = 1;

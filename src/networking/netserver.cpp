@@ -363,9 +363,11 @@ void	NetServer::start(int argc, char **argv)
 
 	startMsg();
 
-	initpaths();
+	CONFIGFILE = new char[42];
+	strcpy( CONFIGFILE, "vegaserver.config");
 	cout<<"Loading server config...";
-	vs_config = new VegaConfig( SERVERCONFIGFILE);
+	initpaths();
+	//vs_config = new VegaConfig( SERVERCONFIGFILE);
 	cout<<" config loaded"<<endl;
 	strperiod = vs_config->getVariable( "server", "saveperiod", "");
 	if( strperiod=="")
@@ -573,6 +575,8 @@ void	NetServer::start(int argc, char **argv)
 		micro_sleep(10000);
 	}
 
+	delete CONFIGFILE;
+	delete vs_config;
 	this->closeAllSockets();
 }
 

@@ -54,9 +54,11 @@ void	AccountServer::start()
 
 	startMsg();
 
-	initpaths();
+	CONFIGFILE = new char[42];
+	strcpy( CONFIGFILE, "accountserver.config");
 	cout<<"Loading config file...";
-	vs_config = new VegaConfig( ACCTCONFIGFILE);
+	initpaths();
+	//vs_config = new VegaConfig( ACCTCONFIGFILE);
 	cout<<" done."<<endl;
 	InitTime();
 	UpdateTime();
@@ -132,6 +134,7 @@ void	AccountServer::start()
 		micro_sleep(40000);
 	}
 
+	delete CONFIGFILE;
 	delete vs_config;
 	Network->disconnect( "Shutting down.");
 }
