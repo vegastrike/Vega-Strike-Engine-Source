@@ -260,8 +260,11 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   si.ringlist=getVarEitherSectionOrSub(galaxy,si.sector,si.ringlist,"ringlist", Ave.ringlist);
   si.nebulaelist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"nebulalist",Ave.nebulaelist);  
   si.backgrounds=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"backgroundlist",Ave.backgrounds);  
-  si.force=parse_bool (getVarEitherSectionOrSub(galaxy,si.sector,si.name,"force",Ave.force?"true":"false"));    
+  si.force=parse_bool (getVarEitherSectionOrSub(galaxy,si.sector,si.name,"force",Ave.force?"true":"false"));
   
+static bool always_force = XMLSupport::parse_float(vs_config->getVariable("galaxy","PushValuesToMean","true"));
+  if (always_force)
+	  si.force=true;
   string dest = galaxy->getVariable (si.sector,si.name,"jumps","");
   if (dest.length()) {
     si.numjumps=0;
