@@ -128,6 +128,8 @@ int lookupMouseButton(int b) {
     return 2;
   case WS_MIDDLE_BUTTON:
     return 1;
+  default:
+    return ((b-WS_LEFT_BUTTON)>=NUM_BUTTONS)?NUM_BUTTONS-1:b-WS_LEFT_BUTTON;
   }
   return 0;
 }
