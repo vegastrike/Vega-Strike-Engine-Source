@@ -1811,7 +1811,18 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 }
 void Unit::AddVelocity(float difficulty) {
-   curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+  Vector v=Velocity;
+   Unit * planet;
+   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
+     if ((Position()-planet->Position()).Magnitude()<planet->rSize()*2) {
+       break;
+     }
+   }
+   if (!planet) {
+     static float multiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","10000"));
+     v*=multiplier;
+   }
+   curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
 }
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
