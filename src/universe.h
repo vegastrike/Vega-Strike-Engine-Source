@@ -129,6 +129,8 @@ private:
   ///returns the index of the faction with that name
   int GetFaction (const char *factionname);
   int GetNumAnimation(int faction);
+  void SerializeFaction (FILE * file);
+  void LoadSerializedFaction (FILE * file);
   std::vector <class Animation *>* GetRandAnimation(int faction);
   std::vector <class Animation *> * GetAnimation(int faction, int n);
   const char * GetFaction (int faction);
