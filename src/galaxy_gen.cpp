@@ -629,7 +629,7 @@ void MakeJump(float radius, bool forceRS=false, Vector R=Vector (0,0,0), Vector 
     center=generateAndUpdateRS (RR,SS,radius,true);
   }
   string thisname;
-  thisname = string("Jump To ")+getStarSystemName(s);
+  thisname = string("Jump_To_")+getStarSystemName(s);
   if (thisname.length()>6) {
     *(thisname.begin()+6)=toupper(*(thisname.begin()+6));
   }
@@ -767,10 +767,8 @@ void MakePlanet(float radius, int entitytype, string texturename, int texturenum
     }
     Tab();f.Fprintf ("<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n",cname.c_str(),wrapx,wrapy);
   }
-  if ((entitytype==PLANET&&temprandom<.1)||(!atmosphere.empty())) {
-    if (atmosphere.empty()) {
-      atmosphere=default_atmosphere;
-    }
+  static float atmosphere_prob=XMLSupport::parse_float(vs_config->getVariable("galaxy","AtmosphereProbability","0.5"));
+  if ((entitytype==PLANET&&temprandom<atmosphere_prob)&&(!atmosphere.empty())) {
     string NAME = thisname+" Atmosphere";
 	{
 	bool doalphaatmosphere = (temprandom<.08||temprandom>.3);
