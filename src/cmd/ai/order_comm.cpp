@@ -38,7 +38,7 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
 float Order::GetEffectiveRelationship (const Unit * target)const {
-  float staticrel =  _Universe->GetRelation (parent->faction,target->faction);
+  float staticrel = FactionUtil::GetIntRelation (parent->faction,target->faction);
   for (unsigned int i=0;i<suborders.size();i++) {
     float effrel = suborders[i]->GetEffectiveRelationship(target);
     if (effrel !=staticrel) {
@@ -99,7 +99,7 @@ extern float myroundclamp(float i);
 Animation * Order::getCommFace(float mood, unsigned char & sex) {
   vector <Animation *> *ani = getCommFaces (sex);
   if (ani==NULL) {
-    ani = _Universe->GetRandAnimation(parent->faction,sex);
+    ani = FactionUtil::GetRandAnimation(parent->faction,sex);
     if (ani==NULL) {
       return NULL;
     }

@@ -147,7 +147,8 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
 	DirectorStart((missionNode *)*siter);
       }
     } else if (((*siter)->Name()=="python")){ //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
-      const char *constdumbstr=(*siter)->attr_value(textAttr).c_str(); //get the text XML attribute
+		string locals = (*siter)->attr_value(textAttr);
+      const char *constdumbstr=locals.c_str(); //get the text XML attribute
       int i=strlen(constdumbstr); //constdumbstr is the string I wish to copy... i is its length.
       char *dumbstr=new char [i+2]; //allocate 2 extra bytes for a double-null-terminated string.
       strncpy(dumbstr,constdumbstr,i); //i copy constdumbstr to dumbstr.

@@ -397,7 +397,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	//changed 042202
 	//    varInst *ovi=getObjectArg(node,mode);
 	//    Unit *my_unit=getUnitObject(node,mode,ovi);
-		string factionname=_Universe->GetFaction(my_unit->faction);
+		string factionname=FactionUtil::GetFaction(my_unit->faction);
 		varInst *str_vi=call_string_new(node,mode,factionname);
 		viret=str_vi;
       }else {
@@ -1108,7 +1108,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	  fg->Decrement(my_unit);
 	  order = fg->ainame;
 	}
-	fg = Flightgroup::newFlightgroup (arg,type,_Universe->GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",this);
+	fg = Flightgroup::newFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",this);
 	my_unit->SetFg (fg,fg->nr_ships_left-1);
       }
       viret =newVarInst(VI_TEMP);
@@ -1208,7 +1208,7 @@ extern BLENDFUNC parse_alpha (const char *);
 
 Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
   //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
-   int faction_nr=_Universe->GetFaction(fg->fg->faction.c_str());
+   int faction_nr=FactionUtil::GetFaction(fg->fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit **units= new Unit *[fg->nr_ships];
    int u;

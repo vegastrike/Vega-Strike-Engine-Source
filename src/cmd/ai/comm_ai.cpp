@@ -1,4 +1,5 @@
 #include "comm_ai.h"
+#include "faction.h"
 #include "communication.h"
 #include "cmd/collection.h"
 #include "gfx/cockpit.h"
@@ -36,7 +37,7 @@ vector <Animation *> *CommunicatingAI::getCommFaces(unsigned char &sex) {
 
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
-  comm_face = _Universe->GetRandAnimation(par->faction,sex);
+  comm_face = FactionUtil::GetRandAnimation(par->faction,sex);
 }
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
@@ -140,7 +141,7 @@ void CommunicatingAI::UpdateContrabandSearch () {
 	GetMadAt(u,1);
 	SpeedAndCourse=u->GetVelocity();
       }
-      if (InList (item,_Universe->GetContraband(parent->faction))) {
+      if (InList (item,FactionUtil::GetContraband(parent->faction))) {
 	TerminateContrabandSearch(true);
       }
     }else {
@@ -152,7 +153,7 @@ void CommunicatingAI::UpdateContrabandSearch () {
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
-    Unit * un =_Universe->GetContraband (parent->faction);
+    Unit * un =FactionUtil::GetContraband (parent->faction);
     if (un) {
     if (un->numCargo()>0) {
     Unit * v;
@@ -178,12 +179,12 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
 
   //now we do our magik  insert 0 if nothing's there... and add on our faction
   relationmap::iterator i = effective_relationship.insert (pair<const Unit*,float>(un,0)).first;
-  bool abovezero=(*i).second+_Universe->GetRelation (parent->faction,un->faction)>=0;
+  bool abovezero=(*i).second+FactionUtil::GetIntRelation (parent->faction,un->faction)>=0;
   if (!abovezero) {
     static float slowrel=XMLSupport::parse_float (vs_config->getVariable ("AI","SlowDiplomacyForEnemies",".25"));
     factor *=slowrel;
   }
-  _Universe->AdjustRelation (parent->faction,un->faction,factor,rank);  
+  FactionUtil::AdjustIntRelation (parent->faction,un->faction,factor,rank);  
   (*i).second+=factor;
   if ((*i).second<anger||(parent->Target()==NULL&&(*i).second+Order::GetEffectiveRelationship (un)<0)) {
     parent->Target(un);//he'll target you--even if he's friendly

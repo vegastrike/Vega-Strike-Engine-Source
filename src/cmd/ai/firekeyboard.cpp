@@ -279,7 +279,7 @@ void HelpOut (bool crit, std::string conv) {
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
-      if ((crit&&_Universe->GetRelation(par->faction,un->faction)>0)||par->faction==un->faction) {
+      if ((crit&&FactionUtil::GetIntRelation(par->faction,un->faction)>0)||par->faction==un->faction) {
 	Unit * threat = GetThreat (par,un);
 	CommunicationMessage c(par,un,NULL,0);
 	if (threat) {
@@ -404,7 +404,7 @@ void FireKeyboard::ChooseNearTargets(bool turret) {
     Vector t;
     bool tmp = parent->InRange (un);
     t = parent->LocalCoordinates (un);
-    if (tmp&&t.Dot(t)<range&&t.k>0&&_Universe->GetRelation(parent->faction,un->faction)<0) {
+    if (tmp&&t.Dot(t)<range&&t.k>0&&FactionUtil::GetIntRelation(parent->faction,un->faction)<0) {
       range = t.Dot(t);
       if (turret)
 	parent->TargetTurret(un);
@@ -849,7 +849,7 @@ void FireKeyboard::Execute () {
     if ((targ =parent->Target())) {
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
       if (mymsg==NULL) {
-	FSM *fsm =_Universe->GetConversation (parent->faction,targ->faction);
+	FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
 	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
       }else {
        _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);

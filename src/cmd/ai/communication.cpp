@@ -187,7 +187,7 @@ float FSM::getDeltaRelation (int prevstate, int current_state) const{
 }
 
 void CommunicationMessage::Init (Unit * send, Unit * recv) {
-  fsm = _Universe->GetConversation (send->faction,recv->faction);
+  fsm = FactionUtil::GetConversation (send->faction,recv->faction);
   sender.SetUnit (send);
   this->prevstate=this->curstate = fsm->getDefaultState(send->getRelation(recv));
 }

@@ -1,3 +1,4 @@
+#include "faction.h"
 #include "mission.h"
 #include "cmd/briefing.h"
 
@@ -23,7 +24,7 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
       float z = getFloatArg(node,mode,4);
       if (mode==SCRIPT_RUN) {
 	viret->int_val=briefing->AddStarship(name.c_str(),
-					     _Universe->GetFaction(faction.c_str()),
+					FactionUtil::GetFaction(faction.c_str()),
 					     Vector(x,y,z));
       }
       viret->type = VAR_INT;
