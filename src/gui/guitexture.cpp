@@ -27,7 +27,9 @@
 #include <map>
 #include <string>
 #include <png.h>
-#include "vsfilesystem.h"		// For GetSharedTexturePath.
+#include "vsfilesystem.h"
+#include "gfx/vsimage.h"
+using namespace VSFileSystem;
 
 
 // TEXTURE CACHE
@@ -128,19 +130,15 @@ static unsigned char* readImageFile(FILE* fp, int& bpp, int& color_type, int& wi
 
 // Add a new entry to the cache.
 static const GuiTexture* addTextureToCache(const std::string& fileName) {
-		assert(textureCache.find(fileName) == textureCache.end());		// Make sure there are no duplicates.
+	assert(textureCache.find(fileName) == textureCache.end());		// Make sure there are no duplicates.
 
-		// Open the file.
-		FILE* file = NULL;
-		if(fileName.size() > 0) {
-				file = VSFileSystem::vs_open(fileName.c_str(), "rb");
-				if(!file) {
-						// File name didn't work.  Try shared textures directory.
-						std::string tempFileName = VSFileSystem::sharedtextures+"/"+fileName;
-						file = VSFileSystem::vs_open(tempFileName.c_str(), "rb");
-		}
+	// Open the file.
+	VSFile file;
+	VSError err;
+	if(fileName.size() > 0) {
+			err = file.OpenReadOnly(fileName, TextureFile);
 	}
-	if(!file) {
+	if(err>Ok) {
 		printf("GuiTexture: Cannot open file '%s'.\n", fileName.c_str());
 		return NULL;
 	}
@@ -149,9 +147,13 @@ static const GuiTexture* addTextureToCache(const std::string& fileName) {
 	int bppDummy;			// Not used.
 	int colorType;			// Info about color in the image.
 	int width, height;		// Size of the image.
-	unsigned char* image = readImageFile(file, bppDummy, colorType, width, height);
+	VSImage img;
+	unsigned char* image = img.ReadImage(&file);
+	colorType = img.Format();
+	width = img.sizeX;
+	height = img.sizeY;
 	// Make sure file gets closed in case of errors.
-	VSFileSystem::vs_close(file);
+	file.Close();
 	if(!image) {
 		printf("GuiTexture: problem reading texture file '%s'.\n", fileName.c_str());
 		return NULL;

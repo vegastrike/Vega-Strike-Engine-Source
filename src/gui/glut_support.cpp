@@ -22,24 +22,32 @@
 #include "gfx/aux_texture.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "gfx/vsimage.h"
+#include "vsfilesystem.h"
+using namespace VSFileSystem;
 
 #define isspace(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
 
 float colors[] = {1, 1, 1, 1};
 
 GUITexture ReadTex(char *texfile) {
-        FILE* file=0;
+	VSFile file;
+	VSError err;
 	int PNG_HAS_ALPHA=4;
         GUITexture tex;
         if (texfile)
         	if (texfile[0])
-					file=VSFileSystem::vs_open(texfile,"rb");
+					err=file.OpenReadOnly(texfile,TextureFile);
 		GLuint name=0;
 		unsigned int width=0,height=0;
-		if (file) {
+		if (err<=Ok) {
+				VSImage img;
 				int bpp,colortype;
 				unsigned char * palette;
-				unsigned char * image=readImage(file,bpp,colortype,width,height,palette);
+				unsigned char * image=img.ReadImage( &file);
+						//	readImage(file,bpp,colortype,width,height,palette);
+				bpp = img.Depth();
+				colortype = img.Format();
 				glGenTextures (1,&name);
 				glBindTexture (GL_TEXTURE_2D,name);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -47,11 +55,10 @@ GUITexture ReadTex(char *texfile) {
 				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,width,height,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
-				VSFileSystem::vs_close(file);
-
-		tex.wid = width;
-		tex.hei = height;
+				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
+				file.Close();
+		tex.wid = img.sizeX;
+		tex.hei = img.sizeY;
 		tex.name = name;
 
 		free(image);
