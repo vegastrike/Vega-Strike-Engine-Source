@@ -325,6 +325,8 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
   std::string turSize;
   un_iter ui;
   bool found=false;
+  up->DisableTurretAI();
+  DisableTurretAI();
   for (j=0,ui=getSubUnits();(*ui)!=NULL&&j<subunitoffset;++ui,j++) {
   }///set the turrets to the offset
   un_iter upturrets;
