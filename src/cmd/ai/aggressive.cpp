@@ -94,8 +94,11 @@ void LeadMe (Unit * un, string directive, string speech) {
 
 static float aggressivity=2.01;
 AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,false)), interrupts(getProperScript(NULL,NULL,true)) {
+  last_jump_distance=FLT_MAX;
   curinter=INTNORMAL;
+  jump_time_check=1;
   last_time_insys=true;
+  logiccurtime=interrupts->maxtime;//set it to the time allotted
   obedient = true;
   if (aggressivity==2.01) {
     float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
@@ -453,7 +456,7 @@ void AggressiveAI::Execute () {
       if (AIjumpCheat) {
 	parent->GetJumpStatus().drive==-1;
       }else {
-	fprintf (stderr,"warning ship not equipped to jump");
+	//	fprintf (stderr,"warning ship not equipped to jump");
 	parent->Target(NULL);
       }
     }else if (parent->GetJumpStatus().drive<0){

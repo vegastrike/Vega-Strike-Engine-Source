@@ -943,6 +943,8 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
     vs_config->getColor("targetting_ship",&targetting.r);
     vs_config->getColor("planet",&planet.r);
   }
+  InitStatic();
+
 }
 void GameCockpit::SelectProperCamera () {
     SelectCamera(view);

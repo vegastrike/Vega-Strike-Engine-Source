@@ -283,7 +283,7 @@ Unit::~Unit()
     delete image->unitwriter;
   unsigned int i;
   for (i=0;i<image->destination.size();i++) {
-    delete [] image->destination[i];
+    free (image->destination[i]);
   }
 
 #ifdef DESTRUCTDEBUG
@@ -328,7 +328,9 @@ Unit::~Unit()
 
 void Unit::Init()
 {
+
 	this->networked=0;
+	RecurseIntoSubUnitsOnCollision=false;
 	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
@@ -487,6 +489,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
 	SubUnit = SubU;
+	RecurseIntoSubUnitsOnCollision=!SubUnit;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
 	bool doubleup=false;

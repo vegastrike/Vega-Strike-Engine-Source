@@ -140,6 +140,9 @@ struct TurretBin{
   float maxrange;
   vector <RangeSortedTurrets> turret;
   vector <TargetAndRange> listOfTargets[2];//we have the over (and eq) 16 crowd and the under 16  
+  TurretBin () {
+    maxrange =0;
+  }
   bool operator < (const TurretBin & o) const{
     return (maxrange>o.maxrange);
   }
@@ -222,6 +225,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       tbin.push_back (TurretBin());
     }
     float gspeed, grange, mrange;
+    grange=FLT_MAX;
     su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
