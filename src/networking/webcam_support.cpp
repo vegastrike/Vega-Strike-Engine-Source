@@ -6,6 +6,8 @@
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "gldrv/winsys.h"
+#include <jpeglib.h>
+#include "gfx/jpeg_memory.h"
 
 using std::cerr;
 using std::endl;
@@ -15,7 +17,6 @@ extern bool cleanexit;
 typedef void* (*VoidVoidFuncType)( void* );
 
 #ifdef DSHOW
-#include "gfx/jpeg_memory.h"
 /**************************************************************************************************/
 /**** DirectShow Callback : SampleGrabberCallback                                              ****/
 /**************************************************************************************************/
@@ -926,6 +927,7 @@ char * JpegFromCapture(HANDLE     hDib, BYTE * bmpBuffer, long bmpLength, int jp
     struct jpeg_decompress_struct cdinfo;
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr       jerr;
+	struct jpeg_destination_mgr jdstmgr;
 
     FILE*      pOutFile;     //Target file 
     int        nSampsPerRow; //Physical row width in image buffer 
@@ -933,7 +935,7 @@ char * JpegFromCapture(HANDLE     hDib, BYTE * bmpBuffer, long bmpLength, int jp
 
     cinfo.err = jpeg_std_error(&jerr); //Use default error handling (ugly!)
 
-    init_destination(&cinfo);
+    jdstmgr.init_destination(&cinfo);
 
 	// This one causes problem but we are not using that JpegFromCapture function anyway
 	//empty_output_buffer(&cinfo);

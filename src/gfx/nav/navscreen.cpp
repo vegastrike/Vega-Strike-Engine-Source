@@ -270,7 +270,10 @@ void NavigationSystem::Setup()
 		buttonskipby4_7[1] = .95;
 		buttonskipby4_7[2] = .25;
 		buttonskipby4_7[3] = .30;
-
+		for (int i=0;i<NAVTOTALMESHCOUNT;i++) {
+			mesh[i]=NULL;
+		}
+		vs_fprintf(stderr,"ERROR: Map mesh file not found!!! Using default: blank mesh.\n");
 		//	end DUMMY VARS
 	}
 
@@ -427,7 +430,9 @@ void NavigationSystem::Draw()
 
 
 		Matrix mat (p,q,r,pos);
-		mesh[i]->DrawNow(1,true,mat);
+		if (mesh[i]) {
+			mesh[i]->DrawNow(1,true,mat);
+		}
 	}
 
 
