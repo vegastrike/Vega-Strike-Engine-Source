@@ -248,6 +248,13 @@ void Python::init() {
   Py_Initialize();
 	InitBriefing ();
 	InitVS ();
+	fprintf (stderr,"testing VS random");
+	std::string changepath ("import sys\nprint sys.path\nimport vsrandom\nprint random.random()\nprint random.randrange(0,4)\nprint \"success!ADFG\"\n");
+	fprintf (stderr,"running %s",changepath.c_str());
+	char * temppython = strdup(changepath.c_str());
+	PyRun_SimpleString(temppython);	
+	Python::reseterrors();
+	free (temppython);
 	InitDirector ();
 	InitBase ();
 //  InitVegastrike();
