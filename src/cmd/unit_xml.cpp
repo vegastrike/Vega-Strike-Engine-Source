@@ -290,6 +290,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case AMMO:
 	ammo = parse_int ((*iter).value);
+	break;
       case MOUNTSIZE:
 	tempbool=true;
 	mntsiz=parseMountSizes((*iter).value.c_str());
@@ -543,7 +544,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case AACCEL:
-	accel=parse_float((*iter).value);
+	//accel=parse_float((*iter).value);
 	break;
       case FORWARD:
 	limits.forward=parse_float((*iter).value);

@@ -122,7 +122,6 @@ void Unit::Init()
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
-  fpos = 0;
   mass = 1.5;
   fuel = 2000;
 
@@ -192,6 +191,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 	if(xml) {
 	  LoadXML(filename);
 	  calculate_extent();
+	  ToggleWeapon(true);//change missiles to only fire 1
 	  return;
 	}
 	LoadFile(filename);
@@ -248,11 +248,10 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 	ReadFloat(maxaccel);
 	ReadFloat(mass);
 
-	fpos = ::GetPosition();
 
 	CloseFile();
 	calculate_extent();
-
+	ToggleWeapon(true);//change missiles to only fire 1
 }
 
 Unit::~Unit()
@@ -661,7 +660,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
         halos[i]->Draw(cumulative_transformation,cumulative_transformation_matrix);
   }
 }
-
+/*
 
 void Unit::ProcessDrawQueue() {
   int a;	
@@ -672,7 +671,7 @@ void Unit::ProcessDrawQueue() {
     subunits[a]->ProcessDrawQueue();
   }
 }
-
+*/
 void Unit::PrimeOrders () {
   if (aistate) {
     aistate->ReplaceOrder (new Order);
@@ -709,6 +708,7 @@ void Unit::UnFire () {
   }
 }
 extern unsigned short apply_float_to_short (float tmp);
+
 void Unit::Fire (bool Missile) {
   for (int i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
@@ -726,6 +726,110 @@ void Unit::Fire (bool Missile) {
     }//unfortunately cumulative transformation not generated in physics atom
   }
 }
+
+
+void Unit::Mount::Activate (bool Missile) {
+  if ((type.type==weapon_info::PROJECTILE)==Missile) {
+    if (status==INACTIVE)
+      status = ACTIVE;
+  }
+}
+///Sets this gun to inactive, unless unchosen or destroyed
+void Unit::Mount::DeActive (bool Missile) {
+  if ((type.type==weapon_info::PROJECTILE)==Missile) {
+    if (status==ACTIVE)
+      status = INACTIVE;
+  }
+}
+void Unit::SelectAllWeapon (bool Missile) {
+  for (int i=0;i<nummounts;i++) {
+    mounts[i].Activate (Missile);
+  }
+}
+
+///In short I have NO CLUE how this works! It just...grudgingly does
+void Unit::ToggleWeapon (bool Missile) {
+  bool selected;
+  int activecount=0;
+  int totalcount=0;
+  bool lasttotal=true;
+  weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
+  if (nummounts<1)
+    return;
+  sz = mounts[0].type.size;
+  for (int i=0;i<nummounts;i++) {
+    if ((mounts[i].type.type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
+      totalcount++;
+      lasttotal=false;
+      if (mounts[i].status==Mount::ACTIVE) {
+	activecount++;
+	lasttotal=true;
+	mounts[i].DeActive (Missile);
+	if (i==nummounts-1) {
+	  sz=mounts[0].type.size;
+	}else {
+	  sz =mounts[i+1].type.size;
+	}
+      }
+    }
+    if ((mounts[i].type.type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
+      if (mounts[i].status==Mount::ACTIVE) {
+	activecount++;//totalcount=0;
+	mounts[i].DeActive (Missile);
+	if (lasttotal) {
+	  totalcount=(i+1)%nummounts;
+	  if (i==nummounts-1) {
+	    sz = mounts[0].type.size;
+	  }else {
+	    sz =mounts[i+1].type.size;
+	  }
+	}
+	lasttotal=false;
+      } 
+    }
+  }
+  if (Missile) {
+    int i=totalcount;
+    for (int j=0;j<2;j++) {
+      for (;i<nummounts;i++) {
+	if (mounts[i].type.size==sz) {
+	  if ((mounts[i].type.type==weapon_info::PROJECTILE)) {
+	    mounts[i].Activate(true);
+	    return;
+	  }else {
+	    sz = mounts[(i+1)%nummounts].type.size;
+	  }
+	}
+      }
+      i=0;
+    }
+  }
+  if (totalcount==activecount) {
+    ActivateGuns (mounts[0].type.size,Missile);
+  } else {
+    if (lasttotal) {
+      SelectAllWeapon(Missile);
+    }else {
+      ActivateGuns (sz,Missile);
+    }
+  }
+}
+
+///cycles through the loop twice turning on all matching to ms weapons of size or after size
+void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
+  for (int j=0;j<2;j++) {
+    for (int i=0;i<nummounts;i++) {
+      if (mounts[i].type.size==sz) {
+	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type.type==weapon_info::PROJECTILE)==ms) {
+	  mounts[i].Activate(ms);
+	}else {
+	  sz = mounts[(i+1)%nummounts].type.size;
+	}
+      }
+    }
+  }
+}
+
 void Unit::Mount::UnFire () {
   if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
     return;

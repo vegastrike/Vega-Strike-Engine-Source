@@ -14,6 +14,8 @@ FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   BindKey(' ',FireKeyboard::FireKey);
   BindKey(13,FireKeyboard::MissileKey);
   BindKey('t',FireKeyboard::TargetKey);
+  BindKey('g',FireKeyboard::WeapSelKey);
+  BindKey('m',FireKeyboard::MisSelKey);
   
 }
 static KBSTATE firekey=UP;
@@ -22,6 +24,8 @@ static KBSTATE missilekey = UP;
 static KBSTATE jfirekey=UP;
 static KBSTATE jtargetkey=UP;
 static KBSTATE jmissilekey = UP;
+static KBSTATE weapk=UP;
+static KBSTATE misk=UP;
 
 void FireKeyboard::FireKey(int, KBSTATE k) {
   if (k==UP&&firekey==RELEASE) {
@@ -44,6 +48,14 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
 void FireKeyboard::JTargetKey(KBSTATE k, float, float,int i) {
   if (jtargetkey!=PRESS)
     jtargetkey = k;
+} 
+void FireKeyboard::WeapSelKey(int, KBSTATE k) {
+  if (weapk!=PRESS)
+    weapk = k;
+}
+void FireKeyboard::MisSelKey(int, KBSTATE k) {
+  if (misk!=PRESS)
+    misk = k;
 } 
 
 void FireKeyboard::MissileKey(int, KBSTATE k) {
@@ -109,6 +121,14 @@ void FireKeyboard::Execute () {
     targetkey=DOWN;
     jtargetkey=DOWN;
     ChooseTargets();
+  }
+  if (weapk==PRESS) {
+    weapk=DOWN;
+    parent->ToggleWeapon (false);
+  }
+  if (misk==PRESS) {
+    misk=DOWN;
+    parent->ToggleWeapon(true);
   }
 }
 

@@ -39,25 +39,42 @@ class GFXVertexList;
 class GFXQuadstrip;
 struct GFXMaterial;
 class BoundingBox;
+///Struct vertex format returned by GetPolys
 struct bsp_vector {
         float x,y,z;
 };
+///Struct polygon format returned by GetPolys
 struct bsp_polygon {
     vector <bsp_vector> v;
 };
-
+/**
+ * Mesh FX stores various lights that light up shield or hull for damage
+ * They may be merged and they grow and shring based on their TTL and TTD and delta values
+ * They must be updated every frame or every physics frame if not drawn (pass in time 
+ */
 class MeshFX : public GFXLight {
 public:
+  ///The ammt of change that such meshFX objects attenuation get
   float delta;
+  ///The Time to live of the current light effect
   float TTL;
+  ///After it has achieved its time to live max it has to slowly fade out and die
   float TTD;
   MeshFX ():GFXLight(){TTL=TTD=delta=0;}
+  ///Makes a meshFX given TTL and delta values.
   MeshFX (const float TTL, const float delta, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
+  ///Merges two MeshFX in a given way to seamlessly blend multiple hits on a shield
   void MergeLights (const MeshFX & other);
+  ///updates the growth and death of the FX. Returns false if dead
   bool Update (float ttime);//if false::dead
 };
+/**
+ * Stores relevant info needed to draw a mesh given only the orig
+ */
 struct MeshDrawContext {
+  ///The matrix in world space
   float mat[16];
+  ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
   MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
 };
@@ -66,10 +83,22 @@ using XMLSupport::AttributeList;
 
 #define NUM_MESH_SEQUENCE 4
 #define MESH_SPECIAL_FX_ONLY 3
+
+/**
+ * Mesh is the basic textured drawable
+ * Mesh has 1 texture and 1 vertex list (with possibly multiple primitives inside
+ * Meshes have a center-location but do not need to be translated to be drawn
+ * Meshes store various LOD's and originals in the orig pointer. These may be accessed
+ * in order to draw quickly a whole series of meshes.
+ * Unless DrawNow is invoked, Drawing only stores the mesh on teh appropriate draw queue so 
+ * they may be drawn at a later date
+ * Also meshe contain Logos, flags based on squadron and faction that may be user-edited and appear in pleasing
+ * places on the hull.
+ */
 class Mesh
 {
 private:
-  // Display list hack
+  ///Stores all the load-time vertex info in the XML struct FIXME light calculations
   struct XML {
     enum Names {
       //elements
@@ -124,6 +153,7 @@ private:
       OFFSET
 
     };
+    ///Saves which attributes of vertex have been set in XML file
     enum PointState {
       P_X = 0x1,
       P_Y = 0x2,
@@ -132,11 +162,13 @@ private:
       P_J = 0x10,
       P_K = 0x20
     };
+    ///Saves which attributes of vertex have been set in Polygon for XML file
     enum VertexState {
       V_POINT = 0x1,
       V_S = 0x2,
       V_T = 0x4
     };
+    ///Save if various logo values have been set
     enum LogoState {
       V_TYPE = 0x1,
       V_ROTATE = 0x2,
@@ -144,12 +176,19 @@ private:
       V_OFFSET=0x8,
       V_REF=0x10
     };
+    ///To save the constructing of a logo
     struct ZeLogo {
+      ///Which type the logo is (0 = faction 1 = squad >2 = internal use
       unsigned int type;
+      ///how many degrees logo is rotated
       float rotate;
+      ///Size of the logo
       float size;
+      ///offset of polygon of logo
       float offset;
+      ///the reference points that the logo is weighted against
       vector <int> refpnt;
+      ///the weight of the points in weighted average of refpnts
       vector <float> refweight;
     };
 
@@ -157,6 +196,7 @@ private:
     static const EnumMap::Pair attribute_names[];
     static const EnumMap element_map;
     static const EnumMap attribute_map;
+    ///All logos on this unit
     vector <ZeLogo> logos;
     vector<Names> state_stack;
     int load_stage;
@@ -168,7 +208,8 @@ private:
     bool recalc_norm;
     int num_vertices;
     vector<GFXVertex> vertices;
-    vector<int>vertexcount;//keep count to make averaging easy 
+    ///keep count to make averaging easy 
+    vector<int>vertexcount;
     vector<GFXVertex> lines;
     vector<GFXVertex> tris;
     vector<GFXVertex> quads;
@@ -183,7 +224,8 @@ private:
     vector<int> lineind;
     vector<int> nrmllinstrip;
     vector<int> linestripind;
-    vector<int> triind;//for possible normal computation
+    ///for possible normal computation
+    vector<int> triind;
     vector<int> nrmltristrip;
     vector<int> tristripind;
     vector<int> nrmltrifan;
@@ -202,8 +244,11 @@ private:
     GFXMaterial material;
     int faction;
   } *xml;
+  ///Loads XML data into this mesh.
   void LoadXML(const char *filename, int faction);
+  ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
+  ///Creates all logos with given XML data info
   void CreateLogos(int faction);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -212,67 +257,98 @@ private:
   void endElement(const string &name);
 
 protected:
+  ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
   bool LoadExistant (const char * filehash);
+  ///the position of the center of this mesh for collision detection
   Vector local_pos; 
-
+  ///The hash table of all meshes
   static Hashtable<string, Mesh,char[127]> meshHashTable;
+  ///The refcount:: how many meshes are referencing the appropriate original
   int refcount;
-  Vector mx;//bounding box
-  Vector mn;
+  ///bounding box
+  Vector mx;  Vector mn;
+  ///The radial size of this mesh
   float radialSize;
+  ///num lods contained in the array of Mesh "orig"
   int numlods;
   Mesh *orig;
+  ///The size that this LOD (if original) comes into effect
   float lodsize;
-  Logo *forcelogos;
-  int numforcelogo;
-
-  Logo *squadlogos;
-  int numsquadlogo;
-  
-  GFXVertexList *vlist;//tri,quad,line
-  
+  ///The number of force logos on this mesh (original)
+  Logo *forcelogos; int numforcelogo; 
+  ///The number of squad logos on this mesh (original)
+  Logo *squadlogos;  int numsquadlogo;
+  ///tri,quad,line, strips, etc
+  GFXVertexList *vlist;
+  ///The number of the appropriate material for this mesh (default 0)
   unsigned int myMatNum;
+  ///The decal relevant to this mesh
   Texture *Decal;  
+  ///whether this should be environment mapped
   GFXBOOL envMap;
+  ///Whether this original will be drawn this frame
   GFXBOOL will_be_drawn;  
-  enum BLENDFUNC blendSrc;
-  enum BLENDFUNC blendDst;
-  // Support for reorganized rendering
+  ///The blend functions
+  enum BLENDFUNC blendSrc;  enum BLENDFUNC blendDst;
+  /// Support for reorganized rendering
   vector<MeshDrawContext> *draw_queue;
+  /// How transparent this mesh is (in what order should it be rendered in 
   int draw_sequence;
+  ///The name of this unit
   string hash_name;
+  ///Setting all values to defaults (good for mesh copying and stuff)
   void InitUnit();
+  ///Needs to have access to our class
   friend class OrigMeshContainer;
+  ///The enabled light effects on this mesh
   vector <MeshFX> LocalFX;
+  ///Returing the mesh relevant to "size" pixels LOD of this mesh
   Mesh *getLOD (float lod);
 public:
   Mesh();
+  ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
   Mesh(const char *filename, bool xml, int faction, bool orig=false);
+  ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
+  ///Destructor... kills orig if refcount of orig becomes zero
   virtual ~Mesh();
-  
+  ///Gets number of specialFX
   unsigned int numFX () {return LocalFX.size();}
+  ///Turns on SpecialFX
   void EnableSpecialFX();
+  ///Gets all polygons in this mesh for BSP computation
   void GetPolys(vector <bsp_polygon> &);
+  ///Sets the material of this mesh to mat (affects original as well)
   void SetMaterial (const GFXMaterial & mat);
+  ///If it has already been drawn this frame
   GFXBOOL HasBeenDrawn() {return will_be_drawn;} 
-  void UnDraw() {will_be_drawn=GFXFALSE;}//so one can query if it has or not been drawn
-  //  void SetPosition (const Vector&);
+  ///so one can query if it has or not been drawn
+  void UnDraw() {will_be_drawn=GFXFALSE;}
+  ///Returns center of this mesh
   Vector &Position() {return local_pos;}
-  //  const char *get_name(){return name}
+  ///Draws lod pixel wide mesh at Transformation LATER
   void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
-void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
+  void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  ///Will draw all undrawn meshes of this type
   virtual void ProcessDrawQueue();
+  ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
+  ///Sets whether or not this unit should be environment mapped
   void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
-  void UpdateHudMatrix();//puts an object on the hud with the matrix
-  Vector corner_min() { return mn; }
-  Vector corner_max() { return mx; }
+  ///Returns bounding box values
+  Vector corner_min() { return mn; }  Vector corner_max() { return mx; }
+  ///Returns a physical boudning box in 3space instead of in current unit space
   BoundingBox * getBoundingBox();
+  ///queries this bounding box with a vector and radius
   bool queryBoundingBox (const Vector &start,const float err);
+  ///Queries bounding box with a ray
   bool queryBoundingBox (const Vector &start, const Vector & end, const float err); 
+  ///returns the radial size of this 
   float rSize () {return radialSize;}
-  void UpdateFX(float ttime);//based on TTL, etc
+  ///based on TTL, etc, updates shield effects
+  void UpdateFX(float ttime);
+  ///Adds a new damage effect with %age damage to the part of the unit. Color specifies the shield oclor
   void AddDamageFX (const Vector &LocalPos, const Vector &LocalNorm, const float percentage, const GFXColor &color=GFXColor (1,1,1,1)); 
 
 };

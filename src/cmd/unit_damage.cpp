@@ -5,6 +5,7 @@
 #include "gfx/halo.h"
 #include "gfx/bsp.h"
 #include "vegastrike.h"
+#include "unit_collide.h"
 #include <float.h>
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {

@@ -23,7 +23,7 @@
 </Appearance>
 </Missile>
 
-<Beam name="Particle" mountsize="light"> 
+<Beam name="Particle" mountsize="medium"> 
 <Energy rate="4" stability="2" refire=".2">
 </Energy>
 <Damage rate="42" longrange="1">
@@ -67,7 +67,7 @@
 </Appearance>
 </Beam>
 
-<Beam name="Neutron" mountsize="light"> 
+<Beam name="Neutron" mountsize="heavy"> 
 <Energy rate="4" stability="3" refire=".5">
 </Energy>
 <Damage rate="40" longrange="1">
@@ -212,11 +212,11 @@
 </Damage>
 <Distance speed="150" radialspeed=".8" radius=".3" pulsespeed="15" range="2000" >
 </Distance>
-<Appearance file="HeatSeak.xmesh" >
+<Appearance file="Dumbfire.xunit" >
 </Appearance>
 </Missile>
 
-<Missile name="Image Recognition">
+<Missile name="ImageRecognition">
 <Locktime time= "3">
 </Locktime>
 <Energy rate="0" stability="6" refire=".3">
@@ -225,11 +225,11 @@
 </Damage>
 <Distance speed="150" radialspeed=".8" radius=".3" pulsespeed="15" range="2000" >
 </Distance>
-<Appearance file="Imrec.xmesh" >
+<Appearance file="Dumbfire.xunit" >
 </Appearance>
 </Missile>
 
-<Missile name="Friend Or Foe">
+<Missile name="FriendOrFoe">
 <Locktime time= "3">
 </Locktime>
 <Energy rate="0" stability="6" refire=".3">
@@ -238,7 +238,7 @@
 </Damage>
 <Distance speed="150" radialspeed=".8" radius=".3" pulsespeed="15" range="2000" >
 </Distance>
-<Appearance file="FORF.xmesh" >
+<Appearance file="Dumbfire.xunit" >
 </Appearance>
 </Missile>
 

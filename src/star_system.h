@@ -29,7 +29,7 @@ class StarSystem {
   ///Physics is divided into 3 stages spread over 3 frames
   enum PHYSICS_STAGE {PHY_AI,PHY_COLLIDE,PHY_RESOLV,PHY_NUM} current_stage;
   
-  // Stars, planets, etc. Orbital mechanics precalculated 
+  ///Stars, planets, etc. Orbital mechanics precalculated 
   int numprimaries; Unit **primaries; 
   ///Starsystem XML Struct For use with XML loading
   struct StarXML { 

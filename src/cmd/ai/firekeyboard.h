@@ -20,6 +20,8 @@ class FireKeyboard: public Order {
   static void JFireKey(KBSTATE,float,float,int);  
   static void JMissileKey(KBSTATE,float,float,int);  
   static void JTargetKey(KBSTATE,float,float,int);  
+  static void WeapSelKey (int,KBSTATE);
+  static void MisSelKey (int, KBSTATE);
 protected:
   float distance;
   void ChooseTargets();//chooses n targets and puts the best to attack in unit's target container
