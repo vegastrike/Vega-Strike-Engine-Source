@@ -114,6 +114,7 @@ class Unit
   friend class VDU;
   friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
+  enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
   void DamageRandSys (float dam,const Vector &vec);
   void SetNebula (Nebula *neb) {
     nebula = neb;
@@ -395,7 +396,7 @@ class Unit
   ///Should not be drawn
   bool invisible;
   
-  enum {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4} DOCKENUM;
+
   unsigned char docked;
   ///How many lists are referencing us
   int ucref;

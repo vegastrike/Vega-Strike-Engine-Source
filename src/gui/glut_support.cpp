@@ -227,11 +227,18 @@ void ShowImage(float x, float y, float wid, float hei, GUITexture image, int til
         glEnd();
 	glDisable(GL_TEXTURE_2D);
 }
-
+float word_length(const char * str) {
+  float length=0;
+  while (*str&&(!isspace(*str))) {
+    char mychar = *str++;
+    length+=glutStrokeWidth (GLUT_STROKE_ROMAN,mychar);
+  }
+  return length/2500;
+}
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-  float font_size_float=4./100;
+  float font_size_float=5./100;
         int cur;
-        float font_size = size;
+        float font_size = size*.66;
 	float width = 0;
 	float cur_width = 0;
 	float end = 0;
@@ -243,7 +250,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 	glLineWidth(wid);
 	glTranslatef(x,y,0);
 	glScalef(font_size,font_size,1);
-	end = glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
+	end = no_end?0:glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
 	end /= 2500;
 	//	if (no_end == 1) { end = 0; }
 	int h=0;
@@ -251,7 +258,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
 		cur_width /= 2500;
 		width += cur_width;
-		if (width+end > wid && str[cur+1] != '\0' ) {
+		if (width+end+word_length(str+cur+1) > wid && str[cur+1] != '\0' ) {
 		  if (no_end==0) {
 		    for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
 		    break;

@@ -328,7 +328,7 @@ void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::s
   ss->JumpTo (un,jumppoint,system);
 }
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
-  if (un->DockedOrDocking()==DOCKED_INSIDE||un->DockedOrDocking()==DOCKED) {
+  if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
   }
 #ifdef JUMP_DEBUG

@@ -389,8 +389,12 @@ bool Mission::runScript(missionNode *module_node,const string &scriptname,unsign
 
 
 void Mission::DirectorBenchmark(){
-
+  double oldgametime=gametime;
   gametime+=SIMULATION_ATOM;//elapsed;
+  if (getTimeCompression()>=.1) {
+    if (gametime<=oldgametime)
+      gametime=SIMULATION_ATOM;
+  }
   total_nr_frames++;
 
   //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;

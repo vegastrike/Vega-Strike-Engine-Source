@@ -98,6 +98,7 @@
   WRAPPED1(bool,isDocked,UnitWrapper,dockingUnit,false)
   WRAPPED1(bool,Dock,UnitWrapper,unitToDockWith,false)
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
+  WRAPPED0(int,DockedOrDocking,0)
   WRAPPED0(int,GetNumMounts,0)
 
   EXPORT_UTIL(JumpTo,false)
