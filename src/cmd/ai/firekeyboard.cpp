@@ -610,6 +610,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
 	  return;
 	}
+	parent->Target(targ);
       }
       }
       CommunicationMessage c(targ,parent,NULL,0);
@@ -639,6 +640,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
 	    mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
 	    return;
 	  }
+	  parent->Target(targ);
 	}
       }
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
