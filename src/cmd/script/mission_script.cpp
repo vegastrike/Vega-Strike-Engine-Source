@@ -334,7 +334,7 @@ varInst * Mission::doScript(missionNode *node,int mode, varInstMap *varmap){
       node->script.nr_arguments=0;
 
       string retvalue=node->attr_value("return");
-      if(retvalue.empty()){
+      if(retvalue.empty() || retvalue=="void"){
 	node->script.vartype=VAR_VOID;
       }
       else{

@@ -110,8 +110,8 @@ template<class domNodeType> class easyDomFactory {
 
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
-    cout << "error: could not open file: " << filename << endl;
-    assert(0);
+    cout << "warning: could not open file: " << filename << endl;
+    //    assert(0);
     return NULL;
   }
 

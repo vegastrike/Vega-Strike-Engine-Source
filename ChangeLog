@@ -1,3 +1,7 @@
+2001-12-11 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter can use c_alike module files
+
 2001-12-10 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* imported vegastrike/src/cmd/script/c_alike
