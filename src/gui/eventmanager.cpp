@@ -112,7 +112,7 @@ void EventManager::removeResponder(
         // Do the loop again if we found one and we want all of them.
     } while(found && !top);
 
-    checkForShutDownEventManager();     // FIXME mbyron -- EVENT HACK.
+//FIXME -- Calling this here causes the loop in processEvent to be b0rked by a deletion. We now must checkForShutdown at a later time...which is below    checkForShutDownEventManager();     // FIXME mbyron -- EVENT HACK.
 }
 
 // Send a command through the responder chain.
@@ -178,6 +178,7 @@ void EventManager::sendInputEvent(const InputEvent& event) {
 			}
 		}
     }
+	checkForShutDownEventManager();
 }
 
 // Constructor isn't public.  Use initializeEventManager.
