@@ -31,8 +31,10 @@ static float aggressivity=2.01;
 AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,2), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
   last_time_insys=true;
   obedient = true;
-  if (aggressivity==2.01)
-    aggressivity = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
+  if (aggressivity==2.01) {
+    float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
+    aggressivity = defagg;
+  }
   if (target !=NULL) {
     AttachOrder (target);
   }

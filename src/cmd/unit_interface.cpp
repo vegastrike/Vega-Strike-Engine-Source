@@ -252,7 +252,9 @@ public:
       }
       break;
     case MISSIONMODE:
-      title = "Mission BBS               ";
+      if (title.find ("Mission BBS")==title.length()) {
+	title = "Mission BBS               ";
+      }
       ButtonText="Accept";
       if (!beginswith (curcategory,"missions")) {
 	curcategory.clear();
@@ -721,11 +723,19 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     if ((un=this->base.GetUnit())) {
       unsigned int index;
       if (NULL!=un->GetCargo(input_buffer,index)) {
-	if (1==un->RemoveCargo(index,1,true)) {
-	  LoadMission (input_buffer,false);
-	  SetMode (mode,submode);
-	  SelectLastSelected();
+	static int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
+	if (active_missions.size()<max_missions) {
+	  if (1==un->RemoveCargo(index,1,true)) {
+	    title= ((string("Accepted Mission ")+input_buffer).c_str());
+	    LoadMission (input_buffer,false);
+	    SetMode (mode,submode);
+	    SelectLastSelected();
 
+	  }else {
+	    title=("Mission BBS::Error Accepting Mission");
+	  }
+	}else {
+	 title= ("Mission BBS::Too Many Missions In Progress");
 	}
       }
     }
