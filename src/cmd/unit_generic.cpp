@@ -2182,17 +2182,17 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
-  float absamt= amt>=0?amt:-amt;
   Cockpit * cpt;
   if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
       phasedamage*= (g_game.difficulty);
       amt*=(g_game.difficulty);
-      cpt->Shake (absamt);
+      cpt->Shake (amt);
     }
   }
   //  #endif
+  float absamt= amt>=0?amt:-amt;  
   float percentage=0;
   //percentage = this->ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
 	// Old ApplyLocalDamage function body (needed here)
