@@ -362,7 +362,7 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
 
     if (target->isUnit()!=PLANETPTR) {
 
-      Vector TargetPos (ToLocalCoordinates ((target->Position()-Position()).Cast())); 
+      Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
 
       TargetPos.Normalize(); 
 
