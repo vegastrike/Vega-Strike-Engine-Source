@@ -88,6 +88,46 @@ void FireAt::LastPythonScript () {
 	lastOrder = PythonAI<Orders::FireAt>::LastPythonClass();
 }
 
+
+
+class EvadeLeftRightC:public FlyByWire {
+  bool updown;
+  Vector facing;
+  bool dir;
+public:
+  EvadeLeftRightC( bool updown) {
+    this->updown=updown;    
+    facing=Vector(0,0,0);    
+    desired_ang_velocity=Vector(0,0,0);
+    dir=(rand()<RAND_MAX/2);
+  }
+  void SetOppositeDir() {
+    dir=!dir;
+    SetDesiredAngularVelocity(Vector(0.0f,0.0f,0.0f),true);
+    if (updown) {
+      Up(dir?1.0f:-1.0f);
+    }else {
+      Right(dir?1.0f:-1.0f);
+    }
+    Vector P=Vector(0,0,0),Q=Vector(0,0,0);
+    parent->GetOrientation(P,Q,facing);
+  }
+  virtual void SetParent(Unit * parent1) {
+    FlyByWire::SetParent(parent1);
+    SetOppositeDir();
+  }
+  void Execute() {    
+    FlyByWire::Execute();
+    Vector P,Q,R;
+    parent->GetOrientation(P,Q,R);
+    static float ang = cos(XMLSupport::parse_float(vs_config->getVariable("AI","evasion_angle","60")));
+    if (R.Dot(facing)<ang||(desired_ang_velocity.i==0&&desired_ang_velocity.j==0&&desired_ang_velocity.k==0)) {
+      SetOppositeDir();
+    }    
+  }
+};
+
+
 void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   bool afterburn = useAfterburner();
@@ -128,6 +168,28 @@ void BarrelRoll (Order * aisc, Unit*un) {
 	broll->MatchSpeed(Vector(0,0,afterburn?un->GetComputerData().max_ab_speed():un->GetComputerData().max_speed()));
 	broll->Afterburn(afterburn);
 }
+
+static void EvadeWavy (Order * aisc, Unit*un, bool updown, bool ab) {
+  EvadeLeftRightC * broll=NULL;
+  broll= new EvadeLeftRightC(updown);
+  AddOrd(aisc,un,broll);
+  bool afterburn = ab&&useAfterburner();
+  broll->MatchSpeed(Vector(0,0,afterburn?un->GetComputerData().max_ab_speed():un->GetComputerData().max_speed()));
+  broll->Afterburn(afterburn);        
+}
+void AfterburnEvadeLeftRight(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,false,true);
+}
+void AfterburnEvadeUpDown(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,true,true);
+}
+void EvadeLeftRight(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,false,false);
+}
+void EvadeUpDown(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,true,false);
+}
+
 
 namespace Orders{
 class LoopAround: public Orders::FaceTargetITTS{
@@ -235,6 +297,7 @@ void AggressiveLoopAroundSlow(Order* aisc, Unit * un) {
 	AddOrd(aisc,un,broll);
 	
 }
+#if 0
 void Evade(Order * aisc, Unit * un) {
   QVector v(un->Position());
   QVector u(v);
@@ -252,6 +315,7 @@ void Evade(Order * aisc, Unit * un) {
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),afterburn),false, afterburn,true);  
   AddOrd (aisc,un,ord);
 }
+#endif
 void MoveTo(Order * aisc, Unit * un) {
   QVector Targ (un->Position());
   Unit * untarg = un->Target();

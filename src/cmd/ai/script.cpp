@@ -34,7 +34,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("afterburn turn towards",&AfterburnTurnTowards));  
   tmp.insert (MyPair ("afterburn turn towards itts",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("cloak",&CloakForScript));  
-  tmp.insert (MyPair ("evade",&Evade));    
+  tmp.insert (MyPair ("evade",&AfterburnEvadeLeftRight));    
   tmp.insert (MyPair ("kick stop",&Kickstop));      
   tmp.insert (MyPair ("move to",&MoveTo));      
   tmp.insert (MyPair ("shelton slide",&SheltonSlide));      
@@ -48,6 +48,10 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("drop cargo",&DropCargo));   
   tmp.insert (MyPair ("roll right",&RollRight));   
   tmp.insert (MyPair ("roll left",&RollLeft));   
+  tmp.insert (MyPair ("evade left right",&EvadeLeftRight));   
+  tmp.insert (MyPair ("evade up down",&EvadeUpDown));   
+  tmp.insert (MyPair ("afterburn evade left right",&AfterburnEvadeLeftRight));   
+  tmp.insert (MyPair ("afterburn evade up down",&AfterburnEvadeUpDown));   
   return tmp;
 }
 

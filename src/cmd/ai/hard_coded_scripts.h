@@ -9,7 +9,6 @@ CCScript FlyStraightAfterburner;
 CCScript AfterburnTurnTowards;
 CCScript AfterburnTurnTowardsITTS;
 CCScript CloakForScript;
-CCScript Evade;
 CCScript MoveTo;
 CCScript Kickstop;
 CCScript MatchVelocity;
@@ -25,7 +24,7 @@ CCScript AfterburnTurnAway;
 CCScript TurnTowardsITTS;
 CCScript TurnTowards;
 CCScript BarrelRoll;
-CCScript EvadeThrust;
+
 CCScript LoopAround;
 CCScript AggressiveLoopAround;
 CCScript LoopAroundFast;
@@ -35,6 +34,10 @@ CCScript AggressiveLoopAroundSlow;
 CCScript DropCargo;
 CCScript RollLeft;
 CCScript RollRight;
+CCScript EvadeLeftRight;
+CCScript EvadeUpDown;
+CCScript AfterburnEvadeLeftRight;
+CCScript AfterburnEvadeUpDown;
 #endif
 
 
