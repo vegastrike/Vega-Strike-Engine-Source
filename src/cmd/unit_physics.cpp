@@ -205,6 +205,13 @@ Vector Unit::ClampThrust(const Vector &amt1){
 
 Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   Vector Res=amt1;
+  if (energy<1+afterburnenergy*SIMULATION_ATOM) {
+    afterburn=false;
+  }
+  if (afterburn) {
+    energy -=apply_float_to_short( afterburnenergy*SIMULATION_ATOM);
+  }
+
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
   static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
@@ -223,9 +230,6 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
-  if (afterburn) {
-    energy -=apply_float_to_short( afterburnenergy);
-  }
   fuel-=(afterburn?abfuelusage:1)*Res.Magnitude();
   return Res;
 }

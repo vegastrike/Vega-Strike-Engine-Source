@@ -821,9 +821,6 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case AFTERBURNER:
 	limits.afterburn=parse_float ((*iter).value);
 	break;
-      case AFTERBURNENERGY:
-	afterburnenergy =CLAMP_SHORT(parse_float((*iter).value)); 
-	break;
       case LEFT:
 	limits.lateral=parse_float((*iter).value);
 	break;
@@ -1007,6 +1004,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   case ENERGY:
     assert (xml->unitlevel==1);
     xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case AFTERBURNENERGY:
+	afterburnenergy =CLAMP_SHORT(parse_float((*iter).value)); 
+	break;
+      default:
+	break;
+      }
+    }
+
     break;
 
   case RESTRICTED:
