@@ -7,7 +7,7 @@ string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA"
 
 void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl,std::string meshname){
   int32bit intbuf;
-  int32bit bytebuf;
+  char8bit bytebuf;
   int32bit word32index=0;
   union chunk32{
 	  int32bit i32val;
@@ -18,25 +18,25 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
   fseek(Inputfile,0,SEEK_SET);
   fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='B'){
-	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\nExpected B got %c",bytebuf);
 	  exit(-1);
   }
   fseek(Inputfile,1,SEEK_SET);
   fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='F'){
-	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\nExpected F got %c",bytebuf);
 	  exit(-1);
   }
   fseek(Inputfile,2,SEEK_SET);
   fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='X'){
-	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\nExpected X got %c",bytebuf);
 	  exit(-1);
   }
   fseek(Inputfile,3,SEEK_SET);
   fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='M'){
-	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\nExpected M got %c",bytebuf);
 	  exit(-1);
   }
 
