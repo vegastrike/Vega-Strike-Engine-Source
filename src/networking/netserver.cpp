@@ -91,6 +91,9 @@ NetServer::NetServer()
 
     _downloadManagerServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerServer );
+#ifdef CRYPTO
+	FileUtil::use_crypto = true;
+#endif
 }
 
 NetServer::~NetServer()

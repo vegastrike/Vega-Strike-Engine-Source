@@ -208,6 +208,8 @@ if( use_crypto)
 	if( (ret=HashCompute( filename.c_str(), hashdigest, type))<0 || ret)
 	{
 		cerr<<"!!! ERROR = couldn't get "<<filename<<" HashDigest (not found or error) !!!"<<endl;
+		if( ret)
+			VSExit(1);
 		cerr<<"-- FILE HASH : "<<filename<<" = "<<hashdigest<<" --"<<endl;
 	}
 	else

@@ -187,19 +187,16 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
         Packet packet2;
-		static string univ = vs_config->getVariable("data","universe_path","universe");
-		string reluniv = univ+"/"+universe_file;
-		netbuf.addString( reluniv);
+		netbuf.addString( universe_file);
 #ifdef CRYPTO
 		unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
-		FileUtil::HashFileCompute( reluniv, digest, UniverseFile);
+		FileUtil::HashFileCompute( universe_file, digest, UniverseFile);
 		// Add the galaxy filename with relative path to datadir
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 #endif
 
 		// Add the initial star system filename + hash if crypto++ support too
-		static string sys = vs_config->getVariable("data","sectors","sectors");
-		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
+		string relsys = cp->savegame->GetStarSystem()+".system";
 		netbuf.addString( relsys);
 
 		// Generate the starsystem before addclient so that it already contains serials
