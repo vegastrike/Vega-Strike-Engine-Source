@@ -21,6 +21,10 @@ using std::string;
 #define activeSys _Universe->activeStarSystem() //less to write
 
 namespace UniverseUtil {
+	void playVictoryTune () {
+	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
+	  muzak->GotoSong(newssong);
+	}
 	int musicAddList(string str) {
 		return muzak->Addlist(str.c_str());
 	}

@@ -19,6 +19,7 @@ using std::string;
 #define activeSys _Universe->activeStarSystem() //less to write
 
 namespace UniverseUtil {
+	void playVictoryTune(){}
 	int musicAddList(string str) {
 		return 0;
 	}

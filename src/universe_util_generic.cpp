@@ -241,7 +241,10 @@ namespace UniverseUtil {
 		return _Universe->AccessCockpit(which)->GetParent();
 	}
 	*/
+	extern void playVictoryTune();
 	void terminateMission(bool Win){
+		if (Win)
+			playVictoryTune();
 		mission->terminateMission();
 	}
 	int addObjective(string objective) {
