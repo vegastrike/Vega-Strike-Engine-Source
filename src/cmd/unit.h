@@ -105,15 +105,15 @@ friend class PlanetaryOrbit;
   class Mount {
     Transformation LocalPosition;
   public:
-    union {
+    union REF{
       Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
       float refire;
-    };
+    } ref;
     short size;
     short ammo;//-1 is infinite
     weapon_info type;
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
-    Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; gun=NULL;}
+    Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL;}
     Mount(const string& name, short int ammo=-1);
     void Activate () {
       if (status==INACTIVE)

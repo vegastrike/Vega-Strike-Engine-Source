@@ -5,7 +5,7 @@
 using namespace XMLSupport;
 class Sprite;
 class Unit;
-enum VIEWSTYLE {CP_INSIDE, CP_BEHIND, CP_PAN};
+enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
   UnitContainer parent;
   Sprite *Pit;

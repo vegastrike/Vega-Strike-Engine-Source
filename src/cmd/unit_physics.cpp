@@ -285,11 +285,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   }      
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].gun) {
-	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+      if (mounts[i].ref.gun) {
+	mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
       }
     } else {
-      mounts[i].refire+=SIMULATION_ATOM;
+      mounts[i].ref.refire+=SIMULATION_ATOM;
     }
   }
   bool dead=true;

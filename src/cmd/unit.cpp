@@ -259,8 +259,8 @@ Unit::~Unit()
   if (bspTree)
     delete bspTree;
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
-    if (mounts[beamcount].gun&&mounts[beamcount].type.type==weapon_info::BEAM)
-      delete mounts[beamcount].gun;//hope we're not killin' em twice...they don't go in gunqueue
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
 	if(meshdata&&nummesh>0)
 	{
@@ -647,8 +647,8 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   }
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].gun) {
-	mounts[i].gun->Draw(cumulative_transformation,cumulative_transformation_matrix);
+      if (mounts[i].ref.gun) {
+	mounts[i].ref.gun->Draw(cumulative_transformation,cumulative_transformation_matrix);
       }
     }
   }
@@ -718,27 +718,27 @@ void Unit::Fire (bool Missile) {
   }
 }
 void Unit::Mount::UnFire () {
-  if (status!=ACTIVE||gun==NULL||type.type!=weapon_info::BEAM)
+  if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
     return;
-  gun->Destabilize();
+  ref.gun->Destabilize();
 }
 bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool Missile) {
   Unit * temp;
   if (status!=ACTIVE||(Missile&&type.type!=weapon_info::PROJECTILE)||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
-    if (gun==NULL)
-      gun = new Beam (LocalPosition,type,owner);
+    if (ref.gun==NULL)
+      ref.gun = new Beam (LocalPosition,type,owner);
     else
-      if (gun->Ready())
-	gun->Init (LocalPosition,type,owner);
+      if (ref.gun->Ready())
+	ref.gun->Init (LocalPosition,type,owner);
       else 
 	return false;//can't fire an active beam
   }else { 
-    if (refire>type.Refire) {
+    if (ref.refire>type.Refire) {
       if (ammo>0)
 	ammo--;
-      refire =0;
+      ref.refire =0;
       Matrix mat;
       Transformation tmp = LocalPosition;
       tmp.Compose (Cumulative,m);
@@ -773,7 +773,8 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
   }
   return true;
 }
-Unit::Mount::Mount(const string& filename, short ammo) :gun(NULL),size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM){
+Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM){
+  ref.gun = NULL;
   status=(UNCHOSEN);
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {

@@ -30,7 +30,7 @@ void Cockpit::Delete () {
     Crosshairs = NULL;
   }
 }
-Cockpit::Cockpit (const char * file, Unit * parent): parent (parent), Pit(NULL),Crosshairs(NULL),cockpit_offset(0), viewport_offset(0), view(CP_INSIDE), zoomfactor (1.2) {
+Cockpit::Cockpit (const char * file, Unit * parent): parent (parent), Pit(NULL),Crosshairs(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
   Init (file);
 }
 void Cockpit::Draw() {
