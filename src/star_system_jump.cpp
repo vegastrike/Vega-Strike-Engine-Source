@@ -9,6 +9,7 @@
 #include "cmd/container.h"
 #include "xml_support.h"
 #include <assert.h>
+#include "gfx/cockpit.h"
 #include "audiolib.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 inline bool CompareDest (Planet * un, StarSystem * origin) {
@@ -45,8 +46,8 @@ struct unorigdest {
   StarSystem * orig;
   StarSystem * dest;
   float delay;
-  unsigned int animation;
-  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  unsigned int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
+  int animation;
+  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
 };
 void CacheJumpStar (bool destroy) {
   static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
@@ -80,7 +81,7 @@ void DealPossibleJumpDamage (Unit *un) {
   float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
   float dam =speed*(damage/10);
   if (dam>1) {
-    un->ApplyDamage (un->GetVelocity(),
+    un->ApplyDamage (un->Position()+un->GetVelocity(),
 		     un->GetVelocity(), 
 		     dam,
 		     GFXColor (((float)(rand()%100))/100,
@@ -90,26 +91,30 @@ void DealPossibleJumpDamage (Unit *un) {
   }
 }
 
-static void VolitalizeJumpAnimation (const unsigned int ani) {
-  VolatileJumpAnimations.push_back (JumpAnimations[ani]);
-  JumpAnimations[ani]=NULL;
-  AnimationNulls.push_back (ani);
+static void VolitalizeJumpAnimation (const int ani) {
+  if (ani !=-1) {
+    VolatileJumpAnimations.push_back (JumpAnimations[ani]);
+    JumpAnimations[ani]=NULL;
+    AnimationNulls.push_back (ani);
+  }
 } 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
 }
 void StarSystem::DrawJumpStars() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) { 
-    unsigned int k=pendingjump[kk]->animation;
-    Unit * un = pendingjump[kk]->un.GetUnit();
-    if (un) {
-      Vector p,q,r;
-      un->GetOrientation (p,q,r);
-      JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*(pendingjump[kk]->delay+.25));
-      JumpAnimations[k]->SetOrientation (p,q,r);
-      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
-      float dd = un->rSize()*JumpStarSize*(un->GetJumpStatus().delay-pendingjump[kk]->delay)/(float)un->GetJumpStatus().delay;
-      JumpAnimations[k]->SetDimensions (dd,dd);
+    int k=pendingjump[kk]->animation;
+    if (k!=-1) {
+      Unit * un = pendingjump[kk]->un.GetUnit();
+      if (un) {
+	Vector p,q,r;
+	un->GetOrientation (p,q,r);
+	JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*(pendingjump[kk]->delay+.25));
+	JumpAnimations[k]->SetOrientation (p,q,r);
+	static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
+	float dd = un->rSize()*JumpStarSize*(un->GetJumpStatus().delay-pendingjump[kk]->delay)/(float)un->GetJumpStatus().delay;
+	JumpAnimations[k]->SetDimensions (dd,dd);
+      }
     }
   }
   unsigned int i;
@@ -149,20 +154,20 @@ void StarSystem::ProcessPendingJumps() {
     Unit * un=pendingjump[kk]->un.GetUnit();
     if (un==NULL) {
 #ifdef JUMP_DEBUG
-  fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
+      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
 #endif
       delete pendingjump[kk];
       pendingjump.erase (pendingjump.begin()+kk);
       kk--;
       continue;
     }
+    bool dosightandsound = ((pendingjump[kk]->orig==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
     _Universe->setActiveStarSystem (pendingjump[kk]->orig);
     if (pendingjump[kk]->orig->RemoveUnit (un)) {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit removed from star system\n");
 #endif
-      static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
-    AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
+
       ///eradicating from system, leaving no trace
       un->RemoveFromSystem();
       pendingjump[kk]->dest->AddUnit (un);
@@ -177,7 +182,7 @@ void StarSystem::ProcessPendingJumps() {
 	iter->advance();
       }
       delete iter;
-      if (un==fighters[0]) {
+      if (un==_Universe->AccessCockpit()->GetParent()) {//originally fighters[0] not sure if hti sis the right solution
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit is a player character...changing scene graph\n");
 #endif
@@ -201,17 +206,20 @@ void StarSystem::ProcessPendingJumps() {
       }
       DealPossibleJumpDamage (un);
       static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
-      AUDPlay (jumparrive,un->LocalPosition(),un->GetVelocity(),1);
+      if (dosightandsound)
+	AUDPlay (jumparrive,un->LocalPosition(),un->GetVelocity(),1);
     } else {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit FAILED remove from star system\n");
 #endif
     }
-    Vector p,q,r;
-    un->GetOrientation (p,q,r);
-      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
-    unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
-    VolatileJumpAnimations[myani]->SetOrientation (p,q,r);
+    static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
+    if (dosightandsound) {
+      Vector p,q,r;
+      un->GetOrientation (p,q,r);
+      unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
+      VolatileJumpAnimations[myani]->SetOrientation (p,q,r);
+    }
     delete pendingjump[kk];
     pendingjump.erase (pendingjump.begin()+kk);
     kk--;
@@ -264,7 +272,15 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
 #endif
     Vector p,q,r;
     un->GetOrientation (p,q,r);
-    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,    AddJumpAnimation (un->Position()+r*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize())));
+    bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||un==_Universe->AccessCockpit()->GetParent());
+    int ani =-1;
+    if (dosightandsound) {
+      ani = AddJumpAnimation (un->Position()+r*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize());
+      static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
+      AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
+    }
+    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani ));
+
   } else {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Failed to retrieve!\n");

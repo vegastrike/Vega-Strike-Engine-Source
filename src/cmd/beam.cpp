@@ -111,6 +111,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 }
 
 Beam::~Beam () {
+  //  fprintf (stderr,"Deleting %x",this);
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
 #endif
@@ -199,6 +200,7 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
 }
 
 void Beam::ProcessDrawQueue() {
+  //  fprintf (stderr,"DrawingAll\n");
     GFXDisable (LIGHTING);
     GFXDisable (CULLFACE);//don't want lighting on this baby
     GFXDisable (DEPTHWRITE);
@@ -209,16 +211,19 @@ void Beam::ProcessDrawQueue() {
   GFXDisable (TEXTURE1);
   DrawContext c;
   for (unsigned int decal = 0;decal < beamdrawqueue.size();decal++) {	
-    beamdecals.GetTexture(decal)->MakeActive();
-    if (beamdrawqueue[decal].size()) {
-      beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
-      while (beamdrawqueue[decal].size()) {
-	c= beamdrawqueue[decal].back();
-	beamdrawqueue[decal].pop_back();
-	GFXLoadMatrix (MODEL, c.m);
-	c.vlist->BeginDrawState(GFXFALSE);
-	c.vlist->Draw();
-	c.vlist->EndDrawState(GFXFALSE);
+    Texture * tex = beamdecals.GetTexture(decal);
+    if (tex) {
+      tex->MakeActive();
+      if (beamdrawqueue[decal].size()) {
+	beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
+	while (beamdrawqueue[decal].size()) {
+	  c= beamdrawqueue[decal].back();
+	  beamdrawqueue[decal].pop_back();
+	  GFXLoadMatrix (MODEL, c.m);
+	  c.vlist->BeginDrawState(GFXFALSE);
+	  c.vlist->Draw();
+	  c.vlist->EndDrawState(GFXFALSE);
+	}
       }
     }
   }

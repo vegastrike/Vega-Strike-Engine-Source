@@ -104,6 +104,8 @@ private:
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
   void popActiveStarSystem() {active_star_system.pop_back();}
+  StarSystem * getActiveStarSystem (unsigned int size) {return active_star_system[size];}
+  unsigned int getNumActiveStarSystem() {return active_star_system.size();}
   void LoadStarSystem(StarSystem * ss);
   void UnloadStarSystem(StarSystem * ss);
 

@@ -93,6 +93,7 @@ class Cockpit {
   void Init (const char * file);
   ///Sets owner of this cockpit
   void SetParent(Unit * unit);
+  Unit * GetParent () {return parent.GetUnit();}
   ///Draws Cockpit then restores viewport
   void Draw();
   ///Sets the current viewstyle
