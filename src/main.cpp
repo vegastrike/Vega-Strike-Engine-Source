@@ -138,7 +138,7 @@ int main( int argc, char *argv[] )
 
 #endif
     */
-    _Universe= new Universe(argc,argv);   
+    _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
 
     _Universe->Loop(bootstrap_main_loop);
     return 0;

@@ -8,6 +8,11 @@ vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a cmd/script/libscript.a cmd/script
 vegastrike_SOURCES =				\
 	endianness.h				\
 	file_main.h				\
+	galaxy.cpp				\
+	galaxy_xml.cpp				\
+	galaxy_xml.h				\
+	galaxy_gen.cpp				\
+	galaxy_gen.h				\
 	gfxlib.h				\
 	gfxlib_struct.h				\
 	hashtable.h				\

@@ -794,10 +794,17 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   //  shield.number=0;
   const int chunk_size = 16384;
   // rrestricted=yrestricted=prestricted=false;
-  FILE * inFile = fopen (filename, "r");
-  if(!inFile) {
+  string file = GetCorrectStarSysPath (filename);
+  FILE * inFile=NULL;
+  if (file.length()) {
+    inFile = fopen (file.c_str(), "r");
+    if(!inFile) {
+      printf("StarSystem: file not found %s\n",filename);
+      
+      return;
+    }
+  }else {
     printf("StarSystem: file not found %s\n",filename);
-    assert(0);
     return;
   }
 
@@ -849,18 +856,14 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
   LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
 #else
-  FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"rb");
+  string bglight= MakeSharedStarSysPath (xml->backgroundname+"_light.bmp");
+  FILE * tempo = fopen (bglight.c_str(),"rb");
   if (!tempo) {
-    tempo = fopen (GetSharedTexturePath (xml->backgroundname+"_light.bmp").c_str(),"rb");
-    if (!tempo) {
-      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
-    } else {
-      fclose (tempo);
-    }
+      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
   }else {
     fclose (tempo);
   }
-  LightMap[0] = new Texture((xml->backgroundname+"_light.bmp").c_str(), 1);
+  LightMap[0] = new Texture(bglight.c_str(), 1);
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
   stars = new Stars (xml->numnearstars, xml->starsp);

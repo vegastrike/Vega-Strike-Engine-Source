@@ -25,7 +25,8 @@ std::string GetSharedSoundHashName(const std::string&);
 std::string GetSharedMeshPath (const std::string &name);
 std::string GetSharedMeshHashName(const std::string &);
 std::string GetSharedUnitPath ();
-
+std::string MakeSharedStarSysPath (const std::string &);
+std::string GetCorrectStarSysPath (const std::string &);
 
 ///sets up the data dir and loads VS config
 void initpaths();

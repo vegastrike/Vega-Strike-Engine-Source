@@ -272,7 +272,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	this->faction = faction;
 	flightgroup=flightgrp;
 	flightgroup_subnumber=fg_subnumber;
-
+	bool doubleup=false;
 	vssetdir (GetSharedUnitPath().c_str());
 	vschdir (filename);
 	FILE *fp = fopen (filename,"r");
@@ -283,18 +283,38 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	    vschdir (c);
 	  else
 	    vschdir ("unknown");
+	  doubleup=true;
 	  vschdir (filename);
 	} else {
 	  fclose (fp);
 	}
+	fp = fopen (filename,"r");
+	if (!fp) {
+	  vscdup();
+	  vschdir ("neutral");
+	  faction=_Universe->GetFaction("neutral");//set it to neutral
+	  doubleup=true;
+	  vschdir (filename);
+	  fp = fopen (filename,"r");
+	  if (fp) fclose (fp); 
+	  else {
+	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  meshdata = new Mesh * [1];
+	    meshdata[0]=NULL;
+	    assert ("Unit Not Found"==NULL);
+	  }
+	}else {
+	  fclose (fp);
+	}
 	name = filename;
 	/*Insert file loading stuff here*/
-	if(xml) {
+	if(xml&&fp) {
 	  LoadXML(filename);
+	}
+	if (xml) {
 	  calculate_extent();
 	  ToggleWeapon(true);//change missiles to only fire 1
-	  vscdup();
-	  if (fp) 
+       	  vscdup();
+	  if (doubleup) 
 	    vscdup();
 	  vsresetdir();
 	  return;

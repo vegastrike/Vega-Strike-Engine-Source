@@ -58,6 +58,7 @@ class StarSystem {
   unsigned char no_collision_time;
   ///system name             
   char * name; 
+  std::string filename;
   ///All avail cameras in this system
   Camera cam[NUM_CAM];
   int currentcamera;

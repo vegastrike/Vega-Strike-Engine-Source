@@ -12,6 +12,12 @@
 #include "gfx/cockpit.h"
 #include "audiolib.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
+
+void StarSystem::AddStarsystemToUniverse(const string &mname) {
+  star_system_table.Put (mname,this);
+  this->filename= mname;
+}
+
 inline bool CompareDest (Unit * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
     if ((origin==star_system_table.Get (string(un->GetDestinations()[i])))||(origin==star_system_table.Get (string(un->GetDestinations()[i])+string (".system")))) 
@@ -100,9 +106,6 @@ static void VolitalizeJumpAnimation (const int ani) {
     AnimationNulls.push_back (ani);
   }
 } 
-void StarSystem::AddStarsystemToUniverse(const string &mname) {
-  star_system_table.Put (mname,this);
-}
 void StarSystem::DrawJumpStars() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) { 
     int k=pendingjump[kk]->animation;
@@ -238,39 +241,12 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
   fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif
   StarSystem *ss = star_system_table.Get(system);
-
+  std::string ssys (system+".system");
   if (!ss) {
-    ss = star_system_table.Get (system+".system");
-#ifdef JUMP_DEBUG
-    fprintf (stderr,"Failed to find system. looking with .system appended\n");
-#endif
-    if (!ss) {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"System not loaded, loading file\n");
-#endif
-      std::string ssys (system);
-      FILE * fp = fopen (ssys.c_str(),"r");
-      if (!fp) {
-#ifdef JUMP_DEBUG
-    fprintf (stderr,"Failed to find system. looking with .system appended\n");
-#endif
-	ssys+=".system";
-	fp = fopen (ssys.c_str(),"r");
-      }
-      if (!fp) {
-#ifdef JUMP_DEBUG
-	fprintf (stderr,"Failed to find system. Abort jump!\n");
-#endif
-	return false;
-      }
-      fclose (fp);
-      //fixme...need to use timeofyear
-      ss = new StarSystem (ssys.c_str(),Vector (0,0,0));
-      _Universe->LoadStarSystem (ss);
-      ss->SwapOut();
-      _Universe->activeStarSystem()->SwapIn();
-    }
+    ss = star_system_table.Get (ssys);
   }
+  if (!ss)
+    ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
   if(ss) {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Pushing back to pending queue!\n");

@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #endif
-
+#include "galaxy_gen.h"
 float simulation_atom_var=(float)(1.0/10.0);
 
 std::vector <std::string> savedpwd;
@@ -156,6 +156,47 @@ std::string GetSharedSoundPath (const std::string &name) {
 std::string GetSharedSoundHashName (const std::string &name) {
   return (string ("#ssnd#")+name);
 }
+
+
+
+std::string MakeSharedStarSysPath (const std::string &s){
+  changehome();
+  getcwd (pwd,8191);
+  string newpath =getStarSystemSector (s);
+ 
+  if (chdir (newpath.c_str())==-1) {
+    mkdir (newpath.c_str(), 0xFFFFFFFF);
+    //system ("mkdir " HOMESUBDIR "/generatedbsp");
+  }else {
+    chdir ("..");
+  }
+  returnfromhome();
+  return string(pwd)+string("/")+s;
+
+
+
+}
+std::string GetCorrectStarSysPath (const std::string &name) {
+  if (name.length()==0) {
+    return string ("");
+  }
+  FILE * fp = fopen (name.c_str(),"r");
+  if (fp){
+    fclose (fp);
+    return name;
+  }
+  changehome();
+  fp = fopen (name.c_str(),"r");
+
+  if (fp!=NULL) {
+    fclose (fp);
+    getcwd (pwd,8191);
+  }
+  returnfromhome();
+  char delim []={DELIM,'\0'};
+  return (fp==NULL)?string (""):string (pwd)+string (delim)+name;
+}
+
 
 void vschdir (const char *path) {
   if (path[0]!='\0') {

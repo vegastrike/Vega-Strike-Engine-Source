@@ -29,13 +29,15 @@
 #include "gfx/cockpit.h"
 #include "cmd/weapon_xml.h"
 //#include "mission.h"
-//#include "vs_globals.h"
+#include "galaxy_xml.h"
+
 
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
-Universe::Universe(int argc, char** argv)
+Universe::Universe(int argc, char** argv, const char * galaxy)
 {
 	//Select drivers
+
 
 
 	GFXInit(argc,argv);
@@ -47,6 +49,7 @@ Universe::Universe(int argc, char** argv)
 	cockpit = new Cockpit ("",NULL);
 	LoadWeapons("weapon_list.xml");
 	LoadFactionXML("factions.xml");	
+	this->galaxy = new GalaxyXML::Galaxy (galaxy);
 }
 
 
@@ -60,8 +63,7 @@ void Universe::Init (string systemfile, const Vector & centr,const string planet
   CacheJumpStar(false);
   string fullname=systemfile+".system";
   StarSystem * ss;
-  LoadStarSystem(ss=new StarSystem((char *)fullname.c_str(),centr));
-  pushActiveStarSystem (ss);
+  ss=GenerateStarSystem((char *)fullname.c_str(),"",centr);
 }
 Universe::~Universe()
 {

@@ -715,13 +715,14 @@ static void GenerateSphereMap()
         DWORD      biClrUsed;%d
         DWORD      biClrImportant;%d",info.biSize,info.biWidth, info.biHeight,info.biPlanes, info.biBitCount, info.biCompression, info.biSizeImage, info.biXPelsPerMeter, info.biYPelsPerMeter, info.biClrUsed, info.biClrImportant);
         */
+	/*
 
-	char tmp [256];
 	strcpy (tmp,OutputName);
+	*/
 	//	fp = fopen (strcat (tmp,".png"), "wb");
 	//	fwrite (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
 	//	fwrite (&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	png_write (strcat(tmp,".bmp"),LightMap,256,256,true,8);
+	png_write (OutputName,LightMap,256,256,true,8);
 	//fclose (fp);
 		
 
@@ -821,16 +822,12 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
       s = GetSharedTexturePath (std::string (inpt));
       InputName = (char *) malloc (sizeof (char)*(s.length()+2));
       strcpy (InputName,s.c_str());
-      s = GetSharedTexturePath (std::string (outpt));
-      OutputName = (char *) malloc (sizeof (char)*(s.length()+2));
-      strcpy (OutputName,s.c_str());
     } else {
       fclose (fp);
-      OutputName = (char *)malloc (sizeof(char)*(strlen(outpt)+2));
       InputName = (char *) malloc (sizeof (char)*(strlen(inpt)+2));
-      strcpy (OutputName,outpt);
       strcpy (InputName,inpt);
     }
+    OutputName=strdup (outpt);
     free(tmp);
     tmp=NULL;
   fprintf (stderr, "input name %s, output name %s\nAffine %f Mult %f Pow %f\n",InputName, OutputName, affine, multiplicitive, power);
