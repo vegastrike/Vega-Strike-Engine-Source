@@ -260,6 +260,25 @@ Bolt::~Bolt () {
   vector <Bolt *>::iterator tmp= std::find ((*target)[decal].begin(),(*target)[decal].end(),this); 
   if (tmp!=(*target)[decal].end()) {
     (*target)[decal].erase(tmp);
+  } else {
+    //might as well look for potential faults! Doesn't cost us time
+    fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
+    for (vector <vector <Bolt *> > *srch = &q->bolts;srch!=NULL;srch=&q->balls) {
+      for (unsigned int mdecal=0;mdecal<(*srch).size();mdecal++) {
+	vector <Bolt *>::iterator mtmp= (*srch)[mdecal].begin();
+	while (mtmp!=(*srch)[mdecal].end()) {
+	  std::find ((*srch)[mdecal].begin(),(*srch)[mdecal].end(),this);       
+	  if (mtmp!=(*srch)[mdecal].end()) {
+	    (*srch)[mdecal].erase (mtmp);
+	    fprintf (stderr,"Bolt Fault Recovered\n");
+	  }
+	}
+      }
+      if (srch==&q->balls) {
+	break;
+      }
+    }
+
   }
 #ifdef PERBOLTSOUND
   if (sound!=-1) {
