@@ -5,6 +5,8 @@
 #include "al_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "cmd/unit_generic.h"
+#include "gfx/cockpit_generic.h"
 #ifdef HAVE_AL
 #ifdef __APPLE__
 #include <al.h>
@@ -13,7 +15,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <cmd/unit_generic.h>
 //their LoadWav is b0rken seriously!!!!!!
 
 bool MacFixedLoadWAVFile(const char * fname,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
