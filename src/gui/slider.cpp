@@ -183,6 +183,7 @@ void Slider::draw(void)
 }
 
 bool Slider::processMouseDown(const InputEvent& event) {
+	static int zoominc = XMLSupport::parse_int (vs_config->getVariable("general","wheel_increment_lines","3"));
     if(event.code == LEFT_MOUSE_BUTTON && m_thumbLength != NO_THUMB_LENGTH && hitTest(event.loc)) {
         if(m_vertical) {
             if(event.loc.y < m_thumbRect.origin.y) {
@@ -212,11 +213,11 @@ bool Slider::processMouseDown(const InputEvent& event) {
         return true;
     } else if (event.code == WHEELUP_MOUSE_BUTTON) {
 		if(hitTest(event.loc)) {
-			setPosition(position()-WHEEL_SCROLL_SIZE);
+			setPosition(position()-zoominc);
 		}
 	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
 		if(hitTest(event.loc)) {
-			setPosition(position()+WHEEL_SCROLL_SIZE);
+			setPosition(position()+zoominc);
 		}
 	}
 

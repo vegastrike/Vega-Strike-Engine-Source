@@ -291,6 +291,7 @@ bool Picker::processCommand(const EventCommandId& command, Control* control) {
 
 // Mouse clicked down.
 bool Picker::processMouseDown(const InputEvent& event) {
+	static int zoominc = XMLSupport::parse_int (vs_config->getVariable("general","wheel_increment_lines","3"));
     if(event.code == LEFT_MOUSE_BUTTON) {
         PickerCell* cell = cellForMouse(event.loc);
         if(cell != NULL) {
@@ -303,11 +304,11 @@ bool Picker::processMouseDown(const InputEvent& event) {
         }
     } else if (event.code == WHEELUP_MOUSE_BUTTON) {
 		if(hitTest(event.loc)) {
-			m_scroller->setScrollPosition(m_scroller->scrollPosition()-WHEEL_SCROLL_SIZE);
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()-zoominc);
 		}
 	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
 		if(hitTest(event.loc)) {
-			m_scroller->setScrollPosition(m_scroller->scrollPosition()+WHEEL_SCROLL_SIZE);
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()+zoominc);
 		}
 	}
 
