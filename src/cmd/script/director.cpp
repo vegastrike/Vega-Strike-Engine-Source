@@ -142,7 +142,9 @@ void Mission::DirectorInitgame(){
     while(true){
       DirectorLoop();
 #ifndef _WIN32
+
       sleep(1);
+
 #endif
     }
   }
@@ -217,7 +219,7 @@ void Mission::DirectorEnd(){
 
 
 #ifdef WIN32
-  var_out.open("c:\tmp\default-player.variables");
+  var_out.open("c:\\tmp\\default-player.variables");
 #else
   var_out.open("/tmp/default-player.variables");
 #endif
@@ -321,7 +323,7 @@ void Mission::loadMissionModules(){
 
 }
 
-void Mission::runScript(string modulename,string scriptname,uint classid){
+void Mission::runScript(string modulename,string scriptname,unsigned int classid){
   missionNode *module_node=runtime.modules[modulename];
   if(module_node==NULL){
     fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");

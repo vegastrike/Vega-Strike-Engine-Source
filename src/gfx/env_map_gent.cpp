@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <string.h>
 #include "vs_path.h"
 #include "png_texture.h"

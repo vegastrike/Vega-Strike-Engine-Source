@@ -175,7 +175,7 @@ varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
 
 /* *********************************************************** */
 
-varInst *Mission::lookupClassVariable(string modulename,string varname,uint classid){
+varInst *Mission::lookupClassVariable(string modulename,string varname,unsigned int classid){
   missionNode *module=runtime.modules[modulename];
   string mname=module->script.name;
 
@@ -202,7 +202,7 @@ varInst *Mission::lookupClassVariable(string modulename,string varname,uint clas
 
 varInst *Mission::lookupClassVariable(missionNode *asknode){
   missionNode *module=runtime.cur_thread->module_stack.back();
-  uint classid=runtime.cur_thread->classid_stack.back();
+  unsigned int classid=runtime.cur_thread->classid_stack.back();
   string mname=module->script.name;
   string varname=asknode->script.name;
 

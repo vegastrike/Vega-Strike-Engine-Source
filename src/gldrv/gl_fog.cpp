@@ -3,11 +3,11 @@ static struct _GFXFogState{
   bool enabled;
   FOGMODE curmode;
   float density;
-  float near;
-  float far;
+  float nnear;
+  float ffar;
   GFXColor c;
   int index;
-  _GFXFogState ():c(0,0,0,0){index=0;near=0;far=1;density=1;curmode=FOG_EXP;}
+  _GFXFogState ():c(0,0,0,0){index=0;nnear=0;ffar=1;density=1;curmode=FOG_EXP;}
 } GFXFogState;
 
 void GFXFogMode (const FOGMODE fog) {
@@ -42,9 +42,9 @@ void GFXFogDensity (const float fogdensity) {
   }
 }
 void GFXFogLimits (const float fognear, const float fogfar) {
-  if (GFXFogState.near!=fognear||GFXFogState.far!=fogfar) {
-    GFXFogState.near = fognear;
-    GFXFogState.far = fogfar;
+  if (GFXFogState.nnear!=fognear||GFXFogState.ffar!=fogfar) {
+    GFXFogState.nnear = fognear;
+    GFXFogState.ffar = fogfar;
     glFogf (GL_FOG_START,fognear); 
     glFogf (GL_FOG_END,fogfar); 
   }

@@ -589,7 +589,7 @@ varInst *Mission::doExec(missionNode *node,int mode){
 
     missionNode *old_module=runtime.cur_thread->module_stack.back();
 
-    uint classid=0;
+    unsigned int classid=0;
     if(old_module==module){
       classid=runtime.cur_thread->classid_stack.back();
     }
@@ -664,7 +664,7 @@ void Mission::deleteVarMap(varInstMap *vmap){
     }
 }
 
-uint Mission::createClassInstance(string modulename){
+unsigned int Mission::createClassInstance(string modulename){
   missionNode *module_node=runtime.modules[modulename];
   if(module_node==NULL){
     fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");

@@ -34,7 +34,7 @@
 #include "xml_support.h"
 #include "easydom.h"
 #include "vs_globals.h"
-
+#include <assert.h>
 using std::string;
 
 using XMLSupport::AttributeList;
@@ -156,7 +156,7 @@ class missionThread {
  public:
   vector<contextStack *> exec_stack;
   vector<missionNode *> module_stack;
-  vector<uint>  classid_stack;
+  vector<unsigned int>  classid_stack;
 };
 
 /* *********************************************************** */
@@ -180,7 +180,7 @@ class missionNode : public tagDomNode {
     int nr_arguments; // script
     missionNode *argument_node; //script
     missionNode *module_node; // exec
-    uint classinst_counter;
+    unsigned int classinst_counter;
   } script;
 };
 
@@ -209,11 +209,11 @@ class Mission {
   void  loadMissionModules();
  void  loadModule(string modulename);
 void addModule(string modulename);
-void runScript(string modulename,string scriptname,uint classid=0);
-uint  createClassInstance(string modulename);
+void runScript(string modulename,string scriptname,unsigned int classid=0);
+unsigned int  createClassInstance(string modulename);
  void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
  void setCurrentAIOrder(Order *order) { current_ai_order=order; };
-varInst* lookupClassVariable(string modulename,string varname,uint classid);
+varInst* lookupClassVariable(string modulename,string varname,unsigned int classid);
 
   MessageCenter *msgcenter;
 
