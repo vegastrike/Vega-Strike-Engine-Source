@@ -183,7 +183,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }
     }else if (fg->directive==string("h")) {
       if (fg->directive!=last_directive&&leader) {
-	Unit * th;
+	Unit * th=NULL;
 	if ((th=leader->Threat())) {
 	  Vector vec;
 	  if (parent->InRange(th,vec)) {
@@ -192,16 +192,18 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	}else {
 	  bool targetted=false;
 	  float mindist;
-	  Unit * un;
+	  Unit * un=NULL;
 	  for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	       (un = *ui);
 	       ++ui) {
-	    float d = (un->Position()-leader->Position()).Magnitude();
-	    bool thistargetted = (un->Target()==leader);
-	    if (!th||(thistargetted&&!targetted)||((thistargetted||(!targetted))&&d<mindist)) {
-	      th = un;
-	      targetted=thistargetted;
-	      mindist = d;
+	    if (_Universe->GetRelation (parent->faction,un->faction)<0) {
+	      float d = (un->Position()-leader->Position()).Magnitude();
+	      bool thistargetted = (un->Target()==leader);
+	      if (!th||(thistargetted&&!targetted)||((thistargetted||(!targetted))&&d<mindist)) {
+		th = un;
+		targetted=thistargetted;
+		mindist = d;
+	      }
 	    }
 	  }
 	  if (th) {
