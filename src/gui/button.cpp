@@ -57,7 +57,14 @@ int Button::MouseMove(float x, float y) {
 
 int Button::MouseMoveClick(float x, float y) {
 	// Nothing to do
-	return 1;
+	return 0;
+}
+
+int Button::DoMouse(int type, float x, float y, int button, int state) {
+        if (type == 1) { return MouseClick(button, state, x, y); }
+        if (type == 2) { return MouseMoveClick(x,y); }
+        if (type == 3) { return MouseMove(x,y); }
+	return 0;
 }
 
 int Button::Inside(float x, float y) {

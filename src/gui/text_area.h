@@ -18,10 +18,11 @@
 #ifndef TEXT_AREA_H
 #define TEXT_AREA_H
 
-// Version: 1.2  - February 27, 2002
+// Version: 1.3  - February 27, 2002
 // Changes:
 //    1.1 - Fixed misaligned down scroll button (FINALLY). Fixed text going past the text area (horizontal). Added multiline text areas.
 //    1.2 - Added sorting
+//    1.3 - Added DoMouse to classes. Also fixed bug where button class would always 1 for dragging
 
 /* This class is designed to be self sufficient.
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
@@ -104,6 +105,11 @@ public:
 	int MouseMove(float x, float y);
 	// Mouse movement while the button is clicked
 	int MouseMoveClick(float x, float y);
+
+	// type: 1 is click
+	//       2 is drag
+	//       3 is movement
+	int DoMouse(int type, float x, float y, int button, int state);
 
 private:
 	// Flag that enables/disables the scrollbar (It is not shown if it is disabled). This includes the scroll buttons

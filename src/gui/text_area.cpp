@@ -388,6 +388,13 @@ int TextArea::MouseMoveClick(float x, float y) {
 	return 1;
 }
 
+int TextArea::DoMouse(int type, float x, float y, int button, int state) {
+	if (type == 1) { return MouseClick(button, state, x, y); }
+	if (type == 2) { return MouseMoveClick(x,y); }
+	if (type == 3) { return MouseMove(x,y); }
+	return 0;
+}
+
 int TextArea::Inside(float x, float y, int group) {
 	if (x < xcoord[group] || y > ycoord[group]) { return 0; }
 	if (x > (xcoord[group] + width[group])) { return 0; }

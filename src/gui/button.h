@@ -49,6 +49,7 @@ public:
 	int MouseClick(int button, int state, float x, float);
 	int MouseMove(float x, float y);
 	int MouseMoveClick(float x, float y);
+	int DoMouse(int type, float x, float y, int button, int state);
 
 private:
 	// Stores the location and label of the button
