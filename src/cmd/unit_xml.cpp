@@ -1790,7 +1790,7 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
   cout<<endl;
   //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
   cout<<endl;
-  image->unitwriter=new XMLSerializer (filename.c_str(),modifications,this);
+  image->unitwriter=new XMLSerializer (name.c_str(),modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = &image->unitwriter->randomdata[0];
   float * myscale=&image->unitscale;
