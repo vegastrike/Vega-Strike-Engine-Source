@@ -51,6 +51,8 @@ AImissionScript::AImissionScript (string modname){
 
 AImissionScript::~AImissionScript () {
   mission->runScript(modulename,"quitai",classid);
+
+  mission->destroyClassInstance(modulename,classid);
 #ifdef ORDERDEBUG
   fprintf (stderr,"aims%x",this);
   fflush (stderr);

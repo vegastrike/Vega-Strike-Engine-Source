@@ -152,6 +152,8 @@ scriptContext *Mission::makeContext(missionNode *node){
 
   context->varinsts=new varInstMap;
 
+  context->block_node=node;
+
   return context;
 }
 
@@ -673,6 +675,10 @@ unsigned int Mission::createClassInstance(string modulename){
 
   module_node->script.classinst_counter++;
 
+  char buf[200];
+  sprintf(buf,"class counter for module %s : %d\n",modulename.c_str(),module_node->script.classinst_counter);
+  debug(1,NULL,0,buf);
+
   varInstMap *cvmap=new varInstMap();
 
   module_node->script.classvars.push_back(cvmap);
@@ -692,4 +698,25 @@ unsigned int Mission::createClassInstance(string modulename){
   }
 
   return module_node->script.classinst_counter;
+}
+
+void Mission::destroyClassInstance(string modulename,unsigned int classid){
+  missionNode *module=runtime.modules[modulename];
+  if(module==NULL){
+    fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");
+    assert(0);
+  }
+
+  if(classid >= module->script.classvars.size()){
+    fatalError(module,SCRIPT_RUN,"illegal classvar nr.");
+    assert(0);
+  }
+
+  printf("destroying class instance %s:%d\n",modulename.c_str(),classid);
+  varInstMap *cvmap=module->script.classvars[classid];
+
+  deleteVarMap(cvmap);
+
+  module->script.classvars[classid]=NULL;
+
 }

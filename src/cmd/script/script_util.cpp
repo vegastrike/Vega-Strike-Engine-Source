@@ -72,6 +72,36 @@ void Mission::fatalError(missionNode *node,int mode,string message){
   if(node){
     cout << "semantic error at line " << node->attr_value("line") << endl;
   }
+
+  if(mode==SCRIPT_RUN){
+    missionNode *module_node=runtime.cur_thread->module_stack.back();
+    if(module_node){
+      cout << "ERROR: " << module_node->script.name << ":" << node->attr_value("line")  << endl;
+    }
+    cout << endl << "Stackdump: " << endl;
+
+    for(unsigned int i=0;i<runtime.cur_thread->exec_stack.size();i++){
+
+      contextStack *cstack=runtime.cur_thread->exec_stack[i];
+      missionNode *mnode=runtime.cur_thread->module_stack[i];
+      unsigned int classid=runtime.cur_thread->classid_stack[i];
+
+      //cout << "module " << mnode->script.name << " classid " << classid << endl;
+
+      for(unsigned int j=0;j<cstack->contexts.size();j++){
+	scriptContext *context=cstack->contexts[j];
+	missionNode *bnode=context->block_node;
+	if(bnode){
+	  //cout << i << " : " << j << " " ;
+	  cout << mnode->script.name << ":" << classid << " line " << bnode->attr_value("line") << " " << bnode->script.name << " ";
+	  
+	  printNode(bnode,mode);
+	}
+      }
+    }
+  }
+
+  cout << endl;
 }
 
 /* *********************************************************** */

@@ -144,13 +144,25 @@ class varInst {
 
   missionNode *defvar_node;
   missionNode *block_node;
+
+  unsigned int varId;
 };
 
 /* *********************************************************** */
 
+class varInstVec : public vector<varInst *>{
+ public:
+  unsigned int addVar(varInst *vi) {
+    push_back(vi);
+    int index=size()-1;
+    vi->varId=index;
+    return index;
+  }
+};
+
 class varInstMap : public map<string,varInst *> {
  public:
-
+  varInstVec varVec;
 };
 
 /* *********************************************************** */
@@ -159,6 +171,11 @@ class scriptContext {
  public:
   varInstMap *varinsts;
   missionNode *block_node;
+
+  scriptContext(){
+    varinsts=NULL;
+    block_node=NULL;
+  };
 };
 
 /* *********************************************************** */
@@ -203,6 +220,8 @@ class missionNode : public tagDomNode {
     missionNode *argument_node; //script
     missionNode *module_node; // exec
     unsigned int classinst_counter;
+    int context_id;
+    int varId;
   } script;
 };
 
@@ -247,6 +266,7 @@ unsigned int  createClassInstance(string modulename);
  void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
  void setCurrentAIOrder(Order *order) { current_ai_order=order; };
 varInst* lookupClassVariable(string modulename,string varname,unsigned int classid);
+void destroyClassInstance(string modulename,unsigned int classid);
 
   MessageCenter *msgcenter;
 
@@ -288,6 +308,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
     int thread_nr;
     missionThread *cur_thread;
     map<string,missionNode *> global_variables;
+    varInstVec global_varvec;
     //    vector<const void *()> callbacks;
   } runtime;
 

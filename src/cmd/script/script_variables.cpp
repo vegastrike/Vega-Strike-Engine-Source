@@ -129,6 +129,7 @@ varInst *Mission::lookupLocalVariable(missionNode *asknode){
   contextStack *cstack=runtime.cur_thread->exec_stack.back();
   varInst *defnode=NULL;
 
+  // slow search/name lookup
   for(unsigned int i=0;i<cstack->contexts.size() && defnode==NULL;i++){
     scriptContext *context=cstack->contexts[i];
     varInstMap *map=context->varinsts;
@@ -137,6 +138,20 @@ varInst *Mission::lookupLocalVariable(missionNode *asknode){
       debug(5,defnode->defvar_node,SCRIPT_RUN,"FOUND local variable defined in that node");
     }
   }
+#if 0
+  // fast index lookup
+  varInst *defnode2=NULL;
+  if(asknode->script.context_id==-1 || asknode->script.varId==-1){
+    printf("ERROR: no local variable with fast lookup\n");
+  }
+  scriptContext *context=cstack->contexts[asknode->script.context_id];
+  varInstMap *map2=context->varinsts;
+  defnode2=map2->varVec[asknode->script.varId];
+
+  if(defnode2!=defnode){
+    printf("ERROR: wrong local variable lookup\n");
+  }
+#endif
   if(defnode==NULL){
     return NULL;
   }
@@ -355,6 +370,8 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
 
     (*vmap)[node->script.name]=vi;
 
+    int varId=vmap->varVec.addVar(vi);
+
     printRuntime();
 
     return;
@@ -378,9 +395,11 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
     node->script.vartype=vartypeFromString(type);
 
     missionNode *scope=NULL;
+    int scope_id=-1;
 
     if(global_var==false){
       scope=scope_stack.back();
+      scope_id=scope_stack.size()-1;
     }
     
   varInst *vi=NULL;
@@ -437,15 +456,22 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
   }
 
   node->script.varinst=vi;//FIXME (not for local var)
+  node->script.context_id=-1;
+  node->script.varId=-1;
 
+  int varId=-1;
   if(global_var){
+    // global var
     debug(3,node,mode,"defining global variable");
     runtime.global_variables[node->script.name]=node;
+    varId=runtime.global_varvec.addVar(vi);
     printGlobals(3);
   }
   else{
+    //module, class or local var
     string classvar=node->attr_value("classvar");
     if(classvar=="true"){
+      // class var
       missionNode *module_node=scope_stack.back();
 
       if(module_node->script.classvars.size()!=1){
@@ -454,13 +480,21 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
       }
       varInstMap *vmap=module_node->script.classvars[0];
       (*vmap)[node->script.name]=vi;
+
+      varId=vmap->varVec.addVar(vi);
     }
     else{
+      //module or local var
       scope->script.variables[node->script.name]=vi;
+      
+      varId=scope->script.variables.varVec.addVar(vi);
     }
     node->script.context_block_node=scope;
+    node->script.context_id=scope_id;
+
     debug(5,scope,mode,"defined variable in that scope");
   }
+  node->script.varId=varId;
 
 }
 

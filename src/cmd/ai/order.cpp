@@ -252,6 +252,10 @@ Order::~Order () {
   fprintf (stderr,"ofr%x\n",this);
   fflush (stderr);
 #endif
+  for (unsigned int i=0;i<suborders.size();i++) {
+    delete suborders[i];
+  }
+  suborders.clear();
 }
 void Order::eraseOrder(Order *ord){
   bool found=false;

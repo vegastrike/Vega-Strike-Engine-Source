@@ -1,3 +1,14 @@
+2002-03-09 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* fixed crosshairs in firefly/hornet cockpit
+	* interpreter:
+	  - deleting class instances correctly
+	  - faster variable lookup (not working yet)
+	  - better fatal error output (stackdump)
+	* modified Order::~Order()
+	  the suborders get now deleted correctly
+
+
 2002-03-08 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* ai_orderlist now faster
