@@ -9,7 +9,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
-bool LoadMission (const char * mission_name, bool loadFirstUnit) {
+void LoadMission (const char * mission_name, bool loadFirstUnit) {
   char * tmp = strdup (mission_name);
   active_missions.push_back (new Mission(tmp));
   active_missions.back()->initMission();
@@ -87,5 +87,5 @@ bool LoadMission (const char * mission_name, bool loadFirstUnit) {
   } // end of for flightgroups
   
   active_missions.back()->DirectorInitgame();
-  return true;
+  //  return true;
 }
