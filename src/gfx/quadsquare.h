@@ -17,7 +17,7 @@
 #include <vector>
 #include "resizable.h"
 #include "nonlinear_transform.h"
-struct Texture;
+class Texture;
 struct TerrainTexture {
   BLENDFUNC blendSrc;
   BLENDFUNC blendDst;

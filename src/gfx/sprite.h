@@ -30,7 +30,7 @@ namespace VSFileSystem
 	class VSFile;
 };
 
-struct Texture;
+class Texture;
 class Sprite {
 	float xcenter;
 	float ycenter;

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <map>
-struct Texture;
+class Texture;
 
 class Flightgroup {
 private:

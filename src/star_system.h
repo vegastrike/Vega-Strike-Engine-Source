@@ -13,7 +13,7 @@ class InputDFA;
 
 
 using XMLSupport::AttributeList;
-struct Texture;
+class Texture;
 class Background;
 class Terrain;
 class ContinuousTerrain;

@@ -28,7 +28,7 @@
 
 //struct glVertex;
 class Mesh;
-struct Texture;
+class Texture;
 class Vector;
 class Logo{
 	int numlogos;

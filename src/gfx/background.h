@@ -22,7 +22,7 @@
 #define BACKGROUND_H
 #include "star.h"
 class SphereMesh;
-struct Texture;
+class Texture;
 class Background {
   bool Enabled;
   StarVlist stars;

@@ -35,7 +35,7 @@ class Planet;
 class Unit;
 class Logo;
 class AnimatedTexture;
-struct Texture;
+class Texture;
 struct GFXVertex;
 class GFXVertexList;
 class GFXQuadstrip;

@@ -7,7 +7,7 @@
 class FSM;
 class Animation;
 class Unit;
-struct Texture;
+class Texture;
 
   class Faction {
 
