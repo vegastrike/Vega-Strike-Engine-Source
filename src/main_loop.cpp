@@ -206,7 +206,7 @@ bool cockpitfront=true;
 }
   void ZoomOut (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
-  _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime();  
+  _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime()/getTimeCompression();  
 }
   void ScrollUp (int, KBSTATE newState) {
 
@@ -223,7 +223,7 @@ bool cockpitfront=true;
   }
   void ZoomIn (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
-  _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime();  
+  _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime()/getTimeCompression();  
 }
 
   void InsideLeft(int,KBSTATE newState) {
