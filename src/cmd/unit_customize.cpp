@@ -638,9 +638,12 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   }
   return cancompletefully;
 }
+extern char * GetUnitDir (const char *);
 double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
 	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
-	Unit * templ = UnitFactory::createUnit ((this->name+".template").c_str(),true,this->faction);
+	char * unitdir  = GetUnitDir(name.c_str());
+	Unit * templ = UnitFactory::createUnit ((string (unitdir)+".template").c_str(),true,this->faction);
+	free (unitdir);
 	double percentage=0;
 	if (up->name!="LOAD_FAILED") {
 	  
