@@ -178,10 +178,11 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
 	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
+    static float collision_scale_factor=XMLSupport::parse_float(vs_config->getVariable("physics","collision_damage_scale","1.0"));
 	
     static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".5"));
-	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
-    float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
+    float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage*collision_scale_factor;
+    float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage*collision_scale_factor;
 	
 
 #if 0	
