@@ -263,7 +263,10 @@ Flightgroup *getStaticUnknownFlightgroup (int faction) {
   setStaticFlightgroup (fg,"Unknown",faction);
   return fg[faction];
 }
-
+//sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
+Unit * getTopLevelOwner( ) {
+  return (Unit *)0x31337;
+}
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
@@ -659,6 +662,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     } else {
       xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,alpha,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname));
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
+      xml->moons.back()->SetOwner (getTopLevelOwner());
     }
     delete []filename;
     break;
@@ -777,6 +781,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  if (elem==UNIT) {
 	    un->SetTurretAI ();
 	  }
+	  un->SetOwner (getTopLevelOwner());//cheating so nothing collides at top lev
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
@@ -823,6 +828,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL));
 
 	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
+	    xml->moons.back()->SetOwner (getTopLevelOwner());
 	    if (elem==UNIT) {
 	      xml->moons.back()->SetTurretAI ();
 	    }
