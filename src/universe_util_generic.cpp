@@ -405,7 +405,7 @@ namespace UniverseUtil {
 	if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
 	  continue;
 	}
-	double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-def_un_size-radial_size;
+	double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
 	if (dist<0) {
 	  QVector delta  = pos-un->LocalPosition();
 	  double mag = delta.Magnitude();
@@ -414,13 +414,13 @@ namespace UniverseUtil {
 	  }else {
 	    delta.Set(0,0,1);
 	  }
-	  delta = delta.Scale ( dist+def_un_size+radial_size);
+	  delta = delta.Scale ( dist+un->rSize()+radial_size);
 	  if (k<5) {
 	    pos = pos+delta;
 	    collision=true;
 	  }else {
 	    QVector r(.5,.5,.5);
-	    pos+=un->rSize()*r;
+	    pos+=(radial_size+un->rSize())*r;
 	    collision=true;
 	  }
 	  
