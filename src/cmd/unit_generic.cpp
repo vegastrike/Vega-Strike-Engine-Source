@@ -1815,14 +1815,14 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 }
 void Unit::AddVelocity(float difficulty) {
-   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","1.5"));     
+   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","0.5"));     
    Vector v=Velocity;
    if(graphicOptions.WarpRamping){ // Warp Turning off/on
 	  graphicOptions.RampCounter=warpramptime;
 	  graphicOptions.WarpRamping=0;
    }
    if(graphicOptions.InWarp==1||graphicOptions.RampCounter!=0){
-	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","314159"));
+	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","3141592"));
 	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
 	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","1000"));     
        //    float speed = v.Magnitude();
@@ -1840,13 +1840,13 @@ void Unit::AddVelocity(float difficulty) {
 		 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
 		 double onethird=1.0/3.0;
 		 double thoudist=1000000;
-		 double thoudistalt=minsizeeffect*100;
+		 double thoudistalt=minsizeeffect*160;
 		 thoudist=(thoudist<thoudistalt)?(thoudist):(thoudistalt);
 		 double thouslow=1000/pow(thoudist,onethird);
 		 double dist=(Position()-planet->Position()).Magnitude();
 		 double cuberoot=pow((dist-(effectiverad)-thoudist),onethird);
 		 if(dist>(effectiverad+thoudist)) {
-			 multipliertemp=1000+(100*cuberoot);
+			 multipliertemp=1000+(314*cuberoot);
 		 } else if (dist>effectiverad){
 			multipliertemp=1000-(thouslow*pow(-(dist-(effectiverad)-thoudist),onethird));
 		 }else{
@@ -1864,7 +1864,11 @@ void Unit::AddVelocity(float difficulty) {
 	   }
 	   minmultiplier*=rampmult;
 	   if(minmultiplier<PI*PI) {
+	     if(graphicOptions.InWarp==1){
 		   minmultiplier=PI*PI;
+		 } else {
+		   minmultiplier=1;
+		 }
 	   }
 	   if(minmultiplier>fmultiplier) {
 		   minmultiplier=fmultiplier; //SOFT LIMIT
