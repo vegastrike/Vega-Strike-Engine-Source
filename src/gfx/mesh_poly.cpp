@@ -95,23 +95,23 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   y->Decal = new Texture (Decal);//use copy constructor;
 
   if (numtqx[0]&&numtqx[1]) {
-    x->vlist = new GFXVertexList (polytypes, numtqx[0]+numtqx[1], X, NULL, 2, numtqx, true); 
+    x->vlist = new GFXVertexList (polytypes, numtqx[0]+numtqx[1], X, 2, numtqx, true); 
   } else {
     int exist = 0;
     if (numtqx[1])
       exist = 1;
     assert (numtqx[0]||numtqx[1]);
-    x->vlist = new GFXVertexList (&polytypes[exist],numtqx[exist],X,NULL,1,&numtqx[exist],true,0);
+    x->vlist = new GFXVertexList (&polytypes[exist],numtqx[exist],X,1,&numtqx[exist],true,0);
    
   }
   if (numtqy[0]||numtqy[1]) {
-    y->vlist = new GFXVertexList (polytypes, numtqy[0]+numtqy[1], Y, NULL, 2, numtqy, true); 
+    y->vlist = new GFXVertexList (polytypes, numtqy[0]+numtqy[1], Y, 2, numtqy, true); 
   } else {
     int exis = 0;
     if (numtqy[1])
       exis = 1;
     assert (numtqx[0]||numtqx[1]);
-    y->vlist = new GFXVertexList (&polytypes[exis],numtqy[exis],Y,NULL,1,&numtqy[exis],true,0);
+    y->vlist = new GFXVertexList (&polytypes[exis],numtqy[exis],Y,1,&numtqy[exis],true,0);
   }
 
 

@@ -66,16 +66,14 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   curlength = SIMULATION_ATOM*speed;
   lastthick=0;
   curthick = SIMULATION_ATOM*radialspeed;
-  GFXVertex beam[32];
-
-  GFXColor * calah = (GFXColor *)malloc (sizeof(GFXColor)*32);
-
+  GFXColorVertex beam[32];
+  GFXColorVertex * calah=beam;
   calah[0].r=0;calah[0].g=0;calah[0].b=0;calah[0].a=0;
   calah[1].r=calah[1].g=calah[1].b=calah[1].a=0;
-  memcpy (&calah[2],&Col,sizeof (GFXColor));
-  memcpy (&calah[3],&Col,sizeof (GFXColor));
-  memcpy (&calah[4],&Col,sizeof (GFXColor));
-  memcpy (&calah[5],&Col,sizeof (GFXColor));
+  memcpy (&calah[2].r,&Col.r,sizeof (GFXColor));
+  memcpy (&calah[3].r,&Col.r,sizeof (GFXColor));
+  memcpy (&calah[4].r,&Col.r,sizeof (GFXColor));
+  memcpy (&calah[5].r,&Col.r,sizeof (GFXColor));
   calah[6].r=calah[6].g=calah[6].b=calah[6].a=0;
   calah[7].r=calah[7].g=calah[7].b=calah[7].a=0;
 
@@ -100,9 +98,9 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   calah[15].r*=Col.a;calah[15].g*=Col.a;calah[15].b*=Col.a;
 
 
-  memcpy (&calah[16],&calah[0],sizeof(GFXColor)*16);    
-  vlist = new GFXVertexList (GFXQUAD,32,beam,calah,true);//mutable color contained list
-  free (calah);
+  memcpy (&calah[16],&calah[0],sizeof(GFXColorVertex)*16);    
+  vlist = new GFXVertexList (GFXQUAD,32,calah,true);//mutable color contained list
+
 }
 
 Beam::~Beam () {
@@ -113,7 +111,7 @@ Beam::~Beam () {
   beamdecals.DelTexture(decal);
 }
 void Beam::RecalculateVertices() {
-  GFXVertex * beam = vlist->BeginMutate(0);
+  GFXColorVertex * beam = (vlist->BeginMutate(0))->colors;
   
   float leftex = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
   float righttex = leftex+curlength/curthick;//how long compared to how wide!

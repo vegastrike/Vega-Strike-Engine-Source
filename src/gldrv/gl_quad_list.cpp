@@ -27,40 +27,29 @@
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
-//#define USE_DISPLAY_LISTS
-GFXQuadList::GFXQuadList(GFXBOOL color): numVertices(0),numQuads(0),myVertices(NULL),myColors(NULL) {
+
+GFXQuadList::GFXQuadList(GFXBOOL color): numVertices(0),numQuads(0){
+  data.vertices=NULL;
   Dirty = GFXFALSE;
   isColor = color;
 }
 
-GFXQuadList::~GFXQuadList()
-{
-  if(myVertices)
-    free(myVertices);
-  if (myColors)
-    free(myColors);
+GFXQuadList::~GFXQuadList() {
+  if(isColor&&data.colors)
+    free(data.colors);
+  else
+    if (!isColor&&data.vertices)
+      free(data.vertices);
 }
 
 void GFXQuadList::Draw() {
   if (!numQuads)return;
-  glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
-  glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
-	
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  if (g_game.Multitexture) 
-    glClientActiveTextureARB (GL_TEXTURE0_ARB);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-  if (g_game.Multitexture) {
-    glClientActiveTextureARB (GL_TEXTURE1_ARB);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+  if (isColor) {
+    glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),&data.colors[0]);
+  }else {
+    glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
   }
-  if (isColor&&myColors) {
-    glEnableClientState(GL_COLOR_ARRAY);
-    glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);    
-  }else 
-    glDisableClientState(GL_COLOR_ARRAY);
   glDrawArrays(GL_QUADS, 0, numQuads*4);
   if (isColor) {
     GFXColor (1,1,1,1);
@@ -68,21 +57,26 @@ void GFXQuadList::Draw() {
 }
 
 
-int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColor * color) {
+int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColorVertex * color) {
   int cur= numQuads*4;
   if (cur+3>=numVertices) {
     if (!numVertices) {
       numVertices = 16;
-      myVertices = (GFXVertex *)malloc (numVertices*sizeof (GFXVertex));
-      myColors = (GFXColor *)malloc (numVertices*sizeof(GFXColor));
+      if (!isColor)
+	data.vertices = (GFXVertex *)malloc (numVertices*sizeof (GFXVertex));
+      else
+	data.colors = (GFXColorVertex *)malloc (numVertices*sizeof(GFXColorVertex));
       quadassignments = (int *)malloc (numVertices*sizeof(int)/4);
       for (int i=0;i<numVertices/8;i++) {
 	quadassignments[i]=-1;
       }
     }else {
       numVertices *=2;    
-      myVertices = (GFXVertex *)realloc (myVertices,numVertices*sizeof(GFXVertex));
-      myColors = (GFXColor *)realloc (myColors,numVertices*sizeof(GFXColor));    
+      if (!isColor) {
+	data.vertices = (GFXVertex *)realloc (data.vertices,numVertices*sizeof(GFXVertex));
+      } else {
+	data.colors = (GFXColorVertex *)realloc (data.colors,numVertices*sizeof(GFXColorVertex));    
+      }
       quadassignments = (int *)realloc (quadassignments,numVertices*sizeof(int)/4);
     }
     for (int i=numVertices/8;i<numVertices/4;i++) {
@@ -91,20 +85,19 @@ int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColor * color) {
     Dirty = numVertices/8;
     quadassignments[numQuads]=numQuads;
     numQuads++;
-    if (vertices) 
-      memcpy (myVertices+cur,vertices,4*sizeof(GFXVertex));
-    if (isColor&&myColors) 
-      memcpy (myColors+cur,color,4*sizeof(GFXColor));
-    
+    if (!isColor&&vertices) 
+      memcpy (data.vertices+cur,vertices,4*sizeof(GFXVertex));
+    if (isColor&&color) 
+      memcpy (data.colors+cur,color,4*sizeof(GFXColorVertex));
     return numQuads-1;
   }
     for (int i=0;i<numVertices/4;i++) {
       if (quadassignments[i]==-1) {
 	quadassignments[i]=numQuads;
-	if (vertices) 
-	  memcpy (myVertices+(quadassignments[i]*4),vertices,4*sizeof(GFXVertex));
+	if (!isColor&&vertices) 
+	  memcpy (data.vertices+(quadassignments[i]*4),vertices,4*sizeof(GFXVertex));
 	if (isColor&&color) 
-	  memcpy (myColors+(quadassignments[i]*4),color,4*sizeof(GFXColor));      
+	  memcpy (data.colors+(quadassignments[i]*4),color,4*sizeof(GFXColorVertex));      
 	numQuads++;
 	Dirty--;
 	return i;
@@ -123,9 +116,10 @@ void GFXQuadList::DelQuad (int which ) {
   Dirty++;
   for (int i=0;i<numVertices/4;i++) {
     if (quadassignments[i]==numQuads-1) {
-      memcpy (myVertices+(quadassignments[which]*4),myVertices+((numQuads-1)*4),4*sizeof(GFXVertex));
       if (isColor)
-	memcpy (myColors+(quadassignments[which]*4),myColors+((numQuads-1)*4),4*sizeof(GFXColor));
+	memcpy (data.colors+(quadassignments[which]*4),data.colors+((numQuads-1)*4),4*sizeof(GFXColorVertex));
+      else
+	memcpy (data.vertices+(quadassignments[which]*4),data.vertices+((numQuads-1)*4),4*sizeof(GFXVertex));
       quadassignments[i]=quadassignments[which];
       quadassignments[which]=-1;
       numQuads--;
@@ -135,12 +129,30 @@ void GFXQuadList::DelQuad (int which ) {
 
   fprintf (stderr," error deleting engine flame\n");
 }
-void GFXQuadList::ModQuad (int which, const GFXVertex * vertices, const GFXColor * colors) {
+void GFXQuadList::ModQuad (int which, const GFXVertex * vertices) {
   if (which <0||which>=numVertices/4||quadassignments[which]==-1)
     return;
-  if (vertices)
-    memcpy (myVertices+(quadassignments[which]*4),vertices,4*sizeof(GFXVertex));
-  if (isColor&&colors) {
-    memcpy (myVertices+(quadassignments[which]*4),colors,4*sizeof(GFXColor));
+  if (isColor) {
+    int w = quadassignments[which]*4;
+
+    data.colors[w+0].SetVtx (vertices[0]);
+    data.colors[w+1].SetVtx (vertices[1]);
+    data.colors[w+2].SetVtx (vertices[2]);
+    data.colors[w+3].SetVtx (vertices[3]);
+  }else {
+    memcpy (data.vertices+(quadassignments[which]*4),vertices,4*sizeof(GFXVertex));
+  }
+}
+
+void GFXQuadList::ModQuad (int which, const GFXColorVertex * vertices) {
+  if (which <0||which>=numVertices/4||quadassignments[which]==-1)
+    return;
+  if (isColor) {
+    memcpy (data.vertices+(quadassignments[which]*4),vertices,4*sizeof(GFXColorVertex));
+  }else {
+    data.vertices[(quadassignments[which]*4)+0].SetTexCoord (vertices[0].s,vertices[0].t).SetNormal (Vector(vertices[0].i,vertices[0].j,vertices[0].k)).SetVertex (Vector(vertices[0].x,vertices[0].y,vertices[0].z));
+    data.vertices[(quadassignments[which]*4)+1].SetTexCoord (vertices[1].s,vertices[1].t).SetNormal (Vector(vertices[1].i,vertices[1].j,vertices[1].k)).SetVertex (Vector(vertices[1].x,vertices[1].y,vertices[1].z));
+    data.vertices[(quadassignments[which]*4)+2].SetTexCoord (vertices[2].s,vertices[2].t).SetNormal (Vector(vertices[2].i,vertices[2].j,vertices[2].k)).SetVertex (Vector(vertices[2].x,vertices[2].y,vertices[2].z));
+    data.vertices[(quadassignments[which]*4)+3].SetTexCoord (vertices[3].s,vertices[3].t).SetNormal (Vector(vertices[3].i,vertices[3].j,vertices[3].k)).SetVertex (Vector(vertices[3].x,vertices[3].y,vertices[3].z));
   }
 }

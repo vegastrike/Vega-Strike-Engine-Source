@@ -21,16 +21,18 @@
 #ifndef _GFXLIB_STRUCT
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
-/// Vertex, Normal, Texture, and (deprecated) Environment Mapping
+
+/// Vertex, Normal, Texture, and (deprecated) Environment Mapping T2F_N3F_V3F format
 struct GFXVertex 
 {
-  float x;
-  float y;
-  float z;
+  float s;
+  float t;
   float i;
   float j;
   float k;
-  float s,t;
+  float x;
+  float y;
+  float z;
   
   GFXVertex(){}
   GFXVertex(const Vector &vert, const Vector &norm, float s, float t){
@@ -42,7 +44,9 @@ struct GFXVertex
   GFXVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
   GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
   GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
+  
 };
+
 //Stores a color (or any 4 valued vector)
 struct GFXColor
 {
@@ -70,6 +74,38 @@ struct GFXColor
     this->a = a;
   }
 };
+
+
+///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F 
+struct GFXColorVertex  {
+  float s;
+  float t;
+  float r;
+  float g;
+  float b;
+  float a;
+  float i;
+  float j;
+  float k;
+  float x;
+  float y;
+  float z;
+  
+  GFXColorVertex(){}
+  GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t){
+    SetVertex(vert);
+    SetNormal(norm);
+    SetColor (rgba);
+    SetTexCoord(s, t);
+  }
+  GFXColorVertex (float x, float y, float z, float i, float j, float k, float r, float g, float b, float a, float s, float t) {this->x=x;this->y=y;this->z=z;this->i=i;this->j=j;this->k=k;this->r = r; this->g = g; this->b=b;this->a=a;this->s=s;this->t=t;}
+  GFXColorVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
+  GFXColorVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
+  GFXColorVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
+  GFXColorVertex &SetColor (const GFXColor &col) {r = col.r;g=col.g;b=col.b;a=col.a;}
+  void SetVtx (const GFXVertex & vv) {s = vv.s;t=vv.t;i=vv.i;j=vv.j;k=vv.k;x=vv.x;y=vv.y;z=vv.z;}
+};
+
 
 ///important ATTENUATE const STAYS AT ONE...for w compat.
 enum LIGHT_TARGET {
@@ -152,7 +188,10 @@ class /*GFXDRVAPI*/ GFXQuadList {
   ///Assignments to packed data for quad modification
   int * quadassignments;
   ///all numVertices allocated vertices and color
-  GFXVertex * myVertices;   GFXColor *myColors;
+  union VCDAT {
+    GFXVertex * vertices;   
+    GFXColorVertex * colors;
+  } data;
   ///Is color in this quad list
   GFXBOOL isColor;
   ///number of "dirty" quads, hence gaps in quadassignments that must be assigned before more are allocated
@@ -165,11 +204,12 @@ class /*GFXDRVAPI*/ GFXQuadList {
   ///Draws all quads contained in quad list
   void Draw();
   ///Adds quad to quad list, an integer indicating number that should be used to henceforth Mod it or delete it
-  int AddQuad (const GFXVertex *vertices, const GFXColor * colors=NULL);
+  int AddQuad (const GFXVertex *vertices, const GFXColorVertex * colors=NULL);
   ///Removes quad from Quad list
   void DelQuad (int which);
   ///modifies quad in quad list to contain new vertices and color information
-  void ModQuad (int which, const GFXVertex *vertices, const GFXColor * colors=NULL);
+  void ModQuad (int which, const GFXVertex *vertices);
+  void ModQuad (int which, const GFXColorVertex *vertices);
 };
 /**
  * A vertex list is a list of any conglomeration of POLY TYPES.
@@ -179,8 +219,13 @@ class /*GFXDRVAPI*/ GFXQuadList {
 class /*GFXDRVAPI*/ GFXVertexList {
   ///Num vertices allocated
   int numVertices;
-  ///Vertices and colors stored 
-  GFXVertex *myVertices;  GFXColor *myColors;
+  ///Vertices and colors stored
+  union VDAT{
+    ///The data either does not have color data
+    GFXVertex *vertices;  
+    ///Or has color data
+    GFXColorVertex *colors;
+  } data;
   ///Array of modes that vertices will be drawn with
   GLenum *mode;
   ///Display list number if list is indeed active. 0 otherwise
@@ -193,17 +238,18 @@ class /*GFXDRVAPI*/ GFXVertexList {
    */
   int *offsets;
   ///If vertex list has been mutated since last draw
-  int changed;
+  char changed;
+  ///Are Colors Stored
+  GFXBOOL isColor;
   ///Returns number of Triangles in vertex list (counts tri strips)
   int numTris ();
   ///Returns number of Quads in vertex list (counts quad strips)
   int numQuads();
   ///Init function (call from construtor)
-  void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor *colors, int numlists, int *offsets, bool Mutable,int tess);
+  void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,int tess);
   ///Propagates modifications to the display list
   void RefreshDisplayList();
 public:
-  GFXVertexList();
   ///creates a vertex list with 1 polytype and a given number of vertices
   inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, NULL, 1, &numVertices,Mutable,tess);}
   ///Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see above)
@@ -211,15 +257,15 @@ public:
     Init(poly,numVertices,vertices,NULL,numlists,offsets,Mutable, tess);
   }
   ///Creates a vertex list with 1 poly type and color information to boot
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,const GFXColor *colors, bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, colors, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXColorVertex *colors, bool Mutable=false, int tess =0){Init (&poly, numVertices, NULL, colors, 1, &numVertices,Mutable,tess);}
   ///Creates a vertex list with an arbitrary number of poly types and color
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor *colors, int numlists, int *offsets, bool Mutable=false, int tess =0) {
-    Init(poly,numVertices,vertices,colors, numlists,offsets,Mutable, tess);
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices,  const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable=false, int tess =0) {
+    Init(poly,numVertices,NULL,colors, numlists,offsets,Mutable, tess);
   }
   ~GFXVertexList();
 
   ///Returns the array of vertices to be mutated
-  GFXVertex * BeginMutate (int offset);
+  VDAT * BeginMutate (int offset);
   ///Ends mutation and refreshes display list
   void EndMutate ();
   ///Loads the draw state (what is active) of a given vlist for mass drawing

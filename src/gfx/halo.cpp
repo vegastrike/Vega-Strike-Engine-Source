@@ -18,7 +18,12 @@ Halo::  Halo (const char * texture, const GFXColor &col, const Vector & pos, flo
   if (decal>=halodrawqueue.size()) {
     halodrawqueue.push_back (new GFXQuadList(GFXTRUE));
   }
-  GFXColor coltmp [4] = {GFXColor(col),GFXColor(col),GFXColor(col),GFXColor(col)};
+  GFXColorVertex coltmp [4];
+  coltmp[0].SetColor (col);
+  coltmp[1].SetColor (col);
+  coltmp[2].SetColor (col);
+  coltmp[3].SetColor (col);
+
   quadnum = halodrawqueue[decal]->AddQuad (NULL,coltmp);  
 }
 
@@ -45,11 +50,16 @@ void Halo::Draw (const Transformation &quat, const Matrix m) {
 		       GFXVertex(pos+p-q+offset,r,1,1),
 		       GFXVertex(pos+p+q+offset,r,1,0),
 		       GFXVertex(pos-p+q+offset,r,0,0)};
-  halodrawqueue[decal]->ModQuad(quadnum,tmp,NULL);
+  halodrawqueue[decal]->ModQuad(quadnum,tmp);
 }
 void Halo::SetColor (const GFXColor &col){
-  GFXColor coltmp [4] = {GFXColor(col),GFXColor(col),GFXColor(col),GFXColor(col)};  
-  halodrawqueue[decal]->ModQuad (quadnum,NULL,coltmp);
+  GFXColorVertex coltmp [4];
+  coltmp[0].SetColor (col);
+  coltmp[1].SetColor (col);
+  coltmp[2].SetColor (col);
+  coltmp[3].SetColor (col);
+
+  halodrawqueue[decal]->ModQuad (quadnum,coltmp);
 }
 
 void Halo::ProcessDrawQueue() {
