@@ -10,6 +10,7 @@ class Music {
   int SelectTracks();
  public:
   Music (const char * playlist, Unit * parent);
+  void Skip();
   void Listen();
   ~Music();
 

@@ -41,15 +41,21 @@ int Music::SelectTracks() {
   Iterator * iter = drawlist->createIterator();
   Unit *target;
   while ((target = iter->current())!=NULL) {
-    goodness += 2*_Universe->GetRelation (un->faction,target->faction);
+    float ftmp;
+    ftmp = 2*_Universe->GetRelation (un->faction,target->faction);
+    if (FINITE (ftmp))
+      goodness += ftmp;
     iter->advance();
   }
   delete iter;
-
-  goodness += (un->FShieldData()+un->RShieldData()-1.7)*10;
+  float ftmp =(un->FShieldData()+un->RShieldData()-1.7)*10;
+  if (FINITE (ftmp)) 
+    goodness += ftmp;
 
   fprintf (stderr,"Choosing Song %f",goodness);
-  goodness += -playlist.size()/8+(rand()%(playlist.size()/4));
+  goodness -= playlist.size()/8;
+  int tmp=(rand()%(playlist.size()/4));
+  goodness+=tmp;
   fprintf (stderr,"Choosing Song With Randomness %f",goodness);
   if (goodness<0)
     goodness=0;
@@ -70,7 +76,9 @@ void Music::Listen() {
   }
 }
 
-
+void Music::Skip() {
+  AUDStopPlaying (song);
+}
 Music::~Music() {
   AUDStopPlaying (song);
   AUDDeleteSound (song,true);//delete buffer too;
