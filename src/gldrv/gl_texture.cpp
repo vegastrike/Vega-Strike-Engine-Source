@@ -336,7 +336,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
     internalformat = GetTextureFormat (internformat);
     if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture){
 		if (detail_texture) {
-			static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","false"))?TRILINEAR:MIPMAP;
+			static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 			textures[handle].mipmapped= 	fil;
 			glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			if (fil&TRILINEAR) {

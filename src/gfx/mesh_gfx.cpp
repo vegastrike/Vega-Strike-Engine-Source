@@ -60,7 +60,7 @@ typedef std::vector<OrigMeshContainer> OrigMeshVector;
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
 Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail) const{
-	static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","false"))?TRILINEAR:MIPMAP;
+	static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 	Texture * ret=NULL;
 	string facplus = factionname+"_"+filename;
 	if (filename.find(".ani")!=string::npos) {
