@@ -28,8 +28,9 @@ class StarSystem {
   Unit **primaries; // Stars, planets, etc. Orbital mechanics  // pre-calculated. Cannot be 
   struct StarXML { //Starsystem XML Struct
   int unitlevel;
-  vector<Planet *> moons;
-  string backgroundname;
+    vector<Planet *> moons;
+    string backgroundname;
+    Vector cursun;
   } *xml;
   UnitCollection *drawList;    // Everything to be drawn. Fold missiles in here someday
   UnitCollection *units;    // Objects subject to global physics

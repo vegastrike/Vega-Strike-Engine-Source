@@ -16,10 +16,13 @@ typedef struct {
   int color_depth;
   int y_resolution;
   int x_resolution;  
-  int fov;
   int cubemap;  
   float MouseSensitivityX;
-  float MouseSensitivityY;
+  float MouseSensitivityY;   
+  float fov ;
+   float aspect ;
+   float znear;
+   float zfar ;
 
   //  scalar_t time;                      /* game time -- now local in lin_time.h*/
   //scalar_t time_step;                 /* size of current time step " */

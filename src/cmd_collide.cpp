@@ -99,11 +99,11 @@ public:
     return false;
   }
   
-  void Put(LineCollide* target, bool huge) {
+  void Put(LineCollide* target, bool hhuge) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
-    if (huge) {
+    if (hhuge) {
       hugeobjects.push_back(target);
       return;
     }
@@ -134,11 +134,11 @@ public:
   }
 } collidetable;
 
-void AddCollideQueue (const LineCollide &tmp, bool huge) {
+void AddCollideQueue (const LineCollide &tmp, bool hhuge) {
   int size = collidequeue.size();
   collidequeue.push_back (new LineCollide(tmp));
 #ifdef _USE_COLLIDE_TABLE
-  collidetable.Put (collidequeue[size],huge);
+  collidetable.Put (collidequeue[size],hhuge);
 #endif
 
   
@@ -155,14 +155,14 @@ void ClearCollideQueue() {
 
 void Unit::CollideAll() {
   unsigned int i;
-  bool huge = false;
+  bool hhuge = false;
   Vector minx (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector maxx(Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   //target->curr_physical_state.position;, rSize();
 #ifdef _USE_COLLIDE_TABLE
   #define COLQ colQ
   vector <LineCollide*> colQ;
-  huge = collidetable.Get (minx,maxx,colQ);
+  hhuge = collidetable.Get (minx,maxx,colQ);
 #else
   #define COLQ collidequeue
 #endif
@@ -191,7 +191,7 @@ void Unit::CollideAll() {
     }
   }
   //add self to the queue??? using prev and cur physical state as an UNKNOWN
-  AddCollideQueue (LineCollide(this,LineCollide::UNIT,minx,maxx),huge);
+  AddCollideQueue (LineCollide(this,LineCollide::UNIT,minx,maxx),hhuge);
 #undef COLQ
 }
 

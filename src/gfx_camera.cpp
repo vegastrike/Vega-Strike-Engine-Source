@@ -22,11 +22,7 @@
 
 //Remove GL specific stuff here
 #include "vegastrike.h"
-
-  const float fov = 78;
-  const float aspect = 1.33F;
-  const float znear = 1.00F;
-  const float zfar = 500000.00F;
+#include "vs_globals.h"
 
 //const float PI=3.1415926536;
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
@@ -59,18 +55,18 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		GFXLoadIdentity(VIEW);
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*fov,aspect,znear,zfar); //set perspective to 78 degree FOV
+		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar); //set perspective to 78 degree FOV
 		  break;
 		case Camera::PARALLEL:
-		  ymax = znear * tanf( zoom*fov * PI / ((float)360.0) ); //78.0 --> 4.7046
+		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); 
 		  
 		  ymin = -ymax; //-4.7046
 		  
-		  xmin = ymin * aspect;//-6.2571
-		  xmax = ymax * aspect;//6.2571
+		  xmin = ymin * g_game.aspect;//-6.2571
+		  xmax = ymax * g_game.aspect;//6.2571
 		  
 		  //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-		  GFXParallel(aspect*-zoom,aspect*zoom,-zoom,zoom,-zfar,zfar);
+		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.zfar,g_game.zfar);
 		  break;
 		}
 		GFXLookAt (Coord-R, Coord, Q);
@@ -93,18 +89,18 @@ void Camera::UpdateGLCenter()
 		//updating the center should always use a perspective
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*fov,aspect,znear,zfar); //set perspective to 78 degree FOV
+		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar); //set perspective to 78 degree FOV
 		  break;
 		case Camera::PARALLEL:
-		  ymax = znear * tanf( zoom*fov * PI / ((float)360.0) ); //78.0 --> 4.7046
+		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); //78.0 --> 4.7046
 		  
 		  ymin = -ymax; //-4.7046
 		  
-		  xmin = ymin * aspect;//-6.2571
-		  xmax = ymax * aspect;//6.2571
+		  xmin = ymin * g_game.aspect;//-6.2571
+		  xmax = ymax * g_game.aspect;//6.2571
 		  
 		  //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-		  GFXParallel(aspect*-zoom,aspect*zoom,-zoom,zoom,-znear,zfar);
+		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.znear,g_game.zfar);
 		  break;
 		}
 

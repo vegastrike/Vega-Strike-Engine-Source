@@ -93,7 +93,6 @@ Planet::Planet()  : Unit(), radius(0.0f), satellites(NULL), numSatellites(0) {
 
 Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname) : Unit(), radius(0.0f),  satellites(NULL), numSatellites(0) {
   numSatellites = 0;
-  origin= Vector(0,0,0);
   satellites = NULL;
   calculatePhysics=false;
 
@@ -153,7 +152,7 @@ void Planet::gravitate(UnitCollection *uc) {
 
   // fake gravity
   for(int a=0; a<numSatellites; a++) {
-    satellites[a]->origin = origin + curr_physical_state.position;
+    satellites[a]->origin =  curr_physical_state.position;
 	if (satellites[a]->isUnit()==PLANETPTR) 
 	    ((Planet *)satellites[a])->gravitate(uc);//FIXME 071201
   }

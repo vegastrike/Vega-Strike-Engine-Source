@@ -255,6 +255,7 @@ public:
   prev_physical_state.position = curr_physical_state.position = pos;}
   void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
   prev_physical_state.position = curr_physical_state.position = Vector(x,y,z);}
+  void SetOrigin(const Vector &pos) {SetPosition(pos);origin=pos;}
   void SetCameraToCockpit();
   //  void Destroy(){active = false;};
   /*

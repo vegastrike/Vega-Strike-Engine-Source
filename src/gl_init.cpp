@@ -111,6 +111,23 @@ void init_opengl_extensions()
 
     }
 }
+
+ static void initfov () {
+    g_game.fov = 78;
+    g_game.aspect = 1.33F;
+    g_game.znear = 1.00F;
+    g_game.zfar = 100000.00F;
+    FILE * fp = fopen ("glsetup.txt","r");
+    if (fp) {
+ 		fscanf (fp,"fov %f\n",&g_game.fov);
+ 		fscanf (fp,"aspect %f\n",&g_game.aspect);
+ 		fscanf (fp,"znear %f\n",&g_game.znear);
+ 		fscanf (fp,"zfar %f\n",&g_game.zfar);
+ 	
+ 		fclose (fp);
+    }
+ }
+
 extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
@@ -143,6 +160,7 @@ void GFXInit (int argc, char ** argv){
     glutIgnoreKeyRepeat(1);
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     glClearColor ((float)0.0, (float)0.0, (float)1.0, (float)0);
+    initfov();
     glShadeModel (GL_SMOOTH);
     glEnable (GL_CULL_FACE);
 	//glDisable (GL_CULL_FACE);
