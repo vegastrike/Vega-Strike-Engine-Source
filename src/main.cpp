@@ -277,7 +277,7 @@ void bootstrap_main_loop () {
 
     mission->initMission();
 
-    bs_tp=new TextPlane("9x12.font");
+    bs_tp=new TextPlane();
  
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);

@@ -57,7 +57,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 {
   const float ZFARCONST= 10000;
   float xmin, xmax, ymin, ymax;
-	if(changed)
+	if(1||changed)
 	{
 
 		myPhysics.Update();

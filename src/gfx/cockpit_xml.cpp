@@ -188,7 +188,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       } 
     }
-    text = new TextPlane (myfont.c_str());
+    text = new TextPlane ();
     break;
   case KARMORF:
   case KARMORR:

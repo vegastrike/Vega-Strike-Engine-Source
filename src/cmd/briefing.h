@@ -1,4 +1,6 @@
 #include "gfx/matrix.h"
+#include "gfx/camera.h"
+#include "gfx/hud.h"
 #include <list>
 #include <vector>
 using std::list;
@@ -31,6 +33,8 @@ class Briefing{
     void OverrideOrder (const Vector &destination, float time);
     void EnqueueOrder (const Vector &destination, float time);
   };
+  Camera cam;
+  TextPlane tp;
   vector <Ship *> starships;  
   void Render();
   void Update();

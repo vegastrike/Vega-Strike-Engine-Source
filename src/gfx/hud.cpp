@@ -29,32 +29,14 @@
 #include "xml_support.h"
 //#include "glut.h"
 
-TextPlane::TextPlane(const char *filename) {
+TextPlane::TextPlane() {
   myDims.i = 2;  myDims.j=-2;
   char font[64]={0};
   char fonta[64]={0};
-  FILE * fp = fopen (filename, "r");
-  if (fp) {
-    fscanf (fp,"%63s %63s",font, fonta);
-    if (fonta[0]) {
-      myFont = new Texture(font,0,BILINEAR);
-    }else {
-      myFont = new Texture(font,fonta,0,BILINEAR);
-    }
-    fscanf (fp,"%f %f %f\n",&myFontMetrics.i,&myFontMetrics.j,&myFontMetrics.k);
-    fscanf (fp,"%d\n",&numlet);
-    if (numlet>256)numlet=256;
-    for(int a = 0; a < numlet; a++) {
-      fscanf (fp, "%f %f %f %f\n", &myGlyphPos[a].left, &myGlyphPos[a].right,&myGlyphPos[a].top,&myGlyphPos[a].bottom);
-    }
-    fclose (fp);
-  } else {
-   myFont = new Texture ("9x12.bmp");
-  }
+  myFontMetrics.Set(.06,.08,0);
   SetPos (0,0);
 }
 TextPlane::~TextPlane () {
-  delete myFont;
 }
 void TextPlane::Draw (int offset) {
   Draw (myText,offset);
@@ -113,7 +95,6 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
   glScalef (scalex,scaley,1);
   while(text_it != newText.end() && row>myDims.j) {
     if(*text_it>=32) {//always true
-      GlyphPosition g = myGlyphPos[*text_it-32];
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
       if (use_bit)
 	glutBitmapCharacter (fnt,*text_it);

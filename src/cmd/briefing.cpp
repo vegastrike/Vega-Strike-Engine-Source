@@ -39,9 +39,11 @@ void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam) {
 }
 extern double interpolation_blend_factor;
 void Briefing::Render() {
+  cam.UpdateGFX(GFXTRUE,GFXFALSE);
   for (unsigned int i=0;i<starships.size();i++) {
     starships[i]->Render(identity_matrix,interpolation_blend_factor);
   }
+  _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
 }
 void Briefing::Ship::Render (const Matrix cam, double interpol) {
   Matrix final;

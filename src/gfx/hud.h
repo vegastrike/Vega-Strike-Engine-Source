@@ -26,15 +26,17 @@ struct Texture;
 class TextPlane {
 	std::string myText;
 
-	Texture *myFont;
+	//Texture *myFont;
 	Vector myFontMetrics; // i = width, j = height
 	Vector myDims;
 	int numlet;
+	/*
 	struct GlyphPosition {
 		float left, right, top, bottom;
 	} myGlyphPos[256];
+	*/
 public:
-	TextPlane(const char *filename);
+	TextPlane();
 	~TextPlane();
 	void SetPos (float x, float y) {
 	  myFontMetrics.k = y;
