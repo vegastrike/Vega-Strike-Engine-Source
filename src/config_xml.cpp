@@ -41,6 +41,7 @@
 #include "main_loop.h" // for CockpitKeys
 #include "gfx/cockpit.h"
 #include "in_kb_data.h"
+#include "python/python_compile.h"
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
@@ -78,15 +79,16 @@ GameVegaConfig::GameVegaConfig(const char *configfile): VegaConfig( configfile)
   }
 }
 
-/*
-for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; done
- */
 
 /* *********************************************************** */
 
 #if 1
 const float volinc = 1;
 const float dopinc = .1;
+void RunPythonPress(const KBData&,KBSTATE);
+void RunPythonRelease(const KBData&,KBSTATE);
+void RunPythonToggle(const KBData&,KBSTATE);
+void RunPythonPhysicsFrame(const KBData&,KBSTATE);
 void incmusicvol (const KBData&,KBSTATE a);
 void decmusicvol (const KBData&,KBSTATE a);
 
@@ -207,9 +209,6 @@ void GameVegaConfig::initKeyMap(){
 
 }
 
-#if 0
-  sed 's/\(.*void \)\(.*\)(.*/ command_map[\"Cockpit::\2\"]=CockpitKeys::\2;/'
-#endif
 
 /* *********************************************************** */
 extern void  inc_time_compression (const KBData&,KBSTATE a);
@@ -223,198 +222,43 @@ extern void VolUp(const KBData&,KBSTATE a);
 extern void VolDown(const KBData&,KBSTATE a);
 
   using namespace CockpitKeys;
+CommandMap initGlobalCommandMap();
+static CommandMap commandMap=initGlobalCommandMap();
+
+static void ComposeFunctions(const KBData& composition, KBSTATE k) {
+  std::string s=composition.data;
+  while (s.length()){
+    std::string::size_type where=s.find(" ");
+    std::string t=s.substr(0,where);
+    if (where!=std::string::npos) 
+      s=s.substr(where+1);
+    else 
+      s="";
+    where=t.find("(");
+    std::string args;
+    if (where!=string::npos) {
+      args=t.substr(where+1,t.rfind(")"));
+      t=t.substr(0,where);    
+    }
+    CommandMap::iterator i = commandMap.find(t);
+    if (i!=commandMap.end()) {
+      (*i).second(args,k);
+    }
+  }
+}
+static void ComposeFunctionsToggle(const KBData& composition, KBSTATE k) {
+  if (k==PRESS||k==RELEASE) {
+    ComposeFunctions(composition,k);
+  }
+}
 
 void GameVegaConfig::initCommandMap(){
-  //  I don't knwo why this gives linker errors!
-  command_map["NoPositionalKey"]=mute;
-  command_map["DopplerInc"]=incdop;
-  command_map["Cockpit::NavScreen"]=GameCockpit::NavScreen;
-  command_map["DopplerDec"]=decdop;
-  command_map["VolumeInc"]=VolUp;
-  command_map["VolumeDec"]=VolDown;
-  command_map["MusicVolumeInc"]=incmusicvol;
-  command_map["MusicVolumeDec"]=decmusicvol;
-  command_map["SetShieldsOneThird"]=FireKeyboard::SetShieldsOneThird;
-  command_map["SetShieldsTwoThird"]=FireKeyboard::SetShieldsTwoThird;
-  command_map["SwitchControl"]=GameCockpit::SwitchControl;
-  command_map["Respawn"]=GameCockpit::Respawn;
-  command_map["TurretControl"]=GameCockpit::TurretControl;
 
-  command_map["TimeInc"]=inc_time_compression;
-  command_map["TimeDec"]=dec_time_compression;
-  command_map["TimeReset"]=reset_time_compression;
-  // mapping from command string to keyboard handler
-  // Networking bindings
+ // commandMap["LocationSelect::MoveMoveHandle"]=LocationSelect::MouseMoveHandle;
+ //commandMap["LocationSelect::incConstanst"]=LocationSelect::incConstant;
+ //commandMap["LocationSelect::decConstant"]=LocationSelect::decConstant;
 
-
-  command_map["SwitchWebcam"]=FlyByKeyboard::SwitchWebcam ;
-  command_map["SwitchSecured"]=FlyByKeyboard::SwitchSecured ;
-  command_map["ChangeCommStatus"]=FlyByKeyboard::ChangeCommStatus ;
-  command_map["UpFreq"]=FlyByKeyboard::UpFreq ;
-  command_map["DownFreq"]=FlyByKeyboard::DownFreq ;
-
-  command_map["ThrustModeKey"]=FlyByKeyboard::KSwitchFlightMode ;
-  command_map["ThrustRight"]=FlyByKeyboard::KThrustRight ;
-  command_map["ThrustLeft"]=FlyByKeyboard::KThrustLeft ;
-  command_map["ThrustBack"]=FlyByKeyboard::KThrustBack ;
-  command_map["ThrustFront"]=FlyByKeyboard::KThrustFront ;
-  command_map["ThrustDown"]=FlyByKeyboard::KThrustDown ;
-  command_map["ThrustUp"]=FlyByKeyboard::KThrustUp ;
-
-  command_map["JoyStickToggleKey"]=JoyStickToggleKey;
-  command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
-  command_map["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;
-  command_map["PauseKey"]=pause_key;
-  command_map["JumpKey"]=FlyByKeyboard::JumpKey;
-  command_map["AutoKey"]=FlyByKeyboard::AutoKey;
-  command_map["SwitchCombatMode"]=FlyByKeyboard::SwitchCombatModeKey;
-  command_map["StartKey"]=FlyByKeyboard::StartKey ;
-  command_map["StopKey"]=FlyByKeyboard::StopKey ;
-  command_map["UpKey"]=FlyByKeyboard::UpKey ;
-  command_map["DownKey"]=FlyByKeyboard::DownKey ;
-  command_map["LeftKey"]=FlyByKeyboard::LeftKey ;
-  command_map["RightKey"]=FlyByKeyboard::RightKey ;
-  command_map["ABKey"]=FlyByKeyboard::ABKey ;
-  command_map["AccelKey"]=FlyByKeyboard::AccelKey ;
-  command_map["DecelKey"]=FlyByKeyboard::DecelKey ;
-  command_map["RollLeftKey"]=FlyByKeyboard::RollLeftKey ;
-  command_map["RollRightKey"]=FlyByKeyboard::RollRightKey ;
-  command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
-  command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
-  command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;
-  command_map["ToggleWarpDrive"]=FireKeyboard::ToggleWarpDrive;
-  command_map["ToggleAnimation"]=FireKeyboard::ToggleAnimation;  
-  command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
-  
-  command_map["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;
-  command_map["CommHelpMeOutFaction"]=FireKeyboard::HelpMeOutFaction;
-  command_map["JoinFlightgroup"]=FireKeyboard::JoinFg;
-  command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
-  command_map["CommHelpMeOut"]=FireKeyboard::HelpMeOut;
-  command_map["CommFormUp"]=FireKeyboard::FormUp;
-#ifdef CAR_SIM
-  command_map["BlinkLeftKey"]=FireKeyboard::BlinkLeftKey;
-  command_map["BlinkRightKey"]=FireKeyboard::BlinkRightKey;
-  command_map["HeadlightKey"]=FireKeyboard::HeadlightKey;
-  command_map["SirenKey"]=FireKeyboard::SirenKey;
-#endif
-  command_map["CommBreakForm"]=FireKeyboard::BreakFormation;
-  
-  command_map["Comm1Key"]=FireKeyboard::PressComm1Key ;
-  command_map["Comm2Key"]=FireKeyboard::PressComm2Key ;
-  command_map["Comm3Key"]=FireKeyboard::PressComm3Key ;
-  command_map["Comm4Key"]=FireKeyboard::PressComm4Key ;
-  command_map["Comm5Key"]=FireKeyboard::PressComm5Key ;
-  command_map["Comm6Key"]=FireKeyboard::PressComm6Key ;
-  command_map["Comm7Key"]=FireKeyboard::PressComm7Key ;
-  command_map["Comm8Key"]=FireKeyboard::PressComm8Key ;
-  command_map["Comm9Key"]=FireKeyboard::PressComm9Key ;
-  command_map["Comm10Key"]=FireKeyboard::PressComm10Key ;
-
-  command_map["SaveTarget1"]=FireKeyboard::SaveTarget1Key ;
-  command_map["SaveTarget2"]=FireKeyboard::SaveTarget2Key ;
-  command_map["SaveTarget3"]=FireKeyboard::SaveTarget3Key ;
-  command_map["SaveTarget4"]=FireKeyboard::SaveTarget4Key;
-  command_map["SaveTarget5"]=FireKeyboard::SaveTarget5Key ;
-  command_map["SaveTarget6"]=FireKeyboard::SaveTarget6Key ;
-  command_map["SaveTarget7"]=FireKeyboard::SaveTarget7Key ;
-  command_map["SaveTarget8"]=FireKeyboard::SaveTarget8Key ;
-  command_map["SaveTarget9"]=FireKeyboard::SaveTarget9Key ;
-  command_map["SaveTarget10"]=FireKeyboard::SaveTarget10Key ;
-
-  command_map["RestoreTarget1"]=FireKeyboard::RestoreTarget1Key ;
-  command_map["RestoreTarget2"]=FireKeyboard::RestoreTarget2Key ;
-  command_map["RestoreTarget3"]=FireKeyboard::RestoreTarget3Key ;
-  command_map["RestoreTarget4"]=FireKeyboard::RestoreTarget4Key ;
-  command_map["RestoreTarget5"]=FireKeyboard::RestoreTarget5Key ;
-  command_map["RestoreTarget6"]=FireKeyboard::RestoreTarget6Key ;
-  command_map["RestoreTarget7"]=FireKeyboard::RestoreTarget7Key ;
-  command_map["RestoreTarget8"]=FireKeyboard::RestoreTarget8Key ;
-  command_map["RestoreTarget9"]=FireKeyboard::RestoreTarget9Key ;
-  command_map["RestoreTarget10"]=FireKeyboard::RestoreTarget10Key ;
-
-
-
-  command_map["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
-  command_map["EjectKey"]=FireKeyboard::EjectKey ;
-  command_map["SuicideKey"]=SuicideKey ;
-  command_map["TurretAIKey"]=FireKeyboard::TurretAI ;
-  command_map["DockKey"]=FireKeyboard::DockKey ;
-  command_map["UnDockKey"]=FireKeyboard::UnDockKey ;
-  command_map["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;
-  command_map["FireKey"]=FireKeyboard::FireKey ;
-  command_map["MissileKey"]=FireKeyboard::MissileKey ;
-  command_map["TargetKey"]=FireKeyboard::TargetKey ;
-  command_map["LockTargetKey"]=FireKeyboard::LockKey ;
-  command_map["ReverseTargetKey"]=FireKeyboard::ReverseTargetKey ;
-  command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
-  command_map["SubUnitTargetKey"]=FireKeyboard::SubUnitTargetKey ;
-  command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
-  command_map["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
-  command_map["SigTargetKey"]=FireKeyboard::SigTargetKey ;
-  command_map["UnitTargetKey"]=FireKeyboard::UnitTargetKey ;
-  command_map["ReversePickTargetKey"]=FireKeyboard::ReversePickTargetKey ;
-  command_map["ReverseNearestTargetKey"]=FireKeyboard::ReverseNearestTargetKey ;
-  command_map["ReverseThreatTargetKey"]=FireKeyboard::ReverseThreatTargetKey ;
-  command_map["ReverseSigTargetKey"]=FireKeyboard::ReverseSigTargetKey ;
-  command_map["ReverseUnitTargetKey"]=FireKeyboard::ReverseUnitTargetKey ;
-  command_map["TurretTargetKey"]=FireKeyboard::TargetTurretKey ;
-  command_map["TurretPickTargetKey"]=FireKeyboard::PickTargetTurretKey ;
-  command_map["TurretNearestTargetKey"]=FireKeyboard::NearestTargetTurretKey ;
-  command_map["TurretThreatTargetKey"]=FireKeyboard::ThreatTargetTurretKey ;
-  command_map["WeapSelKey"]=FireKeyboard::WeapSelKey ;
-  command_map["MisSelKey"]=FireKeyboard::MisSelKey ;
-  command_map["ReverseWeapSelKey"]=FireKeyboard::ReverseWeapSelKey ;
-  command_map["ReverseMisSelKey"]=FireKeyboard::ReverseMisSelKey ;
-  command_map["CloakKey"]=FireKeyboard::CloakKey;
-  command_map["ECMKey"]=FireKeyboard::ECMKey;
- command_map["Cockpit::ScrollDown"]=CockpitKeys::ScrollDown;
- command_map["Cockpit::ScrollUp"]=CockpitKeys::ScrollUp;
-
- command_map["Cockpit::PitchDown"]=CockpitKeys::PitchDown;
- command_map["Cockpit::PitchUp"]=CockpitKeys::PitchUp;
- command_map["Cockpit::YawLeft"]=CockpitKeys::YawLeft;
- command_map["Cockpit::YawRight"]=CockpitKeys::YawRight;
- command_map["Cockpit::Inside"]=CockpitKeys::Inside;
- command_map["Cockpit::ViewTarget"]=CockpitKeys::ViewTarget;
- command_map["Cockpit::OutsideTarget"]=CockpitKeys::OutsideTarget;
- command_map["Cockpit::PanTarget"]=CockpitKeys::PanTarget;
- command_map["Cockpit::ZoomOut"]=CockpitKeys::ZoomOut ;
- command_map["Cockpit::ZoomIn"]=CockpitKeys::ZoomIn ;
- command_map["Cockpit::InsideLeft"]=CockpitKeys::InsideLeft;
- command_map["Cockpit::InsideRight"]=CockpitKeys::InsideRight;
- command_map["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
- command_map["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
-
- command_map["Cockpit::CommMode"]=CockpitKeys::CommModeVDU;
- command_map["Cockpit::TargetMode"]=CockpitKeys::TargetModeVDU;
- command_map["Cockpit::ManifestMode"]=CockpitKeys::ManifestModeVDU;
- command_map["Cockpit::ViewMode"]=CockpitKeys::ViewModeVDU;
- command_map["Cockpit::DamageMode"]=CockpitKeys::DamageModeVDU;
- command_map["Cockpit::GunMode"]=CockpitKeys::GunModeVDU;
- command_map["Cockpit::ReverseGunMode"]=CockpitKeys::ReverseGunModeVDU;
- command_map["Cockpit::MissileMode"]=CockpitKeys::MissileModeVDU;
- command_map["Cockpit::ReverseMissileMode"]=CockpitKeys::ReverseMissileModeVDU;
- command_map["Cockpit::ObjectiveMode"]=CockpitKeys::ObjectiveModeVDU;
- command_map["Cockpit::ScanningMode"]=CockpitKeys::ScanningModeVDU;
-
- command_map["Cockpit::MapKey"]=MapKey;
- command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
- command_map["Cockpit::SwitchMVDU"]=CockpitKeys::SwitchMVDU;
- command_map["Cockpit::SwitchURVDU"]=CockpitKeys::SwitchURVDU;
- command_map["Cockpit::SwitchULVDU"]=CockpitKeys::SwitchULVDU;
- command_map["Cockpit::SwitchUMVDU"]=CockpitKeys::SwitchUMVDU;
- command_map["Cockpit::Behind"]=CockpitKeys::Behind;
- command_map["Cockpit::Pan"]=CockpitKeys::Pan;
- command_map["Cockpit::SkipMusicTrack"]=CockpitKeys::SkipMusicTrack;
-
- command_map["Cockpit::Quit"]=CockpitKeys::Quit;
-
- // command_map["LocationSelect::MoveMoveHandle"]=LocationSelect::MouseMoveHandle;
- //command_map["LocationSelect::incConstanst"]=LocationSelect::incConstant;
- //command_map["LocationSelect::decConstant"]=LocationSelect::decConstant;
-
- //command_map["CoordinateSelect::MouseeMoveHandle"]=CoordinateSelect::MouseMoveHandle;
+ //commandMap["CoordinateSelect::MouseeMoveHandle"]=CoordinateSelect::MouseMoveHandle;
 
 }
 
@@ -556,7 +400,7 @@ void GameVegaConfig::checkBind(configNode *node){
   string player_bound=node->attr_value("player");
   if (player_bound.empty())
     player_bound="0";
-  KBHandler handler=command_map[cmdstr];
+  KBHandler handler=commandMap[cmdstr];
   
   if(handler==NULL){
     cout << "No such command: " << cmdstr << endl;
@@ -710,3 +554,198 @@ void GameVegaConfig::bindKeys(){
 }
 
 /* *********************************************************** */
+CommandMap initGlobalCommandMap() {
+  //  I don't knwo why this gives linker errors!
+  CommandMap commandMap;
+  commandMap["NoPositionalKey"]=mute;
+  commandMap["DopplerInc"]=incdop;
+  commandMap["Cockpit::NavScreen"]=GameCockpit::NavScreen;
+  commandMap["DopplerDec"]=decdop;
+  commandMap["VolumeInc"]=VolUp;
+  commandMap["VolumeDec"]=VolDown;
+  commandMap["MusicVolumeInc"]=incmusicvol;
+  commandMap["MusicVolumeDec"]=decmusicvol;
+  commandMap["SetShieldsOneThird"]=FireKeyboard::SetShieldsOneThird;
+  commandMap["SetShieldsTwoThird"]=FireKeyboard::SetShieldsTwoThird;
+  commandMap["SwitchControl"]=GameCockpit::SwitchControl;
+  commandMap["Respawn"]=GameCockpit::Respawn;
+  commandMap["TurretControl"]=GameCockpit::TurretControl;
+
+  commandMap["TimeInc"]=inc_time_compression;
+  commandMap["TimeDec"]=dec_time_compression;
+  commandMap["TimeReset"]=reset_time_compression;
+  // mapping from command string to keyboard handler
+  // Networking bindings
+
+
+  commandMap["SwitchWebcam"]=FlyByKeyboard::SwitchWebcam ;
+  commandMap["SwitchSecured"]=FlyByKeyboard::SwitchSecured ;
+  commandMap["ChangeCommStatus"]=FlyByKeyboard::ChangeCommStatus ;
+  commandMap["UpFreq"]=FlyByKeyboard::UpFreq ;
+  commandMap["DownFreq"]=FlyByKeyboard::DownFreq ;
+
+  commandMap["ThrustModeKey"]=FlyByKeyboard::KSwitchFlightMode ;
+  commandMap["ThrustRight"]=FlyByKeyboard::KThrustRight ;
+  commandMap["ThrustLeft"]=FlyByKeyboard::KThrustLeft ;
+  commandMap["ThrustBack"]=FlyByKeyboard::KThrustBack ;
+  commandMap["ThrustFront"]=FlyByKeyboard::KThrustFront ;
+  commandMap["ThrustDown"]=FlyByKeyboard::KThrustDown ;
+  commandMap["ThrustUp"]=FlyByKeyboard::KThrustUp ;
+
+  commandMap["JoyStickToggleKey"]=JoyStickToggleKey;
+  commandMap["SheltonKey"]=FlyByKeyboard::SheltonKey ;
+  commandMap["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;
+  commandMap["PauseKey"]=pause_key;
+  commandMap["JumpKey"]=FlyByKeyboard::JumpKey;
+  commandMap["AutoKey"]=FlyByKeyboard::AutoKey;
+  commandMap["SwitchCombatMode"]=FlyByKeyboard::SwitchCombatModeKey;
+  commandMap["StartKey"]=FlyByKeyboard::StartKey ;
+  commandMap["StopKey"]=FlyByKeyboard::StopKey ;
+  commandMap["UpKey"]=FlyByKeyboard::UpKey ;
+  commandMap["DownKey"]=FlyByKeyboard::DownKey ;
+  commandMap["LeftKey"]=FlyByKeyboard::LeftKey ;
+  commandMap["RightKey"]=FlyByKeyboard::RightKey ;
+  commandMap["ABKey"]=FlyByKeyboard::ABKey ;
+  commandMap["AccelKey"]=FlyByKeyboard::AccelKey ;
+  commandMap["DecelKey"]=FlyByKeyboard::DecelKey ;
+  commandMap["RollLeftKey"]=FlyByKeyboard::RollLeftKey ;
+  commandMap["RollRightKey"]=FlyByKeyboard::RollRightKey ;
+  commandMap["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
+  commandMap["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
+  commandMap["ToggleGlow"]=FireKeyboard::ToggleGlow;
+  commandMap["ToggleWarpDrive"]=FireKeyboard::ToggleWarpDrive;
+  commandMap["ToggleAnimation"]=FireKeyboard::ToggleAnimation;  
+  commandMap["CommAttackTarget"]=FireKeyboard::AttackTarget;
+  
+  commandMap["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;
+  commandMap["CommHelpMeOutFaction"]=FireKeyboard::HelpMeOutFaction;
+  commandMap["JoinFlightgroup"]=FireKeyboard::JoinFg;
+  commandMap["CommAttackTarget"]=FireKeyboard::AttackTarget;
+  commandMap["CommHelpMeOut"]=FireKeyboard::HelpMeOut;
+  commandMap["CommFormUp"]=FireKeyboard::FormUp;
+#ifdef CAR_SIM
+  commandMap["BlinkLeftKey"]=FireKeyboard::BlinkLeftKey;
+  commandMap["BlinkRightKey"]=FireKeyboard::BlinkRightKey;
+  commandMap["HeadlightKey"]=FireKeyboard::HeadlightKey;
+  commandMap["SirenKey"]=FireKeyboard::SirenKey;
+#endif
+  commandMap["CommBreakForm"]=FireKeyboard::BreakFormation;
+  
+  commandMap["Comm1Key"]=FireKeyboard::PressComm1Key ;
+  commandMap["Comm2Key"]=FireKeyboard::PressComm2Key ;
+  commandMap["Comm3Key"]=FireKeyboard::PressComm3Key ;
+  commandMap["Comm4Key"]=FireKeyboard::PressComm4Key ;
+  commandMap["Comm5Key"]=FireKeyboard::PressComm5Key ;
+  commandMap["Comm6Key"]=FireKeyboard::PressComm6Key ;
+  commandMap["Comm7Key"]=FireKeyboard::PressComm7Key ;
+  commandMap["Comm8Key"]=FireKeyboard::PressComm8Key ;
+  commandMap["Comm9Key"]=FireKeyboard::PressComm9Key ;
+  commandMap["Comm10Key"]=FireKeyboard::PressComm10Key ;
+
+  commandMap["SaveTarget1"]=FireKeyboard::SaveTarget1Key ;
+  commandMap["SaveTarget2"]=FireKeyboard::SaveTarget2Key ;
+  commandMap["SaveTarget3"]=FireKeyboard::SaveTarget3Key ;
+  commandMap["SaveTarget4"]=FireKeyboard::SaveTarget4Key;
+  commandMap["SaveTarget5"]=FireKeyboard::SaveTarget5Key ;
+  commandMap["SaveTarget6"]=FireKeyboard::SaveTarget6Key ;
+  commandMap["SaveTarget7"]=FireKeyboard::SaveTarget7Key ;
+  commandMap["SaveTarget8"]=FireKeyboard::SaveTarget8Key ;
+  commandMap["SaveTarget9"]=FireKeyboard::SaveTarget9Key ;
+  commandMap["SaveTarget10"]=FireKeyboard::SaveTarget10Key ;
+
+  commandMap["RestoreTarget1"]=FireKeyboard::RestoreTarget1Key ;
+  commandMap["RestoreTarget2"]=FireKeyboard::RestoreTarget2Key ;
+  commandMap["RestoreTarget3"]=FireKeyboard::RestoreTarget3Key ;
+  commandMap["RestoreTarget4"]=FireKeyboard::RestoreTarget4Key ;
+  commandMap["RestoreTarget5"]=FireKeyboard::RestoreTarget5Key ;
+  commandMap["RestoreTarget6"]=FireKeyboard::RestoreTarget6Key ;
+  commandMap["RestoreTarget7"]=FireKeyboard::RestoreTarget7Key ;
+  commandMap["RestoreTarget8"]=FireKeyboard::RestoreTarget8Key ;
+  commandMap["RestoreTarget9"]=FireKeyboard::RestoreTarget9Key ;
+  commandMap["RestoreTarget10"]=FireKeyboard::RestoreTarget10Key ;
+
+
+
+  commandMap["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
+  commandMap["EjectKey"]=FireKeyboard::EjectKey ;
+  commandMap["SuicideKey"]=SuicideKey ;
+  commandMap["TurretAIKey"]=FireKeyboard::TurretAI ;
+  commandMap["DockKey"]=FireKeyboard::DockKey ;
+  commandMap["UnDockKey"]=FireKeyboard::UnDockKey ;
+  commandMap["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;
+  commandMap["FireKey"]=FireKeyboard::FireKey ;
+  commandMap["MissileKey"]=FireKeyboard::MissileKey ;
+  commandMap["TargetKey"]=FireKeyboard::TargetKey ;
+  commandMap["LockTargetKey"]=FireKeyboard::LockKey ;
+  commandMap["ReverseTargetKey"]=FireKeyboard::ReverseTargetKey ;
+  commandMap["PickTargetKey"]=FireKeyboard::PickTargetKey ;
+  commandMap["SubUnitTargetKey"]=FireKeyboard::SubUnitTargetKey ;
+  commandMap["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
+  commandMap["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
+  commandMap["SigTargetKey"]=FireKeyboard::SigTargetKey ;
+  commandMap["UnitTargetKey"]=FireKeyboard::UnitTargetKey ;
+  commandMap["ReversePickTargetKey"]=FireKeyboard::ReversePickTargetKey ;
+  commandMap["ReverseNearestTargetKey"]=FireKeyboard::ReverseNearestTargetKey ;
+  commandMap["ReverseThreatTargetKey"]=FireKeyboard::ReverseThreatTargetKey ;
+  commandMap["ReverseSigTargetKey"]=FireKeyboard::ReverseSigTargetKey ;
+  commandMap["ReverseUnitTargetKey"]=FireKeyboard::ReverseUnitTargetKey ;
+  commandMap["TurretTargetKey"]=FireKeyboard::TargetTurretKey ;
+  commandMap["TurretPickTargetKey"]=FireKeyboard::PickTargetTurretKey ;
+  commandMap["TurretNearestTargetKey"]=FireKeyboard::NearestTargetTurretKey ;
+  commandMap["TurretThreatTargetKey"]=FireKeyboard::ThreatTargetTurretKey ;
+  commandMap["WeapSelKey"]=FireKeyboard::WeapSelKey ;
+  commandMap["MisSelKey"]=FireKeyboard::MisSelKey ;
+  commandMap["ReverseWeapSelKey"]=FireKeyboard::ReverseWeapSelKey ;
+  commandMap["ReverseMisSelKey"]=FireKeyboard::ReverseMisSelKey ;
+  commandMap["CloakKey"]=FireKeyboard::CloakKey;
+  commandMap["ECMKey"]=FireKeyboard::ECMKey;
+
+  commandMap["RunPythonPress"]=RunPythonPress;
+  commandMap["RunPythonRelease"]=RunPythonRelease;
+  commandMap["RunPythonToggle"]=RunPythonToggle;
+  commandMap["RunPythonPhysicsFrame"]=RunPythonPhysicsFrame;
+  commandMap["ComposeFunctions"]=ComposeFunctions;
+  commandMap["ComposeFunctionsToggle"]=ComposeFunctionsToggle;
+ commandMap["Cockpit::ScrollDown"]=CockpitKeys::ScrollDown;
+ commandMap["Cockpit::ScrollUp"]=CockpitKeys::ScrollUp;
+
+ commandMap["Cockpit::PitchDown"]=CockpitKeys::PitchDown;
+ commandMap["Cockpit::PitchUp"]=CockpitKeys::PitchUp;
+ commandMap["Cockpit::YawLeft"]=CockpitKeys::YawLeft;
+ commandMap["Cockpit::YawRight"]=CockpitKeys::YawRight;
+ commandMap["Cockpit::Inside"]=CockpitKeys::Inside;
+ commandMap["Cockpit::ViewTarget"]=CockpitKeys::ViewTarget;
+ commandMap["Cockpit::OutsideTarget"]=CockpitKeys::OutsideTarget;
+ commandMap["Cockpit::PanTarget"]=CockpitKeys::PanTarget;
+ commandMap["Cockpit::ZoomOut"]=CockpitKeys::ZoomOut ;
+ commandMap["Cockpit::ZoomIn"]=CockpitKeys::ZoomIn ;
+ commandMap["Cockpit::InsideLeft"]=CockpitKeys::InsideLeft;
+ commandMap["Cockpit::InsideRight"]=CockpitKeys::InsideRight;
+ commandMap["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
+ commandMap["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
+
+ commandMap["Cockpit::CommMode"]=CockpitKeys::CommModeVDU;
+ commandMap["Cockpit::TargetMode"]=CockpitKeys::TargetModeVDU;
+ commandMap["Cockpit::ManifestMode"]=CockpitKeys::ManifestModeVDU;
+ commandMap["Cockpit::ViewMode"]=CockpitKeys::ViewModeVDU;
+ commandMap["Cockpit::DamageMode"]=CockpitKeys::DamageModeVDU;
+ commandMap["Cockpit::GunMode"]=CockpitKeys::GunModeVDU;
+ commandMap["Cockpit::ReverseGunMode"]=CockpitKeys::ReverseGunModeVDU;
+ commandMap["Cockpit::MissileMode"]=CockpitKeys::MissileModeVDU;
+ commandMap["Cockpit::ReverseMissileMode"]=CockpitKeys::ReverseMissileModeVDU;
+ commandMap["Cockpit::ObjectiveMode"]=CockpitKeys::ObjectiveModeVDU;
+ commandMap["Cockpit::ScanningMode"]=CockpitKeys::ScanningModeVDU;
+
+ commandMap["Cockpit::MapKey"]=MapKey;
+ commandMap["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
+ commandMap["Cockpit::SwitchMVDU"]=CockpitKeys::SwitchMVDU;
+ commandMap["Cockpit::SwitchURVDU"]=CockpitKeys::SwitchURVDU;
+ commandMap["Cockpit::SwitchULVDU"]=CockpitKeys::SwitchULVDU;
+ commandMap["Cockpit::SwitchUMVDU"]=CockpitKeys::SwitchUMVDU;
+ commandMap["Cockpit::Behind"]=CockpitKeys::Behind;
+ commandMap["Cockpit::Pan"]=CockpitKeys::Pan;
+ commandMap["Cockpit::SkipMusicTrack"]=CockpitKeys::SkipMusicTrack;
+
+ commandMap["Cockpit::Quit"]=CockpitKeys::Quit;
+ return commandMap;
+}
