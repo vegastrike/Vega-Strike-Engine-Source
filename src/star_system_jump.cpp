@@ -302,6 +302,14 @@ extern StarSystem *GetLoadedStarSystem(const char * system) {
   }
   return ss;
 }
+void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::string &system) {
+  for (unsigned int i=0;i<pendingjump.size();i++) {
+    if (pendingjump[i]->un.GetUnit()==un) {
+      return;
+    }
+  }
+  ss->JumpTo (un,jumppoint,system);
+}
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());
@@ -330,7 +338,21 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
       AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
     }
     pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
-
+#if 0
+    UnitImages * im=  &un->GetImageInformation();
+    for (unsigned int i=0;i<=im->dockedunits.size();i++) {
+      Unit* unk =NULL;
+      if (i<im->dockedunits.size()) {
+	im->dockedunits[i]->uc.GetUnit();
+      }else {
+	unk = im->DockedTo.GetUnit();
+      }
+      if (unk!=NULL) {
+	TentativeJumpTo (this,unk,jumppoint,system);
+      }
+    }
+    
+#endif
   } else {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Failed to retrieve!\n");
