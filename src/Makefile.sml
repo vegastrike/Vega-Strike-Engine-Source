@@ -2,15 +2,18 @@ MAIN=vegastrike
 
 CC=g++
 
+SUBDIRS = gldrv
+
 CFLAGS= -DUNIX -Wall -g  -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
 
 INCLUDES= -I/usr/X11R6/include 
 
 LFLAGS=  -L/usr/X11R6/lib -lXi -lXmu -lGL -lGLU -lglut -lexpat 
 
+LTWOFLAGS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
+
 SRCS = 	cmd_beam.cpp				\
 	cmd_bolt.cpp				\
-	cmd_gun.cpp				\
 	star_system_xml.cpp			\
 	cmd_navigation_orders.cpp		\
 	cmd_collide.cpp				\
@@ -52,18 +55,6 @@ SRCS = 	cmd_beam.cpp				\
 	gfx_transform_vector.cpp		\
 	gfx_transform_matrix.cpp		\
 	gfx_sphere.cpp				\
-	gl_globals.cpp				\
-	gl_init.cpp				\
-	gl_light.cpp				\
-	gl_light_state.cpp			\
-	gl_light_pick.cpp			\
-	gl_matrix.cpp				\
-	gl_material.cpp				\
-	gl_misc.cpp				\
-	gl_state.cpp				\
-	gl_texture.cpp				\
-	gl_vertex_list.cpp			\
-	gl_quad_list.cpp			\
 	hashtable.cpp				\
 	in_ai.cpp				\
 	in_kb.cpp				\
@@ -79,16 +70,23 @@ SRCS = 	cmd_beam.cpp				\
 	star_system.cpp 			\
 	UnitCollection.cpp			\
 	UnitContainer.cpp			\
-	wrapgfx.cpp				\
+	universe.cpp				\
 	xml_support.cpp				
 
 
 OBJS = $(SRCS:.cpp=.o)
 
 $(MAIN):  $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(MAIN) $(LFLAGS)
+	for dir in $(SUBDIRS); do \
+                (cd $$dir &&  $(MAKE) -f Makefile.sml); \
+        done
+	-$(CC) $(CFLAGS) $(OBJS) gldrv/libgldrv.a -o $(MAIN) $(LFLAGS)
+	-$(CC) $(CFLAGS) $(OBJS) gldrv/libgldrv.a -o $(MAIN) $(LTWOFLAGS)
 .cpp.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
 clean:
+	for dir in $(SUBDIRS); do \
+                (cd $$dir && $(MAKE) clean); \
+        done
 	rm -f *.o *~ $(MAIN)
