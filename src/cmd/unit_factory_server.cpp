@@ -6,6 +6,9 @@
 #include "asteroid_generic.h"
 #include "missile_generic.h"
 #include "enhancement_generic.h"
+#ifdef _WIN32
+#include <direct.h>
+#endif
 
 extern Unit * _masterPartList;
 std::string getMasterPartListUnitName() {
