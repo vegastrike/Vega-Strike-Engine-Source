@@ -101,9 +101,9 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
   }//probably a mountless capship. 50000 is chosen arbitrarily
   float inertial_priority=0;
   {
-    static float mass_inertial_priority_cutoff =XMLSupport::parse_int (vs_config->getVariable ("AI","Targetting","MassInertialPriorityCutoff","5000"));
+    static float mass_inertial_priority_cutoff =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityCutoff","5000"));
     if (me->GetMass()>mass_inertial_priority_cutoff) {
-      static float mass_inertial_priority_scale =XMLSupport::parse_int (vs_config->getVariable ("AI","Targetting","MassInertialPriorityScale",".0000001"));
+      static float mass_inertial_priority_scale =XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","MassInertialPriorityScale",".0000001"));
       Vector normv (me->GetVelocity());
       float Speed = me->GetVelocity().Magnitude();
       normv*=1/Speed;
@@ -113,9 +113,12 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
     }
     
   }
+  static float threat_weight = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","ThreatWeight",".5"));
+  float threat_priority = (me->Threat()==targ)?threat_weight:0;
+  threat_priority+= (targ->Target()==me)?threat_weight:0;
   float role_priority01 = ((float)rolepriority)/31.;
   float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1 for most ships 1 is best
-  return range_priority01*role_priority01+inertial_priority;
+  return range_priority01*role_priority01+inertial_priority+threat_priority;
 }
 void FireAt::SignalChosenTarget () {
 }
@@ -226,7 +229,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     }
     float gspeed, grange, mrange;
     grange=FLT_MAX;
-    su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);
+	if (su->getAIState()) 
+		su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
     }
