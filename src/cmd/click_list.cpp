@@ -60,7 +60,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
     GFXCalculateFrustum(frustum,view,frustmat);
     Unit * un;
     while ((un=myParent->current())) {
-      if (un->queryFrustum(frustum)) {
+      if ((un)->queryFrustum(frustum)) {
 	UAye->preinsert (un);
       }
       myParent->advance(); 

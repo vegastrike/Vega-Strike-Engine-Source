@@ -128,7 +128,7 @@ int Music::SelectTracks(int &whichlist) {
   Unit *target;
   while ((target = iter.current())!=NULL) {
     float ftmp;
-    ftmp = 2*_Universe->GetRelation (un->faction,target->faction);
+    ftmp = 2*FactionUtil::GetIntRelation (un->faction,target->faction);
     if (ftmp<0&&((un->Position()-target->Position()).Magnitude())<hostile_autodist)
       perfect=false;
     iter.advance();

@@ -201,7 +201,7 @@ void Nebula::PutInsideCam(int i) {
 
 Nebula::Nebula(const char * unitfile, bool SubU, int faction,
 	       Flightgroup* fg, int fg_snumber) :
-  Unit (unitfile,SubU,faction,string(""),fg,fg_snumber)
+  GameUnit (unitfile,SubU,faction,string(""),fg,fg_snumber)
 {
   std::string path = GetSharedUnitPath() + "/";
   std::string file = string(unitfile) + "/" + unitfile + "/" + ".nebula";
@@ -212,10 +212,10 @@ Nebula::Nebula(const char * unitfile, bool SubU, int faction,
 
   if(stat(fullpath.c_str(), &info) != 0)
     {
-      fullpath = path + _Universe->GetFaction(faction) + "/" + file;
+      fullpath = path + FactionUtil::GetFaction(faction) + "/" + file;
       if(stat(fullpath.c_str(),&info) != 0)
 	{
-	  faction=_Universe->GetFaction("neutral");
+	  faction=FactionUtil::GetFaction("neutral");
 	  fullpath = path + "neutral/" + file;
 	}
     }

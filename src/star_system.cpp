@@ -367,7 +367,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
   while((unit = iter.current())!=NULL) {
-    unit->Draw();
+    ((GameUnit *)unit)->Draw();
     iter.advance();
   }
 #ifdef UPDATEDEBUG

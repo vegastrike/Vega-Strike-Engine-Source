@@ -133,7 +133,7 @@ static void VolitalizeJumpAnimation (const int ani) {
     AnimationNulls.push_back (ani);
   }
 } 
-bool Unit::TransferUnitToSystem (StarSystem * Current) {
+bool GameUnit::TransferUnitToSystem (StarSystem * Current) {
   if (activeStarSystem->RemoveUnit (this)) {
     this->RemoveFromSystem();  
     this->Target(NULL);
@@ -146,7 +146,7 @@ bool Unit::TransferUnitToSystem (StarSystem * Current) {
   }
   return false;
 }
-void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
+void GameUnit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
   if (pendingjump[kk]->orig==activeStarSystem||activeStarSystem==NULL) {
     if (TransferUnitToSystem (pendingjump[kk]->dest)) {
 #ifdef JUMP_DEBUG

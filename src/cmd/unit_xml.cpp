@@ -25,12 +25,12 @@
 #include "gfx/cockpit.h"
 #include "gfx/animation.h"
 #define VS_PI 3.1415926536
-void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((Unit*)userData)->beginElement(name, AttributeList(atts));
+void GameUnit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  ((GameUnit*)userData)->beginElement(name, AttributeList(atts));
 }
 
-void Unit::endElement(void *userData, const XML_Char *name) {
-  ((Unit*)userData)->endElement(name);
+void GameUnit::endElement(void *userData, const XML_Char *name) {
+  ((GameUnit*)userData)->endElement(name);
 }
 using std::map;
 static std::map<std::string,Animation *> cached_ani;
@@ -73,7 +73,7 @@ Animation* getRandomCachedAni () {
   }
 }
 
-namespace UnitXML {
+namespace GameUnitXML {
     enum Names {
       UNKNOWN,
       UNIT,
@@ -208,8 +208,8 @@ namespace UnitXML {
     EnumMap::Pair ("Sound", SOUND),
     EnumMap::Pair ("MeshFile", MESHFILE),
     EnumMap::Pair ("ShieldMesh",SHIELDMESH),
-    EnumMap::Pair ("BspMesh",BSPMESH),
-    EnumMap::Pair ("RapidMesh",RAPIDMESH),
+    EnumMap::Pair ("BspMesh",RAPIDMESH),
+    EnumMap::Pair ("RapidMesh",BSPMESH),
     EnumMap::Pair ("Light",MESHLIGHT),
     EnumMap::Pair ("Defense", DEFENSE),
     EnumMap::Pair ("Armor", ARMOR),
@@ -343,7 +343,7 @@ namespace UnitXML {
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using namespace UnitXML;
+using namespace GameUnitXML;
 extern int GetModeFromName (const char *);
 int parseMountSizes (const char * str) {
   char tmp[13][50];
@@ -364,7 +364,7 @@ std::string speedStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((*input.w.f)/game_speed);
 }
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
-void Unit::beginElement(const string &name, const AttributeList &attributes) {
+void GameUnit::beginElement(const string &name, const AttributeList &attributes) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
   static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   Cargo carg;
@@ -411,6 +411,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
+
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -418,7 +419,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	xml->rapidmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
 	xml->hasColTree = true;	
 	break;
-      case    RAPID:
+      case RAPID:
 	ADDDEFAULT;
 	xml->hasColTree=parse_bool ((*iter).value);
 	break;
@@ -436,6 +437,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	ADDDEFAULT;
 	xml->bspmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
 	xml->hasBSP = true;	
+	break;
+      case RAPID:
+	ADDDEFAULT;
+	xml->hasColTree=parse_bool ((*iter).value);
 	break;
       case USEBSP:
 	ADDDEFAULT;
@@ -563,8 +568,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }    
-    Unit *upgradee =UnitFactory::createUnit(filename.c_str(),true,_Universe->GetFaction("upgrades"));
-    Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
+    GameUnit *upgradee =UnitFactory::createUnit(filename.c_str(),true,FactionUtil::GetFaction("upgrades"));
+	Unit::Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
     upgradee->Kill();
     }
     break;
@@ -755,7 +760,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(new Mount (filename.c_str(), ammo,volume));
+    xml->mountz.push_back(new GameMount (filename.c_str(), ammo,volume));
     xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()),pos));
     //xml->mountz[indx]->Activate();
     if (tempbool)
@@ -919,10 +924,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case ENGINEWAV:
 	ADDDEFAULT;
 	sound->engine = AUDCreateSoundWAV ((*iter).value,true);
+	cout<<"engine sound wav : "<<(*iter).value<<endl;
 	break;
       case ENGINEMP3:
 	ADDDEFAULT;
 	sound->engine = AUDCreateSoundMP3((*iter).value,true); 
+	cout<<"engine sound mp3 : "<<(*iter).value<<endl;
 	break;
       case SHIELDMP3:
 	ADDDEFAULT;
@@ -963,6 +970,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     if (sound->engine==-1) {
       sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
+	  cout<<"default engine sound : sfx10.wav - sound->engine : "<<sound->engine<<endl;
     }
     if (sound->shield==-1) {
       sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
@@ -1305,7 +1313,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 
   case YAW:
     ADDTAG;
-    xml->yprrestricted+=Unit::XML::YRESTR;
+    xml->yprrestricted+=GameUnit::XML::YRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1324,7 +1332,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 
   case PITCH:
     ADDTAG;
-    xml->yprrestricted+=Unit::XML::PRESTR;
+    xml->yprrestricted+=GameUnit::XML::PRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1343,7 +1351,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 
   case ROLL:
     ADDTAG;
-    xml->yprrestricted+=Unit::XML::RRESTR;
+    xml->yprrestricted+=GameUnit::XML::RRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1476,7 +1484,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 #undef ADDELEM
 }
 
-void Unit::endElement(const string &name) {
+void GameUnit::endElement(const string &name) {
   image->unitwriter->EndTag (name);
   Names elem = (Names)element_map.lookup(name);
 
@@ -1492,67 +1500,7 @@ void Unit::endElement(const string &name) {
   }
 }
 
-std::string Unit::shieldSerializer (const XMLType &input, void * mythis) {
-  Unit * un=(Unit *)mythis;
-  switch (un->shield.number) {
-  case 2:
-    return tostring(un->shield.fb[2])+string("\" back=\"")+tostring(un->shield.fb[3]);
-  case 6:
-    return tostring(un->shield.fbrltb.fbmax)+string("\" back=\"")+tostring(un->shield.fbrltb.fbmax)+string("\" left=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" right=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" top=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" bottom=\"")+tostring(un->shield.fbrltb.rltbmax);
-  case 4:
-  default:
-    return tostring(un->shield.fbrl.frontmax)+string("\" back=\"")+tostring(un->shield.fbrl.backmax)+string("\" left=\"")+tostring(un->shield.fbrl.leftmax)+string("\" right=\"")+tostring(un->shield.fbrl.rightmax);
-  }
-  return string("");
-}
-
-std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
-  Unit * un=(Unit *)mythis;
-  int i=input.w.hardint;
-  if (un->nummounts>i) {
-    string result(lookupMountSize(un->mounts[i].size));
-    if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
-      result+=string("\" weapon=\"")+(un->mounts[i].type->weapon_name);
-    if (un->mounts[i].ammo!=-1)
-      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
-    if (un->mounts[i].volume!=-1) {
-      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i].volume);
-    }
-    Matrix m;
-    un->mounts[i].GetMountLocation().to_matrix(m);
-    result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
-    result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
-    result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));
-
-    result+=string ("\" qi=\"")+tostring(m.getQ().i);
-    result+=string ("\" qj=\"")+tostring(m.getQ().j);
-    result+=string ("\" qk=\"")+tostring(m.getQ().k);
-     
-    result+=string ("\" ri=\"")+tostring(m.getR().i);    
-    result+=string ("\" rj=\"")+tostring(m.getR().j);    
-    result+=string ("\" rk=\"")+tostring(m.getR().k);    
-    return result;
-  }else {
-    return string("");
-  }
-}
-std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
-  Unit * un=(Unit *)mythis;
-  int index=input.w.hardint;
-  Unit *su;
-  int i=0;
-  for (un_iter ui=un->getSubUnits();NULL!= (su=ui.current());++ui,++i) {
-    if (i==index) {
-      if (su->image->unitwriter) {
-	return su->image->unitwriter->getName();
-      }
-      return su->name;
-    }
-  }
-  return string("destroyed_turret");
-}
-
-void Unit::WriteUnit (const char * modifications) {
+void GameUnit::WriteUnit (const char * modifications) {
   if (image->unitwriter)
     image->unitwriter->Write(modifications);
   for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
@@ -1560,37 +1508,41 @@ void Unit::WriteUnit (const char * modifications) {
   } 
 }
 extern std::string GetReadPlayerSaveGame (int);
-void Unit::LoadXML(const char *filename, const char * modifications)
+void GameUnit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
 {
   shield.number=0;
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
   std::string collideTreeHash = GetHashName(string(modifications)+"#"+string(filename));
-  if (modifications) {
-    if (strlen(modifications)!=0) {
-      changehome();
-      static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
-      vschdir (savedunitpath.c_str());
-      string nonautosave=GetReadPlayerSaveGame(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
-      if (nonautosave.empty()) {
-        vschdir (modifications);
-      }else {
-        vschdir (nonautosave.c_str());
-      }
-      inFile = fopen (filename,"r");
-      vscdup();
-      vscdup();
-      returnfromhome();
-    }
+  if( buflength==0 || xmlbuffer==NULL)
+  {
+	  if (modifications) {
+		if (strlen(modifications)!=0) {
+		  changehome();
+		  static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
+		  vschdir (savedunitpath.c_str());
+		  string nonautosave=GetReadPlayerSaveGame(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
+		  if (nonautosave.empty()) {
+			vschdir (modifications);
+		  }else {
+			vschdir (nonautosave.c_str());
+		  }
+		  inFile = fopen (filename,"r");
+		  vscdup();
+		  vscdup();
+		  returnfromhome();
+		}
+	  }
+	  if (inFile==NULL)
+		inFile = fopen (filename, "r");
+	  if(!inFile) {
+		cout << "Unit file " << filename << " not found" << endl;
+		assert(0);
+		return;
+	  }
   }
-  if (inFile==NULL)
-    inFile = fopen (filename, "r");
-  if(!inFile) {
-    cout << "Unit file " << filename << " not found" << endl;
-    assert(0);
-    return;
-  }
+
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = new string("");
@@ -1701,30 +1653,37 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   xml->shieldmesh = NULL;
   xml->bspmesh = NULL;
   xml->rapidmesh = NULL;
-  xml->hasBSP = true;            ;
+  xml->hasBSP = true;
   xml->hasColTree=true;
   xml->unitlevel=0;
   xml->unitscale=1;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
-  XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
+  XML_SetElementHandler(parser, &GameUnit::beginElement, &GameUnit::endElement);
   
-  do {
+  if( buflength!=0 && xmlbuffer!=NULL)
+  {
+	XML_Parse (parser,xmlbuffer,buflength,1);
+  }
+  else
+  {
+	  do {
 #ifdef BIDBG
-    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+		char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
 #else
-    char buf[chunk_size];
+		char buf[chunk_size];
 #endif
-    int length;
-    length = fread (buf,1, chunk_size,inFile);
-    //length = inFile.gcount();
+		int length;
+		length = fread (buf,1, chunk_size,inFile);
+		//length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+		XML_ParseBuffer(parser, length, feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+		XML_Parse (parser,buf,length,feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+	  } while(!feof(inFile));
+	  fclose (inFile);
+  }
   XML_ParserFree (parser);
   // Load meshes into subunit
   image->unitwriter->EndTag ("Unit");
@@ -1816,10 +1775,10 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   meshdata.back()->EnableSpecialFX();
   if (!colTrees) {
-    if (xml->hasBSP          ) {
+    if (xml->hasBSP) {
       tmpname += ".bsp";
       if (!CheckBSP (tmpname.c_str())) {
-	BuildBSPTree (tmpname.c_str(), false,            xml->bspmesh );
+	BuildBSPTree (tmpname.c_str(), false, xml->bspmesh);
       }
       if (CheckBSP (tmpname.c_str())) {
 	bspTree = new BSPTree (tmpname.c_str());
@@ -1846,7 +1805,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     delete xml->bspmesh;
   }
   if (xml->rapidmesh) {
-    delete xml->rapidmesh;
+    delete xml->bspmesh;
   }
   delete xml;
 }

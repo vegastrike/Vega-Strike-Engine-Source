@@ -562,7 +562,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       }
       
       
-      tmptarget[a]=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
+      tmptarget[a]=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
       int fg_terrain=-1;
       //	  cout << "before unit" << endl;
       if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
@@ -595,6 +595,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	if (s==0&&squadnum<(int)fighter0name.size()) {
 		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
 	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
+	    _Universe->AccessCockpit(squadnum)->GetParent()->SetPlayer();
 	}
         
     if (squadnum<(int)fighter0name.size()) {
@@ -643,7 +644,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   for (int rr=0;rr<a;rr++) {
     for (int k=0;k<a-1;k++) {
       int j=rand()%a;
-      if (_Universe->GetRelation(tmptarget[rr],tmptarget[j])<0) {
+      if (FactionUtil::GetIntRelation(tmptarget[rr],tmptarget[j])<0) {
 	fighters[rr]->Target (fighters[j]);
 	break;
       }
@@ -653,7 +654,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
   delete [] tmptarget;
   muzak = new Music (fighters[0]);
-  _Universe->LoadFactionPlaylists();
+  FactionUtil::LoadFactionPlaylists();
   AUDListenerSize (fighters[0]->rSize()*4);
   for (unsigned int cnum=0;cnum<fighter0indices.size();cnum++) {
     if(benchmark==-1){
@@ -674,12 +675,12 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = UnitFactory::createEnhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
+    un = UnitFactory::createEnhancement (su->filename.c_str(),FactionUtil::GetFaction (su->faction.c_str()),string(""));
     un->SetPosition(QVector(0,0,0));
     break;
   case UNITPTR:
   default:
-    un = UnitFactory::createUnit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
+    un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
     if (_Universe->AccessCockpit()->GetParent()) {

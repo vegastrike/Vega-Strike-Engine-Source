@@ -287,7 +287,7 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
   char factname[1024];
   while (3==fscanf (fp,"%d %s %s",&a,unitname,factname)) {
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
-      _Universe->LoadSerializedFaction(fp);
+      FactionUtil::LoadSerializedFaction(fp);
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(fp);
     }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
@@ -331,7 +331,7 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
     fprintf (fp,"\n%d %s %s",0,"news","data ");
     WriteNewsData(fp);
     fprintf (fp,"\n%d %s %s",0,"factions","begin ");
-    _Universe->SerializeFaction(fp);
+    FactionUtil::SerializeFaction(fp);
     fclose (fp);
     if (player_num!=-1) {
       last_pickled_data =last_written_pickled_data;

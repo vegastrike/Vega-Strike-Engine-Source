@@ -13,7 +13,7 @@ void Asteroid::reactToCollision(Unit * smaller, const QVector & biglocation, con
     break;
   }
 }
-Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):Unit (filename,false, faction,string(""),fg,fg_snumber) {
+Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):GameUnit (filename,false, faction,string(""),fg,fg_snumber) {
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit *unit;
   while((unit = iter.current())!=NULL) {
@@ -26,5 +26,5 @@ Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_s
 
 }
 void Asteroid::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
-  Unit::UpdatePhysics (trans,transmat, CumulativeVelocity,ResolveLast,uc);
+  GameUnit::UpdatePhysics (trans,transmat, CumulativeVelocity,ResolveLast,uc);
 }

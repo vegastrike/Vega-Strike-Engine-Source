@@ -724,7 +724,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
-	  NewPart = UnitFactory::createUnit (input_buffer,true,_Universe->GetFaction("upgrades"));
+	  NewPart = UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades"));
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name==string("LOAD_FAILED")) {
 	    NewPart->Kill();

@@ -61,7 +61,7 @@ void Base::Room::BaseShip::Draw (Base *base) {
 		newmat.p.i*=newmat.p.k;
 		newmat.p.j*=newmat.p.k;
 		MultMatrix (final,cam,newmat);
-		un->DrawNow(final);
+		(un)->DrawNow(final);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
 		GFXHudMode (GFXTRUE);
@@ -360,7 +360,7 @@ void Base::InitCallbacks () {
 
 extern string getCargoUnitName (const char *name);
 
-void Unit::UpgradeInterface(Unit * baseun) {
+void GameUnit::UpgradeInterface(Unit * baseun) {
 	if (!Base::CurrentBase) {
 	  string basename = (getCargoUnitName(baseun->getFullname().c_str()));
 	  if (baseun->isUnit()!=PLANETPTR) {
@@ -460,7 +460,7 @@ Base::Base (const char *basefile, Unit *base, Unit*un)
 	othtext.SetCharSize(x*2,y*2);
 	//	othtext.SetSize(2-(x*4),-.75);
 	othtext.SetSize(1-.01,-.75);
-	Load(basefile, compute_time_of_day(base,un),_Universe->GetFaction(base->faction));
+	Load(basefile, compute_time_of_day(base,un),FactionUtil::GetFaction(base->faction));
 	if (!rooms.size()) {
 		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());

@@ -2,7 +2,7 @@
 #define _ENHANCER_H_
 #include "cmd/unit.h"
 #include "savegame.h"
-class Enhancement : public Unit
+class Enhancement : public GameUnit
 {
   std::string filename;
   virtual enum clsptr isUnit() {return ENHANCEMENTPTR;}
@@ -10,7 +10,7 @@ class Enhancement : public Unit
 protected:
   /// constructor only to be called by UnitFactory
   Enhancement(const char * filename, int faction, const string &modifications,Flightgroup * flightgrp=NULL, int fg_subnumber=0)
-    : Unit(filename,false,faction,modifications,flightgrp,fg_subnumber)
+    : GameUnit(filename,false,faction,modifications,flightgrp,fg_subnumber)
     , filename(filename) {
   }
 
@@ -27,7 +27,7 @@ public:
       smaller->Upgrade (this,0,0,true,true,percent);
       memcpy (&this->shield,tempdata,sizeof(this->shield));
       string fn (filename);
-      string fac(_Universe->GetFaction(faction));
+      string fac(FactionUtil::GetFaction(faction));
       Kill();
       _Universe->AccessCockpit()->savegame->AddUnitToSave(fn.c_str(),ENHANCEMENTPTR,fac.c_str(),(long)this);
     }

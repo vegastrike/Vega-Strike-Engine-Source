@@ -2,7 +2,7 @@
 #define _NEBULA_H_
 #include "unit.h"
 
-class Nebula: public Unit {
+class Nebula: public GameUnit {
 private:
 	static void Nebula::beginElement (void * Userdata,const XML_Char * name, const XML_Char ** atts);
 	Vector color;

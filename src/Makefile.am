@@ -52,6 +52,9 @@ vegastrike_SOURCES =				\
 	in.h					\
 	in_joystick.cpp				\
 	in_joystick.h				\
+	faction.h					\
+	faction.cpp					\
+	faction_util.cpp			\
 	force_feedback.cpp			\
 	force_feedback.h			\
 	in_kb.cpp				\

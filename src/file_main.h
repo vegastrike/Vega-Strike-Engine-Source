@@ -20,7 +20,7 @@
  */
 #include <stdio.h>
 #include <string.h>
-#include "gfxlib.h"
+//#include "gfxlib.h"
 #include "endianness.h"
 extern FILE *fpread;
 

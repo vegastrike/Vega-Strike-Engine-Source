@@ -22,37 +22,7 @@
 #include "cmd/script/flightgroup.h"
 #include "music.h"
 //#define DESTRUCTDEBUG
-
 static list<Unit*> Unitdeletequeue;
-static Hashtable <long, Unit, char[2095]> deletedUn;
-int deathofvs=1;
-void CheckUnit(Unit * un) {
-  if (deletedUn.Get ((long)un)!=NULL) {
-    while (deathofvs) {
-      printf ("%ld died",(long)un);
-    }
-  }
-}
-void UncheckUnit (Unit * un) {
-  if (deletedUn.Get ((long)un)!=NULL) {
-    deletedUn.Delete ((long)un);
-  }  
-}
-void Unit::UnRef() {
-#ifdef CONTAINER_DEBUG
-  CheckUnit(this);
-#endif
-  ucref--;
-  if (killed&&ucref==0) {
-    deletedUn.Put ((long)this,this);
-    Unitdeletequeue.push_back(this);//delete
-#ifdef DESTRUCTDEBUG
-    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
-#endif
-  }
-}
-
-
 static std::vector <Mesh *> MakeMesh(unsigned int mysize) {
   std::vector <Mesh *> temp;
   for (unsigned int i=0;i<mysize;i++) {
@@ -60,7 +30,7 @@ static std::vector <Mesh *> MakeMesh(unsigned int mysize) {
   }
   return temp;
 }
-void Unit::Split (int level) {
+void GameUnit::Split (int level) {
   int i;
   int nm = nummesh();
   if (nm<=0) {
@@ -99,7 +69,7 @@ void Unit::Split (int level) {
     delete old[nm];
   old[nm]=NULL;
   for (i=0;i<nm;i++) {
-    Unit * splitsub;
+    GameUnit * splitsub;
     std::vector<Mesh *> tempmeshes;
     tempmeshes.push_back (old[i]);
     SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
@@ -122,7 +92,7 @@ void Unit::Split (int level) {
 
 extern Music *muzak;
 
-void Unit::Kill(bool erasefromsave) {
+void GameUnit::Kill(bool erasefromsave) {
 
   if (colTrees)
     colTrees->Dec();//might delete
@@ -187,32 +157,6 @@ void Unit::Kill(bool erasefromsave) {
 #endif
   }
 }
-void Unit::ProcessDeleteQueue() {
-  while (!Unitdeletequeue.empty()) {
-#ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
-    fflush (stderr);
-    fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
-#endif
-#ifdef DESTRUCTDEBUG
-    if (Unitdeletequeue.back()->SubUnit) {
-
-      fprintf (stderr,"Subunit Deleting (related to double dipping)");
-
-    }
-#endif
-    Unit * mydeleter = Unitdeletequeue.back();
-    Unitdeletequeue.pop_back();
-    delete mydeleter;///might modify unitdeletequeue
-    
-#ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
-    fflush (stderr);
-#endif
-
-  }
-}
-
 
 unsigned short apply_float_to_short (float tmp) {
   unsigned  short ans = (unsigned short) tmp;
@@ -223,82 +167,13 @@ unsigned short apply_float_to_short (float tmp) {
 }
 
 
-float Unit::FShieldData() const{
-  switch (shield.number) {
-  case 2: { if( shield.fb[2]!=0) return shield.fb[0]/shield.fb[2];}
-  case 4: { if( shield.fbrl.frontmax!=0) return ((float)shield.fbrl.front)/shield.fbrl.frontmax;}
-  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;}
-  }
-  return 0;
-}
-void Unit::ArmorData (unsigned short armor[4]) const{
-  //  memcpy (&armor[0],&this->armor.front,sizeof (unsigned short)*4);
-  armor[0]=this->armor.front;
-  armor[1]=this->armor.back;
-  armor[2]=this->armor.right;
-  armor[3]=this->armor.left;
-}
-
-float Unit::FuelData () const{
-  return fuel;
-}
-float Unit::EnergyData() const{
-  if (maxenergy<=MaxShieldVal()) {
-    return 0;
-  }
-  return ((float)energy)/(maxenergy-MaxShieldVal());
-}
-
-float Unit::BShieldData() const{
-  switch (shield.number) {
-  case 2: { if( shield.fb[3]!=0) return shield.fb[1]/shield.fb[3];}
-  case 4: { if( shield.fbrl.backmax!=0) return ((float)shield.fbrl.back)/shield.fbrl.backmax;}
-  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;}
-  }
-  return 0;
-}
-float Unit::LShieldData() const{
-  switch (shield.number) {
-  case 2: return 0;//no data, captain
-  case 4: { if( shield.fbrl.leftmax!=0) return ((float)shield.fbrl.left)/shield.fbrl.leftmax;}
-  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;}
-  }
-  return 0;
-}
-float Unit::RShieldData() const{
-  switch (shield.number) {
-  case 2: return 0;//don't react to stuff we have no data on
-  case 4: { if( shield.fbrl.rightmax!=0) return ((float)shield.fbrl.right)/shield.fbrl.rightmax;}
-  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;}
-  }
-  return 0;
-}
-
 
 float rand01 () {
 	return ((float)rand()/(float)RAND_MAX);
 }
-void Unit::leach (float damShield, float damShieldRecharge, float damEnRecharge) {
-  recharge*=damEnRecharge;
-  shield.recharge*=damShieldRecharge;
-  switch (shield.number) {
-  case 2:
-    shield.fb[2]*=damShield;
-    shield.fb[3]*=damShield;
-    break;
-  case 4:
-    shield.fbrl.frontmax*=damShield;
-    shield.fbrl.backmax*=damShield;
-    shield.fbrl.leftmax*=damShield;
-    shield.fbrl.rightmax*=damShield;
-    break;
-  case 6:
-    shield.fbrltb.fbmax*=damShield;
-    shield.fbrltb.rltbmax*=damShield;
-    break;
-  }
-}
-void Unit::DamageRandSys(float dam, const Vector &vec) {
+
+// Uses a Cockpit static member !!!!!
+void GameUnit::DamageRandSys(float dam, const Vector &vec) {
 	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
 	float randnum=rand01();
 	float degrees=deg;
@@ -347,7 +222,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (nummounts) {
 			unsigned int whichmount=rand()%nummounts;
 			if (randnum>=.9) {
-				mounts[whichmount].status=Unit::Mount::DESTROYED;
+				mounts[whichmount].status=GameUnit::GameMount::DESTROYED;
 			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
 			  mounts[whichmount].ammo*=dam;
 			} else if (randnum>=.1) {
@@ -475,7 +350,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	}
 }
 
-float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
+float GameUnit::DealDamageToHull (const Vector & pnt, float damage ) {
   float percent;
   unsigned short * targ;
 #ifndef ISUCK
@@ -551,135 +426,8 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
     percent = 0;
   return percent;
 }
-bool Unit::ShieldUp (const Vector &pnt) const{
-  const int shieldmin=5;
-  int index;
-  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-  if (nebula!=NULL||nebshields>0)
-    return false;
-  switch (shield.number){
-  case 2:
-    index = (pnt.k>0)?0:1;
-    return shield.fb[index]>shieldmin;
-    break;
-  case 6:
-    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
-      if (pnt.i>0) {
-	index = 3;//left
-      } else {
-	index = 2;//right
-      }
-    }else if (fabs(pnt.j)>fabs (pnt.k)) {
-      if (pnt.j>0) {
-	index = 4;//top;
-      } else {
-	index = 5;//bot;
-      }
-    } else {
-      if (pnt.k>0) {
-	index = 0;
-      } else {
-	index = 1;
-      }
-    }
-    return shield.fbrltb.v[index]>shieldmin;
-    break;
-  case 4:
-  default:
-    if (fabs(pnt.k)>fabs (pnt.i)) {
-      if (pnt.k>0) {
-	return shield.fbrl.front>shieldmin;
-      } else {
-	return shield.fbrl.back>shieldmin;
-      }
-    } else {
-      if (pnt.i>0) {
-	return shield.fbrl.left>shieldmin;
-      } else {
-	return shield.fbrl.right>shieldmin;
-      }
-    }
-    return false;
-  }
-}
-float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
-  int index;
-  float percent=0;
-  unsigned short * targ=NULL;
-  switch (shield.number){
-  case 2:
-    index = (pnt.k>0)?0:1;
-	if( shield.fb[index+2]!=0)
-	    percent = damage/shield.fb[index+2];//comparing with max
-	else
-		percent = 0;
-    shield.fb[index]-=damage;
-    damage =0;
-    if (shield.fb[index]<0) {
-      damage = -shield.fb[index];
-      shield.fb[index]=0;
-    }
-    break;
-  case 6:
-    percent = damage/shield.fbrltb.rltbmax;
-    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
-      if (pnt.i>0) {
-	index = 3;//left
-      } else {
-	index = 2;//right
-      }
-    }else if (fabs(pnt.j)>fabs (pnt.k)) {
-      if (pnt.j>0) {
-	index = 4;//top;
-      } else {
-	index = 5;//bot;
-      }
-    } else {
-      percent = damage/shield.fbrltb.fbmax;
-      if (pnt.k>0) {
-	index = 0;
-      } else {
-	index = 1;
-      }
-    }
-    if (damage>shield.fbrltb.v[index]) {
-      damage -= shield.fbrltb.v[index];
-      shield.fbrltb.v[index]=0;
-    } else {
-      shield.fbrltb.v[index]-=apply_float_to_short (damage);
-      damage = 0;
-    }
-    break;
-  case 4:
-  default:
-    if (fabs(pnt.k)>fabs (pnt.i)) {
-      if (pnt.k>0) {
-	targ = &shield.fbrl.front;
-	percent = damage/shield.fbrl.frontmax;
-      } else {
-	targ = &shield.fbrl.back;
-	percent = damage/shield.fbrl.backmax;
-      }
-    } else {
-      if (pnt.i>0) {
-	percent = damage/shield.fbrl.leftmax;
-	targ = &shield.fbrl.left;
-      } else {
-	targ = &shield.fbrl.right;
-	percent = damage/shield.fbrl.rightmax;
-      }
-    }
-    if (damage>*targ) {
-      damage-=*targ;
-      *targ=0;
-    } else {
-      *targ -= apply_float_to_short (damage);	
-      damage=0;
-    }
-    break;
-  }
-  if (!FINITE (percent))
-    percent = 0;
+float GameUnit::DealDamageToShield (const Vector &pnt, float &damage) {
+  float percent = Unit::DealDamageToShield( pnt, damage);
   if (percent&&!AUDIsPlaying (sound->shield))
 	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
   else
@@ -687,7 +435,8 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 
   return percent;
 }
-void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
+
+void GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
   if (nodockdamage) {
     if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
@@ -739,18 +488,18 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 //un scored a faction kill
 void ScoreKill (Cockpit * cp, Unit * un, int faction) {
   static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
-  _Universe->AdjustRelation(faction,un->faction,KILL_FACTOR,1);
+  FactionUtil::AdjustIntRelation(faction,un->faction,KILL_FACTOR,1);
   static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));
-  for (unsigned int i=0;i<_Universe->GetNumFactions();i++) {
+  for (unsigned int i=0;i<FactionUtil::GetNumFactions();i++) {
     float relation;
     if (faction!=i&&un->faction!=i) {
-      relation=_Universe->GetRelation(i,faction);
+      relation=FactionUtil::GetIntRelation(i,faction);
       if (relation)
-        _Universe->AdjustRelation(i,un->faction,FRIEND_FACTOR*relation,1);
+        FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
   olist_t * killlist = &cp->savegame->getMissionData (string("kills"));
-  while (killlist->size()<=_Universe->GetNumFactions()) {
+  while (killlist->size()<=FactionUtil::GetNumFactions()) {
     killlist->push_back (new varInst (VI_IN_OBJECT));
     killlist->back()->type=VAR_FLOAT;
     killlist->back()->float_val=0;
@@ -762,7 +511,7 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
 }
 
 
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
+void GameUnit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
   Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
 
   if (cp) {
@@ -787,13 +536,9 @@ extern Animation * GetVolatileAni (unsigned int);
 extern unsigned int AddAnimation (const QVector &, const float, bool, const std::string &, float percentgrow);
 
 
-float Unit::ExplosionRadius() {
-  static float expsize=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_size","3"));
-  return expsize*rSize();
-}
 extern Animation * getRandomCachedAni() ;
 extern std::string getRandomCachedAniString() ;
-bool Unit::Explode (bool drawit, float timeit) {
+bool GameUnit::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
 
@@ -805,7 +550,7 @@ bool Unit::Explode (bool drawit, float timeit) {
 
     string bleh=image->explosion_type;
     if (bleh.empty()) {
-      _Universe->getRandAnimation(faction,bleh);
+      FactionUtil::getRandAnimation(faction,bleh);
     }
     if (bleh.empty()) {
       static Animation cache(expani.c_str(),false,.1,BILINEAR,false);

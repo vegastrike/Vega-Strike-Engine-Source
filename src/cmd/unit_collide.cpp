@@ -68,16 +68,7 @@ void AddCollideQueue (LineCollide &tmp,StarSystem * ss) {
     printf ("such collide types as %d not allowed",tmp.type);
   }
 }
-void Unit::SetCollisionParent (Unit * name) {
-  assert (0); //deprecated... many less collisions with subunits out of the table
-#if 0
-    for (int i=0;i<numsubunit;i++) {
-      subunits[i]->CollideInfo.object.u = name;
-      subunits[i]->SetCollisionParent (name);
-    }
-#endif
-}
-void Unit::RemoveFromSystem() {
+void GameUnit::RemoveFromSystem() {
 #define UNSAFE_COLLIDE_RELEASE
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
   if (CollideInfo.object.u!=NULL) {
@@ -121,7 +112,7 @@ void Unit::RemoveFromSystem() {
   activeStarSystem=NULL;
 }
 
-void Unit::UpdateCollideQueue () {
+void GameUnit::UpdateCollideQueue () {
   if (activeStarSystem==NULL) {
     activeStarSystem = _Universe->activeStarSystem();
   } else {
@@ -144,7 +135,7 @@ void Unit::UpdateCollideQueue () {
   }
 }
 
-void Unit::CollideAll() {
+void GameUnit::CollideAll() {
   if (SubUnit||killed)
     return;
 
@@ -155,12 +146,12 @@ void Unit::CollideAll() {
     Unit *un;
     for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {//warning CANNOT use iterator (except for this sort of collide queue now that I fixed the list
       //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!!       //BUG TERMINATED!
-      LineCollide * tmp = &un->CollideInfo;
+      LineCollide * tmp = &(un)->CollideInfo;
       if (tmp->lastchecked==this)
 	continue;//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
 
-      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+	  if ((!GameUnit::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
 	if (Position().i+radial_size>tmp->Mini.i&&
 	    Position().i-radial_size<tmp->Maxi.i&&
 	    Position().j+radial_size>tmp->Mini.j&&
@@ -174,7 +165,7 @@ void Unit::CollideAll() {
   }
 }
 
-bool Unit::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
+bool GameUnit::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   if (!querySphere(target,radius)) {
     return false;;
   }
@@ -191,7 +182,7 @@ bool Unit::Inside (const QVector &target, const float radius, Vector & normal, f
 
   return false;
 }
-bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
+bool GameUnit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
   if (smaller->colTrees==NULL||colTrees==NULL)
     return false;
   if (smaller->colTrees->colTree==NULL||colTrees->colTree==NULL)
@@ -268,7 +259,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 
 
 
-Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, QVector & pos, Vector &norm, double &distance) {
+Unit * GameUnit::BeamInsideCollideTree (const QVector & start,const QVector & end, QVector & pos, Vector &norm, double &distance) {
   QVector r (end-start);
   double mag = r.Magnitude();
   if (mag>0) {
@@ -378,7 +369,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 
 
 
-bool Unit::Collide (Unit * target) {
+bool GameUnit::Collide (Unit * target) {
   if (target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
 
@@ -438,7 +429,7 @@ bool Unit::Collide (Unit * target) {
 
 
 
-Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
+Unit * GameUnit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
   if (!SubUnits.empty()) {
     un_fiter i = SubUnits.fastIterator();
@@ -477,10 +468,7 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
   return NULL;
 }
 
-Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
-
-
-
+Unit * GameUnit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   int i;
   Unit * tmp;
   if (!SubUnits.empty()) {
@@ -529,7 +517,7 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
 }
 
 
-bool Unit::querySphere (const QVector &pnt, float err) const{
+bool GameUnit::querySphere (const QVector &pnt, float err) const{
   int i;
   const Matrix * tmpo = &cumulative_transformation_matrix;
   
@@ -556,7 +544,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
-      if (un->querySphere (pnt,err)) {
+      if (((GameUnit *)un)->querySphere (pnt,err)) {
 	return true;
       }
     }
@@ -566,7 +554,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
 
 
 
-float Unit::querySphere (const QVector &start, const QVector &end, float min_radius) const{
+float GameUnit::querySphere (const QVector &start, const QVector &end, float min_radius) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -580,7 +568,7 @@ float Unit::querySphere (const QVector &start, const QVector &end, float min_rad
   return querySphereNoRecurse (start,end,min_radius);
 }
 
-float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
+float GameUnit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
   int i;
   float tmp;
   QVector st,dir;
@@ -614,7 +602,7 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
   return 0;
 }
 
-void Unit::Destroy() {
+void GameUnit::Destroy() {
   if (!killed)
     if (!Explode(false,SIMULATION_ATOM))
       Kill();
@@ -640,7 +628,7 @@ bool Bolt::Collide () {
     Unit * un;
     for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {
       
-      if (lcwithin (minimaxi,un->GetCollideInfo ())) {
+      if (lcwithin (minimaxi,((GameUnit *)un)->GetCollideInfo ())) {
 	if (this->Collide (un)) {
 	  delete this;
 	  return true;
@@ -660,7 +648,7 @@ void Beam::CollideHuge (const LineCollide & lc) {
       Unit *un;
       for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
 
-	if (lcwithin(lc,	un->GetCollideInfo())) {
+	if (lcwithin(lc,((GameUnit *)un)->GetCollideInfo())) {
 	  this->Collide (un);
 	}
       }
@@ -669,7 +657,7 @@ void Beam::CollideHuge (const LineCollide & lc) {
     un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
     Unit *un;
     for (;(un=*i)!=NULL;++i) {
-      if (lcwithin (lc,un->GetCollideInfo())) {
+      if (lcwithin (lc,((GameUnit *)un)->GetCollideInfo())) {
 	this->Collide(un);
       }
     }

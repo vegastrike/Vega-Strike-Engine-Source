@@ -92,7 +92,7 @@ static Unit * getNearestTarget (Unit *me) {
 }
 void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
     Unit * targ;
-    if ((targ=Target())) {
+	if (targ=Unit::Target()) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
 	Target (this);//go wild
       }
@@ -107,13 +107,13 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat
     if (retarget&&targ==NULL) {
       Target (getNearestTarget (this));
     }
-    Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
+    GameUnit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
       if ((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius) {
 	Vector norm;
 	float dist;
-	if (targ->queryBoundingBox (Position(),detonation_radius+rSize())) {
+	if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
 	  Discharge();
 	  time=-1;
 	}

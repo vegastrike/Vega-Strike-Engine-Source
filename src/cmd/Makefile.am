@@ -38,6 +38,8 @@ libcmd_a_SOURCES =				\
 	nebula.h			\
 	terrain.cpp			\
 	terrain.h			\
+	unit_generic.h				\
+	unit_generic.cpp				\
 	unit.h				\
 	unit.cpp				\
 	unit_bsp.cpp			\

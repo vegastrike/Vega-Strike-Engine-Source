@@ -9,7 +9,7 @@ using std::string;
 namespace UnitUtil {
 	string getFactionName (Unit *my_unit) {
 		if (!my_unit)return "";
-		return _Universe->GetFaction(my_unit->faction);
+		return FactionUtil::GetFaction(my_unit->faction);
     }
 	int getFactionIndex (Unit *my_unit) {
 		if (!my_unit)return 0;
@@ -21,7 +21,7 @@ namespace UnitUtil {
     }
 	void setFactionName (Unit *my_unit,string factionname) {
 		if (!my_unit)return;
-		my_unit->SetFaction(_Universe->GetFaction(factionname.c_str()));
+		my_unit->SetFaction(FactionUtil::GetFaction(factionname.c_str()));
     }
 	string getName(Unit *my_unit){
 		if (!my_unit)return "";
@@ -119,7 +119,7 @@ namespace UnitUtil {
 			fg->Decrement(my_unit);
 			order = fg->ainame;
 		}
-		fg = Flightgroup::newFlightgroup (arg,type,_Universe->GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
+		fg = Flightgroup::newFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
 		my_unit->SetFg (fg,fg->nr_ships_left-1);
 	}
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){

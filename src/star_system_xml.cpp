@@ -247,7 +247,7 @@ void setStaticFlightgroup (vector<Flightgroup *> &fg, const std::string &nam,int
     //    fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
     fg[faction]->nr_ships=0;
     fg[faction]->ainame="default";
-     fg[faction]->faction=_Universe->GetFaction(faction);
+     fg[faction]->faction=FactionUtil::GetFaction(faction);
     fg[faction]->type="Base";
     fg[faction]->nr_waves_left=0;
     fg[faction]->nr_ships_left=0;
@@ -310,7 +310,7 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
 
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
-  static int neutralfaction=_Universe->GetFaction("neutral");
+  static int neutralfaction=FactionUtil::GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
   vector <GFXLightLocal> curlights;
@@ -763,7 +763,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	//curlights.push_back (xml->lights[parse_int ((*iter).value)]);
 	break;
       case FACTION:
-	faction = _Universe->GetFaction ((*iter).value.c_str());
+	faction = FactionUtil::GetFaction ((*iter).value.c_str());
 	break;
       case EMRED:
 	ourmat.er = parse_float((*iter).value);
@@ -891,7 +891,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	dest=ParseDestinations((*iter).value);
 	break;
       case FACTION:
-	faction = _Universe->GetFaction ((*iter).value.c_str());
+	faction = FactionUtil::GetFaction ((*iter).value.c_str());
 	break;
       case RI:
 	R.i=parse_float((*iter).value)*xml->scale;

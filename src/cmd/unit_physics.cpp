@@ -43,89 +43,6 @@ float copysign (float x, float y) {
 //#endif
 
 // the rotation should be applied in world coordinates
-void Unit:: Rotate (const Vector &axis)
-{
-	double theta = axis.Magnitude();
-	double ootheta=0;
-	if( theta==0) return;
-	ootheta = 1/theta;
-	float s = cos (theta * .5);
-	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
-	if(theta < 0.0001) {
-	  rot = identity_quaternion;
-	}
-	curr_physical_state.orientation *= rot;
-	if (limits.limitmin>-1) {
-	  Matrix mat;
-	  curr_physical_state.orientation.to_matrix (mat);
-	  if (limits.structurelimits.Dot (mat.getR())<limits.limitmin) {
-	    curr_physical_state.orientation=prev_physical_state.orientation;
-	  }
-	}
-}
-
-void Unit:: FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
-					float FuelSpeed,
-					float FMass)
-{
-	mass -= FMass; //fuel is sent out
-	fuel -= FMass;
-	if (fuel <0)
-	{
-		
-		FMass +=fuel;
-		mass -= fuel;
-		fuel = 0; //ha ha!
-	}
-	NetForce += Direction *(FuelSpeed *FMass/GetElapsedTime());
-}
-void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
-{
-	NetForce += Vforce;
-}
-void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
-{
-	NetLocalForce += Vforce;
-}
-void Unit::Accelerate(const Vector &Vforce)
-{
-  NetForce += Vforce * mass;
-}
-
-void Unit::ApplyTorque (const Vector &Vforce, const QVector &Location)
-{
-  //Not completely correct
-	NetForce += Vforce;
-	NetTorque += Vforce.Cross ((Location-curr_physical_state.position).Cast());
-}
-void Unit::ApplyLocalTorque (const Vector &Vforce, const Vector &Location)
-{
-	NetForce += Vforce;
-	NetTorque += Vforce.Cross (Location);
-}
-void Unit::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Location) //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
-{
-	NetTorque += Vforce.Cross (Location);
-	
-}
-
-void Unit::ApplyLocalTorque(const Vector &torque) {
-  /*  Vector p,q,r;
-  Vector tmp(ClampTorque(torque));
-  GetOrientation (p,q,r);
-  fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
-  NetTorque+=tmp.i*p+tmp.j*q+tmp.k*r; 
-  */
-  NetLocalTorque+= ClampTorque(torque); 
-}
-
-Vector Unit::MaxTorque(const Vector &torque) {
-  // torque is a normal
-  return torque * (Vector(copysign(limits.pitch, torque.i), 
-			  copysign(limits.yaw, torque.j),
-			  copysign(limits.roll, torque.k)) * torque);
-}
-
 /** MISNOMER...not really clamping... more like renomalizing  slow too
 Vector Unit::ClampTorque(const Vector &amt1) {
   Vector norm = amt1;
@@ -140,247 +57,27 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 */
 //FIXME 062201
 extern unsigned short apply_float_to_short (float tmp);
-Vector Unit::ClampTorque (const Vector &amt1) {
-  Vector Res=amt1;
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
-  float fuelclamp=(fuel<=0)?staticfuelclamp:1;
-  if (fabs(amt1.i)>fuelclamp*limits.pitch)
-    Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
-  if (fabs(amt1.j)>fuelclamp*limits.yaw)
-    Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
-  if (fabs(amt1.k)>fuelclamp*limits.roll)
-    Res.k=copysign(fuelclamp*limits.roll,amt1.k);
-  fuel-=Res.Magnitude()*SIMULATION_ATOM;
-  return Res;
-}
 //    float max_speed;
 //    float max_ab_speed;
 //    float max_yaw;
 //    float max_pitch;
 //    float max_roll;
 
-Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
-  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
-  float fuelclamp=(fuel<=0)?staticfuelclamp:1;
-  float abfuelclamp= (fuel<=0||(energy<afterburnenergy))?staticabfuelclamp:1;
-  float limit = afterburn?(abfuelclamp*(computer.max_ab_speed-computer.max_speed)+(fuelclamp*computer.max_speed)):fuelclamp*computer.max_speed;
-  float tmp = velocity.Magnitude();
-  if (tmp>fabs(limit)) {
-    return velocity * (limit/tmp);
-  }
-  return velocity;
-}
 
-
-Vector Unit::ClampAngVel (const Vector & velocity) {
-  Vector res (velocity);
-  if (fabs (res.i)>computer.max_pitch) {
-    res.i = copysign (computer.max_pitch,res.i);
-  }
-  if (fabs (res.j)>computer.max_yaw) {
-    res.j = copysign (computer.max_yaw,res.j);
-  }
-  if (fabs (res.k)>computer.max_roll) {
-    res.k = copysign (computer.max_roll,res.k);
-  }
-  return res;
-}
-
-
-Vector Unit::MaxThrust(const Vector &amt1) {
-  // amt1 is a normal
-  return amt1 * (Vector(copysign(limits.lateral, amt1.i), 
-	       copysign(limits.vertical, amt1.j),
-	       amt1.k>0?limits.forward:-limits.retro) * amt1);
-}
-/* misnomer..this doesn't get the max value of each axis
-Vector Unit::ClampThrust(const Vector &amt1){ 
-  // Yes, this can be a lot faster with LUT
-  Vector norm = amt1;
-  norm.Normalize();
-  Vector max = MaxThrust(norm);
-
-  if(max.Magnitude() > amt1.Magnitude())
-    return amt1;
-  else 
-    return max;
-}
-*/
-//CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
-
-Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
-  Vector Res=amt1;
-  if (energy<afterburnenergy) {
-    afterburn=false;
-  }
-  if (afterburn) {
-    energy -=apply_float_to_short( afterburnenergy*SIMULATION_ATOM);
-  }
-
-
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
-  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
-  static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
-  float fuelclamp=(fuel<=0)?staticfuelclamp:1;
-  float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
-  if (fabs(amt1.i)>fabs(fuelclamp*limits.lateral))
-    Res.i=copysign(fuelclamp*limits.lateral,amt1.i);
-  if (fabs(amt1.j)>fabs(fuelclamp*limits.vertical))
-    Res.j=copysign(fuelclamp*limits.vertical,amt1.j);
-  float ablimit =       
-    afterburn
-    ?((limits.afterburn-limits.forward)*abfuelclamp+limits.forward*fuelclamp)
-    :limits.forward;
-
-  if (amt1.k>ablimit)
-    Res.k=ablimit;
-  if (amt1.k<-limits.retro)
-    Res.k =-limits.retro;
-  fuel-=(afterburn?abfuelusage:1)*Res.Magnitude();
-  return Res;
-}
-
-
-void Unit::Thrust(const Vector &amt1,bool afterburn){
+void GameUnit::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
-  ApplyLocalForce(amt);
-  if (_Universe->AccessCockpit(0)->GetParent()==this)
+  ApplyLocalForce(amt);  
+if (_Universe->AccessCockpit(0)->GetParent()==this)
   if (afterburn!=AUDIsPlaying (sound->engine)) {
     if (afterburn)
       AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
     else
       //    if (Velocity.Magnitude()<computer.max_speed)
       AUDStopPlaying (sound->engine);
-    
   }
 }
 
-void Unit::LateralThrust(float amt) {
-  if(amt>1.0) amt = 1.0;
-  if(amt<-1.0) amt = -1.0;
-  ApplyLocalForce(amt*limits.lateral * Vector(1,0,0));
-}
-
-void Unit::VerticalThrust(float amt) {
-  if(amt>1.0) amt = 1.0;
-  if(amt<-1.0) amt = -1.0;
-  ApplyLocalForce(amt*limits.vertical * Vector(0,1,0));
-}
-
-void Unit::LongitudinalThrust(float amt) {
-  if(amt>1.0) amt = 1.0;
-  if(amt<-1.0) amt = -1.0;
-  ApplyLocalForce(amt*limits.forward * Vector(0,0,1));
-}
-
-void Unit::YawTorque(float amt) {
-  if(amt>limits.yaw) amt = limits.yaw;
-  else if(amt<-limits.yaw) amt = -limits.yaw;
-  ApplyLocalTorque(amt * Vector(0,1,0));
-}
-
-void Unit::PitchTorque(float amt) {
-  if(amt>limits.pitch) amt = limits.pitch;
-  else if(amt<-limits.pitch) amt = -limits.pitch;
-  ApplyLocalTorque(amt * Vector(1,0,0));
-}
-
-void Unit::RollTorque(float amt) {
-  if(amt>limits.roll) amt = limits.roll;
-  else if(amt<-limits.roll) amt = -limits.roll;
-  ApplyLocalTorque(amt * Vector(0,0,1));
-}
-static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
-  shield+=apply_float_to_short(amt);
-  if (shield>max)
-    shield=max;
-  return (shield>=max)?1:0;
-}
-
-float Unit::MaxShieldVal() const{
-  float maxshield=0;
-  switch (shield.number) {
-  case 2:
-    maxshield = .5*(shield.fb[2]+shield.fb[3]);
-    break;
-  case 4:
-    maxshield = .25*(float(shield.fbrl.frontmax)+shield.fbrl.backmax+shield.fbrl.leftmax+shield.fbrl.rightmax);
-    break;
-  case 6:
-    maxshield = .25*float(shield.fbrltb.fbmax)+.75*shield.fbrltb.rltbmax;
-    break;
-  }
-  return maxshield;
-}
-void Unit::RechargeEnergy() {
-    energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
-}
-void Unit::RegenShields () {
-  int rechargesh=1;
-  float maxshield=MaxShieldVal();
-  static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
-  if (!energy_before_shield) {
-    RechargeEnergy();
-  }
-  float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
-  if (_Universe->isPlayerStarship(this)==NULL) {
-    rec*=g_game.difficulty;
-  }else {
-    rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
-  }
-  if ((image->ecm>0)) {
-    static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
-    float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;
-    if (energy-10>sim_atom_ecm) {
-      energy-=sim_atom_ecm;
-    }else {
-      energy=energy<10?energy:10;
-    }
-  }
-  if (GetNebula()!=NULL) {
-    static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-    rec *=nebshields;
-  }
-  switch (shield.number) {
-  case 2:
-
-    shield.fb[0]+=rec;
-    shield.fb[1]+=rec;
-    if (shield.fb[0]>shield.fb[2]) {
-      shield.fb[0]=shield.fb[2];
-    } else {
-      rechargesh=0;
-    }
-    if (shield.fb[1]>shield.fb[3]) {
-      shield.fb[1]=shield.fb[3];
-
-    } else {
-      rechargesh=0;
-    }
-    break;
-  case 4:
-
-    rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
-    break;
-  case 6:
-    rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
-    break;
-  }
-  if (rechargesh==0)
-    energy-=(short unsigned int)rec;
-  if (energy_before_shield) {
-    RechargeEnergy();
-  }
-  if (maxenergy>maxshield) {
-    if (energy>maxenergy-maxshield)//allow shields to absorb xtra power
-      energy=maxenergy-maxshield;  
-  }else {
-    energy=0;
-  }
-
-}
-Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
+Cockpit * GameUnit::GetVelocityDifficultyMult(float &difficulty) const{
   difficulty=1;
   Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
   if ((player_cockpit)==NULL) {
@@ -389,9 +86,10 @@ Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
   }
   return player_cockpit;
 }
-void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 	Transformation old_physical_state = curr_physical_state;
+	Vector accel( this->ResolveForces( trans, transmat));
   if (docked&DOCKING_UNITS) {
     PerformDockingOperations();
   }
@@ -472,7 +170,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  // If we want to inter(extra)polate sent position, DO IT HERE
 		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
 				// We moved so update
-				 Network->sendPosition( ClientState( Network->getSerial(), curr_physical_state, Velocity, this->ResolveForces( trans, transmat), 0));
+				 Network->sendPosition( ClientState( Network->getSerial(), curr_physical_state, Velocity, accel, 0));
 		    else
 			  // Say we are still alive
 			  Network->sendAlive();
@@ -522,7 +220,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 	
     }
   }      
-  Unit * target = Target();
+  Unit * target = Unit::Target();
   bool increase_locking=false;
   if (target&&cloaking<0/*-1 or -32768*/) {
     if (target->isUnit()!=PLANETPTR) {
@@ -645,7 +343,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 
 }
-void Unit::SetPlanetOrbitData (PlanetaryTransform *t) {
+void GameUnit::SetPlanetOrbitData (PlanetaryTransform *t) {
   if (isUnit()!=BUILDINGPTR)
         return;
   if (!planet)
@@ -659,17 +357,17 @@ void Unit::SetPlanetOrbitData (PlanetaryTransform *t) {
     planet->dirty=true;
   }
 }
-PlanetaryTransform * Unit::GetPlanetOrbit () const {
+PlanetaryTransform * GameUnit::GetPlanetOrbit () const {
   if (planet==NULL)
     return NULL;
   return planet->trans;
 }
 
-bool Unit::jumpReactToCollision (Unit * smalle) {
+bool GameUnit::jumpReactToCollision (Unit * smalle) {
   if (!GetDestinations().empty()) {//only allow big with small
     if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
       smalle->DeactivateJumpDrive();
-      Unit * jumppoint = this;
+      GameUnit * jumppoint = this;
       _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
       return true;
     }
@@ -687,7 +385,7 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 
   return false;
 }
-void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {
+void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {
   clsptr smltyp = smalle->isUnit();
   if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
     if (isUnit()!=ENHANCEMENTPTR&&isUnit()!=MISSILEPTR) {
@@ -713,88 +411,20 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 
 
 
-Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
-  Vector p, q, r;
-  GetOrientation(p,q,r);
-  Vector temp1 = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*(1.0/MomentOfInertia);
-  Vector temp = temp1*SIMULATION_ATOM;
-  if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {
-    AngularVelocity += temp;
-  }
-  Vector temp2 = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ))/mass; //acceleration
-  temp = temp2*SIMULATION_ATOM;
-  if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
-    Velocity += temp;
-  } 
+
+Vector GameUnit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
 #ifndef PERFRAMESOUND
   AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
 #endif
-  NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
-
-  /*
-    if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10) {
-    float magvel = Velocity.Magnitude(); float y = (1-magvel*magvel*oocc);
-    temp = temp * powf (y,1.5);
-    }*/
-
-	return temp2;
-}
-void Unit::SetOrientation (QVector q, QVector r) {
-  q.Normalize();
-  r.Normalize();
-  QVector p;
-  CrossProduct (q,r,p);
-  CrossProduct (r,p,q);
-  curr_physical_state = Transformation (Quaternion::from_vectors (p.Cast(),q.Cast(),r.Cast()),Position());
-}
-void Unit::SetOrientation(Quaternion Q) {
-	curr_physical_state = Transformation ( Q, Position());
-}
-void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
-  Matrix m;
-  curr_physical_state.to_matrix(m);
-  p=m.getP();
-  q=m.getQ();
-  r=m.getR();
+	return Unit::ResolveForces( trans, transmat);
 }
 
-Vector Unit::UpCoordinateLevel (const Vector &v) const {
-  Matrix m;
-  curr_physical_state.to_matrix(m);
-#define M(A,B) m.r[B*3+A]
-  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
-		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
-		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
-#undef M
-}
-Vector Unit::DownCoordinateLevel (const Vector &v) const {
-  Matrix m;
-  curr_physical_state.to_matrix(m);
-  return TransformNormal(m,v);
-}
-
-Vector Unit::ToLocalCoordinates(const Vector &v) const {
-  //Matrix m;
-  //062201: not a cumulative transformation...in prev unit space  curr_physical_state.to_matrix(m);
-  
-#define M(A,B) cumulative_transformation_matrix.r[B*3+A]
-  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
-		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
-		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
-#undef M
-}
-
-Vector Unit::ToWorldCoordinates(const Vector &v) const {
-  return TransformNormal(cumulative_transformation_matrix,v); 
-#undef M
-
-}
 static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
   static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-  static int upgradefaction = _Universe->GetFaction("upgrades");
-  static int neutral = _Universe->GetFaction("neutral");
+  static int upgradefaction = FactionUtil::GetFaction("upgrades");
+  static int neutral = FactionUtil::GetFaction("neutral");
 
   if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
     //same flihgtgroup
@@ -815,7 +445,7 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 	  return ignore_friend?-FLT_MAX:neutral_autodist;
   }
 }
-static signed char  ComputeAutoGuarantee (Unit * un) {
+static signed char  ComputeAutoGuarantee (GameUnit * un) {
   Cockpit * cp;
   int cpnum=-1;
   if ((cp =_Universe->isPlayerStarship (un))) {
@@ -836,7 +466,8 @@ static signed char  ComputeAutoGuarantee (Unit * un) {
   }
   return Mission::AUTO_NORMAL;
 }
-bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
+
+bool GameUnit::AutoPilotTo (GameUnit * target, bool ignore_friendlies) {
   signed char Guaranteed = ComputeAutoGuarantee (this);
   if (Guaranteed==Mission::AUTO_OFF) {
     return false;
@@ -866,12 +497,10 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   }
   bool ok=true;
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
-    static bool autothroughplanets=XMLSupport::parse_bool (vs_config->getVariable("physics","autothroughplanets","true"));
     for (un_iter i=ss->getUnitList().createIterator();
 	 (un=*i)!=NULL; 
 	 ++i) {
-      clsptr isun= un->isUnit();
-      if (isun!=NEBULAPTR&&(isun!=PLANETPTR||(!autothroughplanets))) {
+      if (un->isUnit()!=NEBULAPTR) {
 	
 	if (un!=this&&un!=target) {
 	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
@@ -887,7 +516,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
     }
   }
   if (this!=target) {
-    SetCurPosition(UniverseUtil::SafeEntrancePoint (end,rSize()));
+    SetCurPosition(end);
     if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
       Unit * other=NULL;
       for (un_iter ui=ss->getUnitList().createIterator();
@@ -902,10 +531,9 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 	}
 	if (leadah) {
 	  if (NULL==_Universe->isPlayerStarship (other)) {
-	    //	    other->AutoPilotTo(this);
-
+	    //other->AutoPilotTo(this);
 	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
-	  }
+	   }
 	}
       }
     }

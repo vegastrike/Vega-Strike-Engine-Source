@@ -8,34 +8,7 @@
 #include "vs_globals.h"
 #include "cmd/ai/flybywire.h"
 #include "gfx/cockpit.h"
-inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
-  if (dock.used)
-    return false;
-  double rad=dock.radius+radius;
-  return (pos-dock.pos).MagnitudeSquared()<rad*rad;
-  if (dock.internal) {
-    if ((pos.i+radius<dock.max.i)&&
-	(pos.j+radius<dock.max.j)&&
-	(pos.k+radius<dock.max.k)&&
-	(pos.i-radius>dock.min.i)&&
-	(pos.j-radius>dock.min.j)&&
-	(pos.k-radius>dock.min.k)) {
-      return true;
-    }    
-  }else {
-    if ((pos-dock.pos).Magnitude()<dock.radius+radius&&
-	(pos.i-radius<dock.max.i)&&
-	(pos.j-radius<dock.max.j)&&
-	(pos.k-radius<dock.max.k)&&
-	(pos.i+radius>dock.min.i)&&
-	(pos.j+radius>dock.min.j)&&
-	(pos.k+radius>dock.min.k)) {
-      return true;
-    }
-  }
-  return false;
-}
-bool Unit::RequestClearance (Unit * dockingunit) {
+bool GameUnit::RequestClearance (Unit * dockingunit) {
     static float clearencetime=(XMLSupport::parse_float (vs_config->getVariable ("general","dockingtime","20")));
     EnqueueAIFirst (new ExecuteFor (new Orders::MatchVelocity (Vector(0,0,0),
 							       Vector(0,0,0),
@@ -47,27 +20,7 @@ bool Unit::RequestClearance (Unit * dockingunit) {
     return true;
 }
 
-int Unit::CanDockWithMe(Unit * un) {
-  //  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
-    for (unsigned int i=0;i<image->dockingports.size();i++) {
-      if (un->image->dockingports.size()) {
-	for (unsigned int j=0;j<un->image->dockingports.size();j++) {
-	  if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,Transform (un->cumulative_transformation_matrix,un->image->dockingports[j].pos)),un->image->dockingports[j].radius)) {
-	    if (((un->docked&(DOCKED_INSIDE|DOCKED))==0)&&(!(docked&DOCKED_INSIDE))) {
-	      return i;
-	    }
-	  }
-	}  
-      }else {
-	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position().Cast()),un->rSize())) {
-	  return i;
-	}
-      }
-    }
-    //  }
-  return -1;
-}
-void Unit::FreeDockingPort (unsigned int i) {
+void GameUnit::FreeDockingPort (unsigned int i) {
       if (image->dockedunits.size()==1) {
 	docked&= (~DOCKING_UNITS);
       }
@@ -97,14 +50,7 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   }
   return holder;
 }
-const vector <DockingPorts>& Unit::DockingPortLocations() {
-  return image->dockingports;
-}
-
-bool Unit::IsCleared (Unit * DockingUnit) {
-  return (std::find (image->clearedunits.begin(),image->clearedunits.end(),DockingUnit)!=image->clearedunits.end());
-}
-void Unit::PerformDockingOperations () {
+void GameUnit::PerformDockingOperations () {
   for (unsigned int i=0;i<image->dockedunits.size();i++) {
     Unit * un;
     if ((un=image->dockedunits[i]->uc.GetUnit())==NULL) {
@@ -134,21 +80,7 @@ void Unit::PerformDockingOperations () {
     ///force him in a box...err where he is
   }
 }
-bool Unit::isDocked (Unit* d) {
-  if (!(d->docked&DOCKED_INSIDE|DOCKED)) {
-    return false;
-  }
-  for (unsigned int i=0;i<image->dockedunits.size();i++) {
-    Unit * un;
-    if ((un=image->dockedunits[i]->uc.GetUnit())!=NULL) {
-      if (un==d) {
-	return true;
-      }
-    }
-  }
-  return false;
-}
-bool Unit::Dock (Unit * utdw) {
+bool GameUnit::Dock (Unit * utdw) {
   if (docked&(DOCKED_INSIDE|DOCKED))
     return false;
   std::vector <Unit *>::iterator lookcleared;
@@ -173,22 +105,6 @@ bool Unit::Dock (Unit * utdw) {
 	_Universe->AccessCockpit()->RestoreGodliness();
       }
       
-      return true;
-    }
-  }
-  return false;
-}
-bool Unit::UnDock (Unit * utdw) {
-  unsigned int i=0;
-
-  for (i=0;i<utdw->image->dockedunits.size();i++) {
-    if (utdw->image->dockedunits[i]->uc.GetUnit()==this) {
-      utdw->FreeDockingPort (i);
-      i--;
-      invisible=false;
-      docked&=(~(DOCKED_INSIDE|DOCKED));
-      image->DockedTo.SetUnit (NULL);
-      Velocity=utdw->Velocity;
       return true;
     }
   }

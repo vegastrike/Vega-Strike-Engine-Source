@@ -28,6 +28,7 @@
 #include "gfx/camera.h"
 #include "star_system.h"
 #include "gfx/cockpit.h"
+#include "faction.h"
 class Cockpit;
 
 /**
@@ -60,69 +61,12 @@ protected:
   StarSystem *script_system;
 
 private:
-  /**
-   * Class Faction holds the relationship between one faction and another
-   * All factions are indexed in a vector. Each has a name and a logo.
-   * In addition each has a list of other factions and the relationship to them
-   */
-  class Faction {
-
-  public:
-    /**
-     * Faction_stuff holds the index and relationship of each and every
-     * Other faction.  After it has been properly processed when calling
-     * LoadXML, it will hold an ordered list containing all factions.
-     * myfaction.faction[theirfaction].relationship will contain my 
-     * attitude to theirfaction
-     */
-    struct faction_stuff {
-      ///for internal purposes only.
-      union faction_name {
-	int index;
-	char * name;
-      } stats;
-      ///A value between 0 and 1 indicating my attitude towards index
-      float relationship;
-      class FSM * conversation;//a conversation any two factions can have
-      faction_stuff () {conversation=NULL;relationship=0;}
-    };		
-  public:
-    /**
-     * holds the relationships to all _other_ factions loaded 
-     * hold misguided info for self FIXME
-     */
-    int playlist;
-    float sparkcolor[4];
-    vector <faction_stuff> faction;
-    ///Logos used by the ships of that faction
-    Texture * logo;
-    //if the squadron doens't; have its own particular logo
-    Texture * secondaryLogo;
-    ///char * of the name
-    char * factionname; 
-    std::vector <std::vector <class Animation *> > comm_faces;
-    std::vector <class Animation *> explosion;
-    std::vector <std::string> explosion_name;
-    std::vector <unsigned char> comm_face_sex;
-    Unit * contraband;
-    ///Figures out the relationships of each faction with each other
-    static void ParseAllAllies(Universe * thisuni);
-    void ParseAllies(Universe * thisuni, unsigned int whichfaction);
-    
-    static void LoadXML(const char * factionfile, Universe * thisuni);  
-    static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
-    static void endElement(void *userData, const XML_Char *name);
-    Faction(); //constructor
-    ~Faction(); //destructor
-  };
   ///Many C++ implementations count classes within as friends. (not all)
   friend class Faction;
   friend void bootstrap_main_loop();//so it can get all cockpits
   ///A list of all factions 
-  vector <Faction *> factions; //the factions
   
  public:
-  Animation * getRandAnimation (int whichfaction,std::string&which);
   Cockpit * isPlayerStarship (const Unit* fighter);
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
   std::string getGalaxyProperty (const std::string &sys, const std::string & prop);
@@ -139,46 +83,11 @@ private:
   StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
   ///Loads and parses factions
   void LoadFactionXML (const char * factfile) {
-    Faction::LoadXML (factfile,this);
+    Faction::LoadXML (factfile);
   }
   void SetupCockpits (std::vector <std::string> players);
   void WriteSaveGame(bool auto_save);
-  ///returns the index of the faction with that name
-  int GetFaction (const char *factionname);
-  int GetNumAnimation(int faction);
-  void SerializeFaction (FILE * file);
-  void LoadSerializedFaction (FILE * file);
-  std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
-  std::vector <class Animation *> * GetAnimation(int faction, int n, unsigned char &sex);
-  const char * GetFaction (int faction);
-  class Unit * GetContraband(int faction);
-  void LoadContrabandLists();
-  /**
-   * Returns the relationship between myfaction and theirfaction
-   * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
-   * -1 is mad. <0 will attack
-   */
-  float GetRelation (const int myfaction, const int theirfaction){
-    return factions[myfaction]->faction[theirfaction].relationship;
-  }
-  int GetPlaylist (const int myfaction) {
-    return factions[myfaction]->playlist;//can be -1
-  }
-  const float* GetSparkColor (const int myfaction) {
-    return factions[myfaction]->sparkcolor;//can be -1
-  }
-  void LoadFactionPlaylists();
-  unsigned int GetNumFactions () {
-    return factions.size();
-  }
-  void AdjustRelation (const int myfaction, const int theirfaction, const float factor, const float rank);
-  //Returns a conversation that a myfaction might have with a theirfaction
-  FSM* GetConversation (const int myfaction, const int theirfaction);
   void activateLightMap();
-  ///Returns force logo
-  Texture * getForceLogo (int faction);
-  ///Returns force logo FIXME should return squad logo!
-  Texture * getSquadLogo (int faction);
   ///inits graphics with args
   Universe(int argc, char **argv, const char * galaxy);
   

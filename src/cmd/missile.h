@@ -16,7 +16,7 @@ class MissileEffect {
     radialmultiplier=radmult;
   }
 };
-class Missile:public Unit {
+class Missile:public GameUnit {
  public:
  protected:
   virtual float ExplosionRadius();
@@ -43,7 +43,7 @@ protected:
 	     float radialeffect,
 	     float radmult,
 	     float detonation_radius)
-        : Unit (filename,false,faction,modifications)
+        : GameUnit (filename,false,faction,modifications)
         , time(time)
         , damage(damage)
         , phasedamage(phasedamage)

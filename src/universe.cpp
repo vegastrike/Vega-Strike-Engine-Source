@@ -102,7 +102,7 @@ Universe::~Universe()
   CacheJumpStar(true);
   DeInitInput();
   unsigned int i;
-  for (i=0;i<this->factions.size();i++) {
+  for (i=0;i<factions.size();i++) {
     delete factions[i];
   }
   for (i=0;i<cockpit.size();i++) {

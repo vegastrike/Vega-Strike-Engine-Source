@@ -40,16 +40,6 @@ namespace UniverseUtil {
 	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo);
 ///this gets a random cargo type (useful for cargo missions) from either any category if category is '' or else from a specific category  'Contraband'  comes to mind!
 	Cargo getRandCargo(int quantity, string category);
-///This gets the faction name of an index
-	string GetFactionName(int index);
-///this gets an index given a faction name
-	int GetFactionIndex(string name);
-///this gets a relationship between two factions
-	float GetRelation(string myfaction,string theirfaction);
-///this changes the relaationship based on the rank and how mad or happy they are (the relationship is between 0 and 1... so a adjustment of .01 with a rank of 1 is QUITE significant.
-	void AdjustRelation(string myfaction,string theirfaction, float factor, float rank);
-///this gets the number of factions in game
-	int GetNumFactions ();
 ///this gets the current time in seconds
 	float GetGameTime ();
 ///this sets the time compresison value to zero

@@ -127,21 +127,6 @@ namespace UniverseUtil {
 	    return newret;
 	  }
 	}
-	string GetFactionName(int index) {
-		return _Universe->GetFaction(index);
-	}
-	int GetFactionIndex(string name) {
-		return _Universe->GetFaction(name.c_str());
-	}
-	float GetRelation(string myfaction,string theirfaction) {
-		return _Universe->GetRelation(GetFactionIndex(myfaction),GetFactionIndex(theirfaction));
-	}
-	void AdjustRelation(string myfaction,string theirfaction, float factor, float rank) {
-		_Universe->AdjustRelation(GetFactionIndex(myfaction),GetFactionIndex(theirfaction), factor, rank);
-	}
-	int GetNumFactions () {
-		return _Universe->GetNumFactions();
-	}
 	//NOTEXPORTEDYET
 	float GetGameTime () {
 		return mission->gametime;
@@ -253,7 +238,7 @@ namespace UniverseUtil {
 		return UnitFactory::getMasterPartList();
 	}
 	Unit *GetContrabandList (string faction) {
-		return _Universe->GetContraband(_Universe->GetFaction(faction.c_str()));
+		return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
 	}
         void LoadMission (string missionname) {
                 delayLoadMission (missionname);

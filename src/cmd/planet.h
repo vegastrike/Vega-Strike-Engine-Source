@@ -48,7 +48,7 @@ struct GFXLightLocal {
 };
 class ContinuousTerrain;
 class PlanetaryTransform;
-class Planet : public Unit {
+class Planet : public GameUnit {
  private:
   PlanetaryTransform * terraintrans;
   Atmosphere * atmosphere;

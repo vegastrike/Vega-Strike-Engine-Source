@@ -5,7 +5,7 @@
 extern Vector mouseline;
 extern vector<Vector> perplines;
 Vector MouseCoordinate (int mouseX, int mouseY);
-double Unit::getMinDis (const QVector &pnt) {
+double GameUnit::getMinDis (const QVector &pnt) {
   float minsofar=1e+10;
   float tmpvar;
   int i;
@@ -38,7 +38,7 @@ double Unit::getMinDis (const QVector &pnt) {
   return minsofar;
 }
 
-float Unit::querySphereClickList (const QVector &st, const QVector &dir, float err) const{
+float GameUnit::querySphereClickList (const QVector &st, const QVector &dir, float err) const{
   int i;
   float retval=0;
   float adjretval=0;
@@ -125,7 +125,7 @@ float Unit::querySphereClickList (const QVector &st, const QVector &dir, float e
 
 
 
-bool Unit::queryBoundingBox (const QVector &pnt, float err) {
+bool GameUnit::queryBoundingBox (const QVector &pnt, float err) {
   int i;
   BoundingBox * bbox=NULL;
   for (i=0;i<nummesh();i++) {
@@ -140,7 +140,7 @@ bool Unit::queryBoundingBox (const QVector &pnt, float err) {
   Unit * su;
   UnitCollection::UnitIterator ui=getSubUnits();
   while ((su=ui.current())) {
-    if (su->queryBoundingBox (pnt,err)) {
+    if ((su)->queryBoundingBox (pnt,err)) {
       return true;
     }
     ui.advance();
@@ -148,7 +148,7 @@ bool Unit::queryBoundingBox (const QVector &pnt, float err) {
   return false;
 }
 
-int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, float err) {
+int GameUnit::queryBoundingBox (const QVector &origin, const Vector &direction, float err) {
   int i;
   int retval=0;
   BoundingBox * bbox=NULL;
@@ -183,7 +183,7 @@ int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, floa
 }
 
 
-bool Unit::querySphereClickList (int mouseX, int mouseY, float err, Camera * activeCam) {
+bool GameUnit::querySphereClickList (int mouseX, int mouseY, float err, Camera * activeCam) {
   int i;
   Matrix vw;
   _Universe->AccessCamera()->GetView (vw);
@@ -231,7 +231,7 @@ bool Unit::querySphereClickList (int mouseX, int mouseY, float err, Camera * act
   UnitCollection::UnitIterator ui = getSubUnits();
   Unit * su;
   while ((su=ui.current())) {
-    if (su->querySphereClickList (mouseX,mouseY,err,activeCam)) {
+    if ((su)->querySphereClickList (mouseX,mouseY,err,activeCam)) {
       return true;
     }
     ui.advance();

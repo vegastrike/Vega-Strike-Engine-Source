@@ -31,31 +31,31 @@
 
 Unit* UnitFactory::createUnit( )
 {
-    return new Unit( 0 );
+    return new GameUnit( 0 );
 }
 
-Unit* UnitFactory::createUnit( vector <Mesh*> & meshes,
-		               bool Subunit,
-		               int faction )
-{
-    return new Unit( meshes,
-                     Subunit,
-                     faction );
-}
-
-Unit* UnitFactory::createUnit( const char *filename,
+GameUnit* UnitFactory::createUnit( const char *filename,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber )
 {
-    return new Unit( filename,
+    return new GameUnit( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber );
+}
+
+GameUnit* UnitFactory::createUnit( vector <Mesh*> & meshes,
+		               bool Subunit,
+		               int faction )
+{
+    return new GameUnit( meshes,
+                     Subunit,
+                     faction );
 }
 
 Nebula* UnitFactory::createNebula( const char * unitfile, 
@@ -194,16 +194,17 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                          difficulty );
 }
 
-Unit* UnitFactory::getMasterPartList( )
+/*** Change GameUnit to Unit when faction gets "cleaned" ***/
+GameUnit* UnitFactory::getMasterPartList( )
 {
     if( _masterPartList == NULL )
     {
-        _masterPartList = new Unit( "master_part_list",
+        _masterPartList = new GameUnit( "master_part_list",
 	                            true,
-				    _Universe->GetFaction("upgrades") );
+				    FactionUtil::GetFaction("upgrades") );
     }
     return _masterPartList;
 }
 
-Unit* UnitFactory::_masterPartList = NULL;
+GameUnit* UnitFactory::_masterPartList = NULL;
 

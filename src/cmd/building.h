@@ -2,7 +2,7 @@
 class Terrain;
 class ContinuousTerrain;
 class Flightgroup;
-class Building : public Unit {
+class Building : public GameUnit {
   union Buildingparent{
     Terrain * terrain;
     ContinuousTerrain * plane;

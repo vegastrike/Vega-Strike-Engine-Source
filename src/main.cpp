@@ -106,7 +106,7 @@ void cleanup(void)
 }
 
 VegaConfig *vs_config;
-Mission *mission;
+//Mission *mission;
 LeakVector<Mission *> active_missions;
 double benchmark=-1.0;
 
@@ -472,7 +472,7 @@ void bootstrap_main_loop () {
     delete SplashScreen;
     SplashScreen= NULL;
     SetStarSystemLoading (false);
-    _Universe->LoadContrabandLists();
+    FactionUtil::LoadContrabandLists();
 	{
 		string str=vs_config->getVariable ("general","intro1","Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
 		if (!str.empty()) {

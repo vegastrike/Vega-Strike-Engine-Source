@@ -205,7 +205,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	    QVector fposs =_Universe->AccessCockpit()->GetParent()->Position();
 	    pox = pox+fposs;//adds our own position onto this
 	  }
-	  tmptarget=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
+	  tmptarget=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
 	  string modifications ("");
 	  if (a!=0||loadFirstUnit) {
 	    fighter = UnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);

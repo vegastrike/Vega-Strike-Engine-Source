@@ -16,69 +16,15 @@ Cargo * GetMasterPartList(const char *input_buffer){
   return GetUnitMasterPartList().GetCargo (input_buffer,i);
 }
 
-void Unit::ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev) {
-  unsigned int numcarg = GetUnitMasterPartList().numCargo();
-  float minprice=FLT_MAX;
-  float maxprice=0;
-  for (unsigned int j=0;j<numcarg;++j) {
-    if (GetUnitMasterPartList().GetCargo(j).category==category) {
-      float price = GetUnitMasterPartList().GetCargo(j).price;
-      if (price < minprice)
-	minprice = price;
-      else if (price > maxprice)
-	maxprice = price;
-    }
-  }
-  for (unsigned int i=0;i<numcarg;i++) {
-    Cargo c= GetUnitMasterPartList().GetCargo (i);
-    if (c.category==category) {
-
-      static float aveweight = fabs(XMLSupport::parse_float (vs_config->getVariable ("cargo","price_recenter_factor","0")));
-      c.quantity=quantity-quantdev;
-      float baseprice=c.price;
-      c.price*=price-pricedev;
-
-      //stupid way
-      c.quantity+=(quantdev*2+1)*((double)rand())/(((double)RAND_MAX)+1);
-      c.price+=pricedev*2*((float)rand())/RAND_MAX;
-      c.price=fabs(c.price);
-      c.price=(c.price +(baseprice*aveweight))/ (aveweight+1);
-      if (c.quantity<=0) {
-	c.quantity=0;
-      }else {
-	//quantity more than zero
-	if (maxprice>minprice+.01) {
-	  float renormprice = (baseprice-minprice)/(maxprice-minprice);
-	  static float maxpricequantadj = XMLSupport::parse_float (vs_config->getVariable ("cargo","max_price_quant_adj","5"));
-	  static float minpricequantadj = XMLSupport::parse_float (vs_config->getVariable ("cargo","min_price_quant_adj","1"));
-	  static float powah = XMLSupport::parse_float (vs_config->getVariable ("cargo","price_quant_adj_power","1"));
-	  renormprice = pow(renormprice,powah);
-	  renormprice *= (maxpricequantadj-minpricequantadj);
-	  renormprice+=1;
-	  if (renormprice>.001) {
-	    c.quantity/=renormprice;
-	    if (c.quantity<1)
-	      c.quantity=1;
-	  }
-	}
-      }
-      if (c.price <.01)
-	c.price=.01;
-      c.quantity=abs (c.quantity);
-      AddCargo(c,false);
-    }
-  }
-
-}
 extern int GetModeFromName (const char *);
-vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
+vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
 {
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     if (GetModeFromName(mylist[i].content.c_str())!=2) {
-      Unit * NewPart = UnitFactory::createUnit(mylist[i].content.c_str(),false,_Universe->GetFaction("upgrades"));
+      GameUnit * NewPart = UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades"));
       NewPart->SetFaction(faction);
       if (NewPart->name==string("LOAD_FAILED")) {
 	NewPart->Kill();
@@ -115,7 +61,7 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
   return mylist;
 }
 
-vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
+vector <Cargo>& GameUnit::FilterUpgradeList (vector <Cargo> & mylist) {
 	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
 	Cockpit * cp = _Universe->isPlayerStarship (this);
@@ -133,139 +79,11 @@ vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
 
 
 
-UnitImages &Unit::GetImageInformation() {
-  return *image;
-}
-using XMLSupport::tostring;
-using namespace std;
-std::string CargoToString (const Cargo& cargo) {
-  string missioncargo;
-  if (cargo.mission) {
-	  missioncargo = string("\" missioncargo=\"")+XMLSupport::tostring(cargo.mission);
-  }
-  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+missioncargo+ string("\"/>\n");
-}
-std::string Unit::massSerializer (const XMLType &input, void *mythis) {
-  Unit * un = (Unit *)mythis;
-  float mass = un->mass;
-  for (unsigned int i=0;i<un->image->cargo.size();i++) {
-    mass-=un->image->cargo[i].mass*un->image->cargo[i].quantity;
-  }
-  return XMLSupport::tostring((float)mass);
-}
-void Unit::SortCargo() {
-  Unit *un=this;
-  std::sort (un->image->cargo.begin(),un->image->cargo.end());
-
-  for (unsigned int i=0;i+1<un->image->cargo.size();i++) {
-    if (un->image->cargo[i].content==un->image->cargo[i+1].content) {
-      float tmpmass = un->image->cargo[i].quantity*un->image->cargo[i].mass+un->image->cargo[i+1].quantity*un->image->cargo[i+1].mass;
-      float tmpvolume = un->image->cargo[i].quantity*un->image->cargo[i].volume+un->image->cargo[i+1].quantity*un->image->cargo[i+1].volume;
-      un->image->cargo[i].quantity+=un->image->cargo[i+1].quantity;
-      tmpmass/=un->image->cargo[i].quantity;
-      tmpvolume/=un->image->cargo[i].quantity;
-      un->image->cargo[i].volume=tmpvolume;
-	  un->image->cargo[i].mission = (un->image->cargo[i].mission||un->image->cargo[i+1].mission);
-      un->image->cargo[i].mass=tmpmass;
-      un->image->cargo.erase(un->image->cargo.begin()+(i+1));//group up similar ones
-      i--;
-    }
-
-  }
-}
-std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
-  Unit * un= (Unit *)mythis;
-  if (un->image->cargo.size()==0) {
-    return string("0");
-  }
-  un->SortCargo();
-  string retval("");
-  if (!(un->image->cargo.empty())) {
-    retval= un->image->cargo[0].category+string ("\">\n")+CargoToString(un->image->cargo[0]);
-    
-    for (unsigned int kk=1;kk<un->image->cargo.size();kk++) {
-      if (un->image->cargo[kk].category!=un->image->cargo[kk-1].category) {
-	retval+=string("\t\t</Category>\n\t\t<Category file=\"")+un->image->cargo[kk].category+string ("\">\n");
-      }
-      retval+=CargoToString(un->image->cargo[kk]); 
-    }
-    retval+=string("\t\t</Category>\n\t\t<Category file=\"nothing");
-  }else {
-    retval= string ("nothing");//nothing
-  }
-  return retval;
-}
 
 
 
-bool Unit::CanAddCargo (const Cargo &carg)const {
-  float total_volume=carg.quantity*carg.volume;
-  unsigned int j;
-  for (j=0;j<image->cargo.size();j++) {
-    total_volume+=image->cargo[j].quantity*image->cargo[j].volume;
-  }
-  if  (total_volume<=image->cargo_volume)
-    return true;
-  const Unit * un;
-  for (un_kiter i=viewSubUnits();(un = *i)!=NULL;i++) {
-    if (un->CanAddCargo (carg)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void Unit::AddCargo (const Cargo &carg, bool sort) {
-  mass+=carg.quantity*carg.mass;
-  image->cargo.push_back (carg);   
-  if (sort)
-    SortCargo();
-}
-int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
-  assert (i<image->cargo.size());
-  if (quantity>image->cargo[i].quantity)
-    quantity=image->cargo[i].quantity;
-  mass-=quantity*image->cargo[i].mass;
-  image->cargo[i].quantity-=quantity;
-  if (image->cargo[i].quantity<=0&&eraseZero)
-    image->cargo.erase (image->cargo.begin()+i);
-  return quantity;
-}
-
-float Unit::PriceCargo (const std::string &s) {
-  Cargo tmp;
-  tmp.content=s;
-  vector <Cargo>::iterator mycargo = std::find (image->cargo.begin(),image->cargo.end(),tmp);
-  float price;
-  if (mycargo==image->cargo.end()) {
-    Cargo * masterlist;
-    if ((masterlist=GetMasterPartList (s.c_str()))!=NULL) {
-      price =masterlist->price;
-    } else {
-      static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
-      price = spacejunk;
-    }
-  } else {
-    price = (*mycargo).price;
-  }
-  return price;
-}
-bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer){
-  if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||mass<image->cargo[i].mass)
-    return false;
-  if (quantity>image->cargo[i].quantity)
-    quantity=image->cargo[i].quantity;
-  carg = image->cargo[i];
-  carg.price=buyer->PriceCargo (image->cargo[i].content);
-  creds+=quantity*carg.price;
-  carg.quantity=quantity;
-  buyer->AddCargo (carg);
-  
-  RemoveCargo (i,quantity);
-  return true;
-}
 extern void SwitchUnits (Unit *,Unit*);
-void Unit::EjectCargo (unsigned int index) {
+void GameUnit::EjectCargo (unsigned int index) {
   Cargo * tmp=NULL;
   Cargo ejectedPilot;
   string name;
@@ -293,7 +111,7 @@ void Unit::EjectCargo (unsigned int index) {
 
     if (tmp->quantity>0) {
       const int sslen=strlen("starships");
-      Unit * cargo = NULL;
+      GameUnit * cargo = NULL;
       if (tmp->category.length()>=sslen) {
 	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
 	  string ans = tmpcontent;
@@ -316,11 +134,11 @@ void Unit::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-	cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,_Universe->GetFaction("upgrades"));
+		  cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
-	cargo = UnitFactory::createUnit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));
       }
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
@@ -356,78 +174,4 @@ void Unit::EjectCargo (unsigned int index) {
   }
 }
 
-bool Unit::SellCargo (const std::string &s, int quantity, float & creds, Cargo &carg, Unit *buyer){
-  Cargo tmp;
-  tmp.content=s;
-  vector <Cargo>::iterator mycargo = std::find (image->cargo.begin(),image->cargo.end(),tmp);
-  if (mycargo==image->cargo.end())
-    return false;
 
-  return SellCargo (mycargo-image->cargo.begin(),quantity,creds,carg,buyer);
-}
-unsigned int Unit::numCargo ()const {
-  return image->cargo.size();
-}
-Cargo& Unit::GetCargo (unsigned int i) {
-  return image->cargo[i];
-}
-
-float Unit::CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse) const{
-  if (ViewComputerData().max_ab_speed>.001)
-    return ((OriginalCourse-(FinalCourse)).Magnitude()/ViewComputerData().max_ab_speed);
-  else
-    return (FinalCourse-OriginalCourse).Magnitude();
-}
-
-std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector &oldspd) const{
-///FIXME somehow mangle string
-  string mangled = image->cargo[i].content;
-  static float scramblingmanifest=XMLSupport::parse_float (vs_config->getVariable ("general","PercentageSpeedChangeToFaultSearch",".5"));
-  if (CourseDeviation (oldspd,GetVelocity())>scramblingmanifest) {
-    for (string::iterator i=mangled.begin();i!=mangled.end();i++) {
-      (*i)+=(rand()%3-1);
-    }
-  }
-
-  return mangled;
-}
-
-
-Cargo* Unit::GetCargo (const std::string &s, unsigned int &i) {
-  Cargo searchfor;
-  searchfor.content=s;
-  vector<Cargo>::iterator tmp =(std::find(image->cargo.begin(),image->cargo.end(),searchfor));
-  if (tmp==image->cargo.end())
-    return NULL;
-  i= (tmp-image->cargo.begin());
-  return &(*tmp);
-}
-bool Unit::BuyCargo (const Cargo &carg, float & creds){
-  if (!CanAddCargo(carg)||creds<carg.quantity*carg.price) {
-    return false;    
-  }
-  AddCargo (carg);
-  creds-=carg.quantity*carg.price;
-  mass+=carg.quantity*carg.mass;
-  return true;
-}
-bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds) {
-  Cargo soldcargo= seller->image->cargo[i];
-  if (quantity>(unsigned int)soldcargo.quantity)
-    quantity=soldcargo.quantity;
-  if (quantity==0)
-    return false;
-  soldcargo.quantity=quantity;
-  if (BuyCargo (soldcargo,creds)) {
-    seller->RemoveCargo (i,quantity,false);
-    return true;
-  }
-  return false;
-}
-bool Unit::BuyCargo (const std::string &cargo,unsigned int quantity, Unit * seller, float & creds) {
-  unsigned int i;
-  if (seller->GetCargo(cargo,i)) {
-    return BuyCargo (i,quantity,seller,creds);
-  }
-  return false;
-}

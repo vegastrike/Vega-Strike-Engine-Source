@@ -1,3 +1,5 @@
+#ifndef _IMAGES_H
+#define _IMAGES_H
 
 struct DockingPorts {
   ///Center
@@ -128,3 +130,5 @@ struct UnitSounds {
   int cloak;
   int jump;
 };
+
+#endif

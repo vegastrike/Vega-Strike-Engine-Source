@@ -17,137 +17,9 @@
 #include "config_xml.h"
 #include "force_feedback.h"
 
-void Unit::UnFire () {
-  for (int i=0;i<nummounts;i++) {
-    mounts[i].UnFire();//turns off beams;
-  }
-}
 extern unsigned short apply_float_to_short (float tmp);
 
-void Unit::Fire (bool Missile) {
-
-  if (cloaking>=0)
-    return;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].type->type==weapon_info::BEAM) {
-      if (mounts[i].type->EnergyRate*SIMULATION_ATOM>energy) {
-	mounts[i].UnFire();
-	continue;
-      }
-    }else{ 
-      if (mounts[i].type->EnergyRate>energy) 
-	continue;
-    }
-    
-    if (mounts[i].Fire(owner==NULL?this:owner,Missile)) {
-      energy -=apply_float_to_short( mounts[i].type->type==weapon_info::BEAM?mounts[i].type->EnergyRate*SIMULATION_ATOM:mounts[i].type->EnergyRate);
-    }
-  }
-}
-
-
-void Unit::Mount::Activate (bool Missile) {
-  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-    if (status==INACTIVE)
-      status = ACTIVE;
-  }
-}
-///Sets this gun to inactive, unless unchosen or destroyed
-void Unit::Mount::DeActive (bool Missile) {
-  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-    if (status==ACTIVE)
-      status = INACTIVE;
-  }
-}
-void Unit::SelectAllWeapon (bool Missile) {
-  for (int i=0;i<nummounts;i++) {
-    mounts[i].Activate (Missile);
-  }
-}
-
-///In short I have NO CLUE how this works! It just...grudgingly does
-void Unit::ToggleWeapon (bool Missile) {
-  int activecount=0;
-  int totalcount=0;
-  bool lasttotal=true;
-//  weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
-  const weapon_info * sz=NULL;
-  if (nummounts<1)
-    return;
-  sz = mounts[0].type;
-  for (int i=0;i<nummounts;i++) {
-    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
-      totalcount++;
-      lasttotal=false;
-      if (mounts[i].status==Mount::ACTIVE) {
-	activecount++;
-	lasttotal=true;
-	mounts[i].DeActive (Missile);
-	if (i==nummounts-1) {
-	  sz=mounts[0].type;
-	}else {
-	  sz =mounts[i+1].type;
-	}
-      }
-    }
-    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
-      if (mounts[i].status==Mount::ACTIVE) {
-	activecount++;//totalcount=0;
-	mounts[i].DeActive (Missile);
-	if (lasttotal) {
-	  totalcount=(i+1)%nummounts;
-	  if (i==nummounts-1) {
-	    sz = mounts[0].type;
-	  }else {
-	    sz =mounts[i+1].type;
-	  }
-	}
-	lasttotal=false;
-      } 
-    }
-  }
-  if (Missile) {
-    int i=totalcount;
-    for (int j=0;j<2;j++) {
-      for (;i<nummounts;i++) {
-	if (mounts[i].type==sz) {
-	  if ((mounts[i].type->type==weapon_info::PROJECTILE)) {
-	    mounts[i].Activate(true);
-	    return;
-	  }else {
-	    sz = mounts[(i+1)%nummounts].type;
-	  }
-	}
-      }
-      i=0;
-    }
-  }
-  if (totalcount==activecount) {
-    ActivateGuns (mounts[0].type,Missile);
-  } else {
-    if (lasttotal) {
-      SelectAllWeapon(Missile);
-    }else {
-      ActivateGuns (sz,Missile);
-    }
-  }
-}
-
-///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
-  for (int j=0;j<2;j++) {
-    for (int i=0;i<nummounts;i++) {
-      if (mounts[i].type==sz) {
-	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
-	  mounts[i].Activate(ms);
-	}else {
-	  sz = mounts[(i+1)%nummounts].type;
-	}
-      }
-    }
-  }
-}
-void Unit::Mount::PhysicsAlignedUnfire() {
+void GameUnit::GameMount::PhysicsAlignedUnfire() {
   //Stop Playing SOund?? No, that's done in the beam, must not be aligned
   if (processed==UNFIRED) {
   if (AUDIsPlaying (sound))
@@ -155,7 +27,8 @@ void Unit::Mount::PhysicsAlignedUnfire() {
     processed=PROCESSED;
   }
 }
-void Unit::Mount::UnFire () {
+
+void GameUnit::GameMount::UnFire () {
   processed = UNFIRED;
   if (status!=ACTIVE||ref.gun==NULL||type->type!=weapon_info::BEAM)
     return ;
@@ -163,22 +36,7 @@ void Unit::Mount::UnFire () {
   ref.gun->Destabilize();
 }
 
-int Unit::LockMissile() const{
-  bool missilelock=false;
-  bool dumblock=false;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
-      missilelock=true;
-    }else {
-      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
-	dumblock=true;
-      }
-    }    
-  }
-  return (missilelock?1:(dumblock?-1:0));
-}
-
-static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
+static void AdjustMatrix (Matrix &mat, GameUnit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
@@ -195,14 +53,14 @@ static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, fl
     }
   }
 }
-bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
+bool GameUnit::GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, GameUnit * owner, GameUnit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;
   }
   time_to_lock = type->LockTime;
   if (processed==FIRED) {
     processed = PROCESSED;
-    Unit * temp;
+    GameUnit * temp;
     Transformation tmp = LocalPosition;
     tmp.Compose (Cumulative,m);
     Matrix mat;
@@ -253,7 +111,28 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Mat
   }
   return false;
 }
-bool Unit::Mount::Fire (Unit * owner, bool Missile) {
+
+void GameUnit::Fire (bool Missile) {
+  if (cloaking>=0)
+    return;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].type->type==weapon_info::BEAM) {
+      if (mounts[i].type->EnergyRate*SIMULATION_ATOM>energy) {
+	mounts[i].UnFire();
+	continue;
+      }
+    }else{ 
+      if (mounts[i].type->EnergyRate>energy) 
+	continue;
+    }
+    
+    if (mounts[i].Fire(owner==NULL?this:owner,Missile)) {
+      energy -=apply_float_to_short( mounts[i].type->type==weapon_info::BEAM?mounts[i].type->EnergyRate*SIMULATION_ATOM:mounts[i].type->EnergyRate);
+    }
+  }
+}
+
+bool GameUnit::GameMount::Fire (GameUnit * owner, bool Missile) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -293,14 +172,16 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
   }
   return false;
 }
-Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;ref.gun=NULL; sound=-1;}
-Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon_info::NOWEAP),ammo(ammo),sound(-1){
+GameUnit::GameMount::GameMount(const string& filename, short am,short vol){
   static weapon_info wi(weapon_info::BEAM);
+  size = weapon_info::NOWEAP;
+  ammo = am;
+  sound = -1;
   type = &wi;
-  this->volume=volume;
+  this->volume=vol;
   ref.gun = NULL;
   status=(UNCHOSEN);
-  processed=Mount::PROCESSED;
+  processed=GameMount::PROCESSED;
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;
@@ -310,9 +191,9 @@ Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon
     status=ACTIVE;
     time_to_lock = temp->LockTime;
   }
-
 }
-void Unit::TargetTurret (Unit * targ) {
+
+void GameUnit::TargetTurret (GameUnit * targ) {
 	if (!SubUnits.empty()) {
 		un_iter iter = getSubUnits();
 		Unit * su;
@@ -329,7 +210,7 @@ void Unit::TargetTurret (Unit * targ) {
 	}
 
 }
-void Unit::Target (Unit *targ) {
+void GameUnit::Target (Unit *targ) {
   if (targ==this) {
     return;
   }
@@ -342,7 +223,7 @@ void Unit::Target (Unit *targ) {
   }
   if (targ) {
     if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
-      if (targ!=Target()) {
+		if (targ!=Unit::Target()) {
         for (int i=0;i<nummounts;i++){ 
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
@@ -367,39 +248,5 @@ void Unit::Target (Unit *targ) {
     }
   }else {
     computer.target.SetUnit(NULL);
-  }
-}
-void Unit::VelocityReference (Unit *targ) {
-  computer.velocity_ref.SetUnit(targ);
-}
-void Unit::SetRecursiveOwner(Unit *target) {
-  owner=target;
-  if (!SubUnits.empty()) {
-    UnitCollection::UnitIterator iter = getSubUnits();
-    Unit * su;
-    while ((su=iter.current())) {
-      su->SetRecursiveOwner (target);
-      iter.advance();
-    }
-  }
-}
-void Unit::SetOwner(Unit *target) {
-  owner=target;
-}
-
-void Unit::Cloak (bool loak) {
-  if (loak) {
-    if (image->cloakenergy<energy) {
-      image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
-      if (cloaking==(short)32768) {
-	cloaking=32767;
-      } else {
-       
-      }
-    }
-  }else {
-    image->cloakrate= (image->cloakrate>=0)?-image->cloakrate:image->cloakrate;
-    if (cloaking==cloakmin)
-      cloaking++;
   }
 }

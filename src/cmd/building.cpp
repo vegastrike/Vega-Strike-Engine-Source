@@ -1,13 +1,13 @@
 #include "building.h"
 #include "cont_terrain.h"
 #include "gfx/planetary_transform.h"
-Building::Building (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):Unit (filename,SubUnit,faction,modifications,fg) {
+Building::Building (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):GameUnit (filename,SubUnit,faction,modifications,fg) {
   this->vehicle = vehicle;
   continuous=true;
   this->parent.plane = parent;
 }
 
-Building::Building (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):Unit (filename,SubUnit,faction,modifications,fg) {
+Building::Building (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):GameUnit (filename,SubUnit,faction,modifications,fg) {
   this->vehicle = vehicle;
   continuous=false;
   this->parent.terrain = parent;
@@ -19,7 +19,7 @@ void Building::UpdatePhysics (const Transformation &trans, const Matrix &transma
   if (GetPlanetOrbit()) {
     SetPlanetOrbitData(GetPlanetOrbit());//makes it dirty
   }
-  Unit::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
+  GameUnit::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
   QVector tmp (LocalPosition());
   Vector p,q,r;
   GetOrientation (p,q,r);

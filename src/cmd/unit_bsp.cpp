@@ -210,7 +210,7 @@ void FreeBSP (bsp_tree ** tree) {
 
 static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&, char Vplane);
 #ifndef PROPHECY
-void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
+void GameUnit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
   bsp_tree * bsp=NULL;
   bsp_tree temp_node;
   vector <bsp_polygon> tri;

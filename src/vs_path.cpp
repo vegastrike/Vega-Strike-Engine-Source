@@ -1,6 +1,10 @@
 #include "vegastrike.h"
 #include "vs_path.h"
-#include "config_xml.h"
+#ifdef _SERVER
+	#include "configxml.h"
+#else
+	#include "config_xml.h"
+#endif
 #include "vs_globals.h"
 #include "xml_support.h"
 
@@ -16,7 +20,6 @@
 #endif
 #include "galaxy_gen.h"
 
-float simulation_atom_var=(float)(1.0/10.0);
 char *CONFIGFILE;
 
 std::vector <std::string> savedpwd;

@@ -27,7 +27,7 @@
 #include "gfxlib.h"   // for GFXMaterial
 #include "planet.h"   // for GFXLightLocal
 
-class Unit;
+class GameUnit;
 class Mesh;
 class Flightgroup;
 class Nebula;
@@ -43,16 +43,23 @@ class UnitFactory
 public:
     static Unit* createUnit( );
 
-    static Unit* createUnit( std::vector<Mesh*> &meshes,
-			     bool Subunit,
-			     int faction);
-
-    static Unit* createUnit( const char *filename,
+    static Unit* createGenericUnit( const char *filename,
                              bool        SubUnit,
                              int         faction,
                              std::string customizedUnit=string(""),
                              Flightgroup *flightgroup=NULL,
                              int         fg_subnumber=0 );
+
+    static GameUnit* createUnit( const char *filename,
+                             bool        SubUnit,
+                             int         faction,
+                             std::string customizedUnit=string(""),
+                             Flightgroup *flightgroup=NULL,
+                             int         fg_subnumber=0 );
+
+    static GameUnit* createUnit( std::vector<Mesh*> &meshes,
+			     bool Subunit,
+			     int faction);
 
     static Nebula* createNebula( const char * unitfile, 
                                  bool SubU, 
@@ -119,9 +126,9 @@ public:
 				     int fg_snumber=0,
 				     float difficulty=.01 );
 
-    static Unit* getMasterPartList( );
+    static GameUnit* getMasterPartList( );
 private:
-    static Unit* _masterPartList;
+    static GameUnit* _masterPartList;
 };
 
 #endif /* _UNIT_FACTORY_H_ */

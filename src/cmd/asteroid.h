@@ -1,7 +1,7 @@
 #ifndef _ASTEROID_H_
 #define _ASTEROID_H_
 #include "cmd/unit.h"
-class Asteroid: public Unit {
+class Asteroid: public GameUnit {
   public:
 	virtual enum clsptr isUnit() {return ASTEROIDPTR;}
 	virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);

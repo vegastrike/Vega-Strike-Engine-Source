@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "container.h"
-#include "unit.h"
+#include "unit_generic.h"
 UnitContainer::UnitContainer() {
   unit=NULL;
   VSCONSTRUCT1('U')

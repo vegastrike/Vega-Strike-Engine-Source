@@ -125,7 +125,7 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
 const float densityOfJumpPoint = 100000;
 Planet::Planet()
-    : Unit( 0 )
+    : GameUnit( 0 )
     ,  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites()
 {
   inside=false;
@@ -206,7 +206,7 @@ void Planet::AddRing(const std::string &texture,float iradius,float oradius, con
 
 extern vector <char *> ParseDestinations (const string &value);
 Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
-    : Unit( 0 )
+    : GameUnit( 0 )
     , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
 {
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
@@ -314,7 +314,7 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
   string tempname = (::getCargoUnitName (textname));
   setFullname(tempname);
  
-  Unit * un = UnitFactory::createUnit (tempname.c_str(),true,_Universe->GetFaction("planets"));
+  Unit * un = UnitFactory::createUnit (tempname.c_str(),true,FactionUtil::GetFaction("planets"));
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
     image->cargo_volume=un->GetImageInformation().cargo_volume;
@@ -328,7 +328,7 @@ void Planet::Draw(const Transformation & quat, const Matrix &m) {
   //Do lighting fx
   // if cam inside don't draw?
   //  if(!inside) {
-  Unit::Draw(quat,m);
+  GameUnit::Draw(quat,m);
   //  }
     QVector t (_Universe->AccessCamera()->GetPosition()-Position());
     static int counter=0;
