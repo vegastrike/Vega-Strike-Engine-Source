@@ -57,10 +57,10 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
 
 
-	Vector smforce =(bignormal*.4*bouncepercent*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-	Vector thisforce=(smallnormal*.4*bouncepercent*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-	smforce = (smforce/smforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE;
-	thisforce = (thisforce/thisforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE;
+	Vector smforce =(bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+	Vector thisforce=(smallnormal*.4*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+	smforce = (smforce/smforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
+	thisforce = (thisforce/thisforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 	//	UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)); 
     
 	if(smalle->isUnit()!=MISSILEPTR){ 
