@@ -1,6 +1,6 @@
 confed,0,2,0,Sol/Sol
 purist,0.05,200,0,Sol
-aera,0.09,650,0,Aeneth
+aera,0.1,600,0,Aeneth
 rlaan,0.06,1500,0,Aantlbzz
 uln,0.01,20,0,Ingatwa
 shmrn,0.01,5,0,Redemption
@@ -17,12 +17,14 @@ forsaken,0.00002,20,0,Diaspora
 andolian,0.001,10,0,Crucible
 andolian,0.001,5,0,Redemption
 unadorned,0.0003,10,0,Solace
-rlaan,0.3,30,0,Eebzpt
-rlaan,0.3,30,0,Bzzeen
-rlaan,0.3,30,0,Ahbzeentk
+rlaan,0.3,45,0,Eebzpt
+rlaan,0.3,45,0,Bzzeen
+rlaan,0.3,45,0,Ahbzeentk
 LIHW,0.1,20,0,Rust
 rlaan,0.1,50,0,Bztutpt
 rlaan,0.1,50,0,Bzzahbtktk
 LIHW,0.1,20,0,Thanatos
 rlaan,0.2,10,0,Tutbzzaz
 rlaan,0.2,10,0,Izzptipt
+aera,0.08,50,0,Mahgoh
+aera,0.08,50,0,Ouulneh
