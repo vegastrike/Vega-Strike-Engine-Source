@@ -79,6 +79,7 @@ void Unit::FreeDockingPort (unsigned int i) {
 
 }
 static Transformation HoldPositionWithRespectTo (Transformation holder, const Transformation &changeold, const Transformation &changenew) {
+  Quaternion bak = holder.orientation;
   holder.position=holder.position-changeold.position;
 
   Quaternion invandrest =changeold.orientation.Conjugate();
@@ -90,6 +91,10 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   holder.position = TransformNormal (m,holder.position);
 
   holder.position=holder.position+changenew.position;
+  static bool changeddockedorient=(XMLSupport::parse_bool (vs_config->getVariable ("physics","change_docking_orientation","false")));
+  if (!changeddockedorient) {
+    holder.orientation = bak;
+  }
   return holder;
 }
 const vector <DockingPorts>& Unit::DockingPortLocations() {
