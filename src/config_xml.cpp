@@ -170,6 +170,7 @@ void VegaConfig::initKeyMap(){
 
 /* *********************************************************** */
 extern void  inc_time_compression (int i, KBSTATE a);
+extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
 
@@ -194,6 +195,7 @@ void VegaConfig::initCommandMap(){
   // mapping from command string to keyboard handler
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;
+  command_map["PauseKey"]=pause_key;
   command_map["JumpKey"]=FlyByKeyboard::JumpKey;
   command_map["AutoKey"]=FlyByKeyboard::AutoKey;
   command_map["StartKey"]=FlyByKeyboard::StartKey ;

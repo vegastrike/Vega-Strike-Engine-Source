@@ -53,6 +53,19 @@ void reset_time_compression (int i, KBSTATE a) {
     timecompression=1;
   }
 }
+void pause_key (int i, KBSTATE a) {
+  static bool paused=false;
+  if (a==PRESS) {
+    if (paused==false) {
+      timecompression=.0000001;
+      paused=true;
+    }else {
+      paused=false;
+      reset_time_compression(i,a);
+    }
+  }
+}
+
 float getTimeCompression () {
   return timecompression;
 }
