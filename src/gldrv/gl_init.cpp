@@ -27,16 +27,15 @@
 #include "config_xml.h"
 #include "winsys.h"
 #include <assert.h>
-//#include "gl_globals.h"
 #include "gfxlib.h"
 
 
 #if !defined(_WIN32) && !defined(__CYGWIN__)
 
-#if !(defined(__APPLE__) || defined(MACOSX))
-#define GL_GLEXT_PROTOTYPES 1
-#define GLX_GLXEXT_PROTOTYPES 1
-#define GLX_GLXEXT_LEGACY 1
+//#if !(defined(__APPLE__) || defined(MACOSX))
+//#define GL_GLEXT_PROTOTYPES 1
+//#define GLX_GLXEXT_PROTOTYPES 1
+//#define GLX_GLXEXT_LEGACY 1
 
 //    #   include <GL/glxext.h>
   //  #   include <GL/glx.h>
@@ -48,11 +47,13 @@
 #else
 #include <windows.h>
 #endif
+#define GL_GLEXT_PROTOTYPES 1
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
+    #include <OpenGL/glext.h>
 #else
     #include <GL/gl.h>
-    #include <GL/glx.h>
+    #include <GL/glext.h>
 #endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
@@ -62,16 +63,11 @@
 #if !defined(IRIX)
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
-#undef GL_EXT_compiled_vertex_array
-#ifndef _WIN32
-#define GL_GLEXT_PROTOTYPES 1
-#define GLX_GLXEXT_PROTOTYPES 1
-#define GLX_GLXEXT_LEGACY 1
-#endif
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <OpenGL/glext.h>
-#else
-    # include <GL/glext.h>
+
+#if !defined(__APPLE__) && !defined(MACOSX) && !defined(WIN32)
+    # define GLX_GLXEXT_PROTOTYPES 1
+    # define GLX_GLXEXT_LEGACY 1
+    # include <GL/glx.h>
     # include <GL/glxext.h>
 #endif
 #endif
