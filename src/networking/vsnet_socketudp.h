@@ -28,8 +28,8 @@ public:
     virtual bool isTcp() const { return false; }
 
     virtual bool isActive( );
-    virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
-    virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
+    virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
+    virtual int  recvbuf( PacketMem& buffer, AddressIP *from );
     // virtual void ack( );
 
     virtual void lower_selected( );

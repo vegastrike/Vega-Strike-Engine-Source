@@ -32,13 +32,13 @@
 #include "cmd/bolt.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_util.h"
-//#include "universe_util_generic.h" //Use universe_util_generic.h instead
 #include "cmd/unit_factory.h"
 #include "client.h"
 #include "packet.h"
 #include "lin_time.h"
 #include "netserver.h"
 #include "vsnet_serversocket.h"
+#include "vsnet_debug.h"
 #include "savenet_util.h"
 #include "vs_path.h"
 #include "networking/netbuffer.h"
@@ -491,7 +491,7 @@ void	NetServer::start(int argc, char **argv)
 	FILE * fp = fopen( dynpath.c_str(), "rb");
 	if( !fp)
 	{
-		cerr<<"!!! ERROR : opening dynamic universe file !!!"<<endl;
+		cerr<<"!!! ERROR : opening dynamic universe file " << dynpath.c_str() << " !!!"<<endl;
 		exit(1);
 	}
 	fseek( fp, 0, SEEK_END);

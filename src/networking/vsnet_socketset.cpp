@@ -7,6 +7,7 @@
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
 #include "vsnet_pipe.h"
+#include "vsnet_debug.h"
 #include "const.h"
 
 using namespace std;
@@ -52,6 +53,16 @@ void SocketSet::wait( )
     }
     else
     {
+#ifdef VSNET_DEBUG
+        std::ostringstream ostr;
+        for( int i=0; i<_blockmain_pending; i++ )
+        {
+            if( FD_ISSET( i, &_blockmain_set ) ) ostr << " " << i;
+        }
+        COUT << "something pending for sockets:"
+             << ostr.str()
+             << " (" << _blockmain_pending << ")" << endl;
+#endif
         struct timeval tv;
         tv.tv_sec  = 0;
         tv.tv_usec = 0;
@@ -67,26 +78,49 @@ void SocketSet::wait( )
     {
         _blockmain_cond.wait( _blockmain_mx );
     }
+#ifdef VSNET_DEBUG
+    else
+    {
+        std::ostringstream ostr;
+        for( int i=0; i<_blockmain_pending; i++ )
+        {
+            if( FD_ISSET( i, &_blockmain_set ) ) ostr << " " << i;
+        }
+        COUT << "something pending for sockets:"
+             << ostr.str()
+             << " (" << _blockmain_pending << ")" << endl;
+    }
+#endif
     _blockmain_mx.unlock( );
 }
 #endif
 
-void SocketSet::dec_pending( )
+void SocketSet::add_pending( int fd )
 {
     if( _blockmain )
     {
         _blockmain_mx.lock( );
-        _blockmain_pending--;
+	    FD_SET( fd, &_blockmain_set );
+	    if( fd >= _blockmain_pending ) _blockmain_pending = fd + 1;
         _blockmain_mx.unlock( );
     }
 }
 
-void SocketSet::inc_pending( )
+void SocketSet::rem_pending( int fd )
 {
     if( _blockmain )
     {
         _blockmain_mx.lock( );
-        _blockmain_pending++;
+	    FD_CLR( fd, &_blockmain_set );
+	    if( fd == _blockmain_pending-1 )
+	    {
+	        while( _blockmain_pending > 0 )
+	        {
+	            if( FD_ISSET( _blockmain_pending-1, &_blockmain_set ) )
+		            break;
+                _blockmain_pending -= 1;
+	        }
+        }
         _blockmain_mx.unlock( );
     }
 }
@@ -94,9 +128,11 @@ void SocketSet::inc_pending( )
 int SocketSet::private_select( timeval* timeout )
 {
     fd_set read_set_select;
+    fd_set write_set_select;
     int    max_sock_select = 0;
 
     FD_ZERO( &read_set_select );
+    FD_ZERO( &write_set_select );
 
 #ifdef VSNET_DEBUG
     std::ostringstream ostr;
@@ -104,7 +140,8 @@ int SocketSet::private_select( timeval* timeout )
 #endif
     for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
     {
-        int fd = (*it)->get_fd();
+	    VsnetSocketBase* b = (*it);
+        int fd = b->get_fd();
         if( fd >= 0 )
         {
 #ifdef VSNET_DEBUG
@@ -112,6 +149,10 @@ int SocketSet::private_select( timeval* timeout )
 #endif
             FD_SET( fd, &read_set_select );
             if( fd >= max_sock_select ) max_sock_select = fd+1;
+	        if( b->need_test_writable( ) )
+	        {
+	            FD_SET( b->get_write_fd(), &write_set_select );
+	        }
         }
     }
 
@@ -129,16 +170,10 @@ int SocketSet::private_select( timeval* timeout )
     if( _thread_wakeup.getread() > max_sock_select )
         max_sock_select = _thread_wakeup.getread() + 1;
 
-    int ret = ::select( max_sock_select, &read_set_select, 0, 0, timeout );
-
-    if( _blockmain )
-    {
-        // whatever the reason for leaving select, if we have been asked
-        // to signal the main thread on wakeup, we do it
-        _blockmain_mx.lock( );
-        _blockmain_cond.signal( );
-        _blockmain_mx.unlock( );
-    }
+    COUT << "enter select" << endl;
+    int ret = ::select( max_sock_select,
+	                &read_set_select, &write_set_select, 0, timeout );
+    COUT << "leave select" << endl;
 
     if( ret == -1 )
     {
@@ -159,14 +194,22 @@ int SocketSet::private_select( timeval* timeout )
 #endif
         for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
         {
-            int fd = (*it)->get_fd();
-            if( fd >= 0 && FD_ISSET(fd,&read_set_select) )
-            {
+	        VsnetSocketBase* b = (*it);
+            int fd = b->get_fd();
+	        if( fd >= 0 )
+	        {
+                if( FD_ISSET(fd,&read_set_select) )
+                {
 #ifdef VSNET_DEBUG
-                ostr << fd << " ";
+                    ostr << fd << " ";
 #endif
-                (*it)->lower_selected( );
-            }
+                    b->lower_selected( );
+                }
+                if( FD_ISSET(b->get_write_fd(),&write_set_select) )
+	            {
+                    b->lower_sendbuf( );
+	            }
+	        }
         }
 
         if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
@@ -183,7 +226,22 @@ int SocketSet::private_select( timeval* timeout )
         COUT << "select saw activity on fds=" << ostr.str() << endl;
 #endif
     }
+
+    if( _blockmain )
+    {
+        // whatever the reason for leaving select, if we have been asked
+        // to signal the main thread on wakeup, we do it
+        _blockmain_mx.lock( );
+        _blockmain_cond.signal( );
+        _blockmain_mx.unlock( );
+    }
+
     return ret;
+}
+
+void SocketSet::wakeup( )
+{
+    private_wakeup( );
 }
 
 void SocketSet::private_wakeup( )

@@ -14,24 +14,6 @@ using std::cout;
 using std::endl;
 using std::list;
 using namespace std;
-//using std::hex;
-
-// Number of times we resend a "reliable" packet in UDP mode
-#define NUM_RESEND 3
-enum PCKTFLAGS
-{
-    NONE          = 0,
-    SENDANDFORGET = 0x0001,
-    SENT          = 0x0002,
-    RESENT        = 0x0004,
-    ACKED         = 0x0008,
-    SENDRELIABLE  = 0x0010,
-    COMPRESSED    = 0x1000
-};
-
-ostream& operator<<( ostream& ostr, PCKTFLAGS flags );
-
-class PacketQueue;
 
 class Packet
 {
@@ -52,7 +34,6 @@ class Packet
 
         Header          h;
         PacketMem       _packet;
-        // char   databuffer[MAXBUFFER];
 
         unsigned short  nbsent;
         AddressIP*      destaddr;

@@ -12,6 +12,7 @@
 #include "const.h"
 #include "vsnet_socketudp.h"
 #include "vsnet_err.h"
+#include "vsnet_debug.h"
 
 using namespace std;
 
@@ -35,7 +36,7 @@ VsnetUDPSocket::~VsnetUDPSocket( )
     delete [] _recv_buf;
 }
 
-int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
+int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
     int numsent;
@@ -61,6 +62,7 @@ int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
     if( _cpq.empty() )
     {
         _cpq_mx.unlock( );
+        _set.rem_pending( _fd );
         return -1;
     }
 
@@ -69,7 +71,6 @@ int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
         *from = _cpq.front().ip;
     _cpq.pop();
     _cpq_mx.unlock( );
-    _set.dec_pending( );
     return buffer.len();
 }
 
@@ -113,7 +114,7 @@ void VsnetUDPSocket::lower_selected( )
         _cpq_mx.lock( );
         _cpq.push( mem );
         _cpq_mx.unlock( );
-        _set.inc_pending( );
+        _set.add_pending( _fd );
     }
 }
 

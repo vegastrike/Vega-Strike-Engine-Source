@@ -30,6 +30,9 @@
 #define JTHREAD_H
 
 #include "jmutex.h"
+#ifndef WIN32
+#include "jcond.h"
+#endif
 
 #define ERR_JTHREAD_CANTINITMUTEX						-1
 #define ERR_JTHREAD_CANTSTARTTHREAD						-2
@@ -57,6 +60,7 @@ private:
 	static void *TheThread(void *param);
 	
 	pthread_t threadid;
+	JCond     runningcond;
 #endif // WIN32
 	void *retval;
 	bool running;

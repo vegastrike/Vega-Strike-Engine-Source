@@ -42,6 +42,26 @@ class SocketSet;
 
 int close_socket( int fd );
 
+// Number of times we resend a "reliable" packet in UDP mode
+#define NUM_RESEND 3
+enum PCKTFLAGS
+{
+    NONE          = 0,
+    STDPRI        = 0,      // normal priority
+    LOPRI         = 0x0010, // lower than normal
+    HIPRI         = 0x0020, // higher than normal
+    SENDRELIABLE  = 0,      // retransmit if lost
+    SENDANDFORGET = 0x0100, // do not retransmit if lost
+    SENT          = 0x0001,
+    RESENT        = 0x0002,
+    ACKED         = 0x0004,
+    COMPRESSED    = 0x1000,
+    FRAGMENT      = 0x2000, // low pri packet that is split up
+    LASTFRAGMENT  = 0x4000, // low pri packet that is split up
+};
+
+std::ostream& operator<<( std::ostream& ostr, PCKTFLAGS flags );
+
 class VsnetSocketBase
 {
 public:
@@ -62,6 +82,10 @@ public:
     void disconnect( const char *s, bool fexit );
     
     virtual void lower_selected( ) { }
+
+    virtual bool need_test_writable( ) { return false; }
+    virtual int  get_write_fd( ) const { return _fd; }
+    virtual int  lower_sendbuf( ) { return 0; }
 
 protected:
     virtual void child_disconnect( const char* s ) { }
@@ -90,7 +114,7 @@ public:
     bool eq( const VsnetSocket& r );
     bool sameAddress( const VsnetSocket& r );
 
-    virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
+    virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags ) = 0;
 
     /** This function copies or moves data into the given PacketMem variable.
      *  It is preferred over the other recvbuf function because it may reduce
@@ -146,8 +170,8 @@ public:
         return (_sock.isNull() ? false : _sock->isActive());
     }
 
-    inline int  sendbuf( PacketMem& packet, const AddressIP* to) {
-        return ( _sock.isNull() ? -1 : _sock->sendbuf( packet, to ) );
+    inline int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags ) {
+        return ( _sock.isNull() ? -1 : _sock->sendbuf( packet, to, pcktflags ) );
     }
 
     inline bool set_nonblock( ) {

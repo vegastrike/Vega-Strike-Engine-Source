@@ -12,6 +12,7 @@
 #include "const.h"
 #include "vsnet_sockettcp.h"
 #include "vsnet_err.h"
+#include "vsnet_debug.h"
 
 using namespace std;
 
@@ -61,45 +62,141 @@ private:
 VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet& sets )
     : VsnetSocket( sock, remote_ip, sets )
     , _incomplete_packet( 0 )
-    , _incomplete_len_field( 0 )
+    , _incomplete_header( 0 )
     , _connection_closed( false )
-{ }
+    , _sq_off( 0 )
+{
+#ifdef HAVE_FIOASYNC
+    _sq_fd = ::dup2( sock );
+    const int on = 1;
+    ::ioctl( _sq_fd, FIOASYNC, &on ); // fine if it works, ignore if not
+#else
+    _sq_fd = sock;
+#endif
+}
 
 VsnetTCPSocket::~VsnetTCPSocket( )
 {
+#ifdef HAVE_FIOASYNC
+    ::close( _sq_fd );
+#endif
     if( _incomplete_packet )
     {
-	    delete _incomplete_packet;
+        delete _incomplete_packet;
     }
 }
 
-int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
+int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP*, int pcktflags )
+{
+    int  idx = 1;
+    if( pcktflags & LOPRI ) idx = 0;
+    if( pcktflags & HIPRI ) idx = 2;
+
+    /* Use a priority queue instead of a standard queue.
+     * Add a timestamp here -- drop packets when they get too old.
+     */
+
+    _sq_mx.lock( );
+    if( _sq.empty() )
+    {
+        _sq.push( SqPair(idx,packet) );
+        _sq_mx.unlock( );
+        _set.wakeup( );
+    }
+    else
+    {
+        _sq.push( SqPair(idx,packet) );
+        _sq_mx.unlock( );
+    }
+    return packet.len();
+}
+
+bool VsnetTCPSocket::need_test_writable( )
+{
+    _sq_mx.lock( );
+    bool e = ( _sq.empty() && _sq_current.empty() );
+    _sq_mx.unlock( );
+    return !e;
+}
+
+int VsnetTCPSocket::get_write_fd( ) const
+{
+    return _sq_fd;
+}
+
+int VsnetTCPSocket::lower_sendbuf( )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
-    int numsent;
 
+    _sq_mx.lock( );
+    if( _sq_current.empty() )
+    {
+        if( _sq.empty() )
+        {
+            _sq_mx.unlock( );
+            return 0;
+        }
+        else
+        {
+            Header h( _sq.top().second.len() );
+            _sq_current.push( PacketMem( &h, sizeof(Header) ) );
+            _sq_current.push( _sq.top().second );
+            _sq.pop( );
+            _sq_off = 0;
+        }
+    }
+
+    PacketMem packet( _sq_current.front() );
+
+    int          numsent;
+    unsigned int len = packet.len();
+    assert( len > _sq_off );
+    len -= _sq_off;
+    const char* buf = packet.getConstBuf();
+    numsent = ::send( _sq_fd, &buf[_sq_off], len, 0 );
+    if( numsent < 0 )
+    {
+        switch( errno )
+        {
+        case EWOULDBLOCK :
+        case EINTR :
+            _sq_mx.unlock( );
+            return 0;
+        default :
+            perror( "\tsending TCP data : ");
+            _sq_mx.unlock( );
+            return -1;
+        }
+    }
+    else if( numsent == 0 )
+    {
+        // other side closed socket - what to do now?
+        _sq_mx.unlock( );
+        return numsent;
+    }
+    else if( (unsigned int)numsent == len )
+    {
+        _sq_off = 0;
+        _sq_current.pop( );
+        _sq_mx.unlock( );
 #ifdef VSNET_DEBUG
-    //
-    // DEBUG block - remove soon
-    //
-    {
-        COUT << "trying to send buffer with len " << packet.len() << ": " << endl;
-	    packet.dump( cout, 0 );
-    }
+        //
+        // DEBUG block - remove soon
+        //
+        {
+            COUT << "sent buffer with len " << packet.len() << ": " << endl;
+            packet.dump( cout, 0 );
+        }
 #endif
-
-    unsigned int len = htonl( packet.len() );
-    if( (numsent=send( _fd, (char *)&len, 4, 0 )) < 0 )
-    {
-        perror( "\tsending TCP packet len : ");
-        if( errno == EBADF) return -1;
+        return numsent;
     }
-    if( (numsent=send( _fd, packet.getConstBuf(), packet.len(), 0))<0)
+    else
     {
-        perror( "\tsending TCP data : ");
-        if( errno == EBADF) return -1;
+        assert( (unsigned int)numsent < len ); // should be impossible
+        _sq_off += numsent;
+        _sq_mx.unlock( );
+        return numsent;
     }
-    return numsent;
 }
 
 int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
@@ -110,18 +207,19 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
         buffer = _cpq.front();
         _cpq.pop();
         _cpq_mx.unlock( );
-        _set.dec_pending( );
         return buffer.len();
     }
     else if( _connection_closed )
     {
         _cpq_mx.unlock( );
+        _set.rem_pending( _sq_fd );
         _fd = -1;
         COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
         return 0;
     }
     else
     {
+        _set.rem_pending( _sq_fd );
         _cpq_mx.unlock( );
         return -1;
     }
@@ -175,6 +273,7 @@ bool VsnetTCPSocket::isActive( )
         _cpq_mx.unlock( );
         return true;
     }
+    _set.rem_pending( _sq_fd );
     _cpq_mx.unlock( );
 
     return false;
@@ -193,32 +292,35 @@ void VsnetTCPSocket::lower_selected( )
 
     do
     {
-	    if( ( _incomplete_len_field > 0 ) ||
-	        ( _incomplete_len_field == 0 && _incomplete_packet == 0 ) )
+        if( ( _incomplete_header > 0 ) ||
+	        ( _incomplete_header == 0 && _incomplete_packet == 0 ) )
 	    {
 	        assert( _incomplete_packet == 0 );   // we expect a len, can not have data yet
-	        assert( _incomplete_len_field < 4 ); // len is coded in 4 bytes
-	        int len = 4 - _incomplete_len_field;
-	        int ret = ::recv( _fd, &_len_field[_incomplete_len_field], len, 0 );
+	        assert( _incomplete_header < sizeof(Header) ); // len is coded in sizeof(Header) bytes
+	        int len = sizeof(Header) - _incomplete_header;
+            char* b = (char*)&header;
+	        int ret = ::recv( _fd, &b[_incomplete_header], len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
 	        {
 	            if( ret == 0 )
 		        {
+					COUT << "Connection closed" << endl;
 		            _connection_closed = true;
                     _fd = -1;
+                    _set.add_pending( _sq_fd );
 		        }
                 else if( vsnetEWouldBlock() == false )
                 {
-                    perror( "receiving TCP packet length bytes" );
+                    perror( "receiving TCP packetlength bytes" );
                 }
                 return;
 	        }
-	        if( ret > 0 ) _incomplete_len_field += ret;
-	        if( _incomplete_len_field == 4 )
+	        if( ret > 0 ) _incomplete_header += ret;
+	        if( _incomplete_header == sizeof(Header) )
 	        {
-	            _incomplete_len_field = 0;
-		        len = ntohl( *(unsigned int*)_len_field );
+	            _incomplete_header = 0;
+		        len = _header.h_len();
                 _incomplete_packet = new Blob( len );
 	        }
 	    }
@@ -232,10 +334,12 @@ void VsnetTCPSocket::lower_selected( )
 	            if( ret == 0 )
 		        {
 		            _connection_closed = true;
+                    _fd = -1;
+                    _set.add_pending( _sq_fd );
 		        }
                 else if( vsnetEWouldBlock() == false )
 		        {
-                    perror( "receiving TCP packet bytes" );
+                    perror( "receiving TCP packet" );
 		        }
                 return;
 	        }
@@ -278,7 +382,7 @@ void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
     _cpq_mx.lock( );
     _cpq.push( mem );
     _cpq_mx.unlock( );
-    _set.inc_pending( );
+    _set.add_pending( _sq_fd );
     delete b;
 }
 

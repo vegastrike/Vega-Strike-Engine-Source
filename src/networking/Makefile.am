@@ -43,6 +43,7 @@ libnetgeneric = \
 	packetmem.h				\
 	packet.cpp				\
 	packet.h				\
+	vsnet_debug.h			\
 	vsnet_address.cpp		\
 	vsnet_address.h			\
 	vsnet_socket.cpp		\

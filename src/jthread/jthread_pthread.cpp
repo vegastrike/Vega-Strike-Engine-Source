@@ -25,6 +25,11 @@
 
 */
 
+/* griff: Note that this code has a memory leak - the thread structures remain
+ *        alive because join() is never called, and the threads are not started
+ *        detached!
+ */
+
 #include "jthread.h"
 #include <stdlib.h>
 
@@ -49,6 +54,11 @@ int JThread::Start()
 		if (!runningmutex.IsInitialized())
 		{
 			if (runningmutex.Init() < 0)
+				return ERR_JTHREAD_CANTINITMUTEX;
+		}
+		if (!runningcond.IsInitialized())
+		{
+			if (runningcond.Init() < 0)
 				return ERR_JTHREAD_CANTINITMUTEX;
 		}
 		if (!continuemutex.IsInitialized())
@@ -80,8 +90,7 @@ int JThread::Start()
 	runningmutex.Lock();			
 	while (!running)
 	{
-		runningmutex.Unlock();
-		runningmutex.Lock();
+		runningcond.Wait( runningmutex );
 	}
 	runningmutex.Unlock();
 	continuemutex.Unlock();
@@ -135,6 +144,7 @@ void *JThread::TheThread(void *param)
 	
 	jthread->runningmutex.Lock();
 	jthread->running = true;
+	jthread->runningcond.Signal();
 	jthread->runningmutex.Unlock();
 	
 	// wait till we can continue
@@ -149,3 +159,4 @@ void *JThread::TheThread(void *param)
 	jthread->runningmutex.Unlock();
 	return NULL;		
 }
+

@@ -109,27 +109,27 @@ void PacketMem::inner_set( void* buffer, size_t size, bool own )
 {
     if( buffer != NULL )
     {
-	if( own == false )
-	{
+        if( own == false )
+        {
             _buffer  = new char[size];
-	    _len     = size;
+            _len     = size;
             _cnt     = new size_t;
-	    *_cnt    = 1;
+            *_cnt    = 1;
 
-	    memcpy( _buffer, buffer, size );
-	}
-	else
-	{
+            memcpy( _buffer, buffer, size );
+        }
+        else
+        {
             _buffer  = (char*)buffer;
             _len     = size;
             _cnt     = new size_t;
-	    *_cnt    = 1;
-	}
+            *_cnt    = 1;
+        }
     }
     else
     {
         _buffer  = NULL;
-	_len     = 0;
+        _len     = 0;
         _cnt     = NULL;
     }
 }
@@ -141,27 +141,27 @@ void PacketMem::dump( ostream& ostr, size_t indent_depth ) const
     char x[LEN];
     char* buf  = _buffer;
     size_t len = _len;
-	size_t i=0;
+    size_t i=0;
     while( len > 0 )
     {
         for( i=0; i<indent_depth; i++ ) ostr << " ";
-	memset( x, -1, LEN );
-	for( i=0; i<LEN && len>0; i++ )
-	{
-	    x[i] = *buf;
-	    buf++;
-	    len--;
-	}
-	for( i=0; i<LEN; i++ )
-	{
-	    ostr << " " << std::setw(2) << std::hex << (((unsigned int)x[i])&0xff);
-	}
-	ostr << "   ";
-	for( i=0; i<LEN; i++ )
-	{
-	    if( isprint(x[i]) ) ostr << x[i]; else ostr << "@";
-	}
-	ostr << endl;
+        memset( x, -1, LEN );
+        for( i=0; i<LEN && len>0; i++ )
+        {
+            x[i] = *buf;
+            buf++;
+            len--;
+        }
+        for( i=0; i<LEN; i++ )
+        {
+            ostr << " " << std::setw(2) << std::hex << (((unsigned int)x[i])&0xff);
+        }
+        ostr << "   ";
+        for( i=0; i<LEN; i++ )
+        {
+            if( isprint(x[i]) ) ostr << x[i]; else ostr << "@";
+        }
+        ostr << endl;
     }
     ostr << std::dec;
 }
@@ -205,5 +205,65 @@ void PacketMem::unref( )
     assert( _cnt );
     assert( *_cnt > 0 );
     (*_cnt)--;
+}
+
+/***********************************************************************
+ * PacketMemShadow - definition
+ ***********************************************************************/
+
+PacketMemShadow::PacketMemShadow( )
+    : _idx( 0 )
+    , _len( 0 )
+{ }
+
+PacketMemShadow::PacketMemShadow( const PacketMemShadow& orig )
+    : _mem( orig._mem )
+    , _idx( orig._idx )
+    , _len( orig._len )
+{ }
+
+PacketMemShadow::PacketMemShadow( const PacketMem& mem )
+    : _mem( mem )
+    , _idx( 0 )
+    , _len( mem.len() )
+{ }
+
+PacketMemShadow::PacketMemShadow( const PacketMem& mem, size_t idx size_t len )
+    : _mem( mem )
+    , _idx( idx )
+    , _len( len )
+{
+    if( _idx + _len > _mem.len() )
+    {
+        if( _idx > _mem.len() )
+            _len = 0;
+        else
+            _len = _mem.len() - _idx;
+    }
+}
+
+PacketMemShadow& PacketMemShadow::operator=( const PacketMemShadow& orig )
+{
+    _mem = orig._mem;
+    _idx = orig._idx;
+    _len = orig._len;
+    return *this;
+}
+
+size_t PacketMemShadow::len() const
+{
+    return _len;
+}
+
+char* PacketMemShadow::getVarBuf( )
+{
+    char* r = _mem.getVarBuf( );
+    return &r[_idx];
+}
+
+const char* PacketMemShadow::getConstBuf( ) const
+{
+    const char* r = _mem.getConstBuf( );
+    return &r[_idx];
 }
 

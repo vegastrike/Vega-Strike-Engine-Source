@@ -1,6 +1,7 @@
 #include <config.h>
 
 #include "vsnet_thread.h"
+#include "vsnet_debug.h"
 #ifdef USE_PTHREAD
 
 #include <pthread.h>
@@ -101,7 +102,7 @@ void VSThread::join( )
 
 struct VSMutex::Private
 {
-#if defined(_AIX)
+#if defined(linux) || defined(_AIX)
     pthread_mutexattr_t attr;
 #endif
     pthread_mutex_t     lck;
@@ -109,54 +110,48 @@ struct VSMutex::Private
 
 VSMutex::VSMutex( )
 {
-#if !defined(_AIX)
+#if defined(linux) || defined(_AIX)
+    _internal = new Private;
+    int ret = ::pthread_mutexattr_init( &_internal->attr );
+    if( ret != 0 )
+    {
+        perror("pthread_mutexattr_init failed (ignored)");
+    	ret = ::pthread_mutex_init( &_internal->lck, NULL );
+    }
+    else
+    {
+        /* PTHREAD_MUTEX_DEFAULT    - undefined behaviour
+         * PTHREAD_MUTEX_NORMAL     - hang on double lock
+         * PTHREAD_MUTEX_ERRORCHECK - return an error on double lock
+         * PTHREAD_MUTEX_RECURSIVE  - allow recursive locking (Not Windows
+         *                            semantics, this is a counter!)
+         */
+    #ifdef VSNET_DEBUG
+        ::pthread_mutexattr_settype( &_internal->attr, PTHREAD_MUTEX_ERRORCHECK );
+    #else
+        ::pthread_mutexattr_settype( &_internal->attr, PTHREAD_MUTEX_NORMAL );
+    #endif
+
+        /* PTHREAD_PROCESS_PRIVATE - the default, mutex is not shared with
+         *                           another process
+         * PTHREAD_PROCESS_SHARED  - mutex may be shared with another process
+         */
+        ::pthread_mutexattr_setpshared( &_internal->attr, PTHREAD_PROCESS_PRIVATE );
+
+        ret = ::pthread_mutex_init ( &_internal->lck, &_internal->attr );
+    }
+    if( ret != 0 )
+    {
+        perror("pthread_mutex_init failed");
+    }
+#else /*linux||_AIX*/
     _internal = new Private;
     int ret = ::pthread_mutex_init( &_internal->lck, NULL );
     if( ret != 0 )
     {
         perror("pthread_mutex_init failed");
     }
-#else
-    _internal = new Private;
-    int ret = ::pthread_mutexattr_init( &_internal->attr );
-    if( ret != 0 )
-    {
-        perror("pthread_mutexattr_init failed");
-        return;
-    }
-
-    /* PTHREAD_MUTEX_DEFAULT    - undefined behaviour
-     * PTHREAD_MUTEX_NORMAL     - hang on double lock
-     * PTHREAD_MUTEX_ERRORCHECK - return an error on double lock
-     * PTHREAD_MUTEX_RECURSIVE  - allow recursive locking (Not Windows
-     *                            semantics, this is a counter!)
-     */
-    ret = ::pthread_mutexattr_settype( &_internal->attr,
-                                     PTHREAD_MUTEX_ERRORCHECK );
-    if( ret != 0 )
-    {
-        perror("pthread_mutexattr_settype failed");
-        return;
-    }
-
-    /* PTHREAD_PROCESS_PRIVATE - the default, mutex is not shared with
-     *                           another process
-     * PTHREAD_PROCESS_SHARED  - mutex may be shared with another process
-     */
-    ret = ::pthread_mutexattr_setpshared( &_internal->attr,
-                                        PTHREAD_PROCESS_PRIVATE );
-    if( ret != 0 )
-    {
-        perror("pthread_mutexattr_setpshared failed");
-        return;
-    }
-
-    ret = ::pthread_mutex_init ( &_internal->lck, &_internal->attr );
-    if( ret != 0 )
-    {
-        perror("pthread_mutex_init failed");
-    }
-#endif
+#endif /*linux||_AIX*/
 }
 
 VSMutex::~VSMutex( )
@@ -166,7 +161,7 @@ VSMutex::~VSMutex( )
     {
         perror("pthread_mutex_destroy failed");
     }
-#if defined(_AIX)
+#if defined(linux) || defined(_AIX)
     ret = ::pthread_mutexattr_destroy( &_internal->attr );
     if( ret != 0 )
     {

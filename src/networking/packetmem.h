@@ -6,6 +6,10 @@
 
 #include "const.h"
 
+/***********************************************************************
+ * PacketMem - declaration
+ ***********************************************************************/
+
 class PacketMem
 {
 public:
@@ -60,6 +64,28 @@ private:
     void inner_set( void* buffer, size_t size, bool own );
     void ref( );
     void unref( );
+};
+
+/***********************************************************************
+ * PacketMemShadow - declaration
+ ***********************************************************************/
+
+class PacketMemShadow
+{
+    PacketMem _mem;
+    size_t    _idx;    /* 0-based offset */
+    size_t    _len;    /* fake length in bytes */
+public:
+    PacketMemShadow( );
+    PacketMemShadow( const PacketMemShadow& orig );
+    PacketMemShadow( const PacketMem& mem );
+    PacketMemShadow( const PacketMem& mem, size_t idx size_t len );
+
+    PacketMemShadow& operator=( const PacketMemShadow& orig );
+
+    size_t      len() const;
+    char*       getVarBuf( );
+    const char* getConstBuf( ) const;
 };
 
 #endif

@@ -12,10 +12,10 @@ if NETCOMM
 SUBDIRS = jvoiplib jthread jrtplib cmd gfx gldrv aldrv python gui networking boost common boost129
 ld_add = \
 jvoiplib/libjvoip.a jvoiplib/libgsm.a jvoiplib/liblpc.a \
-jthread/libjthread.a				\
 jrtplib/libjrtp.a
 else
-SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
+SUBDIRS = jthread cmd gfx gldrv aldrv python gui networking boost common boost129
+ld_add =
 endif
 
 vegastrike_LDADD =  				\
@@ -36,9 +36,11 @@ gldrv/libgldrv.a 					\
 gui/libgui.a 						\
 networking/libnet.a 				\
 cmd/collide/libcollide.a 			\
-boost129/libboost_python.a boost/libboost_python.a \
+boost129/libboost_python.a          \
+boost/libboost_python.a             \
 gfx/nav/libnav.a 					\
 $(ld_add)							\
+jthread/libjthread.a                \
 -lpthread 
 
 vegaserver_LDADD =  			\
@@ -56,11 +58,14 @@ python/libpythonserver.a 		\
 gfx/libgfxserver.a 				\
 gldrv/libgldrvserver.a 			\
 cmd/collide/libcollide.a 		\
-boost129/libboost_python.a boost/libboost_python.a
+boost129/libboost_python.a      \
+boost/libboost_python.a	        \
+jthread/libjthread.a
 
-accountserver_LDADD =  \
-common/libvscommon.a \
-networking/libnetacct.a
+accountserver_LDADD =           \
+common/libvscommon.a            \
+networking/libnetacct.a	        \
+jthread/libjthread.a
 
 
 libroot =		\

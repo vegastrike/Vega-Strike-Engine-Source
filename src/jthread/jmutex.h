@@ -30,31 +30,39 @@
 #define JMUTEX_H
 
 #ifdef WIN32
-	#include <windows.h>
+    #include <windows.h>
 #else // using pthread
-	#include <pthread.h>
+    #include <pthread.h>
 #endif // WIN32
 
-#define ERR_JMUTEX_ALREADYINIT						-1
-#define ERR_JMUTEX_NOTINIT						-2
-#define ERR_JMUTEX_CANTCREATEMUTEX					-3
+#define ERR_JMUTEX_ALREADYINIT     -1
+#define ERR_JMUTEX_NOTINIT         -2
+#define ERR_JMUTEX_CANTCREATEMUTEX -3
+
+#define JMUTEX_DEBUG
 
 class JMutex
 {
 public:
-	JMutex();
-	~JMutex();
-	int Init();
-	int Lock();
-	int Unlock();
-	bool IsInitialized() 						{ return initialized; }
+    JMutex();
+    ~JMutex();
+    int Init();
+    int Lock();
+    int Unlock();
+    bool IsInitialized() const { return initialized; }
+
 private:
 #ifdef WIN32
-	HANDLE mutex;
-#else // pthread mutex
-	pthread_mutex_t mutex;
-#endif // WIN32
-	bool initialized;
+    HANDLE mutex;
+#elif defined(linux) || defined(_AIX)
+    pthread_mutexattr_t attr;
+    pthread_mutex_t     mutex;
+    friend class JCond;
+#else
+    pthread_mutex_t     mutex;
+    friend class JCond;
+#endif
+    bool initialized;
 };
 
 #endif // JMUTEX_H

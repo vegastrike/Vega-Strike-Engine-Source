@@ -1,9 +1,9 @@
 #include <config.h>
 
 #include "vsnet_serversocket.h"
-
-#include "const.h"
+#include "vsnet_debug.h"
 #include "vsnet_err.h"
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -56,12 +56,12 @@ void ServerSocketTCP::lower_selected( )
     int sock = ::accept( _fd, (sockaddr *)&remote_ip, &len );
     if( sock > 0 )
     {
-        COUT << "accepted" << endl;
+        COUT << "accepted new sock " << sock  << endl;
         SOCKETALT newsock( sock, SOCKETALT::TCP, remote_ip, _set );
         _ac_mx.lock( );
 	    _accepted_connections.push( newsock );
         _ac_mx.unlock( );
-        _set.inc_pending( );
+        _set.add_pending( _fd );
     }
     else
     {
@@ -91,12 +91,12 @@ SOCKETALT ServerSocketTCP::acceptNewConn( )
         SOCKETALT ret( _accepted_connections.front() );
         _accepted_connections.pop();
         _ac_mx.unlock( );
-        _set.dec_pending( );
         return ret;
     }
     else
     {
         _ac_mx.unlock( );
+        _set.rem_pending( _fd );
         SOCKETALT ret;
         return ret;
     }

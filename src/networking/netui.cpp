@@ -3,6 +3,7 @@
 #include "const.h"
 #include "netui.h"
 #include "vsnet_serversocket.h"
+#include "vsnet_debug.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
     //#warning "Win32 platform"

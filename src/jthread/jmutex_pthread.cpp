@@ -35,7 +35,12 @@ JMutex::JMutex()
 JMutex::~JMutex()
 {
 	if (initialized)
-		pthread_mutex_destroy(&mutex);
+    {
+		::pthread_mutex_destroy(&mutex);
+#if defined(linux) || defined(_AIX)
+		::pthread_mutexattr_destroy(&attr);
+#endif
+    }
 }
 
 int JMutex::Init()
@@ -43,7 +48,21 @@ int JMutex::Init()
 	if (initialized)
 		return ERR_JMUTEX_ALREADYINIT;
 	
-	pthread_mutex_init(&mutex,NULL);
+#if defined(linux) || defined(_AIX)
+  #if defined(JMUTEX_DEBUG)
+	::pthread_mutexattr_init(&attr);
+    ::pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_ERRORCHECK );
+    ::pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_PRIVATE );
+	::pthread_mutex_init(&mutex,&attr);
+  #else
+	::pthread_mutexattr_init(&attr);
+    ::pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_NORMAL );
+    ::pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_PRIVATE );
+	::pthread_mutex_init(&mutex,&attr);
+  #endif
+#else
+	::pthread_mutex_init(&mutex,NULL);
+#endif
 	initialized = true;
 	return 0;	
 }
@@ -53,7 +72,7 @@ int JMutex::Lock()
 	if (!initialized)
 		return ERR_JMUTEX_NOTINIT;
 		
-	pthread_mutex_lock(&mutex);
+	::pthread_mutex_lock(&mutex);
 	return 0;
 }
 
@@ -62,6 +81,7 @@ int JMutex::Unlock()
 	if (!initialized)
 		return ERR_JMUTEX_NOTINIT;
 	
-	pthread_mutex_unlock(&mutex);
+	::pthread_mutex_unlock(&mutex);
 	return 0;
 }
+

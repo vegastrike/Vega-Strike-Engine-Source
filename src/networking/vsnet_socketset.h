@@ -60,6 +60,7 @@ class SocketSet : public VSThread
 
     bool    _blockmain;
     size_t  _blockmain_pending;
+    fd_set  _blockmain_set;
     VSMutex _blockmain_mx;
     VSCond  _blockmain_cond;
 
@@ -76,8 +77,8 @@ public:
 
     /// The upper thread waits for something to arrive on the socket
     void wait( );
-    void dec_pending( );
-    void inc_pending( );
+    void add_pending( int fd );
+    void rem_pending( int fd );
 
     /** Use this function liberally in you code. If you don't have a
      *  network thread, it will check select and return. If you
@@ -87,6 +88,8 @@ public:
     void waste_time( long sec, long usec );
 
     virtual void run( );
+
+    void wakeup( );
 
 private:
     int private_select( timeval* timeout );

@@ -13,6 +13,8 @@
 #include "vsnet_socketudp.h"
 #include "vsnet_socketset.h"
 
+using namespace std;
+
 int close_socket( int fd )
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -24,6 +26,27 @@ int close_socket( int fd )
 
 LOCALCONST_DEF(SOCKETALT,bool,TCP,1)
 LOCALCONST_DEF(SOCKETALT,bool,UDP,0)
+
+/***********************************************************************
+ * PCKTFLAGS
+ ***********************************************************************/
+ 
+ostream& operator<<( ostream& ostr, PCKTFLAGS f )
+{
+    int flags = f;
+    if( flags == 0 ) ostr << "NONE"; return ostr;
+    if( flags & SENDANDFORGET ) ostr << "SENDANDFORGET ";
+    if( flags & SENT          ) ostr << "SENT ";
+    if( flags & RESENT        ) ostr << "RESENT ";
+    if( flags & ACKED         ) ostr << "ACKED ";
+    if( flags & SENDRELIABLE  ) ostr << "SENDRELIABLE ";
+    if( flags & LOPRI         ) ostr << "LOPRI ";
+    if( flags & HIPRI         ) ostr << "HIPRI ";
+    if( flags & COMPRESSED    ) ostr << "COMPRESSED ";
+    flags &= ~0x101f;
+    if( flags != 0 ) ostr << hex << flags;
+    return ostr;
+}
 
 /***********************************************************************
  * SOCKETALT
