@@ -26,7 +26,7 @@
 extern BOOL bTex0;
 extern BOOL bTex1;
 
-
+#define USE_DISPLAY_LISTS
 GFXQuadstrip::GFXQuadstrip(int numVertices,GFXVertex *vertices): numVertices(numVertices), display_list(0)
 {
   // error check # of vertices
@@ -49,8 +49,14 @@ GFXQuadstrip::GFXQuadstrip(int numVertices,GFXVertex *vertices): numVertices(num
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		/*glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		  glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);*/
-		
-		glDrawArrays(GL_QUAD_STRIP, 0, numVertices);
+		glBegin(GL_QUAD_STRIP);
+		for(int a=0; a<numVertices; a++) {
+		  glNormal3f(myVertices[a].i,myVertices[a].j,myVertices[a].k);
+		  glTexCoord2f(myVertices[a].s, myVertices[a].t);
+		  glVertex3f(myVertices[a].x,myVertices[a].y,myVertices[a].z);
+		}
+		glEnd();
+		//glDrawArrays(GL_QUAD_STRIP, 0, numVertices);
 		GFXEndList();
 #endif
 }

@@ -35,7 +35,7 @@ extern BOOL bTex0;
 extern BOOL bTex1;
 
 static int next_display_list = 1;
-
+#define USE_DISPLAY_LISTS
 GFXVertexList::GFXVertexList():myVertices(NULL),numQuads(0),numTriangles(0),numVertices(0), display_list(0)
 {
 }
@@ -73,7 +73,7 @@ GFXVertexList::GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVe
 		
 	//glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
 	//glDrawArrays(GL_QUADS, numTriangles*3, numQuads*4);
-	glActiveTextureARB(GL_TEXTURE0_ARB);
+
 	glBegin(GL_TRIANGLES);
 	for(int a=0; a<numTriangles*3; a++) {
 	  glNormal3f(myVertices[a].i,myVertices[a].j,myVertices[a].k);
@@ -152,7 +152,8 @@ BOOL GFXVertexList::Draw()
 		else
 			glDisable(GL_TEXTURE_2D);
 	}
-    GFXCallList(display_list);
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+	GFXCallList(display_list);
   } else {
 	if(g_game.Multitexture) {
 		glActiveTextureARB(GL_TEXTURE0_ARB);	
