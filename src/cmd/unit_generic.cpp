@@ -5226,12 +5226,6 @@ std::set<std::string> GetListOfDowngrades () {
 }
 bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit,bool force_change_on_nothing) {
   percentage=0;
-  if (up->name=="disruptor") {
-    printf ("dis");
-  }
-  if (up->name=="franklinpd") {
-    printf ("frank");
-  }
   int numave=0;
   bool cancompletefully=true;
   if (mountoffset>=0)

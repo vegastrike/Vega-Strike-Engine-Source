@@ -125,7 +125,7 @@ string buildCargoDescription(Cargo &item);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
 void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter);
 string buildUpgradeDescription(Cargo &item);
-
+int basecargoassets(Unit* base,string cargoname);
 
 // "Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair";
@@ -1319,6 +1319,53 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		maxForPlayer->setText("");
 	}
 }
+
+/*
+// Update the commit controls in the Upgrade screen, since we (will) have three of them.
+void BaseComputer::configureUpgradeCommitControls(const Cargo& item, TransactionType trans) {
+	// "Buy 1" button.
+	NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
+	assert(commitButton != NULL);
+	commitButton->setHidden(false);
+	commitButton->setLabel("Buy 1");
+	commitButton->setCommand("BuyCargo");
+
+	// "Buy 10" button.
+	NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
+	assert(commit10Button != NULL);
+	commit10Button->setHidden(false);
+	commit10Button->setLabel("Buy 10");
+	commit10Button->setCommand("Buy10Cargo");
+
+	// "Buy All" button.
+	NewButton* commitAllButton = static_cast<NewButton*>( window()->findControlById("CommitAll") );
+	assert(commitAllButton != NULL);
+	commitAllButton->setHidden(false);
+	commitAllButton->setLabel("Buy");
+	commitAllButton->setCommand("BuyAllCargo");
+
+	const int maxQuantity = maxQuantityForPlayer(item, item.quantity);
+
+	// Total price display.
+	const double totalPrice = item.price * maxQuantity;
+	char tempString[2048];
+	sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
+	StaticDisplay* totalDisplay = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+	assert(totalDisplay != NULL);
+	totalDisplay->setText(tempString);
+	// Limit if we have one.
+	StaticDisplay* maxForPlayer = static_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+	assert(maxForPlayer != NULL);
+	if(maxQuantity >= item.quantity) {
+		// No limits, so let's not mention anything.
+		maxForPlayer->setText("");
+	} else {
+		char maxString[2048];
+		sprintf(maxString, "Max: #b#%d#-b", maxQuantity);
+		maxForPlayer->setText(maxString);
+	}
+}
+*/
 
 string buildShipDescription(Cargo &item,string & descriptiontexture);
 // Update the controls when the selection for a transaction changes.
@@ -2603,24 +2650,41 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
 
    // Get the upgrade percentage to calculate the full price.
     double percent;
-    playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate);
-    const float price = m_part.price * (1-usedValue(percent));
-    if (_Universe->AccessCockpit()->credits >= price) {
-        // Have enough money.  Buy it.
-        _Universe->AccessCockpit()->credits -= price;
-        // Upgrade the ship.
-        playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate);
-        // Remove the item from the base, since we bought it.
-        unsigned int index;
-        baseUnit->GetCargo(m_part.content, index);
-        baseUnit->RemoveCargo(index, 1, false);
-    }
+	int numleft = basecargoassets(baseUnit,m_part.content);
+	while(numleft>0&&playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate)){
+      const float price = m_part.price * (1-usedValue(percent));
+      if (_Universe->AccessCockpit()->credits >= price) {
+          // Have enough money.  Buy it.
+          _Universe->AccessCockpit()->credits -= price;
+          // Upgrade the ship.
+          playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate);
+          // Remove the item from the base, since we bought it.
+          unsigned int index;
+          baseUnit->GetCargo(m_part.content, index);
+          baseUnit->RemoveCargo(index, 1, false);
+	  } else {
+		break;
+	  }
+	  if(m_newPart->mounts[0].ammo<=0){
+		  break;
+	  }
+	  numleft = basecargoassets(baseUnit,m_part.content);
+	}
 
     updateUI();
 
     finish();
 }
 
+int basecargoassets(Unit* baseUnit, string cargoname){
+  unsigned int dummy;
+  Cargo * somecargo = baseUnit->GetCargo(cargoname,dummy);
+  if (somecargo){
+	return somecargo->quantity;
+  } else {
+	return 0;
+  }
+}
 
 // Start the Sell Upgrade Operation.
 void BaseComputer::SellUpgradeOperation::start(void) {
