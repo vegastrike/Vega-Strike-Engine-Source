@@ -164,8 +164,16 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
     Vector p(-TerrainH.Cross (TerrainUp));
     VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,cumulative_transformation.position);
     terrain->SetTransformation (tmp);
-    if (atmosphere)
+    if (atmosphere) {
+      Vector p = (_Universe->AccessCamera()->GetPosition());
+      Vector blah = p-Vector (tmp[12],tmp[13],tmp[14]);
+      blah = p - (blah.Dot (TerrainUp))*TerrainUp;
+      tmp[12]=p.i;//blah.i;
+      tmp[13]=p.j;//blah.j;
+      tmp[14]=p.k;//blah.k;
+      
       atmosphere->SetMatricesAndDraw (_Universe->AccessCamera()->GetPosition(),tmp);
+    }
   }
   // if cam inside don't draw?
   if(!inside) {
@@ -179,7 +187,6 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   if ((counter++)>100) { 
     Vector t (_Universe->AccessCamera()->GetPosition()-Position());
     if (t.Magnitude()<corner_max.i) {
-      shouldfog=true;
       if (!inside) {
 	TerrainUp = t;
 	Normalize(TerrainUp);
@@ -198,6 +205,8 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 	  
 	  terrain->DisableDraw();
 	}
+      } else {
+	shouldfog=true;
       }
     }
   }

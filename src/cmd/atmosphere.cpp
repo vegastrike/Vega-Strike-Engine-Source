@@ -154,8 +154,10 @@ void Atmosphere::Draw()
 	Matrix rot1;
 	MultMatrix(rot1,tmatrix,rot);
 	CopyMatrix (rot1,tmatrix);
+
 	Vector tmp(rot1[8],rot1[9],rot1[10]);
 	Vector tmp2(rot1[4],rot1[5],rot1[6]);
+
 	rot1[8]=-tmp.i;
 	rot1[9]=-tmp.j;
 	rot1[10]=-tmp.k;
@@ -174,7 +176,7 @@ void Atmosphere::Draw()
 	Update(position,rot1);
 
 	GFXDisable(DEPTHWRITE);
-	dome->DrawNow(100000,GFXTRUE,identity_transformation,rot1);
+	dome->DrawNow(100000,GFXFALSE,identity_transformation,rot1);
 	GFXDisableLight (l0);
 	GFXDisableLight (l1);
 	GFXDeleteLight(l0);
