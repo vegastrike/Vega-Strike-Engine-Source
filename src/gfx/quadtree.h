@@ -1,7 +1,7 @@
 #ifndef QUADTREE_H_
 #define QUADTREE_H_
 #include "quadsquare.h"
-class Texture;
+struct Texture;
 /** 
  * This class is a wrapper class for quadsquare
  * It takes care of activating textures, having possession of the vlist
