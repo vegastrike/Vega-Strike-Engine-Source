@@ -10,6 +10,7 @@ libcmd_a_SOURCES =				\
 	base.h				\
 	base_interface.cpp		\
 	base_xml.cpp			\
+	base_write_xml.cpp		\
 	beam.h				\
 	beam.cpp				\
 	briefing.h			\
