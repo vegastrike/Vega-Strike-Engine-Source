@@ -207,6 +207,7 @@ void StarSystem::SwapOut () {
   }
 
 }
+bool shouldfog=false;
 void StarSystem::Draw() {
   AnimatedTexture::UpdateAllFrame();
   for (unsigned int i=0;i<contterrains.size();i++) {
@@ -214,19 +215,24 @@ void StarSystem::Draw() {
   }
   GFXDisable (LIGHTING);
   bg->Draw();
-  GFXFogMode (FOG_EXP2);
-  GFXFogDensity (.0005);
-  GFXFogLimits (1,1000);
-  GFXFogIndex (0);
-  GFXFogColor (GFXColor(.5,.5,.5,.5));
 
   Iterator *iter = drawList->createIterator();
   Unit *unit;
+  shouldfog=false;
   while((unit = iter->current())!=NULL) {
     unit->Draw();
     iter->advance();
   }
   delete iter;
+  if (shouldfog) {
+    GFXFogMode (FOG_EXP2);
+    GFXFogDensity (.0005);
+    GFXFogLimits (1,1000);
+    GFXFogIndex (0);
+    GFXFogColor (GFXColor(.5,.5,.5,.5));
+  }else {
+    GFXFogMode (FOG_OFF);
+  }
   _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
@@ -246,13 +252,15 @@ void StarSystem::Draw() {
 
   GFXLightContextAmbient(tmpcol);
   Halo::ProcessDrawQueue();
-  GFXFogMode (FOG_EXP2);
+  if (shouldfog)
+    GFXFogMode (FOG_EXP2);
   Beam::ProcessDrawQueue();
   Animation::ProcessDrawQueue();
   Bolt::Draw();
 
   stars->Draw();
-  GFXFogMode (FOG_OFF);
+  if (shouldfog)
+    GFXFogMode (FOG_OFF);
 
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
   _Universe->AccessCockpit()->Draw();

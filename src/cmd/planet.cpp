@@ -156,6 +156,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   */
   meshdata[1]=NULL;
 }
+extern bool shouldfog;
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
   if (inside&&terrain) {
@@ -178,6 +179,7 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   if ((counter++)>100) { 
     Vector t (_Universe->AccessCamera()->GetPosition()-Position());
     if (t.Magnitude()<corner_max.i) {
+      shouldfog=true;
       if (!inside) {
 	TerrainUp = t;
 	Normalize(TerrainUp);

@@ -153,6 +153,17 @@ void Atmosphere::Draw()
 		0, 0, 0, 1};
 	Matrix rot1;
 	MultMatrix(rot1,tmatrix,rot);
+	CopyMatrix (rot1,tmatrix);
+	Vector tmp(rot1[8],rot1[9],rot1[10]);
+	Vector tmp2(rot1[4],rot1[5],rot1[6]);
+	rot1[8]=-tmp.i;
+	rot1[9]=-tmp.j;
+	rot1[10]=-tmp.k;
+
+	rot1[4]=-tmp2.i;
+	rot1[5]=-tmp2.j;
+	rot1[6]=-tmp2.k;
+
 	GFXMaterial a = {0,0,0,0,
 					1,1,1,1,
 					0,0,0,0,
