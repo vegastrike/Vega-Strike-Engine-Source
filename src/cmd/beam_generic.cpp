@@ -370,7 +370,8 @@ bool Beam::Collide (Unit * target) {
 	for (;(un=*ui)!=NULL;++ui) {
 	  if (((void *)un)==owner) {
 	    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics","percent_to_tractor",".1"));
-	    if (target->faction==FactionUtil::GetFaction("upgrades")||un->rSize()*nbig>target->rSize()) {
+            static int upgradesfaction=FactionUtil::GetFaction("upgrades");
+	    if (target->faction==upgradesfaction||un->rSize()*nbig>target->rSize()) {
 	      //we have our man!
 	      //lets add our cargo to him
 	      Cargo *c = GetMasterPartList (target->name.c_str());
@@ -389,6 +390,17 @@ bool Beam::Collide (Unit * target) {
 		tmp.quantity=1;
 		tmp.mass=.001;
 		tmp.volume=1;
+                if (target->faction!=upgradesfaction) {
+                  tmp.content= target->name;
+                  tmp.category="starships";
+                  static float starshipprice = XMLSupport::parse_float(vs_config->getVariable("cargo","junk_starship_price","100000"));
+                  static float starshipmass = XMLSupport::parse_float(vs_config->getVariable("cargo","junk_starship_mass","50"));                  
+                  static float starshipvolume = XMLSupport::parse_float(vs_config->getVariable("cargo","junk_starship_volume","1500"));
+                  tmp.price=starshipprice;
+                  tmp.quantity=1;
+                  tmp.mass=starshipmass;
+                  tmp.volume=starshipvolume;
+                }
 	      }
 	      if (c!=NULL) {
 		Cargo adder = *c;
