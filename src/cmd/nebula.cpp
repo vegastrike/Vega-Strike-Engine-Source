@@ -38,7 +38,7 @@ void GameNebula::UpdatePhysics2 (const Transformation &trans, const Transformati
   if (fadeinvalue<0) {
     fadeinvalue=0;
   }
-  this->Unit::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat,CumulativeVelocity,ResolveLast,uc);
+  this->GameUnit<Nebula>::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat,CumulativeVelocity,ResolveLast,uc);
   Vector t1;
   float dis;
   unsigned int i;
