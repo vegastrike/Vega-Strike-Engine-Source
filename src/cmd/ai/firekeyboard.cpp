@@ -716,6 +716,9 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 		vec.push_back(target);
 		iter.advance();
 	}
+	if (reverse) {
+		std::reverse (vec.begin(),vec.end());
+	}
 	std::vector <Unit *>::const_iterator veciter=std::find(vec.begin(),vec.end(),me->Target());
 	if (veciter!=vec.end())
 		veciter++;
@@ -726,7 +729,6 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 				me->Target(*veciter);
 				if ((*veciter)!=NULL) {
 					if (reverse) {
-						std::reverse (vec.begin(),vec.end());
 						static soundContainer foosound;
 						if (foosound.sound<0) {
 							static string str=vs_config->getVariable("cockpitaudio","target","vdu_b");
