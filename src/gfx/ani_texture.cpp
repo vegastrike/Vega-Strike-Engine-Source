@@ -62,12 +62,13 @@ AnimatedTexture::~AnimatedTexture () {
 }
 AnimatedTexture::AnimatedTexture () {Decal=NULL;}
 void AnimatedTexture::Destroy() {
+  int i;
   if (Decal) {
-    for (int i=0;i<myvec.size();i++) {
+    for (i=0;i<myvec.size();i++) {
       if (myvec[i]==this)
 	myvec.erase (myvec.begin()+i);
     }
-    for (int i=0;i<numframes;i++) {
+    for (i=0;i<numframes;i++) {
       delete Decal[i];
     }
     delete Decal;

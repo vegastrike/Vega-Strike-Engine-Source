@@ -4,6 +4,7 @@
 #include "gfx/matrix.h"
 #include "vegastrike.h"
 ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scales, const float mass) {
+  int i;
   float tmass;
   FILE *fp = fopen (filename,"r");
   if (fp) {
@@ -18,14 +19,13 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
     numcontterr= width*width;
     data = new Terrain *[numcontterr];
     std::string *filenames = new std::string[numcontterr];
-    for (int i=0;i<numcontterr;i++) {
+    for (i=0;i<numcontterr;i++) {
       char tmp[512];
       fscanf (fp,"%511s",tmp);
       tmp[511]='\0';
       filenames[i]=tmp;
     }
     fclose (fp);
-    int i;
     
     for (i=0;i<width;i++) {
       for (int j=0;j<width;j++) {
