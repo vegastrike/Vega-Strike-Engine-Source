@@ -54,7 +54,7 @@ ClientState::ClientState( ObjSerial serial, Transformation trans, Vector velocit
 	this->accel = acc;
 }
 
-void		ClientState::display()
+void		ClientState::display() const
 {
 	cout<<"SERIAL="<<this->client_serial;
 	cout<<" - Position="<<pos.position.i<<","<<pos.position.j<<","<<pos.position.k;

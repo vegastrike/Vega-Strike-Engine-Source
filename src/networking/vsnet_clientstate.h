@@ -60,7 +60,7 @@ class	ClientState
 			// memcpy( &this->position, &posit, sizeof( QVector));
 		}
 
-		void		display();
+		void		display() const;
 		int		operator==( const ClientState & ctmp);
 		void	netswap();
 		//friend class Client;
