@@ -16,18 +16,21 @@ class JVOIPSession;
 class JVOIPSessionParams;
 class JVOIPRTPTransmissionParams;
 #endif
+#ifdef USE_PORTAUDIO
+#endif
 
 class NetworkCommunication
 {
-	public:
+	private:
 		// Text message
 		std::deque<std::string>	message_history;
 		int		max_messages;
-	private:
 		// List of clients we are communicating with
 		list<ClientPtr>	commClients;
 		// The current communication frequency
 		float	freq;
+		bool	active;
+		unsigned char	method;
 #ifndef NETCOMM_NOWEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
@@ -44,13 +47,15 @@ class NetworkCommunication
 		~NetworkCommunication();
 
 		int		InitSession( float frequency);
-		string	GrabImage();
+		void	SendImage( SOCKETALT & send_sock);
+		void	SendSound( SOCKETALT & send_sock);
+		void	SendMessage( SOCKETALT & send_sock, string message);
 		int		DestroySession();
-		bool	WebcamEnabled();
-		bool	WebcamTime();
 
 		void	AddToSession( ClientPtr clt);
 		void	RemoveFromSession( ClientPtr clt);
+
+		bool	IsActive()	{ return active;}
 };
 
 #endif

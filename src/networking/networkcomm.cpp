@@ -2,22 +2,37 @@
 
 #ifndef NETCOMM_NOWEBCAM
 #include "networking/webcam_support.h"
-#endif
+#endif /* NETCOMM_NOWEBCAM */
 #ifndef NETCOMM_NOSOUND
 #include "jvoipsession.h"
 #include "jvoiprtptransmission.h"
-#endif
+#endif /* NETCOMM_NOSOUND */
+
+#define VOIP_PORT	5000
 
 #include "networkcomm.h"
 
+#ifndef NETCOMM_NOSOUND
+void	CheckVOIPError( int val)
+{
+	if( val>=0)
+		return;
+	string error = JVOIPGetErrorString( val);
+	cerr<<"!!! JVOIP ERROR : "<<error<<endl;
+	exit(1);
+}
+#endif /* NETCOMM_NOSOUND */
+
 NetworkCommunication::NetworkCommunication()
 {
+	this->active = false;
 	this->max_messages = 25;
+	this->method = 1;
 #ifndef NETCOMM_NOSOUND
 	this->session = NULL;
 	this->params = NULL;
 	this->rtpparams = NULL;
-#endif
+#endif /* NETCOMM_NOSOUND */
 #ifndef NETCOMM_NOWEBCAM
 	this->Webcam = NULL;
 	string webcam_enable = vs_config->getVariable ("network","use_webcam","false");
@@ -31,7 +46,7 @@ NetworkCommunication::NetworkCommunication()
 			this->Webcam = NULL;
 		}
 	}
-#endif
+#endif /* NETCOMM_NOWEBCAM */
 }
 
 NetworkCommunication::NetworkCommunication( int nb)
@@ -43,25 +58,74 @@ NetworkCommunication::NetworkCommunication( int nb)
 void	NetworkCommunication::AddToSession( ClientPtr clt)
 {
 	this->commClients.push_back( clt);
+#ifndef NETCOMM_NOSOUND
+	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
+#endif /* NETCOMM_NOSOUND */
 }
 
 void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 {
 	this->commClients.remove( clt);
+#ifndef NETCOMM_NOSOUND
+	CheckError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
+#endif /* NETCOMM_NOSOUND */
 }
 
-string	NetworkCommunication::GrabImage()
+void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
+{
+	// If max log size is reached we remove the oldest message
+	if( this->message_history.size()==this->max_messages)
+		this->message_history.pop_front();
+	this->message_history.push_back( message);
+
+	// Send the text message according to method
+}
+
+// Send sound sample
+void	NetworkCommunication::SendSound( SOCKETALT & send_sock)
+{
+#ifdef USE_PORTAUDIO
+#endif /* USE_PORTAUDIO */
+// Do not do anything when using JVoIP lib
+}
+
+// Send a grabbed image
+void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 {
 	string jpeg_str( "");
 #ifndef NETCOMM_NOWEBCAM
-	if( Webcam)
+	if( Webcam && Webcam->isReady())
 	{
 		//cerr<<"--- Trying to grab an image..."<<endl;
 		//cerr<<"\t";
 		jpeg_str = Webcam->CaptureImage();
 		//cerr<<"--- grabbing finished"<<endl;
 	}
-#endif
+	switch( method)
+	{
+		case 1 :
+		{
+			// SEND GRABBED IMAGE TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+		}
+		break;
+		case 2 :
+		{
+			// SEND GRABBED IMAGE TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
+		}
+		break;
+		default :
+			cerr<<"!!! ERROR : communication method do not exist !!!"<<endl;
+			exit(1);
+	}
+
+		/*
+		Packet p;
+		// We don't need that to be reliable in UDP mode
+		p.send( CMD_CAMSHOT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, clt->clt_sock,
+                      __FILE__, PSEUDO__LINE__(49) );
+		*/
+#endif /* NETCOMM_NOWEBCAM */
+	
 	return jpeg_str;
 }
 
@@ -70,25 +134,29 @@ int		NetworkCommunication::InitSession( float frequency)
 	// Init the VoIP session
 #ifndef NETCOMM_NOSOUND
 	this->session = new JVOIPSession;
+	this->session->SetSampleInterval(100);
+
 	this->params = new JVOIPSessionParams;
 	this->rtpparams = new JVOIPRTPTransmissionParams;
 
-	this->session->Create( *(this->params));
-#endif
+	CheckVOIPError( this->session->Create( *(this->params)));
+#endif /* NETCOMM_NOSOUND */
 
 #ifndef NETCOMM_NOWEBCAM
 	if( Webcam)
 		this->Webcam->StartCapture();
-#endif
+#endif /* NETCOMM_NOWEBCAM */
 
+	this->active = true;
 	this->freq = frequency;
 	return 0;
 }
 
 int		NetworkCommunication::DestroySession()
 {
+	this->active = false;
 #ifndef NETCOMM_NOSOUND
-	this->session->Destroy();
+	CheckVOIPError( this->session->Destroy());
 
 	if( this->session)
 		delete this->session;
@@ -96,11 +164,11 @@ int		NetworkCommunication::DestroySession()
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
-#endif
+#endif /* NETCOMM_NOSOUND */
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
 		this->Webcam->EndCapture();
-#endif
+#endif /* NETCOMM_NOWEBCAM */
 
 	return 0;
 }
@@ -114,7 +182,7 @@ NetworkCommunication::~NetworkCommunication()
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
-#endif
+#endif /* NETCOMM_NOSOUND */
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
 	{
@@ -122,24 +190,6 @@ NetworkCommunication::~NetworkCommunication()
 		delete this->Webcam;
 		this->Webcam = NULL;
 	}
-#endif
-}
-
-bool	NetworkCommunication::WebcamEnabled()
-{
-	bool ret = false;
-#ifndef NETCOMM_NOWEBCAM
-	ret = (this->Webcam!=NULL);
-#endif
-	return ret;
-}
-bool	NetworkCommunication::WebcamTime()
-{
-	bool ret = false;
-#ifndef NETCOMM_NOWEBCAM
-	if( this->Webcam)
-		ret = this->Webcam->isReady();
-#endif
-	return ret;
+#endif /* NETCOMM_NOWEBCAM */
 }
 

@@ -17,9 +17,14 @@ int		NetworkCommunication::InitSession( float freq)
 	return 0;
 }
 
-string		NetworkCommunication::GrabImage()
+void	NetworkCommunication::SendImage( SOCKETALT & socket)
 {
-	return 0;
+}
+void	NetworkCommunication::SendSound( SOCKETALT & socket)
+{
+}
+void	NetworkCommunication::SendMessage( SOCKETALT & socket, string message)
+{
 }
 
 int		NetworkCommunication::DestroySession()
@@ -29,14 +34,5 @@ int		NetworkCommunication::DestroySession()
 
 NetworkCommunication::~NetworkCommunication()
 {
-}
-
-bool	NetworkCommunication::WebcamEnabled()
-{
-	return false;
-}
-bool	NetworkCommunication::WebcamTime()
-{
-	return false;
 }
 

@@ -115,7 +115,6 @@ NetClient::NetClient()
 	ingame = false;
 	current_freq = MIN_COMMFREQ;
 	selected_freq = MIN_COMMFREQ;
-	this->netcomm_active = false;
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
 #endif
@@ -587,15 +586,12 @@ int NetClient::checkMsg( Packet* outpacket )
     }
 #ifdef NETCOMM
 	// If we have network communications enabled and webcam support enabled we grab an image
-	if( NetComm->WebcamEnabled() && NetComm->WebcamTime())
+	if( NetComm->IsActive())
 	{
-		jpeg_str = NetComm->GrabImage();
-		/* DO NOT SEND TO SERVER ANYMORE
-		Packet p;
-		// We don't need that to be reliable in UDP mode
-		p.send( CMD_CAMSHOT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, clt->clt_sock,
-                      __FILE__, PSEUDO__LINE__(49) );
-		*/
+		// Send grabbed image from webcam
+		NetComm->SendImage( this->clt_sock);
+		// Here also send samples
+		NetComm->SendSound( this->clt_sock);
 	}
 #endif
 	
@@ -1591,7 +1587,6 @@ bool	NetClient::jumpRequest( string newsystem)
 void	NetClient::startCommunication()
 {
 #ifdef NETCOMM
-	netcomm_active = true;
 	selected_freq = current_freq;
 	NetBuffer netbuf;
 	netbuf.addFloat( selected_freq);
@@ -1609,7 +1604,6 @@ void	NetClient::startCommunication()
 void	NetClient::stopCommunication()
 {
 #ifdef NETCOMM
-	netcomm_active = false;
 	NetBuffer netbuf;
 	netbuf.addFloat( selected_freq);
 	Packet p;
@@ -1646,13 +1640,8 @@ void	NetClient::sendTextMessage( string message)
 {
 #ifdef NETCOMM
 	// Only send if netcomm is active and we are connected on a frequency
-	if( netcomm_active)
-	{
-		// If max log size is reached we remove the oldest message
-		if( this->NetComm->message_history.size()==this->NetComm->max_messages)
-			this->NetComm->message_history.pop_front();
-		this->NetComm->message_history.push_back( message);
-	}
+	if( NetComm->IsActive())
+		NetComm->SendMessage( this->clt_sock, message);
 #endif
 }
 
