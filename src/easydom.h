@@ -128,8 +128,13 @@ domNodeType *LoadXML(const char *filename) {
   VSError err;
   if( !memcmp( (filename+length-7), "mission", 7))
   	err = f.OpenReadOnly( filename, MissionFile);
-  else
+  else {
   	err = f.OpenReadOnly( filename, Unknown);
+        if (err>Ok) {
+           string rootthis = string("/")+filename;
+           err = f.OpenReadOnly(rootthis,Unknown);
+        }
+  }
   if(err>Ok) {
     //cout << "warning: could not open file: " << filename << endl;
     //    assert(0);

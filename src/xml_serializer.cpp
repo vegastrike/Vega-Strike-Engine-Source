@@ -123,7 +123,7 @@ void XMLSerializer::Write (const char * modificationname) {
   VSFile f;
   //string filepath( savedir+"/"+this->filename);
   //cerr<<"Saving Unit to : "<<filepath<<endl;
-  VSError err = f.OpenCreateWrite( this->filename, UnitFile);
+  VSError err = f.OpenCreateWrite( savedir+"/"+this->filename, UnitFile);
   if (err>Ok) {
     fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath().c_str() );
     return;

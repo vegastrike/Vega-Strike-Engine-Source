@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <assert.h>
 #include <stdarg.h>
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -30,7 +31,10 @@ using std::map;
 
 char *CONFIGFILE;
 char pwd[65536];
-
+//extern int vfscanf( FILE * fp, const char * format, va_list arglist) ;
+//int gcc295vfscanf( FILE * fp, const char * format, va_list arglist) {
+//  return vfscanf(fp,format,arglist);
+//}
 VSVolumeType isin_bigvolumes = None;
 string curmodpath = "";
 
@@ -359,7 +363,7 @@ namespace VSFileSystem
 		return 0;
 	}
 
-#ifdef HAVE_VFSCANF
+#if HAVE_VFSCANF
 	int		vs_fscanf( FILE * fp, const char * format, ...)
 	{
 		if( !use_volumes)
@@ -499,34 +503,39 @@ namespace VSFileSystem
 	void	LoadConfig( string subdir)
 	{
 		bool found = false;
+                bool foundweapons = false;
 		// First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
 		weapon_list = "weapon_list.xml";
 		if( subdir!="")
 		{
-			/*
+			
 			if( DirectoryExists( homedir+"/mods/"+subdir))
 			{
 				if( FileExists( homedir+"/mods/"+subdir, config_file)>=0)
 				{
 					cout<<"CONFIGFILE - Found a config file in home mod directory, using : "<<(homedir+"/mods/"+subdir+"/"+config_file)<<endl;
-					if( FileExists( homedir+"/mods/"+subdir, "weapon_list.xml")>=0)
-						weapon_list = "mods/"+subdir+"/weapon_list.xml";
-					config_file = "mods/"+subdir+"/"+config_file;
+					if( FileExists( homedir+"/mods/"+subdir, "weapon_list.xml")>=0) {
+						weapon_list = homedir+"/mods/"+subdir+"/weapon_list.xml";
+                                                foundweapons=true;
+                                        }
+					config_file = homedir+"/mods/"+subdir+"/"+config_file;
 					found = true;
 				}
 			}
-			else
-			{
-			*/
-				cout<<"WARNING : coudn't find a mod named '"<<subdir<<"' in homedir/mods"<<endl;
+			
+			
+                          if (!found)
+                            cout<<"WARNING : coudn't find a mod named '"<<subdir<<"' in homedir/mods"<<endl;
 				if( DirectoryExists( moddir+"/"+subdir))
 				{
 					if( FileExists( moddir+"/"+subdir, config_file)>=0)
 					{
-						cout<<"CONFIGFILE - Found a config file in mods directory, using : "<<(moddir+"/"+subdir+"/"+config_file)<<endl;
-						if( FileExists( moddir+"/"+subdir, "weapon_list.xml")>=0)
+						if (!found) cout<<"CONFIGFILE - Found a config file in mods directory, using : "<<(moddir+"/"+subdir+"/"+config_file)<<endl;
+						if( (!foundweapons)&&FileExists( moddir+"/"+subdir, "weapon_list.xml")>=0) {
 							weapon_list = moddir+"/"+subdir+"/weapon_list.xml";
-						config_file = moddir+"/"+subdir+"/"+config_file;
+                                                        foundweapons=true;
+                                                }
+						if (!found) config_file = moddir+"/"+subdir+"/"+config_file;
 						found = true;
 					}
 				}
@@ -545,6 +554,7 @@ namespace VSFileSystem
 			if( FileExists( homedir, config_file)>=0)
 			{
 				cerr<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/"+config_file)<<endl;
+                                config_file=homedir+"/"+config_file;
 				/*
 				char * conffile = new char[homedir.length()+1+config_file.length()+1];
 				conffile[homedir.length()+1+config_file.length()] = 0;
@@ -575,7 +585,13 @@ namespace VSFileSystem
 					VSExit(1);
 				}
 			}
-		}
+		}else if (subdir!="") {
+                  printf ("\nUsing Mod Directory %s",moddir.c_str());
+                  CreateDirectoryHome( "mods");
+                  CreateDirectoryHome("mods/"+subdir);
+                  datadir = moddir+"/"+subdir;
+                  homedir = homedir+"/mods/"+subdir;
+                }
 
 		// Delete the default config in order to reallocate it with the right one (if it is a mod)
 		delete vs_config;
@@ -744,7 +760,7 @@ namespace VSFileSystem
 		CreateDirectoryHome( sharedsounds);
 		CreateDirectoryHome( "save");
 		CreateDirectoryHome( "generatedbsp");
-		//CreateDirectoryHome( moddir);
+
 
 		// We will be able to automatically add mods files (set of resources or even directory structure similar to the data tree)
 		// by just adding a subdirectory named with the mod name in the subdirectory "mods"...
@@ -1004,6 +1020,8 @@ namespace VSFileSystem
 			else
 				failed += "\tTRY LOADING in "+nameof( type)+" "+fullpath+" : "+file+"... SUCCESS";
 		}
+                //if (found<0&&root=="")
+                //return FileExists("/",filename,type,lookinvolume);
 		return found;
 	}
 	int		FileExists( string root, string filename, VSFileType type, bool lookinvolume) { return FileExists( root, filename.c_str(), type, lookinvolume); }
