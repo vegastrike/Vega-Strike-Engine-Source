@@ -51,6 +51,7 @@ static void convertToLittle(unsigned int tmp, char * data){
   data[2]=(char)((tmp/65536)%256);
   data[3]=(char)((tmp/65536)/256);  
 }
+#ifdef HAVE_OGG
 struct fake_file{
   char * data;
   size_t size;
@@ -118,6 +119,7 @@ int mem_seek (void * datasource, ogg_int64_t offset, int whence) {
  }
  return -1;
 }
+#endif
 static void ConvertFormat (vector<char>& ogg ) {
   vector<char> converted;
 
@@ -337,7 +339,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #else
 		  ALint format;
 	  	  // WIN32
-	  	  f.Read( dat, f.Size());
+	  	  f.Read( &dat[0], f.Size());
                   alutLoadWAVMemory(&dat[0], (int*)&format, &wave, &size, &freq, &looping);
 #endif
 
