@@ -147,7 +147,7 @@ void VegaConfig::initKeyMap(){
   key_map["function-10"]=WSK_F10;
   key_map["function-11"]=WSK_F11;
   key_map["function-12"]=WSK_F12;
-
+  key_map["keypad-insert"]=WSK_KP1;
   key_map["keypad-1"]=WSK_KP1;
   key_map["keypad-2"]=WSK_KP2;
   key_map["keypad-3"]=WSK_KP3;
