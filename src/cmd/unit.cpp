@@ -30,8 +30,8 @@
 
 
 #include "ai/order.h"
+#include "ai/script.h"
 #include "ai/flybywire.h"
-#include "ai/navigation.h"
 #include "gfx/box.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
@@ -748,9 +748,10 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	  temp = new Unit (type.file.c_str(),true,false);
 	  if (target&&target!=owner) {
 	    temp->Target (target);
-	    temp->EnqueueAI (new Orders::FaceTarget ());
+	    temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
+	  } else {
+	    temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
 	  }
-	  temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
 	  temp->SetOwner (owner);
 	  temp->Velocity = velocity;
 	  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = Cumulative;

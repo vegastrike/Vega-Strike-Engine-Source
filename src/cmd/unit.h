@@ -113,7 +113,7 @@ friend class PlanetaryOrbit;
     short ammo;//-1 is infinite
     weapon_info type;
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
-    Mount():size(weapon_info::NOWEAP),ammo(-1),type(weapon_info::BEAM),status(UNCHOSEN){gun=NULL;}
+    Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; gun=NULL;}
     Mount(const string& name, short int ammo=-1);
     void Activate () {
       if (status==INACTIVE)
@@ -202,7 +202,6 @@ friend class PlanetaryOrbit;
   float DealDamageToShield (const Vector & pnt, float &Damage);
   float DealDamageToHull (const Vector &pnt, float Damage);
   void SetCollisionParent (Unit *name);
-  void SetOwner(Unit *target) {owner=target;}//won't collide with owner
   bool ShieldUp (const Vector &);
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
@@ -231,6 +230,7 @@ public:
   inline bool Killed() {return killed;}
   inline void Ref() {ucref++;}
   void UnRef();
+  void SetOwner(Unit *target) {owner=target;}//won't collide with owner
   Unit *Target(){return computer.target.GetUnit();}
   Unit *Threat(){return computer.threat.GetUnit();}
   void Target (Unit * targ) {computer.target.SetUnit(targ);}

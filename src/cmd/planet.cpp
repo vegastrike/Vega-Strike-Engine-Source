@@ -74,6 +74,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
       satellites.prepend(new Unit (filename, true, false));
       satiterator = satellites.createIterator();
       satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
+      satiterator->current()->SetOwner (this);
     }else {
       satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat));
     }
