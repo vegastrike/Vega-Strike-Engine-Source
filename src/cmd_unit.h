@@ -82,6 +82,13 @@ protected:
   Mesh **meshdata;
   Unit **subunits; // the new children fun fun stuff
   //Gun **weapons; // the guns
+  struct {
+	float right, left, front, back;
+  } armor;
+  struct {
+	  float front, back, right, left, top, bottom, recharge; int number;
+  } shield;
+  float hull;
   class Mount {
     Transformation LocalPosition;
   public:
@@ -116,8 +123,8 @@ protected:
   AI *aistate;
   long fpos;
   string name;
-  
-
+  float accel;
+  float recharge;
   float energy;
   float mass;
   float fuel;
@@ -129,13 +136,11 @@ protected:
   Vector AngularVelocity;
   Vector Velocity;
   int slerp_direction;
-
+  enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
+  char yprrestricted;
   float ymin, ymax, ycur;
-  bool yrestricted;
   float pmin, pmax, pcur;
-  bool prestricted;
   float rmin, rmax, rcur;
-  bool rrestricted;
 
   // thrusting limits
   struct Limits {
@@ -254,7 +259,6 @@ public:
   void ApplyLocalTorque(const Vector &torque); //convenient shortcut
 
   Vector ClampThrust(const Vector &thrust);
-
   Vector MaxThrust(const Vector &thrust);
   void Thrust(const Vector &amt);
   void LateralThrust(float amt);
@@ -286,5 +290,6 @@ struct Unit::XML {
     vector<Unit::Mount *> mountz;
     vector<Mesh*> meshes;
     vector<Unit*> units;
+	int unitlevel;
   };
 #endif
