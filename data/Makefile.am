@@ -160,7 +160,9 @@ pkgdata_DATA = \
 ./hornet-cockpit.cpt \
 ./hornet-cockpit.jpg \
 ./hornet-cockpit.spr \
-./hornet-mesh.xml \
+./hornet.xmesh \
+./hornetLOD.xmesh \
+./hornetPYR.xmesh \
 ./hornet.bmp \
 ./hornet.xunit \
 ./jalthi.bmp \

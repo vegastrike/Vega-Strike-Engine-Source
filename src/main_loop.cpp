@@ -368,6 +368,7 @@ void createObjects() {
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
+  UpdateTime();
 }
 
 void destroyObjects() {  
