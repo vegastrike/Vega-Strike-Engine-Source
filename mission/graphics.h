@@ -18,8 +18,9 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 #include "selector.h"
+#ifndef _WIN32
 #include <unistd.h>
-
+#endif
 #define WIDTH 640
 #define HEIGHT 480
 

@@ -28,10 +28,11 @@
     #include <OpenGL/gl.h>
     #include <GLUT/glut.h>
 #else
+#ifndef _WIN32
     #include <GL/gl.h>
+#endif
     #include <GL/glut.h>
 #endif
-#include <iostream.h>
 
 #include "glut_support.h"
 

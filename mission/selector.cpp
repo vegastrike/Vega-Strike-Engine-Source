@@ -16,7 +16,10 @@
  **************************************************************************/
 
 #include "selector.h"
-
+#ifdef _WIN32
+#include <windows.h>
+#include <process.h>
+#endif
 glob_t *MISSIONS;
 struct mission_data DATA;
 
@@ -42,8 +45,8 @@ char *Start(int run_vegastrike) {
 }
 
 void RunMission(void) {
-	if (DATA.path[0] == '\0') { cout << "No mission selected\n"; return; }
-	cout << "Starting " << MISSION_PROGRAM << " with mission " << DATA.path << endl;
+	if (DATA.path[0] == '\0') { printf("No mission selected\n"); return; }
+	printf("Starting %s with mission %s\n",MISSION_PROGRAM,DATA.path);
 #ifdef _WIN32
 	char execname [2048];
 	char mypath[1500];

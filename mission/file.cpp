@@ -43,7 +43,7 @@ int LoadMission(char *filename) {
 
 	free(file);
 
-	if (top == NULL) { cout << "Unable to load mission file\n"; return 1; }
+	if (top == NULL) { printf("Unable to load mission file\n"); return 1; }
 
 	read = top;
 

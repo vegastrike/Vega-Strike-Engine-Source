@@ -27,7 +27,9 @@
     #include <OpenGL/gl.h>
     #include <GLUT/glut.h>
 #else
+#ifndef _WIN32
     #include <GL/gl.h>
+#endif
     #include <GL/glut.h>
 #endif
 
@@ -36,14 +38,12 @@
 extern char macosxExecutablePath[MAXPATHLEN];
 #endif
 
-#include <iostream.h>
 #include <map>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef _WIN32
 #include <direct.h>
-#include <unistd.h>
 #include <windows.h>
 #else
 #include <stdio.h>

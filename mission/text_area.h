@@ -38,7 +38,6 @@
     #include <GL/gl.h>
     #include <GL/glut.h>
 #endif
-#include <iostream.h>
 
 #include "glut_support.h"
 

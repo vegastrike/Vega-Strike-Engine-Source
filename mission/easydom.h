@@ -79,7 +79,7 @@ class tagDomNode : public easyDomNode {
   void Tag(tagMap *tagmap) { 
     tag=(*tagmap)[Name()];
     if(tag==0){
-      cout << "cannot translate tag " << Name() << endl;
+      printf("cannot translate tag %s\n",Name().c_str());
     }
 
     vector<easyDomNode *>::const_iterator siter;
@@ -249,7 +249,7 @@ domNodeType *LoadCalike(const char *filename) {
   domNodeType *stacktop=nodestack.top();
 
   if(stacktop->Name()!=name){
-    cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
+    printf("error: expected %s, got %s\n",stacktop->Name().c_str(),name.c_str());
     exit(0);
   }
   else{

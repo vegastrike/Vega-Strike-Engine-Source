@@ -123,8 +123,8 @@ void ProcessMouseClick(int button, int state, int x, int y) {
 			ShowDesc->SetText("Description:");
 		}
 		else {
-			char NameString[strlen(DATA.name) + strlen("Mission: ")+1];
-			char AuthString[strlen(DATA.author) + strlen("Author: ")+1];
+			char *NameString= new char[strlen(DATA.name) + strlen("Mission: ")+1];
+			char *AuthString= new char[strlen(DATA.author) + strlen("Author: ")+1];
 			sprintf(NameString, "Mission: %s", DATA.name);
 			sprintf(AuthString, "Author: %s", DATA.author);
 			ShowInfo->ChangeTextItem("name", NameString);
@@ -132,6 +132,8 @@ void ProcessMouseClick(int button, int state, int x, int y) {
 
 			ShowDesc->SetText(DATA.description);
 			ShowBrief->SetText(DATA.briefing);
+			delete [] NameString;
+			delete [] AuthString;
 		}
 	}
 	ours = OK->MouseClick(button, state, cur_x, cur_y);

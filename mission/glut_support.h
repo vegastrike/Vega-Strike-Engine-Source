@@ -25,13 +25,15 @@
     #include <OpenGL/gl.h>
     #include <GLUT/glut.h>
 #else
-    #include <GL/gl.h>
+	#ifndef _WIN32
+		#include <GL/gl.h>
+	#endif
     #include <GL/glut.h>
 #endif
 #include <png.h>
 #include <stdio.h>
-#include <vector.h>
-
+#include <vector>
+using std::vector;
 struct Texture {
         unsigned int name;
         unsigned int wid, hei;

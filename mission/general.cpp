@@ -22,7 +22,8 @@
 #if defined(__APPLE__) || defined(MACOSX) 
 #include <sys/param.h> // For MAXPATHLEN
 #endif
-
+using std::string;
+using std::vector;
 #ifdef _G_RANDOM
 int RANDOMIZED = 0;
 #endif    // _G_RANDOM
@@ -114,10 +115,12 @@ char *pre_chomp(char *line) {
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
 	int length, dif, calc;
-	char chr_new[LENGTH+1], current[LENGTH+1];
+	char * chr_new, * current;
 	char *ptr_new, *location;
 	calc = strlen(line) - strlen(search) + strlen(replace);
 	if (calc > LENGTH) { return line; }
+	chr_new= new char [LENGTH+1];
+	current= new char [LENGTH+1];
 	length = strlen(line);
 	strcpy(current, line);
 	while ((location = strstr(current, search)) > 0) {
@@ -132,6 +135,8 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 		strcpy(current, chr_new); 
 	}
 	strcpy(line, current);
+	delete [] chr_new;
+	delete [] current;
 	return line;
 }
 

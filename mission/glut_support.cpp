@@ -52,7 +52,7 @@ Texture ReadTex(char *texfile) {
                 delete [] image;
 	}
 	else {
-		cout << "Error opening file: " << texfile << endl;
+		printf("Error opening file: %s\n",texfile);
 		tex.wid = 0;
 		tex.hei = 0;
 		tex.name = 0;
@@ -164,7 +164,7 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha) {
         float cols[4] = {red, green, blue, alpha};
 
-        if (wid < 0 || hei < 0) { cout << "Cannot draw color with negative height or width\n"; return; }
+        if (wid < 0 || hei < 0) { printf("Cannot draw color with negative height or width\n"); return; }
 
         // Make sure we don't exceed the program
         if (x+wid > 1) { wid = 1 - x; }
@@ -199,7 +199,7 @@ void ShowImage(float x, float y, float wid, float hei, Texture image, int tile_h
         //float cols[] = {0,0,0.9,1};
         float cols[] = {colors[0], colors[1], colors[2], colors[3]};
 
-        if (wid < 0 || hei < 0) { cout << "Cannot draw image with negative height or width\n"; return; }
+        if (wid < 0 || hei < 0) { printf("Cannot draw image with negative height or width\n"); return; }
 
         if (x+wid > 1) { wid = 1 - x; }
         if (y-hei < -1) { hei = -1 + y; }

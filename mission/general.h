@@ -30,7 +30,7 @@
 
 //#define _G_ALL		// Enable everything except _G_DEBUG
 
-#define _G_DEBUG		// Debug Messaging
+//#define _G_DEBUG		// Debug Messaging
 #define _G_ERROR		// Error Messaging (internal and external)
 #define _G_GLIB		// use GLIB for string allocation
 //#define _G_NUMBER		// Number processing
@@ -96,7 +96,6 @@
 #endif    // _G_RANDOM
 
 #if defined _G_DEBUG && defined __cplusplus
-#include <iostream.h>           // iostream is only used in debugging
 #endif    // _G_DEBUG && __cplusplus
 
 #ifndef MAX_READ

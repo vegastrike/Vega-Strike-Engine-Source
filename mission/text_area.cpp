@@ -85,7 +85,7 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
 	// The parent TextAreaItem. This is the only link where parent == NULL. It is not displayed and handled only internally
 	ItemList = new TextAreaItem("", "", NULL);
 
-	if (wid < 0 || hei < 0) { cout << "Cannot draw border with negative height or width\n"; return; }
+	if (wid < 0 || hei < 0) { printf("Cannot draw border with negative height or width\n"); return; }
 	if (x+wid > 1) { wid = 1 - x; }
 	if (y-hei < -1) { hei = -1 + y; }
 
@@ -249,7 +249,7 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level) {
 		RenderTextItem(current->child[cur], level+1);
 	}
 }
-void TextArea::AddTextItem(char *name, char *description) { return AddTextItem(name, description, NULL); }
+void TextArea::AddTextItem(char *name, char *description) { AddTextItem(name, description, NULL); }
 void TextArea::AddTextItem(char *name, char *description, char *parent_name) {
 	TextAreaItem *master;
 	master = ItemList->FindChild(parent_name);
@@ -599,13 +599,15 @@ TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
 	return NULL;
 }
 
+typedef TextAreaItem *TextAreaItemStr;
+
 void TextAreaItem::AddChild(char *new_name, char *desc) {
 	TextAreaItem **newlist;
 	int cur = 0;
 	child_count++;
 	if (child_count > child_count_multiplier*10) {
 		child_count_multiplier++;
-		newlist = new (TextAreaItem *)[child_count_multiplier*10];
+		newlist = new TextAreaItemStr [child_count_multiplier*10];
 		if (child != NULL) {
 			for (cur = 0; cur < child_count-1; cur++) {
 				newlist[cur] = child[cur];
