@@ -5,18 +5,6 @@ AC_PREREQ(2.53)
 AC_LANG(C++)
 dnl AC_LANG_CPLUSPLUS()
 
-dnl ********************** MSVC++ STUFF ***********************
-AC_ARG_ENABLE(vc, AC_HELP_STRING([--enable-vc], [Use the microsoft VC++ compiler.]), CLVER=${enableval})
-
-if test "x${CLVER}" = "xyes" ; then
-	CXX="cccl"
-	AC_MSG_CHECKING([Checking for VC++ compiler (cl).])
-	AC_CHECK_TOOLS(VCXX, [cl])
-	AC_MSG_CHECKING([Checking for VC++ compiler wrapper (cccl) compiler.])
-	AC_PROG_CXX("cccl")
-fi
-dnl ********************** MSVC++ STUFF ***********************
-
 if test "x${CXX}" = "x"; then
 AC_MSG_CHECKING([Checking for C++ compiler.])
 AC_CHECK_TOOLS(CXX, [g++ c++ cl KCC CC cxx c++ xlC aCC egcs gcc])
@@ -49,8 +37,6 @@ AH_TEMPLATE(WIN32_POSIX, [Is this MingW, Cygwin, or a variant POSIX layer?])
 
 AH_TEMPLATE(LINUX, [Is this Linux?])
 AH_TEMPLATE(MACOSX, [Is this MacOS X?])
-AH_TEMPLATE(SOLARIS, [Is this Solaris?])
-AH_TEMPLATE(BSD_COMP, [Use BSD compatibility])
 
 case $target in
 *freebsd* | *netbsd* | *openbsd*)
@@ -75,11 +61,6 @@ case $target in
 	AC_DEFINE(MACOSX, 1)
 	AC_DEFINE(POSIX, 1)
 	AC_DEFINE(BSD, 199999)
-;;
-*solaris*)
-	SOLARIS="1"
-	AC_DEFINE(SOLARIS, 1)
-	AC_DEFINE(BSD_COMP, 1)
 ;;
 *)
 	slabcheck=no;
@@ -122,9 +103,6 @@ case $target in
     bsdthread=no
     ;;
   *mingw*)
-    bsdthread=no
-    ;;
-  *solaris*)
     bsdthread=no
     ;;
   *)
@@ -294,9 +272,11 @@ dnl Add libs required for Windows
 dnl I don't use -mwindows since I like having the console around
 dnl If the console annoys you then remove "-luser32 -lgdi32" and replace
 dnl with "-mwindows"
+WIN32="0"
 if test "x${is_win32}" = "xyes" ; then
 	VS_LIBS="${VS_LIBS} -luser32 -lgdi32"
 	VS_CPPFLAGS="${VS_CXXFLAGS} -DNOMINMAX"
+	WIN32="1"
 fi
 
 AC_MSG_CHECKING([for CygWin platform])
@@ -336,8 +316,9 @@ dnl Add libs required for Windows
 dnl I don't use -mwindows since I like having the console around
 dnl If the console annoys you then remove "-luser32 -lgdi32" and replace
 dnl with "-mwindows"
+LINUX="0"
 if test "x$is_linux" = "xyes" ; then
-    VS_LIBS="$VS_LIBS -lutil"
+	LINUX="1"
 fi
 
 dnl --------------------------------------------------------------------------
@@ -388,18 +369,6 @@ if test "x$is_macosx" = "xyes" ; then
     VS_LIBS="$VS_LIBS -lobjc"
 fi
 
-dnl --------------------------------------------------------------------------
-dnl Check if compiling for Solaris x86
-dnl --------------------------------------------------------------------------
-
-if test "$SOLARIS" = "1" ; then
-	LIBS="-L/opt/csw/lib $LIBS -L/usr/lib -lX11 -lCrun"
-    with_gl_libs=/opt/csw/lib
-    with_gl_inc=/opt/csw/include
-    with_include_dir=/opt/csw/include
-fi
-
-dnl
 dnl
 dnl check for Python
 dnl
@@ -436,7 +405,7 @@ do
         then
             FOUND_PYTHON=yes
             PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1"."$2}'`
-            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT} /sw/include/python /sw/include/python${PYTHON_SHORT} /opt/csw/include/python${PYTHON_SHORT}"
+            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT} /sw/include/python /sw/include/python${PYTHON_SHORT}"
 
 	    PYTHON_incdir=""
 	    if test "x${FOUND_PYTHON}" = "xyes";
@@ -482,7 +451,7 @@ dnl Simple check for libpython2.2.so
 if test "x${FOUND_PYTHON}" = "xyes";
 then
     FOUND_LIBPYTHON_SO=no
-    PYTHON_libchk="/usr/lib /usr/local/lib /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config /opt/csw/lib/python${PYTHON_SHORT}/config"
+    PYTHON_libchk="/usr/lib /usr/local/lib /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config"
     for i in ${PYTHON_libchk};
     do
 	
@@ -1294,13 +1263,14 @@ if test "$CRYPTO" = "1" ; then
 	dnl	fi
 	dnl fi
 
-	saved_LIBS="$LIBS"
     AC_DEFUN( CHECK_FOR_CRYPTO_LIB, [
         AC_MSG_CHECKING([for crypto++ library with $CRYPTO_LIB])
-		LIBS="$saved_LIBS $CRYPTO_LIB"
+		VS_LIBS="$VS_LIBS $CRYPTO_LIB"
+		LIBS="$VS_LIBS"
         AC_TRY_LINK( , , have_crypto_lib=yes, have_crypto_lib=no )
         AC_MSG_RESULT([$have_crypto_lib])
     ]) 
+	saved_VSLIBS="$VS_LIBS"
 	CRYPTO_LIB="-lcrypto++"
 	CHECK_FOR_CRYPTO_LIB
 	if test "x$have_crypto_lib" = "xno" ; then
@@ -1308,24 +1278,30 @@ if test "$CRYPTO" = "1" ; then
 		CHECK_FOR_CRYPTO_LIB
 		dnl Test for debian
 		if test "x$have_crypto_lib" = "xno" ; then
+			VS_LIBS="$saved_VSLIBS"
 			CRYPTO_LIB="-lcrypto++5.1"
 			CHECK_FOR_CRYPTO_LIB
 			if test "x$have_crypto_lib" = "xno" ; then
+				VS_LIBS="$saved_VSLIBS"
 				CRYPTO_LIB="-lcryptopp"
 				CHECK_FOR_CRYPTO_LIB
 				if test "x$have_crypto_lib" = "xno" ; then
+					VS_LIBS="$saved_VSLIBS"
 					CRYPTO_LIB="-L/usr/local/lib -lcryptopp"
 					CHECK_FOR_CRYPTO_LIB
+					if test "x$have_crypto_lib" = "xno" ; then
+						VS_LIBS="$saved_VSLIBS"
+					fi
 				fi
 			fi
 		fi
 	fi
+	LIBS="$VSLIBS"
 	if test "x$have_crypto_lib" = "xyes" ; then
 		VS_CPPFLAGS="$VS_CPPFLAGS -DCRYPTO=$CRYPTO_VERSION"
 		CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 		echo "Crypto++ library support enabled"
 	else
-		LIBS="$saved_LIBS"
 		echo "No Crypto++ support"
 	fi
 else
@@ -1403,7 +1379,7 @@ if test "$TESTNETCOMM" = "1" ; then
 		    AC_MSG_RESULT([$have_core_audio_h])
 		])
 
-		if test "x$is_linux" = "xyes" ; then
+		if test "$LINUX" = "1" ; then
 			CHECK_FOR_OSS_H
 			if test "x$have_oss_h" = "xno" ; then
 				TESTNETCOMM_JVOIP="0"
@@ -1478,7 +1454,7 @@ if test "$TESTNETCOMM" = "1" ; then
 	echo "Trying to enable webcam support... "
 
 	dnl Test to check VFL headers
-	if test "x$is_linux" = "xyes" ; then
+	if test "$LINUX" = "1" ; then
 		CHECK_FOR_VFL_H
 		if test "x$have_vfl_h" = "xyes" ; then
 			echo "Webcam support enabled."
@@ -1523,7 +1499,7 @@ dnl --------------------------------------------------------------------------
 
 dnl Check for win32 winsock 2 support
 dnl --------------------------------------------------------------------------
-if test "x$is_win32" = "xyes" ; then
+if test "$WIN32" = "1" ; then
 AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-winsock2], [Enable winsock2 support instead of winsock1 under win32]), [VS_CPPFLAGS="${VS_CPPFLAGS} -D_WIN32_WINNT=0x0400"; echo "Using winsock 2 support"])
 fi
 
@@ -1580,8 +1556,8 @@ AC_SUBST([BOOST_LIBS])
 AC_SUBST([BOOST_CPPFLAGS])
 AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST128" = "1")
 AM_CONDITIONAL(USEBOOST131, test "$TESTUSEBOOST131" = "1")
-AM_CONDITIONAL(WIN32, test "x$is_win32" = "1")
-AM_CONDITIONAL(LINUX, test "x$is_linux" = "xyes")
+AM_CONDITIONAL(WIN32, test "${WIN32}" = "1")
+AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
 AM_CONDITIONAL(MACOSX, test "x$is_macosx" = "xyes")
 
 
