@@ -320,7 +320,7 @@ planetprob={'rlaan':{'Trantor_Class':1./1024,
 					 'Uninhabitable_Medium_Gas_Giant':1./16,
 					 'Uninhabitable_Dwarf_Gas_Giant':1./16},
 			#FIXME use these probabilities
-			'Uncultivable' : {'Rocky':1./8,
+			'unknown' : {'Rocky':1./8,
 							  'Molten':1./8,
 							  'Ice':1./16,
 							  'Arid':1./32,
@@ -421,7 +421,7 @@ def getBody(plist):
 		rfloat-=plist[i]
 	return plist.items()[len(plist)-1][0]
 
-def getPlanet(fac,radpair=None):
+def getPlanet(fac,radpair=None,name=''):
 	global combined_planet_prob
 	if not fac in planetprob:
 		fac=None
@@ -439,6 +439,8 @@ def getPlanet(fac,radpair=None):
 		#for i in plist:
 		#	tot+=plist[i];
 		#print "total: "+str(tot);
+#	if (name.find('Uncultivable')!=-1):
+#		print plist
 	return getBody(plist)
 def abbreviate(l,planets):
 	ret=[]
@@ -455,8 +457,11 @@ def abbreviate(l,planets):
 			print 'Error no abbreviation! for '+longname	
 	return ret
 			
-def getPlanets(fac,planets, sun_radius):
+def getPlanets(fac,planets, sun_radius,name):
 	import starCodes
+	if (fac==None):
+		fac='unknown'
+
 	pair=starCodes.sizeToNum(sun_radius)
 	numplan=rak.randint(0,5)
 	if (numplan>=4):
@@ -466,7 +471,7 @@ def getPlanets(fac,planets, sun_radius):
 	moonindex=[]
 	j=0
 	for i in range(numplan):
-		plan=getPlanet(fac,pair)
+		plan=getPlanet(fac,pair,name)
 		plist.append(plan)
 		mi=[]
 		if (plan in moonprob):
@@ -489,9 +494,9 @@ def getPlanets(fac,planets, sun_radius):
 			mon = '*'+mon
 			ret.append(mon)
 	return ret
-def getPlanetsString(fac,planets, sun_radius):
+def getPlanetsString(fac,planets, sun_radius,name):
 	ret=""
-	for p in getPlanets(fac,planets,sun_radius):
+	for p in getPlanets(fac,planets,sun_radius,name):
 		if (len(ret)):
 			ret+=' '
 		ret+=p
@@ -501,9 +506,8 @@ if (remakePlanets):
 		removeVal(s,'planets')
 		newchild = xml.dom.minidom.Element('var')
 		newchild.setAttribute('name','planets')
-		newchild.setAttribute('value',getPlanetsString(getVal(s,'faction'),planets,float(getVal(s,"sun_radius"))))
+		newchild.setAttribute('value',getPlanetsString(getVal(s,'faction'),planets,float(getVal(s,"sun_radius")),s.getAttribute('name')))
 		s.insertBefore(newchild,s.firstChild)
-	
 fil = open (sys.argv[2],"w")
 fil.write(g.toxml())
 fil.close()
