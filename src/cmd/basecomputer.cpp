@@ -72,6 +72,7 @@ static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
   GFXColor ret(r,g,b,a);
   return ret;
 }
+std::string emergency_downgrade_mode;
 extern std::string CurrentSaveGameName;
 std::vector<std::string> getWeapFilterVec() {
 	std::vector<std::string> weapfiltervec;
@@ -383,20 +384,6 @@ extern const Unit * makeTemplateUpgrade (string name, int faction);
 
 // Ported from old code.  Not sure what it does.
 const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
-float PercentOperational (Unit * un, std::string name, std::string category="upgrades/") {
-  if (category.find(DamagedCategory)==0) {
-    return 0.0f;
-  }else {
-    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
-    double percent=0;
-    if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
-      if (percent)
-        return percent;
-      else return .5;
-    }else if (percent>0) return percent;
-  }
-  return 1.0;
-}
 
 // Lowerifies a string.
 static std::string &tolower(std::string &loweritem) {
@@ -418,6 +405,35 @@ static bool isWeapon (std::string name) {
 		return true;
 	}
 	return false;
+}
+float PercentOperational (Unit * un, std::string name, std::string category="upgrades/") {
+  if (category.find(DamagedCategory)==0) {
+    return 0.0f;
+  }else if (isWeapon(category)) {
+    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction); 
+    if (upgrade->GetNumMounts()) {
+      const Mount * mnt = &upgrade->mounts[0];
+      unsigned int nummounts=un->GetNumMounts();
+      for (unsigned int i=0;i<nummounts;++i) {
+        if (mnt->type->weapon_name==un->mounts[i].type->weapon_name) {
+          if (un->mounts[i].status==Mount::DESTROYED)
+            return 0.0;
+          if (un->mounts[i].functionality<1.0f){
+            return un->mounts[i].functionality;
+          }
+        }
+      }
+    }
+  }else{
+    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
+    double percent=0;
+    if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
+      if (percent)
+        return percent;
+      else return .5;
+    }else if (percent>0) return percent;
+  }
+  return 1.0;
 }
 
 // CONSTRUCTOR.
@@ -1427,7 +1443,7 @@ void BaseComputer::recalcTitle() {
 			baseName = baseUnit->name;
         }
     }
-    baseTitle += baseName;
+    baseTitle += emergency_downgrade_mode+baseName;
 
 	// Faction name for base.
 	string baseFaction = FactionUtil::GetFactionName(baseUnit->faction);
@@ -1693,10 +1709,30 @@ void BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
 	{
 		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
 		assert(commitButton != NULL);
-		commitButton->setHidden(false);
-		commitButton->setLabel("Sell");
-		commitButton->setCommand("SellUpgrade");
 
+                if (m_player.GetUnit()) {
+                  bool CanDoSell=true;
+                  Unit* player = m_player.GetUnit();                  
+                  unsigned int numc=player->numCargo();
+                  for (unsigned int i=0;i<numc;++i) {
+                    Cargo * c = &player->GetCargo(i);
+                    if (c->category.find("upgrades/")==0&&!isWeapon(c->category)) {
+                      float po=PercentOperational(player,c->content,c->category);
+                      if (po>.02&&po<.98) {
+                        CanDoSell=(emergency_downgrade_mode.length()!=0);
+                      }
+                    }
+                  }
+                  if (CanDoSell) {
+                    commitButton->setHidden(false);
+                    commitButton->setLabel("Sell");
+                    commitButton->setCommand("SellUpgrade");
+                  }else {
+                    commitButton->setHidden(false);
+                    commitButton->setLabel("Fix1st");
+                    commitButton->setCommand("");
+                  }
+                }
                 if (m_player.GetUnit()&&PercentOperational(m_player.GetUnit(), item.content,item.category)<1) {
                     NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
                     if (m_base.GetUnit()) {
@@ -3588,7 +3624,10 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 					Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 					const int quantity=1;
 					playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
-					RecomputeUnitUpgrades(playerUnit);
+                                        const Unit * upgrade=getUnitFromUpgradeName(item->content,playerUnit->faction);                                            
+                                        double percentage=0;
+                                        playerUnit->Upgrade(upgrade,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));                                        
+					//RecomputeUnitUpgrades(playerUnit); //Narfed damage
 					loadUpgradeControls();
 					updateTransactionControls(itemCopy, true);
 				}
@@ -3635,13 +3674,41 @@ bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) 
 // Sell an upgrade on your ship.
 bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 	Cargo* item = selectedItem();
-	if (item) {
-		if (!isWeapon(item->category)) {
+        Unit * playerUnit = m_player.GetUnit();
+        Unit * baseUnit = m_base.GetUnit();
+	if (baseUnit&&playerUnit&&item) {
+		if (isWeapon(item->category)) {
+		    const Unit * upgrade=getUnitFromUpgradeName(item->content,playerUnit->faction);    
+                    if (upgrade->GetNumMounts()) {
+                      const Mount * mnt = &upgrade->mounts[0];
+                      unsigned int nummounts=playerUnit->GetNumMounts();
+                      for (unsigned int i=0;i<nummounts;++i) {
+                        if (mnt->type->weapon_name==playerUnit->mounts[i].type->weapon_name) {
+                          bool complete=false;
+                          if (playerUnit->mounts[i].status==Mount::DESTROYED){
+                            playerUnit->mounts[i].status=Mount::INACTIVE;
+                            complete=true;
+                          }
+                          if (playerUnit->mounts[i].functionality<1.0f){
+                            playerUnit->mounts[i].functionality=1.0f;
+                            complete=true;
+                          }
+                          if (playerUnit->mounts[i].maxfunctionality<1.0f){
+                            playerUnit->mounts[i].maxfunctionality=1.0f;
+                            complete=true;
+                          }
+                          if (complete) break;
+                        }
+                      }
+                      Cargo itemCopy=*item;
+                      loadUpgradeControls();
+                      updateTransactionControls(itemCopy, true);
+
+                    }                
+                }else {
 			Cargo sold;
 			const int quantity=1;
-			Unit * playerUnit = m_player.GetUnit();
-			Unit * baseUnit = m_base.GetUnit();
-			if (baseUnit&&playerUnit&&item->content.find("add_")!=0&&item->content.find("mult_")!=0) {
+			if (item->content.find("add_")!=0&&item->content.find("mult_")!=0) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
                                 
 				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
@@ -3658,6 +3725,9 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
                                       Cargo * c=playerUnit->GetCargo(item->content,where);
                                       if (c) c->category="upgrades/"+c->category.substr(strlen(DamagedCategory));
                                       
+                                    }
+                                    if (PercentOperational(playerUnit,item->content)<1.0) {
+                                      emergency_downgrade_mode="EMERGENCY MODE ";
                                     }
                                   }
                                   

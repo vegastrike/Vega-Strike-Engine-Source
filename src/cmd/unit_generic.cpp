@@ -1834,10 +1834,10 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 			  }
 			  autotarg = target;
 		  }
-		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target,HeatSink?HeatSink:1.0f);
+		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target,(HeatSink?HeatSink:1.0f)*mounts[i].functionality);
       }
     } else {
-      mounts[i].ref.refire+=SIMULATION_ATOM*(HeatSink?HeatSink:1.0f);
+      mounts[i].ref.refire+=SIMULATION_ATOM*(HeatSink?HeatSink:1.0f)*mounts[i].functionality;
     }
     if (mounts[i].processed==Mount::FIRED) {
       Transformation t1;
@@ -3274,13 +3274,15 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 			unsigned int whichmount=rand()%GetNumMounts();
 			if (randnum>=.9) {
                           DestroyMount(&mounts[whichmount]);
-			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
+			}else if (mounts[whichmount].ammo>0&&randnum>=.75) {
 			  mounts[whichmount].ammo*=dam;
-			} else if (randnum>=.1) {
+			} else if (randnum>=.7) {
 				mounts[whichmount].time_to_lock+=(100-(100*dam));
-			} else {
-				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
-			}
+			} else if (randnum>=.2){
+                          mounts[whichmount].functionality*=dam;
+			}else {
+                          mounts[whichmount].maxfunctionality*=dam;
+                        }
 		}
 		damages &= MOUNT_DAMAGED;
 		return;
@@ -6560,11 +6562,12 @@ void Unit::Repair() {
   //note work slows down under time compression!
   static float repairtime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","180"));
   float workunit = image->repair_droid*SIMULATION_ATOM/repairtime;//a droid completes 1 work unit in repairtime
-  if (image->repair_droid&&numCargo()) {
-    if (vsrandom.uniformInc(0,1)<workunit) {
+  if (image->repair_droid&&vsrandom.uniformInc(0,1)<workunit) {
+    bool repaired=false;
+    if (numCargo()) {
       int which =vsrandom.genrand_int31()%numCargo();
       Cargo * carg = &GetCargo(which);
-      bool repaired=false;
+
       if (carg->category.find("upgrades/")==0) {
         if (carg->category.find(DamagedCategory)!=0&&carg->content.find("add_")!=0&&carg->content.find("mult_")!=0) {
           // won't repair destroyed items
@@ -6582,21 +6585,31 @@ void Unit::Repair() {
           }
         }        
       }
-      if (!repaired) {
-        unsigned int numg=(1+UnitImages::NUMGAUGES+MAXVDUS);
-        unsigned int which= vsrandom.genrand_int31()%numg;
-        static float hud_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","hud_repair_unit",".125"));
+    }
+    if (!repaired) {
+      unsigned int numg=(1+UnitImages::NUMGAUGES+MAXVDUS);
+      unsigned int which= vsrandom.genrand_int31()%numg;
+      static float hud_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","hud_repair_unit",".25"));
+      
+      if (image->cockpit_damage[which]<image->cockpit_damage[which+numg]) {//total damage
+        image->cockpit_damage[which]+=hud_repair_quantity;
         
-        if (image->cockpit_damage[which]<image->cockpit_damage[which+numg]) {//total damage
-          image->cockpit_damage[which]+=hud_repair_quantity;
-          
-          if (image->cockpit_damage[which]>image->cockpit_damage[which+numg]) {
-            image->cockpit_damage[which]=image->cockpit_damage[which+numg];//total damage
+        if (image->cockpit_damage[which]>image->cockpit_damage[which+numg]) {
+          image->cockpit_damage[which]=image->cockpit_damage[which+numg];//total damage
+        }
+      }
+      if (mounts.size()) {
+        static float mount_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","mount_repair_unit",".25"));
+        unsigned int i= vsrandom.genrand_int31()%mounts.size();          
+        if (mounts[i].functionality<mounts[i].maxfunctionality) {
+          mounts[i].functionality+=mount_repair_quantity;
+          if (mounts[i].functionality>mounts[i].maxfunctionality) {
+            mounts[i].functionality=mounts[i].maxfunctionality;
           }
         }
-        
       }
     }
   }
+  
 }
 

@@ -590,7 +590,8 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
   }
   unsigned int numCargo =target->numCargo();
   for (unsigned int i=0;i<numCargo;i++) {
-    retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
+    if (target->GetCargo(i).category.find("upgrades/")!=0)
+      retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
   }
   tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
 }
