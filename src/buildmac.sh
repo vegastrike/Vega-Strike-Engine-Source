@@ -1,4 +1,4 @@
-g++    -pipe -O2  -Wall  -ffast-math -fomit-frame-pointer -fexpensive-optimizations    -o vegastrike 	debug_vs.o	main.o		\
+gcc -Xlinker -force_flat_namespace  -Xlinker -nomultidefs  -o vegastrike debug_vs.o			\
 	gfxlib_struct.o		\
 	in_joystick.o			\
 	force_feedback.o		\
@@ -7,6 +7,7 @@ g++    -pipe -O2  -Wall  -ffast-math -fomit-frame-pointer -fexpensive-optimizati
 	in_sdl.o				\
 	in_mouse.o			\
 	in_main.o				\
+	main.o				\
 	in_handler.o			\
 	main_loop.o			\
 	physics.o				\
@@ -36,12 +37,13 @@ g++    -pipe -O2  -Wall  -ffast-math -fomit-frame-pointer -fexpensive-optimizati
 	endianness.o				\
 	faction_util_generic.o	\
 	load_mission.o			\
-	savegame.o	pk3.o			\
-	vs_globals.o	vsfilesystem.o			\
-	cmd/planet.o cmd/planet_generic.o cmd/ai/firekeyboard.o			\
-aldrv/libaldrv.a common/libvscommon.a networking/libnetclient.a networking/lowlevel/libnetlowlevel.a cmd/script/script_call_briefing.o cmd/script/libscript.a cmd/script/c_alike/libc_alike.a python/briefing_wrapper.o cmd/libcmd.a cmd/base_init.o python/libpython.a gfx/nav/libnav.a gfx/libgfx.a cmd/ai/libai.a gldrv/libgldrv.a gui/libgui.a networking/libnet.a cmd/collide/libcollide.a boost129/libboost_python.a boost/libboost_python.a -L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/ -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks -lpthread  /Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/libobjc.dylib -L/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/OpenGL.framework/Libraries -l GL -l GLU  -framework GLUT /sw/lib/libexpat.a /sw/lib/libjpeg.a /sw/lib/python2.2/config/libpython2.2.a   /sw/lib/libopenal.a -framework Carbon -framework CoreAudio -framework IOKit /Users/daniel/Install/libpng/libpng.a /Users/daniel/Install/zlib/libz.a -framework AppKit -framework Foundation -framework OpenGL -framework Quicktime -framework AudioUnit -framework AudioToolbox  -framework System
+	savegame.o				\
+	vs_globals.o				\
+	vsfilesystem.o					\
+	pk3.o					\
+aldrv/libaldrv.a common/libvscommon.a networking/libnetclient.a cmd/script/script_call_briefing.o cmd/script/libscript.a cmd/script/c_alike/libc_alike.a python/briefing_wrapper.o cmd/libcmd.a cmd/base_init.o python/libpython.a gfx/nav/libnav.a gfx/libgfx.a cmd/ai/libai.a gldrv/libgldrv.a gui/libgui.a networking/libnet.a networking/lowlevel/libnetlowlevel.a cmd/collide/libcollide.a  boost/libboost_python.a  -lpthread   -framework OpenGL -framework GLUT /sw/lib/libexpat.a /sw/lib/libjpeg.a /Users/daniel/Install/libpng/libpng.a /users/daniel/install/zlib/libz.a  /usr/lib/gcc/darwin/3.1/libstdc++.a -framework AppKit /users/daniel/Vega/openal/linux/src/libopenal.a  -ldl /Users/daniel/Vega/Python-2.2.3/libpython2.2.a  -framework IOKit -framework Foundation -framework CoreFoundation -framework ApplicationServices -framework CoreServices  -framework Carbon -lcups -lbsm -framework SystemConfiguration -framework CoreAudio
 
-#-framework IOKit -framework AudioUnit -framework AudioToolbox  -framework OpenGL -framework Foundation -framework AppKit /sw/lib/libpng.a -framework Quicktime
-
-#/users/daniel/install/zlib/libz.a -s 
-
+#/sw/lib/python2.2/config/libpython2.2.a 
+#/usr/lib/dyld
+#
+#/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/dylib1.o 
