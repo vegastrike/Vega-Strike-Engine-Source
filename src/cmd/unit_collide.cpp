@@ -198,6 +198,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     return false;
 
     csRapidCollider::CollideReset();
+    //    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
     Unit * bigger =this;
     const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
     const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
@@ -234,8 +235,10 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     if (!bigger->SubUnits.empty()) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((!bigger->isUnit()==ASTEROIDPTR)&&un->rSize()/bigger->rSize()<rsizelim) {
+	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
 	  break;
+	}else {
+	  //	  printf ("s:%f",un->rSize()/bigger->rSize());
 	}
 	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal))) {
 	  return true;
@@ -245,8 +248,10 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     if (!smaller->SubUnits.empty()) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
-	if ((!smaller->isUnit()==ASTEROIDPTR)&&un->rSize()/smaller->rSize()<rsizelim) {
+	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
+	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
 	  break;
+
 	}
 	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal))) {
 	  return true;
