@@ -75,7 +75,7 @@ public:
   void SwitchMode( Unit * parent);
   void SetViewingStyle (VIEWSTYLE vm);
   void Scroll (int howmuch);
-  bool SetCommAnimation (Animation *ani);
+  bool SetCommAnimation (Animation *ani, bool force);
 };
 
 int parse_vdu_type (const char * s);

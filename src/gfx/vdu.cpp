@@ -517,9 +517,8 @@ void	VDU::DrawScanningMessage()
   //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
-bool VDU::SetCommAnimation (Animation * ani) {
-  static bool override=XMLSupport::parse_bool (vs_config->getVariable("graphics","override_comm_screen","true"));
-  if (comm_ani==NULL||override) {
+bool VDU::SetCommAnimation (Animation * ani, bool force) {
+  if (comm_ani==NULL||force) {
     if (posmodes&COMM) {
       if (ani!=NULL&&comm_ani==NULL)
         thismode.push_back(COMM);

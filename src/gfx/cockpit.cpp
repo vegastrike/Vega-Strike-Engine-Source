@@ -1735,10 +1735,19 @@ void GameCockpit::ScrollAllVDU (int howmuch) {
 
 
 void GameCockpit::SetCommAnimation (Animation * ani) {
+  bool seti=false;
   for (unsigned int i=0;i<vdu.size();i++) {
-    if (vdu[i]->SetCommAnimation (ani)) {
+    if (vdu[i]->SetCommAnimation (ani,false)) {
+      seti=true;
       break;
     }
+  }
+  if (!seti) {
+    for (unsigned int i=0;i<vdu.size();i++) {
+      if (vdu[i]->SetCommAnimation (ani,true)) {
+        break;
+      }
+    }    
   }
 }
 void GameCockpit::RestoreViewPort() {
