@@ -449,6 +449,7 @@ void AggressiveAI::Execute () {
   if (!ProcessCurrentFgDirective (fg)) {
   Unit * target = parent->Target();
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
+  if (isjumpable) {
   if (parent->GetJumpStatus().drive<0) {
     parent->ActivateJumpDrive(0);
     if (parent->GetJumpStatus().drive==-2) {
@@ -465,6 +466,7 @@ void AggressiveAI::Execute () {
 	parent->jump.drive=0;
       }
     }
+  }
   }
   if (!isjumpable &&(
 #if 1

@@ -80,7 +80,7 @@ class StarSystem {
   void AddStarsystemToUniverse(const string &filename);
   void RemoveStarsystemFromUniverse();
   int lightcontext;
-  vector <class MissileEffect *> dischargedMissiles;
+  std::vector <class MissileEffect *> dischargedMissiles;
  public:
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();

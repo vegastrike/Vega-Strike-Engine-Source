@@ -26,7 +26,7 @@ namespace XMLSupport {
     {};
   };
 
-  class AttributeList : public vector<Attribute> {
+  class AttributeList : public std::vector<Attribute> {
   public:
     AttributeList(const XML_Char **atts);
   };

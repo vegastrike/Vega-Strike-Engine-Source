@@ -37,7 +37,7 @@ struct Texture;
      */
     int playlist;
     float sparkcolor[4];
-    vector <faction_stuff> faction;
+    std::vector <faction_stuff> faction;
     ///Logos used by the ships of that faction
     Texture * logo;
     //if the squadron doens't; have its own particular logo
@@ -69,7 +69,7 @@ struct Texture;
     ~Faction(); //destructor
  };
 
-extern  vector <Faction *> factions; //the factions
+extern  std::vector <Faction *> factions; //the factions
 
 namespace FactionUtil {
 		std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
@@ -103,6 +103,6 @@ namespace FactionUtil {
 		Texture *getSquadLogo (int faction);
 };
 
-extern  vector <Faction *> factions; //the factions
+extern  std::vector <Faction *> factions; //the factions
 
 #endif

@@ -37,7 +37,7 @@ void WarpToP(Unit * parent, Unit * target) {
     static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
     if(parent->GetWarpEnergy()>parent->GetJumpStatus().energy*insys_jump_cost) {
       if (TargetWorthPursuing(parent,target)){
-	parent->AutoPilotTo(target);
+	parent->AutoPilotTo(target,false);
       }
     }
   }

@@ -107,19 +107,11 @@ static float GetJumpFuelQuantity() {
 void Unit::ActivateJumpDrive (int destination) {
   //const int jumpfuelratio=1;
   if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
-  if (warpenergy>=jump.energy&&(jump.energy>=0)) {
-    jump.drive = destination;
-    //float fuel_used=0;
-    warpenergy-=jump.energy;
-  }/*else {
-    if (abs(jump.energy)<32000) {
-      static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
-      if (fuel>jfuel*GetJumpFuelQuantity()) {
-       fuel-=jfuel*GetJumpFuelQuantity();
-       jump.drive=destination;
-     }
-    }
-    }*/
+	  /*if (1warpenergy>=jump.energy&&(jump.energy>=0)) {*/
+	  jump.drive = destination;
+	  //float fuel_used=0;
+//    warpenergy-=jump.energy; //don't spend energy until later
+	  /*}*/
   }
 }
 
@@ -1416,10 +1408,11 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
   }
   return def;
 }
-bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_level) {
+bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
   static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
   if (warpenergy<insys_jump_cost*jump.energy) {
-    return false;
+	  if (!ignore_energy_requirements)
+		  return false;
   }
   signed char Guaranteed = ComputeAutoGuarantee (this);
   if (Guaranteed==Mission::AUTO_OFF) {
@@ -1462,6 +1455,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
   static bool teleport_autopilot= XMLSupport::parse_bool(vs_config->getVariable("physics","teleport_autopilot","true"));
   if ((!teleport_autopilot)&&(!nanspace)) {
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
+	  bool ignore_friendlies=true;
     for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
       static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
       if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
@@ -1537,7 +1531,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
 	Order * otherord = other->getAIState();
 	if (otherord)
 	  if (otherord->PursueTarget (this,leadah)) {
-	    other->AutoPilotTo(this,true,recursive_level-1);
+	    other->AutoPilotTo(this,ignore_energy_requirements,recursive_level-1);
 	    if (leadah) {
 	      if (NULL==_Universe->isPlayerStarship (other)) {
 		other->SetPosition(AutoSafeEntrancePoint (LocalPosition(),other->rSize()*1.5,other));
@@ -1553,11 +1547,15 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
 
 bool Unit::jumpReactToCollision (Unit * smalle) {
   if (!GetDestinations().empty()) {//only allow big with small
-    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
-      smalle->DeactivateJumpDrive();
-      Unit * jumppoint = this;
-      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
-      return true;
+    if (((smalle->GetJumpStatus().drive>=0&&smalle->warpenergy>=smalle->GetJumpStatus().energy)||image->forcejump)){
+		smalle->warpenergy-=smalle->GetJumpStatus().energy;
+		int dest = smalle->GetJumpStatus().drive;
+		if (dest<0)
+			dest=0;
+		smalle->DeactivateJumpDrive();
+		Unit * jumppoint = this;
+		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
+		return true;
     }
     return true;
   }

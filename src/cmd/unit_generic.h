@@ -438,7 +438,7 @@ protected:
   virtual float ExplosionRadius();
 public:
   virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
-  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false,int recursive_level=2);
+  bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within

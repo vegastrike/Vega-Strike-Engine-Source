@@ -4,7 +4,7 @@
 #if ((WHICH_UNIT_EXPORT_NUMBER==3) || (WHICH_UNIT_EXPORT_NUMBER==2))
 #else
 ////////////////////////////AUTOMATIC WRAP//////
-  WRAPPED2 (bool,AutoPilotTo,UnitWrapper,un,bool,ignore_friendlies,false)
+  WRAPPED2 (bool,AutoPilotTo,UnitWrapper,un,bool,ignore_energy_requirement,false)
   voidWRAPPED0(SetTurretAI)
   voidWRAPPED0(DisableTurretAI)
   voidWRAPPED3(leach,float,XshieldPercent,float,YrechargePercent,float,ZenergyPercent)

@@ -751,7 +751,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     static int wasautopilot=0;
 	int abletoautopilot=0;
     if (target) {
-      abletoautopilot=(target->AutoPilotTo(target)?1:0);
+      abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
@@ -1131,10 +1131,10 @@ int GameCockpit::Autopilot (Unit * target) {
     enableautosound.playsound();
     Unit * un=NULL;
     if ((un=GetParent())) {
-      if ((retauto = un->AutoPilotTo(un))) {//can he even start to autopilot
+      if ((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
 	if (autopan)
 	  SetView (CP_PAN);
-	un->AutoPilotTo(target);
+	un->AutoPilotTo(target,false);
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 	if (face_target_on_auto) {
 	  //	  FaceTarget(un,un->LocalPosition(),un->Target());
@@ -1509,7 +1509,7 @@ void GameCockpit::UpdAutoPilot()
 	Unit * autoun = autopilot_target.GetUnit();
 	autopilot_target.SetUnit(NULL);
 	if (autoun&&autopan) {
-	  par->AutoPilotTo(autoun);
+	  par->AutoPilotTo(autoun,false);
 	}
       }
     }

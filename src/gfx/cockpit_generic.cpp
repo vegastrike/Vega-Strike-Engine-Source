@@ -219,9 +219,9 @@ int Cockpit::Autopilot (Unit * target) {
   if (target) {
     Unit * un=NULL;
     if ((un=GetParent())) {
-      if ((retauto = un->AutoPilotTo(un))) {//can he even start to autopilot
+      if ((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
 	//SetView (CP_PAN);
-	un->AutoPilotTo(target);
+	un->AutoPilotTo(target,false);
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 	if (face_target_on_auto) {
 	  FaceTarget(un);
@@ -311,7 +311,7 @@ void Cockpit::UpdAutoPilot()
 	Unit * autoun = autopilot_target.GetUnit();
 	autopilot_target.SetUnit(NULL);
 	if (autoun) {
-	  par->AutoPilotTo(autoun);
+	  par->AutoPilotTo(autoun,false);
 	}
       }
     }

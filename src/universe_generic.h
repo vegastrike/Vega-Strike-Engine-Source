@@ -90,7 +90,7 @@ private:
   //virtual unsigned int CurrentCockpit(){return 0;}
   Cockpit * createCockpit( std::string player);
 
-  vector <std::string> getAdjacentStarSystems(const std::string &ss);
+  std::vector <std::string> getAdjacentStarSystems(const std::string &ss);
   std::string getGalaxyProperty (const std::string &sys, const std::string & prop);
   std::string getGalaxyPropertyDefault (const std::string & sys, const std::string & prop, const std::string def="");
   bool StillExists(StarSystem * ss);
