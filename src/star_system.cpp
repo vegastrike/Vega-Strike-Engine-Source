@@ -617,10 +617,12 @@ void StarSystem::Update(float priority , bool executeDirector) {
 #endif
       Unit * owner = _Universe->AccessCockpit()->GetParent();
       if (owner) {
-	if (getTimeCompression()>1) {//if not paused
-	  if (!owner->AutoPilotTo (owner)) {
-	    
-	    reset_time_compression(0,PRESS);
+	if (owner->InCorrectStarSystem(this)) {
+	  if (getTimeCompression()>1) {//if not paused
+	    if (!owner->AutoPilotTo (owner)) {
+	      
+	      reset_time_compression(0,PRESS);
+	    }
 	  }
 	}
       }
