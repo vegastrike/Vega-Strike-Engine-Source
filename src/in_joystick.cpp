@@ -241,6 +241,8 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
   int _mx,_my;
   GetMouseXY (_mx,_my);
   GetMouseDelta (_dx,_dy);
+  if (0&&(_dx||_dy))
+    printf ("x:%d y:%d\n",_dx,_dy);
   if (warp_pointer==false) {
     _dx = _mx-g_game.x_resolution/2;
     def_mouse_sens=25;

@@ -248,6 +248,7 @@ static void UpdateTimeCompressionSounds() {
 		lasttimecompress=timecount;
 	}
 }
+extern int getmicrosleep ();
 void GameUniverse::StartDraw()
 {
 #ifndef WIN32
@@ -292,7 +293,7 @@ void GameUniverse::StartDraw()
     ProcessInput(i);//input neesd to be taken care of;
     popActiveStarSystem();
   }
-  //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
+  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();
   //remove systems not recently visited?
   static int sorttime=0;
