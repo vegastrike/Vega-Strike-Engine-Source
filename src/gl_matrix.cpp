@@ -88,14 +88,7 @@ float Magnitude(Vector v)
 	return sqrtf(v.i*v.i + v.j*v.j + v.k*v.k);
 }
 
-Vector CrossProduct(const Vector& v1, const Vector& v2)
-{
-	Vector result;
-    result.i = v1.j * v2.k - v1.k * v2.j;
-    result.j = v1.k * v2.i - v1.i * v2.k;
-    result.k = v1.i * v2.j  - v1.j * v2.i;     
-	return result;
-}
+
 /*
 Vector operator*(float left, const Vector &right)
 {
@@ -759,3 +752,4 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[5][3] /= t;
    
 }
+
