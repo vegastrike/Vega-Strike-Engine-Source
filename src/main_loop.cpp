@@ -160,7 +160,7 @@ void ExamineWhenTargetKey() {
         break;
     }
     for (;examine<2;++examine) {
-      if (_Universe->AccessCockpit()->getVDUMode(view)==VDU::TARGET)
+      if (_Universe->AccessCockpit()->getVDUMode(examine)==VDU::TARGET)
         break;
     }
     if (examine==2){
@@ -170,7 +170,7 @@ void ExamineWhenTargetKey() {
         break;
       default:        
         SwitchVDUTo(VDU::TARGET);
-        if (_Universe->AccessCockpit()->getVDUMode(view)!=VIEW) {
+        if (_Universe->AccessCockpit()->getVDUMode(view)!=VDU::VIEW) {
           SwitchVDUTo(VDU::TARGET);
           SwitchVDUTo(VDU::VIEW);          
         }
