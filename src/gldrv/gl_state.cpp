@@ -51,7 +51,7 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	  glEnable (GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
-	  if (g_game.Multitexture) {
+	  if (gl_options.Multitexture) {
 		bTex1 = GFXTRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
@@ -88,7 +88,7 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	  glDisable (GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
-	  if (g_game.Multitexture) {
+	  if (gl_options.Multitexture) {
 		bTex1 = GFXFALSE;
 		bTex1 = GFXTRUE;
 		GFXActiveTexture (1);
@@ -301,7 +301,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 
 void GFXActiveTexture (const int stage) {
 #if !defined(IRIX)
-  if (g_game.Multitexture&&stage!=activeTextureStage) {
+  if (gl_options.Multitexture&&stage!=activeTextureStage) {
     glActiveTextureARB(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
@@ -356,7 +356,7 @@ GFXBOOL GFXSetTexFunc(int stage, int texset)
 	{
 		GFXStage0 = texset;
 	}	
-	if (g_game.Multitexture)
+	if (gl_options.Multitexture)
 	{
 	  GFXActiveTexture(stage);	
 	  if (!stage) {

@@ -94,15 +94,15 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   
   glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_S, WrapMode);
   glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_T, WrapMode);
-  if (textures[*handle].mipmapped&(TRILINEAR|MIPMAP)&&g_game.mipmap>=2) {
+  if (textures[*handle].mipmapped&(TRILINEAR|MIPMAP)&&gl_options.mipmap>=2) {
     glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    if (textures[*handle].mipmapped&TRILINEAR&&g_game.mipmap>=3) {
+    if (textures[*handle].mipmapped&TRILINEAR&&gl_options.mipmap>=3) {
       glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     }else {
       glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
     }
   } else {
-    if (textures[*handle].mipmapped==NEAREST||g_game.mipmap==0) {
+    if (textures[*handle].mipmapped==NEAREST||gl_options.mipmap==0) {
       glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     } else {
@@ -203,25 +203,25 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
     fprintf (stderr,"RGB24 bitmaps not yet supported");
     break;
   case RGB32:
-    if (textures[handle].mipmapped&&g_game.mipmap>=2)
+    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
       gluBuild2DMipmaps(image2D, 3, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     else
       glTexImage2D(image2D, 0, 3, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     break;
   case RGBA32:
-    if (textures[handle].mipmapped&&g_game.mipmap>=2)
+    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
       gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     else
       glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     break;
   case RGBA16:
-    if (textures[handle].mipmapped&&g_game.mipmap>=2)
+    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
       gluBuild2DMipmaps(image2D, GL_RGBA16, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     else
       glTexImage2D(image2D, 0, GL_RGBA16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     break;
   case RGB16:
-    if (textures[handle].mipmapped&&g_game.mipmap>=2)
+    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
       gluBuild2DMipmaps(image2D, GL_RGB16, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     else
       glTexImage2D(image2D, 0, GL_RGB16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
@@ -229,7 +229,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 
   case PALETTE8:
 #if defined(GL_COLOR_INDEX8_EXT)	// IRIX has no GL_COLOR_INDEX8 extension
-    if (g_game.PaletteExt) {
+    if (gl_options.PaletteExt) {
       error = glGetError();
       glColorTable(textures[handle].targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
       error = glGetError();
@@ -238,7 +238,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	  free(tempbuf);
 	return GFXFALSE;
       }
-      if (textures[handle].mipmapped&&g_game.mipmap>=2)
+      if (textures[handle].mipmapped&&gl_options.mipmap>=2)
 	gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
       else
 	glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
@@ -264,7 +264,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	  tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 	  j ++;
 	}
-      if (textures[handle].mipmapped&&g_game.mipmap>=2)
+      if (textures[handle].mipmapped&&gl_options.mipmap>=2)
 	gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
       else
 	glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
@@ -318,10 +318,10 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
     return ;
   } else
     activetexture[stage] = handle;
-  if (g_game.Multitexture) {
+  if (gl_options.Multitexture) {
     GFXActiveTexture(textures[handle].texturestage);
     glBindTexture(textures[handle].targets, textures[handle].name);
-    /*		if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&g_game.mipmap>=2) {
+    /*		if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&gl_options.mipmap>=2) {
 		glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		if (textures[handle].mipmapped&TRILINEAR) {
 		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -329,7 +329,7 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		}
 		} else {
-		if (textures[handle].mipmapped==NEAREST||g_game.mipmap==0) {
+		if (textures[handle].mipmapped==NEAREST||gl_options.mipmap==0) {
 		glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		} else {
@@ -338,7 +338,7 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		}
 		}*/
 
-    if(g_game.PaletteExt&&textures[handle].textureformat == PALETTE8) {
+    if(gl_options.PaletteExt&&textures[handle].textureformat == PALETTE8) {
       //memset(textures[handle].palette, 255, 1024);
     }
   } else {

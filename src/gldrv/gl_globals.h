@@ -118,8 +118,17 @@ extern int Stage0Texture;
 extern int Stage0TextureName;
 extern int Stage1Texture;
 extern int Stage1TextureName;
-
-
+typedef struct {
+  int fullscreen;
+  int Multitexture;
+  int PaletteExt;
+  int display_lists;
+  int mipmap;//0 = nearest 1 = linear 2 = mipmap
+  int color_depth;
+  int cubemap;  
+  int compression;
+} gl_options_t;
+extern gl_options_t gl_options;
 #include <GL/glut.h>
 
 // Maximum number of things that can be returned in a pick operation

@@ -31,7 +31,7 @@ int Stage0Texture = 1;
 int Stage0TextureName;
 int Stage1Texture= 0;
 int Stage1TextureName;
-
+gl_options_t gl_options;
 namespace GFXMatrices {
   Matrix model,view, projection, invprojection;
   Matrix  rotview;

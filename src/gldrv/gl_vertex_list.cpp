@@ -244,7 +244,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
 
 void GFXVertexList::RefreshDisplayList () {
 #ifdef USE_DISPLAY_LISTS
-  if ((!g_game.display_lists)||(display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
+  if ((!gl_options.display_lists)||(display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
     return;//don't used lists if they're mutable
   }
   if (display_list) {

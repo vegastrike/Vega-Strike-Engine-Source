@@ -1377,7 +1377,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
     }
     vlist = new GFXVertexList (polytypes, xml->vertices.size(),myvert,o_index,poly_offsets,false,myind);
   }else {
-    static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")))&&!g_game.display_lists;
+    static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition",".75")));
     bool cachunk=false;
     if (usopttmp) {

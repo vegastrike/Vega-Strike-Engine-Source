@@ -20,7 +20,6 @@
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
 #endif
-
 #include "vs_globals.h"
 #include "gfxlib.h"
 #include "in_kb.h"
@@ -53,13 +52,9 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.music_volume=1;
   g_game.warning_level=20;
   g_game.capture_mouse=GFXFALSE;
-  g_game.fullscreen = 0;
-  g_game.color_depth = 16;
   g_game.y_resolution = 768;
   g_game.x_resolution = 1024;
   g_game.fov=78;
-  g_game.PaletteExt=1;
-  g_game.cubemap=0;
   g_game.MouseSensitivityX=2;
   g_game.MouseSensitivityY=4;
 
@@ -194,14 +189,11 @@ int main( int argc, char *argv[] )
 
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
-  g_game.Multitexture=1;
-  g_game.display_lists=0;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
       case 'r':
       case 'R':
-	g_game.Multitexture=0;
 	break;
       case 'M':
       case 'm':
@@ -212,14 +204,11 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	g_game.sound_enabled=1;
 	break;
       case '1':
-	g_game.color_depth = 16;
 	break;
       case '3':
-	g_game.color_depth = 32;
 	break; 
       case 'f':
       case 'F':
-	g_game.fullscreen =1;
 	break;
       case 'L':
       case 'l'://low rez
@@ -243,7 +232,6 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'D':
       case 'd':
-	g_game.display_lists=1;
 	break;
       case 'G':
       case 'g':

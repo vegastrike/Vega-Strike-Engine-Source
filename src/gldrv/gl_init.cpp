@@ -18,7 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
+#include "gl_globals.h"
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "config_xml.h"
@@ -38,6 +38,9 @@
 # endif
 #endif
 #if !defined(IRIX)
+//typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
+//typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
+
 # include <GL/glext.h>
 #endif
 
@@ -98,7 +101,6 @@ void init_opengl_extensions()
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
 
-#if defined(GL_EXT_compiled_vertex_array)
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")) {
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
@@ -106,7 +108,6 @@ void init_opengl_extensions()
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
     } else
-#endif
 	{
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
@@ -123,18 +124,24 @@ void init_opengl_extensions()
       glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
     }
 #endif
+    if (glutExtensionSupported ("GL_EXT_texture_compression_s3tc")) {
+      (void) fprintf(stderr, "OpenGL::Texture Compression supported\n");
+    } else {
+      gl_options.compression=0;
+      (void) fprintf(stderr, "OpenGL::Texture Compression unsupported\n");
+    }
     if (glutExtensionSupported ("GL_ARB_multitexture")||glutExtensionSupported ("GL_EXT_multitexture")) {
-      g_game.Multitexture = 1*g_game.Multitexture;//might be zero by input
+      gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
       (void) fprintf(stderr, "OpenGL::Multitexture supported\n");
     } else {
-      g_game.Multitexture = 0;
+      gl_options.Multitexture = 0;
       (void) fprintf(stderr, "OpenGL::Multitexture unsupported\n");
     }
     if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) || glutExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
-      g_game.cubemap = 1;
+      gl_options.cubemap = 1;
       (void) fprintf(stderr, "OpenGL::TextureCubeMapExt supported\n");
     } else {
-      g_game.cubemap = 0;
+      gl_options.cubemap = 0;
       (void) fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n");
     }
 }
@@ -182,11 +189,12 @@ void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
-    g_game.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
-    g_game.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection",g_game.Multitexture?"true":"false"));
-    g_game.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
-    g_game.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
-    g_game.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists",g_game.display_lists?"true":"false"));
+    gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
+    gl_options.compression = XMLSupport::parse_bool (vs_config->getVariable ("graphics","texture_compression","false"));
+    gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
+    gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
+    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
+    gl_options.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists","false"));
 #ifdef USE_STENCIL_BUFFER
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL );
 #else
@@ -194,11 +202,11 @@ void GFXInit (int argc, char ** argv){
 #endif
 
       char str [15];
-      sprintf (str, "%dx%d:%d",g_game.x_resolution,g_game.y_resolution,g_game.color_depth); 
+      sprintf (str, "%dx%d:%d",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
       glutGameModeString(str);
 
     /* Create a window */
-      if (g_game.fullscreen) {
+      if (gl_options.fullscreen) {
 	glutInitWindowPosition( 0, 0 );
 	glutEnterGameMode();
     } else {
@@ -231,7 +239,7 @@ void GFXInit (int argc, char ** argv){
 
     init_opengl_extensions();
     GFXInitTextureManager();
-    if (g_game.Multitexture)
+    if (gl_options.Multitexture)
       GFXActiveTexture(0);
 
     glEnable(GL_TEXTURE_2D);		// use two-dimensional texturing
@@ -243,16 +251,16 @@ void GFXInit (int argc, char ** argv){
     glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
 #endif
     if (glutExtensionSupported("GL_EXT_color_table")||glutExtensionSupported ("GL_EXT_shared_texture_palette")) {
-      g_game.PaletteExt = 1;
+      gl_options.PaletteExt = 1;
       //(void) fprintf(stderr, "OpenGL::EXTColorTable supported\n");
     } else {
-      g_game.PaletteExt = 0;
+      gl_options.PaletteExt = 0;
       (void) fprintf(stderr, "OpenGL::EXTColorTable unsupported\n");
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    if (g_game.Multitexture){
+    if (gl_options.Multitexture){
       GFXActiveTexture(1);
       glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -355,7 +363,7 @@ void GFXShutdown () {
 
   GFXDestroyAllTextures();
   GFXDestroyAllLights();
-  if ( g_game.fullscreen ) {
+  if ( gl_options.fullscreen ) {
     glutLeaveGameMode();
   }
 }

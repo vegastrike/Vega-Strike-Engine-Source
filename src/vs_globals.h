@@ -9,26 +9,15 @@ typedef struct {
   int music_volume;
   int warning_level;
   int capture_mouse;
-  int fullscreen;
-  int Multitexture;
-  int PaletteExt;
-  int display_lists;
-  int mipmap;//0 = nearest 1 = linear 2 = mipmap
-  int color_depth;
-  int y_resolution;
-  int x_resolution;  
-  int cubemap;  
   float MouseSensitivityX;
   float MouseSensitivityY;   
-  float fov ;
-  float aspect ;
+  float detaillevel; /*how much the LOD calculation gets multiplied by...higher="bigger" */
+  int y_resolution;
+  int x_resolution;  
   float znear;
   float zfar ;
-  float detaillevel; /*how much the LOD calculation gets multiplied by...higher="bigger" */
-
-  //  scalar_t time;                      /* game time -- now local in lin_time.h*/
-  //scalar_t time_step;                 /* size of current time step " */
-  //scalar_t secs_since_start;          /* seconds since game was started " */
+  float fov ;
+  float aspect ;
 } game_data_t;
 
 extern game_data_t g_game;

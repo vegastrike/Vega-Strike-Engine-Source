@@ -129,7 +129,7 @@ void /*GFXDRVAPI*/ GFXTexCoord2f(const float s, const float t)
 void /*GFXDRVAPI*/ GFXTexCoord4f(const float s, const float t, const float u, const float v)
 {
 #if !defined(IRIX)
-	if(g_game.Multitexture)
+	if(gl_options.Multitexture)
 	{
 		glMultiTexCoord2fARB(GL_TEXTURE0_ARB, s,t);
 		glMultiTexCoord2fARB(GL_TEXTURE1_ARB, u,v);
