@@ -73,7 +73,7 @@ class quadsquare {
 	int	Render(const quadcornerdata& cd);
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z);
-  static void SetCurrentTerrain (std::vector <unsigned int> *index, unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices );
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices );
 	
 private:
 	void	EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata& cd);
@@ -95,7 +95,7 @@ private:
   static unsigned int * VertexCount;
   static GFXVertexList *vertices;
   static std::vector <unsigned int> *unusedvertices;
-  static std::vector <unsigned int> *indices;
+  static std::vector <unsigned int> indices;
 };
 
 

@@ -20,7 +20,7 @@
 unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
-std::vector <unsigned int> *quadsquare::indices;
+std::vector <unsigned int> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 
 
@@ -781,24 +781,15 @@ int	quadsquare::Render(const quadcornerdata& cd)
 // Draws the heightfield represented by this tree.
 // Returns the number of triangles rendered.
 {
-
-
-	// Do some initial setup, then do all the work in RenderAux().
-//	gl....();
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, VertexArray);
-
-	//xxxx
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glScalef(1.0, VERTICAL_SCALE, 1.0);
+  
+  vertices->LoadDrawState();
+  vertices->BeginDrawState (GFXTRUE);
+  indices.clear();
+  //Should we have somethign like th is?	glScalef(1.0, VERTICAL_SCALE, 1.0);
 	
-	// No texture; use crummy vertex lighting.
-	glEnableClientState(GL_NORMAL_ARRAY);
-	glColorPointer(3, GL_UNSIGNED_BYTE, 0, ColorArray);
-       
 		// Set up automatic texture-coordinate generation.
 		// Basically we're just stretching the current texture over the entire 64K x 64K terrain.
+  /**hmm is this necessary?  how will we do texturing?
 		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
 		float	p[4] = { 1.0 / 65536, 0, 0, 0 };
 		glTexGenfv(GL_S, GL_OBJECT_PLANE, p);
@@ -809,19 +800,17 @@ int	quadsquare::Render(const quadcornerdata& cd)
 
 		glEnable(GL_TEXTURE_GEN_S);
 		glEnable(GL_TEXTURE_GEN_T);
-
+  */
 
 	RenderAux(cd, GFX_PARTIALLY_VISIBLE);
-
+	/*
 	glDisable(GL_TEXTURE_GEN_S);
 	glDisable(GL_TEXTURE_GEN_T);
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-//	gl...();
-
-	glPopMatrix();
-
-	return indices->size();;
+	*/
+	unsigned int isize = indices.size();
+	vertices->Draw(GFXTRI,isize, indices.begin());
+	vertices->EndDrawState();
+	return isize;
 }
 
 
@@ -883,7 +872,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 
 	
 // Local macro to make the triangle logic shorter & hopefully clearer.
-#define tri(aa,bb,cc) (indices->push_back (aa), indices->push_back (bb), indices->push_back (cc))
+#define tri(aa,bb,cc) (indices.push_back (aa), indices.push_back (bb), indices.push_back (cc))
 #define V0 (Vertex[0].vertindex)
 #define V1 (Vertex[1].vertindex)
 #define V2 (cd.Verts[0].vertindex)
@@ -1003,12 +992,11 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 		break;
 	}	
 }
-void quadsquare::SetCurrentTerrain (std::vector <unsigned int> *glind, unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert ) {
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert ) {
   quadsquare::VertexAllocated = VertexAllocated;
   quadsquare::VertexCount = VertexCount;
   quadsquare::vertices = vertices;
   quadsquare::unusedvertices = unvert;
-  quadsquare::indices = glind;
 }
 
 void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
