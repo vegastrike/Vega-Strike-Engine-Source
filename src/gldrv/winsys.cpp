@@ -268,7 +268,11 @@ void winsys_init( int *argc, char **argv, char *window_title,
 */
 void winsys_shutdown()
 {
+  static bool shutdown=false;
+  if (!shutdown) {
+    shutdown=true;
     SDL_Quit();
+  }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -437,6 +441,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 */
 void winsys_exit( int code )
 {
+  winsys_shutdown();
     if ( atexit_func ) {
 	(*atexit_func)();
     }
@@ -673,9 +678,13 @@ void winsys_init( int *argc, char **argv, char *window_title,
 */
 void winsys_shutdown()
 {
+  static bool shutdown=false;
+  if (!shutdown) {
+    shutdown=true;
     if ( gl_options.fullscreen ) {
 	glutLeaveGameMode();
     }
+  }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -739,7 +748,8 @@ void winsys_atexit( winsys_atexit_func_t func )
 {
     static bool called = false;
 
-    check_assertion( called == false, "winsys_atexit called twice" );
+    if (called)
+      fprintf (stderr,"winsys_atexit called twice\n" );
 
     called = true;
 
@@ -756,6 +766,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 */
 void winsys_exit( int code )
 {
+  winsys_shutdown();
     exit(code);
 }
 
