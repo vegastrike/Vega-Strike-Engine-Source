@@ -701,7 +701,6 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
     headtrans.push_back (Matrix());
     Identity(headtrans.back());
   }
-  int i;
   for (i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
