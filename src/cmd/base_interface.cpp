@@ -106,12 +106,13 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 			objs[i]->Draw(base);
 	}
 }
-static BaseInterface::Room::BaseTalk * only_one_talk=NULL;
+static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
 BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
 	if (only_one) {
-		only_one_talk=this;
+		active_talks.clear();
 	}
+	active_talks.push_back(this);
 }
 
 void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
@@ -123,33 +124,33 @@ void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
 		GFXVertex3f(caller->x,caller->y+caller->hei,0);
 		GFXVertex3f(caller->x,caller->y,0);
 	GFXEnd();*/
-	if (only_one_talk!=NULL&&only_one_talk!=this) {
-		curchar = message.size();
-		curtime=999999;
-	}
+	
+	// FIXME: should be called from draw()
 	if (hastalked) return;
+	curtime+=GetElapsedTime()/getTimeCompression();
+	static float delay=XMLSupport::parse_float(vs_config->getVariable("graphics","text_delay",".05"));
+	if ((std::find(active_talks.begin(),active_talks.end(),this)==active_talks.end())||(curchar>=message.size()&&curtime>((delay*message.size())+2))) {
+		curtime=0;
+		BaseObj * self=this;
+		std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
+				base->rooms[base->curroom]->objs.end(),
+				this);
+		if (ind!=base->rooms[base->curroom]->objs.end()) {
+			*ind=NULL;
+		}
+		std::vector<BaseTalk *>::iterator ind2=std::find(active_talks.begin(),active_talks.end(),this);
+		if (ind2!=active_talks.end()) {
+			*ind2=NULL;
+		}
+		base->othtext.SetText("");
+		delete this;
+		return; //do not do ANYTHING with 'this' after the previous statement...
+	}
 	if (curchar<message.size()) {
-		curtime+=GetElapsedTime()/getTimeCompression();
 		static float inbetween=XMLSupport::parse_float(vs_config->getVariable("graphics","text_speed",".025"));
 		if (curtime>inbetween) {
 			base->othtext.SetText(message.substr(0,++curchar));
 			curtime=0;
-		}
-	} else {
-		curtime+=GetElapsedTime()/getTimeCompression();
-		static float delay=XMLSupport::parse_float(vs_config->getVariable("graphics","text_delay",".05"));
-		if (curtime>((delay*message.size())+2)) {
-			curtime=0;
-			BaseObj * self=this;
-			std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
-					base->rooms[base->curroom]->objs.end(),
-					this);
-			if (ind<base->rooms[base->curroom]->objs.end()) {
-				*ind=NULL;
-				base->othtext.SetText("");
-				delete this;
-				return; //do not do ANYTHING with 'this' after the previous statement...
-			}
 		}
 	}
 	hastalked=true;

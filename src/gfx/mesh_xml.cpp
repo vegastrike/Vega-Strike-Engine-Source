@@ -595,7 +595,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -621,7 +621,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -648,7 +648,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -676,7 +676,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -704,7 +704,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -732,7 +732,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -759,7 +759,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -805,7 +805,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::POINT:
 	assert(!(xml->vertex_state & MeshXML::V_POINT));
@@ -873,7 +873,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::TYPE:
 	assert (!(xml->vertex_state&MeshXML::V_TYPE));
@@ -929,7 +929,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(MeshXML::attribute_map.lookup((*iter).name)) {
       case MeshXML::UNKNOWN:
-	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case MeshXML::POINT:
 	assert (ttttttt<2);
