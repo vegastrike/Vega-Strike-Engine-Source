@@ -25,12 +25,62 @@ static KBSTATE neartargetkey=UP;
 static KBSTATE threattargetkey=UP;
 static KBSTATE picktargetkey=UP;
 static KBSTATE targetkey=UP;
-
+const unsigned int NUMCOMMKEYS=10;
+static KBSTATE commKeys[NUMCOMMKEYS]={UP,UP,UP,UP,UP,UP,UP,UP,UP,UP};
 static KBSTATE nearturrettargetkey=UP;
 static KBSTATE threatturrettargetkey=UP;
 static KBSTATE pickturrettargetkey=UP;
 static KBSTATE turrettargetkey=UP;
-
+void FireKeyboard::PressComm1Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[0]=PRESS;
+  }
+}
+void FireKeyboard::PressComm2Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[1]=PRESS;
+  }
+}
+void FireKeyboard::PressComm3Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[2]=PRESS;
+  }
+}
+void FireKeyboard::PressComm4Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[3]=PRESS;
+  }
+}
+void FireKeyboard::PressComm5Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[4]=PRESS;
+  }
+}
+void FireKeyboard::PressComm6Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[5]=PRESS;
+  }
+}
+void FireKeyboard::PressComm7Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[6]=PRESS;
+  }
+}
+void FireKeyboard::PressComm8Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[7]=PRESS;
+  }
+}
+void FireKeyboard::PressComm9Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[8]=PRESS;
+  }
+}
+void FireKeyboard::PressComm10Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    commKeys[9]=PRESS;
+  }
+}
 
 
 void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
@@ -304,7 +354,34 @@ static void DoDockingOps (Unit * parent, Unit * targ) {
       und=false;
     }
 }
+
+
+void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
+
+  Unit * un = c.sender.GetUnit();
+  if (un) {
+    AdjustRelationTo(un,c.getCurrentState()->messagedelta);
+    mission->msgcenter->add ("game","all",un->name+string(": ")+c.getCurrentState()->message);
+  }else {
+    mission->msgcenter->add ("game","all",string("[static]: ")+c.getCurrentState()->message);
+  }
+}
+
+
+static CommunicationMessage * GetTargetMessageQueue (Unit * targ,vector <CommunicationMessage *> messagequeue) {
+      CommunicationMessage * mymsg=NULL;
+      for (unsigned int i=0;i<messagequeue.size();i++) {
+	if (messagequeue[i]->sender.GetUnit()==targ) {
+	  mymsg = messagequeue[i];
+	  break;
+	}
+      }
+      return mymsg;
+}
+
+
 void FireKeyboard::Execute () {
+  ProcessCommunicationMessages();
   Unit * targ;
   bool refresh_target=false;
   if ((targ = parent->Target())) {
@@ -389,18 +466,27 @@ void FireKeyboard::Execute () {
     misk=DOWN;
     parent->ToggleWeapon(true);
   }
+  for (unsigned int i=0;i<NUMCOMMKEYS;i++) {
+    if (commKeys[i]==PRESS) {
+      commKeys[i]=RELEASE;
+      Unit * targ=parent->Target();
+      if (targ) {
+	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,messagequeue);       
+	if (mymsg==NULL) {
+	  targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,i));
+	}else {
+	  FSM::Node * n = mymsg->getCurrentState();
+	  if (i<n->edges.size()) {
+	    targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,*mymsg,i));
+	  }
+	}
+      }
+    }
+  }
   if (refresh_target) {
     Unit * targ;
     if ((targ =parent->Target())) {
-
-      
-      CommunicationMessage * mymsg=NULL;
-      for (unsigned int i=0;i<messagequeue.size();i++) {
-	if (messagequeue[i]->sender.GetUnit()==targ) {
-	  mymsg = messagequeue[i];
-	  break;
-	}
-      }
+      CommunicationMessage *mymsg = GetTargetMessageQueue(targ,messagequeue);
       if (mymsg==NULL) {
 	FSM *fsm =_Universe->GetConversation (parent->faction,targ->faction);
 	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(_Universe->GetRelation(parent->faction,targ->faction)));
@@ -412,4 +498,3 @@ void FireKeyboard::Execute () {
     }
   }
 }
-

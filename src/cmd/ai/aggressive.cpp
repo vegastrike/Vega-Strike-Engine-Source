@@ -7,6 +7,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "cmd/unit.h"
+#include "communication.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
@@ -48,7 +49,18 @@ bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
     return false;
   }
 }
-
+void AggressiveAI::ProcessCommMessage (CommunicationMessage &c) {
+  FSM::Node * n = c.getCurrentState ();
+  if (n) {
+    if (n->edges.size()) {
+      int b = rand()%n->edges.size();
+      Unit * un = c.sender.GetUnit();
+      if (un) {
+	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b));
+      }
+    }
+  }
+}
 
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   float value;

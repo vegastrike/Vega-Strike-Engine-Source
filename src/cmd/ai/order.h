@@ -62,6 +62,8 @@ protected:
   ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
   virtual void AdjustRelationTo (Unit * un, float factor);
 public:
+  ///clears the messasges of this order
+  void ClearMessages();
   ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
   enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, LOCATION = 8, TARGET = 16, SELF = 32 }; 
   ///The default constructor setting everything to NULL and no dependency on order
@@ -91,7 +93,7 @@ public:
   ///Sets the parent of this Unit.  Any virtual functions must call this one
   virtual void SetParent(Unit *parent1) {parent = parent1;};
   ///Sends a communication message from the Unit (encapulated in c) to this unit
-  virtual void Communicate (class CommunicationMessage &c);
+  virtual void Communicate (const class CommunicationMessage &c);
   ///processes a single message...generally called by the Messages() func
   virtual void ProcessCommMessage(class CommunicationMessage &c);
   ///responds (or does not) to certain messages in the message queue

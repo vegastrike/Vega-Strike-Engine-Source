@@ -23,8 +23,9 @@ class CommunicationMessage {
   int curstate;
   UnitContainer sender;
   CommunicationMessage(Unit * send, Unit * recv);
-  CommunicationMessage(Unit * send, Unit * recv, int prevvstate=0);
-  CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate);
+  CommunicationMessage(Unit * send, Unit * recv, int curstate);
+  CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate);
+  CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate);
   void SetCurrentState(int message);
   FSM::Node * getCurrentState() {return &fsm->nodes[curstate];}
 

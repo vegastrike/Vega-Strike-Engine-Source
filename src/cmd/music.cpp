@@ -123,6 +123,8 @@ float HowLong (std::string &song) {
 }
 void Music::Listen() {
 	static bool use_external = XMLSupport::parse_bool(vs_config->getVariable("audio","use_external_player","true"));
+	p.GetUnit();//so we look at it every now and then;
+	
   if (g_game.music_enabled ) {
 #ifdef _WIN32
 	  if (use_external) {

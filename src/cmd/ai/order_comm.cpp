@@ -5,12 +5,13 @@ void Order::AdjustRelationTo (Unit * un, float factor) {
   //virtual stub function
 }
 
-void Order::Communicate (CommunicationMessage &c) {
+void Order::Communicate (const CommunicationMessage &c) {
   int completed=0;
   unsigned int i=0;
+  CommunicationMessage * newC = new CommunicationMessage (c);
   for (i=0;i<suborders.size();i++) {
     if ((completed& ((suborders[i])->getType()&(MOVEMENT|FACING|WEAPON)))==0) {
-      (suborders[i])->Communicate (c);
+      (suborders[i])->Communicate (*newC);
       completed|=(suborders[i])->getType();
     }
   }
@@ -19,14 +20,15 @@ void Order::Communicate (CommunicationMessage &c) {
   for (unsigned int i=0;i<messagequeue.size();i++) {
 
     un=messagequeue[i]->sender.GetUnit();
-    if (un==NULL||un==c.sender.GetUnit()) {
+    if (un==NULL||un==newC->sender.GetUnit()) {
+      delete messagequeue[i];
       messagequeue.erase (messagequeue.begin()+i);
       i--;
     }
   }
-  if ((un=c.sender.GetUnit())) {
-    AdjustRelationTo (un,c.getDeltaRelation());
-    messagequeue.push_back (new CommunicationMessage (c));
+  if ((un=newC->sender.GetUnit())) {
+    AdjustRelationTo (un,newC->getDeltaRelation());
+    messagequeue.push_back (newC);
   }
 }
 
@@ -35,7 +37,7 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
 }
 
 void Order::ProcessCommunicationMessages() {
-  const float AICommresponseTime=5;
+  const float AICommresponseTime=1;
   float time = AICommresponseTime/SIMULATION_ATOM;
   if (time<=.001)
     time+=.001;

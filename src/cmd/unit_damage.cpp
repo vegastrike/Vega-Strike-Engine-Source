@@ -142,8 +142,10 @@ void Unit::Kill(bool erasefromsave) {
   //God I can't believe this next line cost me 1 GIG of memory until I added it
   computer.threat.SetUnit (NULL);
   computer.velocity_ref.SetUnit(NULL);
-  if(aistate)
+  if(aistate) {
+    aistate->ClearMessages();
     delete aistate;
+  }
   aistate=NULL;
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit * un;

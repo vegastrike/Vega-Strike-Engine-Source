@@ -22,6 +22,7 @@
 #include "cmd/unit.h"
 #include "order.h"
 #include "cmd/collection.h"
+#include "communication.h"
 //#define ORDERDEBUG
 void Order::Execute () {
   ProcessCommunicationMessages();
@@ -191,7 +192,20 @@ Order::~Order () {
       delete suborders[i];
     }
   }
+  for (unsigned int i=0;i<messagequeue.size();i++) {
+    delete messagequeue[i];
+  }
+  messagequeue.clear();
   suborders.clear();
+}
+void Order::ClearMessages() {
+  for (unsigned int i=0;i<suborders.size();i++) {
+    suborders[i]->ClearMessages();
+  }
+  for (unsigned int i=0;i<messagequeue.size();i++) {
+    delete messagequeue[i];
+  }
+  messagequeue.clear();
 }
 void Order::eraseOrder(Order *ord){
   bool found=false;

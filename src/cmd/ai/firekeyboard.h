@@ -15,6 +15,16 @@ class FireKeyboard: public Order {
   float agg;
   bool ShouldFire(Unit * targ);
  public:
+  static void PressComm1Key (int,KBSTATE);
+  static void PressComm2Key (int,KBSTATE);
+  static void PressComm3Key (int,KBSTATE);
+  static void PressComm4Key (int,KBSTATE);
+  static void PressComm5Key (int,KBSTATE);
+  static void PressComm6Key (int,KBSTATE);
+  static void PressComm7Key (int,KBSTATE);
+  static void PressComm8Key (int,KBSTATE);
+  static void PressComm9Key (int,KBSTATE);
+  static void PressComm10Key (int,KBSTATE);
   static void RequestClearenceKey(int, KBSTATE);
   static void UnDockKey(int, KBSTATE);
   static void DockKey(int, KBSTATE);
@@ -36,11 +46,13 @@ class FireKeyboard: public Order {
   static void CloakKey (int, KBSTATE);
 protected:
   float distance;
+
   void ChooseTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseNearTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseThreatTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void PickTargets(bool targetturrets); // chooses the target which is nearest to the center of the screen
 public:
+  virtual void ProcessCommMessage (class CommunicationMessage&c);
   FireKeyboard (int whichjoystick, const char * configfile);//weapon prefs?
   virtual void Execute();
   virtual ~FireKeyboard();

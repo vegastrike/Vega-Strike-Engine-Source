@@ -38,19 +38,31 @@ float FSM::getDeltaRelation (int prevstate, int current_state) const{
 void CommunicationMessage::Init (Unit * send, Unit * recv) {
   fsm = _Universe->GetConversation (send->faction,recv->faction);
   sender.SetUnit (send);
+  this->prevstate=this->curstate = fsm->getDefaultState(_Universe->GetRelation(send->faction,recv->faction));
 }
+
+
 
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice) {
   Init (send,recv);
-  prevstate=messagechoice;
-  curstate = messagechoice;
+  prevstate=fsm->getDefaultState (_Universe->GetRelation (send->faction,recv->faction));
+  if (fsm->nodes[prevstate].edges.size()) {
+    curstate = fsm->nodes[prevstate].edges[messagechoice%fsm->nodes[prevstate].edges.size()];
+  }
+}
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int laststate, int thisstate) {
+  Init (send,recv);
+  prevstate=laststate;
+  curstate = thisstate;
 }
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv) {
   Init (send,recv);
-  prevstate = curstate = fsm->getDefaultState (_Universe->GetRelation (send->faction,recv->faction));
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate) {
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate, int curstate) {
   Init (send,recv);
-  this->prevstate = prevstate.prevstate;
-  this->curstate = prevstate.curstate;
+  this->prevstate = prevstate.curstate;
+  if (fsm->nodes[this->prevstate].edges.size()) {
+    this->curstate = fsm->nodes[this->prevstate].edges[curstate%fsm->nodes[this->prevstate].edges.size()];
+  }
+
 }
