@@ -35,7 +35,7 @@ void Stars::Draw() {
   GFXEnable (DEPTHTEST);
   int ligh;
   GFXSelectMaterial (0);
-  GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.2,1/(.75*spread),0));
+  GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.01,0,1/(.4*spread*spread)));
   GFXCreateLight (ligh,FadeLight,true);
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
