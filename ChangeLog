@@ -7,6 +7,7 @@
 	* un_iter is standard un_fiter is the fast iterattor that doesn't check the Killed() value
 	* un_kiter is the standard constant iterator and un_fkiter is the fast constant iterator to go down unit queues
 	* If you get odd segfaults please tell me backtrace
+	* Added autopilot feature (F9 and F10)
 	
 2002-02-09 Alexander Rawass <alexannika@users.sourceforge.net>
 
