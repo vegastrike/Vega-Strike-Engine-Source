@@ -793,7 +793,7 @@ StarSystem * Unit::getStarSystem () {
   return _Universe->activeStarSystem();
 }
 
-void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner, int zone) {
+void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     if (cloaking>=0)
         return;
 	int nm = 0;
@@ -805,7 +805,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner, int zon
 					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
 					// Including the one who fires to make sure it stops
 					if( SERVER)
-						Server->BroadcastUnfire( this->serial, nm, zone);
+						Server->BroadcastUnfire( this->serial, nm, this->zone);
 					// NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
 					// if( !SERVER && Network==NULL)
 						(*i).UnFire();
@@ -847,7 +847,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner, int zon
 								else
 									serid = 0;
 								if( SERVER)
-									Server->BroadcastFire( this->serial, nm, serid, zone);
+									Server->BroadcastFire( this->serial, nm, serid, this->zone);
 								// We could only refresh energy on server side or in non-networking mode, on client side it is done with
 								// info the server sends with ack for fire
 								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
@@ -2342,12 +2342,12 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 /**** UNIT_DAMAGE STUFF                                                            */
 /***********************************************************************************/
 
-// TO TEST
+// NEW TESTING MODIFICATIONS
 float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
   Cockpit * cpt;
-  if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
+  if ( (cpt=_Universe->isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
       phasedamage*= (g_game.difficulty);
@@ -2356,54 +2356,95 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
     }
   }
   //  #endif
-  float absamt= amt>=0?amt:-amt;  
-  float percentage=0;
-  //percentage = this->ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
-	// Old ApplyLocalDamage function body (needed here)
-  		  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
-		  if (nodockdamage) {
-			if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
-			  percentage = -1;
-			}
-		  }
-		  if (affectedUnit!=this) {
-			affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
-			percentage = -1;
-		  }
-		  amt *= 1-.01*shield.leak;
-		  if (GetNebula()==NULL||(nebshields>0)) {
-			percentage = DealDamageToShield (pnt,amt);
-		  }
-		  if (aistate)
-		   aistate->ChooseTarget();
-	// End old body
+  //float absamt= amt>=0?amt:-amt;  
+  float ppercentage=0;
+  // Only check docking if on server side or non-networking mode
+  if( SERVER || Network==NULL)
+  {
+    static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
+    if (nodockdamage) {
+      if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
+	    return -1;
+	  }
+	}
+    if (affectedUnit!=this) {
+	  affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
+	  return -1;
+	}
+  }
+  if (aistate)
+   aistate->ChooseTarget();
 
   float leakamt = phasedamage+amt*.01*shield.leak;
-  if( percentage==-1)
-	return -1;
+  amt *= 1-.01*shield.leak;
+  // Percentage returned by DealDamageToShield
+  float spercentage = 0;
+  // If not a nebula or if shields recharge in nebula => WE COMPUTE SHIELDS DAMAGE AND APPLY
   if (GetNebula()==NULL||(nebshields>0)) {
-    percentage = DealDamageToShield (pnt,absamt);
-	amt = amt>=0?absamt:-absamt;
-    if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
+	// Only in non-networking or on server side
+	if( Network==NULL || SERVER)
+		spercentage = DealDamageToShield (pnt,amt);
+    //percentage = DealDamageToShield (pnt,absamt);
+	//amt = amt>=0?absamt:-absamt;
+    if (meshdata.back()&&spercentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
       if (GetNebula()==NULL) 
-	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage,color);
     }
   }
-  if (shield.leak>0||!meshdata.back()||percentage==0||absamt>0||phasedamage) {
-    percentage = DealDamageToHull (pnt, leakamt+amt);
-    if (percentage!=-1) {//returns -1 on death--could delete
-      for (int i=0;i<nummesh();i++) {
-	if (percentage)
-	  meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
-      }
-    }
+  // If shields failing or... => WE COMPUTE DAMAGE TO HULL
+  if (shield.leak>0||!meshdata.back()||spercentage==0||amt>0||phasedamage) {
+	// ONLY in server or in non-networking
+	if( Network==NULL || SERVER)
+		ppercentage = DealDamageToHull (pnt, leakamt+amt);
+	if (ppercentage!=-1) {//returns -1 on death--could delete
+	  for (int i=0;i<nummesh();i++) {
+		if (ppercentage)
+			meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),ppercentage,color);
+	  }
+	}
+  }
+  // If server and there is damage to shields or if unit is not killed (ppercentage>0)
+  if( SERVER && (ppercentage>0 || spercentage>0))
+  {
+	  // If server side, we send the unit serial + serialized shields + shield recharge + shield leak + ...
+	  Vector netpnt = pnt;
+	  Vector netnormal = normal;
+	  GFXColor col( color.r, color.g, color.b, color.a);
+	  Server->sendDamages( this->serial, this->zone, this->shieldSerializer( XMLType((void *)&shield), this), shield.recharge, shield.leak, armor.back, armor.front, armor.left, armor.right, ppercentage, spercentage, amt, netpnt, netnormal, col);
+	  // This way the client computes damages based on what we send to him => less reliable
+	  //Server->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
   }
   return 1;
+}
+
+void	Unit::ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float ppercentage, float spercentage, GFXColor & color)
+{
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  Cockpit * cpt;
+  if ( (cpt=_Universe->isPlayerStarship(this))!=NULL) {
+    if (color.a!=2)
+      cpt->Shake (amt);
+  }
+  if( GetNebula()==NULL||nebshields>0)
+  {
+    if (meshdata.back()&&spercentage>0&&amt==0) {//shields are up
+      if (GetNebula()==NULL) 
+		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage,color);
+	}
+  }
+  if (shield.leak>0||!meshdata.back()||spercentage==0||amt>0) {
+	if (ppercentage!=-1) {//returns -1 on death--could delete
+	  for (int i=0;i<nummesh();i++) {
+		if (ppercentage)
+			meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),ppercentage,color);
+	  }
+	}
+  }
 }
 
 extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
@@ -2411,7 +2452,8 @@ extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
 void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
   Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
 
-  if (cp) {
+  // Only on client side
+  if (!SERVER && cp) {
       //now we can dereference it because we checked it against the parent
       CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
@@ -2421,11 +2463,13 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
   bool mykilled = hull<0;
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
-  ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
+  // Only call when on servre side or non-networking
+  // If networking damages are applied as they are received
+  if( SERVER || Network==NULL)
+	ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
   if (hull<0&&(!mykilled)) {
     if (cp) {
       ScoreKill (cp,ownerDoNotDereference,faction);
-      
     }
   }
 }

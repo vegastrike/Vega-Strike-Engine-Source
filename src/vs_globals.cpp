@@ -7,6 +7,7 @@ game_data_t g_game;
 ForceFeedback *forcefeedback;
 VegaConfig * vs_config;
 bool cleanexit=false;
+bool run_only_player_starsystem=true;
 
 NetClient * Network=NULL;
 NetServer * Server=NULL;

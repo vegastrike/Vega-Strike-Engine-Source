@@ -67,6 +67,8 @@ enum Cmd
 	CMD_BALL         = 0x93,		// Fire a ball ?
 	CMD_TARGET       = 0x96,		// Receive a target request (server side) or receive target info (client side)
 	CMD_SCAN         = 0x97,		// Receive a scan request (server side) or receive target info (client side)
+	CMD_DAMAGE       = 0x98,		// Send damages to apply
+	CMD_DAMAGE1      = 0x99,		// Send damages to apply
 
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost and established again :

@@ -263,10 +263,13 @@ protected:
   // Tell if networked unit
   bool networked;
   ObjSerial	serial;
+  int		zone;
 public:
   void SetNetworkMode( bool mode=true) {this->networked = mode;}
   ObjSerial GetSerial() { return this->serial;}
   void		SetSerial( ObjSerial ser) { this->serial = ser;}
+  int		GetZone() { return this->zone;}
+  void		SetZone( int zn) { this->zone = zn;}
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/
@@ -670,7 +673,9 @@ public:
   ///convenient shortcut to applying torques with vector and position
   void ApplyLocalTorque(const Vector &torque); 
   ///Applies damage to the local area given by pnt
-  virtual float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
+  float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
+  //Applies damage from network data
+  void	ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float ppercentage, float spercentage, GFXColor & color);
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
@@ -764,6 +769,10 @@ public:
 protected:
   ///Activates all guns of that size
   void ActivateGuns (const weapon_info *, bool Missile);
+  float MaxShieldVal() const;
+  ///regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
+  void RegenShields();
+public:
   ///Armor values: how much damage armor can withhold before internal damage accrues
   struct {
     unsigned short front, back, right, left;
@@ -792,10 +801,6 @@ protected:
     ///What percentage leaks (divide by 100%)
     char leak; 
   } shield;
-  float MaxShieldVal() const;
-  ///regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
-  void RegenShields();
-public:
   ///The structual integ of the current unit
   float hull;
 protected:
@@ -839,7 +844,7 @@ public:
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
   ///Fires all active guns that are or arent Missiles
   // if bitmask is (1<<31) then fire off autotracking of that type;
-  virtual void Fire(unsigned int bitmask, bool beams_target_owner=false, int zone=-1);
+  void Fire(unsigned int bitmask, bool beams_target_owner=false);
   ///Stops all active guns from firing
   void UnFire();
   ///reduces shields to X percentage and reduces shield recharge to Y percentage

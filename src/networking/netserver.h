@@ -34,6 +34,7 @@
 #include "zonemgr.h"
 #include "client.h"
 #include "savegame.h"
+struct GFXColor;
 
 extern VegaConfig *vs_config;
 //extern VegaSimpleConfig *server_config;
@@ -116,6 +117,8 @@ class NetServer
 		// WEAPON STUFF
 		void	BroadcastUnfire( ObjSerial serial, int weapon_index, int zone);
 		void	BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, int zone);
+		void	sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
+		void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 
 		friend class ZoneMgr;
 };

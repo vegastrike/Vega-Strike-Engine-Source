@@ -570,6 +570,39 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				cp = _Universe->isPlayerStarship( this->game_unit.GetUnit());
 				cp->ReceivedTargetInfo();
 			break;
+			case CMD_DAMAGE1 :
+			{
+				float amt = netbuf.getFloat();
+				float ppercentage = netbuf.getFloat();
+				float spercentage = netbuf.getFloat();
+				Vector pnt = netbuf.getVector();
+				Vector normal = netbuf.getVector();
+				GFXColor col = netbuf.getColor();
+				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				un->armor.back = netbuf.getShort();
+				un->armor.front = netbuf.getShort();
+				un->armor.left = netbuf.getShort();
+				un->armor.right = netbuf.getShort();
+				un->shield.recharge = netbuf.getFloat();
+				un->shield.leak = netbuf.getChar();
+				string shields = netbuf.getString();
+				// Apply the damage
+				un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
+			}
+			break;
+			case CMD_DAMAGE :
+			{
+				/*
+				float amt = netbuf.getFloat();
+				float phasedamage = netbuf.getFloat();
+				Vector pnt = netbuf.getVector();
+				Vector normal = netbuf.getVector();
+				GFXColor col = netbuf.getColor();
+				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				un->ApplyLocalDamage( pnt, normal, amt, NULL, col, phasedamage);
+				*/
+			}
+			break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;

@@ -43,6 +43,7 @@
 #include "cmd/ai/fireall.h"
 #include "cmd/ai/flybywire.h"
 #include "cmd/role_bitmask.h"
+#include "gfxlib_struct.h"
 
 double	clienttimeout;
 double	logintimeout;
@@ -367,6 +368,8 @@ void	NetServer::start(int argc, char **argv)
 	strcpy( CONFIGFILE, "vegaserver.config");
 	cout<<"Loading server config...";
 	initpaths();
+	// Here we say we want to only handle activity in all starsystems
+	run_only_player_starsystem=false;
 	//vs_config = new VegaConfig( SERVERCONFIGFILE);
 	cout<<" config loaded"<<endl;
 	strperiod = vs_config->getVariable( "server", "saveperiod", "");
@@ -1055,9 +1058,9 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				un->mounts[mount_num].status=Mount::ACTIVE;
 			// Ask for fire
 			if( mis != 0)
-				un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false, zone);
+				un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
 			else
-				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false, zone);
+				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 		}
 	break;
 	case CMD_SCAN :
@@ -1170,21 +1173,23 @@ void	NetServer::addClient( Client * clt)
 			);
 		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
-		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
-		Packet pp;
-		netbuf.Reset();
-		netbuf.addInt32( zoneid);
-		pp.send( CMD_ADDEDYOU, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1151
-#endif
-			);
 		cout<<"Serial : "<<clt->serial<<endl;
 		// Send info about other ships in the system to "clt"
 		zonemgr->sendZoneClients( clt);
 	}
+	// In all case set the zone and send the client the zone which it is in
+	cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+	clt->game_unit.GetUnit()->SetZone( zoneid);
+	Packet pp;
+	netbuf.Reset();
+	netbuf.addInt32( zoneid);
+	pp.send( CMD_ADDEDYOU, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+#ifndef _WIN32
+		__LINE__
+#else
+		1151
+#endif
+		);
 
 	cout<<"ADDED client n "<<clt->serial<<" in ZONE "<<clt->zone<<endl;
 	//delete cltsbuf;
@@ -1506,6 +1511,36 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
 			__LINE__
 #else
 			1478
+#endif
+		);
+	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
+	zonemgr->broadcast( zone, serial, &p );
+}
+
+void	NetServer::sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	netbuf.addFloat( amt);
+	netbuf.addFloat( ppercentage);
+	netbuf.addFloat( spercentage);
+	netbuf.addVector( pnt);
+	netbuf.addVector( normal);
+	netbuf.addColor( color);
+	netbuf.addShort( ab);
+	netbuf.addShort( af);
+	netbuf.addShort( al);
+	netbuf.addShort( ar);
+	netbuf.addFloat( recharge);
+	netbuf.addChar( leak);
+	netbuf.addString( shields);
+
+	p.bc_create( CMD_DAMAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
+#ifndef _WIN32
+			__LINE__
+#else
+			1541
 #endif
 		);
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED

@@ -24,6 +24,7 @@ extern int	nb_checks;
 extern double last_check;
 extern double cur_check;
 extern bool cleanexit;
+extern bool run_only_player_starsystem;
 
 /* All global data is stored in a variable of this type */
 typedef struct {

@@ -529,11 +529,15 @@ void bootstrap_main_loop () {
 			srvipadr[srvip.length()] = '\0';
 			port = atoi( srvport.c_str());
 			cout<<"Port : "<<port<<endl;
+		// Here we say we want to only handle activity in 1 starsystem not more
+			run_only_player_starsystem=true;
 		}
 		else
 		{
 			Network = NULL;
 			cout<<"Non-networking mode"<<endl;
+		// Here we say we want to only handle activity in 1 starsystem not more
+			run_only_player_starsystem=true;
 		}
 	}
 	vector<std::string>::iterator it, jt;

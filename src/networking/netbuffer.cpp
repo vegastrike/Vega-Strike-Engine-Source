@@ -1,6 +1,7 @@
 #include "networking/netbuffer.h"
 #include "networking/const.h"
 #include "endianness.h"
+#include "gfxlib_struct.h"
 
 
 NetBuffer::NetBuffer()
@@ -85,6 +86,22 @@ Vector	NetBuffer::getVector()
 			offset += sizeof( v);
 			v.netswap();
 			return v;
+		}
+void	NetBuffer::addColor( GFXColor col)
+		{
+			int tmpsize = sizeof( col);
+			resizeBuffer( offset+tmpsize);
+			col.netswap();
+			memcpy( buffer+offset, &col, sizeof( col));
+			offset += tmpsize;
+		}
+GFXColor NetBuffer::getColor()
+		{
+			GFXColor col;
+			memcpy( &col, buffer+offset, sizeof( col));
+			offset += sizeof( col);
+			col.netswap();
+			return col;
 		}
 void	NetBuffer::addMatrix( Matrix m)
 		{

@@ -51,6 +51,8 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_UNFIREREQUEST)
     CASE( CMD_TARGET       )
     CASE( CMD_SCAN         )
+    CASE( CMD_DAMAGE       )
+    CASE( CMD_DAMAGE1      )
 
     CASE( CMD_NEWSUBSCRIBE )
 

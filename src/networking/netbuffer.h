@@ -8,6 +8,8 @@
 #include "gfx/quaternion.h"
 #include "networking/vsnet_clientstate.h"
 
+struct GFXColor;
+
 class NetBuffer
 {
 		char *	buffer;
@@ -31,6 +33,8 @@ class NetBuffer
 		ClientState 	getClientState();
 		void			addVector( Vector v);
 		Vector			getVector();
+		void			addColor( GFXColor col);
+		GFXColor		getColor();
 		void			addMatrix( Matrix m);
 		Matrix			getMatrix();
 		void			addQuaternion( Quaternion quat);

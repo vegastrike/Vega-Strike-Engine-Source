@@ -21,6 +21,7 @@
 #ifndef _GFXLIB_STRUCT
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
+#include "endianness.h"
 
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
@@ -102,6 +103,13 @@ struct GFXColor
     this->g = g;
     this->b = b;
     this->a = a;
+  }
+  void  netswap()
+  {
+    this->r = VSSwapHostFloatToLittle( this->r);
+    this->g = VSSwapHostFloatToLittle( this->g);
+    this->b = VSSwapHostFloatToLittle( this->b);
+    this->a = VSSwapHostFloatToLittle( this->a);
   }
 };
 

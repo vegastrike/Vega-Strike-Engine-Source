@@ -544,18 +544,15 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  Unit::ProcessDeleteQueue();
 	  current_stage=MISSION_SIMULATION;
       }else if (current_stage==MISSION_SIMULATION) {
-#define RUN_ONLY_FOR_PLAYER_STARSYSTEM
-#ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
-	if (_Universe->getActiveStarSystem(0)==this) {
-#endif
-	  if (executeDirector) {
-		  ExecuteDirector();
-	  }
-#ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
-	}
-#endif
+		  // If we run only player starsystem and this is first (only) starsystem or if we run all starsystems
+		if( (run_only_player_starsystem && _Universe->getActiveStarSystem(0)==this) || !run_only_player_starsystem)
+		{
+			if (executeDirector) {
+				ExecuteDirector();
+			}
+		}
 
-	current_stage=PHY_COLLIDE;
+		current_stage=PHY_COLLIDE;
       }else if (current_stage==PHY_COLLIDE) {
 #ifdef NO_COLLISION_TIME
 	if (no_collision_time) {
