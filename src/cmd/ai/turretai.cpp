@@ -14,14 +14,14 @@ void TurretAI::getAverageGunSpeed (float &speed, float & range) const {
 extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missileprob);
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
+  if (range==-1) {
+    parent->getAverageGunSpeed (speed, range);
+  }
   if (targ) {
     static float dot_cutoff = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","TurretDotCutoff",".4"));
     static float missile_prob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","TurretMissileProbability",".05"));
     FaceTarget::Execute();
     if (parent->GetNumMounts()>0) {
-      if (range==-1) {
-        parent->getAverageGunSpeed (speed, range);
-      }
       Vector R (parent->GetTransformation().getR());
       QVector Pos (targ->Position()-parent->Position());
       double mag = Pos.Magnitude();
