@@ -1,3 +1,7 @@
+2002-01-29 Daniel Horn <hellcatv@hotmail.com>
+	* Fixed double delete of SubUnits when Kill() was being called and adding them to the delete queue (only to be delted by the Unit itself on the delete queue)
+	* Fixed some reference count issues with lists
+
 2002-01-29 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* removed some memory leaks in the interpreter
