@@ -187,7 +187,7 @@ Galaxy::Galaxy(const char *configfile){
 	  XML_ParserFree(parser);
   }
 }
-std::map<std::string, class Galaxy > & Galaxy::getHeirarchy() {
+SubHeirarchy & Galaxy::getHeirarchy() {
 	if (!subheirarchy) {
 		subheirarchy = new SubHeirarchy;
 	}
@@ -200,19 +200,19 @@ string Galaxy::getVariable (std::vector<string> section, string name, string def
 	Galaxy * g = this;
 	for (unsigned int i=0;i<section.size();++i) {
 		if (g->subheirarchy) {
-			map<std::string,Galaxy>::iterator sub = subheirarchy->find (section[i]);
+			SubHeirarchy::iterator sub = subheirarchy->find (section[i]);
 			if (sub!=subheirarchy->end()) {
 				g=  &(*sub).second;
 			}else return default_value;
 		}else return default_value;
 	}
-	map<string,string>::iterator dat = data.find (name);
+	StringMap::iterator dat = data.find (name);
 	if (dat!=data.end())
 		return (*dat).second;
 	return default_value;										  
 }
 void Galaxy::addSection (std::vector<string> section) {
-	map<string,Galaxy> * temp= &getHeirarchy();
+	SubHeirarchy * temp= &getHeirarchy();
 	for (unsigned int i=0;i<section.size();++i) {
 		temp = &((*temp)[section[i]].getHeirarchy());
 	}
@@ -246,7 +246,7 @@ string Galaxy::getRandSystem (string sect, string def) {
 	unsigned int size = sector.getHeirarchy().size();
     if (size>0) {
 		int which = rand()%size;
-		map<string,Galaxy>::iterator i =
+		SubHeirarchy::iterator i =
 			sector.getHeirarchy().begin();
 		for (;which>0;which--,i++) {
 		}
@@ -257,8 +257,8 @@ string Galaxy::getRandSystem (string sect, string def) {
 }
 string Galaxy::getVariable(string section,string subsection,string name,string defaultvalue){
 
-	map<string,Galaxy> * s = subheirarchy;
-	map<string,Galaxy>::iterator i;
+	SubHeirarchy * s = subheirarchy;
+	SubHeirarchy::iterator i;
 	if (s) {
 		i = s->find(section);
 		if (i!=s->end()) {
@@ -267,7 +267,7 @@ string Galaxy::getVariable(string section,string subsection,string name,string d
 				i = s->find(subsection);
 				if (i!=s->end()) {
 					Galaxy * g = &(*i).second;
-					map<string,string>::iterator j = g->data.find(name);
+					StringMap::iterator j = g->data.find(name);
 					if (j!=g->data.end())
 						return (*j).second;
 				}
@@ -282,13 +282,13 @@ string Galaxy::getVariable(string section,string subsection,string name,string d
 
 string Galaxy::getVariable(string section,string name,string defaultvalue){
 
-	map<string,Galaxy> * s = subheirarchy;
-	map<string,Galaxy>::iterator i;
+	SubHeirarchy * s = subheirarchy;
+	SubHeirarchy::iterator i;
 	if (s) {
 		i = s->find(section);
 		if (i!=s->end()) {
 			Galaxy * g = &(*i).second;
-			map<string,string>::iterator j = g->data.find(name);
+			StringMap::iterator j = g->data.find(name);
 			if (j!=g->data.end())
 				return (*j).second;
 		}

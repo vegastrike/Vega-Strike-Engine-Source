@@ -4,10 +4,17 @@
 #include <string>
 #include <map>
 namespace GalaxyXML {
-	class SubHeirarchy;
+using std::string;
+class StringWrapper : public string {
+public:
+	StringWrapper() {}
+	StringWrapper(const string &s) : string(s) {}
+};
+class StringMap : public std::map<StringWrapper, StringWrapper> {};
+class SubHeirarchy;
 class Galaxy {
   class SubHeirarchy * subheirarchy;
-  class std::map <std::string,std::string> data;
+  StringMap data;
 	Galaxy & operator = (const Galaxy & a);
  public:
   Galaxy () {subheirarchy=NULL;}
@@ -23,7 +30,7 @@ class Galaxy {
   bool setVariable(string section,string subsection,string name,string value);
   void addSection(std::vector<string> section);
   void setVariable (std::vector<string> section, string name, string value);
-  std::map <std::string, class Galaxy> & getHeirarchy();
+  SubHeirarchy & getHeirarchy();
 };
 class SubHeirarchy : public std::map <std::string,class Galaxy> {};
 }

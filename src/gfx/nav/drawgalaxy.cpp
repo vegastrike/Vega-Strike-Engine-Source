@@ -253,7 +253,7 @@ bool NavigationSystem::CachedSystemIterator::seek(unsigned position) {
 unsigned NavigationSystem::CachedSystemIterator::getIndex() {
 	return currentPosition;
 }
-bool NavigationSystem::NavigationSystem::CachedSystemIterator::done ()const {
+bool NavigationSystem::CachedSystemIterator::done ()const {
 	return currentPosition>=systems.size();
 }
 static std::pair <string , QVector > nullPair ("-", QVector(0,0,0));
