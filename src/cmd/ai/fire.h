@@ -16,6 +16,7 @@ protected:
   float distance;
   float gunspeed;
   float gunrange;
+  float missilerange;
   float lastchangedtarg;
   bool had_target;
   void FireWeapons (bool shouldfire,bool lockmissile);
@@ -29,7 +30,7 @@ public:
     ChooseTargets (1,true);
   }
   void PossiblySwitchTarget(bool istargetjumpableplanet);
-  virtual void getAverageGunSpeed (float & speed, float & range) const;
+  virtual void getAverageGunSpeed (float & speed, float & range, float &missilerange) const;
   void AddReplaceLastOrder (bool replace);
   void ExecuteLastScriptFor(float time);
   void FaceTarget (bool end);

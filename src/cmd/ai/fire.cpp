@@ -14,6 +14,7 @@ void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   missileprobability = missileprob;  
   gunspeed=float(.0001);
   gunrange=float(.0001);
+  missilerange=float(.0001);
   delay=0;
   agg = aggressivitylevel;
   rxntime = reaction_time;
@@ -110,9 +111,10 @@ struct TurretBin{
     }
   }
 };
-void FireAt::getAverageGunSpeed (float & speed, float & range) const{
+void FireAt::getAverageGunSpeed (float & speed, float & range, float &mmrange) const{
   speed =gunspeed;
   range= gunrange;
+  mmrange=missilerange;
 }
 void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
@@ -130,9 +132,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       }
     }
   }
-  float mrange;
   lastchangedtarg=0;
-  parent->getAverageGunSpeed (gunspeed,gunrange,mrange);  
+  parent->getAverageGunSpeed (gunspeed,gunrange,missilerange);  
 
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
   Unit * un=NULL;
