@@ -18,7 +18,19 @@ void Beam::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
   local_transformation.orientation = Quaternion::from_vectors(p,q,r);
 }
-
+void ScaleByAlpha (GFXColorVertex &vert, float alpha) {
+	if (alpha<1) {
+		vert.r*=alpha;
+		vert.g*=alpha;
+		vert.b*=alpha;		
+	}
+}
+void SetColorToVertex (GFXColorVertex &vert,const GFXColor &col=GFXColor(0,0,0,0)) {
+	vert.r=col.r;
+	vert.g=col.g;
+	vert.b=col.b;
+	vert.a=col.a;
+}
 void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
   CollideInfo.object.b = NULL;
@@ -51,41 +63,45 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   curlength = SIMULATION_ATOM*speed;
   lastthick=0;
   curthick = SIMULATION_ATOM*radialspeed;
-  GFXColorVertex beam[32];
+  GFXColorVertex beam[48];
   memset(beam,0,sizeof(GFXColorVertex)*32);
   GFXColorVertex * calah=beam;
-  calah[0].r=0;calah[0].g=0;calah[0].b=0;calah[0].a=0;
-  calah[1].r=calah[1].g=calah[1].b=calah[1].a=0;
-  memcpy (&calah[2].r,&Col.r,sizeof (GFXColor));
-  memcpy (&calah[3].r,&Col.r,sizeof (GFXColor));
-  memcpy (&calah[4].r,&Col.r,sizeof (GFXColor));
-  memcpy (&calah[5].r,&Col.r,sizeof (GFXColor));
-  calah[6].r=calah[6].g=calah[6].b=calah[6].a=0;
-  calah[7].r=calah[7].g=calah[7].b=calah[7].a=0;
-
-
-  calah[8].r=calah[8].g=calah[8].b=calah[8].a=0;
-  calah[9].r=calah[9].g=calah[9].b=calah[9].a=0;
-
-  calah[10].r=calah[10].g=calah[10].b=calah[10].a=0;
-  calah[11].r=Col.r;calah[11].g=Col.g;calah[11].b=Col.b;calah[11].a=Col.a;
-
-  calah[12].r=calah[12].g=calah[12].b=calah[12].a=0;
-  calah[13].r=calah[13].g=calah[13].b=calah[13].a=0;
-  calah[14].r=calah[14].g=calah[14].b=calah[14].a=0;
-
-  calah[15].r=Col.r;calah[15].g=Col.g;calah[15].b=Col.b;calah[15].a=Col.a;
+  SetColorToVertex(calah[0]);
+  SetColorToVertex(calah[1]);  
+  SetColorToVertex(calah[2],Col);
+  SetColorToVertex(calah[3],Col);
+  SetColorToVertex(calah[4],Col);
+  SetColorToVertex(calah[5],Col);    
+  SetColorToVertex(calah[6]);
+  SetColorToVertex(calah[7]);
+  SetColorToVertex(calah[8]);
+  SetColorToVertex(calah[9]);
+  SetColorToVertex(calah[10]);
+  SetColorToVertex(calah[11],Col);
+  SetColorToVertex(calah[12]);
+  SetColorToVertex(calah[13]);
+  SetColorToVertex(calah[14]);
+  SetColorToVertex(calah[15],Col);
+  SetColorToVertex(calah[16]);
+  SetColorToVertex(calah[17]);
+  SetColorToVertex(calah[18]);
+  SetColorToVertex(calah[19],Col);
+  SetColorToVertex(calah[20]);
+  SetColorToVertex(calah[21]);
+  SetColorToVertex(calah[22]);
+  SetColorToVertex(calah[23],Col);  
+  ScaleByAlpha (calah[2],Col.a);
+  ScaleByAlpha (calah[3],Col.a);
+  ScaleByAlpha (calah[4],Col.a);
+  ScaleByAlpha (calah[5],Col.a);
+  ScaleByAlpha (calah[11],Col.a);
+  ScaleByAlpha (calah[15],Col.a);		
+  ScaleByAlpha (calah[19],Col.a);
+  ScaleByAlpha (calah[23],Col.a);		
   //since mode is ONE,ONE
-  calah[2].r*=Col.a;calah[2].g*=Col.a;calah[2].b*=Col.a;
-  calah[3].r*=Col.a;calah[3].g*=Col.a;calah[3].b*=Col.a;
-  calah[4].r*=Col.a;calah[4].g*=Col.a;calah[4].b*=Col.a;
-  calah[5].r*=Col.a;calah[5].g*=Col.a;calah[5].b*=Col.a;
-  calah[11].r*=Col.a;calah[11].g*=Col.a;calah[11].b*=Col.a;
-  calah[15].r*=Col.a;calah[15].g*=Col.a;calah[15].b*=Col.a;
-
-
-  memcpy (&calah[16],&calah[0],sizeof(GFXColorVertex)*16);    
-  vlist = new GFXVertexList (GFXQUAD,32,calah,32,true);//mutable color contained list
+  memcpy (&calah[24],&calah[0],sizeof(GFXColorVertex)*24);
+  
+  vlist = new GFXVertexList (GFXQUAD,48,calah,48,true);//mutable color contained list
 #ifdef PERBOLTSOUND
   AUDStartPlaying (sound);
 #endif
@@ -93,25 +109,41 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
 void Beam::RecalculateVertices() {
   GFXColorVertex * beam = (vlist->BeginMutate(0))->colors;
-  
+  static float fadelocation = XMLSupport::parse_float (vs_config->getVariable ("graphics","BeamFadeoutLength",".8"));
+  static float hitfadelocation=XMLSupport::parse_float (vs_config->getVariable ("graphics","BeamFadeoutHitLength",".95"));
+  const float fadeinlength = 4;
+  const float texturestretch = 1;
   float leftex = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
-  float righttex = leftex+curlength/curthick;//how long compared to how wide!
-  float len = (impact==ALIVE)?(curlength!=range?curlength - speed*SIMULATION_ATOM*(1-interpolation_blend_factor):range):curlength+thickness;
-  float fadelen = (impact==ALIVE)?len*.85:(range*.85>curlength?curlength:range*.85);
-  float fadetex = leftex + (righttex-leftex)*.85;
+  float righttex = leftex+texturestretch*curlength/curthick;//how long compared to how wide!
+  float len = (impact==ALIVE)?
+	  (curlength<range?
+	          curlength - speed*SIMULATION_ATOM*(1-interpolation_blend_factor):
+	          range)
+   :
+	  curlength;
+  float fadelen = (impact==ALIVE)?
+	  len*fadelocation
+	  :
+	  len*hitfadelocation;
+//	  (range*fadelocation>curlength?  // Not sure what this shit means
+//	                 curlength:
+//	                 range*fadelocation);
+  float fadetex = leftex + (righttex-leftex)*fadelocation;
+  const float touchtex = leftex-fadeinlength*.5*texturestretch;
   float thick = curthick!=thickness?curthick-radialspeed*SIMULATION_ATOM*(1-interpolation_blend_factor):thickness;
+  const float invfadelen=thick*fadeinlength;
   int a=0;
 #define V(xx,yy,zz,ss,tt) { beam[a].x = xx; beam[a].y = yy; beam[a].z = zz; beam[a].s=ss; beam[a].t=tt;a++; }
 
-  V(0,thick,0,leftex,1);
+  V(0,thick,invfadelen,leftex,1);
   V(0,thick,fadelen,fadetex,1);
   V(0,0,fadelen,fadetex,.5);
-  V(0,0,0,leftex,.5);
-  V(0,0,0,leftex,.5);
+  V(0,0,invfadelen,leftex,.5);
+  V(0,0,invfadelen,leftex,.5);
   V(0,0,fadelen,fadetex,.5);
   V(0,-thick,fadelen,fadetex,0);
-  V(0,-thick,0,leftex,0);
-
+  V(0,-thick,invfadelen,leftex,0);
+///fade out
   V(0,thick,fadelen,fadetex,1);
   V(0,thick,len,righttex,1);
   V(0,0,len,righttex,.5);
@@ -121,30 +153,51 @@ void Beam::RecalculateVertices() {
   V(0,-thick,len,righttex,0);
   V(0,0,len,righttex,.5);
   V(0,0,fadelen,fadetex,.5);
+///fade in
+  V(0,thick,invfadelen,leftex,1);
+  V(0,thick,0,touchtex,1);
+  V(0,0,0,touchtex,.5);
+  V(0,0,invfadelen,leftex,.5);
+
+  V(0,-thick,invfadelen,leftex,0);
+  V(0,-thick,0,touchtex,0);
+  V(0,0,0,touchtex,.5);
+  V(0,0,invfadelen,leftex,.5);
 
 
 
 
 #undef V//reverse the notation for the rest of the identical vertices
 #define QV(yy,xx,zz,ss,tt) { beam[a].x = xx; beam[a].y = yy; beam[a].z = zz; beam[a].s=ss; beam[a].t=tt;a++; }
-  QV(0,thick,0,leftex,1);
+
+  QV(0,thick,invfadelen,leftex,1);
   QV(0,thick,fadelen,fadetex,1);
   QV(0,0,fadelen,fadetex,.5);
-  QV(0,0,0,leftex,.5);
-  QV(0,0,0,leftex,.5);
+  QV(0,0,invfadelen,leftex,.5);
+  QV(0,0,invfadelen,leftex,.5);
   QV(0,0,fadelen,fadetex,.5);
   QV(0,-thick,fadelen,fadetex,0);
-  QV(0,-thick,0,leftex,0);
-
+  QV(0,-thick,invfadelen,leftex,0);
+///fade out
   QV(0,thick,fadelen,fadetex,1);
   QV(0,thick,len,righttex,1);
   QV(0,0,len,righttex,.5);
   QV(0,0,fadelen,fadetex,.5);
+
   QV(0,-thick,fadelen,fadetex,0);
   QV(0,-thick,len,righttex,0);
   QV(0,0,len,righttex,.5);
   QV(0,0,fadelen,fadetex,.5);
+//fadein
+  QV(0,thick,invfadelen,leftex,1);
+  QV(0,thick,0,touchtex,1);
+  QV(0,0,0,touchtex,.5);
+  QV(0,0,invfadelen,leftex,.5);
 
+  QV(0,-thick,invfadelen,leftex,0);
+  QV(0,-thick,0,touchtex,0);
+  QV(0,0,0,touchtex,.5);
+  QV(0,0,invfadelen,leftex,.5);
 
 
 #undef QV
