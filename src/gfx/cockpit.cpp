@@ -453,6 +453,7 @@ void Cockpit::Init (const char * file) {
 
 void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const Vector & pos) {
   parent.SetUnit (unit);
+  parentturret.SetUnit(NULL);
   unitlocation=pos;
   this->unitfilename=std::string(filename);
   this->unitmodname=std::string(unitmodname);
