@@ -19,7 +19,13 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <sys/dir.h>
+#include <stdio.h>
+#include <unistd.h>
+#endif
 #include <string>
 #include <vector>
 using namespace std;
@@ -468,7 +474,7 @@ glob_t *FindFiles(char *path, char *extension) {
 	vector <string> result;
 	if (dir) {
 		dirent *blah;
-		while (blah=readdir(dir)) {	
+		while (NULL!=(blah=readdir(dir))) {	
 			if (0==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
 				result.push_back (mypath+blah->d_name);
 			}
@@ -478,7 +484,7 @@ glob_t *FindFiles(char *path, char *extension) {
 	}
 	FILES->gl_pathc=result.size();
 	FILES->gl_pathv=new char*[result.size()];
-	for (int i=0;i<result.size();i++) {
+	for (unsigned int i=0;i<result.size();i++) {
 		FILES->gl_pathv[i]=new char [result[i].size()+1];
 		strcpy(FILES->gl_pathv[i],result[i].c_str());
 	}
@@ -510,7 +516,7 @@ glob_t *FindDirs(char *path) {
 	vector <string> result;
 	if (dir) {
 		dirent *blah;
-		while (blah=readdir(dir)) {	
+		while (NULL!=(blah=readdir(dir))) {	
 			if (1==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
 				result.push_back (mypath+blah->d_name+"/");
 				chdir (thispath);
@@ -520,7 +526,7 @@ glob_t *FindDirs(char *path) {
 	}
 	DIRS->gl_pathc=result.size();
 	DIRS->gl_pathv=new char*[result.size()];
-	for (int i=0;i<result.size();i++) {
+	for (unsigned int i=0;i<result.size();i++) {
 		DIRS->gl_pathv[i]=new char [result[i].size()+1];
 		strcpy(DIRS->gl_pathv[i],result[i].c_str());
 	}

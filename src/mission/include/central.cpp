@@ -16,7 +16,13 @@
  **************************************************************************/
 
 #include "central.h"
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <sys/dir.h>
+#include <stdio.h>
+#include <unistd.h>
+#endif
 glob_t *MISSIONS;
 struct mission_data DATA;
 
