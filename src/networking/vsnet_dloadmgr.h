@@ -86,6 +86,8 @@ class Notify
 {
 public:
     virtual void notify( State s, Error e ) = 0;
+    virtual void setTotalBytes( int sz ) { }
+    virtual void addBytes( int sz ) { }
 };
 
 typedef boost::shared_ptr<Notify> NotifyPtr;
@@ -106,12 +108,16 @@ public:
     void changeState( State s );
     void changeState( State s, Error e );
 
-    virtual void setSize( int len ) = 0;
-    virtual void append( unsigned char* buffer, int bufsize ) = 0;
+    void setSize( int len );
+    void append( unsigned char* buffer, int bufsize );
 
     const std::string& getFilename( ) const;
     SOCKETALT          getSock() const;
     int                get_fd() const;
+
+protected:
+    virtual void childSetSize( int len ) = 0;
+    virtual void childAppend( unsigned char* buffer, int bufsize ) = 0;
 
 private:
     SOCKETALT         _sock;
@@ -137,8 +143,9 @@ public:
 
     virtual ~File( );
 
-    virtual void setSize( int len );
-    virtual void append( unsigned char* buffer, int bufsize );
+protected:
+    virtual void childSetSize( int len );
+    virtual void childAppend( unsigned char* buffer, int bufsize );
 
 private:
     std::string    _localbasepath;
@@ -164,8 +171,9 @@ public:
 
     boost::shared_array<uchar> getBuffer( ) const;
 
-    virtual void setSize( int len );
-    virtual void append( unsigned char* buffer, int bufsize );
+protected:
+    virtual void childSetSize( int len );
+    virtual void childAppend( unsigned char* buffer, int bufsize );
 
 private:
     boost::shared_array<uchar> _buf;
@@ -185,10 +193,11 @@ public:
 
     virtual ~TestItem( ) { }
 
-    virtual void setSize( int len );
-    virtual void append( unsigned char* buffer, int bufsize );
-
     virtual void notify( State s, Error e );
+
+protected:
+    virtual void childSetSize( int len );
+    virtual void childAppend( unsigned char* buffer, int bufsize );
 
 private:
     int _len;

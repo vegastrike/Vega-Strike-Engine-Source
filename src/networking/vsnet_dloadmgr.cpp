@@ -240,6 +240,18 @@ Error Item::error( ) const
     return ret;
 }
 
+void Item::setSize( int len )
+{
+    childSetSize( len );
+    if( _notify ) _notify->setTotalBytes( len );
+}
+
+void Item::append( unsigned char* buffer, int bufsize )
+{
+    childAppend( buffer, bufsize );
+    if( _notify ) _notify->addBytes( bufsize );
+}
+
 void Item::changeState( State s )
 {
     _mx.lock( );
@@ -298,7 +310,7 @@ File::~File( )
     }
 }
 
-void File::setSize( int len )
+void File::childSetSize( int len )
 {
     string filename = _localbasepath + "/" + getFilename();
 
@@ -314,7 +326,7 @@ void File::setSize( int len )
     }
 }
 
-void File::append( unsigned char* buffer, int bufsize )
+void File::childAppend( unsigned char* buffer, int bufsize )
 {
     if( _of )
     {
@@ -349,14 +361,14 @@ boost::shared_array<Buffer::uchar> Buffer::getBuffer( ) const
     return _buf;
 }
 
-void Buffer::setSize( int len )
+void Buffer::childSetSize( int len )
 {
     _len    = len;
     _offset = 0;
     _buf.reset( new uchar[len] );
 }
 
-void Buffer::append( unsigned char* buffer, int bufsize )
+void Buffer::childAppend( unsigned char* buffer, int bufsize )
 {
     if( _offset + bufsize <= _len )
     {
@@ -377,13 +389,13 @@ TestItem::TestItem( SOCKETALT sock, const string& filename )
     COUT << "Created TestItem for downloading " << filename << endl;
 }
 
-void TestItem::setSize( int len )
+void TestItem::childSetSize( int len )
 {
     _len = len;
     COUT << "Expecting " << _len << " bytes from server" << endl;
 }
 
-void TestItem::append( unsigned char* buffer, int bufsize )
+void TestItem::childAppend( unsigned char* buffer, int bufsize )
 {
     COUT << "Received buffer with " << bufsize << " bytes" << endl;
     _offset += bufsize;
