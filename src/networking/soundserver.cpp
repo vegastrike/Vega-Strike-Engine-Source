@@ -121,7 +121,7 @@ static int numloops (std::string file) {
   std::string::size_type where;
   if ((where=file.find_last_of("."))!=std::string::npos) {
     file =file.substr(0,where);
-    if ((where=file.find_last_of("_"))!=std::string::npos) {
+    if ((where=file.find_last_of("-_"))!=std::string::npos) {
       file=file.substr(where+1);
       if (file.length()) {
         if (file[0]=='i') {
@@ -161,10 +161,13 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 		oldmusic=NULL;
 	}
 	sende=true;
-	if(Mix_PlayMusic(music, numloops(file))==-1) {
-	  fprintf(STD_OUT, "Mix_FadeInMusic: %s\n", Mix_GetError());
+        int loops=numloops(file);
+	if(Mix_PlayMusic(music, loops)==-1) {
+	  fprintf(STD_OUT, "Mix_FadeInMusic: %s %d\n", Mix_GetError());
 	  return NULL;
-	}
+	}else {
+          fprintf (STD_OUT,"Playing %s with %d loops\n",file,loops);
+        }
 	
 	// well, there's no music, but most games don't break without music...
 	int newvolume=(int)(SDL_MIX_MAXVOLUME*volume);
