@@ -253,18 +253,6 @@ int main( int argc, char *argv[] )
 
     Python::test();
 #endif
-
-	VSFileSystem::vs_fprintf (stderr,"Max role value %d\n",ROLES::maxRoleValue()); 
-	VSFileSystem::vs_fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("FIgHteR"));
-	VSFileSystem::vs_fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("FIgHteR BOMber MISSile"));
-	VSFileSystem::vs_fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("AERO BOMb"));
-	vector <vector <char> >temp=ROLES::getAllRolePriorities();
-	for(unsigned int i=0;i<temp.size();i++) {
-		for (unsigned int j=0;j<temp[i].size();j++) {
-			VSFileSystem::vs_fprintf (stderr,"%d ",(int)temp[i][j]);
-		}
-		VSFileSystem::vs_fprintf (stderr,"\n");
-	}
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     // && defined(HAVE_SDL_MIXER)

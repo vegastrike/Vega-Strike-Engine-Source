@@ -5,6 +5,8 @@ void GFXVertexList::RefreshDisplayList () {}
 
 void GFXVertexList::BeginDrawState(GFXBOOL lock) {
 }
+void GFXVertexList::EndDrawState(GFXBOOL lock) {
+}
 
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV) {
 }

@@ -13,7 +13,7 @@ class SphereMesh : public Mesh {
   virtual float GetT ( float rho, float rho_min, float rho_max);
   virtual float GetS (float theta,  float theta_min, float theta_max);
   virtual Mesh * AllocNewMeshesEachInSizeofMeshSpace (int num) {return new SphereMesh[num];}
-  void InitSphere (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP, bool reverse_normals=false);
+  void InitSphere (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP, bool reverse_normals=false,bool subclass=false);
  public:
   SphereMesh () :Mesh(){}
   virtual int MeshType() {return 1;}
