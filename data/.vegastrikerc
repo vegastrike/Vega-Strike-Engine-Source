@@ -92,7 +92,7 @@
         	<section name="graphics">
 			<var name="x_resolution" value="1024"/>
 			<var name="y_resolution" value="768"/>
-			<var name="mipmapdetail" value="0"/>
+			<var name="mipmapdetail" value="2"/>
 			<var name="reflection" value="true"/>
 			<var name="fullscreen" value="false"/>
 			<var name="colordepth" value="16"/>
