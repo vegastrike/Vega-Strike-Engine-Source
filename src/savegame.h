@@ -28,7 +28,7 @@ class SaveGame {
   std::string last_written_pickled_data;
   std::string outputsavegame;
   std::string originalsystem;
-  static Hashtable<long,SavedUnits,char[47]> savedunits;
+  static Hashtable<long,SavedUnits,char[47]> *savedunits;
   std::string callsign;
   void WriteMissionData(FILE * fp);
   void WriteNewsData (FILE * fp);

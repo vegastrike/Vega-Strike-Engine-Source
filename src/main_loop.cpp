@@ -591,8 +591,9 @@ void AddUnitToSystem (const SavedUnits *su) {
     un = UnitFactory::createUnit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
-    un->SetPosition (QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
-
+    if (_Universe->AccessCockpit()->GetParent()) {
+      un->SetPosition (_Universe->AccessCockpit()->GetParent()->Position()+QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
+    }
     break;
   }
   _Universe->activeStarSystem()->AddUnit(un);

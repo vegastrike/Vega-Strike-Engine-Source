@@ -72,7 +72,7 @@ float getSaveData (int whichcp, string key, unsigned int num) {
     return 0;
   }
   olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
-  if (num <ans->size()) {
+  if (num >=ans->size()) {
     return 0;
   }
   return (*ans)[num]->float_val;

@@ -197,11 +197,11 @@ QVector SaveGame::GetPlayerLocation () {
   return PlayerLocation;
 }
 
-Hashtable<long,SavedUnits,char[47]> SaveGame::savedunits;
+Hashtable<long,SavedUnits,char[47]> *SaveGame::savedunits = new Hashtable<long,SavedUnits,char[47]>();
 void SaveGame::RemoveUnitFromSave (long address) {
   SavedUnits *tmp;
-  if (NULL!=(tmp =savedunits.Get (address))) {
-    savedunits.Delete (address);
+  if (NULL!=(tmp =savedunits->Get (address))) {
+    savedunits->Delete (address);
     delete tmp;
   }
 }
@@ -263,7 +263,7 @@ void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const cha
   string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);
-    savedunits.Put (address,new SavedUnits (filename,type,faction));
+    savedunits->Put (address,new SavedUnits (filename,type,faction));
   }
 }
 olist_t &SaveGame::getMissionData(const std::string &magic_number) {
@@ -340,7 +340,7 @@ void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
 }
  extern bool STATIC_VARS_DESTROYED;
 void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname, int player_num) {
-  vector<SavedUnits *> myvec = savedunits.GetAll();
+  vector<SavedUnits *> myvec = savedunits->GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
     changehome();
@@ -354,7 +354,6 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
-      delete myvec.back();
       myvec.pop_back();
     }
     fprintf (fp,"\n%d %s %s",0,"mission","data ");

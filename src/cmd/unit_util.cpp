@@ -195,7 +195,7 @@ namespace UnitUtil {
 	}
 	bool JumpTo (Unit * unit, string system) {
 		if (unit!=NULL)
-			return _Universe->activeStarSystem()->JumpTo(unit,NULL,system);
+			return unit->getStarSystem()->JumpTo(unit,NULL,system);
 		else
 			return false;
 	}
