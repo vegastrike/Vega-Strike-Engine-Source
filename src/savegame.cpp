@@ -14,7 +14,7 @@
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
 
-if( Network!=NULL)
+if( Network==NULL)
 {
     cout << "Hi helper play " << num << endl;
   static string *res=NULL;
