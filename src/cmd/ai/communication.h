@@ -14,6 +14,9 @@ class FSM {
   std::string GetEdgesString (int curstate);
   float getDeltaRelation (int prevstate, int curstate) const;
   int getDefaultState (float relationship) const;
+  int GetHitNode ();
+  int GetRequestLandNode();
+
 };
 class CommunicationMessage {
   void Init (Unit * send, Unit * recv);
@@ -28,7 +31,6 @@ class CommunicationMessage {
   CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate);
   void SetCurrentState(int message);
   FSM::Node * getCurrentState() {return &fsm->nodes[curstate];}
-
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}
 };

@@ -8,7 +8,7 @@ class Missile:public Unit {
   virtual enum clsptr isUnit() {return MISSILEPTR;}
   Missile (const char * filename, int faction, const string &modifications,const float damage, float time):Unit (filename,false,faction,modifications),time(time),damage(damage) { }
   virtual void reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
-    smaller->ApplyDamage (biglocation,bignormal,damage,smaller,GFXColor(1,1,1,1));
+    smaller->ApplyDamage (biglocation,bignormal,damage,smaller,GFXColor(1,1,1,1),owner);
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
     if (!killed)
       DealDamageToHull (smalllocation,hull+1);

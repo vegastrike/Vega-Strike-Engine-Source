@@ -41,7 +41,7 @@ void Terrain::SetTransformation(Matrix Mat ) {
 void Terrain::ApplyForce (Unit * un, const Vector & normal, float dist) {
   //  fprintf (stderr,"Unit %s has collided at <%f %f %f>", un->name.c_str(),vec.i,vec.j,vec.k);
   un->ApplyForce (normal*.4*un->GetMass()*fabs(normal.Dot ((un->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM)));
-  un->ApplyDamage (un->Position()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1));
+  un->ApplyDamage (un->Position()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1),NULL);
 }
 void Terrain::Collide (Unit *un, Matrix t) {
   Vector norm;

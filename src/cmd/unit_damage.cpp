@@ -16,7 +16,7 @@
 #include "savegame.h"
 #include "gfx/cockpit.h"
 #include "cmd/script/mission.h"
-
+#include "cmd/ai/communication.h"
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
@@ -493,7 +493,15 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 }
 
 
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, float phasedamage) {
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
+  if (ownerDoNotDereference==_Universe->AccessCockpit()->GetParent()) {
+    if (ownerDoNotDereference) {
+      //now we can dereference it because we checked it against the parent
+      CommunicationMessage c(ownerDoNotDereference,this);
+      c.SetCurrentState(c.fsm->GetHitNode());
+      this->getAIState()->Communicate (c);      
+    }
+  }
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
   ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);

@@ -620,7 +620,7 @@ public:
   ///Applies damage to the local area given by pnt
   void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
-  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0 );
+  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Clamps thrust to the limits struct
   Vector ClampThrust(const Vector &thrust, bool afterburn);
   ///Takes a unit vector for direction of thrust and scales to limits

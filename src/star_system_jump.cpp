@@ -98,7 +98,7 @@ void DealPossibleJumpDamage (Unit *un) {
 		     un,
 		     GFXColor (((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100,
-			       ((float)(rand()%100))/100));
+			       ((float)(rand()%100))/100),NULL);
     un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity());
   }
 }

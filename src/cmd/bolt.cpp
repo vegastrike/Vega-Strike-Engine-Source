@@ -247,7 +247,7 @@ bool Bolt::Collide (Unit * target) {
     if (coltmp.r>1)coltmp.r=1;
     if (coltmp.g>1)coltmp.g=1;
     if (coltmp.b>1)coltmp.b=1;*/
-    target->ApplyDamage (prev_position+tmp,normal, ((float(255-percentphase)/255)*damage)* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,((float(percentphase)/255)*damage)* ((1-distance)+distance*longrange));
+    target->ApplyDamage (prev_position+tmp,normal, ((float(255-percentphase)/255)*damage)* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,(Unit*)owner, ((float(percentphase)/255)*damage)* ((1-distance)+distance*longrange));
     return true;
   }
   return false;

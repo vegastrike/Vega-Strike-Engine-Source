@@ -11,14 +11,21 @@ FSM::FSM (const char * filename) {
   nodes.push_back (Node("i 0wnz j00, b17c#",-.08));
   nodes.push_back (Node("Fuck you!",-.1));
   nodes.push_back (Node("Request Clearence To Land.",0));
+  nodes.push_back (Node("*hit*",-.2));
   vector <unsigned int> edges;
-  for (unsigned int i=0;i<nodes.size();i++) {
+  for (unsigned int i=0;i<nodes.size()-2;i++) {
     edges.push_back (i);
   }
   for (unsigned int i=0;i<nodes.size();i++) {
     nodes[i].edges = edges;
   }
   
+}
+int FSM::GetRequestLandNode () {
+  return nodes.size()-2;
+}
+int FSM::GetHitNode () {
+  return nodes.size()-1;
 }
 
 int FSM::getDefaultState (float relationship) const{
@@ -29,6 +36,7 @@ std::string FSM::GetEdgesString (int curstate) {
   for (unsigned int i=0;i<nodes[curstate].edges.size();i++) {
     retval+= tostring ((int)((i+1)%10))+"."+nodes[nodes[curstate].edges[i]].message+"\n";
   }
+  retval+= "0 Request Docking Clearence";
   return retval;
 }
 float FSM::getDeltaRelation (int prevstate, int current_state) const{
@@ -41,7 +49,9 @@ void CommunicationMessage::Init (Unit * send, Unit * recv) {
   this->prevstate=this->curstate = fsm->getDefaultState(_Universe->GetRelation(send->faction,recv->faction));
 }
 
-
+void CommunicationMessage::SetCurrentState (int msg) {
+  curstate = msg;
+}
 
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice) {
   Init (send,recv);

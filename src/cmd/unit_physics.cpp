@@ -485,8 +485,8 @@ void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vec
     smalle->ApplyForce (bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     this->ApplyForce (smallnormal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     
-    smalle->ApplyDamage (biglocation,bignormal,  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,smalle,GFXColor(1,1,1,1));
-    this->ApplyDamage (smalllocation,smallnormal, .5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,this,GFXColor(1,1,1,1));
+    smalle->ApplyDamage (biglocation,bignormal,  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,smalle,GFXColor(1,1,1,1),NULL);
+    this->ApplyDamage (smalllocation,smallnormal, .5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,this,GFXColor(1,1,1,1),NULL);
 #endif
     
   //each mesh with each mesh? naw that should be in one way collide
