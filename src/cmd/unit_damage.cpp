@@ -131,11 +131,15 @@ float Unit::FShieldData() {
   }
   return 0;
 }
-void Unit::AmorData (float armor[4]) {
-  memcpy (&armor[0],&this->armor.right,sizeof (float)*4);
+void Unit::ArmorData (unsigned short armor[4]) {
+  memcpy (&armor[0],&this->armor.right,sizeof (unsigned short)*4);
 }
-
-
+float Unit::FuelData () {
+  return fuel;
+}
+float Unit::EnergyData() {
+  return ((float)energy)/maxenergy;
+}
 
 float Unit::BShieldData() {
   switch (shield.number) {
