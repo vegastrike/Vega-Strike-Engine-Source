@@ -33,6 +33,7 @@ vegastrike_SOURCES =				\
 	main_loop.cpp				\
 	physics.h				\
 	physics.cpp				\
+	resizable.h				\
 	star_system.cpp 			\
 	star_system_xml.cpp			\
 	star_system.h 				\

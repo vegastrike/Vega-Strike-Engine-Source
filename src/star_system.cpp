@@ -221,7 +221,7 @@ void StarSystem::Update() {
 	}
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
-	Terrain::UpdateAll(4);	
+	Terrain::UpdateAll(16);	
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList->createIterator();
