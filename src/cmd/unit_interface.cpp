@@ -368,6 +368,10 @@ void UpgradingInfo::SetupCargoList () {
     CurrentList = &GetCargoList();
     //    std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
+	if (mode==BRIEFINGMODE) {
+		title="Briefings not implemented.";
+		return;
+	}
     if (submode==NORMAL) {
       if (mode==SAVEMODE) {
         CargoList->AddTextItem ("Save","Save");
