@@ -373,9 +373,15 @@ unsigned int FireBitmask (Unit * parent,bool shouldfire, bool firemissile) {
     Unit * un=parent->Target();
     if (un) {
       firebitm = (1 << un->combatRole());
-      firebitm |= ROLES::FIRE_GUNS;
-      if (!shouldfire) 
+
+      static bool AlwaysFireAutotrackers = XMLSupport::parse_bool(vs_config->getVariable("AI","AlwaysFireAutotrackers","true"));
+      if (shouldfire)
+        firebitm|= ROLES::FIRE_GUNS;
+
+      if (AlwaysFireAutotrackers&&!shouldfire) {
+        firebitm |= ROLES::FIRE_GUNS;
 	firebitm |= ROLES::FIRE_ONLY_AUTOTRACKERS;
+      }
       if (firemissile) 
 	firebitm = ROLES::FIRE_MISSILES;// stops guns
     }
