@@ -1246,7 +1246,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       if (player_cockpit) {
 	  touched=true;
       }
-      if (increase_locking&&(dist_sqr_to_target>mounts[i]->type->Range*mounts[i]->type->Range)) {
+      if (increase_locking&&(dist_sqr_to_target<mounts[i]->type->Range*mounts[i]->type->Range)) {
 		mounts[i]->time_to_lock-=SIMULATION_ATOM;
 		static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
 		if (!player_cockpit) {
