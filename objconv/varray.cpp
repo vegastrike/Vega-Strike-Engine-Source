@@ -42,14 +42,23 @@ static GLfloat  vertexArray[] = {
 };
 static GLuint	indices[] = { 2, 3, 4, 0, 1 };
 #define shapesize 5
+unsigned int myrandmax=1880881;
+
+unsigned int myrand() {
+  static unsigned int seed=31337;
+  seed+=345676543;
+  seed%=myrandmax;
+  return seed;
+}
+
 static bool isPowTwo(unsigned int n) {
   return ((n&(n-1))==0);
 }
-template <class T> vector<T> GetIndices (T size, size_t * memsize) {
-  vector<T> index(size);
+template <class T> vector<T> GetIndices (T size, size_t isize, size_t * memsize) {
+  vector<T> index(isize);
   *memsize=sizeof(T);
-  for (size_t i=0;i<size;++i) {
-    index[i]=((i/shapesize)*shapesize)+indices[i%shapesize];
+  for (size_t i=0;i<isize;++i) {
+    index[i]=(((i/shapesize)*shapesize)+indices[i%shapesize])%(size_t)size;
   }
   return index;
 }
@@ -58,16 +67,17 @@ class vbo {
   GLuint vert;
   GLuint ind;
   size_t size;
+  size_t isize;
   void BindBuf() {
     static GLuint cur_buffer=0;
-    if (cur_buffer!=vert) {
+    if (1) {
       (*glBindBufferARB_p)(GL_ARRAY_BUFFER_ARB,vert);
       cur_buffer=vert;
     }
   }
   void BindInd() {
     static GLuint cur_buffer=0;
-    if (cur_buffer!=ind) {
+    if (1) {
       (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,ind);
       cur_buffer=ind;
     }
@@ -77,6 +87,9 @@ public:
     vector<GLfloat> varray(s*3);
     vert=ind=0;
     size=s;
+    if (indexed) {
+      isize=s+(size_t)(s*((float)myrand()/myrandmax));
+    }
     for (size_t i=0;i<s*3;++i) {
       varray[i]=vertexArray[i%(shapesize*3)];
     }
@@ -93,31 +106,24 @@ public:
       BindInd();
       size_t memsize=sizeof(GLubyte);
       if (s<256) {
-        GLubyte LSize=s;
-        vector<GLubyte> indices=GetIndices(LSize,&memsize);
-        //WARNING, GL DRIVER READS PAST THE BOUNDS!
-        //HACK HACK HACK!!
-        
-        while ((indices.size()&(indices.size()-1))!=0) {
-          indices.push_back(0);
-        }
+        vector<GLubyte> indices=GetIndices((GLubyte)size,isize,&memsize);
         (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                             s*memsize,
+                             isize*memsize,
                              &indices[0],
                              (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
       }else if (s<65536){
         GLushort LSize=s;
-        vector<GLushort> indices=GetIndices(LSize,&memsize);
+        vector<GLushort> indices=GetIndices((GLushort)size,isize,&memsize);
 
         (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                             s*memsize,
+                             isize*memsize,
                              &indices[0],
                              (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
       }else {
         GLuint LSize=s;
-        vector<GLuint> indices=GetIndices(LSize,&memsize);
+        vector<GLuint> indices=GetIndices((GLuint)size,isize,&memsize);
         (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                             s*memsize,
+                             isize*memsize,
                              &indices[0],
                              (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);        
       }
@@ -183,7 +189,7 @@ public:
     }
   }
 };
-vector<vbo*>varrays(5);
+vector<vbo*>varrays(33);
 static void 
 keyboard( unsigned char key, int x, int y )
 {
@@ -202,14 +208,6 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #define GET_GL_PROC glXGetProcAddress
 #endif
 
-unsigned int myrandmax=1880881;
-
-unsigned int myrand() {
-  static unsigned int seed=31337;
-  seed+=345676543;
-  seed%=myrandmax;
-  return seed;
-}
 int
 main( int argc, char *argv[] )
 {
@@ -265,7 +263,7 @@ void DrawScene()
           size_t i=myrand()%varrays.size();
           vbo * v=  varrays[i];
           bool didsomething=false;
-          switch (myrand()%5) {//CHANGE 5 to 3 if you wish for simpler behavior (takes longer to crash, like 30 sec)
+          switch (myrand()%7) {//CHANGE 5 to 3 if you wish for simpler behavior (takes longer to crash, like 30 sec)
           case 0:
             if (v) {
               fprintf (stderr,"Drawing %d\n",i);
@@ -300,6 +298,7 @@ void DrawScene()
             }
             break;
           case 3:
+          case 5:
             if (v) {
               fprintf (stderr,"Writing %d\n",i);
 
@@ -308,6 +307,7 @@ void DrawScene()
             }
             break;
           case 4:
+          case 6:
             if (v) {
               fprintf (stderr,"Reading %d\n",i);
               v->Read();
