@@ -890,7 +890,8 @@ string getNameForFaction (std::string faction) {
 				string ner = buf;
 				ner = ner.substr(0,ner.find("\n"));
 				ner = ner.substr(0,ner.find("\r"));
-				factionnameslist.push_back(ner);
+				
+				factionnameslist.push_back(unpretty(ner));
 			}
 			fclose(fp);
 		}
@@ -923,7 +924,7 @@ void planetsIn (System &which, std::string faction) {
 }
 void reName (std::vector<System>&s, System &which, std::string newname) {
 	if (newname.empty()){
-		if (which.interesting==false){
+		if (which.interesting==false && which.habitable && which["faction"]!="unknown"){
 			string rec=recomputeName();
 			if (!rec.empty()) {
 				reName(s,which,rec);
