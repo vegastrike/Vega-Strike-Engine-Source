@@ -58,10 +58,7 @@ void GameUnit<UnitType>::Split (int level) {
   unsigned int num_chunks = unit_stats.success()?atoi(unit_stats["Num_Chunks"].c_str()):0;
   if (num_chunks&&unit_stats.success()) {
     size_t i;
-    for (i=0;i<old.size();++i) {
-      delete old[i];
-    }
-    old.clear();
+    std::vector<Mesh *> nw;   
     unsigned int which_chunk = rand()%num_chunks;
     std::string chunkname = UniverseUtil::LookupUnitStat(name,fac,"Chunk_"+XMLSupport::tostring(which_chunk));
     std::string dir = UniverseUtil::LookupUnitStat(name,fac,"Directory");
@@ -72,10 +69,15 @@ void GameUnit<UnitType>::Split (int level) {
     std::string scalestr=UniverseUtil::LookupUnitStat(name,fac,"Unit_Scale");
     int scale=atoi(scalestr.c_str());
     if (scale==0) scale=1;
-    AddMeshes(old,randomstartframe,randomstartseconds,scale,chunkname,faction,this->getFlightgroup());
+    AddMeshes(nw,randomstartframe,randomstartseconds,scale,chunkname,faction,this->getFlightgroup());
     VSFileSystem::current_type.pop_back();
     VSFileSystem::current_subdirectory.pop_back();    
     VSFileSystem::current_path.pop_back();
+    for (i=0;i<old.size();++i) {
+      delete old[i];
+    }
+    old.clear();
+    old=nw;
   }else {
     for (int split=0;split<level;split++) {
       std::vector<Mesh *> nw;
