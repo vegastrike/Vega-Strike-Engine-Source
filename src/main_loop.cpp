@@ -418,10 +418,14 @@ void InitializeInput() {
 	BindKey('w', FighterPitchDown);
 	BindKey('s', FighterPitchUp);*/
 }
+Sprite *Crosshairs;
 void createObjects() {
   Universe::Faction::LoadXML("factions.xml");
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
+  Crosshairs = new Sprite ("crosshairs.spr");
+  Crosshairs->SetPosition (-.1,.1);
+  Crosshairs->SetSize (.2,.2);
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
@@ -491,6 +495,7 @@ void createObjects() {
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
+  delete Crosshairs;
   delete [] fighters;
   delete locSel;
   delete explosion;
@@ -507,7 +512,7 @@ void main_loop() {
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
-
+  Crosshairs->Draw();
   _Universe->activeStarSystem()->Update();
 
   GFXEndScene();
