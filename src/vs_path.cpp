@@ -81,7 +81,11 @@ char pwd[65536];
 void initpaths () {
   char tmppwd[65536];
   getcwd (tmppwd,32768);
+#ifdef DATADIR
+  datadir = string(DATADIR);
+#else
   datadir= string (tmppwd);  
+#endif
   sharedsounds = datadir;
   FILE *fp= fopen (CONFIGFILE,"r");
   changehome(true);
