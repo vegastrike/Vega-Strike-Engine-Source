@@ -1,7 +1,7 @@
 <Unit>
 	<Meshfile file="hornet.xmesh" />
-	<Light file="supernova.bmp" x="-1.200000" y="0.300000" z="-4.300000" size="1.250000"/>
-	<Light file="supernova.bmp" x="1.200000" y="0.300000" z="-4.300000" size="1.250000"/>
+	<Light file="supernova.bmp" x="-1.200000" y="0.300000" z="-4.300000" size="1.750000"/>
+	<Light file="supernova.bmp" x="1.200000" y="0.300000" z="-4.300000" size="1.750000"/>
 	<Mount weapon="Laser" size="Light" x="-6.300000" y="0.500000" z="9.200000"/>
 	<Mount weapon="Laser" size="Light" x="6.300000" y="0.500000" z="9.200000"/>
 	<Mount weapon="Dumbfire" size="Light-Missile" x="-3.100000" y="0.000000" z="-1.300000" ammo="1"/>
