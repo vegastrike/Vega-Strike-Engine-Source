@@ -536,7 +536,8 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
 		  mysav=ReadSavedUnits (buf);
 		}
 	  }
-	  fclose (fp);
+	  if( read)
+	  	fclose (fp);
   }
 
   if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {

@@ -1,6 +1,7 @@
 //#include <netinet/in.h>
 //#include "gfxlib.h"
 #include "universe_generic.h"
+#include "universe_util_generic.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
@@ -17,15 +18,20 @@ ZoneMgr::ZoneMgr()
 
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
+	cout<<">>> ADDING A NEW ZONE = "<<starsys<<" - # OF ZONES = "<<_Universe->star_system.size()<<endl;
 	list<Client *> lst;
 	StarSystem * sts=NULL;
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
 	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));
 	// Add it in the star_system vector
-	_Universe->star_system.push_back( sts);
+	//_Universe->star_system.push_back( sts);
+	//_Universe->pushActiveStarSystem( sts);
 	// Add an empty list of clients to the zone_list vector
 	zone_list.push_back( lst);
+	// Add zero as number of clients in zone since we increment in ZoneMgr::addClient()
+	zone_clients.push_back( 0);
+	cout<<"<<< NEW ZONE ADDED - # OF ZONES = "<<_Universe->star_system.size()<<endl;
 	return sts;
 }
 
@@ -53,6 +59,7 @@ bool	ZoneMgr::addClient( Client * clt)
 	/*
 	string oldstarsys = clt->save.GetOldStarSystem();
 	*/
+	bool ret = true;
 	StarSystem * sts;
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	string starsys = cp->savegame->GetStarSystem();
@@ -67,25 +74,31 @@ bool	ZoneMgr::addClient( Client * clt)
 		// SOMEDAY TEST IF THE STARSYSTEM WE WANT TO GO IN IS REACHABLE FROM THE OLD ONE
 	}
 	*/
-	if( !(sts = _Universe->getStarSystem( starsys)))
+	if( !(sts = _Universe->getStarSystem( starsys+".system")))
 	{
 		// Add a network zone (StarSystem equivalent) and create the new StarSystem
 		// StarSystem is not loaded so we generate it
 		sts = this->addZone( starsys);
 		// It also mean that there is nobody in that system so no need to send update
+		// Return false since the starsystem didn't contain any client
+		ret = false;
 	}
 	// Get the index of the star_system as it represents the zone number
 	//int zone = _Universe->StarSystemIndex( sts);
 	// This way should be more efficient since the system we just added is the star_system.size()-1
 	int zone = _Universe->star_system.size()-1;
+	cout<<">> ADDING CLIENT IN ZONE # "<<zone<<endl;
 	// Adds the client in the zone
 	zone_list[zone].push_back( clt);
-	zone_clients[zone]++;
 	clt->zone = zone;
+	zone_clients[zone]++;
+
+	// Compute a safe entrance point -> DONE WHEN LOGIN ACCEPTED
+	//QVector safevec;
+	//safevec = UniverseUtil::SafeEntrancePoint( clt->current_state.getPosition());
+	//clt->current_state.setPosition( safevec);
 	sts->AddUnit( clt->game_unit.GetUnit());
-	if( sts)
-		return true;
-	return false;
+	return ret;
 }
 
 // Remove a client from its zone
@@ -242,6 +255,41 @@ void	ZoneMgr::broadcastSnapshots( )
 			}
 		}
 	}
+}
+
+// Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
+void	ZoneMgr::sendZoneClients( Client * clt)
+{
+	LI k;
+	ClientState tmpcs;
+	int nbclients=0;
+	Packet packet2;
+
+	// Loop through client in the same zone to send their current_state and save and xml to "clt"
+	for( k=zone_list[clt->zone].begin(); k!=zone_list[clt->zone].end(); k++)
+	{
+		// Test if *k is the same as clt in which case we don't need to send info
+		if( clt!=(*k))
+		{
+			Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+			string savestr = cp->savegame->WriteSaveGame( cp->savegame->GetStarSystem().c_str(), clt->current_state.getPosition(), cp->credits, cp->unitfilename, 0, false);
+			string xmlstr = clt->game_unit.GetUnit()->WriteUnitString();
+			unsigned int savelen = savestr.length();
+			unsigned int xmllen = xmlstr.length();
+			unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savelen+xmllen;
+			char * savebuf = new char[buflen];
+			unsigned int nsavelen = htonl( savelen);
+			unsigned int nxmllen = htonl( xmllen);
+			memcpy( savebuf, &tmpcs, sizeof( ClientState));
+			memcpy( savebuf+sizeof( ClientState), &nsavelen, sizeof( unsigned int));
+			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short), savestr.c_str(), savelen);
+			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short)+savelen, &nxmllen, sizeof( unsigned int));
+			memcpy( savebuf+sizeof( ClientState)+2*sizeof(unsigned short)+savelen, xmlstr.c_str(), xmllen);
+			packet2.send( CMD_ENTERCLIENT, clt->serial, savebuf, buflen, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+			nbclients++;
+		}
+	}
+	cout<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<clt->serial<<endl;
 }
 
 // Fills buffer with descriptions of clients in the same zone as our client

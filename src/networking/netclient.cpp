@@ -496,7 +496,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
             case CMD_ADDEDYOU :
                 cout << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
-                this->getZoneData( &p1 );
+                //this->getZoneData( &p1 );
                 break;
             case CMD_DISCONNECT :
                 /*** TO REDO IN A CLEAN WAY ***/
@@ -547,6 +547,7 @@ void NetClient::getZoneData( const Packet* packet )
 		offset += desc_size;
 		cs.received();
 		nser2 = cs.getSerial();
+		nser = nser2;
 		nser = ntohs( nser2);
 		if( nser != this->serial && !isLocalSerial( nser))
 		{
@@ -572,7 +573,7 @@ void NetClient::getZoneData( const Packet* packet )
 		else if( nser!=this->serial)
 		{
 			Clients[nser] = new Client;
-			cout<<"IT'S ME OR ANOTHER LOCAL PLAYER ";
+			cout<<"IT'S ANOTHER LOCAL PLAYER ";
 			Clients[nser]->game_unit.SetUnit( getNetworkUnit( nser));
 			assert( Clients[nser]->game_unit.GetUnit() != NULL);
 			cs.display();
@@ -587,76 +588,91 @@ void NetClient::getZoneData( const Packet* packet )
 void	NetClient::addClient( const Packet* packet )
 {
 	ObjSerial cltserial = packet->getSerial();
-	if( Clients[cltserial] != NULL)
+	// NOTE : in splitscreen mode we may receive info about us
+	/*
+	if( cltserial==this->serial)
 	{
-		cout<<"Error, client exists !!"<<endl;
-		exit( 1);
+		// Maybe just ignore here
+		cout<<"FATAL ERROR : RECEIVED INFO ABOUT ME !"<<endl;
+		exit(1);
 	}
+	*/
 
-	Clients[cltserial] = new Client;
-	nbclients++;
-	cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-	cout<<"At : ";
-
-	// Assign the data
-
-	// Copy the client state in its structure
-	Clients[cltserial]->serial = cltserial;
-	// Should receive the name
-	string callsign ("player"+cltserial);
-	memcpy( Clients[cltserial]->name, callsign.c_str(), callsign.length());
-	ClientState cs;
-	memcpy( &cs, packet->getData(), sizeof( ClientState));
-	Clients[cltserial]->current_state = cs;
-	// The save buffer and XML buffer come after the ClientState
-	const char * buf = packet->getData()+sizeof( ClientState);
-	unsigned int savelen = ntohl( *( (unsigned int *)(buf)));
-	unsigned int xmllen = ntohl( *( (unsigned int *)(buf+sizeof( unsigned int)+savelen)));
-	char * savebuf = new char[savelen+1];
-	memcpy( savebuf, buf+sizeof( unsigned int), savelen);
-	savebuf[savelen]=0;
-	char * xmlbuf = new char[xmllen+1];
-	memcpy( xmlbuf, buf+2*sizeof( unsigned int)+savelen, xmllen);
-	xmlbuf[xmllen]=0;
-
-	// We will ignore - starsys as if a client enters he is in the same system
-	//                - pos since we received a ClientState
-	//                - creds as we don't care about other players' credits for now
-	string starsys;
-	QVector pos;
-	float creds;
-	bool update=true;
-	vector<string> savedships;
-	// Parse the save buffer
-	vector<SavedUnits> savedunits = save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
-
-	cs.display();
-	// WE DON'T STORE FACTION IN SAVE YET
-	string PLAYER_FACTION_STRING( "privateer");
-	// Test if not a local player
+	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
-		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
-		// Use the first ship if there are more than one -> we don't handle multiple ships for now
-		// We name the flightgroup with the player name
-		Unit * un = UnitFactory::createUnit( callsign.c_str(),
-                             false,
-                             FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
-                             string(""),
-                             Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-                             0, xmlbuf);
-		Clients[cltserial]->game_unit.SetUnit( un);
-		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
-		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
-		//cout<<"Addclient 4"<<endl;
+		if( Clients[cltserial] != NULL)
+		{
+			cout<<"Error, client exists !!"<<endl;
+			exit( 1);
+		}
 
-		// Assign new coordinates to client
-		Clients[cltserial]->game_unit.GetUnit()->SetPosition( cs.getPosition());
-		Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-		Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
-		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
-		// In that case, we want cubic spline based interpolation
-		//init_interpolation( cltserial);
+		Clients[cltserial] = new Client;
+		nbclients++;
+		// Copy the client state in its structure
+		Clients[cltserial]->serial = cltserial;
+
+		cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+		cout<<"At : ";
+
+		// Should receive the name
+		string callsign ("player"+cltserial);
+		memcpy( Clients[cltserial]->name, callsign.c_str(), callsign.length());
+		ClientState cs;
+		memcpy( &cs, packet->getData(), sizeof( ClientState));
+		Clients[cltserial]->current_state = cs;
+		// The save buffer and XML buffer come after the ClientState
+		const char * buf = packet->getData()+sizeof( ClientState);
+		unsigned int savelen = ntohl( *( (unsigned int *)(buf)));
+		unsigned int xmllen = ntohl( *( (unsigned int *)(buf+sizeof( unsigned int)+savelen)));
+		char * savebuf = new char[savelen+1];
+		memcpy( savebuf, buf+sizeof( unsigned int), savelen);
+		savebuf[savelen]=0;
+		char * xmlbuf = new char[xmllen+1];
+		memcpy( xmlbuf, buf+2*sizeof( unsigned int)+savelen, xmllen);
+		xmlbuf[xmllen]=0;
+
+		// We will ignore - starsys as if a client enters he is in the same system
+		//                - pos since we received a ClientState
+		//                - creds as we don't care about other players' credits for now
+		string starsys;
+		QVector pos;
+		float creds;
+		bool update=true;
+		vector<string> savedships;
+		// Parse the save buffer
+		vector<SavedUnits> savedunits = save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
+
+		cs.display();
+		// WE DON'T STORE FACTION IN SAVE YET
+		string PLAYER_FACTION_STRING( "privateer");
+		// Test if not a local player
+		if( !isLocalSerial( cltserial))
+		{
+			// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
+			// Use the first ship if there are more than one -> we don't handle multiple ships for now
+			// We name the flightgroup with the player name
+			Unit * un = UnitFactory::createUnit( callsign.c_str(),
+								 false,
+								 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
+								 string(""),
+								 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+								 0, xmlbuf);
+			Clients[cltserial]->game_unit.SetUnit( un);
+			//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
+			Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
+			//cout<<"Addclient 4"<<endl;
+
+			// Assign new coordinates to client
+			Clients[cltserial]->game_unit.GetUnit()->SetPosition( cs.getPosition());
+			Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+			Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+			Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
+			// In that case, we want cubic spline based interpolation
+			//init_interpolation( cltserial);
+		}
+		delete savebuf;
+		delete xmlbuf;
 	}
 	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
 	else if( cltserial!=this->serial)
@@ -664,9 +680,6 @@ void	NetClient::addClient( const Packet* packet )
 		Clients[cltserial]->game_unit.SetUnit( getNetworkUnit( cltserial));
 		assert( Clients[cltserial]->game_unit.GetUnit() != NULL);
 	}
-
-	delete savebuf;
-	delete xmlbuf;
 }
 
 /*************************************************************/

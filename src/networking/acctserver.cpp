@@ -218,9 +218,10 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
 			break;
 			case CMD_LOGOUT :
+				packet.display( "", 0);
 				strcpy( name, buf);
-				cout<<">>> LOGOUT REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				strcpy( passwd, buf+NAMELEN);
+				cout<<">>> LOGOUT REQUEST =( "<<name<<":"<<passwd<<" )= --------------------------------------"<<endl;
 				// Receive logout request containing name of player
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
@@ -405,7 +406,7 @@ void	AccountServer::sendUnauthorized( SOCKETALT sock, Account * acct)
 void	AccountServer::sendAlreadyConnected( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
-	packet2.send( LOGIN_ALREADY, 0, packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ );
+	packet2.send( LOGIN_ALREADY, acct->getSerial(), packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
 }
 

@@ -61,6 +61,8 @@ extern double NETWORK_ATOM;
 #undef VSNET_DEBUG
 #endif
 
+#undef VSNET_DEBUG
+
 /* --- BEGIN memory debugging macros --- */
 /** The following macros are intended for default versions a class validity
  *  debugging. The idea is to increase the likelyhood that uninitialized

@@ -181,6 +181,8 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cp->Init ("");
 		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
 		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
+		// Generate the system we enter in if needed
+		zonemgr->addZone( cp->savegame->GetStarSystem());
 		safevec = UniverseUtil::SafeEntrancePoint( tmpvec);
 		cout<<"\tcredits = "<<credits<<endl;
 		cout<<"\tcredits = "<<credits<<endl;
@@ -259,7 +261,7 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 	if( clt!=NULL)
 		sockclt = clt->sock;
 	//cout<<"Creating packet... ";
-	cout<<">>> SEND LOGIN ALREADY =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+	cout<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 	packet2.send( LOGIN_ALREADY, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, __LINE__ );
 	cout<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 }
@@ -326,8 +328,8 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
         tcpClients.push_back( newclt);
 	else
         udpClients.push_back( newclt);
-    COUT << "Added client with socket n°" << sock
-         << " - Actual number of clients : "
+    //COUT << "Added client with socket n°" << sock;
+      cout << " - Actual number of clients : "
          << tcpClients.size() + udpClients.size() << endl;
 
     return newclt;
@@ -340,9 +342,10 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 void	NetServer::start(int argc, char **argv)
 {
 	string strperiod, strtimeout, strlogintimeout, stracct, strnetatom;
-	int period;
+	int period, periodrecon;
 	keeprun = 1;
 	double	savetime=0;
+	double  reconnect_time = 0;
 	double	curtime=0;
 	double	snaptime=0;
 	acct_con = 1;
@@ -358,6 +361,11 @@ void	NetServer::start(int argc, char **argv)
 		period = 7200;
 	else
 		period = atoi( strperiod.c_str());
+	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "");
+	if( strperiodrecon=="")
+		periodrecon = 60;
+	else
+		periodrecon = atoi( strperiodrecon.c_str());
 	tmpdir = vs_config->getVariable( "server", "tmpdir", "");
 	if( strperiod=="")
 		tmpdir = "./tmp/";
@@ -379,6 +387,7 @@ void	NetServer::start(int argc, char **argv)
 	InitTime();
 	UpdateTime();
 	savetime = getNewTime()+period;
+	reconnect_time = getNewTime()+periodrecon;
 
 	string tmp;
 	char srvip[256];
@@ -450,22 +459,25 @@ void	NetServer::start(int argc, char **argv)
 				// Then send clients confirmations or errors
 			}
 		}
-		if( acctserver && !acct_con)
+		curtime = getNewTime();
+		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
+			reconnect_time += periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
 			acct_sock = NetUITCP::createSocket( srvip, tmpport );
 			if( acct_sock.valid())
 			{
+				LI i;
 				COUT <<">>> Reconnected accountserver on socket "<<acct_sock<<" done."<<endl;
 				// Send a list of ingame clients
 				// Build a buffer with number of clients and client serials
 				int listlen = (tcpClients.size()+udpClients.size())*sizeof(ObjSerial)+sizeof(unsigned short);
 				char * buflist = new char[listlen];
-				for( LI i = tcpClients.begin(); i!=tcpClients.end(); i++)
+				for( i = tcpClients.begin(); i!=tcpClients.end(); i++)
 				{
 				}
-				for( LI i = udpClients.begin(); i!=udpClients.end(); i++)
+				for( i = udpClients.begin(); i!=udpClients.end(); i++)
 				{
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
@@ -508,7 +520,7 @@ void	NetServer::start(int argc, char **argv)
 		}
 
 		// Check for automatic server status save time (in seconds)
-		curtime = getNewTime();
+		//curtime = getNewTime();
 		if( curtime - savetime > period)
 		{
 			// Not implemented
@@ -757,8 +769,8 @@ void	NetServer::recvMsg_tcp( Client * clt)
 
     if( recvbytes <= 0 )
     {
-	COUT << "received " << recvbytes << " bytes from " << sockclt
-	     << ", disconnecting" << endl;
+	//COUT << "received " << recvbytes << " bytes from " << sockclt;
+	  cout << ", disconnecting" << endl;
         discList.push_back( clt);
     }
     else
@@ -1019,18 +1031,20 @@ void	NetServer::addClient( Client * clt)
 		cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+		cout<<"Serial : "<<clt->serial<<endl;
+		// Send info about other ships in the system to "clt"
+		zonemgr->sendZoneClients( clt);
 	}
 
-	char * cltsbuf = new char[MAXBUFFER];
-	int cltsbufsize;
+	// char * cltsbuf = new char[MAXBUFFER];
+	// int cltsbufsize;
 	// Send an accepted entering command and current zone's clients infos
 	// So the packet buffer should contain info about other ships (desciptions) present in the zone
-	cltsbufsize = zonemgr->getZoneClients( clt, cltsbuf);
-	cout<<"Serial : "<<clt->serial<<endl;
-	packet2.send( CMD_ADDEDYOU, clt->serial, cltsbuf, cltsbufsize, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+	// cltsbufsize = zonemgr->getZoneClients( clt, cltsbuf);
+	//packet2.send( CMD_ADDEDYOU, clt->serial, cltsbuf, cltsbufsize, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 	cout<<"ADDED client n "<<clt->serial<<" in ZONE "<<clt->zone<<endl;
-	delete cltsbuf;
-	cout<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
+	//delete cltsbuf;
+	//cout<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }
 
 /***************************************************************/
@@ -1099,6 +1113,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
         {
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
 		}
+		//p2.display( "", 0);
 		delete buf;
 	}
 
@@ -1149,8 +1164,11 @@ void	NetServer::logout( Client * clt)
 		char * buf = new char[NAMELEN*2+1];
 		int nbc = strlen( clt->name);
 		memcpy( buf, clt->name, nbc+1);
-		if( p2.send( CMD_LOGOUT, clt->serial, buf, nbc, SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+		memcpy( buf+NAMELEN, clt->passwd, strlen( clt->passwd));
+		buf[NAMELEN*2] = 0;
+		if( p2.send( CMD_LOGOUT, clt->serial, buf, NAMELEN*2, SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
+		//p2.display( "", 0);
 		delete buf;
 	}
 

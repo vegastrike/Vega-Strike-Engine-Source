@@ -202,7 +202,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length
     h.hton( c );
     memcpy( &c[header_length], buf, length );
     COUT << "Created a packet of length " << length+header_length << " for sending" << endl;
-    _packet.dump( cout, 0 );
+    //_packet.dump( cout, 0 );
 
     if( destaddr == NULL )
     {
@@ -269,7 +269,7 @@ void Packet::Header::hton( char* buf )
 
 int Packet::send( )
 {
-    COUT << "sending " << Cmd(h.command) << " through " << socket << " to ";
+    //COUT << "sending " << Cmd(h.command) << " through " << socket << " to ";
     if( destaddr==0 )
         cout << "NULL" << endl;
     else
@@ -288,7 +288,7 @@ int Packet::send( )
         h.ntoh( _packet.getConstBuf() );
 
 	PacketMem m( _packet.getVarBuf(), _packet.len(), PacketMem::LeaveOwnership );
-	m.dump( cout, 3 );
+	//m.dump( cout, 3 );
     }
     return ret;
 }
