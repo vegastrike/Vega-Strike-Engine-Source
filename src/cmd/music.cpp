@@ -178,8 +178,8 @@ void Music::SkipRandList() {
 int Music::Addlist (std::string listfile) {
 	changehome();
 	LoadMusic(listfile.c_str());
-	return playlist.size()-1;
 	returnfromhome();
+	return playlist.size()-1;
 }
 
 void Music::Skip() {
