@@ -544,6 +544,11 @@ namespace UniverseUtil {
 				Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
 						return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 				}
+                                static std::vector <Unit *> cachedUnits;
+				void precacheUnit (string type_string,string faction_string){
+                                  cachedUnits.push_back(UnitFactory::createUnit(type_string.c_str(),true,FactionUtil::GetFactionIndex(faction_string)));
+                                  
+                                }
 				Unit *getPlayer(){
 						return _Universe->AccessCockpit()->GetParent();;
 				}

@@ -203,11 +203,13 @@ namespace UnitUtil {
 			index = rand()%my_unit->numCargo();
 			Cargo c(my_unit->GetCargo(index));	  
 			c.quantity=quantity;
-			if (my_unit->CanAddCargo(c)) {
-				my_unit->AddCargo(c);
-				my_unit->GetCargo(index).price*=percentagechange;
-				return true;
-			}
+                        if (c.price!=0) {
+                          if (my_unit->CanAddCargo(c)) {
+                            my_unit->AddCargo(c);
+                            my_unit->GetCargo(index).price*=percentagechange;
+                            return true;
+                          }
+                        }
 		}
 		return false;
 	}

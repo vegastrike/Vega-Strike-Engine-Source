@@ -397,6 +397,10 @@ int main(int argc, char **argv) {
 	Mix_Music *music=NULL;
 #endif
 	Mix_HookMusicFinished(&music_finished); 
+#else
+#ifndef SONG_MUTEX
+	Mix_Music *music=NULL;
+#endif
 #endif
 #ifndef _WIN32
         fnet=(argc==3&&pipes[1]==-1);
