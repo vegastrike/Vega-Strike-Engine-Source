@@ -60,7 +60,7 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number);
 void /*GFXDRVAPI*/ GFXSetLightContext(int con_number);
 GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
 
-void /*GFXDRVAPI*/ GFXPickLights(const Vector &center);
+void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (GFXBOOL spec);
 GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
 void /*GFXDRVAPI*/ GFXSetOptimalIntensity (float newint, float saturatevalue);
@@ -138,7 +138,7 @@ void /*GFXDRVAPI*/ GFXNormal3f(float i, float j, float k);
 void /*GFXDRVAPI*/ GFXNormal(Vector n);
 void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z = 1.0);
 void /*GFXDRVAPI*/ GFXEnd();
-
+ 
 //display list
 int GFXCreateList();
 GFXBOOL GFXEndList();

@@ -3,7 +3,7 @@
 using std::priority_queue;
 #include "hashtable_3d.h"
 #include "cmd_collide.h"
-
+const float TINYOBJECT = .1;
 //optimization globals
 float intensity_cutoff=.05;//something that would normally round down
 float optintense=.2;
@@ -26,7 +26,14 @@ static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_ke
 static priority_queue<light_key> lightQ;
 
 
-void GFXPickLights (const Vector & center) {
+void GFXPickLights (const Vector & center, const float radius) {
+    vector <LineCollideStar> pickedlights;
+    if (radius < .1*COLLIDETABLEACCURACY) {
+	lighttable.Get (center, pickedlights);
+    } else {
+	Vector tmp (radius,radius,radius);
+	lighttable.Get (center-tmp,center+tmp, pickedlights);
+    }
 
 }
 
