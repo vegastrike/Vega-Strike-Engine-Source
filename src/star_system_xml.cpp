@@ -7,6 +7,7 @@
 #include "cmd/planet.h"
 #include "gfx/star.h"
 #include "vs_globals.h"
+#include "vegastrike.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -66,7 +67,8 @@ namespace StarXML {
       REFLECTIVITY,
       ALPHA,
       DESTINATION,
-      JUMP
+      JUMP,
+      FACTION
     };
 
   const EnumMap::Pair element_names[] = {
@@ -103,11 +105,12 @@ namespace StarXML {
     EnumMap::Pair ("emmisiveR", EMMISIVR),
     EnumMap::Pair ("emmisiveG", EMMISIVG),
     EnumMap::Pair ("emmisiveB", EMMISIVB),
-    EnumMap::Pair ("emmisiveA", EMMISIVA)
+    EnumMap::Pair ("emmisiveA", EMMISIVA),
+    EnumMap::Pair ("faction", FACTION)
 };
 
   const EnumMap element_map(element_names, 5);
-  const EnumMap attribute_map(attribute_names, 27);
+  const EnumMap attribute_map(attribute_names, 28);
 }
 
 using XMLSupport::EnumMap;
@@ -119,7 +122,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   xml->cursun.i=0;
 
   xml->cursun.j=0;
-
+  int faction=0;
   xml->cursun.k=0;	
   GFXMaterial ourmat;
   GFXGetMaterial (0,ourmat);
@@ -205,6 +208,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     alpha = new char [strlen((*iter).value.c_str())+1];
 	strcpy(alpha,(*iter).value.c_str());
 	break;
+      case FACTION:
+	faction = _Universe->GetFaction ((*iter).value.c_str());
+	break;
       case EMMISIVR:
 	ourmat.er = parse_float((*iter).value);
 	break;
@@ -276,9 +282,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	}
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat);
+      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,false,faction);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun, NULL, ourmat));
+      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun, NULL, ourmat,faction));
       xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun);
 	}
     delete []filename;
@@ -296,6 +302,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	delete []filename;
 	filename = new char [strlen((*iter).value.c_str())+1];
 	strcpy(filename,(*iter).value.c_str());
+	break;
+      case FACTION:
+	faction = _Universe->GetFaction ((*iter).value.c_str());
 	break;
       case RI:
 	R.i=parse_float((*iter).value);
@@ -345,9 +354,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }  
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,0,vector <char *>(),xml->unitlevel-1,ourmat,true);
+      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,0,vector <char *>(),xml->unitlevel-1,ourmat,true,faction);
     } else {
-      xml->moons.push_back((Planet *)new Unit(filename,true ,false));
+      xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
       xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun, NULL));
       xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun);
     }

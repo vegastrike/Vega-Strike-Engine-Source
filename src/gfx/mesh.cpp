@@ -110,7 +110,7 @@ bool Mesh::LoadExistant (const char * filehash) {
   return false;
 }
 
-Mesh:: Mesh(const char * filename, bool xml):hash_name(filename)
+Mesh:: Mesh(const char * filename, bool xml, int faction):hash_name(filename)
 {
   InitUnit();
   Mesh *oldmesh;
@@ -122,10 +122,10 @@ Mesh:: Mesh(const char * filename, bool xml):hash_name(filename)
   draw_queue = new vector<MeshDrawContext>;
   
   if(xml) {
-    LoadXML(filename);
+    LoadXML(filename,faction);
   } else {
     this->xml= NULL;
-    LoadBinary(filename);
+    LoadBinary(filename,faction);
   }
   this->orig = oldmesh;
   *oldmesh=*this;

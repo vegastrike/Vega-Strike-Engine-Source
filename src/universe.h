@@ -70,7 +70,7 @@ protected:
         Texture *ForceLogo;
         Texture *SquadLogo;
 	
-public:
+private:
 	class Faction {
 	public:
 		struct faction_stuff {
@@ -80,15 +80,15 @@ public:
 			} stats;
 			float relationship;
 		};		
-	private:
+	public:
 		vector <faction_stuff> faction;
-		friend class Universe;
 		Texture * logo; //the logos
 		char * factionname; //char * of the name
-		static void ParseAllAllies();
-		void ParseAllies();
-	public:
-		static void LoadXML(const char * factionfile);  //load the xml
+		static void ParseAllAllies(Universe * thisuni);
+		void ParseAllies(Universe * thisuni);
+	
+	
+		static void LoadXML(const char * factionfile, Universe * thisuni);  //load the xml
 		static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
 		static void endElement(void *userData, const XML_Char *name);
 //		void beginElement(const string &name, const AttributeList &attributes);
@@ -96,10 +96,15 @@ public:
 		Faction(); //constructor
 		~Faction(); //destructor
 	};
-
-  void activateLightMap();
-  Texture * getForceLogo () {return ForceLogo;};
-  Texture * getSquadLogo () {return SquadLogo;};
+ public:
+	void LoadFactionXML (const char * factfile) {
+	  Faction::LoadXML (factfile,this);
+	}
+	int GetFaction (const char *factionname);
+	float GetRelation (const int myfaction, const int theirfaction);
+	void activateLightMap();
+	Texture * getForceLogo (int faction);
+	Texture * getSquadLogo (int faction);
 	Universe(int argc, char **argv);
 	~Universe();
 
@@ -107,9 +112,9 @@ public:
 	void Init();
 	void StartDraw();
         void Loop(void main_loop());
-  StarSystem* activeStarSystem() {
-    return star_system;
-  }
+	StarSystem* activeStarSystem() {
+	  return star_system;
+	}
 	void SelectCamera(int cam)
 	{
 	  if (star_system!=NULL) {

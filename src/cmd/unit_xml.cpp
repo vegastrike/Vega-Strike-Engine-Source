@@ -201,7 +201,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
-	xml->shieldmesh =(new Mesh((*iter).value.c_str(), true));
+	xml->shieldmesh =(new Mesh((*iter).value.c_str(), true, faction));
 	break;
       case SHIELDTIGHT: 
 	shieldtight = parse_float ((*iter).value);
@@ -216,7 +216,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
-	xml->bspmesh =(new Mesh((*iter).value.c_str(), true));
+	xml->bspmesh =(new Mesh((*iter).value.c_str(), true, faction));
 	xml->hasBSP = true;	
 	break;
       }
@@ -229,7 +229,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
-	xml->meshes.push_back(new Mesh((*iter).value.c_str(), true));
+	xml->meshes.push_back(new Mesh((*iter).value.c_str(), true, faction));
 	break;
       }
     }
@@ -392,7 +392,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     
     CrossProduct (Q,R,P);
     indx = xml->units.size();
-    xml->units.push_back(new Unit (filename.c_str(), true,true));
+    xml->units.push_back(new Unit (filename.c_str(), true,true,faction));
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     

@@ -55,7 +55,7 @@ void Unit::Split (int level) {
     subunits = (Unit **)malloc (nm*sizeof (Unit *));
   }
   for (i=0;i<nm;i++) {
-    subunits[i+numsubunit] = new Unit (old+i,1,true);
+    subunits[i+numsubunit] = new Unit (old+i,1,true,faction);
     subunits[i+numsubunit]->mass = mass/level;
     subunits[i+numsubunit]->timeexplode=.1;
     if (subunits[i+numsubunit]->meshdata[0]) {
@@ -129,6 +129,7 @@ float Unit::FShieldData() {
   case 4: return ((float)shield.fbrl.front)/shield.fbrl.frontmax;
   case 6: return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;
   }
+  return 0;
 }
 float Unit::BShieldData() {
   switch (shield.number) {
@@ -136,6 +137,7 @@ float Unit::BShieldData() {
   case 4: return ((float)shield.fbrl.back)/shield.fbrl.backmax;
   case 6: return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;
   }
+  return 0;
 }
 float Unit::LShieldData() {
   switch (shield.number) {
@@ -143,6 +145,7 @@ float Unit::LShieldData() {
   case 4: return ((float)shield.fbrl.left)/shield.fbrl.leftmax;
   case 6: return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;
   }
+  return 0;
 }
 float Unit::RShieldData() {
   switch (shield.number) {
@@ -150,6 +153,7 @@ float Unit::RShieldData() {
   case 4: return ((float)shield.fbrl.right)/shield.fbrl.rightmax;
   case 6: return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;
   }
+  return 0;
 }
 
 void Unit::RegenShields () {

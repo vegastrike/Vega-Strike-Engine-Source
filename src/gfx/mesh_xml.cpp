@@ -940,7 +940,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename) {
+void Mesh::LoadXML(const char *filename, int faction) {
   const int chunk_size = 16384;
   
   FILE* inFile = fopen (filename, "r");
@@ -1291,7 +1291,7 @@ void Mesh::LoadXML(const char *filename) {
     index+= xml->quadstrips[a].size();
   }
   */
-  CreateLogos();
+  CreateLogos(faction);
   // Calculate bounding sphere
   
   if (mn.i==FLT_MAX) {
@@ -1306,7 +1306,7 @@ void Mesh::LoadXML(const char *filename) {
   delete xml;
 }
 
-void Mesh::CreateLogos() {
+void Mesh::CreateLogos(int faction) {
   numforcelogo=numsquadlogo =0;
   unsigned int index;
   for (index=0;index<xml->logos.size();index++) {
@@ -1318,7 +1318,7 @@ void Mesh::CreateLogos() {
   unsigned int nfl=numforcelogo;
   Logo ** tmplogo;
   Texture * Dec;
-  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_Universe->getForceLogo();index<2;index++,nfl=numsquadlogo,tmplogo=&squadlogos,Dec=_Universe->getSquadLogo()) {
+  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_Universe->getForceLogo(faction);index<2;index++,nfl=numsquadlogo,tmplogo=&squadlogos,Dec=_Universe->getSquadLogo(faction)) {
     if (nfl==0)
       continue;
     Vector *PolyNormal = new Vector [nfl];

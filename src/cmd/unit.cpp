@@ -183,8 +183,9 @@ Unit::Unit() {
 	Init();
 }
 
-Unit::Unit (Mesh ** meshes, int num, bool SubU) {
+Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   Init ();
+  this->faction = faction;
   SubUnit = SubU;
   meshdata = (Mesh **)malloc ((1+num)*sizeof (Mesh *));
   memcpy (meshdata,meshes,(num)*sizeof (Mesh *));
@@ -192,10 +193,10 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU) {
   meshdata[nummesh]=NULL;//turn off shield
   calculate_extent();
 }
-Unit::Unit(const char *filename, bool xml, bool SubU) {
+Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 	Init();
 	SubUnit = SubU;
-
+	this->faction = faction;
 	name = filename + string(" - Unit");
 	/*Insert file loading stuff here*/
 	if(xml) {
@@ -215,7 +216,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU) {
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
 
-		meshdata[meshcount] = new Mesh(meshfilename);
+		meshdata[meshcount] = new Mesh(meshfilename, false, faction);
 
 		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}
@@ -230,7 +231,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU) {
 		switch(type)
 		{
 		default:
-		  subunits[unitcount] = new Unit (unitfilename,false,true);
+		  subunits[unitcount] = new Unit (unitfilename,false,true,faction);
 		}
 		subunits[unitcount]->SetPosition(Vector(x,y,z));
 	}
@@ -706,7 +707,7 @@ void Unit::Fire (bool Missile) {
 	continue;
     }
     if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,Velocity,this,Target(),Missile)) {//FIXME turrets
-    energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate;
+    energy -=(short)( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
     }//unfortunately cumulative transformation not generated in physics atom
   }
 }
@@ -745,7 +746,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	break;
       case weapon_info::PROJECTILE:
 	if (Missile) {
-	  temp = new Unit (type.file.c_str(),true,false);
+	  temp = new Unit (type.file.c_str(),true,false,owner->faction);
 	  if (target&&target!=owner) {
 	    temp->Target (target);
 	    temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
@@ -766,7 +767,8 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
   }
   return true;
 }
-Unit::Mount::Mount(const string& filename, short ammo) :gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM){
+Unit::Mount::Mount(const string& filename, short ammo) :gun(NULL),size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM){
+  status=(UNCHOSEN);
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;

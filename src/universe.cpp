@@ -48,7 +48,7 @@ Universe::Universe(int argc, char** argv)
 	InitInput();
 
 	hud_camera = Camera();
-	
+	LoadFactionXML("factions.xml");	
 }
 void Universe::Init () {
 	star_system = new StarSystem("test.xml");

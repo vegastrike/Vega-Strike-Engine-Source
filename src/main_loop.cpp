@@ -199,7 +199,6 @@ void InitializeInput() {
 }
 Sprite *Crosshairs;
 void createObjects() {
-  Universe::Faction::LoadXML("factions.xml");
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   Crosshairs = new Sprite ("crosshairs.spr");
@@ -244,9 +243,9 @@ void createObjects() {
 	fscanf (fp, "%s %f %f %f %d\n",fightername,&pox.i, &pox.j, &pox.k,&tmptarget[a]);
 
     }
-    if (tmptarget[a]<0||tmptarget[a]>numf)
-      tmptarget[a]=0;
-    fighters[a] = new Unit(fightername, true, false);
+    //    if (tmptarget[a]<0||tmptarget[a]>numf)
+    //      tmptarget[a]=0;
+    fighters[a] = new Unit(fightername, true, false,tmptarget[a]);
     fighters[a]->SetPosition (pox);
     
     //    fighters[a]->SetAI(new Order());
@@ -256,9 +255,9 @@ void createObjects() {
     }
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
   }
-  for (a=0;a<numf;a++) {
-      fighters[a]->Target (fighters[tmptarget[a]]);
-  }
+  //  for (a=0;a<numf;a++) {
+  //      fighters[a]->Target (fighters[tmptarget[a]]);
+  //  }//now it just sets their faction :-D
   delete [] tmptarget;
   if (fp)
       fclose (fp);

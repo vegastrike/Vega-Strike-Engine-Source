@@ -55,6 +55,7 @@ using namespace FactionXML;
 
 
 void Universe::Faction::beginElement(void *userData, const XML_Char *names, const XML_Char **atts) {
+  Universe * thisuni = (Universe *) userData;
 //	((Universe::Faction*)userData)->beginElement(name, AttributeList(atts));
   AttributeList attributes=AttributeList(atts);
   string name=names;
@@ -76,14 +77,14 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   case FACTION:
 	assert (unitlevel==1);
 	unitlevel++;
-	_Universe->factions.push_back(new Faction ());
-	assert(_Universe->factions.size()>0);
-//	_Universe->factions[_Universe->factions.size()-1];
+	thisuni->factions.push_back(new Faction ());
+	assert(thisuni->factions.size()>0);
+//	thisuni->factions[thisuni->factions.size()-1];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
-		_Universe->factions[_Universe->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
-		strcpy(_Universe->factions[_Universe->factions.size()-1]->factionname,(*iter).value.c_str());
+		thisuni->factions[thisuni->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
+		strcpy(thisuni->factions[thisuni->factions.size()-1]->factionname,(*iter).value.c_str());
 		break;
       case LOGORGB:
 		if (RGBfirst==0||RGBfirst==1) {
@@ -92,7 +93,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			_Universe->factions[_Universe->factions.size()-1]->logo=new Texture((*iter).value.c_str(),tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture((*iter).value.c_str(),tmpstr);
 		}
 		break;
 	  case LOGOA:
@@ -102,7 +103,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			_Universe->factions[_Universe->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str());
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str());
 		}
 		break;
       }
@@ -110,10 +111,10 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     }
 	assert (RGBfirst!=0);
 	if (RGBfirst==1) {
-			_Universe->factions[_Universe->factions.size()-1]->logo=new Texture(tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr);
 	}
 	if (RGBfirst==2) {
-			_Universe->factions[_Universe->factions.size()-1]->logo=new Texture(tmpstr,tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,tmpstr);
 	}
 	if (tmpstr!=NULL) {
 		delete []tmpstr; 
@@ -124,22 +125,22 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   case ENEMY:
 	assert (unitlevel==2);
 	unitlevel++;
-	_Universe->factions[_Universe->factions.size()-1]->faction.push_back(faction_stuff());
-	assert(_Universe->factions.size()>0);
-//	_Universe->factions[_Universe->factions.size()-1];
+	thisuni->factions[thisuni->factions.size()-1]->faction.push_back(faction_stuff());
+	assert(thisuni->factions.size()>0);
+//	thisuni->factions[thisuni->factions.size()-1];
 	    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
   case NAME:
 	
-    _Universe->factions[_Universe->factions.size()-1]->
-		faction[_Universe->factions[_Universe->factions.size()-1]->faction.size()-1].stats.name=
+    thisuni->factions[thisuni->factions.size()-1]->
+		faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].stats.name=
 		new char[strlen((*iter).value.c_str())+1];
 
-	strcpy(_Universe->factions[_Universe->factions.size()-1]->faction[_Universe->factions[_Universe->factions.size()-1]->faction.size()-1].stats.name,
+	strcpy(thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].stats.name,
 		(*iter).value.c_str());
 	break;
       case RELATION:
-	_Universe->factions[_Universe->factions.size()-1]->faction[_Universe->factions[_Universe->factions.size()-1]->faction.size()-1].relationship=parse_float((*iter).value);
+	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].relationship=parse_float((*iter).value);
 	break;
       }
 
@@ -152,7 +153,6 @@ void Universe::Faction::endElement(void *userData, const XML_Char *name) {
 
 //void Universe::Faction::endElement(const string &name) {
   Names elem = (Names)element_map.lookup(name);
-
   switch(elem) {
   case UNKNOWN:
 	  unitlevel--;
@@ -163,7 +163,33 @@ void Universe::Faction::endElement(void *userData, const XML_Char *name) {
 	break;
   }
 }
+int Universe::GetFaction (const char * factionname) {
+#ifdef _WIN32
+  #define strcasecmd stricmp
+#endif
+ for (unsigned int i=0;i<factions.size();i++) {
+    if (strcasecmp (factionname, factions[i]->factionname)==0) {
+      return i;
+    }
+  }
+  return 0;
+}
 
+Texture * Universe::getForceLogo (int faction) {
+  return factions[faction]->logo;
+}
+//fixme--add squads in here
+Texture *Universe::getSquadLogo (int faction) {
+  return getForceLogo (faction);
+}
+
+
+float Universe::GetRelation (int Myfaction, int TheirFaction) {
+  if (Myfaction==TheirFaction)
+    return 1;
+  assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
+  return factions[Myfaction]->faction[TheirFaction].relationship;
+}
 Universe::Faction::Faction() {
 	logo=NULL;
 	factionname=NULL;
@@ -173,25 +199,25 @@ Universe::Faction::~Faction() {
 	delete [] factionname;
 }
 
-void Universe::Faction::ParseAllAllies() {
-	for (int i=0;i<_Universe->factions.size();i++) {
-		_Universe->factions[i]->ParseAllies();
+void Universe::Faction::ParseAllAllies(Universe * thisuni) {
+	for (unsigned int i=0;i<thisuni->factions.size();i++) {
+		thisuni->factions[i]->ParseAllies(thisuni);
 		
 	}
 }
-void Universe::Faction::ParseAllies () {
-	int i,j;
+void Universe::Faction::ParseAllies (Universe * thisuni) {
+	unsigned int i,j;
 	vector <faction_stuff> tempvec;
 	for (i=0;i<faction.size();i++) {
-		for (j=0; j<_Universe->factions.size();j++) {
-			if (strcmp (faction[i].stats.name,_Universe->factions[j]->factionname)==0) {
+		for (j=0; j<thisuni->factions.size();j++) {
+			if (strcmp (faction[i].stats.name,thisuni->factions[j]->factionname)==0) {
 				delete [] faction[i].stats.name;
 				faction[i].stats.index = j;
 				break;
 			}
 		}
 	}
-	for (i=0;i<_Universe->factions.size();i++) {
+	for (i=0;i<thisuni->factions.size();i++) {
 		tempvec.push_back (faction_stuff());
 		tempvec[i].stats.index=i;
 		tempvec[i].relationship =0;
@@ -201,7 +227,7 @@ void Universe::Faction::ParseAllies () {
 	}
 	faction = tempvec;
 	/*
-	while (faction.size()<_Universe->factions.size()) {
+	while (faction.size()<thisuni->factions.size()) {
 		faction.push_back (faction_stuff());
 		faction[faction.size()-1].stats.index=-1;
 	}
@@ -229,7 +255,7 @@ void Universe::Faction::ParseAllies () {
 	}
 	*/
 }
-void Universe::Faction::LoadXML(const char * filename) {
+void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   unitlevel=0;
   const int chunk_size = 16384;
   FILE * inFile = fopen (filename, "r");
@@ -238,7 +264,7 @@ void Universe::Faction::LoadXML(const char * filename) {
 	return;
   }
   XML_Parser parser = XML_ParserCreate(NULL);
-  XML_SetUserData(parser, NULL);
+  XML_SetUserData(parser, thisuni);
   XML_SetElementHandler(parser, &Universe::Faction::beginElement, &Universe::Faction::endElement);
  
   do {
@@ -250,5 +276,5 @@ void Universe::Faction::LoadXML(const char * filename) {
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);
-  ParseAllAllies();
+  ParseAllAllies(thisuni);
 }

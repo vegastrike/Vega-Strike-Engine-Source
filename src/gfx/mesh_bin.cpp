@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "vegastrike.h"
 #include "file_main.h"
-void Mesh::LoadBinary (const char * filename) {
+void Mesh::LoadBinary (const char * filename, int faction) {
   GFXBOOL objtex;
   int TexNameLength;
   char *TexName=NULL;
@@ -302,7 +302,7 @@ void Mesh::LoadBinary (const char * filename) {
 		offset [ii] = readf (fp);
 		
 	}
-	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _Universe->getForceLogo(),Ref);
+	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _Universe->getForceLogo(faction),Ref);
 	delete [] Ref;
 	delete []PolyNormal;
 	delete []center;
@@ -428,7 +428,7 @@ void Mesh::LoadBinary (const char * filename) {
 	}
 	
 
-	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _Universe->getSquadLogo(), Ref);
+	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _Universe->getSquadLogo(faction), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	int vert_offset[2];

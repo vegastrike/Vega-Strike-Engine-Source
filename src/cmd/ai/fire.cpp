@@ -14,22 +14,20 @@ FireAt::FireAt (float reaction_time, float aggressivitylevel): Order (WEAPON|TAR
 void FireAt::ChooseTargets (int ) {
   UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
+  float relation=1;
+  float worstrelation=1;
   while ((un = iter->current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-    if (un==parent->Target()||un==parent) {
-      iter->advance();
-      break;
+    relation = _Universe->GetRelation (parent->faction, un->faction);
+    if (relation<worstrelation) {
+      worstrelation = relation;
+      parent->Target (un);
     }
     iter->advance();
   }
-  if ((un = iter->current())) {
-    parent->Target (un);
-  }
   delete iter;
-  if (!un) {
-    UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
-    parent->Target (iter->current());//cycle through for now;
-    delete iter;
+  if (worstrelation>0) {
+    parent->Target (NULL);
   }
 }
 /* Proper choosing of targets

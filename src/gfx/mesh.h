@@ -197,9 +197,9 @@ private:
     GFXVertex vertex;
     GFXMaterial material;
   } *xml;
-  void LoadXML(const char *filename);
-  void LoadBinary (const char * filename);
-  void CreateLogos();
+  void LoadXML(const char *filename, int faction);
+  void LoadBinary (const char * filename, int faction);
+  void CreateLogos(int faction);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   
@@ -240,7 +240,7 @@ protected:
   vector <MeshFX> LocalFX;
 public:
   Mesh();
-  Mesh(const char *filename, bool xml=false);
+  Mesh(const char *filename, bool xml, int faction);
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   virtual ~Mesh();
   unsigned int numFX () {return LocalFX.size();}

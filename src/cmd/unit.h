@@ -217,8 +217,8 @@ public:
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 
   Unit();
-  Unit (Mesh ** meshes  , int num, bool Subunit);
-  Unit(const char *filename, bool SubUnit, bool xml);
+  Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
+  Unit(const char *filename, bool SubUnit, bool xml, int faction);
   virtual ~Unit();
   virtual enum clsptr isUnit() {return UNITPTR;}
   static void ProcessDeleteQueue();

@@ -59,24 +59,24 @@ void PlanetaryOrbit::Execute() {
 void Planet::endElement() {  
 }
 
-void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat,bool isunit){
+void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat,bool isunit, int faction){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {
     UnitCollection::UnitIterator * satiterator = satellites.createIterator();
 	  assert(satiterator->current()!=NULL);
 	  if (satiterator->current()->isUnit()==PLANETPTR) {
-		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,ourmat,isunit);
+		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,ourmat,isunit, faction);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
   } else {
     if (isunit==true) {
-      satellites.prepend(new Unit (filename, true, false));
+      satellites.prepend(new Unit (filename, true, false, faction));
       satiterator = satellites.createIterator();
       satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
       satiterator->current()->SetOwner (this);
     }else {
-      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat));
+      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, faction));
     }
   }
   delete satiterator;
@@ -89,9 +89,10 @@ Planet::Planet()  : Unit(), radius(0.0f), satellites() {
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat) : Unit(), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, int faction) : Unit(), radius(0.0f),  satellites() {
   destination=dest;
   Init();
+  this->faction = faction;
   killed=false;
   name = "Planet - ";
   name += textname;

@@ -29,7 +29,7 @@
 //#include "cmd_order.h"
 float *mview = NULL;
 
-HUDElement::HUDElement(char *filename):Unit(filename,true,false) {
+HUDElement::HUDElement(char *filename):Unit(filename,true,false, 0) {
 	static Matrix view;
 	//myMesh = mesh;
 }

@@ -87,7 +87,7 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   x->forcelogos = x->squadlogos = NULL;
   x->numforcelogo = x->numsquadlogo =0;
   x->Decal = new Texture (Decal);
-  
+
   y = new Mesh;
   y->squadlogos=y->forcelogos = NULL;
   y->numforcelogo = y->numsquadlogo = 0;
@@ -130,6 +130,14 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   *x->orig = *x;
   x->orig->refcount=1;
   y->orig->refcount=1;
+  x->numforcelogo = 0;
+  x->forcelogos=NULL;
+  x->numsquadlogo = 0;
+  x->squadlogos=NULL;
+  x->numforcelogo = 0;
+  x->forcelogos=NULL;
+  x->numsquadlogo = 0;
+  x->squadlogos=NULL;
   
   delete [] X;
   delete [] Y;
