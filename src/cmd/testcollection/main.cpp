@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "unit.h"
-#define _TEST_
+#ifndef _TEST_
+#error DO NOT INCLUDE WITH VEGASTRIKE...these are regression tests ONLY
+#endif
+
+
 #include "iterator.h"
 #include "collection.h"
 
