@@ -1095,7 +1095,7 @@ Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destin
        char ai_agg_c[1024];
        char ai_int_c[1024];
        strncpy(ai_agg_c,ai_agg.c_str(),1023);
-       strncpy(ai_agg_c,ai_agg.c_str(),1023);
+       strncpy(ai_int_c,ai_int.c_str(),1023);
        ai_agg_c[1023]=0;
        ai_int_c[1023]=0;
        //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
