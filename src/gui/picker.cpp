@@ -35,6 +35,9 @@ static const float CHILD_INDENT_FACTOR = 0.6;
 // Make sure we don't get too many re-alloc's in the display vector for cells.
 static const int DISPLAY_VECTOR_RESERVE = 30;
 
+// When scrolling a cell into view, how many lines between the cell and the edge.
+static const int SCROLL_EDGE_EXTRA = 1;
+
 
 // Find a cell by id.  Returns NULL if not found.
 PickerCell* PickerCells::cellWithId(const std::string& id) {
@@ -240,20 +243,32 @@ void Picker::recalcDisplay(void) {
 // Make sure the cell is visible in the scroll area.  If it is, nothing
 //  happens.  If it's not, we move it into the visible section.
 // If NULL, this routine does nothing.
-void Picker::scrollToCell(const PickerCell* cell) {
+void Picker::scrollToCell(const PickerCell* cell, bool middle) {
     if(!cell || !m_scroller) return;
+
+    // If we need to change the displayed cells, do that first.
+    if(m_needRecalcDisplay) {
+        recalcDisplay();
+    }
 
     for(int i=0; i<m_displayCells.size(); i++) {
         if(cell == m_displayCells[i].cell) {
             const int visibleCells = m_rect.size.height / totalCellHeight();
-            if(i < m_scrollPosition) {
-                // Cell is too "high".  Move it to the top line.
-                m_scroller->setScrollPosition(i);
-			} else if(i >= m_scrollPosition + visibleCells) {
-				// Cell is too "low".  Move it to the botom line.
-                m_scroller->setScrollPosition(i-visibleCells+1);
+			if(middle) {
+				// Regardless of where cell is, try to put it in the middle of
+				//  the visible area.
+				m_scroller->setScrollPosition(i - visibleCells/2);
+			} else {
+				// Just make sure we can see it.
+				if(i < m_scrollPosition) {
+					// Cell is too "high".  Move it to the top line.
+					m_scroller->setScrollPosition(i - SCROLL_EDGE_EXTRA);
+				} else if(i >= m_scrollPosition+visibleCells) {
+					// Cell is too "low".  Move it to the bottom line.
+					m_scroller->setScrollPosition(i-visibleCells+1+SCROLL_EDGE_EXTRA);
+				}
 			}
-       }
+		}
     }
 }
 

@@ -100,7 +100,7 @@ public:
     // Make sure the cell is visible in the scroll area.  If it is, nothing
     //  happens.  If it's not, we move it into the visible section.
     // If NULL, this routine does nothing.
-    virtual void scrollToCell(const PickerCell* cell);
+    virtual void scrollToCell(const PickerCell* cell, bool middle = false);
 
     // This should be called when the lists of cells have been changed
     //  in some way -- added to, "hide children" changed, etc.
