@@ -150,6 +150,7 @@ private:
   void SetSoundFile (std::string sound);
   int GetSoundFile () {return soundfile;}
   void SetCommAnimation (Animation * ani);
+  void SetStaticAnimation ();
   ///Accesses the current navigationsystem
   NavigationSystem *AccessNavSystem() {return &ThisNav;}
   ///Accesses the current camera

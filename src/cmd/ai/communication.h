@@ -12,6 +12,7 @@ class FSM {
     float messagedelta;
     vector <unsigned int> edges;
     int GetSound (unsigned char sex, unsigned int multiple)const;
+    bool StopSound(unsigned char sex);
     std::string GetMessage(unsigned int &multiple)const;
     void AddSound (int sound, unsigned char sex);
     Node (const vector<std::string> &message, float messagedel): messages(message),messagedelta(messagedel){if (messages.size()==0) messages.push_back("<static>");}
@@ -21,6 +22,7 @@ class FSM {
     }
   };
   vector <Node> nodes;
+  bool StopAllSounds(unsigned char sex);
   FSM (const char * filename);
   void LoadXML(const char * factionfile);  
   void beginElement(const string &name, const AttributeList attributes);

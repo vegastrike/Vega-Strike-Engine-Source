@@ -140,6 +140,7 @@ protected:
   static void SwitchControl (const KBData&,KBSTATE) {}
   static void TurretControl (const KBData&,KBSTATE) {}
   virtual void SetCommAnimation (Animation * ani) {}
+  virtual void SetStaticAnimation () {}
   class SaveGame * savegame;
   ///Accesses the current navigationsystem
   virtual NavigationSystem *AccessNavSystem() {return NULL;}

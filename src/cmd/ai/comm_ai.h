@@ -28,6 +28,7 @@ class CommunicatingAI:public Order{
   float getAnger (const Unit * un)const;
   virtual std::vector <Animation *> *getCommFaces(unsigned char &sex);
  public:
+  virtual void Destroy();
   virtual float getMood() {return mood;}
   virtual float GetEffectiveRelationship (const Unit * target) const;
   Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);

@@ -2,7 +2,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include <assert.h>
-
+#include "audiolib.h"
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
   if (strlen(filename)==0) {
@@ -101,6 +101,25 @@ int FSM::Node::GetSound (unsigned char sex, unsigned int multiple) const{
   }else {
     return -1;
   }
+}
+bool FSM::Node::StopSound(unsigned char sex) {
+    unsigned int index = ((unsigned int)sex)*messages.size();
+    bool ret=false;
+    for (unsigned int i=index;i<index+messages.size()&&i<sounds.size();++i){
+      if (AUDIsPlaying(sounds[i])){
+            AUDStopPlaying(sounds[i]);
+            ret=true;
+      }
+    }
+    return ret;
+}
+bool FSM::StopAllSounds(unsigned char sex) {
+  bool ret=false;
+    for (unsigned int i=0;i<nodes.size();++i) {
+      if(nodes[i].StopSound(sex))
+        ret=true;
+    }
+    return ret;
 }
 void FSM::Node::AddSound (int sounde, unsigned char sex) {
   for (int multiple=0;;++multiple) {

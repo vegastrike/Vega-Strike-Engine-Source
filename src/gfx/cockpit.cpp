@@ -1751,7 +1751,14 @@ void GameCockpit::ScrollAllVDU (int howmuch) {
   }
 }
 
-
+void GameCockpit::SetStaticAnimation () {
+  static Animation Statuc ("static.ani");
+  for (unsigned int i=0;i<vdu.size();i++) {
+    if (vdu[i]->getMode()==VDU::COMM) {
+      vdu[i]->SetCommAnimation (&Statuc,true);
+    }
+  }
+}
 void GameCockpit::SetCommAnimation (Animation * ani) {
   bool seti=false;
   for (unsigned int i=0;i<vdu.size();i++) {

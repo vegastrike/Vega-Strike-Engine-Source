@@ -233,6 +233,21 @@ void CommunicatingAI::UpdateContrabandSearch () {
 static bool isDockedAtAll(Unit * un) {
   return (un->docked&(Unit::DOCKED_INSIDE|Unit::DOCKED))!=0;
 }
+void CommunicatingAI::Destroy(){    
+	for ( int i=0;i<_Universe->numPlayers();++i) {
+		Unit * target = _Universe->AccessCockpit(i)->GetParent();
+		if (target) {
+			FSM * fsm = FactionUtil::GetConversation(this->parent->faction,target->faction);	
+			if (fsm->StopAllSounds(this->sex)) {
+                          _Universe->AccessCockpit(i)->SetStaticAnimation ();
+                          _Universe->AccessCockpit(i)->SetStaticAnimation ();
+                          
+                        }
+		}
+	}
+    this->Order::Destroy();
+}
+
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
