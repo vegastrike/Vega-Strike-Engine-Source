@@ -20,8 +20,15 @@ void Unit::ImportPartList (const std::string& category, float price, float price
   for (unsigned int i=0;i<numcarg;i++) {
     Cargo c= GetUnitMasterPartList().GetCargo (i);
     if (c.category==category) {
-      c.quantity=quantity;
-      c.price*=price;
+      c.quantity=quantity-quantdev;
+      c.price*=price-pricedev;
+      //stupid way
+      c.quantity+=quantdev*2*((float)rand())/RAND_MAX;
+      c.price+=pricedev*2*((float)rand())/RAND_MAX;
+      c.price=fabs(c.price);
+      if (c.price <.01)
+	c.price+=.01;
+      c.quantity=abs (c.quantity);
       AddCargo(c);
     }
   }
