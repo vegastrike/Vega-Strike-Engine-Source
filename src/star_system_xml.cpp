@@ -380,8 +380,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       assert(xml->moons.size()!=0);
       xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun, NULL, ourmat,curlights,faction));
-      xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun);
+      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction));
+      xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun+xml->systemcentroid);
     }
     delete []filename;
     break;
@@ -453,8 +453,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-1,ourmat,curlights,true,faction);
     } else {
       xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
-      xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun, NULL));
-      xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun);
+      xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
+      xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun+xml->systemcentroid);
     }
     delete []filename;
     break;
@@ -488,7 +488,7 @@ void StarSystem::endElement(const string &name) {
 }
 
 
-void StarSystem::LoadXML(const char *filename) {
+void StarSystem::LoadXML(const char *filename, const Vector & centroid) {
   //  shield.number=0;
   const int chunk_size = 16384;
   // rrestricted=yrestricted=prestricted=false;
@@ -500,6 +500,7 @@ void StarSystem::LoadXML(const char *filename) {
   }
 
   xml = new StarXML;
+  xml->systemcentroid=centroid;
   xml->fade = (vs_config->getVariable ("graphics","starblend","true")==string("true"));
   xml->starsp = 150;
   xml->numnearstars=400;

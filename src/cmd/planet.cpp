@@ -98,6 +98,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
     GFXCreateLight (l,ligh[i].ligh,!ligh[i].islocal);
     lights.push_back (l);
   }
+  curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;
   destination=dest;
   Init();
   this->faction = faction;

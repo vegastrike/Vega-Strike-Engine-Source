@@ -39,6 +39,7 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
   pos=  position.Transform(m);
   offset = (_Universe->AccessCamera()->GetPosition()-pos);
+  //Matrix HACK  pos = -offset;
   offset.Normalize();
   offset*=HaloOffset*(sizex>sizey?sizex:sizey);
   _Universe->AccessCamera()->GetPQR(p,q,r);

@@ -37,6 +37,7 @@ class StarSystem {
     std::vector <GFXLight> lights;
     std::vector <Planet *> moons;
     string backgroundname;
+    Vector systemcentroid;
     Vector cursun;
     float reflectivity;
     int numnearstars;
@@ -69,7 +70,7 @@ class StarSystem {
   Background* getBackground() {return bg;}
   ///activates the light map texture
   void activateLightMap();
-  void LoadXML(const char*);
+  void LoadXML(const char*, const Vector & centroid);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
 
@@ -86,7 +87,7 @@ class StarSystem {
     cam[currentcamera].UpdateGFX();
   }
   ///Loads the star system from an XML file
-  StarSystem(char * filename);
+  StarSystem(char * filename, const Vector & centroid=Vector (0,0,0));
   ~StarSystem();
   UnitCollection * getUnitList();
   /// returns xy sorted bounding spheres of all units in current view

@@ -142,7 +142,7 @@ bool Order::AttachSelfOrder (UnitCollection *targets1) {
   return true;
 }
 bool Order::AttachOrder (Vector targetv) {
-  if (type!=LOCATION) {
+  if (!(type&LOCATION)) {
     return false;
   }
   targetlocation = targetv;

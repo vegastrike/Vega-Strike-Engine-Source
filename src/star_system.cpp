@@ -29,7 +29,7 @@ vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-StarSystem::StarSystem(char * filename) : 
+StarSystem::StarSystem(char * filename, const Vector & centr) : 
 //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
@@ -38,7 +38,7 @@ StarSystem::StarSystem(char * filename) :
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
   numprimaries=0;
-  LoadXML(filename);
+  LoadXML(filename,centr);
 //  primaries[0]->SetPosition(0,0,0);
   int i;
   Iterator * iter;
