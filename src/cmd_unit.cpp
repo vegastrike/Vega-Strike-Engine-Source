@@ -65,7 +65,7 @@ Unit::Unit()
 {
 	Init();
 }
-Unit::Unit(char *filename, bool xml):Mesh()
+Unit::Unit(const char *filename, bool xml):Mesh()
 {
 	Init();
 

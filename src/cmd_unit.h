@@ -57,19 +57,8 @@ enum Aggression{
 class Unit:public Mesh{
  private:
   struct XML {
-    enum Names {
-      UNKNOWN,
-      UNIT,
-      MESHFILE,
-      FILE
-    };
-
-    static const EnumMap::Pair element_names[];
-    static const EnumMap::Pair attribute_names[];
-    static const EnumMap element_map;
-    static const EnumMap attribute_map;
-
     vector<Mesh*> meshes;
+    vector<Unit*> units;
   } *xml;
   
   void LoadXML(const char *filename);
@@ -112,7 +101,7 @@ protected:
 public:
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
   Unit();
-  Unit(char *filename, bool xml=false);
+  Unit(const char *filename, bool xml=false);
   virtual ~Unit();
   void Init();
   

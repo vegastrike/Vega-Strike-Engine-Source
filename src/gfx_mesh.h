@@ -103,11 +103,8 @@ private:
     vector<GFXVertex> tris;
     vector<GFXVertex> quads;
 
-    vector<GFXVertex> &active_list;
+    vector<GFXVertex> *active_list;
     GFXVertex vertex;
-    
-    XML() : active_list(tris)
-    { }
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);

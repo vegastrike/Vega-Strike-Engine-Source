@@ -25,7 +25,7 @@
 extern FILE *fpread;
 
 /*File utility functions*/
-inline void LoadFile(char *filename)
+inline void LoadFile(const char *filename)
 {
 	fpread = fopen(filename, "rb");
 }

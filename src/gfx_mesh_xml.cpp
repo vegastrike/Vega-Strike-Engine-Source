@@ -179,14 +179,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     assert(xml->load_stage==4);
 
     xml->num_vertices=3;
-    xml->active_list = xml->tris;
+    xml->active_list = &xml->tris;
     break;
   case XML::QUAD:
     assert(top==XML::POLYGONS);
     assert(xml->load_stage==4);
 
     xml->num_vertices=4;
-    xml->active_list = xml->quads;
+    xml->active_list = &xml->quads;
     break;
   case XML::VERTEX:
     assert(top==XML::TRI || top==XML::QUAD);
@@ -231,7 +231,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->vertex = xml->vertices[index];
     xml->vertex.s = s;
     xml->vertex.t = t;
-    xml->active_list.push_back(xml->vertex);
+    xml->active_list->push_back(xml->vertex);
     xml->num_vertices--;
     break;
   default:
@@ -303,8 +303,7 @@ void Mesh::endElement(const string &name) {
       clog << "    (" << xml->quads[a].x << ", " << xml->quads[a].y << ", " << xml->quads[a].z << ") (" << xml->quads[a].i << ", " << xml->quads[a].j << ", " << xml->quads[a].k << ") (" << xml->quads[a].s << ", " << xml->quads[a].t << ")\n";
     }
     clog << endl;
-    */
-
+*/
     break;
   case XML::MESH:
     assert(xml->load_stage==4);

@@ -704,6 +704,7 @@ void Mesh::Draw()
 	  GFXDisable(TEXTURE1);
 	}
 	Decal->MakeActive();
+	GFXBlendMode(ONE, ZERO);
 
 	GFXSelectTexcoordSet(0, 0);
 	if(envMap) {

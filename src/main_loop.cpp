@@ -510,8 +510,17 @@ void createObjects() {
   shipList = _GFX->activeStarSystem()->getClickList();
     //BindKey (1,startselect);
     //BindKey (0,clickhandler);
-  midway = new Unit("b_midway.xml", true);
+  /*
+    midway = new Unit("b_midway.xml", true);
+  midway = new Unit("square.xml", true);
   midway->SetPosition(1,1, 10);
+  _GFX->activeStarSystem()->AddUnit(midway);
+  midway = new Unit("mid.xml", true);
+  midway->SetPosition(5,5, 15);
+  _GFX->activeStarSystem()->AddUnit(midway);
+  */
+  midway = new Unit("Homeworld-HeavyCorvette.xml", true);
+  midway->SetPosition(8,-5, 10);
   _GFX->activeStarSystem()->AddUnit(midway);
   //exit(0);
 }
@@ -550,7 +559,7 @@ void main_loop() {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   //bg2->Draw();
-  bg->Draw();
+  //bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);

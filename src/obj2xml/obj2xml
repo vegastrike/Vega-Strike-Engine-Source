@@ -59,7 +59,7 @@ while($line = <INPUT>) {
 	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
 		push @normal_list, [$1, $2, $3];
 	} elsif($line =~ /vt +($float) +($float)/i) {
-		push @texcoord_list, [-$2, -$1];
+		push @texcoord_list, [$1, $2];
 	} elsif($line =~ / *usemtl +(\S+)/) {
 		if(defined $materials{$1}) {
 			$texture = $materials{$1};
