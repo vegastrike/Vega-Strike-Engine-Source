@@ -352,22 +352,29 @@ char *	WebcamSupport::CaptureImage()
 #ifdef __APPLE__
 	// Get Buffer Info and see...
 	ComponentResult		component_error = noErr;
+	OSErr iErr;
 	component_error = SGIdle(video -> sg_channel);
 	if (component_error)
 		DoError(component_error, "SGIdle failed");
-	Ptr pixmap_base = GetPixBaseAddr( GetGWorldPixMap( video->sg_world));
-	if( pixmap_base==NULL)
+	PixMapHandle pix = GetGWorldPixMap( video->sg_world);
+	if( pix==NULL || pix==nil)
+		DoError( -1, "PixMap is NULL");
+	Ptr pixmap_base = GetPixBaseAddr( pix);
+	if( pixmap_base==NULL || pixmap_base==nil)
 		DoError( -1, "PixMap is NULL");
 	// Writes the image to a test jpeg file
-	Rect r = (**GetGWorldPixMap( video->sg_world)).bounds;
-	/*
-	r.top = r.left = 0;
-	r.right = this->width;
-	r.bottom = this->height;
-	*/
-	Ptr	jpeg_data;
-	ImageDescriptionHandle desc;
-	OSErr iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
+	Rect r = (**pix).bounds;
+
+	long	maxCompressionSize;
+	iErr = GetMaxCompressionSize( pix, &r, 0, codecNormalQuality, kJPEGCodecType, (CodecComponent) anyCodec, &maxCompressionSize);
+		DoError( iErr, "GetMaxCompressionSize failed.");
+	Handle	jpeg_handle = NewHandle(maxCompressionSize);
+	Ptr		jpeg_data;
+	ImageDescriptionHandle desc = (ImageDescriptionHandle) NewHandle(4);
+	MoveHHi( jpeg_handle);
+	HLock( jpeg_handle);
+	jpeg_data = StripAddress( *jpeg_handle);
+	iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
 	if (iErr!=noErr)
 		DoError( iErr, "CompressImage failed.");
 	FSSpec spec;
