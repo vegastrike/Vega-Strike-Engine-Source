@@ -22,7 +22,21 @@ def elimiQuote(s, delim='"""'):
 		where=findQuot(s,delim)
 	ret=ret+s
 	return ret
-def semiColonSeparatedList(s, delim):
+def writeList(lis,delim=','):
+	s=""
+	for i in range(len(lis)):
+		l=lis[i]
+		if (l.find('"')!=-1):
+			s+='"""'+l+'"""';
+		elif (l.find(delim)!=-1):
+			s+='"'+l+'"'
+		else:
+			s+=l
+		if (i!=len(lis)-1):
+			s+=delim
+	s+='\n'
+	return s
+def semiColonSeparatedList(s, delim=','):
 	s = s.strip().rstrip()
 	trip=1
 	quot3 = findQuot(s,'"""')
