@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
+#include "networking/const.h"
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
 
@@ -187,7 +188,9 @@ void SaveGame::RemoveUnitFromSave (long address) {
     delete tmp;
   }
 }
-void SaveGame::WriteNewsData (FILE * fp) {
+string SaveGame::WriteNewsData () {
+  char temp[MAXBUFFER];
+  string ret("");
   gameMessage * last;
   vector <gameMessage *> tmp;
   int i=0;
@@ -196,7 +199,9 @@ void SaveGame::WriteNewsData (FILE * fp) {
   while (NULL!=(last=mission->msgcenter->last(i++,newsvec))) {
     tmp.push_back (last);
   }
-  fprintf (fp,"%d\n",i);
+  memset( temp, 0, MAXBUFFER);
+  sprintf (temp,"%d\n",i);
+  ret += string( temp);
   for (int j=tmp.size()-1;j>=0;j--) {
     char * msg = strdup (tmp[j]->message.c_str());
     int k=0;
@@ -205,9 +210,12 @@ void SaveGame::WriteNewsData (FILE * fp) {
 	msg[k]=' ';
       k++;
     }
-    fprintf (fp,"%s\n",msg);
+    memset( temp, 0, MAXBUFFER);
+    sprintf (temp,"%s\n",msg);
+	ret += string( temp);
     free (msg);
   }
+  return ret;
 }
 vector <string> parsePipedString(string s) {
   int loc;
@@ -247,14 +255,29 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
   }
 
 }
-void SaveGame::ReadNewsData (FILE * fp) {
+void SaveGame::ReadNewsData (char * &buf) {
   int numnews;
 
   char news [1024];
-  fgets (news,1023,fp);
+  int i=0, j=0;
+  // Copy until a \n
+  while( buf[0]!='\n')
+  {
+	  news[i] = buf[0];
+	  buf++;
+	  i++;
+  }
+  buf++;
+  //fgets (news,1023,fp);
   sscanf (news,"%d\n",&numnews);
-  for (int i=0;i<numnews;i++) {
-    fgets (news,1023,fp);
+  for (i=0;i<numnews;i++) {
+    //fgets (news,1023,fp);
+	  while( buf[0]!='\n')
+	  {
+		  news[j] = buf[0];
+		  buf++;
+		  j++;
+	  }
     news[1023]='\0';
     if (news[0]!='\r'&&news[0]!='\n') {
       mission->msgcenter->add ("game","news",news);
@@ -275,111 +298,162 @@ olist_t &SaveGame::getMissionData(const std::string &magic_number) {
   }
   return mission_data[i].dat;
 }
-void SaveGame::WriteMissionData (FILE * fp) {
-  fprintf (fp," %d ",mission_data.size());
+string SaveGame::WriteMissionData () {
+  char temp[MAXBUFFER];
+  string ret("");
+  memset( temp, 0, MAXBUFFER);
+  sprintf (temp," %d ",mission_data.size());
+  ret += string(temp);
   for( unsigned int i=0;i<mission_data.size();i++) {
-    fprintf (fp,"\n%s ",mission_data[i].magic_number.c_str());
-    fprintf (fp,"%d ",mission_data[i].dat.size());
+    memset( temp, 0, MAXBUFFER);
+    sprintf (temp,"\n%s ",mission_data[i].magic_number.c_str());
+    ret += string(temp);
+    memset( temp, 0, MAXBUFFER);
+    sprintf (temp,"%d ",mission_data[i].dat.size());
+    ret += string(temp);
     for (unsigned int j=0;j<mission_data[i].dat.size();j++) {
-      fprintf (fp,"%s ",varToString(mission_data[i].dat[j]).c_str());
+      memset( temp, 0, MAXBUFFER);
+      sprintf (temp,"%s ",varToString(mission_data[i].dat[j]).c_str());
+      ret += string(temp);
     }
   }
+  return ret;
 }
-std::string scanInString (FILE * fp) {
+std::string scanInString (char * &buf) {
   std::string str;
   char c[2]={'\n','\0'};
   while (isspace (c[0])) {
-    if (1!=fscanf (fp,"%c",&c[0])) {
+    if (1!=sscanf (buf,"%c",&c[0])) {
+	  buf++;
       break;
     }
   }
   while (!isspace (c[0])) {
     str+=c;
-    if (1!=fscanf (fp,"%c",&c[0])) {
+    if (1!=sscanf (buf,"%c",&c[0])) {
+	  buf++;
       break;
     }
   }
   return str;
 }
-void SaveGame::ReadMissionData (FILE * fp) {
+void SaveGame::ReadMissionData (char * &buf) {
   int mdsize;
-  fscanf (fp," %d ",&mdsize);
+  char * buf2 = buf;
+  sscanf (buf2," %d ",&mdsize);
+  // Put ptr to point after the number we just read
+  for( ; buf2[0]!=' '; buf2++) ;
+  buf2++;
   for( int i=0;i<mdsize;i++) {
     int md_i_size;
-    string mag_num(scanInString (fp));
-    fscanf (fp,"%d ",&md_i_size);
+    string mag_num(scanInString (buf2));
+    sscanf (buf2,"%d ",&md_i_size);
+    // Put ptr to point after the number we just read
+	while( buf2[0]!=' ') buf2++;
+    buf2++;
     mission_data.push_back (MissionDat(mag_num));
     for (int j=0;j<md_i_size;j++) {
       varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
       vi->type = VAR_FLOAT;
-      fscanf (fp,"%lf ",&vi->float_val);
+      sscanf (buf2,"%lf ",&vi->float_val);
+      // Put ptr to point after the number we just read
+	  while( *buf2!=' ') buf2++;
+      buf2++;
       mission_data[i].dat.push_back (vi);
     }
   }
 }
-vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
+vector <SavedUnits> SaveGame::ReadSavedUnits (char * &buf) {
   vector <SavedUnits> su;
-  int a;
+  int a, j=0;
   char unitname[1024];
   char factname[1024];
-  while (3==fscanf (fp,"%d %s %s",&a,unitname,factname)) {
+  while (3==sscanf (buf,"%d %s %s",&a,unitname,factname)) {
+	// Put i to point after what we parsed (on the 3rd space read)
+	for ( j=0; *buf!=' ' && j>2; buf++)
+	{
+		if( *buf==' ')
+			j++;
+	}
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
-      FactionUtil::LoadSerializedFaction(fp);
+      FactionUtil::LoadSerializedFaction(buf);
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
-      ReadMissionData(fp);
+      ReadMissionData(buf);
     }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
-      last_written_pickled_data=last_pickled_data=UnpickleAllMissions(fp);
+      last_written_pickled_data=last_pickled_data=UnpickleAllMissions(buf);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
-      ReadNewsData(fp);
+      ReadNewsData(buf);
     }else {
       su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     }
   }
   return su;
 }
-void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
-  fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
+string SaveGame::WriteSavedUnit (SavedUnits* su) {
+  char temp[MAXBUFFER];
+  memset( temp, 0, MAXBUFFER);
+  sprintf (temp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
+  return string( temp);
 }
  extern bool STATIC_VARS_DESTROYED;
-void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num) {
+string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, bool write) {
+  char tmp[MAXBUFFER];
+  memset( tmp, 0, MAXBUFFER);
+  savestring = string("");
   vector<SavedUnits *> myvec = savedunits->GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
     changehome();
     vschdir ("save");
-    FILE * fp = fopen (outputsavegame.c_str(),"w");
     QVector FighterPos= PlayerLocation-FP;
 //    if (originalsystem!=systemname) {
       FighterPos=FP;
 //    }
       string pipedunitname = createPipedString(unitname);
-    fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
+    memset( tmp, 0, MAXBUFFER);
+    sprintf (tmp,"%s^%f^%s %f %f %f",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
+	savestring += string( tmp);
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
-      WriteSavedUnit (fp,myvec.back());
+      savestring += WriteSavedUnit (myvec.back());
       myvec.pop_back();
     }
-    fprintf (fp,"\n%d %s %s",0,"mission","data ");
-    WriteMissionData(fp);
+    memset( tmp, 0, MAXBUFFER);
+    sprintf (tmp,"\n%d %s %s",0,"mission","data ");
+	savestring += string( tmp);
+    savestring += WriteMissionData();
     if (!STATIC_VARS_DESTROYED)
       last_written_pickled_data=PickleAllMissions(); 
 
-    fprintf (fp,"\n%d %s %s %s ",0,"python","data",last_written_pickled_data.c_str());
+    memset( tmp, 0, MAXBUFFER);
+    sprintf (tmp,"\n%d %s %s %s ",0,"python","data",last_written_pickled_data.c_str());
+	savestring += string( tmp);
 
-    fprintf (fp,"\n%d %s %s",0,"news","data ");
-    WriteNewsData(fp);
-    fprintf (fp,"\n%d %s %s",0,"factions","begin ");
-    FactionUtil::SerializeFaction(fp);
-    fclose (fp);
-    if (player_num!=-1) {
-      last_pickled_data =last_written_pickled_data;
-      FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
-    }
+    memset( tmp, 0, MAXBUFFER);
+    sprintf (tmp,"\n%d %s %s",0,"news","data ");
+	savestring += string( tmp);
+    savestring += WriteNewsData();
+    memset( tmp, 0, MAXBUFFER);
+    sprintf (tmp,"\n%d %s %s",0,"factions","begin ");
+	savestring += string( tmp);
+    savestring += FactionUtil::SerializeFaction();
+	if( write)
+	{
+		FILE * fp = fopen (outputsavegame.c_str(),"w");
+		fwrite( savestring.c_str(), sizeof( char), savestring.length(), fp);
+		fclose (fp);
+		if (player_num!=-1) {
+		  last_pickled_data =last_written_pickled_data;
+		  FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
+		}
+	}
     vscdup();
     returnfromhome();
 
   }
+  return savestring;
 }
+
 static float savedcredits=0;
 float SaveGame::GetSavedCredits () {
   return savedcredits;
@@ -389,7 +463,9 @@ void SaveGame::SetSavedCredits (float c) {
 }
 
 
-vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num) {
+vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, char * buf, bool read) {
+  char temp[MAXBUFFER];
+  int readlen=0;
   if (filename.length()>0)
     filename=callsign+filename;
   vector <SavedUnits> mysav;
@@ -398,57 +474,73 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
   changehome();
   vschdir ("save");
   FILE * fp = NULL;
-  if (filename.length()>0) {
-    if (GetReadPlayerSaveGame(player_num).length()) {
-          fp = fopen (GetReadPlayerSaveGame(player_num).c_str(),"r");
-    }else {
-	  fp = fopen (filename.c_str(),"r");
-    }
+  if( read)
+  {
+	  if (filename.length()>0) {
+		if (GetReadPlayerSaveGame(player_num).length()) {
+			  fp = fopen (GetReadPlayerSaveGame(player_num).c_str(),"r");
+		}else {
+		  fp = fopen (filename.c_str(),"r");
+		}
+	  }
+	  if( fp)
+	  {
+		  fread( temp, sizeof( char), MAXBUFFER, fp);
+		  buf = temp;
+	  }
   }
   vscdup();
   returnfromhome();
-  if (fp) {
-    char tmp2[10000];
-    QVector tmppos;
-    if (4==fscanf (fp,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
-      for (int j=0;'\0'!=tmp2[j];j++) {
-	if (tmp2[j]=='^') {
-	  sscanf (tmp2+j+1,"%f",&credits);
-	  tmp2[j]='\0';
-	  for (int k=j+1;tmp2[k]!='\0';k++) {
-	    if (tmp2[k]=='^') {
-	      tmp2[k]='\0';
-	      savedstarship.clear();
-	      savedstarship=parsePipedString(tmp2+k+1);
-	      break;
-	    }
+  if( fp)
+  {
+	  savestring = string( buf);
+	  if ( savestring.length()>0) {
+		char tmp2[10000];
+		QVector tmppos;
+		if (4==sscanf (buf,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
+		  // Put readlen to point to the end of the line we just parsed
+		  for( readlen=0; buf[readlen]!='\n'; readlen++) ;
+		  readlen++;
+		  for (int j=0;'\0'!=tmp2[j];j++) {
+			if (tmp2[j]=='^') {
+				sscanf (tmp2+j+1,"%f",&credits);
+				tmp2[j]='\0';
+				for (int k=j+1;tmp2[k]!='\0';k++) {
+					if (tmp2[k]=='^') {
+						tmp2[k]='\0';
+						savedstarship.clear();
+						savedstarship=parsePipedString(tmp2+k+1);
+						break;
+					}
+				}
+				break;
+			}
+		  }
+		  if (ForceStarSystem.length()==0) 
+			ForceStarSystem=string(tmp2);
+		  if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
+			shouldupdatepos=true;
+			PlayerLocation=tmppos;//LaunchUnitNear(tmppos);
+		  }
+		  mysav=ReadSavedUnits (buf);
+		}
 	  }
-	  break;
-	}
-      }
-      if (ForceStarSystem.length()==0) 
-	ForceStarSystem=string(tmp2);
-      if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
-	shouldupdatepos=true;
-	PlayerLocation=tmppos;//LaunchUnitNear(tmppos);
-      }
-      mysav=ReadSavedUnits (fp);
-    }
-    fclose (fp);
+	  fclose (fp);
   }
+
   if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
-    shouldupdatepos=false;
-    PlayerLocation=PP;
+	shouldupdatepos=false;
+	PlayerLocation=PP;
   }else {
-    PP = PlayerLocation;
-    shouldupdatepos=true;
+	PP = PlayerLocation;
+	shouldupdatepos=true;
   }
   if (ForceStarSystem.length()==0) {
-    ForceStarSystem = FSS;
-    originalsystem=FSS;
+	ForceStarSystem = FSS;
+	originalsystem=FSS;
   } else {
-    originalsystem = ForceStarSystem;
-    FSS = ForceStarSystem;
+	originalsystem = ForceStarSystem;
+	FSS = ForceStarSystem;
   }
   SetSavedCredits(credits);
   return mysav;

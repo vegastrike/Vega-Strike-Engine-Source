@@ -99,6 +99,19 @@ void FactionUtil::SerializeFaction(FILE * fp) {
     fprintf(fp,"\n");
   }
 }
+string FactionUtil::SerializeFaction() {
+  char temp[8192];
+  string ret("");
+  for (unsigned int i=0;i<factions.size();i++) {
+    for (unsigned int j=0;j<factions[i]->faction.size();j++) {
+      sprintf (temp,"%f ",factions[i]->faction[j].relationship);
+	  ret += string( temp);
+    }
+    sprintf(temp,"\n");
+	ret += string( temp);
+  }
+  return ret;
+}
 int FactionUtil::numnums (const char * str) {
   int count=0;
   for (int i=0;str[i];i++) {
@@ -112,6 +125,39 @@ void FactionUtil::LoadSerializedFaction(FILE * fp) {
   for (unsigned int i=0;i<factions.size();i++) {
     char * tmp = new char[24*factions[i]->faction.size()];
     fgets (tmp,24*factions[i]->faction.size()-1,fp);
+    char * tmp2=tmp;
+    if (numnums(tmp)==0) {
+      i--;
+      continue;
+    }
+    for (unsigned int j=0;j<factions[i]->faction.size();j++) {
+      sscanf (tmp2,"%f ",&factions[i]->faction[j].relationship);
+      int k=0;
+      bool founddig=false;
+      while (tmp2[k]) {
+	if (isdigit(tmp2[k])) { 
+	  founddig=true;
+	}
+	if (founddig&&(!isdigit(tmp2[k])&&tmp2[k]!='.')) {
+	  break;
+	}
+	k++;
+      }
+      tmp2+=k;
+    }
+    delete [] tmp;
+  }
+}
+
+void FactionUtil::LoadSerializedFaction(char * &buf) {
+  char * tmp;
+  for (unsigned int i=0;i<factions.size();i++) {
+	/*
+    char * tmp = new char[24*factions[i]->faction.size()];
+    fgets (tmp,24*factions[i]->faction.size()-1,fp);
+	*/
+	tmp = buf;
+	buf+=24*factions[i]->faction.size()-1;
     char * tmp2=tmp;
     if (numnums(tmp)==0) {
       i--;

@@ -2,6 +2,8 @@
 #ifndef __SAVEGAME_H
 #define __SAVEGAME_H
 
+// WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
+
 #include <vector>
 typedef vector<class varInst *> olist_t;
   struct SavedUnits {
@@ -25,6 +27,7 @@ class SaveGame {
       this->magic_number = magic_number;
     }
   };
+  std::string savestring;
   std::string ForceStarSystem ;
   QVector PlayerLocation;
   std::string last_pickled_data;
@@ -33,13 +36,14 @@ class SaveGame {
   std::string originalsystem;
   static Hashtable<long,SavedUnits,char[47]> *savedunits;
   std::string callsign;
-  void WriteMissionData(FILE * fp);
-  void WriteNewsData (FILE * fp);
-  void ReadNewsData(FILE * fp);
-  void ReadMissionData (FILE * fp);
-  vector <SavedUnits> ReadSavedUnits (FILE * fp);
+  string WriteMissionData();
+  string WriteNewsData ();
+  void ReadNewsData(char * &buf);
+  void ReadMissionData (char * &buf);
+  vector <SavedUnits> ReadSavedUnits (char * &buf);
   vector <MissionDat> mission_data;
  public:
+  SaveGame() {}
   void ReloadPickledData();
   olist_t &getMissionData(const std::string &magic_number);
   SaveGame(const std::string &pilotname);
@@ -49,12 +53,12 @@ class SaveGame {
   QVector GetPlayerLocation ();
   void SetStarSystem (string sys);
   string GetStarSystem();
-  void WriteSavedUnit (FILE *, SavedUnits *su);
-  void WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num);
+  string WriteSavedUnit (SavedUnits *su);
+  string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, bool write=true);
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, enum clsptr type, const char * faction, long address);
-  void RemoveUnitFromSave (long address);//cast it to an long
-  vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num);
+  void RemoveUnitFromSave (long address);//cast it to a long
+  vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, char * savebuf=NULL, bool read=true);
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
 

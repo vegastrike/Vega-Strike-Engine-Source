@@ -74,7 +74,9 @@ extern  vector <Faction *> factions; //the factions
 namespace FactionUtil {
 		std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
 		void SerializeFaction (FILE * file);
+		string SerializeFaction();
 		void LoadSerializedFaction (FILE * file);
+		void LoadSerializedFaction( char * &buf);
 		int numnums (const char * str);
 		///returns the index of the faction with that name
 		int GetFaction (const char *factionname);

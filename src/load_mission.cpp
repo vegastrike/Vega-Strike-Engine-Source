@@ -139,6 +139,25 @@ int ReadIntSpace (FILE * fp) {
   }
   return XMLSupport::parse_int (myint);
 }
+int ReadIntSpace (char * &buf) {
+  std::string myint;
+  bool toggle=false;
+  while (*buf!=0) {
+    char c[2]={0,0};
+    if (c[0]=*buf) {
+      if (c[0]!=' ') {
+		toggle=true;
+		myint+=c;
+      }else {
+		if (toggle) {
+			break;
+	    }
+      }
+	  buf++;
+    }
+  }
+  return XMLSupport::parse_int (myint);
+}
 std::string UnpickleAllMissions (FILE * fp) {
   std::string retval;
   unsigned int nummissions = ReadIntSpace(fp);
@@ -150,6 +169,29 @@ std::string UnpickleAllMissions (FILE * fp) {
     temp[0]=0;
     temp[picklelength]=0;
     fread (temp,picklelength,1,fp);
+    retval += temp;
+    if (i<active_missions.size()) {
+      active_missions[i]->SetUnpickleData (PickledDataSansMissionName(temp));
+    }else {
+      UnpickleMission(temp);
+    }
+    free(temp);
+  }
+  return retval;
+}
+std::string UnpickleAllMissions (char * &buf) {
+  std::string retval;
+  unsigned int nummissions = ReadIntSpace(buf);
+  retval+=XMLSupport::tostring((int)nummissions)+" ";
+  for (unsigned int i=0;i<nummissions;i++) {
+    unsigned int picklelength = ReadIntSpace(buf);
+    retval+=XMLSupport::tostring((int)picklelength)+" ";
+    char * temp = (char *)malloc (sizeof(char)*(1+picklelength));
+    temp[0]=0;
+    temp[picklelength]=0;
+	memcpy( temp, buf, picklelength);
+	buf+=picklelength;
+    //fread (temp,picklelength,1,fp);
     retval += temp;
     if (i<active_missions.size()) {
       active_missions[i]->SetUnpickleData (PickledDataSansMissionName(temp));
