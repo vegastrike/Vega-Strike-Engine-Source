@@ -498,9 +498,74 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
   return NULL;
 }
 
+bool testRayVersusBB(Vector Min, Vector Max, const QVector& start, const Vector& end, Vector& Coord)
+{
+	const float eps =0.00001f;
+	unsigned int i;
+	float bbmin[3];
+	float bbmax[3];
+	float dir[3];
+	float finalCoord[3];
+	bool Inside = true;
+    float origin[3];
+	float tmax[3];
+	tmax[0]=tmax[1]=tmax[2]=-1.0f;
+	origin[0]=start.i;
+	origin[1]=start.j;
+	origin[2]=start.k;
+    bbmin[0]=Min.i;
+	bbmin[1]=Min.j;
+	bbmin[2]=Min.k;
+	bbmax[0]=Max.i;
+	bbmax[1]=Max.j;
+	bbmax[2]=Max.k;
+	dir[0]=end.i-start.i;
+	dir[1]=end.j-start.j;
+	dir[2]=end.k-start.k;
+	for(i=0;i<3;++i)
+	{
+		if(origin[i] > bbmax[i])
+		{
+			finalCoord[i] = bbmax[i];
+			if(dir[i]!=0.0f)	
+				tmax[i] = (bbmax[i] - origin[i]) / dir[i];
+			Inside		= false;
+		}else if(origin[i] < bbmin[i])
+		{
+			finalCoord[i]	= bbmin[i];
+			if(dir[i]!=0.0f)	
+				tmax[i] = (bbmin[i] - origin[i]) / dir[i];
+			Inside		= false;
+		} 
+	}
+
+	if(Inside)
+	{
+		Coord = start.Cast();
+		return true;
+	}
+
+	unsigned int WhichPlane = 0;
+	if(tmax[1] > tmax[WhichPlane])	WhichPlane = 1;
+	if(tmax[2] > tmax[WhichPlane])	WhichPlane = 2;
+
+	if(tmax[WhichPlane]<0) 
+		return false;
+	for(i=0;i<3;i++)
+	{
+		if(i!=WhichPlane)
+		{
+			finalCoord[i] = origin[i] + tmax[WhichPlane] * dir[i];
+			if(finalCoord[i]+eps < bbmin[i] || finalCoord[i] > bbmax[i] + eps)	return false;
+		}
+	}
+	Coord=Vector(finalCoord[0],finalCoord[1],finalCoord[2]);
+	return true;
+}
 
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   Unit * tmp;
+  static bool use_bsp_tree = XMLSupport::parse_bool(vs_config->getVariable("physics","beam_bsp","false"));
   if (graphicOptions.RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
     un_fiter i(SubUnits.fastIterator());
@@ -512,29 +577,32 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
   }
   BSPTree *myNull=NULL;
   BSPTree *const* tmpBsp = &myNull;
-#ifdef OLDSHITWHERESHIELDSUSEDTOMATTER
-  if (this->colTrees) {
-    tmpBsp=ShieldUp(st.Cast())?&this->colTrees->bspShield:&this->colTrees->bspTree;
-    if (this->colTrees->bspTree&&!ShieldBSP) {
-      tmpBsp= &this->colTrees->bspTree;
+  QVector st (InvTransform (cumulative_transformation_matrix,start));
+  QVector ed (InvTransform (cumulative_transformation_matrix,end));
+
+  if (use_bsp_tree) {
+    if (this->colTrees) {
+      tmpBsp=ShieldUp(st.Cast())?&this->colTrees->bspShield:&this->colTrees->bspTree;
+      if (this->colTrees->bspTree&&!ShieldBSP) {
+        tmpBsp= &this->colTrees->bspTree;
+      }
+      tmpBsp = &this->colTrees->bspTree;
     }
-    tmpBsp = &this->colTrees->bspTree;
   }
-#endif
   //for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
     distance = querySphereNoRecurse (start,end);
     if (distance) {
       if (!(*tmpBsp)) {
-	norm = (distance * (start-end)).Cast();
-	distance = norm.Magnitude();
-	norm= (norm.Cast()+start).Cast();
-	norm.Normalize();//normal points out from center
-	return this;
+		  Vector coord;
+		  if(testRayVersusBB(corner_min,corner_max,st,ed,coord)) {
+		    norm = TransformNormal(cumulative_transformation_matrix,coord);
+		    distance=(coord-st).Magnitude();
+	        norm.Normalize();//normal points out from center
+	        return this;
+		  }else return NULL;
       }
     }else
       return NULL;
-    QVector st (InvTransform (cumulative_transformation_matrix,start));
-    QVector ed (InvTransform (cumulative_transformation_matrix,end));
     /*bool temp=false;
         for (i=0;i<nummesh()&&!temp;i++) {
       temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
