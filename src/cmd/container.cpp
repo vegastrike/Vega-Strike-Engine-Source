@@ -3,7 +3,7 @@
 UnitContainer::UnitContainer() {
   unit=NULL;
 }
-UnitContainer::UnitContainer(Unit * un) {
+UnitContainer::UnitContainer(Unit * un):unit (NULL) {
   SetUnit (un);
 }
 UnitContainer::~UnitContainer() {

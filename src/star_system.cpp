@@ -17,6 +17,7 @@
 #include "gfx/star.h"
 #include "cmd/bolt.h"
 #include <expat.h>
+#include "gfx/cockpit.h"
 extern Vector mouseline;
 
 vector<Vector> perplines;
@@ -144,11 +145,21 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
+  _Universe->AccessCockpit()->SetupViewPort();
+  
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
+  Mesh::ProcessUndrawnMeshes(true);
+
+
+  GFXPopGlobalEffects();
+  Halo::ProcessDrawQueue();
+  Beam::ProcessDrawQueue();
+  Animation::ProcessDrawQueue();
+  Bolt::Draw();
 
   stars->Draw();
   //  systemInputDFA->Draw();
-
+  _Universe->AccessCockpit()->Draw();
 }
 
 extern double interpolation_blend_factor;

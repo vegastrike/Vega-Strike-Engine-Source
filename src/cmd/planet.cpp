@@ -102,7 +102,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
 
   meshdata = new Mesh*[2];
-  meshdata[0] = new SphereMesh(radius, 32, 32, textname, alpha);
+  meshdata[0] = new SphereMesh(radius, 16, 16, textname, alpha);
   meshdata[0]->setEnvMap(GFXFALSE);
   meshdata[0]->SetMaterial (ourmat);
   nummesh = 1;

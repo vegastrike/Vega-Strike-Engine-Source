@@ -258,7 +258,8 @@ void createObjects() {
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
   fighters[0]->EnqueueAI(new FireKeyboard ());
-  cockpit = new Cockpit ("hornet-cockpit.cpt", fighters[0]);
+  _Universe->AccessCockpit()->Init ("");
+  _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
 }
@@ -285,19 +286,11 @@ void main_loop() {
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
-  cockpit->SetupViewPort();
+  
   //fighters[0]->UpdateHudMatrix();
   //_Universe->activeStarSystem()->SetViewport();
 
-  Mesh::ProcessUndrawnMeshes(true);
 
-
-  GFXPopGlobalEffects();
-  Halo::ProcessDrawQueue();
-  Beam::ProcessDrawQueue();
-  Animation::ProcessDrawQueue();
-  Bolt::Draw();
-  cockpit->Draw();
   _Universe->activeStarSystem()->Update();
 
   GFXEndScene();

@@ -117,6 +117,8 @@ void Cockpit::LoadXML (const char * filename) {
   const int chunk_size = 16384;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
+    cockpit_offset=0;
+    viewport_offset=0;
     Crosshairs = new Sprite ("crosshairs.spr");
     return;
   }

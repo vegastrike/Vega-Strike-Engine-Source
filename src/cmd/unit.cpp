@@ -569,7 +569,7 @@ void Unit::UpdateHudMatrix() {
 	CrossProduct(r,q, tmp);
     _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
     _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
-    fprintf (stderr, "matrix %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+    /*    fprintf (stderr, "matrix %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
 	     cumulative_transformation_matrix[0],
 	     cumulative_transformation_matrix[1],
 	     cumulative_transformation_matrix[2],
@@ -585,7 +585,7 @@ void Unit::UpdateHudMatrix() {
 	     cumulative_transformation_matrix[12],
 	     cumulative_transformation_matrix[13],
 	     cumulative_transformation_matrix[14],
-	     cumulative_transformation_matrix[15]);
+	     cumulative_transformation_matrix[15]);*/
   /*
   //FIXME
   Matrix tmatrix;

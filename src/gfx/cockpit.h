@@ -17,9 +17,12 @@ class Cockpit {
   static void endElement(void *userData, const XML_Char *name);
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
+  void Delete();
  public:
   Cockpit (const char * file, Unit * parent);
   ~Cockpit();
+  void Init (const char * file);
+  void SetParent(Unit * unit);
   void Draw();//restores viewport
   void SetupViewPort ();
 };

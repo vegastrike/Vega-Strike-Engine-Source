@@ -24,7 +24,7 @@
 #include "vs_globals.h"
 
 #define  MAX_TEXTURES 256
-static int MAX_TEXTURE_SIZE;
+static int MAX_TEXTURE_SIZE=256;
 struct GLTexture{
   //  unsigned char *texture;
   GLubyte * palette;

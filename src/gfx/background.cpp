@@ -123,7 +123,7 @@ void Background::Draw()
 			    //glPushMatrix();
 			    //gluPerspective (90,1.33,0.01,1500); //set perspective to 78 degree FOV
     ********************************/
-    _Universe->AccessCamera()->UpdateGLCenter();
+    //_Universe->AccessCamera()->UpdateGLCenter();
 
 	
     /*up*/
@@ -237,6 +237,6 @@ void Background::Draw()
   GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
   stars->DrawOnce();
 
-  _Universe->AccessCamera()->UpdateGFX(false);
+  //  _Universe->AccessCamera()->UpdateGFX(false);
 
 }

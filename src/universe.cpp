@@ -26,7 +26,7 @@
 //#include "cmd/planet.h"
 #include "gfx/aux_texture.h"
 #include "profile.h"
-
+#include "gfx/cockpit.h"
 
 
 
@@ -48,10 +48,13 @@ Universe::Universe(int argc, char** argv)
 	InitInput();
 
 	hud_camera = Camera();
+	cockpit = new Cockpit ("",NULL);
 	LoadFactionXML("factions.xml");	
 }
 void Universe::Init () {
+
 	star_system = new StarSystem("test.xml");
+
 }
 Universe::~Universe()
 {
@@ -59,6 +62,7 @@ Universe::~Universe()
 	for (i=0;i<this->factions.size();i++) {
 		delete factions[i];
 	}
+	delete cockpit;
 	delete ForceLogo;
 	delete SquadLogo;
 	GFXShutdown();

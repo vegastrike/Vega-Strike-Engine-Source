@@ -53,12 +53,13 @@ struct Light{
 */
 
 //extern StarSystem star_system;
+class Cockpit;
 class Universe {
 protected:
 
 	char * hPalette;
 	GFXBOOL  done;
-
+	Cockpit * cockpit;
 	Camera hud_camera;
 
 	void StartGL();
@@ -123,7 +124,7 @@ private:
 	  //if(cam<NUM_CAM&&cam>=0)
 	  //	currentcamera = cam;
 	}
-
+	Cockpit *AccessCockpit() {return cockpit;}
 	Camera *AccessCamera(int num)
 	{
 	  if (star_system!=NULL) {
