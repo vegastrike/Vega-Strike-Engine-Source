@@ -444,7 +444,7 @@ bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   bool ok=true;
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
     for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
-      if (un->isUnit()!=NEBULAPTR) {
+      if (un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
 		if (un!=this&&un!=target) {
     	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
 	    return false;
