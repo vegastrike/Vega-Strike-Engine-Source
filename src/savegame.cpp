@@ -26,14 +26,14 @@ if( Network==NULL)
     res = new std::string;
     changehome(false);
     //char c[2]={'\0','\0'};
-    FILE * fp = fopen (("save.txt"),"r");
+    FILE * fp = fopen (("save.4.x.txt"),"r");
     if (!fp) {
-      fp = fopen ("save.txt","w");
+      fp = fopen ("save.4.x.txt","w");
       if (fp) {
-	fwrite ("default\n",8,1,fp);
+	fwrite ("defaultsavegame.4x\n",19,1,fp);
 	fclose (fp);
       }
-      fp = fopen (("save.txt"),"r");
+      fp = fopen (("save.4.x.txt"),"r");
     }
     if (fp) {
 	  long length=0;
@@ -84,7 +84,7 @@ if( Network==NULL)
 #endif
     if (!res->empty()) {
       if (*res->begin()=='~') {
-	fp = fopen (("save.txt"),"w");
+	fp = fopen (("save.4.x.txt"),"w");
 	if (fp) {
 	  for (unsigned int i=1;i<res->length();i++) {
 	    fputc (*(res->begin()+i),fp);
@@ -97,7 +97,7 @@ if( Network==NULL)
 
     
 #if 0
-    fp = fopen (("save.txt"),"w");
+    fp = fopen (("save.4.x.txt"),"w");
     if (fp) {
       fputc('\0',fp);
       fclose (fp);

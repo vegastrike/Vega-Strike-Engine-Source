@@ -694,7 +694,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 		}
 		_Universe->activeStarSystem()->AddUnit(fighters[a]);
 	  }
-
+	  printf ("pox %lf %lf %lf\n",pox.i,pox.j,pox.k);
 	  fighters[a]->SetPosAndCumPos (pox);
       fg_radius=fighters[a]->rSize();
       //    fighters[a]->SetAI(new Order());

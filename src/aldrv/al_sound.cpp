@@ -308,10 +308,13 @@ bool starSystemOK( ) {
 
 }
 void AUDStopAllSounds () {
-	for (unsigned int i=0;i<sounds.size();++i) {
+#ifdef HAVE_AL
+	unsigned int s = ::sounds.size();
+	for (unsigned int i=0;i < s;++i) {
 		if (AUDIsPlaying(i))
 			AUDStopPlaying(i);
 	}
+#endif
 }
 bool AUDIsPlaying (const int sound){
 #ifdef HAVE_AL
