@@ -2,6 +2,8 @@
 #define in_addr_t unsigned long
 #include <winsock.h>
 #else
+#define SOCKET_ERROR -1
+#include <error.h>
 #include <netdb.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -75,7 +77,7 @@ bool INET_getHostByName (const char * hostname, unsigned short port, sockaddr_in
     if (addrs->h_addr_list[0]) {
 
       memset (&connexto.sin_addr,0,sizeof (in_addr));
-      if (addrs->h_length>sizeof (in_addr))
+      if (addrs->h_length>(int)sizeof (in_addr))
 		addrs->h_length=sizeof(in_addr);
       memcpy (&connexto.sin_addr ,addrs->h_addr_list[0],addrs->h_length);
       gotaddr=true;
@@ -91,20 +93,27 @@ bool INET_getHostByName (const char * hostname, unsigned short port, sockaddr_in
 }
 int INET_listen (unsigned short port, const char * hostname) {
   int listenqueue=5;
-  int hSocket;  int hServerSocket; // so signal can be caught;
+  int hServerSocket; // so signal can be caught;
   struct sockaddr_in Address; //Internet socket address stuct 
-  int nAddressSize=sizeof(struct sockaddr_in);
+#ifdef _WIN32
+  int 
+#else
+  socklen_t
+#endif
+    nAddressSize=sizeof(struct sockaddr_in);
   hServerSocket=socket(AF_INET,SOCK_STREAM,0);
   int sockerr = SOCKET_ERROR;
 #ifdef _WIN32
   sockerr= INVALID_SOCKET;
 #endif
   if(hServerSocket == sockerr) {
+#ifdef _WIN32
 	  int err = WSAGetLastError();
-        printf("\nCould not make a socket %d\n",err);
+	  printf("\nCould not make a socket %d\n",err);
+
+#endif
         return -1;
   }
-  char on =1;
   INET_getHostByName (hostname,port,Address);
 
   if(bind(hServerSocket,(struct sockaddr*)&Address,sizeof(Address)) 
@@ -117,11 +126,17 @@ int INET_listen (unsigned short port, const char * hostname) {
     printf("\nCould not listen\n");
         return -1;
   }
+  return hServerSocket;
   // get the connected socket 
 }
 int INET_Accept (int hServerSocket) {
   sockaddr_in Address;
-  int nAddressSize = sizeof (Address);
+#ifdef _WIN32
+  int 
+#else
+    socklen_t
+#endif
+    nAddressSize = sizeof (Address);
   return accept(hServerSocket,(struct sockaddr*)&Address,&nAddressSize);
 }
 
@@ -132,7 +147,7 @@ int INET_AcceptFrom ( unsigned short port,const char * hostname) {
   return hSocket;
 }
 int INET_ConnectTo (const char * hostname, unsigned short port) {
-  bool gotaddr=false;
+
   sockaddr_in connexto;
   int aftype=AF_INET;
 #ifdef _WIN32
@@ -147,7 +162,9 @@ int INET_ConnectTo (const char * hostname, unsigned short port) {
 		return my_socket;
       }else {
 		retval=-1;
+#ifdef _WIN32
 		fprintf (stderr,"Socket Error %d",WSAGetLastError());
+#endif
 
       }
   }
