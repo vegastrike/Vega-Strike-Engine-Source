@@ -75,6 +75,11 @@ struct GLTexture{
   GLenum textureformat;
   GLenum targets;
   enum FILTER mipmapped;
+  GLTexture() {
+	palette=NULL;
+	name=-1;
+	width=height=1;
+  }
 };
 //static GLTexture *textures=NULL;
 //static GLEnum * targets=NULL;
@@ -395,4 +400,5 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
     }
   }
 }
+
 
