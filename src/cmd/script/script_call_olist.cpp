@@ -159,8 +159,8 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       viret->type=VAR_VOID;
 
       if(mode==SCRIPT_RUN){
-        olist_t mylist=*getOListObject(node,mode,ovi);
-        mylist.erase(mylist.begin()+index);
+        olist_t *mylist=getOListObject(node,mode,ovi);
+        mylist->erase(mylist.begin()+index);
       }
 
     }

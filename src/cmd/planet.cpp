@@ -481,11 +481,11 @@ void Planet::Kill(bool erasefromsave) {
 	     iter.advance()) {
 	  tmp->SetAI (new Order);
 	}
-	/* probably not FIXME...right now doesn't work on paged out systems... not a big deal
+	/* probably not FIXME...right now doesn't work on paged out systems... not a big deal */
 	for (unsigned int i=0;i<this->lights.size();i++) {
 	  GFXDeleteLight (lights[i]);
 	}
-	*/
+	/*	*/
 	satellites.clear();
 	insiders.clear();
 	Unit::Kill(erasefromsave);
