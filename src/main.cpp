@@ -52,6 +52,8 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+#include "cg_global.h"
+
 int nadanixnuthin() {
   float a=0;
   int test=0;
@@ -124,6 +126,12 @@ void cleanup(void)
 				Network[i].logout();
 		delete [] Network;
   }
+
+    if (defaultcg->vertexProgram) cgDestroyProgram(defaultcg->vertexProgram);
+    if (defaultcg->pixelProgram)  cgDestroyProgram(defaultcg->pixelProgram);
+    if (defaultcg->vertexContext) cgDestroyContext(defaultcg->vertexContext);
+    if (defaultcg->pixelContext)  cgDestroyContext(defaultcg->pixelContext);
+
   if (muzak) {
     delete muzak;
     muzak=NULL;

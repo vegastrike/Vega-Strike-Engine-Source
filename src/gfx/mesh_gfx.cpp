@@ -9,6 +9,8 @@
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 
+#include "cg_global.h"
+
 extern vector<Logo*> undrawn_logos;
 class OrigMeshContainer {
 public:
@@ -370,6 +372,7 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
             if (cloaked&MeshDrawContext::NEARINVIS) {      
                 //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
             }
+#if !defined(CG_SUPPORT)
             GFXBlendMode (SRCALPHA, INVSRCALPHA);
             GFXColorMaterial (AMBIENT|DIFFUSE);
 			if (hulldamage) {
@@ -382,6 +385,9 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
 		GFXColorMaterial (AMBIENT|DIFFUSE);
 		GFXColor4f(1,1,1,hulldamage/255.);
 	}
+#endif
+    }
+}
 }
 static void RestoreCloakState (char cloaked, bool envMap,unsigned char damage) {
     if (cloaked&MeshDrawContext::CLOAK) {
@@ -569,7 +575,35 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   } else {
     GFXDisable(TEXTURE1);
   }
+#if defined(CG_SUPPORT)
+    for (int i=0; i <= this->xml->num_vertices; i++)
+    {
+      
+      GFXVertex GVertex = (GFXVertex)xml->vertices[i];
+    
+    cgGLSetParameter3f(defaultcg->VertexPosition, GVertex.x, GVertex.y, GVertex.z);
+    cgGLSetParameter2f(defaultcg->VertexTexCoord, GVertex.s, GVertex.t);
+    cgGLSetParameter3f(defaultcg->PixelPosition, GVertex.x, GVertex.y, GVertex.z);
+    cgGLSetParameter3f(defaultcg->Camera, _Universe->AccessCamera()->GetPosition().i,_Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k );
+    cgGLSetParameter2f(defaultcg->PixelTexCoord, GVertex.s, GVertex.t);
+    cgGLSetParameter3f(defaultcg->NormalMap,     GVertex.i, GVertex.j, GVertex.k);
+    cgGLSetParameter3f(defaultcg->EnvironmentMap,0, 0, 0);
+cgGLSetParameter3f(defaultcg->CameraVector,_Universe->AccessCamera()->GetPosition().i, _Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k );
+
+    }
+#endif
+
   vlist->BeginDrawState();	
+#if defined(CG_SUPPORT)
+  cgGLBindProgram(defaultcg->vertexProgram);
+  cgGLBindProgram(defaultcg->pixelProgram);
+  cgGLEnableProfile(defaultcg->vertexProfile);
+  cgGLEnableProfile(defaultcg->pixelProfile);
+
+  cgGLSetStateMatrixParameter(defaultcg->WorldViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+  cgGLEnableTextureParameter(defaultcg->NormalMap);
+//  cgGLEnableTextureParameter(defaultcg->BumpMap);
+#endif
 
   switch (whichpass) {
   case 0:
@@ -630,6 +664,11 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     }
   }
   vlist->EndDrawState();
+#if defined(CG_SUPPORT)
+  cgGLDisableProfile(defaultcg->pixelProfile);
+  cgGLDisableProfile(defaultcg->vertexProfile);
+#endif
+
 	switch(whichpass) {
 	case 0:
 		break;
