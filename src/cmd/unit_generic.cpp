@@ -4202,8 +4202,12 @@ std::set<std::string> GetListOfDowngrades () {
 bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit,bool force_change_on_nothing) {
   percentage=0;
   int numave=0;
-  bool cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
-  bool cancompletefully1=UpgradeSubUnits(up,subunitoffset,touchme,downgrade,numave,percentage);
+  bool cancompletefully=true;
+  if (mountoffset>=0)
+	  cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
+  bool cancompletefully1=true;
+  if (subunitoffset>=0)
+	  cancompletefully1=UpgradeSubUnits(up,subunitoffset,touchme,downgrade,numave,percentage);
   cancompletefully=cancompletefully&&cancompletefully1;
   adder Adder;
   comparer Comparer;
@@ -4470,7 +4474,9 @@ Unit * makeBlankUpgrade (string templnam, int faction) {
 }
 const Unit * makeFinalBlankUpgrade (string name, int faction) {
   char * unitdir = GetUnitDir(name.c_str());
-  string limiternam = string(unitdir)+string(".blank");
+  string limiternam = name;
+  if (unitdir!=name)
+	  limiternam=string(unitdir)+string(".blank");
   free (unitdir);
   const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
   if (!lim)
@@ -4498,7 +4504,7 @@ bool Unit::ReduceToTemplate() {
     bool success=false;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
-        success = Upgrade(temprate,0,0,0,true,pct,NULL,true);
+        success = Upgrade(temprate,-1,-1,0,true,pct,NULL,true);
 	if (pct>0)
 	  success=true;
     }
