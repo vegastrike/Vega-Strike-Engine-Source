@@ -74,7 +74,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
     //    stacks = origst/(l+1);
     //slices = origsl/(l+1);
     vlist = NULL;
-    if () {
+    if (subclass) {
       if (stacks>12) {
         stacks -=4;
         slices-=4;
@@ -159,12 +159,13 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       }
       
       vlist = new GFXVertexList(modes,numvertex, vertexlist, numQuadstrips ,QSOffsets);
+      delete [] vertexlist;
+      delete [] modes;
+      delete [] QSOffsets;
+
     }else {
       new GFXSphereVertexList(radius,stacks>slices?stacks:slices,Insideout,reverse_normals);
     }
-    delete [] vertexlist;
-    delete [] modes;
-    delete [] QSOffsets;
       SetBlendMode (a,b);
       string inputtex = texture;
       int count=0;
