@@ -1,3 +1,14 @@
+2001-10-11 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* made joystick work (no buttons yet, no hat, just steering)
+	  - no FlyByWire::Execute(); is called in FlyByKeyboard::Execute()
+	      when Joystick is enabled
+	    FlyByWire::Execute(); is called instead in FlyByJoystick::Execute()
+            please check if keyboard still works on systems without joystick
+	  - modified FlyByJoystick::Execute()
+	  - improved in_joystick
+	  - ProcessJoystick is just a dummy function now
+	
 2001-10-10 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* modified doxyConfig:

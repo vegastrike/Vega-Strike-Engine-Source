@@ -10,10 +10,18 @@ FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByK
 }
 
 void FlyByJoystick::Execute() {
-  FlyByKeyboard::Execute();
+    FlyByKeyboard::Execute();
   if (joystick[which_joystick]->isAvailable()) {
-    //see largely the flybykeyboard execute...except use "joystick[which_joystick]->x
-    //and stuff
+    JoyStick *joy=joystick[which_joystick];
+
+    float x,y;
+    int buttons;
+    joy->GetJoyStick(x,y,buttons);
+    //printf("flybyjoy x=%f y=%f\n",x,y);
+    Up(-y);   // pretty easy
+    Right(-x);
+
+    FlyByWire::Execute(); // has to be done here instead of FlyByKeyboard to avoid strange wobbling effects
   }
 }
 FlyByJoystick::~FlyByJoystick() {

@@ -36,9 +36,10 @@ void InitJoystick(){
   printf("%i joysticks were found.\n\n", num_joysticks);
   printf("The names of the joysticks are:\n");
   for(int i=0; i < MAX_JOYSTICKS; i++ )  {
-    if (i<num_joysticks)
+    if (i<num_joysticks){
       printf("    %s\n", SDL_JoystickName(i));
-    joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
+      joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
+    }
   }
 }
 void DeInitJoystick() {
@@ -49,14 +50,18 @@ void DeInitJoystick() {
 }
 
 void ProcessJoystick(){
+  // we don't need code here cause we don't queue events
+#if 0
+  // not needed, this is done in FlyByJoystick
   int num_joysticks=SDL_NumJoysticks() ;
-  for(int i=0; i < MAX_JOYSTICKS; i++ )  {
+  for(int i=0; i < num_joysticks; i++ )  {
     if(joystick[i]->isAvailable()){
       float x,y;
       int buttons;
       joystick[i]->GetJoyStick(x,y,buttons);
     }
   }
+#endif
 }
 
 JoyStick::JoyStick(int which) {
@@ -76,7 +81,7 @@ JoyStick::JoyStick(int which) {
 
     if(joy==NULL)
     {
-        printf("warning: no joystick\n");
+        printf("warning: no joystick nr %d\n",which);
         joy_available = false;
         return;
     }
@@ -87,10 +92,6 @@ JoyStick::JoyStick(int which) {
     nr_of_buttons=SDL_JoystickNumButtons(joy);
 
     printf("axes: %d buttons %d\n",nr_of_axes,nr_of_buttons);
-    joy_xmin = (float) 0;
-    joy_xmax = (float) 255;
-    joy_ymin = (float) 0;
-    joy_ymax = (float) 255;
 #endif // we have SDL
 }
 
@@ -126,7 +127,7 @@ void JoyStick::GetJoyStick(float &x,float &y,int &buttons)
 
     x=((float)xi/32768.0);
     y=((float)yi/32768.0);
-    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
+    //    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
 
     if(fabs(x)<=deadzone){
         x=0;
