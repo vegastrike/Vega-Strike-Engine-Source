@@ -491,14 +491,42 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    /* Translate Eye to Origin */
   // glTranslated( -eyex, -eyey, -eyez );
 
+   glClientActiveTextureARB (GL_TEXTURE1_ARB);
+
+    float dis = sqrtf(upx*upx+upy*upy);
+   Identity (tm);
+   if (eyez-centerz > 0) {
+     upx = -upx; 
+   }
+#define M(row,col)  tm[col*4+row]
+   M(0,0) = upy/dis;
+   M(0,1) = -upx/dis;
+   M(1,1) = upy/dis;
+   M(1,0) = upx/dis;
+   M(2,2) = 1.0;
+   M(3,3) = 1.0;
+#undef M
+   
+	glMatrixMode (GL_TEXTURE);	
+	glLoadIdentity();
+	glTranslatef(.5f,.5f,.4994f);
+	glMultMatrixf(tm);
+	glTranslatef(-.5f,-.5f,-.4994f);
+	glClientActiveTextureARB (GL_TEXTURE0_ARB);
+	
+	//delete below--
+
 }
 
 BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
 {
 	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
 
+
+
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(view);
+
 
 	return TRUE;
 }
