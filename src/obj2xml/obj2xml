@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 $float = "-?\\d*\\.\\d*"; 
+$scale = 1;
 
 @point_list = ();
 @normal_list = ();
@@ -9,13 +10,14 @@ $float = "-?\\d*\\.\\d*";
 %point_output = ();
 %face_output = ();
 
-if(@ARGV != 2) {
+if(@ARGV < 2) {
 print STDERR "Usage: obj2xml <objfile> <wcpfile>\n";
 exit;
 }
 
 $inputfile = $ARGV[0];
 $texturefile = $ARGV[1];
+$scale = $ARGV[2] if (@ARGV > 2);
 $inputfile =~ /(.*)\.obj/ or die "Bad extension on $inputfile";
 $unitoutfile = ($basename = $1) . ".xml";
 open(INPUT, "<$inputfile") or die "Could not open $inputfile";
@@ -32,7 +34,7 @@ HEAD
 while($line = <INPUT>) {
 	$line =~ s/#.*$//;
 	if($line =~ /v +($float) +($float) +($float)/i) {
-		push @point_list, [$1, $2, $3];
+		push @point_list, [$1*$scale, $2*$scale, $3*$scale];
 	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
 		push @normal_list, [$1, $2, $3];
 	} elsif($line =~ /vt +($float) +($float)/i) {
@@ -90,7 +92,7 @@ for(keys %encountered_points) {
 	$texture = $_;
 	$meshfilename = "$basename-$texture.xml";
 	open(MESHOUTPUT, ">$meshfilename");
-	print MESHOUTPUT "<Mesh texture=\"$texture\">\n";
+	print MESHOUTPUT "<Mesh texture=\"000$texture.bmp\">\n";
 	print MESHOUTPUT $point_output{$texture};
 	print MESHOUTPUT "</Points>\n\n";
 	print MESHOUTPUT $face_output{$texture};
