@@ -101,12 +101,12 @@ ExportUnit (Class);
 
 
 //End of Macro City 2
-#ifdef USE_BOOST_129
+//#ifdef USE_BOOST_129
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::equal,"__eq__");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notequal,"__ne__");
-#else
-  Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
-#endif
+//#else
+//  Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
+//#endif
   DefineOddUnitFunctions(Class);
 PYTHON_END_CLASS(VS,UnitWrapper)
 
