@@ -1,0 +1,136 @@
+#ifndef VSNET_SOCKET_H
+#define VSNET_SOCKET_H
+
+#include <config.h>
+
+/* 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+/*
+  netUI - Network Interface - written by Stephane Vaxelaire <svax@free.fr>
+*/
+
+#include <iostream>
+#include <errno.h>
+#include <assert.h>
+#include "const.h"
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	//#warning "Win32 platform"
+	#define in_addr_t unsigned long
+	#include <winsock.h>
+#else
+	#include <sys/socket.h>
+	#include <unistd.h>
+#endif
+
+#include "GCPtr.h"
+#include "vsnet_address.h"
+#include "vsnet_socketset.h"
+#include "packetmem.h"
+
+class VsnetSocket
+{
+protected:
+    int       fd;
+    AddressIP _remote_ip; // IP address structure of remote server
+
+public:
+    VsnetSocket( );
+    VsnetSocket( int sock, const AddressIP& remote_ip );
+    VsnetSocket( const VsnetSocket& orig );
+
+    virtual ~VsnetSocket( );
+
+    VsnetSocket& operator=( const VsnetSocket& orig );
+
+    virtual bool isTcp() const = 0;
+
+    int  get_fd() const;
+    void set_fd( int sock );
+
+    bool valid() const;
+
+    void         watch( SocketSet& set );
+    virtual bool isActive( SocketSet& set ) = 0;
+
+    bool eq( const VsnetSocket& r );
+
+    virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
+    virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from) = 0;
+    virtual void ack( ) = 0;
+
+    virtual void disconnect( const char *s, bool fexit ) = 0;
+
+    virtual void dump( std::ostream& ostr ) = 0;
+};
+
+
+class SOCKETALT
+{
+    GCPtr<VsnetSocket> _sock;
+
+public:
+    static const bool TCP = true;
+    static const bool UDP = false;
+
+public:
+    SOCKETALT( );
+    SOCKETALT( int sock, bool mode, const AddressIP& remote_ip );
+    SOCKETALT( const SOCKETALT& orig );
+
+    SOCKETALT& operator=( const SOCKETALT& orig );
+
+    inline int get_fd() const {
+        return (_sock.isNull() ? -1 : _sock->get_fd());
+    }
+
+    void set_fd( int sock, bool mode );
+
+    inline bool valid() const {
+        return (_sock.isNull() ? false : _sock->valid());
+    }
+
+    inline void watch( SocketSet& set ) {
+        if(!_sock.isNull()) _sock->watch(set);
+    }
+
+    inline bool isActive( SocketSet& set ) {
+        return (_sock.isNull() ? false : _sock->isActive(set));
+    }
+
+    inline int  sendbuf( PacketMem& packet, const AddressIP* to) {
+        return ( _sock.isNull() ? -1 : _sock->sendbuf( packet, to ) );
+    }
+
+    inline void ack( ) {
+        if( !_sock.isNull() ) _sock->ack( );
+    }
+
+    inline int recvbuf( void *buffer, unsigned int &len, AddressIP *from) {
+        return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, len, from ) );
+    }
+
+    inline void disconnect( const char *s, bool fexit = true ) {
+        if( !_sock.isNull() ) _sock->disconnect( s, fexit );
+    }
+
+    friend std::ostream& operator<<( std::ostream& ostr, const SOCKETALT& s );
+    friend bool operator==( const SOCKETALT& l, const SOCKETALT& r );
+};
+
+#endif /* VSNET_SOCKET_H */
+

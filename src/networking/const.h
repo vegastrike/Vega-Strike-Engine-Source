@@ -21,6 +21,9 @@
 #ifndef __CONST_H
 #define __CONST_H
 
+#include <assert.h>
+#include <stdio.h>
+
 #define SERVERCONFIGFILE	"vegaserver.config"
 #define ACCTCONFIGFILE		"accountserver.config"
 
@@ -31,35 +34,6 @@
 #define NAMELEN		32
 #define MAXBUFFER	16384
 
-// Commands that are sent through the network
-#define CMD_LOGIN		0x01
-#define CMD_LOGOUT		0xA1
-#define CMD_INITIATE	0x02
-#define CMD_POSUPDATE	0x03
-#define CMD_NEWCHAR		0x04
-#define CMD_LETSGO		0x05
-#define CMD_UPDATECLT	0x06
-#define CMD_ADDCLIENT	0x07
-#define CMD_FULLUPDATE	0x08
-#define CMD_PING		0x09
-#define CMD_SNAPSHOT	0xA0
-
-#define CMD_CREATECHAR	0x50
-#define CMD_LOCATIONS	0x51
-#define LOGIN_ERROR		0xF1
-#define LOGIN_ACCEPT	0xF0
-#define LOGIN_ALREADY	0xF6
-#define LOGIN_NEW		0xF7
-
-#define CMD_NEWSUBSCRIBE 0xF8
-
-#define CMD_ENTERCLIENT	0xF2
-#define CMD_EXITCLIENT	0xF3
-#define CMD_ADDEDYOU	0xF5
-#define CMD_DISCONNECT	0xF4
-
-#define CMD_ACK			0xFF
-
 #define MAXSERIAL 0xFFFF
 #define TONET() htons()
 typedef unsigned short ObjSerial;
@@ -67,4 +41,55 @@ typedef unsigned int InstSerial;
 
 extern double NETWORK_ATOM;
 
-#endif
+#define COUT std::cout << __FILE__ << ":" << __LINE__ << " "
+
+#ifndef NDEBUG
+
+#include <assert.h>
+#include <stdio.h>
+
+/** These macros are intended for default versions a class validity
+ *  debugging. The idea is to increase the likelyhood that uninitialized
+ *  and re-initialized memory areas are captured as well as possible.
+ */
+
+#define DECLARE_VALID \
+private: \
+    bool _valid; \
+    bool _invalid; \
+public: \
+    void validate( const char* file, int line ) const { \
+	if( !_valid || _invalid ) { \
+	    fprintf( stderr, "object invalid in %s:%d\n", file, line ); \
+	} \
+        assert( _valid ); \
+        assert( !_invalid ); \
+    }
+
+#define MAKE_VALID \
+    _valid = true; \
+    _invalid = false;
+
+#define MAKE_INVALID \
+    _valid = false; \
+    _invalid = true;
+
+#define CHECK_VALID \
+    validate( __FILE__, __LINE__ );
+
+#define CHECK_VALID_OBJ(a) \
+    (a).validate( __FILE__, __LINE__ );
+
+#define ASSERT(a) if(!(a)) { std::cerr << __FILE__ << ":" << __LINE__ << " assertion failed, forcing segfault for postmortem debugging"; int x = 1/0; }
+
+#else /* NDEBUG */
+#  define DECLARE_VALID
+#  define MAKE_VALID
+#  define MAKE_INVALID
+#  define CHECK_VALID
+#  define CHECK_VALID_OBJ(a)
+#  define ASSERT(a)
+#endif /* NDEBUG */
+
+#endif /* __CONST_H */
+

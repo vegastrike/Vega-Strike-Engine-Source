@@ -36,6 +36,7 @@
 #include "unit_util.h"
 #include "universe_util.h"
 #include "cmd/script/mission.h"
+#include "networking/vsnet_clientstate.h"
 #include "networking/netclient.h"
 //#endif
 extern float copysign (float x, float y);
@@ -180,7 +181,10 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
 		  // If we want to inter(extra)polate sent position, DO IT HERE
 		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
 				// We moved so update
-				Network[player].sendPosition( ClientState( Network[player].getSerial(), curr_physical_state, Velocity, accel, 0));
+		  {
+				ClientState cstmp( Network[player].getSerial(), curr_physical_state, Velocity, accel, 0);
+				Network[player].sendPosition( &cstmp);
+		  }
 		  else
 				// Say we are still alive
 				Network[player].sendAlive();

@@ -23,14 +23,19 @@
 
 #include <string>
 #include <vector>
-#include "vegastrike.h"
-#include "gfx/quaternion.h"
-#include "netclass.h"
-#include "packet.h"
-#include "client.h"
-#include "cmd/unit_generic.h"
+
+#include "const.h"
+#include "vsnet_socket.h"
+#include "gfx/quaternion.h"  // for Transformation
+
+class Packet;
+class Unit;
+class Client;
+class ClientState;
+class NetUI;
 
 using std::vector;
+using std::string;
 extern vector<ObjSerial>	localSerials;
 extern bool isLocalSerial( ObjSerial sernum);
 
@@ -40,13 +45,12 @@ class	NetClient
 {
 		NetUI *				NetInt;		// Network interface
 		Unit *				game_unit;		// Unit struct from the game corresponding to that client
-		Packet				packet;			// Network data packet
+		// Packet				_packet;			// Network data packet
 
 		SOCKETALT			clt_sock;		// Comm. socket
 		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
 		char				keeprun;		// Bool to test client stop
-		AddressIP			cltadr;			// Client IP
 		string				callsign;		// Callsign of the networked player
 		Client *			Clients[MAXCLIENTS];		// Clients in the same zone
 		// a vector because always accessed by their IDs
@@ -60,13 +64,10 @@ class	NetClient
 		unsigned int		current_timestamp;
 		unsigned int		deltatime;
 
-		void	receiveSave();
 		void	receiveData();
-		void	receiveLocations();
 		void	readDatafiles();
 		void	createChar();
-		int		recvMsg( char * netbuffer=NULL);
-		void	getZoneData();
+		int		recvMsg( char* netbuffer, Packet* outpacket );
 		void	disconnect();
 
 	public:
@@ -83,33 +84,21 @@ class	NetClient
 			for( int i=0; i<MAXCLIENTS; i++)
 				Clients[i] = NULL;
 		}
-		~NetClient()
-		{
-			if( NetInt!=NULL)
-				delete NetInt;
-			for( int i=0; i<MAXCLIENTS; i++)
-			{
-				if( Clients[i]!=NULL)
-					delete Clients[i];
-			}
-		}
+		~NetClient();
 
 		int		authenticate();
 		void	start( char * addr, unsigned short port);
-		int		init( char * addr, unsigned short port);
+		SOCKETALT	init( char * addr, unsigned short port);
 		void	checkKey();
-		void	receivePosition();
-		void	sendPosition( ClientState cs);
+		void	sendPosition( const ClientState* cs );
 		void	sendAlive();
 
 		char *	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
-		void	addClient();
-		void	removeClient();
 		void	disable() { enabled=false;}
 		int		isEnabled() { return enabled; }
 		void	setNetworkedMode( bool mode) { enabled = mode;}
-		int		checkMsg( char * netbuffer=NULL);
-		void	sendMsg();
+		int		checkMsg( char* netbuffer, Packet* packet );
+// 		void	sendMsg();
 
 		ObjSerial	getSerial() { return serial; }
 		void	inGame();
@@ -127,6 +116,15 @@ class	NetClient
 		string	getCallsign() {return this->callsign;}
 		void	setUnit( Unit * un) { game_unit = un;}
 		Unit *	getUnit() { return game_unit;}
+
+    private:
+		void	receiveSave( const Packet* packet );
+		void	receiveLocations( const Packet* packet );
+		void	getZoneData( const Packet* packet );
+		void	receivePosition( const Packet* packet );
+		void	addClient( const Packet* packet );
+		void	removeClient( const Packet* packet );
 };
 
 #endif
+

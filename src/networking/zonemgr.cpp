@@ -70,11 +70,9 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt, NetUI *net)
 		if( clt->serial!= (*i)->serial)
 		{
 			cout<<"Sending update to client n° "<<(*i)->serial;
-			//cout<<" @ "<<net->getIPof( (*i)->cltadr);
 			cout<<endl;
 			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
-			sendQueue.add( (*pckt));
-			//net->sendbuf( (*i)->sock, (char *) pckt, pckt->getSendLength(), &(*i)->cltadr);
+			pckt->bc_send( );
 		}
 	}
 }
@@ -120,8 +118,9 @@ void	ZoneMgr::broadcastSnapshots( NetUI * net)
 			// -->> Reduce bandwidth usage but increase CPU usage
 			// Loop for all the zone's clients
 			int	offset = 0, nbclients = 0;
-			float radius, distance, ratio;
-			ObjSerial netserial, sertmp;
+			// float radius, distance, ratio;
+			// ObjSerial netserial;
+			ObjSerial sertmp;
 			Packet pckt;
 			for( k=zone_list[i].begin(); k!=zone_list[i].end(); k++)
 			{
@@ -130,15 +129,15 @@ void	ZoneMgr::broadcastSnapshots( NetUI * net)
 				// buffer is bigger than needed in that way
 				//buffer = new char[nbclients*sizeof( ClientState)];
 				memset( buffer, 0, MAXBUFFER);
-				Quaternion source_orient( (*k)->current_state.getOrientation());
-				QVector source_pos( (*k)->current_state.getPosition());
+				// Quaternion source_orient( (*k)->current_state.getOrientation());
+				// QVector source_pos( (*k)->current_state.getPosition());
 				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
 				{
 					// Check if we are on the same client and that the client has moved !
 					if( l!=k && !((*l)->current_state.getPosition()==(*l)->old_state.getPosition() && (*l)->current_state.getOrientation()==(*l)->old_state.getOrientation()))
 					{
 						//radius = (*l)->game_unit->rSize();
-						QVector target_pos( (*l)->current_state.getPosition());
+						// QVector target_pos( (*l)->current_state.getPosition());
 						// Client pointed by 'k' can see client pointed by 'l'
 						// For now only check if the 'l' client is in front of the ship and not behind
 						if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
@@ -192,11 +191,7 @@ void	ZoneMgr::broadcastSnapshots( NetUI * net)
 				if( offset > 0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.create( CMD_SNAPSHOT, nbclients, buffer, offset, SENDANDFORGET, &((*k)->cltadr), (*k)->sock);
-					sendQueue.add( pckt);
-					//pckt.tosend();
-					//net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getSendLength(), &(*k)->cltadr);
-					//cout<<"SENT PACKET SIZE = "<<pckt.getLength()<<endl;
+					pckt.send( CMD_SNAPSHOT, nbclients, buffer, offset, SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__, __LINE__ );
 				}
 				//delete buffer;
 				offset = 0;

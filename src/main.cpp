@@ -521,7 +521,7 @@ void bootstrap_main_loop () {
 	  if( Network!=NULL)
 	  {
 		char * savedata = 0;
-		if( Network[k].init( srvipadr, (unsigned short) port) == -1)
+		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
 			cleanup();

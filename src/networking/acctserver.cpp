@@ -2,15 +2,15 @@
 #include "acctserver.h"
 #include "packet.h"
 #include "lin_time.h"
+#include "vsnet_serversocket.h"
 
 VegaConfig * vs_config;
-//VegaConfig * acct_config;
 string acctdir;
 
 AccountServer::AccountServer()
 {
 	cout<<"AccountServer init"<<endl;
-	Network = new TCPNetUI();
+	// Network = new TCPNetUI;
 	newaccounts = 0;
 	UpdateTime();
 	srand( (int) getNewTime());
@@ -50,7 +50,7 @@ void	AccountServer::start()
 	double	savetime;
 	double	curtime;
 
-	TCPSOCKET	comsock;
+	SOCKETALT	comsock;
 
 	startMsg();
 
@@ -88,25 +88,44 @@ void	AccountServer::start()
 		tmpport = ACCT_PORT;
 	else
 		tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
-	Network->createSocket( "127.0.0.1", tmpport, 1);
+	Network = NetworkToClient.createServerSocket( tmpport );
 	cout<<"done."<<endl;
 	while( keeprun)
 	{
 		//cout<<"Loop"<<endl;
 		// Check for incoming connections
-		comsock = Network->acceptNewConn( NULL);
-		if( comsock)
+		SocketSet set;
+
+		Network->watchForNewConn( set, 0 );
+		// Check sockets to be watched
+		for( LS i=Socks.begin(); i!=Socks.end(); i++)
+		{
+			cout << "Adding an open connection to select" << endl;
+	    	i->watch( set );
+		}
+
+		set.select( NULL );
+
+		comsock = Network->acceptNewConn( set );
+		if( comsock.valid() )
 		{
 			Socks.push_back( comsock);
 			cout<<"New connection - socket allocated : "<<comsock<<endl;
 		}
-		// Check for messages
-		this->checkMsg();
+
+		// Loop for each active client and process request
+		for( LS i=Socks.begin(); i!=Socks.end(); i++)
+		{
+			if( i->isActive( set ) )
+			{
+				this->recvMsg( (*i));
+			}
+		}
 
 		for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
 		{
 			cout<<"Closing socket number "<<(*j)<<endl;
-			Network->closeSocket( (*j));
+			j->disconnect( "closing socket", false );
 			Socks.remove( (*j));
 		}
 		DeadSocks.clear();
@@ -127,31 +146,7 @@ void	AccountServer::start()
 	Network->disconnect( "Shutting down.");
 }
 
-void	AccountServer::checkMsg()
-{
-	// Check sockets to be watched
-	Network->resetSets();
-	for( LS i=Socks.begin(); i!=Socks.end(); i++)
-	{
-		Network->watchSocket( (*i));
-	}
-	// Get the number of active clients
-	int nb = Network->activeSockets();
-	if( nb)
-	{
-		//cout<<"Net activity !"<<endl;
-		// Loop for each active client and process request
-		for( LS i=Socks.begin(); i!=Socks.end(); i++)
-		{
-			if( Network->isActive( (*i)))
-			{
-				this->recvMsg( (*i));
-			}
-		}
-	}
-}
-
-void	AccountServer::recvMsg( TCPSOCKET sock)
+void	AccountServer::recvMsg( SOCKETALT sock)
 {
 	char			name[NAMELEN+1];
 	char			passwd[NAMELEN+1];
@@ -161,14 +156,17 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 	unsigned char	cmd;
 	Account *		elem = NULL;
 	int 			found=0, connected=0;
+	char buffer[MAXBUFFER];
 
 	// Receive data from sock
-	//cout<<"Receiving on socket "<<sock<<endl;
-	if( (recvcount = Network->recvbuf( sock, (char *)&packet, len, &ipadr))>0)
+	//cout<<"Receiving on socket "<<sock.fd<<endl;
+	len = MAXBUFFER;
+	if( (recvcount = sock.recvbuf( buffer, len, &ipadr))>0)
 	{
+		Packet p( buffer, recvcount );
+
+		packet = p;
 		// Check the command of the packet
-		packet.received();
-		//packet.display();
 		cmd = packet.getCommand();
 		const char * buf = packet.getData();
 		cout<<"Buffer => "<<buf<<endl;
@@ -195,7 +193,7 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 				{
 					if( connected)
 					{
-						cout<<"Inconsistency found !"<<endl;
+						COUT << "Inconsistency found !" << endl;
 						exit( 1);
 					}
 					else
@@ -286,9 +284,8 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 	}
 }
 
-void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
+void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 {
-	Packet	packet2;
 	// Get a serial for client
 	ObjSerial serial = getUniqueSerial();
 	cout<<"\tLOGIN REQUEST SUCCESS for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
@@ -296,9 +293,8 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 	if( acct->isNew())
 	{
 		// Send a command to make the client create a new character/ship
-		packet2.create( LOGIN_NEW, serial, packet.getData(), packet.getLength(), SENDANDFORGET);
-		packet2.tosend();
-		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
+		Packet	packet2;
+		if( packet2.send( LOGIN_NEW, serial, packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -379,15 +375,13 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &savesize, sizeof( unsigned int));
 		cout<<"Loaded -= "<<acct->name<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
 		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
-		//cout<<"Login packet size = "<<total_size<<endl;
+		assert( total_size <= MAXBUFFER );
 
 		// ??? memcpy( buf, packet.getData(), packet.getLength());
 
 		// For now saves are really limited to maxsave bytes
-		packet2.create( LOGIN_ACCEPT, serial, buf, total_size, SENDANDFORGET);
-		cout<<"Login packet size = "<<packet2.getLength()<<endl;
-		packet2.tosend();
-		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
+		Packet	packet2;
+		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDANDFORGET, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -395,27 +389,17 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 	}
 }
 
-void	AccountServer::sendUnauthorized( TCPSOCKET sock, Account * acct)
+void	AccountServer::sendUnauthorized( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
-
-	packet2.create( LOGIN_ERROR, 0, packet.getData(), packet.getLength(), SENDANDFORGET);
-	packet2.tosend();
-	//packet2.displayHex();
-	//cout<<" done."<<endl;
-	Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL);
+	packet2.send( LOGIN_ERROR, 0, packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
 }
 
-void	AccountServer::sendAlreadyConnected( TCPSOCKET sock, Account * acct)
+void	AccountServer::sendAlreadyConnected( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
-
-	packet2.create( LOGIN_ALREADY, 0, packet.getData(), packet.getLength(), SENDANDFORGET);
-	packet2.tosend();
-	//packet2.displayHex();
-	//cout<<" done."<<endl;
-	Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL);
+	packet2.send( LOGIN_ALREADY, 0, packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
 }
 

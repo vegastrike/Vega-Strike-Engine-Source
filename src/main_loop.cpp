@@ -785,8 +785,8 @@ void main_loop() {
   {
 	  for( int jj=0; jj<_Universe->numPlayers(); jj++)
 	  {
-			Network[jj].checkMsg();
-			Network[jj].sendMsg();
+			Network[jj].checkMsg( NULL, NULL);
+			//Network[jj].sendMsg();
 	  }
   }
 }

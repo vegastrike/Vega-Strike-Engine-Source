@@ -7,6 +7,7 @@
 #include "netclass.h"
 #include "accountsxml.h"
 #include "packet.h"
+#include "netui.h"
 
 typedef vector<Account *>::iterator VI;
 
@@ -15,7 +16,7 @@ typedef vector<Account *>::iterator VI;
  * - Returns a packet with LOGIN_ACCEPT or LOGIN_ERROR and with player name
  */
 
-typedef list<TCPSOCKET>::iterator LS;
+typedef list<SOCKETALT>::iterator LS;
 
 /**
  * This class should also :
@@ -25,14 +26,16 @@ typedef list<TCPSOCKET>::iterator LS;
 
 class AccountServer
 {
-		TCPNetUI *			Network;	// Network Interface
+		NetUITCP			NetworkToClient;
+		ServerSocket*		Network;
+		// TCPNetUI *		Network;	// Network Interface
 		vector<Account *>	Cltacct;	// Client accounts
-		list<TCPSOCKET>		Socks;		// List of active sockets on which we can receive requests
-		list<TCPSOCKET>		DeadSocks;		// List of sockets to close
+		list<SOCKETALT>		Socks;		// List of active sockets on which we can receive requests
+		list<SOCKETALT>		DeadSocks;	// List of sockets to close
 
 		int			newaccounts;
 		int			keeprun;
-		TCPSOCKET	conn_sock;
+		// SOCKETALT	conn_sock;
 		ObjSerial	serial_seed;
 		Packet		packet;
 
@@ -43,11 +46,10 @@ class AccountServer
 		void		startMsg();
 		void		start();		// Starts the server
 		void		save();			// Saves new accounts if there are
-		void		checkMsg();		// Check for network message to receive
-		void		recvMsg( TCPSOCKET sock);		// Receive message
-		void		sendAuthorized( TCPSOCKET sock, Account * acct);				// Send authorization and related data
-		void		sendUnauthorized( TCPSOCKET sock, Account * acct);				// Send unauthorizated connection
-		void		sendAlreadyConnected(  TCPSOCKET sock, Account * acct);
+		void		recvMsg( SOCKETALT sock);		// Receive message
+		void		sendAuthorized( SOCKETALT sock, Account * acct);				// Send authorization and related data
+		void		sendUnauthorized( SOCKETALT sock, Account * acct);				// Send unauthorizated connection
+		void		sendAlreadyConnected(  SOCKETALT sock, Account * acct);
 		ObjSerial	getUniqueSerial();
 };
 

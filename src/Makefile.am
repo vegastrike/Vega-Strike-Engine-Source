@@ -36,8 +36,7 @@ python/libpythonserver.a \
 gfx/libgfxserver.a \
 gldrv/libgldrvserver.a \
 cmd/collide/libcollide.a \
-boost/libboost_python.a
-$(BOOSTLIBS)
+boost129/libboost_python.a boost/libboost_python.a
 
 accountserver_LDADD =  \
 networking/libnetacct.a

@@ -1,0 +1,60 @@
+#ifndef PACKETMEM_H
+#define PACKETMEM_H
+
+#include <sys/types.h>
+#include <iostream>
+
+#include "const.h"
+
+class PacketMem
+{
+public:
+    static const bool TakeOwnership  = true;
+    static const bool LeaveOwnership = false;
+
+private:
+    char*   _buffer;
+    size_t  _len;
+    size_t* _cnt;      // delete or return to pool when all references are gone
+
+public:
+    PacketMem( );
+    PacketMem( const PacketMem& );
+    PacketMem( size_t bytesize );
+
+    /// this constructor allows only copy-in of the buffer
+    PacketMem( const void* buffer, size_t size );
+
+    /** this constructor makes it possible to copy-in the buffer, but also to
+     *  acquire only a temporary reference
+     */
+    PacketMem( void* buffer, size_t size, bool own );
+
+    ~PacketMem( );
+
+    void set( void* buffer, size_t size, bool own );
+
+    size_t      len() const;
+    char*       getVarBuf( );
+    const char* getConstBuf( ) const;
+    
+    /** Dump the content of this buffer onto the given ostream, identing
+     *  every line by indent_depth spaces.
+     */
+    void dump( std::ostream& ostr, size_t indent_depth ) const;
+
+    PacketMem& operator=( const PacketMem& );
+
+    bool operator==( const PacketMem& orig ) const;
+
+private:
+    void release( );
+    void inner_set( void* buffer, size_t size, bool own );
+    void ref( );
+    void unref( );
+
+    DECLARE_VALID
+};
+
+#endif
+

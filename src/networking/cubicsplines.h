@@ -1,3 +1,6 @@
+#ifndef CUBICSPLINES_H
+#define CUBICSPLINES_H
+
 // Spline
 /* Cubic spline interpolation functions<p>
 
@@ -48,3 +51,6 @@ class	CubicSpline
 			// Calculates affine vector at time t.<p>
 			QVector computePoint(double t);
 };
+
+#endif /* CUBICSPLINES_H */
+

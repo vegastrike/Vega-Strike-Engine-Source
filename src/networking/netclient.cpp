@@ -18,28 +18,30 @@
   NetClient - Network Client Interface - written by Stephane Vaxelaire <svax@free.fr>
 */
 
+#include "netclient.h"
+#include "netui.h"
+
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
-/*
-#ifndef HAVE_SDL
-	#include <sys/select.h>
-	#include <sys/time.h>
-#endif
-*/
 #include "vs_globals.h"
 #include "endianness.h"
 #include "../config_xml.h"
 #include "client.h"
 #include "const.h"
 #include "packet.h"
-#include "netclient.h"
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
 #include "gfx/matrix.h"
 #include "lin_time.h"
 #include "vs_path.h"
-//#include "incnet.h"
+#include "packet.h"
+
+#include "vsnet_clientstate.h"
+#include "cmd/unit_generic.h"
+#include "vegastrike.h"
+#include "netclass.h"
+#include "client.h"
 
 using std::cout;
 using std::endl;
@@ -78,17 +80,33 @@ Unit * getNetworkUnit( ObjSerial cserial)
 	return NULL;
 }
 
+NetClient::~NetClient()
+{
+    if( NetInt!=NULL)
+        delete NetInt;
+    for( int i=0; i<MAXCLIENTS; i++)
+    {
+        if( Clients[i]!=NULL)
+            delete Clients[i];
+    }
+}
+
 /*************************************************************/
 /**** Authenticate the client                             ****/
 /*************************************************************/
 
 int		NetClient::authenticate()
 {
+	cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
+
 	Packet	packet2;
 	int tmplen = NAMELEN*2;
 	char *	buffer = new char[tmplen+1];
 	char	name[NAMELEN], passwd[NAMELEN];
 	string  str_name, str_passwd;
+
+	memset( name, 0, NAMELEN );		// only for easier debugging
+	memset( passwd, 0, NAMELEN ); 	// only for easier debugging
 
 	// Get the name and password from vegastrike.config
 	// Maybe someday use a default Guest account if no callsign or password is provided thus allowing
@@ -99,21 +117,18 @@ int		NetClient::authenticate()
 	memcpy( passwd, str_passwd.c_str(), str_passwd.length());
 	if( str_name.length() && str_passwd.length())
 	{
+	    COUT << "name:   " << name << endl
+	         << " *** passwd: " << passwd << endl
+	         << " *** buffer: " << buffer << endl;
 		memcpy( buffer, name, str_name.length());
 		memcpy( buffer+NAMELEN, passwd, str_passwd.length());
 		buffer[tmplen] = '\0';
 
-		packet2.create( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, &this->cltadr, this->clt_sock);
-		sendQueue.add( packet2);
-		/*
-		if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
-		{
-			perror( "Error send login ");
-			cleanup();
-		}
-		*/
+		packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
 		delete buffer;
-		cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
+		COUT << "Send login for player <" << str_name << ">:< "<< str_passwd
+		     << "> - buffer length : " << packet2.getDataLength()
+             << " (+" << packet2.getHeaderLength() << " header len" <<endl;
 	}
 	else
 	{
@@ -130,6 +145,8 @@ int		NetClient::authenticate()
 
 char *	NetClient::loginLoop( string str_name, string str_passwd)
 {
+	COUT << "enter " << __FUNCTION__ << endl;
+
 	Packet	packet2;
 	int tmplen = NAMELEN*2;
 	char *	buffer = new char[tmplen+1];
@@ -143,21 +160,22 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 	memcpy( buffer, str_name.c_str(), str_name.length());
 	memcpy( buffer+NAMELEN, str_passwd.c_str(), str_passwd.length());
 
-	packet2.create( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, &this->cltadr, this->clt_sock);
-	cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
-	sendQueue.add( packet2);
-	sendQueue.send( this->NetInt);
-	/*
-	if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
-	{
-		perror( "Error send login ");
-		cleanup();
-	}
-	*/
+	COUT << "Buffering to send with CMD_LOGIN: " << endl;
+	PacketMem m( buffer, tmplen, PacketMem::LeaveOwnership );
+	m.dump( cout, 3 );
+
+	packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
+	COUT << "Sent login for player <" << str_name << ">:<" << str_passwd
+		 << ">" << endl
+	     << "   - buffer length : " << packet2.getDataLength() << endl
+	     << "   - buffer: " << buffer << endl;
 	delete buffer;
 	// Now the loop
 	int timeout=0, recv=0, ret=0;
 	UpdateTime();
+
+	Packet packet;
+
 	while( !timeout && !recv)
 	{
 		// If we have no response in 10 seconds -> fails
@@ -166,7 +184,7 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 			cout<<"Timed out"<<endl;
 			timeout = 1;
 		}
-		ret=this->checkMsg(netbuf);
+		ret=this->checkMsg( netbuf, &packet );
 		if( ret>0)
 		{
 			cout<<"Got a response"<<endl;
@@ -185,9 +203,9 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 	{
 		this->callsign = str_name;
 		// Get the save parts in the buffer
-		const char * xml = netbuf + NAMELEN*2 + sizeof( unsigned int);
+		// const char * xml = netbuf + NAMELEN*2 + sizeof( unsigned int);
 		unsigned int xml_size = ntohl( *( (unsigned int *)(netbuf+NAMELEN*2)));
-		const char * save = netbuf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
+		// const char * save = netbuf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
 		unsigned int save_size = ntohl( *( (unsigned int *)(netbuf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
 		cout<<"XML size = "<<xml_size<<endl;
 		cout<<"Save size = "<<save_size<<endl;
@@ -208,8 +226,11 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 /**** Initialize the client network                       ****/
 /*************************************************************/
 
-int		NetClient::init( char * addr, unsigned short port)
+SOCKETALT	NetClient::init( char * addr, unsigned short port)
 {
+    cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__
+	     << " with " << addr << ":" << port << endl;
+
 	string strnetatom;
 	strnetatom = vs_config->getVariable( "network", "network_atom", "");
 	if( strnetatom=="")
@@ -217,8 +238,10 @@ int		NetClient::init( char * addr, unsigned short port)
 	else
 		NETWORK_ATOM = (double) atoi( strnetatom.c_str());
 
-	NetInt = new NetUI();
-	this->clt_sock = NetInt->createSocket( addr, port, 0);
+	NetInt = new DefaultNetUI;
+	this->clt_sock = NetInt->createSocket( addr, port );
+	cout << __FILE__ << ":" << __LINE__
+	     << ", createSocket(" << addr << "," << port << ") -> " << this->clt_sock << endl;
 
 	/*
 	if( this->authenticate() == -1)
@@ -238,13 +261,16 @@ int		NetClient::init( char * addr, unsigned short port)
 
 void	NetClient::start( char * addr, unsigned short port)
 {
+    cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__
+	     << " with " << addr << ":" << port << endl;
+
 	keeprun = 1;
 
 	cout<<"Loading data files..."<<endl;
 	this->readDatafiles();
 
 	cout<<"Initializing network connection..."<<endl;
-	this->clt_sock = NetInt->createSocket( addr, port, 0);
+	this->clt_sock = NetInt->createSocket( addr, port );
 
 	if( this->authenticate() == -1)
 	{
@@ -256,7 +282,7 @@ void	NetClient::start( char * addr, unsigned short port)
 	while( keeprun)
 	{
 		this->checkKey();
-		this->checkMsg();
+		this->checkMsg( NULL, NULL );
 		micro_sleep( 30000);
 	}
 
@@ -292,7 +318,7 @@ void	NetClient::checkKey()
 			{
 				packet2.create( CMD_POSUPDATE, this->serial, &c, sizeof(char));
 				packet2.tosend();
-				NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr);
+				NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), NULL);
 			}
 		}
 	}
@@ -325,161 +351,158 @@ int		NetClient::isTime()
 /**** Send packets to server                               ****/
 /**************************************************************/
 
-void	NetClient::sendMsg()
-{
-	sendQueue.send( this->NetInt);
-}
+// void	NetClient::sendMsg()
+// {
+// 	sendQueue.send( this->NetInt);
+// }
 
 /**************************************************************/
 /**** Check if server has sent something                   ****/
 /**************************************************************/
 
-int		NetClient::checkMsg( char * netbuffer)
+int NetClient::checkMsg( char* netbuffer, Packet* packet )
 {
-	int nb=0;
-	int ret=0;
+    int ret=0;
 
-	NetInt->resetSets();
-	NetInt->watchSocket( NetInt->sock);
-	nb = NetInt->activeSockets();
-	if( nb)
-	{
-		if( NetInt->isActive( NetInt->sock))
-		{
-			//cout<<"Network Activity !"<<endl;
-			ret = recvMsg( netbuffer);
-		}
-	}
-	//cout<<"CHECK MSG - Length received : "<<ret<<endl;
-	return ret;
+    timeval t;
+    t.tv_sec = 0;
+    t.tv_usec = 0;
+
+    SocketSet set;
+    clt_sock.watch( set );
+    if( set.select( &t ) > 0 )
+    {
+        if( clt_sock.isActive( set ) )
+        {
+            ret = recvMsg( netbuffer, packet );
+        }
+    }
+    return ret;
 }
 
 /**************************************************************/
 /**** Receive a message from the server                    ****/
 /**************************************************************/
 
-int		NetClient::recvMsg( char * netbuffer)
+int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 {
-	unsigned int len2;
-	ObjSerial	packet_serial=0;
-	int len=0;
-	int nbpackets=0;
+    // unsigned int len2;
+    ObjSerial	packet_serial=0;
+    // int len=0;
+    // int nbpackets=0;
 
-	// Receive data
-	nbpackets = recvQueue.receive( this->NetInt, this->clt_sock, this->cltadr, this->serial);
+    // Receive data
+    AddressIP sender_adr;
+    char      buffer[MAXBUFFER];
+    unsigned int    len = MAXBUFFER;
+    int recvbytes = clt_sock.recvbuf( buffer, len, &sender_adr );
 
-	/*
-	if( (len=NetInt->recvbuf( this->clt_sock, (char *)&packet, len2, &this->cltadr))<=0)
-	*/
-	if( nbpackets <= 0)
-	{
-		perror( "Error recv -1 ");
-		NetInt->closeSocket( this->clt_sock);
-	}
-	else
-	{
-	while( !recvQueue.empty())
-	{
-		packet = recvQueue.getNextPacket();
-		//packet.received();
-		packet_serial = packet.getSerial();
-#ifdef _UDP_PROTO
-		// Test if we didn't receive an old packet
-		if( packet.getTimestamp() >= current_timestamp)
-		{
-#endif
-			old_timestamp = current_timestamp;
-			current_timestamp = packet.getTimestamp();
-			deltatime = current_timestamp - old_timestamp;
-			//packet.displayHex();
-			//cout<<"Received command : "<<(char) packet.getCommand()<<endl;
-			packet.displayCmd( packet.getCommand());
-			switch( packet.getCommand())
-			{
-				// Login accept
-				case LOGIN_ACCEPT :
-					cout<<">>> "<<this->serial<<" >>> LOGIN ACCEPTED =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
-					// Should receive player's data (savegame) from server if there is a save
-					this->serial = packet.getSerial();
-					localSerials.push_back( this->serial);
-					//cout<<"Received LOGIN_ACCEPT with serial : "<<this->serial<<endl;
-					memcpy( netbuffer, packet.getData(), packet.getLength());
-					//this->receiveSave( netbuffer);
-					// Set current timestamp
-					this->current_timestamp = packet.getTimestamp();
-					cout<<"<<< LOGIN ACCEPTED ------------------------------------------------------------------------------"<<endl;
-				break;
-				// Login failed
-				case LOGIN_ERROR :
-					cout<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
-					//cout<<"Received LOGIN_ERROR"<<endl;
-					this->disconnect();
-					return -1;
-					cout<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
-				break;
-				// Create a character
-				case CMD_CREATECHAR :
-					// Should begin character/ship creation process
-					//this->createChar();
-				break;
-				// Receive start locations
-				case CMD_LOCATIONS :
-					// Should receive possible starting locations list
-					this->receiveLocations();
-				break;
-				case CMD_SNAPSHOT :
-					// Should update another client's position
-					//cout<<"Received a SNAPSHOT from server"<<endl;
-					this->receivePosition();
-				break;
-				case CMD_ENTERCLIENT :
-					cout<<">>> "<<this->serial<<" >>> ENTERING CLIENT =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
-					this->addClient();
-					cout<<"<<< ENTERING CLIENT ------------------------------------------------------------------------------"<<endl;
-				break;
-				case CMD_EXITCLIENT :
-					cout<<">>> "<<this->serial<<" >>> EXITING CLIENT =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
-					this->removeClient();
-					cout<<"<<< EXITING CLIENT ------------------------------------------------------------------------------"<<endl;
-				break;
-				case CMD_ADDEDYOU :
-					cout<<">>> "<<this->serial<<" >>> ADDED IN GAME =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
-					this->getZoneData();
-					cout<<"<<< ADDED IN GAME ------------------------------------------------------------------------------"<<endl;
-				break;
-				case CMD_DISCONNECT :
-					/*** TO REDO IN A CLEAN WAY ***/
-					cout<<">>> "<<this->serial<<" >>> DISCONNECTED -> Client killed =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
-					exit(1);
-				break;
-				case CMD_ACK :
-					/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
-					/*** We must make sure those 2 conditions are enough ***/
-					cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
-					sendQueue.ack( packet);
-				break;
-				default :
-					cout<<">>> "<<this->serial<<" >>> UNKNOWN COMMAND =( "<<hex<<packet.getCommand()<<" )= --------------------------------------"<<endl;
-					keeprun = 0;
-					this->disconnect();
-			}
-#ifdef _UDP_PROTO
-		}
-		else
-		{
-			cout<<"Received an old packet\n";
-		}
-#endif
-	}
-	}
-	return nbpackets;
+    // nbpackets = recvQueue.receive( this->NetInt, this->clt_sock, sender_adr, this->serial );
+
+    if( recvbytes <= 0)
+    {
+        perror( "Error recv -1 ");
+        clt_sock.disconnect( "socket error", 0 );
+        return -1;
+    }
+    else
+    {
+        Packet p1( buffer, len );
+	    p1.setNetwork( &sender_adr, clt_sock );
+	    if( outpacket )
+	    {
+	        *outpacket = p1;
+	    }
+        packet_serial     = p1.getSerial();
+        old_timestamp     = current_timestamp;
+        current_timestamp = p1.getTimestamp();
+        deltatime         = current_timestamp - old_timestamp;
+	    Cmd cmd           = p1.getCommand( );
+	    COUT << "Rcvd: " << cmd << " ";
+        switch( cmd )
+        {
+            // Login accept
+            case LOGIN_ACCEPT :
+                cout << ">>> " << this->serial << " >>> LOGIN ACCEPTED =( serial n°"
+                     << packet_serial << " )= --------------------------------------"
+					 << endl;
+                // Should receive player's data (savegame) from server if there is a save
+                this->serial = packet_serial;
+                localSerials.push_back( this->serial);
+		        if( netbuffer != NULL )
+				{
+		            memcpy( netbuffer, p1.getData(), p1.getDataLength());
+				}
+                // Set current timestamp
+                break;
+            // Login failed
+            case LOGIN_ERROR :
+                cout<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
+                //cout<<"Received LOGIN_ERROR"<<endl;
+                this->disconnect();
+                return -1;
+                break;
+            // Create a character
+            case CMD_CREATECHAR :
+		cout << endl;
+                // Should begin character/ship creation process
+                //this->createChar();
+                break;
+            // Receive start locations
+            case CMD_LOCATIONS :
+		cout << endl;
+                // Should receive possible starting locations list
+                this->receiveLocations( &p1 );
+                break;
+            case CMD_SNAPSHOT :
+		cout << endl;
+                // Should update another client's position
+                //cout<<"Received a SNAPSHOT from server"<<endl;
+                this->receivePosition( &p1 );
+                break;
+            case CMD_ENTERCLIENT :
+                cout << ">>> " << this->serial << " >>> ENTERING CLIENT =( serial n°"
+                     << packet_serial << " )= --------------------------------------" << endl;
+                this->addClient( &p1 );
+                break;
+            case CMD_EXITCLIENT :
+                cout << ">>> " << this->serial << " >>> EXITING CLIENT =( serial n°"
+                     << packet_serial << " )= --------------------------------------" << endl;
+                this->removeClient( &p1 );
+                break;
+            case CMD_ADDEDYOU :
+                cout << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
+                     << packet_serial << " )= --------------------------------------" << endl;
+                this->getZoneData( &p1 );
+                break;
+            case CMD_DISCONNECT :
+                /*** TO REDO IN A CLEAN WAY ***/
+                cout << ">>> " << this->serial << " >>> DISCONNECTED -> Client killed =( serial n°"
+                     << packet_serial << " )= --------------------------------------" << endl;
+                exit(1);
+                break;
+            case CMD_ACK :
+                /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
+                /*** We must make sure those 2 conditions are enough ***/
+                cout << ">>> ACK =( " << current_timestamp
+                     << " )= ---------------------------------------------------" << endl;
+		p1.ack( );
+                break;
+            default :
+                cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
+                     << " )= --------------------------------------" << endl;
+                keeprun = 0;
+                this->disconnect();
+        }
+    }
+    return recvbytes;
 }
 
 /*************************************************************/
 /**** Get the zone data from server                       ****/
 /*************************************************************/
 
-void	NetClient::getZoneData()
+void NetClient::getZoneData( const Packet* packet )
 {
 	unsigned short nbclts;
 	ClientState cs;
@@ -489,10 +512,9 @@ void	NetClient::getZoneData()
 	ObjSerial nser, nser2 = 0;
 	int		offset=0;
 
-
 	offset = sizeof( unsigned short);
-	char * buf = packet.getData();
-	nbclts = *((unsigned short *) buf);
+	const char* buf = packet->getData();
+	nbclts = *((const unsigned short *) buf);
 	nbclts = ntohs( nbclts);
 	for( int i=0; i<nbclts; i++)
 	{
@@ -500,7 +522,6 @@ void	NetClient::getZoneData()
 		offset += state_size;
 		memcpy( &cd, buf+offset, desc_size);
 		offset += desc_size;
-		//cs = (ClientState *) packet.getData()+offset;
 		cs.received();
 		nser2 = cs.getSerial();
 		nser = ntohs( nser2);
@@ -540,9 +561,9 @@ void	NetClient::getZoneData()
 /**** Adds an entering client in the actual zone          ****/
 /*************************************************************/
 
-void	NetClient::addClient()
+void	NetClient::addClient( const Packet* packet )
 {
-	ObjSerial	cltserial = packet.getSerial();
+	ObjSerial cltserial = packet->getSerial();
 	if( Clients[cltserial] != NULL)
 	{
 		cout<<"Error, client exists !!"<<endl;
@@ -557,10 +578,9 @@ void	NetClient::addClient()
 	// Assign the data
 
 	// Copy the client state in its structure
-	Clients[cltserial]->serial = packet.getSerial();
+	Clients[cltserial]->serial = cltserial;
 	ClientState cs;
-	memcpy( &cs, packet.getData(), sizeof( ClientState));
-	//memcpy( &Clients[cltserial]->current_state, &cs, sizeof( ClientState));
+	memcpy( &cs, packet->getData(), sizeof( ClientState));
 	Clients[cltserial]->current_state = cs;
 
 	cs.display();
@@ -592,12 +612,10 @@ void	NetClient::addClient()
 /**** Removes an exiting client of the actual zone        ****/
 /*************************************************************/
 
-void	NetClient::removeClient()
+void	NetClient::removeClient( const Packet* packet )
 {
-	ObjSerial	cltserial = packet.getSerial();
-	//ObjSerial	cltserial = ntohs( cltserial2);
+	ObjSerial	cltserial = packet->getSerial();
 
-	//cout<<"Serial = "<<cltserial2;
 	cout<<" & HTONS(Serial) = "<<cltserial<<endl;
 	if( Clients[cltserial] == NULL)
 	{
@@ -618,11 +636,11 @@ void	NetClient::removeClient()
 /**** Send an update to server                            ****/
 /*************************************************************/
 
-void	NetClient::sendPosition( ClientState cs)
+void	NetClient::sendPosition( const ClientState* cs )
 {
 	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
 	Packet pckt;
-	ClientState cstmp(cs);
+	ClientState cstmp(*cs);
 	int		update_size = sizeof( ClientState);
 	//char * buffer = new char[update_size];
 
@@ -630,48 +648,35 @@ void	NetClient::sendPosition( ClientState cs)
 	cout<<"Sending position == ";
 	cstmp.display();
 	cstmp.tosend();
-	pckt.create( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, &this->cltadr, this->clt_sock);
-	sendQueue.add( pckt);
-	/*
-	if( NetInt->sendbuf( this->clt_sock, (char *) &pckt, pckt.getSendLength(), &this->cltadr) == -1)
-	{
-		perror( "Error send position ");
-		cleanup();
-	}
-	*/
-	//cs.received();
-	//cout<<"Sent STATE : ";
-	//cs.display();
-	//delete buffer;
+	pckt.send( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__ );
 }
 
 /**************************************************************/
 /**** Update another client position                       ****/
 /**************************************************************/
 
-void	NetClient::receivePosition()
+void	NetClient::receivePosition( const Packet* packet )
 {
 	// When receiving a snapshot, packet serial is considered as the number of client updates
 	ClientState cs;
-	//QVector		tmppos;
-	char *		databuf;
-	ObjSerial	sernum=0;
-	int		nbclts=0, nbclts2=0, i, j, offset=0;;
+	const char* databuf;
+	ObjSerial   sernum=0;
+	int		nbclts=0, i, j, offset=0;;
+	// int		nbclts2=0;
 	int		cssize = sizeof( ClientState);
 	//int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
 	int		qfsize = sizeof( double);
 	unsigned char	cmd;
 
-	nbclts = packet.getSerial();
+	nbclts = packet->getSerial();
 	//nbclts = ntohs( nbclts2);
-	cout<<"Received update for "<<nbclts<<" clients - LENGTH="<<packet.getLength();
-	cout<<endl;
-	databuf = packet.getData();
+	COUT << "Received update for " << nbclts << " clients - LENGTH="
+	     << packet->getDataLength() << endl;
+	databuf = packet->getData();
 	for( i=0, j=0; (i+j)<nbclts;)
 	{
 		cmd = *(databuf+offset);
 		offset += sizeof( unsigned char);
-		//packet.displayCmd( cmd);
 		if( cmd == CMD_FULLUPDATE)
 		{
 			memcpy( &cs, (databuf+offset), cssize);
@@ -749,15 +754,7 @@ void	NetClient::inGame()
 
 	ClientState cs( this->serial, this->game_unit->curr_physical_state, this->game_unit->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
-	packet2.create( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, &this->cltadr, this->clt_sock);
-	sendQueue.add( packet2);
-	/*
-	if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
-	{
-		perror( "Error sending ingame info");
-		exit(1);
-	}
-	*/
+	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
@@ -769,15 +766,7 @@ void	NetClient::sendAlive()
 {
 #ifdef _UDP_PROTO
 	Packet	p;
-	p.create( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, &this->cltadr, this->clt_sock);
-	sendQueue.add( p);
-	/*
-	if( NetInt->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
-	{
-		perror( "Error send PING ");
-		//exit(1);
-	}
-	*/
+	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__ );
 #endif
 }
 
@@ -785,16 +774,16 @@ void	NetClient::sendAlive()
 /**** Receive the ship and char from server               ****/
 /*************************************************************/
 
-void	NetClient::receiveSave()
+void	NetClient::receiveSave( const Packet* packet )
 {
-		char * xml = packet.getData() + NAMELEN*2 + sizeof( int);
-		int xml_size = ntohl(*(packet.getData()+ NAMELEN*2));
+    // char * xml = packet.getData() + NAMELEN*2 + sizeof( int);
+    int xml_size = ntohl(*(packet->getData()+ NAMELEN*2));
 
-		// HERE SHOULD LOAD Savegame desciription from the save in the packet
-		char * save = packet.getData() + NAMELEN*2 + sizeof( int)*2 + xml_size;
-		int save_size = *(packet.getData()+ NAMELEN*2 + sizeof( int) + xml_size);
-		cout<<"RECV SAVES : XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
-		cout<<"Welcome back in VegaStrike, "<<packet.getData()<<endl;
+    // HERE SHOULD LOAD Savegame desciription from the save in the packet
+    // char * save = packet->getData() + NAMELEN*2 + sizeof( int)*2 + xml_size;
+    int save_size = *(packet->getData()+ NAMELEN*2 + sizeof( int) + xml_size);
+    cout<<"RECV SAVES : XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
+    cout<<"Welcome back in VegaStrike, "<<packet->getData()<<endl;
 }
 
 /*************************************************************/
@@ -804,7 +793,7 @@ void	NetClient::receiveSave()
 // Receives possible start locations (first a short representing number of locations)
 // Then for each number, a desc
 
-void	NetClient::receiveLocations()
+void	NetClient::receiveLocations( const Packet* )
 {
 	unsigned char	cmd;
 
@@ -833,23 +822,14 @@ void	NetClient::disconnect()
 {
 	keeprun = 0;
 	// Disconnection is handled in the cleanup() function for each player
-	//NetInt->disconnect( "Closing network");
 }
 
 void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.create( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, &this->cltadr, this->clt_sock);
-	sendQueue.add( p);
-	/*
-	if( NetInt->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
-	{
-		perror( "Error send logout ");
-		//exit(1);
-	}
-	*/
-	NetInt->disconnect( "Closing network", 0);
+	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
+	clt_sock.disconnect( "Closing connection to server", false );
 }
 
 /*************************************************************/

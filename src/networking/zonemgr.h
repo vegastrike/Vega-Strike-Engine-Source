@@ -30,6 +30,8 @@
 using std::list;
 typedef list<Client *>::iterator LI;
 
+class NetUI;
+
 class ZoneMgr
 {
 		int nb_zones;

@@ -108,6 +108,14 @@ void	ClientState::received()
 	this->pos.orientation.v.k = VSSwapHostDoubleToLittle( this->pos.orientation.v.k);
 }
 
+std::ostream& operator<<( std::ostream& ostr, const Client& c )
+{
+    ostr << "(clnt addr " << c.cltadr
+         << " sock=" << c.sock
+	 << " ser=" << c.serial << ")";
+    return ostr;
+}
+
 // LoadXMLUnit on game server received from account server
 void	LoadXMLUnit( Unit * unit, const char * filename, char *buf)
 {
