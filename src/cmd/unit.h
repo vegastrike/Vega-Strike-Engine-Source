@@ -37,6 +37,9 @@ using std::string;
 struct CargoColor {
   Cargo cargo;
   GFXColor color;
+  CargoColor () 
+    : cargo(), color(1,1,1,1) {
+  }
 };//A stupid struct that is only for grouping 2 different types of variables together in one return value
 
 
