@@ -96,24 +96,13 @@ void StarSystem::DrawJumpStars() {
       JumpAnimations[k]->SetDimensions (dd,dd);
     }
   }
-  GFXDisable (LIGHTING);
-  GFXEnable(TEXTURE0);
-  GFXDisable(TEXTURE1);
-  GFXDisable (DEPTHWRITE);
-  GFXBlendMode (ONE,ONE);
-  GFXColor4f (1,1,1,1);//fixme, should we need this? we get som egreenie explosions
-  Matrix result;
   unsigned int i;
   for (i=0;i<JumpAnimations.size();i++) {
-    if (JumpAnimations[i]) {
-      JumpAnimations[i]->CalculateOrientation(result);
-      JumpAnimations[i]->DrawNow(result);
-    }
+    if (JumpAnimations[i])
+      JumpAnimations[i]->Draw();
   }
   for (i=0;i<VolatileJumpAnimations.size();i++) {
     if (VolatileJumpAnimations[i]) {
-      VolatileJumpAnimations[i]->CalculateOrientation(result);
-      VolatileJumpAnimations[i]->DrawNow(result);
       float hei, wid;
       VolatileJumpAnimations[i]->GetDimensions(hei,wid);
       VolatileJumpAnimations[i]->SetDimensions(.95*hei,.95*wid);
@@ -121,6 +110,8 @@ void StarSystem::DrawJumpStars() {
 	delete VolatileJumpAnimations[i];
 	VolatileJumpAnimations.erase (VolatileJumpAnimations.begin()+i);
 	i--;
+      } else {
+	VolatileJumpAnimations[i]->Draw();
       }
     }
   }
