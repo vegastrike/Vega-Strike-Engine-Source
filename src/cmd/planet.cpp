@@ -194,20 +194,54 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 }
 extern bool shouldfog;
 
-vector <Planet *> PlanetTerrainDrawQueue;
+vector <UnitContainer *> PlanetTerrainDrawQueue;
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
   // if cam inside don't draw?
   //  if(!inside) {
   Unit::Draw(quat,m);
   //  }
-
-  int k;
-
     Vector t (_Universe->AccessCamera()->GetPosition()-Position());
     static int counter=0;
     if (counter ++>100)
       if (t.Magnitude()<corner_max.i) {
+	inside=true;
+      } else {
+	//if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
+	inside=false;
+	///somehow warp unit to reasonable place outisde of planet
+	if (terrain) {
+#ifdef PLANETARYTRANSFORM
+	  terrain->DisableUpdate();
+#endif
+	  
+	}
+      }
+
+ GFXLoadIdentity (MODEL);
+ for (unsigned int i=0;i<lights.size();i++) {
+   GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
+ }
+
+ if (inside&&terrain) {
+   PlanetTerrainDrawQueue.push_back (new UnitContainer (this));
+   //DrawTerrain();
+ }
+}
+void Planet::ProcessTerrains () {
+  _Universe->AccessCamera()->SetPlanetaryTransform (NULL);
+  while (!PlanetTerrainDrawQueue.empty()) {
+    Planet * pl = (Planet *)PlanetTerrainDrawQueue.back()->GetUnit();
+    pl->DrawTerrain();
+    PlanetTerrainDrawQueue.back()->SetUnit(NULL);
+    delete PlanetTerrainDrawQueue.back();
+    PlanetTerrainDrawQueue.pop_back();
+  }
+}
+
+void Planet::DrawTerrain() {
+
+
 	  _Universe->AccessCamera()->SetPlanetaryTransform (terraintrans);
 	  inside =true;
 	  if (terrain)
@@ -220,34 +254,11 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 #endif
 	
     //    shouldfog=true;
-      } else {
-	  _Universe->AccessCamera()->SetPlanetaryTransform (NULL);
-	  //if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
-	  inside=false;
-      ///somehow warp unit to reasonable place outisde of planet
-	  if (terrain) {
-#ifdef PLANETARYTRANSFORM
-	    terrain->DisableUpdate();
-#endif
 
-	}
-      }
+
+
+
  GFXLoadIdentity (MODEL);
- for (unsigned int i=0;i<lights.size();i++) {
-   GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
- }
- if (inside&&terrain) {
-   PlanetTerrainDrawQueue.push_back (this);
- }
-}
-void Planet::ProcessTerrains () {
-  while (!PlanetTerrainDrawQueue.empty()) {
-    PlanetTerrainDrawQueue.back()->DrawTerrain();
-    PlanetTerrainDrawQueue.pop_back();
-  }
-}
-
-void Planet::DrawTerrain() {
   if (inside&&terrain) {
     _Universe->AccessCamera()->UpdatePlanetGFX();
     //    Camera * cc = _Universe->AccessCamera();
