@@ -34,7 +34,8 @@ struct GFXColor;
 using std::string;
 #include "gfxlib.h"
 
-struct CargoColor {
+class CargoColor {
+public:
   Cargo cargo;
   GFXColor color;
   CargoColor () 
