@@ -63,7 +63,7 @@ bolt_draw::bolt_draw () {
 extern double interpolation_blend_factor;
 
 inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QVector & prev_position) {
-    drawmat.p = prev_position*(1-interpolation_blend_factor) + cur_position*interpolation_blend_factor;    
+    drawmat.p = prev_position.Scale(1-interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);    
 }
 
 
@@ -179,7 +179,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector
   }
 #ifdef PERBOLTSOUND
   sound = AUDCreateSound (typ.sound,false);
-  AUDAdjustSound (sound,cur_position,shipspeed+speed*drawmat.getR());
+  AUDAdjustSound (sound,cur_position,shipspeed+drawmat.getR().Scale(speed));
 #endif
 }
 
@@ -233,7 +233,7 @@ bool Bolt::Collide (Unit * target) {
   Unit * affectedSubUnit;
   if ((affectedSubUnit =target->queryBSP (prev_position,cur_position,normal,distance))) {//ignore return
     QVector tmp = (cur_position-prev_position).Normalize();
-    tmp = tmp*distance;
+    tmp = tmp.Scale(distance);
     distance = curdist/range;
     GFXColor coltmp (col);
     /*    coltmp.r+=.5;
