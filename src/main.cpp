@@ -183,11 +183,19 @@ int main( int argc, char *argv[] )
     _Universe->Loop(bootstrap_main_loop);
     return 0;
 }
-void bootstrap_draw (const std::string &message, float x, float y, Animation * SplashScreen) {
-  static Animation *ani;
-  static TextPlane tp ("9x12.font");
-  if (SplashScreen!=NULL) {
-    ani = SplashScreen;
+  static Animation * SplashScreen = NULL;
+  static TextPlane bs_tp ("9x12.font");
+
+void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen) {
+  static Animation *ani=NULL;
+  if(SplashScreen==NULL){
+    // if there's no splashscreen, we don't draw on it
+    // this happens, when the splash screens texture is loaded
+    return;
+  }
+
+  if (newSplashScreen!=NULL) {
+    ani = newSplashScreen;
   }
   UpdateTime();
 
@@ -204,23 +212,25 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * S
   GFXLoadIdentityView();
   GFXLoadMatrix (MODEL,tmp);
   GFXBeginScene();
-  tp.SetPos (x,y);
-  //  tp.SetCharSize (.4,.8);
+  bs_tp.SetPos (x,y);
+  //  bs_tp.SetCharSize (.4,.8);
 
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
   }
-  tp.Draw (message);  
+  bs_tp.Draw (message);  
   GFXEndScene();
 
 }
 extern Unit **fighters;
+
+
 void bootstrap_main_loop () {
 
   static bool LoadMission=true;
   InitTime();
-  static Animation * SplashScreen = NULL;
+
   //  bootstrap_draw ("Beginning Load...",SplashScreen);
   //  bootstrap_draw ("Beginning Load...",SplashScreen);
   if (LoadMission) {

@@ -20,6 +20,8 @@
 #include "cmd/nebula.h"
 #include "cmd/asteroid.h"
 #include "cmd/enhancement.h"
+#include "main_loop.h"
+
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -509,7 +511,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
 	fullname=(*iter).value;
-	cout << "\nFOUND planet/unit name " << fullname << endl;
+	//	cout << "\nFOUND planet/unit name " << fullname << endl;
+	bootstrap_draw("loading "+fullname);
 	break;
       case XFILE:
 	delete []filename;

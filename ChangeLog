@@ -1,3 +1,15 @@
+2002-03-20 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* moved the static var SplashScreen from main.cpp:bootstrap_main_loop
+	  to global namespace
+	* the same with the TextPlane that bootstrap_draw uses
+	* bootstrap_draw uses this to check if it should draw
+	* this way, a call to bootstrap_draw can be added to Texture()
+	* see main.cpp:186 aux_texture.cpp:203
+	* Bug: when the background is loaded, there's a short pic of
+	  the environment map
+
+	
 2002-03-20 Daniel Horn <hellcatv@hotmail.com>
 	* Added intiial comm support
 	* Todo:
@@ -9,6 +21,8 @@
 	* c) Alex this might be your job: make it so the other AI's respond to 
 	      messages...currently only AggressiveAI responds to messages
 	* d) someday we might want to color code messages
+
+	
 2002-03-19 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified src/Makefile.am (bindir was screwed up)

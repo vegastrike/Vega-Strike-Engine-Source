@@ -28,6 +28,10 @@
 #include "hashtable.h"
 #include "vs_path.h"
 #include "png_texture.h"
+
+#include "in_kb.h"
+#include "main_loop.h"
+
 using std::string;
 
 
@@ -196,6 +200,8 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
       return;
     }
   }
+  bootstrap_draw("Loading "+string(FileName));
+
   fprintf (stderr,"Loading bmp file %s ",FileName);
 	char *t= strdup (FileName);
 	int tmp = strlen(FileName);
