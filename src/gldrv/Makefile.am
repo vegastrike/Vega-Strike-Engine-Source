@@ -9,6 +9,7 @@ libgldrv_a_SOURCES =				\
 	gl_globals.h				\
 	gl_init.cpp				\
 	gl_init.h				\
+	gl_light.h				\
 	gl_light.cpp				\
 	gl_light_pick.cpp			\
 	gl_light_state.cpp			\
