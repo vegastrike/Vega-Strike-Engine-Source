@@ -1262,7 +1262,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 
 		// Total price display.
 		const double totalPrice = item.price * maxQuantity;
-		char tempString[100];
+		char tempString[2048];
 		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
 		StaticDisplay* totalDisplay = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 		assert(totalDisplay != NULL);
@@ -1275,7 +1275,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 			// No limits, so let's not mention anything.
 			maxForPlayer->setText("");
 		} else {
-			char maxString[100];
+			char maxString[2048];
 			sprintf(maxString, "Max: #b#%d#-b", maxQuantity);
 			maxForPlayer->setText(maxString);
 		}
@@ -1305,7 +1305,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 
 		// Total price display.
 		const double totalPrice = item.price * item.quantity;
-		char tempString[100];
+		char tempString[2048];
 		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
 		StaticDisplay* totalDisplay = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 		assert(totalDisplay != NULL);
@@ -1392,7 +1392,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 
     // The description string.
     string descString;
-    char tempString[256];
+    char tempString[2048];
     Unit* baseUnit = m_base.GetUnit();
 
     if(tlist->transaction == ACCEPT_MISSION) {
