@@ -8,6 +8,7 @@ using std::string;
 #include "xml_support.h"
 #include "hashtable.h"
 using namespace XMLSupport;
+
 struct GFXVertex {
   float x,y,z;
   float i,j,k;
@@ -20,6 +21,21 @@ struct GFXVertex {
 	return ret;
   }
 };
+
+struct GFXMaterial
+{  /// ambient rgba, if you don't like these things, ask me to rename them
+	float ar;float ag;float ab;float aa;
+  /// diffuse rgba
+	float dr;float dg;float db;float da;
+  /// specular rgba
+	float sr;float sg;float sb;float sa;
+  /// emissive rgba
+	float er;float eg;float eb;float ea;
+  /// specular power
+	float power; 
+};
+
+
 struct XML {
   enum Names {
     //elements
@@ -50,6 +66,7 @@ struct XML {
       //attributes
     POWER,
     REFLECT,
+	CULLFACE,
     LIGHTINGON,
     FLATSHADE,
     TEXTURE,
@@ -76,7 +93,13 @@ struct XML {
     SIZE,
     OFFSET,
     ANIMATEDTEXTURE,
-    REVERSE
+	USENORMALS,
+    REVERSE,
+	POLYGONOFFSET,
+	DETAILTEXTURE,
+	DETAILPLANE,
+	FRAMESPERSECOND,
+	STARTFRAME
   };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -116,13 +139,46 @@ struct XML {
       ///the weight of the points in weighted average of refpnts
       vector <float> refweight;
     };
+	struct ZeTexture {
+        string decal_name;
+        string alpha_name;
+        string animated_name;
+    };
+	struct vec3f{
+		float x;
+		float y;
+		float z;
+	};
+
     static const EnumMap::Pair element_names[];
     static const EnumMap::Pair attribute_names[];
     static const EnumMap element_map;
     static const EnumMap attribute_map;
     vector<Names> state_stack;
     vector<GFXVertex> vertices;
+
+	vector <ZeLogo> logos;
+	bool sharevert;
+    bool usenormals;
+    bool reverse;
+    bool force_texture;
+	bool recalc_norm;
+	bool shouldreflect;
+    vector<GFXVertex> lines;
+    vector<GFXVertex> tris;
+    vector<GFXVertex> quads;
+    vector <vector<GFXVertex> > linestrips;
+    vector <vector<GFXVertex> > tristrips;
+    vector <vector<GFXVertex> > trifans;
+    vector <vector<GFXVertex> > quadstrips;
+	
+	vec3f detailplane;
+	bool reflect;
+	bool lighting;
+	bool cullface;
+
     GFXVertex vertex;
+	GFXMaterial material;
     float scale;
   };
 
@@ -156,7 +212,8 @@ const EnumMap::Pair XML::element_names[] = {
   EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
   EnumMap::Pair("Vertex", XML::VERTEX),
   EnumMap::Pair("Logo", XML::LOGO),
-  EnumMap::Pair("Ref",XML::REF)
+  EnumMap::Pair("Ref",XML::REF),
+  EnumMap::Pair("DetailPlane",XML::DETAILPLANE)
 };
 
 const EnumMap::Pair XML::attribute_names[] = {
@@ -192,17 +249,99 @@ const EnumMap::Pair XML::attribute_names[] = {
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
   EnumMap::Pair ("Reverse",XML::REVERSE),
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
-  EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE)
+  EnumMap::Pair ("CullFace",XML::CULLFACE),
+  EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
+  EnumMap::Pair ("UseNormals",XML::USENORMALS),
+  EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET),
+  EnumMap::Pair ("DetailTexture",XML::DETAILTEXTURE),
+  EnumMap::Pair ("FramesPerSecond",XML::FRAMESPERSECOND)
+};
+
+
+const EnumMap XML::element_map(XML::element_names, 24);
+const EnumMap XML::attribute_map(XML::attribute_names, 37);
+
+
+
+enum BLENDFUNC{
+    ZERO            = 1,
+	ONE             = 2, 
+    SRCCOLOR        = 3,
+	INVSRCCOLOR     = 4, 
+    SRCALPHA        = 5,
+	INVSRCALPHA     = 6, 
+    DESTALPHA       = 7,
+	INVDESTALPHA    = 8, 
+    DESTCOLOR       = 9,
+	INVDESTCOLOR    = 10, 
+    SRCALPHASAT     = 11,
+    CONSTALPHA    = 12, 
+    INVCONSTALPHA = 13,
+    CONSTCOLOR = 14,
+    INVCONSTCOLOR = 15
 };
 
 
 
-const EnumMap XML::element_map(XML::element_names, 23);
-const EnumMap XML::attribute_map(XML::attribute_names, 32);
+enum BLENDFUNC parse_alpha (const char * tmp ) {
+  if (strcmp (tmp,"ZERO")==0) {
+    return ZERO;
+  }
+  if (strcmp (tmp,"ONE")==0) {
+    return ONE;
+  }
+  if (strcmp (tmp,"SRCCOLOR")==0) {
+    return SRCCOLOR;
+  }
+  if (strcmp (tmp,"INVSRCCOLOR")==0) {
+    return INVSRCCOLOR;
+  }
+  if (strcmp (tmp,"SRCALPHA")==0) {
+    return SRCALPHA;
+  }
+  if (strcmp (tmp,"INVSRCALPHA")==0) {
+    return INVSRCALPHA;
+  }
+  if (strcmp (tmp,"DESTALPHA")==0) {
+    return DESTALPHA;
+  }
+  if (strcmp (tmp,"INVDESTALPHA")==0) {
+    return INVDESTALPHA;
+  }
+  if (strcmp (tmp,"DESTCOLOR")==0) {
+    return DESTCOLOR;
+  }
+  if (strcmp (tmp,"INVDESTCOLOR")==0) {
+    return INVDESTCOLOR;
+  }
+  if (strcmp (tmp,"SRCALPHASAT")==0) {
+    return SRCALPHASAT;
+  }
+  if (strcmp (tmp,"CONSTALPHA")==0) {
+    return CONSTALPHA;
+  }
+  if (strcmp (tmp,"INVCONSTALPHA")==0) {
+    return INVCONSTALPHA;
+  }
+  if (strcmp (tmp,"CONSTCOLOR")==0) {
+    return CONSTCOLOR;
+  }
+  if (strcmp (tmp,"INVCONSTCOLOR")==0) {
+    return INVCONSTCOLOR;
+  }
+  return ZERO;
+}
 
-
-
-
+bool shouldreflect (string r) {
+    if (strtoupper(r)=="FALSE")
+		return false;
+	int i;
+	for (i=0;i<(int)r.length();++i) {
+		if (r[i]!='0'&&r[i]!='.'&&r[i]!='+'&&r[i]!='e')
+			return true;
+	}
+	return false;
+}
 
 
 
@@ -214,7 +353,43 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
   xml->state_stack.push_back(elem);
   switch(elem) {
-	  case XML::MATERIAL:
+  case XML::DETAILPLANE:
+	 for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(XML::attribute_map.lookup((*iter).name)) {
+		case XML::X:
+			xml->detailplane.x=XMLSupport::parse_float(iter->value);
+			break;
+		case XML::Y:
+			xml->detailplane.y=XMLSupport::parse_float(iter->value);
+			break;
+			
+		case XML::Z:
+			xml->detailplane.z=XMLSupport::parse_float(iter->value);
+			break;
+			}
+	  }
+	  break;
+  case XML::MATERIAL:
+  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		    switch(XML::attribute_map.lookup((*iter).name)) {
+			case XML::USENORMALS:
+			  xml->usenormals = XMLSupport::parse_bool (iter->value);
+			  break;
+		    case XML::POWER:
+		      xml->material.power=XMLSupport::parse_float((*iter).value);
+		      break;
+		    case XML::REFLECT:
+		      xml->reflect= ( shouldreflect((*iter).value));
+		      break;
+		    case XML::LIGHTINGON:
+		      xml->lighting= (XMLSupport::parse_bool((*iter).value)); 
+		      break;
+		    case XML::CULLFACE:
+		      xml->cullface =(XMLSupport::parse_bool((*iter).value)); 
+		      break;
+		    }
+		  }
+		  break;
   case XML::DIFFUSE:
 	  break;
   case XML::EMISSIVE:
