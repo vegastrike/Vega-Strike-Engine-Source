@@ -678,23 +678,15 @@ extern float PercentOperational(Unit*,string,string);
 void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
   float x,y,w,h;
   float th;
-  char st[1024];
+  //  char st[1024];
   GFXColor4f (1,parent->GetHull()/ (*maxhull),parent->GetHull()/(*maxhull),1);
   GFXEnable (TEXTURE0);
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
-  std::string blah (getUnitNameAndFgNoBase(parent));
-  sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
-  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
-  int k=strlen(st);
-  if (k>cols)
-    k=cols;
-  
-  for (int i=0;i<rows-3&&i+k<128;i++) {
-    st[i+k]='\n';
-    st[i+k+1]='\0';
-  }
+  std::string fullname (getUnitNameAndFgNoBase(parent));
+  //sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
+  //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   char ecmstatus[256];
   ecmstatus[0]='\0';
   if (parent->GetImageInformation().ecm>0) {
@@ -713,19 +705,6 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
       s=0;
     DrawShield (0, s, s, 0, x, y, w,h);
   }
-  char qr[256];
-  if (thr) {
-    GFXColor4f (1,0,0,1);
-	string nam =reformatName(thr->name);
-    sprintf (qr, "%s\n%6s\nThreat:%4.4f",ecmstatus,nam.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
-    strncat (st,qr,128);
-  }else {
-    if (parent->GetImageInformation().ecm!=0) {
-      sprintf (qr, "%s\n",ecmstatus);
-      strncat (st,qr,128);
-    }
-  }
-  tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   GFXColor4f (1,1,1,1);
   
 
@@ -740,7 +719,10 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
 
 
     //*******************************************************zade
-    string retval ("\n\n");
+
+    char hullval[128];
+    sprintf (hullval,"%.3f",parent->GetHull());
+    string retval (fullname+"\nHull: "+hullval+"\n");
     unsigned int numCargo =parent->numCargo();
     double percent_working = 0.88;
     for (unsigned int i=0;i<numCargo;i++) {
@@ -785,6 +767,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
         
       }
     }
+    retval+=ecmstatus;
     tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);     
     //*******************************************************
 }
@@ -944,8 +927,8 @@ inline char *GetColorFromSuccess (float suc) {
     return "#FF0000";
   suc +=1.;
   suc*=128;
-  unsigned int tmp2 = suc;
-  unsigned int tmp1 = 255-suc;
+  unsigned int tmp2 = (unsigned int)suc;
+  unsigned int tmp1 = (unsigned int)(255-suc);
   suc_col_str[0]='#';
   suc_col_str[1]=printHex(tmp1/16);
   suc_col_str[2]=printHex(tmp1%16);
