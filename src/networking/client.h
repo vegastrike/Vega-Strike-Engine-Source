@@ -69,7 +69,6 @@ struct	Client
 	ClientDescription	current_desc;
 	/* In-game parameters */
 	int				zone;
-	char			ingame;
 	//char			localplayer;
 
 	Client()
@@ -81,7 +80,6 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
-		ingame=0;
 	}
 
 	Client( SOCKETALT& s, bool tcp )
@@ -95,7 +93,6 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
-		ingame=0;
 	}
 
 	inline bool isTcp( ) const {

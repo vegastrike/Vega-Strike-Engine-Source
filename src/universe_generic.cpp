@@ -139,6 +139,7 @@ StarSystem *Universe::getStarSystem(string name){
 
   return NULL;
 }
+
 extern void SetStarSystemLoading (bool value);
 extern void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom);
 extern string RemoveDotSystem (const char *input);
@@ -219,8 +220,18 @@ void Universe::Update()
   int i;
   static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   float systime=nonactivesystemtime;
-  for (i=0;i<star_system.size();i++) {
+  for (i=0;i<active_star_system.size();i++) {
 	// Calls the update function for server
     star_system[i]->Update((i==0)?1:systime/i);
   }
+}
+
+int	Universe::StarSystemIndex( StarSystem * ss)
+{
+	for (int i=0; i<star_system.size(); i++)
+	{
+		if( star_system[i]==ss)
+			return i;
+	}
+	return -1;
 }

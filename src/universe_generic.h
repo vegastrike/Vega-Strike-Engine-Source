@@ -179,6 +179,7 @@ private:
   }
  public:
   std::vector <StarSystem *> star_system;
+  int	StarSystemIndex( StarSystem *ss);
 };
 
 #endif

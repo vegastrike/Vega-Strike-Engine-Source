@@ -42,6 +42,7 @@ class SaveGame {
   void ReadMissionData (char * &buf);
   vector <SavedUnits> ReadSavedUnits (char * &buf);
   vector <MissionDat> mission_data;
+  string playerfaction;
  public:
   SaveGame() {}
   void ReloadPickledData();
@@ -53,6 +54,9 @@ class SaveGame {
   QVector GetPlayerLocation ();
   void SetStarSystem (string sys);
   string GetStarSystem();
+  string GetOldStarSystem();
+  string GetPlayerFaction() { return playerfaction;}
+  void	 SetPlayerFaction( string faction) { playerfaction = faction;}
   string WriteSavedUnit (SavedUnits *su);
   string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, bool write=true);
   ///cast address to long (for 64 bits compatibility)

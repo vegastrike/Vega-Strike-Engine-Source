@@ -29,23 +29,25 @@
 
 using std::list;
 typedef list<Client *>::iterator LI;
+typedef vector<list<Client *> >::iterator VLI;
 
 class NetUI;
 
 class ZoneMgr
 {
-		int nb_zones;
 		//vector<StarSystem *> starsystems;
-		list<Client *>		*zone_list;
-		int					*zone_clients;
+		vector<list<Client *> >	zone_list;
+		vector<int>				zone_clients;
 
 	public:
 		ZoneMgr();
-		ZoneMgr( int nbzones);
-		~ZoneMgr();
+		//ZoneMgr( int nbzones);
+		//~ZoneMgr();
 		// Serial is the zone id
-		list<Client *>	*GetZone( int serial);
-		void	addClient( Client * clt, int zone);
+		StarSystem *	addZone( string starsys);
+		list<Client *>	GetZone( int serial);
+		//void	addClient( Client * clt, int zone);
+		bool	addClient( Client * clt);
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
         void    broadcastSnapshots();

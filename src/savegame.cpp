@@ -161,9 +161,14 @@ SaveGame::SaveGame(const std::string &pilot) {
 }
 
 void SaveGame::SetStarSystem (string sys) {
+  // Saves the old system we were in
+  originalsystem = ForceStarSystem;
   ForceStarSystem = sys;
 }
 string SaveGame::GetStarSystem () {
+  return ForceStarSystem;
+}
+string SaveGame::GetOldStarSystem () {
   return ForceStarSystem;
 }
 
@@ -491,7 +496,7 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
   }
   vscdup();
   returnfromhome();
-  if( fp)
+  if( fp || (!read && buf))
   {
 	  savestring = string( buf);
 	  if ( savestring.length()>0) {
@@ -516,7 +521,7 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
 				break;
 			}
 		  }
-		  if (ForceStarSystem.length()==0) 
+		  if (ForceStarSystem.length()==0)
 			ForceStarSystem=string(tmp2);
 		  if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
 			shouldupdatepos=true;

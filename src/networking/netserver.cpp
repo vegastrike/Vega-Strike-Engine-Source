@@ -49,7 +49,7 @@ NetServer::NetServer()
 	this->srvtimeout.tv_sec = 0;
 	this->srvtimeout.tv_usec = 0;
 	/***** number of zones should be determined as server loads zones files *****/
-	zonemgr = new ZoneMgr( 10);
+	zonemgr = new ZoneMgr();
 	UpdateTime();
 	srand( (unsigned int) getNewTime());
 	// Here 500 could be something else between 1 and 0xFFFF
@@ -174,7 +174,17 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		string str("");
 		clt->save.ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
 		cout<<"Credits = "<<credits<<endl;
+
+		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
+		clt->game_unit = new Unit();
 		clt->game_unit->LoadXML( "", "", xml, xml_size);
+		string PLAYER_CALLSIGN( clt->name);
+		// We may have to determine which is the current ship of the player if we handle several ships for one player
+		string PLAYER_SHIPNAME = savedships[0];
+		// WE DON'T KNOW THE FACTION YET !!!
+		string PLAYER_FACTION_STRING( "privateer");
+		clt->game_unit->SetFg( Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission), 0);
+		// The Unit will be added in the addClient function
 
 		//string strname( name);
 		// Write temp XML file for unit
@@ -184,7 +194,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		// Then load it in the Unit struct
 		//LoadXMLUnit( clt->game_unit, tmp.c_str(), NULL);
 
-                Packet packet2;
+        Packet packet2;
 		packet2.send( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
@@ -646,7 +656,7 @@ void	NetServer::checkTimedoutClients_udp()
 			// Here considering a delta > 0xFFFFFFFF*X where X should be at least something like 0.9
 			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
 			// side -> when timestamp has grown enough to became bigger than what an u_int can store
-			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
+			if( (*i)->zone>0 && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
 			{
 				cout<<"ACTIVITY TIMEOUT for client number "<<(*i)->serial<<endl;
 				cout<<"\t\tCurrent time : "<<curtime<<endl;
@@ -654,7 +664,7 @@ void	NetServer::checkTimedoutClients_udp()
 				cout<<"t\tDifference : "<<deltatmp<<endl;
 				discList.push_back( *i);
 			}
-			else if( !(*i)->ingame && deltatmp > logintimeout)
+			else if( !(*i)->zone>0 && deltatmp > logintimeout)
 			{
 				cout<<"LOGIN TIMEOUT for client number "<<(*i)->serial<<endl;
 				cout<<"\t\tCurrent time : "<<curtime<<endl;
@@ -904,32 +914,27 @@ void	NetServer::addClient( Client * clt)
 {
 	cout<<">>> SEND ENTERCLIENT =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	Packet packet2;
-	//int		locserial=0;
-	// Should get his last location or a starting location
 
-	// Get the last client zone HERE
-	clt->zone = 1;
-	zonemgr->addClient( clt, 1);
-
-	// GET THE INITIAL CLIENTSTATE FROM PACKET AND SET IT !!
-	// For now, I set it to default values
-	ClientState	tmpcs;
-	memcpy( &tmpcs, packet.getData(), sizeof( ClientState));
-	tmpcs.received();
-	clt->old_state = tmpcs;
-	clt->current_state = tmpcs;
-	//memcpy( &clt->old_state, &tmpcs, sizeof(ClientState));
-	//memcpy( &clt->current_state, &tmpcs, sizeof(ClientState));
-	tmpcs.tosend();
-	// Here the other client in the same zone should be warned of a new client
-	// Should also send data about the ship !!! filename ? IDs ?
-	// maybe those thing should be managed in account.xml
-	// For now assuming a default ship on client side
-	packet2.bc_create( CMD_ENTERCLIENT, clt->serial, (char *) &tmpcs, sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
-	cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
-	zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
-	cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
-	clt->ingame = 1;
+	if( zonemgr->addClient( clt))
+	{
+		// If the system is loaded, there are people in it -> BROADCAST
+		ClientState	tmpcs;
+		memcpy( &tmpcs, packet.getData(), sizeof( ClientState));
+		tmpcs.received();
+		clt->old_state = tmpcs;
+		clt->current_state = tmpcs;
+		//memcpy( &clt->old_state, &tmpcs, sizeof(ClientState));
+		//memcpy( &clt->current_state, &tmpcs, sizeof(ClientState));
+		tmpcs.tosend();
+		// Here the other client in the same zone should be warned of a new client
+		// Should also send data about the ship !!! filename ? IDs ?
+		// maybe those thing should be managed in account.xml
+		// For now assuming a default ship on client side
+		packet2.bc_create( CMD_ENTERCLIENT, clt->serial, (char *) &tmpcs, sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+		cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
+		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
+		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+	}
 
 	char * cltsbuf = new char[MAXBUFFER];
 	int cltsbufsize;
@@ -1010,24 +1015,23 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 		delete buf;
 	}
 
+	// Removes the client from its starsystem
+	if( clt->zone>0)
+		zonemgr->removeClient( clt);
     if( clt->isTcp() )
 	{
-	clt->sock.disconnect( __PRETTY_FUNCTION__, false );
+		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
 	    COUT << "Client " << clt->serial << " disconnected" << endl;
-	    if( clt->ingame )
-		    zonemgr->removeClient( clt );
 	    COUT << "There were "
 	         << tcpClients.size()+udpClients.size() << " clients - ";
 	    tcpClients.remove( clt);
 	}
 	else
 	{
-	Packet p1;
+		Packet p1;
 	    p1.send( CMD_DISCONNECT, clt->serial, NULL, 0,
 		         SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 	    COUT << "Client " << clt->serial << " disconnected" << endl;
-	if( clt->ingame)
-		zonemgr->removeClient( clt);
 	    COUT << "There were "
 	         << tcpClients.size()+udpClients.size() << " clients - ";
 	    udpClients.remove( clt);
@@ -1063,25 +1067,24 @@ void	NetServer::logout( Client * clt)
 		delete buf;
 	}
 
+	// Removes the client from its starsystem
+	if( clt->zone>0)
+		zonemgr->removeClient( clt);
     if( clt->isTcp() )
 	{
-	clt->sock.disconnect( __PRETTY_FUNCTION__, false );
+		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
 	    COUT <<"Client "<<clt->serial<<" disconnected"<<endl;
-	if( clt->ingame)
-		zonemgr->removeClient( clt);
 	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
 	    tcpClients.remove( clt );
 	}
 	else
 	{
 	    COUT <<"Client "<<clt->serial<<" disconnected"<<endl;
-	    if( clt->ingame)
-		    zonemgr->removeClient( clt);
 	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
 	    udpClients.remove( clt );
 	}
 	// Broadcast client EXIT zone
-	if( clt->ingame)
+	if( clt->zone>0)
 	{
 		// p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->serial);
 		p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );

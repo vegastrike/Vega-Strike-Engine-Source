@@ -1,5 +1,7 @@
 //#include <netinet/in.h>
 //#include "gfxlib.h"
+#include "universe_generic.h"
+#include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 #include "packet.h"
 //#include "netserver.h"
@@ -10,46 +12,81 @@
 
 ZoneMgr::ZoneMgr()
 {
-	nb_zones = atoi( (vs_config->getVariable( "server", "maxzones", "")).c_str());
-	zone_list = new list<Client *>[nb_zones];
-	zone_clients = new int[nb_zones];
-	for( int i=0; i<nb_zones; i++)
-		zone_clients[i]=0;
 }
 
-ZoneMgr::ZoneMgr( int nbzones)
+StarSystem *	ZoneMgr::addZone( string starsys)
 {
-	nb_zones = nbzones;
-	zone_list = new list<Client *>[nbzones];
-	zone_clients = new int[nbzones];
-	for( int i=0; i<nbzones; i++)
-		zone_clients[i]=0;
+	list<Client *> lst;
+	StarSystem * sts;
+	// Generate the StarSystem
+	sts = _Universe->GenerateStarSystem (starsys.c_str(),"",Vector(0,0,0));
+	// Add it in the star_system vector
+	_Universe->star_system.push_back( sts);
+	// Add an empty list of clients to the zone_list vector
+	zone_list.push_back( lst);
+	return sts;
 }
-
-ZoneMgr::~ZoneMgr()
-{
-	delete zone_list;
-	delete zone_clients;
-}
-
 
 // Return the client list that are in the zone n° serial
-list<Client *>	* ZoneMgr::GetZone( int serial)
+list<Client *>	ZoneMgr::GetZone( int serial)
 {
-	return &zone_list[serial];
+	return zone_list[serial];
 }
 
 // Adds a client to the zone n° serial
+/*
 void	ZoneMgr::addClient( Client * clt, int zone)
 {
 	zone_list[zone].push_back( clt);
 	zone_clients[zone]++;
-	clt->ingame = 1;
+	clt->zone = zone;
+	// Now we add the unit in that starsystem
+	sts->AddUnit( clt->game_unit);
+}
+*/
+
+bool	ZoneMgr::addClient( Client * clt)
+{
+	// Remove the client from old starsystem if needed and add it in the new one
+	StarSystem * sts;
+	string starsys = clt->save.GetStarSystem();
+	string oldstarsys = clt->save.GetOldStarSystem();
+	// TO BE DONE IN JUMP HANDLING !!!
+	/*
+	if( starsys!=oldstarsys)
+	{
+		// Remove the player from the old starsystem
+		sts = _Universe->getStarSystem( oldstarsys);
+		sts->RemoveUnit( clt->game_unit);
+
+		// SOMEDAY TEST IF THE STARSYSTEM WE WANT TO GO IN IS REACHABLE FROM THE OLD ONE
+	}
+	*/
+	if( !(sts = _Universe->getStarSystem( starsys)))
+	{
+		// Add a network zone (StarSystem equivalent) and create the new StarSystem
+		// StarSystem is not loaded so we generate it
+		sts = this->addZone( starsys);
+		// It also mean that there is nobody in that system so no need to send update
+	}
+	// Get the index of the star_system as it represents the zone number
+	//int zone = _Universe->StarSystemIndex( sts);
+	// This way should be more efficient since the system we just added is the star_system.size()-1
+	int zone = _Universe->star_system.size()-1;
+	// Adds the client in the zone
+	zone_list[zone].push_back( clt);
+	zone_clients[zone]++;
+	clt->zone = zone;
+	sts->AddUnit( clt->game_unit);
+	if( sts)
+		return true;
+	return false;
 }
 
 // Remove a client from its zone
 void	ZoneMgr::removeClient( Client * clt)
 {
+	StarSystem * sts;
 	if( zone_list[clt->zone].empty())
 	{
 		cout<<"Trying to remove on an empty list !!"<<endl;
@@ -58,6 +95,8 @@ void	ZoneMgr::removeClient( Client * clt)
 
 	zone_list[clt->zone].remove( clt);
 	zone_clients[clt->zone]--;
+	sts = _Universe->star_system[clt->zone];
+	sts->RemoveUnit( clt->game_unit);
 }
 
 // Broadcast a packet to a client's zone clients
@@ -88,7 +127,7 @@ void	ZoneMgr::broadcastSnapshots( )
 	//cout<<"Sending snapshot for ";
 	//int h_length = Packet::getHeaderLength();
 	// Loop for all systems/zones
-	for( i=0; i<nb_zones; i++)
+	for( i=0; i<zone_list.size(); i++)
 	{
 		// Check if system is non-empty
 		if( zone_clients[i]>0)
