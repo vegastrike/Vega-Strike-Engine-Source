@@ -71,6 +71,8 @@ void StarSystem::ProcessPendingJumps() {
       pendingjump[kk].delay-=GetElapsedTime();
       continue;
     }
+    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+    _Universe->setActiveStarSystem (pendingjump[kk].orig);
     if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
       pendingjump[kk].un->RemoveFromSystem();
       pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
@@ -87,10 +89,10 @@ void StarSystem::ProcessPendingJumps() {
       delete iter;
       if (pendingjump[kk].un==fighters[0]) {
 	_Universe->activeStarSystem()->SwapOut();
-	_Universe->popActiveStarSystem();
-	_Universe->pushActiveStarSystem(pendingjump[kk].dest);
+	savedStarSystem = pendingjump[kk].dest;
 	pendingjump[kk].dest->SwapIn();
       }
+      _Universe->setActiveStarSystem(pendingjump[kk].dest);
       vector <Unit *> possibilities;
       for (int i=0;i<pendingjump[kk].dest->numprimaries;i++) {
 	vector <Unit *> tmp;
@@ -110,6 +112,7 @@ void StarSystem::ProcessPendingJumps() {
     AddJumpAnimation (pendingjump[kk].un->Position()+pendingjump[kk].un->rSize()*r+pendingjump[kk].un->GetJumpStatus().delay*.5*pendingjump[kk].un->GetVelocity(), pendingjump[kk].un->rSize()*10);
     pendingjump.erase (pendingjump.begin()+kk);
     kk--;
+    _Universe->setActiveStarSystem(savedStarSystem);
   }
 
 }

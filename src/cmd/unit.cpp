@@ -339,6 +339,14 @@ void Unit::RemoveFromSystem() {
   if (CollideInfo.object.u)
     KillCollideTable (&CollideInfo);
   CollideInfo.object.u=NULL;
+  int i;
+  for (i=0;i<nummounts;i++) {
+    if (mounts[i].type.type==weapon_info::BEAM) {
+      if (mounts[i].ref.gun) {
+	mounts[i].ref.gun->RemoveFromSystem();
+      }
+    }
+  }
 }
 Unit::~Unit()
 {

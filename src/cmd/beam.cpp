@@ -114,9 +114,7 @@ Beam::~Beam () {
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
 #endif
-  if (CollideInfo.object.b!=NULL) {
-    KillCollideTable (&CollideInfo);
-  }
+  RemoveFromSystem();
   delete vlist;
   beamdecals.DelTexture(decal);
 }
@@ -230,7 +228,12 @@ void Beam::ProcessDrawQueue() {
   GFXDisable (LIGHTING);
   GFXPopBlendMode();
 }
-
+void Beam::RemoveFromSystem() {
+  if (CollideInfo.object.b!=NULL) {
+    KillCollideTable (&CollideInfo);
+    CollideInfo.object.b = NULL;
+  }
+}
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
@@ -268,10 +271,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   if (curthick<=0) {
 
     curthick =0;//die die die
-    if (CollideInfo.object.b!=NULL) {
-      KillCollideTable (&CollideInfo);
-      CollideInfo.object.b = NULL;
-    }
+    RemoveFromSystem();
     
   } else {
 
@@ -289,10 +289,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 
     tmpvec = center.Max (tmpvec);
     if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object.b==NULL)) {
-      
-      if (CollideInfo.object.b !=NULL) {
-	KillCollideTable (&CollideInfo);
-      }
+      RemoveFromSystem();
       CollideInfo.object.b = this;
       CollideInfo.Mini= tmpMini;
       CollideInfo.Maxi= tmpvec;
