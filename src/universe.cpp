@@ -45,7 +45,7 @@
 using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
-Universe::Universe(int argc, char** argv, const char * galaxy, const vector<std::string> &playerNames)
+Universe::Universe(int argc, char** argv, const char * galaxy)
 {
 	current_cockpit=0;
 #if defined(WITH_MACOSX_BUNDLE)
@@ -85,11 +85,10 @@ bool Universe::StillExists (StarSystem * s) {
 void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
 }
-void Universe::Init (string systemfile, const Vector & centr,const string planetname) {
+StarSystem * Universe::Init (string systemfile, const Vector & centr,const string planetname) {
   CacheJumpStar(false);
   string fullname=systemfile+".system";
-  StarSystem * ss;
-  ss=GenerateStarSystem((char *)fullname.c_str(),"",centr);
+  return GenerateStarSystem((char *)fullname.c_str(),"",centr);
 }
 Universe::~Universe()
 {

@@ -163,13 +163,13 @@ private:
   ///Returns force logo FIXME should return squad logo!
   Texture * getSquadLogo (int faction);
   ///inits graphics with args
-  Universe(int argc, char **argv, const char * galaxy, const std::vector <std::string> &player_names);
+  Universe(int argc, char **argv, const char * galaxy);
   
   ~Universe();
   ///Loads Defaults in Graphics Drivers
   void StartGFX();
   ///Should load the Universe data file. Now just inits system with test.xml
-  void Init(string systemfile, const Vector & centroid=Vector (0,0,0), const string planetname=string());
+  class StarSystem * Init(string systemfile, const Vector & centroid=Vector (0,0,0), const string planetname=string());
   ///Begins a scene
   void StartDraw();
   ///Runs the main loop

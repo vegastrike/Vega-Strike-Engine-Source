@@ -386,8 +386,7 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-
-void createObjects(std::vector <std::string> fighter0name) {
+void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <Vector>& savedloc ) {
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);

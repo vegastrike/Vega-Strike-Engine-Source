@@ -37,7 +37,7 @@ namespace CockpitKeys {
 
 struct SavedUnits;
 void AddUnitToSystem (const SavedUnits * su);
-void createObjects(std::vector <std::string> playersaveunit);
+void createObjects(std::vector <std::string> &playersaveunit, std::vector <StarSystem *> &ssys, std::vector <Vector>& savedloc );
 void destroyObjects();
 void InitializeInput();
 void main_loop();

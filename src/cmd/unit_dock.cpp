@@ -34,7 +34,6 @@ inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radi
   return false;
 }
 bool Unit::RequestClearance (Unit * dockingunit) {
-  if (_Universe->GetRelation(faction,dockingunit->faction)>=0) {
     static float clearencetime=(XMLSupport::parse_float (vs_config->getVariable ("general","dockingtime","20")));
     EnqueueAIFirst (new ExecuteFor (new Orders::MatchVelocity (Vector(0,0,0),
 							       Vector(0,0,0),
@@ -44,8 +43,6 @@ bool Unit::RequestClearance (Unit * dockingunit) {
     if (std::find (image->clearedunits.begin(),image->clearedunits.end(),dockingunit)==image->clearedunits.end())
       image->clearedunits.push_back (dockingunit);
     return true;
-  }
-  return false;
 }
 
 int Unit::CanDockWithMe(Unit * un) {

@@ -33,7 +33,9 @@ void Order::Communicate (const CommunicationMessage &c) {
 void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
-
+float Order::GetEffectiveRelationship (const Unit * target)const {
+  return _Universe->GetRelation (parent->faction,target->faction);
+}
 void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed) {
   float time = AICommresponseTime/SIMULATION_ATOM;
   if (time<=.001)
@@ -45,7 +47,9 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	if (messagequeue.back()->curstate==messagequeue.back()->fsm->GetRequestLandNode()) {
 	  Unit * un=messagequeue.back()->sender.GetUnit();
 	  if (un) {
-	    parent->RequestClearance (un);
+	    if (GetEffectiveRelationship(un)>=0) {
+	      parent->RequestClearance (un);
+	    }
 	  }  
 	}else {
 	  ProcessCommMessage(*messagequeue.back());

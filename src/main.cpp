@@ -176,7 +176,7 @@ int main( int argc, char *argv[] )
 
 #endif
     */
-    _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str(),vector <string>());   
+    _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
 
     _Universe->Loop(bootstrap_main_loop);
     return 0;
@@ -327,7 +327,8 @@ void bootstrap_main_loop () {
 
     }
     SetStarSystemLoading (true);
-    createObjects(playersaveunit);
+    vector <StarSystem *>sss;vector<Vector>v;
+    createObjects(playersaveunit,sss,v);
 
     if (setplayerloc&&fighters) {
       if (fighters[0]) {

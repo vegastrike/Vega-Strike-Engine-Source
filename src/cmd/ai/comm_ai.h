@@ -19,7 +19,7 @@ class CommunicatingAI:public Order{
   relationmap effective_relationship;
   void GetMadAt (Unit * which, int howMad);
  public:
-  float GetEffectiveRelationship (const Unit * target) const;
+  virtual float GetEffectiveRelationship (const Unit * target) const;
   Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);
   void RandomInitiateCommunication (float PlayerProbability, float TargetProbability);
   void TerminateContrabandSearch(bool foundcontraband);

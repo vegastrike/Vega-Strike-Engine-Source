@@ -45,7 +45,7 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   if (i!=effective_relationship.end()) {
     rel = (*i).second;
   }
-  return _Universe->GetRelation (parent->faction,target->faction)+rel;
+  return Order::GetEffectiveRelationship (target)+rel;
 }
 
 void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {

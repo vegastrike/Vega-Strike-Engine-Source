@@ -259,7 +259,14 @@ void StarSystem::ProcessPendingJumps() {
   }
 
 }
-
+extern StarSystem *GetLoadedStarSystem(const char * system) {
+  StarSystem *ss = star_system_table.Get(string(system));
+  std::string ssys (string(system)+string(".system"));
+  if (!ss) {
+    ss = star_system_table.Get (ssys);
+  }
+  return ss;
+}
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());

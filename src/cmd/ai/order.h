@@ -62,6 +62,8 @@ protected:
   ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
   virtual void AdjustRelationTo (Unit * un, float factor);
 public:
+
+  virtual float GetEffectiveRelationship (const Unit * target) const;
   ///clears the messasges of this order
   void ClearMessages();
   ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)

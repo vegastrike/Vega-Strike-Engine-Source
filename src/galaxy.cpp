@@ -305,8 +305,13 @@ vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) 
   string name =RemoveDotSystem (getStarSystemName (file).c_str()); 
   return ParseStringyDestinations (ParseDestinations (galaxy->getVariable (sector,name,"jumps","")));  
 }
+extern StarSystem *GetLoadedStarSystem(const char * file);
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
   static bool firsttime=true;
+  StarSystem *tmpcache;
+  if (tmpcache =GetLoadedStarSystem(file)) {
+    return tmpcache;
+  }
   if (!firsttime) {
 #ifdef _WIN32
   hMutex=CreateMutex(NULL,FALSE,NULL); // nameless mutex object
