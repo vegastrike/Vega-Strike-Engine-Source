@@ -6,6 +6,7 @@
 #include <vector>
 #include <stack>
 #include "vs_path.h"
+#include "tactics.h"
 struct AIScriptXML {
   int unitlevel;
   int acc;
@@ -107,6 +108,7 @@ namespace AiXml {
     YOURWORLD,
     SIMATOM,
     DUPLIC,
+    CLOAKFOR,
     DEFAULT
   };
 
@@ -122,6 +124,7 @@ namespace AiXml {
     EnumMap::Pair ("Targetlocal", TARGETLOCAL),
     EnumMap::Pair ("Yourlocal", YOURLOCAL),
     EnumMap::Pair ("FaceTarget", FACETARGET),
+    EnumMap::Pair ("CloakFor", CLOAKFOR),
     EnumMap::Pair ("ExecuteFor", EXECUTEFOR),
     EnumMap::Pair ("ChangeHead", CHANGEHEAD),
     EnumMap::Pair ("MatchLin", MATCHLIN), 
@@ -167,7 +170,7 @@ namespace AiXml {
 
   };
 
-  const EnumMap element_map(element_names, 31);
+  const EnumMap element_map(element_names, 32);
   const EnumMap attribute_map(attribute_names, 19);
 }
 
@@ -413,7 +416,21 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
       }
     }
     break;
-
+  case CLOAKFOR:
+    xml->unitlevel++;
+    xml->executefor=0;
+    xml->terminate=true;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case TERMINATE:
+	xml->terminate=parse_bool ((*iter).value);
+	break;
+      case TIME:
+	xml->executefor=parse_float((*iter).value);
+	break;
+      }
+    }
+    break;
   case EXECUTEFOR:
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -609,6 +626,10 @@ void AIScript::endElement(const string &name) {
     if (xml->executefor>0) {
       xml->orders[xml->orders.size()-1]=new ExecuteFor(xml->orders[xml->orders.size()-1],xml->executefor);
     }
+    break;
+  case CLOAKFOR:
+    xml->unitlevel--;
+    xml->orders.push_back(new CloakFor(xml->terminate,xml->executefor));
     break;
   case DEFAULT:
     xml->unitlevel-=2;

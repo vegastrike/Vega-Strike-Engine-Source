@@ -6,6 +6,7 @@
 #include "unit_collide.h"
 #include "physics.h"
 #include "hashtable_3d.h"
+#include "gfx/bsp.h"
 Hashtable3d <LineCollide*, char[20],char[200]> collidetable;
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
@@ -149,6 +150,155 @@ bool Unit::Collide (Unit * target) {
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
+
+
+
+bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
+  int i;
+  for (i=0;i<numsubunit;i++) {
+    if ((subunits[i]->queryBSP(pt,err, norm,dist,ShieldBSP)))
+      return true;
+  }
+  Vector st (InvTransform (cumulative_transformation_matrix,pt));
+  bool temp=false;
+  for (i=0;i<nummesh&&!temp;i++) {
+    temp|=meshdata[i]->queryBoundingBox (st,err);
+     
+  }
+  if (!temp)
+    return false;
+  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  if (bspTree&&!ShieldBSP) {
+    tmpBsp= &bspTree;
+  }
+  if (!(*tmpBsp)) {
+    dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
+    return true;
+  }
+  if ((*tmpBsp)->intersects (st,err,norm,dist)) {
+    norm = ToWorldCoordinates (norm);
+    return true;
+  }
+  return false;
+}
+
+float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bool ShieldBSP) {
+  int i;
+  float tmp;
+
+  for (i=0;i<numsubunit;i++) {
+    if ((tmp = subunits[i]->queryBSP(start,end,norm,ShieldBSP))!=0)
+      return tmp;
+  }
+  Vector st (InvTransform (cumulative_transformation_matrix,start));
+  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  if (bspTree&&!ShieldBSP) {
+    tmpBsp= &bspTree;
+  }
+  if (!(*tmpBsp)) {
+    tmp = querySphere (start,end);
+    norm = (tmp * (start-end));
+    tmp = norm.Magnitude();
+    norm +=start;
+    norm.Normalize();//normal points out from center
+    return tmp;
+  }
+  Vector ed (InvTransform (cumulative_transformation_matrix,end));
+  bool temp=false;
+  for (i=0;i<nummesh&&!temp;i++) {
+    temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
+  }
+  if (!temp)
+    return false;
+  if ((tmp = (*tmpBsp)->intersects (st,ed,norm))!=0) {
+    norm = ToWorldCoordinates (norm);
+    return tmp;
+  }
+  return 0;
+}
+
+
+bool Unit::querySphere (const Vector &pnt, float err) {
+  int i;
+  float * tmpo = cumulative_transformation_matrix;
+  
+  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
+#ifdef VARIABLE_LENGTH_PQR
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
+#endif
+  for (i=0;i<nummesh;i++) {
+    TargetPoint = Transform (tmpo,meshdata[i]->Position())-pnt;
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+	*SizeScaleFactor*SizeScaleFactor
+#endif
+	+
+#ifdef VARIABLE_LENGTH_PQR
+	SizeScaleFactor*
+#endif
+	2*err*meshdata[i]->rSize()
+	)
+      return true;
+  }
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->querySphere (pnt,err))
+      return true;
+  }
+  return false;
+}
+
+
+
+float Unit::querySphere (const Vector &start, const Vector &end) {
+  int i;
+  float tmp;
+  Vector st,dir;
+  for (i=0;i<nummesh;i++) {
+    float a, b,c;
+    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position());	
+    dir = end-start;//now start and end are based on mesh's position
+    // v.Dot(v) = r*r; //equation for sphere
+    // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
+    c = st.Dot (st) - meshdata[i]->rSize()*meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+      *SizeScaleFactor*SizeScaleFactor
+#endif
+      ;
+    b = 2 * (dir.Dot (st));
+    a = dir.Dot(dir);
+    //b^2-4ac
+    c = b*b - 4*a*c;
+    if (c<0||a==0)
+      continue;
+    a *=2;
+      
+    tmp = (-b + sqrtf (c))/a;
+    c = (-b - sqrtf (c))/a;
+    if (tmp>0&&tmp<=1) {
+      return (c>0&&c<tmp) ? c : tmp;
+    } else if (c>0&&c<=1) {
+	return c;
+    }
+  }
+  for (i=0;i<numsubunit;i++) {
+    if ((tmp = subunits[i]->querySphere (start,end))!=0) {
+      return tmp;
+    }
+  }
+  return 0;
+}
+
+void Unit::Destroy() {
+  if (!killed)
+    if (!Explode(false,SIMULATION_ATOM))
+      Kill();
+}
+
+
+
+
 
 bool Bolt::Collide () {
   vector <LineCollide *> *candidates[2];  

@@ -102,7 +102,7 @@ struct GFXColorVertex  {
   GFXColorVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
   GFXColorVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
   GFXColorVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
-  GFXColorVertex &SetColor (const GFXColor &col) {r = col.r;g=col.g;b=col.b;a=col.a;}
+  GFXColorVertex &SetColor (const GFXColor &col) {r = col.r;g=col.g;b=col.b;a=col.a; return *this;}
   void SetVtx (const GFXVertex & vv) {s = vv.s;t=vv.t;i=vv.i;j=vv.j;k=vv.k;x=vv.x;y=vv.y;z=vv.z;}
 };
 
@@ -208,7 +208,7 @@ class /*GFXDRVAPI*/ GFXQuadList {
   ///Removes quad from Quad list
   void DelQuad (int which);
   ///modifies quad in quad list to contain new vertices and color information
-  void ModQuad (int which, const GFXVertex *vertices);
+  void ModQuad (int which, const GFXVertex *vertices, float alpha=-1);
   void ModQuad (int which, const GFXColorVertex *vertices);
 };
 /**

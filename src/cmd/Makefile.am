@@ -21,6 +21,7 @@ libcmd_a_SOURCES =				\
 	unit_xml.cpp  			\
 	unit_click.cpp			\
 	unit_physics.cpp				\
+	unit_weapon.cpp			\
 	weapon_xml.cpp			\
 	weapon_xml.h			\
 	planet.h 				\

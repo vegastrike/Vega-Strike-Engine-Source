@@ -247,6 +247,30 @@ void Unit::RollTorque(float amt) {
 
 const float VELOCITY_MAX=1000;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bool lastframe, UnitCollection *uc) {
+  if (cloaking>=cloakmin) {
+    if (cloakenergy*SIMULATION_ATOM>energy) {
+      Cloak(false);//Decloak
+    } else {
+      if (cloakrate>0||cloaking==cloakmin) {
+	energy-=SIMULATION_ATOM*cloakenergy;
+      }
+      if (cloaking>cloakmin) {
+	AUDAdjustSound (sound.cloak, cumulative_transformation.position,Velocity);
+	if ((cloaking==32767&&cloakrate>0)||(cloaking==cloakmin+1&&cloakrate<0)) {
+	  AUDStartPlaying (sound.cloak);
+	}
+	cloaking-=cloakrate;
+	if (cloaking<=cloakmin&&cloakrate>0) {
+	  //AUDStopPlaying (sound.cloak);
+	  cloaking=cloakmin;
+	}
+	if (cloaking<0&&cloakrate<0) {
+	  //AUDStopPlaying (sound.cloak);
+	  cloaking=(short)32768;//wraps
+	}
+      }
+    }
+  }
   RegenShields();
   if (lastframe)
     prev_physical_state = curr_physical_state;//the AIscript should take care

@@ -145,6 +145,7 @@ void VegaConfig::initCommandMap(){
   command_map["TargetKey"]=FireKeyboard::TargetKey ;
   command_map["WeapSelKey"]=FireKeyboard::WeapSelKey ;
   command_map["MisSelKey"]=FireKeyboard::MisSelKey ;
+  command_map["CloakKey"]=FireKeyboard::CloakKey;
 
  command_map["Cockpit::PitchDown"]=CockpitKeys::PitchDown;
  command_map["Cockpit::PitchUp"]=CockpitKeys::PitchUp;

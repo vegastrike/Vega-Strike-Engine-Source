@@ -132,6 +132,7 @@ class Unit {
     int armor;
     int hull;
     int explode;
+    int cloak;
   } sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
@@ -300,10 +301,13 @@ class Unit {
   Computer computer;
   ///no collision table presence.
   bool SubUnit;
-  ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32767 being visible)
+  ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
   short cloaking;
+  ///how fast this starship decloaks/close...if negative, decloaking
   short cloakrate;
+  ///How much energy cloaking takes per frame
   float cloakenergy;
+  ///the minimum cloaking value...
   short cloakmin;
   ///Should draw selection box?
   bool selected;  
@@ -365,6 +369,11 @@ public:
   bool Explode(bool draw, float timeit);
   ///explodes then deletes
   void Destroy();
+  bool InRange (Unit *target, Vector &localcoord);
+  ///how visible the ship is from 0 to 1
+  float CloakVisible () const;
+  ///cloaks or decloaks the starship depending on the bool
+  void Cloak (bool cloak);
   ///deletes
   virtual void Kill();
   ///Is dead yet?

@@ -95,7 +95,8 @@ void Cockpit::DrawTargetBox () {
   GFXEnd();
   if (un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
-    Loc = target->PositionITTS (un->Position(),speed)+10*un->GetComputerData().radar.error*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+    float err = un->GetComputerData().radar.error*(1+.01*(1-un->CloakVisible()));
+    Loc = target->PositionITTS (un->Position(),speed)+10*err*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     GFXVertexf (Loc+(CamP)*.25*un->rSize());
@@ -128,9 +129,11 @@ void Cockpit::DrawBlips (Unit * un) {
   GFXBegin(GFXPOINT);
   while ((target = iter->current())!=NULL) {
     if (target!=un) {
-      Vector localcoord (un->ToLocalCoordinates(target->Position()-un->Position()));
-      float mm= localcoord.Magnitude();
-      if (mm>radarl->maxrange||(localcoord.k/mm)<radarl->maxcone) {
+      Vector localcoord;
+      if (!un->InRange (target,localcoord)) {
+	if (makeBigger==target) {
+	  un->Target(NULL);
+	}
 	iter->advance();	
 	continue;
       }

@@ -132,6 +132,7 @@ void Animation::ProcessDrawQueue () {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   GFXDisable (DEPTHWRITE);
+  GFXColor4f (1,1,1,1);//fixme, should we need this? we get som egreenie explosions
   while (!animationdrawqueue.empty()) {
     Matrix result;
     animationdrawqueue.top()->CalculateOrientation(result);

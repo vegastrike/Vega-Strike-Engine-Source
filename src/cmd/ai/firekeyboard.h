@@ -23,6 +23,7 @@ class FireKeyboard: public Order {
   static void JTargetKey(KBSTATE,float,float,int);  
   static void WeapSelKey (int,KBSTATE);
   static void MisSelKey (int, KBSTATE);
+  static void CloakKey (int, KBSTATE);
 protected:
   float distance;
   void ChooseTargets();//chooses n targets and puts the best to attack in unit's target container

@@ -20,7 +20,8 @@ void FireAt::ChooseTargets (int ) {
   while ((un = iter->current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     relation = _Universe->GetRelation (parent->faction, un->faction);
-    if (relation<worstrelation) {
+    Vector t;
+    if (relation<worstrelation&&parent->InRange (un,t)) {
       worstrelation = relation;
       parent->Target (un);
     }
@@ -82,8 +83,12 @@ void FireAt::Execute () {
 
   }
   if ((targ = parent->Target())) {
-    shouldfire |= ShouldFire (targ);
-    if (targ->GetHull()<0) {
+    if (targ->CloakVisible()>.8) {
+      shouldfire |= ShouldFire (targ);
+      if (targ->GetHull()<0) {
+	ChooseTargets(1);
+      }
+    }else {
       ChooseTargets(1);
     }
   } else {

@@ -24,4 +24,6 @@ libai_a_SOURCES =	\
 	aggressive.h	\
 	flybywire.cpp	\
 	input_dfa.h	\
+	tactics.h	\
+	tactics.cpp	\
 	script.cpp	

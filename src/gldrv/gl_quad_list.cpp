@@ -129,7 +129,7 @@ void GFXQuadList::DelQuad (int which ) {
 
   fprintf (stderr," error deleting engine flame\n");
 }
-void GFXQuadList::ModQuad (int which, const GFXVertex * vertices) {
+void GFXQuadList::ModQuad (int which, const GFXVertex * vertices, float alpha) {
   if (which <0||which>=numVertices/4||quadassignments[which]==-1)
     return;
   if (isColor) {
@@ -139,6 +139,20 @@ void GFXQuadList::ModQuad (int which, const GFXVertex * vertices) {
     data.colors[w+1].SetVtx (vertices[1]);
     data.colors[w+2].SetVtx (vertices[2]);
     data.colors[w+3].SetVtx (vertices[3]);
+    if (alpha!=-1) {
+      if (alpha==0)
+	alpha=.01;
+      float alp = (data.colors[w].r>data.colors[w].b)?
+	((data.colors[w].r>data.colors[w].g)?data.colors[w].r:data.colors[w].g):
+	((data.colors[w].b>data.colors[w].g)?data.colors[w].b:data.colors[w].g);
+      if (alp>.0001) {
+	float tmp [4] = {alpha*data.colors[w+0].r/alp,alpha*data.colors[w+0].g/alp,alpha*data.colors[w+0].b/alp,alpha};
+	memcpy (&data.colors[w+0].r,tmp,sizeof (float)*4);
+	memcpy (&data.colors[w+1].r,tmp,sizeof (float)*4);
+	memcpy (&data.colors[w+2].r,tmp,sizeof (float)*4);
+	memcpy (&data.colors[w+3].r,tmp,sizeof (float)*4);
+      }
+    }
   }else {
     memcpy (data.vertices+(quadassignments[which]*4),vertices,4*sizeof(GFXVertex));
   }

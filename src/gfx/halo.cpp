@@ -34,7 +34,7 @@ Halo::~Halo () {
     halodrawqueue[decal]=NULL;
   }
 }
-void Halo::Draw (const Transformation &quat, const Matrix m) {
+void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   Vector pos,p,q,r, offset;
 
   pos=  position.Transform(m);
@@ -50,7 +50,7 @@ void Halo::Draw (const Transformation &quat, const Matrix m) {
 		       GFXVertex(pos+p-q+offset,r,1,1),
 		       GFXVertex(pos+p+q+offset,r,1,0),
 		       GFXVertex(pos-p+q+offset,r,0,0)};
-  halodrawqueue[decal]->ModQuad(quadnum,tmp);
+  halodrawqueue[decal]->ModQuad(quadnum,tmp,alpha);
 }
 void Halo::SetColor (const GFXColor &col){
   GFXColorVertex coltmp [4];

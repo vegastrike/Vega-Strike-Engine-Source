@@ -1,7 +1,18 @@
+2001-10-23 Daniel Horn <hellcatv@hotmail.com>
+
+	* added cloaking as a feature
+	* added cloaking sound to the config file
+	* added cloaking to the AI
+	* made it so targetting respected cloaked starships
+	* made it so weapons respected cloaked starships
+	* added CloakFor AI script that will cloak for N seconds
+	* added a cloak keybinding
+	* added the basis for fog in the future
+
 2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* changed a lot in in_joystick to support any number of axes
-	* analogue hatswitch definition is now parsed, but not yet used
+	* added analogue hatswitch parser, but not yet used
 
 
 2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>

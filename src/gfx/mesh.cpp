@@ -216,9 +216,10 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, short cl
   c.cloaked=MeshDrawContext::NONE;
   if (cloak>=0) {
     c.cloaked|=MeshDrawContext::CLOAK;
-    if (cloak<16384)
+    if (cloak<16384) {
       c.cloaked|=MeshDrawContext::NEARINVIS;
-    c.mesh_seq=2;//draw near the end with lights
+    }
+    c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
     float tmp = ((float)cloak)/32767;
     c.CloakFX.r = tmp;
     c.CloakFX.g = tmp;
@@ -335,7 +336,11 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
 }
 
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
-  assert(draw_queue->size());
+  //  assert(draw_queue->size());
+  if (draw_queue->empty()) {
+    fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
+    return;
+  }
   GFXSelectMaterial(myMatNum);
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXDisable(DEPTHWRITE);
@@ -363,30 +368,32 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXLoadIdentity(MODEL);
       GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
     }
+    vector <int> specialfxlight;
+    GFXLoadMatrix(MODEL, c.mat);
     if (c.cloaked&MeshDrawContext::CLOAK) {
-      //      if (c.cloaked&MeshDrawContext::NEARINVIS)
-      //	GFXDisable (TEXTURE1);
       GFXPushBlendMode ();
       //	GFXColor4f (1,1,1,.25);
+#if 0
+      //SLOW on TNT
       GFXBlendColor (c.CloakFX);
-      GFXBlendMode (CONSTALPHA,INVCONSTALPHA);
-      //GFXBlendMode (ONE,ONE);
+      GFXBlendMode (CONSTCOLOR,INVCONSTCOLOR);
+#else
+      //      if (c.cloaked&MeshDrawContext::NEARINVIS)
+	GFXDisable (TEXTURE1);
+      int ligh;
+      GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),c.CloakFX,GFXColor(1,0,0)),true);
+      specialfxlight.push_back (ligh);
+      GFXBlendMode (ONE,ONE);
+#endif
     }
-    GFXLoadMatrix(MODEL, c.mat);
-    vector <int> specialfxlight;
+
+
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
       GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
       specialfxlight.push_back(ligh);
     }
-#if 0
-    if (c.cloaked) {
-      int ligh;
-      GFXCreateLight (ligh,c.CloakNebFX,true);
-      specialfxlight.push_back (ligh);
-    }
-#endif
     vlist->Draw();
 
     for ( i=0;i<specialfxlight.size();i++) {
@@ -394,14 +401,14 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
     if (c.cloaked&MeshDrawContext::CLOAK) {
       GFXBlendColor (GFXColor(1,1,1,1));
-      //      if (envMap)
-      //	GFXEnable (TEXTURE1);
+      if (envMap)
+      	GFXEnable (TEXTURE1);
       GFXPopBlendMode ();
     }
-    if(0!=forcelogos) {
+    if(0!=forcelogos&&!(c.cloaked&MeshDrawContext::NEARINVIS)) {
       forcelogos->Draw(c.mat);
     }
-    if (0!=squadlogos){
+    if (0!=squadlogos&&!(c.cloaked&MeshDrawContext::NEARINVIS)){
       squadlogos->Draw(c.mat);
     }
   }

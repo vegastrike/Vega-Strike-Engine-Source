@@ -90,7 +90,11 @@ void Unit::SetResolveForces (bool ys) {
 void Unit::Init()
 {
   cloaking=-1;
+  cloakmin=0;
+  cloakrate=100;
+  cloakenergy=0;
   sound.engine=-1;  sound.armor=-1;  sound.shield=-1;  sound.hull=-1; sound.explode=-1;
+  sound.cloak=-1;
   hudImage=NULL;
   owner = NULL;
   faction =0;
@@ -423,149 +427,6 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
 
 
 
-bool Unit::querySphere (const Vector &pnt, float err) {
-  int i;
-  float * tmpo = cumulative_transformation_matrix;
-  
-  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
-#ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
-#endif
-  for (i=0;i<nummesh;i++) {
-    TargetPoint = Transform (tmpo,meshdata[i]->Position())-pnt;
-    if (TargetPoint.Dot (TargetPoint)< 
-	err*err+
-	meshdata[i]->rSize()*meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor*SizeScaleFactor
-#endif
-	+
-#ifdef VARIABLE_LENGTH_PQR
-	SizeScaleFactor*
-#endif
-	2*err*meshdata[i]->rSize()
-	)
-      return true;
-  }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->querySphere (pnt,err))
-      return true;
-  }
-  return false;
-}
-
-
-
-float Unit::querySphere (const Vector &start, const Vector &end) {
-  int i;
-  float tmp;
-  Vector st,dir;
-  for (i=0;i<nummesh;i++) {
-    float a, b,c;
-    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position());	
-    dir = end-start;//now start and end are based on mesh's position
-    // v.Dot(v) = r*r; //equation for sphere
-    // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
-    c = st.Dot (st) - meshdata[i]->rSize()*meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-      *SizeScaleFactor*SizeScaleFactor
-#endif
-      ;
-    b = 2 * (dir.Dot (st));
-    a = dir.Dot(dir);
-    //b^2-4ac
-    c = b*b - 4*a*c;
-    if (c<0||a==0)
-      continue;
-    a *=2;
-      
-    tmp = (-b + sqrtf (c))/a;
-    c = (-b - sqrtf (c))/a;
-    if (tmp>0&&tmp<=1) {
-      return (c>0&&c<tmp) ? c : tmp;
-    } else if (c>0&&c<=1) {
-	return c;
-    }
-  }
-  for (i=0;i<numsubunit;i++) {
-    if ((tmp = subunits[i]->querySphere (start,end))!=0) {
-      return tmp;
-    }
-  }
-  return 0;
-}
-
-void Unit::Destroy() {
-  if (!killed)
-    if (!Explode(false,SIMULATION_ATOM))
-      Kill();
-}
-
-
-bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
-  int i;
-  for (i=0;i<numsubunit;i++) {
-    if ((subunits[i]->queryBSP(pt,err, norm,dist,ShieldBSP)))
-      return true;
-  }
-  Vector st (InvTransform (cumulative_transformation_matrix,pt));
-  bool temp=false;
-  for (i=0;i<nummesh&&!temp;i++) {
-    temp|=meshdata[i]->queryBoundingBox (st,err);
-     
-  }
-  if (!temp)
-    return false;
-  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
-  if (bspTree&&!ShieldBSP) {
-    tmpBsp= &bspTree;
-  }
-  if (!(*tmpBsp)) {
-    dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
-    return true;
-  }
-  if ((*tmpBsp)->intersects (st,err,norm,dist)) {
-    norm = ToWorldCoordinates (norm);
-    return true;
-  }
-  return false;
-}
-
-float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bool ShieldBSP) {
-  int i;
-  float tmp;
-
-  for (i=0;i<numsubunit;i++) {
-    if ((tmp = subunits[i]->queryBSP(start,end,norm,ShieldBSP))!=0)
-      return tmp;
-  }
-  Vector st (InvTransform (cumulative_transformation_matrix,start));
-  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
-  if (bspTree&&!ShieldBSP) {
-    tmpBsp= &bspTree;
-  }
-  if (!(*tmpBsp)) {
-    tmp = querySphere (start,end);
-    norm = (tmp * (start-end));
-    tmp = norm.Magnitude();
-    norm +=start;
-    norm.Normalize();//normal points out from center
-    return tmp;
-  }
-  Vector ed (InvTransform (cumulative_transformation_matrix,end));
-  bool temp=false;
-  for (i=0;i<nummesh&&!temp;i++) {
-    temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
-  }
-  if (!temp)
-    return false;
-  if ((tmp = (*tmpBsp)->intersects (st,ed,norm))!=0) {
-    norm = ToWorldCoordinates (norm);
-    return tmp;
-  }
-  return 0;
-}
-
 
 bool Unit::queryFrustum(float frustum [6][4]) {
   int i;
@@ -608,36 +469,6 @@ void Unit::UpdateHudMatrix() {
 	CrossProduct(r,q, tmp);
     _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
     _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
-    /*    fprintf (stderr, "matrix %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
-	     cumulative_transformation_matrix[0],
-	     cumulative_transformation_matrix[1],
-	     cumulative_transformation_matrix[2],
-	     cumulative_transformation_matrix[3],
-	     cumulative_transformation_matrix[4],
-	     cumulative_transformation_matrix[5],
-	     cumulative_transformation_matrix[6],
-	     cumulative_transformation_matrix[7],
-	     cumulative_transformation_matrix[8],
-	     cumulative_transformation_matrix[9],
-	     cumulative_transformation_matrix[10],
-	     cumulative_transformation_matrix[11],
-	     cumulative_transformation_matrix[12],
-	     cumulative_transformation_matrix[13],
-	     cumulative_transformation_matrix[14],
-	     cumulative_transformation_matrix[15]);*/
-  /*
-  //FIXME
-  Matrix tmatrix;
-  Vector camp,camq,camr;
-  _Universe->AccessCamera()->GetPQR(camp,camq,camr);
-  
-	//GFXIdentity(MODEL);
-	//Identity (tmatrix);
-	//	Translate (tmatrix,_Universe->AccessCamera()->GetPosition());
-	//	GFXLoadMatrix(MODEL,tmatrix);
-  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_Universe->AccessCamera()->GetPosition()+1.23*camr);  
-  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_Universe->AccessCamera()->GetPosition());
-  */
 }
 
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
@@ -649,6 +480,16 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
 #endif
+  short cloak=cloaking;
+  if (cloaking>cloakmin) {
+    cloak = cloaking-interpolation_blend_factor*cloakrate;
+    if (cloak<0&&cloakrate<0) {
+      cloak=32768;
+    }
+    if (cloak<cloakmin&&cloakrate>0)
+      cloak=cloakmin;
+  }
+  
   int i;
   if (hull <0) {
     Explode(true, GetElapsedTime());
@@ -669,7 +510,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 				   );
       if (d) {  //d can be used for level of detail shit
 	if ((d =g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective(d))>=1) {//if the radius is at least half a pixel
-	  meshdata[i]->Draw(d,cumulative_transformation, cumulative_transformation_matrix,cloaking,0);//cloakign and nebula
+	  meshdata[i]->Draw(d,cumulative_transformation, cumulative_transformation_matrix,cloak,0);//cloakign and nebula
 	} else {
 
 	}
@@ -707,8 +548,12 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       }
     }
   }
+  float haloalpha=1;
+  if (cloak>=0) {
+    haloalpha=((float)cloak)/32767;
+  }
   for (i=0;i<numhalos;i++) {
-        halos[i]->Draw(cumulative_transformation,cumulative_transformation_matrix);
+    halos[i]->Draw(cumulative_transformation,cumulative_transformation_matrix,haloalpha);
   }
 }
 /*
@@ -753,230 +598,18 @@ void Unit::ExecuteAI() {
     subunits[a]->ExecuteAI();//like dubya
   }
 }
-void Unit::UnFire () {
-  for (int i=0;i<nummounts;i++) {
-    mounts[i].UnFire();//turns off beams;
-  }
-}
-extern unsigned short apply_float_to_short (float tmp);
-
-void Unit::Fire (bool Missile) {
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy) {
-	mounts[i].UnFire();
-	continue;
-      }
-    }else{ 
-      if (mounts[i].type.EnergyRate>energy) 
-	continue;
-    }
-    if (mounts[i].Fire(this,Missile)) {
-      energy -=apply_float_to_short( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
-    }
-  }
-}
-
-
-void Unit::Mount::Activate (bool Missile) {
-  if ((type.type==weapon_info::PROJECTILE)==Missile) {
-    if (status==INACTIVE)
-      status = ACTIVE;
-  }
-}
-///Sets this gun to inactive, unless unchosen or destroyed
-void Unit::Mount::DeActive (bool Missile) {
-  if ((type.type==weapon_info::PROJECTILE)==Missile) {
-    if (status==ACTIVE)
-      status = INACTIVE;
-  }
-}
-void Unit::SelectAllWeapon (bool Missile) {
-  for (int i=0;i<nummounts;i++) {
-    mounts[i].Activate (Missile);
-  }
-}
-
-///In short I have NO CLUE how this works! It just...grudgingly does
-void Unit::ToggleWeapon (bool Missile) {
-  bool selected;
-  int activecount=0;
-  int totalcount=0;
-  bool lasttotal=true;
-  weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
-  if (nummounts<1)
-    return;
-  sz = mounts[0].type.size;
-  for (int i=0;i<nummounts;i++) {
-    if ((mounts[i].type.type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
-      totalcount++;
-      lasttotal=false;
-      if (mounts[i].status==Mount::ACTIVE) {
-	activecount++;
-	lasttotal=true;
-	mounts[i].DeActive (Missile);
-	if (i==nummounts-1) {
-	  sz=mounts[0].type.size;
-	}else {
-	  sz =mounts[i+1].type.size;
-	}
-      }
-    }
-    if ((mounts[i].type.type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
-      if (mounts[i].status==Mount::ACTIVE) {
-	activecount++;//totalcount=0;
-	mounts[i].DeActive (Missile);
-	if (lasttotal) {
-	  totalcount=(i+1)%nummounts;
-	  if (i==nummounts-1) {
-	    sz = mounts[0].type.size;
-	  }else {
-	    sz =mounts[i+1].type.size;
-	  }
-	}
-	lasttotal=false;
-      } 
-    }
-  }
-  if (Missile) {
-    int i=totalcount;
-    for (int j=0;j<2;j++) {
-      for (;i<nummounts;i++) {
-	if (mounts[i].type.size==sz) {
-	  if ((mounts[i].type.type==weapon_info::PROJECTILE)) {
-	    mounts[i].Activate(true);
-	    return;
-	  }else {
-	    sz = mounts[(i+1)%nummounts].type.size;
-	  }
-	}
-      }
-      i=0;
-    }
-  }
-  if (totalcount==activecount) {
-    ActivateGuns (mounts[0].type.size,Missile);
-  } else {
-    if (lasttotal) {
-      SelectAllWeapon(Missile);
-    }else {
-      ActivateGuns (sz,Missile);
-    }
-  }
-}
-
-///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
-  for (int j=0;j<2;j++) {
-    for (int i=0;i<nummounts;i++) {
-      if (mounts[i].type.size==sz) {
-	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type.type==weapon_info::PROJECTILE)==ms) {
-	  mounts[i].Activate(ms);
-	}else {
-	  sz = mounts[(i+1)%nummounts].type.size;
-	}
-      }
-    }
-  }
-}
-void Unit::Mount::PhysicsAlignedUnfire() {
-  //Stop Playing SOund?? No, that's done in the beam, must not be aligned
-  if (processed==UNFIRED) {
-    processed=PROCESSED;
-  }
-}
-void Unit::Mount::UnFire () {
-  if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
-    return ;
-  //  AUDStopPlaying (sound);
-  ref.gun->Destabilize();
-}
-bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target) {
-  if (processed==FIRED) {
-    processed = PROCESSED;
-    Unit * temp;
-    Transformation tmp = LocalPosition;
-    tmp.Compose (Cumulative,m);
-    Matrix mat;
-    tmp.to_matrix (mat);
-    switch (type.type) {
-    case weapon_info::BEAM:
-      break;
-    case weapon_info::BOLT:
-      new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity      
-      break;
-    case weapon_info::BALL:
-      new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work      
-      break;
-    case weapon_info::PROJECTILE:
-      temp = new Unit (type.file.c_str(),true,false,owner->faction);
-      if (target&&target!=owner) {
-	temp->Target (target);
-	temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
-      } else {
-	temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
-      }
-      temp->SetOwner (owner);
-      temp->Velocity = velocity;
-      temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
-      CopyMatrix (temp->cumulative_transformation_matrix,m);
-      _Universe->activeStarSystem()->AddUnit(temp);
-      break;
-    }
-    if (!AUDIsPlaying (sound)) {
-      AUDPlay (sound,tmp.position,velocity,1);
-    }else {
-      AUDAdjustSound(sound,tmp.position,velocity);
-    }
-    return true;
-  }
-  return false;
-}
-bool Unit::Mount::Fire (Unit * owner, bool Missile) {
-  if (status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
-    return false;
-  if (type.type==weapon_info::BEAM) {
-    if (ref.gun==NULL) {
-      if (ammo>0)
-	ammo--;
-      processed=FIRED;
-      ref.gun = new Beam (LocalPosition,type,owner,sound);
-      
-    } else {
-      if (ref.gun->Ready()) {
-	if (ammo>0)
-	  ammo--;
-	processed=FIRED;
-	ref.gun->Init (LocalPosition,type,owner);
-      } else 
-	return true;//can't fire an active beam
-    }
-  }else { 
-    if (ref.refire>type.Refire) {
-      ref.refire =0;
-      if (ammo>0)
-	ammo--;
-      processed=FIRED;	
-    }
-  }
-  return true;
-}
-Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM),sound(-1){
-  ref.gun = NULL;
-  status=(UNCHOSEN);
-  weapon_info * temp = getTemplate (filename);  
-  if (temp==NULL) {
-    status=UNCHOSEN;
-  }else {
-    type = *temp;
-    status=ACTIVE;
-  }
-}
 void Unit::Select() {
   selected = true;
 }
 void Unit::Deselect() {
   selected = false;
 }
-
+bool Unit::InRange (Unit *target, Vector &localcoord) {
+  localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
+  float mm= localcoord.Magnitude();
+  if (mm>computer.radar.maxrange||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8) {
+    return false;
+  }
+  return true;
+}
 

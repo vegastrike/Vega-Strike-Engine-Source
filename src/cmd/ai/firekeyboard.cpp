@@ -28,7 +28,14 @@ static KBSTATE jtargetkey=UP;
 static KBSTATE jmissilekey = UP;
 static KBSTATE weapk=UP;
 static KBSTATE misk=UP;
+static KBSTATE cloakkey=UP;
 
+void FireKeyboard::CloakKey(int, KBSTATE k) {
+
+    if (k==PRESS) {
+      cloakkey = k;      
+    }
+}
 void FireKeyboard::FireKey(int key, KBSTATE k) {
   if(firekey==DOWN && k==UP){
     return;
@@ -40,6 +47,7 @@ void FireKeyboard::FireKey(int key, KBSTATE k) {
     //    printf("firekey %d %d\n",k,key);
   }
 }
+
 void FireKeyboard::JFireKey(KBSTATE k, float, float,int i) {
   if (k==UP&&jfirekey==RELEASE) {
 
@@ -78,21 +86,49 @@ void FireKeyboard::JMissileKey(KBSTATE k, float, float,int i) {
 void FireKeyboard::ChooseTargets () {
   UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
+  bool found=false;
+  bool find=false;
   while ((un = iter->current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
+    Vector t;
+
     if (un==parent->Target()) {
       iter->advance();
-      break;
+      found=true;
+      continue;
+    }
+    if (!parent->InRange(un,t)) {
+      iter->advance();
+      continue;
     }
     iter->advance();
+    if (found) {
+      find=true;
+      parent->Target (un);
+      break;
+    }
   }
-  if ((un = iter->current())) {
-    parent->Target (un);
-  }
+  //  if ((un = iter->current())) {
+
+
+    //  }
   delete iter;
-  if (!un) {
-    UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
-    parent->Target (iter->current());//cycle through for now;
+  if (!find) {
+    iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+    while ((un = iter->current())) {
+      //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
+      Vector t;
+      if (un==parent->Target()){
+	iter->advance();
+	continue;
+      }
+      if (!parent->InRange(un,t)) {
+	iter->advance();
+	continue;
+      }
+      parent->Target(un);
+      break;
+    }
     delete iter;
   }
 }
@@ -125,6 +161,12 @@ void FireKeyboard::Execute () {
     firekey=UP;
     jfirekey=UP;
     parent->UnFire();
+  }
+  if (cloakkey==PRESS) {
+    static bool toggle=true;
+    cloakkey=DOWN;
+    parent->Cloak(toggle);
+    toggle=!toggle;
   }
   if (targetkey==PRESS||jtargetkey==PRESS) {
     targetkey=DOWN;

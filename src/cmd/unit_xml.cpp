@@ -13,6 +13,7 @@
 #include "audiolib.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "vegastrike.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -94,6 +95,12 @@ namespace UnitXML {
       RANGE,
       ISCOLOR,
       RADAR,
+      CLOAK,
+      CLOAKRATE,
+      CLOAKMIN,
+      CLOAKENERGY,
+      CLOAKWAV,
+      CLOAKMP3,
       ENGINEWAV,
       ENGINEMP3,
       HULLWAV,
@@ -124,6 +131,7 @@ namespace UnitXML {
     EnumMap::Pair ("Maneuver", MANEUVER),
     EnumMap::Pair ("Engine", ENGINE),
     EnumMap::Pair ("Computer",COMPUTER),
+    EnumMap::Pair ("Cloak", CLOAK),
     EnumMap::Pair ("Energy", ENERGY),
     EnumMap::Pair ("Reactor", REACTOR),
     EnumMap::Pair ("Restricted", RESTRICTED),
@@ -191,11 +199,16 @@ namespace UnitXML {
     EnumMap::Pair ("ShieldWav",SHIELDWAV),
     EnumMap::Pair ("ExplodeMp3",EXPLODEMP3),
     EnumMap::Pair ("ExplodeWav",EXPLODEWAV),
+    EnumMap::Pair ("CloakRate",CLOAKRATE),
+    EnumMap::Pair ("CloakEnergy",CLOAKENERGY),
+    EnumMap::Pair ("CloakMin",CLOAKMIN),
+    EnumMap::Pair ("CloakMp3",CLOAKMP3),
+    EnumMap::Pair ("CloakWav",CLOAKWAV),
     EnumMap::Pair ("Color",ISCOLOR)
 };
 
-  const EnumMap element_map(element_names, 25);
-  const EnumMap attribute_map(attribute_names, 58);
+  const EnumMap element_map(element_names, 26);
+  const EnumMap attribute_map(attribute_names, 63);
 }
 
 using XMLSupport::EnumMap;
@@ -440,6 +453,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case CLOAKWAV:
+	sound.cloak = AUDCreateSoundWAV ((*iter).value,false);
+	break;
+      case CLOAKMP3:
+	sound.cloak = AUDCreateSoundMP3 ((*iter).value,false);
+	break;
       case ENGINEWAV:
 	sound.engine = AUDCreateSoundWAV ((*iter).value,true);
 	break;
@@ -472,6 +491,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
+    if (sound.cloak==-1) {
+      sound.cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
+    }
     if (sound.engine==-1) {
       sound.engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
     }
@@ -489,6 +511,27 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
       
     break;    
+  case CLOAK:
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
+    cloakrate=.2*32767*SIMULATION_ATOM;
+    cloakmin=0;
+    cloakenergy=0;
+    cloaking = (short) 32768;//lowest negative number
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case CLOAKMIN:
+	cloakmin = 32767*parse_float ((*iter).value);
+	break;
+      case CLOAKRATE:
+	cloakrate = 32767*parse_float ((*iter).value)*SIMULATION_ATOM;
+	break;
+      case CLOAKENERGY:
+	cloakenergy = parse_float ((*iter).value);
+	break;
+      }
+    }
+    break;
   case ARMOR:
 	assert (xml->unitlevel==2);
 	xml->unitlevel++;

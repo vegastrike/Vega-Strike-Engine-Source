@@ -91,11 +91,10 @@ void gfx_light::SendGLPosition (const GLenum target) {
 
 inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {
 
-  if (attenuated()) {
-    glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
-    glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
-    glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
-  }
+  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
+  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
+  glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
+
   SendGLPosition (gltarg);
   glLightfv (gltarg,GL_DIFFUSE, diffuse);
   glLightfv (gltarg,GL_SPECULAR, specular);
