@@ -17,7 +17,7 @@ static void seedrand(int seed) {
 
 static unsigned int ssrand()
 {
-        starsysrandom = ( starsysrandom * 1103515245 + 12345) % ((u_long)RAND_MAX + 1);
+        starsysrandom = ( starsysrandom * 1103515245 + 12345) % ((unsigned long)RAND_MAX + 1);
         return starsysrandom;
 }
 
