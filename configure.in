@@ -322,6 +322,21 @@ if test "x$is_linux" = "xyes" ; then
 fi
 
 dnl --------------------------------------------------------------------------
+dnl Check if compiling for FreeBSD 
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING([for FreeBSD platform])
+AC_EGREP_CPP(yes,
+[ 
+#if defined(__FreeBSD__)
+  yes
+#endif
+], [is_freebsd=yes], [is_freebsd=no] )
+AC_MSG_RESULT([${is_freebsd}])
+if test "x$is_freebsd" = "xyes" ; then
+    VS_LIBS="$VS_LIBS -lutil"
+fi
+
+dnl --------------------------------------------------------------------------
 dnl Check if compiling for MacOSX
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING([for MacOSX platform])
@@ -352,8 +367,6 @@ if test "x$is_macosx" = "xyes" ; then
     PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
     with_python_inc=/Library/Frameworks/Python.framework/Headers
     VS_LIBS="$VS_LIBS -lobjc"
-dnl else
-dnl    VS_LIBS="$VS_LIBS -lutil"
 fi
 
 dnl
