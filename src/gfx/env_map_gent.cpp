@@ -106,7 +106,7 @@ static void Lighting (RGBColor &Col, const Vector &Norm)
 
 
 }
-const int lmwid =256;
+const int lmwid =512;
 const int lmwido2=lmwid/2;
 const float ooWIDTHo2 = 2./lmwid;
 const float PIoWIDTHo2 = 2*3.1415926535/lmwid;
@@ -192,8 +192,8 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 		Tex.s = lmwido2 + rf*Normal.k;
 		break;
 	case 5:
-	  Tex.t = lmwido2 + rf*Normal.i;
-	    Tex.s = lmwido2 - rf*Normal.k;
+	  Tex.s = lmwido2 - rf*Normal.i;
+	    Tex.t = lmwido2 + rf*Normal.k;
 		break;
 
 
@@ -426,10 +426,10 @@ static void GenerateSphereMap()
 	int t;
 	for (t=0; t<lmwid; t++) //keep in mind that t = lmwido2 (sin phi) +lmwido2
 	{
-		float to256 = t / (104.*lmwid/256) -1.23*lmwid/256;
+		float to256 = t / (104.*lmwid/256) -1.23;
 		for (int s = 0; s < lmwid; s++) // is is none other than Theta * lmwido2/PI
 		{
-			float so256 = s / (104.*lmwid/256) -1.23*lmwid/256;
+			float so256 = s / (104.*lmwid/256) -1.23;
 			Normal.k = 2 *(1- so256*so256 - to256*to256);
 			float double_one_more_normal = 2*(Normal.k+1);
 			if( double_one_more_normal >=0)
