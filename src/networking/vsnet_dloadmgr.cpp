@@ -37,6 +37,7 @@ using namespace std;
     extern "C" int lstat( const char* name, struct stat* buf );
 #endif
 
+
 namespace VsnetDownload
 {
 
@@ -1248,4 +1249,38 @@ int lstat( const char* name, struct stat* buf )
     return retval;
 }
 #endif /* HAVE_LSTAT */
+
+using namespace VsnetDownload::Client;
+#define CASE(a) case a: return #a; break;
+
+const char * getState( State s)
+{
+	switch( s)
+	{
+		CASE( Idle);
+		CASE( Queued);
+		CASE( Resolving);
+		CASE( Resolved);
+		CASE( Requested);
+		CASE( FragmentReceived);
+		CASE( Completed);
+		default:
+			return "Unknown state";
+	}
+}
+
+const char * getError( Error e)
+{
+	switch( e)
+	{
+		CASE( Ok);
+		CASE( SocketError);
+		CASE( FileNotFound);
+		CASE( LocalPermissionDenied);
+		CASE( RemotePermissionDenied);
+		CASE( DownloadInterrupted);
+		default:
+			return "Unknown error";
+	}
+}
 

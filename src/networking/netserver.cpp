@@ -66,7 +66,7 @@ int		nbchars;
 string	universe_file;
 
 const char* NetServer::_downloadSearchDirs[] = {
-    "/tmp/vs-server-data",
+    datadir.c_str(),
     NULL
 };
 

@@ -67,6 +67,7 @@ libnetgeneric = \
 	vsnet_cmd.cpp		\
 	vsnet_cmd.h		\
 	vsnet_dloadmgr.cpp		\
+	vsnet_notify.cpp		\
 	vsnet_dloadmgr.h		\
 	vsnet_err.h		\
 	vsnet_pipe.cpp		\

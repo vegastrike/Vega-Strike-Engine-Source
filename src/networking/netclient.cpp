@@ -71,7 +71,7 @@ string serverport;
 typedef vector<Client *>::iterator VC;
 
 const char* NetClient::_downloadSearchPaths[] = {
-    "/tmp/vs-client-data",
+    datadir.c_str(),
     NULL
 };
 
@@ -670,6 +670,8 @@ int NetClient::recvMsg( Packet* outpacket )
 					VsnetDownload::Client::File* requested_file;
 					requested_file = new VsnetDownload::Client::File( this->clt_sock, univfile, "");
                 	_downloadManagerClient->addItem( requested_file);
+					while( requested_file->state()!=VsnetDownload::Client::Completed)
+						micro_sleep( 10000);
 					/*
 					netbuf.addString( univfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
@@ -689,6 +691,8 @@ int NetClient::recvMsg( Packet* outpacket )
 					VsnetDownload::Client::File* requested_file;
 					requested_file = new VsnetDownload::Client::File( this->clt_sock, sysfile, "");
                 	_downloadManagerClient->addItem( requested_file);
+					while( requested_file->state()!=VsnetDownload::Client::Completed)
+						micro_sleep( 10000);
 					/*
 					netbuf.addString( sysfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
@@ -1041,8 +1045,8 @@ int NetClient::recvMsg( Packet* outpacket )
 						VsnetDownload::Client::File* requested_file;
 						requested_file = new VsnetDownload::Client::File( this->clt_sock, newsystem, "");
                 		_downloadManagerClient->addItem( requested_file);
-
-						// WAIT FOR THE DOWNLOAD ????
+						while( requested_file->state()!=VsnetDownload::Client::Completed)
+							micro_sleep( 10000);
 					}
 					this->jumpok = true;
 					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();

@@ -76,6 +76,8 @@ enum Error
     DownloadInterrupted
 };
 
+const char * getState( State s);
+const char * getError( Error e);
 std::ostream& operator<<( std::ostream& ostr, Error e );
 
 /*------------------------------------------------------------*
@@ -88,6 +90,14 @@ public:
     virtual void notify( State s, Error e ) = 0;
     virtual void setTotalBytes( int sz ) { }
     virtual void addBytes( int sz ) { }
+};
+
+class VSNotify : public Notify
+{
+	public:
+		void notify( State s, Error e);
+    	void setTotalBytes( int sz );
+    	void addBytes( int sz );
 };
 
 typedef boost::shared_ptr<Notify> NotifyPtr;
