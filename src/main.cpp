@@ -76,7 +76,7 @@ Mission *mission;
 double benchmark=-1.0;
 
 char mission_name[1024];
-
+std::string ForceStarSystem("") ;
 void bootstrap_main_loop();
 int main( int argc, char *argv[] ) 
 {
@@ -185,7 +185,8 @@ void bootstrap_main_loop () {
 
     mission->GetOrigin(pos,planetname);
     bootstrap_draw (SplashScreen);
-    _Universe->Init (mission->getVariable("system","sol.system"),pos,planetname);
+    string mysystem = (ForceStarSystem.length()==0)?mission->getVariable("system","sol.system"):ForceStarSystem;
+    _Universe->Init (mysystem,pos,planetname);
     bootstrap_draw (SplashScreen);
     createObjects();
 
@@ -224,17 +225,12 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
       case 's':
 	g_game.sound_enabled=1;
 	break;
-      case '1':
-	break;
-      case '3':
-	break; 
       case 'f':
       case 'F':
 	break;
       case 'L':
       case 'l'://low rez
-	g_game.y_resolution = 480;
-	g_game.x_resolution = 640;
+	ForceStarSystem = string ((lpCmdLine[i])+2);
 	break;
       case 'A'://average rez
       case 'a': 
