@@ -28,6 +28,7 @@
 #include "vsnet_socket.h"
 #include "gfx/quaternion.h"  // for Transformation
 #include "cmd/container.h"
+#include "cmd/weapon_xml.h"
 #include "savegame.h"
 
 class Packet;
@@ -88,26 +89,36 @@ class	NetClient
 		~NetClient();
 
 		int		authenticate();
-		void	start( char * addr, unsigned short port);
-		SOCKETALT	init( char * addr, unsigned short port);
-		void	checkKey();
-		void	sendPosition( const ClientState* cs );
-		void	sendAlive();
-
 		vector<string>	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
-		void	disable() { enabled=false;}
-		int		isEnabled() { return enabled; }
-		void	setNetworkedMode( bool mode) { enabled = mode;}
-		int		checkMsg( char* netbuffer, Packet* packet );
-// 		void	sendMsg();
+		SOCKETALT	init( char * addr, unsigned short port);
+		void	start( char * addr, unsigned short port);
+		void	checkKey();
+
 
 		ObjSerial	getSerial() { return serial; }
 		void	inGame();
-		int		isTime();
-		void	logout();
+		// Tell if we are currently in the game
 		bool	isInGame() { return (serial!=0);}
-		unsigned int	getLag() { return deltatime;}
 
+		/********************* Network stuff **********************/
+		// Get the lag time between us and the server
+		unsigned int	getLag() { return deltatime;}
+		// Check if it is time to send our update
+		int		isTime();
+		// Warn the server we are leaving the game
+		void	logout();
+		// Check if there are info incoming over the network
+		int		checkMsg( char* netbuffer, Packet* packet );
+		// Send a position update
+		void	sendPosition( const ClientState* cs );
+		// Send a PING-like packet to say we are still alive (UDP)
+		void	sendAlive();
+
+		// void	disable() { enabled=false;}
+		// int		isEnabled() { return enabled; }
+		// void	setNetworkedMode( bool mode) { enabled = mode;}
+
+		/********************* Prediction stuff **********************/
 		void			predict( ObjSerial clientid);
 		void			init_interpolation( ObjSerial clientid);
 		Transformation	spline_interpolate( ObjSerial clientid, double blend);
@@ -117,6 +128,11 @@ class	NetClient
 		string	getCallsign() {return this->callsign;}
 		void	setUnit( Unit * un) { game_unit.SetUnit( un);}
 		Unit *	getUnit() { return game_unit.GetUnit();}
+
+		/********************* Weapon stuff **********************/
+		void	FireBeam();
+		void	FireBolt( weapon_info wi, const Matrix & mat, const Vector & velocity);
+		void	FireProjectile( weapon_info wi);
 
     private:
 		void	receiveSave( const Packet* packet );

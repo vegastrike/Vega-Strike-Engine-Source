@@ -12,6 +12,7 @@
 #include "configxml.h"
 #include "gfx/cockpit_generic.h"
 #include "force_feedback.h"
+#include "networking/netclient.h"
 
 Mount::Mount() {
 	static weapon_info wi(weapon_info::BEAM);
@@ -148,32 +149,58 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     if (autotrack&&NULL!=target) {
       AdjustMatrix (mat,target,type->Speed,autotrack>=2,trackingcone);
     }
-    switch (type->type) {
-    case weapon_info::BEAM:
-      break;
-    case weapon_info::BOLT:
-      new Bolt (*type, mat, velocity, owner);//FIXME turrets! Velocity      
-      break;
-    case weapon_info::BALL:
-      new Bolt (*type,mat, velocity,  owner);//FIXME:turrets won't work      
-      break;
-    case weapon_info::PROJECTILE:
-      temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
-      if (target&&target!=owner) {
-	temp->Target (target);
-	temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
-	temp->EnqueueAI (new Orders::FireAllYouGot);
-      } else {
-	temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
-	temp->EnqueueAI (new Orders::FireAllYouGot);
-      }
-      temp->SetOwner (owner);
-      temp->Velocity = velocity;
-      temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
-      CopyMatrix (temp->cumulative_transformation_matrix,m);
-      _Universe->activeStarSystem()->AddUnit(temp);
-      break;
-    }
+	// Only create the missile if we are non-networking
+	if( Network==NULL)
+	{
+			switch (type->type) {
+			case weapon_info::BEAM:
+			  break;
+			case weapon_info::BOLT:
+			  new Bolt (*type, mat, velocity, owner);//FIXME turrets! Velocity      
+			  break;
+			case weapon_info::BALL:
+			  new Bolt (*type,mat, velocity,  owner);//FIXME:turrets won't work      
+			  break;
+			case weapon_info::PROJECTILE:
+			  temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
+			  if (target&&target!=owner) {
+					temp->Target (target);
+					temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
+					temp->EnqueueAI (new Orders::FireAllYouGot);
+			  } else {
+					temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
+					temp->EnqueueAI (new Orders::FireAllYouGot);
+			  }
+			  temp->SetOwner (owner);
+			  temp->Velocity = velocity;
+			  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
+			  CopyMatrix (temp->cumulative_transformation_matrix,m);
+			  _Universe->activeStarSystem()->AddUnit(temp);
+			  break;
+			}
+	}
+	// If we are in networking mode, we send a request to fire a missile to the server
+	else
+	{
+		// We don't need to use the owner arg here, the client serial will be used to identify
+		// the owner of that weapon ammo on every other client (and server)
+		switch( type->type) {
+		case weapon_info::BEAM :
+			Network->FireBeam();
+		break;
+		case weapon_info::BOLT :
+			Network->FireBolt( *type, mat, velocity);
+		break;
+		case weapon_info::BALL :
+			Network->FireBolt( *type, mat, velocity);
+		break;
+		case weapon_info::PROJECTILE :
+			Network->FireProjectile( *type);
+		break;
+		}
+
+	}
+
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
     if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!_Universe->isPlayerStarship(owner)))&&(type->type!=weapon_info::PROJECTILE)) {
     if (!AUDIsPlaying (sound)) {

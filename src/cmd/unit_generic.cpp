@@ -2155,25 +2155,66 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 
 // TO TEST
 float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
-  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
-  if (nodockdamage) {
-    if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
-      return -1;
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  //  #ifdef REALLY_EASY
+  float absamt= amt>=0?amt:-amt;
+  Cockpit * cpt;
+  if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
+    if (color.a!=2) {
+      //    ApplyDamage (amt);
+      phasedamage*= (g_game.difficulty);
+      amt*=(g_game.difficulty);
+      cpt->Shake (absamt);
     }
   }
-  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-  if (affectedUnit!=this) {
-    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
-    return -1;
-  }
-  amt *= 1-.01*shield.leak;
+  //  #endif
   float percentage=0;
+  //percentage = this->ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
+	// Old ApplyLocalDamage function body (needed here)
+  		  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
+		  if (nodockdamage) {
+			if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
+			  percentage = -1;
+			}
+		  }
+		  if (affectedUnit!=this) {
+			affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
+			percentage = -1;
+		  }
+		  amt *= 1-.01*shield.leak;
+		  if (GetNebula()==NULL||(nebshields>0)) {
+			percentage = DealDamageToShield (pnt,amt);
+		  }
+		  if (aistate)
+		   aistate->ChooseTarget();
+	// End old body
+
+  float leakamt = phasedamage+amt*.01*shield.leak;
+  if( percentage==-1)
+	return -1;
   if (GetNebula()==NULL||(nebshields>0)) {
-    percentage = DealDamageToShield (pnt,amt);
+    percentage = DealDamageToShield (pnt,absamt);
+	amt = amt>=0?absamt:-absamt;
+    if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
+      /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
+	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
+	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
+      //calculate percentage
+      if (GetNebula()==NULL) 
+	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+    }
   }
-  if (aistate)
-   aistate->ChooseTarget();
-  return percentage;
+  if (shield.leak>0||!meshdata.back()||percentage==0||absamt>0||phasedamage) {
+    percentage = DealDamageToHull (pnt, leakamt+amt);
+    if (percentage!=-1) {//returns -1 on death--could delete
+      for (int i=0;i<nummesh();i++) {
+	if (percentage)
+	  meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
+      }
+    }
+  }
+  return 1;
 }
 
 // Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now

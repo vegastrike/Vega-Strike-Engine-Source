@@ -10,6 +10,7 @@
 #include "unit_const_cache.h"
 #include "vs_path.h"
 #include "role_bitmask.h"
+#include "endianness.h"
 /*
 weapon_info& weapon_info::operator = (const weapon_info &tmp){
   size = tmp.size;
@@ -22,6 +23,36 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   return *this;
 }
 */
+
+void	weapon_info::netswap()
+{
+	// Enum elements are the size of an int
+	// byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY
+	//type = VSSwapHostIntToLittle( type);
+	//size = VSSwapHostIntToLittle( size);
+	offset.netswap();
+	role_bits = VSSwapHostIntToLittle( role_bits);
+	sound = VSSwapHostIntToLittle( sound);
+	r = VSSwapHostFloatToLittle( r);
+	g = VSSwapHostFloatToLittle( g);
+	b = VSSwapHostFloatToLittle( b);
+	a = VSSwapHostFloatToLittle( a);
+	Speed = VSSwapHostFloatToLittle( Speed);
+	PulseSpeed = VSSwapHostFloatToLittle( PulseSpeed);
+	RadialSpeed = VSSwapHostFloatToLittle( RadialSpeed);
+	Range = VSSwapHostFloatToLittle( Range);
+	Radius = VSSwapHostFloatToLittle( Radius);
+	Length = VSSwapHostFloatToLittle( Length);
+	Damage = VSSwapHostFloatToLittle( Damage);
+	PhaseDamage = VSSwapHostFloatToLittle( PhaseDamage);
+	Stability = VSSwapHostFloatToLittle( Stability);
+	Longrange = VSSwapHostFloatToLittle( Longrange);
+	LockTime = VSSwapHostFloatToLittle( LockTime);
+	EnergyRate = VSSwapHostFloatToLittle( EnergyRate);
+	Refire = VSSwapHostFloatToLittle( Refire);
+	volume = VSSwapHostFloatToLittle( volume);
+	TextureStretch = VSSwapHostFloatToLittle( TextureStretch);
+}
 
 #include "xml_support.h"
 #include "physics.h"

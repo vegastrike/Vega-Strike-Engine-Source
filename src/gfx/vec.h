@@ -2,22 +2,29 @@
 #define _3DMANIP_H_
 #include "macosx_math.h"
 #include <math.h>
+
+#include "endianness.h"
+
 #define QFLOAT float
+#define NetSwap VSSwapHostFloatToLittle
 #define XSQRT sqrtf
 #define XVector Vector
 #define YVector QVector
 #include "xvector.h"
+#undef NetSwap
 #undef QFLOAT
 #undef XVector
 #undef YVector
 #undef XSQRT
+
 #define QFLOAT double
+#define NetSwap VSSwapHostDoubleToLittle
 #define XSQRT sqrt
 #define XVector QVector
 #define YVector Vector
-
 #include "xvector.h"
 #undef XSQRT
+#undef NetSwap
 #undef QFLOAT
 #undef XVector
 #undef YVector

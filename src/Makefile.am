@@ -27,6 +27,7 @@ vegaserver_LDADD =  \
 cmd/script/director_server.o \
 cmd/unit_util_generic.o \
 cmd/unit_util_server.o \
+networking/netclient.o \
 common/libvscommon.a \
 networking/libnetserver.a \
 cmd/libcmdserver.a \

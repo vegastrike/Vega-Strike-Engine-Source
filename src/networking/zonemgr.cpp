@@ -216,11 +216,11 @@ void	ZoneMgr::broadcastSnapshots( )
 								//cout<<"Sending : ";
 								//(*l)->current_state.display();
 								cstmp = (*l)->current_state;
-								cstmp.tosend();
-								//(*l)->current_state.tosend();
+								cstmp.netswap();
+								//(*l)->current_state.netswap();
 								memcpy( buffer+offset, &cstmp, sizeof( ClientState));
 								// Convert byte order back
-								//(*l)->current_state.received();
+								//(*l)->current_state.netswap();
 								offset += sizeof( ClientState);
 								// Increment the number of clients we send full info about
 								j++;
@@ -350,12 +350,12 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 		cout<<"SENDING : ";
 		cstmp = (*k)->current_state;
 		//(*k)->current_state.display();
-		//(*k)->current_state.tosend();
+		//(*k)->current_state.netswap();
 		cstmp.display();
-		cstmp.tosend();
+		cstmp.netswap();
 		memcpy( bufzone+nbsize+offset, &cstmp, state_size);
 		offset += state_size;
-		//(*k)->current_state.received();
+		//(*k)->current_state.netswap();
 		memcpy( bufzone+nbsize+offset, &(*k)->current_desc, desc_size);
 		offset += desc_size;
 	}

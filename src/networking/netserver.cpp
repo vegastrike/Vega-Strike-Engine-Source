@@ -38,9 +38,10 @@
 VegaConfig * vs_config;
 double	clienttimeout;
 double	logintimeout;
-double	NETWORK_ATOM;
+extern double	NETWORK_ATOM;
 int		acct_con;
 string	tmpdir;
+bool cleanexit;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -995,6 +996,12 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
         packet.ack( );
         break;
+	case CMD_BOLT :
+		// Receive a bolt fire request
+		// Must think to get the Unit * corresponding to that serial (normally just clt->game_unit.GetUnit())
+		break;
+	case CMD_PROJECTILE :
+		break;
     default:
         COUT << "Unknown command " << Cmd(cmd) << " ! "
              << "from client " << clt->serial << endl;
@@ -1016,12 +1023,12 @@ void	NetServer::addClient( Client * clt)
 		// If the system is loaded, there are people in it -> BROADCAST
 		ClientState	tmpcs;
 		memcpy( &tmpcs, packet.getData(), sizeof( ClientState));
-		tmpcs.received();
+		tmpcs.netswap();
 		clt->old_state = tmpcs;
 		clt->current_state = tmpcs;
 		//memcpy( &clt->old_state, &tmpcs, sizeof(ClientState));
 		//memcpy( &clt->current_state, &tmpcs, sizeof(ClientState));
-		tmpcs.tosend();
+		tmpcs.netswap();
 		// Here the other client in the same zone should be warned of a new client
 		// Should also send data about the ship !!! filename ? IDs ?
 		// maybe those thing should be managed in account.xml
@@ -1066,7 +1073,7 @@ void	NetServer::posUpdate( Client * clt)
 	//memcpy( &clt->current_state, packet.getData(), sizeof( ClientState));
 	clt->current_state = *((ClientState *) packet.getData());
 	// Put deltatime in the delay part of ClientState so that it is send to other clients later
-	clt->current_state.received();
+	clt->current_state.netswap();
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	cp->savegame->SetPlayerLocation( clt->current_state.getPosition());
 	clt->current_state.setDelay( clt->deltatime);

@@ -223,7 +223,7 @@ public:
   ///Resolves forces of given unit on a physics frame
   Vector ResolveForces (const Transformation &, const Matrix&);
   ///Applies damage to the local area given by pnt
-  float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
+  //float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects

@@ -153,6 +153,7 @@ float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) 
   return percent;
 }
 
+/*
 template <class UnitType>
 float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
@@ -177,10 +178,10 @@ float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & n
     percentage = DealDamageToShield (pnt,absamt);
 	amt = amt>=0?absamt:-absamt;
     if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
-      /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
-	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
-	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
-	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
+      //      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+	  //    GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
+	  //    GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
+	  //    GFXColor (.5,.5,.5),GFXColor (1,0,.01)));
       //calculate percentage
       if (GetNebula()==NULL) 
 	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
@@ -197,6 +198,7 @@ float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & n
   }
   return 1;
 }
+*/
 
 extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
 

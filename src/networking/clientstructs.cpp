@@ -70,31 +70,11 @@ int		ClientState::operator==( const ClientState & ctmp)
 	//return 0;
 }
 
-void	ClientState::tosend()
-{
-	// Switch everything to network byte order
-	this->delay = htonl( this->delay);
-	this->client_serial = htons( this->client_serial);
-	
-	this->pos.position.i = VSSwapHostDoubleToLittle( this->pos.position.i);
-	this->pos.position.j = VSSwapHostDoubleToLittle( this->pos.position.j);
-	this->pos.position.k = VSSwapHostDoubleToLittle( this->pos.position.k);
-	this->veloc.i = VSSwapHostDoubleToLittle( this->veloc.i);
-	this->veloc.j = VSSwapHostDoubleToLittle( this->veloc.j);
-	this->veloc.k = VSSwapHostDoubleToLittle( this->veloc.k);
-	this->accel.i = VSSwapHostDoubleToLittle( this->accel.i);
-	this->accel.j = VSSwapHostDoubleToLittle( this->accel.j);
-	this->accel.k = VSSwapHostDoubleToLittle( this->accel.k);
-	this->pos.orientation.s = VSSwapHostFloatToLittle( this->pos.orientation.s);
-	this->pos.orientation.v.i = VSSwapHostDoubleToLittle( this->pos.orientation.v.i);
-	this->pos.orientation.v.j = VSSwapHostDoubleToLittle( this->pos.orientation.v.j);
-	this->pos.orientation.v.k = VSSwapHostDoubleToLittle( this->pos.orientation.v.k);
-}
-void	ClientState::received()
+void	ClientState::netswap()
 {
 	// Switch everything to host byte order
-	this->delay = ntohl( this->delay);
-	this->client_serial = ntohs( this->client_serial);
+	this->delay = VSSwapHostIntToLittle( this->delay);
+	this->client_serial = VSSwapHostShortToLittle( this->client_serial);
 
 	this->pos.position.i = VSSwapHostDoubleToLittle( this->pos.position.i);
 	this->pos.position.j = VSSwapHostDoubleToLittle( this->pos.position.j);

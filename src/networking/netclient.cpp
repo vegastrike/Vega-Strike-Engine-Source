@@ -96,9 +96,7 @@ NetClient::~NetClient()
 int		NetClient::authenticate()
 {
 	cout << __FILE__ << ":" 
-#if !(defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129)) //wierd error in MSVC
 	     << __LINE__
-#endif
 	     << " enter " << __PRETTY_FUNCTION__ << endl;
 
 	Packet	packet2;
@@ -126,13 +124,7 @@ int		NetClient::authenticate()
 		memcpy( buffer+NAMELEN, passwd, str_passwd.length());
 		buffer[tmplen] = '\0';
 
-		packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-			0
-#else
-			__LINE__ 
-#endif
-			);
+		packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 		delete buffer;
 		COUT << "Send login for player <" << str_name << ">:< "<< str_passwd
 		     << "> - buffer length : " << packet2.getDataLength()
@@ -173,13 +165,7 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 	PacketMem m( buffer, tmplen, PacketMem::LeaveOwnership );
 	m.dump( cout, 3 );
 
-	packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-			0
-#else
-			__LINE__ 
-#endif
-		);
+	packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	COUT << "Sent login for player <" << str_name << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
@@ -560,7 +546,7 @@ void NetClient::getZoneData( const Packet* packet )
 		offset += state_size;
 		memcpy( &cd, buf+offset, desc_size);
 		offset += desc_size;
-		cs.received();
+		cs.netswap();
 		nser2 = cs.getSerial();
 		nser = nser2;
 		nser = ntohs( nser2);
@@ -734,14 +720,8 @@ void	NetClient::sendPosition( const ClientState* cs )
 	// Send the client state
 	cout<<"Sending position == ";
 	cstmp.display();
-	cstmp.tosend();
-	pckt.send( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-		0
-#else
-		__LINE__ 
-#endif
-		);
+	cstmp.netswap();
+	pckt.send( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__);
 }
 
 /**************************************************************/
@@ -773,7 +753,7 @@ void	NetClient::receivePosition( const Packet* packet )
 		if( cmd == CMD_FULLUPDATE)
 		{
 			memcpy( &cs, (databuf+offset), cssize);
-			cs.received();
+			cs.netswap();
 			// Do what needed with update
 			cout<<"Received FULLSTATE ";
 			// Tell we received the ClientState so we can convert byte order from network to host
@@ -815,7 +795,9 @@ void	NetClient::receivePosition( const Packet* packet )
 				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
 				Clients[sernum]->old_state = Clients[sernum]->current_state;
 				// Set the new received position in current_state
-				QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
+				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
+				QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
+				tmppos.netswap();
 				//tmppos = (QVector) *(databuf+offset);
 				Clients[sernum]->current_state.setPosition( tmppos);
 				// Use SetCurPosition or SetPosAndCumPos ??
@@ -826,7 +808,9 @@ void	NetClient::receivePosition( const Packet* packet )
 			else
 			{
 				ClientState cs2;
-				QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
+				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
+				QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
+				tmppos.netswap();
 				cs2.setPosition( tmppos);
 				cs2.display();
 				cout<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
@@ -847,13 +831,7 @@ void	NetClient::inGame()
 
 	ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
-	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-		0
-#else
-		__LINE__ 
-#endif
-		);
+	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
@@ -866,13 +844,7 @@ void	NetClient::sendAlive()
     if( clt_sock.isTcp() == false )
     {
 	Packet	p;
-	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__,
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-		0
-#else
-		__LINE__ 
-#endif
-		);
+	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__);
     }
 }
 
@@ -934,13 +906,7 @@ void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__,
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-		0
-#else
-		__LINE__ 
-#endif
-		);
+	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	clt_sock.disconnect( "Closing connection to server", false );
 }
 
@@ -1022,3 +988,61 @@ Transformation NetClient::spline_interpolate( ObjSerial clientid, double blend)
 
 	return Transformation( orient, pos);
 }
+
+/******************************************************************************************/
+/*** WEAPON STUFF                                                                      ****/
+/******************************************************************************************/
+
+
+void	NetClient::FireBeam()
+{
+}
+
+void	NetClient::FireBolt( weapon_info wi, const Matrix & mat, const Vector & velocity)
+{
+	// Convert all the vars into network byte order
+	Matrix netmat;
+	CopyMatrix( netmat, mat);
+	netmat.netswap();
+	Vector vel = velocity;
+	vel.netswap();
+	weapon_info netwi = wi;
+	netwi.netswap();
+
+	// Extract the file name and weapon name because they are strings
+	int total_len = 0;
+	int file_len = wi.file.length();
+	int weap_len = wi.weapon_name.length();
+	char * file = new char[file_len+1];
+	char * weapon_name = new char[weap_len+1];
+	memcpy( file, wi.file.c_str(), file_len);
+	file[file_len] = 0;
+	memcpy( weapon_name, wi.weapon_name.c_str(), weap_len);
+	weapon_name[weap_len] = 0;
+
+	// Make the network buffer
+	total_len = sizeof( netmat)+sizeof( vel)+sizeof( netwi)+file_len+weap_len;
+	char * netbuf = new char[total_len];
+	int offset = 0;
+	memcpy( netbuf, &netmat, sizeof( netmat));
+	offset += sizeof( netmat);
+	memcpy( netbuf+offset, &vel, sizeof( vel));
+	offset += sizeof( vel);
+	memcpy( netbuf+offset, &netwi, sizeof( netwi));
+	offset += sizeof( netwi);
+	memcpy( netbuf+offset, file, file_len);
+	offset += file_len;
+	memcpy( netbuf+offset, weapon_name, weap_len);
+
+	Packet p;
+	p.send( CMD_BOLT, this->serial, netbuf, total_len, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+
+	delete netbuf;
+}
+
+void	NetClient::FireProjectile( weapon_info wi)
+{
+	Packet p;
+	p.send( CMD_PROJECTILE, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+}
+

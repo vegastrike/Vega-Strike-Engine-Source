@@ -47,6 +47,8 @@ libnetacct_a_SOURCES = $(libnetgeneric) \
 libnetserver_a_SOURCES = $(libnetgeneric) \
 	netserver.cpp	\
 	netserver.h	\
+	netclient.cpp	\
+	netclient.h	\
 	cubicsplines.cpp	\
 	cubicsplines.h		\
 	savenet_util.cpp	\

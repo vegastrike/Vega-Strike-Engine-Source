@@ -22,6 +22,7 @@
 #define _MATRIX_H
 
 #include "vec.h"
+#include "endianness.h"
 class Matrix {
  private:
   float operator [] (int i);
@@ -30,6 +31,13 @@ class Matrix {
   QVector p;  
   Matrix() {}
 
+  // Convert the matrix into network byte order
+  void	netswap()
+  {
+	for( int i=0; i<9; i++)
+  		r[i] = VSSwapHostFloatToLittle( r[i]);
+	p.netswap();
+  }
   Vector getR() const{return Vector (r[6],r[7],r[8]);}
   Vector getQ() const{return Vector (r[3],r[4],r[5]);}
   Vector getP() const{return Vector (r[0],r[1],r[2]);}

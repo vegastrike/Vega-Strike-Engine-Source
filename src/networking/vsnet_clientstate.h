@@ -62,8 +62,7 @@ class	ClientState
 
 		void		display();
 		int		operator==( const ClientState & ctmp);
-		void	tosend();
-		void	received();
+		void	netswap();
 		//friend class Client;
 };
 
