@@ -160,16 +160,16 @@ AI* MoveTo::Execute(){
 
 //the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
 // vslowdown - decel * t = 0               t = vslowdown/decel
-// finalx = .5 decel ( v/decel)^2 + v^2 / decel + slowdownx = 1.5 * v^2 / decel + slowdownx 
+// finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = 1.5 * v^2 / decel + slowdownx 
 // slowdownx =  .5 accel * t^2 + v0 * t + initx
-// finalx = (1.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
+// finalx = (.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
 
-// Length = (1.5*accel^2*t^2+3*accel*t*v0+ 1.5 *v0^2)/decel + .5 accel * t^2 + v0*t
+// Length = (.5*accel^2*t^2+accel*t*v0+ .5 *v0^2)/decel + .5 accel * t^2 + v0*t
 // Now we assume accel = decel.... for purposes of stupidity :-)
-// Length = 2 accel * t^2 + 4 * t*v0 + 1.5*v0^2/accel
+// Length = accel * t^2 +  2*t*v0 + .5*v0^2/accel
 
-// t = ( -4*v0 (+/-) sqrtf (16*v0^2 - 8*(1.5*v0^2 - accel*Length) ) / (4*accel)) 
-// t = -v0/a + sqrtf (v0^2+ 2*Length*accel)/(2*accel);
+// t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel)) 
+// t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
 
 AI * ChangeHeading::Execute() {
   if (done) return NULL;
