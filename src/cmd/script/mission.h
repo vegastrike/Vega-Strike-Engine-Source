@@ -301,7 +301,7 @@ class varInst {
   var_type type;
 
   scope_type scopetype;
-  float  float_val;
+  double  float_val;
   bool   bool_val;
   int    int_val;
   string string_val;
@@ -420,7 +420,7 @@ class Mission {
 
 
 #ifndef VS_MIS_SEL
-  void GetOrigin(Vector &pos,string &planetname);
+  void GetOrigin(QVector &pos,string &planetname);
 
   void DirectorLoop();
   void DirectorStart(missionNode *node);
@@ -452,7 +452,7 @@ void destroyClassInstance(string modulename,unsigned int classid);
 
   MessageCenter *msgcenter;
 
-void call_vector_into_olist(varInst *vec_vi,Vector vec3);
+void call_vector_into_olist(varInst *vec_vi,QVector vec3);
 void  deleteVarInst(varInst *vi,bool del_local=false);
 
 #endif // VS_MIS_SEL
@@ -524,7 +524,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   void doFlightgroups(easyDomNode *node);
   void doOrder(easyDomNode *node,Flightgroup *fg);
   void checkFlightgroup(easyDomNode *node);
-  bool doPosition(easyDomNode *node,float pos[3],class CreateFlightgroup *);
+  bool doPosition(easyDomNode *node,double pos[3],class CreateFlightgroup *);
   bool doRotation(easyDomNode *node,float rot[3],class CreateFlightgroup *);
   void doOrigin(easyDomNode *node);
   void doSettings(easyDomNode *node);
@@ -568,7 +568,7 @@ int checkIntExpr(missionNode *node,int mode);
 int  doIMath(missionNode *node,int mode);
 varInst * doMath(missionNode *node,int mode);
 int intMath(string mathname,int res1,int res2);
-float floatMath(string mathname,float res1,float res2);
+double floatMath(string mathname,double res1,double res2);
  varInst *checkExpression(missionNode *node,int mode);
 
  void assignVariable(varInst *v1,varInst *v2);
@@ -576,9 +576,9 @@ float floatMath(string mathname,float res1,float res2);
 scriptContext *makeContext(missionNode *node);
  bool checkVarType(varInst *var,enum var_type check_type);
 
- float checkFloatExpr(missionNode *node,int mode);
- float doFloatVar(missionNode *node,int mode);
- float doFMath(missionNode *node,int mode);
+ double checkFloatExpr(missionNode *node,int mode);
+ double doFloatVar(missionNode *node,int mode);
+ double doFMath(missionNode *node,int mode);
 
  void doArguments(missionNode *node,int mode,varInstMap *varmap=NULL);
  void doReturn(missionNode *node,int mode);
@@ -651,7 +651,7 @@ string method_str(missionNode *node);
 varInst * call_olist_at(missionNode *node,int mode,varInst *ovi,int index);
 varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 void  call_olist_toxml(missionNode *node,int mode,varInst *ovi);
- Vector call_olist_tovector(missionNode *node,int mode,varInst *ovi);
+ QVector call_olist_tovector(missionNode *node,int mode,varInst *ovi);
  void call_olist_set(missionNode *node,int mode,varInst *ovi,int index,varInst *new_vi);
 
 varInst* call_omap(missionNode *node,int mode);
@@ -693,9 +693,9 @@ void deleteVarMap(varInstMap *vmap);
 varInst * call_order(missionNode *node,int mode);
 Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
 
- Vector getVec3Arg(missionNode *node,int mode,int arg_nr);
- float getFloatArg(missionNode *node,int mode,int arg_nr);
- float getIntArg(missionNode *node,int mode,int arg_nr);
+ QVector getVec3Arg(missionNode *node,int mode,int arg_nr);
+ double getFloatArg(missionNode *node,int mode,int arg_nr);
+ int getIntArg(missionNode *node,int mode,int arg_nr);
  bool getBoolArg(missionNode *node,int mode,int arg_nr);
 Unit * getUnitArg(missionNode *node,int mode,int arg_nr);
 

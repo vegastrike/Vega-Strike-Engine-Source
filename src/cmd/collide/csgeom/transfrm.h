@@ -190,13 +190,13 @@ public:
   ///Daniel: I think that this matrix is in row major order...
   ///but it appears to look for the matrix that takes from world to object
   ///hence it is the transpose... transpose of transpose is identty...which is what I pass in below
-  csReversibleTransform (const Matrix m):csTransform (csMatrix3 (m[0],m[1],m[2],
-							   m[4],m[5],m[6],
-							   m[8],m[9],m[10]),
+  csReversibleTransform (const Matrix &m):csTransform (csMatrix3 (m.r[0],m.r[1],m.r[2],
+							   m.r[3],m.r[4],m.r[5],
+							   m.r[6],m.r[7],m.r[8]),
 							   /*1,0,0,
 						0,1,0,
 						0,0,1),*/
-						csVector3 (m[12],m[13],m[14])) {
+						csVector3 (m.p.i,m.p.j,m.p.k)) {
     m_t2o = m_o2t.GetInverse ();
   }
   /**

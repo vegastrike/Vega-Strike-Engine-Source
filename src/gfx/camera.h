@@ -18,7 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "vec.h"
+
+
+#include "matrix.h"
 #include "gfxlib.h"
 #include "physics.h"
 
@@ -29,10 +31,10 @@ class PlanetaryTransform;
 class Nebula;
 class Camera{
   
-	Vector Coord;
+	QVector Coord;
 	Matrix planetview;
 	GFXBOOL changed;
-	Vector lastpos;
+	QVector lastpos;
 	float x, y, xsize, ysize;
 	float zoom;
 	float cockpit_offset;
@@ -47,7 +49,9 @@ public:
 private:
 	ProjectionType projectionType;
 	PlanetaryTransform * planet;
+
 public:
+	void LookDirection(const Vector &forevec, const Vector &up);
 	Vector P,Q,R;
 	void SetNebula(Nebula * neb);
 	Nebula * GetNebula();
@@ -57,21 +61,21 @@ public:
 	///This function updates the sound if sound is not updated on a per frame basis
 	void UpdateCameraSounds();
 	Camera(ProjectionType proj = PERSPECTIVE);
-        void GetView (Matrix);
+        void GetView (Matrix &);
         const Vector & GetR () {return R;}
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
 	void UpdateGFX(GFXBOOL clip= GFXTRUE, GFXBOOL updateFrustum=GFXTRUE);
 	void UpdatePlanetGFX();//clip true, frustum true at all times
-	float * GetPlanetGFX();
+	Matrix * GetPlanetGFX();
 	void UpdateGLCenter();
 
-	void SetPosition(const Vector &origin);
-	void GetPosition(Vector &vect);
+	void SetPosition(const QVector &origin);
+	void GetPosition(QVector &vect) {vect=Coord;}
 	Vector GetVelocity ();
-	void GetOrientation(Vector &p, Vector &q, Vector &r);
-	const Vector &GetPosition();
+	void GetOrientation(Vector &p, Vector &q, Vector &r) {p=P;q=Q;r=R;}
+	const QVector &GetPosition() { return Coord;}
 
-	void LookAt(const Vector &loc, const Vector &up);
+
 	void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 	void SetSubwindow(float x, float y, float xsize, float ysize);
 	void SetProjectionType(ProjectionType t);

@@ -154,7 +154,7 @@ void Mission::doOrigin(easyDomNode *node){
 /* *********************************************************** */
 
 #ifndef VS_MIS_SEL
-void Mission::GetOrigin(Vector &pos,string &planetname){
+void Mission::GetOrigin(QVector &pos,string &planetname){
   //  float pos[3];
 
   if(origin_node==NULL){
@@ -267,7 +267,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
   bool have_pos=false;
   bool have_rot=false;
 
-  float pos[3];
+  double pos[3];
   float rot[3];
 
   rot[0]=rot[1]=rot[2]=0.0;
@@ -327,7 +327,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
 /* *********************************************************** */
 
-bool Mission::doPosition(easyDomNode *node,float pos[3], CreateFlightgroup * cf){
+bool Mission::doPosition(easyDomNode *node,double pos[3], CreateFlightgroup * cf){
   string x=node->attr_value("x");
   string y=node->attr_value("y");
   string z=node->attr_value("z");
@@ -340,9 +340,9 @@ bool Mission::doPosition(easyDomNode *node,float pos[3], CreateFlightgroup * cf)
     return false;
   }
 
-  pos[0]=atof(x.c_str());
-  pos[1]=atof(y.c_str());
-  pos[2]=atof(z.c_str());
+  pos[0]=strtod(x.c_str(),NULL);
+  pos[1]=strtod(y.c_str(),NULL);
+  pos[2]=strtod(z.c_str(),NULL);
 
   if(cf!=NULL){
     pos[0]+=cf->fg->pos.i;

@@ -19,7 +19,7 @@ void StarSystem::UpdateMissiles() {
   
 }
 void MissileEffect::ApplyDamage (Unit * smaller) {
-  float rad =(smaller->Position()-pos).Magnitude()-smaller->rSize();
+  float rad =(smaller->Position().Cast()-pos).Magnitude()-smaller->rSize();
   rad=rad*rad;
   if (smaller->isUnit()!=MISSILEPTR&&rad<radius*radius) {
     //    fprintf (stderr,"exploding %s %d at radius %f with dist %f %f\n",smaller->name.c_str(),smaller,radius,sqrtf(rad),(smaller->Position()-pos).Magnitude());
@@ -27,7 +27,7 @@ void MissileEffect::ApplyDamage (Unit * smaller) {
     if (rad<1)
       rad=1;
     if( (damage>0)) {
-      Vector norm (pos-smaller->Position());
+      Vector norm (pos-smaller->Position().Cast());
       norm.Normalize();
       //divide effects by r^2
       smaller->ApplyDamage (pos,norm,damage/rad,smaller,GFXColor(1,1,1,1),NULL,phasedamage>0?phasedamage/rad:0);
@@ -47,14 +47,14 @@ void StarSystem::AddMissileToQueue(MissileEffect * me) {
 }
 void Missile::Discharge() {
   if (!discharged)
-    _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(Position(),damage,phasedamage,radial_effect,radial_multiplier));
+    _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(Position().Cast(),damage,phasedamage,radial_effect,radial_multiplier));
   discharged =true;
 }
 void Missile::Kill (bool erase) {
   Discharge();
   Unit::Kill(erase);
 }
-void Missile::reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
+void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
   static bool doesmissilebounce  = XMLSupport::parse_bool (vs_config->getVariable("physics","missile_bounce","false"));
   if (doesmissilebounce) {
 
@@ -62,10 +62,11 @@ void Missile::reactToCollision (Unit * smaller, const Vector & biglocation, cons
   }
   Discharge();
   if (!killed)
-    DealDamageToHull (smalllocation,hull+1);//should kill, applying addmissile effect
+    DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
   
 }
-void Missile::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
+
+void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
     Unit * targ;
     if ((targ=Target())) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){

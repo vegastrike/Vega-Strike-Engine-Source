@@ -42,7 +42,7 @@
 #endif
 #define GFXTRUE 1
 #define GFXFALSE 0
-
+class Matrix;
 
 using std::vector;
 
@@ -145,23 +145,28 @@ void /*GFXDRVAPI*/ GFXHudMode(const bool Enter);
 //this resets the matrices to what they were when we entered it, without chanigng pushed orpoped matrices
 void /*GFXDRVAPI*/ GFXRestoreHudMode ();
 void /*GFXDRVAPI*/ GFXCenterCamera (const bool Enter);
-void /*GFXDRVAPI*/ GFXTranslateView (const Vector &r);
-void /*GFXDRVAPI*/ GFXLoadMatrixView (const Matrix matrix, const Vector &camloc);
-void /*GFXDRVAPI*/ GFXLoadIdentityView();
-void /*GFXDRVAPI*/ GFXGetMatrixView (Matrix m);
+void /*GFXDRVAPI*/ GFXTranslateView (const QVector &r);
+void /*GFXDRVAPI*/ GFXLoadMatrixView (const Matrix &matrix);
+void /*GFXDRVAPI*/ GFXGetMatrixView (Matrix &m);
 ///Translates the current "mode" matrix by a given vector
-void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector & r);
+
+void /*GFXDRVAPI*/ GFXTranslateProjection( const Vector & r);
+void /*GFXDRVAPI*/ GFXTranslateModel( const QVector & r);
 ///Multipliex the current "mode" matrix by a given matrix
-void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix);
+void /*GFXDRVAPI*/ GFXMultMatrixModel(const Matrix &matrix);
+
 
 ///loads a given matrix to the current "mode"
-void  /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix);
+void  /*GFXDRVAPI*/ GFXLoadMatrixModel( const Matrix &matrix);
+void  /*GFXDRVAPI*/ GFXLoadMatrixProjection( const float matrix[16]);
+
+void  /*GFXDRVAPI*/ GFXLoadMatrixView( const Matrix &matrix);
 
 ///Loads the identity matrix for the given mode
 void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode);
 
 ///retrieves the matrix for a given mode.
-void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix);
+void /*GFXDRVAPI*/ GFXGetMatrixModel(Matrix &matrix);
 
 ///Given the current projection matrix, how much will the model be divided by
 float /*GFXDRVAPI*/ GFXGetZPerspective (const float z);
@@ -178,7 +183,7 @@ void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
 void /*GFXDRVAPI*/ GFXViewPort (int minx, int miny, int maxx, int maxy);
 
 ///Sets the VIEW matrix to look from center in direction of eye with up vector up
-void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
+void /*GFXDRVAPI*/ GFXLookAt(Vector eye, QVector center, Vector up);
 
 ///Gets the 6 clip planes of the current Projection matrix
 void /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
@@ -187,7 +192,7 @@ void /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
 void /*GFXDRVAPI*/ GFXCalculateFrustum();
 
 ///Calculates the planes for a given frustum in 3space given a matrix and a projection.
-void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],float *modlmatrix, float *projection);
+void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],const Matrix &modlmatrix, const float *projection);
 
 ///Saves and restores last used left,right,bot,top,near,far vals (internal use)
 void /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *t, float *n, float *f);
@@ -198,7 +203,7 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum(const Vector &Center, float Radius);
 ///Checks if a sphere is in the given frustum calculated by GFXCalculateFrustum. Used in Unit clipping
 float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4],const Vector &Center, float Radius);
 
-void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix model);
+void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix &model);
 
 CLIPSTATE /*GFXDRVAPI*/ GFXBoxInFrustum (const Vector & min, const Vector & max);
 
@@ -210,7 +215,7 @@ CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (float f[6][4],const Vector 
 
 
 ///Given matrices, calculates the matrix and inverse matrix of a projection matrix to go from screen to 3-space coordinates
-void /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, float bottom, float top, float nearval, float farval);
+void /*GFXDRVAPI*/ GFXFrustum (float *mat, float *inv, float left,float right, float bottom, float top, float nearval, float farval);
 
 //Textures
 /**
@@ -306,9 +311,10 @@ void /*GFXDRVAPI*/ GFXNormal(const Vector &n);
 
 ///Specifies a vertex with 3 floats
 void /*GFXDRVAPI*/ GFXVertex3f(const float x, const float y, const float z = 1.0);
+void /*GFXDRVAPI*/ GFXVertex3f(const double x, const double y, const double z = 1.0);
 ///Specifies a vertex with a vector
 void /*GFXDRVAPI*/ GFXVertexf (const Vector &v);
-
+void /*GFXDRVAPI*/ GFXVertexf (const QVector &v);
 ///Ends the current set of polytypes
 void /*GFXDRVAPI*/ GFXEnd();
 void /*GFXDRVAPI*/ GFXCircle (float x, float y, float r1,float r2);

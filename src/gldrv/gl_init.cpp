@@ -59,7 +59,7 @@
 #include <stdio.h>
 #include "gl_init.h"
 #define WINDOW_TITLE "Vega Strike "VERSION
-static int glutWindow;
+
 
 #ifdef WIN32
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;

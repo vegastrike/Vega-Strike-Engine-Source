@@ -31,11 +31,11 @@ class MoveTo : public Order {
   bool Done (const Vector &);
 public:
   ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
-  MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
+  MoveTo(const QVector &target, bool aft, unsigned char numswitchbacks) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
     targetlocation = target;
     done=false;
   }
-  void SetDest (const Vector&);
+  void SetDest (const QVector&);
   virtual void Execute();
   virtual ~MoveTo();
   virtual string getOrderDescription() { return "moveto"; };
@@ -53,7 +53,7 @@ class ChangeHeading : public Order {
   unsigned char terminatingX;
   unsigned char terminatingY;
   Vector last_velocity;
-  Vector final_heading;
+  QVector final_heading;
   bool terminating;
   bool OptimizeAngSpeed(float limit, float v, float &a);
   bool Done (const Vector &);
@@ -63,8 +63,8 @@ protected:
  
  public:
   ///takes in the destination target, and the ammount of accuracy (how many times it should miss destination and come back) should be used
-   ChangeHeading(const Vector &final_heading, int switchback, float turning_speed=1) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
-  void SetDest (const Vector&);
+   ChangeHeading(const QVector &final_heading, int switchback, float turning_speed=1) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
+  void SetDest (const QVector&);
   virtual void Execute();
   virtual string getOrderDescription() { return "chhead"; };
   virtual ~ChangeHeading();
@@ -98,10 +98,10 @@ public:
   virtual ~FaceTargetITTS();
 };
  class FormUp : public MoveTo {
-   Vector Pos;
+   QVector Pos;
  public:
-   FormUp(const Vector &Position);
-   void SetPos (const Vector &);
+   FormUp(const QVector &Position);
+   void SetPos (const QVector &);
   virtual void SetParent (Unit * parent1);
    virtual void Execute();
    virtual string getOrderDescription () {return "formup";}

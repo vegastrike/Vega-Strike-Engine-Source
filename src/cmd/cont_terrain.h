@@ -15,26 +15,26 @@ class ContinuousTerrain {
   Terrain **data;
   MeshDat * md;
   Matrix transformation;
-  Vector *location;
+  QVector *location;
   bool *dirty;
-  bool checkInvScale(float &pos, float campos, float size);
+  bool checkInvScale(double &pos, double campos, float size);
  public:
   ContinuousTerrain (const char* filenameUL, const Vector & Scales=Vector (0,0,0), const float mass=0);
-  void SetTransformation (Matrix transformation);
+  void SetTransformation (const Matrix &transformation);
   /**
    *  Centers terrain around camera
    */
   void AdjustTerrain(StarSystem *);
 
-  void AdjustTerrain(Matrix transform, const Matrix transformation, const Vector &unitpos,int i);
+  void AdjustTerrain(Matrix &transform, const Matrix &transformation, const QVector &unitpos,int i);
   ~ContinuousTerrain();
   void DisableDraw();
   void EnableDraw();
   void DisableUpdate();
   void EnableUpdate();
   void Draw();
-  Vector GetGroundPosIdentTrans (Vector ShipPos, Vector &norm);
-  Vector GetGroundPos(Vector ShipPos, Vector & norm);
+  QVector GetGroundPosIdentTrans (QVector ShipPos, Vector &norm);
+  QVector GetGroundPos(QVector ShipPos, Vector & norm);
   Vector GetUpVector (const Vector & pos);
   void Collide (Unit * un, Matrix trans);
   void Collide (Unit * un);

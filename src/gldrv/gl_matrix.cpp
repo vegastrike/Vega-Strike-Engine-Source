@@ -37,55 +37,9 @@
 
 #include "vs_globals.h"
 
-
-//#include <GL/glu.h>
-
-
-float Magnitude(Vector v)
-{
-	return sqrtf(v.i*v.i + v.j*v.j + v.k*v.k);
-}
-
-
-/*
-Vector operator*(float left, const Vector &right)
-{
-	return Vector(right.i*left, right.j*left, right.k*left);
-}*/
-
-float DotProduct(Vector &a, Vector &b)
-{
-	return a.Dot(b);
-}
-
-
-static float centerx,centery,centerz;
-
 using namespace GFXMatrices;  //causes problems with g_game
-void evaluateViews (const Vector & myvec) {
-  centerx = myvec.i;
-  centery = myvec.j;
-  centerz = myvec.k;
-  //Identity(transview);
-  Identity (rotview);
-#define M(row,col) rotview[col*4+row]
-  rotview[0]=view[0];
-  rotview[1]=view[1];
-  rotview[2]=view[2];
-  //  transview[3]=view[3];
-  rotview[4]=view[4];
-  rotview[5]=view[5];
-  rotview[6]=view[6];
-  //  transview[7]=view[7];
-  rotview[8]=view[8];
-  rotview[9]=view[9];
-  rotview[10]=view[10];
-  //    transview[11]=view[11];
-  //      fprintf (stderr,"trans %f,%f,%f",transview[3],transview[7],transview[11]);
-#undef M
 
-}
-Vector eye, center, up;
+
 void getInverseProjection (float *& inv) {
   inv = invprojection;
 }
@@ -97,157 +51,176 @@ float GFXGetXInvPerspective () {
 float GFXGetYInvPerspective() {
   return /*invprojection[11]*  */invprojection[5];//invprojection[15];//should be??  c/d == invproj[15]
 }
-inline void ViewToModel (bool tofrom) {
-  static Vector t;
-  if (tofrom) {
-    t.Set (model[12],model[13],model[14]);
-    //    fprintf (stderr,"oldpos <%f %f %f> newpos <%f %f %f>",_Universe->AccessCamera()->GetPosition().i,_Universe->AccessCamera()->GetPosition().j,_Universe->AccessCamera()->GetPosition().k,centerx,centery,centerz);
-    model[12]-=centerx;//_Universe->AccessCamera()->GetPosition().i;
-      model[13]-=centery;//_Universe->AccessCamera()->GetPosition().j;
-      model[14]-=centerz;//_Universe->AccessCamera()->GetPosition().k;
-  }else {
-    model[12]=t.i;
-    model[13]=t.j;
-    model[14]=t.k;
-  }
+static void MatrixToDoubles (double t[],const Matrix & m) {
+  t[0]=m.r[0];//possible performance hit?!?!
+  t[1]=m.r[1];
+  t[2]=m.r[2];
+  t[3]=0;
+  t[4]=m.r[3];
+  t[5]=m.r[4];
+  t[6]=m.r[5];
+  t[7]=0;
+  t[8]=m.r[6];
+  t[9]=m.r[7];
+  t[10]=m.r[8];
+  t[11]=0;
+  t[12]=(m.p.i);
+  t[13]=(m.p.j);
+  t[14]=(m.p.k);
+  t[15]=1;
 }
-void GFXTranslateView (const Vector &a) {
-	  view[12]+=a.i*view[0]+a.j*view[4]+a.k*view[8];
-	  view[13]+=a.i*view[1]+a.j*view[5]+a.k*view[9];
-	  view[14]+=a.i*view[2]+a.j*view[6]+a.k*view[10];
-	  evaluateViews (Vector (centerx, centery, centerz)+a);
-	  glMatrixMode(GL_MODELVIEW);
+inline void ViewToModel () {
+  double t [16];
+  MatrixToDoubles (t,model);
+  t[12]=(model.p.i-view.p.i);
+  t[13]=(model.p.j-view.p.j);
+  t[14]=(model.p.k-view.p.k);
+  glMatrixMode (GL_MODELVIEW);
+  glLoadMatrixd (t);
+}
+static void IdentityFloat (float id[]) {
+  id[0]=id[5]=id[10]=id[15]=1;
+  id[1]=id[2]=id[3]=id[4]=id[6]=id[7]=id[8]=id[9]=id[11]=id[12]=id[13]=id[14]=0;
+}
+void MultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
+{
+  dest[0] = m1[0]*m2.r[0] + m1[4]*m2.r[1] + m1[8]*m2.r[2];
+  dest[1] = m1[1]*m2.r[0] + m1[5]*m2.r[1] + m1[9]*m2.r[2];
+  dest[2] = m1[2]*m2.r[0] + m1[6]*m2.r[1] + m1[10]*m2.r[2];
+  dest[3] = m1[3]*m2.r[0] + m1[7]*m2.r[1] + m1[11]*m2.r[2];
+
+  dest[4] = m1[0]*m2.r[3] + m1[4]*m2.r[4] + m1[8]*m2.r[5];
+  dest[5] = m1[1]*m2.r[3] + m1[5]*m2.r[4] + m1[9]*m2.r[5];
+  dest[6] = m1[2]*m2.r[3] + m1[6]*m2.r[4] + m1[10]*m2.r[5];
+  dest[7] = m1[3]*m2.r[3] + m1[7]*m2.r[4] + m1[11]*m2.r[5];
+
+  dest[8] = m1[0]*m2.r[6] + m1[4]*m2.r[7] + m1[8]*m2.r[8];
+  dest[9] = m1[1]*m2.r[6] + m1[5]*m2.r[7] + m1[9]*m2.r[8];
+  dest[10] = m1[2]*m2.r[6] + m1[6]*m2.r[7] + m1[10]*m2.r[8];
+  dest[11] = m1[3]*m2.r[6] + m1[7]*m2.r[7] + m1[11]*m2.r[8];
+
+  dest[12] = m1[0]*m2.p.i + m1[4]*m2.p.j + m1[8]*m2.p.k + m1[12];
+  dest[13] = m1[1]*m2.p.i + m1[5]*m2.p.j + m1[9]*m2.p.k + m1[13];
+  dest[14] = m1[2]*m2.p.i + m1[6]*m2.p.j + m1[10]*m2.p.k + m1[14];
+  dest[15] = m1[3]*m2.p.i + m1[7]*m2.p.j + m1[11]*m2.p.k + m1[15];
+
+}
+static void RotateFloatMatrix(float dest[], const float m1[], const Matrix &m2)
+{
+  dest[0] = m1[0]*m2.r[0] + m1[4]*m2.r[1] + m1[8]*m2.r[2];
+  dest[1] = m1[1]*m2.r[0] + m1[5]*m2.r[1] + m1[9]*m2.r[2];
+  dest[2] = m1[2]*m2.r[0] + m1[6]*m2.r[1] + m1[10]*m2.r[2];
+  dest[3] = m1[3]*m2.r[0] + m1[7]*m2.r[1] + m1[11]*m2.r[2];
+
+  dest[4] = m1[0]*m2.r[3] + m1[4]*m2.r[4] + m1[8]*m2.r[5];
+  dest[5] = m1[1]*m2.r[3] + m1[5]*m2.r[4] + m1[9]*m2.r[5];
+  dest[6] = m1[2]*m2.r[3] + m1[6]*m2.r[4] + m1[10]*m2.r[5];
+  dest[7] = m1[3]*m2.r[3] + m1[7]*m2.r[4] + m1[11]*m2.r[5];
+
+  dest[8] = m1[0]*m2.r[6] + m1[4]*m2.r[7] + m1[8]*m2.r[8];
+  dest[9] = m1[1]*m2.r[6] + m1[5]*m2.r[7] + m1[9]*m2.r[8];
+  dest[10] = m1[2]*m2.r[6] + m1[6]*m2.r[7] + m1[10]*m2.r[8];
+  dest[11] = m1[3]*m2.r[6] + m1[7]*m2.r[7] + m1[11]*m2.r[8];
+
+  dest[12] = m1[12];
+  dest[13] = m1[13];
+  dest[14] = m1[14];
+  dest[15] = m1[15];
+
+}
+static void InvRotateFloatMatrix(float dest[], const float m1[], const Matrix &m2)
+{
+  dest[0] = m1[0]*m2.r[0] + m1[4]*m2.r[3] + m1[8]*m2.r[6];
+  dest[1] = m1[1]*m2.r[0] + m1[5]*m2.r[3] + m1[9]*m2.r[6];
+  dest[2] = m1[2]*m2.r[0] + m1[6]*m2.r[3] + m1[10]*m2.r[6];
+  dest[3] = m1[3]*m2.r[0] + m1[7]*m2.r[3] + m1[11]*m2.r[6];
+
+  dest[4] = m1[0]*m2.r[1] + m1[4]*m2.r[4] + m1[8]*m2.r[7];
+  dest[5] = m1[1]*m2.r[1] + m1[5]*m2.r[4] + m1[9]*m2.r[7];
+  dest[6] = m1[2]*m2.r[1] + m1[6]*m2.r[4] + m1[10]*m2.r[7];
+  dest[7] = m1[3]*m2.r[1] + m1[7]*m2.r[4] + m1[11]*m2.r[7];
+
+  dest[8] = m1[0]*m2.r[2] + m1[4]*m2.r[5] + m1[8]*m2.r[8];
+  dest[9] = m1[1]*m2.r[2] + m1[5]*m2.r[5] + m1[9]*m2.r[8];
+  dest[10] = m1[2]*m2.r[2] + m1[6]*m2.r[5] + m1[10]*m2.r[8];
+  dest[11] = m1[3]*m2.r[2] + m1[7]*m2.r[5] + m1[11]*m2.r[8];
+
+  dest[12] = m1[12];
+  dest[13] = m1[13];
+  dest[14] = m1[14];
+  dest[15] = m1[15];
+
+}
+
+
+void ConstructAndLoadProjection() {
+
+  float t[16];
+  RotateFloatMatrix (t,projection,view);
+  glMatrixMode(GL_PROJECTION);
+  glLoadMatrixf(t);
+}
+
+
+void /*GLDRVAPI*/ GFXTranslateView (const QVector &a) {
+
+	  view.p += TransformNormal (view,a);
 	  //	  glPopMatrix();
 	  //	  glLoadIdentity();
 	  //	  glTranslatef(-view[12],-view[13],-view[14]);
 	  //	  glPushMatrix();
-	  ViewToModel (true);
-	  glLoadMatrixf(model);
-	  ViewToModel (false);
+	  ViewToModel ();
 }
 
-void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector & a) 
+void /*GFXDRVAPI*/ GFXTranslateModel( const QVector & a) 
 {
-	switch(mode)
-	{
-	case MODEL:
-	  model[12]+=a.i*model[0]+a.j*model[4]+a.k*model[8];
-	  model[13]+=a.i*model[1]+a.j*model[5]+a.k*model[9];
-	  model[14]+=a.i*model[2]+a.j*model[6]+a.k*model[10];
-	  glMatrixMode(GL_MODELVIEW);
-	  glTranslatef(a.i,a.j,a.k);
-	  break;
-	case PROJECTION:
-	  projection[12]+=a.i*projection[0]+a.j*projection[4]+a.k*projection[8];
-	  projection[13]+=a.i*projection[1]+a.j*projection[5]+a.k*projection[9];
-	  projection[14]+=a.i*projection[2]+a.j*projection[6]+a.k*projection[10];
-	  {
-	    Matrix t;
-	    MultMatrix (t,projection,rotview);
-	    glMatrixMode(GL_PROJECTION);
-	    glLoadMatrixf(t);
-	  }
-	  break;
-	}
+	  model.p+=TransformNormal (model,a);
+	  ViewToModel();
+}
+void /*GFXDRVAPI*/ GFXTranslateProjection (const Vector & a) {
+          projection[12]+=a.i*projection[0]+a.j*projection[4]+a.k*projection[8];
+          projection[13]+=a.i*projection[1]+a.j*projection[5]+a.k*projection[9];
+          projection[14]+=a.i*projection[2]+a.j*projection[6]+a.k*projection[10];
+	  ConstructAndLoadProjection();
 }
 
-#if 0
-void GFXMultMatrixView (const Matrix) {
-  const int MULTMATRIXVIEWNOTIMPLEMENTED=0;
-  assert (MULTMATRIXVIEWNOTIMPLEMENTED);
-  MultMatrix(t, view, matrix);
-  CopyMatrix(view, t);
-  evaluateViews();
-  MultMatrix(t, projection,rotview);
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrixf(t);
-  glMatrixMode(GL_MODELVIEW);
-  //glPopMatrix();
-  //glLoadIdentity();
-  //glTranslatef(-centerx,-centery,-centerz);
-  //glPushMatrix();
-  ViewToModel (true);
-  glLoadMatrixf(model);
-  ViewToModel (false);
-}
-#endif
-void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix)
-{
+void /*GFXDRVAPI*/ GFXMultMatrixModel(const Matrix &matrix) {
 	Matrix t;
-	switch(mode)
-	{
-	case MODEL:
-	  MultMatrix(t, model, matrix);
-	  CopyMatrix(model, t);
-	  glMatrixMode(GL_MODELVIEW);
-	  //glPopMatrix();
-	  //glPushMatrix();
-	  ViewToModel (true);
-	  glLoadMatrixf(model);
-	  ViewToModel (false);
-	  break;
-	case PROJECTION:
-		MultMatrix(t, projection, matrix);
-		CopyMatrix(projection, t);
-		MultMatrix (t,projection,rotview);
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(t);
-		break;
-	}
+	MultMatrix(t, model, matrix);
+	CopyMatrix(model, t);
+	ViewToModel ();
 }
-float *mm = model;
-float *vv = view;
-void GFXLoadMatrixView (const Matrix matrix, const Vector &camloc) {
-
+//Matrix *mm = model;
+//Matrix *vv = view;
+void GFXLoadMatrixView (const Matrix &matrix) {
 		CopyMatrix(view, matrix);
-		Matrix t;
-		evaluateViews(camloc);
-		glMatrixMode(GL_MODELVIEW);
-		ViewToModel (true);
-		glLoadMatrixf(model);
-		ViewToModel (false);
-		glMatrixMode(GL_PROJECTION);
-		MultMatrix (t,projection,rotview);
-		glLoadMatrixf(t);
-		
-}
-void /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix)
-{
-	switch(mode)
-	{
-	case MODEL:
-	  CopyMatrix(model, matrix);
-		glMatrixMode(GL_MODELVIEW);
-		//		glPopMatrix();
-		//		glPushMatrix();
-		ViewToModel (true);
-		glLoadMatrixf(model);
-		ViewToModel (false);
-		break;
-	case PROJECTION:
-		CopyMatrix(projection, matrix);
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(projection);
-		glMultMatrixf(rotview);
-		break;
-	}
+		ViewToModel ();
+		ConstructAndLoadProjection ();		
 }
 
-void GFXViewPort (int minx, int miny, int maxx, int maxy) {
+void /*GFXDRVAPI*/ GFXLoadMatrixModel( const Matrix &matrix) {
+	  CopyMatrix(model, matrix);
+	  ViewToModel();
+}
+
+void /*GFXDRVAPI*/ GFXLoadMatrixProjection (const float matrix[16]) {
+  memcpy (projection,matrix,16*sizeof(float));
+  ConstructAndLoadProjection ();		 
+}
+
+void /*GFXDRVAPI*/ GFXViewPort (int minx, int miny, int maxx, int maxy) {
   glViewport (minx,miny,maxx,maxy);
 }
 
-void GFXCenterCamera (bool Enter) {
-  static Vector tmp;
+void /*GFXDRVAPI*/ GFXCenterCamera (bool Enter) {
+  static QVector tmp;
   if (Enter) {
-    tmp.Set (centerx,centery,centerz);
-    centerx=0;centery=0;centerz=0;
+    tmp=view.p;
+    view.p.Set(0,0,0);
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();
   }else {
-    centerx = tmp.i;
-    centery = tmp.j;
-    centerz = tmp.k;
+    view.p = tmp;
     GFXLoadIdentity (MODEL);
   }
 }
@@ -272,17 +245,6 @@ void GFXHudMode (const bool Enter) {
     glPopMatrix();
   }
 }
-void GFXLoadIdentityView () {
-		Identity(view);
-		Identity (rotview);
-		evaluateViews (Vector (0,0,0));
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glLoadMatrixf(model);
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(projection);
-
-}
 void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
 {
 	switch(mode)
@@ -292,32 +254,27 @@ void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
 		glMatrixMode(GL_MODELVIEW);
 		//		glLoadMatrixf(transview);
 		glLoadIdentity();
-		glTranslatef (-centerx,-centery,-centerz);
+		glTranslated (-view.p.i,-view.p.j,-view.p.k);
 		break;
 	case PROJECTION:
-		Identity(projection);
-		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(rotview);
-		break;
+	  IdentityFloat(projection);
+	  ConstructAndLoadProjection();
+	  break;
+	case VIEW:
+	  Identity(view);
+	  ViewToModel();
+	  glMatrixMode(GL_PROJECTION);
+	  glLoadMatrixf(projection);
+	  break;
 	}
-
 }
 
-void GFXGetMatrixView (Matrix matrix) {
+void /*GFXDRVAPI*/ GFXGetMatrixView (Matrix &matrix) {
   CopyMatrix (matrix,view);
 }
-void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix)
+void /*GFXDRVAPI*/ GFXGetMatrixModel(Matrix &matrix)
 {
-
-	switch(mode)
-	{
-	case MODEL:
-	  CopyMatrix (matrix,model);
-	  break;
-	case PROJECTION:
-	  CopyMatrix(matrix, projection);
-	  break;
-	}
+  CopyMatrix (matrix,model);
 }
 
 static void gl_Frustum (float left,float right, float bottom, float top, float nearval,float farval){
@@ -373,8 +330,7 @@ void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
    xmax = (ymax+cockpit_offset/2) * aspect;//6.2571
    ymin-=cockpit_offset;
    gl_Frustum( xmin, xmax, ymin, ymax, znear, zfar );
-   glMatrixMode(GL_PROJECTION);
-   glLoadMatrixf(projection);
+   ConstructAndLoadProjection();
 }
 
 void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)
@@ -393,7 +349,7 @@ void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
    M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = z;     M(2,3) = tz;
    M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 0.0F;  M(3,3) = 1.0F;
 #undef M
-   GFXLoadMatrix(PROJECTION, projection);
+   GFXLoadMatrixProjection( projection);
 
   GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
 
@@ -401,12 +357,12 @@ void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
 
 
 static void LookAtHelper( float eyex, float eyey, float eyez,
-                         float centerx, float centery, float centerz,
+                         double centerx, double centery, double centerz,
                          float upx, float upy, float upz)
 {
-   float m[16];
-   float x[3], y[3], z[3];
-   float mag;
+  //   Matrix m;
+   double x[3], y[3], z[3];
+   double mag;
 
    /* Make rotation matrix */
 
@@ -461,37 +417,81 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
       y[2] /= mag;
    }
 
-#define M(row,col)  m[col*4+row]
-   M(0,0) = x[0];  M(0,1) = x[1];  M(0,2) = x[2];  M(0,3) = 0.0;
-   M(1,0) = y[0];  M(1,1) = y[1];  M(1,2) = y[2];  M(1,3) = 0.0;
-   M(2,0) = z[0];  M(2,1) = z[1];  M(2,2) = z[2];  M(2,3) = 0.0;
-   M(3,0) = 0.0;   M(3,1) = 0.0;   M(3,2) = 0.0;   M(3,3) = 1.0;
+#define M(row,col)  view.r[col*3+row]
+   M(0,0) = x[0];  M(0,1) = x[1];  M(0,2) = x[2];//  M(0,3) = 0.0;
+   M(1,0) = y[0];  M(1,1) = y[1];  M(1,2) = y[2];//  M(1,3) = 0.0;
+   M(2,0) = z[0];  M(2,1) = z[1];  M(2,2) = z[2];//  M(2,3) = 0.0;
+#undef M
+   //   M(3,0) = 0.0;   M(3,1) = 0.0;   M(3,2) = 0.0;   M(3,3) = 1.0;
 
-   float tm[16];
 
-#if defined(WIN32)
-   ZeroMemory(tm, sizeof(tm));
+   //Matrix tm;
+   //Identity(tm);
+   view.p.i = centerx+eyex;
+   view.p.j = centery+eyey;
+   view.p.k = centerz+eyez;
+   //   CopyMatrix (view,m);
+   //   MultMatrix(view, m, tm);
+   
+}
 
-#elif defined(IRIX)	// ANSI standard function, available on Windows also ...
-	(void) memset(tm, 0, sizeof tm);
-#else
-   bzero (tm, sizeof (tm));
+void /*GFXDRVAPI*/ GFXLookAt(Vector eye, QVector center, Vector up )
+{
+	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
+	GFXLoadMatrixView(view);
+}
+
+
+
+#ifdef SELF_TEST
+int main () {
+  float m1[16];
+  double m2[16];
+  Matrix m3[16];
+  float res[16];
+
+
+  return 0;
+}
+
 #endif
 
-#undef M
 
-#define M(row,col)  tm[col*4+row]
-   M(0,0) = 1.0;
-   M(0,3) = -centerx-eyex;
-   M(1,1) = 1.0;
-   M(1,3) = -centery-eyey;
-   M(2,2) = 1.0;
-   M(2,3) = -centerz-eyez;
-   M(3,3) = 1.0;
-#undef M
 
-   MultMatrix(view, m, tm);
 
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+void GFXMultMatrixView (const &Matrix) {
+  const int MULTMATRIXVIEWNOTIMPLEMENTED=0;
+  assert (MULTMATRIXVIEWNOTIMPLEMENTED);
+  MultMatrix(t, view, matrix);
+  CopyMatrix(view, t);
+  ConstructAndLoadProjection();
+  glMatrixMode(GL_MODELVIEW);
+  //glPopMatrix();
+  //glLoadIdentity();
+  //glTranslatef(-centerx,-centery,-centerz);
+  //glPushMatrix();
+  ViewToModel (true);
+  glLoadMatrixf(model);
+  ViewToModel (false);
+}
+#endif
+
+
+#if 0
+   LOOKATHELPER under MultMatrix (view,m,tm);
 /***
     float dis = sqrtf(upx*upx+upy*upy);
    Identity (tm);
@@ -540,18 +540,4 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
 	glTranslatef(-.5f,-.5f,-.4994f);
    */
 #endif
-   
-}
-
-void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up )
-{
-	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
-
-
-	//	Identity(transview);
-	//	transview[3]=center.i;
-	//	transview[7]=center.j;
-	//	transview[11]=center.k;
-	GFXLoadMatrixView(view, center);
-}
-
+#endif

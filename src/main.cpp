@@ -235,13 +235,13 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXColor4f (1,1,1,1);
   GFXClear (GFXTRUE);
   GFXLoadIdentity (PROJECTION);
-  GFXLoadIdentityView();
-  GFXLoadMatrix (MODEL,tmp);
+  GFXLoadIdentity(VIEW);
+  GFXLoadMatrixModel (tmp);
   GFXBeginScene();
   bs_tp->SetPos (x,y);
   bs_tp->SetCharSize (.4,.8);
   ScaleMatrix (tmp,Vector (7,7,0));
-  GFXLoadMatrix (MODEL,tmp);
+  GFXLoadMatrixModel (tmp);
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
@@ -253,8 +253,8 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
 extern Unit **fighters;
 
 
-bool SetPlayerLoc (Vector &sys, bool set) {
-  static Vector mysys;
+bool SetPlayerLoc (QVector &sys, bool set) {
+  static QVector mysys;
   static bool isset=false;
   if (set) {
     isset = true;
@@ -299,7 +299,7 @@ void bootstrap_main_loop () {
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
 
-    Vector pos;
+    QVector pos;
     string planetname;
 
     mission->GetOrigin(pos,planetname);
@@ -318,12 +318,12 @@ void bootstrap_main_loop () {
     vector <string> playersaveunit;
 	vector <StarSystem *> ss;
 	vector <string> starsysname;
-	vector <Vector> playerNloc;
+	vector <QVector> playerNloc;
     for (unsigned int k=0;k<_Universe->cockpit.size();k++) {
       bool setplayerXloc=false;
       std::string psu;
       if (k==0) {
-		Vector myVec;
+		QVector myVec;
 		if (SetPlayerLoc (myVec,false)) {
 		  _Universe->cockpit[0]->savegame->SetPlayerLocation(myVec);
 		}
@@ -339,7 +339,7 @@ void bootstrap_main_loop () {
 	  if (setplayerXloc) {
 	   	  playerNloc.push_back(pos);
 	  }else {
-		  playerNloc.push_back(Vector(FLT_MAX,FLT_MAX,FLT_MAX));
+		  playerNloc.push_back(QVector(FLT_MAX,FLT_MAX,FLT_MAX));
 	  }
 	  setplayerloc=setplayerXloc;//FIX ME will only set first player where he was
 
@@ -386,7 +386,7 @@ void bootstrap_main_loop () {
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
-  Vector PlayerLocation;
+  QVector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
@@ -409,7 +409,7 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'P':
       case 'p':
-	sscanf (lpCmdLine[i]+2,"%f,%f,%f",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
+	sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
 	SetPlayerLoc (PlayerLocation,true);
 	break;
       case 'J':

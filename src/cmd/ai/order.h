@@ -54,7 +54,7 @@ protected:
   ///If this order applies to a group of units (as in form up with this group)
   UnitContainer group;
   ///If this order applies to a physical location in world space
-  Vector targetlocation;
+  QVector targetlocation;
   ///The queue of suborders that will be executed in parallel according to bit code
   std::vector<Order*> suborders;
   ///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
@@ -84,7 +84,7 @@ public:
   ///Attaches a group of targets to this order (used for strategery-type games)
   bool AttachOrder (Unit *targets);
   ///Attaches a navigation point to this order
-  bool AttachOrder (Vector target);
+  bool AttachOrder (QVector target);
   ///Attaches a group (form up) to this order
   bool AttachSelfOrder (Unit *targets);
   ///Enqueues another order that will be executed (in parallel perhaps) when next void Execute() is called

@@ -94,11 +94,9 @@ public:
 
   void GetDimensions (float &wid, float & hei);
 
-  Vector Position();
+  QVector Position();
 
-  void SetPosition (const float, const float, const float);
-
-  void SetPosition (const Vector &);
+  void SetPosition (const QVector &);
 
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 

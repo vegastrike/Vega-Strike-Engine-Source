@@ -146,13 +146,13 @@ float Unit::computeLockingPercent() {
 float Cockpit::computeLockingSymbol(Unit * par) {
   return par->computeLockingPercent();
 }
-inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent) {
+inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent) {
   GFXBegin (GFXLINESTRIP); 
-  GFXVertexf (Loc+(CamP+CamQ)*rSize);
-  GFXVertexf (Loc+(CamP-CamQ)*rSize);
-  GFXVertexf (Loc+(-CamP-CamQ)*rSize);
-  GFXVertexf (Loc+(CamQ-CamP)*rSize);
-  GFXVertexf (Loc+(CamP+CamQ)*rSize);
+  GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+  GFXVertexf (Loc+(CamP-CamQ).Cast()*rSize);
+  GFXVertexf (Loc+(-CamP-CamQ).Cast()*rSize);
+  GFXVertexf (Loc+(CamQ-CamP).Cast()*rSize);
+  GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
   GFXEnd();
   if (lock_percent<.99) {
     if (lock_percent<0) {
@@ -168,64 +168,64 @@ inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vecto
     //    glLineWidth (4);
     Vector TLockBox (rtot*LockBox.i+rtot*LockBox.j,rtot*LockBox.j-rtot*LockBox.i,LockBox.k);
     Vector SLockBox (TLockBox.j,TLockBox.i,TLockBox.k);
-    Vector Origin = (CamP+CamQ)*(rSize*coord);
+    QVector Origin = (CamP+CamQ).Cast()*(rSize*coord);
     TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR);
     SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR);
-    float r1Size = rSize*.58;
+    double r1Size = rSize*.58;
     GFXBegin (GFXLINESTRIP);
     max*=rSize*.75;
     if (lock_percent==0) {
-      GFXVertexf (Loc+CamQ*max*1.5);
-      GFXVertexf (Loc+CamQ*max);
+      GFXVertexf (Loc+CamQ.Cast()*max*1.5);
+      GFXVertexf (Loc+CamQ.Cast()*max);
     }
 
-    GFXVertexf (Loc+Origin+(TLockBox*r1Size));
+    GFXVertexf (Loc+Origin+(TLockBox.Cast()*r1Size));
     GFXVertexf (Loc+Origin);
-    GFXVertexf (Loc+Origin+(SLockBox*r1Size));
+    GFXVertexf (Loc+Origin+(SLockBox.Cast()*r1Size));
     if (lock_percent==0) {
-      GFXVertexf (Loc+CamP*max);
-      GFXVertexf (Loc+CamP*max*1.5);
+      GFXVertexf (Loc+CamP.Cast()*max);
+      GFXVertexf (Loc+CamP.Cast()*max*1.5);
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
-      GFXVertexf (Loc-CamP*max);
+      GFXVertexf (Loc-CamP.Cast()*max);
     }else {
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
     }
-    GFXVertexf (Loc-Origin-(SLockBox*r1Size));
+    GFXVertexf (Loc-Origin-(SLockBox.Cast()*r1Size));
     GFXVertexf (Loc-Origin);
-    GFXVertexf (Loc-Origin-(TLockBox*r1Size));
+    GFXVertexf (Loc-Origin-(TLockBox.Cast()*r1Size));
 
-    Origin=(CamP-CamQ)*(rSize*coord);
+    Origin=(CamP-CamQ).Cast()*(rSize*coord);
     if (lock_percent==0) {
-      GFXVertexf (Loc-CamQ*max);
-      GFXVertexf (Loc-CamQ*max*1.5);
-      GFXVertexf (Loc-CamQ*max);
+      GFXVertexf (Loc-CamQ.Cast()*max);
+      GFXVertexf (Loc-CamQ.Cast()*max*1.5);
+      GFXVertexf (Loc-CamQ.Cast()*max);
     }else {
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
     }
 
-    GFXVertexf (Loc+Origin+(TLockBox*r1Size));
+    GFXVertexf (Loc+Origin+(TLockBox.Cast()*r1Size));
     GFXVertexf (Loc+Origin);
-    GFXVertexf (Loc+Origin-(SLockBox*r1Size));
+    GFXVertexf (Loc+Origin-(SLockBox.Cast()*r1Size));
     if (lock_percent==0) {
-      GFXVertexf (Loc+CamP*max);
+      GFXVertexf (Loc+CamP.Cast()*max);
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
-      GFXVertexf (Loc-CamP*max*1.5);
-      GFXVertexf (Loc-CamP*max);
+      GFXVertexf (Loc-CamP.Cast()*max*1.5);
+      GFXVertexf (Loc-CamP.Cast()*max);
     }else {
       GFXEnd();
       GFXBegin(GFXLINESTRIP);
     }
 
-    GFXVertexf (Loc-Origin+(SLockBox*r1Size));
+    GFXVertexf (Loc-Origin+(SLockBox.Cast()*r1Size));
     GFXVertexf (Loc-Origin);
-    GFXVertexf (Loc-Origin-(TLockBox*r1Size));
+    GFXVertexf (Loc-Origin-(TLockBox.Cast()*r1Size));
 
     if (lock_percent==0) {
-      GFXVertexf (Loc+CamQ*max);
+      GFXVertexf (Loc+CamQ.Cast()*max);
     }
     GFXEnd();
     glLineWidth (1);
@@ -245,7 +245,7 @@ inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const 
     const vector <DockingPorts> d = target->DockingPortLocations();
     for (unsigned int i=0;i<d.size();i++) {
       float rad = d[i].radius/sqrt(2.0);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos),rad ,CamP, CamQ, CamR,1);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast()),rad ,CamP, CamQ, CamR,1);
     }
   }
 }
@@ -276,7 +276,7 @@ void Cockpit::DrawTargetBoxes(){
   Unit *target=uiter.current();
   while(target!=NULL){
     if(target!=un){
-        Vector Loc(target->Position());
+        QVector Loc(target->Position());
 
 	GFXColor drawcolor=unitToColor(un,target);
 	GFXColorf(drawcolor);
@@ -310,25 +310,25 @@ void Cockpit::DrawTargetBox () {
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
-  Vector Loc(target->Position());
+  QVector Loc(target->Position());
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Dot(un->GetComputerData().NavPoint-un->Position()));
+  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-un->Position()));
   GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):GFXColor(1,1,1,1));
 
   if(draw_line_to_target){
-    Vector my_loc(un->Position());
+    QVector my_loc(un->Position());
     GFXBegin(GFXLINESTRIP);
     GFXVertexf(my_loc);
     GFXVertexf(Loc);
     
     Unit *targets_target=target->Target();
     if(draw_line_to_targets_target && targets_target!=NULL){
-      Vector ttLoc(targets_target->Position());
+      QVector ttLoc(targets_target->Position());
       GFXVertexf(ttLoc);
     }
     GFXEnd();
@@ -338,18 +338,18 @@ void Cockpit::DrawTargetBox () {
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
     float err = (.01*(1-un->CloakVisible()));
-   Vector iLoc = target->PositionITTS (un->Position(),speed)+10*err*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   QVector iLoc = target->PositionITTS (un->Position(),speed)+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
       GFXVertexf(Loc);
       GFXVertexf(iLoc);
     }
-    GFXVertexf (iLoc+(CamP)*.25*un->rSize());
-    GFXVertexf (iLoc+(-CamQ)*.25*un->rSize());
-    GFXVertexf (iLoc+(-CamP)*.25*un->rSize());
-    GFXVertexf (iLoc+(CamQ)*.25*un->rSize());
-    GFXVertexf (iLoc+(CamP)*.25*un->rSize());
+    GFXVertexf (iLoc+(CamP.Cast())*.25*un->rSize());
+    GFXVertexf (iLoc+(-CamQ.Cast())*.25*un->rSize());
+    GFXVertexf (iLoc+(-CamP.Cast())*.25*un->rSize());
+    GFXVertexf (iLoc+(CamQ.Cast())*.25*un->rSize());
+    GFXVertexf (iLoc+(CamP.Cast())*.25*un->rSize());
     GFXEnd();
   }
   GFXEnable (TEXTURE0);
@@ -622,7 +622,7 @@ Unit *  Cockpit::GetSaveParent() {
   }
   return un;
 }
-void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const Vector & pos) {
+void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const QVector & pos) {
   activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
   savegame->SetPlayerLocation(pos);
@@ -708,8 +708,8 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
   for (i=0;i<headlag;i++) {
-    headtrans.push_back (MyMat());
-    Identity(headtrans.back().m);
+    headtrans.push_back (Matrix());
+    Identity(headtrans.back());
   }
   InitStatic();
   mesh=NULL;
@@ -786,7 +786,7 @@ void Cockpit::Respawn (int,KBSTATE k) {
 void Cockpit::Autopilot (Unit * target) {
   if (target) {
     Unit * un=NULL;
-    if (un=GetParent()) {
+    if ((un=GetParent())) {
       if (un->AutoPilotTo(un)) {//can he even start to autopilot
 	CockpitKeys::Pan(0,PRESS);
 	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
@@ -805,7 +805,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtonw=false;
 
   for (int i=0;i<_Universe->numPlayers();i++) {
-    if (i!=_Universe->CurrentCockpit()) {
+    if (i!=(int)_Universe->CurrentCockpit()) {
       if (_Universe->AccessCockpit(i)->GetParent()==ol)
 	pointingtool=true;
       if (_Universe->AccessCockpit(i)->GetParent()==nw)
@@ -905,7 +905,7 @@ void Cockpit::Draw() {
     if (mesh) {
       Unit * par=GetParent();
       if (par) {
-	Matrix mat;
+	//	Matrix mat;
       
 	GFXLoadIdentity(MODEL);
 
@@ -916,16 +916,16 @@ void Cockpit::Draw() {
 	Vector P,Q,R;
 	AccessCamera(CP_FRONT)->GetPQR (P,Q,R);
 
-	headtrans.push_back (MyMat());
-	VectorAndPositionToMatrix(headtrans.back().m,P,Q,R,Vector(0,0,0));
+	headtrans.push_back (Matrix());
+	VectorAndPositionToMatrix(headtrans.back(),P,Q,R,QVector(0,0,0));
 	static float theta=0;
 	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed","50"));
 	theta+=shake_speed*GetElapsedTime();
 	static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction","8"));
 
-	headtrans.front().m[12]=shakin*cos(theta);//AccessCamera()->GetPosition().i+shakin*cos(theta);
-	headtrans.front().m[13]=shakin*cos(1.2*theta);//AccessCamera()->GetPosition().j+shakin*cos(theta);
-	headtrans.front().m[14]=0;//AccessCamera()->GetPosition().k;
+	headtrans.front().p.i=shakin*cos(theta);//AccessCamera()->GetPosition().i+shakin*cos(theta);
+	headtrans.front().p.j=shakin*cos(1.2*theta);//AccessCamera()->GetPosition().j+shakin*cos(theta);
+	headtrans.front().p.k=0;//AccessCamera()->GetPosition().k;
 	if (shakin>0) {
 	  shakin-=GetElapsedTime()*shake_reduction;
 	  if (shakin<=0) {
@@ -933,7 +933,7 @@ void Cockpit::Draw() {
 	  }
 	}
 
-	mesh->DrawNow(1,true,headtrans.front().m);
+	mesh->DrawNow(1,true,headtrans.front());
 	headtrans.pop_front();
 	GFXDisable (LIGHTING);
 	GFXDisable( TEXTURE0);
@@ -1264,8 +1264,8 @@ void Cockpit::RestoreViewPort() {
 }
 
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
-  Vector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
+  QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
+  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*un->rSize()*zoomfactor);
 }
 void Cockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
@@ -1306,7 +1306,7 @@ void Cockpit::SetupViewPort (bool clip) {
       
       Vector p,q,r,tmp;
       un->GetOrientation (p,q,r);
-      r = tgt->Position()-un->Position();
+      r = (tgt->Position()-un->Position()).Cast();
       r.Normalize();
       CrossProduct (r,q,tmp);
       CrossProduct (tmp,r,q);

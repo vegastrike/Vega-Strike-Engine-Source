@@ -17,7 +17,7 @@ Stars::Stars(int num, float spread): spread(spread){
   fade = blend=true;
   GFXVertex * tmpvertex = new GFXVertex [curnum];
   memset (tmpvertex,0,sizeof (GFXVertex)*curnum);
-  ResetPosition(Vector(0,0,0));
+  ResetPosition(QVector(0,0,0));
   for (int j=0;j<curnum;j++) {
     tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
     tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
@@ -32,7 +32,7 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 	fade = fadeit;
 }
 void Stars::Draw() {
-  const Vector cp (_Universe->AccessCamera()->GetPosition());
+  const QVector cp (_Universe->AccessCamera()->GetPosition());
   UpdatePosition(cp);
   //  GFXLightContextAmbient(GFXColor(0,0,0,1));
   GFXColor (1,1,1,1);
@@ -59,9 +59,9 @@ void Stars::Draw() {
   vlist->BeginDrawState();
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
-      GFXTranslate (MODEL,pos[i]-pos[i-1]);
+      GFXTranslateModel (pos[i]-pos[i-1]);
     else
-      GFXTranslate (MODEL,pos[i]);
+      GFXTranslateModel (pos[i]);
     vlist->Draw();
   }
   vlist->EndDrawState();
@@ -71,7 +71,7 @@ void Stars::Draw() {
     GFXDeleteLight (ligh);
   GFXLoadIdentity(MODEL);
 }
-static void upd (float &a, float &b, float &c, float &d, float &e, float &f, float &g, float &h, float &i, const float cp, const float spread) {
+static void upd (double &a, double &b, double &c, double &d, double &e, double &f, double &g, double &h, double &i, const double cp, const float spread) {
   //  assert (a==b&&b==c&&c==d&&d==e&&e==f);	
   if (a!=b||a!=c||a!=d||a!=e||a!=f||!FINITE (a)) {
     a=b=c=d=e=f=0;
@@ -100,7 +100,7 @@ static void upd (float &a, float &b, float &c, float &d, float &e, float &f, flo
   }
 }
 
-void Stars::ResetPosition (const Vector &cent){
+void Stars::ResetPosition (const QVector &cent){
   for (int i=0;i<3;i++) {
     for (int j=0;j<3;j++) {
       for (int k=0;k<3;k++) {
@@ -110,7 +110,7 @@ void Stars::ResetPosition (const Vector &cent){
     }
   }
 }
-void Stars::UpdatePosition(const Vector & cp) {
+void Stars::UpdatePosition(const QVector & cp) {
 
   if (fabs(pos[0].i-cp.i)>3*spread||fabs(pos[0].j-cp.j)>3*spread||fabs(pos[0].k-cp.k)>3*spread) {
     ResetPosition(cp);

@@ -76,7 +76,7 @@ bool Mission::doBooleanVar(missionNode *node,int mode){
 }
 /* *********************************************************** */
 
-float Mission::doFloatVar(missionNode *node,int mode){
+double Mission::doFloatVar(missionNode *node,int mode){
   varInst *var=doVariable(node,mode);
 
   bool ok=checkVarType(var,VAR_FLOAT);
@@ -423,10 +423,10 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
     if(!value.empty()){
       debug(4,node,mode,"setting init for "+node->script.name);
       if(vi->type==VAR_FLOAT){
-	vi->float_val=atof(value.c_str());
+	vi->float_val=strtod(value.c_str(),NULL);
       }
       else if(vi->type==VAR_INT){
-	vi->int_val=atoi(value.c_str());
+	vi->int_val=atoi (value.c_str());
       }
       else if(vi->type==VAR_BOOL){
 	if(value=="true"){
@@ -540,7 +540,7 @@ void Mission::doSetVar(missionNode *node,int mode){
       bool res=checkBoolExpr(expr,mode);
     }
     else if(vi->type==VAR_FLOAT){
-      float res=checkFloatExpr(expr,mode);
+      double res=checkFloatExpr(expr,mode);
     }
     else if(vi->type==VAR_INT){
       float res=checkIntExpr(expr,mode);
@@ -569,7 +569,7 @@ void Mission::doSetVar(missionNode *node,int mode){
       var_inst->bool_val=res;
     }
     else if(var_inst->type==VAR_FLOAT){
-      float res=checkFloatExpr(expr,mode);
+      double res=checkFloatExpr(expr,mode);
       var_inst->float_val=res;
     }
     else if(var_inst->type==VAR_INT){

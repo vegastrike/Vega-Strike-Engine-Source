@@ -16,17 +16,18 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
 
     //mousePoint.k= -mousePoint.k;
   Vector CamP,CamQ,CamR;
+  QVector CamPos;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-  _Universe->AccessCamera()->GetPosition(CamP);    
+  _Universe->AccessCamera()->GetPosition(CamPos);    
   //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
   mousePoint.Normalize();
-  mouseline =mousePoint + CamP;
+  mouseline =mousePoint + CamPos.Cast();
   // 
-  int tmp = ship->queryBoundingBox(CamP,mousePoint,0);
+  int tmp = ship->queryBoundingBox(CamPos,mousePoint,0);
   if (tmp)
     //fprintf (stderr, "bounding box hit\n");
-  if (ship->querySphereClickList(CamP,mousePoint,0)){  // camera position is not actually the center of the camera
+  if (ship->querySphereClickList(CamPos,mousePoint.Cast(),0)){  // camera position is not actually the center of the camera
     //fprintf (stderr, "bounding sphere hit\n");
     
     if (tmp) return true;
@@ -48,12 +49,12 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
       return uc;//nothing in it
     UnitCollection::UnitIterator * UAye = new un_iter(uc->createIterator());
     UnitCollection::UnitIterator * myParent = new un_iter(parentIter->createIterator());
-    float view[16];
+    Matrix view;
     float frustmat [16];
     float l, r, b, t , n, f;
-
+    float drivel [16];
     GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
-    GFXFrustum (frustmat, view,l*(-2.*minX/g_game.x_resolution+1) /*  *g_game.MouseSensitivityX*/,r*(2.*maxX/g_game.x_resolution-1)/*  *g_game.MouseSensitivityX*/,t*(-2.*minY/g_game.y_resolution+1) /*  *g_game.MouseSensitivityY*/,b*(2.*maxY/g_game.y_resolution-1)/*  *g_game.MouseSensitivityY*/,n,f);
+    GFXFrustum (frustmat, drivel,l*(-2.*minX/g_game.x_resolution+1) /*  *g_game.MouseSensitivityX*/,r*(2.*maxX/g_game.x_resolution-1)/*  *g_game.MouseSensitivityX*/,t*(-2.*minY/g_game.y_resolution+1) /*  *g_game.MouseSensitivityY*/,b*(2.*maxY/g_game.y_resolution-1)/*  *g_game.MouseSensitivityY*/,n,f);
     _Universe->AccessCamera()->GetView (view);
     float frustum [6][4];
     GFXCalculateFrustum(frustum,view,frustmat);

@@ -227,8 +227,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 											"TurnLeaderDist",
 											"5.0"));
 	      
-	      float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
-	      Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
+	      double dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
+	      Order * ord = new Orders::FormUp(QVector(dist,0,-fabs(dist)));
 	      ord->SetParent (parent);
 	      ReplaceOrder (ord);
 	      ord = new Orders::FaceDirection(dist*turn_leader);

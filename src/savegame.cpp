@@ -23,10 +23,10 @@ string SaveGame::GetStarSystem () {
   return ForceStarSystem;
 }
 
-void SaveGame::SetPlayerLocation (const Vector &v) {
+void SaveGame::SetPlayerLocation (const QVector &v) {
   PlayerLocation =v;
 }
-Vector SaveGame::GetPlayerLocation () {
+QVector SaveGame::GetPlayerLocation () {
   return PlayerLocation;
 }
 
@@ -96,7 +96,7 @@ void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const cha
     savedunits.Put (address,new SavedUnits (filename,type,faction));
   }
 }
-olist_t &SaveGame::getMissionData(float magic_number) {
+olist_t &SaveGame::getMissionData(double magic_number) {
   unsigned int i=std::find (mission_data.begin(),mission_data.end(),magic_number)-mission_data.begin();
   if (i==mission_data.size()) {
     mission_data.push_back(MissionDat(magic_number));
@@ -106,7 +106,7 @@ olist_t &SaveGame::getMissionData(float magic_number) {
 void SaveGame::WriteMissionData (FILE * fp) {
   fprintf (fp," %d ",mission_data.size());
   for( unsigned int i=0;i<mission_data.size();i++) {
-    fprintf (fp,"\n%f ",mission_data[i].magic_number);
+    fprintf (fp,"\n%lf ",mission_data[i].magic_number);
     fprintf (fp,"%d ",mission_data[i].dat.size());
     for (unsigned int j=0;j<mission_data[i].dat.size();j++) {
       fprintf (fp,"%s ",varToString(mission_data[i].dat[j]).c_str());
@@ -118,14 +118,14 @@ void SaveGame::ReadMissionData (FILE * fp) {
   fscanf (fp," %d ",&mdsize);
   for( unsigned int i=0;i<mdsize;i++) {
     int md_i_size;
-    float mag_num;
-    fscanf (fp,"\n%f ",&mag_num);
+    double mag_num;
+    fscanf (fp,"\n%lf ",&mag_num);
     fscanf (fp,"%d ",&md_i_size);
     mission_data.push_back (MissionDat(mag_num));
     for (unsigned int j=0;j<md_i_size;j++) {
       varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
       vi->type = VAR_FLOAT;
-      fscanf (fp,"%f ",&vi->float_val);
+      fscanf (fp,"%lf ",&vi->float_val);
       mission_data[i].dat.push_back (vi);
     }
   }
@@ -151,7 +151,7 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
 void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
-void SaveGame::WriteSaveGame (const char *systemname, const Vector &FP, float credits, std::string unitname) {
+void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname) {
   vector<SavedUnits *> myvec = savedunits.GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
@@ -160,11 +160,11 @@ void SaveGame::WriteSaveGame (const char *systemname, const Vector &FP, float cr
     FILE * fp = fopen (outputsavegame.c_str(),"w");
     vscdup();
     returnfromhome();
-    Vector FighterPos= PlayerLocation-FP;
+    QVector FighterPos= PlayerLocation-FP;
 //    if (originalsystem!=systemname) {
       FighterPos=FP;
 //    }
-    fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
+    fprintf (fp,"%s^%f^%s %lf %lf %lf",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
@@ -189,7 +189,7 @@ void SaveGame::SetSavedCredits (float c) {
 }
 
 
-vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
+vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
   if (filename.length()>0)
     filename=callsign+filename;
   vector <SavedUnits> mysav;
@@ -204,8 +204,8 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
   returnfromhome();
   if (fp) {
     char tmp2[10000];
-    Vector tmppos;
-    if (4==fscanf (fp,"%s %f %f %f\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
+    QVector tmppos;
+    if (4==fscanf (fp,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
       for (int j=0;'\0'!=tmp2[j];j++) {
 	if (tmp2[j]=='^') {
 	  sscanf (tmp2+j+1,"%f",&credits);

@@ -42,13 +42,14 @@ class PhysicsSystem {
 	Vector NetTorque;
 	Vector AngularVelocity;
 	Vector Velocity;
-	Vector *pos, *p, *q, *r;
+	QVector *pos;
+	Vector *p, *q, *r;
 	int NumActiveForces;
 	Force ActiveForces [forcemax];
 	int NumActiveTorques;
 	Force ActiveTorques [forcemax];
 public:
-	PhysicsSystem(float M, float I, Vector *pos, Vector *p, Vector *q, Vector *r);
+	PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r);
 //	~PhysicsSystem();
 	virtual void Rotate (const Vector &axis);
 	virtual void JettisonReactionMass (const Vector &Direction, float speed, float mass);

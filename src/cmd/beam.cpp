@@ -24,22 +24,13 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
   Init(trans,clne,own);
 }
 
-void Beam::SetPosition (float x,float y, float z) {
-  local_transformation.position = Vector (x,y,z);
-}
-void Beam::SetPosition (const Vector &k) {
+void Beam::SetPosition (const QVector &k) {
   local_transformation.position = k;
 }
 void Beam::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
   local_transformation.orientation = Quaternion::from_vectors(p,q,r);
 }
-
-Vector Beam::GetPosition()
-{
-	return local_transformation.position;
-}
-
 
 void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
@@ -184,7 +175,7 @@ void Beam::RecalculateVertices() {
 }
 
 
-void Beam::Draw (const Transformation &trans, const float* m) {//hope that the correct transformation is on teh stack
+void Beam::Draw (const Transformation &trans, const Matrix &m) {//hope that the correct transformation is on teh stack
   if (curthick==0) 
     return;
   Matrix cumulative_transformation_matrix;
@@ -223,7 +214,7 @@ void Beam::ProcessDrawQueue() {
 	while (beamdrawqueue[decal].size()) {
 	  c= beamdrawqueue[decal].back();
 	  beamdrawqueue[decal].pop_back();
-	  GFXLoadMatrix (MODEL, c.m);
+	  GFXLoadMatrixModel ( c.m);
 	  c.vlist->BeginDrawState(GFXFALSE);
 	  c.vlist->Draw();
 	  c.vlist->EndDrawState(GFXFALSE);
@@ -277,7 +268,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #endif
 #endif
 }
-void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
+void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
     curlength=0;
@@ -303,7 +294,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   center = cumulative_transformation.position;
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
 #ifndef PERFRAMESOUND
-  AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
+  AUDAdjustSound (sound,cumulative_transformation.position,speed*cumulative_transformation_matrix.getR());
 #endif
   
   curthick+=(impact&UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
@@ -327,8 +318,8 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
       else
 	curlength=0;
     }
-    Vector tmpvec (center + direction*curlength);
-    Vector tmpMini = center.Min(tmpvec);
+    QVector tmpvec (center + direction.Cast()*curlength);
+    QVector tmpMini = center.Min(tmpvec);
 
 
     tmpvec = center.Max (tmpvec);
@@ -338,13 +329,13 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 #endif
       CollideInfo.object.b = this;
       CollideInfo.hhuge=(((CollideInfo.Maxi.i-CollideInfo.Mini.i)/coltableacc)*((CollideInfo.Maxi.j-CollideInfo.Mini.j)/coltableacc)*(CollideInfo.Maxi.k-CollideInfo.Mini.k)/coltableacc>tablehuge);
-      CollideInfo.Mini= tmpMini;
-      CollideInfo.Maxi= tmpvec;
+      CollideInfo.Mini= tmpMini.Cast();
+      CollideInfo.Maxi= tmpvec.Cast();
 #ifdef BEAMCOLQ
       AddCollideQueue (CollideInfo);
     } else {
-      CollideInfo.Mini= tmpMini;
-      CollideInfo.Maxi= tmpvec;
+      CollideInfo.Mini= tmpMini.Cast();
+      CollideInfo.Maxi= tmpvec.Cast();
     }
 #endif
   }
@@ -358,7 +349,7 @@ bool Beam::Collide (Unit * target) {
   }
   float distance;
   Vector normal;//apply shields
-  Vector end (center+direction*curlength);
+  QVector end (center+direction.Cast()*curlength);
   enum clsptr type = target->isUnit();
   if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) 
     return false;
@@ -420,7 +411,7 @@ bool Beam::Collide (Unit * target) {
       }
     }else {
       if (appldam>0||phasdam>0) {
-	target->ApplyDamage (center+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
+	target->ApplyDamage (center.Cast()+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
       }else if (damagerate<0||phasedamage<0) {
 	target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
       }

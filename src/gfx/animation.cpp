@@ -76,23 +76,16 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
 Animation:: ~Animation () {
   
 }
-void Animation::SetPosition (const float x,const float y, const float z) {
-  local_transformation [12] = x;
-  local_transformation [13] = y;
-  local_transformation [14] = z;
-}
-void Animation::SetPosition (const Vector &k) {
-  local_transformation [12] = k.i;
-  local_transformation [13] = k.j;
-  local_transformation [14] = k.k;  
+void Animation::SetPosition (const QVector &p) {
+  local_transformation.p = p;
 }
 void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
-  VectorAndPositionToMatrix (local_transformation, p,q,r,Vector (local_transformation[12],local_transformation[13], local_transformation[14]));
+  VectorAndPositionToMatrix (local_transformation, p,q,r,local_transformation.p);
 }
-Vector Animation::Position()
+QVector Animation::Position()
 {
-  return Vector(local_transformation[12], local_transformation[13], local_transformation[14]);
+  return local_transformation.p;
 }
 void Animation:: SetDimensions(float wid, float hei) {
   width = wid;
@@ -141,11 +134,11 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
 }
 void Animation::CalculateOrientation (Matrix & result) {
   Vector camp,camq,camr;
-  Vector pos (Position());
+  QVector pos (Position());
   float hei=height;
   float wid=width;
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:local_transformation);
+  ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:&local_transformation);
   
   /*
   Camera* TempCam = _Universe->AccessCamera();
@@ -170,7 +163,7 @@ void Animation::CalculateOrientation (Matrix & result) {
 void Animation::DrawNow(const Matrix &final_orientation) {
  
   if (!Done()||(options&ani_repeat)) {
-    GFXLoadMatrix (MODEL, final_orientation);
+    GFXLoadMatrixModel (final_orientation);
     MakeActive();
     GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
@@ -186,7 +179,7 @@ void Animation::DrawNow(const Matrix &final_orientation) {
   }
 }
 void Animation::DrawAsSprite (Sprite * spr) {
-  unsigned char alphamaps=ani_alpha;
+  //  unsigned char alphamaps=ani_alpha;
   GFXPushBlendMode();
   if (options&ani_alpha)
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
@@ -244,7 +237,8 @@ void Animation::DrawNoTransform() {
 }
 void Animation:: Draw() {
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  if ((_Universe->AccessCamera()->GetR().Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<.8*g_game.zfar   ) {
+  QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
+  if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<.8*g_game.zfar   ) {
     animationdrawqueue.push_back (this);
   }else {
     far_animationdrawqueue.push_back(this);

@@ -234,7 +234,7 @@ Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, i
     vscdup();
   vsresetdir();
 }
-void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
+void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)
     SetNebula(this);
   smaller->SetNebula(this);

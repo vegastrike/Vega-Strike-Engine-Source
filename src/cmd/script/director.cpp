@@ -309,7 +309,6 @@ bool Mission::runScript(missionNode *module_node,const string &scriptname,unsign
 
 
 void Mission::DirectorBenchmark(){
-  double elapsed=GetElapsedTime();
 
   gametime+=SIMULATION_ATOM;//elapsed;
   total_nr_frames++;

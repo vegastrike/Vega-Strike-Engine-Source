@@ -17,9 +17,9 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
 
   detail =128;
   Identity (transformation);
-  transformation[0]=Scales.i;
-  transformation[5]=Scales.j;
-  transformation[10]=Scales.k;
+  transformation.r[0]=Scales.i;
+  transformation.r[4]=Scales.j;
+  transformation.r[8]=Scales.k;
   //  nonlinear_transform = new IdentityTransform;
   RootCornerData.Parent = NULL;
   RootCornerData.Square = NULL;
@@ -83,8 +83,8 @@ QuadTree::~QuadTree () {
   delete nonlinear_transform;
   
 }
-bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float * transf, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
-  Vector Loc = nonlinear_transform->InvTransform (InvScaleTransform (transf,Location));
+bool QuadTree::GetGroundPos (QVector &Location, Vector & norm, const Matrix & transf, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
+  QVector Loc = nonlinear_transform->InvTransform (InvScaleTransform (transf,Location));
   if (TotalTerrainSizeX) {
     float tmpx = Loc.i;
     Loc.i= fmod (Loc.i,TotalTerrainSizeX);
@@ -103,7 +103,7 @@ bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float * transf, fl
   float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,norm);
   if (tmp>-FLT_MAX) {
     //    fprintf (stderr,"Orig<%f,%f,%f> Now <%f,%f,%f>",Loc.i,Loc.j,Loc.k,Loc.i,tmp,Loc.k);
-    Location = Transform (transf,nonlinear_transform->Transform (Vector (TotalTerrainSizeX,tmp,TotalTerrainSizeZ)));
+    Location = Transform (transf,nonlinear_transform->Transform (QVector (TotalTerrainSizeX,tmp,TotalTerrainSizeZ))).Cast();
     norm = TransformNormal (transf,nonlinear_transform->TransformNormal (Location, norm));
     norm.Normalize();
 
@@ -111,7 +111,7 @@ bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float * transf, fl
   }
   return false;
 }
-float QuadTree::GetHeight (Vector Location, Vector & normal,  float * transf, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
+float QuadTree::GetHeight (Vector Location, Vector & normal,  const Matrix& transf, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
   Location = nonlinear_transform->InvTransform (InvScaleTransform (transf,Location));
   if (TotalTerrainSizeX) {
     //float t1=Location.i; 
@@ -141,18 +141,18 @@ void QuadTree::Update (unsigned short numstages, unsigned short whichstage, upda
   root->Update (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition())),detail,numstages,whichstage,uo);
 }
 
-inline Vector calculatenormscale (const Matrix trans) {
-  return Vector (1.0F/(Vector (trans[0],trans[1],trans[2]).Magnitude()),1.0F/(Vector (trans[4],trans[5],trans[6]).Magnitude()),1.0F/(Vector (trans[8],trans[9],trans[10]).Magnitude()));
+inline Vector calculatenormscale (const Matrix &trans) {
+  return Vector (1.0F/(Vector (trans.getP()).Magnitude()),1.0F/(Vector (trans.getQ()).Magnitude()),1.0F/(Vector (trans.getR()).Magnitude()));
 }
 
-void QuadTree::SetTransformation(const Matrix mat) {
-  memcpy (transformation,mat,sizeof(float)*16);
+void QuadTree::SetTransformation(const Matrix &mat) {
+  transformation = mat;
   Scales= (calculatenormscale (mat));
 }
 
 
 void QuadTree::Render () {
-  GFXLoadMatrix (MODEL,transformation);
+  GFXLoadMatrixModel (transformation);
   GFXBoxInFrustumModel (transformation);
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);

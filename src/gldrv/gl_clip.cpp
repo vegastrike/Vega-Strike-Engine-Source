@@ -1,6 +1,8 @@
 #include "gfxlib.h"
 #include "gfx/matrix.h"
 #include "gl_matrix.h"
+#include "lin_time.h"
+#include <stdio.h>
 using namespace GFXMatrices;  //causes problems with g_game
 float BoxFrust [6][4];
 float frust [6][4];
@@ -85,14 +87,58 @@ CLIPSTATE GFXBoxInFrustum (float f [6][4], const Vector &min, const Vector &max)
 	}
 }
 
+void DrawFrustum (float f[6][4]) {
+  GFXColor cols[6]={GFXColor(0,0,1),GFXColor(0,1,0), GFXColor (1,0,0), GFXColor (1,1,0), GFXColor (1,0,1), GFXColor (0,1,1)};
+  for (unsigned int i=0;i<4;i++) {
+    Vector n (f[i][0],f[i][1],f[i][2]);
+    Vector r (9284,-3259,-1249);
+    Vector t = n.Cross (r);
+    Vector q = t.Cross (n);
+    t.Normalize();
+    q.Normalize();
+    t = t*10000;
+    q = q*10000;
+    n = n * f[i][3];
+    Vector a = t+n;
+    Vector b = q+n;
+    Vector c= n-t;
+    Vector d= n-q;
+    GFXDisable(LIGHTING);
+    GFXEnable(DEPTHTEST);
+    GFXEnable(DEPTHWRITE);
+    GFXDisable(TEXTURE0);
+    GFXBlendMode(ONE,ONE);
+    GFXDisable (TEXTURE1);
+    GFXColorf (cols[i]);
+    GFXBegin (GFXQUAD);
+    GFXVertexf (a);
+    GFXVertexf (b);
+    GFXVertexf (c);
+    GFXVertexf (d);
+    GFXVertexf (d);
+    GFXVertexf (c);
+    GFXVertexf (b);
+    GFXVertexf (a);
+    GFXEnd();
+  }
+}
+
 float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const Vector &Cnt, float radius) {
+  /*  
+  static float lasttime = GetElapsedTime();
+  if (lasttime!=GetElapsedTime()) {
+    DrawFrustum (f);
+    lasttime = GetElapsedTime();
+    }*/
    int p;
    float d;
    for( p = 0; p < 5; p++ )//does not evaluate for yon
    {
       d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
-      if( d <= -radius )
-         return 0;
+      
+      if( d <= -radius ){
+	return 0;
+      }
    }
    return d;
 }
@@ -121,7 +167,7 @@ void GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
 void /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4]) {
   f = frust;
 }
-void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix model) {
+void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix &model) {
   Matrix tmp;
   MultMatrix (tmp,view,model);
   GFXCalculateFrustum (BoxFrust,tmp,projection);
@@ -129,40 +175,37 @@ void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix model) {
 void /*GFXDRVAPI*/ GFXCalculateFrustum() {
   GFXCalculateFrustum (frust,view,projection);
 }
+void WackyMultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
+{
+  QVector p (InvTransformNormal (m2,m2.p));
+  p=(TransformNormal (m2,-m2.p));
+  //  p=m2.p;
+  dest[0] = m1[0]*m2.r[0] + m1[4]*m2.r[1] + m1[8]*m2.r[2]; 
+  dest[1] = m1[1]*m2.r[0] + m1[5]*m2.r[1] + m1[9]*m2.r[2] ;
+  dest[2] = m1[2]*m2.r[0] + m1[6]*m2.r[1] + m1[10]*m2.r[2];
+  dest[3] = m1[3]*m2.r[0] + m1[7]*m2.r[1] + m1[11]*m2.r[2];
 
-void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float * proj){
-////float   *proj=projection;
-////float   *modl=view;
+  dest[4] = m1[0]*m2.r[3] + m1[4]*m2.r[4] + m1[8]*m2.r[5];
+  dest[5] = m1[1]*m2.r[3] + m1[5]*m2.r[4] + m1[9]*m2.r[5];
+  dest[6] = m1[2]*m2.r[3] + m1[6]*m2.r[4] + m1[10]*m2.r[5];
+  dest[7] = m1[3]*m2.r[3] + m1[7]*m2.r[4] + m1[11]*m2.r[5];
+
+  dest[8] = m1[0]*m2.r[6] + m1[4]*m2.r[7] + m1[8]*m2.r[8];
+  dest[9] = m1[1]*m2.r[6] + m1[5]*m2.r[7] + m1[9]*m2.r[8];
+  dest[10] = m1[2]*m2.r[6] + m1[6]*m2.r[7] + m1[10]*m2.r[8];
+  dest[11] = m1[3]*m2.r[6] + m1[7]*m2.r[7] + m1[11]*m2.r[8];
+
+  dest[12] = m1[0]*p.i + m1[4]*p.j + m1[8]*p.k + m1[12];
+  dest[13] = m1[1]*p.i + m1[5]*p.j + m1[9]*p.k + m1[13];
+  dest[14] = m1[2]*p.i + m1[6]*p.j + m1[10]*p.k + m1[14];
+  dest[15] = m1[3]*p.i + m1[7]*p.j + m1[11]*p.k + m1[15];
+
+}
+
+void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,const float *proj){
    float   clip[16];
-   float   t;
-
-   /* Get the current PROJECTION matrix from OpenGL */
-   //glGetFloatv( GL_PROJECTION_MATRIX, proj );
-
-   /* Get the current MODELVIEW matrix from OpenGL */
-   //glGetFloatv( GL_MODELVIEW_MATRIX, modl );
-
-   /* Combine the two matrices (multiply projection by modelview) */
-   clip[ 0] = modl[ 0] * proj[ 0] + modl[ 1] * proj[ 4] + modl[ 2] * proj[ 8] + modl[ 3] * proj[12];
-   clip[ 1] = modl[ 0] * proj[ 1] + modl[ 1] * proj[ 5] + modl[ 2] * proj[ 9] + modl[ 3] * proj[13];
-   clip[ 2] = modl[ 0] * proj[ 2] + modl[ 1] * proj[ 6] + modl[ 2] * proj[10] + modl[ 3] * proj[14];
-   clip[ 3] = modl[ 0] * proj[ 3] + modl[ 1] * proj[ 7] + modl[ 2] * proj[11] + modl[ 3] * proj[15];
-
-   clip[ 4] = modl[ 4] * proj[ 0] + modl[ 5] * proj[ 4] + modl[ 6] * proj[ 8] + modl[ 7] * proj[12];
-   clip[ 5] = modl[ 4] * proj[ 1] + modl[ 5] * proj[ 5] + modl[ 6] * proj[ 9] + modl[ 7] * proj[13];
-   clip[ 6] = modl[ 4] * proj[ 2] + modl[ 5] * proj[ 6] + modl[ 6] * proj[10] + modl[ 7] * proj[14];
-   clip[ 7] = modl[ 4] * proj[ 3] + modl[ 5] * proj[ 7] + modl[ 6] * proj[11] + modl[ 7] * proj[15];
-
-   clip[ 8] = modl[ 8] * proj[ 0] + modl[ 9] * proj[ 4] + modl[10] * proj[ 8] + modl[11] * proj[12];
-   clip[ 9] = modl[ 8] * proj[ 1] + modl[ 9] * proj[ 5] + modl[10] * proj[ 9] + modl[11] * proj[13];
-   clip[10] = modl[ 8] * proj[ 2] + modl[ 9] * proj[ 6] + modl[10] * proj[10] + modl[11] * proj[14];
-   clip[11] = modl[ 8] * proj[ 3] + modl[ 9] * proj[ 7] + modl[10] * proj[11] + modl[11] * proj[15];
-
-   clip[12] = modl[12] * proj[ 0] + modl[13] * proj[ 4] + modl[14] * proj[ 8] + modl[15] * proj[12];
-   clip[13] = modl[12] * proj[ 1] + modl[13] * proj[ 5] + modl[14] * proj[ 9] + modl[15] * proj[13];
-   clip[14] = modl[12] * proj[ 2] + modl[13] * proj[ 6] + modl[14] * proj[10] + modl[15] * proj[14];
-   clip[15] = modl[12] * proj[ 3] + modl[13] * proj[ 7] + modl[14] * proj[11] + modl[15] * proj[15];
-
+   WackyMultFloatMatrix (clip,proj,modl);
+   float  t;
    /* Extract the numbers for the RIGHT plane */
    frustum[0][0] = clip[ 3] - clip[ 0];
    frustum[0][1] = clip[ 7] - clip[ 4];
@@ -240,7 +283,6 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[4][1] /= t;
    frustum[4][2] /= t;
    frustum[4][3] /= t;
-   
 }
 
 /**
@@ -263,3 +305,98 @@ float GFXGetZPerspective (const float z) {
 #endif
    return z;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+PROJECTION DOESNt FIT INTO REDUCED MAT
+   /* Extract the numbers for the RIGHT plane */
+   frustum[0][0] = /*clip[ 3]*/ - clip.r[ 0];
+   frustum[0][1] = /*clip[ 7]*/ - clip.r[ 3];
+   frustum[0][2] = /*clip[11]*/ - clip.r[ 6];
+   frustum[0][3] = /*clip[15]*/1 - clip.p.i;
+
+   /* Normalize the result */
+   t = sqrtf( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
+   frustum[0][0] /= t;
+   frustum[0][1] /= t;
+   frustum[0][2] /= t;
+   frustum[0][3] /= t;
+
+   /* Extract the numbers for the LEFT plane */
+   frustum[1][0] = /*clip[ 3]*/ + clip.r[ 0];
+   frustum[1][1] = /*clip[ 7]*/ + clip.r[ 3];
+   frustum[1][2] = /*clip[11]*/ + clip.r[ 6];
+   frustum[1][3] = /*clip[15]*/1 + clip.p.i;
+
+   /* Normalize the result */
+   t = sqrtf( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
+   frustum[1][0] /= t;
+   frustum[1][1] /= t;
+   frustum[1][2] /= t;
+   frustum[1][3] /= t;
+
+   /* Extract the BOTTOM plane */
+   frustum[2][0] = /*clip[ 3]*/ + clip.r[ 1];
+   frustum[2][1] = /*clip[ 7]*/ + clip.r[ 4];
+   frustum[2][2] = /*clip[11]*/ + clip.r[ 7];
+   frustum[2][3] = /*clip[15]*/1 + clip.p.j;
+
+   /* Normalize the result */
+   t = sqrtf( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
+   frustum[2][0] /= t;
+   frustum[2][1] /= t;
+   frustum[2][2] /= t;
+   frustum[2][3] /= t;
+
+   /* Extract the TOP plane */
+   frustum[2][0] = /*clip.r[ 3]*/ - clip.r[ 1];
+   frustum[2][1] = /*clip[ 7]*/ - clip.r[ 4];
+   frustum[2][2] = /*clip[11]*/ - clip.r[ 7];
+   frustum[2][3] = /*clip[15]*/1 - clip.p.j;
+
+   /* Normalize the result */
+   t = sqrtf( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
+   frustum[3][0] /= t;
+   frustum[3][1] /= t;
+   frustum[3][2] /= t;
+   frustum[3][3] /= t;
+
+   /* Extract the FAR plane */
+   frustum[5][0] = /*clip.r[ 3]*/ - clip.r[ 2];
+   frustum[5][1] = /*clip[ 7]*/ - clip.r[ 5];
+   frustum[5][2] = /*clip[11]*/ - clip.r[8];
+   frustum[5][3] = /*clip[15]*/1 - clip.p.k;
+
+   /* Normalize the result */
+   t = sqrtf( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
+   frustum[5][0] /= t;
+   frustum[5][1] /= t;
+   frustum[5][2] /= t;
+   frustum[5][3] /= t;
+
+   /* Extract the NEAR plane */
+   frustum[4][0] = /*clip[ 3]*/ + clip.r[ 2];
+   frustum[4][1] = /*clip[ 7]*/ + clip.r[ 5];
+   frustum[4][2] = /*clip[11]*/ + clip.r[8];
+   frustum[4][3] = /*clip[15]*/1 + clip.p.k;
+
+   /* Normalize the result */
+   t = sqrtf( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
+   frustum[4][0] /= t;
+   frustum[4][1] /= t;
+   frustum[4][2] /= t;
+   frustum[4][3] /= t;
+   
+#endif

@@ -51,7 +51,7 @@
 string varToString (varInst * vi) {
   switch (vi->type) {
   case VAR_FLOAT:
-    return XMLSupport::tostring (vi->float_val);
+    return XMLSupport::tostring ((float)vi->float_val);
   case VAR_INT:
     return XMLSupport::tostring(vi->int_val);
   case VAR_BOOL:
@@ -66,7 +66,7 @@ string varToString (varInst * vi) {
   }
 }
 
-extern unsigned int AddAnimation (const Vector & pos, const float size, bool mvolatile, const std::string &name );
+extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name );
 void Mission::doCall_toxml(string module,varInst *ovi){
   if(module=="_olist"){
     call_olist_toxml(NULL,SCRIPT_RUN,ovi);
@@ -151,7 +151,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     }
     else if (method_id==CMT_STD_playSound) {
       std::string soundName= getStringArgument(node,mode,0);     
-      Vector loc;
+      QVector loc;
       loc.i= getFloatArg(node,mode,1);     
       loc.j= getFloatArg(node,mode,2);     
       loc.k= getFloatArg(node,mode,3);     
@@ -171,7 +171,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       vi->type=VAR_VOID;
     }else if (method_id==CMT_STD_playAnimation) {
       std::string aniName= getStringArgument(node,mode,0);     
-      Vector loc(0,0,0);
+      QVector loc(0,0,0);
       loc.i= getFloatArg(node,mode,1);     
       loc.j= getFloatArg(node,mode,2);     
       loc.k= getFloatArg(node,mode,3);     
@@ -835,12 +835,11 @@ bool Mission::getBoolArg(missionNode *node,int mode,int arg_nr){
   bool res=checkBoolExpr(val_node,mode);
   return res;
 }
-float Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
+double Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
   missionNode *val_node=getArgument(node,mode,arg_nr);
-  float res=checkFloatExpr(val_node,mode);
-  return res;
+  return checkFloatExpr(val_node,mode);
 }
-float Mission::getIntArg(missionNode *node,int mode,int arg_nr){
+int Mission::getIntArg(missionNode *node,int mode,int arg_nr){
   missionNode *val_node=getArgument(node,mode,arg_nr);
   int res=checkIntExpr(val_node,mode);
   return res;
@@ -863,12 +862,12 @@ Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
   deleteVarInst(unit_vi);
   return ret;
 }
-Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
+QVector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
   missionNode *pos_node=getArgument(node,mode,arg_nr);
   varInst *pos_vi=checkObjectExpr(pos_node,mode);
   //  olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
 
-  Vector vec3;
+  QVector vec3;
   if(mode==SCRIPT_RUN){
     vec3=call_olist_tovector(pos_node,mode,pos_vi);
   }

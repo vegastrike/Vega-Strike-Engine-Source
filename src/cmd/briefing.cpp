@@ -3,6 +3,7 @@
 #include "unit_factory.h"
 #include "gfx/mesh.h"
 #include "script/mission.h"
+#include "gfx/matrix.h"
 Briefing::Ship::Ship (const char * filename, int faction, const Vector & position) {
   Unit * tmp  = UnitFactory::createUnit(filename,true,faction);
   meshdata = tmp->StealMeshes();
@@ -26,11 +27,11 @@ bool UpdatePosition (Vector & res, Vector cur, Vector fin, float speed) {
     res= direction+cur;
     return ret;
 }
-void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam, bool updatepos) {
+void SetDirection (Matrix &mat, Vector start, Vector end, const Matrix cam, bool updatepos) {
   end = end-start;
   if (end.MagnitudeSquared()>.000001) {
     Vector p;
-    Vector q (-cam[8],-cam[9],-cam[10]);
+    Vector q (-cam.getR());
     Vector r(end);
     Normalize(r);
     q = q- r*(r.Dot (q)/r.MagnitudeSquared());
@@ -42,7 +43,7 @@ void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam, bool 
     }
     Normalize(q);
     ScaledCrossProduct (q,r,p);
-    VectorToMatrix (mat,p,q,r);
+    VectorAndPositionToMatrix (mat,p,q,r,QVector(0,0,0));
   }
 }
 extern double interpolation_blend_factor;
@@ -64,7 +65,7 @@ void Briefing::Render() {
   _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
   //  glClearColor(0,0,0,0);
 }
-void Briefing::Ship::Render (const Matrix cam, double interpol) {
+void Briefing::Ship::Render (const Matrix &cam, double interpol) {
   Matrix final;
   Identity(final);
   Vector pos(Position());
@@ -74,9 +75,7 @@ void Briefing::Ship::Render (const Matrix cam, double interpol) {
     dir = orders.front().vec;
   }
   SetDirection (final,pos,dir,cam,!orders.empty());
-  final[12]=pos.i;
-  final[13]=pos.j;
-  final[14]=pos.k;
+  final.p =pos.Cast();
   
   Matrix camfinal;
   MultMatrix (camfinal,cam,final);
@@ -98,7 +97,7 @@ void Briefing::Ship::Destroy() {
   meshdata.clear();  
 }
 Briefing::Briefing() {
-  cam.SetPosition(Vector(0,0,0));
+  cam.SetPosition(QVector(0,0,0));
   cam.SetOrientation(Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
   tp.SetPos (-1,1);
   tp.SetSize (1,-.5);

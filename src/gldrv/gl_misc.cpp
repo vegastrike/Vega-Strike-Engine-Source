@@ -169,8 +169,15 @@ void /*GFXDRVAPI*/ GFXVertex3f(const float x, const float y, const float z)
 {
   glVertex3f(x,y,z);
 }
+void /*GFXDRVAPI*/ GFXVertex3f(const double x, const double y, const double z)
+{
+  glVertex3d(x,y,z);
+}
 void GFXVertexf (const Vector &v) {
   glVertex3f(v.i,v.j,v.k);
+}
+void GFXVertexf (const QVector &v) {
+  glVertex3d(v.i,v.j,v.k);
 }
 void /*GFXDRVAPI*/ GFXEnd()
 {

@@ -1,6 +1,6 @@
 /*
  * Vega Strike
- * Copyright (C) 2001-2002 Alan Shieh
+ * Copyright (C) 2001-2002 Alan Shieh Rewritten by Daniel Horn for Double precision
  *
  * http://vegastrike.sourceforge.net/
  *
@@ -22,302 +22,279 @@
 #define _MATRIX_H
 
 #include "vec.h"
+#define MATRIX_TEST
+#ifdef MATRIX_TEST
+#include <vector>
+#endif
+class Matrix {
+ private:
+#ifdef MATRIX_TEXT
+  float operator [] (int i);
+  friend struct DrawContext;
+  friend class Cockpit;
+  friend class std::vector<Matrix>;
+  friend struct MeshDrawContext;
+  friend class Background;
+  Matrix(const Matrix &) {}//BROKEN!!!!!!!
+#endif
+ public:
+  float r[9];
+  QVector p;  
+  Matrix() {}
 
-typedef float Matrix[16];
+  Vector getR() const{return Vector (r[6],r[7],r[8]);}
+  Vector getQ() const{return Vector (r[3],r[4],r[5]);}
+  Vector getP() const{return Vector (r[0],r[1],r[2]);}
+  Matrix (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos) {
+    r[0]=r0;
+    r[1]=r1;
+    r[2]=r2;
+    r[3]=r3;
+    r[4]=r4;
+    r[5]=r5;
+    r[6]=r6;
+    r[7]=r7;
+    r[8]=r8;
+    p=pos;
+  }
+  Matrix(const Vector &v1, const Vector &v2, const Vector &v3):p(0,0,0) {
+    this->r[0] = v1.i;
+    this->r[1] = v1.j;
+    this->r[2] = v1.k;
+    
+    this->r[3] = v2.i;
+    this->r[4] = v2.j;
+    this->r[5] = v2.k;
+    
+    this->r[6] = v3.i;
+    this->r[7] = v3.j;
+    this->r[8] = v3.k;
+  }
+  Matrix (const Vector &v1, const Vector & v2, const Vector & v3, const QVector & pos);
+  Matrix operator * (const Matrix &m2) const;
+};
 
-const Matrix identity_matrix = {1,0,0,0,
-				    0,1,0,0,
-				    0,0,1,0,
-				    0,0,0,1};
+const Matrix identity_matrix (1,0,0,
+			      0,1,0,
+			      0,0,1,
+			      QVector(0,0,0));
 
 /** moves a vector struct to a matrix */
 
-inline void ScaleMatrix(float matrix[], const Vector &scale) {
-  matrix[0]*=scale.i;
-  matrix[1]*=scale.i;
-  matrix[2]*=scale.i;
-  matrix[4]*=scale.j;
-  matrix[5]*=scale.j;
-  matrix[6]*=scale.j;
-  matrix[8]*=scale.k;
-  matrix[9]*=scale.k;
-  matrix[10]*=scale.k;
+inline void ScaleMatrix(Matrix &matrix, const Vector &scale) {
+  matrix.r[0]*=scale.i;
+  matrix.r[1]*=scale.i;
+  matrix.r[2]*=scale.i;
+  matrix.r[3]*=scale.j;
+  matrix.r[4]*=scale.j;
+  matrix.r[5]*=scale.j;
+  matrix.r[6]*=scale.k;
+  matrix.r[7]*=scale.k;
+  matrix.r[8]*=scale.k;
 }
 
-inline void VectorToMatrix(float matrix[], const Vector &v1, const Vector &v2, const Vector &v3)
-{
-	matrix[0] = v1.i;
-	matrix[1] = v1.j;
-	matrix[2] = v1.k;
-	matrix[3] = 0;
+inline void VectorAndPositionToMatrix(Matrix &matrix, const Vector &v1, const Vector &v2, const Vector &v3, const QVector &pos) {
 
-	matrix[4] = v2.i;
-	matrix[5] = v2.j;
-	matrix[6] = v2.k;
-	matrix[7] = 0;
+	matrix.r[0] = v1.i;
+	matrix.r[1] = v1.j;
+	matrix.r[2] = v1.k;
 
-	matrix[8] = v3.i;
-	matrix[9] = v3.j;
-	matrix[10] = v3.k;
-	matrix[11] = 0;
-	
-	matrix[12] = 0;
-	matrix[13] = 0;
-	matrix[14] = 0;
-	matrix[15] = 1;
+	matrix.r[3] = v2.i;
+	matrix.r[4] = v2.j;
+	matrix.r[5] = v2.k;
+
+	matrix.r[6] = v3.i;
+	matrix.r[7] = v3.j;
+	matrix.r[8] = v3.k;
+	matrix.p = pos;  
 }
-
-inline void VectorAndPositionToMatrix(float matrix[], const Vector &v1, const Vector &v2, const Vector &v3, const Vector &pos) {
-
-	matrix[0] = v1.i;
-	matrix[1] = v1.j;
-	matrix[2] = v1.k;
-	matrix[3] = 0;
-
-	matrix[4] = v2.i;
-	matrix[5] = v2.j;
-	matrix[6] = v2.k;
-	matrix[7] = 0;
-
-	matrix[8] = v3.i;
-	matrix[9] = v3.j;
-	matrix[10] = v3.k;
-	matrix[11] = 0;
-	
-	matrix[12] = pos.i;
-	matrix[13] = pos.j;
-	matrix[14] = pos.k;
-	matrix[15] = 1;
-  
+inline Matrix::Matrix (const Vector & v1, const Vector & v2, const Vector & v3, const QVector &pos) {
+  VectorAndPositionToMatrix(*this, v1, v2, v3, pos);
 }
 
 /** zeros out a 4x4 matrix quickly
  */
-inline void Zero(float matrix[])
+inline void Zero(Matrix &  matrix)
 {
-	matrix[0] = 0;
-	matrix[1] = 0;
-	matrix[2] = 0;
-	matrix[3] = 0;
+	matrix.r[0] = 0;
+	matrix.r[1] = 0;
+	matrix.r[2] = 0;
+	matrix.r[3] = 0;
 
-	matrix[4] = 0;
-	matrix[5] = 0;
-	matrix[6] = 0;
-	matrix[7] = 0;
+	matrix.r[4] = 0;
+	matrix.r[5] = 0;
+	matrix.r[6] = 0;
+	matrix.r[7] = 0;
 
-	matrix[8] = 0;
-	matrix[9] = 0;
-	matrix[10] = 0;
-	matrix[11] = 0;
-	
-	matrix[12] = 0;
-	matrix[13] = 0;
-	matrix[14] = 0;
-	matrix[15] = 0;
+	matrix.r[8] = 0;
+	matrix.p.Set(0,0,0);
 }
-
 /** Computes a 4x4 identity matrix
  */
-inline void Identity(float matrix[])
+inline void Identity(Matrix &matrix)
 {
-	matrix[0] = 1;
-	matrix[1] = 0;
-	matrix[2] = 0;
-	matrix[3] = 0;
-
-	matrix[4] = 0;
-	matrix[5] = 1;
-	matrix[6] = 0;
-	matrix[7] = 0;
-
-	matrix[8] = 0;
-	matrix[9] = 0;
-	matrix[10] = 1;
-	matrix[11] = 0;
-	
-	matrix[12] = 0;
-	matrix[13] = 0;
-	matrix[14] = 0;
-	matrix[15] = 1;
+	matrix.r[0] = 1;
+	matrix.r[1] = 0;
+	matrix.r[2] = 0;
+	matrix.r[3] = 0;
+	matrix.r[4] = 1;
+	matrix.r[5] = 0;
+	matrix.r[6] = 0;
+	matrix.r[7] = 0;
+	matrix.r[8] = 1;
+	matrix.p.Set(0,0,0);
 }
 /** Computes a Translation matrix based on x,y,z translation
  */
 
-inline void Translate(float matrix[], float x, float y, float z)
-{
-	matrix[0] = 1;
-	matrix[1] = 0;
-	matrix[2] = 0;
-	matrix[3] = 0;
-
-	matrix[4] = 0;
-	matrix[5] = 1;
-	matrix[6] = 0;
-	matrix[7] = 0;
-
-	matrix[8] = 0;
-	matrix[9] = 0;
-	matrix[10] = 1;
-	matrix[11] = 0;
-	
-	matrix[12] = x;
-	matrix[13] = y;
-	matrix[14] = z;
-	matrix[15] = 1;
-}
-
-inline void RotateAxisAngle(float tmp[], const Vector &axis, const float angle) {
+inline void RotateAxisAngle(Matrix & tmp, const Vector &axis, const float angle) {
   float c = cosf (angle);
   float s = sinf (angle);
-#define M(a,b) (tmp[b*4+a])
+#define M(a,b) (tmp.r[b*3+a])
                 M(0,0)=axis.i*axis.i*(1-c)+c;
                 M(0,1)=axis.i*axis.j*(1-c)-axis.k*s;
                 M(0,2)=axis.i*axis.k*(1-c)+axis.j*s;
-                M(0,3)=0;
+		//                M(0,3)=0;
                 M(1,0)=axis.j*axis.i*(1-c)+axis.k*s;
                 M(1,1)=axis.j*axis.j*(1-c)+c;
                 M(1,2)=axis.j*axis.k*(1-c)-axis.i*s;
-                M(1,3)=0;
+		//                M(1,3)=0;
                 M(2,0)=axis.i*axis.k*(1-c)-axis.j*s;
                 M(2,1)=axis.j*axis.k*(1-c)+axis.i*s;
                 M(2,2)=axis.k*axis.k*(1-c)+c;
-                M(2,3)=0;
-                M(3,0)=0;
-                M(3,1)=0;
-                M(3,2)=0;
-                M(3,3)=1;
+		//                M(2,3)=0;
 #undef M
+		tmp.p.Set (0,0,0);
 }
 
-inline void Translate(float matrix[], const Vector &v) {
-  Translate(matrix, v.i, v.j, v.k);
+inline void Translate(Matrix &matrix, const QVector &v) {
+	matrix.r[0] = 1;
+	matrix.r[1] = 0;
+	matrix.r[2] = 0;
+	matrix.r[3] = 0;
+	matrix.r[4] = 1;
+	matrix.r[5] = 0;
+	matrix.r[6] = 0;
+	matrix.r[7] = 0;
+	matrix.r[8] = 1;
+	matrix.p=v;
 }
 
 /** Multiplies m1 and m2 and pops the result into dest;
  *  dest != m1, dest !=m2
  */
-inline void MultMatrix(float dest[], const float m1[], const float m2[])
+inline void MultMatrix(Matrix &dest, const Matrix & m1, const Matrix &m2)
 {
-  dest[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[12]*m2[3];
-  dest[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[13]*m2[3];
-  dest[2] = m1[2]*m2[0] + m1[6]*m2[1] + m1[10]*m2[2] + m1[14]*m2[3];
-  dest[3] = m1[3]*m2[0] + m1[7]*m2[1] + m1[11]*m2[2] + m1[15]*m2[3];
+  dest.r[0] = m1.r[0]*m2.r[0] + m1.r[3]*m2.r[1] + m1.r[6]*m2.r[2];
+  dest.r[1] = m1.r[1]*m2.r[0] + m1.r[4]*m2.r[1] + m1.r[7]*m2.r[2];
+  dest.r[2] = m1.r[2]*m2.r[0] + m1.r[5]*m2.r[1] + m1.r[8]*m2.r[2];
 
-  dest[4] = m1[0]*m2[4] + m1[4]*m2[5] + m1[8]*m2[6] + m1[12]*m2[7];
-  dest[5] = m1[1]*m2[4] + m1[5]*m2[5] + m1[9]*m2[6] + m1[13]*m2[7];
-  dest[6] = m1[2]*m2[4] + m1[6]*m2[5] + m1[10]*m2[6] + m1[14]*m2[7];
-  dest[7] = m1[3]*m2[4] + m1[7]*m2[5] + m1[11]*m2[6] + m1[15]*m2[7];
+  dest.r[3] = m1.r[0]*m2.r[3] + m1.r[3]*m2.r[4] + m1.r[6]*m2.r[5];
+  dest.r[4] = m1.r[1]*m2.r[3] + m1.r[4]*m2.r[4] + m1.r[7]*m2.r[5];
+  dest.r[5] = m1.r[2]*m2.r[3] + m1.r[5]*m2.r[4] + m1.r[8]*m2.r[5];
 
-  dest[8] = m1[0]*m2[8] + m1[4]*m2[9] + m1[8]*m2[10] + m1[12]*m2[11];
-  dest[9] = m1[1]*m2[8] + m1[5]*m2[9] + m1[9]*m2[10] + m1[13]*m2[11];
-  dest[10] = m1[2]*m2[8] + m1[6]*m2[9] + m1[10]*m2[10] + m1[14]*m2[11];
-  dest[11] = m1[3]*m2[8] + m1[7]*m2[9] + m1[11]*m2[10] + m1[15]*m2[11];
 
-  dest[12] = m1[0]*m2[12] + m1[4]*m2[13] + m1[8]*m2[14] + m1[12]*m2[15];
-  dest[13] = m1[1]*m2[12] + m1[5]*m2[13] + m1[9]*m2[14] + m1[13]*m2[15];
-  dest[14] = m1[2]*m2[12] + m1[6]*m2[13] + m1[10]*m2[14] + m1[14]*m2[15];
-  dest[15] = m1[3]*m2[12] + m1[7]*m2[13] + m1[11]*m2[14] + m1[15]*m2[15];
+  dest.r[6] = m1.r[0]*m2.r[6] + m1.r[3]*m2.r[7] + m1.r[6]*m2.r[8];
+  dest.r[7] = m1.r[1]*m2.r[6] + m1.r[4]*m2.r[7] + m1.r[7]*m2.r[8];
+  dest.r[8] = m1.r[2]*m2.r[6] + m1.r[5]*m2.r[7] + m1.r[8]*m2.r[8];
 
-  /*	for(int rowcount = 0; rowcount<4; rowcount++)
-		for(int colcount = 0; colcount<4; colcount++)
-			for(int mcount = 0; mcount <4; mcount ++)
-			dest[colcount*4+rowcount] += m1[mcount*4+rowcount]*m2[colcount*4+mcount];
-  */
+  dest.p.i = m1.r[0]*m2.p.i + m1.r[3]*m2.p.j + m1.r[6]*m2.p.k + m1.p.i;
+  dest.p.j = m1.r[1]*m2.p.i + m1.r[4]*m2.p.j + m1.r[7]*m2.p.k + m1.p.j;
+  dest.p.k = m1.r[2]*m2.p.i + m1.r[5]*m2.p.j + m1.r[8]*m2.p.k + m1.p.k;
+
 }
+
+inline Matrix Matrix::operator * (const Matrix &m2) const{
+  Matrix res;
+  MultMatrix (res,*this,m2);
+  return res;
+}
+
 /**
  * Copies Matrix source into the destination Matrix 
  */ 
-inline void CopyMatrix(Matrix dest, const Matrix source)
-{
-	dest[0]=source[0];
-	dest[1]=source[1];
-		dest[2]=source[2];
-			dest[3]=source[3];
-	dest[4]=source[4];
-	dest[5]=source[5];
-	dest[6]=source[6];
-	dest[7]=source[7];
-	dest[8]=source[8];
-	dest[9]=source[9];
-	dest[10]=source[10];
-	dest[11]=source[11];
-	dest[12]=source[12];
-	dest[13]=source[13];
-	dest[14]=source[14];
-	dest[15]=source[15];
-
-  //memcpy(dest, source, sizeof(Matrix));
-  /*
-	for(int matindex = 0; matindex<16; matindex++)
-		dest[matindex] = source[matindex];
-  */
+inline void CopyMatrix(Matrix &dest, const Matrix &source) {
+  dest = source;
 }
 /**
  * moves a vector in the localspace to world space through matrix t
 */
-inline Vector Transform (const Matrix t, const Vector & v) {
-  //    Vector tLocation (t[12],t[13],t[14]);
-//    Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
-//    Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
-//    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
-  return Vector (t[12]+v.i*t[0]+v.j*t[4]+v.k*t[8],
-		 t[13]+v.i*t[1]+v.j*t[5]+v.k*t[9],
-		 t[14]+v.i*t[2]+v.j*t[6]+v.k*t[10]);
+inline QVector Transform (const Matrix &t, const QVector & v) {
+  return QVector (t.p.i+v.i*t.r[0]+v.j*t.r[3]+v.k*t.r[6],
+		  t.p.j+v.i*t.r[1]+v.j*t.r[4]+v.k*t.r[7],
+		  t.p.k+v.i*t.r[2]+v.j*t.r[5]+v.k*t.r[8]);
 }
-inline Vector InvTransformNormal (const Matrix t, const Vector & v) {
+inline Vector Transform (const Matrix &t, const Vector & v) {
+  return Vector (t.p.i+v.i*t.r[0]+v.j*t.r[3]+v.k*t.r[6],
+		  t.p.j+v.i*t.r[1]+v.j*t.r[4]+v.k*t.r[7],
+		  t.p.k+v.i*t.r[2]+v.j*t.r[5]+v.k*t.r[8]);
+}
+inline const QVector QVector::Transform(const class Matrix  &m1) const {
+  return ::Transform (m1,*this);
+}
+inline const Vector Vector::Transform(const class Matrix  &m1) const {
+  QVector ret = ::Transform (m1,QVector (i,j,k));
+  return Vector (ret.i,ret.j,ret.k);
+}
 
-#define M(A,B) t[B*4+A]
+//these vectors are going to be just normals...
+inline Vector InvTransformNormal (const Matrix &t, const Vector & v) {
+
+#define M(A,B) t.r[B*3+A]
   return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
 		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
 		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
 #undef M
 }
-inline Vector InvTransform (const Matrix t, const Vector & v) {
-  return InvTransformNormal (t,  Vector (v.i-t[12], v.j-t[13], v.k-t[14]));
+inline QVector InvTransformNormal (const Matrix &t, const QVector & v) {
+
+#define M(A,B) t.r[B*3+A]
+  return QVector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
+		 v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
+		 v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
+#undef M
 }
 
-inline Vector Transform (const Matrix t, const float x, const float y, const float z) {
-  //    Vector tLocation (t[12],t[13],t[14]);
-//    Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
-//    Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
-//    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
-  return Vector (t[12]+x*t[0]+y*t[4]+z*t[8],
-		 t[13]+x*t[1]+y*t[5]+z*t[9],
-		 t[14]+x*t[2]+y*t[6]+z*t[10]);
+inline QVector InvTransform (const Matrix &t, const QVector & v) {
+  return InvTransformNormal (t,  QVector (v.i-t.p.i, v.j-t.p.j, v.k-t.p.k));
+}
+inline Vector InvTransform (const Matrix &t, const Vector & v) {
+  return InvTransformNormal (t,  QVector (v.i-t.p.i, v.j-t.p.j, v.k-t.p.k)).Cast();
 }
 
-inline Vector TransformNormal (const Matrix t, const Vector & v) {
-  return Vector (v.i*t[0]+v.j*t[4]+v.k*t[8],
-		 v.i*t[1]+v.j*t[5]+v.k*t[9],
-		 v.i*t[2]+v.j*t[6]+v.k*t[10]);
+inline Vector TransformNormal (const Matrix &t, const Vector & v) {
+  return Vector (v.i*t.r[0]+v.j*t.r[3]+v.k*t.r[6],
+		 v.i*t.r[1]+v.j*t.r[4]+v.k*t.r[7],
+		 v.i*t.r[2]+v.j*t.r[5]+v.k*t.r[8]);
 }
-inline Vector TransformNormal (const Matrix t, const float x, const float y, const float z) {
-  return Vector (x*t[0]+y*t[4]+z*t[8],
-		 x*t[1]+y*t[5]+z*t[9],
-		 x*t[2]+y*t[6]+z*t[10]);
+inline QVector TransformNormal (const Matrix &t, const QVector & v) {
+  return QVector (v.i*t.r[0]+v.j*t.r[3]+v.k*t.r[6],
+		  v.i*t.r[1]+v.j*t.r[4]+v.k*t.r[7],
+		  v.i*t.r[2]+v.j*t.r[5]+v.k*t.r[8]);
 }
+
 int invert (float b[], float a[]);
 
-inline void MatrixToVectors (const Matrix m,Vector &p,Vector&q,Vector&r, Vector &c) {
-  p.Set (m[0],m[1],m[2]);
-  q.Set (m[4],m[5],m[6]);
-  r.Set (m[8],m[9],m[10]);
-  c.Set (m[12],m[13],m[14]);
+inline void MatrixToVectors (const Matrix &m,Vector &p,Vector&q,Vector&r, QVector &c) {
+  p.Set (m.r[0],m.r[1],m.r[2]);
+  q.Set (m.r[3],m.r[4],m.r[5]);
+  r.Set (m.r[6],m.r[7],m.r[8]);
+  c=m.p;
 }
 
-inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
-  pos = pos - Vector (trans[12],trans[13],trans[14]);
-#define a (trans[0])
-#define b (trans[4])
-#define c (trans[8])
-#define d (trans[1])
-#define e (trans[5])
-#define f (trans[9])
-#define g (trans[2])
-#define h (trans[6])
-#define i (trans[10])
-  float factor = 1.0F/(-c*e*g+ b*f*g + c*d*h - a*f*h - b*d*i + a*e*i);
-  return (Vector(pos.Dot (Vector (e*i- f*h,c*h-b*i,b*f-c*e)),pos.Dot (Vector (f*g-d*i,a*i-c*g, c*d-a*f)),pos.Dot (Vector (d*h-e*g, b*g-a*h, a*e-b*d)))*factor);
+inline QVector InvScaleTransform (const Matrix &trans, QVector pos) {
+  pos = pos - trans.p;
+#define a (trans.r[0])
+#define b (trans.r[3])
+#define c (trans.r[6])
+#define d (trans.r[1])
+#define e (trans.r[4])
+#define f (trans.r[7])
+#define g (trans.r[2])
+#define h (trans.r[5])
+#define i (trans.r[8])
+  double factor = 1.0F/(-c*e*g+ b*f*g + c*d*h - a*f*h - b*d*i + a*e*i);
+  return (QVector(pos.Dot (QVector (e*i- f*h,c*h-b*i,b*f-c*e)),pos.Dot (QVector (f*g-d*i,a*i-c*g, c*d-a*f)),pos.Dot (QVector (d*h-e*g, b*g-a*h, a*e-b*d)))*factor);
 #undef a
 #undef b
 #undef c
@@ -328,29 +305,26 @@ inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
 #undef h
 #undef i
 }
-inline void InvertMatrix (Matrix o, const Matrix trans) {
-#define a (trans[0])
-#define b (trans[4])
-#define c (trans[8])
-#define d (trans[1])
-#define e (trans[5])
-#define f (trans[9])
-#define g (trans[2])
-#define h (trans[6])
-#define i (trans[10])
+inline void InvertMatrix (Matrix &o, const Matrix &trans) {
+#define a (trans.r[0])
+#define b (trans.r[3])
+#define c (trans.r[6])
+#define d (trans.r[1])
+#define e (trans.r[4])
+#define f (trans.r[7])
+#define g (trans.r[2])
+#define h (trans.r[5])
+#define i (trans.r[8])
   float factor = 1.0F/(-c*e*g+ b*f*g + c*d*h - a*f*h - b*d*i + a*e*i);
-  o[0]=factor*(e*i- f*h);
-  o[4]=factor*(c*h-b*i);
-  o[8]=factor*(b*f-c*e);
-  o[1]=factor*(f*g-d*i);
-  o[5]=factor*(a*i-c*g);
-  o[9]=factor*(c*d-a*f);
-  o[2]=factor*(d*h-e*g);
-  o[6]=factor*(b*g-a*h);
-  o[10]=factor*(a*e-b*d);
-  o[3]=0;
-  o[7]=0;
-  o[11]=0;
+  o.r[0]=factor*(e*i- f*h);
+  o.r[3]=factor*(c*h-b*i);
+  o.r[6]=factor*(b*f-c*e);
+  o.r[1]=factor*(f*g-d*i);
+  o.r[4]=factor*(a*i-c*g);
+  o.r[7]=factor*(c*d-a*f);
+  o.r[2]=factor*(d*h-e*g);
+  o.r[5]=factor*(b*g-a*h);
+  o.r[8]=factor*(a*e-b*d);
 #undef a
 #undef b
 #undef c
@@ -360,37 +334,34 @@ inline void InvertMatrix (Matrix o, const Matrix trans) {
 #undef g
 #undef h
 #undef i
-
-  Vector pos (TransformNormal (o,Vector (-trans[12],-trans[13],-trans[14])));
-  o[12]=pos.i;
-  o[13]=pos.j;
-  o[14]=pos.k;
-  o[15]=1;
-
+  o.p= TransformNormal (o,QVector (-trans.p));
 }
 
-inline void Rotate (Matrix tmp, const Vector &axis, float angle) {
+inline void Rotate (Matrix &tmp, const Vector &axis, float angle) {
                 double c = cos (angle);
                 double s = sin (angle);
 //Row, COl
-#define M(a,b) (tmp[b*4+a])
+#define M(a,b) (tmp.r[b*3+a])
                 M(0,0)=axis.i*axis.i*(1-c)+c;
                 M(0,1)=axis.i*axis.j*(1-c)-axis.k*s;
                 M(0,2)=axis.i*axis.k*(1-c)+axis.j*s;
-          M(0,3)=0;
+		//          M(0,3)=0;
                 M(1,0)=axis.j*axis.i*(1-c)+axis.k*s;
                 M(1,1)=axis.j*axis.j*(1-c)+c;
                 M(1,2)=axis.j*axis.k*(1-c)-axis.i*s;
-                M(1,3)=0;
+		//                M(1,3)=0;
                 M(2,0)=axis.i*axis.k*(1-c)-axis.j*s;
                 M(2,1)=axis.j*axis.k*(1-c)+axis.i*s;
                 M(2,2)=axis.k*axis.k*(1-c)+c;
-                M(2,3)=0;
-                M(3,0)=0;
-                M(3,1)=0;
-                M(3,2)=0;
-                M(3,3)=1;
+		//                M(2,3)=0;
 #undef M
+		tmp.p.Set(0,0,0);
 }
+struct DrawContext {
+  Matrix m;
+  class GFXVertexList *vlist;
+  DrawContext() { }
+  DrawContext(const Matrix  &a, GFXVertexList *vl) :m(a),vlist(vl){}
+};
 
 #endif

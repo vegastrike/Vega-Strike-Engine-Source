@@ -21,7 +21,7 @@ void CoordinateSelect::MouseMoveHandle (KBSTATE,int x,int y,int,int,int) {
 
 
 
-CoordinateSelect::CoordinateSelect (Vector start):LocSelAni ("locationselect.ani",true,.5,MIPMAP,true), LocalPosition(start) {
+CoordinateSelect::CoordinateSelect (QVector start):LocSelAni ("locationselect.ani",true,.5,MIPMAP,true), LocalPosition(start) {
   CrosshairSize=2;
   CoordinateSelectmousex = g_game.x_resolution/2;
   CoordinateSelectmousey = g_game.y_resolution/2;
@@ -29,32 +29,33 @@ CoordinateSelect::CoordinateSelect (Vector start):LocSelAni ("locationselect.ani
 }
 void CoordinateSelect::UpdateMouse() {
   if (CoordinateSelectChange==1) {
-    Vector CamPos, CamQ,CamR;
+    Vector CamPos;
+    Vector CamQ,CamR;
     _Universe->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
 
     Vector mousePoint ( MouseCoordinate(CoordinateSelectmousex,CoordinateSelectmousey));
     float mouseDistance= mousePoint.k*mousePoint.k;
     mousePoint = Transform (CamPos,CamQ,CamR,mousePoint);
-    
-    _Universe->AccessCamera()->GetPosition (CamPos);  
+    //    QVector cp;
+    CamPos=_Universe->AccessCamera()->GetPosition ();  
     //float mouseDistance = mousePoint.Dot (CamR); 
     //distance out into z...straight line...
 
 
-    float distance = CamR.Dot (LocalPosition-CamPos);//distance out into z...straight line...
+    float distance = CamR.Dot ((LocalPosition-CamPos).Cast());//distance out into z...straight line...
     //    fprintf (stderr, "distance:%f\n",distance);
     //fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
     if (mouseDistance!=0) {
-      LocalPosition = mousePoint*(distance/mouseDistance)+CamPos;
+      LocalPosition = mousePoint*(distance/mouseDistance)+CamPos.Cast();
     } else {
-      LocalPosition = 2*CamR+CamPos;
+      LocalPosition = 2*CamR+CamPos.Cast();
     }
     CoordinateSelectChange = 0;
   }
   if (CoordinateSelectChange ==2) {
     Vector CamPos, CamQ,CamR;
     _Universe->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
-    _Universe->AccessCamera()->GetPosition (CamPos);
+    CamPos=_Universe->AccessCamera()->GetPosition ();
 
     LocalPosition = LocalPosition - CamPos;
     float distance = sqrt (CamR.Dot (LocalPosition));//distance out into z...straight line...

@@ -19,11 +19,11 @@
 #include "gfx/halo.h"
 #include "gfx/animation.h"
 #include "cmd/script/flightgroup.h"
-PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
+PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
-      focus = Vector(0,0,0);
+      focus = QVector(0,0,0);
     }
     else if(delta>0) {
       focus = x_size*(delta/x_size.Magnitude());
@@ -44,9 +44,9 @@ PlanetaryOrbit::~PlanetaryOrbit () {
 void PlanetaryOrbit::Execute() {
   if (done) 
     return;
-  Vector x_offset = cos(theta) * x_size;
-  Vector y_offset = sin(theta) * y_size;
-  Vector origin (targetlocation);
+  QVector x_offset = cos(theta) * x_size;
+  QVector y_offset = sin(theta) * y_size;
+  QVector origin (targetlocation);
   if (subtype&SSELF) {
       Unit * tmp = group.GetUnit();
       if (tmp) {
@@ -58,7 +58,7 @@ void PlanetaryOrbit::Execute() {
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity*SIMULATION_ATOM;
-  parent->Velocity = (origin - focus + x_offset+y_offset-parent->LocalPosition())/SIMULATION_ATOM;
+  parent->Velocity = ((origin - focus + x_offset+y_offset-parent->LocalPosition())/SIMULATION_ATOM).Cast();
   const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
   if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
     parent->Velocity.Set (0,0,0);
@@ -90,7 +90,7 @@ void Planet::AddSatellite (Unit * orbiter) {
 	orbiter->SetOwner (this);
 }
 extern Flightgroup * getStaticBaseFlightgroup(int faction);
-void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
+void Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
   //this function is OBSOLETE
   if (level>2) {
     UnitCollection::UnitIterator satiterator = satellites.createIterator();
@@ -107,11 +107,11 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
       satellites.prepend(sat_unit=UnitFactory::createUnit (filename, false, faction,"",fg,fg->nr_ships-1));
       sat_unit->setFullname(fullname);
       un_iter satiterator (satellites.createIterator());
-      satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;
+      satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, QVector (0,0,0), this)) ;
       satiterator.current()->SetOwner (this);
     }else {
       Planet * p;
-      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
+      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, QVector (0,0,0), this, ourmat, ligh, faction,fullname));
       p->SetOwner (this);
     }
   }
@@ -155,7 +155,7 @@ string getCargoUnitName (const char * textname) {
 
 
 extern vector <char *> ParseDestinations (const string &value);
-Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid)
+Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid)
     : Unit( 0 )
     , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
 {
@@ -263,7 +263,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
 	halos[0]=new Halo ("shine.png",
 			   //			 ligh[0].ligh.GetProperties (AMBIENT),
 			   c,
-			   Vector (0,0,0),
+			   QVector (0,0,0),
 			   glowradius*radius,
 			   glowradius*radius);
       }else {
@@ -293,13 +293,13 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
 extern bool shouldfog;
 
 vector <UnitContainer *> PlanetTerrainDrawQueue;
-void Planet::Draw(const Transformation & quat, const Matrix m) {
+void Planet::Draw(const Transformation & quat, const Matrix &m) {
   //Do lighting fx
   // if cam inside don't draw?
   //  if(!inside) {
   Unit::Draw(quat,m);
   //  }
-    Vector t (_Universe->AccessCamera()->GetPosition()-Position());
+    QVector t (_Universe->AccessCamera()->GetPosition()-Position());
     static int counter=0;
     if (counter ++>100)
       if (t.Magnitude()<corner_max.i) {
@@ -318,7 +318,7 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 
  GFXLoadIdentity (MODEL);
  for (unsigned int i=0;i<lights.size();i++) {
-   GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
+   GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position.Cast()));
  }
 
  if (inside&&terrain) {
@@ -326,7 +326,8 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
    //DrawTerrain();
  }
  if (shine){
-   Vector p,q,r,c;
+   Vector p,q,r;
+   QVector c;
    MatrixToVectors (cumulative_transformation_matrix,p,r,q,c);
    shine->SetOrientation (p,q,r);
    shine->SetPosition (c);
@@ -368,7 +369,7 @@ void Planet::DrawTerrain() {
     _Universe->AccessCamera()->UpdatePlanetGFX();
     //    Camera * cc = _Universe->AccessCamera();
     //    VectorAndPositionToMatrix (tmp,cc->P,cc->Q,cc->R,cc->GetPosition()+cc->R*100);
-    terrain->SetTransformation (_Universe->AccessCamera()->GetPlanetGFX());
+    terrain->SetTransformation (*_Universe->AccessCamera()->GetPlanetGFX());
     terrain->AdjustTerrain(_Universe->activeStarSystem());
     terrain->Draw();
 #ifdef PLANETARYTRANSFORM
@@ -397,7 +398,7 @@ void Planet::DrawTerrain() {
 
 
 
-void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
+void Planet::reactToCollision(Unit * un, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
 #ifdef JUMP_DEBUG
   fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
 #endif
@@ -463,8 +464,8 @@ Planet::~Planet() {
      delete atmosphere;
   }
 	if (terraintrans) {
-	  float * tmp = (float *) malloc (sizeof(float)*16);
-	  memcpy (tmp,cumulative_transformation_matrix,sizeof(float)*16);
+	  Matrix *tmp = new Matrix ();
+	  *tmp=cumulative_transformation_matrix;
 	  terraintrans->SetTransformation (tmp);
 	  //FIXME
 	  //We're losing memory here...but alas alas... planets don't die that often
@@ -477,7 +478,7 @@ PlanetaryTransform *Planet::setTerrain (ContinuousTerrain * t, float ratiox, int
   float x,z;
   t->GetTotalSize (x,z);
   terraintrans = new PlanetaryTransform (.8*corner_max.i,x*ratiox,z,numwraps,scaleatmos);
-  terraintrans->SetTransformation (cumulative_transformation_matrix);
+  terraintrans->SetTransformation (&cumulative_transformation_matrix);
   return terraintrans;
 }
 void Planet::setAtmosphere (Atmosphere *t) {

@@ -21,6 +21,7 @@
 #ifndef LOGO_H_
 #define LOGO_H_
 
+#include "matrix.h"
 #include "gfxlib.h"
 #include "hashtable.h"
 #include <vector>
@@ -53,7 +54,7 @@ public:
 	~Logo ();
 
 	void SetDecal(Texture *decal);
-	void Draw(Matrix m);
+	void Draw(const Matrix &m);
 
 };
 #endif

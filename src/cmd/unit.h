@@ -191,7 +191,7 @@ class Unit
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
   
-  void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
+  void SetPlanetHackTransformation (Transformation *&ct, Matrix *&ctm);
 
   UnitSounds * sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
@@ -273,7 +273,7 @@ class Unit
      * should it fire
      */ 
     void PhysicsAlignedUnfire();
-    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
+    bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
     bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
   ///Mount may access unit
@@ -449,7 +449,7 @@ public:
   bool Dock (Unit * unitToDockWith);
   bool UnDock (Unit * unitToDockWith);
   ///Does a one way collision between smaller target and this
-  bool Inside (const Vector &position, const float radius, Vector & normal, float &dist);
+  bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
@@ -531,7 +531,8 @@ public:
   void Destroy();
   const LineCollide &GetCollideInfo () {return CollideInfo;}
   bool InRange (Unit *target, Vector &localcoord, bool cone=true) const{
-    localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
+    QVector delta( target->Position()-Position());
+    localcoord =ToLocalCoordinates(Vector (delta.i,delta.j,delta.k));
     float mm= localcoord.Magnitude();
     if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||((localcoord.k/mm)<computer.radar.maxcone&&cone)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
       return false;
@@ -560,7 +561,7 @@ public:
   ///Gets the average gun speed of the unit::caution SLOW
   void getAverageGunSpeed (float & speed, float & range) const;
   ///Finds the position from the local position if guns are aimed at it with speed
-  Vector PositionITTS (const Vector & local_posit, float speed) const;
+  QVector PositionITTS (const QVector & local_posit, float speed) const;
   ///The cosine of the angle to the target given passed in speed and range
   float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001) const;
   ///Highest cosine from given mounts to target. Returns distance and cosine
@@ -608,35 +609,35 @@ public:
   ///Returns the cockpit name so that the controller may load a new cockpit
   std::string getCockpit ()const;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
-  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
+  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
   ///Deprecated
   //virtual void ProcessDrawQueue();
   ///Gets the minimum distance away from the point in 3space
-  float getMinDis(const Vector &pnt);//for clicklist
+  double getMinDis(const QVector &pnt);//for clicklist
   ///queries the sphere for weapons (world space point)
-  bool querySphere (const Vector &pnt, float err) const;
+  bool querySphere (const QVector &pnt, float err) const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius
-  float querySphere (const Vector &start, const Vector & end, float my_unit_radius=0) const;
-  float querySphereNoRecurse (const Vector &start, const Vector &end, float my_unit_radius=0) const ;
+  float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0) const;
+  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0) const ;
   ///queries the ship with a directed ray
-  float querySphereClickList (const Vector &st, const Vector &dir, float err) const;//for click list
+  float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  Unit * queryBSP (const Vector &st, const Vector & end, Vector & normal, float &distance, bool ShieldBSP=true);
+  Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true);
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-  Unit * queryBSP (const Vector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
+  Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
   ///Queries if this unit is within a given frustum
   bool queryFrustum (float frustum[6][4]) const;
 
   /**
    *Queries bounding box with a point, radius err
    */
-  bool queryBoundingBox (const Vector &pnt, float err);
+  bool queryBoundingBox (const QVector &pnt, float err);
   /**
    *Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
    * hits behind.
    * 0 if ray misses 
    */
-  int queryBoundingBox(const Vector &origin,const Vector &direction, float err);
+  int queryBoundingBox(const QVector &origin,const Vector &direction, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphereClickList (int,int, float err, Camera *activeCam);
@@ -656,8 +657,8 @@ public:
 
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
-  bool InsideCollideTree (Unit * smaller, Vector & bigpos, Vector & bigNormal, Vector & smallpos, Vector & smallNormal);
-  virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
+  bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
+  virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
   bool jumpReactToCollision (Unit *smaller);
   ///Does a collision between this and another unit
@@ -665,17 +666,15 @@ public:
   ///checks for collisions with all beams and other units roughly and then more carefully
   void CollideAll();
   ///Returns the current world space position
-  Vector Position() const{return cumulative_transformation.position;};
-  const float*  GetTransformation () const {return &cumulative_transformation_matrix[0];}
+  QVector Position() const{return cumulative_transformation.position;};
+  const Matrix &  GetTransformation () const {return cumulative_transformation_matrix;}
   ///Returns the unit-space position
-  Vector LocalPosition() const {return curr_physical_state.position;};
+  QVector LocalPosition() const {return curr_physical_state.position;};
   ///Sets the unit-space position
-  void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
+  void SetPosition(const QVector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
   ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
-  void SetCurPosition (const Vector & pos) {curr_physical_state.position=pos;}
-  void SetPosAndCumPos (const Vector &pos) {SetPosition (pos);cumulative_transformation_matrix[12]=pos.i;cumulative_transformation_matrix[13]=pos.j;cumulative_transformation_matrix[14]=pos.k;cumulative_transformation.position=pos;}
-  ///Sets the unit-space position
-  void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
+  void SetCurPosition (const QVector & pos) {curr_physical_state.position=pos;}
+  void SetPosAndCumPos (const QVector &pos) {SetPosition (pos);cumulative_transformation_matrix.p=pos;cumulative_transformation.position=pos;}
   ///Sets the state of drawing
   void SetVisible(bool isvis);
   ///Rotates about the axis
@@ -694,7 +693,7 @@ public:
   /// applies a force that is multipled by the mass of the ship
   void Accelerate(const Vector &Vforce); 
   ///Apply a torque in world level coords
-  void ApplyTorque (const Vector &Vforce, const Vector &Location);
+  void ApplyTorque (const Vector &Vforce, const QVector &Location);
   ///Applies a torque in local level coordinates
   void ApplyLocalTorque (const Vector &Vforce, const Vector &Location);
   ///usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
@@ -738,9 +737,9 @@ public:
   ///executes a repair if the repair bot is up to it
   void Repair();
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
-  void ResolveForces (const Transformation &, const Matrix);
+  void ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account

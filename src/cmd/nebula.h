@@ -21,7 +21,7 @@ public:
 	float getFade() {return fadeinvalue;}
 	void PutInsideCam(int);
 	virtual enum clsptr isUnit() {return NEBULAPTR;}
-	virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
+	virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   
 protected:
     /// constructor only to be called by UnitFactory

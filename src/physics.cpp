@@ -22,7 +22,7 @@
 #include "lin_time.h"
 #include "physics.h"
 #include "gfx/quaternion.h"
-PhysicsSystem::PhysicsSystem(float M, float I, Vector *pos, Vector *p, Vector *q, Vector *r) : 
+PhysicsSystem::PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r) : 
   mass (M), 
   MomentOfInertia(I),   
   NetForce(0,0,0),
@@ -133,7 +133,7 @@ void PhysicsSystem::ApplyTorque (const Vector &Vforce, const Vector &Location, f
 	ApplyForce (Vforce, time);
 	if (NumActiveTorques< forcemax)
 	{		
-		ActiveTorques[NumActiveTorques].F = (Location-*pos).Cross (Vforce);
+		ActiveTorques[NumActiveTorques].F = (Location.Cast()-*pos).Cast().Cross (Vforce);
 		ActiveTorques[NumActiveTorques].t = time;
 		NumActiveTorques++;
 	}
@@ -207,6 +207,6 @@ void PhysicsSystem::ApplyImpulses (float Time) {
 		float y = (1-magvel*magvel*oocc);
 		tempforce = tempforce * powf (y,1.5);
 	}
-	*pos += (Velocity+.5*tempforce);
+	*pos += (Velocity+.5*tempforce).Cast();
 	Velocity +=tempforce;
 }

@@ -20,7 +20,6 @@ struct GFXMaterial;
 struct Texture;
 class Atmosphere;
 class Planet;
-typedef float Matrix[16];
 
 class PlanetaryOrbit : public Order {
  private:
@@ -28,16 +27,16 @@ class PlanetaryOrbit : public Order {
   double velocity;
   double theta;
 
-  Vector x_size;
-  Vector y_size;
-  Vector focus;
+  QVector x_size;
+  QVector y_size;
+  QVector focus;
  protected:
   ///A vector containing all lihgts currently activated on current planet
   std::vector <int> lights;
 
  public:
 
-  PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector &Centre, Unit *target=NULL); 
+  PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector &Centre, Unit *target=NULL); 
   ~PlanetaryOrbit();
   void Execute();
 
@@ -70,7 +69,7 @@ protected:
   Planet();
 
     /// constructor - only to be called by UnitFactory
-    Planet(Vector x,Vector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname);
+    Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname);
 
     friend class UnitFactory;
 
@@ -81,10 +80,10 @@ public:
   void EnableLights();
   void AddSatellite (Unit * orbiter);
   void endElement();
-  void beginElement(Vector x,Vector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname);
+  void beginElement(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname);
   Planet * GetTopPlanet (int level);
   virtual enum clsptr isUnit() {return PLANETPTR;}
-  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
+  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
   void DrawTerrain();
   static void ProcessTerrains();
 //  void InitPlanet(FILE *fp);
@@ -94,7 +93,7 @@ public:
   ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}
   void setAtmosphere (Atmosphere *);
   Atmosphere * getAtmosphere () {return atmosphere;}
-  void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist);
+  void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist);
   void gravitate(UnitCollection *units);
 
   class PlanetIterator : public Iterator {

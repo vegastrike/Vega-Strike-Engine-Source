@@ -87,8 +87,8 @@ void Unit::calculate_extent(bool update_collide_queue) {
   un_kiter iter =SubUnits.constIterator();
   const Unit * un;
   while ((un = iter.current())) {
-    corner_min = corner_min.Min(un->LocalPosition()+un->corner_min);
-    corner_max = corner_max.Max(un->LocalPosition()+un->corner_max);
+    corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
+    corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
     iter.advance();
   }
 
@@ -444,7 +444,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
 
 		}
-		un->SetPosition(Vector(x,y,z));
+		un->SetPosition(QVector(x,y,z));
 	}
 
 	int restricted;
@@ -645,20 +645,20 @@ int Unit::LockMissile() {
   }
   return (missilelock?1:(dumblock?-1:0));
 }
-Vector Unit::PositionITTS (const Vector & posit, float speed) const{
-  Vector retval = Position()-posit;
+QVector Unit::PositionITTS (const QVector & posit, float speed) const{
+  QVector retval = Position()-posit;
   speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
-  retval = Position()+Velocity*speed;
+  retval = Position()+Velocity.Cast()*speed;
   return retval;
 }
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
-   Vector Normal (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]);
+  Vector Normal (cumulative_transformation_matrix.getR());
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   Vector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity))));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity.Cast()))));
    totarget = totarget-cumulative_transformation.position;
-   float tmpcos = Normal.Dot (totarget);
+   double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
    if (tmpcos>0) {
       tmpcos = dist*dist - tmpcos*tmpcos;
@@ -686,11 +686,11 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     Transformation finaltrans (mounts[i].GetMountLocation());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
-    Vector Normal (mat[8],mat[9],mat[10]);
+    Vector Normal (mat.getR());
     
-    Vector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
     
-    tmpcos = Normal.Dot (totarget);
+    tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
     if (tmpcos>0) {
       tmpcos = tmpdist*tmpdist - tmpcos*tmpcos;
@@ -749,19 +749,19 @@ bool Unit::queryFrustum(float frustum [6][4]) const{
 float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix(int whichcam) {
   Matrix m;
-  float * ctm=cumulative_transformation_matrix;
+  Matrix ctm=cumulative_transformation_matrix;
   if (planet) {
     Transformation ct (linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor));  
     ct.to_matrix (m);
     ctm=m;
   }
-  Vector q (ctm[4],	    ctm[5],	    ctm[6]);
-  Vector r (ctm[8],	    ctm[9],	    ctm[10]);
+  Vector q (ctm.getQ());
+  Vector r (ctm.getR());
   Vector tmp;
   CrossProduct(r,q, tmp);
   _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter));
+  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
    
 void Unit::SetFaction (int faction) {
@@ -770,33 +770,34 @@ void Unit::SetFaction (int faction) {
     (*ui)->SetFaction(faction);
   }
 }
-void Unit::SetPlanetHackTransformation (Transformation *&ct,float *&ctm) {
+void Unit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
   if (planet) {
     if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
       Matrix tmp;
-      Vector p,q,r,c;
+      Vector p,q,r;
+      QVector c;
       MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
       planet->trans->InvTransformBasis(tmp,p,q,r,c);
-      MultMatrix (planet_temp_matrix,_Universe->AccessCamera()->GetPlanetGFX(),tmp);
+      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
       planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
       ct = &planet_temp_transformation;
-      ctm = planet_temp_matrix;
+      *ctm = planet_temp_matrix;
       ///warning: hack FIXME
       cumulative_transformation=*ct;
-      CopyMatrix (cumulative_transformation_matrix,ctm);
+      CopyMatrix (cumulative_transformation_matrix,*ctm);
     }
   }  
 }
-void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
+void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
 
   cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
-  float * ctm;
+  Matrix *ctm;
   Transformation * ct;
   cumulative_transformation.Compose(parent, parentMatrix);
-  ctm =cumulative_transformation_matrix;
+  ctm =&cumulative_transformation_matrix;
   ct = &cumulative_transformation;
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   SetPlanetHackTransformation (ct,ctm);
@@ -832,7 +833,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 		continue;
 	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
-      Vector TransformedPosition = Transform (ctm,
+      Vector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position());
 #if 0
       //This is a test of the box in frustum setup to be used with terrain
@@ -852,7 +853,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       float lod;
       if (d) {  //d can be used for level of detail shit
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
 	} else {
 
 	}
@@ -861,14 +862,14 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     un_fiter iter =SubUnits.fastIterator();
     Unit * un;
     while ((un = iter.current())) {
-      un->Draw (*ct,ctm);
+      un->Draw (*ct,*ctm);
       iter.advance();
     }
   
     if(selected) {
       static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
       if (doInputDFA)
-	image->selectionBox->Draw(g_game.x_resolution,ctm);
+	image->selectionBox->Draw(g_game.x_resolution,*ctm);
     }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
@@ -892,7 +893,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->Draw(*ct,ctm);
+	mounts[i].ref.gun->Draw(*ct,*ctm);
       }
     }
   }
@@ -901,7 +902,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     haloalpha=((float)cloak)/32767;
   }
   for (i=0;i<numhalos;i++) {
-    halos[i]->Draw(*ct,ctm,haloalpha);
+    halos[i]->Draw(*ct,*ctm,haloalpha);
   }
 }
 void Unit::PrimeOrders () {
@@ -1089,8 +1090,8 @@ void Unit::scanSystem(){
       if(this!=unit){
 	// won;t scan ourselves
 	
-	Vector unit_pos=unit->Position();
-	float dist=getMinDis(unit_pos);
+	QVector unit_pos=unit->Position();
+	double dist=getMinDis(unit_pos);
 	float relation=getRelation(unit);
 	
 	if(relation<0.0){

@@ -18,7 +18,7 @@ class Flightgroup {
   std::string faction;
   int flightgroup_nr; // running fg number
   int nr_ships; // total ships nr
-  Vector pos;
+  QVector pos;
   int nr_ships_left;
   int nr_waves_left;
 

@@ -35,6 +35,11 @@ struct GFXVertex
   float z;
   
   GFXVertex(){}
+  GFXVertex(const QVector & vert, const Vector & norm, float s, float t) {
+    SetVertex(vert.Cast());
+    SetNormal(norm);
+    SetTexCoord(s, t);    
+  }
   GFXVertex(const Vector &vert, const Vector &norm, float s, float t){
     SetVertex(vert);
     SetNormal(norm);
@@ -326,12 +331,6 @@ public:
  * Stores the Draw Context that a vertex list might be drawn with.
  * Especially useful for mass queued drawing (load matrix, draw... )
  */
-struct DrawContext {
-  float m[16];
-  GFXVertexList *vlist;
-  DrawContext() { }
-  DrawContext(const float  a[16], GFXVertexList *vl) { memcpy(m, a, sizeof(float[16])); vlist = vl;}
-};
 
 /**
  * holds all parameters for materials
@@ -349,10 +348,6 @@ struct GFXMaterial
   /// specular power
 	float power; 
 };
-
-///Column major order Matrix
-typedef float Matrix[16];
-
 //Textures may only be cube maps or Texture2d
 enum TEXTURE_TARGET {
   TEXTURE2D,
@@ -376,7 +371,8 @@ enum TEXTURE_IMAGE_TARGET {
  */
 enum MATRIXMODE{
 	MODEL,
-	PROJECTION
+	PROJECTION,
+	VIEW
 };
 
 enum TEXTUREFORMAT {

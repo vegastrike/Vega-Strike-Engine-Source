@@ -17,7 +17,7 @@ protected:
   friend class UnitFactory;
 
 public:
-  virtual void reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
+  virtual void reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
     if (smaller->isUnit()!=ASTEROIDPTR) {
       double percent;
       char * tempdata = (char *)malloc (sizeof(this->shield));

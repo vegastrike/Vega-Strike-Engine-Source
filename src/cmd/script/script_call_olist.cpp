@@ -244,7 +244,7 @@ olist_t *Mission::getOListObject(missionNode *node,int mode,varInst *ovi){
 
 void Mission::call_olist_set(missionNode *node,int mode,varInst *ovi,int index,varInst *new_vi){
   olist_t *olist=getOListObject(node,mode,ovi);
-  	if(index>=olist->size()){
+  	if(((unsigned int)index)>=olist->size()){
 	  char buffer[200];
 	  sprintf(buffer,"olist.set: index out of range size=%d, index=%d\n",olist->size(),index);
 	  fatalError(node,mode,buffer);
@@ -261,7 +261,7 @@ void Mission::call_olist_set(missionNode *node,int mode,varInst *ovi,int index,v
 
 varInst *Mission::call_olist_at(missionNode *node,int mode,varInst *ovi,int index){
   olist_t *olist=getOListObject(node,mode,ovi);
-  	if(index>=olist->size()){
+  	if(((unsigned int)index)>=olist->size()){
 	  char buffer[200];
 	  sprintf(buffer,"olist.at: index out of range size=%d, index=%d\n",olist->size(),index);
 	  fatalError(node,mode,buffer);
@@ -306,7 +306,7 @@ void Mission::call_olist_toxml(missionNode *node,int mode,varInst *ovi){
 
 }
 
-void Mission::call_vector_into_olist(varInst *vec_vi,Vector vec3){
+void Mission::call_vector_into_olist(varInst *vec_vi,QVector vec3){
 
   olist_t *my_object=new olist_t;
   olist_counter++;
@@ -334,7 +334,7 @@ void Mission::call_vector_into_olist(varInst *vec_vi,Vector vec3){
 
 }
 
-Vector Mission::call_olist_tovector(missionNode *node,int mode,varInst *ovi){
+QVector Mission::call_olist_tovector(missionNode *node,int mode,varInst *ovi){
   olist_t *my_olist=getOListObject(NULL,0,ovi);
 
   varInst *x_vi=call_olist_at(node,mode,ovi,0);
@@ -346,7 +346,7 @@ Vector Mission::call_olist_tovector(missionNode *node,int mode,varInst *ovi){
     assert(0);
   }
 
-  Vector pos;
+  QVector pos;
   pos.i=x_vi->float_val;
   pos.j=y_vi->float_val;
   pos.k=z_vi->float_val;

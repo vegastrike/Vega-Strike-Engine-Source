@@ -18,10 +18,10 @@ class Terrain : public QuadTree {
   Terrain (const char * filename, const Vector & Scales, const float mass, const float radius, updateparity *updatetransform=identityparity);
   void SetTotalSize (float X, float Z) {TotalSizeX =X;TotalSizeZ=Z;}
   ~Terrain();
-  void Collide (Unit * un, Matrix t);
+  void Collide (Unit * un, const Matrix &t);
   void Collide (Unit * un);
   void Collide();
-  void SetTransformation (Matrix mat);
+  void SetTransformation (const Matrix &mat);
   static void CollideAll();
   static void DeleteAll ();
   void Render();

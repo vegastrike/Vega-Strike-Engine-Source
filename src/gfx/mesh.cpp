@@ -218,7 +218,7 @@ Mesh * Mesh::getLOD (float lod) {
 
 
 
-void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebdist)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
@@ -265,7 +265,7 @@ void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebd
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
-void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float nebdist) {
+void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, float nebdist) {
   Mesh *o = getLOD (lod);
   //fixme: cloaking not delt with.... not needed for backgroudn anyway
   if (nebdist<0) {
@@ -277,20 +277,19 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float
     GFXFogMode(FOG_OFF);
   }
   if (centered) {
-    float m1[16];
-    memcpy (m1,m,sizeof (float)*16);
+    //    Matrix m1 (m);
     //Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
     //m1[12]=pos.i;
     //m1[13]=pos.j;
     //m1[14]=pos.k;
     GFXCenterCamera (true);
-    GFXLoadMatrix (MODEL,m1);    
+    GFXLoadMatrixModel (m);    
   } else {	
     if (o->draw_sequence!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
-      GFXPickLights (Vector (m[12],m[13],m[14]),rSize());
+      GFXPickLights (Vector (m.p.i,m.p.j,m.p.k),rSize());
     }
-    GFXLoadMatrix (MODEL,m);
+    GFXLoadMatrixModel (m);
   } 
   vector <int> specialfxlight;
   unsigned int i;
@@ -417,7 +416,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 	  for (unsigned int i=0;i<draw_queue->size();i++) {
 		MeshDrawContext * c = &((*draw_queue)[i]);
 	    if (c->mesh_seq==whichdrawqueue) {
-		  Animation::ProcessFarDrawQueue ((_Universe->AccessCamera()->GetPosition()-Vector(c->mat[12],c->mat[13],c->mat[14])).Magnitude()+this->radialSize);		
+		  Animation::ProcessFarDrawQueue ((_Universe->AccessCamera()->GetPosition()-c->mat.p).Magnitude()+this->radialSize);		
 		}
 	  }
       GFXEnable(LIGHTING);
@@ -460,10 +459,10 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
-      GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
+      GFXPickLights (Vector (c.mat.p.i,c.mat.p.j,c.mat.p.k),rSize());
     }
     vector <int> specialfxlight;
-    GFXLoadMatrix(MODEL, c.mat);
+    GFXLoadMatrixModel ( c.mat);
     if (c.cloaked&MeshDrawContext::CLOAK) {
       GFXPushBlendMode ();
       //	GFXColor4f (1,1,1,.25);
@@ -541,7 +540,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   }
 }
 enum EX_EXCLUSION {EX_X, EX_Y, EX_Z};
-inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx, const float err, enum EX_EXCLUSION excludeWhich) {
+inline bool OpenWithin (const QVector &query, const Vector &mn, const Vector &mx, const float err, enum EX_EXCLUSION excludeWhich) {
   switch (excludeWhich) {
   case EX_X:
     return (query.j>=mn.j-err)&&(query.k>=mn.k-err)&&(query.j<=mx.j+err)&&(query.k<=mx.k+err);
@@ -552,10 +551,10 @@ inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx,
     return (query.j>=mn.j-err)&&(query.i>=mn.i-err)&&(query.j<=mx.j+err)&&(query.i<=mx.i+err);
   }
 } 
-bool Mesh::queryBoundingBox (const Vector & eye, const Vector & end, const float err) {
-  Vector slope (end-eye);
-  Vector IntersectXYZ;
-  float k = ((mn.i-eye.i)/slope.i);
+bool Mesh::queryBoundingBox (const QVector & eye, const QVector & end, const float err) {
+  QVector slope (end-eye);
+  QVector IntersectXYZ;
+  double k = ((mn.i-eye.i)/slope.i);
   IntersectXYZ= eye + k*slope;//(Normal dot (mn-eye)/div)*slope
   if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
     return true;
@@ -592,15 +591,15 @@ bool Mesh::queryBoundingBox (const Vector & eye, const Vector & end, const float
   return false;
   
 }
-bool Mesh::queryBoundingBox (const Vector & start,const float err) {
+bool Mesh::queryBoundingBox (const QVector & start,const float err) {
   return start.i>=mn.i-err&&start.j>=mn.j-err&&start.k>=mn.k-err&&
          start.i<=mx.i+err&&start.j<=mx.j+err&&start.k<=mx.k+err;
 }
 BoundingBox * Mesh::getBoundingBox() {
   
-  BoundingBox * tbox = new BoundingBox (Vector (mn.i,0,0),Vector (mx.i,0,0),
-					Vector (0,mn.j,0),Vector (0,mx.j,0),
-					Vector (0,0,mn.k),Vector (0,0,mx.k));
+  BoundingBox * tbox = new BoundingBox (QVector (mn.i,0,0),QVector (mx.i,0,0),
+					QVector (0,mn.j,0),QVector (0,mx.j,0),
+					QVector (0,0,mn.k),QVector (0,0,mx.k));
   return tbox;
 }
 

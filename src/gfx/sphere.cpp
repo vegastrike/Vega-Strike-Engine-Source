@@ -175,14 +175,12 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, const char *texture
   }
   draw_queue = odq;
 }
-void SphereMesh::Draw(float lod,  bool centered, const Matrix m) {
+void SphereMesh::Draw(float lod,  bool centered, const Matrix &m) {
   if (centered) {
-    float m1[16];
-    memcpy (m1,m,sizeof (float)*16);
-    Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
-    m1[12]=pos.i;
-    m1[13]=pos.j;
-    m1[14]=pos.k;
+    Matrix m1(m);
+    //float m1[16];
+    //memcpy (m1,m,sizeof (float)*16);
+    m1.p = QVector(_Universe->AccessCamera()->GetPosition().Transform(m1));
     Mesh::Draw (lod,m1);
   } else {	
     Mesh::Draw(lod,m);

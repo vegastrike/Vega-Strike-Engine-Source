@@ -73,7 +73,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),scrolloffset(0),posmodes(modes), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
   thismode.push_back(MSG);
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
@@ -161,100 +161,100 @@ static std::string MangleString (const char * in, float probability) {
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h) { //FIXME why is this static?
   GFXBegin (GFXLINE);
   if (fs>.2) {
-    GFXVertex3f (x-w/8,y+h/2,0);
-    GFXVertex3f (x-w/3,y+.9*h/2,0);
-    GFXVertex3f (x+w/8,y+h/2,0);
-    GFXVertex3f (x+w/3,y+.9*h/2,0);
-    GFXVertex3f (x+w/8,y+h/2,0);
-    GFXVertex3f (x-w/8,y+h/2,0);
+    GFXVertex3f ((double)x-w/8,y+h/2,0.);
+    GFXVertex3f ((double)x-w/3,y+.9*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y+h/2,0.);
+    GFXVertex3f ((double)x+w/3,y+.9*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y+h/2,0.);
+    GFXVertex3f ((double)x-w/8,y+h/2,0.);
   }
   if (fs>.5) {
-    GFXVertex3f (x-w/8,y+1.1*h/2,0);
-    GFXVertex3f (x+w/8,y+1.1*h/2,0);
-    GFXVertex3f (x-w/8,y+1.1*h/2,0);
-    GFXVertex3f (x-w/3,y+h/2,0);
-    GFXVertex3f (x+w/8,y+1.1*h/2,0);
-    GFXVertex3f (x+w/3,y+h/2,0);
+    GFXVertex3f ((double)x-w/8,y+1.1*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y+1.1*h/2,0.);
+    GFXVertex3f ((double)x-w/8,y+1.1*h/2,0.);
+    GFXVertex3f ((double)x-w/3,y+h/2,0.);
+    GFXVertex3f ((double)x+w/8,y+1.1*h/2,0.);
+    GFXVertex3f ((double)x+w/3,y+h/2,0.);
   }
   if (fs>.75) {
-    GFXVertex3f (x-w/8,y+1.2*h/2,0);
-    GFXVertex3f (x+w/8,y+1.2*h/2,0);
-    GFXVertex3f (x-w/8,y+1.2*h/2,0);
-    GFXVertex3f (x-w/3,y+1.1*h/2,0);
-    GFXVertex3f (x+w/8,y+1.2*h/2,0);
-    GFXVertex3f (x+w/3,y+1.1*h/2,0);
+    GFXVertex3f ((double)x-w/8,y+1.2*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y+1.2*h/2,0.);
+    GFXVertex3f ((double)x-w/8,y+1.2*h/2,0.);
+    GFXVertex3f ((double)x-w/3,y+1.1*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y+1.2*h/2,0.);
+    GFXVertex3f ((double)x+w/3,y+1.1*h/2,0.);
   }
   if (rs>.2) {
-    GFXVertex3f (x+1*w/2,y-h/8,0);
-    GFXVertex3f (x+.9*w/2,y-h/3,0);
-    GFXVertex3f (x+1*w/2,y+h/8,0);
-    GFXVertex3f (x+1*w/2,y-h/8,0);
-    GFXVertex3f (x+.9*w/2,y+h/3,0);
-    GFXVertex3f (x+1*w/2,y+h/8,0);
+    GFXVertex3f ((double)x+1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x+.9*w/2,y-h/3,0.);
+    GFXVertex3f ((double)x+1*w/2,y+h/8,0.);
+    GFXVertex3f ((double)x+1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x+.9*w/2,y+h/3,0.);
+    GFXVertex3f ((double)x+1*w/2,y+h/8,0.);
   }
   if (rs>.5) {
-    GFXVertex3f (x+1.1*w/2,y-h/8,0);
-    GFXVertex3f (x+1*w/2,y-h/3,0);
-    GFXVertex3f (x+1.1*w/2,y+h/8,0);
-    GFXVertex3f (x+1.1*w/2,y-h/8,0);
-    GFXVertex3f (x+1*w/2,y+h/3,0);
-    GFXVertex3f (x+1.1*w/2,y+h/8,0);
+    GFXVertex3f ((double)x+1.1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x+1*w/2,y-h/3,0.);
+    GFXVertex3f ((double)x+1.1*w/2,y+h/8,0.);
+    GFXVertex3f ((double)x+1.1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x+1*w/2,y+h/3,0.);
+    GFXVertex3f ((double)x+1.1*w/2,y+h/8,0.);
   }
   if (rs>.7) {
-    GFXVertex3f (x+1.2*w/2,y-h/8,0);
-    GFXVertex3f (x+1.1*w/2,y-h/3,0);
-    GFXVertex3f (x+1.2*w/2,y+h/8,0);
-    GFXVertex3f (x+1.2*w/2,y-h/8,0);
-    GFXVertex3f (x+1.1*w/2,y+h/3,0);
-    GFXVertex3f (x+1.2*w/2,y+h/8,0);
+    GFXVertex3f ((double)x+1.2*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x+1.1*w/2,y-h/3,0.);
+    GFXVertex3f ((double)x+1.2*w/2,y+h/8,0.);
+    GFXVertex3f ((double)x+1.2*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x+1.1*w/2,y+h/3,0.);
+    GFXVertex3f ((double)x+1.2*w/2,y+h/8,0.);
   }
   if (ls>.2) {
-    GFXVertex3f (x-1*w/2,y-h/8,0);
-    GFXVertex3f (x-.9*w/2,y-h/3,0);
-    GFXVertex3f (x-1*w/2,y+h/8,0);
-    GFXVertex3f (x-1*w/2,y-h/8,0);
-    GFXVertex3f (x-.9*w/2,y+h/3,0);
-    GFXVertex3f (x-1*w/2,y+h/8,0);
+    GFXVertex3f ((double)x-1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x-.9*w/2,y-h/3,0.);
+    GFXVertex3f ((double)x-1*w/2,y+h/8,0.);
+    GFXVertex3f ((double)x-1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x-.9*w/2,y+h/3,0.);
+    GFXVertex3f ((double)x-1*w/2,y+h/8,0.);
   }
   if (ls>.5) {
-    GFXVertex3f (x-1.1*w/2,y-h/8,0);
-    GFXVertex3f (x-1*w/2,y-h/3,0);
-    GFXVertex3f (x-1.1*w/2,y+h/8,0);
-    GFXVertex3f (x-1.1*w/2,y-h/8,0);
-    GFXVertex3f (x-1*w/2,y+h/3,0);
-    GFXVertex3f (x-1.1*w/2,y+h/8,0);
+    GFXVertex3f ((double)x-1.1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x-1*w/2,y-h/3,0.);
+    GFXVertex3f ((double)x-1.1*w/2,y+h/8,0.);
+    GFXVertex3f ((double)x-1.1*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x-1*w/2,y+h/3,0.);
+    GFXVertex3f ((double)x-1.1*w/2,y+h/8,0.);
   }
   if (ls>.7) {
-    GFXVertex3f (x-1.2*w/2,y-h/8,0);
-    GFXVertex3f (x-1.1*w/2,y-h/3,0);
-    GFXVertex3f (x-1.2*w/2,y+h/8,0);
-    GFXVertex3f (x-1.2*w/2,y-h/8,0);
-    GFXVertex3f (x-1.1*w/2,y+h/3,0);
-    GFXVertex3f (x-1.2*w/2,y+h/8,0);
+    GFXVertex3f ((double)x-1.2*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x-1.1*w/2,y-h/3,0.);
+    GFXVertex3f ((double)x-1.2*w/2,y+h/8,0.);
+    GFXVertex3f ((double)x-1.2*w/2,y-h/8,0.);
+    GFXVertex3f ((double)x-1.1*w/2,y+h/3,0.);
+    GFXVertex3f ((double)x-1.2*w/2,y+h/8,0.);
   }
   if (bs>.2) {
-    GFXVertex3f (x-w/8,y-h/2,0);
-    GFXVertex3f (x-w/3,y-.9*h/2,0);
-    GFXVertex3f (x+w/8,y-h/2,0);
-    GFXVertex3f (x+w/3,y-.9*h/2,0);
-    GFXVertex3f (x+w/8,y-h/2,0);
-    GFXVertex3f (x-w/8,y-h/2,0);
+    GFXVertex3f ((double)x-w/8,y-h/2,0.);
+    GFXVertex3f ((double)x-w/3,y-.9*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y-h/2,0.);
+    GFXVertex3f ((double)x+w/3,y-.9*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y-h/2,0.);
+    GFXVertex3f ((double)x-w/8,y-h/2,0.);
   }
   if (bs>.5) {
-    GFXVertex3f (x-w/8,y-1.1*h/2,0);
-    GFXVertex3f (x+w/8,y-1.1*h/2,0);
-    GFXVertex3f (x-w/8,y-1.1*h/2,0);
-    GFXVertex3f (x-w/3,y-h/2,0);
-    GFXVertex3f (x+w/8,y-1.1*h/2,0);
-    GFXVertex3f (x+w/3,y-h/2,0);
+    GFXVertex3f ((double)x-w/8,y-1.1*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y-1.1*h/2,0.);
+    GFXVertex3f ((double)x-w/8,y-1.1*h/2,0.);
+    GFXVertex3f ((double)x-w/3,y-h/2,0.);
+    GFXVertex3f ((double)x+w/8,y-1.1*h/2,0.);
+    GFXVertex3f ((double)x+w/3,y-h/2,0.);
   }
   if (bs>.75) {
-    GFXVertex3f (x-w/8,y-1.2*h/2,0);
-    GFXVertex3f (x+w/8,y-1.2*h/2,0);
-    GFXVertex3f (x-w/8,y-1.2*h/2,0);
-    GFXVertex3f (x-w/3,y-1.1*h/2,0);
-    GFXVertex3f (x+w/8,y-1.2*h/2,0);
-    GFXVertex3f (x+w/3,y-1.1*h/2,0);
+    GFXVertex3f ((double)x-w/8,y-1.2*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y-1.2*h/2,0.);
+    GFXVertex3f ((double)x-w/8,y-1.2*h/2,0.);
+    GFXVertex3f ((double)x-w/3,y-1.1*h/2,0.);
+    GFXVertex3f ((double)x+w/8,y-1.2*h/2,0.);
+    GFXVertex3f ((double)x+w/3,y-1.1*h/2,0.);
   }
 
   GFXEnd();
@@ -651,7 +651,7 @@ void VDU::DrawWeapon (Unit * parent, const GFXColor& c) {
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->nummounts;i++) {
-    Vector pos (parent->mounts[i].GetMountLocation().position);
+    Vector pos (parent->mounts[i].GetMountLocation().position.Cast());
     pos.i=-
 pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
@@ -728,7 +728,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
     DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle,parent,targ,color);
     break;
   case NAV:
-    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()),color);
+    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()),color);
     break;
   case MSG:
     DrawMessages(targ,color);

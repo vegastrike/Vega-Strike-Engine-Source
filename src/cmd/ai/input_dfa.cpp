@@ -46,7 +46,7 @@ void InputDFA::NewLocationSelect(){
   Vector RunningTotal(0,0,0);
   UnitCollection::UnitIterator * ui = new un_iter(selected->createIterator());
   while ((un=ui->current())) {
-    RunningTotal+=un->Position();
+    RunningTotal+=un->Position().Cast();
     cnt++;
     ui->advance();
   }
@@ -55,7 +55,7 @@ void InputDFA::NewLocationSelect(){
   if (locsel)
     delete locsel;
 
-  locsel = new CoordinateSelect (RunningTotal);
+  locsel = new CoordinateSelect (RunningTotal.Cast());
 }
 void InputDFA::BindOrder (int key, OrderFactory *ofac){
   /*  if (orderbindings[KEYMAP_SIZE]) 
@@ -119,10 +119,10 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
     
       UnitCollection::UnitIterator * tmp = new un_iter(CurDFA->selected->createIterator());
       Unit * un;
-      Vector tmplocselvec = CurDFA->locsel->GetVector();
+      Vector tmplocselvec = CurDFA->locsel->GetVector().Cast();
       while ((un = tmp->current())) {
 	Order * nAI = CurDFA->orderfac->newOrder();
-	nAI->AttachOrder(tmplocselvec);
+	nAI->AttachOrder(tmplocselvec.Cast());
 	if (CurDFA->queueOrder) {
 	  un->EnqueueAI(nAI);
 	} else {

@@ -5,22 +5,22 @@
 
 class BoundingBox {
  private:
-  Vector lx,ly,lz;
-  Vector mx,my,mz;
+  QVector lx,ly,lz;
+  QVector mx,my,mz;
 
  public:
-  BoundingBox (Vector LX, Vector MX,Vector LY,Vector MY,Vector LZ,Vector MZ);
-  void Transform (Matrix t);
+  BoundingBox (const QVector &LX, const QVector &MX,const QVector &LY,const QVector &MY,const QVector &LZ,const QVector &MZ);
+  void Transform (const Matrix &t);
   void Transform (const Transformation &transform);
-  Vector Center (){
-    return Vector (.16666666666666666F*((mx+lx)+(my+ly)+(mz+lz)));
+  QVector Center (){
+    return QVector (.16666666666666666F*((mx+lx)+(my+ly)+(mz+lz)));
   }
   float ZCenter () {
     return .166666666666666666F*(mx.k+lx.k+my.k+ly.k+mz.k+lz.k);
   }
-  bool Within (const Vector &query,float err);
-  bool OpenWithin (const Vector &query,float err, int exclude);
-  int Intersect (const Vector &eye, const Vector &pnt, float err);
+  bool Within (const QVector &query,float err);
+  bool OpenWithin (const QVector &query,float err, int exclude);
+  int Intersect (const QVector &eye, const QVector &pnt, float err);
 };
 
 #endif

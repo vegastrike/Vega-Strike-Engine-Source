@@ -99,8 +99,8 @@ Planet* UnitFactory::createPlanet( )
     return new Planet;
 }
 
-Planet* UnitFactory::createPlanet( Vector x,
-                                   Vector y,
+Planet* UnitFactory::createPlanet( QVector x,
+                                   QVector y,
 				   float vely,
 				   const Vector & rotvel,
 				   float pos,
@@ -109,7 +109,7 @@ Planet* UnitFactory::createPlanet( Vector x,
 				   char * filename,
 				   char *alpha,
 				   vector<char *> dest,
-				   const Vector &orbitcent,
+				   const QVector &orbitcent,
 				   Unit * parent,
 				   const GFXMaterial & ourmat,
 				   const std::vector <GFXLightLocal> & ligh,

@@ -121,7 +121,7 @@ void Background::Draw()
       //    Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
     } else {
       GFXCenterCamera(true);
-      GFXLoadMatrix (MODEL,identity_matrix);
+      GFXLoadMatrixModel (identity_matrix);
       //GFXLoadIdentity(MODEL);
 	  //	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
 

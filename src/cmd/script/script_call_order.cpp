@@ -103,7 +103,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector vec3=call_olist_tovector(pos_node,mode,pos_vi);
+      QVector vec3=call_olist_tovector(pos_node,mode,pos_vi);
       
       my_order=new Orders::MoveTo(vec3,afterburn,nr_switchbacks);
     }
@@ -129,7 +129,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector vec3=call_olist_tovector(pos_node,mode,pos_vi);
+      QVector vec3=call_olist_tovector(pos_node,mode,pos_vi);
       
       my_order=new Orders::ChangeHeading(vec3,nr_switchbacks);
     }
@@ -256,8 +256,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector des3=call_olist_tovector(des_node,mode,des_vi);
-      Vector desa3=call_olist_tovector(desa_node,mode,desa_vi);
+      Vector des3=call_olist_tovector(des_node,mode,des_vi).Cast();
+      Vector desa3=call_olist_tovector(desa_node,mode,desa_vi).Cast();
       
       my_order=new Orders::MatchVelocity(des3,desa3,local,afburn,fini);
     }
@@ -287,7 +287,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      Vector des3=call_olist_tovector(des_node,mode,des_vi).Cast();
       
       my_order=new Orders::MatchAngularVelocity(des3,local,fini);
     }
@@ -319,7 +319,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      Vector des3=call_olist_tovector(des_node,mode,des_vi).Cast();
       
       my_order=new Orders::MatchLinearVelocity(des3,local,afburn,fini);
     }
@@ -347,7 +347,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      QVector des3=call_olist_tovector(des_node,mode,des_vi);
       //      printf("vel=%f,afburn=%d,range=%f\n",vel,afburn,range);
 	my_order=new AIFlyToWaypoint(des3,vel,afburn,range);
     }
@@ -376,7 +376,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      QVector des3=call_olist_tovector(des_node,mode,des_vi);
       //      printf("vel=%f,afburn=%d,range=%f\n",vel,afburn,range);
 	my_order=new AIFlyToWaypointDefend(des3,vel,afburn,range,defend_range);
     }
@@ -425,7 +425,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
 
-    float range=getFloatArg(node,mode,2);
+    double range=getFloatArg(node,mode,2);
 
     missionNode *unit_node=getArgument(node,mode,3);
     varInst *unit_vi=checkObjectExpr(unit_node,mode);
@@ -436,7 +436,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      QVector des3=call_olist_tovector(des_node,mode,des_vi);
       //            printf("mode=%d,range=%f speed=%f\n",patrol_mode,range,patrol_speed);
 
       my_order=new AIPatrol(patrol_mode,des3,range,around_unit,patrol_speed);

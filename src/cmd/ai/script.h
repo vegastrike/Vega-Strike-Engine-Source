@@ -26,7 +26,7 @@ class AIScript : public Order {
   ///Rid of the top float on the current stack
   void popf();
   ///The top vector on the current stack
-  Vector& topv();
+  QVector& topv();
   ///Pop the top vector of teh current stack
   void popv ();
   ///member function begin elements... deals with pushing vectors on stack

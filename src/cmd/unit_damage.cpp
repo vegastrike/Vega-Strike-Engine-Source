@@ -476,15 +476,15 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   percent = damage/(*targ+hull);
   if (damage<*targ) {
     if (!AUDIsPlaying (sound->armor))
-      AUDPlay (sound->armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+      AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
     else
-      AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
     *targ -= apply_float_to_short (damage);
   }else {
     if (!AUDIsPlaying (sound->hull))
-      AUDPlay (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+      AUDPlay (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
     else
-      AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
     if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
@@ -647,9 +647,9 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   if (!FINITE (percent))
     percent = 0;
   if (percent&&!AUDIsPlaying (sound->shield))
-	AUDPlay (sound->shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
   else
-	AUDAdjustSound (sound->shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+	AUDAdjustSound (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
 
   return percent;
 }
@@ -741,10 +741,10 @@ bool Unit::Explode (bool drawit, float timeit) {
     if (isUnit()!=MISSILEPTR) {
       static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
-      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
+      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position().Cast(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
     }
 	if (!SubUnit){
-		Vector exploc = cumulative_transformation.position;
+		QVector exploc = cumulative_transformation.position;
 		Unit * un;
 		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
 			exploc = un->Position();						
@@ -757,7 +757,7 @@ bool Unit::Explode (bool drawit, float timeit) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
       //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-      image->explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
+      image->explosion->SetPosition(Position());
       Vector p,q,r;
       GetOrientation (p,q,r);
       image->explosion->SetOrientation(p,q,r);

@@ -405,9 +405,9 @@ void FireKeyboard::PickTargets(bool Turrets){
     Vector t;
     if(other!=parent && parent->InRange(other,t)){
       Vector p,q,r;
-      Vector vectothem=Vector(other->Position() - parent->Position()).Normalize();
+      QVector vectothem=QVector(other->Position() - parent->Position()).Normalize();
       parent->GetOrientation(p,q,r);
-      float angle=acos( vectothem.Dot(r) );
+      double angle=acos( vectothem.Dot(r.Cast()) );
       
       if(angle<smallest_angle){
 	found_unit=other;

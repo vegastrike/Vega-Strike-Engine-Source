@@ -15,12 +15,12 @@ Building::Building (Terrain * parent, bool vehicle, const char *filename, bool S
 
 
 
-void Building::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
+void Building::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
   if (GetPlanetOrbit()) {
     SetPlanetOrbitData(GetPlanetOrbit());//makes it dirty
   }
   Unit::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
-  Vector tmp (LocalPosition());
+  QVector tmp (LocalPosition());
   Vector p,q,r;
   GetOrientation (p,q,r);
   if (continuous) {

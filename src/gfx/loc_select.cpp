@@ -51,10 +51,10 @@ void LocationSelect::MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int del
 }
 
 void LocationSelect::SetPosition (float x,float y, float z) {
-  local_transformation.position = Vector (x,y,z);
+  local_transformation.position = QVector (x,y,z);
 }
 void LocationSelect::SetPosition (const Vector &k) {
-  local_transformation.position = k;
+  local_transformation.position = k.Cast();
 }
 void LocationSelect::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
@@ -72,22 +72,22 @@ void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {
   //UnbindMouse (getMouseDrawFunc()); //don't draw the mouse
   //BindKey (']',::incConstant);
   //BindKey ('[',::decConstant);
-  LocalPosition = Vector(0,0,0);
+  LocalPosition = QVector(0,0,0);
   MakeRVector (Plane1,Plane2,r);
   p = Plane1;
   q = Plane2;
 
 
-  local_transformation.position = start;
+  local_transformation.position = start.Cast();
 }
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Vector Plane3) {    
   //BindKey (1,::MouseMoveHandle);
   //UnbindMouse (getMouseDrawFunc());
-  LocalPosition = Vector(0,0,0);
+  LocalPosition = QVector(0,0,0);
   r = Plane3;
   p = Plane1;
   q = Plane2;
-  local_transformation.position= start;
+  local_transformation.position= start.Cast();
 }
 
 LocationSelect::~LocationSelect() {
@@ -103,7 +103,7 @@ void LocationSelect:: Draw () {
   local_transformation.to_matrix(transformation);
   
   GFXLoadIdentity(MODEL);
-  GFXMultMatrix(MODEL, transformation);
+  GFXMultMatrixModel (transformation);
   /*
     GFXEnable(DEPTHWRITE);
     GFXEnable(DEPTHTEST);
@@ -130,13 +130,12 @@ void LocationSelect:: Draw () {
 #endif
 
   if (changed||vert) {
-    float t[16];
-    float m[16];
-    float v[16];
+    Matrix t,m;
+    Matrix v;
 
     GFXGetMatrixView (v);
 
-    GFXGetMatrix (MODEL,m);
+    GFXGetMatrixModel (m);
     MultMatrix(t,v,m);
 
     //following translates 'z'...not sure it's necessary
@@ -144,9 +143,9 @@ void LocationSelect:: Draw () {
     //    MultMatrix (m,t,v);
 
     //the location in camera coordinates of the beginning of the location select
-    Vector tLocation (t[12],t[13],t[14]);
-    Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
-    Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
+    Vector tLocation (t.p.Cast());
+    Vector tP (t.getP());//the p vector of the plane being selected on
+    Vector tQ (t.getQ());//the q vector of the plane being selected on
     ///unused    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
     //fprintf (stderr,"<%f,%f,%f>",t[0],t[1],t[2]);
     //fprintf (stderr,"<%f,%f,%f>",t[4],t[5],t[6]);
@@ -190,7 +189,7 @@ void LocationSelect:: Draw () {
   }
 
   //draw the animation
-  LocSelUpAni.SetPosition (Vector (LocalPosition.i,LocalPosition.j,0));
+  LocSelUpAni.SetPosition (QVector (LocalPosition.i,LocalPosition.j,0));
   LocSelUpAni.Draw();
   LocSelAni.SetPosition(LocalPosition);
   LocSelAni.Draw();

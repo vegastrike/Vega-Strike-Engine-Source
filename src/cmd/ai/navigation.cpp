@@ -78,7 +78,7 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
  */
 //end failed attempt
 
-void MoveTo::SetDest (const Vector &target) {
+void MoveTo::SetDest (const QVector &target) {
     targetlocation = target;
     done = false;
   }
@@ -108,15 +108,14 @@ bool MoveTo::Done(const Vector & ang_vel) {
 void MoveTo::Execute(){
   //  cout << "MOVETO target =" << targetlocation << endl;
 
-  Vector local_location (parent->UpCoordinateLevel(parent->GetVelocity()));
+  Vector local_vel (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
-  terminatingX += (copysign(1.0F,local_location.i)!=copysign(1.0F,last_velocity.i)||(!local_location.i));
-  terminatingY += (copysign(1.0F,local_location.j)!=copysign(1.0F,last_velocity.j)||(!local_location.j));
-  terminatingZ += (copysign(1.0F,local_location.k)!=copysign(1.0F,last_velocity.k)||(!local_location.k));
+  terminatingX += (copysign(1.0F,local_vel.i)!=copysign(1.0F,last_velocity.i)||(!local_vel.i));
+  terminatingY += (copysign(1.0F,local_vel.j)!=copysign(1.0F,last_velocity.j)||(!local_vel.j));
+  terminatingZ += (copysign(1.0F,local_vel.k)!=copysign(1.0F,last_velocity.k)||(!local_vel.k));
 
-  last_velocity = local_location;
-  local_location = targetlocation - parent->Position();
-  Vector heading = parent->ToLocalCoordinates(local_location);
+  last_velocity = local_vel;
+  Vector heading = parent->ToLocalCoordinates((targetlocation-parent->Position()).Cast());
   Vector thrust (parent->Limits().lateral, parent->Limits().vertical,(afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward);
   if (done) return;
   unsigned char numswitchbacks = afterburnAndSwitchbacks>>1;
@@ -197,7 +196,7 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
     torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;//clamping should take care of it
   }
 }
-void ChangeHeading::SetDest (const Vector &target) {
+void ChangeHeading::SetDest (const QVector &target) {
   final_heading = target;
   ResetDone();
 }
@@ -216,7 +215,7 @@ void ChangeHeading::Execute() {
   terminatingX += (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i));
   terminatingY += (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j));
   last_velocity = local_heading;
-  local_heading = parent->ToLocalCoordinates (final_heading-parent->Position());
+  local_heading = parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast());
   if (done) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
@@ -243,7 +242,7 @@ ChangeHeading::~ChangeHeading() {
 #endif
 
 }
-FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
+FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(QVector(0,0,1),accuracy),finish(fini) {
   type=FACING;
   subtype = STARGET;
   speed=float(.00001);
@@ -270,7 +269,7 @@ void FaceTargetITTS::Execute() {
       speed = range=FLT_MAX;
     }
   }
-  SetDest(target->PositionITTS(parent->Position(),speed+parent->GetVelocity().Dot((target->Position()-parent->Position()).Normalize())));
+  SetDest(target->PositionITTS(parent->Position(),speed+parent->GetVelocity().Dot((target->Position()-parent->Position()).Cast().Normalize())));
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();
@@ -278,7 +277,7 @@ void FaceTargetITTS::Execute() {
 }
 
 
-FaceTarget::FaceTarget (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
+FaceTarget::FaceTarget (bool fini, int accuracy):ChangeHeading(QVector(0,0,1),accuracy),finish(fini) {
   type=FACING;
   subtype =STARGET;
   
@@ -313,7 +312,7 @@ void FaceDirection::SetParent(Unit * un) {
   }
   ChangeHeading::SetParent(un);
 }
-FaceDirection::FaceDirection (float dist, bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
+FaceDirection::FaceDirection (float dist, bool fini, int accuracy):ChangeHeading(QVector(0,0,1),accuracy),finish(fini) {
   type=FACING;
   subtype|=SSELF;
   this->dist=dist;
@@ -325,12 +324,12 @@ void FaceDirection::Execute() {
     done = finish;
     return;
   }
-  Vector face (target->GetTransformation()[8],  target->GetTransformation()[9], target->GetTransformation()[10]);
+  Vector face (target->GetTransformation().getR());
 
   if ((parent->Position()-target->Position()).Magnitude()-parent->rSize()-target->rSize()>dist) {
     SetDest (target->Position());
   }else {
-    SetDest(parent->Position()+face);
+    SetDest(parent->Position()+face.Cast());
     //fprintf (stderr,"facing...cool");
   }
   ChangeHeading::Execute();
@@ -355,10 +354,10 @@ void FormUp::SetParent(Unit * un) {
   MoveTo::SetParent(un);
 }
 
-FormUp::FormUp (const Vector & pos):MoveTo (Vector(0,0,0),false,1000), Pos(pos) { 
+FormUp::FormUp (const QVector & pos):MoveTo (QVector(0,0,0),false,1000), Pos(pos) { 
   subtype |= SSELF;
 }
-void FormUp::SetPos (const Vector &v) {
+void FormUp::SetPos (const QVector &v) {
   Pos=v;
 }
 void FormUp::Execute() {

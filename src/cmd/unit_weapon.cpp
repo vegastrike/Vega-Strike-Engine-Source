@@ -163,14 +163,14 @@ void Unit::Mount::UnFire () {
 }
 static void AdjustMatrix (Matrix mat, Unit * target, float speed, bool lead, float cone) {
   if (target) {
-    Vector pos (mat[12],mat[13],mat[14]);
-    Vector R (mat[8],mat[9],mat[10]);
-    Vector targpos (lead?target->PositionITTS (pos,speed):target->Position());
+    QVector pos (mat.p);
+    Vector R (mat.getR());
+    QVector targpos (lead?target->PositionITTS (pos,speed):target->Position());
 
-    Vector dir = targpos-pos;
+    Vector dir =( targpos-pos).Cast();
     dir.Normalize();
     if (dir.Dot (R)>=cone) {
-      Vector Q(mat[4],mat[5],mat[6]);
+      Vector Q(mat.getQ());
       Vector P;
       ScaledCrossProduct (Q,dir,P);
       ScaledCrossProduct (dir,P,Q);
@@ -178,7 +178,7 @@ static void AdjustMatrix (Matrix mat, Unit * target, float speed, bool lead, flo
     }
   }
 }
-bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
+bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;
   }

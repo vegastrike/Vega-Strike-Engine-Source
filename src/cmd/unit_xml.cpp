@@ -368,7 +368,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   int indx;
   Vector Q;
   Vector R;
-  Vector pos;
+  QVector pos;
   bool tempbool;
   float fbrltb[6];
   AttributeList::const_iterator iter;
@@ -550,7 +550,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     tempbool=false;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    pos=Vector(0,0,0);
+    pos=QVector(0,0,0);
     P=Vector (1,1,1);
     Q=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
     R=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
@@ -605,7 +605,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     if (Q.i==FLT_MAX||Q.j==FLT_MAX||Q.k==FLT_MAX||R.i==FLT_MAX||R.j==FLT_MAX||R.k==FLT_MAX) {
-      image->dockingports.push_back (DockingPorts(pos,P.i,tempbool));
+      image->dockingports.push_back (DockingPorts(pos.Cast(),P.i,tempbool));
     }else {
       Vector tQ = Q.Min (R);
       Vector tR = R.Max (Q);
@@ -619,7 +619,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->unitlevel++;
     P=Vector (1,1,1);
     Q=Vector (1,1,1);
-    pos=Vector(0,0,0);
+    pos=QVector(0,0,0);
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:
@@ -669,7 +669,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
-    pos = Vector (0,0,0);
+    pos = QVector (0,0,0);
     tempbool=false;
     ADDELEMNAME("size",Unit::mountSerializer,XMLType(XMLSupport::tostring(xml->unitscale),(int)xml->mountz.size()));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -748,7 +748,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
-    pos = Vector (0,0,0);
+    pos = QVector (0,0,0);
     fbrltb[0] =-1;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -1475,17 +1475,17 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
     }
     Matrix m;
     un->mounts[i].GetMountLocation().to_matrix(m);
-    result+=string ("\" x=\"")+tostring((float)(m[12]/parse_float(input.str)));
-    result+=string ("\" y=\"")+tostring((float)(m[13]/parse_float(input.str)));
-    result+=string ("\" z=\"")+tostring((float)(m[14]/parse_float(input.str)));
+    result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
+    result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
+    result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));
 
-    result+=string ("\" qi=\"")+tostring(m[4]);
-    result+=string ("\" qj=\"")+tostring(m[5]);
-    result+=string ("\" qk=\"")+tostring(m[6]);
+    result+=string ("\" qi=\"")+tostring(m.getQ().i);
+    result+=string ("\" qj=\"")+tostring(m.getQ().j);
+    result+=string ("\" qk=\"")+tostring(m.getQ().k);
      
-    result+=string ("\" ri=\"")+tostring(m[8]);    
-    result+=string ("\" rj=\"")+tostring(m[9]);    
-    result+=string ("\" rk=\"")+tostring(m[10]);    
+    result+=string ("\" ri=\"")+tostring(m.getR().i);    
+    result+=string ("\" rj=\"")+tostring(m.getR().j);    
+    result+=string ("\" rk=\"")+tostring(m.getR().k);    
     return result;
   }else {
     return string("");

@@ -70,14 +70,14 @@ public:
  */
 struct MeshDrawContext {
   ///The matrix in world space
-  float mat[16];
+  Matrix mat;
   ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
   GFXColor CloakFX;
   enum CLK {NONE=0x0,CLOAK=0x1,FOG=0x2, NEARINVIS=0x4, GLASSCLOAK=0x8};
   char cloaked;
   char mesh_seq;
-  MeshDrawContext(const float m[16]):CloakFX(1,1,1,1) { memcpy(mat, m, sizeof(float[16])); }
+  MeshDrawContext(const Matrix & m):mat(m),CloakFX(1,1,1,1) { }
 };
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
@@ -338,9 +338,9 @@ public:
   ///Returns center of this mesh
   Vector &Position() {return local_pos;}
   ///Draws lod pixel wide mesh at Transformation LATER
-  void Draw(float lod, const Matrix = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0);
+  void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0);
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
-  void DrawNow(float lod, bool centered, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
+  void DrawNow(float lod, bool centered, const Matrix &m= identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type
   virtual void ProcessDrawQueue(int whichdrawqueue);
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
@@ -357,9 +357,9 @@ public:
   ///Returns a physical boudning box in 3space instead of in current unit space
   BoundingBox * getBoundingBox();
   ///queries this bounding box with a vector and radius
-  bool queryBoundingBox (const Vector &start,const float err);
+  bool queryBoundingBox (const QVector &start,const float err);
   ///Queries bounding box with a ray
-  bool queryBoundingBox (const Vector &start, const Vector & end, const float err); 
+  bool queryBoundingBox (const QVector &start, const QVector & end, const float err); 
   ///returns the radial size of this 
   float rSize () {return radialSize;}
   ///based on TTL, etc, updates shield effects

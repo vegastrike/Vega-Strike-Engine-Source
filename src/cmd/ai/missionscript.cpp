@@ -109,7 +109,7 @@ void AImissionScript::Execute () {
 }
 
 
-AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : AImissionScript("ai_flyto_waypoint") {
+AIFlyToWaypoint::AIFlyToWaypoint(const QVector &wp,float velo,bool afburn,float rng) : AImissionScript("ai_flyto_waypoint") {
   waypoint=wp;
   vel=velo;
   range=rng;
@@ -130,7 +130,7 @@ AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : A
 
 }
 
-AIFlyToWaypointDefend::AIFlyToWaypointDefend(Vector wp,float velo,bool afburn,float rng,float defend_range) : AImissionScript("ai_flyto_waypoint_defend") {
+AIFlyToWaypointDefend::AIFlyToWaypointDefend(const QVector &wp,float velo,bool afburn,float rng,float defend_range) : AImissionScript("ai_flyto_waypoint_defend") {
   waypoint=wp;
   vel=velo;
   range=rng;
@@ -172,7 +172,7 @@ AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit,float fly_speed,bool aft
 
 }
 
-AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol") {
+AIPatrol::AIPatrol(int mode,const QVector &area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol") {
 
   varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);
   mission->call_vector_into_olist(vi_wp,area);
@@ -191,7 +191,7 @@ AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patr
   vi_unit->object=around_unit;
 
 }
-AIPatrolDefend::AIPatrolDefend(int mode,Vector area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol_defend") {
+AIPatrolDefend::AIPatrolDefend(int mode,const QVector &area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol_defend") {
 
   varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);
   mission->call_vector_into_olist(vi_wp,area);

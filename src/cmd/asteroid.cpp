@@ -1,5 +1,5 @@
 #include "cmd/asteroid.h"
-void Asteroid::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
+void Asteroid::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
   Unit * t=this;
   switch (smaller->isUnit()) {
   case ASTEROIDPTR:
@@ -25,6 +25,6 @@ Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_s
   }
 
 }
-void Asteroid::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
+void Asteroid::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
   Unit::UpdatePhysics (trans,transmat, CumulativeVelocity,ResolveLast,uc);
 }

@@ -35,7 +35,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	for(int s=0;s < fg->nr_ships;s++){
 
 	  
-	  Vector pox;
+	  QVector pox;
 
 	  pox.i=fg->pos.i+s*fg_radius*3;
 	  pox.j=fg->pos.i+s*fg_radius*3;
@@ -47,7 +47,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 
 	  }
 	  if (_Universe->AccessCockpit()->GetParent()) {
-	    Vector fposs =_Universe->AccessCockpit()->GetParent()->Position();
+	    QVector fposs =_Universe->AccessCockpit()->GetParent()->Position();
 	    pox = pox+fposs;//adds our own position onto this
 	  }
 	  tmptarget=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?

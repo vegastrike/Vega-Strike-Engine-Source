@@ -62,11 +62,8 @@ bolt_draw::bolt_draw () {
 
 extern double interpolation_blend_factor;
 
-inline void BlendTrans (float * drawmat, const Vector & cur_position, const Vector & prev_position) {
-    drawmat[12] = prev_position.i*(1-interpolation_blend_factor) + cur_position.i*interpolation_blend_factor;
-    drawmat[13] = prev_position.j*(1-interpolation_blend_factor) + cur_position.j*interpolation_blend_factor;
-    drawmat[14] = prev_position.k*(1-interpolation_blend_factor) + cur_position.k*interpolation_blend_factor;
-    
+inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QVector & prev_position) {
+    drawmat.p = prev_position*(1-interpolation_blend_factor) + cur_position*interpolation_blend_factor;    
 }
 
 
@@ -95,7 +92,7 @@ void Bolt::Draw () {
       //            cur->SetPosition (result[12],result[13],result[14]);
       cur->SetDimensions ((*j)->radius,(*j)->radius);
       //      cur->DrawNow(result);
-      GFXLoadMatrix (MODEL,(*j)->drawmat);
+      GFXLoadMatrixModel ((*j)->drawmat);
 #ifdef PERBOLTSOUND
 #ifdef PERFRAMESOUND
       if ((*j)->sound!=-1)
@@ -117,7 +114,7 @@ void Bolt::Draw () {
 	dec->MakeActive();
 	for (j=i->begin();j!=i->end();j++) {
 	  BlendTrans ((*j)->drawmat,(*j)->cur_position,(*j)->prev_position);
-	  GFXLoadMatrix (MODEL,(*j)->drawmat);
+	  GFXLoadMatrixModel ((*j)->drawmat);
 	  GFXColorf ((*j)->col);
 	  q->boltmesh->Draw();
 	}
@@ -135,7 +132,7 @@ void Bolt::Draw () {
 }
 
 
-Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos[12],orientationpos[13],orientationpos[14]), ShipSpeed (shipspeed) {
+Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;
   this->owner = owner;
@@ -182,7 +179,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
   }
 #ifdef PERBOLTSOUND
   sound = AUDCreateSound (typ.sound,false);
-  AUDAdjustSound (sound,cur_position,shipspeed+speed*Vector (drawmat[8],drawmat[9],drawmat[10]));
+  AUDAdjustSound (sound,cur_position,shipspeed+speed*drawmat.getR());
 #endif
 }
 
@@ -190,9 +187,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
 bool Bolt::Update () {
   curdist +=speed*SIMULATION_ATOM;
   prev_position = cur_position;
-  cur_position.i+=(ShipSpeed.i+drawmat[8]*speed)*SIMULATION_ATOM;//the r vector I believe;
-  cur_position.j+=(ShipSpeed.j+drawmat[9]*speed)*SIMULATION_ATOM;
-  cur_position.k+=(ShipSpeed.k+drawmat[10]*speed)*SIMULATION_ATOM;
+  cur_position+=((ShipSpeed+drawmat.getR()*speed).Cast()*SIMULATION_ATOM);
   if (curdist>range) {
     delete this;//risky
     return false;
@@ -237,7 +232,7 @@ bool Bolt::Collide (Unit * target) {
   float distance;
   Unit * affectedSubUnit;
   if ((affectedSubUnit =target->queryBSP (prev_position,cur_position,normal,distance))) {//ignore return
-    Vector tmp = (cur_position-prev_position).Normalize();
+    QVector tmp = (cur_position-prev_position).Normalize();
     tmp = tmp*distance;
     distance = curdist/range;
     GFXColor coltmp (col);
@@ -250,7 +245,7 @@ bool Bolt::Collide (Unit * target) {
     float appldam = ((float(255-percentphase)/255)*damage);;
     float phasdam =((float(percentphase)/255)*damage);
     if (damage>0) {
-      target->ApplyDamage (prev_position+tmp,normal, appldam* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,(Unit*)owner, phasdam* ((1-distance)+distance*longrange));
+      target->ApplyDamage ((prev_position+tmp).Cast(),normal, appldam* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,(Unit*)owner, phasdam* ((1-distance)+distance*longrange));
     }else if (damage<0) {
       target->leach (1,phasdam<0?-phasdam:1,appldam<0?-appldam:1);      
     }

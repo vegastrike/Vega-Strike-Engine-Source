@@ -389,7 +389,7 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <Vector>& savedloc ) {
+void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc ) {
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);
@@ -402,11 +402,11 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   if (stdstr.length()>0) {
     Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
     Matrix tmp;
-    Identity (tmp);
-    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
-    Vector pos;
+    ScaleMatrix (tmp,TerrainScale);
+    //    tmp.r[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
+    QVector pos;
     mission->GetOrigin (pos,stdstr);
-    tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
+    tmp.p = -pos;
     terr->SetTransformation (tmp);
 
   }
@@ -415,9 +415,9 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     myterrain=new ContinuousTerrain (stdstr.c_str(),TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
     Matrix tmp;
     Identity (tmp);
-    Vector pos;
+    QVector pos;
     mission->GetOrigin (pos,stdstr);
-    tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
+    tmp.p=-pos;
     myterrain->SetTransformation (tmp);
   }
   //  qt = new QuadTree("terrain.xml");
@@ -461,7 +461,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
     for(int s=0;s < fg->nr_ships;s++){
       numf++;
-      Vector pox (1000+150*a,100*a,100);
+      QVector pox (1000+150*a,100*a,100);
       
       pox.i=fg->pos.i+s*fg_radius*3;
       pox.j=fg->pos.j+s*fg_radius*3;
@@ -589,7 +589,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   }
 
   shipList = _Universe->activeStarSystem()->getClickList();
-  locSel = new CoordinateSelect (Vector (0,0,5));
+  locSel = new CoordinateSelect (QVector (0,0,5));
   UpdateTime();
 //  _Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
@@ -600,14 +600,14 @@ void AddUnitToSystem (const SavedUnits *su) {
   switch (su->type) {
   case ENHANCEMENTPTR:
     un = UnitFactory::createEnhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
-    un->SetPosition(0,0,0);
+    un->SetPosition(QVector(0,0,0));
     break;
   case UNITPTR:
   default:
     un = UnitFactory::createUnit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
-    un->SetPosition (Vector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
+    un->SetPosition (QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
 
     break;
   }

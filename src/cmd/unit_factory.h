@@ -73,8 +73,8 @@ public:
 
     static Planet* createPlanet( );
 
-    static Planet* createPlanet( Vector x,
-                                 Vector y,
+    static Planet* createPlanet( QVector x,
+                                 QVector y,
 				 float vely,
 				 const Vector & rotvel,
 				 float pos,
@@ -83,7 +83,7 @@ public:
 				 char * filename,
 				 char *alpha,
 				 vector<char *> dest,
-				 const Vector &orbitcent,
+				 const QVector &orbitcent,
 				 Unit * parent,
 				 const GFXMaterial & ourmat,
 				 const std::vector <GFXLightLocal> & ligh,

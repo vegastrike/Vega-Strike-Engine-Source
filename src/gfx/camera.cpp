@@ -95,7 +95,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 	}
 }
 Vector Camera::GetVelocity() {
-	return (Coord-lastpos)/SIMULATION_ATOM;
+	return ((Coord-lastpos)/SIMULATION_ATOM).Cast();
 }
 void Camera::UpdateCameraSounds() {
 #ifndef PERFRAMESOUND
@@ -124,7 +124,7 @@ void Camera::UpdateCameraSounds() {
 
 #endif
 
-void Camera::GetView (Matrix vw) {
+void Camera::GetView (Matrix &vw) {
   GFXGetMatrixView (vw);
 }
 void Camera::SetNebula (Nebula * neb) {
@@ -163,7 +163,7 @@ void Camera::UpdateGLCenter()
 	if(changed)
 	{
 		GFXLoadIdentity(PROJECTION);
-		GFXLoadIdentityView();
+		GFXLoadIdentity(VIEW);
 		//updating the center should always use a perspective
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:
@@ -183,13 +183,13 @@ void Camera::UpdateGLCenter()
 		}
 		RestoreViewPort(0,0);
 
-		GFXLookAt (-R, Vector(0,0,0), Q);
+		GFXLookAt (-R, QVector(0,0,0), Q);
 		//changed = GFXFALSE;
 	}
 	//glMultMatrixf(view);
 }
 
-void Camera::SetPosition(const Vector &origin)
+void Camera::SetPosition(const QVector &origin)
 {
   if (FINITE (origin.i)&&FINITE(origin.j)&&FINITE (origin.k)) {
 	Coord = origin;
@@ -199,31 +199,19 @@ void Camera::SetPosition(const Vector &origin)
   }
 }
 
-void Camera::GetPosition(Vector &vect)
-{
-	vect = Coord;
-}
-const Vector &Camera::GetPosition()
-{
-	return Coord;
-}
 
-void Camera::GetOrientation(Vector &p, Vector &q, Vector &r) {
-  p = P;
-  q = Q;
-  r = R;
-}
 
 /** GetView (Matrix x)
  *  returns the view matrix (inverse matrix based on camera pqr)
  */
-float *Camera::GetPlanetGFX () {
-  return &planetview[0];
+Matrix *Camera::GetPlanetGFX () {
+  return &planetview;
   //  CopyMatrix (x,view);
 }
 
-void Camera::LookAt(const Vector &loc, const Vector &up) {
-  P = (loc - Coord).Normalize();
+void Camera::LookDirection(const Vector &myR, const Vector &up) {
+  P = (myR);
+  P.Normalize();
   Q = up;
   Q.Normalize();
   CrossProduct(P,Q,R);
@@ -275,16 +263,16 @@ void Camera::Roll(float rad)
 }
 void Camera::XSlide(float factor)
 {
-	Coord += P * factor;
+	Coord += (P * factor).Cast();
 	changed = GFXTRUE;
 }
 void Camera::YSlide(float factor)
 {
-	Coord += Q * factor;
+	Coord += (Q * factor).Cast();
 	changed = GFXTRUE;
 }
 void Camera::ZSlide(float factor)
 {
-	Coord += R * factor;
+	Coord += (R * factor).Cast();
 	changed = GFXTRUE;
 }

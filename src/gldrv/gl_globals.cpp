@@ -21,6 +21,7 @@
 
 #include "gl_globals.h"
 #include "gfxlib.h"
+#include "gfx/matrix.h"
 //Matrix model = {0};
 //Matrix view = {0};
 
@@ -33,7 +34,9 @@ int Stage1Texture= 0;
 int Stage1TextureName;
 gl_options_t gl_options;
 namespace GFXMatrices {
-  Matrix model,view, projection, invprojection;
+  Matrix model,view;
+  float projection[16];
+  float invprojection[16];
   Matrix  rotview;
 }
 

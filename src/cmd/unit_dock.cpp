@@ -57,7 +57,7 @@ int Unit::CanDockWithMe(Unit * un) {
 	  }
 	}  
       }else {
-	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position()),un->rSize())) {
+	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position().Cast()),un->rSize())) {
 	  return i;
 	}
       }

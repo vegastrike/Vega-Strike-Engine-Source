@@ -166,7 +166,7 @@ void Logo::SetDecal(Texture *decal)
 
 
 
-void Logo::Draw(Matrix m)
+void Logo::Draw(const Matrix &m)
 {
 	if (!numlogos)
 		return;
@@ -199,7 +199,7 @@ void Logo::ProcessDrawQueue() {
 	while(draw_queue->size()) {
 	  c = draw_queue->back();
 	  draw_queue->pop_back();
-	  GFXLoadMatrix(MODEL, c.m);
+	  GFXLoadMatrixModel ( c.m);
 	  c.vlist->BeginDrawState(GFXFALSE);
 	  c.vlist->Draw();
 	  c.vlist->EndDrawState(GFXFALSE);

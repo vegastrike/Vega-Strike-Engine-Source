@@ -199,7 +199,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
     }
     missionNode *pos_node[3];
-    Vector pos (getFloatArg (node,mode,6),
+    QVector pos (getFloatArg (node,mode,6),
 		getFloatArg (node,mode,7),
 		getFloatArg (node,mode,8));
     if (node->subnodes.size()>9) {
@@ -377,7 +377,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_OBJECT;
       viret->objectname="olist";
       if(mode==SCRIPT_RUN){
-	Vector pos=my_unit->Position();
+	QVector pos=my_unit->Position();
 
 	call_vector_into_olist(viret,pos);
       }
@@ -510,9 +510,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->float_val=dist;
     }
     else if(method_id==CMT_UNIT_getMinDis){
-      Vector vec3=getVec3Arg(node,mode,1);
+      QVector vec3=getVec3Arg(node,mode,1);
 
-	float dist=0.0;
+	double dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  dist = (my_unit->Position()-vec3).Magnitude()-my_unit->rSize();
 	  //	  dist=my_unit->getMinDis(vec3);
@@ -528,10 +528,10 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	float dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
-	  Vector vectothem=Vector(other_unit->Position() - my_unit->Position()).Normalize();
+	  QVector vectothem=QVector(other_unit->Position() - my_unit->Position()).Normalize();
 	  my_unit->GetOrientation(p,q,r);
 	  //angle=my_unit->cosAngleTo(other_unit,dist);
-	  angle=acos( vectothem.Dot(r) );
+	  angle=acos( vectothem.Dot(r.Cast()) );
 	  angle=(angle/PI)*180.0;
 	  //printf("angle: %f\n",angle);
 	}
@@ -540,16 +540,16 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret->float_val=angle;
     }
     else if(method_id==CMT_UNIT_getAngleToPos){
-      Vector other_pos=getVec3Arg(node,mode,1);
+      QVector other_pos=getVec3Arg(node,mode,1);
 
-	float angle=0.0;
-	float dist=0.0;
+	double angle=0.0;
+	double dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
-	  Vector vectothem=Vector(other_pos - my_unit->Position()).Normalize();
+	  QVector vectothem=QVector(other_pos - my_unit->Position()).Normalize();
 	  my_unit->GetOrientation(p,q,r);
 	  //angle=my_unit->cosAngleTo(other_unit,dist);
-	  angle=acos( vectothem.Dot(r) );
+	  angle=acos( vectothem.Dot(r.Cast()) );
 	  angle=(angle/PI)*180.0;
 	  //printf("angle: %f\n",angle);
 	}
@@ -981,11 +981,11 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->int_val = carg.quantity;
     }
     else if(method_id==CMT_UNIT_setPosition){
-      float x= getFloatArg(node,mode,1);
-      float y= getFloatArg(node,mode,2);
-      float z= getFloatArg(node,mode,3);
+      double x= getFloatArg(node,mode,1);
+      double y= getFloatArg(node,mode,2);
+      double z= getFloatArg(node,mode,3);
       if(mode==SCRIPT_RUN){
-	my_unit->SetCurPosition(Vector(x,y,z));
+	my_unit->SetCurPosition(QVector(x,y,z));
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
@@ -1164,7 +1164,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        sscanf (fg->fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
-       my_unit = UnitFactory::createPlanet (Vector(0,0,0),Vector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),Vector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
        free (blah);
        free (blooh);
      }else if (type==NEBULAPTR) {
@@ -1180,7 +1180,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
    for(u=0;u<fg->nr_ships;u++){
      my_unit=units[u];
 
-     Vector pox;
+     QVector pox;
 
      pox.i=fg->fg->pos.i+u*fg_radius*3;
      pox.j=fg->fg->pos.j+u*fg_radius*3;
@@ -1290,7 +1290,6 @@ void Mission::call_unit_toxml(missionNode *node,int mode,varInst *ovi){
    string fgid=my_object->getFgID();
    Flightgroup *fg=my_object->getFlightgroup();
 
-   Vector pos=my_object->Position();
   
    var_out << "<unit fgid=" << qu(fgid) << "/>\n";
   }
