@@ -370,7 +370,7 @@ void Mesh::ProcessZFarMeshes () {
   }
   undrawn_meshes[NUM_ZBUF_SEQ].clear();
   GFXFogMode(FOG_OFF);
-  Animation::ProcessFarDrawQueue(-1);
+  Animation::ProcessFarDrawQueue(-FLT_MAX);
   _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
@@ -426,7 +426,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 	  for (unsigned int i=0;i<draw_queue->size();i++) {
 		MeshDrawContext * c = &((*draw_queue)[i]);
 	    if (c->mesh_seq==whichdrawqueue) {
-		  Animation::ProcessFarDrawQueue ((_Universe->AccessCamera()->GetPosition()-c->mat.p).Magnitude()+this->radialSize);		
+	      Animation::ProcessFarDrawQueue ((_Universe->AccessCamera()->GetPosition()-c->mat.p).Magnitude()/*+this->radialSize*/);		
 		}
 	  }
       GFXEnable(LIGHTING);

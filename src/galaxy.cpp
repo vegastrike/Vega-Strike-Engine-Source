@@ -67,6 +67,7 @@ struct SystemInfo {
   vector <string> jumps;
   int numjumps;
   int seed;
+  bool force;
 };
 string getUniversePath () {
   static string datapath = vs_config->getVariable ("data","universe_path", "universe");
@@ -85,60 +86,67 @@ string getVarEitherSectionOrSub (Galaxy *galaxy, string section, string subsecti
   
 }
 
-SystemInfo GetSystemMin (Galaxy * galaxy) {
-  SystemInfo si;
-  si.sunradius=parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","sun_radius","5000"));
-  si.compactness=parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","compactness","1.5"));
-  si.numstars=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_stars","1"));
-  si.numgas=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_gas_giants","0"));
-  si.numplanets=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_planets","1"));
-  si.nummoons=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_moons","1"));
-  si.nebulae=parse_bool(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","nebulae","true"));
-  si.asteroids=parse_bool(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","asteroids","true"));
-  si.numun1=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_natural_phenomena","0"));
-  si.numun2=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_starbases","0"));
-  si.faction=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","faction","unknown");
-  
-  si.seed=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","data","0"));
-  si.numjumps=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","min","num_jump","2"));
-  si.names=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","namelist","names.txt");  
-  si.stars=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","starlist","stars.txt");  
-  si.gasgiants=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","gasgiantlist","gas_giants.txt");  
-  si.planets=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","planetlist","planets.txt");  
-  si.moons=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","moonlist","moons.txt");  
-  si.smallun=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","unitlist","smallunits.txt");  
-  si.asteroidslist=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","asteroidlist","asteroids.txt");  
-  si.nebulaelist=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","nebulalist","nebulae.txt");  
-  si.backgrounds=getVarEitherSectionOrSub(galaxy,"unknown_sector","min","backgroundlist","background.txt");  
+void ClampIt (float & prop, float min, float max) {
+  if (prop<min) {
+    prop = min;
+  }
+  if (prop>max) {
+    prop=max;
+  }
+}
+void ClampIt (int & prop, int min, int max) {
+  if (prop<min) {
+    prop = min;
+  }
+  if (prop>max) {
+    prop=max;
+  }
+}
+static void clampSystem (SystemInfo & si, const SystemInfo & min, const SystemInfo &max) {
+  ClampIt (si.sunradius,min.sunradius,max.sunradius);
+  ClampIt (si.compactness,min.compactness,max.compactness);
+  ClampIt (si.numstars,min.numstars,max.numstars);
+  ClampIt (si.numplanets,min.numplanets,max.numplanets);
+  ClampIt (si.nummoons,min.nummoons,max.nummoons);
+  ClampIt (si.numgas,min.numgas,max.numgas);
+  ClampIt (si.numun1,min.numun1,max.numun1);
+  ClampIt (si.numun2,min.numun2,max.numun2);
+}
 
+SystemInfo GetSystemXProp (Galaxy * galaxy, std::string sector, std::string minmax) {
+  SystemInfo si;
+  si.sunradius=parse_float(getVarEitherSectionOrSub(galaxy,sector,minmax,"sun_radius","5000"));
+  si.compactness=parse_float(getVarEitherSectionOrSub(galaxy,sector,minmax,"compactness","1.5"));
+  si.numstars=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_stars","1"));
+  si.numgas=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_gas_giants","0"));
+  si.numplanets=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_planets","1"));
+  si.nummoons=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_moons","1"));
+  si.nebulae=parse_bool(getVarEitherSectionOrSub(galaxy,sector,minmax,"nebulae","true"));
+  si.asteroids=parse_bool(getVarEitherSectionOrSub(galaxy,sector,minmax,"asteroids","true"));
+  si.numun1=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_natural_phenomena","0"));
+  si.numun2=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_starbases","0"));
+  si.faction=getVarEitherSectionOrSub(galaxy,sector,minmax,"faction","unknown");
+  
+  si.seed=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"data","0"));
+  si.numjumps=parse_int(getVarEitherSectionOrSub(galaxy,sector,minmax,"num_jump","2"));
+  si.names=getVarEitherSectionOrSub(galaxy,sector,minmax,"namelist","names.txt");  
+  si.stars=getVarEitherSectionOrSub(galaxy,sector,minmax,"starlist","stars.txt");  
+  si.gasgiants=getVarEitherSectionOrSub(galaxy,sector,minmax,"gasgiantlist","gas_giants.txt");  
+  si.planets=getVarEitherSectionOrSub(galaxy,sector,minmax,"planetlist","planets.txt");  
+  si.moons=getVarEitherSectionOrSub(galaxy,sector,minmax,"moonlist","moons.txt");  
+  si.smallun=getVarEitherSectionOrSub(galaxy,sector,minmax,"unitlist","smallunits.txt");  
+  si.asteroidslist=getVarEitherSectionOrSub(galaxy,sector,minmax,"asteroidlist","asteroids.txt");  
+  si.nebulaelist=getVarEitherSectionOrSub(galaxy,sector,minmax,"nebulalist","nebulae.txt");  
+  si.backgrounds=getVarEitherSectionOrSub(galaxy,sector,minmax,"backgroundlist","background.txt");  
+  si.force=parse_bool (getVarEitherSectionOrSub (galaxy,sector,minmax,"force","false"));
   return si;
 }
-SystemInfo GetSystemMax (Galaxy * galaxy) {
-  SystemInfo si;
-  si.sunradius=parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","sun_radius","60000"));
-  si.compactness =parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","compactness","2.4"));
-  si.numstars=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_stars","2"));
-  si.numgas=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_gas_giants","3"));
-  si.numplanets=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_planets","10"));
-  si.nummoons=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_moons","10"));
-  si.nebulae=parse_bool(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","nebulae","true"));
-  si.asteroids=parse_bool(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","asteroids","true"));
-  si.numun1=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_natural_phenomena","2"));
-  si.numun2=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_starbases","4"));
-  si.faction=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","faction","unknown");
-  si.names=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","namelist","names.txt");
-  si.seed=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","data","0"));
-  si.numjumps=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_jump","6"));
-  si.stars=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","starlist","stars.txt");  
-  si.gasgiants=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","gasgiantlist","gas_giants.txt");  
-  si.planets=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","planetlist","planets.txt");  
-  si.moons=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","moonlist","moons.txt");  
-  si.smallun=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","unitlist","smallunits.txt");  
-  si.asteroidslist=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","asteroidlist","asteroids.txt");  
-  si.nebulaelist=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","nebulalist","nebulae.txt");  
-  si.backgrounds=getVarEitherSectionOrSub(galaxy,"unknown_sector","max","backgroundlist","background.txt");  
+SystemInfo GetSystemMin (Galaxy * galaxy) {
+  return GetSystemXProp (galaxy, "unknown_sector","min");
+}
 
-  return si;
+SystemInfo GetSystemMax (Galaxy * galaxy) {
+  return GetSystemXProp (galaxy,"unknown_sector","max");
 }
 
 static float av01 () {
@@ -181,6 +189,7 @@ SystemInfo AvgSystems (SystemInfo a, SystemInfo b) {
   si.numun2=isqav (a.numun2,b.numun2);
   si.seed=iav (a.seed,b.seed);
   si.numjumps= isqav (a.numjumps,b.numjumps);
+  si.force = a.force||b.force;
   return si;
 }
 extern vector <char *> ParseDestinations (const string &value);
@@ -226,8 +235,8 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   si.asteroidslist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"asteroidlist",Ave.asteroidslist);  
   si.nebulaelist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"nebulalist",Ave.nebulaelist);  
   si.backgrounds=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"backgroundlist",Ave.backgrounds);  
-
-
+  si.force=parse_bool (getVarEitherSectionOrSub(galaxy,si.sector,si.name,"force",Ave.force?"true":"false"));    
+  
   string dest = galaxy->getVariable (si.sector,si.name,"jumps","");
   if (dest.length()) {
     si.numjumps=0;
@@ -251,6 +260,9 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
 	si.jumps.push_back (string("unknown_sector/")+entities[rnd(0,entities.size())]);
       }
     }
+  }
+  if (!si.force) {
+    clampSystem (si,GetSystemXProp (galaxy,"unknown_sector","minlimit"),GetSystemXProp (galaxy,"unknown_sector","maxlimit"));
   }
   MyLoadSystem (si);
 }
@@ -313,7 +325,7 @@ extern StarSystem *GetLoadedStarSystem(const char * file);
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
   static bool firsttime=true;
   StarSystem *tmpcache;
-  if (tmpcache =GetLoadedStarSystem(file)) {
+  if ((tmpcache =GetLoadedStarSystem(file))) {
     return tmpcache;
   }
   if (!firsttime) {

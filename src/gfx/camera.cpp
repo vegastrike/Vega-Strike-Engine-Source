@@ -56,7 +56,7 @@ void Camera::GetPQR (Vector &p1, Vector &q1, Vector &r1){p1.i = P.i;p1.j = P.j; 
 
 void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 {
-  const float ZFARCONST= 10000;
+  const float ZFARCONST= 1000000;
   float xmin, xmax, ymin, ymax;
 	if(1||changed)
 	{

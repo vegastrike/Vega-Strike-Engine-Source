@@ -110,7 +110,9 @@ void Animation::ProcessFarDrawQueue (float farval) {
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
-//  GFXDisable (DEPTHWRITE);	
+
+  GFXDisable (DEPTHWRITE);	
+  GFXDisable (DEPTHTEST);	
 
   ProcessDrawQueue (far_animationdrawqueue, farval);
 }
@@ -124,7 +126,7 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
       alphamaps = (animationdrawqueue[i]->options&ani_alpha);
       GFXBlendMode ((alphamaps!=0)?SRCALPHA:ONE,(alphamaps!=0)?INVSRCALPHA:ONE);
     }
-	if ((animationdrawqueue[i]->Position()-_Universe->AccessCamera()->GetPosition()).Magnitude()>limit) {
+	if ((animationdrawqueue[i]->Position()-_Universe->AccessCamera()->GetPosition()).Magnitude()-animationdrawqueue[i]->height>limit) {
   	  GFXFogMode(FOG_OFF);
   	  animationdrawqueue[i]->CalculateOrientation(result);
       animationdrawqueue[i]->DrawNow(result);
