@@ -98,7 +98,9 @@ namespace UniverseUtil {
 	    }		  
 	  }
 	  if (ret) {
-	    return *ret;//uses copy
+		Cargo tempret = *ret;
+		tempret.quantity=quantity;
+	    return tempret;//uses copy
 	  }else {
 	    Cargo newret;
 	    newret.quantity=0;

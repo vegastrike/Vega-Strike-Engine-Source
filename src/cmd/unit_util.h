@@ -34,6 +34,7 @@ namespace UnitUtil {
 	float getPlanetRadiusPercent ();
 	float getSignificantDistance (Unit *un, Unit *sig);
 	int isPlayerStarship (Unit * un);
+	int hasCargo (Unit * my_unit, std::string mycarg);
 
 }
 

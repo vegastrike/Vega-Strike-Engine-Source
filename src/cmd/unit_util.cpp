@@ -186,7 +186,13 @@ namespace UnitUtil {
 	  }
 	  return carg.quantity; 
 	}
-
+	int hasCargo (Unit * my_unit, string mycarg) {
+		unsigned int i;
+		Cargo * c = my_unit->GetCargo (mycarg,i);
+		if (c==NULL)
+			return 0;
+		return c->quantity;
+	}
 	bool JumpTo (Unit * unit, string system) {
 		if (unit!=NULL)
 			return _Universe->activeStarSystem()->JumpTo(unit,NULL,system);

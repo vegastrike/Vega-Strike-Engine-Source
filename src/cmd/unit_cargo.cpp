@@ -109,7 +109,7 @@ using namespace std;
 std::string CargoToString (const Cargo& cargo) {
   string missioncargo;
   if (cargo.mission) {
-    missioncargo = string("\" missioncargo=\"")+tostring(cargo.mission);
+	  missioncargo = string("\" missioncargo=\"")+XMLSupport::tostring(cargo.mission);
   }
   return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+missioncargo+ string("\"/>\n");
 }

@@ -149,6 +149,8 @@ Class.def (&Cargo::SetContent,"SetContent");
 Class.def (&Cargo::GetContent,"GetContent");
 Class.def (&Cargo::SetCategory,"SetCategory");
 Class.def (&Cargo::GetCategory,"GetCategory");
+Class.def (&Cargo::SetMissionFlag,"SetMissionFlag");
+Class.def (&Cargo::GetMissionFlag,"GetMissionFlag");
 Class.def (&Cargo::GetDescription,"GetDescription");
 
 
@@ -383,6 +385,10 @@ class Cargo:
   voidWRAPPED1(SetContent,string,content)
   WRAPPED0(string,GetContent,"weapons")
   voidWRAPPED1(SetCategory,string,category)
+  WRAPPED0(string,GetCategory,"contraband")
+  voidWRAPPED1(SetMissionFlag,bool,flag)
+  WRAPPED1(bool,GetMissionFlag,0)
+
   WRAPPED0(string,GetCategory,"contraband")
   WRAPPED0(string,GetDescription,"")
 
