@@ -242,8 +242,10 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	modold (texfilename,shared,texfilename);
 	if (shared) {
 	  if (FileName)
-	    if (FileName[0])
-	      fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
+	    if (FileName[0]) {
+	      string tmp =GetSharedTexturePath (FileName);
+	      fp = fopen (tmp.c_str(),"rb");
+	    }
 	}
 	free ( t);
 	if (fp&&g_game.use_textures==0&&!force_load) {
@@ -405,7 +407,8 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	bool shared = (fp==NULL);
 	modold (texfilename,shared,texfilename);
 	if (shared) {
-	  fp = fopen (GetSharedTexturePath (FileNameRGB).c_str(),"rb");
+	  string tmp = GetSharedTexturePath (FileNameRGB);
+	  fp = fopen (tmp.c_str(),"rb");
 	}
 	if (fp&&g_game.use_textures==0&&(!force_load)) {
 	  fclose (fp);
@@ -472,7 +475,13 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  
 	  if (FileNameA)
 	    {
-	      std::string tmp = shared?GetSharedTexturePath(FileNameA).c_str():FileNameA;
+	      
+	      std::string tmp;
+	      if (shared)
+		tmp = GetSharedTexturePath(FileNameA);
+	      else
+		tmp = FileNameA;
+	     
 	      fp1 = fopen (tmp.c_str(), "rb");
 	      
 	      if (!fp1)
