@@ -62,7 +62,7 @@ void TextPlane::Draw(const string & newText, int offset)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
-  void * fnt = GLUT_BITMAP_HELVETICA_12;//g_game.x_resolution>800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
+  void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
   float tmp,row, col;
   GetPos (row,col);
   GFXPushBlendMode();
@@ -102,7 +102,7 @@ void TextPlane::Draw(const string & newText, int offset)
     }
     if(col+((text_it+1!=newText.end())?(glutBitmapWidth(fnt,*text_it)/(float)g_game.x_resolution):0)>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
-      row -= myFontMetrics.j;
+      row -= (fnt==GLUT_BITMAP_HELVETICA_12)?(18./g_game.y_resolution):(16./g_game.y_resolution);
       glPopMatrix();
       glPushMatrix ();
       glTranslatef (col,row,0);
