@@ -27,7 +27,7 @@
 #include "quaternion.h"
 #include "gfx_aux.h"
 #include "gfx_transform.h"
-
+#include "gfxlib_struct.h"
 using namespace std;
 
 class Planet;
@@ -54,6 +54,11 @@ private:
     enum Names {
       //elements
       UNKNOWN, 
+	  MATERIAL,
+	  AMBIENT,
+	  DIFFUSE,
+	  SPECULAR,
+	  EMISSIVE,
       MESH, 
       POINTS, 
       POINT, 
@@ -71,9 +76,14 @@ private:
       LOGO,
       REF,
       //attributes
+	  POWER,
       FLATSHADE,
       TEXTURE,
       ALPHAMAP,
+	  ALPHA,
+	  RED,
+	  GREEN,
+	  BLUE,
       X,
       Y,
       Z,
@@ -164,6 +174,7 @@ private:
     vector<GFXVertex> *active_list;
     vector<int> *active_ind;
     GFXVertex vertex;
+	GFXMaterial material;
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);

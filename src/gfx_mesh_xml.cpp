@@ -36,9 +36,14 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using XMLSupport::parse_float;
 using XMLSupport::parse_int;
-
+struct GFXMaterial;
 const EnumMap::Pair Mesh::XML::element_names[] = {
   EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
+  EnumMap::Pair("Material", XML::MATERIAL),
+  EnumMap::Pair("Ambient", XML::AMBIENT),
+  EnumMap::Pair("Diffuse", XML::DIFFUSE),
+  EnumMap::Pair("Specular", XML::SPECULAR),
+  EnumMap::Pair("Emissive", XML::EMISSIVE),
   EnumMap::Pair("Mesh", XML::MESH),
   EnumMap::Pair("Points", XML::POINTS),
   EnumMap::Pair("Point", XML::POINT),
@@ -63,6 +68,11 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Blend",XML::BLENDMODE),
   EnumMap::Pair("texture", XML::TEXTURE),
   EnumMap::Pair("alphamap", XML::ALPHAMAP),
+  EnumMap::Pair("red", XML::RED),
+  EnumMap::Pair("green", XML::GREEN),
+  EnumMap::Pair("blue", XML::BLUE),
+  EnumMap::Pair("alpha", XML::ALPHA),
+  EnumMap::Pair("power", XML::POWER),
   EnumMap::Pair("x", XML::X),
   EnumMap::Pair("y", XML::Y),
   EnumMap::Pair("z", XML::Z),
@@ -81,8 +91,8 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Offset",XML::OFFSET),
 };
 
-const EnumMap Mesh::XML::element_map(XML::element_names, 17);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 20);
+const EnumMap Mesh::XML::element_map(XML::element_names, 22);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 25);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -165,6 +175,99 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   bool texture_found = false;
   bool alpha_found = false;
   switch(elem) {
+	  case XML::MATERIAL:
+		  assert(xml->load_stage==4);
+		  xml->load_stage=7;
+		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+			  switch(XML::attribute_map.lookup((*iter).name)) {
+			  case XML::POWER:
+				xml->material.power=parse_float((*iter).value);
+
+			break;
+			  }
+
+			}
+		  break;
+  case XML::DIFFUSE:
+	  assert(xml->load_stage==7);
+	  xml->load_stage=8;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.dr=parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.db=parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.da=parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.dg=parse_float((*iter).value);
+			  break;
+		  }
+	  }
+	  break;
+  case XML::EMISSIVE:
+	  assert(xml->load_stage==7);
+	  xml->load_stage=8;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.er=parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.eb=parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.ea=parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.eg=parse_float((*iter).value);
+			  break;
+		  }
+	  }
+	  break;
+  case XML::SPECULAR:
+	  assert(xml->load_stage==7);
+	  xml->load_stage=8;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.sr=parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.sb=parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.sa=parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.sg=parse_float((*iter).value);
+			  break;
+		  }
+	  }
+	  break;
+  case XML::AMBIENT:
+	  assert(xml->load_stage==7);
+	  xml->load_stage=8;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.ar=parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.ab=parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.aa=parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.ag=parse_float((*iter).value);
+			  break;
+		  }
+	  }
+	  break;
   case XML::UNKNOWN:
    fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
     break;
@@ -741,6 +844,26 @@ void Mesh::endElement(const string &name) {
     assert (xml->vertex_state>=XML::V_REF*3);//make sure there are at least 3 reference points
     xml->load_stage=4;
     break;
+  case XML::MATERIAL:
+	  assert(xml->load_stage==7);
+	  xml->load_stage=4;
+	  break;
+  case XML::DIFFUSE:
+	  assert(xml->load_stage==8);
+	  xml->load_stage=7;
+	  break;
+  case XML::EMISSIVE:
+	  assert(xml->load_stage==8);
+	  xml->load_stage=7;
+	  break;
+  case XML::SPECULAR:
+	  assert(xml->load_stage==8);
+	  xml->load_stage=7;
+	  break;
+  case XML::AMBIENT:
+	  assert(xml->load_stage==8);
+	  xml->load_stage=7;
+	  break;
   case XML::MESH:
     assert(xml->load_stage==4);//4 is done with poly, 5 is done with Logos
 
