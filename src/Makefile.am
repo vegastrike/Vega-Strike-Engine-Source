@@ -63,6 +63,8 @@ vegastrike_SOURCES =				\
 	gfx_click_list.cpp			\
 	gfx_coordinate_select.cpp		\
 	gfx_coordinate_select.h			\
+	gfx_env_map_gent.h			\
+	gfx_env_map_gent.cpp			\
 	gfx_halo.cpp				\
 	gfx_halo.h				\
 	gfx_hud.cpp				\
@@ -125,6 +127,7 @@ vegastrike_SOURCES =				\
 	quaternion.h 				\
 	quaternion.cpp				\
 	star_system.cpp 			\
+	star_system_xml.cpp			\
 	star_system.h 				\
 	iterator.h				\
 	UnitCollection.h			\

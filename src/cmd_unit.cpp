@@ -63,6 +63,7 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  origin= Vector(0,0,0);
   numhalos=0;
   halos=NULL;
   nummounts=0;
@@ -534,7 +535,7 @@ bool Unit::queryFrustum(float frustum [6][4]) {
 bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
   int i;
   Matrix vw;
-  _GFX->AccessCamera()->GetView (vw);
+  _Universe->AccessCamera()->GetView (vw);
   Vector mousePoint;
 #ifdef VARIABLE_LENGTH_PQR
   Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);
@@ -587,14 +588,14 @@ void Unit::UpdateHudMatrix() {
   //FIXME
   Matrix tmatrix;
   Vector camp,camq,camr;
-  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+  _Universe->AccessCamera()->GetPQR(camp,camq,camr);
   
 	//GFXIdentity(MODEL);
 	//Identity (tmatrix);
-	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
+	//	Translate (tmatrix,_Universe->AccessCamera()->GetPosition());
 	//	GFXLoadMatrix(MODEL,tmatrix);
-  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);  
-  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
+  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_Universe->AccessCamera()->GetPosition()+1.23*camr);  
+  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_Universe->AccessCamera()->GetPosition());
 
 }
 

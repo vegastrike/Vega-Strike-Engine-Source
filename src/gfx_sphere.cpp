@@ -116,7 +116,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
 }
 void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/) {
   if (centered) {
-    SetPosition(_GFX->AccessCamera()->GetPosition());
+    SetPosition(_Universe->AccessCamera()->GetPosition());
   }		
 
   Mesh::Draw();
@@ -138,8 +138,8 @@ void SphereMesh::ProcessDrawQueue() {
   
   GFXSelectTexcoordSet(0, 0);
   if(envMap) {
-    //_GFX->getLightMap()->MakeActive();
-    _GFX->activateLightMap();
+    //_Universe->getLightMap()->MakeActive();
+    _Universe->activateLightMap();
     GFXSelectTexcoordSet(1, 1);
   }
   if (insideout) 

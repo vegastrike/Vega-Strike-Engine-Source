@@ -9,7 +9,7 @@ class UnitContainer {
   UnitContainer ();
   UnitContainer (Unit *);
   ~UnitContainer();
-  inline void SetUnit (Unit *);
+  void SetUnit (Unit *);
   Unit * GetUnit();
 };
 #endif

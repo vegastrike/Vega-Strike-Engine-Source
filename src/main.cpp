@@ -33,7 +33,7 @@
  */
 game_data_t g_game;
 
-WrapGFX *_GFX;
+Universe *_Universe;
 FILE * fpread=NULL;
 /* 
  * Function definitions
@@ -64,7 +64,7 @@ void cleanup(void)
   //    write_config_file();
   //  write_saved_games();
   destroyObjects();
-  delete _GFX;
+  delete _Universe;
 }
 
 int main( int argc, char **argv ) 
@@ -103,13 +103,14 @@ int main( int argc, char **argv )
 
 #endif
     */
-    _GFX= new WrapGFX(argc,argv);    
+    _Universe= new Universe(argc,argv);   
+	_Universe->Init ();
     //    glutSetCursor(GLUT_CURSOR_NONE); 
     
     createObjects();
 
        InitializeInput();
-    _GFX->Loop(main_loop);
+    _Universe->Loop(main_loop);
 
     // never makes it here
     return 0;

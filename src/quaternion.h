@@ -21,7 +21,7 @@ struct Quaternion {
   inline Quaternion operator*=(const Quaternion &rval) {
     return *this = *this * rval;
   }
-  Quaternion Normalize() { v = v * (1.0/Magnitude()); s /= Magnitude(); return *this;}
+  Quaternion Normalize() { v = v * (((float)1.0)/Magnitude()); s /= Magnitude(); return *this;}
   void to_matrix(Matrix mat) const;
 
   static Quaternion from_vectors(const  Vector &v1, const Vector &v2, const Vector &v3);
@@ -35,7 +35,7 @@ inline Quaternion operator+(const Quaternion &a, const Quaternion &b) {
   return Quaternion(a.s + b.s, a.v+b.v);
 }
 
-inline Quaternion operator*(const Quaternion &a, const double &b) {
+inline Quaternion operator*(const Quaternion &a, const float &b) {
   return Quaternion(a.s * b, a.v * b);
 }
 

@@ -28,12 +28,13 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 	const float size = 10;
-Background::Background(char *file)
+Background::Background(const char *file)
 {
-	char temp[80]; 
+	char * temp=new char [strlen(file)+25];
+	
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
-	up = new Texture(strcat(temp, "_up.bmp"), 0,false );
+	up = new Texture(strcat(temp, "_up.bmp") );
 	SphereBackground = NULL;
 	
 	if (!up->LoadSuccess()) {
@@ -51,29 +52,30 @@ Background::Background(char *file)
 	//up->Filter();
 
 	strcpy(temp, file);
-	left = new Texture(strcat(temp, "_left.bmp"), 0,false);
+	left = new Texture(strcat(temp, "_left.bmp"));
 	//left->Clamp();
 	//left->Filter();
 
 	strcpy(temp, file);
-	front = new Texture(strcat(temp, "_front.bmp"), 0,false);
+	front = new Texture(strcat(temp, "_front.bmp"));
 	//front->Clamp();
 	//front->Filter();
 
 	strcpy(temp, file);
-	right = new Texture(strcat(temp, "_right.bmp"), 0,false);
+	right = new Texture(strcat(temp, "_right.bmp"));
 	//right->Clamp();
 	//right->Filter();
 
 	strcpy(temp, file);
-	back = new Texture(strcat(temp, "_back.bmp"), 0,false);
+	back = new Texture(strcat(temp, "_back.bmp"));
 	//back->Clamp();
 	//back->Filter();
 
 	strcpy(temp, file);
-	down = new Texture(strcat(temp, "_down.bmp"), 0,false);
+	down = new Texture(strcat(temp, "_down.bmp"));
 	//down->Clamp();
 	//down->Filter();
+	delete temp;
 	}
 }
 
@@ -114,7 +116,7 @@ void Background::Draw()
 	//glPushMatrix();
 	//gluPerspective (90,1.33,0.01,1500); //set perspective to 78 degree FOV
 	********************************/
-	_GFX ->AccessCamera()->UpdateGLCenter();
+	_Universe->AccessCamera()->UpdateGLCenter();
 
 	
 	/*up*/
@@ -218,7 +220,7 @@ void Background::Draw()
 			
 	GFXEnd();//*/
 
-	_GFX ->AccessCamera()->UpdateGFX(false);
+	_Universe->AccessCamera()->UpdateGFX(false);
 	GFXEnable(DEPTHWRITE);
 	GFXEnable(LIGHTING);
 }

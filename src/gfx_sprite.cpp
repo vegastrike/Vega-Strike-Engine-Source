@@ -81,9 +81,9 @@ void Sprite::Draw(const Transformation &dtrans, const Matrix m)
   Matrix tmatrix;
 
   Vector camp,camq,camr;
-  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+  _Universe->AccessCamera()->GetPQR(camp,camq,camr);
   VectorAndPositionToMatrix (tmatrix,camp,camq,camr,
-			     _GFX->AccessCamera()->GetPosition() +
+			     _Universe->AccessCamera()->GetPosition() +
 			     camp * local_transformation.position.i +
 			     camq * local_transformation.position.j +
 			     camr * local_transformation.position.k);

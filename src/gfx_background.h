@@ -33,7 +33,7 @@ class Background{
 	Texture *down;
         SphereMesh * SphereBackground;
 public:
-	Background(char *file);
+	Background(const char *file);
 	~Background();
 
 	void Draw();

@@ -43,7 +43,7 @@ class TextPlane: public HUDElement {
 	struct GlyphPosition {
 		float left, right, top, bottom;
 	} myGlyphPos[256];
-
+	virtual clsptr isUnit() {return TEXTPTR;}
 
 	float rowpos, colpos;
 public:

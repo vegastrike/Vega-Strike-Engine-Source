@@ -109,19 +109,19 @@ static void Slew (int,KBSTATE newState){
 		_Slew = !_Slew;
 	}
 	else if (newState==RELEASE)
-	  ;
+	{}
 }
 static void PitchDown(int,KBSTATE newState) {
 	static Vector Q;
 	static Vector R;
 	if(newState==PRESS) {
-		Q = _GFX->AccessCamera()->Q;
-		R = _GFX->AccessCamera()->R;
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
+		Q = _Universe->AccessCamera()->Q;
+		R = _Universe->AccessCamera()->R;
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		//a =1;
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		//a=0;
 	}
 }
@@ -132,13 +132,13 @@ static void PitchUp(int,KBSTATE newState) {
 	static Vector R;
 
 	if(newState==PRESS) {
-		Q = _GFX->AccessCamera()->Q;
-		R = _GFX->AccessCamera()->R;
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
+		Q = _Universe->AccessCamera()->Q;
+		R = _Universe->AccessCamera()->R;
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		
 	}
 }
@@ -149,13 +149,13 @@ static void YawLeft(int,KBSTATE newState) {
 	static Vector R;
 
 	if(newState==PRESS) {
-		P = _GFX->AccessCamera()->P;
-		R = _GFX->AccessCamera()->R;
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
+		P = _Universe->AccessCamera()->P;
+		R = _Universe->AccessCamera()->R;
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 		
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 		
 	}
 }
@@ -165,13 +165,13 @@ static void YawRight(int,KBSTATE newState) {
 	static Vector P;
 	static Vector R;
 	if(newState==PRESS) {
-		P = _GFX->AccessCamera()->P;
-		R = _GFX->AccessCamera()->R;
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
+		P = _Universe->AccessCamera()->P;
+		R = _Universe->AccessCamera()->R;
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 	
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 	       
 	}
 }
@@ -181,13 +181,13 @@ static void RollLeft(int,KBSTATE newState) {
 	static Vector Q;
 	
 	if(newState==PRESS) {
-		P=_GFX->AccessCamera()->P;
-		Q=_GFX->AccessCamera()->Q;
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
+		P=_Universe->AccessCamera()->P;
+		Q=_Universe->AccessCamera()->Q;
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
 		//a=1;
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
 		//a=0;
 		//Stop();
 	}
@@ -199,13 +199,13 @@ static void RollRight(int,KBSTATE newState) {
 	static Vector Q;
 	
 	if(newState==PRESS) {
-		P=_GFX->AccessCamera()->P;
-		Q=_GFX->AccessCamera()->Q;
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
+		P=_Universe->AccessCamera()->P;
+		Q=_Universe->AccessCamera()->Q;
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
 		
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
 		//Stop();
 	}
 }
@@ -215,12 +215,12 @@ static void SlideForward(int,KBSTATE newState) {
 	
 	static Vector R;
 	if(newState==PRESS) {
-		R = _GFX->AccessCamera()->R;
-		_GFX->AccessCamera()->myPhysics.ApplyForce (R,timek);
+		R = _Universe->AccessCamera()->R;
+		_Universe->AccessCamera()->myPhysics.ApplyForce (R,timek);
 	
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyForce (-R,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyForce (-R,timek);
 		//Stop();
 	}
 }
@@ -229,12 +229,12 @@ static void SlideBackward(int,KBSTATE newState) {
 	
 	static Vector R;
 	if(newState==PRESS) {
-		R = _GFX->AccessCamera()->R;
-		_GFX->AccessCamera()->myPhysics.ApplyForce (-R,timek);
+		R = _Universe->AccessCamera()->R;
+		_Universe->AccessCamera()->myPhysics.ApplyForce (-R,timek);
 		
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyForce (R,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyForce (R,timek);
 		//Stop();
 	}
 }
@@ -243,13 +243,13 @@ static void SlideUp(int,KBSTATE newState) {
 	
 	static Vector Q;
 	if(newState==PRESS){
-		Q = _GFX->AccessCamera()->Q;
-		_GFX->AccessCamera()->myPhysics.ApplyForce(Q,timek);
+		Q = _Universe->AccessCamera()->Q;
+		_Universe->AccessCamera()->myPhysics.ApplyForce(Q,timek);
 		//a=1;
 		//Stop();
 	}
 	else if(_Slew&&newState==RELEASE){
-		_GFX->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
 		//a=0;
 		//Stop();
 	}
@@ -259,12 +259,12 @@ static void SlideDown(int,KBSTATE newState) {
 	
 	static Vector Q;
 	if(newState==PRESS) {
-		Q = _GFX->AccessCamera()->Q;
-		_GFX->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
+		Q = _Universe->AccessCamera()->Q;
+		_Universe->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
 	
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyForce(Q, timek);
+		_Universe->AccessCamera()->myPhysics.ApplyForce(Q, timek);
 		//Stop();
 	}
 }
@@ -273,12 +273,12 @@ static void SlideLeft(int,KBSTATE newState) {
 	
 	static Vector P;
 	if(newState==PRESS) {
-		P = _GFX->AccessCamera()->P;
-		_GFX->AccessCamera()->myPhysics.ApplyForce(-P,timek);
+		P = _Universe->AccessCamera()->P;
+		_Universe->AccessCamera()->myPhysics.ApplyForce(-P,timek);
 	
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyForce(P,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyForce(P,timek);
 		//Stop();
 	}
 }
@@ -287,32 +287,32 @@ static void SlideRight(int,KBSTATE newState) {
        
 	static Vector P;
 	if(newState==PRESS) {
-		P = _GFX->AccessCamera()->P;
-		_GFX->AccessCamera()->myPhysics.ApplyForce(P,timek);
+		P = _Universe->AccessCamera()->P;
+		_Universe->AccessCamera()->myPhysics.ApplyForce(P,timek);
 		//		a=1;
 	}
 	else if(_Slew&&newState==RELEASE) {
-		_GFX->AccessCamera()->myPhysics.ApplyForce(-P,timek);
+		_Universe->AccessCamera()->myPhysics.ApplyForce(-P,timek);
 		//a=0;
 	}
 }
 static void reCenter (int, KBSTATE newState) {
   if (newState==PRESS) {
-    _GFX->AccessCamera()->SetPosition(Vector (0,0,0));
+    _Universe->AccessCamera()->SetPosition(Vector (0,0,0));
   }
 
 }
 static void Stop (int,KBSTATE newState) {
 
 	if (newState==PRESS) {
-		_GFX->AccessCamera()->myPhysics.SetAngularVelocity (Vector (0,0,0));
-		_GFX->AccessCamera()->myPhysics.SetVelocity (Vector (0,0,0));
-		//_GFX->AccessCamera()->myPhysics.ResistiveTorqueThrust (-timek,_GFX->AccessCamera()->P);
-		//_GFX->AccessCamera()->myPhysics.ResistiveThrust (-timek);
+		_Universe->AccessCamera()->myPhysics.SetAngularVelocity (Vector (0,0,0));
+		_Universe->AccessCamera()->myPhysics.SetVelocity (Vector (0,0,0));
+		//_Universe->AccessCamera()->myPhysics.ResistiveTorqueThrust (-timek,_Universe->AccessCamera()->P);
+		//_Universe->AccessCamera()->myPhysics.ResistiveThrust (-timek);
 
 	}
 	else if (newState==RELEASE) 
-			;
+	{}
 }
 static void Quit(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
@@ -326,9 +326,9 @@ Unit *fighter2=NULL;
 const int numf = 1;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
-Background * bg = NULL;
+//Background * bg = NULL;
 SphereMesh *bg2=NULL;
-TextPlane *textplane = NULL;
+
 Beam * DABEAM;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
@@ -461,7 +461,6 @@ void createObjects() {
   //0.0.4fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   //0.0.4fighter2 = new Unit("uosprey.dat");
-  bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
   /******
@@ -472,16 +471,13 @@ void createObjects() {
   ****/
   BindKey (1,CoordinateSelect::MouseMoveHandle);
 
-  locSel = new CoordinateSelect (Vector (0,0,5));
+
 
   //  GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
   
-  textplane = new TextPlane("9x12.fon");
-  textplane->SetText(string("This is a test of the emergency broadcast system"));
-  //textplane->SetPosition(Vector(0.250F, 0.250F, 1.00F));
-  textplane->SetPosition(Vector(0.0F, 0.0F, 2.000F));
+
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
     
@@ -529,68 +525,67 @@ void createObjects() {
     position.k += 6;
     Vector v(0,1,0);
     v.Normalize();
-
+    //fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,1), 1.0));
     v = Vector(1,1,-1);
     v.Normalize();
     fighters[a]->SetAI(new Order());
     ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-20,30,10), true));
-    //fighters[a]->EnqueueAI(new FlyByKeyboard ());
-    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (0,0,-1).Normalize(), 0.04));
+    ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
+    fighters[a]->EnqueueAI(new FlyByKeyboard ());
+    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));
-    //    fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,-4), true,1.0));
-    _GFX->activeStarSystem()->AddUnit(fighters[a]);
+    _Universe->activeStarSystem()->AddUnit(fighters[a]);
   }
 
 
-  //_GFX->activeStarSystem()->AddUnit(fighter);
-  //_GFX->activeStarSystem()->AddUnit(carrier);
-  shipList = _GFX->activeStarSystem()->getClickList();
+  //_Universe->activeStarSystem()->AddUnit(fighter);
+  //_Universe->activeStarSystem()->AddUnit(carrier);
+  shipList = _Universe->activeStarSystem()->getClickList();
     //BindKey (1,startselect);
     //BindKey (0,clickhandler);
   /*
     midway = new Unit("b_midway.xml", true);
   midway = new Unit("square.xml", true);
   midway->SetPosition(1,1, 10);
-  _GFX->activeStarSystem()->AddUnit(midway);
+  _Universe->activeStarSystem()->AddUnit(midway);
   midway = new Unit("mid.xml", true);
   midway->SetPosition(5,5, 15);
-  _GFX->activeStarSystem()->AddUnit(midway);
+  _Universe->activeStarSystem()->AddUnit(midway);
   */
   //midway = new Unit("Homeworld-HeavyCorvette.xml", true);
   //midway->SetPosition(8,-5, 10);
-  //_GFX->activeStarSystem()->AddUnit(midway);
+  //_Universe->activeStarSystem()->AddUnit(midway);
   //exit(0);
+  locSel = new CoordinateSelect (Vector (0,0,5));
 }
 
 void destroyObjects() {  
   delete DABEAM;
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
-  delete textplane;
+
   delete locSel;
   //delete t;
   //delete s;
   //delete carrier;
   //delete fighter2;
   //delete fighter;
-  delete bg;
-  //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
 }
 
 void main_loop() {
-  _GFX->StartDraw();
+  static int state = 0;
+  static bool midcachunk=false;
+  _Universe->StartDraw();
   
   //bg2->Draw();
   GFXBlendMode (ONE,ZERO);
-  bg->Draw();
   //GFXDisable(TEXTURE1);
-  _GFX->activeStarSystem()->Draw();
-  _GFX->activeStarSystem()->Update();
+  _Universe->activeStarSystem()->Draw();
+  _Universe->activeStarSystem()->Update();
   
     GFXDisable(TEXTURE1);
   //  GFXBlendMode(ONE,ONE);
@@ -600,8 +595,8 @@ void main_loop() {
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
 
-  //textplane->Draw();
-  _GFX->EndDraw();
+
+  GFXEndScene();
       
   ProcessInput();
 }

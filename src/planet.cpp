@@ -10,7 +10,7 @@ AI *PlanetaryOrbit::Execute() {
   Vector x_offset = cos(theta) * x_size;
   Vector y_offset = sin(theta) * y_size;
   double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
-  theta+=velocity/radius * SIMULATION_ATOM;
+  theta+=velocity/(radius?radius:1) * SIMULATION_ATOM;
   
   parent->prev_physical_state = parent->curr_physical_state;
   parent->curr_physical_state.position = (parent->origin - focus + 
@@ -18,13 +18,12 @@ AI *PlanetaryOrbit::Execute() {
   return this;
 }
 
-void Planet::InitPlanet(FILE *fp) {
+/*void Planet::InitPlanet(FILE *fp) {
   Init();
   name = "Planet - ";
   satellites = NULL;
   numSatellites = 0;
   calculatePhysics=false;
-
   float orbital_velocity, orbital_position;
   Vector x_axis;
   Vector y_axis;
@@ -58,25 +57,72 @@ void Planet::InitPlanet(FILE *fp) {
 
   calculate_extent();
 }
+*/
+void Planet::endElement() {  
+}
 
-Planet::Planet()  : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
+void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,int level,bool isunit){
+  if (level>2) {
+	  assert(numSatellites!=0);
+	  if (satellites[numSatellites-1]->isUnit()==PLANETPTR) {
+		((Planet *)satellites[numSatellites-1])->beginElement(x,y,vely,pos,gravity,radius,filename,level-1,isunit);
+	  } else {
+		  isUnit();
+//		  ((Unit *)satellites[numSatellites-1])->Planet::beginElement(x,y,vely,pos,gravity,radius,filename,level-1,isunit);
+	  }
+	  return;	  
+  }
+  numSatellites++;
+  if (numSatellites==1) {
+	satellites = (Unit **) malloc (sizeof (Unit *));
+  } else {
+		satellites = (Unit **) realloc (satellites, numSatellites*sizeof (Unit *));
+  }
+  if (isunit==true) {
+	satellites[numSatellites-1]=new Unit (filename, true);
+	satellites[numSatellites-1]->SetAI (new PlanetaryOrbit (satellites[numSatellites-1],vely,pos,x,y)) ;
+  }else
+	satellites [numSatellites-1]=new Planet(x,y,vely,pos,gravity,radius,filename);
+}
+
+Planet::Planet()  : Unit(), radius(0.0f), satellites(NULL), numSatellites(0) {
   Init();
 
   SetAI(new AI()); // no behavior
 }
 
-Planet::Planet(char *filename) : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname) : Unit(), radius(0.0f),  satellites(NULL), numSatellites(0) {
+  numSatellites = 0;
+  origin= Vector(0,0,0);
+  satellites = NULL;
+  calculatePhysics=false;
+
   Init();
   killed=false;
-
-  FILE *fp = fopen(filename, "r");
-  InitPlanet(fp);
-  SetAI(new AI()); // no behavior
+  name = "Planet - ";
+  name += textname;
+  this->radius=radius;
+  this->gravity=gravity;
+//  FILE *fp = fopen(filename, "r");
+//  InitPlanet(fp);
+  SetAI(new PlanetaryOrbit(this, vely, pos, x, y)); // behavior
   //cerr << "\nPlanet: " << this << endl;
-  fclose(fp);
+//  fclose(fp);
+  meshdata = new Mesh*[1];
+  meshdata[0] = new SphereMesh(radius, 16, 16, textname);
+  meshdata[0]->setEnvMap(GFXFALSE);
+  nummesh = 1;
+  calculate_extent();
+
 }
 
-Planet::~Planet() { }
+Planet::~Planet() { 
+	for (int i=0;i<numSatellites;i++) {
+		delete satellites[i];
+	}
+	if (numSatellites)
+		free (satellites);
+}
 
 void Planet::gravitate(UnitCollection *uc) {
   float *t = cumulative_transformation_matrix;
@@ -108,6 +154,7 @@ void Planet::gravitate(UnitCollection *uc) {
   // fake gravity
   for(int a=0; a<numSatellites; a++) {
     satellites[a]->origin = origin + curr_physical_state.position;
-    satellites[a]->gravitate(uc);
+	if (satellites[a]->isUnit()==PLANETPTR) 
+	    ((Planet *)satellites[a])->gravitate(uc);//FIXME 071201
   }
 }

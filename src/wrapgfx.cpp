@@ -51,7 +51,7 @@ Unit *unit;
 
 
 
-WrapGFX::WrapGFX(int argc, char** argv)
+Universe::Universe(int argc, char** argv)
 {
   //currentcamera = 0;
 	numlights = NUM_LIGHT; 
@@ -65,16 +65,6 @@ WrapGFX::WrapGFX(int argc, char** argv)
 
 	ForceLogo = new Texture ("TechPriRGB.bmp","TechPriA.bmp");
 	SquadLogo = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
-#ifdef NV_CUBE_MAP
-	LightMap[0]=new Texture ("cube_right_light.bmp",1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
-	LightMap[1]=new Texture ("cube_left_light.bmp",1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
-	LightMap[2]=new Texture ("cube_up_light.bmp",1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
-	LightMap[3]=new Texture ("cube_down_light.bmp",1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
-	LightMap[4]=new Texture ("cube_front_light.bmp",1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
-	LightMap[5]=new Texture ("cube_back_light.bmp",1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
-#else
-	LightMap[0] = new Texture("light.bmp", 1);
-#endif
 	//else
 	//	LightMap = new Texture("light.bmp", 0);
 
@@ -82,26 +72,17 @@ WrapGFX::WrapGFX(int argc, char** argv)
 	InitInput();
 
 	hud_camera = Camera();
-	star_system = new StarSystem(new Planet("test_system.dat"));
 	//	delete star_system;
 	
 }
-
-WrapGFX::~WrapGFX()
+void Universe::Init () {
+	star_system = new StarSystem("test.xml");
+}
+Universe::~Universe()
 {
 	//if(topobject != NULL)
 	//	delete topobject;
-#ifdef NV_CUBE_MAP
 
-  delete LightMap[0];
-  delete LightMap[1];
-  delete LightMap[2];
-  delete LightMap[3];
-  delete LightMap[4];
-  delete LightMap[5];
-#else
-  delete LightMap[0];
-#endif
 	delete ForceLogo;
 	delete SquadLogo;
 	GFXShutdown();
@@ -109,20 +90,11 @@ WrapGFX::~WrapGFX()
 }
 //sets up all the stuff... in this case the ships to be rendered
 
-void WrapGFX::activateLightMap() {
-#ifdef NV_CUBE_MAP
-  LightMap[0]->MakeActive();
-  LightMap[1]->MakeActive();
-  LightMap[2]->MakeActive();
-  LightMap[3]->MakeActive();
-  LightMap[4]->MakeActive();
-  LightMap[5]->MakeActive();
-#else
-    LightMap[0]->MakeActive();
-#endif
+void Universe::activateLightMap() {
+	this->star_system->activateLightMap();
 }
 
-void WrapGFX::StartGFX()
+void Universe::StartGFX()
 {
   //	SetViewport();
 	GFXBeginScene();
@@ -165,11 +137,11 @@ void WrapGFX::StartGFX()
       	GFXEndScene();
 }
 
-void WrapGFX::Loop(void main_loop()) {
+void Universe::Loop(void main_loop()) {
   GFXLoop(main_loop);
 }
 
-void WrapGFX::StartDraw()
+void Universe::StartDraw()
 {
 #ifndef WIN32
 	RESETTIME();
@@ -184,16 +156,6 @@ void WrapGFX::StartDraw()
 
 	SetViewport();
 }
-
-void WrapGFX::EndDraw()
-{
-	GFXEndScene();
-	//REPORTTIME("End of frame");
-	//glFinish();//finish all drawing commands
-	//SwapBuffers(_hDC); //swap the buffers
-}
-
-void WrapGFX::Switch(){}
 
 
 /************************************************************************

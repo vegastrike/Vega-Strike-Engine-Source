@@ -158,7 +158,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.i=copysign(limits.lateral,amt1.i);
   if (fabs(amt1.j)>fabs(limits.vertical))
     Res.j=copysign(limits.vertical,amt1.j);
-  if (amt1.k>afterburn?limits.afterburn:limits.forward)
+  if (amt1.k>(afterburn?limits.afterburn:limits.forward))
     Res.k=afterburn?limits.afterburn:limits.forward;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;

@@ -28,7 +28,7 @@
 #include <string>
 #include "cmd_weapon_xml.h"
 #include "UnitContainer.h"
-
+using std::string;
 //using std::queue;
 #include "xml_support.h"
 class Beam;
@@ -47,9 +47,16 @@ class Box;
 class Mesh;
 class Camera;
 class Halo;
-//////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 
+class PlanetaryOrbit;
+//////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
+enum clsptr {
+	UNITPTR,
+	PLANETPTR,
+	TEXTPTR
+};
 class Unit {
+friend class PlanetaryOrbit;
  public:
   struct Computer {
     Vector NavPoint;
@@ -172,11 +179,14 @@ protected:
   Box *selectionBox;
 
 public:
+	  Vector origin;
+
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 
   Unit();
   Unit(const char *filename, bool xml=false);
   virtual ~Unit();
+  virtual enum clsptr isUnit() {return UNITPTR;}
   static void ProcessDeleteQueue();
   void Init();
   bool Explode();
@@ -205,7 +215,6 @@ public:
 	virtual void HitTarget(Unit *target) = 0; // sent by the damager that hit the target
 	virtual void Damaged(Unit *shooter) = 0; // sent by the damager that hit it
 	*/
-
   void RestrictYaw(float min, float max);
   void RestrictPitch(float min, float max);
   void RestrictRoll(float min, float max);

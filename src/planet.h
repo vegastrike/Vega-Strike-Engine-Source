@@ -21,7 +21,7 @@ typedef float Matrix[16];
 
 class PlanetaryOrbit : public AI {
  private:
-  Planet *parent;
+  Unit *parent;
   double velocity;
   double theta;
 
@@ -30,7 +30,7 @@ class PlanetaryOrbit : public AI {
   Vector focus;
 
  public:
-  PlanetaryOrbit(Planet *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis) : parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
+  PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis) : parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
       focus = Vector(0,0,0);
@@ -43,7 +43,7 @@ class PlanetaryOrbit : public AI {
   }
   AI *Execute();
 
-  friend class Planet;
+  friend class Unit;
 };
 
 class Planet : public Unit {
@@ -51,17 +51,18 @@ class Planet : public Unit {
   float radius;
   float gravity;
 
-  Vector origin;
-
-  Planet **satellites;
+  Unit **satellites;
   int numSatellites;
 
  public:
   Planet();
-  Planet(char *filename);
+  void endElement();
+  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,int level,bool isunit=false);
+  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename);
   ~Planet();
+  virtual enum clsptr isUnit() {return PLANETPTR;}
 
-  void InitPlanet(FILE *fp);
+//  void InitPlanet(FILE *fp);
 
   void gravitate(UnitCollection *units);
 
@@ -76,7 +77,6 @@ class Planet : public Unit {
     virtual ~PlanetIterator() {
       delete pos;
     }
-
     virtual void preinsert(Unit *unit) {
       abort();
     }
@@ -92,11 +92,13 @@ class Planet : public Unit {
     virtual Unit *advance() {
       if(pos->current()==NULL)
 	return NULL;
-
-      Planet *currentPlanet = (Planet*)pos->current();
-      for(int a=0; a<currentPlanet->numSatellites; a++) {
-	planetStack.append(currentPlanet->satellites[a]);
-      }
+	
+      Unit *currentPlanet = pos->current();
+	  if (currentPlanet->isUnit()==PLANETPTR) {
+	    for(int a=0; a<((Planet*)currentPlanet)->numSatellites; a++) {
+			planetStack.append(((Planet *)currentPlanet)->satellites[a]);
+		}
+	  }
       return pos->advance();
     }
   };

@@ -21,7 +21,7 @@
 #ifdef __cplusplus
 
 #include "wrapgfx.h"
-extern WrapGFX * _GFX;
+extern Universe * _Universe;
 extern "C"
 {
 #endif

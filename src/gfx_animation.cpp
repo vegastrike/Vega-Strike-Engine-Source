@@ -117,8 +117,8 @@ void Animation:: Draw(const Transformation &dtrans, const Matrix m)
     //glMatrixMode(GL_MODELVIEW);
     Vector p1,q1,r1;
     Vector camp,camq,camr;
-    Camera* TempCam = _GFX ->AccessCamera();
-    _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+    Camera* TempCam = _Universe->AccessCamera();
+    _Universe->AccessCamera()->GetPQR(camp,camq,camr);
     if (camup)  {
       p1=camp; q1 =  camq ; r1=camr;
     }else{

@@ -52,10 +52,10 @@ void Halo::Draw (const Transformation &quat, const Matrix m) {
   Vector pos,p,q,r, offset;
 
   pos=  position.Transform(m);
-  offset = (_GFX->AccessCamera()->GetPosition()-pos);
+  offset = (_Universe->AccessCamera()->GetPosition()-pos);
   offset.Normalize();
   offset*=(sizex>sizey?sizex:sizey);
-  _GFX->AccessCamera()->GetPQR(p,q,r);
+  _Universe->AccessCamera()->GetPQR(p,q,r);
   p=p*sizex;
   r =-r;
   q=q*sizey;

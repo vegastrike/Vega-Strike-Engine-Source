@@ -459,7 +459,7 @@ Mesh:: Mesh(const char * filename, bool xml)
 		offset [ii] = readf (fp);
 		
 	}
-	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _GFX->getForceLogo(),Ref);
+	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _Universe->getForceLogo(),Ref);
 	delete [] Ref;
 	delete []PolyNormal;
 	delete []center;
@@ -585,7 +585,7 @@ Mesh:: Mesh(const char * filename, bool xml)
 	}
 	
 
-	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _GFX->getSquadLogo(), Ref);
+	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _Universe->getSquadLogo(), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	int vert_offset[2];
@@ -698,8 +698,8 @@ void Mesh::ProcessDrawQueue() {
   
   GFXSelectTexcoordSet(0, 0);
   if(envMap) {
-    //_GFX->getLightMap()->MakeActive();
-    _GFX->activateLightMap();
+    //_Universe->getLightMap()->MakeActive();
+    _Universe->activateLightMap();
     GFXSelectTexcoordSet(1, 1);
   }
   GFXBlendMode(blendSrc, blendDst);

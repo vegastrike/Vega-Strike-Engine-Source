@@ -54,7 +54,7 @@ struct Light{
 */
 
 //extern StarSystem star_system;
-class WrapGFX {
+class Universe {
 protected:
 
 	char * hPalette;
@@ -68,7 +68,6 @@ protected:
 	//	Light lights[NUM_LIGHT];
 	int numlights;
 	//Mouse *mouse;
-        Texture *LightMap[6]; //type Texture
         Texture *ForceLogo;
         Texture *SquadLogo;
 	
@@ -78,13 +77,12 @@ public:
   void activateLightMap();
   Texture * getForceLogo () {return ForceLogo;};
   Texture * getSquadLogo () {return SquadLogo;};
-	WrapGFX(int argc, char **argv);
-	~WrapGFX();
+	Universe(int argc, char **argv);
+	~Universe();
 
 	void StartGFX();
-
+	void Init();
 	void StartDraw();
-	void EndDraw();
         void Loop(void main_loop());
   StarSystem* activeStarSystem() {
     return star_system;
@@ -123,11 +121,6 @@ public:
 		  //		cam[currentcamera].UpdateGFX(); //sets the cam to the current matrix
 	}
 
-	void Continue()
-	{
-		
-	}
-	void Switch();
 
 };
 
