@@ -3452,7 +3452,7 @@ float Unit::WarpEnergyData() const {
     return ((float)warpenergy)/((float)jump.energy);
 }
 float Unit::EnergyData() const{
-  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","true"));
+  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","false"));
   if (max_shield_lowers_capacitance) {
     if (maxenergy<=totalShieldEnergyCapacitance(shield)) {
       return 0;
