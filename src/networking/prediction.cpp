@@ -9,6 +9,7 @@
 
 Prediction::Prediction()
 {
+	memset(this,0,sizeof(Prediction));
 }
 Prediction::~Prediction()
 {

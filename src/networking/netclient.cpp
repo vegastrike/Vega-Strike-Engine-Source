@@ -106,9 +106,11 @@ Unit * getNetworkUnit( ObjSerial cserial)
 NetClient::NetClient()
     : save("")
 {
+	deltatime = 0;
     game_unit = NULL;
     old_timestamp = 0;
     latest_timestamp = 0;
+	elapsed_since_packet=0;
     //old_time = 0;
     cur_time = 0;
     enabled = 0;
