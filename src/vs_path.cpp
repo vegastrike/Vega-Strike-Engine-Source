@@ -88,8 +88,9 @@ void returnfromhome() {
 
 char pwd[65536];
 void initpaths () {
-
+#ifndef _WIN32
   datadir = getdatadir();
+#endif
   sharedsounds = datadir;
 
   cerr << "Data directory is " << datadir << endl;
