@@ -238,10 +238,14 @@ vector <string> parsePipedString(string s) {
   vector <string> ret;
   while ((loc = s.find("|"))!=string::npos) {
     ret.push_back( s.substr (0,loc));
+	cout<<"Found ship named : "<<s.substr( 0, loc)<<endl;
     s = s.substr (loc+1);
   }
   if (s.length())
+  {
     ret.push_back(s);
+	cout<<"Found ship named : "<<s<<endl;
+  }
   return ret;
 }
 string createPipedString(vector <string> s) {

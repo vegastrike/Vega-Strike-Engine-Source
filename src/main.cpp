@@ -596,11 +596,15 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, savefiles[k][0]);
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit(k)->unitfilename,k, savefiles[k][0], false);
+		/*
+		cout<<"UNIT XML :"<<endl<<savefiles[k][0]<<endl<<endl;
+		cout<<"UNIT FILE NAME = "<<_Universe->AccessCockpit(k)->unitfilename[0]<<endl;
+		*/
 	  }
 	  else
 		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
-	  playersaveunit.push_back(_Universe->AccessCockpit()->GetUnitFileName());
+	  playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;
 		  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
 	  if (setplayerXloc) {

@@ -647,7 +647,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	  if( netxml=="")
 		Unit::LoadXML(filename,unitModifications.c_str());
 	  else
-		Unit::LoadXML( "", "", netxml);
+		Unit::LoadXML( filename, "", netxml);
 	  calculate_extent(false);
 ///	  ToggleWeapon(true);//change missiles to only fire 1
 	  vscdups(path.back());	  

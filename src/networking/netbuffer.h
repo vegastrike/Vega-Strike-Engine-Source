@@ -31,6 +31,8 @@ class NetBuffer
 
 		// Extends the buffer if we exceed its size
 		void			resizeBuffer( int newsize);
+		// Check if there is still enough data for 'len' to be read in buffer
+		void			checkBuffer( int len);
 
 		void			addClientState( ClientState cs);
 		ClientState 	getClientState();

@@ -632,14 +632,18 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
  			// In networking mode we name the ship save with .xml as they are xml files
 			if( Network!=NULL && backupcp!=NULL)
 			{
-				modifications = modifications+".xml";
-				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s, savefiles[squadnum][1]);
+				cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
+				//modifications = modifications+".xml";
+				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],"",fg,s, savefiles[squadnum][1]);
 				// Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
 				fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
 				
 			}
 			else
+			{
+				cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
   				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+			}
 			if( Network!=NULL && backupcp != NULL)
 			{
 				fighters[a]->SetNetworkMode();
@@ -648,7 +652,10 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 			}
 		  }
 		  else
-			fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+			{
+				cout<<"CREATING A LOCAL SHIP : "<<fightername<<endl;
+				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+			}
 
 		  _Universe->activeStarSystem()->AddUnit(fighters[a]);
 		  if (s==0&&squadnum<(int)fighter0name.size())

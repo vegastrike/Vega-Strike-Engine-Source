@@ -1094,7 +1094,8 @@ void	NetClient::addClient( const Packet* packet )
 		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
 		// Use the first ship if there are more than one -> we don't handle multiple ships for now
 		// We name the flightgroup with the player name
-		Unit * un = UnitFactory::createUnit( callsign.c_str(),
+		cerr<<"Found saveship[0] = "<<savedships[0]<<endl;
+		Unit * un = UnitFactory::createUnit( savedships[0].c_str(),
 							 false,
 							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
 							 string(""),

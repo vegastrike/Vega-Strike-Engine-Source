@@ -1656,6 +1656,9 @@ void Unit::LoadXML(const char *filename, const char * modifications, string xmlb
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
   std::string collideTreeHash = GetHashName(string(modifications)+"#"+string(filename));
+  cout<<endl;
+  cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
+  cout<<endl;
   if( xmlbuffer=="")
   {
 	  if (modifications) {

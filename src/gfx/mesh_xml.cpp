@@ -1077,7 +1077,8 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   FILE* inFile = fopen (filename, "r");
   if(!inFile) {
     fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-    winsys_exit(0);
+	cleanexit=1;
+    winsys_exit(1);
     return;
   }
 

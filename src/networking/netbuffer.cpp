@@ -54,6 +54,17 @@ void	NetBuffer::resizeBuffer( int newsize)
 				buffer = tmp;
 			}
 		}
+// Check the buffer to see if we can still get info from it
+void	NetBuffer::checkBuffer( int len)
+{
+#ifndef NDEBUG
+	if( offset+len > size)
+	{
+		cerr<<"!!! ERROR : trying to read more data than buffer size !!!"<<endl;
+		exit(1);
+	}
+#endif
+}
 
 void	NetBuffer::addClientState( ClientState cs)
 		{
@@ -66,6 +77,7 @@ void	NetBuffer::addClientState( ClientState cs)
 ClientState NetBuffer::getClientState()
 		{
 			ClientState cs;
+			checkBuffer( sizeof( cs));
 			memcpy( &cs, buffer+offset, sizeof( cs));
 			offset += sizeof( cs);
 			cs.netswap();
@@ -83,6 +95,7 @@ void	NetBuffer::addVector( Vector v)
 Vector	NetBuffer::getVector()
 		{
 			Vector v;
+			checkBuffer( sizeof( v));
 			memcpy( &v, buffer+offset, sizeof( v));
 			offset += sizeof( v);
 			v.netswap();
@@ -99,6 +112,7 @@ void	NetBuffer::addQVector( QVector v)
 QVector	NetBuffer::getQVector()
 		{
 			Vector v;
+			checkBuffer( sizeof( v));
 			memcpy( &v, buffer+offset, sizeof( v));
 			offset += sizeof( v);
 			v.netswap();
@@ -115,6 +129,7 @@ void	NetBuffer::addColor( GFXColor col)
 GFXColor NetBuffer::getColor()
 		{
 			GFXColor col;
+			checkBuffer( sizeof( col));
 			memcpy( &col, buffer+offset, sizeof( col));
 			offset += sizeof( col);
 			col.netswap();
@@ -131,6 +146,7 @@ void	NetBuffer::addMatrix( Matrix m)
 Matrix	NetBuffer::getMatrix()
 		{
 			Matrix m;
+			checkBuffer( sizeof( m));
 			memcpy( &m, buffer+offset, sizeof(m));
 			offset += sizeof( m);
 			m.netswap();
@@ -147,6 +163,7 @@ void	NetBuffer::addQuaternion( Quaternion quat)
 Quaternion	NetBuffer::getQuaternion()
 		{
 			Quaternion q;
+			checkBuffer( sizeof( q));
 			memcpy( &q, buffer+offset, sizeof(q));
 			offset += sizeof( q);
 			q.netswap();
@@ -163,6 +180,7 @@ void	NetBuffer::addTransformation( Transformation trans)
 Transformation	NetBuffer::getTransformation()
 		{
 			Transformation t;
+			checkBuffer( sizeof( t));
 			memcpy( &t, buffer+offset, sizeof(t));
 			offset += sizeof( t);
 			t.netswap();
@@ -207,6 +225,7 @@ void	NetBuffer::addShield( SHIELD shield)
 SHIELD	NetBuffer::getShield()
 {
 	Unit::Shield shield;
+	checkBuffer( sizeof( shield));
 	shield.number = this->getChar();
 	shield.leak = this->getChar();
 	shield.recharge = this->getFloat();
@@ -252,6 +271,7 @@ void		NetBuffer::addArmor( ARMOR armor)
 ARMOR	NetBuffer::getArmor()
 {
 	Unit::Armor armor;
+	checkBuffer( sizeof( armor));
 	armor.front = this->getShort();
 	armor.back = this->getShort();
 	armor.right = this->getShort();
@@ -271,6 +291,7 @@ void	NetBuffer::addSerial( ObjSerial serial)
 ObjSerial	NetBuffer::getSerial()
 		{
 			ObjSerial s;
+			checkBuffer( sizeof( s));
 			memcpy( &s, buffer+offset, sizeof( s));
 			offset+=sizeof(s);
 			s = OBJSERIAL_TONET( s);
@@ -287,6 +308,7 @@ void	NetBuffer::addFloat( float f)
 float	NetBuffer::getFloat()
 		{
 			float s;
+			checkBuffer( sizeof( s));
 			memcpy( &s, buffer+offset, sizeof( s));
 			s = VSSwapHostFloatToLittle( s);
 			offset+=sizeof(s);
@@ -303,6 +325,7 @@ void	NetBuffer::addDouble( double d)
 double	NetBuffer::getDouble()
 		{
 			double s;
+			checkBuffer( sizeof( s));
 			memcpy( &s, buffer+offset, sizeof( s));
 			s = VSSwapHostDoubleToLittle( s);
 			offset+=sizeof(s);
@@ -319,6 +342,7 @@ void	NetBuffer::addShort( unsigned short s)
 unsigned short	NetBuffer::getShort()
 		{
 			unsigned short s;
+			checkBuffer( sizeof( s));
 			memcpy( &s, buffer+offset, sizeof( s));
 			offset+=sizeof(s);
 			s = VSSwapHostShortToLittle( s);
@@ -335,6 +359,7 @@ void	NetBuffer::addInt32( int i)
 int		NetBuffer::getInt32()
 		{
 			int s;
+			checkBuffer( sizeof( s));
 			memcpy( &s, buffer+offset, sizeof( s));
 			offset+=sizeof(s);
 			s = VSSwapHostIntToLittle( s);
@@ -350,6 +375,7 @@ void	NetBuffer::addChar( char c)
 char	NetBuffer::getChar()
 		{
 			char c;
+			checkBuffer( sizeof( c));
 			memcpy( &c, buffer+offset, sizeof( c));
 			offset+=sizeof(c);
 			return c;
@@ -362,6 +388,7 @@ void	NetBuffer::addBuffer( unsigned char * buf, int bufsize)
 		}
 unsigned char *	NetBuffer::getBuffer( int offt)
 		{
+			checkBuffer( offt);
 			unsigned char * tmp = (unsigned char *)buffer + offset;
 			offset += offt;
 			return tmp;
@@ -388,9 +415,11 @@ void	NetBuffer::addString( string str)
 string	NetBuffer::getString()
 		{
 			unsigned short s;
+			checkBuffer( sizeof( s));
 			memcpy( &s, buffer+offset, sizeof( s));
 			s = VSSwapHostShortToLittle( s);
 			offset+=sizeof(s);
+			checkBuffer( s);
 			char c = buffer[offset+s];
 			buffer[offset+s]=0;
 			string str( buffer+offset);

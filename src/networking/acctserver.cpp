@@ -435,27 +435,45 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		NetBuffer netbuf;
 		unsigned int readsize=0, readsize2=0, xmlsize=0, savesize=0;
 
-	// Try to save xml file
+	// Try to open save file
 		string acctfile = acctdir+acct->callsign+".save";
-		cout<<"Trying to open : "<<acctfile<<endl;
+		cerr<<"Trying to open : "<<acctfile<<endl;
 		FILE *fp = fopen( acctfile.c_str(), "r");
 		if( fp == NULL)
 		{
-			cout<<"Account save file does not exists... sending default one to game server"<<endl;
+			cerr<<"Account save file does not exists... sending default one to game server"<<endl;
 			acctfile = acctdir+"default.save";
-			cout<<"Trying to open : "<<acctfile<<endl;
+			cerr<<"Trying to open : "<<acctfile<<endl;
 			fp = fopen( acctfile.c_str(), "r");
 		}
+		else
+			cout<<"... done !"<<endl;
 	// Try to open xml file
-		string acctsave = acctdir+acct->callsign+".xml";
+		string acctsave;
+		// If we loaded default save -> we must load default xml
+		if( acctfile==acctdir+"default.save")
+			acctsave = acctdir+"default.xml";
+		acctsave = acctdir+acct->callsign+".xml";
+		cerr<<"Trying to open : "<<acctsave<<endl;
 		FILE * fp2 = fopen( acctsave.c_str(), "r");
 		if( fp2 == NULL)
 		{
 			cout<<"XML save file does not exists... sending default one to game server"<<endl;
 			acctsave = acctdir+"default.xml";
-			cout<<"Trying to open : "<<acctsave<<endl;
+			cerr<<"Trying to open : "<<acctsave<<endl;
+			if( acctfile!=acctdir+"default.save")
+			{
+				// We loaded an existing save but no corresponding xml file so load default
+				fclose( fp);
+				cerr<<"Default XML Loaded -> reload the default save !"<<endl;
+				acctfile = acctdir+"default.save";
+				cerr<<"Trying to open : "<<acctfile<<endl;
+				fp = fopen( acctfile.c_str(), "r");
+			}
 			fp2 = fopen( acctsave.c_str(), "r");
 		}
+		else
+			cout<<"... done !"<<endl;
 	// Allocate the needed buffer
 		char * savebuf;
 		char * xmlbuf;
