@@ -559,6 +559,17 @@ bool Unit::queryFrustum(float frustum [6][4]) {
 
 float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix() {
+	Vector q (cumulative_transformation_matrix[4],
+			  cumulative_transformation_matrix[5],
+			  cumulative_transformation_matrix[6]);
+    Vector r (cumulative_transformation_matrix[8],
+			  cumulative_transformation_matrix[9],
+			  cumulative_transformation_matrix[10]);
+	Vector tmp;
+	CrossProduct(r,q, tmp);
+    _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
+    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
+
   /*
   //FIXME
   Matrix tmatrix;
@@ -614,16 +625,6 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
-	Vector q (cumulative_transformation_matrix[4],
-			  cumulative_transformation_matrix[5],
-			  cumulative_transformation_matrix[6]);
-    Vector r (cumulative_transformation_matrix[8],
-			  cumulative_transformation_matrix[9],
-			  cumulative_transformation_matrix[10]);
-	Vector tmp;
-	CrossProduct(r,q, tmp);
-    _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
-    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
     /***DEBUGGING cosAngleFromMountTo
     UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
     UnitCollection::UnitIterator *tmpiter = dL->createIterator();

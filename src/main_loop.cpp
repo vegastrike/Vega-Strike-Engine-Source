@@ -284,9 +284,9 @@ void main_loop() {
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
-
-  _Universe->activeStarSystem()->Update();
   cockpit->Draw();
+  _Universe->activeStarSystem()->Update();
+
   GFXEndScene();
       
   ProcessInput();
