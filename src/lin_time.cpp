@@ -36,7 +36,7 @@ static double lasttime;
 #include <sys/time.h>
 #include <sys/types.h>
 #endif
-static double elapsedtime=.04;
+static double elapsedtime;
 static double timecompression=1;
 void inc_time_compression (int i, KBSTATE a) {
   if (a==PRESS) {
@@ -121,7 +121,7 @@ void UpdateTime() {
 
   lasttime = newtime;
   newtime = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
-      elapsedtime = newtime-lasttime;
+  elapsedtime = newtime-lasttime;
 
 #elif defined(HAVE_SDL)
   lasttime = newtime;
