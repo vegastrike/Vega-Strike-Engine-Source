@@ -632,7 +632,9 @@ void Unit::Init()
   image->repair_droid=0;
   image->ecm=0;
   image->cloakglass=false;
-  image->cargo_volume=0;
+  image->CargoVolume=0;
+  image->UpgradeVolume=0;
+  this->HeatSink=0;
   image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
   image->equipment_volume=0;
@@ -1820,10 +1822,10 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 			  }
 			  autotarg = target;
 		  }
-		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target);
+		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target,HeatSink?HeatSink:1.0f);
       }
     } else {
-      mounts[i].ref.refire+=SIMULATION_ATOM;
+      mounts[i].ref.refire+=SIMULATION_ATOM*(HeatSink?HeatSink:1.0f);
     }
     if (mounts[i].processed==Mount::FIRED) {
       Transformation t1;
@@ -3272,9 +3274,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 			fuel*=dam;
 		} else if (randnum>=.5) {
 			this->afterburnenergy+=((1-dam)*recharge);
+		} else if (randnum>=.35) {
+                  image->CargoVolume*=dam;
 		} else if (randnum>=.25) {
-			image->cargo_volume*=dam;
-		} else {  //Do something NASTY to the cargo
+                  image->UpgradeVolume*=dam;
+                }else {  //Do something NASTY to the cargo
 			if (image->cargo.size()>0) {
 				int i=0;
 				unsigned int cargorand;
@@ -5457,9 +5461,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       maxhull=hull;
   }
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
+  STDUPGRADE(HeatSink,up->HeatSink,templ->HeatSink,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
   static bool unittable=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
-  STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
+  STDUPGRADE(image->CargoVolume,up->image->CargoVolume,templ->image->CargoVolume,0);
+  STDUPGRADE(image->UpgradeVolume,up->image->UpgradeVolume,templ->image->UpgradeVolume,0);
+
   STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
   image->ecm = abs(image->ecm);
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
@@ -5615,7 +5622,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 	percentage++;
       }
       }*/
-    if (cloaking==-1&&up->cloaking!=-1) {
+    if ((cloaking==-1&&up->cloaking!=-1)||force_change_on_nothing) {
       if (touchme) {cloaking=up->cloaking;cloakmin=up->cloakmin;image->cloakrate=up->image->cloakrate; image->cloakglass=up->image->cloakglass;image->cloakenergy=up->image->cloakenergy;}
       numave++;
 
@@ -6118,10 +6125,14 @@ void Unit::AddCargo (const Cargo &carg, bool sort) {
   if (sort)
     SortCargo();
 }
+bool cargoIsUpgrade(const Cargo& c) {
+  return c.category.find("upgrades")==0;
+}
 
 bool Unit::CanAddCargo (const Cargo &carg)const {
-  float total_volume=carg.quantity*carg.volume + CargoVolume();
-  if  (total_volume<=image->cargo_volume)
+  bool upgradep=cargoIsUpgrade(carg);
+  float total_volume=carg.quantity*carg.volume + (upgradep?getUpgradeVolume():getCargoVolume());
+  if  (total_volume<=(upgradep?getEmptyUpgradeVolume():getEmptyCargoVolume()))
     return true;
   const Unit * un;
   for (un_kiter i=viewSubUnits();(un = *i)!=NULL;i++) {
@@ -6133,14 +6144,26 @@ bool Unit::CanAddCargo (const Cargo &carg)const {
 }
 
 // The cargo volume of this ship when empty.  Max cargo volume.
-float Unit::EmptyCargoVolume(void) const {
-	return image->cargo_volume;
+float Unit::getEmptyCargoVolume(void) const {
+	return image->CargoVolume;
 }
-
-float Unit::CargoVolume(void) const {
+float Unit::getEmptyUpgradeVolume(void) const {
+	return image->UpgradeVolume;
+}
+float Unit::getCargoVolume(void) const {
 	float result = 0.0;
 	for(int i=0; i<image->cargo.size(); i++) {
-		result += image->cargo[i].quantity*image->cargo[i].volume;
+          if (!cargoIsUpgrade(image->cargo[i]))
+            result += image->cargo[i].quantity*image->cargo[i].volume;
+	}
+
+	return result;
+}
+float Unit::getUpgradeVolume(void) const {
+	float result = 0.0;
+	for(int i=0; i<image->cargo.size(); i++) {
+          if (cargoIsUpgrade(image->cargo[i]))
+            result += image->cargo[i].quantity*image->cargo[i].volume;
 	}
 
 	return result;

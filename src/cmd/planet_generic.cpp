@@ -332,7 +332,8 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   Unit * un = UnitFactory::createUnit (tempname.c_str(),true,FactionUtil::GetFaction("planets"));
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
-    image->cargo_volume=un->GetImageInformation().cargo_volume;
+    image->CargoVolume=un->GetImageInformation().CargoVolume;
+    image->UpgradeVolume=un->GetImageInformation().UpgradeVolume;
   }
   un->Kill();
 }

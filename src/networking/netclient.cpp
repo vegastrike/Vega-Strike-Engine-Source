@@ -651,7 +651,8 @@ int NetClient::recvMsg( Packet* outpacket )
 					{
 						un->SetFuel( netbuf.getFloat());
 						un->SetAfterBurn(netbuf.getShort());
-						un->image->cargo_volume = netbuf.getFloat();
+						un->image->CargoVolume = netbuf.getFloat();
+						un->image->UpgradeVolume = netbuf.getFloat();
 						for( it=0; it<un->image->cargo.size(); it++)
 							un->image->cargo[it].quantity = netbuf.getInt32();
 					}

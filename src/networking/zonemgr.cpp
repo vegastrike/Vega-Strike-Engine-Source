@@ -696,7 +696,8 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		{
 			netbuf.addFloat( un->FuelData());
 			netbuf.addShort( un->AfterburnData());
-			netbuf.addFloat( un->image->cargo_volume);
+			netbuf.addFloat( un->image->CargoVolume);
+			netbuf.addFloat( un->image->UpgradeVolume);
 			for( it=0; it<un->image->cargo.size(); it++)
 				netbuf.addInt32( un->image->cargo[it].quantity);
 		}

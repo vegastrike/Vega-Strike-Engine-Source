@@ -612,8 +612,9 @@ using namespace UnitXML;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case VOLUME:
-	ADDELEM(floatStarHandler,XMLType(&image->cargo_volume));
-	image->cargo_volume=parse_float ((*iter).value);
+	ADDELEM(floatStarHandler,XMLType(&image->CargoVolume));
+	ADDELEM(floatStarHandler,XMLType(&image->UpgradeVolume));
+	image->UpgradeVolume=image->CargoVolume=parse_float ((*iter).value);
 	break;
       }
     }

@@ -608,6 +608,7 @@ public:
   UnitImages *image;
   ///mass of this unit (may change with cargo)
   float Mass;
+  float HeatSink;
 protected:
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
@@ -997,8 +998,10 @@ public:
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
   void EjectCargo (unsigned int index);
-  float EmptyCargoVolume(void) const;
-  float CargoVolume(void) const;
+  float getEmptyCargoVolume(void) const;
+  float getCargoVolume(void) const;
+  float getEmptyUpgradeVolume(void) const;
+  float getUpgradeVolume(void) const;
 
 /***************************************************************************************/
 /**** AI STUFF                                                                      ****/

@@ -1369,9 +1369,9 @@ void BaseComputer::recalcTitle() {
 			{
 				Unit* playerUnit = m_player.GetUnit();
 				if(playerUnit) {
-					const float emptyVolume = playerUnit->EmptyCargoVolume();
-					const float volumeLeft = emptyVolume - playerUnit->CargoVolume();
-					sprintf(playerTitle, "Credits: %.2f,  Cargo space left: %.6g of %.6g",
+					const float emptyVolume = m_currentDisplay==CARGO?playerUnit->getEmptyCargoVolume():playerUnit->getEmptyUpgradeVolume();
+					const float volumeLeft = emptyVolume - (m_currentDisplay==CARGO?playerUnit->getCargoVolume():playerUnit->getUpgradeVolume());
+					sprintf(playerTitle, "Credits: %.2f,  Space left: %.6g of %.6g",
 						playerCredits, volumeLeft, emptyVolume);
 				}
 			}
@@ -1891,10 +1891,12 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
 			}
             break;
         case SELL_UPGRADE:
-			return true; // You can always sell upgrades, no matter what!
+            if(baseUnit && baseUnit->CanAddCargo(item)) {
+              return true;
+            }
         case BUY_UPGRADE:
             // cargo.mission == true means you can't do the transaction.
-            if(item.price*quantity <= cockpit->credits && !item.mission) {
+            if(item.price*quantity <= cockpit->credits && playerUnit->CanAddCargo(item)&&!item.mission) {
                 return true;
             }
             break;
@@ -2111,7 +2113,7 @@ int BaseComputer::maxQuantityForPlayer(const Cargo& item, int suggestedQuantity)
     Unit* playerUnit = m_player.GetUnit();
 	if(playerUnit) {
 		// Limit by cargo capacity.
-		const float volumeLeft = playerUnit->EmptyCargoVolume() - playerUnit->CargoVolume();
+		const float volumeLeft = playerUnit->getEmptyCargoVolume() - playerUnit->getCargoVolume();
 		result = (int)guiMin(suggestedQuantity, volumeLeft/item.volume);
 
 		// Limit by price.
@@ -4023,19 +4025,27 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	}
 
 	if(!subunitlevel){
+          float vol[2];
+          float bvol[2];
+          const char * dvol[2]={"Hold","Upgrade"};
+          vol[0]=playerUnit->getEmptyCargoVolume();
+          vol[1]=playerUnit->getEmptyUpgradeVolume();
+          bvol[0]=blankUnit->getEmptyCargoVolume();
+          bvol[1]=blankUnit->getEmptyUpgradeVolume();
+          for (int index=0;index<2;++index) {
 		if(!mode){
-			PRETTY_ADDU(statcolor+"Hold volume: #-c",playerUnit->EmptyCargoVolume(),0,"cubic meters");
+			PRETTY_ADDU(statcolor+" "+dvol[index]+" volume: #-c",vol[index],0,"cubic meters");
 		}else{
-			if(blankUnit->EmptyCargoVolume()!=playerUnit->EmptyCargoVolume()){
+			if(bvol[index]!=vol[index]){
 				switch(replacement_mode){
 				case 0: // Replacement or new Module
-					PRETTY_ADDU(statcolor+"Changes Hold Volume to: #-c",playerUnit->EmptyCargoVolume(),0,"cubic meters");
+					PRETTY_ADDU(statcolor+"Changes "+dvol[index]+" Volume to: #-c",vol[index],0,"cubic meters");
 					break;
 				case 1: // Additive
-					PRETTY_ADDU(statcolor+"Adds #-c",playerUnit->EmptyCargoVolume(),0,"cubic meters "+statcolor+"to Hold Volume #-c");
+					PRETTY_ADDU(statcolor+"Adds #-c",vol[index],0,"cubic meters "+statcolor+"to "+dvol[index]+" Volume #-c");
 					break;
 				case 2: // multiplicative
-					PRETTY_ADDU(statcolor+"Increases Hold Volume by #-c",100.0*(playerUnit->EmptyCargoVolume()-1),0,"%");
+					PRETTY_ADDU(statcolor+"Increases "+dvol[index]+" Volume by #-c",100.0*(vol[index]-1),0,"%");
 					break;
 				default: // Failure 
 					text+="Oh dear, this wasn't an upgrade. Please debug code.";
@@ -4043,6 +4053,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 				}
 			}
 		}
+          }
 	}
 	
 	

@@ -499,8 +499,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   string tmpstr;
   csvRow = row[0];
   //
-  image->cargo_volume = atof(row["CargoVolume"].c_str());
-
+  
 
   //begin the geometry (and things that depend on stats)
 
@@ -525,7 +524,8 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   calculate_extent(false);
   AddMounts(this,xml,row["Mounts"]);
-  this->image->cargo_volume=stof(row["Hold_Volume"]);
+  this->image->CargoVolume=stof(row["Hold_Volume"]);
+  this->image->UpgradeVolume=stof(row["Upgrade_Storage_Volume"]);
   this->image->equipment_volume=stof(row["Equipment_Space"]);
   ImportCargo(this,row["Cargo_Import"]);
   AddCarg(this,row["Cargo"]);
@@ -665,6 +665,8 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   image->cloakenergy=stof(row["Cloak_Energy"]);
   image->repair_droid=stoi(row["Repair_Droid"]);
   image->ecm = stoi(row["ECM_Rating"]);
+
+  this->HeatSink = stof(row["Heat_Sink_Rating"]);
   if (image->ecm<0) image->ecm*=-1;
   if (image->cockpit_damage){
     HudDamage(image->cockpit_damage,row["Hud_Functionality"]);
@@ -884,7 +886,8 @@ string Unit::WriteUnitString () {
         }
         // mutable things
         unit["Equipment_Space"]=XMLSupport::tostring(image->equipment_volume);
-        unit["Hold_Volume"]=XMLSupport::tostring(image->cargo_volume);
+        unit["Hold_Volume"]=XMLSupport::tostring(image->CargoVolume);
+        unit["Upgrade_Storage_Volume"]=XMLSupport::tostring(image->UpgradeVolume);
         string mountstr;
         double unitScale=  stof(unit["Unit_Scale"],1);
         {//mounts
@@ -1066,7 +1069,7 @@ string Unit::WriteUnitString () {
         unit["ECM"]=tos(image->ecm>0?image->ecm:-image->ecm);
         unit["Hud_Functionality"]=WriteHudDamage(this);
         unit["Max_Hud_Functionality"]=WriteHudDamageFunc(this);
-
+        unit["Heat_Sink_Rating"]=tos(this->HeatSink);
         unit["Lifesupport_Functionality"]=tos(image->LifeSupportFunctionality);       
         unit["Max_Lifesupport_Functionality"]=tos(image->LifeSupportFunctionalityMax);
         unit["Comm_Functionality"]=tos(image->CommFunctionality);

@@ -247,7 +247,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #endif
 #endif
 }
-void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith) {
+void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith, float HeatSink) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
     curlength=0;
@@ -257,7 +257,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
     //#endif
     if (AUDIsPlaying(sound)&&refiretime>=SIMULATION_ATOM)
       AUDStopPlaying (sound);
-    refiretime +=SIMULATION_ATOM;
+    refiretime +=SIMULATION_ATOM*HeatSink;
  
     return;
   }
