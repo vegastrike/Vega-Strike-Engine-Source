@@ -32,6 +32,7 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Should wait for CMD_ADDEDYOU just before entering in the main game loop
 - Find a way not to use MAXOBJECTS in netclient.h
 - Interpolate(extrapolate) using delatime + the concerned client's current_state delay
 OR

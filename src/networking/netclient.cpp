@@ -996,12 +996,12 @@ void	NetClient::receivePosition( const Packet* packet )
 void	NetClient::inGame()
 {
 	Packet packet2;
-	NetBuffer netbuf;
+	//NetBuffer netbuf;
 
-	ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
-	// HERE SEND INITIAL CLIENTSTATE !!
-	netbuf.addClientState( cs);
-	packet2.send( CMD_ADDCLIENT, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
+	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
+	//netbuf.addClientState( cs);
+	packet2.send( CMD_ADDCLIENT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else

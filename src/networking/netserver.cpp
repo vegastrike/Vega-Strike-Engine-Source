@@ -985,7 +985,6 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         this->sendLocations( clt);
         break;
     case CMD_ADDCLIENT:
-	// SHOULD NOT BE USED ANYMORE
         // Add the client to the game
         cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
         //cout<<"Received ADDCLIENT request"<<endl;

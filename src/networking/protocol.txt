@@ -1,0 +1,9 @@
+# LOGIN AND ADD IN GAME SEQUENCE
+
+CLIENT               		SERVER
+
+CMD_LOGIN			-->
+					<--		LOGIN_ACCEPT, LOGIN_ERROR, LOGIN_ALREADY, LOGIN_UNAVAIL
+CMD_ADDCLIENT		-->
+					<--		CMD_ADDEDYOU (with serial #)
+Enter the game
