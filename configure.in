@@ -1123,6 +1123,9 @@ if test "x$sdl_sound" != "xno" ; then
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"
     	    VS_LIBS="$VS_LIBS $MACORPCLIBS"
+			if test "x${is_mingw}" = "xyes" ; then
+    	    VS_LIBS="$VS_LIBS -lwinmm"
+			fi
             break;
         else
 	    LIBS=""
@@ -1151,7 +1154,7 @@ saved_CPPFLAGS="$CPPFLAGS"
 AC_DEFUN( CHECK_FOR_AL_H, [
     CPPFLAGS="$saved_CPPFLAGS $AL_CPPFLAGS"
     if test "x$is_macosx" = "xno" ; then
-        CPPFLAGS="$VS_CPPFLAGS"
+        CPPFLAGS="$VS_CPPFLAGS $AL_CPPFLAGS"
     fi
 
     AC_MSG_CHECKING([for AL/al.h])
