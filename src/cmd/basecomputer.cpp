@@ -130,6 +130,7 @@ static const char CATEGORY_TAG = (-1);
 static GFXColor NO_MONEY_COLOR = GUI_CLEAR;        // Start out with bogus color.
 // Color of the text of a category.
 static const GFXColor CATEGORY_TEXT_COLOR = GFXColor(.5,1,.5);
+static const GFXColor MISSION_COLOR = GFXColor(.66,.2,0);
 // Space between mode buttons.
 static const float MODE_BUTTON_SPACE = 0.03;
 // Default color in CargoColor.
@@ -266,7 +267,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
 bool BaseComputer::processWindowCommand(const EventCommandId& command, Control* control) {
 
     // Iterate through the dispatch table.
-    for(const WctlTableEntry *p = &WctlCommandTable[0]; p->function != NULL; p++) {
+    for(const WctlTableEntry *p = &WctlCommandTable[0]; p->function ; p++) {
         if(p->command == command) {
             if(p->controlId.size() == 0 || p->controlId == control->id()) {
                 // Found a handler for the command.
@@ -1738,15 +1739,15 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 descString += tempString;
                 break;
             case SELL_CARGO:
-				if (item.description==""||item.description[0]!='@'){
-					item.description=buildCargoDescription(item);
-				}
-                sprintf(tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
-                    baseUnit->PriceCargo(item.content), item.price);
-                descString += tempString;
-                sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
-                descString += tempString;
-                break;
+              if (item.description==""||item.description[0]!='@'){
+                item.description=buildCargoDescription(item);
+              }
+              sprintf(tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
+                      item.mission?0.0f:baseUnit->PriceCargo(item.content), item.price);
+              descString += tempString;
+              sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
+              descString += tempString;
+              break;
             case SELL_UPGRADE:
                 sprintf(tempString, "Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
                     usedValue(baseUnit->PriceCargo(item.content)), item.price);
@@ -1820,7 +1821,7 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
 
 // Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity) {
-    if(originalItem.mission)
+    if(originalItem.mission&&transType!=SELL_CARGO)
         return false;
     // Make sure we have somewhere to put stuff.
     Unit* playerUnit = m_player.GetUnit();
@@ -1841,10 +1842,12 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             break;
         case SELL_CARGO:
             // There is a base here, and it is willing to buy the item.
-			if(baseUnit && baseUnit->CanAddCargo(item)) {
-				return true;
-			}
-            break;
+          if (!originalItem.mission) {
+            if(baseUnit && baseUnit->CanAddCargo(item)) {
+              return true;
+            }
+          }else return true;
+          break;
         case BUY_SHIP:
             // Either you are buying this ship for your fleet, or you already own the
             //  ship and it will be transported to you.
@@ -1961,7 +1964,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 		  }
 	
         // Clear color means use the text color in the picker.
-        SimplePickerCell cell(itemName, item.content, (transOK? GUI_CLEAR : NO_MONEY_COLOR), i);
+        SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR:GUI_CLEAR) : NO_MONEY_COLOR), i);
 
         // Add the cell.
         if(parentCell) {
@@ -2082,11 +2085,11 @@ int BaseComputer::maxQuantityForPlayer(const Cargo& item, int suggestedQuantity)
 	if(playerUnit) {
 		// Limit by cargo capacity.
 		const float volumeLeft = playerUnit->EmptyCargoVolume() - playerUnit->CargoVolume();
-		result = guiMin(suggestedQuantity, volumeLeft/item.volume);
+		result = (int)guiMin(suggestedQuantity, volumeLeft/item.volume);
 
 		// Limit by price.
 		const double credits = _Universe->AccessCockpit()->credits;
-		result = guiMin(result, credits / item.price);
+		result = (int)guiMin(result, credits / item.price);
 	}
 
 	return result;
@@ -2142,9 +2145,16 @@ bool BaseComputer::sellSelectedCargo(int requestedQuantity) {
     Cargo* item = selectedItem();
     if(item) {
         Cargo itemCopy = *item;     // Not sure what "sold" has in it.  Need copy of sold item.
- 		Cargo sold;
-		const int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
-        playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+        Cargo sold;
+        const int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
+        if (item->mission) {
+          vector <Cargo>::iterator mycargo = std::find (playerUnit->image->cargo.begin(),playerUnit->image->cargo.end(),*item);
+          if (mycargo!=playerUnit->image->cargo.end()) {
+            playerUnit->RemoveCargo(mycargo-playerUnit->image->cargo.begin(),quantity,true);
+          }
+        }else {
+          playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+        }
 
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
