@@ -47,6 +47,8 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert){
     if (y<0) y=0;
   }
 }
+static bool createdbase=false;
+
 void ModifyMouseSensitivity(int &x, int &y) {
   biModifyMouseSensitivity(x,y,false);
 }
@@ -391,6 +393,7 @@ int BaseInterface::Room::MouseOver (BaseInterface *base,float x, float y) {
 
 BaseInterface *BaseInterface::CurrentBase=NULL;
 static BaseInterface *lastBaseDoNotDereference=NULL;
+
 bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
@@ -418,13 +421,14 @@ void base_main_loop() {
 	UpdateTime();
 	muzak->Listen();
 	GFXBeginScene();
-	if (lastBaseDoNotDereference!=BaseInterface::CurrentBase) {
-		static int i=0;
-		if (i++%4==3) {
-			lastBaseDoNotDereference=BaseInterface::CurrentBase;
-		}
+	if (createdbase) {
+
+          //		static int i=0;
+          //		if (i++%4==3) {
+                  createdbase=false;
+                  //		}
 		AUDStopAllSounds();
-	}
+	}        
 	if (!RefreshGUI()) {
 		restore_main_loop();
 	}else {
@@ -790,11 +794,11 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
 }
 
 extern void ExecuteDirector();
-
 BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
 	CallComp=false;
+        createdbase=true;
 	caller=un;
         curroom=0;
 	curlinkindex=0;
