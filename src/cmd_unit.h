@@ -85,6 +85,8 @@ protected:
 	Vector NetTorque;
 	Vector Velocity;
 
+	bool calculatePhysics; // physics have an effect on this object (set to false for planetse)
+
 public:
 	//no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 	Unit();
@@ -165,6 +167,8 @@ public:
         Vector &P(){return p;};
         Vector &Q(){return q;};
         Vector &R(){return r;};
+
+	bool queryCalculatePhysics() { return calculatePhysics; }
 };
 
 class AI{

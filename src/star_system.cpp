@@ -9,6 +9,9 @@ StarSystem::StarSystem(Planet *primaries) :
   units(new UnitCollection()), 
   missiles(new UnitCollection()) {
   currentcamera = 0;	
+  Iterator *iter = units->createIterator();
+  iter->insert(primaries);
+  delete iter;
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
   //primaries->SetPosition(0,0,5);
@@ -42,7 +45,7 @@ void StarSystem::RemoveUnit(Unit *unit) {
 }
 
 void StarSystem::Draw() {
-  primaries->Draw();
+  //primaries->Draw();
 
   Iterator *iter = units->createIterator();
   Unit *unit;

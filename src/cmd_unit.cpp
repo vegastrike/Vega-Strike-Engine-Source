@@ -57,6 +57,8 @@ void Unit::Init()
 
 	NetTorque = Vector(0,0,0);
 	NetForce = Vector(0,0,0);
+
+	calculatePhysics = true;
 }
 
 Unit::Unit()
@@ -293,6 +295,7 @@ int Unit::queryBoundingBox (const Vector &origin, const Vector &direction, float
       return 1;
     case -1:delete bbox;
       retval =-1;
+      break;
     case 0: delete bbox;
       break;
     }
@@ -318,14 +321,19 @@ int Unit::queryBoundingBox (Matrix t,const Vector &eye, const Vector &pnt, float
     bbox = meshdata[i]->getBoundingBox();
     bbox->Transform (tmpo);
     switch (bbox->Intersect(eye,pnt,err)){
-    case 1: delete bbox;
+    case 1: 
+      delete bbox;
       return 1;
-    case -1: delete bbox;
+    case -1: 
+      delete bbox;
       retval= -1;
-    case 0: delete bbox;
-	break;
+      break;
+    case 0: 
+      delete bbox;
+      break;
+    default:
+      delete bbox;
     }
-    delete bbox;
   }
   for (i=0;i<numsubunit;i++) {
     switch (subunits[i]->queryBoundingBox (tmpo,eye,pnt,err)) {

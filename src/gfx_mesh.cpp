@@ -105,9 +105,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	float *j;
 	float *k;
 	int NumTris;
-	int **Tris;
+	int *Tris;
 	int NumQuads;
-	int **Quads;
+	int *Quads;
 	BOOL AlphaMap = FALSE;
 	//InitPrimitive();
 
@@ -201,25 +201,16 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
 
 	NumTris = readi (fp);
+	Tris = new int [NumTris*3];
 
-	Tris = new int* [NumTris];
-	///between here
-
-	for (ii=0; ii< NumTris; ii++)
-		Tris[ii] = new int [3];
-
-//and here	
 	for (ii=0; ii< NumTris;ii++)
 		for (int jj=0; jj<3; jj++)
-			Tris[ii][jj] = readi(fp);
-	
-NumQuads = readi (fp);
-	Quads = new int* [NumQuads];
-	for (ii=0; ii< NumQuads; ii++)
-		Quads[ii] = new int [4];
+			Tris[ii*3+jj] = readi(fp);
+	NumQuads = readi (fp);
+	Quads = new int [NumQuads*4];
 	for (ii=0; ii< NumQuads;ii++)
 		for (int jj=0; jj<4; jj++)
-			Quads[ii][jj] = readi(fp);
+			Quads[ii*4+jj] = readi(fp);
 
 	
 	int numtrivertex = NumTris*3;
@@ -236,58 +227,58 @@ NumQuads = readi (fp);
 	jj=0;
 	for (ii=0; ii<NumTris; ii++)
 	{
-		vertexlist[jj].x = x[Tris[ii][0]];
-		vertexlist[jj].y = y[Tris[ii][0]];
-		vertexlist[jj].z = z[Tris[ii][0]];
-		vertexlist[jj].i = i[Tris[ii][0]];
-		vertexlist[jj].j = j[Tris[ii][0]];
-		vertexlist[jj].k = k[Tris[ii][0]];
+		vertexlist[jj].x = x[Tris[ii*3+0]];
+		vertexlist[jj].y = y[Tris[ii*3+0]];
+		vertexlist[jj].z = z[Tris[ii*3+0]];
+		vertexlist[jj].i = i[Tris[ii*3+0]];
+		vertexlist[jj].j = j[Tris[ii*3+0]];
+		vertexlist[jj].k = k[Tris[ii*3+0]];
 		jj++;
-		vertexlist[jj].x = x[Tris[ii][1]];
-		vertexlist[jj].y = y[Tris[ii][1]];
-		vertexlist[jj].z = z[Tris[ii][1]];
-		vertexlist[jj].i = i[Tris[ii][1]];
-		vertexlist[jj].j = j[Tris[ii][1]];
-		vertexlist[jj].k = k[Tris[ii][1]];
+		vertexlist[jj].x = x[Tris[ii*3+1]];
+		vertexlist[jj].y = y[Tris[ii*3+1]];
+		vertexlist[jj].z = z[Tris[ii*3+1]];
+		vertexlist[jj].i = i[Tris[ii*3+1]];
+		vertexlist[jj].j = j[Tris[ii*3+1]];
+		vertexlist[jj].k = k[Tris[ii*3+1]];
 		jj++;
-		vertexlist[jj].x = x[Tris[ii][2]];
-		vertexlist[jj].y = y[Tris[ii][2]];
-		vertexlist[jj].z = z[Tris[ii][2]];
-		vertexlist[jj].i = i[Tris[ii][2]];
-		vertexlist[jj].j = j[Tris[ii][2]];
-		vertexlist[jj].k = k[Tris[ii][2]];
+		vertexlist[jj].x = x[Tris[ii*3+2]];
+		vertexlist[jj].y = y[Tris[ii*3+2]];
+		vertexlist[jj].z = z[Tris[ii*3+2]];
+		vertexlist[jj].i = i[Tris[ii*3+2]];
+		vertexlist[jj].j = j[Tris[ii*3+2]];
+		vertexlist[jj].k = k[Tris[ii*3+2]];
 		jj++;
 	}
 	
 	for (ii=0; ii<NumQuads; ii++)
 	{
-		vertexlist[jj].x = x[Quads[ii][0]];
-		vertexlist[jj].y = y[Quads[ii][0]];
-		vertexlist[jj].z = z[Quads[ii][0]];
-		vertexlist[jj].i = i[Quads[ii][0]];
-		vertexlist[jj].j = j[Quads[ii][0]];
-		vertexlist[jj].k = k[Quads[ii][0]];
+		vertexlist[jj].x = x[Quads[ii*4+0]];
+		vertexlist[jj].y = y[Quads[ii*4+0]];
+		vertexlist[jj].z = z[Quads[ii*4+0]];
+		vertexlist[jj].i = i[Quads[ii*4+0]];
+		vertexlist[jj].j = j[Quads[ii*4+0]];
+		vertexlist[jj].k = k[Quads[ii*4+0]];
 		jj++;
-		vertexlist[jj].x = x[Quads[ii][1]];
-		vertexlist[jj].y = y[Quads[ii][1]];
-		vertexlist[jj].z = z[Quads[ii][1]];
-		vertexlist[jj].i = i[Quads[ii][1]];
-		vertexlist[jj].j = j[Quads[ii][1]];
-		vertexlist[jj].k = k[Quads[ii][1]];
+		vertexlist[jj].x = x[Quads[ii*4+1]];
+		vertexlist[jj].y = y[Quads[ii*4+1]];
+		vertexlist[jj].z = z[Quads[ii*4+1]];
+		vertexlist[jj].i = i[Quads[ii*4+1]];
+		vertexlist[jj].j = j[Quads[ii*4+1]];
+		vertexlist[jj].k = k[Quads[ii*4+1]];
 		jj++;
-		vertexlist[jj].x = x[Quads[ii][2]];
-		vertexlist[jj].y = y[Quads[ii][2]];
-		vertexlist[jj].z = z[Quads[ii][2]];
-		vertexlist[jj].i = i[Quads[ii][2]];
-		vertexlist[jj].j = j[Quads[ii][2]];
-		vertexlist[jj].k = k[Quads[ii][2]];
+		vertexlist[jj].x = x[Quads[ii*4+2]];
+		vertexlist[jj].y = y[Quads[ii*4+2]];
+		vertexlist[jj].z = z[Quads[ii*4+2]];
+		vertexlist[jj].i = i[Quads[ii*4+2]];
+		vertexlist[jj].j = j[Quads[ii*4+2]];
+		vertexlist[jj].k = k[Quads[ii*4+2]];
 		jj++;
-		vertexlist[jj].x = x[Quads[ii][3]];
-		vertexlist[jj].y = y[Quads[ii][3]];
-		vertexlist[jj].z = z[Quads[ii][3]];
-		vertexlist[jj].i = i[Quads[ii][3]];
-		vertexlist[jj].j = j[Quads[ii][3]];
-		vertexlist[jj].k = k[Quads[ii][3]];
+		vertexlist[jj].x = x[Quads[ii*4+3]];
+		vertexlist[jj].y = y[Quads[ii*4+3]];
+		vertexlist[jj].z = z[Quads[ii*4+3]];
+		vertexlist[jj].i = i[Quads[ii*4+3]];
+		vertexlist[jj].j = j[Quads[ii*4+3]];
+		vertexlist[jj].k = k[Quads[ii*4+3]];
 		jj++;
 
 	}

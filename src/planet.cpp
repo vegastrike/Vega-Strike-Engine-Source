@@ -16,6 +16,7 @@ AI *PlanetaryOrbit::Execute() {
 
 void Planet::InitPlanet(FILE *fp) {
   InitUnit();
+  calculatePhysics=false;
 
   double orbital_radius, orbital_velocity, orbital_position;
   char texname[255];
@@ -67,6 +68,7 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   Unit *unit;
   Vector vec(0,0,0);
   while((unit = iterator->current())!=NULL) {
+    if(unit->queryCalculatePhysics()) {
     Vector r = (unit->Position() - (vec.Transform(t)));
     //cerr << "Gravity source: " << vec.Transform(t) << "\nUnit position: " << unit->Position() << "\nDelta: " << r << endl;
     float _r_ = r.Magnitude();
@@ -77,13 +79,14 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
     if(_r_ > radius) {
       unit->Accelerate(r);
     }
+    }
     iterator->advance();
   }
   delete iterator;
 
-  for(int a=0; a<numsubunit; a++) {
-    ((Planet*)subunits[a])->gravitate(uc, t);
-  }
+  //for(int a=0; a<numsubunit; a++) {
+  //  ((Planet*)subunits[a])->gravitate(uc, t);
+  //}
 }
 
 void Planet::gravitate(UnitCollection *uc) {
