@@ -433,6 +433,11 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
     return (target->GetVelocity().Magnitude())*10;
   case SETKPS:
     return target->GetComputerData().set_speed*10;
+  case AUTOPILOT:
+    if (target) {
+      return (target->AutoPilotTo(target)?1:0);
+    }
+    return 0;
   case FPS:
     if (fpsval>=0&&fpsval<.5*FLT_MAX)
       numtimes-=.1+fpsval;
@@ -841,8 +846,9 @@ void Cockpit::Draw() {
     if (un->GetHull()>0)
       die = false;
     if (un->Threat()!=NULL) {
-      FlyByKeyboard::StopAutoKey (0,PRESS);
-      reset_time_compression(0,PRESS);
+      if (getTimeCompression()>1) {
+	reset_time_compression(0,PRESS);
+      }
       un->Threaten (NULL,0);
     }
   }
@@ -878,9 +884,9 @@ void Cockpit::Update () {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<=2*SIMULATION_ATOM&&autopilot_time>SIMULATION_ATOM) {
       AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-      CockpitKeys::Inside(0,PRESS);
+      SetView(CP_FRONT);
     }
-    if (autopilot_time<=0) {
+    if (autopilot_time<= 0) {
       autopilot_time=0;
       Unit * par = GetParent();
       if (par) {

@@ -606,15 +606,27 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
       Unit * owner = _Universe->AccessCockpit()->GetParent();
+      if (owner) {
+	if (getTimeCompression()>1) {//if not paused
+	  if (!owner->AutoPilotTo (owner)) {
+	    
+	    reset_time_compression(0,PRESS);
+	  }
+	}
+      }
       while((unit = iter.current())!=NULL) {
+#ifdef OLD_AUTOPILOT
 	if (owner) 
 	  if (_Universe->GetRelation(owner->faction,unit->faction)<0) {
 	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {
-	      reset_time_compression(0,PRESS);
+	      if (getTimeCompression!=.0000001) {//if not paused
+		reset_time_compression(0,PRESS);
+	      }
 	    }
 	  }
+#endif
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&units);
 	  iter.advance();
 	}
