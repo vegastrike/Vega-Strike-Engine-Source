@@ -1114,7 +1114,7 @@ if test "$NETCOMM" = "1" ; then
 	    echo "*** OSS headers not found : networking communication system disabled."
 		NETCOMM="0"
 	else
-		TR_CPPFLAGS="$TR_CPPFLAGS -DNET_COMM"
+		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
 	fi
 fi
 
