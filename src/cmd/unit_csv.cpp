@@ -15,12 +15,12 @@ void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int 
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 static void UpgradeUnit (Unit * un, std::string upgrades) {
   while (upgrades.length()) {
-    string::size_type where = upgrades.find(":");
+    string::size_type where = upgrades.find(";");
     unsigned int mountoffset=0;
     unsigned int subunitoffset=0;
     string upgrade = upgrades.substr(0,where);
-    string::size_type where1 = upgrade.find(";");
-    string::size_type where2 = upgrade.rfind(";");
+    string::size_type where1 = upgrade.find(":");
+    string::size_type where2 = upgrade.rfind(":");
     if (where1!=string::npos) {
       mountoffset=XMLSupport::parse_int(upgrade.substr(where1+1,where2!=where1?where2:upgrade.length()));      
       if (where2!=where1&&where2!=string::npos) {
@@ -48,7 +48,7 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
 static void AddMeshes(Unit::XML& xml, std::string meshes,string meshStartFrame, string textureStartTime,int faction,Flightgroup *fg){
   string::size_type where,wheresf,wherest;
   while (meshes.length()) {
-    where=meshes.find(":");
+    where=meshes.find(";");
     wheresf = meshStartFrame.find(":");
     wherest = textureStartTime.find(":");
     string startf = strtoupper(meshStartFrame.substr(0,wheresf));
@@ -77,7 +77,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
 
   //begin the geometry (and things that depend on stats)
   UpgradeUnit(this,row["Upgrade"]);
-  xml.unitscale = atoi(row["Scale"].c_str());
+  xml.unitscale = atoi(row["Unit_Scale"].c_str());
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
   AddMeshes(xml,row["Mesh"],row["MeshStartFrame"],row["MeshTextureStartFrame"],faction,getFlightgroup());
@@ -260,8 +260,8 @@ string Unit::WriteUnitString () {
         values.push_back(XMLSupport::tostring(image->cargo_volume));
         
         // immutable things
-        keys.push_back("Scale");
-        values.push_back(row["Scale"]);
+        keys.push_back("Unit_Scale");
+        values.push_back(row["Unit_Scale"]);
         keys.push_back("Mesh");
         values.push_back(row["Mesh"]);       
         if ((val=row["MeshStartFrame"]).length()) {
