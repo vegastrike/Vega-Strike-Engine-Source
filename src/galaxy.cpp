@@ -255,11 +255,10 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   if ((int)si.jumps.size()<(int)si.numjumps) {
     vector <string> entities;
     readnames (entities, (getUniversePath()+si.names).c_str());
-    if (entities.size()) {
-      while ((int)si.jumps.size()<si.numjumps) {
-	si.jumps.push_back (string("unknown_sector/")+entities[rnd(0,entities.size())]);
-      }
+    while ((int)si.jumps.size()<si.numjumps) {
+	si.jumps.push_back (si.sector+string("/")+galaxy->getRandSystem (si.sector,"celeste"));
     }
+    
   }
   if (!si.force) {
     clampSystem (si,GetSystemXProp (galaxy,"unknown_sector","minlimit"),GetSystemXProp (galaxy,"unknown_sector","maxlimit"));

@@ -27,7 +27,7 @@ class Galaxy {
  public:
   Galaxy(const char *configfile);
 
-  
+  string getRandSystem(string section,string default_value);
   string getVariable(string section,string name,string defaultvalue);
   string getVariable(string section,string subsection,string name,string defaultvalue);
   configNode *findSection(string section,configNode *startnode);
