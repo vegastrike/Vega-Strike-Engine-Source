@@ -551,7 +551,8 @@ void	NetServer::start(int argc, char **argv)
 
 		// Check for automatic server status save time (in seconds)
 		//curtime = getNewTime();
-		if( curtime - savetime > period)
+		// period * 60 because in minutes in the config file
+		if( curtime - savetime > period*60)
 		{
 			// Not implemented
 			cout<<">>> Saving server status... ";

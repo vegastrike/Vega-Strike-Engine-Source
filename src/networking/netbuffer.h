@@ -31,14 +31,14 @@ class NetBuffer
 		}
 		NetBuffer( char * buf, int bufsize)
 		{
-			offset = bufsize;
-			resizeBuffer( bufsize);
+			size=bufsize;
+			this->buffer = new char[size];
 			memcpy( buffer, buf, bufsize);
 		}
 		NetBuffer( const char * buf, int bufsize)
 		{
-			offset = bufsize;
-			resizeBuffer( bufsize);
+			size=bufsize;
+			this->buffer = new char[size];
 			memcpy( buffer, buf, bufsize);
 		}
 		~NetBuffer()
