@@ -189,6 +189,8 @@ protected:
     virtual void childSetSize( int len ) = 0;
     virtual void childAppend( unsigned char* buffer, int bufsize ) = 0;
 
+    void    protected_replace_notifier( NotifyPtr ptr );
+
 private:
     SOCKETALT         _sock;
     const std::string _filename;
@@ -228,8 +230,15 @@ private:
  * declaration VsnetDownload::Client::NoteFile
  *------------------------------------------------------------*/
 
-class NoteFile : public File, public NotifyMe
+class NoteFile : public File
 {
+private:
+    NotifyPtr _me;
+
+    inline const NotifyMe* me() const {
+    	return (NotifyMe*)_me.get();
+    }
+
 public:
     NoteFile( SOCKETALT          sock,
               const std::string& filename,
@@ -237,8 +246,25 @@ public:
     NoteFile( SOCKETALT          sock,
               const std::string& filename );
 
-    virtual ~NoteFile( ) { }
+    virtual ~NoteFile( );
+
+    inline bool done( ) const {
+        return me()->done();
+    }
+
+    inline bool ok( ) const {
+        return me()->ok();
+    }
+
+    inline int total( ) const {
+        return me()->total();
+    }
+
+    inline int offset( ) const {
+        return me()->offset();
+    }
 };
+
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
