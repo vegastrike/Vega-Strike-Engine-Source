@@ -414,9 +414,9 @@ public:
 			  startingyear(atoi(stuff[3].c_str())),
 			  homeworld(System::findSystem(s,stuff[4])) {
 		if (!homeworld) {
-			fprintf(stderr,"Fatal error: homeworld \"%s\" not found!!!\n",stuff[3].c_str());
+			fprintf(stderr,"Fatal error: homeworld \"%s\" not found!!!\n",stuff[4].c_str());
 		} else if (homeworld->jumps.empty()) {
-			fprintf(stderr,"Fatal error: homeworld \"%s\" has no jump points!!!\nThis means that the %s faction will wait forever for a jump point\nto come into existance.  The application will probably get stuck in an endless loop somewhere!",stuff[3].c_str(),name.c_str());
+			fprintf(stderr,"Fatal error: homeworld \"%s\" has no jump points!!!\nThis means that the %s faction will wait forever for a jump point\nto come into existance.  The application will probably get stuck in an endless loop somewhere!",stuff[4].c_str(),name.c_str());
 		}
 		std::vector<System*> newsys;
 		newsys.push_back(homeworld);
