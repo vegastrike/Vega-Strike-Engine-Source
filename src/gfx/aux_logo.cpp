@@ -137,8 +137,8 @@ void Logo::SetDecal(Texture *decal)
     owner_of_draw_queue = l;
     l->refcount++;
   } else {
-    l = (Logo*)malloc (sizeof (Logo));
-    memcpy (l,this,sizeof(Logo));
+    l = new Logo (*this);//(Logo*)malloc (sizeof (Logo));
+    //    memcpy (l,this,sizeof(Logo));
     decalHash.Put(decal->name, l);
     draw_queue = l->draw_queue = new vector<DrawContext>();
     owner_of_draw_queue = l->owner_of_draw_queue = l;
