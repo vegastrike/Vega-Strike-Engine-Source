@@ -59,6 +59,8 @@ AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm,bo
   if (err<=Ok){
     Load (f,stage,imm,detailtex);
     f.Close();
+  }else {
+    loadSuccess=false;
   }
 /*
 if (setdir) {
@@ -217,5 +219,8 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
     Decal[0]=dec;
   }
   original = NULL;
-  name=0; // for loadsuccess
+  loadSuccess=true;
+}
+ bool AnimatedTexture::LoadSuccess (){
+  return loadSuccess!=false;
 }

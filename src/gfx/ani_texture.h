@@ -8,6 +8,7 @@ class AnimatedTexture: public Texture {
   Texture ** Decal;
   unsigned int active;
   double physicsactive;
+  bool loadSuccess;
   void AniInit();
  public:
   virtual void setTime(double tim);
@@ -33,4 +34,5 @@ class AnimatedTexture: public Texture {
   //resets the animation to beginning
   void Reset();
   bool Done();
+  virtual bool LoadSuccess ();
 };
