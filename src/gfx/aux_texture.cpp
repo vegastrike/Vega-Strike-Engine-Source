@@ -122,19 +122,21 @@ GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
     original->refcount++;
     return GFXTRUE;
   } else {
-    oldtex = (Texture*)malloc(sizeof(Texture));
-    oldtex->InitTexture();
-    oldtex->name=-1;
-    oldtex->refcount=1;
-    oldtex->original=NULL;
-    oldtex->palette=NULL;
-    oldtex->data=NULL;
-    texHashTable.Put(hashname, oldtex);
-    original = oldtex;
     return GFXFALSE;
   }
 }
-
+void Texture::modold (string s, bool shared, string & hashname) {
+  hashname = shared?GetSharedTextureHashName(s):GetHashName(s);
+  Texture * oldtex = (Texture*)malloc(sizeof(Texture));
+  oldtex->InitTexture();
+  oldtex->name=-1;
+  oldtex->refcount=1;
+  oldtex->original=NULL;
+  oldtex->palette=NULL;
+  oldtex->data=NULL;
+  texHashTable.Put(hashname, oldtex);
+  original = oldtex;
+}
 Texture::Texture () {
   data=NULL;
   InitTexture();
@@ -149,15 +151,21 @@ void Texture::setold()
 	original->original = NULL;
 	original->refcount++;
 }
-Texture::Texture (Texture *orig) {
-  InitTexture();
-  Texture * target = orig->original?orig->original:orig;
-  memcpy (this, target, sizeof (Texture));
-  original = target;
-  refcount = 0;
+Texture *Texture::Clone () {
+  Texture * retval = new Texture();
+  Texture * target = original?original:this;
+  *retval = *target;
+  //  memcpy (this, target, sizeof (Texture));
+  if (retval->name!=-1) {
+    retval->original = target;
+    retval->original->refcount++;
+  } else {
+    retval->original = NULL;
+  }
+  retval->refcount = 0;
+  return retval;
+  //assert (!original->original);
   
-  assert (!original->original);
-  original->refcount++;
 }
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
@@ -169,10 +177,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   image_target=imagetarget;
   this->stage = stage;
   string texfilename = string(FileName);
-  if(checkold(texfilename,false,texfilename)) {
+  string tempstr;
+  if(checkold(texfilename,false,tempstr)) {
     return;
   } else {
-    if (checkold(texfilename,true,texfilename)) {
+    texfilename = string(FileName);
+    if (checkold(texfilename,true,tempstr)) {
       return;
     }
   }
@@ -194,6 +204,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	FILE *fp = NULL;
 	fp = fopen (FileName, "rb");
 	bool shared = (fp==NULL);
+	modold (texfilename,shared,texfilename);
 	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
 	}
@@ -299,10 +310,11 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	texture_target=target;
 	image_target=imagetarget;
 	string texfilename = string(FileNameRGB) + string(FileNameA);
-	if(checkold(texfilename,false,texfilename)) {
+	string tempstr;
+	if(checkold(texfilename,false,tempstr)) {
 	  return;
 	} else {
-	  if (checkold(texfilename,true,texfilename)) {
+	  if (checkold(texfilename,true,tempstr)) {
 	    return;
 	  }
 	}
@@ -311,6 +323,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	FILE *fp = NULL;
 	fp = fopen (FileNameRGB, "rb");
 	bool shared = (fp==NULL);
+	modold (texfilename,shared,texfilename);
 	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileNameRGB).c_str(),"rb");
 	}
@@ -541,13 +554,13 @@ void Texture::Transfer ()
 	switch (mode)
 	{
 	case _24BITRGBA:
-		GFXTransferTexture(data, name,image_target);
+		GFXTransferTexture(data, name,RGBA32,image_target);
 		break;
 	case _24BIT:
-		GFXTransferTexture(data, name,image_target);
+		GFXTransferTexture(data, name,RGBA32,image_target);
 		break;
 	case _8BIT:
-		GFXTransferTexture(data, name,image_target);
+		GFXTransferTexture(data, name,PALETTE8, image_target);
 		//TODO: Do something about this, and put in some code to check that we can actually do 8 bit textures
 
 		break;
@@ -565,7 +578,7 @@ int Texture::Bind()
 	case _24BIT:
 		//not supported by most cards, so i use rgba32
 		//GFXCreateTexture(sizeX, sizeY, RGB24, &name);
-		GFXCreateTexture(sizeX, sizeY, RGB32, &name, NULL, stage,ismipmapped,texture_target);
+		GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,ismipmapped,texture_target);
 		break;
 	case _8BIT:
 		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target);
