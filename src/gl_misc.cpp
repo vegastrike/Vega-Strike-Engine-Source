@@ -60,9 +60,6 @@ void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 	switch(ptype)
 	{
 	case TRIANGLES:
-#ifdef STATS_QUEUE
-	        statsqueue.back() += GFXStats(1, 0, 0);
-#endif
 		mode = GL_TRIANGLES;
 		break;
 	case TRIANGLE_STRIP:
@@ -72,9 +69,6 @@ void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 		mode = GL_TRIANGLE_FAN;
 		break;
 	case QUADS:
-#ifdef STATS_QUEUE
-		statsqueue.back() += GFXStats(0, 1, 0);
-#endif
 		mode = GL_QUADS;
 		break;
 	case POLYGON:
@@ -164,12 +158,6 @@ void GFXSubwindow(float x, float y, float xsize, float ysize) {
 Vector GFXDeviceToEye(int x, int y) {
   float l, r, b, t , n, f;
   GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
-  //fprintf (stderr, "N: %f\n",n);
-  //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
-  /*  cerr.form("%f, %f, %f, %f\n", l,r,b,t);
-  cerr << "top - bottom " <<  t-b << endl;
-  cerr << "right - left " <<  r-l << endl;
-  */
   return Vector ((l + (r-l) * float(x)/g_game.x_resolution),
 		 (t + (b-t) * float(y)/g_game.y_resolution),
 		 n);
