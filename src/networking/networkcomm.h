@@ -129,7 +129,7 @@ class NetworkCommunication
 		void	SwitchWebcam();
 
     private:
-        private_init( );
+        void private_init( );
 };
 
 #endif
