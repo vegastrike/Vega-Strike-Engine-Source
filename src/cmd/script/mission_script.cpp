@@ -62,7 +62,7 @@ void Mission::doImport(missionNode *node,int mode){
       assert(0);
     }
     node->script.name=name;
-    import_stack.push_back(node);
+    import_stack.push_back(name);
   }
 
 }
@@ -113,6 +113,7 @@ void Mission::doModule(missionNode *node,int mode){
     missionNode *snode=(missionNode *)*siter;
     if(snode->tag==DTAG_SCRIPT){
       varInst *vi=doScript(snode,mode);
+      deleteVarInst(vi);
     }
     else if(snode->tag==DTAG_DEFVAR){
       doDefVar(snode,mode);
@@ -152,7 +153,13 @@ scriptContext *Mission::makeContext(missionNode *node){
 /* *********************************************************** */
 
 void Mission::removeContextStack(){
+  contextStack *cstack=runtime.cur_thread->exec_stack.back();
   runtime.cur_thread->exec_stack.pop_back();
+
+  if(cstack->return_value!=NULL){
+    deleteVarInst(cstack->return_value,true);
+  }
+  delete cstack;
 }
 
 void Mission::addContextStack(missionNode *node){
@@ -280,9 +287,17 @@ varInst * Mission::doScript(missionNode *node,int mode, varInstMap *varmap){
 	assert(0);
       }
     }
+
+    varInst *viret=NULL;
+    if(vi){
+      viret=newVarInst(VI_TEMP);
+      viret->type=vi->type;
+      assignVariable(viret,vi);
+    }
+
     removeContextStack();
 
-    return vi;
+    return viret;
   }
   else{
     scope_stack.pop_back();
@@ -597,8 +612,11 @@ varInst *Mission::newVarInst(scope_type scopetype){
 }
 
 void Mission::deleteVarInst(varInst *vi,bool del_local){
+  if(vi==NULL){
+    return;
+  }
   if(vi->scopetype==VI_GLOBAL || vi->scopetype==VI_MODULE){
-    debug(2,NULL,0,"reqested to delete global/module vi\n");
+    debug(12,NULL,0,"reqested to delete global/module vi\n");
   }
   else if(vi->scopetype==VI_ERROR){
     debug(2,NULL,0,"reqested to delete vi_error\n");
@@ -607,10 +625,10 @@ void Mission::deleteVarInst(varInst *vi,bool del_local){
     debug(2,NULL,0,"reqested to delete vi in object\n");
   }
   else if(vi->scopetype==VI_CONST){
-    debug(2,NULL,0,"reqested to delete const vi\n");
+    debug(12,NULL,0,"reqested to delete const vi\n");
   }
   else if(del_local==false && vi->scopetype==VI_LOCAL){
-    debug(2,NULL,0,"reqested to delete local vi\n");
+    debug(12,NULL,0,"reqested to delete local vi\n");
   }
   else{
     delete vi;
@@ -623,7 +641,7 @@ void Mission::deleteVarMap(varInstMap *vmap){
     for(iter=vmap->begin();iter!=vmap->end();iter++){
       varInst *vi=(*iter).second;
       if(vi==NULL){
-	debug(2,NULL,0,"NULLVAR "+ (*iter).first+"\n");
+	debug(12,NULL,0,"NULLVAR "+ (*iter).first+"\n");
       }
       else{
 	deleteVarInst(vi,true);

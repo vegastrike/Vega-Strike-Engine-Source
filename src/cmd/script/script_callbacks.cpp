@@ -58,6 +58,7 @@ void Mission::doCall_toxml(string module,varInst *ovi){
 
 varInst *Mission::doCall(missionNode *node,int mode,string module,string method){
   varInst *vi;
+#if 0
   if(node==NULL){
     node=new missionNode;
     node->set(NULL,"special",NULL);
@@ -66,6 +67,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
 
     int mode=SCRIPT_RUN;
   }
+#endif
 
   if(module=="_io"){
     if(method=="PrintFloats"){
@@ -134,6 +136,7 @@ varInst *Mission::doCall(missionNode *node,int mode){
   // RUNTIME && PARSE
   string module=node->attr_value("module");
   if(module.empty()){
+    // does not work yet
     string object=node->attr_value("object");
     assert(0);
     //varInst *ovi=lookupVariable(object);
@@ -175,11 +178,12 @@ extern double gametime;
 varInst *Mission::call_isNull(missionNode *node,int mode){
   varInst *ovi=getObjectArg(node,mode);
 
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   
   viret->type=VAR_BOOL;
   viret->bool_val=(ovi->object==NULL);
 
+  deleteVarInst(ovi);
   return viret;
 }
 
@@ -187,7 +191,7 @@ varInst *Mission::call_float_cast(missionNode *node,int mode){
   missionNode *snode=getArgument(node,mode,0);
   int intval=checkIntExpr(snode,mode);
 
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   
   viret->type=VAR_FLOAT;
   viret->float_val=(float)intval;
@@ -198,7 +202,7 @@ varInst *Mission::call_int_cast(missionNode *node,int mode){
   missionNode *snode=getArgument(node,mode,0);
   float floatval=checkFloatExpr(snode,mode);
 
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   
   viret->type=VAR_INT;
   viret->int_val=(int)floatval;
@@ -211,7 +215,7 @@ varInst *Mission::call_isequal(missionNode *node,int mode){
   missionNode *other_node=getArgument(node,mode,1);
   varInst *other_vi=checkObjectExpr(other_node,mode);
 
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   
   viret->type=VAR_BOOL;
   bool res=false;
@@ -224,12 +228,15 @@ varInst *Mission::call_isequal(missionNode *node,int mode){
     }
   }
 
+  deleteVarInst(ovi);
+  deleteVarInst(other_vi);
+
   viret->bool_val=res;
   return viret;
 }
 
 varInst *Mission::callGetGameTime(missionNode *node,int mode){
-  varInst *vi=new varInst;
+  varInst *vi=newVarInst(VI_TEMP);
 
   vi->type=VAR_FLOAT;
   if(mode==SCRIPT_RUN){
@@ -239,7 +246,6 @@ varInst *Mission::callGetGameTime(missionNode *node,int mode){
 }
 
 varInst *Mission::call_io_printmsglist(missionNode *node,int mode){
-
   int i=0;
 
   if(mode==SCRIPT_RUN){
@@ -252,11 +258,10 @@ varInst *Mission::call_io_printmsglist(missionNode *node,int mode){
     }
   }
 
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
 
   return viret;
-
 }
 
 varInst *Mission::call_io_message(missionNode *node,int mode){
@@ -270,13 +275,14 @@ varInst *Mission::call_io_message(missionNode *node,int mode){
     if(mode==SCRIPT_RUN){
       args_str[i]=call_string_getstring(node,mode,args_vi[i]);
     }
+    deleteVarInst(args_vi[i]);
    }
 
   if(mode==SCRIPT_RUN){
     msgcenter->add(args_str[0],args_str[1],args_str[2]);
   }
 
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
 
   return viret;
@@ -302,8 +308,6 @@ string Mission::replaceNewline(string origstr){
 #endif
 
 varInst *Mission::call_io_printf(missionNode *node,int mode){
-  //  return NULL;
-#if 1
   missionNode *stringnode=getArgument(node,mode,0);
   if(stringnode->tag!=DTAG_CONST){
     fatalError(node,mode,"only const string allowed for first arg of printf");
@@ -377,6 +381,7 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
 	printf(beforestring.c_str());
 	printf("%s",strptr->c_str());
       }
+      deleteVarInst(res_vi);
     }
     //printf("++");
 
@@ -385,17 +390,18 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
 
 
     current_arg++;
-  }
+  }//while
 
   if(mode==SCRIPT_RUN){
     printf(endstring.c_str());
   }
 
   //  printf("--end==\n");
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
+  deleteVarInst(str_vi);
+
   return viret;
-#endif
 }
 
 varInst *Mission::callPrintFloats(missionNode *node,int mode){
@@ -419,14 +425,14 @@ varInst *Mission::callPrintFloats(missionNode *node,int mode){
     cout << " " << s2 << endl;
   }
 
-  varInst *vi=new varInst;
+  varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_VOID;
 
   return vi;
 }
 
 varInst *Mission::callRnd(missionNode *node,int mode){
-  varInst *vi=new varInst;
+  varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_FLOAT;
   vi->float_val=((float)rand())/(float)RAND_MAX;
 

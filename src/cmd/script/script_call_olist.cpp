@@ -76,9 +76,10 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 	call_olist_push_back(node,mode,ovi,vi);
       }
 
-      viret=new varInst;
+      deleteVarInst(vi);
+      viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
-      return viret;
+      //return viret;
     }
     else if(cmd=="pop_back"){
       debug(3,node,mode,"olist.pop");
@@ -88,21 +89,22 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 	call_olist_pop_back(node,mode,ovi);
       }
       
-      viret=new varInst;
+      viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
-      return viret;
+      //return viret;
     }
     else if(cmd=="back"){
       debug(3,node,mode,"olist.back");
 
-      viret=new varInst;
+      viret=newVarInst(VI_TEMP);
       viret->type=VAR_OBJECT;
 
       if(mode==SCRIPT_RUN){
 	varInst *back_vi=call_olist_back(node,mode,ovi);
 	assignVariable(viret,back_vi);
+	deleteVarInst(back_vi); // this won't delete it
       }
-      return viret;
+      //return viret;
     }
     else if(cmd=="at"){
       debug(3,node,mode,"olist.at");
@@ -112,15 +114,16 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       debug(3,snode,mode,"index is in that node");
 
 
-      viret=new varInst;
+      viret=newVarInst(VI_TEMP);
       viret->type=VAR_ANY;
 
       if(mode==SCRIPT_RUN){
 	varInst *back_vi=call_olist_at(node,mode,ovi,index);
 	assignVariable(viret,back_vi);
+	deleteVarInst(back_vi);
       }
 
-      return viret;
+      //return viret;
     }
     else if(cmd=="toxml"){
       if(node->subnodes.size()!=1){
@@ -134,9 +137,9 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 	call_olist_toxml(node,mode,ovi);
       }
 
-      viret =new varInst;
+      viret =newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
-      return viret;
+      //return viret;
     }
     else if(cmd=="size"){
       if(node->subnodes.size()!=1){
@@ -146,7 +149,7 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 
       debug(3,node,mode,"olist.size");
 
-      viret=new varInst;
+      viret=newVarInst(VI_TEMP);
 
       if(mode==SCRIPT_RUN){
 	int len=my_object->size();
@@ -154,15 +157,17 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       }
 
       viret->type=VAR_INT;
-      return viret;
+      //return viret;
     }
     else{
       fatalError(node,mode,"unknown command "+cmd+" for callback olist");
       assert(0);
     }
     
-    return NULL; // never reach
-  }
+    deleteVarInst(ovi);
+    return viret;
+  } // else (objects)
+
   return NULL; // never reach
 }
 
@@ -176,7 +181,6 @@ olist_t *Mission::getOListObject(missionNode *node,int mode,varInst *ovi){
 	    assert(0);
 	  }
 	}
-
 	return(my_object);
 }
 
@@ -202,7 +206,7 @@ void Mission::call_olist_pop_back(missionNode *node,int mode,varInst *ovi){
 }
 
 void Mission::call_olist_push_back(missionNode *node,int mode,varInst *ovi,varInst *push){
-	varInst *push_vi=new varInst;
+  varInst *push_vi=newVarInst(VI_IN_OBJECT);
 	push_vi->type=push->type;
 	assignVariable(push_vi,push);
 
@@ -228,7 +232,7 @@ void Mission::call_olist_toxml(missionNode *node,int mode,varInst *ovi){
 }
 
 varInst *Mission::call_olist_new(missionNode *node,int mode){
-  varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
 
     olist_t *my_object=new olist_t;
 

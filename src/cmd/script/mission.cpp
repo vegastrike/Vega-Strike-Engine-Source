@@ -287,6 +287,10 @@ void Mission::checkFlightgroup(easyDomNode *node){
     fg->rot[i]=rot[i];
   }
 
+  if(ainame[0]=='_'){
+    addModule(ainame);
+  }
+
   flightgroups.push_back(fg);
 
   number_of_flightgroups++;

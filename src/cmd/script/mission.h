@@ -105,7 +105,7 @@ enum scope_type { VI_GLOBAL,VI_MODULE,VI_LOCAL,VI_TEMP, VI_IN_OBJECT,VI_ERROR,VI
 class varInst {
  public:
   varInst(scope_type sctype) { scopetype=sctype; };
-  varInst() { scopetype=VI_ERROR; };
+  varInst() { cout << "varInst() obsolete\n" << endl; assert(0); };
 
   string name;
   var_type type;
@@ -201,6 +201,10 @@ class Mission {
   void DirectorLoop();
   void DirectorStart(missionNode *node);
   void DirectorEnd();
+  void  loadMissionModules();
+ void  loadModule(string modulename);
+void addModule(string modulename);
+void runScript(string modulename,string scriptname);
 
   MessageCenter *msgcenter;
 
@@ -217,6 +221,7 @@ class Mission {
   easyDomNode *origin_node;
 
   missionNode *director;
+  easyDomFactory<missionNode> *importf;
 
   tagMap tagmap;
 
@@ -234,7 +239,7 @@ class Mission {
   missionNode *current_module;
   missionNode *current_script;
 
-  vector<missionNode *> import_stack;
+  vector<string> import_stack;
 
   void saveVariables(const ostream& out);
   void initTagMap();
@@ -381,8 +386,11 @@ string call_string_getstring(missionNode *node,int mode,varInst *ovi);
 
 varInst *newVarInst(scope_type scopetype);
 void  deleteVarInst(varInst *vi,bool del_local=false);
- int  vi_counter; 
+ int  vi_counter,old_vi_counter; 
 void deleteVarMap(varInstMap *vmap);
+
+
+
 };
 
 #endif // _MISSION_H_

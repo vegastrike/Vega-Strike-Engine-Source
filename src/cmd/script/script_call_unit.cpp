@@ -75,7 +75,6 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
       Iterator *uiter=unitlist->createIterator();
 
-
       int i=0;
       Unit *unit=uiter->current();
       while(unit!=NULL){
@@ -90,7 +89,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
     }
 
-    viret=new varInst;
+    viret=newVarInst(VI_TEMP);
     viret->type=VAR_OBJECT;
     viret->objectname="unit";
     
@@ -109,7 +108,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       my_unit=player_unit;
     }
 
-    viret=new varInst;
+    viret=newVarInst(VI_TEMP);
     viret->type=VAR_OBJECT;
     viret->objectname="unit";
     
@@ -171,7 +170,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       call_unit_launch(fg);
     }
 
-      viret=new varInst;
+    deleteVarInst(name_vi);
+    deleteVarInst(faction_vi);
+    deleteVarInst(type_vi);
+    deleteVarInst(ai_vi);
+
+    viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
       return viret;
   }
@@ -190,28 +194,29 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
 	varInst *pos_vi;
 
-	pos_vi=new varInst;
+	pos_vi=newVarInst(VI_TEMP);
 	pos_vi->type=VAR_FLOAT;
 	pos_vi->float_val=pos.i;
 	call_olist_push_back(node,mode,vec3_vi,pos_vi);
 
-	pos_vi=new varInst;
+	pos_vi=newVarInst(VI_TEMP);
 	pos_vi->type=VAR_FLOAT;
 	pos_vi->float_val=pos.j;
 	call_olist_push_back(node,mode,vec3_vi,pos_vi);
 
-	pos_vi=new varInst;
+	pos_vi=newVarInst(VI_TEMP);
 	pos_vi->type=VAR_FLOAT;
 	pos_vi->float_val=pos.k;
 	call_olist_push_back(node,mode,vec3_vi,pos_vi);
 
-	return vec3_vi;
+	viret=vec3_vi;
+	//return vec3_vi;
       }
       else{
-	viret=new varInst;
+	viret=newVarInst(VI_TEMP);
 	viret->type=VAR_OBJECT;
 	viret->objectname="olist";
-	return viret;
+	//return viret;
       }
     }
     else if(cmd=="getFgId"){
@@ -229,32 +234,36 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	  sprintf(buffer,"unknown");
 	}
 
-
 	varInst *str_vi=call_string_new(node,mode,buffer);
 
-	return str_vi;
+	viret=str_vi;
+	//return str_vi;
       }
       else{
-	varInst *vi=new varInst;
-	vi->type=VAR_OBJECT;
-	vi->objectname="string";
-	return vi;
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_OBJECT;
+	viret->objectname="string";
+	//return vi;
       }
     }
     else if(cmd=="toxml"){
       if(mode==SCRIPT_RUN){
 	call_unit_toxml(node,mode,ovi);
       }
-      viret =new varInst;
+      viret =newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
-      return viret;
+      //return viret;
     }
     else{
       fatalError(node,mode,"no such method "+cmd);
       assert(0);
     }
-    return NULL; // never reach
-  }
+
+    deleteVarInst(ovi);
+    return viret;
+  }//else (objects)
+
+  return NULL; //never reach
 }
 
 Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
@@ -317,16 +326,13 @@ void Mission::call_unit_launch(Flightgroup *fg){
      findNextEnemyTarget(my_unit);
 
    }
-
-
- }
+}
 
 void Mission::findNextEnemyTarget(Unit *my_unit){
       StarSystem *ssystem=_Universe->activeStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
       Iterator *uiter=unitlist->createIterator();
-
 
       int i=0;
       Unit *unit=uiter->current();

@@ -1,3 +1,13 @@
+2001-12-24 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - fixed memory leaks for varInsts
+	* AI scripting:
+	  - added src/cmd/ai/missionscript.{cpp,h}
+	  - modified src/cmd/ai/Makefile.am
+	* new AI scripting is used if ainame begins with _ (not working yet)
+	
+
 2001-12-22 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* interpreter:

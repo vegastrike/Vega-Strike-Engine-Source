@@ -69,12 +69,11 @@ varInst *Mission::call_string(missionNode *node,int mode){
 	call_string_print(node,mode,ovi);
       }
 
-      viret=new varInst;
+      viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
-      return viret;
+      //return viret;
     }
     else if(cmd=="equal"){
-
       missionNode *other_node=getArgument(node,mode,1);
       varInst *other_vi=checkObjectExpr(other_node,mode);
 
@@ -87,11 +86,13 @@ varInst *Mission::call_string(missionNode *node,int mode){
 	  res=true;
 	}
       }
-      viret=new varInst;
+
+      deleteVarInst(other_vi);
+      viret=newVarInst(VI_TEMP);
       viret->type=VAR_BOOL;
       viret->bool_val=res;
 
-      return viret;
+      //return viret;
 
     }
     else{
@@ -99,8 +100,9 @@ varInst *Mission::call_string(missionNode *node,int mode){
       assert(0);
     }
     
-    return NULL; // never reach
-  }
+    deleteVarInst(ovi);
+    return viret;
+  }// else objects
   return NULL; // never reach
 }
 
@@ -127,7 +129,7 @@ void Mission::call_string_print(missionNode *node,int mode,varInst *ovi){
 varInst * Mission::call_string_new(missionNode *node,int mode,string initstring){
   debug(10,node,mode,"call_string");
 
-	varInst *viret=new varInst;
+  varInst *viret=newVarInst(VI_TEMP);
 
 	string* my_string=new string(initstring);
 
@@ -136,7 +138,6 @@ varInst * Mission::call_string_new(missionNode *node,int mode,string initstring)
 	viret->object=(void *)my_string;
 
 	return viret;
-
 }
 
 
@@ -152,5 +153,4 @@ string *Mission::getStringObject(missionNode *node,int mode,varInst *ovi){
 	}
 
 	return(my_object);
- 
 }

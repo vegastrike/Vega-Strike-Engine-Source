@@ -72,7 +72,7 @@ void Mission::checkStatement(missionNode *node,int mode){
 	fatalError(node,mode,"expected void as return from call, got different");
 	assert(0);
       }
-      delete vi;
+      deleteVarInst(vi);
     }
     else if(node->tag==DTAG_WHILE){
       doWhile(node,mode);

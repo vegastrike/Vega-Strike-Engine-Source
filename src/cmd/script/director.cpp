@@ -69,6 +69,7 @@ void Mission::DirectorStart(missionNode *node){
   bool start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
 
   vi_counter=0;
+  old_vi_counter=0;
 
   missionThread *main_thread=new missionThread;
   runtime.thread_nr=0;
@@ -85,53 +86,9 @@ void Mission::DirectorStart(missionNode *node){
 
   doModule(node,SCRIPT_PARSE);
 
-  easyDomFactory<missionNode> *importf=new easyDomFactory<missionNode>();
+  importf=new easyDomFactory<missionNode>();
 
-
-
-  while(import_stack.size()>0){
-    missionNode *import=import_stack.back();
-    import_stack.pop_back();
-
-    missionNode *module=runtime.modules[import->script.name];
-    if(module==NULL){
-      debug(3,node,SCRIPT_PARSE,"loading module "+import->script.name);
-
-      cout << "loading module " << import->script.name << endl;
-
-      string filename="modules/"+import->script.name+".module";
-      missionNode *import_top=importf->LoadXML(filename.c_str());
-
-      if(import_top==NULL){
-	debug(5,node,SCRIPT_PARSE,"could not load "+filename);
-
-	//	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
-	//assert(0);
-	string f2name="modules/"+import->script.name+".c";
-        import_top=importf->LoadCalike(f2name.c_str());
-
-	if(import_top==NULL){
-	  //debug(0,node,SCRIPT_PARSE,"could not load "+f2name);
-	  fatalError(node,SCRIPT_PARSE,"could not load module "+import->script.name);
-	  assert(0);
-	}
-	if(have_yy_error){
-	  fatalError(NULL,SCRIPT_PARSE,"yy-error while parsing "+import->script.name);
-	  assert(0);
-	}
-      }
-
-      import_top->Tag(&tagmap);
-
-      doModule(import_top,SCRIPT_PARSE);
-
-    }
-    else{
-      debug(3,node,SCRIPT_PARSE,"already have module "+import->script.name);
-    }
-  }
-
-
+  loadMissionModules();
 
   parsemode=PARSE_FULL;
 
@@ -170,6 +127,7 @@ void Mission::DirectorStart(missionNode *node){
     runtime.cur_thread->module_stack.push_back(director);
 
     varInst *vi=doScript(initgame,SCRIPT_RUN);
+    deleteVarInst(vi);
 
     runtime.cur_thread->module_stack.pop_back();
   }
@@ -209,13 +167,18 @@ void Mission::DirectorLoop(){
   }
   else{
 
-    char buf[200];
-    sprintf(buf,"VI_COUNTER %d\n",vi_counter);
-    debug(2,NULL,0,buf);
+    if(vi_counter!=old_vi_counter){
+      char buf[200];
+      sprintf(buf,"VI_COUNTER %d\n",vi_counter);
+      debug(2,NULL,0,buf);
+    }
+
+    old_vi_counter=vi_counter;
 
     runtime.cur_thread->module_stack.push_back(director);
 
     varInst *vi=doScript(gameloop,SCRIPT_RUN);
+    deleteVarInst(vi);
 
     runtime.cur_thread->module_stack.pop_back();
   
@@ -239,6 +202,7 @@ void Mission::DirectorEnd(){
     runtime.cur_thread->module_stack.push_back(director);
 
     varInst *vi=doScript(endgame,SCRIPT_RUN);
+    deleteVarInst(vi);
 
     runtime.cur_thread->module_stack.pop_back();
   }
@@ -259,4 +223,113 @@ void Mission::DirectorEnd(){
 
   var_out.close();
 
+}
+
+void Mission::loadModule(string modulename){
+  missionNode *node=director;
+
+      debug(3,node,SCRIPT_PARSE,"loading module "+modulename);
+
+      cout << "  loading module " << modulename << endl;
+
+      string filename="modules/"+modulename+".module";
+      missionNode *import_top=importf->LoadXML(filename.c_str());
+
+      if(import_top==NULL){
+	debug(5,node,SCRIPT_PARSE,"could not load "+filename);
+
+	//	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
+	//assert(0);
+	string f2name="modules/"+modulename+".c";
+        import_top=importf->LoadCalike(f2name.c_str());
+
+	if(import_top==NULL){
+	  //debug(0,node,SCRIPT_PARSE,"could not load "+f2name);
+	  fatalError(node,SCRIPT_PARSE,"could not load module "+modulename);
+	  assert(0);
+	}
+	if(have_yy_error){
+	  fatalError(NULL,SCRIPT_PARSE,"yy-error while parsing "+modulename);
+	  assert(0);
+	}
+      }
+
+      import_top->Tag(&tagmap);
+
+      doModule(import_top,SCRIPT_PARSE);
+
+}
+
+void Mission::addModule(string modulename){
+  import_stack.push_back(modulename);
+}
+
+void Mission::loadMissionModules(){
+  missionNode *node=director;
+
+    while(import_stack.size()>0){
+    string importname=import_stack.back();
+    import_stack.pop_back();
+
+    missionNode *module=runtime.modules[importname];
+    if(module==NULL){
+      loadModule(importname);
+#if 0
+      debug(3,node,SCRIPT_PARSE,"loading module "+import->script.name);
+
+      cout << "  loading module " << import->script.name << endl;
+
+      string filename="modules/"+import->script.name+".module";
+      missionNode *import_top=importf->LoadXML(filename.c_str());
+
+      if(import_top==NULL){
+	debug(5,node,SCRIPT_PARSE,"could not load "+filename);
+
+	//	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
+	//assert(0);
+	string f2name="modules/"+import->script.name+".c";
+        import_top=importf->LoadCalike(f2name.c_str());
+
+	if(import_top==NULL){
+	  //debug(0,node,SCRIPT_PARSE,"could not load "+f2name);
+	  fatalError(node,SCRIPT_PARSE,"could not load module "+import->script.name);
+	  assert(0);
+	}
+	if(have_yy_error){
+	  fatalError(NULL,SCRIPT_PARSE,"yy-error while parsing "+import->script.name);
+	  assert(0);
+	}
+      }
+
+      import_top->Tag(&tagmap);
+
+      doModule(import_top,SCRIPT_PARSE);
+#endif
+    }
+    else{
+      debug(3,node,SCRIPT_PARSE,"already have module "+importname);
+    }
+  }
+
+}
+
+void Mission::runScript(string modulename,string scriptname){
+  missionNode *module_node=runtime.modules[modulename];
+  if(module_node==NULL){
+    fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");
+    assert(0);
+  }
+
+  missionNode *script_node=module_node->script.scripts[scriptname];
+  if(script_node==NULL){
+    fatalError(NULL,SCRIPT_RUN,"can't run "+modulename+"."+scriptname);
+    assert(0);
+  }
+  
+  runtime.cur_thread->module_stack.push_back(module_node);
+
+  varInst *vi=doScript(script_node,SCRIPT_RUN);
+  deleteVarInst(vi);
+
+  runtime.cur_thread->module_stack.pop_back();
 }

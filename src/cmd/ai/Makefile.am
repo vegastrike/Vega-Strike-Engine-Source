@@ -26,4 +26,7 @@ libai_a_SOURCES =	\
 	input_dfa.h	\
 	tactics.h	\
 	tactics.cpp	\
-	script.cpp	
+	script.cpp	\
+	missionscript.cpp	\
+	missionscript.h
+

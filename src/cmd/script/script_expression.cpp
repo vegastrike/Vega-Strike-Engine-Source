@@ -112,7 +112,7 @@ varInst * Mission::doMath(missionNode *node,int mode){
       assert(0);
     }
 
-    varInst *res_vi=new varInst;
+    varInst *res_vi=newVarInst(VI_TEMP);
 
     varInst* res1_vi=checkExpression((missionNode *)node->subnodes[0],mode);
 
@@ -126,6 +126,7 @@ varInst * Mission::doMath(missionNode *node,int mode){
     if(res_vi->type==VAR_ANY){
       res_vi->type=VAR_FLOAT;
     }
+    deleteVarInst(res1_vi);
 
     //    char buffer[200];
     //sprintf(buffer,"fmath: 1st expr returns %f",res);
@@ -174,6 +175,7 @@ varInst * Mission::doMath(missionNode *node,int mode){
 	  }
 	} // of SCRIPT_RUN
       } // else
+      deleteVarInst(res2_vi);
     } // for arguments
 
     return res_vi;
@@ -237,7 +239,10 @@ float Mission::doFMath(missionNode *node,int mode){
     assert(0);
   }
 
-  return math_vi->float_val;
+  float ret=math_vi->float_val;
+  deleteVarInst(math_vi);
+
+  return ret;
 
 
   //  if(mode==SCRIPT_PARSE){
@@ -295,10 +300,13 @@ int Mission::doIMath(missionNode *node,int mode){
     assert(0);
   }
 
-  return math_vi->int_val;
+  int res=math_vi->int_val;
+  deleteVarInst(math_vi);
+
+  return res;
 
 
-
+#if 0
   //  if(mode==SCRIPT_PARSE){
     string mathname=node->attr_value("math");
 
@@ -340,6 +348,7 @@ int Mission::doIMath(missionNode *node,int mode){
       return res;
     }
     return 0;
+#endif
 }
 
 /* *********************************************************** */
@@ -362,6 +371,7 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a float const, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else if(node->tag==DTAG_CALL){
       varInst *vi=doCall(node,mode);
@@ -375,6 +385,7 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a float call, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else if(node->tag==DTAG_EXEC){
       varInst *vi=doExec(node,mode);
@@ -389,6 +400,7 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a float exec, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else{
       fatalError(node,mode,"no such float expression tag");
@@ -417,6 +429,7 @@ int Mission::checkIntExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a float const, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else if(node->tag==DTAG_CALL){
       varInst *vi=doCall(node,mode);
@@ -430,6 +443,7 @@ int Mission::checkIntExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a int call, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else if(node->tag==DTAG_EXEC){
       varInst *vi=doExec(node,mode);
@@ -444,6 +458,7 @@ int Mission::checkIntExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a int exec, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else{
       fatalError(node,mode,"no such int expression tag");
@@ -484,6 +499,7 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a bool const, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
     else if(node->tag==DTAG_CALL){
       varInst *vi=doCall(node,mode);
@@ -497,6 +513,7 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a bool call, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
 
     else if(node->tag==DTAG_EXEC){
@@ -513,6 +530,7 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
 	fatalError(node,mode,"expected a bool exec, got a different one");
 	assert(0);
       }
+      deleteVarInst(vi);
     }
 
 
@@ -715,7 +733,10 @@ bool Mission::doTest(missionNode *node,int mode){
 	fatalError(node,mode,"no such type allowed for test");
 	assert(0);
       }
-    }
+    }// SCRIPT_RUN
+
+    deleteVarInst(arg1_vi);
+    deleteVarInst(arg2_vi);
 
     return res;
 
@@ -738,7 +759,7 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
   case DTAG_TEST_EXPR:
     {
     bool res=checkBoolExpr(node,mode);
-    ret=new varInst;
+    ret=newVarInst(VI_TEMP);
     ret->type=VAR_BOOL;
     ret->bool_val=res;
     return ret;
