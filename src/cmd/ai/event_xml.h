@@ -13,7 +13,6 @@ namespace AIEvents {
     AIEvresult (int type, float const min, const float max, const string &aiscript):
       type (type), max(max), min(min), script(aiscript) {}
     bool Eval (const float eval) const {//return ((eval>=min)&&(eval<max)&&type>0)||(eval>=max&&eval<min&&type<0);
-      fprintf (stderr,"eval %f min %f max %f type %d",eval,min,max,type);
       if (eval>=min)
 	if (eval < max)
 	  if (type>0)
