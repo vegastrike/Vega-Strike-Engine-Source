@@ -95,7 +95,7 @@ namespace UnitXML {
       AMMO,
       HUDIMAGE,
       SOUND,
-      EEERROR,
+      MINTARGETSIZE,
       MAXCONE,
       RANGE,
       ISCOLOR,
@@ -206,7 +206,7 @@ namespace UnitXML {
     EnumMap::Pair ("ammo", AMMO),
     EnumMap::Pair ("HudImage",HUDIMAGE),
     EnumMap::Pair ("Engine",MAXCONE),
-    EnumMap::Pair ("Error",EEERROR),
+    EnumMap::Pair ("MinTargetSize",MINTARGETSIZE),
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("EngineMp3",ENGINEMP3),
     EnumMap::Pair ("EngineWav",ENGINEWAV),
@@ -869,8 +869,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case ITTS:
 	computer.itts=parse_bool ((*iter).value);
 	break;
-      case EEERROR:
-	computer.radar.error=parse_float ((*iter).value);
+      case MINTARGETSIZE:
+	computer.radar.mintargetsize=parse_float ((*iter).value);
 	break;
       case MAXCONE:
 	computer.radar.maxcone = parse_float ((*iter).value);

@@ -210,6 +210,10 @@ void VegaConfig::initCommandMap(){
   command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
   command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
   command_map["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
+  command_map["TurretTargetKey"]=FireKeyboard::TargetTurretKey ;
+  command_map["TurretPickTargetKey"]=FireKeyboard::PickTargetTurretKey ;
+  command_map["TurretNearestTargetKey"]=FireKeyboard::NearestTargetTurretKey ;
+  command_map["TurretThreatTargetKey"]=FireKeyboard::ThreatTargetTurretKey ;
   command_map["WeapSelKey"]=FireKeyboard::WeapSelKey ;
   command_map["MisSelKey"]=FireKeyboard::MisSelKey ;
   command_map["CloakKey"]=FireKeyboard::CloakKey;

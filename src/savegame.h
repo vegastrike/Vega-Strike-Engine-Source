@@ -16,4 +16,4 @@ struct SavedUnits {
     type = typ;
   }
 };
-vector<SavedUnits> ParseSaveGame (const string filename, string &ForceStarSystem, string originalstarsystem, Vector & pos);
+vector<SavedUnits> ParseSaveGame (const string filename, string &ForceStarSystem, string originalstarsystem, Vector & pos, bool &shouldupdatedfighter0pos);

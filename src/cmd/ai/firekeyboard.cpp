@@ -10,7 +10,7 @@ FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
 
 }
 static KBSTATE firekey=UP;
-static KBSTATE targetkey=UP;
+
 static KBSTATE missilekey = UP;
 static KBSTATE jfirekey=UP;
 static KBSTATE jtargetkey=UP;
@@ -21,6 +21,15 @@ static KBSTATE cloakkey=UP;
 static KBSTATE neartargetkey=UP;
 static KBSTATE threattargetkey=UP;
 static KBSTATE picktargetkey=UP;
+static KBSTATE targetkey=UP;
+
+static KBSTATE nearturrettargetkey=UP;
+static KBSTATE threatturrettargetkey=UP;
+static KBSTATE pickturrettargetkey=UP;
+static KBSTATE turrettargetkey=UP;
+
+
+
 
 void FireKeyboard::CloakKey(int, KBSTATE k) {
 
@@ -66,6 +75,34 @@ void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
     threattargetkey = k;
 }
 
+
+void FireKeyboard::TargetTurretKey(int, KBSTATE k) {
+  if (turrettargetkey!=PRESS)
+    turrettargetkey = k;
+  if (k==RESET) {
+    turrettargetkey=PRESS;
+  }
+}
+void FireKeyboard::PickTargetTurretKey(int, KBSTATE k) {
+  if (pickturrettargetkey!=PRESS)
+    pickturrettargetkey = k;
+  if (k==RESET) {
+    pickturrettargetkey=PRESS;
+  }
+}
+
+void FireKeyboard::NearestTargetTurretKey(int, KBSTATE k) {
+  if (nearturrettargetkey!=PRESS)
+    nearturrettargetkey = k;
+
+}
+void FireKeyboard::ThreatTargetTurretKey(int, KBSTATE k) {
+  if (threatturrettargetkey!=PRESS)
+    threatturrettargetkey = k;
+}
+
+
+
 void FireKeyboard::WeapSelKey(int, KBSTATE k) {
   if (weapk!=PRESS)
     weapk = k;
@@ -79,7 +116,7 @@ void FireKeyboard::MissileKey(int, KBSTATE k) {
   if (missilekey!=PRESS)
    missilekey = k;
 }
-void FireKeyboard::ChooseNearTargets() {
+void FireKeyboard::ChooseNearTargets(bool turret) {
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un;
   float range=FLT_MAX;
@@ -88,6 +125,8 @@ void FireKeyboard::ChooseNearTargets() {
     bool tmp = parent->InRange (un,t);
     if (tmp&&t.Dot(t)<range&&t.k>0&&_Universe->GetRelation(parent->faction,un->faction)<0) {
       range = t.Dot(t);
+      if (turret)
+	parent->TargetTurret(un);
       parent->Target (un);
     }
     iter.advance();
@@ -103,13 +142,15 @@ void FireKeyboard::ChooseNearTargets() {
 #endif
 
 }
-void FireKeyboard::ChooseThreatTargets() {
+void FireKeyboard::ChooseThreatTargets(bool turret) {
   Unit * threat = parent->Threat();
   if (threat) 
     parent->Target(threat);
+  if (turret&&threat)
+    parent->TargetTurret(threat);
 }
 
-void FireKeyboard::PickTargets(){
+void FireKeyboard::PickTargets(bool Turrets){
   UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList()->createIterator();
 
   float smallest_angle=PI;
@@ -133,12 +174,13 @@ void FireKeyboard::PickTargets(){
     uiter.advance();
     other=uiter.current();
   }
-
+  if (Turrets)
+    parent->TargetTurret(found_unit);
   parent->Target(found_unit);
 
 }
 
-void FireKeyboard::ChooseTargets () {
+void FireKeyboard::ChooseTargets (bool turret) {
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
   bool found=false;
@@ -159,6 +201,8 @@ void FireKeyboard::ChooseTargets () {
     iter.advance();
     if (found) {
       find=true;
+      if (turret)
+	parent->TargetTurret (un);
       parent->Target (un);
       break;
     }
@@ -190,6 +234,8 @@ void FireKeyboard::ChooseTargets () {
 	iter.advance();
 	continue;
       }
+      if (turret)
+	parent->TargetTurret(un);
       parent->Target(un);
       break;
     }
@@ -221,7 +267,7 @@ void FireKeyboard::Execute () {
   if ((targ = parent->Target())) {
     ShouldFire (targ);
   } else {
-    ChooseTargets();
+    ChooseTargets(false);
   }
   if (firekey==PRESS||jfirekey==PRESS||firekey==DOWN||jfirekey==DOWN) 
     parent->Fire(false);
@@ -246,20 +292,42 @@ void FireKeyboard::Execute () {
   if (targetkey==PRESS||jtargetkey==PRESS) {
     targetkey=DOWN;
     jtargetkey=DOWN;
-    ChooseTargets();
+    ChooseTargets(false);
   }
   if(picktargetkey==PRESS){
     picktargetkey=DOWN;
-    PickTargets();
+    PickTargets(false);
   }
   if (neartargetkey==PRESS) {
-    ChooseNearTargets ();
+    ChooseNearTargets (false);
     neartargetkey=DOWN;
   }
   if (threattargetkey==PRESS) {
-    ChooseThreatTargets ();
+    ChooseThreatTargets (false);
     threattargetkey=DOWN;
   }
+
+
+
+  if (turrettargetkey==PRESS) {
+    turrettargetkey=DOWN;
+    ChooseTargets(true);
+  }
+  if(pickturrettargetkey==PRESS){
+    pickturrettargetkey=DOWN;
+    PickTargets(true);
+  }
+  if (nearturrettargetkey==PRESS) {
+    ChooseNearTargets (true);
+    nearturrettargetkey=DOWN;
+  }
+  if (threatturrettargetkey==PRESS) {
+    ChooseThreatTargets (true);
+    threatturrettargetkey=DOWN;
+  }
+
+
+
   if (weapk==PRESS) {
     weapk=DOWN;
     parent->ToggleWeapon (false);

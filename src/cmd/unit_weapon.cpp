@@ -240,18 +240,22 @@ Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP
     status=ACTIVE;
   }
 }
-
-void Unit::Target (Unit *targ) {
-  computer.target.SetUnit(targ);
+void Unit::TargetTurret (Unit * targ) {
   if (!SubUnits.empty()) {
     un_iter iter = getSubUnits();
     Unit * su;
-
+    Vector localcoord;
     while ((su=iter.current())) {
-      su->Target (targ);
+      if (su->InRange (targ,localcoord)) {
+	su->Target (targ);
+	su->TargetTurret(targ);
+      }
       iter.advance();
     }
   }
+}
+void Unit::Target (Unit *targ) {
+  computer.target.SetUnit(targ);
 }
 void Unit::SetOwner(Unit *target) {
   owner=target;

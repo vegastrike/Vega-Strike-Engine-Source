@@ -107,7 +107,7 @@ class Unit {
       ///the dot with (0,0,1) indicating the farthest to the side the radar can handle.
       float maxcone;
       ///the number of normalized pixels off this radar might be (fuzzes between)
-      float error;
+      float mintargetsize;
       ///does this radar support IFF?
       bool color;
     } radar;
@@ -434,9 +434,11 @@ public:
   float cosAngleFromMountTo (Unit * target, float & distance) const;
   ///won't collide with owner
   void SetOwner(Unit *target);
+
   Unit *Target() {return computer.target.GetUnit(); }
   Unit *Threat() {return computer.threat.GetUnit(); }
   void Target (Unit * targ);
+  void TargetTurret (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
   void Threaten (Unit * targ, float danger);
   ///Rekeys the threat level to zero for another turn of impending danger

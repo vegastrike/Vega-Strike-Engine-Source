@@ -193,27 +193,25 @@ void bootstrap_main_loop () {
     string planetname;
 
     mission->GetOrigin(pos,planetname);
-    bool setplayerloc;
+    bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
 
     string savegamefile = mission->getVariable ("savegame","");
-    vector <SavedUnits> savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos);
+    vector <SavedUnits> savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc);
    
-    bootstrap_draw (SplashScreen);
     _Universe->Init (mysystem,pos,planetname);
-    bootstrap_draw (SplashScreen);
     createObjects();
-    if(!savegamefile.empty()){
     if (setplayerloc&&fighters) {
       if (fighters[0]) {
 	fighters[0]->SetPosition (Vector (0,0,0));
       }
     }
+    
     while (!savedun.empty()) {
       AddUnitToSystem (&savedun.back());
       savedun.pop_back();
     }
-    }
+    
     InitializeInput();
 
     vs_config->bindKeys();

@@ -239,7 +239,7 @@ void Unit::Init()
   computer.itts = false;
   computer.radar.maxrange=10000;
   computer.radar.maxcone=-1;
-  computer.radar.error=0;
+  computer.radar.mintargetsize=0;
   computer.radar.color=true;
   //  Fire();
 
@@ -850,8 +850,8 @@ void Unit::Deselect() {
 }
 bool Unit::InRange (Unit *target, Vector &localcoord) const {
   localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
-  float mm= localcoord.Magnitude();
-  if ((mm>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8) {
+  float mm= localcoord.Magnitude()-rSize()-target->rSize();
+  if (owner==target||this==target||(mm>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
     return false;
   }
   return true;

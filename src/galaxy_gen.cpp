@@ -599,11 +599,12 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     WriteUnit ("unit","planetary-ring","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
   if ((entitytype!=JUMP&&entitytype!=MOON)||grand()<moonofmoonprob) {
-    int numu = numun[1]/(nument[PLANET]+nument[GAS])+ (grand()*(nument[PLANET]+nument[GAS])<(numun[1]%(nument[PLANET]+nument[GAS]))?1:0);
-    if (entitytype==MOON)
-      if (numu>1)
+    int numu;
+    if (entitytype==MOON||(nument[PLANET]+nument[GAS]==0)) {
 	numu=1;
-    
+    }else {
+      numu = numun[1]/(nument[PLANET]+nument[GAS])+ (grand()*(nument[PLANET]+nument[GAS])<(numun[1]%(nument[PLANET]+nument[GAS]))?1:0);
+    }
     for (int i=0;i<numu;i++) {
       MakeSmallUnit ();
     }
@@ -616,9 +617,12 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 }
 
 void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone      ) {
-  unsigned int nummoon = nument[entitytype]/nument[callingentitytype]+((grand ()*nument[callingentitytype]<(nument[entitytype]%nument[callingentitytype]))?1:0);
-  if (forceone)
+  unsigned int nummoon;
+  if (nument[callingentitytype]&&!forceone) {
+    nummoon = nument[entitytype]/nument[callingentitytype]+((grand ()*nument[callingentitytype]<(nument[entitytype]%nument[callingentitytype]))?1:0);
+  }else {
     nummoon=1;
+  }
   for (unsigned int i=0;i<nummoon;i++) {
     MakePlanet ((.5+.5*grand())*radius,entitytype);
   }
@@ -645,8 +649,12 @@ void beginStar (float radius, unsigned int which) {
   radii.push_back (1.5*radius);
   MakeMoons (.3*radius,PLANET,STAR);
   MakeMoons (.6*radius,GAS,STAR);
-
-  int numu = numun[0]/nument[0]+(grand()<float(numun[0]%nument[0])/nument[0]);
+  int numu;
+  if (nument[0]) {
+    numu= numun[0]/nument[0]+(grand()<float(numun[0]%nument[0])/nument[0]);
+  } else {
+    numu=1;
+  }
   if ((int)which==nument[0]-1) {
     numu=numun[0];
   }

@@ -75,8 +75,9 @@ void WriteSaveGame (const char *systemname, const Vector &FP) {
     fclose (fp);
   }
 }
-vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP) {
+vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos) {
   vector <SavedUnits> mysav;
+  shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
   outputsavegame=filename;
   changehome();
   vschdir ("save");
@@ -90,6 +91,7 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
       if (ForceStarSystem.length()==0) 
 	ForceStarSystem=string(tmp);
       if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
+	shouldupdatepos=true;
 	PlayerLocation=tmppos;
       }
       mysav=ReadSavedUnits (fp);
@@ -97,9 +99,11 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
     fclose (fp);
   }
   if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
+    shouldupdatepos=false;
     PlayerLocation=PP;
   }else {
     PP = PlayerLocation;
+    shouldupdatepos=true;
   }
   if (ForceStarSystem.length()==0) {
     ForceStarSystem = FSS;
