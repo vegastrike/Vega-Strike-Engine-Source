@@ -70,9 +70,3 @@ void Faction::ParseAllies (unsigned int thisfaction) {
 	*/
 }
 
-Faction::~Faction() {
-  delete [] factionname;
-  if (contraband) {
-    contraband->Kill();;
-  }
-}

@@ -28,7 +28,7 @@
 #include "bsp.h"
 #include <assert.h>
 #include <math.h>
-#include "cmd/nebula.h"
+#include "cmd/nebula_generic.h"
 #include <list>
 #include <string>
 #include <fstream>
@@ -36,7 +36,7 @@
 #include "lin_time.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "hashtable.h"
 #include "vegastrike.h"
 #include "sphere.h"
@@ -52,8 +52,8 @@ Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
 Vector mouseline;
 
 
-
 void Mesh::InitUnit() {
+	polygon_offset=0;
   numlods=1;
   lodsize=FLT_MAX;
 	forcelogos = NULL;
@@ -81,6 +81,7 @@ void Mesh::InitUnit() {
 	envMapAndLit =0x3;
 	setEnvMap(GFXTRUE);
 	setLighting(GFXTRUE);
+	
 	draw_queue = NULL;
 	will_be_drawn = GFXFALSE;
 	draw_sequence = 0;
@@ -95,7 +96,19 @@ bool Mesh::LoadExistant (Mesh * oldmesh) {
     orig = oldmesh;
     return true;
 }
-bool Mesh::LoadExistant (const string filehash, float scale, int faction) {
+Vector Mesh::GetVertex (int index) const {
+	if (vlist->hasColor()) {
+		const GFXColorVertex * v=vlist->GetColorVertex(index);
+		return Vector(v->x,v->y,v->z);
+	}else {
+		const GFXVertex * v=vlist->GetVertex(index);
+		return Vector(v->x,v->y,v->z);
+	}
+}
+int Mesh::numVertices() const {
+	return vlist->GetNumVertices();
+}
+bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction) {
   Mesh * oldmesh;
 
   hash_name = GetHashName (filehash,scale,faction);
@@ -120,7 +133,7 @@ Mesh::Mesh (const Mesh & m) {
     return;
   }
 }
-Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
+Mesh:: Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
   this->orig=NULL;
   InitUnit();
@@ -137,7 +150,7 @@ Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *f
   }
   bool xml=true;
   if(xml) {
-    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg);
+    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg,orig);
     oldmesh = this->orig;
   } else {
     this->xml= NULL;
@@ -166,6 +179,8 @@ void Mesh::SetMaterial (const GFXMaterial & mat) {
     }
   }
 }
+
+
 Mesh * Mesh::getLOD (float lod) {
   if (!orig)
     return this;

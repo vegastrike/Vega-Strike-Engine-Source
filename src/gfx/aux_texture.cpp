@@ -122,7 +122,7 @@ GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
   Texture *oldtex= texHashTable.Get (hashname);
   if(oldtex!=NULL) {
 	  //*this = *oldtex;//will be obsoleted--unpredictable results with string()
-    memcpy (this, oldtex, sizeof (Texture));
+    *this = *oldtex;
     original = oldtex;
     original->refcount++;
     return GFXTRUE;
@@ -152,7 +152,8 @@ Texture::Texture () {
 void Texture::setold()
 {
   //	*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
-  memcpy (original, this, sizeof (Texture));
+  *original = *this;
+  //memcpy (original, this, sizeof (Texture));
 	original->original = NULL;
 	original->refcount++;
 }
@@ -192,7 +193,7 @@ void Texture::FileNotFound(const string &texfilename) {
 	  return;
 
 }
-Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load)
+Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension)
 {
 
   data = NULL;
@@ -202,7 +203,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   texture_target =target;
   image_target=imagetarget;
   this->stage = stage;
-  string texfilename = string(FileName);
+  texfilename = string(FileName);
   string tempstr;
   if(checkold(texfilename,false,tempstr)) {
     return;
@@ -264,9 +265,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	//	strcpy(filename, FileName);
 	int bpp;
 	int format;
-	this->texfilename = new char [texfilename.length()+1];
-	strcpy(this->texfilename,texfilename.c_str());
-
+	this->texfilename=texfilename;
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -346,6 +345,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	      data = NULL;
 	      data= (unsigned char *)malloc(sizeof(unsigned char)*sizeY*sizeX);
 	      palette = (unsigned char *)malloc(sizeof(unsigned char)* (256*4+1));
+	      memset (palette,0,(256*4+1)*sizeof(unsigned char));
 	      unsigned char *paltemp = palette;
 	      unsigned char ctemp;
 		for(int palcount = 0; palcount < 256; palcount++)
@@ -368,7 +368,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	    }
 	}
 	fprintf (stderr,"Bind... ");
-	Bind();
+	Bind(maxdimension);
  	fclose (fp);
 	if (fp2)
 	  fclose (fp2);
@@ -379,7 +379,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	fprintf (stderr," Load Success\n");
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension)
 {
   data = NULL;
   ismipmapped  = mipmap;
@@ -422,8 +422,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	int bpp;
 	int format;
 	FILE * fp1=NULL;
-	this->texfilename = new char [texfilename.length()+1];
-	strcpy(this->texfilename,texfilename.c_str());
+	this->texfilename=texfilename;
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -630,7 +629,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  }
 	}
 	fprintf (stderr,"Bind... ");
-	Bind();
+	Bind(maxdimension);
 	if (fp)
 	  fclose(fp);
 	if (fp1) {
@@ -655,9 +654,8 @@ Texture::~Texture()
 			}
 		  */
 			if (name!=-1) {
-			  texHashTable.Delete (string(texfilename));
+			  texHashTable.Delete (texfilename);
 			  GFXDeleteTexture(name);
-			  delete []texfilename;				
 			}
 
 				//glDeleteTextures(1, &name);
@@ -676,7 +674,7 @@ Texture::~Texture()
 	}
 
 
-void Texture::Transfer ()
+void Texture::Transfer (int maxdimension)
 {
 	//Implement this in D3D
 	//if(mode == _8BIT)
@@ -685,20 +683,20 @@ void Texture::Transfer ()
 	switch (mode)
 	{
 	case _24BITRGBA:
-		GFXTransferTexture(data, name,RGBA32,image_target);
+		GFXTransferTexture(data, name,RGBA32,image_target,maxdimension);
 		break;
 	case _24BIT:
-		GFXTransferTexture(data, name,RGB24,image_target);
+		GFXTransferTexture(data, name,RGB24,image_target,maxdimension);
 		break;
 	case _8BIT:
-		GFXTransferTexture(data, name,PALETTE8, image_target);
+		GFXTransferTexture(data, name,PALETTE8, image_target,maxdimension);
 		//TODO: Do something about this, and put in some code to check that we can actually do 8 bit textures
 
 		break;
 	}
 	
 }
-int Texture::Bind()
+int Texture::Bind(int maxdimension)
 {
 	switch(mode)
 	{
@@ -715,7 +713,7 @@ int Texture::Bind()
 		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target);
 		break;
 	}
-	Transfer();
+	Transfer(maxdimension);
 
 	return name;
 

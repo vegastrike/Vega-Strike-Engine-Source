@@ -6,9 +6,10 @@
 //#define VS_DEBUG2
 //#define VS_DEBUG3
 
-void VS_DEBUG_ERROR();
-
 #ifndef VS_DEBUG
+inline void VS_DEBUG_ERROR () {
+
+}
 #define VSCONSTRUCT1(a)
 #define VSDESTRUCT1
 #define VSCONSTRUCT2(a)
@@ -17,6 +18,9 @@ void VS_DEBUG_ERROR();
 #define VSDESTRUCT3
 
 #else
+void VS_DEBUG_ERROR();
+
+#error
 #include "hashtable.h"
 extern Hashtable <long,char,char[65535]> constructed;
 extern Hashtable <long,char,char[65535]> destructed;

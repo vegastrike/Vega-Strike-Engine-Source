@@ -1,6 +1,8 @@
 #if defined(_WIN32)
 #define in_addr_t unsigned long
+#include <wchar.h>
 #include <winsock.h>
+#include <io.h>
 #else
 #define SOCKET_ERROR -1
 #if defined(__CYGWIN__)

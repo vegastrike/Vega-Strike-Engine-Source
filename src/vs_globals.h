@@ -17,12 +17,13 @@ extern Universe * _Universe;
 
 extern void cleanup();
 extern bool STATIC_VARS_DESTROYED;
-extern bool SERVER;
+extern char SERVER;
 extern int	loop_count;
 extern double	avg_loop;
 extern int	nb_checks;
 extern double last_check;
 extern double cur_check;
+extern bool cleanexit;
 
 /* All global data is stored in a variable of this type */
 typedef struct {
@@ -56,8 +57,10 @@ class Music;
 extern Music * muzak;
 class VegaConfig;
 extern VegaConfig *vs_config;
+class NetServer;
 class NetClient;
 extern NetClient *Network;
+extern NetServer *Server;
 
 class Mission;
 extern Mission *mission;

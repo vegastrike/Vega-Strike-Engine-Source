@@ -106,14 +106,16 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
   EnumMap::Pair ("Reverse",XML::REVERSE),
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
+  EnumMap::Pair ("CullFace",XML::CULLFACE),
   EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
-  EnumMap::Pair ("UseNormals",XML::USENORMALS)
+  EnumMap::Pair ("UseNormals",XML::USENORMALS),
+  EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 33);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 35);
 
 
 
@@ -230,10 +232,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      setEnvMap ( XMLSupport::parse_bool((*iter).value));
+		      setEnvMap ( (*iter).value!="false"&&(*iter).value!="0");
 		      break;
 		    case XML::LIGHTINGON:
 		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
+		      break;
+		    case XML::CULLFACE:
+		      forceCullFace (XMLSupport::parse_bool((*iter).value)); 
 		      break;
 		    }
 		  }
@@ -340,6 +345,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::SHAREVERT:
 	xml->sharevert = (XMLSupport::parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
+	  case XML::POLYGONOFFSET:
+		  this->polygon_offset = XMLSupport::parse_float ((*iter).value);
+		  break;
       case XML::BLENDMODE:
 	{
 	  char *csrc=strdup ((*iter).value.c_str());
@@ -375,6 +383,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
               string ind(iter->name.substr (strsize));
               if (!ind.empty())
                   texindex=XMLSupport::parse_int(ind);
+			  bool per_pixel_lighting = XMLSupport::parse_bool (vs_config->getVariable ("graphics","per_pixel_lighting","true"));
+			  if (texindex==0||per_pixel_lighting) {
               while (xml->decals.size()<=texindex)
                   xml->decals.push_back(XML::ZeTexture());
               switch (whichtype) {
@@ -387,6 +397,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
                   default:
                       xml->decals[texindex].decal_name=iter->value;
               }
+			  }
               if (texindex==0) {
                   texture_found = true;                  
               }
@@ -821,11 +832,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->logos[xml->logos.size()-1].offset = offset;
     break;
   case XML::REF:
+    {
     assert (top==XML::LOGO);
     //assert (xml->load_stage==5);
     xml->load_stage=6;
-    unsigned int ind;
-    float indweight;
+    unsigned int ind=0;
+    float indweight=1;
+    bool foundindex=false;
     int ttttttt;
     ttttttt=0;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -837,6 +850,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	assert (ttttttt<2);
 	xml->vertex_state |= XML::V_POINT;
 	ind = XMLSupport::parse_int((*iter).value);
+	foundindex=true;
 	ttttttt+=2;
 	break;
       case XML::WEIGHT:
@@ -850,9 +864,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
      }
     }
     assert (ttttttt==3);
+    if (!foundindex) {
+      fprintf (stderr,"mesh with uninitalized logo");
+    }
     xml->logos[xml->logos.size()-1].refpnt.push_back(ind);
     xml->logos[xml->logos.size()-1].refweight.push_back(indweight);
     xml->vertex_state+=XML::V_REF;
+    }
     break;
   default:
     assert(0);
@@ -1053,7 +1071,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup * fg) {
+void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
@@ -1324,8 +1342,11 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   mn = Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   mx = Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   radialSize = 0;
-  enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
-  int *poly_offsets  = new int [totalvertexsize];
+  vector <enum POLYTYPE> polytypes;
+  polytypes.insert(polytypes.begin(),totalvertexsize,GFXTRI);
+  //  enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
+  vector <int> poly_offsets;
+  poly_offsets.insert (poly_offsets.begin(),totalvertexsize,0);
   int o_index=0;
   if (xml->tris.size()) {
     polytypes[o_index]= GFXTRI;
@@ -1401,16 +1422,20 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
   }
-  mn *=xml->scale;
-  mx *=xml->scale;
+  mn.i *=xml->scale.i;
+  mn.j *=xml->scale.j;
+  mn.k *=xml->scale.k;
+  mx.i *=xml->scale.i;
+  mx.j *=xml->scale.j;
+  mx.k *=xml->scale.k;  
   float x_center = (mn.i + mx.i)/2.0,
     y_center = (mn.j + mx.j)/2.0,
     z_center = (mn.k + mx.k)/2.0;
   local_pos = Vector (x_center, y_center, z_center);
   for(a=0; a<totalvertexsize; a++) {
-    vertexlist[a].x*=xml->scale;//FIXME
-    vertexlist[a].y*=xml->scale;
-    vertexlist[a].z*=xml->scale;
+    vertexlist[a].x*=xml->scale.i;//FIXME
+    vertexlist[a].y*=xml->scale.j;
+    vertexlist[a].z*=xml->scale.k;
     vertexlist[a].i*=-1;
     vertexlist[a].j*=-1;
     vertexlist[a].k*=-1;
@@ -1422,9 +1447,9 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     */
   }
   for (a=0;a<xml->vertices.size();a++) {
-    xml->vertices[a].x*=xml->scale;//FIXME
-    xml->vertices[a].y*=xml->scale;
-    xml->vertices[a].z*=xml->scale;
+    xml->vertices[a].x*=xml->scale.i;//FIXME
+    xml->vertices[a].y*=xml->scale.j;
+    xml->vertices[a].z*=xml->scale.k;
     xml->vertices[a].i*=-1;    xml->vertices[a].k*=-1;    xml->vertices[a].j*=-1;
     /*
     xml->vertices[a].x -= x_center;
@@ -1444,17 +1469,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
  	 radialSize = .5*(mx-mn).Magnitude();
 
   if (xml->sharevert) {
-    GFXVertex * myvert = new GFXVertex[xml->vertices.size()];
-    unsigned int * myind= new unsigned int [ind.size()];
-    unsigned int j=0;
-    for (vector<GFXVertex>::iterator i=xml->vertices.begin();i!=xml->vertices.end();i++,j++) {
-      myvert[j]=*i;
-    }
-    j=0;
-    for (vector<unsigned int>::iterator k=ind.begin();k!=ind.end();k++,j++) {
-      myind[j]=*k;
-    }
-    vlist = new GFXVertexList (polytypes, xml->vertices.size(),myvert,o_index,poly_offsets,false,myind);
+    vlist = new GFXVertexList (&polytypes[0], xml->vertices.size(),&xml->vertices[0],o_index,&poly_offsets[0],false,&ind[0]);
   }else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
@@ -1465,14 +1480,14 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
       unsigned int * ind;
       GFXOptimizeList (vertexlist,totalvertexsize,&newv,&numopt,&ind);
       if (numopt < totalvertexsize*optvertexlimit) {
-	vlist = new GFXVertexList (polytypes, numopt,newv,o_index,poly_offsets,false,ind);
+	vlist = new GFXVertexList (&polytypes[0], numopt,newv,o_index,&poly_offsets[0],false,ind);
 	cachunk = true;
       }
       free (ind);
       free (newv);
     }
     if (!cachunk) {
-      vlist= new GFXVertexList(polytypes,totalvertexsize,vertexlist,o_index,poly_offsets); 
+      vlist= new GFXVertexList(&polytypes[0],totalvertexsize,vertexlist,o_index,&poly_offsets[0]); 
     }
   }
   /*
@@ -1505,14 +1520,16 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   GFXSetMaterial (myMatNum,xml->material);
 
   delete [] vertexlist;
-  delete []poly_offsets;
   numlods=xml->lod.size()+1;
-  orig = new Mesh [numlods];
-  for (i=0;i<xml->lod.size();i++) {
-    orig[i+1] = *xml->lod[i];
-    orig[i+1].lodsize=xml->lodsize[i];
+  if (origthis) {
+    orig=NULL;
+  }else {
+    orig = new Mesh [numlods];
+    for (i=0;i<xml->lod.size();i++) {
+      orig[i+1] = *xml->lod[i];
+      orig[i+1].lodsize=xml->lodsize[i];
+    } 
   }
-
   delete xml;
 }
 

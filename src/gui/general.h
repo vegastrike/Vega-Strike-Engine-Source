@@ -102,7 +102,7 @@
 #endif    // _G_RANDOM
 
 #if defined _G_DEBUG && defined __cplusplus
-#include <iostream.h>           // iostream is only used in debugging
+#include <iostream>           // iostream is only used in debugging
 #endif    // _G_DEBUG && __cplusplus
 
 #ifndef MAX_READ

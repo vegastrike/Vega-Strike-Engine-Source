@@ -15,6 +15,7 @@ namespace UnitUtil {
 	void SetHull(Unit *my_unit,float hull);
     string getFlightgroupName(Unit *my_unit);
 	Unit *getFlightgroupLeader (Unit *my_unit);
+	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center); 
 	bool setFlightgroupLeader (Unit *my_unit, Unit *un);
 	string getFgDirective(Unit *my_unit);
 	bool setFgDirective(Unit *my_unit,string inp);
@@ -46,6 +47,7 @@ namespace UnitUtil {
 	Unit *owner (Unit *un);
 	float maxSpeed (Unit *un);
 	float maxAfterburnerSpeed (Unit *un);
+	void performDockingOperations (Unit * un, Unit * unitToDockWith);
 }
 
 #endif

@@ -24,30 +24,47 @@
 #include <list>
 #include <iostream>
 #include "gfx/quaternion.h"
+#include "cmd/unit_generic.h"
 #include "client.h"
 #include "packet.h"
 
 using std::list;
 typedef list<Client *>::iterator LI;
+typedef vector<list<Client *> >::iterator VLI;
+typedef list<Unit *>::iterator LUI;
+
+class NetUI;
 
 class ZoneMgr
 {
-		int nb_zones;
-		list<Client *>		*zone_list;
-		int					*zone_clients;
+		//vector<StarSystem *> starsystems;
+		// List of clients in zones
+		vector<list<Client *> >	zone_list;
+		vector<int>				zone_clients;
+		// List of units in zones (but not Clients)
+		vector<list<Unit *> >	zone_unitlist;
+		vector<int>				zone_units;
 
 	public:
 		ZoneMgr();
-		ZoneMgr( int nbzones);
-		~ZoneMgr();
+		//ZoneMgr( int nbzones);
+		//~ZoneMgr();
 		// Serial is the zone id
-		list<Client *>	*GetZone( int serial);
-		void	addClient( Client * clt, int zone);
+		StarSystem *	addZone( string starsys);
+		list<Client *>	GetZone( int serial);
+		//void	addClient( Client * clt, int zone);
+		void	addUnit( Unit * un, int zone);
+		void	removeUnit( Unit *un, int zone);
+		Unit *	getUnit( ObjSerial unserial, int zone);
+
+		bool	addClient( Client * clt, string starsys, int & num_zone);
 		void	removeClient( Client * clt);
-		void	broadcast( Client * clt, Packet * pckt, NetUI * net);
-		void	broadcastSnapshots( NetUI * net);
+        void    broadcast( Client * clt, Packet * pckt );
+        void    broadcast( int zone, ObjSerial serial, Packet * pckt );
+        void    broadcastSnapshots();
 		int		getZoneClients( Client * clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
+		void	sendZoneClients( Client * clt);
 };
 
 #endif

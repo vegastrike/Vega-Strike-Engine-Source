@@ -55,13 +55,15 @@ protected:
 	void InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num);
 
     friend class UnitFactory;
-
+	Planet (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
 public:
   UnitCollection satellites;
   virtual ~Planet();
+  virtual Vector AddSpaceElevator (const std::string &name, const std::string & faction, char direction);
+  virtual void AddFog (const vector <AtmosphericFogMesh> & meshes){}
   virtual void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst) {}
   virtual void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst) {}
-  virtual void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false) {}
+  virtual void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false,bool reverse_normals=true) {}
   virtual void DisableLights () {}
   virtual void EnableLights() {}
   void AddSatellite (Unit * orbiter);
@@ -121,11 +123,9 @@ public:
     }
   };
   UnIterator *createIterator() { return new PlanetIterator(this);}
-  /*
   bool isAtmospheric  () {
     return hasLights()||atmospheric;
   }
-  */
 
   bool hasLights() { return !lights.empty(); }
   const std::vector <int> & activeLights() { return lights; }
@@ -134,6 +134,7 @@ public:
   friend class PlanetaryOrbit;
 
 private:
+
     /// copy constructor forbidden
     Planet( const Planet& );
     /// assignment operator forbidden

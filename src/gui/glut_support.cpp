@@ -23,6 +23,8 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
+#define isspace(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
+
 float colors[] = {1, 1, 1, 1};
 
 GUITexture ReadTex(char *texfile) {

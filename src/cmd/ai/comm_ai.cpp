@@ -1,10 +1,10 @@
 #include "comm_ai.h"
-#include "faction.h"
+#include "faction_generic.h"
 #include "communication.h"
 #include "cmd/collection.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
@@ -104,7 +104,9 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
     }else {
       c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face,sex);      
     }
-    un->getAIState()->Communicate(c);
+	Order * o = un->getAIState();
+	if (o)
+		o->Communicate(c);
   }
   contraband_searchee.SetUnit(NULL);
 
@@ -114,7 +116,7 @@ void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
       CommunicationMessage hit (un,parent,NULL,0);
       hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face,sex);
       for (         int i=0;i<numHitsPerContrabandFail;i++) {
-	parent->getAIState()->Communicate(hit);
+		  parent->getAIState()->Communicate(hit);
       }
 }
 
@@ -130,26 +132,31 @@ static bool InList (std::string item, Unit * un) {
   return false;
 }
 void CommunicatingAI::UpdateContrabandSearch () {
-  Unit * u = contraband_searchee.GetUnit();
-  if (u) {
-    if (which_cargo_item<(int)u->numCargo()) {
-      std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
-      static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
-      if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
-	CommunicationMessage c(parent,u,comm_face,sex);
-	c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
-	u->getAIState()->Communicate (c);
-	GetMadAt(u,1);
-	SpeedAndCourse=u->GetVelocity();
-      }
-      if (InList (item,FactionUtil::GetContraband(parent->faction))) {
-	TerminateContrabandSearch(true);
-      }
-    }else {
-      TerminateContrabandSearch(false);
-
-    }
-  }
+	Unit * u = contraband_searchee.GetUnit();
+	if (u) {
+		if (which_cargo_item<(int)u->numCargo()) {
+			if (u->GetCargo(which_cargo_item).quantity>0) {
+				std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
+				
+				static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
+				if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
+					CommunicationMessage c(parent,u,comm_face,sex);
+					c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
+					Order * o;
+					if ((o=u->getAIState()))
+						o->Communicate (c);
+					GetMadAt(u,1);
+					SpeedAndCourse=u->GetVelocity();
+				}
+				if (InList (item,FactionUtil::GetContraband(parent->faction))) {
+					TerminateContrabandSearch(true);
+				}
+			}
+		}else {
+			TerminateContrabandSearch(false);
+			
+		}
+	}
 }
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
@@ -168,7 +175,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     SpeedAndCourse = u->GetVelocity();
     CommunicationMessage c(parent,u,comm_face,sex);
     c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face,sex);
-    u->getAIState()->Communicate (c);
+	if (u->getAIState())
+		u->getAIState()->Communicate (c);
     which_cargo_item = 0;
     }
     }
@@ -258,7 +266,9 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
       Unit * un = c.sender.GetUnit();
       if (un) {
 	      int b = selectCommunicationMessage (c,un);
-		  un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+		  Order * o = un->getAIState();
+		  if (o)
+			  o->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
       }
     }
   }

@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libgfx.a libgfxserver.a
 INCLUDES = -I ../ 
-
+SUBDIRS = nav
 libgfxgeneric =  \
 	cockpit_generic.h	\
 	cockpit_generic.cpp	\
@@ -18,9 +18,14 @@ libgfxgeneric =  \
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
+	sphere_generic.cpp	\
+	bsp.cpp		\
+	bsp.h		\
 	vertex.h		
 
 libgfxserver_a_SOURCES =	$(libgfxgeneric)	\
+	sphere_server.cpp	\
+	vsbox_server.cpp	\
 	mesh_server.cpp
 
 libgfx_a_SOURCES =	$(libgfxgeneric)\
@@ -31,6 +36,8 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	animation.h	\
 	aux_logo.cpp	\
 	aux_logo.h	\
+	masks.h		\
+	masks.cpp	\
 	aux_palette.cpp	\
 	aux_palette.h	\
 	aux_texture.cpp	\
@@ -42,8 +49,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	car_assist.h 	\
 	vsbox.cpp		\
 	vsbox.h		\
-	bsp.cpp		\
-	bsp.h		\
 	camera.cpp	\
 	camera.h	\
 	cockpit.h	\
@@ -90,5 +95,7 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	sprite.cpp	\
 	sprite.h	\
 	vdu.cpp		\
+	warptrail.h	\
+	warptrail.cpp	\
 	vdu.h
 

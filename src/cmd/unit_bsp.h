@@ -117,5 +117,13 @@ void load (vector <bsp_polygon> &tri);
 #endif
 enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon & temp_poly3);
 
+#ifdef PROPHECY
+#include <vector>
+#else
+#include "unit_bsp.h"
+#include "configxml.h"
+#include "vs_globals.h"
+#endif
+
 #endif
 

@@ -122,14 +122,50 @@ void MoveTo(Order * aisc, Unit * un) {
   Order * ord = new Orders::MoveTo(Targ,false,3);
   AddOrd (aisc,un,ord);
 }
-void Kickstop(Order * aisc, Unit * un) {
-  Vector vec (0,0,-4);
+
+void KickstopBase(Order * aisc, Unit * un, bool match) {
+  Vector vec (0,0,0);
+  if (match&&un->Target())
+    vec=un->Target()->GetVelocity();
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
   AddOrd (aisc,un,ord);
-  ord =       (new Orders::FaceTarget(false, 3));
+  ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);  
 }
-
+void Kickstop(Order * aisc, Unit * un) {
+  KickstopBase(aisc,un,false);
+}
+void MatchVelocity(Order * aisc, Unit * un) {
+  KickstopBase(aisc,un,false);
+}
+Vector VectorThrustHelper(Order * aisc, Unit * un) {
+  Vector vec (0,0,0);
+  Vector retval(0,0,0);
+  if (un->Target()) {
+    Vector tpos=un->Target()->Position().Cast();
+    Vector relpos=tpos-un->Position().Cast();
+    CrossProduct(relpos,Vector(1,0,0),vec);
+    retval+=tpos;
+  }
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
+  AddOrd (aisc,un,ord);
+  return retval;
+}
+void VeerAway(Order * aisc, Unit * un) {
+  VectorThrustHelper (aisc,un);
+  Order *ord =       (new Orders::FaceTarget(false, 3));
+  AddOrd (aisc,un,ord);  
+}
+void VeerAwayITTS(Order * aisc, Unit * un) {
+  VectorThrustHelper (aisc,un);
+  Order *ord =       (new Orders::FaceTargetITTS(false, 3));
+  AddOrd (aisc,un,ord);  
+}
+void VeerAndTurnAway(Order * aisc, Unit * un) {
+  Vector retval=VectorThrustHelper (aisc,un);
+  Order *ord = new Orders::ChangeHeading(retval,3,1);
+  AddOrd (aisc,un,ord);  
+}
 static void SetupVAndTargetV (QVector & targetv, QVector &targetpos, Unit* un) {
   Unit *targ;
   if ((targ = un->Target())) {
@@ -150,7 +186,7 @@ void SheltonSlide(Order * aisc, Unit * un) {
   perp =(perp+difference)*10000.;
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),true),false,true,true);  
   AddOrd (aisc,un,ord);
-  ord =       (new Orders::FaceTarget(false, 3));
+  ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);
 }
 
@@ -169,7 +205,7 @@ void AfterburnerSlide(Order * aisc, Unit * un) {
   AddOrd (aisc,un,ord);
   ord = new ExecuteFor (new Orders::ChangeHeading (perp+un->Position(),3),1.5);
   AddOrd (aisc,un,ord);
-  ord =       (new Orders::FaceTarget(false, 3));
+  ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);
 }
 void SkilledABSlide (Order * aisc, Unit * un) {
@@ -191,7 +227,7 @@ void SkilledABSlide (Order * aisc, Unit * un) {
   AddOrd (aisc,un,ord);
   ord = new ExecuteFor (new Orders::ChangeHeading (Perp+un->Position(),3),.5);
   AddOrd (aisc,un,ord);
-  ord =       (new Orders::FaceTarget(false, 3));
+  ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);
   
 }
@@ -234,7 +270,7 @@ void CloakForScript(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);
-  ord =       (new Orders::FaceTarget(0, 3));
+  ord =       (new Orders::FaceTargetITTS(0, 3));
   AddOrd (aisc,un,ord);
   ord=new ExecuteFor(new CloakFor(1,8),32);
   AddOrd(aisc,un,ord);

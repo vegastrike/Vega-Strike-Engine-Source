@@ -10,7 +10,7 @@
 #endif
 
 static boost::python::tuple GetRandomBarMessage () {
-	gameMessage * last;
+	gameMessage last;
 	int i=0;
 	vector <std::string> who;
 	vector <std::string> say;
@@ -18,14 +18,16 @@ static boost::python::tuple GetRandomBarMessage () {
 	string newmsg;
 	string newsound;
 	who.push_back ("bar");
-	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
-		newmsg=last->message;
+	while (( mission->msgcenter->last(i++,last,who))) {
+		newmsg=last.message;
 		newsound="";
 		int first=newmsg.find_first_of("[");
-		int last=newmsg.find_first_of("]");
-		if (first!=string::npos&&(first+1)<newmsg.size()) {
-			newsound=newmsg.substr(first+1,last-first-1);
-			newmsg=newmsg.substr(0,first);
+		{
+			int last=newmsg.find_first_of("]");
+			if (first!=string::npos&&(first+1)<newmsg.size()) {
+				newsound=newmsg.substr(first+1,last-first-1);
+				newmsg=newmsg.substr(0,first);
+			}
 		}
 		sounds.push_back(newsound);
 		say.push_back(newmsg);

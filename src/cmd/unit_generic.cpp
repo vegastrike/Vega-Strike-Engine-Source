@@ -1,5 +1,9 @@
+
+#include <set>
 #include "configxml.h"
+#include "audiolib.h"
 #include "unit_generic.h"
+#include "beam.h"
 #include "lin_time.h"
 #include "xml_serializer.h"
 #include "vs_path.h"
@@ -18,14 +22,54 @@
 #include "python/python_class.h"
 #include "cmd/unit_factory.h"
 #include "gfx/cockpit_generic.h"
+#include "gfx/vsbox.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
+#include "role_bitmask.h"
 #include "unit_const_cache.h"
+#include "gfx/warptrail.h"
+#include "networking/netserver.h"
+#include "networking/netclient.h"
+
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
-
+#include "config.h"
 using namespace Orders;
+
+bool flickerDamage (Unit * un, float hullpercent) {
+	#define damagelevel hullpercent
+		  static double counter=getNewTime();
+		  
+		  static float flickertime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","time","30"));
+		  static float flickerofftime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","off-time","2"));
+		  static float minflickercycle = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","min-cycle","2"));		  
+		  static float flickeronprob= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","num-times-per-second-on",".66"));
+		  static float hullfornoflicker= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","hull-for-total-dark",".04"));
+		  float diff = getNewTime()-counter;
+		  if (diff>flickertime) {
+			  counter=getNewTime();
+			  diff=0;
+		  }
+		  float tmpflicker=flickertime*damagelevel;
+		  if (tmpflicker<minflickercycle) {
+			  tmpflicker=minflickercycle;
+		  }
+		  diff = fmod (diff,tmpflicker);
+		  //we know counter is somewhere between 0 and damage level
+		  unsigned int thus = ((int)un)>>2;//cast this to an int for fun!
+		  thus = thus % ((unsigned int)tmpflicker);
+		  diff = fmod (diff+thus,tmpflicker);
+		  if (flickerofftime>diff) {
+			  if (damagelevel>hullfornoflicker)
+				  return rand()>RAND_MAX*GetElapsedTime()*flickeronprob;
+			  else
+				  return true;
+		  }
+	  return false;
+	  #undef damagelevel
+}
+
 
 #define INVERSEFORCEDISTANCE 5400
 
@@ -60,8 +104,12 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 
 	Vector smforce =(bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 	Vector thisforce=(smallnormal*.4*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-	smforce = (smforce/smforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
-	thisforce = (thisforce/thisforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
+	float smag = smforce.Magnitude();
+	float tmag= thisforce.Magnitude();
+	if (smag>.000001)
+		smforce = (smforce/smag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
+	if (tmag>.000001)
+		thisforce = (thisforce/tmag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
     
 	if(smalle->isUnit()!=MISSILEPTR){ 
@@ -100,22 +148,11 @@ static float GetJumpFuelQuantity() {
 void Unit::ActivateJumpDrive (int destination) {
   //const int jumpfuelratio=1;
   if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
-  if ((energy>jump.energy&&(jump.energy>=0||fuel>(-jump.energy*GetJumpFuelQuantity()/100.)))) {
-    jump.drive = destination;
-    //float fuel_used=0;
-    if (jump.energy>0)
-      energy-=jump.energy;
-    else
-      fuel -= jump.energy*GetJumpFuelQuantity()/100.;
-  }else {
-    if (abs(jump.energy)<32000) {
-      static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
-      if (fuel>jfuel*GetJumpFuelQuantity()) {
-       fuel-=jfuel*GetJumpFuelQuantity();
-       jump.drive=destination;
-     }
-    }
-  }
+	  /*if (1warpenergy>=jump.energy&&(jump.energy>=0)) {*/
+	  jump.drive = destination;
+	  //float fuel_used=0;
+//    warpenergy-=jump.energy; //don't spend energy until later
+	  /*}*/
   }
 }
 
@@ -137,9 +174,12 @@ float rand01 () {
 }
 float capship_size=500;
 unsigned short apply_float_to_short (float tmp) {
+  static unsigned int seed = 2531011;
+  seed +=214013;
+  seed %=65536;
   unsigned  short ans = (unsigned short) tmp;
   tmp -=ans;//now we have decimal;
-  if (((float)rand())/((float)RAND_MAX)<tmp)
+  if (seed<(unsigned int)(65536*tmp))
     ans +=1;
   return ans;
 }
@@ -235,165 +275,47 @@ std::string lookupMountSize (int s) {
 /***********************************************************************************/
 
 Unit::Unit( int /*dummy*/ ) {
-	Init();
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  //SetAI (new Order());
+  Init();
 }
 Unit::Unit() {
-	Init();
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  //SetAI (new Order());
+  Init();
 }
 
 Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  //SetAI (new Order());
   Init();
+  hull=1000;
+  maxhull=100000;
   this->faction = fact;
   SubUnit = SubU;
   meshdata = meshes;
   meshes.clear();
-  meshdata_string.push_back(NULL);
+  meshdata.push_back(NULL);
   calculate_extent(false);
 }
 
-Unit::Unit (std::vector <string> & meshes, bool SubU, int fact) {
-  Init();
-  this->faction = fact;
-  SubUnit = SubU;
-  meshdata_string = meshes;
-  meshes.clear();
-  meshdata_string.push_back(NULL);
-  calculate_extent(false);
-}
-
-Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
-	Init();
-	//update_ani_cache();
-	//if (!SubU)
-	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
-	SubUnit = SubU;
-	this->faction = faction;
-	SetFg (flightgrp,fg_subnumber);
-	bool doubleup=false;
-	char * my_directory=GetUnitDir(filename);
-	vssetdir (GetSharedUnitPath().c_str());
-	FILE * fp=NULL;
-	if (!fp) {
-	  const char *c;
-	  if ((c=FactionUtil::GetFaction(faction)))
-	    vschdir (c);
-	  else
-	    vschdir ("unknown");
-	  doubleup=true;
-	  vschdir (my_directory);
-	} else {
-	  fclose (fp);
-	}
-	fp = fopen (filename,"r");
-	if (!fp) {
-	  vscdup();
-	  vscdup();
-	  doubleup=false;
-	  vschdir (my_directory);
-	  fp = fopen (filename,"r");
-	}
-
-	if (!fp) {
-	  if (doubleup) {
-	    vscdup();
-	  }
-	  vscdup();
-	  vschdir ("neutral");
-	  faction=FactionUtil::GetFaction("neutral");//set it to neutral
-	  doubleup=true;
-	  vschdir (my_directory);
-	  fp = fopen (filename,"r");
-	  if (fp) fclose (fp); 
-	  else {
-	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
-	    meshdata_string.clear();
-	    meshdata_string.push_back(NULL);
-	    this->name=string("LOAD_FAILED");
-	    //	    assert ("Unit Not Found"==NULL);
-	  }
-	}else {
-	  fclose (fp);
-	}
-	free(my_directory);
-	/*Insert file loading stuff here*/
-	if(1&&fp) {
-	  name = filename;
-
-	  LoadXML(filename,unitModifications.c_str());
-	}
-	if (1) {
-	  calculate_extent(false);
-	  ToggleWeapon(true);//change missiles to only fire 1
-       	  vscdup();
-	  if (doubleup) 
-	    vscdup();
-	  vsresetdir();
-	  return;
-	}
-	LoadFile(filename);
-	int nummesh;
-	ReadInt(nummesh);
-	meshdata_string.clear();
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		int meshtype;
-		ReadInt(meshtype);
-		char meshfilename[64];
-		//float x,y,z;
-		//ReadMesh(meshfilename, x,y,z);
-		meshdata_string.push_back(meshfilename);
-
-		//		meshdata_string[meshcount]->SetPosition(Vector (x,y,z));
-	}
-	meshdata_string.push_back(NULL);
-	int numsubunit;
-	ReadInt(numsubunit);
-	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
-	{
-		char unitfilename[64];
-		float x,y,z;
-		int type;
-		ReadUnit(unitfilename, type, x,y,z);
-		Unit *un;
-		switch(type)
-		{
-		default:
-		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
-
-		}
-		un->SetPosition(QVector(x,y,z));
-	}
-
-	int restricted;
-	float min, max;
-	ReadInt(restricted); //turrets and weapons
-	//ReadInt(restricted); // What's going on here? i hsould have 2, but that screws things up
-
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictYaw(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictPitch(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictRoll(min,max);
-	}
-	float maxspeed, maxaccel, mass;
-	ReadFloat(maxspeed);
-	ReadFloat(maxaccel);
-	ReadFloat(mass);
-
-
-	CloseFile();
-	calculate_extent(false);
-	ToggleWeapon(true);//change missiles to only fire 1
-	vscdup();
-	if (fp) 
-	  vscdup();
-	vsresetdir();
+extern void update_ani_cache();
+Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string netxml) {
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  //SetAI (new Order());
+  Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml); 
 }
 
 Unit::~Unit()
@@ -419,7 +341,7 @@ Unit::~Unit()
     delete image->unitwriter;
   unsigned int i;
   for (i=0;i<image->destination.size();i++) {
-    delete [] image->destination[i];
+    free (image->destination[i]);
   }
 
 #ifdef DESTRUCTDEBUG
@@ -437,7 +359,7 @@ Unit::~Unit()
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x", 6,mounts);
+  fprintf (stderr,"%d %x", 6,&mounts);
   fflush (stderr);
 #endif
 
@@ -446,24 +368,36 @@ Unit::~Unit()
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 1,mounts);
+  fprintf (stderr,"%d %x ", 1,&mounts);
   fflush (stderr);
 #endif
+#ifndef NO_MOUNT_STAR
 	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
 	{
 		// Free all mounts elements
 		if( (*jj)!=NULL)
 			delete (*jj);
 	}
+#endif
 	mounts.clear();
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d", 0);
   fflush (stderr);
 #endif
 }
+
 void Unit::Init()
 {
+  /*
+  static std::map <Unit *, bool> m;
+  if (m[this]) {
+    fprintf (stderr,"already called this");
+  }else {
+    m[this]=1;
+    }*/
 	this->networked=0;
+	RecurseIntoSubUnitsOnCollision=false;
+	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
@@ -474,16 +408,16 @@ void Unit::Init()
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
-
   jump.energy = 100;
+  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+  jump.insysenergy=insys_jump_cost*jump.energy;
   jump.delay=5;
   jump.damage=0;
+  FaceCamera=false;
   jump.drive=-2;// disabled
   afterburnenergy=0;
   planet=NULL;
   nebula=NULL;
-  image = new UnitImages;
-  sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
   cloaking=-1;
@@ -503,13 +437,15 @@ void Unit::Init()
   faction =0;
   resolveforces=true;
   colTrees=NULL;
-  invisible=false;
+  invisible=DEFAULTVIS;
   //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   
   shieldtight=0;//sphere mesh by default
   energy=maxenergy=1;
+  warpenergy=0;
+  maxwarpenergy=0;
   recharge = 1;
   shield.recharge=shield.leak=0;
   shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
@@ -545,7 +481,7 @@ void Unit::Init()
   NetLocalForce=Vector(0,0,0);
 
   selected = false;
-  image->selectionBox = NULL;
+  //  image->selectionBox = NULL;
 
   limits.yaw = 2.55;
   limits.pitch = 2.55;
@@ -581,19 +517,18 @@ void Unit::Init()
 
   scanner.last_scantime=0.0;
   // No cockpit reference here
-  int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
-  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
-  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
-    image->cockpit_damage[damageiterator]=1;
+  if (!image->cockpit_damage) {
+    int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+    image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
+    for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
+      image->cockpit_damage[damageiterator]=1;
+    }
   }
-  // No CollideInfo yet
-  /*
   CollideInfo.object.u = NULL;
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
-  */
-  SetAI (new Order());
+
   /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;
@@ -613,10 +548,229 @@ void Unit::Init()
   // Not needed here
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
+
 }
-void Unit::Fire (unsigned int bitmask) {
-//FIXME FIRE
-	//FIXME MULTIPLAYE
+std::string getMasterPartListUnitName();
+bool
+verify_path (const vector<string> &path, bool allowmpl=false) {
+	string realpath;
+	for (unsigned int i=0;i<path.size();++i) {
+		if (i!=0)
+			realpath+="/";		
+		realpath+=path[i];
+	}
+	FILE * fp = fopen (realpath.c_str(),"r");
+	if (fp)
+		fclose(fp);
+	
+	if (path.size()==2&&fp==NULL&&allowmpl)
+		if (path[1]==getMasterPartListUnitName())
+			return true;
+	return fp!=NULL;
+}
+void vschdirs (const vector<string> &path) {
+	for (unsigned int i=0;i<path.size();++i) {
+		vschdir(path[i].c_str());
+	}
+}
+void vscdups (const vector<string> &path) {
+	for (unsigned int i=0;i<path.size();++i) {
+		vscdup();
+	}
+}
+
+void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string netxml)
+{
+	this->Unit::Init();
+	update_ani_cache();
+	//if (!SubU)
+	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
+	SubUnit = SubU;
+	RecurseIntoSubUnitsOnCollision=!SubUnit;
+	this->faction = faction;
+	SetFg (flightgrp,fg_subnumber);
+	char * my_directory=GetUnitDir(filename);
+	vssetdir (GetSharedUnitPath().c_str());
+	vector<string>factionsubdir;
+	static string facsd = vs_config->getVariable("data","unitfactiondir","");
+	if (facsd.length()!=0) {
+		factionsubdir.push_back(facsd);
+	}
+	string facstr (FactionUtil::GetFaction(faction));
+	vector<vector <string> > path;
+	path.push_back (factionsubdir);
+	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
+	{
+		path.push_back(vector<string>());		
+		path.back().push_back("weapons");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(factionsubdir);		
+		path.back().insert(path.back().begin(),"weapons");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	}
+	path.push_back(vector<string>());
+	path.back().push_back(my_directory);path.back().push_back(filename);	
+	path.push_back (factionsubdir);
+	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	if (SubU) {
+		path.push_back(vector<string>());		
+		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(factionsubdir);		
+		path.back().insert(path.back().begin(),"subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	}
+	free(my_directory);	
+	while(!path.empty()) {
+		if (verify_path(path.back(),true))
+			break;
+		path.pop_back();
+	}
+	if (path.empty()) {
+	    fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
+	    meshdata.clear();
+	    meshdata.push_back(NULL);
+		this->fullname=filename;
+	    this->name=string("LOAD_FAILED");
+		calculate_extent(false);		
+		radial_size=1;
+		
+	    //	    assert ("Unit Not Found"==NULL);
+	}else {
+	  path.back().pop_back();vschdirs(path.back());
+	  name = filename;
+	  if( netxml=="")
+		Unit::LoadXML(filename,unitModifications.c_str());
+	  else
+		Unit::LoadXML( "", "", netxml);
+	  calculate_extent(false);
+	  ToggleWeapon(true);//change missiles to only fire 1
+	  vscdups(path.back());	  
+	}
+	vsresetdir();
+}
+
+vector <Mesh *> Unit::StealMeshes() {
+  vector <Mesh *>ret;
+  
+  Mesh * shield = meshdata.empty()?NULL:meshdata.back();
+  for (int i=0;i<nummesh();i++) {
+    ret.push_back (meshdata[i]);
+  }
+  meshdata.clear();
+  meshdata.push_back(shield);
+  
+  return ret;
+}
+
+void Unit::calculate_extent(bool update_collide_queue) {  
+  int a;
+  corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+  corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
+
+  for(a=0; a<nummesh(); a++) {
+    corner_min = corner_min.Min(meshdata[a]->corner_min());
+    corner_max = corner_max.Max(meshdata[a]->corner_max());
+  }/* have subunits now in table*/
+  un_kiter iter =SubUnits.constIterator();
+  const Unit * un;
+  while ((un = iter.current())) {
+    corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
+    corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
+    iter.advance();
+  }
+
+  if (corner_min.i==FLT_MAX||corner_max.i==-FLT_MAX||!FINITE (corner_min.i)||!FINITE(corner_max.i)) {
+    radial_size=0;
+    corner_min.Set (0,0,0);
+    corner_max.Set (0,0,0);
+  }else {
+    float tmp1 = corner_min.Magnitude();
+    float tmp2 = corner_max.Magnitude();
+    radial_size = tmp1>tmp2?tmp1:tmp2;
+    //    if (!SubUnit)
+    //      image->selectionBox = new Box(corner_min, corner_max);
+  }
+  if (!SubUnit&&update_collide_queue) {
+    UpdateCollideQueue();
+  }
+  if (isUnit()==PLANETPTR) {
+    radial_size = corner_max.i;
+  }
+}
+
+void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner, int zone) {
+    if (cloaking>=0)
+        return;
+	int nm = 0;
+	vector <Mount>
+		::iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+    for (;i!=mounts.end();++i, nm++) {
+			if ((*i).type->type==weapon_info::BEAM) {
+				if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
+					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
+					// Including the one who fires to make sure it stops
+					if( SERVER)
+						Server->BroadcastUnfire( this->serial, nm, zone);
+					// NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
+					// if( !SERVER && Network==NULL)
+						(*i).UnFire();
+					continue;
+				}
+			}else{
+				// Only in non-networking mode
+				if ( Network==NULL && (*i).type->EnergyRate>energy)
+					continue;
+			}
+
+			const bool mis = (*i).type->type==weapon_info::PROJECTILE;
+			const bool locked_on = (*i).time_to_lock<=0;
+			const bool lockable_weapon = (*i).type->LockTime>0;
+			const bool autotracking_gun =(!mis)&&0!=((*i).size&weapon_info::AUTOTRACKING)&&locked_on;
+			const bool fire_non_autotrackers = (0==(weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS));
+			const bool locked_missile = (mis&&locked_on&&lockable_weapon);
+			const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
+			const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
+			if(missile_and_want_to_fire_missiles&&locked_missile){
+				fprintf (stderr,"\n about to fire locked missile \n");
+			}
+			if (fire_non_autotrackers||autotracking_gun||locked_missile) {
+				if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
+					||(*i).type->role_bits==0) {
+					if ((locked_on&&missile_and_want_to_fire_missiles)
+						||gun_and_want_to_fire_guns) {
+						// If in non-networking mode and mount fire has been accepted or if on server side
+						if( Network==NULL || SERVER || (*i).processed==Mount::ACCEPTED)
+						{
+							// If we are on server or if the weapon has been accepted for fire we fire
+							if ((*i).Fire(owner==NULL?this:owner,mis,listen_to_owner)) {
+								ObjSerial serid;
+								if( missile_and_want_to_fire_missiles)
+								{
+									serid = getUniqueSerial();
+									(*i).serial = serid;
+								}
+								else
+									serid = 0;
+								if( SERVER)
+									Server->BroadcastFire( this->serial, nm, serid, zone);
+								// We could only refresh energy on server side or in non-networking mode, on client side it is done with
+								// info the server sends with ack for fire
+								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
+								// if( Network==NULL || SERVER)
+								energy -=apply_float_to_short((*i).type->type==weapon_info::BEAM?(*i).type->EnergyRate*SIMULATION_ATOM:(*i).type->EnergyRate);
+								// IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
+								if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
+							}
+						}
+						else
+						{
+							// Request a fire order to the server telling him the serial of the unit and the mount index (nm)
+							Network->fireRequest( this->serial, nm);
+							// Mark the mount as fire requested
+							//(*i).processed = Mount::REQUESTED;
+						}
+					}
+				}
+			}
+    }
+
 }
 static bool CheckAccessory (Unit * tur) {
   bool accessory = tur->name.find ("accessory")!=string::npos;
@@ -673,43 +827,74 @@ float Unit::TrackingGuns(bool &missilelock) {
   float trackingcone = 0;
   missilelock=false;
   for (int i=0;i<GetNumMounts();i++) {
-	  if (mounts[i]->status==Mount::ACTIVE&&(mounts[i]->size&weapon_info::AUTOTRACKING)) {
+	  if (mounts[i].status==Mount::ACTIVE&&(mounts[i].size&weapon_info::AUTOTRACKING)) {
       trackingcone= computer.radar.trackingcone;
     }
-    if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0&&mounts[i]->time_to_lock<=0) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0) {
       missilelock=true;
     }
   }
   return trackingcone;
 }
 
-void Unit::getAverageGunSpeed(float & speed, float &range) const {
-   if (GetNumMounts()) {
-     range=0;
-     speed=0;
-     int nummt = GetNumMounts();
-     for (int i=0;i<GetNumMounts();i++) {
-       if (mounts[i]->type->type!=weapon_info::PROJECTILE) {
-	 if (mounts[i]->type->Range > range) {
-	   range=mounts[i]->type->Range;
+void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const {
+  mrange=-1;
+  grange=-1;
+  speed=-1;
+  bool beam=true;
+  if (GetNumMounts()) {
+    grange=0;
+    speed=0;
+	mrange=0;
+	int nummt = 0;
+	// this breaks the name, but... it _is_ more useful.
+    for (int i=0;i<GetNumMounts();i++) {
+	 if (mounts[i].status==Mount::ACTIVE||mounts[i].status==Mount::INACTIVE) {
+      if (mounts[i].type->type!=weapon_info::PROJECTILE) {
+	    if (mounts[i].type->Range > grange) {
+	      grange=mounts[i].type->Range;
+		}
+	  
+		if (mounts[i].status==Mount::ACTIVE) {
+			speed+=mounts[i].type->Speed;
+			nummt++;
+			beam&= (mounts[i].type->type==weapon_info::BEAM);		
+		}
+	  }
+	  else if(mounts[i].type->type==weapon_info::PROJECTILE){
+		  if(mounts[i].type->Range > mrange) {
+			  mrange=mounts[i].type->Range;
+		  }
+	  }
 	 }
-	 speed+=mounts[i]->type->Speed;
-       } else {
-	 nummt--;
-       }
-     }
-     if (nummt) {
-       speed/=nummt;
-     }
-   }
-  
+	}
+	if(nummt){
+		if (beam)
+			speed=FLT_MAX;
+		else
+			speed = speed/nummt;
+	  
+	}
+  }
 }
 
-QVector Unit::PositionITTS (const QVector & posit, float speed) const{
-  QVector retval = Position()-posit;
-  speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
-  retval = Position()+GetVelocity().Cast().Scale(speed);
-  return retval;
+QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed) const{
+	if (speed==FLT_MAX)
+		return this->Position();
+	float difficultyscale=1;
+	if (g_game.difficulty<.99)
+		GetVelocityDifficultyMult(difficultyscale);
+	velocity = (cumulative_velocity.Scale(difficultyscale)-velocity);
+	QVector posit (this->Position()-absposit);
+	QVector curguess(posit);
+	for (unsigned int i=0;i<3;++i) {
+		float time = 0;
+		if(speed>0.001){
+			time = curguess.Magnitude()/speed;
+		}	 
+		curguess = posit+velocity.Scale(time).Cast();
+	}
+	return curguess+absposit;
 }
 
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
@@ -717,7 +902,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   QVector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (GetVelocity().Cast()))));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed));
    totarget = totarget-cumulative_transformation.position;
    double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
@@ -748,12 +933,12 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
   Matrix mat;
   for (int i=0;i<GetNumMounts();i++) {
     float tmpdist = .001;
-    Transformation finaltrans (mounts[i]->GetMountLocation());
+    Transformation finaltrans (mounts[i].GetMountOrientation(),mounts[i].GetMountLocation().Cast());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
     
-    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i]->type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position,cumulative_velocity, mounts[i].type->Speed));
     
     tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
@@ -763,7 +948,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     } else {
       tmpcos /= tmpdist;
     }
-    tmpdist /= mounts[i]->type->Range;//UNLIKELY DIV/0
+    tmpdist /= mounts[i].type->Range;//UNLIKELY DIV/0
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
@@ -797,7 +982,16 @@ void Unit::Select() {
 void Unit::Deselect() {
   selected = false;
 }
-
+void disableSubUnits (Unit * uhn) {
+	Unit * un;
+	for (un_iter i = uhn->getSubUnits();(un=*i)!=NULL;++i) {
+		disableSubUnits(un);
+		for (unsigned int j=0;j<uhn->mounts.size();++j) {
+			uhn->mounts[j].status=Mount::DESTROYED;
+		}
+		
+	}
+}
 un_iter Unit::getSubUnits () {
   return SubUnits.createIterator();
 }
@@ -805,8 +999,26 @@ un_kiter Unit::viewSubUnits() const{
   return SubUnits.constIterator();
 }
 
-void Unit::SetVisible(bool invis) {
-  invisible=!invis;
+void Unit::SetVisible(bool vis) {
+	if (vis) {
+		invisible&=(~INVISCAMERA);
+	}else {
+		invisible|=INVISCAMERA;
+	}
+}
+void Unit::SetAllVisible(bool vis) {
+	if (vis) {
+		invisible&=(~INVISUNIT);
+	}else {
+		invisible|=INVISUNIT;
+	}
+}
+void Unit::SetGlowVisible(bool vis) {
+	if (vis) {
+		invisible&=(~INVISGLOW);
+	}else {
+		invisible|=INVISGLOW;
+	}
 }
 
 float Unit::GetElasticity() {return .5;}
@@ -1045,6 +1257,449 @@ void Unit::DisableTurretAI () {
 /**** UNIT_PHYSICS STUFF                                                           */
 /***********************************************************************************/
 
+extern signed char  ComputeAutoGuarantee ( Unit * un);
+extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
+
+void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+  static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
+
+	Vector accel;
+	Transformation old_physical_state = curr_physical_state;
+  if (docked&DOCKING_UNITS) {
+    PerformDockingOperations();
+  }
+  Repair();
+  if (fuel<0)
+    fuel=0;
+  if (cloaking>=cloakmin) {
+    if (image->cloakenergy*SIMULATION_ATOM>energy) {
+      Cloak(false);//Decloak
+    } else {
+      if (image->cloakrate>0||cloaking==cloakmin) {
+		energy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
+      }
+      if (cloaking>cloakmin) {
+		AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
+		if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
+		  AUDStartPlaying (sound->cloak);
+	    }
+		cloaking-= (short)(image->cloakrate*SIMULATION_ATOM);
+		if (cloaking<=cloakmin&&image->cloakrate>0) {
+		  //AUDStopPlaying (sound->cloak);
+		  cloaking=cloakmin;
+	    }
+	    if (cloaking<0&&image->cloakrate<0) {
+	      //AUDStopPlaying (sound->cloak);
+	      cloaking=(short)32768;//wraps
+	    }
+      }
+    }
+  }
+
+  RegenShields();
+  if (lastframe) {
+    if (!(docked&(DOCKED|DOCKED_INSIDE))) 
+      prev_physical_state = curr_physical_state;//the AIscript should take care
+#ifdef FIX_TERRAIN
+    if (planet) {
+      if (!planet->dirty) {
+	SetPlanetOrbitData (NULL);
+      }else {
+	planet->pps = planet->cps;
+      }
+    }
+#endif
+  }
+
+  if (isUnit()==PLANETPTR) {
+    ((Planet *)this)->gravitate (uc);
+  } else {
+    if (resolveforces) {
+      accel = ResolveForces (trans,transmat);//clamp velocity
+      if (fabs (Velocity.i)>VELOCITY_MAX) {
+	Velocity.i = copysign (VELOCITY_MAX,Velocity.i);
+      }
+      if (fabs (Velocity.j)>VELOCITY_MAX) {
+	Velocity.j = copysign (VELOCITY_MAX,Velocity.j);
+      }
+      if (fabs (Velocity.k)>VELOCITY_MAX) {
+	Velocity.k = copysign (VELOCITY_MAX,Velocity.k);
+      }
+    }
+  } 
+  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
+    Rotate (SIMULATION_ATOM*(AngularVelocity));
+  }
+
+  float difficulty;
+  Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
+
+  this->UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc);
+
+  float dist_sqr_to_target=FLT_MAX;
+  Unit * target = Unit::Target();
+  bool increase_locking=false;
+  if (target&&cloaking<0/*-1 or -32768*/) {
+    if (target->isUnit()!=PLANETPTR) {
+      Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
+      dist_sqr_to_target = TargetPos.MagnitudeSquared(); 
+      TargetPos.Normalize(); 
+      if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
+	increase_locking=true;
+      }
+    }
+  }
+  static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
+  static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
+
+  bool locking=false;
+  bool touched=false;
+
+  for (int i=0;(int)i<GetNumMounts();i++) {
+//    if (increase_locking&&cloaking<0) {
+//      mounts[i].time_to_lock-=SIMULATION_ATOM;
+//    }
+    if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
+      if (player_cockpit) {
+	  touched=true;
+      }
+      if (increase_locking&&(dist_sqr_to_target<mounts[i].type->Range*mounts[i].type->Range)) {
+		mounts[i].time_to_lock-=SIMULATION_ATOM;
+		static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
+		if (!player_cockpit) {
+		  if (ai_lock_cheat) {
+			mounts[i].time_to_lock=-1;
+		  }
+		}else {
+
+		  if (mounts[i].type->LockTime>0) {
+			static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
+			static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
+
+			if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
+			  if (!AUDIsPlaying(LockedSound)) {
+			AUDStartPlaying(LockedSound);
+			AUDStopPlaying(LockingSound);	      
+			  }
+			  AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
+			}else if (mounts[i].time_to_lock>0)  {
+			  locking=true;
+			  if (!AUDIsPlaying(LockingSound)) {
+			AUDStartPlaying(LockingSound);	      
+			  }
+			  AUDAdjustSound (LockingSound,Position(),GetVelocity());
+			}
+		  }
+		}
+      }else {
+        if (mounts[i].ammo!=0) {
+	  mounts[i].time_to_lock=mounts[i].type->LockTime;
+        }
+      }
+    } else {
+      if (mounts[i].ammo!=0) {
+        mounts[i].time_to_lock=mounts[i].type->LockTime;
+      }
+    }
+    if (mounts[i].type->type==weapon_info::BEAM) {
+      if (mounts[i].ref.gun) {
+		mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0))?target:NULL ,computer.radar.trackingcone, target);
+      }
+    } else {
+      mounts[i].ref.refire+=SIMULATION_ATOM;
+    }
+    if (mounts[i].processed==Mount::FIRED) {
+      Transformation t1;
+      Matrix m1;
+      t1=prev_physical_state;//a hack that will not work on turrets
+      t1.Compose (trans,transmat);
+      t1.to_matrix (m1);
+      int autotrack=0;
+      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
+		autotrack = computer.itts?2:1;
+      }
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
+      if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE, i) {
+		ToggleWeapon (true);
+      }
+    }else if (mounts[i].processed==Mount::UNFIRED) {
+      mounts[i].PhysicsAlignedUnfire();
+    }
+  }
+  if (locking==false&&touched==true) {
+    if (AUDIsPlaying(LockingSound)) {
+      AUDStopPlaying(LockingSound);	
+    }      
+  }
+  bool dead=true;
+
+  if (!SubUnits.empty()) {
+    Unit * su;
+    UnitCollection::UnitIterator iter=getSubUnits();
+    while ((su=iter.current())) {
+      su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
+      su->cloaking = (short unsigned int) cloaking;
+      if (hull<0) {
+	su->Target(NULL);
+		UnFire();//don't want to go off shooting while your body's splitting everywhere
+		//DEPRECATEDsu->hull-=SIMULATION_ATOM;
+      }
+      iter.advance();
+      //    dead &=(subunits[i]->hull<0);
+    }
+  }
+  if (hull<0) {
+    dead&= (image->explosion==NULL);    
+    if (dead)
+      Kill();
+  }
+  if ((!SubUnit)&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
+    UpdateCollideQueue();
+  }
+}
+
+void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
+{
+	// If it is not a player, it is a unit controlled by server so compute changes
+	if( !_Universe->isPlayerStarship( this))
+	{
+		curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+		  cumulative_transformation = curr_physical_state;
+		  cumulative_transformation.Compose (trans,transmat);
+		  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
+		  cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
+	}
+}
+static float tempmin (float a, float b) {
+  return a>b?b:a;
+}
+static QVector RealPosition (Unit * un) {
+  if (un->isSubUnit())
+    return un->Position();
+  return un->LocalPosition();
+}
+static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * goal) {
+  QVector def = UniverseUtil::SafeEntrancePoint(start,rsize);
+  float bdis = (def-RealPosition(goal)).MagnitudeSquared();
+  for (int i=-1;i<=1;i++) {
+    for (int j=-1;j<=1;j++) {
+      for (int k=-1;k<=1;k+=2) {
+	QVector delta(i,j,k);delta.Normalize();
+	QVector tmp =RealPosition(goal)+delta*(goal->rSize()+rsize);
+	tmp=UniverseUtil::SafeEntrancePoint (tmp,rsize);
+	float tmag = (tmp-RealPosition(goal)).MagnitudeSquared();
+	if (tmag<bdis){
+	  bdis = tmag;
+	  def = tmp;
+	}
+      }
+    }
+  }
+  return def;
+}
+bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
+	if (target->isUnit()==PLANETPTR) {
+		un_iter i = target->getSubUnits();
+		Unit * targ =*i;
+		if (targ)
+			return AutoPilotTo(targ,ignore_energy_requirements,recursive_level);
+	}
+	//static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+  if (warpenergy<jump.insysenergy) {
+	  if (!ignore_energy_requirements)
+		  return false;
+  }
+  signed char Guaranteed = ComputeAutoGuarantee (this);
+  if (Guaranteed==Mission::AUTO_OFF) {
+    return false;
+  }
+  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
+//  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
+  if (SubUnit) {
+    return false;//we can't auto here;
+  }
+  StarSystem * ss = activeStarSystem;
+  if (ss==NULL) {
+    ss = _Universe->activeStarSystem();
+  }
+
+  Unit * un=NULL;
+  QVector start (Position());
+  QVector end (RealPosition(target));
+  float totallength = (start-end).Magnitude();
+  bool nanspace=false;
+  if (!FINITE(totallength)) {
+    nanspace=true;
+    start=QVector(100000000.0,100000000.0,10000000000000.0);
+    totallength = (start-end).Magnitude();
+	if (!FINITE(totallength)) {
+		end=QVector(200000000.0,100000000.0,10000000000000.0);;
+		totallength=(start-end).Magnitude();
+	}
+  }
+  float totpercent=1;
+  if (totallength>1) {
+    //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
+	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
+    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
+    if (percent>1) {
+      end=start;
+      totpercent=0;
+    }else {
+      totpercent*=(1-percent);
+      end = start*percent+end*(1-percent);
+    }
+  }
+  bool ok=true;
+  static bool teleport_autopilot= XMLSupport::parse_bool(vs_config->getVariable("physics","teleport_autopilot","true"));
+  if ((!teleport_autopilot)&&(!nanspace)) {
+  if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
+	  bool ignore_friendlies=true;
+    for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
+      static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
+      if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
+		if (un!=this&&un!=target) {
+    	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
+	    return false;
+	  }
+	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
+	  if (intersection>0) {
+	    end = start+ (end-start)*intersection;
+	    totpercent*=intersection;
+	    ok=false;
+	  }
+	 }
+    }
+   }
+  }
+  }else if (!nanspace) {
+	  //just make sure we aren't in an asteroid field
+	  Unit * un;
+	  for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
+		  if (un->isUnit()==ASTEROIDPTR) {
+			  if (UnitUtil::getDistance(this,un)<0) {
+				  return false;//no auto in roid field
+			  }
+		  }
+	  }
+	  
+  }
+  bool nowhere=false;
+	
+  if (this!=target) {
+    warpenergy-=totpercent*jump.insysenergy;
+    QVector sep (UniverseUtil::SafeEntrancePoint(end,rSize()));
+    if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
+      sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+    }
+    if ((sep-RealPosition(target)).MagnitudeSquared()>(RealPosition(this)-RealPosition(target)).MagnitudeSquared()) {
+		sep= RealPosition(this);
+		nowhere=true;
+	}
+
+    static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","auto_turn_towards","true"));
+    if (auto_turn_towards) {
+      Vector methem(RealPosition(target).Cast()-sep.Cast());
+      methem.Normalize();
+      Vector p,q,r;
+      GetOrientation(p,q,r);
+      p=methem.Cross(r);
+      float theta = p.Magnitude();
+      if (theta*theta>.00001){
+	p*= (asin (theta)/theta);
+	Rotate(p);
+	GetOrientation (p,q,r);
+	if (r.Dot(methem)<0) {
+	  Rotate (p*(PI/theta));
+	}
+      }
+    }
+    static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
+    if (
+
+		//nowhere==false&&
+
+		insys_jump_ani.length()) {
+      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
+
+
+      Vector v(GetVelocity());
+      v.Normalize();
+      Vector p,q,r;GetOrientation(p,q,r);
+      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+v*rSize(),rSize()*8,.97);
+      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
+    }
+    static bool warptrail = XMLSupport::parse_bool (vs_config->getVariable ("graphics","warp_trail","true"));
+    if (warptrail&&(!nowhere)) {
+      static float warptrailtime = XMLSupport::parse_float (vs_config->getVariable ("graphics","warp_trail_time","20"));
+      AddWarp(this,RealPosition(this),warptrailtime);
+    }
+    //    sep =UniverseUtil::SafeEntrancePoint (sep);
+	if (!nowhere)
+		SetCurPosition(sep);
+    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
+      Unit * other=NULL;
+      if (recursive_level>0)
+      for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
+    	Flightgroup * ff = other->getFlightgroup();
+	bool leadah=(ff==getFlightgroup());
+	if (ff) {
+	  if (ff->leader.GetUnit()==this) {
+	    leadah=true;
+	  }
+	}
+	Order * otherord = other->getAIState();
+	if (otherord)
+	  if (otherord->PursueTarget (this,leadah)) {
+	    other->AutoPilotTo(this,ignore_energy_requirements,recursive_level-1);
+	    if (leadah) {
+	      if (NULL==_Universe->isPlayerStarship (other)) {
+		other->SetPosition(AutoSafeEntrancePoint (LocalPosition(),other->rSize()*1.5,other));
+	      }
+	    }
+	  }
+      
+      }
+    }
+  }
+  return ok;
+}
+
+bool Unit::jumpReactToCollision (Unit * smalle) {
+  if (!GetDestinations().empty()) {//only allow big with small
+    if (((smalle->GetJumpStatus().drive>=0&&smalle->warpenergy>=smalle->GetJumpStatus().energy)||image->forcejump)){
+		smalle->warpenergy-=smalle->GetJumpStatus().energy;
+		int dest = smalle->GetJumpStatus().drive;
+		if (dest<0)
+			dest=0;
+		smalle->DeactivateJumpDrive();
+		Unit * jumppoint = this;
+		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
+		return true;
+    }
+    return true;
+  }
+  if (!smalle->GetDestinations().empty()) {
+    if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
+      DeactivateJumpDrive();
+      Unit * jumppoint = smalle;
+      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+      return true;
+    }
+    return true;
+  }
+  return false;
+}
+
+Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
+  difficulty=1;
+  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
+  if ((player_cockpit)==NULL) {
+    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
+    difficulty = pow(g_game.difficulty,exp);
+  }
+  return player_cockpit;
+}
 
 void Unit::Rotate (const Vector &axis)
 {
@@ -1054,17 +1709,22 @@ void Unit::Rotate (const Vector &axis)
 	ootheta = 1/theta;
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
+	
 	if(theta < 0.0001) {
 	  rot = identity_quaternion;
 	}
 	curr_physical_state.orientation *= rot;
+	
 	if (limits.limitmin>-1) {
 	  Matrix mat;
 	  curr_physical_state.orientation.to_matrix (mat);
 	  if (limits.structurelimits.Dot (mat.getR())<limits.limitmin) {
 	    curr_physical_state.orientation=prev_physical_state.orientation;
+		//fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
+		
 	  }
 	}
+	
 }
 
 void Unit::FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
@@ -1085,15 +1745,27 @@ void Unit::FireEngines (const Vector &Direction/*unit vector... might default to
 }
 void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
 {
-	NetForce += Vforce;
+	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
+		NetForce += Vforce;
+	}else {
+		fprintf (stderr,"fatal force");
+	}
 }
 void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
 {
-	NetLocalForce += Vforce;
+	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
+		NetLocalForce += Vforce;
+	}else {
+		fprintf (stderr,"fatal local force");
+	}
 }
 void Unit::Accelerate(const Vector &Vforce)
 {
-  NetForce += Vforce * mass;
+	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {	
+		NetForce += Vforce * mass;
+	}else {
+		fprintf (stderr,"fatal force");
+	}
 }
 
 void Unit::ApplyTorque (const Vector &Vforce, const QVector &Location)
@@ -1289,7 +1961,10 @@ void Unit::RollTorque(float amt) {
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
-
+float WARPENERGYMULTIPLIER() {
+  static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier",".02"));
+  return warpenergymultiplier;
+}
 static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
   shield+=apply_float_to_short(amt);
   if (shield>max)
@@ -1313,7 +1988,19 @@ float Unit::MaxShieldVal() const{
   return maxshield;
 }
 void Unit::RechargeEnergy() {
-    energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
+    unsigned short newenergy=apply_float_to_short (recharge *SIMULATION_ATOM);
+    if (((int)energy)+((int)newenergy)>65535) {
+      newenergy= 65535 - energy;
+      energy=65535;
+      if (newenergy>0) {
+	newenergy=apply_float_to_short (newenergy*WARPENERGYMULTIPLIER());
+	if (((int)warpenergy)+((int)newenergy)>65535) {	
+	  warpenergy+=newenergy;
+	}
+      }
+    }else {
+      energy+=newenergy;
+    }
 }
 void Unit::RegenShields () {
   int rechargesh=1;
@@ -1349,6 +2036,8 @@ void Unit::RegenShields () {
   }
   static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".95"));
   const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
+  static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));
+
   switch (shield.number) {
   case 2:
 
@@ -1366,29 +2055,40 @@ void Unit::RegenShields () {
       rechargesh=0;
     }
     if (velocity_discharge) {
-      shield.fb[1]*=dischargerate;
-      shield.fb[0]*=dischargerate;
+      if (shield.fb[1]>min_shield_discharge*shield.fb[3])
+	shield.fb[1]*=dischargerate;
+      if (shield.fb[0]>min_shield_discharge*shield.fb[2])
+	shield.fb[0]*=dischargerate;
     }
     break;
   case 4:
-
     rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
     if (velocity_discharge) {
-      shield.fbrl.front*=dischargerate;
-      shield.fbrl.left*=dischargerate;
-      shield.fbrl.back*=dischargerate;
-      shield.fbrl.right*=dischargerate;
+      if (shield.fbrl.front>min_shield_discharge*shield.fbrl.frontmax)
+	shield.fbrl.front*=dischargerate;
+      if (shield.fbrl.left>min_shield_discharge*shield.fbrl.leftmax)
+	shield.fbrl.left*=dischargerate;
+      if (shield.fbrl.back>min_shield_discharge*shield.fbrl.backmax)
+	shield.fbrl.back*=dischargerate;
+      if (shield.fbrl.right>min_shield_discharge*shield.fbrl.rightmax)
+	shield.fbrl.right*=dischargerate;
     }
     break;
   case 6:
     rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
     if (velocity_discharge) {
-      shield.fbrltb.v[0]*=dischargerate;
-      shield.fbrltb.v[1]*=dischargerate;
-      shield.fbrltb.v[2]*=dischargerate;
-      shield.fbrltb.v[3]*=dischargerate;
-      shield.fbrltb.v[4]*=dischargerate;
-      shield.fbrltb.v[5]*=dischargerate;
+      if (shield.fbrltb.v[0]>min_shield_discharge*shield.fbrltb.fbmax)
+	shield.fbrltb.v[0]*=dischargerate;
+      if (shield.fbrltb.v[1]>min_shield_discharge*shield.fbrltb.fbmax)
+	shield.fbrltb.v[1]*=dischargerate;
+      if (shield.fbrltb.v[2]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[2]*=dischargerate;
+      if (shield.fbrltb.v[3]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[3]*=dischargerate;
+      if (shield.fbrltb.v[4]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[4]*=dischargerate;
+      if (shield.fbrltb.v[5]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[5]*=dischargerate;
     }
     break;
   }
@@ -1398,8 +2098,18 @@ void Unit::RegenShields () {
     RechargeEnergy();
   }
   if (maxenergy>maxshield) {
-    if (energy>maxenergy-maxshield)//allow shields to absorb xtra power
+    if (energy>maxenergy-maxshield) {//allow shields to absorb xtra power
+      short excessenergy = energy - (maxenergy-maxshield);
       energy=maxenergy-maxshield;  
+      if (excessenergy >0) {
+	warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
+	unsigned short mwe = maxwarpenergy;
+	if (mwe<jump.energy)
+	  mwe = jump.energy;
+	if (warpenergy>mwe)
+	  warpenergy=mwe;
+      }
+    }
   }else {
     energy=0;
 }
@@ -1408,15 +2118,39 @@ void Unit::RegenShields () {
 Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
   Vector p, q, r;
   GetOrientation(p,q,r);
-  Vector temp1 = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*(1.0/MomentOfInertia);
-  Vector temp = temp1*SIMULATION_ATOM;
-  if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {
+  Vector temp1 (NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r);
+  if (NetTorque.i||NetTorque.j||NetTorque.k) {
+    temp1 += InvTransformNormal(transmat,NetTorque);
+  }
+  if (MomentOfInertia)
+	  temp1=temp1/MomentOfInertia;
+  else
+	  fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
+  Vector temp (temp1*SIMULATION_ATOM);
+  /*  //FIXME  does this shit happen!
+      if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
+  {
+	  if (!FINITE(temp.i)||FINITE (temp.j)||FINITE(temp.k)) {
+
+	  }
     AngularVelocity += temp;
   }
-  Vector temp2 = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ))/mass; //acceleration
+  Vector temp2 = (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ); //acceleration
+  if (!(FINITE(NetForce.i)&&FINITE(NetForce.j)&&FINITE(NetForce.k))) {
+	  cout << "NetForce skrewed";
+  }
 
+  if (NetForce.i||NetForce.j||NetForce.k) {
+    temp2+=InvTransformNormal(transmat,NetForce);
+  }
+  
+  temp2=temp2/mass;
   temp = temp2*SIMULATION_ATOM;
-  if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
+  if (!(FINITE(temp2.i)&&FINITE(temp2.j)&&FINITE(temp2.k))) {
+	  cout << "NetForce transform skrewed";
+  }
+
+  /*if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */{	//FIXME
     Velocity += temp;
   }
     static float air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("air_resistance","0"));
@@ -1511,23 +2245,66 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 
 // TO TEST
 float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
-  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
-  if (nodockdamage) {
-    if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
-      return -1;
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  //  #ifdef REALLY_EASY
+  Cockpit * cpt;
+  if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
+    if (color.a!=2) {
+      //    ApplyDamage (amt);
+      phasedamage*= (g_game.difficulty);
+      amt*=(g_game.difficulty);
+      cpt->Shake (amt);
     }
   }
-  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-  if (affectedUnit!=this) {
-    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
-    return -1;
-  }
-  amt *= 1-.01*shield.leak;
+  //  #endif
+  float absamt= amt>=0?amt:-amt;  
   float percentage=0;
+  //percentage = this->ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
+	// Old ApplyLocalDamage function body (needed here)
+  		  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
+		  if (nodockdamage) {
+			if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
+			  percentage = -1;
+			}
+		  }
+		  if (affectedUnit!=this) {
+			affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
+			percentage = -1;
+		  }
+		  amt *= 1-.01*shield.leak;
+		  if (GetNebula()==NULL||(nebshields>0)) {
+			percentage = DealDamageToShield (pnt,amt);
+		  }
+		  if (aistate)
+		   aistate->ChooseTarget();
+	// End old body
+
+  float leakamt = phasedamage+amt*.01*shield.leak;
+  if( percentage==-1)
+	return -1;
   if (GetNebula()==NULL||(nebshields>0)) {
-    percentage = DealDamageToShield (pnt,amt);
+    percentage = DealDamageToShield (pnt,absamt);
+	amt = amt>=0?absamt:-absamt;
+    if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
+      /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
+	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
+	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
+      //calculate percentage
+      if (GetNebula()==NULL) 
+	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+    }
   }
-  return percentage;
+  if (shield.leak>0||!meshdata.back()||percentage==0||absamt>0||phasedamage) {
+    percentage = DealDamageToHull (pnt, leakamt+amt);
+    if (percentage!=-1) {//returns -1 on death--could delete
+      for (int i=0;i<nummesh();i++) {
+	if (percentage)
+	  meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
+      }
+    }
+  }
+  return 1;
 }
 
 // Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
@@ -1587,13 +2364,13 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (GetNumMounts()) {
 			unsigned int whichmount=rand()%GetNumMounts();
 			if (randnum>=.9) {
-				mounts[whichmount]->status=Mount::DESTROYED;
-			}else if (mounts[whichmount]->ammo>0&&randnum>=.4) {
-			  mounts[whichmount]->ammo*=dam;
+				mounts[whichmount].status=Mount::DESTROYED;
+			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
+			  mounts[whichmount].ammo*=dam;
 			} else if (randnum>=.1) {
-				mounts[whichmount]->time_to_lock+=(100-(100*dam));
+				mounts[whichmount].time_to_lock+=(100-(100*dam));
 			} else {
-				mounts[whichmount]->size&=(~weapon_info::AUTOTRACKING);
+				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
 			}
 		}
 		return;
@@ -1680,7 +2457,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		//DAMAGE Reactor
 		//DAMAGE JUMP
 		if (randnum>=.9) {
-			shield.leak+=((1-dam)*100);
+			shield.leak=(char)((randnum-.9)*900);
+			if (shield.leak<0)
+				shield.leak=0;
+			if (shield.leak>100)
+				shield.leak=100;
 		} else if (randnum>=.7) {
 			shield.recharge*=dam;
 		} else if (randnum>=.5) {
@@ -1715,9 +2496,6 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	}
 }
 
-extern void AUDStopPlaying( int num);
-extern void AUDDeleteSound (int sound, bool music=false);
-
 void Unit::Kill(bool erasefromsave) {
 
   //if (erasefromsave)
@@ -1736,12 +2514,15 @@ void Unit::Kill(bool erasefromsave) {
       dockedun.pop_back();
     }
   }
+
+  #ifndef NO_MOUNT_STAR
 	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
 	{
 		// Free all mounts elements
 		if( (*jj)!=NULL)
 			delete (*jj);
 	}
+	#endif
     mounts.clear();
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
   if (!SubUnit) 
@@ -1827,6 +2608,12 @@ void Unit::ArmorData (unsigned short armor[4]) const{
 
 float Unit::FuelData () const{
   return fuel;
+}
+float Unit::WarpEnergyData() const {
+  if (maxwarpenergy>0)
+    return ((float)warpenergy)/((float)maxwarpenergy);
+  else
+    return ((float)warpenergy)/((float)jump.energy);
 }
 float Unit::EnergyData() const{
   if (maxenergy<=MaxShieldVal()) {
@@ -1914,26 +2701,40 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
       targ = &armor.right;
     }
   }
-  percent = damage/(*targ+hull);
+  int biggerthan=*targ;
+  float absdamage = damage>=0?damage:-damage;
+  percent = absdamage/(*targ+hull);
 
   if( percent == -1)
 	  return -1;
-  if (damage<((float)*targ)) {
+  if (absdamage<((float)*targ)) {
 	ArmorDamageSound( pnt);
-    *targ -= apply_float_to_short (damage);
+    *targ -= apply_float_to_short (absdamage);
   }else {
 	HullDamageSound( pnt);
-    damage -= ((float)*targ);
+    absdamage -= ((float)*targ);
+	damage= damage>=0?absdamage:-absdamage;
     *targ= 0;
-    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
+    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
       static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
-      hull -=damage;
+      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+	  if (damage>0) {
+		  hull -=damage;//FIXME
+	  }else {
+		  recharge+=damage;
+		  shield.recharge+=damage;
+		  if (recharge<0)
+			  recharge=0;
+		  if (shield.recharge<0)
+			  shield.recharge=0;
+	  }
     }else {
-      _Universe->AccessCockpit()->godliness-=damage;
+      _Universe->AccessCockpit()->godliness-=absdamage;
       DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
     }
   }
+  if (*targ>biggerthan)
+	  fprintf (stderr,"errore fatale mit den armorn");
   if (hull <0) {
       static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
     if (!SubUnit&&hull>-hulldamtoeject) {
@@ -2105,27 +2906,6 @@ bool Unit::ShieldUp (const Vector &pnt) const{
 /**** UNIT_WEAPON STUFF                                                            */
 /***********************************************************************************/
 
-Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;sound=-1;}
-Mount::Mount(const string& filename, short am,short vol): size(weapon_info::NOWEAP),ammo(am),sound(-1){
-  static weapon_info wi(weapon_info::BEAM);
-  type = &wi;
-  this->volume=vol;
-  ref.gun = NULL;
-  status=(UNCHOSEN);
-  processed=Mount::PROCESSED;
-  /*
-  weapon_info * temp = getTemplate (filename);  
-  if (temp==NULL) {
-    status=UNCHOSEN;
-    time_to_lock=0;
-  }else {
-    type = temp;
-    status=ACTIVE;
-    time_to_lock = temp->LockTime;
-  }
-  */
-}
-
 void Unit::VelocityReference (Unit *targ) {
   computer.velocity_ref.SetUnit(targ);
 }
@@ -2150,28 +2930,15 @@ void Unit::Cloak (bool loak) {
   }
 }
 
-void Mount::Activate (bool Missile) {
-  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-    if (status==INACTIVE)
-      status = ACTIVE;
-  }
-}
-///Sets this gun to inactive, unless unchosen or destroyed
-void Mount::DeActive (bool Missile) {
-  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-    if (status==ACTIVE)
-      status = INACTIVE;
-  }
-}
 void Unit::SelectAllWeapon (bool Missile) {
   for (int i=0;i<GetNumMounts();i++) {
-    mounts[i]->Activate (Missile);
+    mounts[i].Activate (Missile);
   }
 }
 
 void Unit::UnFire () {
   for (int i=0;i<GetNumMounts();i++) {
-    mounts[i]->UnFire();//turns off beams;
+    mounts[i].UnFire();//turns off beams;
   }
 }
 
@@ -2179,11 +2946,11 @@ void Unit::UnFire () {
 void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   for (int j=0;j<2;j++) {
     for (int i=0;i<GetNumMounts();i++) {
-      if (mounts[i]->type==sz) {
-	if (mounts[i]->status<Mount::DESTROYED&&(mounts[i]->type->type==weapon_info::PROJECTILE)==ms) {
-	  mounts[i]->Activate(ms);
+      if (mounts[i].type==sz) {
+	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
+	  mounts[i].Activate(ms);
 	}else {
-	  sz = mounts[(i+1)%GetNumMounts()]->type;
+	  sz = mounts[(i+1)%GetNumMounts()].type;
 	}
       }
     }
@@ -2199,32 +2966,32 @@ void Unit::ToggleWeapon (bool Missile) {
   const weapon_info * sz=NULL;
   if (GetNumMounts()<1)
     return;
-  sz = mounts[0]->type;
+  sz = mounts[0].type;
   for (int i=0;i<GetNumMounts();i++) {
-    if ((mounts[i]->type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i]->status<Mount::DESTROYED) {
+    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
       totalcount++;
       lasttotal=false;
-      if (mounts[i]->status==Mount::ACTIVE) {
+      if (mounts[i].status==Mount::ACTIVE) {
 	activecount++;
 	lasttotal=true;
-	mounts[i]->DeActive (Missile);
+	mounts[i].DeActive (Missile);
 	if (i==GetNumMounts()-1) {
-	  sz=mounts[0]->type;
+	  sz=mounts[0].type;
 	}else {
-	  sz =mounts[i+1]->type;
+	  sz =mounts[i+1].type;
 	}
       }
     }
-    if ((mounts[i]->type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i]->status<Mount::DESTROYED) {
-      if (mounts[i]->status==Mount::ACTIVE) {
+    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
+      if (mounts[i].status==Mount::ACTIVE) {
 	activecount++;//totalcount=0;
-	mounts[i]->DeActive (Missile);
+	mounts[i].DeActive (Missile);
 	if (lasttotal) {
 	  totalcount=(i+1)%GetNumMounts();
 	  if (i==GetNumMounts()-1) {
-	    sz = mounts[0]->type;
+	    sz = mounts[0].type;
 	  }else {
-	    sz =mounts[i+1]->type;
+	    sz =mounts[i+1].type;
 	  }
 	}
 	lasttotal=false;
@@ -2235,12 +3002,12 @@ void Unit::ToggleWeapon (bool Missile) {
     int i=totalcount;
     for (int j=0;j<2;j++) {
       for (;i<GetNumMounts();i++) {
-	if (mounts[i]->type==sz) {
-	  if ((mounts[i]->type->type==weapon_info::PROJECTILE)) {
-	    mounts[i]->Activate(true);
+	if (mounts[i].type==sz) {
+	  if ((mounts[i].type->type==weapon_info::PROJECTILE)) {
+	    mounts[i].Activate(true);
 	    return;
 	  }else {
-	    sz = mounts[(i+1)%GetNumMounts()]->type;
+	    sz = mounts[(i+1)%GetNumMounts()].type;
 	  }
 	}
       }
@@ -2248,7 +3015,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }
   }
   if (totalcount==activecount) {
-    ActivateGuns (mounts[0]->type,Missile);
+    ActivateGuns (mounts[0].type,Missile);
   } else {
     if (lasttotal) {
       SelectAllWeapon(Missile);
@@ -2275,10 +3042,10 @@ int Unit::LockMissile() const{
   bool missilelock=false;
   bool dumblock=false;
   for (int i=0;i<GetNumMounts();i++) {
-    if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0&&mounts[i]->time_to_lock<=0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
       missilelock=true;
     }else {
-      if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime==0&&mounts[i]->type->type==weapon_info::PROJECTILE&&mounts[i]->time_to_lock<=0) {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
 	dumblock=true;
       }
     }    
@@ -2364,6 +3131,8 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   }
   return holder;
 }
+extern void ExecuteDirector();
+std::set <Unit *> arrested_list_do_not_dereference;
 void Unit::PerformDockingOperations () {
   for (unsigned int i=0;i<image->dockedunits.size();i++) {
     Unit * un;
@@ -2373,6 +3142,29 @@ void Unit::PerformDockingOperations () {
       continue;
     }
     //Transformation t = un->prev_physical_state;
+    unsigned short tmp;
+    tmp=un->maxwarpenergy;
+    if (tmp<un->jump.energy)
+      tmp=un->jump.energy;
+    if (tmp>un->warpenergy){
+      un->warpenergy=tmp;
+      int cockpit=UnitUtil::isPlayerStarship(un);
+      if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
+	static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
+	_Universe->AccessCockpit(cockpit)->credits-=docking_fee;
+      }
+    }
+	std::set<Unit *>::iterator arrested=arrested_list_do_not_dereference.find(this);
+	if (arrested!=arrested_list_do_not_dereference.end()) {
+		arrested_list_do_not_dereference.erase (arrested);
+		//do this for jail time
+		for (unsigned int j=0;j<100000;++j) {
+			for (unsigned int i=0;i<active_missions.size();++i) {
+				
+				ExecuteDirector();
+			}
+		}
+	}
     un->prev_physical_state=un->curr_physical_state;
     un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
     un->NetForce=Vector(0,0,0);
@@ -2401,7 +3193,7 @@ bool Unit::ForceDock (Unit * utdw, int whichdockport) {
       utdw->image->dockedunits.push_back (new DockedUnits (this,whichdockport));
       if (utdw->image->dockingports[whichdockport].internal) {
 	RemoveFromSystem();	
-       	invisible=true;
+	SetVisible(false);
 	docked|=DOCKED_INSIDE;
       }else {
 	docked|= DOCKED;
@@ -2506,7 +3298,7 @@ bool Unit::UnDock (Unit * utdw) {
     if (utdw->image->dockedunits[i]->uc.GetUnit()==this) {
       utdw->FreeDockingPort (i);
       i--;
-      invisible=false;
+      SetVisible(true);;
       docked&=(~(DOCKED_INSIDE|DOCKED));
       image->DockedTo.SetUnit (NULL);
       Velocity=utdw->Velocity;
@@ -2575,8 +3367,12 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
   }
 }
 
-static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB) {
+static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB, bool clamp=false) {
   if (upgrador!=nothing) {//if upgrador is better than nothing
+    if (clamp) {
+      if (tobeupgraded>upgrador)
+	upgrador=tobeupgraded;
+    }
     float newsum = (*myadd)(tobeupgraded,upgrador);
     if (newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum&&at_least_this>=tobeupgraded){//if we're downgrading
         return newsum==upgrador?CAUSESDOWNGRADE:NOTTHERE;
@@ -2609,33 +3405,6 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
   }
 }
 
-void Mount::ReplaceMounts (const Mount *other) {
-  short thisvol = volume;
-  short thissize = size;
-  Transformation t =this->GetMountLocation();
-  *this=*other;
-  this->size=thissize;
-  volume=thisvol;
-  this->SetMountPosition(t);
-  ref.gun=NULL;
-}
-
-void Mount::SwapMounts (Mount * other) {
-  short thisvol = volume;
-  short othervol = other->volume;
-  //short othersize = other->size;
-  short thissize = size;
-  Mount mnt = *this;
-  this->size=thissize;
-  *this=*other;
-  *other=mnt;
-  volume=thisvol;
-
-  other->volume=othervol;//volumes stay the same even if you swap out
-  Transformation t =this->GetMountLocation();
-  this->SetMountPosition(other->GetMountLocation());
-  other->SetMountPosition (t);  
-}
 
 int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage) {
   if (downgrade) {
@@ -2667,36 +3436,6 @@ bool Quit (const char *input_buffer) {
 	  return true;
 	}
 	return false;
-}
-
-double Mount::Percentage (const Mount *newammo) const{
-  float percentage=0;
-  int thingstocompare=0;
-  if (status==UNCHOSEN||status==DESTROYED)
-    return 0;
-  if (newammo->ammo==-1) {
-    if (ammo!=-1) {
-      thingstocompare++;
-    }
-  } else {
-    if (newammo->ammo>0) {
-      percentage+=ammo/newammo->ammo;
-      thingstocompare++;
-    }
-  }
-  if (newammo->type->Range) {
-    percentage+= type->Range/newammo->type->Range;
-    thingstocompare++;
-  }
-  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
-    percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
-    thingstocompare++;
-  }
-  if (thingstocompare) {
-    return percentage/thingstocompare;
-  }else {
-    return 0;
-  }
 }
 
 using std::string;
@@ -2758,58 +3497,61 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
   int i;
   bool cancompletefully=true;
   for (i=0,j=mountoffset;i<up->GetNumMounts()&&i<GetNumMounts()/*i should be GetNumMounts(), s'ok*/;i++,j++) {
-    if (up->mounts[i]->status==Mount::ACTIVE||up->mounts[i]->status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
+    if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
       int jmod=j%GetNumMounts();//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
-	if (up->mounts[i]->type->weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 
 
-	  if (up->mounts[i]->type->size==(up->mounts[i]->type->size&mounts[jmod]->size)) {//only look at this mount if it can fit in the rack
-	    if (up->mounts[i]->type->weapon_name!=mounts[jmod]->type->weapon_name || mounts[jmod]->status==Mount::DESTROYED || mounts[jmod]->status==Mount::UNCHOSEN) {
+	  if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
+	    if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name || mounts[jmod].status==Mount::DESTROYED || mounts[jmod].status==Mount::UNCHOSEN) {
 	      numave++;//ok now we can compute percentage of used parts
+		  Mount upmount(up->mounts[i]);
+		  
 	      if (templ) {
 		if (templ->GetNumMounts()>jmod) {
-		  int maxammo = templ->mounts[jmod]->ammo;
-		  if ((up->mounts[i]->ammo>maxammo||up->mounts[i]->ammo==-1)&&maxammo!=-1) {
-		    up->mounts[i]->ammo = maxammo;
+			
+		  int maxammo = templ->mounts[jmod].ammo;
+		  if ((upmount.ammo>maxammo||upmount.ammo==-1)&&maxammo!=-1) {
+		    upmount.ammo = maxammo;
 		  }
-		  if (templ->mounts[jmod]->volume!=-1) {
-		    if (up->mounts[i]->ammo*up->mounts[i]->type->volume>templ->mounts[jmod]->volume) {
-		      up->mounts[i]->ammo = (templ->mounts[jmod]->volume+1)/up->mounts[i]->type->volume;
+		  if (templ->mounts[jmod].volume!=-1) {
+		    if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
+		      upmount.ammo = (templ->mounts[jmod].volume+1)/upmount.type->volume;
 		    }
 		  }
 		}
 	      }
-	      percentage+=mounts[jmod]->Percentage(up->mounts[i]);//compute here
+	      percentage+=mounts[jmod].Percentage(&upmount);//compute here
 	      if (touchme) {//if we wish to modify the mounts
-		mounts[jmod]->ReplaceMounts (up->mounts[i]);//switch this mount with the upgrador mount
+		mounts[jmod].ReplaceMounts (&upmount);//switch this mount with the upgrador mount
 	      }
 	    }else {
-	      int tmpammo = mounts[jmod]->ammo;
-	      if (mounts[jmod]->ammo!=-1&&up->mounts[i]->ammo!=-1) {
-		tmpammo+=up->mounts[i]->ammo;
+	      int tmpammo = mounts[jmod].ammo;
+	      if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
+		tmpammo+=up->mounts[i].ammo;
 		if (templ) {
 		  if (templ->GetNumMounts()>jmod) {
-		    if (templ->mounts[jmod]->ammo!=-1) {
-		      if (templ->mounts[jmod]->ammo>tmpammo) {
-			tmpammo=templ->mounts[jmod]->ammo;
+		    if (templ->mounts[jmod].ammo!=-1) {
+		      if (templ->mounts[jmod].ammo>tmpammo) {
+			tmpammo=templ->mounts[jmod].ammo;
 		      }
 		    }
-		    if (templ->mounts[jmod]->volume!=-1) {
-		      if (templ->mounts[jmod]->volume>mounts[jmod]->type->volume*tmpammo) {
-			tmpammo=(templ->mounts[jmod]->volume+1)/mounts[jmod]->type->volume;
+		    if (templ->mounts[jmod].volume!=-1) {
+		      if (templ->mounts[jmod].volume>mounts[jmod].type->volume*tmpammo) {
+			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
 		      }
 		    }
 		    
 		  }
 		} 
-		if (tmpammo*mounts[jmod]->type->volume>mounts[jmod]->volume) {
-		  tmpammo = (1+mounts[jmod]->volume)/mounts[jmod]->type->volume;
+		if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
+		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
 		}
-		if (tmpammo>mounts[jmod]->ammo) {
+		if (tmpammo>mounts[jmod].ammo) {
 		  cancompletefully=true;
 		  if (touchme)
-		    mounts[jmod]->ammo = tmpammo;
+		    mounts[jmod].ammo = tmpammo;
 		}else {
 		  cancompletefully=false;
 		}
@@ -2824,12 +3566,12 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  siz = ~siz;
 	  if (templ) {
 	    if (templ->GetNumMounts()>jmod) {
-	      siz = templ->mounts[jmod]->size;
+	      siz = templ->mounts[jmod].size;
 	    }
 	  }
-	  if (((siz&up->mounts[i]->size)|mounts[jmod]->size)!=mounts[jmod]->size) {
+	  if (((siz&up->mounts[i].size)|mounts[jmod].size)!=mounts[jmod].size) {
 	    if (touchme) {
-	      mounts[jmod]->size|=up->mounts[i]->size;
+	      mounts[jmod].size|=up->mounts[i].size;
 	    }
 	    numave++;
 	    percentage++;
@@ -2840,16 +3582,16 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  //we need to |= the mount type
 	}
       } else {
-	if (up->mounts[i]->type->weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 	  bool found=false;//we haven't found a matching gun to remove
 
 		for (unsigned int k=0;k<(unsigned int)GetNumMounts();k++) {///go through all guns
 	      int jkmod = (jmod+k)%GetNumMounts();//we want to start with bias
-	      if (strcasecmp(mounts[jkmod]->type->weapon_name.c_str(),up->mounts[i]->type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
+	      if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
 		found=true;//we got one
-		percentage+=mounts[jkmod]->Percentage(up->mounts[i]);///calculate scrap value (if damaged)
+		percentage+=mounts[jkmod].Percentage(&up->mounts[i]);///calculate scrap value (if damaged)
 		if (touchme) //if we modify
-		  mounts[jkmod]->status=Mount::UNCHOSEN;///deactivate weapon
+		  mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
 		break;
 	      }
 	    }
@@ -2863,9 +3605,9 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 
 	  for (unsigned int k=0;k<(unsigned int)GetNumMounts();k++) {///go through all guns
 	    int jkmod = (jmod+k)%GetNumMounts();//we want to start with bias
-	    if ((up->mounts[i]->size&mounts[jkmod]->size)==(up->mounts[i]->size)) {
+	    if ((up->mounts[i].size&mounts[jkmod].size)==(up->mounts[i].size)) {
 	      if (touchme) {
-		mounts[jkmod]->size&=(~up->mounts[i]->size);
+		mounts[jkmod].size&=(~up->mounts[i].size);
 	      }
 	      percentage++;
 	      numave++;
@@ -2976,7 +3718,7 @@ bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffse
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage,this);
 }
 bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ) {
-  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,true,percentage,this);
+  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,force,percentage,this);
 }
 bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,false,true,false,true,percentage,downgradelimit);
@@ -2984,7 +3726,51 @@ bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitof
 bool Unit::Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage,const Unit * downgradelimit){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage,downgradelimit);
 }
-
+double ComputeMinDowngradePercent() {
+    static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
+    return MyPercentMin;
+}
+class DoubleName {
+public:
+  string s;
+  double d;
+  DoubleName (string ss,double dd) {
+    d =dd;s=ss;
+  }
+  DoubleName () {
+    d = -FLT_MAX;
+  }
+};
+std::map <int, DoubleName> downgrademap;
+int curdowngrademapoffset = 5*sizeof (Unit);
+bool AddToDowngradeMap (std::string name,double value, int unitoffset,std::map <int,DoubleName> &tempdowngrademap) {
+  using std::map;
+  map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
+  if (i!=downgrademap.end()) {
+    if ((*i).second.d<=value) {
+        tempdowngrademap[unitoffset] = DoubleName (name,value);
+        return true;
+    }
+  }else {
+      tempdowngrademap[unitoffset] = DoubleName (name,value);      
+      return true;
+  }
+  return false;
+}
+void ClearDowngradeMap () {
+  downgrademap.clear();
+}
+std::set<std::string> GetListOfDowngrades () {
+  using std::map;
+  map<int,DoubleName>::iterator i =downgrademap.begin();
+  std::set<std::string> retval;
+  for (;i!=downgrademap.end();++i) {
+    retval.insert ((*i).second.s);
+  }
+  
+//  return std::vector<std::string> (retval.begin(),retval.end());
+  return retval;
+}
 bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit) {
   percentage=0;
   int numave=0;
@@ -2994,7 +3780,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   adder Adder;
   comparer Comparer;
   percenter Percenter;
-
+  std::map <int, DoubleName> tempdownmap;
+  if (cancompletefully&&cancompletefully1&&downgrade) {
+	  if (percentage>0)
+		  AddToDowngradeMap (up->name,1,curdowngrademapoffset++,tempdownmap);
+  }
+  
   float tmax_speed = up->computer.max_combat_speed;
   float tmax_ab_speed = up->computer.max_combat_ab_speed;
   float tmax_yaw = up->computer.max_yaw;
@@ -3045,8 +3836,13 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   int retval;
   double temppercent;
   static Unit * blankship = UnitFactory::createServerSideUnit ("blank",true,FactionUtil::GetFaction("upgrades"));
-#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;} else {if (retval!=NOTTHERE) cancompletefully=false;}
-#define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my)
+#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this,tempdownmap);} else {if (retval!=NOTTHERE) cancompletefully=false;}
+
+  
+#define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false,this->my)
+
+#define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,true,this->my)
+
   STDUPGRADE(armor.front,up->armor.front,templ->armor.front,0);
   STDUPGRADE(armor.back,up->armor.back,templ->armor.back,0);
   STDUPGRADE(armor.right,up->armor.right,templ->armor.right,0);
@@ -3063,7 +3859,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   image->ecm = abs(image->ecm);
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
-  //  STDUPGRADE(afterburnenergy,up->afterburnenergy,templ->afterburnenergy,0);
+  STDUPGRADE(maxwarpenergy,up->maxwarpenergy,templ->maxwarpenergy,0);
   STDUPGRADE(limits.yaw,tlimits_yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,tlimits_pitch,templ->limits.pitch,0);
   STDUPGRADE(limits.roll,tlimits_roll,templ->limits.roll,0);
@@ -3072,7 +3868,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(limits.forward,tlimits_forward,templ->limits.forward,0);
   STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
   STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
-  STDUPGRADE(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
+  STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
   STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
   STDUPGRADE(computer.max_combat_ab_speed,tmax_ab_speed,templ->computer.max_combat_ab_speed,0);
   STDUPGRADE(computer.max_yaw,tmax_yaw,templ->computer.max_yaw,0);
@@ -3118,13 +3914,13 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
   bool ccf = cancompletefully;
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100,false,shield.leak);
   if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
   
   myleak = 1-computer.radar.maxcone;
   upleak=1-up->computer.radar.maxcone;
   templeak=1-(templ!=NULL?templ->computer.radar.maxcone:-1);
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.maxcone);
   if (touchme)computer.radar.maxcone=1-myleak;
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   if (up->computer.radar.lockcone!=lc) {
@@ -3134,7 +3930,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (templeak == 1-lc) {
       templeak=2;
     }
-    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.lockcone);
     if (touchme)computer.radar.lockcone=1-myleak;
   }
   static float tc =XMLSupport::parse_float (vs_config->getVariable ("physics","autotracking",".93"));//DO NOT CHANGE! see unit.cpp:258
@@ -3145,7 +3941,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (templeak==1-tc) {
       templeak=2;
     }
-    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.trackingcone);
     if (touchme)computer.radar.trackingcone=1-myleak;    
   }
   cancompletefully=ccf;
@@ -3155,19 +3951,21 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (jump.drive>=-1&&up->jump.drive>=-1) {
       if (touchme) jump.drive=-2;
       numave++;
-      percentage+=(jump.energy&&jump.delay)?(.25*(up->jump.energy/jump.energy+up->jump.delay/jump.delay)):1;
       percentage+=.5*((float)(100-jump.damage))/(101-up->jump.damage);
+	  AddToDowngradeMap (up->name,up->jump.drive,((char *)&this->jump.drive)-((char *)this),tempdownmap);
     }
     if (cloaking!=-1&&up->cloaking!=-1) {
       if (touchme) cloaking=-1;
       numave++;
       percentage++;
+	  AddToDowngradeMap (up->name,up->cloaking,((char *)&this->cloaking)-((char *)this),tempdownmap);	  
     }
   
     if (afterburnenergy<32767&&afterburnenergy<=up->afterburnenergy&&up->afterburnenergy!=0) {
       if (touchme) afterburnenergy=32767;
       numave++;
       percentage++;
+	  AddToDowngradeMap (up->name,65536-((int)up->afterburnenergy),((char *)&this->afterburnenergy)-((char *)this),tempdownmap);	  	  
     }
   
   }else {
@@ -3202,9 +4000,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
       cancompletefully=false;
     }
-    
     if (jump.drive==-2&&up->jump.drive>=-1) {
-      if (touchme) {jump.drive = up->jump.drive;jump.energy=up->jump.energy;jump.delay=up->jump.delay; jump.damage=0;}
+      if (touchme) {jump.drive = up->jump.drive;jump.damage=0;}
       numave++;
     }else if (jump.drive>=-1&&up->jump.drive>=-1) {
       cancompletefully=false;
@@ -3221,6 +4018,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (MomentOfInertia<(templ?templ->MomentOfInertia:0.00000001)) {
       MomentOfInertia=(templ?templ->MomentOfInertia:0.00000001);
     }
+  }
+  float MyPercentMin = ComputeMinDowngradePercent();
+  if (downgrade && percentage > MyPercentMin) {
+      for (std::map<int,DoubleName>::iterator i = tempdownmap.begin();i!=tempdownmap.end();++i) {
+          downgrademap[(*i).first]=(*i).second;
+      }
   }
   return cancompletefully;
 }
@@ -3251,12 +4054,19 @@ const Unit * makeTemplateUpgrade (string name, int faction) {
     lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
   return lim;
 }
+const Unit * loadUnitByCache(std::string name,int faction) {
+      const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(name,faction));
+      if (!temprate)
+		  temprate = UnitConstCache::setCachedConst(StringIntKey(name,faction),UnitFactory::createUnit(name.c_str(),true,faction));
+	  return temprate;
+}
 bool Unit::RepairUpgrade () {
-  const Unit * temprate = makeFinalBlankUpgrade (name,faction);
+	int upfac = FactionUtil::GetFaction("upgrades");
+	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
-        success = Upgrade(temprate,0,0,0,true,pct,NULL);
+        success = Upgrade(temprate,0,0,0,false,pct,NULL);
 	if (pct>0)
 	  success=true;
     }
@@ -3268,7 +4078,25 @@ bool Unit::RepairUpgrade () {
             pct = 1;
         }
     }
-    return success && pct>0;
+	bool ret = success && pct>0;
+	if (ret) {
+		Unit * mpl = UnitFactory::getMasterPartList();
+		for (unsigned int i=0;i<mpl->numCargo();++i) {
+			if (mpl->GetCargo(i).category.find("upgrades")==0) {
+				const Unit * up = loadUnitByCache(mpl->GetCargo(i).content,upfac);
+				//now we analyzify up!
+				if (up->MaxShieldVal()==MaxShieldVal()&&up->shield.recharge>shield.recharge) {
+					shield.recharge = up->shield.recharge;
+					
+				}
+				if (up->maxenergy==maxenergy&&up->recharge>recharge){
+					recharge = up->recharge;
+				}
+			}
+		}
+		
+	}
+    return ret;
 }
 /***********************************************************************************/
 /**** UNIT_CARGO STUFF                                                            */
@@ -3534,16 +4362,17 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
   Unit * un=(Unit *)mythis;
   int i=input.w.hardint;
   if (un->GetNumMounts()>i) {
-    string result(lookupMountSize(un->mounts[i]->size));
-    if (un->mounts[i]->status==Mount::INACTIVE||un->mounts[i]->status==Mount::ACTIVE)
-      result+=string("\" weapon=\"")+(un->mounts[i]->type->weapon_name);
-    if (un->mounts[i]->ammo!=-1)
-      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i]->ammo);
-    if (un->mounts[i]->volume!=-1) {
-      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i]->volume);
+    string result(lookupMountSize(un->mounts[i].size));
+    if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
+      result+=string("\" weapon=\"")+(un->mounts[i].type->weapon_name);
+    if (un->mounts[i].ammo!=-1)
+      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
+    if (un->mounts[i].volume!=-1) {
+      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i].volume);
     }
+	result+=string("\" xyscale=\"")+XMLSupport::tostring(un->mounts[i].xyscale)+string("\" zscale=\"")+XMLSupport::tostring(un->mounts[i].zscale);
     Matrix m;
-    un->mounts[i]->GetMountLocation().to_matrix(m);
+    Transformation(un->mounts[i].GetMountOrientation(),un->mounts[i].GetMountLocation().Cast()).to_matrix(m);
     result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
     result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
     result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));
@@ -3656,3 +4485,103 @@ bool Unit::TransferUnitToSystem (StarSystem * Current) {
   return false;
 }
 
+/***************************************************************************************/
+/*** UNIT_REPAIR STUFF                                                               ***/
+/***************************************************************************************/
+
+extern float rand01();
+void Unit::Repair() {
+  //note work slows down under time compression!
+  static float repairtime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","1000"));
+  float workunit = SIMULATION_ATOM/(repairtime*getTimeCompression());//a droid completes 1 work unit in repairtime
+  switch (image->repair_droid) {
+  case 6:
+    //versatilize Weapons! (invent)
+    if (GetNumMounts()) {
+      if (rand01()<workunit) {
+	int whichmount = rand()%GetNumMounts();
+	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(short))));
+      }
+      if (rand01()<workunit) {
+	int whichmount= rand()%GetNumMounts();
+	if (mounts[whichmount].ammo>0) {
+	  mounts[whichmount].volume++;
+	}
+      }
+    }
+    if (computer.max_combat_speed<60) 
+      computer.max_combat_speed+=workunit;
+    if (computer.max_combat_ab_speed<160)
+      computer.max_combat_ab_speed+=workunit;
+  case 5:
+    //increase maxrange
+    computer.radar.maxrange+=workunit;
+    if (computer.radar.maxcone>-1) {    //Repair MaxCone full
+      computer.radar.maxcone-=workunit;
+    }else {
+      computer.radar.maxcone=-1;
+    }
+    if (computer.radar.lockcone>0) {    //Repair MaxCone full
+      computer.radar.lockcone-=workunit;
+    }else {
+      //      computer.radar.lockcone=-1;
+    }
+    
+    if (rand01()<workunit*.25) {
+      computer.itts=true;
+    }
+    if (computer.radar.mintargetsize>0) {
+      computer.radar.mintargetsize-=rSize()*workunit;
+    }//no break...please continue, colonel
+  case 4:
+    if (GetNumMounts()) {    //    RepairWeapon();
+      if (rand01()<workunit) {
+	unsigned int i=rand()%GetNumMounts();
+	if (mounts[i].status==Mount::DESTROYED) {
+	  mounts[i].status=Mount::INACTIVE;
+	}
+      }
+    }//nobreak
+  case 3:
+    if (computer.radar.mintargetsize>rSize()) {
+      computer.radar.mintargetsize-=rSize()*workunit;
+    }
+    if (rand01()<.5*workunit) {
+      computer.radar.color=true;
+    }
+    if (rand01()<workunit) {
+      if (jump.damage>0)
+	jump.damage--;
+    }//nobreak
+  case 2:
+    {
+      int whichgauge=rand()%(UnitImages::NUMGAUGES+1+MAXVDUS);
+      if (image->cockpit_damage[whichgauge]<1) {
+	image->cockpit_damage[whichgauge]+=workunit;
+	if (image->cockpit_damage[whichgauge]>1)
+	  image->cockpit_damage[whichgauge]=1;
+      }
+    }    
+  case 1:
+    if (computer.radar.maxcone>0) {    //Repair MaxCone half
+      computer.radar.maxcone-=workunit;
+    }
+    if (computer.radar.lockcone>.7) {    //Repair MaxCone half
+      computer.radar.lockcone-=workunit;
+    }
+
+    if (jump.drive!=-1) {    //    RepairJumpEnergy(jump.energy,maxenergy);
+      if (jump.energy>maxenergy) {
+	if (rand01()<workunit) {
+	  jump.energy=maxenergy-1;
+	}
+      }
+    }
+    if (computer.radar.mintargetsize>1.5*rSize()) {//    RepairMinTargetSize
+      computer.radar.mintargetsize-=rSize()*workunit;
+    }
+
+  default: 
+    break;
+  }
+}

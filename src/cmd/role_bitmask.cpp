@@ -46,6 +46,67 @@ namespace ROLES {
 			} while (loc!=string::npos);
 		return v;
 	}
+	unsigned char InternalGetRole (const std::string &s) {
+		map<string,int>::iterator i = rolemap.find (strtoupper (s));
+		if (i!=rolemap.end()) {
+			return (*i).second;
+		}
+		return 0;
+	}
+	vector < vector <string > > buildscripts() {
+	  vector<vector <string> > scripts;
+	  getAllRolePriorities ();
+	  
+	  FILE * fp = fopen("ai/VegaEvents.csv","rb");
+	  if (fp) {
+			fseek (fp,0,SEEK_END);
+			int len = ftell (fp);
+			char *temp = (char *)malloc (len+1);
+			memset (temp,0,len+1);
+			fseek (fp,0,SEEK_SET);
+			fgets(temp,len,fp);
+			vector <string> vec=readCSV(temp);
+			if (vec.size()) vec.erase (vec.begin());
+			unsigned int i=0;
+			for (i=0;i<maxRoleValue();i++) {
+			  scripts.push_back (vector<string>());
+			  for (int j=0;j<maxRoleValue();j++) {
+			    scripts[i].push_back("default");
+			  }
+			}
+			for (i=0;i<vec.size();i++) {
+			  fseek (fp,0,SEEK_SET);
+			  fgets(temp,len,fp);
+			  vector <string> strs=readCSV(temp);
+			  if (strs.size()) {
+			    string front = strs.front();
+			    strs.erase(strs.begin());
+			    unsigned int scriptind = getRole(front);
+			    for (unsigned int j=0;j<strs.size();j++) {
+			      int index=  getRole(vec[j]);
+			      scripts[scriptind][index]=strs[j]; 
+			    }
+			  }
+			 
+			}
+			free (temp);
+			fclose (fp);
+	  }
+	  return scripts;
+	}
+        const std::string &getRoleEvents (unsigned char ourrole, unsigned char theirs) {
+	  static vector < vector <string> > script = buildscripts();
+	  const static string def="default";
+	  if (ourrole>=script.size()) {
+	    fprintf (stderr,"bad error with getRoleEvetnts (no event specified)");
+	    return def;
+	  }
+	  if (theirs>=script[ourrole].size()) {
+	    fprintf (stderr,"bad error || with getRoleEvetnts (no event specified)");
+	    return def;
+	  }
+	  return script[ourrole][theirs];
+	}
 	vector < vector <char > > buildroles() {
 		vector <vector <char> >rolePriorities;
 		int count=0;
@@ -74,7 +135,7 @@ namespace ROLES {
 				temp[0]=0;
 				fgets (temp,len,fp);
 				vector <string> priority = readCSV(temp);
-				int i=getRole (priority[0]);
+				int i=InternalGetRole (priority[0]);
 				//fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
 				if (i<rolePriorities.size()) {
 					for (unsigned int j=0;j<rolePriorities.size();j++) {
@@ -88,6 +149,9 @@ namespace ROLES {
 			}
 			free( temp);
 			fclose (fp);
+		}else {
+		  rolePriorities.push_back(vector <char>());
+		  rolePriorities[0].push_back(0);
 		}
 		return rolePriorities;
 	}
@@ -97,11 +161,7 @@ namespace ROLES {
 	}
 	unsigned char getRole (const std::string &s) {
 		int temp = maxRoleValue();
-		map<string,int>::iterator i = rolemap.find (strtoupper (s));
-		if (i!=rolemap.end()) {
-			return (*i).second;
-		}
-		return 0;
+		return InternalGetRole(s);
 	}
 	unsigned int readBitmask (const std::string &ss){
 		string s= ss;

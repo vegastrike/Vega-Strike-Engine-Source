@@ -1,4 +1,6 @@
+#if 1
 #define JPEG_SUPPORT
+#endif
 #include "endianness.h"
 #include <png.h>
 #include <stdlib.h>

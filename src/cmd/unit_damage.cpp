@@ -1,4 +1,5 @@
 //#include "unit.h"
+//#include "unit_template.h"
 #include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
@@ -35,22 +36,31 @@ void GameUnit<UnitType>::Kill(bool eraseFromSave)
     this->colTrees->Dec();//might delete
   this->colTrees=NULL;
   for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount]->sound);
-    AUDDeleteSound(mounts[beamcount]->sound);
-    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
-      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+    AUDStopPlaying(mounts[beamcount].sound);
+    AUDDeleteSound(mounts[beamcount].sound);
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
-  Unit::Kill(eraseFromSave);
+  UnitType::Kill(eraseFromSave);
 }
 
 template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
+  Vector PlaneNorm;
   int i;
+  for (i=0;i<nummesh();) {
+	  if (meshdata[i]){
+		  if (meshdata[i]->getBlendDst()==ONE){
+			  delete meshdata[i];
+			  meshdata.erase(meshdata.begin()+i);
+		  }else{i++;}
+	  }else{meshdata.erase(meshdata.begin()+i);}
+  }
   int nm = nummesh();
   if (nm<=0) {
     return;
   }
-  Vector PlaneNorm;
+  
   std::vector <Mesh *> old = meshdata;
 
   for (int split=0;split<level;split++) {
@@ -88,15 +98,20 @@ void GameUnit<UnitType>::Split (int level) {
     std::vector<Mesh *> tempmeshes;
     tempmeshes.push_back (old[i]);
     SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
+    splitsub->hull = 1000;
     splitsub->mass = mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
-      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*10*mass*loc/loc.Magnitude());
-      loc.Set (rand(),rand(),rand());
+      static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".5"));//10 seconds for auto to kick in;
+	  float locm=loc.Magnitude();
+	  if (locm<.0001)
+		  locm=1;
+      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*splitsub->GetMass()*loc/locm);
+      loc.Set (rand(),rand(),rand()+.1);
       loc.Normalize();
-      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".002"));//10 seconds for auto to kick in;
-      splitsub->ApplyLocalTorque(loc*mass*explosion_torque*rSize()*(1+rand()%(int)(1+rSize())));
+      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".001"));//10 seconds for auto to kick in;
+      splitsub->ApplyLocalTorque(loc*splitsub->GetMoment()*explosion_torque*(1+rand()%(int)(1+rSize())));
     }
   }
   old.clear();
@@ -129,7 +144,7 @@ void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
 
 template <class UnitType>
 float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
-  float percent = Unit::DealDamageToShield( pnt, damage);
+  float percent = UnitType::DealDamageToShield( pnt, damage);
   if (percent&&!AUDIsPlaying (sound->shield))
 	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
   else
@@ -138,38 +153,41 @@ float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) 
   return percent;
 }
 
+/*
 template <class UnitType>
 float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
+  float absamt= amt>=0?amt:-amt;
   Cockpit * cpt;
   if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
       phasedamage*= (g_game.difficulty);
       amt*=(g_game.difficulty);
-      cpt->Shake (amt);
+      cpt->Shake (absamt);
     }
   }
   //  #endif
   float percentage=0;
-  percentage = Unit::ApplyLocalDamage( pnt, normal, amt, affectedUnit, color, phasedamage);
+  percentage = UnitType::ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
   float leakamt = phasedamage+amt*.01*shield.leak;
   if( percentage==-1)
 	return -1;
   if (GetNebula()==NULL||(nebshields>0)) {
-    percentage = DealDamageToShield (pnt,amt);
+    percentage = DealDamageToShield (pnt,absamt);
+	amt = amt>=0?absamt:-absamt;
     if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
-      /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
-	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
-	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
-	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
+      //      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+	  //    GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
+	  //    GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
+	  //    GFXColor (.5,.5,.5),GFXColor (1,0,.01)));
       //calculate percentage
       if (GetNebula()==NULL) 
 	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
     }
   }
-  if (shield.leak>0||!meshdata.back()||percentage==0||amt>0||phasedamage) {
+  if (shield.leak>0||!meshdata.back()||percentage==0||absamt>0||phasedamage) {
     percentage = DealDamageToHull (pnt, leakamt+amt);
     if (percentage!=-1) {//returns -1 on death--could delete
       for (int i=0;i<nummesh();i++) {
@@ -180,6 +198,7 @@ float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & n
   }
   return 1;
 }
+*/
 
 extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
 
@@ -191,7 +210,7 @@ void GameUnit<UnitType>::ApplyDamage (const Vector & pnt, const Vector & normal,
       //now we can dereference it because we checked it against the parent
       CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
-      this->getAIState()->Communicate (c);      
+      if (this->getAIState()) this->getAIState()->Communicate (c);      
       Threaten (ownerDoNotDereference,10);//the dark danger is real!
   }
   bool mykilled = hull<0;
@@ -211,14 +230,15 @@ extern unsigned int AddAnimation (const QVector &, const float, bool, const std:
 
 extern Animation * getRandomCachedAni() ;
 extern std::string getRandomCachedAniString() ;
+extern void disableSubUnits(Unit * un);
 template <class UnitType>
 bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
 
   // notify the director that a ship got destroyed
-  mission->DirectorShipDestroyed(this);
-
+    mission->DirectorShipDestroyed(this);
+    disableSubUnits(this);
     image->timeexplode=0;
     static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
 
@@ -292,6 +312,8 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	  }
 	}
   }
+  static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
+  bool timealldone =(image->timeexplode>timebeforeexplodedone||isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this||this->SubUnits.empty());
   if (image->explosion) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
@@ -300,7 +322,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
       Vector p,q,r;
       GetOrientation (p,q,r);
       image->explosion->SetOrientation(p,q,r);
-      if (image->explosion->Done()) {
+      if (image->explosion->Done()&&timealldone) {
 	delete image->explosion;	
 	image->explosion=NULL;
       }
@@ -314,9 +336,11 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
     UnitCollection::UnitIterator ui = getSubUnits();
     Unit * su;
     while ((su=ui.current())) {
-      alldone |=su->Explode(drawit,timeit);
+      bool temp = su->Explode(drawit,timeit);
+      if (su->GetImageInformation().explosion)
+	alldone |=temp;
       ui.advance();
     }
   }
-  return alldone;
+  return alldone||(!timealldone);
 }

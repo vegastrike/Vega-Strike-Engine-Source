@@ -1,4 +1,4 @@
-//#include "unit.h"
+//#include "unit_template.h"
 #include "images.h"
 #include "xml_serializer.h"
 #include <algorithm>
@@ -8,17 +8,21 @@
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
 #include "unit_const_cache.h"
-
+#include <set>
 static const GFXColor disable (1,0,0,1);
 
 extern int GetModeFromName (const char *);
+extern std::set <std::string> GetListOfDowngrades();
+extern void ClearDowngradeMap();
+extern double ComputeMinDowngradePercent();
 template<class UnitType>
 vector <CargoColor>& GameUnit<UnitType>::FilterDowngradeList (vector <CargoColor> & mylist, bool downgrade)
 {
   const Unit * templ=NULL;
   const Unit * downgradelimit=NULL;
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
-  static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
+  static float MyPercentMin= ComputeMinDowngradePercent();
+
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     int mode=GetModeFromName(mylist[i].cargo.content.c_str());
@@ -113,7 +117,14 @@ vector <CargoColor>& GameUnit<UnitType>::FilterUpgradeList (vector <CargoColor> 
 	}
 	return FilterDowngradeList(mylist,false);
 }
-
+inline float uniformrand (float min, float max) {
+	return ((float)(rand ())/RAND_MAX)*(max-min)+min;
+}
+inline QVector randVector (float min, float max) {
+	return QVector (uniformrand(min,max),
+					uniformrand(min,max),
+					uniformrand(min,max));
+}
 extern void SwitchUnits (Unit *,Unit*);
 template<class UnitType>
 void GameUnit<UnitType>::EjectCargo (unsigned int index) {
@@ -167,7 +178,14 @@ void GameUnit<UnitType>::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-		  cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
+		  if (tmpcontent=="eject") {
+			  cargo = UnitFactory::createUnit ("eject",false,faction);
+			  int fac = FactionUtil::GetFaction("neutral");
+			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
+		  }else {
+			  string tmpnam = tmpcontent+".cargo";
+			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
+		  }
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
@@ -176,9 +194,9 @@ void GameUnit<UnitType>::EjectCargo (unsigned int index) {
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
       }else {
-	cargo->SetPosAndCumPos (Position());
+	cargo->SetPosAndCumPos (Position()+randVector(-rSize(), rSize()));
 	cargo->SetOwner (this);
-	cargo->SetVelocity(Velocity);
+	cargo->SetVelocity(Velocity+randVector(-.25,.25).Cast());
 	cargo->mass = tmp->mass;
 	if (name.length()>0) {
 	  cargo->name=name;

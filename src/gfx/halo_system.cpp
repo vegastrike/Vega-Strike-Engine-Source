@@ -15,7 +15,7 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
-static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
+void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,float particle_size,int faction) {
   percent = 1-percent;
   int i=rand();
   static float scale = XMLSupport::parse_float (vs_config->getVariable("graphics",
@@ -33,7 +33,7 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
   static float spread = XMLSupport::parse_float (vs_config->getVariable("graphics",
 								       "sparklespread",
 								       
-								       "0"));
+								       ".04"));
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
@@ -44,17 +44,34 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
       pp.col.i=col[0];
       pp.col.j=col[1];
       pp.col.k=col[2];
-      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed);
+	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
+      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed,particle_size*sciz);
     }
 }
   
 
+void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Mesh * mush, float hull,int faction) {
+	if (mush){
+		static bool ignoreGetBlendDst = XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkleoffglow","true"));
+	if (mush->getBlendDst()!=ONE||ignoreGetBlendDst) {		
+		unsigned int numvert = mush->numVertices();
+		if (numvert) {
+			unsigned int whichvert = seed%numvert;
+			QVector v (mush->GetVertex(whichvert).Cast());
+			v=Transform(mat,v);
+			static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
+			DoParticles (v,hull,vel,0,mush->rSize()*sciz,faction);
+		}
+	}
+	}
+}
 
 
 
 HaloSystem::HaloSystem() {
   VSCONSTRUCT2('h')
   mesh=NULL;
+  activation=0;
 }
 
 MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
@@ -62,7 +79,7 @@ MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
     this->size=size;
 }
 
-unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type) {
+unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type, float activation_speed) {
 #ifdef CAR_SIM
   ani.push_back (new Animation ("flare6.ani",1,.1,MIPMAP,true,true,col));
   ani.back()->SetDimensions (size.i,size.j);
@@ -70,7 +87,9 @@ unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, co
   halo_type.push_back (CAR::type_map.lookup(type));//should default to headlights
 #endif
   if (mesh==NULL) {
-    mesh = new Mesh ((string (filename)+".xmesh").c_str(), 1,FactionUtil::GetFaction("neutral"),NULL);
+    mesh = new Mesh ((string (filename)+".xmesh").c_str(), Vector(1,1,1),FactionUtil::GetFaction("neutral"),NULL);
+    float gs =XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+    activation=activation_speed*activation_speed*gs*gs;
   }
   static float engine_scale = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_radii_scale",".4"));
   static float engine_length = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_length_scale","1.25"));
@@ -91,6 +110,9 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
   ani[which]->SetPosition(loc);
 #endif
 
+}
+bool HaloSystem::ShouldDraw (float speedsquared) {
+  return speedsquared>activation;
 }
 void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
 #ifdef CAR_SIM
@@ -147,7 +169,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       m.p = Transform (trans,i->loc);
       mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);    
       if (hullpercent<.99) {
-	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,faction);
+	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,mesh->rSize()*scale.i,faction);
       }
     }
   }

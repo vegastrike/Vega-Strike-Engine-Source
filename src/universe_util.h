@@ -15,7 +15,7 @@ namespace UniverseUtil {
 ///this function sets the "current" system to be "name"  where name may be something like "sol_sector/sol"  or "vega_sector/vega"   this function may take some time if the system has not been loaded before
 
 	void pushSystem (string name);
-
+	bool systemInMemory(string name);
 ///this function restores the active system.... there must be an equal number of pushSystems ans popSystems or else Vega Strike may behave unpredictably
 	void popSystem ();
 ///This function gets the current system's official name
@@ -43,16 +43,20 @@ namespace UniverseUtil {
 	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo);
 ///this gets a random cargo type (useful for cargo missions) from either any category if category is '' or else from a specific category  'Contraband'  comes to mind!
 	Cargo getRandCargo(int quantity, string category);
-///this gets the current time in seconds
-	float GetGameTime ();
-///this sets the time compresison value to zero
-	void SetTimeCompression ();
 ///this gets a string which has in it a space delimited list of neighmoring systems
 	string GetAdjacentSystem (string str, int which);
 ///this gets a specific property of this system as found in universe/milky_way.xml
 	string GetGalaxyProperty (string sys, string prop);
+///this gets a specific property of this system as found in universe/milky_way.xml and returns a default value if not found
+	string GetGalaxyPropertyDefault (string sys, string prop, string def);
 ///this gets the number of systems adjacent to the sysname
+	string GetGalaxyFaction(string sys);
+	void SetGalaxyFaction(string sys, string fac);
 	int GetNumAdjacentSystems (string sysname);
+///this gets the current time in seconds
+	float GetGameTime ();
+///this sets the time compresison value to zero
+	void SetTimeCompression ();
 ///this adds a playlist to the music and may be triggered with an int
 	int musicAddList(string str);
 ///this plays a specific song
@@ -71,6 +75,11 @@ namespace UniverseUtil {
 ///this plays an image (explosion or warp animation) at a location
 	void playAnimation(string aniName, QVector loc, float size);
 	void playAnimationGrow(string aniName, QVector loc, float size,float growpercent);
+	///tells the respective flightgroups in this system to start shooting at each other
+	void TargetEachOther (string fgname, string faction, string enfgname, string enfaction);
+	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
+	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction);
+	
 ///this ends the mission with either success or failure
 	void terminateMission(bool term);
 ///this gets the player belonging to this mission
@@ -107,6 +116,7 @@ namespace UniverseUtil {
 ///this sets whether or not a player may autopilot.  Normally they are both 0 and the autopiloting is allowed based on if enemies are near... if you pass in 1 then autopilot will be allowed no matter who is near... if you set -1 then autopilot is never allowed.  global affects all players... player just affects the player who accepted the mission.
 	void SetAutoStatus (int global_auto, int player_auto);
 	void LoadMission (string missionname);
+	void LoadMissionScript (string scriptcontents);    
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
 	float getPlanetRadiusPercent ();
 
@@ -164,7 +174,7 @@ namespace UniverseUtil {
 	double atan (double);
 	double tan (double);
 	void micro_sleep(int n);
-
+	void addParticle (QVector loc, Vector velocity, Vector color, float size);
 }
 
 #undef activeSys

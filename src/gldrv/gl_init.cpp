@@ -18,7 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#define GL_INIT_CPP
 #include "gl_globals.h"
+#undef GL_INIT_CPP
 #include "gl_include.h"
 #include "vs_globals.h"
 #include "xml_support.h"
@@ -26,15 +28,14 @@
 #include "winsys.h"
 #include <assert.h>
 //#include "gl_globals.h"
-
+#include "gfxlib.h"
 #if !defined(_WIN32) && !defined(__CYGWIN__)
 #if !(defined(__APPLE__) || defined(MACOSX))
 
-#define GLX_GLXEXT_PROTOTYPES
     #   include <GL/glx.h>
 #endif
 #include <stdlib.h>
-#include "gfxlib.h"
+
 #else
 #include <windows.h>
 #endif
@@ -51,7 +52,10 @@
 #if !defined(IRIX)
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
-
+#undef GL_EXT_compiled_vertex_array
+#ifndef _WIN32
+#define GL_GLEXT_PROTOTYPES
+#endif
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/glext.h>
 #else
@@ -63,24 +67,17 @@
 #include "gl_init.h"
 #define WINDOW_TITLE "Vega Strike "VERSION
 
-
-#ifdef _WIN32
-PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
-PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB=0;
-PFNGLCOLORTABLEEXTPROC glColorTable=0;
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
-// the following two lines were not defined for WIN32... any particular reason?
-PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-//PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
-//PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
-//PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
-#include "gfxlib.h"
-#else
-PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-
+#if defined(CG_SUPPORT)
+#include "cg_global.h"
 #endif
+
+PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p=0;
+PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p=0;
+PFNGLCOLORTABLEEXTPROC glColorTable_p=0;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = 0;
+PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
+PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
 #ifdef _WIN32
     typedef char * GET_GL_PTR_TYP;
@@ -89,7 +86,10 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #else
     typedef GLubyte * GET_GL_PTR_TYP;
 #define GET_GL_PROC glXGetProcAddressARB
+#endif
 
+#if defined(CG_SUPPORT)
+CG_Cloak *cloak_cg = new CG_Cloak();
 #endif
 
 void init_opengl_extensions()
@@ -97,38 +97,39 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
-#if !defined(IRIX)
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
-#if defined(__APPLE__) || defined(MACOSX)
+#ifdef __APPLE__
         glLockArraysEXT_p = &glLockArraysEXT;
         glUnlockArraysEXT_p = &glUnlockArraysEXT;
 #else
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
-	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
+	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );	
 #endif
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
-    } else {
+    } else {    
+		glLockArraysEXT_p = NULL;
+		glUnlockArraysEXT_p = NULL;
+		(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
+    }
+#ifdef __APPLE__
+	glColorTable_p = &glColorTableEXT;
+	glMultiTexCoord2fARB_p = &glMultiTexCoord2fARB;
+	glClientActiveTextureARB_p = &glClientActiveTextureARB;
+	glActiveTextureARB_p = &glActiveTextureARB;		
 #else
-    {
+    glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
+    glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
+    glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
+    glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
+    if (!glMultiTexCoord2fARB_p) {
+      glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
+      glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
+      glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
+	}
 #endif
-	glLockArraysEXT_p = NULL;
-	glUnlockArraysEXT_p = NULL;
-	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
-    }
-#ifdef _WIN32
-    glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
-    glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
-    glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
-    if (!glMultiTexCoord2fARB) {
-      glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
-      glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
-      glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
-    }
-#endif
-
+	  
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (glutExtensionSupported ("GL_NV_fog_distance")) {
       fprintf (stderr,"OpenGL::Accurate Fog Distance supported\n");
@@ -176,8 +177,27 @@ void init_opengl_extensions()
       (void) fprintf(stderr, "OpenGL::TextureCubeMapExt supported\n");
     } else {
       gl_options.cubemap = 0;
-      (void) fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n");
+      (void) fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n"); 
     }
+
+#if defined(CG_SUPPORT)
+	if(! glh_init_extensions(CG_REQUIRED_EXTENSIONS))
+	{
+		cerr << "Necessary OpenGL extensions for Cg were not supported:" << endl
+			 << glh_get_unsupported_extensions() << endl << endl
+			 << "Press <enter> to quit." << endl;
+		char buff[10];
+		cin.getline(buff, 10);
+		winsys_exit(0);
+	}
+
+cloak_cg->vertexProfile = CG_PROFILE_ARBVP1;
+cloak_cg->shaderContext = cgCreateContext();
+cloak_cg->cgLoadMedia("programs/cloaking_effect", "vertex.cg");
+#endif
+
+
+    
 }
 
  static void initfov () {
@@ -220,6 +240,7 @@ void GFXInit (int argc, char ** argv){
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
     gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));     
+    gl_options.max_texture_dimension= XMLSupport::parse_int (vs_config->getVariable ("graphics","max_texture_dimension","65536"));     
     gl_options.smooth_shade = XMLSupport::parse_bool (vs_config->getVariable ("graphics","SmoothShade","true"));     
     gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
     gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));

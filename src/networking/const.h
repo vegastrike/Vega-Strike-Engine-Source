@@ -21,50 +21,126 @@
 #ifndef __CONST_H
 #define __CONST_H
 
-#define SERVERCONFIGFILE	"vegaserver.config"
-#define ACCTCONFIGFILE		"accountserver.config"
+#include "config.h"
+#include "endianness.h"
+#include <assert.h>
+#include <stdio.h>
+
+#define GAMESERVER_VERSION 0.2
+#define ACCOUNTSERVER_VERSION 0.2
+#define NETCLIENT_VERSION 0.2
 
 #define MAXCLIENTS	512
+#define MAXOBJECTS	1024 // Maximum numbre of objects in a zone - HAVE TO FIND A WAY NOT TO LIMIT THAT
 #define SERVER_PORT 6777
 #define CLIENT_PORT	6778
 #define ACCT_PORT	6779
 #define NAMELEN		32
 #define MAXBUFFER	16384
 
-// Commands that are sent through the network
-#define CMD_LOGIN		0x01
-#define CMD_LOGOUT		0xA1
-#define CMD_INITIATE	0x02
-#define CMD_POSUPDATE	0x03
-#define CMD_NEWCHAR		0x04
-#define CMD_LETSGO		0x05
-#define CMD_UPDATECLT	0x06
-#define CMD_ADDCLIENT	0x07
-#define CMD_FULLUPDATE	0x08
-#define CMD_PING		0x09
-#define CMD_SNAPSHOT	0xA0
-
-#define CMD_CREATECHAR	0x50
-#define CMD_LOCATIONS	0x51
-#define LOGIN_ERROR		0xF1
-#define LOGIN_ACCEPT	0xF0
-#define LOGIN_ALREADY	0xF6
-#define LOGIN_NEW		0xF7
-
-#define CMD_NEWSUBSCRIBE 0xF8
-
-#define CMD_ENTERCLIENT	0xF2
-#define CMD_EXITCLIENT	0xF3
-#define CMD_ADDEDYOU	0xF5
-#define CMD_DISCONNECT	0xF4
-
-#define CMD_ACK			0xFF
-
 #define MAXSERIAL 0xFFFF
-#define TONET() htons()
+#define OBJSERIAL_TONET VSSwapHostShortToLittle
+#define INSTSERIAL_TONET VSSwapHostIntToLittle
 typedef unsigned short ObjSerial;
 typedef unsigned int InstSerial;
 
 extern double NETWORK_ATOM;
 
+#ifndef COUT
+#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+#define COUT std::cout << __FILE__ << ":"
+#else
+#define COUT std::cout << __FILE__ << ":" << __LINE__ << " "
 #endif
+#endif
+
+#if defined(_WIN32) && !defined(__CYGWIN__) || defined(__APPLE__)
+	//#warning "Win32 platform"
+	#define in_addr_t unsigned long
+	#define socklen_t int
+#else
+	//#warning "GCC platform"
+  #ifndef SOCKET_ERROR
+  #define SOCKET_ERROR -1
+  #endif
+#endif
+
+#ifndef NDEBUG
+#define VSNET_DEBUG
+#else
+#undef VSNET_DEBUG
+#endif
+
+#undef VSNET_DEBUG
+
+/* --- BEGIN memory debugging macros --- */
+/** The following macros are intended for default versions a class validity
+ *  debugging. The idea is to increase the likelyhood that uninitialized
+ *  and re-initialized memory areas are captured as well as possible.
+ */
+#ifndef NDEBUG
+
+#include <assert.h>
+#include <stdio.h>
+
+#define DECLARE_VALID \
+private: \
+    bool _valid; \
+    bool _invalid; \
+public: \
+    void validate( const char* file, int line ) const { \
+	if( !_valid || _invalid ) { \
+	    fprintf( stderr, "object invalid in %s:%d\n", file, line ); \
+	} \
+        assert( _valid ); \
+        assert( !_invalid ); \
+    }
+
+#define MAKE_VALID \
+    _valid = true; \
+    _invalid = false;
+
+#define MAKE_INVALID \
+    _valid = false; \
+    _invalid = true;
+
+#define CHECK_VALID \
+    validate( __FILE__, __LINE__ );
+
+#define CHECK_VALID_OBJ(a) \
+    (a).validate( __FILE__, __LINE__ );
+
+#define ASSERT(a) if(!(a)) { std::cerr << __FILE__ << ":" << __LINE__ << " assertion failed, forcing segfault for postmortem debugging"; int x = 1/0; }
+
+#else /* NDEBUG */
+#  define DECLARE_VALID
+#  define MAKE_VALID
+#  define MAKE_INVALID
+#  define CHECK_VALID
+#  define CHECK_VALID_OBJ(a)
+#  define ASSERT(a)
+#endif /* NDEBUG */
+/* --- END memory debugging macros --- */
+
+#ifndef _WIN32
+#define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
+#define LOCALCONST_DEF(Class,Type,Name,Value)
+#else
+#define LOCALCONST_DECL(Type,Name,Value) static Type Name;
+#define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
+#endif
+
+#ifndef __PRETTY_FUNCTION__
+#define __PRETTY_FUNCTION__ "<Unknown>"
+#endif
+
+#ifndef __FUNCTION__
+#define __FUNCTION__ "<Unknown>"
+#endif
+
+#ifndef __LINE__
+#define __LINE__ "<Unknown>"
+#endif
+
+#endif /* __CONST_H */
+

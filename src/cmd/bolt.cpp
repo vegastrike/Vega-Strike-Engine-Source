@@ -67,6 +67,61 @@ inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QV
     drawmat.p = prev_position.Scale(1-interpolation_blend_factor) + cur_position.Scale(interpolation_blend_factor);    
 }
 
+Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+  VSCONSTRUCT2('t')
+  bolt_draw *q= _Universe->activeStarSystem()->bolts;
+  prev_position= cur_position;
+  this->owner = owner;
+  type = typ.type;
+  damage = typ.Damage+typ.PhaseDamage;
+  if (damage) 
+    percentphase=(unsigned char) (255.*typ.PhaseDamage/damage);
+  else
+    percentphase=0;
+  longrange = typ.Longrange;
+  radius = typ.Radius;
+  speed = typ.Speed/(type==weapon_info::BOLT?typ.Length:typ.Radius);//will scale it by length long!
+  range = typ.Range/(type==weapon_info::BOLT?typ.Length:typ.Radius);
+  curdist = 0;
+  CopyMatrix (drawmat,orientationpos);
+  
+  if (type==weapon_info::BOLT) {
+    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Length));
+    //    if (q->boltmesh==NULL) {
+    //      CreateBoltMesh();
+    //    }
+    decal = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
+    if (decal>=(int)q->bolts.size()) {
+      q->bolts.push_back (vector <Bolt *>());
+      int blargh = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
+      if (blargh>=(int)q->bolts.size()) {
+	q->bolts.push_back (vector <Bolt *>());	
+      }
+      q->cachedecals.push_back (blargh);
+    }
+    q->bolts[decal].push_back (this);
+  } else {
+    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Radius));
+    decal=-1;
+    for (unsigned int i=0;i<q->animationname.size();i++) {
+      if (typ.file==q->animationname[i]) {
+	decal=i;
+      }
+    }
+    if (decal==-1) {
+      decal = q->animations.size();
+      q->animationname.push_back (typ.file);
+      q->animations.push_back (new Animation (typ.file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
+      q->animations.back()->SetPosition (cur_position);
+      q->balls.push_back (vector <Bolt *> ());
+    }
+    q->balls[decal].push_back (this);
+  }
+#ifdef PERBOLTSOUND
+  sound = AUDCreateSound (typ.sound,false);
+  AUDAdjustSound (sound,cur_position,shipspeed+drawmat.getR().Scale(speed));
+#endif
+}
 
 void Bolt::Draw () {
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
@@ -138,143 +193,6 @@ void Bolt::Draw () {
   GFXEnable (TEXTURE0);
   GFXColor4f(1,1,1,1);
 }
-
-
-Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
-  VSCONSTRUCT2('t')
-  bolt_draw *q= _Universe->activeStarSystem()->bolts;
-  prev_position= cur_position;
-  this->owner = owner;
-  type = typ.type;
-  damage = typ.Damage+typ.PhaseDamage;
-  if (damage) 
-    percentphase=(unsigned char) (255.*typ.PhaseDamage/damage);
-  else
-    percentphase=0;
-  longrange = typ.Longrange;
-  radius = typ.Radius;
-  speed = typ.Speed/(type==weapon_info::BOLT?typ.Length:typ.Radius);//will scale it by length long!
-  range = typ.Range/(type==weapon_info::BOLT?typ.Length:typ.Radius);
-  curdist = 0;
-  CopyMatrix (drawmat,orientationpos);
-  
-  if (type==weapon_info::BOLT) {
-    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Length));
-    //    if (q->boltmesh==NULL) {
-    //      CreateBoltMesh();
-    //    }
-    decal = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
-    if (decal>=(int)q->bolts.size()) {
-      q->bolts.push_back (vector <Bolt *>());
-      int blargh = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
-      if (blargh>=(int)q->bolts.size()) {
-	q->bolts.push_back (vector <Bolt *>());	
-      }
-      q->cachedecals.push_back (blargh);
-    }
-    q->bolts[decal].push_back (this);
-  } else {
-    ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Radius));
-    decal=-1;
-    for (unsigned int i=0;i<q->animationname.size();i++) {
-      if (typ.file==q->animationname[i]) {
-	decal=i;
-      }
-    }
-    if (decal==-1) {
-      decal = q->animations.size();
-      q->animationname.push_back (typ.file);
-      q->animations.push_back (new Animation (typ.file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
-      q->animations.back()->SetPosition (cur_position);
-      q->balls.push_back (vector <Bolt *> ());
-    }
-    q->balls[decal].push_back (this);
-  }
-#ifdef PERBOLTSOUND
-  sound = AUDCreateSound (typ.sound,false);
-  AUDAdjustSound (sound,cur_position,shipspeed+drawmat.getR().Scale(speed));
-#endif
-}
-
-
-bool Bolt::Update () {
-  curdist +=speed*SIMULATION_ATOM;
-  prev_position = cur_position;
-  cur_position+=((ShipSpeed+drawmat.getR()*speed).Cast()*SIMULATION_ATOM);
-  if (curdist>range) {
-    delete this;//risky
-    return false;
-  }
-#ifdef PERBOLTSOUND
-  if (!AUDIsPlaying(sound)) {
-    AUDDeleteSound (sound);
-    sound=-1;
-  } else {
-#ifndef PERFRAMESOUND
-    if ((*j)->sound!=-1)
-      AUDAdjustSound ((*j)->sound,cur_position,(*j)->ShipSpeed+(*j)->speed*Vector ((*j)->drawmat[8],(*j)->drawmat[9],(*j)->drawmat[10]));
-#endif
-
-  }
-#endif
-  return true;
-}
-
-void bolt_draw::UpdatePhysics () {
-  vector <vector <Bolt *> > *tmp = &bolts;
-  for (int l=0;l<2;l++) {    
-    for (vector <vector <Bolt *> >::iterator i= tmp->begin();i!=tmp->end();i++) {
-      for (unsigned int j=0;j<i->size();j++) {
-	///warning these require active star system to be set appropriately
-	if (!(*i)[j]->Update()) {
-	  j--;//deleted itself
-	} else if ((*i)[j]->Collide()) {
-	  j--;//deleted itself!
-	}
-      }
-    }
-    tmp = &balls;
-  }
-}
-
-bool Bolt::Collide (Unit * target) {
-  enum clsptr type = target->isUnit();
-  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) {
-    static bool collideroids = XMLSupport::parse_bool(vs_config->getVariable("physics","AsteroidWeaponCollision","false"));
-    if (type!=ASTEROIDPTR||(!collideroids)) {
-      return false;
-    }
-  }
-  Vector normal;
-  float distance;
-  Unit * affectedSubUnit;
-  if ((affectedSubUnit =target->queryBSP (prev_position,cur_position,normal,distance))) {//ignore return
-  //  QVector pos;
-  //  double dis=distance;
-  //  if ((affectedSubUnit = target->BeamInsideCollideTree(prev_position,cur_position,pos,normal,dis))) { 
-  //    distance=dis;
-    QVector tmp = (cur_position-prev_position).Normalize();
-    tmp = tmp.Scale(distance);
-    distance = curdist/range;
-    GFXColor coltmp (col);
-    /*    coltmp.r+=.5;
-    coltmp.g+=.5;
-    coltmp.b+=.5;
-    if (coltmp.r>1)coltmp.r=1;
-    if (coltmp.g>1)coltmp.g=1;
-    if (coltmp.b>1)coltmp.b=1;*/
-    float appldam = ((float(255-percentphase)/255)*damage);;
-    float phasdam =((float(percentphase)/255)*damage);
-    if (damage>0) {
-      target->ApplyDamage ((prev_position+tmp).Cast(),normal, appldam* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,(Unit*)owner, phasdam* ((1-distance)+distance*longrange));
-    }else if (damage<0) {
-      target->leach (1,phasdam<0?-phasdam:1,appldam<0?-appldam:1);      
-    }
-    return true;
-  }
-  return false;
-}
-
 
 Bolt::~Bolt () {
   VSDESTRUCT2

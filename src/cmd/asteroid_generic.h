@@ -18,7 +18,7 @@ protected:
 protected:
     /// default constructor forbidden
     Asteroid( ) {}
-
+	Asteroid (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
     /// copy constructor forbidden
     //Asteroid( const Asteroid& );
 

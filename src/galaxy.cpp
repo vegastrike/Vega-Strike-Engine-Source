@@ -203,7 +203,7 @@ vector <char *> ParseDestinations (const string &value) {
   for (j=0;value[j]!=0;){
     for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
     }
-    tmp.push_back(new char [i+1]);
+    tmp.push_back(new char [i+1]);//leak...somewhere!
     for (k=0;k<i;k++) {
       tmp[tmp.size()-1][k]=value[k+j-i];
     }
@@ -291,6 +291,11 @@ std::string Universe::getGalaxyProperty (const std::string & sys, const std::str
   string sector = getStarSystemSector (sys);
   string name = RemoveDotSystem (getStarSystemName (sys).c_str());
   return galaxy->getVariable (sector,name,prop,galaxy->getVariable (sector,prop,galaxy->getVariable ("unknown_sector","min",prop,"")));
+}
+std::string Universe::getGalaxyPropertyDefault (const std::string & sys, const std::string & prop, const std::string def) {
+  string sector = getStarSystemSector (sys);
+  string name = RemoveDotSystem (getStarSystemName (sys).c_str());
+  return galaxy->getVariable (sector,name,prop,def);
 }
 vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) {
   string sector =getStarSystemSector (file); 

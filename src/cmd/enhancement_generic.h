@@ -36,6 +36,7 @@ public:
 protected:
     /// default constructor forbidden
     Enhancement( ) {}
+	Enhancement (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
     /// copy constructor forbidden
     //Enhancement( const Enhancement& );
     /// assignment operator forbidden

@@ -50,15 +50,33 @@
 #include "networking/netclient.h"
 #include "universe.h"
 #include "save_util.h"
+#include "gfx/masks.h"
+#include "cmd/music.h"
+#if defined (_MSC_VER) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
+
+#if defined(CG_SUPPORT)
+#include "cg_global.h"
+#endif
+
+int nadanixnuthin() {
+  float a=0;
+  int test=0;
+  Delta(a, a);
+  flipbit(test,test);
+  checkbit(test,test);
+  dosetbit(test,test);
+  unsetbit(test,test);
+  return 0;
+}
 /*
  * Globals 
  */
-const char *mission_key="unit_to_dock_with";
-ForceFeedback *forcefeedback;
 Universe * _Universe;
 // GameUniverse _Universe;
 TextPlane *bs_tp=NULL;
-bool SERVER=0;
+char SERVER=0;
 /* 
  * Function definitions
  */
@@ -89,49 +107,7 @@ VegaConfig * createVegaConfig( char * file)
 	return new GameVegaConfig( file);
 }
 
-void DockToSavedBases (int playernum) {
-	string str="MiningBase";
-	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
-	if (!plr) {
-		return;
-	}
-	vector <string> strs=loadStringList(playernum,mission_key);
-	if (strs.size()) {
-		str=strs[0];
-	}
-	un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();
-	Unit *closestUnit=NULL;
-	float lastdist=0;
-	float dist=0;
-	while (iter.current()) {
-		Unit *un=iter.current();
-		if (un->name==str) {
-			dist=UnitUtil::getSignificantDistance(plr,un);
-			if (closestUnit==NULL||dist<lastdist) {
-				lastdist=dist;
-				closestUnit=un;
-			}
-		}
-		iter.advance();
-	}
-	if (closestUnit) {
-		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {
-			plr->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize()));
-		}
-		vector <DockingPorts> dprt=closestUnit->image->dockingports;
-		int i;
-		for (i=0;;i++) {
-			if (i>=dprt.size()) {
-				return;
-			}
-			if (!dprt[i].used) {
-				break;
-			}
-		}
-		plr->ForceDock(closestUnit,i);
-		closestUnit->image->clearedunits.push_back(plr);
-	}
-}
+extern void DockToSavedBases (int playernum);
 
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
@@ -144,7 +120,17 @@ void cleanup(void)
   // In network mode, we may not do the save since it is useless
   if( _Universe != NULL && Network==NULL)
 	  _Universe->WriteSaveGame(true);
-
+#ifdef _WIN32
+#if defined (_MSC_VER) && defined(_DEBUG)
+  if (!cleanexit) {
+    _RPT0(_CRT_ERROR, "WARNING: Vega Strike exit not clean\n");
+  }
+  return;
+#endif
+#else
+  while (!cleanexit) 
+    int i=1;
+#endif
   if( Network!=NULL)
   {
 		cout<<"Number of players"<<_Universe->numPlayers()<<endl;
@@ -153,6 +139,12 @@ void cleanup(void)
 				Network[i].logout();
 		delete [] Network;
   }
+
+#if defined(CG_SUPPORT)
+    if (cloak_cg->vertexProgram) cgDestroyProgram(cloak_cg->vertexProgram);
+    if (cloak_cg->shaderContext)  cgDestroyContext(cloak_cg->shaderContext);
+#endif
+
   if (muzak) {
     delete muzak;
     muzak=NULL;
@@ -168,18 +160,20 @@ void cleanup(void)
   
 }
 
-VegaConfig *vs_config;
 //Mission *mission;
 LeakVector<Mission *> active_missions;
 
 char mission_name[1024];
 
 void bootstrap_main_loop();
+void bootstrap_first_loop();
 
 #if defined(WITH_MACOSX_BUNDLE)
  #undef main
 #endif
+void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
+}
 int main( int argc, char *argv[] ) 
 {
 	CONFIGFILE=0;
@@ -202,20 +196,35 @@ int main( int argc, char *argv[] )
     while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
         c--;
     
-    *c++ = '\0';             /* cut off last part (binary name) */
+    *c = '\0';             /* cut off last part (binary name) */
     if (strlen (parentdir)>0) {  
       chdir (parentdir);/* chdir to the binary app's parent */
     }
 	delete []parentdir;
 	}
 #if defined(WITH_MACOSX_BUNDLE)
-	chdir ("../Resources/data");/* chdir to the .app's parent */
+	FILE * testmac = fopen ("../Resources/data/vegastrike.config","r");
+	if (testmac) {
+		chdir ("../Resources/data");/* chdir to the .app's parent */
+		fclose(testmac);
+	}
 	//chdir ("../../../");/* chdir to the .app's parent */
 #endif
+	
+    FILE * testup = fopen ("../vegastrike.config","r");
+	FILE * test = fopen ("vegastrike.config","r");
+	if (testup)
+		fclose(testup);
+	if (test)
+		fclose(test);
+	if (testup&&NULL==test) {
+		chdir("..");
+	}
+	
 #endif
     /* Print copyright notice */
-  fprintf( stderr, "Vega Strike "  " \n"
-	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
+	printf("Vega Strike "  " \n"
+		   "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
     
 
@@ -306,7 +315,8 @@ int main( int argc, char *argv[] )
     */
     _Universe= new GameUniverse(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
 	//_Universe.Init(argc, argv, vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
-    _Universe->Loop(bootstrap_main_loop);
+    //    winsys_set_keyboard_func(nothinghappens);
+    _Universe->Loop(bootstrap_first_loop);
     return 0;
 }
   static Animation * SplashScreen = NULL;
@@ -314,14 +324,19 @@ static bool BootstrapMyStarSystemLoading=true;
 void SetStarSystemLoading (bool value) {
   BootstrapMyStarSystemLoading=value;
 }
-
+bool GetStarSystemLoading () {
+  return BootstrapMyStarSystemLoading;
+}
+void SetSplashScreen(Animation * ss) {
+  SplashScreen=ss;
+}
 void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen) {
 
   static Animation *ani=NULL;
   if (!BootstrapMyStarSystemLoading) {
     return;
   }
-  if(SplashScreen==NULL){
+  if(SplashScreen==NULL&&newSplashScreen==NULL){
     // if there's no splashscreen, we don't draw on it
     // this happens, when the splash screens texture is loaded
     return;
@@ -394,7 +409,19 @@ bool SetPlayerSystem (std::string &sys, bool set) {
     return isset;
   }
 }
-
+void bootstrap_first_loop() {
+  static int i=0;
+  std::string ss=vs_config->getVariable ("graphics","splash_screen","vega_splash.ani");
+  if (i==0) {
+    SplashScreen = new Animation (ss.c_str(),0);
+    bs_tp=new TextPlane();
+  }
+  bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
+  
+  if (i++>4) {
+    _Universe->Loop(bootstrap_main_loop);
+  }
+}
 void bootstrap_main_loop () {
 
   static bool LoadMission=true;
@@ -408,18 +435,26 @@ void bootstrap_main_loop () {
 
     mission->initMission();
 
-    bs_tp=new TextPlane();
- 
-    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
+    //    if (SplashScreen)
+    //      delete SplashScreen;
+    //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
   if (g_game.music_enabled) {
 #ifdef _WIN32
-//    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
-	  int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
-    if (pid<=32) {
-      g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
-    }
+	  static bool isconsole=XMLSupport::parse_bool(vs_config->getVariable("audio","music_in_console","true"));
+	  if (isconsole) {
+	    int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
+        if (pid<=32) {
+          g_game.music_enabled=false;
+          fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+        }
+	  } else {
+	    int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
+		if (pid==0) {
+          g_game.music_enabled=false;
+          fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+		}
+	  }
 #endif
   }
     QVector pos;
@@ -432,7 +467,7 @@ void bootstrap_main_loop () {
 	int numplayers;
 	/*
 	string nbplayers = vs_config->getVariable("network","nbplayers","1");
-	// Test if nb players if present in netwokr section
+	// Test if nb players if present in network section
 	if( srvip != "" && nbplayers != "")
 	{
 		numplayers = atoi( nbplayers.c_str());
@@ -455,8 +490,8 @@ void bootstrap_main_loop () {
 		  if( pname=="")
 		  {
 			  cout<<"Missing or incomlpete section for player "<<p<<endl;
-		      cleanup();
-			  exit(1);
+			  cleanexit=true;
+			  winsys_exit(1);
 		  }
 	  }
       playername.push_back( pname);
@@ -475,6 +510,7 @@ void bootstrap_main_loop () {
 	vector <QVector> playerNloc;
 
 	/************************* NETWORK INIT ***************************/
+	  vector<vector<std::string> > savefiles;
 	char * srvipadr;
 	int port;
 	if ( srvip != "")
@@ -520,36 +556,38 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-		char * savedata = 0;
-		if( Network[k].init( srvipadr, (unsigned short) port) == -1)
+		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
-			cleanup();
 			cout<<"Network initialization error - exiting"<<endl;
-			exit( 1);
+			cleanexit=true;
+			winsys_exit(1);
 		}
 		//sleep( 3);
-		cout<<"Waiting for player "<<(k+1)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-		savedata = Network[k].loginLoop( (*it), (*jt));
-		if( savedata==0)
+		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
+		savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
+		if( savefiles[k].empty())
 		{
 			cout<<"No server response, cannot connect, exiting"<<endl;
-			cleanup();
-			exit(1);
+			cleanexit=true;
+			winsys_exit(1);
 		}
 		else
 		{
 			cout<<" logged in !"<<endl;
-			delete savedata;
-			savegamefile = homedir+"/save/"+(*it)+".save";
+			//savegamefile = homedir+"/save/"+(*it)+".save";
 		}
 	  }
 		/************* NETWORK PART ***************/
-	  saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
-	  
+	  if( Network!=NULL)
+	  {
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, savefiles[k][0]);
+	  }
+	  else
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
 	  playersaveunit.push_back(_Universe->AccessCockpit()->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;
-  	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
+		  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
 	  if (setplayerXloc) {
 	   	  playerNloc.push_back(pos);
 	  }else {
@@ -567,7 +605,7 @@ void bootstrap_main_loop () {
 
     vs_config->bindKeys();//gotta do this before we do ai
 
-    createObjects(playersaveunit,ss,playerNloc);
+    createObjects(playersaveunit,ss,playerNloc, savefiles);
 
     if (setplayerloc&&fighters) {
       if (fighters[0]) {
@@ -609,7 +647,7 @@ void bootstrap_main_loop () {
 			}
 		}
 	}
-	if (XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
+	if (mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
 		for (int i=0;i<_Universe->numPlayers();i++) {
 			DockToSavedBases(i);
 		}

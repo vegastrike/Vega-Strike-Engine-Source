@@ -1,16 +1,17 @@
+//#include <gfx/aux_texture.h>
+//#include "gfx/animation.h"
 #include <vector>
 #include <string>
 #include <expat.h>
-#include <gfx/aux_texture.h>
 #include "vegastrike.h"
 #include "xml_support.h"
 #include <assert.h>
 #include "ai/communication.h"
-#include "gfx/animation.h"
 #include "unit_factory.h"
 #include "hashtable.h"
 #include "cmd/music.h"
-#include "faction.h"
+#include "faction_generic.h"
+//#include "faction_util.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -18,6 +19,7 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 //using std::sort;
 using std::map;
+
 static FSM * getFSM (const std::string & value) {
   static Hashtable <std::string, FSM, char[16]> fsms;
   FSM * fsm = fsms.Get (value);
@@ -176,7 +178,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
   case FACTION:
     assert (unitlevel==1);
     unitlevel++;
-    factions.push_back(new GameFaction ());
+    factions.push_back(new Faction ());
     assert(factions.size()>0);
     contrabandlists.push_back ("");
     //	factions[factions.size()-1];
@@ -308,7 +310,7 @@ using namespace FactionXML;
 }
 
 
-void GameFaction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
+void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
 using namespace FactionXML;
   unitlevel=0;
   FILE * inFile;
@@ -354,10 +356,27 @@ using namespace FactionXML;
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       if (factions[i]->faction[j].conversation==NULL){
-	factions[i]->faction[j].conversation=getFSM ("communications/neutral.xml");
+		  string fname;
+		  
+		  //if (factions[i]->faction[j].stats.index != 0)	  {
+		  if (0) {//we just want OUR faction to use that file when communicating with ANYONE  -- if we want certain factions to have *special* comm info for each other, then we can specify the conversation flag
+			  fname = factions[factions[i]->faction[j].stats.index]->factionname;
+		  }else {
+			  fname = factions[i]->factionname;
+		  }
+		  string f="communications/"+fname+".xml";
+		  FILE * fp = fopen (f.c_str(),"rb");
+		  if (!fp) {
+			  fname="neutral";
+		  }else {
+			  fclose (fp);
+		  }
+		  factions[i]->faction[j].conversation=getFSM ("communications/" + fname + ".xml");
       }
     }
   }
+  char * munull=NULL;
+  FactionUtil::LoadSerializedFaction(munull);
 }
 void FactionUtil::LoadContrabandLists() {
   for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
@@ -366,26 +385,4 @@ void FactionUtil::LoadContrabandLists() {
     }
   }
   contrabandlists.clear();
-}
-std::vector <Animation *>* FactionUtil::GetAnimation (int faction, int n, unsigned char &sex) {
-  sex = factions[faction]->comm_face_sex[n];
-  return &factions[faction]->comm_faces[n];
-}
-std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, unsigned char &sex) {
-  if (factions[faction]->comm_faces.size()>0) {
-    return GetAnimation ( faction,rand()%factions[faction]->comm_faces.size(),sex);
-  }else {
-    sex=0;
-    return NULL;
-  }
-}
-Animation * FactionUtil::getRandAnimation (int whichfaction, std::string &which) {
-  if (whichfaction<(int)factions.size()) {
-    if (factions[whichfaction]->explosion_name.size()) {
-      int whichexp = rand()%factions[whichfaction]->explosion_name.size();
-      which = factions[whichfaction]->explosion_name[whichexp];
-      return factions[whichfaction]->explosion[whichexp];
-    }
-  }
-  return NULL;
 }

@@ -23,13 +23,11 @@
 #define _HASHTABLE_H_
 
 #include <math.h>
-#include <list>
 #include <string>
 #include <vector>
 
-using namespace std;
 //const int hashsize = 1001;
-
+using namespace std;
 //Hashtable doesn't grow
 template<class KEY, class VALUE, class SIZ> class Hashtable {
 	class HashElement {
@@ -38,21 +36,19 @@ template<class KEY, class VALUE, class SIZ> class Hashtable {
 		VALUE *value;
 		HashElement(KEY k, VALUE *v) {key = k; value = v;}
 	};
-	list<HashElement> table[sizeof (SIZ)];
+	std::vector<HashElement> table[sizeof (SIZ)];
 	static int hash(const int key) {
 	  return key%sizeof(SIZ);
 	}
 	static int hash(const std::string &key) {
-		int k = 0;
-		char *start = (char*)key.c_str();
-		char *end = start + strlen(start);
-
-		for(;start!=end; start++) {
-			k += (k << 3) + *start;
+		unsigned int k = 0;
+		typename std::string::const_iterator start = key.begin();
+		for(;start!=key.end(); start++) {
+			k += (k * 128) + *start;
 		}
 		k %= sizeof(SIZ);
-		return abs(k);
-	}
+		return k;
+	}	
 public:
 
 	Hashtable()
@@ -60,9 +56,9 @@ public:
 	}
 	std::vector <VALUE *> GetAll() const
 	{
-	  vector <VALUE *> retval;
+	  std::vector <VALUE *> retval;
 	  for (unsigned int hashval=0;hashval<sizeof(SIZ);hashval++) {
-	    typename list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+	    typename std::vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 	    for(;iter!=end;iter++) {
 	      retval.push_back ((*iter).value);
 	    }
@@ -72,7 +68,7 @@ public:
 	VALUE *Get(const KEY &key) const
 	{
 		int hashval = hash(key);
-		typename list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+		typename std::vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)
@@ -86,13 +82,13 @@ public:
 	void Put(const KEY &key, VALUE *value)
 	{
 	        int hashval = hash(key);
-		table[hashval].push_front(HashElement(key, value));
+		table[hashval].push_back(HashElement(key, value));
 	}
 
 	void Delete(const KEY &key)
 	{
 		int hashval = hash(key);
-		typename list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+		typename std::vector<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)

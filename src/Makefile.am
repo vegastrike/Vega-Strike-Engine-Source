@@ -3,6 +3,7 @@ bin_PROGRAMS = vegastrike vegaserver accountserver
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
 
 vegastrike_LDADD =  \
+networking/netserver.o \
 aldrv/libaldrv.a \
 common/libvscommon.a \
 networking/libnetclient.a \
@@ -20,12 +21,14 @@ gui/libgui.a \
 networking/libnet.a \
 cmd/collide/libcollide.a \
 boost129/libboost_python.a boost/libboost_python.a \
+gfx/nav/libnav.a \
 -lpthread 
 
 vegaserver_LDADD =  \
 cmd/script/director_server.o \
 cmd/unit_util_generic.o \
 cmd/unit_util_server.o \
+networking/netclient.o \
 common/libvscommon.a \
 networking/libnetserver.a \
 cmd/libcmdserver.a \
@@ -35,9 +38,11 @@ cmd/script/c_alike/libc_alike.a \
 python/libpythonserver.a \
 gfx/libgfxserver.a \
 gldrv/libgldrvserver.a \
-boost/libboost_python.a
-$(BOOSTLIBS) \
+cmd/collide/libcollide.a \
+boost129/libboost_python.a boost/libboost_python.a
+
 accountserver_LDADD =  \
+common/libvscommon.a \
 networking/libnetacct.a
 
 
@@ -50,10 +55,9 @@ libroot =		\
 	linecollide.h			\
 	in_joystick.cpp			\
 	in_joystick.h			\
-	faction.cpp				\
-	faction.h				\
 	force_feedback.cpp		\
 	force_feedback.h		\
+	faction_util.cpp		\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_sdl.cpp				\
@@ -81,7 +85,8 @@ libroot =		\
 	profile.h 				\
 	audiolib.h				\
     macosx_math.cpp			\
-    macosx_math.h
+    macosx_math.h			\
+	cg_global.cpp
 
 librootgeneric =			\
 	star_system_generic.cpp 	\
@@ -113,23 +118,25 @@ librootgeneric =			\
 	endianness.h			\
 	file_main.h				\
 	in.h					\
-	faction_util.cpp		\
+	faction_util_generic.cpp	\
 	load_mission.cpp		\
 	savegame.cpp			\
 	savegame.h				\
 	vegastrike.h			\
+	vs_globals.cpp			\
 	vs_path.cpp				\
 	vs_path.h
 
 librootserver =					\
 	gfxlib_struct_server.cpp	\
+	libaudioserver.cpp			\
 	libserver.cpp				\
 	universe_util_server.cpp	\
+	force_feedback_server.cpp	\
 	faction_util_server.cpp
 
 vegaserver_SOURCES =			\
 	$(librootgeneric) $(librootserver) \
-	vs_globals.cpp			\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
@@ -142,11 +149,15 @@ accountserver_SOURCES =		\
 	xml_support.cpp			\
 	lin_time.cpp				\
 	lin_time.h					\
-	vs_globals.cpp			\
+	endianness.cpp				\
+	endianness.h				\
+	vs_path.cpp				\
+	vs_path.h				\
+	galaxy_gen.cpp				\
+	galaxy_gen.h				\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\
 	$(librootgeneric) $(libroot) \
-	vs_globals.cpp			\
 	main.cpp
 

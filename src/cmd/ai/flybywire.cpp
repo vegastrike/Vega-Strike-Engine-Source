@@ -37,7 +37,12 @@ using Orders::MatchAngularVelocity;
  */
 
 void MatchLinearVelocity::Execute () {
-
+	if (!suborders.empty()) {
+		static int i=0;
+		if (i++%1000==0) {
+			fprintf (stderr,"cannot execute suborders as Linear Velocity Matcher");//error printout just in case
+		}
+	}
   MATCHLINVELSETUP()
 
   if (willfinish) {
@@ -81,7 +86,9 @@ MatchLinearVelocity::~MatchLinearVelocity () {
 
 
 void MatchAngularVelocity::Execute () {
-
+	bool temp = done;
+	Order::Execute();
+	done=temp;
   Vector desired (desired_ang_velocity); 
 
   Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); 

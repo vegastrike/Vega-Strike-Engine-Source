@@ -146,7 +146,7 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
 
 void gfx_light::ClobberGLLight (const int target) {
   this->target = target;
-  if (enabled()!=(GLLights[target].options&OpenGLL::GL_ENABLED)) {
+  if (enabled()!=((GLLights[target].options&OpenGLL::GL_ENABLED)!=0))  {
     if (enabled()) {
       glEnable (GL_LIGHT0+target);
       GLLights[target].options|=OpenGLL::GL_ENABLED;
@@ -212,6 +212,7 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
       break;
     SendGLPosition (GL_LIGHT0+target);
     break;
+  default:
   case ATTENUATE:
     attenuate[0]=color.r; attenuate[1]=color.g; attenuate[2]=color.b;
     apply_attenuate(attenuated());
@@ -236,7 +237,7 @@ void gfx_light::TrashFromGLLights () {
 void gfx_light::AddToTable() {
   LineCollideStar tmp;
   bool err;
-  LineCollide * coltarg= new LineCollide (CalculateBounds(err));
+  LineCollide * coltarg= new LineCollide (CalculateBounds(err));//leak??
   if (err)
     return;
   tmp.lc = coltarg;

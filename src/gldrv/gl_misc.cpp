@@ -154,8 +154,8 @@ void /*GFXDRVAPI*/ GFXTexCoord4f(const float s, const float t, const float u, co
 #if !defined(IRIX)
 	if(gl_options.Multitexture)
 	{
-		glMultiTexCoord2fARB(GL_TEXTURE0_ARB, s,t);
-		glMultiTexCoord2fARB(GL_TEXTURE1_ARB, u,v);
+		glMultiTexCoord2fARB_p(GL_TEXTURE0_ARB, s,t);
+		glMultiTexCoord2fARB_p(GL_TEXTURE1_ARB, u,v);
 	}
 	else
 #endif

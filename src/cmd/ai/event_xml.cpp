@@ -62,7 +62,7 @@ namespace AIEvents {
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
-	  eam->curtime=eam->maxtime=(short)(XMLSupport::parse_float((*iter).value)/SIMULATION_ATOM);
+	  eam->maxtime=(short)(XMLSupport::parse_float((*iter).value));
 	  break;
 	case OBEDIENCE:
 	  eam->obedience=(float)(XMLSupport::parse_float((*iter).value));
@@ -98,16 +98,20 @@ namespace AIEvents {
     ((ElemAttrMap *)userData)->level--;    
     
   }  
-  void LoadAI(const char * filename, ElemAttrMap &result) {//returns obedience
+  void LoadAI(const char * filename, ElemAttrMap &result, const string &faction) {//returns obedience
     const int chunk_size = 16384;
     string full_filename;
     result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
 								      "Targetting",
 								      "obedience",
 								      ".99"));
-    result.curtime=result.maxtime=10/SIMULATION_ATOM;
-    full_filename = string("ai/events/") + filename;
+    result.maxtime=10;
+    full_filename = string("ai/events/") + faction+string("/")+filename;
     FILE * inFile = fopen (full_filename.c_str(), "r");
+    if (!inFile) {
+      full_filename = string("ai/events/") + filename;
+      inFile = fopen (full_filename.c_str(), "r");
+    }
     if(!inFile) {
       printf("ai file %s not found\n",filename);
       assert(0);

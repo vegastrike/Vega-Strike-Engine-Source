@@ -34,7 +34,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
-
+#include "audiolib.h"
 #include "cmd/script/mission.h"
 #include "cmd/unit.h"
 #include "in_kb.h"
@@ -51,6 +51,7 @@ StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const s
   static bool js = true;
   if (js) {
 	js=false;
+	LoadWeapons("weapon_list.xml");
 	CacheJumpStar(false);
   }
   return this->Universe::Init( systemfile, centr, planetname);
@@ -73,13 +74,14 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 	InitInput();
 
 	hud_camera = Camera();
-	LoadWeapons("weapon_list.xml");
-	this->Universe::Init();
-	this->galaxy = new GalaxyXML::Galaxy (galaxy);
+
+	this->Universe::Init( galaxy);
+	//this->galaxy = new GalaxyXML::Galaxy (galaxy);
 }
 GameUniverse::GameUniverse(int argc, char** argv, const char * galaxy)
 {
 	this->Init( argc, argv, galaxy);
+	is_server = false;
 }
 GameUniverse::GameUniverse():Universe()
 {
@@ -243,7 +245,6 @@ static void UpdateTimeCompressionSounds() {
 		lasttimecompress=timecount;
 	}
 }
-
 void GameUniverse::StartDraw()
 {
 #ifndef WIN32
@@ -273,8 +274,8 @@ void GameUniverse::StartDraw()
   }
   UpdateTime();
   UpdateTimeCompressionSounds();
-  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   float systime=nonactivesystemtime;
   _Universe->SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
   
@@ -294,6 +295,7 @@ void GameUniverse::StartDraw()
   static int sorttime=0;
   static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
   if (howoften!=0) {
+	  if (PendingJumpsEmpty()) {//don't want to delete something when there is something pending to jump therexo
     if ((sorttime++)%howoften==1) {
       SortStarSystems(star_system,active_star_system.back());
       static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
@@ -306,6 +308,7 @@ void GameUniverse::StartDraw()
 	  fprintf (stderr,"error with active star system list\n");
 	}
       }
+	}
     }
   }
   

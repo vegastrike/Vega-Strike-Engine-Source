@@ -2,13 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338328
+#endif
 #include <float.h>
 #ifdef __APPLE__
 #define sqrtf sqrt
 #define cosf cos
 #define sinf sin
 #endif
-#define M_PI 3.14159265358979323846264338328
 float safety_zone=0;
 using std::vector;
 class Vector {
@@ -181,7 +183,7 @@ float getR(float minr,float maxr) {
 }
 void generateTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr) {
 
-  double h = 1/sqrt (2);
+  double h = 1/sqrt ((double)2.0);
   double r = getR (minr,maxr);  
   double rA =r;
   v.push_back (Vector (0 ,-r,h*r,0,0));

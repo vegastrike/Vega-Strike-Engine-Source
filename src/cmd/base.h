@@ -154,7 +154,7 @@ public:
 	std::vector <Room*> rooms;
 	TextPlane othtext;
 	static BaseInterface *CurrentBase;
-	static bool CallComp;
+	bool CallComp;
 	UnitContainer caller;
 	UnitContainer baseun;
 #ifdef BASE_MAKER
@@ -169,9 +169,10 @@ public:
 //	static void BaseInterface::endElement(void *userData, const XML_Char *name);
 	void BaseInterface::Load(const char * filename, const char * time_of_day, const char * faction);
 	static void ClickWin (int x, int y, int button, int state);
-	void Click (float x, float y, int button, int state);
-	static void MouseOverWin (int x, int y);
-	void MouseOver (float x, float y);
+	void Click (int x, int y, int button, int state);
+	static void PassiveMouseOverWin (int x, int y);
+	static void ActiveMouseOverWin (int x, int y);
+	void MouseOver (int x, int y);
 	BaseInterface (const char *basefile, Unit *base, Unit *un);
 	~BaseInterface ();
 	static void DrawWin ();

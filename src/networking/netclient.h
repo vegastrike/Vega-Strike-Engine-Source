@@ -23,32 +23,40 @@
 
 #include <string>
 #include <vector>
-#include "vegastrike.h"
-#include "gfx/quaternion.h"
-#include "netclass.h"
-#include "packet.h"
-#include "client.h"
-#include "cmd/unit_generic.h"
+
+#include "networking/const.h"
+#include "networking/vsnet_socket.h"
+#include "gfx/quaternion.h"  // for Transformation
+#include "cmd/container.h"
+#include "cmd/weapon_xml.h"
+#include "savegame.h"
+#include "networking/client.h"
+
+class Packet;
+class Unit;
+class ClientState;
+class NetUI;
 
 using std::vector;
+using std::string;
 extern vector<ObjSerial>	localSerials;
 extern bool isLocalSerial( ObjSerial sernum);
 
-//typedef vector<Client *>::iterator VI;
+typedef vector<Client *>::iterator VC;
 
 class	NetClient
 {
-		NetUI *				NetInt;		// Network interface
-		Unit *				game_unit;		// Unit struct from the game corresponding to that client
-		Packet				packet;			// Network data packet
+		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
 		SOCKETALT			clt_sock;		// Comm. socket
+		SaveGame			save;
 		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
+		int					zone;			// Zone id in universe
 		char				keeprun;		// Bool to test client stop
-		AddressIP			cltadr;			// Client IP
 		string				callsign;		// Callsign of the networked player
 		Client *			Clients[MAXCLIENTS];		// Clients in the same zone
+		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 		// a vector because always accessed by their IDs
 
 		int					enabled;		// Bool to say network is enabled
@@ -60,17 +68,14 @@ class	NetClient
 		unsigned int		current_timestamp;
 		unsigned int		deltatime;
 
-		void	receiveSave();
 		void	receiveData();
-		void	receiveLocations();
 		void	readDatafiles();
 		void	createChar();
-		int		recvMsg( char * netbuffer=NULL);
-		void	getZoneData();
+		int		recvMsg( char* netbuffer, Packet* outpacket );
 		void	disconnect();
 
 	public:
-		NetClient()
+		NetClient():save("")
 		{
 			game_unit = NULL;
 			old_timestamp = 0;
@@ -83,41 +88,39 @@ class	NetClient
 			for( int i=0; i<MAXCLIENTS; i++)
 				Clients[i] = NULL;
 		}
-		~NetClient()
-		{
-			if( NetInt!=NULL)
-				delete NetInt;
-			for( int i=0; i<MAXCLIENTS; i++)
-			{
-				if( Clients[i]!=NULL)
-					delete Clients[i];
-			}
-		}
+		~NetClient();
 
 		int		authenticate();
+		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
+		SOCKETALT	init( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);
-		int		init( char * addr, unsigned short port);
 		void	checkKey();
-		void	receivePosition();
-		void	sendPosition( ClientState cs);
-		void	sendAlive();
 
-		char *	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
-		void	addClient();
-		void	removeClient();
-		void	disable() { enabled=false;}
-		int		isEnabled() { return enabled; }
-		void	setNetworkedMode( bool mode) { enabled = mode;}
-		int		checkMsg( char * netbuffer=NULL);
-		void	sendMsg();
 
 		ObjSerial	getSerial() { return serial; }
 		void	inGame();
-		int		isTime();
-		void	logout();
+		// Tell if we are currently in the game
 		bool	isInGame() { return (serial!=0);}
-		unsigned int	getLag() { return deltatime;}
 
+		/********************* Network stuff **********************/
+		// Get the lag time between us and the server
+		unsigned int	getLag() { return deltatime;}
+		// Check if it is time to send our update
+		int		isTime();
+		// Warn the server we are leaving the game
+		void	logout();
+		// Check if there are info incoming over the network
+		int		checkMsg( char* netbuffer, Packet* packet );
+		// Send a position update
+		void	sendPosition( const ClientState* cs );
+		// Send a PING-like packet to say we are still alive (UDP)
+		void	sendAlive();
+
+		// void	disable() { enabled=false;}
+		// int		isEnabled() { return enabled; }
+		// void	setNetworkedMode( bool mode) { enabled = mode;}
+
+		/********************* Prediction stuff **********************/
 		void			predict( ObjSerial clientid);
 		void			init_interpolation( ObjSerial clientid);
 		Transformation	spline_interpolate( ObjSerial clientid, double blend);
@@ -125,8 +128,29 @@ class	NetClient
 		void	setCallsign( char * calls) { this->callsign = string( calls);}
 		void	setCallsign( string calls) { this->callsign = calls;}
 		string	getCallsign() {return this->callsign;}
-		void	setUnit( Unit * un) { game_unit = un;}
-		Unit *	getUnit() { return game_unit;}
+		void	setUnit( Unit * un) { game_unit.SetUnit( un);}
+		Unit *	getUnit() { return game_unit.GetUnit();}
+
+		/********************* Weapon stuff **********************/
+		// Functions called when we receive a firing order from the server (other clients or ai or us)
+		void	fireRequest( ObjSerial serial, int mount_index);
+		void	unfireRequest( ObjSerial serial, int mount_index);
+		void	FireBeam();
+		void	FireBolt();
+		void	FireProjectile();
+		// Functions to request Firing
+		void	FireBeamRequest();
+		void	FireBoltRequest();
+		void	FireProjectileRequest();
+
+    private:
+		void	receiveSave( const Packet* packet );
+		void	receiveLocations( const Packet* packet );
+		void	getZoneData( const Packet* packet );
+		void	receivePosition( const Packet* packet );
+		void	addClient( const Packet* packet );
+		void	removeClient( const Packet* packet );
 };
 
 #endif
+

@@ -16,7 +16,19 @@ class Background;
 class Terrain;
 class ContinuousTerrain;
 //class TextPlane;
-
+struct AtmosphericFogMesh {
+	std::string meshname;
+	double scale;
+	float er;float eg; float eb; float ea;
+	float dr;float dg; float db; float da;	
+	double focus;
+	double concavity;
+	int tail_mode_start;
+	int tail_mode_end;
+	int min_alpha;
+	int max_alpha;
+	AtmosphericFogMesh ();
+};
 
 using XMLSupport::AttributeList;
 //class Atmosphere;
@@ -54,6 +66,7 @@ class StarSystem {
     bool fade;
     float starsp;
     float scale;
+	std::vector <AtmosphericFogMesh> fog;
   } *xml_string;
 
  protected:
@@ -80,11 +93,11 @@ class StarSystem {
   void AddStarsystemToUniverse(const string &filename);
   void RemoveStarsystemFromUniverse();
   int lightcontext;
-  vector <class MissileEffect *> dischargedMissiles;
+  std::vector <class MissileEffect *> dischargedMissiles;
  public:
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();
-  virtual void UpdateUnitPhysics(bool firstframe){}
+  void UpdateUnitPhysics(bool firstframe);
   virtual void activateLightMap() {}
   ///activates the light map texture
   virtual unsigned int numTerrain () {return 0;}
@@ -92,7 +105,9 @@ class StarSystem {
   ///Draws a frame of action, interpolating between physics frames
   virtual void Draw(bool DrawCockpit=true) {}
   /// update a simulation atom ExecuteDirector must be false if star system is just loaded before mission is loaded
-  virtual void Update(float priority, bool executeDirector) {} 
+  void Update(float priority, bool executeDirector);
+  // This one is temporarly used on server side
+  void Update(float priority);
   ///re-enables the included lights and terrains
   virtual void SwapIn () {}
   ///Disables included lights and terrains
@@ -127,6 +142,6 @@ class StarSystem {
   virtual int DoJumpingLeaveSightAndSound (Unit * un){return -1;}
   //friend class Atmosphere;
 };
-
+bool PendingJumpsEmpty();
 #endif
 

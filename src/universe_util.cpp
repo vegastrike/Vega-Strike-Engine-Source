@@ -14,11 +14,15 @@
 #include "load_mission.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "gfx/particle.h"
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 
 using std::string;
 
 #define activeSys _Universe->activeStarSystem() //less to write
+  void ClientServerSetLightContext (int lightcontext) {
+    GFXSetLightContext(lightcontext);
+  }
 
 namespace UniverseUtil {
 	void playVictoryTune () {
@@ -64,5 +68,13 @@ namespace UniverseUtil {
 	static const int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
 		return max_missions;
 	}
+       	void addParticle (QVector loc, Vector velocity, Vector color, float size)
+	{
+	  ParticlePoint p;
+	  p.loc = loc;
+	  p.col = color;
+	  particleTrail.AddParticle (p,velocity,size);
+	}
+
 }
 #undef activeSys

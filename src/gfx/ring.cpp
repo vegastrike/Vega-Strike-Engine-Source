@@ -16,7 +16,7 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
   ab[1]=b+'0';
   ab[0]=a+'0';
   hash_name = string("@@Ring") + "#" + texture + "#" + XMLSupport::tostring(slices) +  ab + "#" + XMLSupport::tostring(theta_min) + "#" + XMLSupport::tostring(theta_max);
-  if (LoadExistant (hash_name,iradius,0)) {
+  if (LoadExistant (hash_name,Vector(iradius,iradius,iradius),0)) {
     return;
   } else {
 
@@ -24,7 +24,7 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
   oldmesh = AllocNewMeshesEachInSizeofMeshSpace(numspheres);//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,iradius,0), oldmesh);
+  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,Vector(iradius,iradius,iradius),0), oldmesh);
   this->orig = oldmesh;
   radialSize = oradius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (radialSize,radialSize,radialSize);

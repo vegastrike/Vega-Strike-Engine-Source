@@ -321,7 +321,7 @@ void GFXTextureAddOrModulate (int stage, bool modulate) {
 void GFXActiveTexture (const int stage) {
 #if !defined(IRIX)
   if (gl_options.Multitexture&&stage!=activeTextureStage) {
-    glActiveTextureARB(GL_TEXTURE0_ARB+stage);
+    glActiveTextureARB_p(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
 #endif

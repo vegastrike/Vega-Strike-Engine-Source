@@ -1,18 +1,20 @@
 #include <assert.h>
 #include "star_system_generic.h"
 #include "gfx/vec.h"
-//#include "cmd/planet.h"
+#include "cmd/planet_generic.h"
 #include "cmd/unit_generic.h"
-//#include "cmd/unit_collide.h"
+#include "cmd/unit_collide.h"
 #include "cmd/collection.h"
+#include "gfx/cockpit_generic.h"
+#include "audiolib.h"
 //#include "cmd/click_list.h"
 //#include "cmd/ai/input_dfa.h"
-//#include "lin_time.h"
-//#include "cmd/beam.h"
+#include "lin_time.h"
+#include "cmd/beam.h"
 //#include "gfx/sphere.h"
 //#include "cmd/unit_collide.h"
 //#include "gfx/star.h"
-//#include "cmd/bolt.h"
+#include "cmd/bolt.h"
 #include <expat.h>
 //#include "cmd/music.h"
 #include "configxml.h"
@@ -22,7 +24,7 @@
 #include "universe_generic.h"
 //#include "cmd/atmosphere.h"
 #include "hashtable.h"
-//#include "cmd/nebula.h"
+#include "cmd/nebula_generic.h"
 #include "galaxy_gen.h"
 #include "cmd/script/mission.h"
 #include "in_kb.h"
@@ -32,7 +34,8 @@
 //#include "gfx/particle.h"
 //extern Music *muzak;
 //extern Vector mouseline;
-
+#include "cmd/unit_collide.h"
+#include "savegame.h"
 //vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -40,6 +43,13 @@
 //extern void reset_time_compression (int,KBSTATE);
 
 //Atmosphere *theAtmosphere;
+
+float ScaleJumpRadius (float radius) {
+	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
+	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
+	    radius *= jump_radius_scale*game_speed;//need this because sys scale doesn't affect j-point size
+	    return radius;
+}
 
 StarSystem::StarSystem() {
   stars = NULL;
@@ -71,6 +81,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
   current_stage=PHY_AI;
   //systemInputDFA = new InputDFA (this);
+  this->filename = filename;
   LoadXML(filename,centr,timeofyear);
   if (!name)
     name =strdup (filename);
@@ -124,11 +135,12 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
 }
-
+extern void ClientServerSetLightContext (int lightcontext);
 StarSystem::~StarSystem() {
-  //_Universe->activeStarSystem()->SwapOut();
+  _Universe->activeStarSystem()->SwapOut();
   _Universe->pushActiveStarSystem(this);
-  //_Universe->activeStarSystem()->SwapIn();  
+  //  _Universe->activeStarSystem()->SwapIn();  
+  ClientServerSetLightContext (lightcontext);
   //delete stars;
   delete [] name;
   //delete systemInputDFA;
@@ -147,8 +159,11 @@ StarSystem::~StarSystem() {
     unit->Kill(false);
     iter.advance();
   }
-  //delete collidetable;
+  //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
+  if (collidetable) delete collidetable;//DO NOT MOVE THIS LINE! IT MUST STAY
+  //_Universe->activeStarSystem()->SwapOut();  
   _Universe->popActiveStarSystem();
+  _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
   
 }
@@ -264,9 +279,31 @@ void StarSystem::ExecuteUnitAI () {
 	  iter.advance();
 	}
 }
-/*
+//sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
+Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
+  return (Unit *)0x31337;
+}
+
+void CarSimUpdate (Unit *un, float height) {
+	un->SetVelocity(Vector(un->GetVelocity().i,0,un->GetVelocity().k));
+	un->curr_physical_state.position= QVector(un->curr_physical_state.position.i
+											  ,height,
+											  un->curr_physical_state.position.k);
+	
+	
+	
+
+}
+
+
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   un_iter iter = this->getUnitList().createIterator();
+#ifdef CAR_SIM
+  float unitheight=0;  
+  if (_Universe->AccessCockpit(0)->savegame->getMissionData("unitheight").empty())
+	  _Universe->AccessCockpit(0)->savegame->getMissionData("unitheight").push_back(0);
+																						   unitheight=_Universe->AccessCockpit(0)->savegame->getMissionData("unitheight")[0];
+#endif
   Unit * unit=NULL;
 	while((unit = iter.current())!=NULL) {
 #ifdef OLD_AUTOPILOT
@@ -282,13 +319,162 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	  }
 #endif
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());
+#ifdef CAR_SIM
+	  Cockpit * cp = _Universe->isPlayerStarship(unit);
+	  float tmp=0;
+	  if (cp) {
+		  if (cp->savegame->getMissionData("unitheight").empty())
+			  cp->savegame->getMissionData("unitheight").push_back(0);
+		  tmp= cp->savegame->getMissionData("unitheight")[0];
+	  }
+	  static string s = vs_config->getVariable ("physics","seeker","skart");
+	  CarSimUpdate(unit,unit->name==s?unitheight:tmp);
+#endif
 	  iter.advance();
 	}
 }
-*/
 
-/*
+extern void	UpdateTerrain();
+extern void	TerrainCollide();
+extern void UpdateAnimatedTexture();
+extern void UpdateCameraSnds();
+extern void NebulaUpdate( StarSystem * ss);
+extern void TestMusic();
+
+extern void reset_time_compression (int,KBSTATE);
+
 extern float getTimeCompression();
+void StarSystem::Update( float priority)
+{
+	Unit * unit;
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"begin Update");
+  fflush (stderr);
+#endif
+  bool firstframe = true;
+// No time compression here
+  float normal_simulation_atom = SIMULATION_ATOM;
+  time += GetElapsedTime();
+  _Universe->pushActiveStarSystem(this);
+
+  if(time/SIMULATION_ATOM>=(1./PHY_NUM))	  
+  {
+    while(time/SIMULATION_ATOM >= (1./PHY_NUM))
+	{ // Chew up all SIMULATION_ATOMs that have elapsed since last update
+      UnitCollection::UnitIterator iter;
+      if (current_stage==PHY_AI)
+	  {
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"AI");
+		  fflush (stderr);
+		#endif
+		  ExecuteUnitAI();
+		current_stage=TERRAIN_BOLT_COLLIDE;
+      }
+	  else if (current_stage==TERRAIN_BOLT_COLLIDE)
+	  {
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"TerCol");
+		  fflush (stderr);
+		#endif
+			TerrainCollide();
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"DelQ");
+		  fflush (stderr);
+		#endif
+		  Unit::ProcessDeleteQueue();
+		  current_stage=MISSION_SIMULATION;
+      }
+	  else if (current_stage==MISSION_SIMULATION)
+	  {
+		// What to do here on server side for missions ????????
+		current_stage=PHY_COLLIDE;
+      }
+	  else if (current_stage==PHY_COLLIDE)
+	  {
+		#ifdef NO_COLLISION_TIME
+			if (no_collision_time) {
+			  no_collision_time--;//don't resolve physics until 2 seconds
+			}else 
+		#endif
+			{
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"neb");
+		  fflush (stderr);
+		#endif
+			  iter = drawList.createIterator();
+			  while((unit = iter.current())!=NULL) {
+				unit->SetNebula(NULL); 
+				iter.advance();
+			  }
+			  iter = drawList.createIterator();
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"Coll");
+		  fflush (stderr);
+		#endif
+			  while((unit = iter.current())!=NULL) {
+				  unit->CollideAll();
+				  iter.advance();
+			  }
+	        }
+			UpdateMissiles();//do explosions
+			current_stage=PHY_TERRAIN;
+      }
+	  else if (current_stage==PHY_TERRAIN)
+	  {
+		    // What to do on server side ????
+			current_stage=PHY_RESOLV;
+      }
+	  else if (current_stage==PHY_RESOLV)
+	  {
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"muzak");
+		  fflush (stderr);
+		#endif
+		  UpdateUnitPhysics(firstframe);
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"boltphi");
+		  fflush (stderr);
+		#endif
+		  bolts->UpdatePhysics();
+		/*
+		for (unsigned int i=0;i<active_missions.size();i++) {
+		  active_missions[i]->BriefingUpdate();//waste of farkin time
+		}
+		*/
+		  current_stage=PHY_AI;
+		  firstframe = false;
+      }
+      time -= (1./PHY_NUM)*SIMULATION_ATOM;
+    }
+  }
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"endupd\n");
+  fflush (stderr);
+#endif
+  UnitCollection::FreeUnusedNodes();
+  collidetable->Update();
+  SIMULATION_ATOM =  normal_simulation_atom;
+  _Universe->popActiveStarSystem();
+  //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
+}
+void ExecuteDirector () {
+	    unsigned int curcockpit= _Universe->CurrentCockpit();
+	    for (unsigned int i=0;i<active_missions.size();i++) {
+			if (active_missions[i]) {
+				_Universe->SetActiveCockpit(active_missions[i]->player_num);
+				StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
+				if (ss) _Universe->pushActiveStarSystem(ss);
+				mission=active_missions[i];
+				active_missions[i]->DirectorLoop();
+				active_missions[i]->DirectorBenchmark();
+				if (ss)_Universe->popActiveStarSystem();
+			}
+	    }
+		_Universe->SetActiveCockpit(curcockpit);
+		mission=active_missions[0];
+		processDelayedMissions();
+}
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
@@ -338,12 +524,12 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"TerCol");
   fflush (stderr);
 #endif
-	Terrain::CollideAll();
+	TerrainCollide();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Ani");
   fflush (stderr);
 #endif
-	AnimatedTexture::UpdateAllPhysics();
+	UpdateAnimatedTexture();
 	///Do gravitation!
 	iter = units.createIterator();
 	  while((unit = iter.current())!=NULL) {
@@ -363,21 +549,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
-	    unsigned int curcockpit= _Universe->CurrentCockpit();
-	    for (unsigned int i=0;i<active_missions.size();i++) {
-	      if (active_missions[i]) {
-			  _Universe->SetActiveCockpit(active_missions[i]->player_num);
-			   StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
-			  if (ss) _Universe->pushActiveStarSystem(ss);
-			  mission=active_missions[i];
-			  active_missions[i]->DirectorLoop();
-			  active_missions[i]->DirectorBenchmark();
-			  if (ss)_Universe->popActiveStarSystem();
-	      }
-	    }
-		_Universe->SetActiveCockpit(curcockpit);
-		mission=active_missions[0];
-		processDelayedMissions();
+		  ExecuteDirector();
 	  }
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	}
@@ -418,7 +590,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"TerU");
   fflush (stderr);
 #endif
-	Terrain::UpdateAll(64);	
+	UpdateTerrain();
 	unsigned int i=_Universe->CurrentCockpit();
 	for (int j=0;j<_Universe->numPlayers();j++) {
 	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
@@ -434,19 +606,10 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"muzak");
   fflush (stderr);
 #endif
-	if (this==_Universe->getActiveStarSystem(0)) {
-	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
-	  if (muzak)
-		  muzak->Listen();
-	}
-	if (_Universe->AccessCockpit()->activeStarSystem==this){
-	  Nebula * neb;
-	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
-	    if (neb->getFade()<=0) {
-	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
-	    }
-	  }
-	}
+	if (this==_Universe->getActiveStarSystem(0))
+		UpdateCameraSnds();
+	TestMusic();
+	NebulaUpdate( this);
 #ifdef UPDATEDEBUG
   fprintf (stderr,"unphi");
   fflush (stderr);
@@ -487,7 +650,6 @@ void StarSystem::Update(float priority , bool executeDirector) {
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
-*/
 
 /***************************************************************************************/
 /*** STAR SYSTEM JUMP STUFF                                                          ***/
@@ -497,7 +659,6 @@ Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
-  this->filename= mname;
 }
 void StarSystem::RemoveStarsystemFromUniverse () {
   star_system_table.Delete (filename);
@@ -513,6 +674,9 @@ StarSystem *GetLoadedStarSystem(const char * system) {
 }
 
 std::vector <unorigdest *> pendingjump;
+bool PendingJumpsEmpty() {
+	return pendingjump.empty();
+}
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
@@ -553,6 +717,9 @@ void StarSystem::ProcessPendingJumps() {
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
+  }
+  if (un->jump.drive>=0) {
+    un->jump.drive=-1;
   }
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());

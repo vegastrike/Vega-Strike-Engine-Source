@@ -23,13 +23,8 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 
-#ifdef __cplusplus
 #include <string>
-#else
-#include <string.h>
-#endif
 
-using std::string;	// needed for access to std::string
 
 /**
  *  The texture class defines a method of loading bitmap textures
@@ -37,9 +32,9 @@ using std::string;	// needed for access to std::string
  *  to prevent the loading of duplicate textures
  */
 struct Texture{
-  void FileNotFound(const string &);//undoes what it did to hash table when file is not located
+  void FileNotFound(const std::string &);//undoes what it did to hash table when file is not located
   ///The file name used to load this texture
-  char * texfilename;
+  std::string texfilename;
   ///the filter mode of this texture
   enum FILTER ismipmapped;
   ///the dimensions of this texture
@@ -62,8 +57,8 @@ struct Texture{
   ///The target this will go to (cubemap or otherwise)
   enum TEXTURE_TARGET texture_target; enum TEXTURE_IMAGE_TARGET image_target;
   ///Returns if this texture is actually already loaded
-  GFXBOOL checkold(std::string s, bool shared, string & hashname);
-  void modold(std::string s, bool shared, string & hashname);
+  GFXBOOL checkold(std::string s, bool shared, std::string & hashname);
+  void modold(std::string s, bool shared, std::string & hashname);
   ///Loads the old texture
   void setold();
   ///Inits the class with default values
@@ -74,14 +69,14 @@ struct Texture{
   }
   protected:
   ///Binds this texture to GFX library
-  int Bind();
+  int Bind(int maxdimension);
   ///Transfers this texture to GFX library
-  void Transfer();
+  void Transfer(int maxdimension);
   public:
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
-  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE);
+  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
   ///Creates a texture with only color data as a single bitmap
-  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE);
+  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
   virtual Texture * Original();
   virtual Texture * Clone ();
   ///Texture copy constructor that increases appropriate refcounts

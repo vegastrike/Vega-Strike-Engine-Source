@@ -10,6 +10,7 @@
 #include "unit_const_cache.h"
 #include "vs_path.h"
 #include "role_bitmask.h"
+#include "endianness.h"
 /*
 weapon_info& weapon_info::operator = (const weapon_info &tmp){
   size = tmp.size;
@@ -22,6 +23,99 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   return *this;
 }
 */
+
+weapon_info	getWeaponInfoFromBuffer( char * netbuf, int & size)
+{
+		weapon_info wi(weapon_info::UNKNOWN);
+		unsigned short file_len = 0, weap_len = 0;
+		int offset=0;
+
+		// Get the weapon_info structure
+		memcpy( &wi, netbuf+offset, sizeof( wi));
+		offset += sizeof( wi);
+		memcpy( &file_len, netbuf+offset, sizeof( file_len));
+		offset += sizeof( file_len);
+		file_len = VSSwapHostShortToLittle( file_len);
+		char * filename = new char[file_len];
+		memcpy( filename, netbuf, file_len);
+		offset += file_len;
+		memcpy( &weap_len, netbuf+offset, sizeof( weap_len));
+		offset += sizeof( weap_len);
+		weap_len = VSSwapHostShortToLittle( weap_len);
+		char * weapname = new char[weap_len];
+		memcpy( weapname, netbuf, weap_len);
+		wi.file = string( filename);
+		wi.weapon_name = string( weapname);
+		delete filename;
+		delete weapname;
+
+		return wi;
+}
+
+void		setWeaponInfoToBuffer( weapon_info wi, char * netbuf, int & bufsize)
+{
+	bufsize = sizeof( wi)+sizeof( wi.file)+sizeof( wi.weapon_name);
+	netbuf = new char [bufsize+1];
+	netbuf[bufsize]=0;
+	int offset = 0;
+
+	unsigned short file_len = wi.file.length();
+	unsigned short weap_len = wi.weapon_name.length();
+	char * file = new char[file_len+1];
+	char * weapon_name = new char[weap_len+1];
+	memcpy( file, wi.file.c_str(), file_len);
+	file[file_len] = 0;
+	memcpy( weapon_name, wi.weapon_name.c_str(), weap_len);
+	weapon_name[weap_len] = 0;
+
+	// Copy the struct weapon_info in the buffer
+	memcpy( netbuf+offset, &wi, sizeof( wi));
+	offset += sizeof( wi);
+	// Copy the size of filename in the buffer
+	memcpy( netbuf+offset, &file_len, sizeof( file_len));
+	offset += sizeof( file_len);
+	// Copy the filename in the buffer because in weapon_info, it is a string
+	memcpy( netbuf+offset, file, file_len);
+	offset += file_len;
+	// Copy the size of filename in the buffer
+	memcpy( netbuf+offset, &weap_len, sizeof( weap_len));
+	offset += sizeof( weap_len);
+	// Copy the weapon_name in the buffer because in weapon_info, it is a string
+	memcpy( netbuf+offset, weapon_name, weap_len);
+
+	delete file;
+	delete weapon_name;
+}
+
+void	weapon_info::netswap()
+{
+	// Enum elements are the size of an int
+	// byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY
+	//type = VSSwapHostIntToLittle( type);
+	//size = VSSwapHostIntToLittle( size);
+	offset.netswap();
+	role_bits = VSSwapHostIntToLittle( role_bits);
+	sound = VSSwapHostIntToLittle( sound);
+	r = VSSwapHostFloatToLittle( r);
+	g = VSSwapHostFloatToLittle( g);
+	b = VSSwapHostFloatToLittle( b);
+	a = VSSwapHostFloatToLittle( a);
+	Speed = VSSwapHostFloatToLittle( Speed);
+	PulseSpeed = VSSwapHostFloatToLittle( PulseSpeed);
+	RadialSpeed = VSSwapHostFloatToLittle( RadialSpeed);
+	Range = VSSwapHostFloatToLittle( Range);
+	Radius = VSSwapHostFloatToLittle( Radius);
+	Length = VSSwapHostFloatToLittle( Length);
+	Damage = VSSwapHostFloatToLittle( Damage);
+	PhaseDamage = VSSwapHostFloatToLittle( PhaseDamage);
+	Stability = VSSwapHostFloatToLittle( Stability);
+	Longrange = VSSwapHostFloatToLittle( Longrange);
+	LockTime = VSSwapHostFloatToLittle( LockTime);
+	EnergyRate = VSSwapHostFloatToLittle( EnergyRate);
+	Refire = VSSwapHostFloatToLittle( Refire);
+	volume = VSSwapHostFloatToLittle( volume);
+	TextureStretch = VSSwapHostFloatToLittle( TextureStretch);
+}
 
 #include "xml_support.h"
 #include "physics.h"
@@ -74,7 +168,9 @@ namespace BeamXML {
     VOLUME,
     DETONATIONRADIUS,
     LOCKTIME,
-	ROLE
+	ROLE,
+	TEXTURESTRETCH
+	
     //YAW,
     //PITCH,
     //ROLL
@@ -122,10 +218,11 @@ namespace BeamXML {
     EnumMap::Pair ("OffsetY",OFFSETY),
     EnumMap::Pair ("OffsetZ",OFFSETZ),
     EnumMap::Pair ("Volume", VOLUME),
-	EnumMap::Pair("Role",ROLE)
+	EnumMap::Pair("Role",ROLE),
+	EnumMap::Pair ("TextureStretch",TEXTURESTRETCH)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 30);
+  const EnumMap attribute_map(attribute_names, 31);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -232,6 +329,10 @@ namespace BeamXML {
 	  break;
 	case ALPHA:
 	  tmpweapon.a = XMLSupport::parse_float ((*iter).value);
+	  break;
+	case TEXTURESTRETCH:
+      tmpweapon.TextureStretch=
+		  XMLSupport::parse_float((*iter).value);
 	  break;
  	default:
 	  assert (0);
@@ -381,17 +482,19 @@ namespace BeamXML {
 }
 
 using namespace BeamXML;
-
-weapon_info* getTemplate(const string &key) {
- 
+extern string strtolower(const string &foo);
+weapon_info* getTemplate(const string &kkey) {
+  string key =strtolower(kkey);
   weapon_info * wi =  lookuptable.Get(strtoupper(key));
   if (wi) {
     if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {
-      string meshname = sharedmeshes+string ("weapons/") + key+".xmesh"; 
+		static string sharedmountdir = vs_config->getVariable("data","mountlocation","weapons");
+
+      string meshname = sharedmeshes+sharedmountdir+string ("/") + key+".xmesh"; 
       FILE * fp = fopen (meshname.c_str(),"rb");
       if (fp) {
 	fclose (fp);
-	WeaponMeshCache::setCachedMutable (wi->weapon_name,new Mesh (meshname.c_str(),1,0,NULL));
+	WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
       }
     }
   }

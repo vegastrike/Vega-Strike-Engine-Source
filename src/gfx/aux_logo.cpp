@@ -63,7 +63,7 @@ void decoff (int, KBSTATE k) {
   }
 }
 #endif
-list<Logo*> undrawn_logos;
+vector<Logo*> undrawn_logos;
 Hashtable<int, Logo,char[257]> Logo::decalHash;
 
 Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float offset,Texture* Dec, Vector * Ref)
@@ -137,8 +137,8 @@ void Logo::SetDecal(Texture *decal)
     owner_of_draw_queue = l;
     l->refcount++;
   } else {
-    l = (Logo*)malloc (sizeof (Logo));
-    memcpy (l,this,sizeof(Logo));
+    l = new Logo (*this);//(Logo*)malloc (sizeof (Logo));
+    //    memcpy (l,this,sizeof(Logo));
     decalHash.Put(decal->name, l);
     draw_queue = l->draw_queue = new vector<DrawContext>();
     owner_of_draw_queue = l->owner_of_draw_queue = l;

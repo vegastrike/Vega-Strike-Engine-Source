@@ -9,7 +9,7 @@
 #include "cmd/collection.h"
 #include "star_system_generic.h"
 #include <string>
-//#include "cmd/music.h"
+#include "savegame.h"
 //#include "audiolib.h"
 //#include "gfx/animation.h"
 #include "gfx/cockpit_generic.h"
@@ -17,6 +17,7 @@
 #include "load_mission.h"
 #include "configxml.h"
 #include "vs_globals.h"
+#include "cmd/unit_util.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -109,8 +110,67 @@ namespace UniverseUtil {
 	string getSystemFile() {
 		return activeSys->getFileName();
 	}
+
 	string getSystemName() {
 		return activeSys->getName();
+	}
+	///tells the respective flightgroups in this system to start shooting at each other
+	void TargetEachOther (string fgname, string faction, string enfgname, string enfaction){
+		int fac = FactionUtil::GetFaction(faction.c_str());
+		int enfac = FactionUtil::GetFaction(enfaction.c_str());		
+		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		Unit * un=i.current();
+		Unit * en=NULL;
+		Unit * al=NULL;
+		while (un && ((NULL== en) || (NULL==al))){
+			if (un->faction==enfac && UnitUtil::getFlightgroupName(un)==enfgname) {
+				if ((NULL== en) || (rand()%3==0)){
+					en=un;
+				}
+			}
+			if (un->faction==fac && UnitUtil::getFlightgroupName(un)==fgname){
+				al=un;
+			}
+			un=i.next();
+		}
+		if (en && al) {
+			UnitUtil::setFlightgroupLeader(al,al);
+			al->Target(en);
+			UnitUtil::setFgDirective (al,"A."); //attack target, darent change target!
+			UnitUtil::setFlightgroupLeader(en,en);
+			en->Target(al);
+			UnitUtil::setFgDirective (en,"h");//help me out here!
+		}
+	}
+	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
+	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction){
+		int fac = FactionUtil::GetFaction(faction.c_str());
+		int enfac = FactionUtil::GetFaction(enfaction.c_str());	 		
+		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		Unit * un=i.current();
+		int clear = 0;
+		while (un&&clear!=3) {
+			if ((un->faction==enfac && UnitUtil::getFlightgroupName(un)==enfgname)) {
+				clear|=1;
+				UnitUtil::setFgDirective (un,"b");				
+			}else
+				if (un->faction==fac && UnitUtil::getFlightgroupName(un)==fgname) {
+					clear|=2;
+					UnitUtil::setFgDirective (un,"b");
+					//check to see that its' in this flightgroup or something :-)
+				}
+			un=i.next();
+		}
+	}
+	
+	
+	bool systemInMemory(string nam) {
+	  unsigned int nass = _Universe->getNumActiveStarSystem();
+	  for (unsigned int i=0;i<nass;i++) {
+	    if (_Universe->getActiveStarSystem(i)->getFileName()==nam)
+	      return true;
+	  }
+	  return false;
 	}
 	void setMissionOwner(int whichplayer) {
 		mission->player_num=whichplayer;
@@ -184,6 +244,26 @@ namespace UniverseUtil {
 	}
 	string GetGalaxyProperty (string sys, string prop) {
 		return _Universe->getGalaxyProperty(sys,prop);
+	}
+	string GetGalaxyPropertyDefault (string sys, string prop, string def) {
+		return _Universe->getGalaxyPropertyDefault(sys,prop,def);
+	}
+#define DEFAULT_FACTION_SAVENAME "FactionTookOver_"
+	string GetGalaxyFaction (string sys) {
+		string fac = _Universe->getGalaxyProperty (sys,"faction");
+		vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+		if (ans->size()) {
+			fac = (*ans)[0];
+		}
+		return fac;
+	}
+	void SetGalaxyFaction (string sys, string fac) {
+		vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+		if (ans->size()) {
+			(*ans)[0]=fac;
+		}else {
+			ans->push_back(fac);
+		}
 	}
 	int GetNumAdjacentSystems (string sysname) {
 		return _Universe->getAdjacentStarSystems(sysname).size();
@@ -292,6 +372,10 @@ namespace UniverseUtil {
         void LoadMission (string missionname) {
                 delayLoadMission (missionname);
         }
+        void LoadMissionScript (string missionscript) {
+                delayLoadMission ("mission/nothing.mission",missionscript);
+        }
+    
         void SetAutoStatus (int global_auto, int player_auto) {
 	  if (global_auto==1) {
 	    mission->global_autopilot = Mission::AUTO_ON;
@@ -321,7 +405,7 @@ namespace UniverseUtil {
 	if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
 	  continue;
 	}
-	double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-def_un_size;
+	double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
 	if (dist<0) {
 	  QVector delta  = pos-un->LocalPosition();
 	  double mag = delta.Magnitude();
@@ -330,13 +414,13 @@ namespace UniverseUtil {
 	  }else {
 	    delta.Set(0,0,1);
 	  }
-	  delta = delta.Scale ( dist+def_un_size);
+	  delta = delta.Scale ( dist+un->rSize()+radial_size);
 	  if (k<5) {
 	    pos = pos+delta;
 	    collision=true;
 	  }else {
 	    QVector r(.5,.5,.5);
-	    pos+=un->rSize()*r;
+	    pos+=(radial_size+un->rSize())*r;
 	    collision=true;
 	  }
 	  

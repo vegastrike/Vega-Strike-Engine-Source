@@ -10,6 +10,7 @@ using namespace Orders;
 #include "cmd/script/flightgroup.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "warpto.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -130,7 +131,13 @@ void MoveTo::Execute(){
       terminatingY>numswitchbacks&&
       terminatingZ>numswitchbacks) {
     if (Done(last_velocity)) {
-      done = true;
+      if (selfterminating) {
+	done = true;
+      }else {
+	terminatingX=0;
+	terminatingY=0;
+	terminatingZ=0;
+      }	
       return;
     }
     thrust = (-parent->GetMass()/SIMULATION_ATOM)*last_velocity;
@@ -249,7 +256,12 @@ void ChangeHeading::Execute() {
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
     if (Done (local_velocity)) {
-      done = true;
+      if (this->terminating) {
+	done = true;
+      }else {
+	terminatingX=0;
+	terminatingY=0;
+      }
       return;
     }
     torque= (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;
@@ -275,9 +287,12 @@ FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(QVector(0
   type=FACING;
   subtype = STARGET;
   speed=float(.00001);
-  range=float(.00001);
-
-  
+  useitts=true;
+  static bool alwaysuseitts = XMLSupport::parse_bool(vs_config->getVariable ("AI","always_use_itts","false"));
+  if (!alwaysuseitts) {
+	  if (rand()>=g_game.difficulty*RAND_MAX)
+		  useitts=false;
+  }
 }
 FaceTargetITTS::~FaceTargetITTS () {
 #ifdef ORDERDEBUG
@@ -293,12 +308,14 @@ void FaceTargetITTS::Execute() {
     return;
   }
   if (speed == float(.00001)) {
-    parent->getAverageGunSpeed(speed,range);
-    if (speed ==float (.00001)) {
-      speed = range=FLT_MAX;
-    }
+	  float mrange;
+	  float range;
+	  parent->getAverageGunSpeed(speed,range,mrange);
+	  if (speed ==float (.00001)) {
+		  speed = FLT_MAX;
+	  }
   }
-  SetDest(target->PositionITTS(parent->Position(),speed+parent->GetVelocity().Dot((target->Position()-parent->Position()).Cast().Normalize())));
+  SetDest(useitts?target->PositionITTS(parent->Position(),parent->cumulative_velocity,speed):target->Position());
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();
@@ -318,7 +335,7 @@ void FaceTarget::Execute() {
     done = finish;
     return;
   }
-  SetDest(target->Position());
+  SetDest(target->isSubUnit()?target->Position():target->LocalPosition());
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();
@@ -383,7 +400,7 @@ void FormUp::SetParent(Unit * un) {
   MoveTo::SetParent(un);
 }
 
-FormUp::FormUp (const QVector & pos):MoveTo (QVector(0,0,0),false,1000), Pos(pos) { 
+FormUp::FormUp (const QVector & pos):MoveTo (QVector(0,0,0),false,1000,false), Pos(pos) { 
   subtype |= SSELF;
 }
 void FormUp::SetPos (const QVector &v) {
@@ -393,6 +410,8 @@ void FormUp::Execute() {
   Unit * targ = group.GetUnit();
   if (targ) {
     MoveTo::SetDest (Transform (targ->GetTransformation(),Pos));
+    if (rand()%64==0)
+      WarpToP(parent,targ);
   }
   MoveTo::Execute();
 }

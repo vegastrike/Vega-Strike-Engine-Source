@@ -34,6 +34,8 @@
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
 #include "gfx/particle.h"
+#include "gfx/lerp.h"
+#include "gfx/warptrail.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -43,7 +45,7 @@ vector<Vector> perplines;
 
 extern void reset_time_compression (int,KBSTATE);
 
-Atmosphere *theAtmosphere;
+
 
 extern string RemoveDotSystem (const char *input);
 /*
@@ -148,7 +150,6 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
 
   params.scattering = 5;
 
-  theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
 
 }
@@ -169,9 +170,7 @@ void GameStarSystem::activateLightMap() {
 }
 
 GameStarSystem::~GameStarSystem() {
-  _Universe->activeStarSystem()->SwapOut();
-  //_Universe->pushActiveStarSystem(this);
-  _Universe->activeStarSystem()->SwapIn();  
+  _Universe->pushActiveStarSystem(this);
 #ifdef NV_CUBE_MAP
 
   delete LightMap[0];
@@ -187,30 +186,13 @@ GameStarSystem::~GameStarSystem() {
   delete stars;
   //delete [] name;
   delete systemInputDFA;
-  /* //FIXME  after doign so much debugging I think you shouldn't delete this
-  for (int i=0;i<numprimaries;i++) {
-	delete primaries[i];
-	}
-	delete [] primaries;
-
-  */
-
   delete bolts;
+  //  delete collidetable;//BAD BAD BAD we need this to happen later!
 
 
-  /*
-  UnitCollection::UnitIterator iter = drawList.createIterator();
-  Unit *unit;
-  while((unit = iter.current())!=NULL) {
-    unit->Kill(false);
-    iter.advance();
-  }
-  */
-  delete collidetable;
-  _Universe->activeStarSystem()->SwapOut();
-  //  GFXDeleteLightContext (lightcontext);
-  //_Universe->popActiveStarSystem();
-  _Universe->activeStarSystem()->SwapIn();  
+  //I *think* this is legacy 012603  GFXDeleteLightContext (lightcontext);
+
+  _Universe->popActiveStarSystem();
   RemoveStarsystemFromUniverse();
   
 }
@@ -337,6 +319,10 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     if (!par->isSubUnit()) {
       //now we can assume world is topps
       par-> cumulative_transformation = linear_interpolate (par->prev_physical_state,par->curr_physical_state,interpolation_blend_factor);
+      Unit * targ = par->Target();
+      if (targ) {
+	targ-> cumulative_transformation = linear_interpolate (targ->prev_physical_state,targ->curr_physical_state,interpolation_blend_factor);
+      }
       _Universe->AccessCockpit()->SetupViewPort(true);
       alreadysetviewport=true;
     }
@@ -352,6 +338,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     ((GameUnit<Unit> *)unit)->Draw();
     iter.advance();
   }
+  WarpTrailDraw();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"fog");
   fflush (stderr);
@@ -365,6 +352,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 #endif
   if (!alreadysetviewport)
     _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  stars->Draw();
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
@@ -394,7 +382,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   Identity(ident);
 
   //Atmosphere::ProcessDrawQueue();
-  //theAtmosphere->Draw(Vector(0,1,0),ident);
 
 
 
@@ -439,7 +426,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   particleTrail.DrawAndUpdate();
-  stars->Draw();
   GameStarSystem::DrawJumpStars();
 
   //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
@@ -460,27 +446,33 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 }
-void GameStarSystem::UpdateUnitPhysics (bool firstframe) {
-  un_iter iter = this->getUnitList().createIterator();
-  Unit * unit=NULL;
-	while((unit = iter.current())!=NULL) {
-#ifdef OLD_AUTOPILOT
-	if (owner) 
-	  if (owner->getRelation(unit)<0) {
-	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
-	    Vector diff (owner->Position()-unit->Position());
-	    if (diff.Dot(diff)<neardist*neardist) {
-	      if (getTimeCompression!=.0000001) {//if not paused
-		reset_time_compression(0,PRESS);
-	      }
+
+void	UpdateAnimatedTexture()
+{ AnimatedTexture::UpdateAllPhysics();}
+void	TerrainCollide()
+{ Terrain::CollideAll();}
+void	UpdateTerrain()
+{ Terrain::UpdateAll(64);}
+void	UpdateCameraSnds()
+{ _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();}
+void	NebulaUpdate( StarSystem * ss)
+{
+	if (_Universe->AccessCockpit()->activeStarSystem==ss){
+	  Nebula * neb;
+	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
+	    if (neb->getFade()<=0) {
+	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
 	    }
 	  }
-#endif
-	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());
-	  iter.advance();
 	}
 }
-
+extern Music *muzak;
+void	TestMusic()
+{
+	if (muzak)
+		  muzak->Listen();
+}
+/*
 extern float getTimeCompression();
 void GameStarSystem::Update(float priority , bool executeDirector) {
 
@@ -680,5 +672,5 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
-
+*/
 

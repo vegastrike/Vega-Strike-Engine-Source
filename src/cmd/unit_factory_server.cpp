@@ -6,14 +6,27 @@
 #include "asteroid_generic.h"
 #include "missile_generic.h"
 #include "enhancement_generic.h"
+#ifdef _WIN32
+#include <direct.h>
+#endif
 
 extern Unit * _masterPartList;
+std::string getMasterPartListUnitName() {
+	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+	return mpl;
+}
 
 Unit* UnitFactory::getMasterPartList( )
-{
+{ 
+	
+char tmp[2048];
+tmp[2047]=0;
+getcwd (tmp,2046);
+
     if( _masterPartList == NULL )
     {
-        _masterPartList = new Unit( "master_part_list",
+		std::string mpl=getMasterPartListUnitName();
+        _masterPartList = new Unit(mpl.c_str(),
 	                            true,
 				    FactionUtil::GetFaction("upgrades") );
     }
@@ -30,14 +43,14 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               int         faction,
 		               std::string customizedUnit,
 		               Flightgroup *flightgroup,
-		               int         fg_subnumber )
+		               int         fg_subnumber, string netxml)
 {
     return new Unit( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
-                     fg_subnumber );
+                     fg_subnumber, netxml);
 }
 Unit* UnitFactory::createServerSideUnit( const char *filename,
 		               bool        SubUnit,

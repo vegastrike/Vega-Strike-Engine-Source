@@ -8,9 +8,13 @@ class AggressiveAI: public FireAt {
   enum INTERCUR {INTERR,INTNORMAL,INTRECOVER} curinter;
   bool obedient;//am I currently obedient
   bool last_time_insys;
+  char jump_time_check;
+  float last_jump_distance;
 protected:
-  AIEvents::ElemAttrMap logic;
-  AIEvents::ElemAttrMap interrupts;
+  void SignalChosenTarget();
+  AIEvents::ElemAttrMap *logic;
+  AIEvents::ElemAttrMap *interrupts;
+  float logiccurtime;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);
   bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter=false);//returns if found anything
@@ -19,10 +23,12 @@ protected:
   void ReCommandWing(Flightgroup* fg);
   bool ProcessCurrentFgDirective(Flightgroup *fg);
 public:
+  virtual void SetParent(Unit *parent1);
   enum types {AGGAI, MOVEMENT, FACING, UNKNOWN, DISTANCE, METERDISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL, RANDOMIZ};
   AggressiveAI (const char *file, const char * interruptename, Unit * target=NULL);
   void Execute ();
   virtual string getOrderDescription() { return "aggressive"; };
+  void AfterburnerJumpTurnTowards(Unit * target);
 };
 }
 

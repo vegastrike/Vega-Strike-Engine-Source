@@ -14,35 +14,13 @@
 #include "audiolib.h"
 #include "collide/rapcol.h"
 #include "unit_collide.h"
-#include "mount.h"
+
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
 // Those functions are client specific
 
 // Wrappers used in unit_xml.cpp
-void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
-{
-	xml->shieldmesh = new Mesh(filename, scale, faction,fg);
-}
-void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
-{
-	xml->rapidmesh = new Mesh(filename, scale, faction,fg);
-}
-void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
-{
-	xml->bspmesh = new Mesh(filename, scale, faction,fg);
-}
-void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
-{
-	xml->meshes.push_back(new Mesh(filename, scale, faction,fg));
-}
-
-Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1)
-{
-	return new GameMount (name.c_str(), ammo,volume);
-}
-
 Sprite * createSprite(const char *file)
 {
 	return new Sprite (file);
@@ -52,15 +30,6 @@ Sprite * createSprite(const char *file)
 int createSound( string file, bool val)
 {
 	return AUDCreateSoundWAV(file,val);
-}
-
-// From unit_damage.cpp
-std::vector <Mesh *> MakeMesh(unsigned int mysize) {
-  std::vector <Mesh *> temp;
-  for (unsigned int i=0;i<mysize;i++) {
-    temp.push_back(NULL);
-  }
-  return temp;
 }
 
 // From unit_xml.cpp

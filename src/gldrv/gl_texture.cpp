@@ -24,7 +24,7 @@
 
 #include "gfxlib.h"
 
-#if defined(IRIX)	/* missing from SGI OpenGL API beside GL_COLOR_INDEX8_EXT */
+#ifndef GL_TEXTURE_CUBE_MAP_EXT
 #define GL_TEXTURE_CUBE_MAP_EXT           0x8513
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT 0x8516
@@ -32,16 +32,6 @@
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT 0x8518
 #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT 0x8519
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
-#endif
-
-#if defined(__APPLE__) || defined(MACOSX)
-    #define GL_TEXTURE_CUBE_MAP_EXT           0x8513
-    #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
-    #define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT 0x8516
-    #define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT 0x8517
-    #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT 0x8518
-    #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT 0x8519
-    #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
 #endif
 
 //#define  MAX_TEXTURES 16384
@@ -106,11 +96,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
 {
   if (!isPowerOfTwo (width)) {
     fprintf (stderr,"Width %d not a power of two",width);
-    assert (false);
+    //    assert (false);
   }
   if (!isPowerOfTwo (height)) {
     fprintf (stderr,"Height %d not a power of two",height);
-    assert (false);
+    //    assert (false);
     
   }
   GFXActiveTexture(texturestage);
@@ -193,12 +183,14 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   ConvertPalette(textures[handle].palette, palette);
   //memcpy (textures[handle].palette,palette,768);
 }
-static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle) {
+static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle, int maxdimension) {
   int i,j,k,l,m;
+  if (MAX_TEXTURE_SIZE<maxdimension)
+    maxdimension=MAX_TEXTURE_SIZE;
   float *temp = (float *)malloc (pixsize*sizeof(float));
-  int newwidth = width>MAX_TEXTURE_SIZE?MAX_TEXTURE_SIZE:width;
+  int newwidth = width>maxdimension?maxdimension:width;
   int scalewidth = width/newwidth;
-  int newheight = height>MAX_TEXTURE_SIZE?MAX_TEXTURE_SIZE:height;
+  int newheight = height>maxdimension?maxdimension:height;
   int scaleheight = height/newheight;
   *newbuf = (unsigned char*)malloc (newwidth*newheight*pixsize*sizeof(unsigned char));
   for (i=0;i<newheight;i++) {
@@ -305,16 +297,31 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle,
   return GFXTRUE;
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget)
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension)
 {	
+  if (handle<0)
+    return GFXFALSE;
+  if (!isPowerOfTwo (textures[handle].width)|| !isPowerOfTwo (textures[handle].height)) {
+    static unsigned char NONPOWEROFTWO[1024]={255,127,127,255,
+					    255,255,0,255,
+					    255,255,0,255,
+					    255,127,127,255};
+    buffer=NONPOWEROFTWO;
+    textures[handle].width=2;
+    textures[handle].height=2;
+    //    assert (false);
+  }
+  if (maxdimension==65536) {
+    maxdimension = gl_options.max_texture_dimension;
+  }
   int error;
   unsigned char * tempbuf = NULL;
   unsigned char * tbuf =NULL;
   GLenum internalformat;
   GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
-  if (textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
-    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle);
+  if (textures[handle].width>maxdimension||textures[handle].height>maxdimension||textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
+    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension);
     buffer = tempbuf;
   }
   if (internformat!=PALETTE8) {
@@ -327,7 +334,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 #if defined(GL_COLOR_INDEX8_EXT)	// IRIX has no GL_COLOR_INDEX8 extension
     if (gl_options.PaletteExt) {
       error = glGetError();
-      glColorTable(textures[handle].targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
+      glColorTable_p(textures[handle].targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
       error = glGetError();
       if (error) {
 	if (tempbuf)

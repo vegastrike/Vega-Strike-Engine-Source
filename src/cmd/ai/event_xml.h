@@ -41,6 +41,6 @@ namespace AIEvents {
     ElemAttrMap (const XMLSupport::EnumMap &el):
       element_map (el), level(0) { } 
   };
-  void LoadAI (const char * filename, ElemAttrMap &result);//num seconds
+  void LoadAI (const char * filename, ElemAttrMap &result,const std::string &faction );//num seconds
 }
 #endif

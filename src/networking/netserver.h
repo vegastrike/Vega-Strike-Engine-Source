@@ -30,9 +30,10 @@
 #include "configxml.h"
 #include "accountsxml.h"
 #include "const.h"
-#include "netclass.h"
+#include "netui.h"
 #include "zonemgr.h"
 #include "client.h"
+#include "savegame.h"
 
 extern VegaConfig *vs_config;
 //extern VegaSimpleConfig *server_config;
@@ -40,67 +41,81 @@ using std::vector;
 typedef list<Client *>::iterator LI;
 typedef vector<Account *>::iterator VI;
 
-/** Class Netserver : runs the server */
+struct ServerSocket;
+
+/** Class Netserver : runs the "game server" */
 class NetServer
 {
-		NetUI *			Network;				// Network Interface
-		TCPNetUI *		NetAcct;				// TCP Network Interface for requesting accounts server
+        ServerSocket*   tcpNetwork;
+        ServerSocket*   udpNetwork;
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 
+		SaveGame*		globalsave;				// Savegame class used to save dynamic universe
 		ZoneMgr			*zonemgr;				// Zones/star systems Manager
 		int				nbclients;				// Active client connections number
 		int				nbaccts;				// Number of registered accounts
 
-		SOCKETALT		conn_sock;				// Connection socket for game server
-		TCPSOCKET		acct_sock;				// Connection socket for account server
+		SOCKETALT		acct_sock;				// Connection socket for account server
 		int				keeprun;				// Tells if we should keep running server
 		int				snapchanged;			// Tells the snapshot has changed and can be sent
 		int				acctserver;				// Tells if we use an account server
-		ObjSerial		serial_seed;
 
 		timeval				srvtimeout;			// timer
 
 		vector<Account *>	Cltacct;			// Client accounts
-		list<Client *>		Clients;			// Active client connections
+        list<Client *>      tcpClients;         // Active TCP client connections
+        list<Client *>      udpClients;         // Active UDP client connections
 		list<Client *>		discList;			// Client connections to be disconnected
 		list<Client *>		logoutList;			// Client connections that logged out
-#ifdef _TCP_PROTO
-		queue<Client *>		waitList;			// Client connections waiting for login response
-#else
-		queue<AddressIP>	waitList;			// Client addresses waiting for login response
-#endif
+
+	    struct WaitListEntry
+	    {
+	        bool tcp;
+	        Client*   t; // Client connections waiting for login response
+		    AddressIP u; // Client addresses waiting for login response
+	    };
+
+        queue<WaitListEntry> waitList;
 
 		//void			loadConfig();					// Loads configuration from server.xml
-		void			authenticate( Client * clt, AddressIP sernum);	// Authenticate a connected client
+		void			authenticate( Client * clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( Client * clt);		// Update a client position
 		void			addClient( Client * clt);		// Add the client in the game
-		Client *		newConnection( AddressIP * ipadr);
-		void			checkAcctMsg();					// Check for account server message to receive
-		void			checkMsg();						// Check for network message to receive
+		Client *		newConnection_udp( const AddressIP& ipadr);
+		Client *		newConnection_tcp( SocketSet& set );
+		void			prepareCheckAcctMsg( SocketSet& set );	// Check for account server message to receive
+		void			checkAcctMsg( SocketSet& set );			// Check for account server message to receive
+		void			prepareCheckMsg( SocketSet& set );		// Check for network message to receive
+		void			checkMsg( SocketSet& set );				// Check for network message to receive
 		void			checkKey();						// Check for keyboard input
-		void			recvMsg( Client * clt);			// Receive network messages
-		void			processPacket( Client * clt, unsigned char cmd, AddressIP ipadr); // Process received packet info
+		void			recvMsg_tcp( Client * clt);		// Receive network messages
+		void			recvMsg_udp( );					// Receive network messages
+		void			processPacket( Client * clt, unsigned char cmd, const AddressIP& ipadr, Packet& packet ); // Process received packet info
 		void			recvNewChar( Client * clt);		// Receive a new character
 		void			sendLocations( Client * clt);	// Send the start locations
 		void			startMsg();						// Startup showing text
-		void			disconnect( Client * clt);		// Disconnect a client
+		void			disconnect( Client * clt, const char* debug_from_file, int debug_from_line );		// Disconnect a client
 		void			logout( Client * clt);			// Clean disconnect a client
 		void			closeAllSockets();				// Disconnect all clients for shutdown
-		void			checkTimedoutClients();			// Check for timed out clients	
+        void            checkTimedoutClients_udp();     // Check for timed out clients  
 
-		Client *		addNewClient( SOCKETALT sock);	// Adds a new client to listen for
-		ObjSerial		getUniqueSerial();				// Get a pseudo-unique serial
+        Client *        addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
 		void			sendLoginError( Client * clt, AddressIP ipadr);
 		void			sendLoginAlready( Client * clt, AddressIP ipadr);
 		void			sendLoginAccept( Client * clt, AddressIP ipadr, int acctnew);
+		void			sendLoginUnavailable( Client * clt, AddressIP ipadr);
 
 	public:
 		NetServer();
 		~NetServer();
 
-		void	start();
+		void	start( int argc, char ** argv);
 		void	save();
+
+		// WEAPON STUFF
+		void	BroadcastUnfire( ObjSerial serial, int weapon_index, int zone);
+		void	BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, int zone);
 
 		friend class ZoneMgr;
 };
@@ -108,3 +123,4 @@ class NetServer
 //void	str_cat( char *res, char c, char *s);
 
 #endif
+

@@ -12,12 +12,16 @@ struct XMLType {
     void * p;
     char * c;
     short * s;
+    bool * b;
+    double * d;
     unsigned short * us;
     unsigned char * uc;
     int hardint;
     float hardfloat;
   } w;
   std::string str;
+  XMLType (bool *mybool) {w.b = mybool;}
+  XMLType (double *mydouble) {w.d = mydouble;}
   XMLType (int *myint) {w.i =myint;}
   XMLType (int myhardint) {w.hardint=myhardint;}
   XMLType (float myhardfloat) {w.hardfloat = myhardfloat;}
@@ -40,6 +44,8 @@ XMLHandler shortStarHandler;
 XMLHandler shortToFloatHandler;
 XMLHandler ushortStarHandler;
 XMLHandler charStarHandler;
+XMLHandler boolStarHandler;
+XMLHandler doubleStarHandler;
 XMLHandler ucharStarHandler;
 XMLHandler negationCharStarHandler;
 XMLHandler floatStarHandler;
@@ -71,6 +77,7 @@ struct XMLElement {
     handler = hand;
   }
   void Write (FILE * fp,void *mythis);
+  string WriteString (void *mythis);
 };
 struct XMLnode {
   XMLnode *up;
@@ -80,6 +87,7 @@ struct XMLnode {
   XMLnode () {up=NULL;}
   XMLnode (const std::string &val, XMLnode * newup) {this->val=val;up=newup;}
   void Write (FILE * fp, void *mythis, int tablevel);
+  string WriteString( void *mythis, int tablevel);
 };
 class XMLSerializer {
   std::string filename;
@@ -88,10 +96,12 @@ class XMLSerializer {
   XMLnode topnode; 
   XMLnode * curnode;
  public:
+  std::string randomdata[1];
   XMLSerializer(const char * filename, const char * modificationname, void *mythis);
   void AddTag (const std::string &tag);
   void AddElement (const std::string &element, XMLHandler *handler, const XMLType &input);
   void Write (const char * modificationname="");
+  string WriteString();
   void EndTag (const std::string endname=string(""));
   std::string getName (){return filename;}
   void setName (const std::string & fil) {this->filename = fil;}

@@ -43,9 +43,11 @@ protected:
 public:
   UnitCollection satellites;
   virtual ~GamePlanet();
+  virtual void AddFog (const std::vector <AtmosphericFogMesh> &);
+  Vector AddSpaceElevator (const std::string &name, const std::string & faction, char direction);
   void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
-  void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false);
+  void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false, bool reverse_normals=true);
   void DisableLights ();
   void EnableLights();
   //void AddSatellite (Unit * orbiter);
@@ -67,10 +69,6 @@ public:
   Atmosphere * getAtmosphere () {return atmosphere;}
   void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist);
   void gravitate(UnitCollection *units);
-
-  bool isAtmospheric  () {
-    return hasLights()||atmospheric;
-  }
 
   friend class Planet::PlanetIterator;
   friend class PlanetaryOrbit;

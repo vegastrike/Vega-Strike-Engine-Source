@@ -40,7 +40,8 @@ class Camera{
 	float cockpit_offset;
         UnitContainer nebula;
 public:
-	void setCockpitOffset (float c) {cockpit_offset = c;changed=GFXTRUE;} 
+	void setCockpitOffset (float c) {cockpit_offset = c;changed=GFXTRUE;}
+	float getCockpitOffset () {return cockpit_offset;} 
 	enum ProjectionType {
 	  PARALLEL,
 	  PERSPECTIVE

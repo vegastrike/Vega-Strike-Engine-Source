@@ -23,9 +23,21 @@
 #include "cmd/enhancement.h"
 #include "main_loop.h"
 #include "cmd/script/flightgroup.h"
+#include "universe_util.h"
 extern vector <char *> ParseDestinations (const string &value);
 
-	
+AtmosphericFogMesh::AtmosphericFogMesh() {
+	er=eg=eb=ea=.5;
+	dr=dg=db=da=.5;	
+	meshname="sphereatm.xmesh";
+	scale=1.05;
+	focus=.5;
+	concavity=0;
+	tail_mode_start=-1;
+	tail_mode_end=-1;
+	min_alpha=0;
+	max_alpha=255;
+};
 namespace StarXML {
   enum Names {
     UNKNOWN,
@@ -43,6 +55,7 @@ namespace StarXML {
     QJ,
     QK,
     NAME,
+	DIRECTION,
     RADIUS,
     GRAVITY,
     YEAR,
@@ -93,11 +106,24 @@ namespace StarXML {
     OUTERRADIUS,
     NUMSLICES,
     RING,
+	SPACEELEVATOR,
     WRAPX,
-    WRAPY
+    WRAPY,
+	FOG,
+	FOGELEMENT,
+	FOCUS,
+	CONCAVITY,
+	MINALPHA,
+	MAXALPHA,
+	DIRED,
+	DIGREEN,
+	DIBLUE,
+	DIALPHA,
+	TAILMODESTART,
+	TAILMODEEND
   };
 
-  const EnumMap::Pair element_names[] = {
+  const EnumMap::Pair element_names[23] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("System", SYSTEM),
@@ -117,9 +143,12 @@ namespace StarXML {
     EnumMap::Pair ("Nebula",NEBULA),
     EnumMap::Pair ("Asteroid",ASTEROID),
     EnumMap::Pair ("RING",RING),
-    EnumMap::Pair ("citylights",CITYLIGHTS)
+    EnumMap::Pair ("citylights",CITYLIGHTS),
+    EnumMap::Pair ("SpaceElevator",SPACEELEVATOR),
+    EnumMap::Pair ("Fog",FOG),
+    EnumMap::Pair ("FogElement",FOGELEMENT)		
   };
-  const EnumMap::Pair attribute_names[] = {
+  const EnumMap::Pair attribute_names[58] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
     EnumMap::Pair ("stars", STARS),
@@ -129,7 +158,8 @@ namespace StarXML {
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
-    EnumMap::Pair ("destination", DESTINATION), 
+    EnumMap::Pair ("destination", DESTINATION),
+    EnumMap::Pair ("direction", DIRECTION), 	
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
     EnumMap::Pair ("z", Z), 
@@ -148,6 +178,12 @@ namespace StarXML {
     EnumMap::Pair ("year", YEAR),
     EnumMap::Pair ("day", DAY),
     EnumMap::Pair ("position", PPOSITION),
+    EnumMap::Pair ("MaxAlpha", MAXALPHA),
+    EnumMap::Pair ("MinAlpha", MINALPHA),		
+    EnumMap::Pair ("DRed", DIRED),
+    EnumMap::Pair ("DGreen", DIGREEN),
+    EnumMap::Pair ("DBlue", DIBLUE),
+    EnumMap::Pair ("DAlpha", DIALPHA),	
     EnumMap::Pair ("Red", EMRED),
     EnumMap::Pair ("Green", EMGREEN),
     EnumMap::Pair ("Blue", EMBLUE),
@@ -166,12 +202,16 @@ namespace StarXML {
     EnumMap::Pair ("InnerRadius",INNERRADIUS),
     EnumMap::Pair ("OuterRadius",OUTERRADIUS),
     EnumMap::Pair ("WrapX",WRAPX),
-    EnumMap::Pair ("WrapY",WRAPY)
+    EnumMap::Pair ("WrapY",WRAPY),
+    EnumMap::Pair ("Focus",FOCUS),
+    EnumMap::Pair ("Concavity",CONCAVITY),
+    EnumMap::Pair ("TailModeStart",TAILMODESTART),
+    EnumMap::Pair ("TailModeEnd",TAILMODEEND)
     
   };
 
-  const EnumMap element_map(element_names, 20);
-  const EnumMap attribute_map(attribute_names, 47);
+  const EnumMap element_map(element_names, 23);
+  const EnumMap attribute_map(attribute_names, 58);
 }
 
 using XMLSupport::EnumMap;
@@ -216,11 +256,8 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
     }
   }
   free (tmp);
-} 
-//sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
-static Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
-  return (Unit *)0x31337;
 }
+extern Unit * getTopLevelOwner();
 extern BLENDFUNC parse_alpha (const char *);
 void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blendDst) {
   blendSrc=ONE;
@@ -242,15 +279,32 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
       free (d);
     }
 }
-float ScaleJumpRadius (float radius) {
-	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
-	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
-	    radius *= jump_radius_scale*game_speed;//need this because sys scale doesn't affect j-point size
-	    return radius;
+
+int GetNumNearStarsScale (int currentnum) {
+  static float numstars=  XMLSupport::parse_float (vs_config->getVariable("graphics","num_near_stars_scale","2"));
+  return (int)(numstars*currentnum);
+}
+int GetNumStarsScale (int currentnum) {
+  static float numstars=  XMLSupport::parse_float (vs_config->getVariable("graphics","num_far_stars_scale","2"));
+  return (int)(numstars*currentnum);
+}
+float GetStarSpreadScale (float currentnum) {
+  static float numstars=  XMLSupport::parse_float (vs_config->getVariable("graphics","star_spread","200"));
+  static float gamespeed = XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+  return numstars*currentnum*gamespeed;
 }
 
+float ScaleOrbitDist (bool autogenerated) {
+  static float rtcompactness = parse_float (vs_config->getVariable("physics","runtime_compactness","1"));
+  static float agcompactness = parse_float (vs_config->getVariable("physics","autogen_compactness","1"));
+  if (autogenerated)
+    return agcompactness*rtcompactness;
+  return rtcompactness;
+}
+extern float ScaleJumpRadius (float radius);
+
 void GameStarSystem::beginElement(const string &name, const AttributeList &attributes) {
-using namespace StarXML;
+  using namespace StarXML;
   static int neutralfaction=FactionUtil::GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
@@ -304,11 +358,7 @@ using namespace StarXML;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case SCALESYSTEM:
-	xml->scale = parse_float ((*iter).value);
-	{
-		xml->scale*=parse_float (vs_config->getVariable("physics","game_speed","1"));
-		xml->scale*=parse_float (vs_config->getVariable("physics","star_system_scale","1"));
-	}	
+	xml->scale *= parse_float ((*iter).value);
 	break;
       case REFLECTIVITY:
 	xml->reflectivity=parse_float ((*iter).value);
@@ -317,16 +367,16 @@ using namespace StarXML;
 	xml->backgroundname=(*iter).value;
 	break;
       case NEARSTARS:
-	xml->numnearstars = parse_int((*iter).value);
+	xml->numnearstars = GetNumNearStarsScale(parse_int((*iter).value));
 	break;
       case STARS:
-	xml->numstars = parse_int ((*iter).value);
+	xml->numstars = GetNumStarsScale(parse_int ((*iter).value));
 	break;
       case STARSPREAD:
-	xml->starsp = parse_float ((*iter).value);
+	xml->starsp = GetStarSpreadScale(parse_float ((*iter).value));
 	break;
       case FADESTARS:
-	xml->fade = parse_bool ((*iter).value);
+	fprintf (stderr,"deprecated");
 	break;
       case NAME:
 	this->name = new char [strlen((*iter).value.c_str())+1];
@@ -415,6 +465,117 @@ using namespace StarXML;
 	}
       break;
     }
+
+  case SPACEELEVATOR:
+    {
+      xml->unitlevel++;
+      std::string myfile("elevator");
+
+      blendSrc=SRCALPHA;
+      blendDst=INVSRCALPHA;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL)
+	if (p->isUnit()==PLANETPTR) {
+	  string faction(UniverseUtil::GetGalaxyFaction (this->filename));
+	  char direction='b';
+	  
+	  R.Set(1,0,0);
+	  S.Set(0,1,0);
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+	    case XFILE:
+	      myfile = (*iter).value;
+	      break;
+		case DIRECTION:
+			if (!(*iter).value.empty())
+				direction= (*iter).value[0];
+			break;
+		case FACTION:
+			faction = (*iter).value;
+			if (faction==UniverseUtil::GetGalaxyProperty (this->filename,"faction")) {
+				string ownerfaction = UniverseUtil::GetGalaxyFaction (this->filename);
+				faction = ownerfaction;
+			}
+			break;
+	    default:
+	      break;
+	    }
+	  }
+	  if (p!=NULL) {
+	    ((Planet *)p)->AddSpaceElevator (myfile,faction,direction);
+	  }
+	}
+      break;
+    }
+
+  case FOG:
+  
+     xml->unitlevel++;
+	 xml->fog.clear();
+	 break;
+  case FOGELEMENT:
+	  xml->unitlevel++;
+
+	  
+	  xml->fog.push_back(AtmosphericFogMesh());
+	  xml->fog.back().scale=1.1-.075+.075*xml->fog.size();	  
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+		case EMRED:
+			xml->fog.back().er=XMLSupport::parse_float (iter->value);
+			break;
+		case EMGREEN:
+			xml->fog.back().eg=XMLSupport::parse_float (iter->value);			
+			break;
+		case EMBLUE:
+			xml->fog.back().eb=XMLSupport::parse_float (iter->value);			
+			break;
+		case EMALPHA:
+		case ALPHA:			
+			xml->fog.back().ea=XMLSupport::parse_float (iter->value);
+			break;
+		case DIRED:
+			xml->fog.back().dr=XMLSupport::parse_float (iter->value);
+			break;
+		case DIGREEN:
+			xml->fog.back().dg=XMLSupport::parse_float (iter->value);			
+			break;
+		case DIBLUE:
+			xml->fog.back().db=XMLSupport::parse_float (iter->value);			
+			break;
+		case DIALPHA:			
+			xml->fog.back().da=XMLSupport::parse_float (iter->value);
+			break;
+		case XFILE:
+			xml->fog.back().meshname=iter->value;
+			break;
+		case MINALPHA:
+			xml->fog.back().min_alpha=XMLSupport::parse_float(iter->value)*255;
+			break;
+		case MAXALPHA:
+			xml->fog.back().max_alpha=XMLSupport::parse_float(iter->value)*255;
+			break;
+		case CONCAVITY:
+			xml->fog.back().concavity=XMLSupport::parse_float(iter->value);
+			break;
+		case FOCUS:
+			xml->fog.back().focus=XMLSupport::parse_float(iter->value);			
+			break;
+		case TAILMODESTART:
+			xml->fog.back().tail_mode_start=XMLSupport::parse_float(iter->value);
+			break;
+		case TAILMODEEND:
+			xml->fog.back().tail_mode_end=XMLSupport::parse_float(iter->value);
+			break;
+		case SCALEATMOS:
+			xml->fog.back().scale=XMLSupport::parse_float (iter->value);
+			break;
+		default:
+			break;
+		}
+	  }
+	  
+	  break;
   case CITYLIGHTS:
     {
       std::string myfile("planets/Dirt_light.png");
@@ -456,7 +617,7 @@ using namespace StarXML;
 	}
       break;
     }
-    
+	break;    
   case ATMOSPHERE:
     {
       std::string myfile("sol/earthcloudmaptrans.png");
@@ -553,13 +714,13 @@ using namespace StarXML;
 	radius = parse_float ((*iter).value);
 	break;
       case X:
-	pos.i = parse_float ((*iter).value)*xml->scale;
+	pos.i = parse_float ((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case Y:
-	pos.j = parse_float ((*iter).value)*xml->scale;
+	pos.j = parse_float ((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case Z:
-	pos.k = parse_float ((*iter).value)*xml->scale;
+	pos.k = parse_float ((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case RI:
 	R.i=parse_float((*iter).value);
@@ -708,7 +869,14 @@ using namespace StarXML;
 	//curlights.push_back (xml->lights[parse_int ((*iter).value)]);
 	break;
       case FACTION:
-	faction = FactionUtil::GetFaction ((*iter).value.c_str());
+	  {
+		  int originalowner = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyProperty (this->filename,"faction"));
+		  faction = FactionUtil::GetFactionIndex ((*iter).value);
+		  if (faction==originalowner) {
+			  int ownerfaction = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction (this->filename));
+			  faction = ownerfaction;
+		  }
+	  }
 	break;
       case EMRED:
 	ourmat.er = parse_float((*iter).value);
@@ -727,42 +895,37 @@ using namespace StarXML;
 	  ourmat.ar=ourmat.ag=ourmat.ab=0;
 	break;
       case RI:
-	R.i=parse_float((*iter).value)*xml->scale;
+	R.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case RJ:
-	R.j=parse_float((*iter).value)*xml->scale;
+	R.j=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case RK:
-	R.k=parse_float((*iter).value)*xml->scale;
+	R.k=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case SI:
-	S.i=parse_float((*iter).value)*xml->scale;
+	S.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case SJ:
-	S.j=parse_float((*iter).value)*xml->scale;
+	S.j=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case SK:
-	S.k=parse_float((*iter).value)*xml->scale;
+	S.k=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case X:
- 	xml->cursun.i=parse_float((*iter).value)*xml->scale;
+ 	xml->cursun.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
  	break;
 
       case Y:
- 	xml->cursun.j=parse_float((*iter).value)*xml->scale;
+ 	xml->cursun.j=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
  	break;
 
       case Z:
- 	xml->cursun.k=parse_float((*iter).value)*xml->scale;
+ 	xml->cursun.k=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
  	break;
 
       case RADIUS:
 	radius=parse_float((*iter).value);
-	{
-	  if (elem==JUMP) {
-	    radius = ScaleJumpRadius (radius);
-	  }
-	}
 	break;
       case PPOSITION:
 	position=parse_float((*iter).value);
@@ -783,9 +946,11 @@ using namespace StarXML;
       }
 
     }
-    if (isdest==false) {
-      radius*=xml->scale;
+    if (isdest==true) {
+      if (xml->fade) //xml->fade saves if it's autogenerated system
+	radius = ScaleJumpRadius (radius);
     }
+    radius*=xml->scale;
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
       Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
@@ -844,33 +1009,33 @@ using namespace StarXML;
 	faction = FactionUtil::GetFaction ((*iter).value.c_str());
 	break;
       case RI:
-	R.i=parse_float((*iter).value)*xml->scale;
+	R.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case RJ:
-	R.j=parse_float((*iter).value)*xml->scale;
+	R.j=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case RK:
-	R.k=parse_float((*iter).value)*xml->scale;
+	R.k=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case SI:
-	S.i=parse_float((*iter).value)*xml->scale;
+	S.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case SJ:
-	S.j=parse_float((*iter).value)*xml->scale;
+	S.j=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case SK:
-	S.k=parse_float((*iter).value)*xml->scale;
+	S.k=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 	break;
       case X:
- 	xml->cursun.i=parse_float((*iter).value)*xml->scale;
+ 	xml->cursun.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 
  	break;
       case Y:
- 	xml->cursun.j=parse_float((*iter).value)*xml->scale;
+ 	xml->cursun.j=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 
  	break;
       case Z:
- 	xml->cursun.k=parse_float((*iter).value)*xml->scale;
+ 	xml->cursun.k=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
 
  	break;
 
@@ -975,6 +1140,7 @@ using namespace StarXML;
       }
     }
     delete []filename;
+    delete []nebfile;
     break;
 	
   default:
@@ -988,6 +1154,19 @@ using namespace StarXML;
   Names elem = (Names)element_map.lookup(name);
 
   switch(elem) {
+  case FOG:
+  {
+	  xml->unitlevel--;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel);  
+      if (p!=NULL){
+		  if (p->isUnit()==PLANETPTR) {	  
+			  ((Planet *)p)->AddFog(xml->fog);
+		  }
+	  }
+	  
+  }
+  break;
+	  
   case UNKNOWN:
     xml->unitlevel--;
     //    cerr << "Unknown element end tag '" << name << "' detected " << endl;
@@ -1015,7 +1194,13 @@ using namespace StarXML;
   //  shield.number=0;
   const int chunk_size = 16384;
   // rrestricted=yrestricted=prestricted=false;
-  string file = GetCorrectStarSysPath (filename);
+  bool autogenerated=false;
+  this->filename = filename;
+  string file = GetCorrectStarSysPath (filename,autogenerated);
+  static bool game_speed_affects_autogen_systems=XMLSupport::parse_bool(vs_config->getVariable ("physics","game_speed_affects_autogen_systems","false"));
+  if (game_speed_affects_autogen_systems) {
+    autogenerated = false;
+  }
   FILE * inFile=NULL;
   if (file.length()) {
     inFile = fopen (file.c_str(), "r");
@@ -1031,14 +1216,21 @@ using namespace StarXML;
 
   xml = new StarXML;
   xml->scale=1;
+  xml->fade = autogenerated;
+  if (!autogenerated) {
+    xml->scale*=parse_float (vs_config->getVariable("physics","game_speed","1"));
+  }
+  xml->scale*=parse_float (vs_config->getVariable("physics","star_system_scale","1"));
+		
+
   xml->parentterrain=NULL;
   xml->ct=NULL;
   xml->systemcentroid=centroid;
   xml->timeofyear = timeofyear;
-  xml->fade = (vs_config->getVariable ("graphics","starblend","true")==string("true"));
-  xml->starsp = 150;
-  xml->numnearstars=400;
-  xml->numstars=800;
+  //xml->fade is only if autogenerated
+  xml->starsp = GetStarSpreadScale(150);
+  xml->numnearstars=GetNumNearStarsScale(400);
+  xml->numstars=GetNumStarsScale(800);
   xml->backgroundname = string("cube");
   xml->reflectivity=XMLSupport::parse_float (vs_config->getVariable("graphics","reflectivity",".2"));
   xml->unitlevel=0;
@@ -1084,17 +1276,16 @@ using namespace StarXML;
 #else
   string bglight= 
 	  MakeSharedStarSysPath (xml->backgroundname+"_light.bmp");
-  FILE * tempo = fopen (bglight.c_str(),"rb");
-  if (!tempo) {
-      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
-  }else {
-    fclose (tempo);
-  }
   LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  if (!LightMap[0]->LoadSuccess()) {
+      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
+      LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  }
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
   stars = new Stars (xml->numnearstars, xml->starsp);
-  stars->SetBlend (xml->fade,xml->fade);
+  stars->SetBlend (XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")),  
+		   XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")));
   delete xml;
 }
 

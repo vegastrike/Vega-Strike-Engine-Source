@@ -391,32 +391,29 @@ void VDU::DrawMessages(Unit *target){
   whoNOT.push_back ("bar");
 
   vector <std::string> message_people;//should be "all", parent's name
-  gameMessage *lastmsg=mc->last(0,message_people,whoNOT);
-  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && lastmsg!=NULL;i++){
-    lastmsg=mc->last(i,message_people,whoNOT);
-    if(lastmsg!=NULL){
+  gameMessage lastmsg;
+  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && mc->last(i,lastmsg,message_people,whoNOT);i++){
       char timebuf[100];
-      double sendtime=lastmsg->time;
+      double sendtime=lastmsg.time;
       if(sendtime<=nowtime){
-	int sendtime_mins=(int)(sendtime/60.0);
-	int sendtime_secs=(int)(sendtime - sendtime_mins*60);
-
-	sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
-	string mymsg;
- 	if (lastmsg->from!="game") {
-		mymsg=lastmsg->from+" ("+timebuf+"): "+lastmsg->message;
-	} else {
-		mymsg=string(timebuf)+": "+lastmsg->message;
-	}
-	int msglen=mymsg.size();
-	int rows_needed=(int)(msglen/(1.6*cols));
-	fullstr=mymsg+"\n"+fullstr;
-	//fullstr=fullstr+mymsg+"\n";
-
-	rows_used+=rows_needed+1;
-	//      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
+		  int sendtime_mins=(int)(sendtime/60.0);
+		  int sendtime_secs=(int)(sendtime - sendtime_mins*60);
+		  
+		  sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
+		  string mymsg;
+		  if (lastmsg.from!="game") {
+			  mymsg=lastmsg.from+" ("+timebuf+"): "+lastmsg.message;
+		  } else {
+			  mymsg=string(timebuf)+": "+lastmsg.message;
+		  }
+		  int msglen=mymsg.size();
+		  int rows_needed=(int)(msglen/(1.6*cols));
+		  fullstr=mymsg+"\n"+fullstr;
+		  //fullstr=fullstr+mymsg+"\n";
+		  
+		  rows_used+=rows_needed+1;
+		  //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
       }
-    }
   }
 
   fullstr=targetstr+fullstr;
@@ -441,7 +438,7 @@ void VDU::DrawNav (const Vector & nav) {
   Unit * targ = you!=NULL?you->Target():NULL;
   char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  static bool lie=XMLSupport::parse_float (vs_config->getVariable("physics","game_speed_lying","true"));
+  static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,lie?(10*nav.Magnitude()/game_speed):nav.Magnitude());
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
@@ -680,19 +677,19 @@ void VDU::DrawWeapon (Unit * parent) {
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->GetNumMounts();i++) {
-    Vector pos (parent->mounts[i]->GetMountLocation().position.Cast());
+    Vector pos (parent->mounts[i].GetMountLocation());
     pos.i=-
 pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
     pos.k=0;
-    string ammo =(parent->mounts[i]->ammo>=0)?string("(")+tostring(parent->mounts[i]->ammo)+string(")"):string("");
-    switch (parent->mounts[i]->ammo!=0?parent->mounts[i]->status:127) {
+    string ammo =(parent->mounts[i].ammo>=0)?string("(")+tostring(parent->mounts[i].ammo)+string(")"):string("");
+    switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
-      if (parent->mounts[i]->type->size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;
+      if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) 
+	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;
       else
-	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;;
+	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;;
       break;
     case Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);
@@ -707,7 +704,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
       GFXColor4f (0,.2,0,1);
       break;
     }
-    DrawGun (pos,w,h,parent->mounts[i]->type->size);
+    DrawGun (pos,w,h,parent->mounts[i].type->size);
   }
   GFXColor4f(0,1,.2,1);
   if (mbuf.length()!=(unsigned int)mlen) {
@@ -716,56 +713,74 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
   tp->Draw (buf,0,true);
 }
 using std::vector;
+/*
 static GFXColor GetColorFromSuccess (float suc){ 
   suc +=1.;
   suc/=2.;
   return GFXColor(1-suc,suc,0);    
 }
-int VDU::DrawVDUObjective (void * obj, int offset) {
+*/
 
-  if (offset>=0) {
-    Mission::Objective * mo = (Mission::Objective *)obj;
-    tp->col=(GetColorFromSuccess(mo->completeness));
-    std::string rez;
-    for (int i=0;i<offset;i++) {
-      rez+="\n";
-    }
-    rez+=mo->objective;
-    return tp->Draw (rez,0,true);  
-  }
-  return offset+1;
+//
+
+char printHex (unsigned int hex) {
+	if (hex<10) {
+		return hex+'0';
+	}
+	return hex-10+'A';
 }
+static char suc_col_str [8]="#000000";
+inline char *GetColorFromSuccess (float suc) {
+  if (suc>=1)
+    return "#00FF00";
+  if (suc<=-1)
+    return "#FF0000";
+  suc +=1.;
+  suc*=128;
+  unsigned int tmp2 = suc;
+  unsigned int tmp1 = 255-suc;
+  suc_col_str[0]='#';
+  suc_col_str[1]=printHex(tmp1/16);
+  suc_col_str[2]=printHex(tmp1%16);
+  suc_col_str[3]=printHex(tmp2/16);
+  suc_col_str[4]=printHex(tmp2%16);
+  suc_col_str[5]='0';
+  suc_col_str[6]='0';
+  
+  return suc_col_str;
+}
+
+#if 0
+int VDU::DrawVDUObjective (void * obj, int offset) {
+  static bool VDU_DrawVDUObjective_is_now_outdated=false;
+  assert(VDU_DrawVDUObjective_is_now_outdated==true);
+  return 0;
+}
+#endif
+
 void VDU::DrawVDUObjectives (Unit *parent) {
-  GFXColor col (tp->col);
+  std::string rez;
   int offset = scrolloffset;
   for (unsigned int i=0;i<active_missions.size();++i){
     if (!active_missions[i]->objectives.empty()) {
-      if (offset>=0) {
-	tp->col=GFXColor(1,1,1,1);
-	std::string rez;
-	for (int k=0;k<offset;k++) {
-	  rez+="\n";
-	}
+	rez+="#FFFFFF";
 	if (active_missions[i]->mission_name.empty()) {
 	  rez+="Mission "+XMLSupport::tostring((int)i)+"\n";
 	}else {
 	  rez+=active_missions[i]->mission_name+"\n";
 	}
-	offset=tp->Draw (rez,0,true);  	
-      }else {
-	offset++;
-      }
-
-      
       vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
       for (;j!=active_missions[i]->objectives.end();++j) {
 	if (j->owner==NULL||j->owner==parent) {
-	  offset=DrawVDUObjective (&(*j),offset);
+	  rez+=GetColorFromSuccess((*j).completeness);
+	  rez+=(*j).objective;
+	  rez+='\n';
 	}
       }
+	  rez+='\n';
     }
   }
-  tp->col=col;
+  tp->Draw(rez,offset);
 }
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->col=color;

@@ -53,6 +53,7 @@
 #include "force_feedback.h"
 #include "universe_util.h"
 #include "networking/netclient.h"
+#include "save_util.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -120,10 +121,12 @@ bool _Slew = true;
    }
  }
 static bool QuitAllow=false;
-
+extern bool cleanexit;
 namespace CockpitKeys {
+  
   void QuitNow () {
     {
+      cleanexit=true;
 	  if( Network==NULL)
 		_Universe->WriteSaveGame(true);//gotta do important stuff first
       for (unsigned int i=0;i<active_missions.size();i++) {
@@ -479,8 +482,27 @@ void InitializeInput() {
 }
 
 //Cockpit *cockpit;
+
+void IncrementStartupVariable () {
+	if (mission->getVariable ("savegame","").length()==0)
+		return;
+	int len=getSaveDataLength (0,"436457r1K3574r7uP71m35");
+	float var=FLT_MAX;
+	if (len<=0) {
+		pushSaveData(0,"436457r1K3574r7uP71m35",1);
+		var=1;
+	} else {
+		var=getSaveData(0,"436457r1K3574r7uP71m35",0);
+		putSaveData(0,"436457r1K3574r7uP71m35",0,var+1);
+	}
+	if (var<=XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
+		GameCockpit::NavScreen(1,PRESS);
+		
+	}
+}
+
 static Texture *tmpcockpittexture;
-void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc ) {
+void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc, vector<vector<std::string> > &savefiles) {
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);
@@ -607,10 +629,15 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
  			// In networking mode we name the ship save with .xml as they are xml files
 			if( Network!=NULL)
+			{
 				modifications = modifications+".xml";
-  			fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s, savefiles[a][1]);
+			}
+			else
+  				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
 			if( Network!=NULL)
 			{
+				fighters[a]->SetNetworkMode();
 				Network[squadnum].setUnit( fighters[a]);
 				cout<<"Creating fighter["<<a<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
 			}
@@ -679,7 +706,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       int j=rand()%a;
       if (FactionUtil::GetIntRelation(tmptarget[rr],tmptarget[j])<0)
 	  {
-		  fighters[rr]->Target (fighters[j]);
+	    //fighters[rr]->Target (fighters[j]);
 		  break;
       }
     }
@@ -697,6 +724,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       fighters[fighter0indices[cnum]]->EnqueueAI(new FireKeyboard (cnum,cnum));
     }
     fighters[fighter0indices[cnum]]->SetTurretAI ();
+    fighters[fighter0indices[cnum]]->DisableTurretAI ();	
   }
 
   shipList = _Universe->activeStarSystem()->getClickList();
@@ -705,6 +733,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 //  _Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
   mission->DirectorInitgame();
+  IncrementStartupVariable();
 }
 void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
@@ -785,8 +814,8 @@ void main_loop() {
   {
 	  for( int jj=0; jj<_Universe->numPlayers(); jj++)
 	  {
-			Network[jj].checkMsg();
-			Network[jj].sendMsg();
+			Network[jj].checkMsg( NULL, NULL);
+			//Network[jj].sendMsg();
 	  }
   }
 }

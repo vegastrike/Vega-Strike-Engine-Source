@@ -1,5 +1,7 @@
 /* example-start entry entry.c */
-
+#if defined(_WIN32) && _MSC_VER > 1300 
+#define __restrict
+#endif
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,21 +25,22 @@ extern void my_sleep (int i);
 void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
-#define NUM_TITLES 8
-static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Help","Exit Launcher"};
+#define NUM_TITLES 9
+static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Options","Help","Exit Launcher"};
 std::string my_mission ("mission/exploration/explore_universe.mission");
-#define NUM_HELPS 6
+#define NUM_HELPS 7
 static const char * helps [NUM_HELPS] = {
   "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
   "|START A NEW GAME BUTTON|\nStart a new game in the Vegastrike universe.\nYou start with a dinged up old wayfarer\nand head from the vega sector with the hope of finding\nprofit and adventure on the frontier.\nTo begin afresh you must choose a new saved game.",
   "|LOAD GAME BUTTON|\nThis opens up a saved game you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
   "|RECOVER AUTOSAVE BUTTON|\nThis button allows a player to recover their most recently\nplayed game into the selected save game upon next run.\nIf the player quits or the player docks, and then dies,\nit will restore to the last saved position.",
   "|LAUNCH LAST SAVEGAME BUTTON|\nUse this button to launch Vegastrike with from a saved\ngame or mission. If you do not choose a mission, you\nwill start in the standard trading/bounty hunting mission.",
-  "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game."
+  "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game.",
+  "|OPTIONS BUTTON|\nThis button will start up the configurator to allow you to\nselect your preferred options."
 };
 
 
-char * prog_arg=NULL;
+char * prog_arg=0;
 #ifdef _WIN32
 std::string ParentDir () {
   static char * final=NULL;
@@ -90,6 +93,11 @@ void GoToParentDir () {
   std::string par = ParentDir ();
   //  fprintf (stderr,"changing to %s",par.c_str());
   chdir (par.c_str());
+  FILE * fp1 = fopen ("../vegastrike.config","r");
+  FILE * fp2 = fopen ("vegastrike.config","r");
+  if ((!fp2)&&fp1) {
+	  chdir ("..");
+  }
 }
 #endif // _WIN32
 
@@ -173,6 +181,22 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
 	return 0;
 }
 #endif
+
+#ifndef _WIN32
+void changeToData () {
+   chdir ("/usr/games/vegastrike/data");
+   FILE * fp = fopen ("vegastrike.config","r");
+   if (!fp){
+	   chdir ("/usr/local/vegastrike/data");
+	   FILE * fp = fopen ("vegastrike.config","r");
+	   if (!fp){
+
+		   chdir ("/usr/vegastrike/data");
+		   //   FILE * fp = fopen ("vegastrike.config","r");
+	   }
+   }
+}
+#endif
 void launch_mission () {
 #ifdef _WIN32
   if (!progress)
@@ -181,13 +205,13 @@ void launch_mission () {
 #ifdef _WIN32
   GoToParentDir();
 #endif
-  int player = my_mission.rfind ("player");
+  unsigned int player = my_mission.rfind ("player");
   if (player>0&&player!=std::string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
    printf ("vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   chdir ("/usr/games/vegastrike/data");
+   changeToData();
    execlp ("vegastrike","/usr/local/bin/vegastrike",num,my_mission.c_str(),NULL);   
 #else
    DWORD id;
@@ -198,7 +222,8 @@ void launch_mission () {
    printf ("vegastrike %s",my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   chdir ("/usr/games/vegastrike/data");
+
+   changeToData();
    execlp ("vegastrike","/usr/local/bin/vegastrike",my_mission.c_str(),NULL);   
 #else
    DWORD id;
@@ -246,6 +271,7 @@ void file_ok_auto_sel( GtkWidget        *w,
 
 void hello( GtkWidget *widget, gpointer   data ) {
     int i=(int)data;
+    int pid=0;
     switch (i) {
     case 0:
       LoadMissionDialog("Select Mission",i);
@@ -267,9 +293,25 @@ void hello( GtkWidget *widget, gpointer   data ) {
       launch_mission();
       break;
     case 6:
-      help_func(NULL,-1);
+#ifdef _WIN32
+		{
+		char pwd [65535];
+		getcwd(pwd,65533);
+		pwd[65533]=pwd[65534]='\0';
+		spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+		}
+#else
+		pid=fork();
+		if (pid==-1) {
+			execlp("vssetup","vssetup",NULL);
+			return;
+		}
+#endif
       break;
     case 7:
+      help_func(0,-1);
+      break;
+    case 8:
       gtk_main_quit();
       break;
     default:
@@ -354,7 +396,7 @@ void fileop_destroy ( GtkWidget        *w,
 			  GtkFileSelection *fs ) {
   if (fs&&fs->fileop_dialog) {
     gtk_widget_destroy(fs->fileop_dialog);
-    fs->fileop_dialog=NULL;
+    fs->fileop_dialog=0;
   }
 }
 
@@ -367,7 +409,7 @@ void delfile ( GtkWidget        *w,
 		char *remstr=new char[strlen(newstr)+20];
 		sprintf(remstr,"../serialized_xml/%s/",newstr);
 		glob_t *dirs=FindFiles(remstr,"");
-		for (int i=0;i<dirs->gl_pathc;i++) {
+		for (unsigned int i=0;i<dirs->gl_pathc;i++) {
 			remove(dirs->gl_pathv[i]);
 		}
 		rmdir(remstr);
@@ -376,7 +418,7 @@ void delfile ( GtkWidget        *w,
 		delete []remstr;
 		gtk_file_selection_set_filename (fs,"");
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
-		GTK_FILE_SELECTION(fs)->fileop_dialog=NULL;
+		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
 }
 
@@ -427,7 +469,7 @@ void fileop_destroy_dumb ( GtkWidget        *w,
 			  dumbstruct *fs ) {
   if (fs->filesel) {
     gtk_widget_destroy(GTK_FILE_SELECTION(fs->filesel)->fileop_dialog);
-    GTK_FILE_SELECTION(fs->filesel)->fileop_dialog=NULL;
+    GTK_FILE_SELECTION(fs->filesel)->fileop_dialog=0;
   }
   delete fs;
 }
@@ -533,10 +575,10 @@ void copyfile ( GtkWidget        *w,
 		mkdir(rementstr,0xffffffff);
 #endif
 		delete []rementstr;
-		FILE *f1=NULL;
-		FILE *f2=NULL;
+		FILE *f1=0;
+		FILE *f2=0;
 		glob_t *dirs=FindFiles(remstr,"");
-		for (int i=0;i<dirs->gl_pathc;i++) {
+		for (unsigned int i=0;i<dirs->gl_pathc;i++) {
 			f1=fopen(dirs->gl_pathv[i],"rb");
 			if (f1) {
 				int len=strlen(dirs->gl_pathv[i]);
@@ -570,7 +612,7 @@ void copyfile ( GtkWidget        *w,
 		gtk_file_selection_set_filename (fs,"");
 		delete []newentstr;
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
-		GTK_FILE_SELECTION(fs)->fileop_dialog=NULL;
+		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
 }
 

@@ -21,69 +21,31 @@
 #ifndef __CLIENTSTRUCTS_H
 #define __CLIENTSTRUCTS_H
 
+#include <iostream>
 #include <string.h>
 #include "gfx/quaternion.h"
 #include "const.h"
-#include "netclass.h"
 #include "cubicsplines.h"
 #include "configxml.h"
+#include "vsnet_clientstate.h"
+#include "vsnet_address.h"
+#include "vsnet_socket.h"
+#include "cmd/unit_generic.h"
+#include "cmd/container.h"
+#include "savegame.h"
 
 extern VegaConfig *vs_config;
 
-class Unit;
 struct Client;
-
-// Structure used to transmit client updates
-class	ClientState
-{
-	unsigned int	delay;
-	ObjSerial		client_serial;
-	//QVector		pos;
-	//Quaternion	orient;
-	Transformation	pos;
-	Vector			veloc;
-	Vector			accel;
-
-	public:
-		ClientState();
-		ClientState( ObjSerial serial);
-		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc);
-		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, unsigned int del);
-		ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, unsigned int del);
-
-		QVector		getPosition() { return this->pos.position;}
-		Quaternion	getOrientation() { return this->pos.orientation;}
-		Vector		getVelocity() { return this->veloc;}
-		Vector		getAcceleration() { return this->accel;}
-		ObjSerial	getSerial() { return this->client_serial;}
-		unsigned int	getDelay() { return this->delay;}
-		void		setDelay( unsigned int del) { this->delay = del;}
-		void		setSerial( ObjSerial ser) { this->client_serial = ser;}
-		void		setPosition( QVector posit)
-		{
-			this->pos.position = posit;
-			// memcpy( &this->position, &posit, sizeof( QVector));
-		}
-
-		void		display();
-		int		operator==( const ClientState & ctmp);
-		void	tosend();
-		void	received();
-		//friend class Client;
-};
-
-// Description of a client's ship (ship type, weapons, shields status...)
-struct ClientDescription
-{
-};
 
 // Network part of a client description
 struct	Client
 {
 	/* Network and identification properties */
-	Unit	*		game_unit;
+	UnitContainer	game_unit;
 	CubicSpline		spline;
 	AddressIP		cltadr;
+	bool            is_tcp;
 	SOCKETALT		sock;
 	ObjSerial		serial;
 	// 2 timeout vals to check a timeout for client connections
@@ -91,18 +53,17 @@ struct	Client
 	double		old_timeout;
 	double		latest_timeout;
 	// 2 timestamps vals from client time to check receiving old packet after newer ones
-	double			old_timestamp;
-	double			latest_timestamp;
+	unsigned int	old_timestamp;
+	unsigned int	latest_timestamp;
 	unsigned int	deltatime;
 	int				sdl_channel;
-	char			name[NAMELEN];
-	char			passwd[NAMELEN];
+	string			callsign;
+	string			name;
+	string			passwd;
 	ClientState		old_state;
 	ClientState		current_state;
-	ClientDescription	current_desc;
 	/* In-game parameters */
 	int				zone;
-	char			ingame;
 	//char			localplayer;
 
 	Client()
@@ -114,11 +75,43 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
-		ingame=0;
+		zone = -1;
 	}
+
+	Client( SOCKETALT& s, bool tcp )
+	    : is_tcp(tcp)
+	    , sock(s)
+	{
+		memset( &old_state, 0, sizeof( ClientState));
+		memset( &current_state, 0, sizeof( ClientState));
+		latest_timestamp=0;
+		old_timestamp=0;
+		latest_timeout=0;
+		old_timeout=0;
+		deltatime=0;
+		zone = -1;
+	}
+
+	inline bool isTcp( ) const {
+	    return is_tcp;
+	}
+
+	inline bool isUdp( ) const {
+	    return !is_tcp;
+	}
+
+	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
+
+private:
+	Client( const Client& );
+	Client& operator=( const Client& );
 };
 
-void	LoadXMLUnit( Unit * unit, const char * filename, char * buf);
-void	WriteXMLUnit( string filename, char * xmlbuf, int tsize);
+namespace FileUtil
+{
+	// Returns 2 strings -> vector[0] = xml unit, vector[1] = player save
+	vector<string>	GetSaveFromBuffer( const char * buffer);
+	void			WriteSaveFiles( string savestr, string xmlstr, string path, string name);
+}
 
 #endif

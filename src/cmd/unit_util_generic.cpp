@@ -5,9 +5,30 @@
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_util.h"
+#include "cmd/ai/docking.h"
+#include "savegame.h"
+#include "cmd/planet_generic.h"
+#include "faction_generic.h"
+#include "cmd/ai/fire.h"
 using std::string;
-
+extern Unit * getTopLevelOwner();
 namespace UnitUtil {
+	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {
+		if (my_unit) {
+			my_unit->PrimeOrders (new PlanetaryOrbit (my_unit,speed/(3.1415926536*(S.Magnitude()+R.Magnitude())),0,R,S,center,orbitee));
+			if (orbitee){
+				if (orbitee->isUnit()==PLANETPTR) {
+					((Planet *)orbitee)->AddSatellite (my_unit);
+				}
+			}
+			if (my_unit->faction!=FactionUtil::GetFactionIndex ("neutral")) {
+				Order * tmp = new Orders::FireAt (0.2,15.0);
+				my_unit->EnqueueAI (tmp);
+				my_unit->SetTurretAI();
+			}
+			my_unit->SetOwner(getTopLevelOwner());
+		}
+	}
 	string getFactionName (Unit *my_unit) {
 		if (!my_unit)return "";
 		return FactionUtil::GetFaction(my_unit->faction);
@@ -282,5 +303,12 @@ namespace UnitUtil {
 			}
 		}
 		return found;
+	}
+        void performDockingOperations (Unit * un, Unit * unitToDockWith) {
+	  if (un && unitToDockWith) {
+	    Order * ai = un->aistate;
+	    un->aistate = NULL;
+	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai));
+	  }
 	}
 }

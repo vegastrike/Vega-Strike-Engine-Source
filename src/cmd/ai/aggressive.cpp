@@ -14,37 +14,12 @@
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
 #include "lin_time.h"
+#include "faction_generic.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/unit_util.h"
+#include "warpto.h"
 using namespace Orders;
-
-void DoSpeech (Unit * un, const string &speech) {
-  string myname ("[Static]");
-  if (un) {
-    myname= un->name;
-  }
-  mission->msgcenter->add (myname,"all",speech);
-}
-void LeadMe (Unit * un, string directive, string speech) { 
-  if (un!=NULL) {
-    for (int i=0;i<_Universe->numPlayers();i++) {
-      Unit * pun =_Universe->AccessCockpit(i)->GetParent();
-      if (pun) {
-	if (pun->getFlightgroup()==un->getFlightgroup()){
-	  DoSpeech (un, speech);	
-	}
-      }
-    }
-    Flightgroup * fg = un->getFlightgroup();
-    if (fg) {
-      if (fg->leader.GetUnit()!=un) {
-		  if ((!_Universe->isPlayerStarship(fg->leader.GetUnit()))||_Universe->isPlayerStarship(un)) {
-			fg->leader.SetUnit (un);
-		  }
-      }
-      fg->directive = directive;
-    }
-  }
-}
-
+using std::map;
 const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("AggressiveAI" , AggressiveAI::AGGAI),
   EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
@@ -61,10 +36,95 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
 };
 const EnumMap AggressiveAIel_map(element_names, 12);
+using std::pair;
+std::map<string,AIEvents::ElemAttrMap *> logic;
+std::map<string,AIEvents::ElemAttrMap *> interrupts;
+AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, std::map<string,AIEvents::ElemAttrMap *> &mymap, bool inter) {
+  map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (name+string("%")+tostring(faction));
+  if (i==mymap.end()) {
+    AIEvents::ElemAttrMap * attr = new AIEvents::ElemAttrMap(AggressiveAIel_map);
+    string filename (name+(inter?string(".int.xml"):string(".agg.xml")));
+    AIEvents::LoadAI (filename.c_str(),*attr,FactionUtil::GetFaction(faction));
+    mymap.insert (pair<string,AIEvents::ElemAttrMap *> (name+string("%")+tostring(faction),attr));
+    return attr;
+  }
+  return i->second;
+}
+AIEvents::ElemAttrMap* getProperLogicOrInterruptScript (string name,int faction, bool interrupt) {
+  return getLogicOrInterrupt (name,faction,interrupt?interrupts:logic,interrupt);
+}
+AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool interrupt) {
+  if (!me||!targ) {
+    int fac=0;
+    if (me)
+      fac=me->faction;
+    return getProperLogicOrInterruptScript("default",fac,interrupt);
+  }
+  return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->combatRole(),targ->combatRole()),me->faction,interrupt);
+}
+
+inline std::string GetRelationshipColor (float rel) {
+  if (rel>=1)
+    return "#00FF00";
+  if (rel<=-1)
+    return "#FF0000";
+  rel +=1.;
+  rel/=2.;
+  char str[20]; //Just in case all 8 digits of both #s end up inside the string for some reason.
+  sprintf(str,"#%2X%2X00",(int)((1-rel)*256),(int)(rel*256));
+  return str;
+}
+
+void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
+  const string &speech=node.message;
+  string myname ("[Static]");
+  if (un!=NULL) {
+    myname= un->getFullname();
+	Flightgroup * fg=un->getFlightgroup();
+		if (fg&&fg->name!="base"&&fg->name!="Base") {
+			myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->name;
+		}else if (myname.length()==0)
+			myname = un->name;
+	if (player_un!=NULL) {
+		if (player_un==un) {
+			myname=std::string("#0033FF")+myname+"#000000";
+		} else {
+			float rel=un->getRelation(player_un);
+			myname=GetRelationshipColor(rel)+myname+"#000000";
+		}
+	}
+  }
+  mission->msgcenter->add (myname,"all",GetRelationshipColor(node.messagedelta*10)+speech+"#000000"); //multiply by 2 so colors are easier to tell
+}
+void LeadMe (Unit * un, string directive, string speech) { 
+  if (un!=NULL) {
+    for (int i=0;i<_Universe->numPlayers();i++) {
+      Unit * pun =_Universe->AccessCockpit(i)->GetParent();
+      if (pun) {
+	if (pun->getFlightgroup()==un->getFlightgroup()){
+		DoSpeech (un, pun, FSM::Node(speech,.1));	
+	}
+      }
+    }
+    Flightgroup * fg = un->getFlightgroup();
+    if (fg) {
+      if (fg->leader.GetUnit()!=un) {
+		  if ((!_Universe->isPlayerStarship(fg->leader.GetUnit()))||_Universe->isPlayerStarship(un)) {
+			fg->leader.SetUnit (un);
+		  }
+      }
+      fg->directive = directive;
+    }
+  }
+}
+
 static float aggressivity=2.01;
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,false)), interrupts(getProperScript(NULL,NULL,true)) {
+  last_jump_distance=FLT_MAX;
   curinter=INTNORMAL;
+  jump_time_check=1;
   last_time_insys=true;
+  logiccurtime=interrupts->maxtime;//set it to the time allotted
   obedient = true;
   if (aggressivity==2.01) {
     float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
@@ -73,8 +133,27 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
   if (target !=NULL) {
     AttachOrder (target);
   }
-  AIEvents::LoadAI (filename,logic);
-  AIEvents::LoadAI (interruptname,interrupts);
+  last_directive = filename+string("|")+interruptname;
+  //  AIEvents::LoadAI (filename,logic,"neutral");
+  //  AIEvents::LoadAI (interruptname,interrupt,"neutral");
+}
+void AggressiveAI::SetParent (Unit * parent1) {
+  FireAt::SetParent(parent1);
+  int which = last_directive.find("|");
+  string filename (string("default.agg.xml"));
+  string interruptname (string("default.int.xml"));
+  if (which!=string::npos) {
+    filename = last_directive.substr (0,which);
+    interruptname = last_directive.substr(which+1);
+  }
+  last_directive="b";//prevent escort race condition
+}
+void AggressiveAI::SignalChosenTarget () {
+  if (parent) {
+    logic =getProperScript(parent,parent->Target(),false);
+    interrupts=getProperScript(parent,parent->Target(),true);
+  }
+  FireAt::SignalChosenTarget();
 }
 
 bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
@@ -103,7 +182,13 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     {
       Unit * targ = parent->Target();
       if (targ) {
-	value = (parent->Position()-targ->Position()).Magnitude()-parent->rSize()-targ->rSize();
+	Vector PosDifference=targ->Position().Cast()-parent->Position().Cast();
+	float pdmag = PosDifference.Magnitude();
+	value = (pdmag-parent->rSize()-targ->rSize());
+	float myvel = PosDifference.Dot(parent->GetVelocity()-targ->GetVelocity())/pdmag;
+	
+	if (myvel>0)
+	  value-=myvel*myvel/(2*(parent->Limits().retro/parent->GetMass()));
       }else {
 	value = 10000; 
       }
@@ -214,7 +299,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       last_directive = fg->directive;
     }
     if (fg->directive!=last_directive) {
-      if (float(rand())/RAND_MAX<(obedient?(1-logic.obedience):logic.obedience)) {
+      if (float(rand())/RAND_MAX<(obedient?(1-logic->obedience):logic->obedience)) {
 	obedient = !obedient;
       }
       if (obedient) {
@@ -229,7 +314,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }else {
 	    CommunicationMessage c(parent,leader,NULL,0);
 	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-	    leader->getAIState()->Communicate(c);
+		Order * lo = leader->getAIState();
+		if (lo)
+			lo->Communicate(c);
       }
     }
     if (obedient) {
@@ -247,7 +334,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    }
 	    if (fg->directive!=last_directive) {
-	      leader->getAIState()->Communicate(c);
+			Order * lo = leader->getAIState();
+			if (lo)
+				lo->Communicate(c);
 	    }
 	  }
 	}
@@ -262,12 +351,14 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    //}else {
 	      //	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      //	}
-	      leader->getAIState()->Communicate(c);
+		  Order * o = leader->getAIState();
+		  if (o)
+			  o->Communicate(c);
 	      float left= parent->getFgSubnumber()%2?1:-1;
 	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
 											"EscortDistance",
-											"4.0"));
+											"10.0"));
 	      static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
 											"TurnLeaderDist",
@@ -305,7 +396,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
-	      leader->getAIState()->Communicate(c);
+		  Order * oo = leader->getAIState();
+		  if (oo) 
+			  oo->Communicate(c);
 	    }else {
 	      //bool targetted=false;
 	      //float mindist;
@@ -325,7 +418,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
-	      leader->getAIState()->Communicate(c);
+		  Order * loo = leader->getAIState();
+		  if (loo)
+			  loo->Communicate(c);
 	    }
 	  }
 	}
@@ -366,20 +461,61 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
     }
   }
 }
+void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
+  AfterburnTurnTowards(this,parent);
+  if (jump_time_check==0) {
+    float dist = (target->Position()- parent->Position()).MagnitudeSquared();
+    if (last_jump_distance<dist) {
+      //force jump
+      if (target->GetDestinations().size()) {
+	string dest= target->GetDestinations()[0];
+	UnitUtil::JumpTo(parent,dest);
+      }
+    }else {
+      last_jump_distance = dist;
+    }
+  }
+  
+}
 void AggressiveAI::Execute () {  
+  jump_time_check++;//just so we get a nicely often wrapping var;
   Flightgroup * fg=parent->getFlightgroup();
-  ReCommandWing(fg);
+  //ReCommandWing(fg);
   FireAt::Execute();
   if (!ProcessCurrentFgDirective (fg)) {
   Unit * target = parent->Target();
-  bool isjumpable = target?((!target->GetDestinations().empty())&&parent->GetJumpStatus().drive>=0):false;
+  bool isjumpable = target?(!target->GetDestinations().empty()):false;
+  if (isjumpable) {
+  if (parent->GetJumpStatus().drive<0) {
+    parent->ActivateJumpDrive(0);
+    if (parent->GetJumpStatus().drive==-2) {
+      static bool AIjumpCheat=XMLSupport::parse_bool (vs_config->getVariable ("AI","always_have_jumpdrive_cheat","false"));
+      if (AIjumpCheat) {
+		  static int i=0;
+		  if (!i) {
+			  fprintf (stderr,"FIXME: warning ship not equipped to jump");
+			  i=1;
+		  }
+		  parent->jump.drive=-1;
+      }else {
+	//	fprintf (stderr,"warning ship not equipped to jump");
+	parent->Target(NULL);
+      }
+    }else if (parent->GetJumpStatus().drive<0){
+      static bool AIjumpCheat=XMLSupport::parse_bool (vs_config->getVariable ("AI","jump_cheat","true"));
+      if (AIjumpCheat) {
+	parent->jump.drive=0;
+      }
+    }
+  }
+  }
   if (!isjumpable &&(
 #if 1
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
 #endif
       curinter==INTNORMAL)) {
-    if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
-      logic.curtime=interrupts.maxtime;//set it to the time allotted
+    if ((curinter = (ProcessLogic (*interrupts, true)?INTERR:curinter))==INTERR) {
+      logiccurtime=interrupts->maxtime;//set it to the time allotted
     }
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
@@ -388,10 +524,11 @@ void AggressiveAI::Execute () {
 
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
     if (isjumpable) {
-      AfterburnTurnTowards(this,parent);
+      AfterburnerJumpTurnTowards (target);
     }else {
+      last_jump_distance=FLT_MAX;
       if (target) {
-	ProcessLogic(logic);
+	ProcessLogic(*logic);
 	curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       }else {
 	FlyStraight(this,parent);
@@ -404,18 +541,21 @@ void AggressiveAI::Execute () {
     }
   } else {
     if (target) {
-    if ((--logic.curtime)<=0) {
+    WarpToP(parent,target);
+    logiccurtime-=SIMULATION_ATOM;
+    if (logiccurtime<=0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
       if (isjumpable ) {
-	AfterburnTurnTowards(this,parent);
+	AfterburnerJumpTurnTowards (target);
       }else {
-	ProcessLogic (logic);
+	last_jump_distance=FLT_MAX;
+	ProcessLogic (*logic);
       }
-      logic.curtime = logic.maxtime;      
+      logiccurtime = logic->maxtime;      
     }
     }
   }

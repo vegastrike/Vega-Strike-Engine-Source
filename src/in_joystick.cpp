@@ -176,7 +176,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   if (which!=MOUSE_JOYSTICK)
     deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
   else
-    deadzone=0;
+	  deadzone=XMLSupport::parse_float (vs_config->getVariable("joystick","mouse_deadband","0"));
   joy_available = 0;
   joy_x=joy_y=joy_z=0;
   if (which==MOUSE_JOYSTICK) {
@@ -188,7 +188,8 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
 #ifdef HAVE_SDL
   num_joysticks=SDL_NumJoysticks() ;
   if (which>=num_joysticks) {
-    joy_available=false;
+    if (which!=MOUSE_JOYSTICK)
+      joy_available=false;
     return;
   }
   
@@ -205,7 +206,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   nr_of_hats=SDL_JoystickNumHats(joy);
 #else
     //WE HAVE GLUT
-    if (which>0) {
+    if (which>0&&which!=MOUSE_JOYSTICK) {
         joy_available=false;
         return;
     }

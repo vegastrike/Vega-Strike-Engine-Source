@@ -1,4 +1,4 @@
-#include "faction.h"
+#include "faction_generic.h"
 #include "mission.h"
 #include "cmd/briefing.h"
 

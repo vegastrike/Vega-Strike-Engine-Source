@@ -1,4 +1,5 @@
 //#include "unit.h"
+//#include "unit_template.h"
 #include "unit_factory.h"
 #include "images.h"
 #include "universe.h"

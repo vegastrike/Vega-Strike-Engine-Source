@@ -22,7 +22,8 @@
 #include "gfx/animation.h"
 #include "cmd/script/flightgroup.h"
 #include "gfx/ring.h"
-
+#include "alphacurve.h"
+#include "gfx/png_texture.h"
 extern string getCargoUnitName (const char *name);
 
 GamePlanet::GamePlanet()
@@ -37,19 +38,91 @@ GamePlanet::GamePlanet()
   terraintrans = NULL;
   SetAI(new Order()); // no behavior
 }
-void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out){
+class FogMesh : public Mesh {
+public:
+	void SetMaterialColor (const GFXColor &color,const GFXColor & dcolor) {
+		GFXMaterial m;m.ar=m.ag=m.ab=m.aa=m.sr=m.sg=m.sb=m.sa=0;m.power=0;
+		static float emm=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive","1"));
+		static float diff=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse","1"));
+		m.er= emm*color.r;
+		m.eg= emm*color.g;
+		m.eb= emm*color.b;
+		m.ea= emm*color.a;
+		m.dr= diff*dcolor.r;
+		m.dg= diff*dcolor.g;
+		m.db= diff*dcolor.b;
+		m.da= diff*dcolor.a;
+		this->SetMaterial(m);
+		
+	}
+	FogMesh (const AtmosphericFogMesh & f, float radius):Mesh(f.meshname.c_str(),Vector(f.scale*radius,f.scale*radius,f.scale*radius),0,NULL,true) {
+		SetMaterialColor(GFXColor (f.er,f.eg,f.eb,f.ea),GFXColor(f.dr,f.dg,f.db,f.da));
+		if (Decal.size()) {
+			if (Decal[0]) {
+				if (f.min_alpha!=0||f.max_alpha!=255||f.concavity!=0 || f.focus!=.5 || f.tail_mode_start!=-1 || f.tail_mode_end!=-1) {
+					changehome();
+					vschdir("backgrounds");
+					int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
+					unsigned char * tex= (unsigned char *) malloc (sizeof(char) *rez*4);
+					for (int i=0;i<rez;++i) {
+						tex[i*4]=255;
+						tex[i*4+1]=255;
+						tex[i*4+2]=255;
+						tex[i*4+3]=get_alpha(i,rez,f.min_alpha,f.max_alpha,f.focus,f.concavity,f.tail_mode_start,f.tail_mode_end);
+					}
+					static int count=0;
+					count++;
+					string nam = f.meshname+XMLSupport::tostring(count)+".png";
+					png_write(nam.c_str(),&tex[0],rez,1,true,8);
+					delete Decal[0];
+					Decal[0]= new Texture(nam.c_str(),nam.c_str());
+					vscdup();
+					returnfromhome();
+						
+				}
+			}
+		}
+		
+	}
+	virtual ~FogMesh (){}
+};
+void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {
+	if(meshdata.empty()) meshdata.push_back(NULL);
+#ifdef MESHONLY
+	Mesh *shield = meshdata.back(); meshdata.pop_back();
+#endif
+	std::vector <Mesh * > fogs;
+	for (unsigned int i=0;i<v.size();++i) {
+//		static float radiusmult = XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_size","1.01"));
+		
+		Mesh *fog=new FogMesh (v[i],rSize());	
+		fogs.push_back(fog);
+	}
+	Unit* fawg=UnitFactory::createUnit(fogs,true,0);
+	fawg->setFaceCamera();
+	getSubUnits().preinsert (fawg);
+	fawg->hull/=fawg->GetHullPercent();
+#ifdef MESHONLY	
+	meshdata.push_back(shield);
+#endif
+	
+}
+void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out, bool reverse_normals){
   if (meshdata.empty()) {
     meshdata.push_back(NULL);
   }
   Mesh * shield = meshdata.back();
   meshdata.pop_back();
   GFXMaterial m;
-  m.ar=m.ag=m.ab=m.aa=1.0;
-  m.dr=m.dg=m.db=m.da=0.0;
+  m.ar=m.ag=m.ab=m.aa=0.0;
+  static float materialweight=XMLSupport::parse_float (vs_config->getVariable("graphics","city_light_strength","10"));
+  static float daymaterialweight=XMLSupport::parse_float (vs_config->getVariable("graphics","day_city_light_strength","0"));
+  m.dr=m.dg=m.db=m.da=materialweight;
   m.sr=m.sg=m.sb=m.sa=0.0;
-  m.er=m.eg=m.eb=m.ea=m.power=0.0;
+  m.er=m.eg=m.eb=m.ea=daymaterialweight;
+  m.power=0.0;
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE));
+  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE,false,0,M_PI,0.0,2*M_PI,reverse_normals));
   meshdata.back()->setEnvMap (GFXFALSE);
   meshdata.back()->SetMaterial (m);
 
@@ -57,6 +130,10 @@ void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, 
   meshdata.push_back(shield);
 }
 
+
+Vector GamePlanet::AddSpaceElevator(const std::string &name, const std::string &faction,char direction) {//direction is udrlfb//up down right left front ack
+	return Planet::AddSpaceElevator (name,faction,direction);
+}
 void GamePlanet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
   if (meshdata.empty()) {
     meshdata.push_back(NULL);

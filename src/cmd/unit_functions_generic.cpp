@@ -46,16 +46,14 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
         FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
-  olist_t * killlist = &cp->savegame->getMissionData (string("kills"));
+  vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
   while (killlist->size()<=FactionUtil::GetNumFactions()) {
-    killlist->push_back (new varInst (VI_IN_OBJECT));
-    killlist->back()->type=VAR_FLOAT;
-    killlist->back()->float_val=0;
+    killlist->push_back ((float)0.0);
   }
   if ((int)killlist->size()>faction) {
-    (*killlist)[faction]->float_val++;
+    (*killlist)[faction]++;
   }
-  killlist->back()->float_val++;
+  killlist->back()++;
 }
 
 //From unit_physics.cpp
@@ -110,11 +108,11 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 }
 
 // From unit_weapon.cpp
-void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
+void AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
-    QVector targpos (lead?target->PositionITTS (pos,speed):target->Position());
+    QVector targpos (lead?target->PositionITTS (pos,vel,speed):target->Position());
 
     Vector dir =( targpos-pos).Cast();
     dir.Normalize();

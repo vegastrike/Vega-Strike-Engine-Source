@@ -15,6 +15,9 @@
  *                                                                         *
  **************************************************************************/
 
+#if defined(_WIN32) && _MSC_VER > 1300 
+#define __restrict
+#endif
 #include "display_gtk.h"
 
 GtkWidget *window, *main_vbox, *scrolled_win, *tree, *main_hbox;

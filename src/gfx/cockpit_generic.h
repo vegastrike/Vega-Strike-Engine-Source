@@ -68,6 +68,8 @@ protected:
   virtual void DrawTargetBox () {}
   ///draws the target box around all units
   virtual void DrawTargetBoxes () {}
+  ///draws a target cross around all units targeted by your turrets // ** jay
+  virtual void DrawTurretTargetBoxes () {}
   ///Draws all teh blips on the radar.
   virtual void DrawBlips(Unit * un) {}
   ///Draws all teh blips on the radar in Elite-style
@@ -109,7 +111,8 @@ protected:
   Unit * GetSaveParent ();
   ///Draws Cockpit then restores viewport
   virtual void Draw() {}
-  virtual void Update() {}//respawns and the like.
+  void Update(); //respawns and the like.
+  virtual void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   virtual void SetupViewPort (bool clip=true) {}
   virtual void VDUSwitch (int vdunum) {}
@@ -131,6 +134,8 @@ protected:
   virtual void SelectCamera(int) {}
   ///GFXLoadMatrix proper camera
   virtual void SetViewport() {}
-
+  virtual bool SetDrawNavSystem(bool){return false;}
+  virtual bool CanDrawNavSystem() {return false;}
+  virtual bool DrawNavSystem() {return false;}
 };
 #endif

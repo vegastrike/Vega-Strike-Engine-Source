@@ -22,16 +22,20 @@
 #include <stdlib.h>
 #include "vs_globals.h"
 #include "networking/netserver.h"
+#include "cmd/script/mission.h"
+#include "force_feedback.h"
 
-bool SERVER = 1;
+char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
 
-int main( int argc, char *argv[])
+int main( int argc, char **argv)
 {
-	NetServer *Server = new NetServer;
+	Server = new NetServer;
+	// Fake forcefeedback
+    forcefeedback=new ForceFeedback();
 
-	Server->start();
+	Server->start( argc, argv);
 
 	delete Server;
 	return 0;

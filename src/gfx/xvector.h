@@ -53,6 +53,12 @@ class XVector {
     this->k = k;
   }
   inline void Set (QFLOAT x, QFLOAT y, QFLOAT z) {i=x;j=y;k=z;}
+  void netswap()
+  {
+  	this->i = NetSwap( this->i);
+  	this->j = NetSwap( this->j);
+  	this->k = NetSwap( this->k);
+  }
   void Yaw(QFLOAT rad);
   void Roll (QFLOAT rad);
   void Pitch(QFLOAT rad);
@@ -66,7 +72,7 @@ class XVector {
   XVector operator- (const XVector &obj) const {return XVector (i - obj.i, j - obj.j, k - obj.k);}
   XVector Normalize(){::Normalize (*this); return *this;};
   XVector operator- () const {return XVector (-i, -j, -k);}
-  bool operator== (const XVector &b) {return (i==b.i && j==b.j && k==b.k);};
+  bool operator== (const XVector &b)const {return (i==b.i && j==b.j && k==b.k);};
   XVector Cross(const XVector &v) const {return XVector ( this->j*v.k-this->k*v.j, 
 						       this->k*v.i-this->i*v.k,
 						       this->i*v.j-this->j*v.i);}

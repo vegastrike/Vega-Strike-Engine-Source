@@ -21,12 +21,13 @@
 
 #include "gfx/mesh.h"
 //#include "unit.h"
+//#include "unit_template.h"
 #include "lin_time.h"
 //#include "physics.h"
 #include "beam.h"
 #include "planet.h"
 #include "audiolib.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 //#ifdef WIN32
 #ifdef FIX_TERRAIN
@@ -36,6 +37,7 @@
 #include "unit_util.h"
 #include "universe_util.h"
 #include "cmd/script/mission.h"
+#include "networking/vsnet_clientstate.h"
 #include "networking/netclient.h"
 //#endif
 extern float copysign (float x, float y);
@@ -63,105 +65,8 @@ extern unsigned short apply_float_to_short (float tmp);
 //    float max_roll;
 
 template <class UnitType>
-void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
-  Vector amt = ClampThrust(amt1,afterburn);
-  ApplyLocalForce(amt);  
- if (_Universe->AccessCockpit(0)->GetParent()==this)
-  if (afterburn!=AUDIsPlaying (sound->engine)) {
-    if (afterburn)
-      AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
-    else
-      //    if (Velocity.Magnitude()<computer.max_speed)
-      AUDStopPlaying (sound->engine);
-  }
-}
-
-template <class UnitType>
-Cockpit * GameUnit<UnitType>::GetVelocityDifficultyMult(float &difficulty) const{
-  difficulty=1;
-  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
-  if ((player_cockpit)==NULL) {
-    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
-    difficulty = pow(g_game.difficulty,exp);
-  }
-  return player_cockpit;
-}
-
-template <class UnitType>
-void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
-  static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
-
+void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
 	int player = -1;
-	Vector accel;
-	Transformation old_physical_state = curr_physical_state;
-  if (docked&DOCKING_UNITS) {
-    PerformDockingOperations();
-  }
-  Repair();
-  if (fuel<0)
-    fuel=0;
-  if (cloaking>=cloakmin) {
-    if (image->cloakenergy*SIMULATION_ATOM>energy) {
-      Cloak(false);//Decloak
-    } else {
-      if (image->cloakrate>0||cloaking==cloakmin) {
-	energy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
-      }
-      if (cloaking>cloakmin) {
-	AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
-	if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
-	  AUDStartPlaying (sound->cloak);
-	}
-	cloaking-= (short)(image->cloakrate*SIMULATION_ATOM);
-	if (cloaking<=cloakmin&&image->cloakrate>0) {
-	  //AUDStopPlaying (sound->cloak);
-	  cloaking=cloakmin;
-	}
-	if (cloaking<0&&image->cloakrate<0) {
-	  //AUDStopPlaying (sound->cloak);
-	  cloaking=(short)32768;//wraps
-	}
-      }
-    }
-  }
-
-  RegenShields();
-  if (lastframe) {
-    if (!(docked&(DOCKED|DOCKED_INSIDE))) 
-      prev_physical_state = curr_physical_state;//the AIscript should take care
-#ifdef FIX_TERRAIN
-    if (planet) {
-      if (!planet->dirty) {
-	SetPlanetOrbitData (NULL);
-      }else {
-	planet->pps = planet->cps;
-      }
-    }
-#endif
-  }
-
-  if (isUnit()==PLANETPTR) {
-    ((Planet *)this)->gravitate (uc);
-  } else {
-    if (resolveforces) {
-      accel = ResolveForces (trans,transmat);//clamp velocity
-      if (fabs (Velocity.i)>VELOCITY_MAX) {
-	Velocity.i = copysign (VELOCITY_MAX,Velocity.i);
-      }
-      if (fabs (Velocity.j)>VELOCITY_MAX) {
-	Velocity.j = copysign (VELOCITY_MAX,Velocity.j);
-      }
-      if (fabs (Velocity.k)>VELOCITY_MAX) {
-	Velocity.k = copysign (VELOCITY_MAX,Velocity.k);
-      }
-    }
-  } 
-  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
-    Rotate (SIMULATION_ATOM*(AngularVelocity));
-  }
-  float difficulty;
-
-  Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
 
   // Here send (new position + direction = curr_physical_state.position and .orientation)
   // + speed to server (which velocity is to consider ?)
@@ -169,7 +74,6 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
   if( Network!=NULL && Network[0].isTime())
   {
 	  //cout<<"SEND UPDATE"<<endl;
-	  //this->networked=1;
 	  // Check if this is a player, because in network mode we should only send updates of our moves
 	  player= _Universe->whichPlayerStarship( this);
 	  if( player>=0 /* && this->networked */ )
@@ -180,18 +84,25 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
 		  // If we want to inter(extra)polate sent position, DO IT HERE
 		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
 				// We moved so update
-				Network[player].sendPosition( ClientState( Network[player].getSerial(), curr_physical_state, Velocity, accel, 0));
+		  {
+				ClientState cstmp( Network[player].getSerial(), curr_physical_state, Velocity, accel, 0);
+				Network[player].sendPosition( &cstmp);
+		  }
 		  else
 				// Say we are still alive
 				Network[player].sendAlive();
 	  }
 	  else
-		  // Not the player so update the unit's position and stuff with the last received snapshot from the server
-			;
+	  {
+		  // Not a player so update the unit's position and stuff with the last received snapshot from the server
+		  // This may be be a bot or a unit controlled by the server
+		  if( !this->networked)
+			// Case it is a local unit
+ 			curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+	  }
   }
   else
   {
-	  //this->networked++;
  	 curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
   }
 
@@ -218,10 +129,10 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
     char tmp=0;
     for (i=0;i<meshdata.size();i++) {
       if (!meshdata[i])
-	continue;
+		continue;
       tmp |=meshdata[i]->HasBeenDrawn();
       if (!meshdata[i]->HasBeenDrawn()) {
-	meshdata[i]->UpdateFX(SIMULATION_ATOM);
+		meshdata[i]->UpdateFX(SIMULATION_ATOM);
       }
       meshdata[i]->UnDraw();
     }
@@ -230,122 +141,29 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
 	
     }
   }      
-  Unit * target = Unit::Target();
-  bool increase_locking=false;
-  if (target&&cloaking<0/*-1 or -32768*/) {
-    if (target->isUnit()!=PLANETPTR) {
-      Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
-      TargetPos.Normalize(); 
-      if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
-	increase_locking=true;
-      }
-    }
-  }
-  static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
-  static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
-  bool locking=false;
-  bool touched=false;
+}
 
-  for (i=0;(int)i<GetNumMounts();i++) {
-//    if (increase_locking&&cloaking<0) {
-//      mounts[i]->time_to_lock-=SIMULATION_ATOM;
-//    }
-    if (mounts[i]->status==Mount::ACTIVE&&cloaking<0&&mounts[i]->ammo!=0) {
-      if (player_cockpit) {
-	  touched=true;
-      }
-      if (increase_locking) {
-	mounts[i]->time_to_lock-=SIMULATION_ATOM;
-	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
-	if (!player_cockpit) {
-	  if (ai_lock_cheat) {
-	    mounts[i]->time_to_lock=-1;
-	  }
-	}else {
+/****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
 
-	  if (mounts[i]->type->LockTime>0) {
-	    static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
-	    static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
+template <class UnitType>
+void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
+  Unit::Thrust( amt1, afterburn);
+ if (_Universe->AccessCockpit(0)->GetParent()==this)
+  if (afterburn!=AUDIsPlaying (sound->engine)) {
+    if (afterburn)
+      AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
+    else
+      //    if (Velocity.Magnitude()<computer.max_speed)
+      AUDStopPlaying (sound->engine);
+  }
+}
 
-	    if (mounts[i]->time_to_lock>-SIMULATION_ATOM&&mounts[i]->time_to_lock<=0) {
-	      if (!AUDIsPlaying(LockedSound)) {
-		AUDStartPlaying(LockedSound);
-		AUDStopPlaying(LockingSound);	      
-	      }
-	      AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
-	    }else if (mounts[i]->time_to_lock>0)  {
-	      locking=true;
-	      if (!AUDIsPlaying(LockingSound)) {
-		AUDStartPlaying(LockingSound);	      
-	      }
-	      AUDAdjustSound (LockingSound,Position(),GetVelocity());
-	    }
-	  }
-	}
-      }else {
-        if (mounts[i]->ammo!=0) {
-	  mounts[i]->time_to_lock=mounts[i]->type->LockTime;
-        }
-      }
-    } else {
-      if (mounts[i]->ammo!=0) {
-        mounts[i]->time_to_lock=mounts[i]->type->LockTime;
-      }
-    }
-    if (mounts[i]->type->type==weapon_info::BEAM) {
-      if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone);
-      }
-    } else {
-      mounts[i]->ref.refire+=SIMULATION_ATOM;
-    }
-    if (mounts[i]->processed==Mount::FIRED) {
-      Transformation t1;
-      Matrix m1;
-      t1=prev_physical_state;//a hack that will not work on turrets
-      t1.Compose (trans,transmat);
-      t1.to_matrix (m1);
-      int autotrack=0;
-      if ((0!=(mounts[i]->size&weapon_info::AUTOTRACKING))) {
-	autotrack = computer.itts?2:1;
-      }
-      mounts[i]->PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
-      if (mounts[i]->ammo==0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
-	ToggleWeapon (true);
-      }
-    }else if (mounts[i]->processed==Mount::UNFIRED) {
-      mounts[i]->PhysicsAlignedUnfire();
-    }
-  }
-  if (locking==false&&touched==true) {
-    if (AUDIsPlaying(LockingSound)) {
-      AUDStopPlaying(LockingSound);	
-    }      
-  }
-  bool dead=true;
-
-  if (!SubUnits.empty()) {
-    Unit * su;
-    UnitCollection::UnitIterator iter=getSubUnits();
-    while ((su=iter.current())) {
-      su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
-      su->cloaking = (short unsigned int) cloaking;
-      if (hull<0) {
-	UnFire();//don't want to go off shooting while your body's splitting everywhere
-	su->hull-=SIMULATION_ATOM;
-      }
-      iter.advance();
-      //    dead &=(subunits[i]->hull<0);
-    }
-  }
-  if (hull<0) {
-    dead&= (image->explosion==NULL);    
-    if (dead)
-      Kill();
-  }
-  if ((!SubUnit)&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
-    UpdateCollideQueue();
-  }
+template <class UnitType>
+Vector GameUnit<UnitType>::ResolveForces (const Transformation &trans, const Matrix &transmat) {
+#ifndef PERFRAMESOUND
+  AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
+#endif
+	return Unit::ResolveForces( trans, transmat);
 }
 
 template <class UnitType>
@@ -375,112 +193,5 @@ if (planet==NULL)
 #else
   return NULL;
 #endif
-}
-
-template <class UnitType>
-bool GameUnit<UnitType>::jumpReactToCollision (Unit * smalle) {
-  if (!GetDestinations().empty()) {//only allow big with small
-    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
-      smalle->DeactivateJumpDrive();
-      GameUnit<UnitType> * jumppoint = this;
-      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
-      return true;
-    }
-    return true;
-  }
-  if (!smalle->GetDestinations().empty()) {
-    if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
-      DeactivateJumpDrive();
-      Unit * jumppoint = smalle;
-      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
-      return true;
-    }
-    return true;
-  }
-  return false;
-}
-
-template <class UnitType>
-Vector GameUnit<UnitType>::ResolveForces (const Transformation &trans, const Matrix &transmat) {
-#ifndef PERFRAMESOUND
-  AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
-#endif
-	return Unit::ResolveForces( trans, transmat);
-}
-
-extern signed char  ComputeAutoGuarantee ( Unit * un);
-extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
-
-template <class UnitType>
-bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
-  signed char Guaranteed = ComputeAutoGuarantee (this);
-  if (Guaranteed==Mission::AUTO_OFF) {
-    return false;
-  }
-  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
-//  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
-  if (SubUnit) {
-    return false;//we can't auto here;
-  }
-  StarSystem * ss = activeStarSystem;
-  if (ss==NULL) {
-    ss = _Universe->activeStarSystem();
-  }
-
-  Unit * un=NULL;
-  QVector start (Position());
-  QVector end (target->LocalPosition());
-  float totallength = (start-end).Magnitude();
-  if (totallength>1) {
-    //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
-    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
-    if (percent>1) {
-      end=start;
-    }else {
-      end = start*percent+end*(1-percent);
-    }
-  }
-  bool ok=true;
-  if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
-    for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
-      static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
-      if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
-		if (un!=this&&un!=target) {
-    	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
-	    return false;
-	  }
-	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
-	  if (intersection>0) {
-	    end = start+ (end-start)*intersection;
-	    ok=false;
-	  }
-	 }
-    }
-   }
-  }
-
-  if (this!=target) {
-    SetCurPosition(UniverseUtil::SafeEntrancePoint (end));
-    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
-      Unit * other=NULL;
-      for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
-    	Flightgroup * ff = other->getFlightgroup();
-		bool leadah=(ff==getFlightgroup());
-		if (ff) {
-			if (ff->leader.GetUnit()==this) {
-				leadah=true;
-		}
-	}
-	if (leadah) {
-	  if (NULL==_Universe->isPlayerStarship (other)) {
-	    //other->AutoPilotTo(this);
-	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
-	   }
-	}
-      }
-    }
-  }
-  return ok;
 }
 

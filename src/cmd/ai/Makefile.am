@@ -5,6 +5,8 @@ INCLUDES = -I ../../
 libaigeneric =	\
 	comm_ai.h			\
 	comm_ai.cpp			\
+	docking.h			\
+	docking.cpp			\
 	communication.h		\
 	communication.cpp 	\
 	communication_xml.cpp	\
@@ -17,6 +19,8 @@ libaigeneric =	\
 	navigation.h		\
 	fire.cpp			\
 	fire.h				\
+	fireall.cpp			\
+	fireall.h				\
 	hard_coded_scripts.cpp	\
 	hard_coded_scripts.h	\
 	order_comm.cpp \
@@ -31,7 +35,9 @@ libaigeneric =	\
 	tactics.h	\
 	tactics.cpp	\
 	turretai.cpp 		\
-	turretai.h
+	turretai.h	\
+	warpto.cpp	\
+	warpto.h
 
 
 #	pythonai.cpp		

@@ -20,7 +20,8 @@ static char* error="\nERROR: NULL Unit used in Python script; returning default 
 #define voidEXPORT_UTIL0(name) void name (){UnitUtil::name (GetUnit());}  
 #define voidEXPORT_UTIL1(name,atype,a) void name ( atype a ) {UnitUtil::name ( GetUnit(), a );}  
 #define voidEXPORT_UTIL2(name,atype,a,btype,b) void name ( atype a, btype b ){UnitUtil::name ( GetUnit(), a , b );}  
-#define voidEXPORT_UTIL3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b , ctype c ){UnitUtil::name ( GetUnit(), a , b , c );}  
+#define voidEXPORT_UTIL3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b , ctype c ){UnitUtil::name ( GetUnit(), a , b , c );}
+#define voidEXPORT_UTIL5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) void name ( atype a, btype b , ctype c, dtype d, etype e){UnitUtil::name ( GetUnit(), a , b , c, d, e );}  
 //#define EXPORT_UTIL(name,aff)
 //#define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 //End of Macro City
@@ -39,7 +40,7 @@ public:
   boost::python::tuple cosAngleToITTS (UnitWrapper target, float speed, float range) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
   boost::python::tuple cosAngleTo (UnitWrapper target) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleTo(target,dist);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
   boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
-  boost::python::tuple getAverageGunSpeed () {{CHECKME VS_BOOST_MAKE_TUPLE_2 (0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return VS_BOOST_MAKE_TUPLE_2(speed,range);}
+  boost::python::tuple getAverageGunSpeed () {{CHECKME VS_BOOST_MAKE_TUPLE (1,0,0);}float speed, range,missilespeed;unit->getAverageGunSpeed(speed,range,missilespeed);return VS_BOOST_MAKE_TUPLE(speed,range,missilespeed);}
   boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup= VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(bigpos.i,bigpos.j,bigpos.k),VS_BOOST_MAKE_TUPLE(bigNormal.i,bigNormal.j,bigNormal.k),VS_BOOST_MAKE_TUPLE(smallpos.i,smallpos.j,smallpos.k),VS_BOOST_MAKE_TUPLE(smallNormal.i,smallNormal.j,smallNormal.k)); return tup;}
 //  UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
 //  UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
@@ -61,7 +62,7 @@ public:
   UnitWrapper(UnitContainer cont) : UnitContainer(cont){}
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
   operator Unit* () {return GetUnit();}
-  bool isNull () {return GetUnit()==0;}
+  bool isNull () {Unit * un=GetUnit(); if (un) {if (un->GetHull()<=0) {return true;}}return un==0; }
   bool notNull () {return !isNull();}
   void setNull () {SetUnit(0);}
   bool equal (UnitWrapper oth) {
@@ -90,3 +91,4 @@ public:
 #undef voidEXPORT_UTIL1
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
+#undef voidEXPORT_UTIL5

@@ -30,9 +30,17 @@ class MoveTo : public Order {
   Vector last_velocity;
   bool OptimizeSpeed (float v, float &a);
   bool Done (const Vector &);
+  bool selfterminating;
 public:
+  void SetAfterburn(bool tf) {
+    if (tf) {
+      afterburnAndSwitchbacks|=1;
+    }else {
+      afterburnAndSwitchbacks&= (~1);
+    }
+  }
   ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
-  MoveTo(const QVector &target, bool aft, unsigned char numswitchbacks) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
+  MoveTo(const QVector &target, bool aft, unsigned char numswitchbacks, bool terminating=true) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0), selfterminating(terminating) {
     targetlocation = target;
     done=false;
   }
@@ -90,8 +98,7 @@ class FaceTargetITTS : public ChangeHeading {
   bool finish;
   ///The average speed of this target's guns
   float speed;
-  ///The range of this target's guns
-  float range;
+  bool useitts;
 public:
   FaceTargetITTS (bool fini=false, int accuracy = 3);
   virtual void Execute();

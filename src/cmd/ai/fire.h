@@ -3,6 +3,8 @@
 #include "comm_ai.h"
 #include "event_xml.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
+bool RequestClearence(class Unit *parent, class Unit *targ, unsigned char sex);
+Unit * getAtmospheric (Unit * targ);
 namespace Orders {
 
 class FireAt: public CommunicatingAI {
@@ -16,17 +18,23 @@ protected:
   float distance;
   float gunspeed;
   float gunrange;
+  float missilerange;
+  float lastchangedtarg;
+  bool had_target;
   void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
   virtual void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
   bool isJumpablePlanet(Unit *);
   void ReInit (float rxntime, float agglevel);
+  virtual void SignalChosenTarget();
 public:
   //Other new Order functions that can be called from Python.
   virtual void ChooseTarget () {
     ChooseTargets (1,true);
   }
-
+  void PossiblySwitchTarget(bool istargetjumpableplanet);
+  virtual void getAverageGunSpeed (float & speed, float & range, float &missilerange) const;
+  virtual bool PursueTarget(Unit *, bool leader);
   void AddReplaceLastOrder (bool replace);
   void ExecuteLastScriptFor(float time);
   void FaceTarget (bool end);
@@ -42,6 +50,7 @@ public:
   void FaceDirection (float distToMatchFacing, bool finish);
   void XMLScript (string script);
   void LastPythonScript();
+
   virtual void SetParent (Unit * parent) {
 	  CommunicatingAI::SetParent (parent);
   }

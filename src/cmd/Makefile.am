@@ -27,16 +27,32 @@ libcmdgeneric =			\
 	images.h						\
 	collection.h					\
 	collection.cpp					\
+	mount.cpp				\
 	container.h						\
 	container.cpp	\
 	unit_const_cache.cpp \
 	unit_const_cache.h	\
+	alphacurve.cpp	\
+	alphacurve.h	\
+	unit_collide.h				\
+	unit_collide.cpp			\
+	collide.h		\
+	collide.cpp		\
+	bolt.h			\
+	bolt_generic.cpp	\
+	beam.h			\
+	beam_generic.cpp	\
+	weapon_xml.cpp			\
+	weapon_xml.h			\
+	faction_xml.cpp			\
 	role_bitmask.cpp	\
 	role_bitmask.h
 
 libcmdserver_a_SOURCES =$(libcmdgeneric)			\
 	unit_util_server.cpp			\
 	unit_functions_server.cpp			\
+	bolt_server.cpp			\
+	beam_server.cpp			\
 	unit_factory_server.cpp
 
 
@@ -53,11 +69,9 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	base_util.h			\
 	base_write_xml.cpp		\
 	base_write_python.cpp		\
-	beam.h				\
 	beam.cpp				\
 	briefing.h			\
 	briefing.cpp			\
-	bolt.h				\
 	bolt.cpp				\
 	building.h			\
 	building.cpp			\
@@ -65,10 +79,8 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	cont_terrain.h		\
 	click_list.cpp			\
 	click_list.h			\
-	unit_collide.h				\
 	unit_util.h			\
 	unit_util.cpp			\
-	faction_xml.cpp			\
 	music.cpp			\
 	music.h				\
 	enhancement.h			\
@@ -77,17 +89,18 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	terrain.cpp			\
 	terrain.h			\
 	unit.h				\
+	unit_bsp.cpp			\
 	unit_interface.cpp		\
-	unit_bsp.cpp		\
 	unit_factory.cpp		\
-	weapon_xml.cpp			\
-	weapon_xml.h			\
 	planet.h 				\
 	planet.cpp 				\
 	missile.h			\
-	unit_functions.cpp	\
-	mount.cpp		\
-	mount.h			\
-	collide.h		\
-	collide.cpp
+	unit_functions.cpp
 
+#	unit_jump.cpp				\
+#	unit_cargo.cpp				\
+#	unit_customize.cpp			\
+#	unit_damage.cpp				\
+#	unit_physics.cpp			\
+#	unit_weapon.cpp				\
+#	unit.cpp				\

@@ -26,7 +26,7 @@ namespace XMLSupport {
     {};
   };
 
-  class AttributeList : public vector<Attribute> {
+  class AttributeList : public std::vector<Attribute> {
   public:
     AttributeList(const XML_Char **atts);
   };
@@ -66,6 +66,11 @@ namespace XMLSupport {
   string inline tostring (int num) {
 	char tmp[256];
 	sprintf (tmp,"%d",num);
+	return string(tmp);
+  }
+  string inline tostring (unsigned int num) {
+	char tmp[256];
+	sprintf (tmp,"%u",num);
 	return string(tmp);
   }
   string inline tostring (long num) {

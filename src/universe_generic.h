@@ -59,6 +59,7 @@ protected:
 
   // the system currently used by the scripting
   StarSystem *script_system;
+  bool is_server;
 
 private:
   ///Many C++ implementations count classes within as friends. (not all)
@@ -67,6 +68,7 @@ private:
   ///A list of all factions 
   
  public:
+  bool	isServer() { return is_server;}
   Cockpit * isPlayerStarship (const Unit* fighter);
   int whichPlayerStarship (const Unit* fighter);
   Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
@@ -86,9 +88,11 @@ private:
   virtual void activateLightMap() {}
   virtual void SelectCamera(int cam) {}
   //virtual unsigned int CurrentCockpit(){return 0;}
+  Cockpit * createCockpit( std::string player);
 
-  vector <std::string> getAdjacentStarSystems(const std::string &ss);
+  std::vector <std::string> getAdjacentStarSystems(const std::string &ss);
   std::string getGalaxyProperty (const std::string &sys, const std::string & prop);
+  std::string getGalaxyPropertyDefault (const std::string & sys, const std::string & prop, const std::string def="");
   bool StillExists(StarSystem * ss);
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
@@ -103,7 +107,7 @@ private:
   void Generate2( StarSystem * ss);
   virtual StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
   ///Loads and parses factions
-  virtual void LoadFactionXML (const char * factfile) {
+  void LoadFactionXML (const char * factfile) {
     Faction::LoadXML (factfile);
   }
   //void SetupCockpits (std::vector <std::string> players);
@@ -111,8 +115,8 @@ private:
   //void activateLightMap();
   ///inits graphics with args
   Universe();
-  Universe(int argc, char **argv, const char * galaxy);
-  void Init();
+  Universe(int argc, char **argv, const char * galaxy, bool server=false);
+  void Init( const char * gal);
   virtual ~Universe();
   ///Loads Defaults in Graphics Drivers
   //void StartGFX();
@@ -120,6 +124,8 @@ private:
   virtual class StarSystem * Init(string systemfile, const Vector & centroid=Vector (0,0,0), const string planetname=string());
   ///Begins a scene
   virtual void StartDraw() {}
+  // Update starsystems (for server side)
+  void Update();
   ///Runs the main loop
   virtual void Loop(void f()) {}
   ///returns active star system
@@ -175,6 +181,7 @@ private:
   }
  public:
   std::vector <StarSystem *> star_system;
+  int	StarSystemIndex( StarSystem *ss);
 };
 
 #endif

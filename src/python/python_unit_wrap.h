@@ -4,7 +4,7 @@
 #if ((WHICH_UNIT_EXPORT_NUMBER==3) || (WHICH_UNIT_EXPORT_NUMBER==2))
 #else
 ////////////////////////////AUTOMATIC WRAP//////
-  WRAPPED2 (bool,AutoPilotTo,UnitWrapper,un,bool,ignore_friendlies,false)
+  WRAPPED2 (bool,AutoPilotTo,UnitWrapper,un,bool,ignore_energy_requirement,false)
   voidWRAPPED0(SetTurretAI)
   voidWRAPPED0(DisableTurretAI)
   voidWRAPPED3(leach,float,XshieldPercent,float,YrechargePercent,float,ZenergyPercent)
@@ -35,7 +35,7 @@
   WRAPPED0 (float,CloakVisible,false)
   voidWRAPPED1 (Cloak,bool,cloak)
   voidWRAPPED0(RemoveFromSystem)
-  WRAPPED2(QVector, PositionITTS ,QVector, local_posit, float, speed,QVector(0,0,0))
+  WRAPPED3(QVector, PositionITTS ,QVector, local_posit, Vector, local_velocity, float, speed,QVector(0,0,0))
   WRAPPED0(QVector,Position,QVector(0,0,0))
   WRAPPED0(QVector, LocalPosition,QVector(0,0,0))
 
@@ -43,7 +43,7 @@
   voidWRAPPED1( TargetTurret ,UnitWrapper,targ)
   voidWRAPPED2( Threaten ,UnitWrapper,targ, float,danger)
   voidWRAPPED0( ResetThreatLevel)
-  voidWRAPPED1( Fire,bool,Missile)
+  voidWRAPPED2( Fire,bool,Missile,bool,OnlyCollideWithTarget)
   voidWRAPPED0( UnFire)
   WRAPPED0(float, computeLockingPercent,0)//how locked are we
   WRAPPED0(float, FShieldData,0)
@@ -110,6 +110,8 @@
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
   WRAPPED0(int,DockedOrDocking,0)
   WRAPPED0(int,GetNumMounts,0)
+  EXPORT_UTIL0(UnitWrapper,owner)
+  voidEXPORT_UTIL1(performDockingOperations,UnitWrapper,unitToDockWith)
 
 	EXPORT_UTIL0(string,getFactionName)
 	EXPORT_UTIL0(int,getFactionIndex)
@@ -150,5 +152,5 @@
 	voidEXPORT_UTIL1(setSpeed, float,speed)
 	EXPORT_UTIL0(float,maxSpeed)
 	EXPORT_UTIL0(float,maxAfterburnerSpeed)
-
+	voidEXPORT_UTIL5(orbit,UnitWrapper,orbitee,float,speed,QVector,R,QVector,S,QVector,center)
 #endif

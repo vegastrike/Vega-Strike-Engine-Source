@@ -37,6 +37,7 @@ void UncheckUnit (class Unit * un);
 #include <string>
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
+#include "gfxlib_struct.h"
 #include "weapon_xml.h"
 #include "linecollide.h"
 //#include "gfx/vdu.h"
@@ -44,8 +45,9 @@ void UncheckUnit (class Unit * un);
 #include "container.h"
 #include "collection.h"
 #include "script/flightgroup.h"
-#include "faction.h"
+#include "faction_generic.h"
 #include "star_system_generic.h"
+#include "networking/const.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -82,7 +84,77 @@ enum clsptr {
 	MISSILEPTR
 };
 
-class Mount;
+class Mount {
+  protected:
+    ///Where is it
+	Vector pos;
+    Quaternion orient;
+	void ReplaceSound();
+  public:
+	// Serial used to store missiles serial id before they are really created
+	ObjSerial serial;
+	float xyscale;float zscale;//for guns!	
+    void SwapMounts (Mount * other);
+    void ReplaceMounts (const Mount * other);
+	double Percentage (const Mount *newammo) const;
+// Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
+    union REF{
+      ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
+      Beam *gun;
+      ///Other weapons must track refire times
+      float refire;
+    } ref;
+    ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
+
+    short size;
+    ///-1 is infinite
+    short ammo;
+    short volume;//-1 is infinite
+    ///The data behind this weapon. May be accordingly damaged as time goes on
+    enum MOUNTSTATUS{REQUESTED,ACCEPTED,PROCESSED,UNFIRED,FIRED} processed;
+    ///Status of the selection of this weapon. Does it fire when we hit space
+    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
+    ///The sound this mount makes when fired
+    const weapon_info *type;
+    int sound;
+    float time_to_lock;
+    Mount();
+    Mount(const std::string& name, short int ammo, short int volume, float xyscale=0, float zscale=0);
+
+	void Activate (bool Missile) {
+	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
+		if (status==INACTIVE)
+		  status = ACTIVE;
+	  }
+	}
+	///Sets this gun to inactive, unless unchosen or destroyed
+	void DeActive (bool Missile) {
+	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
+		if (status==ACTIVE)
+		  status = INACTIVE;
+	  }
+	}
+
+    ///Sets this gun's position on the mesh
+    void SetMountPosition (const Vector & v) {pos=v;}
+	void SetMountOrientation(const Quaternion &t) {orient = t;}
+    ///Gets the mount's position and transform
+    const Vector &GetMountLocation ()const{return pos;}
+    const Quaternion &GetMountOrientation ()const{return orient;}	
+    ///Turns off a firing beam (upon key release for example)
+	void UnFire();
+    /**
+     *  Fires a beam when the firing unit is at the Cumulative location/transformation 
+     * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
+     * should it fire
+     */ 
+	// Uses Sound Forcefeedback and other stuff
+	void PhysicsAlignedUnfire();
+	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone, int mount_num=0);
+	bool Fire (Unit *owner, bool Missile=false, bool collide_only_with_target=false);
+};
+
+
 class VDU;
 struct UnitImages;
 struct UnitSounds;
@@ -147,7 +219,6 @@ public:
   /** Constructor that creates aa mesh with meshes as submeshes (number
    *  of them) as either as subunit with faction faction
    */
-  Unit (std::vector <string> &meshes  , bool Subunit, int faction);
   Unit (std::vector <Mesh *> &meshes  , bool Subunit, int faction);
 
 
@@ -161,7 +232,15 @@ public:
        int         faction,
        std::string customizedUnit=string(""),
        Flightgroup *flightgroup=NULL,
-       int         fg_subnumber=0 );
+       int         fg_subnumber=0, string netxml="");
+  ///Initialize many of the defaults inherant to the constructor
+  void Init();
+  void Init( const char *filename,
+        bool        SubUnit,
+       int         faction,
+       std::string customizedUnit=string(""),
+       Flightgroup *flightgroup=NULL,
+       int         fg_subnumber=0, string netxml="");
   friend class UnitFactory;
 
 public:    
@@ -173,9 +252,12 @@ public:
 
 protected:
   // Tell if networked unit
-  char networked;
+  bool networked;
+  ObjSerial	serial;
 public:
-  void SetNetworkMode( bool mode) {networked = true;}
+  void SetNetworkMode( bool mode=true) {this->networked = mode;}
+  ObjSerial GetSerial() { return this->serial;}
+  void		SetSerial( ObjSerial ser) { this->serial = ser;}
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/
@@ -198,14 +280,18 @@ public:
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
 public:
-  vector <Mount *> mounts;
+#define NO_MOUNT_STAR
+  vector <Mount> mounts;
 protected:
   ///Mount may access unit
   friend class Mount;
   ///no collision table presence.
   bool SubUnit;
+  bool RecurseIntoSubUnitsOnCollision;
+  bool FaceCamera;
 public:
   bool isSubUnit() {return SubUnit;}
+  void setFaceCamera(){FaceCamera=true;}
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   unsigned char RecomputeRole();//changes own role
@@ -231,7 +317,7 @@ public:
   ///number of meshes (each with separate texture) this unit has
 
   std::vector <Mesh *> meshdata;
-  unsigned char combatRole() {return combat_role;}
+  unsigned char combatRole() const {return combat_role;}
 protected:
   unsigned char combat_role;
   Nebula * nebula;
@@ -258,22 +344,19 @@ protected:
   }
   inline Nebula * GetNebula () const{return nebula;}
   ///Should draw selection box?
-  bool selected;  
   ///Process all meshes to be deleted
   static void ProcessDeleteQueue();
   ///Returns the cockpit name so that the controller may load a new cockpit
   std::string getCockpit ()const;
 
   // Shouldn't do anything here - but needed by Python
-  virtual class Cockpit * GetVelocityDifficultyMult(float &) const { return NULL;}
+  class Cockpit * GetVelocityDifficultyMult(float &) const;
 
   StarSystem * activeStarSystem;//the star system I'm in
   ///Takes out of the collide table for this system.
-// SHOULD COME BACK HERE
-  virtual void RemoveFromSystem (){}
+  void RemoveFromSystem();
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
- std::vector <string> meshdata_string;
-  virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
+  virtual int nummesh()const {return ((int)meshdata.size())-1;}
 //void FixGauges();
 // Uses planet stuff
   virtual void SetPlanetOrbitData (PlanetaryTransform *trans) {}
@@ -284,10 +367,10 @@ protected:
   virtual void Split (int level){}
   //  void SwapOutHalos();
   //  void SwapInHalos();
-  virtual void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type) {}
+  virtual void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type, float activation) {}
 
 // Uses Mesh -> in NetUnit and Unit only
-  virtual vector <Mesh *> StealMeshes() { vector <Mesh *> v; return v;}
+  vector <Mesh *> StealMeshes();
   ///Begin and continue explosion
 // Uses GFX so only in Unit class
   virtual bool Explode(bool draw, float timeit) {return false;}
@@ -372,11 +455,13 @@ public:
   virtual StarSystem * getStarSystem() {return NULL;}
     struct UnitJump {
     short energy;
+    short insysenergy;
     signed char drive;
     unsigned char delay;
     unsigned char damage;
     //negative means fuel
   } jump;
+  bool selected;  
  
   const UnitJump &GetJumpStatus() const {return jump;}
   float CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse)const ;
@@ -418,8 +503,9 @@ public:
 public:
   ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
   void WriteUnit(const char * modificationname="");
+  string WriteUnitString();
   ///Loads a unit from an xml file into a complete datastructure
-  void LoadXML(const char *filename, const char * unitModifications="", char * xmlbuffer=0, int buflength=0);
+  void LoadXML(const char *filename, const char * unitModifications="", string xmlbuffer="");
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                 ****/
@@ -431,7 +517,7 @@ protected:
   virtual float ExplosionRadius();
 public:
   virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
-  virtual bool AutoPilotTo(Unit * un, bool ignore_friendlies=false) {return false;}
+  bool AutoPilotTo(Unit * un, bool automaticenergyrealloc,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within
@@ -499,7 +585,8 @@ protected:
   ///Is dead already?
   bool killed;
   ///Should not be drawn
-  bool invisible;
+  enum INVIS {DEFAULTVIS=0x0,INVISGLOW=0x1,INVISUNIT=0x2,INVISCAMERA=0x4};
+  unsigned char invisible;//1 means turn off glow, 2 means turn off ship
   /// corners of object  
 
 public:
@@ -523,7 +610,11 @@ public:
   ///returns the current ammt of armor left
   float FuelData() const;
   ///Returns the current ammt of energy left
+  float EnergyRechargeData() const{return recharge;}
+  float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
+  float WarpEnergyData() const;
+  unsigned short GetWarpEnergy() {return warpenergy;}
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
@@ -541,6 +632,9 @@ public:
   void SetPosAndCumPos (const QVector &pos) {SetPosition (pos);cumulative_transformation_matrix.p=pos;cumulative_transformation.position=pos;}
   ///Sets the state of drawing
   void SetVisible(bool isvis);
+  void SetAllVisible(bool isvis);
+  void SetGlowVisible(bool isvis);	
+	
   ///Rotates about the axis
   void Rotate(const Vector &axis);
   /**
@@ -606,10 +700,11 @@ public:
   ///Applies a roll of amt
   void RollTorque(float amt);
   ///executes a repair if the repair bot is up to it
-  virtual void Repair() {};
+  void Repair();
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
 // Not needed here, so only in NetUnit and Unit classes
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL) {}
+  void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
   virtual Vector ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
@@ -704,6 +799,10 @@ protected:
   unsigned short maxenergy;
   ///current energy
   unsigned short energy;
+  ///maximum energy
+  unsigned short maxwarpenergy;
+  ///current energy
+  unsigned short warpenergy;
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   virtual float DealDamageToShield (const Vector & pnt, float &Damage);
   ///If the shields are up from this position
@@ -719,9 +818,9 @@ public:
   ///Selects all weapons
   void SelectAllWeapon (bool Missile);
   ///Gets the average gun speed of the unit::caution SLOW
-  void getAverageGunSpeed (float & speed, float & range) const;
+  void getAverageGunSpeed (float & speed, float & grange, float & mrange) const;
   ///Finds the position from the local position if guns are aimed at it with speed
-  QVector PositionITTS (const QVector & local_posit, float speed) const;
+  QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
   void ArmorData(unsigned short armor[4])const;
@@ -730,7 +829,7 @@ public:
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
   ///Fires all active guns that are or arent Missiles
   // if bitmask is (1<<31) then fire off autotracking of that type;
-  virtual void Fire(unsigned int bitmask);
+  virtual void Fire(unsigned int bitmask, bool beams_target_owner=false, int zone=-1);
   ///Stops all active guns from firing
   void UnFire();
   ///reduces shields to X percentage and reduces shield recharge to Y percentage
@@ -879,30 +978,28 @@ public:
 
   // Shouldn't do anything here - but needed by Python
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  virtual Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true) {return NULL;}
+  Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true);
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-  virtual Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP) {return NULL;}
-  // Using collision stuff -> NetUnit if possible
-  virtual Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance) {return NULL;}
+  Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
 
   ///fils in corner_min,corner_max and radial_size
 // Uses Box stuff -> only in NetUnit and Unit
-  virtual void calculate_extent(bool update_collide_queue) {}
+  void calculate_extent(bool update_collide_queue);
 
 // To let only in Unit class
 ///Builds a BSP tree from either the hull or else the current meshdata[] array
   virtual void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL){}//if hull==NULL, then use meshdata **
 // Uses mesh stuff (only rSize()) : I have to find something to do
-  virtual bool Inside (const QVector &position, const float radius, Vector & normal, float &dist) {return false;}
+  bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
-//  void UpdateCollideQueue();
+  void UpdateCollideQueue();
 // Uses LineCollide stuff so only in NetUnit and Unit
   const LineCollide &GetCollideInfo () {return CollideInfo;}
 // Uses collision stuff so only in NetUnit and Unit classes
-//  virtual bool querySphere (const QVector &pnt, float err) const {return false;}
+  bool querySphere (const QVector &pnt, float err)const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius
-  virtual float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0) const { return 1;}
-//  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0) const ;
+  float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0)const;
+  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0)const;
   ///queries the ship with a directed ray
   virtual float querySphereClickList (const QVector &st, const QVector &dir, float err) const {return 1;}//for click list
   ///Queries if this unit is within a given frustum
@@ -928,15 +1025,16 @@ public:
   virtual bool querySphereClickList (int,int, float err, Camera *activeCam) {return false;}
 
 
-  virtual bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal) { return false;}
+  Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance);
+  bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
 // Uses Universe thing
-  virtual bool jumpReactToCollision (Unit *smaller) {return false;}
+  bool jumpReactToCollision (Unit *smaller);
   ///Does a collision between this and another unit
-  virtual bool Collide(Unit * target) {return false;}
+  bool Collide(Unit * target);
   ///checks for collisions with all beams and other units roughly and then more carefully
-  virtual void CollideAll() {}
+  void CollideAll();
 
 /***************************************************************************************/
 /**** DOCKING STUFF                                                                 ****/
@@ -983,8 +1081,8 @@ public:
   ///get the full flightgroup ID (i.e 'green-4')
   const string getFgID();
 
-  virtual vector <class CargoColor>& FilterDowngradeList (vector <class CargoColor> & mylist, bool downgrade =true) { return mylist;}
-  virtual vector <class CargoColor>& FilterUpgradeList (vector <class CargoColor> & mylist) { return mylist;}
+  virtual vector <struct CargoColor>& FilterDowngradeList (vector <struct CargoColor> & mylist, bool downgrade =true) { return mylist;}
+  virtual vector <struct CargoColor>& FilterUpgradeList (vector <struct CargoColor> & mylist) { return mylist;}
 
 /***************************************************************************************/
 /**** MISC STUFF                                                                    ****/
@@ -997,8 +1095,6 @@ public:
   void setFullname(string name)  { fullname=name; };
   string getFullname() const { return fullname; };
 
-  ///Initialize many of the defaults inherant to the constructor
-  void Init();
   ///Is this class a unit
   virtual enum clsptr isUnit()const {return UNITPTR;}
   inline void Ref() {
@@ -1057,64 +1153,11 @@ struct Unit::XML {
   bool calculated_role;
 };
 
-class Mount {
-  protected:
-    ///Where is it
-    Transformation LocalPosition;
-  public:
-    void SwapMounts (Mount * othermount);
-    virtual void ReplaceMounts (const Mount * othermount);
-    double Percentage (const Mount * oldmount) const;
-// Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
-    union REF{
-      ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
-      Beam *gun;
-      ///Other weapons must track refire times
-      float refire;
-    } ref;
-    ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
-
-    short size;
-    ///-1 is infinite
-    short ammo;
-    short volume;//-1 is infinite
-    ///The data behind this weapon. May be accordingly damaged as time goes on
-    enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
-    ///Status of the selection of this weapon. Does it fire when we hit space
-    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
-    ///The sound this mount makes when fired
-    const weapon_info *type;
-    int sound;
-    float time_to_lock;
-    Mount();
-// Requires weapon_xml.cpp stuff so Beam stuff so GFX and AUD stuff
-    Mount(const std::string& name, short int ammo=-1, short int volume=-1);
-    ///Sets this gun to active, unless unchosen or destroyed
-    void Activate (bool Missile);
-    ///Sets this gun to inactive, unless unchosen or destroyed
-    void DeActive (bool Missile);
-    ///Sets this gun's position on the mesh
-    void SetMountPosition (const Transformation &t) {LocalPosition = t;}
-    ///Gets the mount's position and transform
-    Transformation &GetMountLocation () {return LocalPosition;}
-    ///Turns off a firing beam (upon key release for example)
-	virtual void UnFire() {}
-    /**
-     *  Fires a beam when the firing unit is at the Cumulative location/transformation 
-     * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
-     * should it fire
-     */ 
-	// Uses Sound Forcefeedback and other stuff
-	virtual void PhysicsAlignedUnfire() {}
-	virtual bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone) { return false;}//0 is no track...1 is target 2 is target + lead
-	virtual bool Fire (Unit *owner, bool Missile=false) {return false;}
-};
-
 inline void UnitCollection::UnitIterator::GetNextValidUnit () {
   while (pos->next->unit?pos->next->unit->Killed():false) {
     remove();
   }
-}
+};
 
 inline Unit * UnitContainer::GetUnit() {
   if (unit==NULL)

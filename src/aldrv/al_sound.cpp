@@ -131,6 +131,9 @@ ALint format;
 
 #endif
       if(err == AL_FALSE) {
+		free (filename);
+		alDeleteBuffers (1,wavbuf);
+		free (wavbuf);
 		return -1;
       }
       alBufferData( *wavbuf, format, wave, size, freq );

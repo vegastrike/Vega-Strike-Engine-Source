@@ -19,6 +19,7 @@ class MissileEffect {
 class Missile:public Unit {
  public:
  protected:
+	Missile (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
   virtual float ExplosionRadius();
   float time;
   float damage;
@@ -71,7 +72,8 @@ protected:
 public:
   virtual void Kill (bool eraseFromSave=true);
   virtual void reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);	
+	
 
 protected:
     /// default constructor forbidden

@@ -33,6 +33,7 @@
 #include "networking/netclient.h"
 #include "audiolib.h"
 #include "save_util.h"
+#include "cmd/base.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -56,8 +57,10 @@ void soundContainer::playsound () {
 }
 soundContainer::~soundContainer () {
 	if (sound>=0) {
+#if 0
 		AUDStopPlaying(sound);
 		AUDDeleteSound(sound,false);
+#endif
 		sound=-2;
 	}
 }
@@ -434,9 +437,10 @@ void GameCockpit::DrawTargetBox () {
   DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
   DrawDockingBoxes(un,target,CamP,CamQ,CamR);
   if (always_itts || un->GetComputerData().itts) {
-    un->getAverageGunSpeed (speed,range);
+	float mrange;
+    un->getAverageGunSpeed (speed,range,mrange);
     float err = (.01*(1-un->CloakVisible()));
-   QVector iLoc = target->PositionITTS (un->Position(),speed)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
@@ -456,11 +460,103 @@ void GameCockpit::DrawTargetBox () {
 
 }
 
+void GameCockpit::DrawTurretTargetBoxes () {
+
+  static GFXColor black_and_white=DockBoxColor ("black_and_white");
+  Unit * parun = parent.GetUnit();
+  if (!parun)
+    return;
+  UnitCollection::UnitIterator iter = parun->getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+	if (!un)
+      return;
+	if (un->GetNebula()!=NULL)
+	  return;
+    Unit *target = un->Target();
+    if (!target){
+      iter.advance();
+      continue;
+    }
+	Vector CamP,CamQ,CamR;
+    _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+    //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+    QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
+    GFXDisable (TEXTURE0);
+    GFXDisable (TEXTURE1);
+    GFXDisable (DEPTHTEST);
+    GFXDisable (DEPTHWRITE);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXDisable (LIGHTING);
+    DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+    GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
+
+    //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+
+	// ** jay
+	float rSize = target->rSize();
+	GFXBegin(GFXLINE);
+	GFXVertexf (Loc+(CamP).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(CamP).Cast()*rSize*.8);
+
+	GFXVertexf (Loc+(-CamP).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(-CamP).Cast()*rSize*.8);
+
+	GFXVertexf (Loc+(CamQ).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(CamQ).Cast()*rSize*.8);
+
+	GFXVertexf (Loc+(-CamQ).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(-CamQ).Cast()*rSize*.8);
+	GFXEnd();
+
+
+    GFXEnable (TEXTURE0);
+    GFXEnable (DEPTHTEST);
+    GFXEnable (DEPTHWRITE);
+
+    iter.advance();
+  }
+
+}
+
+
+void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize){
+  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+      Vector localcoord (un->LocalCoordinates(target));
+	  float s,t;
+      this->LocalToRadar (localcoord,s,t);
+      GFXColor localcol (un->GetComputerData().radar.color?this->unitToColor (un,target):black_and_white);
+      
+      GFXColorf (localcol);
+      
+      float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
+      Vector v(xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
+      GFXVertexf(v);
+      if (target==un->Target()) {
+	//	GFXEnd();
+	//	GFXBegin(GFXLINE);
+	GFXVertexf(v);
+	GFXVertex3f((float)(v.i+(7.8)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
+	GFXVertex3f((float)(v.i-(7.5)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
+	GFXVertex3f(v.i,(float)(v.j-(7.5)/g_game.y_resolution),v.k); //not knowning whether to use floats
+	GFXVertex3f(v.i,(float)(v.j+(7.8)/g_game.y_resolution),v.k); //or doubles.
+
+	GFXVertex3f((float)(v.i+(3.9)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
+	GFXVertex3f((float)(v.i-(3.75)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
+	GFXVertex3f(v.i,(float)(v.j-(3.75)/g_game.y_resolution),v.k); //not knowning whether to use floats
+	GFXVertex3f(v.i,(float)(v.j+(3.9)/g_game.y_resolution),v.k); //or doubles.
+
+	//	GFXEnd();
+	//	GFXBegin (GFXPOINT);
+	
+      }   
+}
+
 void GameCockpit::Eject() {
   ejecting=true;
 }
 void GameCockpit::DrawBlips (Unit * un) {
-  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+
 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
@@ -490,33 +586,13 @@ void GameCockpit::DrawBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-      Vector localcoord (un->LocalCoordinates(target));
-      LocalToRadar (localcoord,s,t);
-      GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
-      
-      GFXColorf (localcol);
-      
-      float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
-      Vector v(xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
-      GFXVertexf(v);
-      if (target==makeBigger) {
-	//	GFXEnd();
-	//	GFXBegin(GFXLINE);
-	GFXVertexf(v);
-	GFXVertex3f((float)(v.i+(7.8)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
-	GFXVertex3f((float)(v.i-(7.5)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
-	GFXVertex3f(v.i,(float)(v.j-(7.5)/g_game.y_resolution),v.k); //not knowning whether to use floats
-	GFXVertex3f(v.i,(float)(v.j+(7.8)/g_game.y_resolution),v.k); //or doubles.
-
-	GFXVertex3f((float)(v.i+(3.9)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
-	GFXVertex3f((float)(v.i-(3.75)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
-	GFXVertex3f(v.i,(float)(v.j-(3.75)/g_game.y_resolution),v.k); //not knowning whether to use floats
-	GFXVertex3f(v.i,(float)(v.j+(3.9)/g_game.y_resolution),v.k); //or doubles.
-
-	//	GFXEnd();
-	//	GFXBegin (GFXPOINT);
-	
-      }      
+	  drawUnToTarget (un,target,xcent,ycent,xsize,ysize);
+	  if (target->isPlanet()==PLANETPTR) {
+		  Unit * sub=NULL;
+		  for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
+			  drawUnToTarget(un,sub,xcent,ycent, xsize,ysize);
+		  }
+	  }
     }
     iter.advance();
   }
@@ -607,7 +683,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 }
 float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  static bool lie=XMLSupport::parse_float (vs_config->getVariable("physics","game_speed_lying","true"));
+  static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
@@ -632,9 +708,13 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     }
     return ((float)armordat[stat-UnitImages::ARMORF])/StartArmor[stat-UnitImages::ARMORF];
   case UnitImages::FUEL:
+	if (target->FuelData()>maxfuel)
+		maxfuel=target->FuelData();
     if (maxfuel>0) return target->FuelData()/maxfuel;return 0;
   case UnitImages::ENERGY:
     return target->EnergyData();
+  case UnitImages::WARPENERGY:
+    return target->WarpEnergyData();
   case UnitImages::HULL:
     if (maxhull<target->GetHull()) {
       maxhull = target->GetHull();
@@ -684,7 +764,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     static int wasautopilot=0;
 	int abletoautopilot=0;
     if (target) {
-      abletoautopilot=(target->AutoPilotTo(target)?1:0);
+      abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
@@ -876,14 +956,73 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
     vs_config->getColor("targetting_ship",&targetting.r);
     vs_config->getColor("planet",&planet.r);
   }
+  InitStatic();
+
 }
 void GameCockpit::SelectProperCamera () {
     SelectCamera(view);
 }
-static vector <int> respawnunit;
-static vector <int> switchunit;
-static vector <int> turretcontrol;
-static vector <int> suicide;
+extern vector <int> respawnunit;
+extern vector <int> switchunit;
+extern vector <int> turretcontrol;
+extern vector <int> suicide;
+
+void DoCockpitKeys()
+{
+	CockpitKeys::Pan(0,PRESS);
+	CockpitKeys::Inside(0,PRESS);
+}
+void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
+{
+   if (k==PRESS)
+     {
+      //UniverseUtil::IOmessage(0,"game","all","hit key");
+ 
+    if((_Universe->AccessCockpit())->CanDrawNavSystem())
+      {
+       (_Universe->AccessCockpit())->SetDrawNavSystem(0);
+       //UniverseUtil::IOmessage(0,"game","all","DRAWNAV - OFF");
+	   RestoreMouse();
+      }
+  else
+    {
+     (_Universe->AccessCockpit())->SetDrawNavSystem(1);
+     //UniverseUtil::IOmessage(0,"game","all","DRAWNAV - ON");
+	 
+	 winsys_set_mouse_func(BaseInterface::ClickWin);
+	 winsys_set_motion_func(BaseInterface::ActiveMouseOverWin);
+	 winsys_set_passive_motion_func(BaseInterface::PassiveMouseOverWin);
+
+
+//	 _Universe->AccessCockpit()->ThisNav.currentsystem=_Universe->AccessCockpit()->ThisNav.selectedsystem=UniverseUtil::getSystemFile();
+    }
+  }
+}
+bool GameCockpit::SetDrawNavSystem(bool what) {
+  ThisNav.SetDraw(what);
+  return what;
+}
+bool GameCockpit::CanDrawNavSystem() {
+  return ThisNav.CheckDraw();
+}
+bool GameCockpit::DrawNavSystem() {
+
+  
+  bool ret = ThisNav.CheckDraw();
+  if (ret) {
+    float c_o = cockpit_offset;
+    cam[currentcamera].setCockpitOffset(0);
+    cam[currentcamera].UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
+    ThisNav.Draw();
+    cockpit_offset= c_o;
+    cam[currentcamera].setCockpitOffset(c_o);
+    cam[currentcamera].UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
+    
+  }
+
+
+  return ret;
+}
 void RespawnNow (Cockpit * cp) {
   while (respawnunit.size()<=_Universe->numPlayers())
     respawnunit.push_back(0);
@@ -977,21 +1116,33 @@ void GameCockpit::Respawn (int,KBSTATE k) {
 
 }
 
-static void FaceTarget (Unit * un) {
-  Unit * targ = un->Target();
-  if (targ) {
-    QVector dir (targ->Position()-un->Position());
-    dir.Normalize();
-    Vector p,q,r;
-    un->GetOrientation(p,q,r);
-    QVector qq(q.Cast());
-    qq = qq+QVector (.001,.001,.001);
-    un->SetOrientation (qq,dir);
+static void FaceTarget (Unit * un, const QVector &ourpos, Unit * target) {
+  if (target) {
+    QVector RealPosition = target->LocalPosition();
+    if (target->isSubUnit())
+      RealPosition=target->Position();
+      Vector methem(RealPosition.Cast()-ourpos.Cast());
+      methem.Normalize();
+      Vector p,q,r;
+      un->GetOrientation(p,q,r);
+      p=methem.Cross(r);
+      if (p.MagnitudeSquared()){
+	float theta =p.Magnitude();
+	p*= (asin (theta)/theta);
+	un->Rotate(p);
+	un->GetOrientation (p,q,r);
+	if (r.Dot(methem)<0) {
+	  un->Rotate (p*(PI/theta));
+	}
+
+      }
   }
+  
 }
 
 // SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
 int GameCockpit::Autopilot (Unit * target) {
+  static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
   int retauto = 0;
   if (target) {
     if (enableautosound.sound<0) {
@@ -1001,23 +1152,26 @@ int GameCockpit::Autopilot (Unit * target) {
     enableautosound.playsound();
     Unit * un=NULL;
     if ((un=GetParent())) {
-      if ((retauto = un->AutoPilotTo(un))) {//can he even start to autopilot
-	SetView (CP_PAN);
-	un->AutoPilotTo(target);
+      if ((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
+	if (autopan)
+	  SetView (CP_PAN);
+	un->AutoPilotTo(target,false);
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 	if (face_target_on_auto) {
-	  FaceTarget(un);
+	  //	  FaceTarget(un,un->LocalPosition(),un->Target());
 	}	  
 	static double averagetime = GetElapsedTime()/getTimeCompression();
 	static double numave = 1.0;
 	averagetime+=GetElapsedTime()/getTimeCompression();
 	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
 	numave++;
-	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
-							      _Universe->AccessCamera()->R,
-							      averagetime*autospeed/(numave));
-	zoomfactor=1.5;
+	if (autopan) {
+	  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
+								   _Universe->AccessCamera()->R,
+								   averagetime*autospeed/(numave));
+	  zoomfactor=1.5;
+	}
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
 	autopilot_time=autotime;
@@ -1027,57 +1181,6 @@ int GameCockpit::Autopilot (Unit * target) {
   }
   return retauto;
 }
-void SwitchUnits (Unit * ol, Unit * nw) {
-  bool pointingtool=false;
-  bool pointingtonw=false;
-
-  for (int i=0;i<_Universe->numPlayers();i++) {
-    if (i!=(int)_Universe->CurrentCockpit()) {
-      if (_Universe->AccessCockpit(i)->GetParent()==ol)
-	pointingtool=true;
-      if (_Universe->AccessCockpit(i)->GetParent()==nw)
-	pointingtonw=true;
-    }
-  }
-
-  if (ol&&(!pointingtool)) {
-    Unit * oltarg = ol->Target();
-    if (oltarg) {
-      if (ol->getRelation (oltarg)>=0) {
-	ol->Target(NULL);
-      }
-    }
-    ol->PrimeOrders();
-    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
-    ol->SetVisible (true);
-  }
-  if (nw) {
-    nw->PrimeOrders();
-    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
-    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
-    static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
-    if (nw->getCockpit().length()>0&&LoadNewCockpit) {
-      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
-    }else {
-      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
-      if (DisCockpit) {
-	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
-      }
-    }
-  }
-}
-static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
-  static bool FlyStraightInTurret = XMLSupport::parse_bool (vs_config->getVariable("physics","ai_pilot_when_in_turret","true"));
-  if (FlyStraightInTurret) {
-    SwitchUnits (ol,nw);
-  }else {
-    ol->PrimeOrders();
-    SwitchUnits (NULL,nw);
-    
-  }
-
-}
-
 extern void reset_time_compression(int i, KBSTATE a);
 void GameCockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
@@ -1126,6 +1229,7 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   DrawTargetBox();
+  DrawTurretTargetBoxes();
   if(draw_all_boxes){
     DrawTargetBoxes();
   }
@@ -1232,6 +1336,7 @@ void GameCockpit::Draw() {
 		radar_ani.DrawAsSprite(Radar);	
 	}*/
 	float damage =(un->GetImageInformation().cockpit_damage[0]);
+	if (damage<.985) {
       if (radar_time>=0) {
         if (damage>.001&&(cockpit_time>radar_time+(1-damage))) {
 	  if (rand01()>SWITCH_CONST) {
@@ -1248,6 +1353,7 @@ void GameCockpit::Draw() {
           }
         }
       }
+	}
       }
 
       DrawGauges(un);
@@ -1262,6 +1368,7 @@ void GameCockpit::Draw() {
 	  vdu[vd]->Draw(un,textcol);
 	  GFXColor4f (1,1,1,1);
 	  float damage = un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)];
+	if (damage<.985) {
 	  if (vdu_time[vd]>=0) {
 	    if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
 	      if (rand01()>SWITCH_CONST) {
@@ -1279,6 +1386,7 @@ void GameCockpit::Draw() {
 	      }
 	    }
 	  }
+	}
 	  //process VDU, damage VDU, targetting VDU
 	}
       }
@@ -1317,10 +1425,16 @@ void GameCockpit::Draw() {
 			text->GetCharSize (x,y);
 			text->SetCharSize (x*4,y*4);
 			text->SetPos (0-(x*2*14),0-(y*2));
-			mission->msgcenter->add("game","all","You Have Died!");
+			char playr[3];
+			playr[0]='p';
+			playr[1]='0'+_Universe->CurrentCockpit();
+			playr[2]='\0';
+			mission->msgcenter->add("game",playr,"#ff5555You Have Died!");
+			mission->msgcenter->add("game",playr,"Press #8080FF;#000000 (semicolon) to respawn");
+			mission->msgcenter->add("game",playr,"Or Press #8080FFEsc#000000 to quit");
 		}
 		GFXColorf (textcol);
-		text->Draw ("You Have Died!");
+		text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
 		GFXColor4f (1,1,1,1);
 	}
 	dietime +=GetElapsedTime();
@@ -1330,6 +1444,8 @@ void GameCockpit::Draw() {
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
+  DrawNavSystem();
+
   GFXEnable (DEPTHWRITE);
   GFXEnable (DEPTHTEST);
 }
@@ -1340,21 +1456,6 @@ int GameCockpit::getScrollOffset (unsigned int whichtype) {
     }
   }
   return 0;
-}
-
-
-
-
-Unit * GetFinalTurret(Unit * baseTurret) {
-  Unit * un = baseTurret;
-  un_iter uj= un->getSubUnits();
-  Unit * tur;
-  while ((tur=uj.current())) {
-    SwitchUnits (NULL,tur);
-    un = GetFinalTurret (tur);
-    ++uj;
-  }
-  return un;
 }
 
 string GameCockpit::getsoundending(int which) {
@@ -1408,7 +1509,9 @@ string GameCockpit::getsoundfile(string sound) {
 	}
 }
 
-void GameCockpit::Update () {
+void GameCockpit::UpdAutoPilot()
+{
+  static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<= 0) {
@@ -1417,176 +1520,45 @@ void GameCockpit::Update () {
 	disableautosound.loadsound(str);
       }
       disableautosound.playsound();
-      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-      SetView(CP_FRONT);
+      if (autopan) {
+	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	SetView(CP_FRONT);
+      }
       autopilot_time=0;
       Unit * par = GetParent();
       if (par) {
 	Unit * autoun = autopilot_target.GetUnit();
 	autopilot_target.SetUnit(NULL);
-	if (autoun) {
-	  par->AutoPilotTo(autoun);
+	if (autoun&&autopan) {
+	  par->AutoPilotTo(autoun,false);
 	}
       }
     }
   }
-  Unit * par=GetParent();
-  if (!par) {
-    if (respawnunit.size()>_Universe->CurrentCockpit())
-      if (respawnunit[_Universe->CurrentCockpit()]){
-	parentturret.SetUnit(NULL);
-	zoomfactor=1.5;
-	respawnunit[_Universe->CurrentCockpit()]=0;
-	string newsystem = savegame->GetStarSystem()+".system";
-	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-	_Universe->getActiveStarSystem(0)->SwapOut();
-	this->activeStarSystem=ss;
-	_Universe->pushActiveStarSystem(ss);
-
-
-	vector <StarSystem *> saved;
-	while (_Universe->getNumActiveStarSystem()) {
-	  saved.push_back (_Universe->activeStarSystem());
-	  _Universe->popActiveStarSystem();
-	}
-	if (!saved.empty()) {
-	  saved.back()=ss;
-	}
-	unsigned int mysize = saved.size();
-	for (unsigned int i=0;i<mysize;i++) {
-	  _Universe->pushActiveStarSystem (saved.back());
-	  saved.pop_back();
-	}
-	ss->SwapIn();
-	int fgsnumber = 0;
-	if (fg) {
-	  fgsnumber=fg->flightgroup_nr++;
-	  fg->nr_ships++;
-	  fg->nr_ships_left++;
-	}
-	Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
-	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
-	ss->AddUnit (un);
-
-	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
-	//un->SetAI(new FireKeyboard ())
-	SwitchUnits (NULL,un);
-	credits = savegame->GetSavedCredits();
-	CockpitKeys::Pan(0,PRESS);
-	CockpitKeys::Inside(0,PRESS);
-	savegame->ReloadPickledData();
-	_Universe->popActiveStarSystem();
-	DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
-      }
-  }
-  if (turretcontrol.size()>_Universe->CurrentCockpit())
-  if (turretcontrol[_Universe->CurrentCockpit()]) {
-    turretcontrol[_Universe->CurrentCockpit()]=0;
-    Unit * par = GetParent();
-    if (par) {
-      static int index=0;
-      int i=0;bool tmp=false;bool tmpgot=false;
-      if (parentturret.GetUnit()==NULL) {
-	tmpgot=true;
-	un_iter ui= par->getSubUnits();
-	Unit * un;
-	while ((un=ui.current())) {
-		if (_Universe->isPlayerStarship(un)){
-			++ui;
-			continue;
-		}
-
-	  if (i++==index) {
-	    index++;
-	    if (un->name.find ("accessory")==string::npos) {
-	      tmp=true;
-	      SwitchUnitsTurret(par,un);
-	      parentturret.SetUnit(par);
-	      Unit * finalunit = GetFinalTurret(un);
-	      this->SetParent(finalunit,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	      break;
-	    }
-	  }
-	  ++ui;
-	}
-      }
-      if (tmp==false) {
-	if (tmpgot) index=0;
-	Unit * un = parentturret.GetUnit();
-	if (un&&(!_Universe->isPlayerStarship(un))) {
-	  
-	  SetParent (un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	  SwitchUnits (NULL,un);
-	  parentturret.SetUnit(NULL);
-	  un->SetTurretAI();
-	}
-      }
-    }
-  }
-  static bool autoclear=XMLSupport::parse_bool(vs_config->getVariable("AI","autodock","false"));
-  par=GetParent();
-  if (autoclear&&par) {
-    Unit *targ=par->Target();
-	if (targ) {
-    if ((UnitUtil::getSignificantDistance(targ,par)<=0)&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
-      RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
-    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
-      par->EndRequestClearance(targ);
-      targ->EndRequestClearance(par);
-	}
-	}
-  }
-  if (switchunit.size()>_Universe->CurrentCockpit())
-  if (switchunit[_Universe->CurrentCockpit()]) {
-    parentturret.SetUnit(NULL);
-
-    zoomfactor=1.5;
-    static int index=0;
-    switchunit[_Universe->CurrentCockpit()]=0;
-    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
-    Unit * un;
-    bool found=false;
-    int i=0;
-    while ((un=ui.current())) {
-      if (un->faction==this->unitfaction) {
-	
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))) {
-	  found=true;
-	  index++;
-	  Unit * k=GetParent(); 
-	  SwitchUnits (k,un);
-	  this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	  //un->SetAI(new FireKeyboard ())
-	  break;
-	}
-      }
-      ++ui;
-    }
-    if (!found)
-      index=0;
-  }
-  if (ejecting) {
-    ejecting=false;
-    Unit * un = GetParent();
-    if (un) {
-      un->EjectCargo((unsigned int)-1);
-    }
-  }else {
-  if (suicide.size()>_Universe->CurrentCockpit()) {
-    if (suicide[_Universe->CurrentCockpit()]) {
-      Unit * un=NULL;
-      if ((un = parent.GetUnit())) {
-	unsigned short armor[4];
-	un->ArmorData(armor);
-	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
-      }
-      suicide[_Universe->CurrentCockpit()]=0;
-    }
-
-  }
-  }
-
 }
+
+void SwitchUnits2( Unit *nw)
+{
+  if (nw) {
+    nw->PrimeOrders();
+    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
+    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
+
+	nw->SetTurretAI();
+	nw->DisableTurretAI();	
+	
+    static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
+    if (nw->getCockpit().length()>0&&LoadNewCockpit) {
+      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
+    }else {
+      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
+      if (DisCockpit) {
+	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
+      }
+    }
+  }
+}
+
 GameCockpit::~GameCockpit () {
   Delete();
   delete savegame;

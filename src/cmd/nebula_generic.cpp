@@ -135,13 +135,13 @@ void Nebula::LoadXML(const char * filename) {
 void Nebula::InitNebula(const char * unitfile, bool SubU, int faction,
 	       Flightgroup* fg, int fg_snumber)
 {
+  fogme=true;
   std::string path = GetSharedUnitPath() + "/";
   std::string file = string(unitfile) + "/" + unitfile + "/" + ".nebula";
   std::string fullpath = path + file;
   struct stat info;
 
   explosiontime=0;
-
   if(stat(fullpath.c_str(), &info) != 0)
     {
       fullpath = path + FactionUtil::GetFaction(faction) + "/" + file;
@@ -159,14 +159,14 @@ Nebula::Nebula(const char * unitfile, bool SubU, int faction,
 	       Flightgroup* fg, int fg_snumber) :
   Unit (unitfile,SubU,faction,string(""),fg,fg_snumber)
 {
-	this->InitNebula(unitfile, SubU, faction, fg, fg_snumber);
+
+  this->InitNebula(unitfile, SubU, faction, fg, fg_snumber);
 }
 void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)
     SetNebula(this);
   smaller->SetNebula(this);
 }
-
-void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
-  Unit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
+void Nebula::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
+  Unit::UpdatePhysics2 (trans, old_physical_state,  accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc);
 }

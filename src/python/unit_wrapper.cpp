@@ -25,6 +25,11 @@ using Orders::FireAt;
 extern void DefineOddUnitFunctions (boost::python::class_builder <UnitWrapper> &Class);
 extern void ExportUnit (boost::python::class_builder <UnitWrapper> &Class);
 #include "unit_from_to_python.h"
+#if _MSC_VER <=1200
+#else
+#include "define_odd_unit_functions.h"
+#endif
+
 namespace UniverseUtil {
 
 	UnitWrapper newGetPlayer() {
@@ -96,18 +101,19 @@ ExportUnit (Class);
 
 
 //End of Macro City 2
-#ifdef USE_BOOST_129
+//#ifdef USE_BOOST_129
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::equal,"__eq__");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notequal,"__ne__");
-#else
-  Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
-#endif
+//#else
+//  Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
+//#endif
   DefineOddUnitFunctions(Class);
 PYTHON_END_CLASS(VS,UnitWrapper)
 
 PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::current,"current");
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::advance,"advance");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::next,"next");
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::remove,"remove");
   PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::preinsert,"preinsert");
 PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)

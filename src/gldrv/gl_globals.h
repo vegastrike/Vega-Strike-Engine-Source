@@ -53,18 +53,26 @@ struct GFXStats{
 #define GL_EXT_color_subtable 1
 #endif
 
+#ifndef _WIN32
+// #define GL_GLEXT_PROTOTYPES
+
+#endif
 #if defined(_WIN32) || defined(__CYGWIN__)
 #include <windows.h>
 #include <GL/gl.h>
-
-#ifdef GL_EXT_compiled_vertex_array
-# ifndef PFNGLLOCKARRAYSEXTPROC
-#  undef GL_EXT_compiled_vertex_array
-# endif	// PFNGLLOCKARRAYSEXTPROC
-#endif // GL_EXT_compiled_vertex_array
-
-#include <GL/glext.h>
-
+#endif
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+#ifdef GL_INIT_CPP
+#define GL_GLEXT_PROTOTYPES
+#endif
+    #include <OpenGL/glext.h>
+#else
+    #include <GL/glut.h>
+#include "gl_undefined_extensions.h"
+    #include <GL/glext.h>
+#endif
+#ifdef _WIN32
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
 #define GL_TEXTURE_CUBE_MAP_ARB           0x8513
@@ -87,38 +95,12 @@ struct GFXStats{
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
 #define GL_PROXY_TEXTURE_CUBE_MAP_EXT     0x851B
 #define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT  0x851C
-
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLCOLORTABLEEXTPROC glColorTable;
-
-#elif defined(IRIX)
-#include <GL/gl.h>
-typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
-typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
-
-#else // WIN32 || IRIX
-    #if defined(__APPLE__) || defined(MACOSX)
-        #include <GLUT/glut.h>
-        typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
-        typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
-    #else
-        #include <GL/glut.h>
-    #endif
-#ifdef GL_EXT_compiled_vertex_array
-# ifndef PFNGLLOCKARRAYSEXTPROC
-//Somtimes they define GL_EXT_compiled_vertex_array without
-//Defining the PFN function pointer (dumb)
-#  undef GL_EXT_compiled_vertex_array
-# endif
 #endif
-#if defined(__APPLE__) || defined(MACOSX)
-        #include <OpenGL/glext.h>
-    #else
-        #include <GL/glext.h>
-    #endif
-#endif
+
+extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p;
+extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 
@@ -143,6 +125,7 @@ typedef struct {
   int compression;
   char wireframe;
   char smooth_shade;
+  int max_texture_dimension;
   bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;

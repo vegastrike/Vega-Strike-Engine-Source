@@ -11,7 +11,8 @@ class MyIndHalo {
   QVector loc;
   MyIndHalo (const QVector &loc, const Vector &size);
 };
-
+void DoParticles (QVector pos, float hullpercent, const Vector &velocity, float radial_size, float hullpct,int faction);
+void LaunchOneParticle (const Matrix & mat, const Vector & vel,unsigned int seed, Mesh * mesh, float hullpct,int faction);
 class HaloSystem {
  private:
   std::vector <MyIndHalo> halo;
@@ -20,6 +21,7 @@ class HaloSystem {
   std::vector <int> halo_type;
 #endif
   Mesh * mesh;
+  float activation;
  public:
   HaloSystem ();
   ~HaloSystem();
@@ -29,7 +31,8 @@ class HaloSystem {
   unsigned int numhalo () {
     return halo.size();
   }
-  unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type/*when it grows*/);
+  unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type/*when it grows*/, float activation_speed);
+  bool ShouldDraw (float speedsquared);
   void Draw (const Matrix & trans, const Vector & scale, short halo_alpha, float nebdist, float hullpercentage, const Vector & velocity, int faction);//draws smoke and damage fx
   //  unsigned int size(); {return halo.size();}
   void SetPosition (unsigned int which, const QVector &loc);

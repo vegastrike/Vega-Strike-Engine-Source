@@ -48,43 +48,56 @@
 //#include "vegastrike.h"
 
 void MessageCenter::add(string from,string to,string message,double delay){
-  gameMessage *msg=new gameMessage();
+  gameMessage msg;
   
-  msg->from=from;
-  msg->to=to;
-  msg->message=message;
+  msg.from=from;
+  msg.to=to;
+  msg.message=message;
 
 
-  msg->time=mission->getGametime()+delay;
+  msg.time=mission->getGametime()+delay;
 
   messages.push_back(msg);
 }
+void MessageCenter::clear (const std::vector<std::string> &who, const std::vector<std::string> &whoNOT) {
+  if (who.empty()&&whoNOT.empty()) {
+	  messages.clear();
+  }
+  for (int i=messages.size()-1;i>=0;i--) {
+      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i].to)==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i].to)!=who.end())) {
+		  messages.erase(messages.begin()+i);
+	  }
+  }
 
-gameMessage *MessageCenter::last(unsigned int n, const std::vector <std::string> & who, const std::vector <std::string> & whoNOT){
+}
+bool MessageCenter::last(unsigned int n, gameMessage & m, const std::vector <std::string> & who, const std::vector <std::string> & whoNOT){
   if (who.empty()&&whoNOT.empty()) {
     int size=messages.size();
     
     int index=size-1-n;
     
     if(index>=0){
-      return messages[index];
+      m=messages[index];
+	  return true;
     }
     else{
-      return NULL;
+      return false;
     }
   }else {
     int j=0;
     int i=0;
     for (i=messages.size()-1;i>=0;i--) {
-      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i]->to)==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i]->to)!=who.end())) {
-	if (j==n)
+      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i].to)==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i].to)!=who.end())) {
+	if (j==(int)n)
 	  break;
 	j++;
 	
       }
     }
     if (i<0)
-      return NULL;
-    return messages[i];
+      return false;
+
+	m= messages[i];
+    return true;
   }
 }

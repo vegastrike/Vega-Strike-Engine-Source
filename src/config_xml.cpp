@@ -187,9 +187,19 @@ void GameVegaConfig::initKeyMap(){
   key_map["cursor-home"]=WSK_HOME;
   key_map["cursor-end"]=WSK_END;
   key_map["cursor-insert"]=WSK_INSERT;
-  key_map["backspace"]=8;
+  key_map["backspace"]=
+#ifdef __APPLE__
+    127;
+#else
+    8;
+#endif
   key_map["capslock"]=WSK_CAPSLOCK;
-  key_map["cursor-delete"]=127;
+  key_map["cursor-delete"]=
+#ifdef __APPLE__
+    8;
+#else
+    127;
+#endif
   key_map["tab"]='\t';
   key_map["esc"]=27;
   key_map["break"]=WSK_BREAK;
@@ -211,6 +221,7 @@ extern void reset_time_compression(int i, KBSTATE a);
 extern void MapKey(int i, KBSTATE a);
 extern void VolUp(int i, KBSTATE a);
 extern void VolDown(int i, KBSTATE a);
+
   using namespace CockpitKeys;
 
 void GameVegaConfig::initCommandMap(){
@@ -218,6 +229,7 @@ void GameVegaConfig::initCommandMap(){
   //  I don't knwo why this gives linker errors!
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
+  command_map["Cockpit::NavScreen"]=GameCockpit::NavScreen;
   command_map["DopplerDec"]=decdop;
   command_map["VolumeInc"]=VolUp;
   command_map["VolumeDec"]=VolDown;
@@ -260,7 +272,9 @@ void GameVegaConfig::initCommandMap(){
   command_map["RollRightKey"]=FlyByKeyboard::RollRightKey ;
   command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
   command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
+  command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;  
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
+  
   command_map["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;
   command_map["CommHelpMeOutFaction"]=FireKeyboard::HelpMeOutFaction;
   command_map["JoinFlightgroup"]=FireKeyboard::JoinFg;

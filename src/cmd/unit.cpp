@@ -19,13 +19,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-
 #include "vs_path.h"
 #include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
 
-//#include "unit.h"
+
 #include "unit_factory.h"
 
 #include "gfx/sprite.h"
@@ -52,6 +51,18 @@
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/base.h"
+//#include "unit_template.h"
+//#include "gfx/animation.h"
+#include "gfx/point_to_cam.h"
+#include "unit_jump.cpp"
+#include "unit_cargo.cpp"
+#include "unit_customize.cpp"
+#include "unit_damage.cpp"
+#include "unit_physics.cpp"
+#include "unit_weapon.cpp"
+#include "unit_bsp_gfx.h"
+#include "unit_click.cpp"
+
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -102,49 +113,14 @@ void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix
 
 template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType>( int /*dummy*/ ) {
-		this->GameUnit::Init();
+		this->Unit::Init();
 }
 
 #define PARANOIA .4
 
-template <class UnitType>
-void GameUnit<UnitType>::calculate_extent(bool update_collide_queue) {  
-  int a;
-  corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
-  corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
-
-  for(a=0; a<nummesh(); a++) {
-    corner_min = corner_min.Min(meshdata[a]->corner_min());
-    corner_max = corner_max.Max(meshdata[a]->corner_max());
-  }/* have subunits now in table*/
-  un_kiter iter =SubUnits.constIterator();
-  const Unit * un;
-  while ((un = iter.current())) {
-    corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
-    corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
-    iter.advance();
-  }
-
-  if (corner_min.i==FLT_MAX||corner_max.i==-FLT_MAX||!FINITE (corner_min.i)||!FINITE(corner_max.i)) {
-    radial_size=0;
-    corner_min.Set (0,0,0);
-    corner_max.Set (0,0,0);
-  }else {
-    float tmp1 = corner_min.Magnitude();
-    float tmp2 = corner_max.Magnitude();
-    radial_size = tmp1>tmp2?tmp1:tmp2;
-    if (!SubUnit)
-      image->selectionBox = new Box(corner_min, corner_max);
-  }
-  if (!SubUnit&&update_collide_queue) {
-    UpdateCollideQueue();
-  }
-  if (isUnit()==PLANETPTR) {
-    radial_size = corner_max.i;
-  }
-}
-
 extern void UncheckUnit (Unit * un);
+
+/*
 template <class UnitType>
 void GameUnit<UnitType>::Init()
 {
@@ -159,18 +135,17 @@ void GameUnit<UnitType>::Init()
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
   SetAI (new Order());
-  /*
-  yprrestricted=0;
-  ymin = pmin = rmin = -PI;
-  ymax = pmax = rmax = PI;
-  ycur = pcur = rcur = 0;
-  */
-  static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
+  //yprrestricted=0;
+  //ymin = pmin = rmin = -PI;
+  //ymax = pmax = rmax = PI;
+  //ycur = pcur = rcur = 0;
+  //static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   //static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   //static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics", "autotracking", ".93"));// DO NOT CHANGE see unit_customize.cpp
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
 }
+*/
 
 template <class UnitType>
 Sprite * GameUnit<UnitType>::getHudImage () const{
@@ -178,33 +153,18 @@ Sprite * GameUnit<UnitType>::getHudImage () const{
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact) {
-  Init ();
-  this->faction = fact;
-  SubUnit = SubU;
-  meshdata = meshes;
-  meshes.clear();
-  meshdata.push_back(NULL);
-  calculate_extent(false);
-}
-template <class UnitType>
-vector <Mesh *> GameUnit<UnitType>::StealMeshes() {
-  vector <Mesh *>ret;
-  
-  Mesh * shield = meshdata.empty()?NULL:meshdata.back();
-  for (int i=0;i<nummesh();i++) {
-    ret.push_back (meshdata[i]);
-  }
-  meshdata.clear();
-  meshdata.push_back(shield);
-  
-  return ret;
-}
+GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
 
+}
 extern void update_ani_cache();
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
-	this->GameUnit::Init();
+GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string netxml) {
+	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
+}
+/*
+template <class UnitType>
+GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
+	this->Unit::Init();
 	update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
@@ -340,11 +300,17 @@ GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int fact
 	vsresetdir();
 
 }
+*/
+
 template <class UnitType>
 GameUnit<UnitType>::~GameUnit<UnitType>()
 {
   if (image->hudImage )
     delete image->hudImage;
+  if (image->explosion){
+    delete image->explosion;
+    image->explosion=NULL;
+  }
   if (planet)
     delete planet;
   //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
@@ -373,10 +339,10 @@ GameUnit<UnitType>::~GameUnit<UnitType>()
     AUDDeleteSound (sound->cloak);
   }
   for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount]->sound);
-    AUDDeleteSound(mounts[beamcount]->sound);
-    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
-      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+    AUDStopPlaying(mounts[beamcount].sound);
+    AUDDeleteSound(mounts[beamcount].sound);
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
   for(unsigned int meshcount = 0; meshcount < meshdata.size(); meshcount++)
     if (meshdata[meshcount])
@@ -451,11 +417,20 @@ void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   
   _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
-   
+extern bool flickerDamage (Unit * un, float hullpercent);   
 extern short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass);
 template <class UnitType>
-void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
+void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   unsigned int i;
+  Matrix mat(mato);
+  if (FaceCamera){
+	  Vector p,q,r;
+	  QVector pos (mato.p);
+	  float wid,hei;
+	  CalculateOrientation(pos,p,q,r,wid,hei,0,false,&mat);
+	  pos=mato.p;
+	  VectorAndPositionToMatrix(mat,p,q,r,pos);
+  }
   short cloak=cloaking;
   if (cloaking>cloakmin) {
     cloak = cloakVal (cloak,cloakmin,image->cloakrate, image->cloakglass);
@@ -489,15 +464,19 @@ void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
     if (cloak>=0) {
       haloalpha=((float)cloak)/32767;
     }
+    float enginescale = GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
     float cmas=computer.max_ab_speed()*computer.max_ab_speed();
     if (cmas==0)
       cmas =1;
-    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(cmas));
+    if (enginescale>cmas)
+      enginescale=cmas;
+    Vector Scale (1,1,enginescale/(cmas));
 #endif
-    halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
+    if (halos.ShouldDraw (enginescale)) 
+      halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
 }
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
@@ -505,11 +484,22 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 
   cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   Matrix *ctm;
+  Matrix invview;//not used unless FaceCamera
   Transformation * ct;
   cumulative_transformation.Compose(parent, parentMatrix);
   ctm =&cumulative_transformation_matrix;
   ct = &cumulative_transformation;
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  if (FaceCamera) {
+	  Vector p,q,r;
+	  QVector pos (ctm->p);
+	  float wid,hei;
+	  CalculateOrientation(pos,p,q,r,wid,hei,0,false,ctm);
+	  VectorAndPositionToMatrix(invview,p,q,r,ctm->p);
+//	  _Universe->AccessCamera()->GetView(invview);
+
+	  ctm = &invview;	  
+  }
   SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND
@@ -525,13 +515,25 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
+  float damagelevel=hull/maxhull;
+  unsigned char chardamage=(char)(damagelevel*255);
+  chardamage=255-chardamage;
   bool On_Screen=false;
-  if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
+  bool myparent = (this==_Universe->AccessCockpit()->GetParent());
+  if ((!(invisible&INVISUNIT))&&((!(invisible&INVISCAMERA))||(!myparent))) {
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
 	  if ((int)i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
+	  if (meshdata[i]->getBlendDst()==ONE) {
+		  if ((invisible&INVISGLOW)!=0)
+			  continue;
+
+		  if (damagelevel<.9)
+			  if (flickerDamage (this,damagelevel))
+				  continue;
+	  }
 	  QVector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position().Cast());
 #if 0
@@ -554,7 +556,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula
 	  On_Screen=true;
 	} else {
 
@@ -593,24 +595,30 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     delete tmpiter;
     **/
   }
-
-  for (i=0;(int)i<GetNumMounts();i++) {
+  int nummounts= GetNumMounts();
+  for (i=0;(int)i<nummounts;i++) {
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
-
+	Mount * mahnt = &mounts[i];
     if (draw_mounts&&On_Screen) {
-      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+		
+//      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
+      Mesh * gun = mahnt->type->gun;	  
       if (gun) {
-	Transformation mountLocation=mounts[i]->GetMountLocation();
-	mountLocation.Compose (*ct,*ctm);
-	Matrix mat;
-	mountLocation.to_matrix(mat);
-	gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
+		  mountLocation.Compose (*ct,*ctm);
+		  Matrix mat;
+		  mountLocation.to_matrix(mat);
+
+		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
+		  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
 		  
       }
-    }
-    if (mounts[i]->type->type==weapon_info::BEAM) {
-      if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->Draw(*ct,*ctm,((mounts[i]->size&weapon_info::AUTOTRACKING)&&mounts[i]->time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
+	 }
+	}
+    if (mounts[i].type->type==weapon_info::BEAM) {
+      if (mounts[i].ref.gun) {
+	mounts[i].ref.gun->Draw(*ct,*ctm,((mounts[i].size&weapon_info::AUTOTRACKING)&&mounts[i].time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
       }
     }
   }
@@ -619,15 +627,58 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     haloalpha=((float)cloak)/32767;
   }
   if (On_Screen) {
+    float enginescale = GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
-    float cmas = computer.max_ab_speed()*computer.max_ab_speed();
+    float cmas=computer.max_ab_speed()*computer.max_ab_speed();
     if (cmas==0)
-      cmas=1;
-    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/cmas);
+      cmas =1;
+    if (enginescale>cmas)
+      enginescale=cmas;
+    Vector Scale (1,1,enginescale/(cmas));
 #endif
-    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+    if (halos.ShouldDraw (enginescale)) 
+      halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+	int numm = nummesh();
+	if (damagelevel<.99&&numm>0) {
+		unsigned int switcher=(damagelevel>.8)?1:
+			(damagelevel>.6)?2:(damagelevel>.4)?3:(damagelevel>.2)?4:5;
+		const unsigned int thus=(unsigned int)this;
+		Mesh * tmp;
+		switch (switcher) {
+		case 5:
+			tmp=meshdata[(thus+5)%(numm)];
+			if (tmp)
+				if (tmp->getBlendDst()==ONE)
+					tmp=meshdata[(thus+5+17)%(numm)];
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+165,tmp,damagelevel,faction);
+		case 4:
+			tmp=meshdata[(thus+47)%(numm)];
+			if (tmp)
+				if (tmp->getBlendDst()==ONE)
+					tmp=meshdata[(thus+47+17)%(numm)];			
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+47,tmp,damagelevel,faction);
+		case 3:
+			tmp=meshdata[(thus+61)%(numm)];
+			if (tmp)
+				if (tmp->getBlendDst()==ONE)
+					tmp=meshdata[(thus+47+61)%(numm)];						
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+61,tmp,damagelevel,faction);
+		case 2:
+			tmp=meshdata[(thus+2)%(numm)];
+			if (tmp)
+				if (tmp->getBlendDst()==ONE)
+					tmp=meshdata[(thus+1)%(numm)];						
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+65537,tmp,damagelevel,faction);			
+		default:
+			tmp=meshdata[(thus)%(numm)];
+			if (tmp)
+				if (tmp->getBlendDst()==ONE)
+					tmp=meshdata[(thus+129)%(numm)];
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+257,tmp,damagelevel,faction);
+		}
+	}
   }
 }
 using Orders::FireAt;

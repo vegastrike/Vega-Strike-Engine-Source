@@ -16,13 +16,70 @@
 #include "xml_serializer.h"
 #include "vs_path.h"
 #include "gfx/cockpit_generic.h"
-#include "unit_bsp.h"
+//#include "unit_bsp.h"
 #include "unit_collide.h"
 #include "gfx/bsp.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
+#include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
+
+string KillQuadZeros(string inp) {
+	int text = 0;
+	while ((text = inp.find (".000000",text))!=string::npos) {
+		inp = inp.substr(0,text)+inp.substr(text+7);
+	}
+	return inp;
+}
+string MakeUnitXMLPretty (string str, Unit * un) {
+	string writestr;
+		
+	if (un) {
+		writestr+= "Name: "+un->name;
+		writestr+= " " + un->getFullname();
+		Flightgroup *fg = un->getFlightgroup();
+		if (fg) {
+			writestr+= " Designation " +fg->name+ " "+ XMLSupport::tostring (un->getFgSubnumber());
+		}
+		writestr+="\n";
+	}
+	static std::set <string> lookfor;
+	if (lookfor.empty()) {
+		lookfor.insert ("Shie");
+		lookfor.insert ("Armo");
+//		lookfor.insert ("Hull");
+		lookfor.insert ("Reac");
+		lookfor.insert ("Moun");
+		lookfor.insert ("Comp");
+//		lookfor.insert ("Desc");
+		lookfor.insert ("Engi");
+		lookfor.insert ("Mane");
+		lookfor.insert ("Jump");
+//		lookfor.insert ("Defe");
+		lookfor.insert ("Stat");
+		lookfor.insert ("Engi");
+//		lookfor.insert ("Hold");
+		lookfor.insert ("Rada");
+	}
+	int foundpos;
+		while ((foundpos = str.find ("<"))!=string::npos) {
+			if (str.size()<=foundpos+1)
+				break;
+			str = str.substr (foundpos+1);
+			if (str.size()>3) {
+				char mycomp [5]={str[0],str[1],str[2],str[3],0};
+				if (lookfor.find (mycomp)!=lookfor.end()) {
+					int newline = str.find (">");
+					if (newline>0)
+						if (str[newline-1]=='/')
+							newline-=1;
+					writestr+=KillQuadZeros(str.substr (0,newline)+"\n");
+				}
+			}
+		}
+		return writestr;
+}
 
 int GetModeFromName (const char * input_buffer) {
       if (strlen (input_buffer)>3) {
@@ -74,6 +131,7 @@ namespace UnitXML {
       GREEN,
       BLUE,
       ALPHA,
+      ACTIVATIONSPEED,
       MOUNTSIZE,
       WEAPON,
       DEFENSE,
@@ -175,7 +233,13 @@ namespace UnitXML {
       MISSIONCARGO,
       MAXIMUM,
       LIGHTTYPE,
-	  COMBATROLE
+      COMBATROLE,
+      RECURSESUBUNITCOLLISION,
+      WARPENERGY,
+	  FACECAMERA,
+	  XYSCALE,
+	  INSYSENERGY,
+	  ZSCALE
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -215,22 +279,25 @@ namespace UnitXML {
     EnumMap::Pair ("Import",IMPORT),
     EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE),
     EnumMap::Pair ("Upgrade",UPGRADE      ),
-	EnumMap::Pair ("Description",DESCRIPTION)
-
+    EnumMap::Pair ("Description",DESCRIPTION)
+    
   };
-  const EnumMap::Pair attribute_names[95] = {
+  const EnumMap::Pair attribute_names[102] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
     EnumMap::Pair ("z", Z), 
+    EnumMap::Pair ("xyscale", XYSCALE), 
+    EnumMap::Pair ("zscale", ZSCALE), 
     EnumMap::Pair ("ri", RI), 
     EnumMap::Pair ("rj", RJ), 
     EnumMap::Pair ("rk", RK), 
     EnumMap::Pair ("qi", QI),     
     EnumMap::Pair ("qj", QJ),     
     EnumMap::Pair ("qk", QK),
+    EnumMap::Pair ("activationSpeed",ACTIVATIONSPEED),
     EnumMap::Pair ("red",RED),
     EnumMap::Pair ("green",GREEN),
     EnumMap::Pair ("blue",BLUE),    
@@ -245,6 +312,8 @@ namespace UnitXML {
     EnumMap::Pair ("top", TOP),
     EnumMap::Pair ("bottom", BOTTOM),
     EnumMap::Pair ("recharge", RECHARGE),
+    EnumMap::Pair ("warpenergy",WARPENERGY),
+    EnumMap::Pair ("insysenergy",INSYSENERGY),	
     EnumMap::Pair ("leak", LEAK),
     EnumMap::Pair ("strength", STRENGTH),
     EnumMap::Pair ("mass", MASS),
@@ -313,11 +382,44 @@ namespace UnitXML {
     EnumMap::Pair ("MissionCargo",MISSIONCARGO),
     EnumMap::Pair ("Maximum",MAXIMUM),
     EnumMap::Pair ("LightType",LIGHTTYPE),
-	EnumMap::Pair ("CombatRole",COMBATROLE)
+    EnumMap::Pair ("CombatRole",COMBATROLE),
+    EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION),
+    EnumMap::Pair ("FaceCamera",FACECAMERA)	
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 95);
+  const EnumMap attribute_map(attribute_names, 102);
+}
+
+// USED TO BE IN UNIT_FUNCTIONS*.CPP BUT NOW ON BOTH CLIENT AND SERVER SIDE
+std::vector <Mesh *> MakeMesh(unsigned int mysize) {
+  std::vector <Mesh *> temp;
+  for (unsigned int i=0;i<mysize;i++) {
+    temp.push_back(NULL);
+  }
+  return temp;
+}
+
+void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->shieldmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+}
+void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->rapidmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+}
+void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->bspmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+}
+void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
+}
+
+Mount * createMount(const std::string& name, short int ammo, short int volume, float xyscale, float zscale)
+{
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale);
 }
 
 using XMLSupport::EnumMap;
@@ -333,6 +435,7 @@ using namespace UnitXML;
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
   static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   Cargo carg;
+  float act_speed=0;
   short volume=-1;
   string filename;
   QVector P;
@@ -340,6 +443,8 @@ using namespace UnitXML;
   QVector Q;
   QVector R;
   QVector pos;
+  float xyscale=-1;
+  float zscale=-1;
   bool tempbool;
   float fbrltb[6];
   AttributeList::const_iterator iter;
@@ -654,6 +759,9 @@ using namespace UnitXML;
 	ADDDEFAULT;
 	filename = (*iter).value;
 	break;
+      case ACTIVATIONSPEED:
+	act_speed=  parse_float ((*iter).value);
+	break;
       case MOUNTSIZE:
 	ADDDEFAULT;
 	P.i=xml->unitscale*parse_float((*iter).value);
@@ -662,7 +770,7 @@ using namespace UnitXML;
 	break;
       }
     }
-	addHalo( filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type);
+	addHalo( filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type,act_speed);
     break;
   case MOUNT:
     ADDTAG;
@@ -678,6 +786,12 @@ using namespace UnitXML;
       case VOLUME:
 	volume=XMLSupport::parse_int ((*iter).value);
 	break;
+	  case XYSCALE:
+		  xyscale=XMLSupport::parse_float((*iter).value);
+		  break;
+	  case ZSCALE:
+		  zscale=XMLSupport::parse_float((*iter).value);
+		  break;
       case WEAPON:
 	filename = (*iter).value;
 	break;
@@ -731,8 +845,9 @@ using namespace UnitXML;
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume));
-    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()),pos));
+    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale));
+    xml->mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
+	xml->mountz[indx]->SetMountPosition(pos.Cast());
     //xml->mountz[indx]->Activate();
     if (tempbool)
       xml->mountz[indx]->size=mntsiz;
@@ -839,6 +954,9 @@ using namespace UnitXML;
 	  }
 	  break;
   case JUMP:
+  {
+	  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+	  bool foundinsysenergy=false;
     //serialization covered in LoadXML
     assert (xml->unitlevel==1);
     xml->unitlevel++;
@@ -853,6 +971,13 @@ using namespace UnitXML;
       case JUMPENERGY:
 	//serialization covered in LoadXML
 	jump.energy = CLAMP_SHORT(parse_float((*iter).value));
+	if (!foundinsysenergy)
+		jump.insysenergy=jump.energy*insys_jump_cost;
+	break;
+      case INSYSENERGY:
+	//serialization covered in LoadXML
+	jump.insysenergy = CLAMP_SHORT(parse_float((*iter).value));
+	foundinsysenergy=true;
 	break;
   case DAMAGE:
 	  jump.damage=CLAMP_SHORT (parse_float((*iter).value));
@@ -873,6 +998,7 @@ using namespace UnitXML;
 	break;
       }
     }
+  }
     break;
   case SOUND:
     ADDTAG;
@@ -1128,7 +1254,7 @@ using namespace UnitXML;
 	mass = parse_float((*iter).value);
 	break;
       case MOMENTOFINERTIA:
-	MomentOfInertia=parse_float((*iter).value);
+		  MomentOfInertia=parse_float((*iter).value);
 	break;
       case FUEL:
 	fuel=parse_float((*iter).value);
@@ -1228,8 +1354,8 @@ using namespace UnitXML;
       }
     }
     image->unitwriter->AddTag ("Radar");    
-    ADDELEMNAME("itts",charStarHandler,XMLType(&computer.itts));    
-   ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
+    ADDELEMNAME("itts",boolStarHandler,XMLType(&computer.itts));    
+   ADDELEMNAME("color",boolStarHandler,XMLType(&computer.radar.color));    
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
     ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));   
@@ -1274,6 +1400,9 @@ using namespace UnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case RECHARGE:
 	recharge=parse_float((*iter).value);
+	break;
+      case WARPENERGY:
+	maxwarpenergy=CLAMP_SHORT(parse_float ((*iter).value));
 	break;
       case LIMIT:
 	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
@@ -1324,6 +1453,14 @@ using namespace UnitXML;
       xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case RECURSESUBUNITCOLLISION:
+	ADDDEFAULT;
+	RecurseIntoSubUnitsOnCollision= XMLSupport::parse_bool (iter->value);
+	break;
+	  case FACECAMERA:
+		  ADDDEFAULT;
+		  FaceCamera=XMLSupport::parse_bool(iter->value);
+		  break;
       case COMBATROLE:
 		  ADDDEFAULT;
 		  xml->calculated_role=true;
@@ -1487,7 +1624,7 @@ unsigned char Unit::RecomputeRole() {
 	//combat_role = 0;
 	unsigned int mount_bitmask;
 	for (unsigned int i=0;i<mounts.size();i++) {
-		mount_bitmask |=mounts[i]->type->role_bits;
+		mount_bitmask |=mounts[i].type->role_bits;
 	}
 
 	return combatRole();
@@ -1499,16 +1636,27 @@ void Unit::WriteUnit (const char * modifications) {
     (*ui)->WriteUnit(modifications);
   } 
 }
+string Unit::WriteUnitString () {
+  string ret="";
+  if (image->unitwriter)
+    ret = image->unitwriter->WriteString();
+  for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
+    ret = ret + ((*ui)->WriteUnitString());
+  }
+  return ret;
+}
+
 extern std::string GetReadPlayerSaveGame (int);
 
-void Unit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
+void Unit::LoadXML(const char *filename, const char * modifications, string xmlbuffer)
 {
   shield.number=0;
+  RecurseIntoSubUnitsOnCollision=!isSubUnit();
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
   std::string collideTreeHash = GetHashName(string(modifications)+"#"+string(filename));
-  if( buflength==0 || xmlbuffer==NULL)
+  if( xmlbuffer=="")
   {
 	  if (modifications) {
 		if (strlen(modifications)!=0) {
@@ -1520,21 +1668,16 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 		  if( Network==NULL && !SERVER)
 		  {
 			  if (nonautosave.empty()) {
+				  vsmkdir (modifications);
 				vschdir (modifications);
 			  }else {
+				  vsmkdir (nonautosave);
+					  
 				vschdir (nonautosave.c_str());
+				
 			  }
 		  }
-		  // If in network mode on client side we expect saves to be in ./save
-		  else if( !SERVER)
-			  vschdir( "save");
-		  // With account server we expect them in the ./accounts dir
-		  else if( SERVER==2)
-			  vschdir( "accounts");
-		  // With account server we expect them in the ./accountstmp dir
-		  else if( SERVER==1)
-			  vschdir( "accountstmp");
-
+		  vschdir( "save");
 
 		  inFile=NULL;
 		  if (filename[0])
@@ -1556,13 +1699,14 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
-  string * myhudim = new string("");
+  string * myhudim = &image->unitwriter->randomdata[0];
   float * myscale=&image->unitscale;
   image->unitwriter->AddElement("scale",floatStarHandler,XMLType(myscale));
   {
     image->unitwriter->AddTag ("Jump");
     image->unitwriter->AddElement("missing",lessNeg1Handler,XMLType(&jump.drive));
     image->unitwriter->AddElement("jumpenergy",shortStarHandler,XMLType(&jump.energy));
+    image->unitwriter->AddElement("insysenergy",shortStarHandler,XMLType(&jump.insysenergy));
     image->unitwriter->AddElement("delay",ucharStarHandler,XMLType(&jump.delay));
     image->unitwriter->AddElement("damage",ucharStarHandler,XMLType(&jump.damage));
     image->unitwriter->AddElement("wormhole",ucharStarHandler,XMLType(&image->forcejump));
@@ -1606,6 +1750,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
       image->unitwriter->AddElement("front",shieldSerializer,XMLType((void *)&shield));
       image->unitwriter->AddElement("recharge",floatStarHandler,XMLType(&shield.recharge));
       image->unitwriter->AddElement("leak",charStarHandler,XMLType(&shield.leak));
+
       image->unitwriter->EndTag ("Shields");      
     }
     {
@@ -1623,6 +1768,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
     image->unitwriter->AddTag ("Reactor");
     image->unitwriter->AddElement ("recharge",floatStarHandler, XMLType (&recharge) );
     image->unitwriter->AddElement ("limit",ushortStarHandler, XMLType (&maxenergy) );
+    image->unitwriter->AddElement("warpenergy",ushortStarHandler, XMLType (&maxwarpenergy) );
     image->unitwriter->EndTag ("Reactor");
     
     image->unitwriter->EndTag ("Energy");      
@@ -1673,9 +1819,9 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
   
-  if( buflength!=0 && xmlbuffer!=NULL)
+  if( xmlbuffer!="")
   {
-	XML_Parse (parser,xmlbuffer,buflength,1);
+	XML_Parse (parser,xmlbuffer.c_str(),xmlbuffer.length(),1);
   }
   else
   {
@@ -1703,13 +1849,16 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+  warpenergy = maxwarpenergy;
+  if (jump.energy>warpenergy)
+    warpenergy=jump.energy;
   *myhudim =xml->hudimage;
   unsigned int a;
   if (xml->mountz.size())
   {
 	  // DO not destroy anymore, just affect address
 	  for( a=0; a<xml->mountz.size(); a++)
-		mounts.push_back( xml->mountz[a]);
+		mounts.push_back( *xml->mountz[a]);
     //mounts[a]=*xml->mountz[a];
     //delete xml->mountz[a];			//do it stealthily... no cons/destructor
   }
@@ -1719,14 +1868,14 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
     if (a%2==parity) {
       int b=a;
       if(a % 4 == 2 && (int) a < (GetNumMounts()-1)) 
-	if (mounts[a]->type->type != weapon_info::PROJECTILE&&mounts[a+1]->type->type != weapon_info::PROJECTILE)
+	if (mounts[a].type->type != weapon_info::PROJECTILE&&mounts[a+1].type->type != weapon_info::PROJECTILE)
 	  b=a+1;
-      mounts[b]->sound = AUDCreateSound (mounts[b]->type->sound,mounts[b]->type->type!=weapon_info::PROJECTILE);
-    } else if ((!half_sounds)||mounts[a]->type->type == weapon_info::PROJECTILE) {
-      mounts[a]->sound = AUDCreateSound (mounts[a]->type->sound,mounts[a]->type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+      mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
+      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
     }
     if (a>0) {
-      if (mounts[a]->sound==mounts[a-1]->sound&&mounts[a]->sound!=-1) {
+      if (mounts[a].sound==mounts[a-1].sound&&mounts[a].sound!=-1) {
 	printf ("error");
       }
     }
@@ -1779,9 +1928,8 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 	colShield=NULL;
     }
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
-    
-    meshdata.back() = tmp;
+    meshdata.back()= new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
+    tmp=meshdata.back();
     bspShield=NULL;
     colShield=NULL;
   }

@@ -1,3 +1,9 @@
+#if defined(_WIN32) && _MSC_VER > 1300 
+
+#define __restrict
+
+#endif
+
 #include <string.h>
 
 #include <stdlib.h>

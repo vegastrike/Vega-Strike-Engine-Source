@@ -1,4 +1,4 @@
-
+#include <set>
 #include "firekeyboard.h"
 #include "flybywire.h"
 #include "navigation.h"
@@ -17,8 +17,10 @@
 #include "gfx/car_assist.h"
 #include "cmd/unit_util.h"
 #include <algorithm>
-
-
+#include "fire.h"
+#include "docking.h"
+//for getatmospheric
+#include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
@@ -30,7 +32,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    toggleglow=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=
 		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
 		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
@@ -75,8 +77,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE targetskey;
  KBSTATE targetukey;
  KBSTATE turretaikey;
-
-  KBSTATE commKeys[NUMCOMMKEYS];
+ KBSTATE toggleglow;
+ KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
  KBSTATE threatturrettargetkey;
  KBSTATE pickturrettargetkey;
@@ -95,7 +97,11 @@ FIREKEYBOARDTYPE &FireKeyboard::f() {
 FIREKEYBOARDTYPE &FireKeyboard::j() {
   return vectorOfKeyboardInput[whichjoystick];
 }
-
+void FireKeyboard::ToggleGlow (int,KBSTATE k) {
+	if (k==PRESS) {
+		g().toggleglow=PRESS;
+	}
+}
 void FireKeyboard::PressComm1Key (int, KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[0]=PRESS;
@@ -344,7 +350,7 @@ void FireKeyboard::HeadlightKey(int, KBSTATE k) {
     }
 }
 #endif
-extern void DoSpeech (Unit * un, const string &speech);
+extern void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
 extern void LeadMe (Unit * un, string directive, string speech);
 
 static void LeadMe (string directive, string speech) {
@@ -357,7 +363,7 @@ void HelpOut (bool crit, std::string conv) {
   Unit * un = _Universe->AccessCockpit()->GetParent();
   if (un) {
     Unit * par=NULL;
-    DoSpeech(  un,conv);
+    DoSpeech(  un,NULL, FSM::Node(conv,.1));
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
@@ -370,7 +376,9 @@ void HelpOut (bool crit, std::string conv) {
 	} else {
 	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	}
-	un->getAIState()->Communicate (c);
+	Order * o = un->getAIState();
+	if (o)
+		o->Communicate (c);
       }
     }
   }
@@ -725,7 +733,7 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	int cur=0;
 	while (1) {
 		while (veciter!=vec.end()) {
-			if (((*veciter)!=me)&&typeofunit(me,(*veciter))) {
+			if (((*veciter)!=me)&&((*veciter)->GetHull()>=0)&&typeofunit(me,(*veciter))) {
 				me->Target(*veciter);
 				if ((*veciter)!=NULL) {
 					if (reverse) {
@@ -792,8 +800,9 @@ FireKeyboard::~FireKeyboard () {
 }
 bool FireKeyboard::ShouldFire(Unit * targ) {
   float dist=FLT_MAX;
+  float mrange;
   if (gunspeed==.0001) {
-    parent->getAverageGunSpeed (gunspeed,gunrange);
+    parent->getAverageGunSpeed (gunspeed,gunrange,mrange);
   }
   float angle = parent->cosAngleTo (targ, dist,gunspeed,gunrange);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
@@ -816,25 +825,6 @@ static bool UnDockNow (Unit* me, Unit * targ) {
   }
   return ret;
 }
-static Unit * getAtmospheric (Unit * targ) {
-  if (targ) {
-    Unit * un;
-    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-	 (un=*i)!=NULL;
-	 ++i) {
-      if (un->isUnit()==PLANETPTR) {
-	if ((targ->Position()-un->Position()).Magnitude()<targ->rSize()*.5) {
-	  if (!(((GamePlanet *)un)->isAtmospheric())) {
-	    return un;
-	  }
-	}
-      }
-    }
-  }
-  return NULL;
-  
-}
-
 //#include <cmd/music.h>
 //extern Music *muzak;
 
@@ -898,30 +888,13 @@ static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
 }
-bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
-	if (!targ->DockingPortLocations().size())
-		return false;
-	if (targ->isUnit()==PLANETPTR) {
-		if (((GamePlanet * )targ)->isAtmospheric()&&NoDockWithClear()) {
-			targ = getAtmospheric (targ);
-			if (!targ) {
-				return false;
-			}
-			parent->Target(targ);
-		}
-	}
-	CommunicationMessage c(parent,targ,NULL,sex);
-	c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
-	targ->getAIState()->Communicate (c);
-	return true;
-}
 
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
   bool nodockwithclear=NoDockWithClear();
   bool wasdock=vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
      if (targ->isUnit()==PLANETPTR) {
-      if (((GamePlanet * )targ)->isAtmospheric()&&nodockwithclear) {
+      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
 	targ = getAtmospheric (targ);
 	if (!targ) {
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
@@ -993,13 +966,13 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     }
     resp.push_back(c);
     AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-    DoSpeech (un,c.getCurrentState()->message);
+    DoSpeech (un,parent,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->SetCommAnimation (c.ani);
     }
     refresh_target=true;
   }else {
-    DoSpeech (NULL,c.getCurrentState()->message);
+    DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       static Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
@@ -1019,9 +992,86 @@ static CommunicationMessage * GetTargetMessageQueue (Unit * targ,std::list <Comm
       }
       return mymsg;
 }
+extern std::set <Unit *> arrested_list_do_not_dereference;
 
+void Arrested (Unit * parent) {
+	std::string fac = UniverseUtil::GetGalaxyFaction ( UniverseUtil::getSystemFile());
+	int own=FactionUtil::GetFactionIndex(fac);
+	static string po = vs_config->getVariable("galaxy","police_faction","homeland-security");
+	int police= FactionUtil::GetFactionIndex(po);
+	int police2= FactionUtil::GetFactionIndex(po+"_"+fac);
+	float ownrel=FactionUtil::GetIntRelation(own,parent->faction);
+	bool attack = ownrel<0;
+	if (!attack) {
+		Unit * contra =FactionUtil::GetContraband(own);
+		if (contra) {
+			for (unsigned int i=0;(!attack)&&i<parent->numCargo();++i) {
+				Cargo * ci =&parent->GetCargo(i);
+					
+				for (unsigned int j=0;j<contra->numCargo();++j) {
+					Cargo * cj =&contra->GetCargo(j);
+					if (ci->content==cj->content) {
+						attack=true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	if (!attack) {
+		Unit * un;
+		for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+			 (un=*i)!=NULL;
+			 ++i) {
+			if (un->faction==own||un->faction==police||un->faction==police2) {
+				if (un->Target()==parent||un->getRelation(parent)<0) {
+					FactionUtil::AdjustRelation(fac,FactionUtil::GetFactionName(parent->faction),-ownrel-.1,1);
+					attack=true;
+					break;
+				}
+			}
+		}
+	}
+	if (attack) {
+	static std::string prison_system = vs_config->getVariable ("galaxy","PrisonSystem","enigma_sector/prison");
+	std::string psys = prison_system+"_"+fac;
+	if (UnitUtil::getUnitSystemFile(parent)!=psys) {
+		UnitUtil::JumpTo(parent,psys);
+		UniverseUtil::IOmessage(0,"game","all",parent->name+", you are under arrest!  You will be taken to the prison system and will be tried for your crimes.");
+	}else {
+		Unit * un;
+		Unit * owner=NULL;
+		Unit * base=NULL;
+		for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();(un = *i)!=NULL;++i) {
+			if (owner==NULL &&un->getFlightgroup() && un->faction==own)
+				if (UnitUtil::isSignificant(un)&&(!un->isJumppoint())) {
+					owner = un;
+				}
+			if (UnitUtil::isSignificant(un)&&(!un->isJumppoint())) {
+				base=un;
+			}
+		}
+		
+		
+		if (owner ==NULL)
+			owner = base;
+		if (owner) {
+			Order * tmp =parent->aistate;
+			parent->aistate=NULL;
+			parent->PrimeOrders(new Orders::DockingOps (owner,tmp));
+			arrested_list_do_not_dereference.insert (parent);
+			for (int i = parent->numCargo()-1;i>=0;--i) {
+				parent->RemoveCargo (i,parent->GetCargo((unsigned int)i).quantity,true);
+			}
+			UniverseUtil::IOmessage(0,"game","all",parent->name+", your cargo has been confiscated and scanned. Here your ship will be kept until you complete your reintegration into society through our reprogramming pod(tm) system.");
+			FactionUtil::AdjustIntRelation(own,parent->faction,-FactionUtil::GetIntRelation(own,parent->faction),1);
+		}
+	}
+	}
+}
 
 void FireKeyboard::Execute () {
+	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
     vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
   }
@@ -1030,14 +1080,22 @@ void FireKeyboard::Execute () {
   if ((targ = parent->Target())) {
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
+    if (targ->GetHull()<0) {
+      ChooseTargets(parent,TargAll,false);
+      refresh_target=true;
+    }
   } else {
     ChooseTargets(parent,TargAll,false);
     refresh_target=true;
   }
-  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN) 
-    parent->Fire(false);
+  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
+    if (!_Universe->AccessCockpit()->CanDrawNavSystem())
+      parent->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+  }
   if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
-    parent->Fire(true);
+    if (!_Universe->AccessCockpit()->CanDrawNavSystem())
+      //      UnitUtil::performDockingOperations(parent,parent->Target());
+      parent->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
     if (f().missilekey==PRESS)
       f().missilekey = DOWN;
     if (j().jmissilekey==PRESS)
@@ -1211,6 +1269,12 @@ void FireKeyboard::Execute () {
 		}
 		weapsound.playsound();
   }
+  if (f().toggleglow == PRESS) {
+	  f().toggleglow=DOWN;
+	 static bool isvis=true;
+	  isvis=!isvis;
+	  parent->SetGlowVisible (isvis);
+  }
   if (f().misk==PRESS) {
     f().misk=DOWN;
     parent->ToggleWeapon(true);
@@ -1230,20 +1294,24 @@ void FireKeyboard::Execute () {
 
 	if (mymsg==NULL) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
-	  DoSpeech (parent,c.getCurrentState()->message);
+	  DoSpeech (targ,targ,*c.getCurrentState());
 	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	  }
-	  targ->getAIState ()->Communicate (c);
+	  Order * o = targ->getAIState();
+	  if (o)
+		  o->Communicate (c);
 	}else {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
-	    DoSpeech (parent,c.getCurrentState()->message);
+	    DoSpeech (targ,targ,*c.getCurrentState());
 	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	    }
-	    targ->getAIState ()->Communicate (c);
+		Order * oo = targ->getAIState();
+		if (oo)
+			oo->Communicate (c);
 	  }
 	}
       }
@@ -1279,5 +1347,8 @@ void FireKeyboard::Execute () {
     if ((cp=_Universe->isPlayerStarship (parent))) {
       cp->Eject();
     }
+  }
+  if (parent->EnergyRechargeData()==0) {
+	  Arrested(parent);
   }
 }

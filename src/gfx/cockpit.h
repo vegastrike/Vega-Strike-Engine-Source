@@ -4,6 +4,7 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include <vector>
+#include <list>
 using namespace XMLSupport;
 class TextPlane;
 class Sprite;
@@ -11,6 +12,7 @@ class Gauge;
 class Unit;
 #include "vdu.h"
 #include "camera.h"
+#include "nav/navscreen.h"
 #define NUM_CAM		12
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
@@ -76,6 +78,7 @@ private:
   GFXColor relationToColor (float relation);
   // gets the color by looking closer at the unit
   GFXColor unitToColor (Unit *un,Unit *target);
+  void drawUnToTarget(Unit* a,Unit * b, float xcent, float ycent, float xsize, float ysize);
   // the style of the radar (WC|Elite)
   string radar_type;
   void LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h);
@@ -93,13 +96,17 @@ private:
   void DrawTargetBox ();
   ///draws the target box around all units
   void DrawTargetBoxes ();
+  ///draws a target cross around all units targeted by your turrets // ** jay
+  void DrawTurretTargetBoxes ();
   ///Draws all teh blips on the radar.
   void DrawBlips(Unit * un);
   ///Draws all teh blips on the radar in Elite-style
   void DrawEliteBlips(Unit * un);
   ///Draws gauges
   void DrawGauges(Unit * un);
+  NavigationSystem ThisNav;
  public:
+  static void NavScreen (int, KBSTATE k); // scheherazade
   static string getsoundending(int which=0);
   static string getsoundfile(string filename);
   void InitStatic ();
@@ -115,7 +122,8 @@ private:
   void Init (const char * file);
   ///Draws Cockpit then restores viewport
   void Draw();
-  void Update();//respawns and the like.
+  //void Update();//respawns and the like.
+  void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   void SetupViewPort (bool clip=true);
   void VDUSwitch (int vdunum);
@@ -140,6 +148,9 @@ private:
   void SetViewport() {
     cam[currentcamera].UpdateGFX();
   }
+  virtual bool SetDrawNavSystem(bool);
+  virtual bool CanDrawNavSystem();
+  virtual bool DrawNavSystem();
 
 };
 #endif

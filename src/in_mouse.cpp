@@ -127,6 +127,11 @@ void mouseClick( int button, int state, int x, int y ) {
 }
 */
 int lookupMouseButton(int b) {
+	static int adj=0;
+	if (b+adj<WS_LEFT_BUTTON) {
+		adj=WS_LEFT_BUTTON-b;
+	}
+	b+=adj;
   switch (b) {
   case WS_LEFT_BUTTON:
     return 0;

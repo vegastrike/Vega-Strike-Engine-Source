@@ -48,8 +48,9 @@ void MissileEffect::ApplyDamage (Unit * smaller) {
   }
 }
 
-float Missile::ExplosionRadius() {
-  return radial_effect;
+float Missile::ExplosionRadius() {  
+	static float missile_multiplier = XMLSupport::parse_float (vs_config->getVariable ("graphics","missile_explosion_radius_mult","1"));   
+	return radial_effect*(missile_multiplier); 
 }
 
 void StarSystem::AddMissileToQueue(MissileEffect * me) {
@@ -100,7 +101,7 @@ Unit * getNearestTarget (Unit *me) {
        }
     return targ;
 }
-void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
+void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
     Unit * targ;
 	if ((targ=(Unit::Target()))) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
@@ -117,7 +118,7 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat
     if (retarget&&targ==NULL) {
       Target (getNearestTarget (this));
     }
-    Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
+	Unit::UpdatePhysics2 (trans, old_physical_state, accel, difficulty,transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
 	float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
     if (NULL!=targ) {

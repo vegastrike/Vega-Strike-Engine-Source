@@ -60,6 +60,7 @@ class UnitCollection {
     ///returns the unit pos is pointing at or NULL if all dead or end of list.
     Unit *current(){return pos->next->unit;}
     ///advances the counter
+    Unit * next() {advance();return current();}	  
     void advance() {pos = pos->next;GetNextValidUnit();}
     inline Unit * operator ++(int) {Unit * un = current();advance();return un;}
     inline Unit * operator ++() {advance();return current();}
@@ -74,6 +75,7 @@ class UnitCollection {
     ConstIterator(const UnitListNode *start):pos(start) {
       GetNextValidUnit();
     }
+    const Unit * next() {advance();return current();}	  	  
     const Unit *current() const  {return pos->next->unit;}
     void advance() {pos = pos->next;GetNextValidUnit();}
     inline const Unit * operator ++() {advance();return current();}
@@ -92,6 +94,7 @@ class UnitCollection {
     inline const Unit * operator ++() {advance();return current();}
     inline const Unit * operator ++(int) {const Unit * un=current();advance();return un;}
     inline const Unit * operator * ()const {return current();}
+    const Unit * next() {advance();return current();}
   };
   class FastIterator {
     private:
@@ -111,7 +114,7 @@ class UnitCollection {
     inline Unit * operator ++(int) {Unit * un = current();advance();return un;}
     inline Unit * operator ++() {advance();return current();}
     inline Unit * operator * () {return current();}
-
+    Unit * next() {advance();return current();}	  	  
   };
   static void FreeUnusedNodes();//not allowed to happen if any lists are traversing    
   static void * PushUnusedNode(UnitListNode * node);
@@ -124,6 +127,10 @@ class UnitCollection {
   ConstIterator constIterator() const {return ConstIterator (&u);}
   FastIterator fastIterator() {return FastIterator (&u);}
   ConstFastIterator constFastIterator () const{return ConstFastIterator(&u);}
+  void insert_unique(Unit *un) {
+    for (UnitListNode * i=u.next;i!=NULL;i=i->next) if (i->unit==un) return;
+    prepend (un);
+  }
   void prepend(Unit *unit) {u.next= new UnitListNode (unit,u.next);}
   void prepend(UnitIterator *iter);
   void append(Unit *unit);

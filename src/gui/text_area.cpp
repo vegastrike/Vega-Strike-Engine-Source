@@ -199,7 +199,8 @@ void TextArea::Refresh(void) {
 
 //	if (cur_highlighted > 0 && cur_highlighted != (cur_selected - top_item_number)) { HighlightCount(cur_highlighted, 1); }
 	if (cur_highlighted > 0) { HighlightCount(cur_highlighted, 1); }
-	if (cur_selected > 0) { HighlightCount(cur_selected - top_item_number, 2); }
+//	if (cur_selected > 0) { HighlightCount(cur_selected - top_item_number, 2); }
+	if (cur_selected > 0) { HighlightCount(cur_selected, 2); }
 
 	// Displays a transparent red box in the area where text can be displayed
 	//ShowColor(xcoord[5], ycoord[5], width[5], height[5], 1, 0, 0, 0.5);
