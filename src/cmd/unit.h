@@ -34,13 +34,9 @@ struct GFXColor;
 using std::string;
 #include "gfxlib.h"
 
-class CargoColor {
-public:
+struct CargoColor {
   Cargo cargo;
   GFXColor color;
-  CargoColor () 
-    : cargo(), color(1,1,1,1) {
-  }
 };//A stupid struct that is only for grouping 2 different types of variables together in one return value
 
 
@@ -105,8 +101,8 @@ public:
   void EjectCargo (unsigned int index);
   bool CanAddCargo (const Cargo &carg) const;
   ///The faction of this unit
-  vector <class CargoColor>& FilterDowngradeList (vector <class CargoColor> & mylist,bool downgrade=true);
-  vector <class CargoColor>& FilterUpgradeList (vector <class CargoColor> & mylist);
+  vector <struct CargoColor>& FilterDowngradeList (vector <struct CargoColor> & mylist,bool downgrade=true);
+  vector <struct CargoColor>& FilterUpgradeList (vector <struct CargoColor> & mylist);
 
 /***************************************************************************************/
 /**** DOCKING STUFF                                                                 ****/
