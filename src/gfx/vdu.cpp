@@ -101,12 +101,8 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
 void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, float &h) {
   float nw,nh;
   static bool HighQTargetSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
-  if (HighQTargetSprites) {
-    GFXBlendMode (SRCALPHA,INVSRCALPHA);
-  }else {
-    GFXBlendMode (ONE,ZERO);
-    GFXAlphaTest(GREATER,.4);
-  }
+  static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
+
   GetPosition (sx,sy);
   GetSize (w,h);
 
@@ -121,19 +117,26 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   if (!s) {
     h=-h;
     w = fabs (w*per);
-    return;
-  }
-  s->SetPosition (sx,sy);
-  s->GetSize (nw,nh);
-  w= fabs(nw*h/nh);
-  s->SetSize (w,h);
-  s->Draw();
-  s->SetSize (nw,nh);
-  h = fabs(h);
-  if (HighQTargetSprites) {
-    GFXBlendMode (ONE,ZERO);
   }else {
-    GFXAlphaTest(ALWAYS,0);
+	  if (HighQTargetSprites) {
+		  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+	  }else {
+		  GFXBlendMode (ONE,ZERO);
+		  GFXAlphaTest(GREATER,.4);
+	  }	  
+	  s->SetPosition (sx,sy);
+	  s->GetSize (nw,nh);
+	  w= fabs(nw*h/nh);
+	  s->SetSize (w,h);
+	  if (drawweapsprite) 
+		  s->Draw();
+	  s->SetSize (nw,nh);
+	  h = fabs(h);
+	  if (HighQTargetSprites) {
+		  GFXBlendMode (ONE,ZERO);
+	  }else {
+		  GFXAlphaTest(ALWAYS,0);
+	  }
   }
 
 }
@@ -687,7 +690,6 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 
 
 void VDU::DrawWeapon (Unit * parent) {
-  static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
   float x,y,w,h;
   const float percent = .6;
   string buf("G: ");
@@ -696,10 +698,8 @@ void VDU::DrawWeapon (Unit * parent) {
   int mlen = mbuf.length();
   int count=1;int mcount=1;
   GFXColor4f (1,1,1,1);
-  if (drawweapsprite) {
   GFXEnable(TEXTURE0);
   DrawTargetSpr (parent->getHudImage (),percent,x,y,w,h);
-  }
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->GetNumMounts();i++) {
@@ -730,6 +730,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
       GFXColor4f (0,.2,0,1);
       break;
     }
+	static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
     if (drawweapsprite) {
 
       DrawGun (pos,w,h,parent->mounts[i].type->size);
