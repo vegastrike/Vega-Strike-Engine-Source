@@ -825,17 +825,17 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 		string str( "Netlag: ");
 		unsigned int lag = Network[0].getLag();
 		memset( buf, 0, 32);
-		sprintf( buf, "%g", lag);
+		sprintf( buf, "%.1f", lag);
 		if( lag<50)
 			str += "#00FF00";
 		else if( lag<150)
 			str += "#FFFF00";
-		else
+		else if( lag>0)
 			str += "#FF0000";
 		str += string( buf)+"#000000\n";
 		memset( buf, 0, 32);
 		sprintf( buf, "%g", Network[0].getCurrentFrequency());
-		str += "Freq: "+string( buf)+"/";
+		str += string( buf)+"/";
 		memset( buf, 0, 32);
 		sprintf( buf, "%g", Network[0].getSelectedFrequency());
 		str += string( buf)+" GHz";
@@ -895,7 +895,6 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
     DrawVDUObjectives (parent);
     break;
   }
-
 }
 void UpdateViewstyle (VIEWSTYLE &vs) {
   switch (vs) {

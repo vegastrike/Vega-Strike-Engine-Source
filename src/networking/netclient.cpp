@@ -114,6 +114,7 @@ NetClient::NetClient()
 	ingame = false;
 	current_freq = MIN_COMMFREQ;
 	selected_freq = MIN_COMMFREQ;
+	this->netcomm_active = false;
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
 #endif
@@ -1641,4 +1642,18 @@ float	NetClient::getSelectedFrequency()
 
 float	NetClient::getCurrentFrequency()
 { return this->current_freq;}
+
+void	NetClient::sendTextMessage( string message)
+{
+#ifdef NETCOMM
+	// Only send if netcomm is active and we are connected on a frequency
+	if( netcomm_active)
+	{
+		// If max log size is reached we remove the oldest message
+		if( this->NetComm->message_history.size()==this->NetComm->max_messages)
+			this->NetComm->message_history.pop_front();
+		this->NetComm->message_history.push_back( message);
+	}
+#endif
+}
 

@@ -12,6 +12,7 @@
 
 NetworkCommunication::NetworkCommunication()
 {
+	this->max_messages = 25;
 #ifndef NETCOMM_NOSOUND
 	this->session = NULL;
 	this->params = NULL;
@@ -31,6 +32,12 @@ NetworkCommunication::NetworkCommunication()
 		}
 	}
 #endif
+}
+
+NetworkCommunication::NetworkCommunication( int nb)
+{
+	NetworkCommunication::NetworkCommunication();
+	this->max_messages = nb;
 }
 
 void	NetworkCommunication::AddToSession( ClientPtr clt)

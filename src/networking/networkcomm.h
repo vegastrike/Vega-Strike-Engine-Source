@@ -3,7 +3,9 @@
 
 #include "client.h"
 #include "clientptr.h"
+#include <string>
 #include <list>
+#include <deque>
 #include <config.h> // for NETCOMM_NOSOUND
 
 #ifndef NETCOMM_NOWEBCAM
@@ -17,6 +19,10 @@ class JVOIPRTPTransmissionParams;
 
 class NetworkCommunication
 {
+	public:
+		// Text message
+		std::deque<std::string>	message_history;
+		int		max_messages;
 	private:
 		// List of clients we are communicating with
 		list<ClientPtr>	commClients;
@@ -34,6 +40,7 @@ class NetworkCommunication
 
 	public:
 		NetworkCommunication();
+		NetworkCommunication( int nb);
 		~NetworkCommunication();
 
 		int		InitSession( float frequency);

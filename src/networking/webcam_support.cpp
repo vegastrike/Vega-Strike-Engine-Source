@@ -382,6 +382,12 @@ int		WebcamSupport::Init()
 	ZeroMemory( &mt, sizeof( AM_MEDIA_TYPE ) );
 	mt.majortype = MEDIATYPE_Video;
 	mt.subtype = MEDIASUBTYPE_RGB24;
+
+	// Try to specify a framerate for capture
+	VIDEOINFOHEADER *pVideoHeader = (VIDEOINFOHEADER*)MediaType.pbFormat; 
+	// Compute the time between 2 frames in nano seconds according to the specified fps
+	pVideoHeader->AvgTimePerFrame = 1./(float)this->fps*1000000.;
+
 	hr = pSampleGrabber->SetMediaType( &mt );
 	if( FAILED( hr ) )
 		DoError( hr, "SetMediaType failed");

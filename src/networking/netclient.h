@@ -194,6 +194,8 @@ class	NetClient
 		void	decreaseFrequency();
 		float	getSelectedFrequency();
 		float	getCurrentFrequency();
+
+		void	sendTextMessage( string message);
 };
 
 #endif
