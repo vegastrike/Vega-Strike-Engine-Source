@@ -80,6 +80,12 @@ bool flickerDamage (Unit * un, float hullpercent) {
 	  #undef damagelevel
 }
 
+//SERIOUSLY BROKEN
+Vector ReflectNormal (const Vector &vel, const Vector & norm ) {
+//THIS ONE WORKS...but no...we don't want works	return norm * (2*vel.Dot(norm)) - vel;
+	return norm*vel.Magnitude();
+}
+
 
 #define INVERSEFORCEDISTANCE 5400
 
@@ -102,16 +108,20 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
     //Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
     Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
+	Vector SmallerElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,bignormal)+Inelastic_vf;
+	Vector ThisElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,smallnormal)+Inelastic_vf;
+	
     float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
     float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
     float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
 	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
-    static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale","1"));
+    static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".5"));
 	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
     float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
+	
 
-
+#if 0	
 	Vector smforce =(bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 	Vector thisforce=(smallnormal*.4*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 	float smag = smforce.Magnitude();
@@ -120,6 +130,13 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 		smforce = (smforce/smag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 	if (tmag>.000001)
 		thisforce = (thisforce/tmag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
+#endif
+	Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
+	Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
+	Vector smforce = (SmallerDesiredVelocity-smalle->GetVelocity())*smalle->GetMass()/SIMULATION_ATOM;
+	Vector thisforce = (ThisDesiredVelocity-GetVelocity())*GetMass()/SIMULATION_ATOM;
+	
+	
 	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
     
 	if(smalle->isUnit()!=MISSILEPTR){ 
@@ -128,7 +145,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     if(this->isUnit()!=MISSILEPTR) {
 	  this->ApplyForce (thisforce);
 	}
-    
+/*    smalle->curr_physical_state = smalle->prev_physical_state;
+	  this->curr_physical_state = this->prev_physical_state;*/
     smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
     this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),NULL);
 
