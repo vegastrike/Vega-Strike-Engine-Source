@@ -48,6 +48,7 @@ void QuadTree::Render () {
   GFXDisable (TEXTURE1);
   GFXDisable (TEXTURE0);
   GFXEnable (LIGHTING);
+  GFXBlendMode (ONE,ZERO);
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices);
   root->Render (RootCornerData);
 }
