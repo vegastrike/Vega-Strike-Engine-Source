@@ -7,6 +7,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "cmd/container.h"
+#include <assert.h>
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 inline bool CompareDest (Planet * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
