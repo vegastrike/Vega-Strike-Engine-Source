@@ -35,8 +35,9 @@ void ParticleTrail::DrawAndUpdate (){
   GFXDisable(TEXTURE0);
   GFXDisable(LIGHTING);
   GFXLoadIdentity(MODEL);
-  glEnable(GL_POINT_SMOOTH);
-  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  //glEnable(GL_POINT_SMOOTH);
+  //  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  GFXBlendMode(ONE,ZERO);
   GFXPointSize(2);
   GFXBegin (GFXPOINT);
   double mytime= GetElapsedTime();

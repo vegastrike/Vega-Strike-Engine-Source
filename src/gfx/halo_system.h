@@ -26,7 +26,7 @@ class HaloSystem {
     return halo.size();
   }
   unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col);
-  void Draw (const Matrix & trans, const Vector & scale, short halo_alpha, float nebdist, float hullpercentage, const Vector & velocity);//draws smoke and damage fx
+  void Draw (const Matrix & trans, const Vector & scale, short halo_alpha, float nebdist, float hullpercentage, const Vector & velocity, int faction);//draws smoke and damage fx
   //  unsigned int size(); {return halo.size();}
   void SetPosition (unsigned int which, const QVector &loc);
   void SetSize (unsigned int which, const Vector &scale);

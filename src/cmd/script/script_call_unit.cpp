@@ -59,6 +59,7 @@
 #include "gfx/animation.h"
 #include "flightgroup.h"
 #include "cmd/unit_factory.h"
+#include "cmd/asteroid.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
 
@@ -1241,7 +1242,9 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        free (citylights);
      }else if (type==NEBULAPTR) {
        my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
-     } else {
+     } else if (type==ASTEROIDPTR) {
+       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
+     }else {
        my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
      }
      units[u]=my_unit;
@@ -1259,6 +1262,9 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      pox.k=fg->fg->pos.k+u*fg_radius*3;
 
      my_unit->SetPosAndCumPos(pox);
+     if (type==ASTEROIDPTR||type==NEBULAPTR) {
+       my_unit->PrimeOrders();
+     }else {
      my_unit->LoadAIScript (fg->fg->ainame);
 #if 0
      if(fg->fg->ainame[0]!='_'){
@@ -1289,7 +1295,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      }
 #endif
      my_unit->SetTurretAI ();
-
+     }
      //     cout << fg->name << endl;
 
      _Universe->scriptStarSystem()->AddUnit(my_unit);

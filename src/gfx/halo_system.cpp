@@ -11,7 +11,7 @@
 #include "config_xml.h"
 #include "gfx/particle.h"
 #include "lin_time.h"
-static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size) {
+static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
   percent = 1-percent;
   int i=rand();
   static float scale = XMLSupport::parse_float (vs_config->getVariable("graphics",
@@ -22,15 +22,25 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
 								       "sparklespeed",
 								       
 								       ".5"));
+  static float flare = XMLSupport::parse_float (vs_config->getVariable("graphics",
+								       "sparkleflare",
+								       
+								       ".5"));
+  static float spread = XMLSupport::parse_float (vs_config->getVariable("graphics",
+								       "sparklespread",
+								       
+								       ".2"));
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
       float r2 = rand()/((float)RAND_MAX*.5)-1;      
-      pp.loc = pos+QVector (r1,r2,0)*radial_size;
-      pp.col.i=.6;
-      pp.col.j=.6;
-      pp.col.k=1;
-      particleTrail.AddParticle(pp,velocity*sspeed);
+      QVector rand(r1,r2,0);
+      pp.loc = pos+rand*radial_size*flare;
+      const float * col = _Universe->GetSparkColor(faction);
+      pp.col.i=col[0];
+      pp.col.j=col[1];
+      pp.col.k=col[2];
+      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed);
     }
 }
   
@@ -64,7 +74,7 @@ void HaloSystem::SetSize (unsigned int which, const Vector &size) {
 void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
   halo[which].loc = loc;
 }
-void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity) {
+void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
   if (scale.k>0) {
     vector<MyIndHalo>::iterator i = halo.begin();
     for (;i!=halo.end();++i) {
@@ -74,7 +84,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       m.p = Transform (trans,i->loc);
       mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);    
       if (hullpercent<.99) {
-	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i);
+	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i,faction);
       }
     }
   }

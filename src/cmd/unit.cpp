@@ -868,7 +868,7 @@ void Unit::DrawNow (const Matrix & mat, float lod) {
       haloalpha=((float)cloak)/32767;
     }
     Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-    halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity());
+    halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
 }
 void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
@@ -978,12 +978,12 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 	if( computer.max_ab_speed!= 0)
 	{
 	    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity());
+	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	}
 	else
 	{
 	    Vector Scale (1,1,0);
-	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity());
+	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	}
   }
 }

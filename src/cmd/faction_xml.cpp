@@ -70,7 +70,12 @@ namespace FactionXML {
 	MOOD_ANIMATION,
 	CONTRABAND,
 	EXPLOSION,
-	SEX
+	SEX,
+	SPARKRED,
+	SPARKGREEN,
+	SPARKBLUE,
+	SPARKALPHA
+
   };
 
   const EnumMap::Pair element_names[] = {
@@ -87,6 +92,10 @@ namespace FactionXML {
   const EnumMap::Pair attribute_names[] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
 	EnumMap::Pair ("name", NAME), 
+	EnumMap::Pair ("SparkRed", SPARKRED), 
+	EnumMap::Pair ("SparkGreen", SPARKGREEN), 
+	EnumMap::Pair ("SparkBlue", SPARKBLUE), 
+	EnumMap::Pair ("SparkAlpha", SPARKALPHA), 
 	EnumMap::Pair ("logoRGB", LOGORGB), 
 	EnumMap::Pair ("logoA", LOGOA), 
 	EnumMap::Pair ("secLogoRGB", SECLOGORGB), 
@@ -99,7 +108,7 @@ namespace FactionXML {
 
 
   const EnumMap element_map(element_names, 9);
-  const EnumMap attribute_map(attribute_names, 10);
+  const EnumMap attribute_map(attribute_names, 14);
 
 }
 
@@ -174,6 +183,19 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     //	thisuni->factions[thisuni->factions.size()-1];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case SPARKRED:
+	thisuni->factions.back()->sparkcolor[0]=XMLSupport::parse_float((*iter).value);
+
+	break;
+      case SPARKGREEN:
+	thisuni->factions.back()->sparkcolor[1]=XMLSupport::parse_float((*iter).value);
+	break;
+      case SPARKBLUE:
+	thisuni->factions.back()->sparkcolor[2]=XMLSupport::parse_float((*iter).value);
+	break;
+      case SPARKALPHA:
+	thisuni->factions.back()->sparkcolor[3]=XMLSupport::parse_float((*iter).value);
+	break;
       case NAME:
 	thisuni->factions[thisuni->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
 	
@@ -397,6 +419,10 @@ Universe::Faction::Faction() {
 	logo=NULL;
 	contraband=NULL;
 	factionname=NULL;
+	sparkcolor[0]=.5;
+	sparkcolor[1]=.5;
+	sparkcolor[2]=1;
+	sparkcolor[3]=1;
 }
 void Universe::LoadFactionPlaylists() {
   for (unsigned int i=0;i<factions.size();i++) {

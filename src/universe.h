@@ -92,6 +92,7 @@ private:
      * hold misguided info for self FIXME
      */
     int playlist;
+    float sparkcolor[4];
     vector <faction_stuff> faction;
     ///Logos used by the ships of that faction
     Texture * logo;
@@ -162,6 +163,9 @@ private:
   }
   int GetPlaylist (const int myfaction) {
     return factions[myfaction]->playlist;//can be -1
+  }
+  const float* GetSparkColor (const int myfaction) {
+    return factions[myfaction]->sparkcolor;//can be -1
   }
   void LoadFactionPlaylists();
   unsigned int GetNumFactions () {
