@@ -208,11 +208,15 @@ Universe::Faction::~Faction() {
 }
 
 void Universe::Faction::ParseAllAllies(Universe * thisuni) {
-	for (unsigned int i=0;i<thisuni->factions.size();i++) {
+
+	// MSVC has a bug where it won't let you reuse variables intitliezed in the paramater list of the for loop
+	// the work around is A.) make the scope of the variable in the function level or not to re-define it in subsequent loops
+	unsigned int i = 0;
+	for (i=0;i<thisuni->factions.size();i++) {
 		thisuni->factions[i]->ParseAllies(thisuni);
 		
 	}
-	for (unsigned int i=0;i<thisuni->factions.size();i++) {
+	for (i=0;i<thisuni->factions.size();i++) {
 	  thisuni->factions[i]->faction[i].relationship=1;
 	}
 }

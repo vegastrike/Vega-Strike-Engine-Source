@@ -159,7 +159,7 @@ int AUDCreateMusic (const std::string &s,const bool LOOP) {
 }
 
 ///copies other sound loaded through AUDCreateSound
-int AUDCreateSound (int sound,const bool LOOP=false){
+int AUDCreateSound (int sound,const bool LOOP/*=false*/){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size())
     return LoadSound (sounds[sound].buffer,LOOP);
