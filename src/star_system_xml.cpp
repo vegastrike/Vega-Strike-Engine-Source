@@ -1088,7 +1088,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   xml->numnearstars=400;
   xml->numstars=800;
   xml->backgroundname = string("cube");
-  xml->reflectivity=.7;
+  xml->reflectivity=XMLSupport::parse_float (vs_config->getVariable("graphics","reflectivity",".7"));
   xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
