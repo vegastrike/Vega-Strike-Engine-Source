@@ -248,7 +248,7 @@ public:
       break;
     case ADDMODE:
       title = "Enhance Starship ";
-      ButtonText="Add Stats";
+      ButtonText="AddStats";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
 	curcategory.push_back("upgrades");
@@ -572,13 +572,19 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     switch (submode) {
     case NORMAL:
       {
+        Unit * bas = this->base.GetUnit();
+        if (bas) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
-	float oldprice = (*CurrentList)[cargonumber].price;
-	if (mode==DOWNGRADEMODE) {
+	float oldprice;
+        oldprice=bas->PriceCargo((*CurrentList)[cargonumber].content);
+        if (mode==DOWNGRADEMODE) {
 	  oldprice =usedPrice(oldprice);
 	}
+        if ((*CurrentList)[cargonumber].content=="jump_drive") {
+          oldprice/=3.0;
+        }
 	sprintf(floatprice,"Price: %.2f",oldprice);
 	CargoInfo->ChangeTextItem ("price",floatprice);
 	sprintf(floatprice,"Mass: %.2f",(*CurrentList)[cargonumber].mass);
@@ -590,6 +596,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	}else {
 	  CargoInfo->ChangeTextItem ("description","");
 	}
+        }
       }
       break;
     default:
@@ -915,11 +922,15 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       break;
     case DOWNGRADEMODE:
       canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
+      if (part.content=="jump_drive") {
+        part.price/=3;
+      }
       price =part.price*usedPrice(percentage);
       _Universe->AccessCockpit()->credits+=price;
       if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage)) {
       if ((bas=base.GetUnit())) {
 	part.quantity=1;
+        part.price = bas->PriceCargo (part.content);
 	bas->AddCargo (part);
       }
       }

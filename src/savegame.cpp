@@ -18,10 +18,41 @@ using namespace std;
     char c[2]={'\0','\0'};
     FILE * fp = fopen (("save.txt"),"r");
     if (fp) {
+      fseek (fp,0,SEEK_END);
+      int length = ftell (fp);
+      if (length>0) {
+      char * temp = (char *)malloc (length+1);
+      temp[length]='\0';
+      fseek (fp,0,SEEK_SET);
+      fread (temp,length,1,fp);
+      bool end=true;
+      for (int i=length-1;i>=0;i--) {
+        if (temp[i]=='\r'||temp[i]=='\n') {
+          temp[i]=(end?'\0':'_');
+        }else if (temp[i]=='\0'||temp[i]==' '||temp[i]=='\t') {
+          temp[i]=(end?'\0':'_');
+        }else {
+          end=false;
+        }
+      }
+      *res = (temp);
+      free (temp);
+      }
+      fclose (fp);
+
+    }
+#if 0
+    if (fp) {
     while (!feof (fp)) {
       c[0]=fgetc (fp);
       if (!feof(fp)) {
-        if (c[0]!='\0') {
+        if (c[0]!='\r'&&c[0]!='\n'&&c[0]!='\0') {
+          if (c[0]==' ') {
+            c[0]='_';
+            if (feof(fp)) {
+              continue;
+            }
+          }
           (*res)+=c;
         }
       }else {
@@ -29,6 +60,7 @@ using namespace std;
       }
     }
     fclose (fp);
+#endif
     if (!res->empty()) {
       if (*res->begin()=='~') {
 	fp = fopen (("save.txt"),"w");
@@ -42,7 +74,7 @@ using namespace std;
       }
     }
 
-    }
+    
 #if 0
     fp = fopen (("save.txt"),"w");
     if (fp) {

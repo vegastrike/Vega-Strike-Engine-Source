@@ -180,7 +180,7 @@ bool Unit::CanAddCargo (const Cargo &carg)const {
 
 void Unit::AddCargo (const Cargo &carg, bool sort) {
   mass+=carg.quantity*carg.mass;
-  image->cargo.push_back (carg);
+  image->cargo.push_back (carg);   
   if (sort)
     SortCargo();
 }
@@ -219,8 +219,8 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
   carg = image->cargo[i];
-  creds+=quantity*buyer->PriceCargo (image->cargo[i].content);
-  carg =Cargo (image->cargo[i]);
+  carg.price=buyer->PriceCargo (image->cargo[i].content);
+  creds+=quantity*carg.price;
   carg.quantity=quantity;
   buyer->AddCargo (carg);
   

@@ -713,6 +713,7 @@ void FireKeyboard::Execute () {
   if (f().turretaikey==RELEASE) {
     f().turretaikey = UP;
     parent->SetTurretAI();
+    parent->TargetTurret(parent->Target());
   }
   if (f().turrettargetkey==PRESS) {
     f().turrettargetkey=DOWN;
