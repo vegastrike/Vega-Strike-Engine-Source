@@ -53,6 +53,7 @@
 #include "force_feedback.h"
 #include "universe_util.h"
 #include "networking/netclient.h"
+#include "save_util.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -481,6 +482,22 @@ void InitializeInput() {
 }
 
 //Cockpit *cockpit;
+
+void IncrementStartupVariable () {
+	int len=getSaveDataLength (0,"436457r1K3574r7uP71m35");
+	float var=FLT_MAX;
+	if (len<=0) {
+		pushSaveData(0,"436457r1K3574r7uP71m35",1);
+		var=1;
+	} else {
+		var=getSaveData(0,"436457r1K3574r7uP71m35",0);
+		putSaveData(0,"436457r1K3574r7uP71m35",0,var+1);
+	}
+	if (var<XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
+		GameCockpit::NavScreen(0,PRESS);
+	}
+}
+
 static Texture *tmpcockpittexture;
 void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc, vector<vector<std::string> > &savefiles) {
   vector <std::string> fighter0mods;
@@ -713,6 +730,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 //  _Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
   mission->DirectorInitgame();
+  IncrementStartupVariable();
 }
 void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;

@@ -31,6 +31,7 @@
 #include "networking/netclient.h"
 #include "cmd/unit_util.h"
 #include "math.h"
+#include "save_util.h"
 
 
 
@@ -127,7 +128,11 @@ void NavigationSystem::Setup()
 
 
 	buttonstates = 0;
-	whattodraw = (1|2);
+	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
+		whattodraw=0;
+	} else {
+		whattodraw = (1|2);
+	}
 	currentselection = NULL;
 	factioncolours = new GFXColor[FactionUtil::GetNumFactions()];
 	unselectedalpha = 1.0;
