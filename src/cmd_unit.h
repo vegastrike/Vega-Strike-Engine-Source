@@ -46,11 +46,9 @@ class AI;
 class Box;
 class Mesh;
 class Camera;
-
+class Halo;
 //////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
-enum Aggression{
-	LOW, MEDIUM, HIGH, DISABLE, DESTROY
-};
+
 class Unit {
  public:
   struct Computer {
@@ -88,19 +86,15 @@ protected:
   Transformation curr_physical_state;
   Matrix cumulative_transformation_matrix;
   Transformation cumulative_transformation;
-  int nummesh;
   Animation **explosion;
   float timeexplode;  
+  int nummesh;
   Mesh **meshdata;
+  int numsubunit;
   Unit **subunits; // the new children fun fun stuff
-  //Gun **weapons; // the guns
-  struct {
-	float right, left, front, back;
-  } armor;
-  struct {
-	  float front, back, right, left, top, bottom, recharge; int number;
-  } shield;
-  float hull;
+  int numhalos;
+  Halo *halos;
+  int nummounts;
   class Mount {
     Transformation LocalPosition;
   public:
@@ -121,19 +115,20 @@ protected:
     void SetMountPosition (const Transformation &t) {LocalPosition = t;}
     bool Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
   } *mounts;
-  int nummounts;
-  int numsubunit;
   
   //static int refcount; for the inherited classes
-
-  
-  Aggression aggression;
-  
+  struct {
+	float right, left, front, back;
+  } armor;
+  struct {
+	  float front, back, right, left, top, bottom, recharge; int number;
+  } shield;
+  float hull;
+ 
   //  bool active;
   
   //Vector pp, pq, pr, ppos;
   AI *aistate;
-  long fpos;
   string name;
   float accel;
   float recharge;
@@ -153,7 +148,7 @@ protected:
   float ymin, ymax, ycur;
   float pmin, pmax, pcur;
   float rmin, rmax, rcur;
-
+  long fpos;
   // thrusting limits
   struct Limits {
     float yaw;

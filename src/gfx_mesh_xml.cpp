@@ -1092,10 +1092,15 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
   }
-
-  float x_center = (minSizeX + maxSizeX)*scale/2.0,
-    y_center = (minSizeY + maxSizeY)*scale/2.0,
-    z_center = (minSizeZ + maxSizeZ)*scale/2.0;
+  minSizeX *=scale;
+  maxSizeX *=scale;
+  minSizeY *=scale;
+  maxSizeY *=scale;
+  minSizeZ *=scale;
+  maxSizeZ *=scale;
+  float x_center = (minSizeX + maxSizeX)/2.0,
+    y_center = (minSizeY + maxSizeY)/2.0,
+    z_center = (minSizeZ + maxSizeZ)/2.0;
   SetPosition(x_center, y_center, z_center);
   for(a=0; a<totalvertexsize; a++) {
     vertexlist[a].x*=scale;//FIXME
