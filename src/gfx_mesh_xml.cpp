@@ -403,6 +403,13 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     vertexlist[a].z -= z_center;
   }
 
+  minSizeX -= x_center;
+  maxSizeX -= x_center;
+  minSizeY -= y_center;
+  maxSizeY -= y_center;
+  minSizeZ -= z_center;
+  maxSizeZ -= z_center;
+  
   radialSize = .5*sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
 
   vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),

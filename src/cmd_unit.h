@@ -23,6 +23,7 @@
 #include <time.h>
 #include "gfx.h"
 #include "gfx_transform_matrix.h"
+#include <iostream.h>
 //#include "Gun.h"
 //#include "Warhead.h"
 /*EXPLANATION OF TERMS:
@@ -180,7 +181,11 @@ public:
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
+
+  ostream &output(ostream& os) const;
 };
+
+ostream &operator<<(ostream &os, const Unit &);
 
 class AI{
 protected:

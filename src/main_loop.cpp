@@ -312,7 +312,7 @@ static void Quit(KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 16;
+const int numf = 1;
 Unit *fighters[numf];
 //LocationSelect *locSel=NULL;
 Background * bg = NULL;

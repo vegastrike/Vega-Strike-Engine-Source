@@ -19,6 +19,7 @@ AI *PlanetaryOrbit::Execute() {
 
 void Planet::InitPlanet(FILE *fp) {
   InitUnit();
+  strcpy(name, "Planet");
   envMap = TRUE;
   satellites = NULL;
   numSatellites = 0;
@@ -31,6 +32,7 @@ void Planet::InitPlanet(FILE *fp) {
   int a;
 
   fscanf(fp, "%s\n", texname);
+  strcpy(name, texname);
   fscanf(fp, "%f\n", &radius);
   fscanf(fp, "%f\n", &gravity);
   fscanf(fp, "%f %f %f\n", &x_axis.i, &x_axis.j, &x_axis.k);

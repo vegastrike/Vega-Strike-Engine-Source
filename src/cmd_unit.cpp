@@ -250,35 +250,9 @@ float Unit::getMinDis (Matrix t,const Vector &pnt) {
 
 
 bool Unit::querySphere (const Vector &pnt, float err) {
-  UpdateMatrix();
-  int i;
-  Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
-
-#ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
-#endif
-  for (i=0;i<nummesh;i++) {
-
-    TargetPoint = Transform(transformation,meshdata[i]->Position())-pnt;
-    if (TargetPoint.Dot (TargetPoint)< 
-	err*err+
-	meshdata[i]->rSize()*meshdata[i]->rSize()
-#ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor*SizeScaleFactor
-#endif
-	+
-#ifdef VARIABLE_LENGTH_PQR
-	SizeScaleFactor*
-#endif
-	2*err*meshdata[i]->rSize()
-	)
-      return true;
-  }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->querySphere (transformation,pnt,err))
-      return true;
-  }
-  return false;
+  Matrix mat;
+  Identity (mat);
+  return querySphere(mat, pnt, err);
 }
 
 bool Unit::querySphere (Matrix t,const Vector &pnt, float err) {
@@ -692,4 +666,12 @@ void Unit::ExecuteAI() {
   for(int a=0; a<numsubunit; a++) {
     subunits[a]->ExecuteAI();
   }
+}
+
+ostream &Unit::output(ostream& os) const {
+  return os << name;
+}
+
+ostream &operator<<(ostream &os, const Unit &u) {
+  return u.output(os);
 }
