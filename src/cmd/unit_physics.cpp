@@ -480,8 +480,29 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
 	
     }
   }      
+  Unit * target = Target();
+  bool increase_locking=false;
+  if (target) {
+    Vector TargetPos (ToLocalCoordinates (target->Position()-Position())); 
+    TargetPos.Normalize(); 
+    if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
+      increase_locking=true;
+    }
+  }
+
   for (i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
+    if (increase_locking) {
+      if (mounts[i].status==Mount::ACTIVE&&cloaking<0) {
+	mounts[i].time_to_lock-=SIMULATION_ATOM;
+	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
+	if (ai_lock_cheat&&!_Universe->isPlayerStarship(this)) {
+	  mounts[i].time_to_lock=0;
+	}
+      }
+    }else {
+      mounts[i].time_to_lock=mounts[i].type->LockTime;
+    }
+    if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
 	mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
       }
@@ -494,7 +515,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       t1=prev_physical_state;//a hack that will not work on turrets
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
-      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,Target(),0!=(mounts[i].size&weapon_info::AUTOTRACKING));
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,target,0!=(mounts[i].size&weapon_info::AUTOTRACKING));
     }else if (mounts[i].processed==Mount::UNFIRED) {
       mounts[i].PhysicsAlignedUnfire();
     }

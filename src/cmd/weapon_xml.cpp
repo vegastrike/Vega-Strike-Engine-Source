@@ -22,7 +22,7 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   return *this;
 }
 */
-void weapon_info::init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;EnergyRate=18;Refire=.2;sound=-1;volume=0;}
+void weapon_info::init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;Refire=.2;sound=-1;volume=0;}
 void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}}
 
 
@@ -74,7 +74,8 @@ namespace BeamXML {
     LENGTH,
     PHASEDAMAGE,
     VOLUME,
-    DETONATIONRADIUS
+    DETONATIONRADIUS,
+    LOCKTIME
     //YAW,
     //PITCH,
     //ROLL
@@ -106,6 +107,7 @@ namespace BeamXML {
     EnumMap::Pair ("Speed",SPEED),
     EnumMap::Pair ("Pulsespeed",PULSESPEED),
     EnumMap::Pair ("DetonationRange",DETONATIONRADIUS),
+    EnumMap::Pair ("LockTime",LOCKTIME),
     EnumMap::Pair ("Radialspeed",RADIALSPEED),
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("Radius",RADIUS),
@@ -117,13 +119,14 @@ namespace BeamXML {
     EnumMap::Pair ("Consumption",CONSUMPTION),
     EnumMap::Pair ("Refire",REFIRE),
     EnumMap::Pair ("Length", LENGTH),//,
+
     EnumMap::Pair ("Volume", VOLUME)//,
     //EnumMap::Pair ("Yaw",YAW),
     // EnumMap::Pair ("Pitch",PITCH),
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 25);
+  const EnumMap attribute_map(attribute_names, 26);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -241,6 +244,9 @@ namespace BeamXML {
 	  break;
 	case REFIRE:
 	  tmpweapon.Refire = XMLSupport::parse_float ((*iter).value);
+	  break;
+	case LOCKTIME:
+	  tmpweapon.LockTime = XMLSupport::parse_float ((*iter).value);
 	  break;
 	default:
 	  assert (0);

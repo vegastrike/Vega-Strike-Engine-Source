@@ -246,8 +246,11 @@ void Unit::Init()
   computer.max_roll=1;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
-  computer.radar.maxrange=XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
+  static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
+  computer.radar.maxrange=rr;
   computer.radar.maxcone=-1;
+  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));
+  computer.radar.lockcone=lc;
   computer.radar.mintargetsize=0;
   computer.radar.color=true;
   //  Fire();
@@ -537,7 +540,7 @@ Unit::~Unit()
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
 #ifdef DESTRUCTDEBUG
@@ -576,9 +579,9 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
    if (nummounts) {
      int nummt = nummounts;
      for (int i=0;i<nummounts;i++) {
-       if (mounts[i].type.type!=weapon_info::PROJECTILE) {
-	 range+=mounts[i].type.Range;
-	 speed+=mounts[i].type.Speed;
+       if (mounts[i].type->type!=weapon_info::PROJECTILE) {
+	 range+=mounts[i].type->Range;
+	 speed+=mounts[i].type->Speed;
        } else {
 	 nummt--;
        }
@@ -633,7 +636,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     finaltrans.to_matrix (mat);
     Vector Normal (mat[8],mat[9],mat[10]);
     
-    Vector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type.Speed));
+    Vector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
     
     tmpcos = Normal.Dot (totarget);
     tmpdist = totarget.Magnitude();
@@ -643,7 +646,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     } else {
       tmpcos /= tmpdist;
     }
-    tmpdist /= mounts[i].type.Range;//UNLIKELY DIV/0
+    tmpdist /= mounts[i].type->Range;//UNLIKELY DIV/0
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
@@ -835,7 +838,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     **/
   }
   for (i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
+    if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
 	mounts[i].ref.gun->Draw(*ct,ctm);
       }

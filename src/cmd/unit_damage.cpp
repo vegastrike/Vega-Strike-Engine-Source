@@ -129,7 +129,7 @@ void Unit::Kill(bool erasefromsave) {
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
   if (mounts) {
@@ -300,10 +300,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 			computer.target=NULL; //set the target to NULL
 		} else if (randnum>=.4) {
 			limits.retro*=dam;
-		} else if (randnum>=.325) {
+		} else if (randnum>=.3275) {
 			computer.radar.maxcone+=(1-dam);
 			if (computer.radar.maxcone>.99)
 				computer.radar.maxcone=.99;
+		}else if (randnum>=.325) {
+			computer.radar.lockcone+=(1-dam);
+			if (computer.radar.lockcone>.99)
+				computer.radar.lockcone=.99;
 		} else if (randnum>=.25) {
 			computer.radar.mintargetsize+=(rSize()/2);
 			if (computer.radar.mintargetsize>rSize())

@@ -141,6 +141,7 @@ class Unit
       float maxrange;
       ///the dot with (0,0,1) indicating the farthest to the side the radar can handle.
       float maxcone;
+      float lockcone;
       ///The minimum radius of the target
       float mintargetsize;
       ///does this radar support IFF?
@@ -243,13 +244,14 @@ class Unit
     short ammo;
     short volume;//-1 is infinite
     ///The data behind this weapon. May be accordingly damaged as time goes on
-    weapon_info type;
     enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     ///The sound this mount makes when fired
+    const weapon_info *type;
     int sound;
-    Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
+    float time_to_lock;
+    Mount();
     Mount(const std::string& name, short int ammo=-1, short int volume=-1);
     ///Sets this gun to active, unless unchosen or destroyed
     void Activate (bool Missile);
@@ -577,6 +579,7 @@ public:
   float CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse)const ;
   Computer & GetComputerData () {return computer;}
   const Computer & ViewComputerData () const {return computer;}
+  float computeLockingPercent();//how locked are we
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
   void ArmorData(unsigned short armor[4])const;
   ///returns the current ammt of armor left

@@ -142,6 +142,7 @@ namespace UnitXML {
       SOUND,
       MINTARGETSIZE,
       MAXCONE,
+      LOCKCONE,
       RANGE,
       ISCOLOR,
       RADAR,
@@ -232,7 +233,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[87] = {
+  const EnumMap::Pair attribute_names[88] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -280,6 +281,7 @@ namespace UnitXML {
     EnumMap::Pair ("HudImage",HUDIMAGE),
     EnumMap::Pair ("ExplosionAni",EXPLOSIONANI),
     EnumMap::Pair ("MaxCone",MAXCONE),
+    EnumMap::Pair ("LockCone",LOCKCONE),
     EnumMap::Pair ("MinTargetSize",MINTARGETSIZE),
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("EngineMp3",ENGINEMP3),
@@ -323,7 +325,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 87);
+  const EnumMap attribute_map(attribute_names, 88);
 }
 
 using XMLSupport::EnumMap;
@@ -728,7 +730,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     if (tempbool)
       xml->mountz[indx]->size=mntsiz;
     else
-      xml->mountz[indx]->size = xml->mountz[indx]->type.size;
+      xml->mountz[indx]->size = xml->mountz[indx]->type->size;
     //->curr_physical_state=xml->units[indx]->prev_physical_state;
 
     break;
@@ -1188,6 +1190,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
     ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));    
+    ADDELEMNAME("lockcone",floatStarHandler,XMLType(&computer.radar.lockcone));    
     image->unitwriter->EndTag ("Radar");    
     break;
   case RADAR:
@@ -1204,6 +1207,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case MAXCONE:
 	computer.radar.maxcone = parse_float ((*iter).value);
+	break;
+      case LOCKCONE:
+	computer.radar.lockcone = parse_float ((*iter).value);
 	break;
       case RANGE:
 	computer.radar.maxrange = parse_float ((*iter).value);
@@ -1443,7 +1449,7 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
   if (un->nummounts>i) {
     string result(lookupMountSize(un->mounts[i].size));
     if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
-      result+=string("\" weapon=\"")+(un->mounts[i].type.weapon_name);
+      result+=string("\" weapon=\"")+(un->mounts[i].type->weapon_name);
     if (un->mounts[i].ammo!=-1)
       result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
     if (un->mounts[i].volume!=-1) {
@@ -1669,11 +1675,11 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     if (a%2==parity) {
       int b=a;
       if(a % 4 == 2 && a < (nummounts-1)) 
-	if (mounts[a].type.type != weapon_info::PROJECTILE&&mounts[a+1].type.type != weapon_info::PROJECTILE)
+	if (mounts[a].type->type != weapon_info::PROJECTILE&&mounts[a+1].type->type != weapon_info::PROJECTILE)
 	  b=a+1;
-      mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type!=weapon_info::PROJECTILE);
-    } else if ((!half_sounds)||mounts[a].type.type == weapon_info::PROJECTILE) {
-      mounts[a].sound = AUDCreateSound (mounts[a].type.sound,false);      
+      mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
+      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,false);      
     }
   }
   for( a=0; a<(int)xml->units.size(); a++) {

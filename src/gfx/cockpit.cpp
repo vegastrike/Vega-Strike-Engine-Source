@@ -126,7 +126,27 @@ void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const V
     GFXEnd();
   }
 }
-inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR) {
+
+float Unit::computeLockingPercent() {
+  float most=-1024;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].type->type==weapon_info::PROJECTILE||(mounts[i].type->size&(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIAL))) {
+      if (mounts[i].status==Unit::Mount::ACTIVE&&mounts[i].type->LockTime>0) {
+	float rat = mounts[i].time_to_lock/mounts[i].type->LockTime;
+	if (rat<.99) {
+	  if (rat>most) {
+	    most = rat;
+	  }
+	}
+      }
+    }
+  }
+  return (most==-1024)?1:most;
+}
+float Cockpit::computeLockingSymbol(Unit * par) {
+  return par->computeLockingPercent();
+}
+inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent) {
   GFXBegin (GFXLINESTRIP); 
   GFXVertexf (Loc+(CamP+CamQ)*rSize);
   GFXVertexf (Loc+(CamP-CamQ)*rSize);
@@ -134,6 +154,83 @@ inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vecto
   GFXVertexf (Loc+(CamQ-CamP)*rSize);
   GFXVertexf (Loc+(CamP+CamQ)*rSize);
   GFXEnd();
+  if (lock_percent<.99) {
+    if (lock_percent<0) {
+      lock_percent=0;
+    }
+    float max=2.05;
+    //    fprintf (stderr,"lock percent %f\n",lock_percent);
+    float coord = 1.05+(max-1.05)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
+   
+    double rtot = 1./sqrtf(2);
+    float theta = 4*M_PI*lock_percent;
+    Vector LockBox (-cos(theta)*rtot,-rtot,sin(theta)*rtot);
+    //    glLineWidth (4);
+    Vector TLockBox (rtot*LockBox.i+rtot*LockBox.j,rtot*LockBox.j-rtot*LockBox.i,LockBox.k);
+    Vector SLockBox (TLockBox.j,TLockBox.i,TLockBox.k);
+    Vector Origin = (CamP+CamQ)*(rSize*coord);
+    TLockBox = (TLockBox.i*CamP+TLockBox.j*CamQ+TLockBox.k*CamR);
+    SLockBox = (SLockBox.i*CamP+SLockBox.j*CamQ+SLockBox.k*CamR);
+    float r1Size = rSize*.58;
+    GFXBegin (GFXLINESTRIP);
+    max*=rSize*.75;
+    if (lock_percent==0) {
+      GFXVertexf (Loc+CamQ*max*1.5);
+      GFXVertexf (Loc+CamQ*max);
+    }
+
+    GFXVertexf (Loc+Origin+(TLockBox*r1Size));
+    GFXVertexf (Loc+Origin);
+    GFXVertexf (Loc+Origin+(SLockBox*r1Size));
+    if (lock_percent==0) {
+      GFXVertexf (Loc+CamP*max);
+      GFXVertexf (Loc+CamP*max*1.5);
+      GFXEnd();
+      GFXBegin(GFXLINESTRIP);
+      GFXVertexf (Loc-CamP*max);
+    }else {
+      GFXEnd();
+      GFXBegin(GFXLINESTRIP);
+    }
+    GFXVertexf (Loc-Origin-(SLockBox*r1Size));
+    GFXVertexf (Loc-Origin);
+    GFXVertexf (Loc-Origin-(TLockBox*r1Size));
+
+    Origin=(CamP-CamQ)*(rSize*coord);
+    if (lock_percent==0) {
+      GFXVertexf (Loc-CamQ*max);
+      GFXVertexf (Loc-CamQ*max*1.5);
+      GFXVertexf (Loc-CamQ*max);
+    }else {
+      GFXEnd();
+      GFXBegin(GFXLINESTRIP);
+    }
+
+    GFXVertexf (Loc+Origin+(TLockBox*r1Size));
+    GFXVertexf (Loc+Origin);
+    GFXVertexf (Loc+Origin-(SLockBox*r1Size));
+    if (lock_percent==0) {
+      GFXVertexf (Loc+CamP*max);
+      GFXEnd();
+      GFXBegin(GFXLINESTRIP);
+      GFXVertexf (Loc-CamP*max*1.5);
+      GFXVertexf (Loc-CamP*max);
+    }else {
+      GFXEnd();
+      GFXBegin(GFXLINESTRIP);
+    }
+
+    GFXVertexf (Loc-Origin+(SLockBox*r1Size));
+    GFXVertexf (Loc-Origin);
+    GFXVertexf (Loc-Origin-(TLockBox*r1Size));
+
+    if (lock_percent==0) {
+      GFXVertexf (Loc+CamQ*max);
+    }
+    GFXEnd();
+    glLineWidth (1);
+  }
+
 }
 
 static GFXColor DockBoxColor (const string& name) {
@@ -148,7 +245,7 @@ inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const 
     const vector <DockingPorts> d = target->DockingPortLocations();
     for (unsigned int i=0;i<d.size();i++) {
       float rad = d[i].radius/sqrt(2.0);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos),rad ,CamP, CamQ, CamR);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos),rad ,CamP, CamQ, CamR,1);
     }
   }
 }
@@ -185,7 +282,7 @@ void Cockpit::DrawTargetBoxes(){
 	GFXColorf(drawcolor);
 
 	if(target->isUnit()==UNITPTR){
-	  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR);
+	  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un));
 	  if (un->Target()==target) {
 	    DrawDockingBoxes(un,target,CamP,CamQ, CamR);
 	  }
@@ -236,7 +333,7 @@ void Cockpit::DrawTargetBox () {
     }
     GFXEnd();
   }
-  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR);
+  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un));
   DrawDockingBoxes(un,target,CamP,CamQ,CamR);
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);

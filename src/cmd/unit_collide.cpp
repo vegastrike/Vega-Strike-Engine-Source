@@ -110,7 +110,7 @@ void Unit::RemoveFromSystem() {
   CollideInfo.object.u=NULL;
   int j;
   for (j=0;j<nummounts;j++) {
-    if (mounts[j].type.type==weapon_info::BEAM) {
+    if (mounts[j].type->type==weapon_info::BEAM) {
       if (mounts[j].ref.gun) {
 	mounts[j].ref.gun->RemoveFromSystem(true);
       }

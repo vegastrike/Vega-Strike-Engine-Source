@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "gfx/cockpit.h"
 #include "savegame.h"
-
+#include "config_xml.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -42,12 +42,12 @@ double Unit::Mount::Percentage (const Unit::Mount &newammo) const{
       thingstocompare++;
     }
   }
-  if (newammo.type.Range) {
-    percentage+= type.Range/newammo.type.Range;
+  if (newammo.type->Range) {
+    percentage+= type->Range/newammo.type->Range;
     thingstocompare++;
   }
-  if (newammo.type.Damage+100*newammo.type.PhaseDamage) {
-    percentage += (type.Damage+100*type.PhaseDamage)/(newammo.type.Damage+100*newammo.type.PhaseDamage);
+  if (newammo.type->Damage+100*newammo.type->PhaseDamage) {
+    percentage += (type->Damage+100*type->PhaseDamage)/(newammo.type->Damage+100*newammo.type->PhaseDamage);
     thingstocompare++;
   }
   if (thingstocompare) {
@@ -118,11 +118,11 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
     if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
       int jmod=j%nummounts;//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
-	if (up->mounts[i].type.weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 
 
-	  if (up->mounts[i].type.size==(up->mounts[i].type.size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
-	    if (up->mounts[i].type.weapon_name!=mounts[jmod].type.weapon_name) {
+	  if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
+	    if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name) {
 	      numave++;//ok now we can compute percentage of used parts
 	      if (templ) {
 		if (templ->nummounts>jmod) {
@@ -131,8 +131,8 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 		    up->mounts[i].ammo = maxammo;
 		  }
 		  if (templ->mounts[jmod].volume!=-1) {
-		    if (up->mounts[i].ammo*up->mounts[i].type.volume>templ->mounts[jmod].volume) {
-		      up->mounts[i].ammo = (templ->mounts[jmod].volume+1)/up->mounts[i].type.volume;
+		    if (up->mounts[i].ammo*up->mounts[i].type->volume>templ->mounts[jmod].volume) {
+		      up->mounts[i].ammo = (templ->mounts[jmod].volume+1)/up->mounts[i].type->volume;
 		    }
 		  }
 		}
@@ -153,15 +153,15 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 		      }
 		    }
 		    if (templ->mounts[jmod].volume!=-1) {
-		      if (templ->mounts[jmod].volume>mounts[jmod].type.volume*tmpammo) {
-			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type.volume;
+		      if (templ->mounts[jmod].volume>mounts[jmod].type->volume*tmpammo) {
+			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
 		      }
 		    }
 		    
 		  }
 		} 
-		if (tmpammo*mounts[jmod].type.volume>mounts[jmod].volume) {
-		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type.volume;
+		if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
+		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
 		}
 		if (tmpammo>mounts[jmod].ammo) {
 		  cancompletefully=true;
@@ -197,11 +197,11 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 	  //we need to |= the mount type
 	}
       } else {
-	if (up->mounts[i].type.weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 	  bool found=false;//we haven't found a matching gun to remove
 	  for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
 	    int jkmod = (jmod+k)%nummounts;//we want to start with bias
-	    if (strcasecmp(mounts[jkmod].type.weapon_name.c_str(),up->mounts[i].type.weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
+	    if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
 	      found=true;//we got one
 	      percentage+=mounts[jkmod].Percentage(up->mounts[i]);///calculate scrap value (if damaged)
 	      if (touchme) //if we modify
@@ -443,6 +443,14 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   templeak=-(templ!=NULL?templ->computer.radar.maxcone:0);
   STDUPGRADE(myleak,upleak,templeak,0);
   if (touchme)computer.radar.maxcone=1-myleak;
+  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));
+  if (up->computer.radar.lockcone!=lc) {
+    myleak = 1-computer.radar.lockcone;
+    upleak=1-up->computer.radar.lockcone;
+    templeak=-(templ!=NULL?templ->computer.radar.lockcone:0);
+    STDUPGRADE(myleak,upleak,templeak,0);
+    if (touchme)computer.radar.lockcone=1-myleak;
+  }
   cancompletefully=ccf;
   //NO CLUE FOR BELOW
   if (downgrade) {

@@ -94,6 +94,7 @@ private:
   ///draws the navigation symbol around targetted location
   void DrawNavigationSymbol (const Vector &loc, const Vector &p, const Vector &q, float size);
   ///draws the target box around targetted unit
+  float computeLockingSymbol(Unit * par);
   void DrawTargetBox ();
   ///draws the target box around all units
   void DrawTargetBoxes ();

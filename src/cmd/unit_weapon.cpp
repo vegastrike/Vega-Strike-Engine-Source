@@ -29,32 +29,32 @@ void Unit::Fire (bool Missile) {
   if (cloaking>=0)
     return;
   for (int i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy) {
+    if (mounts[i].type->type==weapon_info::BEAM) {
+      if (mounts[i].type->EnergyRate*SIMULATION_ATOM>energy) {
 	mounts[i].UnFire();
 	continue;
       }
     }else{ 
-      if (mounts[i].type.EnergyRate>energy) 
+      if (mounts[i].type->EnergyRate>energy) 
 	continue;
     }
     
     if (mounts[i].Fire(owner==NULL?this:owner,Missile)) {
-      energy -=apply_float_to_short( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
+      energy -=apply_float_to_short( mounts[i].type->type==weapon_info::BEAM?mounts[i].type->EnergyRate*SIMULATION_ATOM:mounts[i].type->EnergyRate);
     }
   }
 }
 
 
 void Unit::Mount::Activate (bool Missile) {
-  if ((type.type==weapon_info::PROJECTILE)==Missile) {
+  if ((type->type==weapon_info::PROJECTILE)==Missile) {
     if (status==INACTIVE)
       status = ACTIVE;
   }
 }
 ///Sets this gun to inactive, unless unchosen or destroyed
 void Unit::Mount::DeActive (bool Missile) {
-  if ((type.type==weapon_info::PROJECTILE)==Missile) {
+  if ((type->type==weapon_info::PROJECTILE)==Missile) {
     if (status==ACTIVE)
       status = INACTIVE;
   }
@@ -73,9 +73,9 @@ void Unit::ToggleWeapon (bool Missile) {
   weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
   if (nummounts<1)
     return;
-  sz = mounts[0].type.size;
+  sz = mounts[0].type->size;
   for (int i=0;i<nummounts;i++) {
-    if ((mounts[i].type.type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
+    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
       totalcount++;
       lasttotal=false;
       if (mounts[i].status==Mount::ACTIVE) {
@@ -83,22 +83,22 @@ void Unit::ToggleWeapon (bool Missile) {
 	lasttotal=true;
 	mounts[i].DeActive (Missile);
 	if (i==nummounts-1) {
-	  sz=mounts[0].type.size;
+	  sz=mounts[0].type->size;
 	}else {
-	  sz =mounts[i+1].type.size;
+	  sz =mounts[i+1].type->size;
 	}
       }
     }
-    if ((mounts[i].type.type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
+    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
       if (mounts[i].status==Mount::ACTIVE) {
 	activecount++;//totalcount=0;
 	mounts[i].DeActive (Missile);
 	if (lasttotal) {
 	  totalcount=(i+1)%nummounts;
 	  if (i==nummounts-1) {
-	    sz = mounts[0].type.size;
+	    sz = mounts[0].type->size;
 	  }else {
-	    sz =mounts[i+1].type.size;
+	    sz =mounts[i+1].type->size;
 	  }
 	}
 	lasttotal=false;
@@ -109,12 +109,12 @@ void Unit::ToggleWeapon (bool Missile) {
     int i=totalcount;
     for (int j=0;j<2;j++) {
       for (;i<nummounts;i++) {
-	if (mounts[i].type.size==sz) {
-	  if ((mounts[i].type.type==weapon_info::PROJECTILE)) {
+	if (mounts[i].type->size==sz) {
+	  if ((mounts[i].type->type==weapon_info::PROJECTILE)) {
 	    mounts[i].Activate(true);
 	    return;
 	  }else {
-	    sz = mounts[(i+1)%nummounts].type.size;
+	    sz = mounts[(i+1)%nummounts].type->size;
 	  }
 	}
       }
@@ -122,7 +122,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }
   }
   if (totalcount==activecount) {
-    ActivateGuns (mounts[0].type.size,Missile);
+    ActivateGuns (mounts[0].type->size,Missile);
   } else {
     if (lasttotal) {
       SelectAllWeapon(Missile);
@@ -136,11 +136,11 @@ void Unit::ToggleWeapon (bool Missile) {
 void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
   for (int j=0;j<2;j++) {
     for (int i=0;i<nummounts;i++) {
-      if (mounts[i].type.size==sz) {
-	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type.type==weapon_info::PROJECTILE)==ms) {
+      if (mounts[i].type->size==sz) {
+	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
 	  mounts[i].Activate(ms);
 	}else {
-	  sz = mounts[(i+1)%nummounts].type.size;
+	  sz = mounts[(i+1)%nummounts].type->size;
 	}
       }
     }
@@ -156,7 +156,7 @@ void Unit::Mount::PhysicsAlignedUnfire() {
 }
 void Unit::Mount::UnFire () {
   processed = UNFIRED;
-  if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
+  if (status!=ACTIVE||ref.gun==NULL||type->type!=weapon_info::BEAM)
     return ;
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
@@ -165,7 +165,7 @@ static void AdjustMatrix (Matrix mat, Unit * target, float speed) {
   if (target) {
     static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",
-										  ".5"));
+										  ".9"));
     
     Vector pos (mat[12],mat[13],mat[14]);
     Vector R (mat[8],mat[9],mat[10]);
@@ -182,6 +182,10 @@ static void AdjustMatrix (Matrix mat, Unit * target, float speed) {
   }
 }
 bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool autotrack) {
+  if (time_to_lock>0) {
+    target=NULL;
+  }
+  time_to_lock = type->LockTime;
   if (processed==FIRED) {
     processed = PROCESSED;
     Unit * temp;
@@ -190,22 +194,22 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
     Matrix mat;
     tmp.to_matrix (mat);
     if (autotrack&&NULL!=target) {
-      AdjustMatrix (mat,target,type.Speed);
+      AdjustMatrix (mat,target,type->Speed);
     }
-    switch (type.type) {
+    switch (type->type) {
     case weapon_info::BEAM:
       break;
     case weapon_info::BOLT:
-      new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity      
+      new Bolt (*type, mat, velocity, owner);//FIXME turrets! Velocity      
       break;
     case weapon_info::BALL:
-      new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work      
+      new Bolt (*type,mat, velocity,  owner);//FIXME:turrets won't work      
       break;
     case weapon_info::PROJECTILE:
-      temp = UnitFactory::createMissile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed,type.Radius,type.RadialSpeed,type.PulseSpeed/*detonation_radius*/);
+      temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
       if (target&&target!=owner) {
 	temp->Target (target);
-	temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
+	temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 	temp->EnqueueAI (new Orders::FireAt (.2,1));
       } else {
 	temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
@@ -228,27 +232,27 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
   return false;
 }
 bool Unit::Mount::Fire (Unit * owner, bool Missile) {
-  if (processed==FIRED||status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
+  if (processed==FIRED||status!=ACTIVE||(Missile!=(type->type==weapon_info::PROJECTILE))||ammo==0)
     return false;
-  if (type.type==weapon_info::BEAM) {
+  if (type->type==weapon_info::BEAM) {
     if (ref.gun==NULL) {
       if (ammo>0)
 	ammo--;
       processed=FIRED;
-      ref.gun = new Beam (LocalPosition,type,owner,sound);
+      ref.gun = new Beam (LocalPosition,*type,owner,sound);
       return true;
     } else {
       if (ref.gun->Ready()) {
 	if (ammo>0)
 	  ammo--;
 	processed=FIRED;
-	ref.gun->Init (LocalPosition,type,owner);
+	ref.gun->Init (LocalPosition,*type,owner);
 	return true;
       } else 
 	return true;//can't fire an active beam
     }
   }else { 
-    if (ref.refire>type.Refire) {
+    if (ref.refire>type->Refire) {
       ref.refire =0;
       if (ammo>0)
 	ammo--;
@@ -264,17 +268,23 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
   }
   return false;
 }
-Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM),sound(-1){
+Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
+Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon_info::NOWEAP),ammo(ammo),sound(-1){
+  static weapon_info wi(weapon_info::BEAM);
+  type = &wi;
   this->volume=volume;
   ref.gun = NULL;
   status=(UNCHOSEN);
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;
+    time_to_lock=0;
   }else {
-    type = *temp;
+    type = temp;
     status=ACTIVE;
+    time_to_lock = temp->LockTime;
   }
+
 }
 void Unit::TargetTurret (Unit * targ) {
   if (!SubUnits.empty()) {

@@ -32,7 +32,15 @@ void Unit::Repair() {
     computer.radar.maxrange+=workunit;
     if (computer.radar.maxcone>-1) {    //Repair MaxCone full
       computer.radar.maxcone-=workunit;
+    }else {
+      computer.radar.maxcone=-1;
     }
+    if (computer.radar.lockcone>0) {    //Repair MaxCone full
+      computer.radar.lockcone-=workunit;
+    }else {
+      //      computer.radar.lockcone=-1;
+    }
+    
     if (rand01()<workunit*.25) {
       computer.itts=true;
     }
@@ -72,6 +80,10 @@ void Unit::Repair() {
     if (computer.radar.maxcone>0) {    //Repair MaxCone half
       computer.radar.maxcone-=workunit;
     }
+    if (computer.radar.lockcone>.7) {    //Repair MaxCone half
+      computer.radar.lockcone-=workunit;
+    }
+
     if (jump.drive!=-1) {    //    RepairJumpEnergy(jump.energy,maxenergy);
       if (jump.energy>maxenergy) {
 	if (rand01()<workunit) {

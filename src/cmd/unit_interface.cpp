@@ -176,7 +176,7 @@ public:
 	case MOUNT_MODE:
 	  for (;i<un->nummounts;i++) {
 	    if (un->mounts[i].status==Unit::Mount::ACTIVE||un->mounts[i].status==Unit::Mount::INACTIVE)
-	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type.weapon_name).c_str(),un->mounts[i].type.weapon_name.c_str());
+	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type->weapon_name).c_str(),un->mounts[i].type->weapon_name.c_str());
 	    else 
 	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),"[Empty]");
 	  }
@@ -195,6 +195,12 @@ public:
 	submode=NORMAL;
       }
     }
+  }
+  bool beginswith (const vector <std::string> &cat, const std::string &s) {
+    if (cat.empty()) {
+      return false;
+    }
+    return cat.front()==s;
   }
   void SetMode (enum BaseMode mod, enum SubMode smod) {
     bool resetcat=false;
@@ -223,27 +229,42 @@ public:
     case UPGRADEMODE:
       title = "Upgrade/Repair Starship";
       ButtonText="Upgrade";
-      curcategory.push_back("upgrades");
+      if (!beginswith (curcategory,"upgrades")) {
+	curcategory.clear();
+	curcategory.push_back("upgrades");
+      }
       break;
     case ADDMODE:
       title = "Enhance Starship Mode";
       ButtonText="Add Stats";
-      curcategory.push_back("upgrades");
+      if (!beginswith (curcategory,"upgrades")) {
+	curcategory.clear();
+	curcategory.push_back("upgrades");
+      }
       break;
     case DOWNGRADEMODE:
       title = "Downgrade Starship Mode";
       ButtonText= "SellPart";
-      curcategory.push_back("upgrades");
+      if (!beginswith (curcategory,"upgrades")) {
+	curcategory.clear();
+	curcategory.push_back("upgrades");
+      }
       break;
     case MISSIONMODE:
       title = "Mission BBS";
       ButtonText="Accept";
-      curcategory.push_back("missions");
+      if (!beginswith (curcategory,"missions")) {
+	curcategory.clear();
+	curcategory.push_back("missions");
+      }
       break;
     case SHIPDEALERMODE:
       title = "Purchase Starship";
       ButtonText="BuyShip";
-      curcategory.push_back("starships");
+      if (!beginswith (curcategory,"starships")) {
+	curcategory.clear();
+	curcategory.push_back("starships");
+      }
       break;
     }
     if (smod!=NORMAL) {
@@ -965,7 +986,16 @@ vector <Cargo>&UpgradingInfo::GetCargoList () {
     case DOWNGRADEMODE:
       relevant = &GetUnitMasterPartList();
       if (buyer.GetUnit()) {
-	return buyer.GetUnit()->FilterDowngradeList (GetCargoFor (relevant));
+	GetCargoFor (relevant);
+	vector <Cargo> tmp;
+	for (unsigned int i=0;i<TempCargo.size();i++) {
+	  if (match(curcategory.begin(),curcategory.end(),
+		    TempCargo[i].category.begin(),TempCargo[i].category.end(),false)) {
+	    tmp.push_back (TempCargo[i]);
+	  }
+	}
+	TempCargo = tmp;
+	return buyer.GetUnit()->FilterDowngradeList (TempCargo);
       }
       break;
     }
