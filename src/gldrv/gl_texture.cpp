@@ -211,6 +211,10 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
       int y =(int)yshift;
       yshift-=y;
       xshift-=x;
+      xshift+=.5;
+      yshift+=.5;
+      if (xshift>1)xshift=1;
+      if (yshift>1)yshift=1;
       x=x<width?x:width-1;
       y=y<height?y:height-1;
       int xpp = x+1<width?x+1:x;
