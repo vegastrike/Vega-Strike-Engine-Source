@@ -48,6 +48,9 @@ vector <SavedUnits> ReadSavedUnits (FILE * fp) {
   char factname[1024];
   while (3==fscanf (fp,"%d %s %s",&a,unitname,factname)) {
     su.push_back (SavedUnits (unitname,(clsptr)a,factname));
+    if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
+      _Universe->LoadSerializedFaction(fp);
+    }
   }
   return su;
 }
@@ -74,6 +77,8 @@ void WriteSaveGame (const char *systemname, const Vector &FP, float credits, std
       delete myvec.back();
       myvec.pop_back();
     }
+    fprintf (fp,"\n%d %s %s",0,"factions","begin ");
+    _Universe->SerializeFaction(fp);
     fclose (fp);
   }
 }

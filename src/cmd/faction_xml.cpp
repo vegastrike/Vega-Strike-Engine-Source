@@ -253,6 +253,51 @@ float Universe::GetRelation (const int Myfaction, const int TheirFaction) {
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
   return factions[Myfaction]->faction[TheirFaction].relationship;
 }
+
+void Universe::SerializeFaction(FILE * fp) {
+  for (unsigned int i=0;i<factions.size();i++) {
+    for (unsigned int j=0;j<factions[i]->faction.size();j++) {
+      fprintf (fp,"%f ",factions[i]->faction[j].relationship);
+    }
+    fprintf(fp,"\n");
+  }
+}
+int numnums (const char * str) {
+  int count;
+  for (int i=0;str[i];i++) {
+    count+=isdigit (str[i])?1:0;
+  }
+  return count;
+}
+void Universe::LoadSerializedFaction(FILE * fp) {
+
+  for (unsigned int i=0;i<factions.size();i++) {
+    char * tmp = new char[24*factions[i]->faction.size()];
+    fgets (tmp,24*factions[i]->faction.size()-1,fp);
+    char * tmp2=tmp;
+    if (numnums(tmp)==0) {
+      i--;
+      continue;
+    }
+    for (unsigned int j=0;j<factions[i]->faction.size();j++) {
+      sscanf (tmp2,"%f ",&factions[i]->faction[j].relationship);
+      int k=0;
+      bool founddig=false;
+      while (tmp2[k]) {
+	if (isdigit(tmp2[k])) { 
+	  founddig=true;
+	}
+	if (founddig&&(!isdigit(tmp2[k])&&tmp2[k]!='.')) {
+	  break;
+	}
+	k++;
+      }
+      tmp2+=k;
+    }
+    delete [] tmp;
+  }
+}
+
 Universe::Faction::Faction() {
 	logo=NULL;
 	contraband=NULL;

@@ -42,7 +42,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
     if (messagequeue.size()) {
       FSM::Node *n;
       if ((n=messagequeue.back()->getCurrentState())) {
-	if (n->message==string("Request Clearence To Land.")) {
+	if (messagequeue.back()->curstate==messagequeue.back()->fsm->GetRequestLandNode()) {
 	  Unit * un=messagequeue.back()->sender.GetUnit();
 	  if (un) {
 	    parent->RequestClearance (un);
