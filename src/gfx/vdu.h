@@ -3,6 +3,7 @@
 
 #include "sprite.h"
 #include <string>
+#include <vector>
 enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
 
 class Unit;
@@ -25,8 +26,9 @@ class VDU: public Sprite {
   TextPlane *tp;
   ///potential modes this computer is equipped for
   unsigned int posmodes;
-  ///The current mode (VDU_MODE) that this unit is in
-  unsigned int thismode;
+  ///The current mode (VDU_MODE) that this unit is in is in back of this vector
+  std::vector <unsigned int> thismode;
+  
   ///Rows and columns of text this VDU can display
   short rows,cols;
   ///Draws a shield display in the VDU

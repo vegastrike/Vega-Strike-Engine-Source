@@ -53,7 +53,8 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(MSG), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes), rows(rwws), cols(clls){
+  thismode.push_back(MSG);
   comm_ani=NULL;
   viewStyle = CP_TARGET;
   StartArmor = ma;
@@ -375,7 +376,7 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
 bool VDU::SetCommAnimation (Animation * ani) {
   if (comm_ani==NULL) {
     if (posmodes&COMM) {
-
+      thismode.push_back(COMM);
       comm_ani = ani;
       ani->Reset();
       return true;
@@ -404,8 +405,18 @@ void VDU::DrawComm (const GFXColor & c) {
     GFXDisable (DEPTHTEST);
 
     comm_ani->DrawAsSprite(this);
-    if (comm_ani->Done())
+    if (comm_ani->Done()) {
+      if (thismode.size()>1) {
+	if (XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switch_back_from_comms","true"))) {
+	  thismode.pop_back();
+	} else {
+	  unsigned int blah = thismode.back();
+	  thismode.pop_back();
+	  thismode.back()=blah;
+	}
+      }
       comm_ani=NULL;
+    }
     GFXDisable (TEXTURE0);
   }else {
     GFXColorf (c);
@@ -653,7 +664,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->SetPos (x-w,y+h);
   tp->SetSize (x+w,y-h-.5*fabs(w/cols));
   targ = parent->GetComputerData().target.GetUnit();
-  switch (thismode) {
+  switch (thismode.back()) {
   case TARGET:
     if (targ)
       DrawTarget(parent,targ,color);
@@ -722,16 +733,16 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
 void VDU::SwitchMode() {
   if (!posmodes)
     return;
-  if (thismode==VIEW&&viewStyle!=CP_BACK&&(thismode&posmodes)) {
+  if (thismode.back()==VIEW&&viewStyle!=CP_BACK&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
     viewStyle = CP_TARGET;
-    thismode<<=1;
-    while (!(thismode&posmodes)) {
-      if (thismode>posmodes) {
-	thismode=0x1;
+    thismode.back()<<=1;
+    while (!(thismode.back()&posmodes)) {
+      if (thismode.back()>posmodes) {
+	thismode.back()=0x1;
       } else {
-	thismode<<=1;
+	thismode.back()<<=1;
       }
     }
   }
