@@ -10,6 +10,7 @@
 #include "cmd/unit_factory.h"
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
+#include "cmd/unit_util.h"
 #include "hud.h"
 #include "vdu.h"
 #include "lin_time.h"//for fps
@@ -1512,6 +1513,17 @@ void GameCockpit::Update () {
 	}
       }
     }
+  }
+  static bool autoclear=XMLSupport::parse_bool(vs_config->getVariable("AI","autodock","false"));
+  par=GetParent();
+  if (autoclear&&par) {
+    Unit *targ=par->Target();
+    if ((!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(UnitUtil::getSignificantDistance(par,targ)<=0)) {
+      RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
+    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
+      par->EndRequestClearance(targ);
+      targ->EndRequestClearance(par);
+	}
   }
   if (switchunit.size()>_Universe->CurrentCockpit())
   if (switchunit[_Universe->CurrentCockpit()]) {

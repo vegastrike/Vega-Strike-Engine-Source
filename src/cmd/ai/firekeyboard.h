@@ -7,6 +7,8 @@
 //all unified AI's should inherit from FireAt, so they can choose targets together.
 
 
+bool RequestClearence(class Unit *parent, class Unit *targ, unsigned char sex);
+
 class FireKeyboard: public Order {
   unsigned char sex;
   bool itts;

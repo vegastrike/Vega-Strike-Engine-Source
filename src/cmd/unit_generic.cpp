@@ -2278,6 +2278,17 @@ void Unit::SetCollisionParent (Unit * name) {
 /**** UNIT_DOCK STUFF                                                            */
 /***********************************************************************************/
 
+bool Unit::EndRequestClearance(Unit *targ) {
+	std::vector <Unit *>::iterator lookcleared;
+	if ((lookcleared = std::find (targ->image->clearedunits.begin(),targ->image->clearedunits.end(),this))!=targ->image->clearedunits.end()) {
+		int whichdockport;
+		targ->image->clearedunits.erase (lookcleared);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 bool Unit::RequestClearance (Unit * dockingunit) {
     static float clearencetime=(XMLSupport::parse_float (vs_config->getVariable ("general","dockingtime","20")));
     EnqueueAIFirst (new ExecuteFor (new Orders::MatchVelocity (Vector(0,0,0),

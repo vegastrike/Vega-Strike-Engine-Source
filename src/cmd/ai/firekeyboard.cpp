@@ -663,14 +663,14 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
 }
 #endif
 
+bool TargAll (Unit *me,Unit *target) {
+	return me->InRange(target,true,false)||me->InRange(target,true,true);
+}
 bool TargUn (Unit *me,Unit *target) {
-	return me->InRange(target,true,false);
+	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==MISSILEPTR||target->isUnit()==ENHANCEMENTPTR);
 }
 bool TargSig (Unit *me,Unit *target) {
-	return me->InRange(target,true,true);
-}
-bool TargAll (Unit *me,Unit *target) {
-	return TargUn(me,target)||TargSig(me,target);
+	return me->InRange(target,true,true)&&UnitUtil::isSignificant(target);
 }
 bool TargFront (Unit *me,Unit *target) {
 	/*
@@ -680,17 +680,21 @@ bool TargFront (Unit *me,Unit *target) {
 	}
 	return false;
 	*/
+	if (!TargAll(me,target))
+		return false;
 	QVector delta( target->Position()-me->Position());
 	double mm = delta.Magnitude();
 	double tempmm =mm-target->rSize();
 	if (tempmm>0.0001) {
-		if ((me->ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/tempmm)>.85) {
+		if ((me->ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/tempmm)>.995) {
 			return true;
 		}
 	}
 	return false;
 }
 bool TargThreat (Unit *me,Unit *target) {
+	if (!TargAll(me,target))
+		return false;
 	if (target->Target()==me) {
 		return true;
 	}
@@ -885,8 +889,31 @@ void abletodock(int dock) {
 		break;
 	}
 }
+
+static bool NoDockWithClear() {
+	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+	return nodockwithclear;
+}
+bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
+	if (!targ->DockingPortLocations().size())
+		return false;
+	if (targ->isUnit()==PLANETPTR) {
+		if (((GamePlanet * )targ)->isAtmospheric()&&NoDockWithClear()) {
+			targ = getAtmospheric (targ);
+			if (!targ) {
+				return false;
+			}
+			parent->Target(targ);
+		}
+	}
+	CommunicationMessage c(parent,targ,NULL,sex);
+	c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
+	targ->getAIState()->Communicate (c);
+	return true;
+}
+
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
-  static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+  bool nodockwithclear=NoDockWithClear();
   bool wasdock=vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
      if (targ->isUnit()==PLANETPTR) {
@@ -922,24 +949,14 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
 
     }
     if (vectorOfKeyboardInput[playa].req) {
-      if (targ->isUnit()==PLANETPTR) {
-
-	if (((GamePlanet * )targ)->isAtmospheric()&&nodockwithclear) {
-	  targ = getAtmospheric (targ);
-	  if (!targ) {
-	    mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-	    abletodock(0);
-	    return;
-	  }
-	  parent->Target(targ);
-	}
+      bool request=RequestClearence(parent,targ,sex);
+      if (!request) {
+        mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+        abletodock(0);
+        return;
+      } else if (!wasdock) {
+        abletodock(1);
       }
-      //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
-      CommunicationMessage c(parent,targ,NULL,sex);
-      c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
-      targ->getAIState()->Communicate (c);
-	  if (!wasdock)
-	    abletodock(1);
       vectorOfKeyboardInput[playa].req=false;
     }
 
