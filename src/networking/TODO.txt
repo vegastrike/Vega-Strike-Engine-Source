@@ -125,3 +125,9 @@ DONE - When receiving a packet : look at timestamp and compare it to latest rece
 DONE - when one exits from VS -> send a quit msg
 DONE - Use a NETWORK_ATOM to check if it's time to send position update
 
+External libs URLs :
+PortAudio : http://www.portaudio.com
+JVoIPlib : http://lumumba.luc.ac.be/jori/jvoiplib/jvoiplib.html
+Crypto++ : http://www.eskimo.com/~weidai/cryptlib.html
+POSH : http://www.pyrogon.com/poshlib/index.html
+

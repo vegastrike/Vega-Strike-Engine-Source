@@ -506,6 +506,7 @@ void	NetworkCommunication::SwitchWebcam()
 
 void	NetworkCommunication::SwitchSecured()
 {
+#ifdef CRYPTO
 	if( secured)
 		secured=0;
 	else
@@ -513,5 +514,9 @@ void	NetworkCommunication::SwitchSecured()
 		if( crypt_key[0]!=0)
 			secured = 1;
 	}
+#else
+	// If cmopiled without crypto++ support secured comms are not available
+	secured = 0;
+#endif
 }
 
