@@ -12,9 +12,12 @@
 #define NAVTOTALMESHCOUNT 8	//	same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
 
+
+
 class NavigationSystem
 {
 private:
+
 
 class navscreenoccupied* screenoccupation;
 class Mesh * mesh[NAVTOTALMESHCOUNT];
@@ -27,6 +30,14 @@ float zoom;
 float camera_z;
 float zshiftmultiplier;
 float item_zscalefactor;
+float minimumitemscaledown;
+float maximumitemscaleup;
+
+
+float center_x;
+float center_y;
+float center_z;
+
 
 float mouse_x_previous;
 float mouse_y_previous;
@@ -36,6 +47,8 @@ bool mouse_wentup[3];
 bool mouse_wentdown[3];
 Unit* currentselection;
 GFXColor* factioncolours;
+
+
 
 int whattodraw;
 //	bit 0 = undefined
@@ -53,8 +66,17 @@ float buttonskipby4_4[4];
 float buttonskipby4_5[4];
 float buttonskipby4_6[4];
 float buttonskipby4_7[4];
+float meshcoordinate_x[NAVTOTALMESHCOUNT];
+float meshcoordinate_y[NAVTOTALMESHCOUNT];
+float meshcoordinate_z[NAVTOTALMESHCOUNT];
+float meshcoordinate_z_delta[NAVTOTALMESHCOUNT];
+
+
 int   buttonstates;	//	bit0 = button1, bit1 = button2, etc
 float system_item_scale;
+float unselectedalpha;
+
+
 
 
 
@@ -70,10 +92,12 @@ static void DrawJump(float x, float y, float size, const GFXColor &col );
 static void DrawMissile(float x, float y, float size, const GFXColor &col );
 static void DrawTargetCorners(float x, float y, float size, const GFXColor &col );
 
+
 void DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline);
 void DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col);
 void DrawCursor(float x, float y, float wid, float hei, const GFXColor &col);
 void DrawGrid(float &screen_x1, float &screen_x2, float &screen_y1, float &screen_y2, const GFXColor &col);
+
 
 bool TestIfInRange(float &x1, float &x2, float &y1, float &y2, float tx, float ty);
 bool TestIfInRangeBlk(float &x1, float &x2, float size, float tx, float ty);
@@ -92,7 +116,7 @@ void ClearPriorities();
 class QVector dxyz(class QVector, double x_, double y_, double z_);
 //float Delta(float a, float b);
 
-
 };
 
 #endif
+

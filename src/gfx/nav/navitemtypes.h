@@ -1,6 +1,8 @@
 #ifndef _NAVITEMTYPES_H_
 #define _NAVITEMTYPES_H_
 
+
+
 enum
 {
 	navsun,
@@ -17,6 +19,8 @@ enum
 	navambiguous
 };
 
+
+
 #define navsunsize 0.1
 #define navplanetsize 0.06
 #define navplayersize 0.045
@@ -29,5 +33,6 @@ enum
 #define navnebulasize 0.1
 #define navjumpsize 0.05
 #define navambiguoussize 0.04
+
 
 #endif

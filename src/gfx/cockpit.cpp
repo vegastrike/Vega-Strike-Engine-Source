@@ -985,9 +985,21 @@ bool GameCockpit::CanDrawNavSystem() {
   return ThisNav.CheckDraw();
 }
 bool GameCockpit::DrawNavSystem() {
+
+  
   bool ret = ThisNav.CheckDraw();
-  if (ret)
+  if (ret) {
+    float c_o = cockpit_offset;
+    cam[currentcamera].setCockpitOffset(0);
+    cam[currentcamera].UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
     ThisNav.Draw();
+    cockpit_offset= c_o;
+    cam[currentcamera].setCockpitOffset(c_o);
+    cam[currentcamera].UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
+    
+  }
+
+
   return ret;
 }
 void RespawnNow (Cockpit * cp) {
