@@ -13,7 +13,7 @@ bool UpdatePosition (Vector & res, Vector cur, Vector fin, float speed) {
   Vector direction (fin-cur);
     float dirmag = direction.Magnitude();
     bool ret=true;
-    if (dirmag>0&&dirmag<speed*SIMULATION_ATOM) {
+    if (dirmag>0&&dirmag>speed*SIMULATION_ATOM) {
       direction=direction* (speed*SIMULATION_ATOM/dirmag);
       ret=false;
     }  

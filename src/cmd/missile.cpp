@@ -65,7 +65,7 @@ void Missile::reactToCollision (Unit * smaller, const Vector & biglocation, cons
     DealDamageToHull (smalllocation,hull+1);//should kill, applying addmissile effect
   
 }
-void Missile::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){
+void Missile::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
     Unit * targ;
     if ((targ=Target())) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
