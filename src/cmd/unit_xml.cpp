@@ -354,7 +354,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case CARGO:
     ///handling taken care of above;
-    assert (xml->unitlevel==2);
+    assert (xml->unitlevel>=2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
