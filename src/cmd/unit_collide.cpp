@@ -36,7 +36,6 @@ void Unit::UpdateCollideQueue () {
       KillCollideTable(&CollideInfo);
     }
     CollideInfo.object = this;
-    SetCollisionParent(this);
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
     AddCollideQueue (CollideInfo);
@@ -48,26 +47,28 @@ void Unit::UpdateCollideQueue () {
 
 void Unit::CollideAll() {
   unsigned int i;
-#define COLQ colQ
   vector <const LineCollide*> colQ;
   collidetable.Get (&CollideInfo,colQ);
-  for (i=0;i<COLQ.size();i++) {
+  for (i=0;i<colQ.size();i++) {
+    if (i<colQ.size()-1)
+      if (colQ[i]==colQ[i+1])
+	continue;//ignore duplicates
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!CollideInfo.hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
+    if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&colQ[i]->type==LineCollide::UNIT))&&((colQ[i]->object>this||(!CollideInfo.hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
       if (
-	  Position().i+radial_size>COLQ[i]->Mini.i&&
-	  Position().i-radial_size<COLQ[i]->Maxi.i&&
-	  Position().j+radial_size>COLQ[i]->Mini.j&&
-	  Position().j-radial_size<COLQ[i]->Maxi.j&&
-	  Position().k+radial_size>COLQ[i]->Mini.k&&
-	  Position().k-radial_size<COLQ[i]->Maxi.k) {
+	  Position().i+radial_size>colQ[i]->Mini.i&&
+	  Position().i-radial_size<colQ[i]->Maxi.i&&
+	  Position().j+radial_size>colQ[i]->Mini.j&&
+	  Position().j-radial_size<colQ[i]->Maxi.j&&
+	  Position().k+radial_size>colQ[i]->Mini.k&&
+	  Position().k-radial_size<colQ[i]->Maxi.k) {
       //continue;
-      switch (COLQ[i]->type) {
+      switch (colQ[i]->type) {
       case LineCollide::UNIT://other units!!!
-	((Unit*)COLQ[i]->object)->Collide(this);
+	((Unit*)colQ[i]->object)->Collide(this);
 	break;
       case LineCollide::BEAM:
-	((Beam*)COLQ[i]->object)->Collide(this);
+	((Beam*)colQ[i]->object)->Collide(this);
 	break;
       case LineCollide::BALL:
 	break;

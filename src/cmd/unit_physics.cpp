@@ -242,7 +242,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   RegenShields();
   if (lastframe)
     prev_physical_state = curr_physical_state;//the AIscript should take care
-  CollideAll(); 
+  if (!SubUnit)
+    CollideAll(); 
   if (isUnit()==PLANETPTR) {
     ((Planet *)this)->gravitate (uc);
   } else {
@@ -254,9 +255,24 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-  
+ 
   
   int i;
+  if (lastframe) {
+    char tmp=0;
+    for (i=0;i<=nummesh;i++) {
+      if (!mehsdata[i])
+	continue;
+      tmp |=meshdata[i]->HasBeenDrawn();
+      if (!meshdata[i]->HasBeenDrawn()) {
+	meshdata[i]->UpdateFX(SIMULATION_ATOM);
+      }
+      meshdata[i]->UnDraw();
+    }
+    if (!tmp&&hull<0) {
+      Explode(false,SIMULATION_ATOM);
+    }
+  }      
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
       if (mounts[i].gun) {
@@ -269,19 +285,15 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
     subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc); 
     if (hull<0) {
       UnFire();//don't want to go off shooting while your body's splitting everywhere
-      subunits[i]->timeexplode+=.1*SIMULATION_ATOM;//urge slowly on
       subunits[i]->hull-=SIMULATION_ATOM;
     }
     dead &=subunits[i]->Killed();
   }
-  UpdateCollideQueue();
+  if (!SubUnit)
+    UpdateCollideQueue();
 
   if (hull<0) {
-    if (timeexplode==0) {
-      Explode(false);
-    }
-    dead&= (explosion==NULL);
-    
+    dead&= (explosion==NULL);    
     if (dead)
       Kill();
   }

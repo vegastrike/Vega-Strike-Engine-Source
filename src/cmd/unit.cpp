@@ -66,14 +66,19 @@ void Unit::calculate_extent() {
   float tmp1 = corner_min.Magnitude();
   float tmp2 = corner_max.Magnitude();
   radial_size = tmp1>tmp2?tmp1:tmp2;
-  UpdateCollideQueue();
+  if (!SubUnit) {
+    UpdateCollideQueue();
+  }
 }
+
 //FIXME Daughter units should be able to be turrets (have y/p/r)
 void Unit::SetResolveForces (bool ys) {
   resolveforces = ys;
+  /*
   for (int i=0;i<numsubunit;i++) {
     subunits[i]->SetResolveForces (ys);
   }
+  */
 }
 
 void Unit::Init()
@@ -174,17 +179,18 @@ Unit::Unit() {
 	Init();
 }
 
-Unit::Unit (Mesh ** meshes, int num) {
+Unit::Unit (Mesh ** meshes, int num, bool SubU) {
   Init ();
+  SubUnit = SubU;
   meshdata = (Mesh **)malloc ((1+num)*sizeof (Mesh *));
   memcpy (meshdata,meshes,(num)*sizeof (Mesh *));
   nummesh = num;
   meshdata[nummesh]=NULL;//turn off shield
   calculate_extent();
 }
-Unit::Unit(const char *filename, bool xml) {
+Unit::Unit(const char *filename, bool xml, bool SubU) {
 	Init();
-
+	SubUnit = SubU;
 
 	name = filename + string(" - Unit");
 	/*Insert file loading stuff here*/
@@ -220,7 +226,7 @@ Unit::Unit(const char *filename, bool xml) {
 		switch(type)
 		{
 		default:
-		  subunits[unitcount] = new Unit (unitfilename);
+		  subunits[unitcount] = new Unit (unitfilename,false,true);
 		}
 		subunits[unitcount]->SetPosition(Vector(x,y,z));
 	}
@@ -440,7 +446,7 @@ float Unit::querySphere (const Vector &start, const Vector &end) {
 
 void Unit::Destroy() {
   if (!killed)
-    if (!Explode())
+    if (!Explode(false,SIMULATION_ATOM))
       Kill();
 }
 
@@ -563,7 +569,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   int i;
   if (hull <0) {
-    Explode();
+    Explode(true, GetElapsedTime());
   }
   if (!invisible) {
     for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh

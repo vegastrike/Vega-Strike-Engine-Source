@@ -55,7 +55,7 @@ void Unit::Split (int level) {
     subunits = (Unit **)malloc (nm*sizeof (Unit *));
   }
   for (i=0;i<nm;i++) {
-    subunits[i+numsubunit] = new Unit (old+i,1);
+    subunits[i+numsubunit] = new Unit (old+i,1,true);
     subunits[i+numsubunit]->mass = mass/level;
     subunits[i+numsubunit]->timeexplode=.1;
     if (subunits[i+numsubunit]->meshdata[0]) {
@@ -374,7 +374,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, co
 
 
 
-bool Unit::Explode (bool drawit) {
+bool Unit::Explode (bool drawit, float timeit) {
   int i;
   if (explosion==NULL&&timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
     timeexplode=0;
@@ -386,7 +386,7 @@ bool Unit::Explode (bool drawit) {
   
   float tmp2[16];
   if (explosion) {
-      timeexplode+=GetElapsedTime();
+      timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
       //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
       explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
@@ -401,7 +401,7 @@ bool Unit::Explode (bool drawit) {
   }
   bool alldone = explosion?!explosion->Done():false;
   for (i=0;i<numsubunit;i++) {
-    alldone |=subunits[i]->Explode();
+    alldone |=subunits[i]->Explode(drawit,timeit);
   }
   return alldone;
 }

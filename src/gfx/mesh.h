@@ -54,7 +54,7 @@ public:
   MeshFX ():GFXLight(){TTL=TTD=delta=0;}
   MeshFX (const float TTL, const float delta, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
   void MergeLights (const MeshFX & other);
-  bool Update ();//if false::dead
+  bool Update (float ttime);//if false::dead
 };
 struct MeshDrawContext {
   float mat[16];
@@ -247,6 +247,8 @@ public:
   void EnableSpecialFX();
   void GetPolys(vector <bsp_polygon> &);
   void SetMaterial (const GFXMaterial & mat);
+  GFXBOOL HasBeenDrawn() {return will_be_drawn;} 
+  void UnDraw() {will_be_drawn=GFXFALSE;}//so one can query if it has or not been drawn
   //  void SetPosition (const Vector&);
   Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}
@@ -261,7 +263,7 @@ public:
   bool queryBoundingBox (const Vector &start,const float err);
   bool queryBoundingBox (const Vector &start, const Vector & end, const float err); 
   float rSize () {return radialSize;}
-  void UpdateFX();//based on TTL, etc
+  void UpdateFX(float ttime);//based on TTL, etc
   void AddDamageFX (const Vector &LocalPos, const Vector &LocalNorm, const float percentage, const GFXColor &color=GFXColor (1,1,1,1)); 
 
 };

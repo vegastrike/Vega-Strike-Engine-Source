@@ -184,7 +184,7 @@ friend class PlanetaryOrbit;
     float afterburn;
   } limits;
   Computer computer;
-  char resolveforces;
+  bool SubUnit;//no collision table presence.
   bool selected;
   bool killed;
   bool invisible;
@@ -208,18 +208,19 @@ public:
   void UpdateCollideQueue();
   string name;
   int faction;
+  bool resolveforces;
   float rSize () {return radial_size;}
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 
   Unit();
-  Unit (Mesh ** meshes  , int num);
-  Unit(const char *filename, bool xml=false);
+  Unit (Mesh ** meshes  , int num, bool Subunit);
+  Unit(const char *filename, bool SubUnit, bool xml);
   virtual ~Unit();
   virtual enum clsptr isUnit() {return UNITPTR;}
   static void ProcessDeleteQueue();
   void Split (int level);
   void Init();
-  bool Explode(bool draw=true);
+  bool Explode(bool draw, float timeit);
   void Destroy();//explodes then deletes
   virtual void Kill();//deletes
   inline bool Killed() {return killed;}

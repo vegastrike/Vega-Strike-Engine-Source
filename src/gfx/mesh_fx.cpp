@@ -50,19 +50,18 @@ void MeshFX::MergeLights (const MeshFX & other) {
     //    memcpy(this, &other, sizeof (MeshFX));
     //  }
 }
-bool MeshFX::Update() {
-  TTL -= GetElapsedTime();
+bool MeshFX::Update(float howmuchtime) {
+  TTL -= howmuchtime;
   if (TTL <0) {
     TTL = 0;
-    TTD -= GetElapsedTime();
-    attenuate[2]+=1.5*delta*GetElapsedTime()
-;
+    TTD -= howmuchtime;
+    attenuate[2]+=1.5*delta*howmuchtime;
     //    attenuate[1]+=2*delta*GetElapsedTime();
     
     //    attenuate[2]*=1+2*delta*GetElapsedTime();
     //    attenuate[1]*=1+2*delta*GetElapsedTime();
   } else {
-    attenuate[2]-=delta*GetElapsedTime();
+    attenuate[2]-=delta*howmuchtime;
     //    attenuate[1]-=1.25*delta*GetElapsedTime();
     //    attenuate[2]*=1- .5*delta*GetElapsedTime();
     //    attenuate[1]*=1- .5*delta*GetElapsedTime();
@@ -88,10 +87,10 @@ void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float dama
     LocalFX.push_back (newFX);
   }
 }
-void Mesh::UpdateFX() {
+void Mesh::UpdateFX(float howmuchtime) {
   //adjusts lights by TTL, eventually removing them
   for (int i=0;i<LocalFX.size();i++) {
-    if (!LocalFX[i].Update()) {
+    if (!LocalFX[i].Update(howmuchtime)) {
       vector <MeshFX>::iterator er = LocalFX.begin();
       er+=i;
       LocalFX.erase (er);

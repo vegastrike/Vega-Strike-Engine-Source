@@ -71,7 +71,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
 	  }
   } else {
     if (isunit==true) {
-      satellites.prepend(new Unit (filename, true));
+      satellites.prepend(new Unit (filename, true, false));
       satiterator = satellites.createIterator();
       satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
     }else {

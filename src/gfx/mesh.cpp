@@ -32,7 +32,7 @@
 #include <string>
 #include <fstream>
 
-
+#include "lin_time.h"
 #include "gfxlib.h"
 
 #include "hashtable.h"
@@ -90,7 +90,7 @@ void Mesh::InitUnit() {
 	
 	envMap = GFXTRUE;
 	draw_queue = NULL;
-	will_be_drawn = false;
+	will_be_drawn = GFXFALSE;
 	draw_sequence = 0;
 }
 
@@ -176,16 +176,17 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
-  UpdateFX();
+  UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
   //  c.mat[12]=pos.i;
   //  c.mat[13]=pos.j;
   //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
-    orig->will_be_drawn = true;
+    orig->will_be_drawn = GFXTRUE;
     undrawn_meshes[draw_sequence].push_back(OrigMeshContainer(orig));
   }
+  will_be_drawn=GFXTRUE;
 }
 
 

@@ -385,7 +385,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     
     CrossProduct (Q,R,P);
     indx = xml->units.size();
-    xml->units.push_back(new Unit (filename.c_str(), true));
+    xml->units.push_back(new Unit (filename.c_str(), true,true));
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     
@@ -763,9 +763,10 @@ fclose (inFile);
   for( a=0; a<numsubunit; a++) {
     subunits[a] = xml->units[a];
   }
-
-  calculate_extent();
-  UpdateCollideQueue();
+  if (!SubUnit) {
+    calculate_extent();
+    UpdateCollideQueue();
+  }
   string tmpname (filename);
 
 

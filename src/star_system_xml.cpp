@@ -347,7 +347,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       assert(xml->moons.size()!=0);
       xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,0,vector <char *>(),xml->unitlevel-1,ourmat,true);
     } else {
-      xml->moons.push_back((Planet *)new Unit(filename,true));
+      xml->moons.push_back((Planet *)new Unit(filename,true ,false));
       xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun, NULL));
       xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun);
     }

@@ -3,6 +3,7 @@
 #include "gfx/vec.h"
 #include <algorithm>
 #include <vector>
+#include <stdio.h>
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 
@@ -91,25 +92,13 @@ public:
 	y = hash_int(j);
 	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
-	  //	  table[i][j][k].push_back(target);
-	  for (unsigned int l=0;l<table[x][y][z].size();l++) {
-	    unsigned int m=0;
-	    for (;m<retval.size();m++) {
-	      if (retval[m]==table[x][y][z][l])
-		//make sure we're not pushing back duplicates;
-		break;
-	    }
-	    if (m==retval.size())
-	      retval.push_back (table[x][y][z][l]);
-	  }
+	  retval.insert (retval.end(),table[x][y][z].begin(),table[x][y][z].end());
 	}
       }
     }
+    std::sort (retval.begin()+hugeobjects.size(),retval.end());
   }
   void Put(LineCollide* target,const T objectToPut) {
-    //    int minx,miny,minz,maxx,maxy,maxz;
-    //    hash_vec(target->Mini,minx,miny,minz);
-    //    hash_vec(target->Maxi,maxx,maxy,maxz);
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -151,7 +140,7 @@ public:
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
-    T retval;
+    T *retval=NULL;
     std::vector <T>::iterator removal= hugeobjects.begin();
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -160,35 +149,41 @@ public:
     if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-
-    if (target->hhuge) {
-      while (removal!=hugeobjects.end()) {
-		  removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
-	if (removal!=hugeobjects.end()) {
-	  retval = *removal;
-	  hugeobjects.erase(removal);
-	}
-      }
-      return retval;
-    }
-    for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
-      x = hash_int(i);
-      for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
-	y = hash_int(j);
-	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
-	  z = hash_int(k);
-	  removal = table[x][y][z].begin();
-	  while (removal!=table[x][y][z].end()) {
-		  removal = std::find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
-	    if (removal!=table[x][y][z].end()) {
-	      retval = *removal;
-	      table[x][y][z].erase(removal);
+    if (!target->hhuge) {
+      for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+	x = hash_int(i);
+	for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
+	  y = hash_int(j);
+	  for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	    z = hash_int(k);
+	    removal = table[x][y][z].begin();
+	    while (removal!=table[x][y][z].end()) {
+	      removal = std::find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
+	      if (removal!=table[x][y][z].end()) {
+		retval = removal;
+		table[x][y][z].erase(removal);
+	      }
 	    }
 	  }
 	}
       }
     }
-    return retval;
+    if (!retval&&!target->hhuge)
+      {
+	fprintf (stderr, "bad things");
+      }
+    if (!retval||target->hhuge) {
+      while (removal!=hugeobjects.end()) {
+		  removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
+	if (removal!=hugeobjects.end()) {
+	  retval = removal;
+	  hugeobjects.erase(removal);
+	}
+      }
+    }
+
+
+    return *retval;
   }
 };
 

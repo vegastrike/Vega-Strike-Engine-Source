@@ -467,7 +467,7 @@ void createObjects() {
     }
     if (tmptarget[a]<0||tmptarget[a]>numf)
       tmptarget[a]=0;
-    fighters[a] = new Unit(fightername, true);
+    fighters[a] = new Unit(fightername, true, false);
     fighters[a]->SetPosition (pox);
     
     fighters[a]->SetAI(new Order());
