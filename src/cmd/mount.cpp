@@ -276,7 +276,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			int snd =AUDCreateSound(sound,false);
                         if (ips&&cp!=NULL&&cp->GetView()<=CP_RIGHT) {
                           AUDAdjustSound(snd,Vector(0,0,0),velocity);
-                          static float gain=XMLSupport::parse_float(vs_config->getVariable("sound","weapon_gain",".25"));
+                          static float gain=XMLSupport::parse_float(vs_config->getVariable("audio","weapon_gain",".25"));
                           AUDSoundGain(snd,gain);
                         }else {
                           AUDAdjustSound(snd,tmp.position,velocity);
