@@ -31,8 +31,10 @@ void Order::Communicate (const CommunicationMessage &c) {
   }
   if ((un=newC->sender.GetUnit())) {
 	  if (un!=parent) {
-	    if (!already_communicated){
-	      AdjustRelationTo (un,newC->getDeltaRelation());
+		static bool talk_more_helps=XMLSupport::parse_bool(vs_config->getVariable("AI","talking_faster_helps","true"));
+		static float talk_factor=XMLSupport::parse_float(vs_config->getVariable("AI","talk_relation_factor",".5"));
+	    if (talk_more_helps||!already_communicated){
+	      AdjustRelationTo (un,newC->getDeltaRelation()*talk_factor);
 	    }
 	    messagequeue.push_back (newC);
 	  }
