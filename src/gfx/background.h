@@ -24,6 +24,7 @@
 class SphereMesh;
 struct Texture;
 class Background {
+  bool Enabled;
   GFXVertexList * stars;
   Texture *up;
   Texture *left;
@@ -35,7 +36,7 @@ class Background {
 public:
   Background(const char *file, int numstars, float spread);
   ~Background();
-  
+  void EnableBG (bool);
   void Draw();
 };
 

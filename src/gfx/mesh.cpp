@@ -182,25 +182,29 @@ void Mesh::SetMaterial (const GFXMaterial & mat) {
     }
   }
 }
-
+Mesh * Mesh::getLOD (float lod) {
+  if (!orig)
+    return this;
+  Mesh * retval =&orig[0];
+  for (int i=1;i<numlods;i++) {
+    if (lod<orig[i].lodsize) {
+      retval = &orig[i];
+    } else {
+      break;
+    }
+  }
+  return retval;
+}
 void Mesh::Draw(float lod, const Transformation &trans, const Matrix m)
 {
   //  Vector pos (local_pos.Transform(m));
-  int i;
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
   //  c.mat[12]=pos.i;
   //  c.mat[13]=pos.j;
   //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
-  Mesh *origmesh = &orig[0];
-  for (i=1;i<numlods;i++) {
-    if (lod<orig[i].lodsize) {
-      origmesh = &orig[i];
-    } else {
-      break;
-    }
-  }
+  Mesh *origmesh = getLOD (lod);
   origmesh->draw_queue->push_back(c);
   if(!origmesh->will_be_drawn) {
     origmesh->will_be_drawn = GFXTRUE;
@@ -208,6 +212,45 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m)
   }
   will_be_drawn=GFXTRUE;
 }
+void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*= identity_transformation*/, const Matrix m) {
+  Mesh *o = getLOD (lod);
+  o->vlist->LoadDrawState();
+  if (centered) {
+    float m1[16];
+    memcpy (m1,m,sizeof (float)*16);
+    Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
+    m1[12]=pos.i;
+    m1[13]=pos.j;
+    m1[14]=pos.k;
+    Transformation tmp = transform;
+    tmp.position = pos;
+    GFXLoadMatrix (MODEL,m1);    
+  } else {	
+    if (o->draw_sequence!=MESH_SPECIAL_FX_ONLY) {
+      GFXLoadIdentity(MODEL);
+      GFXPickLights (Vector (m[12],m[13],m[14]),rSize());
+    }
+    GFXLoadMatrix (MODEL,m);
+  } 
+  vector <int> specialfxlight;
+  unsigned int i;
+  for ( i=0;i<LocalFX.size();i++) {
+    int ligh;
+    GFXCreateLight (ligh,(LocalFX)[i],true);
+    specialfxlight.push_back(ligh);
+  }
+  GFXSelectMaterial(o->myMatNum);
+  if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
+    GFXDisable(DEPTHWRITE);
+  GFXBlendMode(blendSrc, blendDst);
+  if (o->Decal)
+    o->Decal->MakeActive();
+  o->vlist->Draw();
+  for ( i=0;i<specialfxlight.size();i++) {
+    GFXDeleteLight (specialfxlight[i]);
+  }
+}
+
 
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {

@@ -163,7 +163,7 @@ void GFXInit (int argc, char ** argv){
     /* Ingore key-repeat messages */
     glutIgnoreKeyRepeat(1);
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
-    glClearColor ((float)0.0, (float)0.0, (float)1.0, (float)0);
+    glClearColor ((float)0.0, (float)0.0, (float)0.0, (float)0);
     glutReshapeFunc (Reshape);
     initfov();
     glShadeModel (GL_SMOOTH);

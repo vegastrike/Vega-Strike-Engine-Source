@@ -32,7 +32,6 @@ extern GFXBOOL bTex1;
 
 void /*GFXDRVAPI*/ GFXBeginScene()
 {
-	GFXClear(GFXFALSE);
 	GFXLoadIdentity(MODEL); // bad this should instead load the cached view matrix
 	light_rekey_frame();
 }

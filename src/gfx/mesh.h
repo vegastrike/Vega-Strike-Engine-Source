@@ -244,11 +244,13 @@ protected:
   void InitUnit();
   friend class OrigMeshContainer;
   vector <MeshFX> LocalFX;
+  Mesh *getLOD (float lod);
 public:
   Mesh();
   Mesh(const char *filename, bool xml, int faction, bool orig=false);
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   virtual ~Mesh();
+  
   unsigned int numFX () {return LocalFX.size();}
   void EnableSpecialFX();
   void GetPolys(vector <bsp_polygon> &);
@@ -259,6 +261,7 @@ public:
   Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}
   void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
   virtual void ProcessDrawQueue();
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   void setEnvMap(GFXBOOL newValue) {envMap = newValue;}

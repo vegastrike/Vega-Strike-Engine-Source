@@ -34,6 +34,7 @@
 #include "cmd/ai/script.h"
 #include "gfx/cockpit.h"
 #include "gfx/aux_texture.h"
+#include "gfx/background.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -148,15 +149,19 @@ static void Quit(int,KBSTATE newState) {
 }
 bool cockpitfront=false;
 static void Inside(int,KBSTATE newState) {
-
-  static bool tmp=false;
+  const int cockpiton=1;
+  const int backgroundoff=2;
+  const int max = 4;
+  static int tmp=1;
   if(newState==PRESS&&cockpitfront) {
-    if (tmp) {
+    if (tmp&cockpiton) {
       _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
     }else {
       _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
-    tmp = !tmp;
+    _Universe->activeStarSystem()->getBackground()->EnableBG(!(tmp&backgroundoff));
+    tmp--;
+    if (tmp<0) tmp=max-1;
   }
   if(newState==PRESS||newState==DOWN) {
     cockpitfront=true;

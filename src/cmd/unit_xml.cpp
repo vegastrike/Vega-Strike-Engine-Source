@@ -802,7 +802,7 @@ void Unit::LoadXML(const char *filename) {
     }
     bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
   }else {
-    SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp", NULL, false,false,ONE, ONE);
+    SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp", NULL, false,ONE, ONE);
     meshdata[nummesh] = tmp;
     bspShield=NULL;
   }
