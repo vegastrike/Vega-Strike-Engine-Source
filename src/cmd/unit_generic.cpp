@@ -1997,7 +1997,7 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
   return def;
 }
 bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
-	static bool auto_valid = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
+	static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
 	if(!auto_valid) {
 		return false;
 	}
