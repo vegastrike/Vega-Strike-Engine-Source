@@ -420,8 +420,9 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
     {
-      char * unitdir = GetUnitDir(un->name.c_str());
-      
+
+      char *unitdir =GetUnitDir(un->name.c_str());
+
       Unit * temprate= new Unit ((string(unitdir)+string(".template")).c_str(),true,un->faction);
       free(unitdir);
       if (temprate->name!=string("LOAD_FAILED")) {
@@ -448,6 +449,12 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  this->part = *part;
 	  if (NewPart)
 	    NewPart->Kill();
+	  if (0==strcmp (input_buffer,"repair")) {
+	    free (input_buffer);
+	    char *unitdir =GetUnitDir(un->name.c_str());
+	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
+	    free(unitdir);
+	  }
 	  NewPart = new Unit (input_buffer,true,_Universe->GetFaction("upgrades"));
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name==string("LOAD_FAILED")) {

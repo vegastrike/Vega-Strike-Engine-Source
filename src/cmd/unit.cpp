@@ -185,8 +185,8 @@ void Unit::Init()
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   
   shieldtight=0;//sphere mesh by default
-  energy=maxenergy=10000;
-  recharge = 10;
+  energy=maxenergy=1;
+  recharge = 1;
   shield.recharge=shield.leak=0;
   shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
   hull=10;
@@ -203,8 +203,8 @@ void Unit::Init()
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
-  mass = 1.5;
-  fuel = 2000;
+  mass = .01;
+  fuel = 000;
 
   /*
   yprrestricted=0;
@@ -212,7 +212,7 @@ void Unit::Init()
   ymax = pmax = rmax = PI;
   ycur = pcur = rcur = 0;
   */
-  MomentOfInertia = 1.5;
+  MomentOfInertia = .01;
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   AngularVelocity = myang;
   Velocity = Vector(0,0,0);
@@ -224,24 +224,24 @@ void Unit::Init()
   selected = false;
   image->selectionBox = NULL;
 
-  limits.yaw = 25.5;
-  limits.pitch = 25.5;
-  limits.roll = 25.5;
+  limits.yaw = 2.55;
+  limits.pitch = 2.55;
+  limits.roll = 2.55;
 	
-  limits.lateral = 80;
-  limits.vertical = 80;
-  limits.forward = 200;
-  limits.afterburn=500;
-  limits.retro=200;
+  limits.lateral = 2;
+  limits.vertical = 8;
+  limits.forward = 2;
+  limits.afterburn=5;
+  limits.retro=2;
   Target(NULL);
   VelocityReference(NULL);
   computer.threat.SetUnit (NULL);
   computer.set_speed=0;
-  computer.max_speed=15;
-  computer.max_ab_speed=40;
-  computer.max_yaw=100;
-  computer.max_pitch=100;
-  computer.max_roll=100;
+  computer.max_speed=1;
+  computer.max_ab_speed=1;
+  computer.max_yaw=1;
+  computer.max_pitch=1;
+  computer.max_roll=1;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
   computer.radar.maxrange=XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
