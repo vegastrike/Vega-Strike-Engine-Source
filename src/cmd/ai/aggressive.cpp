@@ -425,7 +425,11 @@ void AggressiveAI::Execute () {
   fflush (stderr);
 #endif    
   if (getTimeCompression()>3) {
-    parent->SetVelocity(parent->GetVelocity()*(parent->GetComputerData().max_speed()/getTimeCompression()));
+	float mag = parent->GetVelocity().Magnitude();
+	if (mag>.01)
+		mag = 1/mag;
+    parent->SetVelocity(parent->GetVelocity()*(mag*parent->GetComputerData().max_speed()/getTimeCompression()));
+	parent->NetLocalForce=parent->NetForce=Vector(0,0,0);
   }
 }  
 
