@@ -645,8 +645,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+#ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
-
+#endif
   int i;
   if (hull <0) {
     Explode(true, GetElapsedTime());
@@ -769,10 +770,9 @@ void Unit::Fire (bool Missile) {
       if (mounts[i].type.EnergyRate>energy) 
 	continue;
     }
-    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,Velocity,this,Target(),Missile)) {//FIXME turrets
-
-    energy -=apply_float_to_short( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
-    }//unfortunately cumulative transformation not generated in physics atom
+    if (mounts[i].Fire(this,Missile)) {
+      energy -=apply_float_to_short( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
+    }
   }
 }
 
@@ -878,78 +878,85 @@ void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
     }
   }
 }
-
+void Unit::Mount::PhysicsAlignedUnfire() {
+  //Stop Playing SOund?? No, that's done in the beam, must not be aligned
+  if (processed==UNFIRED) {
+    processed=PROCESSED;
+  }
+}
 void Unit::Mount::UnFire () {
   if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
-    return;
+    return ;
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
-bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool Missile) {
-  Unit * temp;
-
-  Transformation tmp = LocalPosition;
-  tmp.Compose (Cumulative,m);
+bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target) {
+  if (processed==FIRED) {
+    processed = PROCESSED;
+    Unit * temp;
+    Transformation tmp = LocalPosition;
+    tmp.Compose (Cumulative,m);
+    Matrix mat;
+    tmp.to_matrix (mat);
+    switch (type.type) {
+    case weapon_info::BEAM:
+      break;
+    case weapon_info::BOLT:
+      new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity      
+      break;
+    case weapon_info::BALL:
+      new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work      
+      break;
+    case weapon_info::PROJECTILE:
+      temp = new Unit (type.file.c_str(),true,false,owner->faction);
+      if (target&&target!=owner) {
+	temp->Target (target);
+	temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
+      } else {
+	temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
+      }
+      temp->SetOwner (owner);
+      temp->Velocity = velocity;
+      temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
+      CopyMatrix (temp->cumulative_transformation_matrix,m);
+      _Universe->activeStarSystem()->AddUnit(temp);
+      break;
+    }
+    if (!AUDIsPlaying (sound)) {
+      AUDPlay (sound,tmp.position,velocity,1);
+    }else {
+      AUDAdjustSound(sound,tmp.position,velocity);
+    }
+    return true;
+  }
+  return false;
+}
+bool Unit::Mount::Fire (Unit * owner, bool Missile) {
   if (status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
-    if (!Missile){
-      if (ref.gun==NULL) {
+    if (ref.gun==NULL) {
+      if (ammo>0)
+	ammo--;
+      processed=FIRED;
+      ref.gun = new Beam (LocalPosition,type,owner,sound);
+      
+    } else {
+      if (ref.gun->Ready()) {
 	if (ammo>0)
 	  ammo--;
-	ref.gun = new Beam (LocalPosition,type,owner,sound);
-      } else {
-	if (ref.gun->Ready()) {
-	  if (ammo>0)
-	    ammo--;
-	  ref.gun->Init (LocalPosition,type,owner);
-	} else 
-	  return true;//can't fire an active beam
-      }
+	processed=FIRED;
+	ref.gun->Init (LocalPosition,type,owner);
+      } else 
+	return true;//can't fire an active beam
     }
   }else { 
     if (ref.refire>type.Refire) {
       ref.refire =0;
-      Matrix mat;
-      tmp.to_matrix (mat);
-      switch (type.type) {
-      case weapon_info::BALL:
-	if (ammo>0)
-	    ammo--;
-	new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity
-	break;
-      case weapon_info::BOLT:
-	if (ammo>0)
-	    ammo--;
-	new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work
-	break;
-      case weapon_info::PROJECTILE:
-	  if (ammo>0)
-	    ammo--;
-	  temp = new Unit (type.file.c_str(),true,false,owner->faction);
-	  if (target&&target!=owner) {
-	    temp->Target (target);
-	    temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
-	  } else {
-	    temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
-	  }
-	  temp->SetOwner (owner);
-	  temp->Velocity = velocity;
-	  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
-	  CopyMatrix (temp->cumulative_transformation_matrix,m);
-	  _Universe->activeStarSystem()->AddUnit(temp);
-	
-	break;
-      default: 
-	break;
-      }
+      if (ammo>0)
+	ammo--;
+      processed=FIRED;	
     }
-  }
-
-  if (!AUDIsPlaying (sound)) {
-    AUDPlay (sound,tmp.position,velocity,1);
-  }else {
-    AUDAdjustSound(sound,tmp.position,velocity);
   }
   return true;
 }

@@ -189,8 +189,9 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-
+#ifdef PERFRAMESOUND
   AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
+#endif
   AUDSoundGain (sound,curthick*curthick/(thickness*thickness));
 
   RecalculateVertices();
@@ -255,6 +256,9 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   //to help check for crashing.
   center = cumulative_transformation.position;
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
+#ifndef PERFRAMESOUND
+  AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
+#endif
   
   curthick+=(impact&UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
   if (curthick > thickness)

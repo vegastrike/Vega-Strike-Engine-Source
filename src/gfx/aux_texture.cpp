@@ -179,8 +179,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	fp = fopen (FileName, "rb");
 	bool shared = (fp==NULL);
 	if(checkold(texfilename,shared,texfilename)) {
-	  if (fp)
+	  if (fp) {
 	    fclose (fp);
+	  }
+	  if (fp2) {
+	    fclose (fp2);
+	  }
 	  return;
 	}
 	if (!fp) {
@@ -195,6 +199,9 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  data = NULL;
 	  free(original);
 	  original=NULL;
+	  if (fp2) {
+	    fclose (fp2);
+	  }
 	  return;
 	}
 	//	strcpy(filename, FileName);
@@ -264,6 +271,8 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	}
 	Bind();
  	fclose (fp);
+	if (fp2)
+	  fclose (fp2);
 	if (data)
 	  delete [] data;
 	data = NULL;
@@ -288,8 +297,11 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	FILE *fp = NULL;
 	fp = fopen (FileNameRGB, "rb");
 	bool shared = (fp==NULL);
-	if(checkold(texfilename,shared,texfilename))
-		return;
+	if(checkold(texfilename,shared,texfilename)) {
+	  if (fp)
+	    fclose (fp);
+	  return;
+	}
 	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileNameRGB).c_str(),"rb");
 	}
@@ -337,6 +349,9 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 			if (sizeX != (unsigned int) le32_to_cpu(info1.biWidth)||sizeY!=(unsigned int)le32_to_cpu(info1.biHeight))
 			{
 				data = NULL;
+				fclose (fp1);
+				if (fp) 
+				  fclose (fp);
 				return;
 			}
 			RGBQUAD ptemp1;	
@@ -350,10 +365,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	}
 	if(le16_to_cpu(info.biBitCount) == 24) {
 	  mode = _24BITRGBA;
-	  data = NULL;
 	  data= new unsigned char [4*sizeY*sizeX];
-	  if (!data)
-	    return;
 	  for (int i=sizeY-1; i>=0;i--)
 	    {
 	      int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
@@ -398,8 +410,13 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	    paltemp[2] = ctemp;
 	    paltemp+=4;
 	  }
-	  if (!data)
+	  if (!data) {
+	    if (fp)
+	      fclose (fp);
+	    if (fp1)
+	      fclose (fp1);
 	    return;
+	  }
 		//FIXME VEGASTRIKE???		int k=0;
 	  for (int i=sizeY-1; i>=0;i--) {
 	    for (unsigned int j=0; j<sizeX;j++)
@@ -461,7 +478,11 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  
 	}
 	Bind();
-	fclose(fp);
+	if (fp)
+	  fclose(fp);
+	if (fp1) {
+	  fclose (fp1);
+	}
 	if (data)
 	  delete [] data;
 	data = NULL;

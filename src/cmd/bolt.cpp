@@ -92,8 +92,10 @@ void Bolt::Draw () {
       //      cur->DrawNow(result);
       GFXLoadMatrix (MODEL,(*j)->drawmat);
 #ifdef PERBOLTSOUND
+#ifdef PERFRAMESOUND
       if ((*j)->sound!=-1)
 	AUDAdjustSound ((*j)->sound,Vector ((*j)->drawmat[12],(*j)->drawmat[13],(*j)->drawmat[14]),(*j)->ShipSpeed+(*j)->speed*Vector ((*j)->drawmat[8],(*j)->drawmat[9],(*j)->drawmat[10]));
+#endif
 #endif
       GFXColorf ((*j)->col);
       cur->DrawNoTransform();
@@ -174,12 +176,6 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
 
 
 bool Bolt::Update () {
-#ifdef PERBOLTSOUND
-  if (!AUDIsPlaying(sound)) {
-    AUDDeleteSound (sound);
-    sound=-1;
-  }
-#endif
   curdist +=speed*SIMULATION_ATOM;
   prev_position = cur_position;
   cur_position.i+=(ShipSpeed.i+drawmat[8]*speed)*SIMULATION_ATOM;//the r vector I believe;
@@ -189,6 +185,18 @@ bool Bolt::Update () {
     delete this;//risky
     return false;
   }
+#ifdef PERBOLTSOUND
+  if (!AUDIsPlaying(sound)) {
+    AUDDeleteSound (sound);
+    sound=-1;
+  } else {
+#ifndef PERFRAMESOUND
+    if ((*j)->sound!=-1)
+      AUDAdjustSound ((*j)->sound,cur_position,(*j)->ShipSpeed+(*j)->speed*Vector ((*j)->drawmat[8],(*j)->drawmat[9],(*j)->drawmat[10]));
+#endif
+
+  }
+#endif
   return true;
 }
 

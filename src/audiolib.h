@@ -43,4 +43,5 @@ void AUDStartPlaying (const int sound);
 void AUDPlay (const int sound, const Vector & pos, const Vector & vel, const float gain);
 ///Pauses a loaded sound
 void AUDPausePlaying (const int sound);
+//#define PERFRAMESOUND
 #endif

@@ -271,7 +271,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
- 
+
   
   int i;
   if (lastframe) {
@@ -296,6 +296,16 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
       }
     } else {
       mounts[i].ref.refire+=SIMULATION_ATOM;
+    }
+    if (mounts[i].processed==Mount::FIRED) {
+      Transformation t1;
+      Matrix m1;
+      t1=prev_physical_state;//a hack that will not work on turrets
+      t1.Compose (trans,transmat);
+      t1.to_matrix (m1);
+      mounts[i].PhysicsAlignedFire (t1,m1,Velocity,this,Target());//FIXME will not work for turrets (cumulative velocity) maybe need to add to physics frame!
+    }else if (mounts[i].processed==Mount::UNFIRED) {
+      mounts[i].PhysicsAlignedUnfire();
     }
   }
   bool dead=true;
@@ -331,7 +341,10 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
   if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
     Velocity += temp;
   } 
+#ifndef PERFRAMESOUND
+  AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity); 
   NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
+#endif
   /*
     if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10) {
     float magvel = Velocity.Magnitude(); float y = (1-magvel*magvel*oocc);

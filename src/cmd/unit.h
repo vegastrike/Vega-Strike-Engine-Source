@@ -184,10 +184,11 @@ class Unit {
     short ammo;
     ///The data behind this weapon. May be accordingly damaged as time goes on
     weapon_info type;
-    ///The sound this mount makes when fired
-    int sound;
+    enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
+    ///The sound this mount makes when fired
+    int sound;
     Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
     Mount(const std::string& name, short int ammo=-1);
     ///Sets this gun to active, unless unchosen or destroyed
@@ -205,7 +206,9 @@ class Unit {
      * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
      * should it fire
      */ 
-    bool Fire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, bool Missile=false);
+    void PhysicsAlignedUnfire();
+    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target);
+    bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
   ///Mount may access unit
   friend class Unit::Mount;

@@ -28,7 +28,7 @@ class Camera{
 	Vector Coord;
 	Matrix view;
 	GFXBOOL changed;
-	
+	Vector lastpos;
 	float x, y, xsize, ysize;
 	float zoom;
 	float cockpit_offset;
@@ -45,7 +45,8 @@ private:
 public:
 	Vector P,Q,R;
 	PhysicsSystem myPhysics;
-
+	///This function updates the sound if sound is not updated on a per frame basis
+	void UpdateCameraSounds();
 	Camera(ProjectionType proj = PERSPECTIVE);
         void GetView (Matrix);
         const Vector & GetR () {return R;}

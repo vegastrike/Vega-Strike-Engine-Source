@@ -201,6 +201,7 @@ void StarSystem::Update() {
       } else
       if (current_stage==PHY_RESOLV) {
       iter = drawList->createIterator();
+      AccessCamera()->UpdateCameraSounds();
       while((unit = iter->current())!=NULL) {
 
 	unit->UpdatePhysics(identity_transformation,identity_matrix,firstframe,units);

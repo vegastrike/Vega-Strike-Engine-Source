@@ -75,13 +75,22 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		GFXLookAt (Coord-R, Coord, Q);
 		if (updateFrustum) GFXCalculateFrustum();
 		Vector lastpos(view[12],view[13],view[14]);
-		
+#ifdef PERFRAMESOUND		
 		AUDListener (Coord, (Coord-lastpos)/GetElapsedTime());//this pos-last pos / elapsed time
+#endif
 		GFXGetMatrix(VIEW,view);
 		GFXSubwindow(x,y,xsize,ysize);
-
+#ifdef PERFRAMESOUND
 		AUDListenerOrientation (P,Q,R);
+#endif
 	}
+}
+
+void Camera::UpdateCameraSounds() {
+#ifndef PERFRAMESOUND
+  AUDListener (Coord,(Coord-lastpos)/SIMULATION_ATOM);
+  AUDListenerOrientation (P,Q,R);
+#endif
 }
 
 void Camera::UpdateGLCenter()
