@@ -123,6 +123,33 @@ bool _Slew = true;
  }
 bool QuitAllow=false;
 extern bool cleanexit;
+  static void SwitchVDUTo(VDU::VDU_MODE v) {
+    static int whichvdu=1; 
+    for (int j=0;j<3;++j) {
+      if (v!=_Universe->AccessCockpit()->getVDUMode(whichvdu)||(v!=VDU::VIEW&&v!=VDU::WEAPON)){
+        whichvdu+=1;
+        whichvdu%=2;
+      }      
+      int curmode = _Universe->AccessCockpit()->getVDUMode(whichvdu);
+      
+      if (v==_Universe->AccessCockpit()->getVDUMode(whichvdu)) {
+        if (v==VDU::VIEW)
+          _Universe->AccessCockpit()->VDUSwitch(whichvdu);//get different view mode
+        return;
+      }
+      for (int i=0;i<32;++i) {
+        _Universe->AccessCockpit()->VDUSwitch(whichvdu);
+        if (v==_Universe->AccessCockpit()->getVDUMode(whichvdu)) {
+          return;
+        }
+      }
+      for (int i=0;i<32;++i) {
+        _Universe->AccessCockpit()->VDUSwitch(whichvdu);
+        if (curmode==_Universe->AccessCockpit()->getVDUMode(whichvdu))       
+          break;
+      }
+    }
+  }
 namespace CockpitKeys {
   
   void QuitNow () {
@@ -221,13 +248,16 @@ namespace CockpitKeys {
   void Quit(int,KBSTATE newState) {
 	if(newState==PRESS) {
 	  if (QuitAllow) {
+            /*
 	    UniverseUtil::IOmessage(0,"game","all","#ffff00Quit Mode cancelled, Camera Keys restored to former function.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ff00Press Esc and then q to Quit at a later point.");
+            */
 	  }else {
+            /*
 	    UniverseUtil::IOmessage(0,"game","all","#ff0000You have pressed the quit key.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q, the game will quit.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ff55Pressing ESC again will cancel quit confirm mode.");
-	    
+	    */
 	  }
 	  QuitAllow = !QuitAllow;
 	}
@@ -346,7 +376,43 @@ bool cockpitfront=true;
 	  _Universe->AccessCockpit()->SetView (CP_BACK);
 	}
 }
-
+  void CommModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::COMM);
+  }
+  void ScanningModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::SCANNING);
+  }
+  void ObjectiveModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::OBJECTIVES);
+  }
+  void TargetModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::TARGET);
+  }
+  void ViewModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::VIEW);
+  }
+  void DamageModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::DAMAGE);
+  }
+  void ManifestModeVDU(int, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::MANIFEST);
+  }
+  void GunModeVDU(int i, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
+    FireKeyboard::WeapSelKey(i,newState);
+  }
+  void ReverseGunModeVDU(int i, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
+    FireKeyboard::ReverseWeapSelKey(i,newState);
+  }
+  void MissileModeVDU(int i, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
+    FireKeyboard::MisSelKey(i,newState);
+  }
+  void ReverseMissileModeVDU(int i, KBSTATE newState){
+    if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
+    FireKeyboard::ReverseMisSelKey(i,newState);
+  }
   void SwitchLVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {

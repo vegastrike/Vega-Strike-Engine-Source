@@ -136,6 +136,7 @@ private:
   void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   void SetupViewPort (bool clip=true);
+  int getVDUMode(int vdunum);
   void VDUSwitch (int vdunum);
   void ScrollVDU (int vdunum, int howmuch);
   void ScrollAllVDU (int howmuch);

@@ -929,6 +929,8 @@ void GameCockpit::Init (const char * file) {
     Panel.front()->GetPosition (x,y);
     Panel.front()->SetPosition (x,y+viewport_offset);  
   }
+
+  
 }
 void GameCockpit::Delete () {
   int i;
@@ -1677,7 +1679,13 @@ GameCockpit::~GameCockpit () {
   Delete();
   delete savegame;
 }
-
+int GameCockpit::getVDUMode(int vdunum) {
+  if (vdunum<(int)vdu.size()) {
+    if (vdu[vdunum]) {
+      return vdu[vdunum]->getMode();
+    }
+  }return 0;
+}
 void GameCockpit::VDUSwitch (int vdunum) {
   if (soundfile>=0) {
     //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0), .5);

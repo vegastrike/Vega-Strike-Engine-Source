@@ -385,6 +385,19 @@ void GameVegaConfig::initCommandMap(){
  command_map["Cockpit::InsideRight"]=CockpitKeys::InsideRight;
  command_map["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
  command_map["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
+
+ command_map["Cockpit::CommMode"]=CockpitKeys::CommModeVDU;
+ command_map["Cockpit::TargetMode"]=CockpitKeys::TargetModeVDU;
+ command_map["Cockpit::ManifestMode"]=CockpitKeys::ManifestModeVDU;
+ command_map["Cockpit::ViewMode"]=CockpitKeys::ViewModeVDU;
+ command_map["Cockpit::DamageMode"]=CockpitKeys::DamageModeVDU;
+ command_map["Cockpit::GunMode"]=CockpitKeys::GunModeVDU;
+ command_map["Cockpit::ReverseGunMode"]=CockpitKeys::ReverseGunModeVDU;
+ command_map["Cockpit::MissileMode"]=CockpitKeys::MissileModeVDU;
+ command_map["Cockpit::ReverseMissileMode"]=CockpitKeys::ReverseMissileModeVDU;
+ command_map["Cockpit::ObjectiveMode"]=CockpitKeys::ObjectiveModeVDU;
+ command_map["Cockpit::ScanningMode"]=CockpitKeys::ScanningModeVDU;
+
  command_map["Cockpit::MapKey"]=MapKey;
  command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
  command_map["Cockpit::SwitchMVDU"]=CockpitKeys::SwitchMVDU;

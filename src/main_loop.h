@@ -22,8 +22,17 @@ namespace CockpitKeys {
    void  SwitchULVDU(int,KBSTATE newState) ;
    void  SwitchURVDU(int,KBSTATE newState) ;
    void  SwitchUMVDU(int,KBSTATE newState) ;
-
-
+   void  CommModeVDU(int, KBSTATE);
+   void  ObjectiveModeVDU(int, KBSTATE);
+   void  TargetModeVDU(int, KBSTATE);
+   void  ManifestModeVDU(int, KBSTATE);
+   void  DamageModeVDU(int, KBSTATE);
+   void  GunModeVDU(int, KBSTATE);
+   void  MissileModeVDU(int, KBSTATE);
+   void  ScanningModeVDU(int, KBSTATE);
+   void  ReverseGunModeVDU(int, KBSTATE);
+   void  ReverseMissileModeVDU(int, KBSTATE);
+   void  ViewModeVDU(int,KBSTATE);
    void  ScrollUp(int,KBSTATE newState) ;
    void  ScrollDown(int,KBSTATE newState) ;
    void  Behind(int,KBSTATE newState) ;

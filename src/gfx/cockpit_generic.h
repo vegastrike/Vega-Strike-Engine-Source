@@ -128,6 +128,7 @@ protected:
   virtual void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   virtual void SetupViewPort (bool clip=true) {}
+  virtual int getVDUMode (int vdunum) {return 0;}
   virtual void VDUSwitch (int vdunum) {}
   virtual void ScrollVDU (int vdunum, int howmuch) {}
   virtual void ScrollAllVDU (int howmuch) {}

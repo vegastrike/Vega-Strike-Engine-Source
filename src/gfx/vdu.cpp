@@ -495,7 +495,7 @@ void VDU::DrawMessages(Unit *target){
 
 void	VDU::DrawScanningMessage()
 {
-  tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+  //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
 bool VDU::SetCommAnimation (Animation * ani) {
