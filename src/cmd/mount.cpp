@@ -165,17 +165,22 @@ Mount::Mount() {
 	status= UNCHOSEN;
 	processed=Mount::PROCESSED;
 	sound=-1;
-	xyscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
-	zscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
+	static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
+
+	static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
+	xyscale=xyscalestat;	
+	zscale=zscalestat;
 }
 Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
+  static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
   
+  static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));  
   if (xyscale==-1)
-	  xyscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
+	  xyscale=xyscalestat;
   if (zscale==-1)
-	  zscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
+	  zscale=zscalestat;
   this->zscale=zscale;
     this->xyscale=xyscale;
   ammo = am;
