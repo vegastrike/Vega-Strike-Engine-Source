@@ -1097,22 +1097,38 @@ static bool SuperDock(Unit * parent, Unit* target) {
   return false;
 }
 static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severity) {
-  bool hasDock = severity==0?parent->Dock(targ):SuperDock(parent,targ);
-  bool isDone=false;
-  CommunicationMessage c(targ,parent,NULL,0);    
-  if (hasDock) {
-    isDone=true;
-    c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
-    abletodock(3);
-    //vectorOfKeyboardInput[playa].req=true;
-    parent->getAIState()->Communicate (c);
-    parent->UpgradeInterface(targ);
-  }else {
-    if (UnDockNow(parent,targ)) {
+  static float min_docking_relationship = XMLSupport::parse_float(vs_config->getVariable("AI","min_docking_relationship","-.002"));
+  static bool can_dock_to_enemy_base = XMLSupport::parse_bool(vs_config->getVariable("AI","can_dock_to_enemy_base","true"));
+  unsigned char sex=0;
+  vector <Animation *>* anim = NULL;
+  if (targ->getAIState()){
+    anim=targ->getAIState()->getCommFaces(sex);
+  }
+  bool isDone=false;  
+  if (targ->getRelation(parent)>=min_docking_relationship||(can_dock_to_enemy_base&&UnitUtil::getFlightgroupName(targ)=="Base")) {
+    bool hasDock = severity==0?parent->Dock(targ):SuperDock(parent,targ);
+
+    CommunicationMessage c(targ,parent,anim,sex);    
+    if (hasDock) {
       isDone=true;
-      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-      parent->getAIState()->Communicate (c);
-      abletodock(5);
+      c.SetCurrentState (c.fsm->GetDockNode(),anim,sex);
+      abletodock(3);
+      //vectorOfKeyboardInput[playa].req=true;
+      if (parent->getAIState()) parent->getAIState()->Communicate (c);
+      parent->UpgradeInterface(targ);
+    }else {
+      if (UnDockNow(parent,targ)) {
+        isDone=true;
+        c.SetCurrentState (c.fsm->GetUnDockNode(),anim,sex);
+        if (parent->getAIState()) parent->getAIState()->Communicate (c);
+        abletodock(5);
+      }
+    }
+  }else {
+    if (parent->GetComputerData().target==targ) {
+      CommunicationMessage c(targ,parent,anim,sex);  
+      c.SetCurrentState (c.fsm->GetNoNode(),anim,sex);
+      if (parent->getAIState()) parent->getAIState()->Communicate(c);
     }
   }
   return isDone;
