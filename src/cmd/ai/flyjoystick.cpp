@@ -23,6 +23,9 @@ FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByK
   //BindJoyKey(whichjoystick,5,FlyByJoystick::JShelt);
   
 }
+
+
+#if 0
 void FlyByJoystick::JShelt (KBSTATE k, float, float, int) {
   if (k==DOWN) {
     FlyByKeyboard::SheltonKey (0,DOWN);
@@ -52,6 +55,8 @@ void FlyByJoystick::JAccelKey (KBSTATE k, float, float, int) {
 void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
   FlyByKeyboard::DecelKey (0,k);
 }
+
+#endif
 
 void FlyByJoystick::Execute() {
   desired_ang_velocity=Vector(0,0,0); 

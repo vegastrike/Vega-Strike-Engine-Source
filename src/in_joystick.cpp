@@ -134,8 +134,9 @@ JoyStick::JoyStick(int which) {
 
     nr_of_axes=SDL_JoystickNumAxes(joy);
     nr_of_buttons=SDL_JoystickNumButtons(joy);
+    nr_of_hats=SDL_JoystickNumHats(joy);
 
-    printf("axes: %d buttons %d\n",nr_of_axes,nr_of_buttons);
+    printf("axes: %d buttons: %d hats: %d\n",nr_of_axes,nr_of_buttons,nr_of_hats);
 
 #endif // we have SDL
 }
@@ -159,14 +160,25 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 #if defined(HAVE_SDL)
 
     int numaxes = SDL_JoystickNumAxes (joy);
+
+    Sint16 axi[8];
+
+    for(int a=0;a<numaxes;a++){
+      axi[a] = SDL_JoystickGetAxis(joy,a);
+    }
+#if 0
     Sint16 xi =  SDL_JoystickGetAxis(joy,0);
     Sint16 yi =  SDL_JoystickGetAxis(joy,1);
     Sint16 zi=0;
-if (numaxes>2) {
+    Sint16 q
+    if (numaxes>2) {
       zi = SDL_JoystickGetAxis(joy,2);
     }
+#endif
+
     buttons=0;
     nr_of_buttons=SDL_JoystickNumButtons(joy);
+
    for(int i=0;i<nr_of_buttons;i++){
      int  butt=SDL_JoystickGetButton(joy,i);
      if(butt==1){
@@ -175,11 +187,21 @@ if (numaxes>2) {
    }
     joy_buttons = buttons;
 
+    for(int a=0;a<numaxes;a++){
+      joy_axis[a]=((float)axi[a]/32768.0);
+      if(fabs(joy_axis[a])<=deadzone){
+	joy_axis[a]=0.0;
+      }
+    }
+#if 0
     joy_axis[0]=x=((float)xi/32768.0);
     joy_axis[1]=y=((float)yi/32768.0);
     joy_axis[2]=z=((float)zi/32768.0);
-    //    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
+#endif
 
+
+    //    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
+#if 0
     if(fabs(x)<=deadzone){
         joy_axis[0] =x=0;
     }
@@ -189,6 +211,12 @@ if (numaxes>2) {
     if(fabs(z)<=deadzone){
         joy_axis[2] = z=0;
     }
+#endif
+
+    x=joy_axis[0];
+    y=joy_axis[1];
+    z=joy_axis[2];
+
 #endif // we have SDL
     
     return;

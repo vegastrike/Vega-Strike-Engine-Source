@@ -72,7 +72,7 @@ class JoyStick {
 #else
     void *otherdata;//bad form to have an ifdef in a struct
 #endif
-    int nr_of_axes,nr_of_buttons;
+    int nr_of_axes,nr_of_buttons,nr_of_hats;
     int hat_margin;
 
     float joy_axis[16];

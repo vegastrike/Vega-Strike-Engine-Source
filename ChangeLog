@@ -1,5 +1,11 @@
 2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
 	
+	* changed a lot in in_joystick to support any number of axes
+	* analogue hatswitch definition is now parsed, but not yet used
+
+
+2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
+	
 	* modified firekeyboard so that two keys can have the same command
 	  (FireKey)
 	* modified flyjoystick to map axis from config file

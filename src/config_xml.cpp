@@ -355,11 +355,53 @@ void VegaConfig::doAxis(easyDomNode *node){
     axis_axis[3]=axis_nr;
     axis_joy[3]=joy_nr;
   }
+  else if(name=="hatswitch"){
+    string nr_str=node->attr_value("nr");
+    string margin_str=node->attr_value("margin");
+
+    if(nr_str.empty() || margin_str.empty()){
+      cout << "you have to assign a number and a margin to the hatswitch" << endl;
+      return;
+    }
+    int nr=atoi(nr_str.c_str());
+
+    float margin=atof(margin_str.c_str());
+    hatswitch_margin[nr]=margin;
+
+    vector<easyDomNode *>::const_iterator siter;
+  
+    hs_value_index=0;
+    for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+      checkHatswitch(nr,*siter);
+    }
+  }
   else{
     cout << "unknown axis " << name << endl;
     return;
   }
 
+}
+
+void VegaConfig::checkHatswitch(int nr,easyDomNode *node){
+  if(node->Name()!="hatswitch"){
+    cout << "not a hatswitch node " << endl;
+    return;
+  }
+
+  string strval=node->attr_value("value");
+
+  float val=atof(strval.c_str());
+
+  if(val>1.0 || val<-1.0){
+    cout << "only hatswitch values from -1.0 to 1.0 allowed" << endl;
+    return;
+  }
+
+  hatswitch[nr][hs_value_index]=val;
+
+  cout << "setting hatswitch nr " << nr << " " << hs_value_index << " = " << val << endl;
+
+  hs_value_index++;
 }
 
 void VegaConfig::checkBind(easyDomNode *node){
@@ -400,16 +442,33 @@ void VegaConfig::checkBind(easyDomNode *node){
   else if(!(node->attr_value("button").empty())){
     if(!(node->attr_value("button").empty())){
       int button_nr=atoi(node->attr_value("button").data());
-      int joystick_nr=atoi(node->attr_value("joystick").data());
 
-      // now map the command to a callback function and bind it
+      string joy_str=node->attr_value("joystick");
+      string hat_str=node->attr_value("hatswitch");
 
-      // yet to check for correct buttons/joy-nr
+      if(joy_str.empty()){
+	// it has to be the hatswitch
+	if(hat_str.empty()){
+	  cout << "you got to give a hatswitch number" << endl ;
+	  return;
+	}
+
+	int hatswitch_nr=atoi(hat_str.c_str());
+
+      }
+      else{
+	// joystick button
+	int joystick_nr=atoi(joy_str.c_str());
+
+	// now map the command to a callback function and bind it
+
+	// yet to check for correct buttons/joy-nr
 
 
-      BindJoyKey(joystick_nr,button_nr,handler);
+	BindJoyKey(joystick_nr,button_nr,handler);
 
-      cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
+	cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
+      }
     }
     else{
       cout << "you must specify the joystick nr. to use" << endl;

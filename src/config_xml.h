@@ -59,6 +59,12 @@ class VegaConfig {
   int axis_axis[MAX_AXIS];
   int axis_joy[MAX_AXIS];
 
+#define MAX_HATSWITCHES 4
+#define MAX_VALUES 8
+
+  float hatswitch[MAX_HATSWITCHES][MAX_VALUES];
+  float hatswitch_margin[MAX_HATSWITCHES];
+
  private:
   string getVariable(easyDomNode *section,string name,string defaultval);
 
@@ -71,6 +77,7 @@ class VegaConfig {
   easyDomNode *variables;
   easyDomNode *bindings;
 
+  int hs_value_index;
 
   vector<vColor *> colors;
 
@@ -83,6 +90,7 @@ class VegaConfig {
   bool checkColor(easyDomNode *node);
   void checkBind(easyDomNode *node);
   void doAxis(easyDomNode *node);
+  void checkHatswitch(int nr,easyDomNode *node);
 
 
 };
