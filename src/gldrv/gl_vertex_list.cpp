@@ -39,6 +39,64 @@ const int  CHANGE_CHANGE= (sizeof(unsigned int)*4);
 const int HAS_COLOR= (sizeof(unsigned int)*8);
 #define USE_DISPLAY_LISTS
 const int HAS_INDEX = sizeof(unsigned char) | sizeof (unsigned short) | sizeof (unsigned int);
+
+static bool iseq (float a, float b) {
+  const float eps=.001;
+  return (fabs(a-b) <eps);
+}
+static GFXBOOL GFXCompareVertex (GFXVertex *old, GFXVertex * n) {
+  return (old->x==n->x&&old->y==n->y&&old->z==n->z&&iseq(old->s,n->s)&&iseq (old->t,n->t)&&((old->i*n->i+old->j*n->j+old->k*n->k)>=0));
+}
+static void GFXUpdateVertex (GFXVertex *old, GFXVertex *n, unsigned int *ijk) {
+  //  old->i*=ijk;
+  //  old->j*=ijk;
+  //  old->k*=ijk;
+  old->i+=n->i;
+  old->j+=n->j;
+  old->k+=n->k;
+  ijk++;
+  //  old->i/=ijk;
+  //  old->j/=ijk;
+  //  old->k/=ijk;
+}
+
+void GFXNormalizeVert (GFXVertex *v) {
+  float mag =sqrtf( v->i*v->i+v->j*v->j+v->k*v->k);
+  if (mag>0) {
+    v->i/=mag;
+    v->j/=mag;
+    v->k/=mag;
+  }
+}
+void GFXOptimizeList (GFXVertex * old, int numV, GFXVertex ** nw, int * nnewV, unsigned int **ind) {
+  unsigned int *ijk = (unsigned int *)malloc (sizeof (unsigned int)*numV);
+  *ind = (unsigned int *)malloc (sizeof (unsigned int) * numV);
+  *nw = (GFXVertex *)malloc (numV*sizeof (GFXVertex));
+  *nnewV = 0;
+  int i;
+  for (i=0;i<numV;i++) {
+    int j;
+    for (j=0;j<(*nnewV);j++) {
+      if (GFXCompareVertex ((*nw)+j,old+i)==GFXTRUE) {
+	GFXUpdateVertex ((*nw)+j,old+i,ijk+j);
+	(*ind)[i]=j;
+	break;
+      }
+    }
+    if (j==(*nnewV)) {
+      ijk[*nnewV]=1;
+      memcpy ((*nw)+(*nnewV),old+i,sizeof (GFXVertex));
+      ((*ind)[i])=(*nnewV);
+      (*nnewV)=(*nnewV)+1;
+    }
+  }
+  for (i=0;i<*nnewV;i++) {
+    GFXNormalizeVert ((*nw)+i);
+  }
+  free (ijk);  
+}
+
+
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
@@ -298,7 +356,7 @@ void GFXVertexList::IndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
   for (int i=0;i<howmany;i++) {
     unsigned int j = thus->GetIndex (i+offset);
     dst[i].
-      SetTexCoord (thus->data.vertices[j].s,thus->data.colors[j].t).
+      SetTexCoord (thus->data.vertices[j].s,thus->data.vertices[j].t).
       SetNormal (Vector (thus->data.vertices[j].i,thus->data.vertices[j].j,thus->data.vertices[j].k)).
       SetVertex (Vector (thus->data.vertices[j].x,thus->data.vertices[j].y,thus->data.vertices[j].z));
   }

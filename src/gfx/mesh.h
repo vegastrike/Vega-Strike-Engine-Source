@@ -245,7 +245,7 @@ private:
     vector<GFXVertex> *active_list;
     vector<int> *active_ind;
     vector <Mesh *> lod;
-    vector <int> lodsize;
+    vector <float> lodsize;
     GFXVertex vertex;
     GFXMaterial material;
     int faction;
