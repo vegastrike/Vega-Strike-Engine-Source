@@ -272,7 +272,7 @@ varInst *Mission::terminateMission(missionNode *node,int mode){
     if (f!=active_missions.end()) {
       active_missions.erase (f);
     }
-    if (this!=mission) {
+    if (this!=active_missions[0]) {
       Mission_delqueue.push_back(this);//only delete if we arent' the base mission
     }
   }

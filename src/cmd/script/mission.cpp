@@ -97,7 +97,7 @@ void Mission::initMission(){
     msgcenter=new MessageCenter();
     begin=false;
   }else {
-    msgcenter=mission->msgcenter;
+    msgcenter=active_missions[0]->msgcenter;
   }
   msgcenter->add("game","all","Welcome to Vegastrike");
 

@@ -280,6 +280,11 @@ static void ProcessMousePassive(int x, int y) {
   }
 }
 void Unit::UpgradeInterface(Unit * base) {
+  for (unsigned int i=0;i<upgr.size();i++) {
+    if (upgr[i]->buyer.GetUnit()==this) {
+      return;//too rich for my blood...don't let 2 people buy cargo for 1
+    }
+  }
   printf("Starting docking\n");
   glutMouseFunc(ProcessMouseClick);
   glutMotionFunc(ProcessMouseActive);
