@@ -773,7 +773,7 @@ void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &
       case MeshXML::UNKNOWN:
 	break;
 	  case MeshXML::FRAMESPERSECOND:
-		  framespersecond=parse_float((*iter).value);
+		  framespersecond=XMLSupport::parse_float((*iter).value);
 		  break;
       case MeshXML::LODFILE:
 	xml->lod.push_back(new Mesh ((*iter).value.c_str(),xml->lodscale,xml->faction,xml->fg,true));//make orig mesh
