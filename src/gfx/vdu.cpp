@@ -743,7 +743,7 @@ void VDU::DrawVDUObjectives (Unit *parent) {
       vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
       for (;j!=active_missions[i]->objectives.end();++j) {
 	if (j->owner==NULL||j->owner==parent) {
-	  offset=DrawVDUObjective (j,offset);
+	  offset=DrawVDUObjective (&(*j),offset);
 	}
       }
     }
