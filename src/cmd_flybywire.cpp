@@ -14,7 +14,7 @@ AI * MatchLinearVelocity::Execute () {
 #define MATCHANGVELOCITYEXECUTE() Vector desired (desired_ang_velocity); \
   if (!LocalAng)\
     desired = parent->ToLocalCoordinates (desired);\
-  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->GetAngularVelocity())/SIMULATION_ATOM); 
+  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->ToLocalCoordinates(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
 
 
 AI * MatchAngularVelocity::Execute () {
@@ -47,9 +47,11 @@ AI * MatchVelocity::Execute () {
 
 
 FlyByWire::FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true), max_speed(max_spd), max_ab_speed(max_ab_spd), max_yaw(maxyaw),max_pitch(maxpitch),max_roll(maxroll) {
-  SetDesiredVelocity (Vector (0,0,max_spd),true);
+  SetDesiredVelocity (Vector (0,0,0),true);
 }
-
+void FlyByWire::Stop (float per) {
+  SetDesiredVelocity (Vector (0,0,per*max_speed),true);
+}
 void FlyByWire::Right (float per) {
   desired_ang_velocity += (per*parent->Limits().yaw)*Vector (0,1,0);
   fprintf (stderr,"r %f\n",per);

@@ -19,10 +19,11 @@ struct StarShipControlKeyboard {
   int rollrightrelease;
   int rollleftpress;
   int rollleftrelease;
+  bool stoppress;
+  bool startpress;
   bool dirty;//it wasn't updated...
   int refcount;
-  void UnDirty() {uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;
-  dirty=false;}
+  void UnDirty() {uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;startpress=stoppress=dirty=false;}
   StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
@@ -31,6 +32,8 @@ struct StarShipControlKeyboard {
 FlyByKeyboard::FlyByKeyboard (float max_ab_speed,float max_spd, float maxyaw, float maxpitch, float maxroll): FlyByWire (max_ab_speed,max_spd,maxyaw,maxpitch,maxroll) {
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {
+    BindKey(';',FlyByKeyboard::StopKey);
+    BindKey('[',FlyByKeyboard::StartKey);
     BindKey(GLUT_KEY_UP,FlyByKeyboard::UpKey);
     BindKey(GLUT_KEY_DOWN,FlyByKeyboard::DownKey);
     BindKey(GLUT_KEY_LEFT,FlyByKeyboard::RightKey);
@@ -47,6 +50,7 @@ FlyByKeyboard::FlyByKeyboard (float max_ab_speed,float max_spd, float maxyaw, fl
 FlyByKeyboard::~FlyByKeyboard() {
   starshipcontrolkeys.refcount--;
   if (starshipcontrolkeys.refcount==0) {
+    UnbindKey (';');
     UnbindKey (GLUT_KEY_UP);
     UnbindKey (GLUT_KEY_DOWN);
     UnbindKey (GLUT_KEY_LEFT);
@@ -148,6 +152,12 @@ AI * FlyByKeyboard::Execute () {
       Afterburn (((float)FBWABS(SSCK.ABpress))/(FBWABS(SSCK.ABpress)+SSCK.ABrelease));
     }
   }
+  if (SSCK.stoppress) {
+    Stop(0);
+  }
+  if (SSCK.startpress) {
+    Stop(1);
+  }
   SSCK.dirty=true;
 #undef SSCK
   FlyByWire::Execute();
@@ -229,6 +239,16 @@ void FlyByKeyboard::ABKey (int, KBSTATE k) {
   default:break;
   }
 }
+void FlyByKeyboard::StopKey (int,KBSTATE k)  {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP: starshipcontrolkeys.stoppress=false;
+    break;
+  case DOWN:starshipcontrolkeys.stoppress=true;
+    break;
+  default:break;
+  }
+}
 void FlyByKeyboard::AccelKey (int,KBSTATE k) {
   if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
   switch (k) {
@@ -257,6 +277,20 @@ void FlyByKeyboard::DecelKey (int,KBSTATE k) {
   default:break;
   }
 }
+
+
+void FlyByKeyboard::StartKey (int,KBSTATE k)  {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP: starshipcontrolkeys.startpress=false;
+    break;
+  case DOWN:starshipcontrolkeys.startpress=true;
+    break;
+  default:break;
+  }
+}
+
+
 
 
 void FlyByKeyboard::RollRightKey (int,KBSTATE k) {

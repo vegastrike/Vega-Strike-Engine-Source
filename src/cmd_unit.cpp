@@ -98,7 +98,7 @@ void Unit::Init()
   AngularVelocity = Vector(0,0,0);
   Velocity = Vector(0,0,0);
   
-  NetTorque = Vector(0,0,0);
+  NetTorque =NetLocalTorque = Vector(0,0,0);
   NetForce = Vector(0,0,0);
   NetLocalForce=Vector(0,0,0);
 
@@ -106,9 +106,9 @@ void Unit::Init()
   selected = false;
   selectionBox = NULL;
 
-  limits.yaw = 0.15;
-  limits.pitch = 0.15;
-  limits.roll = 0.15;
+  limits.yaw = 2.55;
+  limits.pitch = 2.55;
+  limits.roll = 2.5;
 	
   limits.lateral = 0.1;
   limits.vertical = 0.1;

@@ -125,6 +125,7 @@ protected:
   Vector NetForce;
   Vector NetLocalForce;
   Vector NetTorque;
+  Vector NetLocalTorque;
   Vector AngularVelocity;
   Vector Velocity;
   int slerp_direction;
@@ -270,6 +271,7 @@ public:
   //  void ResolveLast(const Transformation &, const Matrix); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   Vector ToLocalCoordinates(const Vector &v) const;
+  Vector ToWorldCoordinates(const Vector &v) const;
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   const Vector &GetVelocity() const { return Velocity; }
   const Vector &GetPosition() const { return curr_physical_state.position; }

@@ -78,10 +78,17 @@ void Unit::ApplyLocalTorque (const Vector &Vforce, const Vector &Location)
 void Unit::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Location) //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
 {
 	NetTorque += Vforce.Cross (Location);
+	
 }
 
 void Unit::ApplyLocalTorque(const Vector &torque) {
-  NetTorque += ClampTorque(torque);
+  /*  Vector p,q,r;
+  Vector tmp(ClampTorque(torque));
+  GetOrientation (p,q,r);
+  fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
+  NetTorque+=tmp.i*p+tmp.j*q+tmp.k*r; 
+  */
+  NetLocalTorque+= ClampTorque(torque); 
 }
 #ifdef WIN32
 float copysign (float x, float y) {
@@ -201,13 +208,15 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bo
     prev_physical_state = curr_physical_state;  
   // Torque is modeled as a perfect impulse at the beginning of a game
   // turn, for simplicity
-  Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);
-  AngularVelocity += temp;
-  if(AngularVelocity.Magnitude() > 0) {
-    Rotate (SIMULATION_ATOM*(AngularVelocity));
-  }
   Vector p, q, r;
   GetOrientation(p,q,r);
+  Vector CACHUNK = NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r;
+  fprintf (stderr,">>NetTorque: %f,%f,%f NetLocalTorque: %f,%f,%f",NetTorque.i,NetTorque.j,NetTorque.k,CACHUNK.i,CACHUNK.j,CACHUNK.k);
+  Vector temp = (NetTorque+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
+  AngularVelocity += temp;
+  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
+    Rotate (SIMULATION_ATOM*(AngularVelocity));
+  }
 //	cerr << "Orientation: " << p << q << r << endl;
   temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
   Velocity += temp; // modelled as an impulse
@@ -235,8 +244,7 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bo
   for (i=0;i<numsubunit;i++) {
     subunits[i]->ResolveForces(cumulative_transformation,cumulative_transformation_matrix,lastframe);
   }
-  NetForce = NetLocalForce = Vector(0,0,0);
-  NetTorque = Vector(0,0,0);
+  NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
   //cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
 }
 
@@ -264,5 +272,13 @@ Vector Unit::ToLocalCoordinates(const Vector &v) const {
   return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
 		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
 		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
+#undef M
+}
+
+Vector Unit::ToWorldCoordinates(const Vector &v) const {
+  //#define M(B,A) cumulative_transformatioN_matrix[B*4+A]
+  return TransformNormal(cumulative_transformation_matrix,v); 
+#undef M
+
 }
 

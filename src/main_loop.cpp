@@ -417,19 +417,19 @@ static void FighterYawRight(int,KBSTATE newState) {
 void InitializeInput() {
 	BindKey(GLUT_KEY_F1, Slew);
 	BindKey(GLUT_KEY_F12,Stop);
-	BindKey(GLUT_KEY_UP, PitchDown);
-	BindKey(GLUT_KEY_DOWN, PitchUp);
-	BindKey(GLUT_KEY_LEFT, YawLeft);
-	BindKey(GLUT_KEY_RIGHT, YawRight);
-	BindKey('/', RollLeft);
-	BindKey('*', RollRight);
+	BindKey('w', PitchDown);
+	BindKey('z', PitchUp);
+	BindKey('a', YawLeft);
+	BindKey('s', YawRight);
+	BindKey('c', RollLeft);
+	BindKey('v', RollRight);
 	BindKey(GLUT_KEY_PAGE_DOWN, SlideDown);
 	BindKey(GLUT_KEY_PAGE_UP, SlideUp);
-	BindKey('-', SlideBackward);
-	BindKey('+', SlideForward);
-	BindKey(',', SlideLeft);
-	BindKey('.',SlideRight);
-	BindKey('q', Quit);
+	BindKey('1', SlideBackward);
+	BindKey('2', SlideForward);
+	//	BindKey(',', SlideLeft);
+	//	BindKey('.',SlideRight);
+	BindKey('~', Quit);
 	BindKey ('c',reCenter);
 	/*	BindKey('a', FighterYawLeft);
 	BindKey('d', FighterYawRight);
@@ -533,7 +533,7 @@ void createObjects() {
     fighters[a]->SetAI(new Order());
     ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
     ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
-    fighters[a]->EnqueueAI(new FlyByKeyboard (.1,.1,.1,.1,.1));
+    fighters[a]->EnqueueAI(new FlyByKeyboard (.01,.005,.0001,.0001,.0001));
 	//        fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   

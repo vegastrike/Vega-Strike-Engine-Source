@@ -8,6 +8,8 @@
 class FlyByKeyboard: public FlyByWire {
 
  public:
+  static void StartKey (int,KBSTATE);
+  static void StopKey (int, KBSTATE);
   static void UpKey(int, KBSTATE);
   static void DownKey (int,KBSTATE);
   static void LeftKey (int, KBSTATE);

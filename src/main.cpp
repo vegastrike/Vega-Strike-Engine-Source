@@ -106,7 +106,7 @@ int main( int argc, char **argv )
     
     createObjects();
 
-    //    InitializeInput();
+       InitializeInput();
     _GFX->Loop(main_loop);
 
     // never makes it here
