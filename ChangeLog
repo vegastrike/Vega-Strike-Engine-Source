@@ -1,3 +1,10 @@
+2002-01-05 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* imported data/units/drone for testing
+	* added data/mission/test/drone*.mission
+	* imported vegastrike/doc/texturizer
+	
+	
 2002-01-01 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* wrote some dumb ai's in TuxFleet-style
