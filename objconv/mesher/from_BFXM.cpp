@@ -326,7 +326,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 		  for(int32bit lstrip=0;lstrip<numlinestrips;lstrip++){
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
-			fprintf(Outputfile,"\t<Linestrip flatshade=\"%d\"/>\n",flatshade);
+			fprintf(Outputfile,"\t<Linestrip flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -344,7 +344,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 		  for(int32bit tstrip=0;tstrip<numtristrips;tstrip++){
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
-			fprintf(Outputfile,"\t<Tristrip flatshade=\"%d\"/>\n",flatshade);
+			fprintf(Outputfile,"\t<Tristrip flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -362,7 +362,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 		  for(int32bit tfan=0;tfan<numtrifans;tfan++){
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
-			fprintf(Outputfile,"\t<Trifan flatshade=\"%d\"/>\n",flatshade);
+			fprintf(Outputfile,"\t<Trifan flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
@@ -380,7 +380,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 		  for(int32bit qstrip=0;qstrip<numquadstrips;qstrip++){
 			int32bit numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
-			fprintf(Outputfile,"\t<Quadstrip flatshade=\"%d\"/>\n",flatshade);
+			fprintf(Outputfile,"\t<Quadstrip flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
