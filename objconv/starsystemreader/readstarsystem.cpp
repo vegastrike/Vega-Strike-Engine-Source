@@ -47,8 +47,10 @@ class System: public map <string,string> {
 public:
 	System () {}
 	bool habitable;
+	bool interesting;
 	string sector;
 	string name;
+	string alphaonlyname;
 	float distance;
 	float ascension;
 	float declination;
@@ -65,7 +67,8 @@ public:
 	string fullName () {
 		return sector+"/"+name;
 	}
-	void computeProperties() {
+	void computeProperties(bool interestingname) {
+		this->interesting=interestingname;
 		double rad=16000;
 		double lifeprob= .25;
 		if (type<30) {
@@ -113,6 +116,11 @@ public:
 				lifeprob = .125;
 			}else if (size==2)
 				rad = 150000;
+		}
+		if (interesting) {
+			lifeprob *=1;//the answer to the question...
+		}else {
+			lifeprob/=1;
 		}
 		(*this)["sun_radius"]=ftostr(rad);
 		(*this)["data"]=itostr(rand());
@@ -215,7 +223,23 @@ std::string unpretty (std::string s) {
 	return s;
 	
 }
-
+std::string alphaOnly (std::string s){
+	std::string out=s;
+	int count=0;
+	for (string::iterator i = s.begin();i!=s.end();++i) {
+		if ((*i>'a'&&*i<'z')||(*i>'A'&&*i<'Z')) {
+			out[count]=toupper(*i);
+			++count;
+		}
+	}
+	return out.substr(0,count);
+}
+class AlphaOnlySort{
+public:
+	bool operator() (const System &a, const System & b) {
+		return a.alphaonlyname<b.alphaonlyname;
+	}
+};
 vector<System> readfile (const char * name) {
 	vector<System>systems;
 	FILE * fp = fopen (name,"r");
@@ -265,23 +289,71 @@ vector<System> readfile (const char * name) {
 				}
 			   
 			}
+/*			
 			if (in.name=="") {
 				static int num=0;
 				num++;
-				in.name=string("DAN")+itostr(num);
-				
+				in.name=string("Daniel")+itostr(num);
 			}
+*/
+			in.alphaonlyname = alphaOnly(in.name);
 			in.sector="nowhereland";
+
 		}
+
 		in.computeXYZ();
-		in.computeProperties();
 		systems.push_back(in);
+		
 	}
-	
+	std::sort (systems.begin(),systems.end(),AlphaOnlySort());
 	free(line);
+	int hc=0,bc=0;
+	int ic=0,uc=0;
+	int ec=0;
+	if (1) {
+		for (unsigned int i= 0;i<systems.size();++i) {
+			if (systems[i].name.length()==0){
+				systems[i].interesting=false;
+				static int num=0;
+				num++;
+				systems[i].name=string("Daniel")+itostr(num);
+				ec++;
+			}else if (i<4) {
+				systems[i].interesting=true;
+			}else if (i>systems.size()-4) {
+				systems[i].interesting=true;
+			}else {
+				//now we have a buffer zone of 4!
+				//engage!
+				if (systems[i].alphaonlyname==systems[i-1].alphaonlyname&&
+					systems[i].alphaonlyname==systems[i+1].alphaonlyname&&
+					systems[i].alphaonlyname==systems[i+2].alphaonlyname&&
+					systems[i].alphaonlyname==systems[i-2].alphaonlyname) {
+					systems[i].interesting=false;
+					uc++;
+				}else {
+					systems[i].interesting=true;
+				}
+			}
+			
+			if (systems[i].interesting) {
+				ic++;
+				printf("%s interesting\n",systems[i].name.c_str());
+			}else {
+				printf("%s no\n",systems[i].name.c_str());
+			}
+			systems[i].computeProperties(systems[i].interesting);
+			if (systems[i].habitable) {
+				hc +=1;
+			}else {
+				bc+=1;
+			}
+		}
+	}
+	fprintf (stderr,"Habitable count %d Barren count %d\n Interesting count %d Uninteresting count %d Empty count %d",hc,bc,ic,uc,ec);
 	return systems;
 }
-
+	
 
 void writesystems(FILE * fp, std::vector<System> s) {
 	std::sort(s.begin(),s.end());//sort into sector categories
@@ -334,7 +406,7 @@ void processsystems (std::vector <System> & s){
 		for (unsigned int j=0;j<s.size();++j) {
 			if (j!=i && (s[j].habitable||rand()<RAND_MAX*.001)){
 				float dissqr = sqr(s[i].xyz.x-s[j].xyz.x)+sqr(s[i].xyz.y-s[j].xyz.y)+sqr(s[i].xyz.z-s[j].xyz.z);
-				int desired_size = rand()%7+1;
+				int desired_size = rand()%5+1;
 				if (jumps.size()>=desired_size) {
 					if (jumps.upper_bound(dissqr)!=jumps.end() && rand()<RAND_MAX*.995) {
 						jumps[dissqr]=s[j].fullName();
@@ -380,7 +452,7 @@ void processsystems (std::vector <System> & s){
 							unsigned int jjsize = s[j].jumps.size();
 							bool found=false;
 							if (!s[j].habitable)
-								fprintf (stderr,"looking for %s in %s",fullname.c_str(),s[j].name.c_str());
+								fprintf (stderr,"looking for %s in %s\n",fullname.c_str(),s[j].name.c_str());
 							for (unsigned int l=0;l<jjsize;++l) {
 								if (fullname==s[j].jumps[l]) {
 									found=true;
@@ -408,7 +480,7 @@ int main (int argc, char ** argv) {
 		printf ("not enough args. Usage ./a.out <input> <output>\n");
 		return 1;
 	}
-
+	srand(109427);
 	std::vector <System> s=readfile(argv[1]);
 	processsystems(s);
 	FILE * fp = fopen (argv[2],"w");
