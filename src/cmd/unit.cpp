@@ -65,6 +65,7 @@ void Unit::calculate_extent() {
   float tmp1 = corner_min.Magnitude();
   float tmp2 = corner_max.Magnitude();
   radial_size = tmp1>tmp2?tmp1:tmp2;
+  UpdateCollideQueue();
 }
 //FIXME Daughter units should be able to be turrets (have y/p/r)
 void Unit::SetResolveForces (bool ys) {
@@ -246,7 +247,7 @@ Unit::Unit(const char *filename, bool xml) {
 
 	CloseFile();
 	calculate_extent();
-	UpdateCollideQueue();
+
 }
 
 Unit::~Unit()

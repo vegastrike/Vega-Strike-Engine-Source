@@ -19,7 +19,7 @@ Halo::  Halo (const char * texture, const GFXColor &col, const Vector & pos, flo
   int nullio=-1;
   if (tmpDecal) {
     for (;i<HaloDecal.size();i++) {
-      if (HaloDecal[i]==tmpDecal) {
+      if ((*HaloDecal[i])==(*tmpDecal)) {
 	decal = i;
 	HaloDecalRef[i]++;
 	break;

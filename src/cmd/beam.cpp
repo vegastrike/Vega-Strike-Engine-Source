@@ -18,7 +18,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) 
   int nullio=-1;
   if (tmpDecal) {
     for (;i<BeamDecal.size();i++) {
-      if (BeamDecal[i]==tmpDecal) {
+      if ((*BeamDecal[i])==(*tmpDecal)) {
 	decal = i;
 	DecalRef[i]++;
 	break;
