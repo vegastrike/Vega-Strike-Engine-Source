@@ -263,6 +263,9 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		netbuf.addString( relsys);
 		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
 		delete mdigest;
+		cerr<<endl<<"BEGIN FULL BUFFER -------------------------------------------"<<endl<<endl;
+		cerr<<netbuf.getData()<<endl;
+		cerr<<endl<<"END FULL BUFFER ---------------------------------------------"<<endl<<endl;
 		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(241) );
 		COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}

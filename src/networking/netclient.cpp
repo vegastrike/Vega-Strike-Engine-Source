@@ -125,7 +125,9 @@ NetClient::NetClient()
     _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerClient );
 
+#ifdef CRYPTO
 	cout<<endl<<endl<<POSH_GetArchString()<<endl;
+#endif
 }
 
 NetClient::~NetClient()
@@ -662,6 +664,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				// Get the galaxy file from buffer with relative path to datadir !
 				string univfile = netbuf.getString();
 				unsigned char * md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
+				cerr<<"Initial system = "<<univfile<<" - md5 = "<<md5_digest<<endl;
 				// Compare to local md5 and ask for the good file if we don't have it or bad version
 				if( 0 /* !md5CheckFile( univfile, md5_digest) */)
 				{
@@ -685,6 +688,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				// Get the initial system file...
 				string sysfile = netbuf.getString();
 				md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
+				cerr<<"Initial system = "<<sysfile<<" - md5 = "<<md5_digest<<endl;
 				// THINK TO PUT THAT TEST BACK WHEN DOWNLOAD THREAD IS COMPLETE !!!!!!!
 				if( 0 /* !md5CheckFile( sysfile, md5_digest) */)
 				{

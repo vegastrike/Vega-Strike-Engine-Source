@@ -158,7 +158,6 @@ vegaserver_SOURCES =			\
 
 accountserver_SOURCES =		\
 	posh.cpp					\
-	posh.h					\
 	libserver.cpp			\
 	configxml.cpp			\
 	configxml.h				\

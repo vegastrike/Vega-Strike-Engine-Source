@@ -28,10 +28,11 @@ int	md5Compute( string filename, unsigned char * md5digest)
 	if( (ret=md5SumFile( fulluniv.c_str(),
 							md5digest))<0 || ret)
 	{
-		cout<<"!!! ERROR = couldn't get universe file md5sum (not found or error) !!!"<<endl;
+		cerr<<"!!! ERROR = couldn't get "<<filename<<" md5sum (not found or error) !!!"<<endl;
+		cerr<<"-- MD5 FILE : "<<fulluniv<<" = "<<md5digest<<" --"<<endl;
 	}
 	else
-		cout<<"-- MD5 FILE : "<<fulluniv<<" = "<<md5digest<<" --"<<endl;
+		cerr<<"-- MD5 FILE : "<<fulluniv<<" = "<<md5digest<<" --"<<endl;
 
 	return ret;
 }

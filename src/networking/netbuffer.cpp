@@ -9,26 +9,32 @@ NetBuffer::NetBuffer()
 			buffer = new char[MAXBUFFER];
 			offset = 0;
 			size = MAXBUFFER;
+			memset( buffer, 0x20, size);
 		}
 NetBuffer::NetBuffer( int bufsize)
 		{
 			buffer = new char[bufsize];
 			offset = 0;
 			size = bufsize;
+			memset( buffer, 0x20, size);
 		}
 NetBuffer::NetBuffer( char * buf, int bufsize)
 		{
 			offset = 0;
-			size=bufsize;
+			size=bufsize+1;
 			this->buffer = new char[size];
+			memset( buffer, 0x20, size);
 			memcpy( buffer, buf, bufsize);
+			this->buffer[size] = 0;
 		}
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
 			offset = 0;
-			size=bufsize;
+			size=bufsize+1;
 			this->buffer = new char[size];
+			memset( buffer, 0x20, size);
 			memcpy( buffer, buf, bufsize);
+			this->buffer[size] = 0;
 		}
 NetBuffer::~NetBuffer()
 		{
@@ -37,7 +43,7 @@ NetBuffer::~NetBuffer()
 		}
 void	NetBuffer::Reset()
 		{
-			memset( buffer, 0, size);
+			memset( buffer, 0x20, size);
 			offset=0;
 		}
 
@@ -49,16 +55,18 @@ void	NetBuffer::resizeBuffer( int newsize)
 			if( size < newsize)
 			{
 				char * tmp = new char [newsize];
-				memcpy( tmp, buffer, newsize);
+				memset( tmp, 0, newsize);
+				memcpy( tmp, buffer, size);
 				delete buffer;
 				buffer = tmp;
+				size = newsize;
 			}
 		}
 // Check the buffer to see if we can still get info from it
 void	NetBuffer::checkBuffer( int len, const char * fun)
 {
 #ifndef NDEBUG
-	if( offset+len > size)
+	if( offset+len > size-1)
 	{
 		cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") in "<<fun<<" !!!"<<endl;
 		exit(1);
@@ -341,6 +349,7 @@ unsigned short	NetBuffer::getShort()
 			unsigned short s;
 			checkBuffer( sizeof( s), "getShort");
 			s = POSH_ReadU16FromBig( this->buffer+offset);
+			cerr<<"getShort :: offset="<<offset<<" - length="<<sizeof( s)<<" - value="<<s<<endl;
 			offset+=sizeof(s);
 			return s;
 		}
@@ -420,20 +429,17 @@ void	NetBuffer::addString( string str)
 		{
 			assert( str.length()<0xFFFF);
 			unsigned short length = str.length();
-			unsigned short netlength = 0;
-			resizeBuffer( offset+length+sizeof( length));
 			this->addShort( length);
-			offset += sizeof(length);
+			resizeBuffer( offset+length);
 			memcpy( buffer+offset, str.c_str(), length);
 			offset += length;
 		}
 string	NetBuffer::getString()
 		{
 			unsigned short s;
-			checkBuffer( sizeof( s), "getString");
 			s = this->getShort();
-			offset+=sizeof(s);
 			checkBuffer( s, "getString");
+			cerr<<"getString :: offset="<<offset<<" - length="<<s<<endl;
 			char c = buffer[offset+s];
 			buffer[offset+s]=0;
 			string str( buffer+offset);
