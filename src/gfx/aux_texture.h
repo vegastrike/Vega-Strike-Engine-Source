@@ -55,6 +55,8 @@ struct Texture{
     refcount = 0;
     name = -1;
   }
+  int Bind();
+  void Transfer();
 public:
 
   Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
@@ -66,8 +68,6 @@ public:
   bool operator < (const Texture &b);
   bool operator == (const Texture &b);
   
-  int Bind();
-  void Transfer();
   void MakeActive();
   bool LoadSuccess () {
     return (data!=NULL);

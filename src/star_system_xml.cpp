@@ -413,6 +413,7 @@ void StarSystem::LoadXML(const char *filename) {
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
   fclose (inFile);
+  XML_ParserFree (parser);
 #ifdef NV_CUBE_MAP
 	LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
 	LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);

@@ -249,5 +249,6 @@ void Universe::Faction::LoadXML(const char * filename) {
 	XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
   fclose (inFile);
+  XML_ParserFree (parser);
   ParseAllAllies();
 }

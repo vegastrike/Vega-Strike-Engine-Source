@@ -261,7 +261,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   if (lastframe) {
     char tmp=0;
     for (i=0;i<=nummesh;i++) {
-      if (!mehsdata[i])
+      if (!meshdata[i])
 	continue;
       tmp |=meshdata[i]->HasBeenDrawn();
       if (!meshdata[i]->HasBeenDrawn()) {

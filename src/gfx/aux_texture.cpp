@@ -130,12 +130,32 @@ Texture::Texture (Texture *orig) {
 }
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
+  data = NULL;
   ismipmapped  = mipmap;
   InitTexture();
   palette = NULL;
   texture_target =target;
   image_target=imagetarget;
   this->stage = stage;
+
+	char t[64];
+	strcpy(t, FileName);
+	t[strlen(FileName)-3] = 'a';
+	t[strlen(FileName)-2] = 'l';
+	t[strlen(FileName)-1] = 'p';
+	FILE *fp2 = fopen(t, "rb");
+
+	string texfilename = string(FileName);
+	
+	if(fp2) {
+	  //texfilename += string(t);
+	}
+	//	this->texfilename = texfilename;
+	//strcpy (filename,texfilename.c_str());
+	if(checkold(texfilename))
+		return;
+
+
 	FILE *fp = NULL;
 	fp = fopen (FileName, "rb");
 	if (!fp)
@@ -155,22 +175,6 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 
 
 	//while(1);
-	char t[64];
-	strcpy(t, FileName);
-	t[strlen(FileName)-3] = 'a';
-	t[strlen(FileName)-2] = 'l';
-	t[strlen(FileName)-1] = 'p';
-	FILE *fp2 = fopen(t, "rb");
-
-	string texfilename = string(FileName);
-	
-	if(fp2) {
-	  //texfilename += string(t);
-	}
-	//	this->texfilename = texfilename;
-	//strcpy (filename,texfilename.c_str());
-	if(checkold(texfilename))
-		return;
 	this->texfilename = new char [texfilename.length()+1];
 	strcpy(this->texfilename,texfilename.c_str());
 
@@ -229,10 +233,14 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	Bind();
  	fclose (fp);
 	setold();
+	if (data)
+	  delete [] data;
+	data = NULL;
 }
 
 Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
+  data = NULL;
   ismipmapped  = mipmap;
   InitTexture();
   palette = NULL;
@@ -241,6 +249,13 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	this->stage = stage;
 	texture_target=target;
 	image_target=imagetarget;
+	string texfilename = string(FileNameRGB) + string(FileNameA);
+	//this->texfilename = texfilename;
+	//strcpy (filename,texfilename.c_str());
+
+	if(checkold(texfilename))
+		return;
+
 	FILE *fp = NULL;
 	fp = fopen (FileNameRGB, "rb");
 	if (!fp)
@@ -257,12 +272,6 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	BITMAPINFOHEADER info1;
 	FILE *fp1 = NULL;
 
-	string texfilename = string(FileNameRGB) + string(FileNameA);
-	//this->texfilename = texfilename;
-	//strcpy (filename,texfilename.c_str());
-
-	if(checkold(texfilename))
-		return;
 	this->texfilename = new char [texfilename.length()+1];
 	strcpy(this->texfilename,texfilename.c_str());
 
@@ -410,7 +419,9 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	}
 	Bind();
 	fclose(fp);
-	
+	if (data)
+	  delete [] data;
+	data = NULL;
 	setold();
 
 }

@@ -653,11 +653,13 @@ void AIScript::LoadXML() {
     //length = inFile.gcount();
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
+  XML_ParserFree (parser);
   fclose (inFile);
   for (unsigned int i=0;i<xml->orders.size();i++) {
     xml->orders[i]->SetParent(parent);
     EnqueueOrder (xml->orders[i]);
   }
+
   delete xml;
 }
 AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACING){

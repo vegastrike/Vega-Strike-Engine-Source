@@ -337,6 +337,7 @@ void LoadWeapons(const char *filename) {
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
  fclose (inFile);
+ XML_ParserFree (parser);
 }
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
   int i;

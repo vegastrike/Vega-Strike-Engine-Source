@@ -104,6 +104,7 @@ namespace AIEvents {
       XML_ParseBuffer(parser, length, feof(inFile));
     } while(!feof(inFile));
     fclose (inFile);
+    XML_ParserFree (parser);
     assert (result.level==0);
     result.level =0;
       

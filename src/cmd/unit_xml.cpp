@@ -728,7 +728,8 @@ void Unit::LoadXML(const char *filename) {
     //length = inFile.gcount();
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
-fclose (inFile);
+  fclose (inFile);
+  XML_ParserFree (parser);
   // Load meshes into subunit
   nummesh = xml->meshes.size();
   meshdata = new Mesh*[nummesh+1];

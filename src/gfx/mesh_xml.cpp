@@ -966,7 +966,8 @@ void Mesh::LoadXML(const char *filename) {
     //length = inFile.gcount();
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
-	fclose (inFile);
+  fclose (inFile);
+  XML_ParserFree (parser);
   // Now, copy everything into the mesh data structures
   assert(xml->load_stage==5);
   //begin vertex normal calculations if necessary
