@@ -499,7 +499,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	}
   	fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
-	if (s==0) {
+	if (s==0&&squadnum<(int)fighter0name.size()) {
 		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
 	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
 	}

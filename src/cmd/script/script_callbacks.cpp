@@ -904,6 +904,8 @@ void Mission::initCallbackMaps(){
     module_unit_map["getVelocity"]=CMT_UNIT_getVelocity ;
     module_unit_map["getTarget"]=CMT_UNIT_getTarget ;
     module_unit_map["getName"]=CMT_UNIT_getName ;
+    module_unit_map["setName"]=CMT_UNIT_setName ;
+    module_unit_map["equal"]=CMT_UNIT_equal ;
     module_unit_map["getThreat"]=CMT_UNIT_getThreat ;
     module_unit_map["setTarget"]=CMT_UNIT_setTarget ;
     module_unit_map["addCargo"]=CMT_UNIT_addCargo ;

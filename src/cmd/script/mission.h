@@ -190,6 +190,7 @@ enum callback_module_string_type {
 
 enum callback_module_unit_type {
   CMT_UNIT_UNKNOWN=0,
+  CMT_UNIT_equal,//checks for sameness
   CMT_UNIT_getContainer,
   CMT_UNIT_getUnitFromContainer,
   CMT_UNIT_deleteContainer,
@@ -204,6 +205,7 @@ enum callback_module_unit_type {
     CMT_UNIT_getVelocity ,
     CMT_UNIT_getTarget ,
     CMT_UNIT_getName ,
+    CMT_UNIT_setName ,
     CMT_UNIT_getThreat ,
     CMT_UNIT_setTarget ,
     CMT_UNIT_getDistance ,

@@ -425,6 +425,14 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="string";
       viret->object=(void*)res_unit;
     }
+    else if(method_id==CMT_UNIT_setName){
+      string s = getStringArgument (node,mode,1);
+      if(mode==SCRIPT_RUN){
+	my_unit->name=s;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(method_id==CMT_UNIT_getThreat){
       Unit *res_unit=NULL;
       if(mode==SCRIPT_RUN){
@@ -443,6 +451,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
+    }
+    else if(method_id==CMT_UNIT_equal){
+      Unit *other_unit=getUnitArg(node,mode,1);
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=(my_unit==other_unit);//doesn't dereference anything
     }
     else if(method_id==CMT_UNIT_getDistance){
       float dist=0.0;
