@@ -100,16 +100,14 @@ namespace AIEvents {
   }  
   void LoadAI(const char * filename, ElemAttrMap &result) {//returns obedience
     const int chunk_size = 16384;
+    string full_filename;
     result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
 								      "Targetting",
 								      "obedience",
 								      ".99"));
     result.curtime=result.maxtime=10/SIMULATION_ATOM;
-    vschdir ("ai");
-    vschdir ("events");
-    FILE * inFile = fopen (filename, "r");
-    vscdup();
-    vscdup();
+    full_filename = string("ai/events/") + filename;
+    FILE * inFile = fopen (full_filename.c_str(), "r");
     if(!inFile) {
       printf("ai file %s not found\n",filename);
       assert(0);
