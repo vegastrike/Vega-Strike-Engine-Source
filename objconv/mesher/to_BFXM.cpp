@@ -130,6 +130,44 @@ void SetNormal (GFXVertex &outp,
 }
                 
 
+void boundscheck(XML xml){
+float maxa=1.0;
+float maxd=1.0;
+float maxe=1.0;
+float maxs=1.0;
+maxa=(maxa<xml.material.aa)?xml.material.aa:maxa;
+maxa=(maxa<xml.material.ar)?xml.material.ar:maxa;
+maxa=(maxa<xml.material.ag)?xml.material.ag:maxa;
+maxa=(maxa<xml.material.ab)?xml.material.ab:maxa;
+maxd=(maxd<xml.material.da)?xml.material.da:maxd;
+maxd=(maxd<xml.material.dr)?xml.material.dr:maxd;
+maxd=(maxd<xml.material.dg)?xml.material.dg:maxd;
+maxd=(maxd<xml.material.db)?xml.material.db:maxd;
+maxe=(maxe<xml.material.ea)?xml.material.ea:maxe;
+maxe=(maxe<xml.material.er)?xml.material.er:maxe;
+maxe=(maxe<xml.material.eg)?xml.material.eg:maxe;
+maxe=(maxe<xml.material.eb)?xml.material.eb:maxe;
+maxs=(maxs<xml.material.sa)?xml.material.sa:maxs;
+maxs=(maxs<xml.material.sr)?xml.material.sr:maxs;
+maxs=(maxs<xml.material.sg)?xml.material.sg:maxs;
+maxs=(maxs<xml.material.sb)?xml.material.sb:maxs;
+xml.material.aa/=maxa;
+xml.material.ar/=maxa;
+xml.material.ag/=maxa;
+xml.material.ab/=maxa;
+xml.material.da/=maxd;
+xml.material.dr/=maxd;
+xml.material.dg/=maxd;
+xml.material.db/=maxd;
+xml.material.ea/=maxe;
+xml.material.er/=maxe;
+xml.material.eg/=maxe;
+xml.material.eb/=maxe;
+xml.material.sa/=maxs;
+xml.material.sr/=maxs;
+xml.material.sg/=maxs;
+xml.material.sb/=maxs;
+}
 
 enum BLENDFUNC parse_alpha (const char * tmp ) {
   if (strcmp (tmp,"ZERO")==0) {
@@ -839,6 +877,7 @@ XML LoadXML(const char *filename, float32bit unitscale) {
   fclose (inFile);
   XML_ParserFree (parser);
   // Now, copy everything into the mesh data structures
+  boundscheck(xml);
   return xml;
 }
 
