@@ -573,6 +573,8 @@ char *	NetClient::getWebcamCapture()
 {
 #ifdef NETCOMM
 	return NetComm->GetWebcamCapture();
+#else
+	return NULL; // We have no choice...
 #endif
 }
 
