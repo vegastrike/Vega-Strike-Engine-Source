@@ -1,6 +1,5 @@
-#include "SDL.h"
 #include "in_joystick.h"
-#ifdef HAVE_SDL
+
 
 //static KBHandler keyBindings [SDLK_LAST];
 //KBSTATE keyState [SDLK_LAST];
@@ -22,7 +21,7 @@ void BindJoyKey (int joystick, int key, JoyHandler handler) {
 }
 
 void ProcessJoystick () {
-
+#ifdef HAVE_SDL
 
 #ifdef SDLEVENTSNOW
   SDL_Event event;
@@ -71,7 +70,7 @@ void ProcessJoystick () {
     joystick[i]->GetJoyStick (x,y,z,buttons);
     for (int j=0;j<NUMJBUTTONS;j++) {
       if (i==0&&(buttons&(1<<j))) {
-	fprintf (stderr,"Button success %d",j);
+	//	fprintf (stderr,"Button success %d",j);
 	if (JoystickState[i][j]==UP) {
 	  (*JoystickBindings [i][j])(PRESS,x,y,buttons);		  
 	  JoystickState[i][j]=DOWN;
@@ -85,5 +84,6 @@ void ProcessJoystick () {
       (*JoystickBindings [i][j])(JoystickState[i][j],x,y,buttons);	
     }
   }
-}
 #endif
+}
+
