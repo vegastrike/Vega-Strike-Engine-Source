@@ -36,10 +36,10 @@ namespace BaseUtil {
 		if (!newroom) return;
 		newroom->objs.push_back(new BaseInterface::Room::BasePython(ind, pythonfile, time));
 	}
-	void TextBox (int room, std::string ind, std::string text, float x, float y, float wid, float hei, float charsizemult, Vector backcol, float backalp, Vector forecol) {
+	void TextBox (int room, std::string ind, std::string text, float x, float y, Vector widheimult, Vector backcol, float backalp, Vector forecol) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, wid, hei, charsizemult, GFXColor(backcol, backalp), GFXColor(forecol), ind));
+		newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k, GFXColor(backcol, backalp), GFXColor(forecol), ind));
 	}
 	void SetTextBoxText(int room, std::string ind, std::string text) {
 		BaseInterface::Room *newroom=CheckRoom(room);
