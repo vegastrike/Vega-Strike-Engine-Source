@@ -205,7 +205,7 @@ extern void  SuicideKey (int i, KBSTATE a);
 extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
-
+extern void MapKey(int i, KBSTATE a);
   using namespace CockpitKeys;
 
 void VegaConfig::initCommandMap(){
@@ -301,6 +301,7 @@ void VegaConfig::initCommandMap(){
  command_map["Cockpit::InsideRight"]=CockpitKeys::InsideRight;
  command_map["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
  command_map["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
+ command_map["Cockpit::MapKey"]=MapKey;
  command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
  command_map["Cockpit::SwitchMVDU"]=CockpitKeys::SwitchMVDU;
  command_map["Cockpit::SwitchURVDU"]=CockpitKeys::SwitchURVDU;

@@ -868,6 +868,51 @@ void SuicideKey (int, KBSTATE k) {
   }
   
 }
+
+class UnivMap {
+  Sprite * ul;
+  Sprite * ur;
+  Sprite * ll;
+  Sprite * lr;
+public:
+  UnivMap (Sprite * ull, Sprite *url, Sprite * lll, Sprite * lrl) {
+    ul=ull;
+    ur=url;
+    ll=lll;
+    lr = lrl;
+  }
+  void Draw() {
+    if (ul) 
+      ul->Draw();
+    if (ur)
+      ur->Draw();
+    if (ll)
+      ll->Draw();
+    if (lr)
+      lr->Draw();
+  }
+  bool isNull() {
+    return ul==NULL;
+  }
+};
+std::vector <UnivMap> univmap;
+void MapKey (int, KBSTATE k) {
+  if (k==PRESS) {
+    static Sprite ul("upper-left-map.spr");
+    static Sprite ur("upper-right-map.spr");
+    static Sprite ll("lower-left-map.spr");
+    static Sprite lr("lower-right-map.spr");
+    while (univmap.size()<=_Universe->CurrentCockpit())
+      univmap.push_back(UnivMap(NULL,NULL,NULL,NULL));
+    if (univmap[_Universe->CurrentCockpit()].isNull()) {
+      univmap[_Universe->CurrentCockpit()]=UnivMap (&ul,&ur,&ll,&lr);
+    }else {
+      univmap[_Universe->CurrentCockpit()]=UnivMap(NULL,NULL,NULL,NULL);
+    } 
+  } 
+}
+
+
 void Cockpit::TurretControl (int,KBSTATE k) {
   if (k==PRESS) {
     while (turretcontrol.size()<=_Universe->CurrentCockpit())
@@ -1174,6 +1219,9 @@ void Cockpit::Draw() {
 	reset_time_compression(0,PRESS);
       }
       un->Threaten (NULL,0);
+    }
+    if (_Universe->CurrentCockpit()<univmap.size()) {
+      univmap[_Universe->CurrentCockpit()].Draw();
     }
   }
   if (die) {
