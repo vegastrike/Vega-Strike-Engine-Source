@@ -51,7 +51,7 @@ std::vector <std::string> curdir;//current dir starting from datadir
 std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
 void vsmkdir(const std::string &s) {
 	mkdir (s.c_str()
-#ifndef _WIN32
+#if !defined( _WIN32) || defined( __CYGWIN__)
 		   ,0xFFFFFFFF
 #endif
 		);
