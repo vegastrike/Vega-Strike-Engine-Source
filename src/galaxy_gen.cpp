@@ -6,7 +6,9 @@
 #include <math.h>
 #include <time.h>
 #include <assert.h>
-
+#ifndef _WIN32
+#include <ctype.h>
+#endif
 #ifndef M_PI
 #define M_PI 3.1415926536
 #endif
