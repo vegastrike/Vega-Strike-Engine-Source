@@ -358,8 +358,12 @@ class Cargo:
   WRAPPED0(string,GetDescription,"")
 
 class PythonAI:
+  voidWRAPPED1(init,Unit,un)
+  voidWRAPPED0(Execute)
+  WRAPPED0(Unit,GetParent,Unit())
   def __init__(self):
     print 'PythonAI constructor called with (self)'
+    self.init(Unit())
   voidWRAPPED1(AddReplaceLastOrder,bool,replace)
   voidWRAPPED1(ExecuteLastScriptFor,float, time)
   voidWRAPPED1(FaceTarget,bool, end)
