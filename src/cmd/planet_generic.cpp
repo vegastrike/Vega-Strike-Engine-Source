@@ -335,6 +335,9 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
     image->cargo=un->GetImageInformation().cargo;
     image->CargoVolume=un->GetImageInformation().CargoVolume;
     image->UpgradeVolume=un->GetImageInformation().UpgradeVolume;
+    VSSprite * tmp =image->hudImage;
+    image->hudImage=un->GetImageInformation().hudImage;
+    un->GetImageInformation().hudImage=tmp;
   }
   un->Kill();
 }

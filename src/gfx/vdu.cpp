@@ -140,7 +140,7 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
   //cout << "vdu" << endl;
 };
-static void DrawTargetShield (VDU * thus, VSSprite* s, float per, float &sx, float &sy, float & w, float & h, bool drawsprite) {
+static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float &sy, float & w, float & h, bool drawsprite, bool invertsprite) {
   static bool HighQTargetVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
   float nw,nh;
   thus->GetPosition (sx,sy);
@@ -167,7 +167,7 @@ static void DrawTargetShield (VDU * thus, VSSprite* s, float per, float &sx, flo
 	  s->SetPosition (sx,sy);
 	  s->GetSize (nw,nh);
 	  w= fabs(nw*h/nh);
-	  s->SetSize (w,h);
+	  s->SetSize (w,invertsprite?-h:h);
 	  if (drawsprite) 
 		  s->Draw();
 	  s->SetSize (nw,nh);
@@ -181,7 +181,7 @@ static void DrawTargetShield (VDU * thus, VSSprite* s, float per, float &sx, flo
 
 }
 void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
-  DrawTargetShield (this, s, per, sx, sy, w, h, true);
+  DrawHUDSprite (this, s, per, sx, sy, w, h, true,false);
 }
 
 void VDU::Scroll (int howmuch) {
@@ -221,8 +221,13 @@ static std::string MangleString (const char * in, float probability) {
   free (tmp);
   return retval;
 }
-static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h) { //FIXME why is this static?
+static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert) { //FIXME why is this static?
   GFXBegin (GFXLINE);
+  if (invert ) {
+    float tmp = fs;
+    fs = bs;
+    bs = tmp;
+  }
   if (fs>.2) {
     GFXVertex3d ((double)x-w/8,y+h/2,0.);
     GFXVertex3d ((double)x-w/3,y+.9*h/2,0.);
@@ -323,7 +328,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
   GFXEnd();
 
 }
-static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, float y, float w, float h) {
+static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, float y, float w, float h,bool invertfrontback) {
   float fs = parent->FShieldData();
   float rs = parent->RShieldData();
   float ls = parent->LShieldData();
@@ -331,10 +336,10 @@ static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, f
   float armor[8];
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
-  DrawShield (fs,rs,ls,bs,x,y,w,h);
+  DrawShield (fs,rs,ls,bs,x,y,w,h,invertfrontback);
   parent->ArmorData (armor);
   GFXColor4f (1,.6,0,1);
-  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2);
+  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2, invertfrontback);
 }
 void VDU::DrawVDUShield (Unit * parent) {
   float x,y,w,h;
@@ -348,11 +353,13 @@ void VDU::DrawVDUShield (Unit * parent) {
 
   h=fabs (h*.6);
   w=fabs (w*.6);
-  DrawShieldArmor(parent,StartArmor,x,y,w,h);
+  static bool invert_friendly_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_friendly_shields","false"));
+  DrawShieldArmor(parent,StartArmor,x,y,w,h,invert_friendly_shields);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   GFXEnable (TEXTURE0);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
-  DrawTargetSpr (parent->getHudImage (),.25,x,y,w,h);
+  static bool invert_friendly_sprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_friendly_sprite","false"));
+  DrawHUDSprite (this,parent->getHudImage (),.25,x,y,w,h,true,invert_friendly_sprite);
 
 }
 VSSprite * getJumpImage () {
@@ -399,7 +406,7 @@ retString128 PrettyDistanceString(double distance) {
 }
 
 void VDU::DrawTarget(Unit * parent, Unit * target) {
-  float x,y,w,h;
+    float x,y,w,h;
 
   float fs = target->FShieldData();
   float rs = target->RShieldData();
@@ -407,12 +414,14 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   float bs = target->BShieldData();
   GFXEnable (TEXTURE0);
   GFXColor4f (1,target->GetHullPercent(),target->GetHullPercent(),1);
-
-  DrawTargetSpr ((target->isUnit()!=PLANETPTR?target->getHudImage ():
-		  (target->GetDestinations().size()!=0? getJumpImage():
-		   (((Planet *)target)->hasLights()?getSunImage():
-		    (target->getFullname().find("invisible")!=string::npos?getNavImage():getPlanetImage())))),.6,x,y,w,h);
-  GFXDisable (TEXTURE0);    
+  static bool invert_target_sprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_target_sprite","false"));
+    
+  DrawHUDSprite (this,((target->isUnit()!=PLANETPTR||target->getHudImage()!=NULL)?target->getHudImage ():
+                       (target->GetDestinations().size()!=0? getJumpImage():
+                        (((Planet *)target)->hasLights()?getSunImage():
+                         (target->getFullname().find("invisible")!=string::npos?getNavImage():getPlanetImage())))),.6,x,y,w,h,true,invert_target_sprite);
+  
+    GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
   double mm=0;
   string unitandfg=getUnitNameAndFgNoBase(target).c_str();
@@ -439,7 +448,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   strcat (st,qr.str);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
-  DrawShield (fs,rs,ls,bs,x,y,w,h);
+  static bool invert_target_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_target_shields","false"));
+  DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields);
   GFXColor4f (1,1,1,1);
   }else {
   tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
@@ -703,7 +713,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
     s+=.125*SIMULATION_ATOM;
     if (s>1)
       s=0;
-    DrawShield (0, s, s, 0, x, y, w,h);
+    DrawShield (0, s, s, 0, x, y, w,h,false);
   }
   GFXColor4f (1,1,1,1);
   
@@ -832,10 +842,11 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
     static bool draw_vdu_target_info=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_vdu_view_shields","true"));
     if (target&&draw_vdu_target_info){
       if (viewStyle==CP_PANTARGET) {
-        DrawTargetShield(this,getSunImage(),1,x,y,w,h,false);
+        DrawHUDSprite(this,getSunImage(),1,x,y,w,h,false,false);
         h=fabs (h*.6);
         w=fabs (w*.6);
-        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h);
+        static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
+        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h,invert_view_shields);
       }
     }
     GFXColor4f (1,1,1,1);
