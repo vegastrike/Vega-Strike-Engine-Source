@@ -43,8 +43,7 @@ class UnitFactory
 public:
     static Unit* createUnit( );
 
-    static Unit* createUnit( Mesh** meshes,
-                             int num,
+    static Unit* createUnit( std::vector<Mesh*> &meshes,
 			     bool Subunit,
 			     int faction);
 

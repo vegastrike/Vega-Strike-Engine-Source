@@ -215,16 +215,15 @@ class Unit
   ///The image that will appear on those screens of units targetting this unit
   UnitImages *image;
   ///number of meshes (each with separate texture) this unit has
-  int nummesh;
-  ///The pointers to the mesh data of this mesh
-  Mesh **meshdata;
+  std::vector <Mesh *> meshdata;
+  int nummesh()const {return ((int)meshdata.size())-1;}
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
   HaloSystem halos;
   ///NUmber of weapons on this unit
-  int nummounts;
+
   /** 
    * Contains information about a particular Mount on a unit.
    * And the weapons it has, where it is, where it's aimed, 
@@ -279,6 +278,7 @@ class Unit
     bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
     bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
+  int nummounts;
   ///Mount may access unit
   friend class Unit::Mount;
   ///Activates all guns of that size
@@ -457,6 +457,7 @@ public:
   ///Does a one way collision between smaller target and this
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
   int GetNumMounts ()const  {return nummounts;}
+
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
@@ -499,7 +500,7 @@ protected:
   /** Constructor that creates aa mesh with meshes as submeshes (number
    *  of them) as either as subunit with faction faction
    */
-  Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
+  Unit (std::vector <Mesh *> &meshes  , bool Subunit, int faction);
 
   /** Constructor that creates a mesh from an XML file If it is a
    *  customizedUnit, it will check in that directory in the home dir for

@@ -1694,25 +1694,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   XML_ParserFree (parser);
   // Load meshes into subunit
   image->unitwriter->EndTag ("Unit");
-  nummesh = xml->meshes.size();
+  meshdata= xml->meshes;
+  meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   *myhudim =xml->hudimage;
   int a;
-  meshdata = new Mesh*[nummesh+1];
-  for(a=0; a < nummesh; a++) {
-    meshdata[a] = xml->meshes[a];
-  }
-#if 0
-  numhalos = xml->halos.size();
-  if(numhalos)
-    halos = new Halo*[numhalos];
-  else
-    halos=NULL;
-  for(a=0; a < numhalos; a++) {
-    halos[a]=xml->halos[a];
-  }
-#endif
   nummounts = xml->mountz.size();
   if (nummounts)
     mounts = new Mount [nummounts];
@@ -1760,16 +1747,16 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   csRapidCollider *colShield=NULL;
   csRapidCollider *colTree=NULL;
   if (xml->shieldmesh) {
-    meshdata[nummesh] = xml->shieldmesh;
+    meshdata.back() = xml->shieldmesh;
     if (!colTrees) {
       if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
-	BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
+	BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata.back());
       }
       if (CheckBSP ((tmpname+"_shield.bsp").c_str())) {
 	bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
       }
-      if (meshdata[nummesh]) {
-	meshdata[nummesh]->GetPolys(polies);
+      if (meshdata.back()) {
+	meshdata.back()->GetPolys(polies);
 	colShield = new csRapidCollider (polies);
       }
     }
@@ -1789,11 +1776,11 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
     tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
     
-    meshdata[nummesh] = tmp;
+    meshdata.back() = tmp;
     bspShield=NULL;
     colShield=NULL;
   }
-  meshdata[nummesh]->EnableSpecialFX();
+  meshdata.back()->EnableSpecialFX();
   if (!colTrees) {
     if (xml->hasBSP) {
       tmpname += ".bsp";
@@ -1808,7 +1795,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     }
     polies.clear();  
     if (!xml->bspmesh) {
-      for (int j=0;j<nummesh;j++) {
+      for (int j=0;j<nummesh();j++) {
 	meshdata[j]->GetPolys(polies);
       }
     }else {

@@ -82,7 +82,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
   corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
 
-  for(a=0; a<nummesh; a++) {
+  for(a=0; a<nummesh(); a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
   }/* have subunits now in table*/
@@ -236,8 +236,8 @@ void Unit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  nummounts= nummesh=0;
-  mounts = NULL;meshdata = NULL;
+  nummounts=0;
+  mounts = NULL;
   aistate = NULL;
   SetAI (new Order());
   Identity(cumulative_transformation_matrix);
@@ -324,14 +324,13 @@ std::string Unit::getCockpit () const{
 }
 
 
-Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
+Unit::Unit (std::vector <Mesh *>& meshes, bool SubU, int faction) {
   Init ();
   this->faction = faction;
   SubUnit = SubU;
-  meshdata = (Mesh **)malloc ((1+num)*sizeof (Mesh *));
-  memcpy (meshdata,meshes,(num)*sizeof (Mesh *));
-  nummesh = num;
-  meshdata[nummesh]=NULL;//turn off shield
+  meshdata = meshes;
+  meshes.clear();
+  meshdata.push_back(NULL);
   calculate_extent(false);
 }
 char * GetUnitDir (const char * filename) {
@@ -358,21 +357,16 @@ void Unit::GetCargoCat (const std::string &cat, vector <Cargo> &cats) {
 }
 vector <Mesh *> Unit::StealMeshes() {
   vector <Mesh *>ret;
-  Mesh * shield = meshdata[nummesh];
-  for (int i=0;i<nummesh;i++) {
+  
+  Mesh * shield = meshdata.empty()?NULL:meshdata.back();
+  for (int i=0;i<nummesh();i++) {
     ret.push_back (meshdata[i]);
   }
-  delete []meshdata;
-  meshdata = new Mesh *[1];
-  meshdata[0]= shield;
-  nummesh=0;
+  meshdata.clear();
+  meshdata.push_back(shield);
+  
   return ret;
 }
-#if 0
-Unit * _1800GetGod () {
-  return UnitFactory::get_static_1800God( );
-}
-#endif
 
 void Unit::SetFg(Flightgroup * fg, int fg_subnumber) {
   flightgroup=fg;
@@ -426,9 +420,8 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  if (fp) fclose (fp); 
 	  else {
 	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
-	    meshdata = new Mesh * [1];
-	    meshdata[0]=NULL;
-	    nummesh=0;
+	    meshdata.clear();
+	    meshdata.push_back(NULL);
 	    this->name=string("LOAD_FAILED");
 	    //	    assert ("Unit Not Found"==NULL);
 	  }
@@ -452,9 +445,9 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  return;
 	}
 	LoadFile(filename);
+	int nummesh;
 	ReadInt(nummesh);
-	meshdata = new Mesh*[nummesh+1];
-	meshdata[nummesh]=0;
+	meshdata.clear();
 	for(int meshcount = 0; meshcount < nummesh; meshcount++)
 	{
 		int meshtype;
@@ -462,11 +455,11 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		char meshfilename[64];
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
-
-		meshdata[meshcount] = new Mesh(meshfilename, 1, faction,NULL);
+		meshdata.push_back(new Mesh(meshfilename, 1, faction,NULL));
 
 		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}
+	meshdata.push_back(NULL);
 	int numsubunit;
 	ReadInt(numsubunit);
 	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
@@ -605,15 +598,11 @@ Unit::~Unit()
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
-#ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 7,meshdata);
-  fflush (stderr);
-#endif
-  if(meshdata&&nummesh>0) {
-    for(int meshcount = 0; meshcount < nummesh; meshcount++)
+  for(int meshcount = 0; meshcount < meshdata.size(); meshcount++)
+    if (meshdata[meshcount])
       delete meshdata[meshcount];
-    delete [] meshdata;
-  }
+  meshdata.clear();
+  
 
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x ", 9, halos);
@@ -739,7 +728,7 @@ bool Unit::queryFrustum(float frustum [6][4]) const{
 #else
   Vector TargetPoint;
 #endif
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
         TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position());
 	
 	if (GFXSphereInFrustum (frustum, 
@@ -830,7 +819,7 @@ void Unit::DrawNow (const Matrix & mat, float lod) {
   if (cloaking>cloakmin) {
     cloak = cloakVal (cloak,cloakmin,image->cloakrate, image->cloakglass);
   }
-  for (i=0;i<nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+  for (i=0;i<nummesh();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
     if (meshdata[i]==NULL) 
       continue;
     Vector TransformedPosition = Transform (mat,
@@ -889,10 +878,10 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   }
   bool On_Screen=false;
   if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
-    for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+    for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
-	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
+	  if (i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
       Vector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position());
@@ -904,7 +893,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 	fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
       }
 #endif
-
+      //      fprintf (stderr,"%s %d ",name.c_str(),i);
       float d = GFXSphereInFrustum(TransformedPosition,
 				   meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
@@ -912,7 +901,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 #endif 
 				   );
       float lod;
-
+      //      fprintf (stderr,"\n");
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that

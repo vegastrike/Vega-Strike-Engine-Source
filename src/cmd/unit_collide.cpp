@@ -332,9 +332,8 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
   }
   QVector st (InvTransform (cumulative_transformation_matrix,pt));
   bool temp=false;
-  for (i=0;i<nummesh&&!temp;i++) {
+  for (i=0;i<nummesh()&&!temp;i++) {
     temp|=meshdata[i]->queryBoundingBox (st,err);
-     
   }
   if (!temp)
     return NULL;
@@ -393,7 +392,7 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
     }
     QVector ed (InvTransform (cumulative_transformation_matrix,end));
     bool temp=false;
-    for (i=0;i<nummesh&&!temp;i++) {
+    for (i=0;i<nummesh()&&!temp;i++) {
       temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
     }
     if (!temp) {
@@ -416,7 +415,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
 #ifdef VARIABLE_LENGTH_PQR
   float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
 #endif
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
     TargetPoint = (Transform (*tmpo,meshdata[i]->Position()).Cast()-pnt).Cast();
     if (TargetPoint.Dot (TargetPoint)< 
 	err*err+
@@ -463,7 +462,7 @@ float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, fl
   int i;
   float tmp;
   QVector st,dir;
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
     float a, b,c;
     st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position()).Cast();	
     dir = end-start;//now start and end are based on mesh's position

@@ -67,6 +67,8 @@ libgfx_a_SOURCES =	\
 	star.h		\
 	star.cpp	\
 	sphere.cpp	\
+	ring.cpp	\
+	ring.h		\
 	sphere.h	\
 	sprite.cpp	\
 	sprite.h	\

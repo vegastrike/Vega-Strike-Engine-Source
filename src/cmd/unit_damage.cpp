@@ -53,22 +53,31 @@ void Unit::UnRef() {
 }
 
 
-
+static std::vector <Mesh *> MakeMesh(unsigned int mysize) {
+  std::vector <Mesh *> temp;
+  for (unsigned int i=0;i<mysize;i++) {
+    temp.push_back(NULL);
+  }
+  return temp;
+}
 void Unit::Split (int level) {
   int i;
-  int nm = nummesh;
+  int nm = nummesh();
+  if (nm<=0) {
+    return;
+  }
   Vector PlaneNorm;
-  Mesh ** old = meshdata;
+  std::vector <Mesh *> old = meshdata;
 
   for (int split=0;split<level;split++) {
-    Mesh ** nw= new Mesh *[nm*2+1];
+    std::vector<Mesh *> nw= MakeMesh(nm*2+1);
     nw[nm*2]=old[nm];//copy shield
     for (i=0;i<nm;i++) {
       PlaneNorm.Set (rand()-RAND_MAX/2,rand()-RAND_MAX/2,rand()-RAND_MAX/2+.5);
       PlaneNorm.Normalize();  
       old[i]->Fork (nw[i*2], nw[i*2+1],PlaneNorm.i,PlaneNorm.j,PlaneNorm.k,-PlaneNorm.Dot(old[i]->Position()));//splits somehow right down the middle.
       if (nw[i*2]&&nw[i*2+1]) {
-	delete old[i];
+	old.clear();
       }else {
 	nw[i*2+1]= NULL;
 	nw[i*2]=old[i];
@@ -84,7 +93,6 @@ void Unit::Split (int level) {
 	nw[nm]=NULL;
       }
     }
-    delete [] old;
     old = nw;
   }
   if (old[nm])
@@ -92,7 +100,9 @@ void Unit::Split (int level) {
   old[nm]=NULL;
   for (i=0;i<nm;i++) {
     Unit * splitsub;
-    SubUnits.prepend(splitsub = UnitFactory::createUnit (old+i,1,true,faction));
+    std::vector<Mesh *> tempmeshes;
+    tempmeshes.push_back (old[i]);
+    SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
     splitsub->mass = mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
@@ -104,10 +114,9 @@ void Unit::Split (int level) {
       splitsub->ApplyLocalTorque(loc*mass*explosion_torque*rSize()*(1+rand()%(int)(1+rSize())));
     }
   }
-  delete [] old;
-  nummesh = 0;
-  meshdata = new Mesh *[1];
-  meshdata[0]=NULL;//the shield
+  old.clear();
+  meshdata.clear();
+  meshdata.push_back(NULL);//the shield
   //FIXME...how the heck can they go spinning out of control!
 }
 
@@ -697,20 +706,20 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   float percentage=0;
   if (GetNebula()==NULL||(nebshields>0)) {
     percentage = DealDamageToShield (pnt,amt);
-    if (meshdata[nummesh]&&percentage>0&&amt==0) {//shields are up
+    if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
       if (GetNebula()==NULL) 
-	meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
     }
   }
-  if (shield.leak>0||!meshdata[nummesh]||percentage==0||amt>0||phasedamage) {
+  if (shield.leak>0||!meshdata.back()||percentage==0||amt>0||phasedamage) {
     percentage = DealDamageToHull (pnt, leakamt+amt);
     if (percentage!=-1) {//returns -1 on death--could delete
-      for (int i=0;i<nummesh;i++) {
+      for (int i=0;i<nummesh();i++) {
 	if (percentage)
 	  meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
       }

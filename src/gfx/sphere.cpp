@@ -10,7 +10,7 @@
 #endif
 
 using XMLSupport::tostring;
-const int pixelscalesize=30;
+int pixelscalesize=30;
 float SphereMesh::GetT (float rho, float rho_min, float rho_max) {
  return 1-(rho-rho_min)/ (rho_max-rho_min);  
 }
@@ -241,7 +241,6 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
       int pos =wrap.find ("wrapx");
       if (pos!=string::npos) {
 	string Wrapx = wrap.substr (pos+5,wrap.length());
-	float numwraps=1;
 	sscanf(Wrapx.c_str(),"%f",&wrapx);
 	pos = Wrapx.find ("wrapy");
 	if (pos!=string::npos) {

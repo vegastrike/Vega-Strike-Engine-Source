@@ -34,13 +34,11 @@ Unit* UnitFactory::createUnit( )
     return new Unit( 0 );
 }
 
-Unit* UnitFactory::createUnit( Mesh** meshes,
-		               int num,
+Unit* UnitFactory::createUnit( vector <Mesh*> & meshes,
 		               bool Subunit,
 		               int faction )
 {
     return new Unit( meshes,
-                     num,
                      Subunit,
                      faction );
 }

@@ -259,8 +259,8 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
     }
   }
   }
-  if (nummesh) {
-    i = rand()%nummesh;
+  if (nummesh()>0) {
+    i = rand()%(nummesh());
     Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());
     if (((int)(explosiontime/SIMULATION_ATOM))!=0) 
       if (!(rand()%((int)(explosiontime/SIMULATION_ATOM)))) 

@@ -473,7 +473,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   int i;
   if (lastframe) {
     char tmp=0;
-    for (i=0;i<=nummesh;i++) {
+    for (i=0;i<meshdata.size();i++) {
       if (!meshdata[i])
 	continue;
       tmp |=meshdata[i]->HasBeenDrawn();

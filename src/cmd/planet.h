@@ -73,8 +73,10 @@ protected:
     friend class UnitFactory;
 
 public:
-  virtual ~Planet();
 
+  virtual ~Planet();
+  void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
+  void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int texture_rep, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void DisableLights ();
   void EnableLights();
   void AddSatellite (Unit * orbiter);

@@ -14,7 +14,7 @@ double Unit::getMinDis (const QVector &pnt) {
 #ifdef VARIABLE_LENGTH_PQR
   float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
 #endif
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
 
     TargetPoint = (Transform(cumulative_transformation_matrix,meshdata[i]->Position()).Cast()-pnt).Cast();
     tmpvar = sqrtf (TargetPoint.Dot (TargetPoint))-meshdata[i]->rSize()
@@ -45,7 +45,7 @@ float Unit::querySphereClickList (const QVector &st, const QVector &dir, float e
   const Matrix * tmpo = &cumulative_transformation_matrix;
 
   Vector TargetPoint (tmpo->getP());
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
     TargetPoint = Transform (*tmpo,meshdata[i]->Position());
     Vector origPoint = TargetPoint;
 
@@ -128,7 +128,7 @@ float Unit::querySphereClickList (const QVector &st, const QVector &dir, float e
 bool Unit::queryBoundingBox (const QVector &pnt, float err) {
   int i;
   BoundingBox * bbox=NULL;
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
     bbox = meshdata[i]->getBoundingBox();
     bbox->Transform (cumulative_transformation_matrix);
     if (bbox->Within(pnt,err)) {
@@ -152,7 +152,7 @@ int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, floa
   int i;
   int retval=0;
   BoundingBox * bbox=NULL;
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
     bbox = meshdata[i]->getBoundingBox();
     bbox->Transform (cumulative_transformation_matrix);
     switch (bbox->Intersect(origin,direction.Cast(),err)) {
@@ -196,7 +196,7 @@ bool Unit::querySphereClickList (int mouseX, int mouseY, float err, Camera * act
 #endif
 
   Vector CamP,CamQ,CamR;
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
     //cerr << "pretransform position: " << meshdata[i]->Position() << endl;
     TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position());
     

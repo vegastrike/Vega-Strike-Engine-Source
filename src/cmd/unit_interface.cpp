@@ -655,7 +655,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction,"",fg,fgsnumber);
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
-	    if (NewPart->nummesh>0) {
+	    if (NewPart->nummesh()>0) {
 	      _Universe->AccessCockpit()->credits-=part->price-usedprice;
 	      NewPart->curr_physical_state=un->curr_physical_state;
 	      NewPart->prev_physical_state=un->prev_physical_state;
