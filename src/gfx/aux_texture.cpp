@@ -345,6 +345,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	      data = NULL;
 	      data= (unsigned char *)malloc(sizeof(unsigned char)*sizeY*sizeX);
 	      palette = (unsigned char *)malloc(sizeof(unsigned char)* (256*4+1));
+	      memset (palette,0,(256*4+1)*sizeof(unsigned char));
 	      unsigned char *paltemp = palette;
 	      unsigned char ctemp;
 		for(int palcount = 0; palcount < 256; palcount++)

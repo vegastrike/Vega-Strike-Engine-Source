@@ -545,18 +545,22 @@ void Mesh::CreateLogos(int faction, Flightgroup * fg) {
     for (unsigned int ind=0;ind<xml->logos.size();ind++) {
       if (xml->logos[ind].type==index) {
 	float weight=0;
-	norm2=Vector (xml->vertices[xml->logos[ind].refpnt[1]].x-
-		      xml->vertices[xml->logos[ind].refpnt[0]].x,
-		      xml->vertices[xml->logos[ind].refpnt[1]].y-
-		      xml->vertices[xml->logos[ind].refpnt[0]].y,
-		      xml->vertices[xml->logos[ind].refpnt[1]].z-
-		      xml->vertices[xml->logos[ind].refpnt[0]].z);
-	norm1=Vector (xml->vertices[xml->logos[ind].refpnt[2]].x-
-		      xml->vertices[xml->logos[ind].refpnt[0]].x,
-		      xml->vertices[xml->logos[ind].refpnt[2]].y-
-		      xml->vertices[xml->logos[ind].refpnt[0]].y,
-		      xml->vertices[xml->logos[ind].refpnt[2]].z-
-		      xml->vertices[xml->logos[ind].refpnt[0]].z);
+	norm1.Set(0,1,0);
+	norm2.Set(1,0,0);
+	if (xml->logos[ind].refpnt.size()>2) {
+	  norm2=Vector (xml->vertices[xml->logos[ind].refpnt[1]].x-
+			xml->vertices[xml->logos[ind].refpnt[0]].x,
+			xml->vertices[xml->logos[ind].refpnt[1]].y-
+			xml->vertices[xml->logos[ind].refpnt[0]].y,
+			xml->vertices[xml->logos[ind].refpnt[1]].z-
+			xml->vertices[xml->logos[ind].refpnt[0]].z);
+	  norm1=Vector (xml->vertices[xml->logos[ind].refpnt[2]].x-
+			xml->vertices[xml->logos[ind].refpnt[0]].x,
+			xml->vertices[xml->logos[ind].refpnt[2]].y-
+			xml->vertices[xml->logos[ind].refpnt[0]].y,
+			xml->vertices[xml->logos[ind].refpnt[2]].z-
+			xml->vertices[xml->logos[ind].refpnt[0]].z);
+	}
 	CrossProduct (norm2,norm1,norm);
 	
 	Normalize(norm);//norm is our normal vect, norm1 is our reference vect

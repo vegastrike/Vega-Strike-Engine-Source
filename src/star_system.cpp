@@ -44,7 +44,7 @@ vector<Vector> perplines;
 
 extern void reset_time_compression (int,KBSTATE);
 
-Atmosphere *theAtmosphere;
+
 
 extern string RemoveDotSystem (const char *input);
 /*
@@ -149,7 +149,6 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
 
   params.scattering = 5;
 
-  theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
 
 }
@@ -382,7 +381,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   Identity(ident);
 
   //Atmosphere::ProcessDrawQueue();
-  //theAtmosphere->Draw(Vector(0,1,0),ident);
 
 
 

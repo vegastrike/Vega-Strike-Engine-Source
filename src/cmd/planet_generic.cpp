@@ -187,7 +187,6 @@ Planet::Planet()
   // Not needed as Unit default constructor is called and already does Init
   //Init();
   terraintrans = NULL;
-  SetAI(new Order()); // no behavior
 }
 
 void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)

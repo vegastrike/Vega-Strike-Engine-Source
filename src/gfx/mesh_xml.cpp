@@ -1328,7 +1328,9 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   mn = Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   mx = Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   radialSize = 0;
-  enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
+  vector <enum POLYTYPE> polytypes;
+  polytypes.insert(polytypes.begin(),totalvertexsize,GFXTRI);
+  //  enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
   int *poly_offsets  = new int [totalvertexsize];
   int o_index=0;
   if (xml->tris.size()) {
@@ -1448,18 +1450,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
  	 radialSize = .5*(mx-mn).Magnitude();
 
   if (xml->sharevert) {
-    GFXVertex * myvert = new GFXVertex[xml->vertices.size()];
-    unsigned int * myind= new unsigned int [ind.size()];
-    unsigned int j=0;
-    for (vector<GFXVertex>::iterator i=xml->vertices.begin();i!=xml->vertices.end();i++,j++) {
-      myvert[j]=*i;
-    }
-    j=0;
-    for (vector<unsigned int>::iterator k=ind.begin();k!=ind.end();k++,j++) {
-      myind[j]=*k;
-    }
-    vlist = new GFXVertexList (polytypes, xml->vertices.size(),myvert,o_index,poly_offsets,false,myind);
-    delete [] myvert;
+    vlist = new GFXVertexList (&polytypes[0], xml->vertices.size(),&xml->vertices[0],o_index,poly_offsets,false,&ind[0]);
   }else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
@@ -1470,14 +1461,14 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
       unsigned int * ind;
       GFXOptimizeList (vertexlist,totalvertexsize,&newv,&numopt,&ind);
       if (numopt < totalvertexsize*optvertexlimit) {
-	vlist = new GFXVertexList (polytypes, numopt,newv,o_index,poly_offsets,false,ind);
+	vlist = new GFXVertexList (&polytypes[0], numopt,newv,o_index,poly_offsets,false,ind);
 	cachunk = true;
       }
       free (ind);
       free (newv);
     }
     if (!cachunk) {
-      vlist= new GFXVertexList(polytypes,totalvertexsize,vertexlist,o_index,poly_offsets); 
+      vlist= new GFXVertexList(&polytypes[0],totalvertexsize,vertexlist,o_index,poly_offsets); 
     }
   }
   /*

@@ -30,7 +30,7 @@
 #include <float.h>
 	const float size = 100;
 Background::Background(const char *file, int numstars, float spread):Enabled (true) {
-	char * temp=new char [strlen(file)+25];
+	string temp;
 	GFXVertex * tmpvertex = new GFXVertex [numstars];
 	memset (tmpvertex,0,sizeof (GFXVertex)*numstars);	
 	for (int j=0;j<numstars;j++) {
@@ -41,15 +41,14 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, numstars, false,0);
 	delete [] tmpvertex;
 	up = left = down = front=right=back=NULL;
-	strcpy(temp, file);
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));
-	up = new Texture(strcat(temp, "_up.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
+	temp = string(file)+"_up.bmp";
+	up = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	SphereBackground = NULL;
 	
 	if (!up->LoadSuccess()) {
-	strcpy(temp, file);
-	  strcpy (temp,file);
-	  SphereBackground = new SphereMesh (20,8,8,strcat (temp,"_sphere.bmp"),NULL,true);
+	  temp = string(file)+"_sphere.bmp";
+	  SphereBackground = new SphereMesh (20,8,8,temp.c_str(),NULL,true);
 	  //SphereBackground->Pitch(PI*.5);//that's the way prophecy's textures are set up
 	  //SphereBackground->SetOrientation(Vector(1,0,0),
 	  //			   Vector(0,0,-1),
@@ -60,31 +59,31 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	//up->Clamp();
 	//up->Filter();
 
-	strcpy(temp, file);
-	left = new Texture(strcat(temp, "_left.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
+	
+	temp = string(file)+"_left.bmp";
+	left = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
 	//left->Clamp();
 	//left->Filter();
 
-	strcpy(temp, file);
-	front = new Texture(strcat(temp, "_front.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
+	temp = string(file)+"_front.bmp";
+	front = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
 	//front->Clamp();
 	//front->Filter();
 
-	strcpy(temp, file);
-	right = new Texture(strcat(temp, "_right.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
+	temp = string(file)+"_right.bmp";
+	right = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//right->Clamp();
 	//right->Filter();
 
-	strcpy(temp, file);
-	back = new Texture(strcat(temp, "_back.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
+	temp = string(file)+"_back.bmp";
+	back = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//back->Clamp();
 	//back->Filter();
 
-	strcpy(temp, file);
-	down = new Texture(strcat(temp, "_down.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
+	temp = string(file)+"_down.bmp";
+	down = new Texture(temp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//down->Clamp();
 	//down->Filter();
-	delete [] temp;
 	}
 }
 void Background::EnableBG(bool tf) {

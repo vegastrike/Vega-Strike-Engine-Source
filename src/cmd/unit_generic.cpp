@@ -240,13 +240,28 @@ std::string lookupMountSize (int s) {
 /***********************************************************************************/
 
 Unit::Unit( int /*dummy*/ ) {
-	Init();
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  SetAI (new Order());
+  Init();
 }
 Unit::Unit() {
-	Init();
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  SetAI (new Order());
+  Init();
 }
 
 Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  SetAI (new Order());
   Init();
   this->faction = fact;
   SubUnit = SubU;
@@ -258,7 +273,12 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
 
 extern void update_ani_cache();
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
-	Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml); 
+  image = new UnitImages;
+  sound = new UnitSounds;
+  aistate=NULL;
+  image->cockpit_damage=NULL;
+  SetAI (new Order());
+  Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml); 
 }
 
 Unit::~Unit()
@@ -329,7 +349,13 @@ Unit::~Unit()
 
 void Unit::Init()
 {
-
+  /*
+  static std::map <Unit *, bool> m;
+  if (m[this]) {
+    fprintf (stderr,"already called this");
+  }else {
+    m[this]=1;
+    }*/
 	this->networked=0;
 	RecurseIntoSubUnitsOnCollision=false;
 	this->combat_role=ROLES::getRole("INERT");
@@ -351,8 +377,6 @@ void Unit::Init()
   afterburnenergy=0;
   planet=NULL;
   nebula=NULL;
-  image = new UnitImages;
-  sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
   cloaking=-1;
@@ -452,16 +476,18 @@ void Unit::Init()
 
   scanner.last_scantime=0.0;
   // No cockpit reference here
-  int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
-  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
-  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
-    image->cockpit_damage[damageiterator]=1;
+  if (!image->cockpit_damage) {
+    int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+    image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
+    for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
+      image->cockpit_damage[damageiterator]=1;
+    }
   }
   CollideInfo.object.u = NULL;
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
-  SetAI (new Order());
+
   /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;

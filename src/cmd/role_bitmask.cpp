@@ -89,6 +89,8 @@ namespace ROLES {
 			  }
 			 
 			}
+			free (temp);
+			fclose (fp);
 	  }
 	  return scripts;
 	}

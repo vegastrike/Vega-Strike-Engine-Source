@@ -55,6 +55,7 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
 HaloSystem::HaloSystem() {
   VSCONSTRUCT2('h')
   mesh=NULL;
+  activation=0;
 }
 
 MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {

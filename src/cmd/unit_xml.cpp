@@ -1585,7 +1585,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
-  string * myhudim = new string("");
+  string * myhudim = &image->unitwriter->randomdata[0];
   float * myscale=&image->unitscale;
   image->unitwriter->AddElement("scale",floatStarHandler,XMLType(myscale));
   {
@@ -1813,9 +1813,8 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 	colShield=NULL;
     }
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
-    
-    meshdata.back() = tmp;
+    meshdata.back()= new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
+    tmp=meshdata.back();
     bspShield=NULL;
     colShield=NULL;
   }

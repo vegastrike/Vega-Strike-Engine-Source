@@ -97,9 +97,13 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   VSCONSTRUCT1('v')
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
-  mode = new POLYTYPE [numlists];
-  for (int pol=0;pol<numlists;pol++) {
+  if (numlists>0) {
+    mode = new POLYTYPE [numlists];
+    for (int pol=0;pol<numlists;pol++) {
       mode[pol]=poly[pol];//PolyLookup (poly[pol]);
+    }
+  }else {
+    mode=NULL;
   }
   this->numlists = numlists;
   this->numVertices = numVertices;

@@ -296,6 +296,10 @@ GameUnit<UnitType>::~GameUnit<UnitType>()
 {
   if (image->hudImage )
     delete image->hudImage;
+  if (image->explosion){
+    delete image->explosion;
+    image->explosion=NULL;
+  }
   if (planet)
     delete planet;
   //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
