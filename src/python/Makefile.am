@@ -14,7 +14,7 @@ libpythongeneric =				\
 	unit_exports2.cpp	\
 	unit_exports3.cpp	\
 	unit_method_defs.cpp	\
-	universe_util_exports.cpp	\
+	universe_util_export.cpp	\
 	unit_wrapper_class.h	\
 	unit_exports.h		\
 	star_systeM_exports.h
