@@ -69,6 +69,7 @@ namespace CAR {
 
 
   const EnumMap::Pair type_names[6] = {
+    EnumMap::Pair("RUNNINGLIGHTS,RUNNINGLIGHTS),
     EnumMap::Pair("HEADLIGHTS", HEADLIGHTS),
     EnumMap::Pair("LEFTBLINK",LEFTBLINK),
     EnumMap::Pair("RIGHTBLINK",RIGHTBLINK),
@@ -112,36 +113,36 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
 #ifdef CAR_SIM
     for (unsigned int i=0;i<ani.size();++i) {
-      bool      drawnow=false;
       int bitwise = scale.j;
-      int typ = CAR::HEADLIGHTS;
+      int typ = 0;
 #ifdef CAR_SIM
       typ = halo_type [i];
 #endif
+      bool      drawnow= (typ==CAR::RUNNINGLIGHTS);
       if ((typ==CAR::BRAKE&&scale.k<.01&&scale.k>-.01)) {
 	drawnow=true;
       }
-      if ((typ==REVERSE&&scale.k<=-.01)) {
+      if ((typ==CAR::REVERSE&&scale.k<=-.01)) {
 	drawnow=true;
       }
-      if (typ==HEADLIGHTS) {
+      if (typ==CAR::HEADLIGHTS) {
 	if (scale.j>=ON_NO_BLINKEN||(bitwise<8&&bitwise>0&&(bitwise&FORWARD_BLINKEN))) {
 	  drawnow = true;
 	}
       }
-      if (typ==SIREN) {
+      if (typ==CAR::SIREN) {
 	if ((bitwise>0)&&((bitwise>=ON_NO_BLINKEN)||(bitwise&SIREN_BLINKEN))) {
 	  drawnow=true;
 	}
       }
       float blink_prob=.8;
-      if (typ==RIGHTBLINK) {
+      if (typ==CAR::RIGHTBLINK) {
 	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&RIGHT_BLINKEN)) {
 	  if (rand()<RAND_MAX*blink_prob) 
 	    drawnow=true;
 	}
       }
-      if (typ==LEFTBLINK) {
+      if (typ==CAR::LEFTBLINK) {
 	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&LEFT_BLINKEN)) {
 	  if (rand()<RAND_MAX*blink_prob) 
 	    drawnow=true;
