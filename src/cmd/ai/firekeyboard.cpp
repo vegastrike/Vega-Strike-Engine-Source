@@ -990,8 +990,10 @@ void FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMe
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
-  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
-    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+  int sound=c.getCurrentState()->GetSound(c.sex);
+  //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+  if (!AUDIsPlaying (sound)) {
+    AUDStartPlaying(sound);
   }
   bool foundValidMessage=false;
   if (un) {
@@ -1363,8 +1365,10 @@ void FireKeyboard::Execute () {
 	if (mymsg==NULL||mymsg->curstate>=fsm->nodes.size()) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
 	  DoSpeech (targ,targ,*c.getCurrentState());
-	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
-	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+          int sound = c.getCurrentState()->GetSound(c.sex);
+          //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+	  if (!AUDIsPlaying (sound)) {
+	    AUDStartPlaying(sound);
 	  }
 	  Order * o = targ->getAIState();
 	  if (o)
@@ -1376,8 +1380,10 @@ void FireKeyboard::Execute () {
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
 	    DoSpeech (targ,targ,*c.getCurrentState());
-	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
-	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+            int sound=c.getCurrentState()->GetSound(c.sex);
+            //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+	    if (!AUDIsPlaying (sound)) {
+	      AUDStartPlaying(sound);
 	    }
             Order * oo = targ->getAIState();
             if (oo)
