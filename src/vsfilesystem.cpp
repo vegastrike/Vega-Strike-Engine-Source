@@ -1646,29 +1646,29 @@ namespace VSFileSystem
 			return FileNotFound;
 
 		this->file_type = this->alt_type = type;
-		this->filename = filenam;
+		this->filename = string( filenam);
 		this->file_mode = CreateWrite;
 
 		if( type==SystemFile)
 		{
 			string dirpath( sharedsectors+"/"+universe_name);
 			CreateDirectoryHome( dirpath);
-			CreateDirectoryHome( dirpath+"/"+getStarSystemSector( filename));
-			string fpath( homedir+"/"+dirpath+"/"+filename);
+			CreateDirectoryHome( dirpath+"/"+getStarSystemSector( this->filename));
+			string fpath( homedir+"/"+dirpath+"/"+this->filename);
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;
 		}
 		else if( type==TextureFile)
 		{
-			string fpath( homedir+"/"+sharedtextures+"/"+filename);
+			string fpath( homedir+"/"+sharedtextures+"/"+this->filename);
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;
 		}
 		else if( type==UnitFile)
 		{
-			string fpath( homedir+"/"+savedunitpath+"/"+filename);
+			string fpath( homedir+"/"+savedunitpath+"/"+this->filename);
 			this->rootname = homedir;
 			this->directoryname = savedunitpath;
 			this->fp = fopen( fpath.c_str(), "wb");
@@ -1677,28 +1677,28 @@ namespace VSFileSystem
 		}
 		else if( type==SaveFile)
 		{
-			string fpath( homedir+"/save/"+filename);
+			string fpath( homedir+"/save/"+this->filename);
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;
 		}
 		else if( type==BSPFile)
 		{
-			string fpath( homedir+"/generatedbsp/"+filename);
+			string fpath( homedir+"/generatedbsp/"+this->filename);
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;
 		}
 		else if( type==AccountFile)
 		{
-			string fpath( datadir+"/accounts/"+filename);
+			string fpath( datadir+"/accounts/"+this->filename);
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;
 		}
 		else if( type==Unknown)
 		{
-			string fpath( homedir+"/"+filename);
+			string fpath( homedir+"/"+this->filename);
 			this->rootname=homedir;
 			this->directoryname="";
 			this->fp = fopen( fpath.c_str(), "wb");

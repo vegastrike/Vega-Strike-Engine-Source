@@ -781,10 +781,10 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		  {
 			  if (nonautosave.empty()) {
 				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+unitModifications);
-				  filepath = VSFileSystem::savedunitpath+"/"+unitModifications+"/"+string(filename);
+				  filepath = unitModifications+"/"+string(filename);
 			  }else {
 				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+nonautosave);
-				  filepath = VSFileSystem::savedunitpath+"/"+nonautosave+"/"+string(filename);
+				  filepath = nonautosave+"/"+string(filename);
 			  }
 		  }
 		  // This is not necessary as I think... to watch
@@ -792,7 +792,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 
 		  // Try to open save
 		  if (filename[0])
-			  err = f.OpenReadOnly( filepath, Unknown);
+			  err = f.OpenReadOnly( filepath, UnitSaveFile);
 		}
 	}
   // If save was not succesfull we try to open the unit file itself

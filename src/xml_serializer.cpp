@@ -121,7 +121,9 @@ void XMLSerializer::Write (const char * modificationname) {
 
   VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir);
   VSFile f;
-  VSError err = f.OpenCreateWrite( savedir+"/"+filename, UnitFile);
+  //string filepath( savedir+"/"+this->filename);
+  //cerr<<"Saving Unit to : "<<filepath<<endl;
+  VSError err = f.OpenCreateWrite( this->filename, UnitFile);
   if (err>Ok) {
     fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath());
     return;
