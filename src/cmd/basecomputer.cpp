@@ -67,7 +67,7 @@ static const float MODE_BUTTON_SPACE = 0.03;
 static const GFXColor DEFAULT_UPGRADE_COLOR = GFXColor(1,1,1,1);
 
 // Quantity of items that turns on "Buy All" button.
-static const int MIN_BUY_ALL_QUANTITY = 2;
+static const int MIN_BUY_ALL_QUANTITY = 1;
 // Quantity of items that turns on "Buy 10" button.
 static const int MIN_BUY_10_QUANTITY = 11;			// "Buy All" works if there are exactly 10 items.
 
