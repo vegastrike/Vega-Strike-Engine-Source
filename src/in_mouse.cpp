@@ -109,9 +109,18 @@ void mouseMotion(int x, int y) {
    if (joystick[MOUSE_JOYSTICK]->player<_Universe->numPlayers()) {
     if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
       warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
-      warpedmouse=true;
-      x= x-mousex+g_game.x_resolution/2;
-      y= y-mousey+g_game.y_resolution/2;
+      static int warpx=0;
+      static int warpy=0;
+      if (!warpedmouse) {
+	warpedmouse=true;
+	x= x-mousex+g_game.x_resolution/2;
+	y= y-mousey+g_game.y_resolution/2;
+	warpx=x-g_game.x_resolution/2;
+	warpy=y-g_game.y_resolution/2;
+      }else {
+	x=x+warpx;
+	y=y+warpy;
+      }
     }
    }
   }
