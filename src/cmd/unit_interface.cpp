@@ -1082,9 +1082,11 @@ vector <Cargo>&UpgradingInfo::GetCargoList () {
       break;
     case SHIPDEALERMODE:
     case MISSIONMODE://gotta transform the missions into cargo
+    case BRIEFINGMODE:
       relevant = base.GetUnit();
       break;
     case SELLMODE:
+
       relevant = buyer.GetUnit();
       break;
     case DOWNGRADEMODE:

@@ -30,7 +30,7 @@
 using namespace std;
 void FindMissions(char *path);
 void LoadMission(char *filename);
-void ScanNode (string *parent, easyDomNode *node);
+void ScanNode (string *parent, easyDomNode *node, string filename);
 void CheckVar(string parent, string current, string name, string value);
 
 using std::string;

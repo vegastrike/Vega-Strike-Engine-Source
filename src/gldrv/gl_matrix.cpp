@@ -270,7 +270,8 @@ void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
 		glMatrixMode(GL_MODELVIEW);
 		//		glLoadMatrixf(transview);
 		glLoadIdentity();
-		glTranslated (-view.p.i,-view.p.j,-view.p.k);
+		glTranslated (-view.p.i*GFX_SCALE,-view.p.j*GFX_SCALE,-view.p.k*GFX_SCALE);
+		glScalef (GFX_SCALE,GFX_SCALE,GFX_SCALE);
 		break;
 	case PROJECTION:
 	  IdentityFloat(projection);

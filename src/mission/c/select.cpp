@@ -26,7 +26,8 @@
 #endif
 
 int main(int argc, char *argv[]) {
-	for (int i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/';i--) {
+  int i;
+	for (i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/';i--) {
 	}
 	argv[0][i+1]='\0';
 	chdir(argv[0]);
