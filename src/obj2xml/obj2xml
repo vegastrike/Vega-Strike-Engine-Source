@@ -44,6 +44,7 @@ while($line = <INPUT>) {
 		@vertices = split /[ \r\n]/, $line;
 		shift @vertices; # dump out the 'f'
 		@output_vertices = ();
+		@output_texcoords = ();
 
 		# read in texture name
 		read TEXTUREINPUT, $packedinfo, 7*4;
@@ -68,6 +69,7 @@ POINT
 				$point_output{$texture} .= $point;
 			}
 			push @output_vertices, $encountered_points{$texture}->{$point};
+			push @output_texcoords, $texcoord;
 		}
 
 		if(@output_vertices==3) {
@@ -78,7 +80,7 @@ POINT
 			die "Invalid number of vertices in face: $line";
 		}
 		for($v=0;$v<@output_vertices;$v++) {
-			$face_output{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$texcoord][0]\" t=\"$texcoord_list[$texcoord][1]\"/>\n"
+			$face_output{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][1]\" t=\"$texcoord_list[$output_texcoords[$v]][0]\"/>\n"
 		}
 		if(@output_vertices==3) {
 			$face_output{$texture} .= "</Tri>\n"
