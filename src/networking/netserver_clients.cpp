@@ -51,6 +51,7 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 
 	// On server side this is not done in Cockpit::SetParent()
 	cp->activeStarSystem = st2;
+	un->activeStarSystem = st2;
 	// Cannot use sts pointer since it may be NULL if the system was just created
 	// Try to see if the player is docked on start
 	QVector safevec( DockToSavedBases( player));

@@ -713,6 +713,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		{
 			vector<string>	adjacent;
 			string newsystem = netbuf.getString();
+			ObjSerial jumpserial = netbuf.getSerial();
+			unsigned short zonenum = netbuf.getShort();
 			unsigned char * client_hash;
 			unsigned char * server_hash;
 #ifdef CRYPTO
@@ -726,11 +728,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			Cockpit * cp;
 			
 			un = clt->game_unit.GetUnit();
-			cp = _Universe->isPlayerStarship( un);
 			if( un==NULL)
-				COUT<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
+				COUT<<"ERROR --> Received a jump request from non-existing UNIT"<<endl;
 			else
 			{
+					cp = _Universe->isPlayerStarship( un);
 					// Verify if there really is a jump point to the new starsystem
 					adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
 					for( unsigned int i=0; !found && i<adjacent.size(); i++)
@@ -740,6 +742,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					}
 					if( found)
 					{
+						Unit * jumpun = zonemgr->getUnit( jumpserial, zonenum);
 						// Then activate jump drive to say we want to jump
 						un->ActivateJumpDrive();
 						// The jump reply is sent in Unit::jumpReactToCollision()
@@ -752,28 +755,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 
 						if( FileUtil::HashCompare( newsystem, client_hash) )
 							clt->jumpfile = "";
-						/*
-						{
-							// Send an ASKFILE packet with serial == 0 to say file is ok
-							p2.send( CMD_ASKFILE, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
-						}
-						*/
 						else
 						{
-							// Add that file to download queue with client serial !!
+							// Store he system the client has to download
 							clt->jumpfile = newsystem;
 						}
-					}
-					else
-					{
-						// NOTE THAT THIS SHOULD NOT HAPPEN AND THAT WHEN A CLIENT WANTS TO JUMP IN AN UNKNOW
-						// (FROM SERVER POINT OF VIEW) SYSTEM -> IT WILL BE VULNERABLE WHILE IT DOES
-						// JUMP ANIMATION AND WILL STAY ALIVE IN ITS CURRENT SYSTEM FOR OTHER PLAYER...
-						// TOO BAD FOR CHEATERS ;)
-
-						// Set 0 as serial to say client must stay in its current zone/starsystem
-						// p2.send( CMD_JUMP, 0, netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
-						clt->jumpfile="error";
 					}
 			}	
 #ifdef CRYPTO

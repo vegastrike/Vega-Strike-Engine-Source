@@ -165,7 +165,9 @@ class	NetClient
 		void	fireRequest( ObjSerial serial, int mount_index, char mis);
 		void	unfireRequest( ObjSerial serial, int mount_index);
 
-		bool	jumpRequest( string newsystem);
+		bool	jumpRequest( string newsystem, ObjSerial jumpserial);
+		bool	readyToJump();
+		void	unreadyToJump();
 
 		/********************* Docking stuff **********************/
 		void	dockRequest( ObjSerial utdw_serial);

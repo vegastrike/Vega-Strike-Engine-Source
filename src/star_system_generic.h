@@ -137,7 +137,7 @@ class StarSystem {
   void AddUnit(Unit *unit);
   ///Removes from draw list
   bool RemoveUnit(Unit *unit);
-  bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system);
+  bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system, bool force=false);
   static void ProcessPendingJumps ();
   virtual void VolitalizeJumpAnimation(const int ani){}
   virtual void DoJumpingComeSightAndSound(Unit * un){}

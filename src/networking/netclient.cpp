@@ -753,6 +753,9 @@ int NetClient::recvMsg( Packet* outpacket )
 			{
 				StarSystem * sts;
 				string newsystem = netbuf.getString();
+				ObjSerial unserial = netbuf.getSerial();
+				ObjSerial jumpserial = netbuf.getSerial();
+				un = this->game_unit.GetUnit();
 				// Get the pointer to the new star system sent by server
 				if( !(sts=star_system_table.Get( newsystem)))
 				{
@@ -760,29 +763,37 @@ int NetClient::recvMsg( Packet* outpacket )
 					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
 					exit(1);
 				}
-				// If we received a CMD_JUMP with serial==player serial jump is refused because of energy
-				if( packet_serial!=0)
+				// If unserial == un->GetSerial() -> then we are jumping otherwise it is another unit/player
+				if( unserial == un->GetSerial())
 				{
-					// The jump has been allowed
-					// Check if server said we have the good file
-					if( packet_serial!=un->GetSerial())
+					// If we received a CMD_JUMP with serial==player serial jump is refused because of energy
+					if( packet_serial==un->GetSerial())
 					{
-						VsnetDownload::Client::NoteFile f( this->clt_sock, newsystem);
-   	             		_downloadManagerClient->addItem( &f);
+						this->jumpok = true;
+						this->ingame = false;
+					}
+					// The jump has been allowed but we don't have the good system file
+					else
+					{
+						// Here do the jump function
+						Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
+						sts->JumpTo( un, jumpun, newsystem, true);
+						string sysfile( newsystem+".system");
+						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
+   		             	_downloadManagerClient->addItem( &f);
 						while( !f.done())
 						{
 							checkMsg( NULL);
 							micro_sleep( 40000);
 						}
+						this->jumpok = true;
 					}
-					this->jumpok = true;
-					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();
-					this->ingame = false;
 				}
 				else
 				{
-					// Jump was refused either because the destination system asked do not exist or because not enough jump energy
-					this->jumpok = false;
+					// If another player / unit is jumping force it
+					Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
+					sts->JumpTo( un, jumpun, newsystem, true);
 				}
 			}
 			break;

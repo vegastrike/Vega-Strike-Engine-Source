@@ -79,7 +79,7 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	zonemgr->broadcast( zone, serial, &p );
 }
 
-void	NetServer::sendJump( ObjSerial serial, bool ok)
+void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 {
 	Packet p2;
 	NetBuffer netbuf;
@@ -88,9 +88,12 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 
 	// Send a CMD_JUMP to tell the client if the jump is allowed
 	netbuf.addString( clt->jumpfile );
+	netbuf.addSerial( serial);
+	netbuf.addSerial( jumpserial);
 
+	// DO NOT DO THAT : the client itself will ask to be removed and also to be added when it is allowed to do so
 	// And remove the player from its old starsystem and set it out of game
-	this->removeClient( clt );
+	//this->removeClient( clt );
 	// Have to set new starsystem here
 	// ??????
 
@@ -99,17 +102,24 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 	{
 		// If jumpfile is empty the hash was correct
 		if( clt->jumpfile=="" )
-			p2.send( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+			p2.bc_create( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 		// New system file HASH is wrong tell the client with serial != player serial so he can ask for a new download
 		else
-			p2.send( CMD_JUMP, serial+1, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+			p2.bc_create( CMD_JUMP, serial+1, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+		zonemgr->broadcast( clt, &p2);
 	}
-	else if( !ok || clt->jumpfile=="error")
-		p2.send( CMD_JUMP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+
+	// Should broadcast JUMP so other client display jump anim too
 }
 
 void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int docknum, unsigned short zone)
 {
+	// Set client not ingame while docked
+	ClientPtr clt = this->getClientFromSerial( serial);
+	clt->ingame = true;
+	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
+	currentsys->RemoveUnit( clt->game_unit.GetUnit());
+
 	NetBuffer netbuf;
 	Packet p;
 	// Send a CMD_DOCK with serial, an ObjSerial = unit_to_dock_with_serial and an int = docking port num
@@ -132,5 +142,11 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
 	netbuf.addSerial( utdwserial);
 	p.bc_create( CMD_UNDOCK, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(134) );
 	zonemgr->broadcastNoSelf( zone, serial, &p );
+
+	// Set client ingame
+	ClientPtr clt = this->getClientFromSerial( serial);
+	clt->ingame = true;
+	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
+	currentsys->AddUnit( clt->game_unit.GetUnit());
 }
 

@@ -686,16 +686,14 @@ bool PendingJumpsEmpty() {
 }
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
+	Unit * un = pendingjump[kk]->un.GetUnit();
     if (pendingjump[kk]->delay>=0) {
-		Unit * un = pendingjump[kk]->un.GetUnit();
 		Unit * jp = pendingjump[kk]->jumppoint.GetUnit();
 		if (un&&jp) {
 			QVector delta = (jp->LocalPosition()-un->LocalPosition());
 			float dist =delta.Magnitude();
 			float speed = dist/pendingjump[kk]->delay;
 			un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
-			
-			
 		}
 		double time = GetElapsedTime();
 		if (time>1)
@@ -708,32 +706,44 @@ void StarSystem::ProcessPendingJumps() {
 #endif
       _Universe->activeStarSystem()->VolitalizeJumpAnimation (pendingjump[kk]->animation);
     }
-    Unit * un=pendingjump[kk]->un.GetUnit();
+ 	int playernum = _Universe->whichPlayerStarship( un);
+	// In non-networking mode or in networking mode or a netplayer wants to jump and is ready or a non-player jump
+ 	if( Network==NULL || playernum<0 || Network!=NULL && playernum>=0 &&  Network[playernum].readyToJump())
+	{
+	    Unit * un=pendingjump[kk]->un.GetUnit();
  
-    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
+	    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig))
+		{
 #ifdef JUMP_DEBUG
-      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
+	      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
 #endif
-      delete pendingjump[kk];
-      pendingjump.erase (pendingjump.begin()+kk);
-      kk--;
-      continue;
-    }
-    StarSystem * savedStarSystem = _Universe->activeStarSystem();
-    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
-    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
-    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
-    if (dosightandsound) {
-      _Universe->activeStarSystem()->DoJumpingComeSightAndSound(un);
-    }
-    delete pendingjump[kk];
-    pendingjump.erase (pendingjump.begin()+kk);
-    kk--;
-    _Universe->setActiveStarSystem(savedStarSystem);
-	// In networking mode we tell the server we want to go back in game
-	if( Network != NULL)
-		// Find the corresponding networked player
-		Network[_Universe->whichPlayerStarship( un)].inGame();
+	      delete pendingjump[kk];
+	      pendingjump.erase (pendingjump.begin()+kk);
+	      kk--;
+	      continue;
+	    }
+	    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+	    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
+	    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
+	    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
+	    if (dosightandsound) {
+	      _Universe->activeStarSystem()->DoJumpingComeSightAndSound(un);
+	    }
+	    delete pendingjump[kk];
+	    pendingjump.erase (pendingjump.begin()+kk);
+	    kk--;
+	    _Universe->setActiveStarSystem(savedStarSystem);
+		// In networking mode we tell the server we want to go back in game
+		if( Network != NULL)
+		{
+			// Find the corresponding networked player
+			if( playernum >= 0)
+			{
+				Network[playernum].inGame();
+				Network[playernum].unreadyToJump();
+			}
+		}
+	}
   }
 
 }
@@ -745,10 +755,12 @@ void ActivateAnimation(Unit * jumppoint) {
 	}
 }
 
-bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
+bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system, bool force) {
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
   }
+ if( Network==NULL || force)
+ {
   if (un->jump.drive>=0) {
     un->jump.drive=-1;
   }
@@ -777,12 +789,6 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
 #endif
     bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||_Universe->isPlayerStarship (un));
     int ani =-1;
-	bool jumpok = true;
-	if( Network!=NULL && !SERVER)
-		jumpok = Network->jumpRequest( system);
-	// In networking mode we do not push the jump if it is refused
-	if( jumpok)
-	{
       if (dosightandsound) {
         ani=_Universe->activeStarSystem()->DoJumpingLeaveSightAndSound (un);
       }
@@ -802,7 +808,6 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
       }
     
 #endif
-    }
   } else {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Failed to retrieve!\n");
@@ -811,6 +816,13 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
   }
   if (jumppoint) 
 	  ActivateAnimation(jumppoint);
+ }
+ else
+ {
+ 	// Networking mode
+	if( !SERVER)
+		Network->jumpRequest( system, jumppoint->GetSerial());
+ }
 
   return true;
 }

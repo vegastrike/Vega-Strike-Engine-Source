@@ -57,12 +57,14 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
             __FILE__, PSEUDO__LINE__(1518) );
 }
 
-bool	NetClient::jumpRequest( string newsystem)
+bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 {
 	Packet p;
 	NetBuffer netbuf;
 
 	netbuf.addString( newsystem);
+	netbuf.addSerial( jumpserial);
+	netbuf.addShort( this->zone);
 #ifdef CRYPTO
 	unsigned char * hash = new unsigned char[FileUtil::Hash.DigestSize()];
 	FileUtil::HashFileCompute( datadir+"/"+newsystem+".system", hash);
@@ -73,7 +75,9 @@ bool	NetClient::jumpRequest( string newsystem)
             netbuf.getData(), netbuf.getDataLength(),
             SENDRELIABLE, NULL, this->clt_sock,
             __FILE__, PSEUDO__LINE__(1534) );
+	// NO, WE MUST NOT BLOCK THE GAME WHILE WE ARE WAITING FOR SERVER AUTH
 	// Should wait for jump authorization
+	/*
 	this->PacketLoop( CMD_JUMP);
 	bool ret;
 	if( this->jumpok)
@@ -82,8 +86,19 @@ bool	NetClient::jumpRequest( string newsystem)
 		ret = false;
 
 	jumpok = false;
+	*/
 
-	return ret;
+	return true;
+}
+
+bool	NetClient::readyToJump()
+{
+	return jumpok;
+}
+
+void	NetClient::unreadyToJump()
+{
+	jumpok = false;
 }
 
 void	NetClient::dockRequest( ObjSerial utdw_serial)
