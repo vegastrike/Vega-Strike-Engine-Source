@@ -2160,19 +2160,22 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 
     static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","auto_turn_towards","true"));
     if (auto_turn_towards) {
-      Vector methem(RealPosition(target).Cast()-sep.Cast());
-      methem.Normalize();
-      Vector p,q,r;
-      GetOrientation(p,q,r);
-      p=methem.Cross(r);
-      float theta = p.Magnitude();
-      if (theta*theta>.00001){
-	p*= (asin (theta)/theta);
-	Rotate(p);
-	GetOrientation (p,q,r);
-	if (r.Dot(methem)<0) {
-	  Rotate (p*(PI/theta));
-	}
+      for (int i=0;i<3;++i) {
+        Vector methem(RealPosition(target).Cast()-sep.Cast());
+        methem.Normalize();
+        Vector p,q,r;
+        GetOrientation(p,q,r);
+        p=methem.Cross(r);
+        float theta = p.Magnitude();
+        if (theta*theta>.00001){
+          p*= (asin (theta)/theta);
+          Rotate(p);
+          GetOrientation (p,q,r);
+        }
+        if (r.Dot(methem)<0) {
+          Rotate (p*(PI/theta));
+        }
+        
       }
     }
     static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
@@ -4949,6 +4952,27 @@ bool Unit::UnDock (Unit * utdw) {
       docked&=(~(DOCKED_INSIDE|DOCKED));
       image->DockedTo.SetUnit (NULL);
       Velocity=utdw->Velocity;
+      static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","undock_turn_away","true"));
+      if (auto_turn_towards) {
+        for (int i=0;i<3;++i) {
+          Vector methem(RealPosition(this)-RealPosition(utdw).Cast());
+          methem.Normalize();
+          Vector p,q,r;
+          GetOrientation(p,q,r);
+          p=methem.Cross(r);
+          float theta = p.Magnitude();
+          if (theta*theta>.00001){
+            p*= (asin (theta)/theta);
+            Rotate(p);
+            GetOrientation (p,q,r);
+          }
+          if (r.Dot(methem)<0) {
+            Rotate (p*(PI/theta));
+          }
+
+        }
+      }
+      
       return true;
     }
   }
