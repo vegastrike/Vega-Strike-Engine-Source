@@ -2980,10 +2980,14 @@ void Unit::ProcessDeleteQueue() {
 
   }
 }
-bool DestroySystem (float hull, float maxhull) {
+bool DestroySystem (float hull, float maxhull, float numhits) {
 	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".001"));
-	return (rand01()<damage_chance*(maxhull-hull)/maxhull);
+	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
+	if (numhits>1)
+		chance=pow (chance,numhits);
+	return (rand01()>chance);
 }
+static const char * DamagedCategory="upgrades/Damaged/";
 float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
   float percent;
 #ifndef ISUCK
@@ -3021,8 +3025,18 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			absdamage -= ((float)*targ);
 			damage= damage>=0?absdamage:-absdamage;
 			*targ= 0;
+			if (numCargo()>0) {
+				if (DestroySystem(hull,maxhull,numCargo())) {
+					int which = rand()%numCargo();
+					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0) {
+						int lenupgrades = strlen("upgrades/");
+						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).category.substr(lenupgrades);
+					}
+				}
+			}
+			
 			if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
-				if (DestroySystem(hull,maxhull)) {
+				if (DestroySystem(hull,maxhull,1)) {
 					static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
 					
 					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
@@ -3039,7 +3053,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			  }
 			}else {
 			  _Universe->AccessCockpit()->godliness-=absdamage;
-			  if (DestroySystem(hull,maxhull)) {
+			  if (DestroySystem(hull,maxhull,1)) {
 				  DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
 			  }
 			}
@@ -4300,7 +4314,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(limits.forward,tlimits_forward,templ->limits.forward,0);
   STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
   STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
-  bool use_template_maxrange= XMLSupport::parse_bool (vs_config->getVariable("physics","use_upgrade_template_maxrange","true"));
+  static bool use_template_maxrange= XMLSupport::parse_bool (vs_config->getVariable("physics","use_upgrade_template_maxrange","true"));
   
   STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,use_template_maxrange?templ->computer.radar.maxrange:FLT_MAX,0);
   STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
@@ -4510,28 +4524,51 @@ bool Unit::ReduceToTemplate() {
     }
     return success;
 }
-bool Unit::RepairUpgrade () {
+
+int Unit::RepairCost () {
+	int cost =1;
+	for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
+        if (image->cockpit_damage[i]!=1) {
+			cost++;
+		}
+	}
+	for (unsigned int i=0;i<numCargo();++i) {
+		if (GetCargo(i).category.find(DamagedCategory)==0)
+			cost++;
+	}
+	return cost;
+}
+int Unit::RepairUpgrade () {
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
-    bool success=false;
+    int success=0;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
-        success = Upgrade(temprate,0,0,0,false,pct,NULL,false);
+        success = Upgrade(temprate,0,0,0,false,pct,NULL,false)?1:0;
 	if (pct>0)
-	  success=true;
+	  success=1;
     }
     UnitImages * im= &GetImageInformation();
     for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
         if (im->cockpit_damage[i]!=1) {
             im->cockpit_damage[i]=1;
-            success=true;
+            success+=1;
             pct = 1;
         }
     }
 	bool ret = success && pct>0;
-	if (ret) {
+	static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
+	if (ComponentBasedUpgrades){
+	for (unsigned int i=0;i<numCargo();++i) {
+		if (GetCargo(i).category.find(DamagedCategory)==0){
+			success++;
+			static int damlen = strlen(DamagedCategory);
+			GetCargo(i).category="upgrades/"+GetCargo(i).category.substr(damlen);
+		}
+	}
+	}else if (ret) {
 		const Unit * maxrecharge= makeTemplateUpgrade(name+".template",faction);
-
+		
 		Unit * mpl = UnitFactory::getMasterPartList();
 		for (unsigned int i=0;i<mpl->numCargo();++i) {
 			if (mpl->GetCargo(i).category.find("upgrades")==0) {

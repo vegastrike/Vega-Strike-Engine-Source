@@ -178,16 +178,21 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  break;
 			case weapon_info::PROJECTILE:
 			{
+				static bool match_speed_with_target = XMLSupport::parse_float (vs_config->getVariable("physics","match_speed_with_target","true"));
 				string skript =string("ai/script/")+type->file+string(".xai");
 				FILE * fp = fopen (skript.c_str(),"r");
 					if (fp) {
 						fclose(fp);
 						temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
-						temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
-						temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
+						if (!match_speed_with_target) {
+							temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
+							temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
+						}
 					}else {
 						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
 					}
+					temp->SetVelocity(velocity);
+					
 			  // Affect the stored mount serial to the new missile
 			  temp->SetSerial( this->serial);
 			  this->serial = 0;
@@ -197,7 +202,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					if (fp) {
 						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 						temp->EnqueueAI (new Orders::FireAllYouGot);
-						temp->GetComputerData().velocity_ref.SetUnit(target);
+						if (match_speed_with_target)
+							temp->GetComputerData().velocity_ref.SetUnit(target);
 					}else {
 						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml","default.int.xml"));
 						temp->SetTurretAI();
