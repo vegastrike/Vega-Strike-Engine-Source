@@ -563,7 +563,7 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
                                 GFXColor(0,0,0,0),
 				cloakFX,
                                 (envMap&&GFXMultiTexAvailable())?GFXColor (1,1,1,1):GFXColor(0,0,0,0));
-    GFXBlendMode (blendsrc,ONE);
+    GFXBlendMode (ONE,ONE);
     decal->MakeActive();
     float a,b;
     GFXGetPolygonOffset(&a,&b);
