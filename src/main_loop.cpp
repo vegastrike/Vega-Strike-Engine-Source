@@ -515,8 +515,9 @@ void createObjects(std::string fighter0name) {
 	      fighter0name=string(fightername);
 	    else
 	      strcpy(fightername,fighter0name.c_str());
-	    if (mission->getVariable ("savegame","").length()>0)   std::string fighter0name;
-	      fighter0mods=modifications =vs_config->getVariable ("player","callsign","Hellcat");
+	    if (mission->getVariable ("savegame","").length()>0) {  
+	      fighter0mods=modifications =vs_config->getVariable ("player","callsign","")+mission->getVariable("savegame","");
+	    }
 	  }
 	  fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
 	}else {

@@ -323,12 +323,15 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    NewPart = new Unit (input_buffer,false,un->faction);
 	  }
 	  if (NewPart->name!=string("LOAD_FAILED")) {
-	    if (mode==SHIPDEALERMODE&&part->price<=_Universe->AccessCockpit()->credits) {
+	    
+	    float usedprice = usedPrice (base->PriceCargo (_Universe->AccessCockpit()->GetUnitFileName()));
+	    if (mode==SHIPDEALERMODE&&part->price<=usedprice+_Universe->AccessCockpit()->credits) {
 	      if (NewPart->nummesh>0) {
-		_Universe->AccessCockpit()->credits-=part->price;
+		_Universe->AccessCockpit()->credits-=part->price-usedprice;
 		NewPart->curr_physical_state=un->curr_physical_state;
 		NewPart->prev_physical_state=un->prev_physical_state;
 		_Universe->activeStarSystem()->AddUnit (NewPart);
+		
 		_Universe->AccessCockpit()->SetParent(NewPart,input_buffer,"",un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 		SwitchUnits (NULL,NewPart);
 		base->RequestClearance(NewPart);
@@ -754,7 +757,7 @@ void Unit::UpgradeInterface (Unit * base) {
 vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv){
   TempCargo.clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
-      int len = un->GetCargo(i).category.length();
+      unsigned int len = un->GetCargo(i).category.length();
       len = len<filterthis.length()?len:filterthis.length();
       if ((0==memcmp(un->GetCargo(i).category.c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
 	TempCargo.push_back (un->GetCargo(i));
