@@ -1962,7 +1962,13 @@ Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   }
   return velocity;
 }
-
+void Unit::ClearMounts() {
+	mounts.clear();
+	Unit * su;
+	for (un_iter i = getSubUnits(); (su= *i)!=NULL;++i) {
+		su->ClearMounts();
+	}
+}
 
 Vector Unit::ClampAngVel (const Vector & velocity) {
   Vector res (velocity);
@@ -2097,6 +2103,9 @@ float Unit::MaxShieldVal() const{
   return maxshield;
 }
 void Unit::RechargeEnergy() {
+#if 1
+	energy+=recharge*SIMULATION_ATOM;
+#else
     unsigned short newenergy=apply_float_to_short (recharge *SIMULATION_ATOM);
     if (((int)energy)+((int)newenergy)>65535) {
       newenergy= 65535 - energy;
@@ -2108,8 +2117,9 @@ void Unit::RechargeEnergy() {
 	}
       }
     }else {
-      energy+=newenergy;
+      energy+=recharge*SIMULATION_ATOM;
     }
+#endif
 }
 void Unit::RegenShields () {
   int rechargesh=1;
@@ -2208,15 +2218,15 @@ void Unit::RegenShields () {
   }
   if (maxenergy>maxshield) {
     if (energy>maxenergy-maxshield) {//allow shields to absorb xtra power
-      short excessenergy = energy - (maxenergy-maxshield);
+      float excessenergy = energy - (maxenergy-maxshield);
       energy=maxenergy-maxshield;  
       if (excessenergy >0) {
-	warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
-	unsigned short mwe = maxwarpenergy;
-	if (mwe<jump.energy)
-	  mwe = jump.energy;
-	if (warpenergy>mwe)
-	  warpenergy=mwe;
+		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
+		  short mwe = maxwarpenergy;
+		  if (mwe<jump.energy)
+			  mwe = jump.energy;
+		  if (warpenergy>mwe)
+			  warpenergy=mwe;
       }
     }
   }else {
@@ -2481,10 +2491,13 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
   // If networking damages are applied as they are received
   if( SERVER || Network==NULL)
 	ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
-  if (hull<0&&(!mykilled)) {
-    if (cp) {
-      ScoreKill (cp,ownerDoNotDereference,faction);
-    }
+  if (hull<0) {
+	  ClearMounts();
+	  if (!mykilled) {
+		  if (cp) {
+			  ScoreKill (cp,ownerDoNotDereference,faction);
+		  }
+	  }
   }
 }
 

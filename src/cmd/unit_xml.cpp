@@ -1405,7 +1405,7 @@ using namespace UnitXML;
 	maxwarpenergy=CLAMP_SHORT(parse_float ((*iter).value));
 	break;
       case LIMIT:
-	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
+	maxenergy=energy=parse_float((*iter).value);
 	break;
     }
     }
@@ -1767,7 +1767,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, string xmlb
     image->unitwriter->AddElement("afterburnenergy",ushortStarHandler,XMLType(&afterburnenergy));
     image->unitwriter->AddTag ("Reactor");
     image->unitwriter->AddElement ("recharge",floatStarHandler, XMLType (&recharge) );
-    image->unitwriter->AddElement ("limit",ushortStarHandler, XMLType (&maxenergy) );
+    image->unitwriter->AddElement ("limit",floatStarHandler, XMLType (&maxenergy) );
     image->unitwriter->AddElement("warpenergy",ushortStarHandler, XMLType (&maxwarpenergy) );
     image->unitwriter->EndTag ("Reactor");
     

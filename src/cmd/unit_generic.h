@@ -311,7 +311,7 @@ public:
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   unsigned char RecomputeRole();//changes own role
   int GetNumMounts ()const  {return mounts.size();}
-
+  void ClearMounts();
   ///Loads a user interface for the user to upgrade his ship
 // Uses base stuff -> only in Unit
   virtual void UpgradeInterface (Unit * base) {}
@@ -636,7 +636,7 @@ public:
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
   float WarpEnergyData() const;
-  unsigned short GetWarpEnergy() {return warpenergy;}
+  short GetWarpEnergy() {return warpenergy;}
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
@@ -837,9 +837,9 @@ protected:
   ///how much the energy recharges per second
   float recharge;
   ///maximum energy
-  unsigned short maxenergy;
+  float maxenergy;
   ///current energy
-  unsigned short energy;
+  float energy;
   ///maximum energy
   unsigned short maxwarpenergy;
   ///current energy
