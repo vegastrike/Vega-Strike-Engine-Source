@@ -28,7 +28,7 @@ class UnitCollection {
   private:
     UnitListNode *pos;
   public:
-    UnitIterator(UnitListNode *start) : pos(start) {  }
+    UnitIterator(UnitListNode *start);
     ~UnitIterator() { }
 
     void remove();

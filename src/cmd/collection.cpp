@@ -88,6 +88,8 @@ void UnitCollection::UnitIterator::remove() {
 }
 
 Unit *UnitCollection::UnitIterator::current() {
+  return pos->next?pos->next->unit:NULL;
+  /*
   while (pos->next) {
     if (pos->next->unit->Killed()) {
       remove();
@@ -96,14 +98,23 @@ Unit *UnitCollection::UnitIterator::current() {
     }
   }
   return pos->next?pos->next->unit:NULL;//if pos->next return that unit, otherwise NULL;
+  */
 }
-
-Unit *UnitCollection::UnitIterator::advance() {
-  if(pos->next!=NULL) {
-    pos = pos->next;
-    return current();
-  } else {
-    return NULL;
+UnitCollection::UnitIterator::UnitIterator(UnitListNode *start) : pos(start) {
+  if (pos->next!=NULL) {
+    if (pos->next->unit->Killed())
+      advance();
   }
+}
+Unit *UnitCollection::UnitIterator::advance() {
+  pos = pos->next;
+  while(pos->next!=NULL) {
+    if (pos->next->unit->Killed()) {
+      remove();
+    } else {
+      return pos->next->unit;
+    }
+  }
+  return NULL;
 }
 
