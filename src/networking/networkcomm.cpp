@@ -225,8 +225,8 @@ NetworkCommunication::NetworkCommunication( float minfreq, float maxfreq, bool v
 	this->key_length = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_keylength", "40"));
 	bool create_keys = false;
 	VSFile f1, f2;
-	VSError err1 = f1.OpenReadOnly( pubKeyFilename, Unknown);
-	VSError err2 = f2.OpenReadOnly( privKeyFilename, Unknown);
+	VSError err1 = f1.OpenReadOnly( pubKeyFilename, VSFileSystem::UnknownFile);
+	VSError err2 = f2.OpenReadOnly( privKeyFilename, VSFileSystem::UnknownFile);
 	if( err1>Ok || err2>Ok)
 	{
 		// There is a file we cannot open so we create keys

@@ -282,9 +282,9 @@ class	WebcamSupport
 		int		CopyImage();
 		void	DoError( long code, char * msg);
 };
-/*
 // Windows specific stuff to convert BMP to JPEG
 #if defined( _WIN32) && !defined( __CYGWIN__)
+/*
 #ifndef HAVE_BOOLEAN
 #define HAVE_BOOLEAN
 #define FALSE 0

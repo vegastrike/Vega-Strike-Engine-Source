@@ -1233,20 +1233,27 @@ if test "$CRYPTO" = "1" ; then
 	if test "x$have_crypto_lib" = "xno" ; then
 		CRYPTO_LIB="-L/usr/local/lib -lcrypto++"
 		CHECK_FOR_CRYPTO_LIB
+		dnl Test for debian
 		if test "x$have_crypto_lib" = "xno" ; then
 			VS_LIBS="$saved_VSLIBS"
-			CRYPTO_LIB="-lcryptopp"
+			CRYPTO_LIB="-lcrypto++5.1"
 			CHECK_FOR_CRYPTO_LIB
 			if test "x$have_crypto_lib" = "xno" ; then
 				VS_LIBS="$saved_VSLIBS"
-				CRYPTO_LIB="-L/usr/local/lib -lcryptopp"
+				CRYPTO_LIB="-lcryptopp"
 				CHECK_FOR_CRYPTO_LIB
 				if test "x$have_crypto_lib" = "xno" ; then
 					VS_LIBS="$saved_VSLIBS"
+					CRYPTO_LIB="-L/usr/local/lib -lcryptopp"
+					CHECK_FOR_CRYPTO_LIB
+					if test "x$have_crypto_lib" = "xno" ; then
+						VS_LIBS="$saved_VSLIBS"
+					fi
 				fi
 			fi
 		fi
 	fi
+	LIBS="$VSLIBS"
 	if test "x$have_crypto_lib" = "xyes" ; then
 		VS_CPPFLAGS="$VS_CPPFLAGS -DCRYPTO=$CRYPTO_VERSION"
 		CPPFLAGS="$CPPFLAGS -I/usr/local/include"
