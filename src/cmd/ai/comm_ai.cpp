@@ -64,6 +64,25 @@ float CommunicatingAI::getAnger(const Unit * target)const {
   if (i!=effective_relationship.end()) {
     rel = (*i).second;
   }
+  static int pirates=FactionUtil::GetFactionIndex("pirates");
+  if (parent->faction==pirates&&_Universe->isPlayerStarship(target)){
+    static unsigned int cachedCargoNum=0;
+    static bool good=true;
+    if (cachedCargoNum!=target->numCargo()) {
+      cachedCargoNum=target->numCargo();
+      for (unsigned int i=0;i<cachedCargoNum;++i) {
+        Cargo * c=&target->image->cargo[i];
+        if (c->quantity!=0||c->category.find("upgrades")!=0){
+          good=false;
+          break;
+        }
+      }
+    }
+    if (good) {
+      static float goodness_for_nocargo=XMLSupport::parse_float(vs_config->getVariable("AI","pirate_bonus_for_empty_hold",".75"));
+      rel+=goodness_for_nocargo;
+    }    
+  }
   return rel;
 }
 float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
