@@ -57,9 +57,17 @@ struct Transformation {
     orientation*=b.orientation;
     position = position.Transform(m);
   }
-  inline void Invert() {
+  inline void InvertOrientationRevPos() {
     orientation = orientation.Conjugate();
     position = -position;
+  }
+  inline void InvertAndToMatrix (Matrix m) {
+      InvertOrientationRevPos();
+      to_matrix(m);
+      position = TransformNormal (m,position);
+      m[12]=position.i;
+      m[13]=position.j;
+      m[14]=position.k;
   }
 };
 
