@@ -200,10 +200,11 @@ Order::~Order () {
   suborders.clear();
 }
 void Order::ClearMessages() {
-  for (unsigned int i=0;i<suborders.size();i++) {
+  unsigned int i;
+  for (i=0;i<suborders.size();i++) {
     suborders[i]->ClearMessages();
   }
-  for (unsigned int i=0;i<messagequeue.size();i++) {
+  for (i=0;i<messagequeue.size();i++) {
     delete messagequeue[i];
   }
   messagequeue.clear();

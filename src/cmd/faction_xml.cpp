@@ -57,7 +57,7 @@ namespace FactionXML {
 
 using namespace FactionXML;
 
-
+static vector <std::string> contrabandlists;
 void Universe::Faction::beginElement(void *userData, const XML_Char *names, const XML_Char **atts) {
   Universe * thisuni = (Universe *) userData;
 //	((Universe::Faction*)userData)->beginElement(name, AttributeList(atts));
@@ -95,6 +95,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     unitlevel++;
     thisuni->factions.push_back(new Faction ());
     assert(thisuni->factions.size()>0);
+    contrabandlists.push_back ("");
     //	thisuni->factions[thisuni->factions.size()-1];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -350,4 +351,7 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
       }
     }
   }
+}
+void Universe::LoadContrabandLists() {
+
 }

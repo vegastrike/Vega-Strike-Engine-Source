@@ -96,6 +96,7 @@ private:
     ///char * of the name
     char * factionname; 
     std::vector <class Animation *> comm_faces;
+    Unit * contraband;
     ///Figures out the relationships of each faction with each other
     static void ParseAllAllies(Universe * thisuni);
     void ParseAllies(Universe * thisuni);
