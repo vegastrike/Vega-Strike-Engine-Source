@@ -568,19 +568,38 @@ void winsys_set_reshape_func( winsys_reshape_func_t func )
     glutReshapeFunc( func );
 }
 
-
+char AdjustKeyCtrl(char ch) {
+  if (ch=='\0') {
+    ch='2';
+  }else if (ch>='0'&&ch<='9'){
+    
+  }else if (ch>=27&&ch<=31){
+    ch=ch+'0'-24;
+  }else if (ch==127) {
+    ch='8';
+  }else if (ch<=26) {
+    ch+='a'-1;
+  }
+  return ch;
+}
 /* Keyboard callbacks */
 static void glut_keyboard_cb( unsigned char ch, int x, int y ) 
 {
   
     if ( keyboard_func ) {
-	(*keyboard_func)( ch, glutGetModifiers(), false, x, y );
+      int gm = glutGetModifiers();
+      if (gm&GLUT_ACTIVE_CTRL) {
+        AdjustKeyCtrl(ch);
+      }
+      (*keyboard_func)( ch, gm, false, x, y );
+      
     }
 }
 
 static void glut_special_cb( int key, int x, int y ) 
 {
     if ( keyboard_func ) {
+      
 	(*keyboard_func)( key+128, glutGetModifiers(), false, x, y );
     }
 }
@@ -588,7 +607,11 @@ static void glut_special_cb( int key, int x, int y )
 static void glut_keyboard_up_cb( unsigned char ch, int x, int y ) 
 {
     if ( keyboard_func ) {
-	(*keyboard_func)( ch, glutGetModifiers(), true, x, y );
+      int gm = glutGetModifiers();
+      if (gm&GLUT_ACTIVE_CTRL) {
+        AdjustKeyCtrl(ch);
+      }      
+      (*keyboard_func)( ch, gm, true, x, y );
     }
 }
 
