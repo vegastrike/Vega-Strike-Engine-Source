@@ -51,7 +51,14 @@ extern "C"
 
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */
-#ifndef WIN32
+
+#if defined(IRIX)
+#include <GL/gl.h>
+#include <GL/glut.h>
+typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
+typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
+
+#elif !defined(WIN32)
 #include <GL/glut.h>
 #include <GL/glext.h>
 

@@ -89,8 +89,12 @@ extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCOLORTABLEEXTPROC glColorTable;
 
-#else // WIN32
+#elif defined(IRIX)
+#include <GL/gl.h>
+typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
+typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 
+#else // WIN32 || IRIX
 #include <GL/glut.h>
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
