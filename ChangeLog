@@ -1,4 +1,8 @@
-2002-01-24
+2002-01-24 Daniel Horn <hellcatv@users.sourceforge.net>
+	
+	* Made collisions work inside a planet when no terrain or destinations were specified1
+
+2002-01-24 Denial Horn <hellcatv@users.sourceforge.net>
 	* Added jump drives!  Now you can go to a planet designated as a jump point...press 'j' and it will load the system if not already loaded...
 	* Try jumping from the green sphere around earth...and then activating time compression and jumping back from the big earth in the next system... it's great
 	* Warning using fighters[0] as your fighter to indicate whether to teleport the cam as well as the ship
