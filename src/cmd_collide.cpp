@@ -251,14 +251,14 @@ bool Beam::Collide (Unit * target) {
   if (target==owner) 
     return false;
   float distance = target->querySphere (center,direction,0);
-  if (distance==0||distance>curlength) {
+  if (distance<0||distance>curlength) {
     return false;
   }
   if (target->queryBoundingBox(center,direction,0)==0)
     return false;
   curlength = distance;
   impact|=IMPACT;
-  ////fprintf (stderr,"BEAM DELIVERS DAMAGE TO \n");//%s",target->name.c_str());
+  fprintf (stderr,"BEAM DELIVERS DAMAGE TO %s\n",target->name.c_str());
 
   //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
   return true;

@@ -147,7 +147,6 @@ void StarSystem::Draw() {
 
 extern double interpolation_blend_factor;
 
-extern Beam * DABEAM;
 void StarSystem::Update() {
   Unit *unit;
   UpdateTime();
@@ -161,7 +160,6 @@ void StarSystem::Update() {
 
       ClearCollideQueue();
       modelGravity();
-      DABEAM->UpdatePhysics (identity_transformation);
       Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)

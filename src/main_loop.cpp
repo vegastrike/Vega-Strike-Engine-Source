@@ -329,7 +329,6 @@ CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
 SphereMesh *bg2=NULL;
 
-Beam * DABEAM;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
 static void Fire (int, KBSTATE newState) {
@@ -453,7 +452,6 @@ void createObjects() {
   Universe::Faction::LoadXML("factions.xml");
 
   LoadWeapons("weapon_list.xml");
-  DABEAM= new Beam (identity_transformation, weapon_info(weapon_info::BEAM), NULL);
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
@@ -570,7 +568,6 @@ void createObjects() {
 }
 
 void destroyObjects() {  
-  delete DABEAM;
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
 
@@ -590,7 +587,6 @@ void main_loop() {
   _Universe->activeStarSystem()->Draw();
     GFXDisable(TEXTURE1);
     locSel->Draw();
-  DABEAM->Draw (identity_transformation,identity_matrix);
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
 

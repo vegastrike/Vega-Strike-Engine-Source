@@ -360,6 +360,7 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 float Unit::querySphere (const Vector &st, const Vector &dir, float err) {
   int i;
   float retval=0;
+  float adjretval=0;
   float * tmpo = cumulative_transformation_matrix;
 
   Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
@@ -401,11 +402,28 @@ float Unit::querySphere (const Vector &st, const Vector &dir, float err) {
       {
 	if (retval==0) {
 	  retval = k;
+	  adjretval=k;
+	  if (adjretval<0) {
+		adjretval+=meshdata[i]->rSize();
+		if (adjretval>0)
+				adjretval=.001;
+		}
 	}else {
-	  if (retval>0&&k<retval)
-	    retval = k;
-	  if (retval<0&&k>retval)
-	    retval = k;
+		if (retval>0&&k<retval&&k>-meshdata[i]->rSize()){
+			retval = k;
+			adjretval=k;
+			if (adjretval<0) {
+				adjretval+=meshdata[i]->rSize();
+				if (adjretval>0)
+					adjretval=.001;
+			}
+		}
+		if (retval<0&&k+meshdata[i]->rSize()>retval) {
+			retval = k;
+			adjretval=k+meshdata[i]->rSize();
+			if (adjretval>0)
+				adjretval=.001;//THRESHOLD;
+		}
 	}
     }
   }
@@ -415,13 +433,17 @@ float Unit::querySphere (const Vector &st, const Vector &dir, float err) {
     if (retval==0) {
       retval = tmp;
     }else{
-	  if (retval>0&&tmp<retval)
-	    retval = tmp;
-	  if (retval<0&&tmp>retval)
-	    retval = tmp;
+		if (adjretval>0&&tmp<adjretval) {
+			retval = tmp;
+			adjretval=tmp;
+		}
+		if (adjretval<0&&tmp>adjretval) {
+		    retval = tmp;
+			adjretval=tmp;
+		}
     }
   }
-  return retval;
+  return adjretval;
 }
 
 void Unit::Destroy() {

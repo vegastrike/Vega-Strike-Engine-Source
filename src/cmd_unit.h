@@ -137,7 +137,6 @@ protected:
   
   //Vector pp, pq, pr, ppos;
   AI *aistate;
-  string name;
   float accel;
   float recharge;
   float energy;
@@ -180,6 +179,7 @@ protected:
 
 public:
 	  Vector origin;
+  string name;
 
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 

@@ -66,7 +66,6 @@ FlyByKeyboard::~FlyByKeyboard() {
 #define FBWABS(m) (m>=0?m:-m)
 
 AI * FlyByKeyboard::Execute () {
-	fprintf (stderr, "execute like dubya");
   desired_ang_velocity=Vector();
 #define SSCK starshipcontrolkeys
   if (SSCK.dirty) {

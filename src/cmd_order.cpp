@@ -24,7 +24,7 @@
 #include "physics.h"
 AI * Order::Execute () {
   //  int completed=0;
-	fprintf (stderr,"size: %d done %d", suborders.size(), (*suborders.begin())->Done());
+//	fprintf (stderr,"size: %d done %d", suborders.size(), (*suborders.begin())->Done());
   if(suborders.size()) {
     vector<AI*>::iterator ord = suborders.begin();
     (*ord)->Execute();
