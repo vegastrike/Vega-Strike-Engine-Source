@@ -183,7 +183,7 @@ public:
 
 typedef set <systemdrawnode> systemdrawset;
 typedef vector <systemdrawnode> systemdrawlist;
-typedef Hashtable <std::string, systemdrawnode, char [127]> systemdrawhashtable;
+typedef Hashtable <std::string, const systemdrawnode, char [127]> systemdrawhashtable;
 
 bool testandset (bool &b,bool val) {
 	bool tmp = b;
@@ -587,7 +587,7 @@ void NavigationSystem::DrawGalaxy()
 			for (int i=0;i<dest->size();++i) {
 				std::string oth=(*dest)[i];
 				if (sys<oth) {
-					systemdrawnode *j = jumptable.Get (oth);
+					const systemdrawnode *j = jumptable.Get (oth);
 					if (j!=NULL) {
 						GFXColorf (GetColor (sys));
 						GFXVertex3f((*it).x,(*it).y,0);
@@ -601,7 +601,8 @@ void NavigationSystem::DrawGalaxy()
 				}
 			}
 			GFXEnd();
-			(*it).dest=NULL; // just in case, since it will die later on.
+//			(*it).dest=NULL; // just in case, since it will die later on.
+			// GCC won't let me set it to NULL for some silly reason... so I'll just leave it as is...
 		}
 		jumptable.Delete(sys); // Won't ever reference this again, since it checks for less than.
 	   

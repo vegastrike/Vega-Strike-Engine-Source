@@ -9,6 +9,7 @@
 #include <list>
 #include <queue>
 #include <iostream>
+#include <fstream>
 
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
