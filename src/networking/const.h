@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #define MAXCLIENTS	512
+#define MAXOBJECTS	1024 // Maximum numbre of objects in a zone - HAVE TO FIND A WAY NOT TO LIMIT THAT
 #define SERVER_PORT 6777
 #define CLIENT_PORT	6778
 #define ACCT_PORT	6779

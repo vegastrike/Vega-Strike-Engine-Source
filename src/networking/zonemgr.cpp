@@ -1,5 +1,6 @@
 //#include <netinet/in.h>
 //#include "gfxlib.h"
+#include "networking/netbuffer.h"
 #include "universe_generic.h"
 #include "universe_util.h"
 //#include "universe_util_generic.h" //Use universe_util_generic.h instead
@@ -177,6 +178,7 @@ void	ZoneMgr::broadcastSnapshots( )
 	char buffer[MAXBUFFER];
 	int i=0, j=0, p=0;
 	LI k, l;
+	NetBuffer netbuf;
 
 	//cout<<"Sending snapshot for ";
 	//int h_length = Packet::getHeaderLength();
@@ -221,7 +223,8 @@ void	ZoneMgr::broadcastSnapshots( )
 				nbclients = zone_clients[i]-1;
 				// buffer is bigger than needed in that way
 				//buffer = new char[nbclients*sizeof( ClientState)];
-				memset( buffer, 0, MAXBUFFER);
+				netbuf.Reset();
+				//memset( buffer, 0, MAXBUFFER);
 				// Quaternion source_orient( (*k)->current_state.getOrientation());
 				// QVector source_pos( (*k)->current_state.getPosition());
 				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
@@ -242,58 +245,59 @@ void	ZoneMgr::broadcastSnapshots( )
 							if( 1 /* ratio > XX client not too far */)
 							{
 								// Mark as position+orientation+velocity update
-								buffer[offset] = CMD_FULLUPDATE;
-								offset += sizeof( char);
+								//buffer[offset] = CMD_FULLUPDATE;
+								//char cmd = CMD_FULLUPDATE;
+								netbuf.addChar( CMD_FULLUPDATE);
+								//offset += sizeof( char);
 								// Prepare the state to be sent over network (convert byte order)
 								//cout<<"Sending : ";
 								//(*l)->current_state.display();
-								cstmp = (*l)->current_state;
-								cstmp.netswap();
+								//cstmp = (*l)->current_state;
+								//cstmp.netswap();
+								netbuf.addClientState( (*l)->current_state);
 								//(*l)->current_state.netswap();
-								memcpy( buffer+offset, &cstmp, sizeof( ClientState));
+								//memcpy( buffer+offset, &cstmp, sizeof( ClientState));
 								// Convert byte order back
 								//(*l)->current_state.netswap();
-								offset += sizeof( ClientState);
+								//offset += sizeof( ClientState);
 								// Increment the number of clients we send full info about
 								j++;
 							}
 							else if( 1 /* ratio>=1 far but still visible */)
 							{
 								// Mark as position update only
-								buffer[offset] = CMD_POSUPDATE;
-								offset += sizeof( unsigned char);
-								sertmp = htons((*l)->serial);
-								memcpy( buffer+offset, &(sertmp), sizeof( ObjSerial));
-								offset += sizeof( ObjSerial);
-								QVector qvtmp( (*l)->current_state.getPosition());
-								qvtmp.i = VSSwapHostDoubleToLittle( qvtmp.i);
-								qvtmp.j = VSSwapHostDoubleToLittle( qvtmp.j);
-								qvtmp.k = VSSwapHostDoubleToLittle( qvtmp.k);
-								memcpy( buffer+offset+sizeof( ObjSerial), &qvtmp, sizeof( QVector));
-								offset += sizeof( QVector);
+								//buffer[offset] = CMD_POSUPDATE;
+								//char cmd = CMD_POSUPDATE;
+								netbuf.addChar( CMD_POSUPDATE);
+								//offset += sizeof( unsigned char);
+								//sertmp = htons((*l)->serial);
+								//memcpy( buffer+offset, &(sertmp), sizeof( ObjSerial));
+								netbuf.addShort( (*l)->serial);
+								//offset += sizeof( ObjSerial);
+								//QVector qvtmp( (*l)->current_state.getPosition());
+								//qvtmp.i = VSSwapHostDoubleToLittle( qvtmp.i);
+								//qvtmp.j = VSSwapHostDoubleToLittle( qvtmp.j);
+								//qvtmp.k = VSSwapHostDoubleToLittle( qvtmp.k);
+								//memcpy( buffer+offset+sizeof( ObjSerial), &qvtmp, sizeof( QVector));
+								//offset += sizeof( QVector);
+								netbuf.addVector( (*l)->current_state.getPosition());
 								// Increment the number of clients we send limited info about
 								p++;
 							}
 						}
-						assert( offset<MAXBUFFER);
+						//assert( offset<MAXBUFFER);
 					}
 					// Else : always send back to clients their own info or just ignore ?
 					// Ignore for now
 				}
 				// Send snapshot to client k
-				if( offset > 0)
+				if( j+p > 0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.send( CMD_SNAPSHOT, nbclients, buffer, offset, SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__, 
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-						0
-#else
-						__LINE__ 
-#endif
-						);
+					pckt.send( CMD_SNAPSHOT, nbclients, netbuf.getBuffer(), netbuf.getDataSize(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	__LINE__);
 				}
 				//delete buffer;
-				offset = 0;
+				//offset = 0;
 			}
 		}
 	}
@@ -328,6 +332,7 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 			unsigned int nxmllen = htonl( xmllen);
 			*/
 			// Add the ClientState at the beginning of the buffer
+			tmpcs = (*k)->current_state;
 			memcpy( savebuf, &tmpcs, sizeof( ClientState));
 			// Add the save buffer after the ClientState
 			SaveNetUtil::GetSaveBuffer( savestr, xmlstr, savebuf+sizeof( ClientState));
@@ -364,6 +369,7 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 	nbsize = sizeof( unsigned short);
 	nbt = zone_clients[clt->zone];
 	int		offset = 0;
+	NetBuffer netbuf;
 
 	//cout<<"Size of description : "<<desc_size<<endl;
 	if( (desc_size+state_size)*nbt >= MAXBUFFER)
@@ -381,13 +387,10 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 	{
 		cout<<"SENDING : ";
 		cstmp = (*k)->current_state;
-		//(*k)->current_state.display();
-		//(*k)->current_state.netswap();
 		cstmp.display();
 		cstmp.netswap();
 		memcpy( bufzone+nbsize+offset, &cstmp, state_size);
 		offset += state_size;
-		//(*k)->current_state.netswap();
 		memcpy( bufzone+nbsize+offset, &(*k)->current_desc, desc_size);
 		offset += desc_size;
 	}

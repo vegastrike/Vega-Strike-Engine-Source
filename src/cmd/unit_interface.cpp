@@ -1308,7 +1308,8 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   }
   int len=getSaveStringLength(playernum,miss_script);
   assert(len==getSaveStringLength(playernum,miss_name)&&len==getSaveStringLength(playernum,miss_desc));
-  for (unsigned int i=0;i<len;i++) {
+  unsigned int i=0;
+  for (i=0;i<len;i++) {
 	  string m = getSaveString(playernum,miss_name,i);
 	  int count=1;
 	  for (unsigned int j=i+1;j<len;++j) {
@@ -1318,7 +1319,7 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
 		  }
 	  }
   }
-  for (unsigned int i=0;i<len;i++) {
+  for (i=0;i<len;i++) {
     CargoColor c;
     c.cargo.quantity=1;
     c.cargo.volume=1;

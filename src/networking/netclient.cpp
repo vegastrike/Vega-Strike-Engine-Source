@@ -83,11 +83,13 @@ Unit * getNetworkUnit( ObjSerial cserial)
 
 NetClient::~NetClient()
 {
-    for( int i=0; i<MAXCLIENTS; i++)
+    /*
+	for( int i=0; i<MAXCLIENTS; i++)
     {
         if( Clients[i]!=NULL)
             delete Clients[i];
     }
+	*/
 }
 
 /*************************************************************/
@@ -590,6 +592,7 @@ void NetClient::getZoneData( const Packet* packet )
 void	NetClient::addClient( const Packet* packet )
 {
 	ObjSerial cltserial = packet->getSerial();
+	Client * clt;
 	// NOTE : in splitscreen mode we may receive info about us so we comment the following test
 	/*
 	if( cltserial==this->serial)
@@ -600,26 +603,27 @@ void	NetClient::addClient( const Packet* packet )
 	}
 	*/
 
-	if( Clients[cltserial] != NULL)
+	clt = Clients[cltserial];
+	if( clt != NULL)
 	{
 		cout<<"Error, client exists !!"<<endl;
 		exit( 1);
 	}
 
-	Clients[cltserial] = new Client;
+	clt = new Client;
 	nbclients++;
 	// Copy the client state in its structure
-	Clients[cltserial]->serial = cltserial;
+	clt->serial = cltserial;
 
 	cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	cout<<"At : ";
 
 	// Should receive the name
 	string callsign ("player"+cltserial);
-	memcpy( Clients[cltserial]->name, callsign.c_str(), callsign.length());
+	memcpy( clt->name, callsign.c_str(), callsign.length());
 	ClientState cs;
 	memcpy( &cs, packet->getData(), sizeof( ClientState));
-	Clients[cltserial]->current_state = cs;
+	clt->current_state = cs;
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
@@ -658,17 +662,17 @@ void	NetClient::addClient( const Packet* packet )
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
 							 0, xmlbuf);
-		Clients[cltserial]->game_unit.SetUnit( un);
+		clt->game_unit.SetUnit( un);
 		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
-		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
-		Clients[cltserial]->game_unit.GetUnit()->SetSerial( cltserial);
+		clt->game_unit.GetUnit()->SetNetworkMode( true);
+		clt->game_unit.GetUnit()->SetSerial( cltserial);
 		//cout<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
-		Clients[cltserial]->game_unit.GetUnit()->SetPosition( cs.getPosition());
-		Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-		Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
-		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
+		clt->game_unit.GetUnit()->SetPosition( cs.getPosition());
+		clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+		clt->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+		clt->game_unit.GetUnit()->SetNetworkMode( true);
 
 		// In that case, we want cubic spline based interpolation
 		//init_interpolation( cltserial);
@@ -678,8 +682,8 @@ void	NetClient::addClient( const Packet* packet )
 	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
 	else if( cltserial!=this->serial)
 	{
-		Clients[cltserial]->game_unit.SetUnit( getNetworkUnit( cltserial));
-		assert( Clients[cltserial]->game_unit.GetUnit() != NULL);
+		clt->game_unit.SetUnit( getNetworkUnit( cltserial));
+		assert( clt->game_unit.GetUnit() != NULL);
 	}
 }
 
@@ -742,82 +746,91 @@ void	NetClient::receivePosition( const Packet* packet )
 	//int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
 	int		qfsize = sizeof( double);
 	unsigned char	cmd;
+	Client * clt;
 
 	nbclts = packet->getSerial();
 	//nbclts = ntohs( nbclts2);
 	COUT << "Received update for " << nbclts << " clients - LENGTH="
 	     << packet->getDataLength() << endl;
 	databuf = packet->getData();
+	NetBuffer netbuf( packet->getData(), packet->getDataLength());
 	for( i=0, j=0; (i+j)<nbclts;)
 	{
-		cmd = *(databuf+offset);
-		offset += sizeof( unsigned char);
+		//cmd = *(databuf+offset);
+		cmd = netbuf.getChar();
+		//offset += sizeof( unsigned char);
 		if( cmd == CMD_FULLUPDATE)
 		{
-			memcpy( &cs, (databuf+offset), cssize);
-			cs.netswap();
+			cs = netbuf.getClientState();
+			//memcpy( &cs, (databuf+offset), cssize);
+			//cs.netswap();
 			// Do what needed with update
 			cout<<"Received FULLSTATE ";
 			// Tell we received the ClientState so we can convert byte order from network to host
 			//cs.display();
 			sernum = cs.getSerial();
+			clt = Clients[sernum];
 			// Test if this is a local player
 			// Is it is, ignore position update
-			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
+			if( clt!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
 			{
 				// Backup old state
-				Clients[sernum]->old_state = Clients[sernum]->current_state;
+				clt->old_state = Clients[sernum]->current_state;
 				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
 				// Update concerned client directly in network client list
-				Clients[sernum]->current_state = cs;
+				clt->current_state = cs;
 				// memcpy( &(Clients[sernum]->current_state), &cs, sizeof( ClientState));
 
 				// Set the orientation by extracting the matrix from quaternion
-				Clients[sernum]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-				Clients[sernum]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+				clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+				clt->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
 				// Use SetCurPosition or SetPosAndCumPos ??
-				Clients[sernum]->game_unit.GetUnit()->SetCurPosition( cs.getPosition());
+				clt->game_unit.GetUnit()->SetCurPosition( cs.getPosition());
 				// In that case, we want cubic spline based interpolation
 				//predict( sernum);
 				//init_interpolation( sernum);
 			}
-			offset += cssize;
+			//offset += cssize;
 			i++;
 		}
 		else if( cmd == CMD_POSUPDATE)
 		{
 			// Set the serial #
-			sernum = *((ObjSerial *) databuf+offset);
-			sernum = ntohs( sernum);
+			//sernum = *((ObjSerial *) databuf+offset);
+			//sernum = ntohs( sernum);
+			sernum = netbuf.getShort();
+			clt = Clients[sernum];
 			cout<<"Received POSUPDATE for serial "<<sernum<<" -> ";
-			offset += sizeof( ObjSerial);
-			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
+			//offset += sizeof( ObjSerial);
+			if( clt!=NULL && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
 			{
 				// Backup old state
 				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
-				Clients[sernum]->old_state = Clients[sernum]->current_state;
+				clt->old_state = clt->current_state;
 				// Set the new received position in current_state
 				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
-				QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
-				tmppos.netswap();
+				QVector tmppos = netbuf.getVector();
+				//QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
+				//tmppos.netswap();
 				//tmppos = (QVector) *(databuf+offset);
-				Clients[sernum]->current_state.setPosition( tmppos);
+				clt->current_state.setPosition( tmppos);
 				// Use SetCurPosition or SetPosAndCumPos ??
-				Clients[sernum]->game_unit.GetUnit()->SetCurPosition( tmppos);
-				Clients[sernum]->current_state.display();
+				clt->game_unit.GetUnit()->SetCurPosition( tmppos);
+				clt->current_state.display();
 				//predict( sernum);
 			}
 			else
 			{
 				ClientState cs2;
 				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
-				QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
-				tmppos.netswap();
+				//QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
+				QVector tmppos = netbuf.getVector();
+				//tmppos.netswap();
 				cs2.setPosition( tmppos);
 				cs2.display();
 				cout<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
 			}
-			offset += sizeof( QVector);
+			//offset += sizeof( QVector);
 			j++;
 		}
 	}

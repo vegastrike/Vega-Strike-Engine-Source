@@ -24,16 +24,16 @@
 #include <string>
 #include <vector>
 
-#include "const.h"
-#include "vsnet_socket.h"
+#include "networking/const.h"
+#include "networking/vsnet_socket.h"
 #include "gfx/quaternion.h"  // for Transformation
 #include "cmd/container.h"
 #include "cmd/weapon_xml.h"
 #include "savegame.h"
+#include "networking/client.h"
 
 class Packet;
 class Unit;
-class Client;
 class ClientState;
 class NetUI;
 
@@ -54,7 +54,8 @@ class	NetClient
 		int					nbclients;		// Number of clients in the zone
 		char				keeprun;		// Bool to test client stop
 		string				callsign;		// Callsign of the networked player
-		vector<Client *>	Clients;		// Clients or other Units in the same zone
+		Client *			Clients[MAXCLIENTS];		// Clients in the same zone
+		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 		// a vector because always accessed by their IDs
 
 		int					enabled;		// Bool to say network is enabled

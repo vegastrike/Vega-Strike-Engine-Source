@@ -8,6 +8,7 @@
 #include "gfx/vec.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
+#include "networking/vsnet_clientstate.h"
 
 class NetBuffer
 {
@@ -34,10 +35,20 @@ class NetBuffer
 			resizeBuffer( bufsize);
 			memcpy( buffer, buf, bufsize);
 		}
+		NetBuffer( const char * buf, int bufsize)
+		{
+			offset = bufsize;
+			resizeBuffer( bufsize);
+			memcpy( buffer, buf, bufsize);
+		}
 		~NetBuffer()
 		{
 			if( buffer != NULL)
 				delete buffer;
+		}
+		void	Reset()
+		{
+			memset( buffer, 0, size);
 		}
 
 		char *	getBuffer() { return buffer;}
@@ -234,6 +245,20 @@ class NetBuffer
 			offset+=sizeof(s);
 			s = VSSwapHostIntToLittle( s);
 			return s;
+		}
+		void	addChar( char c)
+		{
+			int tmpsize = sizeof( c);
+			resizeBuffer( offset+tmpsize);
+			memcpy( buffer+offset, &c, sizeof( c));
+			offset += tmpsize;
+		}
+		char	getChar()
+		{
+			char c;
+			memcpy( &c, buffer+offset, sizeof( c));
+			offset+=sizeof(c);
+			return c;
 		}
 
 		int		getDataSize() { return offset;}

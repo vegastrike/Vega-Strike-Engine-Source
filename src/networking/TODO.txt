@@ -29,6 +29,7 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Find a way not to use MAXOBJECTS in netclient.h
 - Interpolate(extrapolate) using delatime + the concerned client's current_state delay
 OR
 - Maybe send extrapolated position with deltatime ahead in time
