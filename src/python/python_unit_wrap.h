@@ -35,7 +35,7 @@
   WRAPPED0(QVector,Position,QVector(0,0,0))
   WRAPPED0(QVector, LocalPosition,QVector(0,0,0))
 
-  WRAPPED0(UnitWrapper, Threat,0)
+  WRAPPED0(UnitWrapper, Threat,UnitWrapper(0))
   voidWRAPPED1( TargetTurret ,UnitWrapper,targ)
   voidWRAPPED2( Threaten ,UnitWrapper,targ, float,danger)
   voidWRAPPED0( ResetThreatLevel)

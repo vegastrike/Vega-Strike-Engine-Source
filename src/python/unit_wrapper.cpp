@@ -1,3 +1,4 @@
+#ifndef PYTHON_STUB
 #include "cmd/container.h"
 #include <string>
 #include "gfx/vec.h"
@@ -6,7 +7,7 @@
 #include <boost/python/objects.hpp>
 
 //makes to_python for both vector and qvector turn them into tuples :-)
-#ifndef PYTHON_STUB
+
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 PyObject *to_python (Vector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
@@ -50,7 +51,8 @@ public:
   void SetTarget (UnitWrapper targ) {{CHECKME;}unit->Target(targ);}
   boost::python::tuple GetOrientation() {{CHECKME boost::python::tuple(Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
   boost::python::tuple queryBSP (QVector st, QVector en, bool ShieldBSP) {{CHECKME boost::python::tuple(0,Vector(0,0,1),0);}float dist; UnitWrapper un; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,nml,dist); return ret;}
-  boost::python::tuple cosAngleTo (UnitWrapper target, float speed, float range) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
+  boost::python::tuple cosAngleToITTS (UnitWrapper target, float speed, float range) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
+  boost::python::tuple cosAngleTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist);return boost::python::tuple (ret,dist);}
   boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return boost::python::tuple (ret,dist);}
   boost::python::tuple getAverageGunSpeed () {{CHECKME boost::python::tuple(0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return boost::python::tuple(speed,range);}
   boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple(QVector(0,0,0),Vector(0,0,0),QVector(0,0,0),Vector(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; bool ret=unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal); boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); return tup;}
@@ -112,6 +114,7 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
   Class.def(&UnitWrapper::GetOrientation,"GetOrientation");
   Class.def(&UnitWrapper::queryBSP,"queryBSP");
   Class.def(&UnitWrapper::cosAngleTo,"cosAngleTo");
+  Class.def(&UnitWrapper::cosAngleToITTS,"cosAngleToITTS");
   Class.def(&UnitWrapper::cosAngleFromMountTo,"cosAngleFromMountTo");
   Class.def(&UnitWrapper::getAverageGunSpeed,"getAverageGunSpeed");
   Class.def(&UnitWrapper::InsideCollideTree,"InsideCollideTree");
@@ -123,15 +126,36 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 PYTHON_END_CLASS(VS,UnitWrapper)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(UnitWrapper);
+//below replace ~ with enter
 #else
-#define WRAPPED0(type,name,def) 
-#define WRAPPED1(type,name,atype,a,def) 
-#define WRAPPED2(type,name,atype,a,btype,b,def) 
-#define WRAPPED3(type,name,atype,a,btype,b,ctype,c,def) 
-#define voidWRAPPED0(name) 
-#define voidWRAPPED1(name,atype,a) 
-#define voidWRAPPED2(name,atype,a,btype,b) 
-#define voidWRAPPED3(name,atype,a,btype,b,ctype,c) 
+#define MYPRINT(nam) print #nam
+#define WRAPPED0(type,name,aff) def name(self):~    MYPRINT(name) ~    return aff
+#define WRAPPED1(type,name,atype,a,aff) def name(self,a): ~    MYPRINT(name)  ~    return aff
+#define WRAPPED2(type,name,atype,a,btype,b,aff) def name(self,a,b): ~    MYPRINT(name) ~    return aff
+#define WRAPPED3(type,name,atype,a,btype,b,ctype,c,aff) def name(self,a,b,c): ~    MYPRINT(name) ~    return aff
+#define voidWRAPPED0(name) def name(self): ~    MYPRINT(name)
+#define voidWRAPPED1(name,atype,a) def name(self,a): ~    MYPRINT(name)
+#define voidWRAPPED2(name,atype,a,btype,b) def name(self,a,b): ~    MYPRINT(name)
+#define voidWRAPPED3(name,atype,a,btype,b,ctype,c) def name(self,a,b,c): ~    MYPRINT(name)
+def string ():
+  return ''
+class Unit:
+  def __init__(self,a):
+     self.name=a
+#define UnitWrapper Unit
+#include "python_unit_wrap.h"
 
-
+  voidWRAPPED0(Kill);
+  voidWRAPPED1(SetTarget,UnitWrapper,un);
+  WRAPPED0(UnitWrapper, GetTarget,UnitWrapper(0));
+  WRAPPED0(UnitWrapper, GetVelocityReference,UnitWrapper(0))
+  voidWRAPPED1(SetVelocityReference,UnitWrapper,un);
+  WRAPPED0(Tuple,GetOrientation,((1,0,0),(0,1,0),(0,0,1)))
+  WRAPPED2(Tuple,queryBSP,Vector,start,Vector,end,(un,(0,0,1),0))
+  WRAPPED3(Tuple,cosAngleToITTS,UnitWrapper, un, float,speed, float, range,(.95,10000)) 
+  WRAPPED1(Tuple,cosAngleTo,UnitWrapper,un,(.93,10000))
+  WRAPPED1(Tuple,cosAngleFromMountTo,UnitWrapper,un,(.93,10000)) 
+  WRAPPED0(Tuple,getAverageGunSpeed,(200,10000))
+  WRAPPED1(Tuple,InsideCollideTree,UnitWrapper,un,((0,0,0),(0,0,1),(0,0,0),(0,1,0)))
+  WRAPPED1(UnitWrapper,getSubUnit,int,which,UnitWrapper(0))
 #endif
