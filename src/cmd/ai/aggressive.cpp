@@ -215,12 +215,17 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
 										      "Targetting",
 										      "EscortDistance",
-										      "1.4"));
+										      "2.0"));
+	    static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
+										      "Targetting",
+										      "TurnLeaderDist",
+										      "2.0"));
+
 	    float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
 	    Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
 	    ord->SetParent (parent);
 	    ReplaceOrder (ord);
-	    ord = new Orders::FaceDirection(dist*2);
+	    ord = new Orders::FaceDirection(dist*turn_leader);
 	    ord->SetParent (parent);
 	    ReplaceOrder (ord);
 	  }
@@ -229,9 +234,12 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	  suborders[i]->AttachSelfOrder (leader);
 	}
       }else if (fg->directive==string("h")) {
+	//	fprintf (stderr,"he wnats to help out");
 	if (fg->directive!=last_directive&&leader) {
+	  //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
 	  Unit * th=NULL;
 	  if ((th=leader->Threat())) {
+	    //fprintf (stderr,"he wnats to help out and he has a threat\n");
 	    Vector vec;
 	    CommunicationMessage c(parent,leader,NULL,0);
 	    if (parent->InRange(th,vec)) {
@@ -240,17 +248,23 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    }else {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    }
-	  leader->getAIState()->Communicate(c);
+	    leader->getAIState()->Communicate(c);
 	  }else {
 	    bool targetted=false;
 	    float mindist;
 	    Unit * un=NULL;
 	    th= GetThreat(parent,leader);
 	    CommunicationMessage c(parent,leader,NULL,0);
+	    //fprintf (stderr,"he wnats to help out against threat %d",th);
 	    if (th) {
-	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-	      parent->Target (th);
-	      fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+	      Vector vec;
+	      if (parent->InRange (th,vec)) {
+		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+		parent->Target (th);
+	      }else {
+		c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
+	      }
+	      //fprintf (stderr,"Helping out kill: %s",th->name.c_str());
 	    }else {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    }
