@@ -52,6 +52,7 @@
 #include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
 #include "universe_util.h"
+#include "networking/netclient.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -728,7 +729,10 @@ void main_loop() {
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
 
-
+  if( Network!=NULL) {
+	for( int jj=0; jj<_Universe->numPlayers(); jj++)
+	  Network[jj].checkMsg();
+  }
 }
 
 

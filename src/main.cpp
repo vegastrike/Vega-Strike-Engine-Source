@@ -46,10 +46,13 @@
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
 #include "universe_util.h"
+#include "networking/netclient.h"
 /*
  * Globals 
  */
 game_data_t g_game;
+
+NetClient * Network;
 
 Universe *_Universe;
 FILE * fpread=NULL;
@@ -87,6 +90,13 @@ bool STATIC_VARS_DESTROYED=false;
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
+	if( Network!=NULL)
+	{
+		for( int i=0; i<_Universe->numPlayers(); i++)
+			Network[i].logout();
+		delete [] Network;
+	}
+
   STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
   _Universe->WriteSaveGame(true);
@@ -226,7 +236,6 @@ int main( int argc, char *argv[] )
 #endif
     */
     _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
-
     _Universe->Loop(bootstrap_main_loop);
     return 0;
 }
@@ -351,9 +360,65 @@ void bootstrap_main_loop () {
     string mysystem = mission->getVariable("system","sol.system");
     int numplayers = XMLSupport::parse_int (mission->getVariable ("num_players","1"));
     vector <std::string>playername;
+    vector <std::string>playerpasswd;
     for (int p=0;p<numplayers;p++) {
       playername.push_back(vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"callsign",""));
+	  playerpasswd.push_back(vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"password",""));
     }
+
+	/************************* NETWORK INIT ***************************/
+	cout<<"Number of local players = "<<numplayers<<endl;
+	// Initiate the network if in networking play mode for each local player
+	string srvip = vs_config->getVariable("network","server_ip","");
+	if( srvip != "")
+	{
+		string srvport = vs_config->getVariable("network","server_port","");
+		if( srvport=="")
+		{
+			cout<<"No port found, exiting"<<endl;
+			cleanup();
+			exit( 1);
+		}
+		// Get the number of local players
+		Network = new NetClient[numplayers];
+
+		cout<<endl<<"Server IP : "<<srvip<<" - port : "<<srvport<<endl<<endl;
+		char * srvipadr = new char[srvip.length()+1];
+		memcpy( srvipadr, srvip.c_str(), srvip.length());
+		srvipadr[srvip.length()] = '\0';
+		int port = atoi( srvport.c_str());
+		cout<<"Port : "<<port<<endl;
+		vector<std::string>::iterator i, j;
+		int nbii = 0;
+		for( i=playername.begin(), j=playerpasswd.begin(); i!=playername.end(); i++, j++, nbii++)
+		{
+			int nbok = 0;
+			if( Network[nbii].init( srvipadr, (unsigned short) port) == -1)
+			{
+				// If network initialization fails, exit
+				cleanup();
+				cout<<"Network initialization error - exiting"<<endl;
+				exit( 1);
+			}
+			//sleep( 3);
+			cout<<"Waiting for player "<<(nbii+1)<<" = "<<(*i)<<":"<<(*j)<<"login response...";
+			nbok = Network[nbii].loginLoop( (*i), (*j));
+			if( !nbok)
+			{
+				cout<<"No server response, exiting"<<endl;
+				exit(1);
+			}
+			else
+				cout<<" logged in !"<<endl;
+		}
+	}
+	else
+	{
+		Network = NULL;
+		cout<<"Non-networking mode"<<endl;
+	}
+	/************************* NETWORK INIT ***************************/
+
     _Universe->SetupCockpits(playername);
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     g_game.difficulty=XMLSupport::parse_float (mission->getVariable("difficulty","1"));
@@ -439,6 +504,14 @@ void bootstrap_main_loop () {
 			}
 		}
 	}
+
+	cout<<"Loading completed"<<endl;
+	// Send a network msg saying we are ready
+	if( Network!=NULL) {
+		for( int l=0; l<numplayers; l++)
+			Network[l].inGame();
+	}
+
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }
