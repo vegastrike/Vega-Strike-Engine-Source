@@ -55,10 +55,11 @@ int nadanixnuthin() {
   float a=0;
   int test=0;
   Delta(a, a);
-    flipbit(test,test);
-    checkbit(test,test);
-    dosetbit(test,test);
-    unsetbit(test,test);
+  flipbit(test,test);
+  checkbit(test,test);
+  dosetbit(test,test);
+  unsetbit(test,test);
+  return 0;
 }
 /*
  * Globals 
@@ -509,7 +510,6 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-		char * savedata = 0;
 		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
@@ -538,11 +538,11 @@ void bootstrap_main_loop () {
 	    char * buf = new char[savefiles[k][1].length()+1];
 		buf[savefiles[k][1].length()]=0;
 		memcpy( buf, savefiles[k][1].c_str(), savefiles[k][1].length());
-		saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, buf);
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, buf);
 		delete buf;
 	  }
 	  else
-		saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
 	  
 	  playersaveunit.push_back(_Universe->AccessCockpit()->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;

@@ -46,16 +46,14 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
         FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
-  olist_t * killlist = &cp->savegame->getMissionData (string("kills"));
+  vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
   while (killlist->size()<=FactionUtil::GetNumFactions()) {
-    killlist->push_back (new varInst (VI_IN_OBJECT));
-    killlist->back()->type=VAR_FLOAT;
-    killlist->back()->float_val=0;
+    killlist->push_back ((float)0.0);
   }
   if ((int)killlist->size()>faction) {
-    (*killlist)[faction]->float_val++;
+    (*killlist)[faction]++;
   }
-  killlist->back()->float_val++;
+  killlist->back()++;
 }
 
 //From unit_physics.cpp

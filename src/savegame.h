@@ -2,32 +2,25 @@
 #ifndef __SAVEGAME_H
 #define __SAVEGAME_H
 
-#include "cmd/unit_generic.h"
+
 // WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
 
+#include <string>
 #include <vector>
-typedef vector<class varInst *> olist_t;
   struct SavedUnits {
-    string filename;
-    clsptr type;
-    string faction;
-    SavedUnits (const char * filen, enum clsptr typ, const char * fact) {
+    std::string filename;
+    int type;
+    std::string faction;
+    SavedUnits (const char * filen, int typ, const char * fact) {
       faction=fact;
       filename=filen;
       type = typ;
     }
   };
+class MissionFloatDat;
+class MissionStringDat;
 class SaveGame {
-  struct MissionDat {
-    olist_t dat;
-    std::string magic_number;
-    bool operator == (const MissionDat&i) {
-      return (magic_number==i.magic_number);
-    }
-    MissionDat (const std::string &magic_number) {
-      this->magic_number = magic_number;
-    }
-  };
+  SaveGame(const SaveGame &){}//not used!
   std::string savestring;
   std::string ForceStarSystem ;
   QVector PlayerLocation;
@@ -35,36 +28,39 @@ class SaveGame {
   std::string last_written_pickled_data;
   std::string outputsavegame;
   std::string originalsystem;
-  static Hashtable<long,SavedUnits,char[47]> *savedunits;
   std::string callsign;
-  string WriteMissionData();
-  string WriteNewsData ();
+  std::string WriteMissionData();
+  std::string WriteMissionStringData();
+  std::string WriteNewsData ();
   void ReadNewsData(char * &buf);
   void ReadMissionData (char * &buf);
-  vector <SavedUnits> ReadSavedUnits (char * &buf);
-  vector <MissionDat> mission_data;
-  string playerfaction;
+  void ReadMissionStringData (char * &buf);
+  void ReadSavedPackets (char * &buf);
+  MissionStringDat *missionstringdata;
+  MissionFloatDat *missiondata;
+  std::string playerfaction;
  public:
-  SaveGame() {}
+  ~SaveGame();
   void ReloadPickledData();
-  string GetCallsign() {return callsign;}
-  olist_t &getMissionData(const std::string &magic_number);
+  std::string GetCallsign() {return callsign;}
+  std::vector<float> &getMissionData(const std::string &magic_number);
+  std::vector<std::string> &getMissionStringData(const std::string &magic_number);
   SaveGame(const std::string &pilotname);
   float GetSavedCredits();
   void SetSavedCredits (float);
   void SetPlayerLocation (const QVector &playerloc);
   QVector GetPlayerLocation ();
-  void SetStarSystem (string sys);
-  string GetStarSystem();
-  string GetOldStarSystem();
-  string GetPlayerFaction() { return playerfaction;}
-  void	 SetPlayerFaction( string faction) { playerfaction = faction;}
-  string WriteSavedUnit (SavedUnits *su);
-  string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, bool write=true);
+  void SetStarSystem (std::string sys);
+  std::string GetStarSystem();
+  std::string GetOldStarSystem();
+  std::string GetPlayerFaction() { return playerfaction;}
+  void	 SetPlayerFaction( std::string faction) { playerfaction = faction;}
+  std::string WriteSavedUnit (SavedUnits *su);
+  std::string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, bool write=true);
   ///cast address to long (for 64 bits compatibility)
-  void AddUnitToSave (const char * unitname, enum clsptr type, const char * faction, long address);
+  void AddUnitToSave (const char * unitname, int type, const char * faction, long address);
   void RemoveUnitFromSave (long address);//cast it to a long
-  vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, char * savebuf=NULL, bool read=true);
+  void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, char * savebuf=NULL, bool read=true);
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
 

@@ -5,7 +5,7 @@
 #include "audiolib.h"
 #include "unit_factory.h"
 #include "ai/order.h"
-#include "ai/fire.h"
+#include "ai/fireall.h"
 #include "ai/script.h"
 #include "ai/navigation.h"
 #include "ai/flybywire.h"
@@ -68,10 +68,10 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
       if (target&&target!=owner) {
 	temp->Target (target);
 	temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
-	temp->EnqueueAI (new Orders::FireAt (.2,1));
+	temp->EnqueueAI (new Orders::FireAllYouGot);
       } else {
 	temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
-	temp->EnqueueAI (new Orders::FireAt(.2,1));
+	temp->EnqueueAI (new Orders::FireAllYouGot);
       }
       temp->SetOwner (owner);
       temp->Velocity = velocity;

@@ -72,7 +72,7 @@ class	NetClient
 		void	disconnect();
 
 	public:
-		NetClient()
+		NetClient():save("")
 		{
 			game_unit = NULL;
 			old_timestamp = 0;

@@ -28,39 +28,71 @@ float getSaveData (int whichcp, string key, unsigned int num) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  vector<float> * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
   if (num >=ans->size()) {
     return 0;
   }
-  return (*ans)[num]->float_val;
+  return (*ans)[num];
+}
+string getSaveString (int whichcp, string key, unsigned int num) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return "";
+  }
+  vector<string> * ans = &(_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key));
+  if (num >=ans->size()) {
+    return "";
+  }
+  return (*ans)[num];  
 }
 unsigned int getSaveDataLength (int whichcp, string key) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
-  return ans->size();
+  return (_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)).size();
+}
+unsigned int getSaveStringLength (int whichcp, string key) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  return (_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)).size();
 }
 unsigned int pushSaveData (int whichcp, string key, float val) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
-  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
-  varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
-  vi->type = VAR_FLOAT;
-  vi->float_val=val;
-  ans->push_back (vi);
+  vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  ans->push_back (val);
   return ans->size()-1;
 
+}
+
+
+unsigned int pushSaveString (int whichcp, string key, string value) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  vector<string> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  ans->push_back (value);
+  return ans->size()-1;
+}
+
+void putSaveString (int whichcp, string key, unsigned int num, string val) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return;
+  }
+  vector<string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  if (num<ans->size()) {
+    (*ans)[num]= val;
+  }
 }
 
 void putSaveData (int whichcp, string key, unsigned int num, float val) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return;
   }
-  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
   if (num<ans->size()) {
-    (*ans)[num]->float_val = val;
+    (*ans)[num] = val;
   }
 }
 
@@ -68,16 +100,16 @@ vector <string> loadStringList (int playernum,string mykey) {
 	if (playernum<0||playernum>=_Universe->numPlayers()) {
 		return vector<string> ();
 	}
-	olist_t * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
+	vector<float> * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
 	int lengt = ans->size();
 	if (lengt<1) {
 		return vector<string> ();
 	}
 	vector<string> rez;
 	string curstr;
-	int length = (*ans)[0]->float_val;
+	int length = (int)(*ans)[0];
 	for (int j=0;j<length&&j<lengt;j++) {
-		char myint=(char)(*ans)[j+1]->float_val;
+		char myint=(char)(*ans)[j+1];
 		if (myint != '\0') {
 			curstr += myint;
 		} else {
@@ -91,30 +123,30 @@ void saveStringList (int playernum,string mykey,vector<string> names) {
 	if (playernum<0||playernum>=_Universe->numPlayers()) {
 		return;
 	}
-	olist_t * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
+	vector <float>* ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
 	int length=ans->size();
 	int k=1;
 	int tot=0;
 	int i;
-	for (i=0;i<names.size();i++) {
+	for (i=0;i<(int)names.size();i++) {
 		tot += names[i].size()+1;
 	}
 	if (length==0) {
 		pushSaveData(playernum,mykey,tot);
 	} else {
-		(*ans)[0]->float_val=tot;
+		(*ans)[0]=tot;
 	}
-	for (i=0;i<names.size();i++) {
-		for (int j=0;j<names[i].size();j++) {
+	for (i=0;i<(int)names.size();i++) {
+		for (int j=0;j<(int)names[i].size();j++) {
 			if (k < length) {
-				(*ans)[k]->float_val=(float)names[i][j];
+				(*ans)[k]=(float)names[i][j];
 			} else {
 				pushSaveData(playernum,mykey,(float)names[i][j]);
 			}
 			k+=1;
 		}
 		if (k < length) {
-			(*ans)[k]->float_val=0;
+			(*ans)[k]=0;
 		} else {
 			pushSaveData(playernum,mykey,0);
 		}
@@ -132,6 +164,10 @@ PYTHON_END_CLASS(Director,pythonMission)
   PYTHON_DEFINE_GLOBAL(Director,&pushSaveData,"pushSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveData,"getSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveDataLength,"getSaveDataLength");
+  PYTHON_DEFINE_GLOBAL(Director,&putSaveString,"putSaveString");
+  PYTHON_DEFINE_GLOBAL(Director,&pushSaveString,"pushSaveString");
+  PYTHON_DEFINE_GLOBAL(Director,&getSaveString,"getSaveString");
+  PYTHON_DEFINE_GLOBAL(Director,&getSaveStringLength,"getSaveStringLength");
 PYTHON_END_MODULE(Director)
 
 void InitDirector() {

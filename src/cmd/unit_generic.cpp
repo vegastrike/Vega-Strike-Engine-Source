@@ -1357,7 +1357,33 @@ void Unit::UpdatePhysics2 (const Transformation &trans, Transformation & old_phy
 		  cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
 	}
 }
-
+static float tempmin (float a, float b) {
+  return a>b?b:a;
+}
+static QVector RealPosition (Unit * un) {
+  if (un->isSubUnit())
+    return un->Position();
+  return un->LocalPosition();
+}
+static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * goal) {
+  QVector def = UniverseUtil::SafeEntrancePoint(start,rsize);
+  float bdis = (def-RealPosition(goal)).MagnitudeSquared();
+  for (int i=-1;i<=1;i++) {
+    for (int j=-1;j<=1;j++) {
+      for (int k=-1;k<=1;k+=2) {
+	QVector delta(i,j,k);delta.Normalize();
+	QVector tmp =RealPosition(goal)+delta*(goal->rSize()+rsize);
+	tmp=UniverseUtil::SafeEntrancePoint (tmp,rsize);
+	float tmag = (tmp-RealPosition(goal)).MagnitudeSquared();
+	if (tmag<bdis){
+	  bdis = tmag;
+	  def = tmp;
+	}
+      }
+    }
+  }
+  return def;
+}
 bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_level) {
   static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
   if (warpenergy<insys_jump_cost*jump.energy) {
@@ -1379,9 +1405,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
 
   Unit * un=NULL;
   QVector start (Position());
-  QVector end (target->LocalPosition());
-  if (target->isSubUnit())
-    end = target->Position();
+  QVector end (RealPosition(target));
   float totallength = (start-end).Magnitude();
   float totpercent=1;
   if (totallength>1) {
@@ -1420,7 +1444,9 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
   }
   if (this!=target) {
     warpenergy-=insys_jump_cost*totpercent*jump.energy;
-    SetCurPosition(UniverseUtil::SafeEntrancePoint (end));
+    QVector sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+    //    sep =UniverseUtil::SafeEntrancePoint (sep);
+    SetCurPosition(sep);
     if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
       Unit * other=NULL;
       if (recursive_level>0)
@@ -1438,7 +1464,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
 	    other->AutoPilotTo(this,true,recursive_level-1);
 	    if (leadah) {
 	      if (NULL==_Universe->isPlayerStarship (other)) {
-		other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
+		other->SetPosition(AutoSafeEntrancePoint (LocalPosition(),other->rSize()*1.5,other));
 	      }
 	    }
 	  }

@@ -68,6 +68,11 @@ namespace XMLSupport {
 	sprintf (tmp,"%d",num);
 	return string(tmp);
   }
+  string inline tostring (unsigned int num) {
+	char tmp[256];
+	sprintf (tmp,"%u",num);
+	return string(tmp);
+  }
   string inline tostring (long num) {
 	char tmp[256];
 	sprintf (tmp,"%ld",num);

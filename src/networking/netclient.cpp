@@ -623,7 +623,7 @@ void	NetClient::addClient( const Packet* packet )
 		bool update=true;
 		vector<string> savedships;
 		// Parse the save buffer
-		vector<SavedUnits> savedunits = save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
+		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
 
 		cs.display();
 		// WE DON'T STORE FACTION IN SAVE YET

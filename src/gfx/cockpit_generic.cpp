@@ -122,7 +122,7 @@ void Cockpit::InitStatic () {
   cockpit_time=0;
 }
 
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent), view(CP_FRONT),cockpit_offset(0), viewport_offset(0), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
   fg=NULL;
@@ -330,7 +330,16 @@ void Cockpit::Update () {
 	parentturret.SetUnit(NULL);
 	zoomfactor=1.5;
 	respawnunit[_Universe->CurrentCockpit()]=0;
-	string newsystem = savegame->GetStarSystem()+".system";
+	std::string savegamefile =mission->getVariable ("savegame","");
+	int k;
+	for ( k=0;k<_Universe->numPlayers();++k) {
+	  if (_Universe->AccessCockpit(k)==this)
+	    break;
+	}
+	if (k==_Universe->numPlayers()) k=0;
+	string newsystem;QVector pos; bool setplayerXloc;float credits;
+	savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,credits,unitfilename,k);
+	newsystem= savegame->GetStarSystem()+".system";
 	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
 	_Universe->getActiveStarSystem(0)->SwapOut();
 	this->activeStarSystem=ss;

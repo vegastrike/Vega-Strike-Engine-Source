@@ -19,6 +19,8 @@ libaigeneric =	\
 	navigation.h		\
 	fire.cpp			\
 	fire.h				\
+	fireall.cpp			\
+	fireall.h				\
 	hard_coded_scripts.cpp	\
 	hard_coded_scripts.h	\
 	order_comm.cpp \
