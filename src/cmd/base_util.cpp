@@ -78,7 +78,9 @@ namespace BaseUtil {
 			EnumMap::Pair ("ShipMode", UpgradingInfo::SHIPDEALERMODE), 
 			EnumMap::Pair ("UpgradeMode", UpgradingInfo::UPGRADEMODE), 
 			EnumMap::Pair ("DowngradeMode", UpgradingInfo::DOWNGRADEMODE),
-			EnumMap::Pair ("BriefingMode", UpgradingInfo::BRIEFINGMODE), 
+//			BriefingMode may be enabled at a future time.  For now we use InfoMode.
+//			EnumMap::Pair ("BriefingMode", UpgradingInfo::BRIEFINGMODE), 
+			EnumMap::Pair ("InfoMode", UpgradingInfo::BRIEFINGMODE), 
 			EnumMap::Pair ("MissionMode", UpgradingInfo::MISSIONMODE), 
 			EnumMap::Pair ("SellMode", UpgradingInfo::SELLMODE), 
 			EnumMap::Pair ("BuyMode", UpgradingInfo::BUYMODE),
@@ -106,7 +108,9 @@ namespace BaseUtil {
 			if (modearg<UpgradingInfo::MAXMODE) {
 				newcomp->modes.push_back((UpgradingInfo::BaseMode)(modearg));
 			} else {
-				fprintf(stderr,"WARNING: Computer mode %s not found in python script...\n",curmode);
+				if (curmode!="BriefingMode") { // Deprecated modes
+					fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
+				}
 			}
 		}
 		delete [] curmode;
