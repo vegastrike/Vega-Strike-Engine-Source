@@ -1081,7 +1081,7 @@ vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
   }
 vector <Cargo>&UpgradingInfo::GetCargoList () {
     static vector <Cargo> Nada;//in case the units got k1ll3d.
-    Unit * relevant;
+    Unit * relevant=NULL;
     switch (mode) {
     case BUYMODE:
     case UPGRADEMODE:
