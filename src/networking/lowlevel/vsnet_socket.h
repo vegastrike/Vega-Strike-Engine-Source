@@ -77,5 +77,7 @@ public:
     };
 };
 
-#endif /* VSNET_SOCKET_H */
+std::ostream& operator<<( std::ostream& ostr, const SOCKETALT& s );
+bool          operator==( const SOCKETALT& l, const SOCKETALT& r );
 
+#endif /* VSNET_SOCKET_H */

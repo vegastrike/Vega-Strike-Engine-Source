@@ -7,6 +7,7 @@
 
 #include "vsnet_sockettcp.h"
 #include "vsnet_err.h"
+#include "vsnet_oss.h"
 #include "vsnet_debug.h"
 #include "packet.h"
 
@@ -197,8 +198,12 @@ int VsnetTCPSocket::lower_sendbuf( )
         switch( errno )
         {
 #if defined( _WIN32) && !defined( __CYGWIN__)
+        case WSAECONNRESET :   // other side closed socket
+        case WSAECONNABORTED : // other side closed socket
         case WSAEWOULDBLOCK :
 #else
+        case ECONNRESET :   // other side closed socket
+        case ECONNABORTED : // other side closed socket
         case EWOULDBLOCK :
 #endif
         case EINTR :
@@ -385,19 +390,23 @@ void VsnetTCPSocket::lower_selected( )
 	        assert( _incomplete_header < sizeof(Header) ); // len is coded in sizeof(Header) bytes
 	        int len = sizeof(Header) - _incomplete_header;
             char* b = (char*)&_header;
-	        int ret = ::recv( get_fd(), &b[_incomplete_header], len, 0 );
+	        int ret = VsnetOSS::recv( get_fd(), &b[_incomplete_header], len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
 	        {
-	            if( ret == 0 )
+	            if( ret == 0 || vsnetEConnAborted() || vsnetEConnReset() )
 		        {
-					COUT << "Connection closed" << endl;
-		            _connection_closed = true;
+                    COUT << "Connection closed" << endl;
+                    _connection_closed = true;
                     close_fd();
                     _set.add_pending( _sq_fd );
 		        }
                 else if( vsnetEWouldBlock() == false )
                 {
+                    COUT << "recv returned " << ret
+                         << " errno " << vsnetGetLastError()
+                         << " = " << vsnetLastError()
+                         << endl;
                     perror( "receiving TCP packetlength bytes" );
                 }
                 return;
@@ -413,7 +422,7 @@ void VsnetTCPSocket::lower_selected( )
         if( _incomplete_packet != 0 )
 	    {
 	        int len = _incomplete_packet->missing( );
-	        int ret = ::recv( get_fd(), _incomplete_packet->base(), len, 0 );
+	        int ret = VsnetOSS::recv( get_fd(), _incomplete_packet->base(), len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
 	        {
@@ -523,20 +532,9 @@ VsnetTCPSocket::PacketPtr VsnetTCPSocket::SqQueues::pop( )
             PacketPtr r = it->second.front( );
             it->second.pop( );
             _ct--;
-
-            // {
-                // int idx = it->first;
-                // if( idx >= 0 && idx < 3 ) _debug_array[idx]--;
-                // else                      _debug_array[3]--;
-            // }
-
             return r;
         }
     }
-    // assert( _debug_array[0] == 0 );
-    // assert( _debug_array[1] == 0 );
-    // assert( _debug_array[2] == 0 );
-    // assert( _debug_array[3] == 0 );
     assert( 0 );
     return PacketPtr();
 }

@@ -1,4 +1,7 @@
 #include "vsnet_thread.h"
+#include "vsnet_debug.h"
+
+using namespace std;
 
 #ifdef USE_NO_THREAD
 

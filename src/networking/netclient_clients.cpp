@@ -279,6 +279,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					// Update concerned client with predicted position directly in network client list
 					un->curr_physical_state.position = cs.getPosition();
 					un->curr_physical_state.orientation = cs.getOrientation();
+                    assert( prediction );
 					prediction->InitInterpolation( un, this->deltatime);
 					un->curr_physical_state = prediction->Interpolate( un, this->deltatime);
 					un->Velocity = cs.getVelocity();
@@ -304,6 +305,7 @@ void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, Ne
 					un->BackupState();
 					// Set the new received position in curr_physical_state
 					un->curr_physical_state.position = pos;
+                    assert( prediction );
 					prediction->InitInterpolation( un, this->deltatime);
 					un->curr_physical_state.position = prediction->InterpolatePosition( un, this->deltatime);
 					//predict( sernum);

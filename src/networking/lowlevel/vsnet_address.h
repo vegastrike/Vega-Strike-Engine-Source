@@ -62,8 +62,10 @@ struct AddressIP : public sockaddr_in
     friend bool operator!=( const AddressIP& l, const AddressIP& r );
     friend bool operator<( const AddressIP& l, const AddressIP& r );
 };
+
+std::ostream& operator<<( std::ostream& ostr, const AddressIP& adr );
+
 bool operator==( const AddressIP& l, const AddressIP& r );
 bool operator!=( const AddressIP& l, const AddressIP& r );
 bool operator<( const AddressIP& l, const AddressIP& r );
 #endif /* VSNET_ADDRESS_H */
-

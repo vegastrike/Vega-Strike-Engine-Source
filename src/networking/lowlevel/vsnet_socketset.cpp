@@ -18,6 +18,7 @@ SocketSet::SocketSet( bool blockmainthread )
 #ifndef USE_NO_THREAD
     _thread_end = false;
 #endif
+    FD_ZERO( &_blockmain_set );
 }
 
 SocketSet::~SocketSet( )

@@ -133,9 +133,15 @@ NetClient::NetClient()
 NetClient::~NetClient()
 {
 	if( prediction)
+    {
 		delete prediction;
+        prediction = NULL;
+    }
 	if( NetComm!=NULL)
+    {
 		delete NetComm;
+        NetComm = NULL;
+    }
 }
 
 /*************************************************************/

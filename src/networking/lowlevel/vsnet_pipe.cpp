@@ -66,7 +66,7 @@ int VSPipe::write( const char* buf, int size )
 
 int VSPipe::read( char* buf, int size )
 {
-    return ::recv( _pipe[0], buf, size, 0 );
+    return VsnetOSS::recv( _pipe[0], buf, size, 0 );
 }
 
 #else

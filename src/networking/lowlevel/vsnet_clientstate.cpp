@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "networking/client.h"
 #include "vsnet_clientstate.h"
+#include "vsnet_address.h"
 #include "cmd/unit_generic.h"
 
 using std::string;

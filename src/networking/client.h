@@ -98,4 +98,6 @@ private:
 	void Init();
 };
 
+std::ostream& operator<<( std::ostream& ostr, const Client& c );
+
 #endif

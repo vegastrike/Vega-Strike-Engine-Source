@@ -48,6 +48,12 @@ INLINE int socket(int domain, int type, int protocol)
     return ret;
 }
 
+INLINE int recv(int fd, void* buf, unsigned int len, int flags )
+{
+    int ret = ::recv( fd, buf, len, flags );
+    return ret;
+}
+
 INLINE void memcpy( void* dest, const void* src, int bytesize )
 {
     /* If your memcpy needs a (char* src), make ifdefs and a typecast

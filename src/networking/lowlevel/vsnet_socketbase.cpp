@@ -64,6 +64,7 @@ bool VsnetSocket::sameAddress( const VsnetSocket& r) const
 VsnetSocketBase::VsnetSocketBase( int fd, const char* socktype, SocketSet& sets )
     : _fd( fd )
     , _set( sets )
+    , _noblock( -1 )
 {
     MAKE_VALID
 
@@ -167,7 +168,7 @@ bool VsnetSocketBase::set_block( )
 bool VsnetSocketBase::get_nonblock( ) const
 {
     CHECK_VALID
-    return _noblock;
+    return ( _noblock == 1 );
 }
 
 void VsnetSocketBase::disconnect( const char *s, bool fexit )

@@ -208,6 +208,10 @@ class	NetClient
 		void	sendTextMessage( string message);
 		bool	IsNetcommActive() const;
 		bool	IsNetcommSecured() const;
+
+    private:
+        NetClient( const NetClient& );
+        NetClient& operator=( const NetClient& );
 };
 
 Unit * getNetworkUnit( ObjSerial cserial);

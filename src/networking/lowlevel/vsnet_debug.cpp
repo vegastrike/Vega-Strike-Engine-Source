@@ -8,7 +8,10 @@
 #ifdef VSNET_DEBUG
 
 #include <time.h>
+
+#if !defined(_WIN32)
 #include <sys/time.h>
+#endif
 
 std::ostream& operator<<( std::ostream& ostr, const cout_time& c )
 {

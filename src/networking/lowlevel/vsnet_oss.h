@@ -46,6 +46,11 @@ INLINE int inet_aton(const char *cp, struct in_addr *inp);
  */
 INLINE int socket(int domain, int type, int protocol);
 
+/** make recv calls easier to debug if strangeness is in calling
+ *  class, otherwise no known portability issues.
+ */
+INLINE int recv(int fd, void* buf, unsigned int len, int flags );
+
 INLINE void memcpy( void* dest, const void* src, int bytesize );
 };
 

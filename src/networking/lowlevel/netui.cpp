@@ -98,8 +98,11 @@ SOCKETALT NetUITCP::createSocket( const char * host, unsigned short srv_port, So
         return ret;
     }
     COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
-
     SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip, set );
+    if( ret.set_nonblock() == false )
+    {
+        COUT << "WARNING: TCP client socket may be in blocking mode" << std::endl;
+    }
     COUT << "SOCKETALT n° : " << ret.get_fd() << std::endl;
     return ret;
 }

@@ -81,8 +81,9 @@ protected:
     SocketSet& _set;
 
 private:
-	// bits for boolean operations
-	unsigned   _noblock : 1;
+    // Indicates whether a socket is in blocking or non-blocking mode.
+    // Necessary since WIN32 does not allow testing.
+	int _noblock;
 
 private:
     VsnetSocketBase( );
