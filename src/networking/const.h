@@ -58,9 +58,11 @@
 #define CMD_ADDEDYOU	0xF5
 #define CMD_DISCONNECT	0xF4
 
-typedef unsigned short ObjSerial;
+#define CMD_ACK			0xFF
+
 #define MAXSERIAL 0xFFFF
 #define TONET() htons()
+typedef unsigned short ObjSerial;
 typedef unsigned int InstSerial;
 
 extern double NETWORK_ATOM;

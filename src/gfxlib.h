@@ -37,11 +37,6 @@
     #include <GL/glut.h>
 #endif
 #include <vector>
-#ifndef GFXBOOL
-#define GFXBOOL unsigned char
-#endif
-#define GFXTRUE 1
-#define GFXFALSE 0
 class Matrix;
 
 using std::vector;
@@ -329,14 +324,8 @@ void GFXFogLimits (const float fognear, const float fogfar);
 void GFXFogColor (GFXColor c);
 void GFXFogIndex (const int index);
 //display list
-///Creates a Display list. 0 is returned if no memory is avail for a display list
-int /*GFXDRVAPI*/ GFXCreateList();
-///Ends the display list call.  Returns false if unsuccessful
-GFXBOOL /*GFXDRVAPI*/ GFXEndList();
 ///Draws a given display list
 void /*GFXDRVAPI*/ GFXCallList(int list);
-///Removes a display list from application memory
-void /*GFXDRVAPI*/ GFXDeleteList (int list);
 
 //pick mode
 void /*GFXDRVAPI*/ GFXBeginPick(int x, int y, int xsize, int ysize);

@@ -29,6 +29,21 @@ static list<Unit*> Unitdeletequeue;
 extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>
+void GameUnit<UnitType>::Kill(bool eraseFromSave)
+{
+  if (this->colTrees)
+    this->colTrees->Dec();//might delete
+  this->colTrees=NULL;
+  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
+    AUDStopPlaying(mounts[beamcount]->sound);
+    AUDDeleteSound(mounts[beamcount]->sound);
+    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
+      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+  }
+  Unit::Kill(eraseFromSave);
+}
+
+template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
   int i;
   int nm = nummesh();
@@ -92,140 +107,26 @@ void GameUnit<UnitType>::Split (int level) {
 
 extern Music *muzak;
 
-template <class UnitType>
-void GameUnit<UnitType>::Kill(bool erasefromsave) {
-
-  if (this->colTrees)
-    this->colTrees->Dec();//might delete
-  this->colTrees=NULL;
-  //if (erasefromsave)
-  //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
-  
-  if (docked&(DOCKING_UNITS)) {
-    vector <Unit *> dockedun;
-    unsigned int i;
-    for (i=0;i<image->dockedunits.size();i++) {
-      Unit * un;
-      if (NULL!=(un=image->dockedunits[i]->uc.GetUnit())) 
-	dockedun.push_back (un);
-    }
-    while (!dockedun.empty()) {
-      dockedun.back()->UnDock(this);
-      dockedun.pop_back();
-    }
-  }
-  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount]->sound);
-    AUDDeleteSound(mounts[beamcount]->sound);
-    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
-      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
-  }
-	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
-	{
-		// Free all mounts elements
-		if( (*jj)!=NULL)
-			delete (*jj);
-	}
-    mounts.clear();
-  //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
-  if (!SubUnit) 
-    RemoveFromSystem();
-  killed = true;
-  computer.target.SetUnit (NULL);
-
-  //God I can't believe this next line cost me 1 GIG of memory until I added it
-  computer.threat.SetUnit (NULL);
-  computer.velocity_ref.SetUnit(NULL);
-  if(aistate) {
-    aistate->ClearMessages();
-    aistate->Destroy();
-  }
-  aistate=NULL;
-  UnitCollection::UnitIterator iter = getSubUnits();
-  Unit *un;
-  while ((un=iter.current())) {
-    un->Kill();
-    iter.advance();
-  }
-  if (ucref==0) {
-    Unitdeletequeue.push_back(this);
-  if (flightgroup) {
-    if (flightgroup->leader.GetUnit()==this) {
-      flightgroup->leader.SetUnit(NULL);
-    }
-  }
-
-#ifdef DESTRUCTDEBUG
-    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
-#endif
-  }
-}
-
 extern float rand01 ();
 
 template <class UnitType>
-float GameUnit<UnitType>::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &t ) {
-  float percent;
-  unsigned short *targ=NULL;
-  percent = Unit::DealDamageToHullReturnArmor( pnt, damage, targ);
-  if( percent == -1)
-	  return -1;
-  if (damage<((float)*targ)) {
-    if (!AUDIsPlaying (sound->armor))
+void GameUnit<UnitType>::ArmorDamageSound( const Vector &pnt)
+{
+	if (!AUDIsPlaying (sound->armor))
       AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
     else
       AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
-    *targ -= apply_float_to_short (damage);
-  }else {
-    if (!AUDIsPlaying (sound->hull))
-      AUDPlay (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
-    else
-      AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
-    damage -= ((float)*targ);
-    *targ= 0;
-    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
-      static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
-      hull -=damage;
-    }else {
-      _Universe->AccessCockpit()->godliness-=damage;
-      DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
-    }
-
-  }
-  ////////////////// MOVE IN UNIT::DEALDAMAGETOHULL //////////////////////
-  if (hull <0) {
-      static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
-    if (!SubUnit&&hull>-hulldamtoeject) {
-      static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
-
-      static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
-      if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
-	EjectCargo ((unsigned int)-1);
-      }
-      for (unsigned int i=0;i<numCargo();i++) {
-	if (rand()<(RAND_MAX*cargoejectpercent)) {
-	  EjectCargo(i);
-	}
-      }
-    }
-#ifdef ISUCK
-    Destroy();
-#endif
-    PrimeOrders();
-    maxenergy=energy=0;
-
-    Split (rand()%3+1);
-#ifndef ISUCK
-    Destroy();
-    return -1;
-#endif
-  }
-  /////////////////////////////
-  if (!FINITE (percent))
-    percent = 0;
-  return percent;
 }
+
+template <class UnitType>
+void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
+{
+   if (!AUDIsPlaying (sound->hull))
+     AUDPlay (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
+   else
+     AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
+}
+
 template <class UnitType>
 float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
   float percent = Unit::DealDamageToShield( pnt, damage);

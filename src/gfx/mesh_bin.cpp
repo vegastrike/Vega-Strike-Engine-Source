@@ -1,11 +1,21 @@
 #include "mesh.h"
-#include "aux_logo.h"
-#include "aux_texture.h"
+//#include "aux_logo.h"
+//#include "aux_texture.h"
 #include <stdio.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "file_main.h"
-#include "gldrv/winsys.h"
+//#include "gldrv/winsys.h"
+
+extern Texture * createTexture( const char * filename, int stage);
+extern Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, float* rotations, float offset, Texture * Dec, Vector *Ref);
+#ifdef __cplusplus
+extern "C"
+{
+	void winsys_exit( int code );
+}
+#endif
+
 void Mesh::LoadBinary (const char * filename, int faction) {
   GFXBOOL objtex;
   int TexNameLength;
@@ -202,12 +212,12 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 			TexNameA[TexNameLength+3] = 'p';
 			//Decal =	new Texture(TexName, TexNameA);
 			if (Decal.empty()) Decal.push_back (NULL);
-			Decal[0] =	new Texture(TexName, 0);
+			Decal[0] =	createTexture(TexName, 0);
 		}
 		else 
 		{
 		  if (Decal.empty())Decal.push_back(NULL);
-			Decal [0]= new Texture (TexName, 0);
+			Decal [0]= createTexture (TexName, 0);
 		}
 		if (!Decal[0])
 			objtex = GFXFALSE;
@@ -306,7 +316,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		offset [ii] = readf (fp);
 		
 	}
-	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, FactionUtil::getForceLogo(faction),Ref);
+	forcelogos =  createLogo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, FactionUtil::getForceLogo(faction),Ref);
 	delete [] Ref;
 	delete []PolyNormal;
 	delete []center;
@@ -432,7 +442,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 	}
 	
 
-	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, FactionUtil::getSquadLogo(faction), Ref);
+	squadlogos = createLogo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, FactionUtil::getSquadLogo(faction), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	int vert_offset[2];

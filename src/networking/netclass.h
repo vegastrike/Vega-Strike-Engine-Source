@@ -49,6 +49,7 @@ using std::endl;
 	#define MAXQUEUE 10
 #endif
 
+#define UDP_TIMEOUT 0.4
 
 using std::cout;
 using std::cin;

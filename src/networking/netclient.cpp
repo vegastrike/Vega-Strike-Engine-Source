@@ -103,13 +103,15 @@ int		NetClient::authenticate()
 		memcpy( buffer+NAMELEN, passwd, str_passwd.length());
 		buffer[tmplen] = '\0';
 
-		packet2.create( CMD_LOGIN, 0, buffer, tmplen, 1);
-		packet2.tosend();
+		packet2.create( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, &this->cltadr, this->clt_sock);
+		sendQueue.add( packet2);
+		/*
 		if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 		{
 			perror( "Error send login ");
 			cleanup();
 		}
+		*/
 		delete buffer;
 		cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
 	}
@@ -141,14 +143,17 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 	memcpy( buffer, str_name.c_str(), str_name.length());
 	memcpy( buffer+NAMELEN, str_passwd.c_str(), str_passwd.length());
 
-	packet2.create( CMD_LOGIN, 0, buffer, tmplen, 1);
+	packet2.create( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, &this->cltadr, this->clt_sock);
 	cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
-	packet2.tosend();
+	sendQueue.add( packet2);
+	sendQueue.send( this->NetInt);
+	/*
 	if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send login ");
 		cleanup();
 	}
+	*/
 	delete buffer;
 	// Now the loop
 	int timeout=0, recv=0, ret=0;
@@ -317,6 +322,15 @@ int		NetClient::isTime()
 }
 
 /**************************************************************/
+/**** Send packets to server                               ****/
+/**************************************************************/
+
+void	NetClient::sendMsg()
+{
+	sendQueue.send( this->NetInt);
+}
+
+/**************************************************************/
 /**** Check if server has sent something                   ****/
 /**************************************************************/
 
@@ -349,15 +363,25 @@ int		NetClient::recvMsg( char * netbuffer)
 	unsigned int len2;
 	ObjSerial	packet_serial=0;
 	int len=0;
+	int nbpackets=0;
 
+	// Receive data
+	nbpackets = recvQueue.receive( this->NetInt, this->clt_sock, this->cltadr, this->serial);
+
+	/*
 	if( (len=NetInt->recvbuf( this->clt_sock, (char *)&packet, len2, &this->cltadr))<=0)
+	*/
+	if( nbpackets <= 0)
 	{
 		perror( "Error recv -1 ");
 		NetInt->closeSocket( this->clt_sock);
 	}
 	else
 	{
-		packet.received();
+	while( !recvQueue.empty())
+	{
+		packet = recvQueue.getNextPacket();
+		//packet.received();
 		packet_serial = packet.getSerial();
 #ifdef _UDP_PROTO
 		// Test if we didn't receive an old packet
@@ -428,6 +452,12 @@ int		NetClient::recvMsg( char * netbuffer)
 					cout<<">>> "<<this->serial<<" >>> DISCONNECTED -> Client killed =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
 					exit(1);
 				break;
+				case CMD_ACK :
+					/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
+					/*** We must make sure those 2 conditions are enough ***/
+					cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
+					sendQueue.ack( packet);
+				break;
 				default :
 					cout<<">>> "<<this->serial<<" >>> UNKNOWN COMMAND =( "<<hex<<packet.getCommand()<<" )= --------------------------------------"<<endl;
 					keeprun = 0;
@@ -441,7 +471,8 @@ int		NetClient::recvMsg( char * netbuffer)
 		}
 #endif
 	}
-	return len;
+	}
+	return nbpackets;
 }
 
 /*************************************************************/
@@ -599,13 +630,15 @@ void	NetClient::sendPosition( ClientState cs)
 	cout<<"Sending position == ";
 	cstmp.display();
 	cstmp.tosend();
-	pckt.create( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, 0);
-	pckt.tosend();
+	pckt.create( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, &this->cltadr, this->clt_sock);
+	sendQueue.add( pckt);
+	/*
 	if( NetInt->sendbuf( this->clt_sock, (char *) &pckt, pckt.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send position ");
 		cleanup();
 	}
+	*/
 	//cs.received();
 	//cout<<"Sent STATE : ";
 	//cs.display();
@@ -716,13 +749,15 @@ void	NetClient::inGame()
 
 	ClientState cs( this->serial, this->game_unit->curr_physical_state, this->game_unit->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
-	packet2.create( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), 1);
-	packet2.tosend();
+	packet2.create( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, &this->cltadr, this->clt_sock);
+	sendQueue.add( packet2);
+	/*
 	if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error sending ingame info");
 		exit(1);
 	}
+	*/
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
@@ -734,13 +769,15 @@ void	NetClient::sendAlive()
 {
 #ifdef _UDP_PROTO
 	Packet	p;
-	p.create( CMD_PING, this->serial, NULL, 0, 0);
-	p.tosend();
+	p.create( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, &this->cltadr, this->clt_sock);
+	sendQueue.add( p);
+	/*
 	if( NetInt->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send PING ");
 		//exit(1);
 	}
+	*/
 #endif
 }
 
@@ -803,13 +840,15 @@ void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.create( CMD_LOGOUT, this->serial, NULL, 0, 1);
-	p.tosend();
+	p.create( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, &this->cltadr, this->clt_sock);
+	sendQueue.add( p);
+	/*
 	if( NetInt->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send logout ");
 		//exit(1);
 	}
+	*/
 	NetInt->disconnect( "Closing network", 0);
 }
 

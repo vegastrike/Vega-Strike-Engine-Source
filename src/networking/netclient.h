@@ -109,11 +109,13 @@ class	NetClient
 		int		isEnabled() { return enabled; }
 		void	setNetworkedMode( bool mode) { enabled = mode;}
 		int		checkMsg( char * netbuffer=NULL);
+		void	sendMsg();
+
 		ObjSerial	getSerial() { return serial; }
 		void	inGame();
 		int		isTime();
 		void	logout();
-		bool	isInGame() { return (serial==0);}
+		bool	isInGame() { return (serial!=0);}
 		unsigned int	getLag() { return deltatime;}
 
 		void			predict( ObjSerial clientid);

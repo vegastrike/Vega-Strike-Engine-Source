@@ -4,6 +4,9 @@
 #include "packet.h"
 #include "lin_time.h"
 
+PacketQueue sendQueue;
+PacketQueue recvQueue;
+
 #ifdef _UDP_PROTO
 	char	nbpackets = 0;
 	int		char_size = sizeof( char)*8;
@@ -124,9 +127,43 @@ void	Packet::displayCmd()
 	}
 }
 
-void	Packet::create( unsigned char cmd, ObjSerial nserial, char * buf, unsigned int length, int prio)
+void	Packet::create( unsigned char cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, AddressIP * dst, SOCKETALT sock)
 {
-	this->priority = prio;
+	this->flags = prio;
+	// Get a timestamp for packet (used for interpolation on client side)
+	double curtime = getNewTime();
+	microtime = (unsigned int) (floor(curtime*1000));
+	this->timestamp = microtime;
+	this->command = cmd;
+
+	// buf is an allocated char * containing message
+	if( length > MAXBUFFER)
+	{
+		cout<<"Error : initializing network packet with data length > MAX (length="<<length<<")"<<endl;
+		cout<<"Command was : ";
+		this->displayCmd();
+		exit(1);
+	}
+	this->serial = nserial;
+	//cout<<"Command : "<<cmd<<" - serial : "<<nserial<<" - command : "<<this->command<<" - serial : "<<this->serial<<endl;
+	this->data_length = length;
+	memset( this->databuffer, 0, MAXBUFFER);
+	if( length)
+		memcpy( this->databuffer, buf, length);
+	// Here we memcpy because we don't know the size of these types and if they are pointers or not (they may be)
+	memcpy( &this->destaddr, dst, sizeof( AddressIP));
+	memcpy( &this->socket, &sock, sizeof( SOCKETALT));
+}
+
+void	Packet::setNetwork( AddressIP * dst, SOCKETALT sock)
+{
+	memcpy( &this->destaddr, dst, sizeof( AddressIP));
+	memcpy( &this->socket, &sock, sizeof( SOCKETALT));
+}
+
+void	Packet::create( unsigned char cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio)
+{
+	this->flags = prio;
 	// Get a timestamp for packet (used for interpolation on client side)
 	//UpdateTime();
 	double curtime = getNewTime();
@@ -174,7 +211,7 @@ void	Packet::create( unsigned char cmd, ObjSerial nserial, char * buf, unsigned 
 void	Packet::display()
 {
 	cout<<"*** Packet display -- Command : "<<this->command;
-	cout<<" - Serial : "<<this->serial<<" - Priority : "<<this->priority<<endl;
+	cout<<" - Serial : "<<this->serial<<" - Flags : "<<this->flags<<endl;
 	cout<<"***                   Buffer : ";
 	for( int i=0; i<data_length-1; i++)
 		cout<<databuffer[i];
@@ -206,4 +243,118 @@ void	Packet::tosend()
 	this->timestamp = htonl( this->timestamp);
 	//this->delay = htonl( this->delay);
 	this->data_length = htons( this->data_length);
+}
+
+
+/*** Receive all the packets in the network buffer and adds them to the list ***/
+/*** Also sends back an ack in UDP mode ***/
+int		PacketQueue::receive( NetUI * net, SOCKETALT & sock, AddressIP & ipaddr, ObjSerial ser)
+{
+	// Read the networkfor packets
+	Packet p;
+	// Can receive 8 packets at the same time for now ? Seems reasonable
+	int nb=0;
+	unsigned int len = 0;
+	char buffer[MAXBUFFER*8];
+	unsigned int recvsize=0, totalsize=0;
+
+	if( (len=net->recvbuf( sock, buffer, len, &ipaddr))<=0)
+	{
+		//perror( "Error recv -1 ");
+		nb = -1;
+		//net->closeSocket( this->clt_sock);
+	}
+	else
+	{
+		// Until we haven't read all the buffer
+		while( totalsize<=len)
+		{
+			if( len<MAXBUFFER)
+				recvsize = len;
+			else
+				recvsize = header_length+MAXBUFFER;
+			totalsize += recvsize;
+			// We receive packets
+			memcpy( &p, buffer, recvsize);
+			p.received();
+			packets.push_back( p);
+#ifdef _UDP_PROTO
+			// Prepare an ACK for the packet
+			p.create( CMD_ACK, ser, NULL, 0, SENDRELIABLE, &p.destaddr, p.socket);
+			sendQueue.add( p);
+#endif
+			nb++;
+		}
+	}
+	return nb;
+}
+
+/*** Returns the front element from the list and remove it ***/
+Packet PacketQueue::getNextPacket()
+{
+	Packet ret = packets.front();
+	packets.pop_front();
+	return ret;
+}
+
+/*** Mark a packet as ACKED for removal from the list ***/
+void PacketQueue::ack( Packet p)
+{
+	for( PaI i=packets.begin(); i!=packets.end(); i++)
+	{
+		if( i->timestamp==p.timestamp && i->serial==p.serial)
+			i->flags = ACKED;
+	}
+}
+
+/*** Sends or resends the packets and removes those that are ACKED or never were ***/
+void PacketQueue::send( NetUI * net)
+{
+	// In UDP, we should wait for a timeout before sending the packet again.
+	bool timeout_expired = false;
+	double now = getNewTime();
+	int ret;
+	for( PaI i=packets.begin(); i!=packets.end(); i++)
+	{
+		// Here compute if the ack timeout has been reached
+		if( i->nbsent > 0 && ((now - i->timestamp)*(i->nbsent) > (UDP_TIMEOUT*(i->nbsent)) ) )
+			timeout_expired = true;
+		// See if the packet has to be sent
+		if( i->flags == SENDANDFORGET || (i->flags == SENDRELIABLE && i->nbsent < NUM_RESEND && timeout_expired))
+		{
+			if( (ret = net->sendbuf( i->socket, (char *)&(*i), i->getSendLength(), &i->destaddr)) == -1)
+			{
+				perror( "Error sending packet ");
+				i->displayCmd();
+			}
+			i->oldtimestamp = now;
+			i->nbsent++;
+		}
+		timeout_expired = false;
+	}
+	for( PaI j=packets.begin(); j!=packets.end(); j++)
+	{
+		// in TCP every packet has to be deleted since it is reliable
+		// In UDP mode we must not delete the packet since it may not have been received
+		//
+		// NOTE - NOTE - NOTE
+		// For now, UDP retransmission mecanism is incomplete and thus is disabled
+
+#ifdef _UDP_PROTO
+		// Or removed because ACKED or sent too many times or a SENDANDFORGET packet has been sent
+		//if( j->flags==ACKED || j->nbsent>=NUM_RESEND || (j->flags==SENDANDFORGET && j->nbsent>0))
+		//{
+#endif
+			packets.remove( (*j));
+#ifdef _UDP_PROTO
+		//}
+#endif
+	}
+}
+
+/*** Adds a packet to the list (in order to be sent later) ***/
+void PacketQueue::add( Packet p)
+{
+	p.tosend();
+	packets.push_back( p);
 }

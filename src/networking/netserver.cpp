@@ -174,16 +174,18 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		//WriteXMLUnit( tmp.c_str(), xml, xml_size);
 		// Then load it in the Unit struct
 		//LoadXMLUnit( clt->game_unit, tmp.c_str(), NULL);
-		packet2.create( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getLength(), 1);
+		packet2.create( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getLength(), SENDRELIABLE, &clt->cltadr, clt->sock);
 		//cout<<" 1st packet -------------"<<endl;
 		//packet2.displayHex();
 		cout<<"Packet length = "<<packet2.getLength()<<endl;
-		packet2.tosend();
+		sendQueue.add( packet2);
+		/*
 		if( Network->sendbuf( clt->sock, (char *) &packet2, packet2.getSendLength(), &clt->cltadr) == -1)
 		{
 			cout<<"Error sending login accpet to client"<<endl;
 			discList.push_back( clt);
 		}
+		*/
 		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
 }
@@ -203,12 +205,14 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 		sockclt = clt->sock;
 	//cout<<"Creating packet... ";
 	cout<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
-	packet2.create( LOGIN_ERROR, 0, NULL, 0, 1);
+	packet2.create( LOGIN_ERROR, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt);
 	//packet2.displayHex();
 	//cout<<" done."<<endl;
-	packet2.tosend();
+	sendQueue.add( packet2);
+	/*
 	if( (retsend = Network->sendbuf( sockclt, (char *) &packet2, packet2.getSendLength(), &ipadr))<0)
 		discList.push_back( clt);
+	*/
 	//cout<<"\tLOGIN REQUEST FAILED for <"<<name<<">:<"<<passwd<<">"<<endl;
 	cout<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
 }
@@ -228,12 +232,14 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 		sockclt = clt->sock;
 	//cout<<"Creating packet... ";
 	cout<<">>> SEND LOGIN ALREADY =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
-	packet2.create( LOGIN_ALREADY, 0, NULL, 0, 1);
+	packet2.create( LOGIN_ALREADY, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt);
+	sendQueue.add( packet2);
 	//packet2.displayHex();
 	//cout<<" done."<<endl;
-	packet2.tosend();
+	/*
 	if( (retsend = Network->sendbuf( sockclt, (char *) &packet2, packet2.getSendLength(), &ipadr))<0)
 		discList.push_back( clt);
+	*/
 	cout<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 	//cout<<"\tLOGIN CLIENT ALREADY LOGGED IN for <"<<name<<">:<"<<passwd<<">"<<endl;
 }
@@ -658,7 +664,8 @@ void	NetServer::recvMsg( Client * clt)
 	SOCKETALT sockclt=0;
 	ObjSerial nserial;
 	AddressIP	ipadr;
-	unsigned int ts = 0;
+	int nbpackets = 0;
+	double ts = 0;
 	//unsigned int tstmp = 0;
 
 	// This should only happen in UDP mode
@@ -667,7 +674,11 @@ void	NetServer::recvMsg( Client * clt)
 		sockclt = clt->sock;
 	}
 
+	nbpackets = recvQueue.receive( this->Network, sockclt, ipadr, 0);
+	/*
 	if( (len=Network->recvbuf( sockclt, (char *)&packet, len2, &ipadr))<=0)
+	*/
+	if( nbpackets <=0)
 	{
 		if( clt!=NULL) // Add the client to the disconnect list
 			discList.push_back( clt);
@@ -676,7 +687,10 @@ void	NetServer::recvMsg( Client * clt)
 	}
 	else
 	{
-		packet.received();
+	while( !recvQueue.empty())
+	{
+		packet = recvQueue.getNextPacket();
+		//packet.received();
 		//cout<<"Received packet length : "<<packet.getLength()<<endl;
 		ts = packet.getTimestamp();
 #ifdef _UDP_PROTO
@@ -765,6 +779,7 @@ void	NetServer::recvMsg( Client * clt)
 #endif
 		packet.reset();
 	}
+	}
 }
 
 /**************************************************************/
@@ -786,18 +801,24 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 					this->authenticate( clt, ipadr);
 				else
 				{
+					AddressIP * iptmp;
+					SOCKETALT sock;
 				#ifdef _TCP_PROTO
 					this->waitList.push( clt);
+					iptmp = &clt->cltadr;
+					sock = clt->sock,
 				#else
 					this->waitList.push( ipadr);
+					iptmp = &ipadr;
+					sock = (SOCKETALT) 0;
 					cout<<"Waiting authorization for client IP : ";
 					Network->getIPof( ipadr);
 				#endif
 					// Redirect the login request packet to account server
 					cout<<"Redirecting login request to account server on socket "<<acct_sock<<endl;
 					cout<<"Packet to copy length : "<<packet.getLength()<<endl;
-					p2.create( packet.getCommand(), 0, (char *)packet.getData(), packet.getLength(), 0);
-					p2.tosend();
+					p2.create( packet.getCommand(), 0, (char *)packet.getData(), packet.getLength(), SENDANDFORGET, iptmp, sock);
+					//sendQueue.add( p2);
 					if(NetAcct->sendbuf( acct_sock, (char *)&p2, p2.getSendLength(), NULL)<0)
 					{
 						perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
@@ -844,6 +865,12 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 				logoutList.push_back( clt);
 				cout<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
 			break;
+			case CMD_ACK :
+				/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
+				/*** We must make sure those 2 conditions are enough ***/
+				cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
+				sendQueue.ack( packet);
+			break;
 			default:
 				cout<<"Unknown command "<<cmd<<" ! ";
 				cout<<"from client "<<clt->serial<<endl;
@@ -879,7 +906,7 @@ void	NetServer::addClient( Client * clt)
 	// Should also send data about the ship !!! filename ? IDs ?
 	// maybe those thing should be managed in account.xml
 	// For now assuming a default ship on client side
-	packet2.create( CMD_ENTERCLIENT, clt->serial, (char *) &tmpcs, sizeof( ClientState), 1);
+	packet2.create( CMD_ENTERCLIENT, clt->serial, (char *) &tmpcs, sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock);
 	//cout<<" 2nd packet -------------"<<endl;
 	//packet2.displayHex();
 	packet2.tosend();
@@ -894,13 +921,15 @@ void	NetServer::addClient( Client * clt)
 	// So the packet buffer should contain info about other ships (desciptions) present in the zone
 	cltsbufsize = zonemgr->getZoneClients( clt, cltsbuf);
 	cout<<"Serial : "<<clt->serial<<endl;
-	packet2.create( CMD_ADDEDYOU, clt->serial, cltsbuf, cltsbufsize, 1);
-	packet2.tosend();
+	packet2.create( CMD_ADDEDYOU, clt->serial, cltsbuf, cltsbufsize, SENDRELIABLE, &clt->cltadr, clt->sock);
+	sendQueue.add( packet2);
+	/*
 	if( Network->sendbuf( clt->sock, (char *) &packet2, packet2.getSendLength(), &clt->cltadr) == -1)
 	{
 		cout<<"Error sending ADDED_YOU to client n°"<<clt->serial<<endl;
 		cleanup();
 	}
+	*/
 	cout<<"ADDED client n "<<clt->serial<<" in ZONE "<<clt->zone<<endl;
 	delete cltsbuf;
 	cout<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
@@ -963,7 +992,7 @@ void	NetServer::disconnect( Client * clt)
 		memcpy( buf, clt->name, nbc);
 		memcpy( buf+NAMELEN, clt->passwd, NAMELEN);
 		buf[nbc] = 0;
-		p2.create( CMD_LOGOUT, clt->serial, buf, NAMELEN+NAMELEN , 1);
+		p2.create( CMD_LOGOUT, clt->serial, buf, NAMELEN+NAMELEN , SENDANDFORGET);
 		p2.tosend();
 		if( NetAcct->sendbuf( acct_sock, (char *) &p2, p2.getSendLength(), &clt->cltadr)<0)
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
@@ -973,10 +1002,12 @@ void	NetServer::disconnect( Client * clt)
 #ifdef _TCP_PROTO
 	Network->closeSocket( clt->sock);
 #else
-	p1.create( CMD_DISCONNECT, clt->serial, NULL, 0, 1);
-	p1.tosend();
+	p1.create( CMD_DISCONNECT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock);
+	sendQueue.add( p1);
+/*
 	if( Network->sendbuf( clt->sock, (char *) &p1, p1.getSendLength(), &clt->cltadr)<0)
 		cout<<"ERROR sending DISCONNECT"<<endl;
+*/
 #endif
 	cout<<"Client "<<clt->serial<<" disconnected"<<endl;
 	if( clt->ingame)
@@ -984,7 +1015,7 @@ void	NetServer::disconnect( Client * clt)
 	cout<<"There was "<<Clients.size()<<" clients - ";
 	Clients.remove( clt);
 	// Broadcast client EXIT zone
-	p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, 1);
+	p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock);
 	zonemgr->broadcast( clt, &p, this->Network);
 	if( clt != NULL)
 	{
@@ -1007,7 +1038,7 @@ void	NetServer::logout( Client * clt)
 		char * buf = new char[NAMELEN*2+1];
 		int nbc = strlen( clt->name);
 		memcpy( buf, clt->name, nbc+1);
-		p2.create( CMD_LOGOUT, clt->serial, buf, nbc , 1);
+		p2.create( CMD_LOGOUT, clt->serial, buf, nbc , SENDANDFORGET);
 		p2.tosend();
 		if( NetAcct->sendbuf( acct_sock, (char *) &p2, p2.getSendLength(), &clt->cltadr)<0)
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
@@ -1025,7 +1056,7 @@ void	NetServer::logout( Client * clt)
 	// Broadcast client EXIT zone
 	if( clt->ingame)
 	{
-		p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, 1);
+		p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->serial);
 		zonemgr->broadcast( clt, &p, this->Network);
 	}
 	if( clt != NULL)

@@ -558,10 +558,3 @@ float GameUnit<UnitType>::querySphereNoRecurse (const QVector & start, const QVe
   }
   return 0;
 }
-
-template <class UnitType>
-void GameUnit<UnitType>::Destroy() {
-  if (!killed)
-    if (!Explode(false,SIMULATION_ATOM))
-      Kill();
-}

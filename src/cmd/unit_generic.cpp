@@ -1661,7 +1661,14 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	}
 }
 
+extern void AUDStopPlaying( int num);
+extern void AUDDeleteSound (int sound, bool music=false);
+
 void Unit::Kill(bool erasefromsave) {
+
+  //if (erasefromsave)
+  //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
+  
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
     unsigned int i;
@@ -1855,6 +1862,54 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
   }
   percent = damage/(*targ+hull);
 
+  if( percent == -1)
+	  return -1;
+  if (damage<((float)*targ)) {
+	ArmorDamageSound( pnt);
+    *targ -= apply_float_to_short (damage);
+  }else {
+	HullDamageSound( pnt);
+    damage -= ((float)*targ);
+    *targ= 0;
+    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
+      static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
+      hull -=damage;
+    }else {
+      _Universe->AccessCockpit()->godliness-=damage;
+      DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
+    }
+  }
+  if (hull <0) {
+      static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
+    if (!SubUnit&&hull>-hulldamtoeject) {
+      static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
+
+      static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
+      if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
+	EjectCargo ((unsigned int)-1);
+      }
+      for (unsigned int i=0;i<numCargo();i++) {
+	if (rand()<(RAND_MAX*cargoejectpercent)) {
+	  EjectCargo(i);
+	}
+      }
+    }
+#ifdef ISUCK
+    Destroy();
+#endif
+    PrimeOrders();
+    maxenergy=energy=0;
+
+    Split (rand()%3+1);
+#ifndef ISUCK
+    Destroy();
+    return -1;
+#endif
+  }
+  /////////////////////////////
+  if (!FINITE (percent))
+    percent = 0;
   return percent;
 }
 
@@ -2181,6 +2236,12 @@ int Unit::LockMissile() const{
 /***********************************************************************************/
 /**** UNIT_COLLIDE STUFF                                                            */
 /***********************************************************************************/
+
+void Unit::Destroy() {
+  if (!killed)
+    if (!Explode(false,SIMULATION_ATOM))
+      Kill();
+}
 
 void Unit::SetCollisionParent (Unit * name) {
   assert (0); //deprecated... many less collisions with subunits out of the table

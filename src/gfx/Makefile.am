@@ -10,11 +10,21 @@ libgfxgeneric =  \
 	vec.cpp	\
 	quaternion.cpp	\
 	quaternion.h	\
+	bounding_box.cpp	\
+	bounding_box.h	\
+	mesh.cpp	\
+	mesh.h		\
+	mesh_bin.cpp	\
+	mesh_fx.cpp	\
+	mesh_poly.cpp	\
+	mesh_xml.cpp	\
 	vertex.h		
 
-libgfxserver_a_SOURCES =	$(libgfxgeneric)
+libgfxserver_a_SOURCES =	$(libgfxgeneric)	\
+	mesh_server.cpp
 
 libgfx_a_SOURCES =	$(libgfxgeneric)\
+	mesh_gfx.cpp	\
 	ani_texture.h	\
 	ani_texture.cpp	\
 	animation.cpp	\
@@ -29,8 +39,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	png_texture.h	\
 	background.cpp	\
 	background.h	\
-	bounding_box.cpp	\
-	bounding_box.h	\
 	car_assist.h 	\
 	vsbox.cpp		\
 	vsbox.h		\
@@ -57,12 +65,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	lerp.h		\
 	loc_select.cpp	\
 	loc_select.h	\
-	mesh.cpp	\
-	mesh.h		\
-	mesh_bin.cpp	\
-	mesh_fx.cpp	\
-	mesh_poly.cpp	\
-	mesh_xml.cpp	\
 	nonlinear_transform.h \
 	planetary_transform.h	\
 	pipelined_texture.cpp	\

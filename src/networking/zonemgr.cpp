@@ -72,7 +72,9 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt, NetUI *net)
 			cout<<"Sending update to client n° "<<(*i)->serial;
 			//cout<<" @ "<<net->getIPof( (*i)->cltadr);
 			cout<<endl;
-			net->sendbuf( (*i)->sock, (char *) pckt, pckt->getSendLength(), &(*i)->cltadr);
+			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
+			sendQueue.add( (*pckt));
+			//net->sendbuf( (*i)->sock, (char *) pckt, pckt->getSendLength(), &(*i)->cltadr);
 		}
 	}
 }
@@ -190,9 +192,10 @@ void	ZoneMgr::broadcastSnapshots( NetUI * net)
 				if( offset > 0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.create( CMD_SNAPSHOT, nbclients, buffer, offset, 0);
-					pckt.tosend();
-					net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getSendLength(), &(*k)->cltadr);
+					pckt.create( CMD_SNAPSHOT, nbclients, buffer, offset, SENDANDFORGET, &((*k)->cltadr), (*k)->sock);
+					sendQueue.add( pckt);
+					//pckt.tosend();
+					//net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getSendLength(), &(*k)->cltadr);
 					//cout<<"SENT PACKET SIZE = "<<pckt.getLength()<<endl;
 				}
 				//delete buffer;

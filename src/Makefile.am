@@ -35,6 +35,7 @@ cmd/ai/libaiserver.a \
 cmd/script/c_alike/libc_alike.a \
 python/libpythonserver.a \
 gfx/libgfxserver.a \
+gldrv/libgldrvserver.a \
 boost/libboost_python.a
 
 accountserver_LDADD =  \
@@ -47,6 +48,7 @@ libroot =		\
 	debug_vs.cpp			\
 	gfxlib.h				\
 	gfxlib_struct.h			\
+	gfxlib_struct.cpp		\
 	linecollide.h			\
 	in_joystick.cpp			\
 	in_joystick.h			\
@@ -122,6 +124,7 @@ librootgeneric =			\
 	vs_path.h
 
 librootserver =					\
+	gfxlib_struct_server.cpp	\
 	libserver.cpp				\
 	universe_util_server.cpp	\
 	faction_util_server.cpp

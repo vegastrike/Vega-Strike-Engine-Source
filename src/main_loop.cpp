@@ -779,9 +779,13 @@ void main_loop() {
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
 
-  if( Network!=NULL) {
-	for( int jj=0; jj<_Universe->numPlayers(); jj++)
-	  Network[jj].checkMsg();
+  if( Network!=NULL)
+  {
+	  for( int jj=0; jj<_Universe->numPlayers(); jj++)
+	  {
+			Network[jj].checkMsg();
+			Network[jj].sendMsg();
+	  }
   }
 }
 

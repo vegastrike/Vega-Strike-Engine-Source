@@ -296,7 +296,7 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 	if( acct->isNew())
 	{
 		// Send a command to make the client create a new character/ship
-		packet2.create( LOGIN_NEW, serial, packet.getData(), packet.getLength(), 1);
+		packet2.create( LOGIN_NEW, serial, packet.getData(), packet.getLength(), SENDANDFORGET);
 		packet2.tosend();
 		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
 		{
@@ -384,7 +384,7 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 		// ??? memcpy( buf, packet.getData(), packet.getLength());
 
 		// For now saves are really limited to maxsave bytes
-		packet2.create( LOGIN_ACCEPT, serial, buf, total_size, 1);
+		packet2.create( LOGIN_ACCEPT, serial, buf, total_size, SENDANDFORGET);
 		cout<<"Login packet size = "<<packet2.getLength()<<endl;
 		packet2.tosend();
 		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
@@ -399,7 +399,7 @@ void	AccountServer::sendUnauthorized( TCPSOCKET sock, Account * acct)
 {
 	Packet	packet2;
 
-	packet2.create( LOGIN_ERROR, 0, packet.getData(), packet.getLength(), 1);
+	packet2.create( LOGIN_ERROR, 0, packet.getData(), packet.getLength(), SENDANDFORGET);
 	packet2.tosend();
 	//packet2.displayHex();
 	//cout<<" done."<<endl;
@@ -411,7 +411,7 @@ void	AccountServer::sendAlreadyConnected( TCPSOCKET sock, Account * acct)
 {
 	Packet	packet2;
 
-	packet2.create( LOGIN_ALREADY, 0, packet.getData(), packet.getLength(), 1);
+	packet2.create( LOGIN_ALREADY, 0, packet.getData(), packet.getLength(), SENDANDFORGET);
 	packet2.tosend();
 	//packet2.displayHex();
 	//cout<<" done."<<endl;

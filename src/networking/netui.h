@@ -627,7 +627,7 @@ inline int		NETCLASS::recvbuf( SOCKETALT bsock, char *buffer, unsigned int &len,
 inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, AddressIP * to)
 {
 	int numsent;
-	assert( len<=MAXBUFFER);
+	//assert( len<=MAXBUFFER);
 
 	#ifdef HAVE_SDLnet
 		#ifdef _TCP_PROTO

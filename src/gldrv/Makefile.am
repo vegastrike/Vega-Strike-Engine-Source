@@ -1,8 +1,12 @@
-noinst_LIBRARIES = libgldrv.a
+noinst_LIBRARIES = libgldrv.a libgldrvserver.a
 
 
 INCLUDES = -I ../ 
 
+libgldrv_generic = gl_vertex_list.cpp
+
+libgldrvserver_a_SOURCES =				\
+    $(libgldrv_generic)
 
 libgldrv_a_SOURCES =				\
 	gl_clip.cpp				\
@@ -23,7 +27,7 @@ libgldrv_a_SOURCES =				\
 	gl_quad_list.cpp			\
 	gl_state.cpp				\
 	gl_texture.cpp				\
-	gl_vertex_list.cpp			\
+	$(libgldrv_generic)		\
 	winsys.cpp				\
 	winsys.h
 

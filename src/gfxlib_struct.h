@@ -22,6 +22,28 @@
 #define _GFXLIB_STRUCT
 #include "gfx/vec.h"
 
+#ifndef GFXBOOL
+#define GFXBOOL unsigned char
+#endif
+#define GFXTRUE 1
+#define GFXFALSE 0
+
+const int INDEX_BYTE= sizeof(unsigned char);
+const int INDEX_SHORT= sizeof(unsigned short);
+const int INDEX_INT= sizeof(unsigned int);
+const int CHANGE_MUTABLE= (sizeof(unsigned int)*2);
+const int  CHANGE_CHANGE= (sizeof(unsigned int)*4);
+const int HAS_COLOR= (sizeof(unsigned int)*8);
+#define USE_DISPLAY_LISTS
+const int HAS_INDEX = sizeof(unsigned char) | sizeof (unsigned short) | sizeof (unsigned int);
+
+///Creates a Display list. 0 is returned if no memory is avail for a display list
+extern int /*GFXDRVAPI*/ GFXCreateList();
+///Ends the display list call.  Returns false if unsuccessful
+extern GFXBOOL /*GFXDRVAPI*/ GFXEndList();
+///Removes a display list from application memory
+extern void /*GFXDRVAPI*/ GFXDeleteList (int list);
+
 /// Vertex, Normal, Texture, and (deprecated) Environment Mapping T2F_N3F_V3F format
 struct GFXVertex 
 {
@@ -231,13 +253,14 @@ class /*GFXDRVAPI*/ GFXQuadList {
   ///Draws all quads contained in quad list
   void Draw();
   ///Adds quad to quad list, an integer indicating number that should be used to henceforth Mod it or delete it
-  int AddQuad (const GFXVertex *vertices, const GFXColorVertex * colors=NULL);
+  int AddQuad (const GFXVertex *vertices, const GFXColorVertex * colors=0);
   ///Removes quad from Quad list
   void DelQuad (int which);
   ///modifies quad in quad list to contain new vertices and color information
   void ModQuad (int which, const GFXVertex *vertices, float alpha=-1);
   void ModQuad (int which, const GFXColorVertex *vertices);
 };
+
 /**
  * A vertex list is a list of any conglomeration of POLY TYPES.
  * It is held for storage in an array of GFXVertex but attempts
@@ -259,7 +282,7 @@ class /*GFXDRVAPI*/ GFXVertexList {
     unsigned int *i;//stride 4
   } index;
   ///Array of modes that vertices will be drawn with
-  GLenum *mode;
+  unsigned int *mode;
   ///Display list number if list is indeed active. 0 otherwise
   int display_list;
   ///number of different mode, drawn lists
@@ -289,21 +312,21 @@ class /*GFXDRVAPI*/ GFXVertexList {
   void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,unsigned int * indices);
   ///Propagates modifications to the display list
   void RefreshDisplayList();
-  void Draw (GLenum *poly, const INDEX index, const int numLists, const int *offsets);
+  void Draw (unsigned int *poly, const INDEX index, const int numLists, const int *offsets);
   void RenormalizeNormals();
 
 public:
   ///creates a vertex list with 1 polytype and a given number of vertices
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=NULL){Init (&poly, numVertices, vertices,NULL, 1,&numindices, Mutable,index);}
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=0){Init (&poly, numVertices, vertices,0, 1,&numindices, Mutable,index);}
   ///Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see above)
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false,  unsigned int * index=NULL) {
-    Init(poly,numVertices,vertices,NULL,numlists,offsets,Mutable, index);
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false,  unsigned int * index=0) {
+    Init(poly,numVertices,vertices,0,numlists,offsets,Mutable, index);
   }
   ///Creates a vertex list with 1 poly type and color information to boot
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXColorVertex *colors, int numindices, bool Mutable=false, unsigned int * index=NULL){Init (&poly, numVertices, NULL, colors, 1, &numindices,Mutable,index);}
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXColorVertex *colors, int numindices, bool Mutable=false, unsigned int * index=0){Init (&poly, numVertices, 0, colors, 1, &numindices,Mutable,index);}
   ///Creates a vertex list with an arbitrary number of poly types and color
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices,  const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable=false, unsigned int *index=NULL) {
-    Init(poly,numVertices,NULL,colors, numlists,offsets,Mutable, index);
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices,  const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable=false, unsigned int *index=0) {
+    Init(poly,numVertices,0,colors, numlists,offsets,Mutable, index);
   }
   ~GFXVertexList();
   const GFXVertex * GetVertex (int index);
@@ -324,7 +347,7 @@ public:
   void Draw(enum POLYTYPE poly, int numV, unsigned short *index);
   void Draw(enum POLYTYPE poly, int numV, unsigned int *index);
   ///Loads draw state and prepares to draw only once
-  void DrawOnce (){LoadDrawState();BeginDrawState(GFXFALSE);Draw();EndDrawState(GFXFALSE);}
+  void DrawOnce ();
   void EndDrawState(GFXBOOL lock=GFXTRUE);
   ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
   void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
