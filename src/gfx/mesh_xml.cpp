@@ -426,7 +426,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
               string ind(iter->name.substr (strsize));
               if (!ind.empty())
                   texindex=XMLSupport::parse_int(ind);
-			  bool per_pixel_lighting = XMLSupport::parse_bool (vs_config->getVariable ("graphics","per_pixel_lighting","true"));
+			  static bool per_pixel_lighting = XMLSupport::parse_bool (vs_config->getVariable ("graphics","per_pixel_lighting","true"));
 			  if (texindex==0||per_pixel_lighting) {
               while (xml->decals.size()<=texindex)
                   xml->decals.push_back(XML::ZeTexture());
@@ -1472,6 +1472,9 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
     polytypes[o_index]= GFXLINESTRIP;
     poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
+  }
+  if (mn.i==FLT_MAX&&mn.j==FLT_MAX&&mn.k==FLT_MAX) {
+	  mx.i=mx.j=mx.k=mn.i=mn.j=mn.k=0;
   }
   mn.i *=xml->scale.i;
   mn.j *=xml->scale.j;

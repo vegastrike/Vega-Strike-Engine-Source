@@ -1857,9 +1857,10 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   }
   return ok;
 }
-
+extern void ActivateAnimation(Unit * jp);
 bool Unit::jumpReactToCollision (Unit * smalle) {
   if (!GetDestinations().empty()) {//only allow big with small
+	  //ActivateAnimation(this);
     if (((smalle->GetJumpStatus().drive>=0&&smalle->warpenergy>=smalle->GetJumpStatus().energy)||image->forcejump)){
 		smalle->warpenergy-=smalle->GetJumpStatus().energy;
 		int dest = smalle->GetJumpStatus().drive;
@@ -1880,6 +1881,7 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
     return true;
   }
   if (!smalle->GetDestinations().empty()) {
+	  //  ActivateAnimation(smalle);	  
     if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;

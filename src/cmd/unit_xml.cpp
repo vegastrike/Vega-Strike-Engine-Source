@@ -987,7 +987,11 @@ using namespace UnitXML;
 	  break;
   case DELAY:
 	//serialization covered in LoadXML
-	jump.delay = parse_int ((*iter).value);
+    {
+		static int jumpdelaymult =XMLSupport::parse_int(vs_config->getVariable("physics","jump_delay_multiplier","5"));
+		jump.delay = parse_int ((*iter).value)*jumpdelaymult;
+    }
+																			 
 	break;
       case FUEL:
 	//serialization covered in LoadXML

@@ -687,8 +687,11 @@ bool PendingJumpsEmpty() {
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
-      pendingjump[kk]->delay-=GetElapsedTime();
-      continue;
+		double time = GetElapsedTime();
+		if (time>1)
+			time=1;
+		pendingjump[kk]->delay-=time;
+		continue;
     } else {
 #ifdef JUMP_DEBUG
   fprintf (stderr,"Volitalizing pending jump animation.\n");
@@ -723,6 +726,13 @@ void StarSystem::ProcessPendingJumps() {
 		Network[_Universe->whichPlayerStarship( un)].inGame();
   }
 
+}
+void ActivateAnimation(Unit * jumppoint) {
+	jumppoint->graphicOptions.Animating=1;
+	Unit * un;
+	for (un_iter i = jumppoint->getSubUnits();NULL!=(un = *i);++i){
+		ActivateAnimation(un);
+	}
 }
 
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
@@ -789,5 +799,8 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
 #endif
     return false;
   }
+  if (jumppoint) 
+	  ActivateAnimation(jumppoint);
+
   return true;
 }

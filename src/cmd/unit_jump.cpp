@@ -35,7 +35,7 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
   return myvec;
 }
 extern void DealPossibleJumpDamage (Unit *un);
-
+extern void ActivateAnimation(Unit *);
 template <class UnitType>
 void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
   if (pendingjump[kk]->orig==activeStarSystem||activeStarSystem==NULL) {
@@ -105,6 +105,7 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 		  static int jumpdest=235034;
 		  Unit * jumpnode = possibilities[jumpdest%possibilities.size()];
 		  this->SetCurPosition(jumpnode->Position());
+		  ActivateAnimation(jumpnode);
 		  if (jumpnode->isUnit()==UNITPTR) {
 			  QVector Offset (jumpnode->Position().i<0?1:-1,
 							  jumpnode->Position().j<0?1:-1,

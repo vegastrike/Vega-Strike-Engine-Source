@@ -201,7 +201,12 @@ Mesh * Mesh::getLOD (float lod) {
   if (getFramesPerSecond()>.0000001) {
 	  //return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
 	  unsigned int which=(int)floor(fmod(getCurrentFrame(),getNumLOD()));
-	  setCurrentFrame(getCurrentFrame()+GetElapsedTime()*getFramesPerSecond());
+	  float adv = GetElapsedTime()*getFramesPerSecond();
+	  static float max_frames_skipped=XMLSupport::parse_float(vs_config->getVariable("graphics","mesh_animation_max_frames_skipped","3"));
+	  if (adv>max_frames_skipped) {
+		  adv= max_frames_skipped;
+	  }
+	  setCurrentFrame(getCurrentFrame()+adv);
 	  return &orig[which%getNumLOD()];
   }else {
 	  for (int i=1;i<numlods;i++) {
