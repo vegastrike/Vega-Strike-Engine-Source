@@ -488,7 +488,7 @@ public:
   void SetAI(Order *newAI, int subun);
   ///Enqueues an order to the unit's order queue
   void EnqueueAI(Order *newAI, int subun);
-  virtual void reactToCollision(Unit * bigger, const Vector & normal, float dist);
+  virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
   ///Does a collision between this and another unit
   bool Collide(Unit * target);
   ///checks for collisions with all beams and other units roughly and then more carefully

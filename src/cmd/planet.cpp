@@ -155,12 +155,16 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   FILE * fp = fopen (tmpname.c_str(), "rb");
   if (!fp) {
   */
+#ifdef RAPIDCOLLIDEPLANET
   meshdata[1]= new SphereMesh (radius,8,8,textname, alpha);
   std::vector <bsp_polygon> spherepolys;
   meshdata[1]->GetPolys (spherepolys);
   colTree = new csRapidCollider (spherepolys);
   //BuildBSPTree (tmpname.c_str(),true,meshdata[1]);
   delete meshdata[1];
+#else
+  colTree= NULL;
+#endif
     /*
       } else {
       fclose (fp);
@@ -245,7 +249,7 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 
 
 
-void Planet::reactToCollision (Unit *un, const Vector & normal, float dist) {
+void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
   if (terrain&&un->isUnit()!=PLANETPTR) {
     un->SetPlanetOrbitData (terraintrans);
     Matrix top;

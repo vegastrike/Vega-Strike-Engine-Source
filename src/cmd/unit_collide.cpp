@@ -9,6 +9,7 @@
 #include "gfx/bsp.h"
 #include "collide/rapcol.h"
 #include "collide/csgeom/transfrm.h"
+#include "collide/collider.h"
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
   return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
@@ -114,17 +115,6 @@ bool Unit::Inside (const Vector &target, const float radius, Vector & normal, fl
 bool Unit::Collide (Unit * target) {
   if (target==this||owner==target||target->owner==this||(owner!=NULL&&target->owner==owner)) 
     return false;
-  if (colTree&&target->colTree) {
-    csRapidCollider::CollideReset();
-    const csReversibleTransform bigtransform (cumulative_transformation_matrix);
-    const csReversibleTransform smalltransform (target->cumulative_transformation_matrix);
-    if (target->colTree->Collide (*colTree,
-				  &smalltransform,
-				  &bigtransform)) {
-      static int crashcount=0;
-      fprintf (stderr,"%s Crashez to %s %d\n", this->name.c_str(), target->name.c_str(),crashcount++);
-    }
-  }
 
   //unit v unit? use point sampling?
   //now first make sure they're within bubbles of each other...
@@ -142,32 +132,74 @@ bool Unit::Collide (Unit * target) {
     bigger = this;
     smaller = target;
   }
-  if (!bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist))
-    return false;
+  if (colTree&&target->colTree) {
+    csRapidCollider::CollideReset();
+    const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
+    const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
+    if (smaller->colTree->Collide (*bigger->colTree,
+				  &smalltransform,
+				  &bigtransform)) {
+      static int crashcount=0;
+      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
+      csCollisionPair * mycollide = csRapidCollider::GetCollisions();
+      int numHits = csRapidCollider::numHits;
+      if (numHits) {
+	Vector smallpos((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
+			(mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
+			(mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
+	smallpos = Transform (smaller->cumulative_transformation_matrix,smallpos);
+	Vector bigpos((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,  
+		      (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,  
+		      (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
+	bigpos = Transform (bigger->cumulative_transformation_matrix,bigpos);
+	csVector3 sn, bn;
+	sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
+	bn.Cross (mycollide[0].b2-mycollide[0].a2,mycollide[0].c2-mycollide[0].a2);
+	sn.Normalize();
+	bn.Normalize();
+	Vector smallNormal (sn.x,sn.y,sn.z);
+	Vector bigNormal (bn.x,bn.y,bn.z);
+	smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
+	bigNormal = TransformNormal (bigger->cumulative_transformation_matrix,bigNormal);
+	bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );	
+      }else {
+	return false;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {
+      if (normal.i==-1&&normal.j==-1) {
+	normal = (smaller->Position()-bigger->Position());
+	if (normal.i||normal.j||normal.k)
+	  normal.Normalize();
+      }
+
+      bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
+    }else {
+      return false;      
+    }
+  }
   //UNUSED BUT GOOD  float elast = .5*(smallcsReversibleTransform (cumulative_transformation_matrix),er->GetElasticity()+bigger->GetElasticity());
   //BAD  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
   //BADF  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
   //BAD  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-  if (normal.i==-1&&normal.j==-1) {
-    normal = (smaller->Position()-bigger->Position());
-    if (normal.i||normal.j||normal.k)
-      normal.Normalize();
-  }
-  bigger->reactToCollision (smaller,normal,dist);
+
   //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
   return true;
 }
-#define NOBOUNCECOLLISION
-void Unit::reactToCollision(Unit * smalle, const Vector & normal, float dist) {
+
+void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist) {
 
 #ifdef NOBOUNCECOLLISION
 #else
-  smalle->ApplyForce (normal*.4*smalle->GetMass()*fabs(normal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  this->ApplyForce (normal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*-fabs(normal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  smalle->ApplyForce (bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  this->ApplyForce (smallnormal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 
-  smalle->ApplyDamage (this->Position(),-normal,  .5*fabs(normal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
-  this->ApplyDamage (smalle->Position(),normal, .5*fabs(normal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+  smalle->ApplyDamage (biglocation,bignormal,  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+  this->ApplyDamage (smalllocation,smallnormal, .5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
 #endif
   //each mesh with each mesh? naw that should be in one way collide
 

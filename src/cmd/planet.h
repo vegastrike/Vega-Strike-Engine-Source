@@ -81,7 +81,7 @@ class Planet : public Unit {
   ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}
   void setAtmosphere (Atmosphere *);
   Atmosphere * getAtmosphere () {return atmosphere;}
-  void reactToCollision(Unit * smaller, const Vector & normal, float dist);
+  void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist);
   void gravitate(UnitCollection *units);
 
   class PlanetIterator : public Iterator {
