@@ -95,7 +95,7 @@ NetServer::~NetServer()
 /**** Authenticate a connected client                      ****/
 /**************************************************************/
 
-void	NetServer::authenticate( Client * clt, AddressIP ipadr, Packet& packet )
+void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 {
 	Packet	packet2;
 	string	callsign;
@@ -117,7 +117,9 @@ void	NetServer::authenticate( Client * clt, AddressIP ipadr, Packet& packet )
 			found = 1;
 	}
 	if( !found)
+    {
 		sendLoginError( clt, ipadr);
+    }
 	else
 	{
 		if( elem->isNew())
@@ -127,9 +129,9 @@ void	NetServer::authenticate( Client * clt, AddressIP ipadr, Packet& packet )
 	}
 }
 
-Client * NetServer::getClientFromSerial( ObjSerial serial)
+ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 {
-	Client * clt = NULL;
+	ClientPtr clt;
 	bool	found = false;
 
 	for( LI li=allClients.begin(); li!=allClients.end(); li++)
@@ -142,14 +144,14 @@ Client * NetServer::getClientFromSerial( ObjSerial serial)
 		if (!found)
 		{
 			cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
-			clt = NULL;
+			clt.reset();
 		}
 	}
 
 	return clt;
 }
 
-void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
+void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -165,12 +167,12 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	string serverip = netbuf.getString();
 	string serverport = netbuf.getString();
 
-    if( clt == NULL )
+    if( !clt )
 	{
 	    // This must be UDP mode, because the client would exist otherwise.
 	    // In UDP mode, client is created here.
 		clt = newConnection_udp( ipadr );
-		if( !clt)
+		if( !clt )
 		{
 		    COUT << "Error creating new client connection"<<endl;
 			exit(1);
@@ -263,12 +265,12 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	}
 }
 
-void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
+void	NetServer::sendLoginError( ClientPtr clt, AddressIP ipadr )
 {
 	Packet	packet2;
 	// Send a login error
 	SOCKETALT	sockclt;
-	if( clt!=NULL)
+	if( clt )
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
@@ -276,12 +278,12 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 	COUT<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
 }
 
-void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
+void	NetServer::sendLoginUnavailable( ClientPtr clt, AddressIP ipadr )
 {
 	Packet	packet2;
 	// Send an unavailable login service
 	SOCKETALT	sockclt;
-	if( clt!=NULL)
+	if( clt )
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
@@ -289,14 +291,14 @@ void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
 	COUT<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
 }
 
-void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
+void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
 {
 	// SHOULD NOT WE FREE THE MEMORY OCCUPIED BY A POSSIBLE CLIENT * ???
 	Packet	packet2;
 	// Send a login error
 	// int		retsend;
 	SOCKETALT	sockclt;
-	if( clt!=NULL)
+	if( clt )
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
@@ -318,21 +320,21 @@ void	NetServer::startMsg()
 /**** Handles new connections in TCP_MODE                  ****/
 /**************************************************************/
 
-Client* NetServer::newConnection_udp( const AddressIP& ipadr )
+ClientPtr NetServer::newConnection_udp( const AddressIP& ipadr )
 {
     COUT << " enter " << "NetServer::newConnection_udp" << endl;
 
     SOCKETALT sock( udpNetwork->get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
 
-    Client* ret = addNewClient( sock, false );
+    ClientPtr ret = addNewClient( sock, false );
     nbclients++;
 
     return ret;
 }
 
-Client* NetServer::newConnection_tcp( )
+ClientPtr NetServer::newConnection_tcp( )
 {
-    Client*		ret = NULL;
+    ClientPtr ret;
 
     // Get new connections if there are - do nothing in standard UDP mode
     bool valid = false;
@@ -342,7 +344,7 @@ Client* NetServer::newConnection_tcp( )
         valid = sock.valid();
         if( valid )
         {
-            ret = this->addNewClient( sock, true );
+            ret = addNewClient( sock, true );
             nbclients++;
         }
     }
@@ -354,9 +356,9 @@ Client* NetServer::newConnection_tcp( )
 /**** Adds a new client                                    ****/
 /**************************************************************/
 
-Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
+ClientPtr NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 {
-    Client * newclt = new Client( sock, is_tcp );
+    ClientPtr newclt( new Client( sock, is_tcp ) );
     // New client -> now registering it in the active client list "Clients"
     // Store the associated socket
 
@@ -516,7 +518,7 @@ void	NetServer::start(int argc, char **argv)
 	// Server loop
 	while( keeprun)
 	{
-		int       nb;
+		// int       nb;
 
 		UpdateTime();
 
@@ -580,7 +582,7 @@ void	NetServer::start(int argc, char **argv)
 		LI j;
 		for ( j=discList.begin(); j!=discList.end(); j++)
 		{
-			this->disconnect( (*j), __FILE__, PSEUDO__LINE__(543) );
+			disconnect( (*j), __FILE__, PSEUDO__LINE__(543) );
 		}
 		discList.clear();
 
@@ -595,9 +597,9 @@ void	NetServer::start(int argc, char **argv)
 		// UPDATE STAR SYSTEM -> TO INTEGRATE WITH NETWORKING
 		// PROCESS JUMPS -> MAKE UNITS CHANGE THEIR STAR SYSTEM
 		  unsigned int i;
-		  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+		  // static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
 		  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
-		  float systime=nonactivesystemtime;
+		  // float systime=nonactivesystemtime;
 		  
 		  for (i=0;i<_Universe->star_system.size()&&i<numrunningsystems;i++) {
 			//_Universe->star_system[i]->Update((i==0)?1:systime/i,true);
@@ -728,7 +730,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 {
 	int len=0;
 	AddressIP	ipadr, ip2;
-	Client *	clt = NULL;
+	ClientPtr   clt;
 	unsigned char cmd=0;
 
 	// Watch account server socket
@@ -842,7 +844,7 @@ void	NetServer::checkMsg( SocketSet& sets )
 {
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-        Client* cl = *i;
+        ClientPtr cl = *i;
         if( cl->isTcp() )
         {
 		    if( cl->sock.isActive( ) )
@@ -869,7 +871,7 @@ void	NetServer::checkTimedoutClients_udp()
 	double deltatmp = 0;
 	for (LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-        Client* cl = *i;
+        ClientPtr cl = *i;
         if( cl->isUdp() )
         {
 		    deltatmp = (fabs(curtime - cl->latest_timeout));
@@ -887,6 +889,7 @@ void	NetServer::checkTimedoutClients_udp()
 				    COUT<<"\t\tCurrent time : "<<curtime<<endl;
 				    COUT<<"\t\tLatest timeout : "<<(cl->latest_timeout)<<endl;
 				    COUT<<"t\tDifference : "<<deltatmp<<endl;
+                    cl->_disconnectReason = "UDP timeout";
 				    discList.push_back( cl );
 			    }
 		    }
@@ -898,13 +901,13 @@ void	NetServer::checkTimedoutClients_udp()
 /**** Receive a message from a client                      ****/
 /**************************************************************/
 
-void	NetServer::recvMsg_tcp( Client * clt )
+void	NetServer::recvMsg_tcp( ClientPtr clt )
 {
     char	command;
     AddressIP	ipadr;
     // int nbpackets = 0;
 
-    assert( clt != NULL );
+    assert( clt );
 
     SOCKETALT sockclt( clt->sock );
 	PacketMem mem;
@@ -914,19 +917,21 @@ void	NetServer::recvMsg_tcp( Client * clt )
     if( recvbytes < 0 )
     {
 	    cerr << ", disconnecting(error)" << endl;
-        discList.push_back( clt);
+        clt->_disconnectReason = "TCP error";
+        discList.push_back( clt );
     }
     else if( recvbytes == 0 )
     {
 	    cerr << ", disconnecting(eof)" << endl;
-        discList.push_back( clt);
+        clt->_disconnectReason = "TCP peer closed";
+        discList.push_back( clt );
     }
     else
     {
         Packet packet( mem );
 		packet.setNetwork( &ipadr, sockclt );
 		command = packet.getCommand( );
-        if( clt!=NULL)
+        if( clt )
 			this->updateTimestamps( clt, packet);
 
 #ifdef VSNET_DEBUG
@@ -942,7 +947,7 @@ void	NetServer::recvMsg_tcp( Client * clt )
 void NetServer::recvMsg_udp( )
 {
     SOCKETALT sockclt( udpNetwork->get_fd(), SOCKETALT::UDP, udpNetwork->get_adr(), _sock_set );
-    Client*   clt = NULL;
+    ClientPtr clt;
     AddressIP ipadr;
 	bool process = true;
 
@@ -960,8 +965,8 @@ void NetServer::recvMsg_udp( )
         COUT << "Received from serial : " << nserial << endl;
 
         // Find the corresponding client
-        Client* tmp   = NULL;
-		bool    found = false;
+        ClientPtr tmp;
+		bool      found = false;
         for( LI i=allClients.begin(); i!=allClients.end(); i++)
         {
             tmp = (*i);
@@ -969,7 +974,7 @@ void NetServer::recvMsg_udp( )
             {
                 clt = tmp;
                 found = 1;
-				COUT << " found client " << *clt << endl;
+				COUT << " found client " << *(clt.get()) << endl;
 				break;
             }
         }
@@ -982,19 +987,20 @@ void NetServer::recvMsg_udp( )
 
         // Check if the client's IP is still the same (a very little and unaccurate in some cases protection
 		// against spoofing client serial#)
-        if( clt!=NULL && ipadr!=clt->cltadr )
+        if( clt && ipadr!=clt->cltadr )
         {
 	    	assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
 
             COUT << "Error : IP changed for client # " << clt->game_unit.GetUnit()->GetSerial() << endl;
-            discList.push_back( clt);
+            clt->_disconnectReason = "possible IP spoofing";
+            discList.push_back( clt );
 	    	/* It is not entirely impossible for this to happen; it would be nice
 			 * to add an additional identity check. For now we consider it an error.
 	     	*/
         }
         else
         {
-            if( clt != NULL )
+            if( clt )
 				process = this->updateTimestamps( clt, packet);
 
 			// Do not process a packet considered to be late and not important (positions and damage ?)
@@ -1005,8 +1011,11 @@ void NetServer::recvMsg_udp( )
 }
 
 // Return true if ok, false if we received a late packet
-bool	NetServer::updateTimestamps( Client * clt, Packet & p)
+bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 {
+        assert( cltp );
+        Client* clt = cltp.get();
+
 		bool 	  ret = true;
         double    ts = p.getTimestamp();
 
@@ -1039,7 +1048,7 @@ bool	NetServer::updateTimestamps( Client * clt, Packet & p)
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
-void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP& ipadr, Packet& p )
+void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP& ipadr, Packet& p )
 {
     packet = p;
 
@@ -1068,13 +1077,13 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			}
 			else if( !acct_con)
 			{
-				this->sendLoginUnavailable( clt, ipadr);
+				this->sendLoginUnavailable( clt, ipadr );
 			}
             else
             {
 				SOCKETALT tmpsock;
 				const AddressIP* iptmp;
-				if( clt != NULL )
+				if( clt )
 				{
 					// This must be a TCP client
 					WaitListEntry entry;
@@ -1107,29 +1116,29 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         }
         break;
 		case CMD_INITIATE:
-			this->sendLocations( clt);
+			this->sendLocations( clt );
 			break;
 		case CMD_ADDCLIENT:
 			// Add the client to the game
 			COUT<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			//COUT<<"Received ADDCLIENT request"<<endl;
-			this->addClient( clt);
+			this->addClient( clt );
 			COUT<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
 			break;
 		case CMD_POSUPDATE:
 			// Received a position update from a client
 			cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-			this->posUpdate( clt);
+			this->posUpdate( clt );
 			cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
 			break;
 		case CMD_NEWCHAR:
 			// Receive the new char and store it
-			this->recvNewChar( clt);
-			this->sendLocations( clt);
+			this->recvNewChar( clt );
+			this->sendLocations( clt );
 			break;
 		case CMD_LETSGO:
 			// Add the client to the game in its zone
-			//this->addClient( clt);
+			//this->addClient( clt );
 			break;
 		case CMD_PING:
 			// Nothing to do here, just receiving the packet is enough
@@ -1138,7 +1147,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		case CMD_LOGOUT:
 			COUT<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			// Client wants to quit the game
-			logoutList.push_back( clt);
+			logoutList.push_back( clt );
 			COUT<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
 			break;
 // 		case CMD_ACK :
@@ -1207,7 +1216,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			{
 					// Verify if there really is a jump point to the new starsystem
 					adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
-					for( int i=0; !found && i<adjacent.size(); i++)
+					for( unsigned int i=0; !found && i<adjacent.size(); i++)
 					{
 						if( adjacent[i]==newsystem)
 							found = true;
@@ -1304,7 +1313,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		break;
 		case CMD_STOPNETCOMM :
 		{
-			float freq = netbuf.getFloat();
+			// float freq = netbuf.getFloat();
 			// Broadcast players with same frequency that this client is leaving the comm session
 			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
@@ -1349,7 +1358,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 /**** Check if the client has the right system file        ****/
 /**************************************************************/
 
-void	NetServer::checkSystem( Client * clt)
+void	NetServer::checkSystem( ClientPtr clt)
 {
 	// HERE SHOULD CONTROL THE CLIENT HAS THE SAME STARSYSTEM FILE OTHERWISE SEND IT TO CLIENT
 
@@ -1366,7 +1375,7 @@ void	NetServer::checkSystem( Client * clt)
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
-void	NetServer::addClient( Client * clt)
+void	NetServer::addClient( ClientPtr clt)
 {
 	Unit * un = clt->game_unit.GetUnit();
 	COUT<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
@@ -1429,7 +1438,7 @@ void	NetServer::addClient( Client * clt)
 /**** Removes a client and notify other clients                */
 /***************************************************************/
 
-void	NetServer::removeClient( Client * clt)
+void	NetServer::removeClient( ClientPtr clt)
 {
 	Packet packet2;
 	Unit * un = clt->game_unit.GetUnit();
@@ -1445,7 +1454,7 @@ void	NetServer::removeClient( Client * clt)
 /**** Adds the client update to current client's zone snapshot */
 /***************************************************************/
 
-void	NetServer::posUpdate( Client * clt)
+void	NetServer::posUpdate( ClientPtr clt)
 {
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 	Unit * un = clt->game_unit.GetUnit();
@@ -1470,7 +1479,7 @@ void	NetServer::posUpdate( Client * clt)
 
 // Designed to receive character info after a new creation on client-side
 
-void	NetServer::recvNewChar( Client * clt)
+void	NetServer::recvNewChar( ClientPtr clt)
 {
 }
 
@@ -1478,7 +1487,7 @@ void	NetServer::recvNewChar( Client * clt)
 /**** Receive the new player info                          ****/
 /**************************************************************/
 
-void	NetServer::sendLocations( Client * clt)
+void	NetServer::sendLocations( ClientPtr clt)
 {
 }
 
@@ -1486,25 +1495,28 @@ void	NetServer::sendLocations( Client * clt)
 /**** Disconnect a client                                  ****/
 /**************************************************************/
 
-void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug_from_line )
+void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debug_from_line )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl
-         << " *** from " << debug_from_file << ":" << debug_from_line << endl;
+         << " *** from " << debug_from_file << ":" << debug_from_line << endl
+         << " *** disconnecting " << clt->callsign << " because of "
+         << clt->_disconnectReason << endl;
 
 	NetBuffer netbuf;
 	Unit * un = clt->game_unit.GetUnit();
 
-	if( acctserver)
+	if( acctserver )
 	{
         if( un != NULL )
         {
 		    // Send a disconnection info to account server
-		    netbuf.addString( clt->callsign);
-		    netbuf.addString( clt->passwd);
+		    netbuf.addString( clt->callsign );
+		    netbuf.addString( clt->passwd );
 		    Packet p2;
-		    if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
-		                SENDRELIABLE, NULL, acct_sock, __FILE__,
-                        PSEUDO__LINE__(1395) ) < 0 )
+		    if( p2.send( CMD_LOGOUT, un->GetSerial(),
+                         netbuf.getData(), netbuf.getDataLength(),
+		                 SENDRELIABLE, NULL, acct_sock, __FILE__,
+                         PSEUDO__LINE__(1395) ) < 0 )
             {
 			    COUT<<"ERROR sending LOGOUT to account server"<<endl;
 		    }
@@ -1517,8 +1529,8 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 	}
 
 	// Removes the client from its starsystem
-	if( clt->ingame)
-		this->removeClient( clt);
+	if( clt->ingame )
+		this->removeClient( clt );
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -1532,7 +1544,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 			// exit(1);
         }
 	    COUT << "There were " << allClients.size() << " clients - ";
-	    allClients.remove( clt);
+	    allClients.remove( clt );
 	}
 	else
 	{
@@ -1544,7 +1556,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
                      PSEUDO__LINE__(1432) );
 	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;
 	        COUT << "There were " << allClients.size() << " clients - ";
-	        allClients.remove( clt);
+	        allClients.remove( clt );
         }
         else
         {
@@ -1552,14 +1564,13 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 			// exit(1);
         }
 	}
-	delete clt;
-	clt = NULL;
+	clt.reset();
 	COUT << allClients.size() << " clients left" << endl;
 	nbclients--;
 }
 
 /*** Same as disconnect but do not respond to client since we assume clean exit ***/
-void	NetServer::logout( Client * clt)
+void	NetServer::logout( ClientPtr clt )
 {
 	Packet p, p1, p2;
 	NetBuffer netbuf;
@@ -1582,7 +1593,7 @@ void	NetServer::logout( Client * clt)
 
 	// Removes the client from its starsystem
 	if( clt->ingame)
-		this->removeClient( clt);
+		this->removeClient( clt );
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -1596,8 +1607,7 @@ void	NetServer::logout( Client * clt)
 	    COUT <<"There was "<< allClients.size() <<" clients - ";
 	    allClients.remove( clt );
 	}
-	delete clt;
-	clt = NULL;
+	clt.reset( );
 	COUT << allClients.size() <<" clients left"<<endl;
 	nbclients--;
 }
@@ -1612,7 +1622,7 @@ void	NetServer::closeAllSockets()
 	udpNetwork->disconnect( "Closing sockets", false );
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-        Client* cl = *i;
+        ClientPtr cl = *i;
         if( cl->isTcp() )
 		    cl->sock.disconnect( __PRETTY_FUNCTION__, false );
 	}
@@ -1654,7 +1664,6 @@ void	NetServer::save()
 		fp = NULL;
 	}
 
-	Client * clt;
 	// Loop through all clients and write saves
 	for( int i=0; i<_Universe->numPlayers(); i++)
 	{
@@ -1668,8 +1677,8 @@ void	NetServer::save()
 			netbuf.Reset();
 			bool found = false;
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
-			clt = getClientFromSerial( cp->GetParent()->GetSerial());
-			if (clt==NULL)
+			ClientPtr clt = getClientFromSerial( cp->GetParent()->GetSerial());
+			if( !clt )
 			{
 				cerr<<"Error client not found in save process !!!!"<<endl;
 				exit(1);
@@ -1737,12 +1746,11 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Unit::Shield
 void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 {
 	Packet p;
-	Client * clt;
 	Unit * un;
 
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
-	clt = this->getClientFromSerial( serial);
-	if( clt==NULL)
+	ClientPtr clt = this->getClientFromSerial( serial);
+	if( !clt )
 	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;
 		un = zonemgr->getUnit( serial, zone);
@@ -1751,7 +1759,7 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	else
 	{
 		COUT<<"Killed client serial = "<<serial<<endl;
-		zonemgr->removeClient( clt);
+		zonemgr->removeClient( clt );
 	}
 
 	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1771) );
@@ -1764,13 +1772,13 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 	Packet p2;
 	NetBuffer netbuf;
 	string file_content;
-	Client * clt = this->getClientFromSerial( serial);
+	ClientPtr clt = this->getClientFromSerial( serial);
 
 	// Send a CMD_JUMP to tell the client if the jump is allowed
-	netbuf.addString( clt->jumpfile);
+	netbuf.addString( clt->jumpfile );
 
 	// And remove the player from its old starsystem and set it out of game
-	this->removeClient( clt);
+	this->removeClient( clt );
 	// Have to set new starsystem here
 
 	if( ok)
@@ -1779,9 +1787,11 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 		p2.send( CMD_JUMP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 
 	// If jumpfile is empty the md5 was correct
-	if( clt->jumpfile=="")
+	if( clt->jumpfile=="" )
+    {
 		// Send a 0 serial to say client file is ok
 		p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+    }
 	else
 	{
 		// Otherwise we have to send jumpfile

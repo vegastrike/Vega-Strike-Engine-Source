@@ -111,8 +111,6 @@ NetClient::NetClient()
     enabled = 0;
     nbclients = 0;
 	jumpok = false;
-    for( int i=0; i<MAXCLIENTS; i++)
-        Clients[i] = NULL;
 	ingame = false;
 	current_freq = MIN_COMMFREQ;
 	selected_freq = MIN_COMMFREQ;
@@ -123,13 +121,6 @@ NetClient::NetClient()
 
 NetClient::~NetClient()
 {
-    /*
-	for( int i=0; i<MAXCLIENTS; i++)
-    {
-        if( Clients[i]!=NULL)
-            delete Clients[i];
-    }
-	*/
 #ifdef NETCOMM
 	if( NetComm!=NULL)
 		delete NetComm;
@@ -1108,7 +1099,7 @@ void NetClient::getZoneData( const Packet* packet )
 void	NetClient::addClient( const Packet* packet )
 {
 	ObjSerial cltserial = packet->getSerial();
-	Client * clt;
+	ClientPtr clt;
 	// NOTE : in splitscreen mode we may receive info about us so we comment the following test
 	/*
 	if( cltserial==this->serial)
@@ -1119,15 +1110,15 @@ void	NetClient::addClient( const Packet* packet )
 	}
 	*/
 
-	clt = Clients[cltserial];
-	if( clt != NULL)
+	clt = Clients.get(cltserial);
+	if( clt != NULL )
 	{
 		// Client may exist if it jumped from a starsystem to another of if killed and respawned
 		COUT<<"Existing client n°"<<cltserial<<endl;
 	}
 	else
 	{
-		clt = new Client;
+		clt = Clients.insert( cltserial, new Client );
 		nbclients++;
 		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	}
@@ -1205,19 +1196,17 @@ void	NetClient::removeClient( const Packet* packet )
 	ObjSerial	cltserial = packet->getSerial();
 
 	COUT<<" & HTONS(Serial) = "<<cltserial<<endl;
-	if( Clients[cltserial] == NULL)
+	if( Clients.get(cltserial) == NULL)
 	{
 		cerr<<"Error, client does not exists !!"<<endl;
 		exit( 1);
 	}
 
 	// Removes the unit from starsystem, destroys it and delete client
-	_Universe->activeStarSystem()->RemoveUnit(Clients[cltserial]->game_unit.GetUnit());
+	_Universe->activeStarSystem()->RemoveUnit(Clients.get(cltserial)->game_unit.GetUnit());
 	nbclients--;
-	delete Clients[cltserial];
+	Clients.remove(cltserial);
 	COUT<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-
-	Clients[cltserial] = NULL;
 }
 
 /*************************************************************/
@@ -1257,7 +1246,7 @@ void	NetClient::receivePosition( const Packet* packet )
 	// int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
 	// int		qfsize = sizeof( double);
 	unsigned char	cmd;
-	Client * clt;
+	ClientPtr clt;
 	Unit * un;
 
 	nbclts = packet->getSerial();
@@ -1279,11 +1268,11 @@ void	NetClient::receivePosition( const Packet* packet )
 			// Tell we received the ClientState so we can convert byte order from network to host
 			//cs.display();
 			sernum = cs.getSerial();
-			clt = Clients[sernum];
+			clt = Clients.get(sernum);
 			un = clt->game_unit.GetUnit();
 			// Test if this is a local player
 			// Is it is, ignore position update
-			if( clt!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
+			if( clt!=NULL && !_Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit()))
 			{
 				// Backup old state
 				un->prev_physical_state = un->curr_physical_state;
@@ -1305,7 +1294,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			//sernum = *((ObjSerial *) databuf+offset);
 			//sernum = ntohs( sernum);
 			sernum = netbuf.getShort();
-			clt = Clients[sernum];
+			clt = Clients.get(sernum);
 			COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 			//offset += sizeof( ObjSerial);
 			if( clt!=NULL && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
@@ -1449,8 +1438,8 @@ void	NetClient::predict( ObjSerial clientid)
 	//    - compute a point on the current spline using blend as t value
 	//    - parameter A and B are old_position and new_position (received in the latest packet)
 
-	Unit * un = Clients[clientid]->game_unit.GetUnit();
-	unsigned int del = Clients[clientid]->deltatime;
+	Unit * un = Clients.get(clientid)->game_unit.GetUnit();
+	unsigned int del = Clients.get(clientid)->deltatime;
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
@@ -1478,8 +1467,8 @@ void	NetClient::init_interpolation( ObjSerial clientid)
 	//    - parameter A and B are old_position and new_position (received in the latest packet)
 
 	/************* VA IS TO BE UNCOMMENTED ****************/
-	Unit * un = Clients[clientid]->game_unit.GetUnit();
-	unsigned int del = Clients[clientid]->deltatime;
+	Unit * un = Clients.get(clientid)->game_unit.GetUnit();
+	unsigned int del = Clients.get(clientid)->deltatime;
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
@@ -1495,7 +1484,7 @@ void	NetClient::init_interpolation( ObjSerial clientid)
 	QVector A3( B + VB*delay + AB*delay*delay*0.5);
 	QVector A2( A3 - (VB + AB*delay));
 
-	//Clients[clientid]->spline.createSpline( A, A1, A2, A3);
+	//Clients.get(clientid)->spline.createSpline( A, A1, A2, A3);
 }
 
 Transformation NetClient::spline_interpolate( ObjSerial clientid, double blend)
@@ -1504,7 +1493,7 @@ Transformation NetClient::spline_interpolate( ObjSerial clientid, double blend)
 	// Add a linear interpolation for orientation
 	Quaternion orient;
 	// There should be another function called when received a new position update and creating the spline
-	QVector pos( Clients[clientid]->spline.computePoint( blend));
+	QVector pos( Clients.get(clientid)->spline.computePoint( blend));
 
 	return Transformation( orient, pos);
 }
@@ -1592,10 +1581,12 @@ bool	NetClient::jumpRequest( string newsystem)
 /*** COMMUNICATION STUFF                                                               ****/
 /******************************************************************************************/
 
+#ifdef NETCOMM
 bool	NetClient::IsNetcommActive()
 {
 	return this->netcomm_active;
 }
+#endif
 
 void	NetClient::startCommunication()
 {

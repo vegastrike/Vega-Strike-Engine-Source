@@ -74,6 +74,8 @@ struct	Client
 	string			jumpfile;
 	float			comm_freq;
 
+    string          _disconnectReason;
+
 	Client()
 	{
 		//memset( &old_state, 0, sizeof( ClientState));
@@ -86,6 +88,7 @@ struct	Client
 		zone = 0;
 		ingame = false;
 		jumpfile="";
+        _disconnectReason = "none";
 		comm_freq = MIN_COMMFREQ;
 	}
 
@@ -103,6 +106,7 @@ struct	Client
 		zone = 0;
 		ingame = false;
 		jumpfile="";
+        _disconnectReason = "none";
 		comm_freq = MIN_COMMFREQ;
 	}
 

@@ -40,7 +40,7 @@ struct GFXColor;
 extern VegaConfig *vs_config;
 //extern VegaSimpleConfig *server_config;
 using std::vector;
-typedef list<Client *>::iterator LI;
+// typedef list<Client *>::iterator LI;
 typedef vector<Account *>::iterator VI;
 
 struct ServerSocket;
@@ -69,49 +69,49 @@ class NetServer
 		timeval				srvtimeout;			// timer
 
 		vector<Account *>	Cltacct;			// Client accounts
-        list<Client *>      allClients;         // Active TCP and UDP client connections
-		list<Client *>		discList;			// Client connections to be disconnected
-		list<Client *>		logoutList;			// Client connections that logged out
+        ClientList          allClients;         // Active TCP and UDP client connections
+		ClientList          discList;			// Client connections to be disconnected
+		ClientList          logoutList;			// Client connections that logged out
 
 	    struct WaitListEntry
 	    {
 	        bool tcp;
-	        Client*   t; // Client connections waiting for login response
+	        ClientPtr t; // Client connections waiting for login response
 		    AddressIP u; // Client addresses waiting for login response
 	    };
 
         queue<WaitListEntry> waitList;
 
-		bool			updateTimestamps( Client * clt, Packet & p);
+		bool			updateTimestamps( ClientPtr clt, Packet & p);
 		//void			loadConfig();					// Loads configuration from server.xml
-		void			authenticate( Client * clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
-		void			posUpdate( Client * clt);		// Update a client position
-		void			addClient( Client * clt);		// Add the client in the game
-		void			removeClient( Client * clt);		// Remove the client from the game
-		void			checkSystem( Client * clt);		// Check if the client has the good system file
-		Client *		newConnection_udp( const AddressIP& ipadr);
-		Client *		newConnection_tcp( );
+		void			authenticate( ClientPtr clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
+		void			posUpdate( ClientPtr clt);		// Update a client position
+		void			addClient( ClientPtr clt);		// Add the client in the game
+		void			removeClient( ClientPtr clt);		// Remove the client from the game
+		void			checkSystem( ClientPtr clt);		// Check if the client has the good system file
+		ClientPtr       newConnection_udp( const AddressIP& ipadr);
+		ClientPtr       newConnection_tcp( );
 		void			checkAcctMsg( SocketSet& set );			// Check for account server message to receive
 		void			checkMsg( SocketSet& set );				// Check for network message to receive
 		void			checkKey( SocketSet& set);						// Check for keyboard input
-		void			recvMsg_tcp( Client * clt);		// Receive network messages
+		void			recvMsg_tcp( ClientPtr clt);		// Receive network messages
 		void			recvMsg_udp( );					// Receive network messages
-		void			processPacket( Client * clt, unsigned char cmd, const AddressIP& ipadr, Packet& packet ); // Process received packet info
-		void			recvNewChar( Client * clt);		// Receive a new character
-		void			sendLocations( Client * clt);	// Send the start locations
+		void			processPacket( ClientPtr clt, unsigned char cmd, const AddressIP& ipadr, Packet& packet ); // Process received packet info
+		void			recvNewChar( ClientPtr clt);		// Receive a new character
+		void			sendLocations( ClientPtr clt);	// Send the start locations
 		void			startMsg();						// Startup showing text
-		void			disconnect( Client * clt, const char* debug_from_file, int debug_from_line );		// Disconnect a client
-		void			logout( Client * clt);			// Clean disconnect a client
+		void			disconnect( ClientPtr clt, const char* debug_from_file, int debug_from_line );		// Disconnect a client
+		void			logout( ClientPtr clt);			// Clean disconnect a client
 		void			closeAllSockets();				// Disconnect all clients for shutdown
         void            checkTimedoutClients_udp();     // Check for timed out clients  
 
-        Client *        addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
-		void			sendLoginError( Client * clt, AddressIP ipadr);
-		void			sendLoginAlready( Client * clt, AddressIP ipadr);
-		void			sendLoginAccept( Client * clt, AddressIP ipadr, int acctnew);
-		void			sendLoginUnavailable( Client * clt, AddressIP ipadr);
+        ClientPtr       addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
+		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
+		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
+		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew);
+		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
 		void			getMD5( string filename, unsigned char * md5digest);
-		Client *		getClientFromSerial( ObjSerial serial);
+		ClientPtr       getClientFromSerial( ObjSerial serial);
 
 	public:
 		NetServer();

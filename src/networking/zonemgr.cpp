@@ -23,7 +23,7 @@ ZoneMgr::ZoneMgr()
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
 	COUT<<">>> ADDING A NEW ZONE = "<<starsys<<" - # OF ZONES = "<<_Universe->star_system.size()<<endl;
-	list<Client *>* lst = new list<Client*>;
+    ClientWeakList* lst = new ClientWeakList;
 	list<Unit *> ulst;
 	StarSystem * sts=NULL;
 	// Generate the StarSystem
@@ -47,16 +47,16 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 /************************************************************************************************/
 
 // Return the client list that are in the zone n° serial
-list<Client *>*	ZoneMgr::GetZone( int serial)
+ClientWeakList* ZoneMgr::GetZone( int serial )
 {
 	return zone_list[serial];
 }
 
 // Adds a client to the zone n° serial
 /*
-void	ZoneMgr::addClient( Client * clt, int zone)
+void	ZoneMgr::addClient( ClientWeakPtr clt, int zone)
 {
-    list<Client*>* lst = zone_list[zone];
+    ClientWeakList* lst = zone_list[zone];
     if( lst == NULL )
         zone_list[zone] = lst = new list<Client*>;
 
@@ -111,15 +111,15 @@ Unit *	ZoneMgr::getUnit( ObjSerial unserial, unsigned short zone)
 /**** addClient                                                                             *****/
 /************************************************************************************************/
 
-StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & num_zone)
+StarSystem *	ZoneMgr::addClient( ClientWeakPtr cltw, string starsys, unsigned short & num_zone)
 {
 	// Remove the client from old starsystem if needed and add it in the new one
 	/*
-	string oldstarsys = clt->save.GetOldStarSystem();
+	string oldstarsys = cltw->save.GetOldStarSystem();
 	*/
 	StarSystem * sts=NULL;
 	StarSystem * ret=NULL;
-	//Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	//Cockpit * cp = _Universe->isPlayerStarship( cltw->game_unit.GetUnit());
 	//string starsys = cp->savegame->GetStarSystem();
 	// TO BE DONE IN JUMP HANDLING !!!
 	/*
@@ -127,7 +127,7 @@ StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & 
 	{
 		// Remove the player from the old starsystem
 		sts = _Universe->getStarSystem( oldstarsys);
-		sts->RemoveUnit( clt->game_unit);
+		sts->RemoveUnit( ClientPtr(cltw)->game_unit);
 
 		// SOMEDAY TEST IF THE STARSYSTEM WE WANT TO GO IN IS REACHABLE FROM THE OLD ONE
 	}
@@ -149,10 +149,11 @@ StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & 
 	COUT<<">> ADDING CLIENT IN ZONE # "<<num_zone<<endl;
 	// Adds the client in the zone
 
-    list<Client*>* lst = zone_list[num_zone];
+    ClientWeakList* lst = zone_list[num_zone];
     if( lst == NULL )
-        zone_list[num_zone] = lst = new list<Client*>;
-	lst->push_back( clt );
+        zone_list[num_zone] = lst = new ClientWeakList;
+	lst->push_back( cltw );
+    ClientPtr clt(cltw);
 	clt->zone = num_zone;
 	zone_clients[num_zone]++;
 	cerr<<zone_clients[clt->zone]<<" clients now in zone "<<clt->zone<<endl;
@@ -168,19 +169,19 @@ StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & 
 /************************************************************************************************/
 
 // Remove a client from its zone
-void	ZoneMgr::removeClient( Client * clt)
+void	ZoneMgr::removeClient( ClientPtr clt )
 {
 	StarSystem * sts;
 	Unit * un = clt->game_unit.GetUnit();
-    list<Client*>* lst = zone_list[clt->zone];
+    ClientWeakList* lst = zone_list[clt->zone];
 
 	if( lst == NULL || lst->empty() )
 	{
-		cerr<<"Trying to remove on an empty list !!"<<endl;
-		exit( 1);
-	}
+        cerr<<"Trying to remove on an empty list !!"<<endl;
+        exit( 1);
+    }
 
-	lst->remove( clt);
+	lst->remove( clt );
 	zone_clients[clt->zone]--;
 	cerr<<zone_clients[clt->zone]<<" clients left in zone "<<clt->zone<<endl;
 	sts = _Universe->star_system[clt->zone];
@@ -194,13 +195,14 @@ void	ZoneMgr::removeClient( Client * clt)
 /************************************************************************************************/
 
 // Broadcast a packet to a client's zone clients
-void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
+void ZoneMgr::broadcast( ClientWeakPtr cltw, Packet * pckt )
 {
-    if( clt == NULL )
+    if( cltw.expired() )
     {
         cerr<<"Trying to send update without client" << endl;
         return;
     }
+    ClientPtr clt( cltw );
 	Unit * un = clt->game_unit.GetUnit();
 	Unit * un2 = NULL;
     if( clt->zone > zone_list.size() )
@@ -210,25 +212,28 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
     }
 
     // cout<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
-    list<Client*>* lst = zone_list[clt->zone];
+    ClientWeakList* lst = zone_list[clt->zone];
     if( lst == NULL )
     {
         cerr<<"Trying to send update to nonexistant zone " << clt->zone << endl;
         return;
     }
 
-	for( LI i=lst->begin(); i!=lst->end(); i++)
+	for( CWLI i=lst->begin(); i!=lst->end(); i++)
 	{
-		un2 = (*i)->game_unit.GetUnit();
-		// Broadcast to other clients
-		if( (*i)->ingame && un->GetSerial() != un2->GetSerial())
-		{
-			COUT<<"BROADCASTING "<<pckt->getCommand()<<" to client n° "<<un2->GetSerial();
-			COUT<<endl;
-			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
-			pckt->bc_send( );
-		}
-	}
+        if( (*i).expired() ) continue;
+
+        ClientPtr cpi(*i);
+        un2 = cpi->game_unit.GetUnit();
+        // Broadcast to other clients
+        if( cpi->ingame && un->GetSerial() != un2->GetSerial())
+        {
+            COUT << "BROADCASTING " << pckt->getCommand()
+                 << " to client n° "<<un2->GetSerial() << endl;
+            pckt->setNetwork( &cpi->cltadr, cpi->sock);
+            pckt->bc_send( );
+        }
+    }
 }
 
 /************************************************************************************************/
@@ -238,18 +243,21 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
 // Broadcast a packet to a zone clients with its serial as argument
 void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 {
-    // COUT<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
-    list<Client*>* lst = zone_list[zone];
+    // COUT<<"Sending update to "<<(zone_list[clt->zone]->size()-1)<<" clients"<<endl;
+    ClientWeakList* lst = zone_list[zone];
     if( lst == NULL ) return;
 
-	for( LI i=lst->begin(); i!=lst->end(); i++)
+	for( CWLI i=lst->begin(); i!=lst->end(); i++)
 	{
+        if( (*i).expired() ) continue;
+
+        ClientPtr clt( *i );
 		// Broadcast to all clients including the one who did a request
-		if( (*i)->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
+		if( clt->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
 		{
-			COUT<<"Sending update to client n° "<<(*i)->game_unit.GetUnit()->GetSerial();
+			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
+			pckt->setNetwork( &clt->cltadr, clt->sock);
 			pckt->bc_send( );
 		}
 	}
@@ -262,21 +270,24 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 // Broadcast a packet to a zone clients with its serial as argument
 void	ZoneMgr::broadcastCamshot( int zone, ObjSerial serial, Packet * pckt )
 {
-    // COUT<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
-    list<Client*>* lst = zone_list[zone];
+    // COUT<<"Sending update to "<<(zone_list[clt->zone]->size()-1)<<" clients"<<endl;
+    ClientWeakList* lst = zone_list[zone];
 	Unit * un;
     if( lst == NULL ) return;
 
-	for( LI i=lst->begin(); i!=lst->end(); i++)
+	for( CWLI i=lst->begin(); i!=lst->end(); i++)
 	{
-		un = (*i)->game_unit.GetUnit();
+        if( (*i).expired() ) continue;
+
+        ClientPtr clt( *i );
+		un = clt->game_unit.GetUnit();
 		// Broadcast to all clients excluding the one who did a request and
 		// excluding those who are listening on a different frequency
-		if( (*i)->ingame && un->GetSerial() != serial )
+		if( clt->ingame && un->GetSerial() != serial )
 		{
-			COUT<<"Sending update to client n° "<<(*i)->game_unit.GetUnit()->GetSerial();
+			COUT<<"Sending update to client n° "<<clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
-			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
+			pckt->setNetwork( &clt->cltadr, clt->sock);
 			pckt->bc_send( );
 		}
 	}
@@ -290,8 +301,8 @@ void	ZoneMgr::broadcastCamshot( int zone, ObjSerial serial, Packet * pckt )
 // Broadcast all positions
 void	ZoneMgr::broadcastSnapshots( bool update_planets)
 {
-	int i=0;
-	LI k, l;
+	unsigned int i=0;
+	CWLI k, l;
 	LUI m;
 	NetBuffer netbuf;
 
@@ -312,21 +323,24 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			{
 			/************************* START CLIENTS BROADCAST ***************************/
 				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
-				if( (*k)->ingame)
+                if( (*k).expired() ) continue;
+                ClientPtr cltk( *k );
+				if( cltk->ingame )
 				{
 					nbclients = zone_clients[i]-1;
 					netbuf.Reset();
 					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
 					{
 						// Check if we are on the same client and that the client has moved !
-						if( l!=k && (*l)->ingame)
+                        ClientPtr cltl( *l );
+						if( l!=k && cltl->ingame)
 						{
-							Unit * un = (*l)->game_unit.GetUnit();
+							Unit * un = cltl->game_unit.GetUnit();
 							// Create a client state with a delta time
 							ClientState cs( un);
 							// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
-							cs.setDelay( (*l)->deltatime);
-							this->addPosition( netbuf, un, (*k)->game_unit.GetUnit(), cs);
+							cs.setDelay( cltl->deltatime);
+							this->addPosition( netbuf, un, cltk->game_unit.GetUnit(), cs);
 						}
 						// Else : always send back to clients their own info or just ignore ?
 						// Ignore for now
@@ -343,7 +357,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 						{
 							// Create a client state with a delta time too ?? WHICH ONE ???
 							ClientState cs( (*m));
-							this->addPosition( netbuf, (*m), (*k)->game_unit.GetUnit(), cs);
+							this->addPosition( netbuf, (*m), cltk->game_unit.GetUnit(), cs);
 							// Else : always send back to clients their own info or just ignore ?
 							// Ignore for now
 						}
@@ -353,13 +367,10 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					if(netbuf.getDataLength()>0)
 					{
 						//COUT<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-						pckt.send( CMD_SNAPSHOT, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
-#ifndef _WIN32
-						__LINE__
-#else
-						302
-#endif
-						);
+						pckt.send( CMD_SNAPSHOT, nbclients+nbunits,
+                                   netbuf.getData(), netbuf.getDataLength(),
+                                   SENDANDFORGET, &(cltk->cltadr), cltk->sock,
+                                   __FILE__, PSEUDO__LINE__(337) );
 					}
 				}
 			}
@@ -409,8 +420,8 @@ void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, Clien
 // Broadcast all damages
 void	ZoneMgr::broadcastDamage( )
 {
-	int i=0;
-	LI k, l;
+	unsigned int i=0;
+	CWLI k, l;
 	LUI m;
 	NetBuffer netbuf;
 
@@ -434,16 +445,21 @@ void	ZoneMgr::broadcastDamage( )
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
-				if( (*k)->ingame)
+                if( (*k).expired() ) continue;
+                ClientPtr cp( *k );
+				if( cp->ingame )
 				{
 			/************************* START CLIENTS BROADCAST ***************************/
 					nbclients = zone_clients[i];
 					netbuf.Reset();
 					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
 					{
+                        if( (*l).expired() ) continue;
+
+                        ClientPtr cltl( *l );
 						// Check if there is damages on that client
-						un = (*l)->game_unit.GetUnit();
-						if( (*l)->ingame && un && un->damages)
+						un = cltl->game_unit.GetUnit();
+						if( cltl->ingame && un && un->damages)
 							this->addDamage( netbuf, un);
 					}
 			/************************* END CLIENTS BROADCAST ***************************/
@@ -460,13 +476,10 @@ void	ZoneMgr::broadcastDamage( )
 					// Send snapshot to client k
 					if( netbuf.getDataLength() > 0)
 					{
-						pckt.send( CMD_SNAPDAMAGE, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
-#ifndef _WIN32
-						__LINE__
-#else
-						429
-#endif
-						);
+						pckt.send( CMD_SNAPDAMAGE, nbclients+nbunits,
+                                   netbuf.getData(), netbuf.getDataLength(),
+                                   SENDANDFORGET, &(cp->cltadr), cp->sock,
+                                   __FILE__, PSEUDO__LINE__(442) );
 					}
 				}
 			}
@@ -476,7 +489,7 @@ void	ZoneMgr::broadcastDamage( )
 
 void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 {
-		int it = 0;
+		unsigned int it = 0;
 
 		// Add the damage flag
 		unsigned short damages = un->damages;
@@ -564,44 +577,47 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 /************************************************************************************************/
 
 // Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
-void	ZoneMgr::sendZoneClients( Client * clt)
+void ZoneMgr::sendZoneClients( ClientWeakPtr clt )
 {
-	LI k;
+	CWLI k;
 	int nbclients=0;
 	Packet packet2;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
 
 	// Loop through client in the same zone to send their current_state and save and xml to "clt"
-    list<Client*>* lst = zone_list[clt->zone];
+    if( clt.expired() ) return;
+    ClientPtr cp( clt );
+
+    ClientWeakList* lst = zone_list[cp->zone];
     if( lst == NULL )
     {
-	    COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships to client serial " << clt->game_unit.GetUnit()->GetSerial() << " because of empty (inconsistent?) zone" << endl;
+	    COUT << "\t>>> WARNING: Did not send info about " << nbclients << " other ships to client serial " << cp->game_unit.GetUnit()->GetSerial() << " because of empty (inconsistent?) zone" << endl;
         return;
     }
 
 	for( k=lst->begin(); k!=lst->end(); k++)
 	{
+        if( (*k).expired() ) continue;
+        ClientPtr kp( *k );
+
 		// Test if *k is the same as clt in which case we don't need to send info
-		if( clt!=(*k) && (*k)->ingame)
+		if( cp!=kp && kp->ingame)
 		{
-			SaveNetUtil::GetSaveStrings( (*k), savestr, xmlstr);
+			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr);
 			// Add the ClientState at the beginning of the buffer
-			netbuf.addClientState( ClientState( (*k)->game_unit.GetUnit()));
+			netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
 			// Add the save and xml strings
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
-			packet2.send( CMD_ENTERCLIENT, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
-#ifndef _WIN32
-				__LINE__
-#else
-				336
-#endif
-				);
+			packet2.send( CMD_ENTERCLIENT, cp->game_unit.GetUnit()->GetSerial(),
+                          netbuf.getData(), netbuf.getDataLength(),
+                          SENDRELIABLE, &cp->cltadr, cp->sock,
+                          __FILE__, PSEUDO__LINE__(579) );
 			nbclients++;
 		}
 	}
-	COUT<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<clt->game_unit.GetUnit()->GetSerial()<<endl;
+	COUT<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<cp->game_unit.GetUnit()->GetSerial()<<endl;
 }
 
 /************************************************************************************************/
@@ -611,23 +627,29 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 // Fills buffer with descriptions of clients in the same zone as our client
 // Called after the client has been added in the zone so that it can get his
 // own information/save from the server
-int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
+int		ZoneMgr::getZoneClients( ClientWeakPtr clt, char * bufzone)
 {
-	LI k;
+	CWLI k;
 	int state_size;
-	unsigned short nbt, nb;
-	state_size = sizeof( ClientState);
-	nbt = zone_clients[clt->zone];
+	unsigned short nbt;
+	state_size = sizeof(ClientState);
+
+    if( clt.expired() ) return 0;
+    ClientPtr cp( clt );
+
+	nbt = zone_clients[cp->zone];
 	NetBuffer netbuf;
 
-	COUT<<"ZONE "<<clt->zone<<" - "<<nbt<<" clients"<<endl;
+	COUT<<"ZONE "<<cp->zone<<" - "<<nbt<<" clients"<<endl;
 	netbuf.addShort( nbt);
-    assert( zone_list[clt->zone] != NULL );
-	for( k=zone_list[clt->zone]->begin(); k!=zone_list[clt->zone]->end(); k++)
+    assert( zone_list[cp->zone] != NULL );
+	for( k=zone_list[cp->zone]->begin(); k!=zone_list[cp->zone]->end(); k++)
 	{
 		COUT<<"SENDING : ";
-		if( (*k)->ingame)
-			netbuf.addClientState( ClientState( (*k)->game_unit.GetUnit()));
+        if( (*k).expired() ) continue;
+        ClientPtr kp( *k );
+		if( kp->ingame)
+			netbuf.addClientState( ClientState( kp->game_unit.GetUnit() )  );
 	}
 
 	return state_size*nbt;
@@ -657,7 +679,7 @@ double	ZoneMgr::isVisible( Quaternion orient, QVector src_pos, QVector tar_pos)
 
 void	ZoneMgr::displayStats()
 {
-	int i;
+	unsigned int i;
 	cout<<"\tStar system stats"<<endl;
 	cout<<"\t-----------------"<<endl;
 	for( i=0; i<zone_list.size(); i++)
@@ -674,7 +696,7 @@ void	ZoneMgr::displayStats()
 
 int		ZoneMgr::displayMemory()
 {
-	int i;
+	unsigned int i;
 	int memory_use=0;
 	int memclient=0, memunit=0, memvars=0;
 	cout<<"\tStar system memory usage (do not count struct pointed by pointer)"<<endl;

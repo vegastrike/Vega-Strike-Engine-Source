@@ -34,6 +34,7 @@ libnetgeneric = \
 	accountsxml.cpp			\
 	accountsxml.h			\
 	client.h				\
+	clientptr.h				\
 	clientstructs.cpp		\
 	const.h					\
 	netui.cpp				\

@@ -35,6 +35,7 @@
 #include "gfx/quaternion.h"  // for Transformation
 
 #include "networking/networkcomm.h"
+#include "networking/clientptr.h"
 
 class Packet;
 class Unit;
@@ -49,6 +50,34 @@ extern bool isLocalSerial( ObjSerial sernum);
 
 class	NetClient
 {
+    class Clients
+    {
+        ClientMap _map;
+
+    public:
+        ClientPtr insert( int x, Client* c ) {
+            if( c != NULL ) {
+                ClientPtr cp( c );
+                _map.insert( ClientPair( x, cp ) );
+                return cp;
+            }
+            else {
+                return ClientPtr();
+            }
+        }
+        ClientPtr get( int x ) {
+            ClientIt it = _map.find(x);
+            if( it == _map.end() ) return ClientPtr();
+            return it->second;
+        }
+        bool remove( int x ) {
+            size_t s = _map.erase( x );
+            if( s == 0 ) return false;
+            return true;
+            // shared_ptr takes care of delete
+        }
+    };
+
 		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
 		SOCKETALT			clt_sock;		// Comm. socket
@@ -60,7 +89,8 @@ class	NetClient
 		int					zone;			// Zone id in universe
 		char				keeprun;		// Bool to test client stop
 		string				callsign;		// Callsign of the networked player
-		Client *			Clients[MAXCLIENTS];		// Clients in the same zone
+		// Client *			Clients[MAXCLIENTS];		// Clients in the same zone
+		Clients 			Clients;		// Clients in the same zone
 		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 		// a vector because always accessed by their IDs
 
@@ -69,8 +99,11 @@ class	NetClient
 		bool					netcomm_active;
 	public:
 		bool					IsNetcommActive();
-	private:
+#else
+	public:
+		inline bool IsNetcommActive() const { return false; }
 #endif
+	private:
 
 		int					enabled;		// Bool to say network is enabled
 		// Time used for refresh - not sure still used

@@ -2,11 +2,12 @@
 #include "savenet_util.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/unit_generic.h"
+#include "networking/client.h"
 #include "faction_generic.h"
 
 using std::string;
 
-void	SaveNetUtil::GetSaveStrings( Client * clt, string & savestr, string & xmlstr)
+void	SaveNetUtil::GetSaveStrings( ClientPtr clt, string & savestr, string & xmlstr)
 {
 	Unit * un = clt->game_unit.GetUnit();
 	Cockpit * cp = _Universe->isPlayerStarship( un);

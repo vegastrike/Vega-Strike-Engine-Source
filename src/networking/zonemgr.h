@@ -27,10 +27,11 @@
 #include "cmd/unit_generic.h"
 #include "client.h"
 #include "packet.h"
+#include "boost/smart_ptr.hpp"
+#include "networking/clientptr.h"
 
 using std::list;
-typedef list<Client *>::iterator LI;
-typedef vector<list<Client *> >::iterator VLI;
+
 typedef list<Unit *>::iterator LUI;
 
 class NetUI;
@@ -40,7 +41,7 @@ class ZoneMgr
 {
 		//vector<StarSystem *> starsystems;
 		// List of clients in zones
-		vector<list<Client *>*>	zone_list;
+		vector<ClientWeakList*> zone_list;
 		vector<int>				zone_clients;
 		// List of units in zones (but not Clients)
 		vector<list<Unit *> >	zone_unitlist;
@@ -54,23 +55,22 @@ class ZoneMgr
 		//ZoneMgr( int nbzones);
 		//~ZoneMgr();
 		// Serial is the zone id
-		StarSystem *	addZone( string starsys);
-		list<Client *>*	GetZone( int serial);
-		//void	addClient( Client * clt, int zone);
+		StarSystem* addZone( string starsys);
+		ClientWeakList* GetZone( int serial);
 		void	addUnit( Unit * un, int zone);
 		void	removeUnit( Unit *un, int zone);
 		Unit *	getUnit( ObjSerial unserial, unsigned short zone);
 
-		StarSystem *	addClient( Client * clt, string starsys, unsigned short & num_zone);
-		void	removeClient( Client * clt);
-        void    broadcast( Client * clt, Packet * pckt );
+		StarSystem *	addClient( ClientWeakPtr clt, string starsys, unsigned short & num_zone);
+		void	removeClient( ClientPtr clt );
+        void    broadcast( ClientWeakPtr clt, Packet * pckt );
         void    broadcast( int zone, ObjSerial serial, Packet * pckt );
         void    broadcastCamshot( int zone, ObjSerial serial, Packet * pckt );
         void    broadcastSnapshots( bool update_planets=false);
 		void	broadcastDamage();
-		int		getZoneClients( Client * clt, char * bufzone);
+		int		getZoneClients( ClientWeakPtr clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
-		void	sendZoneClients( Client * clt);
+		void	sendZoneClients( ClientWeakPtr clt );
 
 		void	displayStats();
 		int		displayMemory();
