@@ -39,7 +39,7 @@ GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
 	  // this is a planet
 	  return planet;
 	}
-	else if(target==un->Target()){
+	else if(target==un->Target()&&draw_all_boxes){//if we only draw target box we cannot tell what faction enemy is!
 	  // my target
 	  return targeted;
 	}

@@ -237,7 +237,7 @@ void Unit::Init()
   computer.max_roll=100;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
-  computer.radar.maxrange=10000;
+  computer.radar.maxrange=XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   computer.radar.maxcone=-1;
   computer.radar.mintargetsize=0;
   computer.radar.color=true;
