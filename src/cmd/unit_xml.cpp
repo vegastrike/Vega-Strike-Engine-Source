@@ -439,34 +439,34 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case ENGINEWAV:
-	sound.engine = AUDCreateSoundWAV ((*iter).name,true);
+	sound.engine = AUDCreateSoundWAV ((*iter).value,true);
 	break;
       case ENGINEMP3:
-	sound.engine = AUDCreateSoundMP3((*iter).name,true); 
+	sound.engine = AUDCreateSoundMP3((*iter).value,true); 
 	break;
       case SHIELDMP3:
-	sound.shield = AUDCreateSoundMP3((*iter).name,false); 
+	sound.shield = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case SHIELDWAV:
-	sound.shield = AUDCreateSoundWAV((*iter).name,false); 
+	sound.shield = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case EXPLODEMP3:
-	sound.explode = AUDCreateSoundMP3((*iter).name,false); 
+	sound.explode = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case EXPLODEWAV:
-	sound.explode = AUDCreateSoundWAV((*iter).name,false); 
+	sound.explode = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case ARMORMP3:
-	sound.armor = AUDCreateSoundMP3((*iter).name,false); 
+	sound.armor = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case ARMORWAV:
-	sound.armor = AUDCreateSoundWAV((*iter).name,false); 
+	sound.armor = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case HULLWAV:
-	sound.hull = AUDCreateSoundWAV((*iter).name,false); 
+	sound.hull = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case HULLMP3:
-	sound.hull = AUDCreateSoundMP3((*iter).name,false); 
+	sound.hull = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       }
     }
@@ -916,5 +916,8 @@ void Unit::LoadXML(const char *filename) {
     delete xml->bspmesh;
   }
   delete xml;
+  if (sound.engine!=-1) {
+    AUDStartPlaying (sound.engine);
+  }
 }
 
