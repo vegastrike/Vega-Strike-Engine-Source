@@ -49,6 +49,7 @@ class QuadTree {
   float getminX() {return 0;}  float getminZ() {return 0;}
   float getmaxX() {return minX+(float)maxX;}  float getmaxZ() {return minZ+(float)maxZ;}
   float getSizeX() {return maxX;} float getSizeZ () {return maxZ;}
+  void StaticCullData(const float detail);
 };
 
 #endif

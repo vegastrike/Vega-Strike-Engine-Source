@@ -29,7 +29,7 @@ ContinuousTerrain::ContinuousTerrain (char ** filenames, const int numwidth, con
 				     data[nj+width*i],
 				     data[j+width*ni]);
       location[j+width*i].Set (0+sizeX*j,0,0-sizeZ*i);
-
+      data[j+width*i]->StaticCullData (25);
     }
   }
   Matrix tmpmat;

@@ -65,7 +65,9 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
   */
 
 }
-
+void QuadTree::StaticCullData (const float detail) {
+  root->StaticCullData (RootCornerData,detail);
+}
 void QuadTree::SetNeighbors (quadsquare * east, quadsquare *north, quadsquare *west, quadsquare *south) {
   neighbors[0]=east;
   neighbors[1]=north;
