@@ -97,7 +97,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 	    Vertex[i].vertindex = *VertexCount;
 	    if ((*VertexCount)+1>=(*VertexAllocated)) {
 	      (*VertexAllocated) *=2;
-	      (*vertexs)= (GFXVertex *)realloc ((*vertexs), *VertexAllocated);
+	      (*vertexs)= (GFXVertex *)realloc ((*vertexs), (*VertexAllocated)*sizeof (GFXVertex));
 	    }
 	    (*vertexs) [*VertexCount] = v[i];
 	    (*VertexCount)++;

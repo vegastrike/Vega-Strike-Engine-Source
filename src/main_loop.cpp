@@ -43,7 +43,7 @@
 #include "mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
-
+#include "gfx/quadtree.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -315,11 +315,14 @@ static void SetTurretAI (Unit * fighter) {
     SetTurretAI (fighter->getSubUnit(kk));
   }
 }
+
+
+QuadTree * qt;
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
-
-
+  qt = new QuadTree();
+  qt->Update();
   /****** 
   locSel = new LocationSelect(Vector (0,-2,2),
 			      Vector(1,0,-1), 
@@ -487,6 +490,7 @@ void destroyObjects() {
   delete [] fighters;
   delete locSel;
   delete explosion;
+  delete qt;
   explosion=NULL;
   //delete t;
   //delete s;
@@ -501,10 +505,8 @@ void main_loop() {
 
   _Universe->StartDraw();
   _Universe->activeStarSystem()->Draw();
-  
   //fighters[0]->UpdateHudMatrix();
   //_Universe->activeStarSystem()->SetViewport();
-
 
   _Universe->activeStarSystem()->Update();
 ///CANNOT DO EVERY FRAME...DO EVERY PHYSICS frame  muzak->Listen();

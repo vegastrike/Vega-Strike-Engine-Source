@@ -21,10 +21,10 @@
 #include "cmd/music.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-
+#include "gfx/quadtree.h"
 extern Music *muzak;
 extern Vector mouseline;
-
+extern QuadTree * qt;
 vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -169,6 +169,7 @@ void StarSystem::Draw() {
   Bolt::Draw();
 
   stars->Draw();
+  qt->Render();
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
   _Universe->AccessCockpit()->Draw();
   if (doInputDFA) {
@@ -184,6 +185,8 @@ extern double interpolation_blend_factor;
 void StarSystem::Update() {
   static int numframes;
   Unit *unit;
+  qt->Update();
+
   
   UpdateTime();
   time += GetElapsedTime();
