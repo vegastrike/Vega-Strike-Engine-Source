@@ -940,8 +940,9 @@ string Unit::WriteUnitString () {
                   break;
                 }
               }
-              if (j==subunits.size()) j=k;
-              subunits[j].filename=subun->name;
+              if (j>=subunits.size()) j=k;
+              if (j<subunits.size())
+                subunits[j].filename=subun->name;
             }
             string str;
             for (k=0;k<subunits.size();++k) {
