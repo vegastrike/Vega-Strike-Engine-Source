@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 #ifdef __APPLE__
 
 #include <bits/c++config.h>
@@ -31,23 +32,36 @@ class string : public vector <char> {
   }
  public:
   string (const string &a, size_type pos, size_type n=npos) {
+    assign (a,pos,n);
+  }
+  string (const char *str, const unsigned int len) {
+    assign(str,len);
+  }
+  string (const char *str) {
+    assign (str);
+  }
+  string () {
+    push_back('\0');
+  }
+  string (const string &str) {
+    reallocstr(str.c_str(),str.size());
+  }
+  string& assign (const string &a, size_type pos, size_type n=npos) {
     if (n==npos)
       n=a.size()-pos;
     if (n+pos>a.size())
       n=a.size()-pos;
-    allocstr (str.ptr+pos,n);
+    reallocstr (str.ptr+pos,n);
   }
-  string (const char *str, const unsigned int len) {
+  string& assign (const char *str, const unsigned int len) {
     reallocstr(str,len);
   }
-  string (const char *str) {
+  string& assign (const char *str) {
     reallocstr(str,strlen(str));
   }
-  string () {
-    vector<char>::push_back('\0');
-  }
-  string (const string &str) {
+  string & assign (const string &str) {
     reallocstr(str.c_str(),str.size());
+    return *this;
   }
   ~string () {
   }
@@ -65,6 +79,24 @@ class string : public vector <char> {
     string retval (*this);
     retval.pop_back();
     retvar->allocstr(str,strlen(str));
+  }
+  string &operator += (const string & a) {
+    string tmp(*this + a);
+    *this=tmp;
+    return *this;
+  }
+  /*  string & operator append (const string & a) {
+    return *this +=a;
+    }*/
+  string & operator append (const string & str, size_type pos =0, size_type n=npos) {
+    this+= string(str,pos,n);
+    return *this;
+  }
+  string & operator append (const char * c, size_type siz) {
+    return *this += string(c,siz);
+  }
+  string & operator append (const char * c) {
+    return *this += string (c);
   }
   iterator end() {return vector<char>::end()-1;}
   const_iterator end()const {return vector<char>::end()-1;}
@@ -176,6 +208,7 @@ class string : public vector <char> {
     const basic_string <char> strstr (this.c_str());
     return strstr.find_last_not_of(c,pos);
   }
+
   /*
   void swap (string &s) {
     string oldthis (*this);
@@ -190,7 +223,16 @@ class string : public vector <char> {
   int compare (const string& oth) const {
     return strcmp(c_str(), s.c_str());
   }
-};  
+};
+ inline  istream&
+   operator>> (istream& i, string&s) {basic_string<char> b; i >> b; this = string (b.c_str());return i;  }
+ inline ostream&
+   operator<< (ostream& o, const string &s) {basic_string<char>b(s.c_str());o<<b;return o;}
+ inline   istream&
+   getline (istream& i, string& s, char delim = '\n'){
+   basic_string <char> b; getline (i,b,delim);s=b.c_str();
+   return i;
+ }
 
 inline bool
 operator< (const string& lhs,
