@@ -723,6 +723,11 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 	if (smag>.001){
 	  s.i/=smag;  s.j/=smag;  s.k/=smag;
 	}
+	double movable = grand();
+	static float second_ring_move = XMLSupport::parse_float (vs_config->getVariable ("galaxy","SecondRingDifference",".4"));
+	inner_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
+	outer_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
+
 	fprintf (fp,"<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%lf\" outerradius=\"%lf\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
       }
     }
