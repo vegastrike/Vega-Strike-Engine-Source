@@ -25,11 +25,7 @@
 #include "vs_globals.h"
 #include <assert.h>
 // Untransformed and transformed data 
-//LPDIRECT3DVERTEXBUFFER lpd3dvbUntransformed;
-//LPDIRECT3DVERTEXBUFFER lpd3dvbTransformed;
 
-//int numVertices;
-//int numPolygons;
 GFXVertexList *next;
 
 extern GFXBOOL bTex0;
@@ -39,15 +35,7 @@ extern GFXBOOL bTex1;
 #define CHANGE_CHANGE 2
 #define USE_DISPLAY_LISTS
 GFXVertexList::GFXVertexList():numVertices(0),myVertices(NULL),display_list(0), numlists(0) { }
-/*
-GFXVertexList::GFXVertexList (enum POLYTYPE poly, int numVertices, GFXVertex *vertices) {
-  Init (&poly, numVertices, vertices, 1, &numVertices);
-}
-GFXVertexList::GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets) // TODO: Add in features to accept flags for what's
-{
-  Init (poly,numVertices, vertices, numlists, offsets);
-}
-*/
+
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor * colors, int numlists, int *offsets, bool Mutable, int tess) {
   mode = new GLenum [numlists];
   for (int pol=0;pol<numlists;pol++) {
@@ -397,12 +385,6 @@ void GFXVertexList::Draw()
       glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-      /*
-	if (Multitexture) {
-	  glClientActiveTextureARB (GL_TEXTURE1_ARB);
-	  glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
-	}
-      */
 
       int totoffset=0;
       for (int i=0;i<numlists;i++) {

@@ -268,7 +268,7 @@ void gfx_light::Disable() {
     }
   }
 }
-//FIXME (calculate d)
+
 
 // i =  tot/(A+B*d+C*d*d)    Ai+Bi*d+Ci*d*d = tot   
 // d= (-Bi + sqrtf (B*i*B*i - 4*Ci*(Ai-tot)))/ (2Ci)

@@ -19,10 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <stdio.h>
-//#include <gl/gl.h>
-//#include <gl/glu.h>
 #include <fcntl.h>
-//#include <io.h>
 #include "gfxlib.h"
 #include "wrapgfx.h"
 #include "lin_time.h"
@@ -30,23 +27,6 @@
 
 #include "profile.h"
 
-//#include "cmd.h"
-//#include "glob.h"
-
-//FIXME VEGASTRIKE#include <delayimp.h>
-
-
-
-//Object *novas[40];
-//Object *aeons[10];
-//Object *scouts[10];
-
-//static Animation *explosion;
-
-//delayload:gldrv.dll 
-//Delayimp.lib 
-Unit *unit;
-//Force **forces[NUM_FORCES];
 
 
 
@@ -65,14 +45,10 @@ Universe::Universe(int argc, char** argv)
 
 	ForceLogo = new Texture ("TechPriRGB.bmp","TechPriA.bmp");
 	SquadLogo = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
-	//else
-	//	LightMap = new Texture("light.bmp", 0);
-
 	StartGFX();
 	InitInput();
 
 	hud_camera = Camera();
-	//	delete star_system;
 	
 }
 void Universe::Init () {
@@ -80,8 +56,6 @@ void Universe::Init () {
 }
 Universe::~Universe()
 {
-	//if(topobject != NULL)
-	//	delete topobject;
 	int i;
 	for (i=0;i<this->factions.size();i++) {
 		delete factions[i];
@@ -99,7 +73,7 @@ void Universe::activateLightMap() {
 
 void Universe::StartGFX()
 {
-  //	SetViewport();
+
 	GFXBeginScene();
 	GFXMaterial mat;
 	mat.ar = 1.00F;
@@ -126,15 +100,12 @@ void Universe::StartGFX()
 	GFXSetMaterial(tmp, mat);
 	GFXSelectMaterial(tmp);
 	int ligh;
-	//	GFXSetSeparateSpecularColor (TRUE);
 	
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
 	GFXLightContextAmbient (GFXColor (0,0,0,1));
 	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (01,1,1,1),GFXColor(1,1,1,1), GFXColor (.2,.2,.2,1), GFXColor (1,.002,.0001)),false);
 	GFXEnableLight (ligh);
-	//GFXLoadIdentity(VIEW);
-	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
       	GFXEndScene();
 }
 
@@ -149,12 +120,6 @@ void Universe::StartDraw()
 #endif
 	GFXBeginScene();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	SetViewport();
-
-
-	//HandleMouse(); //do what you will with the data. we might wanna place the DX stuff elsewhere so it can be used in a more well rounded way?
-	//HandleKeyboard();
-
 	SetViewport();
 }
 

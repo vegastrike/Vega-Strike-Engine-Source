@@ -6,7 +6,7 @@ using std::priority_queue;
 #include "cmd_collide.h"
 using std::list;
 const float TINYOBJECT = .1;
-//optimization globals
+ //optimization globals
 float intensity_cutoff=.05;//something that would normally round down
 float optintense=.2;
 float optsat = .95;

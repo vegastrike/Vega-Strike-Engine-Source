@@ -21,13 +21,16 @@
 
 #ifndef _GFXLIB_H
 #define _GFXLIB_H
-/**
+#ifdef _WIN32
 #ifdef GLDRV_EXPORTS
 #define GFXDRVAPI  __declspec(dllexport)
 #else
 #define GFXDRVAPI  __declspec(dllimport)
 #endif
-*/
+#else
+#define GFXDRVAPI
+#endif
+
 #include <GL/glut.h>
 #include <vector>
 #ifndef GFXBOOL
@@ -140,22 +143,22 @@ void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z = 1.0);
 void /*GFXDRVAPI*/ GFXEnd();
  
 //display list
-int GFXCreateList();
-GFXBOOL GFXEndList();
-void GFXCallList(int list);
-void GFXDeleteList (int list);
+int /*GFXDRVAPI*/ GFXCreateList();
+GFXBOOL /*GFXDRVAPI*/ GFXEndList();
+void /*GFXDRVAPI*/ GFXCallList(int list);
+void /*GFXDRVAPI*/ GFXDeleteList (int list);
 
 //pick mode
-void GFXBeginPick(int x, int y, int xsize, int ysize);
-void GFXSetPickName(int name);
+void /*GFXDRVAPI*/ GFXBeginPick(int x, int y, int xsize, int ysize);
+void /*GFXDRVAPI*/ GFXSetPickName(int name);
 //bool GFXCheckPicked();
-vector<PickData> *GFXEndPick();
+vector<PickData> * /*GFXDRVAPI*/ GFXEndPick();
 
 //Subwindow management
-void GFXSubwindow(int x, int y, int xsize, int ysize);
-void GFXSubwindow(float x, float y, float xsize, float ysize);
+void /*GFXDRVAPI*/ GFXSubwindow(int x, int y, int xsize, int ysize);
+void /*GFXDRVAPI*/ GFXSubwindow(float x, float y, float xsize, float ysize);
 
 //Coordinate system conversion
-Vector GFXDeviceToEye(int x, int y);
+Vector /*GFXDRVAPI*/ GFXDeviceToEye(int x, int y);
 
 #endif

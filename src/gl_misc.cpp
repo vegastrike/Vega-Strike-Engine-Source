@@ -32,9 +32,6 @@ extern GFXBOOL bTex1;
 
 void /*GFXDRVAPI*/ GFXBeginScene()
 {
-#ifdef STATS_QUEUE
-	statsqueue.push(GFXStats());
-#endif
 	GFXClear();
 	GFXLoadIdentity(MODEL); // bad this should instead load the cached view matrix
 	light_rekey_frame();
@@ -42,18 +39,8 @@ void /*GFXDRVAPI*/ GFXBeginScene()
 
 void /*GFXDRVAPI*/ GFXEndScene()
 {
-  //	glFinish();//finish all drawing commandes
-	
         glFlush();
 	glutSwapBuffers(); //swap the buffers
-#ifdef STATS_QUEUE
-	cerr.form("Frame stats for frame # %d: %d Tris, %d Quads, %d Points, %d total vertices drawn.\n",
-		statsqueue.size(),
-		statsqueue.back().drawnTris,
-		statsqueue.back().drawnQuads,
-		statsqueue.back().drawnPoints,
-		statsqueue.back().total());
-#endif
 	
 }
 
