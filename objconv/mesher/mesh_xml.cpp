@@ -70,6 +70,12 @@ struct strip{
 };
 
 
+struct LODholder{
+	float FPS;
+	float size;
+	vector<unsigned char> name;
+};
+
 enum polytype{ 
 	LINE,
 	TRIANGLE,
@@ -205,7 +211,7 @@ struct XML {
     vector<triangle> tris;
     vector<quad> quads;
 
-	//FIXME - strips not currently supported
+	//FIXME - strips have yet to be verified to work
     vector <strip> linestrips;
     vector <strip> tristrips;
     vector <strip> trifans;
@@ -245,6 +251,9 @@ struct XML {
 	quad quadtemp;
 	strip striptemp;
 	stripelement stripelementtemp;
+	LODholder lodtemp;
+	vector<LODholder> LODs;
+
 	GFXMaterial material;
     float scale;
 	XML(){ //FIXME make defaults appear here.
@@ -741,8 +750,29 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	}
 	xml->curpolyindex+=1;	
     break;
-  case XML::LOD: //FIXME
-    break;
+  case XML::LOD: //FIXME?
+	  xml->lodtemp.size=0;
+	  xml->lodtemp.FPS=0;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		switch(XML::attribute_map.lookup((*iter).name)) {
+		case XML::UNKNOWN:
+		break;
+		case XML::FRAMESPERSECOND:
+			xml->lodtemp.FPS=XMLSupport::parse_float((*iter).value);
+		  break;
+		case XML::SIZE:
+		  xml->lodtemp.size = XMLSupport::parse_float ((*iter).value);
+		  break;
+		case XML::LODFILE:
+		  string lodname = (*iter).value.c_str();
+		  for(int index=0;index<lodname.size();index++){
+		  xml->lodtemp.name.push_back(lodname[index]);
+		  }
+		  break;
+		}
+	  }
+	  xml->LODs.push_back(xml->lodtemp);
+	  break;
   case XML::LOGO: //FIXME
     break;
   case XML::REF: //FIXME
