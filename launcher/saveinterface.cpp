@@ -125,12 +125,12 @@ void save_stuff( const char *filename) {
 void save_stuff(char *filename) {
 #endif
   changehome();
-    FILE *file=fopen("../save.txt","wt");
+    FILE *file=fopen("../save.4.x.txt","wt");
     if (file) {
       fprintf (file, "%s%c", filename,0);
       fclose(file);
     } else {
-      Help("Error","ERROR: Unable to open ../save.txt");
+      Help("Error","ERROR: Unable to open ../save.4.x.txt");
     }
 }
 
@@ -421,14 +421,16 @@ int main( int   argc,
 #include <wchar.h>
 #endif
 char *makeasc(wchar_t *str) {
+	const int WCHAR_SIZE=(sizeof(wchar_t)/sizeof(char));
+	char *mystr=(char*)str;
 	int i;
-	for (i=0;str[i]!='\0';i+=2) {
+	for (i=0;mystr[i]!='\0'&&mystr[i+1]!='\0';i+=WCHAR_SIZE) {
 	}
-	int len=i/2;
-	char *newstr=new char [len+2];
+	int len=i/WCHAR_SIZE;
+	char *newstr=new char [len+WCHAR_SIZE];
 	int j;
-	for (i=0,j=0;str[i]!='\0';i+=2,j++) {
-		newstr[j]=str[i];
+	for (i=0,j=0;mystr[i]!='\0';i+=WCHAR_SIZE,j++) {
+		newstr[j]=mystr[i];
 	}
 	newstr[j]='\0';
 	return newstr;
