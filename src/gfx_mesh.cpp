@@ -629,8 +629,8 @@ void Mesh::Reflect()
 		for (int j=0; j<3;j++)
 		{
 			int k = i+j;
-			pnt = ::Transform(currentMatrix, Vector(vertexlist[k].x, vertexlist[k].y, vertexlist[k].z));
-			nml[j] = ::TransformNormal(currentMatrix, Vector(vertexlist[k].i, vertexlist[k].j, vertexlist[k].k));
+			pnt = ::Transform(currentMatrix, vertexlist[k].x, vertexlist[k].y, vertexlist[k].z);
+			nml[j] = ::TransformNormal(currentMatrix, vertexlist[k].i, vertexlist[k].j, vertexlist[k].k);
 
 			Camera* TempCam = _GFX->AccessCamera();
 			TempCam->GetPosition (CamPos);
