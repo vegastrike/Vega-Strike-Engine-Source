@@ -945,6 +945,23 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile){
   return runningbytenum;
 
 }
+static float mymax(float a, float b) {
+  return a>b?a:b;
+}
+void NormalizeProperty(float&r, float&g, float&b, float&a) {
+  if (r>1||g>1||b>1||a>1) {
+    float mx = mymax(mymax(mymax(r,g),b),a);
+    r/=mx;g/=mx;b/=mx;
+    if (a>1)//sometimes they get the alpha right
+      a/=mx;
+  }
+}
+void NormalizeMaterial(GFXMaterial &m) {
+  NormalizeProperty(m.ar,m.ag,m.ab,m.aa);
+  NormalizeProperty(m.dr,m.dg,m.db,m.da);
+  NormalizeProperty(m.sr,m.sg,m.sb,m.sa);
+  NormalizeProperty(m.er,m.eg,m.eb,m.ea);
+}
 int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
   unsigned int32bit intbuf;
   float32bit floatbuf;
@@ -970,6 +987,7 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Blend Source
   intbuf= VSSwapHostIntToLittle(memfile.blend_dst);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Blend Destination
+  NormalizeMaterial(memfile.material);
   floatbuf= VSSwapHostFloatToLittle(memfile.material.power);
   runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Specular:Power
   floatbuf= VSSwapHostFloatToLittle(memfile.material.ar);
