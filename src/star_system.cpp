@@ -296,11 +296,6 @@ void StarSystem::Draw() {
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   shouldfog=false;
-  static float bloo;
-  if (interpolation_blend_factor<bloo) {
-    fprintf (stderr,"bad times\n");
-  }
-  bloo = interpolation_blend_factor;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   while((unit = iter->current())!=NULL) {
     unit->Draw();
