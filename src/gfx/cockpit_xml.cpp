@@ -101,6 +101,7 @@ namespace CockpitXML {
     EnumMap::Pair ("Speed", UnitImages::KPS),
     EnumMap::Pair ("SetSpeed", UnitImages::SETKPS),
     EnumMap::Pair ("Auto", UnitImages::AUTOPILOT),
+	EnumMap::Pair ("Collision", UnitImages::COLLISION),
     EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS)
   };
   const EnumMap::Pair attribute_names[] = {
@@ -133,7 +134,7 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE)
   };
 
-  const EnumMap element_map(element_names, 30);
+  const EnumMap element_map(element_names, 31);
   const EnumMap attribute_map(attribute_names, 27);
 }
 
@@ -224,6 +225,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case UnitImages::KPS:
   case UnitImages::SETKPS:
   case UnitImages::AUTOPILOT:
+  case UnitImages::COLLISION:
   case UnitImages::COCKPIT_FPS:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {

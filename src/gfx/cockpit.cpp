@@ -787,6 +787,9 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	  if (target->graphicOptions.missilelock)
 		  return 1;
 	  return 0;
+  case UnitImages::COLLISION:
+	  return rand ()%2;
+	  break;
   case UnitImages::ECM:
 	  return target->GetImageInformation().ecm>0?1:0;
   case UnitImages::JUMP:
