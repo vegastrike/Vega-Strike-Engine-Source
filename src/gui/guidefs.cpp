@@ -34,7 +34,7 @@ GFXColor getConfigColor(const char * name, GFXColor defaul) {
   return GFXColor(color[0], color[1], color[2], color[3]);
 }
 
-GFXColor SaturatedColor(float r, float g, float b, float a=1.0f) {
+GFXColor SaturatedColor(float r, float g, float b, float a) {
   static float Saturation=XMLSupport::parse_float(vs_config->getVariable("graphics","base_saturation","1.0"));
   
   return GFXColor((r*Saturation*3+(r+b+g)*(1-Saturation))/3,
