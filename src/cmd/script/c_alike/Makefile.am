@@ -1,6 +1,5 @@
 noinst_LIBRARIES = libc_alike.a
-SUBDIRS = 
-INCLUDES = 
+
 
 libc_alike_a_SOURCES =				\
 	c_alike.tab.cpp		\
