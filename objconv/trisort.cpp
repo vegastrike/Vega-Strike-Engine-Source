@@ -96,7 +96,7 @@ void Mesh::write(const char * filename)const {
     if (fp) {
     unsigned int i;
     for (i=0;i<p.size();i++) {
-        fprintf (fp,"p %lf %lf %lf\n",p[i].x,p[i].y,p[i].z);
+        fprintf (fp,"v %lf %lf %lf\n",p[i].x,p[i].y,p[i].z);
     }
     for (i=0;i<n.size();i++) {
         fprintf (fp,"n %lf %lf %lf\n",n[i].x,n[i].y,n[i].z);
@@ -175,8 +175,8 @@ Face Mesh::processface (char * line) const{
 void Mesh::processline (char * line) {
     double a=0,b=0,c=0,d=0;
     switch (line[0]) {
-        case 'p':
-            sscanf (line,"p %lf %lf %lf",&a,&b,&c);
+        case 'v':
+            sscanf (line,"v %lf %lf %lf",&a,&b,&c);
             p.push_back (Vector (a,b,c));
             break;
         case 'n':
