@@ -143,6 +143,10 @@ typedef EventKeyCode EventButton;
 static const int LEFT_MOUSE_BUTTON = WS_LEFT_BUTTON;
 static const int MIDDLE_MOUSE_BUTTON = WS_MIDDLE_BUTTON;
 static const int RIGHT_MOUSE_BUTTON = WS_RIGHT_BUTTON;
+static const int WHEELUP_MOUSE_BUTTON = WS_WHEEL_UP;
+static const int WHEELDOWN_MOUSE_BUTTON = WS_WHEEL_DOWN;
+
+static const int WHEEL_SCROLL_SIZE = 3; ///< Number of lines to scroll when using the wheel.
 
 
 /* This describes an event from an input device: mouse, keyboard, etc.

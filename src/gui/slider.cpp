@@ -210,7 +210,15 @@ bool Slider::processMouseDown(const InputEvent& event) {
         // Make sure we see mouse events *first* until we get a mouse-up.
         globalEventManager().pushResponder(this);
         return true;
-    }
+    } else if (event.code == WHEELUP_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			setPosition(position()-WHEEL_SCROLL_SIZE);
+		}
+	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			setPosition(position()+WHEEL_SCROLL_SIZE);
+		}
+	}
 
     return Control::processMouseDown(event);
 }

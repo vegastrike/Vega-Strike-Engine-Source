@@ -237,6 +237,8 @@ void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
     assert( LEFT_MOUSE_BUTTON == WS_LEFT_BUTTON );
     assert( RIGHT_MOUSE_BUTTON == WS_RIGHT_BUTTON );
     assert( MIDDLE_MOUSE_BUTTON == WS_MIDDLE_BUTTON );
+    assert( WHEELUP_MOUSE_BUTTON == WS_WHEEL_UP );
+    assert( WHEELDOWN_MOUSE_BUTTON == WS_WHEEL_DOWN );
 
     if(state == WS_MOUSE_DOWN) {
         InputEvent event(MOUSE_DOWN_EVENT, button, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));

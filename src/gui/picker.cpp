@@ -301,7 +301,15 @@ bool Picker::processMouseDown(const InputEvent& event) {
             globalEventManager().pushResponder(this);
             return true;
         }
-    }
+    } else if (event.code == WHEELUP_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()-WHEEL_SCROLL_SIZE);
+		}
+	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()+WHEEL_SCROLL_SIZE);
+		}
+	}
 
     return Control::processMouseDown(event);
 }

@@ -75,6 +75,9 @@ public:
     // The outside boundaries of the control.
     virtual void setRect(const Rect& r);
 
+    // OVERRIDES - used for scrolling.
+    virtual bool processMouseDown(const InputEvent& event);
+
     // Process a command event.
     virtual bool processCommand(const EventCommandId& command, Control* control);
 

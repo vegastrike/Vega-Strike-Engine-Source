@@ -86,6 +86,21 @@ bool StaticDisplay::processCommand(const EventCommandId& command, Control* contr
     return Control::processCommand(command, control);
 }
 
+// Process wheel events for scrolling.
+bool StaticDisplay::processMouseDown(const InputEvent& event) {
+	if (event.code == WHEELUP_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()-WHEEL_SCROLL_SIZE);
+		}
+	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()+WHEEL_SCROLL_SIZE);
+		}
+	}
+
+	return Control::processMouseDown(event);
+}
+
 // CONSTRUCTION
 StaticDisplay::StaticDisplay(void)
 :
