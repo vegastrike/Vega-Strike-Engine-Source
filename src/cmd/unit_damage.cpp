@@ -131,6 +131,10 @@ float Unit::FShieldData() {
   }
   return 0;
 }
+float Unit::AmorData (float armor[4]) {
+  memcpy (&armor[0],&this->armor.right,sizeof (float)*4);
+}
+
 float Unit::BShieldData() {
   switch (shield.number) {
   case 2: return shield.fb[1]/shield.fb[3];

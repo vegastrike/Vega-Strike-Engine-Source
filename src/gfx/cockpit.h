@@ -8,12 +8,13 @@ class Sprite;
 class Unit;
 enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
-  enum GAGUES {SHIELDF,SHIELDR,SHIELDL,SHIELDB,ARMORF,ARMORR,ARMORL,ARMORB,FUEL};
-  float StartArmor[4];
+  enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, NUMGAGUES};
+  float StartArmor[FUEL+1];//and startfuel
   UnitContainer parent;
   Sprite *Pit [4];
   Sprite *Radar;
   Sprite *VDU [2];
+  Sprite *gauges[NUMGAUGES];
   std::vector <Sprite *> Panel;
   float cockpit_offset;
   float viewport_offset;
@@ -31,6 +32,8 @@ class Cockpit {
   float zoomfactor;
   Cockpit (const char * file, Unit * parent);
   ~Cockpit();
+  static float LookupTargetStat (int stat, Unit *target);
+  void DrawGauges();
   void Init (const char * file);
   void SetParent(Unit * unit);
   void Draw();//restores viewport

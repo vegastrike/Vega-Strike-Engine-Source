@@ -105,8 +105,40 @@ void Cockpit::DrawBlips (Unit * un) {
   GFXEnable (TEXTURE0);
   delete iter;
 }
-
-
+float Cockpit::LookupTargetStat (int stat, Unit *target) {
+  switch (stat) {
+  case SHIELDF:
+    break;
+  case SHIELDR:
+    break;
+  case SHIELDL:
+    break;
+  case SHIELDB:
+    break;
+  case ARMORF:
+    break;
+  case ARMORR:
+    break;
+  case ARMORL:
+    break;
+  case ARMORB:
+    break;
+  case FUEL:
+    break;
+  case ENERGY:
+    break;
+  }
+}
+void Cockpit::DrawGauges() {
+  Unit * un = parent->GetUnit();
+  if (un) {
+    for (int i=0;i<NUMGAUGES;i++) {
+      if (gauges[i]) {
+	gauges[i]->Draw(LookupStat (i,un));
+      }
+    }
+  }
+}
 void Cockpit::Init (const char * file) {
   Delete();
   LoadXML(file);
@@ -119,6 +151,10 @@ void Cockpit::Init (const char * file) {
 
 void Cockpit::SetParent (Unit * unit) {
   parent.SetUnit (unit);
+  if (unit) {
+    
+
+  }
 }
 void Cockpit::Delete () {
   for (int i=0;i<4;i++) {

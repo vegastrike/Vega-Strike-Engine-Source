@@ -240,6 +240,8 @@ public:
   void UnFire();
   Computer & GetComputerData () {return computer;}
   float FShieldData();  float RShieldData();  float LShieldData();  float BShieldData();
+  void ArmorData(float armor[4]);
+  float FuelData();
   float GetHull() {return hull;}
   void UpdateHudMatrix();
   Order *getAIState() {return aistate;}
