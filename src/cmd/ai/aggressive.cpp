@@ -21,7 +21,7 @@ const EnumMap::Pair element_names[] = {
 const EnumMap AggressiveAIel_map(element_names, 11);
 
 AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map) {
-  
+  olddist = distance;
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);
@@ -41,8 +41,30 @@ bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   }
 }
 
+bool AggressiveAI::ItemDistChange (const float newdist, const AIEvents::AIEvresult &item) {
+  if (abs(item.type)==DISTANCE) {
+    return item.Eval(distance)!=item.Eval (newdist);    
+  } else {
+    return false;
+  }
+}
+
+bool AggressiveAI::DistChange () {
+  std::vector <std::list <AIEvents::AIEvresult> >::iterator i = logic.result.begin();  
+  for (;i!=logic.result.end();i++) {
+    std::list <AIEvents::AIEvresult>::iterator j;
+    for (j= i->begin();j!=i->end();j++) {
+      if (ItemDistChange(olddist,*j)) {
+	return true;
+      }
+    }  
+  }
+  return false;
+}
+
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   float value;
+  olddist = distance;
   switch (abs(item.type)) {
   case DISTANCE:
     value = distance;
@@ -108,9 +130,9 @@ void AggressiveAI::ProcessLogic () {
 void AggressiveAI::Execute () {  
   FireAt::Execute();
   if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
-    ProcessLogic();
+     ProcessLogic();
   } else {
-    if ( (--logic.curtime)==0) {
+    if ( DistChange()||(--logic.curtime)==0) {
       parent->getAIState()->eraseType (Order::FACING);
       parent->getAIState()->eraseType (Order::MOVEMENT);
       

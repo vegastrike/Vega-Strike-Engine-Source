@@ -629,7 +629,7 @@ void AIScript::LoadXML() {
   if(!inFile) {
     return;
   }
-
+  fprintf (stderr, "Loading AIscript: %s\n", filename);
   xml = new AIScriptXML;
   xml->unitlevel=0;
   xml->terminate=true;
