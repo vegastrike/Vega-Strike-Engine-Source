@@ -136,6 +136,7 @@ EXPORT_UTIL(GetMasterPartList,Unit())
 EXPORT_UTIL(GetContrabandList,Unit())
 EXPORT_UTIL(numActiveMissions,1)
 voidEXPORT_UTIL(SetAutoStatus)
+voidEXPORT_UTIL(LoadMission)
 voidEXPORT_UTIL(setMissionOwner)
 EXPORT_UTIL(getMissionOwner,1)
 #undef EXPORT_UTIL
@@ -345,6 +346,7 @@ def IOmessage(time,fr,to,message):
 EXPORT_UTIL(GetMasterPartList,Unit())
 EXPORT_UTIL(GetContrabandList,Unit())
 voidEXPORT_UTIL(SetAutoStatus)
+voidEXPORT_UTIL(LoadMission)
 voidEXPORT_UTIL(setMissionOwner)
 EXPORT_UTIL(getMissionOwner,1)
 

@@ -9,6 +9,7 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "lin_time.h"
+#include "load_mission.h"
 extern class Music *muzak;
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name );
 
@@ -230,6 +231,9 @@ namespace UniverseUtil {
 	Unit *GetContrabandList (string faction) {
 		return _Universe->GetContraband(_Universe->GetFaction(faction.c_str()));
 	}
+        void LoadMission (string missionname) {
+                ::LoadMission (missionname.c_str(),false);
+        }
         void SetAutoStatus (int global_auto, int player_auto) {
 	  if (global_auto==1) {
 	    mission->global_autopilot = Mission::AUTO_ON;
