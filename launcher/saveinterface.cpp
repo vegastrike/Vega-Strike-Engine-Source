@@ -38,7 +38,7 @@ static const char * helps [NUM_HELPS] = {
 };
 
 
-char * prog_arg=NULL;
+char * prog_arg=0;
 #ifdef _WIN32
 std::string ParentDir () {
   static char * final=NULL;
@@ -182,7 +182,7 @@ void launch_mission () {
 #ifdef _WIN32
   GoToParentDir();
 #endif
-  int player = my_mission.rfind ("player");
+  unsigned int player = my_mission.rfind ("player");
   if (player>0&&player!=std::string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
    printf ("vegastrike %s %s",num,my_mission.c_str());
@@ -247,6 +247,7 @@ void file_ok_auto_sel( GtkWidget        *w,
 
 void hello( GtkWidget *widget, gpointer   data ) {
     int i=(int)data;
+    int pid=0;
     switch (i) {
     case 0:
       LoadMissionDialog("Select Mission",i);
@@ -271,14 +272,15 @@ void hello( GtkWidget *widget, gpointer   data ) {
 #ifdef _WIN32
 		spawnl(P_NOWAIT,"./Setup.exe","./Setup.exe",NULL);
 #else
-		int pid=fork()
+		pid=fork();
 		if (pid==-1) {
 			execlp("vssetup","vssetup",NULL);
+			return;
 		}
 #endif
       break;
     case 7:
-      help_func(NULL,-1);
+      help_func(0,-1);
       break;
     case 8:
       gtk_main_quit();
@@ -365,7 +367,7 @@ void fileop_destroy ( GtkWidget        *w,
 			  GtkFileSelection *fs ) {
   if (fs&&fs->fileop_dialog) {
     gtk_widget_destroy(fs->fileop_dialog);
-    fs->fileop_dialog=NULL;
+    fs->fileop_dialog=0;
   }
 }
 
@@ -378,7 +380,7 @@ void delfile ( GtkWidget        *w,
 		char *remstr=new char[strlen(newstr)+20];
 		sprintf(remstr,"../serialized_xml/%s/",newstr);
 		glob_t *dirs=FindFiles(remstr,"");
-		for (int i=0;i<dirs->gl_pathc;i++) {
+		for (unsigned int i=0;i<dirs->gl_pathc;i++) {
 			remove(dirs->gl_pathv[i]);
 		}
 		rmdir(remstr);
@@ -387,7 +389,7 @@ void delfile ( GtkWidget        *w,
 		delete []remstr;
 		gtk_file_selection_set_filename (fs,"");
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
-		GTK_FILE_SELECTION(fs)->fileop_dialog=NULL;
+		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
 }
 
@@ -438,7 +440,7 @@ void fileop_destroy_dumb ( GtkWidget        *w,
 			  dumbstruct *fs ) {
   if (fs->filesel) {
     gtk_widget_destroy(GTK_FILE_SELECTION(fs->filesel)->fileop_dialog);
-    GTK_FILE_SELECTION(fs->filesel)->fileop_dialog=NULL;
+    GTK_FILE_SELECTION(fs->filesel)->fileop_dialog=0;
   }
   delete fs;
 }
@@ -544,10 +546,10 @@ void copyfile ( GtkWidget        *w,
 		mkdir(rementstr,0xffffffff);
 #endif
 		delete []rementstr;
-		FILE *f1=NULL;
-		FILE *f2=NULL;
+		FILE *f1=0;
+		FILE *f2=0;
 		glob_t *dirs=FindFiles(remstr,"");
-		for (int i=0;i<dirs->gl_pathc;i++) {
+		for (unsigned int i=0;i<dirs->gl_pathc;i++) {
 			f1=fopen(dirs->gl_pathv[i],"rb");
 			if (f1) {
 				int len=strlen(dirs->gl_pathv[i]);
@@ -581,7 +583,7 @@ void copyfile ( GtkWidget        *w,
 		gtk_file_selection_set_filename (fs,"");
 		delete []newentstr;
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
-		GTK_FILE_SELECTION(fs)->fileop_dialog=NULL;
+		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
 }
 
