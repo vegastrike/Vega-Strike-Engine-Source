@@ -193,12 +193,13 @@ void GFXInit (int argc, char ** argv){
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 #endif
 
-      char str [15];
+      char str [1024];
       sprintf (str, "%dx%d:%d",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
       glutGameModeString(str);
 
     /* Create a window */
-      if (gl_options.fullscreen) {
+      if (gl_options.fullscreen&&(glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)!=-1)) {
+	
 	glutInitWindowPosition( 0, 0 );
 	glutEnterGameMode();
     } else {
