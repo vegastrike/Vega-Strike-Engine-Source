@@ -41,8 +41,9 @@ FILE *mystdout=stdout;
 #define STD_ERR stderr
 #define STD_OUT stdout
 #endif
-
-
+#ifdef __APPLE
+#undef main
+#endif
 /******************************************************************************/
 /* some simple exit and error routines                                        */
 
