@@ -35,11 +35,11 @@ float Unit::getMinDis (const Vector &pnt) {
   return minsofar;
 }
 
-float Unit::querySphere (const Vector &st, const Vector &dir, float err) {
+float Unit::querySphere (const Vector &st, const Vector &dir, float err) const{
   int i;
   float retval=0;
   float adjretval=0;
-  float * tmpo = cumulative_transformation_matrix;
+  const float * tmpo = cumulative_transformation_matrix;
 
   Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
   for (i=0;i<nummesh;i++) {

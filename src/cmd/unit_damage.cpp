@@ -136,7 +136,7 @@ static int applyto (unsigned short &shield, const unsigned short max, const floa
   return (shield>=max)?1:0;
 }
 
-float Unit::FShieldData() {
+float Unit::FShieldData() const{
   switch (shield.number) {
   case 2: return shield.fb[0]/shield.fb[2];
   case 4: return ((float)shield.fbrl.front)/shield.fbrl.frontmax;
@@ -144,7 +144,7 @@ float Unit::FShieldData() {
   }
   return 0;
 }
-void Unit::ArmorData (unsigned short armor[4]) {
+void Unit::ArmorData (unsigned short armor[4]) const{
   //  memcpy (&armor[0],&this->armor.front,sizeof (unsigned short)*4);
   armor[0]=this->armor.front;
   armor[1]=this->armor.back;
@@ -152,14 +152,14 @@ void Unit::ArmorData (unsigned short armor[4]) {
   armor[3]=this->armor.left;
 }
 
-float Unit::FuelData () {
+float Unit::FuelData () const{
   return fuel;
 }
-float Unit::EnergyData() {
+float Unit::EnergyData() const{
   return ((float)energy)/maxenergy;
 }
 
-float Unit::BShieldData() {
+float Unit::BShieldData() const{
   switch (shield.number) {
   case 2: return shield.fb[1]/shield.fb[3];
   case 4: return ((float)shield.fbrl.back)/shield.fbrl.backmax;
@@ -167,7 +167,7 @@ float Unit::BShieldData() {
   }
   return 0;
 }
-float Unit::LShieldData() {
+float Unit::LShieldData() const{
   switch (shield.number) {
   case 2: return 0;//no data, captain
   case 4: return ((float)shield.fbrl.left)/shield.fbrl.leftmax;
@@ -175,7 +175,7 @@ float Unit::LShieldData() {
   }
   return 0;
 }
-float Unit::RShieldData() {
+float Unit::RShieldData() const{
   switch (shield.number) {
   case 2: return 0;//don't react to stuff we have no data on
   case 4: return ((float)shield.fbrl.right)/shield.fbrl.rightmax;
@@ -259,7 +259,7 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
     percent = 0;
   return percent;
 }
-bool Unit::ShieldUp (const Vector &pnt) {
+bool Unit::ShieldUp (const Vector &pnt) const{
   const int shieldmin=5;
   int index;
   switch (shield.number){

@@ -396,7 +396,7 @@ void Unit::SetPlanetOrbitData (PlanetaryTransform *t) {
     planet->dirty=true;
   }
 }
-PlanetaryTransform * Unit::GetPlanetOrbit () {
+PlanetaryTransform * Unit::GetPlanetOrbit () const {
   if (planet==NULL)
     return NULL;
   return planet->trans;

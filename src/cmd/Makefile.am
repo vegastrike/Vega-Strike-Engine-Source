@@ -20,6 +20,8 @@ libcmd_a_SOURCES =				\
 	faction_xml.cpp			\
 	music.cpp			\
 	music.h				\
+	nebula.cpp			\
+	nebula.h			\
 	terrain.cpp			\
 	terrain.h			\
 	unit.h				\

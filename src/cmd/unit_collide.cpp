@@ -93,16 +93,16 @@ void Unit::CollideAll() {
 #undef COLQ
 }
 
-bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
+bool Unit::Inside (const Vector &target, const float radius, Vector & normal, float &dist) const {//do each of these bubbled subunits collide with the other unit?
   int i;
-  if (!querySphere(target->Position(),target->rSize())) {
+  if (!querySphere(target,radius)) {
     return false;;
   }
-  if (queryBSP(target->Position(), target->rSize(), normal,dist,false)) {
+  if (queryBSP(target, radius, normal,dist,false)) {
     return true;
   }
   for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->OneWayCollide(target,normal,dist)) {
+    if (subunits[i]->Inside(target,radius,normal,dist)) {
       return true;
     }
   }
@@ -131,7 +131,7 @@ bool Unit::Collide (Unit * target) {
     bigger = this;
     smaller = target;
   }
-  if (!bigger->OneWayCollide(smaller,normal,dist))
+  if (!bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist))
     return false;
   //UNUSED BUT GOOD  float elast = .5*(smaller->GetElasticity()+bigger->GetElasticity());
   //BAD  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
@@ -158,7 +158,7 @@ void Unit::reactToCollision(Unit * smalle, const Vector & normal, float dist) {
 
 
 
-bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
+bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) const{
   int i;
   for (i=0;i<numsubunit;i++) {
     if ((subunits[i]->queryBSP(pt,err, norm,dist,ShieldBSP)))
@@ -172,7 +172,7 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bo
   }
   if (!temp)
     return false;
-  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  BSPTree *const* tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
   if (bspTree&&!ShieldBSP) {
     tmpBsp= &bspTree;
   }
@@ -187,7 +187,7 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bo
   return false;
 }
 
-float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bool ShieldBSP) {
+float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bool ShieldBSP) const{
   int i;
   float tmp;
 
@@ -196,7 +196,7 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bo
       return tmp;
   }
   Vector st (InvTransform (cumulative_transformation_matrix,start));
-  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  BSPTree *const* tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
   if (bspTree&&!ShieldBSP) {
     tmpBsp= &bspTree;
   }
@@ -223,9 +223,9 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bo
 }
 
 
-bool Unit::querySphere (const Vector &pnt, float err) {
+bool Unit::querySphere (const Vector &pnt, float err) const{
   int i;
-  float * tmpo = cumulative_transformation_matrix;
+  const float * tmpo = cumulative_transformation_matrix;
   
   Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
 #ifdef VARIABLE_LENGTH_PQR
@@ -256,7 +256,7 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 
 
 
-float Unit::querySphere (const Vector &start, const Vector &end) {
+float Unit::querySphere (const Vector &start, const Vector &end) const{
   int i;
   float tmp;
   Vector st,dir;

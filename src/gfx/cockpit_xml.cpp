@@ -330,7 +330,6 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     }
     break;
 
-    
   }
   
 }

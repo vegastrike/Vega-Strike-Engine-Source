@@ -28,10 +28,9 @@ struct GFXColor;
 #include <string>
 #include "weapon_xml.h"
 #include "linecollide.h"
-#include "container.h"
 #include "gfx/vdu.h"
 #include "xml_support.h"
-
+#include "container.h"
 class Flightgroup;
 class Nebula;
 
@@ -186,6 +185,7 @@ class Unit {
       float refire;
     } ref;
     ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
+
     short size;
     ///-1 is infinite
     short ammo;
@@ -341,12 +341,14 @@ class Unit {
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
   void SetCollisionParent (Unit *name);
   ///If the shields are up from this position
-  bool ShieldUp (const Vector &);
+  bool ShieldUp (const Vector &) const;
   ///Builds a BSP tree from either the hull or else the current meshdata[] array
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
+  ///Does a one way collision between smaller target and this
+  bool Inside (const Vector &position, const float radius, Vector & normal, float &dist) const;
   void SetPlanetOrbitData (PlanetaryTransform *trans);
-  PlanetaryTransform *GetPlanetOrbit ();
+  PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
   void UpdateCollideQueue();
   ///The name of this unit
@@ -377,7 +379,7 @@ public:
   bool Explode(bool draw, float timeit);
   ///explodes then deletes
   void Destroy();
-  bool InRange (Unit *target, Vector &localcoord);
+  bool InRange (Unit *target, Vector &localcoord) const;
   ///how visible the ship is from 0 to 1
   float CloakVisible () const;
   ///cloaks or decloaks the starship depending on the bool
@@ -385,23 +387,23 @@ public:
   ///deletes
   virtual void Kill();
   ///Is dead yet?
-  inline bool Killed() {return killed;}
+  inline bool Killed() const {return killed;}
   ///Low level list function to reference the unit as being the target of a UnitContainer or Colleciton
   inline void Ref() {ucref++;}
   ///Releases the unit from this reference of UnitContainer or Collection
   void UnRef();
   ///Gets the average gun speed of the unit::caution SLOW
-  void getAverageGunSpeed (float & speed, float & range);
+  void getAverageGunSpeed (float & speed, float & range) const;
   ///Finds the position from the local position if guns are aimed at it with speed
-  Vector PositionITTS (const Vector & local_posit, float speed);
+  Vector PositionITTS (const Vector & local_posit, float speed) const;
   ///The cosine of the angle to the target given passed in speed and range
-  float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001);
+  float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001) const;
   ///Highest cosine from given mounts to target. Returns distance and cosine
-  float cosAngleFromMountTo (Unit * target, float & distance);
+  float cosAngleFromMountTo (Unit * target, float & distance) const;
   ///won't collide with owner
   void SetOwner(Unit *target);
-  Unit *Target(){return computer.target.GetUnit();}
-  Unit *Threat(){return computer.threat.GetUnit();}
+  Unit *Target() {return computer.target.GetUnit(); }
+  Unit *Threat() {return computer.threat.GetUnit(); }
   void Target (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
   void Threaten (Unit * targ, float danger);
@@ -412,26 +414,26 @@ public:
   ///Stops all active guns from firing
   void UnFire();
   Computer & GetComputerData () {return computer;}
-  float FShieldData();  float RShieldData();  float LShieldData();  float BShieldData();
-  void ArmorData(unsigned short armor[4]);
+  float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
+  void ArmorData(unsigned short armor[4])const;
   ///returns the current ammt of armor left
-  float FuelData();
+  float FuelData() const;
   ///Returns the current ammt of energy left
-  float EnergyData();
+  float EnergyData() const;
   ///Gets the current status of the hull
-  float GetHull() {return hull;}
+  float GetHull() const{return hull;}
   ///Sets the camera to be within this unit.
   void UpdateHudMatrix();
   ///Returns the current AI state of the current unit for modification
-  Order *getAIState() {return aistate;}
+  Order *getAIState() const{return aistate;}
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
-  float rSize () {return radial_size;}
+  float rSize () const {return radial_size;}
   ///What's the HudImage of this unit
-  Sprite * getHudImage ();
+  Sprite * getHudImage ()const ;
   ///Returns the cockpit name so that the controller may load a new cockpit
-  std::string getCockpit ();
+  std::string getCockpit ()const;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
   ///Deprecated
@@ -439,17 +441,17 @@ public:
   ///Gets the minimum distance away from the point in 3space
   float getMinDis(const Vector &pnt);//for clicklist
   ///queries the sphere for weapons (world space point)
-  bool querySphere (const Vector &pnt, float err);
+  bool querySphere (const Vector &pnt, float err) const;
   ///queries the sphere for beams (world space start,end)
-  float querySphere (const Vector &start, const Vector & end);
+  float querySphere (const Vector &start, const Vector & end) const;
   ///queries the ship with a directed ray
-  float querySphere (const Vector &st, const Vector &dir, float err);//for click list
+  float querySphere (const Vector &st, const Vector &dir, float err) const;//for click list
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  float queryBSP (const Vector &st, const Vector & end, Vector & normal, bool ShieldBSP=true);
+  float queryBSP (const Vector &st, const Vector & end, Vector & normal, bool ShieldBSP=true) const;
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield
-  bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist, bool ShieldBSP);
+  bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist, bool ShieldBSP) const;
   ///Queries if this unit is within a given frustum
-  bool queryFrustum (float frustum[6][4]);
+  bool queryFrustum (float frustum[6][4]) const;
 
   /**
    *Queries bounding box with a point, radius err
@@ -484,16 +486,14 @@ public:
   ///Enqueues an order to the unit's order queue
   void EnqueueAI(Order *newAI, int subun);
   virtual void reactToCollision(Unit * bigger, const Vector & normal, float dist);
-  ///Does a one way collision between smaller target and this
-  bool OneWayCollide (Unit *target, Vector & normal, float &dist);
   ///Does a collision between this and another unit
   bool Collide(Unit * target);
   ///checks for collisions with all beams and other units roughly and then more carefully
   void CollideAll();
   ///Returns the current world space position
-  Vector Position(){return cumulative_transformation.position;};
+  Vector Position() const{return cumulative_transformation.position;};
   ///Returns the unit-space position
-  Vector LocalPosition(){return curr_physical_state.position;};
+  Vector LocalPosition() const {return curr_physical_state.position;};
   ///Sets the unit-space position
   void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
   ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
@@ -613,5 +613,18 @@ struct Unit::XML {
   float rmin, rmax, rcur;
 
 };
+
+inline Unit * UnitContainer::GetUnit() {
+  if (unit==NULL)
+    return NULL;
+  if (unit->Killed()) {
+    unit->UnRef();
+    unit = NULL;
+    return NULL;
+  }
+  return unit;
+}
+
+
 #endif
 

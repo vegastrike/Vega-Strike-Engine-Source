@@ -21,13 +21,5 @@ void UnitContainer::SetUnit (Unit * un) {
   unit = un;
   unit->Ref();
 }
-Unit * UnitContainer::GetUnit() {
-  if (unit==NULL)
-    return NULL;
-  if (unit->Killed()) {
-    unit->UnRef();
-    unit = NULL;
-    return NULL;
-  }
-  return unit;
-}
+
+

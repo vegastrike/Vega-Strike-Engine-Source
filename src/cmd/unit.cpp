@@ -199,10 +199,10 @@ void Unit::SetVisible(bool invis) {
 Unit::Unit() {
 	Init();
 }
-Sprite * Unit::getHudImage () {
+Sprite * Unit::getHudImage () const{
 	return image->hudImage;
 }
-std::string Unit::getCockpit () {
+std::string Unit::getCockpit () const{
 	return image->cockpitImage;
 }
 
@@ -383,7 +383,7 @@ Unit::~Unit()
 	}
 */
 }
-void Unit::getAverageGunSpeed(float & speed, float &range) {
+void Unit::getAverageGunSpeed(float & speed, float &range) const {
    if (nummounts) {
      int nummt = nummounts;
      for (int i=0;i<nummounts;i++) {
@@ -401,13 +401,13 @@ void Unit::getAverageGunSpeed(float & speed, float &range) {
    }
   
 }
-Vector Unit::PositionITTS (const Vector & posit, float speed) {
+Vector Unit::PositionITTS (const Vector & posit, float speed) const{
   Vector retval = Position()-posit;
   speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
   retval = Position()+Velocity*speed;
   return retval;
 }
-float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
+float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
    Vector Normal (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]);
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
@@ -425,7 +425,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
    dist /= range;//WARNING POTENTIAL DIV/0
    return tmpcos;
 }
-float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
+float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
   float retval = -1;
   dist = FLT_MAX;
   float tmpcos;
@@ -462,7 +462,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
 
 
 
-bool Unit::queryFrustum(float frustum [6][4]) {
+bool Unit::queryFrustum(float frustum [6][4]) const{
   int i;
 #ifdef VARIABLE_LENGTH_PQR
   Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);
@@ -687,7 +687,7 @@ void Unit::Select() {
 void Unit::Deselect() {
   selected = false;
 }
-bool Unit::InRange (Unit *target, Vector &localcoord) {
+bool Unit::InRange (Unit *target, Vector &localcoord) const {
   localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
   float mm= localcoord.Magnitude();
   if (mm>computer.radar.maxrange||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8) {

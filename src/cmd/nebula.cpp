@@ -62,13 +62,13 @@ using XMLSupport::AttributeList;
 using namespace NebulaXML;
 
 void Nebula::beginElement (void * Userdata,const XML_Char * name, const XML_Char ** atts) {
-	((Nebula *)Userdata)->beginElem(string(name),AttributeList(atts));
+	((Nebula *)Userdata)->beginElem(std::string(name),AttributeList(atts));
 }
 
 static void Nebula_endElement (void * Userdata,const XML_Char *) {}
 
 
-void Nebula::beginElem(std::string& name, AttributeList& atts) {
+void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 	Names elem = (Names)element_map.lookup(name);
 	AttributeList::const_iterator iter;
 	switch(elem) {

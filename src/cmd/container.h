@@ -2,6 +2,7 @@
 #ifndef _UNITCONTAINER_H_
 #define _UNITCONTAINER_H_
 class Unit;
+
 class UnitContainer {
  private:
   Unit * unit;
@@ -10,6 +11,6 @@ class UnitContainer {
   UnitContainer (Unit *);
   ~UnitContainer();
   void SetUnit (Unit *);
-  Unit * GetUnit();
+  inline Unit * GetUnit();
 };
 #endif
