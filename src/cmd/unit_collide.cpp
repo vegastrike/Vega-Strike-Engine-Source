@@ -249,24 +249,30 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bo
   if (bspTree&&!ShieldBSP) {
     tmpBsp= &bspTree;
   }
-  if (!(*tmpBsp)) {
-    tmp = querySphere (start,end);
-    norm = (tmp * (start-end));
-    tmp = norm.Magnitude();
-    norm +=start;
-    norm.Normalize();//normal points out from center
-    return tmp;
-  }
-  Vector ed (InvTransform (cumulative_transformation_matrix,end));
-  bool temp=false;
-  for (i=0;i<nummesh&&!temp;i++) {
-    temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
-  }
-  if (!temp)
-    return false;
-  if ((tmp = (*tmpBsp)->intersects (st,ed,norm))!=0) {
-    norm = ToWorldCoordinates (norm);
-    return tmp;
+  for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st)&&(tmpBsp!=(&bspTree)))?(&bspTree):NULL)) {
+    if (!(*tmpBsp)) {
+      tmp = querySphere (start,end);
+      norm = (tmp * (start-end));
+      tmp = norm.Magnitude();
+      norm +=start;
+      norm.Normalize();//normal points out from center
+      if (tmp)
+	return tmp;
+      else
+	continue;
+    }
+    Vector ed (InvTransform (cumulative_transformation_matrix,end));
+    bool temp=false;
+    for (i=0;i<nummesh&&!temp;i++) {
+      temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
+    }
+    if (!temp) {
+      continue;
+    }
+    if ((tmp = (*tmpBsp)->intersects (st,ed,norm))!=0) {
+      norm = ToWorldCoordinates (norm);
+      return tmp;
+    }
   }
   return 0;
 }

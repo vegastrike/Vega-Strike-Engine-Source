@@ -1,4 +1,8 @@
-2002-01-21 Alexander Rawass <alexannika@users.sourceforge.net>
+2002-01-21 Daniel Horn <hellcatv@users.sourceforge.net>
+	
+	* Made collisions work inside the shield by checking against the shield bsp and then the mesh BSP, so shots wouldn't go inside the mesh if the shields were up. 
+
+2002-01-21 Daniel Horn <hellcatv@users.sourceforge.net>
 	
 	* changed Planets to deactivate their lights at destroy, not delete
 
