@@ -310,7 +310,11 @@ void winsys_enable_key_repeat( bool enabled )
 */
 void winsys_show_cursor( bool visible )
 {
-    SDL_ShowCursor( visible );
+	static bool vis=true;
+	if (visible!=vis) {
+		SDL_ShowCursor( visible );
+		vis = visible;
+	}
 }
 
 /*---------------------------------------------------------------------------*/
@@ -717,11 +721,16 @@ void winsys_enable_key_repeat( bool enabled )
 */
 void winsys_show_cursor( bool visible )
 {
+	static bool vis=true;
+	if (visible!=vis) {
+
     if ( visible ) {
 	glutSetCursor( GLUT_CURSOR_LEFT_ARROW );
     } else {
 	glutSetCursor( GLUT_CURSOR_NONE );
     }
+	vis = visible;
+	}
 }
 
 
