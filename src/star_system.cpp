@@ -285,7 +285,7 @@ void StarSystem::SwapOut () {
 bool shouldfog=false;
 extern double interpolation_blend_factor;
 void StarSystem::Draw() {
-
+  interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
   AnimatedTexture::UpdateAllFrame();
   for (unsigned int i=0;i<contterrains.size();i++) {
     contterrains[i]->AdjustTerrain(this);
@@ -431,7 +431,7 @@ void StarSystem::Update() {
       time -= (1./PHY_NUM)*SIMULATION_ATOM;
     }
   }
-  interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
+
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
