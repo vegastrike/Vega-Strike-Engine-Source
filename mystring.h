@@ -155,6 +155,10 @@ class string : public vector <char> {
     *this=tmp;
     return *this;
   }
+  string &operator += (char a) {
+	char bleh[2]={a,0};
+	return (*this)+=bleh;
+  }
   /*  string & operator append (const string & a) {
     return *this +=a;
     }*/
@@ -419,6 +423,21 @@ operator<= (const string& lhs,
 {
   return (lhs.compare (rhs) <= 0);
 }
+
+
+inline string
+operator+ (const char * lhs,
+	    const string& rhs)
+{
+  return string(lhs)+rhs;
+}
+/*
+inline string
+operator+ (const string & lhs,
+	    const char * rhs)
+{
+  return lhs+string(rhs);
+}*/
 
 inline bool
 operator>= (const string& lhs,
