@@ -3,13 +3,6 @@
 #include "vsnet_socketset.h"
 #include "const.h"
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#else
-  #ifndef SOCKET_ERROR
-  #define SOCKET_ERROR -1
-  #endif
-#endif
-
 SocketSet::SocketSet( )
 {
     clear();

@@ -30,10 +30,11 @@
 #include "vsnet_clientstate.h"
 #include "vsnet_address.h"
 #include "vsnet_socket.h"
+#include "cmd/unit_generic.h"
+#include "savegame.h"
 
 extern VegaConfig *vs_config;
 
-class Unit;
 struct Client;
 
 // Description of a client's ship (ship type, weapons, shields status...)
@@ -46,6 +47,7 @@ struct	Client
 {
 	/* Network and identification properties */
 	Unit	*		game_unit;
+	SaveGame		save;
 	CubicSpline		spline;
 	AddressIP		cltadr;
 	bool            is_tcp;

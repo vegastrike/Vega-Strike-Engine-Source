@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include "vs_globals.h"
 #include "endianness.h"
+#include "cmd/unit_generic.h"
 #include "../config_xml.h"
 #include "client.h"
 #include "const.h"
@@ -38,7 +39,6 @@
 #include "packet.h"
 
 #include "vsnet_clientstate.h"
-#include "cmd/unit_generic.h"
 #include "vegastrike.h"
 #include "client.h"
 

@@ -10,13 +10,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#else
-  #ifndef SOCKET_ERROR
-  #define SOCKET_ERROR -1
-  #endif
-#endif
-
 LOCALCONST_DEF(SOCKETALT,bool,TCP,1)
 LOCALCONST_DEF(SOCKETALT,bool,UDP,0)
 
@@ -317,11 +310,7 @@ int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
 
     int       ret = 0;
 
-#if defined (_WIN32) || defined (__APPLE__)
-    int len1;
-#else
     socklen_t len1;
-#endif
 
     AddressIP dummy;
     if( from == NULL ) from = &dummy;

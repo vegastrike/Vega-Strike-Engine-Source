@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <math.h>
 
+#include "cmd/unit_generic.h"
 #include "client.h"
 #include "packet.h"
 #include "lin_time.h"
@@ -117,7 +118,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 
     char name[NAMELEN+1];
     char passwd[NAMELEN+1];
-    const char * buf = packeta.getData();
+    char * buf = packeta.getData();
     strcpy( name, buf);
     strcpy( passwd, buf+NAMELEN);
 
@@ -156,11 +157,26 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << clt->serial << " )= --------------------------------------" << endl;
 		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
 		// Get the save parts in the buffer
-		// const char * xml = buf + NAMELEN*2 + sizeof( unsigned int);
+		char * xml = buf + NAMELEN*2 + sizeof( unsigned int);
 		unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
-		// const char * save = buf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
+		/*
+		char * xml_tmp = new char[xml_size+1];
+		memcpy( xml_tmp, xml, xml_size);
+		xml_tmp[xml_size]=0;
+		*/
+		bool update = true;
+		char * save = buf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
 		unsigned int save_size = ntohl( *( (unsigned int *)(buf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
 		cout<<"XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
+		/*
+		QVector tmpvec( 0, 0, 0);
+		float credits;
+		vector<string> savedships;
+		string str("");
+		clt->save.ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
+		cout<<"Credits = "<<credits<<endl;
+		clt->game_unit->LoadXML( "", "", xml, xml_size);
+		*/
 
 		//string strname( name);
 		// Write temp XML file for unit
@@ -511,7 +527,7 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 				cout<<"Error : trying to remove client on empty waitList"<<" - len="<<len<<endl;
 				exit( 1);
 			}
-            WaitListEntry& entry( waitList.front() );
+            WaitListEntry entry( waitList.front() );
 			if( entry.tcp )
 			{
 			    clt = entry.t;

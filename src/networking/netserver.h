@@ -33,6 +33,7 @@
 #include "netui.h"
 #include "zonemgr.h"
 #include "client.h"
+#include "savegame.h"
 
 extern VegaConfig *vs_config;
 //extern VegaSimpleConfig *server_config;

@@ -11,11 +11,7 @@ using std::hex;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	//#warning "Win32 platform"
-	#define in_addr_t unsigned long
 	#include <winsock.h>
-#else
-	//#warning "GCC platform"
-	#define SOCKET_ERROR -1
 #endif
 
 std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s )
@@ -64,12 +60,7 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
     cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
 
     struct sockaddr_in remote_ip;
-#ifdef __APPLE__
-    int
-#else
-    socklen_t          
-#endif
-      len = sizeof( struct sockaddr_in );
+    socklen_t  len = sizeof( struct sockaddr_in );
 
     if( set.is_set( _fd ) )
     {

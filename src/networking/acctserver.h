@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "configxml.h"
+#include "netclass.h"
 #include "accountsxml.h"
 #include "packet.h"
 #include "netui.h"
@@ -27,12 +28,14 @@ class AccountServer
 {
 		NetUITCP			NetworkToClient;
 		ServerSocket*		Network;
+		// TCPNetUI *		Network;	// Network Interface
 		vector<Account *>	Cltacct;	// Client accounts
 		list<SOCKETALT>		Socks;		// List of active sockets on which we can receive requests
 		list<SOCKETALT>		DeadSocks;	// List of sockets to close
 
 		int			newaccounts;
 		int			keeprun;
+		// SOCKETALT	conn_sock;
 		ObjSerial	serial_seed;
 		Packet		packet;
 

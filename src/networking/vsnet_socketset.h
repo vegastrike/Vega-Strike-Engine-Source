@@ -27,7 +27,6 @@
 #include <errno.h>
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	//#warning "Win32 platform"
-	#define in_addr_t unsigned long
 	#include <winsock.h>
 #else
 	#include <sys/socket.h>
@@ -38,6 +37,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #endif
+#include "const.h"
 
 class SocketSet
 {

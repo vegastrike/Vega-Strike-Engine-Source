@@ -44,6 +44,17 @@ extern double NETWORK_ATOM;
 
 #define COUT std::cout << __FILE__ << ":" << __LINE__ << " "
 
+#if defined(_WIN32) && !defined(__CYGWIN__) || defined(__APPLE__)
+	//#warning "Win32 platform"
+	#define in_addr_t unsigned long
+	#define socklen_t int
+#else
+	//#warning "GCC platform"
+  #ifndef SOCKET_ERROR
+  #define SOCKET_ERROR -1
+  #endif
+#endif
+
 #ifndef NDEBUG
 #define VSNET_DEBUG
 #else
@@ -103,15 +114,10 @@ public: \
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
 #define LOCALCONST_DEF(Class,Type,Name,Value)
 #else
+#define __PRETTY_FUNCTION__ "<Unknown>"
+#define __FUNCTION__ "<Unknown>"
 #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
 #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
-#endif
-
-#if !defined __PRETTY_FUNCTION__
-#define __PRETTY_FUNCTION__ "<Unknown>"
-#endif
-#if !defined __FUNCTION__
-#define __FUNCTION__ "<Unknown>"
 #endif
 
 #endif /* __CONST_H */

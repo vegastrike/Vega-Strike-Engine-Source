@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "client.h"
 #include "acctserver.h"
 #include "packet.h"

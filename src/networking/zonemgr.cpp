@@ -1,6 +1,6 @@
 //#include <netinet/in.h>
 //#include "gfxlib.h"
-//#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "packet.h"
 //#include "netserver.h"
 #include "zonemgr.h"
