@@ -272,7 +272,7 @@ void gfx_light::Enable() {
 	ClobberGLLight (newtarg);
       }
       glEnable (GL_LIGHT0+this->target);
-      GLLights[this->target].options|=OpenGLL::GL_ENABLED;
+      GLLights[this->target].options|=OpenGLL::GL_ENABLED|OpenGLL::GLL_ON;
     }
     enable();
   }
@@ -286,7 +286,7 @@ void gfx_light::Disable() {
 	_GLLightsEnabled--;
 	glDisable (GL_LIGHT0+this->target);
       }
-      GLLights[this->target].options&=(~(OpenGLL::GL_ENABLED||OpenGLL::GLL_ON));
+      GLLights[this->target].options&=(~(OpenGLL::GL_ENABLED|OpenGLL::GLL_ON));
     }
     if (LocalLight()&&enabled()) {
       RemoveFromTable();

@@ -88,7 +88,7 @@ void StarSystem::ProcessPendingJumps() {
       }
       delete iter;
       if (pendingjump[kk].un==fighters[0]) {
-	_Universe->activeStarSystem()->SwapOut();
+	savedStarSystem->SwapOut();
 	savedStarSystem = pendingjump[kk].dest;
 	pendingjump[kk].dest->SwapIn();
       }
@@ -135,6 +135,7 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
       fclose (fp);
       ss = new StarSystem (ssys.c_str(),Vector (0,0,0),un->name);
       _Universe->LoadStarSystem (ss);
+      ss->SwapOut();
     }
   }
   if(ss) {
