@@ -731,7 +731,9 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
     //same flihgtgroup
     return orig->rSize();
   }
-  float rel=_Universe->GetRelation(orig->faction,un->faction);
+  float rel=_Universe->GetRelation(un->faction,orig->faction);
+  if (orig == un->Target())
+	rel-=1.5;
   if (rel>.1) {
 	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
   }else if (rel<-.1) {

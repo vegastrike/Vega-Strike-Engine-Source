@@ -65,7 +65,7 @@ static void AllUnitsCloseAndEngage(Unit * un, int faction) {
 		Vector loc;
 
 		if (ally->faction==faction) {
-			if (ally->InRange (un,loc,true)) {
+			//if (ally->InRange (un,loc,true)) {
 				if ((ally->Position()-un->Position()).Magnitude()<contraband_assist_range) {
 					Flightgroup * fg = ally->getFlightgroup();
 					if (fg) {
@@ -81,7 +81,7 @@ static void AllUnitsCloseAndEngage(Unit * un, int faction) {
 						}
 					}
 				}
-			}
+			//}
 		}
 	}
 }
