@@ -3350,13 +3350,15 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	static Unit* blankUnit = UnitFactory::createUnit("blank",1,FactionUtil::GetFactionIndex("upgrades"));
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
 	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
+	static float warpenratio = XMLSupport::parse_float (vs_config->getVariable("physics","warp_energy_multiplier","0.12"));
+	static float warpbleed = XMLSupport::parse_float (vs_config->getVariable("physics","warpbleed","1"));
+	float Wconv= (1.0/warpenratio); // converts from reactor to warp energy scales
 	char conversionBuffer[2048];
 	string prefix="";
 	for (int i=0;i<subunitlevel;i++) prefix+="   ";
 	//get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
 	float VSDM = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"))/1000.0;
 	float RSconverter = 100; // 100MJ per reactor or shield recharge energy unit
-	float Wconv= (1.0/0.12); // converts from reactor to warp energy scales
 	float totalWeaponEnergyUsage=0;
 	float totalWeaponDamage=0;
 	string MPLdesc="";
@@ -3515,10 +3517,9 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			if(playerUnit->limits.yaw!=blankUnit->limits.yaw){
 				switch(replacement_mode){
 				case 0: // Replacement or new Module
-					PRETTY_ADDU(statcolor+"#n#Installs maneuvering jets with turning response #-c",playerUnit->limits.yaw,0," metric-ton*radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c");
+					PRETTY_ADDU(statcolor+"#n#Installs maneuvering jets with turning response #-c",playerUnit->limits.yaw,0," radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c");
 					break;
 				case 1: // Additive
-					PRETTY_ADDU(statcolor+"#n#Increases turning response by #-c",playerUnit->limits.yaw,0," metric-ton*radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c");
 					break;
 				case 2: // multiplicative
 					PRETTY_ADDU(statcolor+"#n#Increases turning response by #-c",100.0*((playerUnit->limits.yaw*180/PI)-1),0,"% "+statcolor+"(yaw, pitch, roll)#-c");
@@ -3532,7 +3533,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 	} else {
 		if(!mode){
-			float moment = (playerUnit->GetMoment()==0)?playerUnit->GetMoment():1;
+			float moment = (playerUnit->GetMoment()!=0)?playerUnit->GetMoment():1;
 			PRETTY_ADDN(statcolor+" yaw #-c",playerUnit->limits.yaw/(moment),4);
 			PRETTY_ADDN(statcolor+"  pitch #-c",playerUnit->limits.pitch/(moment),4);
 			PRETTY_ADDN(statcolor+"  roll #-c",playerUnit->limits.roll/(moment),4);
@@ -3810,7 +3811,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			PRETTY_ADDU(statcolor+"Warp capacitor bank storage: #-c",playerUnit->GetWarpEnergy()*RSconverter*Wconv,0,"MJ");
 
     		text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
-		 
+			
 			PRETTY_ADDU(statcolor+"Energy cost for insystem jump: #-c",uj.insysenergy*RSconverter*Wconv,0,"MJ");
 			if (uj.drive==-2) {
 				text+="#n##c1:.3:.3#No outsystem jump drive present#-c"; // fixed??
