@@ -48,8 +48,8 @@ static list<Unit*> Unitdeletequeue;
 void Unit::calculate_extent() {  
 	int a;
 	for(a=0; a<nummesh; a++) {
-    corner_min = corner_min.Min(meshdata[a]->corner_min() + meshdata[a]->Position());
-    corner_max = corner_max.Max(meshdata[a]->corner_max() + meshdata[a]->Position());
+    corner_min = corner_min.Min(meshdata[a]->corner_min());
+    corner_max = corner_max.Max(meshdata[a]->corner_max());
   }
   for(a=0; a<numsubunit; a++) {
     corner_min = corner_min.Min(subunits[a]->corner_min);

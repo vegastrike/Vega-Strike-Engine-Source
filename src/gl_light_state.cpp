@@ -4,8 +4,8 @@
 
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
-
-Hashtable3d <LineCollideStar, char[20],char[200]> lighttable;
+int _GLLightsEnabled=0;
+Hashtable3d <LineCollideStar, char[20],char[CTACC]> lighttable;
 
 GFXLight gfx_light::operator = (const GFXLight &tmp) {
     memcpy (this,&tmp,sizeof (GFXLight));
@@ -15,12 +15,12 @@ GFXLight gfx_light::operator = (const GFXLight &tmp) {
 int gfx_light::lightNum() {
   int tmp =  (this-_llights->begin());
   assert (tmp>=0&&tmp<(int)_llights->size());
-  assert (&(*_llights)[GLLights[target].index]==this);
+  //  assert (&(*_llights)[GLLights[target].index]==this);
   return tmp;
 }//which number it is in the main scheme of things
 
 
-static int findLocalClobberable() {
+int findLocalClobberable() {
   int clobberdisabled =-1;
   for (int i=0;i<GFX_MAX_LIGHTS;i++) {
     if (GLLights[i].index==-1) 
@@ -57,12 +57,13 @@ bool gfx_light::Create (const GFXLight & temp, bool global) {
 	options |=GFX_LOCAL_LIGHT;
     } else {
 	options &=(~GFX_LOCAL_LIGHT);
-	foundclobberable = findGlobalClobberable ();
+	foundclobberable = enabled()?findGlobalClobberable ():findLocalClobberable();
 	if (foundclobberable!=-1) {
-	    ClobberGLLight (foundclobberable);
+	  _GLLightsEnabled++;
+	  ClobberGLLight (foundclobberable);
 	}
     }
-    return foundclobberable!=-1;
+    return (foundclobberable!=-1)||(!enabled());
 }
 void gfx_light::Kill() {
     Disable();//first disables it...which _will_ remove it from the light table.
@@ -86,6 +87,7 @@ void gfx_light::SendGLPosition (const GLenum target) {
 }  
 
 inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {
+
   if (attenuated()) {
     glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
     glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
@@ -131,6 +133,13 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
 
 void gfx_light::ClobberGLLight (const int target) {
   this->target = target;
+  if (enabled()!=(GLLights[target].options&OpenGLLights::GL_ENABLED)) {
+    if (enabled()) {
+      glEnable (GL_LIGHT0+target);
+    } else {
+      glDisable (GL_LIGHT0+target);
+    }
+  }
 #ifdef GFX_HARDWARE_LIGHTING
     if (GLLights[target].index==-1) {
 #endif
@@ -198,11 +207,11 @@ void gfx_light::TrashFromGLLights () {
 void gfx_light::AddToTable() {
   LineCollideStar tmp;
   bool err;
-  LineCollide coltarg (CalculateBounds(err));
+  LineCollide * coltarg= new LineCollide (CalculateBounds(err));
   if (err)
     return;
-  tmp.lc = &coltarg;
-  lighttable.Put (&coltarg, tmp);
+  tmp.lc = coltarg;
+  lighttable.Put (coltarg, tmp);
 }
 void gfx_light::RemoveFromTable() {
   LineCollideStar tmp;
@@ -211,8 +220,11 @@ void gfx_light::RemoveFromTable() {
   if (err)
     return;
   tmp.lc = &coltarg;
-  lighttable.Remove ( &coltarg, tmp);
-  
+  tmp = lighttable.Remove ( &coltarg, tmp);
+  if (tmp.lc)
+    delete tmp.lc;
+  else
+    assert (tmp.lc);
 }
 
 
@@ -226,9 +238,11 @@ void gfx_light::Enable() {
 	int newtarg =  findGlobalClobberable();
 	if (newtarg==-1)
 	  return;
+	_GLLightsEnabled++;
 	ClobberGLLight (newtarg);
       }
       glEnable (GL_LIGHT0+this->target);
+      GLLights[this->target].options|=OpenGLLights::GL_ENABLED;
     }
     enable();
   }
@@ -240,6 +254,11 @@ void gfx_light::Disable() {
     TrashFromGLLights();
     if (LocalLight())
       RemoveFromTable();
+    else if (this->target!=-1) {
+      _GLLightsEnabled--;
+      glDisable (GL_LIGHT0+this->target);
+      GLLights[this->target].options&=(~OpenGLLights::GL_ENABLED);
+    }
   }
 }
 //FIXME (calculate d)

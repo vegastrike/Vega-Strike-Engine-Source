@@ -40,6 +40,8 @@ void Unit::CollideAll() {
   #define COLQ colQ
   vector <LineCollide*> colQ;
   hhuge = collidetable.Get (minx,maxx,colQ);
+  if (hhuge) 
+    colQ = collidequeue;
 #else
   #define COLQ collidequeue
 #endif

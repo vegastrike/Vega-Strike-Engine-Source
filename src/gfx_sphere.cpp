@@ -147,7 +147,7 @@ void SphereMesh::ProcessDrawQueue() {
   GFXSelectMaterial(myMatNum);
   //static float rot = 0;
   GFXColor(1.0, 1.0, 1.0, 1.0);
-  GFXDisable (LIGHTING);
+  GFXEnable (LIGHTING);
   GFXEnable(TEXTURE0);
   if(envMap) {
     GFXEnable(TEXTURE1);
@@ -183,8 +183,9 @@ void SphereMesh::ProcessDrawQueue() {
         VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)),Vector(0,1,0), Vector (-sin (theta),0,cos(theta)));
     }
     MultMatrix (tmp2, c.mat, tmp);
-    GFXLoadMatrix(MODEL, tmp2);
+    GFXLoadIdentity(MODEL);
     GFXPickLights (Vector (tmp2[12],tmp2[13],tmp2[14]),rSize());
+    GFXLoadMatrix(MODEL, tmp2);
     theta+=.01;
     vlist->Draw();
     if(0!=forcelogos) {

@@ -1,8 +1,10 @@
 #include "gl_light.h"
 #include <queue>
+#include <list>
 using std::priority_queue;
 #include "hashtable_3d.h"
 #include "cmd_collide.h"
+using std::list;
 const float TINYOBJECT = .1;
 //optimization globals
 float intensity_cutoff=.05;//something that would normally round down
@@ -25,9 +27,9 @@ static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_ke
 
 static priority_queue<light_key> lightQ;
 
-static vector <LineCollideStar> pickedlights [2];
-static vector <LineCollideStar>* newpicked=&pickedlights[0];
-static vector <LineCollideStar>* oldpicked=&pickedlights[1];
+static list <int> pickedlights [2];
+static list <int>* newpicked=&pickedlights[0];
+static list <int>* oldpicked=&pickedlights[1];
 
 inline int getIndex (const LineCollide & t) {
     return *((int *)(&t.object));
@@ -42,57 +44,79 @@ static void swappicked () {
     }
     newpicked->clear();
 }
+
+static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled);
 void GFXPickLights (const Vector & center, const float radius) {
     Vector tmp;
-    int index;
+    int lightsenabled = _GLLightsEnabled;
     swappicked();
-    if (radius < .1*COLLIDETABLEACCURACY) {
-	lighttable.Get (center, pickedlights);
+    vector <LineCollideStar> tmppickt;
+    if (radius < .1*CTACC) {
+	lighttable.Get (center, tmppickt);
     } else {
 	tmp = Vector(radius,radius,radius);
-	lighttable.Get (center-tmp,center+tmp, *newpicked);
+	if (lighttable.Get (center-tmp,center+tmp, tmppickt)) 
+	  lighttable.Get (center,tmppickt);//FIXME (shouldn't get small loc)
     }
-    for (int i=0;i<lighttable.size();i++){
-	
-    }
-  
-}
-
-
-
-
-
-#ifdef MIRACLESAVESDAY
-inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for relatively small source 
-  float dis, dissqr;
-  unsigned int i;
-  for (i=0;i<_llights->size();i++) {
-    if ((*_llights)[i].intensity>0) {
-      if ((*_llights)[i].vect[3]!=0) {
-	dissqr = 
-	  ((*_llights)[i].vect[0]-x.i)*((*_llights)[i].vect[0]-x.i)+
-	  ((*_llights)[i].vect[1]-x.j)*((*_llights)[i].vect[1]-x.j)+
-	  ((*_llights)[i].vect[2]-x.k)*((*_llights)[i].vect[2]-x.k);
-	dis = sqrtf (dissqr);//should use fast sqrt by nvidia
-	
-	float intensity=(*_llights)[i].intensity/(
-						    (*_llights)[i].attenuate[0] +
-						    (*_llights)[i].attenuate[1]*dis +
-						    (*_llights)[i].attenuate[2]*dissqr);
-			       
-	if (intensity>intensity_cutoff) {
-	  lightQ.push (light_key(i,intensity));
-	}	
-      }else {
-	if ((*_llights)[i].intensity>intensity_cutoff)
-	  lightQ.push (light_key(i,(*_llights)[i].intensity));
+    for (int i=0;i<tmppickt.size();i++){
+      if (picklight (*tmppickt[i].lc,center,radius,lightsenabled)) {
+	newpicked->push_back (tmppickt[i].GetIndex());
+	lightsenabled++;
       }
     }
-  }
+    gfx_light::dopickenables ();  
 }
 
+static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled) {
+  return true;
 
+}
 
+void gfx_light::dopickenables () {
+  newpicked->sort();//sort it to find minimum num lights changed from last time.
+  list<int>::iterator traverse= newpicked->begin();
+  list<int>::iterator oldtrav;
+  while (traverse!=newpicked->end()&&(!oldpicked->empty())) {
+    oldtrav = oldpicked->begin();
+    while (oldtrav!=oldpicked->end()&& *oldtrav < *traverse) {
+      oldtrav++;
+    }
+    if (((*traverse)==(*oldtrav))&&((*_llights)[*oldtrav].target>=0)) {
+      assert (GLLights[(*_llights)[oldpicked->front()].target].index == oldpicked->front());
+      oldpicked->erase (oldtrav);//already taken care of. main screen turn on ;-)
+    } 
+    traverse++;
+  }
+  oldtrav = oldpicked->begin();
+  while (oldtrav!=oldpicked->end()) {
+    assert (GLLights[(*_llights)[(*oldtrav)].target].index == (*oldtrav));
+    GLLights[(*_llights)[(*oldtrav)].target].index = -1;
+    GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLLights::GL_ENABLED&OpenGLLights::GLL_LOCAL);//set it to be desirable to kill
+    oldtrav++;
+  }
+  traverse= newpicked->begin();
+  while (traverse!=newpicked->end()) {
+    int gltarg = findLocalClobberable();
+    if (gltarg==-1) {
+      newpicked->erase (traverse,newpicked->end());//erase everything on the picked list. Nothing can fit;
+      break;
+    }
+    (*_llights)[(*traverse)].ClobberGLLight(gltarg);
+  }    
+  
+  while (!oldpicked->empty()) {
+    int glind=(*_llights)[(*oldtrav)].target;
+    if ((GLLights[glind].options&OpenGLLights::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
+      glDisable (GL_LIGHT0+glind);
+      GLLights[glind].options &= (~OpenGLLights::GL_ENABLED);
+    }
+    (*_llights)[(*oldtrav)].target=-1;//make sure it doesn't think it owns any gl lights!
+    oldpicked->pop_front();
+  }
+
+}
+
+#ifdef MIRACLESAVESDAY
 
 void /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
   //picks 1-5 lights to use

@@ -84,7 +84,7 @@ public:
     if (Min.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (Min.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
     if (fabs((maxx-Min.i)*(maxy-Min.j)*(maxz-Min.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
-      retval = collidequeue;
+      //      retval = collidequeue;
       return true;
     } else {
       retval = hugeobjects;
@@ -143,10 +143,11 @@ public:
       }
     }
   }
-  void Remove(const LineCollide* target,const T objectToKill) {
+  T Remove(const LineCollide* target,const T objectToKill) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
+    T retval;
     vector <T>::iterator removal= hugeobjects.begin();
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -160,10 +161,11 @@ public:
       while (removal!=hugeobjects.end()) {
 	removal = find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
 	if (removal!=hugeobjects.end()) {
+	  retval = *removal;
 	  hugeobjects.erase(removal);
 	}
       }
-      return;
+      return retval;
     }
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int(i);
@@ -175,12 +177,14 @@ public:
 	  while (removal!=table[x][y][z].end()) {
 	    removal = find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
 	    if (removal!=table[x][y][z].end()) {
+	      retval = *removal;
 	      table[x][y][z].erase(removal);
 	    }
 	  }
 	}
       }
     }
+    return retval;
   }
 };
 

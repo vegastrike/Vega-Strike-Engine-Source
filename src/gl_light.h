@@ -41,6 +41,7 @@ class gfx_light: public GFXLight {
   void AddToTable();
   void RemoveFromTable();
   void TrashFromGLLights();
+  static void dopickenables();
   LineCollide CalculateBounds (bool & err);//calculates bounds for the table!
 };
 struct OpenGLLights {
@@ -48,7 +49,7 @@ struct OpenGLLights {
     const static char GLL_OFF=0;
     const static char GLL_ON=1;
     const static char GLL_LOCAL=2;
-    const static char GLL_LOCAL_ON=3;
+    const static char GL_ENABLED= 4;
     char options;
 };
 
@@ -59,21 +60,25 @@ extern int _currentContext;
 extern vector <vector <gfx_light> > _local_lights_dat;
 extern vector <GFXColor> _ambient_light;
 extern vector <gfx_light> * _llights;
-
+extern int _GLLightsEnabled;
 //currently stored GL lights!
 extern OpenGLLights* GLLights;
 struct LineCollideStar {
   LineCollide* lc;
+  LineCollideStar () {lc = NULL;}
   bool operator == (const LineCollideStar & b) {
     return lc->object==b.lc->object;
   }
   bool operator < (const LineCollideStar &b) {
       return (*((int *)&(lc->object)) < *((int *)&(b.lc->object)));
   }
+  inline int GetIndex () {return *((int *)(&lc->object));}
 };
 
+int findLocalClobberable();
 //table to store local lights, numerical pointers to _llights (eg indices)
-extern Hashtable3d <LineCollideStar, char[20],char[200]> lighttable;
+#define CTACC 200
+extern Hashtable3d <LineCollideStar, char[20],char[CTACC]> lighttable;
 
 //optimization globals
 extern float intensity_cutoff;//something that would normally round down

@@ -191,8 +191,8 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
   GFXSelectMaterial(myMatNum);
-  //GFXEnable(LIGHTING);
-  GFXDisable (LIGHTING);
+  GFXEnable(LIGHTING);
+  //GFXDisable (LIGHTING);
   
   GFXEnable(TEXTURE0);
   GFXEnable(CULLFACE);
@@ -214,8 +214,10 @@ void Mesh::ProcessDrawQueue() {
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    GFXLoadMatrix(MODEL, c.mat);
+    GFXLoadIdentity(MODEL);
     GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
+    GFXLoadMatrix(MODEL, c.mat);
+
     vlist->Draw();
     if(0!=forcelogos) {
       forcelogos->Draw(c.mat);
