@@ -675,8 +675,8 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
   if (ownerDoNotDereference==_Universe->AccessCockpit()->GetParent()) {
     if (ownerDoNotDereference) {
       //now we can dereference it because we checked it against the parent
-      CommunicationMessage c(ownerDoNotDereference,this,NULL);
-      c.SetCurrentState(c.fsm->GetHitNode(),NULL);
+      CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
+      c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
       this->getAIState()->Communicate (c);      
     }
   }

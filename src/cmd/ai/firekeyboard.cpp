@@ -8,9 +8,11 @@
 #include "gfx/cockpit.h"
 #include "gfx/animation.h"
 #include "audiolib.h"
+#include "config_xml.h"
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
   refresh_target=true;
+  sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
 }
 static KBSTATE firekey=UP;
 static bool doc=0;
@@ -342,11 +344,11 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
   return (dist<.8*agg&&angle>1/agg);
 }
 
-static void DoDockingOps (Unit * parent, Unit * targ) {
+static void DoDockingOps (Unit * parent, Unit * targ,unsigned char sex) {
     if (req) {
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
-      CommunicationMessage c(parent,targ,NULL);
-      c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL);
+      CommunicationMessage c(parent,targ,NULL,sex);
+      c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
       targ->getAIState()->Communicate (c);
       req=false;
     }
@@ -364,7 +366,9 @@ using std::list;
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
-  AUDStartPlaying(c.getCurrentState()->sound);
+  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
+    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+  }
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
@@ -406,7 +410,7 @@ void FireKeyboard::Execute () {
   Unit * targ;
   if ((targ = parent->Target())) {
     ShouldFire (targ);
-    DoDockingOps(parent,targ);
+    DoDockingOps(parent,targ,sex);
   } else {
     ChooseTargets(false);
     refresh_target=true;
@@ -494,16 +498,20 @@ void FireKeyboard::Execute () {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       
 
 	if (mymsg==NULL) {
-	  CommunicationMessage c(parent,targ,i,NULL);
+	  CommunicationMessage c(parent,targ,i,NULL,sex);
 	  mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
-	  AUDStartPlaying(c.getCurrentState()->sound);
+	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
+	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+	  }
 	  targ->getAIState ()->Communicate (c);
 	}else {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
-	    CommunicationMessage c(parent,targ,*mymsg,i,NULL);
+	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
 	    mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
-	    AUDStartPlaying(c.getCurrentState()->sound);
+	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
+	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+	    }
 	    targ->getAIState ()->Communicate (c);
 	  }
 	}

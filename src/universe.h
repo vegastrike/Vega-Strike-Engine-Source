@@ -96,6 +96,7 @@ private:
     ///char * of the name
     char * factionname; 
     std::vector <std::vector <class Animation *> > comm_faces;
+    std::vector <unsigned char> comm_face_sex;
     Unit * contraband;
     ///Figures out the relationships of each faction with each other
     static void ParseAllAllies(Universe * thisuni);
@@ -131,8 +132,8 @@ private:
   int GetNumAnimation(int faction);
   void SerializeFaction (FILE * file);
   void LoadSerializedFaction (FILE * file);
-  std::vector <class Animation *>* GetRandAnimation(int faction);
-  std::vector <class Animation *> * GetAnimation(int faction, int n);
+  std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
+  std::vector <class Animation *> * GetAnimation(int faction, int n, unsigned char &sex);
   const char * GetFaction (int faction);
   class Unit * GetContraband(int faction);
   void LoadContrabandLists();

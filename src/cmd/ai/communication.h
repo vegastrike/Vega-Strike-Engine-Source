@@ -5,10 +5,12 @@ class FSM {
  public:
   struct Node {
     std::string message;
-    int sound;
+    vector <int> sound;//one sound for each sex
     float messagedelta;
     vector <unsigned int> edges;
-    Node (const std::string &message, int sound, float messagedel): message(message),sound(sound),messagedelta(messagedel){}
+    int GetSound (unsigned char sex);
+    void AddSound (int sound, unsigned char sex);
+    Node (const std::string &message, float messagedel): message(message),sound(sound),messagedelta(messagedel){}
   };
   vector <Node> nodes;
   FSM (const char * filename);
@@ -29,18 +31,19 @@ class FSM {
 };
 class CommunicationMessage {
   void Init (Unit * send, Unit * recv);
-  void SetAnimation (std::vector <class Animation *>*ani);
+  void SetAnimation (std::vector <class Animation *>*ani,unsigned char sex);
  public:
   FSM *fsm;//the finite state that this communcation stage is in
   class Animation * ani;
+  unsigned char sex;//which sound should play
   int prevstate;
   int curstate;
   UnitContainer sender;
-  CommunicationMessage(Unit * send, Unit * recv, std::vector <class Animation *>* ani);
-  CommunicationMessage(Unit * send, Unit * recv, int curstate, std::vector <class Animation *>* ani);
-  CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani);
-  CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani);
-  void SetCurrentState(int message, std::vector <class Animation *> *ani);
+  CommunicationMessage(Unit * send, Unit * recv, std::vector <class Animation *>* ani, unsigned char sex);
+  CommunicationMessage(Unit * send, Unit * recv, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
+  CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
+  CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
+  void SetCurrentState(int message, std::vector <class Animation *> *ani,unsigned char sex);
   FSM::Node * getCurrentState() {return &fsm->nodes[curstate];}
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}

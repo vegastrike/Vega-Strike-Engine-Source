@@ -3,21 +3,21 @@
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
   if (strlen(filename)==0) {
-    nodes.push_back (Node("welcome to cachunkcachunk.com",-1,0));
-    nodes.push_back (Node("I love you!",-1,.1));
-    nodes.push_back (Node("J00 0wnz m3",-1,.08));
-    nodes.push_back (Node("You are cool!",-1,.06));
-    nodes.push_back (Node("You are nice!",-1,.05));
-    nodes.push_back (Node("Ya you're naled! NALED PAL!",-1,-.02));
-    nodes.push_back (Node("i 0wnz j00",-1,-.08));
-    nodes.push_back (Node("I hate you!",-1,-.1));
+    nodes.push_back (Node("welcome to cachunkcachunk.com",0));
+    nodes.push_back (Node("I love you!",.1));
+    nodes.push_back (Node("J00 0wnz m3",.08));
+    nodes.push_back (Node("You are cool!",.06));
+    nodes.push_back (Node("You are nice!",.05));
+    nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
+    nodes.push_back (Node("i 0wnz j00",-.08));
+    nodes.push_back (Node("I hate you!",-.1));
 
-    nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",-1,0));
-    nodes.push_back (Node("No contraband detected: You may proceed.",-1,0));
-    nodes.push_back (Node("Contraband detected! All units close and engage!",-1,0));
-    nodes.push_back (Node("Your Course is deviating! Maintain Course!",-1,0));
-    nodes.push_back (Node("Request Clearence To Land.",-1,0));
-    nodes.push_back (Node("*hit*",-1,-.2));
+    nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
+    nodes.push_back (Node("No contraband detected: You may proceed.",0));
+    nodes.push_back (Node("Contraband detected! All units close and engage!",0));
+    nodes.push_back (Node("Your Course is deviating! Maintain Course!",0));
+    nodes.push_back (Node("Request Clearence To Land.",0));
+    nodes.push_back (Node("*hit*",-.2));
     vector <unsigned int> edges;
     unsigned int i;
     for (i=0;i<nodes.size()-6;i++) {
@@ -52,6 +52,19 @@ int FSM::GetHitNode () {
 }
 static float sq (float i) {return i*i;}
 bool nonneg (float i) {return i>=0;}
+int FSM::Node::GetSound (unsigned char sex) {
+  if (((unsigned int)sex)<sound.size()) {
+    return sound[sex];
+  }else {
+    return -1;
+  }
+}
+void FSM::Node::AddSound (int sounds, unsigned char sex) {
+  while (((unsigned int) sex)>=sound.size()) {
+    sound.push_back (-1);
+  }
+  sound[sex]=sounds;
+}
 int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) const{
   const FSM::Node *n = &nodes[curstate];
     mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
@@ -109,7 +122,8 @@ if (j<0)
 j=0;
 return j;
 }
-void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
+void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani,unsigned char sex) {
+  this->sex=sex;//for audio
   if (ani){ 
     if (ani->size()>0) {
 	float mood= fsm->getDeltaRelation(this->prevstate,this->curstate);
@@ -128,43 +142,43 @@ void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
   }
 }
 
-void CommunicationMessage::SetCurrentState (int msg,std::vector <Animation *>*ani) {
+void CommunicationMessage::SetCurrentState (int msg,std::vector <Animation *>*ani, unsigned char sex) {
   curstate = msg;
-  SetAnimation(ani);
+  SetAnimation(ani,sex);
   assert (this->curstate>=0);
 }
 
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice, std::vector <Animation *>* ani) {
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice, std::vector <Animation *>* ani, unsigned char sex) {
   Init (send,recv);
   prevstate=fsm->getDefaultState (_Universe->GetRelation (send->faction,recv->faction));
   if (fsm->nodes[prevstate].edges.size()) {
     curstate = fsm->nodes[prevstate].edges[messagechoice%fsm->nodes[prevstate].edges.size()];
   }
-  SetAnimation(ani);
+  SetAnimation(ani,sex);
   assert (this->curstate>=0);
 
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int laststate, int thisstate, std::vector <Animation *>* ani) {
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int laststate, int thisstate, std::vector <Animation *>* ani, unsigned char sex) {
   Init (send,recv);
   prevstate=laststate;
   curstate = thisstate;
-  SetAnimation(ani);
+  SetAnimation(ani,sex);
     assert (this->curstate>=0);
 
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv,std::vector<Animation *>* ani) {
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv,std::vector<Animation *>* ani, unsigned char sex) {
   Init (send,recv);
-  SetAnimation(ani);
+  SetAnimation(ani,sex);
   assert (this->curstate>=0);
 
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate, int curstate, std::vector<Animation *>* ani) {
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate, int curstate, std::vector<Animation *>* ani, unsigned char sex) {
   Init (send,recv);
   this->prevstate = prevstate.curstate;
   if (fsm->nodes[this->prevstate].edges.size()) {
     this->curstate = fsm->nodes[this->prevstate].edges[curstate%fsm->nodes[this->prevstate].edges.size()];
   }
-  SetAnimation(ani);
+  SetAnimation(ani,sex);
   assert (this->curstate>=0);
 
 }

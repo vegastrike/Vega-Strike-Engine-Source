@@ -6,6 +6,7 @@
 
 class CommunicatingAI:public Order{
   typedef std::map<const Unit*,float> relationmap;
+  unsigned char sex;//male female robot???
   float anger;//how easily he will target you if you taunt him enough (-.00001 is always -.4 is often -.6 is normal
   float moodswingyness;
   float randomresponse;

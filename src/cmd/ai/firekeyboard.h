@@ -8,6 +8,7 @@
 
 
 class FireKeyboard: public Order {
+  unsigned char sex;
   bool itts;
   bool refresh_target;
   float gunspeed;

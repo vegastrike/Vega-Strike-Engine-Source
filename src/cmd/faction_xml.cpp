@@ -29,7 +29,8 @@ namespace FactionXML {
 	CONVERSATION,
 	COMM_ANIMATION,
 	MOOD_ANIMATION,
-	CONTRABAND
+	CONTRABAND,
+	SEX
   };
 
   const EnumMap::Pair element_names[] = {
@@ -49,12 +50,13 @@ namespace FactionXML {
 	EnumMap::Pair ("logoA", LOGOA), 
 	EnumMap::Pair ("relation",RELATION),
 	EnumMap::Pair ("Conversation", CONVERSATION),
-	EnumMap::Pair ("Contraband",CONTRABAND)
+	EnumMap::Pair ("Contraband",CONTRABAND),
+	EnumMap::Pair ("sex",SEX)
 };
 
 
   const EnumMap element_map(element_names, 8);
-  const EnumMap attribute_map(attribute_names, 7);
+  const EnumMap attribute_map(attribute_names, 8);
 
 }
 
@@ -87,6 +89,14 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     assert (unitlevel==2);
     unitlevel++;
     thisuni->factions.back()->comm_faces.push_back (std::vector<Animation *>());
+    thisuni->factions.back()->comm_face_sex.push_back (0);
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case SEX:
+	thisuni->factions.back()->comm_face_sex.back() = parse_int ((*iter).value);
+	break;
+      }
+    }
     break;
   case MOOD_ANIMATION:
     assert (unitlevel==3);
@@ -225,16 +235,18 @@ Texture * Universe::getForceLogo (int faction) {
 Texture *Universe::getSquadLogo (int faction) {
   return getForceLogo (faction);
 }
-std::vector <Animation *>* Universe::GetAnimation (int faction, int n) {
+std::vector <Animation *>* Universe::GetAnimation (int faction, int n, unsigned char &sex) {
+  sex = factions[faction]->comm_face_sex[n];
   return &factions[faction]->comm_faces[n];
 }
 int Universe::GetNumAnimation (int faction) {
   return factions[faction]->comm_faces.size();
 }
-std::vector <Animation *>* Universe::GetRandAnimation(int faction) {
+std::vector <Animation *>* Universe::GetRandAnimation(int faction, unsigned char &sex) {
   if (factions[faction]->comm_faces.size()>0) {
-    return &factions[faction]->comm_faces[rand()%factions[faction]->comm_faces.size()];
+    return GetAnimation ( faction,rand()%factions[faction]->comm_faces.size(),sex);
   }else {
+    sex=0;
     return NULL;
   }
 }

@@ -26,7 +26,7 @@ CommunicatingAI::CommunicatingAI (int ttype, float rank, float mood, float anger
 }
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
-  comm_face = _Universe->GetRandAnimation(par->faction);
+  comm_face = _Universe->GetRandAnimation(par->faction,sex);
 }
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
@@ -52,13 +52,13 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
   //reports success or failure
   Unit * un;
   if ((un=contraband_searchee.GetUnit())) {
-    CommunicationMessage c(parent,un,comm_face);
+    CommunicationMessage c(parent,un,comm_face,sex);
     if (contraband_detected) {
-      c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face);
+      c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face,sex);
       static int numHitsPerContrabandFail=3;
       GetMadAt (un,numHitsPerContrabandFail);
     }else {
-      c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face);      
+      c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face,sex);      
     }
     un->getAIState()->Communicate(c);
   }
@@ -67,8 +67,8 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
 }
 void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
 
-      CommunicationMessage hit (un,parent,NULL);
-      hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face);
+      CommunicationMessage hit (un,parent,NULL,0);
+      hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face,sex);
       for (         int i=0;i<numHitsPerContrabandFail;i++) {
 	parent->getAIState()->Communicate(hit);
       }
@@ -91,8 +91,8 @@ void CommunicatingAI::UpdateContrabandSearch () {
       std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
       static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
       if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
-	CommunicationMessage c(parent,u,comm_face);
-	c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face);
+	CommunicationMessage c(parent,u,comm_face,sex);
+	c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
 	u->getAIState()->Communicate (c);
 	GetMadAt(u,1);
 	SpeedAndCourse=u->GetVelocity();
@@ -118,8 +118,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     }
     contraband_searchee.SetUnit (u);
     SpeedAndCourse = u->GetVelocity();
-    CommunicationMessage c(parent,u,comm_face);
-    c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face);
+    CommunicationMessage c(parent,u,comm_face,sex);
+    c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face,sex);
     u->getAIState()->Communicate (c);
     which_cargo_item = 0;
   }
@@ -173,7 +173,7 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
       }
     }
     //ok we're good to put a default msg in the queue as a fake message;
-    messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face));
+    messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
   }
 }
 
@@ -197,7 +197,7 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
       int b = selectCommunicationMessage (c);
       Unit * un = c.sender.GetUnit();
       if (un) {
-	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face));
+	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
       }
     }
   }
