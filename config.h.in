@@ -117,6 +117,9 @@
 /* Define to 1 if `vfork' works. */
 #undef HAVE_WORKING_VFORK
 
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
+
 /* Define to 1 if you have the `_finite' function. */
 #undef HAVE__FINITE
 
@@ -147,14 +150,14 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
+/* Use JThreads */
+#undef USE_NET_THREAD_J
+
 /* Use no threads */
 #undef USE_NET_THREAD_NONE
 
 /* Use POSIX threads */
 #undef USE_NET_THREAD_POSIX
-
-/* Use SDL threads */
-#undef USE_NET_THREAD_SDL
 
 /* Version number of package */
 #undef VERSION
