@@ -121,6 +121,8 @@ inline Vector operator* (const float obj, const Vector &rval) {Vector retval(rva
 
 inline Vector operator+= (Vector &lval, const Vector &obj) {lval.i += obj.i; lval.j += obj.j; lval.k += obj.k; return lval;}
 
+inline Vector operator*= (Vector &lval, const float &obj) {lval.i *= obj; lval.j *= obj, lval.k *= obj; return lval;}
+
 /*
 inline Vector operator*(const Vector &lval, const float &rval)
 {

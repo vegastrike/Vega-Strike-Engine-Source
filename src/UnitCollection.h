@@ -45,6 +45,15 @@ class UnitCollection {
     return new UnitIterator(units);
   }
   void prepend(Unit *unit) { units->next = new UnitListNode(unit, units->next); }
+  void prepend(Iterator *iter) {
+    UnitListNode *n = units;
+
+    while(iter->current()!=NULL) {
+      n->next = new UnitListNode(iter->current(), n->next);
+      iter->advance();
+    }
+  }
+
   void append(Unit *unit) { 
     UnitListNode *n = units;
     while(n->next!=NULL) n = n->next;

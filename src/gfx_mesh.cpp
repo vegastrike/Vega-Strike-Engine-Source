@@ -79,6 +79,8 @@ void Mesh::InitUnit()
 	orig = NULL;
 	
 	debugName = NULL;
+
+	envMap = TRUE;
 }
 
 Mesh::Mesh():Primitive()
@@ -609,34 +611,34 @@ void Mesh::Reflect()
 	Vector nml [4];
 	Vector CamPos;
 	float dist, oodist;
-	Vector p = pp;
-	Vector q = pq;
+	//Vector p = pp;
+	//Vector q = pq;
 	//Vector r = pr;
 	//Vector pos = ppos;
 	int nt3 = 3 * numtris;
 	int i;
 	float w;
 	vertexlist = vlist->LockUntransformed();
+	/*	Matrix currentMatrix;
+		VectorToMatrix(pp,pq,pr);
+	*/
+	Matrix currentMatrix;
+	GFXGetMatrix(MODEL, currentMatrix);
 	for (i=0; i< nt3;i+=3)
 	{
 		for (int j=0; j<3;j++)
 		{
 			int k = i+j;
-			pnt.i = p.i*vertexlist[k].x + q.i*vertexlist[k].y+this->r.i * vertexlist[k].z;
-			pnt.j = p.j*vertexlist[k].x + q.j*vertexlist[k].y+this->r.j * vertexlist[k].z;
-			pnt.k = p.k*vertexlist[k].x + q.k*vertexlist[k].y+this->r.k * vertexlist[k].z;
-			nml[j].i = p.i*vertexlist[k].i + q.i*vertexlist[k].j+this->r.i * vertexlist[k].k;
-			nml[j].j = p.j*vertexlist[k].i + q.j*vertexlist[k].j+this->r.j * vertexlist[k].k;
-			nml[j].k = p.k*vertexlist[k].i + q.k*vertexlist[k].j+this->r.k * vertexlist[k].k;
-			
+			pnt = ::Transform(currentMatrix, Vector(vertexlist[k].x, vertexlist[k].y, vertexlist[k].z));
+			nml[j] = ::Transform(currentMatrix, Vector(vertexlist[k].i, vertexlist[k].j, vertexlist[k].k));
+
 			Camera* TempCam = _GFX->AccessCamera();
 			TempCam->GetPosition (CamPos);
-			CamPos = CamPos - pnt;
-			dist = sqrtf (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
+			CamPos = pnt - CamPos;
+			//dist = sqrtf (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
+			dist = CamPos.Magnitude();
 			oodist = ((float)1.0)/ dist;
-			CamPos.i *= oodist;
-			CamPos.j *= oodist;
-			CamPos.k *= oodist;
+			CamPos *= oodist;
 			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
 
 			nml[j] = reflect;
@@ -655,21 +657,15 @@ void Mesh::Reflect()
 		for (int j=0; j<4;j++)
 		{
 			int k = i+j;
-			pnt.i = p.i*vertexlist[k].x + q.i*vertexlist[k].y+this->r.i * vertexlist[k].z;
-			pnt.j = p.j*vertexlist[k].x + q.j*vertexlist[k].y+this->r.j * vertexlist[k].z;
-			pnt.k = p.k*vertexlist[k].x + q.k*vertexlist[k].y+this->r.k * vertexlist[k].z;
-			nml[j].i = p.i*vertexlist[k].i + q.i*vertexlist[k].j+this->r.i * vertexlist[k].k;
-			nml[j].j = p.j*vertexlist[k].i + q.j*vertexlist[k].j+this->r.j * vertexlist[k].k;
-			nml[j].k = p.k*vertexlist[k].i + q.k*vertexlist[k].j+this->r.k * vertexlist[k].k;
+			pnt = ::Transform(currentMatrix, Vector(vertexlist[k].x, vertexlist[k].y, vertexlist[k].z));
+			nml[j] = ::Transform(currentMatrix, Vector(vertexlist[k].i, vertexlist[k].j, vertexlist[k].k));
 			
 			Camera* TempCam = _GFX->AccessCamera();
 			TempCam->GetPosition (CamPos);
 			CamPos = CamPos - pnt;
-			dist = sqrtf (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
+			dist = CamPos.Magnitude();
 			oodist = ((float)1.0)/ (float)dist;
-			CamPos.i *= oodist;
-			CamPos.j *= oodist;
-			CamPos.k *= oodist;
+			CamPos *= oodist;
 			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
 
 			nml[j] = reflect;
@@ -689,13 +685,19 @@ void Mesh::Draw()
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	UpdateMatrix();
-	Reflect();
 	GFXEnable(TEXTURE0);
-	GFXEnable(TEXTURE1);
+	if(envMap) {
+	  Reflect();
+	  GFXEnable(TEXTURE1);
+	} else {
+	  GFXDisable(TEXTURE1);
+	}
 	Decal->MakeActive();
 	_GFX->getLightMap()->MakeActive();
 	GFXSelectTexcoordSet(0, 0);
-	GFXSelectTexcoordSet(1, 1);
+	if(envMap)
+	  GFXSelectTexcoordSet(1, 1);
+
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)

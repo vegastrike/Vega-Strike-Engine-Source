@@ -19,6 +19,7 @@ AI *PlanetaryOrbit::Execute() {
 
 void Planet::InitPlanet(FILE *fp) {
   InitUnit();
+  envMap = FALSE;
   satellites = NULL;
   numSatellites = 0;
   calculatePhysics=false;

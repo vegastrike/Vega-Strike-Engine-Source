@@ -63,6 +63,7 @@ protected:
 
 	BOOL objtex;
 	Texture *Decal;
+	BOOL envMap;
   //	int texturename[2];
 
 	BSPTree *bspTree;

@@ -450,10 +450,10 @@ void createObjects() {
   fighter->SetPosition(Vector(0.0, 10.0, 0.0));
   fighter->SetAI(new Orbit);
   //fighter->Roll(PI/4);
-  fighter->Accelerate(Vector(25,0,0));
+  //fighter->Accelerate(Vector(25,0,0));
   carrier->SetPosition(Vector(0.0, 5.0, 10.0));
   carrier->Pitch(-PI/2);
-  carrier->Accelerate(Vector(0, 25, 0));
+  //carrier->Accelerate(Vector(0, 25, 0));
   fighter->Scale(Vector(0.1,0.1,0.1));
   fighter2->Scale(Vector(0.1,0.1,0.1));
   carrier->Scale(Vector(0.2,0.2,0.2));
@@ -538,8 +538,7 @@ void main_loop() {
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);
-  //GFXEnable(TEXTURE1);
-  GFXDisable(TEXTURE1);
+  GFXEnable(TEXTURE1);
 
   GFXMaterial mat;
   GFXGetMaterial(0, mat);

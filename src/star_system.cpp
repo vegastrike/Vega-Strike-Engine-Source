@@ -11,7 +11,7 @@ StarSystem::StarSystem(Planet *primaries) :
   currentcamera = 0;	
 
   Iterator *iter = primaries->createIterator();
-  units->append(iter);
+  units->prepend(iter);
 
   delete iter;
   // Calculate movement arcs; set behavior of primaries to follow these arcs
