@@ -137,8 +137,14 @@ inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for re
     }
   }
 }
-BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
 
+BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
+  static BOOL LightInit=FALSE;
+  if (!LightInit) {
+    LightInit = TRUE;
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
+    glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
+  }
   con_number = _local_lights_loc.size();
   _currentContext= con_number;
   _ambient_light.push_back (GFXColor (0,0,0,1));
@@ -171,7 +177,6 @@ BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   }
   return TRUE;
 }
-
 
 BOOL /*GFXDRVAPI*/ GFXLightModelAmbient (GFXColor amb) {
   if (_currentContext >=_ambient_light.size())

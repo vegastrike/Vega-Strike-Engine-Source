@@ -147,16 +147,18 @@ BOOL WrapGFX::StartGFX()
 	mat.eg = 0.0F;
 	mat.eb = 0.0F;
 	mat.ea = 1.0F;
+	mat.power=60.0F;
 	int tmp;
 	GFXSetMaterial(tmp, mat);
-	//GFXSelectMaterial(tmp);
+	GFXSelectMaterial(tmp);
 	int ligh;
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
 	GFXCreateLight (ligh);
 	GFXSetLight (ligh, POSITION, GFXColor (2,2,2,0));
-	//	GFXSetLight (ligh, ATTENUATE, GFXColor (.3,0,1));
-	GFXSetLight (ligh, DIFFUSE, GFXColor (1,1,1,1));
+	//GFXSetLight (ligh, ATTENUATE, GFXColor (1,0,.01));
+	GFXSetLight (ligh, DIFFUSE, GFXColor (1,0,0,1));
+	GFXSetLight (ligh, SPECULAR, GFXColor (1,1,1,1));
 	GFXEnableLight (ligh);
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
