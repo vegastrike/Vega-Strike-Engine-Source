@@ -11,14 +11,14 @@ using XMLSupport::tostring;
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip) : Mesh() {
 
   SphereMesh *oldmesh;
-  string hash_key = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
-  if(0 != (oldmesh = (SphereMesh*)meshHashTable.Get(hash_key)))
-    {
-      *this = *oldmesh;
-      oldmesh->refcount++;
-      orig = oldmesh;
-      return;
-    }
+  hash_name = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
+  if (LoadExistant (hash_name.c_str())) {
+    return;
+  }
+  oldmesh = new SphereMesh();
+  meshHashTable.Put (hash_name, oldmesh);
+  draw_queue = new vector<MeshDrawContext>;
+  
 
   insideout= Insideout;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
@@ -120,11 +120,10 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
    if(centered) {
      draw_sequence=0;
    }
-   
-   meshHashTable.Put(hash_key, this);
-   orig = this;
-   refcount++;
-   draw_queue = new vector<MeshDrawContext>;
+  this->orig = oldmesh;
+  *oldmesh=*this;
+  oldmesh->orig = NULL;
+  oldmesh->refcount++;
 }
 void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/, const Matrix m) {
   if (centered) {

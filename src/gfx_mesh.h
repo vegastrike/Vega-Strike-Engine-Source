@@ -196,9 +196,8 @@ private:
     GFXVertex vertex;
     GFXMaterial material;
   } *xml;
-
-  void LoadXML(const char *filename, Mesh *oldmesh);
-  void LoadBinary (const char * filename, Mesh * oldmesh);
+  void LoadXML(const char *filename);
+  void LoadBinary (const char * filename);
   void CreateLogos();
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -207,7 +206,7 @@ private:
   void endElement(const string &name);
 
 protected:
- 
+  bool LoadExistant (const char * filehash);
   Vector local_pos; 
 
   static Hashtable<string, Mesh,char[127]> meshHashTable;

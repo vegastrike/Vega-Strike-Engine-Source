@@ -1,6 +1,6 @@
 #include "gfx_mesh.h"
 #include "vegastrike.h"
-void Mesh::LoadBinary (const char * filename, Mesh * oldmesh) {
+void Mesh::LoadBinary (const char * filename) {
   GFXBOOL objtex;
   int TexNameLength;
   char *TexName=NULL;
@@ -442,10 +442,6 @@ void Mesh::LoadBinary (const char * filename, Mesh * oldmesh) {
 	// Load the BSP tree
 	//bspTree = new BSPTree((filename + string(".bsp")).c_str());
 
-	this->orig = oldmesh;
-	*oldmesh = *this;
-	oldmesh->orig = NULL;
-	oldmesh->refcount++;
 
 	delete [] vertexlist;
 	delete []PolyNormal;

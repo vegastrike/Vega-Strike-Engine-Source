@@ -99,27 +99,39 @@ Mesh::Mesh()
 	InitUnit();
 }
 
+bool Mesh::LoadExistant (const char * filehash) {
+  Mesh * oldmesh;
+  if(0 != (oldmesh = meshHashTable.Get(string (filehash)))) {
+    *this = *oldmesh;
+    oldmesh->refcount++;
+    orig = oldmesh;
+    return true;
+  }
+  return false;
+}
+
 Mesh:: Mesh(const char * filename, bool xml):hash_name(filename)
 {
   InitUnit();
   Mesh *oldmesh;
-  if(0 != (oldmesh = meshHashTable.Get(string(filename)))) {
-    *this = *oldmesh;
-    oldmesh->refcount++;
-    orig = oldmesh;
+  if (LoadExistant (filename)) {
     return;
-  } else {
-    //oldmesh = (Mesh*)malloc(sizeof(Mesh));
-    oldmesh = new Mesh();
-    meshHashTable.Put(string(filename), oldmesh);
-    draw_queue = new vector<MeshDrawContext>;
   }
+  oldmesh = new Mesh();
+  meshHashTable.Put(string(filename), oldmesh);
+  draw_queue = new vector<MeshDrawContext>;
+  
   if(xml) {
-    LoadXML(filename, oldmesh);
+    LoadXML(filename);
   } else {
     this->xml= NULL;
-    LoadBinary(filename,oldmesh);
+    LoadBinary(filename);
   }
+  this->orig = oldmesh;
+  *oldmesh=*this;
+  oldmesh->orig = NULL;
+  oldmesh->refcount++;
+
 }
 
 Mesh::~Mesh()

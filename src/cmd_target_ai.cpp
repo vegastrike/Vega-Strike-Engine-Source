@@ -1,3 +1,4 @@
+#include "physics.h"
 #include "cmd_target_ai.h"
 #include "cmd_flybywire.h"
 #include "vegastrike.h"
@@ -55,8 +56,12 @@ void FireAt::Execute () {
     iter->advance();
   }
   if (shouldfire) {
-    parent->Fire();
+    if (delay>rxntime)
+      parent->Fire();
+    else
+      delay +=SIMULATION_ATOM;
   } else {
+    delay =0;
     parent->UnFire();
   }
   delete iter;  
@@ -75,10 +80,10 @@ AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6)  {
 void AggressiveAI::Execute () {  
   FireAt::Execute();
   if (parent->getAIState()->queryType (FACING)==NULL) {
-    parent->EnqueueAI (new Orders::FaceTarget (false));
+    //parent->EnqueueAI (new Orders::FaceTarget (false));
   }
   if (parent->getAIState()->queryType (MOVEMENT)==NULL) {
-    parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
+    //parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
   }
 
 }

@@ -938,7 +938,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
+void Mesh::LoadXML(const char *filename) {
   const int chunk_size = 16384;
   
   FILE* inFile = fopen (filename, "r+b");
@@ -1291,10 +1291,6 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   CreateLogos();
   // Calculate bounding sphere
   
-  this->orig = oldmesh;
-  *oldmesh=*this;
-  oldmesh->orig = NULL;
-  oldmesh->refcount++;
   if (mn.i==FLT_MAX) {
     mn=Vector (0,0,0);
     mx=Vector (0,0,0);
