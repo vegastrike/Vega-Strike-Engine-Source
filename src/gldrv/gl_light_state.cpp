@@ -338,11 +338,21 @@ void light_rekey_frame() {
     for (int i=0;i<GFX_MAX_LIGHTS;i++) {
 	if (GLLights[i].options & OpenGLL::GL_ENABLED) {
 	    if (GLLights[i].index>=0) {
+	      if ((*_llights)[GLLights[i].index].Target() == i) {
 		(*_llights)[GLLights[i].index].SendGLPosition(GL_LIGHT0+i);//send position transformed by current cam matrix
-		assert ((*_llights)[GLLights[i].index].Target() == i);
+	      }else {
+		unsigned int li=GLLights[i].index;
+		if ((*_llights)[li].enabled()&&((*_llights)[li].Target()==-1)) {
+		  (*_llights)[li].ClobberGLLight (i);
+		}else {
+		  glDisable (GL_LIGHT0+i);
+		  GLLights[i].index=-1;
+		}
+	      }
 	    }else {
 		glDisable (GL_LIGHT0+i);
 		GLLights[i].options&=(~OpenGLL::GL_ENABLED);
+
 	    }
 	}
     }
