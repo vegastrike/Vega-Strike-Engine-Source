@@ -672,7 +672,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 		return target->GetComputerData().set_speed*3.6;
   case UnitImages::AUTOPILOT:
     {
-    static wasautopilot=0;
+    static int wasautopilot=0;
 	int abletoautopilot=0;
     if (target) {
       abletoautopilot=(target->AutoPilotTo(target)?1:0);
