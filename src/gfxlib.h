@@ -107,7 +107,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(const int light);
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(const int light);
 
 ///Modifies the parameters of the given light
-GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, enum LIGHT_TARGET, const GFXColor &color);
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET, const GFXColor &color);
 
 /**
  * In the case of shields and other T&L based effects, the global lights
