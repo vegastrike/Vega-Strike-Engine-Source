@@ -305,7 +305,7 @@ void ResetGlobalVariables () {
 void readColorGrads (vector <string> &entity,const char * file) {
   VSFile f;
   VSError err = f.OpenReadOnly( file, UniverseFile);
-  static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","50"));
+  static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","1000"));
 
   if (err>Ok) {
     printf ("Failed to load %s",file);
