@@ -21,9 +21,9 @@ namespace FileUtil
 	vector<string>	GetSaveFromBuffer( const char * buffer);
 	void			WriteSaveFiles( string savestr, string xmlstr, string name);
 
+	extern bool				use_crypto;
 #ifdef CRYPTO
 	extern HASHMETHOD		Hash;
-	extern bool				use_crypto;
 #endif
 	void			displayHash( unsigned char * hash, unsigned int length);
 	int				HashCompare( string filename, unsigned char * hashdigest, VSFileType type);
