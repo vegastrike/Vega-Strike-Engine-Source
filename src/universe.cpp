@@ -47,6 +47,7 @@ using namespace std;
 extern void CacheJumpStar (bool);
 Universe::Universe(int argc, char** argv, const char * galaxy, const vector<std::string> &playerNames)
 {
+	current_cockpit=0;
 #if defined(WITH_MACOSX_BUNDLE)
     // get the current working directory so when glut trashes it we can restore.
     char pwd[MAXPATHLEN];
