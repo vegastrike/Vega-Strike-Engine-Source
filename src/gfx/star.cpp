@@ -350,6 +350,7 @@ void Stars::Draw() {
   GFXSelectMaterial (0);
   if (fade) {
     static float star_spread_attenuation = XMLSupport::parse_float(vs_config->getVariable("graphics","star_spread_attenuation",".2"));
+	GFXPushGlobalEffects();
     GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.01,0,1/(star_spread_attenuation*star_spread_attenuation*spread*spread)));
     GFXCreateLight (ligh,FadeLight,true);
     GFXEnable (LIGHTING);
@@ -372,8 +373,10 @@ _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE,GFXFALSE)	  ;
 
   GFXEnable (TEXTURE0);
   GFXEnable (TEXTURE1);
-  if (fade)
+  if (fade){
     GFXDeleteLight (ligh);
+	GFXPopGlobalEffects();
+  }
   GFXLoadIdentity(MODEL);
 }
 static void upd (double &a, double &b, double &c, double &d, double &e, double &f, double &g, double &h, double &i, const double cp, const float spread) {
