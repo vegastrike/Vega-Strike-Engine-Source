@@ -391,7 +391,6 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	double elapsed=0;
 	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
 	int login_to = atoi( login_tostr.c_str());
-	int nb=0;
 	while( !timeout && !recv)
 	{
 		// If we have no response in "login_to" seconds -> fails
@@ -847,7 +846,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				// SHOULD READ THE DAMAGE SNAPSHOT HERE !
 				int nbupdates = packet_serial;
 				ObjSerial serial;
-				int it=0;
+				size_t it=0;
 				unsigned short damages;
 				for( int i=0; i<nbupdates; i++)
 				{
@@ -1546,12 +1545,16 @@ bool	NetClient::jumpRequest( string newsystem)
 
 void	NetClient::startCommunication( float freq)
 {
+#ifdef NETCOMM
 	NetComm->InitSession( freq);
 	NetComm->GrabImage();
+#endif
 }
 
 void	NetClient::stopCommunication( float freq)
 {
+#ifdef NETCOMM
 	NetComm->DestroySession();
+#endif
 }
 

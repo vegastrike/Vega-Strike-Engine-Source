@@ -120,9 +120,9 @@ private:
         int     send( );
 
         static bool packet_uncompress( PacketMem&           dest,
-	                               const unsigned char* src,
-				       size_t               sz,
-				       Header&              header );
+                                       const unsigned char* src,
+                                       size_t               sz,
+                                       Header&              header );
 };
 
 #endif

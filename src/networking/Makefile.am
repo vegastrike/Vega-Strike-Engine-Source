@@ -65,6 +65,8 @@ libnetgeneric = \
     vsnet_thread.h          \
     vsnet_pipe.cpp          \
     vsnet_pipe.h            \
+    vsnet_dloadmgr.cpp      \
+    vsnet_dloadmgr.h        \
 	savenet_util.cpp		\
 	savenet_util.h
 
