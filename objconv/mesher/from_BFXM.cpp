@@ -1,6 +1,6 @@
 #include "mesh_io.h"
 #include "from_BFXM.h"
-
+extern float transx,transy,transz;
 string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA","INVSRCALPHA",
 "DESTALPHA","INVDESTALPHA","DESTCOLOR","INVDESTCOLOR","SRCALPHASAT","CONSTALPHA","INVCONSTALPHA",
 "CONSTCOLOR","INVCONSTCOLOR"};
@@ -321,8 +321,8 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
 			float32bit s=VSSwapHostFloatToLittle(inmemfile[word32index+6].f32val);//s
 			float32bit t=VSSwapHostFloatToLittle(inmemfile[word32index+7].f32val);//t
 		    word32index+=NUMFIELDSPERVERTEX;
-			fprintf(Outputfile,"<Point>\n\t<Location x=\"%f\" y=\"%f\" z=\"%f\" s=\"%f\" t=\"%f\"/>\n\t<Normal i=\"%f\" j=\"%f\" k=\"%f\"/>\n</Point>\n",x,y,z,s,t,i,j,k);
-                        fprintf (OutputObj,"v %f %f %f\nvn %f %f %f\n",scale*x,scale*y,scale*z,i,j,k);
+			fprintf(Outputfile,"<Point>\n\t<Location x=\"%f\" y=\"%f\" z=\"%f\" s=\"%f\" t=\"%f\"/>\n\t<Normal i=\"%f\" j=\"%f\" k=\"%f\"/>\n</Point>\n",x+transx,y+transy,z+transz,s,t,i,j,k);
+                        fprintf (OutputObj,"v %f %f %f\nvn %f %f %f\n",scale*(x+transx),scale*(y+transy),scale*(z+transz),i,j,k);
                         if (sharevert) {
                           fprintf (OutputObj,"vt %f %f\n",s,t);                          
                           texcount+=1;

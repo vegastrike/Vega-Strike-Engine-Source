@@ -6,6 +6,9 @@ void usage(){
 }
 bool flip=false;
 bool flop=false;
+float transx=0;
+float transy=0;
+float transz=0;
 int main (int argc, char** argv) {
   {for (int i=0;i<argc;++i) {
     bool match=false;
@@ -16,6 +19,18 @@ int main (int argc, char** argv) {
     if (strcmp(argv[i],"-flop")==0) {
       match=true;
       flop=true;
+    }
+    if (strncmp(argv[i],"-x",2)==0) {
+		sscanf(argv[i]+2,"%f",&transx);
+		match=true;
+    }
+    if (strncmp(argv[i],"-y",2)==0) {
+		sscanf(argv[i]+2,"%f",&transy);
+		match=true;
+    }
+    if (strncmp(argv[i],"-z",2)==0) {
+		sscanf(argv[i]+2,"%f",&transz);
+		match=true;
     }
     if(match) {
       for (int j=i;j+1<argc;++j) {
