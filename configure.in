@@ -791,7 +791,11 @@ dnl Check for glext.h
 if test "x$is_macosx" = "xyes" ; then
     have_glext_h=yes
 else
-    AC_CHECK_HEADERS(GL/glext.h, have_glext_h=yes, have_glext_h=no )
+    AC_CHECK_HEADERS([GL/gl.h GL/glext.h], [have_glext_h=yes], [have_glext_h=no],
+    [[#if HAVE_GL_GL_H
+    #include <GL/gl.h>
+    #endif
+    ]])
 fi
 
 if test "x$have_glext_h" = "xno" ; then
