@@ -16,7 +16,7 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   return *this;
 }
 */
-void weapon_info::init() {size=NOWEAP;r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=60;Longrange=.5;EnergyRate=18;EnergyConsumption=18;Refire=.2;}
+void weapon_info::init() {size=NOWEAP;r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=60;Longrange=.5;EnergyRate=18;Refire=.2;}
 void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}}
 
 
@@ -204,7 +204,7 @@ namespace BeamXML {
 	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case CONSUMPTION:
-	  tmpweapon.EnergyConsumption = XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.EnergyRate = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case RATE:
 	  tmpweapon.EnergyRate = XMLSupport::parse_float ((*iter).value);

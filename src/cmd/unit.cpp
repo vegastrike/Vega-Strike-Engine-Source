@@ -691,11 +691,11 @@ void Unit::Fire () {
       if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy)
 	continue;
     }else{ 
-      if (mounts[i].type.EnergyConsumption>energy) 
+      if (mounts[i].type.EnergyRate>energy) 
 	continue;
     }
     if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,this)) {
-    energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyConsumption;
+    energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate;
     }//unfortunately cumulative transformation not generated in physics atom
   }
 }
