@@ -361,8 +361,10 @@ using namespace VSFileSystem;
   ParseAllAllies();
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
-      if (factions[i]->faction[j].conversation==NULL){
-		  string fname;
+      Faction * fact=factions[i];
+      string fname=fact->factionname;
+
+      if (fact->faction[j].conversation==NULL){
 		  
 		  //if (factions[i]->faction[j].stats.index != 0)	  {
 		  if (0) {//we just want OUR faction to use that file when communicating with ANYONE  -- if we want certain factions to have *special* comm info for each other, then we can specify the conversation flag
@@ -374,6 +376,8 @@ using namespace VSFileSystem;
 		  if (VSFileSystem::LookForFile( f, CommFile)>Ok)
 			  fname="neutral";
 		  factions[i]->faction[j].conversation=getFSM (/*"communications/" +*/ fname + ".xml");
+      }else{
+        //printf ("Already have converastion for %s with %s\n",fname.c_str(),factions[j]->factionname);
       }
     }
   }

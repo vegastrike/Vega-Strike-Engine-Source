@@ -1348,8 +1348,8 @@ void FireKeyboard::Execute () {
       Unit * targ=parent->Target();
       if (targ) {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       
-
-	if (mymsg==NULL) {
+        FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
+	if (mymsg==NULL||mymsg->curstate>=fsm->nodes.size()) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
 	  DoSpeech (targ,targ,*c.getCurrentState());
 	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
@@ -1359,6 +1359,8 @@ void FireKeyboard::Execute () {
 	  if (o)
 		  o->Communicate (c);
 	}else {
+          FSM * tmp = mymsg->fsm;
+          mymsg->fsm = fsm;
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
@@ -1366,10 +1368,11 @@ void FireKeyboard::Execute () {
 	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	    }
-		Order * oo = targ->getAIState();
-		if (oo)
-			oo->Communicate (c);
+            Order * oo = targ->getAIState();
+            if (oo)
+              oo->Communicate (c);
 	  }
+          mymsg->fsm=tmp;
 	}
       }
     }
@@ -1378,11 +1381,11 @@ void FireKeyboard::Execute () {
     Unit * targ;
     if ((targ =parent->Target())) {
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
+      FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
       if (mymsg==NULL) {
-	FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
 	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
       }else {
-       _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
+       _Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(mymsg->curstate);
       }
     } else {
       _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";

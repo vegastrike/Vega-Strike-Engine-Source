@@ -38,6 +38,7 @@ class FSM {
   int GetContrabandUnDetectedNode();
   int GetContrabandDetectedNode();
   int GetContrabandWobblyNode();
+  
 };
 class CommunicationMessage {
   void Init (Unit * send, Unit * recv);
@@ -54,7 +55,7 @@ class CommunicationMessage {
   CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   void SetCurrentState(int message, std::vector <class Animation *> *ani,unsigned char sex);
-  FSM::Node * getCurrentState() {return &fsm->nodes[curstate];}
+  FSM::Node * getCurrentState() {if (curstate<fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}
 };

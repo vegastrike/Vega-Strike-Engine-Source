@@ -264,17 +264,23 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * 
 
 void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
   Order::ProcessCommMessage(c);
-  FSM::Node * n = c.getCurrentState ();
-  if (n) {
-     if (n->edges.size()) {
-      Unit * un = c.sender.GetUnit();
-      if (un) {
-	      int b = selectCommunicationMessage (c,un);
-		  Order * o = un->getAIState();
-		  if (o)
-			  o->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+  FSM *tmpfsm = c.fsm;
+  Unit * targ = c.sender.GetUnit();
+  if (targ) {
+    c.fsm  =FactionUtil::GetConversation (parent->faction,targ->faction);
+    FSM::Node * n = c.getCurrentState ();
+    if (n) {
+      if (n->edges.size()) {
+        Unit * un = c.sender.GetUnit();
+        if (un) {
+          int b = selectCommunicationMessage (c,un);
+          Order * o = un->getAIState();
+          if (o)
+            o->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+        }
       }
     }
+    c.fsm=tmpfsm;    
   }
 }
 CommunicatingAI::~CommunicatingAI() {
