@@ -96,7 +96,8 @@ void Unit::calculate_extent() {
     float tmp1 = corner_min.Magnitude();
     float tmp2 = corner_max.Magnitude();
     radial_size = tmp1>tmp2?tmp1:tmp2;
-    image->selectionBox = new Box(corner_min, corner_max);
+    if (!SubUnit)
+      image->selectionBox = new Box(corner_min, corner_max);
   }
   if (!SubUnit) {
     UpdateCollideQueue();
@@ -175,9 +176,7 @@ void Unit::Init()
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
-  
-  bspShield = bspTree = NULL;
-  colTree = colShield = NULL;
+  colTrees=NULL;
   invisible=false;
   //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
@@ -487,18 +486,10 @@ Unit::~Unit()
   fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
   fflush (stderr);
 #endif
-  if (bspTree)
-    delete bspTree;
-  if (bspShield)
-    delete bspShield;
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d", 5);
   fflush (stderr);
 #endif
-  if (colTree)
-    delete colTree;
-  if (colShield)
-    delete colShield;
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x", 6,mounts);
   fflush (stderr);

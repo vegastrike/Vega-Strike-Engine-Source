@@ -19,6 +19,7 @@
 #include "images.h"
 #include "xml_serializer.h"
 #include "collide/rapcol.h"
+#include "unit_collide.h"
 #include "vs_path.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
@@ -1432,67 +1433,83 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   for( a=0; a<(int)xml->units.size(); a++) {
     SubUnits.prepend(xml->units[a]);
   }
+  calculate_extent();
   if (!SubUnit) {
-    calculate_extent();
     UpdateCollideQueue();
   }
   *myscale=xml->unitscale;
   string tmpname (filename);
   vector <bsp_polygon> polies;
+  std::string collideTreeHash = string(filename)+string(modifications)+XMLSupport::tostring(faction);
+  colTrees = collideTrees::Get(collideTreeHash);
+  if (colTrees) {
+    colTrees->Inc();
+  }
+  BSPTree * bspTree=NULL;
+  BSPTree * bspShield=NULL;
+  csRapidCollider *colShield=NULL;
+  csRapidCollider *colTree=NULL;
   if (xml->shieldmesh) {
     meshdata[nummesh] = xml->shieldmesh;
-    
-    if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
-      BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
-    }
-    if (CheckBSP ((tmpname+"_shield.bsp").c_str())) {
-      bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
-    }
-    if (meshdata[nummesh]) {
-      meshdata[nummesh]->GetPolys(polies);
-      colShield = new csRapidCollider (polies);
+    if (!colTrees) {
+      if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
+	BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
+      }
+      if (CheckBSP ((tmpname+"_shield.bsp").c_str())) {
+	bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
+      }
+      if (meshdata[nummesh]) {
+	meshdata[nummesh]->GetPolys(polies);
+	colShield = new csRapidCollider (polies);
+      }
     }
   }
   else {
-    SphereMesh * tmp = new SphereMesh (rSize(),8,8,"shield.bmp", NULL, false,ONE, ONE);
-    tmp->GetPolys (polies);
-    if (xml->hasColTree)
-      colShield = new csRapidCollider (polies);
-    else
-      colShield=NULL;
-    static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    if (shieldstacks!=8) {
-      delete tmp;
-      tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,"shield.bmp", NULL, false,ONE, ONE);
+    SphereMesh * tmp = NULL;
+    if (!colTrees) {
+#if 0
+      tmp= new SphereMesh (rSize(),8,8,"shield.bmp", NULL, false,ONE, ONE);///shield not used right now for collisions
+      tmp->GetPolys (polies);
+      if (xml->hasColTree)
+	colShield = new csRapidCollider (polies);
+      else
+#endif
+	colShield=NULL;
     }
+    static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
+    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,"shield.bmp", NULL, false,ONE, ONE);
+    
     meshdata[nummesh] = tmp;
     bspShield=NULL;
     colShield=NULL;
   }
   meshdata[nummesh]->EnableSpecialFX();
-  if (xml->hasBSP) {
-    tmpname += ".bsp";
-    if (!CheckBSP (tmpname.c_str())) {
-      BuildBSPTree (tmpname.c_str(), false, xml->bspmesh);
+  if (!colTrees) {
+    if (xml->hasBSP) {
+      tmpname += ".bsp";
+      if (!CheckBSP (tmpname.c_str())) {
+	BuildBSPTree (tmpname.c_str(), false, xml->bspmesh);
+      }
+      if (CheckBSP (tmpname.c_str())) {
+	bspTree = new BSPTree (tmpname.c_str());
+      }	
+    } else {
+      bspTree = NULL;
     }
-    if (CheckBSP (tmpname.c_str())) {
-      bspTree = new BSPTree (tmpname.c_str());
-    }	
-  } else {
-    bspTree = NULL;
-  }
-  polies.clear();
-  if (!xml->bspmesh) {
-    for (int j=0;j<nummesh;j++) {
-      meshdata[j]->GetPolys(polies);
+    polies.clear();  
+    if (!xml->bspmesh) {
+      for (int j=0;j<nummesh;j++) {
+	meshdata[j]->GetPolys(polies);
+      }
+    }else {
+      xml->bspmesh->GetPolys (polies);
     }
-  }else {
-    xml->bspmesh->GetPolys (polies);
-  }
-  if (xml->hasColTree ) {
-    colTree = new csRapidCollider (polies);    
-  }else {
-    colTree=NULL;
+    if (xml->hasColTree ) {
+      colTree = new csRapidCollider (polies);    
+    }else {
+      colTree=NULL;
+    }
+    colTrees = new collideTrees (collideTreeHash,bspTree,bspShield,colTree,colShield);
   }
   if (xml->bspmesh) {
     delete xml->bspmesh;

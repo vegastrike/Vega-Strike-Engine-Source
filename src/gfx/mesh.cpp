@@ -117,6 +117,7 @@ Mesh::Mesh()
 bool Mesh::LoadExistant (const char * filehash, float scale) {
   Mesh * oldmesh;
   oldmesh = meshHashTable.Get(GetHashName(filehash,scale));
+
   if (oldmesh==0) {
     oldmesh = meshHashTable.Get(GetSharedMeshHashName(filehash,scale));  
   }
@@ -126,6 +127,8 @@ bool Mesh::LoadExistant (const char * filehash, float scale) {
     orig = oldmesh;
     return true;
   }
+  //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale).c_str());
+
   return false;
 }
 

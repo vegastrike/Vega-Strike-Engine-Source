@@ -185,7 +185,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   //BuildBSPTree (tmpname.c_str(),true,meshdata[1]);
   delete meshdata[1];
 #else
-  colTree= NULL;
+  colTrees= NULL;
 #endif
     /*
       } else {
@@ -352,8 +352,6 @@ Planet::~Planet() {
   if (atmosphere){
      delete atmosphere;
   }
-	if (bspTree)
-	  delete bspTree;
 	if (terraintrans) {
 	  float * tmp = (float *) malloc (sizeof(float)*16);
 	  memcpy (tmp,cumulative_transformation_matrix,sizeof(float)*16);

@@ -15,7 +15,6 @@
 #include "xml_support.h"
 #include "savegame.h"
 #include "gfx/cockpit.h"
-
 #include "cmd/script/mission.h"
 
 //#define DESTRUCTDEBUG
@@ -89,10 +88,6 @@ void Unit::Split (int level) {
       splitsub->ApplyLocalTorque(loc*mass*rSize()*(1+rand()%(int)(1+rSize())));
     }
   }
-  if (bspTree) {
-    delete bspTree;
-    bspTree=NULL;
-  }
   delete [] old;
   nummesh = 0;
   meshdata = new Mesh *[1];
@@ -101,6 +96,9 @@ void Unit::Split (int level) {
 }
 
 void Unit::Kill(bool erasefromsave) {
+  if (colTrees)
+    colTrees->Dec();//might delete
+  colTrees=NULL;
   if (erasefromsave)
     RemoveUnitFromSave((int)this);
   
@@ -282,7 +280,7 @@ void Unit::RegenShields () {
     break;
   }
   if (rechargesh==0)
-    energy-=rec;
+    energy-=(short unsigned int)rec;
   if (energy>maxenergy)//allow shields to absorb xtra power
     energy=maxenergy;  
 

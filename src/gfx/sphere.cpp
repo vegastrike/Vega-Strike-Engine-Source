@@ -18,16 +18,19 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   Mesh *oldmesh;
   char ab[3];
   ab[2]='\0';
-  ab[1]=a+'0';
-  ab[2]=a+'0';
+  ab[1]=b+'0';
+  ab[0]=a+'0';
   hash_name = string("@@Sphere") + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) +  ab + "#" + tostring(rho_min) + "#" + tostring(rho_max);
   if (LoadExistant (hash_name.c_str(),radius)) {
     return;
+  } else {
+
   }
   oldmesh = new SphereMesh[numspheres];//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=GetHashName(hash_name,radius), oldmesh);
+  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,radius), oldmesh);
+  //  fprintf (stderr,"\nput %s\n",hash_name.c_str());
   this->orig = oldmesh;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (-radialSize,-radialSize,-radialSize);

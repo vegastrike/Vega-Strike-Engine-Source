@@ -10,6 +10,32 @@
 #include "collide/rapcol.h"
 #include "collide/csgeom/transfrm.h"
 #include "collide/collider.h"
+#include "hashtable.h"
+#include <string>
+static Hashtable <std::string,collideTrees,char[127]> unitColliders;
+collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), colTree(cT), bspShield(bS), colShield(cS) {
+  refcount=1;
+  unitColliders.Put (hash_key,this);
+}
+collideTrees* collideTrees::Get(const std::string &hash_key) {
+  return unitColliders.Get(hash_key);
+}
+void collideTrees::Dec() {
+  refcount--;
+  if (refcount==0) {
+    unitColliders.Delete (hash_key);
+    if (bspTree)
+      delete bspTree;
+    if (colTree) 
+      delete colTree;
+    if (bspShield)
+      delete bspShield;
+    if (colShield)
+      delete colShield;
+    delete this;
+    return;
+  }
+}
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
   return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
@@ -150,14 +176,16 @@ bool Unit::Inside (const Vector &target, const float radius, Vector & normal, fl
   return false;
 }
 bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal, Vector & smallpos, Vector & smallNormal) {
-    if (smaller->colTree==NULL||colTree==NULL)
-      return false;
+  if (smaller->colTrees==NULL||colTrees==NULL)
+    return false;
+  if (smaller->colTrees->colTree==NULL||colTrees->colTree==NULL)
+    return false;
 
     csRapidCollider::CollideReset();
     Unit * bigger =this;
     const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
     const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
-    if (smaller->colTree->Collide (*bigger->colTree,
+    if (smaller->colTrees->colTree->Collide (*bigger->colTrees->colTree,
 				  &smalltransform,
 				  &bigtransform)) {
       //static int crashcount=0;
@@ -226,7 +254,10 @@ bool Unit::Collide (Unit * target) {
     bigger = this;
     smaller = target;
   }
-  if (colTree&&target->colTree) {
+  bool usecoltree =(colTrees&&target->colTrees)
+    ?colTrees->colTree&&target->colTrees->colTree
+    : false;
+  if (usecoltree) {
     Vector bigpos,smallpos,bigNormal,smallNormal;
     if (bigger->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
       bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );	
@@ -275,9 +306,15 @@ Unit * Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, 
   }
   if (!temp)
     return NULL;
-  BSPTree *const* tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
-  if (bspTree&&!ShieldBSP) {
-    tmpBsp= &bspTree;
+  BSPTree *const* tmpBsp;
+  BSPTree *myNull=NULL;
+  if (colTrees) {
+    tmpBsp = ShieldUp(st)?&colTrees->bspShield:&colTrees->bspTree;
+    if (colTrees->bspTree&&!ShieldBSP) {
+      tmpBsp= &colTrees->bspTree;
+    }
+  } else {
+    tmpBsp=&myNull;
   }
   if (!(*tmpBsp)) {
     dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
@@ -301,12 +338,16 @@ Unit * Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, f
       }
     }
   }
+  BSPTree *myNull=NULL;
   Vector st (InvTransform (cumulative_transformation_matrix,start));
-  BSPTree *const* tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
-  if (bspTree&&!ShieldBSP) {
-    tmpBsp= &bspTree;
+  BSPTree *const* tmpBsp = &myNull;
+  if (colTrees) {
+    tmpBsp=ShieldUp(st)?&colTrees->bspShield:&colTrees->bspTree;
+    if (colTrees->bspTree&&!ShieldBSP) {
+      tmpBsp= &colTrees->bspTree;
+    }
   }
-  for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st)&&(tmpBsp!=(&bspTree)))?(&bspTree):NULL)) {
+  for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st)&&(tmpBsp!=((colTrees?&colTrees->bspTree:&myNull))))?((colTrees?&colTrees->bspTree:&myNull)):NULL)) {
     if (!(*tmpBsp)) {
       distance = querySphereNoRecurse (start,end);
       norm = (distance * (start-end));
