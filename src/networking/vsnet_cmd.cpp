@@ -47,6 +47,9 @@ const char* displayCmd( Cmd cmd )
     CASE( LOGIN_ALREADY    )
     CASE( LOGIN_NEW        )
 
+    CASE( CMD_FIREREQUEST  )
+    CASE( CMD_UNFIREREQUEST)
+
     CASE( CMD_NEWSUBSCRIBE )
 
     CASE( CMD_ENTERCLIENT  )

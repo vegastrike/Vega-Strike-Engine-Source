@@ -35,7 +35,6 @@ class AccountServer
 		int			newaccounts;
 		int			keeprun;
 		// SOCKETALT	conn_sock;
-		ObjSerial	serial_seed;
 		Packet		packet;
 
 		double	savetime;
@@ -52,7 +51,6 @@ class AccountServer
 		void		sendAuthorized( SOCKETALT sock, Account * acct);				// Send authorization and related data
 		void		sendUnauthorized( SOCKETALT sock, Account * acct);				// Send unauthorizated connection
 		void		sendAlreadyConnected(  SOCKETALT sock, Account * acct);
-		ObjSerial	getUniqueSerial();
 
 		void		writeSave( const char * buffer);
 		void		removeDeadSockets();

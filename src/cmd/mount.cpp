@@ -28,6 +28,7 @@ Mount::Mount() {
 	static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
 	xyscale=xyscalestat;	
 	zscale=zscalestat;
+	serial = 0;
 }
 
 Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
@@ -42,6 +43,7 @@ Mount::Mount(const string& filename, short am,short vol, float xyscale, float zs
 	  zscale=zscalestat;
   this->zscale=zscale;
     this->xyscale=xyscale;
+  serial = 0;
   ammo = am;
   sound = -1;
   type = &wi;
@@ -135,7 +137,7 @@ double Mount::Percentage (const Mount *newammo) const{
 	  }
 }
 
-bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
+bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone, int mount_num) {
   if (time_to_lock>0) {
     target=NULL;
   }
@@ -164,6 +166,9 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  break;
 			case weapon_info::PROJECTILE:
 			  temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
+			  // Affect the stored mount serial to the new missile
+			  temp->SetSerial( this->serial);
+			  this->serial = 0;
 			  if (target&&target!=owner) {
 					temp->Target (target);
 					temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));

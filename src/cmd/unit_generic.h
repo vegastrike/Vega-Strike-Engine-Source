@@ -91,6 +91,8 @@ class Mount {
     Quaternion orient;
 	void ReplaceSound();
   public:
+	// Serial used to store missiles serial id before they are really created
+	ObjSerial serial;
 	float xyscale;float zscale;//for guns!	
     void SwapMounts (Mount * other);
     void ReplaceMounts (const Mount * other);
@@ -109,7 +111,7 @@ class Mount {
     short ammo;
     short volume;//-1 is infinite
     ///The data behind this weapon. May be accordingly damaged as time goes on
-    enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
+    enum MOUNTSTATUS{REQUESTED,ACCEPTED,PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     ///The sound this mount makes when fired
@@ -148,7 +150,7 @@ class Mount {
      */ 
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
-	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);
+	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone, int mount_num=0);
 	bool Fire (Unit *owner, bool Missile=false, bool collide_only_with_target=false);
 };
 
@@ -827,7 +829,7 @@ public:
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
   ///Fires all active guns that are or arent Missiles
   // if bitmask is (1<<31) then fire off autotracking of that type;
-  virtual void Fire(unsigned int bitmask, bool beams_target_owner=false);
+  virtual void Fire(unsigned int bitmask, bool beams_target_owner=false, int zone=-1);
   ///Stops all active guns from firing
   void UnFire();
   ///reduces shields to X percentage and reduces shield recharge to Y percentage

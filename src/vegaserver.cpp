@@ -28,7 +28,6 @@
 char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
-NetServer * Server;
 
 int main( int argc, char **argv)
 {
@@ -38,6 +37,6 @@ int main( int argc, char **argv)
 
 	Server->start( argc, argv);
 
-	delete Server;
+	delete Network;
 	return 0;
 }

@@ -4,8 +4,11 @@
 #include <string>
 #include <vector>
 #include "configxml.h"
+#include "networking/const.h"
 extern char *CONFIGFILE;
 extern VegaConfig * createVegaConfig( char * file);
+extern ObjSerial	serial_seed;
+ObjSerial	getUniqueSerial();
 
 #define DELIM '/'
 #define DELIMSTR "/"

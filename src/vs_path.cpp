@@ -3,6 +3,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+#include "networking/const.h"
 
 #include "common/common.h"
 
@@ -17,6 +18,14 @@
 #include "galaxy_gen.h"
 
 char *CONFIGFILE;
+
+ObjSerial	serial_seed = 0;
+ObjSerial	getUniqueSerial()
+{
+	// MAYBE CHANGE TO SOMETHING MORE "RANDOM"
+	serial_seed = (serial_seed+3)%MAXSERIAL;
+	return serial_seed;
+}
 
 string floattostringh (float f) {
 	char c[128];

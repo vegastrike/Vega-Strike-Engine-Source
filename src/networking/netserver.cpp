@@ -42,14 +42,13 @@
 #include "cmd/ai/fire.h"
 #include "cmd/ai/fireall.h"
 #include "cmd/ai/flybywire.h"
+#include "cmd/role_bitmask.h"
 
-VegaConfig * vs_config;
 double	clienttimeout;
 double	logintimeout;
 extern double	NETWORK_ATOM;
 int		acct_con;
 string	tmpdir;
-bool cleanexit;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -76,17 +75,6 @@ NetServer::~NetServer()
 {
 	delete zonemgr;
 	delete globalsave;
-}
-
-/**************************************************************/
-/**** Authenticate a connected client                      ****/
-/**************************************************************/
-
-ObjSerial	NetServer::getUniqueSerial()
-{
-	// MAYBE CHANGE TO SOMETHING MORE "RANDOM"
-	serial_seed = (serial_seed+3)%MAXSERIAL;
-	return serial_seed;
 }
 
 /**************************************************************/
@@ -903,6 +891,11 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 
     Packet p2;
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
+	int mount_num;
+	int zone;
+	char mis;
+	// Find the unit
+	Unit * un = NULL;
 
     switch( cmd)
     {
@@ -999,6 +992,32 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         packet.ack( );
         break;
 
+	case CMD_FIREREQUEST :
+		// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
+		mount_num = netbuf.getInt32();
+		zone = netbuf.getInt32();
+		mis = netbuf.getChar();
+		// Find the unit
+		un = zonemgr->getUnit( packet.getSerial(), zone);
+		// Set the concerned mount as ACTIVE and others as INACTIVE
+
+		if( un==NULL)
+			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+		else
+		{
+			vector <Mount>
+				::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+			for (;i!=un->mounts.end();++i)
+				(*i).status=Mount::INACTIVE;
+				un->mounts[mount_num].status=Mount::ACTIVE;
+			// Ask for fire
+			if( mis != 0)
+				un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false, zone);
+			else
+				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false, zone);
+		}
+	break;
+
 	// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
 	// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
 	// IF SOMEONE HAS BEEN HIT
@@ -1055,7 +1074,8 @@ void	NetServer::addClient( Client * clt)
 	clt->current_state.setPosition( cp->savegame->GetPlayerLocation());
 	clt->current_state.setSerial( clt->serial);
 
-	if( zonemgr->addClient( clt, starsys))
+	int zoneid;
+	if( zonemgr->addClient( clt, starsys, zoneid))
 	{
 		//NetBuffer netbuf2( packet.getData(), packet.getDataLength());
 		// If the system is loaded, there are people in it -> BROADCAST
@@ -1073,6 +1093,10 @@ void	NetServer::addClient( Client * clt)
 		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+		Packet pp;
+		netbuf.Reset();
+		netbuf.addInt32( zoneid);
+		pp.send( CMD_ADDEDYOU, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
 		cout<<"Serial : "<<clt->serial<<endl;
 		// Send info about other ships in the system to "clt"
 		zonemgr->sendZoneClients( clt);
@@ -1327,11 +1351,31 @@ void	NetServer::save()
 
 // WEAPON STUFF
 
-void	NetServer::BroadcastUnfire( Client * clt, int weapon_index)
+void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, int zone)
 {
+	Packet p;
+	NetBuffer netbuf;
+
+	//netbuf.addSerial( serial);
+	netbuf.addInt32( weapon_index);
+
+	//p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.bc_create( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__);
+	zonemgr->broadcast( zone, serial, &p );
 }
 
-void	NetServer::BroadcastFire( Client * clt, int weapon_index)
+// In BroadcastFire we must use the provided serial because it may not be the client's serial
+// but may be a turret serial
+void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, int zone)
 {
-}
+	Packet p;
+	NetBuffer netbuf;
+	bool found = false;
 
+	netbuf.addInt32( weapon_index);
+	netbuf.addSerial( missile_serial);
+
+	p.bc_create( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__);
+	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
+	zonemgr->broadcast( zone, serial, &p );
+}

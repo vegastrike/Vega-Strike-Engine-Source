@@ -39,6 +39,7 @@
 #include "lin_time.h"
 #include "vs_path.h"
 #include "packet.h"
+#include "cmd/role_bitmask.h"
 
 #include "vsnet_clientstate.h"
 #include "vegastrike.h"
@@ -394,6 +395,11 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
     // Receive data
     AddressIP sender_adr;
 	PacketMem mem;
+	Unit * un = NULL;
+	int mount_num;
+	ObjSerial mis;
+	un_iter it;
+
     int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
 
     if( recvbytes <= 0)
@@ -477,6 +483,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
             case CMD_ADDEDYOU :
                 cout << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
+				// Get the zone id in the packet
+				this->zone = netbuf.getInt32();
                 //this->getZoneData( &p1 );
                 break;
             case CMD_DISCONNECT :
@@ -492,6 +500,70 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                      << " )= ---------------------------------------------------" << endl;
 				p1.ack( );
                 break;
+			case CMD_FIREREQUEST :
+				// WE RECEIVED A FIRE NOTIFICATION SO FIRE THE WEAPON
+				mount_num = netbuf.getInt32();
+				mis = netbuf.getSerial();
+				// Find the unit
+				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
+				it = UniverseUtil::getUnitList();
+				for( ; un==NULL && it.current!=NULL; it.advance())
+				{
+					if( it.current()->GetSerial()==p1.getSerial())
+						un = it.current();
+				}
+				if( un==NULL)
+					cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+				else
+				{
+					// Set the concerned mount as ACTIVE and others as INACTIVE
+					vector <Mount>
+						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+					for (;i!=un->mounts.end();++i)
+						(*i).status=Mount::INACTIVE;
+					un->mounts[mount_num].processed=Mount::ACCEPTED;
+					un->mounts[mount_num].status=Mount::ACTIVE;
+					// Store the missile id in the mount that should fire a missile
+					un->mounts[mount_num].serial=mis;
+					// Ask for fire
+					if( mis != 0)
+						un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
+					else
+						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+				}
+
+			break;
+			case CMD_UNFIREREQUEST :
+				// WE RECEIVED AN UNFIRE NOTIFICATION SO DEACTIVATE THE WEAPON
+				mount_num = netbuf.getInt32();
+				mis = netbuf.getSerial();
+				it = UniverseUtil::getUnitList();
+				// Find the unit
+				for( ; un==NULL && it.current!=NULL; it.advance())
+				{
+					if( it.current()->GetSerial()==p1.getSerial())
+						un = it.current();
+				}
+				if( un==NULL)
+					cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+				else
+				{
+					// Set the concerned mount as ACTIVE and others as INACTIVE
+					vector <Mount>
+						::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+					for (;i!=un->mounts.end();++i)
+						(*i).status=Mount::INACTIVE;
+					un->mounts[mount_num].processed=Mount::UNFIRED;
+					// Store the missile id in the mount that should fire a missile
+					un->mounts[mount_num].serial=mis;
+					// Ask for fire
+					if( mis != 0)
+						un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
+					else
+						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+				}
+
+			break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;
@@ -509,9 +581,9 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 // NOT USED ANYMORE !!
 void NetClient::getZoneData( const Packet* packet )
 {
+	/*
 	unsigned short nbclts;
 	ClientState cs;
-	ClientDescription cd;
 	int		state_size=sizeof( ClientState);
 	int		desc_size=sizeof( ClientDescription);
 	ObjSerial nser, nser2 = 0;
@@ -561,6 +633,7 @@ void NetClient::getZoneData( const Packet* packet )
 			cs.display();
 		}
 	}
+	*/
 }
 
 /*************************************************************/
@@ -635,6 +708,11 @@ void	NetClient::addClient( const Packet* packet )
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
 							 0, saves[1]);
 		clt->game_unit.SetUnit( un);
+		// Set all weapons to inactive
+		vector <Mount>
+			::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+		for (;i!=un->mounts.end();++i)
+			(*i).status=Mount::INACTIVE;
 		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
 		clt->game_unit.GetUnit()->SetNetworkMode( true);
 		clt->game_unit.GetUnit()->SetSerial( cltserial);
@@ -961,6 +1039,32 @@ Transformation NetClient::spline_interpolate( ObjSerial clientid, double blend)
 /******************************************************************************************/
 /*** WEAPON STUFF                                                                      ****/
 /******************************************************************************************/
+
+// In fireRequest we must use the provided serial because it may not be the client's serial
+// but may be a turret serial
+void	NetClient::fireRequest( ObjSerial serial, int mount_index)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	//netbuf.addSerial( serial);
+	netbuf.addInt32( mount_index);
+	netbuf.addInt32( this->zone);
+
+	p.send( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+}
+
+void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	//netbuf.addSerial( serial);
+	netbuf.addInt32( mount_index);
+	netbuf.addInt32( this->zone);
+
+	p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+}
 
 
 void	NetClient::FireBeam()

@@ -30,23 +30,7 @@ libnetgeneric =	\
 	vsnet_cmd.h				\
 	vsnet_clientstate.h		\
 	vsnet_serversocket.cpp	\
-	vsnet_serversocket.h
-
-libnet_a_SOURCES =	\
-	inet.cpp		\
-	inet.h
-
-libnetclient_a_SOURCES = $(libnetgeneric) \
-	netclient.cpp	\
-	netclient.h	\
-	cubicsplines.cpp	\
-	cubicsplines.h
-
-libnetacct_a_SOURCES = $(libnetgeneric) \
-	acctserver.cpp \
-	acctserver.h
-
-libnetserver_a_SOURCES = $(libnetgeneric) \
+	vsnet_serversocket.h	\
 	netserver.cpp	\
 	netserver.h	\
 	netclient.cpp	\
@@ -57,4 +41,16 @@ libnetserver_a_SOURCES = $(libnetgeneric) \
 	savenet_util.h		\
 	zonemgr.cpp	\
 	zonemgr.h
+
+libnet_a_SOURCES =	\
+	inet.cpp		\
+	inet.h
+
+libnetclient_a_SOURCES = $(libnetgeneric) 
+
+libnetacct_a_SOURCES = $(libnetgeneric) \
+	acctserver.cpp \
+	acctserver.h
+
+libnetserver_a_SOURCES = $(libnetgeneric)
 

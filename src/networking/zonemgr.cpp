@@ -87,7 +87,7 @@ Unit *	ZoneMgr::getUnit( ObjSerial unserial, int zone)
 	return un;
 }
 
-bool	ZoneMgr::addClient( Client * clt, string starsys)
+bool	ZoneMgr::addClient( Client * clt, string starsys, int & num_zone)
 {
 	// Remove the client from old starsystem if needed and add it in the new one
 	/*
@@ -117,16 +117,17 @@ bool	ZoneMgr::addClient( Client * clt, string starsys)
 		// It also mean that there is nobody in that system so no need to send update
 		// Return false since the starsystem didn't contain any client
 		ret = false;
+		num_zone = _Universe->star_system.size()-1;
 	}
-	// Get the index of the star_system as it represents the zone number
-	//int zone = _Universe->StarSystemIndex( sts);
-	// This way should be more efficient since the system we just added is the star_system.size()-1
-	int zone = _Universe->star_system.size()-1;
-	cout<<">> ADDING CLIENT IN ZONE # "<<zone<<endl;
+	else
+	// Get the index of the existing star_system as it represents the zone number
+		num_zone = _Universe->StarSystemIndex( sts);
+
+	cout<<">> ADDING CLIENT IN ZONE # "<<num_zone<<endl;
 	// Adds the client in the zone
-	zone_list[zone].push_back( clt);
-	clt->zone = zone;
-	zone_clients[zone]++;
+	zone_list[num_zone].push_back( clt);
+	clt->zone = num_zone;
+	zone_clients[num_zone]++;
 
 	// Compute a safe entrance point -> DONE WHEN LOGIN ACCEPTED
 	//QVector safevec;
@@ -175,11 +176,28 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
 		// Broadcast to other clients
 		if( clt->serial!= (*i)->serial)
 		{
-			cout<<"Sending update to client n° "<<(*i)->serial;
+			cout<<"BROADCASTING "<<pckt->getCommand()<<" to client n° "<<(*i)->serial;
 			cout<<endl;
 			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
 			pckt->bc_send( );
 		}
+	}
+}
+
+// Broadcast a packet to a zone clients with its serial as argument
+void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
+{
+    // cout<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
+	for( LI i=zone_list[zone].begin(); i!=zone_list[zone].end(); i++)
+	{
+		// Broadcast to all clients including the one who did a request
+		//if( serial!= (*i)->serial)
+		//{
+			cout<<"Sending update to client n° "<<(*i)->serial;
+			cout<<endl;
+			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
+			pckt->bc_send( );
+		//}
 	}
 }
 

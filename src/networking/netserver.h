@@ -60,7 +60,6 @@ class NetServer
 		int				keeprun;				// Tells if we should keep running server
 		int				snapchanged;			// Tells the snapshot has changed and can be sent
 		int				acctserver;				// Tells if we use an account server
-		ObjSerial		serial_seed;
 
 		timeval				srvtimeout;			// timer
 
@@ -102,7 +101,6 @@ class NetServer
         void            checkTimedoutClients_udp();     // Check for timed out clients  
 
         Client *        addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
-		ObjSerial		getUniqueSerial();				// Get a pseudo-unique serial
 		void			sendLoginError( Client * clt, AddressIP ipadr);
 		void			sendLoginAlready( Client * clt, AddressIP ipadr);
 		void			sendLoginAccept( Client * clt, AddressIP ipadr, int acctnew);
@@ -116,8 +114,8 @@ class NetServer
 		void	save();
 
 		// WEAPON STUFF
-		void	BroadcastUnfire( Client * clt, int weapon_index);
-		void	BroadcastFire( Client * clt, int weapon_index);
+		void	BroadcastUnfire( ObjSerial serial, int weapon_index, int zone);
+		void	BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, int zone);
 
 		friend class ZoneMgr;
 };

@@ -22,10 +22,12 @@ extern unsigned short apply_float_to_short (float tmp);
 
 extern void AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, bool lead, float cone);
 
+/*
 template <class UnitType>
-void GameUnit<UnitType>::Fire (unsigned int weapon_type_bitmask,bool follow_target) {//FIXME FIRE
-  UnitType::Fire(weapon_type_bitmask,follow_target);
+void GameUnit<UnitType>::Fire (unsigned int weapon_type_bitmask,bool follow_target, int zone) {//FIXME FIRE
+  UnitType::Fire(weapon_type_bitmask,follow_target, zone);
 }
+*/
 
 template <class UnitType>
 void GameUnit<UnitType>::TargetTurret (Unit * targ) {

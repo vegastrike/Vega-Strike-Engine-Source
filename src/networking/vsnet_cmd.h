@@ -59,6 +59,8 @@ enum Cmd
     CMD_SNAPSHOT     = 0xA0,		// A packet with all the necessary ships' data in order to update
 
 	// Weapons commands
+	CMD_FIREREQUEST  = 0x94,		// Fire Request
+	CMD_UNFIREREQUEST= 0x95,		// UnFire Request
 	CMD_BOLT         = 0x90,		// Fire a bolt
 	CMD_BEAM         = 0x91,		// Fire a beam
 	CMD_PROJECTILE   = 0x92,        // Fire a projectile

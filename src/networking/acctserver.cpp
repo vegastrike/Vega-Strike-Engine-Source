@@ -24,12 +24,6 @@ AccountServer::AccountServer()
 /**** Authenticate a connected client                      ****/
 /**************************************************************/
 
-ObjSerial	AccountServer::getUniqueSerial()
-{
-	// MAYBE CHANGE TO SOMETHING MORE "RANDOM"
-	serial_seed = (serial_seed+3)%MAXSERIAL;
-	return serial_seed;
-}
 
 AccountServer::~AccountServer()
 {

@@ -5,8 +5,11 @@
  */
 game_data_t g_game;
 ForceFeedback *forcefeedback;
+VegaConfig * vs_config;
+bool cleanexit=false;
 
 NetClient * Network=NULL;
+NetServer * Server=NULL;
 
 FILE * fpread=NULL;
 

@@ -38,11 +38,6 @@ extern VegaConfig *vs_config;
 
 struct Client;
 
-// Description of a client's ship (ship type, weapons, shields status...)
-struct ClientDescription
-{
-};
-
 // Network part of a client description
 struct	Client
 {
@@ -67,7 +62,6 @@ struct	Client
 	string			passwd;
 	ClientState		old_state;
 	ClientState		current_state;
-	ClientDescription	current_desc;
 	/* In-game parameters */
 	int				zone;
 	//char			localplayer;

@@ -23,6 +23,7 @@ extern double	avg_loop;
 extern int	nb_checks;
 extern double last_check;
 extern double cur_check;
+extern bool cleanexit;
 
 /* All global data is stored in a variable of this type */
 typedef struct {
@@ -56,9 +57,9 @@ class Music;
 extern Music * muzak;
 class VegaConfig;
 extern VegaConfig *vs_config;
+class NetServer;
 class NetClient;
 extern NetClient *Network;
-class NetServer;
 extern NetServer *Server;
 
 class Mission;

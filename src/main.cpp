@@ -110,7 +110,6 @@ VegaConfig * createVegaConfig( char * file)
 extern void DockToSavedBases (int playernum);
 
 std::string ParseCommandLine(int argc, char ** CmdLine);
-bool cleanexit=false;
 void cleanup(void)
 {
   fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
@@ -161,7 +160,6 @@ void cleanup(void)
   
 }
 
-VegaConfig *vs_config;
 //Mission *mission;
 LeakVector<Mission *> active_missions;
 

@@ -57,9 +57,10 @@ class ZoneMgr
 		void	removeUnit( Unit *un, int zone);
 		Unit *	getUnit( ObjSerial unserial, int zone);
 
-		bool	addClient( Client * clt, string starsys);
+		bool	addClient( Client * clt, string starsys, int & num_zone);
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
+        void    broadcast( int zone, ObjSerial serial, Packet * pckt );
         void    broadcastSnapshots();
 		int		getZoneClients( Client * clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
