@@ -52,13 +52,13 @@ void Missile::Discharge() {
 }
 void Missile::Kill (bool erase) {
   Discharge();
-  Unit::Kill(erase);
+  GameUnit::Kill(erase);
 }
 void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
   static bool doesmissilebounce  = XMLSupport::parse_bool (vs_config->getVariable("physics","missile_bounce","false"));
   if (doesmissilebounce) {
 
-    Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
+    GameUnit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
   Discharge();
   if (!killed)
