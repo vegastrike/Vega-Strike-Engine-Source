@@ -135,9 +135,13 @@ extern string getCargoUnitName (const char *name);
 
 void Unit::UpgradeInterface(Unit * baseun) {
 	if (!Base::CurrentBase) {
-		Base *base=new Base ((getCargoUnitName(baseun->getFullname().c_str())+".xbase").c_str(),baseun,this);
-		base->InitCallbacks();
-		SetSoftwareMousePosition(0,0);
+	  string basename = (getCargoUnitName(baseun->getFullname().c_str())+".xbase");
+	  if (baseun->isUnit()!=PLANETPTR) {
+	    basename = baseun->name;
+	  }
+	  Base *base=new Base (basename.c_str(),baseun,this);
+	  base->InitCallbacks();
+	  SetSoftwareMousePosition(0,0);
 	}
 }
 

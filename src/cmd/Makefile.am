@@ -7,6 +7,9 @@ libcmd_a_SOURCES =				\
 	atmosphere.cpp			\
 	asteroid.cpp			\
 	asteroid.h			\
+	base.h				\
+	base_interface.cpp		\
+	base_xml.cpp			\
 	beam.h				\
 	beam.cpp				\
 	briefing.h			\
