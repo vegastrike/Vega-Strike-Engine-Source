@@ -170,10 +170,8 @@ int SocketSet::private_select( timeval* timeout )
     if( _thread_wakeup.getread() > max_sock_select )
         max_sock_select = _thread_wakeup.getread() + 1;
 
-    COUT << "enter select" << endl;
     int ret = ::select( max_sock_select,
 	                &read_set_select, &write_set_select, 0, timeout );
-    COUT << "leave select" << endl;
 
     if( ret == -1 )
     {
