@@ -59,8 +59,19 @@ Use + and - to increase/decrease your speed while flying around
 to get near to an enemy fighter
 <p>If you press y then, your speed will be matched with the targets speed,
 and you can easily fire on it
-<p>If you press and hold ` (~ without shift) your computer will cease correcting your speed and you will continue travel in your previous direction until acted on by an external force. Let go of this button and your speed is restored to set speed.
-<br>Afterburner is engaged with TAB.  Certain races (eg aera) have nearly unlimited fuel, yet afterburner for them sucks down energy.  Combat with afterburner becomes difficult for aera.  Terrans use fuel for afterburner, meaning that there is no immediate consequence for using it in combat.  Since fuel is only used when computer corrects your speed to be straight ahead, your fuel will only go down much when you make sharp turns while pressing tab. A wise tactic for terrans is to use TAB to accelerate to desired speed and let go during sharp turns. This also produces a sliding effect in your previous direction known fondly as <b>afterburner slide</b>
+<p>If you press and hold ` (~ without shift) your computer will cease correcting
+your speed and you will continue travel in your previous direction until
+acted on by an external force. Let go of this button and your speed is
+restored to set speed.
+<br>Afterburner is engaged with TAB. Certain races (eg aera) have nearly
+unlimited fuel, yet afterburner for them sucks down energy. Combat with
+afterburner becomes difficult for aera. Terrans use fuel for afterburner,
+meaning that there is no immediate consequence for using it in combat.
+Since fuel is only used when computer corrects your speed to be straight
+ahead, your fuel will only go down much when you make sharp turns while
+pressing tab. A wise tactic for terrans is to use TAB to accelerate to
+desired speed and let go during sharp turns. This also produces a sliding
+effect in your previous direction known fondly as <b>afterburner slide</b>
 <br>&nbsp;
 <h4>
 Newtonian Physics:</h4>
@@ -68,7 +79,8 @@ Vegastrike usel real, newtonian physics and forces to calculate where the
 space ships are flying too.
 <p>This means, that when your ship has built up a certain velocity, it
 will continue to fly in this direction even when you rotate/bank the ship
-around.  However, the computer corrects for this unless you hold down shelton slide (~)
+around. However, the computer corrects for this unless you hold down shelton
+slide (~)
 <br>&nbsp;
 <br>&nbsp;
 <br>&nbsp;
@@ -131,19 +143,25 @@ n - nearest Target</li>
 h - select Threat</li>
 
 <br>select the enemy target that is most threatening to you
-<br>All computers, yours and the AI's can tell when another starship has focused radar on that computer and is in position to shoot.  In this case the aiming ship will be a threat to whomever he threatened.</ul>
+<br>All computers, yours and the AI's can tell when another starship has
+focused radar on that computer and is in position to shoot. In this case
+the aiming ship will be a threat to whomever he threatened.</ul>
 
 <p><br>Please note that the targeting range is limited - that means, you
 can't target ships which are more than about 10.000 away.
 <br>The targeting range depends on the ship type that you're using.
-<br>In addition certain old technology has a maximum conical radius that only allows one to target a starship in front of the current ship.
+<br>In addition certain old technology has a maximum conical radius that
+only allows one to target a starship in front of the current ship.
 <br>And large turret computers have a minimum target size they can attack.
 <br>&nbsp;
 <h4>
-ITTS</h4>
-ITTS means ......&nbsp;<img SRC="itts1.png" NOSAVE height=144 width=153 align=ABSCENTER>
-<p><b>Intertial Tracking and Targetting System</b>
-<p>Some ships have got an ITTS display to help you in aiming at your target.
+ITTS :</h4>
+
+<h4>
+<b>Intertial Tracking and Targetting System</b>&nbsp;<img SRC="itts1.png" NOSAVE height=144 width=153 align=ABSCENTER></h4>
+
+<p><br>Some ships have got an ITTS display to help you in aiming at your
+target.
 <p>The above screenshots shows two rectangles - the left, smaller one is
 the ITTS indicator, the big to the right is the target box that is drawn
 around your target.
@@ -159,8 +177,40 @@ section "graphics", subsection "hud", variable "drawAlwaysITTS"</li>
 <li>
 set this <a href="editing_vegaconfig.html#variables">variable</a> to "true"
 and the ITTS will always show up.</li>
-</ul>
 
+<br>&nbsp;</ul>
+
+<h3>
+<a NAME="targeting_turrets"></a>Targeting Turrets</h3>
+When you are attacking a capital ship like a cruiser or carrier, or a space-station,
+you'll have to target and destroy the turrets that defend these unit.
+<p>These screenshots show the turrets on a space-station:
+<p>&nbsp;:&nbsp;<a href="docking1.jpg"><img SRC="docking1s.png" NOSAVE height=150 width=200></a>
+:&nbsp;<a href="docking2.jpg"><img SRC="docking2s.png" NOSAVE height=150 width=200></a>
+:&nbsp;<a href="docking3.jpg"><img SRC="docking3s.png" NOSAVE height=150 width=200></a>
+:&nbsp;<a href="docking4.jpg"><img SRC="docking4s.png" NOSAVE height=150 width=200></a>
+:
+<p>Keys to target turrets:
+<ul>
+<li>
+T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target turret</li>
+
+<br>cycle through the targetable turrets
+<li>
+P&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pick turret</li>
+
+<br>pick the turret nearest your crosshair as target
+<li>
+N&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target nearest turret</li>
+
+<br>select the nearest turret as target
+<li>
+H&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target threat turret</li>
+
+<br>select the turret that's most threatening to you</ul>
+You can destroy turrets without destroying the whole installation.
+<p>TODO:is this correct? or are those keys to select targets for YOUR turret???
+<p>
 <hr WIDTH="100%">
 <p>please send feedback to <a href="mailto:vegastrike-users@lists.sourceforge.net">vegastrike-users@lists.sourceforge.net</a>
 and tell us what you think :-)

@@ -1,3 +1,16 @@
+2002-02-24 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* updated docu
+	  - added TODO lines
+	  - Terrain section
+	  - Docking section
+	* imported data/mission/devel/visit_from the aera
+	  and data/visit_from_the_aera
+	* patched src/in_sdl.cpp, for joy buttons to work with 
+	  a second joystick
+	  thanks to Martin Scherer <marsch84@web.de> for his patch
+
+	
 2002-02-23 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* updated documentation/homepage

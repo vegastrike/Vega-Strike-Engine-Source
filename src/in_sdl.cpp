@@ -165,7 +165,7 @@ void ProcessJoystick () {
       } // digital_hatswitch
 
       for (int j=0;j<NUMJBUTTONS;j++) {
-	if (i==0&&(buttons&(1<<j))) {
+	if (/* i==0&& */ (buttons&(1<<j))) {
 	  //	fprintf (stderr,"Button success %d",j);
 	  if (JoystickState[i][j]==UP) {
 	    (*JoystickBindings [i][j])(0,PRESS);
