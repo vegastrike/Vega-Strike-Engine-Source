@@ -6,7 +6,7 @@
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include <vector>
-struct GFXVertexList;
+class GFXVertexList;
 struct Texture;
 struct GFXColor;
 using std::vector;
@@ -65,3 +65,4 @@ public:
 
 };
 #endif
+
