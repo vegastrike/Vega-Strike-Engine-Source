@@ -10,6 +10,10 @@
 #include "hud.h"
 #include "vdu.h"
 #include "lin_time.h"//for fps
+#include "vegaconfig.h"
+
+
+
 static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
@@ -18,11 +22,20 @@ static void LocalToRadar (const Vector & pos, float &s, float &t) {
 }
 
 static GFXColor relationToColor (float relation) {
+  static GFXColor friendly=GFXColor(-1,-1,-1,-1);
+  static GFXColor enemy=GFXColor(-1,-1,-1,-1);
+  static GFXColor neutral=GFXColor(-1,-1,-1,-1);
+  if (friendly.r==-1) {///this won't be that be a speed hit, will it?
+    vs_config->getColor ("enemy",&enemy.r);
+    vs_config->getColor ("friend",&friendly.r);
+    vs_config->getColor ("neutral",&neutral.r);
+  }
   return 
     (relation>=0)?
-    GFXColor (1-relation,1-relation,1,.5)
+    GFXColor (relation*friendly.r+(1-relation)*neutral.r,relation*friendly.g+(1-relation)*neutral.g,relation*friendly.b+(1-relation)*neutral.b,relation*friendly.a+(1-relation)*neutral.a)
     :
-    GFXColor (1,relation+1,relation+1,.5);
+    GFXColor (-relation*enemy.r+(1+relation)*neutral.r,-relation*enemy.g+(1+relation)*neutral.g,-relation*enemy.b+(1+relation)*neutral.b,-relation*enemy.a+(1+relation)*neutral.a);
+
 }
 void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
   GFXColor4f (1,1,1,1);
