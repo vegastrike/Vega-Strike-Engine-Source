@@ -286,7 +286,7 @@ void SetSoftwareMousePosition (int x, int y) {
 }
 /** Starts a Frame of OpenGL with proper parameters and mouse
  */
-void StartGUIFrame(void) {
+void StartGUIFrame(GFXBOOL clr) {
   //  glutSetCursor(GLUT_CURSOR_INHERIT);
   //  GFXViewPort (0,0,g_game.x_resolution,g_game.y_resolution);
   GFXHudMode (true);
@@ -296,7 +296,7 @@ void StartGUIFrame(void) {
   GFXDisable (DEPTHWRITE);
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
-  GFXClear (GFXTRUE);
+  GFXClear (clr);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);

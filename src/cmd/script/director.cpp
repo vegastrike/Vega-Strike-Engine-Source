@@ -161,6 +161,7 @@ void Mission::DirectorLoop(){
   }
   old_string_counter=string_counter;
   RunDirectorScript("gameloop");
+  BriefingLoop();
 }
 void Mission::DirectorEnd(){
   if(director==NULL){
@@ -377,14 +378,19 @@ bool Mission::BriefingInProgress() {
   return (briefing!=NULL);
 }
 void Mission::BriefingStart() {
+  if (briefing) {
+    BriefingEnd();
+  }
   briefing = new Briefing();
   RunDirectorScript ("initbriefing");
 }
 void Mission::BriefingLoop() {
   if (briefing) {
-    RunDirectorScript ("loopbriefing");
+    if (briefing)
+      briefing->Update();
+    if (briefing)
+      RunDirectorScript ("loopbriefing");
   }
-  briefing->Update();
 }
 void Mission::BriefingRender() {
   if (briefing) {

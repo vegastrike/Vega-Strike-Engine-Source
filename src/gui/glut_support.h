@@ -34,6 +34,7 @@
 #include <png.h>
 #include <stdio.h>
 #include <vector>
+#include "gfxlib.h"
 using std::vector;
 //#include "gfx/png_texture.h"
 
@@ -55,7 +56,7 @@ void ShowImage(float x, float y, float wid, float hei, struct GUITexture image, 
 void ShowText(float x, float y, float wid, int size, const char *string, int no_end);
 float WidthOfChar(char chr);
 void SetSoftwareMousePosition (int x, int y);
-void StartGUIFrame();
+void StartGUIFrame(GFXBOOL clear=GFXTRUE);
 void EndGUIFrame();
 extern int HAS_ALPHA;
 

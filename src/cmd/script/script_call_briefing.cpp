@@ -8,7 +8,7 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
   
   if(mode==SCRIPT_PARSE){
     string cmd=node->attr_value("name");
-    node->script.method_id=module_unit_map[cmd];
+    node->script.method_id=module_briefing_map[cmd];
   }
   callback_module_briefing_type method_id=(callback_module_briefing_type) node->script.method_id;
   viret=newVarInst(VI_TEMP);
