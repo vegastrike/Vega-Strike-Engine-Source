@@ -703,8 +703,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     smalle->ApplyForce (bignormal*.4*bouncepercent*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     this->ApplyForce (smallnormal*.4*bouncepercent*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     
-    smalle->ApplyDamage (biglocation.Cast(),bignormal,g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
-    this->ApplyDamage (smalllocation.Cast(),smallnormal, g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
+    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
+    this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
 #endif
     
   //each mesh with each mesh? naw that should be in one way collide
@@ -891,7 +891,14 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
       for (un_iter ui=ss->getUnitList().createIterator();
 	   NULL!=(other = *ui);
 	   ++ui) {
-	if (other->getFlightgroup()==getFlightgroup()) {
+	Flightgroup * ff = other->getFlightgroup();
+	bool leadah=(ff==getFlightgroup());
+	if (ff) {
+		if (ff->leader.GetUnit()==this) {
+			leadah=true;
+		}
+	}
+	if (leadah) {
 	  if (NULL==_Universe->isPlayerStarship (other)) {
 	    other->AutoPilotTo(this);
 	    other->SetPosition(UniverseUtil::SafeEntrancePoint (other->LocalPosition(),other->rSize()*1.5));

@@ -379,14 +379,15 @@ void	NetServer::start()
 #endif
 
 		// Remove all clients to be disconnected
-		for (LI j=discList.begin(); j!=discList.end(); j++)
+		LI j;
+		for ( j=discList.begin(); j!=discList.end(); j++)
 		{
 			this->disconnect( (*j));
 		}
 		discList.clear();
 
 		// Remove all clients that logged out
-		for (LI j=logoutList.begin(); j!=logoutList.end(); j++)
+		for ( j=logoutList.begin(); j!=logoutList.end(); j++)
 		{
 			this->logout( (*j));
 		}

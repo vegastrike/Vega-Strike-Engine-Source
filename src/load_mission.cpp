@@ -168,6 +168,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
   fclose (fp);
   char * tmp = strdup (mission_name);
   active_missions.push_back (new Mission(tmp));
+  mission = active_missions.back();
   active_missions.back()->initMission();
   free (tmp);
 
@@ -243,5 +244,6 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
   } // end of for flightgroups
   
   active_missions.back()->DirectorInitgame();
+  mission=active_missions[0];
   //  return true;
 }

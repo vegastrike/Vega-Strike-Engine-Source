@@ -432,7 +432,7 @@ class Mission {
 	unpickleData=dat;
   }
   class Briefing * briefing;
-  double gametime;
+  static double gametime;
   string mission_name;
   void terminateMission();
  Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
@@ -445,9 +445,10 @@ class Mission {
   ~Mission();
   //deletes missions pushed back onto a delete queue at a *safe time*
   static void wipeDeletedMissions();
-  int number_of_flightgroups,number_of_ships;
+  static int number_of_flightgroups;
+  static int number_of_ships;
 
-  vector<Flightgroup *> flightgroups;
+  static vector<Flightgroup *> flightgroups;
 
   Flightgroup *findFlightgroup(const string &fg_name, const string &faction);
 
@@ -509,7 +510,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   bool do_trace;
   int tracelevel;//unusued
 
-  int total_nr_frames;
+  static int total_nr_frames;
 
   ofstream var_out;
 

@@ -58,12 +58,15 @@ Mission::~Mission() {
   fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital
 }
+double   Mission::gametime=0.0;
+int Mission::number_of_ships=0;
+int Mission::number_of_flightgroups=0;
+int Mission::total_nr_frames=0;
+vector<Flightgroup *> Mission::flightgroups;
 Mission::Mission(const char *configfile, bool loadscripts){
   player_autopilot=global_autopilot=AUTO_NORMAL;
   briefing=NULL;
   director=NULL;
-  number_of_flightgroups=0;
-  number_of_ships=0;
   runtime.pymissions=NULL;
   nextpythonmission=NULL;
   easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
@@ -87,8 +90,6 @@ Mission::Mission(const char *configfile, bool loadscripts){
 #ifndef VS_MIS_SEL
   director=NULL;
 
-  gametime=0.0;
-  total_nr_frames=0;
   if (loadscripts) {
     initTagMap();
     initCallbackMaps();

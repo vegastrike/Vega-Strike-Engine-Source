@@ -170,12 +170,13 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
 	  unit->ActivateJumpDrive (0);
 	}else {
-	  if (unit->getFlightgroup()!=NULL&&unit->getFlightgroup()==getFlightgroup()) {
-	    if (unit->getFlightgroup()->leader.GetUnit()==this&&(unit->getFlightgroup()->directive=="f"||unit->getFlightgroup()->directive=="F")) {
-	      unit->Target (pendingjump[kk]->jumppoint.GetUnit());
-	      unit->getFlightgroup()->directive="F";
-	      unit->ActivateJumpDrive (0);
-	    }
+	  Flightgroup * ff = unit->getFlightgroup();
+	  if (ff) {
+		  if (this==ff->leader.GetUnit()&&(ff->directive=="f"||ff->directive=="F")) {
+			unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+			unit->getFlightgroup()->directive="F";
+			unit->ActivateJumpDrive (0);
+		  }
 	  }
 	}
 	iter.advance();

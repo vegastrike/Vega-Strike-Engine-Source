@@ -14,6 +14,7 @@ using std::endl;
 	extern char nbpackets;
 	extern int	char_size;
 #endif
+const static unsigned short	header_length = sizeof( ObjSerial) + sizeof( char) + sizeof( unsigned short) + sizeof( unsigned int); // + sizeof( unsigned int);
 
 class Packet
 {
@@ -28,7 +29,6 @@ class Packet
 		char			databuffer[MAXBUFFER];
 		int				priority;
 
-		const static unsigned short	header_length = sizeof( ObjSerial) + sizeof( char) + sizeof( unsigned short) + sizeof( unsigned int); // + sizeof( unsigned int);
 
 	public:
 

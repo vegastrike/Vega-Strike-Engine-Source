@@ -257,7 +257,9 @@ void LeadMe (Unit * un, string directive, string speech) {
     Flightgroup * fg = un->getFlightgroup();
     if (fg) {
       if (fg->leader.GetUnit()!=un) {
-	fg->leader.SetUnit (un);
+		  if ((!_Universe->isPlayerStarship(fg->leader.GetUnit()))||_Universe->isPlayerStarship(un)) {
+			fg->leader.SetUnit (un);
+		  }
       }
       fg->directive = directive;
     }

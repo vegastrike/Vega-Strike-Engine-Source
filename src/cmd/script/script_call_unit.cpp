@@ -1306,7 +1306,9 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 
    printf ("%s",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)).c_str());
    my_unit= units[0];
-   fg->fg->leader.SetUnit(my_unit);
+   if (!_Universe->isPlayerStarship(fg->fg->leader.GetUnit())) {
+	   fg->fg->leader.SetUnit(my_unit);
+   }
    delete [] units;
    return my_unit;
 }

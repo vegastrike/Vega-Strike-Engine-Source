@@ -159,7 +159,7 @@ void	AccountServer::recvMsg( SocketAlt sock)
 		//packet.display();
 		cmd = packet.getCommand();
 		const char * buf = packet.getData();
-
+		VI j;
 		switch( cmd)
 		{
 			case CMD_LOGIN :
@@ -167,7 +167,7 @@ void	AccountServer::recvMsg( SocketAlt sock)
 				strcpy( name, buf);
 				strcpy( passwd, buf+NAMELEN);
 
-				for ( VI j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
+				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
 					elem = *j;
 					if( !elem->compareName( name) && !elem->comparePass( passwd))
@@ -209,7 +209,7 @@ void	AccountServer::recvMsg( SocketAlt sock)
 			case CMD_LOGOUT :
 				cout<<"LOGOUT REQUEST"<<endl;
 				// Receive logout request containing name of player
-				for ( VI j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
+				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
 					elem = *j;
 					if( !elem->compareName( name) && !elem->comparePass( passwd))
