@@ -220,7 +220,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-  UpdateCollideQueue();
+  
+  
   int i;
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
@@ -234,6 +235,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
     subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc);
     dead &=subunits[i]->Killed();
   }
+  UpdateCollideQueue();
+
   if (hull<0) {
     if (timeexplode==0) {
       Explode(false);

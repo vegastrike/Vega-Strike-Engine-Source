@@ -22,13 +22,21 @@ void KillCollideTable (LineCollide * lc) {
 void AddCollideQueue (const LineCollide &tmp) {
   collidetable.Put (&tmp,&tmp);
 }
+void Unit::SetCollisionParent (Unit * name) {
+    for (int i=0;i<numsubunit;i++) {
+      subunits[i]->CollideInfo.object = name;
+      subunits[i]->SetCollisionParent (name);
+    }
+}
 void Unit::UpdateCollideQueue () {
   Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   if (CollideInfo.object == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
-    if (CollideInfo.object!=NULL)
+    if (CollideInfo.object!=NULL) {
       KillCollideTable(&CollideInfo);
+    }
     CollideInfo.object = this;
+    SetCollisionParent(this);
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
     AddCollideQueue (CollideInfo);

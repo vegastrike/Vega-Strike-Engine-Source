@@ -55,6 +55,13 @@ void Unit::Split (int level) {
     subunits[i+numsubunit] = new Unit (old+i,1);
     subunits[i+numsubunit]->mass = mass/level;
     subunits[i+numsubunit]->timeexplode=.1;
+    if (subunits[i+numsubunit]->meshdata[0]) {
+      Vector loc = subunits[i+numsubunit]->meshdata[0]->Position();
+      subunits[i+numsubunit]->ApplyForce(subunits[i+numsubunit]->meshdata[0]->rSize()*mass*loc/loc.Magnitude());
+      loc.Set (rand(),rand(),rand());
+      loc.Normalize();
+      subunits[i+numsubunit]->ApplyLocalTorque(loc*mass*rSize()*(1+rand()%(int)rSize()));
+    }
   }
   numsubunit = numsubunit+nm;
   if (bspTree) {

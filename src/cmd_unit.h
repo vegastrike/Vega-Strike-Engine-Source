@@ -199,7 +199,7 @@ friend class PlanetaryOrbit;
   Vector corner_min, corner_max; // corners of object
   void calculate_extent();
   Box *selectionBox;
-
+  void SetCollisionParent (Unit *name);
 public:
   void UpdateCollideQueue();
   Vector origin;
