@@ -86,19 +86,12 @@ void init_opengl_extensions()
       g_game.Multitexture =0;
     }
     g_game.Multitexture=1;
-    if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) ) {
-	print_debug( DEBUG_GL_EXT, "GL_ARB_texture_cube_map extension "
-		     "supported" );
-    } else {
-	print_debug( DEBUG_GL_EXT, "GL_ARB_texture_cube_map extension "
-		     "NOT supported" );
-    }
 }
 BOOL GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
     
 #ifdef USE_STENCIL_BUFFER
-    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL );
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE/* | GLUT_STENCIL*/ );
 #else
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 #endif
@@ -153,8 +146,10 @@ BOOL GFXInit (int argc, char ** argv){
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
     int retval= glGetError();
-    if (retval == 0x0500)
+    if (retval == 0x0500) {
       g_game.PaletteExt = 0;
+      printf ("Palette Not Supported");
+    }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
