@@ -178,7 +178,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==PRESS){
 
-  Vector v = GFXDeviceToEye(x,y);
+    //  Vector v = GFXDeviceToEye(x,y);
   CurDFA->SelectBox.SetPosition (GetX(x), GetY(y));
     Unit * sel = CurDFA->clickList->requestShip(x,y);
     if (sel!=NULL) {
@@ -203,7 +203,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==DOWN) {
     if (delx||dely) {
-      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy);// - GFXDeviceToEye(0,0);
+      //      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy);// - GFXDeviceToEye(0,0);
       float dumbx,dumby;
       dumbx = -GetX(x)+GetX(CurDFA->prevx);
       dumby = -GetY(y)+GetY(CurDFA->prevy);
@@ -242,7 +242,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 
 //this function is bound in the NONE state...
 void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) {
-  Vector v = GFXDeviceToEye(x,y);
+  //  Vector v = GFXDeviceToEye(x,y);
   float xs,ys;
 
   CurDFA->MouseArrow.GetSize (xs,ys);
@@ -254,7 +254,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   if (mod&ACTIVE_CTRL)
     return; //you don't want control pressed
   if (k==PRESS) {
-    Vector v = GFXDeviceToEye(x,y);
+    //    Vector v = GFXDeviceToEye(x,y);
     CurDFA->SelectBox.SetPosition (GetX(x), GetY(y));
     CurDFA->Selecting=false;
     kmod = mod;
@@ -278,7 +278,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   
   if (k==DOWN) {
     if (delx||dely) {
-      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
+      //      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
       float dumbx,dumby;
       dumbx = -GetX(x)+GetX(CurDFA->prevx);
       dumby = -GetY(y)+GetY(CurDFA->prevy);
