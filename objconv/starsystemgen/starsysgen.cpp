@@ -153,10 +153,25 @@ void Tab () {
   }
 
 }
-float starradius =0;
+vector <float> starradius;
 string faction;
+
+
+Color StarColor (float radius) {
+  
+  return Color (grand(),grand(),grand());
+}
+
 void CreateLight(unsigned int i) {
-  lights.push_back (Color (grand(),grand(),grand()));
+  if (i==0) {
+    assert (!starradius.empty());
+    assert (starradius[0]);
+  } else {
+    assert (starradius.size()==i);
+    starradius.push_back (starradius[0]*(.5+grand()*.5));
+  }
+
+  lights.push_back (StarColor (starradius[i]));
   float h = lights.back().r;
   if (h<lights.back().g) h=lights.back().g;
   if (h<lights.back().b) h=lights.back().b;
@@ -234,7 +249,7 @@ Vector generateAndUpdateRS (Vector &r, Vector & s, float thisplanetradius) {
   if (radii.empty()) {
     r=Vector (0,0,0);
     s=Vector (0,0,0);
-    return generateCenter (starradius);
+    return generateCenter (starradius[0]);
   }
   float tmp=radii.back()+thisplanetradius;
   Updateradii(makeRS (r,s,tmp),thisplanetradius);
@@ -534,10 +549,10 @@ void CreateFirstStar(float radius, unsigned int which){
   beginStar(radius,which);
   for (unsigned int i=which+1;i<nument[0];i++) {
     if (grand()>.5) {
-      CreateFirstStar(.8*radius*grand(),i);
+      CreateFirstStar(starradius[i],i);
       break;
     } else {
-      CreateStar (.8*radius*grand(),i);
+      CreateStar (starradius[i],i);
     }
   }
   endStar();
@@ -557,10 +572,10 @@ void CreatePrimaries (float starradius) {
 }
 
 void CreateStarSystem () {
-
-  assert (starradius);
+  assert (!starradius.empty());
+  assert (starradius[0]);
   fprintf (fp,"<system name=\"%s\" background=\"%s\" nearstars=\"%d\" stars=\"%d\" starspread=\"150\">\n",systemname.c_str(),getRandName(background).c_str(),500,1000,150);
-  CreatePrimaries (starradius);
+  CreatePrimaries (starradius[0]);
   fprintf (fp,"</system>\n");
 }
 
@@ -625,7 +640,7 @@ const char * noslash (const char * in) {
 int main (int argc, char ** argv) {
 
   if (argc<9) {
-    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius> <numstars> <numgasgiants> <numrockyplanets> <nummoons> <numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...");
+    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius> <numstars> <numgasgiants> <numrockyplanets> <nummoons> <numnaturalphenomena>[N][A] <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...");
     return 1;
   }
   int seed;
@@ -640,7 +655,7 @@ int main (int argc, char ** argv) {
   readentity (entities[1],"planets.txt");
   readentity (entities[2],"gas_giants.txt");
   readentity (entities[3],"moons.txt");
-  readentity (units[0],"bigunits.txt");
+
   readentity (units[1],"smallunits.txt");
   readentity (background,"background.txt");
   readnames (names,argv[11]);
@@ -652,7 +667,8 @@ int main (int argc, char ** argv) {
   filename[0]= toupper (filename[0]);
   systemname=string(filename);
   free(filename);
-  if (1!=sscanf (argv[3],"%f",&starradius)) {
+  starradius.push_back(0);
+  if (1!=sscanf (argv[3],"%f",&starradius[0])) {
     return -1;
   }
   if (1!=sscanf(argv[4],"%d",&nument[0])) {
@@ -667,7 +683,17 @@ int main (int argc, char ** argv) {
   if (1!=sscanf(argv[7],"%d",&nument[3])) {
     return -1; 
   }
-  if (1!=sscanf(argv[8],"%d",&numun[0])) {
+  if (1==sscanf(argv[8],"AN%d",&numun[0])||1==sscanf (argv[8],"NA%d",&numun[0])) {
+    readentity (units[0],"asteroids.txt");
+    readentity (units[0],"nebulae.txt");
+  } else if (1==sscanf (argv[8],"A%d",&numun[0])) {
+    readentity (units[0],"asteroids.txt"); 
+  } else if (1==sscanf (argv[8],"N%d",&numun[0])) {
+    readentity (units[0],"nebulae.txt");
+  }else if (1==sscanf (argv[8],"%d",&numun[0])) {
+    readentity (units[0],"asteroids.txt");
+    readentity (units[0],"nebulae.txt");
+  } else {
     return -1;
   }
   if (1!=sscanf(argv[9],"%d",&numun[1])) {
