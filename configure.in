@@ -299,7 +299,7 @@ AC_MSG_RESULT([${is_macosx}])
 
 if test "x$is_macosx" = "xyes" ; then
 	CXXFLAGS="$CXXFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
-	CPP_FLAGS="$CPP_FLAGS -Wno-long-double"
+	CPPFLAGS="$CPPFLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
 	VS_LIBS="$VS_LIBS -framework OpenGL -framework GLUT"
