@@ -372,60 +372,61 @@ void Cockpit::Update () {
   UpdAutoPilot();
   Unit * par=GetParent();
   if (!par) {
-    if (respawnunit.size()>_Universe->CurrentCockpit())
-      if (respawnunit[_Universe->CurrentCockpit()]){
-	parentturret.SetUnit(NULL);
-	static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-	zoomfactor=initialzoom;
-	respawnunit[_Universe->CurrentCockpit()]=0;
-	std::string savegamefile =mission->getVariable ("savegame","");
-	int k;
-	for ( k=0;k<_Universe->numPlayers();++k) {
-	  if (_Universe->AccessCockpit(k)==this)
-	    break;
-	}
-	if (k==_Universe->numPlayers()) k=0;
-	string newsystem;QVector pos; bool setplayerXloc;float credits;
-	savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,credits,unitfilename,k);
-	newsystem= savegame->GetStarSystem()+".system";
-	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-	_Universe->getActiveStarSystem(0)->SwapOut();
-	this->activeStarSystem=ss;
-	_Universe->pushActiveStarSystem(ss);
+	if (respawnunit.size()>_Universe->CurrentCockpit()){
+	  if (respawnunit[_Universe->CurrentCockpit()]){
+		parentturret.SetUnit(NULL);
+		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+		zoomfactor=initialzoom;
+		respawnunit[_Universe->CurrentCockpit()]=0;
+		std::string savegamefile =mission->getVariable ("savegame","");
+		int k;
+		for ( k=0;k<_Universe->numPlayers();++k) {
+		  if (_Universe->AccessCockpit(k)==this)
+		  break;
+		}
+		if (k==_Universe->numPlayers()) k=0;
+		string newsystem;QVector pos; bool setplayerXloc;float credits;
+		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,credits,unitfilename,k);
+		newsystem= savegame->GetStarSystem()+".system";
+		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+		_Universe->getActiveStarSystem(0)->SwapOut();
+		this->activeStarSystem=ss;
+		_Universe->pushActiveStarSystem(ss);
 
 
-	vector <StarSystem *> saved;
-	while (_Universe->getNumActiveStarSystem()) {
-	  saved.push_back (_Universe->activeStarSystem());
-	  _Universe->popActiveStarSystem();
-	}
-	if (!saved.empty()) {
-	  saved.back()=ss;
-	}
-	unsigned int mysize = saved.size();
-	for (unsigned int i=0;i<mysize;i++) {
-	  _Universe->pushActiveStarSystem (saved.back());
-	  saved.pop_back();
-	}
-	ss->SwapIn();
-	int fgsnumber = 0;
-	if (fg) {
-	  fgsnumber=fg->flightgroup_nr++;
-	  fg->nr_ships++;
-	  fg->nr_ships_left++;
-	}
-	Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
-	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
-	ss->AddUnit (un);
+		vector <StarSystem *> saved;
+		while (_Universe->getNumActiveStarSystem()) {
+		  saved.push_back (_Universe->activeStarSystem());
+		  _Universe->popActiveStarSystem();
+		}
+		if (!saved.empty()) {
+		  saved.back()=ss;
+		}
+		unsigned int mysize = saved.size();
+		for (unsigned int i=0;i<mysize;i++) {
+		  _Universe->pushActiveStarSystem (saved.back());
+		  saved.pop_back();
+		}
+		ss->SwapIn();
+		int fgsnumber = 0;
+		if (fg) {
+		  fgsnumber=fg->flightgroup_nr++;
+		  fg->nr_ships++;
+		  fg->nr_ships_left++;
+		}
+		Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
+		un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
+		ss->AddUnit (un);
 
-	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
-	SwitchUnits (NULL,un);
-	credits = savegame->GetSavedCredits();
-	DoCockpitKeys();
-	savegame->ReloadPickledData();
-	_Universe->popActiveStarSystem();
-	DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
+		this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
+		SwitchUnits (NULL,un);
+		credits = savegame->GetSavedCredits();
+		DoCockpitKeys();
+		savegame->ReloadPickledData();
+		_Universe->popActiveStarSystem();
+		DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
       }
+	} 
   }
   if (turretcontrol.size()>_Universe->CurrentCockpit())
   if (turretcontrol[_Universe->CurrentCockpit()]) {
