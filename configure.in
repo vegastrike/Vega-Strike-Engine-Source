@@ -167,6 +167,7 @@ else if test "x${malign}" = "xyes"; then
 VS_ALIGN="-malign-loops=2 -malign-jumps=2 -malign-functions=2"
 else VS_ALIGN=""
 fi
+fi
 
 
 if test "x${bsdthreads}" = "xyes"; then
