@@ -814,9 +814,9 @@ void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, cons
 
     static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale","1"));
 
-	float large_damage=inelastic_scale*(InelasticDeltaKE *(1/4+ (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
+	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
 
-    float small_damage=inelastic_scale*(InelasticDeltaKE *(1/4+ (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
+    float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
 
     smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
 
