@@ -411,7 +411,7 @@ string AnyStringScanInString (char * &buf) {
   return ret;
 }
 string AnyStringWriteString (string input) {
-  return string (" ")+XMLSupport::tostring ((int)input.length())+" "+input;
+  return XMLSupport::tostring ((int)input.length())+" "+input;
 }
 void SaveGame::ReadMissionStringData (char * &buf) {
   missionstringdata->m.clear();

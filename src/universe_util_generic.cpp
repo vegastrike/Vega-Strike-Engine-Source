@@ -9,7 +9,7 @@
 #include "cmd/collection.h"
 #include "star_system_generic.h"
 #include <string>
-//#include "cmd/music.h"
+#include "savegame.h"
 //#include "audiolib.h"
 //#include "gfx/animation.h"
 #include "gfx/cockpit_generic.h"
@@ -196,6 +196,23 @@ namespace UniverseUtil {
 	}
 	string GetGalaxyPropertyDefault (string sys, string prop, string def) {
 		return _Universe->getGalaxyPropertyDefault(sys,prop,def);
+	}
+#define DEFAULT_FACTION_SAVENAME "FactionTookOver_"
+	string GetGalaxyFaction (string sys) {
+		string fac = _Universe->getGalaxyProperty (sys,"faction");
+		vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+		if (ans->size()) {
+			fac = (*ans)[0];
+		}
+		return fac;
+	}
+	void SetGalaxyFaction (string sys, string fac) {
+		vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+		if (ans->size()) {
+			(*ans)[0]=fac;
+		}else {
+			ans->push_back(fac);
+		}
 	}
 	int GetNumAdjacentSystems (string sysname) {
 		return _Universe->getAdjacentStarSystems(sysname).size();

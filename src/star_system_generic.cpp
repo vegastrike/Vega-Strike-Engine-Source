@@ -80,6 +80,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
   current_stage=PHY_AI;
   //systemInputDFA = new InputDFA (this);
+  this->filename = filename;
   LoadXML(filename,centr,timeofyear);
   if (!name)
     name =strdup (filename);
@@ -276,6 +277,10 @@ void StarSystem::ExecuteUnitAI () {
 	  unit->ResetThreatLevel();
 	  iter.advance();
 	}
+}
+//sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
+Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
+  return (Unit *)0x31337;
 }
 
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
@@ -622,7 +627,6 @@ Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
-  this->filename= mname;
 }
 void StarSystem::RemoveStarsystemFromUniverse () {
   star_system_table.Delete (filename);

@@ -50,6 +50,9 @@ PlanetaryOrbit::~PlanetaryOrbit () {
   parent->SetResolveForces (true);
 }
 void PlanetaryOrbit::Execute() {
+  bool done =this->done;
+  this->Order::Execute();
+  this->done=done;//we ain't done till the cows come home
   if (done) 
     return;
   QVector x_offset = cos(theta) * x_size;
@@ -58,10 +61,11 @@ void PlanetaryOrbit::Execute() {
   if (subtype&SSELF) {
       Unit * tmp = group.GetUnit();
       if (tmp) {
-	origin = tmp->Position();
+		  origin+= tmp->Position();
       }else {
-	done = true;
-	return;
+		  done = true;
+		  parent->SetResolveForces(true);
+		  return;
       }
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
