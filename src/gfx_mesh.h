@@ -212,10 +212,8 @@ protected:
   
   GFXVertexList *vlist;//tri,quad,line
   
-  GFXMaterial myMat;
-  int myMatNum;
+  unsigned int myMatNum;
   
-
   GFXBOOL objtex;
   Texture *Decal;
   GFXBOOL envMap;

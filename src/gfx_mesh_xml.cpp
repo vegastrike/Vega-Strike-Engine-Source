@@ -1286,6 +1286,9 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     minSizeX = minSizeY = minSizeZ = 0;
     maxSizeX = maxSizeY = maxSizeZ = 0;
   }
+
+  GFXSetMaterial (myMatNum,xml->material);
+
   delete [] vertexlist;
   delete []poly_offsets;
   delete xml;

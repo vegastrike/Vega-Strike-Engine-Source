@@ -27,7 +27,7 @@ vector <GFXMaterial> materialinfo;
 int selectedmaterial = -1;
 void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material)
 {
-  number = -1;
+    number = -1;//warning unsigned.... 
   for (unsigned int i=0;i<materialinfo.size();i++){
     if (memcmp (&materialinfo[i],&material,sizeof(GFXMaterial))==0) {
       number = i;

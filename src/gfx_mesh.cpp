@@ -80,15 +80,6 @@ void Mesh::ProcessUndrawnMeshes() {
 
 int Mesh::dlist_count = 1;
 
-void DrawVector(const Vector &start, const Vector &vect)
-{ 
-  //float x = start.i, y = start.j, z = start.k;
-	//glBegin(GL_LINES);
-	//glVertex3f(x, y, z);
-	//glVertex3f(vect.i + x, vect.j + y, vect.k + z);
-	//glEnd();
-}
-
 void Mesh::InitUnit()
 {
 	forcelogos = NULL;
@@ -114,8 +105,7 @@ void Mesh::InitUnit()
 	
 	//	texturename[0] = -1;
 	numforcelogo = numsquadlogo = 0;
-	GFXGetMaterial(0, myMat);
-	myMatNum = 0;
+	myMatNum = 0;//default material!
 	//	scale = Vector(1.0,1.0,1.0);
 	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
