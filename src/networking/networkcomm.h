@@ -36,6 +36,8 @@ class NetworkCommunication
 		int		InitSession( float frequency);
 		int		GrabImage();
 		int		DestroySession();
+		bool	WebcamEnabled();
+		bool	WebcamTime();
 };
 
 #endif

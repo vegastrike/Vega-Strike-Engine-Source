@@ -17,7 +17,7 @@ AM_MEDIA_TYPE g_StillMediaType;
 STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long BufferLen )
 	{
 		// Check if it is time to send capture to communicating client(s)
-		if( ws->isReady())
+		//if( ws->isReady())
 		{
 			if ((g_StillMediaType.majortype != MEDIATYPE_Video) ||
 				(g_StillMediaType.formattype != FORMAT_VideoInfo) ||
@@ -48,7 +48,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			ws->old_size = ws->jpeg_size;
 			ws->old_buffer = ws_jpeg_buffer;
 			// JpegFromBmp should allocate the needed buffer;
-			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, 40, "c:\test.jpg");
+			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, this->jpeg_quality, "c:\test.jpg");
 		}
 
 		return S_OK;
@@ -60,32 +60,52 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 /**************************************************************************************************/
 pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chRefCon, TimeValue time, short writeType, long refCon)
 {
+	//cerr<<"\t\tProcessing a frame"<<endl;
 	// HERE SHOULD ONLY COPY THE IMAGE INTO THE JPEG BUFFER
 	WebcamSupport * ws = (WebcamSupport *) refCon;
-	if( ws->old_buffer)
-		delete ws->old_buffer;
-	ws->old_buffer = ws->jpeg_buffer;
-	ws->old_size = ws->jpeg_size;
-	ws->jpeg_buffer = new char[len];
-	memcpy( ws->jpeg_buffer, p, len);
-	ws->jpeg_size = len;
-	if( ws && ws->isReady())
+	// Sometimes on bad capture a black image can be caught with a size og about 45kB !
+	// So we don't take it into account
+	if( len<MAX_JPEG_SIZE)
 	{
-		// Write p to a file for testing
-		string path = datadir+"testcam.jpg";
-		FILE * fp;
-		fp = fopen( path.c_str(), "w");
-		if( !fp)
+		// Clear the old buffer
+		if( ws->old_buffer)
 		{
-			cerr<<"opening jpeg file failed"<<endl;
-			exit(1);
+			delete ws->old_buffer;
+			ws->old_buffer = NULL;
 		}
-		if( fwrite( p, 1, len, fp)!=len)
+		if( ws->jpeg_buffer)
 		{
-			cerr<<"writing jpeg description to file"<<endl;
-			exit(1);
+			ws->old_buffer = ws->jpeg_buffer;
+			ws->old_size = ws->jpeg_size;
 		}
-		fclose( fp);
+		ws->jpeg_buffer = new char[len+1];
+		memcpy( ws->jpeg_buffer, p, len);
+		ws->jpeg_buffer[len] = 0;
+		ws->jpeg_size = len;
+		/*
+		if( ws)
+		{
+			// Write p to a file for testing
+			char file[256];
+			memset( file, 0, 256);
+			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
+			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
+			string path = datadir+file;
+			FILE * fp;
+			fp = fopen( path.c_str(), "w");
+			if( !fp)
+			{
+				cerr<<"opening jpeg file failed"<<endl;
+				exit(1);
+			}
+			if( fwrite( p, 1, len, fp)!=len)
+			{
+				cerr<<"writing jpeg description to file"<<endl;
+				exit(1);
+			}
+			fclose( fp);
+		}
+		*/
 	}
 
 	return noErr;
@@ -112,16 +132,20 @@ void	WebcamSupport::DoError( long error, char * message)
 /**************************************************************************************************/
 WebcamSupport::WebcamSupport()
 {
-	this->width = 160;
-	this->height = 120;
-	this->fps = 5;
+	this->width = 120;
+	this->height = 90;
+	this->fps = 1;
 	this->grabbing = false;
 	this->depth = 16;
+	this->nbframes = 0;
+	this->jpeg_quality = 20;
 
 	this->last_time = 0;
 	// Get the period between 2 captured images
-	period = 1000000./(double)this->fps;
+	period = 1./(double)this->fps;
 
+	this->old_buffer = NULL;
+	this->old_size = 0;
 	this->jpeg_buffer = NULL;
 	this->jpeg_size = 0;
 
@@ -160,7 +184,8 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 	this->width = w;
 	this->height = h;
 	this->fps = f;
-	this->Init();
+	if( this->Init() == -1)
+		DoError( -1, "initializing webcam");
 }
 
 /**************************************************************************************************/
@@ -298,9 +323,10 @@ int		WebcamSupport::Init()
 	r.left = r.top = 0;
 	r.right = video -> video_width;
 	r.bottom = video -> video_height;
-	iErr = NewGWorld(&video -> sg_world, this->depth, &r, NULL, NULL, 0);
+	iErr = QTNewGWorld(&video -> sg_world, this->depth, &r, 0, NULL, 0);
 	DoError(iErr, "NewGWorld failed - Trying giving me more memory or use a sensible video size");
-	LockPixels( GetGWorldPixMap( video -> sg_world));
+	if( !LockPixels( GetGWorldPixMap( video -> sg_world)))
+		DoError( -1, "locking pixmap");
 
 	//	open default sequence grabber
 	video -> sg_component = OpenDefaultComponent('barg', 0);
@@ -320,8 +346,8 @@ int		WebcamSupport::Init()
 	DoError( component_error, "SGSetDataRef failed");
 
 	//	set output settings
-	component_error = SGSetDataOutput( video->sg_component, NULL, seqGrabToMemory | seqGrabDontMakeMovie);
-	DoError(component_error, "SGSetDataOutput failed");
+	//component_error = SGSetDataOutput( video->sg_component, NULL, seqGrabToMemory | seqGrabDontMakeMovie);
+	//DoError(component_error, "SGSetDataOutput failed");
 
 	//	get a new sequence grabber channel
 	component_error = SGNewChannel(video -> sg_component, VideoMediaType, &video -> sg_channel);
@@ -337,16 +363,23 @@ int		WebcamSupport::Init()
 	DoError(component_error, "SGSetChannelUsage failed");
 	
 	//	configure for JPEG capture
-	component_error = SGSetVideoCompressorType(video -> sg_channel, 'jpeg');
+	component_error = SGSetVideoCompressor(video -> sg_channel, this->depth, 'jpeg', codecLowQuality, codecNormalQuality, 5);
 	DoError(component_error, "SGSetVideoCompressorType failed");
 
 	// tell we won't render on screen
 	component_error = SGSetUseScreenBuffer(video -> sg_channel, false);
 	DoError(component_error, "SGSetUseScreenBuffer failed");
 
-	// specify the framerate (not necessary now)
-	component_error = SGSetFrameRate(video -> sg_channel, this->fps);
+	// specify the framerate (only to reduce CPU usage we set FPS to twice the real FPS)
+	// if we don't do that the FPS will be the fastest QuickTime can use
+	component_error = SGSetFrameRate(video -> sg_channel, this->fps*2);
 	DoError(component_error, "SGSetUseScreenBuffer failed");
+
+	// Set the callback
+	iErr = SGSetDataProc( video->sg_component, NewSGDataUPP( processFrame), (long)this);
+	// Prepare for recording
+	component_error = SGPrepare( video->sg_component, false, true);
+	DoError( component_error, "SGPrepare failed");
 
 	return 0;
 #endif
@@ -361,7 +394,7 @@ bool	WebcamSupport::isReady()
 	// Current time in seconds with microseconds
 	double curtime = getNewTime();
 	// Check that the webcam is grabbin info and that the elapsed time since last capture is bigger than period
-	if( grabbing && (last_time-curtime>period) )
+	if( grabbing && (curtime-last_time>period) )
 	{
 		ret = true;
 		last_time = curtime;
@@ -412,14 +445,6 @@ void	WebcamSupport::StartCapture()
 #endif
 #ifdef __APPLE__
 	ComponentResult		component_error = noErr;
-	OSErr	iErr;
-
-	// Set the callback
-	iErr = SGSetDataProc( video->sg_component, NewSGDataUPP( processFrame), (long)this->video);
-	// Prepare for recording
-	component_error = SGPrepare( video->sg_component, false, true);
-	DoError( component_error, "SGPrepare failed");
-
 	// Start record
 	component_error = SGStartRecord( video->sg_component);
 	DoError( component_error, "SGStartRecord failed");
@@ -431,11 +456,6 @@ void	WebcamSupport::StartCapture()
 /**************************************************************************************************/
 int		WebcamSupport::CopyImage()
 {
-#ifdef linux
-#endif
-#if defined(_WIN32) && !defined(__CYGWIN__)
-	// Should copy the image data from memory buffer ... where ??
-#endif
 	return 0;
 }
 
@@ -443,6 +463,8 @@ int		WebcamSupport::CopyImage()
 /**** End capture mode                                                                         ****/
 /**************************************************************************************************/
 void	WebcamSupport::EndCapture()
+{
+if( grabbing)
 {
 	grabbing = false;
 #ifdef linux
@@ -459,8 +481,8 @@ void	WebcamSupport::EndCapture()
 	ComponentResult		component_error = noErr;
 	component_error = SGStop( video->sg_component);
 	DoError( component_error, "stopping video capture");
-	CloseComponent( video->sg_component);
 #endif
+}
 }
 
 /**************************************************************************************************/
@@ -470,6 +492,7 @@ std::string	WebcamSupport::CaptureImage()
 {
 if( grabbing)
 {
+	this->nbframes++;
 #ifdef linux // Does not work under Cygwin
 	// Returns the image buffer
 	char * strptr = (char *) fg_get_next_image(&fg);
@@ -532,67 +555,19 @@ if( grabbing)
 #endif
 #endif
 #ifdef __APPLE__
+	ComponentResult		component_error = noErr;
+	// Update the offscreen GWorld
+	component_error = SGIdle( video->sg_channel);
+	if (component_error)
+		DoError(component_error, "SGIdle failed");
 	// Just return the jpeg_bufer filled by the callback function
 	if( !jpeg_buffer)
 	{
-		cerr<<"!!! JPEG BUFFER EMPTY !!!"<<endl;
+		//cerr<<"Frame #"<<nbframes<<" !!! JPEG BUFFER EMPTY !!!"<<endl;
 		return string("");
 	}
-	cerr<<"--== JPEG BUFFER OK ==--"<<endl;
+	//cerr<<"Frame #"<<nbframes<<" --== JPEG BUFFER OK ==--"<<endl;
 	return string( jpeg_buffer);
-
-	/* BAD WAY TO TRY CAPTURE : ACCESSING DIRECTLY GWORLD BUFFER
-	OSErr iErr;
-	ComponentResult		component_error = noErr;
-	// Update the offscreen GWorld
-	component_error = SGIdle(video -> sg_channel);
-	if (component_error)
-		DoError(component_error, "SGIdle failed");
-	iErr = SGUpdate( video->sg_component, 0);
-	if( iErr)
-		DoError( iErr, "updating sg_component failed.");
-	// Get the pixmap associated with the GWorld
-	PixMapHandle pix = GetGWorldPixMap( video->sg_world);
-	if( pix==NULL || pix==nil)
-		DoError( -1, "PixMap is NULL");
-	// Get the base address of the pixel array
-	Ptr pixmap_base = GetPixBaseAddr( pix);
-	if( pixmap_base==NULL || pixmap_base==nil)
-		DoError( -1, "PixMapBaseAddress is NULL");
-	// Writes the image to a test jpeg file
-	Rect r = (**pix).bounds;
-	cerr<<"Captured image : "<<r.right<<"x"<<r.bottom<<endl;
-
-	// Get the size of the compressed file
-	long	maxCompressionSize;
-	iErr = GetMaxCompressionSize( pix, &r, 0, codecNormalQuality, kJPEGCodecType, (CodecComponent) anyCodec, &maxCompressionSize);
-		DoError( iErr, "GetMaxCompressionSize failed.");
-	// Compress the image and get the its description
-	ImageDescriptionHandle desc = (ImageDescriptionHandle) NewHandle(0);
-	Handle	jpeg_handle = NewHandle(maxCompressionSize);
-	Ptr jpeg_data = *jpeg_handle;
-	MoveHHi( jpeg_handle);
-	HLock( jpeg_handle);
-	iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
-	if (iErr!=noErr)
-		DoError( iErr, "CompressImage failed.");
-	// Associate the current image capture buffer with what we just compressed into a jpeg buffer
-	this->jpeg_buffer = (char *) jpeg_data;
-	this->jpeg_size = maxCompressionSize;
-
-	// THE FOLLOWING PART IS FOR TESTING PURPOSE ONLY
-	// Write the jpeg_data into a file
-	int jpeg_length = maxCompressionSize;
-	cerr<<"MaxCompressionSize = "<<maxCompressionSize<<endl;
-	string path = datadir+"testcam.jpg";
-	FILE * fp;
-	fp = fopen( path.c_str(), "w");
-	if( !fp)
-		DoError( -1, "opening jpeg file failed");
-	if( fwrite( jpeg_data, 1, maxCompressionSize, fp)!=maxCompressionSize)
-		DoError( -1, "writing jpeg description to file");
-	fclose( fp);
-	*/
 #endif
 }
 else

@@ -589,6 +589,12 @@ int NetClient::checkMsg( Packet* outpacket )
     {
         ret = recvMsg( outpacket );
     }
+#ifdef NETCOMM
+	if( NetComm->WebcamEnabled() && NetComm->WebcamTime())
+		NetComm->GrabImage();
+	// And then send the string to concerned clients (to do in NetworkCommunication class)
+#endif
+	
     return ret;
 }
 

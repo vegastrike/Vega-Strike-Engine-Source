@@ -23,3 +23,12 @@ NetworkCommunication::~NetworkCommunication()
 {
 }
 
+bool	NetworkCommunication::WebcamEnabled()
+{
+	return false;
+}
+bool	NetworkCommunication::WebcamTime()
+{
+	return false;
+}
+

@@ -57,6 +57,8 @@ public:
 pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chRefCon, TimeValue time, short writeType, long refcon);
 #endif
 #define DEFAULT_CAPTURE_DRIVER 0
+// This is a limit for jpeg size so we just don't consider bigger shots (should even be less)
+#define MAX_JPEG_SIZE 5000
 
 // CAPTURE WINDOW SIZE MUST BE DETERMINED AND THEREFORE WILL NOT BE ADJUSTABLE
 
@@ -121,6 +123,7 @@ class	WebcamSupport
 		double	last_time;
 		double	period;
 		bool	grabbing;
+		int		jpeg_quality;
 
 	public:
 		// Buffer containing current jpeg image capture
@@ -128,6 +131,7 @@ class	WebcamSupport
 		int		old_size;
 		char *	jpeg_buffer;
 		int		jpeg_size;
+		int		nbframes;
 
 		WebcamSupport();
 		WebcamSupport( int f, int w, int h);
