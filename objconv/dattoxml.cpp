@@ -462,6 +462,24 @@ int main (int argc, char ** argv)
 	    DrawDat.Lins[i][0] = readf(shp);
 	    DrawDat.Lins[i][1] = readf(shp);
 	  }
+	  Stat.NumGuns = DrawDat.NumLines;
+	  Stat.GunType = new unsigned char [Stat.NumGuns];
+	  for (i=0; i<Stat.NumGuns; i++)
+	    Stat.GunType[i] = 14;//laser
+	  Stat.GunOffset = new LVector [Stat.NumGuns];
+	  for (i=0;i<Stat.NumGuns;i++)
+	    {
+	      if (DrawDat.FixP[DrawDat.Lins[i][0]].Vertex.z>DrawDat.FixP[DrawDat.Lins[i][1]].Vertex.z) {
+		Stat.GunOffset[i].i = DrawDat.FixP[DrawDat.Lins[i][0]].Vertex.x;
+		Stat.GunOffset[i].j = DrawDat.FixP[DrawDat.Lins[i][0]].Vertex.y;
+		Stat.GunOffset[i].k = DrawDat.FixP[DrawDat.Lins[i][0]].Vertex.z;
+	      } else {
+		Stat.GunOffset[i].i = DrawDat.FixP[DrawDat.Lins[i][1]].Vertex.x;
+		Stat.GunOffset[i].j = DrawDat.FixP[DrawDat.Lins[i][1]].Vertex.y;
+		Stat.GunOffset[i].k = DrawDat.FixP[DrawDat.Lins[i][1]].Vertex.z;
+	      }
+	    }
+
 	  DrawDat.NumRevHexs = 0;
 	  DrawDat.NumRevQuads=0;
 	  DrawDat.NumRevPents=0;
@@ -894,7 +912,7 @@ int main (int argc, char ** argv)
 	  StrWrite ("/>\n");
 	}
 	for (i=0;i<Stat.NumGuns;i++) {
-	  for (int j=-1;j<=1;j+=2) {
+	  for (int j=(vegaclassic?-1:1);j<=1;j+=2) {
 	  Tab();
 	  StrWrite ("<Mount weapon=\"");
 	  switch (Stat.GunType[i]) {
@@ -952,7 +970,7 @@ int main (int argc, char ** argv)
 	}
 	}
 	for (i=0;i<Stat.NumMissiles;i++) {
-	  for (int j=-1;j<=1;j+=2) {
+	  for (int j=vegaclassic?-1:1;j<=1;j+=2) {
 	    int ammo = (int)( (j==-1?ceil:floor)(((float)Stat.MissileAmmo[i])/2));
 	    if (!ammo)
 	      continue;
