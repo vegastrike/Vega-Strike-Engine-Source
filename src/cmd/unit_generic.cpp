@@ -1901,9 +1901,11 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
   return def;
 }
 bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
-	return false;
-}
-	/*
+	static bool auto_valid = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
+	if(!auto_valid) {
+		return false;
+	}
+	
 	if (target->isUnit()==PLANETPTR) {
 		un_iter i = target->getSubUnits();
 		Unit * targ =*i;
@@ -2076,7 +2078,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   }
   return ok;
 }
-*/
+
 extern void ActivateAnimation(Unit * jp);
 void TurnJumpOKLightOn(Unit * un, Cockpit * cp) {
 	if (cp) {
