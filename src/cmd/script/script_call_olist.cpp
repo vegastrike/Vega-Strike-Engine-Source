@@ -160,7 +160,7 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 
       if(mode==SCRIPT_RUN){
         olist_t *mylist=getOListObject(node,mode,ovi);
-        mylist->erase(mylist.begin()+index);
+        mylist->erase(mylist->begin()+index);
       }
 
     }
