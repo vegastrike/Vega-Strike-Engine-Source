@@ -1,2 +1,22 @@
+* global xml-config file, inclusive key-bindings
+* make joystick button handler like keyboard handler
+* xml-mission file
+* Sound with OpenAL
 
-Merge the globals in vegastrike.h (contained in g_game), the ones in gl_globals.h and the one in GFX_GLOBALS.h
+
+--LOW PRIORITY--  PERHAPS GLUT IS NICE...I FOUND MORE GLUT KEYBINDINGS--
+* redo the keyboard with SDL
+* queue joystick events
+
+Job Assignment:
+Daniel
+	Finish up VDU's
+
+
+
+alex:	write a rpm spec file
+ 	write code for config-file
+ 	re-make joystick/keybindings by using the config-file
+-later-
+	Radar colors for factions? (factions_xml.cpp... cockpit.cpp)
+	Mission file stuff
