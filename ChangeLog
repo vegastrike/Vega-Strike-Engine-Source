@@ -1,4 +1,19 @@
 2001-12-04 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter:
+	  - import of multiple modules
+	  - exec in another module
+	  - saveVariables
+	  - datatype object (not yet)
+	* change of dir structure
+	  - modified src/Makefile.am src/cmd/Makefile.am configure.in
+	  - imported interpreter code at src/cmd/script
+	  - imported missions to data/mission
+	  - imported modules to data/modules
+	* imported doc dir at vegastrike/doc
+	  
+
+2001-12-04 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* interpreter:
 	  - scripts can have return values
