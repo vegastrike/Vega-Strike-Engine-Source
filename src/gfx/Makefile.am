@@ -10,6 +10,8 @@ libgfxgeneric =  		\
 	vec.cpp				\
 	lerp.cpp			\
 	lerp.h				\
+	screenshot.cpp		\
+	screenshot.h		\
 	quaternion.cpp		\
 	quaternion.h		\
 	bounding_box.cpp	\

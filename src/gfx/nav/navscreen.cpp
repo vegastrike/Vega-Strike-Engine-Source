@@ -416,7 +416,8 @@ void visitSystemHelp (Cockpit * cp, string systemname,float num) {
 	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
 	if (v->empty()){
 		v->push_back (num);
-		if(_Universe->AccessCockpit()->AccessNavSystem())
+                static bool AlwaysUpdateNavMap=XMLSupport::parse_bool(vs_config->getVariable("graphics","update_nav_after_jump","false"));//causes occasional crash--only may have tracked it down
+		if(AlwaysUpdateNavMap&&_Universe->AccessCockpit()->AccessNavSystem())
 		        _Universe->AccessCockpit()->AccessNavSystem()->pathman->updatePaths();
 	} else if ((*v)[0]!=1.0&&num==1) {
 		(*v)[0]=num;
@@ -1199,7 +1200,9 @@ void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
 
 void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
   currentsystemindex = newSystemIndex;
-  pathman->updatePaths(PathManager::CURRENT);
+  static bool AlwaysUpdateNavMap=XMLSupport::parse_bool(vs_config->getVariable("graphics","update_nav_after_jump","false"));//causes occasional crash--only may have tracked it down
+  if (AlwaysUpdateNavMap)
+    pathman->updatePaths(PathManager::CURRENT);
 }
 
 void NavigationSystem::setDestinationSystemIndex(unsigned newSystemIndex) {

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -276,7 +277,7 @@ void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor() {
 //May generate incorrect links to destinations, if called before destinations have been added.
 //Since links are bidirectional, one WILL have to be created before the other
 //It is recommended that placeholders are created and links updated later
-NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const NavigationSystem::CachedSystemIterator *csi)
+NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, NavigationSystem::CachedSystemIterator *csi)
                 : name(name), position(position), part_of_path(false) {
         // Eww... double for loop!
         UpdateColor();
@@ -285,6 +286,8 @@ NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &nam
                         for (int j=0;j<csi->systems.size();++j) {
                                 if ((*csi)[j].name==destinations[i]) {
                                         lowerdestinations.push_back(j);
+                                        if (std::find((*csi)[j].lowerdestinations.begin(),(*csi)[j].lowerdestinations.end(),i)==(*csi)[j].lowerdestinations.end())
+                                          (*csi)[j].lowerdestinations.push_back(i);//this is in case of asymmetric links
                                         // Push the destination back.
                                         // Tasty....
                                         // Mmm.......

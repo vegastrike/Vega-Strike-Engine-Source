@@ -281,7 +281,8 @@ bool NavPath::checkForCycles() const {
 bool NavPath::evaluate() {
   NavigationSystem::CachedSystemIterator & systemIter=_Universe->AccessCockpit()->AccessNavSystem()->systemIter;
   path.clear();
-
+  static int max_size = XMLSupport::parse_int (vs_config->getVariable("graphics","nav_max_search_size","65536"));
+    
   if(!isComplete())
     return false;
     
@@ -314,7 +315,7 @@ bool NavPath::evaluate() {
     destFront.push_back(destIndex);
     visited[destIndex]=2;
     
-    while(!oriFront.empty() && !destFront.empty() && !found) {
+    while(oriFront.size()<max_size && destFront.size()<max_size && !oriFront.empty() && !destFront.empty() && !found ) { // stay within memory bounds in case something goes wrong (it has, unfortunately on occasion)
       if(oriTurn) {
 	front=&oriFront;
 	visitMark=1;
@@ -398,7 +399,7 @@ bool NavPath::evaluate() {
       }
     }
     
-    while(!frontier.empty() && !found) {
+    while(frontier.size()<max_size && !frontier.empty() && !found) {
       index=frontier.front();
       frontier.pop_front();
       

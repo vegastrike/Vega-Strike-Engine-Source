@@ -38,11 +38,13 @@
 #include "cmd/script/mission.h"
 #include "cmd/unit.h"
 #include "in_kb.h"
+#include "in_kb_data.h"
 #include "in_main.h"
 #if defined(__APPLE__)
 #import <sys/param.h>
 #endif
 #include "savegame.h"
+#include "gfx/screenshot.h"
 using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
@@ -248,6 +250,10 @@ static void UpdateTimeCompressionSounds() {
 		lasttimecompress=timecount;
 	}
 }
+
+extern bool screenshotkey;
+
+
 extern int getmicrosleep ();
 void GameUniverse::StartDraw()
 {
@@ -294,6 +300,11 @@ void GameUniverse::StartDraw()
     popActiveStarSystem();
   }
   GFXEndScene();
+  if (screenshotkey) {
+    KBData b;
+    Screenshot(b,PRESS);
+    screenshotkey=false;
+  }
   micro_sleep (getmicrosleep());//so we don't starve the audio thread  
 
   //remove systems not recently visited?

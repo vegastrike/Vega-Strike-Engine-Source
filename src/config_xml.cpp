@@ -44,7 +44,7 @@
 #include "python/python_compile.h"
 //#include "vs_globals.h"
 //#include "vegastrike.h"
-
+#include "gfx/screenshot.h"
 /* *********************************************************** */
 
 GameVegaConfig::GameVegaConfig(const char *configfile): VegaConfig( configfile)
@@ -91,7 +91,12 @@ void RunPythonToggle(const KBData&,KBSTATE);
 void RunPythonPhysicsFrame(const KBData&,KBSTATE);
 void incmusicvol (const KBData&,KBSTATE a);
 void decmusicvol (const KBData&,KBSTATE a);
-
+bool screenshotkey=false;
+void doScreenshot(const KBData&, KBSTATE a) {
+  if (a==PRESS) {
+    screenshotkey=true;
+  }
+}
 void incvol (const KBData&,KBSTATE a) {
 #ifdef HAVE_AL
 	if (a==DOWN) {
@@ -604,6 +609,7 @@ CommandMap initGlobalCommandMap() {
   commandMap["SwitchCombatMode"]=FlyByKeyboard::SwitchCombatModeKey;
   commandMap["StartKey"]=FlyByKeyboard::StartKey ;
   commandMap["StopKey"]=FlyByKeyboard::StopKey ;
+  commandMap["Screenshot"]=doScreenshot ;
   commandMap["UpKey"]=FlyByKeyboard::UpKey ;
   commandMap["DownKey"]=FlyByKeyboard::DownKey ;
   commandMap["LeftKey"]=FlyByKeyboard::LeftKey ;

@@ -57,7 +57,7 @@ public:
 			unsigned GetDestinationSize() const;
 			GFXColor GetColor();
 			SystemInfo(const string &name);
-		        SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const CachedSystemIterator *csi);
+		        SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, CachedSystemIterator *csi);
 		        void loadData(map<string, unsigned> * index_table);
 		};
 
