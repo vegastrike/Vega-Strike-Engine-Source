@@ -491,7 +491,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
-    float cmas=computer.max_ab_speed*computer.max_ab_speed;
+    float cmas=computer.max_ab_speed()*computer.max_ab_speed();
     if (cmas==0)
       cmas =1;
     Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(cmas));
@@ -621,7 +621,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
-    float cmas = computer.max_ab_speed*computer.max_ab_speed;
+    float cmas = computer.max_ab_speed()*computer.max_ab_speed();
     if (cmas==0)
       cmas=1;
     Vector Scale (1,1,GetVelocity().MagnitudeSquared()/cmas);
