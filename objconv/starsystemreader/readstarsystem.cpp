@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
+#include <set>
 #include <math.h>
 #include <float.h>
 #include <ctype.h>
@@ -86,6 +87,33 @@ public:
 
 class System: public map <string,string> {
 public:
+	static System* findSystem(vector<System> &s, string outgoing) {
+		int slash = outgoing.find("/");
+		string sys=outgoing;
+		if (slash!=std::string::npos) {
+			sys = outgoing.substr(slash);
+		}
+		System *bestChoice=NULL;
+		if (sys.length())
+			if (sys[0]=='/')
+				sys = sys.substr(1);
+		outgoing = outgoing.substr(0,slash);
+		for (unsigned int j=0;j<s.size();++j) {
+			if (s[j].name==sys) {
+				if (s[j].sector!=outgoing) {
+					fprintf (stderr,"Error: System %s not in %s but in %s\n",sys.c_str(),outgoing.c_str(),s[j].sector.c_str());
+					if (bestChoice==NULL) {
+						bestChoice=&s[j];
+					} else if (bestChoice!=&s[j]) {
+						fprintf(stderr," -- Duplicate ambiguous system name... Some systems may have invalid jump points!!!!\n");
+					}
+				}else {
+					return &s[j];
+				}
+			}
+		}
+		return bestChoice;
+	}
 	System () {}
 	bool habitable;
 	bool interesting;
@@ -473,62 +501,113 @@ void writesystems(FILE * fp, std::vector<System> s) {
 
 class FactionInfo {
 	unsigned maxsystems;
-	float takeoverprob;
+	float takeoverprob; // The chace that an enemy system will be taken over.
+	float takeneutralprob; // The chance that a neutral system will be taken over.
 	string name;
 	unsigned turn;
 	unsigned numsystems;
+	System *homeworld;
+	std::vector<System*> borderSystems;
+	std::vector<System*> developingSystems;
+	std::set<System*> systems; // for quick access.
 public:
-	FactionInfo(vector<string> stuff)
-			: turn(0) {
-		if (stuff.size()<3) {
-			if (stuff.size()<2) {
-				if (stuff.size()<1) {
-					stuff.push_back("");
-				}
-				stuff.push_back("");
-			}
-			stuff.push_back("");
+	void developBorderSystems() {
+		// reserve memory to increse speed.
+		developingSystems.reserve(developingSystems.size()+borderSystems.size());
+		for (int i=borderSystems.size()-1;i>=0;i--) {
+			developingSystems.push_back(borderSystems[i]);
+//			borderSystems.erase(borderSystems.begin()+i);
 		}
-		name=stuff[2];
+		borderSystems.clear();
+	}
+	void addNewSystems(const vector<System*> &newSystems) {
+		developBorderSystems();
+		borderSystems=newSystems;
+		for (int i=0;i<borderSystems.size();i++) {
+			systems.insert(borderSystems[i]);
+		}
+		numsystems+=newSystems.size();
+	}
+	FactionInfo(vector<string> stuff, vector<System> &s)
+			: turn(0), numsystems(1) {
+		if (stuff.size()<4) {
+			if (stuff.size()<3) {
+				if (stuff.size()<2) {
+					if (stuff.size()<1) {
+						stuff.push_back("<Error while reading faction>");
+					}
+					stuff.push_back(".1");
+				}
+				stuff.push_back("10");
+			}
+			stuff.push_back("You are getting this error due to lack of required columns.");
+		}
+		name=stuff[0];
 		takeoverprob=atof(stuff[1].c_str());
-		maxsystems=atoi(stuff[0].c_str());
+		takeneutralprob=1-takeoverprob;
+		maxsystems=atoi(stuff[2].c_str());
+		homeworld=System::findSystem(s,stuff[3]);
+		if (!homeworld) {
+			fprintf(stderr,"Fatal error: homeworld \"%s\" not found!!!\n",stuff[3].c_str());
+		}
+		systems.insert(homeworld);
+		borderSystems.push_back(homeworld);
 	}
 	FactionInfo(string nam, float prob, int max)
 			: name(nam), takeoverprob(prob), maxsystems(max) {
 	}
-	void simulateTurn (unsigned int totalturn) {
+	void simulateTurn (unsigned int totalturn, vector<System> &s) {
 		++turn;
-		++numsystems;
+		vector<System*> systemsToAdd;
+		for (int i=0;i<borderSystems.size();i++) {
+			std::vector<std::string>::const_iterator end=borderSystems[i]->jumps.end();
+			for (std::vector<std::string>::const_iterator iter=borderSystems[i]->jumps.begin();iter!=end;++iter) {
+				System *jump=System::findSystem(s,*iter);
+				if (jump!=NULL&&systems.find(jump)==systems.end()) {
+					// not in our territory! and it is valid.
+					if (((*jump)["faction"]=="neutral"
+							&& (((float)rand())/RAND_MAX)<takeoverprob)
+							|| ((((float)rand())/RAND_MAX)<takeoverprob)) {
+						(*jump)["faction"]=name;
+						systemsToAdd.push_back(jump);
+					}
+				}
+			}
+		}
+		addNewSystems(systemsToAdd);
 	}
 	bool active() {
 		return (numsystems<maxsystems);
 	}
 };
 
-std::vector<FactionInfo> readFactions() {
+std::vector<FactionInfo> readFactions(vector<System> &s) {
 	std::vector<FactionInfo> ret;
 	std::string file = readfiledata("factions.csv");
 	while (true) {
-		ret.push_back(FactionInfo(readCSV(file)));
+		vector<string> temp=readCSV(file);
 		int r=file.find("\r");
 		int n=file.find("\n");
 		if (r==std::string::npos&&n==std::string::npos) {
 			break;
 		}
 		file=file.substr(r>n?r+1:n+1);
+		if (temp.size()) {
+			ret.push_back(FactionInfo(temp, s));
+		}
 	}
 	return ret;
 }
 
 
-void simulateFactionTurns () {
-	std::vector<FactionInfo> factions=readFactions();
+void simulateFactionTurns (vector<System> &s) {
+	std::vector<FactionInfo> factions=readFactions(s);
 	for (unsigned turn=0;;turn++) {
 		int num_inactive=0;
 		for (unsigned i=0;i<factions.size();i++) {
 			if (factions[i].active()) {
 				printf("");
-				factions[i].simulateTurn(turn);
+				factions[i].simulateTurn(turn, s);
 			} else {
 				num_inactive++;
 			}
@@ -679,45 +758,34 @@ void processsystems (std::vector <System> & s){
 			unsigned int jsize = s[i].jumps.size();
 			for (unsigned int k=0;k<jsize;++k) {
 				string outgoing = s[i].jumps[k];
-				int slash = outgoing.find("/");
-				string sys = outgoing.substr(slash);
-				if (sys.length())
-					if (sys[0]=='/')
-						sys = sys.substr(1);
-				outgoing = outgoing.substr(0,slash);
-				for (unsigned int j=0;j<s.size();++j) {
-					if (s[j].name==sys) {
-						if (s[j].sector!=outgoing) {
-							fprintf (stderr,"error %s not in %s but in %s",sys.c_str(),outgoing.c_str(),s[j].sector.c_str());
-						}else {
-							string fullname = s[i].sector+"/"+s[i].name;
-							unsigned int jjsize = s[j].jumps.size();
-							bool found=false;
-							if (!s[j].habitable){
-								//fprintf (stderr,"looking for %s in %s\n",fullname.c_str(),s[j].name.c_str());
-							}
-							for (unsigned int l=0;l<jjsize;++l) {
-								if (fullname==s[j].jumps[l]) {
-									found=true;
-									break;
-								}
-							}
-							if (!found){
-								/*
-								if (s[j].jumps.empty())
-									s[j]["jumps"]=fullname;
-								else
-									s[j]["jumps"]=s[j]["jumps"]+" "+fullname;
-								*/
-								s[j].jumps.push_back(fullname);
-							}
+				System *foundsys=System::findSystem(s, outgoing);
+				if (foundsys!=NULL) {
+					string fullname = s[i].sector+"/"+s[i].name;
+					unsigned int jjsize = foundsys->jumps.size();
+					bool found=false;
+					if (!foundsys->habitable){
+						//fprintf (stderr,"looking for %s in %s\n",fullname.c_str(),s[j].name.c_str());
+					}
+					for (unsigned int l=0;l<jjsize;++l) {
+						if (fullname==foundsys->jumps[l]) {
+							found=true;
+							break;
 						}
+					}
+					if (!found){
+						/*
+						  if (s[j].jumps.empty())
+						    s[j]["jumps"]=fullname;
+						  else
+						    s[j]["jumps"]=s[j]["jumps"]+" "+fullname;
+						*/
+						foundsys->jumps.push_back(fullname);
 					}
 				}
 			}
 		}
 	}
-	simulateFactionTurns(); // Simulates the factions starting with one homeworld, and expands their territories.x
+	simulateFactionTurns(s); // Simulates the factions starting with one homeworld, and expands their territories.x
 }
 int main (int argc, char ** argv) {
 	if (argc<3) {
