@@ -15,10 +15,13 @@ Number of fields per polygon structure: integer (3)
 Number of fields per referenced vertex: integer (3)
 Number of fields per referenced animation: integer (1)
 Number of records: integer
-
+256 bytes of 0: reserved for future superheader parametrization use.
+---End SuperHeader
+---Record Header---
 for each record:
     Size of record in bytes: integer 
     number of meshes:integer
+---End Record Header---
     for each mesh:
 	---Header---
 	Size of mesh in bytes: integer
