@@ -15,7 +15,7 @@ namespace UniverseUtil {
 ///this function sets the "current" system to be "name"  where name may be something like "sol_sector/sol"  or "vega_sector/vega"   this function may take some time if the system has not been loaded before
 
 	void pushSystem (string name);
-
+	bool systemInMemory(string name);
 ///this function restores the active system.... there must be an equal number of pushSystems ans popSystems or else Vega Strike may behave unpredictably
 	void popSystem ();
 ///This function gets the current system's official name

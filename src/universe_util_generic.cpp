@@ -109,8 +109,17 @@ namespace UniverseUtil {
 	string getSystemFile() {
 		return activeSys->getFileName();
 	}
+
 	string getSystemName() {
 		return activeSys->getName();
+	}
+	bool systemInMemory(string nam) {
+	  unsigned int nass = _Universe->getNumActiveStarSystem();
+	  for (unsigned int i=0;i<nass;i++) {
+	    if (_Universe->getActiveStarSystem(i)->getFileName()==nam)
+	      return true;
+	  }
+	  return false;
 	}
 	void setMissionOwner(int whichplayer) {
 		mission->player_num=whichplayer;
