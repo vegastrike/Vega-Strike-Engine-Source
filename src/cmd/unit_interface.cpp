@@ -1119,15 +1119,16 @@ void UpgradingInfo::SelectLastSelected() {
 	if (lastselected.last) {
     int ours = CargoList->DoMouse(lastselected.type, lastselected.x, lastselected.y, lastselected.button, lastselected.state);
     if (ours) {
+      ProcessMouse(lastselected.type, lastselected.x, lastselected.y, lastselected.button, lastselected.state);
       char *buy_name = CargoList->GetSelectedItemName();
       
       if (buy_name) {
 	if (buy_name[0]) {
-	  //not sure
+	  SelectItem(buy_name,lastselected.button, lastselected.state);
 	}
       }
     }
-  }
+    }
 }
 void UpgradingInfo::CompleteTransactionConfirm () {
   double percentage;
