@@ -1716,7 +1716,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 		  for(int LOD=0;LOD<numLODs;LOD++){
 			float size=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//Size
 			int index=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//Mesh index
-			fprintf(Outputfile,"<LOD size=\"%f\" not_a_meshfile=\"%d_%d.xmesh\"/>\n",size,recordindex,index);
+			fprintf(Outputfile,"<LOD size=\"%f\" meshfile=\"%d_%d.xmesh\"/>\n",size,recordindex,index);
 			word32index+=2;
 		  }
 		  //End LODs
