@@ -9,6 +9,7 @@
 #include "cmd/container.h"
 #include "xml_support.h"
 #include <assert.h>
+#include "audiolib.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 inline bool CompareDest (Planet * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
@@ -160,6 +161,8 @@ void StarSystem::ProcessPendingJumps() {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit removed from star system\n");
 #endif
+      static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
+    AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
       ///eradicating from system, leaving no trace
       un->RemoveFromSystem();
       pendingjump[kk]->dest->AddUnit (un);
@@ -197,6 +200,8 @@ void StarSystem::ProcessPendingJumps() {
 	jumpdest+=23231;
       }
       DealPossibleJumpDamage (un);
+      static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
+      AUDPlay (jumparrive,un->LocalPosition(),un->GetVelocity(),1);
     } else {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit FAILED remove from star system\n");
