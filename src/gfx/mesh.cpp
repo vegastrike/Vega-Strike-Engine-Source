@@ -415,7 +415,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     return;
   }
   GFXSelectMaterial(myMatNum);
-  if (blendDst!=ZERO) {
+  if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    GFXDisable(CULLFACE);
     GFXDisable(DEPTHWRITE);
     if (blendSrc!=SRCALPHA) {
@@ -518,7 +518,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     draw_queue->push_back (tmp_draw_queue.back());
     tmp_draw_queue.pop_back();
   }
-  if (blendDst!=ZERO) {
+  if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //GFXEnable (CULLFACE);
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
     if (blendSrc!=SRCALPHA) {
