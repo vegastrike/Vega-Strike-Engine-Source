@@ -126,8 +126,9 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 		if (targ->hull<0){
 			targ=NULL; 
 		}else {
-			if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
-				Target (this);//go wild
+                  static int max_ecm = XMLSupport::parse_int(vs_config->getVariable("physics","max_ecm","3"));
+			if ((((int)this)/16383)%max_ecm<targ->GetImageInformation().ecm){
+				Target (NULL);//go wild
 			}else if (hull>0){
 				static unsigned int pointdef = ROLES::getRole("POINTDEF");
 				targ->graphicOptions.missilelock=true;
