@@ -688,6 +688,12 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   return percent;
 }
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
+  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
+  if (nodockdamage) {
+    if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
+      return;
+    }
+  }
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
   Cockpit * cpt;

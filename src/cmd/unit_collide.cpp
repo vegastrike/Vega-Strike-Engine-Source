@@ -379,13 +379,16 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 
 
 bool Unit::Collide (Unit * target) {
-  if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
+  if (target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
 
   //unit v unit? use point sampling?
   //now first make sure they're within bubbles of each other...
   if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
     return false;
+  if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))) {
+    return false;
+  }
   //now do some serious checks
   Vector normal(-1,-1,-1);
   float dist;
