@@ -15,6 +15,7 @@ class FireKeyboard: public Order {
   float gunrange;
   float rxntime;
   float delay;
+  float autotrackingtoggle;
   bool ShouldFire(Unit * targ);
   std::list <CommunicationMessage> resp;
  public:
@@ -28,6 +29,7 @@ class FireKeyboard: public Order {
   static void SetShieldsTwoThird (const KBData&,KBSTATE);
   static void ToggleGlow (const KBData&,KBSTATE);
   static void ToggleWarpDrive (const KBData&,KBSTATE);
+  static void ToggleAutotracking (const KBData&,KBSTATE);
   static void ToggleAnimation (const KBData&,KBSTATE);	
   static void PressComm1Key (const KBData&,KBSTATE);
   static void PressComm2Key (const KBData&,KBSTATE);

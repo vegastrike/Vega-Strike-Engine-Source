@@ -23,6 +23,7 @@
 #include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   memset (savedTargets,0,sizeof(void*)*NUMSAVEDTARGETS);
+  this->autotrackingtoggle=1;
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
@@ -34,7 +35,7 @@ const unsigned int NUMCOMMKEYS=10;
 
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = turretoffkey=turretfaw=saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
+    toggleautotracking=togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = turretoffkey=turretfaw=saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
 
     eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
@@ -88,6 +89,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE turretoffkey;
  KBSTATE turretfaw;
  KBSTATE toggleglow;
+ KBSTATE toggleautotracking;
  KBSTATE togglewarpdrive;
  KBSTATE toggleanimation;	
  KBSTATE commKeys[NUMCOMMKEYS];
@@ -135,6 +137,11 @@ void FireKeyboard::SetShieldsTwoThird(const KBData&,KBSTATE k) {
 void FireKeyboard::ToggleGlow (const KBData&,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleglow=PRESS;
+	}
+}
+void FireKeyboard::ToggleAutotracking (const KBData&,KBSTATE k) {
+	if (k==PRESS) {
+		g().toggleautotracking=PRESS;
 	}
 }
 
@@ -1440,6 +1447,7 @@ static void ForceChangeTarget(Unit*  parent) {
   if (parent->Target()==curtarg)
     ChooseTargets(parent,TargAll,false);
 }
+bool isMissile(const weapon_info *);
 void FireKeyboard::Execute () {
 	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
@@ -1464,8 +1472,9 @@ void FireKeyboard::Execute () {
     //f().shieldpowerstate=1;
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
-    if (!_Universe->AccessCockpit()->CanDrawNavSystem())
+    if (!_Universe->AccessCockpit()->CanDrawNavSystem()) {
       parent->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+    }
   }
   if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
@@ -1677,6 +1686,16 @@ void FireKeyboard::Execute () {
 	  f().togglewarpdrive=DOWN;
 	  parent->graphicOptions.InWarp=1-parent->graphicOptions.InWarp;
 	  parent->graphicOptions.WarpRamping=1;
+  }
+  if (f().toggleautotracking == PRESS) {
+	  f().toggleautotracking=DOWN;
+          if (autotrackingtoggle==1) {
+            autotrackingtoggle = parent->GetComputerData().radar.trackingcone;
+            parent->GetComputerData().radar.trackingcone=1;
+          }else {
+            parent->GetComputerData().radar.trackingcone=autotrackingtoggle;
+            autotrackingtoggle=1;
+          }
   }
 
   if (f().misk==PRESS||f().rmisk==PRESS) {
