@@ -1,3 +1,13 @@
+2001-10-21 Daniel Horn <hellcatv@hotmail.com>
+
+	* added Sound support
+	* added buffers share preloaded sounds
+	* added heuristic that will take X sounds of one type and N closest sounds
+	* modified weapon sounds to be present on the mount (with exception of beams)
+	* added sounds in unit config file and global config file for common things like explosions, etc
+	* added music that will determine the "badness" of current situation and play sounds accordingly
+
+
 2001-10-21 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added mapping from string to KBHandler to config_xml
