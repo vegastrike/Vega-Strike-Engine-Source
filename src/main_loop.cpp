@@ -333,13 +333,18 @@ void createObjects() {
 
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
-    char *happy[4];
+    char *happy[9];
     happy[0]=strdup (stdstr.c_str());
     happy[1]=strdup (stdstr.c_str());
     happy[2]=strdup (stdstr.c_str());
     happy[3]=strdup (stdstr.c_str());
+    happy[4]=strdup ("terrain2.xml");
+    happy[5]=strdup ("terrain2.xml");
+    happy[6]=strdup ("terrain2.xml");
+    happy[7]=strdup ("terrain2.xml");
+    happy[8]=strdup ("terrain2.xml");
 
-    myterrain=new ContinuousTerrain (happy,2,TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
+    myterrain=new ContinuousTerrain (happy,2/*3Use 3 if you want all 9 datasets*/,TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
 			   //Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
           Matrix tmp;
           Identity (tmp);

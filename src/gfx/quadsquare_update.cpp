@@ -223,12 +223,25 @@ static unsigned int calculatestage (unsigned int numstages, unsigned int whichst
   return stage;
 }
 
+///transforms our stages to little endian notation so most significant half-byte is on the right :-)
+static unsigned int transformstage (unsigned int stage) {
+  int tmp;
+  unsigned int transformedstage=0;
+  while ((tmp=(stage&(1|2|4|8)))!=0) {
+    stage >>=4;
+    transformedstage <<=4;
+    transformedstage |=tmp;
+  }
+  
+  return transformedstage;
+}
+
 /// Refresh the vertex enabled states in the tree, according to the
 /// location of the viewer.  May force creation or deletion of qsquares
 /// in areas which need to be interpolated.
 void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage) {
   DetailThreshold = Detail;
-  UpdateAux(cd, ViewerLocation, 0,calculatestage (numstages,whichstage));
+  UpdateAux(cd, ViewerLocation, 0,transformstage(calculatestage (numstages,whichstage)));
 
 }
 

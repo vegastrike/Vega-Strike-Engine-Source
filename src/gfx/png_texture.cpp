@@ -17,7 +17,7 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
       for (unsigned int i=0;i<height;i++) {
 	unsigned int iwid = i*width;
 	for (unsigned int j=0;j<width;j++) {
-	  dat[iwid+j] = row_pointers[i][j]*256;
+	  dat[iwid+j] = row_pointers[i][j];
 	}
       }
     } else {
