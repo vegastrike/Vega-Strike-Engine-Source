@@ -49,7 +49,7 @@ static const float SIMULATION_ATOM = (float)(1.0/10.0);
     /* Note that this will define WIN32 for us, if it isn't defined already
      */
 #  include <windows.h>
-#include <wingdi.h>
+//#include <wingdi.h>
 #include <time.h>
 #else
 #include <sys/time.h>

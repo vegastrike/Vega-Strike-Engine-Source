@@ -450,8 +450,11 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
   if (!temp)
     return false;
   BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
-  if (!(*tmpBsp))
+  if (!(*tmpBsp)) {
+	  dist = pt.Magnitude()-err-rSize();
+	  if (dist<0) dist = 0.0001;
       return true;
+  }
   if ((*tmpBsp)->intersects (st,err,norm,dist)) {
     norm = ToWorldCoordinates (norm);
     return true;
