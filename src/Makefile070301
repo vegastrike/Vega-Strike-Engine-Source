@@ -21,6 +21,7 @@ SRCS = 	cmd_beam.cpp				\
 	cmd_order.cpp				\
 	cmd_unit.cpp				\
 	cmd_unit_click.cpp			\
+	cmd_unit_damage.cpp			\
 	cmd_unit_xml.cpp  			\
 	cmd_physics.cpp				\
 	cmd_weapon_xml.cpp			\
