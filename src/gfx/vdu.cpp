@@ -109,6 +109,12 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   }
   GetPosition (sx,sy);
   GetSize (w,h);
+  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
+  if( use_reduced_vdus)
+  {
+  	w = w-(.005*w);
+	h = h-(.005*h);
+  }
   h=-fabs (h*per);
 
   if (!s) {
@@ -165,6 +171,9 @@ static std::string MangleString (const char * in, float probability) {
     tmp[kk]=str[kk];
   }
   std::string retval = string (tmp);
+  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
+  if( use_reduced_vdus)
+  	retval = "\n"+retval;
   free (tmp);
   return retval;
 }
@@ -279,6 +288,12 @@ void VDU::DrawVDUShield (Unit * parent) {
   float x,y,w,h;
   GetPosition (x,y);
   GetSize (w,h);
+  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
+  if( use_reduced_vdus)
+  {
+  	w = w-(.005*w);
+	h = h-(.005*h);
+  }
   h=fabs (h*.6);
   w=fabs (w*.6);
   unsigned short armor[4];
@@ -677,6 +692,9 @@ void VDU::DrawWeapon (Unit * parent) {
   float x,y,w,h;
   const float percent = .6;
   string buf("G: ");
+  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
+  if( use_reduced_vdus)
+  	buf = "\n"+buf;
   int len= buf.length();
   string mbuf("\nM: ");
   int mlen = mbuf.length();
@@ -808,6 +826,12 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   float x,y;
   float h,w;
   GetSize (w,h);
+  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
+  if( use_reduced_vdus)
+  {
+  	w = w-(.005*w);
+	h = h-(.005*h);
+  }
   GetPosition (x,y);
   //tp->SetCharSize (fabs(w/cols),fabs(h/rows));
   float csx,csy;

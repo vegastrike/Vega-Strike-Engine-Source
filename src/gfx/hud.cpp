@@ -109,6 +109,12 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   myFontMetrics.j/=.5*g_game.y_resolution;
   float tmp,row, col;
   GetPos (row,col);
+  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
+  if( use_reduced_vdus)
+  {
+  	row = row-(.005*row);
+	col = col-(.005*col);
+  }
   float rowheight=(use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
   if (startlower) {
       row -= rowheight;
