@@ -23,14 +23,15 @@ Vega Strike is an Interactive Flight Simulator/Real Time Stratagy being
 %prep
 rm -rf $RPM_BUILD_ROOT
 
-%setup
+%setup -n vegastrike
 
 %build
-./configure --prefix=/usr/local 
+./configure --prefix=$RPM_BUILD_ROOT/usr/local 
 make
 
 %install
 make install
+cp vssetup $RPM_BUILD_ROOT/usr/local/bin/
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -38,3 +39,4 @@ rm -rf $RPM_BUILD_ROOT
 %files
 /usr/local/bin/vegastrike
 /usr/local/bin/vslauncher
+/usr/local/bin/vssetup

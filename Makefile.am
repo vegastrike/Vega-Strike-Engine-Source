@@ -1,4 +1,4 @@
-SUBDIRS = src objconv launcher
+SUBDIRS = common src objconv launcher
 
 EXTRA_DIST =						\
 	vegastrike.dsp					\
