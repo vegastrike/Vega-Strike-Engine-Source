@@ -600,7 +600,7 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    cubemapincamspace.Normalize();
    axis.Normalize();
    //   float theta = arcsinf (Vector (centerx,centery,centerz).Normalize().Dot (Vector (1,0,0)));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE
-   float theta =arcsinf (axis.Dot(cubemapincamspace));
+   float theta =asinf (axis.Dot(cubemapincamspace));
    axis = axis.Cross (axis.Cross(cubemapincamspace));
    glRotatef (theta,axis.i,axis.j,axis.k);
    //ok do matrix math to rotate by theta on axis  those ..
