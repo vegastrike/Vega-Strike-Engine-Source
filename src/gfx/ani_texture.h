@@ -10,10 +10,10 @@ class AnimatedTexture: public Texture {
   void AniInit();
  public:
   AnimatedTexture ();
-  AnimatedTexture (const char * file, int stage, enum FILTER imm);
-  AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm);
-  void Load (char * buffer, int length, int nframe, enum FILTER imm);
-  void Load (FILE * openedfile, int stage, enum FILTER imm);
+  AnimatedTexture (const char * file, int stage, enum FILTER imm, bool detailtexture=false);
+  AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);
+  void Load (char * buffer, int length, int nframe, enum FILTER imm,bool detailtexture=false);
+  void Load (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);
   void Destroy();
   virtual Texture *Original();
   ~AnimatedTexture();

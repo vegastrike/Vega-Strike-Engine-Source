@@ -16,6 +16,10 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
 }
 void Mesh::CreateLogos(int faction, Flightgroup * fg) {
 }
+Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail )const {
+	return NULL;
+}
+   
 Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
 	return NULL;    
 }

@@ -297,7 +297,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle,
   return GFXTRUE;
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension)
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension, GFXBOOL detail_texture)
 {	
   if (handle<0)
     return GFXFALSE;
@@ -413,7 +413,40 @@ void GFXDestroyAllTextures () {
   }
 }
 
-
+void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]) {
+	switch (tex) {
+	case NO_GEN:
+		glDisable(GL_TEXTURE_GEN_S);
+		glDisable(GL_TEXTURE_GEN_T);
+		glDisable(GL_TEXTURE_GEN_R);
+		break;
+	case EYE_LINEAR_GEN:
+		glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_EYE_LINEAR);
+		glTexGenfv(GL_S,GL_EYE_PLANE,params);
+		glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_EYE_LINEAR);
+		glTexGenfv(GL_T,GL_EYE_PLANE,paramt);
+		glEnable(GL_TEXTURE_GEN_S);
+		glEnable(GL_TEXTURE_GEN_T);
+		break;
+	case OBJECT_LINEAR_GEN:
+		glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
+		glTexGenfv(GL_S,GL_OBJECT_PLANE,params);
+		glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_OBJECT_LINEAR);
+		glTexGenfv(GL_T,GL_OBJECT_PLANE,paramt);
+		glEnable(GL_TEXTURE_GEN_S);
+		glEnable(GL_TEXTURE_GEN_T);
+		break;		
+	case SPHERE_MAP_GEN:
+		glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
+		glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
+		glEnable(GL_TEXTURE_GEN_S);
+		glEnable(GL_TEXTURE_GEN_T);
+		break;
+	case CUBE_MAP_GEN:
+		assert(0);
+		break;
+	}
+}
 void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
   //FIXME? is this legit?

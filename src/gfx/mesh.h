@@ -104,6 +104,7 @@ class Mesh
 private:
     //make sure to only use TempGetTexture when xml-> is valid \|/
     Texture * TempGetTexture (int index, std::string factionname) const;
+	Texture * TempGetTexture (std::string filename, std::string factionname,GFXBOOL detail) const;
   ///Stores all the load-time vertex info in the XML struct FIXME light calculations
   struct XML {
     enum Names {
@@ -164,7 +165,8 @@ private:
       ANIMATEDTEXTURE,
       USENORMALS,
       REVERSE,
-	  POLYGONOFFSET
+	  POLYGONOFFSET,
+	  DETAILTEXTURE
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -307,6 +309,7 @@ protected:
   unsigned int myMatNum;
   ///The decal relevant to this mesh
   vector <Texture *> Decal;
+  Texture * detailTexture;
   float polygon_offset;
   ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
   char envMapAndLit;

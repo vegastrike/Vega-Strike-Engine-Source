@@ -69,15 +69,15 @@ struct Texture{
   }
   protected:
   ///Binds this texture to GFX library
-  int Bind(int maxdimension);
+  int Bind(int maxdimension,GFXBOOL detailtexture);
   ///Transfers this texture to GFX library
-  void Transfer(int maxdimension);
+  void Transfer(int maxdimension,GFXBOOL detailtexture);
   public:
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
-  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
-  Texture(char *,int length, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
+  Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE);
+  Texture(char *,int length, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE);
   ///Creates a texture with only color data as a single bitmap
-  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
+  Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536,GFXBOOL detail_texture=GFXFALSE);
   virtual Texture * Original();
   virtual Texture * Clone ();
   ///Texture copy constructor that increases appropriate refcounts

@@ -59,7 +59,32 @@ typedef std::vector<OrigMeshContainer> OrigMeshVector;
 #define DAMAGE_PASS 2
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
-
+Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail) const{
+	static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","false"))?TRILINEAR:MIPMAP;
+	Texture * ret=NULL;
+	string facplus = factionname+"_"+filename;
+	if (filename.find(".ani")!=string::npos) {
+	    ret = new AnimatedTexture(facplus.c_str(),1,fil,detail);
+		if (!ret->LoadSuccess()) {
+			delete ret;
+			ret = new AnimatedTexture(filename.c_str(),1,fil,detail);
+			if (!ret->LoadSuccess()) {
+				delete ret;
+				ret=NULL;
+			}else {
+				return ret;
+			}
+		}else {
+			return ret;
+		}
+	}
+	ret = new Texture (facplus.c_str(),1,fil,TEXTURE2D,TEXTURE_2D,GFXFALSE,65536,detail);
+	if (!ret->LoadSuccess()) {
+		delete ret;
+		ret = new Texture (filename.c_str(),1,fil,TEXTURE2D,TEXTURE_2D,GFXFALSE,65536,detail);
+	}
+	return ret;
+}
 Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
     Texture *tex=NULL;
     assert (index<(int)xml->decals.size());
@@ -424,7 +449,7 @@ static void SetupFogState (char cloaked) {
         GFXFogMode (FOG_OFF);
     }    
 }
-bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset) {
+bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset,Texture *detailTexture) {
 	if (polygon_offset){
 		float a,b;
 		GFXGetPolygonOffset(&a,&b);
@@ -440,13 +465,30 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
                                         GFXColor(0,0,0,0),
                                         GFXColor(0,0,0,0));
             retval=true;
-            if (envMap)
+            if (envMap&&detailTexture==NULL)
                 GFXDisable(TEXTURE1);
+			
             if (decal[0])
                 decal[0]->MakeActive();
+			if (detailTexture) {
+				GFXActiveTexture(1);
+				const float params[4]={1,0,0,0};
+				const float paramt[4]={0,1,0,0};
+				GFXTextureCoordGenMode(OBJECT_LINEAR_GEN,params,paramt);
+				detailTexture->MakeActive();
+				GFXActiveTexture(0);
+			}
         }
     }
     return retval;
+}
+void RestoreFirstPassState(Texture * detailTexture ) {
+	if (detailTexture) {
+		static float tempo[4]={1,0,0,0};
+		GFXActiveTexture(1);
+		GFXTextureCoordGenMode(SPHERE_MAP_GEN,tempo,tempo);
+		_Universe->activeStarSystem()->activateLightMap();
+	}
 }
 void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX, float polygon_offset) {
 	GFXPushBlendMode();			
@@ -614,7 +656,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 
   switch (whichpass) {
   case 0:
-	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset);
+	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture);
 	  break;
   case 1:
 	  
@@ -678,6 +720,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 
 	switch(whichpass) {
 	case 0:
+		RestoreFirstPassState(detailTexture);
 		break;
 	case 1:
 		RestoreSpecMapState(getEnvMap(),write_to_depthmap,polygon_offset);

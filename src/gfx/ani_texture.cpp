@@ -35,7 +35,7 @@ bool AnimatedTexture::Done() {
   return physicsactive<0;
 }
 
-AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm){
+AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm,bool detailtex){
   AniInit();
   FILE * fp = fopen (file,"r");
   bool setdir=false;
@@ -51,7 +51,7 @@ AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm){
     
 }
   if (fp){
-    Load (fp,stage,imm);
+    Load (fp,stage,imm,detailtex);
     fclose (fp);
   }
 if (setdir) {
@@ -67,10 +67,10 @@ void AnimatedTexture::AniInit() {
   active=0;
   original = NULL;
 }
-AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
+AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
   AniInit();
   if (fp)
-    Load (fp,stage,imm);
+    Load (fp,stage,imm,detailtex);
 }
 
 Texture *AnimatedTexture::Original(){
@@ -122,7 +122,7 @@ void AnimatedTexture::Reset () {
   active=0;
   physicsactive = numframes*timeperframe;
 }
-void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER ismipmapped)
+void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER ismipmapped,bool detailtex)
 {
 	myvec.push_back (this);
 	numframes = nframe;
@@ -138,7 +138,7 @@ void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER i
     loadall=false;
   }
   for (;i<numframes;i++) {
-	Decal[i]=new Texture (buffer,length,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+	Decal[i]=new Texture (buffer,length,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
   }
   if (!loadall) {
     Texture * dec = Decal[numframes/2];
@@ -153,7 +153,7 @@ void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER i
   original = NULL;
 }
 
-void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
+void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool detailtex) {
   myvec.push_back (this);
   fscanf (fp,"%d %f",&numframes,&timeperframe);
   cumtime=0;
@@ -184,9 +184,9 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
     }
     if (loadall||i==numframes/2) {
       if (numgets==2) {
-	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
       }else {
-	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
       }    
     }
   }

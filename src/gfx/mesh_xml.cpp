@@ -109,13 +109,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair ("CullFace",XML::CULLFACE),
   EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
   EnumMap::Pair ("UseNormals",XML::USENORMALS),
-  EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET)
+  EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET),
+  EnumMap::Pair ("DetailTexture",XML::DETAILTEXTURE)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 35);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 36);
 
 
 
@@ -369,6 +370,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  free (cdst);
 	}
 	break;
+	  case XML::DETAILTEXTURE:
+		  detailTexture = TempGetTexture(iter->value,FactionUtil::GetFaction(xml->faction),GFXTRUE);
+		  break;
       case XML::TEXTURE:
           //NO BREAK..goes to next statement
       case XML::ALPHAMAP:
@@ -1332,6 +1336,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   while (Decal.back()==NULL&&Decal.size()>1) {
       Decal.pop_back();
   }
+
   unsigned int index = 0;
 
   unsigned int totalvertexsize = xml->tris.size()+xml->quads.size()+xml->lines.size();

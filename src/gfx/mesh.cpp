@@ -81,7 +81,7 @@ void Mesh::InitUnit() {
 	envMapAndLit =0x3;
 	setEnvMap(GFXTRUE);
 	setLighting(GFXTRUE);
-	
+	detailTexture=NULL;
 	draw_queue = NULL;
 	will_be_drawn = GFXFALSE;
 	draw_sequence = 0;

@@ -238,7 +238,7 @@ void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
  * in previously specified format. Scales texture approrpiately to
  * Max texture sizes gotten from vid card
  */
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTUREFORMAT internalformat, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D, int max_texture_dimension=65536/*make sure it's not bigger than this--usually maybe 65536*/);
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTUREFORMAT internalformat, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D, int max_texture_dimension=65536/*make sure it's not bigger than this--usually maybe 65536*/,GFXBOOL detailtexture=GFXFALSE);
 
 GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle, int x, int y, unsigned int width, unsigned int height, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
 
@@ -345,6 +345,14 @@ void /*GFXDRVAPI*/ GFXSubwindow(int x, int y, int xsize, int ysize);           v
 //Coordinate system conversion
 ///convertes eyespace to 3space at the near plane
 Vector /*GFXDRVAPI*/ GFXDeviceToEye(int x, int y);
+enum GFXTEXTURECOORDMODE{
+	NO_GEN,
+	EYE_LINEAR_GEN,
+	OBJECT_LINEAR_GEN,
+	SPHERE_MAP_GEN,
+	CUBE_MAP_GEN
+};
+void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]);
 
 #endif
 

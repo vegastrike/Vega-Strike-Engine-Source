@@ -321,11 +321,9 @@ void GFXInit (int argc, char ** argv){
       glEnable(GL_TEXTURE_GEN_R);
 
 #else
+	  const float tempo[4]={1,0,0,0};
+	  GFXTextureCoordGenMode(SPHERE_MAP_GEN,tempo,tempo);
       glEnable(GL_TEXTURE_2D);
-      glTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-      glTexGenf(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-      glEnable(GL_TEXTURE_GEN_S);
-      glEnable(GL_TEXTURE_GEN_T);
 #endif
     }
     glClearDepth(1);
