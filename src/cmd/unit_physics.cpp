@@ -866,10 +866,12 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   }
   bool ok=true;
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
+    static bool autothroughplanets=XMLSupport::parse_bool (vs_config->getVariable("physics","autothroughplanets","true"));
     for (un_iter i=ss->getUnitList().createIterator();
 	 (un=*i)!=NULL; 
 	 ++i) {
-      if (un->isUnit()!=NEBULAPTR) {
+      clsptr isun= un->isUnit();
+      if (isun!=NEBULAPTR&&(isun!=PLANETPTR||(!autothroughplanets))) {
 	
 	if (un!=this&&un!=target) {
 	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
@@ -885,7 +887,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
     }
   }
   if (this!=target) {
-    SetCurPosition(end);
+    SetCurPosition(UniverseUtil::SafeEntrancePoint (end,rSize()));
     if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
       Unit * other=NULL;
       for (un_iter ui=ss->getUnitList().createIterator();
