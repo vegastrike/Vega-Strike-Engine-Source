@@ -32,7 +32,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%{prefix}/games/vegastrike/bin/vegastrike
-%{prefix}/games/vegastrike/objconv/3ds2xml
-%{prefix}/games/vegastrike/objconv/obj2xml
-%{prefix}/games/vegastrike/objconv/wcp2xml
+%{prefix}/vegastrike
+%{prefix}/select
+%{prefix}/objconv/3ds2xml
+%{prefix}/objconv/obj2xml
+%{prefix}/objconv/wcp2xml

@@ -1,5 +1,5 @@
 
-bindir = $(prefix)/games/@PACKAGE@/bin
+bindir = ../$(prefix)
 
 bin_PROGRAMS = vegastrike
 SUBDIRS = cmd gfx gldrv aldrv python

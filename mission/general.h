@@ -28,13 +28,13 @@
 //#define _G_ALL		// Enable everything except _G_DEBUG
 
 //#define _G_DEBUG		// Debug Messaging
-//#define _G_ERROR		// Error Messaging (internal and external)
+#define _G_ERROR		// Error Messaging (internal and external)
 //#define _G_GLIB		// use GLIB for string allocation
 //#define _G_NUMBER		// Number processing
-//#define _G_PATH               // Functions that deal with directories
+#define _G_PATH               // Functions that deal with directories
 //#define _G_RANDOM		// Enable Random Number
-//#define _G_STRING_MANAGE	// Enable String Management
-//#define _G_STRING_PARSE	// Enable the String Parsing
+#define _G_STRING_MANAGE	// Enable String Management
+#define _G_STRING_PARSE	// Enable the String Parsing
 //#define _G_XML          	// Enable the XML string parsing
 
 // If memory can't be allocated to perform a function, and EXIT_ON_FATAL is not defined,

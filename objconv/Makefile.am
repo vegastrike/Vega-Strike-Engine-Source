@@ -1,4 +1,4 @@
-pkgdatadir = $(prefix)/games/@PACKAGE@/objconv
+pkgdatadir = ../$(prefix)/objconv
 
 pkgdata_DATA = 3ds2xml obj2xml wcp2xml
 

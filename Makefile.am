@@ -1,4 +1,4 @@
-SUBDIRS = src objconv
+SUBDIRS = src objconv mission
 EXTRA_DIST =						\
 	vegastrike.dsp					\
 	vegastrike.dsw					\
