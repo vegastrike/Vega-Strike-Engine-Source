@@ -84,8 +84,8 @@ bool STATIC_VARS_DESTROYED=false;
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
-	fprintf( stdout, "\n\nLoop average : %s\n\n", avg_loop);
-	fprintf( stderr, "\n\nLoop average : %s\n\n", avg_loop);
+	fprintf( stdout, "\n\nLoop average : %d\n\n", avg_loop);
+	fprintf( stderr, "\n\nLoop average : %d\n\n", avg_loop);
 	if( Network!=NULL)
 	{
 		for( int i=0; i<_Universe.numPlayers(); i++)
