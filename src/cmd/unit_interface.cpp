@@ -1290,6 +1290,12 @@ vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
   return TempCargo;
 }
 
+class CargoColorSort {
+public:
+	bool operator () (const CargoColor & a, const CargoColor&b) {
+		return a.cargo<b.cargo;
+	}
+};
 vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
   if (miss_from_cargolist) {
@@ -1312,9 +1318,17 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
     c.cargo.price=0;
     c.cargo.content=getSaveString(playernum,miss_name,i);
 	c.cargo.description=getSaveString(playernum,miss_desc,i);
-    c.cargo.category=std::string("missions");
+	int index=c.cargo.content.rfind("/");
+	if (index==std::string::npos) {
+		c.cargo.category=std::string("missions");
+	} else {
+		c.cargo.category=std::string("missions/"+c.cargo.content.substr(0,index));
+	}
+//	if ((index+1)<c.cargo.content.size())
+//		c.cargo.content=c.cargo.content.substr(index+1);
     TempCargo.push_back (c);
   }
+  std::sort(TempCargo.begin(),TempCargo.end(),CargoColorSort());
   return TempCargo;
 }
 
