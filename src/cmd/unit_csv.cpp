@@ -617,12 +617,22 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   computer.radar.maxcone=cos(stof(row["Max_Cone"],180)*VS_PI/180);
   computer.radar.trackingcone=cos(stof(row["Tracking_Cone"],180)*VS_PI/180);
   computer.radar.lockcone=cos(stof(row["Lock_Cone"],180)*VS_PI/180);
-  cloakmin=(int)(stof(row["Cloak_Min"])*100);
+  cloakmin=(int)(stof(row["Cloak_Min"])*2147483647);
+  image->cloakglass=XMLSupport::parse_bool(row["Cloak_Glass"]);
+  if ((cloakmin&0x1)&&!image->cloakglass) {
+    cloakmin-=1;
+  }
+  if ((cloakmin&0x1)==0&&image->cloakglass) {
+    cloakmin+=1;
+  }
+
+
   if (!XMLSupport::parse_bool(row["Can_Cloak"]))
     cloaking=-1;
+  else
+    cloaking = (int)(-2147483647)-1;
   image->cloakrate = (int)(2147483647.*stof(row["Cloak_Rate"])); //short fix  
   image->cloakenergy=stof(row["Cloak_Energy"]);
-  image->cloakglass=XMLSupport::parse_bool(row["Cloak_Glass"]);
   image->repair_droid=stoi(row["Repair_Droid"]);
   image->ecm = stoi(row["ECM_Rating"]);
   if (image->ecm<0) image->ecm*=-1;
@@ -1012,7 +1022,7 @@ string Unit::WriteUnitString () {
         unit["Max_Cone"]=tos(acos(computer.radar.maxcone)*180./VS_PI);
         unit["Lock_Cone"]=tos(acos(computer.radar.lockcone)*180./VS_PI);
         unit["Cloak_Min"]=tos(cloakmin/100.0);
-        unit["Can_Cloak"]=tos(cloaking>=-1);
+        unit["Can_Cloak"]=tos(cloaking>=0||cloaking==-214783648);
         unit["Cloak_Rate"]=tos(image->cloakrate/2147483647.);
         unit["Cloak_Energy"]=tos(image->cloakenergy);
         unit["Cloak_Glass"]=tos(image->cloakglass);

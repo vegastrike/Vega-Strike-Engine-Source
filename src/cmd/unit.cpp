@@ -306,7 +306,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
     }
     float haloalpha=1;
     if (cloak>=0) {
-      haloalpha=((float)cloak)/32767;
+      haloalpha=((float)cloak)/2147483647;
     }
     float enginescale = this->GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
@@ -492,7 +492,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   }
   float haloalpha=1;
   if (cloak>=0) {
-    haloalpha=((float)cloak)/32767;
+    haloalpha=((float)cloak)/2147483647;
   }
   if (On_Screen) {
     float enginescale = this->GetVelocity().MagnitudeSquared();

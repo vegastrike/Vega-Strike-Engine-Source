@@ -661,7 +661,7 @@ public:
   float CloakVisible() const {
     if (cloaking<0)
       return 1;
-    return ((float)cloaking)/32767;
+    return ((float)cloaking)/2147483647;
   }
 
   ///cloaks or decloaks the starship depending on the bool

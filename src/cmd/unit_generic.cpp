@@ -1692,7 +1692,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 	    }
 	    if (cloaking<0&&image->cloakrate<0) {
 	      //AUDStopPlaying (sound->cloak);
-	      cloaking=(1)<<31;//wraps short fix
+	      cloaking=-2147483648;//wraps short fix
 	    }
       }
     }
@@ -3870,7 +3870,7 @@ void Unit::Cloak (bool loak) {
   if (loak) {
     if (image->cloakenergy<warpenergy) {
       image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
-      if (cloaking==(1)<<31) { //short fix
+      if (cloaking==-2147483648) { //short fix
 	cloaking=2147483647; //short fix
       } else {
        

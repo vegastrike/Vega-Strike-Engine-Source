@@ -1236,7 +1236,7 @@ using namespace UnitXML;
     image->cloakrate=(int)(.2*(2147483647));  //short fix
     cloakmin=1;
     image->cloakenergy=0;
-    cloaking = (1)<<31;//lowest negative number  //short fix
+    cloaking = -2147483648;//lowest negative number  //short fix
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MISSING:

@@ -15,16 +15,16 @@ double interpolation_blend_factor;
 
 int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Short fix ?
     if (cloak<0&&cloakrate<0) {
-      cloak=1<<31;//intended warning should be max neg :-) leave it be
+      cloak=-2147483648;//intended warning should be max neg :-) leave it be
     }
+    if (cloak<cloakmin&&cloakrate>0)
+      cloak=cloakmin;
     if ((cloak&0x1)&&!cloakglass) {
       cloak-=1;
     }
     if ((cloak&0x1)==0&&cloakglass) {
       cloak+=1;
     }
-    if (cloak<cloakmin&&cloakrate>0)
-      cloak=cloakmin;
     return cloak;
 }
 

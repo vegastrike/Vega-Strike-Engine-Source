@@ -149,7 +149,7 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 bool HaloSystem::ShouldDraw (float speedsquared) {
   return speedsquared>activation;
 }
-void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
+void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
 #ifdef CAR_SIM
     for (unsigned int i=0;i<ani.size();++i) {
       int bitwise = scale.j;
@@ -195,6 +195,11 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
 
     }
 #else
+  if (halo_alpha>=0) {
+    if ((halo_alpha&0x1)==0) {
+      halo_alpha+=1;
+    }
+  }
   if (scale.k>0) {
     vector<MyIndHalo>::iterator i = halo.begin();
     for (;i!=halo.end();++i) {

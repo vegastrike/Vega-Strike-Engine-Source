@@ -245,19 +245,19 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdi
     } else {
       c.mesh_seq =2;
     }
-    if (cloak<16384) {
+    if (cloak<=2147483647/2) {
       c.cloaked|=MeshDrawContext::NEARINVIS;
     }
-    float tmp = ((float)cloak)/32767;
+    float tmp = ((float)cloak)/2147483647;
     c.CloakFX.r = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.g = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.b = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.a = tmp;
     /*
-    c.CloakNebFX.ambient[0]=((float)cloak)/32767;
-    c.CloakNebFX.ag=((float)cloak)/32767;
-    c.CloakNebFX.ab=((float)cloak)/32767;
-    c.CloakNebFX.aa=((float)cloak)/32767;
+    c.CloakNebFX.ambient[0]=((float)cloak)/2147483647;
+    c.CloakNebFX.ag=((float)cloak)/2147483647;
+    c.CloakNebFX.ab=((float)cloak)/2147483647;
+    c.CloakNebFX.aa=((float)cloak)/2147483647;
     */
     ///all else == defaults, only ambient
   } 
@@ -323,7 +323,7 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float 
   for ( i=0;i<specialfxlight.size();i++) {
     GFXDeleteLight (specialfxlight[i]);
   }
-  if (cloak>=0&&cloak<32767) {
+  if (cloak>=0&&cloak<2147483647) {
     GFXEnable (TEXTURE1);
   }
 }
