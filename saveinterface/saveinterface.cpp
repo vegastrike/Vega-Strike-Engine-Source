@@ -54,7 +54,7 @@ std::string ParentDir () {
       while (*c != '\0')     /* go to end */
         c++;
       
-      while ((*c != '/')&&(*c != '\\'))      /* back up to parent */
+      while ((*c != '/')&&(*c != '\\')&&(c>parentdir))      /* back up to parent */
         c--;
       if (c>parentdir+1) {
 	if (*(c-1)=='.'&&*(c-2)=='/') {
@@ -70,9 +70,13 @@ std::string ParentDir () {
       parentdir = new char [1000];
       parentdir[999]='\0';
       getcwd (parentdir,999);
-      chdir (mypwd.c_str());
+      if (mypwd.length()>0) {
+        chdir (mypwd.c_str());
+      }
       getcwd (final,999);
-      chdir (parentdir);
+      if (strlen(parentdir)>0) {
+        chdir (parentdir);
+      }
       delete [] parentdir;
     }
   }else {
@@ -156,7 +160,7 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
 	stupod *s= (stupod*)lpParameter;
         progress=false;
         Help ("Please wait while vegastrike loads...","Please wait while vegastrike loads...");
-        spawnl (P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:s->my_mission,s->num?s->my_mission:NULL,NULL); 
+        spawnl (P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL); 
         if (s->num)
           free (s->num);
         free (s->my_mission);
@@ -177,7 +181,7 @@ void launch_mission () {
    printf ("./vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   execlp ("./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
+   execlp ("./vegastrike","./vegastrike",num,(std::string("\"")+my_mission+"\"").c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
@@ -186,7 +190,7 @@ void launch_mission () {
    printf ("./vegastrike %s",my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
+   execlp ("./vegastrike","./vegastrike",(std::string("\"")+my_mission+"\"").c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),NULL),0,&id);

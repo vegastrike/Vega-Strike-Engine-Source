@@ -57,9 +57,11 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
         progress=false;
         Help ("Please Wait While Downloading Data...","Please Wait While Downloading Data...");
 	spawnl (P_WAIT,"cvs","cvs","-z9","update","-kb","-d","-r",str,checked?"-C":NULL,NULL);
+	spawnl (P_WAIT,"cvs","cvs","-z9","update","-kb","-d","-r",str,"-C","vegastrike.config","vegastrile.exe",NULL);
         free (str);
         progress=true;
         g_print("\nDone updating data...\n");
+	spawnl (P_WAIT,"setup","setup",NULL);
 	return 0;
 }
 void CvsUpdate (int index) {
@@ -155,12 +157,13 @@ void main2()
 
 void CvsUpdateList () {
   char *str="HEAD";
-  printf ("cvs update -kb -r %s",str);
+  printf ("cvs update -kb -r %s update_list.txt\n",str);
   fflush (stdout);
   spawnl (P_WAIT,"cvs","cvs","update","-kb","-r","HEAD","update_list.txt",NULL);
+  g_print("\nDone updating list...\n");
  // spawnl (P_WAIT,"cvs","cvs","update","-kb","-r","HEAD","update_list.txt",NULL);
  // gdk_exit (0);  
-  //main2 ();
+  main2 ();
 }
 
 void bCvsUpdateList ( GtkWidget *widget, gpointer   data ) {
@@ -190,12 +193,13 @@ int main (int argc, char **argv) {
     while (*c != '\0')     /* go to end */
         c++;
     
-    while ((*c != '/')&&(*c != '\\'))      /* back up to parent */
+    while ((*c != '/')&&(*c != '\\')&&(c>parentdir))      /* back up to parent */
         c--;
     
     *c++ = '\0';             /* cut off last part (binary name) */
-  
-    chdir (parentdir);/* chdir to the binary app's parent */
+    if (strlen(parentdir)>0) {
+      chdir (parentdir);/* chdir to the binary app's parent */
+    }
 	delete []parentdir;
 #if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */

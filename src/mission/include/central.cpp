@@ -52,8 +52,8 @@ void RunMission(void) {
 	char mypath[1500];
 	getcwd (mypath,1499);
 	sprintf (execname,"%s\\Vegastrike",mypath);
-	spawnl(P_NOWAIT,execname,execname,DATA.path, (string("-m")+DATA.numplayers).c_str(), NULL);
+	spawnl(P_NOWAIT,execname,execname,(string("\"")+string(DATA.path)+string("\"")).c_str(), (string("-m")+DATA.numplayers).c_str(), NULL);
 #else
-	execlp("./vegastrike", "./vegastrike", DATA.path, (string("-m")+DATA.numplayers).c_str(), NULL);
+	execlp("./vegastrike", "./vegastrike", (string("\"")+string(DATA.path)+string("\"")).c_str(), (string("-m")+DATA.numplayers).c_str(), NULL);
 #endif
 }

@@ -122,12 +122,13 @@ int main( int argc, char *argv[] )
     while (*c != '\0')     /* go to end */
         c++;
     
-    while ((*c != '/')&&(*c != '\\'))      /* back up to parent */
+    while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
         c--;
     
     *c++ = '\0';             /* cut off last part (binary name) */
-  
-    chdir (parentdir);/* chdir to the binary app's parent */
+    if (strlen (parentdir)>0) {  
+      chdir (parentdir);/* chdir to the binary app's parent */
+    }
 	delete []parentdir;
 #if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */
