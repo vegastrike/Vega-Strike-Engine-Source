@@ -78,7 +78,7 @@ class Planet : public Unit {
 //  void InitPlanet(FILE *fp);
   virtual void Kill();
   const vector <char *> &GetDestinations () {return destination;}
-  PlanetaryTransform*  setTerrain (ContinuousTerrain *); 
+  PlanetaryTransform*  setTerrain (ContinuousTerrain *, float ratiox, int numwraps); 
   ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}
   void setAtmosphere (Atmosphere *);
   Atmosphere * getAtmosphere () {return atmosphere;}

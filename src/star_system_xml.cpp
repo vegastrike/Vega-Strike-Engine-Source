@@ -95,7 +95,9 @@ namespace StarXML {
     VEHICLE,
     ATMOSPHERE,
 	NEBULA,
-	NEBFILE
+    NEBFILE,
+    SCALEX,
+    NUMWRAPS
   };
 
   const EnumMap::Pair element_names[] = {
@@ -151,11 +153,13 @@ namespace StarXML {
     EnumMap::Pair ("Alfa", EMALPHA),
     EnumMap::Pair ("faction", FACTION),
     EnumMap::Pair ("Light", LIGHT),
-    EnumMap::Pair ("Mass", MASS)
+    EnumMap::Pair ("Mass", MASS),
+    EnumMap::Pair ("ScaleX", SCALEX),
+    EnumMap::Pair ("NumWraps", NUMWRAPS)
   };
 
   const EnumMap element_map(element_names, 16);
-  const EnumMap attribute_map(attribute_names, 35);
+  const EnumMap attribute_map(attribute_names, 37);
 }
 
 using XMLSupport::EnumMap;
@@ -201,7 +205,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   vs_config->getColor ("planet_mat_diffuse",&ourmat.dr);
   vs_config->getColor ("planet_mat_specular",&ourmat.sr);
   vs_config->getColor ("planet_mat_emmissive",&ourmat.er);
-
+  int numwraps=1;
+  float scalex=1;
   vector <char *>dest;
   char * filename =NULL;
   char * alpha = NULL;
@@ -323,6 +328,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case NUMWRAPS:
+	numwraps = parse_int ((*iter).value);
+	break;
+      case SCALEX:
+	scalex = parse_float((*iter).value);
+	break;
       case XFILE:
 	myfile = (*iter).value;
 	break;
@@ -402,7 +413,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	    if (p) {
 	      xml->ct->DisableDraw();
-	      p->setTerrain (xml->ct);
+	      p->setTerrain (xml->ct,scalex,numwraps);
 		  PlanetaryTransform ** tmpp = (PlanetaryTransform**) &xml->parentterrain;
 	      p->getTerrain(*tmpp);
 	    }
