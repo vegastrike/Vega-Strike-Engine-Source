@@ -358,7 +358,16 @@ void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int 
   }
 }
 
-void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
+static unsigned char texturelookup[256];
+void quadsquare::AddHeightMap (const quadcornerdata &cd,const HeightMapInfo &hm) {
+  unsigned int i;
+  memset (texturelookup,0,sizeof(unsigned char)*256);
+  for (i=0;i<textures->size();i++) {
+    texturelookup[(*textures)[i].color] = i;
+  }
+  AddHeightMapAux (cd,hm);
+}
+void	quadsquare::AddHeightMapAux(const quadcornerdata& cd, const HeightMapInfo& hm)
 // Sets the height of all samples within the specified rectangular
 // region using the given array of floats.  Extends the tree to the
 // level of detail defined by (1 << hm.Scale) as necessary.
@@ -394,7 +403,7 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 		
 		// Recurse.
 		if (Child[i]) {
-			Child[i]->AddHeightMap(q, hm);
+			Child[i]->AddHeightMapAux(q, hm);
 		}
 	}
 	//don't want to bother changing things if the sample won't change things :-)
@@ -483,10 +492,10 @@ float	HeightMapInfo::Sample(int x, int z, float &texture) const
 	float	s10 = Data[ix + (iz+1) * RowWidth];
 	float	s11 = Data[(ix+1) + (iz+1) * RowWidth];
 
-	float	t00 = terrainmap[ix + iz * RowWidth];
-	float	t01=  terrainmap[(ix+1) + iz * RowWidth];
-	float	t10 = terrainmap[ix + (iz+1) * RowWidth];
-	float	t11 = terrainmap[(ix+1) + (iz+1) * RowWidth];
+	float	t00 = texturelookup[terrainmap[ix + iz * RowWidth]];
+	float	t01=  texturelookup[terrainmap[(ix+1) + iz * RowWidth]];
+	float	t10 = texturelookup[terrainmap[ix + (iz+1) * RowWidth]];
+	float	t11 = texturelookup[terrainmap[(ix+1) + (iz+1) * RowWidth]];
 	texture = (t00 * (1-fx) + t01 * fx) * (1-fz) +
 	  (t10 * (1-fx) + t11 * fx) * fz;
 	

@@ -20,11 +20,11 @@ struct Texture;
 struct TerrainTexture {
   BLENDFUNC blendSrc;
   BLENDFUNC blendDst;
-  int color;
   unsigned int material;
   bool reflect;
   float scales;
   float scalet;
+  unsigned char color;
   union {
     char * filename;
     Texture * t;
@@ -121,8 +121,9 @@ class quadsquare {
 // public:
 	quadsquare(quadcornerdata* pcd);
 	~quadsquare();
-
+	///Createsa  lookup table for the terrain texture
 	void	AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm);
+	void	AddHeightMapAux(const quadcornerdata& cd, const HeightMapInfo& hm);
 	void	StaticCullData(const quadcornerdata& cd, float ThresholdDetail);	
 	float	RecomputeErrorAndLighting(const quadcornerdata& cd);
 	int	CountNodes();

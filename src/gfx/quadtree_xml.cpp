@@ -129,6 +129,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		break;
 	case TEXTURE:
 		textures.push_back(TerrainTexture());
+		textures.back().color= textures.size()-1;
 		xml->mat.push_back(GFXMaterial());
 		GFXGetMaterial (0,xml->mat.back());
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
