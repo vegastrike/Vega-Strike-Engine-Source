@@ -49,8 +49,9 @@ Universe::Universe(int argc, char** argv)
 void Universe::Init (string systemfile, const Vector & centr,const string planetname) {
 
   string fullname=systemfile+".system";
-  star_system = new StarSystem((char *)fullname.c_str(),centr,planetname);
-
+  StarSystem * ss;
+  star_system.push_back (ss=new StarSystem((char *)fullname.c_str(),centr,planetname));
+  pushActiveStarSystem (ss);
 }
 Universe::~Universe()
 {
@@ -66,7 +67,7 @@ Universe::~Universe()
 //sets up all the stuff... in this case the ships to be rendered
 
 void Universe::activateLightMap() {
-	this->star_system->activateLightMap();
+	activeStarSystem()->activateLightMap();
 }
 
 void Universe::StartGFX()

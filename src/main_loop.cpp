@@ -590,7 +590,7 @@ void main_loop() {
   _Universe->activeStarSystem()->Draw();
   //fighters[0]->UpdateHudMatrix();
   //_Universe->activeStarSystem()->SetViewport();
-
+  UpdateTime();
   _Universe->activeStarSystem()->Update();
 ///CANNOT DO EVERY FRAME...DO EVERY PHYSICS frame  muzak->Listen();
 

@@ -48,8 +48,9 @@ protected:
   ///init proc
   void StartGL();
   ///currently only 1 star system is stored
-  StarSystem * star_system;
-	
+  std::vector <StarSystem *> active_star_system;
+  std::vector <StarSystem *> star_system;
+
 private:
   /**
    * Class Faction holds the relationship between one faction and another
@@ -100,6 +101,12 @@ private:
 	vector <Faction *> factions; //the factions
 
  public:
+  void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
+  void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
+  void popActiveStarSystem() {active_star_system.pop_back();}
+  void LoadStarSystem(StarSystem * ss);
+  void UnloadStarSystem(StarSystem * ss);
+
 	///Loads and parses factions
 	void LoadFactionXML (const char * factfile) {
 	  Faction::LoadXML (factfile,this);
@@ -130,14 +137,12 @@ private:
 	///Runs the main loop
         void Loop(void main_loop());
 	///returns active star system
-	StarSystem* activeStarSystem() {
-	  return star_system;
-	}
+	StarSystem* activeStarSystem() {return active_star_system.back();}
 	///Wrapper function for Star System
 	void SelectCamera(int cam)
 	{
-	  if (star_system!=NULL) {
-	    star_system->SelectCamera(cam);
+	  if (activeStarSystem()!=NULL) {
+	    activeStarSystem()->SelectCamera(cam);
 	  }
 	}
 	///Accessor to cockpit
@@ -145,16 +150,16 @@ private:
 	///Wrapper function for Star System
 	Camera *AccessCamera(int num)
 	{
-	  if (star_system!=NULL) {
-	    return star_system->AccessCamera(num);
+	  if (activeStarSystem()!=NULL) {
+	    return activeStarSystem()->AccessCamera(num);
 	  } else
 	    return NULL;
 	}
 	///Wrapper function for star system
 	Camera *AccessCamera()
 	{
-	  if (star_system!=NULL) {
-		return star_system->AccessCamera();
+	  if (activeStarSystem()!=NULL) {
+		return activeStarSystem()->AccessCamera();
 	  } else
 	    return NULL;
 	}
@@ -163,8 +168,8 @@ private:
 	///Wrapper function for star system
 	void SetViewport()
 	{
-	  	  if (star_system!=NULL) {
-		    star_system->SetViewport();
+	  	  if (activeStarSystem()!=NULL) {
+		    activeStarSystem()->SetViewport();
 		  }
 	}
 

@@ -7,22 +7,22 @@
 #include "physics.h"
 #include "hashtable_3d.h"
 #include "gfx/bsp.h"
-const int tablehuge=12;
-Hashtable3d <LineCollide*, char[20],char[200], char [tablehuge]> collidetable;
+
+
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
-  return (collidetable.hash_int (Mini.i)!=collidetable.hash_int (minz.i) ||
-	  collidetable.hash_int (Mini.j)!=collidetable.hash_int (minz.j) ||
-	  collidetable.hash_int (Mini.k)!=collidetable.hash_int (minz.k));
+  return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
+	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.j)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.j) ||
+	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.k)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.k));
 }
 bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vector & maxx) {
   return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
 }
 void KillCollideTable (LineCollide * lc) {
-  collidetable.Remove (lc, lc);
+  _Universe->activeStarSystem()->collidetable->c.Remove (lc, lc);
 }
 void AddCollideQueue (LineCollide &tmp) {
-  collidetable.Put (&tmp,&tmp);
+  _Universe->activeStarSystem()->collidetable->c.Put (&tmp,&tmp);
 }
 void Unit::SetCollisionParent (Unit * name) {
     for (int i=0;i<numsubunit;i++) {
@@ -53,7 +53,7 @@ void Unit::CollideAll() {
     return;
 
   vector <LineCollide*> * colQ [tablehuge+1];
-  int sizecolq = collidetable.Get (&CollideInfo,colQ);
+  int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ);
   int j = 0;
   for (;j<sizecolq;j++) {
     for (unsigned int i=0;i<colQ[j]->size();i++) {//warning CANNOT use iterator
@@ -307,7 +307,7 @@ void Unit::Destroy() {
 
 bool Bolt::Collide () {
   vector <LineCollide *> *candidates[2];  
-  collidetable.Get (cur_position,candidates);
+  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates);
   Vector Mini ( prev_position.Min (cur_position));
   Vector Maxi ( prev_position.Max (cur_position));
   for (unsigned int j=0;j<2;j++) {
@@ -332,7 +332,7 @@ bool Bolt::Collide () {
 
 
 void Beam::CollideHuge (const LineCollide & lc) {
-  vector <LineCollide *> tmp = collidetable.GetHuge();
+  vector <LineCollide *> tmp = _Universe->activeStarSystem()->collidetable->c.GetHuge();
   for (unsigned int i=0;i<tmp.size();i++) {
     if (tmp[i]->type==LineCollide::UNIT) {
       if (lc.Mini.i< tmp[i]->Maxi.i&&

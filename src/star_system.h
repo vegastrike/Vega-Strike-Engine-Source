@@ -72,6 +72,8 @@ class StarSystem {
   ///The Light Map corresponding for the BP for spheremapping
   Texture *LightMap[6]; 
  public:
+  class CollideTable *collidetable;
+  class bolt_draw *bolts;
   Background* getBackground() {return bg;}
   ///activates the light map texture
   void activateLightMap();

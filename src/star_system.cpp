@@ -2,6 +2,7 @@
 #include "star_system.h"
 #include "cmd/planet.h"
 #include "cmd/unit.h"
+#include "cmd/unit_collide.h"
 #include "cmd/collection.h"
 #include "cmd/click_list.h"
 #include "cmd/ai/input_dfa.h"
@@ -22,8 +23,8 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "cmd/cont_terrain.h"
-
-
+#include "vegastrike.h"
+#include "universe.h"
 #include "cmd/atmosphere.h"
 
 
@@ -40,11 +41,13 @@ vector<Vector> perplines;
 Atmosphere *theAtmosphere;
 
 StarSystem::StarSystem(char * filename, const Vector & centr,const string planetname) : 
-//  primaries(primaries), 
+  //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
   missiles(new UnitCollection) {
-
+  _Universe->pushActiveStarSystem (this);
+  bolts = new bolt_draw;
+  collidetable = new CollideTable;
   cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
 
   current_stage=PHY_AI;
@@ -137,6 +140,7 @@ StarSystem::StarSystem(char * filename, const Vector & centr,const string planet
   params.scattering = 5;
 
   theAtmosphere = new Atmosphere(params);
+  _Universe->popActiveStarSystem ();
 
 }
 void StarSystem::activateLightMap() {
@@ -172,7 +176,8 @@ StarSystem::~StarSystem() {
 	delete primaries[i];
   }
   delete [] primaries;
-  Bolt::Cleanup();
+  delete bolts;
+  delete collidetable;
 }
 
 UnitCollection * StarSystem::getUnitList () {
@@ -316,9 +321,10 @@ extern double interpolation_blend_factor;
 void StarSystem::Update() {
 
   Unit *unit;
-  UpdateTime();
+
   time += GetElapsedTime();
   bool firstframe = true;
+  _Universe->pushActiveStarSystem(this);
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       Iterator *iter;
@@ -370,7 +376,7 @@ void StarSystem::Update() {
 	  iter->advance();
 	}
 	delete iter;
-	Bolt::UpdatePhysics();
+	bolts->UpdatePhysics();
 	current_stage=PHY_AI;
 	firstframe = false;
       }
@@ -378,6 +384,7 @@ void StarSystem::Update() {
     }
   }
   interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
+  _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 

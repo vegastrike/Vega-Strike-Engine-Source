@@ -23,11 +23,22 @@ class Bolt {
  public:
   Bolt(const weapon_info &type, const Matrix orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
   ~Bolt();
-  static void Cleanup();
   static void Draw();
-  static void UpdatePhysics();
   bool Update();///www.cachunkcachunk.com
   bool Collide();
+};
+class bolt_draw {
+public:
+  class DecalQueue *boltdecals;
+  static GFXVertexList * boltmesh;
+  vector <string> animationname;
+  vector <Animation *> animations;
+  vector <vector <Bolt *> > bolts;
+  vector <vector <Bolt *> > balls;
+  vector <int> cachedecals;
+  bolt_draw();
+  ~bolt_draw();
+  void UpdatePhysics();
 };
 
 #endif

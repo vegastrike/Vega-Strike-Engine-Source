@@ -2,6 +2,11 @@
 #define _CMD_COLLIDE_H_
 #include "gfx/vec.h"
 #include "hashtable_3d.h"
+const int tablehuge=12;
+class CollideTable {
+ public:
+  Hashtable3d <LineCollide*, char[20],char[200], char [tablehuge]> c;
+};
 
 void AddCollideQueue(LineCollide & );
 bool TableLocationChanged (const Vector &, const Vector &);
