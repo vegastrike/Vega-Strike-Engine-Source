@@ -2979,8 +2979,10 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
 	  } else {
 		break;
 	  }
-	  if(m_newPart->mounts[0].ammo<=0){
-		  break;
+          if(m_newPart->mounts.size()==0) {
+            break;
+          }else if(m_newPart->mounts[0].ammo<=0){
+            break;
 	  }
 	  numleft = basecargoassets(baseUnit,m_part.content);
 	}
@@ -4768,6 +4770,7 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
 bool BaseComputer::LoadSaveQuitConfirm::processWindowCommand(const EventCommandId& command, Control* control) {
 	if(command == "Save") {
 		m_parent->actionConfirmedSaveGame();
+                window()->close();
 	} else if(command == "Load") {
 		m_parent->actionConfirmedLoadGame();
 	} else if(command == "Quit") {

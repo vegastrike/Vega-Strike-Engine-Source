@@ -430,7 +430,9 @@ void Cockpit::Update () {
 		DoCockpitKeys();
 		savegame->ReloadPickledData();
 		_Universe->popActiveStarSystem();
+                _Universe->pushActiveStarSystem(ss);
 		DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
+                _Universe->popActiveStarSystem();
       }
 	} 
   }
