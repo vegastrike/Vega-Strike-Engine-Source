@@ -74,14 +74,6 @@ public:
 
 const float timek = .005;
 bool _Slew = true;
-static void Slew (int,KBSTATE newState){
-	
-	if (newState==PRESS) {
-		_Slew = !_Slew;
-	}
-	else if (newState==RELEASE)
-	{}
-}
 static void PitchDown(int,KBSTATE newState) {
 	static Vector Q;
 	static Vector R;
@@ -146,145 +138,6 @@ static void YawRight(int,KBSTATE newState) {
 	       
 	}
 }
-
-static void RollLeft(int,KBSTATE newState) {
-	static Vector P;
-	static Vector Q;
-	
-	if(newState==PRESS) {
-		P=_Universe->AccessCamera()->P;
-		Q=_Universe->AccessCamera()->Q;
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
-		//a=1;
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
-		//a=0;
-		//Stop();
-	}
-}
-
-static void RollRight(int,KBSTATE newState) {
-	
-	static Vector P;
-	static Vector Q;
-	
-	if(newState==PRESS) {
-		P=_Universe->AccessCamera()->P;
-		Q=_Universe->AccessCamera()->Q;
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
-		
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
-		//Stop();
-	}
-}
-
-
-static void SlideForward(int,KBSTATE newState) {
-	
-	static Vector R;
-	if(newState==PRESS) {
-		R = _Universe->AccessCamera()->R;
-		_Universe->AccessCamera()->myPhysics.ApplyForce (R,timek);
-	
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyForce (-R,timek);
-		//Stop();
-	}
-}
-
-static void SlideBackward(int,KBSTATE newState) {
-	
-	static Vector R;
-	if(newState==PRESS) {
-		R = _Universe->AccessCamera()->R;
-		_Universe->AccessCamera()->myPhysics.ApplyForce (-R,timek);
-		
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyForce (R,timek);
-		//Stop();
-	}
-}
-
-static void SlideUp(int,KBSTATE newState) {
-	
-	static Vector Q;
-	if(newState==PRESS){
-		Q = _Universe->AccessCamera()->Q;
-		_Universe->AccessCamera()->myPhysics.ApplyForce(Q,timek);
-		//a=1;
-		//Stop();
-	}
-	else if(_Slew&&newState==RELEASE){
-		_Universe->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
-		//a=0;
-		//Stop();
-	}
-}
-
-static void SlideDown(int,KBSTATE newState) {
-	
-	static Vector Q;
-	if(newState==PRESS) {
-		Q = _Universe->AccessCamera()->Q;
-		_Universe->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
-	
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyForce(Q, timek);
-		//Stop();
-	}
-}
-
-static void SlideLeft(int,KBSTATE newState) {
-	
-	static Vector P;
-	if(newState==PRESS) {
-		P = _Universe->AccessCamera()->P;
-		_Universe->AccessCamera()->myPhysics.ApplyForce(-P,timek);
-	
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyForce(P,timek);
-		//Stop();
-	}
-}
-
-static void SlideRight(int,KBSTATE newState) {
-       
-	static Vector P;
-	if(newState==PRESS) {
-		P = _Universe->AccessCamera()->P;
-		_Universe->AccessCamera()->myPhysics.ApplyForce(P,timek);
-		//		a=1;
-	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyForce(-P,timek);
-		//a=0;
-	}
-}
-static void reCenter (int, KBSTATE newState) {
-  if (newState==PRESS) {
-    _Universe->AccessCamera()->SetPosition(Vector (0,0,0));
-  }
-
-}
-static void Stop (int,KBSTATE newState) {
-
-	if (newState==PRESS) {
-		_Universe->AccessCamera()->myPhysics.SetAngularVelocity (Vector (0,0,0));
-		_Universe->AccessCamera()->myPhysics.SetVelocity (Vector (0,0,0));
-		//_Universe->AccessCamera()->myPhysics.ResistiveTorqueThrust (-timek,_Universe->AccessCamera()->P);
-		//_Universe->AccessCamera()->myPhysics.ResistiveThrust (-timek);
-
-	}
-	else if (newState==RELEASE) 
-	{}
-}
 static void Quit(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
 		exit(0);
@@ -302,16 +155,6 @@ SphereMesh *bg2=NULL;
 Animation *  explosion= NULL;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
-/*
-static void Fire (int, KBSTATE newState) {
-  if (newState==DOWN) {
-    fighters[0]->Fire(false);
-  }
-  if (newState==RELEASE) {
-    fighters[0]->UnFire();
-  }
-}
-*/
 /*
 int oldx =0;
 int  oldy=0;
@@ -346,78 +189,13 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   }
 }
 */
-/*
-static void FighterPitchDown(int,KBSTATE newState) {
-	static Vector Q = fighter->Q();
-	static Vector R = fighter->R();
-	if(newState==PRESS) {
-	  fighter->Pitch(PI/8);
-	  //fighter->ApplyBalancedLocalTorque(-Q, R);
-	}
-	else if(_Slew&&newState==RELEASE) {
-		//a=0;
-	}
-}
-
-static void FighterPitchUp(int,KBSTATE newState) {
-	
-	static Vector Q = fighter->P();
-	static Vector R = fighter->R();
-
-	if(newState==PRESS) {
-	  fighter->ApplyBalancedLocalTorque(Q, R);
-	}
-	else if(_Slew&&newState==RELEASE) {
-	}
-}
-
-static void FighterYawLeft(int,KBSTATE newState) {
-	
-	static Vector P = fighter->P();
-	static Vector R = fighter->R();
-
-	if(newState==PRESS) {
-	  fighter->ApplyBalancedLocalTorque(-P, R);
-	}
-	else if(_Slew&&newState==RELEASE) {
-	}
-}
-
-static void FighterYawRight(int,KBSTATE newState) {
-	
-	static Vector P = fighter->P();
-	static Vector R = fighter->R();
-	if(newState==PRESS) {
-	  fighter->ApplyBalancedLocalTorque(P, R);
-	  fighter->ApplyForce(P*10);
-	}
-	else if(_Slew&&newState==RELEASE) {
-	}
-}
-*/
 
 void InitializeInput() {
-	BindKey(GLUT_KEY_F1, Slew);
-	BindKey(GLUT_KEY_F12,Stop);
 	BindKey('w', PitchDown);
 	BindKey('z', PitchUp);
 	BindKey('a', YawLeft);
 	BindKey('s', YawRight);
-	BindKey('c', RollLeft);
-	BindKey('v', RollRight);
-	BindKey(GLUT_KEY_PAGE_DOWN, SlideDown);
-	BindKey(GLUT_KEY_PAGE_UP, SlideUp);
-	BindKey('1', SlideBackward);
-	BindKey('2', SlideForward);
-	//	BindKey(',', SlideLeft);
-	//	BindKey('.',SlideRight);
 	BindKey(27, Quit);
-	BindKey ('c',reCenter);
-	//	BindKey (' ',Fire);
-	/*	BindKey('a', FighterYawLeft);
-	BindKey('d', FighterYawRight);
-	BindKey('w', FighterPitchDown);
-	BindKey('s', FighterPitchUp);*/
 }
 Sprite *Crosshairs;
 void createObjects() {

@@ -160,10 +160,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	fp = fopen (FileName, "rb");
 	if (!fp)
 	{
-	  fprintf (stderr, "%s, not found",FileName);
 	  
-		data = NULL;
-		return;
+	  fprintf (stderr, "%s, not found",FileName);
+	  name=-1;
+	  data = NULL;
+	  original=NULL;
+	  return;
 	}
 	//	strcpy(filename, FileName);
 	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
@@ -261,8 +263,12 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	fp = fopen (FileNameRGB, "rb");
 	if (!fp)
 	{
-		data = NULL;
-		return;
+	  texHashTable.Delete (texfilename);
+	  palette = NULL;
+	  data = NULL;
+	  name=-1;
+	  original=NULL;
+	  return;
 	}
 	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	//long temp;
@@ -436,9 +442,12 @@ Texture::~Texture()
 
 				data = NULL;
 			}
-			texHashTable.Delete (string(texfilename));
-			GFXDeleteTexture(name);
-			delete []texfilename;				
+			if (name!=-1) {
+			  texHashTable.Delete (string(texfilename));
+			  GFXDeleteTexture(name);
+			  delete []texfilename;				
+			}
+
 				//glDeleteTextures(1, &name);
 			
 			if (palette !=NULL) {

@@ -237,7 +237,7 @@ void Unit::RollTorque(float amt) {
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
 
-
+const float VELOCITY_MAX=1000;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bool lastframe, UnitCollection *uc) {
   RegenShields();
   if (lastframe)
@@ -247,10 +247,20 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   if (isUnit()==PLANETPTR) {
     ((Planet *)this)->gravitate (uc);
   } else {
-    if (resolveforces)
-      ResolveForces (trans,transmat);
+    if (resolveforces) {
+      ResolveForces (trans,transmat);//clamp velocity
+      if (fabs (Velocity.i)>VELOCITY_MAX) {
+	Velocity.i = copysign (VELOCITY_MAX,Velocity.i);
+      }
+      if (fabs (Velocity.j)>VELOCITY_MAX) {
+	Velocity.j = copysign (VELOCITY_MAX,Velocity.j);
+      }
+      if (fabs (Velocity.k)>VELOCITY_MAX) {
+	Velocity.k = copysign (VELOCITY_MAX,Velocity.k);
+      }
+    }
   } 
-    
+  
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);

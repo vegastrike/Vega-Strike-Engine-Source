@@ -20,7 +20,8 @@ void FireKeyboard::FireKey(int, KBSTATE k) {
   firekey = k;
 }
 void FireKeyboard::TargetKey(int, KBSTATE k) {
-  targetkey = k;
+  if (targetkey!=PRESS)
+    targetkey = k;
 }
 void FireKeyboard::MissileKey(int, KBSTATE k) {
   missilekey = k;
@@ -77,6 +78,7 @@ void FireKeyboard::Execute () {
     parent->UnFire();
   }
   if (targetkey==PRESS) {
+    targetkey=DOWN;
     ChooseTargets();
   }
 }
