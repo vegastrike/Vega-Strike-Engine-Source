@@ -251,6 +251,44 @@ class string : public vector <char> {
    basic_string <char> b; getline (i,b,delim);s=b.c_str();
    return i;
  }
+inline bool
+operator== (const string& lhs,
+	    const string & rhs)
+{
+  return (lhs.compare (rhs) == 0);
+}
+
+inline bool
+operator== (const char* lhs, const string& rhs)
+{
+  return (rhs.compare (lhs) == 0);
+}
+
+
+inline bool
+operator== (const string& lhs, const char* rhs)
+{
+  return (lhs.compare (rhs) == 0);
+}
+
+
+inline bool
+operator!= (const char* lhs, const string& rhs)
+{
+  return (rhs.compare (lhs) != 0);
+}
+inline bool
+operator!= (const string& lhs, const char* rhs)
+{
+  return (lhs.compare (rhs) != 0);
+}
+inline bool
+operator!= (const string& lhs,
+	    const string& rhs)
+{
+  return (lhs.compare (rhs) != 0);
+}
+
 
 inline bool
 operator< (const string& lhs,
