@@ -26,7 +26,6 @@ namespace AIEvents {
   const int AISCRIPT =3;
   const int AINOT=4;
   const int TIMEIT=5;
-  const int CLOSEIT=6;
   const XMLSupport::EnumMap::Pair AIattribute_names[] = {
     EnumMap::Pair ("UNKNOWN", AIUNKNOWN),
     EnumMap::Pair ("min", AIMIN), 
@@ -34,9 +33,8 @@ namespace AIEvents {
     EnumMap::Pair ("not", AINOT),
     EnumMap::Pair ("Script", AISCRIPT),
     EnumMap::Pair ("time", TIMEIT),
-    EnumMap::Pair ("close", CLOSEIT)
   };
-  const XMLSupport::EnumMap attr_map(AIattribute_names, 7);
+  const XMLSupport::EnumMap attr_map(AIattribute_names, 6);
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
@@ -50,10 +48,7 @@ namespace AIEvents {
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
-	  eam->curtime=eam->maxtime=parse_float((*iter).value)/SIMULATION_ATOM;
-	  break;
-	case CLOSEIT:
-	  eam->distclose = parse_float ((*iter).value);
+	  eam->curtime=eam->maxtime=(short)parse_float((*iter).value)/SIMULATION_ATOM;
 	  break;
 	}
       }
@@ -89,7 +84,6 @@ namespace AIEvents {
   }  
   void LoadAI(const char * filename, ElemAttrMap &result) {
     const int chunk_size = 16384;
-    result.distclose = .05;
     result.curtime=result.maxtime=10/SIMULATION_ATOM;
     FILE * inFile = fopen (filename, "r+b");
     if(!inFile) {

@@ -24,7 +24,6 @@ namespace AIEvents {
     } 
   };
   struct ElemAttrMap {
-    float distclose;
     XMLSupport::EnumMap element_map;
     int level; short curtime; short maxtime;
     std::vector <std::list <AIEvresult> >result;

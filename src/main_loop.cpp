@@ -466,7 +466,7 @@ void createObjects() {
     
     fighters[a]->SetAI(new Order());
     if (a!=0) {
-      fighters[a]->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml"));
+      fighters[a]->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
       fighters[a]->Target (fighters[targetnum]);
     }
     _Universe->activeStarSystem()->AddUnit(fighters[a]);

@@ -20,13 +20,14 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 11);
 
-AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map) {
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);
     AttachOrder (&tmp);
   }
   AIEvents::LoadAI (filename,logic);
+  AIEvents::LoadAI (interruptname,interrupts);
 }
 
 bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
@@ -40,27 +41,7 @@ bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   }
 }
 
-bool AggressiveAI::ItemDistChange (const float newdist, const AIEvents::AIEvresult &item) {
-  if (abs(item.type)==DISTANCE) {
-    return item.Eval(distance)!=item.Eval (newdist);    
-  } else {
-    return false;
-  }
-}
-/*deprecated
-bool AggressiveAI::DistChange () {
-  std::vector <std::list <AIEvents::AIEvresult> >::iterator i = logic.result.begin();  
-  for (;i!=logic.result.end();i++) {
-    std::list <AIEvents::AIEvresult>::iterator j;
-    for (j= i->begin();j!=i->end();j++) {
-      if (ItemDistChange(olddist,*j)) {
-	return true;
-      }
-    }  
-  }
-  return false;
-}
-*/
+
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   float value;
   switch (abs(item.type)) {
@@ -95,12 +76,13 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   return item.Eval(value);
 }
 
-void AggressiveAI::ProcessLogic () {
+bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
   //go through the logic. 
-  Unit * tmp = parent->Target();
+  bool retval=false;
+  //  Unit * tmp = parent->Target();
   //  distance = tmp? (tmp->Position()-parent->Position()).Magnitude()-parent->rSize()-tmp->rSize() : FLT_MAX;
-  std::vector <std::list <AIEvents::AIEvresult> >::iterator i = logic.result.begin();
-  for (;i!=logic.result.end();i++) {
+  std::vector <std::list <AIEvents::AIEvresult> >::iterator i = logi.result.begin();
+  for (;i!=logi.result.end();i++) {
     std::list <AIEvents::AIEvresult>::iterator j;
     for (j= i->begin();j!=i->end();j++) {
       if (!ProcessLogicItem(*j)) {
@@ -109,11 +91,16 @@ void AggressiveAI::ProcessLogic () {
     }
     if (j==i->end()) {
       //do it
+      if (inter) {
+	parent->getAIState()->eraseType (Order::FACING);
+	parent->getAIState()->eraseType (Order::MOVEMENT);
+      }
       j = i->begin();
       while (j!=i->end()) {
 	if (ExecuteLogicItem (*j)) {
 	  AIEvents::AIEvresult tmp = *j;
 	  i->erase(j);
+	  retval=true;
 	  i->push_back (tmp);
 	  break; 
 	}else {
@@ -122,31 +109,31 @@ void AggressiveAI::ProcessLogic () {
       }
     }
   }
+  return retval;
 }
 
 
 void AggressiveAI::Execute () {  
   FireAt::Execute();
+  if (curinter==INTNORMAL) {
+    if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
+      logic.curtime=interrupts.maxtime;//set it to the time allotted
+    }
+  }
   if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
-     ProcessLogic();
+     ProcessLogic(logic);
+     curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
   } else {
-    if ( (distance<logic.distclose&&close!=(distance<logic.distclose))||(--logic.curtime)==0) {
-      
+    if ((--logic.curtime)==0) {
+      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       parent->getAIState()->eraseType (Order::FACING);
       parent->getAIState()->eraseType (Order::MOVEMENT);
       
-      ProcessLogic ();
+      ProcessLogic (logic);
       logic.curtime = logic.maxtime;      
     }
   }
-  close= distance<logic.distclose;
+
 }  
-  //if (parent->getAIState()->queryType (FACING)==NULL) {
-    //  parent->EnqueueAI (new Orders::FaceTarget (false));
-  //}
-  //if (parent->getAIState()->queryType (MOVEMENT)==NULL) {
-  //  parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,420),true,false));
-  //}
-  
 
 
