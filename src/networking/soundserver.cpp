@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
 			std::string hsd="";
 			int c;
 			while ((c=fgetc(version))!=EOF) {
-				if (isspace(c))
+				if (((c)==' ')||((c)=='\t')||((c)=='\n')||((c)=='\r')||((c)=='\0'))
 					break;
 				hsd+=(char)c;
 			}
