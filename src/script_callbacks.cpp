@@ -79,7 +79,7 @@ varInst *Mission::callRnd(missionNode *node,int mode){
 
   char buffer[100];
   sprintf(buffer,"rnd returning %f", (vi->float_val));
-  debug(node,mode,buffer);
+  debug(7,node,mode,buffer);
 
   return vi;
 }

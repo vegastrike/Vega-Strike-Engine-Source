@@ -57,8 +57,12 @@ float Mission::doFMath(missionNode *node,int mode){
 
     float res=checkFloatExpr((missionNode *)node->subnodes[0],mode);
 
+    char buffer[200];
+    sprintf(buffer,"fmath: 1st expr returns %f",res);
+    debug(4,node,mode,buffer);
+
     for(int i=1;i<len;i++){
-      float res2=checkFloatExpr((missionNode *)node->subnodes[0],mode);
+      float res2=checkFloatExpr((missionNode *)node->subnodes[i],mode);
       if(mode==SCRIPT_RUN){
 	if(mathname=="+"){
 	  res=res+res2;
@@ -78,7 +82,11 @@ float Mission::doFMath(missionNode *node,int mode){
 	}
       }
     }
-    return res;
+
+    if(mode==SCRIPT_RUN){
+      return res;
+    }
+    return 0.0;
 }
 
 float Mission::checkFloatExpr(missionNode *node,int mode){

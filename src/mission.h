@@ -140,6 +140,7 @@ class missionNode : public tagDomNode {
     missionNode *test_arg[2]; // test
     enum var_type vartype; // defvar
     string initval;
+    missionNode *context_block_node; // defvar
   } script;
 };
 
@@ -240,12 +241,14 @@ scriptContext *makeContext(missionNode *node);
  void runtimeFatal(string message);
  void warning(string message);
  void debug(missionNode *node,int mode,string message);
+ void debug(int level,missionNode *node,int mode,string message);
 
 void printNode(missionNode *node,int mode);
 
  void printRuntime();
  void printThread(missionThread *thread);
  void printVarmap(const varInstMap & vmap);
+ void printVarInst(varInst *vi);
 
  varInst *searchScopestack(string name);
 

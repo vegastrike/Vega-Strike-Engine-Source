@@ -59,6 +59,7 @@ void Mission::DirectorStart(missionNode *node){
 
   while(true){
     DirectorLoop();
+    sleep(1);
   }
 }
 
@@ -81,6 +82,14 @@ void Mission::runtimeFatal(string message){
 
 void Mission::warning(string message){
   cout << "warning: " << message << endl;
+}
+
+#define DEBUG_LEVEL 0
+
+void Mission::debug(int level,missionNode *node,int mode,string message){
+  if(level<=DEBUG_LEVEL){
+    debug(node,mode,message);
+  }
 }
 
 void Mission::debug(missionNode *node,int mode,string message){
@@ -120,8 +129,13 @@ void Mission::doModule(missionNode *node,int mode){
 
     scope_stack.push_back(node);
 
-    debug(node,mode,"added module "+name+" to list of known modules");
+    debug(5,node,mode,"added module "+name+" to list of known modules");
   }
+  else{
+    // SCRIPT_RUN
+    runtime.cur_thread->module_stack.push_back(node);
+  }
+
 
   vector<easyDomNode *>::const_iterator siter;
   
@@ -141,6 +155,9 @@ void Mission::doModule(missionNode *node,int mode){
 
   if(mode==SCRIPT_PARSE){
     scope_stack.pop_back();
+  }
+  else{
+    runtime.cur_thread->module_stack.pop_back();
   }
 }
 
@@ -168,13 +185,13 @@ void Mission::addContextStack(missionNode *node){
 
 scriptContext *Mission::addContext(missionNode *node)
 {
-  printRuntime();
 
   scriptContext *context=makeContext(node);
   contextStack *stack=runtime.cur_thread->exec_stack.back();
   stack->contexts.push_back(context);
 
-  debug(node,0,"added context for this node");
+  debug(5,node,0,"added context for this node");
+  printRuntime();
 
   return context;
 }
@@ -206,7 +223,7 @@ void Mission::doScript(missionNode *node,int mode){
     scope_stack.push_back(node);
   }
 
-  debug(node,mode,"executing script name="+node->script.name);
+  debug(5,node,mode,"executing script name="+node->script.name);
 
   if(mode==SCRIPT_RUN){
     addContextStack(node);
@@ -301,6 +318,9 @@ varInst *Mission::lookupLocalVariable(missionNode *asknode){
     scriptContext *context=cstack->contexts[i];
     varInstMap *map=context->varinsts;
     defnode=(*map)[asknode->script.name];
+    if(defnode!=NULL){
+      debug(5,defnode->defvar_node,0,"FOUND local variable defined in that node");
+    }
   }
   if(defnode==NULL){
     return NULL;
@@ -316,6 +336,8 @@ varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
   missionNode *module_node=runtime.modules[mname];
 
   if(module_node==NULL){
+    fatalError(asknode,0,"no such module named "+mname);
+    assert(0);
     return NULL;
   }
 
@@ -324,6 +346,11 @@ varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
   for(siter= module_node->subnodes.begin() ; siter!=module_node->subnodes.end() ; siter++){
     missionNode *varnode=(missionNode *)*siter;
     if(varnode->script.name==asknode->script.name){
+      char buffer[200];
+      sprintf(buffer,"FOUND module variable %s in that node",varnode->script.name.c_str());
+      debug(4,varnode,0,buffer);
+      printVarInst(varnode->script.varinst);
+
       return varnode->script.varinst;
     }
   }
@@ -403,6 +430,31 @@ varInst *Mission::doVariable(missionNode *node,int mode){
 
 void Mission::doDefVar(missionNode *node,int mode){
   if(mode==SCRIPT_RUN){
+    missionNode *scope=node->script.context_block_node;
+    if(scope->tag==DTAG_MODULE){
+      // this is a module variable - it has been initialized at parse time
+      debug(4,node,mode,"defined module variable "+node->script.name);
+      return;
+    }
+
+    debug(5,node,mode,"defining context variable "+node->script.name);
+
+    contextStack *stack=runtime.cur_thread->exec_stack.back();
+    scriptContext *context=stack->contexts.back();
+
+
+    varInstMap *vmap=context->varinsts;
+
+    varInst *vi=new varInst;
+    vi->defvar_node=node;
+    vi->block_node=scope;
+    vi->type=node->script.vartype;
+    vi->name=node->script.name;
+
+    (*vmap)[node->script.name]=vi;
+
+    printRuntime();
+
     return;
   }
 
@@ -410,9 +462,12 @@ void Mission::doDefVar(missionNode *node,int mode){
   node->script.name=node->attr_value("name");
     if(node->script.name.empty()){
       fatalError(node,mode,"you have to give a variable name");
+      assert(0);
     }
 
-    debug(node,mode,"defining variable "+node->script.name);
+    string value=node->attr_value("init");
+
+    debug(5,node,mode,"defining variable "+node->script.name);
 
     string type=node->attr_value("type");
     //    node->initval=node->attr_value("init");
@@ -443,16 +498,38 @@ void Mission::doDefVar(missionNode *node,int mode){
   vi->defvar_node=node;
   vi->block_node=scope;
   vi->type=node->script.vartype;
+  vi->name=node->script.name;
 
-  //  if(scope->tag==DTAG_MODULE){
-    // we have to add the variable to module scope
+  if(scope->tag==DTAG_MODULE){
+    if(!value.empty()){
+      debug(4,node,mode,"setting init for "+node->script.name);
+      if(vi->type==VAR_FLOAT){
+	vi->float_val=atof(value.c_str());
+      }
+      else if(vi->type==VAR_BOOL){
+	if(value=="true"){
+	vi->bool_val=true;
+	}
+	else if(value=="false"){
+	  vi->bool_val=false;
+	}
+	else{
+	  fatalError(node,mode,"wrong bool value");
+	  assert(0);
+	}
+      }
+      printVarInst(vi);
+    }
+  }
+
   scope->script.variables[node->script.name]=vi;
   node->script.varinst=vi;//FIXME
+  node->script.context_block_node=scope;
     //}
     //else
   //    scope->script.variables.push_back(node);
 
-    debug(scope,mode,"defined variable in that scope");
+    debug(5,scope,mode,"defined variable in that scope");
 }
 
 
@@ -465,7 +542,7 @@ void Mission::doSetVar(missionNode *node,int mode){
     }
   }
 
-  debug(node,mode,"trying to set variable "+node->script.name);
+  debug(5,node,mode,"trying to set variable "+node->script.name);
 
   //    varInst *var_expr=checkExpression((missionNode *)node->subnodes[0],mode);
   missionNode *expr=(missionNode *)node->subnodes[0];
@@ -484,11 +561,17 @@ void Mission::doSetVar(missionNode *node,int mode){
     else if(vi->type==VAR_FLOAT){
       float res=checkFloatExpr(expr,mode);
     }
+
   }
 
     if(mode==SCRIPT_RUN){
       varInst *var_inst=doVariable(node,mode); // lookup variable instance
 
+      if(var_inst==NULL){
+	fatalError(node,mode,"variable lookup failed for "+node->script.name);
+	printRuntime();
+	assert(0);
+      }
     if(var_inst->type==VAR_BOOL){
       bool res=checkBoolExpr(expr,mode);
       var_inst->bool_val=res;
@@ -522,7 +605,7 @@ varInst *Mission::doConst(missionNode *node,int mode){
       assert(0);
     }
     
-    debug(node,mode,"parsed const value "+valuestr);
+    debug(5,node,mode,"parsed const value "+valuestr);
 
     varInst *vi=new varInst;
     if(typestr=="float"){
@@ -627,7 +710,7 @@ void Mission::assignVariable(varInst *v1,varInst *v2){
 varInst *Mission::checkExpression(missionNode *node,int mode){
 
   varInst *ret=NULL;
-  debug(node,mode,"checking expression");
+  debug(5,node,mode,"checking expression");
   printRuntime();
 
   switch(node->tag){
@@ -650,13 +733,10 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
   }
   return ret;
 }
+void Mission::printVarInst(varInst *vi){
 
-void Mission::printVarmap(const varInstMap & vmap){
-  map<string,varInst *>::const_iterator iter;
+  return;
 
-  for(iter=vmap.begin();iter!=vmap.end();iter++){
-    cout << "variable " << (*iter).first ;
-    varInst *vi=(*iter).second;
     char buffer[100];
     if(vi==NULL){
       sprintf(buffer," NULL");
@@ -669,12 +749,22 @@ void Mission::printVarmap(const varInstMap & vmap){
 	sprintf(buffer," float %f",vi->float_val);
       }
     }
-    cout << buffer << endl;
+    cout << vi->name << buffer << endl;
+}
+
+void Mission::printVarmap(const varInstMap & vmap){
+  map<string,varInst *>::const_iterator iter;
+
+  for(iter=vmap.begin();iter!=vmap.end();iter++){
+    cout << "variable " << (*iter).first ;
+    varInst *vi=(*iter).second;
+
+    printVarInst(vi);
   }
 }
 
 void Mission::printRuntime(){
-  
+  return;
   cout << "RUNTIME" << endl;
   cout << "MODULES:" << endl;
 
@@ -693,6 +783,7 @@ void Mission::printRuntime(){
 }
 
 void Mission::printThread(missionThread *thread){
+  return;
       vector<contextStack *>::const_iterator siter;
 
     for(siter= thread->exec_stack.begin() ; siter!=thread->exec_stack.end() ; siter++){
@@ -722,12 +813,12 @@ varInst *Mission::searchScopestack(string name){
     vi=scope->script.variables[name];
 
     if(vi==NULL){
-      debug(scope,0,"variable "+name+" not found in that scope");
-      printVarmap(scope->script.variables);
+      debug(5,scope,0,"variable "+name+" not found in that scope");
+      //printVarmap(scope->script.variables);
     }
     else{
-      debug(scope,0,"variable "+name+" FOUND in that scope");
-      printVarmap(scope->script.variables);
+      debug(5,scope,0,"variable "+name+" FOUND in that scope");
+      //printVarmap(scope->script.variables);
     }
     elem--;
   };

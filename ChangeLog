@@ -1,3 +1,9 @@
+2001-12-02 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* mission script interpreter working
+	* added more testd*.mission files
+
+
 2001-12-01 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* same seed when in benchmark mode

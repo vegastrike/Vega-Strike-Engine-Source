@@ -97,13 +97,13 @@ void Mission::doIf(missionNode *node,int mode){
 #endif
 
   node->script.if_block[0]=(missionNode *)node->subnodes[0];
-  debug(node->script.if_block[0],mode,"if-node");
+  debug(8,node->script.if_block[0],mode,"if-node");
 
   node->script.if_block[1]=(missionNode *)node->subnodes[1];
-  debug(node->script.if_block[1],mode,"if-node");
+  debug(8,node->script.if_block[1],mode,"if-node");
 
   node->script.if_block[2]=(missionNode *)node->subnodes[2];
-  debug(node->script.if_block[2],mode,"if-node");
+  debug(8,node->script.if_block[2],mode,"if-node");
 
   }
 
