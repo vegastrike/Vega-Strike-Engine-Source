@@ -801,6 +801,10 @@ void writesystems(FILE * fp, std::vector<System> s) {
 	fprintf(fp,"<galaxy><systems>\n");
 	int iter=0;
 	for (std::vector<System>::iterator i = s.begin();i!=s.end();++i) {
+		// use FLOAT_MIN because of accuracy problems.
+		if (i->luminosity<=FLT_MIN&&i->luminosity>=-FLT_MIN&&i->jumps.size()==0) {
+			continue;
+		}
 		if ((*i).sector != cursector) {
  			//start sectortag;
 			if (cursector!="")
@@ -808,9 +812,11 @@ void writesystems(FILE * fp, std::vector<System> s) {
 			fprintf (fp, "\t<sector name=\"%s\">\n",(*i).sector.c_str());
 			cursector = (*i).sector;
 		}
-		fprintf(fp,"\t\t<sector name=\"%s\">\n",(*i).name.c_str());
+		fprintf(fp,"\t\t<system name=\"%s\">\n",(*i).name.c_str());
 		for (std::map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
-			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
+			if ((*i).jumps.size()>0||(*j).first=="luminosity"||(*j).first=="xyz"||(*j).first=="sun_radius") {
+				fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());
+			}
 		}
 		fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"");
 		if ((*i).jumps.size()) {
@@ -823,7 +829,7 @@ void writesystems(FILE * fp, std::vector<System> s) {
 /*		if (iter>4 && iter+4<s.size()) {
 			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
 			}*/
-		fprintf(fp,"\t\t</sector>\n");
+		fprintf(fp,"\t\t</system>\n");
 		iter++;
 	}	
 	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
