@@ -73,7 +73,8 @@ namespace BeamXML {
     REFIRE,
     LENGTH,
     PHASEDAMAGE,
-    VOLUME
+    VOLUME,
+    DETONATIONRADIUS
     //YAW,
     //PITCH,
     //ROLL
@@ -104,6 +105,7 @@ namespace BeamXML {
     EnumMap::Pair ("a",ALPHA),
     EnumMap::Pair ("Speed",SPEED),
     EnumMap::Pair ("Pulsespeed",PULSESPEED),
+    EnumMap::Pair ("DetonationRange",DETONATIONRADIUS),
     EnumMap::Pair ("Radialspeed",RADIALSPEED),
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("Radius",RADIUS),
@@ -121,7 +123,7 @@ namespace BeamXML {
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 24);
+  const EnumMap attribute_map(attribute_names, 25);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -293,7 +295,14 @@ namespace BeamXML {
 	  tmpweapon.Speed = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case PULSESPEED:
-	  tmpweapon.PulseSpeed = XMLSupport::parse_float ((*iter).value);
+	  if (tmpweapon.type!=weapon_info::PROJECTILE) {
+	    tmpweapon.PulseSpeed = XMLSupport::parse_float ((*iter).value);
+	  }
+	  break;
+	case DETONATIONRADIUS:
+	  if (tmpweapon.type==weapon_info::PROJECTILE) {
+	    tmpweapon.PulseSpeed = XMLSupport::parse_float ((*iter).value);
+	  }
 	  break;
 	case RADIALSPEED:
 	  tmpweapon.RadialSpeed = XMLSupport::parse_float ((*iter).value);

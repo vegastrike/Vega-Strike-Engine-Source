@@ -69,6 +69,13 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix transmat,
     }
     Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
-    if (time<0)
+    if (NULL!=targ) {
+      if ((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius) {
+	Discharge();
+	time=-1;
+      }
+    }
+    if (time<0) {
       DealDamageToHull (Vector(.1,.1,.1),hull+1);
+    }
   }
