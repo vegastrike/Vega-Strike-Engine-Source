@@ -27,6 +27,41 @@ struct to_python <Vector> {
 	}
 };
 */
+#ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE
+# define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr)        \
+    template <> struct to_python_value<T&>                      \
+        : detail::builtin_to_python                             \
+    {                                                           \
+        inline PyObject* operator()(T const& x) const           \
+        {                                                       \
+            return (expr);                                      \
+        }                                                       \
+    };                                                          \
+    template <> struct to_python_value<T const&>                \
+        : detail::builtin_to_python                             \
+    {                                                           \
+        inline PyObject* operator()(T const& x) const           \
+        {                                                       \
+            return (expr);                                      \
+        }                                                       \
+    };
+
+# define BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T, expr)   \
+    namespace converter                                 \
+    {                                                   \
+      template <> struct arg_to_python< T >             \
+        : handle<>                                      \
+      {                                                 \
+          arg_to_python(T const& x)                     \
+            : python::handle<>(expr) {}                 \
+      };                                                \
+    } 
+
+// Specialize argument and return value converters for T using expr
+# define BOOST_PYTHON_TO_PYTHON_BY_VALUE(T, expr)       \
+        BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T,expr)  \
+        BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T,expr)
+#endif
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector, boost::python::to_python_value<boost::python::tuple> ()(boost::python::make_tuple((double)x.i,(double)x.j,(double)x.k)));
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector, boost::python::to_python_value<boost::python::tuple> ()(boost::python::make_tuple((double)x.i,(double)x.j,(double)x.k)));
 #else
