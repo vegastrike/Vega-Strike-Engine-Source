@@ -106,15 +106,15 @@ if test "x$have_SDL" = "xyes" ; then
     fi
 
     dnl Check for SDL_mixer
-    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
-                  have_SDL_mixer=yes, have_SDL_mixer=no )
+dnl    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
+dnl                  have_SDL_mixer=yes, have_SDL_mixer=no )
 
-    if test "x$have_SDL_mixer" = "xyes" ; then 
-	TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDL_MIXER=1" 
-        TR_LIBS="$TR_LIBS -lSDL_mixer"
-    else
-        echo "*** SDL_mixer not found.  Configuring without audio support."
-    fi
+dnl    if test "x$have_SDL_mixer" = "xyes" ; then 
+dnl	TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDL_MIXER=1" 
+dnl        TR_LIBS="$TR_LIBS -lSDL_mixer"
+dnl    else
+dnl        echo "*** SDL_mixer not found.  Configuring without audio support."
+dnl    fi
 
     LIBS="$saved_LIBS"
 else
@@ -581,14 +581,18 @@ CHECK_FOR_AL_H
 
 if test "x$have_al_h" = "xno" -a "x$AL_CPPFLAGS" = "x" ; then
     echo "*** Hmm, you don't seem to have OpenAL headers installed in the standard"
-    echo "*** location (/usr/include).  I'll check in /usr/X11R6/include, since"
+    echo "*** location (/usr/include).  I'll check in /usr/local/include, since"
     echo "*** many distributions (incorrectly) put OpenAL headers there."
-    AL_CPPFLAGS="-I/usr/X11R6/include"
+    AL_CPPFLAGS="-I/usr/local/include"
     CHECK_FOR_AL_H
 fi
 
 if test "x$have_al_h" = "xno" ; then
-    AC_MSG_ERROR([Cannot find AL/al.h])
+    echo "Cannot find AL/al.h"
+    echo "Error::Configuring without OpenAL support!"
+else
+    echo "Configuring with OpenAL support!"
+    TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1"    
 fi
 
 dnl Check for alext.h 
@@ -598,15 +602,13 @@ if test "x$have_alext_h" = "xno" ; then
     AC_MSG_ERROR([
 *****************************************************************
 You are missing the file alext.h.
-You can get a copy at
-http://oss.sgi.com/projects/oal-sample/ABI/alext.h
 Place it in the directory /usr/include/AL.
 *****************************************************************])
 fi
 
 
 CPPFLAGS="$saved_CPPFLAGS" 
-TR_CPPFLAGS="$TR_CPPFLAGS $GL_CPPFLAGS"
+TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 
 
 
