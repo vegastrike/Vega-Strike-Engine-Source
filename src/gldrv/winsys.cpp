@@ -378,7 +378,7 @@ void winsys_process_events()
 		break;
 
 	    case SDL_VIDEORESIZE:
-	      
+#if !(defined(_WIN32)&&defined(SDL_WINDOWING))
 		g_game.x_resolution=event.resize.w;
 		g_game.y_resolution=event.resize.h;
 		setup_sdl_video_mode();
@@ -386,7 +386,7 @@ void winsys_process_events()
 		    (*reshape_func)( event.resize.w,
 				     event.resize.h );
 		}
-		
+#endif
 		break;
 	    }
 

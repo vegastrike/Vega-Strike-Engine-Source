@@ -246,11 +246,18 @@ void Base::LoadXML(const char * filename) {
   cout << "Base::LoadXML " << filename << endl;
   vschdir("bases");
   FILE * inFile = fopen (filename, "r");
-  vscdup();
   if(!inFile) {
-	assert(0);
-	return;
+    if (baseun->isUnit()==PLANETPTR)
+      inFile=fopen("planet.xbase","r");
+    else
+      inFile=fopen("unit.xbase","r");
+    if (!inFile) {
+      assert(0);
+      vscdup();
+      return;
+    }
   }
+  vscdup();
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Base::beginElement, &Base::endElement);

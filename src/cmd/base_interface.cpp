@@ -30,6 +30,7 @@ void Base::Room::BaseObj::Draw () {
 
 void Base::Room::BaseSprite::Draw () {
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	GFXEnable(TEXTURE0);
 	spr.Draw();
 }
 
@@ -288,6 +289,7 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 	if (!rooms.size()) {
 		fprintf(stderr,"\nERROR: there are no rooms...");
 		rooms.push_back(new Room ());
+		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75)));
 		rooms.back()->links.push_back(new Room::Launch ());
 		rooms.back()->links.back()->x=rooms.back()->links.back()->y=-1;
 		rooms.back()->links.back()->wid=rooms.back()->links.back()->hei=2;
