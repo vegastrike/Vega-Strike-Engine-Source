@@ -55,8 +55,10 @@ public:
 
 class OrderFactory: public AIFactory {
 public:
+  virtual int type () {return 0;}
   OrderFactory():AIFactory(){}
   virtual AI * newAI () {return new Order;}
+  virtual Order * newOrder() {return new Order;}
 };
 
 

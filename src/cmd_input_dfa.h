@@ -26,6 +26,7 @@ class InputDFA {
   //wish the mouse-bound functions could be member functions
   static void ClickSelect (KBSTATE, int,int,int,int,int);
   static void TargetSelect (KBSTATE,int,int,int,int,int);
+  static void LocationSelect (KBSTATE,int,int,int,int,int);
   static void NoneSelect (KBSTATE,int,int,int,int,int);
   void SetStateDragSelect();
   void SetStateSomeSelected();

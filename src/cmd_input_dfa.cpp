@@ -47,20 +47,32 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
   if (CurDFA->state==TARGET_SELECT) {
     //executeOrders from selected->target;
     if (k==RELEASE&&CurDFA->targetted!=NULL) {
-      UnitCollection::UnitIterator * tmp = CurDFA->targetted->createIterator();
+      UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
       Unit * un;
       while (un = tmp->current()) {
-	fprintf (stderr,"Execute orders on target! %x\n",un);
-	
+	Order * nAI = CurDFA->orderfac->newOrder();
+	nAI->AttachOrder(CurDFA->targetted);
+	if (CurDFA->queueOrder) {
+	  un->EnqueueAI(nAI);
+	} else {
+	  un->SetAI(nAI);//will take care of doing the setparent 
+	}
 	tmp->advance();
       }
       delete tmp;
       delete CurDFA->targetted;
-      CurDFA->targetted=NULL;      
+      CurDFA->targetted=NULL;  
+
+      CurDFA->orderfac = NULL;//I know we don't dealloc
     }
     CurDFA->SetStateNone(); //go back up the heirarchy;
   }
 }
+void InputDFA::LocationSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
+
+
+}
+
 void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   static int kmod;
   CurDFA->MouseArrow.SetPosition (1.33-((float)(x*2.66))/g_game.x_resolution,1-((float)(y*2))/g_game.y_resolution);
@@ -84,7 +96,15 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     CurDFA->SetOrder (new OrderFactory());
   }
   if (CurDFA->orderfac!=NULL) {
-    TargetSelect(k,x,y,delx,dely,kmod);//add some provision for binding keys to orders
+    if (CurDFA->orderfac->type()&LOCATION) {
+      LocationSelect (k,x,y,delx,dely,kmod);
+      return;
+    }
+    if (CurDFA->orderfac->type()&TARGET||CurDFA->orderfac->type()&SELF) {
+      TargetSelect(k,x,y,delx,dely,kmod);//add some provision for binding keys to orders
+      return;
+    }
+    CurDFA->orderfac = NULL;//??
     return;
   }
   if (k==PRESS){

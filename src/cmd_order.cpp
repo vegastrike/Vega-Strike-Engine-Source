@@ -63,8 +63,12 @@ AI* Order::ReplaceOrder (AI *ord) {
 }
 
 bool Order::AttachOrder (UnitCollection *targets1) {
-  if (!(type&TARGET))
+  if (!(type&TARGET)) {
+    if (type&SELF) {
+      return AttachSelfOrder (targets1);//can use attach order to do shit
+    }
     return false;
+  }
   if (targets)
     delete targets;
   
