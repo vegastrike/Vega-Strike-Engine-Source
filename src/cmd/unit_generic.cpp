@@ -2727,17 +2727,12 @@ void Unit::RegenShields () {
 			  UniverseUtil::IOmessage(0,"	game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
   static int modcounter=0;
-  static int warpfractional = XMLSupport::parse_int(vs_config->getVariable("physics","warpfractional","4"));  
-  modcounter++;
-  modcounter%=warpfractional;
-
+  
   if(graphicOptions.InWarp){ //FIXME FIXME FIXME
-	  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","10"));
-	  float truebleed=bleedfactor*SIMULATION_ATOM;
-	  if(warpenergy>truebleed){
-		  if(modcounter==0){
-		    warpenergy-=truebleed;
-		  }
+	  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","20"));
+	  float bleed=jump.insysenergy/bleedfactor*SIMULATION_ATOM;
+	  if(warpenergy>bleed){
+		    warpenergy-=bleed;
 	  } else {
 		  graphicOptions.InWarp=0;
 	  }
