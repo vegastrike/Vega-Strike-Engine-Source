@@ -180,8 +180,9 @@ public:
 /***************************************************************************************/
 
 // Uses mmm... stuff not desired here ?
-  virtual bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
-  bool UpgradeMounts (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
+  bool UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage, Unit * (*createupgradesubunit) (std::string s, int faction));
+  virtual bool UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
+  bool UpgradeMounts (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, const Unit * templ, double &percentage);
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
 
@@ -203,7 +204,7 @@ protected:
   ///no collision table presence.
   bool SubUnit;
 public:
-  bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
+  bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
 
   int GetNumMounts ()const  {return mounts.size();}
@@ -212,11 +213,11 @@ public:
 // Uses base stuff -> only in Unit
   virtual void UpgradeInterface (Unit * base) {}
 
-  bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
-  bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
+  bool canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
+  bool Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
   virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
-  bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
-  bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
+  bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
+  bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
 
 /***************************************************************************************/
 /**** GFX/PLANET STUFF                                                              ****/

@@ -4,7 +4,7 @@
 #include "xml_serializer.h"
 #include "vs_path.h"
 #include "file_main.h"
-#include "unit_factory.h"
+
 #include "unit_util.h"
 #include "script/mission.h"
 #include "script/flightgroup.h"
@@ -16,6 +16,7 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
+#include "cmd/unit_factory.h"
 #include <algorithm>
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -2480,7 +2481,7 @@ std::string getTurretSize (const std::string &size) {
   return "capitol";
 }
 
-bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage) {
+bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, const Unit * templ, double &percentage) {
   int j;
   int i;
   bool cancompletefully=true;
@@ -2611,8 +2612,14 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
   }
   return cancompletefully;
 }
+Unit * CreateGenericTurret (std::string tur,int faction) {
+  return new Unit (tur.c_str(),true,faction,"",0,0);
+}
 
-bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
+bool Unit::UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
+  return UpgradeSubUnitsWithFactory( up, subunitoffset, touchme, downgrade, numave, percentage,&CreateGenericTurret);
+}
+bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage, Unit * (*createupgradesubunit) (std::string s, int faction))  {
   bool cancompletefully=true;
   int j;
   std::string turSize;
@@ -2620,7 +2627,7 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
   bool found=false;
   for (j=0,ui=getSubUnits();(*ui)!=NULL&&j<subunitoffset;++ui,j++) {
   }///set the turrets to the offset
-  un_iter upturrets;
+  un_kiter upturrets;
   Unit * giveAway;
 
   giveAway=*ui;
@@ -2629,9 +2636,9 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
   }
   bool hasAnyTurrets=false;
     turSize = getTurretSize (giveAway->name);
-  for (upturrets=up->getSubUnits();((*upturrets)!=NULL)&&((*ui)!=NULL); ++ui,++upturrets) {//begin goign through other unit's turrets
+  for (upturrets=up->viewSubUnits();((*upturrets)!=NULL)&&((*ui)!=NULL); ++ui,++upturrets) {//begin goign through other unit's turrets
     hasAnyTurrets = true;
-    Unit *addtome;
+    const Unit *addtome;
 
     addtome=*upturrets;//set pointers
 
@@ -2648,26 +2655,26 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
     }
     if (foundthis) {
       if (touchme) {//if we wish to modify,
-	Transformation t(addtome->curr_physical_state);//switch their current positions
-	addtome->curr_physical_state=giveAway->curr_physical_state;
-	giveAway->curr_physical_state=t;
-	t=addtome->prev_physical_state;
-	addtome->prev_physical_state=giveAway->prev_physical_state;
-	giveAway->prev_physical_state=t;//switch their previous positions
-	giveAway->SetRecursiveOwner(up);//set the owners of the respective turrets
-	
-	upturrets.postinsert (giveAway);//add it to the second unit
+	Transformation addToMeCur = giveAway->curr_physical_state;
+	Transformation addToMePrev = giveAway->prev_physical_state;
+       	//	upturrets.postinsert (giveAway);//add it to the second unit
+	giveAway->Kill();//risky??
 	ui.remove();//remove the turret from the first unit
 	
 	if (!downgrade) {//if we are upgrading swap them
-	  ui.preinsert(addtome);//add unit to your ship
-	  upturrets.remove();//remove unit from being a turret on other ship
-	  addtome->SetRecursiveOwner(this);//set recursive owner
+	  Unit * addToMeNew = (*createupgradesubunit)(addtome->name,addtome->faction);
+	  addToMeNew->curr_physical_state = addToMeCur;
+	  addToMeNew->prev_physical_state = addToMePrev;
+	  ui.preinsert(addToMeNew);//add unit to your ship
+	  //	  upturrets.remove();//remove unit from being a turret on other ship
+	  addToMeNew->SetRecursiveOwner(this);//set recursive owner
 	} else {
 	  Unit * un;//make garbage unit
 	  // NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
 	  ui.preinsert (un=UnitFactory::createUnit("blank",true,faction));//give a default do-nothing unit
-	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
+	  //WHAT?!?!?!?! 102302	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
+	  un->curr_physical_state = addToMeCur;
+	  un->prev_physical_state = addToMePrev;
 	  un->limits.yaw=0;
 	  un->limits.pitch=0;
 	  un->limits.roll=0;
@@ -2682,7 +2689,6 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
 	  un->prev_physical_state=addtome->prev_physical_state;
 	  
 	  un->SetRecursiveOwner(this);
-	  upturrets.remove();//remove unit from being a turret on other ship
 	}
       }
     }
@@ -2696,20 +2702,20 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
   return cancompletefully;
 }
 
-bool Unit::canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ){
+bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ){
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage);
 }
-bool Unit::Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ) {
+bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ) {
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,true,percentage);
 }
-bool Unit::canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage){
+bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,false,true,false,true,percentage);
 }
-bool Unit::Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage){
+bool Unit::Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage);
 }
 
-bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage) {
+bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage) {
   percentage=0;
   int numave=0;
   bool cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
@@ -2719,7 +2725,19 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   comparer Comparer;
   percenter Percenter;
 
-
+  float tmax_speed = up->computer.max_speed;
+  float tmax_ab_speed = up->computer.max_ab_speed;
+  float tmax_yaw = up->computer.max_yaw;
+  float tmax_pitch = up->computer.max_pitch;
+  float tmax_roll = up->computer.max_roll;
+  float tlimits_yaw=up->limits.yaw;
+  float tlimits_roll=up->limits.roll;
+  float tlimits_pitch=up->limits.pitch;
+  float tlimits_lateral = up->limits.lateral;
+  float tlimits_vertical = up->limits.vertical;
+  float tlimits_forward = up->limits.forward;
+  float tlimits_retro = up->limits.retro;
+  float tlimits_afterburn = up->limits.afterburn;
   if (downgrade) {
     Adder=&SubtractUp;
     Percenter=&computeDowngradePercent;
@@ -2731,21 +2749,21 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     }else if (additive==2) {
       Adder=&MultUp;
       Percenter=&computeMultPercent;
-      up->computer.max_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&up->computer.max_speed),up));
-      up->computer.max_ab_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&up->computer.max_ab_speed),up));
-      up->computer.max_yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&up->computer.max_yaw),up));
-      up->computer.max_pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&up->computer.max_pitch),up));
-      up->computer.max_roll = XMLSupport::parse_float (angleStarHandler (XMLType (&up->computer.max_roll),up));
+      tmax_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&tmax_speed),NULL));
+      tmax_ab_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&tmax_ab_speed),NULL));
+      tmax_yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_yaw),NULL));
+      tmax_pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_pitch),NULL));
+      tmax_roll = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_roll),NULL));
 
-      up->limits.yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&up->limits.yaw),up));
-      up->limits.pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&up->limits.pitch),up));
-      up->limits.roll = XMLSupport::parse_float (angleStarHandler (XMLType (&up->limits.roll),up));
+      tlimits_yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&tlimits_yaw),NULL));
+      tlimits_pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&tlimits_pitch),NULL));
+      tlimits_roll = XMLSupport::parse_float (angleStarHandler (XMLType (&tlimits_roll),NULL));
 
-      up->limits.forward = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.forward),up));
-      up->limits.retro = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.retro),up));
-      up->limits.lateral = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.lateral),up));
-      up->limits.vertical = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.vertical),up));
-      up->limits.afterburn = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.afterburn),up));
+      tlimits_forward = XMLSupport::parse_float (accelStarHandler (XMLType (&tlimits_forward),NULL));
+      tlimits_retro = XMLSupport::parse_float (accelStarHandler (XMLType (&tlimits_retro),NULL));
+      tlimits_lateral = XMLSupport::parse_float (accelStarHandler (XMLType (&tlimits_lateral),NULL));
+      tlimits_vertical = XMLSupport::parse_float (accelStarHandler (XMLType (&tlimits_vertical),NULL));
+      tlimits_afterburn = XMLSupport::parse_float (accelStarHandler (XMLType (&tlimits_afterburn),NULL));
       
     }else {
       Adder=&GetsB;
@@ -2775,20 +2793,20 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   //  STDUPGRADE(afterburnenergy,up->afterburnenergy,templ->afterburnenergy,0);
-  STDUPGRADE(limits.yaw,up->limits.yaw,templ->limits.yaw,0);
-  STDUPGRADE(limits.pitch,up->limits.pitch,templ->limits.pitch,0);
-  STDUPGRADE(limits.roll,up->limits.roll,templ->limits.roll,0);
-  STDUPGRADE(limits.lateral,up->limits.lateral,templ->limits.lateral,0);
-  STDUPGRADE(limits.vertical,up->limits.vertical,templ->limits.vertical,0);
-  STDUPGRADE(limits.forward,up->limits.forward,templ->limits.forward,0);
-  STDUPGRADE(limits.retro,up->limits.retro,templ->limits.retro,0);
-  STDUPGRADE(limits.afterburn,up->limits.afterburn,templ->limits.afterburn,0);
+  STDUPGRADE(limits.yaw,tlimits_yaw,templ->limits.yaw,0);
+  STDUPGRADE(limits.pitch,tlimits_pitch,templ->limits.pitch,0);
+  STDUPGRADE(limits.roll,tlimits_roll,templ->limits.roll,0);
+  STDUPGRADE(limits.lateral,tlimits_lateral,templ->limits.lateral,0);
+  STDUPGRADE(limits.vertical,tlimits_vertical,templ->limits.vertical,0);
+  STDUPGRADE(limits.forward,tlimits_forward,templ->limits.forward,0);
+  STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
+  STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
   STDUPGRADE(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
-  STDUPGRADE(computer.max_speed,up->computer.max_speed,templ->computer.max_speed,0);
-  STDUPGRADE(computer.max_ab_speed,up->computer.max_ab_speed,templ->computer.max_ab_speed,0);
-  STDUPGRADE(computer.max_yaw,up->computer.max_yaw,templ->computer.max_yaw,0);
-  STDUPGRADE(computer.max_pitch,up->computer.max_pitch,templ->computer.max_pitch,0);
-  STDUPGRADE(computer.max_roll,up->computer.max_roll,templ->computer.max_roll,0);
+  STDUPGRADE(computer.max_speed,tmax_speed,templ->computer.max_speed,0);
+  STDUPGRADE(computer.max_ab_speed,tmax_ab_speed,templ->computer.max_ab_speed,0);
+  STDUPGRADE(computer.max_yaw,tmax_yaw,templ->computer.max_yaw,0);
+  STDUPGRADE(computer.max_pitch,tmax_pitch,templ->computer.max_pitch,0);
+  STDUPGRADE(computer.max_roll,tmax_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
 
   for (unsigned int upgr=0;upgr<UnitImages::NUMGAUGES+1+MAXVDUS;upgr++) {

@@ -28,7 +28,7 @@ using std::string;
 class Unit;
 class Flightgroup;
 
-class UnitFactory
+class UnitGenericFactory
 {
 public:
     static Unit* createGenericUnit( const char *filename,

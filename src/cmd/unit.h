@@ -260,7 +260,7 @@ public:
 /**** CUSTOMIZE/UPGRADE STUFF                                                          */
 /***************************************************************************************/
 
-  bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
+  bool UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
   double Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
 
 };

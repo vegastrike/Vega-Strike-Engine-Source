@@ -146,6 +146,8 @@ FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,fa
 #endif
 ))){
   DesiredThrust= Vector(0,0,0);
+  stolen_setspeed=false;
+  stolen_setspeed_value=0;
 }
 
 void FlyByWire::Stop (float per) {
@@ -259,6 +261,10 @@ void FlyByWire::Execute () {
   Vector des_vel_bak (desired_velocity);
   if (DesiredThrust.i||DesiredThrust.j||DesiredThrust.k) {
     desired_velocity = parent->UpCoordinateLevel(parent->GetVelocity())+(SIMULATION_ATOM*DesiredThrust);
+    if (!stolen_setspeed) {
+      stolen_setspeed=true;
+      stolen_setspeed_value= parent->GetComputerData().set_speed;
+    }
     parent->GetComputerData().set_speed = desired_velocity.Magnitude();
 
     desireThrust=true;
@@ -267,6 +273,11 @@ void FlyByWire::Execute () {
 	desired_velocity.k=0;
 	parent->GetComputerData().set_speed = 0;
       }
+    }
+  }else {
+    if (stolen_setspeed) {
+      parent->GetComputerData().set_speed = stolen_setspeed_value;
+      stolen_setspeed=false;
     }
   }
   if ((sheltonslide||!controltype)&&(!desireThrust)) {

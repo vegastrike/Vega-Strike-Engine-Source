@@ -77,6 +77,8 @@ class FlyByWire : public Orders::MatchVelocity {
   ///If shelton slide, do not have the computer match linear
   bool sheltonslide;
   bool controltype;//false for car
+  bool stolen_setspeed;
+  float stolen_setspeed_value;
  public:
   FlyByWire ();
   ~FlyByWire ();

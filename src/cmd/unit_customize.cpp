@@ -21,10 +21,11 @@ void GameUnit::GameMount::ReplaceMounts (const Unit::Mount *other) {
   sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
 }
 
-
-bool GameUnit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
-  bool bl = Unit::UpgradeSubUnits( up, subunitoffset, touchme, downgrade, numave, percentage);
-  up->DisableTurretAI();
+Unit * CreateGameTurret (std::string tur,int faction) {
+  return UnitFactory::createUnit (tur.c_str(),true,faction);
+}
+bool GameUnit::UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
+  bool bl = UpgradeSubUnitsWithFactory( up, subunitoffset, touchme, downgrade, numave, percentage,&CreateGameTurret);
   DisableTurretAI();
   return bl;
 }
