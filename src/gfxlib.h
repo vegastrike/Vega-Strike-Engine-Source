@@ -54,7 +54,7 @@ void /*GFXDRVAPI*/ GFXShutdown();
 //Misc functions
 void /*GFXDRVAPI*/ GFXBeginScene();
 void /*GFXDRVAPI*/ GFXEndScene();
-void /*GFXDRVAPI*/ GFXClear();
+void /*GFXDRVAPI*/ GFXClear(GFXBOOL ColorBuffer);
 
 //Light
 

@@ -103,7 +103,7 @@ void Universe::StartGFX()
 	
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
-	GFXLightContextAmbient (GFXColor (0,0,0,1));
+	GFXLightContextAmbient (GFXColor (.3,.30,.30,1));
 	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (01,1,1,1),GFXColor(1,1,1,1), GFXColor (.2,.2,.2,1), GFXColor (1,.002,.0001)),false);
 	GFXEnableLight (ligh);
       	GFXEndScene();
@@ -119,7 +119,6 @@ void Universe::StartDraw()
 	RESETTIME();
 #endif
 	GFXBeginScene();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	SetViewport();
 }
 

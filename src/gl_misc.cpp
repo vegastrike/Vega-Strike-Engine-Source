@@ -32,7 +32,7 @@ extern GFXBOOL bTex1;
 
 void /*GFXDRVAPI*/ GFXBeginScene()
 {
-	GFXClear();
+	GFXClear(GFXFALSE);
 	GFXLoadIdentity(MODEL); // bad this should instead load the cached view matrix
 	light_rekey_frame();
 }
@@ -44,9 +44,9 @@ void /*GFXDRVAPI*/ GFXEndScene()
 	
 }
 
-void /*GFXDRVAPI*/ GFXClear()
+void /*GFXDRVAPI*/ GFXClear(GFXBOOL colorbuffer)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear((colorbuffer?GL_COLOR_BUFFER_BIT:0) | GL_DEPTH_BUFFER_BIT);
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
