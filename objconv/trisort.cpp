@@ -245,4 +245,5 @@ std::string rez (argv[i]);
         rez+=".out";
         m.write (rez.c_str());
     }
+	return 0;
 };
