@@ -88,7 +88,8 @@ class StarSystem {
   void LoadXML(const char*, const Vector & centroid, const float timeofyear);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
-
+  string getFileName();
+  string getName();
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
   ///Accesses the current camera

@@ -28,7 +28,7 @@
 #include "cmd/atmosphere.h"
 #include "hashtable.h"
 #include "cmd/nebula.h"
-
+#include "galaxy_gen.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -40,8 +40,13 @@ vector<Vector> perplines;
 
 Atmosphere *theAtmosphere;
 
-
-
+extern string RemoveDotSystem (const char *input);
+string StarSystem::getFileName() {
+  return getStarSystemSector (filename)+string("/")+RemoveDotSystem(getStarSystemName (filename).c_str());
+}
+string StarSystem::getName () {
+  return string(name);
+}
 
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) : 
   //  primaries(primaries), 

@@ -19,6 +19,9 @@ string RemoveDotSystem (const char *input) {
     if (*ptr=='.') {
       if (0==strcmp (ptr,".system")) {
 	*ptr='\0';
+	char * ttmp=tmp;
+	tmp = strdup (RemoveDotSystem(tmp).c_str());
+	free (ttmp);
       }else {
 	break;
       }      

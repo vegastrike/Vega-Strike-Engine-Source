@@ -30,8 +30,8 @@
 #include "audiolib.h"
 #include "vs_path.h"
 #include "gfx/animation.h"
-
-
+#include "cmd/unit.h"
+#include "gfx/cockpit.h"
 #include "python/init.h"
 /*
  * Globals 
@@ -63,7 +63,13 @@ void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
   printf ("Thank you for playing!\n");
-
+  if (_Universe->AccessCockpit()) {
+    if (_Universe->AccessCockpit()->GetParent()) {
+      if(_Universe->AccessCockpit()->GetParent()->GetHull()>0) {
+	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position());
+      } 
+    }
+  }
   //    write_config_file();
   //  write_saved_games();
   AUDDestroy();
@@ -76,8 +82,51 @@ Mission *mission;
 double benchmark=-1.0;
 
 char mission_name[1024];
-std::string ForceStarSystem("") ;
+static std::string ForceStarSystem("") ;
+static Vector PlayerLocation (FLT_MAX,FLT_MAX,FLT_MAX);
+static std::string outputsavegame;
+static std::string originalsystem;
+void WriteSaveGame (const char *systemname, const Vector &FP) {
+  if (outputsavegame.length()!=0) {
+    printf ("Writing Save Game %s",outputsavegame.c_str());
+    changehome();
+    vschdir ("save");
+    FILE * fp = fopen (outputsavegame.c_str(),"w");
+    vscdup();
+    returnfromhome();
+    Vector FighterPos= PlayerLocation-FP;
+    if (originalsystem!=systemname) {
+      FighterPos=-FP;
+    }
+    fprintf (fp,"%s %f %f %f",systemname,FighterPos.i,FighterPos.j,FighterPos.k);
+    fclose (fp);
+  }
+}
+bool ParseSaveGame (const string filename, string &ForceStarSystem, string originalstarsystem, Vector &Pos) {
+  outputsavegame=filename;
+  originalsystem = originalstarsystem;
+  changehome();
+  vschdir ("save");
+  FILE * fp = fopen (filename.c_str(),"r");
+  vscdup();
+  returnfromhome();
+  if (fp) {
+    char tmp[10000];
+    if (4==fscanf (fp,"%s %f %f %f\n",tmp,&Pos.i,&Pos.j,&Pos.k)) {
+      ForceStarSystem=string(tmp);
+      originalsystem = ForceStarSystem;
+      PlayerLocation=Pos;
+      fclose (fp);
+      return true;
+    }
+    fclose (fp);
+  }
+  return false;  
+  
+}
+
 void bootstrap_main_loop();
+
 int main( int argc, char *argv[] ) 
 {
 
@@ -164,6 +213,7 @@ void bootstrap_draw (Animation * SplashScreen) {
     GFXEndScene();
   }
 }
+extern Unit **fighters;
 void bootstrap_main_loop () {
   static bool LoadMission=true;
   InitTime();
@@ -184,12 +234,30 @@ void bootstrap_main_loop () {
     string planetname;
 
     mission->GetOrigin(pos,planetname);
-    bootstrap_draw (SplashScreen);
+    bool setplayerloc;
     string mysystem = (ForceStarSystem.length()==0)?mission->getVariable("system","sol.system"):ForceStarSystem;
+    if (PlayerLocation.i!=FLT_MAX&&PlayerLocation.j!=FLT_MAX&&PlayerLocation.k!=FLT_MAX) {
+      pos = PlayerLocation;
+      setplayerloc=true;
+    } else {
+      string savegamefile = mission->getVariable ("savegame","");
+      if (savegamefile.length()) {
+	if (ParseSaveGame (savegamefile,ForceStarSystem,mysystem,pos)) {
+	  setplayerloc=true;
+	}
+      }
+      PlayerLocation=pos;
+    }
+    bootstrap_draw (SplashScreen);
+    mysystem = (ForceStarSystem.length()==0)?mission->getVariable("system","sol.system"):ForceStarSystem;
     _Universe->Init (mysystem,pos,planetname);
     bootstrap_draw (SplashScreen);
     createObjects();
-
+    if (setplayerloc&&fighters) {
+      if (fighters[0]) {
+	fighters[0]->SetPosition (Vector (0,0,0));
+      }
+    }
     InitializeInput();
 
     vs_config->bindKeys();
@@ -227,6 +295,10 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'f':
       case 'F':
+	break;
+      case 'P':
+      case 'p':
+	sscanf (lpCmdLine[i]+2,"%f,%f,%f",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
 	break;
       case 'L':
       case 'l'://low rez

@@ -600,8 +600,6 @@ void createObjects() {
 }
 
 void destroyObjects() {  
-  for(int a = 0; a < numf; a++)
-  	delete fighters[a];
   if (myterrain)
     delete myterrain;
   Terrain::DeleteAll();

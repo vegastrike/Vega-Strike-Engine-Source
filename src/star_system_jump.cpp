@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "gfx/cockpit.h"
 #include "audiolib.h"
+
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
@@ -234,7 +235,6 @@ void StarSystem::ProcessPendingJumps() {
   }
 
 }
-
 
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
 #ifdef JUMP_DEBUG

@@ -40,6 +40,12 @@ void changehome(bool makehomedir) {
     }else {
       chdir (pwent->pw_dir);
     }
+    if (chdir (HOMESUBDIR "/save")==-1) {
+      mkdir (HOMESUBDIR "/save", 0xFFFFFFFF);
+      //system ("mkdir " HOMESUBDIR "/generatedbsp");
+    }else {
+      chdir (pwent->pw_dir);
+    }
   }
   vschdir (HOMESUBDIR);
 #endif
