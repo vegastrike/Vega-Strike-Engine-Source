@@ -26,7 +26,7 @@
 #include "aux_texture.h"
 #include "sphere.h"
 #include <float.h>
-	const float size = 10;
+	const float size = 100;
 Background::Background(const char *file, int numstars, float spread):Enabled (true) {
 	char * temp=new char [strlen(file)+25];
 	GFXVertex * tmpvertex = new GFXVertex [numstars];
@@ -120,9 +120,11 @@ void Background::Draw()
       SphereBackground->DrawNow(FLT_MAX,true);
       //    Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
     } else {
+	  GFXLoadIdentity(MODEL);
+	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+
       GFXTextureAddressMode(CLAMP);
       //glMatrixMode(GL_MODELVIEW);
-      GFXLoadIdentity(MODEL);
       
       GFXSelectTexcoordSet(0, 0);
       /***********************?????????
@@ -237,15 +239,17 @@ void Background::Draw()
     }
   }
   GFXLoadIdentity(MODEL);
+  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+
   GFXEnable(DEPTHWRITE);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
   GFXColor (1,1,1,1);
   GFXDisable (TEXTURE1);
 
-  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
   stars->DrawOnce();
   GFXEnable (DEPTHTEST);
   //  _Universe->AccessCamera()->UpdateGFX(false);
 
 }
+

@@ -338,7 +338,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->sharevert = parse_bool ((*iter).value);
 	break;
       case XML::BLENDMODE:
-	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
+	sscanf (((*iter).value).c_str(),"%.126s %.126s",csrc,cdst);
 	blendSrc = parse_alpha (csrc);
 	blendDst = parse_alpha (cdst);
 	if (blendDst==blendSrc&&blendSrc==ZERO) {

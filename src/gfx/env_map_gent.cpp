@@ -812,3 +812,4 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
   free (InputName);
   free (OutputName);
 }
+

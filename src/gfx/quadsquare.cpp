@@ -842,6 +842,8 @@ static void TerrainMakeActive (Texture *text) {
   if (text==(Texture *)1||text==(Texture *)2) {
     GFXPushBlendMode();
     GFXBlendMode (ONE,ONE);
+	GFXDisable(TEXTURE0);
+	GFXDisable (TEXTURE1);
   }
   if (text==(Texture *)0||text==(Texture *)2){
     GFXEnable (TEXTURE1);
@@ -855,9 +857,9 @@ static void TerrainMakeDeactive (Texture *text) {
   if (text==(Texture *)1||text==(Texture *)2) {
     GFXPopBlendMode();
   }
-  if (text==(Texture *)0||text==(Texture *)2) {
+  if (text==(Texture *)0||text==(Texture *)1||text==(Texture *)2) {
     GFXEnable (TEXTURE0);
-    GFXEnable (TEXTURE1);
+    GFXDisable (TEXTURE1);
   }
 }
 

@@ -28,7 +28,8 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   
 
   VertexAllocated = VertexCount = 4;
-  for (int i=0;i<10;i++) {
+  textures.push_back ((Texture *)0);
+  for (int i=1;i<10;i++) {
     char name[]="terrainX.bmp";
     name[7] = '0'+i;
     textures.push_back (new Texture (name));
