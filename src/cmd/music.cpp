@@ -70,7 +70,7 @@ bool Music::LoadMusic (const char *file) {
   VSFile f;
   VSError err = f.OpenReadOnly(file, Unknown);
   if (err>Ok)
-     VSError err = f.OpenReadOnly( string(".vegastrike/")+file, Unknown);
+     err = f.OpenReadOnly( string(".vegastrike/")+file, Unknown);
 
   char songname[1024];
   this->playlist.push_back(std::vector <std::string> ());
