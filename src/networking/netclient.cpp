@@ -667,12 +667,17 @@ int NetClient::recvMsg( Packet* outpacket )
 				// Compare to local md5 and ask for the good file if we don't have it or bad version
 				if( 0 /* !md5CheckFile( univfile, md5_digest) */)
 				{
+					VsnetDownload::Client::File* requested_file;
+					requested_file = new VsnetDownload::Client::File( this->clt_sock, univfile, "");
+                	_downloadManagerClient->addItem( requested_file);
+					/*
 					netbuf.addString( univfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
                                netbuf.getData(), netbuf.getDataLength(),
                                SENDRELIABLE, NULL, this->clt_sock,
                                __FILE__, PSEUDO__LINE__(663) );
 					this->PacketLoop( CMD_ASKFILE);
+					*/
 				}
 
 				// Get the initial system file...
@@ -681,18 +686,26 @@ int NetClient::recvMsg( Packet* outpacket )
 				// THINK TO PUT THAT TEST BACK WHEN DOWNLOAD THREAD IS COMPLETE !!!!!!!
 				if( 0 /* !md5CheckFile( sysfile, md5_digest) */)
 				{
+					VsnetDownload::Client::File* requested_file;
+					requested_file = new VsnetDownload::Client::File( this->clt_sock, sysfile, "");
+                	_downloadManagerClient->addItem( requested_file);
+					/*
 					netbuf.addString( sysfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
                                netbuf.getData(), netbuf.getDataLength(),
                                SENDRELIABLE, NULL, this->clt_sock,
                                __FILE__, PSEUDO__LINE__(677) );
 					this->PacketLoop( CMD_ASKFILE);
+					*/
+					// Loop until the download is complete
 				}
 				//globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
 
+				/*
                 VsnetDownload::Client::TestItem* t;
                 t = new VsnetDownload::Client::TestItem( clt_sock, "TESTFILE" );
                 _downloadManagerClient->addItem( t );
+				*/
 			}
             break;
 			case CMD_ASKFILE :
@@ -1018,54 +1031,27 @@ int NetClient::recvMsg( Packet* outpacket )
 					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
 					exit(1);
 				}
-				// If we received a CMD_JUMP with serial==1 jump is refused because of energy
+				// If we received a CMD_JUMP with serial==player serial jump is refused because of energy
 				if( packet_serial!=0)
 				{
+					// The jump has been allowed
+					// Check if server said we have the good file
+					if( packet_serial!=un->GetSerial())
+					{
+						VsnetDownload::Client::File* requested_file;
+						requested_file = new VsnetDownload::Client::File( this->clt_sock, newsystem, "");
+                		_downloadManagerClient->addItem( requested_file);
+
+						// WAIT FOR THE DOWNLOAD ????
+					}
 					this->jumpok = true;
 					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();
 					this->ingame = false;
-					
-					/* NOT USED ANYMORE
-					for( i=0; !found && i<pendingjump.size(); i++)
-					{
-						// Find the corresponding destination
-						if( pendingjump[i]->dest == sts)
-						{
-							// Packet serial == 0 -> jump refused so we stay in the same system => NO WE WILL JUST DO NOTHING AND REMOVE THE JUMP FROM pendingjump
-							//if( packet_serial == 0)
-							//	pendingjump[i]->dest = star_system_table.Get( system2);
-							found = true;
-						}
-					}
-					if( !found)
-					{
-						cerr<<"!!! ERROR : Jump with destination "<<newsystem<<" not found !!!"<<endl;
-						exit(1);
-					}
-					else
-					{
-						// Should wait for the system file or the confirmation we have the good one here if we are authorized to jump
-						// DO NOT WAIT FOR ASK_FILE ANYMORE -> THIS WILL BE THE NEXT PACKET ANYWAY AND THIS WILL ALLOW TO
-						// DO JUMP ANIMATION
-						// if( packet_serial != 0)
-						// this->PacketLoop( CMD_ASKFILE);
-					}
-					*/
 				}
 				else
 				{
 					// Jump was refused either because the destination system asked do not exist or because not enough jump energy
 					this->jumpok = false;
-					/* NOT USED ANYMORE
-					std::vector <unorigdest *>pendingtemp;
-					// Copy the jump vector without the concerned element and copy it over the original one
-					for( i=0; i<pendingjump.size(); i++)
-					{
-						if( pendingjump[i]->dest != sts)
-							pendingtemp.push_back( pendingjump[i]);
-					}
-					pendingjump = pendingtemp;
-					*/
 				}
 			}
 			break;

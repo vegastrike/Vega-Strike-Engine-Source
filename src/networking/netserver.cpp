@@ -1166,8 +1166,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 // 			// packet.ack( );
 // 			break;
 
+		// SHOULD NOT BE USED ANYMORE
 		case CMD_ASKFILE :
 		{
+			/*
 			char nbfiles = netbuf.getChar();
 			string file;
 			for( char i=0; i<nbfiles; i++)
@@ -1177,6 +1179,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				// with client serial in order to send him the file later
 				//DownloadQueue.add( file, clt->serial);
 			}
+			*/
 		}
 		break;
         case CMD_DOWNLOAD :
@@ -1807,25 +1810,19 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 	// And remove the player from its old starsystem and set it out of game
 	this->removeClient( clt );
 	// Have to set new starsystem here
+	// ??????
 
+	// Test whether the jump was accepted or not by server
 	if( ok)
-		p2.send( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+	{
+		// If jumpfile is empty the md5 was correct
+		if( clt->jumpfile=="" )
+			p2.send( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+		// New system file MD5 is wrong tell the client with serial != player serial so he can ask for a new download
+		else
+			p2.send( CMD_JUMP, serial+1, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+	}
 	else if( !ok || clt->jumpfile=="error")
 		p2.send( CMD_JUMP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
-
-	// If jumpfile is empty the md5 was correct
-	if( clt->jumpfile=="" )
-    {
-		// Send a 0 serial to say client file is ok
-		p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
-    }
-	else
-	{
-		// Otherwise we have to send jumpfile
-		// Should read the file in the file_content string here !
-		netbuf.addString( clt->jumpfile);
-		netbuf.addString( file_content);
-		p2.send( CMD_ASKFILE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
-	}
 }
 
