@@ -109,7 +109,7 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   QVector newcampos =_Universe->AccessCamera()->GetPosition();
-  vlist.BeginDrawState(QVector(0,0,0),(newcampos                               -campos).Cast());
+  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),(newcampos-campos).Cast());
   campos = newcampos;
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
