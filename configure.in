@@ -411,11 +411,6 @@ dnl Check for SDL_mixer
         echo "*** SDL_mixer not found.  Configuring without audio support."
     fi
 
-	if (test "x$_tcp" = "xno" && test "x$_udp" = "xno"); then
-	echo "*** Configuring without networking support."
-	NET_LIBS=""
-	else
-
     LIBS="$saved_LIBS"
 else
     echo "*** SDL not found.  Configuring without audio or joystick support."
