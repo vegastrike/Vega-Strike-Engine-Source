@@ -147,7 +147,7 @@ StarSystem::~StarSystem() {
     unit->Kill(false);
     iter.advance();
   }
-  //delete collidetable;
+  if (collidetable) delete collidetable;
   _Universe->popActiveStarSystem();
   RemoveStarsystemFromUniverse();
   
