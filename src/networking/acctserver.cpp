@@ -442,9 +442,9 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		if( fp!=NULL)
 		{
 			readsize = fread( (buf+2*NAMELEN+sizeof( unsigned int)), sizeof( char), maxsave, fp);
-			if( readsize!=xmlsize)
+			if( readsize!=savesize)
 			{
-				cout<<"Error reading save file : "<<readsize<<" read ("<<xmlsize<<" to read)"<<endl;
+				cout<<"Error reading save file : "<<readsize<<" read ("<<savesize<<" to read)"<<endl;
 				exit( 1);
 			}
 			fclose( fp);
@@ -467,7 +467,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		{
 			// Read the XML unit file
 			readsize2 = fread( (buf+readsize+2*NAMELEN+2*sizeof( unsigned int)), sizeof( char), maxsave, fp2);
-			if( savesize!=readsize2)
+			if( xmlsize!=readsize2)
 			{
 				cout<<"Error reading xml save file : "<<readsize2<<" read ("<<xmlsize<<" to read)"<<endl;
 				exit( 1);
