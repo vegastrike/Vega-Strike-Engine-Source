@@ -74,6 +74,7 @@ class	NetClient
 		void	createChar();
 		int		recvMsg( char* netbuffer, Packet* outpacket );
 		void	disconnect();
+		void	checkFile( string filename, unsigned char * md5digest);
 
 	public:
 		NetClient():save("")

@@ -1,6 +1,8 @@
 #ifndef MD5_H
 #define MD5_H
 
+#define MD5_DIGEST_SIZE 16
+
 #ifdef __alpha
 typedef unsigned int uint32;
 #else
@@ -16,8 +18,8 @@ struct MD5Context {
 void MD5Init(struct MD5Context *context);
 void MD5Update(struct MD5Context *context, unsigned char const *buf,
 	       unsigned len);
-void MD5Final(unsigned char digest[16], struct MD5Context *context);
-void MD5Transform(uint32 buf[4], uint32 const in[16]);
+void MD5Final(unsigned char digest[MD5_DIGEST_SIZE], struct MD5Context *context);
+void MD5Transform(uint32 buf[4], uint32 const in[MD5_DIGEST_SIZE]);
 
 /*
  * This is needed to make RSAREF happy on some MS-DOS compilers.

@@ -1,16 +1,23 @@
 #include <string>
 #include <stdio.h>
+#include <errno.h>
 #include "endianness.h"
 #include "cmd/unit_generic.h"
 #include "packet.h"
 #include "client.h"
 #include "md5.h"
 
-int		md5sum_file( char * filename, unsigned char * digest)
+int	md5sum_file( const char * filename, unsigned char * digest)
 {
 	FILE * fp = fopen( filename, "r");
 	if( !fp)
-		return -1;
+	{
+		if( errno==ENOENT)
+			// Return 1 if file does not exists
+			return 1;
+		else
+			return -1;
+	}
 
 	unsigned char buffer[1024];
 	MD5_CTX	ctx;

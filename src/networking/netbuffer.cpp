@@ -353,19 +353,19 @@ char	NetBuffer::getChar()
 			offset+=sizeof(c);
 			return c;
 		}
-void	NetBuffer::addBuffer( char * buf, int bufsize)
+void	NetBuffer::addBuffer( unsigned char * buf, int bufsize)
 		{
 			resizeBuffer( offset+bufsize);
 			memcpy( buffer+offset, buf, bufsize);
 			offset+=bufsize;
 		}
-char *	NetBuffer::getBuffer( int offt)
+unsigned char *	NetBuffer::getBuffer( int offt)
 		{
-			char * tmp = buffer+offset;
+			unsigned char * tmp = (unsigned char *)buffer + offset;
 			offset += offt;
 			return tmp;
 		}
-void	NetBuffer::addBuffer( const char * buf, int bufsize)
+void	NetBuffer::addBuffer( const unsigned char * buf, int bufsize)
 		{
 			resizeBuffer( offset+bufsize);
 			memcpy( buffer+offset, buf, bufsize);

@@ -47,6 +47,7 @@
 #include "vegastrike.h"
 #include "client.h"
 #include "networking/netbuffer.h"
+#include "md5.h"
 
 using std::cout;
 using std::endl;
@@ -452,6 +453,36 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
     return ret;
 }
 
+void NetClient::checkFile( string filename, unsigned char * md5digest)
+{
+	Packet pckt;
+	NetBuffer netbuf;
+
+	string full_univ_path = datadir+filename;
+	unsigned char * local_digest = new unsigned char[MD5_DIGEST_SIZE];
+	int ret;
+	if( (ret=md5sum_file( full_univ_path.c_str(), local_digest))<0)
+		cout<<"!!! ERROR = couldn't compute md5 digest on universe file !!!"<<endl;
+	delete local_digest;
+	// If the file does not exist or if md5sum are !=
+	if( ret || memcmp( md5digest, local_digest, MD5_DIGEST_SIZE))
+	{
+		// Add a char telling there is only one file to download
+		netbuf.addChar( 1);
+		// Add the galaxy file to be downloaded
+		netbuf.addString( filename);
+		pckt.send( CMD_ASKFILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+		__LINE__
+#else
+		528
+#endif
+		);
+		// HERE WAIT FOR THE DOWNLOAD in a CMD_ASKFILE packet !!!!
+		// this->PacketLoop( CMD_ASKFILE);
+	}
+}
+
 /**************************************************************/
 /**** Receive a message from the server                    ****/
 /**************************************************************/
@@ -495,19 +526,31 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
         {
             // Login accept
             case LOGIN_ACCEPT :
+			{
                 cout << ">>> " << this->serial << " >>> LOGIN ACCEPTED =( serial n°"
                      << packet_serial << " )= --------------------------------------"
 					 << endl;
                 // Should receive player's data (savegame) from server if there is a save
                 this->serial = packet_serial;
                 localSerials.push_back( this->serial);
-				// Go forward to go after the 2 strings (name, passwd)
-				netbuf.getString();
-				netbuf.getString();
 				globalsaves.push_back( netbuf.getString());
 				globalsaves.push_back( netbuf.getString());
+				// Get the galaxy file from buffer with relative path to datadir !
+				string univfile = netbuf.getString();
+				unsigned char * md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
+				this->checkFile( univfile, md5_digest);
+				// Get the initial system file...
+				string sysfile = netbuf.getString();
+				md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
+				this->checkFile( sysfile, md5_digest);
 				//globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
-                break;
+			}
+            break;
+			case CMD_ASKFILE :
+			{
+				// Receive the file and write it (trunc if exists)
+			}
+			break;
             // Login failed
             case LOGIN_ERROR :
                 cout<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;

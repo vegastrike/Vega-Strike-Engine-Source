@@ -73,6 +73,7 @@ enum Cmd
 
 	CMD_KILL         = 0x80,		// Send a kill to clients
 	CMD_JUMP         = 0x81,		// Send a jump request
+	CMD_ASKFILE      = 0x83,		// Ask the server for files (char=number of files and string containing the file names)
 
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost and established again :

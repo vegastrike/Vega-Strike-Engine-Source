@@ -108,6 +108,7 @@ class NetServer
 		void			sendLoginAlready( Client * clt, AddressIP ipadr);
 		void			sendLoginAccept( Client * clt, AddressIP ipadr, int acctnew);
 		void			sendLoginUnavailable( Client * clt, AddressIP ipadr);
+		void			getMD5( string filename, unsigned char * md5digest);
 
 	public:
 		NetServer();

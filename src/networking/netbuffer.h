@@ -82,9 +82,9 @@ class NetBuffer
 		int				getInt32();
 		void			addChar( char c);
 		char			getChar();
-		void			addBuffer( char * buf, int bufsize);
-		char *			getBuffer( int offt);
-		void			addBuffer( const char * buf, int bufsize);
+		void			addBuffer( unsigned char * buf, int bufsize);
+		unsigned char *	getBuffer( int offt);
+		void			addBuffer( const unsigned char * buf, int bufsize);
 		// Add and get a string with its length before the char * buffer part
 		void			addString( string str);
 		string			getString();

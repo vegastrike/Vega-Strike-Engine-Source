@@ -11,6 +11,9 @@
 
 *** ACCOUNT SERVER *****************************************************
 
+- Web-based account creation enhancements : fully create an initial savegame
+	- has to read faction.xml
+	- has to know about a few basic ships (specified by hand ?)
 
 *** GAME SERVER ********************************************************
 

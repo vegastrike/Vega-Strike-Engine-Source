@@ -49,6 +49,7 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/role_bitmask.h"
 #include "gfxlib_struct.h"
+#include "md5.h"
 
 double	clienttimeout;
 double	logintimeout;
@@ -60,6 +61,8 @@ double	SAVE_ATOM;
 #define MAXINPUT 1024
 char	input_buffer[MAXINPUT];
 int		nbchars;
+
+string	universe_file;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -172,6 +175,9 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		saves.push_back( netbuf.getString());
 		// Put the save parts in buffers in order to load them properly
 		cout<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
+		netbuf.Reset();
+		netbuf.addString( saves[0]);
+		netbuf.addString( saves[1]);
 
 		string PLAYER_CALLSIGN( clt->name);
 		QVector tmpvec( 0, 0, 0);
@@ -213,7 +219,21 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cout<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
         Packet packet2;
-		packet2.send( LOGIN_ACCEPT, cltserial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
+		unsigned char * mdigest = new unsigned char[MD5_DIGEST_SIZE];
+		string reluniv = "/universe/"+universe_file;
+		this->getMD5( reluniv, mdigest);
+		// Add the galaxy filename with relative path to datadir
+		netbuf.addString( reluniv);
+		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
+
+		// Add the initial star system filename + md5 too
+		static string sys = vs_config->getVariable("data","sectors","sectors");
+		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
+		this->getMD5( relsys, mdigest);
+		netbuf.addString( relsys);
+		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
+		delete mdigest;
+		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -221,6 +241,19 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 #endif
 			);
 		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
+	}
+}
+
+void	NetServer::getMD5( string filename, unsigned char * md5digest)
+{
+	// Add the galaxy md5sum in the netbuffer (as we should be at the end of it) in order to control on client side
+	string fulluniv = datadir+filename;
+	int ret;
+	if( (ret=md5sum_file( fulluniv.c_str(),
+							md5digest))<0 || ret)
+	{
+		cout<<"!!! ERROR = couldn't get universe file md5sum (not found or error) !!!"<<endl;
+		cleanup();
 	}
 }
 
@@ -449,7 +482,8 @@ void	NetServer::start(int argc, char **argv)
 	COUT << "done." << endl;
 
 	// Create the _Universe telling it we are on server side
-	_Universe = new Universe(argc,argv,vs_config->getVariable ("server","galaxy","milky_way.xml").c_str(), true);
+	universe_file = vs_config->getVariable ("server","galaxy","milky_way.xml");
+	_Universe = new Universe( argc, argv, universe_file.c_str(), true);
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
@@ -1051,172 +1085,183 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
             cout<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
         }
         break;
-    case CMD_INITIATE:
-        this->sendLocations( clt);
-        break;
-    case CMD_ADDCLIENT:
-		// Get the control stuff from buffer
-		// control = netbuf.get???();
-        // Add the client to the game
-        cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-        //cout<<"Received ADDCLIENT request"<<endl;
-        this->addClient( clt);
-        cout<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
-        break;
-    case CMD_POSUPDATE:
-        // Received a position update from a client
-        cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-        this->posUpdate( clt);
-        cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
-        break;
-    case CMD_NEWCHAR:
-        // Receive the new char and store it
-        this->recvNewChar( clt);
-        this->sendLocations( clt);
-        break;
-    case CMD_LETSGO:
-        // Add the client to zone id 1
-        // zonemgr->AddClient( clt, 1);
-        break;
-    case CMD_PING:
-		// Nothing to do here, just receiving the packet is enough
-        //cout<<"Got PING from serial "<<packet.getSerial()<<endl;
-        break;
-    case CMD_LOGOUT:
-        cout<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-        // Client wants to quit the game
-        logoutList.push_back( clt);
-        cout<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
-        break;
-    case CMD_ACK :
-        /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
-        /*** We must make sure those 2 conditions are enough ***/
-        cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
-        packet.ack( );
-        break;
+		case CMD_INITIATE:
+			this->sendLocations( clt);
+			break;
+		case CMD_ADDCLIENT:
+			// Add the client to the game
+			cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			//cout<<"Received ADDCLIENT request"<<endl;
+			this->addClient( clt);
+			cout<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
+			break;
+		case CMD_POSUPDATE:
+			// Received a position update from a client
+			cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			this->posUpdate( clt);
+			cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
+			break;
+		case CMD_NEWCHAR:
+			// Receive the new char and store it
+			this->recvNewChar( clt);
+			this->sendLocations( clt);
+			break;
+		case CMD_LETSGO:
+			// Add the client to the game in its zone
+			//this->addClient( clt);
+			break;
+		case CMD_PING:
+			// Nothing to do here, just receiving the packet is enough
+			//cout<<"Got PING from serial "<<packet.getSerial()<<endl;
+			break;
+		case CMD_LOGOUT:
+			cout<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			// Client wants to quit the game
+			logoutList.push_back( clt);
+			cout<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
+			break;
+		case CMD_ACK :
+			/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
+			/*** We must make sure those 2 conditions are enough ***/
+			cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
+			packet.ack( );
+			break;
 
-	case CMD_FIREREQUEST :
-		// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
-		// target_serial is in fact the serial of the firing unit (client itself or turret)
-		target_serial = netbuf.getSerial();
-		mount_num = netbuf.getInt32();
-		zone = netbuf.getShort();
-		mis = netbuf.getChar();
-		// Find the unit
-		// Set the concerned mount as ACTIVE and others as INACTIVE
-		un = zonemgr->getUnit( target_serial, zone);
-		if( un==NULL)
-			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
-		else
+		case CMD_ASKFILE :
 		{
-			vector <Mount>
-				::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
-			for (;i!=un->mounts.end();++i)
-				(*i).status=Mount::INACTIVE;
-				un->mounts[mount_num].status=Mount::ACTIVE;
-			// Ask for fire
-			if( mis != 0)
-				un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
-			else
-				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
-		}
-	break;
-	case CMD_JUMP :
-	{
-		string newsystem = netbuf.getString();
-		StarSystem * sts;
-		Cockpit * cp;
-		
-		un = clt->game_unit.GetUnit();
-		if( un==NULL)
-			cout<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
-		else
-		{
-			// Create the new star system if it isn't loaded yet
-			if( !(sts = _Universe->getStarSystem( newsystem+".system")))
-				zonemgr->addZone( newsystem+".system");
-			if( UnitUtil::JumpTo( un, newsystem))
+			char nbfiles = netbuf.getChar();
+			string file;
+			for( char i=0; i<nbfiles; i++)
 			{
-				// Remove unit/client from its old system
-				zonemgr->removeClient( clt);
-				// Update its star system in its savegame
-				cp = _Universe->isPlayerStarship( un);
-				cp->savegame->SetStarSystem( newsystem);
-				// Add it in the new one
-				this->addClient( clt);
-				// Send a CMD_JUMP to client with name of system (and md5 string ?)
-				netbuf.Reset();
-				netbuf.addString( newsystem);
-				p2.send( CMD_JUMP, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-					__LINE__
-#else
-					1076
-#endif
-					);
+				file = netbuf.getString();
+				// Add the file to a queue in the download thread
+				// with client serial in order to send him the file later
+				//DownloadQueue.add( file, clt->serial);
 			}
-		}	
-	}
-	break;
-	case CMD_SCAN :
-	{
-		// Received a target scan request
-		// WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
-		target_serial = netbuf.getSerial();
-		zone = netbuf.getShort();
-		un = zonemgr->getUnit( target_serial, zone);
-		// Get the un Unit data and send it in a packet
-		// Here we should get what a scanner could get on the target ship
-		// Get the unit that asked for target info
-		netbuf.Reset();
-		unclt = zonemgr->getUnit( packet.getSerial(), zone);
-		//float distance = UnitUtil::getDistance( unclt, un);
-		// Add armor data
-		/*
-		netbuf.addShort();
-		netbuf.addShort();
-		netbuf.addShort();
-		netbuf.addShort();
-		*/
-		// Add shield data
-		//netbuf.addFloat();
-		// ??
-		// Add hull
-		//netbuf.addFloat( un->hull);
-		// Add distance
-		//netbuf.addFloat( distance);
-	}
-	break;
-
-	/***************** NOT USED ANYMORE *******************/
-	// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
-	// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
-	// IF SOMEONE HAS BEEN HIT
-	case CMD_BOLT :
-	case CMD_BALL :
-		  // HERE ONLY SET THE CORRESPONDING MOUNT,UNIT COUPLE TO "FIRE"
-		  //p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
-		  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
+		}
 		break;
-	case CMD_PROJECTILE :
-	{
-		// DO NOT GET INFO FROM NETWORK - WE HAVE ALL THE INFO ON SERVER SIDE !!!
-		// SO ONLY DO WHAT IS NEEDED SO THAT IN THE NEXT STARSYSTEM UPDATE THE PROJECTILE IS "FIRED"
+		case CMD_FIREREQUEST :
+			// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
+			// target_serial is in fact the serial of the firing unit (client itself or turret)
+			target_serial = netbuf.getSerial();
+			mount_num = netbuf.getInt32();
+			zone = netbuf.getShort();
+			mis = netbuf.getChar();
+			// Find the unit
+			// Set the concerned mount as ACTIVE and others as INACTIVE
+			un = zonemgr->getUnit( target_serial, zone);
+			if( un==NULL)
+				cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+			else
+			{
+				vector <Mount>
+					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+				for (;i!=un->mounts.end();++i)
+					(*i).status=Mount::INACTIVE;
+					un->mounts[mount_num].status=Mount::ACTIVE;
+				// Ask for fire
+				if( mis != 0)
+					un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
+				else
+					un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+			}
+		break;
+		case CMD_JUMP :
+		{
+			string newsystem = netbuf.getString();
+			StarSystem * sts;
+			Cockpit * cp;
+			
+			un = clt->game_unit.GetUnit();
+			if( un==NULL)
+				cout<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
+			else
+			{
+				// Create the new star system if it isn't loaded yet
+				if( !(sts = _Universe->getStarSystem( newsystem+".system")))
+					zonemgr->addZone( newsystem+".system");
+				if( UnitUtil::JumpTo( un, newsystem))
+				{
+					// Remove unit/client from its old system
+					zonemgr->removeClient( clt);
+					// Update its star system in its savegame
+					cp = _Universe->isPlayerStarship( un);
+					cp->savegame->SetStarSystem( newsystem);
+					// Add it in the new one
+					this->addClient( clt);
+					// Send a CMD_JUMP to client with name of system (and md5 string ?)
+					netbuf.Reset();
+					netbuf.addString( newsystem);
+					p2.send( CMD_JUMP, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+#ifndef _WIN32
+						__LINE__
+#else
+						1076
+#endif
+						);
+				}
+			}	
+		}
+		break;
+		case CMD_SCAN :
+		{
+			// Received a target scan request
+			// WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
+			target_serial = netbuf.getSerial();
+			zone = netbuf.getShort();
+			un = zonemgr->getUnit( target_serial, zone);
+			// Get the un Unit data and send it in a packet
+			// Here we should get what a scanner could get on the target ship
+			// Get the unit that asked for target info
+			netbuf.Reset();
+			unclt = zonemgr->getUnit( packet.getSerial(), zone);
+			//float distance = UnitUtil::getDistance( unclt, un);
+			// Add armor data
+			/*
+			netbuf.addShort();
+			netbuf.addShort();
+			netbuf.addShort();
+			netbuf.addShort();
+			*/
+			// Add shield data
+			//netbuf.addFloat();
+			// ??
+			// Add hull
+			//netbuf.addFloat( un->hull);
+			// Add distance
+			//netbuf.addFloat( distance);
+		}
+		break;
 
-		  // THIS IS TO BE DONE IN MOUNT.CPP
-		  // Add the projectile in the client's zone
-		  //zonemgr->addUnit( temp, clt->zone);
+		/***************** NOT USED ANYMORE *******************/
+		// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
+		// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
+		// IF SOMEONE HAS BEEN HIT
+		case CMD_BOLT :
+		case CMD_BALL :
+			  // HERE ONLY SET THE CORRESPONDING MOUNT,UNIT COUPLE TO "FIRE"
+			  //p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
+			  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
+			break;
+		case CMD_PROJECTILE :
+		{
+			// DO NOT GET INFO FROM NETWORK - WE HAVE ALL THE INFO ON SERVER SIDE !!!
+			// SO ONLY DO WHAT IS NEEDED SO THAT IN THE NEXT STARSYSTEM UPDATE THE PROJECTILE IS "FIRED"
+
+			  // THIS IS TO BE DONE IN MOUNT.CPP
+			  // Add the projectile in the client's zone
+			  //zonemgr->addUnit( temp, clt->zone);
 
 		  // Finally send an ack to the creation of the created projectile in order to create them on all the clients in
 		  // the same zone (send the projectile serial)
 		  // We can some day add a check to send only to clients that are in a given range to that projectile
 		  //p2.bc_create( packet.getCommand(), temp->GetSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
 		  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
-	}
-	break;
-    default:
-        COUT << "Unknown command " << Cmd(cmd) << " ! "
-             << "from client " << clt->game_unit.GetUnit()->GetSerial() << endl;
+		}
+		break;
+    	default:
+        	COUT << "Unknown command " << Cmd(cmd) << " ! "
+             	 << "from client " << clt->game_unit.GetUnit()->GetSerial() << endl;
     }
 }
 
@@ -1254,7 +1299,6 @@ void	NetServer::addClient( Client * clt)
 	QVector safevec;
 	Cockpit * cp = _Universe->isPlayerStarship( un);
 	string starsys = cp->savegame->GetStarSystem();
-
 
 	unsigned short zoneid;
 	// If we return an existing starsystem we broadcast our info to others

@@ -1,9 +1,11 @@
 # LOGIN AND ADD IN GAME SEQUENCE
 
-CLIENT               		SERVER
+CLIENT               							SERVER
 
-CMD_LOGIN			-->
-					<--		LOGIN_ACCEPT, LOGIN_ERROR, LOGIN_ALREADY, LOGIN_UNAVAIL
-CMD_ADDCLIENT		-->
-					<--		CMD_ADDEDYOU (with serial #)
+CMD_LOGIN								-->
+										<--		LOGIN_ACCEPT (+md5sum of initial files), LOGIN_ERROR, LOGIN_ALREADY, LOGIN_UNAVAIL
+CMD_ASKFILE	(list bad or missing files)	-->
+										<--		CMD_ASKFILE*needed_files with needed files' content
+CMD_ADDCLIENT							-->
+										<--		CMD_ASKFILE (if bad or missing files) or CMD_ADDEDYOU (with serial #)
 Enter the game

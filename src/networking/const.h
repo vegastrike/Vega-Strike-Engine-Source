@@ -123,7 +123,7 @@ public: \
 #endif /* NDEBUG */
 /* --- END memory debugging macros --- */
 
-#ifndef _WIN32
+#if !defined( _WIN32) || defined( __CYGWIN__)
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
 #define LOCALCONST_DEF(Class,Type,Name,Value)
 #else
