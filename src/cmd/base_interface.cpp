@@ -104,7 +104,7 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		GFXEnable(LIGHTING);
 		int light=0;
 		GFXCreateLight(light,GFXLight(true,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(.1,.1,.1,1),GFXColor(1,0,0),GFXColor(1,1,1,0),24),true);
-		(un)->DrawNow(final);
+		(un)->DrawNow(final,FLT_MAX);
 		GFXDeleteLight(light);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
