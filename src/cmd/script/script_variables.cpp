@@ -292,7 +292,7 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
       assert(0);
     }
 
-    string value=node->attr_value("init");
+    string value=node->attr_value("initvalue");
 
     debug(5,node,mode,"defining variable "+node->script.name);
 
@@ -336,6 +336,13 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
 	assert(0);
       }
       printVarInst(vi);
+    }
+  }
+  else{
+    //local variable
+    if(!value.empty()){
+      fatalError(node,mode,"initvalue is not allowed for a local variable");
+      assert(0);
     }
   }
 

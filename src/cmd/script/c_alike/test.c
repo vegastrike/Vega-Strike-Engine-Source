@@ -8,6 +8,16 @@ globals {
 
 import a1;
 
+ int arss=4.3;
+ int aty:=34.3;
+
+ void t1(){
+   float b1=a*b;
+   float b2:=3.4;
+   a->push(a,b,cd);
+   
+ };
+
  int m1;
  //int ms1;
  float sdm2;
@@ -19,7 +29,7 @@ import a1;
  float sdm2;
 
 
-bool blah=true;
+bool blah:=true;
 
  float v,blubb,schnupf,blahs,df,a,vf,b,c;
  

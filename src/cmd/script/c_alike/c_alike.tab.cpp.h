@@ -27,10 +27,8 @@
 #define	L_BOOL	280
 #define	L_OBJECT	281
 #define	L_VOID	282
-#define	L_BEGINSCRIPT	283
-#define	L_ENDSCRIPT	284
-#define	L_BEGINBLOCK	285
-#define	L_ENDBLOCK	286
+#define	L_METHODCALL	283
+#define	L_INITVALUE	284
 
 
 extern YYSTYPE yylval;

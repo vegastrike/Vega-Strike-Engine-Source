@@ -55,6 +55,7 @@ void Mission::DirectorStart(missionNode *node){
   cout << "DIRECTOR START" << endl;
 
   debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
+  bool start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
 
   missionThread *main_thread=new missionThread;
   runtime.thread_nr=0;
@@ -145,14 +146,15 @@ void Mission::DirectorStart(missionNode *node){
     runtime.cur_thread->module_stack.pop_back();
   }
 
-#if 0
-  while(true){
-    DirectorLoop();
+  if(debuglevel>=1 && start_game==false){
+    while(true){
+      DirectorLoop();
 #ifndef _WIN32
-    sleep(1);
+      sleep(1);
 #endif
+    }
   }
-#endif
+
 }
 
 void Mission::DirectorLoop(){
@@ -256,7 +258,7 @@ void Mission::doModule(missionNode *node,int mode){
     }
     
     else{
-      fatalError(node,mode,"unkown node type");
+      fatalError(snode,mode,"unkown node type for module subnodes");
       assert(0);
     }
 

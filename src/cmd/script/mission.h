@@ -36,6 +36,7 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
+
 /* *********************************************************** */
 
 class Flightgroup {
@@ -164,6 +165,8 @@ class missionNode : public tagDomNode {
 };
 
 /* *********************************************************** */
+
+typedef vector<varInst *> olist_t;
 
 class Mission {
  public:
@@ -306,7 +309,21 @@ void printNode(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
 
+
+string method_str(missionNode *node);
+ missionNode *getArgument(missionNode *node,int mode,int arg_nr);
+
  varInst *call_olist(missionNode *node,int mode);
+ olist_t *getOListObject(missionNode *node,int mode,varInst *ovi);
+ varInst *call_olist_new(missionNode *node,int mode);
+ void call_olist_pop_back(missionNode *node,int mode,varInst *ovi);
+ void call_olist_push_back(missionNode *node,int mode,varInst *ovi,varInst *push);
+varInst * call_olist_at(missionNode *node,int mode,varInst *ovi,int index);
+varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
+
+ varInst *getObjectArg(missionNode *node,int mode);
+
+
 };
 
 #endif // _MISSION_H_

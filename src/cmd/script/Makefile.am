@@ -10,5 +10,7 @@ libscript_a_SOURCES =				\
 	script_util.cpp				\
 	script_statement.cpp			\
 	script_expression.cpp			\
-	script_callbacks.cpp			
+	script_callbacks.cpp			\
+	script_call_olist.cpp			
+
 
