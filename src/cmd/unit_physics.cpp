@@ -68,6 +68,7 @@ template <class UnitType>
 void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
 	int player = -1;
 
+  UnitType::UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc);
   // Here send (new position + direction = curr_physical_state.position and .orientation)
   // + speed to server (which velocity is to consider ?)
   // + maybe Angular velocity to anticipate rotations in the other network clients
@@ -141,7 +142,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 	
     }
   }
-  UnitType::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat, cum_vel,  lastframe,uc);
+  //UnitType::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat, cum_vel,  lastframe,uc);
 }
 
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/

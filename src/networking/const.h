@@ -22,7 +22,7 @@
 #define __CONST_H
 
 #include "config.h"
-#include "endianness.h"
+#include "posh.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -42,8 +42,10 @@
 #define MAX_COMMFREQ	42.0
 
 #define MAXSERIAL 0xFFFF
-#define OBJSERIAL_TONET VSSwapHostShortToLittle
-#define INSTSERIAL_TONET VSSwapHostIntToLittle
+#define OBJSERIAL_ToBig POSH_WriteU16ToBig
+#define INSTSERIAL_ToBig POSH_WriteU32ToBig
+#define OBJSERIAL_FromBig POSH_ReadU16FromBig
+#define INSTSERIAL_FromBig POSH_ReadU32FromBig
 typedef unsigned short ObjSerial;
 typedef unsigned int InstSerial;
 

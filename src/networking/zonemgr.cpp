@@ -412,7 +412,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, ClientState & un_cs)
 {
 	// This test may be wrong for server side units -> may cause more traffic than needed
-	if( !(un->prev_physical_state.position==un->curr_physical_state.position) || !(un->prev_physical_state.orientation==un->curr_physical_state.orientation))
+	if( !(un->old_state.getPosition()==un->curr_physical_state.position) || !(un->old_state.getOrientation()==un->curr_physical_state.orientation))
 	{
 		// Unit 'un' can see Unit 'iter'
 		// For now only check if the 'iter' client is in front of Unit 'un')

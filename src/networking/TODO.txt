@@ -1,10 +1,8 @@
 
 *** GENERAL ************************************************************
 
-- PORTAUDIO : add calls to Pa_CloseStream in DestroySession
-- Add text message support to NetworkCommunication class : displaying message has to be added
 - Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
-- Complete jVoIP support
+- LOW : Complete jVoIP support
 - PortAudio : tune MAX_PA_CPU_LOAD when support is complete
 - Netcomm : Add support for secure channels (encrypt with a key every data send on those channels)
   add encryption stuff
@@ -50,6 +48,8 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE - Add text message support to NetworkCommunication class : displaying message has to be added
+DONE - PORTAUDIO : add calls to Pa_CloseStream in DestroySession
 DONE - Server must be aware of webcam and portaudio client abilities
 DONE OK - Check if I really send path relative to datadir with filenames to download
 DONE - Implement a download manager -> Carsten is on that one
@@ -111,6 +111,7 @@ DONE - forsee account server unavailability and in that case, deny new logins + 
 
 === CLIENT SIDE =========================================================
 
+ELIMINATED - BUG : do not broadcast when orientation changes
 DONE - Find the jump call and make it only send a jump request to server
 DONE - Check if we received position info about us -> ignore
 DONE - Add the detection ov Video For Linux or Quicktime in configure.in -> if no present disable webcam (add a NETCOMM_NOCAM const)

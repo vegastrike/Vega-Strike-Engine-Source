@@ -1612,15 +1612,15 @@ void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & o
 {
 	Cockpit * cp = _Universe->isPlayerStarship( this);
   // Only in non-networking OR networking && is a player OR SERVER && not a player
-  if( (Network==NULL && !SERVER) || (Network!=NULL && cp) || (SERVER && !cp))
+  if( (Network==NULL && !SERVER) || (Network!=NULL && cp && !SERVER) || (SERVER && !cp))
   {
 	  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
 	    Rotate (SIMULATION_ATOM*(AngularVelocity));
 	  }
   }
 
-	// If it is not a player, it is a unit controlled by server so compute changes
-	if(Network!=NULL&& !cp)
+	// SERVERSIDE ONLY : If it is not a player, it is a unit controlled by server so compute changes
+	if( SERVER && Network!=NULL && !cp)
 	{
 		curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 		cumulative_transformation = curr_physical_state;

@@ -53,6 +53,7 @@
 #include "client.h"
 #include "networking/netbuffer.h"
 #include "networking/networkcomm.h"
+#include "posh.h"
 #include "md5.h"
 
 #ifdef micro_sleep
@@ -124,6 +125,7 @@ NetClient::NetClient()
     _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerClient );
 
+	cout<<endl<<endl<<POSH_GetArchString()<<endl;
 }
 
 NetClient::~NetClient()
@@ -1269,6 +1271,7 @@ void	NetClient::sendPosition( const ClientState* cs )
 	// Send the client state
 	COUT<<"Sending ClientState == ";
 	(*cs).display();
+	netbuf.addSerial( cs->getSerial());
 	netbuf.addClientState( (*cs));
 	pckt.send( CMD_POSUPDATE, this->game_unit.GetUnit()->GetSerial(),
                netbuf.getData(), netbuf.getDataLength(),

@@ -30,7 +30,7 @@ class NetBuffer
 		// Extends the buffer if we exceed its size
 		void			resizeBuffer( int newsize);
 		// Check if there is still enough data for 'len' to be read in buffer
-		void			checkBuffer( int len);
+		void			checkBuffer( int len, const char * fun);
 
 		void			addClientState( ClientState cs);
 		ClientState 	getClientState();
@@ -80,6 +80,8 @@ class NetBuffer
 		unsigned short	getShort();
 		void			addInt32( int i);
 		int				getInt32();
+		void			addUInt32( unsigned int i);
+		unsigned int	getUInt32();
 		void			addChar( char c);
 		char			getChar();
 		void			addBuffer( unsigned char * buf, int bufsize);

@@ -7,6 +7,7 @@
 #include "vs_path.h"
 #include "networking/netbuffer.h"
 #include "networking/vsnet_debug.h"
+#include "posh.h"
 
 VegaConfig * vs_config;
 string acctdir;
@@ -14,6 +15,7 @@ string acctdir;
 AccountServer::AccountServer()
     : _sock_set( true )
 {
+	cout<<endl<<POSH_GetArchString()<<endl;
     cout<<"AccountServer init"<<endl;
     // Network = new TCPNetUI;
     newaccounts = 0;

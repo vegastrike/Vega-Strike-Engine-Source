@@ -159,9 +159,9 @@ int		ClientState::operator==( const ClientState & ctmp)
 
 void	ClientState::netswap()
 {
-	// Switch everything to host byte order
-	this->delay = VSSwapHostIntToLittle( this->delay);
-	this->client_serial = OBJSERIAL_TONET( this->client_serial);
+	// Switch everything to host or network byte order
+	//this->delay = POSH_BigU32( this->delay);
+	//this->client_serial = OBJSERIAL_TONET( this->client_serial);
 
 	this->pos.netswap();
 	this->veloc.netswap();

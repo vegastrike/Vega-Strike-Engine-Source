@@ -29,6 +29,7 @@
 #include "configxml.h"
 
 class Unit;
+class NetBuffer;
 
 // Structure used to transmit client updates
 class	ClientState
@@ -63,6 +64,8 @@ class	ClientState
 		void	display() const;
 		int		operator==( const ClientState & ctmp);
 		void	netswap();
+
+		friend	class NetBuffer;
 };
 
 #endif

@@ -50,6 +50,7 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/role_bitmask.h"
 #include "gfxlib_struct.h"
+#include "posh.h"
 #include "md5.h"
 
 double	clienttimeout;
@@ -315,7 +316,8 @@ void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
 void	NetServer::startMsg()
 {
 	cout<<endl<<"Vegastrike Server version "<<GAMESERVER_VERSION<<endl;
-	cout<<"Written by Stephane Vaxelaire"<<endl<<endl;
+	cout<<"Written by Stephane Vaxelaire"<<endl<<endl<<endl;
+	cout<<POSH_GetArchString()<<endl;
 }
 
 /**************************************************************/

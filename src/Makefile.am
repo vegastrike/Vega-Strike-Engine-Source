@@ -100,6 +100,8 @@ libroot =		\
 	cg_global.cpp
 
 librootgeneric =				\
+	posh.c						\
+	posh.h						\
 	stardate.cpp				\
 	stardate.h					\
 	md5.cpp						\
@@ -155,6 +157,8 @@ vegaserver_SOURCES =			\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
+	posh.c					\
+	posh.h					\
 	libserver.cpp			\
 	configxml.cpp			\
 	configxml.h				\
