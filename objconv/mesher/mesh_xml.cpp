@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
-#include <expat.h>
+#include "expat.h"
 
 using std::vector;
 using std::string;
@@ -811,12 +811,23 @@ int main (int argc, char** argv) {
 
   XML memfile=(LoadXML(argv[1],1));
   fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
-  FILE * Outputfile=fopen(argv[2],"w"); 
+  FILE * Outputfile=fopen(argv[2],"wb"); 
   int intbuf;
   float floatbuf;
-  float versionnumber=(1.0)/(16.0);
+  int versionnumber=1;
+  unsigned char bytebuf;
+
   //HEADER
-  fwrite(&versionnumber,sizeof(float),1,Outputfile);// VERSION number for BinaryFormattedXMesh
+  bytebuf='B';
+  fwrite(&bytebuf,1,1,Outputfile);
+  bytebuf='F';
+  fwrite(&bytebuf,1,1,Outputfile);
+  bytebuf='X';
+  fwrite(&bytebuf,1,1,Outputfile);
+  bytebuf='M';
+  fwrite(&bytebuf,1,1,Outputfile);
+
+  fwrite(&versionnumber,sizeof(int),1,Outputfile);// VERSION number for BinaryFormattedXMesh
   floatbuf = memfile.scale;
   fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
   intbuf= memfile.reverse;
@@ -865,55 +876,83 @@ int main (int argc, char** argv) {
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Blue
   floatbuf= memfile.material.sa;
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
+  
+  //Incorrectly implemented 
+  /*
   floatbuf= memfile.detailplane.x;
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:X
   floatbuf= memfile.detailplane.y;
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Y
   floatbuf= memfile.detailplane.z;
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Z
+  */
+  //End Incorrectly implemented
+
   //END HEADER
   //GEOMETRY
   intbuf= memfile.vertices.size();
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices
-//  intbuf=-1;
-//  for(int j=0;j<3;j++){
-//		fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
-//  }
   for(int verts=0;verts<memfile.vertices.size();verts++){
-	  //intbuf=-1;
 	  floatbuf=memfile.vertices[verts].x;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:x
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:x
 	  floatbuf=memfile.vertices[verts].y;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:y
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:y
 	  floatbuf=memfile.vertices[verts].z;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:z
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:z
 	  floatbuf=memfile.vertices[verts].i;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:i
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:i
 	  floatbuf=memfile.vertices[verts].j;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:j
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:j
 	  floatbuf=memfile.vertices[verts].k;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:k
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:k
 	  floatbuf=memfile.vertices[verts].s;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:s
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:s
 	  floatbuf=memfile.vertices[verts].t;
-	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:t
-	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
-	  //for(int i=0;i<4;i++){
-	//	fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
-	 // }
+	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:t
+  }
+  intbuf= memfile.lines.size();
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of lines
+  for(int lines=0;lines<memfile.lines.size();lines++){
+	intbuf= memfile.lines[lines].flatshade;
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<2;tmpcounter++){
+		intbuf= memfile.lines[lines].indexref[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		intbuf= memfile.lines[lines].s[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//s coord
+		intbuf= memfile.lines[lines].t[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//t coord
+	}
+  }
+  intbuf= memfile.tris.size();
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of triangles
+  for(int tris=0;tris<memfile.tris.size();tris++){
+	intbuf= memfile.tris[tris].flatshade;
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<3;tmpcounter++){
+		intbuf= memfile.tris[tris].indexref[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		intbuf= memfile.tris[tris].s[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//s coord
+		intbuf= memfile.tris[tris].t[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//t coord
+	}
+  }
+  intbuf= memfile.quads.size();
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of Quads
+  for(int quads=0;quads<memfile.quads.size();quads++){
+	intbuf= memfile.quads[quads].flatshade;
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<4;tmpcounter++){
+		intbuf= memfile.quads[quads].indexref[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		intbuf= memfile.quads[quads].s[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//s coord
+		intbuf= memfile.quads[quads].t[tmpcounter];
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//t coord
+	}
   }
   //END GEOMETRY
-	//intbuf=-1;
-	//for(int i=0;i<4;i++){
-//		fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
-//	}
   return 0;
 }
 
