@@ -92,10 +92,11 @@ void GameUnit<UnitType>::Split (int level) {
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
-      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*10*mass*loc/loc.Magnitude());
+      static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".01"));//10 seconds for auto to kick in;
+      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*mass*loc/loc.Magnitude());
       loc.Set (rand(),rand(),rand());
       loc.Normalize();
-      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".002"));//10 seconds for auto to kick in;
+      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".0005"));//10 seconds for auto to kick in;
       splitsub->ApplyLocalTorque(loc*mass*explosion_torque*rSize()*(1+rand()%(int)(1+rSize())));
     }
   }
@@ -292,6 +293,8 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	  }
 	}
   }
+  static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
+  bool timealldone =(image->timeexplode>timebeforeexplodedone||_Universe->AccessCockpit()->GetParent()==this);
   if (image->explosion) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
@@ -300,7 +303,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
       Vector p,q,r;
       GetOrientation (p,q,r);
       image->explosion->SetOrientation(p,q,r);
-      if (image->explosion->Done()) {
+      if (image->explosion->Done()&&timealldone) {
 	delete image->explosion;	
 	image->explosion=NULL;
       }
@@ -314,9 +317,11 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
     UnitCollection::UnitIterator ui = getSubUnits();
     Unit * su;
     while ((su=ui.current())) {
-      alldone |=su->Explode(drawit,timeit);
+      bool temp = su->Explode(drawit,timeit);
+      if (su->GetImageInformation().explosion)
+	alldone |=temp;
       ui.advance();
     }
   }
-  return alldone;
+  return alldone||(!timealldone);
 }

@@ -1324,7 +1324,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       su->cloaking = (short unsigned int) cloaking;
       if (hull<0) {
 		UnFire();//don't want to go off shooting while your body's splitting everywhere
-		su->hull-=SIMULATION_ATOM;
+		//DEPRECATEDsu->hull-=SIMULATION_ATOM;
       }
       iter.advance();
       //    dead &=(subunits[i]->hull<0);
@@ -1371,6 +1371,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   Unit * un=NULL;
   QVector start (Position());
   QVector end (target->LocalPosition());
+  if (target->isSubUnit())
+    end = target->Position();
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;

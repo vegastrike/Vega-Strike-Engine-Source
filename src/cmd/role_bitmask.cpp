@@ -147,6 +147,9 @@ namespace ROLES {
 			}
 			free( temp);
 			fclose (fp);
+		}else {
+		  rolePriorities.push_back(vector <char>());
+		  rolePriorities[0].push_back(0);
 		}
 		return rolePriorities;
 	}
