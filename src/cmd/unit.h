@@ -768,6 +768,8 @@ public:
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;
+  ///Transforms a orientation vector Down a coordinate level. Does not take position into account
+  Vector DownCoordinateLevel(const Vector &v) const;
   ///Transforms a orientation vector from world space to local space. Does not take position into account 
   Vector ToLocalCoordinates(const Vector &v) const;
   ///Transforms a orientation vector to world space. Does not take position into account

@@ -724,6 +724,11 @@ Vector Unit::UpCoordinateLevel (const Vector &v) const {
 		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
 #undef M
 }
+Vector Unit::DownCoordinateLevel (const Vector &v) const {
+  Matrix m;
+  curr_physical_state.to_matrix(m);
+  return TransformNormal(m,v);
+}
 
 Vector Unit::ToLocalCoordinates(const Vector &v) const {
   //Matrix m;

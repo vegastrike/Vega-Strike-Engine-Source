@@ -212,8 +212,21 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
 }
 void ChangeHeading::Execute() {
   Vector local_heading (parent->UpCoordinateLevel(parent->GetAngularVelocity()));
-  terminatingX += (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i));
-  terminatingY += (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j));
+  char xswitch = (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i))?1:0;
+  char yswitch = (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j))?1:0;
+  if (xswitch) {
+    if (yswitch) {
+      parent->SetAngularVelocity(Vector (0,0,0));
+    }else {
+      local_heading.i=0;
+      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_heading));
+    }
+  }else {
+      local_heading.j=0;
+      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_heading));
+  }
+  terminatingX += xswitch;
+  terminatingY += yswitch;
   last_velocity = local_heading;
   local_heading = parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast());
   if (done) return ;
