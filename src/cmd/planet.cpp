@@ -219,7 +219,17 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
   }
 
   calculate_extent(false);
-
+  if (wormhole) {
+	  static float radscale=XMLSupport::parse_float(vs_config->getVariable("physics","jump_radius_scale",".5"));
+	  radius*=radscale;
+	  corner_min.i=corner_min.j=corner_min.k=-radius;
+	  corner_max.i=corner_max.j=corner_max.k=radius;
+	  radial_size=radius;
+	  if (!meshdata.empty()) {
+		  meshdata[0]->setVirtualBoundingBox(corner_min,corner_max,radius);
+	  }
+	  
+  }  
   /*stupid Sphere BSP when intersection should do
   string tmpname ("sphere");
   char temp [64];

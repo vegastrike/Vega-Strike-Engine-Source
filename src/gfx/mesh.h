@@ -396,7 +396,11 @@ public:
   void UpdateFX(float ttime);
   ///Adds a new damage effect with %age damage to the part of the unit. Color specifies the shield oclor
   void AddDamageFX (const Vector &LocalPos, const Vector &LocalNorm, const float percentage, const GFXColor &color=GFXColor (1,1,1,1)); 
-
+  void setVirtualBoundingBox(const Vector & mn, const Vector &mx, float rsize) {
+        radialSize=rsize;
+        this->mn=mn;
+		this->mx=mx;
+  }
 };
 #endif
 
