@@ -357,7 +357,8 @@ void NavigationSystem::Setup()
 
 
 void visitSystemHelp (Cockpit * cp, string systemname) {
-	vector< string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData(string("visited_")+_Universe->activeStarSystem()->getFileName());
+	string key (string("visited_")+systemname);
+	vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData(key);
 	if (v->empty())v->push_back ("v"); else (*v)[0]="v";
 	
 }

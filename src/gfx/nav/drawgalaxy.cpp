@@ -183,8 +183,10 @@ public:
 				for (int j=0;j<nas;++j) {
 					string n = UniverseUtil::GetAdjacentSystem(vstack[i],j);
 					if (!testandset(visited[n],true)) {
+						string key (string("visited_")+n);
 						static bool dontbothervisiting = !XMLSupport::parse_bool (vs_config->getVariable ("graphics","explore_for_map","true"));
-						if (dontbothervisiting||_Universe->AccessCockpit()->savegame->getMissionStringData(string("visited_")+n).size()>0) {
+						vector <string> * v = &_Universe->AccessCockpit()->savegame->getMissionStringData(key);
+						if (dontbothervisiting||v->size()>0) {
 							newsys.push_back(n);
 						}
 					}
