@@ -1066,8 +1066,8 @@ int main (int argc, char ** argv) {
 	}
 	if (argc>4)
 		path_to_universe=argv[4];
-	init_genrand(1094447);
-	srand(1094447);
+	init_genrand(4294442);
+	srand(4294442);
 	std::vector <System> s=readfile(argv[1]);
 	processsystems(s);
 	FILE * fp = fopen (argv[2],"w");
