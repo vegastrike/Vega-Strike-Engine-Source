@@ -174,8 +174,8 @@ bool Unit::Collide (Unit * target) {
     if (smaller->colTree->Collide (*bigger->colTree,
 				  &smalltransform,
 				  &bigtransform)) {
-      static int crashcount=0;
-      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
+      //static int crashcount=0;
+      //      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
       csCollisionPair * mycollide = csRapidCollider::GetCollisions();
       int numHits = csRapidCollider::numHits;
       if (numHits) {
