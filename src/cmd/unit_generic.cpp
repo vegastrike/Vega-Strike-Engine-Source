@@ -512,6 +512,7 @@ void Unit::Init()
   image->forcejump=false;
   sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
   sound->cloak=-1;
+  sound->jump=-1;
   image->hudImage=NULL;
   owner = NULL;
   faction =0;

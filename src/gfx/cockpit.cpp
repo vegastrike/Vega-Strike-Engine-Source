@@ -52,6 +52,7 @@ void soundContainer::loadsound (string soundfile,bool looping) {
 }
 void soundContainer::playsound () {
 	if (sound>=0) {
+		AUDAdjustSound(sound,_Universe->AccessCockpit()->AccessCamera()->GetPosition(),Vector(0,0,0));
 		AUDStartPlaying (sound);
 	}
 }
