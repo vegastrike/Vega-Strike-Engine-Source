@@ -2642,7 +2642,7 @@ void Unit::RegenShields () {
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
   static bool apply_difficulty_shields = XMLSupport::parse_bool (vs_config->getVariable("physics","difficulty_based_shield_recharge","true"));
   static float shield_maintenance_cost=XMLSupport::parse_float(vs_config->getVariable("physics","shield_maintenance_charge",".25"));
-  static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_power","true"));
+  static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_passive_recharge_maintenance","true"));
   static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".25"));
   const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
   static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));

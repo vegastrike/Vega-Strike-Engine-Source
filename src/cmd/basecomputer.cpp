@@ -3365,7 +3365,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	static float warpenratio = XMLSupport::parse_float (vs_config->getVariable("physics","warp_energy_multiplier","0.12"));
 	static float warpbleed = XMLSupport::parse_float (vs_config->getVariable("physics","warpbleed","1"));
     static float shield_maintenance_cost=XMLSupport::parse_float(vs_config->getVariable("physics","shield_maintenance_charge",".25"));
-    static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_power","true"));
+    static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_passive_recharge_maintenance","true"));
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
 
 	float Wconv= (1.0/warpenratio); // converts from reactor to warp energy scales
