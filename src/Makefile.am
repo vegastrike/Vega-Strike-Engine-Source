@@ -50,11 +50,11 @@ gfx/libgfxserver.a 				\
 gldrv/libgldrvserver.a 			\
 cmd/collide/libcollide.a 		\
 boost129/libboost_python.a      \
-boost/libboost_python.a
+boost/libboost_python.a -lz
 
 accountserver_LDADD =           \
 common/libvscommon.a            \
-networking/libnetacct.a
+networking/libnetacct.a -lz
 
 
 libroot =		\
