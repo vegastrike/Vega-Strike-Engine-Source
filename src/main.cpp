@@ -20,6 +20,11 @@
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
 #endif
+
+#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#import <sys/param.h>
+#endif
+
 #include "vs_globals.h"
 #include "gfxlib.h"
 #include "in_kb.h"
@@ -89,8 +94,25 @@ void bootstrap_main_loop();
 
 int main( int argc, char *argv[] ) 
 {
+#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+    // We need to set the path back 2 to make everything ok.
+    char parentdir[MAXPATHLEN];
+    char *c;
+    printf("current dir: %s\n", argv[0]);
+    strncpy ( parentdir, argv[0], sizeof(parentdir) );
+    c = (char*) parentdir;
 
+    while (*c != '\0')     /* go to end */
+        c++;
+    
+    while (*c != '/')      /* back up to parent */
+        c--;
+    
+    *c++ = '\0';             /* cut off last part (binary name) */
   
+    chdir (parentdir);/* chdir to the binary app's parent */
+    chdir ("../../../");/* chdir to the .app's parent */
+#endif
     /* Print copyright notice */
   fprintf( stderr, "Vega Strike "  " \n"
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );

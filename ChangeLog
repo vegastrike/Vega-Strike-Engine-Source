@@ -1,3 +1,7 @@
+2002-04-01 Corey O'Connor <oconnorc@dogheadbone.com>
+        * Additions and fixes to make a double clickable app.
+          - The big problem was the os x glut was setting the working dir to Resources in the bundle. Ack.
+          
 2002-03-01 Corey O'Connor <oconnorc@dogheadbone.com>
         * Initial commit of mac os x support. 
           - Lot's of small changes. Mostly to header files and such.

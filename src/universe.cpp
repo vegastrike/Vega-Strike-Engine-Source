@@ -37,17 +37,26 @@
 
 #include "cmd/script/mission.h"
 
+#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#import <sys/param.h>
+#endif
+
 using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
 Universe::Universe(int argc, char** argv, const char * galaxy)
 {
+#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+    // get the current working directory so when glut trashes it we can restore.
+    char pwd[MAXPATHLEN];
+    getcwd (pwd,MAXPATHLEN);
+#endif
 	//Select drivers
-
-
-
 	GFXInit(argc,argv);
-
+#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+    // Restore it
+    chdir(pwd);
+#endif
 	StartGFX();
 	InitInput();
 

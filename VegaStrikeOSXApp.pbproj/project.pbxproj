@@ -138,7 +138,6 @@
 			children = (
 				F545C038022F465B01AD3AF8,
 				089C165CFE840E0CC02AAC07,
-				F545BE37022F426101AD3AF8,
 			);
 			isa = PBXGroup;
 			name = Resources;
@@ -188,6 +187,7 @@
 				WRAPPER_EXTENSION = app;
 			};
 			dependencies = (
+				F57B9BC50231750F01AD3AF8,
 			);
 			isa = PBXApplicationTarget;
 			name = VegaStrikeOSXApp;
@@ -212,10 +212,6 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>0.1</string>
-	<key>NSMainNibFile</key>
-	<string>SDLMain</string>
-	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
 </dict>
 </plist>
 ";
@@ -232,7 +228,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				089C165EFE840E0CC02AAC07,
-				F545BE39022F426101AD3AF8,
 				F545C039022F465B01AD3AF8,
 			);
 			isa = PBXResourcesBuildPhase;
@@ -314,27 +309,6 @@
 			settingsToPassInEnvironment = 287;
 			settingsToPassOnCommandLine = 280;
 			shouldUseHeadermap = 0;
-		};
-		F545BE37022F426101AD3AF8 = {
-			children = (
-				F545BE38022F426101AD3AF8,
-			);
-			isa = PBXVariantGroup;
-			name = SDLMain.nib;
-			path = "";
-			refType = 4;
-		};
-		F545BE38022F426101AD3AF8 = {
-			isa = PBXFileReference;
-			name = English;
-			path = English.lproj/SDLMain.nib;
-			refType = 4;
-		};
-		F545BE39022F426101AD3AF8 = {
-			fileRef = F545BE37022F426101AD3AF8;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		F545BE3A022F432401AD3AF8 = {
 			children = (
@@ -3447,6 +3421,10 @@
 			isa = PBXBuildFile;
 			settings = {
 			};
+		};
+		F57B9BC50231750F01AD3AF8 = {
+			isa = PBXTargetDependency;
+			target = F545BE36022F3FB301AD3AF8;
 		};
 	};
 	rootObject = 29B97313FDCFA39411CA2CEA;

@@ -2,7 +2,7 @@
 {
 	29B97313FDCFA39411CA2CEA = {
 		activeBuildStyle = 4A9504CCFFE6A4B311CA0CBA;
-		activeTarget = F545BE36022F3FB301AD3AF8;
+		activeTarget = 29B97326FDCFA39411CA2CEA;
 		addToTargets = (
 			29B97326FDCFA39411CA2CEA,
 		);
@@ -13,9 +13,10 @@
 					ActiveTab = 0;
 					Frame = "{{0, 23}, {1174, 891}}";
 					Split0 = {
+						ActiveTab = 2;
 						Frame = "{{224, 0}, {950, 891}}";
 						Split0 = {
-							Frame = "{{0, 24}, {950, 867}}";
+							Frame = "{{0, 453}, {950, 438}}";
 						};
 						SplitCount = 1;
 						Tab0 = {

@@ -273,6 +273,7 @@ void Universe::Faction::ParseAllies (Universe * thisuni) {
 void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   unitlevel=0;
   const int chunk_size = 16384;
+  cout << "FactionXML:LoadXML " << filename << endl;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
 	assert(0);
