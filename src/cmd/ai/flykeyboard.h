@@ -11,6 +11,7 @@
 class FlyByKeyboard: public FlyByWire {
   Order * autopilot;
   Vector axis_key;
+  float last_jumped;
  protected:
   void KeyboardUp (float val);
   void KeyboardRight (float val);

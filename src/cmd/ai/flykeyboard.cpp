@@ -7,7 +7,7 @@
 #include "vs_globals.h"
 #include "gfx/cockpit.h" 
 #include "networking/netclient.h"
-
+#include "lin_time.h"
 struct StarShipControlKeyboard {
   bool switchmode;
   bool setunvel;
@@ -63,7 +63,7 @@ static StarShipControlKeyboard &g() {
 
 extern void JoyStickToggleDisable();
 FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire (),axis_key(0,0,0) {
-  
+  this->last_jumped=0;
   this->whichplayer=whichplayer;
   while(starshipcontrolkeys.size()<=whichplayer) {
     starshipcontrolkeys.push_back (StarShipControlKeyboard());
@@ -351,14 +351,17 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       MatchSpeed (targ->GetVelocity());
   }
   if (SSCK.jumpkey) {
-    parent->ActivateJumpDrive();
-    if (parent->GetJumpStatus().drive>=0) {
-      static soundContainer foobar;
-      if (foobar.sound==-2) {
-	static string str=vs_config->getVariable("cockpitaudio","jump_engaged","jump");
-	foobar.loadsound(str);
+    if (getNewTime()-last_jumped>3||last_jumped==0) {
+      last_jumped=getNewTime();
+      parent->ActivateJumpDrive();
+      if (parent->GetJumpStatus().drive>=0) {
+        static soundContainer foobar;
+        if (foobar.sound==-2) {
+          static string str=vs_config->getVariable("cockpitaudio","jump_engaged","jump");
+          foobar.loadsound(str);
+        }
+        foobar.playsound();
       }
-      foobar.playsound();
     }
     SSCK.jumpkey=false;
   }else {
