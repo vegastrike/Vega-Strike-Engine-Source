@@ -10,6 +10,9 @@ using std::hex;
 extern bool cleanexit;
 
 #ifdef DSHOW
+/**************************************************************************************************/
+/**** SampleGrabberCallback for DirectShow                                                     ****/
+/**************************************************************************************************/
 AM_MEDIA_TYPE g_StillMediaType;
 STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long BufferLen )
 	{
@@ -47,6 +50,10 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 		return S_OK;
 	}
 #endif
+
+/**************************************************************************************************/
+/**** DoError : Close webcam stuff and exits with given code                                   ****/
+/**************************************************************************************************/
 void	WebcamSupport::DoError( long error, char * message)
 {
 	if( error)
@@ -58,6 +65,9 @@ void	WebcamSupport::DoError( long error, char * message)
 	}
 }
 
+/**************************************************************************************************/
+/**** WebcamSupport default constructor                                                        ****/
+/**************************************************************************************************/
 WebcamSupport::WebcamSupport()
 {
 	this->width = 160;
@@ -99,6 +109,9 @@ WebcamSupport::WebcamSupport()
 #endif
 }
 
+/**************************************************************************************************/
+/**** WebcamSupport constructor specifying capture size and fps                                ****/
+/**************************************************************************************************/
 WebcamSupport::WebcamSupport( int f, int w, int h)
 {
 	WebcamSupport::WebcamSupport();
@@ -107,6 +120,9 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 	this->fps = f;
 }
 
+/**************************************************************************************************/
+/**** Initialize the webcam                                                                    ****/
+/**************************************************************************************************/
 int		WebcamSupport::Init()
 {
 #ifdef linux
@@ -289,6 +305,9 @@ int		WebcamSupport::Init()
 #endif
 }
 
+/**************************************************************************************************/
+/**** Tell if it is time to grab a new frame                                                   ****/
+/**************************************************************************************************/
 bool	WebcamSupport::isReady()
 {
 	bool ret;
@@ -305,6 +324,9 @@ bool	WebcamSupport::isReady()
 	return ret;
 }
 
+/**************************************************************************************************/
+/**** Display webcam driver info                                                               ****/
+/**************************************************************************************************/
 void	WebcamSupport::GetInfo()
 {
 #ifdef linux
@@ -312,6 +334,9 @@ void	WebcamSupport::GetInfo()
 #endif
 }
 
+/**************************************************************************************************/
+/**** Start the capture mode                                                                   ****/
+/**************************************************************************************************/
 void	WebcamSupport::StartCapture()
 {
 	grabbing = true;
@@ -330,14 +355,51 @@ void	WebcamSupport::StartCapture()
 #endif
 #ifdef __APPLE__
 	ComponentResult		component_error = noErr;
+	OSErr	iErr;
+
+	// Set the callback
+	//iErr = SGSetDataProc( video->sg_component, NewSGDataUPP( processFrame), (long)this->video);
+	// Prepare for recording
 	component_error = SGPrepare( video->sg_component, false, true);
 	DoError( component_error, "SGPrepare failed");
 
+	// Start record
 	component_error = SGStartRecord( video->sg_component);
 	DoError( component_error, "SGStartRecord failed");
 #endif
 }
 
+#ifdef __APPLE__
+/**************************************************************************************************/
+/**** Process data written to the video channel                                                ****/
+/**************************************************************************************************/
+pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chRefCon, TimeValue time, short writeType, long refCon)
+{
+	WebcamSupport * ws = (WebcamSupport *) refCon;
+	if( ws && ws->isReady())
+	{
+		// Write p to a file
+		string path = datadir+"testcam.jpg";
+		FILE * fp;
+		fp = fopen( path.c_str(), "w");
+		if( !fp)
+		{
+			cerr<<"opening jpeg file failed"<<endl;
+			exit(1);
+		}
+		if( fwrite( p, 1, len, fp)!=len)
+		{
+			cerr<<"writing jpeg description to file"<<endl;
+			exit(1);
+		}
+		fclose( fp);
+	}
+}
+#endif
+
+/**************************************************************************************************/
+/**** Copy an image... not used for now                                                        ****/
+/**************************************************************************************************/
 int		WebcamSupport::CopyImage()
 {
 #ifdef linux
@@ -348,6 +410,9 @@ int		WebcamSupport::CopyImage()
 	return 0;
 }
 
+/**************************************************************************************************/
+/**** End capture mode                                                                         ****/
+/**************************************************************************************************/
 void	WebcamSupport::EndCapture()
 {
 	grabbing = false;
@@ -369,6 +434,9 @@ void	WebcamSupport::EndCapture()
 #endif
 }
 
+/**************************************************************************************************/
+/**** Get the latest grabbed image                                                             ****/
+/**************************************************************************************************/
 char *	WebcamSupport::CaptureImage()
 {
 if( grabbing)
@@ -460,7 +528,7 @@ if( grabbing)
 	iErr = GetMaxCompressionSize( pix, &r, 0, codecNormalQuality, kJPEGCodecType, (CodecComponent) anyCodec, &maxCompressionSize);
 		DoError( iErr, "GetMaxCompressionSize failed.");
 	// Compress the image and get the its description
-	ImageDescriptionHandle desc = (ImageDescriptionHandle) NewHandle(4);
+	ImageDescriptionHandle desc = (ImageDescriptionHandle) NewHandle(0);
 	Handle	jpeg_handle = NewHandle(maxCompressionSize);
 	Ptr jpeg_data = *jpeg_handle;
 	MoveHHi( jpeg_handle);
@@ -491,6 +559,9 @@ else
 return NULL;
 }
 
+/**************************************************************************************************/
+/**** GetCapturedSize : not used                                                              ****/
+/**************************************************************************************************/
 int		WebcamSupport::GetCapturedSize()
 {
 #ifdef linux
@@ -506,6 +577,9 @@ int		WebcamSupport::GetCapturedSize()
 	return 0;
 }
 
+/**************************************************************************************************/
+/**** Close devices, free momory correctly (well soon :))                                      ****/
+/**************************************************************************************************/
 void	WebcamSupport::Shutdown()
 {
 #ifdef linux

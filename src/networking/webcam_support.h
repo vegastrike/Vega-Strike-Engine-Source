@@ -53,6 +53,7 @@ public:
 #endif
 #ifdef __APPLE__
 #include <QuickTimeComponents.h>
+pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chRefCon, TimeValue time, short writeType, long refcon);
 #endif
 #define DEFAULT_CAPTURE_DRIVER 0
 
