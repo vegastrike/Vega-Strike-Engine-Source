@@ -163,19 +163,8 @@ void ExamineWhenTargetKey() {
       if (_Universe->AccessCockpit()->getVDUMode(examine)==VDU::TARGET)
         break;
     }
-    if (examine==2){
-      switch (view) {
-      case 2:
-        SwitchVDUTo(VDU::TARGET);
-        break;
-      default:        
-        SwitchVDUTo(VDU::TARGET);
-        if (_Universe->AccessCockpit()->getVDUMode(view)!=VDU::VIEW) {
-          SwitchVDUTo(VDU::TARGET);
-          SwitchVDUTo(VDU::VIEW);          
-        }
-        break;
-      }
+    if ((examine==2) && (view==2)){
+      SwitchVDUTo(VDU::TARGET);
     }
   }
 }
