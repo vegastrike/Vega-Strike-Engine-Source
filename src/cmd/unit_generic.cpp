@@ -3192,17 +3192,35 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   return cancompletefully;
 }
-
+Unit * makeBlankUpgrade (string templnam, int faction) {
+  Unit * bl =  UnitFactory::createServerSideUnit (templnam.c_str(),true,faction);
+  for (int i= bl->numCargo()-1;i>=0;i--) {
+    int q =bl->GetCargo (i).quantity;
+    bl->RemoveCargo (i,q);
+  }
+  bl->mass=0;
+  return bl;
+}
+const Unit * makeFinalBlankUpgrade (string name, int faction) {
+  char * unitdir = GetUnitDir(name.c_str());
+  string limiternam = string(unitdir)+string(".blank");
+  free (unitdir);
+  const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
+  if (!lim)
+    lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),makeBlankUpgrade(limiternam,faction));
+  return lim;
+}
+const Unit * makeTemplateUpgrade (string name, int faction) {
+  char * unitdir = GetUnitDir(name.c_str());
+  string limiternam = string(unitdir)+string(".template");
+  free (unitdir);
+  const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
+  if (!lim)
+    lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
+  return lim;
+}
 bool Unit::RepairUpgrade () {
-    char * unitdir = GetUnitDir (name.c_str());
-    string templnam = unitdir+string(".blank");
-    const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(templnam,
-                                                                        faction));
-    if (!temprate) {
-        temprate = UnitConstCache::setCachedConst(StringIntKey(templnam,faction),
-                                                  UnitFactory::createServerSideUnit (templnam.c_str(),true,faction));
-    }
-    free(unitdir);
+  const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
@@ -3458,7 +3476,8 @@ std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   Unit * un = (Unit *)mythis;
   float mass = un->mass;
   for (unsigned int i=0;i<un->image->cargo.size();i++) {
-    mass-=un->image->cargo[i].mass*un->image->cargo[i].quantity;
+    if (un->image->cargo[i].quantity>0)
+      mass-=un->image->cargo[i].mass*un->image->cargo[i].quantity;
   }
   return XMLSupport::tostring((float)mass);
 }
@@ -3531,8 +3550,10 @@ void Unit::SortCargo() {
       float tmpmass = un->image->cargo[i].quantity*un->image->cargo[i].mass+un->image->cargo[i+1].quantity*un->image->cargo[i+1].mass;
       float tmpvolume = un->image->cargo[i].quantity*un->image->cargo[i].volume+un->image->cargo[i+1].quantity*un->image->cargo[i+1].volume;
       un->image->cargo[i].quantity+=un->image->cargo[i+1].quantity;
-      tmpmass/=un->image->cargo[i].quantity;
-      tmpvolume/=un->image->cargo[i].quantity;
+      if (un->image->cargo[i].quantity) {
+	tmpmass/=un->image->cargo[i].quantity;
+	tmpvolume/=un->image->cargo[i].quantity;
+      }
       un->image->cargo[i].volume=tmpvolume;
 	  un->image->cargo[i].mission = (un->image->cargo[i].mission||un->image->cargo[i+1].mission);
       un->image->cargo[i].mass=tmpmass;

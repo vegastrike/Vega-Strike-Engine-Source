@@ -25,7 +25,8 @@ extern Music *muzak;
 extern int GetModeFromName (const char *);
 
 using std::string;
-
+extern const Unit * makeFinalBlankUpgrade (string name, int faction);
+extern const Unit * makeTemplateUpgrade (string name, int faction);
 static string beautify (const std::string &input) {
   string ret = input;
   string::iterator i=ret.begin();
@@ -880,17 +881,14 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
       std::string limiternam = (string(unitdir)+string(".blank"));
       const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(templnam,un->faction));
       if (!temprate)
-	temprate = UnitConstCache::setCachedConst(StringIntKey(templnam,un->faction),UnitFactory::createUnit (templnam.c_str(),true,un->faction));
+	temprate = UnitConstCache::setCachedConst(StringIntKey(templnam,un->faction),UnitFactory::createUnit(templnam.c_str(),true,un->faction));
       free(unitdir);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
       }else {
 	templ=NULL;
       }
-      const Unit * dglim = UnitConstCache::getCachedConst (StringIntKey (limiternam,un->faction));
-      if (!dglim) {
-          dglim = UnitConstCache::setCachedConst (StringIntKey(limiternam,un->faction), UnitFactory::createServerSideUnit(limiternam.c_str(),true,un->faction));
-      }
+      const Unit * dglim = makeFinalBlankUpgrade (un->name,un->faction);
       if (dglim->name!=string("LOAD_FAILED")) {
           downgradelimiter= dglim;
       }else {
@@ -918,6 +916,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  if (0==strcmp (input_buffer,"repair")) {
 	    free (input_buffer);
 	    char *unitdir =GetUnitDir(un->name.c_str());
+	    fprintf (stderr,"SOMETHING WENT WRONG WITH REPAIR UPGRADE");
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
