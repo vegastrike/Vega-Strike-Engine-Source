@@ -62,11 +62,18 @@ private:
         u_int8_t  _pri;
         u_int8_t  _flags;
 
+        Header( ) {
+            _len   = 0;
+            _pri   = 1;
+            _flags = 0;
+	}
+		
         Header( int l ) {
             _len   = htonl( l );
             _pri   = 1;
             _flags = 0;
         }
+
         inline u_int32_t h_len() const {
             return ntohl(_len);
         }

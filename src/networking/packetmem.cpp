@@ -228,7 +228,7 @@ PacketMemShadow::PacketMemShadow( const PacketMem& mem )
     , _len( mem.len() )
 { }
 
-PacketMemShadow::PacketMemShadow( const PacketMem& mem, size_t idx size_t len )
+PacketMemShadow::PacketMemShadow( const PacketMem& mem, size_t idx, size_t len )
     : _mem( mem )
     , _idx( idx )
     , _len( len )

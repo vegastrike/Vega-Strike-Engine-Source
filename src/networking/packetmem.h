@@ -79,7 +79,7 @@ public:
     PacketMemShadow( );
     PacketMemShadow( const PacketMemShadow& orig );
     PacketMemShadow( const PacketMem& mem );
-    PacketMemShadow( const PacketMem& mem, size_t idx size_t len );
+    PacketMemShadow( const PacketMem& mem, size_t idx, size_t len );
 
     PacketMemShadow& operator=( const PacketMemShadow& orig );
 

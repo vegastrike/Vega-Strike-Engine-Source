@@ -298,7 +298,7 @@ void VsnetTCPSocket::lower_selected( )
 	        assert( _incomplete_packet == 0 );   // we expect a len, can not have data yet
 	        assert( _incomplete_header < sizeof(Header) ); // len is coded in sizeof(Header) bytes
 	        int len = sizeof(Header) - _incomplete_header;
-            char* b = (char*)&header;
+            char* b = (char*)&_header;
 	        int ret = ::recv( _fd, &b[_incomplete_header], len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
