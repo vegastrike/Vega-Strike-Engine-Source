@@ -225,6 +225,10 @@ void Unit::EjectCargo (unsigned int index) {
 	cargo->mass = tmp->mass;
 	if (name.length()>0) {
 	  cargo->name=name;
+	} else {
+	  if (tmp) {
+	    cargo->name=tmp->content;
+	  }
 	}
 	if (cp) {
 	  PrimeOrders();

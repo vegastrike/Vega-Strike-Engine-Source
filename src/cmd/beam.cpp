@@ -7,6 +7,7 @@
 #include "gfx/decalqueue.h"
 using std::vector;
 #include "audiolib.h"
+#include "images.h"
 static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
@@ -349,7 +350,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   }
   //Check if collide...that'll change max beam length REAL quick
 }
-
+extern Cargo * GetMasterPartList (const char *);
 bool Beam::Collide (Unit * target) {
   if (this==NULL||target==NULL){
     fprintf (stderr,"Recovering from nonfatal beam error when beam inactive\n");
@@ -381,10 +382,44 @@ bool Beam::Collide (Unit * target) {
     float tmp=(curlength/range); 
     float appldam = (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
     float phasdam = (phasedamage*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
-    if (appldam>0||phasdam>0) {
-      target->ApplyDamage (center+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
-    }else if (damagerate<0||phasedamage<0) {
-      target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
+    if (appldam<0&&phasdam>0) {
+      //tractor beam!
+      target->ApplyForce (direction*appldam);
+      if ((center-target->Position()).Magnitude()<phasdam) {
+	un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
+	Unit *un;
+	for (;(un=*ui)!=NULL;++ui) {
+	  if (((void *)un)==owner) {
+	    //we have our man!
+	    //lets add our cargo to him
+	    Cargo *c = GetMasterPartList (target->name.c_str());
+	    Cargo tmp;
+	    if (c==NULL) {
+	      c=&tmp;
+	      tmp.content="spacejunk";
+	      tmp.category="misc";
+	      tmp.price=200;
+	      tmp.quantity=1;
+	      tmp.mass=.001;
+	      tmp.volume=1;
+	    }
+	    if (c!=NULL) {
+	      Cargo adder = *c;
+	      adder.quantity=1;
+	      if (un->CanAddCargo(adder)) {
+		un->AddCargo(adder);
+		target->Kill();
+	      }
+	    }
+	  }
+	}
+      }
+    }else {
+      if (appldam>0||phasdam>0) {
+	target->ApplyDamage (center+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
+      }else if (damagerate<0||phasedamage<0) {
+	target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
+      }
     }
     return true;
     
