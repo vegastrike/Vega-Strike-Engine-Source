@@ -622,6 +622,7 @@ void Cockpit::Draw() {
       }
 
     }
+    GFXColor4f (1,1,1,1);
     if (un->GetHull()>0)
       die = false;
     if (un->Threat()!=NULL) {

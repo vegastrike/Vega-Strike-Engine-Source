@@ -498,7 +498,7 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   GFXColor4f (1,parent->GetHull()/ (*maxhull),parent->GetHull()/(*maxhull),1);
   GFXEnable (TEXTURE0);
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
-
+  GFXColor4f (1,1,1,1);
   
 }
 void VDU::SetViewingStyle(VIEWSTYLE vs) {

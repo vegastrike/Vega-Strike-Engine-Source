@@ -62,6 +62,7 @@ class Planet : public Unit {
   UnitCollection satellites;
   UnitCollection insiders;
   std::vector <int> lights;
+  Animation *shine;
  public:
   Planet();
   void DisableLights ();

@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <memory.h>
-#include "aux_texture.h"
+#include "animation.h"
 #include "aux_logo.h"
 #include "mesh.h"
 #include "matrix.h"
@@ -383,6 +383,7 @@ void Mesh::ProcessZFarMeshes () {
     i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));
   }
   undrawn_meshes[NUM_ZBUF_SEQ].clear();
+  Animation::ProcessFarDrawQueue();
   _Universe->activeStarSystem()->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);

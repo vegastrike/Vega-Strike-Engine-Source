@@ -26,9 +26,18 @@
 #include "lin_time.h"
 #include <stack>
 #include "vs_path.h"
+#include "vs_globals.h"
+#include "point_to_cam.h"
+#include "config_xml.h"
+#include "xml_support.h"
 using std::stack;
 
+static stack<Animation *> far_animationdrawqueue;
 static stack<Animation *> animationdrawqueue;
+const unsigned char ani_up=1;
+const unsigned char ani_close=2;
+const unsigned char ani_alpha=4;
+const unsigned char ani_repeat=8;
 
 Animation::Animation ()
 {
@@ -36,18 +45,28 @@ Animation::Animation ()
 	width = 0.001F;
 }
 
-Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient)
+Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
 {	
   vschdir ("animations");
   vschdir (FileName);
-  repeat = Rep;
-  camup = camorient;
+  //  repeat = Rep;
+  options=0;
+  if (Rep)
+    options|=ani_repeat;
+  if (camorient) {
+    options |= ani_up;
+  }
+  if (appear_near_by_radius) {
+    options|=ani_close;
+  }
   FILE * fp = fopen (FileName, "r");
-  if (!fp)
+  if (!fp) {
     ; // do something 
-  else {
+  } else {
     fscanf (fp, "%f %f", &width, &height);
-    alphamaps=(width>0);
+    if (width>0) {
+      options|=ani_alpha;
+    }
     width = fabs(width*0.5F);
     height = height*0.5F;
     Load (fp,0,ismipmapped);
@@ -90,19 +109,31 @@ void Animation:: GetDimensions(float &wid, float &hei) {
   hei = height;
 }
 
+
 void Animation::ProcessDrawQueue () {
-  bool alphamaps=true;
+  ProcessDrawQueue (animationdrawqueue);
+}
+
+void Animation::ProcessFarDrawQueue () {
+
+  //set farshit
+  ProcessDrawQueue (far_animationdrawqueue);
+}
+
+void Animation::ProcessDrawQueue (std::stack <Animation *> &animationdrawqueue) {
+  unsigned char alphamaps=ani_alpha;
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   GFXDisable (DEPTHWRITE);
-  GFXColor4f (1,1,1,1);//fixme, should we need this? we get som egreenie explosions
+
   while (!animationdrawqueue.empty()) {
+    GFXColorf (animationdrawqueue.top()->mycolor);//fixme, should we need this? we get som egreenie explosions
     Matrix result;
-    if (alphamaps!=animationdrawqueue.top()->alphamaps) {
-      alphamaps = !alphamaps;
-      GFXBlendMode (alphamaps?SRCALPHA:ONE,alphamaps?INVSRCALPHA:ONE);
+    if (alphamaps!=(animationdrawqueue.top()->options&ani_alpha)) {
+      alphamaps = (animationdrawqueue.top()->options&ani_alpha);
+      GFXBlendMode ((alphamaps!=0)?SRCALPHA:ONE,(alphamaps!=0)?INVSRCALPHA:ONE);
     }
     animationdrawqueue.top()->CalculateOrientation(result);
     animationdrawqueue.top()->DrawNow(result);
@@ -113,6 +144,13 @@ void Animation::ProcessDrawQueue () {
 
 void Animation::CalculateOrientation (Matrix & result) {
   Vector camp,camq,camr;
+  Vector pos (Position());
+  float hei=height;
+  float wid=width;
+  static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
+  ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:local_transformation);
+  
+  /*
   Camera* TempCam = _Universe->AccessCamera();
   TempCam->GetPQR(camp,camq,camr);
   if (!camup){
@@ -129,12 +167,13 @@ void Animation::CalculateOrientation (Matrix & result) {
     ScaledCrossProduct (camr,camp,camq); 
     //if the vectors are linearly dependant we're phucked :) fun fun fun
   }
-  VectorAndPositionToMatrix (result, camp,camq,camr,Position());    
+  */
+  VectorAndPositionToMatrix (result, camp,camq,camr,pos);    
 }
 
 void Animation::DrawNow(const Matrix &final_orientation) {
  
-  if (!Done()) {
+  if (!Done()||(options&ani_repeat)) {
     GFXLoadMatrix (MODEL, final_orientation);
     MakeActive();
     GFXBegin (GFXQUAD);
@@ -152,7 +191,7 @@ void Animation::DrawNow(const Matrix &final_orientation) {
 }
 void Animation::DrawNoTransform() {
 
-  if (!Done()) {
+  if (!Done()||(options&ani_repeat)) {
     MakeActive();
     GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
@@ -187,7 +226,12 @@ void Animation::DrawNoTransform() {
   }
 }
 
-void Animation:: Draw(const Transformation &, const float *) {
-  animationdrawqueue.push (this);
+void Animation:: Draw() {
+  static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
+  if ((_Universe->AccessCamera()->GetR().Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<g_game.zfar*.9) {
+    animationdrawqueue.push (this);
+  }else {
+    far_animationdrawqueue.push(this);
+  }
 }
 

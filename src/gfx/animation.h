@@ -22,26 +22,27 @@
 #define ANIMATION_H
 #include "lin_time.h"
 #include "vec.h"
-
+#include <stack>
 #include "quaternion.h"
 #include "ani_texture.h"
 class Animation: public AnimatedTexture {
+  GFXColor mycolor;
   Matrix local_transformation;
-  bool camup;
   float height; //half the height so you can do fancy vector translatons to campspace
   float width;
-  bool repeat;
+  unsigned char options;
   void InitAnimation();
-  bool alphamaps;
 public:
   Animation();
-  Animation(const char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false);
+  Animation(const char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false, bool appear_near_by_radius=false, const GFXColor &col=GFXColor(1,1,1,1));
   ~Animation();
-  void Draw(const Transformation & t=identity_transformation, const float *m=identity_matrix );
+  void Draw();
   void CalculateOrientation (Matrix &result);
   void DrawNow(const Matrix & final_orientation);
   void DrawNoTransform ();
+  static void ProcessDrawQueue(std::stack <Animation *> &);
   static void ProcessDrawQueue();
+  static void ProcessFarDrawQueue();
   void SetDimensions(float wid, float hei);
   void GetDimensions (float &wid, float & hei);
   Vector Position();

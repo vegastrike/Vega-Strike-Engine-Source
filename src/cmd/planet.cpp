@@ -16,6 +16,7 @@
 #include "collide/rapcol.h"
 #include "images.h"
 #include "gfx/halo.h"
+#include "gfx/animation.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -125,7 +126,7 @@ Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), sa
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL) {
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".5"));
   radius*=bodyradius;
   inside =false;
@@ -205,17 +206,31 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
 
     static bool drawstar = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_body","true"));
     static float glowradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_glow_radius","1.33"))/bodyradius;
-
+    static bool far_shine = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow_halo","false"));
     if (drawglow) {
-      numhalos=1;
-      halos= new Halo *[1];
-      halos[0]=new Halo ("shine.png",
-			 //			 ligh[0].ligh.GetProperties (AMBIENT),
-			 GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea),
-			 Vector (0,0,0),
-			 glowradius*radius,
-			 glowradius*radius);
+      GFXColor c(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea);
+      static bool spec = XMLSupport::parse_bool(vs_config->getVariable ("graphics","glow_ambient_star_light","false"));
+      static bool diff = XMLSupport::parse_bool(vs_config->getVariable ("graphics","glow_diffuse_star_light","false"));
+      if (diff)
+	c= ligh[0].ligh.GetProperties(DIFFUSE);
+      if (spec)
+	c= ligh[0].ligh.GetProperties(AMBIENT);
 
+	
+      if (far_shine) {
+	numhalos=1;
+	
+	halos= new Halo *[1];
+	halos[0]=new Halo ("shine.png",
+			   //			 ligh[0].ligh.GetProperties (AMBIENT),
+			   c,
+			   Vector (0,0,0),
+			   glowradius*radius,
+			   glowradius*radius);
+      }else {
+	shine = new Animation ("shine.ani",true,.1,MIPMAP,true,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+	shine->SetDimensions ( glowradius*radius,glowradius*radius);
+      }
       if (!drawstar) {
 	delete meshdata[0];
 	meshdata[0]=NULL;
@@ -259,6 +274,13 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
  if (inside&&terrain) {
    PlanetTerrainDrawQueue.push_back (new UnitContainer (this));
    //DrawTerrain();
+ }
+ if (shine){
+   Vector p,q,r,c;
+   MatrixToVectors (cumulative_transformation_matrix,p,r,q,c);
+   shine->SetOrientation (p,q,r);
+   shine->SetPosition (c);
+   shine->Draw ();
  }
 }
 void Planet::ProcessTerrains () {
@@ -383,6 +405,8 @@ void Planet::DisableLights () {
   }
 }
 Planet::~Planet() { 
+  if (shine)
+    delete shine;
   if (terrain) {
     delete terrain;
   }

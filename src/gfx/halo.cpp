@@ -6,6 +6,7 @@
 #include "decalqueue.h"
 #include "config_xml.h"
 #include "xml_support.h"
+#include "point_to_cam.h"
 static DecalQueue halodecal;
 static vector <GFXQuadList *> halodrawqueue;
 
@@ -36,37 +37,21 @@ Halo::~Halo () {
 }
 float kkkk=3;
 void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
-  Vector pos,p,q,r, offset;
+  Vector pos,p,q,r;
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
   pos=  position.Transform(m);
-  offset = (_Universe->AccessCamera()->GetPosition()-pos);
-  _Universe->AccessCamera()->GetPQR(p,q,r);
-  //Matrix HACK  pos = -offset;
-  float offmag = offset.Magnitude();
-  float offz = -r.Dot (offset);
-  float wid = sizex;
-  float hei = sizey;
-  float rad =(wid>hei?wid:hei);
-  offset*=1./offmag;
-  if (offz<rad+.4*g_game.zfar) {
-    if (offz-HaloOffset*rad<2*g_game.znear) {
-      rad = (offz-2*g_game.znear)/HaloOffset;
-    }
-    offset*=HaloOffset*rad;
-  }else {
-    offset *= (offmag/offz)*(offz-2*g_game.znear);//-rad-.4*g_game.zfar);
-    wid/=((offz)/(kkkk*g_game.znear));//it's 1 time away from znear 
-    hei/=((offz)/(kkkk*g_game.znear));
-  }
-
+  float wid=sizex;
+  float hei=sizey;
+  static bool far_shine = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow_halo","false"))||XMLSupport::parse_bool(vs_config->getVariable ("graphics","HaloFarDraw","false"));
+  CalculateOrientation (pos,p,q,r,wid,hei,HaloOffset,far_shine,NULL);
   p=p*wid;
   r =-r;
   q=q*hei;
   //  offset = r*(sizex>sizey?sizex:sizey); //screws up cus of perspective
-  GFXVertex tmp[4] = {GFXVertex(pos-p-q+offset,r,0,1),
-		       GFXVertex(pos+p-q+offset,r,1,1),
-		       GFXVertex(pos+p+q+offset,r,1,0),
-		       GFXVertex(pos-p+q+offset,r,0,0)};
+  GFXVertex tmp[4] = {GFXVertex(pos-p-q,r,0,1),
+		       GFXVertex(pos+p-q,r,1,1),
+		       GFXVertex(pos+p+q,r,1,0),
+		       GFXVertex(pos-p+q,r,0,0)};
   halodrawqueue[decal]->ModQuad(quadnum,tmp,alpha);
 }
 void Halo::SetColor (const GFXColor &col){
