@@ -6,7 +6,6 @@
 #include "unit_collide.h"
 #include "physics.h"
 #include "hashtable_3d.h"
-
 Hashtable3d <LineCollide*, char[20],char[200]> collidetable;
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
@@ -50,31 +49,34 @@ void Unit::UpdateCollideQueue () {
 void Unit::CollideAll() {
   if (SubUnit)
     return;
-  vector <LineCollide*>::const_iterator i;
+
   vector <LineCollide*> * colQ [HUGEOBJECT+1];
   int sizecolq = collidetable.Get (&CollideInfo,colQ);
   int j = 0;
   for (;j<sizecolq;j++) {
-    for (i=colQ[j]->begin();i!=colQ[j]->end();i++) {
-      if ((*i)->lastchecked==this)
+    for (unsigned int i=0;i<colQ[j]->size();i++) {//warning CANNOT use iterator
+      //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!! 
+      //BUG TERMINATED!
+      LineCollide * tmp = (*colQ[j])[i];
+      if (tmp->lastchecked==this)
 	continue;//ignore duplicates
-      (*i)->lastchecked = this;//now we're the last checked.
+      tmp->lastchecked = this;//now we're the last checked.
       //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&(*i)->type==LineCollide::UNIT))&&(((*i)->object>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
 	if (
-	    Position().i+radial_size>(*i)->Mini.i&&
-	    Position().i-radial_size<(*i)->Maxi.i&&
-	    Position().j+radial_size>(*i)->Mini.j&&
-	    Position().j-radial_size<(*i)->Maxi.j&&
-	    Position().k+radial_size>(*i)->Mini.k&&
-	    Position().k-radial_size<(*i)->Maxi.k) {
+	    Position().i+radial_size>tmp->Mini.i&&
+	    Position().i-radial_size<tmp->Maxi.i&&
+	    Position().j+radial_size>tmp->Mini.j&&
+	    Position().j-radial_size<tmp->Maxi.j&&
+	    Position().k+radial_size>tmp->Mini.k&&
+	    Position().k-radial_size<tmp->Maxi.k) {
       //continue;
-	  switch ((*i)->type) {
+	  switch (tmp->type) {
 	  case LineCollide::UNIT://other units!!!
-	    ((Unit*)(*i)->object)->Collide(this);
+	    ((Unit*)tmp->object)->Collide(this);
 	    break;
 	  case LineCollide::BEAM:
-	    ((Beam*)(*i)->object)->Collide(this);
+	    ((Beam*)tmp->object)->Collide(this);
 	    break;
 	  case LineCollide::BALL:
 	    break;
@@ -91,15 +93,16 @@ void Unit::CollideAll() {
 
 bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   int i;
-  if (!querySphere(target->Position(),target->rSize()))
+  if (!querySphere(target->Position(),target->rSize())) {
     return false;;
+  }
   if (queryBSP(target->Position(), target->rSize(), normal,dist,false)) {
-
     return true;
   }
   for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->OneWayCollide(target,normal,dist))
+    if (subunits[i]->OneWayCollide(target,normal,dist)) {
       return true;
+    }
   }
 
   return false;
@@ -143,7 +146,6 @@ bool Unit::Collide (Unit * target) {
   bigger->ApplyForce (normal*.4*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   smaller->ApplyDamage (bigger->Position(),-normal,  .5*fabs(normal.Dot(smaller->GetVelocity()-bigger->GetVelocity()))*bigger->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
   bigger->ApplyDamage (smaller->Position(),normal, .5*fabs(normal.Dot(smaller->GetVelocity()-bigger->GetVelocity()))*smaller->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
-
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }

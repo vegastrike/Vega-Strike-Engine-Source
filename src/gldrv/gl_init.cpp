@@ -71,8 +71,7 @@ void init_opengl_extensions()
 
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
 
-	printf( "GL_EXT_compiled_vertex_array extension "
-		     "supported\n" );
+	printf( "OpenGL::GL_EXT_compiled_vertex_array extension supported\n" );
 
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
@@ -80,8 +79,7 @@ void init_opengl_extensions()
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 
     } else {
-	printf(  "GL_EXT_compiled_vertex_array extension "
-		     "NOT supported\n" );
+	printf(  "OpenGL::GL_EXT_compiled_vertex_array extension NOT supported\n" );
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
 
@@ -92,15 +90,20 @@ void init_opengl_extensions()
     glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
     glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
+    if (!glMultiTexCoord2fARB) {
+      glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
+      glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
+      glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
+    }
 #endif
-    if (glutExtensionSupported ("GL_ARB_multitexture")) {
-      g_game.Multitexture = 1;
+    if (glutExtensionSupported ("GL_ARB_multitexture")||glutExtensionSupported ("GL_EXT_multitexture")) {
+      g_game.Multitexture = 1*g_game.Multitexture;//might be zero by input
       printf ("OpenGL::Multitexture supported\n");
     } else {
       g_game.Multitexture =0;
       printf ("OpenGL::Multitexture unsupported\n");
     }
-    if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) ) {
+    if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) || glutExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
       printf ("OpenGL::Texture Cube Map Ext Supported\n");
       g_game.cubemap =1;
     }
@@ -115,7 +118,7 @@ void init_opengl_extensions()
     g_game.znear = 1.00F;
 
     g_game.zfar = 100000.00F;
-    g_game.display_lists=1;
+
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {
       fscanf (fp,"fov %f\n",&g_game.fov);
@@ -187,7 +190,7 @@ void GFXInit (int argc, char ** argv){
     //int retval= glGetError();
     if ( !glutExtensionSupported( "GL_EXT_color_table" ) ) {
       g_game.PaletteExt = 0;
-      printf ("Color Table Not Supported\n");
+      printf ("OpenGL::Color Table Not Supported\n");
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

@@ -126,10 +126,15 @@ int main( int argc, char **argv )
 
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
- 
+  g_game.Multitexture=1;
+  g_game.display_lists=0;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
+      case 'r':
+      case 'R':
+	g_game.Multitexture=0;
+	break;
       case 'M':
       case 'm':
 	g_game.music_enabled=1;
@@ -170,7 +175,7 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'D':
       case 'd':
-	//viddrv = "D3DDRV.DLL";
+	g_game.display_lists=1;
 	break;
       case 'G':
       case 'g':
