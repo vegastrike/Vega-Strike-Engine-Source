@@ -3273,7 +3273,7 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
   assert (i<image->cargo.size());
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
-  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","false"));
+  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   if (usemass)
 	  mass-=quantity*image->cargo[i].mass;
   image->cargo[i].quantity-=quantity;
@@ -3284,7 +3284,7 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
 
 
 void Unit::AddCargo (const Cargo &carg, bool sort) {
-  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","false"));
+  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   if (usemass)
 	  mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);   
@@ -3475,9 +3475,12 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   Unit * un = (Unit *)mythis;
   float mass = un->mass;
+  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   for (unsigned int i=0;i<un->image->cargo.size();i++) {
-    if (un->image->cargo[i].quantity>0)
-      mass-=un->image->cargo[i].mass*un->image->cargo[i].quantity;
+    if (un->image->cargo[i].quantity>0){
+      if (usemass)
+	mass-=un->image->cargo[i].mass*un->image->cargo[i].quantity;
+    }
   }
   return XMLSupport::tostring((float)mass);
 }
