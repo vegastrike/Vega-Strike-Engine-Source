@@ -133,7 +133,6 @@ void cleanup(void)
   VSFileSystem::vs_fprintf( stderr, "\n\nLoop average : %g\n\n", avg_loop);
   STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
-
   // In network mode, we may not do the save since it is useless
   if( _Universe != NULL && Network==NULL)
 	  _Universe->WriteSaveGame(true);
@@ -297,7 +296,7 @@ int main( int argc, char *argv[] )
     AUDInit();
     AUDListenerGain (XMLSupport::parse_float(vs_config->getVariable ("audio","sound_gain",".5")));   
     /* Set up a function to clean up when program exits */
-    winsys_atexit( cleanup );
+    atexit( cleanup );
     /*
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
 

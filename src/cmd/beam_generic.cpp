@@ -375,11 +375,17 @@ bool Beam::Collide (Unit * target) {
 	      //lets add our cargo to him
 	      Cargo *c = GetMasterPartList (target->name.c_str());
 	      Cargo tmp;
-	      if (c==NULL) {
+              bool isnotcargo = (c==NULL);
+              if (!isnotcargo) {
+                if (c->category.find("upgrades")==0)
+                  isnotcargo=true;// add upgrades as space junk
+              }
+	      if (isnotcargo) {
 		c=&tmp;
-		tmp.content="spacejunk";
-		tmp.category="misc";
-		tmp.price=200;
+		tmp.content="Space_Salvage";
+		tmp.category="Uncategorized_Cargo";
+                static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
+		tmp.price=spacejunk;
 		tmp.quantity=1;
 		tmp.mass=.001;
 		tmp.volume=1;
