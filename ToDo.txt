@@ -8,6 +8,12 @@ Goals for 0.4.2 release:
 ** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
 )
 
+*Clydesdale
+http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
+Apparently upgrade system doesn't quite work right and jump drive doesn't quite install right and cargo sometimes grows without bounds...
+ECM apparently causes some of these problems
+Jump drive goes away after selling it can't buy it back
+
 *Map
 we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
 the circles could deal with being, at least on the galaxy view, even a bit smaller
