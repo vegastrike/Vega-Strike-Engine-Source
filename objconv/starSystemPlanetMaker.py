@@ -3,7 +3,17 @@ import xml
 import xml.dom
 import xml.dom.minidom
 import math
-
+stardatafile=None
+arg=0
+while (arg<len(sys.argv)):
+	match=0
+	if sys.argv[arg].find("-csv")==0:
+		stardatafile=sys.argv[arg][4:]
+		match=1
+	if (match==1):
+		del sys.argv[arg]
+		arg-=1
+	arg+=1
 def getParentVal(node,val):
 	i = node.parentNode
 	while(i):
@@ -40,8 +50,8 @@ planets= g.getElementsByTagName('planet')
 systems = g.getElementsByTagName('system')
 stardata=None
 starcoords=[]
-if (len(sys.argv)>3):
-	fsd = open(sys.argv[3])
+if (stardatafile):
+	fsd = open(stardatafile)
 	stardatalines=fsd.readlines()
 	stardatalines=stardatalines[1:]
 	for i in range(len(stardatalines)):
@@ -68,7 +78,7 @@ if (stardata):
 			x=c[0]-coord[0]
 			y=c[1]-coord[1]
 			z=c[2]-coord[2]
-			if (x*x+y*y+z*z<.00001):
+			if (x*x+y*y+z*z<.000001):
 				if (not len(stardata[k][0])):
 					break;
 				print s.getAttribute('name') +' same as '+stardata[k][0];
