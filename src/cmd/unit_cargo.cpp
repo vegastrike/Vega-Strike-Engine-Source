@@ -163,8 +163,9 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
 
 bool Unit::CanAddCargo (const Cargo &carg)const {
   float total_volume=carg.quantity*carg.volume;
-  for (unsigned int i=0;i<image->cargo.size();i++) {
-    total_volume+=image->cargo[i].quantity*image->cargo[i].volume;
+  unsigned int j;
+  for (j=0;j<image->cargo.size();j++) {
+    total_volume+=image->cargo[j].quantity*image->cargo[j].volume;
   }
   if  (total_volume<=image->cargo_volume)
     return true;
