@@ -987,9 +987,9 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       }
     }
     if (!isDone) {
-      for (int severity=0;severity<maxseverity;++severity) {
+      for (int severity=0;severity<maxseverity&&!isDone;++severity) {
       for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();
-           (targ=*u)!=NULL;
+           (targ=*u)!=NULL&&!isDone;
            ++u) {
         if (targ!=parent) {
           targ->RequestClearance(parent);
