@@ -380,7 +380,7 @@ void visitSystemHelp (Cockpit * cp, string systemname,float num) {
 	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
 	if (v->empty()){
 		v->push_back (num);
-	} else if ((*v)[0]!=1.0) {
+	} else if ((*v)[0]!=1.0&&num==1) {
 		(*v)[0]=num;
 	}
 	
