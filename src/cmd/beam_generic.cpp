@@ -395,6 +395,10 @@ bool Beam::Collide (Unit * target) {
 		adder.quantity=1;
 		if (un->CanAddCargo(adder)) {
 		  un->AddCargo(adder);
+                  if (_Universe->isPlayerStarship(un)) {
+                    static int tractor_onboard = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_tractor_cargo","tractor_onboard.wav"));
+                    AUDPlay(tractor_onboard,QVector(0,0,0),Vector(0,0,0),1);
+                  }
 		  target->Kill();
 		}
 	      }
