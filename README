@@ -24,13 +24,17 @@ I would welcome any changes or additions to shield.bmp that would make the shiel
  Controls:
 -----------
 Arrow keys: WC style turning
-[ full throttle
-; zero throttle
-space Guns
+\ full throttle
+backspace zero throttle
+=,+ accel
+- decel
+t target
+ENTER fire missile
+space Fie Guns
 TAB Afterburners
-* Spin Right
-/ Spin Left
-q (hold down, engage shelton slide)
+*,ins Spin Right
+/,del Spin Left
+~ (hold down, engage shelton slide)
 
 -----------
 Command Line Arguments
