@@ -43,22 +43,11 @@ unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
 GFXVertexList *quadsquare::blendVertices=NULL;
-std::vector <TextureIndex *> quadsquare::indices;
+std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <TerrainTexture> *quadsquare::textures;
 
-void quadsquare::FreeSquares() {
-  for (unsigned int i=0;i<indices.size();i++) {
-    delete indices[i];
-  }
-  indices.clear();
-}
-
-void TextureIndex::Clear() {
-  numq=0;
-  numc=0;
-}
 
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
 	unsigned int half= 1<<pcd.Level;
@@ -94,7 +83,6 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 // +-4-+
 static void InterpolateTextures (VertInfo res[5], VertInfo  in[4], const quadcornerdata &cd) {
   //  const float epsilon;
-  float tmp;
   res[0].SetTex(0.25 * ((((float)in[0].Rem)+in[1].Rem+in[2].Rem+in[3].Rem)/256.+ in[0].Tex + in[1].Tex + in[2].Tex + in[3].Tex));
   res[1].SetTex(0.5 * ((((float)in[0].Rem)+in[3].Rem)/256.+ (in[3].Tex) + in[0].Tex));
 
@@ -341,9 +329,8 @@ quadsquare*	quadsquare::GetNeighbor(int dir, const quadcornerdata& cd)
 
 
 void VertInfo::SetTex (float t) {
-  Tex = t;
-  Rem = (t-Tex)*256;
-
+  Tex = (unsigned char ) t;
+  Rem = (unsigned char) ((t-Tex)*256);
   /*
   if (Rem==127||Rem==126||Rem==125)
     Rem = 128;
@@ -365,7 +352,7 @@ void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int 
 
   if (indices.size()<tex->size()) {
     while (indices.size()<tex->size()) {
-      indices.push_back (new TextureIndex ());
+      indices.push_back (TextureIndex ());
     }
   }
 }

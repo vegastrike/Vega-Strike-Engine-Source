@@ -15,7 +15,7 @@
 #include "vec.h"
 #include "gfxlib.h"
 #include <vector>
-
+#include "resizable.h"
 struct Texture;
 struct TerrainTexture {
   BLENDFUNC blendSrc;
@@ -54,36 +54,9 @@ struct HeightMapInfo {
  * If the trianlge has 0 vertices filled, it is a nonblended one with all 4 filled
  */
 struct TextureIndex {
-  unsigned int numq;
-  unsigned int allocq;
-  unsigned int *q;
-  unsigned int allocc;
-  unsigned int numc;
-  GFXColorVertex *c;
-  void qpush_back (const unsigned int aa,const unsigned int bb, const unsigned int cc) {
-    if (allocq<numq+3) {
-      allocq*=2;
-      q=(unsigned int *)realloc (q,sizeof (unsigned int)*allocq);
-    }
-    q[numq]=aa;
-    q[numq+1]=bb;
-    q[numq+2]=cc;
-    numq+=3;
-  }
-  void cpush_back (const GFXColorVertex aa[3]) {
-    if (allocc<numc+3) {
-      allocc*=2;
-      c=(GFXColorVertex *)realloc (c,sizeof (GFXColorVertex)*allocc);
-    }
-    c[numc]=aa[0];
-    c[numc+1]=aa[1];
-    c[numc+2]=aa[2];
-    numc+=3;
-  }
-
-  TextureIndex () {allocq=16;numq=0;allocc=16;numc =0; q=(unsigned int*)malloc (sizeof(unsigned int)*16);c=(GFXColorVertex*)malloc(sizeof(GFXColorVertex)*16);}
-  ~TextureIndex () {free (q);free (c);}
-  void Clear();
+  Resizable <unsigned int> q;
+  Resizable <GFXColorVertex> c;
+  void Clear() {q.clear();c.clear();}
 };
 
 /**
@@ -137,7 +110,6 @@ struct quadcornerdata {
  */
 class quadsquare {
  public:
-  static void FreeSquares();
 	quadsquare*	Child[4];
 
 	VertInfo	Vertex[5];	// center, e, n, w, s
@@ -191,7 +163,7 @@ private:
 	static GFXVertexList *blendVertices;
 	static std::vector <unsigned int> *unusedvertices;
 	static std::vector <TerrainTexture> *textures;
-	static std::vector <TextureIndex *> indices;
+	static std::vector <TextureIndex> indices;
 };
 
 

@@ -127,7 +127,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 				xml->detail=parse_float((*iter).value);
 				break;
 			case LEVEL:
-				RootCornerData.Level=parse_float((*iter).value);
+				RootCornerData.Level=parse_int((*iter).value);
 				break;
 			case SCALES:
 			  xml->scales = parse_float ((*iter).value);
@@ -327,8 +327,8 @@ void QuadTree::LoadXML (const char *filename) {
   root = new quadsquare (&RootCornerData);
   for (i=0;i<xml->data.size();i++) {
     HeightMapInfo hm;
-    hm.XOrigin =xml->data[i].OriginX;
-    hm.ZOrigin=xml->data[i].OriginY;
+    hm.XOrigin =(int)xml->data[i].OriginX;
+    hm.ZOrigin=(int)xml->data[i].OriginY;
     hm.Scale = xml->data[i].scale;
     int format;int bpp; unsigned char * palette;
     hm.Data = (short *) readImage (xml->data[i].file.c_str(),bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform);

@@ -29,7 +29,7 @@ static void TerrainMakeDeactive (const TerrainTexture text) {
   }
 }
 
-typedef std::vector <TextureIndex *> vecTextureIndex;
+typedef std::vector <TextureIndex> vecTextureIndex;
 typedef std::vector <TerrainTexture> vecTextureStar;
 
 int	quadsquare::Render(const quadcornerdata& cd)
@@ -48,25 +48,25 @@ int	quadsquare::Render(const quadcornerdata& cd)
 
   for (k=textures->begin();k!=textures->end();i++,k++) {
     TerrainMakeActive(*k);
-    unsigned int isize = (*i)->numq;
+    unsigned int isize = (*i).q.size();
     totsize+=isize;
-    vertices->Draw(GFXTRI,isize, (*i)->q);
+    vertices->Draw(GFXTRI,isize, (*i).q.begin());
     TerrainMakeDeactive (*k);
   }
   vertices->EndDrawState();
   i=indices.begin();
   int j=0;
   for (k=textures->begin();k!=textures->end();i++,j++,k++) {
-    if ((*i)->numc>2) {
+    if ((*i).c.size()>2) {
       TerrainMakeClearActive(*k);
       GFXPolygonOffset (0,-j);
       GFXColorMaterial (AMBIENT|DIFFUSE);
       GFXColorVertex ** cv = (&blendVertices->BeginMutate(0)->colors);
       GFXColorVertex *tmp = *cv;
-      *cv = (*i)->c;
-      blendVertices->EndMutate((*i)->numc);
+      *cv = (*i).c.begin();
+      blendVertices->EndMutate((*i).c.size());
       blendVertices->LoadDrawState(); blendVertices->BeginDrawState(GFXFALSE);
-      blendVertices->Draw(GFXTRI,(*i)->numc);
+      blendVertices->Draw(GFXTRI,(*i).c.size());
       blendVertices->EndDrawState(GFXFALSE);
       cv = (&blendVertices->BeginMutate(0)->colors);
       *cv = tmp;
@@ -75,7 +75,7 @@ int	quadsquare::Render(const quadcornerdata& cd)
       GFXPolygonOffset (0,0);
       TerrainMakeDeactive(*k);
     }
-    (*i)->Clear();
+    (*i).Clear();
   }
 
   return totsize;
@@ -132,7 +132,7 @@ void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned 
 
 #ifdef DONOTDRAWBLENDEDQUADS
   if (ta==tb&&tb==tc) {
-    indices[ta]->qpush_back (aa,bb,cc);
+    indices[ta]->q.push_back (aa,bb,cc);
     return;
   } else {
     return;
@@ -165,23 +165,23 @@ void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned 
       cv[0].a = 0;
       cv[1].a = 1;
       cv[2].a = 1;
-      indices[tb]->cpush_back(cv);
+      indices[tb].c.push_back3(cv);
     }else {
       if (tb!=ta) {
   	    cv[0].a = 0;
 	    cv[1].a = 1;
 	    cv[2].a = 0;
-	    indices[tb]->cpush_back(cv);
+	    indices[tb].c.push_back3(cv);
       }
       if (tc!=ta) {
 	    cv[0].a = 0;
 	    cv[1].a = 0;
 	    cv[2].a = 1;
-	    indices[tc]->cpush_back(cv);
+	    indices[tc].c.push_back3(cv);
       }
     }
   }
-  indices[ta]->qpush_back (aa,bb,cc);
+  indices[ta].q.push_back (aa,bb,cc);
  
 }
 
