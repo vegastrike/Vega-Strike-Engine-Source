@@ -7,7 +7,7 @@
 
 ZoneMgr::ZoneMgr()
 {
-	nb_zones = atoi( (server_config->getVariable( "server", "maxzones", "")).c_str());
+	nb_zones = atoi( (vs_config->getVariable( "server", "maxzones", "")).c_str());
 	zone_list = new list<Client *>[nb_zones];
 	zone_clients = new int[nb_zones];
 	for( int i=0; i<nb_zones; i++)

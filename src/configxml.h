@@ -52,9 +52,9 @@ enum section_t { SECTION_COLOR,SECTION_VAR };
 class configNodeFactory : public easyDomFactory<configNode> {
 };
 
-class VegaSimpleConfig {
+class VegaConfig {
  public:
-  VegaSimpleConfig(char *configfile);
+  VegaConfig(char *configfile);
 
   void getColor(configNode *node,string name, float color[4],bool have_color=false);
   void getColor(string section, string name, float color[4],bool have_color=false);

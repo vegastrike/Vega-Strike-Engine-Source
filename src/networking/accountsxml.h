@@ -24,6 +24,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdio.h>
+#include <cmd/unit.h>
 #include "const.h"
 
 using std::cout;
@@ -43,8 +45,10 @@ class Account
 			PLAYER,
 			ADMIN,
 		  } type;
+		FILE *		fp;
 		char	name[NAMELEN];
 		char	passwd[NAMELEN];
+		Unit *		unit;
 
 		// Assume player has created ship/char -> to remove in the future
 		Account() { haschar=1; connected=false; };

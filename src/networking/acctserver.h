@@ -2,12 +2,14 @@
 #define __ACCTSERVER_H
 
 #include <vector>
+
 #include "configxml.h"
 #include "netclass.h"
 #include "accountsxml.h"
 #include "packet.h"
 
-extern VegaSimpleConfig * acct_config;
+extern VegaConfig *acct_config;
+//extern VegaSimpleConfig *acct_config;
 
 typedef vector<Account *>::iterator VI;
 

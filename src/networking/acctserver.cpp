@@ -1,8 +1,11 @@
+#include "client.h"
 #include "acctserver.h"
 #include "packet.h"
 #include "lin_time.h"
 
-VegaSimpleConfig * acct_config;
+VegaConfig * acct_config;
+//VegaConfig * acct_config;
+string acctdir;
 
 AccountServer::AccountServer()
 {
@@ -51,10 +54,13 @@ void	AccountServer::start()
 	startMsg();
 
 	cout<<"Loading config file...";
-	acct_config = new VegaSimpleConfig( ACCTCONFIGFILE);
+	acct_config = new VegaConfig( ACCTCONFIGFILE);
 	cout<<" done."<<endl;
 	InitTime();
 	UpdateTime();
+	acctdir = acct_config->getVariable( "server", "accounts_dir", "");
+	if( acctdir=="")
+		acctdir = "./accounts/";
 	strperiod = acct_config->getVariable( "server", "saveperiod", "");
 	int period;
 	if( strperiod=="")
@@ -284,7 +290,24 @@ void	AccountServer::sendAuthorized( SocketAlt sock, Account * acct)
 	else
 	{
 		// Should get the data about the player state and data so they can be sent with ACCEPT
-		packet2.create( LOGIN_ACCEPT, serial, packet.getData(), packet.getLength(), 1);
+		char	buf[MAXBUFFER];
+
+		/*
+		string acctfile = acctdir+acct->name+".xml";
+		FILE *fp = fopen( acctfile.c_str(), "r");
+		if( fp == NULL)
+		{
+			cout<<"Account file does not exists... sending default one to game server"<<endl;
+			acctfile = acctdir+"default.xml";
+		}
+		else
+			fclose( fp);
+		LoadXMLUnit( acct->unit, acctfile.c_str(), buf);
+		*/
+		// For now saves are really limited to MAXBUFFER-(a little less than 100 bytes) bytes
+		memcpy( buf, packet.getData(), packet.getLength());
+
+		packet2.create( LOGIN_ACCEPT, serial, buf, packet.getLength(), 1);
 		packet2.tosend();
 		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
 		{

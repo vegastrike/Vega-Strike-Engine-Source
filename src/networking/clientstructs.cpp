@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include "cmd/unit.h"
+#include "packet.h"
 #include "client.h"
 
 ClientState::ClientState()
@@ -72,4 +75,49 @@ void	ClientState::received()
 {
 	this->delay = ntohl( this->delay);
 	this->client_serial = ntohs( this->client_serial);
+}
+
+// Warning char* is allocated here
+void	LoadXMLUnit( Unit * unit, const char * filename, char *buf)
+{
+	// Load XML of unit
+	if( unit != NULL)
+	{
+		cout<<"Error : unit already allocated !"<<endl;
+		exit( 1);
+	}
+	//unit = new Unit( 0);
+	//unit->LoadXML( filename, NULL);
+
+	int maxsave = MAXBUFFER - Packet::getHeaderLength() - 2*NAMELEN, readsize=0;
+	// Read the save or default save in buf after the login info
+	if( buf!=NULL)
+	{
+		FILE *fp = fopen( filename, "r");
+		if( fp == NULL)
+		{
+			cout<<"Error opening file "<<filename<<" - THAT SHOULD NOT HAPPEN !!"<<endl;
+		}
+		readsize = fread( (buf), sizeof( char), maxsave, fp);
+		if( readsize>=maxsave)
+		{
+			cout<<"Error : save file is bigger than "<<maxsave<<" ("<<readsize<<")"<<endl;
+			exit( 1);
+		}
+	}
+}
+
+void	WriteXMLUnit( const char * filename, char * xmlbuf, int tsize)
+{
+	FILE *fp = fopen( filename, "w");
+	if( fp==NULL)
+	{
+		cout<<"File not found : "<<filename<<endl;
+	}
+	int ret = fwrite( xmlbuf, sizeof( char), tsize, fp);
+	if( ret < 0)
+	{
+		cout<<"Error writing in xml file : "<<filename<<endl;
+		exit( 1);
+	}
 }

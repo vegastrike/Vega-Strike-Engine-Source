@@ -26,6 +26,7 @@
 #include <queue>
 #include <string.h>
 #include <stdlib.h>
+
 #include "configxml.h"
 #include "accountsxml.h"
 #include "const.h"
@@ -33,8 +34,8 @@
 #include "zonemgr.h"
 #include "client.h"
 
-extern VegaSimpleConfig * server_config;
-
+extern VegaConfig *vs_config;
+//extern VegaSimpleConfig *server_config;
 using std::vector;
 typedef list<Client *>::iterator LI;
 typedef vector<Account *>::iterator VI;

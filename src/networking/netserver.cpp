@@ -32,11 +32,13 @@
 #include "lin_time.h"
 #include "netserver.h"
 
-VegaSimpleConfig * server_config;
+VegaConfig * vs_config;
+//VegaConfig * vs_config;
 double	clienttimeout;
 double	logintimeout;
 double	NETWORK_ATOM;
 int		acct_con;
+string	tmpdir;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -155,7 +157,17 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	}
 	else
 	{
-		packet2.create( LOGIN_ACCEPT, clt->serial, NULL, 0, 1);
+		// HERE SHOULD LOAD XML Unit desciription from the xml save in the packet
+		char * xml = packet.getData() + NAMELEN*2;
+		int xml_size = packet.getLength() - Packet::getHeaderLength() - NAMELEN*2;
+		string strname( name);
+		// Write temp XML file for unit
+		string tmp;
+		tmp = tmpdir+name+".xml";
+		//WriteXMLUnit( tmp.c_str(), xml, xml_size);
+		// Then load it in the Unit struct
+		//LoadXMLUnit( clt->game_unit, tmp.c_str(), NULL);
+		packet2.create( LOGIN_ACCEPT, clt->serial, xml, xml_size, 1);
 		//cout<<" 1st packet -------------"<<endl;
 		//packet2.displayHex();
 		cout<<"Packet length = "<<packet2.getLength()<<endl;
@@ -289,24 +301,27 @@ void	NetServer::start()
 	startMsg();
 
 	cout<<"Loading server config...";
-	server_config = new VegaSimpleConfig( SERVERCONFIGFILE);
+	vs_config = new VegaConfig( SERVERCONFIGFILE);
 	cout<<" config loaded"<<endl;
-	strperiod = server_config->getVariable( "server", "saveperiod", "");
+	strperiod = vs_config->getVariable( "server", "saveperiod", "");
 	if( strperiod=="")
 		period = 7200;
 	else
 		period = atoi( strperiod.c_str());
-	strtimeout = server_config->getVariable( "server", "clienttimeout", "");
+	tmpdir = vs_config->getVariable( "server", "tmpdir", "");
+	if( strperiod=="")
+		tmpdir = "./tmp/";
+	strtimeout = vs_config->getVariable( "server", "clienttimeout", "");
 	if( strtimeout=="")
 		clienttimeout = 20;
 	else
 		clienttimeout = atoi( strtimeout.c_str());
-	strlogintimeout = server_config->getVariable( "server", "logintimeout", "");
+	strlogintimeout = vs_config->getVariable( "server", "logintimeout", "");
 	if( strlogintimeout=="")
 		logintimeout = 60;
 	else
 		logintimeout = atoi( strlogintimeout.c_str());
-	strnetatom = server_config->getVariable( "network", "network_atom", "");
+	strnetatom = vs_config->getVariable( "network", "network_atom", "");
 	if( strnetatom=="")
 		NETWORK_ATOM = 0.2;
 	else
@@ -316,7 +331,7 @@ void	NetServer::start()
 	savetime = getNewTime()+period;
 
 	string tmp;
-	stracct = server_config->getVariable( "server", "useaccountserver", "");
+	stracct = vs_config->getVariable( "server", "useaccountserver", "");
 	acctserver = ( stracct=="true");
 	if( !acctserver)
 	{
@@ -332,25 +347,25 @@ void	NetServer::start()
 		NetAcct = new TCPNetUI();
 		cout<<"Initializing connection to account server..."<<endl;
 		char srvip[256];
-		if( server_config->getVariable( "network", "accountsrvip", "")=="")
+		if( vs_config->getVariable( "network", "accountsrvip", "")=="")
 		{
 			cout<<"Account server IP not specified, exiting"<<endl;
 			exit(1);
 		}
 		memset( srvip, 0, 256);
-		memcpy( srvip, (server_config->getVariable( "network", "accountsrvip", "")).c_str(), server_config->getVariable( "network", "accountsrvip", "").length());
+		memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), vs_config->getVariable( "network", "accountsrvip", "").length());
 		unsigned short tmpport;
-		if( server_config->getVariable( "network", "accountsrvport", "")=="")
+		if( vs_config->getVariable( "network", "accountsrvport", "")=="")
 			tmpport = ACCT_PORT;
 		else
-			tmpport = atoi((server_config->getVariable( "network", "accountsrvport", "")).c_str());
+			tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
 		acct_sock = NetAcct->createSocket( srvip, tmpport, 0);
 		cout<<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
 
 	// Create and bind socket
 	cout<<"Initializing network..."<<endl;
-	conn_sock = Network->createSocket( "127.0.0.1", atoi((server_config->getVariable( "network", "serverport", "")).c_str()), 1);
+	conn_sock = Network->createSocket( "127.0.0.1", atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), 1);
 	cout<<"done."<<endl;
 	
 	// Server loop

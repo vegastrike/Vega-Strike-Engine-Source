@@ -27,6 +27,7 @@
 #include "netclass.h"
 #include "packet.h"
 #include "client.h"
+#include "cmd/unit.h"
 
 //using std::vector;
 

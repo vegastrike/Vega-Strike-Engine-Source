@@ -47,16 +47,10 @@
 #include "gldrv/winsys.h"
 #include "universe_util.h"
 #include "networking/netclient.h"
+
 /*
  * Globals 
  */
-game_data_t g_game;
-
-NetClient * Network;
-
-Universe *_Universe;
-FILE * fpread=NULL;
-
 ForceFeedback *forcefeedback;
 
 TextPlane *bs_tp=NULL;
