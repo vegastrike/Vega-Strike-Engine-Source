@@ -429,17 +429,18 @@ void RefreshGUI(void) {
 }
 
 void StartFrame(void) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glMatrixMode (GL_MODELVIEW);
-	glPushMatrix();
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+  GFXHudMode (true);
+  GFXClear (GFXTRUE);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXDisable (TEXTURE1);
+  GFXEnable (TEXTURE0);
 }
 
 void EndFrame(void) {
-	glPopMatrix();
-	glutSwapBuffers();
-	glFlush();
+  GFXHudMode(false);
+  GFXEndScene();
 }
 
 void ProcessMouseClick(int button, int state, int x, int y) {
