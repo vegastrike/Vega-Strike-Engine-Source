@@ -114,13 +114,13 @@ bool INET_getHostByName (const char * hostname, unsigned short port, sockaddr_in
 int INET_listen (unsigned short port, const char * hostname) {
   int listenqueue=5;
   int hServerSocket; // so signal can be caught;
-  struct sockaddr_in Address; //Internet socket address stuct 
+  struct sockaddr_in Address; //Internet socket address stuct
 #ifdef _WIN32
-  int 
+  int
 #else
   socklen_t
 #endif
-    nAddressSize=sizeof(struct sockaddr_in);
+  nAddressSize=sizeof(struct sockaddr_in);
   hServerSocket=socket(AF_INET,SOCK_STREAM,0);
   int sockerr = SOCKET_ERROR;
 #ifdef _WIN32

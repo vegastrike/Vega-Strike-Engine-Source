@@ -52,8 +52,8 @@ class NetServer
 		int				nbclients;				// Active client connections number
 		int				nbaccts;				// Number of registered accounts
 
-		SocketAlt		conn_sock;				// Connection socket for game server
-		SocketAlt		acct_sock;				// Connection socket for account server
+		SOCKETALT		conn_sock;				// Connection socket for game server
+		TCPSOCKET		acct_sock;				// Connection socket for account server
 		int				keeprun;				// Tells if we should keep running server
 		int				snapchanged;			// Tells the snapshot has changed and can be sent
 		int				acctserver;				// Tells if we use an account server
@@ -89,7 +89,7 @@ class NetServer
 		void			closeAllSockets();				// Disconnect all clients for shutdown
 		void			checkTimedoutClients();			// Check for timed out clients	
 
-		Client *		addNewClient( SocketAlt sock);	// Adds a new client to listen for
+		Client *		addNewClient( SOCKETALT sock);	// Adds a new client to listen for
 		ObjSerial		getUniqueSerial();				// Get a pseudo-unique serial
 		void			sendLoginError( Client * clt, AddressIP ipadr);
 		void			sendLoginAlready( Client * clt, AddressIP ipadr);

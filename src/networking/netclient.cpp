@@ -578,6 +578,7 @@ void	NetClient::receivePosition()
 				// Use SetCurPosition or SetPosAndCumPos ??
 				Clients[sernum]->game_unit->SetCurPosition( cs.getPosition());
 				// In that case, we want cubic spline based interpolation
+				predict( sernum);
 				//init_interpolation( sernum);
 			}
 		}
@@ -597,6 +598,7 @@ void	NetClient::receivePosition()
 			Clients[sernum]->game_unit->SetCurPosition( tmppos);
 			offset += sizeof( QVector);
 			j++;
+			predict( sernum);
 			// In that case, we only want linear interpolation, but the end point is in the future
 		}
 		// Update concerned client directly in the game unit list
@@ -720,6 +722,33 @@ void	NetClient::readDatafiles()
 /**** INTERPOLATION STUFF                                 ****/
 /*************************************************************/
 
+void	NetClient::predict( ObjSerial clientid)
+{
+	// This function is to call after the state have been updated (which should be always the case)
+
+	// This function computes 4 splines points needed for a spline creation
+	//    - compute a point on the current spline using blend as t value
+	//    - parameter A and B are old_position and new_position (received in the latest packet)
+
+	unsigned int del = Clients[clientid]->current_state.getDelay();
+	double delay = del;
+	// A is last known position and B is the position we just received
+	// A1 is computed from position A and velocity VA
+	//QVector A( Clients[clientid]->old_state.getPosition());
+	QVector B( Clients[clientid]->current_state.getPosition());
+	//Vector  VA( Clients[clientid]->old_state.getVelocity());
+	Vector  VB( Clients[clientid]->current_state.getVelocity());
+	//Vector  AA( Clients[clientid]->old_state.getAcceleration());
+	Vector  AB( Clients[clientid]->current_state.getAcceleration());
+	//QVector A1( A + VA);
+	// A2 is computed from position B and velocity VB
+	QVector A3( B + VB*delay + AB*delay*delay*0.5);
+	//QVector A2( A3 - (VB + AB*delay));
+
+	memcpy( &Clients[clientid]->old_state, &Clients[clientid]->current_state, sizeof( ClientState));
+	Clients[clientid]->current_state.setPosition( A3);
+}
+
 void	NetClient::init_interpolation( ObjSerial clientid)
 {
 	// This function is to call after the state have been updated (which should be always the case)
@@ -740,8 +769,8 @@ void	NetClient::init_interpolation( ObjSerial clientid)
 	Vector  AB( Clients[clientid]->current_state.getAcceleration());
 	QVector A1( A + VA);
 	// A2 is computed from position B and velocity VB
-	QVector A2( B + VB*delay + AB*delay*delay*0.5);
-	QVector A3( A2 - (VB + AB*delay));
+	QVector A3( B + VB*delay + AB*delay*delay*0.5);
+	QVector A2( A3 - (VB + AB*delay));
 
 	//Clients[clientid]->spline.createSpline( A, A1, A2, A3);
 }

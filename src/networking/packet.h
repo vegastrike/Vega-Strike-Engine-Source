@@ -2,7 +2,7 @@
 #define __PACKET_H
 
 #include <iostream>
-//#include "incnet.h"
+#include <string.h>
 #include "const.h"
 #include "netclass.h"
 

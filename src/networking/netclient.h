@@ -27,7 +27,7 @@
 #include "netclass.h"
 #include "packet.h"
 #include "client.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 
 //using std::vector;
 
@@ -39,7 +39,7 @@ class	NetClient
 		Unit *				game_unit;		// Unit struct from the game corresponding to that client
 		Packet				packet;			// Network data packet
 
-		SocketAlt			clt_sock;		// Comm. socket
+		SOCKETALT			clt_sock;		// Comm. socket
 		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
 		char				keeprun;		// Bool to test client stop
@@ -110,6 +110,7 @@ class	NetClient
 		void	logout();
 		unsigned int	getLag() { return deltatime;}
 
+		void			predict( ObjSerial clientid);
 		void			init_interpolation( ObjSerial clientid);
 		Transformation	spline_interpolate( ObjSerial clientid, double blend);
 };

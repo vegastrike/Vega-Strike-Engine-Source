@@ -26,7 +26,7 @@ class NETCLASS
 		AddressIP				clt_ip;				// IP Address of client
 		SocketSet				client_set;			// Set of clients' sockets
 		SocketSet				conn_set;			// Set of sockets used to listen for connections
-		Socket					max_sock;			// Maximum client socket descriptor
+		SOCKETALT				max_sock;			// Maximum client socket descriptor
 		unsigned short			max_clients;		// Maximum number of clients authorized on server
 		unsigned short			nb_clients;			// Number of clients
 		char					netbuf[MAXBUFFER];	// Network message buffer
@@ -39,7 +39,7 @@ class NETCLASS
 #endif
 
 	public:
-		Socket					sock;			// Socket
+		SOCKET					sock;			// SOCKETALT
 
 		// Constructor
 		NETCLASS()
@@ -71,18 +71,18 @@ class NETCLASS
 			//this->disconnect( "");
 		}
 		// Create a socket
-		int		createSocket();
+		SOCKETALT		createSocket();
 		// Create socket for either server or client (for server, server must be set to 1 otherwise 0)
-		SocketAlt	createSocket( char * host, unsigned short port, int srvmode);
+		SOCKETALT	createSocket( char * host, unsigned short port, int srvmode);
 		// Accept a new connection
-		SocketAlt	acceptNewConn( AddressIP * ipadr);
+		SOCKETALT	acceptNewConn( AddressIP * ipadr);
 		// Receive data from network
-		int		recvbuf( SocketAlt sock, char *buffer, unsigned int &len, AddressIP *from);
+		int		recvbuf( SOCKETALT sock, char *buffer, unsigned int &len, AddressIP *from);
 		// Send data over network
-		int		sendbuf( SocketAlt sock, void *buffer, unsigned int len, AddressIP *to);
+		int		sendbuf( SOCKETALT sock, void *buffer, unsigned int len, AddressIP *to);
 
 		// Return the receiving socket (used for UDP mode)
-		Socket	getRecvSocket() { return sock;}
+		SOCKET	getRecvSocket() { return sock;}
 
 		// Reset a socket set
 		void	resetSets()
@@ -106,16 +106,16 @@ class NETCLASS
 #endif
 		}
 		// Add a socket to a set to be watched
-		void	watchSocket( Socket bsock);
+		void	watchSocket( SOCKET bsock);
 		// Checks for client activity and returns #of active clients
 		int		activeSockets();
 		// Check if socket is active (need to be added in a set before)
-		int		isActive( Socket bsock);
+		int		isActive( SOCKET bsock);
 
 		// Disconnect
 		void	disconnect( char *s);
 		// Close a socket
-		void	closeSocket( Socket bsock)
+		void	closeSocket( SOCKETALT bsock)
 		{
 			#ifdef HAVE_SDLnet
 				#ifdef _TCP_PROTO
@@ -123,8 +123,7 @@ class NETCLASS
 				#endif
 				#ifdef _UDP_PROTO
 					// Unbind a channel from socket
-					// SDLNet_UDP_Unbind( this->sock, sock);
-					SDLNet_UDP_Close(bsock);
+					SDLNet_UDP_Unbind( this->sock, bsock);
 				#endif
 			#else
 				#ifdef _WIN32
@@ -135,7 +134,7 @@ class NETCLASS
 			#endif
 		}
 
-		void	showIP( Socket socket);
+		void	showIP( SOCKET socket);
 
 		// returns the number of clients
 		int		getNumClients() { return this->nb_clients;}
@@ -169,9 +168,9 @@ class NETCLASS
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-inline SocketAlt	NETCLASS::createSocket( char * host, unsigned short port, int srvmode)
+inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int srvmode)
 {
-	SocketAlt	ret;
+	SOCKETALT	ret;
 	unsigned short srv_port=0, clt_port=0;
 	this->server = srvmode;
 	// If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
@@ -234,7 +233,7 @@ inline SocketAlt	NETCLASS::createSocket( char * host, unsigned short port, int s
 			cout<<"UDP socket ok"<<endl;
 		#endif
 	#else
-		// Socket part
+		// SOCKETALT part
 		struct hostent	*he = NULL;
 #ifdef _WIN32
 		int sockerr= INVALID_SOCKET;
@@ -328,7 +327,7 @@ inline SocketAlt	NETCLASS::createSocket( char * host, unsigned short port, int s
 		}
 #endif
 		ret=this->sock;
-		cout<<"Socket n° : "<<ret<<endl;
+		cout<<"SOCKETALT n° : "<<ret<<endl;
 #endif
 	return ret;
 }
@@ -340,14 +339,14 @@ inline SocketAlt	NETCLASS::createSocket( char * host, unsigned short port, int s
 // Not used in standard UDP mode
 // Returns channel number in SDL UDP mode
 
-inline SocketAlt	NETCLASS::acceptNewConn( AddressIP * ipadr)
+inline SOCKETALT	NETCLASS::acceptNewConn( AddressIP * ipadr)
 {
-	SocketAlt	ret;
+	SOCKETALT	ret;
 
 	#ifdef HAVE_SDLnet
 		conn_set=SDLNet_AllocSocketSet(1);
 		if(!conn_set) {
-			cout<<"SDLNet_AllocSocketSet: "<<SDLNet_GetError()<<endl;
+			cout<<"SDLNet_AllocSOCKETALTSet: "<<SDLNet_GetError()<<endl;
 			exit(1);
 		}
 
@@ -395,9 +394,9 @@ inline SocketAlt	NETCLASS::acceptNewConn( AddressIP * ipadr)
 		#endif
 		SDLNet_FreeSocketSet( conn_set);
 	#else
-		// Socket part, only in TCP mode, returns 0 when no activity, socket descriptor if activity detected
+		// SOCKETALT part, only in TCP mode, returns 0 when no activity, socket descriptor if activity detected
 		#ifdef _TCP_PROTO
-			Socket bsock;
+			SOCKETALT bsock;
 			struct sockaddr_in clt_addr;
 			int s;
 #ifdef _WIN32
@@ -438,7 +437,7 @@ inline SocketAlt	NETCLASS::acceptNewConn( AddressIP * ipadr)
 /**************************************************************/
 /**** Add a socket to a set to be watched                  ****/
 /**************************************************************/
-inline void	NETCLASS::watchSocket( Socket bsock)
+inline void	NETCLASS::watchSocket( SOCKET bsock)
 {
 #ifdef HAVE_SDLnet
 	#ifdef _UDP_PROTO
@@ -504,7 +503,7 @@ inline int		NETCLASS::activeSockets()
 /**************************************************************/
 // Returns 1 if socket active, -1 on error
 
-inline int		NETCLASS::isActive( Socket bsock)
+inline int		NETCLASS::isActive( SOCKET bsock)
 {
 	int	ret;
 
@@ -525,14 +524,10 @@ inline int		NETCLASS::isActive( Socket bsock)
 /**** recvbuf data from network                            ****/
 /**************************************************************/
 
-inline int		NETCLASS::recvbuf( SocketAlt bsock, char *buffer, unsigned int &len, AddressIP * from)
+inline int		NETCLASS::recvbuf( SOCKETALT bsock, char *buffer, unsigned int &len, AddressIP * from)
 {
 	int ret = 0;
-#ifdef _WIN32
 	int tmplen;
-#else
-	socklen_t tmplen;
-#endif
 	tmplen = MAXBUFFER;
 
 	#ifdef HAVE_SDLnet
@@ -552,7 +547,7 @@ inline int		NETCLASS::recvbuf( SocketAlt bsock, char *buffer, unsigned int &len,
 			if(ret<=0)
 			{
 				ret = -1;
-				//this->closeSocket( sock);
+				//this->closeSOCKETALT( sock);
 			}
 			else
 			{
@@ -571,15 +566,20 @@ inline int		NETCLASS::recvbuf( SocketAlt bsock, char *buffer, unsigned int &len,
 		len = ret;
 		#endif
 		#ifdef _UDP_PROTO
+#ifdef _WIN32
+			int len1;
+#else
+			socklen_t len1;
+#endif
 		// In UDP mode, always receive data on sock
-		if( (ret = recvfrom( this->sock, buffer, MAXBUFFER, 0, (sockaddr *) from, &tmplen)) <= 0)
+		if( (ret = recvfrom( this->sock, buffer, MAXBUFFER, 0, (sockaddr *) from, &len1)) <= 0)
 		{
 			cout<<"Received "<<ret<<" bytes : "<<buffer<<endl;
 			//getIPof( *from);
 			perror( "Error receiving ");
 			ret = -1;
 		}
-		len = tmplen;
+		len = len1;
 		#endif
 	#endif
 	//cout<<"Received "<<ret<<" bytes"<<endl;
@@ -590,7 +590,7 @@ inline int		NETCLASS::recvbuf( SocketAlt bsock, char *buffer, unsigned int &len,
 /**** sendbuf data over the network                        ****/
 /**************************************************************/
 
-inline int		NETCLASS::sendbuf( SocketAlt bsock, void *buffer, unsigned int len, AddressIP * to)
+inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, AddressIP * to)
 {
 	int numsent;
 
@@ -598,7 +598,8 @@ inline int		NETCLASS::sendbuf( SocketAlt bsock, void *buffer, unsigned int len, 
 		#ifdef _TCP_PROTO
 			// TCP
 			numsent=SDLNet_TCP_Send( bsock, buffer, len);
-			if(numsent<len) {
+			int tmplen = len;
+			if(numsent<tmplen) {
 				cout<<"SDLNet_TCP_Send: "<<SDLNet_GetError()<<endl;
 				this->closeSocket( bsock);
 				return -1;
@@ -692,7 +693,7 @@ inline void	NETCLASS::disconnect( char *s)
 	exit(1);
 }
 
-inline void	NETCLASS::showIP( Socket socket)
+inline void	NETCLASS::showIP( SOCKET socket)
 {
 #ifndef HAVE_SDLnet
 	struct sockaddr_in tmp;

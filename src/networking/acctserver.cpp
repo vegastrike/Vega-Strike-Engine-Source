@@ -49,7 +49,7 @@ void	AccountServer::start()
 	double	savetime;
 	double	curtime;
 
-	Socket	comsock;
+	TCPSOCKET	comsock;
 
 	startMsg();
 
@@ -145,7 +145,7 @@ void	AccountServer::checkMsg()
 	}
 }
 
-void	AccountServer::recvMsg( SocketAlt sock)
+void	AccountServer::recvMsg( TCPSOCKET sock)
 {
 	char			name[NAMELEN+1];
 	char			passwd[NAMELEN+1];
@@ -214,6 +214,8 @@ void	AccountServer::recvMsg( SocketAlt sock)
 			break;
 			case CMD_LOGOUT :
 				cout<<"LOGOUT REQUEST"<<endl;
+				strcpy( name, buf);
+				strcpy( passwd, buf+NAMELEN);
 				// Receive logout request containing name of player
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
@@ -228,7 +230,7 @@ void	AccountServer::recvMsg( SocketAlt sock)
 				}
 				if( !found)
 				{
-					cout<<"ERROR LOGOUT -> didn't find player to disconnect"<<endl;
+					cout<<"ERROR LOGOUT -> didn't find player to disconnect : "<<name<<endl;
 				}
 				else
 				{
@@ -256,7 +258,7 @@ void	AccountServer::recvMsg( SocketAlt sock)
 	/*
 	else if( recvcount==0)
 	{
-		// Socket should have been closed by that game server
+		// SOCKET should have been closed by that game server
 		cout<<"Received 0 data on socket "<<sock<<endl;
 	}
 	*/
@@ -267,7 +269,7 @@ void	AccountServer::recvMsg( SocketAlt sock)
 	}
 }
 
-void	AccountServer::sendAuthorized( SocketAlt sock, Account * acct)
+void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 {
 	Packet	packet2;
 	// Get a serial for client
@@ -317,7 +319,7 @@ void	AccountServer::sendAuthorized( SocketAlt sock, Account * acct)
 	}
 }
 
-void	AccountServer::sendUnauthorized( SocketAlt sock, Account * acct)
+void	AccountServer::sendUnauthorized( TCPSOCKET sock, Account * acct)
 {
 	Packet	packet2;
 
@@ -329,7 +331,7 @@ void	AccountServer::sendUnauthorized( SocketAlt sock, Account * acct)
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
 }
 
-void	AccountServer::sendAlreadyConnected( SocketAlt sock, Account * acct)
+void	AccountServer::sendAlreadyConnected( TCPSOCKET sock, Account * acct)
 {
 	Packet	packet2;
 

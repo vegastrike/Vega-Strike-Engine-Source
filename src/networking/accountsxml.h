@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
-#include <cmd/unit.h>
+#include "cmd/unit_generic.h"
 #include "const.h"
 
 using std::cout;

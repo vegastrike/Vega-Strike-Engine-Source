@@ -140,6 +140,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 #endif
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	strcpy( clt->name, buf);
+	strcpy( clt->passwd, buf+NAMELEN);
 
 	// Assign its serial to client*
 	if( !acctserver)
@@ -190,7 +191,7 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 	strcpy( passwd, buf+NAMELEN);
 	// Send a login error
 	int		retsend;
-	SocketAlt	sockclt = 0;
+	SOCKETALT	sockclt = 0;
 	if( clt!=NULL)
 		sockclt = clt->sock;
 	//cout<<"Creating packet... ";
@@ -213,7 +214,7 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 	strcpy( passwd, buf+NAMELEN);
 	// Send a login error
 	int		retsend;
-	SocketAlt	sockclt = 0;
+	SOCKETALT	sockclt = 0;
 	if( clt!=NULL)
 		sockclt = clt->sock;
 	//cout<<"Creating packet... ";
@@ -242,7 +243,7 @@ void	NetServer::startMsg()
 
 Client *	NetServer::newConnection( AddressIP * ipadr)
 {
-	SocketAlt	sock;
+	SOCKETALT	sock;
 	Client *	ret = NULL;
 
 	// Just ignore the client for now
@@ -270,7 +271,7 @@ Client *	NetServer::newConnection( AddressIP * ipadr)
 /**** Adds a new client                                    ****/
 /**************************************************************/
 
-Client *	NetServer::addNewClient( SocketAlt sock)
+Client *	NetServer::addNewClient( SOCKETALT sock)
 {
 	Client * newclt = new Client;
 	// New client -> now registering it in the active client list "Clients"
@@ -626,7 +627,7 @@ void	NetServer::recvMsg( Client * clt)
 	//char *	buf;
 	int len;
 	unsigned int len2;
-	SocketAlt sockclt=0;
+	SOCKETALT sockclt=0;
 	ObjSerial nserial;
 	AddressIP	ipadr;
 	unsigned int ts = 0;
@@ -773,7 +774,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 					if(NetAcct->sendbuf( acct_sock, (char *)&p2, p2.getSendLength(), NULL)<0)
 					{
 						perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
-						cout<<"Socket was : "<<acct_sock<<endl;
+						cout<<"SOCKET was : "<<acct_sock<<endl;
 						exit(1);
 					}
 				}
@@ -912,7 +913,9 @@ void	NetServer::disconnect( Client * clt)
 		char * buf = new char[NAMELEN*2+1];
 		int nbc = strlen( clt->name);
 		memcpy( buf, clt->name, nbc);
-		p2.create( CMD_LOGOUT, clt->serial, buf, nbc , 1);
+		memcpy( buf+NAMELEN, clt->passwd, NAMELEN);
+		buf[nbc] = 0;
+		p2.create( CMD_LOGOUT, clt->serial, buf, NAMELEN+NAMELEN , 1);
 		p2.tosend();
 		if( NetAcct->sendbuf( acct_sock, (char *) &p2, p2.getSendLength(), &clt->cltadr)<0)
 			cout<<"ERROR sending LOGOUT to account server"<<endl;

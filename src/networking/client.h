@@ -21,6 +21,7 @@
 #ifndef __CLIENTSTRUCTS_H
 #define __CLIENTSTRUCTS_H
 
+#include <string.h>
 #include "gfx/quaternion.h"
 //#include "cmd/unit.h"
 #include "const.h"
@@ -81,18 +82,19 @@ struct	Client
 	Unit	*		game_unit;
 	CubicSpline		spline;
 	AddressIP		cltadr;
-	SocketAlt		sock;
+	SOCKETALT		sock;
 	ObjSerial		serial;
 	// 2 timeout vals to check a timeout for client connections
 	// those vals are server times
-	unsigned int	old_timeout;
-	unsigned int	latest_timeout;
+	double		old_timeout;
+	double		latest_timeout;
 	// 2 timestamps vals from client time to check receiving old packet after newer ones
 	double			old_timestamp;
 	double			latest_timestamp;
 	unsigned int	deltatime;
 	int				sdl_channel;
 	char			name[NAMELEN];
+	char			passwd[NAMELEN];
 	ClientState		old_state;
 	ClientState		current_state;
 	ClientDescription	current_desc;

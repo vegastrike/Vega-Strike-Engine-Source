@@ -9,17 +9,10 @@ using std::endl;
 
 #ifdef HAVE_SDLnet
 	#include <SDL/SDL_net.h>
-	#ifdef _UDP_PROTO
-		typedef UDPsocket Socket;
-		// Type SocketAlt is designed to handle channel numbers in SDL UDP mode
-		typedef int SocketAlt;
-	#endif
-	#ifdef _TCP_PROTO
-		typedef TCPsocket Socket;
-		typedef TCPsocket SocketAlt;
-	#endif
 	typedef IPaddress AddressIP;
 	typedef SDLNet_SocketSet SocketSet;
+	#define TCPSOCKET TCPsocket
+	#define UDPSOCKET UDPsocket
 #else
 	#ifdef _WIN32
 	#define in_addr_t unsigned long
@@ -37,8 +30,10 @@ using std::endl;
 	#endif
 	#include <stdio.h>
 	#include <stdlib.h>
-	typedef int Socket;
-	typedef int SocketAlt;
+	#define SOCKET int
+	#define SOCKETALT int
+	#define TCPSOCKET int
+	#define UDPSOCKET int
 	typedef sockaddr_in AddressIP;
 	typedef fd_set SocketSet;
 	#define MAXQUEUE 10
@@ -71,10 +66,25 @@ inline void f_error( char *s)
 
 // See what's the default NetUI to use
 #define DEFAULT
+	#ifdef HAVE_SDLnet
+		#ifdef __TCP_PROTO
+			#define SOCKET TCPsocket
+			#define SOCKETALT TCPsocket
+		#else
+			#define SOCKET UDPsocket
+			// Type SocketAlt is designed to handle channel numbers in SDL UDP mode
+			#define SOCKETALT int
+		#endif
+	#endif
 	#define NETCLASS NetUI
 	#include "netui.h"
 	#undef NETCLASS
 #undef DEFAULT
+
+#ifdef HAVE_SDLnet
+	#undef SOCKET
+	#undef SOCKETALT
+#endif
 
 // Include NetUI to create classes for UDP and TCP
 #undef _UDP_PROTO
@@ -82,22 +92,50 @@ inline void f_error( char *s)
 
 // Include NetUI UDP version
 #define _UDP_PROTO
+	#ifdef HAVE_SDLnet
+		#define SOCKET UDPsocket
+		// Type SocketAlt is designed to handle channel numbers in SDL UDP mode
+		#define SOCKETALT int
+	#endif
 	#define NETCLASS UDPNetUI
 	#include "netui.h"
 	#undef NETCLASS
 #undef _UDP_PROTO
 
+#ifdef HAVE_SDLnet
+	#undef SOCKET
+	#undef SOCKETALT
+#endif
+
 // Include NetUI TCP version
 #define _TCP_PROTO
+	#ifdef HAVE_SDLnet
+		#define SOCKET TCPsocket
+		#define SOCKETALT TCPsocket
+	#endif
 	#define NETCLASS TCPNetUI
 	#include "netui.h"
 	#undef NETCLASS
 #undef _TCP_PROTO
 
+#ifdef HAVE_SDLnet
+	#undef SOCKET
+	#undef SOCKETALT
+#endif
+
 #ifdef TCPMODE
-#define _TCP_PROTO
+	#define _TCP_PROTO
+	#ifdef HAVE_SDLnet
+		#define SOCKET TCPsocket
+		#define SOCKETALT TCPsocket
+	#endif
 #else
-#define _UDP_PROTO
+	#define _UDP_PROTO
+	#ifdef HAVE_SDLnet
+		#define SOCKET UDPsocket
+		// Type SocketAlt is designed to handle channel numbers in SDL UDP mode
+		#define SOCKETALT int
+	#endif
 #endif
 
 #endif
