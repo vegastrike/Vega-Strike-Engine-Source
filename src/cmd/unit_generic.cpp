@@ -3847,7 +3847,48 @@ std::string CheckBasicSizes (const std::string tokens) {
   return "";
 }
 
+class VCString : public std::string {
+public:
+	VCString(){}
+	VCString(const string & s): string(s){}
+};
+std::map<VCString,VCString> parseTurretSizes () {
+	std::map<VCString,VCString> t;
+	FILE * fp = fopen ("turretsize.txt","r");
+	if (fp) {
+		fseek (fp,0,SEEK_END);
+		int siz = ftell (fp);
+		fseek (fp,0,SEEK_SET);
+		char * filedata= (char *)malloc (siz+1);
+		filedata[siz]=0;
+		while (fgets (filedata,siz,fp)) {
+
+			std::string x(filedata);
+			int len= x.find (",");
+			if (len!=std::string::npos) {
+				std::string y = x.substr (len+1);
+				x = x.substr(0,len);				
+				len = y.find(",");
+				y = y.substr(0,len);
+				sscanf (y.c_str(),"%s",filedata);
+				y = filedata;
+				VCString key (x);
+				VCString value (y);
+				t[key]=value;
+			}
+		}
+		free(filedata);
+		fclose (fp);
+	}
+	return t;
+}
+
 std::string getTurretSize (const std::string &size) {
+  static std::map <VCString,VCString> turretmap = parseTurretSizes();
+  std::map<VCString,VCString>::iterator h= turretmap.find(size);
+  if (h!=turretmap.end()) {
+	  return (*h).second;
+  }
   vector <string> tokens;
   Tokenize (size,tokens,"_");
   for (unsigned int i=0;i<tokens.size();i++) {
