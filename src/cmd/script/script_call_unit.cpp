@@ -1105,6 +1105,14 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret =newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
+    else if(method_id==CMT_UNIT_frameOfReference){
+      Unit * other_unit = getUnitArg (node,mode,1);
+      if (mode==SCRIPT_RUN) {
+	my_unit->VelocityReference (other_unit);
+      }
+      viret = newVarInst (VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(method_id==CMT_UNIT_communicateTo){
       Unit *other_unit=getUnitArg(node,mode,1);
       float mood =getFloatArg(node,mode,2);

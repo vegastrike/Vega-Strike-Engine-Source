@@ -1055,6 +1055,8 @@ void Mission::initCallbackMaps(){
     module_unit_map["scannerNearestShipDist"]=CMT_UNIT_scannerNearestShipDist ;
     module_unit_map["toxml"]=CMT_UNIT_toxml ;
     module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
+    module_unit_map["upgrade"]=CMT_UNIT_upgrade ;
+    module_unit_map["frameOfReference"]=CMT_UNIT_frameOfReference ;
     module_unit_map["communicateTo"]=CMT_UNIT_communicateTo ;
     module_unit_map["commAnimation"]=CMT_UNIT_commAnimation ;
     module_unit_map["correctStarSystem"]=  CMT_UNIT_correctStarSystem ;//useful when comparing _jumps_
