@@ -549,7 +549,7 @@ void BaseComputer::constructControls(void) {
         picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
         picture->setTexture("blackclear.png");
         picture->setId("DescriptionImage");
-        ms->setRect( Rect(-.6, -.95, 1.56, .5) );
+        ms->setRect( Rect(-.6, -.95, 1.51, .5) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
@@ -670,7 +670,7 @@ void BaseComputer::constructControls(void) {
         picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
         picture->setTexture("blackclear.png");
         picture->setId("DescriptionImage");
-        ms->setRect( Rect(-.6, -.95, 1.56, .5) );
+        ms->setRect( Rect(-.6, -.95, 1.51, .5) );
 
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
@@ -863,7 +863,7 @@ void BaseComputer::constructControls(void) {
         picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
         picture->setTexture("blackclear.png");
         picture->setId("DescriptionImage");
-        ms->setRect( Rect(-.6, -.95, 1.56, .5) );
+        ms->setRect( Rect(-.6, -.95, 1.51, .5) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
