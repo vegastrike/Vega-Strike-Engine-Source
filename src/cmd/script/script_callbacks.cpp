@@ -420,7 +420,7 @@ varInst *Mission::callGetSystemName(missionNode *node,int mode){
 
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    StarSystem *ssystem=_Universe.activeStarSystem();
+    StarSystem *ssystem=_Universe->activeStarSystem();
     string sysname=ssystem->getName();
     vi=call_string_new(node,mode,sysname);
   }
@@ -434,7 +434,7 @@ varInst *Mission::callGetSystemFile (missionNode *node,int mode, StarSystem * ss
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
     if (ss==NULL) {
-      ss=_Universe.activeStarSystem();
+      ss=_Universe->activeStarSystem();
     }
     string sysname=ss->getFileName();
     vi=call_string_new(node,mode,sysname);
@@ -449,7 +449,7 @@ varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   int which= (int)getIntArg(node,mode,1);
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    string sysname=_Universe.getAdjacentStarSystems(str)[which];
+    string sysname=_Universe->getAdjacentStarSystems(str)[which];
     vi=call_string_new(node,mode,sysname);
   }
   return vi;
@@ -463,7 +463,7 @@ varInst *Mission::callGetGalaxyProperty (missionNode *node,int mode) {
   string prop = getStringArgument(node,mode,1);
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    string sysname=_Universe.getGalaxyProperty(sys,prop);
+    string sysname=_Universe->getGalaxyProperty(sys,prop);
     vi=call_string_new(node,mode,sysname);
   }
   return vi;
@@ -473,7 +473,7 @@ varInst *Mission::callGetNumAdjacentSystems (missionNode *node,int mode) {
   string sysname = getStringArgument (node,mode,0);
   int ret=0;
   if(mode==SCRIPT_RUN){
-    ret=_Universe.getAdjacentStarSystems(sysname).size();
+    ret=_Universe->getAdjacentStarSystems(sysname).size();
   }
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_INT;

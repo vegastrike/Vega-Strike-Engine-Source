@@ -1,6 +1,7 @@
 #ifndef _UNIVERSE_UTILGENERIC_H__
 #define _UNIVERSE_UTILGENERIC_H__
 #include "cmd/collection.h"
+#include "cmd/images.h"
 #include <string>
 
 using std::string;

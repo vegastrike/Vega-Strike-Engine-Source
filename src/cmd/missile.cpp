@@ -5,6 +5,7 @@
 #include "config_xml.h"
 #include "images.h"
 #include "collection.h"
+#include "star_system.h"
 void GameStarSystem::UpdateMissiles() {
   if (!dischargedMissiles.empty()) {
     Unit * un;
@@ -47,7 +48,7 @@ void GameStarSystem::AddMissileToQueue(MissileEffect * me) {
 }
 void Missile::Discharge() {
   if (!discharged)
-    _Universe.activeStarSystem()->AddMissileToQueue(new MissileEffect(Position().Cast(),damage,phasedamage,radial_effect,radial_multiplier));
+    _Universe->activeStarSystem()->AddMissileToQueue(new MissileEffect(Position().Cast(),damage,phasedamage,radial_effect,radial_multiplier));
   discharged =true;
 }
 void Missile::Kill (bool erase) {
@@ -70,7 +71,7 @@ static Unit * getNearestTarget (Unit *me) {
   Unit * un=NULL;
   Unit * targ=NULL;
   double minrange=FLT_MAX;
-  for (un_iter i=_Universe.activeStarSystem()->getUnitList().createIterator();
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
        (un=(*i));
        ++i) {
          if (un==me)

@@ -60,10 +60,10 @@ struct FIREKEYBOARDTYPE {
 };
 static std::vector <FIREKEYBOARDTYPE> vectorOfKeyboardInput;
 static FIREKEYBOARDTYPE &g() {
-  while (vectorOfKeyboardInput.size()<=(unsigned int)_Universe.CurrentCockpit()||vectorOfKeyboardInput.size()<=(unsigned int)MAX_JOYSTICKS) {
+  while (vectorOfKeyboardInput.size()<=(unsigned int)_Universe->CurrentCockpit()||vectorOfKeyboardInput.size()<=(unsigned int)MAX_JOYSTICKS) {
     vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
   }
-  return vectorOfKeyboardInput [_Universe.CurrentCockpit()];
+  return vectorOfKeyboardInput [_Universe->CurrentCockpit()];
 }
 FIREKEYBOARDTYPE &FireKeyboard::f() {
   return vectorOfKeyboardInput[whichplayer];
@@ -246,8 +246,8 @@ void DoSpeech (Unit * un, const string &speech) {
 }
 void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {
-    for (int i=0;i<_Universe.numPlayers();i++) {
-      Unit * pun =_Universe.AccessCockpit(i)->GetParent();
+    for (int i=0;i<_Universe->numPlayers();i++) {
+      Unit * pun =_Universe->AccessCockpit(i)->GetParent();
       if (pun) {
 	if (pun->getFlightgroup()==un->getFlightgroup()){
 	  DoSpeech (un, speech);	
@@ -257,7 +257,7 @@ void LeadMe (Unit * un, string directive, string speech) {
     Flightgroup * fg = un->getFlightgroup();
     if (fg) {
       if (fg->leader.GetUnit()!=un) {
-		  if ((!_Universe.isPlayerStarship(fg->leader.GetUnit()))||_Universe.isPlayerStarship(un)) {
+		  if ((!_Universe->isPlayerStarship(fg->leader.GetUnit()))||_Universe->isPlayerStarship(un)) {
 			fg->leader.SetUnit (un);
 		  }
       }
@@ -266,17 +266,17 @@ void LeadMe (Unit * un, string directive, string speech) {
   }
 }
 static void LeadMe (string directive, string speech) {
-  Unit * un= _Universe.AccessCockpit()->GetParent();
+  Unit * un= _Universe->AccessCockpit()->GetParent();
   LeadMe (un,directive,speech);
   
 }
 extern Unit * GetThreat (Unit * par, Unit * leader);
 void HelpOut (bool crit, std::string conv) {
-  Unit * un = _Universe.AccessCockpit()->GetParent();
+  Unit * un = _Universe->AccessCockpit()->GetParent();
   if (un) {
     Unit * par=NULL;
     DoSpeech(  un,conv);
-    for (un_iter ui = _Universe.activeStarSystem()->getUnitList().createIterator();
+    for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
       if ((crit&&FactionUtil::GetIntRelation(par->faction,un->faction)>0)||par->faction==un->faction) {
@@ -295,7 +295,7 @@ void HelpOut (bool crit, std::string conv) {
 }
 void FireKeyboard::JoinFg (int, KBSTATE k) {
   if (k==PRESS) {
-    Unit * un = _Universe.AccessCockpit()->GetParent();
+    Unit * un = _Universe->AccessCockpit()->GetParent();
     if (un) {
       Unit * targ = un->Target();
       if (targ) {
@@ -397,7 +397,7 @@ void FireKeyboard::MissileKey(int, KBSTATE k) {
    g().missilekey = k;
 }
 void FireKeyboard::ChooseNearTargets(bool turret) {
-  UnitCollection::UnitIterator iter = _Universe.activeStarSystem()->getUnitList().createIterator();
+  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un;
   float range=FLT_MAX;
   while ((un = iter.current())) {
@@ -432,7 +432,7 @@ void FireKeyboard::ChooseThreatTargets(bool turret) {
 }
 
 void FireKeyboard::PickTargets(bool Turrets){
-  UnitCollection::UnitIterator uiter = _Universe.activeStarSystem()->getUnitList().createIterator();
+  UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList().createIterator();
 
   float smallest_angle=PI;
 
@@ -464,7 +464,7 @@ void FireKeyboard::ChooseRTargets (bool turret) {
   Unit * oldun=NULL;
   Unit * un=NULL;
   un_iter i;
-  for (i=_Universe.activeStarSystem()->getUnitList().createIterator();
+  for (i=_Universe->activeStarSystem()->getUnitList().createIterator();
        (un=*i)!=NULL;
        ++i) {
     if (un==targ) {
@@ -476,7 +476,7 @@ void FireKeyboard::ChooseRTargets (bool turret) {
     }
   }
   if (oldun==NULL) {//get us the last
-    for (i=_Universe.activeStarSystem()->getUnitList().createIterator();
+    for (i=_Universe->activeStarSystem()->getUnitList().createIterator();
 	 (un=*i)!=NULL;
 	 ++i) {
       if (un!=parent) {
@@ -491,7 +491,7 @@ void FireKeyboard::ChooseRTargets (bool turret) {
 }
 
 void FireKeyboard::ChooseTargets (bool turret) {
-  UnitCollection::UnitIterator iter = _Universe.activeStarSystem()->getUnitList().createIterator();
+  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un ;
   bool found=false;
   bool find=false;
@@ -532,7 +532,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
   fflush (stderr);
 #endif
   if (!find) {
-    iter = _Universe.activeStarSystem()->getUnitList().createIterator();
+    iter = _Universe->activeStarSystem()->getUnitList().createIterator();
     while ((un = iter.current())) {
       //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
       Vector t;
@@ -573,7 +573,7 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
 static bool UnDockNow (Unit* me, Unit * targ) {
   bool ret=false;
   Unit * un;
-  for (un_iter i=_Universe.activeStarSystem()->getUnitList().createIterator();
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
        (un = *i)!=NULL;
        ++i) {
     if (un->isDocked (me)) {
@@ -587,7 +587,7 @@ static bool UnDockNow (Unit* me, Unit * targ) {
 static Unit * getAtmospheric (Unit * targ) {
   if (targ) {
     Unit * un;
-    for (un_iter i=_Universe.activeStarSystem()->getUnitList().createIterator();
+    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 	 (un=*i)!=NULL;
 	 ++i) {
       if (un->isUnit()==PLANETPTR) {
@@ -680,15 +680,15 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     resp.push_back(c);
     AdjustRelationTo(un,c.getCurrentState()->messagedelta);
     DoSpeech (un,c.getCurrentState()->message);
-    if (parent==_Universe.AccessCockpit()->GetParent()) {
-      _Universe.AccessCockpit()->SetCommAnimation (c.ani);
+    if (parent==_Universe->AccessCockpit()->GetParent()) {
+      _Universe->AccessCockpit()->SetCommAnimation (c.ani);
     }
     refresh_target=true;
   }else {
     DoSpeech (NULL,c.getCurrentState()->message);
-    if (parent==_Universe.AccessCockpit()->GetParent()) {
+    if (parent==_Universe->AccessCockpit()->GetParent()) {
       static Animation Statuc ("static.ani");
-      _Universe.AccessCockpit()->SetCommAnimation (&Statuc);
+      _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
     }
 
   }
@@ -850,16 +850,16 @@ void FireKeyboard::Execute () {
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
       if (mymsg==NULL) {
 	FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
-	_Universe.AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
+	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
       }else {
-       _Universe.AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
+       _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
       }
     } else {
-      _Universe.AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
+      _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
     }
   }
   if (f().ejectcargo==PRESS) {
-    int offset = _Universe.AccessCockpit()->getScrollOffset (VDU::MANIFEST);
+    int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
     if (offset<3) {
       offset=0;
     }else {
@@ -871,7 +871,7 @@ void FireKeyboard::Execute () {
   if (f().eject==PRESS) {
     f().eject=DOWN;
     Cockpit * cp;
-    if ((cp=_Universe.isPlayerStarship (parent))) {
+    if ((cp=_Universe->isPlayerStarship (parent))) {
       cp->Eject();
     }
   }

@@ -63,7 +63,7 @@ extern unsigned short apply_float_to_short (float tmp);
 void GameUnit::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);  
- if (_Universe.AccessCockpit(0)->GetParent()==this)
+ if (_Universe->AccessCockpit(0)->GetParent()==this)
   if (afterburn!=AUDIsPlaying (sound->engine)) {
     if (afterburn)
       AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
@@ -75,7 +75,7 @@ void GameUnit::Thrust(const Vector &amt1,bool afterburn){
 
 Cockpit * GameUnit::GetVelocityDifficultyMult(float &difficulty) const{
   difficulty=1;
-  Cockpit * player_cockpit=_Universe.isPlayerStarship(this);
+  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
   if ((player_cockpit)==NULL) {
     static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
     difficulty = pow(g_game.difficulty,exp);
@@ -236,7 +236,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
 		// Check if this is a player, because in network mode we should only send updates of our moves
 
-	  if( _Universe.isPlayerStarship( this) /* && this->networked */ )
+	  if( _Universe->isPlayerStarship( this) /* && this->networked */ )
 
 	  {
 
@@ -622,7 +622,7 @@ bool GameUnit::jumpReactToCollision (Unit * smalle) {
     if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
       smalle->DeactivateJumpDrive();
       GameUnit * jumppoint = this;
-      _Universe.activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
+      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
       return true;
     }
     return true;
@@ -631,7 +631,7 @@ bool GameUnit::jumpReactToCollision (Unit * smalle) {
     if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
-      _Universe.activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
       return true;
     }
     return true;
@@ -688,8 +688,8 @@ Vector GameUnit::ResolveForces (const Transformation &trans, const Matrix &trans
 static signed char  ComputeAutoGuarantee (GameUnit * un) {
   Cockpit * cp;
   int cpnum=-1;
-  if ((cp =_Universe.isPlayerStarship (un))) {
-    cpnum = cp-_Universe.AccessCockpit(0);
+  if ((cp =_Universe->isPlayerStarship (un))) {
+    cpnum = cp-_Universe->AccessCockpit(0);
   }else {
     return Mission::AUTO_ON;
   }
@@ -745,7 +745,7 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   }
   StarSystem * ss = activeStarSystem;
   if (ss==NULL) {
-    ss = _Universe.activeStarSystem();
+    ss = _Universe->activeStarSystem();
   }
 
   Unit * un=NULL;
@@ -782,7 +782,7 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 
   if (this!=target) {
     SetCurPosition(end);
-    if (_Universe.isPlayerStarship (this)&&getFlightgroup()!=NULL) {
+    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
       Unit * other=NULL;
       for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
     	Flightgroup * ff = other->getFlightgroup();
@@ -793,7 +793,7 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 		}
 	}
 	if (leadah) {
-	  if (NULL==_Universe.isPlayerStarship (other)) {
+	  if (NULL==_Universe->isPlayerStarship (other)) {
 	    //other->AutoPilotTo(this);
 	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
 	   }

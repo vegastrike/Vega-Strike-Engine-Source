@@ -122,7 +122,7 @@ int Music::SelectTracks(void) {
   return 0;
   int whichlist=0;
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-  Unit * un=_Universe.AccessCockpit()->GetParent();
+  Unit * un=_Universe->AccessCockpit()->GetParent();
   if (un==NULL) {
     whichlist=PEACELIST;
     if (playlist[PEACELIST].empty())
@@ -133,7 +133,7 @@ int Music::SelectTracks(void) {
 
 
   bool perfect=true;
-  un_iter iter = _Universe.activeStarSystem()->getUnitList().createIterator();
+  un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit *target;
   while ((target = iter.current())!=NULL) {
     float ftmp;

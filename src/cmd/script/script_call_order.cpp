@@ -494,7 +494,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=getOrderObject(node,mode,ovi);
 
     if(mode==SCRIPT_RUN){
-      Unit * player =_Universe.AccessCockpit()->GetParent();
+      Unit * player =_Universe->AccessCockpit()->GetParent();
       if (player) {
 	if(my_order==player->getAIState()){
 	  printf("IGNOREING order for player\n");

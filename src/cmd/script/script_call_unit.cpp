@@ -76,7 +76,7 @@ Better:
 extern UnitContainer player_unit;
 
 Best:
-_Universe.AccessCockpit()->GetParent();
+_Universe->AccessCockpit()->GetParent();
 #endif
 
 static Unit * getIthUnit (un_iter uiter, int i);
@@ -104,7 +104,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     Unit *my_unit=NULL;
 
     if(mode==SCRIPT_RUN){
-      StarSystem *ssystem=_Universe.scriptStarSystem();
+      StarSystem *ssystem=_Universe->scriptStarSystem();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
       un_iter uiter=ssystem->getUnitList().createIterator();
       my_unit=getIthUnit (uiter,unit_nr);
@@ -126,7 +126,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     Unit *my_unit=NULL;
 
     if(mode==SCRIPT_RUN){
-      my_unit=_Universe.AccessCockpit()->GetParent();;
+      my_unit=_Universe->AccessCockpit()->GetParent();;
     }
 
     viret=newVarInst(VI_TEMP);
@@ -147,9 +147,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     if(mode==SCRIPT_RUN){
       int j=0;
-      for (unsigned int i=0;i<_Universe.numPlayers();i++) {
+      for (unsigned int i=0;i<_Universe->numPlayers();i++) {
 	Unit * un;
-	if (NULL!=(un=_Universe.AccessCockpit(i)->GetParent())) {
+	if (NULL!=(un=_Universe->AccessCockpit(i)->GetParent())) {
 	  if (j==which) {
 	    my_unit=un;
 	    break;
@@ -701,7 +701,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
      viret->float_val=0;
      if (mode==SCRIPT_RUN) {
        Cockpit * tmp;
-       if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+       if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 	 viret->float_val=tmp->credits;
        }
      }
@@ -713,7 +713,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
      float credits=doFloatVar(nr_node,mode);
      if (mode==SCRIPT_RUN) {
        Cockpit * tmp;
-       if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+       if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 	 tmp->credits+=credits;
        }
      }
@@ -755,7 +755,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(method_id==CMT_UNIT_correctStarSystem){
       bool ret=false;
       if(mode==SCRIPT_RUN){
-	ret = my_unit->InCorrectStarSystem(_Universe.activeStarSystem());
+	ret = my_unit->InCorrectStarSystem(_Universe->activeStarSystem());
 	
       }
       viret=newVarInst(VI_TEMP);
@@ -1076,7 +1076,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       magic_num= getStringArgument(node,mode,1);
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
-	if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 	  my_obj=(void *)&tmp->savegame->getMissionData (magic_num);	  
 	}
       }
@@ -1128,7 +1128,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       unsigned char sex=0;
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
-	if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 	  Order * ord=other_unit->getAIState();
 	  if (ord) {
 	    Animation * ani= ord->getCommFace (mood,sex);
@@ -1147,7 +1147,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       string anim =getStringArgument (node,mode,1);
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
-	if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 	  Hashtable <std::string, Animation, char [63]> AniHashTable;
 	  Animation * ani= AniHashTable.Get(anim);
 	  if (NULL==ani) {
@@ -1298,7 +1298,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      }
      //     cout << fg->name << endl;
 
-     _Universe.scriptStarSystem()->AddUnit(my_unit);
+     _Universe->scriptStarSystem()->AddUnit(my_unit);
 
      //findNextEnemyTarget(my_unit);
      my_unit->Target(NULL);
@@ -1306,7 +1306,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 
    printf ("%s",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)).c_str());
    my_unit= units[0];
-   if (!_Universe.isPlayerStarship(fg->fg->leader.GetUnit())) {
+   if (!_Universe->isPlayerStarship(fg->fg->leader.GetUnit())) {
 	   fg->fg->leader.SetUnit(my_unit);
    }
    delete [] units;
@@ -1314,22 +1314,22 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 }
 
 void Mission::findNextEnemyTarget(Unit *my_unit){
-      StarSystem *ssystem=_Universe.scriptStarSystem();
+      StarSystem *ssystem=_Universe->scriptStarSystem();
 
       un_iter uiter(ssystem->getUnitList().createIterator());
 
       int i=0;
       Unit *unit=uiter.current();
       Unit *target_unit=NULL;
-      //      int my_faction=_Universe.GetFaction(my_unit->getFlightgroup()->faction.c_str());
+      //      int my_faction=_Universe->GetFaction(my_unit->getFlightgroup()->faction.c_str());
       while(unit!=NULL){
-	//	int other_faction=_Universe.GetFaction(unit->getFlightgroup()->faction.c_str());
+	//	int other_faction=_Universe->GetFaction(unit->getFlightgroup()->faction.c_str());
 	if(my_unit->getRelation(unit)<0.0){
 	  target_unit=uiter.current();
 	  unit=NULL;
 	}
 	else{
-	  //	  printf("relation was: %f %d %d\n",_Universe.GetRelation(my_faction,other_faction),my_faction,other_faction);
+	  //	  printf("relation was: %f %d %d\n",_Universe->GetRelation(my_faction,other_faction),my_faction,other_faction);
 	  unit=++(uiter);
 	  i++;
 	}

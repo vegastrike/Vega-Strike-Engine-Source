@@ -15,7 +15,7 @@ extern unsigned int AddAnimation (const QVector & pos, const float size, bool mv
 
 using std::string;
 
-#define activeSys _Universe.activeStarSystem() //less to write
+#define activeSys _Universe->activeStarSystem() //less to write
 
 namespace UniverseUtil {
 	int musicAddList(string str) {
@@ -47,7 +47,7 @@ namespace UniverseUtil {
 		AddAnimation(loc,size,true,aniName,growpercent);
 	}
         unsigned int getCurrentPlayer() {
-	  return _Universe.CurrentCockpit();
+	  return _Universe->CurrentCockpit();
         }
 	Unit *launchJumppoint(string name_string,
 			string faction_string,

@@ -160,18 +160,18 @@ void GameUnit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSys
 	}
 	iter.advance();
       }
-      Cockpit * an_active_cockpit = _Universe.isPlayerStarship(this);
+      Cockpit * an_active_cockpit = _Universe->isPlayerStarship(this);
       if (an_active_cockpit!=NULL) {
 	an_active_cockpit->activeStarSystem=pendingjump[kk]->dest;
       }
-      if (this==_Universe.AccessCockpit()->GetParent()) {
+      if (this==_Universe->AccessCockpit()->GetParent()) {
 	fprintf (stderr,"Unit is the active player character...changing scene graph\n");
 	savedStarSystem->SwapOut();
 	savedStarSystem = pendingjump[kk]->dest;
 	pendingjump[kk]->dest->SwapIn();
       }
       
-      _Universe.setActiveStarSystem(pendingjump[kk]->dest);
+      _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
       iter = pendingjump[kk]->dest->getUnitList().createIterator();
       Unit * primary;
@@ -281,7 +281,7 @@ void StarSystem::ProcessPendingJumps() {
 
     Unit * un=pendingjump[kk]->un.GetUnit();
     
-    if (un==NULL||!_Universe.StillExists (pendingjump[kk]->dest)||!_Universe.StillExists(pendingjump[kk]->orig)) {
+    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
 #endif
@@ -290,9 +290,9 @@ void StarSystem::ProcessPendingJumps() {
       kk--;
       continue;
     }
-    StarSystem * savedStarSystem = _Universe.activeStarSystem();
-    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||un==_Universe.AccessCockpit()->GetParent());
-    _Universe.setActiveStarSystem (pendingjump[kk]->orig);
+    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
+    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
     un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
     static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
     if (dosightandsound) {
@@ -304,7 +304,7 @@ void StarSystem::ProcessPendingJumps() {
     delete pendingjump[kk];
     pendingjump.erase (pendingjump.begin()+kk);
     kk--;
-    _Universe.setActiveStarSystem(savedStarSystem);
+    _Universe->setActiveStarSystem(savedStarSystem);
   }
 
 }
@@ -331,7 +331,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
   bool justloaded=false;
   if (!ss) {
     justloaded=true;
-    ss = _Universe.GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
+    ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
   }
   if(ss) {
 #ifdef JUMP_DEBUG
@@ -339,7 +339,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
 #endif
     Vector p,q,r;
     un->GetOrientation (p,q,r);
-    bool dosightandsound = ((this==_Universe.getActiveStarSystem (0))||un==_Universe.AccessCockpit()->GetParent());
+    bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||un==_Universe->AccessCockpit()->GetParent());
     int ani =-1;
     if (dosightandsound) {
       ani = AddJumpAnimation (un->Position()+r.Cast()*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize());

@@ -159,7 +159,7 @@ void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,
       alphamaps = (animationdrawqueue[i]->options&ani_alpha);
       GFXBlendMode ((alphamaps!=0)?SRCALPHA:ONE,(alphamaps!=0)?INVSRCALPHA:ONE);
     }
-	if ((animationdrawqueue[i]->Position()-_Universe.AccessCamera()->GetPosition()).Magnitude()-animationdrawqueue[i]->height>limit) {
+	if ((animationdrawqueue[i]->Position()-_Universe->AccessCamera()->GetPosition()).Magnitude()-animationdrawqueue[i]->height>limit) {
   	  GFXFogMode(FOG_OFF);
   	  animationdrawqueue[i]->CalculateOrientation(result);
       animationdrawqueue[i]->DrawNow(result);
@@ -176,7 +176,7 @@ void Animation::CalculateOrientation (Matrix & result) {
   ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:&local_transformation);
   
   /*
-  Camera* TempCam = _Universe.AccessCamera();
+  Camera* TempCam = _Universe->AccessCamera();
   TempCam->GetPQR(camp,camq,camr);
   if (!camup){
     Vector q1 (local_transformation[1],local_transformation[5],local_transformation[9]);
@@ -280,9 +280,9 @@ void Animation::DrawNoTransform() {
 void Animation:: Draw() {
   if (g_game.use_animations!=0||g_game.use_textures!=0) {
     static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-    QVector R (_Universe.AccessCamera()->GetR().i,_Universe.AccessCamera()->GetR().j,_Universe.AccessCamera()->GetR().k);
+    QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
     static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
-    if ((R.Dot (Position()-_Universe.AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
+    if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
       animationdrawqueue.push_back (this);
     }else {
       far_animationdrawqueue.push_back(this);

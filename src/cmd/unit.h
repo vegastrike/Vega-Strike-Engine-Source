@@ -121,7 +121,7 @@ public:
 /***************************************************************************************/
 
   void RestoreGodliness() {
-	_Universe.AccessCockpit()->RestoreGodliness();
+	_Universe->AccessCockpit()->RestoreGodliness();
   }
 
 /***************************************************************************************/

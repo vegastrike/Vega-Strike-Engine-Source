@@ -3,6 +3,9 @@
 
 #include <vector>
 
+#include "universe_generic.h"
+extern Universe * _Universe;
+/*
 #ifdef _SERVER
 	#include "universe_generic.h"
 	extern Universe _Universe;
@@ -10,6 +13,7 @@
 	#include "universe.h"
 	extern GameUniverse _Universe;
 #endif
+*/
 
 extern int	loop_count;
 extern double	avg_loop;

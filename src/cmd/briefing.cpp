@@ -66,7 +66,7 @@ void Briefing::Render() {
   // 
   GFXClear(GFXTRUE);
   Mesh::ProcessUndrawnMeshes();
-  _Universe.AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
+  _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
   //  glClearColor(0,0,0,0);
 }
 void Briefing::Ship::Render (const Matrix &cam, double interpol) {

@@ -4,6 +4,7 @@
 #include "cmd/unit_util.h"
 #include "configxml.h"
 #include "vs_globals.h"
+#include "gfx/cockpit_generic.h"
 using std::string;
 
 namespace UnitUtil {
@@ -31,7 +32,7 @@ namespace UnitUtil {
 		if (!my_unit)return 0;
 		Cockpit * tmp;
 		float viret=0;
-		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			viret=tmp->credits;
 		}
 		return viret;
@@ -39,7 +40,7 @@ namespace UnitUtil {
 	void addCredits(Unit *my_unit,float credits) {
 		if (!my_unit)return;
 		Cockpit * tmp;
-		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			tmp->credits+=credits;
 		}
 	}
@@ -137,7 +138,7 @@ namespace UnitUtil {
 	}
         string getUnitSystemFile (Unit * un) {
 	  if (!un) {
-	    return _Universe.activeStarSystem()->getFileName();
+	    return _Universe->activeStarSystem()->getFileName();
 	  }
 	  StarSystem * ss = un->getStarSystem();
 	  return ss->getFileName();
@@ -218,10 +219,10 @@ namespace UnitUtil {
 		return dist;
 	}
         int isPlayerStarship (Unit * un) {
-                Cockpit * cp = _Universe.isPlayerStarship (un);
+                Cockpit * cp = _Universe->isPlayerStarship (un);
                 if (cp==NULL) {
                         return -1;
                 }
-                return (cp - _Universe.AccessCockpit(0));
+                return (cp - _Universe->AccessCockpit(0));
         }
 }

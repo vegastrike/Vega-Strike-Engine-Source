@@ -49,7 +49,7 @@ extern string RemoveDotSystem (const char *input);
 /*
 GameStarSystem::GameStarSystem(): StarSystem()
 {
-  _Universe.pushActiveStarSystem (this);
+  _Universe->pushActiveStarSystem (this);
   GFXCreateLightContext (lightcontext);
   bolts = new bolt_draw;
   collidetable = new CollideTable(this);
@@ -60,7 +60,7 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
-  _Universe.pushActiveStarSystem (this);
+  _Universe->pushActiveStarSystem (this);
   GFXCreateLightContext (lightcontext);
   bolts = new bolt_draw;
   collidetable = new CollideTable(this);
@@ -149,7 +149,7 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
   params.scattering = 5;
 
   theAtmosphere = new Atmosphere(params);
-  _Universe.popActiveStarSystem ();
+  _Universe->popActiveStarSystem ();
 
 }
 void GameStarSystem::activateLightMap() {
@@ -169,9 +169,9 @@ void GameStarSystem::activateLightMap() {
 }
 
 GameStarSystem::~GameStarSystem() {
-  _Universe.activeStarSystem()->SwapOut();
-  //_Universe.pushActiveStarSystem(this);
-  _Universe.activeStarSystem()->SwapIn();  
+  _Universe->activeStarSystem()->SwapOut();
+  //_Universe->pushActiveStarSystem(this);
+  _Universe->activeStarSystem()->SwapIn();  
 #ifdef NV_CUBE_MAP
 
   delete LightMap[0];
@@ -207,10 +207,10 @@ GameStarSystem::~GameStarSystem() {
   }
   */
   delete collidetable;
-  _Universe.activeStarSystem()->SwapOut();
+  _Universe->activeStarSystem()->SwapOut();
   //  GFXDeleteLightContext (lightcontext);
-  //_Universe.popActiveStarSystem();
-  _Universe.activeStarSystem()->SwapIn();  
+  //_Universe->popActiveStarSystem();
+  _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
   
 }
@@ -325,12 +325,12 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"cp");
   fflush (stderr);
 #endif
-  if (_Universe.AccessCockpit()->GetParent()==NULL) {
+  if (_Universe->AccessCockpit()->GetParent()==NULL) {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cpu");
   fflush (stderr);
 #endif
-    _Universe.AccessCamera()->UpdateGFX (GFXTRUE);
+    _Universe->AccessCamera()->UpdateGFX (GFXTRUE);
   }
 #ifdef UPDATEDEBUG
   fprintf (stderr,">un<");
@@ -351,7 +351,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"vp");
   fflush (stderr);
 #endif
-  _Universe.AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
@@ -402,7 +402,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 
-  if ((neb = _Universe.AccessCamera()->GetNebula())) {
+  if ((neb = _Universe->AccessCamera()->GetNebula())) {
     neb->SetFogState();
   }
   Beam::ProcessDrawQueue();
@@ -421,7 +421,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"star");
   fflush (stderr);
 #endif
-  //  if (_Universe.AccessCamera()->GetNebula()!=NULL)
+  //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
   GFXFogMode (FOG_OFF);
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
@@ -435,7 +435,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
   if (DrawCockpit) {
-    _Universe.AccessCockpit()->Draw();
+    _Universe->AccessCockpit()->Draw();
     //    if (doInputDFA) {
     //      GFXHudMode (true);
     //      systemInputDFA->Draw();
@@ -479,8 +479,8 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   bool firstframe = true;
 
   ///this makes it so systems without players may be simulated less accurately
-  for (int k=0;k<_Universe.numPlayers();k++) {
-    if (_Universe.AccessCockpit(k)->activeStarSystem==this) {
+  for (int k=0;k<_Universe->numPlayers();k++) {
+    if (_Universe->AccessCockpit(k)->activeStarSystem==this) {
       priority=1;
     }
   }
@@ -489,7 +489,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   ///just be sure to restore this at the end
 
   time += GetElapsedTime();
-  _Universe.pushActiveStarSystem(this);
+  _Universe->pushActiveStarSystem(this);
   //WARNING PERFORMANCE HACK!!!!!
     if (time>2*SIMULATION_ATOM) {
       time = 2*SIMULATION_ATOM;
@@ -499,7 +499,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
       UnitCollection::UnitIterator iter;
       if (current_stage==PHY_AI) {
 	if (firstframe&&rand()%2) {
-	  if (this==_Universe.getActiveStarSystem(0)) {
+	  if (this==_Universe->getActiveStarSystem(0)) {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Snd");
   fflush (stderr);
@@ -540,22 +540,22 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
       }else if (current_stage==MISSION_SIMULATION) {
 #define RUN_ONLY_FOR_PLAYER_STARSYSTEM
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
-	if (_Universe.getActiveStarSystem(0)==this) {
+	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
-	    unsigned int curcockpit= _Universe.CurrentCockpit();
+	    unsigned int curcockpit= _Universe->CurrentCockpit();
 	    for (unsigned int i=0;i<active_missions.size();i++) {
 	      if (active_missions[i]) {
-			  _Universe.SetActiveCockpit(active_missions[i]->player_num);
-			   StarSystem * ss=_Universe.AccessCockpit()->activeStarSystem;
-			  if (ss) _Universe.pushActiveStarSystem(ss);
+			  _Universe->SetActiveCockpit(active_missions[i]->player_num);
+			   StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
+			  if (ss) _Universe->pushActiveStarSystem(ss);
 			  mission=active_missions[i];
 			  active_missions[i]->DirectorLoop();
 			  active_missions[i]->DirectorBenchmark();
-			  if (ss)_Universe.popActiveStarSystem();
+			  if (ss)_Universe->popActiveStarSystem();
 	      }
 	    }
-		_Universe.SetActiveCockpit(curcockpit);
+		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 		processDelayedMissions();
 	  }
@@ -599,14 +599,14 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
 	Terrain::UpdateAll(64);	
-	unsigned int i=_Universe.CurrentCockpit();
-	for (int j=0;j<_Universe.numPlayers();j++) {
-	  if (_Universe.AccessCockpit(j)->activeStarSystem==this) {
-	    _Universe.SetActiveCockpit(j);
-	    _Universe.AccessCockpit(j)->Update();
+	unsigned int i=_Universe->CurrentCockpit();
+	for (int j=0;j<_Universe->numPlayers();j++) {
+	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
+	    _Universe->SetActiveCockpit(j);
+	    _Universe->AccessCockpit(j)->Update();
 	  }
 	}
-	_Universe.SetActiveCockpit(i);
+	_Universe->SetActiveCockpit(i);
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
@@ -614,16 +614,16 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"muzak");
   fflush (stderr);
 #endif
-	if (this==_Universe.getActiveStarSystem(0)) {
-	  _Universe.AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
+	if (this==_Universe->getActiveStarSystem(0)) {
+	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
 	  if (muzak)
 		  muzak->Listen();
 	}
-	if (_Universe.AccessCockpit()->activeStarSystem==this){
+	if (_Universe->AccessCockpit()->activeStarSystem==this){
 	  Nebula * neb;
-	  if ((neb=_Universe.AccessCamera()->GetNebula())) {
+	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
 	    if (neb->getFade()<=0) {
-	      _Universe.AccessCamera()->SetNebula(NULL);//Update physics should set this
+	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
 	    }
 	  }
 	}
@@ -631,7 +631,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
-      Unit * owner = _Universe.AccessCockpit()->GetParent();
+      Unit * owner = _Universe->AccessCockpit()->GetParent();
       if (owner) {
 	if (owner->InCorrectStarSystem(this)) {
 	  if (getTimeCompression()>1) {//if not paused
@@ -664,7 +664,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   UnitCollection::FreeUnusedNodes();
   collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
-  _Universe.popActiveStarSystem();
+  _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 

@@ -190,13 +190,13 @@ void Nebula::SetFogState () {
 void Nebula::PutInsideCam(int i) {
   static float nebdelta= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_time",".01"));
   static float fadeinrate= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_fade_in_percent","0.5"));
-  if (_Universe.AccessCamera()==_Universe.AccessCamera(i)) {
+  if (_Universe->AccessCamera()==_Universe->AccessCamera(i)) {
     fadeinvalue+=(1+fadeinrate)*nebdelta*SIMULATION_ATOM;
     if (fadeinvalue>1) {
       fadeinvalue=1;
     }
   }
-  _Universe.AccessCamera(i)->SetNebula (this);
+  _Universe->AccessCamera(i)->SetNebula (this);
 }
 
 Nebula::Nebula(const char * unitfile, bool SubU, int faction,
@@ -240,9 +240,9 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   Vector t1;
   float dis;
   unsigned int i;
-  if (_Universe.activeStarSystem()==_Universe.AccessCockpit()->activeStarSystem) {
+  if (_Universe->activeStarSystem()==_Universe->AccessCockpit()->activeStarSystem) {
   for (i=0;i<NUM_CAM;i++) {
-    if (Inside (_Universe.AccessCamera(i)->GetPosition(),0,t1,dis)) {
+    if (Inside (_Universe->AccessCamera(i)->GetPosition(),0,t1,dis)) {
       PutInsideCam(i);
 
     }

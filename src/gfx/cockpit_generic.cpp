@@ -80,7 +80,7 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
   if (unit->getFlightgroup()!=NULL) {
     fg = unit->getFlightgroup();
   }
-  activeStarSystem= _Universe.activeStarSystem();//cannot switch to units in other star systems.
+  activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
   savegame->SetPlayerLocation(pos);
   if (filename[0]!='\0') {
@@ -168,28 +168,28 @@ static vector <int> switchunit;
 static vector <int> turretcontrol;
 static vector <int> suicide;
 void RespawnNow (Cockpit * cp) {
-  while (respawnunit.size()<=_Universe.numPlayers())
+  while (respawnunit.size()<=_Universe->numPlayers())
     respawnunit.push_back(0);
-  for (unsigned int i=0;i<_Universe.numPlayers();i++) {
-    if (_Universe.AccessCockpit(i)==cp) {
+  for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+    if (_Universe->AccessCockpit(i)==cp) {
       respawnunit[i]=2;
     }
   }
 }
 void Cockpit::SwitchControl (int,KBSTATE k) {
   if (k==PRESS) {
-    while (switchunit.size()<=_Universe.CurrentCockpit())
+    while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
-    switchunit[_Universe.CurrentCockpit()]=1;
+    switchunit[_Universe->CurrentCockpit()]=1;
   }
 
 }
 
 void Cockpit::Respawn (int,KBSTATE k) {
   if (k==PRESS) {
-    while (respawnunit.size()<=_Universe.CurrentCockpit())
+    while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);
-    respawnunit[_Universe.CurrentCockpit()]=1;
+    respawnunit[_Universe->CurrentCockpit()]=1;
   }
 }
 */
@@ -225,8 +225,8 @@ int Cockpit::Autopilot (Unit * target) {
 	numave++;
 	/*
 	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe.AccessCamera()->P,
-							      _Universe.AccessCamera()->R,
+	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
+							      _Universe->AccessCamera()->R,
 							      averagetime*autospeed/(numave));
 	*/
 	zoomfactor=1.5;
@@ -244,11 +244,11 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
   bool pointingtonw=false;
 
-  for (int i=0;i<_Universe.numPlayers();i++) {
-    if (i!=(int)_Universe.CurrentCockpit()) {
-      if (_Universe.AccessCockpit(i)->GetParent()==ol)
+  for (int i=0;i<_Universe->numPlayers();i++) {
+    if (i!=(int)_Universe->CurrentCockpit()) {
+      if (_Universe->AccessCockpit(i)->GetParent()==ol)
 	pointingtool=true;
-      if (_Universe.AccessCockpit(i)->GetParent()==nw)
+      if (_Universe->AccessCockpit(i)->GetParent()==nw)
 	pointingtonw=true;
     }
   }
@@ -266,15 +266,15 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   }
   if (nw) {
     nw->PrimeOrders();
-    nw->EnqueueAI (new FireKeyboard (_Universe.CurrentCockpit(),_Universe.CurrentCockpit()));
-    nw->EnqueueAI (new FlyByJoystick (_Universe.CurrentCockpit()));
+    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
+    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
     static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
     if (nw->getCockpit().length()>0&&LoadNewCockpit) {
-      _Universe.AccessCockpit()->Init (nw->getCockpit().c_str());
+      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
     }else {
       static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
       if (DisCockpit) {
-	_Universe.AccessCockpit()->Init ("disabled-cockpit.cpt");
+	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
       }
     }
   }
@@ -323,29 +323,29 @@ void Cockpit::Update () {
   }
   Unit * par=GetParent();
   if (!par) {
-    if (respawnunit.size()>_Universe.CurrentCockpit())
-      if (respawnunit[_Universe.CurrentCockpit()]){
+    if (respawnunit.size()>_Universe->CurrentCockpit())
+      if (respawnunit[_Universe->CurrentCockpit()]){
 	parentturret.SetUnit(NULL);
 	zoomfactor=1.5;
-	respawnunit[_Universe.CurrentCockpit()]=0;
+	respawnunit[_Universe->CurrentCockpit()]=0;
 	string newsystem = savegame->GetStarSystem()+".system";
-	StarSystem * ss = _Universe.GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-	_Universe.getActiveStarSystem(0)->SwapOut();
+	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+	_Universe->getActiveStarSystem(0)->SwapOut();
 	this->activeStarSystem=ss;
-	_Universe.pushActiveStarSystem(ss);
+	_Universe->pushActiveStarSystem(ss);
 
 
 	vector <StarSystem *> saved;
-	while (_Universe.getNumActiveStarSystem()) {
-	  saved.push_back (_Universe.activeStarSystem());
-	  _Universe.popActiveStarSystem();
+	while (_Universe->getNumActiveStarSystem()) {
+	  saved.push_back (_Universe->activeStarSystem());
+	  _Universe->popActiveStarSystem();
 	}
 	if (!saved.empty()) {
 	  saved.back()=ss;
 	}
 	unsigned int mysize = saved.size();
 	for (unsigned int i=0;i<mysize;i++) {
-	  _Universe.pushActiveStarSystem (saved.back());
+	  _Universe->pushActiveStarSystem (saved.back());
 	  saved.pop_back();
 	}
 	ss->SwapIn();
@@ -366,12 +366,12 @@ void Cockpit::Update () {
 	CockpitKeys::Pan(0,PRESS);
 	CockpitKeys::Inside(0,PRESS);
 	savegame->ReloadPickledData();
-	_Universe.popActiveStarSystem();
+	_Universe->popActiveStarSystem();
       }
   }
-  if (turretcontrol.size()>_Universe.CurrentCockpit())
-  if (turretcontrol[_Universe.CurrentCockpit()]) {
-    turretcontrol[_Universe.CurrentCockpit()]=0;
+  if (turretcontrol.size()>_Universe->CurrentCockpit())
+  if (turretcontrol[_Universe->CurrentCockpit()]) {
+    turretcontrol[_Universe->CurrentCockpit()]=0;
     Unit * par = GetParent();
     if (par) {
       static int index=0;
@@ -381,7 +381,7 @@ void Cockpit::Update () {
 	un_iter ui= par->getSubUnits();
 	Unit * un;
 	while ((un=ui.current())) {
-		if (_Universe.isPlayerStarship(un)){
+		if (_Universe->isPlayerStarship(un)){
 			++ui;
 			continue;
 		}
@@ -403,7 +403,7 @@ void Cockpit::Update () {
       if (tmp==false) {
 	if (tmpgot) index=0;
 	Unit * un = parentturret.GetUnit();
-	if (un&&(!_Universe.isPlayerStarship(un))) {
+	if (un&&(!_Universe->isPlayerStarship(un))) {
 	  
 	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  SwitchUnits (NULL,un);
@@ -413,21 +413,21 @@ void Cockpit::Update () {
       }
     }
   }
-  if (switchunit.size()>_Universe.CurrentCockpit())
-  if (switchunit[_Universe.CurrentCockpit()]) {
+  if (switchunit.size()>_Universe->CurrentCockpit())
+  if (switchunit[_Universe->CurrentCockpit()]) {
     parentturret.SetUnit(NULL);
 
     zoomfactor=1.5;
     static int index=0;
-    switchunit[_Universe.CurrentCockpit()]=0;
-    un_iter ui= _Universe.activeStarSystem()->getUnitList().createIterator();
+    switchunit[_Universe->CurrentCockpit()]=0;
+    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
     int i=0;
     while ((un=ui.current())) {
       if (un->faction==this->unitfaction) {
 	
-	if ((i++)>=index&&(!_Universe.isPlayerStarship(un))) {
+	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))) {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
@@ -449,15 +449,15 @@ void Cockpit::Update () {
       un->EjectCargo((unsigned int)-1);
     }
   }else {
-  if (suicide.size()>_Universe.CurrentCockpit()) {
-    if (suicide[_Universe.CurrentCockpit()]) {
+  if (suicide.size()>_Universe->CurrentCockpit()) {
+    if (suicide[_Universe->CurrentCockpit()]) {
       Unit * un=NULL;
       if ((un = parent.GetUnit())) {
 	unsigned short armor[4];
 	un->ArmorData(armor);
 	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
       }
-      suicide[_Universe.CurrentCockpit()]=0;
+      suicide[_Universe->CurrentCockpit()]=0;
     }
 
   }

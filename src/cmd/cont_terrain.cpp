@@ -221,7 +221,7 @@ void ContinuousTerrain::Draw() {
 				   md[i].mesh->rSize()
 				   );
       if (d)
-	md[i].mesh->Draw (1000,md[i].mat,d,-1,(_Universe.AccessCamera()->GetNebula()!=NULL)?-1:0);
+	md[i].mesh->Draw (1000,md[i].mat,d,-1,(_Universe->AccessCamera()->GetNebula()!=NULL)?-1:0);
     }
   }  
 }
@@ -357,7 +357,7 @@ void ContinuousTerrain::AdjustTerrain (Matrix &transform, const Matrix &transfor
 void ContinuousTerrain::AdjustTerrain(StarSystem * ss) {
   Matrix transform;
 
-  QVector campos =InvScaleTransform (transformation, _Universe.AccessCamera()->GetPosition());
+  QVector campos =InvScaleTransform (transformation, _Universe->AccessCamera()->GetPosition());
   for (int i=0;i<numcontterr;i++) {
     if (1||dirty[i]) {
       AdjustTerrain (transform,transformation,campos,i);

@@ -46,7 +46,7 @@ namespace UnitUtil {
 		if (!my_unit)return 0;
 		unsigned char sex=0;
 		Cockpit * tmp;
-		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			Order * ord=other_unit->getAIState();
 			if (ord) {
 				Animation * ani= ord->getCommFace (mood,sex);
@@ -60,7 +60,7 @@ namespace UnitUtil {
 	bool commAnimation(Unit *my_unit,string anim){
 		if (!my_unit)return false;
 		Cockpit * tmp;
-		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			Hashtable <std::string, Animation, char [63]> AniHashTable;
 			Animation * ani= AniHashTable.Get(anim);
 			if (NULL==ani) {

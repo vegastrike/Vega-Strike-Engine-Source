@@ -1513,7 +1513,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
 		  changehome();
 		  static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
 		  vschdir (savedunitpath.c_str());
-		  string nonautosave=GetReadPlayerSaveGame(_Universe.AccessCockpit()-_Universe.AccessCockpit(0));
+		  string nonautosave=GetReadPlayerSaveGame(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
 		  if (nonautosave.empty()) {
 			vschdir (modifications);
 		  }else {

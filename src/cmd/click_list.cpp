@@ -17,9 +17,9 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
     //mousePoint.k= -mousePoint.k;
   Vector CamP,CamQ,CamR;
   QVector CamPos;
-  _Universe.AccessCamera()->GetPQR(CamP,CamQ,CamR);
+  _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-  _Universe.AccessCamera()->GetPosition(CamPos);    
+  _Universe->AccessCamera()->GetPosition(CamPos);    
   //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
   mousePoint.Normalize();
   mouseline =mousePoint + CamPos.Cast();
@@ -55,7 +55,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
     float drivel [16];
     GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
     GFXFrustum (frustmat, drivel,l*(-2.*minX/g_game.x_resolution+1) /*  *g_game.MouseSensitivityX*/,r*(2.*maxX/g_game.x_resolution-1)/*  *g_game.MouseSensitivityX*/,t*(-2.*minY/g_game.y_resolution+1) /*  *g_game.MouseSensitivityY*/,b*(2.*maxY/g_game.y_resolution-1)/*  *g_game.MouseSensitivityY*/,n,f);
-    _Universe.AccessCamera()->GetView (view);
+    _Universe->AccessCamera()->GetView (view);
     float frustum [6][4];
     GFXCalculateFrustum(frustum,view,frustmat);
     Unit * un;
@@ -113,10 +113,10 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
   float tmpdis;
   Unit * targetUnit=NULL;
   if (equalCheck&&lastSelected) {//the person clicked the same place and wishes to cycle through units from front to back
-    float morethan = lastSelected->getMinDis(_Universe.AccessCamera()->GetPosition());//parent system for access cam
+    float morethan = lastSelected->getMinDis(_Universe->AccessCamera()->GetPosition());//parent system for access cam
     UAye = new un_iter (uc->createIterator());
     while ((un=UAye->current())) {
-      tmpdis = un->getMinDis (_Universe.AccessCamera()->GetPosition());//parent_system? FIXME (for access cam
+      tmpdis = un->getMinDis (_Universe->AccessCamera()->GetPosition());//parent_system? FIXME (for access cam
       if (tmpdis>morethan&&tmpdis<minDistance) {
 	minDistance=tmpdis;
 	targetUnit=un;
@@ -129,7 +129,7 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
     //he clicked on the back of the list and wishes to start over
     UAye = new un_iter (uc->createIterator());
     while ((un=UAye->current())) {
-      tmpdis = un->getMinDis (_Universe.AccessCamera()->GetPosition());//parent_system FIXME
+      tmpdis = un->getMinDis (_Universe->AccessCamera()->GetPosition());//parent_system FIXME
       if (tmpdis<minDistance) {
 	minDistance=tmpdis;
 	targetUnit=un;

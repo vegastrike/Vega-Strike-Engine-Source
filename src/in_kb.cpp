@@ -40,8 +40,8 @@ static unsigned int playerBindings [WSK_LAST];
 KBSTATE keyState [WSK_LAST];
 
 static void kbGetInput(int key, bool release, int x, int y){
-  int i=_Universe.CurrentCockpit();
-  _Universe.SetActiveCockpit(playerBindings[key]);
+  int i=_Universe->CurrentCockpit();
+  _Universe->SetActiveCockpit(playerBindings[key]);
 
 
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
@@ -49,7 +49,7 @@ static void kbGetInput(int key, bool release, int x, int y){
   if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)
     keyBindings[key](key,RELEASE);
   keyState[key] = release?UP:DOWN;
-  _Universe.SetActiveCockpit(i);
+  _Universe->SetActiveCockpit(i);
 }
 int shiftup (int ch) {
   switch (ch) {

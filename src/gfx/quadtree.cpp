@@ -139,7 +139,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal,  const Matrix& tran
 void QuadTree::Update (unsigned short numstages, unsigned short whichstage, updateparity * uo) {
   //GetViewerPosition
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
-  root->Update (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe.AccessCamera()->GetPosition())),detail,numstages,whichstage,uo);
+  root->Update (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition())),detail,numstages,whichstage,uo);
 }
 
 inline Vector calculatenormscale (const Matrix &trans) {
@@ -160,7 +160,7 @@ void QuadTree::Render () {
   GFXEnable (LIGHTING);
   GFXBlendMode (ONE,ZERO);
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform,&textures, Scales,neighbors);
-  root->Render (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe.AccessCamera()->GetPosition())));
+  root->Render (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition())));
 }
 void	QuadTree::LoadData()
 // Load some data and put it into the quadtree.

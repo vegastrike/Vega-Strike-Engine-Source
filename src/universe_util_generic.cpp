@@ -19,7 +19,7 @@
 
 using std::string;
 
-#define activeSys _Universe.activeStarSystem() //less to write
+#define activeSys _Universe->activeStarSystem() //less to write
 
 namespace UniverseUtil {
 	Cargo getRandCargo(int quantity, string category) {
@@ -64,11 +64,11 @@ namespace UniverseUtil {
 		return UnitFactory::getMasterPartList();
 	}
 	void pushSystem (string name) {
-		StarSystem * ss = _Universe.GenerateStarSystem (name.c_str(),"",Vector(0,0,0));
-		_Universe.pushActiveStarSystem(ss);
+		StarSystem * ss = _Universe->GenerateStarSystem (name.c_str(),"",Vector(0,0,0));
+		_Universe->pushActiveStarSystem(ss);
 	}
 	void popSystem () {
-		_Universe.popActiveStarSystem();
+		_Universe->popActiveStarSystem();
 	}
 	string getSystemFile() {
 		return activeSys->getFileName();
@@ -144,13 +144,13 @@ namespace UniverseUtil {
 	}
 	*/
 	string GetAdjacentSystem (string str, int which) {
-		return _Universe.getAdjacentStarSystems(str)[which];
+		return _Universe->getAdjacentStarSystems(str)[which];
 	}
 	string GetGalaxyProperty (string sys, string prop) {
-		return _Universe.getGalaxyProperty(sys,prop);
+		return _Universe->getGalaxyProperty(sys,prop);
 	}
 	int GetNumAdjacentSystems (string sysname) {
-		return _Universe.getAdjacentStarSystems(sysname).size();
+		return _Universe->getAdjacentStarSystems(sysname).size();
 	}
 	/*
 	int musicAddList(string str) {
@@ -190,19 +190,19 @@ namespace UniverseUtil {
 		AddAnimation(loc,size,true,aniName,growpercent);
 	}
         unsigned int getCurrentPlayer() {
-	  return _Universe.CurrentCockpit();
+	  return _Universe->CurrentCockpit();
         }
 	Unit *getPlayer(){
-		return _Universe.AccessCockpit()->GetParent();;
+		return _Universe->AccessCockpit()->GetParent();;
 	}
 	int getNumPlayers () {
-		return _Universe.numPlayers();
+		return _Universe->numPlayers();
 	}
 	Unit *getPlayerX(int which){
 		if (which>=getNumPlayers()) {
 			return NULL;
 		}
-		return _Universe.AccessCockpit(which)->GetParent();
+		return _Universe->AccessCockpit(which)->GetParent();
 	}
 	*/
 	void terminateMission(bool Win){
@@ -278,7 +278,7 @@ namespace UniverseUtil {
     for (unsigned int k=0;k<10;k++) {
       Unit * un;
       bool collision=false;
-      for (un_iter i=_Universe.activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
+      for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
 	if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
 	  continue;
 	}
@@ -312,16 +312,16 @@ namespace UniverseUtil {
 		return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 	}
 	Unit *getPlayer(){
-		return _Universe.AccessCockpit()->GetParent();;
+		return _Universe->AccessCockpit()->GetParent();;
 	}
 	int getNumPlayers () {
-		return _Universe.numPlayers();
+		return _Universe->numPlayers();
 	}
 	Unit *getPlayerX(int which){
 		if (which>=getNumPlayers()) {
 			return NULL;
 		}
-		return _Universe.AccessCockpit(which)->GetParent();
+		return _Universe->AccessCockpit(which)->GetParent();
 	}
 }
 

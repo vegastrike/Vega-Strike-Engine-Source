@@ -200,7 +200,7 @@ void FlyByWire::Afterburn (float per){
   desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed-cpu->set_speed));
 
 
-  if(parent==_Universe.AccessCockpit()->GetParent()){
+  if(parent==_Universe->AccessCockpit()->GetParent()){
     //printf("afterburn is %d\n",afterburn);
     forcefeedback->playAfterburner(afterburn);
   }

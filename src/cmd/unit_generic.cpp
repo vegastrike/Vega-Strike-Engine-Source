@@ -153,7 +153,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	Init();
 	//update_ani_cache();
 	//if (!SubU)
-	//  _Universe.AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
+	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
 	this->player = false;
 	SubUnit = SubU;
 	this->faction = faction;
@@ -843,7 +843,7 @@ void Unit::setTargetFg(string primary,string secondary,string tertiary){
 
 void Unit::ReTargetFg(int which_target){
 #if 0
-      StarSystem *ssystem=_Universe.activeStarSystem();
+      StarSystem *ssystem=_Universe->activeStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       Iterator uiter=unitlist->createIterator();
 
@@ -2115,7 +2115,7 @@ void Unit::PerformDockingOperations () {
     un->NetLocalTorque=Vector (0,0,0);
     un->AngularVelocity=Vector (0,0,0);
     un->Velocity=Vector (0,0,0);
-    if (un==_Universe.AccessCockpit()->GetParent()) {
+    if (un==_Universe->AccessCockpit()->GetParent()) {
       ///CHOOSE NEW MISSION
       for (unsigned int i=0;i<image->clearedunits.size();i++) {
 	if (image->clearedunits[i]==un) {//this is a hack because we don't have an interface to say "I want to buy a ship"  this does it if you press shift-c in the base
@@ -2149,9 +2149,9 @@ bool Unit::Dock (Unit * utdw) {
       }
       image->DockedTo.SetUnit (utdw);
       computer.set_speed=0;
-      if (this==_Universe.AccessCockpit()->GetParent()) {
+      if (this==_Universe->AccessCockpit()->GetParent()) {
 		  this->RestoreGodliness();
-	//_Universe.AccessCockpit()->RestoreGodliness();
+	//_Universe->AccessCockpit()->RestoreGodliness();
       }
       
       return true;
@@ -2189,7 +2189,7 @@ inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radi
 }
 
 int Unit::CanDockWithMe(Unit * un) {
-  //  if (_Universe.GetRelation(faction,un->faction)>=0) {//already clearneed
+  //  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
     for (unsigned int i=0;i<image->dockingports.size();i++) {
       if (un->image->dockingports.size()) {
 	for (unsigned int j=0;j<un->image->dockingports.size();j++) {

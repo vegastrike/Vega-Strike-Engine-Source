@@ -204,7 +204,7 @@ GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unit
 	Init();
 	update_ani_cache();
 	//if (!SubU)
-	//  _Universe.AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
+	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
 	SubUnit = SubU;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
@@ -383,13 +383,13 @@ StarSystem * GameUnit::getStarSystem () {
   if (activeStarSystem) {
     return activeStarSystem;
   }else {
-    Cockpit * cp=_Universe.isPlayerStarship(this);
+    Cockpit * cp=_Universe->isPlayerStarship(this);
     if (cp) {
       if (cp->activeStarSystem)
 	return cp->activeStarSystem;
     }
   }
-  return _Universe.activeStarSystem();
+  return _Universe->activeStarSystem();
 }
 
 
@@ -438,22 +438,22 @@ void GameUnit::UpdateHudMatrix(int whichcam) {
   Vector r (ctm.getR());
   Vector tmp;
   CrossProduct(r,q, tmp);
-  _Universe.AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
+  _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe.AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
+  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
    
 void GameUnit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
   if (planet) {
-    if (planet->trans==_Universe.AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
+    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
       Matrix tmp;
       Vector p,q,r;
       QVector c;
       MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
       planet->trans->InvTransformBasis(tmp,p,q,r,c);
-      MultMatrix (planet_temp_matrix,*_Universe.AccessCamera()->GetPlanetGFX(),tmp);
+      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
       planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
       ct = &planet_temp_transformation;
       *ctm = planet_temp_matrix;
@@ -542,7 +542,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     Explode(true, GetElapsedTime());
   }
   bool On_Screen=false;
-  if (!invisible||(this!=_Universe.AccessCockpit()->GetParent())) {
+  if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
@@ -568,9 +568,9 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
       float lod;
       //      fprintf (stderr,"\n");
       if (d) {  //d can be used for level of detail shit
-	d = (TransformedPosition-_Universe.AccessCamera()->GetPosition().Cast()).Magnitude();
+	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe.AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
 	  On_Screen=true;
 	} else {
 
@@ -591,10 +591,10 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
       //	image->selectionBox->Draw(g_game.x_resolution,*ctm);
     }
   } else {
-	  _Universe.AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
+	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
     //        UpdateHudMatrix();
     /***DEBUGGING cosAngleFromMountTo
-    UnitCollection *dL = _Universe.activeStarSystem()->getUnitList();
+    UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
     UnitCollection::UnitIterator *tmpiter = dL->createIterator();
     GameUnit * curun;
     while (curun = tmpiter->current()) {
@@ -624,12 +624,12 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 	if( computer.max_ab_speed!= 0)
 	{
 	    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-	    halos.Draw(*ctm,Scale,cloak,(_Universe.AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	}
 	else
 	{
 	    Vector Scale (1,1,0);
-	    halos.Draw(*ctm,Scale,cloak,(_Universe.AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	}
   }
 }
@@ -666,7 +666,7 @@ void GameUnit::scanSystem(){
     return;
   }
 
-    StarSystem *ssystem=_Universe.activeStarSystem();
+    StarSystem *ssystem=_Universe->activeStarSystem();
     un_iter uiter(ssystem->getUnitList().createIterator());
     
     float min_enemy_dist=9999999.0;

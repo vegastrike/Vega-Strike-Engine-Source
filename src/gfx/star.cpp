@@ -2,6 +2,7 @@
 #include <assert.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "gfx/camera.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -33,7 +34,7 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 	fade = fadeit;
 }
 void Stars::Draw() {
-  const QVector cp (_Universe.AccessCamera()->GetPosition());
+  const QVector cp (_Universe->AccessCamera()->GetPosition());
   UpdatePosition(cp);
   //  GFXLightContextAmbient(GFXColor(0,0,0,1));
   GFXColor (1,1,1,1);

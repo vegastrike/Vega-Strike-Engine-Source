@@ -43,7 +43,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   un_iter subun = parent->getSubUnits();
   Unit * su=NULL;
   double dist;
-  UnitCollection::UnitIterator iter (_Universe.activeStarSystem()->getUnitList().createIterator());
+  UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
   Unit * un=NULL;
   while ((un = iter.current())) {
     float range=UnitUtil::getDistance(parent,un);
@@ -111,7 +111,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
 /* Proper choosing of targets
 void FireAt::ChooseTargets (int num) {
   UnitCollection tmp;
-  UnitCollection::UnitIterator *iter = _Universe.activeStarSystem()->getUnitList().createIterator();
+  UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un ;
   while ((un = iter->current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);

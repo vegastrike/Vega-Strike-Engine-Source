@@ -330,7 +330,7 @@ void Planet::Draw(const Transformation & quat, const Matrix &m) {
   //  if(!inside) {
   GameUnit::Draw(quat,m);
   //  }
-    QVector t (_Universe.AccessCamera()->GetPosition()-Position());
+    QVector t (_Universe->AccessCamera()->GetPosition()-Position());
     static int counter=0;
     if (counter ++>100)
       if (t.Magnitude()<corner_max.i) {
@@ -366,7 +366,7 @@ void Planet::Draw(const Transformation & quat, const Matrix &m) {
  }
 }
 void Planet::ProcessTerrains () {
-  _Universe.AccessCamera()->SetPlanetaryTransform (NULL);
+  _Universe->AccessCamera()->SetPlanetaryTransform (NULL);
   while (!PlanetTerrainDrawQueue.empty()) {
     Planet * pl = (Planet *)PlanetTerrainDrawQueue.back()->GetUnit();
     pl->DrawTerrain();
@@ -379,7 +379,7 @@ void Planet::ProcessTerrains () {
 void Planet::DrawTerrain() {
 
 
-	  _Universe.AccessCamera()->SetPlanetaryTransform (terraintrans);
+	  _Universe->AccessCamera()->SetPlanetaryTransform (terraintrans);
 	  inside =true;
 	  if (terrain)
 	    terrain->EnableUpdate();
@@ -397,27 +397,27 @@ void Planet::DrawTerrain() {
 
  GFXLoadIdentity (MODEL);
   if (inside&&terrain) {
-    _Universe.AccessCamera()->UpdatePlanetGFX();
-    //    Camera * cc = _Universe.AccessCamera();
+    _Universe->AccessCamera()->UpdatePlanetGFX();
+    //    Camera * cc = _Universe->AccessCamera();
     //    VectorAndPositionToMatrix (tmp,cc->P,cc->Q,cc->R,cc->GetPosition()+cc->R*100);
-    terrain->SetTransformation (*_Universe.AccessCamera()->GetPlanetGFX());
-    terrain->AdjustTerrain(_Universe.activeStarSystem());
+    terrain->SetTransformation (*_Universe->AccessCamera()->GetPlanetGFX());
+    terrain->AdjustTerrain(_Universe->activeStarSystem());
     terrain->Draw();
 #ifdef PLANETARYTRANSFORM
 
-    terraintrans->GrabPerpendicularOrigin (_Universe.AccessCamera()->GetPosition(),tmp);
+    terraintrans->GrabPerpendicularOrigin (_Universe->AccessCamera()->GetPosition(),tmp);
     terrain->SetTransformation (tmp);
-    terrain->AdjustTerrain(_Universe.activeStarSystem());
+    terrain->AdjustTerrain(_Universe->activeStarSystem());
     terrain->Draw();
     if (atmosphere) {
       Vector tup (tmp[4],tmp[5],tmp[6]);
-      Vector p = (_Universe.AccessCamera()->GetPosition());
+      Vector p = (_Universe->AccessCamera()->GetPosition());
       Vector blah = p-Vector (tmp[12],tmp[13],tmp[14]);
       blah = p - (blah.Dot (tup))*tup;
       tmp[12]=blah.i;
       tmp[13]=blah.j;
       tmp[14]=blah.k;      
-      atmosphere->SetMatricesAndDraw (_Universe.AccessCamera()->GetPosition(),tmp);
+      atmosphere->SetMatricesAndDraw (_Universe->AccessCamera()->GetPosition(),tmp);
     }
 #endif
   }
@@ -457,7 +457,7 @@ void Planet::reactToCollision(Unit * un, const QVector & biglocation, const Vect
     static int tmp=0;
     /*    if (tmp) {
       terrain->SetTransformation (top);
-      terrain->AdjustTerrain (_Universe.activeStarSystem());
+      terrain->AdjustTerrain (_Universe->activeStarSystem());
       terrain->Collide (un);
       }else {*/
 

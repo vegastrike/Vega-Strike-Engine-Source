@@ -71,7 +71,7 @@ void Terrain::EnableDraw() {
 }
 void Terrain::Collide () {
   un_iter iter;
-  iter = _Universe.activeStarSystem()->getUnitList().createIterator();
+  iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit *unit;
   while((unit = iter.current())!=NULL) {
     Collide (unit);

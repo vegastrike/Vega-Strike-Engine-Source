@@ -35,7 +35,7 @@ string getUnitNameAndFgNoBase (Unit * target) {
     }
   }
   if (string("neutral")!=FactionUtil::GetFaction(target->faction)) {
-    return /*string(_Universe.GetFaction(target->faction))+" "+*/target->name;
+    return /*string(_Universe->GetFaction(target->faction))+" "+*/target->name;
   }
   return target->name;
 }
@@ -84,7 +84,7 @@ int parse_vdu_type (const char * x) {
 
 VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
   thismode.push_back(MSG);
-  if (_Universe.numPlayers()>1) {
+  if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
   }
   comm_ani=NULL;
@@ -333,7 +333,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
     }
     
   }
-  tp->Draw (MangleString (unitandfg.c_str(),_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+  tp->Draw (MangleString (unitandfg.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
 
   if (inrange) {  
   int i=0;
@@ -347,12 +347,12 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   sprintf (qr,"Dis %.4f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
   strcat (st,qr);
-  tp->Draw (MangleString (st,_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
   DrawShield (fs,rs,ls,bs,x,y,w,h);
   GFXColor4f (1,1,1,1);
   }else {
-  tp->Draw (MangleString ("\n[OutOfRange]",_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+  tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
 
   }
 }
@@ -423,7 +423,7 @@ void VDU::DrawMessages(Unit *target){
   }
 
   fullstr=targetstr+fullstr;
-  tp->Draw(MangleString (fullstr.c_str(),_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+  tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 bool VDU::SetCommAnimation (Animation * ani) {
   if (comm_ani==NULL) {
@@ -440,12 +440,12 @@ bool VDU::SetCommAnimation (Animation * ani) {
 }
 void VDU::DrawNav (const Vector & nav) {
   char nothing[]="none";
-  Unit * you = _Universe.AccessCockpit()->GetParent();
+  Unit * you = _Universe->AccessCockpit()->GetParent();
   Unit * targ = you!=NULL?you->Target():NULL;
-  char *navdata=new char [1024+(_Universe.activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
+  char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe.activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude()/game_speed);
-  tp->Draw (MangleString (navdata,_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
+  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude()/game_speed);
+  tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
 
 }
@@ -472,7 +472,7 @@ void VDU::DrawComm () {
 
 
   }else {
-    tp->Draw (MangleString (_Universe.AccessCockpit()->communication_choices.c_str(),_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
+    tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
   }
 }
 
@@ -481,13 +481,13 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {
   if (target!=parent) {
     retval+=string ("Tgt: ")+target->name+string("\n");
   }else {
-    retval+=string ("--------\nCredits: ")+tostring((int)_Universe.AccessCockpit()->credits)+/*string(".")+tostring (((int)(_Universe.AccessCockpit()->credits*100))%100) +*/string("\n");
+    retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+/*string(".")+tostring (((int)(_Universe->AccessCockpit()->credits*100))%100) +*/string("\n");
   }
   unsigned int numCargo =target->numCargo();
   for (unsigned int i=0;i<numCargo;i++) {
     retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
   }
-  tp->Draw (MangleString (retval.c_str(),_Universe.AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
+  tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
   w=fabs (w);
@@ -579,7 +579,7 @@ void VDU::DrawDamage(Unit * parent) {
   Unit * thr = parent->Threat();
   std::string blah (getUnitNameAndFgNoBase(parent));
   sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
-  tp->Draw (MangleString (st,_Universe.AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
+  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   int k=strlen(st);
   if (k>cols)
     k=cols;
@@ -617,7 +617,7 @@ void VDU::DrawDamage(Unit * parent) {
       strncat (st,qr,128);
     }
   }
-  tp->Draw (MangleString (st+k,_Universe.AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
+  tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   GFXColor4f (1,1,1,1);
   
 }
@@ -629,19 +629,19 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
   VIEWSTYLE which=viewStyle;
-  _Universe.AccessCamera(which)->SetSubwindow (x,y,w,h);
-  _Universe.SelectCamera(which);
-  VIEWSTYLE tmp = _Universe.AccessCockpit()->GetView ();
-  _Universe.AccessCockpit()->SetView (viewStyle);
-  _Universe.AccessCockpit()->SelectProperCamera();
-   _Universe.AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
+  _Universe->SelectCamera(which);
+  VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView ();
+  _Universe->AccessCockpit()->SetView (viewStyle);
+  _Universe->AccessCockpit()->SelectProperCamera();
+   _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   GFXClear (GFXFALSE);
   GFXColor4f(1,1,1,1);
-  _Universe.activeStarSystem()->Draw(false);
-  _Universe.AccessCamera (which)->SetSubwindow (0,0,1,1);
-  _Universe.AccessCockpit()->SetView (tmp);
-  _Universe.AccessCockpit()->SelectProperCamera();
-   _Universe.AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  _Universe->activeStarSystem()->Draw(false);
+  _Universe->AccessCamera (which)->SetSubwindow (0,0,1,1);
+  _Universe->AccessCockpit()->SetView (tmp);
+  _Universe->AccessCockpit()->SelectProperCamera();
+   _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   GFXRestoreHudMode();
 
   GFXBlendMode (ONE,ZERO);
@@ -658,7 +658,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
     sprintf (buf,"This is a test of the emergencyBroadcastSystem\n");
   }
   tp->Draw(buf,0,true);
-  // _Universe.AccessCockpit()->RestoreViewPort();
+  // _Universe->AccessCockpit()->RestoreViewPort();
 }
 
 

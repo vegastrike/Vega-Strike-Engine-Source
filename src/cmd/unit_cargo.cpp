@@ -56,7 +56,7 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
 vector <Cargo>& GameUnit::FilterUpgradeList (vector <Cargo> & mylist) {
 	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
-	Cockpit * cp = _Universe.isPlayerStarship (this);
+	Cockpit * cp = _Universe->isPlayerStarship (this);
   if (cp) {
     for (unsigned int i=0;i<mylist.size();i++) {
       if (mylist[i].price>cp->credits) {
@@ -82,9 +82,9 @@ void GameUnit::EjectCargo (unsigned int index) {
 
   Cockpit * cp = NULL;
   if (index==((unsigned int)-1)) {
-    int pilotnum = _Universe.CurrentCockpit();
+    int pilotnum = _Universe->CurrentCockpit();
     name = "Pilot";
-    if (NULL!=(cp = _Universe.isPlayerStarship (this))) {
+    if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
       string playernum =string("player")+((pilotnum==0)?string(""):XMLSupport::tostring(pilotnum));
       //name = vs_config->getVariable(playernum,"callsign","TigerShark");
     }
@@ -146,7 +146,7 @@ void GameUnit::EjectCargo (unsigned int index) {
 	    cargo->name=tmpcontent;
 	  }
 	}
-	if (cp&&_Universe.numPlayers()==1) {
+	if (cp&&_Universe->numPlayers()==1) {
 	  cargo->SetOwner(NULL);
 	  PrimeOrders();
 	  cargo->SetTurretAI();
@@ -154,7 +154,7 @@ void GameUnit::EjectCargo (unsigned int index) {
 	  cp->SetParent (cargo,"","",Position());
 	  SwitchUnits (NULL,cargo);
 	}
-	_Universe.activeStarSystem()->AddUnit(cargo);
+	_Universe->activeStarSystem()->AddUnit(cargo);
 	if ((unsigned int) index!=((unsigned int)-1)) {
 	  if (index<image->cargo.size()) {
 	    RemoveCargo (index,1,true);

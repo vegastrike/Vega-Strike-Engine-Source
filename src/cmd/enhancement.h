@@ -29,7 +29,7 @@ public:
       string fn (filename);
       string fac(FactionUtil::GetFaction(faction));
       Kill();
-      _Universe.AccessCockpit()->savegame->AddUnitToSave(fn.c_str(),ENHANCEMENTPTR,fac.c_str(),(long)this);
+      _Universe->AccessCockpit()->savegame->AddUnitToSave(fn.c_str(),ENHANCEMENTPTR,fac.c_str(),(long)this);
     }
   }
 

@@ -8,6 +8,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "lin_time.h"
+#include "star_system.h"
 using namespace XMLSupport;
 using namespace GalaxyXML;
 string RemoveDotSystem (const char *input) {

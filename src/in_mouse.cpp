@@ -80,7 +80,7 @@ void DealWithWarp (int x, int y) {
   static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   static int mouse_warp_zone = XMLSupport::parse_int(vs_config->getVariable ("joystick","warp_mouse_zone","100"));
  if (warp_pointer) {
-   if (joystick[MOUSE_JOYSTICK]->player<_Universe.numPlayers()) {
+   if (joystick[MOUSE_JOYSTICK]->player<_Universe->numPlayers()) {
     if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
       //fprintf (stderr,"warped from %d %d to %d %d",mousex,mousey, g_game.x_resolution/2,g_game.y_resolution/2);
       

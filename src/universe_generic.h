@@ -33,7 +33,7 @@ class Unit;
 
 /**
  * Class Universe Deals with universal constants. It is a global, 
- * accessed from anywhere as _Universe. Universe may be queried for 
+ * accessed from anywhere as _Universe-> Universe may be queried for 
  * Relationships, the current star system rendering is taking place in
  * etc.  It acts as a wrapper to the active Star System.
  * Additionally it handles beginning and ending the main loop.

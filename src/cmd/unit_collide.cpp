@@ -39,9 +39,9 @@ void collideTrees::Dec() {
 }
 
 bool TableLocationChanged (const QVector & Mini,const QVector & minz) { 
-  return (_Universe.activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe.activeStarSystem()->collidetable->c.hash_int (minz.i) ||
-	  _Universe.activeStarSystem()->collidetable->c.hash_int (Mini.j)!=_Universe.activeStarSystem()->collidetable->c.hash_int (minz.j) ||
-	  _Universe.activeStarSystem()->collidetable->c.hash_int (Mini.k)!=_Universe.activeStarSystem()->collidetable->c.hash_int (minz.k));
+  return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
+	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.j)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.j) ||
+	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.k)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.k));
 }
 bool TableLocationChanged (const LineCollide &lc, const QVector &minx, const QVector & maxx) {
   return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
@@ -91,13 +91,13 @@ void GameUnit::RemoveFromSystem() {
 #endif
 #endif
 #ifdef SAFE_COLLIDE_DEBUG
-    for (unsigned int i=0;i<_Universe.star_system.size();i++) {
-      _Universe.pushActiveStarSystem(_Universe.star_system[i]);
+    for (unsigned int i=0;i<_Universe->star_system.size();i++) {
+      _Universe->pushActiveStarSystem(_Universe->star_system[i]);
     
-    if (EradicateCollideTable (&CollideInfo,_Universe.star_system[i])) {
+    if (EradicateCollideTable (&CollideInfo,_Universe->star_system[i])) {
       fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x %s",(int)((int *)(this)),this->name.c_str());
     }
-    _Universe.popActiveStarSystem();
+    _Universe->popActiveStarSystem();
     }
 #endif
   CollideInfo.object.u=NULL;
@@ -114,9 +114,9 @@ void GameUnit::RemoveFromSystem() {
 
 void GameUnit::UpdateCollideQueue () {
   if (activeStarSystem==NULL) {
-    activeStarSystem = _Universe.activeStarSystem();
+    activeStarSystem = _Universe->activeStarSystem();
   } else {
-    assert (activeStarSystem==_Universe.activeStarSystem());
+    assert (activeStarSystem==_Universe->activeStarSystem());
   }
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
   QVector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
@@ -140,7 +140,7 @@ void GameUnit::CollideAll() {
     return;
 
   UnitCollection * colQ [tablehuge+1];
-  int sizecolq = _Universe.activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ);
+  int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ);
   int j = 0;
   for (;j<sizecolq;j++) {
     Unit *un;
@@ -629,7 +629,7 @@ static bool lcwithin (const LineCollide & lc, const LineCollide&tmp) {
 
 bool Bolt::Collide () {
   UnitCollection *candidates[2];  
-  _Universe.activeStarSystem()->collidetable->c.Get (cur_position,candidates);
+  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates);
   LineCollide minimaxi;//might as well have this so we can utilize common function
   minimaxi.Mini= ( prev_position.Min (cur_position));
   minimaxi.Maxi= ( prev_position.Max (cur_position));
@@ -652,7 +652,7 @@ bool Bolt::Collide () {
 void Beam::CollideHuge (const LineCollide & lc) {
   UnitCollection *colQ [tablehuge+1];
   if (!lc.hhuge) {
-    int sizecolq = _Universe.activeStarSystem()->collidetable->c.Get (&lc,colQ);
+    int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&lc,colQ);
     for (int j=0;j<sizecolq;j++) {
       Unit *un;
       for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
@@ -663,7 +663,7 @@ void Beam::CollideHuge (const LineCollide & lc) {
       }
     }
   }else {
-    un_iter i=_Universe.activeStarSystem()->getUnitList().createIterator();
+    un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
     Unit *un;
     for (;(un=*i)!=NULL;++i) {
       if (lcwithin (lc,((GameUnit *)un)->GetCollideInfo())) {
