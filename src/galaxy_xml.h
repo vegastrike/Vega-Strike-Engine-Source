@@ -58,8 +58,8 @@ class Galaxy: public SGalaxy {
   void setupPlanetTypeMaps();
  public:
   
-  string getNameFromInitial(std::string abbrev) {return initial2name[abbrev];}
-  string getNameFromTexture(std::string tex) {return texture2name[tex];}
+  string getPlanetNameFromInitial(std::string abbrev) {return initial2name[abbrev];}
+  string getPlanetNameFromTexture(std::string tex) {return texture2name[tex];}
   string getPlanetVariable(string name,string defaultvalue);
   string getPlanetVariable(string planet,string name,string defaultvalue);
   void writeGalaxy(VSFileSystem::VSFile &f);
