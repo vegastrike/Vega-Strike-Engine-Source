@@ -5,7 +5,8 @@
 	* Finished Asteroid generator
 	* Added more camera views
 	* Added more VDU options
-
+	* Fixed Explosions (sometimes they wouldn't show up. now they do)
+	
 2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* set the color of planets in the radar to blue
