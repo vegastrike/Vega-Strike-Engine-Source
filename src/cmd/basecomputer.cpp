@@ -4583,7 +4583,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 		PRETTY_ADDU(statcolor+"Minimum time to reach full afterburner speed: #-c",playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn,2,"seconds");
 		//reactor
-		PRETTY_ADDU(statcolor+"Reactor nominal replenish time: #-c",((playerUnit->MaxEnergyData()-maxshield)*RSconverter)/((playerUnit->EnergyRechargeData()-(shields_require_power)?(playerUnit->shield.recharge*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0)*RSconverter),2,"seconds");
+		float avail=(playerUnit->MaxEnergyData()*RSconverter-maxshield*VSDM);
+		float overhead=(shields_require_power)?(playerUnit->shield.recharge/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number*VSDM):0;
+		float nrt=avail/(playerUnit->EnergyRechargeData()*RSconverter-overhead);
+		PRETTY_ADDU(statcolor+"Reactor nominal replenish time: #-c",nrt,2,"seconds");
 		//shield related stuff
 		//code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
 		static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
@@ -4594,16 +4597,16 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		/*	PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
 		}
 		
-		if (playerUnit->shield.recharge*playerUnit->shield.number*shieldenergycap>playerUnit->EnergyRechargeData()) {
+		if (playerUnit->shield.recharge*playerUnit->shield.number*VSDM/shieldenergycap>playerUnit->EnergyRechargeData()*RSconverter) {
 			text+="#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
 			text+="Your shields won't be able to regenerate at their optimal speed!#-c";
 		}
 		if(shields_require_power){
 			text+="#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
-			sprintf(conversionBuffer,"%.2f",playerUnit->shield.recharge*100.0*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/playerUnit->EnergyRechargeData());
+			float maint_draw_percent=playerUnit->shield.recharge*VSDM*100.0/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/(playerUnit->EnergyRechargeData()*RSconverter);
+			sprintf(conversionBuffer,"%.2f",maint_draw_percent);
 			text+=conversionBuffer;
 			text+=" %.";
-			float maint_draw_percent=playerUnit->shield.recharge*100.0*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/playerUnit->EnergyRechargeData();
 			if (maint_draw_percent>60) {
 		      text+="#n##c1:1:.1#"+prefix+"WARNING: Reactor power is heavily consumed by passive shield maintenance: consider downgrading shield or upgrading reactor.#-c";
 			} else if(maint_draw_percent>95){
@@ -4611,14 +4614,14 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			}
 		}
 		totalWeaponEnergyUsage=totalWeaponEnergyUsage*RSconverter;
-		float maint_draw=(shields_require_power)?(playerUnit->shield.recharge*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0;
+		float maint_draw=(shields_require_power)?(playerUnit->shield.recharge*VSDM/shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0;
 		PRETTY_ADDU(statcolor+"Combined weapon energy usage: #-c",totalWeaponEnergyUsage,0,"MJ/s");
-		if (totalWeaponEnergyUsage<(playerUnit->EnergyRechargeData()-maint_draw)*RSconverter) {
+		if (totalWeaponEnergyUsage<(playerUnit->EnergyRechargeData()*RSconverter-maint_draw)) {
 			//waouh, impressive...
 			text+="#n##c0:1:.2#"+prefix+"Your reactor produces more energy than your weapons can use!#-c";
 		}
 		else {
-			PRETTY_ADDU(statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",(playerUnit->MaxEnergyData()*RSconverter)/(totalWeaponEnergyUsage-((playerUnit->EnergyRechargeData()-maint_draw)*RSconverter)),2,"seconds");	
+			PRETTY_ADDU(statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",(playerUnit->MaxEnergyData()*RSconverter)/(totalWeaponEnergyUsage-((playerUnit->EnergyRechargeData()*RSconverter-maint_draw))),2,"seconds");	
 		}
 	PRETTY_ADDU(statcolor+"Combined (non-missile) weapon damage: #-c",totalWeaponDamage*VSDM,0,"MJ/s");
 	}

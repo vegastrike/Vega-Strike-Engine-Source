@@ -2669,15 +2669,23 @@ void Unit::RegenShields () {
   static float max_shield_lowers_recharge=XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
   static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","false"));
   static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","false"));
-
+  static float VSD=XMLSupport::parse_float (vs_config->getVariable("physics","VSD_MJ_yield","5.4"));
   int rechargesh=1; // used ... oddly
   float maxshield=totalShieldEnergyCapacitance(shield);
   bool velocity_discharge=false;
-  energy=energy<0?0:energy;
+  
   if (!energy_before_shield) {
     RechargeEnergy();
   }
-  float rec = ((shield.recharge*SIMULATION_ATOM*shield.number)>energy)?(energy/shield.number):shield.recharge*SIMULATION_ATOM;
+// GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
+  if(!graphicOptions.InWarp){
+    energy-=shield.recharge*VSD/100/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
+	if(energy<0){
+		velocity_discharge=true;
+		energy=0;
+	}
+  }
+  float rec = (velocity_discharge)?0:((shield.recharge*VSD/100*SIMULATION_ATOM*shield.number/shieldenergycap)>energy)?(energy*shieldenergycap*100/VSD/shield.number):shield.recharge*SIMULATION_ATOM;
   if (apply_difficulty_shields) {
     if (!_Universe->isPlayerStarship(this)) {
       rec*=g_game.difficulty;
@@ -2730,7 +2738,7 @@ void Unit::RegenShields () {
       if (shield.shield2fb.front>min_shield_discharge*shield.shield2fb.frontmax)
 	shield.shield2fb.front*=dischargerate;
     }
-	rec=rec*2*shieldenergycap;
+	rec=rec*2/shieldenergycap*VSD/100;
     break;
   case 4:
     rechargesh = applyto (shield.shield4fbrl.front,shield.shield4fbrl.frontmax,rec)*(applyto (shield.shield4fbrl.back,shield.shield4fbrl.backmax,rec))*applyto (shield.shield4fbrl.right,shield.shield4fbrl.rightmax,rec)*applyto (shield.shield4fbrl.left,shield.shield4fbrl.leftmax,rec);
@@ -2744,7 +2752,7 @@ void Unit::RegenShields () {
       if (shield.shield4fbrl.right>min_shield_discharge*shield.shield4fbrl.rightmax)
 	shield.shield4fbrl.right*=dischargerate;
     }
-	rec=rec*4*shieldenergycap;
+	rec=rec*4/shieldenergycap*VSD/100;
     break;
   case 8:
     rechargesh = applyto (shield.shield8.frontrighttop,shield.shield8.frontrighttopmax,rec)*(applyto (shield.shield8.backrighttop,shield.shield8.backrighttopmax,rec))*applyto (shield.shield8.frontlefttop,shield.shield8.frontlefttopmax,rec)*applyto (shield.shield8.backlefttop,shield.shield8.backlefttopmax,rec)*applyto (shield.shield8.frontrightbottom,shield.shield8.frontrightbottommax,rec)*(applyto (shield.shield8.backrightbottom,shield.shield8.backrightbottommax,rec))*applyto (shield.shield8.frontleftbottom,shield.shield8.frontleftbottommax,rec)*applyto (shield.shield8.backleftbottom,shield.shield8.backleftbottommax,rec);
@@ -2766,18 +2774,17 @@ void Unit::RegenShields () {
 	  if (shield.shield8.backleftbottom>min_shield_discharge*shield.shield8.backleftbottommax)
 		shield.shield8.backleftbottom*=dischargerate;
     }
-	rec=rec*8*shieldenergycap;
+	rec=rec*8/shieldenergycap*VSD/100;
     break;
   }
   if (rechargesh==0){
     energy-=rec;
   }
   if (shields_require_power) {
-    energy-=rec*shield_maintenance_cost;
 	maxshield=0;
   }
   if (max_shield_lowers_recharge) {
-     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield;
+     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/100;
   }
   if (!max_shield_lowers_capacitance) {
     maxshield=0;
