@@ -16,7 +16,7 @@ int  JCond::Init()
 
     waiting = 0;
     signals = 0;
-    if( lock.init( )!=0 || wait_sem.init( )!=0 || wait_done.init( )!=0 )
+    if( lock.Init( )!=0 || wait_sem.Init( 0)!=0 || wait_done.Init( 0)!=0 )
         return ERR_JCOND_CANTCREATECOND;
 
     initialized = true;
@@ -46,6 +46,7 @@ int JCond::Signal()
 
 int JCond::Broadcast()
 {
+	int i=0;
     if( !initialized )
         return ERR_JCOND_NOTINIT;
 
@@ -54,10 +55,10 @@ int JCond::Broadcast()
     {
         int num_waiting = waiting - signals;
         signals = waiting;
-        for( int i=0; i<num_waiting; i++ )
+        for( i=0; i<num_waiting; i++ )
             wait_sem.Post( );
         lock.Unlock( );
-        for( int i=0; i<num_waiting; i++ )
+        for( i=0; i<num_waiting; i++ )
             wait_done.Wait( );
     }
     else

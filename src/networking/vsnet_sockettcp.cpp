@@ -1,10 +1,10 @@
 #include <config.h>
 
+#include "const.h"
 #include "vsnet_headers.h"
 
 #include <list>
 
-#include "const.h"
 #include "vsnet_sockettcp.h"
 #include "vsnet_err.h"
 #include "vsnet_debug.h"
@@ -153,7 +153,11 @@ int VsnetTCPSocket::lower_sendbuf( )
     {
         switch( errno )
         {
+#if defined( _WIN32) && !defined( __CYGWIN__)
+        case WSAEWOULDBLOCK :
+#else
         case EWOULDBLOCK :
+#endif
         case EINTR :
             _sq_mx.unlock( );
             return 0;

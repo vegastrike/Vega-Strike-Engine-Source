@@ -35,7 +35,7 @@ public:
 
 private:
 #ifdef WIN32
-    HANDLE                 sempahore;
+    HANDLE                 semaphore;
 #else
     sem_t                  semaphore;
 #endif

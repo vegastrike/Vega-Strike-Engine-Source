@@ -8,6 +8,9 @@
 #include <windows.h>
 #include <vfw.h>
 #endif
+#ifdef __APPLE__
+//#include <quicktimeincludes_whatever.h>
+#endif
 #define DEFAULT_CAPTURE_DRIVER 0
 
 // CAPTURE WINDOW SIZE MUST BE DETERMINED AND THEREFORE WILL NOT BE ADJUSTABLE
@@ -40,6 +43,12 @@ class	WebcamSupport
 		HWND			capvideo, hwndCap;
 		CAPTUREPARMS	capparam;
 #endif
+#ifdef __APPLE__
+		Boolean				gQuicktimeInitialised;
+		// Sequence Grabber info
+		videoRec *			video;
+#endif
+
 		int		width;
 		int		height;
 		int		depth;

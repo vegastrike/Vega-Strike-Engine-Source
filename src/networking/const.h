@@ -70,7 +70,7 @@ extern double DAMAGE_ATOM;
   #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
 #endif
 
-#ifdef USE_WINSOCK2
+#if _WIN32_WINNT >= 0x0400
 typedef unsigned int u_int32_t;
 typedef unsigned short u_int16_t;
 typedef unsigned char u_int8_t;
