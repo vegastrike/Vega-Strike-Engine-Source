@@ -584,7 +584,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
      tmpcos /= dist;
    }
    dist = (dist-rSize()-targ->rSize())/range;//WARNING POTENTIAL DIV/0
-   if (!finite(dist)||dist<0) {
+   if (!FINITE(dist)||dist<0) {
      dist=0;
    }
    return tmpcos;
