@@ -59,6 +59,8 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  nummounts=0;
+  energy=1;
   explosion=NULL;
   timeexplode=0;
  killed=false;
@@ -71,6 +73,7 @@ void Unit::Init()
 
 
   Identity(cumulative_transformation_matrix);
+  cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
   fpos = 0;
   mass = 1;
@@ -553,7 +556,7 @@ void Unit::UpdateHudMatrix() {
 	//Identity (tmatrix);
 	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
 	//	GFXLoadMatrix(MODEL,tmatrix);
-  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);//FIXME!!! WHY 1.25 
+  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);  
   VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
   Transformation t = identity_transformation;
 }
@@ -561,7 +564,7 @@ void Unit::UpdateHudMatrix() {
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 {
   //Matrix cumulative_transformation_matrix;
-  Transformation cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
+  /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
 
@@ -650,8 +653,23 @@ void Unit::ExecuteAI() {
     subunits[a]->ExecuteAI();//like dubya
   }
 }
-
-void Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit * owner) {
+void Unit::Fire () {
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].type.type==weapon_info::BEAM) {
+      if (mounts[i].type.EnergyRate*SIMULATION_ATOM<energy)
+	return;
+    }else{ 
+      if (mounts[i].type.EnergyConsumption<energy) 
+	return;
+    }
+    ///FIXME!!    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,this)) {
+    ///      energy -= mounts[i].type==BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyConsumption;
+    ///}//unfortunately cumulative transformation not generated in physics atom
+  }
+}
+bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit * owner) {
+  if (status!=ACTIVE) 
+    return false;
   if (type.type==weapon_info::BEAM) {
     if (gun==NULL)
       gun = new Beam (LocalPosition,type,owner);
@@ -659,7 +677,7 @@ void Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit
       if (gun->Dissolved())
 	gun->Init (LocalPosition,type,owner);
       else 
-	return;//can't fire an active beam
+	return false;//can't fire an active beam
   }else { 
     Transformation tmp = LocalPosition;
     tmp.Compose (Cumulative,m);
@@ -680,6 +698,7 @@ void Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit
       break;
     }
   }
+  return true;
 }
 
 void Unit::Select() {

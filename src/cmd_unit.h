@@ -77,7 +77,7 @@ protected:
   Transformation prev_physical_state;
   Transformation curr_physical_state;
   Matrix cumulative_transformation_matrix;
-
+  Transformation cumulative_transformation;
   int nummesh;
   Animation **explosion;
   float timeexplode;  
@@ -87,16 +87,26 @@ protected:
   class Mount {
     Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
     Transformation LocalPosition;
-    weapon_info type;
+    enum {ACTIVE, INACTIVE, DESTROYED} status;
   public:
+    weapon_info type;
     Mount():gun(NULL),type(weapon_info::BEAM){}
+    void Activate () {
+      if (status==INACTIVE)
+	status = ACTIVE;
+    }
+    void DeActive () {
+      if (status==ACTIVE)
+	status = INACTIVE;
+    }
     void SetMountPosition (const Transformation &t) {LocalPosition = t;}
-    void Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
+    bool Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
   } *mounts;
+  int nummounts;
   int numsubunit;
   
   //static int refcount; for the inherited classes
-  Unit *target;
+  Unit *target;//make sure to increase ucref when attaching a target...an check it each frame
   
   Aggression aggression;
   
@@ -107,6 +117,8 @@ protected:
   long fpos;
   string name;
   
+
+  float energy;
   float mass;
   float fuel;
   float MomentOfInertia;
@@ -156,7 +168,7 @@ public:
   inline void Ref() {ucref++;}
   void UnRef();
   Unit *&Target(){return target;}; // Accessor for target; probably shouldn't use it
-
+  void Fire();
 	/*COMMAND*/
 	/*
 	virtual void ChangeTarget(Unit *target) = 0; // sent by the flight commander, supercommand AI, or player; tells it to switch to this new target HANDLETHIS BY REPLACE/ENQUEUE ORDER after having primed orders
@@ -211,7 +223,6 @@ public:
   prev_physical_state.position = curr_physical_state.position = Vector(x,y,z);}
 
   //  void Destroy(){active = false;};
-  virtual void Fire(){};
   /*
   Unit *Update() {
     if(active) {
