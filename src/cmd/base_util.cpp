@@ -160,10 +160,11 @@ namespace BaseUtil {
 	void EraseLink (int room, std::string index) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->links.size();i++) {
+		for (int i=0;i<(int)newroom->links.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					newroom->links.erase(newroom->links.begin()+i);
+                                        i--;
 //					break;
 				}
 			}
@@ -172,10 +173,11 @@ namespace BaseUtil {
 	void EraseObj (int room, std::string index) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->objs.size();i++) {
+		for (int i=0;i<(int)newroom->objs.size();i++) {
 			if (newroom->objs[i]) {
 				if (newroom->objs[i]->index==index) {
 					newroom->objs.erase(newroom->objs.begin()+i);
+                                        i--;
 //					break;
 				}
 			}
