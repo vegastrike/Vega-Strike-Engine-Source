@@ -59,6 +59,10 @@ Universe::Universe(int argc, char** argv, const char * galaxy)
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
 }
+bool Universe::StillExists (StarSystem * s) {
+  return std::find (star_system.begin(),star_system.end(),s)!=star_system.end();
+}
+
 void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
 }
@@ -160,20 +164,24 @@ void Universe::StartDraw()
   _Universe->activeStarSystem()->Draw();
 
   UpdateTime();
-  for (unsigned int i=0;i<star_system.size();i++) {
-    star_system[i]->Update();
+  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+  float systime=nonactivesystemtime;
+  for (unsigned int i=0;i<star_system.size()&&i<numrunningsystems;i++) {
+    star_system[i]->Update((i==0)?1:systime/i);
   }
   StarSystem::ProcessPendingJumps();
   //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();
   //remove systems not recently visited?
   static int sorttime=0;
-  static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","2001"));
+  static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
   if (howoften!=0) {
     if ((sorttime++)%howoften==1) {
       SortStarSystems(star_system,active_star_system.back());
-      static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numrunningsystems","6"));
-      if (star_system.size()>numrunningsystems) {
+      static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
+      static bool deleteoldsystems = XMLSupport::parse_bool (vs_config->getVariable ("general","deleteoldsystems","true"));
+      if (star_system.size()>numrunningsystems&&deleteoldsystems) {
 	if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
 	  delete star_system.back();
 	  star_system.pop_back();

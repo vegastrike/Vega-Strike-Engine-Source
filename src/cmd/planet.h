@@ -77,7 +77,7 @@ class Planet : public Unit {
   void DrawTerrain();
   static void ProcessTerrains();
 //  void InitPlanet(FILE *fp);
-  virtual void Kill();
+  virtual void Kill(bool erasefromsave=false);
 
   PlanetaryTransform*  setTerrain (ContinuousTerrain *, float ratiox, int numwraps); 
   ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}

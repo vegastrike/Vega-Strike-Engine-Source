@@ -109,7 +109,7 @@ SystemInfo GetSystemMin (Galaxy * galaxy) {
 }
 SystemInfo GetSystemMax (Galaxy * galaxy) {
   SystemInfo si;
-  si.sunradius=parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","sun_radius","50000"));
+  si.sunradius=parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","sun_radius","60000"));
   si.compactness =parse_float(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","compactness","2.4"));
   si.numstars=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_stars","2"));
   si.numgas=parse_int(getVarEitherSectionOrSub(galaxy,"unknown_sector","max","num_gas_giants","3"));
@@ -135,8 +135,18 @@ SystemInfo GetSystemMax (Galaxy * galaxy) {
   return si;
 }
 
+static float av01 () {
+  return (float (rand()))/((((float)RAND_MAX)+1));
+}
+static float sqav01() {
+  float tmp =av01();
+  return tmp*tmp;
+}
 static float fav (float in1, float in2) {
-  return in1+ (in2-in1)*(float (rand()))/(((float)RAND_MAX));
+  return in1+ (in2-in1)*av01();
+}
+static float fsqav(float in1, float in2) {
+  return sqav01()*(in2-in1)+in1;
 }
 //not including in2
 static int rnd (int in1, int in2) {
@@ -146,21 +156,25 @@ static int rnd (int in1, int in2) {
 static int iav (int in1, int in2) {
   return rnd (in1,in2+1);
 }
+static int isqav (int in1, int in2) {
+  return (int)(in1+ (in2+1-in1)*sqav01());
+}
+
 SystemInfo AvgSystems (SystemInfo a, SystemInfo b) {
   SystemInfo si;
   si = a;//copy all stuff that cna't be averaged
-  si.sunradius=fav (a.sunradius,b.sunradius);
-  si.compactness=fav (a.compactness,b.compactness);
-  si.numstars=iav (a.numstars,b.numstars);
-  si.numgas=iav (a.numgas,b.numgas);
-  si.numplanets=iav (a.numplanets,b.numplanets);
-  si.nummoons=iav (a.nummoons,b.nummoons);
+  si.sunradius=fsqav (a.sunradius,b.sunradius);
+  si.compactness=fsqav (a.compactness,b.compactness);
+  si.numstars=isqav (a.numstars,b.numstars);
+  si.numgas=isqav (a.numgas,b.numgas);
+  si.numplanets=isqav (a.numplanets,b.numplanets);
+  si.nummoons=isqav (a.nummoons,b.nummoons);
   si.nebulae=a.nebulae||b.nebulae;
   si.asteroids=a.asteroids||b.asteroids;
-  si.numun1=iav (a.numun1,b.numun1);
-  si.numun2=iav (a.numun2,b.numun2);
+  si.numun1=isqav (a.numun1,b.numun1);
+  si.numun2=isqav (a.numun2,b.numun2);
   si.seed=iav (a.seed,b.seed);
-  si.numjumps= iav (a.numjumps,b.numjumps);
+  si.numjumps= isqav (a.numjumps,b.numjumps);
   return si;
 }
 extern vector <char *> ParseDestinations (const string &value);

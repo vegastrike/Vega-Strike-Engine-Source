@@ -196,6 +196,8 @@ StarSystem::~StarSystem() {
     iter.advance();
   }
   delete drawList;
+  delete units;
+  RemoveStarsystemFromUniverse();
 }
 
 UnitCollection * StarSystem::getUnitList () {
@@ -447,7 +449,7 @@ void StarSystem::Draw(bool DrawCockpit) {
 
 
 extern float getTimeCompression();
-void StarSystem::Update() {
+void StarSystem::Update(float priority ) {
 
   Unit *unit;
 #ifdef UPDATEDEBUG
@@ -457,13 +459,12 @@ void StarSystem::Update() {
   bool firstframe = true;
 
   ///this makes it so systems without players may be simulated less accurately
-  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime","1"));
-  float moretime = nonactivesystemtime;
+
   if (_Universe->activeStarSystem()==this) {
-    moretime=1;
+    priority=1;
   }
   float normal_simulation_atom = SIMULATION_ATOM;
-  SIMULATION_ATOM/=(moretime/getTimeCompression());
+  SIMULATION_ATOM/=(priority/getTimeCompression());
   ///just be sure to restore this at the end
 
   time += GetElapsedTime();

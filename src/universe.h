@@ -106,6 +106,7 @@ private:
   vector <Faction *> factions; //the factions
   
  public:
+  bool StillExists(StarSystem * ss);
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
   void popActiveStarSystem() {active_star_system.pop_back();}

@@ -73,6 +73,7 @@ class StarSystem {
   ///The Light Map corresponding for the BP for spheremapping
   Texture *LightMap[6]; 
   void AddStarsystemToUniverse(const string &filename);
+  void RemoveStarsystemFromUniverse();
   int lightcontext;
  public:
   class CollideTable *collidetable;
@@ -116,7 +117,7 @@ class StarSystem {
   ///Draws a frame of action, interpolating between physics frames
   void Draw(bool DrawCockpit=true);
   /// update a simulation atom
-  void Update(); 
+  void Update(float priority); 
   ///re-enables the included lights and terrains
   void SwapIn ();
   ///Disables included lights and terrains

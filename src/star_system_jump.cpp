@@ -18,7 +18,9 @@ void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
   this->filename= mname;
 }
-
+void StarSystem::RemoveStarsystemFromUniverse () {
+  star_system_table.Delete (filename);
+}
 inline bool CompareDest (Unit * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
     if ((origin==star_system_table.Get (string(un->GetDestinations()[i])))||(origin==star_system_table.Get (string(un->GetDestinations()[i])+string (".system")))) 
@@ -156,9 +158,11 @@ void StarSystem::ProcessPendingJumps() {
 
       VolitalizeJumpAnimation (pendingjump[kk]->animation);
     }
-    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+    
+
     Unit * un=pendingjump[kk]->un.GetUnit();
-    if (un==NULL) {
+    
+    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
 #endif
@@ -167,6 +171,7 @@ void StarSystem::ProcessPendingJumps() {
       kk--;
       continue;
     }
+    StarSystem * savedStarSystem = _Universe->activeStarSystem();
     bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
     _Universe->setActiveStarSystem (pendingjump[kk]->orig);
     if (pendingjump[kk]->orig->RemoveUnit (un)) {

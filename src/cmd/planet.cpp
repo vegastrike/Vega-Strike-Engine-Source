@@ -375,7 +375,7 @@ void Planet::setAtmosphere (Atmosphere *t) {
 }
 
 
-void Planet::Kill() {
+void Planet::Kill(bool erasefromsave) {
 	UnitCollection::UnitIterator iter;
 	Unit *tmp;
 	for (iter = satellites.createIterator();
@@ -383,11 +383,14 @@ void Planet::Kill() {
 	     iter.advance()) {
 	  tmp->SetAI (new Order);
 	}
+	/* probably not FIXME...right now doesn't work on paged out systems... not a big deal
 	for (unsigned int i=0;i<this->lights.size();i++) {
 	  GFXDeleteLight (lights[i]);
 	}
-
-	Unit::Kill();
+	*/
+	satellites.clear();
+	insiders.clear();
+	Unit::Kill(erasefromsave);
 }
 
 void Planet::gravitate(UnitCollection *uc) {
