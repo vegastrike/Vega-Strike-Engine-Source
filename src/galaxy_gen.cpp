@@ -218,6 +218,7 @@ vector <float> starradius;
 string faction;
 vector <GradColor> colorGradiant;
   float compactness=2;
+  float jumpcompactness=2;
   void ResetGlobalVariables () {
     lights.clear();
     gradtex.clear();
@@ -235,7 +236,7 @@ vector <GradColor> colorGradiant;
     starradius.clear();
     faction=string ("");
     colorGradiant.clear();
-    compactness=2;
+    compactness=2;    jumpcompactness=2;
     radii.clear();
 
   }
@@ -346,9 +347,12 @@ void CreateLight(unsigned int i) {
 }
 
 
-Vector generateCenter (float minradii) {
+Vector generateCenter (float minradii,bool jumppoint) {
   Vector r;
-  r = Vector (compactness*grand()+1,compactness*grand()+1,compactness*grand()+1);
+  float tmpcompactness = compactness;
+  if (jumppoint)
+	  tmpcompactness=jumpcompactness;
+  r = Vector (tmpcompactness*grand()+1,tmpcompactness*grand()+1,tmpcompactness*grand()+1);
   r.i*=minradii;
   r.j*=minradii;
   r.k*=minradii;
@@ -358,7 +362,7 @@ Vector generateCenter (float minradii) {
   r.k=(i&4)?-r.k:r.k;
   return r;
 }
-float makeRS (Vector &r, Vector &s,float minradii) {
+float makeRS (Vector &r, Vector &s,float minradii,bool jumppoint) {
   r=Vector (grand(),grand(),grand());
   int i=(rnd(0,8));
   r.i=(i&1)?-r.i:r.i;
@@ -374,17 +378,20 @@ float makeRS (Vector &r, Vector &s,float minradii) {
   s = r.Cross (k);
   float sm = s.Mag();
   if (sm<.01) {
-    return makeRS(r,s,minradii);
+    return makeRS(r,s,minradii,jumppoint);
   }
   s.i/=sm;  s.j/=sm;  s.k/=sm;
   sm = r.Mag();
   r.i/=sm;  r.j/=sm;  r.k/=sm;
   bool tmp=false;
   float rm;
-  rm= (compactness*grand()+1); if (rm<1) {rm=(1+grand()*.5);tmp=true;}
+  float tmpcompactness=compactness;
+  if (jumppoint)
+	  tmpcompactness=  jumpcompactness;
+  rm= (tmpcompactness*grand()+1); if (rm<1) {rm=(1+grand()*.5);tmp=true;}
   rm*=minradii;
   r.i*=rm;r.j*=rm;r.k*=rm;
-  sm= (compactness*grand()+1); if (tmp) sm=(1+grand()*.5);
+  sm= (tmpcompactness*grand()+1); if (tmp) sm=(1+grand()*.5);
   sm*=minradii;
   s.i*=sm;s.j*=sm;s.k*=sm;
   return mmax (rm,sm);
@@ -401,15 +408,15 @@ void Updateradii (float orbitsize, float thisplanetradius) {
 
 }
 
-Vector generateAndUpdateRS (Vector &r, Vector & s, float thisplanetradius) {
+Vector generateAndUpdateRS (Vector &r, Vector & s, float thisplanetradius,bool jumppoint) {
   if (radii.empty()) {
     r=Vector (0,0,0);
     s=Vector (0,0,0);
-    return generateCenter (starradius[0]);
+    return generateCenter (starradius[0],jumppoint);
   }
   float tmp=radii.back()+thisplanetradius;
-  Updateradii(makeRS (r,s,tmp),thisplanetradius);
-  return generateCenter (tmp);
+  Updateradii(makeRS (r,s,tmp,jumppoint),thisplanetradius);
+  return generateCenter (tmp,jumppoint);
 }
 
 vector <string> parseBigUnit (string input) {
@@ -551,7 +558,8 @@ void MakeSmallUnit () {
   string nebfile ("");
   float radius;
   string type = AnalyzeType(nam,nebfile,radius);
-  Vector center=generateAndUpdateRS(r,S,radius);
+  Vector center=generateAndUpdateRS(r,S,radius,true);
+
   WriteUnit (type,"",nam,r,S,center,nebfile,s,true);
 
 }
@@ -583,35 +591,35 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
     if (1==sscanf (fullname[i].c_str(),"jump%f",&size)) {
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size);
+	center=generateAndUpdateRS (r,s,size,true);
 	stdloy=LengthOfYear (r,s);	
       }
       MakePlanet(size,JUMP,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)) {
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size);
+	center=generateAndUpdateRS (r,s,size,false);
 	stdloy=LengthOfYear (r,s);	
       }
       MakePlanet(size,PLANET,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {      
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size);
+	center=generateAndUpdateRS (r,s,size,false);
 	stdloy=LengthOfYear (r,s);	
       }
       MakePlanet (size,MOON,true,r,s,center,stdloy);
     } else if (1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size);
+	center=generateAndUpdateRS (r,s,size,false);
 	stdloy=LengthOfYear (r,s);	
       }
       MakePlanet (size,GAS,true,r,s,center,stdloy);
     }else if ((tmp=starin(fullname[i])).length()>0) {
       if (!first) {
 	first= true;
-	center=generateAndUpdateRS (r,s,size);
+	center=generateAndUpdateRS (r,s,size,true);
 	stdloy=LengthOfYear (r,s);	
       }
       string S = getRandName (entities[JUMP]);
@@ -620,13 +628,14 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
 	WriteUnit (type, S,tmp,r,s,center,nebfile,getJumpTo(S),false,stdloy);
       }
     } else {
-      if (!first) {
-	first= true;
-	center=generateAndUpdateRS (r,s,size);
-	stdloy=LengthOfYear (r,s);	
-      }
-      string type = AnalyzeType(fullname[i],nebfile,size);
-      WriteUnit(type,"",fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
+		string type = AnalyzeType(fullname[i],nebfile,size);
+		if (!first) {
+			first= true;
+			center=generateAndUpdateRS (r,s,size,type=="Unit");
+			stdloy=LengthOfYear (r,s);	
+		}
+		WriteUnit(type,"",fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
+		
     }
   }
 
@@ -642,7 +651,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     r=R;SS=S;
     Updateradii (mmax(r.Mag(),SS.Mag()),radius);
   }else {
-    center=generateAndUpdateRS (r,SS,radius);
+    center=generateAndUpdateRS (r,SS,radius,entitytype==JUMP);
   }
   string thisname;
   if (entitytype!=JUMP) {
@@ -727,7 +736,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
       }
       if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
 	Vector r,s;
-	makeRS(r,s,1);
+	makeRS(r,s,1,entitytype==JUMP);
 	float rmag = r.Mag();
 	if (rmag>.001) {
 	  r.i/=rmag;  r.j/=rmag;  r.k/=rmag;
@@ -987,6 +996,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   sunradius *=radiusscale;
   systemname=system;
   static float compactness_scale = XMLSupport::parse_float (vs_config->getVariable("galaxy","CompactnessScale","1.5"));
+  static float jump_compactness_scale = XMLSupport::parse_float (vs_config->getVariable("galaxy","JumpCompactnessScale","1.5"));
   //  static int meansuns = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanSuns","1.5"));
   static int meangas = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanGasGiants","1"));
   static int meanplanets = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanPlanets","5"));
@@ -994,6 +1004,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   static int meannaturalphenomena = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanNaturalPhenomena","1"));
   static int meanbases = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanStarBases","2"));
   compactness = compac*compactness_scale;
+  jumpcompactness = compac*jump_compactness_scale;  
   if (seed)
     seedrand (seed);
   else
@@ -1006,6 +1017,8 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   int nat = pushTowardsMean(meannaturalphenomena,numnaturalphenomena);
   numun[0]= nat>numnaturalphenomena?numnaturalphenomena:nat;
   numun[1]=pushTowardsMean(meanbases,numstarbases);
+  static float smallUnitsMultiplier= XMLSupport::parse_float (vs_config->getVariable ("galaxy","SmallUnitsMultiplier","0"));
+  numun[1]=(int) (numun[1]*smallUnitsMultiplier);
   fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
   readColorGrads (gradtex,(datapath+starlist).c_str());
