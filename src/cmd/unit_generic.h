@@ -48,11 +48,20 @@ void UncheckUnit (class Unit * un);
 #include "faction_generic.h"
 #include "star_system_generic.h"
 #include "networking/const.h"
+#include "gfx/cockpit_generic.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
 extern float capship_size;
 using namespace XMLSupport;
+
+struct CargoColor {
+  Cargo cargo;
+  GFXColor color;
+  CargoColor () 
+    : cargo(), color(1,1,1,1) {
+  }
+};//A stupid struct that is only for grouping 2 different types of variables together in one return value
 
 class PlanetaryOrbit;
 class UnitCollection;
@@ -373,7 +382,8 @@ protected:
   vector <Mesh *> StealMeshes();
   ///Begin and continue explosion
 // Uses GFX so only in Unit class
-  virtual bool Explode(bool draw, float timeit) {return false;}
+// But should always return true on server side = assuming explosion time=0 here
+  virtual bool Explode(bool draw, float timeit) {return true;}
   ///explodes then deletes
   void Destroy();
 
@@ -923,8 +933,7 @@ public:
   bool BuyCargo (const Cargo &carg, float & creds);
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
-// Uses Universe stuff
-  virtual void EjectCargo (unsigned int index) {}
+  void EjectCargo (unsigned int index);
 
 /***************************************************************************************/
 /**** AI STUFF                                                                      ****/
@@ -1057,7 +1066,9 @@ public:
   bool RequestClearance (Unit * dockingunit);
   bool EndRequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);
-  virtual void RestoreGodliness() {}
+  void RestoreGodliness() {
+	_Universe->AccessCockpit()->RestoreGodliness();
+  }
 
 /***************************************************************************************/
 /**** FACTION/FLIGHTGROUP STUFF                                                     ****/
@@ -1081,8 +1092,8 @@ public:
   ///get the full flightgroup ID (i.e 'green-4')
   const string getFgID();
 
-  virtual vector <struct CargoColor>& FilterDowngradeList (vector <struct CargoColor> & mylist, bool downgrade =true) { return mylist;}
-  virtual vector <struct CargoColor>& FilterUpgradeList (vector <struct CargoColor> & mylist) { return mylist;}
+  vector <struct CargoColor>& FilterDowngradeList (vector <struct CargoColor> & mylist, bool downgrade =true);
+  vector <struct CargoColor>& FilterUpgradeList (vector <struct CargoColor> & mylist);
 
 /***************************************************************************************/
 /**** MISC STUFF                                                                    ****/

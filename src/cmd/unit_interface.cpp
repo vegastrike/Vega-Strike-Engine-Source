@@ -26,6 +26,8 @@ extern Music *muzak;
 #endif
 extern int GetModeFromName (const char *);
 
+extern std::set <std::string> GetListOfDowngrades();
+extern void ClearDowngradeMap();
 extern unsigned int getSaveStringLength (int whichcp, string key);
 extern unsigned int eraseSaveString (int whichcp, string key, unsigned int num);
 extern std::string getSaveString (int whichcp, string key, unsigned int num);

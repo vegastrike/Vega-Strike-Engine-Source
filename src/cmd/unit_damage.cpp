@@ -26,7 +26,6 @@
 #include "base.h"
 extern unsigned short apply_float_to_short (float tmp);
 
-static list<Unit*> Unitdeletequeue;
 extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>

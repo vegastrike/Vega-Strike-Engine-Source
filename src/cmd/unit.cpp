@@ -55,7 +55,6 @@
 //#include "gfx/animation.h"
 #include "gfx/point_to_cam.h"
 #include "unit_jump.cpp"
-#include "unit_cargo.cpp"
 #include "unit_customize.cpp"
 #include "unit_damage.cpp"
 #include "unit_physics.cpp"

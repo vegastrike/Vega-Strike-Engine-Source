@@ -10,7 +10,11 @@
 class Atmosphere;
 class PlanetaryTransform;
 class ContinuousTerrain;
-struct GFXLightLocal;
+
+struct GFXLightLocal {
+  GFXLight ligh;
+  bool islocal;
+};
 
 class PlanetaryOrbit : public Order {
  private:

@@ -22,10 +22,6 @@ struct GFXMaterial;
 struct Texture;
 class Atmosphere;
 
-struct GFXLightLocal {
-  GFXLight ligh;
-  bool islocal;
-};
 class ContinuousTerrain;
 class PlanetaryTransform;
 class GamePlanet : public GameUnit<class Planet> {

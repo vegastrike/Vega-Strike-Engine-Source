@@ -98,9 +98,7 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	unit_functions.cpp
 
 #	unit_jump.cpp				\
-#	unit_cargo.cpp				\
 #	unit_customize.cpp			\
 #	unit_damage.cpp				\
 #	unit_physics.cpp			\
-#	unit_weapon.cpp				\
 #	unit.cpp				\

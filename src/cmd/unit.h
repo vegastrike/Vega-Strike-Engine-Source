@@ -34,15 +34,6 @@ struct GFXColor;
 using std::string;
 #include "gfxlib.h"
 
-struct CargoColor {
-  Cargo cargo;
-  GFXColor color;
-  CargoColor () 
-    : cargo(), color(1,1,1,1) {
-  }
-};//A stupid struct that is only for grouping 2 different types of variables together in one return value
-
-
 /**
  * GameUnit contains any physical object that may collide with something
  * And may be physically affected by forces.
@@ -94,26 +85,6 @@ protected:
   friend class UnitFactory;
 
 public:
-  ///Initialize many of the defaults inherant to the constructor
-  //void Init();
-
-/***************************************************************************************/
-/**** CARGO STUFF                                                                   ****/
-/***************************************************************************************/
-
-  void EjectCargo (unsigned int index);
-  bool CanAddCargo (const Cargo &carg) const;
-  ///The faction of this unit
-  vector <struct CargoColor>& FilterDowngradeList (vector <struct CargoColor> & mylist,bool downgrade=true);
-  vector <struct CargoColor>& FilterUpgradeList (vector <struct CargoColor> & mylist);
-
-/***************************************************************************************/
-/**** DOCKING STUFF                                                                 ****/
-/***************************************************************************************/
-
-  void RestoreGodliness() {
-	_Universe->AccessCockpit()->RestoreGodliness();
-  }
 
 /***************************************************************************************/
 /**** GFX/MESHES STUFF                                                              ****/
@@ -153,15 +124,8 @@ public:
   PlanetaryTransform *GetPlanetOrbit () const;
   //bool TransferUnitToSystem (StarSystem *NewSystem);
   void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
-  //void ActivateJumpDrive (int destination=0);
-  //void DeactivateJumpDrive ();
   ///Begin and continue explosion
   bool Explode(bool draw, float timeit);
-  const LineCollide &GetCollideInfo () {return CollideInfo;}
-  ///Takes out of the collide table for this system.
-  void RemoveFromSystem ();
-  ///Fires all active guns that are in that bitmask... if (1<<31) is set then only autotracking
-  //void Fire(unsigned int Mount_roles, bool listen_to_owner=false);
 
 /***************************************************************************************/
 /**** COLLISION STUFF                                                               ****/
