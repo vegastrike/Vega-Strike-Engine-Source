@@ -28,6 +28,10 @@ class NetworkCommunication
 		int		max_messages;
 		// List of clients we are communicating with
 		list<ClientPtr>	commClients;
+		// List of clients using webcam
+		list<ClientPtr>	webcamClients;
+		// Selected webcam from webcamClients list
+		ClientPtr		webcamClient;
 #ifdef HYBRID_PROTO
 		// Socket list -> one for each client we are communicating with
 		list<SOCKETALT>	sockClients;

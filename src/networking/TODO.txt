@@ -1,15 +1,15 @@
 
 *** GENERAL ************************************************************
 
+- Check if I really send path relative to datadir with filenames to download
 - Add text message support to NetworkCommunication class
 - Complete jVoIP support
 - About NetworkCommunications : assign a different freq range for each faction ?
-- NOTE : network communication system is only working when 1 local player
-- Implement a download manager -> Carsten is on that one
 - Download manager must be told that sockets have closed or timeout out
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2
+- NOTE : network communication system is only working when 1 local player
 
 *** ACCOUNT SERVER *****************************************************
 
@@ -50,6 +50,7 @@ OR
 
 === GENERAL STUFF =======================================================
 
+DONE - Implement a download manager -> Carsten is on that one
 DONE - When client starts server send galaxy filename with md5sum or other check system
 	if client has the file and the same md5 -> ok
 	if not server sends the file content and client writes it

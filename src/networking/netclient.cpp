@@ -660,11 +660,10 @@ int NetClient::recvMsg( Packet* outpacket )
 				// Compare to local md5 and ask for the good file if we don't have it or bad version
 				if( 0 /* !md5CheckFile( univfile, md5_digest) */)
 				{
-					VsnetDownload::Client::File* requested_file;
-					requested_file = new VsnetDownload::Client::File( this->clt_sock, univfile, "");
-                	_downloadManagerClient->addItem( requested_file);
-					while( requested_file->state()!=VsnetDownload::Client::Completed)
-						micro_sleep( 10000);
+					VsnetDownload::Client::NoteFile f( this->clt_sock, univfile);
+                	_downloadManagerClient->addItem( &f);
+					while( !f.done())
+						micro_sleep( 40000);
 					/*
 					netbuf.addString( univfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
@@ -681,11 +680,10 @@ int NetClient::recvMsg( Packet* outpacket )
 				// THINK TO PUT THAT TEST BACK WHEN DOWNLOAD THREAD IS COMPLETE !!!!!!!
 				if( 0 /* !md5CheckFile( sysfile, md5_digest) */)
 				{
-					VsnetDownload::Client::File* requested_file;
-					requested_file = new VsnetDownload::Client::File( this->clt_sock, sysfile, "");
-                	_downloadManagerClient->addItem( requested_file);
-					while( requested_file->state()!=VsnetDownload::Client::Completed)
-						micro_sleep( 10000);
+					VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
+                	_downloadManagerClient->addItem( &f);
+					while( !f.done())
+						micro_sleep( 40000);
 					/*
 					netbuf.addString( sysfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
@@ -1034,11 +1032,10 @@ int NetClient::recvMsg( Packet* outpacket )
 					// Check if server said we have the good file
 					if( packet_serial!=un->GetSerial())
 					{
-						VsnetDownload::Client::File* requested_file;
-						requested_file = new VsnetDownload::Client::File( this->clt_sock, newsystem, "");
-                		_downloadManagerClient->addItem( requested_file);
-						while( requested_file->state()!=VsnetDownload::Client::Completed)
-							micro_sleep( 10000);
+						VsnetDownload::Client::NoteFile f( this->clt_sock, newsystem);
+   	             		_downloadManagerClient->addItem( &f);
+						while( !f.done())
+							micro_sleep( 40000);
 					}
 					this->jumpok = true;
 					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();

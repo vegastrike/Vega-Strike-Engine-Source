@@ -4,18 +4,14 @@ incl2 = \
 	 -I/System/Library/Frameworks/Carbon.framework/Versions/A/Headers
 endif
 
+if NETCOMM_JVOIP
 incl = \
 	-I/usr/local/include/jvoiplib	\
 	-I/usr/local/include/jrtplib	\
 	-I/usr/local/include/jthread
-#    -I$(top_srcdir)/src/jvoiplib \
-#	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
-#	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
-#	 -I$(top_srcdir)/src/jvoiplib/componentframework	\
-#	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
-#	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
-#	 -I$(top_srcdir)/src/jthread \
-#	 -I$(top_srcdir)/src/jrtplib
+else
+incl = ""
+endif
 
 if USEBOOST128
 INCLUDES= $(incl) $(incl2)	\

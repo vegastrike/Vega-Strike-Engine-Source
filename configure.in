@@ -1,4 +1,4 @@
-	dnl Process this file with autoconf to produce a configure script.
+dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/vegastrike.h)
 AC_PREREQ(2.13)
 
@@ -198,7 +198,7 @@ AC_EGREP_CPP(yes,
 AC_MSG_RESULT([$is_macosx])
 
 if test "x$is_macosx" = "xyes" ; then
-    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+    CFLAGS="$CFLAGS -Wno-long-double -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
 	TR_LIBS="$TR_LIBS -framework OpenGL -framework GLUT"
@@ -1208,6 +1208,7 @@ if test "$TESTNETCOMM" = "1" ; then
 		dnl				echo "JRtp lib headers not found : disabling JVoIP support"
 		dnl			else
 					  	TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_JVOIP"
+						TR_LIBS="$TR_LIBS -L/usr/local/lib -ljvoip -ljrtp -ljthread"
 					   	AC_DEFINE(NETCOMM_JVOIP,1,[enable JVoIP library for sound support with NETCOMM])
 						echo "VoIP support enabled."
 		dnl			fi
@@ -1216,10 +1217,12 @@ if test "$TESTNETCOMM" = "1" ; then
 		else
 			if test "$TESTNETCOMM_PORTAUDIO" = "1" ; then
    				TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_PORTAUDIO"
+				TR_LIBS="$TR_LIBS -L/usr/local/lib -lportaudio"
 	   			AC_DEFINE(NETCOMM_PORTAUDIO,1,[enable PortAudio library for sound support with NETCOMM])
-				echo "VoIP support enabled."
+				echo "PortAudio support enabled."
 			else
-				echo "VoIP support disabled."
+				TESTNETCOMM_PORTAUDIO="0"
+				echo "PortAudio support disabled."
 			fi
 		fi
 		CPPFLAGS="$saved_CPPFLAGS"
@@ -1252,9 +1255,8 @@ if test "$TESTNETCOMM" = "1" ; then
 	fi
 
 	dnl Check for QuickTime headers under MacOS X
-	dnl  <QuickTimeComponents.h>
-	saved_TR_CPPFLAGS="$TR_CPPFLAGS"
-	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers -I/System/Library/Frameworks/Carbon.framework/Versions/A/Headers"
+	dnl saved_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Versions/A/Headers"
 	AC_DEFUN( CHECK_FOR_QT_H, [
 	    AC_MSG_CHECKING([for QuickTimeComponents.h])
 	    AC_TRY_CPP( [ #include <QuickTimeComponents.h> ], have_qt_h=yes, have_qt_h=no )
@@ -1263,7 +1265,6 @@ if test "$TESTNETCOMM" = "1" ; then
 
 	if test "$is_macosx" = "yes" ; then
 		CHECK_FOR_QT_H
-		TR_CPPFLAGS="$saved_TR_CPPFLAGS"
 		if test "x$have_qt_h" = "xyes" ; then
 			TESTNETCOMM_NOWEBCAM="0"
    			LIBS="$LIBS -framework QuickTime -framework Carbon -lz"

@@ -11,16 +11,6 @@ bin_PROGRAMS = vegastrike vegaserver accountserver
 SUBDIRS = \
     cmd gfx gldrv aldrv python gui networking boost common boost129
 
-if NETCOMM_JVOIP
-extraldadd = -ljvoip -ljrtp -ljthread
-else
-	if NETCOMM_PORTAUDIO
-	extraldadd = -lportaudio
-	else
-	extraldadd =
-	endif
-endif
-
 vegastrike_LDADD =  				\
 networking/netserver.o 				\
 aldrv/libaldrv.a 					\
@@ -42,7 +32,7 @@ cmd/collide/libcollide.a 			\
 boost129/libboost_python.a          \
 boost/libboost_python.a             \
 gfx/nav/libnav.a 					\
--lpthread -lz $(extraldadd)
+-lpthread -lz
 
 vegaserver_LDADD =  			\
 cmd/script/director_server.o 	\

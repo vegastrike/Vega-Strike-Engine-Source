@@ -32,16 +32,16 @@ void	CheckPAError( PaError err)
 {
 	if( err==paNoError)
 		return;
-	cerr<<"!!! PORTAUDIO ERROR : "<<Pa_GetErrorText( err)<<end;
+	cerr<<"!!! PORTAUDIO ERROR : "<<Pa_GetErrorText( err)<<endl;
 	if( err==paHostError)
 		cerr<<"!!! PA HOST ERROR : "<<Pa_GetHostError()<<" - "<<Pa_GetErrorText( Pa_GetHostError())<<endl;
 	cleanexit = true;
 	winsys_exit(1);
 }
 
-void	Pa_DisplayInfo( PaDeviceId id)
+void	Pa_DisplayInfo( PaDeviceID id)
 {
-	PaDeviceInfo * info = Pa_GetDeviceInfo( id);
+	const PaDeviceInfo * info = Pa_GetDeviceInfo( id);
 
 	cout<<"PORTAUDIO Device "<<id<<"---------------"<<endl;
 	cout<<"\tName : "<<info->name<<endl;
@@ -73,6 +73,12 @@ void	Pa_DisplayInfo( PaDeviceId id)
 	for( int i=0; i<info->numSampleRates; i++)
 		cout<<"\t\tRate "<<i<<" = "<<info->sampleRates[i];
 }
+
+int	Pa_Callback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata)
+{
+	return 0;
+}
+
 #endif /* NETCOMM_PORTAUDIO */
 
 NetworkCommunication::NetworkCommunication()
@@ -90,13 +96,13 @@ NetworkCommunication::NetworkCommunication()
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
 
-	this->dev = paNoDevice;
+	this->indev = paNoDevice;
+	this->outdev = paNoDevice;
 	this->devinfo = NULL;
 	// Initialize PortAudio lib
 	CheckPAError( Pa_Initialize());
 
 	// Testing purpose : list devices and display info about them
-	PaDeviceInfo * info;
 	int nbdev = Pa_CountDevices();
 	for( int i=0; i<nbdev; i++)
 		Pa_DisplayInfo( i);
@@ -104,7 +110,7 @@ NetworkCommunication::NetworkCommunication()
 	// Get the default devices for input and output streams
 	this->indev = Pa_GetDefaultInputDeviceID();
 	this->outdev = Pa_GetDefaultOutputDeviceID();
-	this->samplerate = 11025;
+	this->sample_rate = 11025;
 
 #endif /* NETCOMM_PORTAUDIO */
 #ifndef NETCOMM_NOWEBCAM
@@ -228,10 +234,10 @@ int		NetworkCommunication::InitSession( float frequency)
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
 
-	CheckPAError( Pa_OpenDefaultStream( &this->stream,
+	CheckPAError( Pa_OpenStream( &this->stream,
 								 this->indev, 1, paInt16, NULL,
 								 this->outdev, 2, paInt16, NULL,
-								 this->samplerate, 256, 0, paNoFlag,
+								 this->sample_rate, 256, 0, paNoFlag,
 								 Pa_Callback, (void *)this));
 
 #endif /* NETCOMM_PORTAUDIO */
