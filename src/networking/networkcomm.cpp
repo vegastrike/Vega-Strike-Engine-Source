@@ -1,4 +1,15 @@
 #include "networkcomm.h"
+#include "vs_path.h"
+#include <crypto++/filters.h>
+#include <crypto++/hex.h>
+#include <crypto++/randpool.h>
+#include <crypto++/files.h>
+
+#include <crypto++/rsa.h>
+#include <crypto++/des.h>
+#include <crypto++/sha.h>
+
+using namespace CryptoPP;
 
 #ifdef NETCOMM
 
@@ -182,31 +193,52 @@ NetworkCommunication::NetworkCommunication()
 
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
-	string privKeyFilename = vs_config->getVariable( "network", "encryption_private_key_file", "");
-	string pubKeyFilename = vs_config->getVariable( "network", "encryption_public_key_file", "");
-	string seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
+	pubKeyFilename = datadir+"vsnet_public_"+crypto_method+".key";
+	privKeyFilename = datadir+"vsnet_private_"+crypto_method+".key";
+	seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
 	// Key length is only used when we need to generate a key
 	this->key_length = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_keylength", "40"));
-	bool use_keys = true;
-	if( privKeyFilename=="")
-	{
-		use_keys = false;
-		privKeyFilename = datadir+"vsnet_private.key";
-		pubKeyFilename = datadir+"vsnet_public.key";
-	}
+	bool create_keys = false;
 	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
-	if( crypto_method=="blowfish")
+	FILE * fp1 = fopen( pubKeyFilename.c_str(), "rb");
+	FILE * fp2 = fopen( privKeyFilename.c_str(), "rb");
+	if( !fp1 || !fp2)
 	{
-		use_secured = 1;
-	}
-	else if( crypto_method=="rsa")
-	{
-		use_secured = 1;
-		if( !use_keys)
-			this->GenerateKey( privKeyFilename, pubKeyFilename);
+		// There is a file we cannot open so we create keys
+		create_keys = true;
 	}
 	else
-		cerr<<"WARNING : Unknown encryption method - encryption disabled"<<endl;
+	{
+		// Read the keys in their buffers
+		fseek( fp1, 0, SEEK_END);
+		unsigned int publength = ftell( fp1);
+		fseek( fp1, 0, SEEK_SET);
+		fseek( fp2, 0, SEEK_END);
+		unsigned int privlength = ftell( fp1);
+		fseek( fp2, 0, SEEK_SET);
+
+		char * pubk = new char[publength];
+		if( fread( pubk, sizeof( char), publength, fp1)!=publength)
+		{
+			cerr<<"!!! ERROR : reading crypto public key"<<endl;
+			exit(1);
+		}
+		char * privk = new char[privlength];
+		if( fread( privk, sizeof( char), privlength, fp2)!=privlength)
+		{
+			cerr<<"!!! ERROR : reading crypto private key"<<endl;
+			exit(1);
+		}
+		this->pubkey = string( pubk);
+		this->privkey = string( privk);
+		delete pubk;
+		delete privk;
+
+		fclose( fp1);
+		fclose( fp2);
+	}
+	if( create_keys)
+		this->GenerateKey();
 
 #endif
 }
@@ -496,6 +528,8 @@ if( use_pa)
 	}
 
 #endif /* NETCOMM_NOWEBCAM */
+#ifdef CRYPTO
+#endif
 }
 
 #endif /* NETCOMM */
@@ -544,70 +578,119 @@ void	NetworkCommunication::SwitchSecured()
 			secured = 1;
 	}
 #else
-	// If cmopiled without crypto++ support secured comms are not available
+	// If compiled without crypto++ support secured comms are not available
 	secured = 0;
 #endif
 }
 
 #ifdef CRYPTO
-void	NetworkCommunication::GenerateKey( string privKeyFilename, pubKeyFilename)
+void	NetworkCommunication::GenerateKey()
 {
 	if( crypto_method == "rsa")
 	{
+		use_secured = true;
 		RandomPool randPool;
 		randPool.Put((byte *)this->seed.c_str(), this->seed.length());
 
 		RSAES_OAEP_SHA_Decryptor priv(randPool, this->key_length);
-		HexEncoder privFile(new FileSink(privKeyFilename));
+		HexEncoder privFile(new FileSink(privKeyFilename.c_str()));
+		HexEncoder privstr(new StringSink(privkey));
 		priv.DEREncode(privFile);
 		privFile.MessageEnd();
 
 		RSAES_OAEP_SHA_Encryptor pub(priv);
-		HexEncoder pubFile(new FileSink(pubKeyFilename));
+		HexEncoder pubFile(new FileSink(pubKeyFilename.c_str()));
+		HexEncoder pubstr(new StringSink(pubkey));
 		pub.DEREncode(pubFile);
 		pubFile.MessageEnd();
 	}
-	else if( 1)
+	else if( crypto_method == "3des")
 	{
+		use_secured = true;
+		/* initialize a DES-EDE3 encryption filter with a 192 bit (24 bytes) key */
+		static DES_EDE3_Encryption des_encryptor ((byte *)privkey.c_str(), 24);
+		static DES_EDE3_Decryption des_decryptor ((byte *)privkey.c_str(), 24);
 	}
 	else
 	{
+		use_secured = false;
 	}
 }
 
-string	NetworkCommunication::EncryptBuffer( string pubKeyFilename, const char * buffer);
+string	NetworkCommunication::EncryptBuffer( const char * buffer, unsigned int length)
 {
+	string result;
 	if( crypto_method == "rsa")
 	{
-		FileSource pubFile(pubKeyFilename, true, new HexDecoder);
-		RSAES_OAEP_SHA_Encryptor pub(pubFile);
+		StringSource pubstr(pubkey, true, new HexDecoder);
+		RSAES_OAEP_SHA_Encryptor pub(pubstr);
 
-		RandomPool randPool;
-		randPool.Put((byte *)seed, strlen(seed));
+		randPool.Put((byte *)seed.c_str(), seed.length());
 
-		string result;
-		StringSource(message, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
-		return result;
+		StringSource(buffer, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
 	}
-	else if( 1)
+	else if( crypto_method == "3des")
 	{
+		/* calculate how many blocks (each block is 8 bytes) the input consists of, add 
+		padding if needed */
+			/*
+			int nBlocks = length / 8;						
+			if (length % 8 != 0)
+				nBlocks ++;
+			// allocate the output buffer
+			byte*	pResult = new byte[nBlocks * 8];
+			byte	plainByte [8];
+			// encrypt the blocks one by one
+			for (int block_num = 0; block_num < nBlocks; block_num ++)
+			{
+				// build the 8 byte block plain text, add padding if needed
+				for (int i = 0 ; i < 8; i++)
+				{
+					// this is a full block
+					if (block_num * 8 + i < length)
+					{
+						plainByte[i] = buffer[block_num * 8 + i];
+					}
+					// this is the last block that needs padding
+					else
+					{
+						plainByte[i]  = 0x00; // pad with a random byte
+					}
+				}
+				// encrypt the 8 byte block and store in output buffer
+			if (encrypting_mode)
+				des_encryptor.ProcessBlock(plainByte, pResult + block_num * 8);	
+			else
+				des_decryptor.ProcessBlock(plainByte, pResult + block_num * 8);
+			}
+			*output_length= nBlocks * 8;
+			return pResult;
+		*/
 	}
 	else
 	{
 	}
+	return result;
 }
 
-string	NetworkCommunication::DecryptBuffer( string pubKeyFilename, const char * buffer)
+string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int length)
 {
+	string result;
 	if( crypto_method == "rsa")
 	{
+		StringSource privstr(privkey, true, new HexDecoder);
+		RSAES_OAEP_SHA_Decryptor priv(privstr);
+
+		StringSource( buffer, true, new HexDecoder(new PK_DecryptorFilter( randPool, priv, new StringSink(result))));
 	}
-	else if
+	else if( crypto_method == "3des")
 	{
 	}
 	else
 	{
 	}
+
+	return result;
 }
 
 #endif

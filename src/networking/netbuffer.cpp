@@ -39,7 +39,7 @@ NetBuffer::NetBuffer( const char * buf, int bufsize)
 NetBuffer::~NetBuffer()
 		{
 			if( buffer != NULL)
-				delete buffer;
+				delete []buffer;
 		}
 void	NetBuffer::Reset()
 		{

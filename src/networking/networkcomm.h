@@ -26,7 +26,8 @@ class JVOIPRTPTransmissionParams;
 // (MAX_PA_CPU_LOAD*100)% CPU LOAD
 #endif
 #ifdef CRYPTO
-#include <crypto++/cryptlib.h>
+#include <crypto++/randpool.h>
+using namespace CryptoPP;
 #endif
 
 typedef list<ClientPtr>::iterator CltPtrIterator;
@@ -84,13 +85,18 @@ class NetworkCommunication
 #endif
 #ifdef CRYPTO
 		//Algorithm *			cryptalgo;
+		RandomPool			randPool;
 		string				crypto_method;
 		string				seed;
 		unsigned int		key_length;
+		string				pubKeyFilename;
+		string				privKeyFilename;
+		string				pubkey;
+		string				privkey;
 
-		void				GenerateKey( string privKeyFilename, pubKeyFilename);
-		string				EncryptBuffer( string pubKeyFilename, char * buffer);
-		string				DecryptBuffer( string pubKeyFilename, char * buffer);
+		void				GenerateKey();
+		string				EncryptBuffer( const char * buffer, unsigned int length = 0);
+		string				DecryptBuffer( const char * buffer, unsigned int length = 0);
 #endif
 
 	public:

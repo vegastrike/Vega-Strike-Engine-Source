@@ -1150,7 +1150,7 @@ if test "$CRYPTO" = "1" ; then
 		fi
 	fi
 	if test "x$have_crypto_lib" = "xyes" ; then
-		TR_CPPFLAGS="$TR_CPPFLAGS -DCRPYTO"
+		TR_CPPFLAGS="$TR_CPPFLAGS -DCRYPTO"
 		CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 		echo "Crypto++ library support enabled"
 	else
