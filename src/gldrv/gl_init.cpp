@@ -42,9 +42,23 @@
 #include "gl_init.h"
 #define WINDOW_TITLE "Vega Strike "VERSION
 static int glutWindow;
-
-
-
+#ifdef _WIN32
+static HWND hWnd;
+static HINSTANCE hInst;								// current instance
+LRESULT CALLBACK DLOG_start(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
+	case WM_INITDIALOG:
+		return TRUE;
+	case WM_CLOSE:
+		DestroyWindow(hWnd);
+		return TRUE;
+	case WM_DESTROY:
+		return FALSE;
+	}
+    return FALSE;
+}
+#include "../resource.h"
+#endif
 
 #ifdef WIN32
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
@@ -145,6 +159,20 @@ static void Reshape (int x, int y) {
 }
 extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
+#ifdef _WIN32
+	int dumbi;
+	MSG msg;
+	hWnd=CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_START),NULL, (DLGPROC)DLOG_start, 0);
+	ShowWindow(hWnd, SW_SHOW);
+	for (dumbi=0;dumbi<5;dumbi++) {
+		if(GetMessage(&msg, NULL, 0, 0)) {
+			DispatchMessage(&msg);
+		} else {
+			break;
+		}
+	}
+//	DialogBox (hInst,(LPCTSTR)IDD_START,hWnd,(DLGPROC)DLOG_start);
+#endif
     glutInit( &argc, argv );
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
@@ -197,7 +225,6 @@ void GFXInit (int argc, char ** argv){
 
     init_opengl_extensions();
     GFXInitTextureManager();
-    
     if (g_game.Multitexture)
       GFXActiveTexture(0);
     glEnable(GL_TEXTURE_2D);
@@ -275,6 +302,9 @@ void GFXInit (int argc, char ** argv){
 void GFXLoop(void main_loop()) {
   glutDisplayFunc(main_loop);
   glutIdleFunc (main_loop);
+#ifdef _WIN32
+  DestroyWindow(hWnd);
+#endif
   glutMainLoop();
   //never make it here;
 
