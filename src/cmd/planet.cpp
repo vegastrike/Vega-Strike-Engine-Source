@@ -163,9 +163,13 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
     Vector p(-TerrainH.Cross (TerrainUp));
     VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,cumulative_transformation.position);
     terrain->SetTransformation (tmp);
+    if (atmosphere)
+      atmosphere->SetMatricesAndDraw (_Universe->AccessCamera()->GetPosition(),tmp);
   }
   // if cam inside don't draw?
-  Unit::Draw(quat,m);
+  if(!inside) {
+    Unit::Draw(quat,m);
+  }
   GFXLoadIdentity (MODEL);
   for (unsigned int i=0;i<lights.size();i++) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));

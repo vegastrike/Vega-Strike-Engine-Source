@@ -126,8 +126,20 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 		//GFXEnableLight(l2);
 	}
 }
+static std::vector <Atmosphere *> draw_queue;
+void Atmosphere::SetMatricesAndDraw(const Vector &pos, const Matrix mat) {
+  CopyMatrix (tmatrix,mat);
+  position =pos;
+  draw_queue.push_back (this);
+}
 
-void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
+void Atmosphere::ProcessDrawQueue () {
+  while (!draw_queue.empty()) {
+    draw_queue.back()->Draw();
+    draw_queue.pop_back();
+  }
+}
+void Atmosphere::Draw()
 {
   GFXDisable (TEXTURE1);
 	/*

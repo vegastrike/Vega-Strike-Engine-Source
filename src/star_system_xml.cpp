@@ -257,14 +257,30 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     break;
   case ATMOSPHERE:
     {
+      Atmosphere::Parameters params;
+      params.radius = 40000;
       xml->unitlevel++;
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attribute_map.lookup((*iter).name)) {
+	case RADIUS:
+	  params.radius = parse_float ((*iter).value);	  
+	  break;
 	default:
 	  break;
 	}
       }  
-      Atmosphere * a = NULL /* new Atmosphere(); */;
+
+      
+      params.low_color[0] = GFXColor(0,0.5,0.0);
+      params.low_color[1] = GFXColor(0,1.0,0.0);
+      params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+      params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+      params.high_color[0] = GFXColor(0.5,0.0,0.0);
+      params.high_color[1] = GFXColor(1.0,0.0,0.0);
+      params.high_ambient_color[0] = GFXColor(0,0,0);
+      params.high_ambient_color[1] = GFXColor(0,0,0);
+      params.scattering = 5;
+      Atmosphere * a =  new Atmosphere(params); 
       if (xml->unitlevel>2) {
 	assert(xml->moons.size()!=0);
 	Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);

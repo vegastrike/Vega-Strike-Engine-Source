@@ -239,7 +239,8 @@ void StarSystem::Draw() {
   GFXFogMode (FOG_OFF);
   Matrix ident;
   Identity(ident);
-  theAtmosphere->Draw(Vector(0,1,0),ident);
+  Atmosphere::ProcessDrawQueue();
+  //theAtmosphere->Draw(Vector(0,1,0),ident);
 
   GFXPopGlobalEffects();
 

@@ -32,9 +32,11 @@ private:
 	Mesh *cap; /* mid to zenith */
 	Mesh *stack; /* horizon to zenith */
 	std::vector <SunBox *> sunboxes; /* box around the sun (single star for now) */
-
+	Matrix tmatrix;
+	Vector position;
 	/* lighting contexts for the above 3 */
 public:
+
 	Atmosphere(const Parameters &params);
 	~Atmosphere();
 	const Parameters &parameters();
@@ -46,7 +48,9 @@ public:
 
 	/* ugh, make update just change the lighting state */
 	void Update(const Vector &position, const Matrix tmatrix);
-	void Draw(const Vector &position, const Matrix tmatrix); /* inherit the orientation of 
+	void Draw();
+	static void ProcessDrawQueue();
+	void SetMatricesAndDraw (const Vector &position, const Matrix tmatrix); /* inherit the orientation of 
 	                                    the transformation matrix  */
 	static void DrawAtmospheres();
 };
