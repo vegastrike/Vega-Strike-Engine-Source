@@ -3109,6 +3109,17 @@ bool DestroySystem (float hull, float maxhull, float numhits) {
 		chance=pow (chance,numhits);
 	return (rand01()>chance);
 }
+bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
+	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".1"));
+	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
+	if (numhits>1)
+		chance=pow (chance,numhits);
+	bool ret = (rand01()>chance);
+	if (ret) {
+//		printf("DAAAAAAMAGED!!!!\n");
+	}
+	return ret;
+}
 static const char * DamagedCategory="upgrades/Damaged/";
 float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
   float percent;
@@ -3156,11 +3167,13 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 					}
 				}
 			}
-			
-			if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
-				if (DestroySystem(hull,maxhull,1)) {
-					static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+			bool isplayer = _Universe->isPlayerStarship(this);
+			if ((!isplayer)||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0	
+				static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+				if ((!isplayer)&&DestroySystem(hull,maxhull,1)) {
 					
+					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+				}else if (isplayer&&DestroyPlayerSystem(hull,maxhull,1)) {
 					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
 				}
 			  if (damage>0) {
@@ -3175,7 +3188,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			  }
 			}else {
 			  _Universe->AccessCockpit()->godliness-=absdamage;
-			  if (DestroySystem(hull,maxhull,1)) {
+			  if (DestroyPlayerSystem(hull,maxhull,1)) {
 				  DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
 			  }
 			}
