@@ -413,8 +413,9 @@ public:
 		} else if (homeworld->jumps.empty()) {
 			fprintf(stderr,"Fatal error: homeworld \"%s\" has no jump points!!!\nThis means that the %s faction will wait forever for a jump point\nto come into existance.  The application will probably get stuck in an endless loop somewhere!",stuff[3].c_str(),name.c_str());
 		}
-		systems.insert(homeworld);
-		borderSystems.push_back(homeworld);
+		std::vector<System*> newsys;
+		newsys.push_back(homeworld);
+		addNewSystems(newsys);
 	}
 	FactionInfo(string nam, float prob, int max, System *homeworld)
 			: turn(0), numsystems(1), name(nam), takeoverprob(prob),
