@@ -8,7 +8,7 @@
 #include <vector>
 using std::vector;
 struct bsp_vector {
-  float x,y,z;
+  double x,y,z;
 };
 
 struct bsp_polygon {
@@ -73,7 +73,7 @@ understand, e-mail me back and i'll try to explain things a bit better:)
 Seeya!:)
 */
 #define RIGHT_HANDED -1
-#define BSPG_THRESHOLD .00001
+
 enum INTERSECT_TYPE {
     BSPG_BACK =-1,
     BSPG_INTERSECT =0,
@@ -87,7 +87,7 @@ typedef struct bsp_vector VECTOR;
 
 
 struct bsp_tree {
-    float a,b,c,d;
+    double a,b,c,d;
     vector <bsp_polygon> tri;
     vector <bsp_tree> triplane;
     struct bsp_tree * left;
@@ -97,7 +97,7 @@ struct bsp_tree {
 
 
 static bool Cross (const bsp_polygon &x, bsp_tree &result) {
-  float size =0;
+  double size =0;
   
   for (unsigned int i=2;(!size)&&i<x.v.size();i++) {
     bsp_vector v1;
@@ -114,7 +114,7 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
     size = result.a*result.a+result.b*result.b+result.c*result.c;
   }
   if (size)
-      size = ((float)1)/sqrtf (size);
+      size = ((double)1)/sqrtf (size);
   else 
     return false;
   result.a *=RIGHT_HANDED*(size);
@@ -123,7 +123,7 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
   return true;
 }
 
-float Dot (const bsp_vector & A, const bsp_vector & B) {
+double Dot (const bsp_vector & A, const bsp_vector & B) {
     return A.x *B.x + A.y*B.y+A.z*B.z;
 }
 
@@ -133,8 +133,8 @@ static FILE * o;
 // k = (A * n + d) / (A * n - B * n) 
 //
 bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vector & B, bsp_vector & res) {
-    float inter = A.x*n.a + A.y*n.b+A.z*n.c;
-    float k=(inter - (B.x * n.a + B.y * n.b + B.z * n.c)); 
+    double inter = A.x*n.a + A.y*n.b+A.z*n.c;
+    double k=(inter - (B.x * n.a + B.y * n.b + B.z * n.c)); 
     if (!k)
       return false;
     k = (inter + n.d ) / k; 
@@ -146,7 +146,7 @@ bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vecto
 }
 
 enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_tree & temp_node) {
-     float tmp = ((temp_node.a)*(v.x))+((temp_node.b)*(v.y))+((temp_node.c)*(v.z))+(temp_node.d);
+     double tmp = ((temp_node.a)*(v.x))+((temp_node.b)*(v.y))+((temp_node.c)*(v.z))+(temp_node.d);
      if (tmp < 0) {
 	 return BSPG_BACK;
      }else if (tmp >0) {
@@ -229,7 +229,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
       continue;
     }	
     // Calculate 'd'
-    temp_node.d = (float) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+    temp_node.d = (double) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
     temp_node.d*=-1.0;
     triplane.push_back(temp_node);
     //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3); 
@@ -263,7 +263,7 @@ long getsize (char * name)
 void load (vector <bsp_polygon> &tri) {
   FILE *f;
   long size;
-  float x,y,z;
+  double x,y,z;
   vector <bsp_vector> vec;
   vector <int> numberof;
   vector <int> vertexnum;
@@ -277,7 +277,7 @@ void load (vector <bsp_polygon> &tri) {
   long end;
   
   long vert,light;
-  float fx,fy;
+  double fx,fy;
   
   long i;
   // Loading VERT ...
@@ -398,7 +398,7 @@ int main(int argc, char * argv) {
 	 continue;
      }
      // Calculate 'd'
-     temp_node.d = (float) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+     temp_node.d = (double) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
      temp_node.d*=-1.0;
      triplane.push_back(temp_node);
  }
@@ -512,14 +512,14 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
 
 static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane) {
   assert (triplane.size()==tri.size());
-  float splits=0;
+  double splits=0;
   int front = 0;
   int back = 0;
   unsigned int retval= 0;
-  float least_penalty = 10000000000.;
-  const float size_factor = .3333333;
-  const float balance_factor = 1;
-  const float  split_factor = .1;
+  double least_penalty = 10000000000.;
+  const double size_factor = .3333333;
+  const double balance_factor = 1;
+  const double  split_factor = .1;
   const unsigned int toobig=100;
   const int RANDOM_BSP = 0;
   const unsigned int samplesize = 10;
@@ -527,7 +527,7 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
   unsigned int jj;
   for (unsigned int i=0;i<triplane.size();i++) {
     splits = front = back =0;
-    splits = size_factor*(-((float)tri[i].v.size())+3);//start off somewhat negative
+    splits = size_factor*(-((double)tri[i].v.size())+3);//start off somewhat negative
     if (tri[i].v.size()>toobig) {
       return i;
     }
@@ -549,12 +549,12 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
       }    
     
     }
-    float balance_penalty = ((float)fabs (front+splits-back))/(float)(n);
+    double balance_penalty = ((double)fabs (front+splits-back))/(double)(n);
     // split_penalty is 0 for a very good tree with regards to splitting
     // and 1 for a very bad one.
-    float split_penalty = (float)splits/(float)n;
+    double split_penalty = (double)splits/(double)n;
     // Total penalty is a combination of both penalties. 0 is very good,
-    float penalty = balance_factor * balance_penalty + split_factor * split_penalty;
+    double penalty = balance_factor * balance_penalty + split_factor * split_penalty;
     if (penalty < least_penalty) {
       least_penalty = penalty;
       retval = i;
@@ -567,7 +567,7 @@ enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon &
 
 {
     INTERSECT_TYPE last = BSPG_INTERSECT;
-    float cur;
+    double cur;
     INTERSECT_TYPE icur;
     for (unsigned int i=0;i<temp_poly3.v.size();i++) {
 	cur = ((temp_node.a)*(temp_poly3.v[i].x))+((temp_node.b)*(temp_poly3.v[i].y))+((temp_node.c)*(temp_poly3.v[i].z))+(temp_node.d);
@@ -596,7 +596,7 @@ enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon &
 static unsigned int maxheight;
 static unsigned int minheight;
 static double average_height;
-//static float almost_av_height;
+//static double almost_av_height;
 static unsigned int numends;
 static unsigned int numnodes;
 
