@@ -86,10 +86,7 @@ int main( int argc, char *argv[] )
   fprintf( stderr, "Vega Strike "  " \n"
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
-
-    strcpy(mission_name,"test1.mission");
-
-    ParseCommandLine(argc,argv);
+    
 
     if(benchmark<0.0){
       srand( time(NULL) );
@@ -98,13 +95,14 @@ int main( int argc, char *argv[] )
       // in benchmark mode, always use the same seed
       srand(171070);
     }
-
+    //this sets up the vegastrike config variable
     setup_game_data(); 
-
-
-
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
+    //can use the vegastrike config variable to read in the default mission
+    strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
+    //might overwrite the default mission with the command line
+    ParseCommandLine(argc,argv);
 
 #ifdef HAVE_BOOST
 
