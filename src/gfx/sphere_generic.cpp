@@ -60,7 +60,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   oldmesh = this->orig;
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=VSFileSystem::GetSharedMeshHashName(hash_name,Vector(radius,radius,radius),0), oldmesh);
+  meshHashTable.Put (hash_name, oldmesh);
   //  VSFileSystem::Fprintf (stderr,"\nput %s\n",hash_name.c_str());
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (-radialSize,-radialSize,-radialSize);
