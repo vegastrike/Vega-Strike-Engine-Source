@@ -46,6 +46,8 @@ LOCALCONST_DEF(VSImage, int,SIZEOF_RGBQUAD,sizeof(BYTE)*4)
 
 VSImage::VSImage()
 {
+  this->img_depth=8;
+  this->img_color_type=8;
 	this->Init();
 }
 
@@ -298,6 +300,8 @@ unsigned char *	VSImage::ReadPNG()
 #ifdef VSIMAGE_DEBUG
 	cerr<<"2. Loading a PNG file : width="<<sizeX<<", height="<<sizeY<<", depth="<<img_depth<<", img_color="<<img_color_type<<", interlace="<<interlace_type<<endl;
 #endif
+        if (img_depth!=16)
+          img_depth=8;
 	row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) *this->sizeY);
 	int numchan=1;
 	if (this->img_color_type&PNG_COLOR_MASK_COLOR)
