@@ -128,7 +128,7 @@ boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (
 #define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
 );
 #define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (funname,fun)
-#define PYTHON_DEFINE_METHOD_DEFAULT(modul,fun,funname,default) modul.def (funname,fun,default)
+#define PYTHON_DEFINE_METHOD_DEFAULT(modul,fun,funname,deflt) modul.def (funname,deflt)
 #else
 
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \

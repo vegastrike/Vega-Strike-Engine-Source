@@ -103,6 +103,19 @@ public:
     return (this->operator!=(oth));
   }
 };
+#ifdef USE_BOOST_129
+BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
+
+
+BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,to_python_value <UnitWrapper> ()(UnitWrapper(x)));
+template <>
+struct default_result_converter::apply<Unit *>
+{
+    typedef boost::python::to_python_value<Unit *> type;
+};
+
+BOOST_PYTHON_END_CONVERSION_NAMESPACE
+#endif
 PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)
 #undef EXPORT_UTIL
@@ -178,7 +191,6 @@ EXPORT_UTIL(GetMasterPartList,Unit())
 #undef voidEXPORT_UTIL
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
-
 PYTHON_BASE_BEGIN_CLASS(VS,Cargo,"Cargo")
 #ifdef USE_BOOST_129
 , boost::python::init<std::string,std::string,float,int,float,float>());
@@ -297,9 +309,7 @@ PYTHON_END_CLASS(VS,FireAt)
 
 PYTHON_END_MODULE(VS)
 #ifdef USE_BOOST_129
-BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,to_python_value <UnitWrapper> ()(UnitWrapper(x)));
-BOOST_PYTHON_END_CONVERSION_NAMESPACE
+
 #else
 TO_PYTHON_SMART_POINTER(UnitWrapper);
 TO_PYTHON_SMART_POINTER(Cargo);
