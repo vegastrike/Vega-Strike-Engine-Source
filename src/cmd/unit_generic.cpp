@@ -1839,7 +1839,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
       Vector v(GetVelocity());
       v.Normalize();
       Vector p,q,r;GetOrientation(p,q,r);
-	  float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","1.5"));
+	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","1.5"));
       UniverseUtil::playAnimationGrow (insys_jump_ani,sep+GetVelocity()*sec+v*rSize(),rSize()*8,.97);
       UniverseUtil::playAnimationGrow (insys_jump_ani,sep+GetVelocity()*sec+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
     }
@@ -2435,6 +2435,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   bool oldbig = oldmagsquared>cutsqr;
   bool newbig = newmagsquared>cutsqr;
   if (oldbig!=newbig) {
+
 	  static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
 	  static bool docache=true;
 	  if (docache){
@@ -2445,8 +2446,10 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
       Vector v(GetVelocity());
       v.Normalize();
       Vector p,q,r;GetOrientation(p,q,r);
-	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead",".5"));
-      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+GetVelocity()*sec+v*rSize(),rSize()*8,1);
+	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","4"));
+	  static float endsec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead_end",".03"));
+	  float tmpsec = oldbig?endsec:sec;
+      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+Velocity*tmpsec+v*rSize(),rSize()*8,1);
 //      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+GetVelocity()*sec+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
 	  
 	  
