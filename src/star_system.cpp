@@ -432,6 +432,7 @@ extern Unit ** fighters;
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
+      pendingjump[kk].un->RemoveFromSystem();
       pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
       if (pendingjump[kk].un==fighters[0]) {
 	_Universe->activeStarSystem()->SwapOut();
