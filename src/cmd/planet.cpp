@@ -81,7 +81,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
   delete satiterator;
 }
 
-const float densityOfRock = 1; // 1 cm of durasteel equiv per cubic meter
+const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
 
 Planet::Planet()  : Unit(), radius(0.0f), satellites() {
   Init();
