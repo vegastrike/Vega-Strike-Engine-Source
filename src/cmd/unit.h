@@ -168,9 +168,6 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
-  bool CanAddCargo (const Cargo &carg) const;
-  void AddCargo (const Cargo &carg);
-  int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
 
@@ -399,6 +396,9 @@ class Unit {
   void SetRecursiveOwner(Unit *target);
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
 public:
+  bool CanAddCargo (const Cargo &carg) const;
+  void AddCargo (const Cargo &carg);
+  int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
   float PriceCargo (const std::string &s);
   void SwapOutHalos();
   void SwapInHalos();

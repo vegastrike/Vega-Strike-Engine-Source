@@ -818,6 +818,10 @@ void Mission::initCallbackMaps(){
     module_unit_map["getTarget"]=CMT_UNIT_getTarget ;
     module_unit_map["getThreat"]=CMT_UNIT_getThreat ;
     module_unit_map["setTarget"]=CMT_UNIT_setTarget ;
+    module_unit_map["addCargo"]=CMT_UNIT_addCargo ;
+    module_unit_map["removeCargo"]=CMT_UNIT_removeCargo ;
+    module_unit_map["incrementCargo"]=CMT_UNIT_incrementCargo ;
+    module_unit_map["getThreat"]=CMT_UNIT_getThreat ;
     module_unit_map["getMinDis"]=CMT_UNIT_getMinDis ;
     module_unit_map["getAngle"]=CMT_UNIT_getAngle ;
     module_unit_map["getAngleToPos"]=CMT_UNIT_getAngleToPos ;

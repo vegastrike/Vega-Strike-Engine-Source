@@ -52,6 +52,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "gfx/cockpit.h"
+#include "cmd/images.h"
 //#include "vegastrike.h"
 
 /* *********************************************************** */
@@ -674,6 +675,68 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	//return vi;
       }
     }
+    else if(method_id==CMT_UNIT_removeCargo){
+      
+      string s = getStringArgument (node,mode,1);
+
+      int quantity= getIntArg(node,mode,2);
+      bool erasezero= getBoolArg(node,mode,3);
+      if(mode==SCRIPT_RUN){
+	int numret=0;
+	unsigned int index;
+	if (my_unit->GetCargo(s,index)) {
+	  quantity = my_unit->RemoveCargo (index,quantity,erasezero);
+	}else {
+	  quantity=0;
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_INT;
+      viret->int_val = quantity;
+    }
+    else if(method_id==CMT_UNIT_addCargo){
+      Cargo carg;
+      carg.content = getStringArgument (node,mode,1);
+      carg.category = getStringArgument (node,mode,2);
+      carg.price= getFloatArg(node,mode,3);
+      carg.quantity= getIntArg(node,mode,4);
+      carg.mass =getFloatArg(node,mode,5);
+      carg.volume =getFloatArg(node,mode,6);
+      if(mode==SCRIPT_RUN){
+	int i;
+	for (i=carg.quantity;i>0&&!my_unit->CanAddCargo(carg);i--) {
+	  carg.quantity=i;
+	}
+	if (i>0) {
+	  carg.quantity=i;
+	  my_unit->AddCargo(carg);
+	}else {
+	  carg.quantity=0;
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_INT;
+      viret->int_val = carg.quantity;
+    }
+    else if(method_id==CMT_UNIT_incrementCargo){
+      if(mode==SCRIPT_RUN){
+
+
+	if (my_unit->numCargo()>0) {
+	  unsigned int index;
+	  index = rand()%my_unit->numCargo();
+	  Cargo c(my_unit->GetCargo(index));	  
+	  c.quantity=1;
+	  if (my_unit->CanAddCargo(c)) {
+	    my_unit->AddCargo(c);
+	  }
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+
+
     else if(method_id==CMT_UNIT_toxml){
       if(mode==SCRIPT_RUN){
 	call_unit_toxml(node,mode,ovi);
