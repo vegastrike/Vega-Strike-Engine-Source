@@ -24,26 +24,24 @@
 
 struct GFXVertex // Vertex, Normal, Texture, and Environment
 {
-	float x;
-	float y;
-	float z;
-	float i;
-	float j;
-	float k;
-	float s,t;
-
-	GFXVertex()
-	{
-	}
-	GFXVertex(const Vector &vert, const Vector &norm, float s, float t)
-	{
-		SetVertex(vert);
-		SetNormal(norm);
-		SetTexCoord(s, t);
-	}
-	GFXVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
-	GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
-	GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
+  float x;
+  float y;
+  float z;
+  float i;
+  float j;
+  float k;
+  float s,t;
+  
+  GFXVertex(){}
+  GFXVertex(const Vector &vert, const Vector &norm, float s, float t){
+    SetVertex(vert);
+    SetNormal(norm);
+    SetTexCoord(s, t);
+  }
+  GFXVertex (float x, float y, float z, float i, float j, float k, float s, float t) {this->x=x;this->y=y;this->z=z;this->i=i;this->j=j;this->k=k;this->s=s;this->t=t;}
+  GFXVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
+  GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
+  GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
 };
 struct GFXColor
 {
@@ -116,14 +114,11 @@ class /*GFXDRVAPI*/ GFXQuadList {
   GFXQuadList(GFXBOOL color=GFXFALSE);
   ~GFXQuadList();
   void Draw();
-  int AddQuad (GFXVertex *vertices, GFXColor * colors=NULL);
+  int AddQuad (const GFXVertex *vertices, const GFXColor * colors=NULL);
   void DelQuad (int which);
-  void ModQuad (int which, GFXVertex *vertices, GFXColor * colors=NULL);
+  void ModQuad (int which, const GFXVertex *vertices, const GFXColor * colors=NULL);
 };
 class /*GFXDRVAPI*/ GFXVertexList {
-
-  //	int numTriangles;
-  //	int numQuads;
   int numVertices;
   GFXVertex *myVertices;
   GFXColor *myColors;
@@ -134,17 +129,17 @@ class /*GFXDRVAPI*/ GFXVertexList {
   int *offsets;
   int tessellation;
   int changed;
-  void Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, GFXColor *colors, int numlists, int *offsets, bool Mutable,int tess);
+  void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor *colors, int numlists, int *offsets, bool Mutable,int tess);
   void RefreshDisplayList();
 public:
   GFXVertexList();
   void Tess (int );
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices,bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, NULL, 1, &numVertices,Mutable,tess);}
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false, int tess =0) {
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, NULL, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false, int tess =0) {
     Init(poly,numVertices,vertices,NULL,numlists,offsets,Mutable, tess);
   }
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices,GFXColor *colors, bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, colors, 1, &numVertices,Mutable,tess);}
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, GFXColor *colors, int numlists, int *offsets, bool Mutable=false, int tess =0) {
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,const GFXColor *colors, bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, colors, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor *colors, int numlists, int *offsets, bool Mutable=false, int tess =0) {
     Init(poly,numVertices,vertices,colors, numlists,offsets,Mutable, tess);
   }
 
@@ -157,7 +152,9 @@ public:
   
   GFXBOOL SetNext(GFXVertexList *vlist);
   GFXBOOL Mutate (int offset,  const GFXVertex *vlist,int number, const GFXColor *color=NULL);
+  void LoadDrawState();
   void Draw();
+  void DrawOnce (){LoadDrawState();Draw();}
   GFXBOOL SwapUntransformed();
   GFXBOOL SwapTransformed();
 };
@@ -166,7 +163,7 @@ struct DrawContext {
   float m[16];
   GFXVertexList *vlist;
   DrawContext() { }
-  DrawContext(float  a[16], GFXVertexList *vl) { memcpy(m, a, sizeof(float[16])); vlist = vl;}
+  DrawContext(const float  a[16], GFXVertexList *vl) { memcpy(m, a, sizeof(float[16])); vlist = vl;}
 };
 
 struct GFXMaterial

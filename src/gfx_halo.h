@@ -1,19 +1,26 @@
+#include "gfxlib.h"
 #include "gfx_transform_vector.h"
 #include "quaternion.h"
 
 
 class Halo {
-  Transformation local_transformation;  
-  //enum BLENDFUNC blendSrc;
-  //enum BLENDFUNC blendDst;
+  Vector position;
+  float sizex;
+  float sizey;
+  int decal;
+  int quadnum;
+  //static enum BLENDFUNC blendSrc;
+  //static enum BLENDFUNC blendDst;
  public:
-  Halo();
+  Halo (const char * texture, const GFXColor &col=GFXColor (1,1,1,.5), const Vector & pos= Vector (0,0,0), float sizx= 1, float sizy =1 );
   ~Halo();
   void Draw (const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
-  void SetDimensions(float wid, float hei);
-  Vector &Position();
-  void SetPosition (float, float, float);
-  void SetPosition (const Vector &);
-  void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
+  static void ProcessDrawQueue();
+  void SetDimensions (float wid, float hei) {sizex = wid; sizey=hei;}
+  void SetPosition (float x,float y, float z) {position = Vector (x,y,z);}
+  void SetPosition (const Vector &k) {position = k;}
+  Vector &Position(){return position;}
+  void SetColor (const GFXColor &col);
 
-}
+
+};

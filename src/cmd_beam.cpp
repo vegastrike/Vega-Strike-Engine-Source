@@ -7,30 +7,24 @@
 //using std::vector;
 
 
-vector <Texture *> BeamDecal;
-vector <int> DecalRef;
-vector <vector <DrawContext> > beamdrawqueue;
+static vector <Texture *> BeamDecal;
+static vector <int> DecalRef;
+static vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
 Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
   string texname (clne.file);
   Texture * tmpDecal = Texture::Exists(texname);
+  unsigned int i=0;
   if (tmpDecal) {
-    unsigned int i;
-    for (i=0;i<BeamDecal.size();i++) {
+    for (;i<BeamDecal.size();i++) {
       if (BeamDecal[i]==tmpDecal) {
 	decal = i;
 	DecalRef[i]++;
 	break;
       }
     }
-    if (i==BeamDecal.size()) {
-      decal = i;
-      BeamDecal.push_back (tmpDecal);
-
-      beamdrawqueue.push_back (vector<DrawContext>());
-      DecalRef.push_back(1);
-    }
-  }else {
+  }
+  if (!tmpDecal||i==BeamDecal.size()) { //make sure we have our own to delete upon refcount =0
     decal = BeamDecal.size();
     BeamDecal.push_back(new Texture (texname.c_str(),0,TRILINEAR));
     beamdrawqueue.push_back (vector<DrawContext>());
@@ -212,10 +206,14 @@ void Beam::ProcessDrawQueue() {
 
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
+  DrawContext c;
   for (unsigned int decal = 0;decal < beamdrawqueue.size();decal++) {	
     BeamDecal[decal]->MakeActive();
+    if (beamdrawqueue[decal].size()) {
+      beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
+    }
     while (beamdrawqueue[decal].size()) {
-      DrawContext c= beamdrawqueue[decal].back();
+      c= beamdrawqueue[decal].back();
       beamdrawqueue[decal].pop_back();
       GFXLoadMatrix (MODEL, c.m);
       c.vlist->Draw();

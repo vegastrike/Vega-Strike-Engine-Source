@@ -680,34 +680,33 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
-  	GFXSelectMaterial(myMatNum);
-	//GFXEnable(LIGHTING);
-	GFXDisable (LIGHTING);
-	//static float rot = 0;
-	//GFXColor(1.0, 1.0, 1.0, 1.0);
-	
-	GFXEnable(TEXTURE0);
-	GFXEnable(CULLFACE);
-	if(envMap) {
-	  GFXEnable(TEXTURE1);
-	} else {
-	  GFXDisable(TEXTURE1);
-	}
-	if(Decal)
-	  Decal->MakeActive();
-	
-	GFXSelectTexcoordSet(0, 0);
-	if(envMap) {
-	  //_GFX->getLightMap()->MakeActive();
-	  _GFX->activateLightMap();
-	  GFXSelectTexcoordSet(1, 1);
-	  }
-	GFXBlendMode(blendSrc, blendDst);
+  GFXSelectMaterial(myMatNum);
+  //GFXEnable(LIGHTING);
+  GFXDisable (LIGHTING);
+  //static float rot = 0;
+  //GFXColor(1.0, 1.0, 1.0, 1.0);
+  
+  GFXEnable(TEXTURE0);
+  GFXEnable(CULLFACE);
+  if(envMap) {
+    GFXEnable(TEXTURE1);
+  } else {
+    GFXDisable(TEXTURE1);
+  }
+  if(Decal)
+    Decal->MakeActive();
+  
+  GFXSelectTexcoordSet(0, 0);
+  if(envMap) {
+    //_GFX->getLightMap()->MakeActive();
+    _GFX->activateLightMap();
+    GFXSelectTexcoordSet(1, 1);
+  }
+  GFXBlendMode(blendSrc, blendDst);
+  vlist->LoadDrawState();	
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    //GFXLoadIdentity (MODEL);
-
     GFXLoadMatrix(MODEL, c.mat);
     GFXPickLights (c.mat/*GetPosition()*/);
     vlist->Draw();

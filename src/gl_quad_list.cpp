@@ -22,6 +22,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "gl_globals.h"
+#include "vs_globals.h"
 
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
@@ -47,18 +48,19 @@ void GFXQuadList::Draw() {
 	
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  if (bTex0) 
+  if (g_game.Multitexture) 
     glClientActiveTextureARB (GL_TEXTURE0_ARB);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
   glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-  if (bTex0) {
+  if (g_game.Multitexture) {
     glClientActiveTextureARB (GL_TEXTURE1_ARB);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   }
   if (isColor&&myColors) {
     glEnableClientState(GL_COLOR_ARRAY);
     glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);    
-  }
+  }else 
+    glDisableClientState(GL_COLOR_ARRAY);
   glDrawArrays(GL_QUADS, 0, numQuads*4);
   if (isColor) {
     GFXColor (1,1,1,1);
@@ -66,7 +68,7 @@ void GFXQuadList::Draw() {
 }
 
 
-int GFXQuadList::AddQuad (GFXVertex *vertices,GFXColor * color) {
+int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColor * color) {
   int cur= numQuads*4;
   if (Dirty)
     for (int i=0;i<numQuads;i++) {
@@ -120,10 +122,11 @@ void GFXQuadList::DelQuad (int which ) {
     }
   }
 }
-void GFXQuadList::ModQuad (int which, GFXVertex * vertices, GFXColor * colors) {
+void GFXQuadList::ModQuad (int which, const GFXVertex * vertices, const GFXColor * colors) {
   if (which <0||which>=numQuads||quadassignments[which]==-1)
     return;
-  memcpy (myVertices+(quadassignments[which]*4),vertices,4*sizeof(GFXVertex));
+  if (vertices)
+    memcpy (myVertices+(quadassignments[which]*4),vertices,4*sizeof(GFXVertex));
   if (isColor&&colors) {
     memcpy (myVertices+(quadassignments[which]*4),colors,4*sizeof(GFXColor));
   }

@@ -48,7 +48,7 @@ GFXVertexList::GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *ve
   Init (poly,numVertices, vertices, numlists, offsets);
 }
 */
-void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, GFXColor * colors, int numlists, int *offsets, bool Mutable, int tess) {
+void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor * colors, int numlists, int *offsets, bool Mutable, int tess) {
   mode = new GLenum [numlists];
   for (int pol=0;pol<numlists;pol++) {
     switch (poly[pol]) {
@@ -237,74 +237,68 @@ GFXBOOL GFXVertexList::Mutate (int offset, const GFXVertex *vlist, int number, c
   return GFXTRUE;
 } 
 
-
+void GFXVertexList::LoadDrawState() {
+#ifdef USE_DISPLAY_LISTS
+  if (display_list!=0) return;
+#endif
+    if (g_game.Multitexture){
+      if (myColors!=NULL) {
+	glEnableClientState(GL_COLOR_ARRAY);
+      }else {
+	glDisableClientState (GL_COLOR_ARRAY);
+      }
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_NORMAL_ARRAY);
+      glClientActiveTextureARB (GL_TEXTURE0_ARB);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glClientActiveTextureARB (GL_TEXTURE1_ARB);
+      /*
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      */
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      glClientActiveTextureARB (GL_TEXTURE0_ARB);
+    }else{ 
+      if (myColors!=NULL) {
+	glEnableClientState(GL_COLOR_ARRAY);
+      }else {
+	glDisableClientState (GL_COLOR_ARRAY);
+      }
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glEnableClientState(GL_VERTEX_ARRAY);
+      glEnableClientState(GL_NORMAL_ARRAY);
+    }
+}
 void GFXVertexList::Draw()
 {
   if (tessellation&&tesslist) {
     tesslist->Draw();
     return;
   }
-#ifdef STATS_QUEUE
-  //  statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
-#endif
 #ifdef USE_DISPLAY_LISTS
   if(display_list!=0) {
     GFXCallList(display_list);
   } else 
 #endif
     {
-    if (g_game.Multitexture){
       if (myColors!=NULL) {
-	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);
-      }else {
-	glDisableClientState (GL_COLOR_ARRAY);
       }
       glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
       glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glEnableClientState(GL_NORMAL_ARRAY);
-      
-      glClientActiveTextureARB (GL_TEXTURE0_ARB);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-      
-      glClientActiveTextureARB (GL_TEXTURE1_ARB);
-      
       /*
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
+	if (Multitexture) {
+	  glClientActiveTextureARB (GL_TEXTURE1_ARB);
+	  glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
+	}
       */
-      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
       int totoffset=0;
       for (int i=0;i<numlists;i++) {
 	glDrawArrays(mode[i], totoffset, offsets[i]);
 	totoffset += offsets[i];
       }
-    }else{ 
-      /*transfer vertex, texture coords, and normal pointer*/
-      //GLenum err;
-      if (myColors!=NULL) {
-	glEnableClientState(GL_COLOR_ARRAY);
-	glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0]);
-      }else {
-	glDisableClientState (GL_COLOR_ARRAY);
-      }
-      glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
-      glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-      glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
-      
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glEnableClientState(GL_NORMAL_ARRAY);
-      
-      int totoffset=0;
-      for (int i=0;i<numlists;i++) {
-	glDrawArrays(mode[i], totoffset, offsets[i]);
-	totoffset += offsets[i];
-      }
-      
-    }
     }
   if (myColors!=NULL) {
     GFXColor4f(1,1,1,1);

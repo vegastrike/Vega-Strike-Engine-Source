@@ -144,9 +144,10 @@ void Logo::ProcessDrawQueue() {
 	GFXSelectTexcoordSet(1, 1);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	//GFXBlendMode(ONE,ZERO);
-
+        DrawContext c = draw_queue->back();
+	c.vlist->LoadDrawState();
 	while(draw_queue->size()) {
-	  DrawContext c = draw_queue->back();
+	  c = draw_queue->back();
 	  draw_queue->pop_back();
 	  GFXLoadMatrix(MODEL, c.m);
 	  c.vlist->Draw();

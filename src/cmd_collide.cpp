@@ -72,11 +72,11 @@ public:
     float maxy= (ceil(Max.j*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
     float maxz= (ceil(Max.k*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
     int x,y,z;
-    for (float i=Min.i;i<maxx;i+=((float)1)/COLLIDETABLEACCURACY) {
+    for (float i=Min.i;i<=maxx;i+=((float)1)/COLLIDETABLEACCURACY) {
       x = hash_int (i);
-      for (float j=Min.j;j<maxy;j+=((float)1)/COLLIDETABLEACCURACY) {   
+      for (float j=Min.j;j<=maxy;j+=((float)1)/COLLIDETABLEACCURACY) {   
 	y = hash_int(j);
-	for (float k=Min.k;k<maxz;k+=((float)1)/COLLIDETABLEACCURACY) {
+	for (float k=Min.k;k<=maxz;k+=((float)1)/COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
 	  //	  table[i][j][k].push_back(target);
 	  for (unsigned int l=0;l<table[x][y][z].size();l++) {
@@ -103,15 +103,15 @@ public:
     float maxx= (ceil(target->Maxi.i*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
     float maxz= (ceil(target->Maxi.k*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
-    for (float i=target->Mini.i;i<maxx;i+=((float)1)/COLLIDETABLEACCURACY) {
+    for (float i=target->Mini.i;i<=maxx;i+=((float)1)/COLLIDETABLEACCURACY) {
       x = hash_int(i);
       if (x<minaccessx) minaccessx=x;
       if (x>maxaccessx) maxaccessx=x;
-      for (float j=target->Mini.j;j<maxy;j+=((float)1)/COLLIDETABLEACCURACY) {    
+      for (float j=target->Mini.j;j<=maxy;j+=((float)1)/COLLIDETABLEACCURACY) {    
 	y = hash_int(j);
 	if (y<minaccessy) minaccessy=y;
 	if (y>maxaccessy) maxaccessy=y;
-	for (float k=target->Mini.k;k<maxz;k+=((float)1)/COLLIDETABLEACCURACY) {
+	for (float k=target->Mini.k;k<=maxz;k+=((float)1)/COLLIDETABLEACCURACY) {
 	  z = hash_int(j);
 	  if (z<minaccessz) minaccessz=z;
 	  if (z>maxaccessz) maxaccessz=z;
@@ -233,6 +233,7 @@ bool Unit::Collide (Unit * target) {
 
 
 bool Beam::Collide (Unit * target) {
+  fprintf (stderr,"BEAM DELIVERS DAMAGE TO \n");//%s",target->name.c_str());
   if (target==owner) 
     return false;
   float distance = target->querySphere (center,direction,0);

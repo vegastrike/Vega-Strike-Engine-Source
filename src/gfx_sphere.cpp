@@ -150,6 +150,7 @@ void SphereMesh::ProcessDrawQueue() {
     GFXDisable(DEPTHTEST);
     GFXDisable(TEXTURE1);
   }	
+  vlist->LoadDrawState();
   static float theta=0;
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();

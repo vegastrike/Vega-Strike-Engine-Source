@@ -61,6 +61,8 @@ vegastrike_SOURCES =				\
 	gfx_click_list.cpp			\
 	gfx_coordinate_select.cpp		\
 	gfx_coordinate_select.h			\
+	gfx_halo.cpp				\
+	gfx_halo.h				\
 	gfx_hud.cpp				\
 	gfx_hud.h				\
 	gfx_lerp.cpp 				\
