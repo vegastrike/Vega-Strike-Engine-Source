@@ -332,6 +332,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   BLENDFUNC blendDst=ZERO;
   bool isdest=false;
   xml->cursun.k=0;	
+  static bool useAtmosphere = XMLSupport::parse_bool(vs_config->getVariable("graphics","usePlanetAtmosphere","true"));
+  static bool useFog = XMLSupport::parse_bool(vs_config->getVariable("graphics","usePlanetFog","true"));
+
   static float yearscale = XMLSupport::parse_float (vs_config->getVariable ("physics","YearScale","10"));
   static float dayscale = yearscale;//XMLSupport::parse_float (vs_config->getVariable ("physics","DayScale","10"));
   GFXMaterial ourmat;
@@ -519,6 +522,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
 
   case FOG:
+	  if (!useFog)
+		  break;
 	  xml->fogopticalillusion=true;
  	  xml->fog.clear();
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -531,6 +536,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  xml->unitlevel++;
 	  break;
   case FOGELEMENT:
+	  if (!useFog)
+		  break;
 	  xml->unitlevel++;
 
 	  
@@ -637,6 +644,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;    
   case ATMOSPHERE:
     {
+		if (!useAtmosphere)
+			break;
       std::string myfile("sol/earthcloudmaptrans.png");
       xml->unitlevel++;
       blendSrc=SRCALPHA;
@@ -1200,6 +1209,9 @@ using namespace StarXML;
   switch(elem) {
   case FOG:
   {
+	  static bool useFog = XMLSupport::parse_bool(vs_config->getVariable("graphics","usePlanetFog","true"));
+	  if (!useFog)
+		  break;
 	  xml->unitlevel--;
       Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel);  
       if (p!=NULL){
