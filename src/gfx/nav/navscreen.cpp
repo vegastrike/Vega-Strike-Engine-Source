@@ -127,7 +127,7 @@ void NavigationSystem::Setup()
 
 
 	buttonstates = 0;
-	whattodraw = 0;
+	whattodraw = (1|2);
 	currentselection = NULL;
 	factioncolours = new GFXColor[FactionUtil::GetNumFactions()];
 	unselectedalpha = 1.0;
