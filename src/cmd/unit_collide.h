@@ -257,7 +257,7 @@ public:
   }
 };
 
-const int tablehuge=10;
+const int tablehuge=27;
 const int coltableacc = 32768;
 const int coltablesize=20;
 class CollideTable {

@@ -75,6 +75,7 @@ void Unit::UpdateCollideQueue () {
     CollideInfo.object.u = this;
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
+	CollideInfo.type=LineCollide::UNIT;
     AddCollideQueue (CollideInfo,activeStarSystem);
   } else {
     CollideInfo.Mini= Puffmin;
