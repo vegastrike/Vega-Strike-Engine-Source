@@ -1088,6 +1088,12 @@ TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 CPPFLAGS="$saved_CPPFLAGS" 
 
 
+dnl --------------------------------------------------------------------------
+dnl Check for network communication system
+dnl --------------------------------------------------------------------------
+NETCOMM="0"
+AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-netcomm], [Enable hazardous network communications (Webcam and VOIP)]), [NETCOMM="1"; TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM "; echo "Network communication system enabled"])
+
 
 dnl --------------------------------------------------------------------------
 dnl Other options
@@ -1123,6 +1129,7 @@ fi
 AC_SUBST([BOOST_LIBS])
 AC_SUBST([BOOST_CPPFLAGS])
 AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST129" = "0")
+AM_CONDITIONAL(NETCOMM, test "$NETCOMM" = "1")
 
 CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 CFLAGS="$CFLAGS $TR_CFLAGS  -pipe "
