@@ -398,7 +398,8 @@ int main(int argc, char **argv) {
 #endif
 	Mix_HookMusicFinished(&music_finished); 
 #else
-#ifndef SONG_MUTEX
+#if SONG_MUTEX
+#else
 	Mix_Music *music=NULL;
 #endif
 #endif
