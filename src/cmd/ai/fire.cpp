@@ -60,7 +60,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       su->Target (un);
       su->TargetTurret(un);
       if (un) {
-	fprintf (stderr,"turret %s targetting %s",parent->name.c_str(),un->name.c_str());
+	//	fprintf (stderr,"turret %s targetting %s",parent->name.c_str(),un->name.c_str());
       }
     }
   }
