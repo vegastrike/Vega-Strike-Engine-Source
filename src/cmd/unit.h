@@ -33,7 +33,6 @@ struct GFXColor;
 #include "unit_generic.h"
 using std::string;
 #include "gfxlib.h"
-#include "mount.h"
 
 struct CargoColor {
   Cargo cargo;

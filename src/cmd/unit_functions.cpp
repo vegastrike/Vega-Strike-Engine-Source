@@ -14,7 +14,7 @@
 #include "audiolib.h"
 #include "collide/rapcol.h"
 #include "unit_collide.h"
-#include "mount.h"
+
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
