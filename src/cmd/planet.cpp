@@ -145,7 +145,7 @@ string getCargoUnitName (const char * textname) {
     tmp[i]='\0';
   }
   string retval(tmp);
-  free(tmp);
+  free(tmp2);
   return retval;
 }
 
