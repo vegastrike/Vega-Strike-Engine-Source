@@ -472,6 +472,35 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
+    else if(cmd=="getFgName"){
+      if(mode==SCRIPT_RUN){
+	string fgname;
+	Flightgroup *fg=my_unit->getFlightgroup();
+	if(fg){
+	  fgname=fg->name;
+	}
+	if(fgname.empty()){
+	  fgname="-none-";
+	}
+
+	varInst *str_vi=call_string_new(node,mode,fgname);
+	viret=str_vi;
+      }
+      else{
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_OBJECT;
+	viret->objectname="string";
+      }
+    }
+    else if(cmd=="getFgSubnumber"){
+      int num=0;
+      if(mode==SCRIPT_RUN){
+	num=my_unit->getFgSubnumber();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_INT;
+      viret->int_val=num;
+    }
     else if(cmd=="getFgId" || cmd=="getFgID"){
       if(mode==SCRIPT_RUN){
 	
