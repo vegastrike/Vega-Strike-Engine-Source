@@ -7,6 +7,7 @@
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
+#include <algorithm>
 using Orders::FireAt;
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
@@ -58,14 +59,14 @@ struct RangeSortedTurrets {
 struct TurretBin{
   float maxrange;
   vector <RangeSortedTurrets> turret;
-  vector <TargetAndRange> listOfTargets;  
+  vector <TargetAndRange> listOfTargets[2];//we have the over (and eq) 16 crowd and the under 16  
   bool operator < (const TurretBin & o) const{
     return (maxrange>o.maxrange);
   }
   void AssignTargets(const TargetAndRange &finalChoice) {
     //go through modularly assigning as you go;
     int count=0;
-    const unsigned int lotsize = listOfTargets.size();
+    const unsigned int lotsize[2]={listOfTargets[0].size(),listOfTargets[1].size()};
     for (vector<RangeSortedTurrets>::iterator uniter=turret.begin();uniter!=turret.end();++uniter) {
       bool foundfinal=false;
       uniter->tur->Target(NULL);
@@ -78,19 +79,25 @@ struct TurretBin{
 	}
       }
       if (!foundfinal) {
-	for (unsigned int i=0;i<lotsize;i++) {
-	  const int index =(count+i)%lotsize;
-	  if (listOfTargets[index].range<uniter->gunrange) {
-	    uniter->tur->Target(listOfTargets[index].t);
-	    uniter->tur->TargetTurret(listOfTargets[index].t);
+	for (char f=0;f<2;f++) {
+	for (unsigned int i=0;i<lotsize[f];i++) {
+	  const int index =(count+i)%lotsize[f];
+	  if (listOfTargets[f][index].range<uniter->gunrange) {
+	    uniter->tur->Target(listOfTargets[f][index].t);
+	    uniter->tur->TargetTurret(listOfTargets[f][index].t);
 	    count++;
 	    break;
 	  }
+	}
 	}
       }
     }
   }
 };
+void FireAt::getAverageGunSpeed (float & speed, float & range) const{
+  speed =gunspeed;
+  range= gunrange;
+}
 void FireAt::ChooseTargets (int numtargs, bool force) {
   parent->getAverageGunSpeed (gunspeed,gunrange);  
 
@@ -112,7 +119,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       tbin.push_back (TurretBin());
     }
     float gspeed, grange;
-    parent->getAverageGunSpeed (gspeed,grange);  //FIXME Slow as a pig in mud
+    su->getAIState()->getAverageGunSpeed (gspeed,grange);  //FIXME Slow as a pig in mud
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
     }
@@ -120,6 +127,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   }
   std::sort (tbin.begin(),tbin.end());
   while ((un = iter.current())) {
+    if (un->CloakVisible()<=.8)
+      continue;//sanity check
     float rangetotarget = UnitUtil::getDistance (parent,un);
     float relationship = GetEffectiveRelationship (un);
     float tmp=Priority (parent,un, gunrange,rangetotarget, relationship);
@@ -130,9 +139,12 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       if (rangetotarget>k->maxrange) {
 	break;
       }
-      if (relationship<0&&ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()]<31 ){
-	k->listOfTargets.push_back (TargetAndRange (un,rangetotarget,relationship));
-      }    
+      const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
+      if (relationship<0&&tprior<16){
+	k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
+      }else if (tprior<31){
+	k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+      }
     }
     iter.advance();
   }
@@ -220,7 +232,23 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
     }
     return istargetjumpableplanet;
 }
-
+void FireAt::PossiblySwitchTarget(bool istargetjumpableplanet ) {
+  static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
+  if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM) {
+    bool switcht=true;
+    Flightgroup * fg = parent->getFlightgroup();;
+    if (fg) {
+      if (!fg->directive.empty()) {
+	if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
+	  switcht=false;
+	}
+      }
+    }
+    if (switcht) {
+      ChooseTarget();
+    }
+  }
+}
 void FireAt::Execute () {
   bool missilelock=false;
   bool tmp = done;
@@ -252,9 +280,9 @@ void FireAt::Execute () {
   bool shouldfire=false;
   //  if (targets) 
   //    shouldfire |=DealWithMultipleTargets();
-
+  bool istargetjumpableplanet=false;
   if ((targ = parent->Target())) {
-    bool istargetjumpableplanet = isJumpablePlanet (targ);
+    istargetjumpableplanet = isJumpablePlanet (targ);
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
       if (parent->GetNumMounts()>0) {
 	if (!istargetjumpableplanet)
@@ -263,24 +291,9 @@ void FireAt::Execute () {
     }else {
       ChooseTarget();
     }
-    static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
-    if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM) {
-      bool switcht=true;
-      Flightgroup * fg = parent->getFlightgroup();;
-      if (fg) {
-	if (!fg->directive.empty()) {
-	  if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
-	    switcht=false;
-	  }
-	}
-      }
-      if (switcht) {
-	ChooseTarget();
-      }
-    }
-  } else {
-    ChooseTarget();
   }
+  PossiblySwitchTarget(istargetjumpableplanet);
+
   if (parent->GetNumMounts ()>0) {
     FireWeapons (shouldfire,missilelock);
   }

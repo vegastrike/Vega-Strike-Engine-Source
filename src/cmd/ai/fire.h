@@ -26,7 +26,8 @@ public:
   virtual void ChooseTarget () {
     ChooseTargets (1,true);
   }
-
+  void PossiblySwitchTarget(bool istargetjumpableplanet);
+  virtual void getAverageGunSpeed (float & speed, float & range) const;
   void AddReplaceLastOrder (bool replace);
   void ExecuteLastScriptFor(float time);
   void FaceTarget (bool end);
@@ -42,6 +43,7 @@ public:
   void FaceDirection (float distToMatchFacing, bool finish);
   void XMLScript (string script);
   void LastPythonScript();
+
   virtual void SetParent (Unit * parent) {
 	  CommunicatingAI::SetParent (parent);
   }

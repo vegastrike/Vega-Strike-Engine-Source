@@ -14,6 +14,7 @@
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
 #include "lin_time.h"
+#include "faction_generic.h"
 using namespace Orders;
 
 void DoSpeech (Unit * un, const string &speech) {
@@ -73,10 +74,23 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
   if (target !=NULL) {
     AttachOrder (target);
   }
-  AIEvents::LoadAI (filename,logic);
-  AIEvents::LoadAI (interruptname,interrupts);
+  last_directive = filename+string("|")+interruptname;
+  //  AIEvents::LoadAI (filename,logic,"neutral");
+  //  AIEvents::LoadAI (interruptname,interrupt,"neutral");
 }
-
+void AggressiveAI::SetParent (Unit * parent1) {
+  FireAt::SetParent(parent1);
+  int which = last_directive.find("|");
+  string filename (string("default.agg.xml"));
+  string interruptname (string("default.int.xml"));
+  if (which!=string::npos) {
+    filename = last_directive.substr (0,which);
+    interruptname = last_directive.substr(which+1);
+  }
+  last_directive="b";//prevent escort race condition
+  AIEvents::LoadAI (filename.c_str(),logic,FactionUtil::GetFaction(parent1->faction));
+  AIEvents::LoadAI (interruptname.c_str(),interrupts,FactionUtil::GetFaction(parent1->faction));
+}
 bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   
   if (item.script.length()!=0) {

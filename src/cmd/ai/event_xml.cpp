@@ -98,7 +98,7 @@ namespace AIEvents {
     ((ElemAttrMap *)userData)->level--;    
     
   }  
-  void LoadAI(const char * filename, ElemAttrMap &result) {//returns obedience
+  void LoadAI(const char * filename, ElemAttrMap &result, const string &faction) {//returns obedience
     const int chunk_size = 16384;
     string full_filename;
     result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
@@ -106,8 +106,12 @@ namespace AIEvents {
 								      "obedience",
 								      ".99"));
     result.curtime=result.maxtime=10/SIMULATION_ATOM;
-    full_filename = string("ai/events/") + filename;
+    full_filename = string("ai/events/") + faction+string("/")+filename;
     FILE * inFile = fopen (full_filename.c_str(), "r");
+    if (!inFile) {
+      full_filename = string("ai/events/") + filename;
+      inFile = fopen (full_filename.c_str(), "r");
+    }
     if(!inFile) {
       printf("ai file %s not found\n",filename);
       assert(0);

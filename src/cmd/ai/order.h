@@ -96,7 +96,7 @@ class Order {
   /// this function calls the destructor (needs to be overridden for python;
 
  public:
-
+  virtual void getAverageGunSpeed (float & speed, float & range) const;
   virtual float GetEffectiveRelationship (const Unit * target) const;
   ///clears the messasges of this order
   void ClearMessages();

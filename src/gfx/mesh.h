@@ -326,6 +326,7 @@ protected:
 public:
   Mesh();
   Mesh(const Mesh &m);
+  virtual int MeshType() {return 0;}
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
   Mesh( const char *filename, const float scale,int faction,class Flightgroup * fg, bool orig=false);
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted

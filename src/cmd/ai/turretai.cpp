@@ -8,7 +8,9 @@ TurretAI::TurretAI ():FaceTarget (false) {
   type|=WEAPON;
   range=-1;
 }
-
+void TurretAI::getAverageGunSpeed (float &speed, float & range) const {
+  speed=this->speed;range=this->range;
+}
 extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missileprob);
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
@@ -18,7 +20,6 @@ void TurretAI::Execute () {
     FaceTarget::Execute();
     if (parent->GetNumMounts()>0) {
       if (range==-1) {
-		float speed;
         parent->getAverageGunSpeed (speed, range);
       }
       Vector R (parent->GetTransformation().getR());

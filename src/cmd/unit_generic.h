@@ -231,7 +231,7 @@ public:
   ///number of meshes (each with separate texture) this unit has
 
   std::vector <Mesh *> meshdata;
-  unsigned char combatRole() {return combat_role;}
+  unsigned char combatRole() const {return combat_role;}
 protected:
   unsigned char combat_role;
   Nebula * nebula;

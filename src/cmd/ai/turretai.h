@@ -4,9 +4,11 @@
 namespace Orders {
 class TurretAI :public FaceTarget {
   float range;
+  float speed;
  public:
   TurretAI();
   virtual void Execute ();
+  virtual void getAverageGunSpeed (float &speed, float & range) const;
 };
 }
 #endif

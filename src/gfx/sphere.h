@@ -16,6 +16,7 @@ class SphereMesh : public Mesh {
   void InitSphere (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP);
  public:
   SphereMesh () :Mesh(){}
+  virtual int MeshType() {return 1;}
   SphereMesh(float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI, FILTER mipmap=MIPMAP){
     InitSphere (radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,mipmap);
   }

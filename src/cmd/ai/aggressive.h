@@ -19,6 +19,7 @@ protected:
   void ReCommandWing(Flightgroup* fg);
   bool ProcessCurrentFgDirective(Flightgroup *fg);
 public:
+  virtual void SetParent(Unit *parent1);
   enum types {AGGAI, MOVEMENT, FACING, UNKNOWN, DISTANCE, METERDISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL, RANDOMIZ};
   AggressiveAI (const char *file, const char * interruptename, Unit * target=NULL);
   void Execute ();
