@@ -1411,6 +1411,12 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
   QVector start (Position());
   QVector end (RealPosition(target));
   float totallength = (start-end).Magnitude();
+  bool nanspace=false;
+  if (!FINITE(totallength)) {
+    nanspace=true;
+    start=QVector(100000000,100000000,10000000000000);
+    float totallength = (start-end).Magnitude();  
+  }
   float totpercent=1;
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
@@ -1426,7 +1432,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
   }
   bool ok=true;
   static bool teleport_autopilot= XMLSupport::parse_bool(vs_config->getVariable("physics","teleport_autopilot","true"));
-  if (!teleport_autopilot) {
+  if ((!teleport_autopilot)&&(!nanspace)) {
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
     for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
       static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
@@ -1452,6 +1458,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
     if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
       sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
     }
+
     static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","auto_turn_towards","true"));
     if (auto_turn_towards) {
       Vector methem(RealPosition(target).Cast()-sep.Cast());
