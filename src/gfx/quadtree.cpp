@@ -20,6 +20,7 @@
 unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
+std::vector <unsigned int> *quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 
 
@@ -762,9 +763,8 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 float	VertexArray[9 * 3];
 unsigned int	ColorArray[9];
 unsigned char	VertList[24];
-int	TriCount = 0;
 	
-
+/*DEPRECATED!!!
 
 static void	InitVert(int index, float x, float y, float z)
 // Initializes the indexed vertex of VertexArray[] with the
@@ -775,13 +775,13 @@ static void	InitVert(int index, float x, float y, float z)
 	VertexArray[i+1] = y;
 	VertexArray[i+2] = z;
 }
-
+*/
 
 int	quadsquare::Render(const quadcornerdata& cd)
 // Draws the heightfield represented by this tree.
 // Returns the number of triangles rendered.
 {
-	TriCount = 0;
+
 
 	// Do some initial setup, then do all the work in RenderAux().
 //	gl....();
@@ -821,7 +821,7 @@ int	quadsquare::Render(const quadcornerdata& cd)
 
 	glPopMatrix();
 
-	return TriCount;
+	return indices->size();;
 }
 
 
@@ -829,9 +829,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 // Does the work of rendering this square.  Uses the enabled vertices only.
 // Recurses as necessary.
 {
-	int	half = 1 << cd.Level;
-	int	whole = 2 << cd.Level;
-	
+	unsigned int	whole = 2 << cd.Level;	
 	// If this square is outside the frustum, then don't render it.
 	if (vis != GFX_TOTALLY_VISIBLE) {
 		Vector	min, max;
@@ -867,6 +865,10 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 	if (flags == 0) return;
 
 	// Init vertex data.
+	/* DEPRECATED!!!!!!!!!!!!
+	int	half = 1 << cd.Level;
+
+
 	InitVert(0, cd.xorg + half, Vertex[0].Y, cd.zorg + half);
 	InitVert(1, cd.xorg + whole, Vertex[1].Y, cd.zorg + half);
 	InitVert(2, cd.xorg + whole, cd.Verts[0].Y, cd.zorg);
@@ -876,39 +878,58 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 	InitVert(6, cd.xorg, cd.Verts[2].Y, cd.zorg + whole);
 	InitVert(7, cd.xorg + half, Vertex[4].Y, cd.zorg + whole);
 	InitVert(8, cd.xorg + whole, cd.Verts[3].Y, cd.zorg + whole);
-
 	int	vcount = 0;
+	*/
+
 	
 // Local macro to make the triangle logic shorter & hopefully clearer.
-#define tri(a,b,c) ( VertList[vcount++] = a, VertList[vcount++] = b, VertList[vcount++] = c )
-
+#define tri(aa,bb,cc) (indices->push_back (aa), indices->push_back (bb), indices->push_back (cc))
+#define V0 (Vertex[0].vertindex)
+#define V1 (Vertex[1].vertindex)
+#define V2 (cd.Verts[0].vertindex)
+#define V3 (Vertex[2].vertindex)
+#define V4 (cd.Verts[1].vertindex)
+#define V5 (Vertex[3].vertindex)
+#define V6 (cd.Verts[2].vertindex)
+#define V7 (Vertex[4].vertindex)
+#define V8 (cd.Verts[3].vertindex)
+	
 	// Make the list of triangles to draw.
-	if ((EnabledFlags & 1) == 0) tri(0, 8, 2);
+	if ((EnabledFlags & 1) == 0) tri(V0, V8, V2);
 	else {
-		if (flags & 8) tri(0, 8, 1);
-		if (flags & 1) tri(0, 1, 2);
+		if (flags & 8) tri(V0, V8, V1);
+		if (flags & 1) tri(V0, V1, V2);
 	}
-	if ((EnabledFlags & 2) == 0) tri(0, 2, 4);
+	if ((EnabledFlags & 2) == 0) tri(V0, V2, V4);
 	else {
-		if (flags & 1) tri(0, 2, 3);
-		if (flags & 2) tri(0, 3, 4);
+		if (flags & 1) tri(V0, V2, V3);
+		if (flags & 2) tri(V0, V3, V4);
 	}
-	if ((EnabledFlags & 4) == 0) tri(0, 4, 6);
+	if ((EnabledFlags & 4) == 0) tri(V0, V4, V6);
 	else {
-		if (flags & 2) tri(0, 4, 5);
-		if (flags & 4) tri(0, 5, 6);
+		if (flags & 2) tri(V0, V4, V5);
+		if (flags & 4) tri(V0, V5, V6);
 	}
-	if ((EnabledFlags & 8) == 0) tri(0, 6, 8);
+	if ((EnabledFlags & 8) == 0) tri(V0, V6, V8);
 	else {
-		if (flags & 4) tri(0, 6, 7);
-		if (flags & 8) tri(0, 7, 8);
+		if (flags & 4) tri(V0, V6, V7);
+		if (flags & 8) tri(V0, V7, V8);
 	}
-
+#undef V1
+#undef V2
+#undef V3
+#undef V4
+#undef V5
+#undef V6
+#undef V7
+#undef V8
+#undef tri
 	// Draw 'em.
-	glDrawElements(GL_TRIANGLES, vcount, GL_UNSIGNED_BYTE, VertList);
+	//	glDrawElements(GL_TRIANGLES, vcount, GL_UNSIGNED_BYTE, VertList);
 
 	// Count 'em.
-	TriCount += vcount / 3;
+	//	TriCount += vcount / 3;
+
 }
 
 
@@ -982,11 +1003,12 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 		break;
 	}	
 }
-void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert) {
+void quadsquare::SetCurrentTerrain (std::vector <unsigned int> *glind, unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert ) {
   quadsquare::VertexAllocated = VertexAllocated;
   quadsquare::VertexCount = VertexCount;
   quadsquare::vertices = vertices;
   quadsquare::unusedvertices = unvert;
+  quadsquare::indices = glind;
 }
 
 void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)

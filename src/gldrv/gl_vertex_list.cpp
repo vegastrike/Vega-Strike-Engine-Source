@@ -236,7 +236,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
     changed&=(~CHANGE_CHANGE);
   }
   if (newvertexsize) {
-    numVertex = newvertexsize;
+    numVertices = newvertexsize;
   }
 }
 
