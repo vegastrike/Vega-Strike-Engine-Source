@@ -96,12 +96,8 @@ const float timek = .01;
 bool _Slew = true;
 static void Slew (KBSTATE newState){
 	
-	if (newState==PRESS)
-	{
-		
-		
+	if (newState==PRESS) {
 		_Slew = !_Slew;
-
 	}
 	else if (newState==RELEASE)
 	  ;
@@ -184,6 +180,7 @@ static void RollLeft(KBSTATE newState) {
 	else if(Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
 		//a=0;
+		//Stop();
 	}
 }
 
@@ -200,7 +197,7 @@ static void RollRight(KBSTATE newState) {
 	}
 	else if(Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
-		
+		//Stop();
 	}
 }
 
@@ -215,7 +212,7 @@ static void SlideForward(KBSTATE newState) {
 	}
 	else if(Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce (-R,timek);
-	
+		//Stop();
 	}
 }
 
@@ -229,7 +226,7 @@ static void SlideBackward(KBSTATE newState) {
 	}
 	else if(Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce (R,timek);
-		
+		//Stop();
 	}
 }
 
@@ -240,10 +237,12 @@ static void SlideUp(KBSTATE newState) {
 		Q = _GFX->AccessCamera()->Q;
 		_GFX->AccessCamera()->myPhysics.ApplyForce(Q,timek);
 		//a=1;
+		//Stop();
 	}
 	else if(Slew&&newState==RELEASE){
 		_GFX->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
 		//a=0;
+		//Stop();
 	}
 }
 
@@ -257,7 +256,7 @@ static void SlideDown(KBSTATE newState) {
 	}
 	else if(Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(Q, timek);
-	
+		//Stop();
 	}
 }
 
@@ -271,7 +270,7 @@ static void SlideLeft(KBSTATE newState) {
 	}
 	else if(Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(P,timek);
-		
+		//Stop();
 	}
 }
 
@@ -302,31 +301,25 @@ static void Stop (KBSTATE newState) {
 }
 static void Quit(KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
-		quit = TRUE;
+		exit(0);
 	}
 }
 
 void InitializeInput() {
-	BindKey('`', Slew);
-	BindKey(GLUT_KEY_HOME,Stop);
+	BindKey(GLUT_KEY_F3, Slew);
+	BindKey('-',Stop);
 	BindKey(GLUT_KEY_UP, PitchDown);
 	BindKey(GLUT_KEY_DOWN, PitchUp);
 	BindKey(GLUT_KEY_LEFT, YawLeft);
 	BindKey(GLUT_KEY_RIGHT, YawRight);
-	BindKey('q', RollLeft);
-	BindKey('/', RollLeft);
-	BindKey('w', RollRight);
-	BindKey('*', RollRight);
-	BindKey('+', SlideForward);
-	BindKey('-', SlideBackward);
-	BindKey('a', SlideForward);
-	BindKey('z', SlideBackward);
-	BindKey('s', SlideUp);
-	BindKey('x', SlideDown);
-	BindKey(GLUT_KEY_PAGE_UP, SlideUp);
-	BindKey(GLUT_KEY_PAGE_DOWN, SlideDown);
-	BindKey(GLUT_KEY_INSERT, SlideLeft);
-	BindKey(GLUT_KEY_END, SlideRight);
+	BindKey(GLUT_KEY_F11, RollLeft);
+	BindKey(GLUT_KEY_F12, RollRight);
+	BindKey(GLUT_KEY_PAGE_DOWN, SlideForward);
+	//BindKey(GLUT_KEY_HOME, SlideBackward);
+	BindKey(GLUT_KEY_END, SlideUp);
+	BindKey(GLUT_KEY_INSERT, SlideDown);
+	BindKey(GLUT_KEY_HOME, SlideLeft);
+	BindKey(GLUT_KEY_PAGE_UP, SlideRight);
 	BindKey(GLUT_KEY_F1, Quit);
 }
 Unit *carrier=NULL;

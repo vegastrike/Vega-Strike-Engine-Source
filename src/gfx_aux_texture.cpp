@@ -54,7 +54,8 @@ typedef struct {
         DWORD   bfOffBits;
 } BITMAPFILEHEADER;
 
-
+const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD);
+const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
 
 typedef struct {
         BYTE    rgbBlue;
@@ -103,10 +104,10 @@ Texture::Texture(char * FileName, int stage)
 		data = NULL;
 		return;
 	}
-	fseek (fp,sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD),SEEK_SET);
+	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	//long temp;
 	BITMAPINFOHEADER info;
-	fread(&info, sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD),1,fp);
+	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	sizeX = info.biWidth;
 	int i;
 	
@@ -196,10 +197,10 @@ Texture::Texture (char * FileNameRGB, char *FileNameA, int stage)
 		data = NULL;
 		return;
 	}
-	fseek (fp,sizeof(BITMAPFILEHEADER),SEEK_SET);
+	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	//long temp;
 	BITMAPINFOHEADER info;
-	fread(&info, sizeof(BITMAPINFOHEADER),1,fp);
+	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	sizeX = info.biWidth;
 	sizeY = info.biHeight;
 	BITMAPINFOHEADER info1;
@@ -223,9 +224,9 @@ Texture::Texture (char * FileNameRGB, char *FileNameA, int stage)
 		}
 		else
 		{
-			fseek (fp1,sizeof(BITMAPFILEHEADER),SEEK_SET);
+			fseek (fp1,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 			
-			fread (&info1,sizeof (BITMAPINFOHEADER),1,fp1);
+			fread (&info1,SIZEOF_BITMAPINFOHEADER,1,fp1);
 			if (sizeX != (unsigned int) info1.biWidth||sizeY!=(unsigned int)info1.biHeight)
 			{
 				data = NULL;

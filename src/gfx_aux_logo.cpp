@@ -100,9 +100,9 @@ void Logo::Draw()
 {
 	if (!numlogos)
 		return;
-	GFXEnable(TEXTURE0);
-	GFXDisable(TEXTURE1);
-	Decal->MakeActive();
+		GFXEnable(TEXTURE0);
+		GFXDisable(TEXTURE1);
+		Decal->MakeActive();
 	GFXSelectTexcoordSet(0, 0);
 	GFXSelectTexcoordSet(1, 1);
 	for (int i=0; i<numlogos; i++)

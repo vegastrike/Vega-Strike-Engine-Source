@@ -53,8 +53,8 @@
 #define HAVE_UNISTD_H 1
 
 /* Name of package */
-#define PACKAGE "tuxracer"
+#define PACKAGE "vegastrike"
 
 /* Version number of package */
-#define VERSION "0.60.3"
+#define VERSION "0.0.1"
 
