@@ -24,7 +24,7 @@
 #include <assert.h>	// needed for assert() calls
 #include "savegame.h"
 #include "animation.h"
-
+#include "mesh.h"
 
 extern float rand01();
 #define SWITCH_CONST .9
@@ -500,6 +500,7 @@ void Cockpit::DrawGauges(Unit * un) {
   GFXColor4f (1,1,1,1);
 }
 void Cockpit::Init (const char * file) {
+  shakin=0;
   autopilot_time=0;
   if (strlen(file)==0) {
     Init ("disabled-cockpit.cpt");
@@ -541,6 +542,10 @@ void Cockpit::Delete () {
     delete text;
     text = NULL;
   }
+  if (mesh) {
+    delete mesh;
+    mesh = NULL;
+  }
   viewport_offset=cockpit_offset=0;
   for (i=0;i<4;i++) {
     if (Pit[i]) {
@@ -579,11 +584,20 @@ void Cockpit::RestoreGodliness() {
     godliness=maxgodliness;
 }
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","20"));
+  int i;
+  for (i=0;i<headlag;i++) {
+    headtrans.push_back (MyMat());
+    Identity(headtrans.back().m);
+  }
+  mesh=NULL;
   ejecting=false;
   currentcamera = 0;	
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   RestoreGodliness();
-  int i;
+
+
+  
   for (i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
@@ -671,7 +685,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
   bool pointingtonw=false;
 
-  for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+  for (int i=0;i<_Universe->numPlayers();i++) {
     if (i!=_Universe->CurrentCockpit()) {
       if (_Universe->AccessCockpit(i)->GetParent()==ol)
 	pointingtool=true;
@@ -713,7 +727,10 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 }
 
 extern void reset_time_compression(int i, KBSTATE a);
-
+void Cockpit::Shake (float amt) {
+  static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake",".01"));
+  shakin=amt*shak;
+}
 
 static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXColor &col) {
 	GFXColorf(col);
@@ -752,6 +769,42 @@ void Cockpit::Draw() {
   DrawTargetBox();
   if(draw_all_boxes){
     DrawTargetBoxes();
+  }
+  if (view<CP_CHASE) {
+    if (mesh) {
+      Unit * par=GetParent();
+      if (par) {
+	Matrix mat;
+      
+	GFXLoadIdentity(MODEL);
+
+	GFXDisable (DEPTHTEST);
+	GFXDisable(DEPTHWRITE);
+	GFXEnable (TEXTURE0);
+	GFXEnable (LIGHTING);
+	Vector P,Q,R;
+	AccessCamera(CP_FRONT)->GetPQR (P,Q,R);
+
+	headtrans.push_back (MyMat());
+	VectorAndPositionToMatrix(headtrans.back().m,P,Q,R,Vector(0,0,0));
+	static float theta=0;
+	theta+=.1*GetElapsedTime();
+	
+	headtrans.front().m[12]=shakin*cos(theta);//AccessCamera()->GetPosition().i+shakin*cos(theta);
+	headtrans.front().m[13]=shakin*cos(1.2*theta);//AccessCamera()->GetPosition().j+shakin*cos(theta);
+	headtrans.front().m[14]=0;//AccessCamera()->GetPosition().k;
+	if (shakin<.1) {
+	  shakin=0;
+	}else{
+	  shakin*=.999;
+	}
+
+	mesh->DrawNow(1,true,headtrans.front().m);
+	headtrans.pop_front();
+	GFXDisable (LIGHTING);
+	GFXDisable( TEXTURE0);
+      }
+    }
   }
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);

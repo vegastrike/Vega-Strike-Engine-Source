@@ -38,6 +38,12 @@ private:
   UnitContainer parentturret; 
   int unitfaction;
   ///4 views f/r/l/b
+  struct MyMat {
+    float m[16];
+  };
+  float shakin;
+  std::list <MyMat> headtrans;
+  class Mesh * mesh;
   Sprite *Pit [4];
   Sprite *Radar;
   ///Video Display Units (may need more than 2 in future)
@@ -100,6 +106,7 @@ private:
   float cockpit_time;
   bool ejecting;
  public:
+  void Shake (float amt);
   float godliness;
   void Autopilot (Unit * target);
   void RestoreGodliness();

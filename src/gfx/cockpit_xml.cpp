@@ -4,6 +4,7 @@
 #include <float.h>
 #include "hud.h"
 #include "vdu.h"
+#include "mesh.h"
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
@@ -14,6 +15,7 @@ namespace CockpitXML {
     enum Names {
       UNKNOWN,
       COCKPIT,
+      MESH,
       CROSSHAIRS,
       RADAR,
       LVDU,
@@ -93,6 +95,7 @@ namespace CockpitXML {
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
+    EnumMap::Pair ("mesh", MESH),
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("font", MYFONT),
     EnumMap::Pair ("front", FRONT),
@@ -179,6 +182,9 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       case XFILE:
 	Pit[0]= new Sprite ((*iter).value.c_str(),NEAREST);
+	break;
+      case MESH:
+	mesh = new Mesh ((*iter).value.c_str(),1,0,NULL,false);
 	break;
       case FRONT:
       case BACK:
