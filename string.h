@@ -21,9 +21,9 @@ class string : public vector <char> {
   const static unsigned int npos=-1;
   allocstr (const char *str, const unsigned int len) {
     for (int i=0;i<len;i++) {
-      push_back(str[i]);
+      vector<char>::push_back(str[i]);
     }
-    push_back('\0');
+    vector<char>::push_back('\0');
   }
   reallocstr (coonst char *str, const unsigned int len) {
     this->clear();
@@ -44,7 +44,7 @@ class string : public vector <char> {
     reallocstr(str,strlen(str));
   }
   string () {
-    push_back('\0');
+    vector<char>::push_back('\0');
   }
   string (const string &str) {
     reallocstr(str.c_str(),str.size());
@@ -53,6 +53,9 @@ class string : public vector <char> {
   }
   const char *c_str() const {
     return &(*this->begin());
+  }
+  const char *data () const {
+    return c_str();
   }
   string &operator= (const char *str) {
     reallocstr(str,strlen(str));
@@ -173,6 +176,96 @@ class string : public vector <char> {
     const basic_string <char> strstr (this.c_str());
     return strstr.find_last_not_of(c,pos);
   }
-};
+  /*
+  void swap (string &s) {
+    string oldthis (*this);
+    (*this)=s;
+    s=oldthis;
+  }
+  */
+  void push_back (char c) {
+    vector<char>::at(vector<char>::size()-1)=c;
+    vector<char>::push_back('\0');
+  }
+  int compare (const string& oth) const {
+    return strcmp(c_str(), s.c_str());
+  }
+};  
+
+inline bool
+operator< (const string& lhs,
+	    const string& rhs)
+{
+  return (lhs.compare (rhs) < 0);
 }
-    
+
+inline bool
+operator< (const char* lhs, const string& rhs)
+{
+  return (rhs.compare (lhs) > 0);
+}
+
+inline bool
+operator< (const string& lhs, const char* rhs)
+{
+  return (lhs.compare (rhs) < 0);
+}
+
+inline bool
+operator> (const char* lhs, const string& rhs)
+{
+  return (rhs.compare (lhs) < 0);
+}
+
+inline bool
+operator> (const string& lhs, const char* rhs)
+{
+  return (lhs.compare (rhs) > 0);
+}
+
+inline bool
+operator<= (const char* lhs, const string& rhs)
+{
+  return (rhs.compare (lhs) >= 0);
+}
+
+inline bool
+operator<= (const string& lhs, const char* rhs)
+{
+  return (lhs.compare (rhs) <= 0);
+}
+
+inline bool
+operator>= (const char* lhs, const string& rhs)
+{
+  return (rhs.compare (lhs) <= 0);
+}
+
+inline bool
+operator>= (const string& lhs, const char* rhs)
+{
+  return (lhs.compare (rhs) >= 0);
+}
+
+inline bool
+operator> (const string& lhs,
+	   const string& rhs)
+{
+  return (lhs.compare (rhs) > 0);
+}
+
+inline bool
+operator<= (const string& lhs,
+	    const string& rhs)
+{
+  return (lhs.compare (rhs) <= 0);
+}
+
+inline bool
+operator>= (const string& lhs,
+	    const string& rhs)
+{
+  return (lhs.compare (rhs) >= 0);
+}
+
+}
