@@ -351,6 +351,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     image->unitwriter->AddTag ("Cargo");
     image->unitwriter->AddElement ("mass",Unit::cargoSerializer,XMLType ((int)0));
+    image->unitwriter->EndTag ("Cargo");
     break;
   case CARGO:
     ///handling taken care of above;
