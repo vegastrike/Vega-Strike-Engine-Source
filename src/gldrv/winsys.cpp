@@ -29,7 +29,6 @@
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 
-
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 /* SDL version */
@@ -225,6 +224,7 @@ static void setup_sdl_video_mode()
   \date    Created:  2000-10-19
   \date    Modified: 2000-10-19
 */
+
 void winsys_init( int *argc, char **argv, char *window_title, 
 		  char *icon_title )
 {
@@ -240,8 +240,13 @@ void winsys_init( int *argc, char **argv, char *window_title,
 	fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
 	exit(1);
     }
-
-
+#if 1
+	{
+	SDL_Surface *tempsurf=SDL_LoadBMP(icon_title);
+	int ret=SDL_SetColorKey(tempsurf,SDL_SRCCOLORKEY,((Uint32*)(tempsurf->pixels))[0]);
+	SDL_WM_SetIcon(tempsurf,0);
+	}
+#endif
     /* 
      * Init video 
      */
