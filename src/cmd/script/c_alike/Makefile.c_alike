@@ -1,0 +1,11 @@
+all:
+	bison -dv -o c_alike.tab.cpp c_alike.yacc
+	flex -olex.yy.cpp -d c_alike.lex 
+
+	gcc -c -o c_alike.o c_alike.tab.cpp
+	gcc -c -o lex.yy.o lex.yy.cpp
+	gcc -o test c_alike.o lex.yy.o
+
+
+
+
