@@ -86,9 +86,9 @@ class NetworkCommunication
 		~NetworkCommunication();
 
 		int		InitSession( float frequency);
-		void	SendImage( SOCKETALT & send_sock);
-		void	SendSound( SOCKETALT & send_sock);
-		void	SendMessage( SOCKETALT & send_sock, string message);
+		//void	SendImage( SOCKETALT & send_sock);
+		void	SendSound( SOCKETALT & send_sock, ObjSerial serial);
+		void	SendMessage( SOCKETALT & send_sock, ObjSerial serial, string message);
 		int		DestroySession();
 
 		void	AddToSession( ClientPtr clt);
@@ -96,6 +96,9 @@ class NetworkCommunication
 
 		bool	IsActive()	{ return active;}
 		char *	GetWebcamCapture();
+
+		char	HasWebcam();
+		char	HasPortaudio();
 };
 
 #endif

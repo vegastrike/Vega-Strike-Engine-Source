@@ -1318,6 +1318,8 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		{
 			float freq = netbuf.getFloat();
 			clt->comm_freq = freq;
+			clt->webcam = netbuf.getChar();
+			clt->portaudio = netbuf.getChar();
 			// Broadcast players with same frequency that there is a new one listening to it
 			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
@@ -1326,6 +1328,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		break;
 		case CMD_STOPNETCOMM :
 		{
+			clt->comm_freq = -1;
 			// float freq = netbuf.getFloat();
 			// Broadcast players with same frequency that this client is leaving the comm session
 			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
@@ -1333,7 +1336,20 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			zonemgr->broadcast( clt->zone, packet_serial, &p2);
 		}
 		break;
+		case CMD_SOUNDSAMPLE :
+		{
+			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
+			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1341));
+			zonemgr->broadcastSample( clt->zone, packet_serial, &p2, clt->comm_freq);
 
+		}
+		case CMD_TXTMESSAGE :
+		{
+			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
+			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1341));
+			zonemgr->broadcastText( clt->zone, packet_serial, &p2, clt->comm_freq);
+
+		}
 
 		/***************** NOT USED ANYMORE *******************/
 		// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???

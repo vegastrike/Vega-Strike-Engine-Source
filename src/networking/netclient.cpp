@@ -592,7 +592,7 @@ int NetClient::checkMsg( Packet* outpacket )
 	if( NetComm->IsActive())
 	{
 		// Here also send samples
-		NetComm->SendSound( this->clt_sock);
+		NetComm->SendSound( this->clt_sock, this->serial);
 	}
 #endif
 	
@@ -1059,14 +1059,24 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_STARTNETCOMM :
 #ifdef NETCOMM
 			{
-				ClientPtr clt;
-				// Check this is not us
-				if( packet_serial != this->serial)
+				float freq = netbuf.getFloat();
+				if( freq == current_freq)
 				{
-					// Add the client to netcomm list in NetComm ?
-					clt = Clients.get(packet_serial);
-					NetComm->AddToSession( clt);
+					char webc = netbuf.getChar();
+					char pa = netbuf.getChar();
+					ClientPtr clt;
+					// Check this is not us
+					if( packet_serial != this->serial)
+					{
+						// Add the client to netcomm list in NetComm ?
+						clt = Clients.get(packet_serial);
+						clt->webcam = webc;
+						clt->portaudio = pa;
+						NetComm->AddToSession( clt);
+					}
 				}
+				else
+					cerr<<"WARNING : Received a STARTCOMM from another frequency"<<endl;
 			}
 #endif
 			break;
@@ -1599,9 +1609,13 @@ bool	NetClient::jumpRequest( string newsystem)
 void	NetClient::startCommunication()
 {
 #ifdef NETCOMM
+	char webcam_support = NetComm->HasWebcam();
+	char portaudio_support = NetComm->HasPortaudio();
 	selected_freq = current_freq;
 	NetBuffer netbuf;
 	netbuf.addFloat( selected_freq);
+	netbuf.addChar( webcam_support);
+	netbuf.addChar( portaudio_support);
 	NetComm->InitSession( selected_freq);
 	//cerr<<"Session started."<<endl;
 	//cerr<<"Grabbing an image"<<endl;
@@ -1653,7 +1667,7 @@ void	NetClient::sendTextMessage( string message)
 #ifdef NETCOMM
 	// Only send if netcomm is active and we are connected on a frequency
 	if( NetComm->IsActive())
-		NetComm->SendMessage( this->clt_sock, message);
+		NetComm->SendMessage( this->clt_sock, this->serial, message);
 #endif
 }
 

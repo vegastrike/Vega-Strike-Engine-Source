@@ -1,5 +1,6 @@
 #ifdef NETCOMM
 
+#include "netbuffer.h"
 #include <config.h>
 
 #include "vsnet_dloadmgr.h"
@@ -16,6 +17,7 @@ extern bool cleanexit;
 
 #include "gldrv/winsys.h"
 #include "networkcomm.h"
+#include "packet.h"
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
@@ -163,6 +165,26 @@ NetworkCommunication::NetworkCommunication()
 #endif /* NETCOMM_NOWEBCAM */
 }
 
+char	NetworkCommunication::HasWebcam()
+{
+#ifndef NETCOMM_NOWEBCAM
+	if( this->Webcam)
+		return 1;
+	return 0;
+#else
+	return 0;
+#endif
+}
+
+char	NetworkCommunication::HasPortaudio()
+{
+#ifdef NETCOMM_PORTAUDIO
+	return 1;
+#else
+	return 0;
+#endif
+}
+
 NetworkCommunication::NetworkCommunication( int nb)
 {
 	NetworkCommunication::NetworkCommunication();
@@ -192,21 +214,32 @@ void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 /**** Send text message                                                             ****/
 /**** Broadcast string function param as a text message to the current frequency    ****/
 /***************************************************************************************/
-void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
+void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial, string message)
 {
+	Packet p;
 	// If max log size is reached we remove the oldest message
 	if( this->message_history.size()==this->max_messages)
 		this->message_history.pop_front();
 	this->message_history.push_back( message);
 
 	// Send the text message according to the chosen method
+	NetBuffer netbuf;
+	netbuf.addString( message);
 	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+		p.send( CMD_TXTMESSAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, send_sock,
+    	        __FILE__, PSEUDO__LINE__(229) );
 	}
 	else if( method==ClientBroadcast)
 	{
 		// SEND STRING PARAMETER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
+		CltPtrIterator it;
+		for( it = commClients.begin(); it!=commClients.end(); it++)
+		{
+			p.send( CMD_TXTMESSAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, (*it)->sock,
+						__FILE__, PSEUDO__LINE__(244) );
+		}
 	}
 }
 
@@ -214,19 +247,18 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
 /**** Send sound sample in PortAudio mode                                           ****/
 /**** Send audio_inbuffer over the network according to the chosen method           ****/
 /***************************************************************************************/
-void	NetworkCommunication::SendSound( SOCKETALT & send_sock)
+void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 {
 #ifdef USE_PORTAUDIO
+	Netbuffer netbuf( this->audio_inbuffer, this->audio_inlength);
+	Packet p;
 	if( method==ServerUnicast)
 	{
 		// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 
 		Packet p;
 		// We don't need that to be reliable in UDP mode
-		// Serial is not necessary since it is just sound to be played... or it could at least be used to test that the serial
-		// is known on the other side someday...
-		Netbuffer netbuf( this->audio_inbuffer, this->audio_inlength);
-		p.send( CMD_SOUNDSAMPLE, 0 /*clt->serial*/, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, send_sock,
+		p.send( CMD_SOUNDSAMPLE, serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, sock,
     	        __FILE__, PSEUDO__LINE__(229) );
 	}
 	else if( method==ClientBroadcast)
@@ -237,9 +269,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & send_sock)
 		{
 			if( (*it)->portaudio)
 			{
-				Packet p;
-				Netbuffer netbuf( this->audio_inbuffer, this->audio_inlength);
-				p.send( CMD_SOUNDSAMPLE, 0 /*clt->serial*/, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, (*it)->sock,
+				p.send( CMD_SOUNDSAMPLE, serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
 			}
 		}
@@ -253,6 +283,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & send_sock)
 /**** Send a webcam capture                                                         ****/
 /**** Send jpeg_buffer over the network according to the chosen method              ****/
 /***************************************************************************************/
+/*
 void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 {
 	string jpeg_str( "");
@@ -272,8 +303,9 @@ void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 	{
 		// SEND GRABBED IMAGE TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
 	}
-#endif /* NETCOMM_NOWEBCAM */
+#endif
 }
+*/
 
 int		NetworkCommunication::InitSession( float frequency)
 {

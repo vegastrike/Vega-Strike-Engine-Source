@@ -19,13 +19,15 @@ int		NetworkCommunication::InitSession( float freq)
 	return 0;
 }
 
+/*
 void	NetworkCommunication::SendImage( SOCKETALT & socket)
 {
 }
-void	NetworkCommunication::SendSound( SOCKETALT & socket)
+*/
+void	NetworkCommunication::SendSound( SOCKETALT & socket, ObjSerial serial)
 {
 }
-void	NetworkCommunication::SendMessage( SOCKETALT & socket, string message)
+void	NetworkCommunication::SendMessage( SOCKETALT & socket, ObjSerial serial, string message)
 {
 }
 
@@ -41,6 +43,14 @@ NetworkCommunication::~NetworkCommunication()
 char *	NetworkCommunication::GetWebcamCapture()
 {
 	return NULL;
+}
+
+char	NetworkCommunication::HasWebcam()
+{
+}
+
+char	NetworkCommunication::HasPortaudio()
+{
 }
 
 #endif

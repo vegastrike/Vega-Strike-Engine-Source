@@ -264,11 +264,11 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 }
 
 /************************************************************************************************/
-/**** broadcastCamshot : broadcast webcamshot to players in the zone and on the same frequency  *****/
+/**** broadcastSample : broadcast sound sample to players in the zone and on same frequency *****/
 /************************************************************************************************/
 
 // Broadcast a packet to a zone clients with its serial as argument
-void	ZoneMgr::broadcastCamshot( int zone, ObjSerial serial, Packet * pckt )
+void	ZoneMgr::broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency )
 {
     // COUT<<"Sending update to "<<(zone_list[clt->zone]->size()-1)<<" clients"<<endl;
     ClientWeakList* lst = zone_list[zone];
@@ -282,10 +282,11 @@ void	ZoneMgr::broadcastCamshot( int zone, ObjSerial serial, Packet * pckt )
         ClientPtr clt( *i );
 		un = clt->game_unit.GetUnit();
 		// Broadcast to all clients excluding the one who did a request and
-		// excluding those who are listening on a different frequency
-		if( clt->ingame && un->GetSerial() != serial )
+		// excluding those who are listening on a different frequency, those who aren't communicating
+		// and those who don't have PortAudio support
+		if( clt->ingame && clt->comm_freq!=-1 && clt->portaudio && clt->comm_freq==frequency && un->GetSerial() != serial )
 		{
-			COUT<<"Sending update to client n° "<<clt->game_unit.GetUnit()->GetSerial();
+			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
 			pckt->setNetwork( &clt->cltadr, clt->sock);
 			pckt->bc_send( );
@@ -293,6 +294,36 @@ void	ZoneMgr::broadcastCamshot( int zone, ObjSerial serial, Packet * pckt )
 	}
 }
 
+/************************************************************************************************/
+/**** broadcastText : broadcast a text message to players in the zone and on same frequency *****/
+/************************************************************************************************/
+
+// Broadcast a packet to a zone clients with its serial as argument
+void	ZoneMgr::broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency )
+{
+    // COUT<<"Sending update to "<<(zone_list[clt->zone]->size()-1)<<" clients"<<endl;
+    ClientWeakList* lst = zone_list[zone];
+	Unit * un;
+    if( lst == NULL ) return;
+
+	for( CWLI i=lst->begin(); i!=lst->end(); i++)
+	{
+        if( (*i).expired() ) continue;
+
+        ClientPtr clt( *i );
+		un = clt->game_unit.GetUnit();
+		// Broadcast to all clients excluding the one who did a request and
+		// excluding those who are listening on a different frequency, those who aren't communicating
+		// and those who don't have PortAudio support
+		if( clt->ingame && clt->comm_freq!=-1 && un->GetSerial() != serial )
+		{
+			COUT<<"Sending sound sample to client n° "<<clt->game_unit.GetUnit()->GetSerial();
+			COUT<<endl;
+			pckt->setNetwork( &clt->cltadr, clt->sock);
+			pckt->bc_send( );
+		}
+	}
+}
 
 /************************************************************************************************/
 /**** broadcastSnapshots                                                                    *****/
