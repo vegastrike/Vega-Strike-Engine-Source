@@ -487,10 +487,10 @@ void FireKeyboard::Execute () {
   }
   if (f().ejectcargo==PRESS) {
     int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
-    if (offset<1) {
+    if (offset<3) {
       offset=0;
     }else {
-      offset-=1;
+      offset-=3;
     }
     parent->EjectCargo(offset);
     f().ejectcargo=DOWN;
