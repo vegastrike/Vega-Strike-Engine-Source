@@ -11,7 +11,7 @@ class Sprite;
 class Gauge;
 class Unit;
 #include "vdu.h"
-
+#include "in_kb.h"
 
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
@@ -26,11 +26,15 @@ class Cockpit {
   float maxfuel, maxhull;
   ///this is the parent that Cockpit will read data from
   UnitContainer parent; 
+  UnitContainer parentturret; 
+  int unitfaction;
   ///4 views f/r/l/b
   Sprite *Pit [4];
   Sprite *Radar;
   ///Video Display Units (may need more than 2 in future)
   std::vector <VDU *> vdu;
+  std::string unitfilename;
+  Vector unitlocation;
   ///Color of cockpit default text
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color
@@ -92,7 +96,7 @@ class Cockpit {
   ///Loads cockpit info...just as constructor
   void Init (const char * file);
   ///Sets owner of this cockpit
-  void SetParent(Unit * unit);
+  void SetParent(Unit * unit, const char * filename, const Vector &startloc);
   Unit * GetParent () {return parent.GetUnit();}
   ///Draws Cockpit then restores viewport
   void Draw();
@@ -105,5 +109,8 @@ class Cockpit {
   void ScrollVDU (int vdunum, int howmuch);
   void ScrollAllVDU (int howmuch);
   void SelectProperCamera ();
+  static void Respawn (int,KBSTATE);
+  static void SwitchControl (int,KBSTATE);
+  static void TurretControl (int, KBSTATE);
 };
 #endif

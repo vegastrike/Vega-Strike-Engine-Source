@@ -15,7 +15,9 @@
 #include "lin_time.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
-#include "cmd/ai/flykeyboard.h"
+#include "cmd/ai/flyjoystick.h"
+#include "cmd/ai/firekeyboard.h"
+#include "cmd/ai/aggressive.h"
 #include <assert.h>	// needed for assert() calls
 
 
@@ -425,9 +427,12 @@ void Cockpit::Init (const char * file) {
   }
 }
 
-void Cockpit::SetParent (Unit * unit) {
+void Cockpit::SetParent (Unit * unit, const char * filename, const Vector & pos) {
   parent.SetUnit (unit);
+  unitlocation=pos;
+  this->unitfilename=std::string(filename);
   if (unit) {
+    this->unitfaction = unit->faction;
     unit->ArmorData (StartArmor);
     if (StartArmor[0]==0) StartArmor[0]=1;
     if (StartArmor[1]==0) StartArmor[1]=1;
@@ -508,8 +513,42 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
 void Cockpit::SelectProperCamera () {
     _Universe->activeStarSystem()->SelectCamera(view);
 }
-int cachunki=0;
-int cachunkj=0;
+static int respawnunit=0;
+static int switchunit=0;
+static int turretcontrol=0;
+void Cockpit::SwitchControl (int,KBSTATE k) {
+  if (k==PRESS) {
+    switchunit=1;
+  }
+
+}
+void Cockpit::TurretControl (int,KBSTATE k) {
+  if (k==PRESS) {
+    turretcontrol=1;
+  }
+
+}
+void Cockpit::Respawn (int,KBSTATE k) {
+  if (k==PRESS) {
+    respawnunit=1;
+  }
+
+}
+
+void SwitchUnits (Unit * ol, Unit * nw) {
+  if (ol) {
+    ol->PrimeOrders();
+    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
+    ol->SetVisible (true);
+  }
+  if (nw) {
+    nw->PrimeOrders();
+    nw->EnqueueAI (new FireKeyboard (0,""));
+    nw->EnqueueAI (new FlyByJoystick (0,"player1.kbconf"));
+  }
+}
+
+
 extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Draw() { 
   GFXDisable (TEXTURE1);
@@ -586,20 +625,81 @@ void Cockpit::Draw() {
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
-/*	un_iter ui= _Universe->activeStarSystem()->getUnitList();
-	Unit * un;
-	while ((un=ui.current()) {
-		if (un->faction==this->faction) {
-			this->SetParent(un);
-			//un->SetAI(new FireKeyboard ())
-			un->EnqueueAI(new FireKeyboard (0,""));
-			un->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
-
-			break;
-		}
-		++ui;
-	}*/
+	if (respawnunit){
+	  respawnunit=0;
+	  Unit * un = new Unit (unitfilename.c_str(),true,false,this->unitfaction,NULL,0);
+	  un->SetCurPosition (unitlocation);
+	  _Universe->activeStarSystem()->AddUnit (un);
+	  this->SetParent(un,unitfilename.c_str(),unitlocation);
+	  //un->SetAI(new FireKeyboard ())
+	  SwitchUnits (NULL,un);
+	}
   }
+  if (turretcontrol) {
+    turretcontrol=0;
+    Unit * par = GetParent();
+    if (par) {
+      static int index=0;
+      int i=0;bool tmp=false;bool tmpgot=false;
+      if (parentturret.GetUnit()==NULL) {
+	tmpgot=true;
+	un_iter ui= par->getSubUnits();
+	Unit * un;
+	while ((un=ui.current())) {
+	  if (i++==index) {
+	    tmp=true;
+	    index++;
+
+	    SwitchUnits(par,un);
+	    parentturret.SetUnit(par);
+	    un_iter uj= un->getSubUnits();
+	    Unit * tur;
+	    while ((tur=uj.current())) {
+	      SwitchUnits (NULL,tur);
+	      this->SetParent(tur,this->unitfilename.c_str(),unitlocation);
+	      ++uj;
+	    }
+	  }
+	  ++ui;
+	}
+      }
+      if (tmp==false) {
+	if (tmpgot) index=0;
+	Unit * un = parentturret.GetUnit();
+	if (un) {
+	  
+	  SetParent (un,unitfilename.c_str(),unitlocation);
+	  SwitchUnits (NULL,un);
+	  parentturret.SetUnit(NULL);
+	}
+      }
+    }
+  }
+  if (switchunit) {
+    static int index=0;
+    switchunit=0;
+    un_iter ui= _Universe->activeStarSystem()->getUnitList()->createIterator();
+    Unit * un;
+    bool found=false;
+    int i=0;
+    while ((un=ui.current())) {
+      if (un->faction==this->unitfaction) {
+	
+	if ((i++)>=index&&(un!=GetParent())) {
+	  found=true;
+	  Unit * k=GetParent(); 
+	  SwitchUnits (k,un);
+	  this->SetParent(un,this->unitfilename.c_str(),unitlocation);
+	  //un->SetAI(new FireKeyboard ())
+	  break;
+	}
+      }
+      ++ui;
+    }
+    if (!found)
+      index=0;
+  }
+  
   GFXHudMode (false);
 
 }

@@ -780,10 +780,10 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 }
 void Unit::PrimeOrders () {
   if (aistate) {
-    aistate->ReplaceOrder (new Order);
-  } else {
-    aistate = new Order; //get 'er ready for enqueueing
+    delete aistate;
   }
+  aistate = new Order; //get 'er ready for enqueueing
+  aistate->SetParent (this);
 }
 
 

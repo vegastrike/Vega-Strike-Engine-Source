@@ -38,7 +38,7 @@
 #include "audiolib.h"
 #include "in_joystick.h"
 #include "main_loop.h" // for CockpitKeys
-
+#include "gfx/cockpit.h"
 
 //#include "vs_globals.h"
 //#include "vegastrike.h"
@@ -184,6 +184,10 @@ void VegaConfig::initCommandMap(){
   command_map["VolumeInc"]=incvol;
   command_map["VolumeDec"]=decvol;
 #endif
+  command_map["SwitchControl"]=Cockpit::SwitchControl;
+  command_map["Respawn"]=Cockpit::Respawn;
+  command_map["TurretControl"]=Cockpit::TurretControl;
+
   command_map["TimeInc"]=inc_time_compression;
   command_map["TimeDec"]=dec_time_compression;
   command_map["TimeReset"]=reset_time_compression;

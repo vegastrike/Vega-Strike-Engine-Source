@@ -431,7 +431,7 @@ void createObjects() {
   GFXEnable(TEXTURE1);
 
   map<string,int> targetmap;
-  
+  std::string fighter0name;
   char fightername [1024]="hornet.xunit";
   int a=0;
 
@@ -498,6 +498,8 @@ void createObjects() {
 
 	//	  cout << "before unit" << endl;
 	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
+	  if (a==0)
+	    fighter0name=string(fightername);
 	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg,s);
 	}else {
 	  if (fg_terrain==-2) {
@@ -581,9 +583,9 @@ void createObjects() {
   Inside(0,PRESS);//set up hornet cockpti
   //  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
 #ifdef IPILOTTURRET
-  _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0));
+  _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0),fighter0name.c_str(),fighters[0]->LocalPosition());
 #else
-  _Universe->AccessCockpit()->SetParent(fighters[0]);
+  _Universe->AccessCockpit()->SetParent(fighters[0],fighter0name.c_str(),fighters[0]->LocalPosition());
   fighters[0]->SetTurretAI ();
 #endif
 
