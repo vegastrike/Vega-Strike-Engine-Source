@@ -16,11 +16,12 @@ GFXBOOL GFXLIGHTING=GFXFALSE;
 class gfx_light: public GFXLight {
  public:
   gfx_light():GFXLight(){}
+  GFXLight operator =(const GFXLight &tmp);
   int lightNum();
   bool LocalLight() {return (options&GFX_LOCAL_LIGHT)!=0;}
   bool enabled () {return (options&GFX_LIGHT_ENABLED)!=0;}
   int& Target () {return target;}
-  void Create (const GFXLight &, bool global);//if global, puts it into GLlights (if space ||enabled) <clobber?>
+  bool Create (const GFXLight &, bool global);//if global, puts it into GLlights (if space ||enabled) <clobber?>
   //for local lights, if enabled, call Enable().
   void Kill (); // Disables it (may remove from table), trashes it from GLlights. sets target to -2 (dead)  
 

@@ -258,7 +258,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateLight (int &light, const GFXLight &templatecopy, 
     _llights->push_back (gfx_light());
   }
   
-  (*_llights)[light].Create(templatecopy,global);
+  return (*_llights)[light].Create(templatecopy,global);
 }
 
 void /*GFXDRVAPI*/ GFXDeleteLight (int light) {
@@ -278,15 +278,21 @@ static int findLocalClobberable() {
 }
 static int findGlobalClobberable () {//searches through the GLlights and sees which one is clobberable.  Returns -1 if not.
   int clobberdisabled =-1;
-  if ((clobberdisabled=findLocalClobberable())!=-1) {
-    return clobberdisabled;
-  }
+  int clobberlocal=-1;
   for (int i=0;i<GFX_MAX_LIGHTS;i++) {
-    if (GLLights[i].options&OpenGLLights::GLL_LOCAL) {
-      return i;
-    }
+      if (GLLights[i].index==-1) {
+	  return i;
+      }
+      if (GLLights[i].options&OpenGLLights::GLL_LOCAL) {
+	  clobberlocal = i;
+      }
+      if (!(GLLights[i].options&OpenGLLights::GLL_ON)) {
+	  if (clobberlocal==i||clobberdisabled==-1) {
+	      clobberdisabled = i;
+	  }
+      }
   }
-  return -1;
+  return (clobberdisabled==-1)?clobberlocal:clobberdisabled;
 }
 
 
@@ -320,12 +326,27 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET lt, const GFXColo
   
   return GFXTRUE;
 }
-
-void gfx_light::Create (const GFXLight & temp, bool global) {
-
+GFXLight gfx_light::operator = (const GFXLight &tmp) {
+    memcpy (this,&tmp,sizeof (GFXLight));
+    return tmp;
+}
+bool gfx_light::Create (const GFXLight & temp, bool global) {
+    int foundclobberable=0;
+    *this = temp;
+    if (!global) {
+	options |=GFX_LOCAL_LIGHT;
+    } else {
+	options &=(~GFX_LOCAL_LIGHT);
+	foundclobberable = findGlobalClobberable ();
+	if (foundclobberable!=-1) {
+	    ClobberGLLight (foundclobberable);
+	}
+    }
+    return foundclobberable!=-1;
 }
 void gfx_light::Kill() {
-
+    Disable();//first disables it...which may remove it from the light table.
+    
 }
 void gfx_light::ClobberGLLight (const int target) {
 
