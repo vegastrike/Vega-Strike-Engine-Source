@@ -89,9 +89,12 @@ float FlyByKeyboard::reduce_axis (float v) {
   }
   return v;
 }
-FlyByKeyboard::~FlyByKeyboard() {
+void FlyByKeyboard::Destroy() {
   if (autopilot)
-    delete autopilot;
+    autopilot->Destroy();
+  Order::Destroy();
+}
+FlyByKeyboard::~FlyByKeyboard() {
 }
 void FlyByKeyboard::KeyboardUp (float v) {
   if (v==0) {
@@ -267,7 +270,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   }
   if (SSCK.autopilot||SSCK.terminateauto) {
     if (autopilot) {
-      delete autopilot;
+      autopilot->Destroy();
       autopilot=NULL;
     }
     SSCK.autopilot=false;

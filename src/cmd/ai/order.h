@@ -42,7 +42,11 @@
 //#define ORDERDEBUG
 
 class Order {
-protected:
+ private:
+
+ protected:
+  virtual ~Order ();
+  friend class PythonAI;//docu said this was neceessary
   ///The unit this order is attached to
   Unit * parent;
   ///The bit code (from ORDERTYPES) that this order is (for parallel execution)
@@ -61,7 +65,11 @@ protected:
   std::list<class CommunicationMessage *>messagequeue;
   ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
   virtual void AdjustRelationTo (Unit * un, float factor);
-public:
+  virtual void Destructor();
+ protected:
+  /// this function calls the destructor (needs to be overridden for python;
+
+ public:
 
   virtual float GetEffectiveRelationship (const Unit * target) const;
   ///clears the messasges of this order
@@ -73,8 +81,9 @@ public:
   Order (): targetlocation(0,0,0){parent = NULL;type=0;subtype=0,done=false; actionstring=""; }
   ///The constructor that specifies what order dependencies this order has
   Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;type = ttype;done=false; actionstring=""; }
-  ///The virutal destructor
-  virtual ~Order ();
+  ///The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling delete on this
+  virtual void Destroy();
+
   ///The function that gets called and executes all queued suborders 
   virtual void Execute();
   ///returns a pointer to the first order that may be bitwised ored with that type
@@ -132,18 +141,28 @@ public:
 };
 ///Executes another order for a number of seconds
 class ExecuteFor:  public Order {
+
+ private:
+
   ///The child order to execute
   Order * child;
   ///the time it has executed the child order for
   float time;
   ///the total time it can execute child order
   float maxtime;
+ protected:
+  virtual ~ExecuteFor () {}
  public:
+
   ExecuteFor (Order * chld, float seconds): Order(chld->getType(),chld->getSubType()),child(chld),time(0),maxtime(seconds) {}
   ///Executes child order and then any suborders that may be pertinant
   void Execute ();
   ///Removes this order
-  ~ExecuteFor () {delete child;}
+  virtual void Destroy () {
+    child->Destroy();
+    Order::Destroy();
+  }
+
 };
 
 #endif

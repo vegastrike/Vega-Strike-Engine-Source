@@ -38,7 +38,7 @@ void Order::Execute () {
       completed|=(suborders[i])->getType();
       if ((suborders[i])->Done()) {
 	vector<Order*>::iterator ord = suborders.begin()+i;
-	delete (*ord);
+	(*ord)->Destroy();
 	ord =suborders.erase(ord);
 	i--;
       } 
@@ -67,7 +67,7 @@ Order * Order::queryType (unsigned int type) {
 void Order::eraseType (unsigned int type) {
   for (unsigned int i=0;i<suborders.size();i++) {
     if ((suborders[i]->type&type)==type) {
-      delete suborders[i];
+      suborders[i]->Destroy();
       vector <Order *>::iterator j= suborders.begin()+i;
       suborders.erase(j);
       i--;
@@ -103,7 +103,7 @@ Order* Order::ReplaceOrder (Order *ord) {
   vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
     if ((ord->getType()&(*ordd)->getType()&(ALLTYPES))){
-      	delete (*ordd);
+      	(*ordd)->Destroy();
 	ordd =suborders.erase(ordd);
     } else {
       ordd++;
@@ -172,6 +172,12 @@ Order* Order::findOrder(Order *ord){
   return NULL;
 }
 Order::~Order () {
+
+}
+void Order::Destructor () {
+  delete this;
+}
+void Order::Destroy() {
   unsigned int i;
   for (i=0;i<suborders.size();i++) {
     if(suborders[i]==NULL){
@@ -179,7 +185,7 @@ Order::~Order () {
       printf("this order: %s\n",getOrderDescription().c_str());
     }
     else{
-      delete suborders[i];
+      suborders[i]->Destroy();
     }
   }
   {for (list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {
@@ -187,6 +193,7 @@ Order::~Order () {
   }}
   messagequeue.clear();
   suborders.clear();
+  this->Destructor();
 }
 void Order::ClearMessages() {
   unsigned int i;
@@ -208,7 +215,7 @@ void Order::eraseOrder(Order *ord){
 
   for (unsigned int i=0;i<suborders.size() && found==false;i++) {
     if (suborders[i]==ord){
-      delete suborders[i];
+      suborders[i]->Destroy();
       vector <Order *>::iterator j= suborders.begin()+i;
       suborders.erase(j);
       found=true;

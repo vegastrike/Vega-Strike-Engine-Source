@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libai.a
 
-INCLUDES = -I ../../
+INCLUDES = -I ../../ -I../../boost/
 
 libai_a_SOURCES =	\
 	comm_ai.h	\
@@ -33,6 +33,8 @@ libai_a_SOURCES =	\
 	flybywire.cpp	\
 	input_dfa.h	\
 	tactics.h	\
+	pythonai.cpp	\
+	pythonai.h	\
 	tactics.cpp	\
 	script.cpp	\
 	missionscript.cpp	\

@@ -979,7 +979,8 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 }
 void Unit::PrimeOrders () {
   if (aistate) {
-    delete aistate;
+    aistate->Destroy();
+    aistate=NULL;
   }
   aistate = new Order; //get 'er ready for enqueueing
   aistate->SetParent (this);
@@ -1017,7 +1018,7 @@ void Unit::SetTurretAI () {
     Unit * un;
     while (NULL!=(un=iter.current())) {
       if (un->aistate) {
-	delete un->aistate;
+	un->aistate->Destroy();
       }
       un->aistate = (new Orders::TurretAI());
       un->aistate->SetParent (un);
@@ -1031,7 +1032,7 @@ void Unit::DisableTurretAI () {
   Unit * un;
   while (NULL!=(un=iter.current())) {
     if (un->aistate) {
-      delete un->aistate;
+      un->aistate->Destroy();
     }
     un->aistate = new Order; //get 'er ready for enqueueing
     un->aistate->SetParent (un);

@@ -5,7 +5,10 @@
 
 
 class CommunicatingAI:public Order{
+
   typedef std::map<const Unit*,float> relationmap;
+ protected:
+  friend class PythonAI;//docu said this is necessary
   unsigned char sex;//male female robot???
   float anger;//how easily he will target you if you taunt him enough (-.00001 is always -.4 is often -.6 is normal
   float appease;//how easily he will switch from you if you silence his will to kill (-.5)

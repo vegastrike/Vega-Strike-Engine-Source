@@ -6,6 +6,8 @@ INCLUDES = -I ../ -I../boost  -I/usr/include/python2.2
 
 libpython_a_SOURCES =				\
 	init.cpp \
-	init.h
+	init.h	\
+	python_compile.h	\
+	python_compile.cpp
 
 

@@ -183,11 +183,12 @@ int main( int argc, char *argv[] )
     if (mission_name[0]=='\0')
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
-#ifdef HAVE_BOOST
+
 #ifdef HAVE_PYTHON
     Python::init();
 #endif
-#endif
+
+    
 
 #if defined(HAVE_SDL)
     // && defined(HAVE_SDL_MIXER)

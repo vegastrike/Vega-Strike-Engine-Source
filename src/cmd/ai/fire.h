@@ -6,7 +6,7 @@
 namespace Orders {
 
 class FireAt: public CommunicatingAI {
-
+  friend class PythonAI;//docu said this was neceessary
 
   bool ShouldFire(Unit * targ,bool &missilelock);
 protected:

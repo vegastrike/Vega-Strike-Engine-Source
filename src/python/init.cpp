@@ -1,4 +1,4 @@
-#ifdef HAVE_BOOST
+
 #ifdef HAVE_PYTHON
 #include <stdio.h>
 #include <Python.h>
@@ -9,13 +9,13 @@
 #include "vs_path.h"
 #include <strstream>
 #include "init.h"
-
+#include "python_compile.h"
      class hello {
 		 std::string country;
       public:
          hello(const std::string& country) { this->country = country; }
          virtual std::string greet() const { return "Hello from " + country; }
-         virtual ~hello(){} // Good practice 
+         virtual ~hello(){fprintf (stderr,"NO HELLO %d",this);} // Good practice 
      };
 	 struct hello_callback : hello
      {
@@ -30,7 +30,7 @@
          // Override greet to call back into Python
          std::string greet() const // 4
              { return boost::python::callback<std::string>::call_method(self, "greet"); }
-
+             virtual ~hello_callback () {fprintf (stderr,"NO CALLBAC %d",this);}
          // Supplies the default implementation of greet
          static std::string default_greet(const hello& self_) //const // 5
              { return self_.hello::greet(); }
@@ -162,7 +162,7 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 
 */
 	boost::python::class_builder<MyFA> FA(vs, "CommAI");
-	FA.def(MyFA::Execute,"Execute");
+	FA.def(&MyFA::Execute,"Execute");
 	FA.def(boost::python::constructor<>());
 	boost::python::class_builder<PythonIOString >
 		IO(vs, "IO");
@@ -224,7 +224,14 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		fclose(fp1);
 	}
 #endif
-	PyRun_SimpleString(
+	//	PyObject * po= CompilePython ("simple_test.py");
+	//	PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
+	//	PyObject * res = PyEval_CallObject(po, arglist);
+	//	Py_DECREF(arglist);
+	//	Py_XDECREF(res);
+
+
+	/*	PyRun_SimpleString(
 	   "import VS\n"
 	   "import sys\n"
 	   "sys.stderr.write('asdf')\n"
@@ -242,6 +249,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 	   "print hi1.Execute()\n"
 	   "print hi2.Execute()\n"
 	);
+	*/
 //	char buffer[128];
 //	PythonIOString::buffer << endl << '\0';
 //	vs_config->setVariable("data","test","NULL");
@@ -252,4 +260,4 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 }
 
 #endif
-#endif
+

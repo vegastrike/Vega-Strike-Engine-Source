@@ -8,11 +8,13 @@
 
 //#define BASE_MAKER
 
-class Texture;
+
 
 class Base {
-	struct Room {
-		struct Link {
+	class Room {
+	public:
+		class Link {
+		public:
 			float x,y,wid,hei;
 			std::string text;
 		        virtual void Click (::Base* base,float x, float y, int button, int state);
@@ -22,7 +24,8 @@ class Base {
 			virtual void EndXML(FILE *fp);
 #endif
 		};
-		struct Goto : public Link {
+		class Goto : public Link {
+		public:
 			int index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 		        virtual ~Goto () {}
@@ -30,7 +33,8 @@ class Base {
 			virtual void EndXML(FILE *fp);
 #endif
 		};
-		struct Comp : public Link {
+		class Comp : public Link {
+		public:
 			vector <UpgradingInfo::BaseMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 		        virtual ~Comp () {}
@@ -38,14 +42,16 @@ class Base {
 			virtual void EndXML(FILE *fp);
 #endif
 		};
-		struct Launch : public Link {
+		class Launch : public Link {
+		public:
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 		        virtual ~Launch () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
 		};
-		struct Talk : public Link {
+		class Talk : public Link {
+		public:
 			std::vector <std::string> say;
 			std::vector <std::string> soundfiles;
 			int index;
@@ -57,7 +63,8 @@ class Base {
 			virtual void EndXML(FILE *fp);
 #endif
 		};
-		struct BaseObj {
+		class BaseObj {
+		public:
 			virtual void Draw (::Base *base);
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -65,7 +72,8 @@ class Base {
 			virtual ~BaseObj () {}
 			BaseObj () {}
 		};
-		struct BaseShip : public BaseObj {
+		class BaseShip : public BaseObj {
+		public:
 			virtual void Draw (::Base *base);
 			Matrix mat;
 			virtual ~BaseShip () {}
@@ -76,7 +84,8 @@ class Base {
 			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos)
 				:mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos) {}
 		};
-		struct BaseSprite : public BaseObj {
+		class BaseSprite : public BaseObj {
+		public:
 			virtual void Draw (::Base *base);
 			Sprite spr;
 #ifdef BASE_MAKER
@@ -87,7 +96,8 @@ class Base {
 			BaseSprite (const char *spritefile) 
 				:spr(spritefile) {}
 		};
-		struct BaseTalk : public BaseObj {
+		class BaseTalk : public BaseObj {
+		public:
 			virtual void Draw (::Base *base);
 			Talk * caller;
 			int sayindex;
@@ -112,6 +122,8 @@ class Base {
 		Room ();
 		~Room ();
 	};
+	friend class Room;
+	friend class Room::BaseTalk;
 	int curlinkindex;
 	bool drawlinkcursor;
 	TextPlane curtext;

@@ -137,7 +137,7 @@ void Unit::Kill(bool erasefromsave) {
   computer.velocity_ref.SetUnit(NULL);
   if(aistate) {
     aistate->ClearMessages();
-    delete aistate;
+    aistate->Destroy();
   }
   aistate=NULL;
   UnitCollection::UnitIterator iter = getSubUnits();
