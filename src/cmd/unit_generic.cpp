@@ -2658,11 +2658,11 @@ void Unit::RegenShields () {
   int rechargesh=1; // used ... oddly
   float maxshield=totalShieldEnergyCapacitance(shield);
   bool velocity_discharge=false;
-
+  energy=energy<0?0:energy;
   if (!energy_before_shield) {
     RechargeEnergy();
   }
-  float rec = (shield.recharge*SIMULATION_ATOM*shield.number)>energy?energy/shield.number:shield.recharge*SIMULATION_ATOM;
+  float rec = ((shield.recharge*SIMULATION_ATOM*shield.number)>energy)?(energy/shield.number):shield.recharge*SIMULATION_ATOM;
   if (apply_difficulty_shields) {
     if (!_Universe->isPlayerStarship(this)) {
       rec*=g_game.difficulty;
@@ -2686,7 +2686,7 @@ void Unit::RegenShields () {
     if (energy-10>sim_atom_ecm) {
       energy-=sim_atom_ecm;
     }else {
-      energy=energy<10?energy:10;
+      energy=energy<10?10:energy;
     }
   }
   if (GetNebula()!=NULL) {
@@ -2805,6 +2805,7 @@ void Unit::RegenShields () {
   }else {
     energy=0;
   }
+  energy=energy<0?0:energy;
 }
 
 Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
