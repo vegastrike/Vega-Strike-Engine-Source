@@ -25,8 +25,6 @@ libnetclient_a_SOURCES =	\
 libnetserver_a_SOURCES =	\
 	accountsxml.cpp	\
 	accountsxml.h	\
-	acctserver.cpp	\
-	acctserver.h	\
 	client.h	\
 	clientstructs.cpp	\
 	const.h		\

@@ -124,13 +124,15 @@ static bool QuitAllow=false;
 namespace CockpitKeys {
   void QuitNow () {
     {
-      _Universe->WriteSaveGame(true);//gotta do important stuff first
+	  if( Network==NULL)
+		_Universe->WriteSaveGame(true);//gotta do important stuff first
       for (unsigned int i=0;i<active_missions.size();i++) {
 	if (active_missions[i]) {
 	  active_missions[i]->DirectorEnd();
 	}
       }
-      delete forcefeedback;
+	  if( forcefeedback)
+		delete forcefeedback;
       winsys_exit(0);
     }
     
@@ -535,7 +537,8 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   vector<Flightgroup *>::const_iterator siter;
   vector<Flightgroup *> fg=mission->flightgroups;
   int squadnum=0;
-  for(siter= fg.begin() ; siter!=fg.end() ; siter++){
+  for(siter= fg.begin() ; siter!=fg.end() ; siter++)
+  {
     Flightgroup *fg=*siter;
     string fg_name=fg->name;
     string fullname=fg->type;// + ".xunit";
@@ -545,7 +548,8 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     string ainame=fg->ainame;
     float fg_radius=0.0;
 
-    for(int s=0;s < fg->nr_ships;s++){
+    for(int s=0;s < fg->nr_ships;s++)
+	{
       numf++;
       QVector pox (1000+150*a,100*a,100);
       
@@ -554,98 +558,126 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       pox.k=fg->pos.k+s*fg_radius*3;
       //	  cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
       
-      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
-	pox.i=rand()*10000./RAND_MAX-5000;
-	pox.j=rand()*10000./RAND_MAX-5000;
-	pox.k=rand()*10000./RAND_MAX-5000;
-	
+      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0)
+	  {
+		  pox.i=rand()*10000./RAND_MAX-5000;
+		  pox.j=rand()*10000./RAND_MAX-5000;
+		  pox.k=rand()*10000./RAND_MAX-5000;
       }
-      
       
       tmptarget[a]=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
       int fg_terrain=-1;
       //	  cout << "before unit" << endl;
-      if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
-	string modifications ("");
-	if (s==0&&squadnum<(int)fighter0name.size()) {
-	  _Universe->AccessCockpit(squadnum)->activeStarSystem=ssys[squadnum];
-  	  fighter0indices.push_back(a);
-	  if (fighter0name[squadnum].length()==0)
-	    fighter0name[squadnum]=string(fightername);
-	  else
-	    strcpy(fightername,fighter0name[squadnum].c_str());
-	  if (mission->getVariable ("savegame","").length()>0) {
-		  if (savedloc[squadnum].i!=FLT_MAX) {
-			pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
+      if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL))
+	  {
+		  string modifications ("");
+		  if (s==0&&squadnum<(int)fighter0name.size())
+		  {
+			  _Universe->AccessCockpit(squadnum)->activeStarSystem=ssys[squadnum];
+			  fighter0indices.push_back(a);
+			  
+			  if (fighter0name[squadnum].length()==0)
+				fighter0name[squadnum]=string(fightername);
+			  else
+				strcpy(fightername,fighter0name[squadnum].c_str());
+
+			  if (mission->getVariable ("savegame","").length()>0)
+			  {
+				if (savedloc[squadnum].i!=FLT_MAX)
+				{
+					pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
+				}
+				fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign",""));
+			  }
+			  else
+			  {
+				  fighter0mods.push_back("");
+			  }
 		  }
-	    fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","")+mission->getVariable("savegame",""));
-	  }else {
-	    fighter0mods.push_back("");
-	  }
-	}
-        Cockpit * backupcp = _Universe->AccessCockpit();
-
-        if (squadnum<(int)fighter0name.size()) {
-		_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
-                _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
-
-        }
-  	fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
-    _Universe->activeStarSystem()->AddUnit(fighters[a]);
-	if (s==0&&squadnum<(int)fighter0name.size()) {
-		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
-	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
-	}
         
-    if (squadnum<(int)fighter0name.size()) {
-		_Universe->popActiveStarSystem ();
-                _Universe->SetActiveCockpit(backupcp);
-	}
+		  Cockpit * backupcp = _Universe->AccessCockpit();
 
-      }else {
-	  bool isvehicle=false;
-	if (fg_terrain==-2) {
+		  if (squadnum<(int)fighter0name.size())
+		  {
+			_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
+            _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
 
-	  fighters[a]= UnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
-	}else {
-	  
-	  if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
-	    ContinuousTerrain * t;
-	    assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
-	    t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
-	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
-	  }else {
-	    Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
-	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+ 			// In networking mode we name the ship save with .xml as they are xml files
+			if( Network!=NULL)
+				modifications = modifications+".xml";
+  			fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+			if( Network!=NULL)
+			{
+				Network[squadnum].setUnit( fighters[a]);
+				cout<<"Creating fighter["<<a<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
+			}
+		  }
+		  else
+			fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+
+		  _Universe->activeStarSystem()->AddUnit(fighters[a]);
+		  if (s==0&&squadnum<(int)fighter0name.size())
+		  {
+			  _Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
+			  _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
+		  }
+        
+		  if (squadnum<(int)fighter0name.size())
+		  {
+			  _Universe->popActiveStarSystem ();
+              _Universe->SetActiveCockpit(backupcp);
+		  }
 	  }
-	  
-	}
-      _Universe->activeStarSystem()->AddUnit(fighters[a]);
+	  else
+	  {
+		bool isvehicle=false;
+		if (fg_terrain==-2)
+		{
+			fighters[a]= UnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+		}
+		else
+		{
+			if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain())
+			{
+	    
+				ContinuousTerrain * t;
+				assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
+				t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
+				fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+			}
+			else 
+			{
+				Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
+				fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+			}
+		}
+		_Universe->activeStarSystem()->AddUnit(fighters[a]);
+	  }
 
-      }
-      fighters[a]->SetPosAndCumPos (pox);
-      
+	  fighters[a]->SetPosAndCumPos (pox);
       fg_radius=fighters[a]->rSize();
-      
       //    fighters[a]->SetAI(new Order());
-      
       // cout << "before ai" << endl;
-      
-      if (benchmark>0.0  || (s!=0||squadnum>=(int)fighter0name.size())) {
-	fighters[a]->LoadAIScript(ainame);
-	fighters[a]->SetTurretAI ();
+      if (benchmark>0.0  || (s!=0||squadnum>=(int)fighter0name.size()))
+	  {
+		  fighters[a]->LoadAIScript(ainame);
+		  fighters[a]->SetTurretAI ();
       }
       a++;
-    } // for nr_ships
-    squadnum++;
+    
+   } // for nr_ships
+   squadnum++;
   } // end of for flightgroups
   
-  for (int rr=0;rr<a;rr++) {
-    for (int k=0;k<a-1;k++) {
+  for (int rr=0;rr<a;rr++)
+  {
+    for (int k=0;k<a-1;k++)
+	{
       int j=rand()%a;
-      if (FactionUtil::GetIntRelation(tmptarget[rr],tmptarget[j])<0) {
-	fighters[rr]->Target (fighters[j]);
-	break;
+      if (FactionUtil::GetIntRelation(tmptarget[rr],tmptarget[j])<0)
+	  {
+		  fighters[rr]->Target (fighters[j]);
+		  break;
       }
     }
   }//now it just sets their faction :-D

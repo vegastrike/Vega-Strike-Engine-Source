@@ -28,6 +28,7 @@
 #endif
 */
 #include "vs_globals.h"
+#include "endianness.h"
 #include "../config_xml.h"
 #include "client.h"
 #include "const.h"
@@ -45,18 +46,36 @@ using std::endl;
 using std::cin;
 
 double NETWORK_ATOM;
+
+/*************************************************************/
+/**** Tool funcitons                                      ****/
+/*************************************************************/
+
 typedef vector<ObjSerial>::iterator ObjI;
 vector<ObjSerial>	localSerials;
 bool isLocalSerial( ObjSerial sernum)
 {
+	cout<<"Looking for serial : "<<sernum<<" in ";
 	bool ret=false;
 	for( ObjI i=localSerials.begin(); !ret && i!=localSerials.end(); i++)
 	{
+		cout<<(*i)<<", ";
 		if( sernum==(*i))
 			ret = true;
 	}
+	cout<<endl;
 
 	return ret;
+}
+
+Unit * getNetworkUnit( ObjSerial cserial)
+{
+	for( int i=0; i<_Universe->numPlayers(); i++)
+	{
+		if( Network[i].getSerial() == cserial)
+			return Network[i].getUnit();
+	}
+	return NULL;
 }
 
 /*************************************************************/
@@ -86,10 +105,10 @@ int		NetClient::authenticate()
 
 		packet2.create( CMD_LOGIN, 0, buffer, tmplen, 1);
 		packet2.tosend();
-		if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
+		if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 		{
 			perror( "Error send login ");
-			exit(1);
+			cleanup();
 		}
 		delete buffer;
 		cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
@@ -125,10 +144,10 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 	packet2.create( CMD_LOGIN, 0, buffer, tmplen, 1);
 	cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
 	packet2.tosend();
-	if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
+	if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send login ");
-		exit(1);
+		cleanup();
 	}
 	delete buffer;
 	// Now the loop
@@ -157,17 +176,26 @@ char *	NetClient::loginLoop( string str_name, string str_passwd)
 		micro_sleep( 40000);
 	}
 	cout<<"End of login loop"<<endl;
-	// Get the save parts in the buffer
-	const char * xml = netbuf + NAMELEN*2 + sizeof( unsigned int);
-	unsigned int xml_size = ntohl( *( (unsigned int *)(netbuf+NAMELEN*2)));
-	const char * save = netbuf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
-	unsigned int save_size = ntohl( *( (unsigned int *)(netbuf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
-	cout<<"XML size = "<<xml_size<<endl;
-	cout<<"Save size = "<<save_size<<endl;
-	// Write temp save files
-	//changehome();
-	WriteXMLUnit( homedir+"/save/"+str_name+".xml", netbuf+2*NAMELEN+sizeof( unsigned int), xml_size);
-	WriteXMLUnit( homedir+"/save/"+str_name+".save", netbuf+2*NAMELEN+sizeof( unsigned int)*2+xml_size, save_size);
+	if( ret>0 && packet.getCommand()!=LOGIN_ERROR)
+	{
+		this->callsign = str_name;
+		// Get the save parts in the buffer
+		const char * xml = netbuf + NAMELEN*2 + sizeof( unsigned int);
+		unsigned int xml_size = ntohl( *( (unsigned int *)(netbuf+NAMELEN*2)));
+		const char * save = netbuf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
+		unsigned int save_size = ntohl( *( (unsigned int *)(netbuf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
+		cout<<"XML size = "<<xml_size<<endl;
+		cout<<"Save size = "<<save_size<<endl;
+		// Write temp save files
+		//changehome();
+		WriteXMLUnit( homedir+"/save/"+str_name+".xml", netbuf+2*NAMELEN+sizeof( unsigned int), xml_size);
+		WriteXMLUnit( homedir+"/save/"+str_name+".save", netbuf+2*NAMELEN+sizeof( unsigned int)*2+xml_size, save_size);
+	}
+	else
+	{
+		delete netbuf;
+		netbuf=NULL;
+	}
 	return netbuf;
 }
 
@@ -184,8 +212,8 @@ int		NetClient::init( char * addr, unsigned short port)
 	else
 		NETWORK_ATOM = (double) atoi( strnetatom.c_str());
 
-	Network = new NetUI();
-	this->clt_sock = Network->createSocket( addr, port, 0);
+	NetInt = new NetUI();
+	this->clt_sock = NetInt->createSocket( addr, port, 0);
 
 	/*
 	if( this->authenticate() == -1)
@@ -211,12 +239,12 @@ void	NetClient::start( char * addr, unsigned short port)
 	this->readDatafiles();
 
 	cout<<"Initializing network connection..."<<endl;
-	this->clt_sock = Network->createSocket( addr, port, 0);
+	this->clt_sock = NetInt->createSocket( addr, port, 0);
 
 	if( this->authenticate() == -1)
 	{
 		perror( "Error login in ");
-		exit(1);
+		cleanup();
 	}
 
 	cout<<"Initiating client loop"<<endl;
@@ -259,7 +287,7 @@ void	NetClient::checkKey()
 			{
 				packet2.create( CMD_POSUPDATE, this->serial, &c, sizeof(char));
 				packet2.tosend();
-				Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr);
+				NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr);
 			}
 		}
 	}
@@ -297,12 +325,12 @@ int		NetClient::checkMsg( char * netbuffer)
 	int nb=0;
 	int ret=0;
 
-	Network->resetSets();
-	Network->watchSocket( Network->sock);
-	nb = Network->activeSockets();
+	NetInt->resetSets();
+	NetInt->watchSocket( NetInt->sock);
+	nb = NetInt->activeSockets();
 	if( nb)
 	{
-		if( Network->isActive( Network->sock))
+		if( NetInt->isActive( NetInt->sock))
 		{
 			//cout<<"Network Activity !"<<endl;
 			ret = recvMsg( netbuffer);
@@ -322,10 +350,10 @@ int		NetClient::recvMsg( char * netbuffer)
 	ObjSerial	packet_serial=0;
 	int len=0;
 
-	if( (len=Network->recvbuf( this->clt_sock, (char *)&packet, len2, &this->cltadr))<=0)
+	if( (len=NetInt->recvbuf( this->clt_sock, (char *)&packet, len2, &this->cltadr))<=0)
 	{
 		perror( "Error recv -1 ");
-		Network->closeSocket( this->clt_sock);
+		NetInt->closeSocket( this->clt_sock);
 	}
 	else
 	{
@@ -359,7 +387,7 @@ int		NetClient::recvMsg( char * netbuffer)
 				break;
 				// Login failed
 				case LOGIN_ERROR :
-					cout<<">>> "<<this->serial<<" >>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
+					cout<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
 					//cout<<"Received LOGIN_ERROR"<<endl;
 					this->disconnect();
 					return -1;
@@ -381,10 +409,7 @@ int		NetClient::recvMsg( char * netbuffer)
 					this->receivePosition();
 				break;
 				case CMD_ENTERCLIENT :
-					// I dunno why I need to do a ntohs again... really weird
-					packet_serial = ntohs(packet_serial);
 					cout<<">>> "<<this->serial<<" >>> ENTERING CLIENT =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
-					//cout<<"ntohs(serial) = "<<<<endl;
 					this->addClient();
 					cout<<"<<< ENTERING CLIENT ------------------------------------------------------------------------------"<<endl;
 				break;
@@ -430,7 +455,7 @@ void	NetClient::getZoneData()
 	ClientDescription cd;
 	int		state_size=sizeof( ClientState);
 	int		desc_size=sizeof( ClientDescription);
-	ObjSerial nser;
+	ObjSerial nser, nser2 = 0;
 	int		offset=0;
 
 
@@ -446,22 +471,18 @@ void	NetClient::getZoneData()
 		offset += desc_size;
 		//cs = (ClientState *) packet.getData()+offset;
 		cs.received();
-		nser = cs.getSerial();
+		nser2 = cs.getSerial();
+		nser = ntohs( nser2);
 		if( nser != this->serial && !isLocalSerial( nser))
 		{
 			cout<<"NEW CLIENT - ";
 			cs.display();
-			Clients[nser] = new Client;
 			Clients[nser]->serial = nser;
-			memcpy( &Clients[nser]->current_state, &cs, state_size);
+			//memcpy( &Clients[nser]->current_state, &cs, state_size);
+			Clients[nser]->current_state = cs;
 			memcpy( &Clients[nser]->current_desc, &cd, desc_size);
 			// Launch the unit in the game
 			Clients[nser]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
-			/*
-			Clients[nser]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
-			Clients[nser]->game_unit->SetTurretAI();
-  			_Universe->activeStarSystem()->AddUnit(Clients[nser]->game_unit);
-			*/
 			Clients[nser]->game_unit->PrimeOrders();
 			Clients[nser]->game_unit->SetNetworkMode( true);
 
@@ -472,9 +493,13 @@ void	NetClient::getZoneData()
 			// In that case, we want cubic spline based interpolation
 			//init_interpolation( nser);
 		}
-		else
+		// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
+		else if( nser!=this->serial)
 		{
+			Clients[nser] = new Client;
 			cout<<"IT'S ME OR ANOTHER LOCAL PLAYER ";
+			Clients[nser]->game_unit = getNetworkUnit( nser);
+			assert( Clients[nser]->game_unit != NULL);
 			cs.display();
 		}
 	}
@@ -486,7 +511,7 @@ void	NetClient::getZoneData()
 
 void	NetClient::addClient()
 {
-	ObjSerial	cltserial = ntohs(packet.getSerial());
+	ObjSerial	cltserial = packet.getSerial();
 	if( Clients[cltserial] != NULL)
 	{
 		cout<<"Error, client exists !!"<<endl;
@@ -504,20 +529,14 @@ void	NetClient::addClient()
 	Clients[cltserial]->serial = packet.getSerial();
 	ClientState cs;
 	memcpy( &cs, packet.getData(), sizeof( ClientState));
-	memcpy( &Clients[cltserial]->current_state, &cs, sizeof( ClientState));
+	//memcpy( &Clients[cltserial]->current_state, &cs, sizeof( ClientState));
+	Clients[cltserial]->current_state = cs;
 
 	cs.display();
 	// Test if not a local player
 	if( !isLocalSerial( cltserial))
 	{
-		// Create the unit for the client
-		// should get the ship's
-		/*
-		Clients[cltserial]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
-		Clients[cltserial]->game_unit->SetTurretAI();
-		_Universe->activeStarSystem()->AddUnit(Clients[cltserial]->game_unit);
-		*/
-		// Or :
+		// CREATES THE UNIT... GET XML DATA OF UNIT FROM SERVER
 		Clients[cltserial]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
 		Clients[cltserial]->game_unit->PrimeOrders();
 		Clients[cltserial]->game_unit->SetNetworkMode( true);
@@ -530,6 +549,12 @@ void	NetClient::addClient()
 		// In that case, we want cubic spline based interpolation
 		//init_interpolation( cltserial);
 	}
+	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
+	else if( cltserial!=this->serial)
+	{
+		Clients[cltserial]->game_unit = getNetworkUnit( cltserial);
+		assert( Clients[cltserial]->game_unit != NULL);
+	}
 }
 
 /*************************************************************/
@@ -539,6 +564,10 @@ void	NetClient::addClient()
 void	NetClient::removeClient()
 {
 	ObjSerial	cltserial = packet.getSerial();
+	//ObjSerial	cltserial = ntohs( cltserial2);
+
+	//cout<<"Serial = "<<cltserial2;
+	cout<<" & HTONS(Serial) = "<<cltserial<<endl;
 	if( Clients[cltserial] == NULL)
 	{
 		cout<<"Error, client does not exists !!"<<endl;
@@ -560,21 +589,24 @@ void	NetClient::removeClient()
 
 void	NetClient::sendPosition( ClientState cs)
 {
-	// Serial in ClientState is updated in VS code at ClientState creation (with pos, veloc...)
+	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
 	Packet pckt;
+	ClientState cstmp(cs);
 	int		update_size = sizeof( ClientState);
 	//char * buffer = new char[update_size];
 
 	// Send the client state
-	cs.tosend();
-	pckt.create( CMD_POSUPDATE, this->serial, (char *) &cs, update_size, 0);
+	cout<<"Sending position == ";
+	cstmp.display();
+	cstmp.tosend();
+	pckt.create( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, 0);
 	pckt.tosend();
-	if( Network->sendbuf( this->clt_sock, (char *) &pckt, pckt.getSendLength(), &this->cltadr) == -1)
+	if( NetInt->sendbuf( this->clt_sock, (char *) &pckt, pckt.getSendLength(), &this->cltadr) == -1)
 	{
-		perror( "Error send login ");
-		exit(1);
+		perror( "Error send position ");
+		cleanup();
 	}
-	cs.received();
+	//cs.received();
 	//cout<<"Sent STATE : ";
 	//cs.display();
 	//delete buffer;
@@ -591,13 +623,14 @@ void	NetClient::receivePosition()
 	//QVector		tmppos;
 	char *		databuf;
 	ObjSerial	sernum=0;
-	int		nbclts, i, j, offset=0;;
+	int		nbclts=0, nbclts2=0, i, j, offset=0;;
 	int		cssize = sizeof( ClientState);
 	//int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
 	int		qfsize = sizeof( double);
 	unsigned char	cmd;
 
 	nbclts = packet.getSerial();
+	//nbclts = ntohs( nbclts2);
 	cout<<"Received update for "<<nbclts<<" clients - LENGTH="<<packet.getLength();
 	cout<<endl;
 	databuf = packet.getData();
@@ -620,11 +653,11 @@ void	NetClient::receivePosition()
 			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit))
 			{
 				// Backup old state
-				memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
+				Clients[sernum]->old_state = Clients[sernum]->current_state;
+				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
 				// Update concerned client directly in network client list
-				memcpy( &(Clients[sernum]->current_state), &cs, sizeof( ClientState));
-				offset += cssize;
-				i++;
+				Clients[sernum]->current_state = cs;
+				// memcpy( &(Clients[sernum]->current_state), &cs, sizeof( ClientState));
 
 				// Set the orientation by extracting the matrix from quaternion
 				Clients[sernum]->game_unit->SetOrientation( cs.getOrientation());
@@ -632,30 +665,44 @@ void	NetClient::receivePosition()
 				// Use SetCurPosition or SetPosAndCumPos ??
 				Clients[sernum]->game_unit->SetCurPosition( cs.getPosition());
 				// In that case, we want cubic spline based interpolation
-				predict( sernum);
+				//predict( sernum);
 				//init_interpolation( sernum);
 			}
+			offset += cssize;
+			i++;
 		}
 		else if( cmd == CMD_POSUPDATE)
 		{
 			// Set the serial #
-			cout<<"Received POSUPDATE : ";
-			sernum = (ObjSerial) *(databuf+offset);
+			sernum = *((ObjSerial *) databuf+offset);
+			sernum = ntohs( sernum);
+			cout<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 			offset += sizeof( ObjSerial);
-			// Backup old state
-			memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
-			// Set the new received position in current_state
-			QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
-			//tmppos = (QVector) *(databuf+offset);
-			Clients[sernum]->current_state.setPosition( tmppos);
-			// Use SetCurPosition or SetPosAndCumPos ??
-			Clients[sernum]->game_unit->SetCurPosition( tmppos);
+			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit))
+			{
+				// Backup old state
+				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
+				Clients[sernum]->old_state = Clients[sernum]->current_state;
+				// Set the new received position in current_state
+				QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
+				//tmppos = (QVector) *(databuf+offset);
+				Clients[sernum]->current_state.setPosition( tmppos);
+				// Use SetCurPosition or SetPosAndCumPos ??
+				Clients[sernum]->game_unit->SetCurPosition( tmppos);
+				Clients[sernum]->current_state.display();
+				//predict( sernum);
+			}
+			else
+			{
+				ClientState cs2;
+				QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
+				cs2.setPosition( tmppos);
+				cs2.display();
+				cout<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
+			}
 			offset += sizeof( QVector);
 			j++;
-			predict( sernum);
-			// In that case, we only want linear interpolation, but the end point is in the future
 		}
-		// Update concerned client directly in the game unit list
 	}
 }
 
@@ -667,9 +714,11 @@ void	NetClient::inGame()
 {
 	Packet packet2;
 
-	packet2.create( CMD_ADDCLIENT, this->serial, NULL, 0, 1);
+	ClientState cs( this->serial, this->game_unit->curr_physical_state, this->game_unit->Velocity, Vector(0,0,0), 0);
+	// HERE SEND INITIAL CLIENTSTATE !!
+	packet2.create( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), 1);
 	packet2.tosend();
-	if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
+	if( NetInt->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error sending ingame info");
 		exit(1);
@@ -687,7 +736,7 @@ void	NetClient::sendAlive()
 	Packet	p;
 	p.create( CMD_PING, this->serial, NULL, 0, 0);
 	p.tosend();
-	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
+	if( NetInt->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send PING ");
 		//exit(1);
@@ -746,8 +795,8 @@ void	NetClient::createChar()
 void	NetClient::disconnect()
 {
 	keeprun = 0;
-	Packet p;
-	Network->disconnect( "Closing network");
+	// Disconnection is handled in the cleanup() function for each player
+	//NetInt->disconnect( "Closing network");
 }
 
 void	NetClient::logout()
@@ -756,12 +805,12 @@ void	NetClient::logout()
 	Packet p;
 	p.create( CMD_LOGOUT, this->serial, NULL, 0, 1);
 	p.tosend();
-	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
+	if( NetInt->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send logout ");
 		//exit(1);
 	}
-	Network->disconnect( "Closing network", 0);
+	NetInt->disconnect( "Closing network", 0);
 }
 
 /*************************************************************/

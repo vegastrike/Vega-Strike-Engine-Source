@@ -68,6 +68,7 @@ private:
   
  public:
   Cockpit * isPlayerStarship (const Unit* fighter);
+  int whichPlayerStarship (const Unit* fighter);
   Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
   Cockpit *AccessCockpit (int i) {return cockpit[i];}
   unsigned int CurrentCockpit(){return current_cockpit;}

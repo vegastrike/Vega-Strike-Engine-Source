@@ -38,7 +38,7 @@ extern bool isLocalSerial( ObjSerial sernum);
 
 class	NetClient
 {
-		NetUI *				Network;		// Network interface
+		NetUI *				NetInt;		// Network interface
 		Unit *				game_unit;		// Unit struct from the game corresponding to that client
 		Packet				packet;			// Network data packet
 
@@ -47,6 +47,7 @@ class	NetClient
 		int					nbclients;		// Number of clients in the zone
 		char				keeprun;		// Bool to test client stop
 		AddressIP			cltadr;			// Client IP
+		string				callsign;		// Callsign of the networked player
 		Client *			Clients[MAXCLIENTS];		// Clients in the same zone
 		// a vector because always accessed by their IDs
 
@@ -78,13 +79,14 @@ class	NetClient
 			cur_time = 0;
 			enabled = 0;
 			nbclients = 0;
+			serial = 0;
 			for( int i=0; i<MAXCLIENTS; i++)
 				Clients[i] = NULL;
 		}
 		~NetClient()
 		{
-			if( Network!=NULL)
-				delete Network;
+			if( NetInt!=NULL)
+				delete NetInt;
 			for( int i=0; i<MAXCLIENTS; i++)
 			{
 				if( Clients[i]!=NULL)
@@ -111,11 +113,18 @@ class	NetClient
 		void	inGame();
 		int		isTime();
 		void	logout();
+		bool	isInGame() { return (serial==0);}
 		unsigned int	getLag() { return deltatime;}
 
 		void			predict( ObjSerial clientid);
 		void			init_interpolation( ObjSerial clientid);
 		Transformation	spline_interpolate( ObjSerial clientid, double blend);
+
+		void	setCallsign( char * calls) { this->callsign = string( calls);}
+		void	setCallsign( string calls) { this->callsign = calls;}
+		string	getCallsign() {return this->callsign;}
+		void	setUnit( Unit * un) { game_unit = un;}
+		Unit *	getUnit() { return game_unit;}
 };
 
 #endif

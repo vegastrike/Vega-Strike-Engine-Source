@@ -55,9 +55,8 @@ class Account
 		Account() { haschar=1; connected=false; };
 		Account( char * sname, char * spasswd)
 		{
-			assert( strlen( name)<NAMELEN && strlen( passwd)<NAMELEN);
-			strcpy( name, sname);
-			strcpy( passwd, spasswd);
+			strncpy( name, sname, NAMELEN);
+			strncpy( passwd, spasswd, NAMELEN);
 		}
 
 		void	display();
@@ -68,9 +67,8 @@ class Account
 		void		setSerial( ObjSerial sernum) { this->serial = sernum;}
 		void		set( char * sname, char * spasswd)
 		{
-			assert( strlen( name)<NAMELEN && strlen( passwd)<NAMELEN);
-			strcpy( name, sname);
-			strcpy( passwd, spasswd);
+			strncpy( name, sname, NAMELEN);
+			strncpy( passwd, spasswd, NAMELEN);
 		}
 
 		int		compareName( char *str)

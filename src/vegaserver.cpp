@@ -23,6 +23,7 @@
 #include "vs_globals.h"
 #include "networking/netserver.h"
 
+bool SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
 

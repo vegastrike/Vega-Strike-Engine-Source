@@ -3,8 +3,10 @@
 
 #include <iostream>
 #include <errno.h>
+#include <assert.h>
 #include "const.h"
 using std::cout;
+using std::cerr;
 using std::endl;
 
 #ifdef HAVE_SDLnet

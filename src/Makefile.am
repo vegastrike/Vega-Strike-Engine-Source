@@ -25,19 +25,19 @@ cmd/collide/libcollide.a \
 
 vegaserver_LDADD =  \
 networking/libnetserver.a \
-cmd/libcmdserver.a cmd/libcmdgeneric.a \
+cmd/libcmdserver.a \
+cmd/libcmdgeneric.a \
 cmd/ai/libaigeneric.a \
-cmd/script/libscriptserver.a cmd/script/libscriptgeneric.a \
+cmd/script/libscriptserver.a \
+cmd/script/libscriptgeneric.a \
 cmd/script/c_alike/libc_alike.a \
 gfx/libgfxgeneric.a \
-python/libpython.a python/libpythongeneric.a \
+python/libpythongeneric.a \
 boost/libboost_python.a \
 librootserver.a librootgeneric.a 
 
-
-
-
 accountserver_LDADD =  \
+networking/acctserver.o \
 networking/libnetserver.a
 
 INCLUDES = -Iboost/
@@ -136,6 +136,7 @@ vegaserver_SOURCES =			\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
+	libserver.cpp		\
 	configxml.cpp				\
 	configxml.h					\
 	easydom.cpp					\
@@ -226,5 +227,4 @@ vegastrike_SOURCES =		\
 	vegastrike.h			\
 	vs_path.cpp				\
 	vs_path.h
-
 

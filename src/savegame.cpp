@@ -14,6 +14,8 @@
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
 
+if( Network!=NULL)
+{
     cout << "Hi helper play " << num << endl;
   static string *res=NULL;
   if (res==NULL) {
@@ -93,7 +95,14 @@ using namespace std;
     return (*res);  
   }
   return (*res)+XMLSupport::tostring(num);
- }
+}
+else
+{
+	//return Network[num].getCallsign();
+	// Return "" so that the filename argument to ParseSavegame will be used
+	return "";
+}
+}
 
 std::string GetWritePlayerSaveGame(int num) {
   string ret = GetHelperPlayerSaveGame(num);

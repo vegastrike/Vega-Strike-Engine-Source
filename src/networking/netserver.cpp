@@ -202,7 +202,7 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 	if( clt!=NULL)
 		sockclt = clt->sock;
 	//cout<<"Creating packet... ";
-	cout<<">>> SEND LOGIN ERROR =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+	cout<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
 	packet2.create( LOGIN_ERROR, 0, NULL, 0, 1);
 	//packet2.displayHex();
 	//cout<<" done."<<endl;
@@ -362,7 +362,7 @@ void	NetServer::start()
 		if( vs_config->getVariable( "network", "accountsrvip", "")=="")
 		{
 			cout<<"Account server IP not specified, exiting"<<endl;
-			exit(1);
+			cleanup();
 		}
 		memset( srvip, 0, 256);
 		memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), vs_config->getVariable( "network", "accountsrvip", "").length());
@@ -614,24 +614,33 @@ void	NetServer::checkTimedoutClients()
 	for (LI i=Clients.begin(); i!=Clients.end(); i++)
 	{
 		deltatmp = (fabs(curtime - (*i)->latest_timeout));
-		//cout<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
-		// Here considering a delta > 0xFFFFFFFF*X where X should be at least something like 0.9
-		// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
-		// side -> when timestamp has grown enough to became bigger than what an u_int can store
-		if( (*i)->ingame && deltatmp > clienttimeout /*&& deltatmp < (0xFFFFFFFF*0.8)*/ )
+		if( (*i)->latest_timeout!=0)
 		{
-			cout<<"ACTIVITY TIMEOUT for client number "<<(*i)->serial<<endl;
-			discList.push_back( *i);
+			//cout<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
+			// Here considering a delta > 0xFFFFFFFF*X where X should be at least something like 0.9
+			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
+			// side -> when timestamp has grown enough to became bigger than what an u_int can store
+			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
+			{
+				cout<<"ACTIVITY TIMEOUT for client number "<<(*i)->serial<<endl;
+				cout<<"\t\tCurrent time : "<<curtime<<endl;
+				cout<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
+				cout<<"t\tDifference : "<<deltatmp<<endl;
+				discList.push_back( *i);
+			}
+			else if( !(*i)->ingame && deltatmp > logintimeout)
+			{
+				cout<<"LOGIN TIMEOUT for client number "<<(*i)->serial<<endl;
+				cout<<"\t\tCurrent time : "<<curtime<<endl;
+				cout<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
+				cout<<"t\tDifference : "<<deltatmp<<endl;
+				discList.push_back( *i);
+			}
+			/*
+			else
+				cout<<"CLIENT "<<(*i)->serial<<" - DELTA="<<deltatmp<<endl;
+			*/
 		}
-		else if( (*i)->ingame && deltatmp > logintimeout)
-		{
-			cout<<"LOGIN TIMEOUT for client number "<<(*i)->serial<<endl;
-			discList.push_back( *i);
-		}
-		/*
-		else
-			cout<<"CLIENT "<<(*i)->serial<<" - DELTA="<<deltatmp<<endl;
-		*/
 	}
 }
 #endif
@@ -725,7 +734,6 @@ void	NetServer::recvMsg( Client * clt)
 			//if( (clt!=NULL && ts > clt->latest_timestamp && tstmp < (0xFFFFFFFF*0.8)) || clt==NULL)
 			//{
 #endif
-				/*
 				if( clt!=NULL)
 				{
 					clt->old_timestamp = clt->latest_timestamp;
@@ -736,7 +744,6 @@ void	NetServer::recvMsg( Client * clt)
 						clt->deltatime = (ts - clt->latest_timestamp);
 					clt->latest_timestamp = ts;
 				}
-				*/
 
 				//packet.setLength( len);
 				//packet.displayHex();
@@ -795,7 +802,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 					{
 						perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 						cout<<"SOCKET was : "<<acct_sock<<endl;
-						exit(1);
+						cleanup();
 					}
 				}
 				cout<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
@@ -813,11 +820,11 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 			break;
 			case CMD_POSUPDATE:
 				// Received a position update from a client
-				cout<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+				cerr<<">>> POSITION UPDATE =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 				//Network->getIPof( ipadr);
 				//cout<<endl;
 				this->posUpdate( clt);
-				cout<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
+				cerr<<"<<< POSITION UPDATE ---------------------------------------------------------------"<<endl;
 			break;
 			case CMD_NEWCHAR:
 				// Receive the new char and store it
@@ -829,6 +836,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 				// zonemgr->AddClient( clt, 1);
 			break;
 			case CMD_PING:
+				//cout<<"Got PING from serial "<<packet.getSerial()<<endl;
 			break;
 			case CMD_LOGOUT:
 				cout<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
@@ -857,9 +865,16 @@ void	NetServer::addClient( Client * clt)
 	clt->zone = 1;
 	zonemgr->addClient( clt, 1);
 
-	// Get the last location of client
+	// GET THE INITIAL CLIENTSTATE FROM PACKET AND SET IT !!
 	// For now, I set it to default values
-	ClientState	tmpcs( clt->serial);
+	ClientState	tmpcs;
+	memcpy( &tmpcs, packet.getData(), sizeof( ClientState));
+	tmpcs.received();
+	clt->old_state = tmpcs;
+	clt->current_state = tmpcs;
+	//memcpy( &clt->old_state, &tmpcs, sizeof(ClientState));
+	//memcpy( &clt->current_state, &tmpcs, sizeof(ClientState));
+	tmpcs.tosend();
 	// Here the other client in the same zone should be warned of a new client
 	// Should also send data about the ship !!! filename ? IDs ?
 	// maybe those thing should be managed in account.xml
@@ -867,6 +882,7 @@ void	NetServer::addClient( Client * clt)
 	packet2.create( CMD_ENTERCLIENT, clt->serial, (char *) &tmpcs, sizeof( ClientState), 1);
 	//cout<<" 2nd packet -------------"<<endl;
 	//packet2.displayHex();
+	packet2.tosend();
 	cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
 	zonemgr->broadcast( clt, &packet2, this->Network);
 	cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
@@ -883,7 +899,7 @@ void	NetServer::addClient( Client * clt)
 	if( Network->sendbuf( clt->sock, (char *) &packet2, packet2.getSendLength(), &clt->cltadr) == -1)
 	{
 		cout<<"Error sending ADDED_YOU to client n°"<<clt->serial<<endl;
-		exit(1);
+		cleanup();
 	}
 	cout<<"ADDED client n "<<clt->serial<<" in ZONE "<<clt->zone<<endl;
 	delete cltsbuf;
@@ -901,9 +917,11 @@ void	NetServer::posUpdate( Client * clt)
 	//zonemgr->broadcast( clt, pckt, this->Network);
 
 	// Set old position
-	memcpy( &clt->old_state, &clt->current_state, sizeof( ClientState));
+	//memcpy( &clt->old_state, &clt->current_state, sizeof( ClientState));
+	clt->old_state = clt->current_state;
 	// Update client position in client list
-	memcpy( &clt->current_state, packet.getData(), sizeof( ClientState));
+	//memcpy( &clt->current_state, packet.getData(), sizeof( ClientState));
+	clt->current_state = *((ClientState *) packet.getData());
 	// Put deltatime in the delay part of ClientState so that it is send to other clients later
 	clt->current_state.received();
 	clt->current_state.setDelay( clt->deltatime);
@@ -1005,8 +1023,11 @@ void	NetServer::logout( Client * clt)
 	cout<<"There was "<<Clients.size()<<" clients - ";
 	Clients.remove( clt);
 	// Broadcast client EXIT zone
-	p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, 1);
-	zonemgr->broadcast( clt, &p, this->Network);
+	if( clt->ingame)
+	{
+		p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, 1);
+		zonemgr->broadcast( clt, &p, this->Network);
+	}
 	if( clt != NULL)
 	{
 		delete clt;

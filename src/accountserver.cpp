@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include "networking/acctserver.h"
 
+bool SERVER = 1;
+
 int main( int argc, char **argv)
 {
 	AccountServer *Server = new AccountServer;

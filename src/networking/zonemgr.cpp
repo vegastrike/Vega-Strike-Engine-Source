@@ -4,6 +4,9 @@
 #include "packet.h"
 //#include "netserver.h"
 #include "zonemgr.h"
+#include "vs_globals.h"
+#include "endianness.h"
+#include <assert.h>
 
 ZoneMgr::ZoneMgr()
 {
@@ -69,7 +72,7 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt, NetUI *net)
 			cout<<"Sending update to client n° "<<(*i)->serial;
 			//cout<<" @ "<<net->getIPof( (*i)->cltadr);
 			cout<<endl;
-			net->sendbuf( (*i)->sock, (char *) pckt, pckt->getLength(), &(*i)->cltadr);
+			net->sendbuf( (*i)->sock, (char *) pckt, pckt->getSendLength(), &(*i)->cltadr);
 		}
 	}
 }
@@ -77,7 +80,8 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt, NetUI *net)
 // Broadcast all snapshots
 void	ZoneMgr::broadcastSnapshots( NetUI * net)
 {
-	char * buffer;
+	ClientState cstmp;
+	char buffer[MAXBUFFER];
 	int i=0, j=0, p=0;
 	LI k, l;
 
@@ -86,107 +90,115 @@ void	ZoneMgr::broadcastSnapshots( NetUI * net)
 	// Loop for all systems/zones
 	for( i=0; i<nb_zones; i++)
 	{
-	// Check if system is non-empty
-	if( zone_clients[i]>0)
-	{
-		//buffer = new char[zone_clients[i]*sizeof( ClientState)+h_length];
+		// Check if system is non-empty
+		if( zone_clients[i]>0)
+		{
+			//buffer = new char[zone_clients[i]*sizeof( ClientState)+h_length];
 
-		/************* First method : build a snapshot buffer ***************/
-		// It just look if positions or orientations have changed
-		/*
-		for( j=0, k=zone_list[i].begin(); k!=zone_list[i].end(); k++, j++)
-		{
-			// Check if position has changed
-			memcpy( buffer+h_length+(j*sizeof( ClientState)), &(*k)->current_state, sizeof( ClientState));
-		}
-		// Then send all clients the snapshot
-		Packet pckt;
-		pckt.create( CMD_SNAPSHOT, zone_clients[i], buffer, zone_clients[j]*sizeof(ClientState), 0);
-		for( j=0, k=zone_list[i].begin(); k!=zone_list[i].end(); k++, j++)
-		{
-			net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getLength(), &(*k)->cltadr);
-		}
-		*/
-		/************* Second method : send independently to each client an update ***************/
-		// It allows to check (for a given client) if other clients are far away (so we can only
-		// send position, not orientation and stuff) and if other clients are visible to the given
-		// client.
-		// -->> Reduce bandwidth usage but increase CPU usage
-		// Loop for all the zone's clients
-		int	offset = 0, nbclients = 0;
-		float radius, distance, ratio;
-		ObjSerial netserial, sertmp;
-		Packet pckt;
-		for( k=zone_list[i].begin(); k!=zone_list[i].end(); k++)
-		{
-			// If we don't want to send a client its own info set nbclients to zone_clients-1
-			nbclients = zone_clients[i]-1;
-			// buffer is bigger than needed in that way
-			buffer = new char[nbclients*sizeof( ClientState)];
-			Quaternion source_orient( (*k)->current_state.getOrientation());
-			QVector source_pos( (*k)->current_state.getPosition());
-			for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
+			/************* First method : build a snapshot buffer ***************/
+			// It just look if positions or orientations have changed
+			/*
+			for( j=0, k=zone_list[i].begin(); k!=zone_list[i].end(); k++, j++)
 			{
-				// Check if we are on the same client and that the client has moved !
-				if( l!=k && !((*l)->current_state.getPosition()==(*l)->old_state.getPosition() && (*l)->current_state.getOrientation()==(*l)->old_state.getOrientation()))
-				{
-					//radius = (*l)->game_unit->rSize();
-					QVector target_pos( (*l)->current_state.getPosition());
-					// Client pointed by 'k' can see client pointed by 'l'
-					// For now only check if the 'l' client is in front of the ship and not behind
-					if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
-					{
-						// Test if client 'l' is far away from client 'k' = test radius/distance<=X
-						// So we can send only position
-						// Here distance should never be 0
-						//ratio = radius/distance;
-						if( 1 /* ratio > XX client not too far */)
-						{
-							// Mark as position+orientation+velocity update
-							buffer[offset] = CMD_FULLUPDATE;
-							offset += sizeof( char);
-							// Prepare the state to be sent over network (convert byte order)
-							//cout<<"Sending : ";
-							//(*l)->current_state.display();
-							(*l)->current_state.tosend();
-							memcpy( buffer+offset, &((*l)->current_state), sizeof( ClientState));
-							// Convert byte order back
-							(*l)->current_state.received();
-							offset += sizeof( ClientState);
-							// Increment the number of clients we send full info about
-							j++;
-						}
-						else if( 1 /* ratio>=1 far but still visible */)
-						{
-							// Mark as position update only
-							buffer[offset] = CMD_POSUPDATE;
-							offset += sizeof( char);
-							sertmp = htons((*l)->serial);
-							memcpy( buffer+offset, &(sertmp), sizeof( ObjSerial));
-							offset += sizeof( ObjSerial);
-							QVector qvtmp( (*l)->current_state.getPosition());
-							memcpy( buffer+offset+sizeof( ObjSerial), &qvtmp, sizeof( QVector));
-							offset += sizeof( QVector);
-							// Increment the number of clients we send limited info about
-							p++;
-						}
-					}
-				}
-				// Else : always send back to clients their own info or just ignore ?
-				// Ignore for now
+				// Check if position has changed
+				memcpy( buffer+h_length+(j*sizeof( ClientState)), &(*k)->current_state, sizeof( ClientState));
 			}
-			// Send snapshot to client k
-			if( offset > 0)
+			// Then send all clients the snapshot
+			Packet pckt;
+			pckt.create( CMD_SNAPSHOT, zone_clients[i], buffer, zone_clients[j]*sizeof(ClientState), 0);
+			for( j=0, k=zone_list[i].begin(); k!=zone_list[i].end(); k++, j++)
 			{
-				//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-				pckt.create( CMD_SNAPSHOT, nbclients, buffer, offset, 0);
 				net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getLength(), &(*k)->cltadr);
-				//cout<<"SENT PACKET SIZE = "<<pckt.getLength()<<endl;
 			}
-			delete buffer;
-			offset = 0;
+			*/
+			/************* Second method : send independently to each client an update ***************/
+			// It allows to check (for a given client) if other clients are far away (so we can only
+			// send position, not orientation and stuff) and if other clients are visible to the given
+			// client.
+			// -->> Reduce bandwidth usage but increase CPU usage
+			// Loop for all the zone's clients
+			int	offset = 0, nbclients = 0;
+			float radius, distance, ratio;
+			ObjSerial netserial, sertmp;
+			Packet pckt;
+			for( k=zone_list[i].begin(); k!=zone_list[i].end(); k++)
+			{
+				// If we don't want to send a client its own info set nbclients to zone_clients-1
+				nbclients = zone_clients[i]-1;
+				// buffer is bigger than needed in that way
+				//buffer = new char[nbclients*sizeof( ClientState)];
+				memset( buffer, 0, MAXBUFFER);
+				Quaternion source_orient( (*k)->current_state.getOrientation());
+				QVector source_pos( (*k)->current_state.getPosition());
+				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
+				{
+					// Check if we are on the same client and that the client has moved !
+					if( l!=k && !((*l)->current_state.getPosition()==(*l)->old_state.getPosition() && (*l)->current_state.getOrientation()==(*l)->old_state.getOrientation()))
+					{
+						//radius = (*l)->game_unit->rSize();
+						QVector target_pos( (*l)->current_state.getPosition());
+						// Client pointed by 'k' can see client pointed by 'l'
+						// For now only check if the 'l' client is in front of the ship and not behind
+						if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
+						{
+							// Test if client 'l' is far away from client 'k' = test radius/distance<=X
+							// So we can send only position
+							// Here distance should never be 0
+							//ratio = radius/distance;
+							if( 1 /* ratio > XX client not too far */)
+							{
+								// Mark as position+orientation+velocity update
+								buffer[offset] = CMD_FULLUPDATE;
+								offset += sizeof( char);
+								// Prepare the state to be sent over network (convert byte order)
+								//cout<<"Sending : ";
+								//(*l)->current_state.display();
+								cstmp = (*l)->current_state;
+								cstmp.tosend();
+								//(*l)->current_state.tosend();
+								memcpy( buffer+offset, &cstmp, sizeof( ClientState));
+								// Convert byte order back
+								//(*l)->current_state.received();
+								offset += sizeof( ClientState);
+								// Increment the number of clients we send full info about
+								j++;
+							}
+							else if( 1 /* ratio>=1 far but still visible */)
+							{
+								// Mark as position update only
+								buffer[offset] = CMD_POSUPDATE;
+								offset += sizeof( unsigned char);
+								sertmp = htons((*l)->serial);
+								memcpy( buffer+offset, &(sertmp), sizeof( ObjSerial));
+								offset += sizeof( ObjSerial);
+								QVector qvtmp( (*l)->current_state.getPosition());
+								qvtmp.i = VSSwapHostDoubleToLittle( qvtmp.i);
+								qvtmp.j = VSSwapHostDoubleToLittle( qvtmp.j);
+								qvtmp.k = VSSwapHostDoubleToLittle( qvtmp.k);
+								memcpy( buffer+offset+sizeof( ObjSerial), &qvtmp, sizeof( QVector));
+								offset += sizeof( QVector);
+								// Increment the number of clients we send limited info about
+								p++;
+							}
+						}
+						assert( offset<MAXBUFFER);
+					}
+					// Else : always send back to clients their own info or just ignore ?
+					// Ignore for now
+				}
+				// Send snapshot to client k
+				if( offset > 0)
+				{
+					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
+					pckt.create( CMD_SNAPSHOT, nbclients, buffer, offset, 0);
+					pckt.tosend();
+					net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getSendLength(), &(*k)->cltadr);
+					//cout<<"SENT PACKET SIZE = "<<pckt.getLength()<<endl;
+				}
+				//delete buffer;
+				offset = 0;
+			}
 		}
-	}
 	}
 }
 
@@ -196,6 +208,7 @@ void	ZoneMgr::broadcastSnapshots( NetUI * net)
 int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 {
 	LI k;
+	ClientState cstmp;
 	int desc_size, state_size, nbsize;
 	unsigned short nbt, nb;
 	desc_size = sizeof( ClientDescription);
@@ -210,7 +223,7 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 		cout<<"Error : packet size too big, adjust MAXBUFFER in const.h"<<endl;
 		cout<<"Data size = "<<((desc_size+state_size)*nbt)<<endl;
 		cout<<"Nb clients = "<<nbt<<endl;
-		exit( 1);
+		cleanup();
 	}
 
 	cout<<"ZONE "<<clt->zone<<" - "<<nbt<<" clients"<<endl;
@@ -219,11 +232,14 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 	for( k=zone_list[clt->zone].begin(); k!=zone_list[clt->zone].end(); k++)
 	{
 		cout<<"SENDING : ";
-		(*k)->current_state.display();
-		(*k)->current_state.tosend();
-		memcpy( bufzone+nbsize+offset, &(*k)->current_state, state_size);
+		cstmp = (*k)->current_state;
+		//(*k)->current_state.display();
+		//(*k)->current_state.tosend();
+		cstmp.display();
+		cstmp.tosend();
+		memcpy( bufzone+nbsize+offset, &cstmp, state_size);
 		offset += state_size;
-		(*k)->current_state.received();
+		//(*k)->current_state.received();
 		memcpy( bufzone+nbsize+offset, &(*k)->current_desc, desc_size);
 		offset += desc_size;
 	}

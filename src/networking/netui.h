@@ -486,7 +486,7 @@ inline void	NETCLASS::watchSocket( SOCKET bsock)
 	#else
 		if( bsock < this->sock)
 			bsock = this->sock;
-		//cout<<"NETUI : watching descriptor "<<bsock<<endl;
+		//cerr<<"NETUI : watching descriptor "<<bsock<<endl;
 	#endif
 	FD_SET( bsock, &client_set);
 #endif
@@ -613,7 +613,7 @@ inline int		NETCLASS::recvbuf( SOCKETALT bsock, char *buffer, unsigned int &len,
 			ret = -1;
 		}
 		len = len1;
-		cout<<"NETUI : Recvd "<<len<<" bytes"<<" <- "<<inet_ntoa( from->sin_addr)<<":"<<ntohs(from->sin_port)<<endl;
+		cerr<<"NETUI : Recvd "<<len<<" bytes"<<" <- "<<inet_ntoa( from->sin_addr)<<":"<<ntohs(from->sin_port)<<endl;
 		#endif
 	#endif
 	//cout<<"Received "<<ret<<" bytes"<<endl;
@@ -627,6 +627,7 @@ inline int		NETCLASS::recvbuf( SOCKETALT bsock, char *buffer, unsigned int &len,
 inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, AddressIP * to)
 {
 	int numsent;
+	assert( len<=MAXBUFFER);
 
 	#ifdef HAVE_SDLnet
 		#ifdef _TCP_PROTO
@@ -698,7 +699,7 @@ inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, 
 #endif
 			return -1;
 		}
-		cout<<"NETUI : Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
+		cerr<<"NETUI : Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
 		#endif
 	#endif
 	return 0;

@@ -56,7 +56,7 @@ ForceFeedback *forcefeedback;
 Universe * _Universe;
 // GameUniverse _Universe;
 TextPlane *bs_tp=NULL;
-
+bool SERVER=0;
 /* 
  * Function definitions
  */
@@ -96,13 +96,14 @@ void cleanup(void)
   printf ("Thank you for playing!\n");
 
   // In network mode, we may not do the save since it is useless
-  if( _Universe != NULL && Network!=NULL)
+  if( _Universe != NULL && Network==NULL)
 	  _Universe->WriteSaveGame(true);
 
   if( Network!=NULL)
   {
 		cout<<"Number of players"<<_Universe->numPlayers()<<endl;
 		for( int i=0; i<_Universe->numPlayers(); i++)
+			if( Network[i].isInGame())
 				Network[i].logout();
 		delete [] Network;
   }
@@ -479,6 +480,7 @@ void bootstrap_main_loop () {
 		else
 		{
 			cout<<" logged in !"<<endl;
+			delete savedata;
 			savegamefile = homedir+"/save/"+(*it)+".save";
 		}
 	  }
@@ -548,7 +550,7 @@ void bootstrap_main_loop () {
 	}
 
 	cout<<"Loading completed"<<endl;
-	// Send a network msg saying we are ready
+	// Send a network msg saying we are ready and also send position info
 	if( Network!=NULL) {
 		for( int l=0; l<_Universe->numPlayers(); l++)
 			Network[l].inGame();

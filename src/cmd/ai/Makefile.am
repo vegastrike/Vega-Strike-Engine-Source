@@ -10,6 +10,7 @@ libaigeneric_a_SOURCES =	\
 	communication_xml.cpp	\
 	event_xml.cpp	\
 	flybywire.h	\
+	flybywire.cpp	\
 	navigation.cpp		\
 	ikarus.cpp		\
 	script.h			\
@@ -42,6 +43,5 @@ libai_a_SOURCES =	\
 	flyjoystick.h	\
 	flyjoystick.cpp	\
 	input_dfa.cpp	\
-	flybywire.cpp	\
 	input_dfa.h
 

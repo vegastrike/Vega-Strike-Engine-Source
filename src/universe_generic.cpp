@@ -25,6 +25,15 @@ Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
   }
   return NULL;
 }
+int Universe::whichPlayerStarship(const Unit * doNotDereference) {
+  if (!doNotDereference)
+    return -1;
+  for (unsigned int i=0;i<cockpit.size();i++) {
+    if (doNotDereference==cockpit[i]->GetParent())
+      return i;
+  }
+  return -1;
+}
 void Universe::SetActiveCockpit (int i) {
 #ifdef VS_DEBUG
   if (i<0||i>=cockpit.size()) {

@@ -77,7 +77,7 @@ void	AccountServer::start()
 	if(Cltacct.size()<=0)
 	{
 		cout<<"No account found in accounts.xml"<<endl;
-		exit(1);
+		cleanup();
 	}
 	cout<<Cltacct.size()<<" accounts loaded."<<endl;
 
@@ -177,8 +177,8 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 		{
 			case CMD_LOGIN :
 				strcpy( name, buf);
-				cout<<">>> LOGIN REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				strcpy( passwd, buf+NAMELEN);
+				cout<<">>> LOGIN REQUEST =( "<<name<<":"<<passwd<<" )= --------------------------------------"<<endl;
 
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
@@ -338,7 +338,7 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 		else
 		{
 			cout<<"Error, default xml save not found"<<endl;
-			exit(1);
+			cleanup();
 		}
 		// Put the size of the first save file in the buffer to send
 		unsigned int xmlsize = htonl( readsize);
@@ -353,6 +353,7 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 		{
 			cout<<"Save file does not exists... sending default one to game server"<<endl;
 			acctsave = acctdir+"default.save";
+			cout<<"Trying to open : "<<acctsave<<endl;
 			fp = fopen( acctsave.c_str(), "r");
 		}
 		if( fp!=NULL)
@@ -369,7 +370,7 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 		else
 		{
 			cout<<"Error, default save not found"<<endl;
-			exit(1);
+			cleanup();
 		}
 		// Put the size of the second save file in the buffer to send
 		unsigned int savesize = htonl( readsize2);

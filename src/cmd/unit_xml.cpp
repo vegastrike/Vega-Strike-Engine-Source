@@ -1487,11 +1487,20 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 		  static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
 		  vschdir (savedunitpath.c_str());
 		  string nonautosave=GetReadPlayerSaveGame(_Universe->CurrentCockpit());
-		  if (nonautosave.empty()) {
-			vschdir (modifications);
-		  }else {
-			vschdir (nonautosave.c_str());
+		  // In network mode we only look in the save subdir in HOME
+		  if( Network==NULL && !SERVER)
+		  {
+			  if (nonautosave.empty()) {
+				vschdir (modifications);
+			  }else {
+				vschdir (nonautosave.c_str());
+			  }
 		  }
+		  else if( !SERVER)
+			  vschdir( "save");
+		  else
+			  vschdir( "accounts");
+
 		  inFile=NULL;
 		  if (filename[0])
     		    inFile = fopen (filename,"r");
