@@ -483,6 +483,28 @@ void	NetServer::start(int argc, char **argv)
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
 
+	// Loads dynamic universe
+	string dynpath = datadir+"/dynaverse.dat";
+	FILE * fp = fopen( dynpath.c_str(), "rb");
+	if( !fp)
+	{
+		cerr<<"!!! ERROR : opening dynamic universe file !!!"<<endl;
+		exit(1);
+	}
+	fseek( fp, 0, SEEK_END);
+	int dynsize = ftell( fp);
+	fseek( fp, 0, SEEK_SET);
+	char * dynaverse = new char[dynsize+1];
+	dynaverse[dynsize] = 0;
+	int nbread;
+	if( (nbread = fread( dynaverse, sizeof( char), dynsize, fp)) != dynsize)
+	{
+		cerr<<"!!! ERROR : read "<<nbread<<" bytes, there were "<<dynsize<<" to read !!!"<<endl;
+		exit(1);
+	}
+
+	globalsave->ReadSavedPackets( dynaverse);
+
 	// Server loop
 	while( keeprun)
 	{

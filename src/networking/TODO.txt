@@ -1,7 +1,6 @@
 
 *** GENERAL ************************************************************
 
-- In which directory should be the system files ?
 - Implement a download manager -> Carsten is on that one
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
@@ -10,20 +9,15 @@
 *** ACCOUNT SERVER *****************************************************
 
 - BUG : when account already logged -> game server fails to send info to client
-- Handle case where player has no server affected yet
-- Web-based account creation enhancements : fully create an initial savegame
-	- has to read faction.xml
-	- has to know about a few basic ships (specified by hand ?)
+- In client-to-acctserver mode : Handle case where player has no server affected yet
 
 *** GAME SERVER ********************************************************
 
-- Add a check for player jump energy when a jump request arrives and send back a CMD_ASKFILE with packetserial = 0 if not enough
-  Also send a CMD_JUMP thta will be ignored on client side
+- Add a communication system allowing the player to either broacast a message or to send it on a given subspace channel ;)
 - Handle a timeout between the time the player logged in and the time he really enters the game
 - Turn mount_num into a char ?
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
 
-- When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 - Think about transfering config data such as difficulty, physics...
 - Find all the used vars in Unit stuff and integrate them in the serverconfig
 
@@ -34,7 +28,6 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
-- Ask directly account server for authentication and get serverip/port to connect to
 - Check if we received position info about us -> ignore
 - Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
@@ -75,6 +68,9 @@ NO BECAUSE DEFAULT TO ZLIB - Put some negociation stage to check that client sup
 
 === ACCOUNT SERVER ======================================================
 
+DONE - Web-based account creation enhancements : fully create an initial savegame
+DONE	- has to read faction.xml
+DONE	- has to know about a few basic ships (specified by hand ?)
 DONE - Load whole system description when generating a system (if not already done)
 DONE - Compress the save files before sending them to game server
 DONE - Then transfert unit description with login acceptance
@@ -87,6 +83,8 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
+DONE ANOTHER WAY - Add a check for player jump energy when a jump request arrives and send back a CMD_ASKFILE with packetserial = 0 if not enough
 DONE - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
 DONE - Add position stuff transmission for other units than clients (ai, missiles)
 DONE - Make the difference between ships/ai and planets/bases that move really slowly so updates are not required that often
@@ -100,6 +98,7 @@ DONE - forsee account server unavailability and in that case, deny new logins + 
 
 === CLIENT SIDE =========================================================
 
+MADE POSSIBLE - Ask directly account server for authentication and get serverip/port to connect to
 DONE - Write the function that receive damage snapshot
 DONE - Do not maintain ClientStates anymore -> maintain Unit members directly
 DONE - When receiving position update, test if local player
