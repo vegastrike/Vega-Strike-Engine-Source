@@ -9,6 +9,9 @@ struct LVector {
   float k;
 
 };
+enum GUNS {FLUX, LASER, MASSDRIVER, MESON, NEUTRON,ION, PARTICLE, TACH, PLASMA, REAPER,PHOTON, ANTIMATTER, STORMFIRE, LEECH};
+enum MISS {DRAGONFLY, DUMBFIRE, HS, IR, FF, TORP, SWARM, TRACKER, LEECHMIS, MACE};
+
 struct V {
   float x,y,z,i,j,k,s,t;
 
@@ -197,18 +200,11 @@ int main (int argc, char ** argv)
     sscanf (argv[3],"%f",&scl);
   }
   FILE *shp = fopen (argv[1],"r+b");
-        fp = fopen (argv[2],"w+b");
+
 	char meshname [256];
 	strcpy (meshname, argv[2]);
 	meshname[strlen(meshname)-6]='\0';
 	strcat (meshname, ".xmesh");
-	Tag ("Unit");
-	Tab();
-	StrWrite ("<Meshfile file=\"");
-	StrWrite (meshname);
-	StrWrite ("\" />\n");
-	ETag ("Unit");
-	fclose (fp);
 	char tmp [255];
 	fp = fopen (meshname,"w+b");
 	short texfilenamesize =readf (shp);
@@ -735,6 +731,131 @@ int main (int argc, char ** argv)
 	Stat.Roll = 1.2*readf (shp)*PI/360; //make maneuverability less should be /180
 	
 	fclose (shp);
+        fp = fopen (argv[2],"w+b");
+	Tag ("Unit");
+	Tab();
+	StrWrite ("<Meshfile file=\"");
+	StrWrite (meshname);
+	StrWrite ("\" />\n");
+	
+	for (i=0;i<DrawDat.numengines;i++) {
+	  Tab();
+	  StrWrite ("<Light file=\"supernova.bmp\" x=");
+	  TextF (DrawDat.Engine[i].V[0].x*scl);
+	  StrWrite (" y=");
+	  TextF (DrawDat.Engine[i].V[0].y*scl);
+	  StrWrite (" z=");
+	  TextF (DrawDat.Engine[i].V[0].z*scl);
+	  StrWrite (" size=");
+	  TextF ((DrawDat.Engine[i].minradius+DrawDat.Engine[i].maxradius)*.5*scl);
+	  StrWrite ("/>\n");
+	}
+	for (i=0;i<Stat.NumGuns;i++) {
+	  Tab();
+	  StrWrite ("<Mount weapon=\"");
+	  switch (Stat.GunType[i]) {
+	  case FLUX:
+	    StrWrite ("flux\" size=\"Light\"");
+	    break;
+	  case MASSDRIVER:
+	    StrWrite ("MassDriver\" size=\"Medium\"");
+	    break;
+	  case MESON:
+	    StrWrite ("Meson\" size=\"Medium\"");
+	    break;
+	  case NEUTRON:
+	    StrWrite ("Neutron\" size=\"Medium\"");
+	    break;
+	  case ION:
+	    StrWrite ("Ion\" size=\"Medium\"");
+	    break;
+	  case PARTICLE:
+	    StrWrite ("Particle\" size=\"Heavy\"");
+	    break;
+	  case TACH:
+	    StrWrite ("Tach\" size=\"Heavy\"");
+	    break;
+	  case PLASMA:
+	    StrWrite ("Plasma\" size=\"heavy\"");
+	    break;
+	  case REAPER:
+	    StrWrite ("Reaper\" size=\"heavy\"");
+	    break;
+	  case PHOTON:
+	    StrWrite ("Photon\" size=\"heavy\"");
+	    break;
+	  case ANTIMATTER:
+	    StrWrite ("AntiMatter\" size=\"heavy\"");
+	    break;
+	  case STORMFIRE:
+	    StrWrite ("Light\" size=\"Special\"");
+	    break;
+	  case LEECH:
+	    StrWrite ("Leech\" size=\"Special\"");
+	    break;
+	  case LASER:
+	  default:
+	    StrWrite ("laser\" size=\"Light\"");
+	    break;
+	  }
+	  StrWrite (" x=");
+	  TextF (Stat.GunOffset[i].i*scl);
+	  StrWrite (" y=");
+	  TextF (Stat.GunOffset[i].j*scl);
+	  StrWrite (" z=");
+	  TextF (Stat.GunOffset[i].k*scl);
+	  StrWrite ("/>\n");
+
+	}
+	for (i=0;i<Stat.NumMissiles;i++) {
+	  Tab();
+	  StrWrite ("<Mount weapon=\"");
+	  switch (Stat.MissileType[i]) {
+	  case DRAGONFLY:
+	    StrWrite ("DragonFly\" size=\"Special-Missile\"");
+	    break;
+	  case DUMBFIRE:
+	    StrWrite ("Dumbfire\" size=\"Light-Missile\"");
+	    break;
+	  case HS:
+	    StrWrite ("HeatSeeker\" size=\"Medium-Missile\"");
+	    break;
+	  case FF:
+	    StrWrite ("FriendOrFoe\" size=\"Medium-Missile\"");
+	    break;
+	  case TORP:
+	    StrWrite ("Torpedo\" size=\"Heavy-Missile\"");
+	    break;
+	  case SWARM:
+	    StrWrite ("Swarm\" size=\"Special-Missile\"");
+	    break;
+	  case TRACKER:
+	    StrWrite ("Tracker\" size=\"Special-Missile\"");
+	    break;
+	  case LEECHMIS:
+	    StrWrite ("LeechMis\" size=\"Medium-Missile\"");
+	    break;
+	  case MACE:
+	    StrWrite ("Mace\" size=\"Special-Missile\"");
+	    break;
+	  case IR:
+	  default:
+	    StrWrite ("ImageRecognition\" size=\"Medium-Missile\"");
+	    break;
+	  }
+	  StrWrite (" x=");
+	  TextF (Stat.MissileOffset[i].i*scl);
+	  StrWrite (" y=");
+	  TextF (Stat.MissileOffset[i].j*scl);
+	  StrWrite (" z=");
+	  TextF (Stat.MissileOffset[i].k*scl);
+	  StrWrite ("/>\n");
+	  
+	}
+
+	ETag ("Unit");
+	fclose (fp);
+
 	/*	yawing = pitching = rolling = 0;
 	const float Root3 = 1.73205080757f;
 	ShieldPnt[0].init (.5 , -Root3 * .5 , 2.5); // init the shield
