@@ -88,7 +88,7 @@ void init_opengl_extensions()
     glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
     glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
 #endif
-    if (glMultiTexCoord2fARB!=0) {
+    if (glutExtensionSupported ("GL_ARB_multitexture")) {
       g_game.Multitexture = 1;
 	  printf ("Multitexture supported");
     } else {

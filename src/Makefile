@@ -72,7 +72,7 @@ SDL_LIBS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
 TR_CFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
 TR_CPPFLAGS =   -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1   
 TR_CXXFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
-TR_LIBS =   -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
+TR_LIBS =   -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer -L/usr/X11R6/lib -lGL -lGLU  -lglut  -lexpat
 VERSION = 0.0.1
 
 bin_PROGRAMS = vegastrike
@@ -97,7 +97,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
 CPPFLAGS =    -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1   
 LDFLAGS = 
-LIBS =    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
+LIBS =    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer -L/usr/X11R6/lib -lGL -lGLU  -lglut  -lexpat
 vegastrike_OBJECTS =  alglib.o cmd_ai.o cmd_input_dfa.o cmd_unit.o \
 cmd_gun.o cmd_physics.o debug.o error_util.o file_util.o gauss.o \
 gfx_animation.o gfx_aux_logo.o gfx_aux_palette.o gfx_aux_texture.o \

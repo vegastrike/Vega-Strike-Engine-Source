@@ -28,23 +28,24 @@
 #include <vector>
 const int LOCATION =1;
 const int TARGET = 2;
-const int SELF = 3; //the order types are orthogonal...you can form up while attacking and moving to a location
+const int SELF = 4; //the order types are orthogonal...you can form up while attacking and moving to a location
 class Order:public AI {
 protected:
   int type; 
+  bool done;
   UnitCollection *group;
   UnitCollection *targets;
   Vector targetlocation;
   vector<Order*> suborders;
 public:
-  Order (): AI(), targetlocation(0,0,0){group =targets=NULL;type=0;}
-  Order(int ttype):AI(), targetlocation(0,0,0){targets=NULL;type = ttype;}
+  Order (): AI(), targetlocation(0,0,0){group =targets=NULL;type=0;done=false;}
+  Order(int ttype):AI(), targetlocation(0,0,0){targets=NULL;type = ttype;done=false;}
   virtual AI *Execute();
   bool AttachOrder (UnitCollection *targets);
   bool AttachOrder (Vector target);
-  bool AttachSelfOrder (UnitCollection *targets);
+  bool AttachSelfOrder (UnitCollection *targets=NULL);
   bool AppendOrder (Order * ord);
-  
+  bool Done() {return done;}
   int getType() {return type;}
 };
 
@@ -76,7 +77,9 @@ public:
 			return this;
 		}
 	}
-        int getType() {return 0;}
+	
+	bool Done() {return false;}
+	int getType() {return 0;}
         bool AppendOrder (Order * tmp) {return false;}
 
 };

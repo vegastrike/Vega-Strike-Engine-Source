@@ -22,8 +22,19 @@
 #include "cmd_ai.h"
 #include "UnitCollection.h"
 AI * Order::Execute () {
+  int completed=0;
+  vector<Order*>::iterator ord = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
-    suborders[i]->Execute();
+    if (completed&(*ord)->getType()){
+      (*ord)->Execute();
+      completed|=(*ord)->getType();
+      if ((*ord)->Done()) {
+	delete (*ord);
+	ord =suborders.erase(ord);
+      } else {
+	ord++;
+      }
+    }
   }
   return this;
 }
@@ -57,14 +68,18 @@ bool Order::AttachSelfOrder (UnitCollection *targets1) {
     return false;
   if (group)
     delete group;
-  group = new UnitCollection();
-  UnitCollection::UnitIterator *iter = targets1->createIterator();
-  Unit *u;
-  while(0!=(u = iter->current())) {
-    group->prepend (u);
-    iter->advance();
+  if (targets1==NULL) {
+    group = NULL;
+  } else {
+    group = new UnitCollection();
+    UnitCollection::UnitIterator *iter = targets1->createIterator();
+    Unit *u;
+    while(0!=(u = iter->current())) {
+      group->prepend (u);
+      iter->advance();
+    }
+    delete iter;
   }
-  delete iter;
   return true;
 }
 bool Order::AttachOrder (Vector targetv) {

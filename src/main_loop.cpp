@@ -312,7 +312,7 @@ static void Quit(KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 1;
+const int numf = 5;
 Unit *fighters[numf];
 //LocationSelect *locSel=NULL;
 Background * bg = NULL;
@@ -524,7 +524,13 @@ void createObjects() {
     */
     //fighters[a] = new Unit("phantom.xunit", true);
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
-    fighters[a]->SetPosition((a%10)*35 - 40.0F, (a/10)*35 - 40.0F,7.0F);
+
+
+     fighters[a]->SetPosition((a%10)*35 - 40.0F, (a/10)*35 - 40.0F,7.0F);
+  
+
+
+
     //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));

@@ -110,6 +110,8 @@ Texture::Texture(const char * FileName, int stage, enum TEXTURE_TARGET target, e
 	fp = fopen (FileName, "r+b");
 	if (!fp)
 	{
+	  fprintf (stderr, "%s, not found",FileName);
+	  
 		data = NULL;
 		return;
 	}
