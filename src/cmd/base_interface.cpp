@@ -665,6 +665,11 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 	if (state==WS_MOUSE_UP) {
 		const char * filnam=this->pythonfile.c_str();
 		if (filnam[0]) {
+                  if (filnam[0]=='#') {
+                    ::Python::reseterrors();
+                    PyRun_SimpleString(const_cast<char*>(filnam));
+                    ::Python::reseterrors();
+                  }else {
 			FILE *fp=VSFileSystem::vs_open(filnam,"r");
 			if (fp) {
 				int length=strlen(filnam);
@@ -678,6 +683,7 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 			} else {
 				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
 			}
+                  }
 		}
 	}}
 
