@@ -13,6 +13,9 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#else
+#include <direct.h>
+#include <process.h>
 #endif
 #if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX)) && !defined(BSD)
 #include <values.h>
