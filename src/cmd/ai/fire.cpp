@@ -8,6 +8,7 @@ using Orders::FireAt;
 FireAt::FireAt (float reaction_time, float aggressivitylevel): Order (WEAPON|TARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
   gunspeed=float(.0001);
   gunrange=float(.0001);
+  missileprobability=.001;
   
 }
 //temporary way of choosing
@@ -86,10 +87,14 @@ void FireAt::Execute () {
     ChooseTargets(1);
   }
   if (shouldfire) {
-    if (delay>rxntime) {
-      parent->Fire(false);
+    if ((float(rand())/RAND_MAX)<missileprobability*SIMULATION_ATOM) {
       parent->Fire(true);
       parent->ToggleWeapon(true);//change missiles to only fire 1
+    }
+    if (delay>rxntime) {
+      parent->Fire(false);
+
+
     } else {
       delay +=SIMULATION_ATOM;
     }

@@ -10,6 +10,7 @@ class FireAt: public Order {
 
   bool ShouldFire(Unit * targ);
 protected:
+  float missileprobability;
   float rxntime;
   float delay;
   float agg;
