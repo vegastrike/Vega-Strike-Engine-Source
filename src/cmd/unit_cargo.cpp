@@ -8,25 +8,27 @@
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
 #include "unit_const_cache.h"
+
+static const GFXColor disable (1,0,0,1);
+
 extern int GetModeFromName (const char *);
-vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist, bool downgrade)
+vector <CargoColor>& GameUnit::FilterDowngradeList (vector <CargoColor> & mylist, bool downgrade)
 {
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
-    int mode=GetModeFromName(mylist[i].content.c_str());
+    int mode=GetModeFromName(mylist[i].cargo.content.c_str());
     if (mode!=2 || (!downgrade)) {
-       const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].content.c_str(),FactionUtil::GetFaction("upgrades")));
+      const Unit * NewPart =  UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),FactionUtil::GetFaction("upgrades")));
       if (!NewPart){
-	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].content,FactionUtil::GetFaction("upgrades")),UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades")));
+	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.content,FactionUtil::GetFaction("upgrades")),UnitFactory::createUnit(mylist[i].cargo.content.c_str(),false,FactionUtil::GetFaction("upgrades")));
       }
       if (NewPart->name==string("LOAD_FAILED")) {
-	const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].content.c_str(),faction));
+	const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].cargo.content.c_str(),faction));
 	if (!NewPart){
-	  NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].content,
-								 faction),
-				       UnitFactory::createUnit(mylist[i].content.c_str(),false,faction));
+	  NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].cargo.content, faction),
+				       UnitFactory::createUnit(mylist[i].cargo.content.c_str(),false,faction));
 	}
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
@@ -71,22 +73,27 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist, bool dow
       removethis=true;
     }
     if (removethis) {
-      mylist.erase (mylist.begin()+i);
-      i--;
+      if (downgrade) {
+        mylist.erase (mylist.begin()+i);	  
+        i--;
+      } else {
+        mylist[i].color=disable;
+      }
     }
   }
   return mylist;
 }
 
-vector <Cargo>& GameUnit::FilterUpgradeList (vector <Cargo> & mylist) {
+vector <CargoColor>& GameUnit::FilterUpgradeList (vector <CargoColor> & mylist) {
 	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
 	Cockpit * cp = _Universe->isPlayerStarship (this);
 	if (cp) {
 	  for (unsigned int i=0;i<mylist.size();i++) {
-	    if (mylist[i].price>cp->credits) {
-	      mylist.erase (mylist.begin()+i);
-	      i--;
+	    if (mylist[i].cargo.price>cp->credits) {
+//	      mylist.erase (mylist.begin()+i);
+//	      i--;
+          mylist[i].color=disable;
 	    }
 	  }
 	}
@@ -190,5 +197,6 @@ void GameUnit::EjectCargo (unsigned int index) {
 
   }
 }
+
 
 

@@ -197,7 +197,8 @@ void TextArea::Refresh(void) {
 	if (has_scrollbar != 0) { DisplayScrollbar(); }
 	RenderText();
 
-	if (cur_highlighted > 0 && cur_highlighted != (cur_selected - top_item_number)) { HighlightCount(cur_highlighted, 1); }
+//	if (cur_highlighted > 0 && cur_highlighted != (cur_selected - top_item_number)) { HighlightCount(cur_highlighted, 1); }
+	if (cur_highlighted > 0) { HighlightCount(cur_highlighted, 1); }
 	if (cur_selected > 0) { HighlightCount(cur_selected - top_item_number, 2); }
 
 	// Displays a transparent red box in the area where text can be displayed
@@ -239,6 +240,7 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level) {
 		else {
 			new_y = ycoord[5] - (text_spacing * (count + 1 - top_item_number)) + horizontal_spacer;
 			new_x = xcoord[5] + (horizontal_per_level * (level-1));
+			GFXColorf(current->col);
 			ShowText(new_x, new_y, width[5], font_size, current->description, do_multiline);
 			count++;
 		}
@@ -249,13 +251,12 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level) {
 		RenderTextItem(current->child[cur], level+1);
 	}
 }
-void TextArea::AddTextItem(const char *name, const char *description) {AddTextItem(name, description, NULL); }
-void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name) {
+void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name, const GFXColor col) {
 	TextAreaItem *master;
 	master = ItemList->FindChild(parent_name);
 	item_count++;
-	if (master == NULL) { ItemList->AddChild(name, description); }
-	else { master->AddChild(name, description); }
+	if (master == NULL) { ItemList->AddChild(name, description,col); }
+	else { master->AddChild(name, description,col); }
 }
 
 void TextArea::ChangeTextItem(const char *name, const char *description,bool wrap) {
@@ -264,6 +265,13 @@ void TextArea::ChangeTextItem(const char *name, const char *description,bool wra
 	if (search == 0) { return; }
 	if (search->description != 0) { free(search->description); }
 	search->description = strdup(description);
+}
+
+void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col) {
+	TextAreaItem *search;
+	search = ItemList->FindChild(name);
+	if (search == 0) { return; }
+	search->col=col;
 }
 
 void TextArea::ClearList(void) {
@@ -349,7 +357,7 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
 		}
 	}
 	if (Inside(x,y,5) != 0 && do_highlight > 0) {
-		cur_selected = LocateCount(y) + top_item_number;
+		cur_selected = LocateCount(y);
 	}
 	if (Inside(x,y,3) != 0 && Inside(x,y,4) == 0) {
 		if (state != WS_MOUSE_UP) { return 1; }
@@ -443,12 +451,14 @@ int TextArea::LocateCount(float y) {
 
 void TextArea::HighlightCount(int count, int type) {
 	float x = 0, y = 0;
-	if (count <= 0 || count > max_lines) { return; }
+	if (count <= 0 || count > max_lines+1) { return; }
 
 	y = ycoord[5] - (text_spacing * (count-1)) - horizontal_spacer + ((text_spacing - (font_size_float / 100))/2);
 	x = xcoord[5];
-	if (type == 1) { ShowColor(x, y, width[5], text_spacing,   1, 1, 1, 0.25); }
-	if (type == 2) { ShowColor(x, y, width[5], text_spacing,   0.2, 0.2, 0.4, 0.5); }
+	if (count<=this->ItemList->child_count) {
+		if (type == 1) { ShowColor(x, y, width[5], text_spacing,   1, 1, 1, 0.25); }
+		if (type == 2) { ShowColor(x, y, width[5], text_spacing,   0.2, 0.2, 0.4, 0.5); }
+	}
 }
 
 void TextArea::DisplayScrollbar(void) {
@@ -543,11 +553,14 @@ void TextArea::ChompIntoItems(const char *text, const char *parent) {
 	free (temp);
 }
 
-TextAreaItem::TextAreaItem(void) {
+/*TextAreaItem::TextAreaItem(void) {
 	TextAreaItem("blank","", NULL);
-}
-
-TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class) {
+}*/
+//#include <stdlib.h>
+//#define rnd (((float)rand())/((float)RAND_MAX))
+TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class) 
+	: col (1,1,1,1) {
+//{	col = GFXColor (rnd,rnd,rnd,1);
 	if (new_name != 0 ) { name = strdup(new_name); }
 	else { name = 0; }
 	if (desc != 0 ) { description = strdup(desc); }
@@ -556,7 +569,7 @@ TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem 
 	child_count = 0;
 	child = NULL;
 	parent = NULL;
-	if (parent == NULL) { expanded = 1; }
+//	if (parent == NULL) { expanded = 1; }
 }
 
 TextAreaItem::~TextAreaItem(void) {
@@ -615,7 +628,7 @@ TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
 
 typedef TextAreaItem * TextAreaItemStr;
 
-void TextAreaItem::AddChild(const char *new_name, const char *desc) {
+void TextAreaItem::AddChild(const char *new_name, const char *desc,const GFXColor col) {
 	TextAreaItem **newlist;
 	int cur = 0;
 	child_count++;
@@ -631,4 +644,5 @@ void TextAreaItem::AddChild(const char *new_name, const char *desc) {
 		child = newlist;
 	}
 	child[child_count-1] = new TextAreaItem(new_name, desc, NULL);
+	child[child_count-1]->col=col;
 }

@@ -31,8 +31,8 @@ public:
   struct LastSelected{int type; float x; float y; int button; int state;bool last;LastSelected() {last=false;}} lastselected;
   void ProcessMouse(int type, int x, int y, int button, int state);
 
-  vector <Cargo> TempCargo;//used to store cargo list
-  vector <Cargo> * CurrentList;
+  vector <CargoColor> TempCargo;//used to store cargo list
+  vector <CargoColor> * CurrentList;
   enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE, STOP_MODE}submode;
   enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,BRIEFINGMODE,NEWSMODE,SHIPDEALERMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE, SAVEMODE, MAXMODE} mode;
   bool multiplicitive;
@@ -40,10 +40,10 @@ public:
   vector <BaseMode> availmodes;
   string title;
   vector <string> curcategory;
-  vector <Cargo>&FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero);
-  vector <Cargo>&GetCargoFor(Unit *un);
-  vector <Cargo>&GetCargoList ();
-  vector <Cargo>&MakeActiveMissionCargo();
+  vector <CargoColor>&FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero);
+  vector <CargoColor>&GetCargoFor(Unit *un);
+  vector <CargoColor>&GetCargoList ();
+  vector <CargoColor>&MakeActiveMissionCargo();
   void StopBriefing();
   void SetupCargoList();
   bool beginswith (const vector <std::string> &cat, const std::string &s);

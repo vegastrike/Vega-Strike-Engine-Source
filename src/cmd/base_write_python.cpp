@@ -26,7 +26,7 @@ void Base::Room::Talk::EndXML (FILE *fp) {
 	Link::EndXML(fp);
 	fprintf(fp,", '%s')\n",randstr);
 	FILE *py=fopen(randstr,"wt");
-	fprintf(py,"import Base\nimport VS\nimport rnadom\n\nrandnum=random.randrange(0,%d)\n",say.size());
+	fprintf(py,"import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n",say.size());
 	for (int i=0;i<say.size();i++) {
 		fprintf(fp,"if (randnum==%d):\n",i);
 		for (int j=0;j<say[i].size();j++) {

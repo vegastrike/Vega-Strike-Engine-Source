@@ -44,6 +44,7 @@
 #endif
 
 #include "glut_support.h"
+#include "gfxlib_struct.h"
 
 #define DIR_TEXT "textures/gui/"
 
@@ -90,9 +91,9 @@ public:
 	void DoMultiline(int yes){do_multiline=yes;}	// DoMultiline(1) to enable multi-line entries
 	void Refresh(void);
 	void RenderText(void);
-	void AddTextItem(const char *name, const char *description);
-	void AddTextItem(const char *name, const char *description, const char *parent_name);
+	void AddTextItem(const char *name, const char *description, const char *parent_name=NULL, const GFXColor col=GFXColor(1,1,1,1));
 	void ChangeTextItem(const char *name, const char *description, bool wrap=false);
+	void ChangeTextItemColor(const char *name, const GFXColor& col);
 	void SetText(const char *text);	// Sets the text. Enables Multiline and disables highlighting
 	void ClearList(void);
 	// Returns the char of the currently selected item. NULL if nothing is selected
@@ -114,11 +115,11 @@ public:
 
 private:
 	// Flag that enables/disables the scrollbar (It is not shown if it is disabled). This includes the scroll buttons
-	int has_scrollbar;
+	char has_scrollbar;
 
 	// Flags that enable/disable Highlighting and Mutli-line text
-	int do_highlight;
-	int do_multiline;
+	char do_highlight;
+	char do_multiline;
 
 	// Array is as follows:
 	// Entire box (the border), top scroll button, buttom scroll button, entire scrollbar, active scrollbar, text area
@@ -156,7 +157,7 @@ private:
 	float max_lines;
 
 	// 0 for no button clicked, 1 for top button, 2 for bottom button, 3 for scrollbar, 4 for above scrollbar, 5 for below scrollbar
-	int button_pressed;
+	char button_pressed;
 
 	// The currently highlighted item
 	int cur_highlighted;
@@ -202,9 +203,9 @@ private:
 // Keep everything public so the TextArea class can get faster access to the elements in this class
 class TextAreaItem {
 public:
-	TextAreaItem(void);
+//	TextAreaItem(void);
 	// parent_class is NULL for the master TextAreaItem
-	TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class);
+	TextAreaItem(const char *new_name="blank", const char *desc="", TextAreaItem *parent_class=0);
 	~TextAreaItem(void);
 
 	// A recursive function. This function will be called to all the children until one of them matches the search_name
@@ -212,10 +213,10 @@ public:
 	TextAreaItem *FindChild(const char *search_name);
 	TextAreaItem *FindCount(int count, int cur);
 
-	void AddChild(const char *new_name, const char *desc);
+	void AddChild(const char *new_name, const char *desc, const GFXColor col=GFXColor(1,1,1,1));
 	void ExpandTree(void);
 	void Sort(void);
-
+	GFXColor col;
 	char *name;
 	char *description;
 
@@ -226,7 +227,8 @@ public:
 
 	TextAreaItem *parent;
 
-	int expanded;
+	//seems to be unused, except for the constructor...
+//	int expanded;
 };
 
 void LoadTextures(void);
