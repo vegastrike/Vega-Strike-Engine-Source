@@ -67,7 +67,10 @@ extern bool have_yy_error;
 /* *********************************************************** */
 PYTHON_INIT_INHERIT_GLOBALS(Director,missionThread);
 PYTHON_BEGIN_MODULE(Director)
-PYTHON_BEGIN_INHERIT_CLASS(Director,missionThread,"Mission")
+PYTHON_BEGIN_INHERIT_CLASS(Director,PythonMission,missionThread,"Mission")
+  Class.def (&missionThread::Pickle,"Pickle",PythonMission::default_Pickle);
+  Class.def (&missionThread::UnPickle,"UnPickle",PythonMission::default_UnPickle);
+  Class.def (&missionThread::Execute,"Execute",PythonMission::default_Execute);
 PYTHON_END_CLASS(Director,missionThread)
 PYTHON_END_MODULE(Director)
 

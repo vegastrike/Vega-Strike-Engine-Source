@@ -73,7 +73,7 @@ void UnpickleMission (std::string pickled) {
     }else {
       delete active_missions.back()->runtime.threads.back();
     }
-    active_missions.back()->runtime.threads.back()= PythonClass<missionThread>::Factory (file);
+    active_missions.back()->runtime.threads.back()= PythonMission::Factory (file);
     active_missions.back()->UnPickle (pickled);
   }
 }

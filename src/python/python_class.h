@@ -95,12 +95,10 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
-#define PYTHON_BEGIN_INHERIT_CLASS(name,SuperClass,myclass) { \
-    boost::python::class_builder <SuperClass,PythonClass< SuperClass > > Class (name,myclass); \
-    Class.def (boost::python::constructor<>()); \
-    Class.def (&SuperClass::Pickle,"Pickle",PythonClass< SuperClass >::default_Pickle); \
-    Class.def (&SuperClass::UnPickle,"UnPickle",PythonClass< SuperClass >::default_UnPickle); \
-    Class.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute);
+#define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
+    boost::python::class_builder <SuperClass ,NewClass> Class (name,myclass);
+#define PYTHON_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) \
+    Class.def (boost::python::constructor<>());
 #define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
     boost::python::class_builder <CLASS> Class (name,myclass);
 #define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
@@ -111,8 +109,8 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 
 template <class SuperClass> class PythonClass:public SuperClass {
-  PyObject * self;
  protected:
+  PyObject * self;
   virtual void Destructor() {
     Py_XDECREF(self);
   }
@@ -123,29 +121,13 @@ template <class SuperClass> class PythonClass:public SuperClass {
     Py_XINCREF(self);
     last_instance=this;
   }
-  virtual void callFunction (std::string str) {
-	  boost::python::callback<void>::call_method(self,str.c_str());
-  }
-  virtual void Execute () {
-    boost::python::callback <void>::call_method (self,"Execute");
-  }
-  virtual std::string Pickle() { return boost::python::callback <std::string>::call_method (self,"Pickle");}
-  virtual void UnPickle(std::string s)  {
-    boost::python::callback<void>::call_method(self,"UnPickle",s);
-  }
-  static void default_Execute(SuperClass & self_) {
-    (self_).SuperClass::Execute();
-  }
-  static std::string default_Pickle(SuperClass & self_) {
-    return (self_).SuperClass::Pickle();
-  }
-  static void default_UnPickle(SuperClass & self_, std::string str) {
-    (self_).SuperClass::UnPickle(str);
-  }
   static PythonClass * LastPythonClass(){
     PythonClass * myclass = last_instance;
     last_instance=NULL;
     return myclass;
+  }
+  virtual void callFunction (std::string str) {
+	  boost::python::callback<void>::call_method(self,str.c_str());
   }
   static PythonClass * Factory(const std::string &file) {
     CompileRunPython (file);
@@ -155,5 +137,51 @@ template <class SuperClass> class PythonClass:public SuperClass {
     fprintf (stderr,"Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
   }
 };
-
+template <class SuperClass> class PythonAI: public PythonClass <SuperClass> {
+public:
+  PythonAI (PyObject * self_):PythonClass<SuperClass>(self_) {
+  }
+  virtual void Execute () {
+    boost::python::callback <void>::call_method (self,"Execute");
+  }
+  virtual void SetParent (Unit * parent) {
+    SuperClass::SetParent (parent);
+    boost::python::callback<void>::call_method (self,"init",parent);
+  }
+  static void default_Execute(SuperClass & self_) {
+    (self_).SuperClass::Execute();
+  }
+  static void default_SetParent (SuperClass &self_, Unit * parent) {
+  }
+  static PythonClass<SuperClass> * LastPythonClass () {
+	  return PythonClass<SuperClass>::LastPythonClass();	  
+  }
+  static PythonClass<SuperClass> * Factory (const std::string &file) {
+	  return PythonClass<SuperClass>::Factory(file);
+  }
+};
+class PythonMission: public PythonClass <missionThread> {
+public:
+  PythonMission (PyObject * self_):PythonClass<missionThread>(self_) {
+  }
+  virtual void Execute () {
+    boost::python::callback <void>::call_method (self,"Execute");
+  }
+  virtual std::string Pickle() { return boost::python::callback <std::string>::call_method (self,"Pickle");}
+  virtual void UnPickle(std::string s)  {
+    boost::python::callback<void>::call_method(self,"UnPickle",s);
+  }
+  static void default_Execute(missionThread & self_) {
+    (self_).missionThread::Execute();
+  }
+  static std::string default_Pickle(missionThread & self_) {
+    return (self_).missionThread::Pickle();
+  }
+  static void default_UnPickle(missionThread & self_, std::string str) {
+    (self_).missionThread::UnPickle(str);
+  }
+  static PythonClass<missionThread> * Factory (const std::string &file) {
+	  return PythonClass<missionThread>::Factory(file);
+  }  
+};
 #endif

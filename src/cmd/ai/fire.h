@@ -6,7 +6,6 @@
 namespace Orders {
 
 class FireAt: public CommunicatingAI {
-  friend class PythonAI;//docu said this was neceessary
 
   bool ShouldFire(Unit * targ,bool &missilelock);
 protected:
@@ -23,6 +22,25 @@ protected:
   bool isJumpablePlanet(Unit *);
   void ReInit (float rxntime, float agglevel);
 public:
+  //Other new Order functions that can be called from Python.
+  void AddReplaceLastOrder (bool replace);
+  void ExecuteLastScriptFor(float time);
+  void FaceTarget (bool end);
+  void FaceTargetITTS (bool end);
+  void MatchLinearVelocity(bool terminate, Vector vec, bool afterburn, bool local);
+  void MatchAngularVelocity(bool terminate, Vector vec, bool local);
+  void ChangeHeading(QVector vec);
+  void ChangeLocalDirection(Vector vec);
+  void MoveTo(QVector, bool afterburn);
+  void MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local);
+  void Cloak(bool enable,float seconds);
+  void FormUp(QVector pos);
+  void FaceDirection (float distToMatchFacing, bool finish);
+  void XMLScript (string script);
+  void LastPythonScript();
+  virtual void SetParent (Unit * parent) {
+	  CommunicatingAI::SetParent (parent);
+  }
   Unit * GetParent() {return CommunicatingAI::GetParent();}
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
   FireAt();

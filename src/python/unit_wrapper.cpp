@@ -202,8 +202,26 @@ PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
   Class.def (&UnitCollection::UnitIterator::remove,"remove");
   Class.def (&UnitCollection::UnitIterator::preinsert,"preinsert");
 PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
-PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonAI")
-Class.def (&FireAt::GetParent,"GetParent");
+typedef PythonAI<FireAt> PythonAIFireAt;
+PYTHON_BEGIN_INHERIT_CLASS(VS,PythonAIFireAt ,FireAt,"PythonAI")
+  Class.def (&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);
+  Class.def (&FireAt::SetParent,"init",PythonAI< FireAt >::default_SetParent);
+  Class.def (&FireAt::GetParent,"GetParent");
+  Class.def (&FireAt::AddReplaceLastOrder,"AddReplaceLastOrder");
+  Class.def (&FireAt::ExecuteLastScriptFor,"ExecuteLastScriptFor");
+  Class.def (&FireAt::FaceTarget,"FaceTarget");
+  Class.def (&FireAt::FaceTargetITTS,"FaceTargetITTS");
+  Class.def (&FireAt::MatchLinearVelocity,"MatchLinearVelocity");
+  Class.def (&FireAt::MatchAngularVelocity,"MatchAngularVelocity");
+  Class.def (&FireAt::ChangeHeading,"ChangeHeading");
+  Class.def (&FireAt::ChangeLocalDirection,"ChangeLocalDirection");
+  Class.def (&FireAt::MoveTo,"MoveTo");
+  Class.def (&FireAt::MatchVelocity,"MatchVelocity");
+  Class.def (&FireAt::Cloak,"Cloak");
+  Class.def (&FireAt::FormUp,"FormUp");
+  Class.def (&FireAt::FaceDirection,"FaceDirection");
+  Class.def (&FireAt::XMLScript,"XMLScript");
+  Class.def (&FireAt::LastPythonScript,"LastPythonScript");
 PYTHON_END_CLASS(VS,FireAt)
 
 
@@ -250,6 +268,7 @@ void InitVS() {
 #define voidWRAPPED1(name,atype,a) def name(self,a): ~    MYPRINT(name)
 #define voidWRAPPED2(name,atype,a,btype,b) def name(self,a,b): ~    MYPRINT(name)
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) def name(self,a,b,c): ~    MYPRINT(name)
+#define voidWRAPPED4(name,atype,a,btype,b,ctype,c,dtype,d) def name(self,a,b,c,d): ~    MYPRINT(name)
 #define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) def name(self,a,b,c,d,e): ~    MYPRINT(name)
 #define voidEXPORT_UTIL(name) def name(self,a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
@@ -332,5 +351,24 @@ class Cargo:
   voidWRAPPED1(SetCategory,string,category)
   WRAPPED0(string,GetCategory)
   WRAPPED0(string,GetDescription)
+
+class PythonAI:
+  def __init__(self):
+    print 'PythonAI constructor called with (self)'
+  voidWRAPPED1(AddReplaceLastOrder,bool,replace)
+  voidWRAPPED1(ExecuteLastScriptFor,float, time)
+  voidWRAPPED1(FaceTarget,bool, end)
+  voidWRAPPED1(FaceTargetITTS,bool, end)
+  voidWRAPPED4(MatchLinearVelocity,bool,terminate, Vector, vec, bool ,afterburn, bool, local)
+  voidWRAPPED3(MatchAngularVelocity,bool, terminate, Vector, vec, bool, local)
+  voidWRAPPED1(ChangeHeading,QVector, vec)
+  voidWRAPPED1(ChangeLocalDirection,Vector, vec)
+  voidWRAPPED1(MoveTo,Unit *,Targ, bool, afterburn)
+  voidWRAPPED5(MatchVelocity,bool, terminate, Vector, vec, Vector, angvel, bool, afterburn, bool, local)
+  voidWRAPPED2(Cloak,bool, enable,float, seconds)
+  voidWRAPPED1(FormUp,QVector, pos)
+  voidWRAPPED2(FaceDirection ,float, distToMatchFacing, bool, finish)
+  voidWRAPPED1(XMLScript (string, script)
+  voidWRAPPED0(LastPythonScript)
 
 #endif

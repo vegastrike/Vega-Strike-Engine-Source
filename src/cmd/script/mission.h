@@ -373,6 +373,7 @@ class missionThread {
  protected:
   virtual void Destructor () {delete this;}
  public:
+	 virtual void SetParent (int){}
   virtual void callFunction (std::string str) {}
   virtual ~missionThread(){}//call me and DIE
   vector<contextStack *> exec_stack;
