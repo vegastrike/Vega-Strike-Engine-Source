@@ -55,12 +55,12 @@ void InitJoystick(){
     }
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
   }
-
+  /*
   for(int a=0; a<joystick[0]->NumButtons(); a++) {
     buttonState[a] = UP;
     UnbindButton(a);
   }
-
+  */
   
 #endif
 }
