@@ -749,6 +749,13 @@ using namespace StarXML;
 
       case RADIUS:
 	radius=parse_float((*iter).value);
+	{
+	  if (elem==JUMP) {
+	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
+	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
+	    radius *= jump_radius_scale*game_speed;
+	  }
+	}
 	break;
       case PPOSITION:
 	position=parse_float((*iter).value);
