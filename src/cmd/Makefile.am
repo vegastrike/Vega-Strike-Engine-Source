@@ -9,6 +9,8 @@ libcmd_a_SOURCES =				\
 	asteroid.h			\
 	beam.h				\
 	beam.cpp				\
+	briefing.h			\
+	briefing.cpp			\
 	bolt.h				\
 	bolt.cpp				\
 	building.h			\

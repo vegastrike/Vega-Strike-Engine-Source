@@ -295,7 +295,18 @@ char * GetUnitDir (const char * filename) {
   }
   return retval;
 }
-
+vector <Mesh *> Unit::StealMeshes() {
+  vector <Mesh *>ret;
+  Mesh * shield = meshdata[nummesh];
+  for (int i=0;i<nummesh;i++) {
+    ret.push_back (meshdata[i]);
+  }
+  delete []meshdata;
+  meshdata = new Mesh *[1];
+  meshdata[0]= shield;
+  nummesh=0;
+  return ret;
+}
 Unit * _1800GetGod () {
   static Unit god ("god",true,_Universe->GetFaction("upgrades"),"",NULL,0);
   return &god;

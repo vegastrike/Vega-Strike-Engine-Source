@@ -462,6 +462,8 @@ public:
   ///Creates a mesh from an XML file If it is a customizedUnit, it will check in that directory in teh home dir for the unit
   Unit(const char *filename, bool SubUnit, int faction, std::string customizedUnit=string(""), Flightgroup *flightgroup=NULL,int fg_subnumber=0);
   virtual ~Unit();
+
+  vector <Mesh *> StealMeshes();
   ///Changes currently selected weapon
   void ToggleWeapon (bool Missile);
   ///Selects all weapons
