@@ -201,7 +201,7 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat ) /
   int i;
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].gun&&mounts[i].gun->Dissolved()) {
+      if (mounts[i].gun&&!mounts[i].gun->Dissolved()) {
 	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
 	//check for impact!!!???!!!  err prolly later on since we space position and direction
       }

@@ -1,8 +1,18 @@
 #include "cmd_beam.h"
 #include "cmd_weapon_xml.h"
 
-
-
+weapon_info::weapon_info(const weapon_info &tmp) {
+  *this = tmp;
+}
+weapon_info& weapon_info::operator = (const weapon_info &tmp){
+  type = tmp.type;
+  file = tmp.file;
+  r = tmp.r;g=tmp.g;b=tmp.b;a=tmp.a;
+  Speed=tmp.Speed;PulseSpeed=tmp.PulseSpeed;RadialSpeed=tmp.RadialSpeed;Range=tmp.Range;Radius=tmp.Radius;Length=tmp.Length;
+  Damage=tmp.Damage;Stability=tmp.Stability;Longrange=tmp.Longrange;
+  EnergyRate=tmp.EnergyRate;EnergyConsumption=tmp.EnergyConsumption;Refire=tmp.Refire;
+  return *this;
+}
 void weapon_info::init() {r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=60;Longrange=.5;EnergyRate=18;EnergyConsumption=18;Refire=.2;}
 void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case MISSILE:file=string("missile.xmesh");break;default:break;}}
 
@@ -90,7 +100,7 @@ namespace BeamXML {
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 9);
-  const EnumMap attribute_map(attribute_names, 18);
+  const EnumMap attribute_map(attribute_names, 19);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);

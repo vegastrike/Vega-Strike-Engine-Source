@@ -21,6 +21,8 @@ struct weapon_info {
   float Damage,Stability,Longrange;
   float EnergyRate, EnergyConsumption,Refire;
   weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}
+  weapon_info(const weapon_info&);
+  weapon_info& operator = (const weapon_info &tmp);
   void init(); 
   void Type (enum WEAPON_TYPE typ); 
 };

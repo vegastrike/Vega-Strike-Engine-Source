@@ -60,7 +60,13 @@ void Unit::calculate_extent() {
 void Unit::Init()
 {
   nummounts=0;
-  energy=1;
+  mounts=NULL;
+  //    nummounts=1;
+    
+  //    mounts = new Mount [1];
+  //    mounts[0].Activate();
+    //  mounts[0].Fire(identity_transformation,identity_matrix,this);
+  energy=10000;
   explosion=NULL;
   timeexplode=0;
  killed=false;
@@ -103,6 +109,7 @@ void Unit::Init()
   limits.lateral = 0.1;
   limits.vertical = 0.1;
   limits.longitudinal = 1;
+  //  Fire();
 }
 void Unit::UnRef() {
   ucref--;
@@ -564,7 +571,7 @@ void Unit::UpdateHudMatrix() {
 	//	GFXLoadMatrix(MODEL,tmatrix);
   //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);  
   VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
-  Transformation t = identity_transformation;
+
 }
 
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
@@ -669,16 +676,18 @@ void Unit::ExecuteAI() {
 void Unit::Fire () {
   for (int i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].type.EnergyRate*SIMULATION_ATOM<energy)
-	return;
+      if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy)
+	continue;
     }else{ 
-      if (mounts[i].type.EnergyConsumption<energy) 
-	return;
+      if (mounts[i].type.EnergyConsumption>energy) 
+	continue;
     }
     ///FIXME!!    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,this)) {
     ///      energy -= mounts[i].type==BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyConsumption;
     ///}//unfortunately cumulative transformation not generated in physics atom
+    mounts[i].gun = new Beam(identity_transformation,mounts[i].type,this);
   }
+  
 }
 bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit * owner) {
   if (status!=ACTIVE) 

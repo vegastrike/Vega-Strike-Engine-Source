@@ -562,7 +562,7 @@ void createObjects() {
 }
 
 void destroyObjects() {  
-  delete DABEAM;
+  //delete DABEAM;
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
   delete Preload;
@@ -624,7 +624,7 @@ void main_loop() {
     if (time > .5)
       fighters[0]->Destroy();
   }
-  DABEAM->Draw(identity_transformation,identity_matrix);
+  //  DABEAM->Draw(identity_transformation,identity_matrix);
   Beam::ProcessDrawQueue();
 
   //textplane->Draw();
