@@ -210,9 +210,15 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 	const float CubeSize = 128; //half of the length of any of the cube's sides
 		r[0] = CubeSize / Normal.k; // find what you need to multiply to get to the cube
 		r[1] = -r[0];
-		r[2] = CubeSize / Normal.i; // find what you need to multiply to get to the cube
+		if( Normal.i<=0)
+			r[2] = 0;
+		else
+			r[2] = CubeSize / Normal.i; // find what you need to multiply to get to the cube
 		r[3] = -r[2];
-		r[4] = CubeSize / Normal.j; // find what you need to multiply to get to the cube
+		if( Normal.j<=0)
+			r[4] = 0;
+		else
+			r[4] = CubeSize / Normal.j; // find what you need to multiply to get to the cube
 		r[5] = -r[4];
 		if (!Normal.k)
 			r[0] = r[1] = CubeSize*1000;
@@ -662,8 +668,16 @@ static void GenerateSphereMap()
 		{
 			float so256 = s / 104. -1.23;
 			Normal.k = 2 *(1- so256*so256 - to256*to256);
-			Normal.i = so256 *sqrt (2*(Normal.k+1));
-			Normal.j = to256 *sqrt (2*(Normal.k+1));
+			float double_one_more_normal = 2*(Normal.k+1);
+			if( double_one_more_normal >=0)
+			{
+				Normal.i = so256 *sqrt (2*(Normal.k+1));
+				Normal.j = to256 *sqrt (2*(Normal.k+1));
+			}
+			else
+			{
+				Normal.i = Normal.j = 0.0;
+			}
 			float sz = sqrt (Normal.k*Normal.k+Normal.j*Normal.j+Normal.i*Normal.i);
 			Normal.k /= -sz;
 			Normal.i /= sz;
