@@ -355,7 +355,8 @@ planetprob={'rlaan':{'Trantor_Class':1./1024,
 					 'Uninhabitable_Medium_Gas_Giant':1./32,
 					 'Uninhabitable_Dwarf_Gas_Giant':1./16}
 			}
-					 
+planetprob['kilrathi']=planetprob['rlaan']
+planetprob['nephilim']=planetprob['aera']					 
 moonprob={'Trantor_Class':(1./2,1./8,giant_moon),
 		  'Arid':(1./8,1./16,hot_moon),
 		  'Arid_Methane':(1./8,1./16,normal_moon),
