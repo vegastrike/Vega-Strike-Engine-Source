@@ -599,7 +599,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   }else {
     DoSpeech (NULL,c.getCurrentState()->message);
     if (parent==_Universe->AccessCockpit()->GetParent()) {
-      Animation Statuc ("static.ani");
+      static Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
     }
 
