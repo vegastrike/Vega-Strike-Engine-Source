@@ -66,8 +66,8 @@ subdirs:;
 
 clean:;
 	-rm -f vegastrike ${OBJECTS}
-	for subd in aldrv gldrv gfx cmd cmd/ai; do (cd $$subd && ${MAKE} -${MAKEFLAGS} clean); done
-
+	for subd in aldrv gldrv gfx cmd cmd/ai; \
+	do (cd $$subd && ${MAKE} -f ${MAKEFILE} -${MAKEFLAGS} clean); done
 
 realclean:	clean
 	-rm -rf ii_files aldrv/ii_files gldrv/ii_files gfx/ii_files cmd/ii_files cmd/ai/ii_files
