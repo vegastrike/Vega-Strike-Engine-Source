@@ -224,7 +224,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void Cockpit::SwitchControl (int,KBSTATE k) {
+void Cockpit::SwitchControl (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
@@ -233,7 +233,7 @@ void Cockpit::SwitchControl (int,KBSTATE k) {
 
 }
 
-void Cockpit::Respawn (int,KBSTATE k) {
+void Cockpit::Respawn (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);
@@ -327,7 +327,7 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
   }
 
 }
-extern void reset_time_compression(int i, KBSTATE a);
+
 
 Unit * GetFinalTurret(Unit * baseTurret) {
   Unit * un = baseTurret;

@@ -238,12 +238,12 @@ Music::~Music() {
 	INET_close(socket);
 	INET_cleanup();
 }
-void incmusicvol (int i, KBSTATE a) {
+void incmusicvol (const std::string&, KBSTATE a) {
 	if (a==PRESS) {
 		muzak->ChangeVolume (.0625);
 	}
 }
-void decmusicvol (int i, KBSTATE a) {
+void decmusicvol (const std::string&, KBSTATE a) {
 	if (a==PRESS) {
 		muzak->ChangeVolume (-.0625);
 	}

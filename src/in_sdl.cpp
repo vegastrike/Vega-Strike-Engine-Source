@@ -3,55 +3,65 @@
 #include "config_xml.h"
 
 #include <assert.h>	/// needed for assert() calls.
-
-KBHandler JoystickBindings [MAX_JOYSTICKS][NUMJBUTTONS];
-KBSTATE JoystickState [MAX_JOYSTICKS][NUMJBUTTONS];
-
-KBHandler HatswitchBindings [MAX_HATSWITCHES][MAX_VALUES];
-KBSTATE HatswitchState [MAX_HATSWITCHES][MAX_VALUES];
-
-
-KBHandler DigHatswitchBindings [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
-KBSTATE DigHatswitchState [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
-
-void DefaultJoyHandler (int key, KBSTATE newState) {
+void DefaultJoyHandler (const std::string&, KBSTATE newState) {
   //  VSFileSystem::Fprintf (stderr,"STATE: %d", st);
 }
+struct JSHandlerCall {
+  KBHandler function;
+  std::string data;
+  JSHandlerCall() {
+    function=DefaultJoyHandler;
+  }
+  JSHandlerCall(KBHandler function, std::string data) {
+    this->function=function;
+    this->data=data;
+  }
+};
+enum JSSwitches{
+  JOYSTICK_SWITCH,
+  HATSWITCH,
+  DIGHATSWITCH,
+  NUMSWITCHES
+};
+#define MAXOR(A,B) (((A)<(B))?(B):(A))
+JSHandlerCall JoystickBindings [NUMSWITCHES][MAXOR(MAX_HATSWITCHES,MAX_JOYSTICKS)][MAXOR(NUMJBUTTONS,MAXOR(MAX_VALUES,MAX_DIGITAL_HATSWITCHES*MAX_DIGITAL_VALUES))];
+KBSTATE JoystickState [NUMSWITCHES][MAXOR(MAX_HATSWITCHES,MAX_JOYSTICKS)][MAXOR(MAX_VALUES,MAXOR(NUMJBUTTONS,MAX_DIGITAL_HATSWITCHES*MAX_DIGITAL_VALUES))];
+
+static void GenUnbindJoyKey (JSSwitches whichswitch, int joystick, int key) {
+  assert (key<MAXOR(NUMJBUTTONS,MAXOR(MAX_VALUES,MAX_DIGITAL_HATSWITCHES*MAX_DIGITAL_VALUES))&&joystick<MAXOR(MAX_JOYSTICKS,MAX_HATSWITCHES));
+  JoystickBindings[whichswitch][joystick][key]=JSHandlerCall();
+  JoystickState[whichswitch][joystick][key]=UP;
+}
+
+static void GenBindJoyKey (JSSwitches whichswitch,int joystick, int key, KBHandler handler, const std::string &data) {
+  assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
+  JoystickBindings[JOYSTICK_SWITCH][joystick][key]=JSHandlerCall(handler,data);
+  handler (std::string(),RESET);
+}
+
 
 void UnbindJoyKey (int joystick, int key) {
-  assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
-  JoystickBindings[joystick][key]=DefaultJoyHandler;
-  JoystickState[joystick][key]=UP;
+  GenUnbindJoyKey(JOYSTICK_SWITCH,joystick,key);
 }
 
-void BindJoyKey (int joystick, int key, KBHandler handler) {
-  assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
-  JoystickBindings[joystick][key]=handler;
-  handler (0,RESET);
+void BindJoyKey (int joystick, int key, KBHandler handler, const std::string &data) {
+  GenBindJoyKey(JOYSTICK_SWITCH,joystick,key,handler,data);
 }
 
-void UnbindHatswitchKey (int hatswitch, int val_index) {
-  assert (hatswitch<MAX_HATSWITCHES && val_index<MAX_VALUES);
-  HatswitchBindings[hatswitch][val_index]=DefaultJoyHandler;
-  //  JoystickState[joystick][key]=UP;
+void UnbindHatswitchKey (int joystick, int key) {
+  GenUnbindJoyKey(HATSWITCH,joystick,key);
 }
 
-void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler) {
-  assert (hatswitch<MAX_HATSWITCHES && val_index<MAX_VALUES);
-  HatswitchBindings[hatswitch][val_index]=handler;
-  handler (0,RESET);
+void BindHatswitchKey (int joystick, int key, KBHandler handler, const std::string &data) {
+  GenBindJoyKey(HATSWITCH,joystick,key,handler,data);
 }
 
-void BindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index, KBHandler handler) {
-  assert (hatswitch<MAX_DIGITAL_HATSWITCHES && dir_index<MAX_DIGITAL_VALUES);
-  DigHatswitchBindings[joy_nr][hatswitch][dir_index]=handler;
-  handler (0,RESET);
+void UnbindDigitalHatswitchKey (int joystick, int key, int dir) {
+  GenUnbindJoyKey(DIGHATSWITCH,joystick,key*MAX_DIGITAL_VALUES+dir);
 }
 
-void UnbindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index) {
-  assert (hatswitch<MAX_DIGITAL_HATSWITCHES && dir_index<MAX_DIGITAL_VALUES);
- DigHatswitchBindings[joy_nr][hatswitch][dir_index]=DefaultJoyHandler;
-  //  JoystickState[joystick][key]=UP;
+void BindDigitalHatswitchKey (int joystick, int key, int dir, KBHandler handler, const std::string &data) {
+  GenBindJoyKey(DIGHATSWITCH,joystick,key*MAX_DIGITAL_VALUES+dir,handler,data);
 }
 
 
@@ -114,40 +124,48 @@ void ProcessJoystick (int whichplayer) {
 	  }
 #endif
 #endif
+          KBSTATE * state
+            =&JoystickState[DIGHATSWITCH][i][h*MAX_DIGITAL_VALUES+dir_index];
+          JSHandlerCall* handler
+            =&JoystickBindings[DIGHATSWITCH][i][h*MAX_DIGITAL_VALUES+dir_index];
 	  if(press==true){
-	    if(DigHatswitchState[i][h][dir_index]==UP){
-	      (*DigHatswitchBindings[i][h][dir_index])(0,PRESS);
-	      DigHatswitchState[i][h][dir_index]=DOWN;
+	    if(*state==UP){
+	      (*handler->function)
+                (handler->data,PRESS);
+	      *state=DOWN;
 	    }
 	  }
 	  else{
-	    if(DigHatswitchState[i][h][dir_index]==DOWN){
-	      (*DigHatswitchBindings[i][h][dir_index])(0,RELEASE);
+	    if(*state==DOWN){
+	      (*handler->function)
+                (handler->data,RELEASE);
 	    }
-	    DigHatswitchState[i][h][dir_index]=UP;
+	    *state=UP;
 	  }
-	  (*DigHatswitchBindings[i][h][dir_index])(0,DigHatswitchState[i][h][dir_index]);
+	  (*handler->function) (handler->data,*state);
 	}
       }
       } // digital_hatswitch
-
+      
       for (int j=0;j<NUMJBUTTONS;j++) {
+        KBSTATE * state = &JoystickState[JOYSTICK_SWITCH][i][j];
+        JSHandlerCall*handler=&JoystickBindings [JOYSTICK_SWITCH][i][j];
 	if ((buttons&(1<<j))) {
-	  if (JoystickState[i][j]==UP) {
-	    (*JoystickBindings [i][j])(0,PRESS);
-	    JoystickState[i][j]=DOWN;
-	  }
+	  if (*state==UP) {
+	    (*handler->function)
+              (handler->data,PRESS);
+	    *state=DOWN;
+          }
 	}else {
-	  if (JoystickState[i][j]==DOWN) {
-	    (*JoystickBindings [i][j])(0,RELEASE);
+	  if (*state==DOWN) {
+	    (*handler->function)(handler->data,RELEASE);
 	  }
-	  JoystickState[i][j]=UP;
+	  *state=UP;
 	}
-	(*JoystickBindings [i][j])(0,JoystickState[i][j]);
+	(*handler->function) (handler->data,*state);
       }
     } // is available
-  } // for nr joysticks
-
+  } // for nr joysticks  
 
   for(int h=0;h<MAX_HATSWITCHES;h++){
     float margin=fabs(vs_config->hatswitch_margin[h]);
@@ -163,23 +181,24 @@ void ProcessJoystick (int whichplayer) {
 	    float hs_val=vs_config->hatswitch[h][v];
 	    if(fabs(hs_val)<=1.0){
 	      // this is set
-	      KBHandler handler=(*HatswitchBindings[h][v]);
+	      JSHandlerCall *handler=&JoystickBindings[HATSWITCH][h][v];
+              KBSTATE * state = &JoystickState[HATSWITCH][h][v];
 	      if(hs_val-margin<=axevalue && axevalue<=hs_val+margin){
 		// hatswitch pressed
 		
-		if(HatswitchState[h][v]==UP){
-		  handler(0,PRESS);
-		  HatswitchState[h][v]=DOWN;
+		if(*state==UP){
+		  (*handler->function)(handler->data,PRESS);
+		  *state=DOWN;
 		}
 	      }
 	      else{
 		// not pressed
-		if(HatswitchState[h][v]==DOWN){
-		  handler(0,RELEASE);
+		if(*state==DOWN){
+		  (*handler->function)(handler->data,RELEASE);
 		}
-		HatswitchState[h][v]=UP;
+		*state=UP;
 	      }
-	      handler(0,HatswitchState[h][v]);
+	      (*handler->function)(handler->data,*state);
 	    }
 	  } // for all values
 	} // is available

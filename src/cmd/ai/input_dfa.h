@@ -59,6 +59,6 @@ public:
   void ContextAcquire();
   void UnselectAll();
   UnitCollection *getCollection();
-  static void OrderHandler (int,KBSTATE);
+  static void OrderHandler (const std::string&,KBSTATE);
 };
 #endif

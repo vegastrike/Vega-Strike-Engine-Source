@@ -31,9 +31,9 @@ FlyByJoystick::FlyByJoystick(unsigned int configfile): FlyByKeyboard (configfile
 #if 0
 void FlyByJoystick::JShelt (KBSTATE k, float, float, int) {
   if (k==DOWN) {
-    FlyByKeyboard::SheltonKey (0,DOWN);
-    FlyByKeyboard::SheltonKey (0,DOWN);
-    FlyByKeyboard::SheltonKey (0,DOWN);
+    FlyByKeyboard::SheltonKey (std::string(),DOWN);
+    FlyByKeyboard::SheltonKey (std::string(),DOWN);
+    FlyByKeyboard::SheltonKey (std::string(),DOWN);
   }
   if (k==UP) {
 
@@ -43,20 +43,20 @@ void FlyByJoystick::JShelt (KBSTATE k, float, float, int) {
 }
 void FlyByJoystick::JAB (KBSTATE k, float, float, int) {
   if (k==PRESS) {
-    FlyByKeyboard::ABKey (0,PRESS);
-    FlyByKeyboard::ABKey (0,DOWN);
+    FlyByKeyboard::ABKey (std::string(),PRESS);
+    FlyByKeyboard::ABKey (std::string(),DOWN);
 
   }
   if (k==DOWN) {
-    FlyByKeyboard::ABKey (0,DOWN);
+    FlyByKeyboard::ABKey (std::string(),DOWN);
   }
 }
 
 void FlyByJoystick::JAccelKey (KBSTATE k, float, float, int) {
-  FlyByKeyboard::AccelKey (0,k);
+  FlyByKeyboard::AccelKey (std::string(),k);
 }
 void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
-  FlyByKeyboard::DecelKey (0,k);
+  FlyByKeyboard::DecelKey (std::string(),k);
 }
 
 #endif

@@ -28,42 +28,6 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "xml_support.h"
-#if 0
-static float scl=0;
-static float offs=1;
-
-void incscl (int, KBSTATE k) {
-  if (k==DOWN) {
-    VSFileSystem::Fprintf (stderr,"scl:%f",scl);
-    scl+=.1;
-  }
-
-}
-
-void decscl (int, KBSTATE k) {
-  if (k==DOWN) {
-    VSFileSystem::Fprintf (stderr,"scl:%f",scl);
-    scl-=.1;
-  }
-
-
-}
-void incoff (int, KBSTATE k) {
-  if (k==DOWN) {
-    VSFileSystem::Fprintf (stderr,"off:%f",offs);
-    offs+=.1;
-  }
-
-
-}
-
-void decoff (int, KBSTATE k) {
-  if (k==DOWN) {
-    VSFileSystem::Fprintf (stderr,"off:%f",offs);
-    offs-=.1;
-  }
-}
-#endif
 vector<Logo*> undrawn_logos;
 Hashtable<int, Logo, 257> Logo::decalHash;
 

@@ -34,8 +34,18 @@ extern list<InputListener*> listeners;
 
 extern InputListener* activelistener;
 */
-
-static KBHandler keyBindings [LAST_MODIFIER][WSK_LAST];
+static void DefaultKBHandler(const std::string&,KBSTATE newState) {
+	// do nothing
+	return;
+}
+struct HandlerCall{
+  KBHandler function;
+  std::string data;
+  HandlerCall() {
+    function=DefaultKBHandler;
+  }
+};
+static HandlerCall keyBindings [LAST_MODIFIER][WSK_LAST];
 static unsigned int playerBindings [LAST_MODIFIER][WSK_LAST];
 KBSTATE keyState [LAST_MODIFIER][WSK_LAST];
 
@@ -45,9 +55,9 @@ static void kbGetInput(int key, int modifiers, bool release, int x, int y){
 
 
   if ((keyState[modifiers][key]==RESET||keyState[modifiers][key]==UP)&&!release)
-    keyBindings[modifiers][key](key,PRESS);
+    keyBindings[modifiers][key].function(keyBindings[modifiers][key].data,PRESS);
   if ((keyState[modifiers][key]==DOWN||keyState[modifiers][key]==RESET)&&release)
-    keyBindings[modifiers][key](key,RELEASE);
+    keyBindings[modifiers][key].function(keyBindings[modifiers][key].data,RELEASE);
   keyState[modifiers][key] = release?UP:DOWN;
   _Universe->SetActiveCockpit(i);
 }
@@ -214,7 +224,7 @@ void RestoreKB() {
   for (int i=0;i<LAST_MODIFIER;++i) {
     for(int a=0; a<KEYMAP_SIZE; a++) {
       if (keyState[i][a]==DOWN) {
-        keyBindings[i][a](a,RELEASE);      
+        keyBindings[i][a].function(keyBindings[i][a].data,RELEASE);      
         keyState[i][a] = UP;
       }
     }
@@ -255,23 +265,20 @@ void ProcessKB(unsigned int player)
   for(int mod=0; mod<LAST_MODIFIER; mod++) {
     for(int a=0; a<KEYMAP_SIZE; a++) {
       if (playerBindings[mod][a]==player)
-        keyBindings[mod][a](a,keyState[mod][a]);
+        keyBindings[mod][a].function(keyBindings[mod][a].data,keyState[mod][a]);
     }
   }
 }	
 
-void BindKey(int key,unsigned int mod, unsigned int player, KBHandler handler) {
-	keyBindings[mod][key] = handler;
+void BindKey(int key,unsigned int mod, unsigned int player, KBHandler handler, const std::string&data) {
+	keyBindings[mod][key].function = handler;
+	keyBindings[mod][key].data = data;
 	playerBindings[mod][key]=player;
-	handler(-1,RESET); // key is not used in handler
+	handler(std::string(),RESET); // key is not used in handler
 }
 
-static void DefaultKBHandler(int key, KBSTATE newState) {
-	// do nothing
-	return;
-}
 
 void UnbindKey(int key,unsigned int mod) {
-  keyBindings[mod][key] = DefaultKBHandler;
+  keyBindings[mod][key] = HandlerCall();
 }
 

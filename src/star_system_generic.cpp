@@ -63,7 +63,6 @@ vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-//extern void reset_time_compression (int,KBSTATE);
 
 //Atmosphere *theAtmosphere;
 extern std::vector <unorigdest *>pendingjump;
@@ -358,7 +357,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {
 	      if (0&&getTimeCompression!=.0000001) {//if not paused
-		reset_time_compression(0,PRESS);
+		reset_time_compression(std::string(),PRESS);
 	      }
 	    }
 	  }
@@ -386,7 +385,7 @@ extern void UpdateCameraSnds();
 extern void NebulaUpdate( StarSystem * ss);
 extern void TestMusic();
 
-extern void reset_time_compression (int,KBSTATE);
+extern void reset_time_compression (const std::string&,KBSTATE);
 
 extern float getTimeCompression();
 void StarSystem::Update( float priority)
@@ -680,7 +679,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  if (0&&getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
-	      reset_time_compression(0,PRESS);
+	      reset_time_compression(std::string(),PRESS);
 	    }
 	  }
 	}

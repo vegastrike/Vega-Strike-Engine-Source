@@ -104,13 +104,13 @@ class JoyStick {
 
 extern JoyStick *joystick[MAX_JOYSTICKS];
 typedef void (*JoyHandler)(KBSTATE,float x, float y, int mod);
-void BindJoyKey (int key, int joystick, KBHandler handler);
+void BindJoyKey (int key, int joystick, KBHandler handler, const std::string&data);
 void UnbindJoyKey (int joystick, int key);
 
 void UnbindHatswitchKey (int hatswitch, int val_index);
-void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler);
+void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler, const std::string&data);
 
-void BindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index, KBHandler handler);
+void BindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index, KBHandler handler, const std::string&data);
 void UnbindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index);
 
 

@@ -1054,10 +1054,10 @@ extern vector <int> suicide;
 
 void DoCockpitKeys()
 {
-	CockpitKeys::Pan(0,PRESS);
-	CockpitKeys::Inside(0,PRESS);
+	CockpitKeys::Pan(std::string(),PRESS);
+	CockpitKeys::Inside(std::string(),PRESS);
 }
-void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
+void GameCockpit::NavScreen (const std::string&,KBSTATE k) // scheherazade
 {
    if (k==PRESS)
      {
@@ -1117,7 +1117,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void GameCockpit::SwitchControl (int,KBSTATE k) {
+void GameCockpit::SwitchControl (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
@@ -1125,7 +1125,7 @@ void GameCockpit::SwitchControl (int,KBSTATE k) {
   }
 
 }
-void SuicideKey (int, KBSTATE k) {
+void SuicideKey (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     while (suicide.size()<=_Universe->CurrentCockpit())
       suicide.push_back(0);
@@ -1167,7 +1167,7 @@ public:
   }
 };
 std::vector <UnivMap> univmap;
-void MapKey (int, KBSTATE k) {
+void MapKey (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     static VSSprite ul("upper-left-map.spr");
     static VSSprite ur("upper-right-map.spr");
@@ -1184,7 +1184,7 @@ void MapKey (int, KBSTATE k) {
 }
 
 
-void GameCockpit::TurretControl (int,KBSTATE k) {
+void GameCockpit::TurretControl (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     while (turretcontrol.size()<=_Universe->CurrentCockpit())
       turretcontrol.push_back(0);
@@ -1192,7 +1192,7 @@ void GameCockpit::TurretControl (int,KBSTATE k) {
   }
 
 }
-void GameCockpit::Respawn (int,KBSTATE k) {
+void GameCockpit::Respawn (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);
@@ -1268,7 +1268,7 @@ int GameCockpit::Autopilot (Unit * target) {
   }
   return retauto;
 }
-extern void reset_time_compression(int i, KBSTATE a);
+extern void reset_time_compression(const std::string&, KBSTATE a);
 void GameCockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
   static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","20"));
@@ -1494,7 +1494,7 @@ void GameCockpit::Draw() {
       die = false;
     if (un->Threat()!=NULL) {
       if (0&&getTimeCompression()>1) {
-	reset_time_compression(0,PRESS);
+	reset_time_compression(std::string(),PRESS);
       }
       un->Threaten (NULL,0);
     }

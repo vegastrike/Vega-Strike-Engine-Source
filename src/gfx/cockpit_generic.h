@@ -135,9 +135,9 @@ protected:
   virtual int getScrollOffset (unsigned int whichtype) { return 1;}
   virtual void SelectProperCamera () {}
   virtual void Eject ();
-  static void Respawn (int,KBSTATE) {}
-  static void SwitchControl (int,KBSTATE) {}
-  static void TurretControl (int, KBSTATE) {}
+  static void Respawn (const std::string&,KBSTATE) {}
+  static void SwitchControl (const std::string&,KBSTATE) {}
+  static void TurretControl (const std::string&,KBSTATE) {}
   virtual void SetCommAnimation (Animation * ani) {}
   class SaveGame * savegame;
   ///Accesses the current camera

@@ -43,7 +43,6 @@ extern Vector mouseline;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-extern void reset_time_compression (int,KBSTATE);
 
 
 
@@ -658,7 +657,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  if (getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
-	      reset_time_compression(0,PRESS);
+	      reset_time_compression("",PRESS);
 	    }
 	  }
 	}

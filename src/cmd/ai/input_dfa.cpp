@@ -21,7 +21,8 @@ static float GetY (float x) {
   return 1-((float)2*x)/g_game.y_resolution;
 }
 
-void InputDFA::OrderHandler (int key, KBSTATE k) {
+void InputDFA::OrderHandler (const std::string& keys, KBSTATE k) {
+  int key = atoi(keys.c_str());
   if (k==PRESS) {
     if (k<='Z'&&k>='A')
       CurDFA->queueOrder=true;
@@ -62,8 +63,10 @@ void InputDFA::BindOrder (int key, OrderFactory *ofac){
     delete orderbindings[KEYMAP_SIZE];
   */
   orderbindings[key]= ofac;
+  char num[256];
+  sprintf(num,"%d",key);
 #ifdef USE_INPUT_DFA
-  BindKey (key,0,InputDFA::OrderHandler);
+  BindKey (key,0,InputDFA::OrderHandler,num);
 #endif
 }
 void InputDFA::SetOrder (OrderFactory *ofac) {

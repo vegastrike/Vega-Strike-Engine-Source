@@ -366,7 +366,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 // Changing the frequency doesn't kill a communication anymore until the player stopped its current one
 // and starts a new one in that other frequency
 
-void FlyByKeyboard::DownFreq (int,KBSTATE k) {
+void FlyByKeyboard::DownFreq (const std::string&,KBSTATE k) {
 if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
@@ -383,7 +383,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::UpFreq (int,KBSTATE k) {
+void FlyByKeyboard::UpFreq (const std::string&,KBSTATE k) {
 if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
@@ -400,7 +400,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::ChangeCommStatus (int,KBSTATE k) {
+void FlyByKeyboard::ChangeCommStatus (const std::string&,KBSTATE k) {
 if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
@@ -423,7 +423,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::SwitchWebcam(int,KBSTATE k)
+void FlyByKeyboard::SwitchWebcam(const std::string&,KBSTATE k)
 {
 if(Network!=NULL)
 {
@@ -443,7 +443,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::SwitchSecured(int,KBSTATE k)
+void FlyByKeyboard::SwitchSecured(const std::string&,KBSTATE k)
 {
 if(Network!=NULL)
 {
@@ -463,7 +463,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
+void FlyByKeyboard::SetVelocityRefKey(const std::string&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
@@ -473,7 +473,7 @@ void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
+void FlyByKeyboard::SetNullVelocityRefKey(const std::string&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
@@ -485,7 +485,7 @@ void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
 }
 
 
-void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
+void FlyByKeyboard::SheltonKey(const std::string&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
@@ -496,7 +496,7 @@ void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::JumpKey(int, KBSTATE k) {
+void FlyByKeyboard::JumpKey(const std::string&,KBSTATE k) {
   switch (k) {
   case PRESS:
     g().jumpkey=true;
@@ -509,7 +509,7 @@ void FlyByKeyboard::JumpKey(int, KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::UpKey(int, KBSTATE k) {
+void FlyByKeyboard::UpKey(const std::string&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP: g().uprelease++;
@@ -524,7 +524,7 @@ void FlyByKeyboard::UpKey(int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::KThrustRight (int,KBSTATE k) {
+void FlyByKeyboard::KThrustRight (const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().horizontal+=1;
@@ -536,7 +536,7 @@ void FlyByKeyboard::KThrustRight (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustLeft (int,KBSTATE k) {
+void FlyByKeyboard::KThrustLeft (const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().horizontal-=1;
@@ -548,7 +548,7 @@ void FlyByKeyboard::KThrustLeft (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustUp (int,KBSTATE k) {
+void FlyByKeyboard::KThrustUp (const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().vertical+=1;
@@ -560,7 +560,7 @@ void FlyByKeyboard::KThrustUp (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustDown (int,KBSTATE k) {
+void FlyByKeyboard::KThrustDown (const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().vertical-=1;
@@ -572,7 +572,7 @@ void FlyByKeyboard::KThrustDown (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustFront(int,KBSTATE k) {
+void FlyByKeyboard::KThrustFront(const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().axial+=1;
@@ -584,7 +584,7 @@ void FlyByKeyboard::KThrustFront(int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustBack (int,KBSTATE k) {
+void FlyByKeyboard::KThrustBack (const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().axial-=1;
@@ -597,7 +597,7 @@ void FlyByKeyboard::KThrustBack (int,KBSTATE k) {
   }
 }
 
-void FlyByKeyboard::DownKey (int,KBSTATE k) {
+void FlyByKeyboard::DownKey (const std::string&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case UP: g().downrelease++;
@@ -614,7 +614,7 @@ void FlyByKeyboard::DownKey (int,KBSTATE k) {
 }
 
 
-void FlyByKeyboard::LeftKey (int, KBSTATE k) {
+void FlyByKeyboard::LeftKey (const std::string&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP: g().leftrelease++;
@@ -629,7 +629,7 @@ void FlyByKeyboard::LeftKey (int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::KSwitchFlightMode (int,KBSTATE k) {
+void FlyByKeyboard::KSwitchFlightMode (const std::string&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case PRESS:
@@ -639,7 +639,7 @@ void FlyByKeyboard::KSwitchFlightMode (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::RightKey (int,KBSTATE k) {
+void FlyByKeyboard::RightKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().rightrelease++;
@@ -654,7 +654,7 @@ void FlyByKeyboard::RightKey (int,KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::ABKey (int, KBSTATE k) {
+void FlyByKeyboard::ABKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().ABrelease++;
@@ -669,19 +669,19 @@ void FlyByKeyboard::ABKey (int, KBSTATE k) {
   }
 }
 
-void FlyByKeyboard::AutoKey (int, KBSTATE k) {
+void FlyByKeyboard::AutoKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
     g().realauto=true;
   }
 }
-void FlyByKeyboard::SwitchCombatModeKey (int, KBSTATE k) {
+void FlyByKeyboard::SwitchCombatModeKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
     g().switch_combat_mode=true;
   }
 }
-void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
+void FlyByKeyboard::StopAutoKey (const std::string&,KBSTATE k) {
   
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
@@ -689,7 +689,7 @@ void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
   }
 }
 
-void FlyByKeyboard::StopKey (int,KBSTATE k)  {
+void FlyByKeyboard::StopKey (const std::string&,KBSTATE k)  {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().stoppress=false;
@@ -699,7 +699,7 @@ void FlyByKeyboard::StopKey (int,KBSTATE k)  {
   default:break;
   }
 }
-void FlyByKeyboard::AccelKey (int,KBSTATE k) {
+void FlyByKeyboard::AccelKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().accelrelease++;
@@ -713,7 +713,7 @@ void FlyByKeyboard::AccelKey (int,KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::DecelKey (int,KBSTATE k) {
+void FlyByKeyboard::DecelKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().decelrelease++;
@@ -729,7 +729,7 @@ void FlyByKeyboard::DecelKey (int,KBSTATE k) {
 }
 
 
-void FlyByKeyboard::StartKey (int,KBSTATE k)  {
+void FlyByKeyboard::StartKey (const std::string&,KBSTATE k)  {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().startpress=false;
@@ -743,7 +743,7 @@ void FlyByKeyboard::StartKey (int,KBSTATE k)  {
 
 
 
-void FlyByKeyboard::RollRightKey (int,KBSTATE k) {
+void FlyByKeyboard::RollRightKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().rollrightrelease++;
@@ -757,13 +757,13 @@ void FlyByKeyboard::RollRightKey (int,KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::MatchSpeedKey (int, KBSTATE k) {
+void FlyByKeyboard::MatchSpeedKey (const std::string&,KBSTATE k) {
   if (k==PRESS) {
     if (g().dirty)  g().UnDirty();
     g().matchspeed=true;
   }
 }
-void FlyByKeyboard::RollLeftKey (int,KBSTATE k) {
+void FlyByKeyboard::RollLeftKey (const std::string&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().rollleftrelease++;
