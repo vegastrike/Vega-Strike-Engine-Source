@@ -273,13 +273,17 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   un_iter subun = parent->getSubUnits();
   for (;(su = *subun)!=NULL;++subun) {
 	  static int inert = ROLES::getRole ("INERT");
-	  if (su->combatRole()!=inert) {
+	  static int pointdef = ROLES::getRole("POINTDEF");
+	  static bool assignpointdef = XMLSupport::parse_bool(vs_config->getVariable("AI","Targetting","AssignPointDef","true"));
+	  if ((su->combatRole()!=pointdef)||assignpointdef) {
+		if (su->combatRole()!=inert) {
 		  AssignTBin (su,tbin);
-	  }else {
-		  Unit * ssu=NULL;
-		  for (un_iter subturret = su->getSubUnits();(ssu =(*subturret));++subturret) {
+		}else {
+			Unit * ssu=NULL;
+			for (un_iter subturret = su->getSubUnits();(ssu =(*subturret));++subturret) {
 			  AssignTBin(ssu ,tbin);
-		  }
+			}
+		}
 	  }
 	  
   }
@@ -319,8 +323,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   for (vector <TurretBin>::iterator k =  tbin.begin();k!=tbin.end();++k) {
     k->AssignTargets(my_target,parent->cumulative_transformation_matrix);
   } 
-  SignalChosenTarget();
   parent->Target (mytarg);
+  SignalChosenTarget();
 }
 /* Proper choosing of targets
 void FireAt::ChooseTargets (int num) {

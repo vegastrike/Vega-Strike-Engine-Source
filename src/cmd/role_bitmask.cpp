@@ -74,8 +74,8 @@ namespace ROLES {
 			    scripts[i].push_back("default");
 			  }
 			}
+  		    //fseek (fp,0,SEEK_SET);
 			for (i=0;i<vec.size();i++) {
-			  fseek (fp,0,SEEK_SET);
 			  fgets(temp,len,fp);
 			  vector <string> strs=readCSV(temp);
 			  if (strs.size()) {

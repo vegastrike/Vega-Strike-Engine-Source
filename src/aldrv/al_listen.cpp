@@ -64,7 +64,7 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
 	    break;
 	  }
 	}else {
-	  fprintf (stderr,"stole %d",tmpsrc);
+	  //fprintf (stderr,"stole %d",tmpsrc);
 	  return 2;
 	}
       }

@@ -30,6 +30,7 @@ extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
+  static float debrismassmult = XMLSupport::parse_float(vs_config->getVariable("physics","debris_mass",".00001"));
   Vector PlaneNorm;
   int i;
   for (i=0;i<nummesh();) {
@@ -83,7 +84,7 @@ void GameUnit<UnitType>::Split (int level) {
     tempmeshes.push_back (old[i]);
     SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
     splitsub->hull = 1000;
-    splitsub->mass = mass/level;
+    splitsub->mass = debrismassmult*mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
@@ -101,7 +102,7 @@ void GameUnit<UnitType>::Split (int level) {
   old.clear();
   meshdata.clear();
   meshdata.push_back(NULL);//the shield
-  //FIXME...how the heck can they go spinning out of control!
+  mass*=debrismassmult;
 }
 
 extern Music *muzak;
