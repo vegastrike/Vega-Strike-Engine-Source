@@ -30,6 +30,12 @@
     #include <GL/gl.h>
     #include <GL/glut.h>
 #endif
+
+#if defined(WITH_MACOSX_BUNDLE) && defined(__APPLE__) || defined(MACOSX) 
+#include <sys/param.h> // For MAXPATHLEN
+extern char macosxExecutablePath[MAXPATHLEN];
+#endif
+
 #include <iostream.h>
 #include <map>
 #include <stdlib.h>

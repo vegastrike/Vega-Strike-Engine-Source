@@ -92,6 +92,7 @@
 //194
 		19C28FACFE9D520D11CA2CBB = {
 			children = (
+				F5AA34170236012101AD3AF8,
 				F545C034022F456401AD3AF8,
 				17587328FF379C6511CA2CBB,
 			);
@@ -201,7 +202,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>vegastrike</string>
+	<string>select</string>
 	<key>CFBundleIconFile</key>
 	<string>VegaStrikeOSX.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -229,6 +230,7 @@
 			files = (
 				089C165EFE840E0CC02AAC07,
 				F545C039022F465B01AD3AF8,
+				F5AA34180236012101AD3AF8,
 			);
 			isa = PBXResourcesBuildPhase;
 			name = "Bundle Resources";
@@ -3400,7 +3402,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F545C03B022F46DE01AD3AF8,
+				F5AA34190236012101AD3AF8,
 			);
 			isa = PBXCopyFilesBuildPhase;
 			name = "Copy Files";
@@ -3416,15 +3418,27 @@
 			settings = {
 			};
 		};
-		F545C03B022F46DE01AD3AF8 = {
+		F57B9BC50231750F01AD3AF8 = {
+			isa = PBXTargetDependency;
+			target = F545BE36022F3FB301AD3AF8;
+		};
+		F5AA34170236012101AD3AF8 = {
+			isa = PBXExecutableFileReference;
+			name = select;
+			path = mission/select;
+			refType = 4;
+		};
+		F5AA34180236012101AD3AF8 = {
 			fileRef = F545C034022F456401AD3AF8;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		F57B9BC50231750F01AD3AF8 = {
-			isa = PBXTargetDependency;
-			target = F545BE36022F3FB301AD3AF8;
+		F5AA34190236012101AD3AF8 = {
+			fileRef = F5AA34170236012101AD3AF8;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 29B97313FDCFA39411CA2CEA;

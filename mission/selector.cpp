@@ -51,6 +51,9 @@ void RunMission(void) {
 	sprintf (execname,"%s\\Vegastrike",mypath);
 	spawnl(P_NOWAIT,execname,execname,DATA.path,NULL);
 #else
+    #if defined(WITH_MACOSX_BUNDLE)
+        chdir(macosxExecutablePath);
+    #endif
 	execlp("./vegastrike", "./vegastrike", DATA.path, NULL);
 #endif
 }

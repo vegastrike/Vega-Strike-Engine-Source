@@ -101,7 +101,6 @@ int main( int argc, char *argv[] )
     // We need to set the path back 2 to make everything ok.
     char parentdir[MAXPATHLEN];
     char *c;
-    printf("current dir: %s\n", argv[0]);
     strncpy ( parentdir, argv[0], sizeof(parentdir) );
     c = (char*) parentdir;
 
