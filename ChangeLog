@@ -1,4 +1,9 @@
-2002-01-21 Daniel Horn <hellcatv@users.sourceforge.net>
+2002-01-24
+	* Added jump drives!  Now you can go to a planet designated as a jump point...press 'j' and it will load the system if not already loaded...
+	* Try jumping from the green sphere around earth...and then activating time compression and jumping back from the big earth in the next system... it's great
+	* Warning using fighters[0] as your fighter to indicate whether to teleport the cam as well as the ship
+
+2002-01-24 Daniel Horn <hellcatv@users.sourceforge.net>
 	
 	* Made collisions work inside the shield by checking against the shield bsp and then the mesh BSP, so shots wouldn't go inside the mesh if the shields were up. 
 
