@@ -1219,7 +1219,7 @@ void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
 	//Cent.i-=x_center;
 	//Cent.j-=y_center;
 	//Cent.k-=z_center;
-	Ref[ri]=norm1;
+	Ref[ri]=norm2;
 	PolyNormal[ri]=norm;
 	center[ri] = Cent*scale-Vector (x_center,y_center,z_center);;
 	sizes[ri]=xml->logos[ind].size*scale;
