@@ -99,9 +99,12 @@ inline XVector operator*= (XVector &lval, const QFLOAT &obj) {lval.i *= obj; lva
 inline void Normalize(XVector &r)
 {
 	QFLOAT size = XSQRT(r.i*r.i+r.j*r.j+r.k*r.k);
-	r.i /= size;
-	r.j /= size;
-	r.k /= size;
+	if( size != 0)
+	{
+		r.i /= size;
+		r.j /= size;
+		r.k /= size;
+	}
 }
 
 inline QFLOAT DotProduct(const XVector &a,const XVector &b)
