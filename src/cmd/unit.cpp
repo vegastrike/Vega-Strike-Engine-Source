@@ -595,19 +595,21 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     delete tmpiter;
     **/
   }
-
-  for (i=0;(int)i<GetNumMounts();i++) {
+  int nummounts= GetNumMounts();
+  for (i=0;(int)i<nummounts;i++) {
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
-
+	Mount * mahnt = mounts[i];
     if (draw_mounts&&On_Screen) {
+		
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
-      Mesh * gun = mounts[i]->type->gun;	  
+      Mesh * gun = mahnt->type->gun;	  
       if (gun) {
-	Transformation mountLocation=mounts[i]->GetMountLocation();
-	mountLocation.Compose (*ct,*ctm);
-	Matrix mat;
-	mountLocation.to_matrix(mat);
-	gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
+		  mountLocation.Compose (*ct,*ctm);
+		  Matrix mat;
+		  mountLocation.to_matrix(mat);
+		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
+		  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
 		  
       }
     }

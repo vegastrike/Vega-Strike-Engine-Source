@@ -1,6 +1,8 @@
 #include "unit_generic.h"
 
-Mount::Mount(const string& filename, short am,short vol): size(weapon_info::NOWEAP),ammo(am),sound(-1){
+Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale): size(weapon_info::NOWEAP),ammo(am),sound(-1){
+	this->xyscale=xyscale;
+	this->zscale=zscale;
   static weapon_info wi(weapon_info::BEAM);
   type = &wi;
   this->volume=vol;

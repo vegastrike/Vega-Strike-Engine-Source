@@ -38,9 +38,9 @@ void pushMesh( Unit::XML * xml, const char *filename, const float scale,int fact
 	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
 }
 
-Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1)
+Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1, float xyscale=0, float zscale=0)
 {
-	return new Mount (name.c_str(), ammo,volume);
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale);
 }
 
 Sprite * createSprite(const char *file)

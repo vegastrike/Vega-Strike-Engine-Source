@@ -141,7 +141,7 @@ Mesh::~Mesh()
 	  }
 	}
 }
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist,unsigned char hulldamage)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist,unsigned char hulldamage, bool renormalize)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
@@ -154,6 +154,9 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   c.cloaked=MeshDrawContext::NONE;
   if (nebdist<0) {
     c.cloaked|=MeshDrawContext::FOG;
+  }
+  if (renormalize) {
+	  c.cloaked|=MeshDrawContext::RENORMALIZE;
   }
   if (cloak>=0) {
     c.cloaked|=MeshDrawContext::CLOAK;
@@ -294,7 +297,6 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     }
 	for (int k=0;k<NUM_PASSES;++k) {
     if (!undrawn_meshes[a][k].empty()) {	
-      // shouldn't the sort - if any - be placed here??
       std::sort(undrawn_meshes[a][k].begin(),undrawn_meshes[a][k].end());//sort by texture address
       undrawn_meshes[a][k].back().orig->vlist->LoadDrawState();
     }
@@ -600,7 +602,12 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
       specialfxlight.push_back(ligh);
     }
     SetupFogState(c.cloaked);
+	if (c.cloaked&MeshDrawContext::RENORMALIZE)
+		glEnable(GL_NORMALIZE);
     vlist->Draw();
+	if (c.cloaked&MeshDrawContext::RENORMALIZE)
+		glDisable(GL_NORMALIZE);
+	
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }

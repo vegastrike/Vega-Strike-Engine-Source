@@ -75,7 +75,7 @@ struct MeshDrawContext {
   ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
   GFXColor CloakFX;
-  enum CLK {NONE=0x0,CLOAK=0x1,FOG=0x2, NEARINVIS=0x4, GLASSCLOAK=0x8};
+  enum CLK {NONE=0x0,CLOAK=0x1,FOG=0x2, NEARINVIS=0x4, GLASSCLOAK=0x8, RENORMALIZE=0x10};
   char cloaked;
   char mesh_seq;
   unsigned char damage;//0 is perfect 255 is dead
@@ -358,7 +358,7 @@ public:
   ///Returns center of this mesh
   Vector &Position() {return local_pos;}
   ///Draws lod pixel wide mesh at Transformation LATER
-  void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0, unsigned char damage=0);
+  void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0, unsigned char damage=0,bool renormalize_normals=false);
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
   void DrawNow(float lod, bool centered, const Matrix &m= identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type

@@ -12,7 +12,68 @@
 #include "configxml.h"
 #include "gfx/cockpit_generic.h"
 #include "force_feedback.h"
+void Mount::ReplaceMounts (const Mount * other) {
+	short thisvol = volume;
+	short thissize = size;
+	Quaternion q =this->GetMountOrientation();
+	Vector v = this->GetMountLocation();
+	*this=*other;
+	this->size=thissize;
+	volume=thisvol;
+	this->SetMountPosition(v);
+	this->SetMountOrientation(q);	
+	ref.gun=NULL;
+	this->ReplaceSound();
+}
+double Mount::Percentage (const Mount *newammo) const{
+	  float percentage=0;
+	  int thingstocompare=0;
+	  if (status==UNCHOSEN||status==DESTROYED)
+		return 0;
+	  if (newammo->ammo==-1) {
+		if (ammo!=-1) {
+		  thingstocompare++;
+		}
+	  } else {
+		if (newammo->ammo>0) {
+		  percentage+=ammo/newammo->ammo;
+		  thingstocompare++;
+		}
+	  }
+	  if (newammo->type->Range) {
+		percentage+= type->Range/newammo->type->Range;
+		thingstocompare++;
+	  }
+	  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
+		percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
+		thingstocompare++;
+	  }
+	  if (thingstocompare) {
+		return percentage/thingstocompare;
+	  }else {
+		return 0;
+	  }
+}
 
+void Mount::SwapMounts(Mount * other) {
+	  short thisvol = volume;
+	  short othervol = other->volume;
+	  //short othersize = other->size;
+	  short thissize = size;
+	  Mount mnt = *this;
+	  this->size=thissize;
+	  *this=*other;
+	  *other=mnt;
+	  volume=thisvol;
+
+	  other->volume=othervol;//volumes stay the same even if you swap out
+	  Vector v =this->GetMountLocation();
+	  Quaternion q = this->GetMountOrientation();
+	  this->SetMountPosition(other->GetMountLocation());
+	  this->SetMountOrientation(other->GetMountOrientation());
+	  other->SetMountPosition (v);
+	  other->SetMountOrientation (q);  
+}
 void Mount::ReplaceSound () {
   sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
 }
@@ -46,11 +107,11 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
   if (processed==FIRED) {
     processed = PROCESSED;
     Unit * temp;
-    Transformation tmp = LocalPosition;
+    Transformation tmp (orient,pos.Cast());
     tmp.Compose (Cumulative,m);
     Matrix mat;
     tmp.to_matrix (mat);
-    mat.p = Transform(mat,type->offset.Cast());
+    mat.p = Transform(mat,(type->offset+Vector(0,0,zscale)).Cast());
     if (autotrack&&NULL!=target) {
       AdjustMatrix (mat,target,type->Speed,autotrack>=2,trackingcone);
     }
@@ -109,7 +170,7 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
       if (ammo>0)
 	ammo--;//do we want beams to have amo
       processed=FIRED;
-      ref.gun = new Beam (LocalPosition,*type,owner,sound);
+      ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,sound);
       ref.gun->ListenToOwner(listen_to_owner);
       return true;
     } else {
@@ -117,7 +178,7 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
 	if (ammo>0)
 	  ammo--;//ditto about beams ahving ammo
 	processed=FIRED;
-	ref.gun->Init (LocalPosition,*type,owner);
+	ref.gun->Init (Transformation(orient,pos.Cast()),*type,owner);
 	return true;
       } else 
 	return true;//can't fire an active beam
@@ -139,10 +200,23 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
   }
   return false;
 }
-
-Mount::Mount(const string& filename, short am,short vol){
+Mount::Mount() {
+	static weapon_info wi(weapon_info::BEAM);
+	type=&wi; size=weapon_info::NOWEAP;
+	ammo=-1;
+	status= UNCHOSEN;
+	processed=Mount::PROCESSED;
+	sound=-1;
+	xyscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
+	zscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
+}
+Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
+  if (xyscale==0)
+	  xyscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
+  if (zscale==0)
+	  zscale=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
   ammo = am;
   sound = -1;
   type = &wi;

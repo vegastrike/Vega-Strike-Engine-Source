@@ -680,7 +680,7 @@ void VDU::DrawWeapon (Unit * parent) {
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->GetNumMounts();i++) {
-    Vector pos (parent->mounts[i]->GetMountLocation().position.Cast());
+    Vector pos (parent->mounts[i]->GetMountLocation());
     pos.i=-
 pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;

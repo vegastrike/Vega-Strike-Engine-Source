@@ -180,8 +180,9 @@ namespace UnitXML {
       COMBATROLE,
       RECURSESUBUNITCOLLISION,
       WARPENERGY,
-	  FACECAMERA
-	  
+	  FACECAMERA,
+	  XYSCALE,
+	  ZSCALE
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -224,13 +225,15 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION)
     
   };
-  const EnumMap::Pair attribute_names[99] = {
+  const EnumMap::Pair attribute_names[101] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
     EnumMap::Pair ("z", Z), 
+    EnumMap::Pair ("xyscale", XYSCALE), 
+    EnumMap::Pair ("zscale", ZSCALE), 
     EnumMap::Pair ("ri", RI), 
     EnumMap::Pair ("rj", RJ), 
     EnumMap::Pair ("rk", RK), 
@@ -327,7 +330,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 99);
+  const EnumMap attribute_map(attribute_names, 101);
 }
 
 using XMLSupport::EnumMap;
@@ -351,6 +354,8 @@ using namespace UnitXML;
   QVector Q;
   QVector R;
   QVector pos;
+  float xyscale=0;
+  float zscale=0;
   bool tempbool;
   float fbrltb[6];
   AttributeList::const_iterator iter;
@@ -692,6 +697,12 @@ using namespace UnitXML;
       case VOLUME:
 	volume=XMLSupport::parse_int ((*iter).value);
 	break;
+	  case XYSCALE:
+		  xyscale=XMLSupport::parse_float((*iter).value);
+		  break;
+	  case ZSCALE:
+		  zscale=XMLSupport::parse_float((*iter).value);
+		  break;
       case WEAPON:
 	filename = (*iter).value;
 	break;
@@ -745,8 +756,9 @@ using namespace UnitXML;
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume));
-    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()),pos));
+    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale));
+    xml->mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
+	xml->mountz[indx]->SetMountPosition(pos.Cast());
     //xml->mountz[indx]->Activate();
     if (tempbool)
       xml->mountz[indx]->size=mntsiz;

@@ -1076,69 +1076,14 @@ struct Unit::XML {
 class Mount {
   protected:
     ///Where is it
-    Transformation LocalPosition;
+	Vector pos;
+    Quaternion orient;
 	void ReplaceSound();
   public:
-    void SwapMounts (Mount * other)
-	{
-	  short thisvol = volume;
-	  short othervol = other->volume;
-	  //short othersize = other->size;
-	  short thissize = size;
-	  Mount mnt = *this;
-	  this->size=thissize;
-	  *this=*other;
-	  *other=mnt;
-	  volume=thisvol;
-
-	  other->volume=othervol;//volumes stay the same even if you swap out
-	  Transformation t =this->GetMountLocation();
-	  this->SetMountPosition(other->GetMountLocation());
-	  other->SetMountPosition (t);  
-	}
-
-    void ReplaceMounts (const Mount * other)
-	{
-		  short thisvol = volume;
-		  short thissize = size;
-		  Transformation t =this->GetMountLocation();
-		  *this=*other;
-		  this->size=thissize;
-		  volume=thisvol;
-		  this->SetMountPosition(t);
-		  ref.gun=NULL;
-		  this->ReplaceSound();
-	}
-	double Percentage (const Mount *newammo) const{
-	  float percentage=0;
-	  int thingstocompare=0;
-	  if (status==UNCHOSEN||status==DESTROYED)
-		return 0;
-	  if (newammo->ammo==-1) {
-		if (ammo!=-1) {
-		  thingstocompare++;
-		}
-	  } else {
-		if (newammo->ammo>0) {
-		  percentage+=ammo/newammo->ammo;
-		  thingstocompare++;
-		}
-	  }
-	  if (newammo->type->Range) {
-		percentage+= type->Range/newammo->type->Range;
-		thingstocompare++;
-	  }
-	  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
-		percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
-		thingstocompare++;
-	  }
-	  if (thingstocompare) {
-		return percentage/thingstocompare;
-	  }else {
-		return 0;
-	  }
-	}
-
+	float xyscale;float zscale;//for guns!	
+    void SwapMounts (Mount * other);
+    void ReplaceMounts (const Mount * other);
+	double Percentage (const Mount *newammo) const;
 // Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
     union REF{
       ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
@@ -1160,8 +1105,8 @@ class Mount {
     const weapon_info *type;
     int sound;
     float time_to_lock;
-    Mount() {static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;sound=-1;}
-    Mount(const std::string& name, short int ammo=-1, short int volume=-1);
+    Mount();
+    Mount(const std::string& name, short int ammo, short int volume, float xyscale=0, float zscale=0);
 
 	void Activate (bool Missile) {
 	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
@@ -1178,9 +1123,11 @@ class Mount {
 	}
 
     ///Sets this gun's position on the mesh
-    void SetMountPosition (const Transformation &t){LocalPosition = t;}
+    void SetMountPosition (const Vector & v) {pos=v;}
+	void SetMountOrientation(const Quaternion &t) {orient = t;}
     ///Gets the mount's position and transform
-    Transformation &GetMountLocation (){return LocalPosition;}
+    const Vector &GetMountLocation ()const{return pos;}
+    const Quaternion &GetMountOrientation ()const{return orient;}	
     ///Turns off a firing beam (upon key release for example)
 	void UnFire();
     /**

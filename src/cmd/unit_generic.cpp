@@ -914,7 +914,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
   Matrix mat;
   for (int i=0;i<GetNumMounts();i++) {
     float tmpdist = .001;
-    Transformation finaltrans (mounts[i]->GetMountLocation());
+    Transformation finaltrans (mounts[i]->GetMountOrientation(),mounts[i]->GetMountLocation().Cast());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
@@ -4202,7 +4202,7 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
       result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i]->volume);
     }
     Matrix m;
-    un->mounts[i]->GetMountLocation().to_matrix(m);
+    Transformation(un->mounts[i]->GetMountOrientation(),un->mounts[i]->GetMountLocation().Cast()).to_matrix(m);
     result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
     result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
     result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));
