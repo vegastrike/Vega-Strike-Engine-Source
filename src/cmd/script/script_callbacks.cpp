@@ -359,7 +359,7 @@ varInst *Mission::call_float_cast(missionNode *node,int mode){
 }
 varInst *Mission::call_int_cast(missionNode *node,int mode){
   missionNode *snode=getArgument(node,mode,0);
-  float floatval=checkFloatExpr(snode,mode);
+  double floatval=checkFloatExpr(snode,mode);
 
   varInst *viret=newVarInst(VI_TEMP);
   

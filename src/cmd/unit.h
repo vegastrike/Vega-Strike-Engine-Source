@@ -304,8 +304,8 @@ public:
 class GameUnit::GameMount: public Unit::Mount {
     ///Where is it
     //Transformation LocalPosition;
-    void ReplaceMounts (const Mount * othermount);
   public:
+    void ReplaceMounts (const Mount * othermount);
 
 	GameMount();
 	// Requires weapon_xml.cpp stuff so Beam stuff so GFX and AUD stuff

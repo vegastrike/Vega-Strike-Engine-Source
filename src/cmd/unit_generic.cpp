@@ -1716,7 +1716,7 @@ void Unit::Mount::ReplaceMounts (const Unit::Mount *other) {
   this->size=thissize;
   volume=thisvol;
   this->SetMountPosition(t);
-  ref.gun=NULL;  
+  ref.gun=NULL;
 }
 
 void Unit::Mount::SwapMounts (Unit::Mount * other) {

@@ -1684,16 +1684,16 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   *myhudim =xml->hudimage;
   int a;
-  if (GetNumMounts())
+  if (xml->mountz.size())
   {
 	  // DO not destroy anymore, just affect address
-	  for( a=0; a<GetNumMounts(); a++)
+	  for( a=0; a<xml->mountz.size(); a++)
 		mounts.push_back( xml->mountz[a]);
     //mounts[a]=*xml->mountz[a];
     //delete xml->mountz[a];			//do it stealthily... no cons/destructor
   }
   char parity=0;
-  for (a=0;a<GetNumMounts();a++) {
+  for (a=0;a<xml->mountz.size();a++) {
     static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
     if (a%2==parity) {
       int b=a;

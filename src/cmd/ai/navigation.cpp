@@ -32,12 +32,17 @@ using namespace Orders;
 static float CalculateBalancedDecelTime (float l, float v, float &F, float mass) {
 
   float accel = F/mass;
+  if( accel<=0)
+	return 0;
   if (l<0) {
     l=-l;
     v=-v;
     F=-F;
   }
-  return (-v+sqrtf(.5*v*v+(l+v*SIMULATION_ATOM*(.5))*accel))/accel;
+  double temp = .5*v*v+(l+v*SIMULATION_ATOM*(.5))*accel;
+  if( temp < 0)
+	temp = 0;
+  return (-v+sqrtf(temp))/accel;
 } 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
