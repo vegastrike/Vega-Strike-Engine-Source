@@ -296,8 +296,8 @@ GFXBOOL GFXSetTexFunc(int stage, int texset)
 	  GFXActiveTexture(stage);
 		
 	}	
-	else return FALSE;
+	else return GFXFALSE;
 	
-	return TRUE;
+	return GFXTRUE;
 }
 
