@@ -339,11 +339,6 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
     if (c->createIterator()->advance()!=NULL)
       fprintf (stderr,"Hit Multiple Targets");
     fprintf (stderr,"\n");
-    c=shipList->requestIterator (0,0,x,y);
-    if (c->createIterator()->current()!=NULL)
-      fprintf (stderr,"Hit single Barget");
-    if (c->createIterator()->advance()!=NULL)
-      fprintf (stderr,"Hit Multiple Bargets");
     
   }
 }
