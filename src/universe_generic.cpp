@@ -59,7 +59,11 @@ void Universe::Init()
 {
 	// No need to load weapons on server side
 	//LoadWeapons("weapon_list.xml");
-	LoadFactionXML("factions.xml");	
+
+#warning STEPHANEFIXME
+  //LoadFactionXML("factions.xml");	
+	GameFaction::LoadXML("factions.xml");
+#warning STEPHANEFIXME
 	//this->galaxy = new GalaxyXML::Galaxy (galaxy);
 
 	script_system=NULL;
