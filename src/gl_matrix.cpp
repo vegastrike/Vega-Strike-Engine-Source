@@ -439,7 +439,6 @@ float frustum [6][4];
 float GFXSphereInFrustum (const Vector &Cnt, float radius) {
    int p;
    float d;
-   fprintf (stderr,"Cnt: %f,%f,%f rad:%f\n",Cnt.i,Cnt.j,Cnt.k,radius);
    for( p = 0; p < 6; p++ )
    {
       d = frustum[p][0] * Cnt.i + frustum[p][1] * Cnt.j + frustum[p][2] * Cnt.k + frustum[p][3];

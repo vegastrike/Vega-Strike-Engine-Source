@@ -471,8 +471,8 @@ void Unit::Draw()
 	for (int i=0;i<nummesh;i++) {
 	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	  //meshdata[i]->Draw(np, nq, nr, npos);
-	  /////////already completed if the camera was changedGFXCalculateFrustum();
-	  GFXCalculateFrustum();
+	  /////////already completed if the camera was changedGFXCalculateFrustum(); Moved into update camera
+	  ;
 	  float d = GFXSphereInFrustum(Transform (currentMatrix,
 						  meshdata[i]->Position()),
 				       meshdata[i]->rSize()
@@ -483,7 +483,7 @@ void Unit::Draw()
 	  if (d) {  //d can be used for level of detail shit
 	    meshdata[i]->Draw();
 	  }else {
-	    fprintf (stderr,"boing");
+
 	  }
 	}
 	for(int subcount = 0; subcount < numsubunit; subcount++)
