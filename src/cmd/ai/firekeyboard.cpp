@@ -12,6 +12,9 @@
 #include "cmd/images.h"
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
+#include "cmd/script/mission.h"
+#include "vs_globals.h"
+
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->cloaktoggle=false;
   this->whichjoystick = whichjoystick;

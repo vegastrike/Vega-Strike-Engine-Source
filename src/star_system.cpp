@@ -29,7 +29,7 @@
 #include "hashtable.h"
 #include "cmd/nebula.h"
 #include "galaxy_gen.h"
-
+#include "cmd/script/mission.h"
 #include "in_kb.h"
 #include "cmd/script/flightgroup.h"
 extern Music *muzak;

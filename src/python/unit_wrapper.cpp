@@ -125,6 +125,12 @@ voidEXPORT_UTIL(terminateMission)
 EXPORT_UTIL(getPlayer,Unit())
 EXPORT_UTIL(getPlayerX,Unit())
 EXPORT_UTIL(getNumPlayers,1)
+EXPORT_UTIL(addObjective,0)
+voidEXPORT_UTIL(setObjective)
+voidEXPORT_UTIL(setCompleteness)
+EXPORT_UTIL(getCompleteness,0)
+voidEXPORT_UTIL(setOwner)
+EXPORT_UTIL(getOwner,0)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -315,6 +321,12 @@ voidEXPORT_UTIL(terminateMission)
 EXPORT_UTIL(getPlayer,Unit())
 EXPORT_UTIL(getPlayerX,Unit())
 EXPORT_UTIL(getNumPlayers,2)
+EXPORT_UTIL(addObjective,0)
+voidEXPORT_UTIL(setObjective)
+voidEXPORT_UTIL(setCompleteness)
+EXPORT_UTIL(getCompleteness,0)
+voidEXPORT_UTIL(setOwner)
+EXPORT_UTIL(getOwner,Unit())
 
 def string ():
   return ''

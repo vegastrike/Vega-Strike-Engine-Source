@@ -1,6 +1,7 @@
 #ifndef PYTHON_STUB
 #include "python_class.h"
 #include "cmd/briefing.h"
+#include "cmd/script/mission.h"
 
 namespace BriefingUtil {
 	int addShip(string name, string faction, Vector vec){

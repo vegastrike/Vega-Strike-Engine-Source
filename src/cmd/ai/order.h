@@ -50,9 +50,11 @@
 
 #include "gfx/vec.h"
 #include "cmd/collection.h"
+#include "cmd/container.h"
 #include <list>
+#include <vector>
 
-#include <cmd/script/mission.h>
+//#include <cmd/script/mission.h>
 
 /**
  * Order is the base class for all orders.  All orders inherit from Order
@@ -64,7 +66,8 @@
  * various variables may be set earlier than at every execution time
  */
 //#define ORDERDEBUG
-
+class Animation;
+typedef vector<class varInst *> olist_t;
 class Order {
  private:
 

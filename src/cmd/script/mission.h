@@ -416,6 +416,14 @@ class PythonMissionBaseClass;
 
 class Mission {
  public:
+  struct Objective {
+    float completeness;
+	std::string objective;
+	UnitContainer owner;
+	Objective () {completeness=0;}
+	Objective (float complete,std::string obj) {completeness=complete;objective=obj;}
+  };
+  vector <Objective> objectives;
   void SetUnpickleData(std::string dat) {
 	unpickleData=dat;
   }

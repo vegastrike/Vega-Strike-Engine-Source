@@ -1,4 +1,6 @@
-#include "cmd/script/mission.h"
+//#include "cmd/script/mission.h"
+#include <vector>
+typedef vector<class varInst *> olist_t;
   struct SavedUnits {
     string filename;
     clsptr type;

@@ -10,6 +10,7 @@
 #include "config_xml.h"
 #include "xml_serializer.h"
 #include "audiolib.h"
+#include "vs_globals.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1

@@ -175,6 +175,39 @@ namespace UniverseUtil {
 		}
 		return _Universe->AccessCockpit(which)->GetParent();
 	}
+	int addObjective(string objective) {
+		mission->objectives.push_back(Mission::Objective(0,objective));
+		return mission->objectives.size()-1;
+	}
+	void setObjective(int which, string newobjective) {
+		if (which<mission->objectives.size()) {
+			mission->objectives[which].objective=newobjective;
+		}
+	}
+	void setCompleteness(int which, float completeNess) {
+		if (which<mission->objectives.size()) {
+			mission->objectives[which].completeness=completeNess;
+		}
+	}
+	float getCompleteness(int which) {
+		if (which<mission->objectives.size()) {
+			return mission->objectives[which].completeness;
+		} else {
+			return 0;
+		}
+	}
+	void setOwner(int which,Unit *owner) {
+		if (which<mission->objectives.size()) {
+			mission->objectives[which].owner=owner;
+		}
+	}
+	Unit* getOwner(int which) {
+		if (which<mission->objectives.size()) {
+			return mission->objectives[which].owner.GetUnit();
+		} else {
+			return 0;
+		}
+	}
 }
 
 #undef activeSys

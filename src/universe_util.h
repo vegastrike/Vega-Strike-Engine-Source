@@ -47,6 +47,12 @@ namespace UniverseUtil {
 	Unit *getPlayer();
 	Unit *getPlayerX(int which);
 	int getNumPlayers ();
+	int addObjective(string objective);
+	void setObjective(int which, string newobjective);
+	void setCompleteness(int which, float completeNess);
+	float getCompleteness(int which);
+	void setOwner(int which,Unit *owner);
+	Unit* getOwner(int which);
 }
 
 #undef activeSys

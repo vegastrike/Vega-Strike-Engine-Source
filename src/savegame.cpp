@@ -10,6 +10,7 @@
 #include "savegame.h"
 #include "load_mission.h"
 #include <algorithm>
+#include "cmd/script/mission.h"
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
 
