@@ -46,6 +46,13 @@ void micro_sleep(unsigned int n) {
 
 	return;
 }
+#elif defined(IRIX)
+#include <unistd.h>
+
+void micro_sleep(unsigned int n) {
+	(void) usleep((useconds_t)n);
+	return;
+}
 
 #else
 
@@ -53,60 +60,58 @@ void micro_sleep(unsigned int n) {
 	struct timeval tv = { 0, 0 };
 
 	tv.tv_usec = n;
-
 	select(0, NULL, NULL, NULL, &tv);
 
 	return;
 }
 #endif
 
-
-
-
-
-double get_clock_time()
-{
-#if defined( HAVE_GETTIMEOFDAY )
-
-    struct timeval tv;
-    gettimeofday( &tv, NULL );
-
-    return (double) tv.tv_sec + (double) tv.tv_usec * 1.e-6;
-#elif defined (WIN32)
-	return 0;
-	//We're cool
-#elif defined( HAVE_SDL ) 
-
-    return SDL_GetTicks() * 1.e-3;
-
-#else
-
-#   error "We have no way to determine the time on this system."
-
-#endif /* defined( HAVE_GETTIMEOFDAY ) */
-} 
-
 void InitTime () {
 #ifdef WIN32
   QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
   QueryPerformanceCounter((LARGE_INTEGER*)&ttime);
-#else
-  newtime = get_clock_time();
+
+#elif defined(HAVE_GETTIMEOFDAY)
+  struct timeval tv;
+  (void) gettimeofday(&tv, NULL);
+
+  newtime = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
   lasttime = newtime -.001;
+
+#elif defined(HAVE_SDL)
+  newtime = SDL_GetTicks() * 1.e-3;
+  lasttime = newtime -.001;
+
+#else
+# error "We have no way to determine the time on this system."
 #endif
   elapsedtime = .001;
 }
+
 double GetElapsedTime() {
   return elapsedtime;
 }
+
 void UpdateTime() {
 #ifdef WIN32
   QueryPerformanceCounter((LARGE_INTEGER*)&newtime);
   elapsedtime = ((double)(newtime-ttime))/freq;
   ttime = newtime;
-#else
+
+#elif defined(HAVE_GETTIMEOFDAY)
+  struct timeval tv;
+  (void) gettimeofday(&tv, NULL);
+
   lasttime = newtime;
-  newtime = get_clock_time();
-  elapsedtime =newtime-lasttime;
+  newtime = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  elapsedtime = newtime-lasttime;
+
+#elif defined(HAVE_SDL)
+  lasttime = newtime;
+  newtime = SDL_GetTicks() * 1.e-3;
+  elapsedtime = newtime-lasttime;
+
+#else
+# error "We have no way to determine the time on this system."
 #endif
 }
