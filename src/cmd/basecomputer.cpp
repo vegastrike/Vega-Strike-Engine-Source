@@ -1080,6 +1080,8 @@ void BaseComputer::recalcTitle() {
 				sprintf(playerTitle, "Credits: %.2f,  Active missions: %d", playerCredits, count);
 			}
 			break;
+		case UPGRADE:
+			// Fall through.
 		case CARGO:
 			{
 				Unit* playerUnit = m_player.GetUnit();
