@@ -223,7 +223,7 @@ namespace UnitUtil {
 	float getDistance(Unit *my_unit,Unit *un){
 		return (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
 	}
-	inline float getPlanetRadiusPercent () {
+	float getPlanetRadiusPercent () {
 		static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
 		return planet_rad_percent;
 	}
