@@ -105,6 +105,7 @@ class Order {
   int getSubType () {return subtype;}
   ///Sets the parent of this Unit.  Any virtual functions must call this one
   virtual void SetParent(Unit *parent1) {parent = parent1;};
+  Unit * GetParent() {return parent;}
   ///Sends a communication message from the Unit (encapulated in c) to this unit
   virtual void Communicate (const class CommunicationMessage &c);
   ///processes a single message...generally called by the Messages() func
