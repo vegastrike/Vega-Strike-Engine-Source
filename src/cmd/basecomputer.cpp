@@ -3641,11 +3641,20 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                 flightGroup->nr_ships_left++;
             }
             string newModifications;
+            std::string tmpnam=CurrentSaveGameName;
             if(swappingShipsIndex != -1) {//if we're swapping not buying load the olde one
                 newModifications = _Universe->AccessCockpit()->GetUnitModifications();
+                CurrentSaveGameName="~"+CurrentSaveGameName;
             }
-            Unit* newPart = UnitFactory::createUnit(item->content.c_str(), false, baseUnit->faction, newModifications,
-                flightGroup,fgsNumber);
+            WriteSaveGame(_Universe->AccessCockpit(), true);//oops saved game last time at wrong place
+            Unit* newPart = 
+               UnitFactory::createUnit(item->content.c_str(), 
+                                       false, 
+                                       baseUnit->faction, 
+                                       newModifications,
+                                       flightGroup,
+                                       fgsNumber);
+            CurrentSaveGameName=tmpnam;
             newPart->SetFaction(playerUnit->faction);
             if (newPart->name != LOAD_FAILED) {
                 if (newPart->nummesh() > 0) {
