@@ -62,9 +62,12 @@ FILE *mystdout=stdout;
 #ifdef __APPLE
 #undef main
 #endif
+#include "SDL_mutex.h"
 /******************************************************************************/
 /* some simple exit and error routines                                        */
-
+char * songNames[5]={0,0,0,0,0};
+unsigned int counter=0;
+SDL_mutex * RestartSong=NULL;
 void errorv(char *str, va_list ap)
 {
 #ifdef HAVE_SDL
@@ -73,7 +76,17 @@ void errorv(char *str, va_list ap)
 	fprintf(STD_ERR,": %s.\n", SDL_GetError());
 #endif
 }
-
+vector<string> split(string tmpstr,string splitter) {
+  string::size_type where;
+  vector<string> ret;
+  while ((where=tmpstr.find(splitter))!=string::npos) {
+    ret.push_back(tmpstr.substr(0,where));
+    tmpstr= tmpstr.substr(where+1);
+  }
+  if (tmpstr.length())
+    ret.push_back(tmpstr);
+  return ret;
+}
 void cleanExit(char *str,...)
 {
 #ifdef HAVE_SDL
@@ -114,7 +127,7 @@ void changehome (bool to, bool linuxhome=true) {
 #ifdef _WIN32
 #undef main
 #endif
-bool sende=true;
+volatile bool sende=true;
 std::string curmus;
 static int numloops (std::string file) {
   int value=1;
@@ -179,13 +192,27 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 }
 int mysocket = -1;
 int mysocket_write=-1;
+Mix_Music *music=NULL;
 void music_finished () {
 	if (sende) {
 		char data='e';
-                if (fnet) {
-                  fNET_Write(mysocket_write,sizeof(char),&data);	
+                SDL_mutexP(RestartSong);
+                int tmp = counter;
+                char * newname=NULL;
+                if (tmp<5) {
+                  newname=songNames[tmp];
+                  counter++;
+                }
+                if (newname) {
+                  music=PlayMusic(newname,music);
+                  SDL_mutexV(RestartSong);
                 }else {
-                  INET_Write(mysocket_write,sizeof(char),&data);	
+                  SDL_mutexV(RestartSong);
+                  if (fnet) {
+                    fNET_Write(mysocket_write,sizeof(char),&data);	
+                  }else {
+                    INET_Write(mysocket_write,sizeof(char),&data);	
+                  }
                 }
 		fprintf(STD_OUT, "\ne\n[SONG DONE]\n");
 	}
@@ -247,7 +274,7 @@ int main(int argc, char **argv) {
 
 
 
-	Mix_Music *music=NULL;
+	music=NULL;
 	int audio_rate,audio_channels,
  		// set this to any of 512,1024,2048,4096
 		// the higher it is, the more FPS shown and CPU needed
@@ -256,11 +283,11 @@ int main(int argc, char **argv) {
 	Uint16 audio_format;
 	// initialize SDL for audio and video
 
-	if(SDL_Init(SDL_INIT_AUDIO)<0)
+	if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_TIMER)<0)
 		cleanExit("SDL_Init\n");
-
-    signal( SIGSEGV, SIG_DFL );
-
+        
+        signal( SIGSEGV, SIG_DFL );
+        RestartSong = SDL_CreateMutex();
 	Mix_HookMusicFinished(&music_finished); 
 #endif
         fnet=(argc==3);
@@ -325,7 +352,17 @@ int main(int argc, char **argv) {
 				    ||(!Mix_PlayingMusic())
 #endif
 				    ) {
-					music=PlayMusic(str.c_str(),music);
+                                  vector<string> names = split(str,"|");                                 
+                                  char * tmpstrings[5]={NULL,NULL,NULL,NULL,NULL};
+                                  for(unsigned int t=0;t<5&&t+1<names.size();++t) {
+                                    tmpstrings[t]=strdup(names[t+1].c_str());
+                                  }
+                                  SDL_mutexP(RestartSong);
+                                  memcpy(songNames,tmpstrings,sizeof(char*)*5);
+                                  if (names.size()>0) str=names[0];
+                                  counter=0;
+                                  music=PlayMusic(str.c_str(),music);
+                                  SDL_mutexV(RestartSong);
 					if (music) {
 						fprintf(STD_OUT, "\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
 						curmus=str;
@@ -422,6 +459,7 @@ int main(int argc, char **argv) {
         }
 #ifdef HAVE_SDL
 	Mix_CloseAudio();
+        SDL_DestroyMutex(RestartSong);
 	SDL_Quit();
 #endif
 
