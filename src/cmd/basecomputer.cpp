@@ -2264,7 +2264,8 @@ static std::string GarnerInfoFromSaveGame(string text) {
   vector<std::string> Ships;
   std::string sillytemp=CurrentSaveGameName;
   CurrentSaveGameName=text;
-  savegame.ParseSaveGame(text,system,"Gemini/troy",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true);
+  savegame.SetStarSystem("");
+  savegame.ParseSaveGame(text,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true);
   CurrentSaveGameName=sillytemp;
   text="Savegame: "+text+"#n#_________________#n#";  
   text+="Credits: "+tostring((unsigned int)creds)+"."+tostring(((unsigned int)(creds*100))%100)+"#n#";
@@ -2274,7 +2275,7 @@ static std::string GarnerInfoFromSaveGame(string text) {
     if (Ships.size()>2){
       text+="Fleet:#n#";
       for (int i=2;i<Ships.size();i+=2){
-        text+=simplePrettyShip(Ships[i-1])+"#n#  Located At:#n#  "+simplePrettySystem(Ships[i])+"#n#";
+        text+=" "+simplePrettyShip(Ships[i-1])+"#n#  Located At:#n#  "+simplePrettySystem(Ships[i])+"#n#";
       }
     }
   }
