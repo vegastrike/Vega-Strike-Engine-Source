@@ -459,7 +459,7 @@ void StarSystem::Update() {
     moretime=1;
   }
   float normal_simulation_atom = SIMULATION_ATOM;
-  SIMULATION_ATOM*=moretime;
+  SIMULATION_ATOM/=moretime;
   ///just be sure to restore this at the end
 
   time += GetElapsedTime();
