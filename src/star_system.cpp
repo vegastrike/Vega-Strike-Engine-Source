@@ -46,12 +46,10 @@ struct unorigdest {
   Planet * jumppoint;
   StarSystem * orig;
   StarSystem * dest;
-  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest):un(un),jumppoint(jumppoint),orig(orig),dest(dest) {}
+  float delay;
+  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay) {}
 };
 static std::vector <unorigdest> pendingjump;
-void SSTransfer (Unit * un,Planet * jumppoint, StarSystem * orig,StarSystem * target){
-  pendingjump.push_back (unorigdest (un,jumppoint,orig,target));
-}
 
 StarSystem::StarSystem(const char * filename, const Vector & centr,const string planetname) : 
   //  primaries(primaries), 
@@ -285,7 +283,9 @@ void StarSystem::SwapOut () {
 
 }
 bool shouldfog=false;
+extern double interpolation_blend_factor;
 void StarSystem::Draw() {
+
   AnimatedTexture::UpdateAllFrame();
   for (unsigned int i=0;i<contterrains.size();i++) {
     contterrains[i]->AdjustTerrain(this);
@@ -296,6 +296,12 @@ void StarSystem::Draw() {
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   shouldfog=false;
+  static float bloo;
+  if (interpolation_blend_factor<bloo) {
+    fprintf (stderr,"bad times\n");
+  }
+  bloo = interpolation_blend_factor;
+  //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   while((unit = iter->current())!=NULL) {
     unit->Draw();
     iter->advance();
@@ -359,7 +365,7 @@ void StarSystem::Draw() {
 
 }
 
-extern double interpolation_blend_factor;
+
 
 void StarSystem::Update() {
 
@@ -436,6 +442,7 @@ inline bool CompareDest (Planet * un, StarSystem * origin) {
     if (star_system_table.Get (string(un->GetDestinations()[i]))||star_system_table.Get (string(un->GetDestinations()[i])+string (".system"))) 
       return true;
   }
+  return false;
 }
 inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin) {
   std::vector <Unit *> myvec;
@@ -458,6 +465,10 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
 }
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
+    if (pendingjump[kk].delay>=0) {
+      pendingjump[kk].delay-=GetElapsedTime();
+      continue;
+    }
     if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
       pendingjump[kk].un->RemoveFromSystem();
       pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
@@ -491,8 +502,10 @@ void StarSystem::ProcessPendingJumps() {
 	jumpdest+=23231;
       }
     }
+    pendingjump.erase (pendingjump.begin()+kk);
+    kk--;
   }
-  pendingjump.clear();
+
 }
 
 bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &system) {
@@ -516,7 +529,9 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
     }
   }
   if(ss) {
-    SSTransfer (un,jumppoint, this,ss);
+    float delay=4;
+
+    pendingjump.push_back (unorigdest (un,jumppoint, this,ss,delay));
   } else {
     return false;
   }
