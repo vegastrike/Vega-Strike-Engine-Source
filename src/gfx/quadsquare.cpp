@@ -85,7 +85,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 	v[3].z = pcd->zorg + half;
 	v[4].x = pcd->xorg + half; 
 	v[4].z = pcd->zorg + half*2;
-	//FIXME fill in!
+	//FIXME fill in st!
 
 	for (int i=0;i<5;i++) {
 	  v[i].y= Vertex[i].Y;	  
