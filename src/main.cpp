@@ -343,7 +343,7 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
 
   bs_tp->SetPos (x,y);
   bs_tp->SetCharSize (.4,.8);
-  ScaleMatrix (tmp,Vector (7,7,0));
+  ScaleMatrix (tmp,Vector (6500,6500,0));
   GFXLoadMatrixModel (tmp);
   GFXHudMode (GFXTRUE);
   if (ani) {
@@ -407,9 +407,9 @@ void bootstrap_main_loop () {
 #ifdef _WIN32
 //    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
 	  int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
-    if (!pid) {
+    if (pid<=32) {
       g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server\n");
+      fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
     }
 #endif
   }
