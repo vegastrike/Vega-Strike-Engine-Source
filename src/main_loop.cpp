@@ -24,7 +24,7 @@
 #include "cmd_navigation_orders.h"
 #include "cmd_beam.h"
 #include "gfx_transform_matrix.h"
-#include "cmd_flybywire.h"
+#include "in_ai.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -531,9 +531,9 @@ void createObjects() {
     v = Vector(1,1,-1);
     v.Normalize();
     fighters[a]->SetAI(new Order());
-    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
-    //fighters[a]->EnqueueAI(new FlyByWire (5,5,5,5,5));
+    ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
+    ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
+    fighters[a]->EnqueueAI(new FlyByKeyboard (.1,.1,.1,.1,.1));
 	//        fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   

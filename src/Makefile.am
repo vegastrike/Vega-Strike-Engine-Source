@@ -98,6 +98,8 @@ vegastrike_SOURCES =				\
 	hashtable.h				\
 	hashtable.cpp				\
 	in.h					\
+	in_ai.h					\
+	in_ai.cpp				\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_mouse.cpp				\
