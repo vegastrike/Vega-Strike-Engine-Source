@@ -1064,9 +1064,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_VOID;
     }
     else if(method_id==CMT_UNIT_getSaveData){
-      float magic_num;
+      std::string magic_num;
       void * my_obj=NULL;
-      magic_num= getFloatArg(node,mode,1);
+      magic_num= getStringArgument(node,mode,1);
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
 	if ((tmp=_Universe->isPlayerStarship (my_unit))) {

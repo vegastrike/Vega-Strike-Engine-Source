@@ -12,12 +12,11 @@
 class SaveGame {
   struct MissionDat {
     olist_t dat;
-    double magic_number;
+    std::string magic_number;
     bool operator == (const MissionDat&i) {
-      double eps=.00001;
-      return fabs (magic_number-i.magic_number)<eps;
+      return (magic_number==i.magic_number);
     }
-    MissionDat (double magic_number) {
+    MissionDat (const std::string &magic_number) {
       this->magic_number = magic_number;
     }
   };
@@ -34,7 +33,7 @@ class SaveGame {
   vector <SavedUnits> ReadSavedUnits (FILE * fp);
   vector <MissionDat> mission_data;
  public:
-  olist_t &getMissionData(double magic_number);
+  olist_t &getMissionData(const std::string &magic_number);
   SaveGame(const std::string &pilotname);
   float GetSavedCredits();
   void SetSavedCredits (float);

@@ -140,7 +140,7 @@ void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const cha
     savedunits.Put (address,new SavedUnits (filename,type,faction));
   }
 }
-olist_t &SaveGame::getMissionData(double magic_number) {
+olist_t &SaveGame::getMissionData(const std::string &magic_number) {
   unsigned int i=std::find (mission_data.begin(),mission_data.end(),magic_number)-mission_data.begin();
   if (i==mission_data.size()) {
     mission_data.push_back(MissionDat(magic_number));
@@ -150,20 +150,35 @@ olist_t &SaveGame::getMissionData(double magic_number) {
 void SaveGame::WriteMissionData (FILE * fp) {
   fprintf (fp," %d ",mission_data.size());
   for( unsigned int i=0;i<mission_data.size();i++) {
-    fprintf (fp,"\n%lf ",mission_data[i].magic_number);
+    fprintf (fp,"\n%s ",mission_data[i].magic_number.c_str());
     fprintf (fp,"%d ",mission_data[i].dat.size());
     for (unsigned int j=0;j<mission_data[i].dat.size();j++) {
       fprintf (fp,"%s ",varToString(mission_data[i].dat[j]).c_str());
     }
   }
 }
+std::string scanInString (FILE * fp) {
+  std::string str;
+  char c[2]={'\n','\0'};
+  while (isspace (c[0])) {
+    if (1!=fscanf (fp,"%c",&c[0])) {
+      break;
+    }
+  }
+  while (!isspace (c[0])) {
+    if (1!=fscanf (fp,"%c",&c[0])) {
+      break;
+    }
+    str+=c;
+  }
+  return str;
+}
 void SaveGame::ReadMissionData (FILE * fp) {
   int mdsize;
   fscanf (fp," %d ",&mdsize);
   for( unsigned int i=0;i<mdsize;i++) {
     int md_i_size;
-    double mag_num;
-    fscanf (fp,"\n%lf ",&mag_num);
+    string mag_num(scanInString (fp));
     fscanf (fp,"%d ",&md_i_size);
     mission_data.push_back (MissionDat(mag_num));
     for (unsigned int j=0;j<md_i_size;j++) {
