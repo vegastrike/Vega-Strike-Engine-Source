@@ -1,0 +1,77 @@
+
+*** GENERAL ************************************************************
+
+- Consider handle damages to docked ships if they can be hit
+- Use and "hand-shake" protocol between server and client
+- Interpolate orientation too ? (3 interpolations)
+- CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2
+DONE ? Carsten - Compress sent data in Packet (_packetmem member)
+
+*** ACCOUNT SERVER *****************************************************
+
+- Compress the save files before sending them to game server
+
+
+*** GAME SERVER ********************************************************
+
+- Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
+- Add the player faction to SaveGame
+- Transmit data only for ships, missiles, bolt : send only direction ?
+- When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
+- Think about transfering config data such as difficulty, physics...
+- Find all the used vars in Unit stuff and integrate them in the serverconfig
+- When another player is targeted, get his data (damage level, shield, weapons if we have the appropriate sensors)
+  -> at least the name (got from unit name... to see)
+
+TO TEST - try to reconnect to account server periodicaly if connection lost
+TO LOOK AT - When receiving a packet : look at timestamp and compare it to latest receive timestamp for that client
+
+
+*** CLIENT SIDE *********************************************************
+
+- Interpolate(extrapolate) using delatime + the concerned client's current_state delay
+OR
+- Maybe send extrapolated position with deltatime ahead in time
+- and when receiving position updates extrapolate only with concerned client's delay
+DONE - When receiving position update, test if local player
+DONE - When receiving a packet : look at timestamp and compare it to latest receive timestamp from the server
+DONE - when one exits from VS -> send a quit msg
+DONE - Use a NETWORK_ATOM to check if it's time to send position update
+
+
+=== GENERAL STUFF =======================================================
+
+DONE - split asteroids, enhancement, building, nebula into 2 classes
+DANIEL DONE in endianness.cpp - add htond and htond for doubles : they are completely reversed
+DONE - Remove the isPlayer function and related data
+
+OBSOLETE - Maybe send the unit radius in some way to the server so he can approximate if we can see other clients
+DONE - make first login packets more reliable and stopping the game when fails (use a loop)
+DONE - create configxml.* to handle VS server's configuration file (TIMEOUT, number of clients...)
+DONE - remove "SERIAL" from accountxml
+DONE - think about sending a warning to the account server from the game server when a client is disconnected
+DONE - Add a networked boolean in the Unit class with a SetNetworkMode() method to set networked=1
+DONE - Problem on old_microtime (not initialized) when sending first packet
+DONE - Send a delay var in Packet for client->server delay and then timestamp from server->clients
+NO BECAUSE DEFAULT TO ZLIB - Put some negociation stage to check that client support zlib
+
+
+=== ACCOUNT SERVER ======================================================
+
+DONE - Then transfert unit description with login acceptance
+DONE - Fix the bug when transmitting name for disconnection ??
+DONE : made a StarSystem::Update() method for server - Move StarSystem::Loop to server side
+DONE - Move to server side UpdatePhysics function from unit_physics.cpp
+DONE - Turn Client::game_unit into a UnitContainer
+DONE - Implement removeFromStarSystem ? and Destroy in Unit class
+DONE - add a timeout test if !ingame with a second timeout much bigger
+
+=== GAME SERVER =========================================================
+
+DONE - when server savetime comes, send unit xml to account server for each client
+  compressed? in a single packet with serials or names
+DONE - Load StarSystems on demand (when a player enters an empty starsystem)
+DONE - forsee account server unavailability and in that case, deny new logins + send msg to client
+
+=== CLIENT SIDE =========================================================
+

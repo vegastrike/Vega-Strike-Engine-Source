@@ -55,14 +55,13 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_ICON3               ICON    DISCARDABLE     "icon3.ico"
-IDI_ICON2               ICON    DISCARDABLE     "icon2.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Cursor
 //
 
-IDC_CURSOR1             CURSOR  DISCARDABLE     "cursor1.cur"
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////

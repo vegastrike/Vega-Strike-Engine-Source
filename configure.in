@@ -331,41 +331,6 @@ dnl --------------------------------------------------------------------------
 dnl Check for car sim
 dnl --------------------------------------------------------------------------
 AC_ARG_ENABLE(car, AC_HELP_STRING([--enable-car], [Produce an executable for car simulation]), [TR_CPPFLAGS="$TR_CPPFLAGS -DCAR_SIM "; echo "making car simulator"])
-dnl --------------------------------------------------------------------------
-dnl Check for network protocol
-dnl --------------------------------------------------------------------------
-
-AC_ARG_ENABLE(udp, AC_HELP_STRING([--disable-udp], [Default to TCP if UDP is disabled]), _udp=$enableval)
-
-AC_ARG_ENABLE(tcp, AC_HELP_STRING([--disable-tcp], [Default to none if both TCP and UDP are disabled]), _tcp=$enableval)
-
-if test "x$_udp" != "xno" ; then
-    echo "Configuring for UDP network protocol"
-    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO=1"
-else
-	if test "x$_tcp" != "xno" ; then
-	    TR_CPPFLAGS="$TR_CPPFLAGS -D_TCP_PROTO=1"
-	    echo "Configuring for TCP network protocol"
-	fi
-fi
-
-AC_ARG_ENABLE(stlport, AC_HELP_STRING([--enable-stlport], [Use STLport for compiling process]), stlport=$enableval)
-
-if !(test "x$stlport" = "xno" || test "x$stlport" = "x") ; then
-
-	if test "x$stlport" = "xyes" ; then
-	stlportdir="/usr/include/stlport"
-	else
-	stlportdir="$stlport"
-	fi
-
-	TR_CPPFLAGS="-I$stlportdir $TR_CPPFLAGS"
-	TR_CFLAGS="-I$stlportdir $TR_CFLAGS"
-	TR_CXXFLAGS="-I$stlportdir $TR_CXXFLAGS"
-	echo "Configuring for STLport support."
-fi
-
-
 
 dnl --------------------------------------------------------------------------
 dnl Check for SDL
