@@ -782,7 +782,7 @@ fi
 if test "x$have_python_lib" = "xyes" ; then
 AC_DEFUN( CHECK_FOR_BOOST_LIB, [
     AC_MSG_CHECKING([for $BOOST_LIB_NAME library])
-    LIBS="$PYTHON_LDOPTS -l$BOOST_LIB_NAME"
+    LIBS="$PYTHON_LDOPTS -l$BOOST_LIB_NAME -l$PYTHON_LIB_NAME"
     AC_TRY_LINK( , , have_boost_lib=yes, have_boost_lib=no )
     AC_MSG_RESULT([$have_boost_lib])
 ]) 
