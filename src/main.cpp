@@ -696,7 +696,11 @@ void bootstrap_main_loop () {
 			Network[l].inGame();
 		}
 	}
-
+	{
+		for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+			WriteSaveGame(_Universe->AccessCockpit(i),false);
+		}
+	}
 	cur_check = getNewTime();
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
