@@ -157,6 +157,7 @@ Index Mesh::processfacevertex(char * vertex)const {
 }
 Face Mesh::processface (char * line) const{
     Face f;
+    char * ln = line;
     while (line[0]) {
         char * lastspace = findspace (line);
         if (lastspace) {
@@ -170,6 +171,8 @@ Face Mesh::processface (char * line) const{
             break;
         }
     }
+    if (f.p.size()<3)
+        printf ("%s",ln);
     return f;
 }
 void Mesh::processline (char * line) {
