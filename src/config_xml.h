@@ -28,12 +28,17 @@
 
 #include <expat.h>
 #include <string>
+#include <map>
 #include "xml_support.h"
 #include "easydom.h"
+#include "in_kb.h"
 
 using std::string;
 
 using XMLSupport::AttributeList;
+
+typedef map<string,KBHandler> CommandMap;
+typedef map<string,int> KeyMap;
 
 class vColor {
  public:
@@ -47,11 +52,20 @@ class VegaConfig {
 
   void getColor(string name, float color[4]);
   string getVariable(string section,string name,string defaultvalue);
+  void bindKeys();
 
  private:
   string getVariable(easyDomNode *section,string name,string defaultval);
 
+  void initCommandMap();
+  void initKeyMap();
+
+  CommandMap command_map;
+  KeyMap     key_map;
+
   easyDomNode *variables;
+  easyDomNode *bindings;
+
   vector<vColor *> colors;
 
   bool checkConfig(easyDomNode *node);

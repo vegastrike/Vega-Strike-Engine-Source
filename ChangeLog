@@ -1,3 +1,18 @@
+2001-10-21 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added mapping from string to KBHandler to config_xml
+	* modified firekeyboard.h
+	  the static void xxKey(int, KBSTATE) are now public
+	   to be used in config_xml
+	* removed config tests from main.cpp
+	* uncommented old BindKeys(..) in FlyByKeyboard::FlyByKeyboard 
+	* uncommented old BindKeys(..) in FireKeyboard
+	* uncommented old BindKeys(..) in main_loop:InitializeInput
+	* added cockpit-callbacks to main_loop.h
+	  gave it namespace CockpitKeys
+	* added bindings to vegastrike.config
+	
+
 2001-10-20 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added variables and colors to vegastrike.config

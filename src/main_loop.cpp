@@ -36,6 +36,8 @@
 #include "gfx/aux_texture.h"
 #include "gfx/background.h"
 
+#include "main_loop.h"
+
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -79,7 +81,10 @@ public:
 
 const float timek = .005;
 bool _Slew = true;
-static void PitchDown(int,KBSTATE newState) {
+
+namespace CockpitKeys {
+
+ void PitchDown(int,KBSTATE newState) {
 	static Vector Q;
 	static Vector R;
 	if(newState==PRESS) {
@@ -94,7 +99,7 @@ static void PitchDown(int,KBSTATE newState) {
 	}
 }
 
-static void PitchUp(int,KBSTATE newState) {
+ void PitchUp(int,KBSTATE newState) {
 	
 	static Vector Q;
 	static Vector R;
@@ -111,7 +116,7 @@ static void PitchUp(int,KBSTATE newState) {
 	}
 }
 
-static void YawLeft(int,KBSTATE newState) {
+  void YawLeft(int,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector R;
@@ -128,7 +133,7 @@ static void YawLeft(int,KBSTATE newState) {
 	}
 }
 
-static void YawRight(int,KBSTATE newState) {
+  void YawRight(int,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector R;
@@ -143,13 +148,13 @@ static void YawRight(int,KBSTATE newState) {
 	       
 	}
 }
-static void Quit(int,KBSTATE newState) {
+  void Quit(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
 		exit(0);
 	}
 }
 bool cockpitfront=true;
-static void Inside(int,KBSTATE newState) {
+  void Inside(int,KBSTATE newState) {
   const int cockpiton=1;
   const int backgroundoff=2;
   const int max = 4;
@@ -169,31 +174,31 @@ static void Inside(int,KBSTATE newState) {
     _Universe->AccessCockpit()->SetView (CP_FRONT);
   }
 }
-static void ZoomOut (int, KBSTATE newState) {
+  void ZoomOut (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime();  
 }
 
-static void ZoomIn (int, KBSTATE newState) {
+  void ZoomIn (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime();  
 }
 
-static void InsideLeft(int,KBSTATE newState) {
+  void InsideLeft(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_LEFT);
 	}
 }
-static void InsideRight(int,KBSTATE newState) {
+  void InsideRight(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	    cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_RIGHT);
 	}
 }
-static void InsideBack(int,KBSTATE newState) {
+  void InsideBack(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	    cockpitfront=false;
@@ -201,27 +206,27 @@ static void InsideBack(int,KBSTATE newState) {
 	}
 }
 
-static void SwitchLVDU(int,KBSTATE newState) {
+  void SwitchLVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (0);
 	}
 }
-static void SwitchRVDU(int,KBSTATE newState) {
+  void SwitchRVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (1);
 	}
 }
 
-static void Behind(int,KBSTATE newState) {
+  void Behind(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_CHASE);
 	}
 }
-static void Pan(int,KBSTATE newState) {
+  void Pan(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	  cockpitfront=false;
@@ -229,7 +234,9 @@ static void Pan(int,KBSTATE newState) {
 	}
 }
 
+}
 
+using namespace CockpitKeys;
 
 Unit *carrier=NULL;
 Unit *fighter = NULL;
@@ -279,6 +286,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 void InitializeInput() {
 
+#if 0
   	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F1, Inside);
 	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F2, InsideLeft);
 	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F3, InsideRight);
@@ -298,7 +306,8 @@ void InitializeInput() {
 	BindKey('z', PitchUp);
 	BindKey('a', YawLeft);
 	BindKey('s', YawRight);
-	BindKey(27, Quit);
+#endif
+	BindKey(27, Quit); // always have quit on esc
 }
 
 //Cockpit *cockpit;

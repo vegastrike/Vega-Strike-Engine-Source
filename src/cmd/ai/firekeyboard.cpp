@@ -7,6 +7,7 @@
 
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
+#if 0
   BindJoyKey (whichjoystick,0,FireKeyboard::JFireKey);
   BindJoyKey (whichjoystick,1,FireKeyboard::JMissileKey);
   BindJoyKey (whichjoystick,3,FireKeyboard::JTargetKey);
@@ -16,7 +17,8 @@ FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   BindKey('t',FireKeyboard::TargetKey);
   BindKey('g',FireKeyboard::WeapSelKey);
   BindKey('m',FireKeyboard::MisSelKey);
-  
+
+#endif
 }
 static KBSTATE firekey=UP;
 static KBSTATE targetkey=UP;

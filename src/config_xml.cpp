@@ -23,12 +23,16 @@
   xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
+#if 0
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
 #include <unistd.h>
+
+#endif
 
 #include <expat.h>
 #include "xml_support.h"
@@ -37,12 +41,15 @@
 
 #include "config_xml.h"
 #include "easydom.h"
+#include "cmd/ai/flykeyboard.h"
+#include "cmd/ai/firekeyboard.h"
+#include "main_loop.h" // for CockpitKeys
 
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+
 VegaConfig::VegaConfig(char *configfile){
-  //LoadXML(configfile);
 
   easyDomFactory *domf = new easyDomFactory();
 
@@ -53,10 +60,98 @@ VegaConfig::VegaConfig(char *configfile){
     exit(0);
   }
   //top->walk(0);
+  
+  initCommandMap();
+  initKeyMap();
 
   variables=NULL;
 
   checkConfig(top);
+}
+
+/*
+for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; done
+ */
+
+void VegaConfig::initKeyMap(){
+  // mapping from special key string to glut key
+  key_map["space"]=' ';
+  key_map["return"]=13;
+  key_map["function-1"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F1;
+  key_map["function-2"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F2;
+  key_map["function-3"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F3;
+  key_map["function-4"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F4;
+  key_map["function-5"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F5;
+  key_map["function-6"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F6;
+  key_map["function-7"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F7;
+  key_map["function-8"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F8;
+  key_map["function-9"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F9;
+  key_map["function-10"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F10;
+  key_map["function-11"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F11;
+  key_map["function-12"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F12;
+
+  key_map["cursor-left"]=KEY_SPECIAL_OFFSET+GLUT_KEY_LEFT;
+  key_map["cursor-up"]=KEY_SPECIAL_OFFSET+GLUT_KEY_UP;
+  key_map["cursor-right"]=KEY_SPECIAL_OFFSET+GLUT_KEY_RIGHT;
+  key_map["cursor-down"]=KEY_SPECIAL_OFFSET+GLUT_KEY_DOWN;
+
+  key_map["cursor-pageup"]=KEY_SPECIAL_OFFSET+GLUT_KEY_PAGE_UP;
+  key_map["cursor-pagedown"]=KEY_SPECIAL_OFFSET+GLUT_KEY_PAGE_DOWN;
+  key_map["cursor-home"]=KEY_SPECIAL_OFFSET+GLUT_KEY_HOME;
+  key_map["cursor-end"]=KEY_SPECIAL_OFFSET+GLUT_KEY_END;
+  key_map["cursor-insert"]=KEY_SPECIAL_OFFSET+GLUT_KEY_INSERT;
+  key_map["backspace"]=8;
+  key_map["capslock"]=96;
+  key_map["cursor-delete"]=127;
+  key_map["tab"]='\t';
+  key_map["esc"]=27;
+
+}
+
+#if 0
+  sed 's/\(.*void \)\(.*\)(.*/ command_map[\"Cockpit::\2\"]=CockpitKeys::\2;/'
+#endif
+
+  using namespace CockpitKeys;
+
+void VegaConfig::initCommandMap(){
+  // mapping from command string to keyboard handler
+  command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
+  command_map["StartKey"]=FlyByKeyboard::StartKey ;
+  command_map["StopKey"]=FlyByKeyboard::StopKey ;
+  command_map["UpKey"]=FlyByKeyboard::UpKey ;
+  command_map["DownKey"]=FlyByKeyboard::DownKey ;
+  command_map["LeftKey"]=FlyByKeyboard::LeftKey ;
+  command_map["RightKey"]=FlyByKeyboard::RightKey ;
+  command_map["ABKey"]=FlyByKeyboard::ABKey ;
+  command_map["AccelKey"]=FlyByKeyboard::AccelKey ;
+  command_map["DecelKey"]=FlyByKeyboard::DecelKey ;
+  command_map["RollLeftKey"]=FlyByKeyboard::RollLeftKey ;
+  command_map["RollRightKey"]=FlyByKeyboard::RollRightKey ;
+
+  command_map["FireKey"]=FireKeyboard::FireKey ;
+  command_map["MissileKey"]=FireKeyboard::MissileKey ;
+  command_map["TargetKey"]=FireKeyboard::TargetKey ;
+  command_map["WeapSelKey"]=FireKeyboard::WeapSelKey ;
+  command_map["MisSelKey"]=FireKeyboard::MisSelKey ;
+
+ command_map["Cockpit::PitchDown"]=CockpitKeys::PitchDown;
+ command_map["Cockpit::PitchUp"]=CockpitKeys::PitchUp;
+ command_map["Cockpit::YawLeft"]=CockpitKeys::YawLeft;
+ command_map["Cockpit::YawRight"]=CockpitKeys::YawRight;
+ command_map["Cockpit::Inside"]=CockpitKeys::Inside;
+ command_map["Cockpit::ZoomOut"]=CockpitKeys::ZoomOut ;
+ command_map["Cockpit::ZoomIn"]=CockpitKeys::ZoomIn ;
+ command_map["Cockpit::InsideLeft"]=CockpitKeys::InsideLeft;
+ command_map["Cockpit::InsideRight"]=CockpitKeys::InsideRight;
+ command_map["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
+ command_map["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
+ command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
+ command_map["Cockpit::Behind"]=CockpitKeys::Behind;
+ command_map["Cockpit::Pan"]=CockpitKeys::Pan;
+
+ command_map["Cockpit::Quit"]=CockpitKeys::Quit;
+
 }
 
 bool VegaConfig::checkConfig(easyDomNode *node){
@@ -75,7 +170,8 @@ bool VegaConfig::checkConfig(easyDomNode *node){
       doColors(*siter);
     }
     else if(((*siter)->Name()=="bindings")){
-      doBindings(*siter);
+      bindings=*siter; // delay the bindings until keyboard/joystick is initialized
+      //doBindings(*siter);
     }
     else{
       cout << "Unknown tag: " << (*siter)->Name() << endl;
@@ -210,6 +306,30 @@ void VegaConfig::checkBind(easyDomNode *node){
   if(!(node->attr_value("key").empty())){
       // now map the command to a callback function and bind it
     
+    string keystr=node->attr_value("key");
+    string cmdstr=node->attr_value("command");
+    
+    KBHandler handler=command_map[cmdstr];
+
+    if(handler==NULL){
+      cout << "No such command: " << cmdstr << endl;
+      return;
+    }
+
+    if(keystr.length()==1){
+      BindKey(keystr[0],handler);
+    }
+    else{
+      int glut_key=key_map[keystr];
+      if(glut_key==0){
+	cout << "No such special key: " << keystr << endl;
+	return;
+      }
+      BindKey(glut_key,handler);
+    }
+
+    cout << "bound key " << keystr << " to " << cmdstr << endl;
+
   }
   else if(!(node->attr_value("button").empty())){
     if(!(node->attr_value("button").empty())){
@@ -283,4 +403,8 @@ void VegaConfig::getColor(string name,float color[4]){
   color[3]=1.0;
 
   cout << "WARNING: color " << name << " not defined, using default" << endl;
+}
+
+void VegaConfig::bindKeys(){
+  doBindings(bindings);
 }

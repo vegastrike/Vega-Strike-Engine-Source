@@ -35,6 +35,7 @@ struct StarShipControlKeyboard {
 FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {
+#if 0
     BindKey(8,FlyByKeyboard::StopKey);
     BindKey(92,FlyByKeyboard::StartKey);
     BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_UP,FlyByKeyboard::UpKey);
@@ -50,6 +51,7 @@ FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
     BindKey('*',FlyByKeyboard::RollRightKey);
     BindKey(127,FlyByKeyboard::RollRightKey);
     BindKey(96,FlyByKeyboard::SheltonKey);    
+#endif
   }
   starshipcontrolkeys.refcount++;
 }

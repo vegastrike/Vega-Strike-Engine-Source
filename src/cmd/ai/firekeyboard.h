@@ -14,6 +14,7 @@ class FireKeyboard: public Order {
   float delay;
   float agg;
   bool ShouldFire(Unit * targ);
+ public:
   static void FireKey(int, KBSTATE);
   static void MissileKey(int, KBSTATE);
   static void TargetKey(int, KBSTATE);
