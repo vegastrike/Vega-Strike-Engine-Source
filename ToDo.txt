@@ -12,13 +12,9 @@ Goals for 0.4.2 release:
 *Damage
 ** Fix System Damage so it happens with reasonable frequency
 
-* Resource management/organization:
-** trim redundant thrust animation images
-
 * AI:
 ** Fix AI range trigger happiness
 ** Fix ITTS to use more iterations of Newton's method
-
 
 Scripting Goals:
 * Flightgroups
@@ -32,10 +28,9 @@ Scripting Goals:
 	  This means that there is actually a fleet led by a dodo, it's
 	  not wrong, just a bad simulation :-) --Dan.a
 	  -- By fix, we mean take advantage of the pending changes to script 
-	     side that will classify flightgroups in a reasonable way
+	     side that will classify flightgroups in a reasonable way - thus, 
+	     if the lead ship is a dodo it shouldn't be a _fleet_
 ** Get formatted date back.
-
-
 ----------------------------------------------------------------------------
 
 Goals for 'Sometime over the rainbow'
@@ -55,6 +50,8 @@ Goals for 'Sometime over the rainbow'
 ** Merge BaseComputer modes with NavScreen?
 ** radio chatter from: to:
 
+* Resource management/organization:
+** trim redundant thrust animation images
 
 * Universe consistency
 ** make pirates... more pirate-like
