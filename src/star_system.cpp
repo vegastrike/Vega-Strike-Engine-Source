@@ -11,8 +11,8 @@
 #include "gfx_sphere.h"
 extern Vector mouseline;
 vector<Vector> perplines;
-static SphereMesh *foo;
-static Unit *earth;
+//static SphereMesh *foo;
+//static Unit *earth;
 
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
@@ -26,17 +26,17 @@ StarSystem::StarSystem(Planet *primaries) :
   drawList->prepend(iter);
 
   delete iter;
-  iter = primaries->createIterator();
-  iter->advance();
-  earth=iter->current();
-  delete iter;
+  //iter = primaries->createIterator();
+  //iter->advance();
+  //earth=iter->current();
+  //delete iter;
 
   tp->SetPosition(0.5,0.5,1);
 
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
   //primaries->SetPosition(0,0,5);
-  foo = new SphereMesh(1,5,5,"moon.bmp");
+  //foo = new SphereMesh(1,5,5,"moon.bmp");
 
   cam[1].SetProjectionType(Camera::PARALLEL);
   cam[1].SetZoom(10.0);

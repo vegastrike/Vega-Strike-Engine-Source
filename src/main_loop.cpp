@@ -440,6 +440,7 @@ Animation *ss=NULL;
 Animation *sss=NULL;
 Animation *Preload = NULL;
 void createObjects() {
+  LoadWeapons("weapon_list.xml");
   DABEAM = new Beam (identity_transformation,
 		     weapon_info(weapon_info::BEAM),
 		     NULL);

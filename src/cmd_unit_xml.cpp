@@ -23,6 +23,7 @@ namespace UnitXML {
       UNIT,
       SUBUNIT,
       MESHFILE,
+      MOUNT,
       XFILE,
       X,
       Y,
@@ -32,16 +33,18 @@ namespace UnitXML {
       RK,
       QI,
       QJ,
-      QK
+      QK,
+      MOUNTSIZE,
+      WEAPON
     };
 
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
-    EnumMap::Pair ("MeshFile", MESHFILE)
+    EnumMap::Pair ("MeshFile", MESHFILE),
+    EnumMap::Pair ("Mount", MOUNT)
   };
-
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("file", XFILE), 
@@ -53,11 +56,13 @@ namespace UnitXML {
     EnumMap::Pair ("rk", RK), 
     EnumMap::Pair ("qi", QI),     
     EnumMap::Pair ("qj", QJ),     
-    EnumMap::Pair ("qk", QK)
+    EnumMap::Pair ("qk", QK),
+    EnumMap::Pair ("size", MOUNTSIZE),     
+    EnumMap::Pair ("weapon", WEAPON)
 };
 
-  const EnumMap element_map(element_names, 4);
-  const EnumMap attribute_map(attribute_names, 11);
+  const EnumMap element_map(element_names, 5);
+  const EnumMap attribute_map(attribute_names, 13);
 }
 
 using XMLSupport::EnumMap;
@@ -65,13 +70,27 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace UnitXML;
 
+enum weapon_info::MOUNT_SIZE parseMountSizes (const char * str) {
+  char tmp[13][50];
+  enum weapon_info::MOUNT_SIZE ans = weapon_info::NOWEAP;
+  int num= sscanf (str,"%s %s %s %s %s %s %s %s %s %s %s %s %s",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5],tmp[6],tmp[7],tmp[8],tmp[9],tmp[10],tmp[11],tmp[12]);
+  for (int i=0;i<num;i++) {
+    ans = (enum weapon_info::MOUNT_SIZE)(ans|lookupMountSize (tmp[i]));
+  }
+  return ans;
+}
+
+
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
     string filename;
+    Vector P;
+    int indx;
     Vector Q;
     Vector R;
     Vector pos;
+    bool tempbool;
   Names elem = (Names)element_map.lookup(name);
-
+    enum weapon_info::MOUNT_SIZE mntsiz=weapon_info::NOWEAP;
 	AttributeList::const_iterator iter;
   switch(elem) {
   case UNKNOWN:
@@ -86,6 +105,75 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
+  case MOUNT:
+    Q = Vector (0,1,0);
+    R = Vector (0,0,1);
+    pos = Vector (0,0,0);
+    tempbool=false;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case WEAPON:
+	filename = (*iter).value;
+	break;
+      case MOUNTSIZE:
+	tempbool=true;
+	mntsiz=parseMountSizes((*iter).value.c_str());
+	break;
+      case X:
+	pos.i=parse_float((*iter).value);
+	break;
+      case Y:
+	pos.j=parse_float((*iter).value);
+	break;
+      case Z:
+	pos.k=parse_float((*iter).value);
+	break;
+      case RI:
+	R.i=parse_float((*iter).value);
+	break;
+      case RJ:
+	R.j=parse_float((*iter).value);
+	break;
+      case RK:
+	R.k=parse_float((*iter).value);
+	break;
+      case QI:
+	Q.i=parse_float((*iter).value);
+	break;
+      case QJ:
+	Q.j=parse_float((*iter).value);
+	break;
+      case QK:
+	Q.k=parse_float((*iter).value);
+	break;
+      }
+
+    }
+
+     
+    Q.Normalize();
+    if (fabs(Q.i)==fabs(R.i)&&fabs(Q.j)==fabs(R.j)&&fabs(Q.k)==fabs(R.k)){
+      Q.i=-1;
+      Q.j=0;
+      Q.k=0;
+    }
+    R.Normalize();
+    
+    CrossProduct (Q,R,P);
+    CrossProduct (P,R,Q);
+    Q.Normalize();
+    //Transformation(Quaternion (from_vectors (P,Q,R),pos);
+    indx = xml->units.size();
+    xml->mountz.push_back(new Mount (filename.c_str()));
+    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
+    if (tempbool)
+      xml->mountz[indx]->size=mntsiz;
+    else
+      xml->mountz[indx]->size = xml->mountz[indx]->type.size;
+    //->curr_physical_state=xml->units[indx]->prev_physical_state;
+
+    break;
+
   case SUBUNIT:
 
     Q = Vector (0,1,0);
@@ -125,18 +213,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
 
-      Q.Normalize();
-      R.Normalize();
-      Vector P;
-      CrossProduct (Q,R,P);
-      int indx = xml->units.size();
-      xml->units.push_back(new Unit (filename.c_str(), true));
-      xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
-      xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     }
-    break;    break;
+    Q.Normalize();
+    R.Normalize();
+    
+    CrossProduct (Q,R,P);
+    indx = xml->units.size();
+    xml->units.push_back(new Unit (filename.c_str(), true));
+    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
+    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
+    
+    break;   
   default:
-    ;
+    break;
   }
 }
 

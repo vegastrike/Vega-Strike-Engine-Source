@@ -4,7 +4,9 @@
 weapon_info::weapon_info(const weapon_info &tmp) {
   *this = tmp;
 }
+/*
 weapon_info& weapon_info::operator = (const weapon_info &tmp){
+  size = tmp.size;
   type = tmp.type;
   file = tmp.file;
   r = tmp.r;g=tmp.g;b=tmp.b;a=tmp.a;
@@ -13,8 +15,9 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   EnergyRate=tmp.EnergyRate;EnergyConsumption=tmp.EnergyConsumption;Refire=tmp.Refire;
   return *this;
 }
-void weapon_info::init() {r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=60;Longrange=.5;EnergyRate=18;EnergyConsumption=18;Refire=.2;}
-void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case MISSILE:file=string("missile.xmesh");break;default:break;}}
+*/
+void weapon_info::init() {size=NOWEAP;r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=60;Longrange=.5;EnergyRate=18;EnergyConsumption=18;Refire=.2;}
+void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}}
 
 
 #include "xml_support.h"
@@ -32,10 +35,11 @@ using XMLSupport::AttributeList;
 namespace BeamXML {
   enum Names {
     UNKNOWN,
+    WEAPONS,
     BEAM,
     BALL,
     BOLT,
-    MISSILE,
+    PROJECTILE,
     APPEARANCE,
     //    MANEUVER,
     ENERGY,
@@ -43,6 +47,7 @@ namespace BeamXML {
     DISTANCE,
     //attributes
     NAME,
+    WEAPSIZE,
     XFILE,
     RED,
     GREEN,
@@ -65,10 +70,11 @@ namespace BeamXML {
   };
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN",UNKNOWN),
+    EnumMap::Pair ("Weapons",WEAPONS),
     EnumMap::Pair ("Beam",BEAM),
     EnumMap::Pair ("Ball",BALL),
     EnumMap::Pair ("Bolt",BOLT),
-    EnumMap::Pair ("Missile", MISSILE),
+    EnumMap::Pair ("Missile", PROJECTILE),
     EnumMap::Pair ("Appearance", APPEARANCE),
     //    EnumMap::Pair ("Maneuver",MANEUVER),
     EnumMap::Pair ("Energy",ENERGY),
@@ -78,6 +84,7 @@ namespace BeamXML {
   const EnumMap::Pair attribute_names [] = {
     EnumMap::Pair ("UNKNOWN",UNKNOWN),
     EnumMap::Pair ("Name",NAME),
+    EnumMap::Pair ("MountSize",WEAPSIZE),
     EnumMap::Pair ("file",XFILE),
     EnumMap::Pair ("r",RED),
     EnumMap::Pair ("g",GREEN),
@@ -99,12 +106,12 @@ namespace BeamXML {
     // EnumMap::Pair ("Pitch",PITCH),
     // EnumMap::Pair ("Roll",ROLL)
   };
-  const EnumMap element_map(element_names, 9);
-  const EnumMap attribute_map(attribute_names, 19);
+  const EnumMap element_map(element_names, 10);
+  const EnumMap attribute_map(attribute_names, 20);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
-  int level=0;
+  int level=-1;
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
     Names elem = (Names) element_map.lookup(string (name));
@@ -112,10 +119,14 @@ namespace BeamXML {
     switch (elem) {
     case UNKNOWN:
       break;
+    case WEAPONS:
+      assert (level==-1);
+      level++;
+      break;
     case BOLT:
     case BEAM:
     case BALL:
-    case MISSILE:
+    case PROJECTILE:
       assert (level==0);
       level++;
    
@@ -127,6 +138,9 @@ namespace BeamXML {
 	  break;
 	case NAME:
 	  curname = (*iter).value;
+	  break;
+	case WEAPSIZE:
+	  tmpweapon.MntSize (lookupMountSize ((*iter).value.c_str()));
 	  break;
 	default:
 	  assert (0);
@@ -255,10 +269,14 @@ namespace BeamXML {
     switch (elem) {
     case UNKNOWN:
       break;
+    case WEAPONS:
+      assert (level==0);
+      level--;
+      break;
     case BEAM:
     case BOLT:
     case BALL:
-    case MISSILE:
+    case PROJECTILE:
       assert (level==1);
       level--;
       lookuptable.Put (curname,new weapon_info (tmpweapon));
@@ -302,4 +320,37 @@ void LoadWeapons(const char *filename) {
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
  fclose (inFile);
+}
+enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
+  int i;
+  char tmp[51];
+  for (i=0;i<50&&str[i]!='\0';i++) {
+    tmp[i]=(char)toupper(str[i]);
+  }
+  tmp[i]='\0';
+  if (strcmp ("LIGHT",tmp)==0)
+    return weapon_info::LIGHT;
+  if (strcmp ("MEDIUM",tmp)==0)
+    return weapon_info::MEDIUM;
+  if (strcmp ("HEAVY",tmp)==0)
+    return weapon_info::HEAVY;
+    if (strcmp ("CAPSHIP-LIGHT",tmp)==0)
+    return weapon_info::CAPSHIPLIGHT;
+  if (strcmp ("CAPSHIP-HEAVY",tmp)==0)
+    return weapon_info::CAPSHIPHEAVY;
+  if (strcmp ("SPECIAL",tmp)==0)
+    return weapon_info::SPECIAL;
+  if (strcmp ("LIGHT-MISSILE",tmp)==0)
+    return weapon_info::LIGHTMISSILE;
+  if (strcmp ("MEDIUM-MISSILE",tmp)==0)
+    return weapon_info::MEDIUMMISSILE;
+  if (strcmp ("HEAVY-MISSILE",tmp)==0)
+    return weapon_info::HEAVYMISSILE;
+  if (strcmp ("LIGHT-CAPSHIP-MISSILE",tmp)==0)
+    return weapon_info::CAPSHIPLIGHTMISSILE;
+  if (strcmp ("HEAVY-CAPSHIP-MISSILE",tmp)==0)
+    return weapon_info::CAPSHIPHEAVYMISSILE;
+  if (strcmp ("SPECIAL-MISSILE",tmp)==0)
+    return weapon_info::SPECIALMISSILE;
+  return weapon_info::NOWEAP;
 }

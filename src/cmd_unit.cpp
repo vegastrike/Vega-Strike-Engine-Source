@@ -712,7 +712,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit
       gun=NULL;
       //new Bolt (tmp, type, owner);
       break;
-    case weapon_info::MISSILE:
+    case weapon_info::PROJECTILE:
       gun=NULL;
       //new Missile (tmp, type, owner);
       break;
@@ -722,7 +722,17 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit
   }
   return true;
 }
-
+Unit::Mount::Mount(const string& filename) :gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),type(weapon_info::BEAM){
+  weapon_info * temp = getTemplate (filename);
+ 
+  
+  if (temp==NULL) {
+    status=UNCHOSEN;
+  }else {
+    type = *temp;
+    status=ACTIVE;
+  }
+}
 void Unit::Select() {
   selected = true;
 }
