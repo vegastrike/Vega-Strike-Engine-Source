@@ -7,6 +7,7 @@
 #else
 #include <unistd.h>
 #include <pwd.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #endif
 
@@ -27,13 +28,14 @@ void changehome(bool makehomedir) {
   vssetdir (pwent->pw_dir);
   if (makehomedir) {
     if (chdir (HOMESUBDIR)==-1) {
-      system ("mkdir " HOMESUBDIR);
-
+      //      system ("mkdir " HOMESUBDIR);
+      mkdir (HOMESUBDIR, 644);
     } else {
       chdir ("..");
     }
     if (chdir (HOMESUBDIR "/generatedbsp")==-1) {
-      system ("mkdir " HOMESUBDIR "/generatedbsp");
+      mkdir (HOMESUBDIR "/generatedbsp", 644);
+      //system ("mkdir " HOMESUBDIR "/generatedbsp");
     }else {
       chdir (pwent->pw_dir);
     }
