@@ -199,8 +199,9 @@ AC_MSG_RESULT([$is_macosx])
 
 if test "x$is_macosx" = "xyes" ; then
     CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
-    GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
-    GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
+    dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
+    dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
+	TR_LIBS="$TR_LIBS -framework OpenGL -framework GLUT"
     with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
     with_gl_libs=/System/Library/Frameworks/OpenGL.framework/Libraries
     with_al_inc=/Library/Frameworks/OpenAL.framework/Headers
@@ -1114,8 +1115,10 @@ if test "$NETCOMM" = "1" ; then
 	    echo "*** OSS headers not found : webcam support only."
 		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOSOUND -DNETCOMM"
 		NETCOMM_NOSOUND="1"
+		dnl SHOULD TEST FOR QUICKTIME FRAMEWORK HERE !!!!
 		if test "$is_macosx" = "yes" ; then
     	 	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers"
+    		LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
 		fi
 	else
 		NETCOMM_NOSOUND="0"

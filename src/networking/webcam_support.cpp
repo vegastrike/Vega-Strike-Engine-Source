@@ -4,6 +4,28 @@
 
 using std::cerr;
 using std::endl;
+using std::hex;
+
+#ifdef __APPLE__
+OSErr	ExhaustiveError(void)
+{
+	OSErr iErr;
+	iErr = ResError();
+	if( !iErr)
+		iErr = MemError();
+	else
+		iErr = -1;
+	return iErr;
+}
+void	DoError( long error, char * message)
+{
+	if( error)
+	{
+		cerr<<"!!! ERROR : "<<message<<" - code : "<<hex<<error<<endl;
+		exit(1);
+	}
+}
+#endif
 
 WebcamSupport::WebcamSupport()
 {
@@ -11,6 +33,7 @@ WebcamSupport::WebcamSupport()
 	this->height = 120;
 	this->fps = 5;
 	this->grabbing = false;
+	this->depth = 16;
 
 	this->last_time = 0;
 	// Get the period between 2 captured images
@@ -18,12 +41,26 @@ WebcamSupport::WebcamSupport()
 
 #ifdef __APPLE__
 	OSErr				iErr = noErr;
-	iErr = InitializeQuicktime();
+	GDHandle			saveDevice;
+	CGrafPtr			savePort;
+	long				qtVers;
+
+	GetGWorld( &savePort, &saveDevice);
+	
+	iErr = Gestalt( gestaltQuickTime, &qtVers);
 	if( iErr)
 	{
 		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
 		exit(1);
 	}
+	iErr = EnterMovies();
+	if( iErr)
+	{
+		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
+		exit(1);
+	}
+	SetGWorld( savePort, saveDevice);
+
 	this->gQuicktimeInitialized = true;
 	this->video = NULL;
 #endif
@@ -35,10 +72,37 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 	this->height = h;
 	this->fps = f;
 	this->grabbing = false;
+	this->depth = 16;
 
 	this->last_time = 0;
 	// Get the period between 2 captured images
 	period = 1000000./(double)this->fps;
+
+#ifdef __APPLE__
+	OSErr				iErr = noErr;
+	GDHandle			saveDevice;
+	CGrafPtr			savePort;
+	long				qtVers;
+
+	GetGWorld( &savePort, &saveDevice);
+	
+	iErr = Gestalt( gestaltQuickTime, &qtVers);
+	if( iErr)
+	{
+		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
+		exit(1);
+	}
+	iErr = EnterMovies();
+	if( iErr)
+	{
+		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
+		exit(1);
+	}
+	SetGWorld( savePort, saveDevice);
+
+	this->gQuicktimeInitialized = true;
+	this->video = NULL;
+#endif
 }
 
 int		WebcamSupport::Init()
@@ -80,12 +144,14 @@ int		WebcamSupport::Init()
 	video->video_height = this->height;
 
 	//	get video prefs, if any
+	/*
 	if (GetPrefHandle(kVideoServerPrefsSig, kVideoServerPrefsID, &data))
 		{
 		if (NewUserDataFromHandle(data, &settings))
 			settings = NULL;
 		DisposeHandle(data);
 		}
+	*/
 	
 	//	configure video
 	Rect				r;
@@ -95,14 +161,14 @@ int		WebcamSupport::Init()
 	r.left = r.top = 0;
 	r.right = video -> video_width;
 	r.bottom = video -> video_height;
-	iErr = NewGWorld(&video -> sg_world, kDefaultVideoDepth, &r, NULL, NULL, 0);
+	iErr = NewGWorld(&video -> sg_world, this->depth, &r, NULL, NULL, 0);
 	if (iErr)
 	{
 		iErr = ExhaustiveError();
 		DoError(iErr, "NewGWorld failed.\rTrying giving me more memory or use a sensible video size");
 		exit(1);
 	}
-	LockPixels(video -> sg_world -> portPixMap);
+	//LockPixels(video -> sg_world -> portPixMap);
 
 	//	open default sequence grabber
 	video -> sg_component = OpenDefaultComponent('barg', 0);
@@ -137,14 +203,6 @@ int		WebcamSupport::Init()
 		goto bail;
 		}
 
-	//	set data ref
-	component_error = SGSetDataOutput( video->sg_component, NULL, seqGrabToMemory | seqGrabDontMakeMovie);
-	if (component_error)
-		{
-		DoError(component_error, "SGSetDataOutput failed");
-		goto bail;
-		}
-
 	//	get a new sequence grabber channel
 	component_error = SGNewChannel(video -> sg_component, VideoMediaType, &video -> sg_channel);
 	if (component_error)
@@ -154,9 +212,9 @@ int		WebcamSupport::Init()
 		}
 	
 	//	set channel settings
+	/*
 	if (settings)
 		{
-		//	we have data...let's use it
 		component_error = SGSetChannelSettings(video -> sg_component, video -> sg_channel, settings, 0);
 		if (component_error)
 		{
@@ -170,9 +228,11 @@ int		WebcamSupport::Init()
 				DoError(component_error, "SGSettingsDialog failed");
 			goto bail;
 	}
+	*/
 	
 	//	set sequence grabber bounds
-	component_error = SGSetChannelBounds(video -> sg_channel, &video -> sg_world -> portRect);
+	//component_error = SGSetChannelBounds(video -> sg_channel, &video -> sg_world -> portRect);
+	component_error = SGSetChannelBounds(video -> sg_channel, &r);
 	if (component_error)
 		{
 		DoError(component_error, "SGSetChannelBounds failed");
@@ -365,6 +425,7 @@ char *	WebcamSupport::CaptureImage()
 #endif
 #ifdef __APPLE__
 	// Get Buffer Info and see...
+	ComponentResult		component_error = noErr;
 	component_error = SGIdle(video -> sg_channel);
 	if (component_error)
 		{

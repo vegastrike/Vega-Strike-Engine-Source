@@ -30,9 +30,12 @@
 #include "vsnet_clientstate.h"
 #include "vsnet_address.h"
 #include "vsnet_socket.h"
-#include "cmd/unit_generic.h"
+//#include "cmd/unit_generic.h"
 #include "cmd/container.h"
 #include "savegame.h"
+
+class Unit;
+class UnitContainer;
 
 extern VegaConfig *vs_config;
 int		md5SumFile( const char * filename, unsigned char * digest);

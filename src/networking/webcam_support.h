@@ -51,7 +51,7 @@ class	WebcamSupport
 			GWorldPtr			sg_world;
 			short				video_width, video_height;
 		} videoRec;
-		Boolean				gQuicktimeInitialised;
+		Boolean				gQuicktimeInitialized;
 		// Sequence Grabber info
 		videoRec *			video;
 #endif

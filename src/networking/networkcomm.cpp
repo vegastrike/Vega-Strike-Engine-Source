@@ -1,7 +1,9 @@
 #include "networking/webcam_support.h"
 #include "networkcomm.h"
+#ifndef NETCOMM_NOSOUND
 #include "jvoipsession.h"
 #include "jvoiprtptransmission.h"
+#endif
 
 NetworkCommunication::NetworkCommunication()
 {
