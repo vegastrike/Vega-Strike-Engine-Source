@@ -624,8 +624,10 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
   {
 	  savestring = str;
 	  if ( savestring.length()>0) {
-	    char * buf = new char[str.length()];
+	    char * buf = new char[str.length()+1];
+		buf[str.length()]='\0';
 		memcpy( buf, str.c_str(), str.length());
+		
 		char *tmp2= (char *)malloc(savestring.length()+2);
 		QVector tmppos;
 		if (4==sscanf (buf,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
