@@ -1,24 +1,13 @@
 #!/usr/bin/python
-import sys
-import csv
-args=sys.argv[2:]
-file=sys.argv[1]
-key=[]
-guide=[]
-f=open(file)
-showunits=0
+
+
+
 def interleave (l1,l2,add1,add2):
 	ret=[]
 	for i in range(len(l1)):
 		ret.append(add1+l1[i]+add2);
 		ret.append(l2[i]);
 	return ret
-def earlyStrCmp(haystack,needle):
-	ln = len(needle)
-	lh = len(haystack)
-	if lh>=ln+7:	
-		return (haystack[0:ln]==needle and haystack[ln]==',') or (haystack[0]=='"' and ((haystack[1:ln+1]==needle and haystack[ln+2]==',') or (haystack[3:ln+3]==needle and haystack[ln+6]==',')))
-	return 0
 def makeName(nam,guide,useguide):
 	if (useguide):
 		return nam+'('+guide+')'
@@ -54,6 +43,17 @@ def ProcessList(guide,row):
 	return ret
 
 
+
+import sys
+import csv
+args=sys.argv[2:]
+file=sys.argv[1]
+key=[]
+guide=[]
+f=open(file)
+showunits=0
+
+
 key=csv.semiColonSeparatedList(f.readline().strip(),',')
 guide=csv.semiColonSeparatedList(f.readline().strip(),',')
 for i in args:
@@ -62,7 +62,7 @@ for i in args:
 arg=args[-1]
 line= f.readline().strip();
 while len(line):
-	if (earlyStrCmp(line,arg)):
+	if (csv.earlyStrCmp(line,arg)):
 		row = csv.semiColonSeparatedList(line,',')
 		length=len(row)
 		if (length!=len(key) or length!=len(guide)):

@@ -22,6 +22,13 @@ def elimiQuote(s, delim='"""'):
 		where=findQuot(s,delim)
 	ret=ret+s
 	return ret
+def earlyStrCmp(haystack,needle):
+	ln = len(needle)
+	lh = len(haystack)
+	if lh>=ln+7:	
+		return (haystack[0:ln]==needle and haystack[ln]==',') or (haystack[0]=='"' and ((haystack[1:ln+1]==needle and haystack[ln+2]==',') or (haystack[3:ln+3]==needle and haystack[ln+6]==',')))
+	return 0
+
 def writeList(lis,delim=','):
 	s=""
 	for i in range(len(lis)):
