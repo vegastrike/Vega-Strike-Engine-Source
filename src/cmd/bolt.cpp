@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "unit.h"
 #include "audiolib.h"
+#include "config_xml.h"
 using std::vector;
 using std::string;
 GFXVertexList * bolt_draw::boltmesh=NULL;
@@ -71,7 +72,14 @@ void Bolt::Draw () {
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
-  GFXBlendMode (ONE,ONE);
+
+  static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
+  if (blendbeams==true) {
+    GFXBlendMode (ONE,ONE);
+  }else {
+    GFXBlendMode (ONE,ZERO);
+  }
+
   //  GFXDisable(DEPTHTEST);
   GFXDisable(DEPTHWRITE);
   GFXDisable(TEXTURE1);

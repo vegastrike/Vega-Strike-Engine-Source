@@ -7,6 +7,7 @@
 #include "gfx/decalqueue.h"
 using std::vector;
 #include "audiolib.h"
+#include "config_xml.h"
 #include "images.h"
 static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
@@ -200,7 +201,12 @@ void Beam::ProcessDrawQueue() {
     GFXDisable (CULLFACE);//don't want lighting on this baby
     GFXDisable (DEPTHWRITE);
     GFXPushBlendMode();
-    GFXBlendMode(ONE,ONE);
+    static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
+    if (blendbeams==true) {
+      GFXBlendMode(ONE,ONE);
+    }else {
+      GFXBlendMode(ONE,ZERO);
+    }
 
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
