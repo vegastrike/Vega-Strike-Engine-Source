@@ -133,14 +133,13 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
   //cout << "vdu" << endl;
 };
-
-void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
-  float nw,nh;
+static void DrawTargetShield (VDU * thus, VSSprite* s, float per, float &sx, float &sy, float & w, float & h, bool drawsprite) {
   static bool HighQTargetVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
   static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
 
-  GetPosition (sx,sy);
-  GetSize (w,h);
+  float nw,nh;
+  thus->GetPosition (sx,sy);
+  thus->GetSize (w,h);
 
   // Use margins specified from config file
   static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
@@ -164,7 +163,7 @@ void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w,
 	  s->GetSize (nw,nh);
 	  w= fabs(nw*h/nh);
 	  s->SetSize (w,h);
-	  if (drawweapsprite||1) 
+	  if (drawweapsprite&&drawsprite) 
 		  s->Draw();
 	  s->SetSize (nw,nh);
 	  h = fabs(h);
@@ -175,6 +174,9 @@ void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w,
 	  }
   }
 
+}
+void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
+  DrawTargetShield (this, s, per, sx, sy, w, h, true);
 }
 
 void VDU::Scroll (int howmuch) {
@@ -316,16 +318,23 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
   GFXEnd();
 
 }
-
-void VDU::DrawVDUShield (Unit * parent) {
+static void DrawShieldArmor(Unit * parent, const float StartArmor[8], float x, float y, float w, float h) {
   float fs = parent->FShieldData();
   float rs = parent->RShieldData();
   float ls = parent->LShieldData();
   float bs = parent->BShieldData();
+  float armor[8];
+  GFXColor4f (.4,.4,1,1);
+  GFXDisable (TEXTURE0);
+  DrawShield (fs,rs,ls,bs,x,y,w,h);
+  parent->ArmorData (armor);
+  GFXColor4f (1,.6,0,1);
+  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2);
+}
+void VDU::DrawVDUShield (Unit * parent) {
   float x,y,w,h;
   GetPosition (x,y);
   GetSize (w,h);
-
   // Use margins specified from config file
   static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
   static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
@@ -334,13 +343,7 @@ void VDU::DrawVDUShield (Unit * parent) {
 
   h=fabs (h*.6);
   w=fabs (w*.6);
-  float armor[8];
-  GFXColor4f (.4,.4,1,1);
-  GFXDisable (TEXTURE0);
-  DrawShield (fs,rs,ls,bs,x,y,w,h);
-  parent->ArmorData (armor);
-  GFXColor4f (1,.6,0,1);
-  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2);
+  DrawShieldArmor(parent,StartArmor,x,y,w,h);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   GFXEnable (TEXTURE0);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
@@ -362,6 +365,32 @@ VSSprite * getPlanetImage () {
 VSSprite * getNavImage () {
   static VSSprite s("nav-hud.spr");
   return &s;
+}
+
+double DistanceTwoTargets(Unit *parent, Unit *target) {
+  return ((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
+}
+
+struct retString128{
+  char str [128];
+};
+
+retString128 PrettyDistanceString(double distance) {
+	struct retString128 qr;
+	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+	static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
+	if(lie){
+		sprintf (qr.str,"Distance: %.2lf",distance/game_speed);
+	} else {
+		if(distance<100000){
+			sprintf (qr.str,"Distance: %.0lf Meters",distance);
+		} else if (distance<100000000){
+			sprintf (qr.str,"Distance: %.0lf Kilometers",distance/1000);
+		} else {
+			sprintf (qr.str,"Distance: %.2lf LightSeconds",distance/300000000);
+		}
+	}
+	return qr;
 }
 
 void VDU::DrawTarget(Unit * parent, Unit * target) {
@@ -401,22 +430,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
 
   }
   st[i]='\0';
-  char qr[256];
-  static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
-  if(lie){
-	  sprintf (qr,"Distance: %.2f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))/game_speed);
-  } else {
-	double dist=((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
-	if(dist<100000){
-		sprintf (qr,"Distance: %.0f Meters",dist);
-	} else if (dist <100000000){
-		sprintf (qr,"Distance: %.0f Kilometers",dist/1000);
-	}else {
-		sprintf (qr,"Distance: %.2f LightSeconds",dist/300000000);
-	}
-  }
-  strcat (st,qr);
+  retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
+  strcat (st,qr.str);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
   DrawShield (fs,rs,ls,bs,x,y,w,h);
@@ -737,14 +752,41 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXDisable(DEPTHWRITE);   
 #ifndef CAR_SIM
   char buf[1024];
+  bool inrange=false;
   if (target) {
+    double mm=0;
     std::string blah(getUnitNameAndFgNoBase(target));
     sprintf(buf,"%s\n",blah.c_str());
-  } else {
-    sprintf (buf,"This is a test of the emergencyBroadcastSystem\n");
+    inrange=parent->InRange(target,mm,true,false,false);
   }
+  tp->Draw(MangleString (buf,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 
-  tp->Draw(buf,0,true);
+  if (inrange) {  
+    int i=0;
+    char st[1024];
+    for (i=0;i<rows-1&&i<128;i++) {
+      st[i]='\n';
+    }
+    st[i]='\0';
+    struct retString128 qr=PrettyDistanceString(DistanceTwoTargets(parent,target));
+    strcat (st,qr.str);
+    tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+    GFXColor4f (.4,.4,1,1);
+    GetPosition (x,y);
+    GetSize (w,h);
+    static bool draw_vdu_target_info=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_vdu_view_shields","true"));
+    if (target&&draw_vdu_target_info){
+      if (viewStyle==CP_PANTARGET||viewStyle==CP_TARGET)
+        DrawTargetShield(this,getSunImage(),1,x,y,w,h,false);
+        h=fabs (h*.6);
+        w=fabs (w*.6);
+        DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h);
+    }
+    GFXColor4f (1,1,1,1);
+  }else {
+    if (target)
+      tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+  }
 #endif
   // _Universe->AccessCockpit()->RestoreViewPort();
 }
