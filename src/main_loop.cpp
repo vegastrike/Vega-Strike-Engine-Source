@@ -526,19 +526,20 @@ void createObjects() {
     position.k += 6;
     Vector v(0,1,0);
     v.Normalize();
-    //fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,1), 1.0));
+
     v = Vector(1,1,-1);
     v.Normalize();
     fighters[a]->SetAI(new Order());
     ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
     ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
     //fighters[a]->EnqueueAI(new FlyByKeyboard ());
-    fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
+    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (0,0,-1).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));
+    fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,-4), true,1.0));
     _GFX->activeStarSystem()->AddUnit(fighters[a]);
   }
 
