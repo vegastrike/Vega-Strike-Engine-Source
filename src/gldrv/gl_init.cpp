@@ -242,7 +242,7 @@ void GFXInit (int argc, char ** argv){
 #if defined(IRIX)
     glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
 #endif
-    if (glutExtensionSupported("GL_EXT_color_table")) {
+    if (glutExtensionSupported("GL_EXT_color_table")||glutExtensionSupported ("GL_EXT_shared_texture_palette")) {
       g_game.PaletteExt = 1;
       //(void) fprintf(stderr, "OpenGL::EXTColorTable supported\n");
     } else {

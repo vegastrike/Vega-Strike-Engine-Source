@@ -28,8 +28,16 @@ void Building::UpdatePhysics (const Transformation &trans, const Matrix transmat
   }
   if (vehicle) {
     Normalize(p);
-    Vector tmp1 = 200*p.Cross (q);
-    
+    float k = p.Dot (q);
+    Vector tmp1;
+    if (k<=0) {
+      tmp1 = Vector (0,0,1);//q.Cross (p);
+      if (k=tmp1.Magnitude()){
+	tmp1*=400./k;
+      }
+    } else {
+      tmp1 = 200*q.Cross (p);
+    }
     NetLocalTorque+=((tmp1-tmp1*(tmp1.Dot (GetAngularVelocity())/tmp1.Dot(tmp1))))*1./GetMass();
   }
   SetCurPosition (tmp);
