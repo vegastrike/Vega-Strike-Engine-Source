@@ -39,6 +39,10 @@ std::string readfiledata(const char * name) {
 	return std::string(line,line+len);
 }
 
+double sqr (double x){
+	return x*x;
+}
+
 std::string itostr(int i) {
 	char test[256];
 	sprintf (test,"%d",i);
@@ -89,30 +93,45 @@ class System: public map <string,string> {
 public:
 	static System* findSystem(vector<System> &s, string outgoing) {
 		int slash = outgoing.find("/");
-		string sys=outgoing;
-		if (slash!=std::string::npos) {
-			sys = outgoing.substr(slash);
-		}
-		System *bestChoice=NULL;
-		if (sys.length())
-			if (sys[0]=='/')
-				sys = sys.substr(1);
-		outgoing = outgoing.substr(0,slash);
-		for (unsigned int j=0;j<s.size();++j) {
-			if (s[j].name==sys) {
-				if (s[j].sector!=outgoing) {
-					fprintf (stderr,"Error: System %s not in %s but in %s\n",sys.c_str(),outgoing.c_str(),s[j].sector.c_str());
-					if (bestChoice==NULL) {
-						bestChoice=&s[j];
-					} else if (bestChoice!=&s[j]) {
-						fprintf(stderr," -- Duplicate ambiguous system name... Some systems may have invalid jump points!!!!\n");
+		if (slash==std::string::npos) {
+			std::vector<System*> habitableSystems;
+			for (unsigned int j=0;j<s.size();++j) {
+				if (s[j].sector==outgoing) {
+					if (s[j].habitable) {
+						habitableSystems.push_back(&s[j]);
 					}
-				}else {
-					return &s[j];
 				}
 			}
+			if (habitableSystems.empty()) {
+				fprintf(stderr, "Fatal Error: No habitable systems in the %s sector!!!\n",outgoing.c_str());
+				return NULL;
+			} else {
+				return habitableSystems[(int)((((float)rand())/RAND_MAX)*habitableSystems.size())];
+			}
+		} else {
+			string sys=outgoing;
+			sys = outgoing.substr(slash);
+			System *bestChoice=NULL;
+			if (sys.length())
+				if (sys[0]=='/')
+					sys = sys.substr(1);
+			outgoing = outgoing.substr(0,slash);
+			for (unsigned int j=0;j<s.size();++j) {
+				if (s[j].name==sys) {
+					if (s[j].sector!=outgoing) {
+						fprintf (stderr,"Error: System %s not in %s but in %s\n",sys.c_str(),outgoing.c_str(),s[j].sector.c_str());
+						if (bestChoice==NULL) {
+							bestChoice=&s[j];
+						} else if (bestChoice!=&s[j]) {
+							fprintf(stderr," -- Duplicate ambiguous system name... Some systems may have invalid jump points!!!!\n");
+						}
+					}else {
+						return &s[j];
+					}
+				}
+			}
+			return bestChoice;
 		}
-		return bestChoice;
 	}
 	System () {}
 	bool habitable;
@@ -136,7 +155,7 @@ public:
 	string fullName () {
 		return sector+"/"+name;
 	}
-	void computeProperties(bool interestingname) {
+	void computeProperties(bool interestingname,const vector<string> homeworlds) {
 		this->interesting=interestingname;
 		double rad=16000;
 		double lifeprob= .25;
@@ -196,6 +215,14 @@ public:
 		(*this)["faction"]="neutral";
 		lifeprob*=1;
 		habitable=false;
+		for (int i=0;i<homeworlds.size();i++) {
+			if (homeworlds[i]==name) {
+				//All homeworlds have life!
+				//(Or else I would not exist or be able to write this program)
+				lifeprob=1;
+				break;
+			}
+		}
 		if (rand()<RAND_MAX*lifeprob) {
 			habitable=true;
 			//living
@@ -331,186 +358,27 @@ std::vector<string> readMilkyWayNames( ) {
 	}while (where!=string::npos);
 	return retval;
 }
-string dodad (int which) {
-	if (which==0)
-		return "";
-	return "_"+itostr(which);
-}
-vector<string> shuffle (const vector<string> & inp) {
-	vector<string> retval;
-	for (unsigned int i=0;i<inp.size();++i) {
-		int index = rand()%(retval.size()+1);
-		if (std::find(retval.begin(),retval.end(),inp[i])==retval.end()) {
-			retval.insert(retval.begin()+index,inp[i]);
-		}
-	}
-	return retval;
-}
-string recomputeName(){
-	static int which=-1;
-	static std::vector<string> genericnames=shuffle(readMilkyWayNames());
-	which++;
-	return genericnames[(which)%genericnames.size()]+dodad(which/genericnames.size());
-}
-
-vector<System> readfile (const char * name) {
-	vector<System>systems;
-	std::string line=readfiledata(name);
-	if (line.empty()){
-		return systems;
-	}
-	int len=line.size();
-	std::vector<string> keys = readCSV(line);
-	for (std::vector<string>::iterator i =keys.begin();i!=keys.end();++i) {
-		*i = strtoupper(*i);
-	}
-	while(true) {
-		int n=line.find("\n");
-		if (n==std::string::npos) {
-			break;
-		}
-		line=line.substr(n+1);
-		
-		System in;
-		std::vector <string> content = readCSV(line);
-		for (int i = 0;i<content.size();++i) {
-			if (keys[i].find("DISTANCE")!=string::npos) {
-				in.distance = atof (content[i].c_str());
-			}else if (keys[i].find("ASCENSION")!=string::npos) {
-				in.ascension = atof(content[i].c_str());
-			}else if (keys[i].find("DECLINATION")!=string::npos) { 
-				in.declination = atof (content[i].c_str());
-			}else if (keys[i].find("LUMIN")!=string::npos) {
-				in.luminosity = atof(content[i].c_str());
-			}else if (keys[i].find("SPECTRUM")!=string::npos||keys[i].find("TYPE")!=string::npos) {
-				in.type = atoi(content[i].c_str());
-			}else if (keys[i].find("SIZE")!=string::npos) {
-				in.size = atoi(content[i].c_str());
-			}else {
-				if (keys[i].find("NAME")!=string::npos) {
-					in.name = unpretty(content[i]);
-				}else {
-					printf ( "error key %s not found\n",keys[i].c_str());
-					in[keys[i]] = content[i];
-				}
-			   
-			}
-/*			
-			if (in.name=="") {
-				static int num=0;
-				num++;
-				in.name=string("Daniel")+itostr(num);
-			}
-*/
-			in.alphaonlyname = alphaOnly(in.name);
-			in.sector="nowhereland";
-
-		}
-
-		in.computeXYZ();
-		systems.push_back(in);
-		
-	}
-	std::sort (systems.begin(),systems.end(),AlphaOnlySort());
-	int hc=0,bc=0;
-	int ic=0,uc=0;
-	int ec=0;
-	if (1) {
-		for (unsigned int i= 0;i<systems.size();++i) {
-			if (systems[i].name.length()==0){
-				systems[i].interesting=false;
-				static int num=0;
-				num++;
-				systems[i].name=string("Daniel")+itostr(num);
-				ec++;
-			}else if (i<4) {
-				systems[i].interesting=true;
-			}else if (i>systems.size()-4) {
-				systems[i].interesting=true;
-			}else {
-				//now we have a buffer zone of 4!
-				//engage!
-				if (systems[i].alphaonlyname==systems[i-1].alphaonlyname&&
-					systems[i].alphaonlyname==systems[i+1].alphaonlyname&&
-					systems[i].alphaonlyname==systems[i+2].alphaonlyname&&
-					systems[i].alphaonlyname==systems[i-2].alphaonlyname) {
-					systems[i].interesting=false;
-					uc++;
-				}else {
-					systems[i].interesting=true;
-				}
-			}
-			
-			if (systems[i].interesting) {
-				ic++;
-				//printf("%s interesting\n",systems[i].name.c_str());
-			}else {
-				//printf("%s no\n",systems[i].name.c_str());
-			}
-			systems[i].computeProperties(systems[i].interesting);
-			if (systems[i].habitable) {
-				hc +=1;
-				if (systems[i].interesting==false) {
-					systems[i].name = recomputeName();
-				}
-			}else {
-				bc+=1;
-			}
-		}
-	}
-	fprintf (stderr,"\n\nParsing has been completed.\nHabitable count: %d\nBarren count: %d\n\nInteresting count: %d\nUninteresting count: %d\nEmpty count: %d\n\nGenerating data...\n\n",hc,bc,ic,uc,ec);
-	return systems;
-}
-	
-
-void writesystems(FILE * fp, std::vector<System> s) {
-	std::sort(s.begin(),s.end());//sort into sector categories
-	string cursector;
-	fprintf(fp,"<galaxy><systems>\n");
-	int iter=0;
-	for (std::vector<System>::iterator i = s.begin();i!=s.end();++i) {
-		if ((*i).sector != cursector) {
- 			//start sectortag;
-			if (cursector!="")
-					fprintf(fp,"\t</sector>\n");
-			fprintf (fp, "\t<sector name=\"%s\">\n",(*i).sector.c_str());
-			cursector = (*i).sector;
-		}
-		fprintf(fp,"\t\t<sector name=\"%s\">\n",(*i).name.c_str());
-		for (std::map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
-			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
-		}
-		fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"");
-		if ((*i).jumps.size()) {
-			fprintf(fp,"%s",(*i).jumps[0].c_str());
-			for (unsigned int k=1;k<(*i).jumps.size();++k) {
-				fprintf (fp," %s",(*i).jumps[k].c_str());
-			}
-		}
-		fprintf (fp,"\"/>\n");
-/*		if (iter>4 && iter+4<s.size()) {
-			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
-			}*/
-		fprintf(fp,"\t\t</sector>\n");
-		iter++;
-	}	
-	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
-	
-}
-
 
 class FactionInfo {
 	unsigned maxsystems;
 	float takeoverprob; // The chace that an enemy system will be taken over.
 	float takeneutralprob; // The chance that a neutral system will be taken over.
 	string name;
+	System *homeworld;
+	
 	unsigned turn;
 	unsigned numsystems;
-	System *homeworld;
 	std::vector<System*> borderSystems;
 	std::vector<System*> developingSystems;
 	std::set<System*> systems; // for quick access.
+	
 public:
+	System *getHomeworld() {
+		return homeworld;
+	}
+	const System *getHomeworld() const{
+		return homeworld;
+	}
 	void developBorderSystems() {
 		// reserve memory to increse speed.
 		developingSystems.reserve(developingSystems.size()+borderSystems.size());
@@ -528,37 +396,51 @@ public:
 		}
 		numsystems+=newSystems.size();
 	}
+	/*
+	FactionInfo(const FactionInfo &other)
+			: turn(other.turn), numsystems(other.numsystems), name(other.name), takeoverprob(other.takeoverprob),
+			  takeneutralprob(other.takeneutralprob), maxsystems(other.maxsystems),
+			  homeworld(other.homeworld), systems(other.systems), developingSystems(other.developingSystems),
+			  borderSystems(other.borderSystems) {
+	}
+	*/
 	FactionInfo(vector<string> stuff, vector<System> &s)
-			: turn(0), numsystems(1) {
-		if (stuff.size()<4) {
-			if (stuff.size()<3) {
-				if (stuff.size()<2) {
-					if (stuff.size()<1) {
-						stuff.push_back("<Error while reading faction>");
-					}
-					stuff.push_back(".1");
-				}
-				stuff.push_back("10");
-			}
-			stuff.push_back("You are getting this error due to lack of required columns.");
-		}
-		name=stuff[0];
-		takeoverprob=atof(stuff[1].c_str());
-		takeneutralprob=1-takeoverprob;
-		maxsystems=atoi(stuff[2].c_str());
-		homeworld=System::findSystem(s,stuff[3]);
+			: turn(0), numsystems(1), name(stuff[0]), takeoverprob(atof(stuff[1].c_str())),
+			  takeneutralprob(1-takeoverprob), maxsystems(atoi(stuff[2].c_str())),
+			  homeworld(System::findSystem(s,stuff[3])) {
 		if (!homeworld) {
 			fprintf(stderr,"Fatal error: homeworld \"%s\" not found!!!\n",stuff[3].c_str());
+		} else if (homeworld->jumps.empty()) {
+			fprintf(stderr,"Fatal error: homeworld \"%s\" has no jump points!!!\nThis means that the %s faction will wait forever for a jump point\nto come into existance.  The application will probably get stuck in an endless loop somewhere!",stuff[3].c_str(),name.c_str());
 		}
 		systems.insert(homeworld);
 		borderSystems.push_back(homeworld);
 	}
-	FactionInfo(string nam, float prob, int max)
-			: name(nam), takeoverprob(prob), maxsystems(max) {
+	FactionInfo(string nam, float prob, int max, System *homeworld)
+			: turn(0), numsystems(1), name(nam), takeoverprob(prob),
+			  takeneutralprob(1-takeoverprob), maxsystems(max), homeworld(homeworld) {
 	}
-	void simulateTurn (unsigned int totalturn, vector<System> &s) {
+	/*
+	FactionInfo &operator= (const FactionInfo &other) {
+		turn=(other.turn);
+		numsystems=(other.numsystems);
+		name=(other.name);
+		takeoverprob=(other.takeoverprob);
+		takeneutralprob=(other.takeneutralprob);
+		maxsystems=(other.maxsystems);
+		homeworld=(other.homeworld);
+		systems=(other.systems);
+		developingSystems=(other.developingSystems);
+		borderSystems=(other.borderSystems);
+		return *this;
+	}
+	*/
+	void simulateTurn (unsigned int totalturn, bool allowTakeover, vector<System> &s) {
 		++turn;
 		vector<System*> systemsToAdd;
+		if (borderSystems.empty()) {
+			numsystems=maxsystems;
+		}
 		for (int i=0;i<borderSystems.size();i++) {
 			std::vector<std::string>::const_iterator end=borderSystems[i]->jumps.end();
 			for (std::vector<std::string>::const_iterator iter=borderSystems[i]->jumps.begin();iter!=end;++iter) {
@@ -566,8 +448,8 @@ public:
 				if (jump!=NULL&&systems.find(jump)==systems.end()) {
 					// not in our territory! and it is valid.
 					if (((*jump)["faction"]=="neutral"
-							&& (((float)rand())/RAND_MAX)<takeoverprob)
-							|| ((((float)rand())/RAND_MAX)<takeoverprob)) {
+							&& (((float)rand())/RAND_MAX)<takeneutralprob)
+							|| ((((float)rand())/RAND_MAX)<takeoverprob&&allowTakeover)) {
 						(*jump)["faction"]=name;
 						systemsToAdd.push_back(jump);
 					}
@@ -593,12 +475,20 @@ std::vector<FactionInfo> readFactions(vector<System> &s) {
 		}
 		file=file.substr(r>n?r+1:n+1);
 		if (temp.size()) {
+			if (temp.size()<4) {
+				if (temp.size()<3) {
+					if (temp.size()<2) {
+						temp.push_back(".1");
+					}
+					temp.push_back("10");
+				}
+				temp.push_back("You are getting this error due to lack of required columns.");
+			}
 			ret.push_back(FactionInfo(temp, s));
 		}
 	}
 	return ret;
 }
-
 
 void simulateFactionTurns (vector<System> &s) {
 	std::vector<FactionInfo> factions=readFactions(s);
@@ -606,14 +496,16 @@ void simulateFactionTurns (vector<System> &s) {
 		int num_inactive=0;
 		for (unsigned i=0;i<factions.size();i++) {
 			if (factions[i].active()) {
-				printf("");
-				factions[i].simulateTurn(turn, s);
+				factions[i].simulateTurn(turn, false, s);
 			} else {
 				num_inactive++;
 			}
 		}
 		if (num_inactive>=factions.size())
 			break;
+	}
+	for (unsigned i=0;i<factions.size();i++) {
+		factions[i].simulateTurn(turn, true, s);
 	}
 }
 
@@ -711,16 +603,200 @@ std::string getSector(const System &s, vec3 min, vec3 max) {
 		return error;
 	}
 }
-double sqr (double x){
-	return x*x;
+
+string dodad (int which) {
+	if (which==0)
+		return "";
+	return "_"+itostr(which);
+}
+vector<string> shuffle (const vector<string> & inp) {
+	vector<string> retval;
+	for (unsigned int i=0;i<inp.size();++i) {
+		int index = rand()%(retval.size()+1);
+		if (std::find(retval.begin(),retval.end(),inp[i])==retval.end()) {
+			retval.insert(retval.begin()+index,inp[i]);
+		}
+	}
+	return retval;
+}
+string recomputeName(){
+	static int which=-1;
+	static std::vector<string> genericnames=shuffle(readMilkyWayNames());
+	which++;
+	return genericnames[(which)%genericnames.size()]+dodad(which/genericnames.size());
+}
+
+vector<System> readfile (const char * name) {
+	vector<System>systems;
+	std::string line=readfiledata(name);
+	if (line.empty()){
+		return systems;
+	}
+	int len=line.size();
+	std::vector<string> keys = readCSV(line);
+	for (std::vector<string>::iterator i =keys.begin();i!=keys.end();++i) {
+		*i = strtoupper(*i);
+	}
+	while(true) {
+		int n=line.find("\n");
+		if (n==std::string::npos) {
+			break;
+		}
+		line=line.substr(n+1);
+		
+		System in;
+		std::vector <string> content = readCSV(line);
+		for (int i = 0;i<content.size();++i) {
+			if (keys[i].find("DISTANCE")!=string::npos) {
+				in.distance = atof (content[i].c_str());
+			}else if (keys[i].find("ASCENSION")!=string::npos) {
+				in.ascension = atof(content[i].c_str());
+			}else if (keys[i].find("DECLINATION")!=string::npos) { 
+				in.declination = atof (content[i].c_str());
+			}else if (keys[i].find("LUMIN")!=string::npos) {
+				in.luminosity = atof(content[i].c_str());
+			}else if (keys[i].find("SPECTRUM")!=string::npos||keys[i].find("TYPE")!=string::npos) {
+				in.type = atoi(content[i].c_str());
+			}else if (keys[i].find("SIZE")!=string::npos) {
+				in.size = atoi(content[i].c_str());
+			}else {
+				if (keys[i].find("NAME")!=string::npos) {
+					in.name = unpretty(content[i]);
+				}else {
+					printf ( "error key %s not found\n",keys[i].c_str());
+					in[keys[i]] = content[i];
+				}
+			   
+			}
+/*			
+			if (in.name=="") {
+				static int num=0;
+				num++;
+				in.name=string("Daniel")+itostr(num);
+			}
+*/
+			in.alphaonlyname = alphaOnly(in.name);
+			in.sector="nowhereland";
+
+		}
+
+		in.computeXYZ();
+		systems.push_back(in);
+		
+	}
+	std::sort (systems.begin(),systems.end(),AlphaOnlySort());
+	vec3 min,max;
+	computeminmax(systems,min,max);
+	for (unsigned index=0;index<systems.size();++index) {
+		systems[index].sector=getSector(systems[index],min,max);
+	}
+	int hc=0,bc=0;
+	int ic=0,uc=0;
+	int ec=0;
+	if (1) {
+		std::vector<string> homeworlds;
+		{
+			std::string factionsdata = readfiledata("factions.csv");
+			while (true) {
+				std::vector<std::string> vec=(readCSV(factionsdata));
+				int n=factionsdata.find("\n");
+				if (n==std::string::npos) {
+					break;
+				}
+				factionsdata=factionsdata.substr(n+1);
+				if (vec.size()>=4) {
+					int slash=vec[3].find("/");
+					if (slash!=std::string.npos) {
+						homeworlds.push_back(vec[3].substr(slash+1));
+					}
+				}
+			}
+		}
+		for (unsigned int i= 0;i<systems.size();++i) {
+			if (systems[i].name.length()==0){
+				systems[i].interesting=false;
+				static int num=0;
+				num++;
+				systems[i].name=string("Daniel")+itostr(num);
+				ec++;
+			}else if (i<4) {
+				systems[i].interesting=true;
+			}else if (i>systems.size()-4) {
+				systems[i].interesting=true;
+			}else {
+				//now we have a buffer zone of 4!
+				//engage!
+				if (systems[i].alphaonlyname==systems[i-1].alphaonlyname&&
+					systems[i].alphaonlyname==systems[i+1].alphaonlyname&&
+					systems[i].alphaonlyname==systems[i+2].alphaonlyname&&
+					systems[i].alphaonlyname==systems[i-2].alphaonlyname) {
+					systems[i].interesting=false;
+					uc++;
+				}else {
+					systems[i].interesting=true;
+				}
+			}
+			
+			if (systems[i].interesting) {
+				ic++;
+				//printf("%s interesting\n",systems[i].name.c_str());
+			}else {
+				//printf("%s no\n",systems[i].name.c_str());
+			}
+			systems[i].computeProperties(systems[i].interesting, homeworlds);
+			if (systems[i].habitable) {
+				hc +=1;
+				if (systems[i].interesting==false) {
+					systems[i].name = recomputeName();
+				}
+			}else {
+				bc+=1;
+			}
+		}
+	}
+	fprintf (stderr,"\n\nParsing has been completed.\nHabitable count: %d\nBarren count: %d\n\nInteresting count: %d\nUninteresting count: %d\nEmpty count: %d\n\nGenerating data...\n\n",hc,bc,ic,uc,ec);
+	return systems;
+}
+	
+
+void writesystems(FILE * fp, std::vector<System> s) {
+	std::sort(s.begin(),s.end());//sort into sector categories
+	string cursector;
+	fprintf(fp,"<galaxy><systems>\n");
+	int iter=0;
+	for (std::vector<System>::iterator i = s.begin();i!=s.end();++i) {
+		if ((*i).sector != cursector) {
+ 			//start sectortag;
+			if (cursector!="")
+					fprintf(fp,"\t</sector>\n");
+			fprintf (fp, "\t<sector name=\"%s\">\n",(*i).sector.c_str());
+			cursector = (*i).sector;
+		}
+		fprintf(fp,"\t\t<sector name=\"%s\">\n",(*i).name.c_str());
+		for (std::map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
+			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
+		}
+		fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"");
+		if ((*i).jumps.size()) {
+			fprintf(fp,"%s",(*i).jumps[0].c_str());
+			for (unsigned int k=1;k<(*i).jumps.size();++k) {
+				fprintf (fp," %s",(*i).jumps[k].c_str());
+			}
+		}
+		fprintf (fp,"\"/>\n");
+/*		if (iter>4 && iter+4<s.size()) {
+			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
+			}*/
+		fprintf(fp,"\t\t</sector>\n");
+		iter++;
+	}	
+	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
+	
 }
 void processsystems (std::vector <System> & s){
 	vec3 min,max;
 	computeminmax(s,min,max);
 	unsigned int i;
-	for (i=0;i<s.size();++i) {
-		s[i].sector=getSector(s[i],min,max);
-	}
 	for (i=0;i<s.size();++i) {
 		std::map <double,string> jumps;
 		if (s[i].habitable)
