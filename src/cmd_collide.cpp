@@ -1,7 +1,9 @@
 #include "cmd_unit.h"
 #include "cmd_beam.h"
+#include "gfx_mesh.h"
 
 vector <LineCollide> collidequeue;
+
 
 void Unit::CollideAll() {
   unsigned int i;
@@ -30,6 +32,11 @@ void Unit::CollideAll() {
   }
     //add self to the queue??? using prev and cur physical state as an UNKNOWN
 }
+
+bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat) {
+
+}
+
 bool Unit::Collide (Unit * target) {
   if (target==this) 
     return false;

@@ -36,6 +36,7 @@
 using namespace std;
 
 class Planet;
+class Unit;
 class BSPTree;
 class GFXVertex;
 class GFXVertexList;
@@ -213,7 +214,7 @@ protected:
   void InitUnit();
   
   void Reflect ();
-  
+  bool Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat);
   string *hash_name;
   // Support for reorganized rendering
   bool will_be_drawn;
