@@ -168,7 +168,8 @@ void Mission::DirectorEnd(){
   if(director==NULL){
     return;
   }
-  RunDirectorScript ("endgame");
+  //  RunDirectorScript ("endgame");
+
 #ifdef WIN32
   var_out.open("c:\\tmp\\default-player.variables");
 #else
