@@ -25,7 +25,8 @@
 #include "gfx_transform_vector.h"
 class Animation:public Primitive
 {
-	Texture **Decal;
+	Texture **Decal; 
+   bool camup;
 	short numframes;
 	float timeperframe;
 	scalar_t cumtime;
@@ -37,7 +38,7 @@ class Animation:public Primitive
 
 public:
 	Animation();
-	Animation(char *, bool Rep=0);
+	 Animation(char *, bool Rep=0, bool camorient=false);
 	~Animation();
   //  void SetPosition (float x,float y,float z);
   //  void SetPosition(const Vector &k);
