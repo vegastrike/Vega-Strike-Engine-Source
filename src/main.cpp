@@ -129,8 +129,7 @@ void cleanup(void)
 
     if (defaultcg->vertexProgram) cgDestroyProgram(defaultcg->vertexProgram);
     if (defaultcg->pixelProgram)  cgDestroyProgram(defaultcg->pixelProgram);
-    if (defaultcg->vertexContext) cgDestroyContext(defaultcg->vertexContext);
-    if (defaultcg->pixelContext)  cgDestroyContext(defaultcg->pixelContext);
+    if (defaultcg->shaderContext)  cgDestroyContext(defaultcg->shaderContext);
 
   if (muzak) {
     delete muzak;
