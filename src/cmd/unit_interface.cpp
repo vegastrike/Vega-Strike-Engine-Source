@@ -405,11 +405,11 @@ void UpgradingInfo::SetupCargoList () {
       if (un) {
 	switch (submode) {
 	case MOUNT_MODE:
-	  for (;i<un->nummounts;i++) {
-	    if (un->mounts[i].status==Unit::Mount::ACTIVE||un->mounts[i].status==Unit::Mount::INACTIVE)
-	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type->weapon_name).c_str(),un->mounts[i].type->weapon_name.c_str());
+	  for (;i<un->GetNumMounts();i++) {
+	    if (un->mounts[i]->status==Unit::Mount::ACTIVE||un->mounts[i]->status==Unit::Mount::INACTIVE)
+	      CargoList->AddTextItem ((tostring(i)+un->mounts[i]->type->weapon_name).c_str(),un->mounts[i]->type->weapon_name.c_str());
 	    else 
-	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i].size)+std::string("]")).c_str());
+	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i]->size)+std::string("]")).c_str());
 	  }
 	  break;
 	case SUBUNIT_MODE:
@@ -734,7 +734,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
    	    if (mode!=SHIPDEALERMODE) {
 	      selectedmount=0;
 	      selectedturret=0;
-	      if (NewPart->nummounts) {
+	      if (NewPart->GetNumMounts()) {
 		SetMode(mode,MOUNT_MODE);
 	      }else {
 		CompleteTransactionAfterMountSelect();

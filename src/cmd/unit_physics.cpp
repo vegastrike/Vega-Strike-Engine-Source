@@ -34,13 +34,8 @@
 #include "universe_util.h"
 #include "cmd/script/mission.h"
 #include "networking/netclient.h"
-float copysign (float x, float y) {
-	if (y>0)
-			return x;
-	else
-			return -x;
-}
 //#endif
+extern float copysign (float x, float y);
 
 // the rotation should be applied in world coordinates
 /** MISNOMER...not really clamping... more like renomalizing  slow too
@@ -235,34 +230,34 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
   static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
   bool locking=false;
   bool touched=false;
-  for (i=0;i<nummounts;i++) {
+  for (i=0;i<GetNumMounts();i++) {
 //    if (increase_locking&&cloaking<0) {
-//      mounts[i].time_to_lock-=SIMULATION_ATOM;
+//      mounts[i]->time_to_lock-=SIMULATION_ATOM;
 //    }
-    if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
+    if (mounts[i]->status==Mount::ACTIVE&&cloaking<0&&mounts[i]->ammo!=0) {
       if (player_cockpit) {
 	  touched=true;
       }
       if (increase_locking) {
-	mounts[i].time_to_lock-=SIMULATION_ATOM;
+	mounts[i]->time_to_lock-=SIMULATION_ATOM;
 	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
 	if (!player_cockpit) {
 	  if (ai_lock_cheat) {
-	    mounts[i].time_to_lock=-1;
+	    mounts[i]->time_to_lock=-1;
 	  }
 	}else {
 
-	  if (mounts[i].type->LockTime>0) {
+	  if (mounts[i]->type->LockTime>0) {
 	    static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
 	    static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
 
-	    if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
+	    if (mounts[i]->time_to_lock>-SIMULATION_ATOM&&mounts[i]->time_to_lock<=0) {
 	      if (!AUDIsPlaying(LockedSound)) {
 		AUDStartPlaying(LockedSound);
 		AUDStopPlaying(LockingSound);	      
 	      }
 	      AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
-	    }else if (mounts[i].time_to_lock>0)  {
+	    }else if (mounts[i]->time_to_lock>0)  {
 	      locking=true;
 	      if (!AUDIsPlaying(LockingSound)) {
 
@@ -278,38 +273,38 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 	}
       
       }else {
-        if (mounts[i].ammo!=0) {
-	  mounts[i].time_to_lock=mounts[i].type->LockTime;
+        if (mounts[i]->ammo!=0) {
+	  mounts[i]->time_to_lock=mounts[i]->type->LockTime;
         }
       }
     } else {
-      if (mounts[i].ammo!=0) {
-        mounts[i].time_to_lock=mounts[i].type->LockTime;
+      if (mounts[i]->ammo!=0) {
+        mounts[i]->time_to_lock=mounts[i]->type->LockTime;
       }
     }
-    if (mounts[i].type->type==weapon_info::BEAM) {
-      if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+    if (mounts[i]->type->type==weapon_info::BEAM) {
+      if (mounts[i]->ref.gun) {
+	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
       }
     } else {
-      mounts[i].ref.refire+=SIMULATION_ATOM;
+      mounts[i]->ref.refire+=SIMULATION_ATOM;
     }
-    if (mounts[i].processed==Mount::FIRED) {
+    if (mounts[i]->processed==Mount::FIRED) {
       Transformation t1;
       Matrix m1;
       t1=prev_physical_state;//a hack that will not work on turrets
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
       int autotrack=0;
-      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
+      if ((0!=(mounts[i]->size&weapon_info::AUTOTRACKING))) {
 	autotrack = computer.itts?2:1;
       }
-      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
-      if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+      mounts[i]->PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
+      if (mounts[i]->ammo==0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
 	ToggleWeapon (true);
       }
-    }else if (mounts[i].processed==Mount::UNFIRED) {
-      mounts[i].PhysicsAlignedUnfire();
+    }else if (mounts[i]->processed==Mount::UNFIRED) {
+      mounts[i]->PhysicsAlignedUnfire();
     }
   }
   if (locking==false&&touched==true) {
@@ -467,7 +462,7 @@ static signed char  ComputeAutoGuarantee (GameUnit * un) {
   return Mission::AUTO_NORMAL;
 }
 
-bool GameUnit::AutoPilotTo (GameUnit * target, bool ignore_friendlies) {
+bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   signed char Guaranteed = ComputeAutoGuarantee (this);
   if (Guaranteed==Mission::AUTO_OFF) {
     return false;

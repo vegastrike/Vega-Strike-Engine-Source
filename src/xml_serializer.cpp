@@ -1,8 +1,12 @@
 #include "xml_serializer.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "cmd/images.h"
 #include "vs_path.h"
-#include "config_xml.h"
+#ifdef _SERVER
+	#include "configxml.h"
+#else
+	#include "config_xml.h"
+#endif
 #include "vs_globals.h"
 #include "vegastrike.h"
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>

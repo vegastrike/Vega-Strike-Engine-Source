@@ -7,9 +7,6 @@
 #include "audiolib.h"
 #include "unit.h"
 #include "beam.h"
-weapon_info::weapon_info(const weapon_info &tmp) {
-  *this = tmp;
-}
 /*
 weapon_info& weapon_info::operator = (const weapon_info &tmp){
   size = tmp.size;
@@ -22,9 +19,6 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   return *this;
 }
 */
-void weapon_info::init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;Refire=.2;sound=-1;volume=0;}
-void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}}
-
 
 #include "xml_support.h"
 #include "physics.h"
@@ -398,51 +392,6 @@ void LoadWeapons(const char *filename) {
   } while(!feof(inFile));
  fclose (inFile);
  XML_ParserFree (parser);
-}
-std::string lookupMountSize (int s) {
-  std::string result;
-  if (s&weapon_info::LIGHT) {
-    result+="LIGHT ";
-  }
-  if (s&weapon_info::MEDIUM) {
-    result+="MEDIUM ";
-  }
-  if (s&weapon_info::HEAVY) {
-    result+="HEAVY ";
-  }
-  if (s&weapon_info::CAPSHIPLIGHT) {
-    result+="CAPSHIP-LIGHT ";
-  }
-  if (s&weapon_info::CAPSHIPHEAVY) {
-    result+="CAPSHIP-HEAVY ";
-  }
-  if (s&weapon_info::SPECIAL) {
-    result+="SPECIAL ";
-  }
-  if (s&weapon_info::LIGHTMISSILE) {
-    result+="LIGHT-MISSILE ";
-  }
-  if (s&weapon_info::MEDIUMMISSILE) {
-    result+="MEDIUM-MISSILE ";
-  }
-  if (s&weapon_info::HEAVYMISSILE) {
-    result+="HEAVY-MISSILE ";
-  }
-  if (s&weapon_info::CAPSHIPLIGHTMISSILE) {
-    result+="LIGHT-CAPSHIP-MISSILE ";
-  }
-  if (s&weapon_info::CAPSHIPHEAVYMISSILE) {
-    result+="HEAVY-CAPSHIP-MISSILE ";
-  }
-  if (s&weapon_info::SPECIALMISSILE) {
-    result+="SPECIAL-MISSILE ";
-  }
-  if (s&weapon_info::AUTOTRACKING) {
-    result+="AUTOTRACKING ";
-  }
-  return result;
-
-
 }
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
   int i;

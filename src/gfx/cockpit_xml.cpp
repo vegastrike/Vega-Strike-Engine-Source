@@ -62,7 +62,8 @@ namespace CockpitXML {
       G_UP,
       G_DOWN,
       G_LEFT,
-      G_RIGHT
+      G_RIGHT,
+	  LAG
     };
 
   const EnumMap::Pair element_names[] = {
@@ -119,8 +120,8 @@ namespace CockpitXML {
     EnumMap::Pair ("r", RED),
     EnumMap::Pair ("g", GREEN),
     EnumMap::Pair ("b", BLUE),
-    EnumMap::Pair ("type", VDUTYPE)
-
+    EnumMap::Pair ("type", VDUTYPE),
+    EnumMap::Pair ("lag", LAG)
   };
 
   const EnumMap element_map(element_names, 25);

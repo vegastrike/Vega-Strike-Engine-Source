@@ -36,7 +36,7 @@ void GameUnit::GameMount::UnFire () {
   ref.gun->Destabilize();
 }
 
-static void AdjustMatrix (Matrix &mat, GameUnit * target, float speed, bool lead, float cone) {
+static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
@@ -53,14 +53,14 @@ static void AdjustMatrix (Matrix &mat, GameUnit * target, float speed, bool lead
     }
   }
 }
-bool GameUnit::GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, GameUnit * owner, GameUnit *target, signed char autotrack, float trackingcone) {
+bool GameUnit::GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;
   }
   time_to_lock = type->LockTime;
   if (processed==FIRED) {
     processed = PROCESSED;
-    GameUnit * temp;
+    Unit * temp;
     Transformation tmp = LocalPosition;
     tmp.Compose (Cumulative,m);
     Matrix mat;
@@ -115,24 +115,24 @@ bool GameUnit::GameMount::PhysicsAlignedFire(const Transformation &Cumulative, c
 void GameUnit::Fire (bool Missile) {
   if (cloaking>=0)
     return;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].type->type==weapon_info::BEAM) {
-      if (mounts[i].type->EnergyRate*SIMULATION_ATOM>energy) {
-	mounts[i].UnFire();
+  for (int i=0;i<GetNumMounts();i++) {
+    if (mounts[i]->type->type==weapon_info::BEAM) {
+      if (mounts[i]->type->EnergyRate*SIMULATION_ATOM>energy) {
+	mounts[i]->UnFire();
 	continue;
       }
     }else{ 
-      if (mounts[i].type->EnergyRate>energy) 
+      if (mounts[i]->type->EnergyRate>energy) 
 	continue;
     }
     
-    if (mounts[i].Fire(owner==NULL?this:owner,Missile)) {
-      energy -=apply_float_to_short( mounts[i].type->type==weapon_info::BEAM?mounts[i].type->EnergyRate*SIMULATION_ATOM:mounts[i].type->EnergyRate);
+    if (mounts[i]->Fire(owner==NULL?this:owner,Missile)) {
+      energy -=apply_float_to_short( mounts[i]->type->type==weapon_info::BEAM?mounts[i]->type->EnergyRate*SIMULATION_ATOM:mounts[i]->type->EnergyRate);
     }
   }
 }
 
-bool GameUnit::GameMount::Fire (GameUnit * owner, bool Missile) {
+bool GameUnit::GameMount::Fire (Unit * owner, bool Missile) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -224,8 +224,8 @@ void GameUnit::Target (Unit *targ) {
   if (targ) {
     if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
 		if (targ!=Unit::Target()) {
-        for (int i=0;i<nummounts;i++){ 
-  	  mounts[i].time_to_lock = mounts[i].type->LockTime;
+        for (int i=0;i<GetNumMounts();i++){ 
+  	  mounts[i]->time_to_lock = mounts[i]->type->LockTime;
         }
         computer.target.SetUnit(targ);
 	LockTarget(false);

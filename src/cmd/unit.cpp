@@ -159,6 +159,7 @@ void GameUnit::calculate_extent(bool update_collide_queue) {
 extern void UncheckUnit (Unit * un);
 void GameUnit::Init()
 {
+	this->player=0;
 	this->networked=0;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
@@ -225,8 +226,7 @@ void GameUnit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  nummounts=0;
-  mounts = NULL;
+  //mounts = NULL;
   aistate = NULL;
   SetAI (new Order());
   Identity(cumulative_transformation_matrix);
@@ -504,11 +504,11 @@ GameUnit::~GameUnit()
     AUDStopPlaying (sound->cloak);
     AUDDeleteSound (sound->cloak);
   }
-  for (int beamcount=0;beamcount<nummounts;beamcount++) {
-    AUDStopPlaying(mounts[beamcount].sound);
-    AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
-      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
+    AUDStopPlaying(mounts[beamcount]->sound);
+    AUDDeleteSound(mounts[beamcount]->sound);
+    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
+      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
   for(int meshcount = 0; meshcount < meshdata.size(); meshcount++)
     if (meshdata[meshcount])
@@ -747,10 +747,10 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     delete tmpiter;
     **/
   }
-  for (i=0;i<nummounts;i++) {
-    if (mounts[i].type->type==weapon_info::BEAM) {
-      if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->Draw(*ct,*ctm);
+  for (i=0;i<GetNumMounts();i++) {
+    if (mounts[i]->type->type==weapon_info::BEAM) {
+      if (mounts[i]->ref.gun) {
+	mounts[i]->ref.gun->Draw(*ct,*ctm);
       }
     }
   }

@@ -23,12 +23,12 @@ struct weapon_info {
   float Speed,PulseSpeed,RadialSpeed,Range,Radius, Length;
   float Damage,PhaseDamage,Stability,Longrange,LockTime;
   float EnergyRate,Refire,volume;
-  weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}
-  weapon_info(const weapon_info&);
-  //  weapon_info& operator = (const weapon_info &tmp);
-  void init(); 
-  void Type (enum WEAPON_TYPE typ); 
+  void init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;Refire=.2;sound=-1;volume=0;} 
+  void Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}} 
   void MntSize(enum MOUNT_SIZE size) {this->size = size;}
+  weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}
+  weapon_info::weapon_info(const weapon_info &tmp) {*this = tmp;}
+  //  weapon_info& operator = (const weapon_info &tmp);
 };
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);
 std::string lookupMountSize (int size);

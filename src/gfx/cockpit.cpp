@@ -132,10 +132,10 @@ void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const V
 
 float Unit::computeLockingPercent() {
   float most=-1024;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].type->type==weapon_info::PROJECTILE||(mounts[i].type->size&(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIAL))) {
-      if (mounts[i].status==Unit::Mount::ACTIVE&&mounts[i].type->LockTime>0) {
-	float rat = mounts[i].time_to_lock/mounts[i].type->LockTime;
+  for (int i=0;i<GetNumMounts();i++) {
+    if (mounts[i]->type->type==weapon_info::PROJECTILE||(mounts[i]->type->size&(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIAL))) {
+      if (mounts[i]->status==Unit::Mount::ACTIVE&&mounts[i]->type->LockTime>0) {
+	float rat = mounts[i]->time_to_lock/mounts[i]->type->LockTime;
 	if (rat<.99) {
 	  if (rat>most) {
 	    most = rat;

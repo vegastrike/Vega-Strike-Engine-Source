@@ -10,8 +10,31 @@
 #define strcasecmp stricmp
 #endif
 
+float copysign (float x, float y) {
+	if (y>0)
+			return x;
+	else
+			return -x;
+}
+
 float capship_size=500;
-extern unsigned short apply_float_to_short (float tmp);
+unsigned short apply_float_to_short (float tmp) {
+  unsigned  short ans = (unsigned short) tmp;
+  tmp -=ans;//now we have decimal;
+  if (((float)rand())/((float)RAND_MAX)<tmp)
+    ans +=1;
+  return ans;
+}
+
+std::string accelStarHandler (const XMLType &input,void *mythis) {
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+  static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
+  return XMLSupport::tostring(*input.w.f/(game_speed*game_accel));
+}
+std::string speedStarHandler (const XMLType &input,void *mythis) {
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+  return XMLSupport::tostring((*input.w.f)/game_speed);
+}
 
 static list<Unit*> Unitdeletequeue;
 static Hashtable <long, Unit, char[2095]> deletedUn;
@@ -42,6 +65,51 @@ char * GetUnitDir (const char * filename) {
     }
   }
   return retval;
+}
+
+// From weapon_xml.cpp
+std::string lookupMountSize (int s) {
+  std::string result;
+  if (s&weapon_info::LIGHT) {
+    result+="LIGHT ";
+  }
+  if (s&weapon_info::MEDIUM) {
+    result+="MEDIUM ";
+  }
+  if (s&weapon_info::HEAVY) {
+    result+="HEAVY ";
+  }
+  if (s&weapon_info::CAPSHIPLIGHT) {
+    result+="CAPSHIP-LIGHT ";
+  }
+  if (s&weapon_info::CAPSHIPHEAVY) {
+    result+="CAPSHIP-HEAVY ";
+  }
+  if (s&weapon_info::SPECIAL) {
+    result+="SPECIAL ";
+  }
+  if (s&weapon_info::LIGHTMISSILE) {
+    result+="LIGHT-MISSILE ";
+  }
+  if (s&weapon_info::MEDIUMMISSILE) {
+    result+="MEDIUM-MISSILE ";
+  }
+  if (s&weapon_info::HEAVYMISSILE) {
+    result+="HEAVY-MISSILE ";
+  }
+  if (s&weapon_info::CAPSHIPLIGHTMISSILE) {
+    result+="LIGHT-CAPSHIP-MISSILE ";
+  }
+  if (s&weapon_info::CAPSHIPHEAVYMISSILE) {
+    result+="HEAVY-CAPSHIP-MISSILE ";
+  }
+  if (s&weapon_info::SPECIALMISSILE) {
+    result+="SPECIAL-MISSILE ";
+  }
+  if (s&weapon_info::AUTOTRACKING) {
+    result+="AUTOTRACKING ";
+  }
+  return result;
 }
 
 /***********************************************************************************/
@@ -256,9 +324,13 @@ Unit::~Unit()
   fprintf (stderr,"%d %x ", 1,mounts);
   fflush (stderr);
 #endif
-  if (mounts) {
-    delete []mounts;
-  }
+	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
+	{
+		// Free all mounts elements
+		if( (*jj)!=NULL)
+			delete (*jj);
+	}
+	mounts.clear();
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d", 0);
   fflush (stderr);
@@ -266,6 +338,7 @@ Unit::~Unit()
 }
 void Unit::Init()
 {
+	this->player=0;
 	this->networked=0;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
@@ -336,8 +409,6 @@ void Unit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  nummounts=0;
-  mounts = NULL;
   aistate = NULL;
   // No AI here
   //SetAI (new Order());
@@ -465,11 +536,11 @@ const std::vector <char *>& Unit::GetDestinations () const{
 float Unit::TrackingGuns(bool &missilelock) {
   float trackingcone = 0;
   missilelock=false;
-  for (int i=0;i<nummounts;i++) {
-	  if (mounts[i].status==Mount::ACTIVE&&(mounts[i].size&weapon_info::AUTOTRACKING)) {
+  for (int i=0;i<GetNumMounts();i++) {
+	  if (mounts[i]->status==Mount::ACTIVE&&(mounts[i]->size&weapon_info::AUTOTRACKING)) {
       trackingcone= computer.radar.trackingcone;
     }
-    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0) {
+    if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0&&mounts[i]->time_to_lock<=0) {
       missilelock=true;
     }
   }
@@ -477,16 +548,16 @@ float Unit::TrackingGuns(bool &missilelock) {
 }
 
 void Unit::getAverageGunSpeed(float & speed, float &range) const {
-   if (nummounts) {
+   if (GetNumMounts()) {
      range=0;
      speed=0;
-     int nummt = nummounts;
-     for (int i=0;i<nummounts;i++) {
-       if (mounts[i].type->type!=weapon_info::PROJECTILE) {
-	 if (mounts[i].type->Range > range) {
-	   range=mounts[i].type->Range;
+     int nummt = GetNumMounts();
+     for (int i=0;i<GetNumMounts();i++) {
+       if (mounts[i]->type->type!=weapon_info::PROJECTILE) {
+	 if (mounts[i]->type->Range > range) {
+	   range=mounts[i]->type->Range;
 	 }
-	 speed+=mounts[i].type->Speed;
+	 speed+=mounts[i]->type->Speed;
        } else {
 	 nummt--;
        }
@@ -539,14 +610,14 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
   dist = FLT_MAX;
   float tmpcos;
   Matrix mat;
-  for (int i=0;i<nummounts;i++) {
+  for (int i=0;i<GetNumMounts();i++) {
     float tmpdist = .001;
-    Transformation finaltrans (mounts[i].GetMountLocation());
+    Transformation finaltrans (mounts[i]->GetMountLocation());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
     
-    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i]->type->Speed));
     
     tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
@@ -556,7 +627,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     } else {
       tmpcos /= tmpdist;
     }
-    tmpdist /= mounts[i].type->Range;//UNLIKELY DIV/0
+    tmpdist /= mounts[i]->type->Range;//UNLIKELY DIV/0
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
@@ -1328,26 +1399,26 @@ void Unit::Mount::DeActive (bool Missile) {
   }
 }
 void Unit::SelectAllWeapon (bool Missile) {
-  for (int i=0;i<nummounts;i++) {
-    mounts[i].Activate (Missile);
+  for (int i=0;i<GetNumMounts();i++) {
+    mounts[i]->Activate (Missile);
   }
 }
 
 void Unit::UnFire () {
-  for (int i=0;i<nummounts;i++) {
-    mounts[i].UnFire();//turns off beams;
+  for (int i=0;i<GetNumMounts();i++) {
+    mounts[i]->UnFire();//turns off beams;
   }
 }
 
 ///cycles through the loop twice turning on all matching to ms weapons of size or after size
 void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   for (int j=0;j<2;j++) {
-    for (int i=0;i<nummounts;i++) {
-      if (mounts[i].type==sz) {
-	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
-	  mounts[i].Activate(ms);
+    for (int i=0;i<GetNumMounts();i++) {
+      if (mounts[i]->type==sz) {
+	if (mounts[i]->status<Mount::DESTROYED&&(mounts[i]->type->type==weapon_info::PROJECTILE)==ms) {
+	  mounts[i]->Activate(ms);
 	}else {
-	  sz = mounts[(i+1)%nummounts].type;
+	  sz = mounts[(i+1)%GetNumMounts()]->type;
 	}
       }
     }
@@ -1361,34 +1432,34 @@ void Unit::ToggleWeapon (bool Missile) {
   bool lasttotal=true;
 //  weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
   const weapon_info * sz=NULL;
-  if (nummounts<1)
+  if (GetNumMounts()<1)
     return;
-  sz = mounts[0].type;
-  for (int i=0;i<nummounts;i++) {
-    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
+  sz = mounts[0]->type;
+  for (int i=0;i<GetNumMounts();i++) {
+    if ((mounts[i]->type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i]->status<Mount::DESTROYED) {
       totalcount++;
       lasttotal=false;
-      if (mounts[i].status==Mount::ACTIVE) {
+      if (mounts[i]->status==Mount::ACTIVE) {
 	activecount++;
 	lasttotal=true;
-	mounts[i].DeActive (Missile);
-	if (i==nummounts-1) {
-	  sz=mounts[0].type;
+	mounts[i]->DeActive (Missile);
+	if (i==GetNumMounts()-1) {
+	  sz=mounts[0]->type;
 	}else {
-	  sz =mounts[i+1].type;
+	  sz =mounts[i+1]->type;
 	}
       }
     }
-    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
-      if (mounts[i].status==Mount::ACTIVE) {
+    if ((mounts[i]->type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i]->status<Mount::DESTROYED) {
+      if (mounts[i]->status==Mount::ACTIVE) {
 	activecount++;//totalcount=0;
-	mounts[i].DeActive (Missile);
+	mounts[i]->DeActive (Missile);
 	if (lasttotal) {
-	  totalcount=(i+1)%nummounts;
-	  if (i==nummounts-1) {
-	    sz = mounts[0].type;
+	  totalcount=(i+1)%GetNumMounts();
+	  if (i==GetNumMounts()-1) {
+	    sz = mounts[0]->type;
 	  }else {
-	    sz =mounts[i+1].type;
+	    sz =mounts[i+1]->type;
 	  }
 	}
 	lasttotal=false;
@@ -1398,13 +1469,13 @@ void Unit::ToggleWeapon (bool Missile) {
   if (Missile) {
     int i=totalcount;
     for (int j=0;j<2;j++) {
-      for (;i<nummounts;i++) {
-	if (mounts[i].type==sz) {
-	  if ((mounts[i].type->type==weapon_info::PROJECTILE)) {
-	    mounts[i].Activate(true);
+      for (;i<GetNumMounts();i++) {
+	if (mounts[i]->type==sz) {
+	  if ((mounts[i]->type->type==weapon_info::PROJECTILE)) {
+	    mounts[i]->Activate(true);
 	    return;
 	  }else {
-	    sz = mounts[(i+1)%nummounts].type;
+	    sz = mounts[(i+1)%GetNumMounts()]->type;
 	  }
 	}
       }
@@ -1412,7 +1483,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }
   }
   if (totalcount==activecount) {
-    ActivateGuns (mounts[0].type,Missile);
+    ActivateGuns (mounts[0]->type,Missile);
   } else {
     if (lasttotal) {
       SelectAllWeapon(Missile);
@@ -1438,11 +1509,11 @@ void Unit::SetRecursiveOwner(Unit *target) {
 int Unit::LockMissile() const{
   bool missilelock=false;
   bool dumblock=false;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+  for (int i=0;i<GetNumMounts();i++) {
+    if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0&&mounts[i]->time_to_lock<=0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
       missilelock=true;
     }else {
-      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
+      if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime==0&&mounts[i]->type->type==weapon_info::PROJECTILE&&mounts[i]->time_to_lock<=0) {
 	dumblock=true;
       }
     }    
@@ -1637,32 +1708,32 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
   }
 }
 
-void Unit::Mount::ReplaceMounts (const Unit::Mount &other) {
+void Unit::Mount::ReplaceMounts (const Unit::Mount *other) {
   short thisvol = volume;
   short thissize = size;
   Transformation t =this->GetMountLocation();
-  *this=other;
+  *this=*other;
   this->size=thissize;
   volume=thisvol;
   this->SetMountPosition(t);
   ref.gun=NULL;  
 }
 
-void Unit::Mount::SwapMounts (Unit::Mount &other) {
+void Unit::Mount::SwapMounts (Unit::Mount * other) {
   short thisvol = volume;
-  short othervol = other.volume;
-  short othersize = other.size;
+  short othervol = other->volume;
+  short othersize = other->size;
   short thissize = size;
   Mount mnt = *this;
   this->size=thissize;
-  *this=other;
-  other=mnt;
+  *this=*other;
+  *other=mnt;
   volume=thisvol;
 
-  other.volume=othervol;//volumes stay the same even if you swap out
+  other->volume=othervol;//volumes stay the same even if you swap out
   Transformation t =this->GetMountLocation();
-  this->SetMountPosition(other.GetMountLocation());
-  other.SetMountPosition (t);  
+  this->SetMountPosition(other->GetMountLocation());
+  other->SetMountPosition (t);  
 }
 
 int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage) {
@@ -1697,27 +1768,27 @@ bool Quit (const char *input_buffer) {
 	return false;
 }
 
-double Unit::Mount::Percentage (const Unit::Mount &newammo) const{
+double Unit::Mount::Percentage (const Unit::Mount *newammo) const{
   float percentage=0;
   int thingstocompare=0;
   if (status==UNCHOSEN||status==DESTROYED)
     return 0;
-  if (newammo.ammo==-1) {
+  if (newammo->ammo==-1) {
     if (ammo!=-1) {
       thingstocompare++;
     }
   } else {
-    if (newammo.ammo>0) {
-      percentage+=ammo/newammo.ammo;
+    if (newammo->ammo>0) {
+      percentage+=ammo/newammo->ammo;
       thingstocompare++;
     }
   }
-  if (newammo.type->Range) {
-    percentage+= type->Range/newammo.type->Range;
+  if (newammo->type->Range) {
+    percentage+= type->Range/newammo->type->Range;
     thingstocompare++;
   }
-  if (newammo.type->Damage+100*newammo.type->PhaseDamage) {
-    percentage += (type->Damage+100*type->PhaseDamage)/(newammo.type->Damage+100*newammo.type->PhaseDamage);
+  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
+    percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
     thingstocompare++;
   }
   if (thingstocompare) {
@@ -1785,59 +1856,59 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
   int j;
   int i;
   bool cancompletefully=true;
-  for (i=0,j=mountoffset;i<up->nummounts&&i<nummounts/*i should be nummounts, s'ok*/;i++,j++) {
-    if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
-      int jmod=j%nummounts;//make sure since we're offsetting the starting we don't overrun the mounts
+  for (i=0,j=mountoffset;i<up->GetNumMounts()&&i<GetNumMounts()/*i should be GetNumMounts(), s'ok*/;i++,j++) {
+    if (up->mounts[i]->status==Mount::ACTIVE||up->mounts[i]->status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
+      int jmod=j%GetNumMounts();//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
-	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i]->type->weapon_name!="MOUNT_UPGRADE") {
 
 
-	  if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
-	    if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name) {
+	  if (up->mounts[i]->type->size==(up->mounts[i]->type->size&mounts[jmod]->size)) {//only look at this mount if it can fit in the rack
+	    if (up->mounts[i]->type->weapon_name!=mounts[jmod]->type->weapon_name) {
 	      numave++;//ok now we can compute percentage of used parts
 	      if (templ) {
-		if (templ->nummounts>jmod) {
-		  int maxammo = templ->mounts[jmod].ammo;
-		  if ((up->mounts[i].ammo>maxammo||up->mounts[i].ammo==-1)&&maxammo!=-1) {
-		    up->mounts[i].ammo = maxammo;
+		if (templ->GetNumMounts()>jmod) {
+		  int maxammo = templ->mounts[jmod]->ammo;
+		  if ((up->mounts[i]->ammo>maxammo||up->mounts[i]->ammo==-1)&&maxammo!=-1) {
+		    up->mounts[i]->ammo = maxammo;
 		  }
-		  if (templ->mounts[jmod].volume!=-1) {
-		    if (up->mounts[i].ammo*up->mounts[i].type->volume>templ->mounts[jmod].volume) {
-		      up->mounts[i].ammo = (templ->mounts[jmod].volume+1)/up->mounts[i].type->volume;
+		  if (templ->mounts[jmod]->volume!=-1) {
+		    if (up->mounts[i]->ammo*up->mounts[i]->type->volume>templ->mounts[jmod]->volume) {
+		      up->mounts[i]->ammo = (templ->mounts[jmod]->volume+1)/up->mounts[i]->type->volume;
 		    }
 		  }
 		}
 	      }
-	      percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
+	      percentage+=mounts[jmod]->Percentage(up->mounts[i]);//compute here
 	      if (touchme) {//if we wish to modify the mounts
-		mounts[jmod].ReplaceMounts (up->mounts[i]);//switch this mount with the upgrador mount
+		mounts[jmod]->ReplaceMounts (up->mounts[i]);//switch this mount with the upgrador mount
 	      }
 	    }else {
-	      int tmpammo = mounts[jmod].ammo;
-	      if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
-		tmpammo+=up->mounts[i].ammo;
+	      int tmpammo = mounts[jmod]->ammo;
+	      if (mounts[jmod]->ammo!=-1&&up->mounts[i]->ammo!=-1) {
+		tmpammo+=up->mounts[i]->ammo;
 		if (templ) {
-		  if (templ->nummounts>jmod) {
-		    if (templ->mounts[jmod].ammo!=-1) {
-		      if (templ->mounts[jmod].ammo>tmpammo) {
-			tmpammo=templ->mounts[jmod].ammo;
+		  if (templ->GetNumMounts()>jmod) {
+		    if (templ->mounts[jmod]->ammo!=-1) {
+		      if (templ->mounts[jmod]->ammo>tmpammo) {
+			tmpammo=templ->mounts[jmod]->ammo;
 		      }
 		    }
-		    if (templ->mounts[jmod].volume!=-1) {
-		      if (templ->mounts[jmod].volume>mounts[jmod].type->volume*tmpammo) {
-			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
+		    if (templ->mounts[jmod]->volume!=-1) {
+		      if (templ->mounts[jmod]->volume>mounts[jmod]->type->volume*tmpammo) {
+			tmpammo=(templ->mounts[jmod]->volume+1)/mounts[jmod]->type->volume;
 		      }
 		    }
 		    
 		  }
 		} 
-		if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
-		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
+		if (tmpammo*mounts[jmod]->type->volume>mounts[jmod]->volume) {
+		  tmpammo = (1+mounts[jmod]->volume)/mounts[jmod]->type->volume;
 		}
-		if (tmpammo>mounts[jmod].ammo) {
+		if (tmpammo>mounts[jmod]->ammo) {
 		  cancompletefully=true;
 		  if (touchme)
-		    mounts[jmod].ammo = tmpammo;
+		    mounts[jmod]->ammo = tmpammo;
 		}else {
 		  cancompletefully=false;
 		}
@@ -1851,13 +1922,13 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  unsigned int siz=0;
 	  siz = ~siz;
 	  if (templ) {
-	    if (templ->nummounts>jmod) {
-	      siz = templ->mounts[jmod].size;
+	    if (templ->GetNumMounts()>jmod) {
+	      siz = templ->mounts[jmod]->size;
 	    }
 	  }
-	  if (((siz&up->mounts[i].size)|mounts[jmod].size)!=mounts[jmod].size) {
+	  if (((siz&up->mounts[i]->size)|mounts[jmod]->size)!=mounts[jmod]->size) {
 	    if (touchme) {
-	      mounts[jmod].size|=up->mounts[i].size;
+	      mounts[jmod]->size|=up->mounts[i]->size;
 	    }
 	    numave++;
 	    percentage++;
@@ -1868,16 +1939,16 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  //we need to |= the mount type
 	}
       } else {
-	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i]->type->weapon_name!="MOUNT_UPGRADE") {
 	  bool found=false;//we haven't found a matching gun to remove
 
-		for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
-	      int jkmod = (jmod+k)%nummounts;//we want to start with bias
-	      if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
+		for (unsigned int k=0;k<(unsigned int)GetNumMounts();k++) {///go through all guns
+	      int jkmod = (jmod+k)%GetNumMounts();//we want to start with bias
+	      if (strcasecmp(mounts[jkmod]->type->weapon_name.c_str(),up->mounts[i]->type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
 		found=true;//we got one
-		percentage+=mounts[jkmod].Percentage(up->mounts[i]);///calculate scrap value (if damaged)
+		percentage+=mounts[jkmod]->Percentage(up->mounts[i]);///calculate scrap value (if damaged)
 		if (touchme) //if we modify
-		  mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+		  mounts[jkmod]->status=Mount::UNCHOSEN;///deactivate weapon
 		break;
 	      }
 	    }
@@ -1889,11 +1960,11 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  static   bool downmount =XMLSupport::parse_bool (vs_config->getVariable ("physics","can_downgrade_mount_upgrades","false"));
 	  if (downmount ) {
 
-	  for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
-	    int jkmod = (jmod+k)%nummounts;//we want to start with bias
-	    if ((up->mounts[i].size&mounts[jkmod].size)==(up->mounts[i].size)) {
+	  for (unsigned int k=0;k<(unsigned int)GetNumMounts();k++) {///go through all guns
+	    int jkmod = (jmod+k)%GetNumMounts();//we want to start with bias
+	    if ((up->mounts[i]->size&mounts[jkmod]->size)==(up->mounts[i]->size)) {
 	      if (touchme) {
-		mounts[jkmod].size&=(~up->mounts[i].size);
+		mounts[jkmod]->size&=(~up->mounts[i]->size);
 	      }
 	      percentage++;
 	      numave++;
@@ -1907,7 +1978,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
       }
     }
   }
-  if (i<up->nummounts) {
+  if (i<up->GetNumMounts()) {
     cancompletefully=false;//if we didn't reach the last mount that we wished to upgrade, we did not fully complete
   }
   return cancompletefully;
@@ -2475,17 +2546,17 @@ std::string Unit::shieldSerializer (const XMLType &input, void * mythis) {
 std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
   Unit * un=(Unit *)mythis;
   int i=input.w.hardint;
-  if (un->nummounts>i) {
-    string result(lookupMountSize(un->mounts[i].size));
-    if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
-      result+=string("\" weapon=\"")+(un->mounts[i].type->weapon_name);
-    if (un->mounts[i].ammo!=-1)
-      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
-    if (un->mounts[i].volume!=-1) {
-      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i].volume);
+  if (un->GetNumMounts()>i) {
+    string result(lookupMountSize(un->mounts[i]->size));
+    if (un->mounts[i]->status==Mount::INACTIVE||un->mounts[i]->status==Mount::ACTIVE)
+      result+=string("\" weapon=\"")+(un->mounts[i]->type->weapon_name);
+    if (un->mounts[i]->ammo!=-1)
+      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i]->ammo);
+    if (un->mounts[i]->volume!=-1) {
+      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i]->volume);
     }
     Matrix m;
-    un->mounts[i].GetMountLocation().to_matrix(m);
+    un->mounts[i]->GetMountLocation().to_matrix(m);
     result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
     result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
     result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));

@@ -31,7 +31,7 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
 	NewPart = UnitFactory::createUnit (mylist[i].content.c_str(),false,faction);
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
-	int maxmountcheck = NewPart->nummounts?nummounts:1;
+	int maxmountcheck = NewPart->GetNumMounts()?GetNumMounts():1;
 	for (int m=0;m<maxmountcheck;m++) {
 	  int s =0;
 	  for (un_iter ui=getSubUnits();s==0||((*ui)!=NULL);++ui,++s) {

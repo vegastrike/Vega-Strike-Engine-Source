@@ -22,6 +22,9 @@
 #include "cmd/script/flightgroup.h"
 #include "music.h"
 //#define DESTRUCTDEBUG
+
+extern unsigned short apply_float_to_short (float tmp);
+
 static list<Unit*> Unitdeletequeue;
 static std::vector <Mesh *> MakeMesh(unsigned int mysize) {
   std::vector <Mesh *> temp;
@@ -47,7 +50,8 @@ void GameUnit::Split (int level) {
       PlaneNorm.Normalize();  
       old[i]->Fork (nw[i*2], nw[i*2+1],PlaneNorm.i,PlaneNorm.j,PlaneNorm.k,-PlaneNorm.Dot(old[i]->Position()));//splits somehow right down the middle.
       if (nw[i*2]&&nw[i*2+1]) {
-        delete old[i];
+	delete old[i];
+	old[i]=NULL;
       }else {
 	nw[i*2+1]= NULL;
 	nw[i*2]=old[i];
@@ -98,7 +102,7 @@ void GameUnit::Kill(bool erasefromsave) {
     colTrees->Dec();//might delete
   colTrees=NULL;
   if (erasefromsave)
-    _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((int)this);
+    _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
   
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
@@ -113,17 +117,19 @@ void GameUnit::Kill(bool erasefromsave) {
       dockedun.pop_back();
     }
   }
-  for (int beamcount=0;beamcount<nummounts;beamcount++) {
-    AUDStopPlaying(mounts[beamcount].sound);
-    AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
-      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
+    AUDStopPlaying(mounts[beamcount]->sound);
+    AUDDeleteSound(mounts[beamcount]->sound);
+    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
+      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
-  if (mounts) {
-    delete []mounts;
-    nummounts=0;
-    mounts = NULL;
-  }
+	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
+	{
+		// Free all mounts elements
+		if( (*jj)!=NULL)
+			delete (*jj);
+	}
+    mounts.clear();
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
   if (!SubUnit) 
     RemoveFromSystem();
@@ -157,16 +163,6 @@ void GameUnit::Kill(bool erasefromsave) {
 #endif
   }
 }
-
-unsigned short apply_float_to_short (float tmp) {
-  unsigned  short ans = (unsigned short) tmp;
-  tmp -=ans;//now we have decimal;
-  if (((float)rand())/((float)RAND_MAX)<tmp)
-    ans +=1;
-  return ans;
-}
-
-
 
 float rand01 () {
 	return ((float)rand()/(float)RAND_MAX);
@@ -219,16 +215,16 @@ void GameUnit::DamageRandSys(float dam, const Vector &vec) {
 		//DAMAGE MOUNT
 		if (randnum>=.65&&randnum<.9) {
 			image->ecm*=dam;
-		} else if (nummounts) {
-			unsigned int whichmount=rand()%nummounts;
+		} else if (GetNumMounts()) {
+			unsigned int whichmount=rand()%GetNumMounts();
 			if (randnum>=.9) {
-				mounts[whichmount].status=GameUnit::GameMount::DESTROYED;
-			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
-			  mounts[whichmount].ammo*=dam;
+				mounts[whichmount]->status=GameUnit::GameMount::DESTROYED;
+			}else if (mounts[whichmount]->ammo>0&&randnum>=.4) {
+			  mounts[whichmount]->ammo*=dam;
 			} else if (randnum>=.1) {
-				mounts[whichmount].time_to_lock+=(100-(100*dam));
+				mounts[whichmount]->time_to_lock+=(100-(100*dam));
 			} else {
-				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
+				mounts[whichmount]->size&=(~weapon_info::AUTOTRACKING);
 			}
 		}
 		return;

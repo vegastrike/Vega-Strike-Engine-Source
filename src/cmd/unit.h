@@ -288,7 +288,7 @@ public:
 
  public:
   ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
-  bool AutoPilotTo(GameUnit * un, bool ignore_friendlies=false);
+  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
   void SetTurretAI ();
   void DisableTurretAI ();
   string getFullAIDescription();
@@ -304,7 +304,7 @@ public:
 class GameUnit::GameMount: public Unit::Mount {
     ///Where is it
     //Transformation LocalPosition;
-    void ReplaceMounts (const Mount & othermount);
+    void ReplaceMounts (const Mount * othermount);
   public:
 
 	GameMount();
@@ -319,8 +319,8 @@ class GameUnit::GameMount: public Unit::Mount {
      */ 
 	// Uses Sound Forcefeedback and other stuff
 	void PhysicsAlignedUnfire();
-	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, GameUnit *owner,  GameUnit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
-	bool Fire (GameUnit *owner, bool Missile=false);
+	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
+	bool Fire (Unit *owner, bool Missile=false);
 };
 
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info

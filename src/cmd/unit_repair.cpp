@@ -11,15 +11,15 @@ void GameUnit::Repair() {
   switch (image->repair_droid) {
   case 6:
     //versatilize Weapons! (invent)
-    if (nummounts) {
+    if (GetNumMounts()) {
       if (rand01()<workunit) {
-	int whichmount = rand()%nummounts;
-	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(short))));
+	int whichmount = rand()%GetNumMounts();
+	mounts[whichmount]->size |=(1>>(rand()%(8*sizeof(short))));
       }
       if (rand01()<workunit) {
-	int whichmount= rand()%nummounts;
-	if (mounts[whichmount].ammo>0) {
-	  mounts[whichmount].volume++;
+	int whichmount= rand()%GetNumMounts();
+	if (mounts[whichmount]->ammo>0) {
+	  mounts[whichmount]->volume++;
 	}
       }
     }
@@ -48,11 +48,11 @@ void GameUnit::Repair() {
       computer.radar.mintargetsize-=rSize()*workunit;
     }//no break...please continue, colonel
   case 4:
-    if (nummounts) {    //    RepairWeapon();
+    if (GetNumMounts()) {    //    RepairWeapon();
       if (rand01()<workunit) {
-	unsigned int i=rand()%nummounts;
-	if (mounts[i].status==Mount::DESTROYED) {
-	  mounts[i].status=Mount::INACTIVE;
+	unsigned int i=rand()%GetNumMounts();
+	if (mounts[i]->status==Mount::DESTROYED) {
+	  mounts[i]->status=Mount::INACTIVE;
 	}
       }
     }//nobreak

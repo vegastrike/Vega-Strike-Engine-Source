@@ -354,15 +354,6 @@ int parseMountSizes (const char * str) {
   }
   return ans;
 }
-std::string accelStarHandler (const XMLType &input,void *mythis) {
-  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
-  static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
-  return XMLSupport::tostring(*input.w.f/(game_speed*game_accel));
-}
-std::string speedStarHandler (const XMLType &input,void *mythis) {
-  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
-  return XMLSupport::tostring((*input.w.f)/game_speed);
-}
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
 void GameUnit::beginElement(const string &name, const AttributeList &attributes) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
@@ -1693,29 +1684,28 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   *myhudim =xml->hudimage;
   int a;
-  nummounts = xml->mountz.size();
-  if (nummounts)
-    mounts = new Mount [nummounts];
-  else
-    mounts = NULL;
-  char parity=0;
-  for(a=0; a < nummounts; a++) {
-    mounts[a]=*xml->mountz[a];
-    delete xml->mountz[a];			//do it stealthily... no cons/destructor
+  if (GetNumMounts())
+  {
+	  // DO not destroy anymore, just affect address
+	  for( a=0; a<GetNumMounts(); a++)
+		mounts.push_back( xml->mountz[a]);
+    //mounts[a]=*xml->mountz[a];
+    //delete xml->mountz[a];			//do it stealthily... no cons/destructor
   }
-  for (a=0;a<nummounts;a++) {
+  char parity=0;
+  for (a=0;a<GetNumMounts();a++) {
     static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
     if (a%2==parity) {
       int b=a;
-      if(a % 4 == 2 && a < (nummounts-1)) 
-	if (mounts[a].type->type != weapon_info::PROJECTILE&&mounts[a+1].type->type != weapon_info::PROJECTILE)
+      if(a % 4 == 2 && a < (GetNumMounts()-1)) 
+	if (mounts[a]->type->type != weapon_info::PROJECTILE&&mounts[a+1]->type->type != weapon_info::PROJECTILE)
 	  b=a+1;
-      mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
-    } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
-      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+      mounts[b]->sound = AUDCreateSound (mounts[b]->type->sound,mounts[b]->type->type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||mounts[a]->type->type == weapon_info::PROJECTILE) {
+      mounts[a]->sound = AUDCreateSound (mounts[a]->type->sound,mounts[a]->type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
     }
     if (a>0) {
-      if (mounts[a].sound==mounts[a-1].sound&&mounts[a].sound!=-1) {
+      if (mounts[a]->sound==mounts[a-1]->sound&&mounts[a]->sound!=-1) {
 	printf ("error");
       }
     }

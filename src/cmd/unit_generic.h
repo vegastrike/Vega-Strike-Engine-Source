@@ -195,9 +195,8 @@ public:
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
 protected:
-  Mount *mounts;
+  vector <Mount *> mounts;
 protected:
-  int nummounts;
   ///Mount may access unit
   friend class Unit::Mount;
   ///no collision table presence.
@@ -206,7 +205,7 @@ public:
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
 
-  int GetNumMounts ()const  {return nummounts;}
+  int GetNumMounts ()const  {return mounts.size();}
 
   ///Loads a user interface for the user to upgrade his ship
 // Uses base stuff -> only in Unit
@@ -1041,9 +1040,9 @@ class Unit::Mount {
     ///Where is it
     Transformation LocalPosition;
   public:
-    void SwapMounts (Mount & othermount);
-    virtual void ReplaceMounts (const Mount & othermount);
-    double Percentage (const Mount& oldmount) const;
+    void SwapMounts (Mount * othermount);
+    virtual void ReplaceMounts (const Mount * othermount);
+    double Percentage (const Mount * oldmount) const;
 // Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
     union REF{
       ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
