@@ -1630,25 +1630,28 @@ namespace VSFileSystem
 				bool nl_found = false;
 				int i=0;
 				//cerr<<"READLINE STARTING OFFSET="<<offset;
-				for( i=0; !nl_found && i<length && offset<size; offset++, i++)
+				for( i=0; !nl_found && i<length-1 && offset<size; offset++, i++)
 				{
 					if( pk3_extracted_file[offset]=='\n' || pk3_extracted_file[offset]=='\r')
 					{
 						nl_found = true;
+                                                /*
 						if( pk3_extracted_file[offset]=='\n')
 							cerr<<"\\n ";
 						if( pk3_extracted_file[offset]=='\r')
 							cerr<<"\\r ";
+                                                */
+                                                break;
 					}
 					else
 					{
 						ret[i] = pk3_extracted_file[offset];
-						cerr<<hex<<ret[i]<<" ";
+						//cerr<<hex<<ret[i]<<" ";
 					}
 				}
 				this->GoAfterEOL( length);
 				ret[i] = 0;
-				cerr<<dec<<" - read "<<i<<" char - "<<ret<<endl;
+				//cerr<<dec<<" - read "<<i<<" char - "<<ret<< endl;
 				if( !nl_found)
 					return Unspecified;
 			}
@@ -2029,10 +2032,10 @@ namespace VSFileSystem
 	{
 		while( this->offset<length && this->offset<this->size && (this->pk3_extracted_file[offset]=='\r' || this->pk3_extracted_file[offset]=='\n'))
 		{
-			if( pk3_extracted_file[offset]=='\n')
+                  /*			if( pk3_extracted_file[offset]=='\n')
 				cerr<<"\\n ";
 			if( pk3_extracted_file[offset]=='\r')
-				cerr<<"\\r ";
+                        cerr<<"\\r ";*/
 			this->offset++;
 		}
 	}
@@ -2040,10 +2043,10 @@ namespace VSFileSystem
 	{
 		while( this->offset<this->size && (this->pk3_extracted_file[offset]=='\r' || this->pk3_extracted_file[offset]=='\n'))
 		{
-			if( pk3_extracted_file[offset]=='\n')
+                  /*			if( pk3_extracted_file[offset]=='\n')
 				cerr<<"\\n ";
 			if( pk3_extracted_file[offset]=='\r')
-				cerr<<"\\r ";
+                        cerr<<"\\r ";*/
 			this->offset++;
 		}
 	}
