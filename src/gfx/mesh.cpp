@@ -217,7 +217,7 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, float to
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
-  c.mesh_seq=((toofar>g_game.zfar)&&draw_sequence==0)?NUM_ZBUF_SEQ:draw_sequence;
+  c.mesh_seq=((toofar>g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
   c.cloaked=MeshDrawContext::NONE;
   if (cloak>=0) {
     c.cloaked|=MeshDrawContext::CLOAK;
