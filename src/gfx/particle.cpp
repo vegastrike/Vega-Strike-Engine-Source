@@ -32,15 +32,21 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, const Vector &p, 
 #ifdef USE_POINTS
   GFXVertexf(loc);
 #else
+  GFXTexCoord2f(0,0);
   GFXVertex3d(loc.i+p.i+q.i,loc.j+p.j+q.j,loc.k+p.k+q.k);
+  GFXTexCoord2f(0,1);  
   GFXVertex3d(loc.i+p.i-q.i,loc.j+p.j-q.j,loc.k+p.k-q.k);
+  GFXTexCoord2f(1,1);  
   GFXVertex3d(loc.i-p.i-q.i,loc.j-p.j-q.j,loc.k-p.k-q.k);
+  GFXTexCoord2f(1,0);  
   GFXVertex3d(loc.i-p.i+q.i,loc.j-p.j+q.j,loc.k-p.k+q.k);
+#if 0
   GFXEnd();
   GFXBegin(GFXPOINT);
   GFXVertexf(loc);
   GFXEnd();
   GFXBegin(GFXQUAD);
+#endif
 #endif
   return colorOK(col,time);
 }
@@ -57,27 +63,29 @@ void ParticleTrail::DrawAndUpdate (){
   list<ParticlePoint>::iterator p=particle.begin();
 #ifdef USE_POINTS
   GFXDisable(TEXTURE0);
+  GFXDisable(CULLFACE);
+  static float psiz=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkesize","1.5"));
+  
+  GFXPointSize(psiz);
   static bool psmooth=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkesmooth","false"));  
   glEnable(psmooth);
-  
 #else
   GFXEnable(TEXTURE0);
+  GFXDisable(TEXTURE1);
   GFXDisable(CULLFACE);
-  static Texture * t = new Texture ("supernova.bmp");
+  static Texture * t = new Texture ("flare1.png");
+  
   t->MakeActive();
 #endif
   GFXDisable(LIGHTING);
   GFXLoadIdentity(MODEL);
   static bool pblend=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkeblend","false"));
   //GFXBlendMode(ONE,ZERO);
-  static float psiz=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkesize","1.5"));
 #ifdef USE_POINTS
   if (pblend)
 	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
   else
 	  GFXBlendMode(ONE,ZERO);
-  
-  GFXPointSize(psiz);
   GFXBegin (GFXPOINT);
 #else
   GFXBlendMode(ONE,ONE);
