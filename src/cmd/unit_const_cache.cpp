@@ -27,8 +27,8 @@ const Unit * getCachedConstUnit (std::string name, int faction) {
     return (*i).second;
   return NULL;
 }
-const Unit * setCachedConstUnit (Unit * un) {
-  unit_cache.insert (pair<keyval,Unit *> (keyval(un->name,un->faction),un));
+const Unit * setCachedConstUnit (std::string name, int faction, Unit * un) {
+  unit_cache.insert (pair<keyval,Unit *> (keyval(name,faction),un));
   return un;
 }
 void purgeCache( ) {

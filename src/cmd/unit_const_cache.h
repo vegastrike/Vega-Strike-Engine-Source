@@ -1,5 +1,5 @@
 #include <string>
 class Unit;
-const Unit * getCachedContUnit (std::string name, int faction);
-void setCachedConstUnit (Unit * un);
+const Unit * getCachedConstUnit (std::string name, int faction);
+const Unit * setCachedConstUnit (std::string nam, int fac, Unit * un);
 void purgeCache ();

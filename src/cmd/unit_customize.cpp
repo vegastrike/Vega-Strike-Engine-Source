@@ -11,6 +11,7 @@
 #include "xml_serializer.h"
 #include "audiolib.h"
 #include "vs_globals.h"
+#include "unit_const_cache.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -39,25 +40,17 @@ double GameUnit::Upgrade (const std::string &file, int mountoffset, int subunito
 
   }
 #endif
-	Unit * up = UnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades"));
-	static Unit * last_template=NULL;
-	char * unitdir  = GetUnitDir(name.c_str());
-	
-	Unit * templ = NULL;
-	if (last_template!=NULL) {
-	  if (last_template->name==(string (unitdir)+".template")) {
-	    templ = last_template;
-#if 0
-	    printf ("cache hit");
-#endif
-	  }else {
-	    last_template->Kill();
-	    last_template=NULL;
-	  }
-	}
+  const Unit * up = getCachedConstUnit (file,FactionUtil::GetFaction("upgrades"));
+  if (!up) {
+    up = setCachedConstUnit (file,
+			     FactionUtil::GetFaction("upgrades"),
+			     UnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades")));
+  }
+  char * unitdir  = GetUnitDir(name.c_str());
+  string templnam = string(unitdir)+".template";	  
+  const Unit * templ = getCachedConstUnit (templnam,faction);
 	if (templ==NULL) {
-	  templ = UnitFactory::createUnit ((string (unitdir)+".template").c_str(),true,this->faction);
-	  last_template=templ;
+	  templ = setCachedConstUnit (templnam,faction,UnitFactory::createUnit (templnam.c_str(),true,this->faction));
 	}
 	free (unitdir);
 	double percentage=0;
@@ -72,7 +65,6 @@ double GameUnit::Upgrade (const std::string &file, int mountoffset, int subunito
 	    }
 	  }
 	}
-	up->Kill();
 #if 0
   if (shield.number==2) {
     printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);

@@ -13,6 +13,7 @@
 #include "config_xml.h"
 #include "gldrv/winsys.h"
 #include "base.h"
+#include "unit_const_cache.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -176,14 +177,14 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 	}
 }
 UpgradingInfo::~UpgradingInfo() {
-    if (templ){
+  /*    if (templ){
       templ->Kill();
       templ=NULL;
     }
     if (NewPart) {
       NewPart->Kill();
       NewPart=NULL;
-    }
+      }*/
     base.SetUnit(NULL);
     buyer.SetUnit(NULL);
     delete CargoList;
@@ -633,7 +634,6 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   char * input_buffer = strdup (inp_buf);
   sscanf (inp_buf,"%d %s",&index,input_buffer);
   if (templ!=NULL) {
-    templ->Kill();
     templ=NULL;
   }
   if (state==0&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
@@ -691,14 +691,16 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     {
 
       char *unitdir =GetUnitDir(un->name.c_str());
-
-      Unit * temprate= UnitFactory::createUnit ((string(unitdir)+string(".template")).c_str(),true,un->faction);
+      std::string templnam = (string(unitdir)+string(".template"));
+      
+      const Unit * temprate= getCachedConstUnit (templnam,un->faction);
+      if (!temprate)
+	temprate = setCachedConstUnit(templnam,un->faction,UnitFactory::createUnit (templnam.c_str(),true,un->faction));
       free(unitdir);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
       }else {
 	templ=NULL;
-	temprate->Kill();
       }
     }
     switch(submode) {
@@ -716,19 +718,27 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
        	if ((part?part->quantity:0) ||
 	    (mode==DOWNGRADEMODE&&(part=GetMasterPartList(input_buffer))!=NULL)) {
 	  this->part = *part;
-	  if (NewPart)
-	    NewPart->Kill();
+	  if (NewPart) 
+	    NewPart=NULL;
 	  if (0==strcmp (input_buffer,"repair")) {
 	    free (input_buffer);
 	    char *unitdir =GetUnitDir(un->name.c_str());
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
-	  NewPart = UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades"));
-	  NewPart->SetFaction(un->faction);
+	  NewPart = getCachedConstUnit (input_buffer,FactionUtil::GetFaction("upgrades"));
+	  if (!NewPart) {
+	    NewPart = setCachedConstUnit (input_buffer,
+					  FactionUtil::GetFaction("upgrades"),
+					  UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades")));
+	  }
 	  if (NewPart->name==string("LOAD_FAILED")) {
-	    NewPart->Kill();
-	    NewPart = UnitFactory::createUnit (input_buffer,true,un->faction);
+	    NewPart = getCachedConstUnit (input_buffer,un->faction);
+	    if (!NewPart) {
+	      NewPart = setCachedConstUnit (input_buffer,
+					    un->faction,
+					    UnitFactory::createUnit (input_buffer,true,un->faction));
+	    }
 	  }
 	  if (NewPart->name!=string("LOAD_FAILED")) {
    	    if (mode!=SHIPDEALERMODE) {
@@ -741,13 +751,12 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	      }
 	    }
 	  } else {
-	    NewPart->Kill();
 	    NewPart=NULL;
 	  }
 	} else {
 	  if (NewPart) {
 	    if (NewPart->name==string("LOAD_FAILED")) {
-	      NewPart->Kill();
+	      //	      NewPart->Kill();
 	      NewPart=NULL;
 	    }
 	  }
@@ -819,7 +828,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
 
 void UpgradingInfo::CompleteTransactionAfterMountSelect() {
-    if (NewPart->getSubUnits().current()!=NULL) {
+    if (NewPart->viewSubUnits().current()!=NULL) {
       SetMode (mode,SUBUNIT_MODE);
     }else {
       selectedturret=0;

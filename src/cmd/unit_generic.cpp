@@ -2664,6 +2664,7 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
 	if (!downgrade) {//if we are upgrading swap them
 	  Unit * addToMeNew = (*createupgradesubunit)(addtome->name,addtome->faction);
 	  addToMeNew->curr_physical_state = addToMeCur;
+	  addToMeNew->SetFaction(faction);
 	  addToMeNew->prev_physical_state = addToMePrev;
 	  ui.preinsert(addToMeNew);//add unit to your ship
 	  //	  upturrets.remove();//remove unit from being a turret on other ship
@@ -2673,6 +2674,7 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
 	  // NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
 	  ui.preinsert (un=UnitFactory::createUnit("blank",true,faction));//give a default do-nothing unit
 	  //WHAT?!?!?!?! 102302	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
+	  un->SetFaction(faction);
 	  un->curr_physical_state = addToMeCur;
 	  un->prev_physical_state = addToMePrev;
 	  un->limits.yaw=0;
@@ -2698,10 +2700,10 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
   return cancompletefully;
 }
 
-bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ){
+bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ){
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage);
 }
-bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ) {
+bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ) {
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,true,percentage);
 }
 bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage){

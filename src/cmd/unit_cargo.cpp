@@ -7,7 +7,7 @@
 #include "unit_factory.h"
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
-
+#include "unit_const_cache.h"
 extern int GetModeFromName (const char *);
 vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
 {
@@ -16,11 +16,17 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     if (GetModeFromName(mylist[i].content.c_str())!=2) {
-      Unit * NewPart = UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades"));
-      NewPart->SetFaction(faction);
+      const Unit * NewPart = getCachedConstUnit (mylist[i].content.c_str(),FactionUtil::GetFaction("upgrades"));
+      if (!NewPart){
+	NewPart= setCachedConstUnit (mylist[i].content,FactionUtil::GetFaction("upgrades"),UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades")));
+      }
       if (NewPart->name==string("LOAD_FAILED")) {
-	NewPart->Kill();
-	NewPart = UnitFactory::createUnit (mylist[i].content.c_str(),false,faction);
+	const Unit * NewPart = getCachedConstUnit (mylist[i].content.c_str(),faction);
+	if (!NewPart){
+	  NewPart= setCachedConstUnit (mylist[i].content,
+				       faction,
+				       UnitFactory::createUnit(mylist[i].content.c_str(),false,faction));
+	}
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->GetNumMounts()?GetNumMounts():1;
@@ -41,7 +47,7 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
 	  }
 	}
       }
-      NewPart->Kill();
+  
     } else {
       removethis=true;
     }
@@ -104,7 +110,7 @@ void GameUnit::EjectCargo (unsigned int index) {
     if (tmp->quantity>0) {
       const int sslen=strlen("starships");
       Unit * cargo = NULL;
-      if (tmp->category.length()>=sslen) {
+      if (tmp->category.length()>=(unsigned int)sslen) {
 	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
 	  string ans = tmpcontent;
 	  unsigned int blank = ans.find (".blank");

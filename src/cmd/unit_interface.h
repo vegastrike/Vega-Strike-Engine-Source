@@ -22,8 +22,8 @@ public:
   UnitContainer base;
   UnitContainer buyer;
   //below are state variables while the user is selecting mounts
-  Unit * NewPart;
-  Unit * templ;
+  const Unit * NewPart;
+  const Unit * templ;
   Cargo part;
   int selectedmount;
   int selectedturret;
