@@ -1,5 +1,12 @@
 Potential pitfalls with Python on win32
 
+MSVC 5,6 has a ridiculous bug that screws up Boost.python. If you get a
+nonsensical error message talking about 'modulus' (something to do with
+template name and formal parameter name conflicting, even though they're in
+different namespaces and locals should mask those names), rename the formal
+parameter to something else.  This may occur in other contexts.
+
+
 You want to link with the debug libraries. If _DEBUG is defined, you have to:
 You'll have to build the debug libraries manually
 
