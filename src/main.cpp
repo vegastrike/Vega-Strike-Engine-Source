@@ -88,7 +88,7 @@ void cleanup(void)
   //    write_config_file();
   //  write_saved_games();
   AUDDestroy();
-  destroyObjects();
+  //destroyObjects();
   Unit::ProcessDeleteQueue();
   delete _Universe;
   

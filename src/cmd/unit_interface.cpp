@@ -43,7 +43,7 @@ struct UpgradingInfo {
   Button *Modes[MAXMODE];
   string title;
   string curcategory;
-  vector <Cargo>&FilterCargo(Unit *un, const string filterthis, bool inv);
+  vector <Cargo>&FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero);
   vector <Cargo>&GetCargoFor(Unit *un);
   vector <Cargo>&GetCargoList ();
   void SetupCargoList() {
@@ -206,7 +206,7 @@ struct UpgradingInfo {
 	ShowColor(-1,-1,2,2, 0,0,0,1);
 	ShowColor(0,0,0,0, 1,1,1,1);
 	char floatprice [100];
-	sprintf(floatprice,"%g",_Universe->AccessCockpit()->credits);
+	sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
 	ShowText(-0.98, 0.93, 2, 4, (title+ string(" Credits: ")+floatprice).c_str(), 0);
 	CargoList->Refresh();
 	CargoInfo->Refresh();
@@ -282,7 +282,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
-	sprintf(floatprice,"%g",(*CurrentList)[cargonumber].price);
+	sprintf(floatprice,"%.2f",(*CurrentList)[cargonumber].price);
 	CargoInfo->ChangeTextItem ("price",floatprice);
       }
       break;
@@ -777,34 +777,35 @@ void Unit::UpgradeInterface (Unit * base) {
 
 
 
-vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv){
+vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero){
   TempCargo.clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
       unsigned int len = un->GetCargo(i).category.length();
       len = len<filterthis.length()?len:filterthis.length();
       if ((0==memcmp(un->GetCargo(i).category.c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
-	TempCargo.push_back (un->GetCargo(i));
+		  if ((!removezero)||un->GetCargo(i).quantity>0) {
+			TempCargo.push_back (un->GetCargo(i));
+		  }
       }
     }
     return TempCargo;
-  }
-
+}
 vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     switch (mode) {
     case BUYMODE:
     case SELLMODE:
-      return FilterCargo (un,"missions",false);//anything but a mission
+      return FilterCargo (un,"missions",false,true);//anything but a mission
     case UPGRADEMODE:
     case DOWNGRADEMODE:
     case ADDMODE:
       curcategory=string("upgrades");
-      return FilterCargo (un,"upgrades",true);
+      return FilterCargo (un,"upgrades",true,false);
     case SHIPDEALERMODE:
       curcategory=string("starships");
-      return FilterCargo (un,"starships",true);
+      return FilterCargo (un,"starships",true,true);
     case MISSIONMODE:
       curcategory=string("missions");
-      return FilterCargo (un,"missions",true);
+      return FilterCargo (un,"missions",true,true);
     }
     fprintf (stderr,"Error in picking cargo lists");
     return TempCargo;

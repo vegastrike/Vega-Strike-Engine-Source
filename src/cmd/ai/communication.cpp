@@ -97,13 +97,25 @@ void CommunicationMessage::Init (Unit * send, Unit * recv) {
   sender.SetUnit (send);
   this->prevstate=this->curstate = fsm->getDefaultState(_Universe->GetRelation(send->faction,recv->faction));
 }
+float myround (float i) {
+	float j= floor(i);
+	if (i-j>=.5)
+		return j+1;
+	return j;
+}
+float myroundclamp (float i) {
+float j=myround (i);
+if (j<0)
+j=0;
+return j;
+}
 void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
   if (ani){ 
     if (ani->size()>0) {
 	float mood= fsm->getDeltaRelation(this->prevstate,this->curstate);
-	mood+=1;
-	mood*=ani->size()/2.;
-	unsigned int index=(unsigned int)mood;
+	mood+=.1;
+	mood*=(ani->size())/.2;
+	unsigned int index=(unsigned int)myroundclamp(floor(mood));
 	if (index>=ani->size()) {
 	  index=ani->size()-1;
 	}

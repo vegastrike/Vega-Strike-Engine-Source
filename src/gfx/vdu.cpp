@@ -376,11 +376,12 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
 bool VDU::SetCommAnimation (Animation * ani) {
   if (comm_ani==NULL) {
     if (posmodes&COMM) {
-      thismode.push_back(COMM);
       comm_ani = ani;
-      if (ani)
-	ani->Reset();
-      return true;
+      if (ani){
+	      thismode.push_back(COMM);
+		  ani->Reset();
+	  }
+	  return true;
     }
   }
   return false;
