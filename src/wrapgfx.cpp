@@ -178,7 +178,7 @@ void WrapGFX::StartDraw()
 void WrapGFX::EndDraw()
 {
 	GFXEndScene();
-	REPORTTIME("End of frame");
+	//REPORTTIME("End of frame");
 	//glFinish();//finish all drawing commands
 	//SwapBuffers(_hDC); //swap the buffers
 }

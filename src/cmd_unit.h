@@ -106,9 +106,17 @@ protected:
   float rmin, rmax, rcur;
   bool rrestricted;
 
+  // thrusting limits
+  struct Limits {
+    float yaw;
+    float pitch;
+    float roll;
 
-  //AffineTransform last_atom, current_atom;
-  
+    float lateral;
+    float vertical;
+    float longitudinal;
+  } limits;
+
   bool calculatePhysics; // physics have an effect on this object (set to false for planets)
 
   bool selected;
@@ -192,17 +200,33 @@ public:
   }
 
   void Rotate(const Vector &axis);
-  void FireEngines (Vector Direction, /*unit vector... might default to "r"*/
+  void FireEngines (const Vector &Direction, /*unit vector... might default to "r"*/
 					float FuelSpeed,
 					float FMass);
-  void ApplyForce(Vector Vforce); //applies a force for the whole gameturn upon the center of mass
-  void Accelerate(Vector Vforce); // applies a force that is multipled by the mass of the ship
-  void ApplyTorque (Vector Vforce, Vector Location);
-  void ApplyLocalTorque (Vector Vforce, Vector Location);
-  void ApplyBalancedLocalTorque (Vector Vforce, Vector Location); //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
+  void ApplyForce(const Vector &Vforce); //applies a force for the whole gameturn upon the center of mass
+  void Accelerate(const Vector &Vforce); // applies a force that is multipled by the mass of the ship
+  void ApplyTorque (const Vector &Vforce, const Vector &Location);
+  void ApplyLocalTorque (const Vector &Vforce, const Vector &Location);
+  void ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Location); //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
+
+  // Help out AI creation
+  void ApplyLocalTorque(const Vector &torque); //convenient shortcut
+
+  void LateralThrust(float amt);
+  void VerticalThrust(float amt);
+  void LongitudinalThrust(float amt);
+
+  void YawThrust(float amt);
+  void PitchThrust(float amt);
+  void RollThrust(float amt);
+
   void ResolveForces ();
   void ResolveLast(); // used for lerp
-  void GetOrientation(Vector &p, Vector &q, Vector &r);
+  void GetOrientation(Vector &p, Vector &q, Vector &r) const;
+  Vector ToLocalCoordinates(const Vector &v) const;
+  Vector GetAngularVelocity() const;
+  float GetMoment() const { return MomentOfInertia; }
+  const Limits &Limits() const { return limits; }
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();

@@ -83,6 +83,14 @@ void Unit::Init()
 	calculatePhysics = true;
 	selected = false;
 	selectionBox = NULL;
+
+	limits.yaw = 5;
+	limits.pitch = 5;
+	limits.roll = 5;
+	
+	limits.lateral = 10;
+	limits.vertical = 10;
+	limits.longitudinal = 100;
 }
 
 Unit::Unit()

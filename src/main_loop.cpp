@@ -314,7 +314,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 40;
+const int numf = 10;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
@@ -474,7 +474,7 @@ void createObjects() {
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-    switch(3) {
+    switch(a%7) {
     case 0:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);
@@ -509,7 +509,9 @@ void createObjects() {
     Vector position((a%20)/0.25 - 4.0F, (a/20)/0.25 - 4.0F,2.0F);
     fighters[a]->SetPosition(position);
     position.k += 6;
-    fighters[a]->SetAI(new MoveOrder(position));
+    Vector v(0,1,0);
+    v.Normalize();
+    fighters[a]->SetAI(new Orders::ChangeHeading(v));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);

@@ -14,7 +14,6 @@ AI *PlanetaryOrbit::Execute() {
   
   parent->SetPosition(parent->origin - focus + 
 		      x_offset + y_offset);
-  clog << "planet position updated\n";
   return this;
 }
 

@@ -33,7 +33,7 @@ void Unit:: Rotate (const Vector &axis)
 	curr_physical_state.orientation *= rot;
 }
 
-void Unit:: FireEngines (Vector Direction/*unit vector... might default to "r"*/,
+void Unit:: FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
 					float FuelSpeed,
 					float FMass)
 {
@@ -48,28 +48,70 @@ void Unit:: FireEngines (Vector Direction/*unit vector... might default to "r"*/
 	}
 	NetForce += Direction *(FuelSpeed *FMass/GetElapsedTime());
 }
-void Unit::ApplyForce(Vector Vforce) //applies a force for the whole gameturn upon the center of mass
+void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
 {
 	NetForce += Vforce;
 }
-void Unit::Accelerate(Vector Vforce)
+void Unit::Accelerate(const Vector &Vforce)
 {
   NetForce += Vforce * mass;
 }
 
-void Unit::ApplyTorque (Vector Vforce, Vector Location)
+void Unit::ApplyTorque (const Vector &Vforce, const Vector &Location)
 {
+  //Not completely correct
 	NetForce += Vforce;
 	NetTorque += Vforce.Cross (Location-curr_physical_state.position);
 }
-void Unit::ApplyLocalTorque (Vector Vforce, Vector Location)
+void Unit::ApplyLocalTorque (const Vector &Vforce, const Vector &Location)
 {
 	NetForce += Vforce;
 	NetTorque += Vforce.Cross (Location);
 }
-void Unit::ApplyBalancedLocalTorque (Vector Vforce, Vector Location) //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
+void Unit::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Location) //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
 {
 	NetTorque += Vforce.Cross (Location);
+}
+
+void Unit::ApplyLocalTorque(const Vector &torque) {
+  NetTorque += torque;
+}
+
+
+void Unit::LateralThrust(float amt) {
+  if(amt>1.0) amt = 1.0;
+  if(amt<-1.0) amt = -1.0;
+  ApplyForce(amt*limits.lateral * Vector(1,0,0));
+}
+
+void Unit::VerticalThrust(float amt) {
+  if(amt>1.0) amt = 1.0;
+  if(amt<-1.0) amt = -1.0;
+  ApplyForce(amt*limits.vertical * Vector(0,1,0));
+}
+
+void Unit::LongitudinalThrust(float amt) {
+  if(amt>1.0) amt = 1.0;
+  if(amt<-1.0) amt = -1.0;
+  ApplyForce(amt*limits.longitudinal * Vector(0,0,1));
+}
+
+void Unit::YawThrust(float amt) {
+  if(amt>limits.yaw) amt = limits.yaw;
+  else if(amt<-limits.yaw) amt = -limits.yaw;
+  ApplyLocalTorque(amt * Vector(0,1,0));
+}
+
+void Unit::PitchThrust(float amt) {
+  if(amt>limits.pitch) amt = limits.pitch;
+  else if(amt<-limits.pitch) amt = -limits.pitch;
+  ApplyLocalTorque(amt * Vector(1,0,0));
+}
+
+void Unit::RollThrust(float amt) {
+  if(amt>limits.roll) amt = limits.roll;
+  else if(amt<-limits.roll) amt = -limits.roll;
+  ApplyLocalTorque(amt * Vector(0,0,1));
 }
 
 void Unit::ResolveForces () // don't call this 2x
@@ -78,7 +120,7 @@ void Unit::ResolveForces () // don't call this 2x
   if(AngularVelocity.Magnitude() > 0) {
     Rotate (SIMULATION_ATOM*(AngularVelocity+ temp*.5));
   }
-	AngularVelocity+= temp;
+	AngularVelocity += temp;
 	temp = NetForce * SIMULATION_ATOM*(1/mass);//acceleration
 	//now the fuck with it... add relitivity to the picture here
 	/*
@@ -99,7 +141,7 @@ void Unit::ResolveLast() {
   ResolveForces();
 }
 
-void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) {
+void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
   Matrix m;
   curr_physical_state.to_matrix(m);
   p.i = m[0];
@@ -113,4 +155,18 @@ void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) {
   r.i = m[8];
   r.j = m[9];
   r.k = m[10];
+}
+
+Vector Unit::ToLocalCoordinates(const Vector &v) const {
+  Matrix m;
+  curr_physical_state.to_matrix(m);
+
+#define M(A,B) m[B*4+A]
+  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
+		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
+		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
+}
+
+Vector Unit::GetAngularVelocity() const {
+  return AngularVelocity;
 }

@@ -208,21 +208,26 @@ void StarSystem::Update() {
   //time = SIMULATION_ATOM+SIMULATION_ATOM/2.0;
   if(time/SIMULATION_ATOM>=1.0) {
     while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
-      Iterator *iter = drawList->createIterator();
       modelGravity();
-      
+
+      Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually
 	if(time>2.0) 
 	  unit->ResolveForces();
 	else
 	  unit->ResolveLast();
+	iter->advance();
+      }
+      delete iter;
+      
+      // Handle AI in pass 2 to maintain consistency
+      iter = drawList->createIterator();
+      while((unit = iter->current())!=NULL) {
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast saves the 2nd to last position for proper interpolation)
 	iter->advance();
       }
-
       time -= SIMULATION_ATOM;
-      delete iter;
     }
     UpdateTime();
   }
