@@ -94,10 +94,10 @@ class NetworkCommunication
 		string				pubkey;
 		string				privkey;
 
+#endif
 		void				GenerateKey();
 		string				EncryptBuffer( const char * buffer, unsigned int length = 0);
 		string				DecryptBuffer( const char * buffer, unsigned int length = 0);
-#endif
 
 	public:
 		enum	CommunicationMethod { ClientBroadcast, ServerUnicast };

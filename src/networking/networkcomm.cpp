@@ -1,5 +1,6 @@
 #include "networkcomm.h"
 #include "vs_path.h"
+#ifdef CRYPTO
 #include <crypto++/filters.h>
 #include <crypto++/hex.h>
 #include <crypto++/randpool.h>
@@ -10,6 +11,7 @@
 #include <crypto++/sha.h>
 
 using namespace CryptoPP;
+#endif /* CRYPTO */
 
 #ifdef NETCOMM
 
@@ -311,7 +313,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
-		if( this->secured)
+		if( this->secured && use_secured)
 		{
 			encrypted = this->EncryptBuffer( message.c_str(), message.length());
 			p.send( CMD_TXTMESSAGE, serial, encrypted.c_str(), message.length(), SENDRELIABLE, NULL, send_sock,
@@ -329,7 +331,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
-			if( this->secured)
+			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBuffer( message.c_str(), message.length());
 				p.send( CMD_TXTMESSAGE, serial, encrypted.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
@@ -360,7 +362,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 			Packet p;
 			// We don't need that to be reliable in UDP mode
-			if( this->secured)
+			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
 				p.send( CMD_SOUNDSAMPLE, serial, encrypted.c_str(), encrypted.length(), SENDANDFORGET, NULL, sock,
@@ -380,7 +382,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			{
 				if( (*it)->portaudio)
 				{
-					if( this->secured)
+					if( this->secured && use_secured)
 					{
 						encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
 						p.send( CMD_SOUNDSAMPLE, serial, encrypted.c_str(), encrypted.length(), SENDANDFORGET, NULL, (*it)->sock,
@@ -631,9 +633,9 @@ void	NetworkCommunication::SwitchSecured()
 #endif
 }
 
-#ifdef CRYPTO
 void	NetworkCommunication::GenerateKey()
 {
+#ifdef CRYPTO
 	if( crypto_method == "rsa")
 	{
 		use_secured = true;
@@ -663,11 +665,13 @@ void	NetworkCommunication::GenerateKey()
 	{
 		use_secured = false;
 	}
+#endif
 }
 
 string	NetworkCommunication::EncryptBuffer( const char * buffer, unsigned int length)
 {
 	string result;
+#ifdef CRYPTO
 	if( crypto_method == "rsa")
 	{
 		StringSource pubstr(pubkey, true, new HexDecoder);
@@ -718,12 +722,14 @@ string	NetworkCommunication::EncryptBuffer( const char * buffer, unsigned int le
 	else
 	{
 	}
+#endif /* CRYPTO */
 	return result;
 }
 
 string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int length)
 {
 	string result;
+#ifdef CRYPTO
 	if( crypto_method == "rsa")
 	{
 		StringSource privstr(privkey, true, new HexDecoder);
@@ -738,8 +744,7 @@ string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int le
 	{
 	}
 
+#endif /* CRYPTO */
 	return result;
 }
-
-#endif
 

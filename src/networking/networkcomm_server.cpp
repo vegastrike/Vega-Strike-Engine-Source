@@ -22,11 +22,9 @@ char	NetworkCommunication::HasPortaudio() { return 0;}
 void	NetworkCommunication::SwitchWebcam() {}
 void	NetworkCommunication::SwitchSecured() {}
 
-#ifdef CRYPTO
 void	NetworkCommunication::GenerateKey() {}
 string	NetworkCommunication::EncryptBuffer( const char * buffer, unsigned int length) { return string("");}
 string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int length) { return string("");}
-#endif
 
 #endif
 
