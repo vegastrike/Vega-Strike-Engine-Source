@@ -60,7 +60,7 @@ case $target in
 *Darwin* | *darwin*)
 	AC_DEFINE(MACOSX, 1)
 	AC_DEFINE(POSIX, 1)
-	AC_DEFINE(BSD, 1)
+	AC_DEFINE(BSD, 199999)
 ;;
 *)
 	slabcheck=no;
