@@ -55,6 +55,9 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
 	playingbuffers[hashed][target].soundname = sound;
 	if (tmpsrc==0) {
 	  playingbuffers[hashed].erase(playingbuffers[hashed].begin()+target);
+	  if (!playingbuffers[hashed].size()) {
+	    break;
+	  }
 	}else {
 	  fprintf (stderr,"stole %d",tmpsrc);
 	  return 2;
