@@ -19,7 +19,7 @@ Stars::Stars(int num, float spread): spread(spread){
     tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
     tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
   }
-  vlist= new GFXVertexList (GFXPOINT,curnum,tmpvertex, false,0);
+  vlist= new GFXVertexList (GFXPOINT,curnum,tmpvertex, curnum, false,0);
   
   delete []tmpvertex;
 }

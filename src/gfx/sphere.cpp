@@ -95,7 +95,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 	  vertexlist[j*2+fir].i = x * nsign;
 	  vertexlist[j*2+fir].k = -y * nsign;
 	  vertexlist[j*2+fir].j = z * nsign;
-	  vertexlist[j*2+fir].s = insideout?1-s:s;
+	  vertexlist[j*2+fir].s = 1-s;//insideout?1-s:s;
 	  vertexlist[j*2+fir].t = t;
 	  vertexlist[j*2+fir].x = x * radius;
 	  vertexlist[j*2+fir].z = -y * radius;
@@ -109,7 +109,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 	  vertexlist[j*2+sec].i = x * nsign;
 	  vertexlist[j*2+sec].k = -y * nsign;
 	  vertexlist[j*2+sec].j = z * nsign;
-	  vertexlist[j*2+sec].s = insideout?1-s:s;
+	  vertexlist[j*2+sec].s = 1-s;//insideout?1-s:s;
 	  vertexlist[j*2+sec].t = t - dt;
 	  vertexlist[j*2+sec].x = x * radius;
 	  vertexlist[j*2+sec].z = -y * radius;

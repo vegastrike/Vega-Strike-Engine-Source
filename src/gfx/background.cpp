@@ -36,7 +36,7 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	  tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
 	  tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
 	}
-	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, false,0);
+	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, numstars, false,0);
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
 	up = new Texture(strcat(temp, "_up.bmp") );
