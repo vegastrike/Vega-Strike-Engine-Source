@@ -57,7 +57,7 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
      quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
      root = new quadsquare (&RootCornerData);
   }
-  root->StaticCullData (RootCornerData,25);
+  //  root->StaticCullData (RootCornerData,25);
   /*
         for (i = 0; i < 10; i++) {
                 root->Update(RootCornerData, (const float*) ViewerLoc, Detail);

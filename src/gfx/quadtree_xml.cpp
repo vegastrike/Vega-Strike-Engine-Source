@@ -427,7 +427,10 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
       free (hm.terrainmap);
     }
   }
-  
+  if (biggest){
+    quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
+    root = new quadsquare (&RootCornerData);
+  }
   // root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
 }
