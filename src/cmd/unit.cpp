@@ -121,16 +121,38 @@ void Unit::SetResolveForces (bool ys) {
   */
 }
 
-
+static Unit * getFuelUpgrade () {
+  return UnitFactory::createUnit("add_fuel",true,_Universe->GetFaction("upgrades"));
+}
+static float getFuelAmt () {
+  Unit * un = getFuelUpgrade();
+  float ret = un->FuelData();
+  un->Kill();
+  return ret;
+}
+static float GetJumpFuelQuantity() {
+  static float f= getFuelAmt();
+  return f;
+}
 void Unit::ActivateJumpDrive (int destination) {
   const int jumpfuelratio=1;
-
-  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2&&(energy>jump.energy&&(jump.energy>=0||fuel>-jump.energy))) {
+  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
+  if ((energy>jump.energy&&(jump.energy>=0||fuel>(-jump.energy*GetJumpFuelQuantity()/100.)))) {
     jump.drive = destination;
+    float fuel_used=0;
     if (jump.energy>0)
       energy-=jump.energy;
     else
-      fuel += jump.energy*mass*jumpfuelratio;
+      fuel -= jump.energy*GetJumpFuelQuantity()/100.;
+  }else {
+    if (abs(jump.energy)<32000) {
+      static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
+      if (fuel>jfuel*GetJumpFuelQuantity()) {
+       fuel-=jfuel*GetJumpFuelQuantity();
+       jump.drive=destination;
+     }
+    }
+  }
   }
 }
 void Unit::DeactivateJumpDrive () {

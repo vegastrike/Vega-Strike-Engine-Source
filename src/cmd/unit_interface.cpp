@@ -543,13 +543,13 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
       Cockpit * cp = _Universe->isPlayerStarship(buy);
       if (cp) {
        if (item[0]=='S') {
-	 title="Game Saved Successfully";
+	 title="Game Saved Successfully. ";
 	 WriteSaveGame(cp,false);
        }else if (item[0]=='L') {
+	title="Game Loaded. Click Done to Return to ship. ";
         buy->Kill();
         RespawnNow(cp);
         DoDone();
-	title="Game Loaded. Click Done to Return to ship";
       }
      }
     }

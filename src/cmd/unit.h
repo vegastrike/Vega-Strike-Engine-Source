@@ -541,7 +541,8 @@ public:
     return InRange( target,mm,cone,cap);
   }
   bool InRange (Unit *target, double & mm, bool cone, bool cap) const{
-
+    if (this==target||target->CloakVisible()<.8)
+      return false;
     if (cone&&computer.radar.maxcone>-.99) {
 	QVector delta( target->Position()-Position());
 	mm = delta.Magnitude();
@@ -551,9 +552,10 @@ public:
     }else {
       mm = (target->Position()-Position()).Magnitude();
     }
-    if (this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {//owner==target?!
-      if ((target->rSize()<capship_size||(!cap)||this==target)&&(flightgroup==NULL?true:flightgroup->name!="Base")) 
-	return false;
+    if (((mm-rSize()-target->rSize())>computer.radar.maxrange)||target->rSize()<computer.radar.mintargetsize) {//owner==target?!
+      Flightgroup *fg = target->getFlightgroup();
+      if ((target->rSize()<capship_size||(!cap))&&(fg==NULL?true:fg->name!="Base")) 
+        return target->isUnit()==PLANETPTR;
     }
     return true;
   }

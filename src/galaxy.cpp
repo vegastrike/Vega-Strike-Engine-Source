@@ -303,9 +303,9 @@ DWORD WINAPI DrawStartupDialog(
 			} else {
 				break;
 			}
-			if (WaitForSingleObject(hMutex,100)==WAIT_OBJECT_0) break; // wait for ownership
 		}
 		Sleep(100);
+		if (WaitForSingleObject(hMutex,100)==WAIT_OBJECT_0) break; // wait for ownership
 	}
 	DestroyWindow(hWnd);
 	return 0;
