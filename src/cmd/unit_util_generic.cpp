@@ -32,6 +32,10 @@ namespace UnitUtil {
 		if (!my_unit)return;
 		my_unit->name=name;
 	}
+	void SetHull(Unit *my_unit,float newhull){
+		if (!my_unit)return;
+		my_unit->hull=newhull;
+	}
 	float getCredits(Unit *my_unit) {
 		if (!my_unit)return 0;
 		Cockpit * tmp;
