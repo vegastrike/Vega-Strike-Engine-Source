@@ -289,7 +289,7 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
    }
    for(a=0;a<MAX_AXES;a++)
        joy_axis[a]=((float)axi[a]/32768.0);
-   modifyDeadZone(j);
+   modifyDeadZone(this);
 #else //we have glut
     if (JoystickPollingRate()<=0) {
         glutForceJoystickFunc();
