@@ -454,7 +454,6 @@ void Cockpit::Init (const char * file) {
 
 void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const Vector & pos) {
   parent.SetUnit (unit);
-  parentturret.SetUnit(NULL);
   unitlocation=pos;
   this->unitfilename=std::string(filename);
   this->unitmodname=std::string(unitmodname);
@@ -660,6 +659,7 @@ void Cockpit::Draw() {
     }
   }
   if (die) {
+
 	static float dietime = 0;
 	if (text) {
 		GFXColor4f (1,1,1,1);
@@ -680,6 +680,7 @@ void Cockpit::Draw() {
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
 	if (respawnunit){
+	  parentturret.SetUnit(NULL);
    	  zoomfactor=1;
 	  respawnunit=0;
 	  Unit * un = new Unit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
@@ -736,6 +737,8 @@ void Cockpit::Draw() {
     }
   }
   if (switchunit) {
+    parentturret.SetUnit(NULL);
+
     zoomfactor=1;
     static int index=0;
     switchunit=0;
