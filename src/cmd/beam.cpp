@@ -303,7 +303,10 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 }
 
 bool Beam::Collide (Unit * target) {
-
+  if (this==NULL||target==NULL){
+    fprintf (stderr,"Holy SH-- report immed! hellcatv@hotmail.com");
+    return false;
+  }
   float distance;
   Vector normal;//apply shields
   Vector end (center+direction*curlength);
