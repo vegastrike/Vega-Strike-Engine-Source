@@ -426,13 +426,14 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
       }
       GFXEnable(DEPTHWRITE);
     }
-  }
-  while(undrawn_logos.size()) {
-    Logo *l = undrawn_logos.back();
-    undrawn_logos.pop_back();
-    l->ProcessDrawQueue();
-    l->will_be_drawn = false;
+  
+    while(undrawn_logos.size()) {
+      Logo *l = undrawn_logos.back();
+      undrawn_logos.pop_back();
+      l->ProcessDrawQueue();
+      l->will_be_drawn = false;
     }
+  }
 }
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   //  assert(draw_queue->size());
