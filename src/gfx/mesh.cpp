@@ -298,9 +298,7 @@ static GFXColor getMeshColor () {
 }
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
-  GFXColor meshcolor (getMeshColor());
-  GFXColor tmpcol (0,0,0,1);
-  GFXGetLightContextAmbient(tmpcol);
+  static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
 
   GFXEnable(DEPTHWRITE);
@@ -338,7 +336,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     l->ProcessDrawQueue();
     l->will_be_drawn = false;
     }
-  GFXLightContextAmbient(tmpcol);
+
 }
 
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {

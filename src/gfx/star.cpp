@@ -30,6 +30,7 @@ void Stars::SetBlend(bool blendit, bool fadeit) {
 void Stars::Draw() {
   const Vector cp (_Universe->AccessCamera()->GetPosition());
   UpdatePosition(cp);
+  //  GFXLightContextAmbient(GFXColor(0,0,0,1));
   GFXColor (1,1,1,1);
   GFXLoadIdentity(MODEL);
   GFXEnable(DEPTHWRITE);

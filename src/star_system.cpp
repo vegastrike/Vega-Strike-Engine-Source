@@ -154,10 +154,11 @@ void StarSystem::Draw() {
   _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
   
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
+  GFXColor tmpcol (0,0,0,1);
+  GFXGetLightContextAmbient(tmpcol);
   Mesh::ProcessUndrawnMeshes(true);
-
-
   GFXPopGlobalEffects();
+  GFXLightContextAmbient(tmpcol);
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
   Animation::ProcessDrawQueue();
