@@ -51,6 +51,16 @@ void save_stuff(char *filename) {
     }
 }
 
+int lastSlash (const char * c) {
+      int last=0;
+      char temp;
+      for (unsigned int i=0;(temp=c[i])!='\0';i++) {
+        if (temp=='\\'||temp=='/') {
+          last = i+1;
+        }
+      }
+      return last;
+}
 void help_func( GtkWidget *w, int i)
 {
 
@@ -65,34 +75,20 @@ void file_ok_sel( GtkWidget        *w,
                   GtkFileSelection *fs )
 {
     if ((gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)))[0]!='\0') {
-      char temp;
-      int last=0;
-      for (unsigned int i=0;(temp=gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))[i])!='\0';i++) {
-        if (temp=='\\'||temp=='/') {
-          last = i+1;
-        }
-      }
-      save_stuff(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+last);
+      save_stuff(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+lastSlash(gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs))));
     }
-    gtk_main_quit ();
+    //    gtk_main_quit ();
 }
 void file_ok_auto_sel( GtkWidget        *w,
                   GtkFileSelection *fs )
 {
     if ((gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)))[0]!='\0') {
       char *name=new char [strlen(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)))+2];
-      int last=0;
-      char temp;
-      for (unsigned int i=0;(temp=gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))[i])!='\0';i++) {
-        if (temp=='\\'||temp=='/') {
-          last = i+1;
-        }
-      }
-      strcpy(name+1,gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+last);
+      strcpy(name+1,gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs))+lastSlash (gtk_file_selection_get_filename (GTK_FILE_SELECTION(fs))));
       name[0]='~';
       save_stuff(name);
     }
-    gtk_main_quit ();
+    //    gtk_main_quit ();
 }
 
 void hello( GtkWidget *widget, gpointer   data ) {
@@ -183,57 +179,33 @@ int main( int   argc,
     gtk_main();
     return(0);
 }
-void LoadSaveDialog (char *Filename,int i) {
-    GtkWidget *filew;
-    /* Create a new file selection widget */
+
+void LoadSaveFunction (char *Filename, int i, GtkSignalFunc func) {
+     GtkWidget *filew;
     filew = gtk_file_selection_new (Filename);
     
-    /* Connect the ok_button to file_ok_sel function */
     gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-                        "clicked", (GtkSignalFunc) file_ok_sel, filew );
+                        "clicked", (GtkSignalFunc) func, filew );
     GTK_FILE_SELECTION(filew)->help_button=gtk_button_new_with_label ("Help");
     gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->help_button),
                         "clicked", (GtkSignalFunc) help_func, (void*)i );
 
-    /* Connect the cancel_button to destroy the widget */
     gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION
                                             (filew)->cancel_button),
                                "clicked", (GtkSignalFunc) gtk_widget_destroy,
                                GTK_OBJECT (filew));
     
-    /* Lets set the filename, as if this were a save dialog, and we are giving
-     a default filename */
     gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew), "");
     
     gtk_widget_show(filew);
     gtk_container_add (GTK_CONTAINER (GTK_FILE_SELECTION(filew)->button_area),GTK_FILE_SELECTION (filew)->help_button);
     gtk_widget_show(GTK_FILE_SELECTION(filew)->help_button);
 }
+void LoadSaveDialog (char *Filename,int i) {
+  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_ok_sel);
+}
 void LoadAutoDialog (char *Filename) {
-    GtkWidget *filew;
-    /* Create a new file selection widget */
-    filew = gtk_file_selection_new (Filename);
-    
-    /* Connect the ok_button to file_ok_sel function */
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-                        "clicked", (GtkSignalFunc) file_ok_auto_sel, filew );
-    GTK_FILE_SELECTION(filew)->help_button=gtk_button_new_with_label ("Help");
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->help_button),
-                        "clicked", (GtkSignalFunc) help_func, (void*)2 );
-
-    /* Connect the cancel_button to destroy the widget */
-    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION
-                                            (filew)->cancel_button),
-                               "clicked", (GtkSignalFunc) gtk_widget_destroy,
-                               GTK_OBJECT (filew));
-    
-    /* Lets set the filename, as if this were a save dialog, and we are giving
-     a default filename */
-    gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew), "");
-    
-    gtk_widget_show(filew);
-    gtk_container_add (GTK_CONTAINER (GTK_FILE_SELECTION(filew)->button_area),GTK_FILE_SELECTION (filew)->help_button);
-    gtk_widget_show(GTK_FILE_SELECTION(filew)->help_button);
+  LoadSaveFunction (Filename,2,(GtkSignalFunc)file_ok_auto_sel);
 }
 /* example-end */
 
