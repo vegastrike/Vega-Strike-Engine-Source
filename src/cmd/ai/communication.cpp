@@ -10,7 +10,7 @@ FSM::FSM (const char * filename) {
   nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
   nodes.push_back (Node("i 0wnz j00, b17c#",-.08));
   nodes.push_back (Node("Fuck you!",-.1));
-  nodes.push_back (Node("Request Clearence To Land!",0));
+  nodes.push_back (Node("Request Clearence To Land.",0));
   vector <unsigned int> edges;
   for (unsigned int i=0;i<nodes.size();i++) {
     edges.push_back (i);

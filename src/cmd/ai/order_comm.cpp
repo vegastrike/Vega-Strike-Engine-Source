@@ -43,7 +43,17 @@ void Order::ProcessCommunicationMessages() {
     time+=.001;
   if ((((float)rand())/RAND_MAX)<(1/time)) {
     if (messagequeue.size()) {
-      ProcessCommMessage(*messagequeue.back());
+      FSM::Node *n;
+      if ((n=messagequeue.back()->getCurrentState())) {
+	if (n->message==string("Request Clearence To Land.")) {
+	  Unit * un=messagequeue.back()->sender.GetUnit();
+	  if (un) {
+	    parent->RequestClearance (un);
+	  }  
+	}else {
+	  ProcessCommMessage(*messagequeue.back());
+	}
+      }
       delete messagequeue.back();
       messagequeue.pop_back();
     }
