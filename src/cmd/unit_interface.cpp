@@ -9,6 +9,7 @@
 #include "gfx/cockpit.h"
 #include "savegame.h"
 #include "cmd/script/mission.h"
+#include "gfx/hud.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -261,13 +262,14 @@ struct UpgradingInfo {
     }
     bool render=true;
 
+    TextPlane * tp=NULL;
     if (mode==BRIEFINGMODE&&submode==STOP_MODE) {
       for (unsigned int i=0;i<active_missions.size();i++) {
 	if (active_missions[i]==briefingMission) {
 	  if (briefingMission->BriefingInProgress()) {
 	    render=false;
 	    GFXClear (GFXTRUE);
-	    briefingMission->BriefingRender();
+	    tp = briefingMission->BriefingRender();
 	  }else {
 	    SetMode(BRIEFINGMODE,NORMAL);
 	  }
@@ -284,6 +286,16 @@ struct UpgradingInfo {
       ShowText(-0.98, 0.93, 2, 4, (title+ string(" Credits: ")+floatprice).c_str(), 0);
       CargoList->Refresh();
       CargoInfo->Refresh();
+    }
+
+    if (tp) {
+      GFXDisable(TEXTURE0);
+      GFXDisable(TEXTURE1);
+      GFXColor (0,1,1,1);
+      tp->Draw();
+      GFXColor (1,1,1,1);
+      GFXDisable(TEXTURE0);
+      GFXEnable(TEXTURE1);
     }
     OK->Refresh();
     COMMIT->Refresh();

@@ -39,7 +39,7 @@ TextPlane::TextPlane() {
 TextPlane::~TextPlane () {
 }
 void TextPlane::Draw (int offset) {
-  Draw (myText,offset);
+  Draw (myText,offset,true);
 }
 
 void TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)

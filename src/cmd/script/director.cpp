@@ -384,18 +384,35 @@ void Mission::BriefingStart() {
   briefing = new Briefing();
   RunDirectorScript ("initbriefing");
 }
-void Mission::BriefingLoop() {
-  if (briefing) {
-    if (briefing)
+void Mission::BriefingUpdate() {
+  if (briefing){
       briefing->Update();
-    if (briefing)
-      RunDirectorScript ("loopbriefing");
   }
 }
-void Mission::BriefingRender() {
+
+void Mission::BriefingLoop() {
   if (briefing) {
-    briefing->Render();
+    RunDirectorScript ("loopbriefing");
   }
+}
+class TextPlane * Mission::BriefingRender() {
+  if (briefing) {
+    vector <std::string> who;
+    who.push_back ("briefing");
+    string str1;
+    gameMessage * g1 = msgcenter->last(0,who);
+    gameMessage * g2=msgcenter->last(1,who);
+    if (g1) {
+      str1 = g1->message;
+    }
+    if (g2) {
+      str1 = str1 + string("\n")+g2->message;
+    }
+    briefing->tp.SetText (str1);
+    briefing->Render();
+    return &briefing->tp;
+  }
+  return NULL;
 }
 
 void Mission::BriefingEnd() {

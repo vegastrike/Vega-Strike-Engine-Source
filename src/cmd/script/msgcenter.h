@@ -60,7 +60,7 @@ class gameMessage {
 
 class MessageCenter {
  public:
-  gameMessage *last(unsigned int n, const std::vector <std::string> &who=std::vector<std::string>());
+  gameMessage *last(unsigned int n, const std::vector <std::string> &who=std::vector<std::string>(), const std::vector <std::string> & whoNOT=std::vector<std::string>());
   void add(string from,string to,string message,double delay=0.0);
 
  private:

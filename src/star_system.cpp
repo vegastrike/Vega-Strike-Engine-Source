@@ -638,6 +638,9 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
 	bolts->UpdatePhysics();
+	for (unsigned int i=0;i<active_missions.size();i++) {
+	  active_missions[i]->BriefingUpdate();//waste of farkin time
+	}
 	current_stage=PHY_AI;
 	firstframe = false;
       }

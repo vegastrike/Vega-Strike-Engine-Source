@@ -62,8 +62,8 @@ void MessageCenter::add(string from,string to,string message,double delay){
   messages.push_back(msg);
 }
 
-gameMessage *MessageCenter::last(unsigned int n, const std::vector <std::string> & who){
-  if (who.empty()) {
+gameMessage *MessageCenter::last(unsigned int n, const std::vector <std::string> & who, const std::vector <std::string> & whoNOT){
+  if (who.empty()&&whoNOT.empty()) {
     int size=messages.size();
     
     int index=size-1-n;
@@ -78,7 +78,7 @@ gameMessage *MessageCenter::last(unsigned int n, const std::vector <std::string>
     int j=0;
     int i=0;
     for (i=messages.size()-1;i>=0;i--) {
-      if (std::find (who.begin(),who.end(),messages[i]->to)!=who.end()) {
+      if (std::find(whoNOT.begin(),whoNOT.end(),messages[i]->to)==whoNOT.end()&& (who.empty()||std::find (who.begin(),who.end(),messages[i]->to)!=who.end())) {
 	if (j==n)
 	  break;
 	j++;

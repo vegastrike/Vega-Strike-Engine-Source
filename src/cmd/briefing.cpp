@@ -84,6 +84,8 @@ void Briefing::Ship::Destroy() {
 Briefing::Briefing() {
   cam.SetPosition(Vector(0,0,0));
   cam.SetOrientation(Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
+  tp.SetPos (-1,1);
+  tp.SetSize (1,-.5);
 }
 Briefing::~Briefing() {
   for (unsigned int i=0;i<starships.size();i++) {

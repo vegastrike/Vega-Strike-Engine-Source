@@ -458,8 +458,9 @@ class Mission {
   void DirectorShipDestroyed(Unit *unit);
   void BriefingStart() ;
   //clobbers the cam view & renders btw 0,0, and 1,1
-  void BriefingRender ();
+  class TextPlane* BriefingRender ();
   void BriefingLoop();
+  void BriefingUpdate();
   void BriefingEnd();
   bool BriefingInProgress();
   double getGametime();
