@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-$root = "/home/reliant/vsmission/";
+$root = "./";
 $name = "New GUI";
 
 $exec_include = "-Wall -O3 -g -D_G_PATH -D_G_STRING_PARSE -D_G_STRING_MANAGE -D_G_ERROR";
@@ -14,7 +14,7 @@ $exec_bin = "g++";
 		"name" => "New GUI",
 		"include" => $root."include/",
 		"src" => $root."c/",
-		"build" => $root."bin/",
+		"build" => $root,
 		"install" => $root
 	}
 );
