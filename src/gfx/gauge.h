@@ -8,4 +8,6 @@ private:  enum DIRECTION dir;
  public:
   Gauge (const char *file, DIRECTION up);
   void Draw (float percentage);
+  void SetSize (float x, float y);
+  void GetSize (float &x, float &y);
 };

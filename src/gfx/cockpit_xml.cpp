@@ -27,7 +27,17 @@ namespace CockpitXML {
       FRONT,
       LEFT,
       RIGHT,
-      BACK
+      BACK,
+      KARMORF,
+      KARMORR,
+      KARMORL,
+      KARMORB,
+      KFUEL, 
+      KSHIELDF,
+      KSHIELDR,
+      KSHIELDL,
+      KSHIELDB, 
+      KENERGY
     };
 
   const EnumMap::Pair element_names[] = {
@@ -37,7 +47,17 @@ namespace CockpitXML {
     EnumMap::Pair ("LeftVDU", LVDU),
     EnumMap::Pair ("RightVDU", RVDU),
     EnumMap::Pair ("Panel", PANEL),
-    EnumMap::Pair ("Crosshairs", CROSSHAIRS)
+    EnumMap::Pair ("Crosshairs", CROSSHAIRS),
+    EnumMap::Pair ("ArmorF", KARMORF),
+    EnumMap::Pair ("ArmorR", KARMORR),
+    EnumMap::Pair ("ArmorL", KARMORL),
+    EnumMap::Pair ("ArmorB", KARMORB),
+    EnumMap::Pair ("ShieldF", KSHIELDF),
+    EnumMap::Pair ("ShieldR", KSHIELDR),
+    EnumMap::Pair ("ShieldL", KSHIELDL),
+    EnumMap::Pair ("ShieldB", KSHIELDB),
+    EnumMap::Pair ("Fuel", KFUEL),
+    EnumMap::Pair ("Energy", KENERGY)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -54,7 +74,7 @@ namespace CockpitXML {
     EnumMap::Pair ("CockpitOffset", COCKPITOFFSET)
   };
 
-  const EnumMap element_map(element_names, 7);
+  const EnumMap element_map(element_names, 17);
   const EnumMap attribute_map(attribute_names, 12);
 }
 
@@ -99,6 +119,18 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       } 
     }
+    break;
+  case KARMORF:
+  case KARMORR:
+  case KARMORL:
+  case KARMORB:
+  case KFUEL:
+  case KSHIELDF:
+  case KSHIELDL:
+  case KSHIELDR:
+  case KSHIELDB:
+  case KENERGY:
+    
     break;
   case CROSSHAIRS:
   case PANEL: 

@@ -157,10 +157,17 @@ void Cockpit::SetParent (Unit * unit) {
   }
 }
 void Cockpit::Delete () {
-  for (int i=0;i<4;i++) {
+  int i;
+  for (i=0;i<4;i++) {
     if (Pit[i]) {
       delete Pit[i];
       Pit[i] = NULL;
+    }
+  }
+  for (i=0;i<NUMGAUGES;i++) {
+    if (gauges[i]) {
+      delete gauges[i];
+      gauges[i]=NULL;
     }
   }
   if (Radar) {
@@ -183,6 +190,9 @@ void Cockpit::Delete () {
 }
 Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
   Radar=VDU[0]=VDU[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+  for (int i=0;i<NUMGAUGES;i++) {
+    gauges[i]=NULL;
+  }
   Init (file);
 }
 void Cockpit::Draw() {

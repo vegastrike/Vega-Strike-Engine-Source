@@ -5,16 +5,33 @@ Gauge::Gauge (const char *file, DIRECTION up): Sprite(file) {
   dir = up;
   float sx,sy;
   if (dir==GAUGE_UP) {
-    GetSize(sx,sy);
-    SetSize (sx,-sy);
-    dir = GAUGE_DOWN;
+    Sprite::GetSize(sx,sy);
+    Sprite::SetSize (sx,-sy);
   }
   if (dir==GAUGE_LEFT) {
-    GetSize (sx,sy);
-    SetSize (-sx,sy);
-    dir = GAUGE_RIGHT;
+    Sprite::GetSize (sx,sy);
+    Sprite::SetSize (-sx,sy);
   }
 }
+void Gauge::SetSize (float x, float y) {
+  if (dir==GAUGE_UP) {
+    y= -y;
+  } else if (dir==GAUGE_LEFT) {
+    x = -x;
+  }
+  Sprite::SetSize (x,y);
+
+}
+void Gauge::GetSize (float &x, float &y) {
+  Sprite::GetSize (x,y);
+  if (dir==GAUGE_UP) {
+    y= -y;
+  } else if (dir==GAUGE_LEFT) {
+    x = -x;
+  }
+}
+
+
 void Gauge::Draw (float percentage) {
   float sx,sy,px,py;
   GetSize (sx,sy);
