@@ -72,9 +72,12 @@ BaseInterface::Room::BaseVSSprite::BaseVSSprite (const char *spritefile, std::st
   : BaseObj(ind),spr(spritefile,BlurBases(),GFXTRUE) {}
 
 void BaseInterface::Room::BaseVSSprite::Draw (BaseInterface *base) {
-	GFXBlendMode(SRCALPHA,INVSRCALPHA);
-	GFXEnable(TEXTURE0);
-	spr.Draw();
+  static float AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","base_alpha_test_cutoff","0"));  
+  GFXAlphaTest (GREATER,AlphaTestingCutoff);
+  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  GFXEnable(TEXTURE0);
+  spr.Draw();
+  GFXAlphaTest (ALWAYS,0);
 }
 
 void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
