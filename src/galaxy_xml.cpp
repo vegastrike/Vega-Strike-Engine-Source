@@ -35,109 +35,6 @@
 #endif
 #include <float.h>
 using namespace XMLSupport;
-extern std::string universe_path;
-#include "networking/netserver.h"
-
-
-std::vector <std::string> systems_vector;
-
-void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
-{
-	cout<<"Generating random serial numbers :"<<endl;
-	static string sys = vs_config->getVariable("data","sectors","sectors");
-	for( std::string sys=stak.back(); !stak.empty(); stak.pop_back())
-	{
-		string relpath( universe_path+sys+"/"+sys+".system");
-		string systempath( datadir+relpath);
-		cout<<"\t\tcomputing serials for "<<systempath<<"...";
-		
-		// Read the file
-		FILE * fp = fopen( systempath.c_str(), "w+b");
-		if( !fp)
-		{
-			cerr<<"!!! ERROR : cannot open system file : "<<systempath<<endl;
-			exit(1);
-		}
-		fseek( fp, 0, SEEK_END);
-		int readsize = 0;
-		int file_size = ftell( fp);
-		fseek( fp, 0, SEEK_SET);
-		char * systembuf = new char[file_size+1];
-        readsize = fread( systembuf, sizeof( char), file_size, fp);
-        if( readsize!=file_size)
-        {
-            cout<<"Error reading system file : "<<systempath<<" read ("<<readsize<<") -  to be read("<<file_size<<")"<<endl;
-            exit( 1);
-        }
-		systembuf[file_size] = 0;
-		string system( systembuf);
-
-		// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
-		std::vector<std::string> search_patterns;
-
-		bool newserials = true;
-		if( system.find( "serial=", 0) != std::string::npos)
-		{
-			newserials = false;
-			cout<<"Found serial in system file : replacing serials..."<<endl;
-		}
-		search_patterns.push_back( "<planet ");
-		search_patterns.push_back( "<Planet ");
-		search_patterns.push_back( "<PLANET ");
-		search_patterns.push_back( "<unit ");
-		search_patterns.push_back( "<Unit ");
-		search_patterns.push_back( "<UNIT ");
-		search_patterns.push_back( "<nebula ");
-		search_patterns.push_back( "<Nebula ");
-		search_patterns.push_back( "<NEBULA ");
-
-		for( std::vector<std::string>::iterator ti=search_patterns.begin(); ti!=search_patterns.end(); ti++)
-		{
-			std::string search( (*ti));
-			std::string::size_type search_length = (*ti).length();
-			std::string::size_type curpos = 0;
-			while( (curpos = system.find( "<planet ", curpos))!=std::string::npos)
-			{
-				ObjSerial new_serial = getUniqueSerial();
-				std::string serial_str( (*ti)+"serial="+XMLSupport::tostring5( new_serial)+" ");
-				// If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
-				// of length search_length + 14 (length of serial="XXXXX")
-				if( newserials)
-					system.replace( curpos, search_length, serial_str);
-				else
-					system.replace( curpos, search_length+14, serial_str);
-			}
-		}
-
-		// Add the system xml string to the server
-		Server->addSystem( sys, system);
-
-		// Overwrite the system files with the buffer containing serials
-		fseek( fp, 0, SEEK_SET);
-		if( fwrite( system.c_str(), 1, system.length(), fp) != system.length() )
-		{
-			cerr<<"!!! ERROR : writing system file"<<endl;
-			exit(1);
-		}
-
-		/*
-		std::vector<std::string> data;
-		data.clear(); // clear the vector first.
-		std::ifstream f(file);
-		char buf[4096]; // assume no line is longer than 4095 chars.
-
-		while (f.getline(buf,sizeof(buf)))
-		{
-			data.push_back(buf);
-			if (! f.ignore(4096,'\n'))
-				break; // ignore the newline.
-		}
-		*/
-		cout<<" OK !"<<endl;
-		delete systembuf;
-	}
-	cout<<"Computing done."<<endl;
-}
 
 namespace GalaxyXML {
 enum GalaxyNames {
@@ -197,8 +94,6 @@ const EnumMap attribute_map(attribute_names, 3);
 					break;
 				}
 			}
-			// Add the system in the system vector so that we can later compute serials
-			systems_vector.push_back( name);
 			xml->stak.push_back (name);
 			xml->g->addSection (xml->stak);
 
@@ -346,9 +241,6 @@ Galaxy::Galaxy(const char *configfile){
 	  fclose (fp);
 
 	  XML_ParserFree(parser);
-
-	  if(SERVER)
-		this->ComputeSerials( systems_vector);
   }
   else
   {

@@ -5,6 +5,7 @@
 #include "networking/const.h"
 
 #include <string>
+#include <vector>
 
 using std::string;
 
@@ -180,6 +181,9 @@ namespace UniverseUtil {
 	double tan (double);
 	void micro_sleep(int n);
 	void addParticle (QVector loc, Vector velocity, Vector color, float size);
+
+	void	ComputeGalaxySerials( std::vector<std::string> & stak);
+	void	ComputeSystemSerials( std::string & sys, std::string & systempath);
 }
 
 #undef activeSys

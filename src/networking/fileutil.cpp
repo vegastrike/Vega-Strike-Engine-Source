@@ -69,7 +69,7 @@ int		FileUtil::HashStringCompute( std::string buffer, unsigned char * digest)
 
 	const int block_size = Hash.OptimalBlockSize();
 	unsigned char * hashbuf = new unsigned char[block_size];
-	char * buf = buffer.c_str();
+	const char * buf = buffer.c_str();
 	int nb=0, offset=0;
 
 	while( offset<buffer.length())

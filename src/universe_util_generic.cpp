@@ -17,10 +17,13 @@
 #include "load_mission.h"
 #include "configxml.h"
 #include "vs_globals.h"
+#include "vs_path.h"
 #include "cmd/unit_util.h"
+#include "networking/netserver.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
+extern std::string universe_path;
 
 using std::string;
 
@@ -533,6 +536,102 @@ namespace UniverseUtil {
     ::micro_sleep(n);
   }
 
+  void	ComputeSystemSerials( std::string & sys, std::string & systempath)
+  {
+		// Read the file
+		FILE * fp = fopen( systempath.c_str(), "w+b");
+		if( fp)
+		{
+			cout<<"\t\tcomputing serials for "<<systempath<<"...";
+			fseek( fp, 0, SEEK_END);
+			int readsize = 0;
+			int file_size = ftell( fp);
+			fseek( fp, 0, SEEK_SET);
+			char * systembuf = new char[file_size+1];
+	   	    readsize = fread( systembuf, sizeof( char), file_size, fp);
+	   	    if( readsize!=file_size)
+	        {
+	            cout<<"Error reading system file : "<<systempath<<" read ("<<readsize<<") -  to be read("<<file_size<<")"<<endl;
+	            exit( 1);
+	        }
+			systembuf[file_size] = 0;
+			string system( systembuf);
+
+			// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
+			std::vector<std::string> search_patterns;
+
+			bool newserials = true;
+			if( system.find( "serial=", 0) != std::string::npos)
+			{
+				newserials = false;
+				cout<<"Found serial in system file : replacing serials..."<<endl;
+			}
+			search_patterns.push_back( "<planet ");
+			search_patterns.push_back( "<Planet ");
+			search_patterns.push_back( "<PLANET ");
+			search_patterns.push_back( "<unit ");
+			search_patterns.push_back( "<Unit ");
+			search_patterns.push_back( "<UNIT ");
+			search_patterns.push_back( "<nebula ");
+			search_patterns.push_back( "<Nebula ");
+			search_patterns.push_back( "<NEBULA ");
+
+			for( std::vector<std::string>::iterator ti=search_patterns.begin(); ti!=search_patterns.end(); ti++)
+			{
+				std::string search( (*ti));
+				std::string::size_type search_length = (*ti).length();
+				std::string::size_type curpos = 0;
+				while( (curpos = system.find( search, curpos))!=std::string::npos)
+				{
+					ObjSerial new_serial = getUniqueSerial();
+					std::string serial_str( (*ti)+"serial="+XMLSupport::tostring5( new_serial)+" ");
+					// If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
+					// of length search_length + 14 (length of serial="XXXXX")
+					if( newserials)
+						system.replace( curpos, search_length, serial_str);
+					else
+						system.replace( curpos, search_length+14, serial_str);
+				}
+			}
+
+			// Add the system xml string to the server
+			Server->addSystem( sys, system);
+
+			// Overwrite the system files with the buffer containing serials
+			fseek( fp, 0, SEEK_SET);
+			if( fwrite( system.c_str(), 1, system.length(), fp) != system.length() )
+			{
+				cerr<<"!!! ERROR : writing system file"<<endl;
+				exit(1);
+			}
+
+			cout<<" OK !"<<endl;
+			delete systembuf;
+		}
+		else
+		{
+			cerr<<"ERROR cannot open system file : "<<systempath<<endl;
+			exit(1);
+		}
+  }
+
+void	ComputeGalaxySerials( std::vector<std::string> & stak)
+{
+	cout<<"Going through "<<stak.size()<<" sectors"<<endl;
+	cout<<"Generating random serial numbers :"<<endl;
+	static string sysdir = vs_config->getVariable("data","sectors","sectors");
+	for( ;!stak.empty();)
+	{
+		string sys( stak.back());
+		stak.pop_back();
+		string sysfilename( sys+".system");
+		string relpath( universe_path+sysdir+"/"+sysfilename);
+		string systempath( datadir+relpath);
+		
+		ComputeSystemSerials( sysfilename, systempath);
+	}
+	cout<<"Computing done."<<endl;
+}
 }
 
 #undef activeSys
