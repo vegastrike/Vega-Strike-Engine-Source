@@ -719,9 +719,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->int_val = carg.quantity;
     }
     else if(method_id==CMT_UNIT_incrementCargo){
+      float percentagechange= getFloatArg(node,mode,1);
       if(mode==SCRIPT_RUN){
-
-
 	if (my_unit->numCargo()>0) {
 	  unsigned int index;
 	  index = rand()%my_unit->numCargo();
@@ -729,6 +728,22 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	  c.quantity=1;
 	  if (my_unit->CanAddCargo(c)) {
 	    my_unit->AddCargo(c);
+	    my_unit->GetCargo(index).price*=percentagechange;
+	  }
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(method_id==CMT_UNIT_decrementCargo){
+      float percentagechange;
+      percentagechange= getFloatArg(node,mode,1);
+      if(mode==SCRIPT_RUN){
+	if (my_unit->numCargo()>0) {
+	  unsigned int index;
+	  index = rand()%my_unit->numCargo();
+	  if (my_unit->RemoveCargo(index,1,false)) {
+	    my_unit->GetCargo(index).price*=percentagechange;
 	  }
 	}
       }

@@ -220,6 +220,7 @@ enum callback_module_unit_type {
     CMT_UNIT_addCargo ,
     CMT_UNIT_removeCargo ,
     CMT_UNIT_incrementCargo ,
+    CMT_UNIT_decrementCargo ,
     CMT_UNIT_scanSystem ,
     CMT_UNIT_scannerNearestEnemy ,
     CMT_UNIT_scannerNearestFriend ,
