@@ -450,8 +450,19 @@ void StarSystem::Update() {
   fprintf (stderr,"begin Update");
   fflush (stderr);
 #endif
-  time += GetElapsedTime();
   bool firstframe = true;
+
+  ///this makes it so systems without players may be simulated less accurately
+  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime","1"));
+  float moretime = nonactivesystemtime;
+  if (_Universe->activeStarSystem()==this) {
+    moretime=1;
+  }
+  float normal_simulation_atom = SIMULATION_ATOM;
+  SIMULATION_ATOM*=moretime;
+  ///just be sure to restore this at the end
+
+  time += GetElapsedTime();
   _Universe->pushActiveStarSystem(this);
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
@@ -572,6 +583,7 @@ void StarSystem::Update() {
   fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
+  SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }

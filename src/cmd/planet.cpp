@@ -58,7 +58,7 @@ void PlanetaryOrbit::Execute() {
     }
   }
   double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
-  theta+=velocity/(radius?radius:1) *SIMULATION_ATOM;
+  theta+=velocity*SIMULATION_ATOM;
   parent->Velocity = (origin - focus + x_offset+y_offset-parent->LocalPosition())/SIMULATION_ATOM;
   const int Unreasonable_value=100000/SIMULATION_ATOM;
   if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
@@ -90,13 +90,13 @@ void Planet::AddSatellite (Unit * orbiter) {
 	satellites.prepend (orbiter);
 	orbiter->SetOwner (this);
 }
-void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
+void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {
     UnitCollection::UnitIterator * satiterator = satellites.createIterator();
 	  assert(satiterator->current()!=NULL);
 	  if (satiterator->current()->isUnit()==PLANETPTR) {
-		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,ourmat,ligh, isunit, faction,fullname);
+		((Planet *)satiterator->current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,alpha,dest,level-1,ourmat,ligh, isunit, faction,fullname);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
@@ -109,7 +109,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
       satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
       satiterator->current()->SetOwner (this);
     }else {
-      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
+      satellites.prepend(new Planet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
     }
   }
   delete satiterator;
@@ -124,7 +124,7 @@ Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), sa
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
   inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
@@ -194,6 +194,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
       bspTree = new BSPTree (tmpname.c_str());
   */
   meshdata[1]=NULL;
+  SetAngularVelocity (rotvel);
 }
 extern bool shouldfog;
 

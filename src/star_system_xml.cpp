@@ -65,7 +65,8 @@ namespace StarXML {
     NAME,
     RADIUS,
     GRAVITY,
-    VELOCITY,
+    YEAR,
+    DAY,
     PPOSITION,
     SYSTEM,
     PLANET,
@@ -150,7 +151,8 @@ namespace StarXML {
     EnumMap::Pair ("name", NAME),
     EnumMap::Pair ("radius", RADIUS),
     EnumMap::Pair ("gravity", GRAVITY),
-    EnumMap::Pair ("velocity", VELOCITY),
+    EnumMap::Pair ("year", YEAR),
+    EnumMap::Pair ("day", DAY),
     EnumMap::Pair ("position", PPOSITION),
     EnumMap::Pair ("Red", EMRED),
     EnumMap::Pair ("Green", EMGREEN),
@@ -165,13 +167,25 @@ namespace StarXML {
   };
 
   const EnumMap element_map(element_names, 17);
-  const EnumMap attribute_map(attribute_names, 38);
+  const EnumMap attribute_map(attribute_names, 39);
 }
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace StarXML;
+
+static Vector ComputeRotVel (float rotvel, const Vector &r, const Vector & s) {
+  if ((r.i||r.j||r.k)&&(s.i||s.j||s.k)) {
+    Vector retval = r.Cross (s);
+    retval.Normalize();
+    retval= retval * rotvel;
+    return retval;
+  }else {
+    return Vector (0,rotvel,0);
+  }
+}
+
 
 extern void SetTurretAI (Unit * fighter);
 static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLocal> &curlights, const char *str) {
@@ -220,6 +234,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   float gravity=0;
   float velocity=0;
   float position=0;
+  float rotvel=0;
   Vector S(0,0,0), pos(0,0,0), R(0,0,0);
   Names elem = (Names)element_map.lookup(name);
   float radius=1;
@@ -551,8 +566,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case PPOSITION:
 	position=parse_float((*iter).value);
 	break;
-      case VELOCITY:
-	velocity=parse_float((*iter).value);
+      case DAY:
+	rotvel = 2*M_PI/parse_float ((*iter).value);
+	break;
+      case YEAR:
+	velocity=2*M_PI/parse_float((*iter).value);
 	break;
       case GRAVITY:
 	gravity=parse_float((*iter).value);
@@ -566,9 +584,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname);
+      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction,fullname));
+      xml->moons.push_back(new Planet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction,fullname));
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
     }
     delete []filename;
@@ -647,8 +665,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case PPOSITION:
 	position=parse_float((*iter).value);
 	break;
-      case VELOCITY:
-	velocity=parse_float((*iter).value);
+      case DAY:
+	rotvel = 2*M_PI/parse_float ((*iter).value);
+	break;
+      case YEAR:
+	velocity=2*M_PI/parse_float((*iter).value);
 	break;
       }
 
@@ -673,7 +694,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
 	  SetTurretAI (un);
-
+	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
 	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction);

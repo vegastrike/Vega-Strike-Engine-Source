@@ -5,7 +5,7 @@
 
 #define SAFE_COLLIDE_DEBUG
 
-const int tablehuge=12;
+const int tablehuge=10;
 class CollideTable {
  public:
   Hashtable3d <LineCollide*, char[20],char[200], char [tablehuge]> c;
