@@ -1463,6 +1463,12 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
   return def;
 }
 bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
+	if (target->isUnit()==PLANETPTR) {
+		un_iter i = target->getSubUnits();
+		Unit * targ =*i;
+		if (targ)
+			return AutoPilotTo(targ,ignore_energy_requirements,recursive_level);
+	}
   static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
   if (warpenergy<insys_jump_cost*jump.energy) {
 	  if (!ignore_energy_requirements)

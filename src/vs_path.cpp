@@ -40,6 +40,13 @@ std::string homedir;
 std::string HOMESUBDIR(".vegastrike");
 std::vector <std::string> curdir;//current dir starting from datadir
 std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
+void vsmkdir(const std::string &s) {
+	mkdir (s.c_str()
+#ifndef _WIN32
+		   ,0xFFFFFFFF
+#endif
+		);
+}
 void changehome(bool makehomedir) {
   static char pw_dir[2000];
 #ifndef _WIN32

@@ -1,5 +1,6 @@
 #include "planet_generic.h"
 #include "unit_factory.h"
+#include "gfx/mesh.h"
 
 
 char * getnoslash (char * inp) {
@@ -26,7 +27,6 @@ string getCargoUnitName (const char * textname) {
   free(tmp2);
   return retval;
 }
-
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -77,8 +77,80 @@ void PlanetaryOrbit::Execute() {
     parent->SetCurPosition (origin-focus+x_offset+y_offset);
   }
 }
+string GetElMeshName (string name, string faction,char direction)
+{
+		char strdir[2]={direction,0};
+		string elxmesh=string(strdir)+"_elevator.xmesh";
+		string elevator_mesh =name+"_"+faction+elxmesh;				 
+		string tump = string("meshes/"+elevator_mesh);
+		FILE * fp = fopen (tump.c_str(),"r");
+		if (fp) fclose( fp);
+		else elevator_mesh=name+elxmesh;
+		return elevator_mesh;
+}
 
-
+Vector Planet::AddSpaceElevator (const std::string &name, const std::string & faction, char direction) {
+	Vector dir,scale;
+	
+	switch (direction){
+	case 'u':
+		dir.Set(0,1,0);
+//		scale.Set(1,len,1);
+		break;
+	case 'd':
+		dir.Set(0,-1,0);
+//		scale.Set(1,len,1);		
+		break;
+	case 'l':
+		dir.Set(-1,0,0);
+//		scale.Set(len,1,1);		
+		break;
+	case 'r':
+		dir.Set(1,0,0);
+//		scale.Set(len,1,1);		
+		break;
+	case 'b':
+		dir.Set(0,0,-1);
+//		scale.Set(1,1,len);				
+		break;
+	default:
+		dir.Set(0,0,1);
+//		scale.Set(1,1,len);						
+		break;
+	}
+	Matrix ElevatorLoc(Vector(dir.j,dir.k,dir.i),dir,Vector(dir.k,dir.i,dir.j));
+	scale = dir * radius +Vector(1,1,1)-dir;
+	if (meshdata.empty()) meshdata.push_back(NULL);
+	Mesh * shield = meshdata.back();
+	string elevator_mesh=GetElMeshName(name,faction,direction);//filename	
+	Mesh * tmp = meshdata.back()=new Mesh (elevator_mesh.c_str(),
+										   scale,
+										   FactionUtil::
+										   GetFaction(faction.c_str()),
+										   NULL);
+	
+	meshdata.push_back(shield);
+	{//subunit computations
+		Vector mn(tmp->corner_min());
+		Vector mx(tmp->corner_max());
+		if (dir.Dot (Vector(1,1,1))>0) {
+			ElevatorLoc.p.Set (dir.i*mx.i,dir.j*mx.j,dir.k*mx.k);
+		}else {
+			ElevatorLoc.p.Set (-dir.i*mn.i,-dir.j*mn.j,-dir.k*mn.k);
+		}
+		
+		Unit * un=UnitFactory::createUnit (name.c_str(),true,FactionUtil::GetFactionIndex(faction),"",NULL);
+		if (image->dockingports.back().pos.MagnitudeSquared()<10)
+			image->dockingports.clear();
+		image->dockingports.push_back (DockingPorts(ElevatorLoc.p,un->rSize()*1.5,true));
+		un->SetRecursiveOwner(this);
+		un->SetOrientation(ElevatorLoc.getQ(),ElevatorLoc.getR());
+		un->SetPosition(ElevatorLoc.p);
+		SubUnits.prepend(un);
+		
+	}
+	return dir;
+}
 void Planet::endElement() {  
 }
 Planet * Planet::GetTopPlanet (int level) {

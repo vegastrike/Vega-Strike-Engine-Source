@@ -115,11 +115,10 @@ string FactionUtil::SerializeFaction() {
 int FactionUtil::numnums (const char * str) {
   int count=0;
   for (int i=0;str[i];i++) {
-    count+=isdigit (str[i])?1:0;
+    count+=(str[i]>='0'&&str[i]<='9')?1:0;
   }
   return count;
 }
-
 void FactionUtil::LoadSerializedFaction(FILE * fp) {
 
   for (unsigned int i=0;i<factions.size();i++) {

@@ -57,6 +57,10 @@ void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, 
   meshdata.push_back(shield);
 }
 
+
+Vector GamePlanet::AddSpaceElevator(const std::string &name, const std::string &faction,char direction) {//direction is udrlfb//up down right left front ack
+	return Planet::AddSpaceElevator (name,faction,direction);
+}
 void GamePlanet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
   if (meshdata.empty()) {
     meshdata.push_back(NULL);

@@ -43,7 +43,7 @@ void returnfromhome();
 void vschdir (const char *path);
 //Goes up one level, and changes the directory accordingly
 void vscdup();
-
+void vsmkdir (const std::string &nam);
 void vssetdir (const char * path);
 void vsresetdir ();
 #endif

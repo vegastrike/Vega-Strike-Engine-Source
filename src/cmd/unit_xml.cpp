@@ -23,9 +23,6 @@
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
 #include "cmd/collide/rapcol.h"
-#ifdef _WIN32
-#include <direct.h>
-#endif
 #define VS_PI 3.1415926536
 
 int GetModeFromName (const char * input_buffer) {
@@ -1552,18 +1549,10 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 		  if( Network==NULL && !SERVER)
 		  {
 			  if (nonautosave.empty()) {
-				  mkdir (modifications
-#ifndef _WIN32
-						 ,0xFFFFFFFF
-#endif
-					  );
+				  vsmkdir (modifications);
 				vschdir (modifications);
 			  }else {
-				  mkdir (nonautosave.c_str()
-#ifndef _WIN32
-						 ,0xFFFFFFFF
-#endif
-					  );
+				  vsmkdir (nonautosave);
 					  
 				vschdir (nonautosave.c_str());
 				

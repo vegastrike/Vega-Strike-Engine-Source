@@ -1000,8 +1000,8 @@ public:
   ///get the full flightgroup ID (i.e 'green-4')
   const string getFgID();
 
-  virtual vector <class CargoColor>& FilterDowngradeList (vector <class CargoColor> & mylist, bool downgrade =true) { return mylist;}
-  virtual vector <class CargoColor>& FilterUpgradeList (vector <class CargoColor> & mylist) { return mylist;}
+  virtual vector <struct CargoColor>& FilterDowngradeList (vector <struct CargoColor> & mylist, bool downgrade =true) { return mylist;}
+  virtual vector <struct CargoColor>& FilterUpgradeList (vector <struct CargoColor> & mylist) { return mylist;}
 
 /***************************************************************************************/
 /**** MISC STUFF                                                                    ****/

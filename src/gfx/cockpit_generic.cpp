@@ -320,7 +320,20 @@ void Cockpit::UpdAutoPilot()
 
 extern void DoCockpitKeys();
 extern void DockToSavedBases (int playernum);
-
+static float dockingdistance (Unit* port, Unit * un) {
+	vector<DockingPorts>::const_iterator i =port->GetImageInformation().dockingports.begin();
+	vector<DockingPorts>::const_iterator end =port->GetImageInformation().dockingports.end();
+	QVector pos (InvTransform (port->cumulative_transformation_matrix,un->Position()));
+	float mag=FLT_MAX;
+	for (;i!=end;++i) {
+		float tmag =(pos.Cast()-(*i).pos).Magnitude()-un->rSize()-(*i).radius;
+		if (tmag < mag)
+			mag=tmag;
+	}
+	if (mag==FLT_MAX)
+		return UnitUtil::getDistance(port,un);
+	return mag;
+}
 void Cockpit::Update () {
   UpdAutoPilot();
   Unit * par=GetParent();
@@ -429,7 +442,8 @@ void Cockpit::Update () {
   if (autoclear&&par) {
     Unit *targ=par->Target();
 	if (targ) {
-    if ((UnitUtil::getSignificantDistance(targ,par)<=0)&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
+		static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));		
+    if ((dockingdistance(targ,par)<autopilot_term_distance||(UnitUtil::getSignificantDistance(targ,par)<=0))&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
       RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
     } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
       par->EndRequestClearance(targ);

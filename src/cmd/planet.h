@@ -43,6 +43,7 @@ protected:
 public:
   UnitCollection satellites;
   virtual ~GamePlanet();
+  Vector AddSpaceElevator (const std::string &name, const std::string & faction, char direction);
   void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false);

@@ -44,6 +44,7 @@ namespace StarXML {
     QJ,
     QK,
     NAME,
+	DIRECTION,
     RADIUS,
     GRAVITY,
     YEAR,
@@ -94,6 +95,7 @@ namespace StarXML {
     OUTERRADIUS,
     NUMSLICES,
     RING,
+	SPACEELEVATOR,
     WRAPX,
     WRAPY
   };
@@ -118,7 +120,8 @@ namespace StarXML {
     EnumMap::Pair ("Nebula",NEBULA),
     EnumMap::Pair ("Asteroid",ASTEROID),
     EnumMap::Pair ("RING",RING),
-    EnumMap::Pair ("citylights",CITYLIGHTS)
+    EnumMap::Pair ("citylights",CITYLIGHTS),
+    EnumMap::Pair ("SpaceElevator",SPACEELEVATOR)	
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -130,7 +133,8 @@ namespace StarXML {
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
-    EnumMap::Pair ("destination", DESTINATION), 
+    EnumMap::Pair ("destination", DESTINATION),
+    EnumMap::Pair ("direction", DIRECTION), 	
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
     EnumMap::Pair ("z", Z), 
@@ -171,8 +175,8 @@ namespace StarXML {
     
   };
 
-  const EnumMap element_map(element_names, 20);
-  const EnumMap attribute_map(attribute_names, 47);
+  const EnumMap element_map(element_names, 21);
+  const EnumMap attribute_map(attribute_names, 48);
 }
 
 using XMLSupport::EnumMap;
@@ -243,11 +247,11 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
 
 int GetNumNearStarsScale (int currentnum) {
   static float numstars=  XMLSupport::parse_float (vs_config->getVariable("graphics","num_near_stars_scale","2"));
-  return numstars*currentnum;
+  return (int)(numstars*currentnum);
 }
 int GetNumStarsScale (int currentnum) {
   static float numstars=  XMLSupport::parse_float (vs_config->getVariable("graphics","num_far_stars_scale","2"));
-  return numstars*currentnum;
+  return (int)(numstars*currentnum);
 }
 float GetStarSpreadScale (float currentnum) {
   static float numstars=  XMLSupport::parse_float (vs_config->getVariable("graphics","star_spread","200"));
@@ -426,6 +430,50 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
 	}
       break;
     }
+
+  case SPACEELEVATOR:
+    {
+      xml->unitlevel++;
+      std::string myfile("elevator");
+
+      blendSrc=SRCALPHA;
+      blendDst=INVSRCALPHA;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL)
+	if (p->isUnit()==PLANETPTR) {
+	  string faction(UniverseUtil::GetGalaxyFaction (this->filename));
+	  char direction='b';
+	  
+	  R.Set(1,0,0);
+	  S.Set(0,1,0);
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+	    case XFILE:
+	      myfile = (*iter).value;
+	      break;
+		case DIRECTION:
+			if (!(*iter).value.empty())
+				direction= (*iter).value[0];
+			break;
+		case FACTION:
+			faction = (*iter).value;
+			if (faction==UniverseUtil::GetGalaxyProperty (this->filename,"faction")) {
+				string ownerfaction = UniverseUtil::GetGalaxyFaction (this->filename);
+				faction = ownerfaction;
+			}
+			break;
+	    default:
+	      break;
+	    }
+	  }
+	  if (p!=NULL) {
+	    ((Planet *)p)->AddSpaceElevator (myfile,faction,direction);
+	  }
+	}
+      break;
+    }
+
+
   case CITYLIGHTS:
     {
       std::string myfile("planets/Dirt_light.png");
