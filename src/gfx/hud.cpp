@@ -90,7 +90,7 @@ void TextPlane::Draw(const string & newText, int offset)
     }
     
     if(*text_it=='\t') {
-      col+=glutBitmapWidth (fnt,' ')*5;
+      col+=glutBitmapWidth (fnt,' ')*5./g_game.x_resolution;;
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
@@ -98,9 +98,9 @@ void TextPlane::Draw(const string & newText, int offset)
       glutBitmapCharacter (fnt,' ');
     } else {
       col+=myFontMetrics.i;
-      col+=glutBitmapWidth (fnt,*text_it)*5;
+      col+=glutBitmapWidth (fnt,*text_it)/(float)g_game.x_resolution;;
     }
-    if(/*col+((text_it+1!=newText.end())?glutBitmapWidth(fnt,*text_it):0)>=myDims.i||*/*text_it == '\n') {
+    if(col+((text_it+1!=newText.end())?(glutBitmapWidth(fnt,*text_it)/(float)g_game.x_resolution):0)>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
       row -= myFontMetrics.j;
       glPopMatrix();
