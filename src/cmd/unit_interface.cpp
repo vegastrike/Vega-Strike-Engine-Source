@@ -71,7 +71,7 @@ static bool match (vector <string>::const_iterator cat, vector<string>::const_it
     cat++;
     return match (cat,endcat,item,itemend,perfect_match);
   }else {
-    return true;
+    return endcat==(cat+1);
   }
 }
 extern void LoadMission (const char *, bool loadfirst);
@@ -175,8 +175,11 @@ struct UpgradingInfo {
     }
   }
   void SetMode (enum BaseMode mod, enum SubMode smod) {
-    if (mod!=mode)
+    bool resetcat=false;
+    if (mod!=mode) {
       curcategory.clear();
+      resetcat=true;
+    }
     string ButtonText;
     switch (mod) {
     case BRIEFINGMODE:
@@ -198,22 +201,27 @@ struct UpgradingInfo {
     case UPGRADEMODE:
       title = "Upgrade/Repair Starship";
       ButtonText="Upgrade";
+      curcategory.push_back("upgrades");
       break;
     case ADDMODE:
       title = "Enhance Starship Mode";
       ButtonText="Add Stats";
+      curcategory.push_back("upgrades");
       break;
     case DOWNGRADEMODE:
       title = "Downgrade Starship Mode";
       ButtonText= "SellPart";
+      curcategory.push_back("upgrades");
       break;
     case MISSIONMODE:
       title = "Mission BBS";
       ButtonText="Accept";
+      curcategory.push_back("missions");
       break;
     case SHIPDEALERMODE:
       title = "Purchase Starship";
       ButtonText="BuyShip";
+      curcategory.push_back("starships");
       break;
     }
     if (smod!=NORMAL) {
@@ -888,22 +896,22 @@ vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     case UPGRADEMODE:
     case DOWNGRADEMODE:
     case ADDMODE:
-      curcategory.clear();
-      curcategory.push_back(string("upgrades"));
+      //      curcategory.clear();
+      //      curcategory.push_back(string("upgrades"));
       return FilterCargo (un,"upgrades",true,false);
     case SHIPDEALERMODE:
-      curcategory.clear();
-      curcategory.push_back(string("starships"));
+      //      curcategory.clear();
+      //      curcategory.push_back(string("starships"));
       return FilterCargo (un,"starships",true,true);
     case MISSIONMODE:
-      curcategory.clear();
-      curcategory.push_back(string("missions"));
+      //      curcategory.clear();
+      //      curcategory.push_back(string("missions"));
       return FilterCargo (un,"missions",true,true);
     case NEWSMODE:
       return TempCargo;
     case BRIEFINGMODE:
-      curcategory.clear();
-      curcategory.push_back (string("briefings"));
+      //      curcategory.clear();
+      //      curcategory.push_back (string("briefings"));
       return MakeActiveMissionCargo ();
     }
     fprintf (stderr,"Error in picking cargo lists");
