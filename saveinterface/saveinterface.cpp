@@ -8,6 +8,7 @@
 #include <string>
 #ifdef _WIN32
 #include <direct.h>
+#include <process.h>
 #else
 #include <pwd.h>
 #include <sys/stat.h>
@@ -20,21 +21,24 @@ extern void GetRidOfConsole ();
 void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *,int);
 void LoadAutoDialog (char *,int);
-
-static const char * titles [] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Help Button"};
-string my_mission ("mission/exploration/explore_universe.mission");
-static const char * helps [] = {
+#define NUM_TITLES 8
+static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Exit","Help"};
+std::string my_mission ("mission/exploration/explore_universe.mission");
+#define NUM_HELPS 6
+static const char * helps [NUM_HELPS] = {
   "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
   "|START A NEW GAME BUTTON|\nStart a new game in the Vegastrike universe.\nYou start with a dinged up old wayfarer\nand head from the vega sector with the hope of finding\nprofit and adventure on the frontier.\nTo begin afresh you must choose a new saved game.",
-  "|LOAD GAME BUTTON|\nThis opens up a saved\ngame you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
-"|RECOVER AUTOSAVE BUTTON|\nThis button allows a player to recover their\nmost recently played game into the\nselected save game upon next run.\nIf the player quits or the player docks,\nand then dies, it will restore\nto the last saved position."
+  "|LOAD GAME BUTTON|\nThis opens up a saved game you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
+  "|RECOVER AUTOSAVE BUTTON|\nThis button allows a player to recover their most recently\nplayed game into the selected save game upon next run.\nIf the player quits or the player docks, and then dies,\nit will restore to the last saved position.",
+  "|LAUNCH LAST SAVEGAME BUTTON|\nUse this button to launch Vegastrike with from a saved\ngame or mission. If you do not choose a mission, you\nwill start in the standard trading/bounty hunting mission.",
+  "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game."
 };
 
 
 char * prog_arg=NULL;
 std::string ParentDir () {
   static char * final=NULL;
-  string mypwd;
+  std::string mypwd;
   if (final==NULL) {
     if (prog_arg!=NULL) {
       // We need to set the path back 2 to make everything ok.
@@ -42,7 +46,8 @@ std::string ParentDir () {
       int pathlen=strlen(prog_arg);
       parentdir=new char[pathlen+1];
       char *c;
-      strncpy ( parentdir, prog_arg, pathlen+1 );
+      parentdir[pathlen]='\0';
+      strncpy ( parentdir, prog_arg, pathlen );
       c = (char*) parentdir;
       
       while (*c != '\0')     /* go to end */
@@ -70,12 +75,12 @@ std::string ParentDir () {
       delete [] parentdir;
     }
   }else {
-    mypwd = string(final);
+    mypwd = std::string(final);
   }
   return mypwd;
 }
 void GoToParentDir () {
-  string par = ParentDir ();
+  std::string par = ParentDir ();
   //  fprintf (stderr,"changing to %s",par.c_str());
   chdir (par.c_str());
 }
@@ -120,29 +125,44 @@ int lastSlash (const char * c) {
 void help_func( GtkWidget *w, int i)
 {
 
-  if (i<0||i>3) {
-      Help("Help",(std::string(helps[0])+"\n"+helps[1]+"\n"+helps[2]+"\n"+helps[3]).c_str());
+#if NUM_HELPS>0
+  if (i<0||i>(NUM_HELPS-1)) {
+      std::string str=helps[0];
+      for (int i=1;i<NUM_HELPS;i++) {
+        str+=std::string("\n")+helps[i];
+      }
+      Help("Help",str.c_str());
     } else {
       Help(titles[i],helps[i]);
     }
+#endif
 
 }
 void launch_mission () {
+  Help("Loading...","\n      Vegastrike is loading... Please wait while it starts up.      \n");
   GoToParentDir();
   int player = my_mission.find ("player");
-  if (player>0&&player!=string::npos) {
+  if (player>0&&player!=std::string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
    printf ("./vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
+#ifndef _WIN32
    execlp ("./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
+#else
+   spawnl (P_NOWAIT,"./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
+#endif
   } else {
    printf ("./vegastrike %s",my_mission.c_str());
    fflush (stdout);
-    execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);
+#ifndef _WIN32
+   execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
+#else
+   spawnl (P_NOWAIT,"./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
+#endif
   }
 }
 void file_mission_sel (GtkWidget *w, GtkFileSelection *fs) {
-  string tmp = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
+  std::string tmp = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
   FILE * fp =(fopen (tmp.c_str(),"r"));
   if (fp!=NULL) {
     fclose (fp);
@@ -202,6 +222,9 @@ void hello( GtkWidget *widget, gpointer   data ) {
       launch_mission();
       break;
     case 6:
+      gtk_main_quit();
+      break;
+    case 7:
       help_func(NULL,-1);
       break;
     default:
@@ -224,7 +247,7 @@ int main( int   argc,
     GtkWidget *window;
     GtkWidget *button;
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_default_size(GTK_WINDOW(window), 300,200);
+    gtk_window_set_default_size(GTK_WINDOW(window), 300,350);
     gtk_window_set_title(GTK_WINDOW(window), "Saved Game Selector");
     GtkWidget *vbox=gtk_vbox_new(FALSE, 3);
      /* When the window is given the "delete_event" signal (this is given
@@ -234,7 +257,7 @@ int main( int   argc,
       * function is NULL and is ignored in the callback function. */
     gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(gtk_exit), NULL);
     gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(gtk_exit), NULL);
-    for (int i=0;i<7;i++) {
+    for (int i=0;i<NUM_TITLES;i++) {
         button = gtk_button_new_with_label (titles[i]);
          
          /* When the button receives the "clicked" signal, it will call the
@@ -278,9 +301,12 @@ void LoadSaveFunction (char *Filename, int i, GtkSignalFunc func,const char * de
     }else {
       gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew), default_thing);
     }
-    gtk_widget_show(filew);
-    gtk_container_add (GTK_CONTAINER (GTK_FILE_SELECTION(filew)->button_area),GTK_FILE_SELECTION (filew)->help_button);
+    GtkWidget *box=gtk_hbox_new (FALSE,0);
+    gtk_container_add (GTK_CONTAINER (GTK_FILE_SELECTION(filew)->button_area),box);
+    gtk_box_pack_end (GTK_BOX (GTK_FILE_SELECTION(filew)->button_area),GTK_FILE_SELECTION (filew)->help_button, TRUE, TRUE, 40);
+    gtk_widget_show(box);
     gtk_widget_show(GTK_FILE_SELECTION(filew)->help_button);
+    gtk_widget_show(filew);
 }
 void LoadMissionDialog (char * Filename,int i) {
   GoToParentDir ();
@@ -288,7 +314,7 @@ void LoadMissionDialog (char * Filename,int i) {
   char mypwd [1000];
   getcwd (mypwd,1000);
   //  fprintf (stderr,mypwd);
-  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/""/*(ParentDir()+"/mission").c_str()*/);
+  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/"*.mission"/*(ParentDir()+"/mission").c_str()*/);
 }
 #define HOMESUBDIR ".vegastrike"
 void changehome() {
@@ -329,4 +355,5 @@ void LoadAutoDialog (char *Filename, int i) {
   LoadSaveFunction (Filename,i,(GtkSignalFunc)file_ok_auto_sel);
 }
 /* example-end */
+
 
