@@ -4,6 +4,7 @@
 #include "vegastrike.h"
 #include "communication.h"
 #include <assert.h>
+#include "audiolib.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -17,6 +18,7 @@ namespace CommXML {
 	NAME,
 	INDEX,
 	VALUE,
+	SOUND
   };
 
   const EnumMap::Pair element_names[3] = {
@@ -24,16 +26,17 @@ namespace CommXML {
 	EnumMap::Pair ("Node", NODE),
 	EnumMap::Pair ("Edge", EDGE),
   };
-  const EnumMap::Pair attribute_names[4] = {
+  const EnumMap::Pair attribute_names[5] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
 	EnumMap::Pair ("Text", NAME), 
+	EnumMap::Pair ("Sound", SOUND), 
 	EnumMap::Pair ("Index", INDEX), 
 	EnumMap::Pair ("Relationship", VALUE), 
 };
 
 
   const EnumMap element_map(element_names, 3);
-  const EnumMap attribute_map(attribute_names, 4);
+  const EnumMap attribute_map(attribute_names, 5);
 
 }
 
@@ -50,6 +53,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
 	Names elem = (Names)element_map.lookup(name);
 	string nam;
 	float val;
+	int sound=-1;
 	switch(elem) {
 	case UNKNOWN:
 		unitlevel++;
@@ -67,12 +71,15 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
 					}
 				}}
 				break;
+			case SOUND:
+			  sound=AUDCreateSoundWAV((*iter).value,false);
+			  break;
 			case VALUE:
 				val=parse_float((*iter).value);
 				break;
 			}
 		}
-		nodes.push_back(Node(nam,val));
+		nodes.push_back(Node(nam,sound,val));
 		break;
 	case EDGE:
 		unitlevel++;

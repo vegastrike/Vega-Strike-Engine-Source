@@ -5,9 +5,10 @@ class FSM {
  public:
   struct Node {
     std::string message;
+    int sound;
     float messagedelta;
     vector <unsigned int> edges;
-    Node (const std::string &message, float messagedel): message(message),messagedelta(messagedel){}
+    Node (const std::string &message, int sound, float messagedel): message(message),sound(sound),messagedelta(messagedel){}
   };
   vector <Node> nodes;
   FSM (const char * filename);

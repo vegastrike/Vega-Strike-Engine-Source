@@ -3,21 +3,21 @@
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
   if (strlen(filename)==0) {
-    nodes.push_back (Node("welcome to cachunkcachunk.com",0));
-    nodes.push_back (Node("I love you!",.1));
-    nodes.push_back (Node("J00 0wnz m3",.08));
-    nodes.push_back (Node("You are cool!",.06));
-    nodes.push_back (Node("You are nice!",.05));
-    nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
-    nodes.push_back (Node("i 0wnz j00",-.08));
-    nodes.push_back (Node("I hate you!",-.1));
+    nodes.push_back (Node("welcome to cachunkcachunk.com",-1,0));
+    nodes.push_back (Node("I love you!",-1,.1));
+    nodes.push_back (Node("J00 0wnz m3",-1,.08));
+    nodes.push_back (Node("You are cool!",-1,.06));
+    nodes.push_back (Node("You are nice!",-1,.05));
+    nodes.push_back (Node("Ya you're naled! NALED PAL!",-1,-.02));
+    nodes.push_back (Node("i 0wnz j00",-1,-.08));
+    nodes.push_back (Node("I hate you!",-1,-.1));
 
-    nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
-    nodes.push_back (Node("No contraband detected: You may proceed.",0));
-    nodes.push_back (Node("Contraband detected! All units close and engage!",0));
-    nodes.push_back (Node("Your Course is deviating! Maintain Course!",0));
-    nodes.push_back (Node("Request Clearence To Land.",0));
-    nodes.push_back (Node("*hit*",-.2));
+    nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",-1,0));
+    nodes.push_back (Node("No contraband detected: You may proceed.",-1,0));
+    nodes.push_back (Node("Contraband detected! All units close and engage!",-1,0));
+    nodes.push_back (Node("Your Course is deviating! Maintain Course!",-1,0));
+    nodes.push_back (Node("Request Clearence To Land.",-1,0));
+    nodes.push_back (Node("*hit*",-1,-.2));
     vector <unsigned int> edges;
     unsigned int i;
     for (i=0;i<nodes.size()-6;i++) {

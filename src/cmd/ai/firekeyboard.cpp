@@ -7,6 +7,7 @@
 #include "communication.h"
 #include "gfx/cockpit.h"
 #include "gfx/animation.h"
+#include "audiolib.h"
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
   refresh_target=true;
@@ -363,6 +364,7 @@ using std::list;
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
+  AUDStartPlaying(c.getCurrentState()->sound);
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
@@ -490,15 +492,18 @@ void FireKeyboard::Execute () {
       Unit * targ=parent->Target();
       if (targ) {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       
+
 	if (mymsg==NULL) {
 	  CommunicationMessage c(parent,targ,i,NULL);
 	  mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
+	  AUDStartPlaying(c.getCurrentState()->sound);
 	  targ->getAIState ()->Communicate (c);
 	}else {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL);
 	    mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
+	    AUDStartPlaying(c.getCurrentState()->sound);
 	    targ->getAIState ()->Communicate (c);
 	  }
 	}
