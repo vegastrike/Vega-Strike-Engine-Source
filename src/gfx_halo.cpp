@@ -68,7 +68,7 @@ void Halo::ProcessDrawQueue() {
   GFXDisable (CULLFACE);//don't want lighting on this baby
   GFXEnable (DEPTHWRITE);
   GFXPushBlendMode();
-  GFXBlendMode(ONE,ONE);
+  GFXBlendMode(ONE,ZERO);
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);

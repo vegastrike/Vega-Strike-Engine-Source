@@ -96,7 +96,7 @@ void StarSystem::Draw() {
   delete iter;
   GFXDisable(LIGHTING);
   Mesh::ProcessUndrawnMeshes();
-  Halo::ProcessDrawQueue();
+  //  Halo::ProcessDrawQueue();
   systemInputDFA->Draw();
 }
 

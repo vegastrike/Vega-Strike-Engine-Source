@@ -23,6 +23,7 @@
 #include "gfx_mesh.h"
 #include "cmd_navigation_orders.h"
 #include "cmd_beam.h"
+#include  "gfx_halo.h"
 #include "gfx_transform_matrix.h"
 #include "in_ai.h"
 using namespace std;
@@ -587,8 +588,9 @@ void main_loop() {
   static float time=0;
   //  DABEAM->Draw(identity_transformation,identity_matrix);
   DABEAM->Draw (identity_transformation,identity_matrix);
+  Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
-  
+
   //textplane->Draw();
   _GFX->EndDraw();
       
