@@ -1,0 +1,1 @@
+MiningBase2/ MiningBase3/ MiningBase1 ConfedHq/ station/ Refinery/ drydock/
