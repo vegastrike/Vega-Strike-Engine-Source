@@ -22,7 +22,7 @@
 
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
-//#define _G_ALL		// Enable everything except _G_DEBUG
+#define _G_ALL		// Enable everything except _G_DEBUG
 
 //#define _G_DEBUG		// Debug Messaging
 //#define _G_ERROR		// Error Messaging (internal and external)
@@ -56,10 +56,6 @@
 #endif    // _G_ALL
 
 #define SEPERATOR '/'
-
-#if defined WIN32 || defined _WIN32 || defined __CYGWIN__
-#define SEPERATOR '\\'
-#endif    // WIN32 || _WIN32 || __CYGWIN__
 
 #ifdef _G_GLIB
 #include <glib.h>

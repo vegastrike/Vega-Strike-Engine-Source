@@ -19,7 +19,10 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
-
+#include <direct.h>
+#include <string>
+#include <vector>
+using namespace std;
 #ifdef _G_RANDOM
 int RANDOMIZED = 0;
 #endif    // _G_RANDOM
@@ -111,8 +114,11 @@ char *pre_chomp(char *line) {
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
 	int length, dif, calc;
-	char chr_new[LENGTH], current[LENGTH];
 	char *ptr_new, *location;
+
+	char *chr_new,*current;
+	chr_new = (char *) malloc (sizeof (char)*LENGTH);
+	current = (char *) malloc (sizeof (char)*LENGTH);
 	calc = strlen(line) - strlen(search) + strlen(replace);
 	if (calc > LENGTH) { return line; }
 	length = strlen(line);
@@ -120,7 +126,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	while ((location = strstr(current, search)) > 0) {
 		chr_new[0] = '\0';
 		calc = strlen(current) - strlen(search) + strlen(replace);
-		if (calc > LENGTH) { strcpy(line, current); return line; }
+		if (calc > LENGTH) { strcpy(line, current); free(current); free(chr_new); return line; }
 		dif = location - current;
 		strncat(chr_new, current, dif);
 		strncat(chr_new, replace, strlen(replace));
@@ -129,8 +135,11 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 		strcpy(current, chr_new); 
 	}
 	strcpy(line, current);
+	free(chr_new);
+	free(current);
 	return line;
 }
+
 
 char *strmov(char *to, char *from) {
 	char *end;
@@ -280,7 +289,7 @@ double pwer(double start, long end) {
 void btoa(char *dest, char *string) {
 	int max, cur, pos, new_val;
 	char *ptr_char, cur_char[1];
-	char new_string[strlen(string)+1];
+	char *new_string= (char *)malloc(strlen(string)+1);
 	max = 7;
 	cur = 7;
 	pos = 0;
@@ -295,6 +304,7 @@ void btoa(char *dest, char *string) {
 	}
 	new_string[pos] = '\0';
 	strcpy(dest, new_string);
+	free (new_string);
 	return;
 }
 
@@ -414,6 +424,25 @@ char *xml_chomp_comment(char *string) {
 // Please note: These functions have not been tested with C, only with C++
 // Reminder: Add an error control function for glob()
 
+
+int isdir (const char * file) {
+	int tmp = strlen(file);
+	if (tmp==0) return -1;
+	if (file[tmp-1]=='.') {
+		if (tmp==1)
+			return -1;
+		if (file[tmp-2]=='.'||file[tmp-2]=='/'||file[tmp-2]=='\\')
+			return -1;
+	}
+	
+	if (-1==chdir ((string(file)+"/").c_str())) {
+		return 0;
+	}else {
+		chdir ("..");
+		return 1;
+	}
+}
+
 glob_t *FindFiles(char *path, char *extension) {
 	glob_t *FILES;
 	char *pattern;
@@ -429,7 +458,30 @@ glob_t *FindFiles(char *path, char *extension) {
 
 	sprintf(pattern, "%s%s", path, extension);
 
-	glob(pattern, GLOB_MARK, NULL, FILES);
+	//glob(pattern, GLOB_MARK, NULL, FILES);
+	string mypath(path);
+	char thispath[800000];
+	getcwd (thispath,790000);
+	chdir (path);
+	DIR * dir=opendir(".");
+	chdir (thispath);
+	vector <string> result;
+	if (dir) {
+		dirent *blah;
+		while (blah=readdir(dir)) {	
+			if (0==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
+				result.push_back (mypath+blah->d_name);
+			}
+			chdir (thispath);
+		}
+		closedir (dir);
+	}
+	FILES->gl_pathc=result.size();
+	FILES->gl_pathv=new char*[result.size()];
+	for (int i=0;i<result.size();i++) {
+		FILES->gl_pathv[i]=new char [result[i].size()+1];
+		strcpy(FILES->gl_pathv[i],result[i].c_str());
+	}
 	return FILES;
 }
 
@@ -447,7 +499,31 @@ glob_t *FindDirs(char *path) {
 #endif    // __cplusplus
 
 	sprintf(pattern, "%s*", path);
-	glob(pattern, GLOB_MARK, NULL, DIRS);
+
+	//glob(pattern, GLOB_MARK, NULL, DIRS);
+	char thispath[800000];
+	getcwd (thispath,790000);
+	chdir(path);
+	string mypath(path);
+	DIR * dir=opendir(".");
+	chdir (thispath);
+	vector <string> result;
+	if (dir) {
+		dirent *blah;
+		while (blah=readdir(dir)) {	
+			if (1==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
+				result.push_back (mypath+blah->d_name+"/");
+				chdir (thispath);
+			}
+		}
+		closedir (dir);
+	}
+	DIRS->gl_pathc=result.size();
+	DIRS->gl_pathv=new char*[result.size()];
+	for (int i=0;i<result.size();i++) {
+		DIRS->gl_pathv[i]=new char [result[i].size()+1];
+		strcpy(DIRS->gl_pathv[i],result[i].c_str());
+	}
 	return DIRS;
 }
 

@@ -23,10 +23,11 @@
 #include "easydom.h"
 #include "general.h"
 #include "glob.h"
-#include <vector.h>
+#include <vector>
 #include <list.h>
 #include <string.h>
-
+#include <string>
+using namespace std;
 void FindMissions(char *path);
 void LoadMission(char *filename);
 void ScanNode (string *parent, easyDomNode *node);

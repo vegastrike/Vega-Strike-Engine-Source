@@ -16,7 +16,7 @@
  **************************************************************************/
 
 #include "central.h"
-
+#include <direct.h>
 glob_t *MISSIONS;
 struct mission_data DATA;
 
@@ -38,5 +38,14 @@ char *Start(int run_vegastrike) {
 void RunMission(void) {
 	if (DATA.path[0] == '\0') { cout << "No mission selected\n"; return; }
 	cout << "Starting " << MISSION_PROGRAM << " with mission " << DATA.path << endl;
+#ifdef _WIN32
+	char * execname = new char [strlen(DATA.path)+strlen (MISSION_PROGRAM)+200];
+	char mypath[8000];
+	getcwd (mypath,7999);
+	sprintf (execname,"vegast~1 %s",DATA.path);
+	system (execname);
+	delete [] execname;
+#else
 	execlp("./vegastrike", "./vegastrike", DATA.path, NULL);
+#endif
 }

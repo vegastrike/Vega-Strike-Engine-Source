@@ -25,7 +25,7 @@ void InitGraphics(void) {
 	GtkWidget *label;
 
 	/* Create a new GTK window */
-	snprintf(title, 1024, "Mission Selector - %s - Version %s", MISSION_PROGRAM, MISSION_VERSION);
+	sprintf(title, "Mission Selector - %s - Version %s", MISSION_PROGRAM, MISSION_VERSION);
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(window), 600, 400);
 	gtk_window_set_title(GTK_WINDOW(window), title);
@@ -41,7 +41,7 @@ void InitGraphics(void) {
 	gtk_container_add(GTK_CONTAINER(window), main_vbox);
 
 	/* A label with the program name at the top */
-	snprintf(title, 1024, "%s Mission Selector %s", MISSION_PROGRAM, MISSION_VERSION);
+	sprintf(title,  "%s Mission Selector %s", MISSION_PROGRAM, MISSION_VERSION);
 	label = gtk_label_new(title);
 	gtk_container_add(GTK_CONTAINER(main_vbox), label);
 	gtk_widget_show(label);
