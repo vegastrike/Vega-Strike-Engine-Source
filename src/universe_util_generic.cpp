@@ -137,7 +137,7 @@ namespace UniverseUtil {
 		return scratch_unit.GetUnit();
 	}
         void setScratchUnit (Unit * un) {
-		return scratch_unit.SetUnit(un);
+		scratch_unit.SetUnit(un);
 	}
 
 	QVector getScratchVector () {
