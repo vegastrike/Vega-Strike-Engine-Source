@@ -10,6 +10,7 @@
 #include "gfx/sphere.h"
 #include "gfx/bsp.h"
 #include "gfx/sprite.h"
+#include "audiolib.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -92,6 +93,7 @@ namespace UnitXML {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
+    EnumMap::Pair ("Sound", SOUND),
     EnumMap::Pair ("MeshFile", MESHFILE),
     EnumMap::Pair ("ShieldMesh",SHIELDMESH),
     EnumMap::Pair ("BspMesh",BSPMESH),
@@ -111,8 +113,7 @@ namespace UnitXML {
     EnumMap::Pair ("Yaw", YAW),
     EnumMap::Pair ("Pitch", PITCH),
     EnumMap::Pair ("Roll", ROLL),
-    EnumMap::Pair ("Mount", MOUNT),
-    EnumMap::Pair ("Sound",SOUND)
+    EnumMap::Pair ("Mount", MOUNT)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -158,8 +159,8 @@ namespace UnitXML {
     EnumMap::Pair ("tightness",SHIELDTIGHT),
     EnumMap::Pair ("itts",ITTS),
     EnumMap::Pair ("ammo", AMMO),
-    EnumMap::Pair ("engine",ENGINE),
-    EnumMap::Pair ("HudImage",HUDIMAGE)
+    EnumMap::Pair ("HudImage",HUDIMAGE),
+    EnumMap::Pair ("Engine",ENGINE)
 };
 
   const EnumMap element_map(element_names, 24);
@@ -408,13 +409,50 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-      case ENGINE:
-	enginesound = AUDCreateSound((*iter).value.c_str(),true);
+	case ENGINE:
+	  enginesound = AUDCreateSound ((*iter).name,true);
+	  break;
+      }
+    }
+    break;    
+  case ARMOR:
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case FRONT:
+	armor.front = CLAMP_SHORT(parse_float((*iter).value));
+	break;
+      case BACK:
+	armor.back= CLAMP_SHORT(parse_float((*iter).value));
+	break;
+      case LEFT:
+	armor.left= CLAMP_SHORT(parse_float((*iter).value));
+	break;
+      case RIGHT:
+	armor.right= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       }
-    }    
+    }
+
+ 
     break;
-  case ARMOR:
+  case SHIELDS:
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case FRONT:
+	fbrltb[0] = parse_float((*iter).value);
+	shield.number++;
+	break;
+      case BACK:
+	fbrltb[1]=parse_float((*iter).value);
+	shield.number++;
+	break;
+      case LEFT:
+	fbrltb[3]=parse_float((*iter).value);
+	shield.number++;
 	break;
       case RIGHT:
 	fbrltb[2]=parse_float((*iter).value);

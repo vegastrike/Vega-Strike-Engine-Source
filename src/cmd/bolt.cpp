@@ -47,7 +47,6 @@ inline void BlendTrans (float * drawmat, const Vector & cur_position, const Vect
     
 }
 void Bolt::Cleanup() {
-  AUDDeleteSound(sound);
   unsigned int i;
   if (boltmesh)
     delete boltmesh;
@@ -163,7 +162,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
     }
     balls[decal].push_back (this);
   }
-  AUDPlayOnce (typ.sound,sound,cur_position,shipspeed+speed*Vector (drawmat[8],drawmat[9],drawmat[10]));
+  AUDPlayOnce (typ.sound,cur_position,shipspeed+speed*Vector (drawmat[8],drawmat[9],drawmat[10]));
 }
 
 bool Bolt::Update () {
