@@ -352,8 +352,8 @@ void LoadWeapons(const char *filename) {
 }
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
   int i;
-  char tmp[51];
-  for (i=0;i<50&&str[i]!='\0';i++) {
+  char tmp[384];
+  for (i=0;i<383&&str[i]!='\0';i++) {
     tmp[i]=(char)toupper(str[i]);
   }
   tmp[i]='\0';

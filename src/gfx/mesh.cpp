@@ -363,11 +363,14 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   }
 
   vlist->BeginDrawState();	
+  vector<MeshDrawContext> tmp_draw_queue;
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    if (c.mesh_seq!=whichdrawqueue)
+    if (c.mesh_seq!=whichdrawqueue) {
+      tmp_draw_queue.push_back (c);
       continue;
+    }
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
       GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
@@ -419,6 +422,10 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
   }
   vlist->EndDrawState();
+  while (tmp_draw_queue.size()) {
+    draw_queue->push_back (tmp_draw_queue.back());
+    tmp_draw_queue.pop_back();
+  }
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
 

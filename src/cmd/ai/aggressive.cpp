@@ -3,6 +3,9 @@
 #include "script.h"
 #include <list>
 #include <vector>
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
@@ -20,8 +23,10 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
 };
 const EnumMap AggressiveAIel_map(element_names, 12);
-
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,15), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+static float aggressivity=2.01;
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,2), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+  if (aggressivity==2.01)
+    aggressivity = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);

@@ -195,7 +195,7 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
   return false;
 }
 bool Unit::Mount::Fire (Unit * owner, bool Missile) {
-  if (status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
+  if (processed==FIRED||status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
     if (ref.gun==NULL) {
@@ -203,13 +203,14 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
 	ammo--;
       processed=FIRED;
       ref.gun = new Beam (LocalPosition,type,owner,sound);
-      
+      return true;
     } else {
       if (ref.gun->Ready()) {
 	if (ammo>0)
 	  ammo--;
 	processed=FIRED;
 	ref.gun->Init (LocalPosition,type,owner);
+	return true;
       } else 
 	return true;//can't fire an active beam
     }
@@ -219,9 +220,10 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
       if (ammo>0)
 	ammo--;
       processed=FIRED;	
+      return true;
     }
   }
-  return true;
+  return false;
 }
 Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM),sound(-1){
   ref.gun = NULL;

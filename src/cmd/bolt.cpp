@@ -19,6 +19,7 @@ namespace bolt_draw {
   static vector <Animation *> animations;
   static vector <vector <Bolt *> > bolts;
   static vector <vector <Bolt *> > balls;
+  static vector <int> cachedecals;
   static void CreateBoltMesh () {
     GFXVertex vtx[12];
     #define V(ii,xx,yy,zz,ss,tt) vtx[ii].x=xx;vtx[ii].y=yy;vtx[ii].z=zz;vtx[ii].i=0;vtx[ii].j=0;vtx[ii].k=1;vtx[ii].s=ss;vtx[ii].t=tt;
@@ -48,6 +49,10 @@ inline void BlendTrans (float * drawmat, const Vector & cur_position, const Vect
 }
 void Bolt::Cleanup() {
   unsigned int i;
+  for (i=0;i<cachedecals.size();i++) {
+    boltdecals.DelTexture (cachedecals[i]);
+  }
+  cachedecals.clear();
   if (boltmesh)
     delete boltmesh;
   boltmesh = NULL;
@@ -148,8 +153,10 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
       CreateBoltMesh();
     }
     decal = boltdecals.AddTexture (typ.file.c_str(),MIPMAP);
-    if (decal>=(int)bolts.size())
+    if (decal>=(int)bolts.size()) {
       bolts.push_back (vector <Bolt *>());
+      cachedecals.push_back (boltdecals.AddTexture (typ.file.c_str(),MIPMAP));
+    }
     bolts[decal].push_back (this);
   } else {
     ScaleMatrix (drawmat,Vector (typ.Radius,typ.Radius,typ.Radius));

@@ -53,7 +53,7 @@ bool FireAt::ShouldFire(Unit * targ) {
   if (targ==parent->Target()) {
     distance = dist;
   }
-  return (dist<.8*agg&&angle>1/agg);
+  return (dist<agg&&angle>1/agg);
 }
 
 

@@ -122,8 +122,10 @@ void gfx_light::dopickenables () {
   }
   oldtrav = oldpicked->begin();
   while (oldtrav!=oldpicked->end()) {
-    if (GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav))
+    if (GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav)) {
+      oldtrav++;
       continue;//don't clobber what's not yours
+    }
     GLLights[(*_llights)[(*oldtrav)].target].index = -1;
     GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLL::GL_ENABLED&OpenGLL::GLL_LOCAL);//set it to be desirable to kill
     oldtrav++;

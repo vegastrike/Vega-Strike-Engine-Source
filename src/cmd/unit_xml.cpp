@@ -726,7 +726,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	computer.max_speed=parse_float((*iter).value);
 	break;
       case AFTERBURNER:
-	computer.max_ab_speed+=parse_float((*iter).value);
+	computer.max_ab_speed=parse_float((*iter).value);
 	break;
       case YAW:
 	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);

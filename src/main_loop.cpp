@@ -434,9 +434,17 @@ void createObjects() {
 	} // for nr_ships
   } // end of for flightgroups
 
-  //  for (a=0;a<numf;a++) {
-  //      fighters[a]->Target (fighters[tmptarget[a]]);
-  //  }//now it just sets their faction :-D
+  for (int rr=0;rr<a;rr++) {
+    for (int k=0;k<a-1;k++) {
+      int j=rand()%a;
+      if (_Universe->GetRelation(tmptarget[rr],tmptarget[j])<0) {
+	fighters[rr]->Target (fighters[j]);
+	break;
+      }
+    }
+  }//now it just sets their faction :-D
+
+
   delete [] tmptarget;
 
  
