@@ -57,6 +57,7 @@ class Planet : public Unit {
   Vector TerrainUp;
   Vector TerrainH;
   bool inside;
+  bool atmospheric;//then users can go inside!
   float radius;
   float gravity;
   UnitCollection satellites;

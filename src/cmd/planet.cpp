@@ -157,13 +157,16 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
   BLENDFUNC blendSrc=SRCALPHA;
   BLENDFUNC blendDst=INVSRCALPHA;
+  atmospheric=true;
   if (!alpha) {
+    atmospheric=false;
     blendSrc=ONE;
     blendDst=ZERO;
   }else if (0==strcmp ("ONE ONE",alpha)) {
     blendSrc = ONE;
     blendDst = ONE;
     alpha = NULL;
+    
   }
   meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha,false,blendSrc,blendDst);
   meshdata[0]->setEnvMap(GFXFALSE);
@@ -385,7 +388,7 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
   }
   jumpReactToCollision(un);
   //screws with earth having an atmosphere... blahrgh
-  if (!terrain&&GetDestinations().empty()) {//no place to go and acts like a ship
+  if (!terrain&&GetDestinations().empty()&&!atmospheric) {//no place to go and acts like a ship
     Unit::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
 
