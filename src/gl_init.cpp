@@ -28,7 +28,7 @@
 
 #include "gl_init.h"
 #include "gfxlib.h"
-#define WINDOW_TITLE "Vega Strike " VERSION
+#define WINDOW_TITLE "Vega Strike "VERSION
 static int glutWindow;
 
 

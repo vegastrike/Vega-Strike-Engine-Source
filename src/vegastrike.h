@@ -84,7 +84,7 @@ extern "C"
 #include "alglib.h"
 #include "debug.h"
 #include "error_util.h"
-#define VERSION "0.0.3"
+
 #define PROG_NAME "vegastrike"
 
 /* Macros and include files for non-standard math routines */

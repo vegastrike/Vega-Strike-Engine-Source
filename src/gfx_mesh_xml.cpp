@@ -371,6 +371,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   vertexlist = new GFXVertex[xml->tris.size()+xml->quads.size()];
   minSizeX = minSizeY = minSizeZ = FLT_MAX;
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
+  radialSize = FLT_MAX;
   for(int a=0; a<xml->tris.size(); a++, index++) {
     minSizeX = min(vertexlist[index].x, minSizeX);
     maxSizeX = max(vertexlist[index].x, maxSizeX);
@@ -378,6 +379,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     maxSizeY = max(vertexlist[index].y, maxSizeY);
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    radialSize = max (sqrtf (vertexlist[index].x*vertexlist[index].x+vertexlist[index].y*vertexlist[index].y+vertexlist[index].z*vertexlist[index].z),radialSize);
     vertexlist[index] = xml->tris[a];
   }
   for(int a=0; a<xml->quads.size(); a++, index++) {
@@ -387,6 +389,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     maxSizeY = max(vertexlist[index].y, maxSizeY);
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    radialSize = max (sqrtf (vertexlist[index].x*vertexlist[index].x+vertexlist[index].y*vertexlist[index].y+vertexlist[index].z*vertexlist[index].z),radialSize);
     vertexlist[index] = xml->quads[a];
   }
   vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),
@@ -401,7 +404,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
 
   // Calculate bounding sphere
-  radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
+
 
   delete [] vertexlist;
   delete xml;
