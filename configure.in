@@ -119,9 +119,9 @@ i*86-*-*) TR_CFLAGS="$TR_CFLAGS $TR_FALIGN $USER_FLAGS";
 
 esac
 
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [TR_CFLAGS="$DEBUG_FLAGS -Wall "; TR_CXXFLAGS="-ggdb3 -Wall"])
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [TR_CFLAGS="$DEBUG_FLAGS -Wall "; TR_CXXFLAGS="$DEBUG_FLAGS -Wall"])
 
-AC_ARG_ENABLE(debug-rel, AC_HELP_STRING([--enable-debug-rel], [Produce an executable with debugging symbols and optimizations]), [TR_CFLAGS="-ggdb3 -O3 -Wall -ffast-math $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS -Wall -O3 -ffast-math $TR_ALIGN $USER_FLAGS"])
+AC_ARG_ENABLE(debug-rel, AC_HELP_STRING([--enable-debug-rel], [Produce an executable with debugging symbols and optimizations]), [TR_CFLAGS="$DEBUG_FLAGS -O3 -Wall -ffast-math $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS -Wall -O3 -ffast-math $TR_ALIGN $USER_FLAGS"])
 
  AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce a profiled executable]),  [TR_CFLAGS="$DEBUG_FLAGS -pg $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS  -pg $USER_FLAGS"])
 
