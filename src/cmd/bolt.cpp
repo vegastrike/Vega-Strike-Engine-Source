@@ -21,9 +21,9 @@ bolt_draw::~bolt_draw () {
     boltdecals->DelTexture (cachedecals[i]);
   }
   cachedecals.clear();
-  if (boltmesh)
-    delete boltmesh;
-  boltmesh = NULL;
+  //if (boltmesh)
+  //  delete boltmesh;
+  //boltmesh = NULL;
   for (i=0;i<animations.size();i++) {
     delete animations[i];
   }
