@@ -724,7 +724,8 @@ static float getAutoRSize (Unit * orig,Unit * un) {
   static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
   static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-  if (un->isUnit()==PLANETPTR) {
+  if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
+    //same flihgtgroup
     return orig->rSize();
   }
   float rel=_Universe->GetRelation(orig->faction,un->faction);
