@@ -158,7 +158,7 @@ Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
-  float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
+  float abfuelclamp= (fuel<=0||(energy<1+afterburnenergy*SIMULATION_ATOM))?staticabfuelclamp:1;
   float limit = afterburn?(abfuelclamp*(computer.max_ab_speed-computer.max_speed)+(fuelclamp*computer.max_speed)):fuelclamp*computer.max_speed;
   float tmp = velocity.Magnitude();
   if (tmp>fabs(limit)) {
