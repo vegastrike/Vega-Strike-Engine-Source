@@ -80,7 +80,7 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 	  sizeX = le32_to_cpu (info.biWidth);
 	  sizeY = le32_to_cpu(info.biHeight);
 
-	  if(le32_to_cpu(info.biBitCount) == 24)
+	  if(le16_to_cpu(info.biBitCount) == 24)
 	    {
 	      data = NULL;
 	      data= new unsigned char [3*sizeY*sizeX];
@@ -102,7 +102,7 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 		    }
 		}
 	    }
-	  else if(le32_to_cpu(info.biBitCount) == 8)
+	  else if(le16_to_cpu(info.biBitCount) == 8)
 	    {
 	      data = NULL;
 	      data= new unsigned char [sizeY*sizeX*3];
