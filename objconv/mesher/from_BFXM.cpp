@@ -7,12 +7,39 @@ string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA"
 
 void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
   int32bit intbuf;
+  char8bit bytebuf;
   int32bit word32index=0;
   union chunk32{
 	  int32bit i32val;
 	  float32bit f32val;
 	  char8bit c8val[4];
   } * inmemfile;
+  //CHECK MAGIC WORD
+  fseek(Inputfile,0,SEEK_SET);
+  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  if(bytebuf!='B'){
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  exit(-1);
+  }
+  fseek(Inputfile,1,SEEK_SET);
+  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  if(bytebuf!='F'){
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  exit(-1);
+  }
+  fseek(Inputfile,2,SEEK_SET);
+  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  if(bytebuf!='X'){
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  exit(-1);
+  }
+  fseek(Inputfile,3,SEEK_SET);
+  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  if(bytebuf!='M'){
+	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
+	  exit(-1);
+  }
+
   fseek(Inputfile,4+sizeof(int32bit),SEEK_SET);
   fread(&intbuf,sizeof(int32bit),1,Inputfile);//Length of Inputfile
   int32bit Inputlength=VSSwapHostIntToLittle(intbuf);
