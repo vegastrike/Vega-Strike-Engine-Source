@@ -287,7 +287,7 @@ void Python::init() {
 	InitBriefing ();
 	InitVS ();
 	fprintf (stderr,"testing VS random");
-	std::string changepath ("import sys\nprint sys.path\nimport vsrandom\nprint vsrandom.random()\nprint vsrandom.randrange(0,4)\nprint vsrandom.uniform (0,10)\nimport VS\nprint VS.timeofday()\nprint \"success!ADFG\"\n");
+	std::string changepath ("import sys\nprint sys.path\n");
 	fprintf (stderr,"running %s",changepath.c_str());
 	char * temppython = strdup(changepath.c_str());
 	PyRun_SimpleString(temppython);	
