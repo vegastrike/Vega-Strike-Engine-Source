@@ -98,6 +98,24 @@ void changehome (bool to, bool linuxhome=true) {
 #endif
 bool sende=true;
 std::string curmus;
+static int numloops (std::string file) {
+  int value=1;
+  std::string::size_type where;
+  if ((where=file.find_last_of("."))!=std::string::npos) {
+    file =file.substr(0,where);
+    if ((where=file.find_last_of("_"))!=std::string::npos) {
+      file=file.substr(where+1);
+      if (file.length()) {
+        if (file[0]=='i') {
+          return -1;
+        }else {
+          return atoi(file.c_str());
+        }
+      }
+    }
+  }
+  return value;
+}
 Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 #ifdef HAVE_SDL
 	Mix_Music *music=Mix_LoadMUS(file);
@@ -125,7 +143,7 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 		oldmusic=NULL;
 	}
 	sende=true;
-	if(Mix_FadeInMusic(music, 1, fadein)==-1) {
+	if(Mix_FadeInMusic(music, numloops(file), fadein)==-1) {
 	  fprintf(STD_OUT, "Mix_FadeInMusic: %s\n", Mix_GetError());
 	  return NULL;
 	}
