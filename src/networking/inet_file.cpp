@@ -51,7 +51,7 @@ int fNET_Recv (int socket, char * data, int bytestoread) {
     int retval=0;
     while (retval==0) {
         retval = read(socket,data,bytestoread);
-        if (!retval)micro_sleep(1000);
+        if (!retval)micro_sleep(50000);
     }
     return retval;
 }
@@ -64,7 +64,7 @@ bool fNET_Read (int socket, char *data, int bytestoread) {
 			return false;
 		}
 		bytes_read +=ret;
-                if (!ret) micro_sleep(1000);
+                if (!ret) micro_sleep(50000);
 	}
 	return true;
 }

@@ -55,7 +55,10 @@ struct Music {
     void SetVolume(float vol) {
         if (m) {
             F_API FSOUND_SetVolume(this->channel,(int)(vol*GetMaxVolume()));
-        }
+	    }
+    }
+    void SetMasterVolume(float vol) {
+    FSOUND_SetSFXMasterVolume((int) (vol*GetMaxVolume()));
     }
      */
     void Play(float fadeout, float fadein, Music &oldmusic){
@@ -91,6 +94,9 @@ struct Music {
         SetVolume(1);
         e_already_sent=false;
     }
+  void SetMasterVolume(float vol) {
+    FSOUND_SetSFXMasterVolume((int) (vol*GetMaxVolume()));
+  }
     void SetVolume(float vol) {
         if (m) {
             printf ("Setting %d to %d\n", this->channel, (int)(vol*GetMaxVolume()));
@@ -142,6 +148,9 @@ struct Music {
             Mix_VolumeMusic(vol*GetMaxVolume());
         }
     }
+  void SetMasterVolume(float vol) {
+    SetVolume(vol);
+  }
 }
 #ifdef _WIN32
 #include <direct.h>
@@ -406,7 +415,7 @@ int main(int argc, char **argv)
 				printf("%s",str.c_str());
 				volume=atof(str.c_str());
 				printf("\n[SETTING VOLUME TO %f]\n",volume);
-				music.SetVolume(volume);
+				music.SetMasterVolume(volume);
 			}
 			break;
 		case 't':
