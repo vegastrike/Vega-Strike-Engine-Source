@@ -445,7 +445,7 @@ Unit::~Unit()
 void Unit::Init()
 {
 	this->networked=0;
-	this->combat_mode=true;
+	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
 #endif
@@ -1117,10 +1117,12 @@ Vector Unit::ClampTorque (const Vector &amt1) {
   return Res;
 }
 float Unit::Computer::max_speed() const {
-  return max_combat_speed;
+  static float combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
+  return combat_mode?combat_mode_mult*max_combat_speed:max_combat_speed;
 }
 float Unit::Computer::max_ab_speed() const {
-  return max_combat_ab_speed;
+  static float combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
+  return combat_mode?combat_mode_mult*max_combat_ab_speed:max_combat_ab_speed;
 }
 void Unit::SwitchCombatFlightMode() {
   if (computer.combat_mode)
