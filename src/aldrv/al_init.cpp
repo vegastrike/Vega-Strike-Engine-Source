@@ -1,4 +1,5 @@
 #include "audiolib.h"
+#ifdef HAVE_AL
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
@@ -74,12 +75,13 @@ static void fixup_function_pointers(void) {
   */
 	return;
 }
+#endif
 ///I don't think we'll need to switch contexts or devices in vegastrike
 static ALCdevice *dev;
 static void *context_id;
 
 bool AUDInit () {
-
+#ifdef HAVE_AL
 	int attrlist[] = { ALC_FREQUENCY, 22050, 0 };
 
 	dev = alcOpenDevice( NULL );
@@ -97,10 +99,12 @@ bool AUDInit () {
 	alcMakeContextCurrent( context_id );
 
 	fixup_function_pointers();
+#endif
 }
 void AUDDestroy() {
+#ifdef HAVE_AL
   //Go through and delete all loaded wavs
   alcDestroyContext(context_id);
   alcCloseDevice( dev );
-
+#endif
 }
