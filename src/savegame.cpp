@@ -670,7 +670,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
 	outputsavegame=filename;
 	VSFile f;
-	VSError err;
+	VSError err=FileNotFound;
 	if( read)
 	{
 		if (filename.length()>0) {
