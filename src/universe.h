@@ -94,6 +94,8 @@ private:
 		Faction(); //constructor
 		~Faction(); //destructor
 	};
+	///Many C++ implementations count classes within as friends. (not all)
+	friend class Faction;
 	///A list of all factions 
 	vector <Faction *> factions; //the factions
 
