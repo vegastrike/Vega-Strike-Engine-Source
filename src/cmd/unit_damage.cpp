@@ -286,16 +286,16 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 			limits.retro*=dam;
 		} else if (randnum>=.3275) {
 			computer.radar.maxcone+=(1-dam);
-			if (computer.radar.maxcone>.99)
-				computer.radar.maxcone=.99;
+			if (computer.radar.maxcone>.9)
+				computer.radar.maxcone=.9;
 		}else if (randnum>=.325) {
 			computer.radar.lockcone+=(1-dam);
-			if (computer.radar.lockcone>.99)
-				computer.radar.lockcone=.99;
+			if (computer.radar.lockcone>.95)
+				computer.radar.lockcone=.95;
 		} else if (randnum>=.25) {
-			computer.radar.mintargetsize+=(rSize()/2);
-			if (computer.radar.mintargetsize>rSize())
-				computer.radar.mintargetsize=rSize();
+			computer.radar.trackingcone+=(1-dam);
+			if (computer.radar.trackingcone>.98)
+				computer.radar.trackingcone=.98;
 		} else if (randnum>=.175) {
 			computer.radar.maxrange*=dam;
 		} else {
