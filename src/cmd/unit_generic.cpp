@@ -4436,7 +4436,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   if (numave)
     percentage=percentage/numave;
-  if (touchme&&up->mass&&numave) {
+  if (0&&touchme&&up->mass&&numave) {
     float multiplyer =((downgrade)?-1:1);
     mass +=multiplyer*percentage*up->mass;
     if (mass<(templ?templ->mass:.000000001))
