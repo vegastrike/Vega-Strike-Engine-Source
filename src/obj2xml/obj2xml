@@ -22,7 +22,10 @@ exit;
 $inputfile = $ARGV[0];
 $scale = $ARGV[1] if (@ARGV > 1);
 $inputfile =~ /(.*)\.obj/ or die "Bad extension on $inputfile";
-$unitoutfile = ($basename = $1) . ".xunit";
+$basename = $1;
+$basename = `basename $basename`;
+chomp $basename;
+$unitoutfile =  $basename . ".xunit";
 open(INPUT, "<$inputfile") or die "Could not open $inputfile";
 open(UNITOUTPUT, ">$unitoutfile") or die "Could not create $unitoutfile";
 
