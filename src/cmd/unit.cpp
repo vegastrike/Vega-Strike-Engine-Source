@@ -330,7 +330,11 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	vsresetdir();
 
 }
-
+void Unit::RemoveFromSystem() {
+  if (CollideInfo.object.u)
+    KillCollideTable (&CollideInfo);
+  CollideInfo.object.u=NULL;
+}
 Unit::~Unit()
 {
   if (sound->engine!=-1) {
@@ -358,8 +362,7 @@ Unit::~Unit()
     delete image->hudImage;
   delete image;
   delete sound;
-  if (CollideInfo.object.u)
-    KillCollideTable (&CollideInfo);
+  RemoveFromSystem()
   if (bspTree)
     delete bspTree;
   if (bspShield)

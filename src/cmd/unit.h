@@ -396,6 +396,8 @@ public:
   virtual void Kill();
   ///Is dead yet?
   inline bool Killed() const {return killed;}
+  ///Takes out of the collide table for this system.
+  void RemoveFromSystem ();
   ///Low level list function to reference the unit as being the target of a UnitContainer or Colleciton
   inline void Ref() {ucref++;}
   ///Releases the unit from this reference of UnitContainer or Collection

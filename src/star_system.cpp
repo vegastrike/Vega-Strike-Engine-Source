@@ -256,10 +256,11 @@ void StarSystem::SwapIn () {
   delete iter;  
   unsigned int i;
   for (i=0;i<terrains.size();i++) {
-    terrains[i]->EnableDraw();
+    //gotta push this shit somehow
+    //terrains[i]->EnableDraw();
   }
   for (i=0;i<contterrains.size();i++) {
-    contterrains[i]->EnableDraw();
+    //contterrains[i]->EnableDraw();
   }
 }
 
@@ -275,10 +276,10 @@ void StarSystem::SwapOut () {
   delete iter;
   unsigned int i;
   for (i=0;i<terrains.size();i++) {
-    terrains[i]->DisableDraw();
+    //terrains[i]->DisableDraw();
   }
   for (i=0;i<contterrains.size();i++) {
-    contterrains[i]->DisableDraw();
+    //contterrains[i]->DisableDraw();
   }
 
 }
@@ -433,8 +434,10 @@ void StarSystem::ProcessPendingJumps() {
     if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
       pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
       if (pendingjump[kk].un==fighters[0]) {
+	_Universe->activeStarSystem()->SwapOut();
 	_Universe->popActiveStarSystem();
 	_Universe->pushActiveStarSystem(pendingjump[kk].dest);
+	pendingjump[kk].dest->SwapIn();
       }
     }
   }
