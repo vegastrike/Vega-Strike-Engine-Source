@@ -272,6 +272,9 @@ Planet::Planet()
   //Init();
   terraintrans = NULL;
   atmospheric = false;
+  // Force shields to 0
+  memset(&(this->shield),0,sizeof(Unit::shield));
+  this->shield.number=2;
 }
 
 void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
@@ -339,13 +342,16 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
     lights.push_back (l);
   }
   // Force shields to 0
+  /*
   this->shield.number=2;
   this->shield.recharge=0;
   this->shield.shield2fb.frontmax=0;
   this->shield.shield2fb.backmax=0;
   this->shield.shield2fb.front=0;
   this->shield.shield2fb.back=0;
-
+*/
+  memset(&(this->shield),0,sizeof(Unit::shield));
+  this->shield.number=2;
 }
 
 extern std::map<std::string,std::string> readPlanetTypes(std::string filename);
