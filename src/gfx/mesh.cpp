@@ -187,7 +187,7 @@ Mesh * Mesh::getLOD (float lod) {
     return this;
   Mesh * retval =&orig[0];
   if (framespersecond>.0000001) {
-	  return &orig[(int)floor(fmod (getNewTime()/framespersecond,numlods))];
+	  return &orig[(int)floor(fmod (getNewTime()*framespersecond,numlods))];
   }else {
 	  for (int i=1;i<numlods;i++) {
 		  if (lod<orig[i].lodsize) {
