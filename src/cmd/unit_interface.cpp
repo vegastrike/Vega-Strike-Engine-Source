@@ -417,6 +417,8 @@ public:
 	    temp = "Industrial World";
 	  }else if (temp=="university") {
 	    temp = "University Planet";
+	  }else if (temp=="Snow") {
+	    temp = "Ice Colony"
 	  }else if (temp=="carribean") {
 	    temp="Pleasure Planet";
 	  }
