@@ -24,6 +24,7 @@ std::string sharedsounds;
 std::string sharedmeshes;
 std::string datadir;
 std::vector <std::string> curdir;//current dir starting from datadir
+std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
 void changehome(bool makehomedir) {
 #ifndef _WIN32
   struct passwd *pwent;
@@ -179,10 +180,15 @@ void vschdir (const char *path) {
 void vssetdir (const char * path) {
   getcwd (pwd,8191);
   savedpwd.push_back (string (pwd));
+  savedcurdir.push_back (curdir);
+  curdir.clear();
+  curdir.push_back (path);
   chdir (path);
 }
 void vsresetdir () {
   chdir (savedpwd.back().c_str());
+  curdir = savedcurdir.back();
+  savedcurdir.pop_back();
   savedpwd.pop_back();
 }
 
