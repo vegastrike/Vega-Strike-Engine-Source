@@ -58,6 +58,18 @@ struct quad{
 	float t[4]; //V
 };
 
+struct stripelement{
+	int indexref;
+	float s;
+	float t;
+};
+
+struct strip{
+	bool flatshade;
+	vector <stripelement> points;
+};
+
+
 enum polytype{ 
 	LINE,
 	TRIANGLE,
@@ -194,10 +206,10 @@ struct XML {
     vector<quad> quads;
 
 	//FIXME - strips not currently supported
-    vector <vector<GFXVertex> > linestrips;
-    vector <vector<GFXVertex> > tristrips;
-    vector <vector<GFXVertex> > trifans;
-    vector <vector<GFXVertex> > quadstrips;
+    vector <strip> linestrips;
+    vector <strip> tristrips;
+    vector <strip> trifans;
+    vector <strip> quadstrips;
 	//END FIXME
 
 	//FIXME - Logos not currently supported
@@ -205,9 +217,8 @@ struct XML {
 	//End FIXME
 
 	vec3f detailplane;
-	//FIXME - currently do not support multiple detail planes
 	vector <vec3f> detailplanes;
-	//End FIXME
+	
 
 	bool sharevert;
     bool usenormals;
@@ -232,6 +243,8 @@ struct XML {
 	line linetemp;
 	triangle triangletemp;
 	quad quadtemp;
+	strip striptemp;
+	stripelement stripelementtemp;
 	GFXMaterial material;
     float scale;
 	XML(){ //FIXME make defaults appear here.
@@ -662,17 +675,31 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	  }
 	}
     break;
-  case XML::LINESTRIP: //FIXME
-    break;
-  case XML::TRISTRIP: //FIXME
-    break;
-  case XML::TRIFAN: //FIXME
-    break;
-  case XML::QUADSTRIP: //FIXME
-    break;
+  case XML::LINESTRIP: //FIXME?
+	memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+	xml->curpolytype=LINESTRIP;
+	xml->striptemp.flatshade=0;
+	break;
+  case XML::TRISTRIP: //FIXME?
+    memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+	xml->curpolytype=TRISTRIP;
+	xml->striptemp.flatshade=0;
+	break;
+  case XML::TRIFAN: //FIXME?
+    memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+	xml->curpolytype=TRIFAN;
+	xml->striptemp.flatshade=0;
+	break;
+  case XML::QUADSTRIP: //FIXME?
+    memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+	xml->curpolytype=QUADSTRIP;
+	xml->striptemp.flatshade=0;
+	break;
   case XML::VERTEX:
 	unsigned int index;
-    float s, t;
+    float s,t;
+	s=0;
+	t=0;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::POINT:
@@ -701,6 +728,15 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		xml->triangletemp.indexref[xml->curpolyindex]=index;
 		xml->triangletemp.s[xml->curpolyindex]=s;
 		xml->triangletemp.t[xml->curpolyindex]=t;
+		break;
+	case LINESTRIP:
+	case TRISTRIP:
+	case TRIFAN:
+	case QUADSTRIP:
+		xml->stripelementtemp.indexref=index;
+		xml->stripelementtemp.s=s;
+		xml->stripelementtemp.t=t;
+		xml->striptemp.points.push_back(xml->stripelementtemp);
 		break;
 	}
 	xml->curpolyindex+=1;	
@@ -740,13 +776,17 @@ void endElement(const string &name, XML * xml) {
   case XML::QUAD:
 	xml->quads.push_back (xml->quadtemp);
     break;
-  case XML::LINESTRIP://FIXME
+  case XML::LINESTRIP://FIXE?
+	xml->linestrips.push_back(xml->striptemp);
     break;
-  case XML::TRISTRIP://FIXME
+  case XML::TRISTRIP://FIXME?
+	xml->tristrips.push_back(xml->striptemp);
     break;
-  case XML::TRIFAN://FIXME
+  case XML::TRIFAN://FIXME?
+	xml->trifans.push_back(xml->striptemp);
     break;
-  case XML::QUADSTRIP://FIXME
+  case XML::QUADSTRIP://FIXME?
+	xml->quadstrips.push_back(xml->striptemp);
     break;
   case XML::POLYGONS:
     break;
@@ -827,7 +867,7 @@ int main (int argc, char** argv) {
   FILE * Outputfile=fopen(argv[2],"wb"); 
   unsigned int intbuf;
   float floatbuf;
-  int versionnumber=2;
+  int versionnumber=3;
   unsigned char bytebuf;
 
   //HEADER
@@ -965,6 +1005,70 @@ int main (int argc, char** argv) {
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].s[tmpcounter]);
 		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].t[tmpcounter]);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+	}
+  }
+  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of linestrips
+  for(int ls=0;ls<memfile.linestrips.size();ls++){
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points.size());
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current linestrip
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].flatshade);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<memfile.linestrips[ls].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points[tmpcounter].indexref);
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].s);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].t);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+	}
+  }
+  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of tristrips
+  for(int ts=0;ts<memfile.linestrips.size();ts++){
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points.size());
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current tristrip
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].flatshade);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<memfile.linestrips[ts].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points[tmpcounter].indexref);
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].s);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].t);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+	}
+  }
+  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of trifans
+  for(int tf=0;tf<memfile.linestrips.size();tf++){
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points.size());
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current trifan
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].flatshade);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<memfile.linestrips[tf].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points[tmpcounter].indexref);
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].s);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].t);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+	}
+  }
+  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of quadstrips
+  for(int qs=0;qs<memfile.linestrips.size();qs++){
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points.size());
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current quadstrip
+	intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].flatshade);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
+	for(int tmpcounter=0;tmpcounter<memfile.linestrips[qs].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points[tmpcounter].indexref);
+		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].s);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].t);
 		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }

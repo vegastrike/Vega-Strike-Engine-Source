@@ -1,4 +1,4 @@
-Format for version 0.02
+Format for version 0.03
 All data stored in little endian order except for Type String
 ---Header---
 Type String:'BFXM'
@@ -29,4 +29,28 @@ Number of Triangles: integer
 Number of Quads: integer
        for each Quad:
        <flatshade:integer,4 <index:integer,s:float,t:float>>
+Number of Linestrips:
+       for each:
+       Number of elements in current Linestrip: Integer
+       Flatshade: integer (always 0 actually... could optimize out)
+              for each element:
+	      <index:integer,s:float,t:float>
+Number of Tristrips:
+       for each:
+       Number of elements in current Tristrip: Integer
+       Flatshade: integer (always 0 actually... could optimize out)
+              for each element:
+	      <index:integer,s:float,t:float>
+Number of Trifans:
+       for each:
+       Number of elements in current Trifan: Integer
+       Flatshade: integer (always 0 actually... could optimize out)
+              for each element:
+	      <index:integer,s:float,t:float>
+Number of Quadstrips:
+       for each:
+       Number of elements in current Quadstrip: Integer
+       Flatshade: integer (always 0 actually... could optimize out)
+              for each element:
+	      <index:integer,s:float,t:float>
 ---End Geometry---
