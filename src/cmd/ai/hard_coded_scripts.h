@@ -16,6 +16,7 @@ CCScript MatchVelocity;
 CCScript VeerAway;
 CCScript VeerAwayITTS;
 CCScript VeerAndTurnAway;
+CCScript AfterburnVeerAndTurnAway;
 CCScript SheltonSlide;
 CCScript SkilledABSlide;
 CCScript Stop;
