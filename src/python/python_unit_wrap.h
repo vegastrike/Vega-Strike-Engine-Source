@@ -1,4 +1,8 @@
-
+#ifndef WHICH_UNIT_EXPORT_NUMBER
+#define WHICH_UNIT_EXPORT_NUMBER 0
+#endif
+#if ((WHICH_UNIT_EXPORT_NUMBER==3) || (WHICH_UNIT_EXPORT_NUMBER==2))
+#else
 ////////////////////////////AUTOMATIC WRAP//////
   WRAPPED2 (bool,AutoPilotTo,UnitWrapper,un,bool,ignore_friendlies,false)
   voidWRAPPED0(SetTurretAI)
@@ -37,7 +41,6 @@
 
   WRAPPED0(UnitWrapper, Threat,UnitWrapper())
   voidWRAPPED1( TargetTurret ,UnitWrapper,targ)
-  WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
   voidWRAPPED2( Threaten ,UnitWrapper,targ, float,danger)
   voidWRAPPED0( ResetThreatLevel)
   voidWRAPPED1( Fire,bool,Missile)
@@ -52,6 +55,9 @@
   WRAPPED0(float, GetHull,0)
   WRAPPED0(float, GetHullPercent,0)
   WRAPPED0(float, rSize ,0)
+#endif
+#if WHICH_UNIT_EXPORT_NUMBER==1 || WHICH_UNIT_EXPORT_NUMBER==3
+#else
   WRAPPED1(double, getMinDis,QVector,pnt,0)//for clicklist
   WRAPPED3(float, querySphere, QVector,start, QVector ,end, float ,my_unit_radius,0)
   WRAPPED3(int, queryBoundingBox,QVector,origin,Vector,direction, float, err,0)
@@ -87,6 +93,9 @@
   WRAPPED0(Vector,GetVelocity,Vector(0,0,0))
   voidWRAPPED1( SetVelocity ,Vector, v)
   voidWRAPPED1( SetAngularVelocity ,Vector, v)
+#endif
+#if WHICH_UNIT_EXPORT_NUMBER==1 || WHICH_UNIT_EXPORT_NUMBER==2
+#else
   WRAPPED0(float, GetMoment,0)
   WRAPPED0(float, GetMass,0)
   WRAPPED0(int,LockMissile,0)
@@ -102,38 +111,40 @@
   WRAPPED0(int,DockedOrDocking,0)
   WRAPPED0(int,GetNumMounts,0)
 
-  EXPORT_UTIL(JumpTo,false)
-  EXPORT_UTIL(getFactionName,'')
-  EXPORT_UTIL(getFactionIndex,0)
-  voidEXPORT_UTIL(setFactionName)
-  voidEXPORT_UTIL(setFactionIndex)
-  EXPORT_UTIL(getName,'')
-  EXPORT_UTIL(getFlightgroupName,'')
-  EXPORT_UTIL(getFgDirective,'')
-  EXPORT_UTIL(getFlightgroupLeader,Unit())
-  voidEXPORT_UTIL(addCredits)
-  voidEXPORT_UTIL(switchFg)
-  EXPORT_UTIL(getCredits,0)
-  EXPORT_UTIL(setFlightgroupLeader,false)
-  EXPORT_UTIL(setFgDirective,false)
-  EXPORT_UTIL(getFgSubnumber,-1)
-  EXPORT_UTIL(isSignificant,false)
-  voidEXPORT_UTIL(setSpeed)
-  EXPORT_UTIL(getECM,0)
-  voidEXPORT_UTIL(setECM)
-  EXPORT_UTIL(isSun,false)
-  EXPORT_UTIL(communicateTo,0)
-  EXPORT_UTIL(commAnimation,false)
-  EXPORT_UTIL(removeCargo,0)
-  EXPORT_UTIL(upgrade,0)
-  EXPORT_UTIL(addCargo,0)
-  EXPORT_UTIL(getDistance,0)
-  EXPORT_UTIL(incrementCargo,false)
-  EXPORT_UTIL(decrementCargo,false)
-  EXPORT_UTIL(getSignificantDistance,0)
-  EXPORT_UTIL(isPlayerStarship,-1)
-  EXPORT_UTIL(getUnitSystemFile,"")
-  EXPORT_UTIL(hasCargo,0)
-  EXPORT_UTIL(GetCargo,Cargo("","",1,1,1,1))
-  EXPORT_UTIL(GetCargoIndex,Cargo("","",1,1,1,1))
+	EXPORT_UTIL0(string,getFactionName)
+	EXPORT_UTIL0(int,getFactionIndex)
+	voidEXPORT_UTIL1(setFactionIndex,int,factionname)
+	voidEXPORT_UTIL1(setFactionName,string,factionname)
+	EXPORT_UTIL0(string,getName)
+    EXPORT_UTIL0(string,getFlightgroupName)
+	EXPORT_UTIL0(UnitWrapper,getFlightgroupLeader)
+	EXPORT_UTIL1(bool,setFlightgroupLeader,UnitWrapper,un)
+	EXPORT_UTIL0(string,getFgDirective)
+	EXPORT_UTIL1(bool,setFgDirective,string,inp)
+//	EXPORT_UTIL0(int,getFgSubnumber)
+	EXPORT_UTIL3(int,removeCargo,string,s, int,quantity, bool, erasezero)
+	EXPORT_UTIL5(float,upgrade,string,file,int,mountoffset,int, subunitoffset, bool, force,bool, loop_through_mounts)
+	EXPORT_UTIL1(int, addCargo, Cargo, carg)
+	EXPORT_UTIL2(bool, incrementCargo,float, percentagechange,int, quantity)
+	EXPORT_UTIL1(bool,decrementCargo,float, percentagechange)
+	EXPORT_UTIL1(float, getDistance,UnitWrapper, un)
+//	EXPORT_UTIL0(float, getPlanetRadiusPercent)
+	EXPORT_UTIL1(float, getSignificantDistance,UnitWrapper, sig)
+	EXPORT_UTIL1(int, hasCargo,std::string,mycarg)
+	EXPORT_UTIL1(Cargo, GetCargoIndex, int, index);
+	EXPORT_UTIL1(Cargo, GetCargo,std::string,cargname)
+	EXPORT_UTIL0(string,getUnitSystemFile)
+	EXPORT_UTIL0(float,getCredits)
+	voidEXPORT_UTIL1(addCredits,float,credits)
+	EXPORT_UTIL0(bool,isSignificant)
+	EXPORT_UTIL0(bool,isSun)
+	voidEXPORT_UTIL1(switchFg,string,arg)
+	EXPORT_UTIL2(int,communicateTo,UnitWrapper,other_unit,float,mood)
+	EXPORT_UTIL1(bool,commAnimation,string,anim)
+	EXPORT_UTIL1(bool,JumpTo,string,system)
+	EXPORT_UTIL0(int,isPlayerStarship )
+	voidEXPORT_UTIL1(setECM, short,NewECM)
+	EXPORT_UTIL0(short,getECM )
+	voidEXPORT_UTIL1(setSpeed, float,speed)
 
+#endif

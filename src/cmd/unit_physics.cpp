@@ -433,7 +433,7 @@ bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UnitUtil::getPlanetRadiusPercent()):autopilot_term_distance;
+	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
     if (percent>1) {
       end=start;

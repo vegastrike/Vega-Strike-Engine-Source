@@ -23,7 +23,6 @@ namespace UnitUtil {
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity);
 	bool decrementCargo(Unit *my_unit,float percentagechange);
 	float getDistance(Unit *my_unit,Unit *un);
-	float getPlanetRadiusPercent ();
 	float getSignificantDistance (Unit *un, Unit *sig);
 	int hasCargo (Unit * my_unit, std::string mycarg);
 	Cargo GetCargoIndex (Unit * my_unit, int index);

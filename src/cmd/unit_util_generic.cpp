@@ -201,17 +201,13 @@ namespace UnitUtil {
 	    return FLT_MAX;
 	  return (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
 	}
-	float getPlanetRadiusPercent () {
-		static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
-		return planet_rad_percent;
-	}
 	float getSignificantDistance (Unit *un, Unit *sig) {
 	  if (un==NULL||sig==NULL)
 	    return FLT_MAX;
 	  
 		float dist = getDistance (un,sig);
 		
-		float planetpct=getPlanetRadiusPercent();
+		float planetpct=UniverseUtil::getPlanetRadiusPercent();
 		if (sig->isPlanet ())
 			dist = dist - (sig->rSize()*planetpct);
 		if (un->isPlanet ())

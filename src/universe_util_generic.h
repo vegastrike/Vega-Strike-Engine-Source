@@ -89,6 +89,7 @@ namespace UniverseUtil {
 	void setOwner(int which,Unit *owner);
 ///this gets an owner of a completeness (NULL means all players can see this objective)
 	Unit* getOwner(int which);
+	float getPlanetRadiusPercent ();
 	//gets the owner of this mission
 	int getMissionOwner();
 	//sets the owner of this mission to be a particular cockpit

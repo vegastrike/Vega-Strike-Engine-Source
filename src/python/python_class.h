@@ -64,8 +64,8 @@ int main (int argc,char *argv[]) {
 */
 #define TO_PYTHON_SMART_POINTER(Pointer) \
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
-PyObject* to_python(class Pointer* x) {return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x);} \
-PyObject* to_python(const class Pointer* p) {return to_python(const_cast<class Pointer*>(p));} \
+inline PyObject* to_python(class Pointer* x) {return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x);} \
+inline PyObject* to_python(const class Pointer* p) {return to_python(const_cast<class Pointer*>(p));} \
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 //		return from_python(p,boost::python::type<SuperClass &>());
@@ -121,7 +121,7 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
 boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (myclass
 #define PYTHON_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) \
-,boost::python::no_init);
+);
 
 #define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
     boost::python::class_builder <CLASS> Class (myclass

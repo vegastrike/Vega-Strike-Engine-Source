@@ -108,6 +108,7 @@ namespace UniverseUtil {
 	void SetAutoStatus (int global_auto, int player_auto);
 	void LoadMission (string missionname);
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
+	float getPlanetRadiusPercent ();
 
 	void cacheAnimation (string anim);
 ///this function launches a wormhole or ajump point.
