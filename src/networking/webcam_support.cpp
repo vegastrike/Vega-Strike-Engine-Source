@@ -14,10 +14,14 @@ typedef int INT32;
 #include <iostream>
 #include "webcam_support.h"
 #include "lin_time.h"
+#include "vs_path.h"
 
 using std::cerr;
 using std::endl;
 using std::hex;
+
+extern bool cleanexit;
+#include "gldrv/winsys.h"
 
 #ifdef __APPLE__
 //#include <Quickdraw.h>
@@ -33,15 +37,16 @@ OSErr	ExhaustiveError(void)
 		iErr = -1;
 	return iErr;
 }
+#endif
 void	DoError( long error, char * message)
 {
 	if( error)
 	{
-		cerr<<"!!! ERROR : "<<message<<" - code : "<<hex<<error<<endl;
-		exit(1);
+		cerr<<"!!! ERROR : "<<message<<" - code : "<<error<<endl;
+		cleanexit = true;
+		winsys_exit(1);
 	}
 }
-#endif
 
 WebcamSupport::WebcamSupport()
 {
@@ -64,17 +69,9 @@ WebcamSupport::WebcamSupport()
 	GetGWorld( &savePort, &saveDevice);
 	
 	iErr = Gestalt( gestaltQuickTime, &qtVers);
-	if( iErr)
-	{
-		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
-		exit(1);
-	}
+	DoError( iErr, "initialising Quicktime");
 	iErr = EnterMovies();
-	if( iErr)
-	{
-		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
-		exit(1);
-	}
+	DoError( iErr, "initialising Quicktime part 2");
 	SetGWorld( savePort, saveDevice);
 
 	this->gQuicktimeInitialized = true;
@@ -103,17 +100,9 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 	GetGWorld( &savePort, &saveDevice);
 	
 	iErr = Gestalt( gestaltQuickTime, &qtVers);
-	if( iErr)
-	{
-		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
-		exit(1);
-	}
+	DoError( iErr, "initialising Quicktime");
 	iErr = EnterMovies();
-	if( iErr)
-	{
-		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
-		exit(1);
-	}
+	DoError( iErr, "initialising Quicktime part 2");
 	SetGWorld( savePort, saveDevice);
 
 	this->gQuicktimeInitialized = true;
@@ -178,178 +167,52 @@ int		WebcamSupport::Init()
 	r.right = video -> video_width;
 	r.bottom = video -> video_height;
 	iErr = NewGWorld(&video -> sg_world, this->depth, &r, NULL, NULL, 0);
-	if (iErr)
-	{
-		iErr = ExhaustiveError();
-		DoError(iErr, "NewGWorld failed.\rTrying giving me more memory or use a sensible video size");
-		exit(1);
-	}
+	DoError(iErr, "NewGWorld failed - Trying giving me more memory or use a sensible video size");
 	LockPixels( GetGWorldPixMap( video -> sg_world));
 
 	//	open default sequence grabber
 	video -> sg_component = OpenDefaultComponent('barg', 0);
 	if (!video -> sg_component)
-	{
-		iErr = ExhaustiveError();
 		DoError(iErr, "OpenDefaultComponent failed");
-		goto bail;
-	}
 	
 	//	initialise the sequence grabber
 	component_error = SGInitialize(video -> sg_component);
-	if (component_error)
-		{
-		DoError(component_error, "SGInitialize failed");
-		goto bail;
-		}
+	DoError(component_error, "SGInitialize failed");
 	
 	//	set the sequence grabber's grab area to our offscreen area
 	component_error = SGSetGWorld(video -> sg_component, video -> sg_world, NULL);
-	if (component_error)
-		{
-		DoError(component_error, "SGSetGWorld failed");
-		goto bail;
-		}
+	DoError(component_error, "SGSetGWorld failed");
 	
 	//	set output settings
 	component_error = SGSetDataOutput( video->sg_component, NULL, seqGrabToMemory | seqGrabDontMakeMovie);
-	if (component_error)
-		{
-		DoError(component_error, "SGSetDataOutput failed");
-		goto bail;
-		}
+	DoError(component_error, "SGSetDataOutput failed");
 
 	//	get a new sequence grabber channel
 	component_error = SGNewChannel(video -> sg_component, VideoMediaType, &video -> sg_channel);
-	if (component_error)
-		{
-		DoError(component_error, "SGNewChannel failed");
-		goto bail;
-		}
-	
-	//	set channel settings
-	/*
-	if (settings)
-		{
-		component_error = SGSetChannelSettings(video -> sg_component, video -> sg_channel, settings, 0);
-		if (component_error)
-		{
-				if (component_error != userCanceledErr)
-					DoError(component_error, "SGSetChannelSettings and SGSettingsDialog failed");
-				goto bail;
-		}
-	else
-	{
-			if (component_error != userCanceledErr)
-				DoError(component_error, "SGSettingsDialog failed");
-			goto bail;
-	}
-	*/
+	DoError(component_error, "SGNewChannel failed");
 	
 	//	set sequence grabber bounds
 	//component_error = SGSetChannelBounds(video -> sg_channel, &video -> sg_world -> portRect);
 	component_error = SGSetChannelBounds(video -> sg_channel, &r);
-	if (component_error)
-		{
-		DoError(component_error, "SGSetChannelBounds failed");
-		goto bail;
-		}
+	DoError(component_error, "SGSetChannelBounds failed");
 	
 	//	set sequence grabber usage
 	component_error = SGSetChannelUsage(video -> sg_channel, seqGrabRecord); // maybe seqGrabLowLatencyCapture ?
-	if (component_error)
-		{
-		DoError(component_error, "SGSetChannelUsage failed");
-		goto bail;
-		}
+	DoError(component_error, "SGSetChannelUsage failed");
 	
 	//	configure for JPEG capture
 	component_error = SGSetVideoCompressorType(video -> sg_channel, 'jpeg');
-	if (component_error)
-		{
-		DoError(component_error, "SGSetVideoCompressorType failed");
-		goto bail;
-		}
+	DoError(component_error, "SGSetVideoCompressorType failed");
 
 	// tell we won't render on screen
 	component_error = SGSetUseScreenBuffer(video -> sg_channel, false);
-	if (component_error)
-		{
-		DoError(component_error, "SGSetUseScreenBuffer failed");
-		goto bail;
-		}
+	DoError(component_error, "SGSetUseScreenBuffer failed");
 
 	// specify the framerate (not necessary now)
 	component_error = SGSetFrameRate(video -> sg_channel, this->fps);
-	if (component_error)
-		{
-		DoError(component_error, "SGSetUseScreenBuffer failed");
-		goto bail;
-		}
-
-	//	start the sequence grabber
-	/*
-	component_error = SGStartPreview(video -> sg_channel);
-	if (component_error)
-		{
-		DoError(component_error, "SGStartPreview failed");
-		goto bail;
-		}
-	*/
-
-	//	update preview window
-	/*
-	component_error = SGIdle(video -> sg_channel);
-	if (component_error)
-		{
-		DoError(component_error, "SGIdle failed");
-		goto bail;
-		}
-	*/
-	//	done it
-	iErr = noErr;
+	DoError(component_error, "SGSetUseScreenBuffer failed");
 
 	return 0;
-
-bail:
-	exit(1);
-
-/*
-	ComponentResult				myErr = noErr;
-	gSeqGrabber = OpenDefaultComponent(SeqGrabComponentType, 0);
-	if (gSeqGrabber == NULL) {
-		cerr<<"!!! ERROR : Opening default component !!!"<<endl
-		exit(1);
-	}
-	// initialize the sequence grabber
-	myErr = SGInitialize(gSeqGrabber);
-	if (myErr == noErr) {
-		// create a video channel
-		myErr = SGNewChannel(gSeqGrabber, VideoMediaType, &gVideoChannel);
-		if ((gVideoChannel != NULL) && (myErr == noErr)) {
-			Rect myrect;
-			myrect.width = this->width;
-			myrect.height = this->height;
-			myrect.top = myrect.left = 0;
-			myErr = SGSetChannelBounds(gVideoChannel, &myrect);
-			myErr = SGSetChannelUsage(gVideoChannel, seqGrabRecord);
-			if (myErr != noErr) {
-				SGDisposeChannel(gSeqGrabber, gVideoChannel);
-				gVideoChannel = NULL;
-			}
-		}
-		//
-		// create a sound channel
-		myErr = SGNewChannel(gSeqGrabber, SoundMediaType, &gSoundChannel);
-		if ((gSoundChannel != NULL) && (myErr == noErr)) {
-			Handle		myRates = NULL;
-			myErr = SGSetChannelUsage(gSoundChannel, seqGrabRecord);
-			*((long *)(*myRates) + 3) = Long2Fix(8000);	// add 22kHz 
-			if (myErr != noErr) {
-				SGDisposeChannel(gSeqGrabber, gSoundChannel);
-				gSoundChannel = NULL;
-			}
-*/
 #endif
 }
 
@@ -437,15 +300,10 @@ char *	WebcamSupport::CaptureImage()
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	// Open and empty the clipboard
 	if ( !OpenClipboard(NULL) )
-	{
-		cerr<<"!!! ERROR opening windows clipboard !!!"<<endl;
-		exit(1);
-	}
+		DoError( 0, "!!! ERROR opening windows clipboard !!!");
 	if ( !EmptyClipboard() )
-	{
-		cerr<<"!!! ERROR emptying the clipboard !!!"<<endl;
-		exit(1);
-	}
+		DoError( 0, "!!! ERROR emptying the clipboard !!!");
+
 	// Test to see supported clipboard formats
 	UINT format = 0;
 	bool t = false;
@@ -496,26 +354,38 @@ char *	WebcamSupport::CaptureImage()
 	ComponentResult		component_error = noErr;
 	component_error = SGIdle(video -> sg_channel);
 	if (component_error)
-		{
 		DoError(component_error, "SGIdle failed");
-		exit(1);
-		}
 	Ptr pixmap_base = GetPixBaseAddr( GetGWorldPixMap( video->sg_world));
+	if( pixmap_base==NULL)
+		DoError( -1, "PixMap is NULL");
 	// Writes the image to a test jpeg file
-	Rect r;
+	Rect r = (**GetGWorldPixMap( video->sg_world)).bounds;
+	/*
 	r.top = r.left = 0;
 	r.right = this->width;
 	r.bottom = this->height;
+	*/
 	Ptr	jpeg_data;
 	ImageDescriptionHandle desc;
 	OSErr iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
+	if (iErr!=noErr)
+		DoError( iErr, "CompressImage failed.");
 	FSSpec spec;
+	string path = datadir+"/testcam.jpg";
+	FSMakeFSSpec( 1, 0, path.c_str(), &spec);
 	short fp;
 	long nbwritten;
 	// Open for writing
 	iErr = FSpOpenDF( &spec, fsWrPerm, &fp);
+	if (iErr)
+		DoError( iErr, "FSpOpenDF failed.");
+	iErr = FSpOpenRF( &spec, fsWrPerm, &fp);
+	if (iErr)
+		DoError( iErr, "FSpOpenRF failed.");
 	// Write the jpeg data
 	iErr = FSWrite( fp, &nbwritten, jpeg_data);
+	if (iErr)
+		DoError( iErr, "FSWrite failed.");
 	// Close the file
 	FSClose( fp);
 	/*
@@ -523,14 +393,6 @@ char *	WebcamSupport::CaptureImage()
 	int y = GetGWorldPixMap( video->sg_world)->bounds.bottom;
 	int rowb = GetGWorldPixMap( video->sg_world)->rowBytes;
 	cerr<<"\t\tCaptured "<<x<<"x"<<y<<" size with "<<hex<<rowb<<" row bytes"<<endl;
-	*/
-	/*
-	component_error = SGUpdate(video -> sg_component, ??????? );
-	if (component_error)
-		{
-		DoError(component_error, "SGIdle failed");
-		exit(1);
-		}
 	*/
 	return NULL;
 #endif
@@ -924,3 +786,4 @@ RGBQUAD QuadFromWord(WORD b16)
 }
 
 #endif
+

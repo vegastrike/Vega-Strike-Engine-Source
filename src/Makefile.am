@@ -44,8 +44,8 @@ cmd/libcmd.a 						\
 cmd/base_init.o 					\
 python/libpython.a 					\
 gfx/libgfx.a 						\
-cmd/ai/libai.a 						\
 gldrv/libgldrv.a 					\
+cmd/ai/libai.a 						\
 gui/libgui.a 						\
 networking/libnet.a 				\
 cmd/collide/libcollide.a 			\

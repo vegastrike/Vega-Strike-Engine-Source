@@ -154,6 +154,7 @@ void FlyByKeyboard::Execute () {
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
   if(SSCK.killcomm) {
+	printf( "Stopping a NETCOMM\n\n");
     parent->StopNetworkComm( g().comm_freq);
 	SSCK.killcomm=false;
   }
@@ -162,10 +163,13 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     parent->StartNetworkComm( g().comm_freq);
 	SSCK.commchanged=false;
   }
+  /*
   if(!SSCK.startcomm && SSCK.commchanged) {
+	printf( "Stopping a NETCOMM\n\n");
     parent->StopNetworkComm( g().comm_freq);
 	SSCK.commchanged=false;
   }
+  */
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());
@@ -387,7 +391,10 @@ if(Network!=NULL)
   case DOWN:
 	printf( "Pressed NETCOMM key !!!\n");
 	if(g().startcomm==true)
+	{
 		g().startcomm=false;
+		g().killcomm = true;
+	}
 	else
 		g().startcomm=true;
 	g().commchanged=true;

@@ -101,7 +101,7 @@ void    AccountServer::start()
 
     while( keeprun)
     {
-        COUT << "Loop" << endl;
+        //COUT << "Loop" << endl;
         // Check for incoming connections
 
         _sock_set.wait( );
