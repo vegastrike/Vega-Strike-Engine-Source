@@ -843,7 +843,7 @@ int VDU::DrawVDUObjective (void * obj, int offset) {
 #endif
 
 void VDU::DrawVDUObjectives (Unit *parent) {
-  std::string rez;
+  std::string rez("\n");
   int offset = scrolloffset;
   for (unsigned int i=0;i<active_missions.size();++i){
     if (!active_missions[i]->objectives.empty()) {

@@ -269,8 +269,8 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdi
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
     //    VSFileSystem::vs_fprintf (stderr,"origmesh %x",origmesh);
-	for (unsigned int i=0;i<Decal.size()&& i < NUM_PASSES;++i) {
-		if (Decal[i]) {
+	for (unsigned int i=0;i<origmesh->Decal.size()&& i < NUM_PASSES;++i) {
+		if (origmesh->Decal[i]) {
 			undrawn_meshes[c.mesh_seq][i].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
 		}
 	}
