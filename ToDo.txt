@@ -1,27 +1,39 @@
 Goals for 0.4.2 release
+* Warp:
+** Rename warp to ... think of something cool
+** Warp energy use
+** Time Compression back for devels
 
-Warp:
-Rename warp to ... think of something cool
-Warp energy use
-Time Compression back for devels
+* Universe/system generation:
+** Fix systems to have jump points only outside the "slow-zone"
+** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 
-Universe/system generation:
-fix systems to have jump points only outside the "slow-zone"
-fix a bit of the system generation code: so we can specify everything in the milky_way.xml
+* Resource management/organization:
+** Make un-modded units appear in 1 big table, not dozens of xml files
 
-Resource management/organization:
-make un-modded units appear in 1 big table, not dozens of xml files
+* UI:
+** Add cargo pics
+** Warp vs. Auto graphic
 
-UI:
-Add cargo pics
-Warp vs. Auto graphic
 
 Goals for 'Sometime over the rainbow'
+* File loading: 
+** Load balance hash-table
+** Support full expressivity of BFXM animations
+** Fix excessive seeking in File-System
+** Install time generation of all BSP files
+** Per-System (versus strict per need) ship loading optimization
 
-Load balance hash-table
-support full expressivity of BFXM animations
-#Fix excessive seeking in File-System
-Complete Ships list.
-Complete histories.
-Install time generation of all BSP files
-Per-System (versus strict per need) ship loading optimization
+* Vega Strike universe information:
+** Complete Ships list.
+** Complete histories.
+
+* UI:
+** Merge BaseComputer modes with NavScreen?
+
+
+
+Emacs mode info:
+Local Variables:
+mode: outline
+End:
