@@ -10,6 +10,7 @@
 #include "gfx/animation.h"
 #include "unit_factory.h"
 #include <map>
+#include "hashtable.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -17,6 +18,21 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using std::sort;
 using std::map;
+static FSM * getFSM (const std::string & value) {
+  static Hashtable <std::string, FSM, char[16]> fsms;
+  FSM * fsm = fsms.Get (value);
+  if (fsm) {
+    return fsm;
+  }else {
+    if (value!="FREE_THIS_LOAD") {
+      FSM * retval= new FSM (value.c_str());
+      fsms.Put (value,retval);
+      return retval;
+    }
+  }
+  return NULL;
+}
+#if 0
 static FSM * getFSM (const std::string &value) {
   static map <const std::string, FSM *> fsms;
   map<const std::string,FSM*>::iterator i = fsms.find (value);
@@ -35,7 +51,7 @@ static FSM * getFSM (const std::string &value) {
     }
   }
 }
-
+#endif
 namespace FactionXML {
   enum Names {
 	UNKNOWN,
