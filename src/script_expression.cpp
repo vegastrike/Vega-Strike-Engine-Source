@@ -78,6 +78,7 @@ float Mission::doFMath(missionNode *node,int mode){
 	}
       }
     }
+    return res;
 }
 
 float Mission::checkFloatExpr(missionNode *node,int mode){
