@@ -155,12 +155,13 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     Matrix mat;
     tmp.to_matrix (mat);
     mat.p = Transform(mat,(type->offset+Vector(0,0,zscale)).Cast());
+	static bool firemissingautotrackers = XMLSupport::parse_bool (vs_config->getVariable("physics","fire_missing_autotrackers","true"));
     if (autotrack&&NULL!=target) {
 		if (!AdjustMatrix (mat,velocity,target,type->Speed,autotrack>=2,trackingcone)) {
-			return false;
+			if (!firemissingautotrackers)
+				return false;
 		}
     }else if (this->size&weapon_info::AUTOTRACKING) {
-		static bool firemissingautotrackers = XMLSupport::parse_bool (vs_config->getVariable("physics","fire_missing_autotrackers","true"));
 		if (!firemissingautotrackers)
 			return false;
 	}
