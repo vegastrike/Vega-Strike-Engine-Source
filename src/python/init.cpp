@@ -58,7 +58,7 @@ public:
 		buffer << data;
 	}
 };
-std::strstream PythonIOString::buffer = std::strstream();
+std::strstream PythonIOString::buffer;
 
 /* Basic mode of operation:
   Define a module_builder per module and class_builders for each 
@@ -163,7 +163,12 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		fclose(fp1);
 	}
 	else if(fp!=NULL) {
-		PyRun_SimpleFile(fp1, "config.py");
+	  /*PyRun_SimpleFile(fp1, "config.py");*/
+	  PyRun_SimpleString(
+"import VS\n"
+"import sys\n"
+"sys.stderr.write('asdf')\n"
+);
 		fclose(fp);
 	}
 	char buffer[128];

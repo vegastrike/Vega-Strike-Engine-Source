@@ -3,6 +3,8 @@ AC_INIT(src/vegastrike.h)
 AM_INIT_AUTOMAKE(vegastrike, "0.1.0cvs")
 AM_CONFIG_HEADER(config.h)
 
+AC_LANG_CPLUSPLUS
+
 dnl Check system type
 AC_CANONICAL_HOST
 
@@ -593,6 +595,140 @@ fi
 CPPFLAGS="$saved_CPPFLAGS" 
 TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 
+dnl --------------------------------------------------------------------------
+dnl Check for python 2.1+ library, and then boost
+dnl --------------------------------------------------------------------------
+AC_ARG_WITH(python-libs,[  --with-python-libs=DIR    Location of python library])
+
+if test "x$with_python_libs" = "x" ; then
+    PYTHON_LDOPTS=""
+else
+    PYTHON_LDOPTS="-L$with_python_libs"
+fi
+
+AC_DEFUN( CHECK_FOR_PYTHON_LIB, [
+    AC_MSG_CHECKING([for $PYTHON_LIB_NAME library])
+    LIBS="$PYTHON_LDOPTS -l$PYTHON_LIB_NAME -lutil"
+    AC_TRY_LINK( , , have_python_lib=yes, have_python_lib=no )
+    AC_MSG_RESULT([$have_python_lib])
+]) 
+
+saved_LIBS="$RRLIBS"
+
+PYTHON_LIB_LIST="python2.1 python2.2"
+
+for PYTHON_LIB_NAME in $PYTHON_LIB_LIST ; do
+    CHECK_FOR_PYTHON_LIB
+
+    if test "x$have_python_lib" = "xyes" ; then
+	LIBS="$saved_LIBS"
+	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$PYTHON_LIB_NAME -lutil"
+        break;
+    else
+	LIBS=""
+	saved_LIBS=""
+    fi
+done
+
+AC_ARG_WITH(boost-libs,[  --with-boost-libs=DIR    Location of Boost library])
+
+if test "x$with_boost_libs" != "x" ; then
+    PYTHON_LDOPTS="$PYTHON_LDOPTS -L$with_boost_libs"
+fi
+
+if test "x$have_python_lib" = "xyes" ; then
+AC_DEFUN( CHECK_FOR_BOOST_LIB, [
+    AC_MSG_CHECKING([for $BOOST_LIB_NAME library])
+    LIBS="$PYTHON_LDOPTS -l$BOOST_LIB_NAME"
+    AC_TRY_LINK( , , have_python_lib=yes, have_python_lib=no )
+    AC_MSG_RESULT([$have_python_lib])
+]) 
+
+saved_LIBS="$RRLIBS"
+
+BOOST_LIB_LIST="boost_python"
+
+for BOOST_LIB_NAME in $BOOST_LIB_LIST ; do
+    CHECK_FOR_BOOST_LIB
+
+    if test "x$have_python_lib" = "xyes" ; then
+	LIBS="$saved_LIBS"
+	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$BOOST_LIB_NAME"
+        break;
+    else
+	LIBS=""
+	saved_LIBS=""
+    fi
+done
+fi
+
+dnl --------------------------------------------------------------------------
+dnl Check for Python headers
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(python-inc,   [  --with-python-inc=DIR       Python header file location])
+
+if test "x$with_python_inc" = "x" ; then
+    PYTHON_CPPFLAGS=""
+else 
+    PYTHON_CPPFLAGS="-I$with_python_inc"
+fi
+
+dnl check for al.h
+saved_CPPFLAGS="$CPPFLAGS"
+
+AC_DEFUN( CHECK_FOR_PYTHON_H, [
+    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $TR_CPPFLAGS"
+
+    have_python_h=no
+    AC_MSG_CHECKING([for Python.h])
+    AC_TRY_CPP( [ #include <Python.h> ], 
+    AC_TRY_CPP( [ #include <Python.h>
+   #if PY_MAJOR_VERSION <= 2 && PY_MINOR_VERSION <1
+     #error "Vegastrike needs Python version >= 2.1"
+   #endif
+    ], [have_python_h=yes AC_MSG_RESULT([yes])] ,[ AC_MSG_RESULT([Need version >= 2.1])]))
+])
+
+CHECK_FOR_PYTHON_H
+
+CPPFLAGS="$saved_CPPFLAGS" 
+TR_CPPFLAGS="$TR_CPPFLAGS $PYTHON_CPPFLAGS"
+
+AC_ARG_WITH(boost-inc,   [  --with-boost-inc=DIR       Boost header file location])
+
+if test "x$have_python_h" != "x" ; then
+if test "x$with_boost_inc" != "x" ; then
+    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS -I$with_boost_inc"
+fi
+
+    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $TR_CPPFLAGS"
+
+    AC_MSG_CHECKING([for <boost/python/module_builder.hpp>])
+    AC_TRY_CPP( [ #include <boost/python/module_builder.hpp> ], 
+    [have_python_h=yes], [have_python_h=no])
+    AC_MSG_RESULT([$have_python_h])
+fi
+
+if test "x$have_python_lib" = "xno" ; then
+    AC_MSG_WARN([
+**************
+Python or boost libraries not found
+**************
+])
+else
+    if test "x$have_python_h" = "xno" ; then
+    AC_MSG_WARN([
+**************
+Python or boost headers not found
+**************
+])
+    else
+    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS -DHAVE_PYTHON=1"
+    fi
+fi
+CPPFLAGS="$saved_CPPFLAGS" 
+
 
 
 
@@ -611,11 +747,12 @@ AC_SUBST(TR_CPPFLAGS)
 AC_SUBST(TR_CFLAGS)
 AC_SUBST(TR_CXXFLAGS)
 AC_SUBST(TR_LIBS)
+AC_SUBST(PYTHON_CPPFLAGS)
 
-CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS"
 CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS"
 
-AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile \
+AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/python/Makefile \
 	objconv/Makefile )

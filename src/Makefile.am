@@ -2,8 +2,8 @@
 bindir = $(prefix)/games/@PACKAGE@/bin
 
 bin_PROGRAMS = vegastrike
-SUBDIRS = cmd gfx gldrv  aldrv
-vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a
+SUBDIRS = cmd gfx gldrv  aldrv python
+vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a
 
 vegastrike_SOURCES =				\
 	endianness.h				\
