@@ -764,7 +764,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	  }
 	  temp->SetOwner (owner);
 	  temp->Velocity = velocity;
-	  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = Cumulative;
+	  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
 	  CopyMatrix (temp->cumulative_transformation_matrix,m);
 	  _Universe->activeStarSystem()->AddUnit(temp);
 	}

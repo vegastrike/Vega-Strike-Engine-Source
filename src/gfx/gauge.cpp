@@ -34,23 +34,23 @@ void Gauge::GetSize (float &x, float &y) {
 
 void Gauge::Draw (float percentage) {
   float sx,sy,px,py;
-  GetSize (sx,sy);
-  GetPosition(px,py);
+  Sprite::GetSize (sx,sy);
+  Sprite::GetPosition(px,py);
   switch (dir) {
   case GAUGE_RIGHT:
   case GAUGE_LEFT:
     SetST (percentage,1);
-    SetSize (sx*percentage,sy);
-    SetPosition (px+sx*(1-percentage)*.5,py);
+    Sprite::SetSize (sx*percentage,sy);
+    Sprite::SetPosition (px+sx*(1-percentage)*.5,py);
     break;
   case GAUGE_DOWN:
   case GAUGE_UP:
     SetST (1,percentage);
-    SetSize (sx,sy*percentage);
-    SetPosition (px,py+sy*(1-percentage)*.5);
+    Sprite::SetSize (sx,sy*percentage);
+    Sprite::SetPosition (px,py+sy*(1-percentage)*.5);
     break;
   }
   Sprite::Draw();
-  SetSize (sx,sy);
-  SetPosition (px,py);
+  Sprite::SetSize (sx,sy);
+  Sprite::SetPosition (px,py);
 }
