@@ -340,6 +340,8 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 
 
 void FlyByKeyboard::DownFreq (int,KBSTATE k) {
+if(Network!=NULL)
+{
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN: if( g().comm_freq==MIN_COMMFREQ) g().comm_freq=MAX_COMMFREQ; else g().comm_freq -= .1;
@@ -351,8 +353,11 @@ void FlyByKeyboard::DownFreq (int,KBSTATE k) {
     break;
   }
 }
+}
 
 void FlyByKeyboard::UpFreq (int,KBSTATE k) {
+if(Network!=NULL)
+{
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN: if( g().comm_freq==MAX_COMMFREQ) g().comm_freq=MIN_COMMFREQ; else g().comm_freq += .1;
@@ -364,8 +369,11 @@ void FlyByKeyboard::UpFreq (int,KBSTATE k) {
     break;
   }
 }
+}
 
 void FlyByKeyboard::ChangeCommStatus (int,KBSTATE k) {
+if(Network!=NULL)
+{
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:
@@ -381,6 +389,7 @@ void FlyByKeyboard::ChangeCommStatus (int,KBSTATE k) {
   case RESET:
     break;
   }
+}
 }
 
 void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
