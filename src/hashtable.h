@@ -81,13 +81,14 @@ public:
 	  return retval;
 	}
 
-	VALUE *Get(const KEY &key)
+	VALUE *Get(const KEY &key) const
 	{
         HashElementEq eq(key);
 		int hashval = hash(key);
-		It iter;
-        It end = table[hashval].end();
-        iter = find_if( table[hashval].begin(), end, eq );
+	    CIt iter = table[hashval].begin(), end = table[hashval].end();
+	    for(;iter!=end;iter++) {
+			if( eq(*iter) ) break;
+		}
 		if(iter==end)
 			return NULL;
 		else
