@@ -1160,9 +1160,9 @@ void LaunchConverter(const char * input, const char * output, const char* args="
 #ifndef _WIN32
     int pid=fork();
     if (!pid) {
-      string soundserver_path = VSFileSystem::datadir+"/mesher";
+      string soundserver_path = VSFileSystem::datadir+"/bin/mesher";
       pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
-      soundserver_path = VSFileSystem::datadir+"/bin/mesher";
+      soundserver_path = VSFileSystem::datadir+"/mesher";
       pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn converter\n");
       exit (-1);

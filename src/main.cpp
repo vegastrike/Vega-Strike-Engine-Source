@@ -230,7 +230,9 @@ int main( int argc, char *argv[] )
   if (g_game.music_enabled) {
     int pid=fork();
     if (!pid) {
-	  string soundserver_path = VSFileSystem::datadir+"/soundserver";
+	  string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
+      soundserver_path = VSFileSystem::datadir+"/soundserver";
       pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
       g_game.music_enabled=false;
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server\n");
