@@ -610,7 +610,7 @@ void SetupDamageMapThirdPass(Texture * decal,unsigned int mat, float polygon_off
 	GFXDisable(TEXTURE1);
 }
 
-void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,BLENDFUNC src, BLENDFUNC dst, float NOT_USED_BUT_BY_HELPER=3) { 
+void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,float NOT_USED_BUT_BY_HELPER=3) { 
   float a,b;
     GFXGetPolygonOffset(&a,&b);
     GFXPolygonOffset (a, b+polygonoffset+NOT_USED_BUT_BY_HELPER);
@@ -619,11 +619,10 @@ void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,BLENDFUNC s
 		GFXEnable(DEPTHWRITE);
 	}
 	GFXEnable(TEXTURE1);
-	GFXPopBlendMode();
-        GFXBlendMode(src,dst);
+	GFXPopBlendMode();				
 }
-void RestoreDamageMapState(bool write_to_depthmap, float polygonoffset, BLENDFUNC a, BLENDFUNC b) {
-	RestoreGlowMapState(write_to_depthmap,polygonoffset,a,b,DAMAGE_PASS);
+void RestoreDamageMapState(bool write_to_depthmap, float polygonoffset) {
+	RestoreGlowMapState(write_to_depthmap,polygonoffset,DAMAGE_PASS);
 }
 void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffset) { 
   float a,b;
@@ -807,10 +806,10 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 		RestoreSpecMapState(getEnvMap(),write_to_depthmap,polygon_offset);
 		break;
 	case 3:
-		RestoreGlowMapState(write_to_depthmap,polygon_offset,blendSrc,blendDst);
+		RestoreGlowMapState(write_to_depthmap,polygon_offset);
 		break;
 	case DAMAGE_PASS:
-		RestoreDamageMapState(write_to_depthmap,polygon_offset,blendSrc,blendDst);//nothin
+		RestoreDamageMapState(write_to_depthmap,polygon_offset);//nothin
 		break;
 	}  
   if (!getLighting()) {
