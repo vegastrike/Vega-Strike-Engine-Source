@@ -309,6 +309,121 @@ extern void TestMusic();
 extern void reset_time_compression (int,KBSTATE);
 
 extern float getTimeCompression();
+void StarSystem::Update( float priority)
+{
+	Unit * unit;
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"begin Update");
+  fflush (stderr);
+#endif
+  bool firstframe = true;
+// No time compression here
+  float normal_simulation_atom = SIMULATION_ATOM;
+  time += GetElapsedTime();
+  _Universe->pushActiveStarSystem(this);
+
+  if(time/SIMULATION_ATOM>=(1./PHY_NUM))	  
+  {
+    while(time/SIMULATION_ATOM >= (1./PHY_NUM))
+	{ // Chew up all SIMULATION_ATOMs that have elapsed since last update
+      UnitCollection::UnitIterator iter;
+      if (current_stage==PHY_AI)
+	  {
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"AI");
+		  fflush (stderr);
+		#endif
+		  ExecuteUnitAI();
+		current_stage=TERRAIN_BOLT_COLLIDE;
+      }
+	  else if (current_stage==TERRAIN_BOLT_COLLIDE)
+	  {
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"TerCol");
+		  fflush (stderr);
+		#endif
+			TerrainCollide();
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"DelQ");
+		  fflush (stderr);
+		#endif
+		  Unit::ProcessDeleteQueue();
+		  current_stage=MISSION_SIMULATION;
+      }
+	  else if (current_stage==MISSION_SIMULATION)
+	  {
+		// What to do here on server side for missions ????????
+		current_stage=PHY_COLLIDE;
+      }
+	  else if (current_stage==PHY_COLLIDE)
+	  {
+		#ifdef NO_COLLISION_TIME
+			if (no_collision_time) {
+			  no_collision_time--;//don't resolve physics until 2 seconds
+			}else 
+		#endif
+			{
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"neb");
+		  fflush (stderr);
+		#endif
+			  iter = drawList.createIterator();
+			  while((unit = iter.current())!=NULL) {
+				unit->SetNebula(NULL); 
+				iter.advance();
+			  }
+			  iter = drawList.createIterator();
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"Coll");
+		  fflush (stderr);
+		#endif
+			  while((unit = iter.current())!=NULL) {
+				  unit->CollideAll();
+				  iter.advance();
+			  }
+	        }
+			UpdateMissiles();//do explosions
+			current_stage=PHY_TERRAIN;
+      }
+	  else if (current_stage==PHY_TERRAIN)
+	  {
+		    // What to do on server side ????
+			current_stage=PHY_RESOLV;
+      }
+	  else if (current_stage==PHY_RESOLV)
+	  {
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"muzak");
+		  fflush (stderr);
+		#endif
+		  UpdateUnitPhysics(firstframe);
+		#ifdef UPDATEDEBUG
+		  fprintf (stderr,"boltphi");
+		  fflush (stderr);
+		#endif
+		  bolts->UpdatePhysics();
+		/*
+		for (unsigned int i=0;i<active_missions.size();i++) {
+		  active_missions[i]->BriefingUpdate();//waste of farkin time
+		}
+		*/
+		  current_stage=PHY_AI;
+		  firstframe = false;
+      }
+      time -= (1./PHY_NUM)*SIMULATION_ATOM;
+    }
+  }
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"endupd\n");
+  fflush (stderr);
+#endif
+  UnitCollection::FreeUnusedNodes();
+  collidetable->Update();
+  SIMULATION_ATOM =  normal_simulation_atom;
+  _Universe->popActiveStarSystem();
+  //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
+}
+
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;

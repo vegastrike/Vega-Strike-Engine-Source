@@ -93,6 +93,8 @@ class StarSystem {
   virtual void Draw(bool DrawCockpit=true) {}
   /// update a simulation atom ExecuteDirector must be false if star system is just loaded before mission is loaded
   void Update(float priority, bool executeDirector);
+  // This one is temporarly used on server side
+  void Update(float priority);
   ///re-enables the included lights and terrains
   virtual void SwapIn () {}
   ///Disables included lights and terrains

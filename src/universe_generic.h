@@ -59,6 +59,7 @@ protected:
 
   // the system currently used by the scripting
   StarSystem *script_system;
+  bool is_server;
 
 private:
   ///Many C++ implementations count classes within as friends. (not all)
@@ -67,6 +68,7 @@ private:
   ///A list of all factions 
   
  public:
+  bool	isServer() { return is_server;}
   Cockpit * isPlayerStarship (const Unit* fighter);
   int whichPlayerStarship (const Unit* fighter);
   Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
@@ -111,8 +113,8 @@ private:
   //void activateLightMap();
   ///inits graphics with args
   Universe();
-  Universe(int argc, char **argv, const char * galaxy);
-  void Init();
+  Universe(int argc, char **argv, const char * galaxy, bool server=false);
+  void Init( const char * gal);
   virtual ~Universe();
   ///Loads Defaults in Graphics Drivers
   //void StartGFX();
@@ -120,6 +122,8 @@ private:
   virtual class StarSystem * Init(string systemfile, const Vector & centroid=Vector (0,0,0), const string planetname=string());
   ///Begins a scene
   virtual void StartDraw() {}
+  // Update starsystems (for server side)
+  void Update();
   ///Runs the main loop
   virtual void Loop(void f()) {}
   ///returns active star system

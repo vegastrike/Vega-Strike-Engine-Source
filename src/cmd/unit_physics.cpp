@@ -26,7 +26,7 @@
 #include "beam.h"
 #include "planet.h"
 #include "audiolib.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 //#ifdef WIN32
 #ifdef FIX_TERRAIN
@@ -64,80 +64,8 @@ extern unsigned short apply_float_to_short (float tmp);
 //    float max_roll;
 
 template <class UnitType>
-void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
-  static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
-
+void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
 	int player = -1;
-	Vector accel;
-	Transformation old_physical_state = curr_physical_state;
-  if (docked&DOCKING_UNITS) {
-    PerformDockingOperations();
-  }
-  Repair();
-  if (fuel<0)
-    fuel=0;
-  if (cloaking>=cloakmin) {
-    if (image->cloakenergy*SIMULATION_ATOM>energy) {
-      Cloak(false);//Decloak
-    } else {
-      if (image->cloakrate>0||cloaking==cloakmin) {
-	energy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
-      }
-      if (cloaking>cloakmin) {
-	AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
-	if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
-	  AUDStartPlaying (sound->cloak);
-	}
-	cloaking-= (short)(image->cloakrate*SIMULATION_ATOM);
-	if (cloaking<=cloakmin&&image->cloakrate>0) {
-	  //AUDStopPlaying (sound->cloak);
-	  cloaking=cloakmin;
-	}
-	if (cloaking<0&&image->cloakrate<0) {
-	  //AUDStopPlaying (sound->cloak);
-	  cloaking=(short)32768;//wraps
-	}
-      }
-    }
-  }
-
-  RegenShields();
-  if (lastframe) {
-    if (!(docked&(DOCKED|DOCKED_INSIDE))) 
-      prev_physical_state = curr_physical_state;//the AIscript should take care
-#ifdef FIX_TERRAIN
-    if (planet) {
-      if (!planet->dirty) {
-	SetPlanetOrbitData (NULL);
-      }else {
-	planet->pps = planet->cps;
-      }
-    }
-#endif
-  }
-
-  if (isUnit()==PLANETPTR) {
-    ((Planet *)this)->gravitate (uc);
-  } else {
-    if (resolveforces) {
-      accel = ResolveForces (trans,transmat);//clamp velocity
-      if (fabs (Velocity.i)>VELOCITY_MAX) {
-	Velocity.i = copysign (VELOCITY_MAX,Velocity.i);
-      }
-      if (fabs (Velocity.j)>VELOCITY_MAX) {
-	Velocity.j = copysign (VELOCITY_MAX,Velocity.j);
-      }
-      if (fabs (Velocity.k)>VELOCITY_MAX) {
-	Velocity.k = copysign (VELOCITY_MAX,Velocity.k);
-      }
-    }
-  } 
-  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
-    Rotate (SIMULATION_ATOM*(AngularVelocity));
-  }
-  float difficulty;
-
-  Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
 
   // Here send (new position + direction = curr_physical_state.position and .orientation)
   // + speed to server (which velocity is to consider ?)
@@ -209,124 +137,6 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
 	
     }
   }      
-  float dist_sqr_to_target=FLT_MAX;
-  Unit * target = Unit::Target();
-  bool increase_locking=false;
-  if (target&&cloaking<0/*-1 or -32768*/) {
-    if (target->isUnit()!=PLANETPTR) {
-      Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
-      dist_sqr_to_target = TargetPos.MagnitudeSquared(); 
-      TargetPos.Normalize(); 
-      if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
-	increase_locking=true;
-      }
-    }
-  }
-  static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
-  static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
-  bool locking=false;
-  bool touched=false;
-
-  for (i=0;(int)i<GetNumMounts();i++) {
-//    if (increase_locking&&cloaking<0) {
-//      mounts[i]->time_to_lock-=SIMULATION_ATOM;
-//    }
-    if (mounts[i]->status==Mount::ACTIVE&&cloaking<0&&mounts[i]->ammo!=0) {
-      if (player_cockpit) {
-	  touched=true;
-      }
-      if (increase_locking&&(dist_sqr_to_target>mounts[i]->type->Range*mounts[i]->type->Range)) {
-	mounts[i]->time_to_lock-=SIMULATION_ATOM;
-	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
-	if (!player_cockpit) {
-	  if (ai_lock_cheat) {
-	    mounts[i]->time_to_lock=-1;
-	  }
-	}else {
-
-	  if (mounts[i]->type->LockTime>0) {
-	    static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
-	    static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
-
-	    if (mounts[i]->time_to_lock>-SIMULATION_ATOM&&mounts[i]->time_to_lock<=0) {
-	      if (!AUDIsPlaying(LockedSound)) {
-		AUDStartPlaying(LockedSound);
-		AUDStopPlaying(LockingSound);	      
-	      }
-	      AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
-	    }else if (mounts[i]->time_to_lock>0)  {
-	      locking=true;
-	      if (!AUDIsPlaying(LockingSound)) {
-		AUDStartPlaying(LockingSound);	      
-	      }
-	      AUDAdjustSound (LockingSound,Position(),GetVelocity());
-	    }
-	  }
-	}
-      }else {
-        if (mounts[i]->ammo!=0) {
-	  mounts[i]->time_to_lock=mounts[i]->type->LockTime;
-        }
-      }
-    } else {
-      if (mounts[i]->ammo!=0) {
-        mounts[i]->time_to_lock=mounts[i]->type->LockTime;
-      }
-    }
-    if (mounts[i]->type->type==weapon_info::BEAM) {
-      if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone, target);
-      }
-    } else {
-      mounts[i]->ref.refire+=SIMULATION_ATOM;
-    }
-    if (mounts[i]->processed==Mount::FIRED) {
-      Transformation t1;
-      Matrix m1;
-      t1=prev_physical_state;//a hack that will not work on turrets
-      t1.Compose (trans,transmat);
-      t1.to_matrix (m1);
-      int autotrack=0;
-      if ((0!=(mounts[i]->size&weapon_info::AUTOTRACKING))) {
-	autotrack = computer.itts?2:1;
-      }
-      mounts[i]->PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
-      if (mounts[i]->ammo==0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
-	ToggleWeapon (true);
-      }
-    }else if (mounts[i]->processed==Mount::UNFIRED) {
-      mounts[i]->PhysicsAlignedUnfire();
-    }
-  }
-  if (locking==false&&touched==true) {
-    if (AUDIsPlaying(LockingSound)) {
-      AUDStopPlaying(LockingSound);	
-    }      
-  }
-  bool dead=true;
-
-  if (!SubUnits.empty()) {
-    Unit * su;
-    UnitCollection::UnitIterator iter=getSubUnits();
-    while ((su=iter.current())) {
-      su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
-      su->cloaking = (short unsigned int) cloaking;
-      if (hull<0) {
-	UnFire();//don't want to go off shooting while your body's splitting everywhere
-	su->hull-=SIMULATION_ATOM;
-      }
-      iter.advance();
-      //    dead &=(subunits[i]->hull<0);
-    }
-  }
-  if (hull<0) {
-    dead&= (image->explosion==NULL);    
-    if (dead)
-      Kill();
-  }
-  if ((!SubUnit)&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
-    UpdateCollideQueue();
-  }
 }
 
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/

@@ -75,12 +75,13 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 
 	hud_camera = Camera();
 
-	this->Universe::Init();
-	this->galaxy = new GalaxyXML::Galaxy (galaxy);
+	this->Universe::Init( galaxy);
+	//this->galaxy = new GalaxyXML::Galaxy (galaxy);
 }
 GameUniverse::GameUniverse(int argc, char** argv, const char * galaxy)
 {
 	this->Init( argc, argv, galaxy);
+	is_server = false;
 }
 GameUniverse::GameUniverse():Universe()
 {
@@ -274,8 +275,8 @@ void GameUniverse::StartDraw()
   }
   UpdateTime();
   UpdateTimeCompressionSounds();
-  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   float systime=nonactivesystemtime;
   _Universe->SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
   

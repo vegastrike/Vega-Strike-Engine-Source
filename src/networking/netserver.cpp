@@ -301,7 +301,7 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 /**** Start the server loop                                ****/
 /**************************************************************/
 
-void	NetServer::start()
+void	NetServer::start(int argc, char **argv)
 {
 	string strperiod, strtimeout, strlogintimeout, stracct, strnetatom;
 	int period;
@@ -381,7 +381,10 @@ void	NetServer::start()
 	COUT << "Initializing UDP server ..." << endl;
 	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
 	COUT << "done." << endl;
-	
+
+	// Create the _Universe telling it we are on server side
+	_Universe = new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str(), true);
+
 	// Server loop
 	while( keeprun)
 	{

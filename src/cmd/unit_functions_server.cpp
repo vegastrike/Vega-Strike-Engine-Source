@@ -34,13 +34,6 @@ Sprite * createSprite(const char *file)
 	return NULL;
 }
 
-int AUDCreateSoundWAV (const std::string &, const bool LOOP=false) {return -1;}
-int AUDCreateSoundMP3 (const std::string &, const bool LOOP=false) {return -1;}
-int AUDCreateSound (int sound,const bool LOOP=false) {return -1;}
-int AUDCreateSound (const std::string &,const bool LOOP=false) {return -1;}
-void AUDStopPlaying( int i) {}
-void AUDDeleteSound( int i) {}
-
 void cache_ani (string s) {}
 void update_ani_cache () {}
 
@@ -50,10 +43,3 @@ std::string getRandomCachedAniString () {
 Animation* getRandomCachedAni () {
     return NULL;
 }
-
-// From communication_xml.cpp
-int createSound( string file, bool val)
-{
-	return -1;
-}
-

@@ -217,10 +217,8 @@ public:
   //bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
 
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics2 (const Transformation &trans, Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   //class Cockpit * GetVelocityDifficultyMult(float &) const;
-  ///executes a repair if the repair bot is up to it
-  void Repair();
   ///Thrusts by ammt and clamps accordingly (afterburn or not)
   void Thrust(const Vector &amt,bool afterburn = false);
   ///Resolves forces of given unit on a physics frame
@@ -341,7 +339,6 @@ void GameUnit<UnitType>::BuildBSPTree(const char *filename, bool vplane, Mesh * 
 #include "unit_damage.cpp"
 //#include "base_interface.cpp"
 #include "unit_physics.cpp"
-#include "unit_repair.cpp"
 #include "unit_weapon.cpp"
 //#include "unit_xml.cpp"
 

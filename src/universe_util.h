@@ -43,16 +43,16 @@ namespace UniverseUtil {
 	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo);
 ///this gets a random cargo type (useful for cargo missions) from either any category if category is '' or else from a specific category  'Contraband'  comes to mind!
 	Cargo getRandCargo(int quantity, string category);
-///this gets the current time in seconds
-	float GetGameTime ();
-///this sets the time compresison value to zero
-	void SetTimeCompression ();
 ///this gets a string which has in it a space delimited list of neighmoring systems
 	string GetAdjacentSystem (string str, int which);
 ///this gets a specific property of this system as found in universe/milky_way.xml
 	string GetGalaxyProperty (string sys, string prop);
 ///this gets the number of systems adjacent to the sysname
 	int GetNumAdjacentSystems (string sysname);
+///this gets the current time in seconds
+	float GetGameTime ();
+///this sets the time compresison value to zero
+	void SetTimeCompression ();
 ///this adds a playlist to the music and may be triggered with an int
 	int musicAddList(string str);
 ///this plays a specific song

@@ -124,6 +124,7 @@ librootgeneric =			\
 
 librootserver =					\
 	gfxlib_struct_server.cpp	\
+	libaudioserver.cpp			\
 	libserver.cpp				\
 	universe_util_server.cpp	\
 	faction_util_server.cpp

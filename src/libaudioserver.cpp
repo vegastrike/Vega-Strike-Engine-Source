@@ -1,0 +1,18 @@
+#include <string>
+#include "audiolib.h"
+
+void AUDAdjustSound(int i, QVector const & qv, Vector const & vv) {}
+
+bool AUDIsPlaying(int snd) { return false;}
+
+void	AUDRefreshSounds() {}
+int		AUDCreateSoundWAV (const std::string &, const bool LOOP) {return -1;}
+int		AUDCreateSoundMP3 (const std::string &, const bool LOOP) {return -1;}
+int		AUDCreateSound (int sound,const bool LOOP) {return -1;}
+int		AUDCreateSound (const std::string &,const bool LOOP) {return -1;}
+void	AUDStartPlaying ( int i) {}
+void	AUDStopPlaying( int i) {}
+void	AUDDeleteSound( int i) {}
+
+// From communication_xml.cpp
+int createSound( std::string file, bool val) { return -1;}

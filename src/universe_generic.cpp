@@ -71,23 +71,24 @@ void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
     }
   }
 }
-void Universe::Init()
+void Universe::Init( const char * gal)
 {
 	// No need to load weapons on server side
 	//LoadWeapons("weapon_list.xml");
 
-
-	//this->galaxy = new GalaxyXML::Galaxy (galaxy);
+	this->galaxy = new GalaxyXML::Galaxy (gal);
 
 	script_system=NULL;
 }
-Universe::Universe(int argc, char** argv, const char * galaxy)
+Universe::Universe(int argc, char** argv, const char * galaxy, bool server)
 {
-	this->Init();
+	this->Init( galaxy);
+	is_server = server;
 }
 Universe::Universe()
 {
 	script_system=NULL;
+	is_server = false;
 }
 
 Universe::~Universe()
@@ -211,4 +212,15 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   StarSystem * ss = new StarSystem (file,center);
   this->Generate2( ss);
   return ss;
+}
+
+void Universe::Update()
+{
+  int i;
+  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+  float systime=nonactivesystemtime;
+  for (i=0;i<star_system.size();i++) {
+	// Calls the update function for server
+    star_system[i]->Update((i==0)?1:systime/i);
+  }
 }

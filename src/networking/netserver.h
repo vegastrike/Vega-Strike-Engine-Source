@@ -110,7 +110,7 @@ class NetServer
 		NetServer();
 		~NetServer();
 
-		void	start();
+		void	start( int argc, char ** argv);
 		void	save();
 
 		friend class ZoneMgr;
