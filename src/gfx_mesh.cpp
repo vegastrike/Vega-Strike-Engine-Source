@@ -427,11 +427,11 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	delete [] offset;
 	for (ii=0; ii< numtris*3; ii+=3)
 	{
-		
 		Vector Norm1 (vertexlist[ii+1].x-vertexlist[ii].x,vertexlist[ii+1].y-vertexlist[ii].y,vertexlist[ii+1].z-vertexlist[ii].z);
 		Vector Norm2 (vertexlist[ii+2].x-vertexlist[ii].x,vertexlist[ii+2].y-vertexlist[ii].y,vertexlist[ii+2].z-vertexlist[ii].z);
 		Vector Normal;
-		CrossProduct (Norm2, Norm1, Normal);
+				CrossProduct (Norm2, Norm1, Normal);
+		//CrossProduct (Norm1,Norm2,Normal);
 		Normalize(Normal);
 		vertexlist[ii].i =  vertexlist[ii+1].i = vertexlist[ii+2].i =Normal.i;
 		vertexlist[ii].j =  vertexlist[ii+1].j = vertexlist[ii+2].j =Normal.j;
@@ -442,12 +442,15 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		Vector Norm1 (vertexlist[ii+1].x-vertexlist[ii].x,vertexlist[ii+1].y-vertexlist[ii].y,vertexlist[ii+1].z-vertexlist[ii].z);
 		Vector Norm2 (vertexlist[ii+3].x-vertexlist[ii].x,vertexlist[ii+3].y-vertexlist[ii].y,vertexlist[ii+3].z-vertexlist[ii].z);
 		Vector Normal;
-		CrossProduct (Norm2, Norm1, Normal);
+				CrossProduct (Norm2, Norm1, Normal);
+				//CrossProduct (Norm1,Norm2,Normal);
 		Normalize(Normal);
 		vertexlist[ii].i =  vertexlist[ii+1].i = vertexlist[ii+2].i = vertexlist[ii+3].i =Normal.i;
 		vertexlist[ii].j =  vertexlist[ii+1].j = vertexlist[ii+2].j = vertexlist[ii+3].j =Normal.j;
 		vertexlist[ii].k =  vertexlist[ii+1].k = vertexlist[ii+2].k = vertexlist[ii+3].k =Normal.k;
-	}
+
+	}	
+
 	numsquadlogo = readi (fp);
 	PolyNormal = new Vector [numsquadlogo];
 	center = new Vector [numsquadlogo];
@@ -543,6 +546,7 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 
 	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _GFX->getSquadLog(), Ref);
 	delete [] Ref;
+	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	vlist = new GFXVertexList(numvertex,numtris,numquads, vertexlist);
 	//vlist = new GFXVertexList(numtris*4,0,numquads*4, vertexlist+numtris*3);
 	long pos = ftell(fp);
@@ -563,6 +567,7 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	delete [] sizes;
 	delete [] rotations;
 	delete [] offset;
+
 }
 
 Mesh::~Mesh()

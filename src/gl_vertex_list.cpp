@@ -47,6 +47,16 @@ GFXVertexList::GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVe
 	this->numQuads = numQuad;
 	myVertices = new GFXVertex[numVertices];
 	memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
+
+
+	//fprintf (stderr, "ffRi:%f ffRj: %f ffRk %f",vertices[0].i,vertices[0].j,vertices[0].k);
+
+	//    fprintf (stderr, "i:%f\n",myVertices[0].i);
+	//fprintf (stderr, "j:%f\n",myVertices[0].j);
+	//fprintf (stderr, "k:%f\n",myVertices[0].k);
+		    
+
+
 }
 
 GFXVertexList::~GFXVertexList()
@@ -127,12 +137,10 @@ BOOL GFXVertexList::Draw()
 			texcoords[4*a+2] = myVertices[a].u;
 			texcoords[4*a+3] = myVertices[a].v;
 		}*/
-
 		glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
 		glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
-
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
 
 		glClientActiveTextureARB (GL_TEXTURE0_ARB);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -154,7 +162,7 @@ BOOL GFXVertexList::Draw()
 
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
 
 		if(bTex0) {
 			glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
