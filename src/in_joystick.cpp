@@ -124,7 +124,7 @@ JoyStick::JoyStick(int which) {
   return;
 #else
     int num_joysticks=SDL_NumJoysticks() ;
-    if (which>num_joysticks)
+    if (which>=num_joysticks)
       return;
 
     SDL_JoystickEventState(SDL_ENABLE);
