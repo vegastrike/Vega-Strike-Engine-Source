@@ -238,10 +238,12 @@ public:
 			Matrix k(ctm);
 			
 			float speed = GetVelocity().Magnitude();
-			float stretchlength = (speed-cutoff)/cutoff;
 			//Matrix scalar=identity_matrix;
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
+			static float maxspeed = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max_speed","1000000"));
+			float stretchlength = maxstretch*(speed-cutoff)/(maxspeed-cutoff);
+			
 			if (stretchlength>maxstretch)
 				stretchlength= maxstretch;
 			ScaleMatrix(k,Vector(1,1,1+stretchlength));			
