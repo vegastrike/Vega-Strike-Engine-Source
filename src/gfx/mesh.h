@@ -109,9 +109,9 @@ private:
 	Texture * TempGetTexture (struct MeshXML *, std::string filename, std::string factionname,GFXBOOL detail) const;
   ///Stores all the load-time vertex info in the XML struct FIXME light calculations
   ///Loads XML data into this mesh.
-  void LoadXML(const char *filename, const Vector & scale, int faction, class Flightgroup * fg, bool orig=false);
-  void LoadXML(VSFileSystem::VSFile & f, const Vector & scale, int faction, class Flightgroup * fg, bool orig=false);
-  void PostProcessLoading(struct MeshXML *xml);
+  void LoadXML(const char *filename, const Vector & scale, int faction, class Flightgroup * fg, bool orig,const vector<string> &overrideTexture);
+  void LoadXML(VSFileSystem::VSFile & f, const Vector & scale, int faction, class Flightgroup * fg, bool orig, const vector<string> &overrideTexture);
+  void PostProcessLoading(struct MeshXML *xml,const vector<string> &overrideTexture);
   ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
   ///Creates all logos with given XML data info
@@ -121,8 +121,12 @@ private:
   
   void beginElement(struct MeshXML *xml, const string &name, const AttributeList &attributes);
   void endElement(struct MeshXML *xml, const string &name);
-
+private:
+  Mesh( const char *filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig, const std::vector<std::string> &textureOverride=std::vector<std::string>());
 protected:
+  // only may be called from subclass. orig request may be denied if unit was in past usage. (not likely in the case where a unit must be constructed in orig)
+  Mesh( std::string filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig=false);
+
   ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
   bool LoadExistant (Mesh *mesh);
   bool LoadExistant (const string filehash, const Vector & scale, int faction);
@@ -194,11 +198,10 @@ public:
   BLENDFUNC getBlendDst() {return blendDst;}		
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
 //private:  
-	Mesh( const char *filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig=false);
 //public:
-	static Mesh* LoadMesh(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
-  static vector<Mesh*> LoadMeshes(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
-  static vector<Mesh*> LoadMeshes(VSFileSystem::VSFile & f, const Vector & scalex, int faction, class Flightgroup * fg, std::string hash_name);
+	static Mesh* LoadMesh(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg, const std::vector<std::string> &textureOverride=std::vector<std::string>());
+  static vector<Mesh*> LoadMeshes(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg, const std::vector<std::string> &textureOverride=std::vector<std::string>());
+  static vector<Mesh*> LoadMeshes(VSFileSystem::VSFile & f, const Vector & scalex, int faction, class Flightgroup * fg, std::string hash_name, const std::vector<std::string> &textureOverride=std::vector<std::string>());
 
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);

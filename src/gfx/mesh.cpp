@@ -42,6 +42,7 @@
 #include "sphere.h"
 #include "lin_time.h"
 #include "gldrv/winsys.h"
+#include "mesh_xml.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -165,18 +166,19 @@ Mesh::Mesh (const Mesh & m) {
 
 using namespace VSFileSystem;
 extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
-Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
+Mesh::Mesh(std::string filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
-  Mesh* cpy=LoadMesh(filename,scale,faction,fg);
+  Mesh* cpy=LoadMesh(filename.c_str(),scale,faction,fg,vector<std::string>());
   if (cpy->orig) {
     LoadExistant(cpy->orig);
     delete cpy;//wasteful, but hey
     if (orig!=false) {
       orig=false;
       std::vector<Mesh*> *tmp=bfxmHashTable.Get(this->orig->hash_name);
-      if (tmp->size()&&(*tmp)[0]==this->orig) {
+      if (tmp&&tmp->size()&&(*tmp)[0]==this->orig) {
         if (this->orig->refcount==1) {
           bfxmHashTable.Delete(this->orig->hash_name);        
+          delete tmp;
           orig=true;
         }
       }
@@ -196,7 +198,10 @@ Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup 
     }
   }else {
     delete cpy;
-    fprintf (stderr,"fallback, %s unable to be loaded as bfxm\n",filename); 
+    fprintf (stderr,"fallback, %s unable to be loaded as bfxm\n",filename.c_str()); 
+  }
+}
+Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig, const vector<string>&textureOverride):hash_name(filename){
     this->orig=NULL;
     InitUnit();
     Mesh *oldmesh;
@@ -219,7 +224,7 @@ Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup 
     bool xml=true;
     if(xml) {
       //LoadXML(filename,scale,faction,fg,orig);
-      LoadXML(f,scale,faction,fg,orig);
+      LoadXML(f,scale,faction,fg,orig,textureOverride);
       oldmesh = this->orig;
     } else {
       // This must be changed someday
@@ -239,8 +244,8 @@ Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup 
     } else {
       this->orig=NULL;
     }
-  }
 }
+
 float const ooPI = 1.00F/3.1415926535F;
 //#include "d3d_internal.h"
 void Mesh::SetMaterial (const GFXMaterial & mat) {

@@ -126,7 +126,7 @@ struct OrigMeshLoader{
 void Mesh::BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, vector<Mesh*>&output, Vector overallscale,int fac){
   Flightgroup * fg=0;
 #else
-vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & scalex, int faction, class Flightgroup * fg,std::string hash_name){
+vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & scalex, int faction, class Flightgroup * fg,std::string hash_name, const std::vector<std::string>&overrideTextures){
   Vector overallscale=scalex;
   int fac=faction;
   FILE * Outputfile=0;
@@ -336,6 +336,24 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
                           break;
                         }
 		  }
+                  /*
+                  for (int LC=0;LC<overrideTextures.size();++LC) {
+                    if (overrideTextures[LC]!="") {
+                      while (xml.decals.size()<=LC) {
+                        MeshXML::ZeTexture z;
+                        xml.decals.push_back(z);
+                      }
+                      if (overrideTextures[LC].find(".ani")!=string::npos) {
+                        xml.decals[LC].decal_name="";
+                        xml.decals[LC].animated_name=overrideTextures[LC];
+                        xml.decals[LC].alpha_name="";
+                      }else {
+                        xml.decals[LC].animated_name="";
+                        xml.decals[LC].alpha_name="";
+                        xml.decals[LC].decal_name=overrideTextures[LC];
+                      }
+                    }
+                    }*/
 		  fprintf(Outputfile,">\n");
 		  //End Textures
 		  fprintf(Outputfile,"<Material power=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\">\n",power,cullface,lighting,reflect,usenormals);
@@ -655,7 +673,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 		  //End Geometry
 		  //go to next mesh
 		  fprintf(Outputfile,"</Mesh>\n");
-                  mesh->PostProcessLoading(&xml);
+                  mesh->PostProcessLoading(&xml,overrideTextures);
 		  word32index=meshbeginword+(meshlength/4);
 	  }
 	  //go to next record

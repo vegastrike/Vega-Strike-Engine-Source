@@ -1261,8 +1261,8 @@ bool loadObj(VSFile &f, std::string str) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction, Flightgroup * fg){
-  vector<Mesh *> m = LoadMeshes(filename,scale,faction,fg);
+Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction, Flightgroup * fg,const std::vector<std::string> & overridetextures){
+  vector<Mesh *> m = LoadMeshes(filename,scale,faction,fg,overridetextures);
   if (m.empty()) {
     return 0;
   }
@@ -1276,7 +1276,7 @@ Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction,
 }
 
 Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
-vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int faction, Flightgroup * fg) {
+vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int faction, Flightgroup * fg, const std::vector<std::string> &overrideTextures) {
   /*
   if (strstr(filename,".xmesh")) {
     Mesh * m = new Mesh (filename,scale,faction,fg);
@@ -1324,7 +1324,7 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
     }
     f.GoTo(0);
     hash_name =(err==VSFileSystem::Shared)?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
-    vector <Mesh*> retval (LoadMeshes(f,scale,faction,fg,hash_name));
+    vector <Mesh*> retval (LoadMeshes(f,scale,faction,fg,hash_name,overrideTextures));
     vector <Mesh*>* newvec = new vector<Mesh*>(retval);
     for (unsigned int i=0;i<retval.size();++i) {
       retval[i]->hash_name=hash_name;
@@ -1336,13 +1336,14 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
     return retval;
   }else {
     f.Close();
-    Mesh * m = new Mesh (filename,scale,faction,fg);
+    int dummyXML;
+    Mesh * m = new Mesh (filename,scale,faction,fg,dummyXML);
     vector <Mesh*> ret;
     ret.push_back(m);
     return ret;    
   }
 }
-void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis) {
+void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis, const vector<string> &textureOverride) {
   VSFile f;
   VSError err = f.OpenReadOnly( filename, MeshFile);
   if( err>Ok)
@@ -1352,11 +1353,11 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
 	winsys_exit(1);
 	return;
   }
-  LoadXML( f, scale, faction, fg, origthis);
+  LoadXML( f, scale, faction, fg, origthis,textureOverride);
   f.Close();
 }
 
-void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction, Flightgroup *fg, bool origthis)
+void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction, Flightgroup *fg, bool origthis, const vector<string> &textureOverride)
 {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;
@@ -1406,7 +1407,7 @@ void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction,
     exit(-1);
   }
 
-  PostProcessLoading(xml);
+  PostProcessLoading(xml,textureOverride);
   numlods=xml->lod.size()+1;
   if (origthis) {
     orig=NULL;
@@ -1421,7 +1422,7 @@ void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction,
 
   delete xml;
 }
-void Mesh::PostProcessLoading(MeshXML * xml) {
+void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverride) {
   unsigned int i; unsigned int a=0;
   unsigned int j;
   //begin vertex normal calculations if necessary
@@ -1612,6 +1613,25 @@ void Mesh::PostProcessLoading(MeshXML * xml) {
       
   }
   string factionname = FactionUtil::GetFaction(xml->faction);
+  
+  for (int LC=0;LC<textureOverride.size();++LC) {
+    if (textureOverride[LC]!="") {
+      while (xml->decals.size()<=LC) {
+        MeshXML::ZeTexture z;
+        xml->decals.push_back(z);
+      }
+      if (textureOverride[LC].find(".ani")!=string::npos) {
+        xml->decals[LC].decal_name="";
+        xml->decals[LC].animated_name=textureOverride[LC];
+        xml->decals[LC].alpha_name="";
+      }else {
+        xml->decals[LC].animated_name="";
+        xml->decals[LC].alpha_name="";
+        xml->decals[LC].decal_name=textureOverride[LC];
+      }
+    }
+  }
+
   while (Decal.size()<xml->decals.size())
       Decal.push_back(NULL);
   Decal[0]=(TempGetTexture(xml, 0,factionname));
