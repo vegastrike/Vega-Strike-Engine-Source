@@ -283,11 +283,19 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   XML_SetElementHandler(parser, &Universe::Faction::beginElement, &Universe::Faction::endElement);
  
   do {
+#ifdef BIDBG
 	char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+#else
+	char buf[chunk_size];
+#endif
 	int length;
 	length = fread (buf,1, chunk_size,inFile);
 	//length = inFile.gcount();
+#ifdef BIDBG
 	XML_ParseBuffer(parser, length, feof(inFile));
+#else
+	XML_Parse(parser, buf,length, feof(inFile));
+#endif
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);

@@ -1035,11 +1035,19 @@ void Unit::LoadXML(const char *filename)
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
   
   do {
+#ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+#else
+    char buf[chunk_size];
+#endif
     int length;
     length = fread (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
+#ifdef BIDBG
     XML_ParseBuffer(parser, length, feof(inFile));
+#else
+    XML_Parse (parser,buf,length,feof(inFile));
+#endif
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);

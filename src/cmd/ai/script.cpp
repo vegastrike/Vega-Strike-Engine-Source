@@ -726,11 +726,11 @@ void AIScript::LoadXML() {
 
   do {
 #ifdef BIDBG
-  fprintf (stderr,"bufget");
-#endif
+    fprintf (stderr,"bufget");
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-#ifdef BIDBG
-  fprintf (stderr,"%xebufget",buf);
+    fprintf (stderr,"%xebufget",buf);
+#else
+    char buf[chunk_size];
 #endif
     int length;
 
@@ -738,11 +738,11 @@ void AIScript::LoadXML() {
     length = fread (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-  fprintf (stderr,"pars%d",length);
-#endif
+    fprintf (stderr,"pars%d",length);
     XML_ParseBuffer(parser, length, feof(inFile));
-#ifdef BIDBG
-  fprintf (stderr,"ed");
+    fprintf (stderr,"ed");
+#else
+    XML_Parse (parser,buf,length,feof(inFile));
 #endif
 
   } while(!feof(inFile));

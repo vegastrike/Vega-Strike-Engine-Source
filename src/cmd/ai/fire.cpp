@@ -245,7 +245,6 @@ void FireAt::Execute () {
   fflush (stderr);
 #endif
       parent->Fire(true);
-      fprintf (stderr,"tog ");
       parent->ToggleWeapon(true);//change missiles to only fire 1
 #ifdef AGGDEBUG
   fprintf (stderr,"ebb ");
