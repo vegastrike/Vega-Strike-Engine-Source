@@ -187,8 +187,8 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  string wormholename = wormhole_unit+".stable";
 	  
 	  Unit * jump = UnitFactory::createUnit (wormholename.c_str(),true,faction);
-
-	  
+	  static int neutralfaction=FactionUtil::GetFaction("neutral");
+	  faction = neutralfaction;
 	  if (jump->name=="LOAD_FAILED") {
 		  wormhole=false;
 	  }else {

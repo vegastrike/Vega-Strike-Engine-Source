@@ -695,7 +695,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     }
   }
   if (entitytype==JUMP) {
-    fprintf (fp, "alpha=\"ONE ONE\" destination=\"%s\" ",getJumpTo(s).c_str());
+    fprintf (fp, "alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" ",getJumpTo(s).c_str(),StarSystemGent::faction.c_str());
 
   }
   fprintf (fp," >\n");

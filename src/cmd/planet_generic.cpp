@@ -303,7 +303,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static int numdock = XMLSupport::parse_int(vs_config->getVariable ("physics","num_planet_docking_port","4"));
   static float planetdockportsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_size","1.2"));
   static float planetdockportminsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_min_size","300"));
-  if (!atmospheric) {
+  if ((!atmospheric) && dest.size()==0) {
     for (int pdp=0;pdp<numdock;pdp++) {
       float dock = radius*planetdockportsize;
       if (dock-radius<planetdockportminsize) {
