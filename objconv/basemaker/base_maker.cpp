@@ -757,6 +757,7 @@ void Base::Room::Talk::EndXML (FILE *fp) {
 }
 
 void Base::Room::Bar::EndXML (FILE *fp) {
+	Indent(fp);fprintf(fp,"import bar_lib\n");
 	Indent(fp);fprintf(fp,"bar = bar_lib.MakeBar (room,time_of_day)\n");
 	Indent(fp);
 	fprintf(fp,"Base.Link (");
@@ -765,6 +766,7 @@ void Base::Room::Bar::EndXML (FILE *fp) {
 }
 
 void Base::Room::Weapon::EndXML (FILE *fp) {
+	Indent(fp);fprintf(fp,"import weapons_lib\n");
 	Indent(fp);fprintf(fp,"weap = weapons_lib.MakeWeapon (room,time_of_day)\n");
 	Indent(fp);
     
@@ -881,7 +883,7 @@ void Base::EndXML () {
 	} else {
 		fp=fopen((basefile+".py").c_str(),"wt");
 	}
-	fprintf(fp,"import Base\nimport bar_lib\nimport weapons_lib\nimport dynamic_mission\nimport VS\n\n");
+	fprintf(fp,"import Base\nimport dynamic_mission\nimport VS\n\n");
 	if (time_of_day) {
 		fprintf(fp,"def Make%s (time_of_day='_day'):\n",basefile.c_str());
 		indentlevel++;
