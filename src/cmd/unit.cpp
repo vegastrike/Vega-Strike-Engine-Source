@@ -1071,7 +1071,7 @@ void Unit::SwapInHalos() {
 static bool CheckAccessory (Unit * tur) {
   bool accessory = tur->name.find ("accessory")!=string::npos;
   if (accessory) {
-    tur->SetAngularVelocity(tur->UpCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
+    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
 							   tur->GetComputerData().max_yaw,
 							   tur->GetComputerData().max_roll)));
   }
