@@ -44,7 +44,7 @@
     #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
 #endif
 
-#define  MAX_TEXTURES 256
+//#define  MAX_TEXTURES 16384
 static GLint MAX_TEXTURE_SIZE=256;
 
 GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat) {
@@ -79,7 +79,7 @@ struct GLTexture{
 //static GLTexture *textures=NULL;
 //static GLEnum * targets=NULL;
 
-static GLTexture textures[MAX_TEXTURES];
+static vector <GLTexture> textures;
 static int activetexture[4]={-1,-1};
 
 static void ConvertPalette(unsigned char *dest, unsigned char *src)
@@ -96,10 +96,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   GFXActiveTexture(texturestage);
   //case 3:  ... 3 pass... are you insane? well look who's talking to himself! oh.. good point :)
   *handle = 0;
-  while (*handle<MAX_TEXTURES&&textures[*handle].alive)
+  while (*handle<textures.size()&&textures[*handle].alive)
     (*handle)++;
-  if (*handle==MAX_TEXTURES)
-    return GFXFALSE;
+  if ((*handle)==textures.size())
+    textures.push_back(GLTexture());
   GLenum WrapMode;
   switch (texture_target) {
   case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
@@ -352,7 +352,7 @@ void /*GFXDRVAPI*/ GFXDeleteTexture (int handle) {
   textures[handle].alive = GFXFALSE;
 }
 void GFXInitTextureManager() {
-  for (int handle=0;handle<MAX_TEXTURES;handle++) {
+  for (int handle=0;handle<textures.size();handle++) {
     textures[handle].palette=NULL;
     textures[handle].width=textures[handle].height=0;
     textures[handle].texturestage=0;
@@ -365,7 +365,7 @@ void GFXInitTextureManager() {
   glGetIntegerv (GL_MAX_TEXTURE_SIZE,&MAX_TEXTURE_SIZE);
 }
 void GFXDestroyAllTextures () {
-  for (int handle=0;handle<MAX_TEXTURES;handle++) {
+  for (int handle=0;handle<textures.size();handle++) {
     GFXDeleteTexture (handle);
   }
 }
