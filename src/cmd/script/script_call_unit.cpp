@@ -232,24 +232,23 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret=vec3_vi;
 	//return vec3_vi;
       }
-  	  else if(cmd=="getFaction"){
-      if(mode==SCRIPT_RUN){
-		string factionname=_Universe->GetFaction(my_unit->faction);
-		varInst *str_vi=call_string_new(node,mode,factionname);
-		viret=str_vi;
-      }else {
-		varInst *str_vi=call_string_new(node,mode,"");
-		viret =str_vi;
-	  }
-	  return viret;
-	  }
-
       else{
 	viret=newVarInst(VI_TEMP);
 	viret->type=VAR_OBJECT;
 	viret->objectname="olist";
 	//return viret;
       }
+    }
+    else if(cmd=="getFaction"){
+      if(mode==SCRIPT_RUN){
+	string factionname=_Universe->GetFaction(my_unit->faction);
+	varInst *str_vi=call_string_new(node,mode,factionname);
+	viret=str_vi;
+      }else {
+	varInst *str_vi=call_string_new(node,mode,"");
+	viret =str_vi;
+      }
+      return viret;
     }
     else if(cmd=="getVelocity"){
       if(mode==SCRIPT_RUN){
