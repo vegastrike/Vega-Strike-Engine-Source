@@ -46,23 +46,27 @@ enum GalaxyNames {
 	SYSTEM,
 	VAR,
 	NAME,
-	VALUE
+	VALUE,
+        PLANETS,
+        PLANET
 };
-const EnumMap::Pair element_names [] = {
+const EnumMap::Pair element_names [8] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Galaxy",GALAXY),
     EnumMap::Pair ("Systems", SYSTEMS),
     EnumMap::Pair ("Sector", SECTOR),
     EnumMap::Pair ("System", SYSTEM),
+    EnumMap::Pair ("Planets", PLANETS),
+    EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("Var", VAR)
 };
-const EnumMap::Pair attribute_names [] = {
+const EnumMap::Pair attribute_names [3] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
 	EnumMap::Pair ("name",NAME),
     EnumMap::Pair ("value",VALUE)
 };
 
-const EnumMap element_map(element_names, 6);
+const EnumMap element_map(element_names, 8);
 const EnumMap attribute_map(attribute_names, 3);
 	class XML {
 	public:
@@ -82,9 +86,13 @@ const EnumMap attribute_map(attribute_names, 3);
 		case GALAXY:
 			break;
 		case SYSTEMS:
+			xml->stak.push_back ("<planets>");
+			xml->g->addSection (xml->stak);
 			break;
 		case SECTOR:
 		case SYSTEM:
+                case PLANETS:
+                case PLANET:
 			for (iter = attributes.begin(); iter!=attributes.end();++iter) {
 				attr = (GalaxyNames)attribute_map.lookup((*iter).name);
 				switch (attr) {
@@ -164,6 +172,14 @@ Galaxy::Galaxy (const Galaxy & g):data(g.data) {
 		subheirarchy = new SubHeirarchy (*g.subheirarchy);
 	}else
 		subheirarchy = NULL;
+        if (subheirarchy) {
+          SubHeirarchy::iterator iter=subheirarchy->find("<planets>");
+          if (iter==subheirarchy->end()) {
+            planet_types = NULL;
+          } else {
+            planet_types = &(*iter).second;
+          }
+        }
 }
 
 void Galaxy::processSystem(string sys,const QVector &coords){
@@ -191,34 +207,47 @@ void dotabs (VSFileSystem::VSFile & f, unsigned int tabs) {
 		f.Fprintf ("\t");
 	}
 }
-void Galaxy::writeSector(VSFileSystem::VSFile & f, int tabs) {
-	for (StringMap::iterator dat = data.begin();dat!=data.end();++dat) {
+void Galaxy::writeSector(VSFileSystem::VSFile & f, int tabs, string sectorType) {
+	StringMap::iterator dat;
+	for (dat = data.begin();dat!=data.end();++dat) {
+          if ((*dat).first!="jumps") {
 		dotabs(f,tabs);
 		f.Fprintf ("<var name=\"%s\" value=\"%s\"/>\n",(*dat).first.c_str(),(*dat).second.c_str());
+          }
 	}
+        dat = data.find("jumps");
+        if (dat!=data.end()) {
+          dotabs(f,tabs);
+          f.Fprintf("<var name=\"jumps\" value=\"%s\"/>\n",(*dat).second.c_str());
+        }
 	if (subheirarchy) {
 		for (SubHeirarchy::iterator it=  subheirarchy->begin();it!=subheirarchy->end();++it) {
-			dotabs(f,tabs);
-			f.Fprintf ("<%s name=\"%s\">\n",tabs>1?"system":"sector",(*it).first.c_str());
-			(*it).second.writeSector(f,tabs+1);
-			dotabs(f,tabs);
-			f.Fprintf ("</%s>\n",tabs>1?"system":"sector");
+			if (&(*it).second!=planet_types) {
+				dotabs(f,tabs);
+				f.Fprintf ("<%s name=\"%s\">\n",sectorType.c_str(),(*it).first.c_str());
+				(*it).second.writeSector(f,tabs+1,"system");
+				dotabs(f,tabs);
+				f.Fprintf ("</%s>\n",sectorType.c_str());
+			}
 		}
 	}
 }
-void Galaxy::writeGalaxy(const char * filename) {
-	VSFile f;
-	VSError err = f.OpenCreateWrite( filename, UniverseFile);
-	if (err<=Ok ) {
-		f.Fprintf ("<galaxy><systems>\n");
-		writeSector(f,1);
-		f.Fprintf ("</systems></galaxy>\n");
-
+void Galaxy::writeGalaxy(VSFile &f) {
+	f.Fprintf ("<galaxy>\n<systems>\n");
+	writeSector(f,1);
+	f.Fprintf ("</systems>\n");
+	if (planet_types) {
+		f.Fprintf("<planets>\n");
+		planet_types->writeSector(f,1,"planet");
+		f.Fprintf("</planets>\n");
 	}
+	f.Fprintf("</galaxy>\n");
 }
+
 Galaxy::Galaxy(const char *configfile){
   using namespace VSFileSystem;
   subheirarchy=NULL;
+  planet_types=NULL;
   VSFile f;
   VSError err = f.OpenReadOnly(configfile,UniverseFile);
   if (err<=Ok) {
@@ -251,6 +280,10 @@ Galaxy::Galaxy(const char *configfile){
 		exit(1);
 	}
   }
+}
+
+Galaxy *Galaxy::getPlanetTypes() {
+  return planet_types;
 }
 SubHeirarchy & Galaxy::getHeirarchy() {
 	if (!subheirarchy) {
@@ -370,3 +403,40 @@ string Galaxy::getVariable(string section,string name,string defaultvalue){
 }
 
 
+ bool Galaxy::setPlanetVariable(string name,string value){
+       if (!planet_types)
+               return false;
+       planet_types->data[name]=value;
+       return true;
+ }
+ 
+ bool Galaxy::setPlanetVariable(string section,string name,string value){
+       if (!planet_types)
+               return false;
+       planet_types->getHeirarchy()[section].data[name]=value;
+       return true;
+ }
+ 
+ string Galaxy::getPlanetVariable(string section,string name,string defaultvalue){
+       if (planet_types) {
+               SubHeirarchy::iterator i;
+               i = planet_types->subheirarchy->find(section);
+               if (i!=planet_types->subheirarchy->end()) {
+                       Galaxy * g = &(*i).second;
+                       StringMap::iterator j = planet_types->data.find(name);
+                       if (j!=g->data.end())
+                               return (*j).second;
+               }
+       }
+       return defaultvalue;
+ }
+ 
+ 
+ 
+string Galaxy::getPlanetVariable(string name,string defaultvalue){
+  if (planet_types) {
+    StringMap::iterator j = planet_types->data.find(name);
+    if (j!=planet_types->data.end())
+      return (*j).second;
+  }
+}
