@@ -1401,7 +1401,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 }
 
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
-{s
+{
 	// If it is not a player, it is a unit controlled by server so compute changes
 	if( !_Universe->isPlayerStarship( this))
 	{

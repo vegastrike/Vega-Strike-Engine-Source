@@ -13,11 +13,11 @@ GameBuilding::GameBuilding (Terrain * parent, bool vehicle, const char *filename
   this->parent.terrain = parent;
 }
 
-void GameBuilding::UpdatePhysics2 (const Transformation &trans, const Transfromation &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
+void GameBuilding::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL) {
   if (GetPlanetOrbit()) {
     SetPlanetOrbitData(GetPlanetOrbit());//makes it dirty
   }
-  GameUnit<Building>::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
+  GameUnit<Building>::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat,cum_vel,lastframe,uc);
   QVector tmp (LocalPosition());
   Vector p,q,r;
   GetOrientation (p,q,r);

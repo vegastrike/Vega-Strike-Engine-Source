@@ -12,8 +12,8 @@ protected:
   friend class UnitFactory;
 
  public:
-  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
-
+	
+	virtual void UpdatePhysics2 (const Transformation &trans, const Transformation &oldtranssmat, const Matrix & m, float, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);	
 protected:
     /// default constructor forbidden
     GameBuilding( );
