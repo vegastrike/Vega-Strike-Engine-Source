@@ -793,6 +793,12 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   }
 
   if (ol&&(!pointingtool)) {
+    Unit * oltarg = ol->Target();
+    if (oltarg) {
+      if (_Universe->getRelationship (ol->faction,oltarg->faction)>=0) {
+	ol->Target(NULL);
+      }
+    }
     ol->PrimeOrders();
     ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
     ol->SetVisible (true);
