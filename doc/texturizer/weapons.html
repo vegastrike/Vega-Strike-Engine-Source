@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
-<META Name="Generator" Content="Lotus Word Pro"></META>
-<TITLE>Place Your Web Page Title Here</TITLE>
+<META Name="Vegastrike Texturiser" Content="Howto"></META>
+<TITLE>Placing Weapons Using Texturiser</TITLE>
 </HEAD>
 
 <BODY BGCOLOR="#C0C0C0">
@@ -25,7 +25,7 @@
 		<TD ALIGN="CENTER" VALIGN="TOP">Resize logo.</TD>
 		<TD ALIGN="CENTER" VALIGN="TOP">Rotate logo.</TD>
 		<TD ALIGN="CENTER" VALIGN="TOP">Turn logo into gun.</TD>
-		<TD ALIGN="CENTER" VALIGN="TOP">Turn logo into engine.</TD>
+		<TD ALIGN="CENTER" VALIGN="TOP">Turn logo into engine. *</TD>
 		<TD ALIGN="CENTER" VALIGN="TOP">Turn logo into turret.</TD>
 		<TD ALIGN="CENTER" VALIGN="TOP">Turn logo into lights.</TD>
 		<TD ALIGN="CENTER" VALIGN="TOP">Travel through active logos.</TD></TR>
@@ -51,9 +51,9 @@
 		<TD ALIGN="CENTER" VALIGN="TOP">Makes squadron logo.</TD></TR>
 
 </TABLE>
-<FONT FACE="Arial"></FONT>
-<P><FONT FACE="Arial"></FONT>
-<P><FONT FACE="Arial">Hit space to change to weapon mode.  The texture will disappear.</FONT>
+<FONT>* Not yet implemented.</FONT>
+<P>
+<HR><P><FONT FACE="Arial">Hit space to change to weapon mode.  The texture will disappear.</FONT>
 <P><FONT FACE="Arial">Weapon mode is a bit more complicated than texturing, any given weapon must be on the surface of your starship.</FONT>
 <P><FONT FACE="Arial">Also you may position painted decals on your starship.  This is used for force identification (not yet used in the game) and will be eventually used to identify captured ships in future multiplayer.</FONT>
 <P><FONT FACE="Arial">The hornet so far has 2 confed logos, 2 engines and no weapons.</FONT>
@@ -62,7 +62,7 @@
 <P><FONT FACE="Arial">Similarly, they are made into turrets through "k" and lights through "l."  It is probably best to make them different sizes so you don't get confused with thich one is what. </FONT> 
 <P><FONT FACE="Arial">Try adding a new weapon or logo, press "s".</FONT>  <FONT FACE="Arial">To position it on the current polygon, press a number 1 through 4 to draw it towards the selected vertex.  Similarly 5-8 pushes it away from that vertex.</FONT>  <FONT FACE="Arial">This can be used relaticely easily to position polygons on mesh. </FONT> 
 <P><FONT FACE="Arial">Now unfortunately the saving of the weapons is somewhat user unfriendly. when you exit and save, the results go into a file known as export-unit.xunit </FONT> 
-<P><FONT FACE="Arial">This is the editor's best guess at what you'd like to save. It names all newly selected weapons as lasers...leaves all old weapons there too...if you move weapons around or even edit them, it'll maybe have duplicates of them. You must edit export-unit.xunit by hand to delete duplicates and to specify mount type and weapon type (though size and x,y,z,qi,qj,qk,ri,rj,rk are already there for you.  To see how to edit the unit fully, see the unit section in the <A HREF="howto.htm" TARGET="_top">howto</A>.</FONT>
+<P><FONT FACE="Arial">This is the editor's best guess at what you'd like to save. It names all newly selected weapons as lasers and leaves all old weapons there too.  If you move weapons around or even edit them, it may have duplicates of them. You must edit export-unit.xunit by hand to delete the (possible) duplicates and to specify mount type and weapon type.  To see how to edit the unit file fully, see the <A HREF="howto.htm#unit" TARGET="_top">unit</A> section in the howto.</FONT>
 <P>
 <!--<FOOTER>-->
 

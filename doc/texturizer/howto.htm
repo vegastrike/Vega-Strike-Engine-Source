@@ -12,13 +12,10 @@
 <P><FONT FACE="Arial">This HOWTO will go through the basics of creating a model (starfighter or otherwise) and then playing as it or against it in vegastrike. </FONT> 
 <P><FONT FACE="Arial"><I>Note: This HOWTO is a work in progress, chances are there are going to be a lot of missing or wrong bits. If anyone can spot an error, or would like something included, let someone know.</I> </FONT> 
 <P><FONT FACE="Arial">If anyone would like to change/improve this, feel free to do so.....so long as you send any modifications to <A HREF="MAILTO:&#100;&#97;&#110;&#100;&#97;&#110;&#100;&#97;&#109;&#97;&#110;&#64;users.sourceforge.net" TARGET="_top" TARGET="_top">me.</A></FONT>
-<UL>
-	<LI><FONT FACE="Arial">What you need</FONT> 
-</UL>
-<FONT FACE="Arial">To get started you are going to need several things.</FONT> 
+<P><FONT FACE="Arial">To get started you are going to need several things.</FONT> 
 <P><FONT FACE="Arial">1. A copy of <A HREF="http://sourceforge.net/projects/vegastrike" TARGET="_top" TARGET="_top">Vegastrike</A></FONT> 
 <P><FONT FACE="Arial">2. A 3D <A HREF="#modellers">modelling program</A> that ouputs 3DS, OBJ or WCP files, or a <A HREF="#converters">converter</A> that does the same.</FONT> 
-<P><FONT FACE="Arial">3. Access to a 'perl' enabled computer</FONT> 
+<P><FONT FACE="Arial">3. Access to a <A HREF="#perl">'perl' enabled computer</A></FONT> 
 <P><FONT FACE="Arial">4. An <A HREF="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/vegastrike/vegastrike/objconv/" TARGET="_top" TARGET="_top">xml converter script</A></FONT> 
 <P><FONT FACE="Arial">Optional 5. A copy of</FONT><FONT SIZE="3" FACE="Arial"> <A HREF="http://sourceforge.net/projects/vegastrike" TARGET="_top" TARGET="_top">Texturiser</A></FONT> 
 <P><FONT SIZE="3" FACE="Arial"><I>Note: It is not necessary to get the cvs version of Vegastrike, the tarball should work fine. Texturiser however has had a few new features added since the last &quot;pre-release&quot;, and some of these will be referred to in this howto. So if you plan to use texturiser with your modelling, it is recommended --but not nescesary-- that you get the cvs version.</I></FONT> 
@@ -42,11 +39,13 @@
 <UL>
 	<LI><FONT FACE="Arial">Converting (Getting to a VS supported file type)</FONT> 
 </UL>
-<FONT FACE="Arial">If your chosen program can output into of the supported file types, then there is no need for you to read this stage. If not though, then you need a converter that is able to convert your spaceship file into a supported file. Simply follow the converters instructions to export your model. If you do not want to have to retexture the whole craft again (assuming you did it already), then you should make sure that your converter can convert UV coordinates. If it doesn't (most likely) and you can't find one that does (I haven't found one yet), don't despair. All it means is that you are going to have to retexture you craft (and if you have any, its LODs) using texturiser.</FONT> 
+<FONT FACE="Arial">If your chosen program can output into of the supported file types, then there is no need for you to read this stage. If not though, then you need a converter that is able to convert your spaceship file into a supported file. Simply follow the converters instructions to export your model. If you do not want to have to retexture the whole craft again (assuming you did it already), then you should make sure that your converter can convert UV coordinates. If it doesn't (most likely) and you can't find one that does (<A HREF="http://www.anim8or.com/" TARGET="_top" TARGET="_top">Anim8or </A><I>should</I> do it), don't despair. All it means is that you are going to have to retexture you craft (and if you have any, its LODs) using texturiser.</FONT> 
 <UL>
-	<LI><FONT FACE="Arial">Converting (Getting to xml)</FONT> 
+<A NAME="perl"/>
+<LI><FONT FACE="Arial">Converting (Getting to xml)</FONT> 
 </UL>
-<CENTER><FONT FACE="Arial"><U>Linux</U>: The converters are perl scripts, and using them are very simple. Simply apply the script to a file..... </FONT></CENTER>
+<P ALIGN="center"><FONT FACE="Arial"><I>Note: If you are running linux, then you should have perl already installed (or at least on your distribution CDs).  If you are using windows, you most likely do not have it -so follow the instructions below.</I></FONT>
+<P ALIGN="CENTER"><FONT FACE="Arial"><U>Linux</U>: Once perl is installed it is all very easy.  The converters are perl scripts, so simply apply the script to a file..... </FONT></CENTER>
 <P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial"><I>Eg using bash: ./3ds2xml hellcat.3ds</I></FONT><FONT FACE="Arial"> </FONT> 
 <P ALIGN="CENTER"><FONT FACE="Arial"><U>Windows</U>: In windows it is a bit harder...............and the instructions are not yet written. </FONT> 
 <P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial"><I>For windows: coming soon</I></FONT><FONT FACE="Arial"> </FONT> 
@@ -54,11 +53,11 @@
 <P><FONT FACE="Arial">You can safely delete all but one xunit file, and then rename it to what your ship is called (while lopping off the xunit extension). Now, open up the unit file, and make sure that it is pointing to the right xmesh file/s. </FONT> 
 <P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial">For a single mesh file: &lt;Meshfile file=&quot;hellcat.xmesh&quot;/&gt;</FONT> 
 <P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial">For multiple mesh files:</FONT> 
-<P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial">&lt;Meshfile file=&quot;hellcat1.xmesh&quot;/&gt;</FONT> 
+<P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial">&lt;Meshfile file=&quot;hellcat1.xmesh&quot;/&gt;</FONT>
 <P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial">&lt;Meshfile file=&quot;hellcat2.xmesh&quot;/&gt;</FONT> 
 <P ALIGN="CENTER"><FONT SIZE="3" FACE="Arial">&lt;Meshfile file=&quot;hellcat3.xmesh&quot;/&gt;</FONT> 
 <P><FONT FACE="Arial">And then open up the xmesh file, to make sure it's pointing to the right texture file. </FONT> 
-<P><FONT FACE="Arial">Congratulations, your basic ship designing is done (unless you need to <A HREF="texturing.html" TARGET="_top" TARGET="_top">texture</A> using texturiser). Now it is time to change your ship from an empty shell to a fully fledged ship, using the unit file. Texturiser is good to be used when adding weapons, but is not nescesary.  Other options are available for your model other than a simple texture.  The options and how to use them are found in the <A HREF="#xmesh">xmesh</A> section of this howto.</FONT> 
+<P><FONT FACE="Arial">Congratulations, your basic ship designing is done (unless you need to <A HREF="texturing.html" TARGET="_top" TARGET="_top">texture</A> using texturiser). Now it is time to change your ship from an empty shell to a fully fledged ship, using the xmesh and unit files. Texturiser is good to be used when adding weapons, but is not nescesary.  Other options are available for your model other than a simple texture.  The options and how to use them are found in the <A HREF="#xmesh">xmesh</A> section of this howto.</FONT> 
 <P><FONT FACE="Arial"><B><U>Texturiser</U></B><I> -Preparing to texture</I> </FONT> 
 <P><FONT FACE="Arial">The texturiser is an utility for adding weapons and engines etc to a ship, as well as changing the uv mapping of a texture on a mesh. In the editor (because it's an old branch of vegastrike) confed stars and blue turret-like things are used to place weapons etc.</FONT>
 <P><FONT FACE="Arial">You texture the unit titled texture.xunit .You rename the .xunit file of the spaceship you wish to texture as &quot;texture.xunit&quot;. If there is no texture on the .xmesh file you can specify it either by writing it in texture.txt, or by editing the first line of the .xmesh file so that the first line reads </FONT> 
@@ -66,22 +65,46 @@
 <P><FONT FACE="Arial">Where xxxxx is the name of the texture file ie hellcat.png. The file types that are currently supported are bmp and png.  Although it is prefered, if your ship is going to be submitted, that it be in the png filetype.</FONT>
 <P><FONT FACE="Arial">Ok now it is time to run the program. To get a feel for this, it is recommended that you follow the walkthrough, which will take you through the process of <A HREF="texturing.html">texturing</A> and adding <A HREF="weapons.html" TARGET="_top">weapons</A>.  You can also refer to the <A HREF="controls.html" TARGET="_top">controls</A> page for a printable list of all texturiser commands.</FONT>
 <P>
-<P><FONT FACE="Arial"><B><U>The xmesh file</U></B><I> -Pretty decorations and such...</I> </FONT>
+<P><A NAME="xmesh"/><FONT FACE="Arial"><B><U>The xmesh file</U></B><I> -Pretty decorations and such...</I> </FONT>
+<P><FONT FACE="Arial">The options in the xmesh file are pretty much straight forward.  The top line as you would notice starts with &lt;Mesh texture="yourtexture.png"&gt;.  There are other options available though, these are scale, animation, blendmode and alphamap.
+<P align="center"><U>Using BMP files:</U>
+<P><U>Scale:</U><I>0.5 is half scale, 1.0 is normal etc</I>
+<P><U>Animation:</U><I>Allows texture animations.  eg </I>animation="test.ani<I>  The is a plain text file using the following format:</I>
+<P>numframes numsecondsperframe
+<P>frame1.bmp frame1.alp
+<P>frame2.bmp frame2.alp
+<P><I>The alp files are optional 256 colour greyscale files specifying the transparency.  White is solid, and black is transparent.</I>
+<P><U>Blendmode:</U><I>This is the transparency of the mesh.  If it is set to "ONE ZERO" then the mesh will be solid.  If it is "ONE ONE" then it will be 50% transparent.  If it is set to "SRCALPHA INVSRCALPHA" then it will use the alphamap file to set the transparency.</I>
+<P><U>Alphamap:</U><I>This is the map to be used to set the transparency with blendmode="SRCALPHA INVSRCALPHA".  It should be in the same format as the alp files (256 colour greyscale) and is used in the same way, with white solid, and black transparent.
+<P align="center"><U>Using PNG files:</U>
+<P align="center">Sorry, not yet :-(
+<P>You can also add some other options at the bottom of the file: 
+<P>&lt;/Polygons&gt;
+<P>&lt;material reflect="0"&gt;
+<P>&lt;specular red="0" green="0" blue="0" alpha="0"/&gt;
+<P>&lt;ambient red="1" green="1" blue="1" alpha="1"/&gt;
+<P>&lt;diffuse red="1" green="1" blue="1" alpha="1"/&gt;
+<P>&lt;/material&gt;
+<P>&lt;/mesh&gt;
+<P>These are all pretty self explanatory, but if you don't get it, feel free to ask.
 <P>
-<P><FONT FACE="Arial"><B><U>The unit file</U></B><I> -Give your ship some guts!</I> </FONT> 
-<P><FONT FACE="Arial">The unit file is the file that defines what your spaceship can do. It is here that you can adjust its mass, speed, engines and most important of all...... weapons. Until I get around to writing this part up properly, self explanatory items will not be covered.  It is probably best to look at some of the unit files of the vegastrike ships, and then fiddle with the values not covered here until you get a result you are happy with.</FONT>
+<P><A NAME="unit"/><FONT FACE="Arial"><B><U>The unit file</U></B><I> -Give your ship some guts!</I> </FONT> 
+<P><FONT FACE="Arial">The unit file is the file that defines what your spaceship can do. It is here that you can adjust its mass, speed, engines and most important of all...... weapons. Self explanatory items (of my judging) will not be covered.  It is probably best to look at some of the unit files of the vegastrike ships, and then fiddle with the values not covered here until you get a result you are happy with.</FONT>
 <P><FONT FACE="Arial">Mounts have sizes, specifying which types of weapons they could hold should that ordinance be available. The sizes available are: </FONT> 
 <P align="center"><FONT FACE="Arial">"light," "medium," "heavy," "capship-light," "capship-heavy" and "special" </FONT> 
 <P><FONT FACE="Arial">and for missiles: </FONT> 
 <P align="center"><FONT FACE="Arial">"light-missile," "medium-missile," "heavy-missile," "light-capship-missile," "heavy-capship-missile," "special-missile"</FONT> 
 <P><FONT FACE="Arial">The mount can be any of these types, or if nothing is specified, the weapon will be fixed.</FONT> 
-<P><FONT FACE="Arial">Now that mount size is specified, you can choose the weapon type.  The names of all current weapons available to be specified is located in weapon-info.xml.  If you want to, you are welcome to create your own weapons for inclusion.</FONT> 
+<P><FONT FACE="Arial">Now that mount size is specified, you can choose the weapon type.  The names of all current weapons available to be specified is located in weapon-info.xml.  If you want to, you are welcome to create your own weapons for inclusion.  An example is:
+<P><I>&lt;Mount weapon="Laser" size="Light" x="1.600000" y="-1.200000" z="14.000000" ri="0.762493" rj="0.457496" rk="0.457496" qi="-0.432829" qj="0.886268" qk="-0.164887"/&gt;</I></FONT>
+<P><FONT FACE="Arial">Turrets are similar, and can have a file specified from where to load the turret unit (and meshes).
+<P><I>eg  &lt;Subunit file="turret" x="-37.414394" y="13.548389" z="204.285370" ri="0.762493" rj="0.457496" rk="0.457496" qi="-0.432829" qj="0.886268" qk="-0.164887"/&gt;
+<P>In both of these cases, ri,rj,rk and qi,qj,qk are the orientation of the weapon.  They appear when texturizer is used to place the gun/turret and point out perpendicular from the polygon it was placed on.  Delete them to make the weapon face forward, or leave rk="-1" to make it face backwards.</I></FONT> 
 <P><FONT FACE="Arial">Lights can have both color and a texture specified.
-<P>eg......</FONT> 
-<P><FONT FACE="Arial">Turrets can have a file specified from where to load the turret unit (and meshes).
-<P>eg......</FONT>
+<P><I>eg  &lt;Light file="texturefile.png" x="0" y="0" z="-66" size="50" r="0.898039" g="0.803922" b="0.070588"/&gt;
+<P>Here, r,g,b is the colour of the light (each ranging from 0 to 1).</I></FONT>
 <P><FONT FACE="Arial">Cockpits can have the file specified and the position of the cockpit.
-<P>eg......</FONT>
+<P><I>eg &lt;Cockpit file="happy.bmp" x="10" y="10" z="100"/&gt;</I></FONT>
 <P><FONT FACE="Arial"><B><U>Playing against or as your ship</U></B> </FONT> 
 <P><FONT FACE="Arial">Well, this is the easy part.  Create a folder in the units subdir with its name being your ships name.  Now move the mesh, unit file and texture into it (the texture could also be place in the textures directory).  Make sure that the unit files name is the same as the folder and then we are done.  Now simply open up the mission file you intend playing.  You are positioned in the first flightgroup.  Change the type of craft to your new one and off you go.  If you want to play against your ship, then simply change any other flightgroup to use your ship.
 <P><I>Tip:  If you find your ships blowing up before you can do anything, they may be too big for the current spacing........resize them in the xmesh file or move them away from other craft!</I></FONT> 
@@ -95,6 +118,7 @@
 <P><I>About the bookmarks:</I>
 <P>The recommended programs are purely a personal choice from what some of us found easiest to use several months ago.  If you find a program just as useable, let us know.  Also, if you find a program/converter/tutorial not included on this list that can compete with the ones included, let us know about it.  If it is a modelling program, then also give us your own rating compared to our recommended ones.</FONT>
 <DL>
+	<DT><A HREF="http://truevision.sourceforge.net/">Truevision</A>
 	<DT><FONT FACE="Arial"><A HREF="http://www.comp.lancs.ac.uk/computing/users/andy/ac3d.html" TARGET="_top" TARGET="_top">AC3D - 3D Graphics Modeller - HOME PAGE</A></FONT>
 	<DT><FONT FACE="Arial"><A HREF="http://www.anim8or.com/" TARGET="_top" TARGET="_top">Anim8or Free 3D Animation Software</A> </FONT>
 	<DT><FONT FACE="Arial"><A HREF="http://prettypoly.sourceforge.net/" TARGET="_top" TARGET="_top">Pretty Poly Editor - PPE</A> </FONT> 
@@ -151,12 +175,12 @@
 	<DT><FONT FACE="Arial"><A HREF="http://www.amabilis.com/3dc-tutorial-01/3dc%20low%20poly%20modeling.htm" TARGET="_top" TARGET="_top">3D Canvas tutorial - low poly modeling</A> </FONT> 
 	<DT><FONT FACE="Arial"><A HREF="http://dbolling.50megs.com/canopytutorial.htm" TARGET="_top" TARGET="_top">Making the canopy</A> </FONT> 
 </DL>
-<FONT FACE="Arial">Many of these <A HREF="#bookmarks">bookmarks</A> may be in the wrong category, or obselete (as I have not had a chance to check them all out.....) I would appreciate it if anyone could let me know if this has happened. </FONT>  
+<P><FONT FACE="Arial">Many of these <A HREF="#bookmarks">bookmarks</A> may be in the wrong category, or obselete (as I have not had a chance to check them all out.....) I would appreciate it if anyone could let me know if this has happened. </FONT>  
 <P><FONT FACE="Arial"><B><U>Last Updated</U></B> </FONT> 
 <P><FONT FACE="Arial">1-JAN-2002 </FONT> 
 <P><FONT FACE="Arial"><B><U>Authors</U></B> </FONT> 
 <P><FONT FACE="Arial"><A HREF="MAILTO:this person" TARGET="_top" TARGET="_top">Daniel Horn</A>: texturiser stuff</FONT> 
-<P><FONT FACE="Arial"><A HREF="MAILTO:this person" TARGET="_top" TARGET="_top">Jason Winzenried</A>: perl in windows</FONT> 
+<!--P><FONT FACE="Arial"><A HREF="MAILTO:this person" TARGET="_top" TARGET="_top">Jason Winzenried</A>: perl in windows</FONT--> 
 <P><FONT FACE="Arial"><A HREF="MAILTO:&#100;&#97;&#110;&#100;&#97;&#110;&#100;&#97;&#109;&#97;&#110;&#64;users.sourceforge.net" TARGET="_top" TARGET="_top">Daniel Aleksandrow</A>: everything else</FONT>
 <P><FONT FACE="Arial"><B><U>License</U></B> </FONT> 
 <P><FONT FACE="Arial"><I>Vegastrike 3D Howto: Creating models for use in Vegastrike (C) 2001 Vegastrike Team</I> </FONT> 
