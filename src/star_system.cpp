@@ -32,6 +32,7 @@
 #include "cmd/script/mission.h"
 #include "in_kb.h"
 #include "cmd/script/flightgroup.h"
+#include "load_mission.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -570,6 +571,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	    }
 		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
+		processDelayedMissions();
 	  }
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	}

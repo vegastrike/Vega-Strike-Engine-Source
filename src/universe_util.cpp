@@ -232,7 +232,7 @@ namespace UniverseUtil {
 		return _Universe->GetContraband(_Universe->GetFaction(faction.c_str()));
 	}
         void LoadMission (string missionname) {
-                ::LoadMission (missionname.c_str(),false);
+                delayLoadMission (missionname);
         }
         void SetAutoStatus (int global_auto, int player_auto) {
 	  if (global_auto==1) {

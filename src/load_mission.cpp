@@ -14,6 +14,7 @@
 #include "cmd/script/flightgroup.h"
 #include "python/python_class.h"
 #include "savegame.h"
+#include "load_mission.h"
 std::string PickledDataSansMissionName (std::string pickled) {
   unsigned int newline = pickled.find ("\n");
   if (newline!=string::npos)
@@ -43,6 +44,37 @@ int ReadIntSpace (std::string &str) {
   }
   str =str.substr (i,str.length()-i);
   return XMLSupport::parse_int (myint);
+
+}
+struct delayed_mission {
+  std::string str;
+  unsigned int player;
+  delayed_mission (std::string str) {
+    this->str= str;
+    player = _Universe->CurrentCockpit();
+  }
+};
+vector <delayed_mission> delayed_missions;
+
+void processDelayedMissions() {
+  while (!delayed_missions.empty()) {
+    if (delayed_missions.back().player<(unsigned int)_Universe->numPlayers()) {
+      int i = _Universe->CurrentCockpit();
+      _Universe->SetActiveCockpit(delayed_missions.back().player);
+      StarSystem * ss =_Universe->AccessCockpit()->activeStarSystem;
+      if (ss==NULL) {
+	ss = _Universe->activeStarSystem();
+      }
+      _Universe->pushActiveStarSystem (ss);
+      LoadMission (delayed_missions.back().str.c_str(),false);
+      delayed_missions.pop_back();
+      _Universe->popActiveStarSystem();
+      _Universe->SetActiveCockpit(i);
+    }
+  }
+}
+void delayLoadMission (std::string str) {
+  delayed_missions.push_back (delayed_mission(str));
 }
 void SaveGame::ReloadPickledData () {
   std::string lpd = last_pickled_data;
