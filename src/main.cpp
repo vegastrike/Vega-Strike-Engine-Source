@@ -431,7 +431,7 @@ void bootstrap_main_loop () {
 	int numplayers;
 	/*
 	string nbplayers = vs_config->getVariable("network","nbplayers","1");
-	// Test if nb players if present in netwokr section
+	// Test if nb players if present in network section
 	if( srvip != "" && nbplayers != "")
 	{
 		numplayers = atoi( nbplayers.c_str());
@@ -454,6 +454,7 @@ void bootstrap_main_loop () {
 		  if( pname=="")
 		  {
 			  cout<<"Missing or incomlpete section for player "<<p<<endl;
+			  cleanexit=true;
 			  winsys_exit(1);
 		  }
 	  }
@@ -522,6 +523,7 @@ void bootstrap_main_loop () {
 		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
+			cleanexit=true;
 			winsys_exit(1);
 			cout<<"Network initialization error - exiting"<<endl;
 		}
@@ -531,6 +533,7 @@ void bootstrap_main_loop () {
 		if( savefiles[k].empty())
 		{
 			cout<<"No server response, cannot connect, exiting"<<endl;
+			cleanexit=true;
 			winsys_exit(1);
 		}
 		else

@@ -277,6 +277,8 @@ SOCKETALT	NetClient::init( char * addr, unsigned short port)
 /**** Launch the client                                   ****/
 /*************************************************************/
 
+extern bool cleanexit;
+
 void	NetClient::start( char * addr, unsigned short port)
 {
     COUT << " enter " << __PRETTY_FUNCTION__
@@ -302,6 +304,7 @@ void	NetClient::start( char * addr, unsigned short port)
 	if( this->authenticate() == -1)
 	{
 		perror( "Error login in ");
+		cleanexit=true;
 		winsys_exit(1);
 	}
 
