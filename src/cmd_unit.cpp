@@ -198,8 +198,8 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 	)
       return true;
   }
-  for (int i=0;i<numsubunit;i++) {
-    if (querySphere (transformation,pnt,err))
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->querySphere (transformation,pnt,err))
       return true;
   }
   return false;
@@ -231,8 +231,8 @@ bool Unit::querySphere (Matrix t,const Vector &pnt, float err) {
 	)
       return true;
   }
-  for (int i=0;i<numsubunit;i++) {
-    if (querySphere (tmpo,pnt,err))
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->querySphere (tmpo,pnt,err))
       return true;
   }
   return false;
@@ -252,7 +252,7 @@ bool Unit::queryBoundingBox (const Vector &pnt, float err) {
     delete bbox;
   }
   for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->queryBoundingBox (transformation,pnt,err)) 
+    if (subunits[i]->subunits[i]->queryBoundingBox (transformation,pnt,err)) 
       return true;
   }
   return false;
@@ -369,7 +369,7 @@ bool Unit::queryFrustum(float frustum [6][4]) {
   }	
   
   for (i=0;i<numsubunit;i++) {
-    if (queryFrustum(transformation,frustum))
+    if (subunits[i]->queryFrustum(transformation,frustum))
       return true;
   }
   return false;
@@ -401,7 +401,7 @@ bool Unit::queryFrustum(Matrix t, float frustum [6][4]) {
   }	
   
   for (i=0;i<numsubunit;i++) {
-    if (queryFrustum(tmpo,frustum))
+    if (subunits[i]->queryFrustum(tmpo,frustum))
       return true;
   }
   return false;
@@ -461,8 +461,8 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
 	)
       return true;
   }
-  for (int i=0;i<numsubunit;i++) {
-    if (querySphere (transformation,mouseX,mouseY,err,activeCam,vw))
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->querySphere (transformation,mouseX,mouseY,err,activeCam,vw))
       return true;
   }
   return false;
@@ -503,8 +503,8 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Camera * act
 	)
       return true;
   }
-  for (int i=0;i<numsubunit;i++) {
-    if (querySphere (tmpo,mouseX,mouseY,err,activeCam,vw))
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->querySphere (tmpo,mouseX,mouseY,err,activeCam,vw))
       return true;
   }
   return false;
