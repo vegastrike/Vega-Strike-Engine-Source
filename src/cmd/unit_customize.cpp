@@ -202,14 +202,17 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
       } else {
 	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 	  bool found=false;//we haven't found a matching gun to remove
-	  for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
-	    int jkmod = (jmod+k)%nummounts;//we want to start with bias
-	    if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
-	      found=true;//we got one
-	      percentage+=mounts[jkmod].Percentage(up->mounts[i]);///calculate scrap value (if damaged)
-	      if (touchme) //if we modify
-		mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
-	      break;
+	  static   bool downmount =XMLSupport::parse_bool (vs_config->getVariable ("physics","can_downgrade_mount_upgrades","false"));
+	  if (downmount ) {
+	    for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
+	      int jkmod = (jmod+k)%nummounts;//we want to start with bias
+	      if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
+		found=true;//we got one
+		percentage+=mounts[jkmod].Percentage(up->mounts[i]);///calculate scrap value (if damaged)
+		if (touchme) //if we modify
+		  mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+		break;
+	      }
 	    }
 	  }
 	  if (!found)

@@ -516,7 +516,11 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
-	sprintf(floatprice,"Price: %.2f",(*CurrentList)[cargonumber].price);
+	float oldprice = (*CurrentList)[cargonumber].price;
+	if (mode==DOWNGRADEMODE) {
+	  oldprice =usedPrice(oldprice);
+	}
+	sprintf(floatprice,"Price: %.2f",oldprice);
 	CargoInfo->ChangeTextItem ("price",floatprice);
 	sprintf(floatprice,"Mass: %.2f",(*CurrentList)[cargonumber].mass);
 	CargoInfo->ChangeTextItem ("mass",floatprice);
