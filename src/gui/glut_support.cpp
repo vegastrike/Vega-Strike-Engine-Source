@@ -278,7 +278,8 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		    glScalef(font_size,font_size,1);
 		  }
 		}
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[cur]);
+		if (str[cur]!='\\')
+		  glutStrokeCharacter(GLUT_STROKE_ROMAN, str[cur]);
         }
 	glLoadIdentity();
 	glDisable(GL_LINE_SMOOTH);
