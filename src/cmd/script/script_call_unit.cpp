@@ -401,8 +401,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     }
     else if(method_id==CMT_UNIT_getFaction){
       if(mode==SCRIPT_RUN){
-	    varInst *ovi=getObjectArg(node,mode);
-	    Unit *my_unit=getUnitObject(node,mode,ovi);
+	//changed 042202
+	//    varInst *ovi=getObjectArg(node,mode);
+	//    Unit *my_unit=getUnitObject(node,mode,ovi);
 		string factionname=_Universe->GetFaction(my_unit->faction);
 		varInst *str_vi=call_string_new(node,mode,factionname);
 		viret=str_vi;
@@ -410,7 +411,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		varInst *str_vi=call_string_new(node,mode,"");
 		viret =str_vi;
       }
-      return viret;
+      //      return viret;
     }
     else if(method_id==CMT_UNIT_getVelocity){
       if(mode==SCRIPT_RUN){

@@ -80,25 +80,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
   varInst *vi=NULL;
 
   callback_module_type module_id=node->script.callback_module_id;
-
-  if(module_id==CMT_IO){
-    if(method=="PrintFloats"){
-      vi=callPrintFloats(node,mode);
-    }
-    else if(method=="printf"){
-      vi=call_io_printf(node,mode);
-    }
-    else if(method=="sprintf"){
-      vi=call_io_sprintf(node,mode);
-    }
-    else if(method=="message"){
-      vi=call_io_message(node,mode);
-    }
-    else if(method=="printMsgList"){
-      vi=call_io_printmsglist(node,mode);
-    }
-  }
-  else if(module_id==CMT_STD){
+  if(module_id==CMT_UNIT){
+    vi=call_unit(node,mode);
+  } else if(module_id==CMT_STD){
     if(mode==SCRIPT_PARSE){
       node->script.method_id=module_std_map[method];
     }
@@ -193,12 +177,29 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
   else if(module_id==CMT_ORDER){
     vi=call_order(node,mode);
   }
-  else if(module_id==CMT_UNIT){
-    vi=call_unit(node,mode);
-  }
   else if(module_id==CMT_STRING){
     vi=call_string(node,mode);
+  } 
+  else if(module_id==CMT_IO){
+    if(method=="PrintFloats"){
+      vi=callPrintFloats(node,mode);
+    }
+    else if(method=="printf"){
+      vi=call_io_printf(node,mode);
+    }
+    else if(method=="sprintf"){
+      vi=call_io_sprintf(node,mode);
+    }
+    else if(method=="message"){
+      vi=call_io_message(node,mode);
+    }
+    else if(method=="printMsgList"){
+      vi=call_io_printmsglist(node,mode);
+    }
+  }else if(module_id==CMT_BRIEFING){
+    vi=call_briefing(node,mode);
   }
+  
 
   return vi;
 }

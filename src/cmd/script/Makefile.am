@@ -12,6 +12,7 @@ libscript_a_SOURCES =				\
 	script_statement.cpp			\
 	script_expression.cpp			\
 	script_callbacks.cpp			\
+	script_call_briefing.cpp		\
 	script_call_olist.cpp			\
 	script_call_omap.cpp			\
 	script_call_unit.cpp			\

@@ -112,7 +112,7 @@ enum parsemode_type { PARSE_FULL,PARSE_DECL };
 
 enum callback_module_type {
   CMT_UNKNOWN=0,
-  CMT_IO,CMT_STD,CMT_STRING,CMT_OLIST,CMT_OMAP,CMT_ORDER,CMT_UNIT 
+  CMT_IO,CMT_STD,CMT_STRING,CMT_OLIST,CMT_OMAP,CMT_ORDER,CMT_UNIT, CMT_BRIEFING 
 };
 
 enum callback_module_std_type {
@@ -136,7 +136,16 @@ enum callback_module_std_type {
   CMT_STD_playSound,
   CMT_STD_terminateMission
 };
-
+enum callback_module_briefing_type {
+  CMT_BRIEFING_UNKNOWN=0,
+  CMT_BRIEFING_addShip,
+  CMT_BRIEFING_removeShip,
+  CMT_BRIEFING_enqueueOrder,
+  CMT_BRIEFING_replaceOrder,
+  CMT_BRIEFING_setShipPosition,
+  CMT_BRIEFING_getShipPosition,
+  CMT_BRIEFING_terminate
+}
 enum callback_module_olist_type {
   CMT_OLIST_UNKNOWN=0,
   CMT_OLIST_new ,
@@ -672,7 +681,8 @@ omap_t* getOMapObject(missionNode *node,int mode,varInst *ovi);
 
  varInst *getObjectArg(missionNode *node,int mode);
 
-varInst * call_unit(missionNode *node,int mode);
+ varInst * call_unit(missionNode *node,int mode);
+ varInst * call_briefing(missionNode *node,int mode);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
