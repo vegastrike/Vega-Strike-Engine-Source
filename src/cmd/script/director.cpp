@@ -101,6 +101,7 @@ unsigned int pushSaveData (int whichcp, string key, float val) {
   return ans->size()-1;
 
 }
+
 void putSaveData (int whichcp, string key, unsigned int num, float val) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return;
@@ -111,6 +112,63 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
   }
 }
 
+vector <string> loadStringList (int playernum,string mykey) {
+	if (playernum<0||playernum>=_Universe->numPlayers()) {
+		return vector<string> ();
+	}
+	olist_t * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
+	int lengt = ans->size();
+	if (lengt<1) {
+		return vector<string> ();
+	}
+	vector<string> rez;
+	string curstr;
+	int length = (*ans)[0]->float_val;
+	for (int j=0;j<length&&j<lengt;j++) {
+		char myint=(char)(*ans)[j+1]->float_val;
+		if (myint != '\0') {
+			curstr += myint;
+		} else {
+			rez.push_back(curstr);
+			curstr="";
+		}
+	}
+	return rez;
+}
+void saveStringList (int playernum,string mykey,vector<string> names) {
+	if (playernum<0||playernum>=_Universe->numPlayers()) {
+		return;
+	}
+	olist_t * ans =&((_Universe->AccessCockpit(playernum)->savegame->getMissionData (mykey)));
+	int length=ans->size();
+	int k=1;
+	int tot=0;
+	int i;
+	for (i=0;i<names.size();i++) {
+		tot += names[i].size()+1;
+	}
+	if (length==0) {
+		pushSaveData(playernum,mykey,tot);
+	} else {
+		(*ans)[0]->float_val=tot;
+	}
+	for (i=0;i<names.size();i++) {
+		for (int j=0;j<names[i].size();j++) {
+			if (k < length) {
+				(*ans)[k]->float_val=(float)names[i][j];
+			} else {
+				pushSaveData(playernum,mykey,(float)names[i][j]);
+			}
+			k+=1;
+		}
+		if (k < length) {
+			(*ans)[k]->float_val=0;
+		} else {
+			pushSaveData(playernum,mykey,0);
+		}
+		k+=1;
+	}
+}
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 PYTHON_BEGIN_MODULE(Director)
 PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")

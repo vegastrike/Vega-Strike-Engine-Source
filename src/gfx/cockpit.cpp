@@ -32,6 +32,7 @@
 #include "gui/glut_support.h"
 #include "networking/netclient.h"
 #include "audiolib.h"
+#include "save_util.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -1468,6 +1469,7 @@ void GameCockpit::Update () {
 	CockpitKeys::Inside(0,PRESS);
 	savegame->ReloadPickledData();
 	_Universe->popActiveStarSystem();
+	DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
       }
   }
   if (turretcontrol.size()>_Universe->CurrentCockpit())

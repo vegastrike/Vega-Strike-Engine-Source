@@ -2362,17 +2362,10 @@ void Unit::PerformDockingOperations () {
     ///force him in a box...err where he is
   }
 }
-bool Unit::Dock (Unit * utdw) {
-  if (docked&(DOCKED_INSIDE|DOCKED))
-    return false;
-  std::vector <Unit *>::iterator lookcleared;
-  if ((lookcleared = std::find (utdw->image->clearedunits.begin(),
-				utdw->image->clearedunits.end(),this))!=utdw->image->clearedunits.end()) {
-    int whichdockport;
-    if ((whichdockport=utdw->CanDockWithMe(this))!=-1) {
+
+bool Unit::ForceDock (Unit * utdw, int whichdockport) { 
       utdw->image->dockingports[whichdockport].used=true;
       utdw->docked|=DOCKING_UNITS;
-      utdw->image->clearedunits.erase (lookcleared);
       utdw->image->dockedunits.push_back (new DockedUnits (this,whichdockport));
       if (utdw->image->dockingports[whichdockport].internal) {
 	RemoveFromSystem();	
@@ -2387,8 +2380,18 @@ bool Unit::Dock (Unit * utdw) {
 		  this->RestoreGodliness();
 	//_Universe->AccessCockpit()->RestoreGodliness();
       }
-      
-      return true;
+	  return true;
+}
+bool Unit::Dock (Unit * utdw) {
+  if (docked&(DOCKED_INSIDE|DOCKED))
+    return false;
+  std::vector <Unit *>::iterator lookcleared;
+  if ((lookcleared = std::find (utdw->image->clearedunits.begin(),
+				utdw->image->clearedunits.end(),this))!=utdw->image->clearedunits.end()) {
+    int whichdockport;
+    if ((whichdockport=utdw->CanDockWithMe(this))!=-1) {
+	    utdw->image->clearedunits.erase (lookcleared);
+		return ForceDock(utdw,whichdockport);      
     }
   }
   return false;

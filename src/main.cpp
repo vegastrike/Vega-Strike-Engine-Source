@@ -49,9 +49,11 @@
 #include "universe_util.h"
 #include "networking/netclient.h"
 #include "universe.h"
+#include "save_util.h"
 /*
  * Globals 
  */
+const char *mission_key="unit_to_dock_with";
 ForceFeedback *forcefeedback;
 Universe * _Universe;
 // GameUniverse _Universe;
@@ -85,6 +87,47 @@ void setup_game_data ( ){ //pass in config file l8r??
 VegaConfig * createVegaConfig( char * file)
 {
 	return new GameVegaConfig( file);
+}
+
+void DockToSavedBases (int playernum) {
+	string str="MiningBase";
+	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
+	if (!plr) {
+		return;
+	}
+	vector <string> strs=loadStringList(playernum,mission_key);
+	if (strs.size()) {
+		str=strs[0];
+	}
+	un_iter iter=_Universe->activeStarSystem()->getUnitList().createIterator();
+	Unit *closestUnit=NULL;
+	float lastdist=0;
+	float dist=0;
+	while (iter.current()) {
+		Unit *un=iter.current();
+		if (un->name==str) {
+			dist=UnitUtil::getSignificantDistance(plr,un);
+			if (closestUnit==NULL||dist<lastdist) {
+				lastdist=dist;
+				closestUnit=un;
+			}
+		}
+		iter.advance();
+	}
+	if (closestUnit) {
+		vector <DockingPorts> dprt=closestUnit->image->dockingports;
+		int i;
+		for (i=0;;i++) {
+			if (i>=dprt.size()) {
+				return;
+			}
+			if (!dprt[i].used) {
+				break;
+			}
+		}
+		plr->ForceDock(closestUnit,i);
+		closestUnit->image->clearedunits.push_back(plr);
+	}
 }
 
 void ParseCommandLine(int argc, char ** CmdLine);
@@ -549,7 +592,11 @@ void bootstrap_main_loop () {
 			}
 		}
 	}
-
+	if (XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
+		for (int i=0;i<_Universe->numPlayers();i++) {
+			DockToSavedBases(i);
+		}
+	}
 	cout<<"Loading completed"<<endl;
 	// Send a network msg saying we are ready and also send position info
 	if( Network!=NULL) {

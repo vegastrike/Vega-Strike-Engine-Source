@@ -11,6 +11,8 @@
 #include <algorithm>
 #include "base_util.h"
 #include "config_xml.h"
+#include "save_util.h"
+#include "unit_util.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -18,7 +20,7 @@
  #endif
 static char makingstate=0;
 #endif
-
+extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked=false;
 
 BaseInterface::Room::~Room () {
@@ -450,6 +452,14 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	//	othtext.SetSize(2-(x*4),-.75);
 	othtext.SetSize(1-.01,-.75);
 	Load(basefile, compute_time_of_day(base,un),FactionUtil::GetFaction(base->faction));
+	vector <string> vec;
+	vec.push_back(base->name);
+	if (un) {
+	    int cpt=UnitUtil::isPlayerStarship(un);
+		if (cpt>=0) {
+			saveStringList(UnitUtil::isPlayerStarship(un),mission_key,vec);
+		}
+	}
 	if (!rooms.size()) {
 		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
@@ -484,8 +494,14 @@ void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int
 	}
 }
 void BaseInterface::Terminate() {
+  Unit *un=caller.GetUnit();
+  int cpt=UnitUtil::isPlayerStarship(un);
+  if (un&&cpt>=0) {
+    vector <string> vec;
+    vec.push_back(string());
+    saveStringList(cpt,mission_key,vec);
+  }
   BaseInterface::CurrentBase=NULL;
-
   restore_main_loop();
   delete this;
 }
