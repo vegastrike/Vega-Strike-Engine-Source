@@ -655,7 +655,7 @@ vector<System> readfile (const char * name) {
 			}else if (keys[i].find("DECLINATION")!=string::npos) { 
 				in.declination = atof (content[i].c_str());
 			}else if (keys[i].find("LUMIN")!=string::npos) {
-				in["lunminosity"]=content[i];  				
+				in["luminosity"]=content[i];  				
 				in.luminosity = atof(content[i].c_str());
 			}else if (keys[i].find("SPECTRUM")!=string::npos||keys[i].find("TYPE")!=string::npos) {
 				in.type = atoi(content[i].c_str());
