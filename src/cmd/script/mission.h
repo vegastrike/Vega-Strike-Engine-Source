@@ -417,6 +417,7 @@ class missionNode : public tagDomNode {
 
 
 class Mission {
+  class Briefing * briefing;
  public:
   Mission(char *configfile);
   void initMission();
@@ -443,13 +444,20 @@ class Mission {
   void DirectorEnd();
   void DirectorBenchmark();
   void DirectorShipDestroyed(Unit *unit);
-
+  void BriefingStart() ;
+  //clobbers the cam view & renders btw 0,0, and 1,1
+  void BriefingRender ();
+  void BriefingLoop();
+  void BriefingEnd();
+  bool BriefingInProgress();
   double getGametime();
 
   void  loadMissionModules();
  void  loadModule(string modulename);
 void addModule(string modulename);
-bool runScript(string modulename,string scriptname,unsigned int classid=0);
+bool runScript(string modulename,const string &scriptname,unsigned int classid=0);
+bool runScript(missionNode *,const string &scriptname,unsigned int classid=0);
+ void RunDirectorScript (const string &);
 unsigned int  createClassInstance(string modulename);
  void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
  void setCurrentAIOrder(Order *order) { current_ai_order=order; };

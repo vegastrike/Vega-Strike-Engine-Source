@@ -54,7 +54,7 @@
 #include "config_xml.h"
 
 #include "msgcenter.h"
-
+#include "cmd/briefing.h"
 #ifdef HAVE_PYTHON
 #include "Python.h"
 #endif
@@ -125,125 +125,74 @@ void Mission::DirectorInitgame(){
   if(director==NULL){
     return;
   }
-
-
 #ifdef HAVE_PYTHON
   Py_Initialize();
-  PyRun_SimpleString("import test1");
-  //  PyRun_SimpleString("director=VSdirector()");
+  PyRun_SimpleString("import test1");  //  PyRun_SimpleString("director=VSdirector()");
 #endif
-
-  missionNode *initgame=director->script.scripts["initgame"];
-
-  if(initgame==NULL){
-    warning("initgame not found");
-  }
-  else{
-    runtime.cur_thread->module_stack.push_back(director);
-    runtime.cur_thread->classid_stack.push_back(0);
-
-    varInst *vi=doScript(initgame,SCRIPT_RUN);
-    deleteVarInst(vi);
-
-    runtime.cur_thread->module_stack.pop_back();
-    runtime.cur_thread->classid_stack.pop_back();
-  }
-
-  //  msgcenter->add("game","all","initialization of programmed missions done");
-
-  if(debuglevel>=1 && start_game==false){
-    while(true){
-      DirectorLoop();
-#ifndef _WIN32
-
-      sleep(1);
-
-#endif
-    }
-  }
-
+  RunDirectorScript("initgame");
 }
 
 void Mission::DirectorLoop(){
-
   if(director==NULL){
     return;
   }
-
 #ifdef HAVE_PYTHON
   PyRun_SimpleString("test1.director.gameloop()");
 #endif
 
-  //  cout << "DIRECTOR LOOP" << endl;
-
-  //  saveVariables(cout);
-
-  missionNode *gameloop=director->script.scripts["gameloop"];
-
-  if(gameloop==NULL){
-    warning("no gameloop");
-    return;
+  if(vi_counter!=old_vi_counter){
+    char buf[200];
+    sprintf(buf,"VI_COUNTER %d\n",vi_counter);
+    debug(2,NULL,0,buf);
   }
-  else{
-
-    if(vi_counter!=old_vi_counter){
-      char buf[200];
-      sprintf(buf,"VI_COUNTER %d\n",vi_counter);
-      debug(2,NULL,0,buf);
-    }
-    old_vi_counter=vi_counter;
-
-    if(olist_counter!=old_olist_counter){
-      char buf[200];
-      sprintf(buf,"OLIST_COUNTER %d\n",olist_counter);
-      debug(2,NULL,0,buf);
-    }
-    old_olist_counter=olist_counter;
-
-    if(string_counter!=old_string_counter){
-      char buf[200];
-      sprintf(buf,"STRING_COUNTER %d\n",string_counter);
-      debug(2,NULL,0,buf);
-    }
-    old_string_counter=string_counter;
-
-    runtime.cur_thread->module_stack.push_back(director);
-    runtime.cur_thread->classid_stack.push_back(0);
-
-    varInst *vi=doScript(gameloop,SCRIPT_RUN);
-    deleteVarInst(vi);
-
-    runtime.cur_thread->module_stack.pop_back();
-    runtime.cur_thread->classid_stack.pop_back();
- 
-    //    doModule(director,SCRIPT_RUN);
+  old_vi_counter=vi_counter;
+  
+  if(olist_counter!=old_olist_counter){
+    char buf[200];
+    sprintf(buf,"OLIST_COUNTER %d\n",olist_counter);
+    debug(2,NULL,0,buf);
+  }
+  old_olist_counter=olist_counter;
+  
+  if(string_counter!=old_string_counter){
+    char buf[200];
+    sprintf(buf,"STRING_COUNTER %d\n",string_counter);
+    debug(2,NULL,0,buf);
+  }
+  old_string_counter=string_counter;
+  RunDirectorScript("gameloop");
+}
+bool Mission::BriefingInProgress() {
+  return (briefing!=NULL);
+}
+void Mission::BriefingStart() {
+  briefing = new Briefing();
+  RunDirectorScript ("initbriefing");
+}
+void Mission::BriefingLoop() {
+  if (briefing) {
+    RunDirectorScript ("loopbriefing");
+  }
+  briefing.Update();
+}
+void Mission::BriefingRender() {
+  if (briefing) {
+    briefing->Render();
   }
 }
 
+void Mission::BriefingEnd() {
+  if (briefing) {
+    RunDirectorScript ("endbriefing");      
+    delete briefing;
+    briefing = NULL;
+  }
+}
 void Mission::DirectorEnd(){
   if(director==NULL){
     return;
   }
-
-  missionNode *endgame=director->script.scripts["endgame"];
-
-  if(endgame==NULL){
-    warning("endgame not found");
-  }
-  else{
-    cout << "ENDGAME" << endl;
-
-    runtime.cur_thread->module_stack.push_back(director);
-    runtime.cur_thread->classid_stack.push_back(0);
-
-    varInst *vi=doScript(endgame,SCRIPT_RUN);
-    deleteVarInst(vi);
-
-    runtime.cur_thread->module_stack.pop_back();
-    runtime.cur_thread->classid_stack.pop_back();
-  }
-
-
+  RunDirectorScript ("endgame");
 #ifdef WIN32
   var_out.open("c:\\tmp\\default-player.variables");
 #else
@@ -354,9 +303,13 @@ void Mission::loadMissionModules(){
   }
 
 }
-
-bool Mission::runScript(string modulename,string scriptname,unsigned int classid){
-  missionNode *module_node=runtime.modules[modulename];
+void Mission::RunDirectorScript (const string& script){
+  runScript (director,script,0);
+}
+bool Mission::runScript(string modulename,const string &scriptname,unsigned int classid){
+  runScript (runtime.modules[modulename],scriptname,classid);
+}
+bool Mission::runScript(missionNode *module_node,const string &scriptname,unsigned int classid){
   if(module_node==NULL){
     return false;
   }
@@ -444,24 +397,5 @@ void Mission::DirectorShipDestroyed(Unit *unit){
 }
 
 void Mission::DirectorStartStarSystem(StarSystem *ss){
-  if(director==NULL){
-    return;
-  }
-
-  missionNode *iss=director->script.scripts["initstarsystem"];
-
-  if(iss==NULL){
-    warning("no initstarsystems");
-    return;
-  }
-
-    runtime.cur_thread->module_stack.push_back(director);
-    runtime.cur_thread->classid_stack.push_back(0);
-
-    varInst *vi=doScript(iss,SCRIPT_RUN);
-    deleteVarInst(vi);
-
-    runtime.cur_thread->module_stack.pop_back();
-    runtime.cur_thread->classid_stack.pop_back();
-
+  RunDirectorScript ("initstarsystem");
 }

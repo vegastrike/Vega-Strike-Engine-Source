@@ -53,6 +53,7 @@ Mission::~Mission() {
   //do not delete msgcenter...could be vital
 }
 Mission::Mission(char *configfile){
+  briefing=NULL;
   number_of_flightgroups=0;
   number_of_ships=0;
 
