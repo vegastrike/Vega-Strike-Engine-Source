@@ -104,6 +104,19 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   if (lastchangedtarg+mintimetoswitch>0) 
     return;//don't switch if switching too soon
+  Unit * curtarg=NULL;
+  if ((curtarg=parent->Target())) 
+    if (isJumpablePlanet (curtarg))
+      return;
+  Flightgroup * fg = parent->getFlightgroup();;
+  if (fg) {
+    if (!fg->directive.empty()) {
+      if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
+	return;//not allowed to switch targets
+      }
+    }
+  }
+
   lastchangedtarg=0;
   parent->getAverageGunSpeed (gunspeed,gunrange);  
 
@@ -240,22 +253,11 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
     }
     return istargetjumpableplanet;
 }
-void FireAt::PossiblySwitchTarget(bool istargetjumpableplanet ) {
+void FireAt::PossiblySwitchTarget(bool unused) {
   static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
   static float targettime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));
-  if ((!istargetjumpableplanet)&&/*(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM*/lastchangedtarg+targettime<0) {
-    bool switcht=true;
-    Flightgroup * fg = parent->getFlightgroup();;
-    if (fg) {
-      if (!fg->directive.empty()) {
-	if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
-	  switcht=false;
-	}
-      }
-    }
-    if (switcht) {
-      ChooseTarget();
-    }
+  if (lastchangedtarg+targettime<0) {
+    ChooseTarget();
   }
 }
 void FireAt::Execute () {
