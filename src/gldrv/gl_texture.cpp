@@ -102,10 +102,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   GFXActiveTexture(texturestage);
   //case 3:  ... 3 pass... are you insane? well look who's talking to himself! oh.. good point :)
   *handle = 0;
-  while (*handle<textures.size()&&textures[*handle].alive)
-    (*handle)++;
-  if ((*handle)==textures.size())
+  while (*handle<textures.size()) {
+    if (!textures[*handle].alive){
+      fprintf (stderr,"got dead tex");
+      break;
+    }else{
+      (*handle)++;
+    }
+  }
+  if ((*handle)==textures.size()) {
+    fprintf (stderr,"!");
     textures.push_back(GLTexture());
+  }
   GLenum WrapMode;
   switch (texture_target) {
   case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
@@ -116,12 +124,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     fprintf (stderr, "stage %d, wid %d, hei %d",texturestage,width,height);
     break;
   }
-  
+  fprintf (stderr,"!");  
   textures[*handle].name = *handle+1; //for those libs with stubbed out handle gen't
   //fprintf (stderr,"Texture Handle %d",*handle);
   textures[*handle].alive = GFXTRUE;
   textures[*handle].texturestage = texturestage;
   textures[*handle].mipmapped = mipmap;
+  fprintf (stderr,"!");
   glGenTextures (1,&textures[*handle].name);
   glBindTexture (textures[*handle].targets,textures[*handle].name);
   activetexture[texturestage]=*handle;
@@ -146,12 +155,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
   textures[*handle].width = width;
   textures[*handle].height = height;
-  if (palette&&textureformat == PALETTE8)
-    {
-      textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
+  if (palette&&textureformat == PALETTE8){
+    fprintf (stderr," palette ");  
+    textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
       ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
     }
   textures[*handle].textureformat = GetUncompressedTextureFormat(textureformat);
+  fprintf (stderr,"!");
   //  GFXActiveTexture(0);
   return GFXTRUE;
 }

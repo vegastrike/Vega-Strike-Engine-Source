@@ -814,6 +814,7 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       _Universe->AccessCockpit()->credits+=price;
       if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage)) {
       if ((bas=base.GetUnit())) {
+	part.quantity=1;
 	bas->AddCargo (part);
       }
       }

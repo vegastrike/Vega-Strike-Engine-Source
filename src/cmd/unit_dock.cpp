@@ -127,7 +127,20 @@ void Unit::PerformDockingOperations () {
     ///force him in a box...err where he is
   }
 }
-
+bool Unit::isDocked (Unit* d) {
+  if (!(d->docked&DOCKED_INSIDE|DOCKED)) {
+    return false;
+  }
+  for (unsigned int i=0;i<image->dockedunits.size();i++) {
+    Unit * un;
+    if ((un=image->dockedunits[i]->uc.GetUnit())!=NULL) {
+      if (un==d) {
+	return true;
+      }
+    }
+  }
+  return false;
+}
 bool Unit::Dock (Unit * utdw) {
   if (docked&(DOCKED_INSIDE|DOCKED))
     return false;

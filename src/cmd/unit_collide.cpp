@@ -274,8 +274,10 @@ bool Unit::Collide (Unit * target) {
   if (usecoltree) {
     Vector bigpos,smallpos,bigNormal,smallNormal;
     if (bigger->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
-      bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );	
-    }
+      if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
+	bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   ); 
+      } else return false;
+    } else return false;
   } else {
     if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {
       if (normal.i==-1&&normal.j==-1) {
@@ -283,8 +285,9 @@ bool Unit::Collide (Unit * target) {
 	if (normal.i||normal.j||normal.k)
 	  normal.Normalize();
       }
-
-      bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
+      if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
+	bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
+      }else return false;
     }else {
       return false;      
     }

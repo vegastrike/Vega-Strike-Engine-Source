@@ -442,6 +442,7 @@ public:
   const vector <struct DockingPorts> &DockingPortLocations();
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   bool RequestClearance (Unit * dockingunit);
+  bool isDocked (Unit *dockingUnit);
   bool Dock (Unit * unitToDockWith);
   bool UnDock (Unit * unitToDockWith);
   ///Does a one way collision between smaller target and this
