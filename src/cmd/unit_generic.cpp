@@ -1815,23 +1815,27 @@ void Unit::AddVelocity(float difficulty) {
    if(graphicOptions.InWarp==1){
 	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","100000"));
 	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
-	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","15000"));     
+	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","1000"));     
 	   float minmultiplier=fmultiplier;
 	   Unit * planet;
 	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
-		 if (_Universe->isPlayerStarship(planet)) continue;
-		 if(planet->rSize()<1){continue;}
-		 if(((Position()-planet->Position()).Magnitude())<1){ minmultiplier=1; break;}
+		   if (planet==this) {
+			   continue;
+		   }
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
 		 double onethird=1.0/3.0;
+		 double thoudist=1000000;
+		 double thoudistalt=minsizeeffect*100;
+		 thoudist=(thoudist<thoudistalt)?(thoudist):(thoudistalt);
+		 double thouslow=1000/pow(thoudist,onethird);
 		 double dist=(Position()-planet->Position()).Magnitude();
-		 double cuberoot=pow((dist-(effectiverad)-1000000),onethird);
-		 if(dist>(effectiverad+1000000)) {
+		 double cuberoot=pow((dist-(effectiverad)-thoudist),onethird);
+		 if(dist>(effectiverad+thoudist)) {
 			 multipliertemp=1000+(100*cuberoot);
 		 } else if (dist>effectiverad){
-			multipliertemp=1000-(10*pow(-(dist-(effectiverad)-1000000),onethird));
+			multipliertemp=1000-(thouslow*pow(-(dist-(effectiverad)-thoudist),onethird));
 		 }else{
 			minmultiplier=1;
 		 }
@@ -1846,9 +1850,10 @@ void Unit::AddVelocity(float difficulty) {
 	   if(vmag>PI*PI*300000000.0){
 		   v*=PI*PI*300000000/vmag; // HARD LIMIT
 	   }
-
+	   graphicOptions.WarpFieldStrength=minmultiplier;
+   } else {
+	   graphicOptions.WarpFieldStrength=1;
    }
-   
    curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
 }
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
