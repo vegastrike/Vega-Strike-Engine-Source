@@ -1562,7 +1562,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = new string("");
-  float * myscale=new float;//memory leak!
+  float * myscale=&image->unitscale;
   image->unitwriter->AddElement("scale",floatStarHandler,XMLType(myscale));
   {
     image->unitwriter->AddTag ("Jump");
@@ -1739,7 +1739,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   if (!SubUnit) {
     //UpdateCollideQueue();
   }
-  *myscale=xml->unitscale;
+  image->unitscale=xml->unitscale;
   string tmpname (filename);
   vector <bsp_polygon> polies;
 

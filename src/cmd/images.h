@@ -82,6 +82,7 @@ struct UnitImages {
   std::vector <Unit *> clearedunits;
   std::vector <DockedUnits *> dockedunits;
   UnitContainer DockedTo;
+  float unitscale;//for output
   class XMLSerializer *unitwriter;
 };
 
