@@ -216,11 +216,24 @@ void Python::initpaths(){
 			  ",\""+std::string(pwd)+DELIMSTR+basesdir + string("\"")+
 			  "]\n");
    */
+  std::string modpaths("");
+  // Find all the mods dir (ignore homedir)
+  for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
+  {
+	  modpaths += "\""+VSFileSystem::Rootdir[i]+"/modules/builtin/\",";
+	  modpaths += "\""+VSFileSystem::Rootdir[i]+"/"+moduledir+"/\",";
+	  modpaths += "\""+VSFileSystem::Rootdir[i]+"/"+basesdir+"/\"";
+	  if( i+1<VSFileSystem::Rootdir.size())
+		  modpaths+= ",";
+  }
+   std::string changepath ("import sys\nprint sys.path\nsys.path = ["+modpaths+"]\n");
+  /*
    std::string changepath ("import sys\nprint sys.path\nsys.path = ["
 			  "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
 			  ",\""+VSFileSystem::datadir+DELIMSTR+moduledir+string("\"")+
 			  ",\""+VSFileSystem::datadir+DELIMSTR+basesdir + string("\"")+
 			  "]\n");
+	*/
   VSFileSystem::vs_fprintf (stderr,"running %s",changepath.c_str());
   char * temppython = strdup(changepath.c_str());
   PyRun_SimpleString(temppython);	
