@@ -1055,9 +1055,9 @@ int main (int argc, char** argv) {
   fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
   FILE * Outputfile;
   if(append){
-	Outputfile=fopen(argv[2],"ab"); //append
+	Outputfile=fopen(argv[2],"ab+"); //append
   }else{
-	Outputfile=fopen(argv[2],"wb"); //create
+	Outputfile=fopen(argv[2],"wb+"); //create
   }
   
   unsigned int intbuf;
@@ -1070,11 +1070,13 @@ int main (int argc, char** argv) {
   }
   runningbytenum+=appendrecordfromxml(memfile,Outputfile); //Append one record
 
+  rewind(Outputfile);
   fseek(Outputfile,4+7*sizeof(int),SEEK_SET);
   fread(&intbuf,sizeof(int),1,Outputfile);//Current number of records
   intbuf=VSSwapHostIntToLittle(intbuf);
   ++intbuf;
   intbuf=VSSwapHostIntToLittle(intbuf);
+  fseek(Outputfile,4+7*sizeof(int),SEEK_SET);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//number of records++
   fseek(Outputfile,0,SEEK_END);
 
@@ -1083,6 +1085,7 @@ int main (int argc, char** argv) {
   intbuf=VSSwapHostIntToLittle(intbuf);
   intbuf+=runningbytenum;
   intbuf=VSSwapHostIntToLittle(intbuf);
+  fseek(Outputfile,4+sizeof(int),SEEK_SET);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total file
   fseek(Outputfile,0,SEEK_END);
 
