@@ -856,7 +856,24 @@ int main (int argc, char ** argv)
 	    StrWrite ("/>\n");
 	  }
 	}
-
+	Tab();Tag ("Thrust");
+	Tab(2);fprintf (fp,"<Engine Afterburner=\"%d\" Forward=\"%d\" Retro=\"%d\" Left=\"%d\" Right=\"%d\" Top=\"%d\" Bottom=\"%d\"/>\n",600,240,240,50,50,50,50);
+	Tab(2);fprintf (fp,"<Maneuver yaw=\"%d\" pitch=\"%d\" roll=\"%d\"/>\n",1400, 1450, 1400);
+	Tab();ETag("Thrust");
+	Tab();Tag ("Defense");
+	Tab(2);fprintf (fp,"<Armor front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\"/>\n", 40,40,40,40);
+	if (Stat.NumShieldFacing==2) {
+	  Tab(2);fprintf (fp,"<Shield front=\"%d\" back=\"%d\" recharge=\"%d\"/>\n", 40,40,3);
+	}else {
+	  Tab(2);fprintf (fp,"<Shield front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\" recharge=\"%d\"/>\n", 40,40,40,40,3);
+	}
+	Tab(2); fprintf (fp, "<Hull strength=\"%d\"/>\n", 5);
+	Tab();ETag("Defense");
+	Tab();fprintf (fp,"<Stats mass=\"%d\" momentofinertia=\"%d\" fuel=\"%d\"></Stats>\n",2,2,20000);
+	Tab();fprintf (fp,"<Computer yaw=\"%d\" pitch=\"%d\" afterburner=\"%d\" maxspeed=\"%d\"/>\n",180,180,180,60,21);
+	Tab();Tag("Energy");
+	Tab(2);fprintf (fp,"<Reactor recharge=\"%d\" limit=\"%d\"/>\n",10,100);
+	Tab();ETag("Energy");
 	ETag ("Unit");
 	fclose (fp);
 
