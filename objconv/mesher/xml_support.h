@@ -8,7 +8,7 @@
 #endif
 #include "hashtable.h"
 #include <vector>
-#include <expat.h>
+#include "expat.h"
 #include <iostream>		// needed for cout calls in config_xml.cpp (and other places too i'm sure)
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
