@@ -24,6 +24,17 @@
 
 #include "gfxlib.h"
 
+#if defined(IRIX)	/* missing from SGI OpenGL API beside GL_COLOR_INDEX8_EXT */
+#define GL_TEXTURE_CUBE_MAP_EXT           0x8513
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT 0x8516
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT 0x8517
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT 0x8518
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT 0x8519
+#define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
+#endif
+
+
 #define  MAX_TEXTURES 256
 static int MAX_TEXTURE_SIZE=256;
 struct GLTexture{
@@ -215,7 +226,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
     else
       glTexImage2D(image2D, 0, GL_RGB16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     break;
+
   case PALETTE8:
+#if defined(GL_COLOR_INDEX8_EXT)	// IRIX has no GL_COLOR_INDEX8 extension
     if (g_game.PaletteExt) {
       error = glGetError();
       glColorTable(textures[handle].targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
@@ -236,7 +249,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	  free(tempbuf);
 	return GFXFALSE;
       }
-    } else{
+    } else
+#endif
+    {
       int nsize = 4*textures[handle].height*textures[handle].width;
       tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
       //      textures[handle].texture = tbuf;
