@@ -158,6 +158,8 @@ void VegaConfig::initKeyMap(){
   key_map["keypad-7"]=WSK_KP7;
   key_map["keypad-8"]=WSK_KP8;
   key_map["keypad-9"]=WSK_KP9;
+  key_map["less-than"]='<';
+  key_map["greater-than"]='>';
   key_map["keypad-numlock"]=WSK_NUMLOCK;
   key_map["keypad-period"]=WSK_KP_PERIOD;
   key_map["keypad-delete"]=WSK_KP_PERIOD;
