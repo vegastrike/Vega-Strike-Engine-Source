@@ -94,7 +94,7 @@ void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
 		}
 	}
   }
-  mission->msgcenter->add (myname,"all",GetRelationshipColor(node.messagedelta*2)+speech+"#000000"); //multiply by 2 so colors are easier to tell
+  mission->msgcenter->add (myname,"all",GetRelationshipColor(node.messagedelta*10)+speech+"#000000"); //multiply by 2 so colors are easier to tell
 }
 void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {
