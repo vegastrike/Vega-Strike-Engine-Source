@@ -2636,7 +2636,7 @@ protected:
         : m_parent(p), m_newPart(NULL), m_part(), m_selectedMount(0), m_selectedTurret(0), m_selectedItem() {};
     virtual ~UpgradeOperation(void) {};
 
-    void commonInit(void);              // Initialization.
+    bool commonInit(void);              // Initialization.
     void finish(void);                  // Finish up -- destruct the object.  MUST CALL THIS LAST.
     bool endInit(void);                 // Finish initialization.  Returns true if successful.
     bool gotSelectedMount(int index);   // We have the mount number.  Returns true if the operation was completed.
@@ -2705,13 +2705,12 @@ static const string CONFIRM_ID = "Confirm";
 
 
 // Some common initialization.
-void BaseComputer::UpgradeOperation::commonInit(void) {
+bool BaseComputer::UpgradeOperation::commonInit(void) {
     Cargo* selectedItem = m_parent.selectedItem();
-    if(!selectedItem) {
-        // We don't have enough to do the operation.  Forget it.
-        finish();
-    }
-    m_selectedItem = *selectedItem;
+    if (selectedItem) {
+      m_selectedItem = *selectedItem;
+      return true;
+    }else return false;
 }
 
 // Update the UI controls after a transaction has been concluded successfully.
@@ -2821,11 +2820,10 @@ void BaseComputer::UpgradeOperation::modalDialogResult(
 
 // Start the Buy Upgrade Operation.
 void BaseComputer::BuyUpgradeOperation::start(void) {
-    commonInit();
 
     Unit* playerUnit = m_parent.m_player.GetUnit();
     Unit* baseUnit = m_parent.m_base.GetUnit();
-    if(!(playerUnit && baseUnit)) {
+    if(!(playerUnit && baseUnit&&commonInit())) {
         finish();
         return;
     }
@@ -3004,10 +3002,9 @@ int basecargoassets(Unit* baseUnit, string cargoname){
 
 // Start the Sell Upgrade Operation.
 void BaseComputer::SellUpgradeOperation::start(void) {
-    commonInit();
 
     Unit* playerUnit = m_parent.m_player.GetUnit();
-    if(!playerUnit) {
+    if(!(playerUnit&&commonInit())) {
         finish();
         return;
     }

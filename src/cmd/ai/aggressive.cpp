@@ -21,6 +21,7 @@
 #include "cmd/csv.h"
 #include "universe_util.h"
 #include "vs_random.h"
+#include "python/python_compile.h"
 using namespace Orders;
 using std::map;
 const EnumMap::Pair element_names[] = {
@@ -772,6 +773,18 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
   }
 }
 static Unit * ChooseNavPoint(Unit * parent) {
+  static string script=vs_config->getVariable("AI","ChooseDestinationScript","");
+
+  if (script.length()>0) {
+    Unit * ret=NULL;
+    UniverseUtil::setScratchUnit(parent);
+    CompileRunPython(script);
+    ret=UniverseUtil::getScratchUnit();
+    UniverseUtil::setScratchUnit(NULL);
+    if (ret!=NULL&&ret!=parent) {
+      return ret;
+    }
+  }
   Unit* un;
   vector <Unit*> navs;
   for (un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
@@ -784,10 +797,18 @@ static Unit * ChooseNavPoint(Unit * parent) {
     }
   } 
   if (navs.size()>0) {
-    return navs[vsrandom.genrand_int32()%navs.size()];
+    int k = (int)(getNewTime()/120);// two minutes
+    string key = UnitUtil::getFlightgroupName(parent);
+    std::string::const_iterator start = key.begin();
+    for(;start!=key.end(); start++) {
+      k += (k * 128) + *start;
+    }
+    VSRandom choosePlace(k);
+    return navs[choosePlace.genrand_int32()%navs.size()];
   }
   return NULL;
 }
+
 static Unit * ChooseNearNavPoint(Unit * parent,QVector location, float locradius) {
   Unit * candidate=NULL;
   float dist = FLT_MAX;
@@ -822,6 +843,9 @@ public:
     }
   }
 };
+static Vector randVector() {
+  return Vector((rand()/(float)RAND_MAX)*2-1,(rand()/(float)RAND_MAX)*2-1,(rand()/(float)RAND_MAX)*2-1);
+}
 static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime) {
   static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI","afterburn_to_no_enemies","true")); 
   Order * mt=new FlyTo(nav,can_afterburn,true,creationtime);
@@ -846,7 +870,8 @@ void AggressiveAI::ExecuteNoEnemies() {
       }
       Vector dir = parent->Position()-dest->Position();
       dir.Normalize();
-      dir*=dest->rSize();
+      dir*=dest->rSize()+parent->rSize();
+      dir+=randVector()*parent->rSize()*4;
       if (dest->isUnit()==PLANETPTR) {
         float planetpct=UniverseUtil::getPlanetRadiusPercent();
         dir *=planetpct+1.0f;

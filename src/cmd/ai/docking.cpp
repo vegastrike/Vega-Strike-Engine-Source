@@ -3,6 +3,19 @@
 #include "config_xml.h"
 #include "cmd/unit_generic.h"
 #include "warpto.h"
+#include "universe_util.h"
+#include "python/python_compile.h"
+static void DockedScript(Unit * docker, Unit * base) {
+  static string script = vs_config->getVariable("AI","DockedToScript","");
+  if (script.length()>0) {
+    Unit * targ = docker->Target();
+    docker->GetComputerData().target.SetUnit(base);
+    UniverseUtil::setScratchUnit(docker);
+    CompileRunPython(script);
+    UniverseUtil::setScratchUnit(NULL);
+    docker->GetComputerData().target.SetUnit(targ);//should be NULL;
+  }
+}
 namespace Orders {
   DockingOps::DockingOps (Unit * unitToDockWith, Order * ai,bool physical_docking): MoveTo (QVector (0,0,1),
 								      false,
@@ -135,7 +148,7 @@ namespace Orders {
     float diss =(parent->Position()-loc).MagnitudeSquared()-.1;
     bool isplanet=utdw->isUnit()==PLANETPTR;
     if (diss<=(isplanet?rad*rad:parent->rSize()*parent->rSize())) {
-      
+      DockedScript(parent,utdw);      
       if (physicallyDock)
         return parent->Dock(utdw);
       else{
