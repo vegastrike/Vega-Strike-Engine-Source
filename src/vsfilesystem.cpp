@@ -660,7 +660,7 @@ namespace VSFileSystem
 		current_type.push_back( UnknownFile);
 
 		int i;
-		for( i=0; i<=Unknown; i++)
+		for( i=0; i<=UnknownFile; i++)
 			UseVolumes.push_back( 0);
 
 		/************************** Data and home directory settings *************************/
@@ -681,7 +681,7 @@ namespace VSFileSystem
 		// Sprite are in sprites/ or in ./ (when full subpath is provided) or in the current cockpit dir that is being loaded
 		
 		// First allocate an empty directory list for each file type
-		for( i=0; i<Unknown; i++)
+		for( i=0; i<UnknownFile; i++)
 		{
 			vector<string> vec;
 			Directories.push_back( "");
@@ -777,7 +777,7 @@ namespace VSFileSystem
 		if( FileExists( datadir, "/data."+volume_format)>=0)
 		{
 			// Every kind of file will use the big volume except Unknown files and python files that needs to remain standard files
-			for( i=0; i<Unknown; i++)
+			for( i=0; i<UnknownFile; i++)
 				UseVolumes[i] = 2;
 			UseVolumes[PythonFile] = 0;
 			UseVolumes[AccountFile] = 0;
@@ -894,7 +894,7 @@ namespace VSFileSystem
 
 		if( !UseVolumes[type] || !lookinvolume)
 		{
-			if( type == Unknown)
+			if( type == UnknownFile)
 				fullpath = root+file;
 			else
 				fullpath = root+Directories[type]+"/"+file;
@@ -1315,11 +1315,11 @@ namespace VSFileSystem
 		VSError err = Ok;
 
 		cerr<<"Loading a " << type << " : "<<file<<endl;
-	if( type < ZoneBuffer || type==Unknown) // It is a "classic file"
+	if( type < ZoneBuffer || type==UnknownFile) // It is a "classic file"
 	{
 		if( !UseVolumes[type])
 		{
-			if( type==Unknown)
+			if( type==UnknownFile)
 			{
 				// We look in the current_path or for a full relative path to either homedir or datadir
 				if( current_path.back()!="")
@@ -1453,7 +1453,7 @@ namespace VSFileSystem
 	// Open a standard file read/write
 	VSError VSFile::OpenReadWrite( const char * filename, VSFileType type)
 	{
-		if( type >= ZoneBuffer && type != Unknown)
+		if( type >= ZoneBuffer && type != UnknownFile)
 			return FileNotFound;
 
 		this->file_type = this->alt_type = type;
@@ -1466,7 +1466,7 @@ namespace VSFileSystem
 	// Open (truncate) or create a standard file read/write
 	VSError VSFile::OpenCreateWrite( const char * filenam, VSFileType type)
 	{
-		if( type >= ZoneBuffer && type != Unknown)
+		if( type >= ZoneBuffer && type != UnknownFile)
 			return FileNotFound;
 
 		this->file_type = this->alt_type = type;
@@ -1520,7 +1520,7 @@ namespace VSFileSystem
 			if( !fp)
 				return LocalPermissionDenied;
 		}
-		else if( type==Unknown)
+		else if( type==UnknownFile)
 		{
 			string fpath( homedir+"/"+this->filename);
 			this->rootname=homedir;
@@ -1875,7 +1875,7 @@ namespace VSFileSystem
 
 	void  VSFile::Close()
 	{
-		if( this->file_type >= ZoneBuffer && this->file_type!=Unknown && this->pk3_extracted_file)
+		if( this->file_type >= ZoneBuffer && this->file_type!=UnknownFile && this->pk3_extracted_file)
 		{
 			delete this->pk3_extracted_file;
 			this->pk3_extracted_file = NULL;
