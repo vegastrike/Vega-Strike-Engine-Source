@@ -77,6 +77,10 @@ Universe * _Universe;
 // GameUniverse _Universe;
 TextPlane *bs_tp=NULL;
 char SERVER=0;
+
+// true if command line option --nonet is given to start without network
+static bool ignore_network = false;
+
 /* 
  * Function definitions
  */
@@ -464,6 +468,8 @@ void bootstrap_main_loop () {
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
 	string srvip = vs_config->getVariable("network","server_ip","");
+    if( ignore_network ) srvip = "";
+
 	int numplayers;
 	/*
 	string nbplayers = vs_config->getVariable("network","nbplayers","1");
@@ -768,16 +774,20 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
 	//viddrv = "GLDRV.DLL";
 	break;
       case '-':
-	// long options
-	if(strcmp(lpCmdLine[i],"--benchmark")==0){
-	  //benchmark=30.0;
-	  benchmark=atof(lpCmdLine[i+1]);
-	  i++;
-	}
-    else if(strcmp(lpCmdLine[i], "--help")==0) {
-        cout << helpmessage;
-        exit(0);
-    }
+        // long options
+        if(strcmp(lpCmdLine[i],"--benchmark")==0){
+          //benchmark=30.0;
+          benchmark=atof(lpCmdLine[i+1]);
+          i++;
+        }
+        else if(strcmp(lpCmdLine[i], "--nonet")==0) {
+          // ignore the network section of the config file
+          ignore_network=true;
+        }
+        else if(strcmp(lpCmdLine[i], "--help")==0) {
+          cout << helpmessage;
+          exit(0);
+        }
       }
     }
     else{
