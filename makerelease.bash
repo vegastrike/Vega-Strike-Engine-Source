@@ -22,16 +22,21 @@
 # BUILD  RPMS  SOURCES  SPECS  SRPMS
 # In RedHat for example, it is /usr/src/redhat
 
-SRCPATHDEFAULT="/usr/src/redhat"
+SRCPATHDEFAULT="/usr/src"
 
 # And make sure you know the program that can build RPMs -- mainly either /usr/bin/rpm or /usr/bin/rpmbuild
 
-RPMBUILDERDEFAULT="/usr/bin/rpmbuild"
+RPMBUILDERDEFAULT="/usr/bin/rpm"
 
 # Now, simply run this script! :-)
 # 
 # 
 
+echo "Welcome to the Vegastrike Auto-Release System.  If you have prepared the directories
+as instructed in the top part of this file, then simply follow the on-screen prompts
+to create a new release for vegastrike.  If you have not prepared the directories as
+instructed, then please exit this script by pressing ctrl-c NOW.
+ "
 
 echo "Now Setting up the scripts Variables."
 
@@ -84,6 +89,10 @@ tar -cvzf vegastrike-data.tar.gz data
 mv vegastrike-data.tar.gz $SRCPATH/SOURCES
 $RPMBUILDER -bb vegastrike-data.spec
 
+# Remove these next two lines to prevent the vegastrike-data tarball being removed by me.
+echo "Removing Temporary .tar.gz file [$SRCPATH/SOURCES/vegastrike-data.tar.gz]"
+rm -f $SRCPATH/SOURCES/vegastrike-data.tar.gz
+
 echo "Data RPM Complete...you can start uploading now"
 
 echo "Making RPMS -- (2 of 3 -- Music)"
@@ -92,19 +101,31 @@ tar -cvzf vegastrike-music.tar.gz music
 mv vegastrike-music.tar.gz $SRCPATH/SOURCES
 $RPMBUILDER -bb vegastrike-music.spec
 
+# Remove these next two lines to prevent the vegastrike-music tarball being removed by me.
+echo "Removing Temporary .tar.gz file [$SRCPATH/SOURCES/vegastrike-music.tar.gz]"
+rm -f $SRCPATH/SOURCES/vegastrike-music.tar.gz
+
 echo "Music RPM Complete...you can start uploading now"
 
 echo "Making RPMS -- (3 of 3 -- Vegastrike)"
 
-tar -cvzf vegastrike.tar.gz music
+tar -cvzf vegastrike.tar.gz vegastrike
 mv vegastrike.tar.gz $SRCPATH/SOURCES
 $RPMBUILDER -ba vegastrike.spec
 
+# Remove these next two lines to prevent the vegastrike tarball being removed by me.
+echo "Removing Temporary .tar.gz file [$SRCPATH/SOURCES/vegastrike.tar.gz]"
+rm -f $SRCPATH/SOURCES/vegastrike.tar.gz
+
 echo "Vegastrike RPM and SRPM Complete...you can start uploading now"
 
-echo "Congratulations on a sucessfull build.  I will *NOT* clean up the tarballs now, in
-case you wish to use them again and I get in trouble.  They are located in $SRCPATH/SOURCES
-The src.rpm is located in $SRCPATH/SRPMS The RPMS are located in $SRCPATH/RPMS/i386
+# echo "Congratulations on a sucessfull build.  I will *NOT* clean up the tarballs now, in
+# case you wish to use them again and I get in trouble.  They are located in $SRCPATH/SOURCES
+# The src.rpm is located in $SRCPATH/SRPMS The RPMS are located in $SRCPATH/RPMS/i386
+
+echo "Congratulations on a sucessfull build.  I have already cleaned up the temporary tarballs
+created by this script from $SRCPATH/SOURCES
+The final src.rpm and RPMs are located in $SRCPATH/SRPMS and $SRCPATH/RPMS/i386 respectively.
 
 Happy releasing, may the gods of the GPL shine upon you :-)"
 

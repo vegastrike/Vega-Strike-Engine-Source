@@ -1,6 +1,6 @@
 Name: vegastrike
 Summary: Vegastrike - a free 3D space fight simulator (program files)
-Version: 0.3
+Version: 0.3.1
 Release: gcc3.2
 Copyright: GPL
 Group: Amusements/Games
@@ -29,21 +29,24 @@ automake -a --add-missing
 make
 
 %install
+mkdir -p $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
+mkdir -p $RPM_BUILD_ROOT/usr/local/man/man1/
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 cp vssetup $RPM_BUILD_ROOT/usr/local/bin/
-cp vslauncher $RPM_BUILD_ROOT/usr/local/bin/
 cp src/networking/soundserver $RPM_BUILD_ROOT/usr/local/bin/
 cp src/vegastrike $RPM_BUILD_ROOT/usr/local/bin/
-mkdir -p $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
 cp README $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
+cp doc/vegastrike.1 $RPM_BUILD_ROOT/usr/local/man/man1/
+cp doc/vssetup.1 $RPM_BUILD_ROOT/usr/local/man/man1/
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
+%docdir /usr/local/doc/vegastrike
+/usr/local/doc/vegastrike/README
+%doc /usr/local/man/man1/vegastrike.1
+%doc /usr/local/man/man1/vssetup.1
 /usr/local/bin/vegastrike
-/usr/local/bin/vslauncher
 /usr/local/bin/vssetup
 /usr/local/bin/soundserver
-/usr/local/games/vegastrike/data/soundserver
-/usr/local/doc/vegastrike/README
