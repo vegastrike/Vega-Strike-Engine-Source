@@ -518,7 +518,7 @@ varInst *Mission::doConst(missionNode *node,int mode){
 /* *********************************************************** */
 
 void Mission::assignVariable(varInst *v1,varInst *v2){
-  if(v1->type!=v2->type){
+  if(v1->type!=v2->type && v1->type!=VAR_ANY){
     fatalError(NULL,SCRIPT_RUN,"wrong types in assignvariable");
     saveVarInst(v1,cout);
     saveVarInst(v2,cout);
@@ -535,6 +535,9 @@ void Mission::assignVariable(varInst *v1,varInst *v2){
 	assert(0);
       }
     }
+  }
+  if(v1->type==VAR_ANY){
+    v1->type=v2->type;
   }
   v1->float_val=v2->float_val;
   v1->bool_val=v2->bool_val;

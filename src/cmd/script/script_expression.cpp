@@ -58,6 +58,9 @@ varInst *Mission::checkObjectExpr(missionNode *node,int mode){
       if(vi->type==VAR_OBJECT){
 	res=vi;
       }
+      else if(vi->type==VAR_ANY && mode==SCRIPT_PARSE){
+	res=vi;
+      }
       else{
 	fatalError(node,mode,"expected a object call, got a different one");
 	assert(0);
@@ -155,7 +158,10 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
     }
     else if(node->tag==DTAG_CALL){
       varInst *vi=doCall(node,mode);
-      if(vi->type==VAR_FLOAT){
+      if(vi->type==VAR_FLOAT){ 
+	res=vi->float_val;
+      }
+      else if(vi->type==VAR_ANY && mode==SCRIPT_PARSE){
 	res=vi->float_val;
       }
       else{
@@ -220,6 +226,9 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
     else if(node->tag==DTAG_CALL){
       varInst *vi=doCall(node,mode);
       if(vi->type==VAR_BOOL){
+	ok=vi->bool_val;
+      }
+      else if(vi->type==VAR_ANY && mode==SCRIPT_PARSE){
 	ok=vi->bool_val;
       }
       else{

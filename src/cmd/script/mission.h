@@ -36,6 +36,7 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
+class Unit;
 
 /* *********************************************************** */
 
@@ -84,7 +85,7 @@ enum tag_type {
   DTAG_IMPORT
 };
 
-enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
+enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID,VAR_ANY };
 
 enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
 
@@ -323,6 +324,8 @@ varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 
  varInst *getObjectArg(missionNode *node,int mode);
 
+varInst * call_unit(missionNode *node,int mode);
+ Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
 };
 

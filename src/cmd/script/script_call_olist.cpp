@@ -108,12 +108,12 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       debug(3,node,mode,"olist.at");
 
       missionNode *snode=getArgument(node,mode,1);
-      float findex=doFloatVar(snode,mode);
+      float findex=checkFloatExpr(snode,mode);
       debug(3,snode,mode,"index is in that node");
 
 
       viret=new varInst;
-      viret->type=VAR_OBJECT;
+      viret->type=VAR_ANY;
 
       if(mode==SCRIPT_RUN){
 	int index=(int)findex;

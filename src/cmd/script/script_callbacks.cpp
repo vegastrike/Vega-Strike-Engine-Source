@@ -103,6 +103,9 @@ varInst *Mission::doCall(missionNode *node,int mode){
   else if(module=="_olist"){
     vi=call_olist(node,mode);
   }
+  else if(module=="_unit"){
+    vi=call_unit(node,mode);
+  }
 
   if(vi==NULL){
     fatalError(node,mode,"no such callback named "+module+"."+node->script.name);
