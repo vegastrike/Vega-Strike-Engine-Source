@@ -20,6 +20,7 @@ gui/libgui.a \
 networking/libnet.a \
 cmd/collide/libcollide.a \
 boost129/libboost_python.a boost/libboost_python.a \
+gfx/nav/libnav.a \
 -lpthread 
 
 vegaserver_LDADD =  \
