@@ -74,7 +74,7 @@ void Unit::calculate_extent() {
     corner_max = corner_max.Max(subunits[a]->LocalPosition()+subunits[a]->corner_max);
   }
   image->selectionBox = new Box(corner_min, corner_max);
-  if (corner_min==-FLT_MIN||corner_max==FLT_MAX) {
+  if (corner_min.i==-FLT_MAX||corner_max.i==FLT_MAX) {
     radial_size=0;
     corner_min.Set (0,0,0);
     corner_max.Set (0,0,0);
