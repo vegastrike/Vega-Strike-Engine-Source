@@ -830,8 +830,9 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
   }
 }
 
-QVector Unit::PositionITTS (QVector  posit, float speed) const{
-	posit= posit-this->Position();
+QVector Unit::PositionITTS (const QVector& absposit, float speed) const{
+	
+	QVector posit (absposit-this->Position());
 	QVector curguess(posit);
 	for (unsigned int i=0;i<3;++i) {
 		float time = 0;
@@ -840,7 +841,7 @@ QVector Unit::PositionITTS (QVector  posit, float speed) const{
 		}	 
 		curguess = posit+GetVelocity().Cast().Scale(time);
 	}
-	return curguess+this->Position();
+	return curguess+absposit;
 }
 
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
