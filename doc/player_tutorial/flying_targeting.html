@@ -9,9 +9,8 @@
 
 <h1>
 <a href="http://sourceforge.net"><img SRC="http://sourceforge.net/sflogo.php?group_id=19507" ALT="SourceForge Logo" NOSAVE BORDER=0 height=31 width=88></a>&nbsp;&nbsp;
-Vegastrike Player Tutorial - Flying and Targeting&nbsp;&nbsp;&nbsp;&nbsp;
-
-<font size=+0><a href="../index.html">to Index</a></font></h1>
+Vegastrike Player Tutorial - Flying and Targeting&nbsp;&nbsp;&nbsp; <font size=+0><a href="index.html">to
+Index</a></font></h1>
 
 <hr WIDTH="100%">
 <br>&nbsp;
@@ -49,12 +48,29 @@ y</li>
 <li>
 ` or capslock</li>
 
-<br>shelton key - you can do the shelton slide with it</ul>
+<br>shelton key - you can do the shelton slide with it
+<li>
+A</li>
+
+<br>autopilot: flies your ship to your target (usually a base or station
+or jumppoint)</ul>
 Use + and - to increase/decrease your speed while flying around
 <p>But if you really wanna go fast, press TAB to put in the afterburners
 to get near to an enemy fighter
 <p>If you press y then, your speed will be matched with the targets speed,
 and you can easily fire on it
+<br>&nbsp;
+<h4>
+Newtonian Physics:</h4>
+Vegastrike usel real, newtonian physics and forces to calculate where the
+space ships are flying too.
+<p>This means, that when your ship has built up a certain velocity, it
+will continue to fly in this direction even when you rotate/bank the ship
+around.
+<br>To fly in a new direction, you have to accellerate the ship into that
+direction.
+<p>Can anyone explain that better?
+<br>&nbsp;
 <br>&nbsp;
 <br>&nbsp;
 <h2>
@@ -64,7 +80,37 @@ the ship you're firing at.
 <p>But it is advised that you target the ship you want to fire on.
 <p>The targeted ship will be highlighted and it's blip on the radar will
 appear bigger, so you'll always know here your target is.
-<p>Use those keys to target differently:
+<br>A rectangular target box will appear round the target.
+<br>This target box will have the same color as the blip on the radar -
+green for friends, red for enemies, yellow for neutral ships
+<p>If you want that all units in space should have a box rendered around
+them - so that you can see them better - you have to <a href="editing_vegaconfig.html">edit
+vegastrike.config</a>:
+<ul>
+<li>
+section "graphics", subsection "hud", variable "drawAllTargetBoxes"</li>
+
+<li>
+set this <a href="editing_vegaconfig.html#variables">variable</a> to "true"
+to have boxes on all units</li>
+
+<li>
+in this mode, friends will be green, enemies red, neutral ships yellow
+and your target will be purple</li>
+</ul>
+<img SRC="all_target_boxes.png" NOSAVE height=154 width=197> :&nbsp;<img SRC="all_target_boxes_false.png" NOSAVE height=143 width=205>
+<br>&nbsp;
+<ul>
+<li>
+The left shows a screenshot with drawAllTargetBoxes=true</li>
+
+<br>you can easily identity your current target (purple) and who's friend
+and who's hostile
+<li>
+the right screenshot was taken with drawAllTargetBoxes=false</li>
+
+<br>your targeted ship has a red box - it's hostile</ul>
+Use those keys to target differently:
 <ul>
 <li>
 t - cycle Targets</li>
@@ -87,12 +133,36 @@ h - select Threat</li>
 
 <br>select the enemy target that is most threatening to you</ul>
 
+<p><br>Please note that the targeting range is limited - that means, you
+can't target ships which are more than about 10.000 away.
+<br>The targeting range depends on the ship type that you're using.
+<br>&nbsp;
+<br>&nbsp;
+<h4>
+ITTS</h4>
+ITTS means ......&nbsp;<img SRC="itts1.png" NOSAVE height=144 width=153 align=ABSCENTER>
+<p>Some ships have got an ITTS display to help you in aiming at your target.
+<p>The above screenshots shows two rectangles - the left, smaller one is
+the ITTS indicator, the big to the right is the target box that is drawn
+around your target.
+<p>The ITTS calculates the point in space where you have to aim/fire at
+to hit your target, when it keeps flying with that speed and direction.
+<p>So, you should always aim at your ITTS, if your ship has one.
+<p>If you want every ship you fly to have an ITTS, then you have to <a href="editing_vegaconfig.html">edit
+your vegastrike.config</a>:
+<ul>
+<li>
+section "graphics", subsection "hud", variable "drawAlwaysITTS"</li>
+
+<li>
+set this <a href="editing_vegaconfig.html#variables">variable</a> to "true"
+and the ITTS will always show up.</li>
+</ul>
+
 <hr WIDTH="100%">
 <p>please send feedback to <a href="mailto:vegastrike-users@lists.sourceforge.net">vegastrike-users@lists.sourceforge.net</a>
 and tell us what you think :-)
 <p>this page maintained by: Alexander Rawass &lt;<a href="mailto:alexannika@users.sourceforge.net">alexannika@users.sourceforge.net</a>>
-<br>&nbsp;
-<br>&nbsp;
 <br>&nbsp;
 </body>
 </html>
