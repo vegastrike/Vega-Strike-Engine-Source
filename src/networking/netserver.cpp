@@ -64,9 +64,9 @@ char	input_buffer[MAXINPUT];
 int		nbchars;
 
 string	universe_file;
-
+#warning this FAILS when the local variables are initialized in the wrong order.
 const char* NetServer::_downloadSearchDirs[] = {
-    datadir.c_str(),
+    "FAILED - email danielhorn at mindspring dot com for help",
     NULL
 };
 

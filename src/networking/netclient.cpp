@@ -69,9 +69,9 @@ extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
 string serverip;
 string serverport;
 typedef vector<Client *>::iterator VC;
-
+#warning cannot call .c_str() on a string that has not been initd yet-- prolly just quote quote anyway
 const char* NetClient::_downloadSearchPaths[] = {
-    datadir.c_str(),
+    "FAILED - email daniel horn at mindspring dotten com for hlep",
     NULL
 };
 
