@@ -393,7 +393,9 @@ void Cockpit::Update () {
 		string newsystem;QVector pos; bool setplayerXloc;
                 savegame->SetStarSystem("");
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
+		bool actually_have_save=false;
 		if (savegame->GetStarSystem()!="") {
+			actually_have_save=true;
 			newsystem= savegame->GetStarSystem()+".system";
 		}else {
 			newsystem = _Universe->activeStarSystem()->getFileName();
@@ -434,9 +436,10 @@ void Cockpit::Update () {
 		DoCockpitKeys();
 		savegame->ReloadPickledData();
 		_Universe->popActiveStarSystem();
-                _Universe->pushActiveStarSystem(ss);
-		DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
-                _Universe->popActiveStarSystem();
+		_Universe->pushActiveStarSystem(ss);
+		if (actually_have_save)
+			DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
+		_Universe->popActiveStarSystem();
       }
 	} 
   }

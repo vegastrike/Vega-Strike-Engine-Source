@@ -18,6 +18,9 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/unit_util.h"
 #include "warpto.h"
+
+#include "universe_util.h"
+
 using namespace Orders;
 using std::map;
 const EnumMap::Pair element_names[] = {
@@ -33,9 +36,20 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("Hull", AggressiveAI::HULL),
   EnumMap::Pair ("Facing", AggressiveAI::FACING),
   EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT),
-  EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
+  EnumMap::Pair ("FShield_Heal_Rate", AggressiveAI::FSHIELD_HEAL_RATE),
+  EnumMap::Pair ("BShield_Heal_Rate", AggressiveAI::BSHIELD_HEAL_RATE),
+  EnumMap::Pair ("LShield_Heal_Rate", AggressiveAI::LSHIELD_HEAL_RATE),
+  EnumMap::Pair ("RShield_Heal_Rate", AggressiveAI::RSHIELD_HEAL_RATE),
+  EnumMap::Pair ("FArmor_Heal_Rate", AggressiveAI::FARMOR_HEAL_RATE),
+  EnumMap::Pair ("BArmor_Heal_Rate", AggressiveAI::BARMOR_HEAL_RATE),
+  EnumMap::Pair ("LArmor_Heal_Rate", AggressiveAI::LARMOR_HEAL_RATE),
+  EnumMap::Pair ("RArmor_Heal_Rate", AggressiveAI::RARMOR_HEAL_RATE),
+  EnumMap::Pair ("Hull_Heal_Rate", AggressiveAI::HULL_HEAL_RATE),
+  EnumMap::Pair ("Target_Faces_You", AggressiveAI::TARGET_FACES_YOU),
+  EnumMap::Pair ("Target_In_Front_Of_You", AggressiveAI::TARGET_IN_FRONT_OF_YOU),
+  EnumMap::Pair ("Target_Going_Your_Direction", AggressiveAI::TARGET_GOING_YOUR_DIRECTION)
 };
-const EnumMap AggressiveAIel_map(element_names, 13);
+const EnumMap AggressiveAIel_map(element_names, 24);
 using std::pair;
 std::map<string,AIEvents::ElemAttrMap *> logic;
 std::map<string,AIEvents::ElemAttrMap *> interrupts;
@@ -147,6 +161,35 @@ void AggressiveAI::SetParent (Unit * parent1) {
     interruptname = last_directive.substr(which+1);
   }
   last_directive="b";//prevent escort race condition
+
+  //INIT stored stuff
+  Fshield_prev = parent->graphicOptions.InWarp?1:parent->FShieldData();
+  Fshield_rate_old = 0.0;
+  Fshield_prev_time = UniverseUtil::GetGameTime();
+  Bshield_prev = parent->graphicOptions.InWarp?1:parent->BShieldData();
+  Bshield_rate_old = 0.0;
+  Bshield_prev_time = UniverseUtil::GetGameTime();
+  Lshield_prev = parent->graphicOptions.InWarp?1:parent->LShieldData();
+  Lshield_rate_old = 0.0;
+  Lshield_prev_time = UniverseUtil::GetGameTime();
+  Rshield_prev = parent->graphicOptions.InWarp?1:parent->RShieldData();
+  Rshield_rate_old = 0.0;
+  Rshield_prev_time = UniverseUtil::GetGameTime();
+  Farmour_prev = 1.0;
+  Farmour_rate_old = 0.0;
+  Farmour_prev_time = UniverseUtil::GetGameTime();
+  Barmour_prev = 1.0;
+  Barmour_rate_old = 0.0;
+  Barmour_prev_time = UniverseUtil::GetGameTime();
+  Larmour_prev = 1.0;
+  Larmour_rate_old = 0.0;
+  Larmour_prev_time = UniverseUtil::GetGameTime();
+  Rarmour_prev = 1.0;
+  Rarmour_rate_old = 0.0;
+  Rarmour_prev_time = UniverseUtil::GetGameTime();
+  Hull_prev = parent->GetHullPercent();
+  Hull_rate_old = 0.0;
+  Hull_prev_time = UniverseUtil::GetGameTime();
 }
 void AggressiveAI::SignalChosenTarget () {
   if (parent) {
@@ -170,7 +213,7 @@ bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
 
 
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
-  float value;
+  float value = 0.0;
 
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
   static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
@@ -204,15 +247,174 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   case BSHIELD:
     value = parent->graphicOptions.InWarp?1:parent->BShieldData();
     break;
-  case HULL:
-    value = parent->GetHull();
-    break;
+  case HULL:{
+    value = parent->GetHullPercent();
+    break;}
   case LSHIELD:
     value = parent->graphicOptions.InWarp?1:parent->LShieldData();
     break;
   case RSHIELD:
     value = parent->graphicOptions.InWarp?1:parent->RShieldData();
     break;
+  case FSHIELD_HEAL_RATE:{
+	double delta_t = UniverseUtil::GetGameTime() - Fshield_prev_time;
+    if(delta_t>0.5)	//	0.5 = reaction time limit for hit rate
+	{
+		double delta_v = parent->graphicOptions.InWarp?1:parent->FShieldData() - Fshield_prev;
+		value = delta_v / delta_t;
+		Fshield_rate_old = value;
+		Fshield_prev_time = UniverseUtil::GetGameTime();
+		Fshield_prev = parent->graphicOptions.InWarp?1:parent->FShieldData();
+	}
+	else {
+		value = Fshield_rate_old;}
+
+
+//		if(value != 0.0)
+//		{
+//		string mystr ("Fshield "+XMLSupport::tostring (value)); 
+//		UniverseUtil::IOmessage (0,"game","all",mystr);
+//		}
+	break;}
+  case BSHIELD_HEAL_RATE:{
+	double delta_t = UniverseUtil::GetGameTime() - Bshield_prev_time;
+    if(delta_t>0.5)	//	0.5 = reaction time limit for hit rate
+	{
+		double delta_v = parent->graphicOptions.InWarp?1:parent->BShieldData() - Bshield_prev;
+		value = delta_v / delta_t;
+		Bshield_rate_old = value;
+		Bshield_prev_time = UniverseUtil::GetGameTime();
+		Bshield_prev = parent->graphicOptions.InWarp?1:parent->BShieldData();
+	}
+	else {
+		value = Bshield_rate_old;}
+
+//		if(value != 0.0)
+//		{
+//		string mystr ("Fshield "+XMLSupport::tostring (value)); 
+//		UniverseUtil::IOmessage (0,"game","all",mystr);
+//		}
+	break;}
+  case LSHIELD_HEAL_RATE:{
+	double delta_t = UniverseUtil::GetGameTime() - Lshield_prev_time;
+    if(delta_t>0.5)	//	0.5 = reaction time limit for hit rate
+	{
+		double delta_v = parent->graphicOptions.InWarp?1:parent->LShieldData() - Lshield_prev;
+		value = delta_v / delta_t;
+		Lshield_rate_old = value;
+		Lshield_prev_time = UniverseUtil::GetGameTime();
+		Lshield_prev = parent->graphicOptions.InWarp?1:parent->LShieldData();
+	}
+	else {
+		value = Lshield_rate_old;}
+
+//		if(value != 0.0)
+//		{
+//		string mystr ("Fshield "+XMLSupport::tostring (value)); 
+//		UniverseUtil::IOmessage (0,"game","all",mystr);
+//		}
+	break;}
+  case RSHIELD_HEAL_RATE:{
+	double delta_t = UniverseUtil::GetGameTime() - Rshield_prev_time;
+    if(delta_t>0.5)	//	0.5 = reaction time limit for hit rate
+	{
+		double delta_v = parent->graphicOptions.InWarp?1:parent->RShieldData() - Rshield_prev;
+		value = delta_v / delta_t;
+		Rshield_rate_old = value;
+		Rshield_prev_time = UniverseUtil::GetGameTime();
+		Rshield_prev = parent->graphicOptions.InWarp?1:parent->RShieldData();
+	}
+	else {
+		value = Rshield_rate_old;}
+
+//		if(value != 0.0)
+//		{
+//		string mystr ("Fshield "+XMLSupport::tostring (value)); 
+//		UniverseUtil::IOmessage (0,"game","all",mystr);
+//		}
+	break;}
+  case FARMOR_HEAL_RATE:
+	value = 0.0;
+	break;
+  case BARMOR_HEAL_RATE:
+	value = 0.0;
+	break;
+  case LARMOR_HEAL_RATE:
+	value = 0.0;
+	break;
+  case RARMOR_HEAL_RATE:
+	value = 0.5;
+	break;
+  case HULL_HEAL_RATE:{
+	double delta_t = UniverseUtil::GetGameTime() - Hull_prev_time;
+    if(delta_t>0.5)	//	0.5 = reaction time limit for hit rate
+	{
+		double delta_v = parent->GetHullPercent() - Hull_prev;
+		value = delta_v / delta_t;
+		Hull_rate_old = value;
+		Hull_prev_time = UniverseUtil::GetGameTime();
+		Hull_prev = parent->GetHullPercent();
+	}
+	else {
+		value = Hull_rate_old;}
+
+//		if(value != 0.0)
+//		{
+//		string mystr ("Fshield "+XMLSupport::tostring (value)); 
+//		UniverseUtil::IOmessage (0,"game","all",mystr);
+//		}
+
+	break;}
+  case TARGET_FACES_YOU:
+	{
+	value = 0.0;
+    Unit * targ = parent->Target();
+    if (targ) {
+
+	Vector Q;
+	Vector P;
+	Vector R;
+
+	Vector PosDelta=(parent->Position()) - (targ->Position());
+	PosDelta = PosDelta/PosDelta.Magnitude();
+	targ->GetOrientation(Q, P, R);
+	value = PosDelta.Dot(R);
+	}
+	}
+	break;
+  case TARGET_IN_FRONT_OF_YOU:
+	{
+	value = 0.0;
+    Unit * targ = parent->Target();
+    if (targ) {
+
+	Vector Q;
+	Vector P;
+	Vector S;
+
+	Vector PosDelta=(targ->Position()) - (parent->Position());
+	PosDelta = PosDelta/PosDelta.Magnitude();
+	parent->GetOrientation(Q, P, S);
+	value = PosDelta.Dot(S);
+	}
+	}
+	break;
+  case TARGET_GOING_YOUR_DIRECTION:
+	{
+	value = 0.0;
+    Unit * targ = parent->Target();
+    if (targ) {
+	Vector Q;
+	Vector P;
+	Vector R;
+	Vector S;
+
+	parent->GetOrientation(Q, P, S);
+	targ->GetOrientation(Q, P, R);
+	value = S.Dot(R);
+	}
+	}
+	break;
   case FACING:
     //    return parent->getAIState()->queryType (Order::FACING)==NULL;
     return queryType (Order::FACING)==NULL;
@@ -224,6 +426,7 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   default:
     return false;
   }
+
   return item.Eval(value);
 }
 
@@ -507,7 +710,9 @@ void AggressiveAI::Execute () {
   //ReCommandWing(fg);
   FireAt::Execute();
   Unit * target = parent->Target();
+
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
+
   if (!ProcessCurrentFgDirective (fg)) {
   if (isjumpable) {
   if (parent->GetJumpStatus().drive<0) {
@@ -591,7 +796,9 @@ void AggressiveAI::Execute () {
 	parent->NetLocalForce=parent->NetForce=Vector(0,0,0);
   }
   target = parent->Target();
+
   isjumpable = target?(!target->GetDestinations().empty()):false;
+
   if (!isjumpable) {
      if (parent->GetJumpStatus().drive>=0) {
         parent->ActivateJumpDrive(-1);
