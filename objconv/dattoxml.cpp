@@ -100,7 +100,7 @@ struct drawdata {
 
 
 FILE * fp = NULL;
-const bool writenormals=false;
+const bool writenormals=true;
 void wrtc (char c)
 {
 	fwrite (&c,sizeof (char),1,fp);
@@ -200,8 +200,8 @@ int main (int argc, char ** argv)
         fp = fopen (argv[2],"w+b");
 	char meshname [256];
 	strcpy (meshname, argv[2]);
-	meshname[strlen(meshname)-4]='\0';
-	strcat (meshname, "-mesh.xml");
+	meshname[strlen(meshname)-6]='\0';
+	strcat (meshname, ".xmesh");
 	Tag ("Unit");
 	Tab();
 	StrWrite ("<Meshfile file=\"");
