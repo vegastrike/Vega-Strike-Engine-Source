@@ -13,26 +13,80 @@ extern bool cleanexit;
 /**************************************************************************************************/
 /**** DirectShow Callback : SampleGrabberCallback                                              ****/
 /**************************************************************************************************/
-AM_MEDIA_TYPE g_StillMediaType;
+
 STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long BufferLen )
 {
 	cerr<<"\t\tProcessing a frame"<<endl;
 		// Check if it is time to send capture to communicating client(s)
 		//if( ws->isReady())
 		{
-			if ((g_StillMediaType.majortype != MEDIATYPE_Video) ||
-				(g_StillMediaType.formattype != FORMAT_VideoInfo) ||
-				(g_StillMediaType.cbFormat < sizeof(VIDEOINFOHEADER)) ||
-				(g_StillMediaType.pbFormat == NULL))
+			AM_MEDIA_TYPE MediaType; 
+			ZeroMemory(&MediaType,sizeof(MediaType)); 
+			HRESULT hr = ws->pSampleGrabber->GetConnectedMediaType(&MediaType); 
+			if (FAILED(hr)) 
 			{
-				cerr<<"INVALID MEDIA TYPE"<<endl;
-				exit(1);
+				cerr<<"GetConnectedMediaType"<<endl;
+				cleanexit = true;
+				winsys_exit(1);
+			}
+			if(MediaType.majortype != MEDIATYPE_Video)
+			{
+				cerr<<"INVALID MEDIA TYPE 1"<<endl;
+				cleanexit = true;
+				winsys_exit(1);
 				return VFW_E_INVALIDMEDIATYPE;
 			}
-			long cbBitmapInfoSize = g_StillMediaType.cbFormat - SIZE_PREHEADER;
-			VIDEOINFOHEADER *pVideoHeader =
-			   (VIDEOINFOHEADER*)g_StillMediaType.pbFormat;
+			if(MediaType.formattype != FORMAT_VideoInfo)
+			{
+				cerr<<"INVALID MEDIA TYPE 2"<<endl;
+				cleanexit = true;
+				winsys_exit(1);
+				return VFW_E_INVALIDMEDIATYPE;
+			}
+			if(MediaType.cbFormat < sizeof(VIDEOINFOHEADER))
+			{
+				cerr<<"INVALID MEDIA TYPE 3"<<endl;
+				cleanexit = true;
+				winsys_exit(1);
+				return VFW_E_INVALIDMEDIATYPE;
+			}
+			if(MediaType.pbFormat == NULL)
+			{
+				cerr<<"INVALID MEDIA TYPE 4"<<endl;
+				cleanexit = true;
+				winsys_exit(1);
+				return VFW_E_INVALIDMEDIATYPE;
+			}
 
+			VIDEOINFOHEADER *pVideoHeader = (VIDEOINFOHEADER*)MediaType.pbFormat; 
+			if (pVideoHeader == NULL) 
+				return E_FAIL; 
+			// The video header contains the bitmap information. 
+			// Copy it into a BITMAPINFO structure. 
+			BITMAPINFO BitmapInfo; 
+			ZeroMemory(&BitmapInfo, sizeof(BitmapInfo)); 
+			CopyMemory(&BitmapInfo.bmiHeader, &(pVideoHeader->bmiHeader), 
+					   sizeof(BITMAPINFOHEADER)); 
+
+			// Create a DIB from the bitmap header, and get a pointer to the buffer. 
+			void *buffer = NULL; 
+			HBITMAP hBitmap = ::CreateDIBSection(0, &BitmapInfo, DIB_RGB_COLORS, (void **)&pBuffer, 
+                                     NULL, 0);
+			// Copy the image into the buffer. 
+			long size = 0; 
+			/*
+			hr = ws->pSampleGrabber->GetCurrentBuffer(&size,(long *)buffer);   
+			if (FAILED(hr)) 
+			{
+				cerr<<"GETCURRENTBUFFER";
+				cerr<<" - code : "<<hr<<" HEX : ";
+				cerr<<hex<<hr<<endl;
+				cleanexit = true;
+				winsys_exit(1);
+			}
+			*/
+			/*
+			long cbBitmapInfoSize = g_StillMediaType.cbFormat - SIZE_PREHEADER;
 			BITMAPFILEHEADER bfh;
 			ZeroMemory(&bfh, sizeof(bfh));
 			bfh.bfType = 'MB';  // Little-endian for "MB".
@@ -40,7 +94,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			bfh.bfOffBits = sizeof( BITMAPFILEHEADER ) + cbBitmapInfoSize;
 
 		    LPBITMAPINFOHEADER lpbi = HEADER( pVideoHeader);
-
+			*/
 			// The picture is composed like this :
 			// - bfh : bitmap file header
 			// - HEADER(pVideoHeader) : bitmap info header
@@ -60,7 +114,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			// Write p to a file for testing
 			char file[256];
 			memset( file, 0, 256);
-			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
+			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".bmp");
 			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
 			string path = datadir+file;
 			FILE * fp;
@@ -68,6 +122,11 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;
+				exit(1);
+			}
+			if( fwrite( &BitmapInfo, 1, sizeof(BITMAPINFOHEADER), fp)!=sizeof(BITMAPINFOHEADER))
+			{
+				cerr<<"!!! ERROR : writing jpeg description to file 1"<<endl;
 				exit(1);
 			}
 			if( fwrite( pBuffer, 1, BufferLen, fp)!=BufferLen)
@@ -79,6 +138,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 
 			// JpegFromBmp should allocate the needed buffer;
 			//ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
+			//FreeMediaType(MediaType);
 		}
 
 		return S_OK;
@@ -321,7 +381,7 @@ int		WebcamSupport::Init()
 	AM_MEDIA_TYPE mt;
 	ZeroMemory( &mt, sizeof( AM_MEDIA_TYPE ) );
 	mt.majortype = MEDIATYPE_Video;
-	mt.subtype = MEDIASUBTYPE_IJPG;
+	mt.subtype = MEDIASUBTYPE_RGB24;
 	hr = pSampleGrabber->SetMediaType( &mt );
 	if( FAILED( hr ) )
 		DoError( hr, "SetMediaType failed");

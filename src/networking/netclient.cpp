@@ -1111,7 +1111,7 @@ void	NetClient::addClient( const Packet* packet )
 	*/
 
 	clt = Clients.get(cltserial);
-	if( clt != NULL )
+	if( clt)
 	{
 		// Client may exist if it jumped from a starsystem to another of if killed and respawned
 		COUT<<"Existing client n°"<<cltserial<<endl;
@@ -1196,7 +1196,7 @@ void	NetClient::removeClient( const Packet* packet )
 	ObjSerial	cltserial = packet->getSerial();
 
 	COUT<<" & HTONS(Serial) = "<<cltserial<<endl;
-	if( Clients.get(cltserial) == NULL)
+	if( !Clients.get(cltserial))
 	{
 		cerr<<"Error, client does not exists !!"<<endl;
 		exit( 1);
@@ -1272,7 +1272,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			un = clt->game_unit.GetUnit();
 			// Test if this is a local player
 			// Is it is, ignore position update
-			if( clt!=NULL && !_Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit()))
+			if( clt && !_Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit()))
 			{
 				// Backup old state
 				un->prev_physical_state = un->curr_physical_state;
@@ -1297,7 +1297,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			clt = Clients.get(sernum);
 			COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 			//offset += sizeof( ObjSerial);
-			if( clt!=NULL && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
+			if( clt && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
 			{
 				// Backup old state
 				un->prev_physical_state = un->curr_physical_state;
