@@ -20,6 +20,7 @@ namespace UnitUtil {
 	bool setFgDirective(Unit *my_unit,string inp);
 	int getFgSubnumber(Unit *my_unit);
 	int removeCargo(Unit *my_unit,string s, int quantity, bool erasezero);
+        bool repair (Unit * my_unit);
 	float upgrade(Unit *my_unit, string file,int mountoffset,int subunitoffset, bool force,bool loop_through_mounts);
 	int addCargo (Unit *my_unit,Cargo carg);
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity);

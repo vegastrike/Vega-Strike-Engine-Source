@@ -39,6 +39,20 @@ Unit* UnitFactory::createUnit( const char *filename,
                      flightgroup,
                      fg_subnumber );
 }
+Unit* UnitFactory::createServerSideUnit( const char *filename,
+		               bool        SubUnit,
+		               int         faction,
+		               std::string customizedUnit,
+		               Flightgroup *flightgroup,
+		               int         fg_subnumber )
+{
+    return new Unit( filename,
+                     SubUnit,
+                     faction,
+                     customizedUnit,
+                     flightgroup,
+                     fg_subnumber );
+}
 
 Unit* UnitFactory::createUnit( vector <Mesh*> & meshes,
 		               bool Subunit,

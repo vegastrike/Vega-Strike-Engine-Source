@@ -102,7 +102,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 	  WriteSaveGame(cp,true);
 	}
 	NewPart=NULL;//no ship to upgrade
-	templ=NULL;//no template
+	downgradelimiter=templ=NULL;//no template
 	//	CargoList->AddTextItem("a","Just a test item");
 	//	CargoList->AddTextItem("b","And another just to be sure");
 	CargoInfo->AddTextItem("name", "");
@@ -684,9 +684,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   int index;
   char * input_buffer = strdup (inp_buf);
   sscanf (inp_buf,"%d %s",&index,input_buffer);
-  if (templ!=NULL) {
-    templ=NULL;
-  }
+  downgradelimiter=templ=NULL;
   if (state==0&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
   
   switch (mode) {
@@ -743,7 +741,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
       char *unitdir =GetUnitDir(un->name.c_str());
       std::string templnam = (string(unitdir)+string(".template"));
-      
+      std::string limiternam = (string(unitdir)+string(".blank"));
       const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(templnam,un->faction));
       if (!temprate)
 	temprate = UnitConstCache::setCachedConst(StringIntKey(templnam,un->faction),UnitFactory::createUnit (templnam.c_str(),true,un->faction));
@@ -753,6 +751,16 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
       }else {
 	templ=NULL;
       }
+      const Unit * dglim = UnitConstCache::getCachedConst (StringIntKey (limiternam,un->faction));
+      if (!dglim) {
+          dglim = UnitConstCache::setCachedConst (StringIntKey(limiternam,un->faction), UnitFactory::createServerSideUnit(limiternam.c_str(),true,un->faction));
+      }
+      if (dglim->name!=string("LOAD_FAILED")) {
+          downgradelimiter= dglim;
+      }else {
+          downgradelimiter=NULL;
+      }
+      
     }
     switch(submode) {
     case NORMAL:
@@ -906,7 +914,7 @@ void UpgradingInfo::CompleteTransactionAfterTurretSelect() {
       canupgrade = un->canUpgrade (NewPart,mountoffset,subunitoffset,addmultmode,false,percentage,templ);
       break;
     case DOWNGRADEMODE:
-      canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
+      canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage,downgradelimiter);
       break;
     }
     if (!canupgrade) {
@@ -967,13 +975,13 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       }
       break;
     case DOWNGRADEMODE:
-      canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
+      canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage,downgradelimiter);
       //      if (part.content=="jump_drive") {
       //        part.price/=3;
       //      }
       price =part.price*usedPrice(percentage);
       _Universe->AccessCockpit()->credits+=price;
-      if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage)) {
+      if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage,downgradelimiter)) {
       if ((bas=base.GetUnit())) {
 	part.quantity=1;
         part.price = bas->PriceCargo (part.content);

@@ -107,6 +107,21 @@ namespace UnitUtil {
 		}
 		return quantity;
 	}
+        bool repair(Unit *my_unit) {
+	  if (!my_unit)
+	    return false;
+            char * undir = GetUnitDir(my_unit->name.c_str());
+            bool ret= my_unit->Upgrade (undir,0,0,true,false)!=0;
+	    UnitImages * im= &my_unit->GetImageInformation();
+	    for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
+	      if (im->cockpit_damage[i]!=1) {
+		im->cockpit_damage[i]=1;
+		ret=true;
+	      }
+	    }
+            free (undir);
+            return ret;
+        }
 	float upgrade(Unit *my_unit, string file,int mountoffset,int subunitoffset, bool force,bool loop_through_mounts) {
 		if (!my_unit)return 0;
 		double percentage=0;

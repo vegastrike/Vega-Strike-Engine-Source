@@ -53,6 +53,13 @@ public:
                              Flightgroup *flightgroup=NULL,
                              int         fg_subnumber=0 );
 
+    static Unit* createServerSideUnit( const char *filename,
+                             bool        SubUnit,
+                             int         faction,
+                             std::string customizedUnit=string(""),
+                             Flightgroup *flightgroup=NULL,
+                             int         fg_subnumber=0 );
+
     static Unit* createUnit( std::vector<Mesh*> &meshes,
 			     bool Subunit,
 			     int faction);

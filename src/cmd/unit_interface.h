@@ -24,6 +24,7 @@ public:
   //below are state variables while the user is selecting mounts
   const Unit * NewPart;
   const Unit * templ;
+  const Unit * downgradelimiter;
   Cargo part;
   int selectedmount;
   int selectedturret;

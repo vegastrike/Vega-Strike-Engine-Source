@@ -15,6 +15,8 @@ extern int GetModeFromName (const char *);
 template<class UnitType>
 vector <CargoColor>& GameUnit<UnitType>::FilterDowngradeList (vector <CargoColor> & mylist, bool downgrade)
 {
+  const Unit * templ=NULL;
+  const Unit * downgradelimit=NULL;
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
@@ -35,21 +37,30 @@ vector <CargoColor>& GameUnit<UnitType>::FilterDowngradeList (vector <CargoColor
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->GetNumMounts()?GetNumMounts():1;
 	char * unitdir  = GetUnitDir(name.c_str());
-	string templnam = string(unitdir)+".template";	  
-	const Unit * templ=NULL;
+	string templnam = string(unitdir)+".template";
+        string limiternam = string(unitdir)+".blank";
+        
 	if (!downgrade) {
 	  templ = UnitConstCache::getCachedConst (StringIntKey(templnam,faction));
 	  if (templ==NULL) {
 	    templ = UnitConstCache::setCachedConst (StringIntKey(templnam,faction),UnitFactory::createUnit (templnam.c_str(),true,this->faction));
 	  }
-	}
+          if (templ->name == std::string("LOAD_FAILED")) templ = NULL;
+
+        }else {
+            downgradelimit = UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
+            if (downgradelimit==NULL) {
+                downgradelimit = UnitConstCache::setCachedConst (StringIntKey (limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,this->faction));
+            }
+            if (downgradelimit->name == std::string("LOAD_FAILED")) downgradelimit = NULL;
+        }
 	free (unitdir);
 	for (int m=0;m<maxmountcheck;m++) {
 	  int s =0;
 	  for (un_iter ui=getSubUnits();s==0||((*ui)!=NULL);++ui,++s) {
 	    double percent=1;
 	    if (downgrade) {
-	      if (canDowngrade (NewPart,m,s,percent)) {
+	      if (canDowngrade (NewPart,m,s,percent,downgradelimit)) {
 		if (percent>MyPercentMin) {
 		  removethis=false;
 		  break;

@@ -264,6 +264,8 @@ string Planet::getHumanReadablePlanetType () const{
 	    temp = "Ice Colony";
 	  }else if (temp=="carribean") {
 	    temp="Pleasure";
+	  }else if (temp=="ocean") {
+	    temp = "Oceanic";
 	  }else if (temp=="tundra") {
 	    temp = "Rlaan_Ice_Agriculture";
 	  }else if (temp=="n_class") {

@@ -205,7 +205,7 @@ protected:
   ///no collision table presence.
   bool SubUnit;
 public:
-  bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
+  bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
 
   int GetNumMounts ()const  {return mounts.size();}
@@ -217,8 +217,8 @@ public:
   bool canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL);
   bool Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL);
   virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
-  bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
-  bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
+  bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit);
+  bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage, const Unit * downgradelimit);
 
 /***************************************************************************************/
 /**** GFX/PLANET STUFF                                                              ****/
