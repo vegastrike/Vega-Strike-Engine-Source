@@ -66,12 +66,13 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #include <GL/glut.h>
 void init_opengl_extensions()
 {
-
+	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
+	fprintf (stderr,"OpenGL Extensions supported: %s\n",extensions);
 #ifdef PFNGLLOCKARRAYSEXTPROC
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
 
 	printf( "GL_EXT_compiled_vertex_array extension "
-		     "supported" );
+		     "supported\n" );
 
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
@@ -80,7 +81,7 @@ void init_opengl_extensions()
 
     } else {
 	printf(  "GL_EXT_compiled_vertex_array extension "
-		     "NOT supported" );
+		     "NOT supported\n" );
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
 
@@ -95,13 +96,13 @@ void init_opengl_extensions()
 #endif
     if (glutExtensionSupported ("GL_ARB_multitexture")) {
       g_game.Multitexture = 1;
-      printf ("Multitexture supported");
+      printf ("OpenGL::Multitexture supported\n");
     } else {
       g_game.Multitexture =0;
-      printf ("Multitexture unsupported");
+      printf ("OpenGL::Multitexture unsupported\n");
     }
     if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) ) {
-      printf ("Texture Cube Map Ext Supported");
+      printf ("OpenGL::Texture Cube Map Ext Supported\n");
       g_game.cubemap =1;
     }
 }
@@ -187,7 +188,7 @@ void GFXInit (int argc, char ** argv){
     //int retval= glGetError();
     if ( !glutExtensionSupported( "GL_EXT_color_table" ) ) {
       g_game.PaletteExt = 0;
-      printf ("Palette Not Supported");
+      printf ("Color Table Not Supported\n");
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

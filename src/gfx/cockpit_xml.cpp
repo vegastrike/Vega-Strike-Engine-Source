@@ -132,10 +132,10 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	myfont = (*iter).value;
 	break;
       case VIEWOFFSET:
-	viewport_offset = parse_float ((*iter).value);
+		  viewport_offset = XMLSupport::parse_float ((*iter).value);
 	break;
       case COCKPITOFFSET:
-	cockpit_offset = parse_float ((*iter).value);
+		  cockpit_offset = XMLSupport::parse_float ((*iter).value);
 	break;
       case XFILE:
 	Pit[0]= new Sprite ((*iter).value.c_str());
@@ -171,16 +171,16 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	gaugename = (*iter).value;
 	break;
       case XSIZE:
-	xsize = parse_float ((*iter).value);
+		  xsize = XMLSupport::parse_float ((*iter).value);
 	break;
       case YSIZE:
-	ysize = parse_float ((*iter).value);
+	ysize = XMLSupport::parse_float ((*iter).value);
 	break;
       case XCENT:
-	xcent = parse_float ((*iter).value);
+	xcent = XMLSupport::parse_float ((*iter).value);
 	break;
       case YCENT:
-	ycent = parse_float ((*iter).value);
+	ycent = XMLSupport::parse_float ((*iter).value);
 	break;
       case G_UP:
 	tmpdir = Gauge::GAUGE_UP;
@@ -223,16 +223,16 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	(*newsprite) = new Sprite ((*iter).value.c_str());
 	break;
       case XSIZE:
-	xsize = parse_float ((*iter).value);
+	xsize = XMLSupport::parse_float ((*iter).value);
 	break;
       case YSIZE:
-	ysize = parse_float ((*iter).value);
+	ysize = XMLSupport::parse_float ((*iter).value);
 	break;
       case XCENT:
-	xcent = parse_float ((*iter).value);
+	xcent = XMLSupport::parse_float ((*iter).value);
 	break;
       case YCENT:
-	ycent = parse_float ((*iter).value);
+	ycent = XMLSupport::parse_float ((*iter).value);
 	break;
       }
     }
@@ -260,12 +260,16 @@ void Cockpit::endElement(const string &name) {
 
 void Cockpit::LoadXML (const char * filename) {
   const int chunk_size = 16384;
-  FILE * inFile = fopen (filename, "r");
+  FILE * inFile=NULL;
+  if (filename[0]!='\0') {
+	inFile = fopen (filename, "r");
+  }
   if(!inFile) {
-    cockpit_offset=0;
-    viewport_offset=0;
-    Panel.push_back(new Sprite ("crosshairs.spr"));
-    return;
+	 cockpit_offset=0;
+	 viewport_offset=0;
+	 Panel.push_back(new Sprite ("crosshairs.spr"));
+	 return;
+	
   }
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);

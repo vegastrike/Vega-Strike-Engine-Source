@@ -42,6 +42,7 @@ FlyByKeyboard::FlyByKeyboard (): FlyByWire () {
     BindKey(GLUT_KEY_RIGHT,FlyByKeyboard::LeftKey);
     BindKey('\t',FlyByKeyboard::ABKey);
     BindKey('+',FlyByKeyboard::AccelKey);
+    BindKey('=',FlyByKeyboard::AccelKey);
     BindKey('-',FlyByKeyboard::DecelKey);   
     BindKey('/',FlyByKeyboard::RollLeftKey);
     BindKey('*',FlyByKeyboard::RollRightKey);

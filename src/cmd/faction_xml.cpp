@@ -165,7 +165,7 @@ void Universe::Faction::endElement(void *userData, const XML_Char *name) {
 }
 int Universe::GetFaction (const char * factionname) {
 #ifdef _WIN32
-  #define strcasecmd stricmp
+  #define strcasecmp stricmp
 #endif
  for (unsigned int i=0;i<factions.size();i++) {
     if (strcasecmp (factionname, factions[i]->factionname)==0) {

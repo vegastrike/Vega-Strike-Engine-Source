@@ -57,8 +57,8 @@ public:
 	  myDims.j = y;
 	}
 	void Draw();
-	void Draw (const string &text);
-	void SetText(const string &newText) {
+	void Draw (const std::string &text);
+	void SetText(const std::string &newText) {
 		myText = newText;
 	}
 

@@ -1,10 +1,11 @@
 #include "gl_light.h"
 #include <queue>
 #include <list>
+#include <vector>
 using std::priority_queue;
 #include "hashtable_3d.h"
 using std::list;
-
+using std::vector;
  //optimization globals
 float intensity_cutoff=.05;//something that would normally round down
 float optintense=.2;
@@ -61,7 +62,7 @@ void unpicklights () {
 }
 
 static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled);
-
+typedef vector <LineCollideStar> veclinecol;
 void GFXPickLights (const Vector & center, const float radius) {
     Vector tmp;
     void * rndvar = (void *)rand();
@@ -75,14 +76,15 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmpcollide.object=NULL;
     tmpcollide.type=LineCollide::UNIT;
     swappicked();
-    vector <LineCollideStar> *tmppickt[HUGEOBJECT+1];
+    veclinecol *tmppickt[HUGEOBJECT+1];
     //FIXMESPEEDHACK    if (radius < CTACC) {
 	lighttable.Get (center, tmppickt);
 	//FIXMESPEEDHACK} else {
 	//FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt); 
 	//FIXMESPEEDHACK}
     for (int j=0;j<sizeget;j++) {
-      for (vector <LineCollideStar>::iterator i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){
+	  veclinecol::iterator i;
+      for (i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){
 	//warning::duplicates may Exist
 	//FIXMESPEEDHACKif (i->lc->lastchecked!=rndvar) {
 	//FIXMESPEEDHACKi->lc->lastchecked = rndvar;

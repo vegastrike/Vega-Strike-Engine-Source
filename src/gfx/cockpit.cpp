@@ -147,12 +147,13 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   return 1;
 }
 void Cockpit::DrawGauges(Unit * un) {
-  for (int i=0;i<KPS;i++) {
+  int i;
+  for (i=0;i<KPS;i++) {
     if (gauges[i]) {
       gauges[i]->Draw(LookupTargetStat (i,un));
     }
   }
-  for (int i=KPS;i<NUMGAUGES;i++) {
+  for (i=KPS;i<NUMGAUGES;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
       gauges[i]->GetSize (sx,sy);

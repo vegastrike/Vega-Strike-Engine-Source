@@ -44,7 +44,10 @@ Sprite::Sprite(const char *file) {
   rotation = 0;
   surface = NULL;
   maxs = maxt =0;
-  FILE *fp = fopen(file, "r");
+  FILE *fp = NULL;
+  if (file[0]!='\0') {
+    fp = fopen(file, "r");
+  }
   if (fp) {
     char texture[64]={0};
     char texturea[64]={0};
