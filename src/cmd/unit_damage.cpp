@@ -79,7 +79,7 @@ void GameUnit<UnitType>::Split (int level) {
     tempmeshes.push_back (old[i]);
     this->SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,this->faction));
     splitsub->hull = 1000;
-    splitsub->Mass = debrismassmult*Mass/level;
+    splitsub->Mass = debrismassmult*splitsub->Mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
