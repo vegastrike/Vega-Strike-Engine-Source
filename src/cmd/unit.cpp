@@ -1113,6 +1113,7 @@ void Unit::DisableTurretAI () {
     }
     un->aistate = new Order; //get 'er ready for enqueueing
     un->aistate->SetParent (un);
+    un->UnFire();
     un->DisableTurretAI ();
     iter.advance();
   }
