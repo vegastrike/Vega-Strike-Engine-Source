@@ -194,6 +194,9 @@ namespace UniverseUtil {
 	string GetGalaxyProperty (string sys, string prop) {
 		return _Universe->getGalaxyProperty(sys,prop);
 	}
+	string GetGalaxyPropertyDefault (string sys, string prop, string def) {
+		return _Universe->getGalaxyPropertyDefault(sys,prop,def);
+	}
 	int GetNumAdjacentSystems (string sysname) {
 		return _Universe->getAdjacentStarSystems(sysname).size();
 	}

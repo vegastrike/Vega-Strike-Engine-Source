@@ -292,6 +292,11 @@ std::string Universe::getGalaxyProperty (const std::string & sys, const std::str
   string name = RemoveDotSystem (getStarSystemName (sys).c_str());
   return galaxy->getVariable (sector,name,prop,galaxy->getVariable (sector,prop,galaxy->getVariable ("unknown_sector","min",prop,"")));
 }
+std::string Universe::getGalaxyPropertyDefault (const std::string & sys, const std::string & prop, const std::string def) {
+  string sector = getStarSystemSector (sys);
+  string name = RemoveDotSystem (getStarSystemName (sys).c_str());
+  return galaxy->getVariable (sector,name,prop,def);
+}
 vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) {
   string sector =getStarSystemSector (file); 
   string name =RemoveDotSystem (getStarSystemName (file).c_str()); 

@@ -47,6 +47,8 @@ namespace UniverseUtil {
 	string GetAdjacentSystem (string str, int which);
 ///this gets a specific property of this system as found in universe/milky_way.xml
 	string GetGalaxyProperty (string sys, string prop);
+///this gets a specific property of this system as found in universe/milky_way.xml and returns a default value if not found
+	string GetGalaxyPropertyDefault (string sys, string prop, string def);
 ///this gets the number of systems adjacent to the sysname
 	int GetNumAdjacentSystems (string sysname);
 ///this gets the current time in seconds

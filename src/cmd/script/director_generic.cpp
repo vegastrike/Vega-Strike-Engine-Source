@@ -66,7 +66,17 @@ unsigned int pushSaveData (int whichcp, string key, float val) {
 
 }
 
+unsigned int eraseSaveData (int whichcp, string key, unsigned int index) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  vector<float> * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  if (index <ans->size()) {
+    ans->erase (ans->begin()+index);
+  }
+  return ans->size();
 
+}
 unsigned int pushSaveString (int whichcp, string key, string value) {
   if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
@@ -94,6 +104,18 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
   if (num<ans->size()) {
     (*ans)[num] = val;
   }
+}
+
+unsigned int eraseSaveString (int whichcp, string key, unsigned int index) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
+    return 0;
+  }
+  vector<string> *ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData (key)));
+  if (index <ans->size()) {
+    ans->erase (ans->begin()+index);
+  }
+  return ans->size();
+
 }
 
 vector <string> loadStringList (int playernum,string mykey) {
@@ -162,12 +184,14 @@ PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Missio
 PYTHON_END_CLASS(Director,pythonMission)
   PYTHON_DEFINE_GLOBAL(Director,&putSaveData,"putSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&pushSaveData,"pushSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&eraseSaveData,"eraseSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveData,"getSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveDataLength,"getSaveDataLength");
   PYTHON_DEFINE_GLOBAL(Director,&putSaveString,"putSaveString");
   PYTHON_DEFINE_GLOBAL(Director,&pushSaveString,"pushSaveString");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveString,"getSaveString");
   PYTHON_DEFINE_GLOBAL(Director,&getSaveStringLength,"getSaveStringLength");
+  PYTHON_DEFINE_GLOBAL(Director,&eraseSaveString,"eraseSaveString");
 PYTHON_END_MODULE(Director)
 
 void InitDirector() {

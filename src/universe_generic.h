@@ -92,6 +92,7 @@ private:
 
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
   std::string getGalaxyProperty (const std::string &sys, const std::string & prop);
+  std::string getGalaxyPropertyDefault (const std::string & sys, const std::string & prop, const std::string def="");
   bool StillExists(StarSystem * ss);
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}

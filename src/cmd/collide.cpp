@@ -51,14 +51,14 @@ void KillCollideTable (LineCollide * lc,StarSystem * ss) {
   if (lc->type==LineCollide::UNIT) {
     ss->collidetable->c.Remove ( lc,lc->object.u);
   } else {
-    printf ("such collide types as %d not allowed",lc->type);
+//    printf ("such collide types as %d not allowed",lc->type);
   }
 }
 bool EradicateCollideTable (LineCollide * lc, StarSystem * ss) {
   if (lc->type==LineCollide::UNIT) { 
     return ss->collidetable->c.Eradicate (lc->object.u);
   } else {
-    printf ("such collide types as %d not allowed",lc->type);
+//    printf ("such collide types as %d not allowed",lc->type);
     return false;
   }
 }
@@ -66,7 +66,7 @@ void AddCollideQueue (LineCollide &tmp,StarSystem * ss) {
   if (tmp.type==LineCollide::UNIT) { 
     ss->collidetable->c.Put (&tmp,tmp.object.u);
   } else {
-    printf ("such collide types as %d not allowed",tmp.type);
+//    printf ("such collide types as %d not allowed",tmp.type);
   }
 }
 
