@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "HAVE_SDL" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS"  /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -87,7 +87,15 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\Src\Alglib.c
+SOURCE=..\Src\cmd_aiscript.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\cmd_beam.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\cmd_bolt.cpp
 # End Source File
 # Begin Source File
 
@@ -95,7 +103,23 @@ SOURCE=..\Src\Cmd_gun.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\Src\cmd_collide.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\Src\cmd_input_dfa.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\cmd_faction_xml.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\cmd_flybywire.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\cmd_navigation_orders.cpp
 # End Source File
 # Begin Source File
 
@@ -115,23 +139,7 @@ SOURCE=..\Src\cmd_unit_xml.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\Debug.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\error_util.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\file_util.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Fog.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Gauss.c
+SOURCE=..\Src\cmd_weapon_xml.cpp
 # End Source File
 # Begin Source File
 
@@ -163,6 +171,10 @@ SOURCE=..\Src\Gfx_box.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\Src\Gfx_bsp_gent.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\Src\Gfx_bsp.cpp
 # End Source File
 # Begin Source File
@@ -178,6 +190,15 @@ SOURCE=..\Src\gfx_click_list.cpp
 SOURCE=..\Src\gfx_coordinate_select.cpp
 # End Source File
 # Begin Source File
+
+SOURCE=..\Src\Gfx_env_map_gent.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\Gfx_halo.cpp
+# End Source File
+# Begin Source File
+
 
 SOURCE=..\Src\Gfx_hud.cpp
 # End Source File
@@ -196,6 +217,14 @@ SOURCE=..\Src\Gfx_mesh.cpp
 # Begin Source File
 
 SOURCE=..\Src\gfx_mesh_xml.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\Gfx_mesh_fx.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\Gfx_mesh_bin.cpp
 # End Source File
 # Begin Source File
 
@@ -231,6 +260,14 @@ SOURCE=..\Src\Gl_light.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\Src\Gl_light_pick.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\Gl_light_state.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\Src\gl_material.cpp
 # End Source File
 # Begin Source File
@@ -247,7 +284,7 @@ SOURCE=..\Src\Gl_pick.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\gl_quadstrip.cpp
+SOURCE=..\Src\gl_quad_list.cpp
 # End Source File
 # Begin Source File
 
@@ -259,19 +296,11 @@ SOURCE=..\Src\gl_texture.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\GL_util.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\Src\gl_vertex_list.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\Src\hashtable.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Image.c
 # End Source File
 # Begin Source File
 
@@ -291,15 +320,7 @@ SOURCE=..\Src\In_mouse.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\Joystick.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\Src\Lin_time.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\List.c
 # End Source File
 # Begin Source File
 
@@ -311,7 +332,7 @@ SOURCE=..\Src\main_loop.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\Nmrcl.c
+SOURCE=..\Src\Planet.cpp
 # End Source File
 # Begin Source File
 
@@ -319,35 +340,7 @@ SOURCE=..\Src\Physics.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\Pic.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Planet.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Quadgeom.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\Src\quaternion.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\screenshot.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\sdl_audio.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\sdl_audio_data.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Sdl_init.c
 # End Source File
 # Begin Source File
 
@@ -355,15 +348,15 @@ SOURCE=..\Src\star_system.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\string_util.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\tex_font_metrics.c
+SOURCE=..\Src\star_system_xml.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=..\Src\UnitCollection.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\Src\UnitContainer.cpp
 # End Source File
 # Begin Source File
 
@@ -659,17 +652,7 @@ SOURCE=..\Src\screenshot.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\Src\sdl_audio.h
-# End Source File
-# Begin Source File
 
-SOURCE=..\Src\sdl_audio_data.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\Src\Sdl_init.h
-# End Source File
-# Begin Source File
 
 SOURCE=..\Src\star_system.h
 # End Source File
@@ -714,117 +697,3 @@ SOURCE=..\Src\xml_support.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
-# Begin Group "SDL"
-
-# PROP Default_Filter ".lib,.sdl"
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\begin_code.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\close_code.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_active.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_audio.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_byteorder.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_cdrom.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_copying.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_endian.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_error.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_events.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_joystick.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_keyboard.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_keysym.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_main.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_mouse.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_mutex.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_quit.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_rwops.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_syswm.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_thread.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_timer.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_types.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_version.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\include\SDL_video.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\lib\SDLmain.lib"
-# End Source File
-# Begin Source File
-
-SOURCE=".\sdl\SDL-1.1.7\lib\SDL.lib"
-# End Source File
-# End Group
-# End Target
-# End Project
