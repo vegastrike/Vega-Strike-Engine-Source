@@ -276,7 +276,35 @@ Unit::~Unit()
 }
 
 
-
+float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
+  float retval = -1;
+  float tmpdist;
+  float tmpcos;
+  Matrix mat;
+  for (int i=0;i<nummounts;i++) {
+    Transformation finaltrans (mounts[i].GetMountLocation());
+    finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
+    finaltrans.to_matrix (mat);
+    Vector totarget (targ->Position()-finaltrans.position);
+    Vector Normal (mat[8],mat[9],mat[10]);
+    tmpcos = Normal.Dot (totarget);
+    //*maybe unnecessary ********
+    Vector rSizeAdj = (totarget-Normal).Normalize();
+    totarget=totarget -rSizeAdj;
+    tmpcos = Normal.Dot (totarget);
+    //***************************
+    tmpdist = totarget.Magnitude();
+    tmpcos/=tmpdist;
+    tmpdist /= mounts[i].type.Range;
+    if (tmpdist <dist) {
+      if (tmpcos > retval-tmpdist/2) {
+	dist = tmpdist;
+	retval = tmpcos;
+      }      
+    }
+  }
+  return retval;
+}
 
 
 

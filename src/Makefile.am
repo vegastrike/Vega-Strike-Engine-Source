@@ -2,20 +2,6 @@
 bin_PROGRAMS = vegastrike
 SUBDIRS = gldrv
 vegastrike_LDADD = gldrv/libgldrv.a
-#	fonts.c					\
-#	fonts.h
-##	quadtree.cpp				\
-##	quadtree.hpp				\
-#	gfx_hud.cpp				\
-#	gfx_hud.h				\
-#	gfx_light.cpp				\
-#	gfx_light.h				\
-#	quadgeom.cpp				\
-#	quadgeom.hpp				\
-
-
-
-
 
 vegastrike_SOURCES =				\
 	cmd.h					\
@@ -30,12 +16,14 @@ vegastrike_SOURCES =				\
 	cmd_input_dfa.h				\
 	cmd_input_dfa.cpp			\
 	cmd_faction_xml.cpp			\
-	cmd_flybywire.h			\
+	cmd_flybywire.h				\
 	cmd_flybywire.cpp			\
 	cmd_navigation_orders.h			\
 	cmd_navigation_orders.cpp		\
 	cmd_order.cpp				\
 	cmd_order.h				\
+	cmd_target_ai.cpp			\
+	cmd_target_ai.h				\
 	cmd_unit.h				\
 	cmd_unit.cpp				\
 	cmd_unit_damage.cpp			\

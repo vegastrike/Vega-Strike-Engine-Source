@@ -128,6 +128,7 @@ friend class PlanetaryOrbit;
 	status = INACTIVE;
     }
     void SetMountPosition (const Transformation &t) {LocalPosition = t;}
+    Transformation &GetMountLocation () {return LocalPosition;}
     void UnFire();
     bool Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
   } *mounts;
@@ -201,6 +202,7 @@ friend class PlanetaryOrbit;
   Box *selectionBox;
   void SetCollisionParent (Unit *name);
 public:
+  float cosAngleFromMountTo (Unit * target, float & distance);
   void UpdateCollideQueue();
   string name;
   float rSize () {return radial_size;}
