@@ -410,7 +410,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
 	case ENGINE:
-	  enginesound = AUDCreateSound ((*iter).name,true);
+	  enginesound = AUDCreateSound ((*iter).name.c_str(),true);
 	  break;
       }
     }
