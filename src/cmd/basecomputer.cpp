@@ -1606,9 +1606,9 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
     // Iterate through the list and load the picker from it.
     string currentCategory = "--ILLEGAL CATEGORY--";    // Current category we are adding cells to.
     SimplePickerCell* parentCell = NULL;                // Place to add new items.  NULL = Add to picker.
-    for(int i=0; i<tlist.masterList.size(); i++) {
+	for(int i=0; i<tlist.masterList.size(); i++) {
         Cargo& item = tlist.masterList[i].cargo;
-        if(item.category != currentCategory) {
+	    if(item.category != currentCategory) {
             // Create new cell(s) for the new category.
             parentCell = createCategoryCell(*dynamic_cast<SimplePickerCells*>(picker.cells()), item.category, skipFirstCategory);
             currentCategory = item.category;
@@ -1616,11 +1616,14 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
         // Construct the cell for this item.
         const bool transOK = isTransactionOK(item, transType);
+					
         string itemName = beautify(item.content);
-        if (item.quantity > 1) {
+	
+          if (item.quantity > 1) {
             // If there is more than one item, show the number of items.
-	    itemName += " (" + tostring(item.quantity) + ")";
-        }
+	      itemName += " (" + tostring(item.quantity) + ")";
+		  }
+	
         // Clear color means use the text color in the picker.
         SimplePickerCell cell(itemName, item.content, (transOK? GUI_CLEAR : NO_MONEY_COLOR), i);
 
@@ -2490,13 +2493,16 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
         
 		// Figure color and label based on weapon that is in the slot.
 		GFXColor mountColor = MOUNT_POINT_NO_SELECT;
-		char mountName[256];
+		string mountName;
+		string ammoexp;
 		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
-			sprintf(mountName, "%2d. %s", i+1, playerUnit->mounts[i].type->weapon_name.c_str());
+			mountName=tostring(i+1)+" "+ playerUnit->mounts[i].type->weapon_name;
+			ammoexp=(playerUnit->mounts[i].ammo==-1)?string(""):string((" ammo: "+tostring(playerUnit->mounts[i].ammo)));
+			mountName+=ammoexp;
 			mountColor = MOUNT_POINT_FULL;
         } else {
 			const std::string temp = lookupMountSize(playerUnit->mounts[i].size);
-			sprintf(mountName, "%2d. (Empty) %s", i+1, temp.c_str());
+			mountName=tostring(i+1)+" (Empty) "+ temp.c_str();
 			mountColor = MOUNT_POINT_EMPTY;
         }
 
@@ -2655,12 +2661,15 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 		bool selectable = false;
 
 		// Get the name.
-		char mountName[256];
+		string mountName;
 		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
 			// Something is mounted here.
 			const std::string unitName = playerUnit->mounts[i].type->weapon_name;
 			const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(m_part.content, FactionUtil::GetFaction("upgrades")));
-			sprintf(mountName, "%2d. %s", i+1, unitName.c_str());
+			string ammoexp;
+			mountName=tostring(i+1)+" "+ unitName.c_str();
+			ammoexp=(playerUnit->mounts[i].ammo==-1)?string(""):string((" ammo: "+tostring(playerUnit->mounts[i].ammo)));
+			mountName+=ammoexp;
 			if (partUnit) {
 				if (partUnit->GetNumMounts()) {
 					if (partUnit->mounts[0].type==playerUnit->mounts[i].type) {
@@ -2679,8 +2688,8 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
         } else {
 			// Nothing at this mount point.
 			const std::string temp = lookupMountSize(playerUnit->mounts[i].size);
-			sprintf(mountName, "%2d. (Empty) %s", i+1, temp.c_str());
-        }
+			mountName=tostring(i+1)+" (Empty) "+ temp.c_str();
+	     }
 
 		// Now we add the cell.  Note that "selectable" is stored in the tag property.
 		const GFXColor mountColor = (selectable? MOUNT_POINT_FULL:MOUNT_POINT_NO_SELECT);
