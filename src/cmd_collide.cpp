@@ -3,6 +3,67 @@
 #include "gfx_mesh.h"
 #include "cmd_collide.h"
 vector <LineCollide> collidequeue;
+const int COLLIDETABLESIZE=20;//cube root of entries
+const float COLLIDETABLEACCURACY=.005;// "1/largeness of sectors"
+
+class CollideTable {
+  vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
+  void hash_vec (const Vector & tmp, int &x, int &y, int &z) {
+    x = ((int)(tmp.i*COLLIDETABLEACCURACY));
+    y = ((int)(tmp.j*COLLIDETABLEACCURACY));
+    z = ((int)(tmp.k*COLLIDETABLEACCURACY));
+  }
+
+  
+  void Add(const Vector &Min, const Vector &Max, LineCollide* target) {
+    int minx,miny,minz,maxx,maxy,maxz;
+    hash_vec(Min,minx,miny,minz);
+    hash_vec(Max,maxx,maxy,maxz);
+    if (maxx-minx>=COLLIDETABLESIZE) {
+      minx = 0;
+      maxx = COLLIDETABLESIZE-1;
+    }
+    if (maxy-miny>=COLLIDETABLESIZE) {
+      miny = 0;
+      maxy = COLLIDETABLESIZE-1;    
+    }
+    if (maxz-minz>=COLLIDETABLESIZE) {
+      minz = 0;
+      maxz = COLLIDETABLESIZE-1;
+    }
+
+    minx = minx%COLLIDETABLESIZE;
+    miny = miny%COLLIDETABLESIZE;
+    minz = minz%COLLIDETABLESIZE;
+
+    maxx = maxx%COLLIDETABLESIZE;
+    maxy = maxy%COLLIDETABLESIZE;
+    maxz = maxz%COLLIDETABLESIZE;
+    
+    for (int k=minz;;k++) {//reverse??????????????? which is fast
+      if (k==COLLIDETABLESIZE) k=0;
+      for (int j=miny;;j++) {      
+	if (j==COLLIDETABLESIZE) j=0;
+	for (int i=minx;;i++) {
+	  if (i==COLLIDETABLESIZE) i=0;	  
+	  table[i][j][k].push_back(target);
+	  if (i==maxx) 
+	    break;
+	}
+	if (j==maxy) 
+	  break;
+      }
+      if (k==maxz)
+	break;
+    }
+
+  }
+
+};
+
+
+
+
 
 
 void Unit::CollideAll() {
