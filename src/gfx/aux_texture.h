@@ -22,63 +22,79 @@
 #define _TEXTURE_H_
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
-//#include <gl/gl.h>
+
 #ifdef __cplusplus
 #include <string>
 #else
 #include <string.h>
 #endif
-using namespace std;
 
+/**
+ *  The texture class defines a method of loading bitmap textures
+ *  It also defines a hash table in which textures are kept and looked up
+ *  to prevent the loading of duplicate textures
+ */
 struct Texture{
+  ///The file name used to load this texture
   char * texfilename;
-  //  char filename[64];
+  ///the filter mode of this texture
   enum FILTER ismipmapped;
-	unsigned int sizeX;
-	unsigned int sizeY;
-	unsigned char *data;
-	enum {_8BIT, _24BIT, _24BITRGBA} mode;
-  //unsigned char palette[256*4+1];
-  unsigned char * palette;  ///if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be ph00ked
-	int name;
-	int stage;
-
-	Texture *original;
-	int refcount;
-        enum TEXTURE_TARGET texture_target;
-        enum TEXTURE_IMAGE_TARGET image_target;
-        GFXBOOL checkold(const string &s);
-	void setold();
-  //char  texfilename;
+  ///the dimensions of this texture
+  unsigned int sizeX; unsigned int sizeY;
+  ///The data of this texture (used in between functions, deleted)
+  unsigned char *data;
+  ///The bitmode of this texture
+  enum {_8BIT, _24BIT, _24BITRGBA} mode;
+  ///if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be messed
+  unsigned char * palette;  
+  ///The GFXname of this texture
+  int name;
+  ///The multitexture stage of this texture
+  int stage;
+  ///The original data that would represent this texture
+  Texture *original;
+  ///The number of references on the original data
+  int refcount;
+  ///The target this will go to (cubemap or otherwise)
+  enum TEXTURE_TARGET texture_target; enum TEXTURE_IMAGE_TARGET image_target;
+  ///Returns if this texture is actually already loaded
+  GFXBOOL checkold(const std::string &s);
+  ///Loads the old texture
+  void setold();
+  ///Inits the class with default values
   void InitTexture() {
     original = 0;
     refcount = 0;
     name = -1;
   }
+  ///Binds this texture to GFX library
   int Bind();
+  ///Transfers this texture to GFX library
   void Transfer();
 public:
-
+  ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
   Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
+  ///Creates a texture with only color data as a single bitmap
   Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
+  ///Texture copy constructor that increases appropriate refcounts
   Texture (Texture *t);
+  ///Destructor for texture
   ~Texture();
-  static Texture * Exists (string s);
-  static Texture * Exists (string s, string a);
+  ///Whether or not the string exists as a texture
+  static Texture * Exists (std::string s);
+  ///Whether or not the color and alpha data already exist
+  static Texture * Exists (std::string s, std::string a);
+  ///A way to sort the texture by the original address (to make sure like textures stick togehter
   bool operator < (const Texture &b);
+  ///A way to test if the texture is equal to another based on original values
   bool operator == (const Texture &b);
-  
+  ///Binds the texture in the GFX library
   void MakeActive();
+  ///If the texture has loaded properly returns true
   bool LoadSuccess () {
     return (name>=0);
   }
+  ///Changes priority of texture
   void Prioritize (float);
-  //void Filter();
-  //void NoFilter();
 };
-//Texture * LoadAlphaMap (char *FileName, float alpha=1);
-//Texture * LoadTexture (char * FileName);
-//Texture * LoadRGBATexture (char * FileNameRGB, char *FileNameA, float alpha=1);
-
-//void DelTexDat (Texture *); //note does not remove from OpenGL
 #endif

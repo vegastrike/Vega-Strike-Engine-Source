@@ -200,6 +200,18 @@ static void InsideBack(int,KBSTATE newState) {
 	}
 }
 
+static void SwitchLVDU(int,KBSTATE newState) {
+
+	if(newState==PRESS) {
+	  _Universe->AccessCockpit()->VDUSwitch (0);
+	}
+}
+static void SwitchRVDU(int,KBSTATE newState) {
+
+	if(newState==PRESS) {
+	  _Universe->AccessCockpit()->VDUSwitch (1);
+	}
+}
 
 static void Behind(int,KBSTATE newState) {
 
@@ -270,6 +282,9 @@ void InitializeInput() {
 	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F2, InsideLeft);
 	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F3, InsideRight);
 	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F4, InsideBack);
+
+	BindKey('W', SwitchLVDU);
+	BindKey('T', SwitchRVDU);
 
 
 	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F5, Behind);

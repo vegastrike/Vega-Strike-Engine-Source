@@ -44,6 +44,9 @@ void FireKeyboard::JFireKey(KBSTATE k, float, float,int i) {
 void FireKeyboard::TargetKey(int, KBSTATE k) {
   if (targetkey!=PRESS)
     targetkey = k;
+  if (k==RESET) {
+    targetkey=PRESS;
+  }
 }
 void FireKeyboard::JTargetKey(KBSTATE k, float, float,int i) {
   if (jtargetkey!=PRESS)

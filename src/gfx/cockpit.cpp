@@ -288,6 +288,11 @@ Cockpit::~Cockpit () {
 void Cockpit::SetView (const enum VIEWSTYLE tmp) {
   view = tmp;
 }
+void Cockpit::VDUSwitch (int vdunum) {
+  if (vdu[vdunum]) {
+    vdu[vdunum]->SwitchMode();
+  }
+}
 
 void Cockpit::RestoreViewPort() {
   GFXViewPort (0, 0, g_game.x_resolution,g_game.y_resolution);

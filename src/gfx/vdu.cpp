@@ -1,7 +1,8 @@
 #include "vdu.h"
 #include "cmd/unit.h"
 #include "hud.h"
-VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls) :Sprite (file),tp(textp),posmodes(modes),thismode(WEAPON), rows(rwws), cols(clls){
+#include "vs_globals.h"
+VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls) :Sprite (file),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
   SwitchMode();
 
 };
@@ -33,14 +34,93 @@ void VDU::DrawTarget(Unit * target) {
 void VDU::DrawNav (const Vector & nav) {
 
 }
-static void DrawGun (const Vector & pos, weapon_info::MOUNT_SIZE sz) {
-  GFXPointSize (4);
-  GFXBegin (GFXPOINT);
-  GFXVertexf (pos);
-  GFXEnd ();
+static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
+  w=fabs (w);
+  h=fabs(h);
+  float oox = 1./g_game.x_resolution;
+  float ooy = 1./g_game.y_resolution;
+  pos.j-=h/3.8;
+  if (sz==weapon_info::NOWEAP) {
+    GFXPointSize (4);
+    GFXBegin (GFXPOINT);
+    GFXVertexf (pos);
+    GFXEnd ();
+    GFXPointSize (1);
+  } else if (sz<weapon_info::SPECIAL) {
+    GFXBegin (GFXLINE);
+    GFXVertex3f (pos.i+oox,pos.j,0);
+    GFXVertex3f (pos.i+oox,pos.j-h/15,0);
+    GFXVertex3f (pos.i-oox,pos.j,0);
+    GFXVertex3f (pos.i-oox,pos.j-h/15,0);
+    GFXVertex3f (pos.i+oox,pos.j-h/15,0);
+    GFXVertex3f (pos.i-oox,pos.j-h/15,0);
+    if (sz==weapon_info::LIGHT) {
+      GFXVertex3f (pos.i,pos.j,0);
+      GFXVertex3f (pos.i,pos.j+h/4,0);
+      GFXVertex3f (pos.i,pos.j+h/4+ooy*2,0);
+      GFXVertex3f (pos.i,pos.j+h/4+ooy*5,0);
+    }else if (sz==weapon_info::MEDIUM) {
+      GFXVertex3f (pos.i,pos.j,0);
+      GFXVertex3f (pos.i,pos.j+h/5,0);
+      GFXVertex3f (pos.i,pos.j+h/5+ooy*4,0);
+      GFXVertex3f (pos.i,pos.j+h/5+ooy*5,0);
+      GFXVertex3f (pos.i+oox,pos.j+h/5+ooy*2,0);      
+      GFXVertex3f (pos.i-oox,pos.j+h/5+ooy*2,0);      
+    }else if (sz==weapon_info::HEAVY) {
+      GFXVertex3f (pos.i,pos.j,0);
+      GFXVertex3f (pos.i,pos.j+h/5,0);
+      GFXVertex3f (pos.i,pos.j+h/5+ooy*4,0);
+      GFXVertex3f (pos.i,pos.j+h/5+ooy*5,0);
+      GFXVertex3f (pos.i+2*oox,pos.j+h/5+ooy*3,0);      
+      GFXVertex3f (pos.i,pos.j+h/5+ooy*2,0);      
+      GFXVertex3f (pos.i-2*oox,pos.j+h/5+ooy*3,0);      
+      GFXVertex3f (pos.i,pos.j+h/5+ooy*2,0);      
+    }else {//capship gun
+      GFXVertex3f (pos.i,pos.j,0);
+      GFXVertex3f (pos.i,pos.j+h/6,0);
+      GFXVertex3f (pos.i,pos.j+h/6+ooy*6,0);
+      GFXVertex3f (pos.i,pos.j+h/6+ooy*7,0);
+      GFXVertex3f (pos.i-oox,pos.j+h/6+ooy*2,0);
+      GFXVertex3f (pos.i+oox,pos.j+h/6+ooy*2,0);
+      GFXVertex3f (pos.i-2*oox,pos.j+h/6+ooy*4,0);
+      GFXVertex3f (pos.i+2*oox,pos.j+h/6+ooy*4,0);
+    }  
+    GFXEnd ();
+  }else if (sz==weapon_info::SPECIAL||sz==weapon_info::SPECIALMISSILE) {
+    GFXPointSize (4);
+    GFXBegin (GFXPOINT);
+    GFXVertexf (pos);
+    GFXEnd ();
+    GFXPointSize (1);//classified...  FIXME    
+  }else if (sz<weapon_info::HEAVYMISSILE) {
+    GFXBegin (GFXLINE);
+    GFXVertex3f (pos.i,pos.j-h/8,0);
+    GFXVertex3f (pos.i,pos.j+h/8,0);
+    GFXVertex3f (pos.i+2*oox,pos.j-h/8+2*ooy,0);
+    GFXVertex3f (pos.i-2*oox,pos.j-h/8+2*ooy,0);
+    GFXEnd();
+  }else if (sz<=weapon_info::CAPSHIPHEAVYMISSILE) {
+    GFXBegin (GFXLINE);
+    GFXVertex3f (pos.i,pos.j-h/6,0);
+    GFXVertex3f (pos.i,pos.j+h/6,0);
+    GFXVertex3f (pos.i+3*oox,pos.j-h/6+2*ooy,0);
+    GFXVertex3f (pos.i-3*oox,pos.j-h/6+2*ooy,0);
+    GFXVertex3f (pos.i+oox,pos.j-h/6,0);
+    GFXVertex3f (pos.i+oox,pos.j+h/9,0);
+    GFXVertex3f (pos.i-oox,pos.j-h/6,0);
+    GFXVertex3f (pos.i-oox,pos.j+h/9,0);
+    GFXEnd();
+  }
   
 }
 void VDU::DrawDamage(Unit * parent) {
+  float x,y,w,h;
+  DrawTargetSpr (parent->getHudImage (),.6);
+  
+}
+
+void VDU::DrawWeapon (Unit * parent) {
+    
   float x,y,w,h;
   const float percent = .6;
   DrawTargetSpr (parent->getHudImage (),percent,x,y,w,h);
@@ -48,10 +128,10 @@ void VDU::DrawDamage(Unit * parent) {
   GFXDisable (LIGHTING); 
   for (int i=0;i<parent->nummounts;i++) {
     Vector pos (parent->mounts[i].GetMountLocation().position);
-    pos.i=pos.i*w/parent->rSize()*percent+x;
-    pos.j=pos.k*h/parent->rSize()*percent+y;
+    pos.i=-pos.i*fabs(w)/parent->rSize()*percent+x;
+    pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
     pos.k=0;
-    switch (parent->mounts[i].status) {
+    switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Unit::Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
       break;
@@ -64,13 +144,13 @@ void VDU::DrawDamage(Unit * parent) {
     case Unit::Mount::UNCHOSEN:
       GFXColor4f (1,1,1,1);
       break;
+    case 127:
+      GFXColor4f (0,.2,0,1);
+      break;
     }
-    DrawGun (pos,parent->mounts[i].type.size);
+    DrawGun (pos,w,h,parent->mounts[i].type.size);
   }
-}
-
-void VDU::DrawWeapon (Unit * parent) {
-  //  DrawTargetSpr (parent->getHudImage (),.6);
+  GFXColor4f(1,1,1,1);
   
 }
 

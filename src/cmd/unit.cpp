@@ -840,17 +840,19 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
   if (status!=ACTIVE||(Missile&&type.type!=weapon_info::PROJECTILE)||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
-    if (ref.gun==NULL)
+    if (ref.gun==NULL) {
+      if (ammo>0)
+	ammo--;
       ref.gun = new Beam (LocalPosition,type,owner);
-    else
-      if (ref.gun->Ready())
+    } else 
+      if (ref.gun->Ready()) {
+	if (ammo>0)
+	  ammo--;
 	ref.gun->Init (LocalPosition,type,owner);
-      else 
+      } else 
 	return true;//can't fire an active beam
   }else { 
     if (ref.refire>type.Refire) {
-      if (ammo>0)
-	ammo--;
       ref.refire =0;
       Matrix mat;
       Transformation tmp = LocalPosition;
@@ -858,13 +860,19 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
       tmp.to_matrix (mat);
       switch (type.type) {
       case weapon_info::BALL:
+	if (ammo>0)
+	    ammo--;
 	new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity
 	break;
       case weapon_info::BOLT:
+	if (ammo>0)
+	    ammo--;
 	new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work
 	break;
       case weapon_info::PROJECTILE:
 	if (Missile) {
+	  if (ammo>0)
+	    ammo--;
 	  temp = new Unit (type.file.c_str(),true,false,owner->faction);
 	  if (target&&target!=owner) {
 	    temp->Target (target);

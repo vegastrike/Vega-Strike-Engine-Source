@@ -10,8 +10,21 @@
 </Appearance>
 </Bolt>
 
-<Missile name="Dumbfire">
+<Missile name="Dumbfire" mountsize="light-missile">
 <Locktime time="3">
+</Locktime>
+<Energy rate="0" stability="6" refire=".3">
+</Energy>
+<Damage rate="80" longrange="1">
+</Damage>
+<Distance speed="150" radialspeed=".8" radius=".3" pulsespeed="15" range="2000" >
+</Distance>
+<Appearance file="Dumbfire.xunit" >
+</Appearance>
+</Missile>
+
+<Missile name="HeatSeeker" size="Medium-Missile">
+<Locktime time= "3">
 </Locktime>
 <Energy rate="0" stability="6" refire=".3">
 </Energy>
@@ -203,18 +216,6 @@
 </Appearance>
 </Missile>
 
-<Missile name="HeatSeaker">
-<Locktime time= "3">
-</Locktime>
-<Energy rate="0" stability="6" refire=".3">
-</Energy>
-<Damage rate="80" longrange="1">
-</Damage>
-<Distance speed="150" radialspeed=".8" radius=".3" pulsespeed="15" range="2000" >
-</Distance>
-<Appearance file="Dumbfire.xunit" >
-</Appearance>
-</Missile>
 
 <Missile name="ImageRecognition">
 <Locktime time= "3">

@@ -33,6 +33,11 @@ typedef unsigned long DWORD;
 typedef long  LONG;
 typedef unsigned short WORD;
 typedef unsigned char BYTE;
+/**
+ * Windows Bitmap format.  Caution about mips systems which cannot handle
+ * misaligned structs
+ * Caution about big endian systems (use endianness.h to read in things)
+ */
 typedef struct {
         DWORD      biSize;
         LONG       biWidth;
@@ -46,7 +51,10 @@ typedef struct {
         DWORD      biClrUsed;
         DWORD      biClrImportant;
 } BITMAPINFOHEADER;
-
+/**
+ * File header of a bitmap. Won't work on mips architecture with 
+ * misaligned structs
+ */
 typedef struct {
         WORD    bfType;
         DWORD   bfSize;
@@ -54,6 +62,9 @@ typedef struct {
         WORD    bfReserved2;
         DWORD   bfOffBits;
 } BITMAPFILEHEADER;
+/**
+ *  The color data of a bitmap
+ */
 typedef struct {
         BYTE    rgbBlue;
         BYTE    rgbGreen;
@@ -67,11 +78,15 @@ typedef struct {
 
 
 #endif
+///Defined for gcc which pads the size of structs
 const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD);
+///Defined for gcc which pads the size of structs
 const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
+///defined for gcc which pads size of structs (not entirely necessary)
 const int SIZEOF_RGBQUAD=sizeof(BYTE)*4;
-
-static Hashtable<string, Texture,char [1001]> texHashTable;
+///holds all the textures in a huge hash table
+static Hashtable<string, Texture,char [127]> texHashTable;
+///returns if a texture exists
 Texture * Texture::Exists (string s, string a) {
   return Texture::Exists (s+a);
 }
