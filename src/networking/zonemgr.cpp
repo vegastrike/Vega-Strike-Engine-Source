@@ -158,6 +158,7 @@ StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & 
 	lst->push_back( clt );
 	clt->zone = num_zone;
 	zone_clients[num_zone]++;
+	cerr<<zone_clients[clt->zone]<<" clients now in zone "<<clt->zone<<endl;
 
 	// Compute a safe entrance point -> DONE WHEN LOGIN ACCEPTED
 	//QVector safevec;
@@ -184,6 +185,7 @@ void	ZoneMgr::removeClient( Client * clt)
 
 	lst->remove( clt);
 	zone_clients[clt->zone]--;
+	cerr<<zone_clients[clt->zone]<<" clients left in zone "<<clt->zone<<endl;
 	sts = _Universe->star_system[clt->zone];
 	sts->RemoveUnit( un);
 	// SHIP MAY NOT HAVE BEEN KILLED BUT JUST CHANGED TO ANOTHER STAR SYSTEM -> NO KILL
@@ -276,6 +278,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			int	nbclients = 0, nbunits=0;
 			Packet pckt;
 
+			cerr<<"BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
@@ -301,6 +304,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			/************************* END CLIENTS BROADCAST ***************************/
 			/************************* START UNITS BROADCAST ***************************/
 				nbunits = zone_units[i];
+				cerr<<"BROADCAST SNAPSHOTS = "<<zone_units[i]<<" units in zone "<<i<<endl;
 				//netbuf.Reset();
 				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
 				{
@@ -395,6 +399,7 @@ void	ZoneMgr::broadcastDamage( )
 			Packet pckt;
 			Unit * un;
 
+			cerr<<"BROADCAST DAMAGE = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
@@ -410,6 +415,7 @@ void	ZoneMgr::broadcastDamage( )
 				}
 			/************************* END CLIENTS BROADCAST ***************************/
 			/************************* START UNITS BROADCAST ***************************/
+				cerr<<"BROADCAST DAMAGE = "<<zone_units[i]<<" units in zone "<<i<<endl;
 				nbunits = zone_units[i];
 				//netbuf.Reset();
 				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)

@@ -1464,7 +1464,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 	}
 
 	// Removes the client from its starsystem
-	if( clt->zone>0)
+	if( clt->zone>=0)
 		zonemgr->removeClient( clt);
     if( clt->isTcp() )
 	{
@@ -1523,7 +1523,7 @@ void	NetServer::logout( Client * clt)
 		// Send a disconnection info to account server
 		netbuf.addString( clt->callsign);
 		netbuf.addString( clt->passwd);
-		COUT<<"Loggin out "<<clt->name<<":"<<clt->passwd<<endl;
+		COUT<<"Loggin out "<<clt->callsign<<":"<<clt->passwd<<endl;
 		Packet p2;
 		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,
@@ -1539,7 +1539,7 @@ void	NetServer::logout( Client * clt)
 	}
 
 	// Removes the client from its starsystem
-	if( clt->zone>0)
+	if( clt->zone>=0)
 		zonemgr->removeClient( clt);
     if( clt->isTcp() )
 	{
