@@ -9,10 +9,12 @@ namespace Orders {
   // This moveto always attempts to move in a straight line (unaware of strafing)
   const float bleed_threshold = 0.0001;
   const float THRESHOLD = 0.001;
-
+  
 class MoveTo : public Order {
   bool afterburn;
+  bool terminating;
   bool OptimizeSpeed (float v, float &a);
+  bool Done (const Vector &, const Vector &);
 public:
   MoveTo(const Vector &target, bool aft) : Order(), afterburn(aft)  {
     type = LOCATION;
@@ -25,6 +27,7 @@ public:
 
 class ChangeHeading : public Order {
   Vector final_heading;
+  bool terminating;
   bool OptimizeAngSpeed(float limit, float v, float &a);
   bool Done (const Vector &, const Vector &);
   void TurnToward (float angle, float ang_vel, float &torque);

@@ -69,40 +69,70 @@ bool MoveTo::OptimizeSpeed (float v, float &a) {
   return false;
 }
 
+float MOVETHRESHOLD=.05;
+bool MoveTo::Done(const Vector & local_heading, const Vector & ang_vel) {
+  if (fabs(local_heading.i) < MOVETHRESHOLD&&//and local heading is close to the front
+      fabs(local_heading.j) < MOVETHRESHOLD&&
+      fabs(local_heading.k) < MOVETHRESHOLD) {
+    terminating = true;
+    if (fabs(ang_vel.i) < THRESHOLD&&
+	fabs(ang_vel.j) < THRESHOLD&&
+	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
+      return true;
+    }
+  }else {
+    if (terminating&& (
+	fabs(local_heading.k) > 2*MOVETHRESHOLD||
+	fabs(local_heading.i) > 2*MOVETHRESHOLD||//and local heading is close to the front
+	fabs(local_heading.j) > 2*MOVETHRESHOLD)) 
+      terminating=false;
+  }
+  return false;
+}
+
+
 AI* MoveTo::Execute(){
   Vector local_location = targetlocation - parent->GetPosition();
   Vector heading = parent->ToLocalCoordinates(local_location);
   Vector velocity = parent->UpCoordinateLevel(parent->GetVelocity());
   Vector thrust (parent->Limits().lateral, parent->Limits().vertical,afterburn?parent->Limits().afterburn:parent->Limits().forward);
-  //start with Forward/Reverse:
-  float t = CalculateDecelTime(heading.k, velocity.k, thrust.k, parent->Limits().retro, parent->GetMass());
-  if (t<THRESHOLD) {
-    thrust.k = (thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward));
-  }else {
-    if (t<SIMULATION_ATOM) {
-      thrust.k*=t/SIMULATION_ATOM;
-      thrust.k+= (SIMULATION_ATOM-t)*(thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward))/SIMULATION_ATOM;
-    }
+  if (Done(heading,velocity)) {
+    done = true;
   }
-  OptimizeSpeed (velocity.k,thrust.k);
-  t = CalculateBalancedDecelTime(heading.i, velocity.i, thrust.i,parent->GetMass());
-  if (t<THRESHOLD) {
-    thrust.i = -thrust.i;
+  if (done) return NULL;
+  if (terminating) {
+    thrust = (-parent->GetMass()/SIMULATION_ATOM)*velocity;
   }else {
-    if (t<SIMULATION_ATOM) {
-      thrust.i *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
+    //start with Forward/Reverse:
+    float t = CalculateDecelTime(heading.k, velocity.k, thrust.k, parent->Limits().retro, parent->GetMass());
+    if (t<THRESHOLD) {
+      thrust.k = (thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward));
+    }else {
+      if (t<SIMULATION_ATOM) {
+	thrust.k*=t/SIMULATION_ATOM;
+	thrust.k+= (SIMULATION_ATOM-t)*(thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward))/SIMULATION_ATOM;
+      }
     }
-  }
-  OptimizeSpeed (velocity.i,thrust.i);
-  t = CalculateBalancedDecelTime(heading.j, velocity.j, thrust.j,parent->GetMass());
-  if (t<THRESHOLD) {
-    thrust.j = -thrust.j;
-  }else {
-    if (t<SIMULATION_ATOM) {
-      thrust.j *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
+    OptimizeSpeed (velocity.k,thrust.k);
+    t = CalculateBalancedDecelTime(heading.i, velocity.i, thrust.i,parent->GetMass());
+    if (t<THRESHOLD) {
+      thrust.i = -thrust.i;
+    }else {
+      if (t<SIMULATION_ATOM) {
+	thrust.i *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
+      }
     }
+    OptimizeSpeed (velocity.i,thrust.i);
+    t = CalculateBalancedDecelTime(heading.j, velocity.j, thrust.j,parent->GetMass());
+    if (t<THRESHOLD) {
+      thrust.j = -thrust.j;
+    }else {
+      if (t<SIMULATION_ATOM) {
+	thrust.j *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
+      }
+    }
+    OptimizeSpeed (velocity.j,thrust.j);
   }
-  OptimizeSpeed (velocity.j,thrust.j);
   parent->ApplyLocalForce (thrust);
   return this;
 }
@@ -134,34 +164,45 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
   fprintf (stderr," angle: %f\n", atancalc);
 }
 void ChangeHeading::SetDest (const Vector &target) {
-    final_heading = target;
-    done = false;
-  }
-
+  final_heading = target;
+  done = false;
+}
+float TURNTHRESHOLD=.05;
 bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
-  return (fabs(ang_vel.i) < THRESHOLD&&
-	  fabs(ang_vel.j) < THRESHOLD&&
-	  ang_vel.k>0&& //if velocity is lower than threshold
-	  fabs(local_heading.i) < THRESHOLD&&//and local heading is close to the front
-	  fabs(local_heading.j) < THRESHOLD);
+  if (fabs(local_heading.i) < TURNTHRESHOLD&&//and local heading is close to the front
+      fabs(local_heading.j) < TURNTHRESHOLD&&
+      local_heading.k>0) {
+    terminating = true;
+    if (fabs(ang_vel.i) < THRESHOLD&&
+	fabs(ang_vel.j) < THRESHOLD&&
+	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
+      return true;
+    }
+  }else {
+    if (terminating&&(
+	fabs(local_heading.i) > 2*TURNTHRESHOLD||//and local heading is close to the front
+	fabs(local_heading.j) > 2*TURNTHRESHOLD)) 
+      terminating=false;
+  }
+  return false;
 }
 AI * ChangeHeading::Execute() {
   Vector local_heading = parent->ToLocalCoordinates (final_heading);
   Vector ang_vel = parent->UpCoordinateLevel(parent->GetAngularVelocity());
-
   done =  Done (local_heading,ang_vel);
   if (done) return NULL;
-
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
-
-  TurnToward (atan2(local_heading.j, local_heading.k),ang_vel.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-  OptimizeAngSpeed(parent->GetComputerData().max_pitch,ang_vel.i,torque.i);
-
-  TurnToward (atan2 (local_heading.i, local_heading.k), -ang_vel.j, torque.j);
-  torque.j=-torque.j;
-  OptimizeAngSpeed(parent->GetComputerData().max_yaw,ang_vel.j,torque.j);
-  torque.k  =-parent->GetMoment()*ang_vel.k/SIMULATION_ATOM;//try to counteract roll;
-
+  if (terminating) {
+    torque= (-parent->GetMoment()/SIMULATION_ATOM)*ang_vel;
+  } else {
+    TurnToward (atan2(local_heading.j, local_heading.k),ang_vel.i,torque.i);// find angle away from axis 0,0,1 in yz plane
+    OptimizeAngSpeed(parent->GetComputerData().max_pitch,ang_vel.i,torque.i);
+    
+    TurnToward (atan2 (local_heading.i, local_heading.k), -ang_vel.j, torque.j);
+    torque.j=-torque.j;
+    OptimizeAngSpeed(parent->GetComputerData().max_yaw,ang_vel.j,torque.j);
+    torque.k  =-parent->GetMoment()*ang_vel.k/SIMULATION_ATOM;//try to counteract roll;
+  }
   parent->ApplyLocalTorque (torque);
   return this;
 }

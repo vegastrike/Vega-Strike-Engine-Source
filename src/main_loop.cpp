@@ -526,11 +526,12 @@ void createObjects() {
     Vector v(0,1,0);
     v.Normalize();
     //fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,1), 1.0));
-    v = Vector(1,1,-1);
+    v = Vector(0,.2,-1);
     v.Normalize();
     fighters[a]->SetAI(new Order());
-    ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
+    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v));
+    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true));
+    fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v));
     fighters[a]->EnqueueAI(new FlyByKeyboard ());
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
