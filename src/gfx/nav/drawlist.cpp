@@ -670,7 +670,8 @@ void navdrawlist::draw()	//	Draw the items in the list
 					if(!inmouserange)
 					{
 						NavigationSystem::DrawMissile(current->x, current->y, current->size, relColor);
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+				//		drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+				//	NOT DRAWING NAME OF MISSILE TO MAKE ROOM FOR IMPORTANT TEXT ON SCREEN
 					}
 					else
 					{

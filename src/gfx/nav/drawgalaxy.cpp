@@ -1,5 +1,5 @@
 #include <set>
-#include "vsfilesystem.h"
+#include "vs_path.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -394,15 +394,18 @@ void NavigationSystem::DrawGalaxy()
 	float zdistance = 0.0;
 	float zscale = 0.0;
 
-	Adjust3dTransformation();
+	Adjust3dTransformation(galaxy_3d, 0);
 
 	pos = systemIter.Position();
 	ReplaceAxes(pos);
 
 	//Modify by old rotation amount
 	//*************************
-	pos = dxyz(pos, 0, ry, 0);
-	pos = dxyz(pos, rx, 0, 0);
+//	if(galaxy_3d)
+//	{
+//		pos = dxyz(pos, 0, ry, 0);
+//		pos = dxyz(pos, rx, 0, 0);
+//	}
 	//*************************
 
 	float max_x = (float)pos.i;
@@ -411,7 +414,11 @@ void NavigationSystem::DrawGalaxy()
 	float min_y = (float)pos.j;
 	float max_z = (float)pos.k;
 	float min_z = (float)pos.k;
-	float themaxvalue = fabs(pos.i);
+
+//	float themaxvalue = fabs(pos.i);
+	float themaxvalue = 0.0;
+
+
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
 	//	**********************************
@@ -421,9 +428,9 @@ void NavigationSystem::DrawGalaxy()
 	//Find Centers
 	//**********************************
 	// This will use the current system as the center
-	center_x=pos.i;
-	center_y=pos.j;
-	center_z=pos.k;
+//	center_x=pos.i;
+//	center_y=pos.j;
+//	center_z=pos.k;
 	//**********************************
 
 	
@@ -437,8 +444,11 @@ void NavigationSystem::DrawGalaxy()
 
 		//Modify by old rotation amount
 		//*************************
-		pos = dxyz(pos, 0, ry, 0);
-		pos = dxyz(pos, rx, 0, 0);
+//		if(galaxy_3d)
+//		{
+//			pos = dxyz(pos, 0, ry, 0);
+//			pos = dxyz(pos, rx, 0, 0);
+//		}
 		//*************************
 		//*************************
 
@@ -454,9 +464,9 @@ void NavigationSystem::DrawGalaxy()
 	//Find Centers
 	//**********************************
 	// this will make the center be the center of the displayable area.
-//	center_x = (min_x + max_x)/2;
-//	center_y = (min_y + max_y)/2;
-//	center_z = (min_z + max_z)/2;
+	center_x = (min_x + max_x)/2;
+	center_y = (min_y + max_y)/2;
+	center_z = (min_z + max_z)/2;
 	//**********************************
 /*	min_x = (min_x+center_x)/2;
 	min_y = (min_y+center_y)/2;
@@ -467,26 +477,38 @@ void NavigationSystem::DrawGalaxy()
 	//Set Camera Distance
 	//**********************************
 
-	{
-		float half_x;//=(0.5*(max_x - min_x));
-		float half_y;//=(0.5*(max_y - min_y));
-		float half_z;//=(0.5*(max_z - min_z));
-		half_x = vsmax(max_x-center_x,center_x-min_x);
-		half_y = vsmax(max_y-center_y,center_y-min_y);
-		half_z = vsmax(max_z-center_z,center_z-min_z);
-		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + 0*( half_z * half_z ));
-	
-	}
+//#define SQRT3 1.7320508
+//	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
+//	themaxvalue = SQRT3*themaxvalue;
 
-//	camera_z=  zoom * themaxvalue;
+
+
+//	{
+//		float half_x;//=(0.5*(max_x - min_x));
+//		float half_y;//=(0.5*(max_y - min_y));
+//		float half_z;//=(0.5*(max_z - min_z));
+//		half_x = vsmax(max_x-center_x,center_x-min_x);
+//		half_y = vsmax(max_y-center_y,center_y-min_y);
+//		half_z = vsmax(max_z-center_z,center_z-min_z);
+
+//		float half_x =(0.5*(max_x - min_x));
+//		float half_y =(0.5*(max_y - min_y));
+//		float half_z =(0.5*(max_z - min_z));
+
+//		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+
+//		float halfmax = 0.5*themaxvalue;
+//		camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
+		camera_z = 4.0*themaxvalue;
+//	}
+
+//	camera_z = themaxvalue;
 
 	//**********************************
 
-	DrawOriginOrientationTri(center_nav_x, center_nav_y);
+	DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
 
-#define SQRT3 1.7320508
-//	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-	themaxvalue = SQRT3*themaxvalue;
+
 
 
 	//	Enlist the items and attributes
@@ -502,9 +524,10 @@ void NavigationSystem::DrawGalaxy()
 
 
 		pos = systemIter.Position();
+		ReplaceAxes(pos);	//	poop
 
 		float the_x, the_y, system_item_scale_temp;
-		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp);
+		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp, 0);
 
 
 		//IGNORE OFF SCREEN
@@ -542,7 +565,7 @@ void NavigationSystem::DrawGalaxy()
 		}
 
 		bool moused = false;
-		if (TestIfInRangeRad(the_x, the_y, insert_size, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) ) {
+		if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
 			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,false,&systemIter.Destinations()));
 			moused=true;
 		}

@@ -57,6 +57,9 @@ void NavigationSystem::DrawSystem()
 	if(!(*bleh))
 		return;
 
+//	string mystr ("3d "+XMLSupport::tostring (system_3d)); 
+//	UniverseUtil::IOmessage (0,"game","all",mystr);
+
 
 	//what's my name
 	//***************************
@@ -83,7 +86,8 @@ void NavigationSystem::DrawSystem()
 	float zdistance = 0.0;
 	float zscale = 0.0;
 
-	Adjust3dTransformation();
+	Adjust3dTransformation(system_3d, 1);
+
 
 	//	Set up first item to compare to + centres
 	//	**********************************
@@ -103,10 +107,14 @@ void NavigationSystem::DrawSystem()
 	//*************************
 
 
+
 	//Modify by old rotation amount
 	//*************************
-	pos = dxyz(pos, 0, ry, 0);
-	pos = dxyz(pos, rx, 0, 0);
+//	if(system_3d)
+//	{
+//		pos = dxyz(pos, 0, ry_s, 0);
+//		pos = dxyz(pos, rx_s, 0, 0);
+//	}
 	//*************************
 
 	
@@ -117,7 +125,8 @@ void NavigationSystem::DrawSystem()
 	float max_z = (float)pos.k;
 	float min_z = (float)pos.k;
 
-	float themaxvalue = fabs(pos.i);
+//	float themaxvalue = fabs(pos.i);
+	float themaxvalue = 0.0;
 
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
@@ -133,7 +142,7 @@ void NavigationSystem::DrawSystem()
 			++bleh;
 			continue;
 		}
-		string temp = (*bleh)->name; 
+		string temp = (*bleh)->name;
 
 
 
@@ -142,8 +151,11 @@ void NavigationSystem::DrawSystem()
 		
 		//Modify by old rotation amount
 		//*************************
-		pos = dxyz(pos, 0, ry, 0);
-		pos = dxyz(pos, rx, 0, 0);
+//		if(system_3d)
+//		{
+//			pos = dxyz(pos, 0, ry_s, 0);
+//			pos = dxyz(pos, rx_s, 0, 0);
+//		}
 		//*************************
 		//*************************
 		
@@ -168,26 +180,30 @@ void NavigationSystem::DrawSystem()
 	//**********************************
 
 
-#define SQRT3 1.7320508
+//#define SQRT3 1.7320508
 //	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-	themaxvalue = SQRT3*themaxvalue;
+//	themaxvalue = SQRT3*themaxvalue;
 
 
 	//Set Camera Distance
 	//**********************************
 
-	{
-		float half_x=(0.5*(max_x - min_x));
-		float half_y=(0.5*(max_y - min_y));
-		float half_z=(0.5*(max_z - min_z));
+//	{
+//		float half_x=(0.5*(max_x - min_x));
+//		float half_y=(0.5*(max_y - min_y));
+//		float half_z=(0.5*(max_z - min_z));
 	
-		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+//		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
 	
-	}
+//		float halfmax = 0.5*themaxvalue;
+//		camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
+		camera_z = 4.0*themaxvalue;
+//	}
 
 	//**********************************
 
-	DrawOriginOrientationTri(center_nav_x, center_nav_y);
+	DrawOriginOrientationTri(center_nav_x, center_nav_y, 1);
+
 
 /*
 	string mystr ("max x "+XMLSupport::tostring (max_x)); 
@@ -231,9 +247,10 @@ void NavigationSystem::DrawSystem()
 
 
 		pos = (*blah)->Position();
+		ReplaceAxes(pos);
 			
 		float the_x, the_y, system_item_scale_temp;
-		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp);
+		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y, system_item_scale_temp, 1);
 
 		//IGNORE OFF SCREEN
 		//**********************************
@@ -377,9 +394,14 @@ void NavigationSystem::DrawSystem()
 		}
 
 
+		bool tests_in_range = 0;
 
+		if(insert_type == navstation)
+			tests_in_range = TestIfInRangeBlk(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
+		else 
+			tests_in_range = TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
 
-		if (TestIfInRangeRad(the_x, the_y, insert_size, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) )
+		if(tests_in_range)
 			mouselist.insert(insert_type, insert_size, the_x, the_y, (*blah));
 		else
 			mainlist.insert(insert_type, insert_size, the_x, the_y, (*blah));

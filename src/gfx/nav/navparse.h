@@ -60,7 +60,7 @@ bool NavigationSystem::ParseFile(string filename)
 
 				if(tag == "console")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_small = atof( (retrievedata(data, "x_small")).c_str() );
 					float x_large = atof( (retrievedata(data, "x_large")).c_str() );
 					float y_small = atof( (retrievedata(data, "y_small")).c_str() );
@@ -80,7 +80,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button1")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -105,7 +105,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button2")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -131,7 +131,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button3")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -157,7 +157,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button4")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -183,7 +183,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button5")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -209,7 +209,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button6")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -235,7 +235,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "button7")
 				{
-					string mesh_ = retrievedata(data, "Meshfile file");
+					string mesh_ = retrievedata(data, "file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
 					float y_ = atof( (retrievedata(data, "y")).c_str() );
 					float dx_ = atof( (retrievedata(data, "dx")).c_str() );
@@ -261,7 +261,7 @@ bool NavigationSystem::ParseFile(string filename)
 				}
 				else if(tag == "systemiteminfo")
 				{
-					float scale_ = atof( (retrievedata(data, "Info itemscale")).c_str() );
+					float scale_ = atof( (retrievedata(data, "itemscale")).c_str() );
 					float zmult_ = atof( (retrievedata(data, "zshiftmultiplier")).c_str() );
 					float zfactor_ = atof( (retrievedata(data, "itemzscalefactor")).c_str() );
 					float _unselectedalpha = atof( (retrievedata(data, "unselectedalpha")).c_str() );
@@ -293,9 +293,36 @@ bool NavigationSystem::ParseFile(string filename)
 					else
 						item_zscalefactor = zfactor_;
 				}
+				else if(tag == "dimensions")
+				{
+					int how_many_sys = atoi( (retrievedata(data, "system")).c_str() );
+					int how_many_gal = atoi( (retrievedata(data, "galaxy")).c_str() );
+					string multi_sys    = retrievedata(data, "systemmultidimensional");
+					string multi_gal    = retrievedata(data, "galaxymultidimensional");
+
+					if(how_many_sys == 3)
+						system_3d = 1;
+					else
+						system_3d = 0;
+
+					if(how_many_gal == 3)
+						galaxy_3d = 1;
+					else
+						galaxy_3d = 0;
+
+					if(multi_sys == "yes")
+						system_multi_dimensional = 1;
+					else
+						system_multi_dimensional = 0;
+
+					if(multi_gal == "yes")
+						galaxy_multi_dimensional = 1;
+					else
+						galaxy_multi_dimensional = 0;
+				}
 				else if(tag == "factioncolours")
 				{
-					string factionname = retrievedata(data, "colour faction");
+					string factionname = retrievedata(data, "faction");
 					float r_ = atof( (retrievedata(data, "r")).c_str() );
 					float g_ = atof( (retrievedata(data, "g")).c_str() );
 					float b_ = atof( (retrievedata(data, "b")).c_str() );
@@ -316,6 +343,7 @@ bool NavigationSystem::ParseFile(string filename)
 				{
 					int configmode_ = atoi( (retrievedata(data, "configmode")).c_str() );
 					configmode = configmode_;
+
 				}
 				data = "";
 			//	tag = "";
