@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "vs_globals.h"
 #include "config_xml.h"
+#include <assert.h>
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {
@@ -31,8 +32,8 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
   }
   string retval= CargoToString(un->image->cargo[0]);
 
-  for (unsigned int i=1;i<un->image->cargo.size();i++) {
-    retval+= string ("\"/><Cargo mass=\"")+CargoToString(un->image->cargo[i]);
+  for (unsigned int kk=1;kk<un->image->cargo.size();kk++) {
+    retval+= string ("\"/><Cargo mass=\"")+CargoToString(un->image->cargo[kk]);
   }
   return retval;
 }
