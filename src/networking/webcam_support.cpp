@@ -384,9 +384,12 @@ int		WebcamSupport::Init()
 	mt.subtype = MEDIASUBTYPE_RGB24;
 
 	// Try to specify a framerate for capture
-	VIDEOINFOHEADER *pVideoHeader = (VIDEOINFOHEADER*)MediaType.pbFormat; 
+	// NOT SURE THIS HAS A REAL EFFECT SO WE MIGHT WANT TO COMMENT IT SINCE IT ALLOCATES MEMORY
+	VIDEOINFOHEADER * pVidH = new VIDEOINFOHEADER;
+	ZeroMemory(pVidH, sizeof(VIDEOINFOHEADER)); 
 	// Compute the time between 2 frames in nano seconds according to the specified fps
-	pVideoHeader->AvgTimePerFrame = 1./(float)this->fps*1000000.;
+	pVidH->AvgTimePerFrame = (1./(float)this->fps)*1000000.;
+	mt.pbFormat = (unsigned char *) pVidH;
 
 	hr = pSampleGrabber->SetMediaType( &mt );
 	if( FAILED( hr ) )
