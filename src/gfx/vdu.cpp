@@ -308,6 +308,7 @@ Sprite * getPlanetImage () {
 
 void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   float x,y,w,h;
+
   float fs = target->FShieldData();
   float rs = target->RShieldData();
   float ls = target->LShieldData();
@@ -323,9 +324,11 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
 
 
 
-  
+
   GFXColorf (c);
   tp->Draw (MangleString (getUnitNameAndFgNoBase(target).c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+  double mm=0;
+  if (parent->InRange(target,mm,true,false,false)) {  
   int i=0;
   char st[1024];
   for (i=0;i<rows-1&&i<128;i++) {
@@ -341,6 +344,10 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   GFXColor4f (.4,.4,1,1);
   DrawShield (fs,rs,ls,bs,x,y,w,h);
   GFXColor4f (1,1,1,1);
+  }else {
+  tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+
+  }
 }
 
 void VDU::DrawMessages(Unit *target, const GFXColor & c){
