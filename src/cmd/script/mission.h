@@ -63,7 +63,7 @@ class varInst;
 
 typedef vector<varInst *> olist_t;
 typedef map<string,varInst *> omap_t;
-
+std::string varToString (varInst * s);
 class Flightgroup {
  public:
   string name; // flightgroup name
@@ -198,6 +198,7 @@ enum callback_module_unit_type {
   CMT_UNIT_getPlayer ,
   CMT_UNIT_getRandCargo ,
   CMT_UNIT_getCredits ,
+  CMT_UNIT_getSaveData ,//gets saved data for this unit
   CMT_UNIT_addCredits ,
   CMT_UNIT_launch ,
     CMT_UNIT_getPosition ,

@@ -8,6 +8,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "savegame.h"
+#include <algorithm>
 using namespace std;
 SaveGame::SaveGame(const std::string &pilot) {
   callsign=pilot;
@@ -44,7 +45,41 @@ void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const cha
     savedunits.Put (address,new SavedUnits (filename,type,faction));
   }
 }
-vector <SavedUnits> ReadSavedUnits (FILE * fp) {
+olist_t &SaveGame::getMissionData(float magic_number) {
+  unsigned int i=std::find (mission_data.begin(),mission_data.end(),magic_number)-mission_data.begin();
+  if (i==mission_data.size()) {
+    mission_data.push_back(MissionDat(magic_number));
+  }
+  return mission_data[i].dat;
+}
+void SaveGame::WriteMissionData (FILE * fp) {
+  fprintf (fp," %d ",mission_data.size());
+  for( unsigned int i=0;i<mission_data.size();i++) {
+    fprintf (fp,"\n%f ",mission_data[i].magic_number);
+    fprintf (fp,"%d ",mission_data[i].dat.size());
+    for (unsigned int j=0;j<mission_data[i].dat.size();j++) {
+      fprintf (fp,"%s ",varToString(mission_data[i].dat[j]).c_str());
+    }
+  }
+}
+void SaveGame::ReadMissionData (FILE * fp) {
+  int mdsize;
+  fscanf (fp," %d ",&mdsize);
+  for( unsigned int i=0;i<mdsize;i++) {
+    int md_i_size;
+    float mag_num;
+    fscanf (fp,"\n%f ",&mag_num);
+    fscanf (fp,"%d ",&md_i_size);
+    mission_data.push_back (MissionDat(mag_num));
+    for (unsigned int j=0;j<md_i_size;j++) {
+      varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
+      vi->type = VAR_FLOAT;
+      fscanf (fp,"%f ",&vi->float_val);
+      mission_data[i].dat.push_back (vi);
+    }
+  }
+}
+vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
   vector <SavedUnits> su;
   int a;
   char unitname[1024];
@@ -52,9 +87,11 @@ vector <SavedUnits> ReadSavedUnits (FILE * fp) {
   while (3==fscanf (fp,"%d %s %s",&a,unitname,factname)) {
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
       _Universe->LoadSerializedFaction(fp);
+    }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
+      ReadMissionData(fp);
     }else {
-	    su.push_back (SavedUnits (unitname,(clsptr)a,factname));
-	}
+      su.push_back (SavedUnits (unitname,(clsptr)a,factname));
+    }
   }
   return su;
 }
@@ -81,6 +118,8 @@ void SaveGame::WriteSaveGame (const char *systemname, const Vector &FP, float cr
       delete myvec.back();
       myvec.pop_back();
     }
+    fprintf (fp,"\n%d %s %s",0,"mission","data ");
+    WriteMissionData(fp);
     fprintf (fp,"\n%d %s %s",0,"factions","begin ");
     _Universe->SerializeFaction(fp);
     fclose (fp);
@@ -93,6 +132,8 @@ float SaveGame::GetSavedCredits () {
 void SaveGame::SetSavedCredits (float c) {
   savedcredits = c;
 }
+
+
 vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
   if (filename.length()>0)
     filename=callsign+filename;

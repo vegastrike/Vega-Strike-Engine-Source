@@ -1,3 +1,4 @@
+#include "cmd/script/mission.h"
   struct SavedUnits {
     string filename;
     clsptr type;
@@ -8,15 +9,30 @@
       type = typ;
     }
   };
-
 class SaveGame {
+  struct MissionDat {
+    olist_t dat;
+    float magic_number;
+    bool operator == (const MissionDat&i) {
+      float eps=.00001;
+      return fabs (magic_number-i.magic_number)<eps;
+    }
+    MissionDat (float magic_number) {
+      this->magic_number = magic_number;
+    }
+  };
   std::string ForceStarSystem ;
   Vector PlayerLocation;
   std::string outputsavegame;
   std::string originalsystem;
   static Hashtable<int,SavedUnits,char[47]> savedunits;
   std::string callsign;
+  void WriteMissionData(FILE * fp);
+  void ReadMissionData (FILE * fp);
+  vector <SavedUnits> ReadSavedUnits (FILE * fp);
+  vector <MissionDat> mission_data;
  public:
+  olist_t &getMissionData(float magic_number);
   SaveGame(const std::string &pilotname);
   float GetSavedCredits();
   void SetSavedCredits (float);

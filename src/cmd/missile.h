@@ -12,7 +12,7 @@ class Missile:public Unit {
       smaller->ApplyDamage (biglocation,bignormal,damage,smaller,GFXColor(1,1,1,1),owner,phasedamage>0?phasedamage:0);
     }
     if (damage<0||phasedamage<0) {
-      smaller->leach (1,-phasedamage,-damage);
+      smaller->leach (1,phasedamage<0?-phasedamage:1,damage<0?-damage:0);
     }
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
     if (!killed)

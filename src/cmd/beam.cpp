@@ -359,7 +359,13 @@ bool Beam::Collide (Unit * target) {
     if (coltmp.b>1)coltmp.b=1;
     */
     float tmp=(curlength/range); 
-    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),colidee,coltmp,(Unit *)owner,phasedamage*SIMULATION_ATOM);
+    float appldam = (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
+    float phasdam = (phasedamage*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
+    if (appldam>0||phasdam>0) {
+      target->ApplyDamage (center+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
+    }else if (damagerate<0||phasedamage<0) {
+      target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
+    }
     return true;
     
   }

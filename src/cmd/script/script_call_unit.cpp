@@ -53,6 +53,7 @@
 #include "config_xml.h"
 #include "gfx/cockpit.h"
 #include "cmd/images.h"
+#include "savegame.h"
 //#include "vegastrike.h"
 
 /* *********************************************************** */
@@ -901,8 +902,21 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-
-
+    else if(method_id==CMT_UNIT_getSaveData){
+      float magic_num;
+      void * my_obj=NULL;
+      magic_num= getFloatArg(node,mode,1);
+      if(mode==SCRIPT_RUN){
+	Cockpit * tmp;
+	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+	  my_obj=(void *)&tmp->savegame->getMissionData (magic_num);	  
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname = "olist";
+      viret->object = my_obj;
+    }
     else if(method_id==CMT_UNIT_toxml){
       if(mode==SCRIPT_RUN){
 	call_unit_toxml(node,mode,ovi);

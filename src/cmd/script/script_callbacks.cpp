@@ -48,6 +48,25 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+string varToString (varInst * vi) {
+  switch (vi->type) {
+  case VAR_FLOAT:
+    return XMLSupport::tostring (vi->float_val);
+  case VAR_INT:
+    return XMLSupport::tostring(vi->int_val);
+  case VAR_BOOL:
+    return XMLSupport::tostring (vi->bool_val);
+  case VAR_OBJECT:
+  default:
+    if (vi->objectname=="string") {
+      return *((string *)vi->object);
+    }else {
+      return XMLSupport::tostring ((int)vi->object);
+    }
+  }
+}
+
+
 void Mission::doCall_toxml(string module,varInst *ovi){
   if(module=="_olist"){
     call_olist_toxml(NULL,SCRIPT_RUN,ovi);
@@ -945,7 +964,8 @@ void Mission::initCallbackMaps(){
     module_unit_map["scannerNearestEnemyDist"]=CMT_UNIT_scannerNearestEnemyDist ;
     module_unit_map["scannerNearestFriendDist"]=CMT_UNIT_scannerNearestFriendDist ;
     module_unit_map["scannerNearestShipDist"]=CMT_UNIT_scannerNearestShipDist ;
-  module_unit_map["toxml"]=CMT_UNIT_toxml ;
+    module_unit_map["toxml"]=CMT_UNIT_toxml ;
+    module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
 
 
 
