@@ -146,10 +146,13 @@ namespace UnitXML {
       COCKPITDAMAGE,
       REPAIRDROID,
       ECM,
-      DESCRIPTION
+      DESCRIPTION,
+      UPGRADE,
+      MOUNTOFFSET,
+      SUBUNITOFFSET
     };
 
-  const EnumMap::Pair element_names[34] = {
+  const EnumMap::Pair element_names[35]= {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
@@ -183,10 +186,11 @@ namespace UnitXML {
     EnumMap::Pair ("Cargo",CARGO),
     EnumMap::Pair ("Category",CATEGORY),
     EnumMap::Pair ("Import",IMPORT),
-	EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE)
+    EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE),
+    EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[84] = {
+  const EnumMap::Pair attribute_names[86] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -270,19 +274,20 @@ namespace UnitXML {
     EnumMap::Pair ("Damage",DAMAGE),
     EnumMap::Pair ("RepairDroid",REPAIRDROID),
     EnumMap::Pair ("ECM",ECM),
-    EnumMap::Pair ("Description",DESCRIPTION)
-
+    EnumMap::Pair ("Description",DESCRIPTION),
+    EnumMap::Pair ("MountOffset",MOUNTOFFSET),
+    EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET)
   };
 
-  const EnumMap element_map(element_names, 34);
-  const EnumMap attribute_map(attribute_names, 84);
+  const EnumMap element_map(element_names, 35);
+  const EnumMap attribute_map(attribute_names, 86);
 }
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace UnitXML;
-
+extern int GetModeFromName (const char *);
 int parseMountSizes (const char * str) {
   char tmp[13][50];
   int ans = weapon_info::NOWEAP;
@@ -449,6 +454,34 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	xml->meshes.push_back(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
 	break;
       }
+    }
+    break;
+  case UPGRADE:
+    {
+      assert (xml->unitlevel>=1);
+      xml->unitlevel++;
+ 
+      double percent;
+      int moffset=0;
+      int soffset=0;
+    //don't serialize    
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	filename = (*iter).value.c_str();
+	break;
+      case SUBUNITOFFSET:
+	soffset = parse_int ((*iter).value);
+	break;
+      case MOUNTOFFSET:
+	moffset = parse_int ((*iter).value);
+	break;
+      }
+    }    
+    Unit *upgradee =new Unit(filename.c_str(),true,_Universe->GetFaction("upgrades"));
+    Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
+    upgradee->Kill();
     }
     break;
   case DOCK:
