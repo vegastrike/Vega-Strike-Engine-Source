@@ -205,7 +205,7 @@ void StarSystem::Update() {
       AccessCamera()->UpdateCameraSounds();
       while((unit = iter->current())!=NULL) {
 
-	unit->UpdatePhysics(identity_transformation,identity_matrix,firstframe,units);
+	unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
 	iter->advance();
       }
       delete iter;

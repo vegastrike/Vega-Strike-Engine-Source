@@ -209,10 +209,11 @@ void Unit::Thrust(const Vector &amt1,bool afterburn){
   ApplyLocalForce(amt);
   if (afterburn!=AUDIsPlaying (sound.engine)) {
     if (afterburn)
-      AUDPlay (sound.engine,cumulative_transformation.position,Velocity,1);
+      AUDPlay (sound.engine,cumulative_transformation.position,cumulative_velocity,1);
     else
       //    if (Velocity.Magnitude()<computer.max_speed)
       AUDStopPlaying (sound.engine);
+    
   }
 }
 
@@ -253,7 +254,7 @@ void Unit::RollTorque(float amt) {
 }
 
 const float VELOCITY_MAX=1000;
-void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bool lastframe, UnitCollection *uc) {
+void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   if (cloaking>=cloakmin) {
     if (cloakenergy*SIMULATION_ATOM>energy) {
       Cloak(false);//Decloak
@@ -262,7 +263,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
 	energy-=SIMULATION_ATOM*cloakenergy;
       }
       if (cloaking>cloakmin) {
-	AUDAdjustSound (sound.cloak, cumulative_transformation.position,Velocity);
+	AUDAdjustSound (sound.cloak, cumulative_transformation.position,cumulative_velocity);
 	if ((cloaking==32767&&cloakrate>0)||(cloaking==cloakmin+1&&cloakrate<0)) {
 	  AUDStartPlaying (sound.cloak);
 	}
@@ -278,6 +279,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
       }
     }
   }
+
   RegenShields();
   if (lastframe)
     prev_physical_state = curr_physical_state;//the AIscript should take care
@@ -298,10 +300,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
     }
   } 
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
+
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-
+  cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
   
   int i;
   if (lastframe) {
@@ -333,14 +336,14 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
       t1=prev_physical_state;//a hack that will not work on turrets
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
-      mounts[i].PhysicsAlignedFire (t1,m1,Velocity,owner==NULL?this:owner,Target());//FIXME will not work for turrets (cumulative velocity) maybe need to add to physics frame!
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,Target());
     }else if (mounts[i].processed==Mount::UNFIRED) {
       mounts[i].PhysicsAlignedUnfire();
     }
   }
   bool dead=true;
   for (i=0;i<numsubunit;i++) {
-    subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc); 
+    subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
     if (hull<0) {
       UnFire();//don't want to go off shooting while your body's splitting everywhere
       subunits[i]->hull-=SIMULATION_ATOM;
@@ -372,9 +375,10 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
     Velocity += temp;
   } 
 #ifndef PERFRAMESOUND
-  AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity); 
-  NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
+  AUDAdjustSound (sound.engine,cumulative_transformation.position, cumulative_velocity); 
 #endif
+  NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
+
   /*
     if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10) {
     float magvel = Velocity.Magnitude(); float y = (1-magvel*magvel*oocc);

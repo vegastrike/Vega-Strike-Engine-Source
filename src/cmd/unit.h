@@ -144,6 +144,8 @@ class Unit {
   Matrix cumulative_transformation_matrix;
   ///The cumulative (incl subunits parents' transformation)
   Transformation cumulative_transformation;
+  ///The velocity this unit has in World Space
+  Vector cumulative_velocity;
   ///The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
   LineCollide CollideInfo;
   ///The explosion starts at null, when activated time explode is incremented and ends at null  
@@ -548,7 +550,7 @@ public:
   ///Applies a roll of amt
   void RollTorque(float amt);
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-  void UpdatePhysics (const Transformation &trans, const Matrix transmat, bool ResolveLast, UnitCollection *uc=NULL);
+  void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
   void ResolveForces (const Transformation &, const Matrix);
   ///Returns the pqr oritnattion of the unit in world space
@@ -562,7 +564,7 @@ public:
   ///Returns unit-space ang velocity
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   ///Return unit-space velocity
-  const Vector &GetVelocity() const { return Velocity; }
+  const Vector &GetVelocity() const { return cumulative_velocity; }
 
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
