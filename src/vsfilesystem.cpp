@@ -1433,6 +1433,7 @@ namespace VSFileSystem
 				if( !this->fp)
 				{
 					cerr<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen"<<endl;
+                                        this->valid=false;
 					return FileNotFound; // fault!
 				}
 				this->valid = true;
@@ -1461,6 +1462,7 @@ namespace VSFileSystem
 					if( !this->fp)
 					{
 						cerr<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen"<<endl;
+                                                this->valid=false;
 						return FileNotFound;//fault
 					}
 				}
