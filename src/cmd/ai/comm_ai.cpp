@@ -57,23 +57,29 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   return Order::GetEffectiveRelationship (target)+rel;
 }
 static void AllUnitsCloseAndEngage(Unit * un, int faction) {
-  Unit * ally;
-  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
-       (ally = *i)!=NULL;
-       ++i) {
-    if (ally->faction==faction) {
-      Flightgroup * fg = ally->getFlightgroup();
-      if (fg) {
-	if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
-	  ally->Target (un);
-	  fg->directive=string("a");//attack my target (of leader)
-	}
-      }else {
-	ally->Target (un);
-      }
-    }
-  }
+	Unit * ally;
+	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
+	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		(ally = *i)!=NULL;
+		++i) {
+		Vector loc;
 
+		if (ally->faction==faction) {
+			if (ally->InRange (un,loc,true)) {
+				if ((ally->Position()-un->Position()).Magnitude()<contraband_assist_range) {
+					Flightgroup * fg = ally->getFlightgroup();
+					if (fg) {
+						if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
+							ally->Target (un);
+							fg->directive=string("a");//attack my target (of leader)
+						}else {
+							ally->Target (un);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
   //reports success or failure
