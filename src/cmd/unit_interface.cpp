@@ -28,11 +28,52 @@ int GetModeFromName (const char * input_buffer) {
       }
       return 0;
 }
-
+using std::string;
 static float usedPrice (float percentage) {
   return .66*percentage;
 }
-
+static bool final_cat (const std::string &cat) {
+  if (cat.empty())
+    return false;
+  return (std::find (cat.begin(),cat.end(),'*')==cat.end());
+}
+static string getLevel (const string &input, int level) {
+  string ret;
+  string::const_iterator i;
+  int count=0;
+  for (i=input.begin();count!=level&&i!=input.end();i++) {
+    if (*i=='/') {
+      count++;
+    }
+  }
+  for (;i!=input.end();i++) {
+    if (*i=='/')
+      break;
+    ret.push_back(*i);
+  }
+  return ret;
+}
+static bool match (vector <string>::const_iterator cat, vector<string>::const_iterator endcat, string::const_iterator item, string::const_iterator itemend, bool perfect_match) {
+  string::const_iterator a;
+  if (cat==endcat) {
+    return (!perfect_match)||(item==itemend);
+  }
+  a = (*cat).begin();
+  for (;a!=(*cat).end()&&item!=itemend;a++,item++) {
+    if (*a!=*item) {
+      return false;
+    }
+  }
+  if (item!=itemend) {
+    if (*item!='/') 
+      return false;
+    item++;
+    cat++;
+    return match (cat,endcat,item,itemend,perfect_match);
+  }else {
+    return true;
+  }
+}
 extern void LoadMission (const char *, bool loadfirst);
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
@@ -60,7 +101,7 @@ struct UpgradingInfo {
   bool multiplicitive;
   Button *Modes[MAXMODE];
   string title;
-  string curcategory;
+  vector <string> curcategory;
   vector <Cargo>&FilterCargo(Unit *un, const string filterthis, bool inv, bool removezero);
   vector <Cargo>&GetCargoFor(Unit *un);
   vector <Cargo>&GetCargoList ();
@@ -81,24 +122,29 @@ struct UpgradingInfo {
 	}
 
       }else {
-	if (curcategory.length()!=0) {
+	if (!curcategory.empty()) {
 	  if (mode==BUYMODE||mode==SELLMODE) 
 	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
-	    if ((*CurrentList)[i].category==curcategory)
+	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].category.begin(),(*CurrentList)[i].category.end(),true)) {
 	      CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,((*CurrentList)[i].content+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
-	  }
-	} else {
-	  string curcat=("");
-	  CargoList->AddTextItem ("","");
-	  for (unsigned int i=0;i<CurrentList->size();i++) {
-	    if ((*CurrentList)[i].category!=curcat) {
-	      CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
-	      curcat =((*CurrentList)[i].category);
 	    }
 	  }
-	}      
-      }
+	}
+	string curcat=("");
+	CargoList->AddTextItem ("","");
+	for (unsigned int i=0;i<CurrentList->size();i++) {
+	  string curlist  ((*CurrentList)[i].category);
+	  string lev=getLevel (curlist,curcategory.size());
+	  if (match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),false)&&
+	      (!match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),true))&&
+	      lev!=curcat) {
+	    CargoList->AddTextItem ((string("x")+lev).c_str(),lev.c_str());
+	    curcat =lev;
+	  }
+	}
+      }      
+      
     }else {
       Unit * un = buyer.GetUnit();
       int i=0;
@@ -130,7 +176,7 @@ struct UpgradingInfo {
   }
   void SetMode (enum BaseMode mod, enum SubMode smod) {
     if (mod!=mode)
-      curcategory="";
+      curcategory.clear();
     string ButtonText;
     switch (mod) {
     case BRIEFINGMODE:
@@ -389,7 +435,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   case BRIEFINGMODE:
     switch (submode) {
     case NORMAL:
-      if (curcategory.length()!=0) {
+      {
 	int cargonumber;
 	if (sscanf (item,"%d",&cargonumber)==1) {
 	  if (cargonumber<(int)active_missions.size()) {
@@ -410,7 +456,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   case SHIPDEALERMODE:
     switch (submode) {
     case NORMAL:
-      if (curcategory.length()!=0) {
+      {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
@@ -731,15 +777,17 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 	cur_y = ((new_y / g_game.y_resolution) * -2) + 1;
 
 	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
-	if (ours == 1 && type == 1) {
+	if (ours == 1 && type == 1 &&state==0) {
 		buy_name = CargoList->GetSelectedItemName();
 		if (buy_name) {
 		  if (buy_name[0]!='\0') {
 		    if (0==strcmp(buy_name,"[Back To Categories]")) {
-		      curcategory=string("");
-		      SetupCargoList();
+		      if (!curcategory.empty()) {
+			curcategory.pop_back();		     
+			SetupCargoList();
+		      }
 		    }else {
-		      if (curcategory.length()!=0) {
+		      if (buy_name[0]!='x') {
 			  lastselected.type=type;
 			  lastselected.x=cur_x;
 			  lastselected.y=cur_y;
@@ -751,7 +799,7 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			//CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); 
 			//CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
 		      }else {
-			curcategory=buy_name;
+			curcategory.push_back(buy_name+1);
 			SetupCargoList();
 		      }
 		    }
@@ -840,18 +888,22 @@ vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     case UPGRADEMODE:
     case DOWNGRADEMODE:
     case ADDMODE:
-      curcategory=string("upgrades");
+      curcategory.clear();
+      curcategory.push_back(string("upgrades"));
       return FilterCargo (un,"upgrades",true,false);
     case SHIPDEALERMODE:
-      curcategory=string("starships");
+      curcategory.clear();
+      curcategory.push_back(string("starships"));
       return FilterCargo (un,"starships",true,true);
     case MISSIONMODE:
-      curcategory=string("missions");
+      curcategory.clear();
+      curcategory.push_back(string("missions"));
       return FilterCargo (un,"missions",true,true);
     case NEWSMODE:
       return TempCargo;
     case BRIEFINGMODE:
-      curcategory=string("briefings");
+      curcategory.clear();
+      curcategory.push_back (string("briefings"));
       return MakeActiveMissionCargo ();
     }
     fprintf (stderr,"Error in picking cargo lists");

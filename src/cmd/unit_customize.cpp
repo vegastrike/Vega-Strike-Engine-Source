@@ -358,7 +358,9 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
 
   for (unsigned int upgr=0;upgr<Cockpit::NUMGAUGES+1+MAXVDUS;upgr++) {
 	STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
-
+	if (image->cockpit_damage[upgr]>1) {
+	  image->cockpit_damage[upgr]=1;//keep it real
+	}
   }
   if (shield.number==up->shield.number) {
     switch (shield.number) {
