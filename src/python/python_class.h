@@ -25,17 +25,18 @@ int main (int argc,char *argv[]) {
 */
 
 //These two functions purposely have opening/closing braces that don't match up
+#define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
 #define PYTHON_INIT_CLASS(name,SuperClass,myclass) { \
-	PythonClass< SuperClass >::last_instance = NULL; \
     boost::python::class_builder <SuperClass,PythonClass< SuperClass > > BaseClass (name,myclass); \
     BaseClass.def (boost::python::constructor<>()); \
     BaseClass.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute); \
 }
+//    boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); 
 
-//__declspec(dllexport) class Orders::FireAt;
+
 
 template <class SuperClass> class PythonClass:public SuperClass {
   PyObject * self;

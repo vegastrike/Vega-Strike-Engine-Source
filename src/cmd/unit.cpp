@@ -979,11 +979,21 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
   }
 }
-
+using Orders::FireAt;
+PYTHON_INIT_GLOBALS(AI,FireAt);
+PYTHON_BEGIN_MODULE(AI)
+PYTHON_INIT_CLASS(AI,FireAt,"PythonAI")
+PYTHON_END_MODULE(AI)
+ 
 void Unit::LoadAIScript(const std::string & s) {
-
+  static bool init=false;
+  if (!init) {
+    init=true;
+    PYTHON_INIT_MODULE(AI);
+  }
+  //  static bool initsuccess= initPythonAI();
   if (s.find (".py")!=string::npos) {
-    Order * ai = PythonClass <Orders::FireAt>::Factory (s);
+    Order * ai = PythonClass <FireAt>::Factory (s);
     PrimeOrders (ai);
     return;
   }else {

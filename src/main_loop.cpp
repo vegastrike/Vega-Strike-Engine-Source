@@ -542,24 +542,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       // cout << "before ai" << endl;
       
       if (benchmark>0.0  || (s!=0||squadnum>=(int)fighter0name.size())) {
-	if(ainame[0]!='_'){
-	  string ai_agg=ainame+".agg.xml";
-	  string ai_int=ainame+".int.xml";
-	  
-	  char ai_agg_c[1024];
-	  char ai_int_c[1024];
-	  strcpy(ai_agg_c,ai_agg.c_str());
-	  strcpy(ai_int_c,ai_int.c_str());
-	  //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
-	  
-	  fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-	}
-	else{
-	  string modulename=ainame.substr(1);
-	  
-	  fighters[a]->EnqueueAI( new AImissionScript(modulename));
-	  //fighters[a]->SetAI( new AImissionScript(modulename));
-	}
+	fighters[a]->LoadAIScript(ainame);
 	fighters[a]->SetTurretAI ();
       }
       a++;

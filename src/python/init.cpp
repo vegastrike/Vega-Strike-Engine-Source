@@ -180,9 +180,6 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 }
 //boost::python::detail::extension_instance::wrapped_objects
 
-PYTHON_BEGIN_MODULE(AI)
-	PYTHON_INIT_CLASS(AI,Orders::FireAt,"PythonAI")
-PYTHON_END_MODULE(AI)
 
 void Python::initpaths(){
   char pwd[2048];
@@ -195,7 +192,7 @@ void Python::initpaths(){
 }
 
 void Python::init() {
-  PYTHON_INIT_MODULE(AI);
+
   static bool isinit=false;
   if (isinit) {
     return;
