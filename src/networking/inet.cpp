@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <errno.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -137,10 +138,12 @@ int INET_listen (unsigned short port, const char * hostname) {
         return -1;
   }
   INET_getHostByName (hostname,port,Address);
-
+  Address.sin_addr.s_addr = INADDR_ANY;
+  Address.sin_family=AF_INET;
   if(bind(hServerSocket,(struct sockaddr*)&Address,sizeof(Address)) 
                         == SOCKET_ERROR) {
         printf("\nCould not connect to host\n");
+	printf ("%d Error ",errno);
         return -1;
   }
   getsockname( hServerSocket, (struct sockaddr *) &Address,&nAddressSize);
