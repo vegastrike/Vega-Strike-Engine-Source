@@ -7,6 +7,7 @@
 #include "cmd/planet.h"
 #include "gfx/star.h"
 #include "vs_globals.h"
+#include "vs_path.h"
 #include "config_xml.h"
 #include "vegastrike.h"
 
@@ -530,7 +531,12 @@ void StarSystem::LoadXML(const char *filename) {
 #else
   FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"rb");
   if (!tempo) {
-    EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
+    tempo = fopen (GetSharedTexturePath (xml->backgroundname+"_light.bmp").c_str(),"rb");
+    if (!tempo) {
+      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
+    } else {
+      fclose (tempo);
+    }
   }else {
     fclose (tempo);
   }

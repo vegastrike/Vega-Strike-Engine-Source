@@ -164,11 +164,19 @@ void Mesh::GetPolys (vector <bsp_polygon> & polys) {
     for (int l=0;l<2;l++) {
 	for (i=0;i<last;i++) {
 	    polys.push_back (tmppolygon);
-	    for (int j=0;j<inc;j++) {
+	    for (int j=0;j<3;j++) {
 	      vv.x=tmpres[offset+i*inc+j].x;//+local_pos.i;
 	      vv.y=tmpres[offset+i*inc+j].y;//+local_pos.j;
 	      vv.z=tmpres[offset+i*inc+j].z;//+local_pos.k;
 	      polys[polys.size()-1].v.push_back (vv);
+	    }
+	    if (inc==4) {
+	      for (int j=1;j<4;j++) {
+		vv.x=tmpres[offset+i*inc+j].x;//+local_pos.i;
+		vv.y=tmpres[offset+i*inc+j].y;//+local_pos.j;
+		vv.z=tmpres[offset+i*inc+j].z;//+local_pos.k;
+		polys[polys.size()-1].v.push_back (vv);
+	      }
 	    }
 	}
 	inc=4;
