@@ -1,6 +1,4 @@
 %{
-
-
 #include <stdio.h>
 #include <malloc.h>
 
@@ -15,7 +13,7 @@ extern int yylex();
 #define YYDEBUG 0
 
   typedef char* str;
-#define YYSTYPE str
+#define YYSTYPE string
 
 	vector<string> pstack;
 
@@ -52,78 +50,73 @@ string printStack(){
 %%
 
 module:		L_MODULE  module_body 	{
-	 printf("<module>\n");
-	string module="<module>\n";
-
-	module=module+Pop();
-
-	module=module+"\n</module>\n\n";
-
-	printf("ENDRESULT: %s\n",module.c_str());
+	printf("module is:\n");
+	printf("%s\n",$2.c_str());
 };
-module_body:	/* empty */
-		| module_body module_statement ';'		;
-module_statement:	script  | defvar | import 	{
-	string statement=Pop();
-	string body=Pop();
-	body=body+statement;
-	pstack.push_back(body);
-};
+module_body:	/* empty */   { $$=""; }
+		| module_body module_statement ';' {
+	$$=$1+"\n"+$2;
+}		;
+module_statement:	script  { $$=$1; } | defvar {$$=$1}; | import { $$=$1 };
 import:		L_IMPORT L_ID 	{
-	 printf("<import name=%s/>\n",$2);
-	string imp="<import name="+string($2)+">\n";
-	pstack.push_back(imp);
+	$$="<import name="+$2+"/>";
  };
 vartype:	inttype | floattype | booltype | objecttype ;
 
-inttype:        L_INT  		{ pstack.push_back("int"); $$=strdup("blah")};
-floattype:      L_FLOAT 	  { pstack.push_back("float"); };
-booltype:       L_BOOL		{ pstack.push_back("bool"); };
-objecttype:     L_OBJECT 	 { pstack.push_back("object"); };
+inttype:        L_INT  		{ $$="int" };
+floattype:      L_FLOAT 	  { $$="float"};
+booltype:       L_BOOL		{  $$="bool"};
+objecttype:     L_OBJECT 	 { $$="object"};
 defvar:		vartype L_ID	{
-	string type=Pop();
-	 printf("<defvar 1=%s name=%s type=%s/>\n",$$,$2,type.c_str());
-	string defvar="<defvar name="+string($2)+" type="+type+">\n";
-	pstack.push_back(defvar);
+	$$="<defvar name="+$2+" type="+$1+"/>\n";
 };
 script:		L_SCRIPT '{' script_body '}'	{
-
-	string script="<script>\n";
-#if 0
-	script=script+printStack();
-	script=script+"\n</script>\n";
-#endif
-	script=script+Pop();
-	pstack.push_back(script);
+	$$="<script>\n"+$3+"\n</script>\n";
 };
 script_body:	/* empty */
+		{ $$=""; }
 		| script_body script_statement ';'  {
-	printf("SCRIPT_BODY\n");
-	string forget=printStack();
-
-	string last_statement=Pop();
-
-	string body=Pop();
-	body=body+last_statement;
-	pstack.push_back(body);
+//	$$="\nscript_body\n";
+	$$=$1+"\n"+$2;
 };
-script_statement:	if_statement
-			| block_statement
-			| defvar
-			| setvar		;
-setvar:			L_ID '=' expr		;
-if_statement:		L_IF '(' expr ')' block_statement L_ELSE block_statement	;
-block_statement:	'{' script_body '}'			;
-number:			L_FLOATCONST | L_INTCONST		;
-expr:			number
-			| L_ID
+script_statement:	if_statement { $$=$1; }
+			| block_statement { $$=$1; }
+			| defvar  { $$=$1; }
+			| setvar { $$=$1; };
+
+setvar:			L_ID '=' expr   {
+	$$="<setvar name="+$1+" >\n"+$3+"\n</setvar>\n";
+}
+if_statement:		L_IF '(' expr ')' block_statement L_ELSE block_statement	{
+	$$="<if>\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
+};
+block_statement:	'{' script_body '}'	{
+	$$="<block>\n"+$2+"\n</block>\n";
+};
+number:			L_FLOATCONST {
+	 $$="<const type=float value="+$1+" />\n";
+ }
+			| L_INTCONST	{
+	 $$="<const type=int value="+$1+" />\n";
+}
+expr:			number	{ $$=$1; };
+			| L_ID {
+	$$="<var name="+$1+" />\n";
+}
 			| expr L_EQUAL expr
+{ $$="<test test=eq >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_NOT_EQUAL expr
+{ $$="<test test=ne >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr '*' expr
+{ $$="<fmath math=* >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '/' expr
+{ $$="<fmath math=/ >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '-' expr
+{ $$="<fmath math=- >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '+' expr
-			| '(' expr ')'				;
+{ $$="<fmath math=+ >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+			| '(' expr ')'
+{ $$=$2; };
 
 %%
 

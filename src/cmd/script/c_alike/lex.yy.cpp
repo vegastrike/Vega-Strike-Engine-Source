@@ -264,13 +264,9 @@ static void yy_flex_free YY_PROTO(( void * ));
 
 
 #define YY_USES_REJECT
-
-#define FLEX_DEBUG
 typedef unsigned char YY_CHAR;
 FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
-
-#define FLEX_DEBUG
 extern int yylineno;
 int yylineno = 1;
 extern char *yytext;
@@ -433,16 +429,6 @@ static yyconst short int yy_chk[140] =
        91,   91,   91,   91,   91,   91,   91,   91,   91
     } ;
 
-extern int yy_flex_debug;
-int yy_flex_debug = 1;
-
-static yyconst short int yy_rule_linenum[23] =
-    {   0,
-       25,   26,   27,   29,   30,   31,   33,   34,   36,   37,
-       38,   39,   41,   42,   43,   44,   46,   48,   49,   50,
-       52,   53
-    } ;
-
 static yy_state_type yy_state_buf[YY_BUF_SIZE + 2], *yy_state_ptr;
 static char *yy_full_match;
 static int yy_lp;
@@ -460,8 +446,14 @@ char *yytext;
 #line 1 "c_alike.lex"
 #define INITIAL 0
 #line 2 "c_alike.lex"
+#include <stdio.h>
+#include <malloc.h>
+
+#include <vector>
+#include <string>
+
   typedef char* str;
-#define YYSTYPE str
+#define YYSTYPE string
 #define YY_SKIP_YYWRAP
 
 #include "c_alike.tab.cpp.h"
@@ -472,7 +464,7 @@ char *yytext;
 
   //  extern char *yylval;
 
-#line 476 "lex.yy.cpp"
+#line 468 "lex.yy.cpp"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -623,9 +615,9 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 24 "c_alike.lex"
+#line 30 "c_alike.lex"
 
-#line 629 "lex.yy.cpp"
+#line 621 "lex.yy.cpp"
 
 	if ( yy_init )
 		{
@@ -713,140 +705,125 @@ find_rule: /* we branch to this label when backing up */
 
 do_action:	/* This label is used only to access EOF actions. */
 
-		if ( yy_flex_debug )
-			{
-			if ( yy_act == 0 )
-				fprintf( stderr, "--scanner backing up\n" );
-			else if ( yy_act < 23 )
-				fprintf( stderr, "--accepting rule at line %d (\"%s\")\n",
-				         yy_rule_linenum[yy_act], yytext );
-			else if ( yy_act == 23 )
-				fprintf( stderr, "--accepting default rule (\"%s\")\n",
-				         yytext );
-			else if ( yy_act == 24 )
-				fprintf( stderr, "--(end of buffer or a NUL)\n" );
-			else
-				fprintf( stderr, "--EOF (start condition %d)\n", YY_START );
-			}
 
 		switch ( yy_act )
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 25 "c_alike.lex"
+#line 31 "c_alike.lex"
 { return(L_MODULE);		}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 26 "c_alike.lex"
+#line 32 "c_alike.lex"
 {  return(L_SCRIPT);	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 27 "c_alike.lex"
+#line 33 "c_alike.lex"
 {  return(L_IMPORT); 		}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 29 "c_alike.lex"
+#line 35 "c_alike.lex"
 { return(L_IF);			}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 30 "c_alike.lex"
+#line 36 "c_alike.lex"
 { return(L_THEN);			}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 31 "c_alike.lex"
+#line 37 "c_alike.lex"
 { return(L_ELSE);			}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 33 "c_alike.lex"
+#line 39 "c_alike.lex"
 { return(L_EQUAL);			}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 34 "c_alike.lex"
+#line 40 "c_alike.lex"
 { return(L_NOT_EQUAL);			}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 36 "c_alike.lex"
+#line 42 "c_alike.lex"
 { 	 return(L_INT);		}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 37 "c_alike.lex"
+#line 43 "c_alike.lex"
 { return(L_FLOAT);			}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 38 "c_alike.lex"
+#line 44 "c_alike.lex"
 { return(L_BOOL);			}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 39 "c_alike.lex"
+#line 45 "c_alike.lex"
 { return(L_OBJECT);			}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 41 "c_alike.lex"
+#line 47 "c_alike.lex"
 { return(L_BEGINSCRIPT);		}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 42 "c_alike.lex"
+#line 48 "c_alike.lex"
 { return(L_ENDSCRIPT);			}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 43 "c_alike.lex"
+#line 49 "c_alike.lex"
 { return(L_BEGINBLOCK);		}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 44 "c_alike.lex"
+#line 50 "c_alike.lex"
 { return(L_ENDBLOCK);		}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 46 "c_alike.lex"
+#line 52 "c_alike.lex"
 { /* return(yytext[0]); */			}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 48 "c_alike.lex"
+#line 54 "c_alike.lex"
 {  yylval=strdup(yytext); return(L_ID);		}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 49 "c_alike.lex"
+#line 55 "c_alike.lex"
 { yylval=strdup(yytext); return(L_INTCONST);	}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 50 "c_alike.lex"
+#line 56 "c_alike.lex"
 {  yylval=strdup(yytext); return(L_FLOATCONST);		}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 52 "c_alike.lex"
+#line 58 "c_alike.lex"
 { return(yytext[0]); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 53 "c_alike.lex"
+#line 59 "c_alike.lex"
 {  return(yytext[0]); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 54 "c_alike.lex"
+#line 60 "c_alike.lex"
 ECHO;
 	YY_BREAK
-#line 850 "lex.yy.cpp"
+#line 827 "lex.yy.cpp"
 			case YY_STATE_EOF(INITIAL):
 				yyterminate();
 
@@ -1725,7 +1702,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 54 "c_alike.lex"
+#line 60 "c_alike.lex"
 
 
 /* nothing */

@@ -1,6 +1,12 @@
 %{
+#include <stdio.h>
+#include <malloc.h>
+
+#include <vector>
+#include <string>
+
   typedef char* str;
-#define YYSTYPE str
+#define YYSTYPE string
 #define YY_SKIP_YYWRAP
 
 #include "c_alike.tab.cpp.h"
