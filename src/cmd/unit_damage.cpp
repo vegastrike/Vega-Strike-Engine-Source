@@ -363,12 +363,15 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 		Vector p,q,r;
 		GetOrientation(p,q,r);
 		int tmp = rand();
-		if (tmp < RAND_MAX/3) {
-		  ani->SetOrientation (Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
-		}else if (tmp< 2*(RAND_MAX/3)) {
-		  ani->SetOrientation (Vector(0,1,0),Vector(0,0,1),Vector(1,0,0));
-		}else {
+
+		if (tmp < RAND_MAX/24) {
 		  ani->SetOrientation (Vector(0,0,1),Vector(1,0,0),Vector(0,1,0));
+		}else if (tmp< RAND_MAX/16) {
+		  ani->SetOrientation (Vector(0,1,0),Vector(0,0,1),Vector(1,0,0));
+		}else if (tmp < RAND_MAX/8) {
+		  ani->SetOrientation (Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
+		}else {
+		  ani->SetOrientation (p,q,r);
 		}
 	      }
 	    }

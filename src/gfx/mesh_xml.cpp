@@ -1250,8 +1250,14 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   }
 
   //  printf("MESHXML texture name:%s:\n",xml->decal_name.c_str());
+  string factionname = FactionUtil::GetFaction(xml->faction);
   if (xml->animated_name.length()) {
-    Decal = new AnimatedTexture (xml->animated_name.c_str(),0,BILINEAR);
+    string tempani = factionname+"_"+xml->animated_name;
+    Decal = new AnimatedTexture (tempani.c_str(),0,BILINEAR);
+    if (!Decal->LoadSuccess()) {
+      delete Decal;
+      Decal = new AnimatedTexture (xml->animated_name.c_str(),0,BILINEAR);
+    }
     //printf("ani\n");
   }else if (xml->decal_name.length()==0) {	
     Decal = NULL;
@@ -1260,9 +1266,20 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     //printf("tex\n");
 
     if (xml->alpha_name.length()==0) {
-      Decal = new Texture(xml->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);    
+      string temptex = factionname+"_"+xml->decal_name;
+      Decal = new Texture(temptex.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);    
+      if (!Decal->LoadSuccess()) {
+	delete Decal;
+	Decal = new Texture(xml->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);    
+      }
     }else {
-      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+      string temptex = factionname+"_"+xml->decal_name;
+      string tempalp = factionname+"_"+xml->alpha_name;
+      Decal = new Texture(temptex.c_str(), tempalp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+      if (!Decal->LoadSuccess()) {
+	delete Decal;
+	Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+      }
      
     }
   }
