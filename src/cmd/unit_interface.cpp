@@ -36,7 +36,8 @@ struct UpgradingInfo {
     std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
     if (curcategory.length()!=0) {
-      CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
+      if (mode==BUYMODE||mode==SELLMODE) 
+	CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
       for (int i=0;i<CurrentList->size();i++) {
 	if ((*CurrentList)[i].category==curcategory)
 	  CargoList->AddTextItem ((tostring(i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(*CurrentList)[i].content.c_str());
