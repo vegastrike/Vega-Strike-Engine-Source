@@ -29,11 +29,12 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
 #ifdef HAVE_AL
   if (sounds[sound].buffer==(ALuint)0) 
     return 0;
+  sounds[sound].pos = pos;
   Vector t = pos-mylistener.pos;
   float mag = t.Dot(t);
   int hashed = hash_sound (sounds[sound].buffer);
 
-  if (mag<mylistener.rsize||playingbuffers[hashed].size()<maxallowedsingle) return 1;
+  if ((!unusedsrcs.empty())&&playingbuffers[hashed].size()<maxallowedsingle) return 1;
   ///could theoretically "steal" buffer from playing sound at this point
 
   if (playingbuffers[hashed].empty()) 
@@ -50,7 +51,6 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
 	//	fprintf (stderr,"stole sound %d %f\n", target1,mag);
 	sounds[target1].source = sounds[sound].source;
 	sounds[sound].source = tmpsrc;
-	sounds[sound].pos=pos;
 	playingbuffers[hashed][target].soundname = sound;
 	return 2;
       }

@@ -37,6 +37,7 @@
 #include "gfx/lerp.h"
 #include "gfx/bsp.h"
 #include "audiolib.h"
+#include "gfx/cockpit.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -511,7 +512,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif 
 				   );
       if (d) {  //d can be used for level of detail shit
-	if ((d =g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective(d))>=1) {//if the radius is at least half a pixel
+	if ((d =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective(d))>=1) {//if the radius is at least half a pixel
 	  meshdata[i]->Draw(d,cumulative_transformation, cumulative_transformation_matrix,cloak,0);//cloakign and nebula
 	} else {
 
@@ -526,6 +527,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       //selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
+	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
     //        UpdateHudMatrix();
     /***DEBUGGING cosAngleFromMountTo
     UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();

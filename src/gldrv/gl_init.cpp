@@ -125,6 +125,7 @@ void init_opengl_extensions()
     g_game.aspect = XMLSupport::parse_float (vs_config->getVariable ("graphics","aspect","1.33"));
     g_game.znear = XMLSupport::parse_float (vs_config->getVariable ("graphics","znear","1"));
     g_game.zfar = XMLSupport::parse_float (vs_config->getVariable ("graphics","zfar","100000"));
+    g_game.detaillevel = XMLSupport::parse_float (vs_config->getVariable ("graphics","ModelDetail","1"));
     /*
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {

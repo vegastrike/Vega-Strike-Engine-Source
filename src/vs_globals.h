@@ -21,9 +21,10 @@ typedef struct {
   float MouseSensitivityX;
   float MouseSensitivityY;   
   float fov ;
-   float aspect ;
-   float znear;
-   float zfar ;
+  float aspect ;
+  float znear;
+  float zfar ;
+  float detaillevel; /*how much the LOD calculation gets multiplied by...higher="bigger" */
 
   //  scalar_t time;                      /* game time -- now local in lin_time.h*/
   //scalar_t time_step;                 /* size of current time step " */

@@ -140,10 +140,13 @@ void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
 void Unit::Mount::PhysicsAlignedUnfire() {
   //Stop Playing SOund?? No, that's done in the beam, must not be aligned
   if (processed==UNFIRED) {
+  if (AUDIsPlaying (sound))
+    AUDStopPlaying (sound);
     processed=PROCESSED;
   }
 }
 void Unit::Mount::UnFire () {
+  processed = UNFIRED;
   if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
     return ;
   //  AUDStopPlaying (sound);

@@ -183,10 +183,10 @@ namespace BeamXML {
 	   tmpweapon.file = (*iter).value;
 	  break;
 	case SOUNDMP3:
-	  tmpweapon.sound = AUDCreateSoundMP3((*iter).value,tmpweapon.type==weapon_info::BEAM);
+	  tmpweapon.sound = AUDCreateSoundMP3((*iter).value,true/*tmpweapon.type==weapon_info::BEAM*/);
 	  break;
 	case SOUNDWAV:
-	  tmpweapon.sound = AUDCreateSoundWAV((*iter).value,tmpweapon.type==weapon_info::BEAM);
+	  tmpweapon.sound = AUDCreateSoundWAV((*iter).value,true/*tmpweapon.type==weapon_info::BEAM*/);
 	  break;
 	case RED:
 	  tmpweapon.r = XMLSupport::parse_float ((*iter).value);

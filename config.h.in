@@ -42,9 +42,6 @@
 /* Define if you have the <GL/glext.h> header file.  */
 #undef HAVE_GL_GLEXT_H
 
-/* Define if you have the <GL/glx.h> header file.  */
-#undef HAVE_GL_GLX_H
-
 /* Define if you have the <ieeefp.h> header file.  */
 #undef HAVE_IEEEFP_H
 

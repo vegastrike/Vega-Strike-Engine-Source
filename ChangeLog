@@ -1,3 +1,20 @@
+2001-10-27 Daniel Horn <hellcatv@hotmail.com>
+2001-10-28 Daniel Horn <hellcatv@hotmail.com>
+2001-10-29 Daniel Horn <hellcatv@hotmail.com>
+
+	* ported to windows (sound et all)
+	* added Direct3DSound support for windoze hardware acceleration
+	* added doppler effect (off by default) to config & aldrv lib
+	* modified aldrv to use a limited number of sources
+	* fixed sound "stealing" so that it respected the limited sources
+	* changed weapons to play with looping sounds to eliminate static
+	* modified weapon sounds to 'steal' properly so human gets to hear his sounds
+	* modified camera to have 1/2 frame lagtime in figuring out which ships to clip
+	* modified music to respect limited number of sources.
+	* modified music to respect doppler effect & position
+	* modified music to allow <4 length playlists
+	* modified Units to have a configurable ModelDetail value (higher means that higher (better) LODs are used for far starships
+	* added factions to mission parsing (_Universe->GetFaction(int i)) hehe
 2001-10-27 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added section printout when warning for variables

@@ -20,6 +20,7 @@
 #include "audiolib.h"
 #include "cmd/music.h"
 
+
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -149,7 +150,7 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
-  _Universe->AccessCockpit()->SetupViewPort();
+  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
   
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   Mesh::ProcessUndrawnMeshes(true);
