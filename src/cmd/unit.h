@@ -30,7 +30,7 @@ struct GFXColor;
 #include <string>
 #include "weapon_xml.h"
 #include "linecollide.h"
-#include "gfx/vdu.h"
+//#include "gfx/vdu.h"
 #include "xml_support.h"
 #include "container.h"
 #include "collection.h"
@@ -90,8 +90,8 @@ class Unit {
   friend class PlanetaryOrbit;
   friend class ContinuousTerrain;
   ///VDU needs mount data to draw weapon displays
-  friend void VDU::DrawWeapon (Unit * parent);
-  friend void VDU::DrawDamage (Unit * parent);
+  friend class VDU;
+
  public:
   void SetNebula (Nebula *neb);
   inline Nebula * GetNebula () const{return nebula;}
@@ -722,6 +722,7 @@ struct Unit::XML {
   float pmin, pmax, pcur;
   float rmin, rmax, rcur;
   std::string cargo_category;
+  std::string hudimage;
 };
 
 inline Unit * UnitContainer::GetUnit() {

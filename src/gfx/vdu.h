@@ -29,29 +29,29 @@ class VDU: public Sprite {
   ///Rows and columns of text this VDU can display
   short rows,cols;
   ///Draws a shield display in the VDU
-  void DrawVDUShield (Unit * parent);
+  void DrawVDUShield (Unit * parent, const GFXColor & c);
   ///Draws the target display of Unit *target (only call with nonNULL)
-  void DrawTarget(Unit * parent, Unit *target);
+  void DrawTarget(Unit * parent, Unit *target, const GFXColor & c);
   ///Draws a list of cargo contents
-  void DrawManifest (Unit * parent, Unit * target);
+  void DrawManifest (Unit * parent, Unit * target, const GFXColor & c);
   ///Draws the message from the messagecenter
-  void DrawMessages(Unit *target);
+  void DrawMessages(Unit *target, const GFXColor & c);
   ///Draws the nav point this unit is heading to
-  void DrawNav(const Vector &navPoint);
+  void DrawNav(const Vector &navPoint, const GFXColor & c);
   ///Draws the damage this unit has sustained
-  void DrawDamage(Unit * parent);
+  void DrawDamage(Unit * parent, const GFXColor & c);
   ///Draws the weapons activated on current unit
-  void DrawWeapon(Unit *parent);
+  void DrawWeapon(Unit *parent, const GFXColor & c);
   ///Draws the sprite representing the current starship. Returns proper location and size for future use (with weaps and damage display)
   void DrawTargetSpr(Sprite * s,float percent, float &x, float &y, float &w, float &h);
   ///draws the target camera
-void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target);
+void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target, const GFXColor & c);
 public:
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
   enum VDU_MODE {TARGET=0x1,NAV=0x2,WEAPON=0x4, DAMAGE=0x8, SHIELD=0x10,  MANIFEST=0x20, TARGETMANIFEST=0x40, VIEW=0x80, MSG=0x100};
   VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
-  void Draw(Unit * parent);
+  void Draw(Unit * parent, const GFXColor & c);
   ///Changes the mode of the current VDU to another legal mode
   void SwitchMode();
   void SetViewingStyle (VIEWSTYLE vm);

@@ -1208,8 +1208,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case HUDIMAGE:
-	if ((*iter).value.length())
+	if ((*iter).value.length()){
 	  image->hudImage = new Sprite ((*iter).value.c_str());
+	  xml->hudimage=(*iter).value;
+	}
 	break;
       default:
 	break;
@@ -1368,6 +1370,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
+  string * myhudim = new string("");
   float * myscale=new float;//memory leak!
   image->unitwriter->AddElement("scale",floatStarHandler,XMLType(myscale));
   {
@@ -1381,6 +1384,8 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   {
     image->unitwriter->AddTag("Defense");
+    image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
+    
     {
       image->unitwriter->AddTag ("Cloak");
       image->unitwriter->AddElement("missing",cloakHandler,XMLType(&cloaking));
@@ -1476,6 +1481,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   nummesh = xml->meshes.size();
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+  *myhudim =xml->hudimage;
   int a;
   meshdata = new Mesh*[nummesh+1];
   for(a=0; a < nummesh; a++) {
