@@ -5,11 +5,15 @@
 #include "cmd/images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
+CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank==666) {
     static float ran = XMLSupport::parse_float(vs_config->getVariable ("AI","DefaultRank",".01"));
     this->rank = ran;
+  }
+  if (appease==666) {
+    static float appeas = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAppease",".5"));
+    this->appease = appeas;    
   }
   if (anger==666) {
     static float ang = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAnger","-.5"));
@@ -144,6 +148,10 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   (*i).second+=factor;
   if ((*i).second<anger) {
     parent->Target(un);//he'll target you--even if he's friendly
+  } else if ((*i).second>appease) {
+    if (parent->Target()==un) {
+      parent->Target(NULL);
+    }
   }
   mood+=factor*moodswingyness;
 }

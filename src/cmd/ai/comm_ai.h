@@ -8,6 +8,7 @@ class CommunicatingAI:public Order{
   typedef std::map<const Unit*,float> relationmap;
   unsigned char sex;//male female robot???
   float anger;//how easily he will target you if you taunt him enough (-.00001 is always -.4 is often -.6 is normal
+  float appease;//how easily he will switch from you if you silence his will to kill (-.5)
   float moodswingyness;
   float randomresponse;
   float mood;
@@ -27,7 +28,7 @@ class CommunicatingAI:public Order{
   void TerminateContrabandSearch(bool foundcontraband);
   void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
   void UpdateContrabandSearch();
-  CommunicatingAI (int ttype,int stype, float rank=666, float mood=0, float anger=-666/*-.5*/, float moodswingyness=666/*.2*/, float randomnessresponse=666/*.8*/);
+  CommunicatingAI (int ttype,int stype, float rank=666, float mood=0, float anger=-666/*-.5*/, float appeasement=666, float moodswingyness=666/*.2*/, float randomnessresponse=666/*.8*/);
    virtual void ProcessCommMessage (class CommunicationMessage &c); 
    virtual void AdjustRelationTo (Unit * un, float factor);
    virtual ~CommunicatingAI ();
