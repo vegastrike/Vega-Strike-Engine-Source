@@ -525,6 +525,7 @@ Stars::~Stars() {
 SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturenames,float size):StarVlist(spread) {
   int curtexture=0;
   vector<AnimatedTexture *>animations;
+  static bool near_stars_alpha=XMLSupport::parse_bool(vs_config->getVariable("graphics","near_stars_alpha","false"));
   for (curtexture=0;curtexture<NUM_ACTIVE_ANIMATIONS;++curtexture) {
     std::string::size_type where=texturenames.find(" ");
     string texturename=texturenames.substr(0,where);
@@ -533,11 +534,11 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
     }else texturenames="";
     
     if (texturename.find(".ani")!=string::npos) {
-      animations.push_back(new AnimatedTexture(texturename.c_str(),0,MIPMAP));
+      animations.push_back(new AnimatedTexture(texturename.c_str(),0,near_stars_alpha?NEAREST:BILINEAR));
       decal[curtexture]=animations.back();
     }else if (texturename.length()==0) {
       if (curtexture==0) {
-        decal[curtexture]= new Texture("white.bmp");
+        decal[curtexture]= new Texture("white.bmp",0,near_stars_alpha?NEAREST:BILINEAR);
       }else {
         if (animations.size()) {
           AnimatedTexture *tmp= static_cast<AnimatedTexture*>(animations[curtexture%animations.size()]->Clone());
@@ -557,10 +558,11 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
       decal[curtexture] = new Texture(texturename.c_str());
     }
   }
-  GFXColorVertex * tmpvertex = AllocVerticesForSystem(sysnam,this->spread,&num,12);
+  int numVerticesPer=near_stars_alpha?4:12;
+  GFXColorVertex * tmpvertex = AllocVerticesForSystem(sysnam,this->spread,&num,numVerticesPer);
   
-  for (int LC=0;LC<num;LC+=12) {
-    int LAST=LC+11;
+  for (int LC=0;LC<num;LC+=numVerticesPer) {
+    int LAST=LC+numVerticesPer-1;
     for (int i=LC;i<=LAST;++i) {
       tmpvertex[i].r=tmpvertex[LAST].r;
       tmpvertex[i].g=tmpvertex[LAST].g;
@@ -569,60 +571,61 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
     }
     tmpvertex[LC+0].x-=size;
     tmpvertex[LC+0].y+=size;
-    tmpvertex[LC+0].s=0;    
-    tmpvertex[LC+0].t=1;    
+    tmpvertex[LC+0].s=0.15625;    
+    tmpvertex[LC+0].t=.984375;    
     tmpvertex[LC+1].x+=size;
     tmpvertex[LC+1].y+=size;
-    tmpvertex[LC+1].s=1;    
-    tmpvertex[LC+1].t=1;    
+    tmpvertex[LC+1].s=.984375;    
+    tmpvertex[LC+1].t=.984375;    
     tmpvertex[LC+2].x+=size;
     tmpvertex[LC+2].y-=size;
-    tmpvertex[LC+2].s=1;    
-    tmpvertex[LC+2].t=0;    
+    tmpvertex[LC+2].s=.984375;    
+    tmpvertex[LC+2].t=.015625;    
     tmpvertex[LC+3].x-=size;
     tmpvertex[LC+3].y-=size;
-    tmpvertex[LC+3].s=0;    
-    tmpvertex[LC+3].t=0;    
-    
-    tmpvertex[LC+4].x-=size;
-    tmpvertex[LC+4].z+=size;
-    tmpvertex[LC+4].s=0;
-    tmpvertex[LC+4].t=1;
-    tmpvertex[LC+5].x+=size;
-    tmpvertex[LC+5].z+=size;
-    tmpvertex[LC+5].s=1;
-    tmpvertex[LC+5].t=1;
-    tmpvertex[LC+6].x+=size;
-    tmpvertex[LC+6].z-=size;
-    tmpvertex[LC+6].s=1;
-    tmpvertex[LC+6].t=0;
-    tmpvertex[LC+7].x-=size;
-    tmpvertex[LC+7].z-=size;
-    tmpvertex[LC+7].s=0;
-    tmpvertex[LC+7].t=0;
-
-    tmpvertex[LC+8].y-=size;
-    tmpvertex[LC+8].z+=size;
-    tmpvertex[LC+8].s=0;
-    tmpvertex[LC+8].t=1;
-    tmpvertex[LC+9].y+=size;
-    tmpvertex[LC+9].z+=size;
-    tmpvertex[LC+9].s=1;
-    tmpvertex[LC+9].t=1;
-    tmpvertex[LC+10].y+=size;
-    tmpvertex[LC+10].z-=size;
-    tmpvertex[LC+10].s=1;
-    tmpvertex[LC+10].t=0;
-    tmpvertex[LC+11].y-=size;
-    tmpvertex[LC+11].z-=size;
-    tmpvertex[LC+11].s=0;
-    tmpvertex[LC+11].t=0;
-    
+    tmpvertex[LC+3].s=.015625;    
+    tmpvertex[LC+3].t=.015625;    
+    if (numVerticesPer>4) {
+      tmpvertex[LC+4].x-=size;
+      tmpvertex[LC+4].z+=size;
+      tmpvertex[LC+4].s=.015625;
+      tmpvertex[LC+4].t=.984375;
+      tmpvertex[LC+5].x+=size;
+      tmpvertex[LC+5].z+=size;
+      tmpvertex[LC+5].s=.984375;
+      tmpvertex[LC+5].t=.984375;
+      tmpvertex[LC+6].x+=size;
+      tmpvertex[LC+6].z-=size;
+      tmpvertex[LC+6].s=.984375;
+      tmpvertex[LC+6].t=.015625;
+      tmpvertex[LC+7].x-=size;
+      tmpvertex[LC+7].z-=size;
+      tmpvertex[LC+7].s=.015625;
+      tmpvertex[LC+7].t=.015625;
+    }
+    if (numVerticesPer>8) {
+      tmpvertex[LC+8].y-=size;
+      tmpvertex[LC+8].z+=size;
+      tmpvertex[LC+8].s=.015625;
+      tmpvertex[LC+8].t=.984375;
+      tmpvertex[LC+9].y+=size;
+      tmpvertex[LC+9].z+=size;
+      tmpvertex[LC+9].s=.984375;
+      tmpvertex[LC+9].t=.984375;
+      tmpvertex[LC+10].y+=size;
+      tmpvertex[LC+10].z-=size;
+      tmpvertex[LC+10].s=.984375;
+      tmpvertex[LC+10].t=.015625;
+      tmpvertex[LC+11].y-=size;
+      tmpvertex[LC+11].z-=size;
+      tmpvertex[LC+11].s=.015625;
+      tmpvertex[LC+11].t=.015625;
+    }
   }
   {
     int start=0;
     int inc = num/NUM_ACTIVE_ANIMATIONS;
-    inc-=inc%12;
+    inc-=inc%numVerticesPer;
     for (int i=0;i<NUM_ACTIVE_ANIMATIONS;++i,start+=inc) {
       int later=start+inc;
       if (i==NUM_ACTIVE_ANIMATIONS-1)
