@@ -13,15 +13,18 @@ UnitContainer::~UnitContainer() {
   //bad idea...arrgh!
 }
 void UnitContainer::SetUnit (Unit * un) {
-  if (unit)
-    unit->UnRef();
   // if the unit is null then go here otherwise if the unit is killed then go here
   if (un!=NULL?un->Killed()==true:true) {
+    if (unit)
+      unit->UnRef();
     unit = NULL;
     return;
+  } else {
+    if (unit)
+      unit->UnRef();
+    unit = un;
+    unit->Ref();
   }
-  unit = un;
-  unit->Ref();
 }
 
 
