@@ -1,7 +1,6 @@
 /* example-start entry entry.c */
 
 #include <gtk/gtk.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +13,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "common.h"
 #endif
 #ifdef _WIN32
 extern void GetRidOfConsole ();
@@ -37,6 +38,7 @@ static const char * helps [NUM_HELPS] = {
 
 
 char * prog_arg=NULL;
+#ifdef _WIN32
 std::string ParentDir () {
   static char * final=NULL;
   std::string mypwd;
@@ -89,6 +91,8 @@ void GoToParentDir () {
   //  fprintf (stderr,"changing to %s",par.c_str());
   chdir (par.c_str());
 }
+#endif // _WIN32
+
 int win_close( GtkWidget *w, void *)
 {
     return FALSE;
@@ -160,7 +164,7 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
 	stupod *s= (stupod*)lpParameter;
         progress=false;
         Help ("Please wait while vegastrike loads...","Please wait while vegastrike loads...");
-        spawnl (P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL); 
+        spawnl (P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
         if (s->num)
           free (s->num);
         free (s->my_mission);
@@ -174,23 +178,25 @@ void launch_mission () {
   if (!progress)
     return;
 #endif
+#ifdef _WIN32
   GoToParentDir();
+#endif
   int player = my_mission.rfind ("player");
   if (player>0&&player!=std::string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
-   printf ("./vegastrike %s %s",num,my_mission.c_str());
+   printf ("vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   execlp ("./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
+   execlp ("vegastrike","/usr/local/bin/vegastrike",num,my_mission.c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
 #endif
   } else {
-   printf ("./vegastrike %s",my_mission.c_str());
+   printf ("vegastrike %s",my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
+   execlp ("vegastrike","/usr/local/bin/vegastrike",my_mission.c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),NULL),0,&id);
@@ -277,7 +283,11 @@ int main( int   argc,
 
 
     prog_arg = argv[0];
+#ifdef _WIN32
     GoToParentDir ();
+#else
+    getdatadir(); // Will change to the data dir which makes selecting missions easier.
+#endif
     //    chdir ("./.vegastrike/save");
     gtk_init (&argc, &argv);
     GtkWidget *window;
@@ -345,7 +355,11 @@ void LoadSaveFunction (char *Filename, int i, GtkSignalFunc func,const char * de
     gtk_widget_show(filew);
 }
 void LoadMissionDialog (char * Filename,int i) {
+#ifdef _WIN32
   GoToParentDir ();
+#else
+  getdatadir();
+#endif
   chdir ("mission");
   char mypwd [1000];
   getcwd (mypwd,1000);
