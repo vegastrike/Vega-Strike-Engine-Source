@@ -127,7 +127,6 @@ float Dot (const bsp_vector & A, const bsp_vector & B) {
 }
 
 static FILE * o;
-static int highestlevel=0;
 //ax + by + cz =0;  A.x + (B.x - A.x)k = x;A.y + (B.y - A.y)k = y;A.z + (B.z - A.z)k = z;
 // x*A.x + b*B.y + c*C.z + d + k*(a*B.x - a*A.x + b*B.y - b&A.y + c*B.z - c*A.z) = 0;
 // k = (A * n + d) / (A * n - B * n) 
@@ -244,7 +243,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
    bsp_stats (bsp);
    FreeBSP (&bsp);
  }	
- fprintf (stderr,"HighestLevel, BSP Tree %d",highestlevel);
+
 }
 #else
 long getsize (char * name)
@@ -788,8 +787,6 @@ static void write_bsp_tree (bsp_tree *tree,int level)//assume open file
 			wrtb (false);
 		}
 	}
-	if (level > highestlevel)
-		highestlevel = level;
 }
 
 

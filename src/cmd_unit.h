@@ -332,5 +332,6 @@ struct Unit::XML {
   Mesh * bspmesh;
   vector<Unit*> units;
   int unitlevel;
+  bool hasBSP;
 };
 #endif
