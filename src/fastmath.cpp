@@ -119,7 +119,7 @@ __forceinline void FloatToInt(int *int_pointer, float f)
 {
   *int_pointer = f;
 }
-int main(int argc, char* argv[])
+int Stupodmain(int argc, char* argv[])
 {
   float t, it, test_sqrt;
   int i = 0;
