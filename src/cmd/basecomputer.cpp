@@ -2994,7 +2994,7 @@ string buildUpgradeDescription(Cargo &item) {
     Flightgroup* flightGroup=new Flightgroup();//sigh
     int fgsNumber=0;
 	current_unit_load_mode=NO_MESH;
-    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, 0,blnk,flightGroup,fgsNumber);
+    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetFaction("upgrades"),blnk,flightGroup,fgsNumber);
 	current_unit_load_mode=DEFAULT;
 	string str="";
 	str+=item.description;
