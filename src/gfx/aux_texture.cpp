@@ -214,7 +214,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   }
   bootstrap_draw("Loading "+string(FileName));
 
-  fprintf (stderr,"Loading bmp file %s ",FileName);
+  fprintf (stderr,"1.Loading bmp file %s ",FileName);
 	char *t= strdup (FileName);
 	int tmp = strlen(FileName);
 	if (tmp>3) {
@@ -265,7 +265,6 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	this->texfilename = new char [texfilename.length()+1];
 	strcpy(this->texfilename,texfilename.c_str());
 
-//	 printf( "Width0 : %d - Height0 : %d", sizeX, sizeY);	  //What's the point in printing out uninitialized memory, other than cluttering up stdout???
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -309,7 +308,6 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	  sizeX = le32_to_cpu(info.biWidth);	
 	  sizeY = le32_to_cpu(info.biHeight);
-	  printf( "Width : %d - Height : %d || Width2 : %d - Height2 : %d", info.biWidth, info.biHeight, sizeX, sizeY);	  
 	  
 	  
 	  //while(1);
@@ -399,7 +397,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	    return;
 	  }
 	}
-	fprintf (stderr,"Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
+	fprintf (stderr,"2.Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
 	//this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
 	FILE *fp = NULL;

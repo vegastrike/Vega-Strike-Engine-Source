@@ -49,7 +49,7 @@ struct HeightMapInfo {
   short* Data;
   unsigned char * terrainmap;
   int	XOrigin, ZOrigin;
-  unsigned int	XSize, ZSize;
+  unsigned long	XSize, ZSize;
   unsigned int	RowWidth;
   int	Scale;
   
