@@ -761,7 +761,17 @@ std::string getMasterPartListUnitName();
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame (int);
 
-
+static std::string csvUnit(std::string un) {
+  unsigned int i=un.find_last_of(".");
+  unsigned int del=un.find_last_of("/\\:");
+  if (i==std::string::npos) {
+    return un+".csv";
+  }
+  if (del==std::string::npos||del<i) {
+    return un.substr(0,i)+".csv";
+  }
+  return un+".csv";
+}
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
 	this->Unit::Init();
@@ -774,7 +784,9 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	SetFg (flightgrp,fg_subnumber);
 
 	VSFile f;
+        VSFile unitTab;
 	VSError err = Unspecified;
+        VSError taberr= Unspecified;;
   if( netxml==NULL)
   {
 		if (unitModifications.length()!=0) {
@@ -795,17 +807,23 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		  //VSFileSystem::vs_chdir( "save");
 
 		  // Try to open save
-		  if (filename[0])
-			  err = f.OpenReadOnly( filepath, UnitSaveFile);
+		  if (filename[0]) {
+                    taberr=unitTab.OpenReadOnly( filepath+".csv", UnitSaveFile);
+                    if (taberr<=Ok) {
+                      
+                    }
+                    err = f.OpenReadOnly( filepath, UnitSaveFile);
+                          
+                  }
 		}
 	}
   // If save was not succesfull we try to open the unit file itself
   VSFile f2;
   if( netxml==NULL)
   {
-      if (filename[0])
-	  {
+      if (filename[0]) {
 	    string subdir = "factions/"+FactionUtil::GetFactionName(faction);
+           // begin deprecated code (5/11)            
 		if( err>Ok) {
 	  	    f.SetSubDirectory(subdir);
 			// No save found loading default unit
@@ -823,6 +841,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 				err = f2.OpenReadOnly (filename, UnitFile);
 			}
 		}
+                //end deprecated code
 	  }
   }
   if(err>Ok) {
