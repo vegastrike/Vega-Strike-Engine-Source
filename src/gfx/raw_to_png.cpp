@@ -95,7 +95,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
   png_set_compression_window_bits(png_ptr, 15);
   png_set_compression_method(png_ptr, 8);
   
-  png_set_IHDR(png_ptr, info_ptr, height,width,
+  png_set_IHDR(png_ptr, info_ptr, width, height,
 	       16, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
 	       PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
   

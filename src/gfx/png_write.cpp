@@ -34,8 +34,8 @@ void png_write (const char * myfile, unsigned char * data, unsigned int width, u
   
   png_set_IHDR(png_ptr, 
 	       info_ptr, 
-	       height,
 	       width,
+	       height,
 	       bpp, 
 	       alpha?PNG_COLOR_TYPE_RGB_ALPHA:PNG_COLOR_TYPE_RGB, 
 	       PNG_INTERLACE_NONE,

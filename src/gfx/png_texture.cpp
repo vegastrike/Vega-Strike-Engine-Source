@@ -6,7 +6,7 @@
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
-
+//#define PNGDEBUG
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
 int PNG_HAS_ALPHA=4;
@@ -167,7 +167,9 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
    }
    png_init_io(png_ptr, fp);
    png_set_sig_bytes(png_ptr, 8);
+#ifdef PNGDEBUG
    fprintf (stderr,"Loading Done. Decompressing\n");
+#endif
    png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
 # if __BYTE_ORDER != __BIG_ENDIAN
@@ -216,8 +218,9 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
    png_infop end_info;
    png_read_end(png_ptr, info_ptr);
    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+#ifdef PNGDEBUG
    fprintf (stderr,"Decompressing Done.\n");
-
+#endif
    /* close the file */
    return result;
 }
