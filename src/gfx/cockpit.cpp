@@ -584,7 +584,7 @@ void Cockpit::RestoreGodliness() {
     godliness=maxgodliness;
 }
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
-  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","20"));
+  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
   for (i=0;i<headlag;i++) {
     headtrans.push_back (MyMat());
@@ -728,7 +728,7 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 
 extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Shake (float amt) {
-  static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake",".01"));
+  static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake",".05"));
   shakin=amt*shak;
 }
 
@@ -788,15 +788,15 @@ void Cockpit::Draw() {
 	headtrans.push_back (MyMat());
 	VectorAndPositionToMatrix(headtrans.back().m,P,Q,R,Vector(0,0,0));
 	static float theta=0;
-	theta+=.1*GetElapsedTime();
-	
+	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed",".5"));
+	theta+=shake_speed*GetElapsedTime();
+	static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction",".01"));
+
 	headtrans.front().m[12]=shakin*cos(theta);//AccessCamera()->GetPosition().i+shakin*cos(theta);
 	headtrans.front().m[13]=shakin*cos(1.2*theta);//AccessCamera()->GetPosition().j+shakin*cos(theta);
 	headtrans.front().m[14]=0;//AccessCamera()->GetPosition().k;
-	if (shakin<.1) {
-	  shakin=0;
-	}else{
-	  shakin*=.999;
+	if (shakin>0) {
+	  shakin-=GetElapsedTime()*shake_reduction;
 	}
 
 	mesh->DrawNow(1,true,headtrans.front().m);
