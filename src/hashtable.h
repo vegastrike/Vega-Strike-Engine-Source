@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include <iostream>
 
@@ -33,26 +34,14 @@ using namespace std;
 
 template<typename KEY, int SIZ> struct ValueHashtableKey
 {
-    // partial specialization for int and string exists below
-	static inline int hash(const KEY& key);
-};
-
-template<int SIZ> struct ValueHashtableKey<int,SIZ>
-{
 	static inline int hash(const int& key) {
 	    return key%SIZ;
 	}
-};
 
-template<int SIZ> struct ValueHashtableKey<long,SIZ>
-{
 	static inline long hash(const long& key) {
 	    return key%SIZ;
 	}
-};
 
-template<int SIZ> struct ValueHashtableKey<string,SIZ>
-{
 	static inline int hash(const std::string& key) {
 		unsigned int k = 0;
 		typename std::string::const_iterator start = key.begin();
@@ -67,13 +56,6 @@ template<int SIZ> struct ValueHashtableKey<string,SIZ>
 template <typename VALUE> struct ValueHashtableValue
 {
     static inline VALUE invariant( ) {
-        return VALUE();
-    }
-};
-
-template <typename VALUE> struct ValueHashtableValue<VALUE*>
-{
-    static inline VALUE* invariant( ) {
         return NULL;
     }
 };
