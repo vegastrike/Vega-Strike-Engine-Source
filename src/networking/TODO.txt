@@ -1,11 +1,10 @@
 
 *** GENERAL ************************************************************
 
-- Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuff look for that
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
 - Add a ranking system for each faction in factions.xml
-- Have a device (maybe in upgrade list) for networking communications and prevent usage of device if not present on ship
-- Vsnet_dloadmgr -> save starsystems in homedir !!!
+LOPRI - Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuff look for that
+        Have a device (maybe in upgrade list) for networking communications and prevent usage of device if not present on ship
 
 - Switch to the usage of the ZoneMgr::Systems map instead of reading file on demand and then send a buffer to buffer download
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
@@ -62,6 +61,7 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE through VSFileSystem - Vsnet_dloadmgr -> save starsystems in homedir !!!
 TO TEST - Possibility of specifying a mod
 TO TEST - Add the command line datapath if supplied !
 DONE - Fix the generated BSP save path

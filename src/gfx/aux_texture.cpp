@@ -37,6 +37,7 @@ using namespace VSFileSystem;
 
 ///holds all the textures in a huge hash table
 Hashtable<string, Texture,char [511]> texHashTable;
+Hashtable<string, bool, char [511]> badtexHashTable;
 ///returns if a texture exists
 Texture * Texture::Exists (string s, string a) {
   return Texture::Exists (s+a);
@@ -127,16 +128,46 @@ Texture *Texture::Clone () {
   
 }
 void Texture::FileNotFound(const string &texfilename) {
+	  // We may need to remove from texHashTable if we found the file but it is a bad one
 	  texHashTable.Delete (texfilename);
+
+	  setbad( texfilename);
 	  name=-1;
 	  data = NULL;
-	  original->name=-1;
-	  delete original;
-	  original=NULL;
+	  if( original != NULL)
+	  {
+	  	original->name=-1;
+	  	delete original;
+	  	original=NULL;
+	  }
 	  palette=NULL;
-	  
-	  return;
 
+	  return;
+}
+
+bool Texture::checkbad( string & s)
+{
+  string hashname = VSFileSystem::GetSharedTextureHashName(s);
+  bool * found=NULL;
+  found = badtexHashTable.Get (hashname);
+  if(found!=NULL) {
+	return true;
+  }
+  hashname = VSFileSystem::GetHashName(s);
+  found= badtexHashTable.Get (hashname);
+  if(found!=NULL) {
+	return true;
+  }
+  return false;
+}
+
+void Texture::setbad( const string & s)
+{
+	// Put both current path+texfile and shared texfile since they both have been looked for
+	bool * b = new bool( true);
+	if( VSFileSystem::current_path.back()!="")
+		badtexHashTable.Put( VSFileSystem::GetHashName(s), b);
+	badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName(s), b);
 }
 
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture)
@@ -151,6 +182,8 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   this->stage = stage;
   texfilename = string(FileName);
   string tempstr;
+  if( checkbad( texfilename))
+  	return;
   if(checkold(texfilename,false,tempstr)) {
     return;
   } else {
@@ -187,7 +220,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  if (FileName[0])
 	    err = f.OpenReadOnly (FileName, TextureFile);
 	bool shared = (err==Shared);
-	modold (texfilename,shared,texfilename);
+	//modold (texfilename,shared,texfilename);
 	/*
 	if (shared) {
 	  if (FileName)
@@ -211,6 +244,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 		}
 		return;
 	}
+	modold (texfilename,shared,texfilename);
 	if (texfilename.find("white")==string::npos)
 		bootstrap_draw("Loading "+string(FileName));
 	

@@ -56,6 +56,8 @@ public:
   void modold(std::string s, bool shared, std::string & hashname);
   ///Loads the old texture
   void setold();
+  bool checkbad( string & s);
+  void setbad( const string & s);
   ///Inits the class with default values
   void InitTexture() {
     original = 0;

@@ -107,6 +107,7 @@ namespace VSFileSystem
 			CASE( VSFileSystem::MissionFile)
 			CASE( VSFileSystem::BSPFile)
 			CASE( VSFileSystem::MusicFile)
+			CASE( VSFileSystem::AccountFile)
 			CASE( VSFileSystem::Unknown)
 			default: ostr << "VSFileSystem::<undefined VSFileType>"; break;
 		}
