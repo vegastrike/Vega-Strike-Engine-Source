@@ -49,9 +49,9 @@ public:
   float price;
   float mass;
   float volume;
-  char * description;//mem leak... for the master part list (global var, no prob)
+  std::string description;
   bool mission;
-  Cargo () {mass=0; volume=0;price=0;quantity=1;description=NULL;mission=false;}
+  Cargo () {mass=0; volume=0;price=0;quantity=1;mission=false;}
   Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) {
 	quantity=qq;
 	content=name;
@@ -59,7 +59,6 @@ public:
 	price=pp;
 	mass = mm;
 	volume=vv;
-	description=NULL;
 	mission=false;
   }
   void SetMissionFlag(bool flag){this->mission=flag;}
@@ -76,7 +75,7 @@ public:
   float GetVolume () {return volume;}
   float GetMass() {return mass;}
   float GetPrice () {return price;}
-  std::string GetDescription() {if (description!=NULL) {return description;}return std::string("");}
+  std::string GetDescription() {return description;}
   bool operator == (const Cargo & other) const {
     return content==other.content;
   }

@@ -46,6 +46,7 @@ public:
   vector <CargoColor>&GetCargoFor(Unit *un);
   vector <CargoColor>&GetCargoList ();
   vector <CargoColor>&MakeActiveMissionCargo();
+  vector <CargoColor>&MakeMissionsFromSavegame(Unit *un);
   void StopBriefing();
   void SetupCargoList();
   bool beginswith (const vector <std::string> &cat, const std::string &s);

@@ -210,13 +210,18 @@ std::string UnpickleAllMissions (char * &buf) {
 void LoadMission (const char * mn, bool loadFirstUnit) {
     LoadMission(mn,string(""),loadFirstUnit);
 }
-void LoadMission (const char * mission_name, const std::string &script, bool loadFirstUnit) {
-  FILE * fp = fopen (mission_name,"r");
+void LoadMission (const char * nission_name, const std::string &script, bool loadFirstUnit) {
+	string mission_name(nission_name);
+	if (mission_name.empty()) {
+		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","mission/default.mission");
+		mission_name=mission_name_def;
+	}
+  FILE * fp = fopen (mission_name.c_str(),"r");
   if (!fp) {
     return;
   }
   fclose (fp);
-  active_missions.push_back (new Mission(mission_name,script));
+  active_missions.push_back (new Mission(mission_name.c_str(),script));
   mission = active_missions.back();
   active_missions.back()->initMission();
 

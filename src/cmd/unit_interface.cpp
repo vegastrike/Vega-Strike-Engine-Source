@@ -19,11 +19,18 @@
 #include "unit_const_cache.h"
 #include "configxml.h"
 #include "unit_util.h"
+#include "load_mission.h"
 extern Music *muzak;
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 extern int GetModeFromName (const char *);
+
+extern unsigned int getSaveStringLength (int whichcp, string key);
+extern std::string getSaveString (int whichcp, string key, unsigned int num);
+static const char *miss_script="mission_scripts";
+static const char *miss_name="mission_names";
+static const char *miss_desc="mission_descriptions";
 
 using std::string;
 extern const Unit * makeFinalBlankUpgrade (string name, int faction);
@@ -326,11 +333,11 @@ void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
       if (title.find ("Mission BBS")==string::npos) {
 	title = "Mission BBS  ";
       }
-      ButtonText="Accept";
       if (!beginswith (curcategory,"missions")) {
 	curcategory.clear();
 	curcategory.push_back("missions");
       }
+      ButtonText="Accept";
       break;
     case SHIPDEALERMODE:
       title = "Buy Starship  ";
@@ -684,11 +691,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 //	CargoInfo->ChangeTextItemColor("price",(*CurrentList)[cargonumber].color);
 	sprintf(floatprice,"Cargo Volume: %.2f",(*CurrentList)[cargonumber].cargo.volume);
 	CargoInfo->ChangeTextItem ("volume",floatprice);
-	if ((*CurrentList)[cargonumber].cargo.description!=NULL) {
-	  CargoInfo->ChangeTextItem ("description",(*CurrentList)[cargonumber].cargo.description,true);
-	}else {
-	  CargoInfo->ChangeTextItem ("description","");
-	}
+	CargoInfo->ChangeTextItem ("description",(*CurrentList)[cargonumber].cargo.description.c_str(),true);
       }
 	  }
       break;
@@ -1006,8 +1009,23 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	static int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
 	if (active_missions.size()<max_missions) {
 	  if (1==un->RemoveCargo(index,1,true)) {
+	    std::string myscript;
 	    title= ((string("Accepted Mission ")+input_buffer).c_str());
-	    LoadMission (input_buffer,false);
+	    static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVarible("cargo","missions_from_cargolist","true"));
+	    if (!miss_from_cargolist) {
+		int playernum=UnitUtil::isPlayerStarship(this->buyer.GetUnit());
+		int len=getSaveStringLength(playernum,miss_name);
+		assert(len==getSaveStringLength(playernum,miss_script));
+		for (unsigned int i=0;i<len;i++) {
+		  if (getSaveString(playernum,miss_name,i)==input_buffer) {
+			myscript=getSaveString(playernum,miss_script,i);
+			break;
+		  }
+		}
+		LoadMission ("",myscript,false);
+	    } else {
+		LoadMission (input_buffer,false);
+	    }
 	    SetMode (mode,submode);
 	    SelectLastSelected();
 
@@ -1228,7 +1246,6 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 
 
 
-
 vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
   TempCargo.clear();
   for (unsigned int i=0;i<active_missions.size();i++) {
@@ -1238,6 +1255,28 @@ vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
     c.cargo.price=0;
     c.cargo.content=XMLSupport::tostring((int)i)+" "+active_missions[i]->getVariable("mission_name", string("Mission"));
     c.cargo.category=string("briefings");
+    TempCargo.push_back (c);
+  }
+  return TempCargo;
+}
+
+vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *un) {
+  static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVarible("cargo","missions_from_cargolist","true"));
+  if (miss_from_cargolist) {
+    return FilterCargo (un,"missions",true,true);
+  }
+  TempCargo.clear();
+  int playernum=UnitUtil::isPlayerStarship(un);
+  int len=getSaveStringLength(playernum,miss_script);
+  assert(len==getSaveStringLength(playernum,miss_name)&&len==getSaveStringLength(playernum,miss_desc));
+  for (unsigned int i=0;i<len;i++) {
+    CargoColor c;
+    c.cargo.quantity=1;
+    c.cargo.volume=1;
+    c.cargo.price=0;
+    c.cargo.content=getSaveString(playernum,miss_name,i);
+	c.cargo.description=getSaveString(playernum,miss_desc,i);
+    c.cargo.category=std::string("missions");
     TempCargo.push_back (c);
   }
   return TempCargo;
@@ -1320,7 +1359,8 @@ vector <CargoColor>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     case MISSIONMODE:
       //      curcategory.clear();
       //      curcategory.push_back(string("missions"));
-      return FilterCargo (un,"missions",true,true);
+//      return FilterCargo (un,"missions",true,true);
+      return MakeMissionsFromSavegame (un);
     case NEWSMODE:
       return TempCargo;
     case BRIEFINGMODE:
