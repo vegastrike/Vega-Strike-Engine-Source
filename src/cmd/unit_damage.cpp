@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
 #include "gfx/mesh.h"
@@ -79,7 +80,7 @@ void Unit::Split (int level) {
   old[nm]=NULL;
   for (i=0;i<nm;i++) {
     Unit * splitsub;
-    SubUnits.prepend(splitsub = new Unit (old+i,1,true,faction));
+    SubUnits.prepend(splitsub = UnitFactory::createUnit (old+i,1,true,faction));
     splitsub->mass = mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {

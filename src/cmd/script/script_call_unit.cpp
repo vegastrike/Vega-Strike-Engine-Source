@@ -58,6 +58,7 @@
 #include "hashtable.h"
 #include "gfx/animation.h"
 #include "flightgroup.h"
+#include "unit_factory.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
 /* *********************************************************** */
@@ -1150,13 +1151,13 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        sscanf (fg->fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
-       my_unit = new Planet (Vector(0,0,0),Vector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),Vector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
+       my_unit = UnitFactory::createPlanet (Vector(0,0,0),Vector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),Vector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
        free (blah);
        free (blooh);
      }else if (type==NEBULAPTR) {
-       my_unit=new Nebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
+       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
      } else {
-       my_unit=new Unit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
+       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
      }
      units[u]=my_unit;
    }

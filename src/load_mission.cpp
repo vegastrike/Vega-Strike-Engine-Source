@@ -5,6 +5,7 @@
 #include "star_system.h"
 #include "vs_globals.h"
 #include "cmd/unit.h"
+#include "cmd/unit_factory.h"
 #include "gfx/cockpit.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
@@ -52,7 +53,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	  tmptarget=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
 	  string modifications ("");
 	  if (a!=0||loadFirstUnit) {
-	    fighter = new Unit(fightername, false,tmptarget,modifications,fg,s);
+	    fighter = UnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);
 	  }else {
 	    continue;
 	  }

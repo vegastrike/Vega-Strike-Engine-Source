@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "unit_factory.h"
 #include "beam.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
@@ -201,7 +202,7 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
       new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work      
       break;
     case weapon_info::PROJECTILE:
-      temp = new Missile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed,type.Radius,type.RadialSpeed,type.PulseSpeed/*detonation_radius*/);
+      temp = UnitFactory::createMissile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed,type.Radius,type.RadialSpeed,type.PulseSpeed/*detonation_radius*/);
       if (target&&target!=owner) {
 	temp->Target (target);
 	temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));

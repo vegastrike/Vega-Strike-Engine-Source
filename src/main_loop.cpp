@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "cmd/unit.h"
+#include "cmd/unit_factory.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "in.h"
@@ -494,7 +495,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     if (squadnum<(int)fighter0name.size()) {
 		_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
 	}
-  	fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
+  	fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
 	if (s==0&&squadnum<(int)fighter0name.size()) {
 		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
@@ -509,17 +510,17 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	  bool isvehicle=false;
 	if (fg_terrain==-2) {
 
-	  fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	  fighters[a]= UnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	}else {
 	  
 	  if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
 	    ContinuousTerrain * t;
 	    assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
 	    t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
-	    fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }else {
 	    Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
-	    fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }
 	  
 	}
@@ -585,7 +586,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
   UpdateTime();
-//  _Universe->activeStarSystem()->AddUnit(new Nebula ("mynebula.xml","nebula",false,0,NULL,0));
+//  _Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
   mission->DirectorInitgame();
 }
@@ -593,12 +594,12 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = new Enhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
+    un = UnitFactory::createEnhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
     un->SetPosition(0,0,0);
     break;
   case UNITPTR:
   default:
-    un = new Unit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
+    un = UnitFactory::createUnit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
     un->SetPosition (Vector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));

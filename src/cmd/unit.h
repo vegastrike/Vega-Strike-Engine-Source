@@ -97,7 +97,8 @@ struct Scanner {
  */
 class PlanetaryTransform;
 struct PlanetaryOrbitData;
-class Unit {
+class Unit
+{
   bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
   bool UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
 
@@ -457,11 +458,44 @@ public:
   bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
   vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist);
   vector <struct Cargo>& FilterUpgradeList (vector <struct Cargo> & mylist);
+
+private:
+  /// forbidden
+  Unit( const Unit& ); 
+  
+  /// forbidden
+  Unit& operator=( const Unit& );
+  
+  /** default constructor
+   */
   Unit();
-  ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction
+    
+protected:
+  /** Default constructor. This is just to figure out where default
+   *  constructors are used. The useless argument will be removed
+   *  again later.
+   */
+  Unit( int dummy );
+  
+  /** Constructor that creates aa mesh with meshes as submeshes (number
+   *  of them) as either as subunit with faction faction
+   */
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
-  ///Creates a mesh from an XML file If it is a customizedUnit, it will check in that directory in teh home dir for the unit
-  Unit(const char *filename, bool SubUnit, int faction, std::string customizedUnit=string(""), Flightgroup *flightgroup=NULL,int fg_subnumber=0);
+
+  /** Constructor that creates a mesh from an XML file If it is a
+   *  customizedUnit, it will check in that directory in the home dir for
+   *  the unit.
+   */
+  Unit( const char *filename,
+        bool        SubUnit,
+       int         faction,
+       std::string customizedUnit=string(""),
+       Flightgroup *flightgroup=NULL,
+       int         fg_subnumber=0 );
+    
+  friend class UnitFactory;
+    
+public:
   virtual ~Unit();
 
   vector <Mesh *> StealMeshes();

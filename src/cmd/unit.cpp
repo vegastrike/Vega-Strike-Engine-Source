@@ -26,6 +26,7 @@
 #include "gfx/halo.h"
 
 #include "unit.h"
+#include "unit_factory.h"
 
 #include "gfx/sprite.h"
 #include "lin_time.h"
@@ -261,6 +262,9 @@ void Unit::SetVisible(bool invis) {
   invisible=!invis;
 }
 
+Unit::Unit( int /*dummy*/ ) {
+	Init();
+}
 Unit::Unit() {
 	Init();
 }
@@ -308,10 +312,11 @@ vector <Mesh *> Unit::StealMeshes() {
   nummesh=0;
   return ret;
 }
+#if 0
 Unit * _1800GetGod () {
-  static Unit god ("god",true,_Universe->GetFaction("upgrades"),"",NULL,0);
-  return &god;
+  return UnitFactory::get_static_1800God( );
 }
+#endif
 
 void Unit::SetFg(Flightgroup * fg, int fg_subnumber) {
   flightgroup=fg;
@@ -409,7 +414,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		switch(type)
 		{
 		default:
-		  SubUnits.prepend (un=new Unit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
+		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
 
 		}
 		un->SetPosition(Vector(x,y,z));
@@ -853,7 +858,7 @@ void Unit::PrimeOrders () {
 }
 void Unit::SwapOutHalos() {
   for (int i=0;i<numhalos;i++) {
-    float x,y;
+    // float x,y;
     //halos[i]->GetDimensions (x,y);
     //halos[i]->SetDimensions (x/(1024),y/(1024));
     halos[i]->Draw (cumulative_transformation,cumulative_transformation_matrix,0);
@@ -861,7 +866,7 @@ void Unit::SwapOutHalos() {
 }
 void Unit::SwapInHalos() {
   for (int i=0;i<numhalos;i++) {
-    float x,y;
+    // float x,y;
     //halos[i]->GetDimensions (x,y);
     //halos[i]->SetDimensions (x*(1024),y*(1024));
   }

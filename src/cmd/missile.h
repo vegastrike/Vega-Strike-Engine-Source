@@ -30,11 +30,42 @@ class Missile:public Unit {
  public:
   void Discharge();
   virtual enum clsptr isUnit() {return MISSILEPTR;}
-  Missile (const char * filename, int faction, const string &modifications,const float damage,float phasedamage,  float time, float radialeffect, float radmult, float detonation_radius):Unit (filename,false,faction,modifications),time(time),damage(damage),phasedamage(phasedamage), radial_effect(radialeffect), radial_multiplier (radmult), detonation_radius(detonation_radius),discharged(false) { }
+
+protected:
+    /// constructor only to be called by UnitFactory
+    Missile( const char * filename,
+             int faction,
+	     const string &modifications,
+	     const float damage,
+	     float phasedamage,
+	     float time,
+	     float radialeffect,
+	     float radmult,
+	     float detonation_radius)
+        : Unit (filename,false,faction,modifications)
+        , time(time)
+        , damage(damage)
+        , phasedamage(phasedamage)
+        , radial_effect(radialeffect)
+        , radial_multiplier (radmult)
+        , detonation_radius(detonation_radius)
+        , discharged(false)
+    { }
+
+  friend class UnitFactory;
+
+public:
   virtual void Kill (bool eraseFromSave=true);
   virtual void reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
   virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 
+private:
+    /// default constructor forbidden
+    Missile( );
+    /// copy constructor forbidden
+    Missile( const Missile& );
+    /// assignment operator forbidden
+    Missile& operator=( const Missile& );
 };
 
 

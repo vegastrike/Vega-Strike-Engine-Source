@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "ai/communication.h"
 #include "gfx/animation.h"
+#include "unit_factory.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -224,6 +225,8 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 	
       }
     }
+    break;
+  default :
     break;
   }
 
@@ -476,7 +479,7 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
 void Universe::LoadContrabandLists() {
   for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
     if (contrabandlists[i].length()>0) {
-      factions[i]->contraband = new Unit (contrabandlists[i].c_str(),true,i);
+      factions[i]->contraband = UnitFactory::createUnit (contrabandlists[i].c_str(),true,i);
     }
   }
   contrabandlists.clear();

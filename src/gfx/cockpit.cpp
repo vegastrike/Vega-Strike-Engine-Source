@@ -7,6 +7,7 @@
 #include "universe.h"
 #include "star_system.h"
 #include "cmd/unit.h"
+#include "cmd/unit_factory.h"
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "hud.h"
@@ -983,7 +984,7 @@ void Cockpit::Update () {
 	parentturret.SetUnit(NULL);
 	zoomfactor=1.5;
 	respawnunit[_Universe->CurrentCockpit()]=0;
-	Unit * un = new Unit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
+	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
 	un->SetCurPosition (unitlocation);
 	_Universe->activeStarSystem()->AddUnit (un);
 	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),unitlocation);

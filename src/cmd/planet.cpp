@@ -1,6 +1,7 @@
 #include <math.h>
 #include "vegastrike.h"
 #include "planet.h"
+#include "unit_factory.h"
 #include "gfxlib.h"
 #include "gfx/sphere.h"
 #include "collection.h"
@@ -103,14 +104,14 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
     if (isunit==true) {
       Unit *sat_unit=NULL;
       Flightgroup *fg = getStaticBaseFlightgroup(faction);
-      satellites.prepend(sat_unit=new Unit (filename, false, faction,"",fg,fg->nr_ships-1));
+      satellites.prepend(sat_unit=UnitFactory::createUnit (filename, false, faction,"",fg,fg->nr_ships-1));
       sat_unit->setFullname(fullname);
       un_iter satiterator (satellites.createIterator());
       satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;
       satiterator.current()->SetOwner (this);
     }else {
       Planet * p;
-      satellites.prepend(p=new Planet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
+      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
       p->SetOwner (this);
     }
   }
@@ -118,7 +119,10 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
 
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
 const float densityOfJumpPoint = 100;
-Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites() {
+Planet::Planet()
+    : Unit( 0 )
+    ,  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites()
+{
   inside=false;
   Init();
   terraintrans = NULL;
@@ -151,7 +155,10 @@ string getCargoUnitName (const char * textname) {
 
 
 
-Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL) {
+Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid)
+    : Unit( 0 )
+    , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
+{
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".5"));
   radius*=bodyradius;
   inside =false;
@@ -272,7 +279,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   }
   string cargounitname =getCargoUnitName (textname);
  
-  Unit * un = new Unit (cargounitname.c_str(),true,_Universe->GetFaction("planets"));
+  Unit * un = UnitFactory::createUnit (cargounitname.c_str(),true,_Universe->GetFaction("planets"));
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
     image->cargo_volume=un->GetImageInformation().cargo_volume;

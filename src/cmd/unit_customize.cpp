@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "unit_factory.h"
 #include "images.h"
 #include "universe.h"
 #include "vegastrike.h"
@@ -269,7 +270,7 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
 	addtome->SetRecursiveOwner(this);//set recursive owner
       } else {
 	Unit * un;//make garbage unit
-	ui.preinsert (un=new Unit("nothing",true,faction));//give a default do-nothing unit
+	ui.preinsert (un=UnitFactory::createUnit("nothing",true,faction));//give a default do-nothing unit
 	un->curr_physical_state=addtome->curr_physical_state;
 	un->prev_physical_state=addtome->prev_physical_state;
 

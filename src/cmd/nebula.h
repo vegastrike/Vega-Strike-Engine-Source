@@ -19,9 +19,27 @@ public:
 	virtual enum clsptr isUnit() {return NEBULAPTR;}
 	virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
   
-	Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg=NULL, int fg_snumber=0);
+protected:
+    /// constructor only to be called by UnitFactory
+    Nebula( const char * unitfile,
+            bool SubU,
+	    int faction,
+	    Flightgroup* fg=NULL,
+	    int fg_snumber=0 );
+
+    friend class UnitFactory;
+
+public:
 	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 	void SetFogState();
+
+private:
+    /// default constructor forbidden
+    Nebula( );
+    /// copy constructor forbidden
+    Nebula( const Nebula& );
+    /// assignment operator forbidden
+    Nebula& operator=( const Nebula& );
 };
 
 #endif

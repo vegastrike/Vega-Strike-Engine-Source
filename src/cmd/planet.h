@@ -64,16 +64,25 @@ class Planet : public Unit {
   UnitCollection insiders;
   std::vector <int> lights;
   Animation *shine;
- public:
+
+protected:
+    /// default constructor - only to be called by UnitFactory
   Planet();
+
+    /// constructor - only to be called by UnitFactory
+    Planet(Vector x,Vector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname);
+
+    friend class UnitFactory;
+
+public:
+  virtual ~Planet();
+
   void DisableLights ();
   void EnableLights();
   void AddSatellite (Unit * orbiter);
   void endElement();
   void beginElement(Vector x,Vector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname);
-  Planet(Vector x,Vector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname);
   Planet * GetTopPlanet (int level);
-  ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
   void DrawTerrain();
@@ -132,6 +141,12 @@ class Planet : public Unit {
 
   friend class Planet::PlanetIterator;
   friend class PlanetaryOrbit;
+
+private:
+    /// copy constructor forbidden
+    Planet( const Planet& );
+    /// assignment operator forbidden
+    Planet& operator=( const Planet& );
 };
 
 #endif

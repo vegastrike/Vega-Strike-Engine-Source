@@ -133,6 +133,8 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 			}
 		}
 		break;
+	default :
+	    break;
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "gfx/env_map_gent.h"
 #include "gfx/aux_texture.h"
 #include "cmd/planet.h"
+#include "cmd/unit_factory.h"
 #include "gfx/star.h"
 #include "vs_globals.h"
 #include "vs_path.h"
@@ -657,7 +658,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       assert(xml->moons.size()!=0);
       xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction,fullname));
+      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction,fullname));
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
     }
     delete []filename;
@@ -756,16 +757,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
 	    Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	    plan->AddSatellite(un=new Unit(filename,false,faction,"",fg,fg->nr_ships-1));
+	    plan->AddSatellite(un=UnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1));
 	    un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 	    Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	    plan->AddSatellite(un=new Nebula(filename,false,faction,fg,fg->nr_ships-1));			
+		    plan->AddSatellite(un=UnitFactory::createNebula(filename,false,faction,fg,fg->nr_ships-1));			
 	  } else if (elem==ASTEROID) {
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	    plan->AddSatellite (un=new Asteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	    plan->AddSatellite (un=UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	  } else if (elem==ENHANCEMENT) {
-	    plan->AddSatellite (un=new Enhancement (filename,faction,string("")));
+	    plan->AddSatellite (un=UnitFactory::createEnhancement (filename,faction,string("")));
 	  }
 	  while (!dest.empty()) {
 	    un->AddDestination (dest.back());
@@ -778,7 +779,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
-	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
+	Unit * b = UnitFactory::createBuilding (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
@@ -788,7 +789,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  }
 
       }else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
-	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,false,faction);
+	Unit * b=UnitFactory::createBuilding (xml->ct,elem==VEHICLE,filename,false,faction);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
@@ -802,17 +803,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }else {
    	    if (elem==UNIT) {
 	      Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	      Unit *moon_unit=new Unit(filename,false,faction,"",fg,fg->nr_ships-1);
+	      Unit *moon_unit=UnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1);
 	      moon_unit->setFullname(fullname);
 	      xml->moons.push_back((Planet *)moon_unit);
 	    }else if (elem==NEBULA){
 	      Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction,fg,fg->nr_ships-1));
+	      xml->moons.push_back ((Planet *)UnitFactory::createNebula (filename,false,faction,fg,fg->nr_ships-1));
 	    } else if (elem==ASTEROID){
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	      xml->moons.push_back ((Planet *)UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	    } else if (elem==ENHANCEMENT) {
-	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction,string("")));
+	      xml->moons.push_back ((Planet *)UnitFactory::createEnhancement (filename,faction,string("")));
 	    }
 	    while (!dest.empty()) {
 	      xml->moons.back()->AddDestination (dest.back());

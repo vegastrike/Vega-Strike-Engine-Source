@@ -4,11 +4,11 @@
 #include <algorithm>
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "unit_factory.h"
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
 Unit& GetUnitMasterPartList () {
-  static Unit MasterPartList ("master_part_list",true,_Universe->GetFaction("upgrades"));
-  return MasterPartList;
+  return *UnitFactory::getMasterPartList( );
 }
 
 Cargo * GetMasterPartList(const char *input_buffer){
@@ -36,17 +36,18 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 
 }
 extern int GetModeFromName (const char *);
-vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
+vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
+{
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     if (GetModeFromName(mylist[i].content.c_str())!=2) {
-      Unit * NewPart = new Unit (mylist[i].content.c_str(),false,_Universe->GetFaction("upgrades"));
+      Unit * NewPart = UnitFactory::createUnit(mylist[i].content.c_str(),false,_Universe->GetFaction("upgrades"));
       NewPart->SetFaction(faction);
       if (NewPart->name==string("LOAD_FAILED")) {
 	NewPart->Kill();
-	NewPart = new Unit (mylist[i].content.c_str(),false,faction);
+	NewPart = UnitFactory::createUnit (mylist[i].content.c_str(),false,faction);
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->nummounts?nummounts:1;
@@ -239,7 +240,7 @@ void Unit::EjectCargo (unsigned int index) {
       Unit * cargo = NULL;
       if (tmp->category.length()>=sslen) {
 	if (memcmp (tmp->category.c_str(),"starships",sslen)==0) {
-	  cargo = new Unit (tmp->content.c_str(),false,faction);
+	  cargo = UnitFactory::createUnit (tmp->content.c_str(),false,faction);
 	  cargo->PrimeOrders();
 	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
 	  cargo->SetTurretAI();	  
@@ -247,11 +248,11 @@ void Unit::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-	cargo = new Unit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
-	cargo = new Unit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
       }
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();

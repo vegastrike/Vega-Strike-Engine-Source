@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "unit_factory.h"
 
 #include "xml_support.h"
 #include "gfx/halo.h"
@@ -531,7 +532,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }    
-    Unit *upgradee =new Unit(filename.c_str(),true,_Universe->GetFaction("upgrades"));
+    Unit *upgradee =UnitFactory::createUnit(filename.c_str(),true,_Universe->GetFaction("upgrades"));
     Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
     upgradee->Kill();
     }
@@ -794,7 +795,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     
     CrossProduct (Q,R,P);
     indx = xml->units.size();
-    xml->units.push_back(new Unit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
+    xml->units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
     xml->units.back()->SetRecursiveOwner (this);
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;

@@ -1,9 +1,10 @@
 #include "briefing.h"
 #include "unit.h"
+#include "unit_factory.h"
 #include "gfx/mesh.h"
 #include "script/mission.h"
 Briefing::Ship::Ship (const char * filename, int faction, const Vector & position) {
-  Unit * tmp  = new Unit (filename,true,faction);
+  Unit * tmp  = UnitFactory::createUnit(filename,true,faction);
   meshdata = tmp->StealMeshes();
   tmp->Kill();
   cloak=1;
