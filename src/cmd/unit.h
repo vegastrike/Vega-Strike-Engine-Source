@@ -372,6 +372,7 @@ class Unit {
   int CanDockWithMe (Unit * dockingunit) ;
   void PerformDockingOperations ();
   void FreeDockingPort(unsigned int whichport);
+  void SetRecursiveOwner(Unit *target);
 public:
   bool RequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);

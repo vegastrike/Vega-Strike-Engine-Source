@@ -591,7 +591,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     CrossProduct (Q,R,P);
     indx = xml->units.size();
     xml->units.push_back(new Unit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
-    xml->units.back()->SetOwner (this);
+    xml->units.back()->SetRecursiveOwner (this);
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     xml->units[indx]->limits.structurelimits=R;

@@ -260,7 +260,7 @@ void Unit::Target (Unit *targ) {
 void Unit::VelocityReference (Unit *targ) {
   computer.velocity_ref.SetUnit(targ);
 }
-void Unit::SetOwner(Unit *target) {
+void Unit::SetRecursiveOwner(Unit *target) {
   owner=target;
   if (!SubUnits.empty()) {
     UnitCollection::UnitIterator iter = getSubUnits();
@@ -270,6 +270,9 @@ void Unit::SetOwner(Unit *target) {
       iter.advance();
     }
   }
+}
+void Unit::SetOwner(Unit *target) {
+  owner=target;
 }
 
 void Unit::Cloak (bool loak) {
