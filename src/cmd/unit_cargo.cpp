@@ -203,9 +203,16 @@ Cargo& Unit::GetCargo (unsigned int i) {
   return image->cargo[i];
 }
 
-std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit) const{
+std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector &oldspd) const{
   ///FIXME somehow mangle string
-  return image->cargo[i].content;
+  string mangled = image->cargo[i].content;
+  if (((float)rand()/RAND_MAX)<.5*(1-oldspd.Dot(GetVelocity())/(oldspd.Magnitude()*GetVelocity().Magnitude()))) {
+    for (string::iterator i=mangled.begin();i!=mangled.end();i++) {
+      (*i)+=(rand()%3-1);
+    }
+  }
+
+  return mangled;
 }
 
 

@@ -11,14 +11,15 @@ class CommunicatingAI:public Order{
   float mood;
   Animation * comm_face;
   UnitContainer contraband_searchee;
-  bool contraband_detected;
   Vector SpeedAndCourse;
+  int which_cargo_item;
   relationmap effective_relationship;
+  void GetMadAt (Unit * which, int howMad);
  public:
   float GetEffectiveRelationship (const Unit * target) const;
   Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);
   void RandomInitiateCommunication (float PlayerProbability, float TargetProbability);
-  void TerminateContrabandSearch();
+  void TerminateContrabandSearch(bool foundcontraband);
   void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
   void UpdateContrabandSearch();
    CommunicatingAI (int ttype, float anger=-.5, float moodswingyness=.2, float randomnessresponse=.8,float mood=0);

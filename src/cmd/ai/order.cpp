@@ -23,9 +23,12 @@
 #include "order.h"
 #include "cmd/collection.h"
 #include "communication.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 //#define ORDERDEBUG
 void Order::Execute () {
-  ProcessCommunicationMessages();
+  static float airesptime=XMLSupport::parse_float(vs_config->getVariable ("AI","CommResponseTime","3"));
+  ProcessCommunicationMessages(airesptime);
   int completed=0;
   unsigned int i=0;
 

@@ -112,9 +112,18 @@ void FireAt::Execute () {
   }
   done = tmp;
   Unit * targ;
-  if (rand()<RAND_MAX*(SIMULATION_ATOM/300)) {
-    RandomInitiateCommunication(.5,.25);
+  if (rand()<RAND_MAX*SIMULATION_ATOM/2) {
+    UpdateContrabandSearch();
   }
+
+  if (rand()<RAND_MAX*(SIMULATION_ATOM/300)) {
+    if (rand()%10) {
+      RandomInitiateCommunication(.5,.25);
+    }else {
+      InitiateContrabandSearch (.98,.02);
+    }
+  }
+
   bool shouldfire=false;
   if (targets) 
     shouldfire |=DealWithMultipleTargets();

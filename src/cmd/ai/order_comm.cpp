@@ -36,8 +36,7 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
 
-void Order::ProcessCommunicationMessages() {
-  const float AICommresponseTime=1;
+void Order::ProcessCommunicationMessages(float AICommresponseTime) {
   float time = AICommresponseTime/SIMULATION_ATOM;
   if (time<=.001)
     time+=.001;

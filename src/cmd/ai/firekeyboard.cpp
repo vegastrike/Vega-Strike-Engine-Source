@@ -394,7 +394,7 @@ static CommunicationMessage * GetTargetMessageQueue (Unit * targ,vector <Communi
 
 
 void FireKeyboard::Execute () {
-  ProcessCommunicationMessages();
+  ProcessCommunicationMessages(SIMULATION_ATOM);
   Unit * targ;
   bool refresh_target=false;
   if ((targ = parent->Target())) {

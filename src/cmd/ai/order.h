@@ -97,7 +97,7 @@ public:
   ///processes a single message...generally called by the Messages() func
   virtual void ProcessCommMessage(class CommunicationMessage &c);
   ///responds (or does not) to certain messages in the message queue
-  virtual void ProcessCommunicationMessages();
+  virtual void ProcessCommunicationMessages(float CommRepsonseTime);
   /// return pointer to order or NULL if not found
   Order *findOrder(Order *ord);
   /// erase that order from the list

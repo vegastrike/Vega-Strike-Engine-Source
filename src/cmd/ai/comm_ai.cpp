@@ -2,7 +2,7 @@
 #include "communication.h"
 #include "cmd/collection.h"
 #include "gfx/cockpit.h"
-
+#include "cmd/images.h"
 CommunicatingAI::CommunicatingAI (int ttype, float anger, float moodswingyness, float randomresp, float mood) :Order (ttype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
   comm_face=NULL;
 }
@@ -47,37 +47,79 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   return _Universe->GetRelation (parent->faction,target->faction)+rel;
 }
 
-void CommunicatingAI::TerminateContrabandSearch() {
+void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
   //reports success or failure
   Unit * un;
   if ((un=contraband_searchee.GetUnit())) {
     CommunicationMessage c(parent,un,comm_face);
     if (contraband_detected) {
       c.SetCurrentState(c.fsm->GetContrabandDetectedNode());
-      CommunicationMessage hit (un,parent,NULL);
-      hit.fsm->GetHitNode();
       static int numHitsPerContrabandFail=3;
-      for (unsigned int i=0;i<numHitsPerContrabandFail;i++) {
-	ProcessCommMessage(hit);
-      }
+      GetMadAt (un,numHitsPerContrabandFail);
     }else {
       c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode());      
     }
     un->getAIState()->Communicate(c);
   }
+  contraband_searchee.SetUnit(NULL);
+
+}
+void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
+
+      CommunicationMessage hit (un,parent,NULL);
+      hit.SetCurrentState(hit.fsm->GetHitNode());
+      for (         int i=0;i<numHitsPerContrabandFail;i++) {
+	parent->getAIState()->Communicate(hit);
+      }
+}
+
+static bool InList (std::string item, Unit * un) {
+  if (un) {
+  for (unsigned int i=0;i<un->numCargo();i++) {
+    if (item==un->GetCargo(i).content) {
+      return true;
+    }
+  }
+  }
+  return false;
+}
+void CommunicatingAI::UpdateContrabandSearch () {
+  Unit * u = contraband_searchee.GetUnit();
+  if (u) {
+    if (which_cargo_item<(int)u->numCargo()) {
+      std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
+      if (SpeedAndCourse.Dot (u->GetVelocity())<0) {
+	CommunicationMessage c(parent,u,comm_face);
+	c.SetCurrentState(c.fsm->GetContrabandWobblyNode());
+	u->getAIState()->Communicate (c);
+	GetMadAt(u,1);
+	SpeedAndCourse=u->GetVelocity();
+      }
+      if (InList (item,_Universe->GetContraband(parent->faction))) {
+	TerminateContrabandSearch(true);
+      }
+    }else {
+      TerminateContrabandSearch(false);
+
+    }
+  }
 }
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
-    if (contraband_searchee.GetUnit()) {
-      TerminateContrabandSearch();
+    Unit * v;
+    if ((v=contraband_searchee.GetUnit())) {
+      if (v==u) {
+	return;
+      }
+      TerminateContrabandSearch(false);
     }
     contraband_searchee.SetUnit (u);
-    contraband_detected=false;
     SpeedAndCourse = u->GetVelocity();
     CommunicationMessage c(parent,u,comm_face);
     c.SetCurrentState(c.fsm->GetContrabandInitiateNode());
     u->getAIState()->Communicate (c);
+    which_cargo_item = 0;
   }
 }
 
