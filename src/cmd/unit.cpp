@@ -362,7 +362,7 @@ Unit::~Unit()
     delete image->hudImage;
   delete image;
   delete sound;
-  RemoveFromSystem()
+  RemoveFromSystem();
   if (bspTree)
     delete bspTree;
   if (bspShield)
