@@ -80,7 +80,7 @@ int main( int argc, char **argv )
 
 #if defined(HAVE_SDL)
     // && defined(HAVE_SDL_MIXER)
-  if (  SDL_Init( SDL_INIT_JOYSTICK ))
+  if (  SDL_Init( SDL_INIT_JOYSTICK |SDL_INIT_EVENTTHREAD ))
     {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         exit(1);

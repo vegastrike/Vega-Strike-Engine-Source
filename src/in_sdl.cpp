@@ -11,10 +11,12 @@ void DefaultJoyHandler (KBSTATE st, float x, float y, int mod) {
 }
 
 void UnbindJoyKey (int joystick, int key) {
+  assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
   JoystickBindings[joystick][key]=DefaultJoyHandler;
   JoystickState[joystick][key]=UP;
 }
 void BindJoyKey (int key, int joystick, JoyHandler handler) {
+  assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
   JoystickBindings[joystick][key]=handler;
   handler (RESET,0,0,0);
 }
