@@ -128,7 +128,7 @@ void init_opengl_extensions()
 static void Reshape (int x, int y) {
   g_game.x_resolution = x;
   g_game.y_resolution = y;
-  glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
+
   
 }
 extern void GFXInitTextureManager();

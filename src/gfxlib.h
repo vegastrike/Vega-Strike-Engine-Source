@@ -91,6 +91,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material)
 void /*GFXDRVAPI*/ GFXSelectMaterial(unsigned int number);
 
 //Matrix
+void /*GFXDRVAPI*/ GFXHudMode(bool Enter);
 void /*GFXDRVAPI*/ GFXTranslate(MATRIXMODE mode, const Vector & r);
 void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
 void  /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
@@ -99,8 +100,9 @@ void /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
 float /*GFXDRVAPI*/ GFXGetZPerspective (float z);
 float /*GFXDRVAPI*/GFXGetXInvPerspective();
 float /*GFXDRVAPI*/GFXGetYInvPerspective();
-void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);
+void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset);
 void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar);
+void /*GFXDRVAPI*/ GFXViewPort (int minx, int miny, int maxx, int maxy);
 void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
 void /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
 void /*GFXDRVAPI*/ GFXCalculateFrustum();
@@ -134,7 +136,7 @@ void /*GFXDRVAPI*/ GFXPushBlendMode();
 void /*GFXDRVAPI*/ GFXPopBlendMode();
 void /*GFXDRVAPI*/ GFXActiveTexture (int stage);
 void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
-
+void /*GFXDRVALP*/ GFXAlphaTest (enum DEPTHFUNC,float ref);
 //primitive Begin/End 
 void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE);
 void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col); 

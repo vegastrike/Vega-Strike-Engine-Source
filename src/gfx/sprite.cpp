@@ -27,43 +27,38 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include <assert.h>
+#include <math.h>
+#ifndef M_PI_2
+# define M_PI_2		1.57079632679489661923	/* pi/2 */
+#endif
 static float *mview = NULL;
 
-Sprite::Sprite(char *file, bool trackzoom):local_transformation(),track_zoom(trackzoom)
-{
+Sprite::Sprite(const char *file) {
 
-  local_transformation.position = Vector(0,0,1.001);
+
 
   xcenter = 0;
   ycenter = 0;
-  width = 0;
-  height = 0;
+  widtho2 = 0;
+  heighto2 = 0;
   rotation = 0;
   surface = NULL;
-  //changed = TRUE;
-  //vlist = NULL;
   
   FILE *fp = fopen(file, "r");
-  char texture[64];
-  fscanf(fp, "%s", texture);
-  fscanf(fp, "%f %f", &width, &height);
+  char texture[64]={0};
+  char texturea[64]={0};
+  fscanf(fp, "%63s %63s", texture, texturea);
+  fscanf(fp, "%f %f", &widtho2, &heighto2);
   fscanf(fp, "%f %f", &xcenter, &ycenter);
   fclose(fp);
-  left = -xcenter;
-  right = width - xcenter;
-  top = -ycenter;
-  bottom = height - ycenter;
-  
-  surface = new Texture(texture);
-  /*
-    GFXVertex vertices[4] = { 
-    GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
-    GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
-    GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),
-    GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
-    vlist = new GFXVertexList(4, vertices);
-  */
 
+  widtho2/=2;
+  heighto2/=-2;
+  if (texturea[0]==0) {
+    surface = new Texture(texture);    
+  } else {
+    surface = new Texture(texture,texturea);    
+  }
 }	
 
 Sprite::~Sprite()
@@ -73,90 +68,72 @@ Sprite::~Sprite()
 }
 
 
-void Sprite::UpdateHudMatrix() {
-  assert(0);
-}
 
 void Sprite::Draw(const Transformation &dtrans, const Matrix m)
 {
-  Matrix tmatrix;
-  
-  Vector camp,camq,camr;
-  _Universe->AccessCamera()->GetPQR(camp,camq,camr);
-  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,
-			     _Universe->AccessCamera()->GetPosition() +
-			     camp * local_transformation.position.i +
-			     camq * local_transformation.position.j +
-			     camr * local_transformation.position.k);
-  GFXLoadMatrix(MODEL, tmatrix);
-  
-	if(surface!=NULL)
-	{
-
-		GFXDisable(LIGHTING);
-		GFXDisable(DEPTHWRITE);
-		GFXDisable(DEPTHTEST);
-		GFXPushBlendMode();
-		GFXColor4f (1,1,1,1);
-		//GFXBlendMode(SRCALPHA, INVSRCALPHA);
-		GFXBlendMode(ONE, ONE);
-		GFXEnable(TEXTURE0);
-		GFXDisable(TEXTURE1);
-		surface->MakeActive();
-
-
-		//GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
-		//GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
-		//GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),
-		//GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
-
-		GFXColor(1.00f, 1.00f, 1.00f, 1.00f);
-		GFXBegin(QUADS);
-		
-		GFXTexCoord2f(0.00f, 1.00f);
-		GFXVertex3f(left, top, 0.00f);
-		GFXTexCoord2f(1.00f, 1.00f);
-		GFXVertex3f(right, top, 0.00f);
-		GFXTexCoord2f(1.00f, 0.00f);
-		GFXVertex3f(right, bottom, 0.00f);
-		GFXTexCoord2f(0.00f, 0.00f);
-		GFXVertex3f(left, bottom, 0.00f);
-
-		GFXEnd();
-		GFXEnable(LIGHTING);
-		GFXEnable(DEPTHWRITE);
-		GFXEnable(DEPTHTEST);
-
-	}
+    GFXDisable(LIGHTING);
+    GFXDisable(DEPTHWRITE);
+    GFXDisable(DEPTHTEST);
+    GFXEnable(TEXTURE0);
+    GFXDisable(TEXTURE1);
+    surface->MakeActive();
+    GFXDisable (CULLFACE);
+    GFXBegin(QUADS);
+    if (rotation) {
+      const float cw = widtho2*cos(rotation);
+      const float sw = widtho2*sin(rotation);
+      const float ch = heighto2*cos(M_PI_2+rotation);
+      const float sh = heighto2*sin(M_PI_2+rotation);
+      const float wnew = cw+ch;
+      const float hnew = sw+sh;
+      GFXTexCoord2f(0.00f, 1.00f);
+      GFXVertex3f(xcenter-wnew, ycenter+hnew, 0.00f);
+      GFXTexCoord2f(1.00f, 1.00f);
+      GFXVertex3f(xcenter+wnew, ycenter+hnew, 0.00f);
+      GFXTexCoord2f(1.00f, 0.00f);
+      GFXVertex3f(xcenter+wnew, ycenter-hnew, 0.00f);
+      GFXTexCoord2f(0.00f, 0.00f);
+      GFXVertex3f(xcenter-wnew, ycenter-hnew, 0.00f);
+    } else {
+      GFXTexCoord2f(0.00f, 1.00f);
+      GFXVertex3f(xcenter-widtho2, ycenter+heighto2, 0.00f);
+      GFXTexCoord2f(1.00f, 1.00f);
+      GFXVertex3f(xcenter+widtho2, ycenter+heighto2, 0.00f);
+      GFXTexCoord2f(1.00f, 0.00f);
+      GFXVertex3f(xcenter+widtho2, ycenter-heighto2, 0.00f);
+      GFXTexCoord2f(0.00f, 0.00f);
+      GFXVertex3f(xcenter-widtho2, ycenter-heighto2, 0.00f);
+    }
+    GFXEnd();
+    GFXEnable (CULLFACE);
+    GFXEnable(LIGHTING);
+    GFXEnable(DEPTHWRITE);
+    GFXEnable(DEPTHTEST);
 }
 
-void Sprite::SetPosition(const float &x1, const float &y1)
-{
-	local_transformation.position.i = x1;
-	local_transformation.position.j = y1;
+void Sprite::SetPosition(const float &x1, const float &y1) {
+  xcenter =x1;
+  ycenter = y1;
 }
 
 void Sprite::GetPosition(float &x1, float &y1)
 {
-	x1 = local_transformation.position.i;
-	y1 = local_transformation.position.j;
+	x1 = xcenter;
+	y1 = ycenter;
 }
 void Sprite::SetSize (float x1, float y1) {
-  right = left+x1;
-  bottom = top+y1;
+  widtho2 = x1/2;
+  heighto2 = y1/2;
 }
 void Sprite::GetSize (float &x1,float &y1) {
-  x1 = right-left;
-  y1 = bottom - top;
+  x1 = widtho2*2;
+  y1 = heighto2*2;
 }
 
-void Sprite::SetRotation(const float &rot)
-{
-  local_transformation.orientation *= Quaternion::from_axis_angle(Vector(0,1,0), rot - rotation);
+void Sprite::SetRotation(const float &rot) {
   rotation = rot;
 }
 
-void Sprite::GetRotation(float &rot)
-{
+void Sprite::GetRotation(float &rot) {
   rot = rotation;
 }

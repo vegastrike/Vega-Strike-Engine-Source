@@ -28,27 +28,19 @@
 
 struct Texture;
 class Sprite {
-        Transformation local_transformation;
 	float xcenter;
 	float ycenter;
-	float width;
-	float height;
-	
-	float left, right, top, bottom;
+	float widtho2;
+	float heighto2;
 
 	float rotation;
 
 	Texture *surface;
-	//GFXVertexList *vlist;
-
-	//BOOL changed;
-	bool track_zoom;
 
 public:
-	Sprite(char *file, bool trackZoom = false);
+	Sprite (const char *file);
 	~Sprite();
 
-	void UpdateHudMatrix();
 	void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
 
 	void Rotate(const float &rad){ rotation += rad;};

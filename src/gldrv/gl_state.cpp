@@ -280,6 +280,43 @@ void GFXActiveTexture (int stage) {
 
 }
 
+void GFXAlphaTest (enum DEPTHFUNC df, float ref) {
+  if (df==ALWAYS) {
+    glDisable (GL_ALPHA_TEST);
+    return;
+  }else {
+    glEnable (GL_ALPHA_TEST);
+  }
+  GLenum tmp;
+  switch (df) {
+  case NEVER:
+    tmp = GL_NEVER;
+    break;
+  case LESS:
+    tmp = GL_LESS;
+    break;
+  case EQUAL:
+    tmp = GL_EQUAL;
+    break;
+  case LEQUAL:
+    tmp = GL_LEQUAL;
+    break;
+  case GREATER:
+    tmp = GL_GREATER;
+    break;
+  case NEQUAL:
+    tmp = GL_NOTEQUAL;
+    break;
+  case GEQUAL:
+    tmp = GL_GEQUAL;
+    break;
+  case ALWAYS:
+    tmp= GL_ALWAYS;
+    break;
+  } 
+  glAlphaFunc (tmp,ref);
+}
+
 GFXBOOL GFXSetTexFunc(int stage, int texset)
 {
 

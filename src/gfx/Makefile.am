@@ -21,6 +21,9 @@ libgfx_a_SOURCES =	\
 	bsp.h		\
 	camera.cpp	\
 	camera.h	\
+	cockpit.h	\
+	cockpit.cpp	\
+	cockpit_xml.cpp	\
 	coord_select.cpp	\
 	coord_select.h	\
 	decalqueue.h	\

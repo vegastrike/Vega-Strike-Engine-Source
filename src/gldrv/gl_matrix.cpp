@@ -27,6 +27,9 @@
 #include <assert.h>
 #ifdef WIN32
 #include <windows.h>
+#ifndef M_PI
+# define M_PI		3.14159265358979323846	/* pi */
+#endif
 #endif
 #include "gl_matrix.h"
 
@@ -34,7 +37,7 @@
 
 
 //#include <GL/glu.h>
-const float PI=3.1415926536;
+
 inline void Zero(float matrix[])
 {
 	matrix[0] = 0;
@@ -319,6 +322,26 @@ void /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 	}
 }
 
+void GFXViewPort (int minx, int miny, int maxx, int maxy) {
+  glViewport (minx,miny,maxx,maxy);
+}
+
+void GFXHudMode (bool Enter) {
+  if (Enter) {
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode (GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+  }else {
+    glMatrixMode (GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode (GL_MODELVIEW);
+    glPopMatrix();
+  }
+}
+
 void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 {
 	switch(mode)
@@ -426,7 +449,7 @@ void GFXFrustum(float * m,float *i,
    M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 1.F/d;  M(3,3) = (float)c/d;
 #undef M
 }
-void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar)
+void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset)
 {
 
   //  gluPerspective (fov,aspect,znear,zfar);
@@ -436,52 +459,16 @@ void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 
 
 
-   ymax = znear * tanf( fov * PI / ((float)360.0) ); //78.0 --> 4.7046
+   ymax = znear * tanf( fov * M_PI / ((float)360.0) ); //78.0 --> 4.7046
 
    ymin = -ymax; //-4.7046
 
-   xmin = ymin * aspect;//-6.2571
-   xmax = ymax * aspect;//6.2571
-
+   xmin = (ymin-cockpit_offset/2) * aspect;//-6.2571
+   xmax = (ymax+cockpit_offset/2) * aspect;//6.2571
+   ymin-=cockpit_offset;
    gl_Frustum( xmin, xmax, ymin, ymax, znear, zfar );
    glMatrixMode(GL_PROJECTION);
    glLoadMatrixf(projection);
-   //glMatrixMode(GL_PROJECTION);
-   //glFrustum(xmin,xmax,ymin,ymax,znear,zfar);
-
-
-
-/*	float fov_vert = fov*(PI/180);
-	float fov_horiz = aspect*fov_vert; //I HOPE this is right
-									//YO IF SOMETHING GOES WRONG WITH THIS CHECK THIS LINE FIRST!!!
-	float near_plane = znear;
-	float far_plane = zfar;
-
-    float    h, w, Q;
- 
-    w = 1.00F/(float)(tan(fov_horiz*0.50)); // modified
-    h = 1.00F/(float)(tan(fov_vert*0.50));
-
-    Q = far_plane/(far_plane - near_plane);
- 
-    //D3DMATRIX ret = ZeroMatrix();
-	ZeroMemory(projection, sizeof(projection));
-#define M(row, col) projection[col*4+row]
-    M(0, 0) = -w;
-    M(1, 1) = h;
-    M(2, 2) = Q;
-    M(3, 2) = -Q*near_plane;
-    M(2, 3) = 1;
-#undef M
-	glMatrixMode(GL_PROJECTION);
-   glLoadMatrixf(projection);
-	return TRUE;
-*/
-/*	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(-1, 1, 1, -1, 0.10, 10);
-	return TRUE;
-*/
 }
 
 void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)

@@ -68,7 +68,7 @@ void Bolt::Draw () {
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
   GFXBlendMode (ONE,ONE);
-  GFXDisable(DEPTHTEST);
+  //  GFXDisable(DEPTHTEST);
   GFXDisable(DEPTHWRITE);
   GFXDisable(TEXTURE1);
   GFXEnable (TEXTURE0);

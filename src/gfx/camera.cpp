@@ -56,7 +56,7 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		GFXLoadIdentity(VIEW);
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar); //set perspective to 78 degree FOV
+		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
 
 		  break;
 		case Camera::PARALLEL:
@@ -91,7 +91,7 @@ void Camera::UpdateGLCenter()
 		//updating the center should always use a perspective
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar); //set perspective to 78 degree FOV
+		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
 
 		  break;
 		case Camera::PARALLEL:

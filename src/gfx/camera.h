@@ -31,8 +31,9 @@ class Camera{
 	
 	float x, y, xsize, ysize;
 	float zoom;
-
+	float cockpit_offset;
 public:
+	void setCockpitOffset (float c) {cockpit_offset = c;changed=GFXTRUE;} 
 	enum ProjectionType {
 	  PARALLEL,
 	  PERSPECTIVE

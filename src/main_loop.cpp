@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "cmd/unit.h"
+#include "vegastrike.h"
+#include "vs_globals.h"
 #include "in.h"
 #include "gfx/mesh.h"
 #include "gfx/sprite.h"
@@ -29,7 +31,7 @@
 #include "cmd/ai/flykeyboard.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/script.h"
-
+#include "gfx/cockpit.h"
 
 using namespace std;
 
@@ -197,23 +199,13 @@ void InitializeInput() {
 	BindKey('s', YawRight);
 	BindKey(27, Quit);
 }
-Sprite *Crosshairs;
+
+Cockpit *cockpit;
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
-  Crosshairs = new Sprite ("crosshairs.spr");
-  Crosshairs->SetPosition (0,0);
-  //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-  //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
-  //0.0.4  carrier = new Unit("ucarrier.dat");
-  //star_system = new StarSystem(new Planet("test_system.dat"));  
-  //Unit *fighter = new Unit("uospreys.dat");
-  //0.0.4fighter = new Unit("uosprey.dat");
-  //Unit *fighter2 = new Unit("uosprey.dat");
-  //0.0.4fighter2 = new Unit("uosprey.dat");
-  //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
-  //HUDElement *t = new HUDElement("ucarrier.dat");
+  cockpit = new Cockpit ("hornet-cockpit.cpt");
   /******
   locSel = new LocationSelect(Vector (0,-2,2),
 			      Vector(1,0,-1), 
@@ -272,7 +264,7 @@ void createObjects() {
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
-  delete Crosshairs;
+  delete cockpit;
   delete [] fighters;
   delete locSel;
   delete explosion;
@@ -285,13 +277,15 @@ void destroyObjects() {
 }
 
 void main_loop() {
+  cockpit->SetupViewPort();
+
   fighters[0]->SetCameraToCockpit();
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
-  Crosshairs->Draw();
-  _Universe->activeStarSystem()->Update();
 
+  _Universe->activeStarSystem()->Update();
+  cockpit->Draw();
   GFXEndScene();
       
   ProcessInput();
