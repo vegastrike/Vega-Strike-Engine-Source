@@ -34,7 +34,6 @@ JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 void InitJoystick(){
   //  SDL_EventState (SDL_KEYDOWN,SDL_ENABLE);
   //  SDL_EventState (SDL_KEYUP,SDL_ENABLE);
-  fprintf (stderr,"haha fooled you");
   for (int i=0;i<NUMJBUTTONS;i++) {
     for (int j=0;j<MAX_JOYSTICKS;j++) {
       UnbindJoyKey (j,i);
@@ -66,35 +65,24 @@ void DeInitJoystick() {
 }
 /*
 void BindButton(int button,KBHandler handler){
-  // have to check if button>allowed
-  joyBindings[button]=handler;
-  handler(button,RESET);
+// have to check if button>allowed
+joyBindings[button]=handler;
+handler(button,RESET);
 }
 
 static void DefaultJoyHandler(int button,KBSTATE state){
-	// do nothing
-	return;
+// do nothing
+return;
 }
 
 void UnbindButton(int button) {
-  joyBindings[button] = DefaultJoyHandler;
+joyBindings[button] = DefaultJoyHandler;
 }
 */
-#if 0
-void ProcessJoystick(){
 
-  // we don't need code here cause we don't queue events
-
-
-    for(int i=0;i<joystick[0]->NumButtons();i++){
-	joyBindings[i](-1,buttonState[i]);
-	buttonState[i]=UP;
-    }
-#endif
-
-  // we don't need code here cause we don't queue events
-#if 0
-  // not needed, this is done in FlyByJoystick
+// we don't need code here cause we don't queue events
+/*
+// not needed, this is done in FlyByJoystick
   int num_joysticks=SDL_NumJoysticks() ;
   for(int i=0; i < num_joysticks; i++ )  {
     if(joystick[i]->isAvailable()){
@@ -105,29 +93,31 @@ void ProcessJoystick(){
   }
 
 }
-#endif
-JoyStick::JoyStick(int which) {
-    deadzone=0.01;
 
-    joy_available = 0;
+#endif
+*/
+JoyStick::JoyStick(int which) {
+  deadzone=0.01;
+
+  joy_available = 0;
 
 #if !defined(HAVE_SDL)
   return;
 #else
-    int num_joysticks=SDL_NumJoysticks() ;
-    if (which>=num_joysticks)
-      return;
-
-    //    SDL_JoystickEventState(SDL_ENABLE);
-    joy=SDL_JoystickOpen(which);  // joystick nr should be configurable
-
-    if(joy==NULL)
+  int num_joysticks=SDL_NumJoysticks() ;
+  if (which>=num_joysticks)
+    return;
+  
+  //    SDL_JoystickEventState(SDL_ENABLE);
+  joy=SDL_JoystickOpen(which);  // joystick nr should be configurable
+  
+  if(joy==NULL)
     {
-        printf("warning: no joystick nr %d\n",which);
-        joy_available = false;
-        return;
+      printf("warning: no joystick nr %d\n",which);
+      joy_available = false;
+      return;
     }
-
+  
     joy_available=true;
 
     nr_of_axes=SDL_JoystickNumAxes(joy);
@@ -145,7 +135,7 @@ JoyStick::JoyStick(int which) {
 }
 
 bool JoyStick::isAvailable(){
-  return joy_available;
+return joy_available;
 }
 
 void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
@@ -154,10 +144,10 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     int status;
     
     if(joy_available==false){
-        x=0;
-        y=0;
-	z=0;
-        buttons=0;
+        joy_x= x=0;
+        joy_y=y=0;
+	joy_z=z=0;
+        joy_buttons=buttons=0;
         return;
     }
 #if defined(HAVE_SDL)
@@ -166,18 +156,16 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     Sint16 xi =  SDL_JoystickGetAxis(joy,0);
     Sint16 yi =  SDL_JoystickGetAxis(joy,1);
     Sint16 zi=0;
-    if (numaxes>2) {
+if (numaxes>2) {
       zi = SDL_JoystickGetAxis(joy,2);
     }
     buttons=0;
     nr_of_buttons=SDL_JoystickNumButtons(joy);
    for(int i=0;i<nr_of_buttons;i++){
-      int  butt=SDL_JoystickGetButton(joy,i);
-      if(butt==1){
-	printf ("button %d",i);
-	fprintf (stderr,"button %d",i);
-	
-	buttons|=(1<<i);
+     int  butt=SDL_JoystickGetButton(joy,i);
+     fprintf (stderr,"button %d  %d\n",i,butt);
+     if(butt==1){
+       buttons|=(1<<i);
       }
    }
     joy_buttons = buttons;
@@ -188,13 +176,13 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     //    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
 
     if(fabs(x)<=deadzone){
-        x=0;
+        joy_x =x=0;
     }
     if(fabs(y)<=deadzone){
-        y=0;
+        joy_y = y=0;
     }
     if(fabs(z)<=deadzone){
-        z=0;
+        joy_z = z=0;
     }
 #endif // we have SDL
     
