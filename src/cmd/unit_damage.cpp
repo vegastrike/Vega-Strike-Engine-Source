@@ -48,14 +48,14 @@ template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
   int i;
   Vector PlaneNorm;
-  for (int i=0;i<nummesh();) {
+  {for (int i=0;i<nummesh();) {
 	  if (meshdata[i]){
 		  if (meshdata[i]->getBlendDst()==ONE){
 			  delete meshdata[i];
 			  meshdata.erase(meshdata.begin()+i);
 		  }else{i++;}
 	  }else{meshdata.erase(meshdata.begin()+i);}
-  }
+  }}
   int nm = nummesh();
   if (nm<=0) {
     return;

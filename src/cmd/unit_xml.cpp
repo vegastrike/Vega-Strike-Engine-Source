@@ -23,6 +23,9 @@
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
 #include "cmd/collide/rapcol.h"
+#ifdef _WIN32
+#include <direct.h>
+#endif
 #define VS_PI 3.1415926536
 
 int GetModeFromName (const char * input_buffer) {
