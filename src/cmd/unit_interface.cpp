@@ -29,29 +29,49 @@ int GetModeFromName (const char * input_buffer) {
       return 0;
 }
 using std::string;
+
+static string beautify (const std::string &input) {
+  string ret = input;
+  string::iterator i=ret.begin();
+  for (;i!=ret.end();i++) {
+    if (i!=ret.begin()) {
+      if ((*(i-1))==' ') {
+	*i = toupper(*i);
+      }
+    }
+    if (*i=='_') {
+      *i=' ';
+    }
+  }
+  return ret;
+}
+
 static float usedPrice (float percentage) {
   return .66*percentage;
 }
-static bool final_cat (const std::string &cat) {
+bool final_cat (const std::string &cat) {
   if (cat.empty())
     return false;
   return (std::find (cat.begin(),cat.end(),'*')==cat.end());
 }
 static string getLevel (const string &input, int level) {
-  string ret;
-  string::const_iterator i;
+  char * ret=strdup (input.c_str());
   int count=0;
-  for (i=input.begin();count!=level&&i!=input.end();i++) {
+  char * i =ret;
+  for (;count!=level&&((*i)!='\0');i++) {
     if (*i=='/') {
       count++;
     }
   }
-  for (;i!=input.end();i++) {
-    if (*i=='/')
-      break;
-    ret.push_back(*i);
+  char * retthis=i;
+  for (;*i!='\0';i++) {
+    if (*i=='/'){
+      *i='\0';
+    }
   }
-  return ret;
+  string retval (retthis);
+  free (ret);
+  return retval;
 }
 static bool match (vector <string>::const_iterator cat, vector<string>::const_iterator endcat, string::const_iterator item, string::const_iterator itemend, bool perfect_match) {
   string::const_iterator a;
@@ -78,7 +98,8 @@ extern void LoadMission (const char *, bool loadfirst);
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
 extern Unit&GetUnitMasterPartList();
-struct UpgradingInfo {
+class UpgradingInfo {
+public:
   Mission * briefingMission;//do not dereference! instead scan through activve_missions
   TextArea *CargoList, *CargoInfo;
   Button *OK, *COMMIT;
@@ -139,7 +160,7 @@ struct UpgradingInfo {
 	  if (match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),false)&&
 	      (!match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),true))&&
 	      lev!=curcat) {
-	    CargoList->AddTextItem ((string("x")+lev).c_str(),lev.c_str());
+	    CargoList->AddTextItem ((string("x")+lev).c_str(),beautify(lev).c_str());
 	    curcat =lev;
 	  }
 	}
