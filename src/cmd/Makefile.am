@@ -25,7 +25,6 @@ libcmd_a_SOURCES =				\
 	click_list.h			\
 	unit_collide.cpp				\
 	unit_collide.h				\
-	unit_util.cpp			\
 	unit_util.h			\
 	faction_xml.cpp			\
 	music.cpp			\
@@ -62,3 +61,4 @@ libcmd_a_SOURCES =				\
 	missile.h			\
 	missile.cpp
 
+#unit_util.cpp is #included in python/unit_wrapper.cpp due to gcc-3.1 compiler bug

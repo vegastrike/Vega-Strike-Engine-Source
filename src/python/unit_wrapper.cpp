@@ -5,7 +5,7 @@
 #include "gfx/vec.h"
 #include "cmd/unit.h"
 #include "python_class.h"
-#include "cmd/unit_util.h"
+#include "cmd/unit_util.cpp"
 #include <boost/python/objects.hpp>
 #include "universe_util.h"
 #include "cmd/ai/fire.h"

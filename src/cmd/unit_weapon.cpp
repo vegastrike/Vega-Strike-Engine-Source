@@ -161,6 +161,22 @@ void Unit::Mount::UnFire () {
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
+
+int Unit::LockMissile() const{
+  bool missilelock=false;
+  bool dumblock=false;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+      missilelock=true;
+    }else {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
+	dumblock=true;
+      }
+    }    
+  }
+  return (missilelock?1:(dumblock?-1:0));
+}
+
 static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);

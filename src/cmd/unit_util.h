@@ -31,7 +31,7 @@ namespace UnitUtil {
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity);
 	bool decrementCargo(Unit *my_unit,float percentagechange);
 	float getDistance(Unit *my_unit,Unit *un);
-	inline float getPlanetRadiusPercent ();
+	float getPlanetRadiusPercent ();
 	float getSignificantDistance (Unit *un, Unit *sig);
 	int isPlayerStarship (Unit * un);
 

@@ -287,6 +287,7 @@ void Unit::Init()
   computer.itts = false;
   static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   computer.radar.maxrange=rr;
+  comptuer.radar.locked=false;
   computer.radar.maxcone=-1;
   static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",
@@ -661,20 +662,6 @@ float Unit::TrackingGuns(bool &missilelock) {
     }
   }
   return trackingcone;
-}
-int Unit::LockMissile() {
-  bool missilelock=false;
-  bool dumblock=false;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
-      missilelock=true;
-    }else {
-      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
-	dumblock=true;
-      }
-    }    
-  }
-  return (missilelock?1:(dumblock?-1:0));
 }
 QVector Unit::PositionITTS (const QVector & posit, float speed) const{
   QVector retval = Position()-posit;

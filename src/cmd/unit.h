@@ -150,6 +150,7 @@ class Unit
       float mintargetsize;
       ///does this radar support IFF?
       bool color;
+      bool locked;
     } radar;
     ///The nav point the unit may be heading for
     Vector NavPoint;
@@ -256,7 +257,6 @@ class Unit
     ///The sound this mount makes when fired
     const weapon_info *type;
     int sound;
-    
     float time_to_lock;
     Mount();
     Mount(const std::string& name, short int ammo=-1, short int volume=-1);
@@ -422,7 +422,10 @@ class Unit
   //0 in additive is reaplce  1 is add 2 is mult
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
 public:
-  int LockMissile();//-1 is no lock necessary 1 is locked
+  int LockMissile() const;//-1 is no lock necessary 1 is locked
+  void LockTarget(bool myboo){computer.radar.locked=myboo;}
+  bool TargetLocked()const {return computer.radar.locked;}
+
   float TrackingGuns(bool &missileLock);
 
   void EjectCargo (unsigned int index);
@@ -540,18 +543,20 @@ public:
   Vector LocalCoordinates (Unit * un) const {
     return ToLocalCoordinates ((un->Position()-Position()).Cast());
   }
-  bool InRange (Unit *target, bool cone=true, bool cap=true) const{
+  bool InRange (Unit *target, bool cone=true, bool cap=true, bool lock=true) const{
     double mm;
-    return InRange( target,mm,cone,cap);
+    return InRange( target,mm,cone,cap,lock);
   }
-  bool InRange (Unit *target, double & mm, bool cone, bool cap) const{
+  bool InRange (Unit *target, double & mm, bool cone, bool cap, bool lock) const{
     if (this==target||target->CloakVisible()<.8)
       return false;
-    if (cone&&computer.radar.maxcone>-.99) {
+    if ((cone&&computer.radar.maxcone>-.98)&&((!lock)||(!TargetLocked()))) {
 	QVector delta( target->Position()-Position());
-	mm = delta.Magnitude();
-	if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/mm)<computer.radar.maxcone&&cone) {
-	  return false;
+	mm = delta.Magnitude()-target->rSize();
+	if (mm>0.0001) {
+	  if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/mm)<computer.radar.maxcone&&cone) {
+	    return false;
+	  }
 	}
     }else {
       mm = (target->Position()-Position()).Magnitude();
