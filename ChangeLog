@@ -1,3 +1,8 @@
+2002-02-28 Daniel Horn <hellcatv@hotmail.com>
+	* Added Terrain support for rendered meshes...this was a hell of a lot of work
+	* Added glutStrokeFont and broke a level of abstraction cus I'm tired... basically GFX does not wrap glutStrokeFont at the moment...should be trivial fix...enjoy pretty fonts
+	
+
 2002-02-28 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* ai_orderlist (not yet finished)
