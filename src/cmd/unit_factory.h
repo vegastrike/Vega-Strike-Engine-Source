@@ -80,7 +80,6 @@ public:
 				 float gravity,
 				 float radius,
 				 const char * filename,
-				 const char *citylights,
 				 BLENDFUNC blendsrc,
 				 BLENDFUNC blenddst,
 				 vector<char *> dest,

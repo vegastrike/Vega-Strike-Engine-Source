@@ -1223,7 +1223,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        bsrc[0]='\0';//have at least 1 char
        bdst[0]='\0';
        citylights[0]='\0';
-       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s %s",&radius,tex,bsrc,bdst, citylights);
+       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s",&radius,tex,bsrc,bdst);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
       
@@ -1233,7 +1233,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	 d=parse_alpha (bdst);
        if (bsrc[0]!='\0') 
 	 s=parse_alpha (bsrc);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,citylights,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
 
        free (bsrc);
        free (bdst);

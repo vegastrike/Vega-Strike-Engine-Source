@@ -91,14 +91,14 @@ void Planet::AddSatellite (Unit * orbiter) {
 	orbiter->SetOwner (this);
 }
 extern Flightgroup * getStaticBaseFlightgroup(int faction);
-Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,const char * citylights,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
+Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
   //this function is OBSOLETE
   Unit * un=NULL;
   if (level>2) {
     UnitCollection::UnitIterator satiterator = satellites.createIterator();
 	  assert(satiterator.current()!=NULL);
 	  if (satiterator.current()->isUnit()==PLANETPTR) {
-		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,citylights,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
+		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
@@ -114,7 +114,7 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
       satiterator.current()->SetOwner (this);
     }else {
       Planet * p;
-      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,citylights,blendSrc,blendDst,dest, QVector (0,0,0), this, ourmat, ligh, faction,fullname,inside_out));
+      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,blendSrc,blendDst,dest, QVector (0,0,0), this, ourmat, ligh, faction,fullname,inside_out));
       un = p;
       p->SetOwner (this);
     }
@@ -156,6 +156,25 @@ string getCargoUnitName (const char * textname) {
   free(tmp2);
   return retval;
 }
+void Planet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out){
+  if (meshdata.empty()) {
+    meshdata.push_back(NULL);
+  }
+  Mesh * shield = meshdata.back();
+  meshdata.pop_back();
+  GFXMaterial m;
+  m.ar=m.ag=m.ab=m.aa=1.0;
+  m.dr=m.dg=m.db=m.da=0.0;
+  m.sr=m.sg=m.sb=m.sa=0.0;
+  m.er=m.eg=m.eb=m.ea=0.0;
+  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
+  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE));
+  meshdata.back()->setEnvMap (GFXFALSE);
+  meshdata.back()->SetMaterial (m);
+
+
+  meshdata.push_back(shield);
+}
 
 void Planet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
   if (meshdata.empty()) {
@@ -167,27 +186,33 @@ void Planet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC 
   meshdata.push_back(new SphereMesh(radius, stacks, stacks, texture.c_str(), NULL,false,blendSrc,blendDst));  
   meshdata.push_back(shield);
 }
-void Planet::AddRing(const std::string &texture,float iradius,float oradius, const QVector &R,const QVector &S,  int slices, int texture_rep, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
+void Planet::AddRing(const std::string &texture,float iradius,float oradius, const QVector &R,const QVector &S,  int slices, int wrapx, int wrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
   if (meshdata.empty()) {
     meshdata.push_back(NULL);
   }
   Mesh * shield = meshdata.back();
   meshdata.pop_back();
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  for (int i=0;i<slices;i++) {
-    meshdata.push_back(new RingMesh(iradius,oradius ,stacks,texture.c_str(),R,S,  blendSrc,blendDst,false,i*(2*M_PI)/((float)slices),(i+1)*(2*M_PI)/((float)slices)));  
+  if (slices>0) {
+    stacks = stacks/slices;
+    if (stacks<3)
+      stacks=3;
+    for (int i=0;i<slices;i++) {
+      meshdata.push_back(new RingMesh(iradius,oradius ,stacks,texture.c_str(),R,S,wrapx, wrapy,  blendSrc,blendDst,false,i*(2*M_PI)/((float)slices),(i+1)*(2*M_PI)/((float)slices)));  
+    }
   }
-  meshdata.push_back(shield);
-  
+  meshdata.push_back(shield);  
 }
 
 extern vector <char *> ParseDestinations (const string &value);
-Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,const char * citylights,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
+Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
     : Unit( 0 )
     , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
 {
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".5"));
-  radius*=bodyradius;
+  if (!ligh.empty()){
+    radius*=bodyradius;
+  }
   inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
@@ -220,18 +245,6 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
   meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
   meshdata.back()->setEnvMap(GFXFALSE);
   meshdata.back()->SetMaterial (ourmat);
-
-  if ((!citylights)?true:(citylights[0]=='\0')) {
-  }else {
-    GFXMaterial m;
-    m.ar=m.ag=m.ab=m.aa=1.0;
-    m.dr=m.dg=m.db=m.da=0.0;
-    m.sr=m.sg=m.sb=m.sa=0.0;
-    m.er=m.eg=m.eb=m.ea=0.0;
-    meshdata.push_back(new CityLights (radius,stacks,stacks, citylights, NULL, inside_out,ONE, ONE));
-    meshdata.back()->setEnvMap (GFXFALSE);
-    meshdata.back()->SetMaterial (m);
-  }
   meshdata.push_back(NULL);
   calculate_extent(false);
 

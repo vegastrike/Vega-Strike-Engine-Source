@@ -116,7 +116,9 @@ namespace StarXML {
     INNERRADIUS,
     OUTERRADIUS,
     NUMSLICES,
-    RING
+    RING,
+    WRAPX,
+    WRAPY
   };
 
   const EnumMap::Pair element_names[] = {
@@ -138,7 +140,8 @@ namespace StarXML {
     EnumMap::Pair ("Atmosphere",ATMOSPHERE),
     EnumMap::Pair ("Nebula",NEBULA),
     EnumMap::Pair ("Asteroid",ASTEROID),
-    EnumMap::Pair ("RING",RING)
+    EnumMap::Pair ("RING",RING),
+    EnumMap::Pair ("citylights",CITYLIGHTS)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -150,7 +153,6 @@ namespace StarXML {
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
-    EnumMap::Pair ("citylights",CITYLIGHTS),
     EnumMap::Pair ("destination", DESTINATION), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
@@ -186,11 +188,14 @@ namespace StarXML {
     EnumMap::Pair ("ScaleSystem",SCALESYSTEM),
     EnumMap::Pair ("InsideOut",INSIDEOUT),
     EnumMap::Pair ("InnerRadius",INNERRADIUS),
-    EnumMap::Pair ("OuterRadius",OUTERRADIUS)
+    EnumMap::Pair ("OuterRadius",OUTERRADIUS),
+    EnumMap::Pair ("WrapX",WRAPX),
+    EnumMap::Pair ("WrapY",WRAPY)
+    
   };
 
-  const EnumMap element_map(element_names, 19);
-  const EnumMap attribute_map(attribute_names, 46);
+  const EnumMap element_map(element_names, 20);
+  const EnumMap attribute_map(attribute_names, 47);
 }
 
 using XMLSupport::EnumMap;
@@ -406,12 +411,13 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
       if (p!=NULL)
 	if (p->isUnit()==PLANETPTR) {
-	  int numwraps = 1;
+	  int wrapx = 1;
+	  int wrapy = 1;
 	  int numslices=6;
 	  float iradius = p->rSize()*1.25;
 	  float oradius = p->rSize()*1.75;
 	  R.Set(1,0,0);
-	  S.Set(0,0,1);
+	  S.Set(0,1,0);
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	    switch(attribute_map.lookup((*iter).name)) {
 	    case XFILE:
@@ -429,8 +435,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    case NUMSLICES:
 	      numslices = parse_int ((*iter).value);
 	      break;
-	    case NUMWRAPS:
-	      numwraps = parse_int ((*iter).value);
+	    case WRAPX:
+	      wrapx = parse_int ((*iter).value);
+	      break;
+	    case WRAPY:
+	      wrapy = parse_int ((*iter).value);
 	      break;
 	    case RI:
 	      R.i=parse_float((*iter).value);
@@ -456,8 +465,49 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    }
 	  }
 	  if (p!=NULL) {
-	    ((Planet *)p)->AddRing (myfile,iradius,oradius,R,S,numslices,numwraps,blendSrc,blendDst);
+	    ((Planet *)p)->AddRing (myfile,iradius,oradius,R,S,numslices,wrapx, wrapy,blendSrc,blendDst);
 	  }
+	}
+      break;
+    }
+  case CITYLIGHTS:
+    {
+      std::string myfile("planets/Dirt_light.png");
+      xml->unitlevel++;
+      blendSrc=SRCALPHA;
+      blendDst=ONE;
+      int wrapx=1;
+      bool inside_out=false;
+      int wrapy=1;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL)
+	if (p->isUnit()==PLANETPTR) {
+	  float radius = p->rSize();
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+	    case XFILE:
+	      myfile = (*iter).value;
+	      break;
+	    case ALPHA:
+	      parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
+	      break;
+	    case RADIUS:
+	      radius = parse_float ((*iter).value)*xml->scale;	  
+	      break;
+	    case WRAPX:
+	      wrapx = parse_int ((*iter).value);
+	      break;
+	    case WRAPY:
+	      wrapy = parse_int ((*iter).value);
+	      break;
+	    case INSIDEOUT:
+	      inside_out=parse_bool((*iter).value);
+	      break;
+	    default:
+	      break;
+	    }
+	  }
+	  ((Planet *)p)->AddCity (myfile,radius,wrapx,wrapy,blendSrc,blendDst,inside_out);
 	}
       break;
     }
@@ -471,7 +521,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
       if (p!=NULL)
 	if (p->isUnit()==PLANETPTR) {
-	  float radius = p->rSize()*1.1;
+	  float radius = p->rSize()*1.075;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	    switch(attribute_map.lookup((*iter).name)) {
 	    case XFILE:
@@ -481,7 +531,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	      parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
 	      break;
 	    case RADIUS:
-	      radius = parse_float ((*iter).value);	  
+	      radius = parse_float ((*iter).value)*xml->scale;	  
 	      break;
 	    default:
 	      break;
@@ -703,6 +753,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case CITYLIGHTS:
 	citylights = (*iter).value;
 	break;
+
       case INSIDEOUT:
 	insideout=XMLSupport::parse_bool ((*iter).value);
 	break;
@@ -787,14 +838,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,citylights.c_str(),blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
+      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
       if (un) {
 	un->SetOwner (getTopLevelOwner());
       }
     } else {
 
       
-      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,citylights.c_str(),blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
+      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
 
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
       xml->moons.back()->SetOwner (getTopLevelOwner());
