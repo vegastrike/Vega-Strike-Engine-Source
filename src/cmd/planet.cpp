@@ -89,6 +89,10 @@ extern vector <char *> ParseDestinations (const string &value);
 GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
     : GameUnit<Planet>( 0 )
 {
+	  atmosphere = NULL;
+  terrain = NULL;
+
+  shine = NULL;
   unsigned int nlights=0;
   if( !ligh.empty())
 	  nlights=ligh.size();
