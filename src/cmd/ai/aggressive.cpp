@@ -403,7 +403,7 @@ void AggressiveAI::Execute () {
     }
   } else {
     if (target) {
-    if ((--logic.curtime)==0) {
+    if ((--logic.curtime)<=0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
