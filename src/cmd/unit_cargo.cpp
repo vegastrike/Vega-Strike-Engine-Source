@@ -203,10 +203,18 @@ Cargo& Unit::GetCargo (unsigned int i) {
   return image->cargo[i];
 }
 
+float Unit::CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse) const{
+  if (ViewComputerData().max_ab_speed>.001)
+    return ((OriginalCourse-(FinalCourse)).Magnitude()/ViewComputerData().max_ab_speed);
+  else
+    return (FinalCourse-OriginalCourse).Magnitude();
+}
+
 std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector &oldspd) const{
-  ///FIXME somehow mangle string
+///FIXME somehow mangle string
   string mangled = image->cargo[i].content;
-  if (((float)rand()/RAND_MAX)<.5*(1-oldspd.Dot(GetVelocity())/(oldspd.Magnitude()*GetVelocity().Magnitude()))) {
+  static float scramblingmanifest=XMLSupport::parse_float (vs_config->getVariable ("general","PercentageSpeedChangeToFaultSearch",".5"));
+  if (CourseDeviation (oldspd,GetVelocity())>scramblingmanifest) {
     for (string::iterator i=mangled.begin();i!=mangled.end();i++) {
       (*i)+=(rand()%3-1);
     }

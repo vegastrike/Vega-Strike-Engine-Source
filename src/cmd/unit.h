@@ -501,7 +501,10 @@ public:
   void Fire(bool Missile);
   ///Stops all active guns from firing
   void UnFire();
+  ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 
+  float CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse)const ;
   Computer & GetComputerData () {return computer;}
+  const Computer & ViewComputerData () const {return computer;}
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
   void ArmorData(unsigned short armor[4])const;
   ///returns the current ammt of armor left

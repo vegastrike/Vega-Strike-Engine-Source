@@ -3,6 +3,8 @@
 #include "cmd/collection.h"
 #include "gfx/cockpit.h"
 #include "cmd/images.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 CommunicatingAI::CommunicatingAI (int ttype, float anger, float moodswingyness, float randomresp, float mood) :Order (ttype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
   comm_face=NULL;
 }
@@ -88,7 +90,8 @@ void CommunicatingAI::UpdateContrabandSearch () {
   if (u) {
     if (which_cargo_item<(int)u->numCargo()) {
       std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
-      if (SpeedAndCourse.Dot (u->GetVelocity())<0) {
+      static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
+      if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
 	CommunicationMessage c(parent,u,comm_face);
 	c.SetCurrentState(c.fsm->GetContrabandWobblyNode());
 	u->getAIState()->Communicate (c);
