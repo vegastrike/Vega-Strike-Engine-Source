@@ -294,6 +294,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
 
   this->faction = faction;
   killed=false;
+  bool destempty=dest.empty();
   while (!dest.empty()) {
     AddDestination(dest.back());
     dest.pop_back();
@@ -307,8 +308,8 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_rock","3"));
   static  float densityOfJumpPoint = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point","100000"));
   //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
-  hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
-  this->Mass = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:(densityOfJumpPoint/100000));
+  hull = (4./3)*M_PI*radius*radius*radius*(destempty?densityOfRock:densityOfJumpPoint);
+  this->Mass = (4./3)*M_PI*radius*radius*radius*(destempty?densityOfRock:(densityOfJumpPoint/100000));
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
 
@@ -317,7 +318,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static int numdock = XMLSupport::parse_int(vs_config->getVariable ("physics","num_planet_docking_port","4"));
   static float planetdockportsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_size","1.2"));
   static float planetdockportminsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_min_size","300"));
-  if ((!atmospheric) && dest.size()==0) {
+  if ((!atmospheric) && destempty) {
     for (int pdp=0;pdp<numdock;pdp++) {
       float dock = radius*planetdockportsize;
       if (dock-radius<planetdockportminsize) {
