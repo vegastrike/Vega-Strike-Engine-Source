@@ -4,6 +4,7 @@
 #include "vegastrike.h"
 #include "cmd_unit.h"
 #include "cmd_order.h"
+#include "gfx_location_select.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 
@@ -17,11 +18,39 @@ void InputDFA::OrderHandler (int key, KBSTATE k) {
       CurDFA->queueOrder=true;
     else
       CurDFA->queueOrder=false;
+    if (orderbindings[key]->type()&LOCATION) {
+      CurDFA->NewLocationSelect(); //set up us the location select
+    }
     CurDFA->SetOrder(orderbindings[key]);
+    if (orderbindings[key]->type()&LOCATION) {
+      CurDFA->SetState (LOCATION_SELECT);
+      CurDFA->ContextAcquire();
+    }
+
   }
 }
+void InputDFA::NewLocationSelect(){
+  if (selected==NULL)
+    return;
+  Unit * un;
+  int cnt=0;
+  Vector RunningTotal(0,0,0);
+  UnitCollection::UnitIterator * ui = selected->createIterator();
+  while (un=ui->current()) {
+    RunningTotal+=un->Position();
+    cnt++;
+    ui->advance();
+  }
+  if (cnt==0) return;
+  RunningTotal = (1./cnt)*(RunningTotal);
+  if (locsel)
+    delete locsel;
 
-void BindOrder (int key, OrderFactory *ofac){
+  locsel = new LocationSelect (RunningTotal,
+			       Vector (1,0,0),
+			       Vector (0,0,-1));
+}
+void InputDFA::BindOrder (int key, OrderFactory *ofac){
   /*  if (orderbindings[KEYMAP_SIZE]) 
     delete orderbindings[KEYMAP_SIZE];
   */
@@ -68,7 +97,7 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
     CurDFA->SetStateNone(); //go back up the heirarchy;
   }
 }
-void InputDFA::LocationSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
+void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 
 }
@@ -97,7 +126,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (CurDFA->orderfac!=NULL) {
     if (CurDFA->orderfac->type()&LOCATION) {
-      LocationSelect (k,x,y,delx,dely,kmod);
+      LocSelect (k,x,y,delx,dely,kmod);
       return;
     }
     if (CurDFA->orderfac->type()&TARGET||CurDFA->orderfac->type()&SELF) {
@@ -223,6 +252,7 @@ InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr"), SelectBox("sele
   parentSystem= par;
   clickList = parentSystem->getClickList();
   state = NONE;
+  locsel=NULL;
   ContextAcquire();//binds keys, etc
   Selecting=false;
   selected = NULL;
@@ -231,6 +261,8 @@ InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr"), SelectBox("sele
 
 InputDFA::~InputDFA() {
   delete clickList;
+  if (locsel) 
+    delete locsel;
 }
 /**
 enum State InputDFA::startOver() {
@@ -420,6 +452,8 @@ void InputDFA::Draw () {
     
     break;
   case LOCATION_SELECT:
+    if (locsel)
+      locsel->Draw();
     break;
   case TARGET_SELECT:
     if (Selecting) {
@@ -441,7 +475,7 @@ void InputDFA::ContextAcquire() {
   break;
   case UNITS_SELECTED:BindKey (0,ClickSelect);
     break;
-  case LOCATION_SELECT://BindKey (0,ClickSelect);
+  case LOCATION_SELECT:BindKey (0,LocSelect);
     break;
   case TARGET_SELECT:BindKey (0,ClickSelect);
     break;
@@ -455,7 +489,7 @@ void InputDFA::ContextSwitch (){
       break;
   case UNITS_SELECTED:UnbindMouse(0);
     break;
-  case LOCATION_SELECT://UnbindMouse(0);
+  case LOCATION_SELECT:UnbindMouse(0);
     break;
   case TARGET_SELECT:UnbindMouse(0);
     break;

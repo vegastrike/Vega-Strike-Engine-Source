@@ -11,22 +11,22 @@ class UnitCollection;
 class ClickList;
 class Sprite;
 class OrderFactory;
+class LocationSelect;
 
 
-void BindOrder(int,OrderFactory *);
 
 class InputDFA {
   enum State {NONE, UNITS_SELECTED, LOCATION_SELECT, TARGET_SELECT};
   OrderFactory *orderfac;
   bool queueOrder;
-
+  LocationSelect * locsel;
   Sprite MouseArrow;
   Sprite SelectBox;
 
   //wish the mouse-bound functions could be member functions
   static void ClickSelect (KBSTATE, int,int,int,int,int);
   static void TargetSelect (KBSTATE,int,int,int,int,int);
-  static void LocationSelect (KBSTATE,int,int,int,int,int);
+  static void LocSelect (KBSTATE,int,int,int,int,int);
   static void NoneSelect (KBSTATE,int,int,int,int,int);
   void SetStateDragSelect();
   void SetStateSomeSelected();
@@ -36,6 +36,7 @@ class InputDFA {
   State state;
   StarSystem *parentSystem;
   ClickList *clickList;
+
   UnitCollection * selected;
   UnitCollection * targetted;
   void ContextSwitch();
@@ -47,11 +48,14 @@ class InputDFA {
   //  enum State dragSelect();
   void replaceCollection (UnitCollection * newcol);
   void appendCollection (UnitCollection *newcol);
+  void NewLocationSelect();
 public:
   InputDFA (StarSystem * par);
   ~InputDFA();
+  
   void Draw();
   void SetOrder (OrderFactory * ofac);
+  static void BindOrder(int,OrderFactory *);
   void ContextAcquire();
   void UnselectAll();
   UnitCollection *getCollection();

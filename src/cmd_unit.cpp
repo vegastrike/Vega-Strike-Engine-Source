@@ -302,15 +302,16 @@ bool Unit::querySphere (float * t,const Vector &pnt, float err) {
 }
 
 
-bool Unit::querySphere (const Vector &start, const Vector &end, float err) {
-  Matrix mat;
+int Unit::querySphere (const Vector &start, const Vector &end, float err) {
+  //Matrix mat;
   //  Identity (mat);
   return querySphere(NULL, start, end, err);
 }
 
-bool Unit::querySphere (float * t,const Vector &st, const Vector &end, float err) {
+int Unit::querySphere (float * t,const Vector &st, const Vector &dir, float err) {
   UpdateMatrix();
   int i;
+  int retval=0;
   float * tmpo = transformation;
   if (t!=NULL) { 
     MultMatrix (tmpo,t,transformation);
@@ -325,9 +326,9 @@ bool Unit::querySphere (float * t,const Vector &st, const Vector &end, float err
     //find distance away from the line now :-)
     //find scale factor of end on start to get line.
     Vector tst (TargetPoint-st);
-    float k = tst.Dot (end)/ (end).Dot (end);
-    TargetPoint = tst - k*(end/*location on line*/);//this is distance 
-      fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
+    float k = tst.Dot (dir)/ (dir).Dot (dir);
+    TargetPoint = tst - k*(dir);
+    ///      fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
     if (TargetPoint.Dot (TargetPoint)< 
 	err*err+
 	meshdata[i]->rSize()*meshdata[i]->rSize()
@@ -340,16 +341,24 @@ bool Unit::querySphere (float * t,const Vector &st, const Vector &end, float err
 #endif
 	2*err*meshdata[i]->rSize()
 	)
-      return true;
-    
-
+      {
+	if (k<-(err*err)) {
+	  retval = -1;
+	  continue;
+	} else 
+	  return 1;
+    }
   }
   for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->querySphere (tmpo,st,end,err))
-      return true;
+    int tmp = (subunits[i]->querySphere (tmpo,st,dir,err));
+    if (tmp==1) return 1;
+    if (tmp ==-1) retval=-1;
+    
   }
-  return false;
+  return retval;
 }
+
+
 
 
 
