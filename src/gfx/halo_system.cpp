@@ -42,7 +42,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       Matrix m = trans;
       ScaleMatrix (m,Vector (scale.i*i->size.i,scale.j*i->size.j,scale.k*i->size.k));
       m.p = Transform (trans,i->loc);
-      mesh->Draw(50000000000000,m,1,halo_alpha,nebdist);    
+      mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);    
     }
   }
 }
