@@ -503,9 +503,9 @@ void AggressiveAI::Execute () {
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
   FireAt::Execute();
-  if (!ProcessCurrentFgDirective (fg)) {
   Unit * target = parent->Target();
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
+  if (!ProcessCurrentFgDirective (fg)) {
   if (isjumpable) {
   if (parent->GetJumpStatus().drive<0) {
     parent->ActivateJumpDrive(0);
