@@ -29,7 +29,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   float worstrelation=0;
   while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-    relation = _Universe->GetRelation (parent->faction, un->faction);
+    relation = GetEffectiveRelationship (un);
     Vector t;
     bool tmp = parent->InRange (un,t);
     if (tmp&&((relation<worstrelation||(relation==worstrelation&&t.Dot(t)<range)))) {
@@ -112,6 +112,9 @@ void FireAt::Execute () {
   }
   done = tmp;
   Unit * targ;
+  if (rand()<RAND_MAX*(SIMULATION_ATOM/300)) {
+    RandomInitiateCommunication(.5,.25);
+  }
   bool shouldfire=false;
   if (targets) 
     shouldfire |=DealWithMultipleTargets();

@@ -193,7 +193,7 @@ vector <string> ParseStringyDestinations (vector <char *> v) {
   }
   return retval;
 }
-
+extern void SetStarSystemLoading (bool value);
 
 void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom) {
 
@@ -317,6 +317,7 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
 #endif
   }
   int count=0;
+  SetStarSystemLoading (true);
   while (GetCorrectStarSysPath (file).length()==0) {
     MakeStarSystem(file, galaxy,RemoveDotSystem (jumpback),count);
     count++;
@@ -347,6 +348,7 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
     ReleaseMutex(hMutex);
 #endif
   }
+  SetStarSystemLoading (false);
   return ss;
 
 }

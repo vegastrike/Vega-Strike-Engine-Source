@@ -185,9 +185,16 @@ int main( int argc, char *argv[] )
 }
   static Animation * SplashScreen = NULL;
   static TextPlane bs_tp ("9x12.font");
-
+static bool BootstrapMyStarSystemLoading=true;
+void SetStarSystemLoading (bool value) {
+  BootstrapMyStarSystemLoading=value;
+}
 void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen) {
+
   static Animation *ani=NULL;
+  if (!BootstrapMyStarSystemLoading) {
+    return;
+  }
   if(SplashScreen==NULL){
     // if there's no splashscreen, we don't draw on it
     // this happens, when the splash screens texture is loaded
@@ -201,10 +208,15 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
 
   Matrix tmp;
   Identity (tmp);
+  BootstrapMyStarSystemLoading=false;
+  static Texture dummy ("white.bmp");
+  BootstrapMyStarSystemLoading=true;
+  dummy.MakeActive();
   GFXDisable(LIGHTING);
   GFXDisable(DEPTHTEST);
   GFXBlendMode (ONE,ZERO);
   GFXEnable (TEXTURE0);
+  GFXDisable (TEXTURE1);
   GFXColor4f (1,1,1,1);
   ScaleMatrix (tmp,Vector (7,7,0));
   GFXClear (GFXTRUE);
@@ -256,7 +268,7 @@ void bootstrap_main_loop () {
     savedun=ParseSaveGame (savegamefile.length()>0?(vs_config->getVariable ("player","callsign","")+savegamefile):string(""),mysystem,mysystem,pos,setplayerloc,credits,playersaveunit);
    
     _Universe->Init (mysystem,pos,planetname);
-
+    SetStarSystemLoading (true);
     bootstrap_draw ("make[1]: Nothing to be done for `Love`");
     bootstrap_draw ("make[1]: Loving directory /home/daniel<3 <3");
     createObjects(playersaveunit);
@@ -281,6 +293,7 @@ void bootstrap_main_loop () {
     UpdateTime();
     delete SplashScreen;
     SplashScreen= NULL;
+    SetStarSystemLoading (false);
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }
