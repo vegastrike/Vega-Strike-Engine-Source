@@ -47,10 +47,11 @@ struct bsp_polygon {
 
 class MeshFX : public GFXLight {
 public:
+  float delta;
   float TTL;
   float TTD;
   MeshFX ():GFXLight(){TTL=0;}
-  MeshFX (const float TTL, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0)): GFXLight(enabled,vect,diffuse,specular,ambient,attenuate){this->TTL = TTL; this->TTD = .4*this->TTL;}
+  MeshFX (const float TTL, const float delta, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0)): GFXLight(enabled,vect,diffuse,specular,ambient,attenuate){this->TTL = TTL; this->TTD = .5*this->TTL; this->delta = delta;}
   void MergeLights (const MeshFX & other);
   bool Update ();//if false::dead
 };
@@ -72,11 +73,11 @@ private:
     enum Names {
       //elements
       UNKNOWN, 
-	  MATERIAL,
-	  AMBIENT,
-	  DIFFUSE,
-	  SPECULAR,
-	  EMISSIVE,
+      MATERIAL,
+      AMBIENT,
+      DIFFUSE,
+      SPECULAR,
+      EMISSIVE,
       MESH, 
       POINTS, 
       POINT, 
@@ -94,15 +95,15 @@ private:
       LOGO,
       REF,
       //attributes
-	  POWER,
+      POWER,
       REFLECT,
       FLATSHADE,
       TEXTURE,
       ALPHAMAP,
-	  ALPHA,
-	  RED,
-	  GREEN,
-	  BLUE,
+      ALPHA,
+      RED,
+      GREEN,
+      BLUE,
       X,
       Y,
       Z,
@@ -193,7 +194,7 @@ private:
     vector<GFXVertex> *active_list;
     vector<int> *active_ind;
     GFXVertex vertex;
-	GFXMaterial material;
+    GFXMaterial material;
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);

@@ -62,35 +62,6 @@ Vector mouseline;
 
 
 
-void Mesh::ProcessUndrawnMeshes() {
-  GFXEnable(DEPTHWRITE);
-  GFXEnable(DEPTHTEST);
-  for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
-    if (a==MESH_SPECIAL_FX_ONLY) {
-      GFXPushGlobalEffects();
-      GFXDisable(DEPTHWRITE);
-    } else {
-
-    }
-    undrawn_meshes[a].sort();//sort by texture address
-    while(undrawn_meshes[a].size()) {
-      Mesh *m = undrawn_meshes[a].back().orig;
-      undrawn_meshes[a].pop_back();
-      m->ProcessDrawQueue();
-      m->will_be_drawn = false;
-    }
-    if (a==MESH_SPECIAL_FX_ONLY) {
-      GFXPopGlobalEffects();
-      GFXEnable(DEPTHWRITE);
-    }
-  }
-  while(undrawn_logos.size()) {
-    Logo *l = undrawn_logos.back();
-    undrawn_logos.pop_back();
-    l->ProcessDrawQueue();
-    l->will_be_drawn = false;
-    }
-}
 
 
 
@@ -188,6 +159,7 @@ static void AvLights (float target[4], const float  other[4]) {
   target[3] = .5*(target[3] + other[3]);
 }
 void MeshFX::MergeLights (const MeshFX & other) {
+  delta = (other.delta + this->delta) *.5;
   TTL = (TTL>other.TTL)
     ?
     (.666667*TTL+.33333*other.TTL)
@@ -229,10 +201,11 @@ bool MeshFX::Update() {
   }
   return TTD>0;
 }
+
 void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm, const float damage, const GFXColor &col) {
   Vector loc (pnt+(rSize()*rSize()-pnt.Dot(pnt))*norm);
   GFXColor tmp (col.r*.5*damage,col.g*.5*damage,col.b*.5*damage,col.a*.5*damage);
-  MeshFX newFX (2*damage,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,4*damage/(rSize()*rSize())));
+  MeshFX newFX (2,.1,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,4*damage/(rSize()*rSize())));
   if (LocalFX.size()>2) {
     LocalFX[LocalFX.size()-1].MergeLights (newFX);
   } else {
@@ -249,6 +222,12 @@ void Mesh::UpdateFX() {
       i--;
     }
   }
+}
+
+void Mesh::EnableSpecialFX(){
+  draw_sequence=MESH_SPECIAL_FX_ONLY;
+  setEnvMap(GFXFALSE);
+  orig->envMap = GFXFALSE;
 }
 
 //#include "d3d_internal.h"
@@ -268,33 +247,60 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
     undrawn_meshes[draw_sequence].push_back(OrigMeshContainer(orig));
   }
 }
-void Mesh::EnableSpecialFX(){
-  draw_sequence=MESH_SPECIAL_FX_ONLY;
-  setEnvMap(GFXFALSE);
-  orig->envMap = GFXFALSE;
+
+
+void Mesh::ProcessUndrawnMeshes() {
+  GFXEnable(DEPTHWRITE);
+  GFXEnable(DEPTHTEST);
+  GFXEnable(LIGHTING);
+  GFXEnable(CULLFACE);
+
+  for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
+    if (a==MESH_SPECIAL_FX_ONLY) {
+      GFXPushGlobalEffects();
+      GFXDisable(DEPTHWRITE);
+    } else {
+
+    }
+    undrawn_meshes[a].sort();//sort by texture address
+    while(undrawn_meshes[a].size()) {
+      Mesh *m = undrawn_meshes[a].back().orig;
+      undrawn_meshes[a].pop_back();
+      m->ProcessDrawQueue();
+      m->will_be_drawn = false;
+    }
+    if (a==MESH_SPECIAL_FX_ONLY) {
+      GFXPopGlobalEffects();
+      GFXEnable(DEPTHWRITE);
+    }
+  }
+  while(undrawn_logos.size()) {
+    Logo *l = undrawn_logos.back();
+    undrawn_logos.pop_back();
+    l->ProcessDrawQueue();
+    l->will_be_drawn = false;
+    }
 }
+
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
   GFXSelectMaterial(myMatNum);
-  GFXEnable(LIGHTING);
-  //GFXDisable (LIGHTING);
-  
+  if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
+    GFXDisable(DEPTHWRITE);
+  GFXBlendMode(blendSrc, blendDst);
+
   GFXEnable(TEXTURE0);
-  GFXEnable(CULLFACE);
+  if(Decal)
+    Decal->MakeActive();
+  GFXSelectTexcoordSet(0, 0);
   if(envMap) {
     GFXEnable(TEXTURE1);
+    _Universe->activateLightMap();
+    GFXSelectTexcoordSet(1, 1);
   } else {
     GFXDisable(TEXTURE1);
   }
-  if(Decal)
-    Decal->MakeActive();
-  
-  GFXSelectTexcoordSet(0, 0);
-  if(envMap) {
-    _Universe->activateLightMap();
-    GFXSelectTexcoordSet(1, 1);
-  }
-  GFXBlendMode(blendSrc, blendDst);
+
   vlist->LoadDrawState();	
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();
@@ -311,9 +317,11 @@ void Mesh::ProcessDrawQueue() {
       specialfxlight.push_back(ligh);
     }
     vlist->Draw();
+
     for (int i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
+
     if(0!=forcelogos) {
       forcelogos->Draw(c.mat);
     }
@@ -321,6 +329,9 @@ void Mesh::ProcessDrawQueue() {
       squadlogos->Draw(c.mat);
     }
   }
+  if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
+    GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
+
 }
 enum EX_EXCLUSION {EX_X, EX_Y, EX_Z};
 inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx, const float err, enum EX_EXCLUSION excludeWhich) {

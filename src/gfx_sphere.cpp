@@ -147,25 +147,7 @@ void SphereMesh::SetBlendMode (const BLENDFUNC a, const BLENDFUNC b) {
 }
 
 void SphereMesh::ProcessDrawQueue() {
-  GFXSelectMaterial(myMatNum);
-  //static float rot = 0;
-  GFXColor(1.0, 1.0, 1.0, 1.0);
-  GFXEnable (LIGHTING);
-  GFXEnable(TEXTURE0);
-  if(envMap) {
-    GFXEnable(TEXTURE1);
-  } else {
-    GFXDisable(TEXTURE1);
-  }
-  Decal->MakeActive();
-  GFXBlendMode(blendSrc, blendDst);
-  
-  GFXSelectTexcoordSet(0, 0);
-  if(envMap) {
-    //_Universe->getLightMap()->MakeActive();
-    _Universe->activateLightMap();
-    GFXSelectTexcoordSet(1, 1);
-  }
+
   if (insideout||(blendDst!=ZERO)) 
     GFXDisable (CULLFACE);
   if (centered) {
@@ -174,42 +156,14 @@ void SphereMesh::ProcessDrawQueue() {
     GFXDisable(DEPTHTEST);
     GFXDisable(TEXTURE1);
   }	
-  vlist->LoadDrawState();
-  static float theta=0;
-  while(draw_queue->size()) {
-    MeshDrawContext c = draw_queue->back();
-    draw_queue->pop_back();
-    Matrix tmp;	
-    Matrix tmp2;
-    Identity (tmp);
-    if (!centered){
-        VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)),Vector(0,1,0), Vector (-sin (theta),0,cos(theta)));
-    }
-    MultMatrix (tmp2, c.mat, tmp);
-    GFXLoadIdentity(MODEL);
-    GFXPickLights (Vector (tmp2[12],tmp2[13],tmp2[14]),rSize());
-    
-    if (c.SpecialFX->size())
-      GFXLoadMatrix(MODEL, c.mat);
-    vector <int> specialfxlight;
-    for (int i=0;i<c.SpecialFX->size();i++) {
-      int ligh;
-      GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
-      specialfxlight.push_back(ligh);
-    }
-    GFXLoadMatrix(MODEL, tmp2);
-    theta+=.01;
-    vlist->Draw();
-    for (int i=0;i<specialfxlight.size();i++) {
-      GFXDeleteLight (specialfxlight[i]);
-    }
-
-    if(0!=forcelogos) {
-      forcelogos->Draw(tmp2);
-      squadlogos->Draw(tmp2);
-    }
-  }
-
+    //Matrix tmp;	
+    //Matrix tmp2;
+    //Identity (tmp);
+    //    if (!centered){
+      //dumb rotation        VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)),Vector(0,1,0), Vector (-sin (theta),0,cos(theta)));
+    //}
+    //MultMatrix (tmp2, c.mat, tmp);
+  Mesh::ProcessDrawQueue();
   if (insideout)
     GFXEnable(CULLFACE);
   if (centered) {
