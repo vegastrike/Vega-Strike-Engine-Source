@@ -4,6 +4,7 @@
  * Globals 
  */
 game_data_t g_game;
+ForceFeedback *forcefeedback;
 
 NetClient * Network=NULL;
 

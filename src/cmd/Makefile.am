@@ -27,7 +27,7 @@ libcmdgeneric =			\
 	images.h						\
 	collection.h					\
 	collection.cpp					\
-	mount_generic.cpp				\
+	mount.cpp				\
 	container.h						\
 	container.cpp	\
 	unit_const_cache.cpp \
@@ -42,6 +42,8 @@ libcmdgeneric =			\
 	bolt_generic.cpp	\
 	beam.h			\
 	beam_generic.cpp	\
+	weapon_xml.cpp			\
+	weapon_xml.h			\
 	role_bitmask.cpp	\
 	role_bitmask.h
 
@@ -50,7 +52,6 @@ libcmdserver_a_SOURCES =$(libcmdgeneric)			\
 	unit_functions_server.cpp			\
 	bolt_server.cpp			\
 	beam_server.cpp			\
-	mount_server.cpp		\
 	unit_factory_server.cpp
 
 
@@ -91,12 +92,9 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	unit_bsp.cpp			\
 	unit_interface.cpp		\
 	unit_factory.cpp		\
-	weapon_xml.cpp			\
-	weapon_xml.h			\
 	planet.h 				\
 	planet.cpp 				\
 	missile.h			\
-	mount.cpp			\
 	unit_functions.cpp
 
 #	unit_jump.cpp				\

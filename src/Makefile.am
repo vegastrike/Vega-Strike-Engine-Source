@@ -131,6 +131,7 @@ librootserver =					\
 	libaudioserver.cpp			\
 	libserver.cpp				\
 	universe_util_server.cpp	\
+	force_feedback_server.cpp	\
 	faction_util_server.cpp
 
 vegaserver_SOURCES =			\

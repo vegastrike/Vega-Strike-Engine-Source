@@ -980,6 +980,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         // zonemgr->AddClient( clt, 1);
         break;
     case CMD_PING:
+		// Nothing to do here, just receiving the packet is enough
         //cout<<"Got PING from serial "<<packet.getSerial()<<endl;
         break;
     case CMD_LOGOUT:

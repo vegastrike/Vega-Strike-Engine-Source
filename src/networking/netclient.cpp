@@ -523,7 +523,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 /*** We must make sure those 2 conditions are enough ***/
                 cout << ">>> ACK =( " << current_timestamp
                      << " )= ---------------------------------------------------" << endl;
-		p1.ack( );
+				p1.ack( );
                 break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd

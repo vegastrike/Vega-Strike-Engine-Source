@@ -13,6 +13,63 @@
 #include "gfx/cockpit_generic.h"
 #include "force_feedback.h"
 
+Mount::Mount() {
+	static weapon_info wi(weapon_info::BEAM);
+	type=&wi; size=weapon_info::NOWEAP;
+	ammo=-1;
+	status= UNCHOSEN;
+	processed=Mount::PROCESSED;
+	sound=-1;
+	static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
+
+	static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
+	xyscale=xyscalestat;	
+	zscale=zscalestat;
+}
+
+Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
+  static weapon_info wi(weapon_info::BEAM);
+  size = weapon_info::NOWEAP;
+  static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
+  
+  static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));  
+  if (xyscale==-1)
+	  xyscale=xyscalestat;
+  if (zscale==-1)
+	  zscale=zscalestat;
+  this->zscale=zscale;
+    this->xyscale=xyscale;
+  ammo = am;
+  sound = -1;
+  type = &wi;
+  this->volume=vol;
+  ref.gun = NULL;
+  status=(UNCHOSEN);
+  processed=Mount::PROCESSED;
+  weapon_info * temp = getTemplate (filename);  
+  if (temp==NULL) {
+    status=UNCHOSEN;
+    time_to_lock=0;
+  }else {
+    type = temp;
+    status=ACTIVE;
+    time_to_lock = temp->LockTime;
+  }
+}
+
+extern void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone);
+void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone) {
+  AdjustMatrix (mat,target,speed,lead,cone);
+}
+
+void Mount::UnFire () {
+  processed = UNFIRED;
+  if (status!=ACTIVE||ref.gun==NULL||type->type!=weapon_info::BEAM)
+    return ;
+  //  AUDStopPlaying (sound);
+  ref.gun->Destabilize();
+}
+
 void Mount::SwapMounts(Mount * other) {
 	  short thisvol = volume;
 	  short othervol = other->volume;
@@ -32,31 +89,49 @@ void Mount::SwapMounts(Mount * other) {
 	  other->SetMountPosition (v);
 	  other->SetMountOrientation (q);  
 }
-void Mount::ReplaceSound () {
-  sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
+void Mount::ReplaceMounts (const Mount * other) {
+	short thisvol = volume;
+	short thissize = size;
+	Quaternion q =this->GetMountOrientation();
+	Vector v = this->GetMountLocation();
+	*this=*other;
+	this->size=thissize;
+	volume=thisvol;
+	this->SetMountPosition(v);
+	this->SetMountOrientation(q);	
+	ref.gun=NULL;
+	this->ReplaceSound();
+}
+double Mount::Percentage (const Mount *newammo) const{
+	  float percentage=0;
+	  int thingstocompare=0;
+	  if (status==UNCHOSEN||status==DESTROYED)
+		return 0;
+	  if (newammo->ammo==-1) {
+		if (ammo!=-1) {
+		  thingstocompare++;
+		}
+	  } else {
+		if (newammo->ammo>0) {
+		  percentage+=ammo/newammo->ammo;
+		  thingstocompare++;
+		}
+	  }
+	  if (newammo->type->Range) {
+		percentage+= type->Range/newammo->type->Range;
+		thingstocompare++;
+	  }
+	  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
+		percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
+		thingstocompare++;
+	  }
+	  if (thingstocompare) {
+		return percentage/thingstocompare;
+	  }else {
+		return 0;
+	  }
 }
 
-void Mount::PhysicsAlignedUnfire() {
-  //Stop Playing SOund?? No, that's done in the beam, must not be aligned
-  if (processed==UNFIRED) {
-  if (AUDIsPlaying (sound))
-    AUDStopPlaying (sound);
-    processed=PROCESSED;
-  }
-}
-
-void Mount::UnFire () {
-  processed = UNFIRED;
-  if (status!=ACTIVE||ref.gun==NULL||type->type!=weapon_info::BEAM)
-    return ;
-  //  AUDStopPlaying (sound);
-  ref.gun->Destabilize();
-}
-
-extern void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone);
-void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone) {
-  AdjustMatrix (mat,target,speed,lead,cone);
-}
 bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;
@@ -158,45 +233,16 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
   }
   return false;
 }
-Mount::Mount() {
-	static weapon_info wi(weapon_info::BEAM);
-	type=&wi; size=weapon_info::NOWEAP;
-	ammo=-1;
-	status= UNCHOSEN;
-	processed=Mount::PROCESSED;
-	sound=-1;
-	static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
-
-	static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));
-	xyscale=xyscalestat;	
-	zscale=zscalestat;
-}
-Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
-  static weapon_info wi(weapon_info::BEAM);
-  size = weapon_info::NOWEAP;
-  static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
-  
-  static float zscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_zscale","1"));  
-  if (xyscale==-1)
-	  xyscale=xyscalestat;
-  if (zscale==-1)
-	  zscale=zscalestat;
-  this->zscale=zscale;
-    this->xyscale=xyscale;
-  ammo = am;
-  sound = -1;
-  type = &wi;
-  this->volume=vol;
-  ref.gun = NULL;
-  status=(UNCHOSEN);
-  processed=Mount::PROCESSED;
-  weapon_info * temp = getTemplate (filename);  
-  if (temp==NULL) {
-    status=UNCHOSEN;
-    time_to_lock=0;
-  }else {
-    type = temp;
-    status=ACTIVE;
-    time_to_lock = temp->LockTime;
+void Mount::PhysicsAlignedUnfire() {
+  //Stop Playing SOund?? No, that's done in the beam, must not be aligned
+  if (processed==UNFIRED) {
+  if (AUDIsPlaying (sound))
+    AUDStopPlaying (sound);
+    processed=PROCESSED;
   }
 }
+
+void Mount::ReplaceSound () {
+  sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
+}
+

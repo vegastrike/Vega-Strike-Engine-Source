@@ -73,7 +73,6 @@ int nadanixnuthin() {
 /*
  * Globals 
  */
-ForceFeedback *forcefeedback;
 Universe * _Universe;
 // GameUniverse _Universe;
 TextPlane *bs_tp=NULL;
