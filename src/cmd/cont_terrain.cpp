@@ -22,6 +22,12 @@ ContinuousTerrain::ContinuousTerrain (char ** filenames, const int numwidth, con
   }
   for (i=0;i<width;i++) {
     for (int j=0;j<width;j++) {
+      int nj = j-1<0?width-1:j-1;
+      int ni = i-1<0?width-1:i-1;
+      data[j+width*i]->SetNeighbors (data[(j+1)%width+width*i],
+				     data[j+width*((i+1)%width)],
+				     data[nj+width*i],
+				     data[j+width*ni]);
       location[j+width*i].Set (0+sizeX*j,0,0-sizeZ*i);
 
     }

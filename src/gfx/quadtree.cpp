@@ -9,6 +9,11 @@ const GFXVertex InitialVertices [4]= { GFXVertex (Vector(0,0,0),Vector (0,1,0), 
 				       GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0) };
  
 QuadTree::QuadTree (const char * filename, const Vector &Scales, const float radius):minX(0), minZ(0), maxX(0),  maxZ(0),Scales (Scales), vertices (GFXTRI,4,InitialVertices,4,true) {
+  neighbors[0]=NULL;
+  neighbors[1]=NULL;
+  neighbors[2]=NULL;
+  neighbors[3]=NULL;
+
   detail =128;
   Identity (transformation);
   transformation[0]=Scales.i;
@@ -49,7 +54,7 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
     LoadXML(filename, Scales,radius);
     //adData();
    } else {
-     quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k));
+     quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
      root = new quadsquare (&RootCornerData);
   }
   root->StaticCullData (RootCornerData,25);
@@ -61,8 +66,15 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
 
 }
 
-
-
+void QuadTree::SetNeighbors (quadsquare * east, quadsquare *north, quadsquare *west, quadsquare *south) {
+  neighbors[0]=east;
+  neighbors[1]=north;
+  neighbors[2]=west;
+  neighbors[3]=south;
+}
+void QuadTree::SetNeighbors (QuadTree *east, QuadTree * north, QuadTree *west, QuadTree * south) {
+  SetNeighbors (east->root, north->root, west->root, south->root);
+}
 QuadTree::~QuadTree () {
   delete root;
   delete nonlinear_transform;
@@ -80,7 +92,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal) {
 
 void QuadTree::Update (unsigned short numstages, unsigned short whichstage) {
   //GetViewerPosition
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k));
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
   root->Update (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition())),detail,numstages,whichstage);
 }
 
@@ -101,7 +113,7 @@ void QuadTree::Render () {
   GFXDisable (TEXTURE1);
   GFXEnable (LIGHTING);
   GFXBlendMode (ONE,ZERO);
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform,&textures, Scales);
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform,&textures, Scales,neighbors);
   root->Render (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition())));
 }
 void	QuadTree::LoadData()

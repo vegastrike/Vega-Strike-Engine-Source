@@ -334,10 +334,10 @@ void createObjects() {
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
     char *happy[9];
-    happy[0]=strdup (stdstr.c_str());
-    happy[1]=strdup (stdstr.c_str());
-    happy[2]=strdup (stdstr.c_str());
-    happy[3]=strdup (stdstr.c_str());
+    happy[0]=strdup ("terrainul.xml");//stdstr.c_str());
+    happy[1]=strdup ("terrainur.xml");//stdstr.c_str());
+    happy[2]=strdup ("terrainll.xml");//stdstr.c_str());
+    happy[3]=strdup ("terrainlr.xml");//stdstr.c_str());
     happy[4]=strdup ("terrain2.xml");
     happy[5]=strdup ("terrain2.xml");
     happy[6]=strdup ("terrain2.xml");

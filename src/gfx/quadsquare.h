@@ -119,7 +119,7 @@ class quadsquare {
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
 	static Vector MakeLightness (float xslope, float zslope, const Vector & loc);
-  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <TerrainTexture> *texturelist, const Vector & NormalScale );
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <TerrainTexture> *texturelist, const Vector & NormalScale, quadsquare * neighbor [4] );
 	
 private:
   static void tri (unsigned int Aind, unsigned short Atex, unsigned int Bind, unsigned short Btex, unsigned int Cind, unsigned short Ctex);
@@ -134,6 +134,7 @@ private:
 	void	StaticCullAux(const quadcornerdata& cd, float ThresholdDetail, int TargetLevel);
 
 	quadsquare*	GetNeighbor(int dir, const quadcornerdata& cd);
+	quadsquare*	GetFarNeighbor(int dir, const quadcornerdata& cd);
 	void	CreateChild(int index, const quadcornerdata& cd);
 	void	SetupCornerData(quadcornerdata* q, const quadcornerdata& pd, int ChildIndex);
 
@@ -150,6 +151,7 @@ private:
 	static std::vector <TextureIndex> indices;
 	static Vector normalscale;
 	static Vector camerapos;
+	static quadsquare *neighbor[4];
 };
 
 

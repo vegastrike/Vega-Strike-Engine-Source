@@ -11,6 +11,7 @@
 
 
 #include <stdio.h>
+#include <float.h>
 #include <math.h>
 #include <assert.h>
 #include "quadsquare.h"
@@ -28,7 +29,7 @@ IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <TerrainTexture> *quadsquare::textures;
 Vector quadsquare::normalscale;
 Vector quadsquare::camerapos;
-
+quadsquare *quadsquare::neighbor[4] = {NULL,NULL,NULL,NULL};
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
 	unsigned int half= 1<<pcd.Level;
 	Vector v[5];
@@ -46,6 +47,8 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 	  v[i].j = Vertex[i].Y;
 	  vertexs[Vertex[i].vertindex].SetTexCoord (nonlinear_trans->TransformS(v[i].i,(*textures)[Vertex[i].GetTex()].scales),nonlinear_trans->TransformT(v[i].k, (*textures)[Vertex[i].GetTex()].scalet));
 	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->Transform(v[i]));
+	  if (vertexs[Vertex[i].vertindex].y>10000||vertexs[Vertex[i].vertindex].z>32768||vertexs[Vertex[i].vertindex].x>32768)
+	    fprintf (stderr,"high %f", vertexs[Vertex[i].vertindex].y);
 	}
 	return half;  
 }
@@ -219,10 +222,10 @@ float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z,  Vector 
 	int	iz = (int)floor(lz);
 
 	// Clamp.
-	if (ix < 0) ix = 0;
-	if (ix > 1) ix = 1;
-	if (iz < 0) iz = 0;
-	if (iz > 1) iz = 1;
+	if (ix < 0) return -FLT_MAX;//ix = 0;
+	  if (ix > 1) return -FLT_MAX;//ix = 1;
+	    if (iz < 0) return -FLT_MAX;//iz = 0;
+	      if (iz > 1) return -FLT_MAX;///iz = 1;
 
 	int	index = ix ^ (iz ^ 1) + (iz << 1);
 	if (Child[index] && Child[index]->Static) {
@@ -273,7 +276,35 @@ float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z,  Vector 
 	return (s00 * (1-lx) + s01 * lx) * (1 - lz) + (s10 * (1-lx) + s11 * lx) * lz;
 }
 
+quadsquare* quadsquare::GetFarNeighbor (int dir, const quadcornerdata&cd) {
+// Traverses the tree in search of the quadsquare neighboring this square to the
+// specified direction.  0-3 --> { E, N, W, S }.
+// Returns NULL if the neighbor is outside the bounds of the tree.
 
+  // If we don't have a parent, then we don't have a neighbor.
+  // (Actually, we could have inter-tree connectivity at this level
+  // for connecting separate trees together.)
+  if (cd.Parent == 0) 
+    return neighbor[dir];
+	
+	// Find the parent and the child-index of the square we want to locate or create.
+	quadsquare*	p = 0;
+	
+	int	index = cd.ChildIndex ^ 1 ^ ((dir & 1) << 1);
+	bool	SameParent = ((dir - cd.ChildIndex) & 2) ? true : false;
+	
+	if (SameParent) {
+		p = cd.Parent->Square;
+	} else {
+		p = cd.Parent->Square->GetFarNeighbor(dir, *cd.Parent);
+		
+		if (p == 0) return 0;
+	}
+	
+	quadsquare*	n = p->Child[index];
+	
+	return n;
+}
 quadsquare*	quadsquare::GetNeighbor(int dir, const quadcornerdata& cd)
 // Traverses the tree in search of the quadsquare neighboring this square to the
 // specified direction.  0-3 --> { E, N, W, S }.
@@ -282,7 +313,7 @@ quadsquare*	quadsquare::GetNeighbor(int dir, const quadcornerdata& cd)
 	// If we don't have a parent, then we don't have a neighbor.
 	// (Actually, we could have inter-tree connectivity at this level
 	// for connecting separate trees together.)
-	if (cd.Parent == 0) return 0;
+	if (cd.Parent == 0) return NULL;
 	
 	// Find the parent and the child-index of the square we want to locate or create.
 	quadsquare*	p = 0;
@@ -318,8 +349,12 @@ void VertInfo::SetTex (float t) {
   assert (t-Tex<1);
 }
 
-void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <TerrainTexture> *tex, const Vector & NormScale ) {
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <TerrainTexture> *tex, const Vector & NormScale,quadsquare * neighbors[4] ) {
   normalscale= NormScale;
+  neighbor[0] = neighbors[0];
+  neighbor[1] = neighbors[1];
+  neighbor[2] = neighbors[2];
+  neighbor[3] = neighbors[3];
   if (quadsquare::blendVertices==NULL) {
     GFXColorVertex tmp[3];
     blendVertices = new GFXVertexList (GFXTRI,3,tmp,3,true);
@@ -412,8 +447,10 @@ void	quadsquare::AddHeightMapAux(const quadcornerdata& cd, const HeightMapInfo& 
 	  Vertex[i].SetTex(texture[i]);
 		if (s[i] != 0) {
 			Dirty = true;
-			Vertex[i].Y += s[i];
-       			
+			if (Vertex[i].Y+s[i]>0)
+			  Vertex[i].Y += s[i];
+       			else
+			  Vertex[i].Y=0;
 			//			vertices[Vertex[i].vertindex].x = v[i].i;//FIXME are we necessary?
 			//vertices[Vertex[i].vertindex].z = v[i].k;
 
@@ -460,9 +497,19 @@ float	HeightMapInfo::Sample(int x, int z, float &texture) const
 	int	rx = (x - XOrigin) & mask;
 	int	rz = (z - ZOrigin) & mask;
 
-	if (ix < 0 || ix >= XSize-1 || iz < 0 || iz >= ZSize-1) {
-	  texture=0;
-	  return 0;	// Outside the grid.
+	if (ix < 0 ){
+	  ix =0;
+	}
+	if (ix >= XSize-1) {
+	  ix = XSize-1;
+	}
+	if (iz < 0) {
+	  iz=0;
+	}
+	if (iz >= ZSize-1) {
+	  iz = ZSize-1;
+	  //	  texture=0;
+	  //	  return 0;	// Outside the grid.
 	}
 	float	fx = float(rx) / (mask + 1);
 	float	fz = float(rz) / (mask + 1);

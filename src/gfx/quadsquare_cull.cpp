@@ -68,7 +68,7 @@ void	quadsquare::StaticCullAux(const quadcornerdata& cd, float ThresholdDetail, 
 	// Check edge vertices to see if they're necessary.
 	float	size = 2 << cd.Level;	// Edge length.
 	if (Child[0] == NULL && Child[3] == NULL && Error[0] * ThresholdDetail < size) {
-		quadsquare*	s = GetNeighbor(0, cd);
+		quadsquare*	s = GetFarNeighbor(0, cd);
 		if (s == NULL || (s->Child[1] == NULL && s->Child[2] == NULL)) {
 
 			// Force vertex height to the edge value.
@@ -84,7 +84,7 @@ void	quadsquare::StaticCullAux(const quadcornerdata& cd, float ThresholdDetail, 
 	}
 
 	if (Child[2] == NULL && Child[3] == NULL && Error[1] * ThresholdDetail < size) {
-		quadsquare*	s = GetNeighbor(3, cd);
+		quadsquare*	s = GetFarNeighbor(3, cd);
 		if (s == NULL || (s->Child[0] == NULL && s->Child[1] == NULL)) {
 			unsigned short y = (unsigned short) ((cd.Verts[2].Y + cd.Verts[3].Y) * 0.5);
 			Vertex[4].Y = y;

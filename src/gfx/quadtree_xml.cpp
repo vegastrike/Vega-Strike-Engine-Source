@@ -419,7 +419,7 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
 
 
 	vertices.EndMutate();
-	quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k));
+	quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
 	root = new quadsquare (&RootCornerData);
       }
       root->AddHeightMap (RootCornerData,hm);
@@ -428,6 +428,6 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
     }
   }
   
- root->StaticCullData (RootCornerData,xml->detail);
+  // root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
 }

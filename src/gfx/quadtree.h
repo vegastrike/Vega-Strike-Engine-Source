@@ -23,6 +23,7 @@ class QuadTree {
   Matrix transformation;
   quadcornerdata RootCornerData;
   quadsquare *root;
+  quadsquare *neighbors[4];
   std::vector <TerrainTexture> textures;
   std::vector <unsigned int> unusedvertices;
   GFXVertexList vertices;
@@ -31,11 +32,13 @@ class QuadTree {
   void LoadData();
   void LoadXML (const char * filename, const Vector & scales, const float radius);
   TerraXML * xml;
+  void SetNeighbors (quadsquare * east, quadsquare * north, quadsquare *west, quadsquare * south);
  public:
   
   QuadTree (const char * filename, const Vector & scales, const float Radius);
   ~QuadTree();
   void Render();
+  void SetNeighbors (QuadTree * east, QuadTree * north, QuadTree *west, QuadTree * south);
   void Update(unsigned short numstages, unsigned short whichstage);
   void SetTransformation (const Matrix transformation);
   float GetHeight (Vector Location, Vector & normal);
@@ -43,7 +46,7 @@ class QuadTree {
   static void endElement(void *userData, const XML_Char *name);
   void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);
   void endElement(const std::string &name);
-  float getminX() {return minX;}  float getminZ() {return minZ;}
+  float getminX() {return 0;}  float getminZ() {return 0;}
   float getmaxX() {return minX+(float)maxX;}  float getmaxZ() {return minZ+(float)maxZ;}
   float getSizeX() {return maxX;} float getSizeZ () {return maxZ;}
 };

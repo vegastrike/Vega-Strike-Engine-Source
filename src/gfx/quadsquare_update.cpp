@@ -132,12 +132,12 @@ void	quadsquare::NotifyChildDisable(const quadcornerdata& cd, int index)
 	quadsquare*	s;
 	
 	if (index & 2) s = this;
-	else s = GetNeighbor(1, cd);
+	else s = GetFarNeighbor(1, cd);
 	if (s) {
 		s->SubEnabledCount[1]--;
 	}
 	
-	if (index == 1 || index == 2) s = GetNeighbor(2, cd);
+	if (index == 1 || index == 2) s = GetFarNeighbor(2, cd);
 	else s = this;
 	if (s) {
 		s->SubEnabledCount[0]--;
@@ -319,12 +319,12 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 	// Test for disabling.  East, South, and center.
 	if ((EnabledFlags & 1) && SubEnabledCount[0] == 0 && VertexTest(cd.xorg + (half<<1), Vertex[1].Y, cd.zorg + half, Error[0], ViewerLocation) == false) {
 		EnabledFlags &= ~1;
-		quadsquare*	s = GetNeighbor(0, cd);
+		quadsquare*	s = GetFarNeighbor(0, cd);
 		if (s) s->EnabledFlags &= ~4;
 	}
 	if ((EnabledFlags & 8) && SubEnabledCount[1] == 0 && VertexTest(cd.xorg + half, Vertex[4].Y, cd.zorg + (half<<1), Error[1], ViewerLocation) == false) {
 		EnabledFlags &= ~8;
-		quadsquare*	s = GetNeighbor(3, cd);
+		quadsquare*	s = GetFarNeighbor(3, cd);
 		if (s) s->EnabledFlags &= ~2;
 	}
 	if (EnabledFlags == 0 &&
@@ -425,7 +425,7 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata& cd) {
 
 
 	float	v;
-	quadsquare*	s = GetNeighbor(0, cd);
+	quadsquare*	s = GetFarNeighbor(0, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[1].Y;
 	
 	V=&vertexs[Vertex[1].vertindex];
@@ -433,21 +433,21 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata& cd) {
 				    (cd.Verts[3].Y-cd.Verts[0].Y)*OneOverSize,
 				    V->GetConstVertex()));
 	
-	s = GetNeighbor(1, cd);
+	s = GetFarNeighbor(1, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[2].Y;
 	V=&vertexs[Vertex[2].vertindex];
 	V->SetNormal (MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
 				    (Vertex[0].Y - v) * OneOverSize,
 				    V->GetConstVertex()));
 	
-	s = GetNeighbor(2, cd);
+	s = GetFarNeighbor(2, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[3].Y;
 	V = &vertexs[Vertex[3].vertindex];
 	V->SetNormal (MakeLightness((Vertex[0].Y - v) * OneOverSize,
 				    (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize,
 				    V->GetConstVertex()));
 	
-	s = GetNeighbor(3, cd);
+	s = GetFarNeighbor(3, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[4].Y;
 	V =&vertexs[Vertex[4].vertindex];
 	V->SetNormal (MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,

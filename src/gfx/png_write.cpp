@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+unsigned int height=256;
+unsigned int width =256;
+int rowoffset=0;
+int coloffset=0;
 
 
 
@@ -12,7 +16,20 @@ unsigned short * Rread (const char * myfile) {
     return tm;
   fread (tm,sizeof (unsigned short), 512*512,fp);
   fclose (fp);
-  return tm;
+  unsigned short *smaller = (unsigned short *)malloc (256*256*sizeof (unsigned short));
+  for (int i=0;i<256;i++) {
+    memcpy (smaller+(i*256),tm+rowoffset+((i+coloffset)*512),sizeof (unsigned short)*256);
+  }
+  if (rowoffset) {
+    for (int i=0;i<256;i++) {
+      smaller[i*256]=tm[rowoffset+-1+((i+coloffset)*512)];
+    }
+  }
+  if (coloffset) {
+    memcpy (smaller,tm+rowoffset+(coloffset-1)*512,sizeof(unsigned short)*256);
+  }
+  delete []tm;
+  return smaller;
 }
 
 void Wwrite (const char * myfile, unsigned short * data) {
@@ -46,8 +63,6 @@ void Wwrite (const char * myfile, unsigned short * data) {
   png_set_compression_window_bits(png_ptr, 15);
   png_set_compression_method(png_ptr, 8);
   
-  const unsigned int height=512;
-  const unsigned int width =512;
   png_set_IHDR(png_ptr, info_ptr, height,width,
 	       16, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
 	       PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -73,6 +88,10 @@ void Wwrite (const char * myfile, unsigned short * data) {
 
 
 int main (int argc, char **argv) {
+  if (argc>3)
+    sscanf (argv[3],"%d",&rowoffset);
+  if (argc>4)
+    sscanf (argv[4],"%d",&coloffset);
   Wwrite (argv[2],Rread (argv[1])); 
   return 0;
 
