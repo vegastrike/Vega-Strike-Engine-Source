@@ -220,6 +220,7 @@ void GFXInit (int argc, char ** argv){
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
     gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));     
+    gl_options.max_texture_dimension= XMLSupport::parse_int (vs_config->getVariable ("graphics","max_texture_dimension","65536"));     
     gl_options.smooth_shade = XMLSupport::parse_bool (vs_config->getVariable ("graphics","SmoothShade","true"));     
     gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
     gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));

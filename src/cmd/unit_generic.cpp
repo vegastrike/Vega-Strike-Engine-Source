@@ -2624,7 +2624,11 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
   }
 }
 
-static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB) {
+static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB, bool clamp=false) {
+  if (clamp) {
+    if (tobeupgraded>upgrador)
+      upgrador=tobeupgraded;
+  }
   if (upgrador!=nothing) {//if upgrador is better than nothing
     float newsum = (*myadd)(tobeupgraded,upgrador);
     if (newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum&&at_least_this>=tobeupgraded){//if we're downgrading
@@ -3094,8 +3098,9 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   int retval;
   double temppercent;
   static Unit * blankship = UnitFactory::createServerSideUnit ("blank",true,FactionUtil::GetFaction("upgrades"));
-#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;} else {if (retval!=NOTTHERE) cancompletefully=false;}
-#define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my)
+#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault),clamp); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;} else {if (retval!=NOTTHERE) cancompletefully=false;}
+#define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false)
+#define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,true)
   STDUPGRADE(armor.front,up->armor.front,templ->armor.front,0);
   STDUPGRADE(armor.back,up->armor.back,templ->armor.back,0);
   STDUPGRADE(armor.right,up->armor.right,templ->armor.right,0);
@@ -3121,7 +3126,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(limits.forward,tlimits_forward,templ->limits.forward,0);
   STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
   STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
-  STDUPGRADE(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
+  STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
   STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
   STDUPGRADE(computer.max_combat_ab_speed,tmax_ab_speed,templ->computer.max_combat_ab_speed,0);
   STDUPGRADE(computer.max_yaw,tmax_yaw,templ->computer.max_yaw,0);
@@ -3167,13 +3172,13 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
   bool ccf = cancompletefully;
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100,false);
   if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
   
   myleak = 1-computer.radar.maxcone;
   upleak=1-up->computer.radar.maxcone;
   templeak=1-(templ!=NULL?templ->computer.radar.maxcone:-1);
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false);
   if (touchme)computer.radar.maxcone=1-myleak;
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   if (up->computer.radar.lockcone!=lc) {
@@ -3183,7 +3188,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (templeak == 1-lc) {
       templeak=2;
     }
-    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false);
     if (touchme)computer.radar.lockcone=1-myleak;
   }
   static float tc =XMLSupport::parse_float (vs_config->getVariable ("physics","autotracking",".93"));//DO NOT CHANGE! see unit.cpp:258
@@ -3194,7 +3199,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (templeak==1-tc) {
       templeak=2;
     }
-    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false);
     if (touchme)computer.radar.trackingcone=1-myleak;    
   }
   cancompletefully=ccf;

@@ -26,6 +26,16 @@ float CityLights::GetS (float theta, float theta_min, float theta_max) {
   
   return wrapx * SphereMesh::GetS(theta,theta_min,theta_max);
 }
+string truncateByPipe (string & input) {
+  unsigned int i=input.find ("|");
+  if (i!=string::npos) {
+    string ret=input.substr (0,i);
+    input=input.substr (i+1);
+  }
+  string tmp (input);
+  input="";
+  return tmp;
+}
 void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap){
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
@@ -146,34 +156,28 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       delete [] modes;
       delete [] QSOffsets;
       SetBlendMode (a,b);
-      int texlen = strlen (texture);
-      bool found_texture=false;
-      if (texlen>3) {
-	if (texture[texlen-1]=='i'&&texture[texlen-2]=='n'&&
-	    texture[texlen-3]=='a'&&texture[texlen-4]=='.') {
-	  found_texture = true;
-	  if (Decal.empty())
-	    Decal.push_back(NULL);
-	  Decal[0] = new AnimatedTexture (texture,0,mipmap);
-	}
-
-      }
-      if (!found_texture) {
-	if (alpha) {
-	  if (Decal.empty())
-	    Decal.push_back(NULL);
-	  Decal[0] = new Texture(texture, alpha,0,mipmap,TEXTURE2D,TEXTURE_2D,1,0,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
-	  
+      string inputtex = texture;
+      int count=0;
+      if (Decal.empty())
+	Decal.push_back(NULL);
+      while (inputtex.length()) {
+	string thistex = truncateByPipe(inputtex);
+	while (Decal.size()<=count)
+	  Decal.push_back(NULL);
+	if (thistex.find (".ani")!=string::npos) {
+	  Decal[count] = new AnimatedTexture (thistex.c_str(),0,mipmap);
 	}else {
-	  if (Decal.empty())
-	    Decal.push_back(NULL);
-	  Decal[0] = new Texture (texture,0,mipmap,TEXTURE2D,TEXTURE_2D,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
+	  if (alpha) {
+	    Decal[count] = new Texture(thistex.c_str(), alpha,0,mipmap,TEXTURE2D,TEXTURE_2D,1,0,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
+	  }else {
+	    Decal[count] = new Texture (thistex.c_str(),0,mipmap,TEXTURE2D,TEXTURE_2D,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
+	  }
 	}
       }
       Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);
       
       if(Insideout) {
-      draw_sequence=0;
+	draw_sequence=0;
       }
       
       Mesh * oldorig = orig;

@@ -143,6 +143,7 @@ typedef struct {
   int compression;
   char wireframe;
   char smooth_shade;
+  int max_texture_dimension;
   bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;

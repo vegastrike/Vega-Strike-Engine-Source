@@ -15,7 +15,51 @@
 #include "gfx/cockpit_generic.h"
 #include "lin_time.h"
 #include "faction_generic.h"
+#include "cmd/role_bitmask.h"
 using namespace Orders;
+using std::map;
+const EnumMap::Pair element_names[] = {
+  EnumMap::Pair ("AggressiveAI" , AggressiveAI::AGGAI),
+  EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
+  EnumMap::Pair ("Distance", AggressiveAI::DISTANCE),
+  EnumMap::Pair ("MeterDistance", AggressiveAI::METERDISTANCE),
+  EnumMap::Pair ("Threat", AggressiveAI::THREAT),
+  EnumMap::Pair ("FShield", AggressiveAI::FSHIELD),
+  EnumMap::Pair ("LShield",AggressiveAI:: LSHIELD),
+  EnumMap::Pair ("RShield", AggressiveAI::RSHIELD),
+  EnumMap::Pair ("BShield", AggressiveAI::BSHIELD),
+  EnumMap::Pair ("Hull", AggressiveAI::HULL),
+  EnumMap::Pair ("Facing", AggressiveAI::FACING),
+  EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT),
+  EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
+};
+const EnumMap AggressiveAIel_map(element_names, 12);
+using std::pair;
+std::map<string,AIEvents::ElemAttrMap *> logic;
+std::map<string,AIEvents::ElemAttrMap *> interrupts;
+AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, std::map<string,AIEvents::ElemAttrMap *> &mymap, bool inter) {
+  map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (name+string("%")+tostring(faction));
+  if (i==mymap.end()) {
+    AIEvents::ElemAttrMap * attr = new AIEvents::ElemAttrMap(AggressiveAIel_map);
+    string filename (name+(inter?string(".int.xml"):string(".agg.xml")));
+    AIEvents::LoadAI (filename.c_str(),*attr,FactionUtil::GetFaction(faction));
+    mymap.insert (pair<string,AIEvents::ElemAttrMap *> (name+string("%")+tostring(faction),attr));
+    return attr;
+  }
+  return i->second;
+}
+AIEvents::ElemAttrMap* getProperLogicOrInterruptScript (string name,int faction, bool interrupt) {
+  return getLogicOrInterrupt (name,faction,interrupt?interrupts:logic,interrupt);
+}
+AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool interrupt) {
+  if (!me||!targ) {
+    int fac=0;
+    if (me)
+      fac=me->faction;
+    return getProperLogicOrInterruptScript("default",fac,interrupt);
+  }
+  return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->combatRole(),targ->combatRole()),me->faction,interrupt);
+}
 
 void DoSpeech (Unit * un, const string &speech) {
   string myname ("[Static]");
@@ -46,24 +90,8 @@ void LeadMe (Unit * un, string directive, string speech) {
   }
 }
 
-const EnumMap::Pair element_names[] = {
-  EnumMap::Pair ("AggressiveAI" , AggressiveAI::AGGAI),
-  EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
-  EnumMap::Pair ("Distance", AggressiveAI::DISTANCE),
-  EnumMap::Pair ("MeterDistance", AggressiveAI::METERDISTANCE),
-  EnumMap::Pair ("Threat", AggressiveAI::THREAT),
-  EnumMap::Pair ("FShield", AggressiveAI::FSHIELD),
-  EnumMap::Pair ("LShield",AggressiveAI:: LSHIELD),
-  EnumMap::Pair ("RShield", AggressiveAI::RSHIELD),
-  EnumMap::Pair ("BShield", AggressiveAI::BSHIELD),
-  EnumMap::Pair ("Hull", AggressiveAI::HULL),
-  EnumMap::Pair ("Facing", AggressiveAI::FACING),
-  EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT),
-  EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
-};
-const EnumMap AggressiveAIel_map(element_names, 12);
 static float aggressivity=2.01;
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,false)), interrupts(getProperScript(NULL,NULL,true)) {
   curinter=INTNORMAL;
   last_time_insys=true;
   obedient = true;
@@ -88,9 +116,15 @@ void AggressiveAI::SetParent (Unit * parent1) {
     interruptname = last_directive.substr(which+1);
   }
   last_directive="b";//prevent escort race condition
-  AIEvents::LoadAI (filename.c_str(),logic,FactionUtil::GetFaction(parent1->faction));
-  AIEvents::LoadAI (interruptname.c_str(),interrupts,FactionUtil::GetFaction(parent1->faction));
 }
+void AggressiveAI::SignalChosenTarget () {
+  if (parent) {
+    logic =getProperScript(parent,parent->Target(),false);
+    interrupts=getProperScript(parent,parent->Target(),true);
+  }
+  FireAt::SignalChosenTarget();
+}
+
 bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   
   if (item.script.length()!=0) {
@@ -228,7 +262,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       last_directive = fg->directive;
     }
     if (fg->directive!=last_directive) {
-      if (float(rand())/RAND_MAX<(obedient?(1-logic.obedience):logic.obedience)) {
+      if (float(rand())/RAND_MAX<(obedient?(1-logic->obedience):logic->obedience)) {
 	obedient = !obedient;
       }
       if (obedient) {
@@ -392,8 +426,8 @@ void AggressiveAI::Execute () {
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
 #endif
       curinter==INTNORMAL)) {
-    if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
-      logic.curtime=interrupts.maxtime;//set it to the time allotted
+    if ((curinter = (ProcessLogic (*interrupts, true)?INTERR:curinter))==INTERR) {
+      logiccurtime=interrupts->maxtime;//set it to the time allotted
     }
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
@@ -405,7 +439,7 @@ void AggressiveAI::Execute () {
       AfterburnTurnTowards(this,parent);
     }else {
       if (target) {
-	ProcessLogic(logic);
+	ProcessLogic(*logic);
 	curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       }else {
 	FlyStraight(this,parent);
@@ -418,7 +452,8 @@ void AggressiveAI::Execute () {
     }
   } else {
     if (target) {
-    if ((--logic.curtime)<=0) {
+    logiccurtime-=SIMULATION_ATOM;
+    if (logiccurtime<=0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
@@ -427,9 +462,9 @@ void AggressiveAI::Execute () {
       if (isjumpable ) {
 	AfterburnTurnTowards(this,parent);
       }else {
-	ProcessLogic (logic);
+	ProcessLogic (*logic);
       }
-      logic.curtime = logic.maxtime;      
+      logiccurtime = logic->maxtime;      
     }
     }
   }

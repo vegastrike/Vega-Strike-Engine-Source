@@ -193,12 +193,14 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   ConvertPalette(textures[handle].palette, palette);
   //memcpy (textures[handle].palette,palette,768);
 }
-static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle) {
+static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle, int maxdimension) {
   int i,j,k,l,m;
+  if (MAX_TEXTURE_SIZE<maxdimension)
+    maxdimension=MAX_TEXTURE_SIZE;
   float *temp = (float *)malloc (pixsize*sizeof(float));
-  int newwidth = width>MAX_TEXTURE_SIZE?MAX_TEXTURE_SIZE:width;
+  int newwidth = width>maxdimension?maxdimension:width;
   int scalewidth = width/newwidth;
-  int newheight = height>MAX_TEXTURE_SIZE?MAX_TEXTURE_SIZE:height;
+  int newheight = height>maxdimension?maxdimension:height;
   int scaleheight = height/newheight;
   *newbuf = (unsigned char*)malloc (newwidth*newheight*pixsize*sizeof(unsigned char));
   for (i=0;i<newheight;i++) {
@@ -305,16 +307,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle,
   return GFXTRUE;
 }
 
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget)
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension)
 {	
+  if (maxdimension==65536) {
+    maxdimension = gl_options.max_texture_dimension;
+  }
   int error;
   unsigned char * tempbuf = NULL;
   unsigned char * tbuf =NULL;
   GLenum internalformat;
   GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
-  if (textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
-    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle);
+  if (textures[handle].width>maxdimension||textures[handle].height>maxdimension||textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
+    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension);
     buffer = tempbuf;
   }
   if (internformat!=PALETTE8) {

@@ -192,7 +192,7 @@ void Texture::FileNotFound(const string &texfilename) {
 	  return;
 
 }
-Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load)
+Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension)
 {
 
   data = NULL;
@@ -368,7 +368,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	    }
 	}
 	fprintf (stderr,"Bind... ");
-	Bind();
+	Bind(maxdimension);
  	fclose (fp);
 	if (fp2)
 	  fclose (fp2);
@@ -379,7 +379,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	fprintf (stderr," Load Success\n");
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension)
 {
   data = NULL;
   ismipmapped  = mipmap;
@@ -630,7 +630,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  }
 	}
 	fprintf (stderr,"Bind... ");
-	Bind();
+	Bind(maxdimension);
 	if (fp)
 	  fclose(fp);
 	if (fp1) {
@@ -676,7 +676,7 @@ Texture::~Texture()
 	}
 
 
-void Texture::Transfer ()
+void Texture::Transfer (int maxdimension)
 {
 	//Implement this in D3D
 	//if(mode == _8BIT)
@@ -685,20 +685,20 @@ void Texture::Transfer ()
 	switch (mode)
 	{
 	case _24BITRGBA:
-		GFXTransferTexture(data, name,RGBA32,image_target);
+		GFXTransferTexture(data, name,RGBA32,image_target,maxdimension);
 		break;
 	case _24BIT:
-		GFXTransferTexture(data, name,RGB24,image_target);
+		GFXTransferTexture(data, name,RGB24,image_target,maxdimension);
 		break;
 	case _8BIT:
-		GFXTransferTexture(data, name,PALETTE8, image_target);
+		GFXTransferTexture(data, name,PALETTE8, image_target,maxdimension);
 		//TODO: Do something about this, and put in some code to check that we can actually do 8 bit textures
 
 		break;
 	}
 	
 }
-int Texture::Bind()
+int Texture::Bind(int maxdimension)
 {
 	switch(mode)
 	{
@@ -715,7 +715,7 @@ int Texture::Bind()
 		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target);
 		break;
 	}
-	Transfer();
+	Transfer(maxdimension);
 
 	return name;
 

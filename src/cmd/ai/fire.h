@@ -24,6 +24,7 @@ protected:
   virtual void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
   bool isJumpablePlanet(Unit *);
   void ReInit (float rxntime, float agglevel);
+  virtual void SignalChosenTarget();
 public:
   //Other new Order functions that can be called from Python.
   virtual void ChooseTarget () {

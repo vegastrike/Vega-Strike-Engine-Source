@@ -62,7 +62,7 @@ namespace AIEvents {
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
-	  eam->curtime=eam->maxtime=(short)(XMLSupport::parse_float((*iter).value)/SIMULATION_ATOM);
+	  eam->maxtime=(short)(XMLSupport::parse_float((*iter).value));
 	  break;
 	case OBEDIENCE:
 	  eam->obedience=(float)(XMLSupport::parse_float((*iter).value));
@@ -105,7 +105,7 @@ namespace AIEvents {
 								      "Targetting",
 								      "obedience",
 								      ".99"));
-    result.curtime=result.maxtime=10/SIMULATION_ATOM;
+    result.maxtime=10;
     full_filename = string("ai/events/") + faction+string("/")+filename;
     FILE * inFile = fopen (full_filename.c_str(), "r");
     if (!inFile) {

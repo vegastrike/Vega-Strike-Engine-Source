@@ -9,8 +9,10 @@ class AggressiveAI: public FireAt {
   bool obedient;//am I currently obedient
   bool last_time_insys;
 protected:
-  AIEvents::ElemAttrMap logic;
-  AIEvents::ElemAttrMap interrupts;
+  void SignalChosenTarget();
+  AIEvents::ElemAttrMap *logic;
+  AIEvents::ElemAttrMap *interrupts;
+  float logiccurtime;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);
   bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter=false);//returns if found anything

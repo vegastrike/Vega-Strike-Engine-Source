@@ -237,7 +237,7 @@ void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
  * in previously specified format. Scales texture approrpiately to
  * Max texture sizes gotten from vid card
  */
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTUREFORMAT internalformat, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTUREFORMAT internalformat, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D, int max_texture_dimension=65536/*make sure it's not bigger than this--usually maybe 65536*/);
 
 GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle, int x, int y, unsigned int width, unsigned int height, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
 

@@ -50,6 +50,8 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
   float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1 for most ships 1 is best
   return range_priority01*role_priority01;
 }
+void FireAt::SignalChosenTarget () {
+}
 //temporary way of choosing
 struct TargetAndRange {
   Unit * t;
@@ -194,6 +196,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   for (vector <TurretBin>::iterator k =  tbin.begin();k!=tbin.end();++k) {
     k->AssignTargets(my_target);
   } 
+  SignalChosenTarget();
   parent->Target (mytarg);
 }
 /* Proper choosing of targets

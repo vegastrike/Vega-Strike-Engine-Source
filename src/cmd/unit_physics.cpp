@@ -230,11 +230,13 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
 	
     }
   }      
+  float dist_sqr_to_target=FLT_MAX;
   Unit * target = Unit::Target();
   bool increase_locking=false;
   if (target&&cloaking<0/*-1 or -32768*/) {
     if (target->isUnit()!=PLANETPTR) {
       Vector TargetPos (InvTransform (cumulative_transformation_matrix,(target->Position()).Cast())); 
+      dist_sqr_to_target = TargetPos.MagnitudeSquared(); 
       TargetPos.Normalize(); 
       if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
 	increase_locking=true;
@@ -254,7 +256,7 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
       if (player_cockpit) {
 	  touched=true;
       }
-      if (increase_locking) {
+      if (increase_locking&&(dist_sqr_to_target>mounts[i]->type->Range*mounts[i]->type->Range)) {
 	mounts[i]->time_to_lock-=SIMULATION_ATOM;
 	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
 	if (!player_cockpit) {
