@@ -748,11 +748,11 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static int upgradefaction = _Universe->GetFaction("upgrades");
   static int neutral = _Universe->GetFaction("neutral");
 
-  if (un->isUnit()==PLANETPTR) {
+  if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
     //same flihgtgroup
     return orig->rSize();
   }
-  if (un->faction==upgradefaction||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
+  if (un->faction==upgradefaction) {
     return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
   }
   float rel=_Universe->GetRelation(un->faction,orig->faction);
