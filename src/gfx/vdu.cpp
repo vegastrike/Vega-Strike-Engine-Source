@@ -503,6 +503,11 @@ void VDU::DrawWeapon (Unit * parent) {
     
   float x,y,w,h;
   const float percent = .6;
+  string buf("\nG: ");
+  int len= buf.length();
+  string mbuf("\nM: ");
+  int mlen = mbuf.length();
+  int count=1;int mcount=1;
   DrawTargetSpr (parent->getHudImage (),percent,x,y,w,h);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING); 
@@ -514,6 +519,10 @@ void VDU::DrawWeapon (Unit * parent) {
     switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Unit::Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
+      if (parent->mounts[i].type.size<weapon_info::LIGHTMISSILE) 
+	buf+=((buf.length()==len)?string(""):string(","))+((count++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name;
+      else
+	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name;
       break;
     case Unit::Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);
@@ -530,8 +539,11 @@ void VDU::DrawWeapon (Unit * parent) {
     }
     DrawGun (pos,w,h,parent->mounts[i].type.size);
   }
-  GFXColor4f(1,1,1,1);
-  
+  GFXColor4f(0,1,.2,1);
+  if (mbuf.length()!=mlen) {
+    buf+=mbuf;
+  }
+  tp->Draw (buf);
 }
 
 void VDU::Draw (Unit * parent) {
