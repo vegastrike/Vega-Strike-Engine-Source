@@ -10,11 +10,11 @@ class StarVlist {
 	GFXVertexList * vlist;
 	float spread;
     Vector camr;
-	
+	Vector camq;
 public:
 	StarVlist (int num, float spread);
 	~StarVlist();
-	void BeginDrawState(const QVector &center, const Vector & vel);
+	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate);
 	void Draw();
 	void EndDrawState();
 };

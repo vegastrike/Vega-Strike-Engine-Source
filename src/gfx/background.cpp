@@ -244,7 +244,7 @@ void Background::Draw()
   GFXDisable (TEXTURE1);
   GFXDisable(DEPTHWRITE);
   GFXBlendMode(ONE,ONE);
-  stars.BeginDrawState(QVector(0,0,0), Vector(0,0,0));
+  stars.BeginDrawState(QVector(0,0,0), Vector(0,0,0),true);
   stars.Draw();
   stars.EndDrawState();
   GFXBlendMode(ONE,ZERO);

@@ -40,10 +40,28 @@ StarVlist::StarVlist (int num ,float spread) {
 	vlist= new GFXVertexList (GFXLINE,2*num,tmpvertex, 2*num, true,0);  
 	delete []tmpvertex;
 }
-void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity) {
-	Vector newcamr = _Universe->AccessCamera()->GetR();
+void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, bool roll) {
+	Vector newcamp,newcamq,newcamr;
+	_Universe->AccessCamera()->GetPQR(newcamp,newcamq,newcamr);
+	Vector camq_delta(newcamq-camq);
     Vector camr_delta(newcamr-camr);
+	Matrix rollMatrix;
+	if (roll) {
+		static float rollstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","roll_star_streak_scale","1"));
+		
+		float hack = (camq_delta.Magnitude()-camr_delta.Magnitude());
+		Vector roller = camq_delta-newcamr.Scale(camq_delta.Dot(newcamr));
+		hack = roller.Magnitude();
+		if (roller.Cross(newcamq).Dot(newcamr)>0) {
+			hack*=-1;
+		}
+		if (0&&hack<0)
+			roll=false;
+		else
+			RotateAxisAngle(rollMatrix,newcamr,hack*rollstreakscale);
+	}
 	camr = newcamr;
+	camq = newcamq;
 	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 
 	Vector vel (-velocity*velstreakscale);
@@ -59,11 +77,16 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity) 
 
 	static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
 	for (int i=0;i<numvertices-1;i+=2) {
-		float scale= (Vector(v[i].x,v[i].y,v[i].z)-center.Cast()).Magnitude()*torquestreakscale;
-		v[i].x=v[i+1].x-vel.i-camr_delta.i*scale;
-		v[i].y=v[i+1].y-vel.j-camr_delta.j*scale;
-		v[i].z=v[i+1].z-vel.k-
-			camr_delta.k*scale;
+		Vector vpoint (v[i+1].x,v[i+1].y,v[i+1].z);
+		Vector recenter =(vpoint-center.Cast());
+		float scale= recenter.Magnitude();
+   		scale*=torquestreakscale;
+		if (roll) {
+			vpoint = Transform(rollMatrix,recenter)+center.Cast();
+		}
+		v[i].x=vpoint.i-vel.i-camr_delta.i*scale;
+		v[i].y=vpoint.j-vel.j-camr_delta.j*scale;
+		v[i].z=vpoint.k-vel.k-camr_delta.k*scale;
 	}
 	vlist->EndMutate();
 	vlist->LoadDrawState();
@@ -114,7 +137,7 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   QVector newcampos =_Universe->AccessCamera()->GetPosition();
-  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity());
+  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),false);
   campos = newcampos;
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
