@@ -51,7 +51,7 @@ class NetBuffer
 			memset( buffer, 0, size);
 		}
 
-		char *	getBuffer() { return buffer;}
+		char *	getData() { return buffer;}
 
 		// Extends the buffer if we exceed MAXBUFFER
 		void	resizeBuffer( int newsize)
@@ -260,8 +260,51 @@ class NetBuffer
 			offset+=sizeof(c);
 			return c;
 		}
+		void	addBuffer( char * buf, int bufsize)
+		{
+			resizeBuffer( offset+bufsize);
+			memcpy( buffer+offset, buf, bufsize);
+			offset+=bufsize;
+		}
+		char *	getBuffer( int offt)
+		{
+			char * tmp = buffer+offset;
+			offset += offt;
+			return tmp;
+		}
+		void	addBuffer( const char * buf, int bufsize)
+		{
+			resizeBuffer( offset+bufsize);
+			memcpy( buffer+offset, buf, bufsize);
+			offset+=bufsize;
+		}
+		// Add and get a string with its length before the char * buffer part
+		void	addString( string str)
+		{
+			int length = str.length();
+			resizeBuffer( offset+length+sizeof( int));
+			length = VSSwapHostIntToLittle( length);
+			memcpy( buffer+offset, &length, sizeof( int));
+			offset += sizeof(int);
+			memcpy( buffer+offset, str.c_str(), length);
+			offset += length;
+		}
+		string	getString()
+		{
+			int s;
+			memcpy( &s, buffer+offset, sizeof( s));
+			offset+=sizeof(s);
+			s = VSSwapHostIntToLittle( s);
+			char c = buffer[offset+s];
+			buffer[offset+s]=0;
+			string str( buffer+offset);
+			buffer[offset+s]=c;
+			offset += s;
 
-		int		getDataSize() { return offset;}
+			return str;
+		}
+
+		int		getDataLength() { return offset;}
 		int		getSize() { return size;}
 };
 

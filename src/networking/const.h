@@ -26,6 +26,10 @@
 #include <assert.h>
 #include <stdio.h>
 
+#define GAMESERVER_VERSION 0.2
+#define ACCOUNTSERVER_VERSION 0.2
+#define NETCLIENT_VERSION 0.2
+
 #define MAXCLIENTS	512
 #define MAXOBJECTS	1024 // Maximum numbre of objects in a zone - HAVE TO FIND A WAY NOT TO LIMIT THAT
 #define SERVER_PORT 6777

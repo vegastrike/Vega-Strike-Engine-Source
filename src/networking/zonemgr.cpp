@@ -218,34 +218,26 @@ void	ZoneMgr::broadcastSnapshots( )
 				net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getLength(), &(*k)->cltadr);
 			}
 			*/
-			/************* Second method : send independently to each client an update ***************/
+			/************* Second method : send independently to each client a buffer of its zone  ***************/
 			// It allows to check (for a given client) if other clients are far away (so we can only
 			// send position, not orientation and stuff) and if other clients are visible to the given
 			// client.
 			// -->> Reduce bandwidth usage but increase CPU usage
-			// Loop for all the zone's clients
 			int	offset = 0, nbclients = 0;
-			// float radius, distance, ratio;
-			// ObjSerial netserial;
 			ObjSerial sertmp;
 			Packet pckt;
+
+			// Loop for all the zone's clients
 			for( k=zone_list[i].begin(); k!=zone_list[i].end(); k++)
 			{
-				// If we don't want to send a client its own info set nbclients to zone_clients-1
+				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
 				nbclients = zone_clients[i]-1;
-				// buffer is bigger than needed in that way
-				//buffer = new char[nbclients*sizeof( ClientState)];
 				netbuf.Reset();
-				//memset( buffer, 0, MAXBUFFER);
-				// Quaternion source_orient( (*k)->current_state.getOrientation());
-				// QVector source_pos( (*k)->current_state.getPosition());
 				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
 				{
 					// Check if we are on the same client and that the client has moved !
 					if( l!=k && !((*l)->current_state.getPosition()==(*l)->old_state.getPosition() && (*l)->current_state.getOrientation()==(*l)->old_state.getOrientation()))
 					{
-						//radius = (*l)->game_unit->rSize();
-						// QVector target_pos( (*l)->current_state.getPosition());
 						// Client pointed by 'k' can see client pointed by 'l'
 						// For now only check if the 'l' client is in front of the ship and not behind
 						if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
@@ -257,47 +249,24 @@ void	ZoneMgr::broadcastSnapshots( )
 							if( 1 /* ratio > XX client not too far */)
 							{
 								// Mark as position+orientation+velocity update
-								//buffer[offset] = CMD_FULLUPDATE;
-								//char cmd = CMD_FULLUPDATE;
 								netbuf.addChar( CMD_FULLUPDATE);
-								//offset += sizeof( char);
-								// Prepare the state to be sent over network (convert byte order)
-								//cout<<"Sending : ";
-								//(*l)->current_state.display();
-								//cstmp = (*l)->current_state;
-								//cstmp.netswap();
+								// Put the current client state in
 								netbuf.addClientState( (*l)->current_state);
-								//(*l)->current_state.netswap();
-								//memcpy( buffer+offset, &cstmp, sizeof( ClientState));
-								// Convert byte order back
-								//(*l)->current_state.netswap();
-								//offset += sizeof( ClientState);
 								// Increment the number of clients we send full info about
 								j++;
 							}
+							// Here find a condition for which sending only position would be enough
 							else if( 1 /* ratio>=1 far but still visible */)
 							{
 								// Mark as position update only
-								//buffer[offset] = CMD_POSUPDATE;
-								//char cmd = CMD_POSUPDATE;
 								netbuf.addChar( CMD_POSUPDATE);
-								//offset += sizeof( unsigned char);
-								//sertmp = htons((*l)->serial);
-								//memcpy( buffer+offset, &(sertmp), sizeof( ObjSerial));
+								// Add the client serial
 								netbuf.addShort( (*l)->serial);
-								//offset += sizeof( ObjSerial);
-								//QVector qvtmp( (*l)->current_state.getPosition());
-								//qvtmp.i = VSSwapHostDoubleToLittle( qvtmp.i);
-								//qvtmp.j = VSSwapHostDoubleToLittle( qvtmp.j);
-								//qvtmp.k = VSSwapHostDoubleToLittle( qvtmp.k);
-								//memcpy( buffer+offset+sizeof( ObjSerial), &qvtmp, sizeof( QVector));
-								//offset += sizeof( QVector);
 								netbuf.addVector( (*l)->current_state.getPosition());
 								// Increment the number of clients we send limited info about
 								p++;
 							}
 						}
-						//assert( offset<MAXBUFFER);
 					}
 					// Else : always send back to clients their own info or just ignore ?
 					// Ignore for now
@@ -306,10 +275,8 @@ void	ZoneMgr::broadcastSnapshots( )
 				if( j+p > 0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.send( CMD_SNAPSHOT, nbclients, netbuf.getBuffer(), netbuf.getDataSize(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	__LINE__);
+					pckt.send( CMD_SNAPSHOT, nbclients, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	__LINE__);
 				}
-				//delete buffer;
-				//offset = 0;
 			}
 		}
 	}
@@ -319,12 +286,10 @@ void	ZoneMgr::broadcastSnapshots( )
 void	ZoneMgr::sendZoneClients( Client * clt)
 {
 	LI k;
-	ClientState tmpcs;
 	int nbclients=0;
 	Packet packet2;
 	string savestr, xmlstr;
-	char * savebuf;
-	int buflen;
+	NetBuffer netbuf;
 
 	// Loop through client in the same zone to send their current_state and save and xml to "clt"
 	for( k=zone_list[clt->zone].begin(); k!=zone_list[clt->zone].end(); k++)
@@ -333,34 +298,14 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 		if( clt!=(*k))
 		{
 			SaveNetUtil::GetSaveStrings( (*k), savestr, xmlstr);
-			buflen = 2*sizeof(unsigned int)+savestr.length()+xmlstr.length();
-			savebuf = new char[buflen];
-			/*
 			unsigned int savelen = savestr.length();
 			unsigned int xmllen = xmlstr.length();
-			unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savelen+xmllen;
-			char * savebuf = new char[buflen];
-			unsigned int nsavelen = htonl( savelen);
-			unsigned int nxmllen = htonl( xmllen);
-			*/
 			// Add the ClientState at the beginning of the buffer
-			tmpcs = (*k)->current_state;
-			memcpy( savebuf, &tmpcs, sizeof( ClientState));
-			// Add the save buffer after the ClientState
-			SaveNetUtil::GetSaveBuffer( savestr, xmlstr, savebuf+sizeof( ClientState));
-			/*
-			memcpy( savebuf+sizeof( ClientState), &nsavelen, sizeof( unsigned int));
-			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short), savestr.c_str(), savelen);
-			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short)+savelen, &nxmllen, sizeof( unsigned int));
-			memcpy( savebuf+sizeof( ClientState)+2*sizeof(unsigned short)+savelen, xmlstr.c_str(), xmllen);
-			*/
-			packet2.send( CMD_ENTERCLIENT, clt->serial, savebuf, buflen+sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-				0
-#else
-				__LINE__ 
-#endif
-				);
+			netbuf.addClientState( (*k)->current_state);
+			// Add the save and xml strings
+			netbuf.addString( savestr);
+			netbuf.addString( xmlstr);
+			packet2.send( CMD_ENTERCLIENT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
 			nbclients++;
 		}
 	}
@@ -373,41 +318,22 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 {
 	LI k;
-	ClientState cstmp;
-	int desc_size, state_size, nbsize;
+	int state_size;
 	unsigned short nbt, nb;
-	desc_size = sizeof( ClientDescription);
 	state_size = sizeof( ClientState);
-	nbsize = sizeof( unsigned short);
 	nbt = zone_clients[clt->zone];
-	int		offset = 0;
 	NetBuffer netbuf;
 
-	//cout<<"Size of description : "<<desc_size<<endl;
-	if( (desc_size+state_size)*nbt >= MAXBUFFER)
-	{
-		cout<<"Error : packet size too big, adjust MAXBUFFER in const.h"<<endl;
-		cout<<"Data size = "<<((desc_size+state_size)*nbt)<<endl;
-		cout<<"Nb clients = "<<nbt<<endl;
-		cleanup();
-	}
-
 	cout<<"ZONE "<<clt->zone<<" - "<<nbt<<" clients"<<endl;
-	nb = htons( nbt);
-	memcpy( bufzone, &nb, nbsize);
+	netbuf.addShort( nbt);
 	for( k=zone_list[clt->zone].begin(); k!=zone_list[clt->zone].end(); k++)
 	{
 		cout<<"SENDING : ";
-		cstmp = (*k)->current_state;
-		cstmp.display();
-		cstmp.netswap();
-		memcpy( bufzone+nbsize+offset, &cstmp, state_size);
-		offset += state_size;
-		memcpy( bufzone+nbsize+offset, &(*k)->current_desc, desc_size);
-		offset += desc_size;
+		netbuf.addClientState( (*k)->current_state);
+		(*k)->current_state.display();
 	}
 
-	return (state_size+desc_size)*nbt;
+	return state_size*nbt;
 }
 
 double	ZoneMgr::isVisible( Quaternion orient, QVector src_pos, QVector tar_pos)

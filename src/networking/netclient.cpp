@@ -103,33 +103,24 @@ int		NetClient::authenticate()
 	     << " enter " << __PRETTY_FUNCTION__ << endl;
 
 	Packet	packet2;
-	int tmplen = NAMELEN*2;
-	char *	buffer = new char[tmplen+1];
-	char	name[NAMELEN], passwd[NAMELEN];
-	string  str_name, str_passwd;
-
-	memset( name, 0, NAMELEN );		// only for easier debugging
-	memset( passwd, 0, NAMELEN ); 	// only for easier debugging
+	string  str_callsign, str_passwd;
+	NetBuffer netbuf;
 
 	// Get the name and password from vegastrike.config
 	// Maybe someday use a default Guest account if no callsign or password is provided thus allowing
 	// Player to wander but not interact with the universe
-	str_name = vs_config->getVariable ("player","callsign","");
+	str_callsign = vs_config->getVariable ("player","callsign","");
 	str_passwd = vs_config->getVariable ("player","password","");
-	memcpy( name, str_name.c_str(), str_name.length());
-	memcpy( passwd, str_passwd.c_str(), str_passwd.length());
-	if( str_name.length() && str_passwd.length())
+	if( str_callsign.length() && str_passwd.length())
 	{
-	    COUT << "name:   " << name << endl
-	         << " *** passwd: " << passwd << endl
-	         << " *** buffer: " << buffer << endl;
-		memcpy( buffer, name, str_name.length());
-		memcpy( buffer+NAMELEN, passwd, str_passwd.length());
-		buffer[tmplen] = '\0';
+	    COUT << "callsign:   " << str_callsign << endl
+	         << " *** passwd: " << str_passwd << endl
+	         << " *** buffer: " << netbuf.getData() << endl;
+		netbuf.addString( str_callsign);
+		netbuf.addString( str_passwd);
 
-		packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-		delete buffer;
-		COUT << "Send login for player <" << str_name << ">:< "<< str_passwd
+		packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+		COUT << "Send login for player <" << str_callsign << ">:< "<< str_passwd
 		     << "> - buffer length : " << packet2.getDataLength()
              << " (+" << packet2.getHeaderLength() << " header len" <<endl;
 	}
@@ -146,34 +137,27 @@ int		NetClient::authenticate()
 /**** Login loop                                          ****/
 /*************************************************************/
 
-vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
+vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 {
 	COUT << "enter " << "NetClient::loginLoop" << endl;
 
 	Packet	packet2;
-	int tmplen = NAMELEN*2;
-	char *	buffer = new char[tmplen+1];
-	// HAVE TO DELETE netbuf after return in calling function
-	//char *	netbuf = new char[MAXBUFFER];
-	char	name[NAMELEN], passwd[NAMELEN];
 	vector<string> savefiles;
+	NetBuffer netbuf;
 
-	memset( buffer, 0, tmplen+1);
-	memset( name, 0, NAMELEN);
-	memset( passwd, 0, NAMELEN);
-	memcpy( buffer, str_name.c_str(), str_name.length());
-	memcpy( buffer+NAMELEN, str_passwd.c_str(), str_passwd.length());
+	//memset( buffer, 0, tmplen+1);
+	netbuf.addString( str_callsign);
+	netbuf.addString( str_passwd);
 
 	COUT << "Buffering to send with CMD_LOGIN: " << endl;
-	PacketMem m( buffer, tmplen, PacketMem::LeaveOwnership );
+	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
 	m.dump( cout, 3 );
 
-	packet2.send( CMD_LOGIN, 0, buffer, tmplen, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-	COUT << "Sent login for player <" << str_name << ">:<" << str_passwd
+	packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
-	     << "   - buffer: " << buffer << endl;
-	delete buffer;
+	     << "   - buffer: " << netbuf.getData() << endl;
 	// Now the loop
 	int timeout=0, recv=0, ret=0;
 	UpdateTime();
@@ -214,10 +198,9 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 	cout<<"End of login loop"<<endl;
 	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_UNAVAIL)
 	{
-		this->callsign = str_name;
+		this->callsign = str_callsign;
 		savefiles = globalsaves;
 	}
-	//delete netbuf;
 	return savefiles;
 }
 
@@ -404,15 +387,10 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
 
 int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 {
-    // unsigned int len2;
     ObjSerial	packet_serial=0;
-    // int len=0;
-    // int nbpackets=0;
 
     // Receive data
     AddressIP sender_adr;
-    //char      buffer[MAXBUFFER];
-    //unsigned int    len = MAXBUFFER;
 	PacketMem mem;
     int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
 
@@ -424,8 +402,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
     }
     else
     {
-        //Packet p1( buffer, len );
         Packet p1( mem );
+		NetBuffer netbuf( p1.getData(), p1.getDataLength());
 	    p1.setNetwork( &sender_adr, clt_sock );
 	    if( outpacket )
 	    {
@@ -447,14 +425,12 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 // Should receive player's data (savegame) from server if there is a save
                 this->serial = packet_serial;
                 localSerials.push_back( this->serial);
-				globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
-				/* USELESS NOW : directly get the save strings
-		        if( netbuffer != NULL )
-				{
-		            memcpy( netbuffer, p1.getData(), p1.getDataLength());
-				}
-				*/
-                // Set current timestamp
+				// Go forward to go after the 2 strings (name, passwd)
+				netbuf.getString();
+				netbuf.getString();
+				globalsaves[0] = netbuf.getString();
+				globalsaves[1] = netbuf.getString();
+				//globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
                 break;
             // Login failed
             case LOGIN_ERROR :
@@ -618,18 +594,19 @@ void	NetClient::addClient( const Packet* packet )
 	cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	cout<<"At : ";
 
+	//Packet ptmp = packet;
+	NetBuffer netbuf( packet->getData(), packet->getDataLength());
 	// Should receive the name
-	string callsign ("player"+cltserial);
-	memcpy( clt->name, callsign.c_str(), callsign.length());
-	ClientState cs;
-	memcpy( &cs, packet->getData(), sizeof( ClientState));
-	clt->current_state = cs;
+	clt->name = netbuf.getString();
+	//ClientState cs = clt->current_state = netbuf.getClientState();
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
 		// The save buffer and XML buffer come after the ClientState
 		vector<string> saves;
-		saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
+		saves[0] = netbuf.getString();
+		saves[1] = netbuf.getString();
+		//saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
 		char * savebuf = new char[saves[1].length()+1];
 		memcpy( savebuf, saves[1].c_str(), saves[1].length());
 		savebuf[saves[1].length()] = 0;
@@ -649,7 +626,6 @@ void	NetClient::addClient( const Packet* packet )
 		// Parse the save buffer
 		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
 
-		cs.display();
 		// WE DON'T STORE FACTION IN SAVE YET
 		string PLAYER_FACTION_STRING( "privateer");
 
@@ -669,9 +645,12 @@ void	NetClient::addClient( const Packet* packet )
 		//cout<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
-		clt->game_unit.GetUnit()->SetPosition( cs.getPosition());
-		clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-		clt->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+		clt->game_unit.GetUnit()->SetPosition( save.GetPlayerLocation());
+		clt->current_state.setSerial( cltserial);
+		clt->current_state.setPosition( save.GetPlayerLocation());
+		// No need to set orientation and speed when client is created in the zone
+		//clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+		//clt->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
 		clt->game_unit.GetUnit()->SetNetworkMode( true);
 
 		// In that case, we want cubic spline based interpolation
@@ -719,15 +698,13 @@ void	NetClient::sendPosition( const ClientState* cs )
 {
 	// Serial in ClientState is updated in UpdatePhysics code at ClientState creation (with pos, veloc...)
 	Packet pckt;
-	ClientState cstmp(*cs);
-	int		update_size = sizeof( ClientState);
-	//char * buffer = new char[update_size];
+	NetBuffer netbuf;
 
 	// Send the client state
-	cout<<"Sending position == ";
-	cstmp.display();
-	cstmp.netswap();
-	pckt.send( CMD_POSUPDATE, this->serial, (char *) &cstmp, update_size, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__);
+	cout<<"Sending ClientState == ";
+	(*cs).display();
+	netbuf.addClientState( (*cs));
+	pckt.send( CMD_POSUPDATE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__);
 }
 
 /**************************************************************/
@@ -762,8 +739,6 @@ void	NetClient::receivePosition( const Packet* packet )
 		if( cmd == CMD_FULLUPDATE)
 		{
 			cs = netbuf.getClientState();
-			//memcpy( &cs, (databuf+offset), cssize);
-			//cs.netswap();
 			// Do what needed with update
 			cout<<"Received FULLSTATE ";
 			// Tell we received the ClientState so we can convert byte order from network to host
@@ -776,10 +751,8 @@ void	NetClient::receivePosition( const Packet* packet )
 			{
 				// Backup old state
 				clt->old_state = Clients[sernum]->current_state;
-				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
 				// Update concerned client directly in network client list
 				clt->current_state = cs;
-				// memcpy( &(Clients[sernum]->current_state), &cs, sizeof( ClientState));
 
 				// Set the orientation by extracting the matrix from quaternion
 				clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
@@ -805,14 +778,10 @@ void	NetClient::receivePosition( const Packet* packet )
 			if( clt!=NULL && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
 			{
 				// Backup old state
-				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
 				clt->old_state = clt->current_state;
 				// Set the new received position in current_state
 				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
 				QVector tmppos = netbuf.getVector();
-				//QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
-				//tmppos.netswap();
-				//tmppos = (QVector) *(databuf+offset);
 				clt->current_state.setPosition( tmppos);
 				// Use SetCurPosition or SetPosAndCumPos ??
 				clt->game_unit.GetUnit()->SetCurPosition( tmppos);
@@ -822,10 +791,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			else
 			{
 				ClientState cs2;
-				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
-				//QVector tmppos( (double) *(databuf+offset), (double) *(databuf+offset+qfsize), (double) *(databuf+offset+qfsize+qfsize));
 				QVector tmppos = netbuf.getVector();
-				//tmppos.netswap();
 				cs2.setPosition( tmppos);
 				cs2.display();
 				cout<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
@@ -843,10 +809,12 @@ void	NetClient::receivePosition( const Packet* packet )
 void	NetClient::inGame()
 {
 	Packet packet2;
+	NetBuffer netbuf;
 
 	ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
-	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	netbuf.addClientState( cs);
+	packet2.send( CMD_ADDCLIENT, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
@@ -869,14 +837,6 @@ void	NetClient::sendAlive()
 
 void	NetClient::receiveSave( const Packet* packet )
 {
-    // char * xml = packet.getData() + NAMELEN*2 + sizeof( int);
-    int xml_size = ntohl(*(packet->getData()+ NAMELEN*2));
-
-    // HERE SHOULD LOAD Savegame desciription from the save in the packet
-    // char * save = packet->getData() + NAMELEN*2 + sizeof( int)*2 + xml_size;
-    int save_size = *(packet->getData()+ NAMELEN*2 + sizeof( int) + xml_size);
-    cout<<"RECV SAVES : XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
-    cout<<"Welcome back in VegaStrike, "<<packet->getData()<<endl;
 }
 
 /*************************************************************/
@@ -1024,7 +984,7 @@ void	NetClient::FireBolt()
 	netbuf.addWeaponInfo( wi);
 
 	Packet p;
-	p.send( CMD_BOLT, this->serial, netbuf.getBuffer(), netbuf.getDataSize(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_BOLT, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 
 	*/
 }
@@ -1047,7 +1007,7 @@ void	NetClient::FireProjectile()
 	//setWeaponInfo( netwi, wi_buffer, wi_size);
 	
 	Packet p;
-	p.send( CMD_PROJECTILE, this->serial, netbuf.getBuffer(), netbuf.getDataSize(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_PROJECTILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 	*/
 }
 

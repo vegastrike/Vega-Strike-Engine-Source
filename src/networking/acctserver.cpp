@@ -5,6 +5,7 @@
 #include "lin_time.h"
 #include "vsnet_serversocket.h"
 #include "vs_path.h"
+#include "networking/netbuffer.h"
 
 VegaConfig * vs_config;
 string acctdir;
@@ -141,10 +142,8 @@ void	AccountServer::start()
 
 void	AccountServer::recvMsg( SOCKETALT sock)
 {
-	char			name[NAMELEN+1];
-	char			passwd[NAMELEN+1];
+	string callsign, passwd;
 	AddressIP		ipadr;
-	unsigned int	len=0;
 	int				recvcount=0;
 	unsigned char	cmd;
 	Account *		elem = NULL;
@@ -163,22 +162,22 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 		Packet p( mem);
 
 		packet = p;
+		NetBuffer netbuf( p.getData(), p.getDataLength());
 		// Check the command of the packet
 		cmd = packet.getCommand();
-		const char * buf = packet.getData();
-		cout<<"Buffer => "<<buf<<endl;
+		cout<<"Buffer => "<<p.getData()<<endl;
 		VI j;
 		switch( cmd)
 		{
 			case CMD_LOGIN :
-				strcpy( name, buf);
-				strcpy( passwd, buf+NAMELEN);
-				cout<<">>> LOGIN REQUEST =( "<<name<<":"<<passwd<<" )= --------------------------------------"<<endl;
+				callsign = netbuf.getString();
+				passwd = netbuf.getString();
+				cout<<">>> LOGIN REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
 
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
 					elem = *j;
-					if( !elem->compareName( name) && !elem->comparePass( passwd))
+					if( !elem->compareName( callsign) && !elem->comparePass( passwd))
 					{
 						// We found the client in the account list
 						found = 1;
@@ -192,7 +191,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				if( !found)
 				{
 					cout<<"Login/passwd not found"<<endl;
-					Account elt(name, passwd);
+					Account elt(callsign, passwd);
 					this->sendUnauthorized( sock, &elt);
 					delete elem;
 				}
@@ -213,15 +212,14 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
 			break;
 			case CMD_LOGOUT :
-				packet.display( "", 0);
-				strcpy( name, buf);
-				strcpy( passwd, buf+NAMELEN);
-				cout<<">>> LOGOUT REQUEST =( "<<name<<":"<<passwd<<" )= --------------------------------------"<<endl;
+				cout<<">>> LOGOUT REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
+				callsign = netbuf.getString();
+				passwd = netbuf.getString();
 				// Receive logout request containing name of player
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
 					elem = *j;
-					if( !elem->compareName( name) && !elem->comparePass( passwd))
+					if( !elem->compareName( callsign) && !elem->comparePass( passwd))
 					{
 						found = 1;
 						if( elem->isConnected())
@@ -232,14 +230,14 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				}
 				if( !found)
 				{
-					cout<<"ERROR LOGOUT -> didn't find player to disconnect = <"<<name<<">:<"<<passwd<<">"<<endl;
+					cout<<"ERROR LOGOUT -> didn't find player to disconnect = <"<<callsign<<">:<"<<passwd<<">"<<endl;
 				}
 				else
 				{
 					if( connected)
 					{
 						elem->setConnected( false);
-						cout<<"-= "<<name<<" =- Disconnected"<<endl;
+						cout<<"-= "<<callsign<<" =- Disconnected"<<endl;
 					}
 					else
 					{
@@ -249,23 +247,23 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< LOGOUT REQUEST ---------------------------------------"<<endl;
 			break;
 			case CMD_NEWCHAR :
-				cout<<">>> NEW CHAR REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
+				cout<<">>> NEW CHAR REQUEST =( "<<callsign<<" )= --------------------------------------"<<endl;
 				// Should receive the result of the creation of a new char/ship
 				cout<<"<<< NEW CHAR REQUEST -------------------------------------------------------"<<endl;
 			break;
 			case CMD_NEWSUBSCRIBE :
 			{
-				cout<<">>> SUBSRIBE REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
+				cout<<">>> SUBSRIBE REQUEST =( "<<callsign<<" )= --------------------------------------"<<endl;
 				// Should receive a new subscription
-				strcpy( name, buf);
-				strcpy( passwd, buf+NAMELEN);
+				callsign = netbuf.getString();
+				passwd = netbuf.getString();
 				// Loop through accounts to see if the required callsign already exists
 				bool found = false;
 				Packet	packet2;
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
 					elem = *j;
-					if( !elem->compareName( name))
+					if( !elem->compareName( callsign))
 					{
 						// We found an account with the requested name
 						found = true;
@@ -297,7 +295,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 							fbuf=fgets( fbuf, MAXBUFFER, fp);
 							cout<<"Read line : "<<fbuf<<endl;
 						}
-						string acctstr = "\t<PLAYER name=\""+string(name)+"\"\tpassword=\""+string(passwd)+"\" />\n"+"</ACCOUNTS>\n";
+						string acctstr = "\t<PLAYER name=\""+callsign+"\"\tpassword=\""+passwd+"\" />\n"+"</ACCOUNTS>\n";
 						cout<<"Adding to file : "<<acctstr<<endl;
 						if( fputs( acctstr.c_str(), fp) < 0)
 						{
@@ -305,7 +303,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 							exit(1);
 						}
 						fclose( fp);
-						Cltacct.push_back( new Account( name, passwd));
+						Cltacct.push_back( new Account( callsign, passwd));
 					}
 					if( packet2.send( packet.getCommand(), packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
 					{
@@ -345,7 +343,8 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				// Loop through received client serials
 				for( i=0; i<nbclients; i++)
 				{
-					sertmp = ntohs( *( (ObjSerial *)(buf+sizeof( ObjSerial)*i)));
+					sertmp = netbuf.getShort();
+					//sertmp = ntohs( *( (ObjSerial *)(buf+sizeof( ObjSerial)*i)));
 					// Loop through accounts
 					for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
 					{
@@ -386,7 +385,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	// Get a serial for client
 	ObjSerial serial = getUniqueSerial();
 	acct->setSerial( serial);
-	cout<<"\tLOGIN REQUEST SUCCESS for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
+	cout<<"\tLOGIN REQUEST SUCCESS for <"<<acct->callsign<<">:<"<<acct->passwd<<">"<<endl;
 	// Store socket as a game server id
 	acct->setSocket( sock);
 	// Verify that client already has a ship or if it is a new account
@@ -404,12 +403,11 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	}
 	else
 	{
+		NetBuffer netbuf;
 		unsigned int readsize=0, readsize2=0, xmlsize=0, savesize=0;
-		// Put maxsave value to a high value that will be always bigger than simple player saves
-		int maxsave = 0x7fffffff;
 
 	// Try to save xml file
-		string acctfile = acctdir+acct->name+".save";
+		string acctfile = acctdir+acct->callsign+".save";
 		cout<<"Trying to open : "<<acctfile<<endl;
 		FILE *fp = fopen( acctfile.c_str(), "r");
 		if( fp == NULL)
@@ -420,7 +418,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			fp = fopen( acctfile.c_str(), "r");
 		}
 	// Try to open xml file
-		string acctsave = acctdir+acct->name+".xml";
+		string acctsave = acctdir+acct->callsign+".xml";
 		FILE * fp2 = fopen( acctsave.c_str(), "r");
 		if( fp2 == NULL)
 		{
@@ -430,7 +428,8 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			fp2 = fopen( acctsave.c_str(), "r");
 		}
 	// Allocate the needed buffer
-		char * buf;
+		char * savebuf;
+		char * xmlbuf;
 		if( fp!=NULL && fp2!=NULL)
 		{
 			fseek( fp, 0, SEEK_END);
@@ -439,12 +438,13 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			fseek( fp2, 0, SEEK_END);
 			xmlsize = ftell( fp2);
 			fseek( fp2, 0, SEEK_SET);
-			buf = new char[savesize+xmlsize];
+			savebuf = new char[savesize];
+			xmlbuf = new char[xmlsize];
 		}
-	// Read the XML unit file
+	// Read the save unit file
 		if( fp!=NULL)
 		{
-			readsize = fread( (buf+2*NAMELEN+sizeof( unsigned int)), sizeof( char), maxsave, fp);
+			readsize = fread( savebuf, sizeof( char), savesize, fp);
 			if( readsize!=savesize)
 			{
 				cout<<"Error reading save file : "<<readsize<<" read ("<<savesize<<" to read)"<<endl;
@@ -458,18 +458,17 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			cleanup();
 		}
 		// Put the name and passwd of the player in the packet
-		memcpy( buf, packet.getData(), NAMELEN*2);
+		//memcpy( buf, packet.getData(), NAMELEN*2);
+		netbuf.addString( acct->callsign);
+		netbuf.addString( acct->passwd);
 		// Put the size of the first save file in the buffer to send
-		savesize = htonl( readsize);
-		memcpy( buf+2*NAMELEN, &savesize, sizeof( unsigned int));
-		//unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
-		//cout<<"XML reversed = "<<xml_size<<endl;
+		netbuf.addString( string(savebuf));
 
-	// Read the save file
+	// Read the XML file
 		if( fp2!=NULL)
 		{
 			// Read the XML unit file
-			readsize2 = fread( (buf+readsize+2*NAMELEN+2*sizeof( unsigned int)), sizeof( char), maxsave, fp2);
+			readsize2 = fread( xmlbuf, sizeof( char), xmlsize, fp2);
 			if( xmlsize!=readsize2)
 			{
 				cout<<"Error reading xml save file : "<<readsize2<<" read ("<<xmlsize<<" to read)"<<endl;
@@ -482,20 +481,16 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			cout<<"Error, default xml not found"<<endl;
 			cleanup();
 		}
-		// Put the size of the second save file in the buffer to send
-		xmlsize = htonl( readsize2);
-		//cout<<"NETWORK FORMAT : XML size = "<<xmlsize<<" --- SAVE size = "<<savesize<<endl;
-		//cout<<"HOST FORMAT : XML size = "<<ntohl(xmlsize)<<" --- SAVE size = "<<ntohl(savesize)<<endl;
-		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &xmlsize, sizeof( unsigned int));
+		netbuf.addString( string( xmlbuf));
 		cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;
-		cout<<"Loaded -= "<<acct->name<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
+		cout<<"Loaded -= "<<acct->callsign<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
 		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
 
 		// ??? memcpy( buf, packet.getData(), packet.getLength());
 
 		// Saves are still limited to maxsave bytes but this is a very high value
 		Packet	packet2;
-		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDRELIABLE|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
+		if( packet2.send( LOGIN_ACCEPT, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -507,14 +502,14 @@ void	AccountServer::sendUnauthorized( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
 	packet2.send( LOGIN_ERROR, 0, packet.getData(), packet.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
-	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
+	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->callsign<<">:<"<<acct->passwd<<">"<<endl;
 }
 
 void	AccountServer::sendAlreadyConnected( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
 	packet2.send( LOGIN_ALREADY, acct->getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
-	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
+	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->callsign<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
 }
 
 void	AccountServer::save()
@@ -581,5 +576,5 @@ void	AccountServer::writeSave( const char * buffer)
 	}
 	else
 		// Save the files
-		FileUtil::WriteSaveFiles( savestr, xmlstr, acctdir, (*vi)->name);
+		FileUtil::WriteSaveFiles( savestr, xmlstr, acctdir, (*vi)->callsign);
 }

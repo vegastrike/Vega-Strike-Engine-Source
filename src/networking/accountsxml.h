@@ -48,15 +48,22 @@ class Account
 			ADMIN,
 		  } type;
 		FILE *		fp;
-		char	name[NAMELEN];
-		char	passwd[NAMELEN];
+		string callsign;
+		string passwd;
+		//char	name[NAMELEN];
+		//char	passwd[NAMELEN];
 
 		// Assume player has created ship/char -> to remove in the future
 		Account() { haschar=1; connected=false; };
-		Account( char * sname, char * spasswd)
+		Account( char * scallsign, char * spasswd)
 		{
-			strncpy( name, sname, NAMELEN);
-			strncpy( passwd, spasswd, NAMELEN);
+			callsign = string(scallsign);
+			passwd = string( spasswd);
+		}
+		Account( string scallsign, string spasswd)
+		{
+			callsign = scallsign;
+			passwd = spasswd;
 		}
 
 		void	display();
@@ -67,30 +74,27 @@ class Account
 		void		setSerial( ObjSerial sernum) { this->serial = sernum;}
 		SOCKETALT	getSocket() { return this->server_sock;}
 		void		setSocket( SOCKETALT sck) { this->server_sock = sck;}
-		void		set( char * sname, char * spasswd)
+		void		set( char * scallsign, char * spasswd)
 		{
-			strncpy( name, sname, NAMELEN);
-			strncpy( passwd, spasswd, NAMELEN);
+			callsign = string( scallsign);
+			passwd = string( spasswd);
+		}
+		void		set( string scallsign, string spasswd)
+		{
+			callsign = scallsign;
+			passwd = spasswd;
 		}
 
 		int		compareName( char *str)
-		{
-			int ret = 0;
-			cout<<"Name compared to : "<<this->name;
-			ret=strncmp( name, str, strlen( name));
-			if( ret)
-				cout<<endl;
-			else
-				cout<<" - ";
-			return ret;
-		}
+		{ return callsign==string( str); }
 		int		comparePass( char *str)
-		{
-			int ret = 0;
-			cout<<"Passwd compared to : "<<this->passwd<<endl;
-			ret=strncmp( passwd, str, strlen( passwd));
-			return ret;
-		}
+		{ return passwd==string( str); }
+
+		int		compareName( string str)
+		{ return callsign==str; }
+		int		comparePass( string str)
+		{ return passwd==str; }
+
 		int		isConnected()
 		{
 			return (connected==true);

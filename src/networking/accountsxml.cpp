@@ -45,7 +45,7 @@ using XMLSupport::AttributeList;
 void	Account::display()
 {
 	cout<<"Serial #: "<<serial<<endl;
-	cout<<"Name: "<<name<<endl;
+	cout<<"Name: "<<callsign<<endl;
 	cout<<"Pass: "<<passwd<<endl;
 	if( this->type==0)
 		cout<<"Type : UNKNOWN"<<endl;
@@ -134,11 +134,13 @@ namespace accountXML
 			  break;
 			case NAME:
 			  curname = (*iter).value;
-			  strncpy( tmpacct->name, curname.c_str(), NAMELEN);
+			  tmpacct->callsign = curname;
+			  //strncpy( tmpacct->name, curname.c_str(), NAMELEN);
 			  break;
 			case PASSWORD:
 			  curname = (*iter).value;
-			  strncpy( tmpacct->passwd, curname.c_str(), NAMELEN);
+			  tmpacct->passwd = curname;
+			  //strncpy( tmpacct->passwd, curname.c_str(), NAMELEN);
 			  break;
 			default:
 			  assert (0);

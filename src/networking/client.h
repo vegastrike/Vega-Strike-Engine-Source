@@ -62,8 +62,9 @@ struct	Client
 	unsigned int	latest_timestamp;
 	unsigned int	deltatime;
 	int				sdl_channel;
-	char			name[NAMELEN];
-	char			passwd[NAMELEN];
+	string			callsign;
+	string			name;
+	string			passwd;
 	ClientState		old_state;
 	ClientState		current_state;
 	ClientDescription	current_desc;

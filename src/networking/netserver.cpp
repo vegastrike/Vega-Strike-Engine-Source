@@ -96,23 +96,22 @@ ObjSerial	NetServer::getUniqueSerial()
 void	NetServer::authenticate( Client * clt, AddressIP ipadr, Packet& packet )
 {
 	Packet	packet2;
-	char *	name = new char[NAMELEN+1];
-	char *	passwd = new char[NAMELEN+1];
-	int		i, lisize;
+	string	callsign;
+	string	passwd;
+	int		i;
 	Account *	elem = NULL;
+	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 
-	lisize = sizeof( unsigned long) + sizeof( int);
-	//buflen = NAMELEN*2 + lisize;
-	const char * buf = packet.getData();
-	strcpy( name, buf);
-	strcpy( passwd, buf+NAMELEN);
+	// Get the callsign/passwd from network
+	callsign = netbuf.getString();
+	passwd = netbuf.getString();
 
 	i=0;
 	int found=0;
 	for ( VI j=Cltacct.begin(); j!=Cltacct.end() && !found; j++, i++)
 	{
 		elem = *j;
-		if( !elem->compareName( name) && !elem->comparePass( passwd))
+		if( !elem->compareName( callsign) && !elem->comparePass( passwd))
 			found = 1;
 	}
 	if( !found)
@@ -124,36 +123,36 @@ void	NetServer::authenticate( Client * clt, AddressIP ipadr, Packet& packet )
 		else
 			sendLoginAccept( clt, ipadr, 0);
 	}
-
-	delete name;
-	delete passwd;
 }
 
 void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
-    char name[NAMELEN+1];
-    char passwd[NAMELEN+1];
-    char * buf = packeta.getData();
-    strcpy( name, buf);
-    strcpy( passwd, buf+NAMELEN);
+    string callsign;
+    string passwd;
+    //char * buf = packeta.getData();
+    //strcpy( name, buf);
+    //strcpy( passwd, buf+NAMELEN);
+	NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
+	callsign = netbuf.getString();
+	passwd = netbuf.getString();
 
     if( clt == NULL )
 	{
 	    // This must be UDP mode, because the client would exist otherwise.
 	    // In UDP mode, client is created here.
-	clt = newConnection_udp( ipadr );
-	if( !clt)
-	{
+		clt = newConnection_udp( ipadr );
+		if( !clt)
+		{
 		    COUT << "Error creating new client connection"<<endl;
-		exit(1);
-	}
+			exit(1);
+		}
 	}
 
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
-	strcpy( clt->name, buf);
-	strcpy( clt->passwd, buf+NAMELEN);
+	clt->callsign = callsign;
+	clt->passwd = passwd;
 
 	// Assign its serial to client*
 	if( !acctserver)
@@ -162,7 +161,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		clt->serial = packeta.getSerial();
 	clt->current_state.setSerial( clt->serial);
 	//cout<<"Authentication success for serial "<<clt->serial<<endl;
-	COUT << "LOGIN REQUEST SUCCESS for <" << name << ">" << endl;
+	COUT << "LOGIN REQUEST SUCCESS for <" << callsign << ">" << endl;
 	// Verify that client already has a character
 	if( newacct)
 	{
@@ -175,7 +174,8 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
 		// Get the save parts in a string array
 		vector<string> saves;
-		saves = FileUtil::GetSaveFromBuffer( packeta.getData()+2*NAMELEN);
+		saves[0] = netbuf.getString();
+		saves[1] = netbuf.getString();
 		// Put the save parts in buffers in order to load them properly
 		char * savebuf = new char[saves[1].length()+1];
 		memcpy( savebuf, saves[1].c_str(), saves[1].length());
@@ -265,12 +265,8 @@ void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
 
 void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 {
+	// SHOULD NOT WE FREE THE MEMORY OCCUPIED BY A POSSIBLE CLIENT * ???
 	Packet	packet2;
-	char name[NAMELEN+1];
-	char passwd[NAMELEN+1];
-	const char * buf = packet.getData();
-	strcpy( name, buf);
-	strcpy( passwd, buf+NAMELEN);
 	// Send a login error
 	// int		retsend;
 	SOCKETALT	sockclt;
@@ -288,7 +284,7 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 
 void	NetServer::startMsg()
 {
-	cout<<endl<<"Vegastrike Server version 0.0.1"<<endl;
+	cout<<endl<<"Vegastrike Server version "<<GAMESERVER_VERSION<<endl;
 	cout<<"Written by Stephane Vaxelaire"<<endl<<endl;
 }
 
@@ -917,10 +913,6 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 
     Packet p2;
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
-	char * buf = packet.getData();
-
-	weapon_info wi( weapon_info::BALL);
-	Matrix m; Vector vel;
 
     switch( cmd)
     {
@@ -1021,58 +1013,25 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 	// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
 	// IF SOMEONE HAS BEEN HIT
 	case CMD_BOLT :
-		wi.type = weapon_info::BOLT;
 	case CMD_BALL :
-		// Get the info from the buffer
-		m = netbuf.getMatrix();
-		vel = netbuf.getVector();
-		wi = netbuf.getWeaponInfo();
-		new Bolt ( wi, m, vel, clt->game_unit.GetUnit());
-		  // Send the bolt info to all clients in the same zone as the one who fired
-		  p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
-		  zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
+		  // HERE ONLY SET THE CORRESPONDING MOUNT,UNIT COUPLE TO "FIRE"
+		  //p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
+		  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
 		break;
 	case CMD_PROJECTILE :
 	{
 		// DO NOT GET INFO FROM NETWORK - WE HAVE ALL THE INFO ON SERVER SIDE !!!
 		// SO ONLY DO WHAT IS NEEDED SO THAT IN THE NEXT STARSYSTEM UPDATE THE PROJECTILE IS "FIRED"
-		// (set processed to FIRE)
-		ObjSerial target_id = netbuf.getSerial();
-		m = netbuf.getMatrix();
-		vel = netbuf.getVector();
-		Transformation tmp = netbuf.getTransformation();
-		weapon_info type = netbuf.getWeaponInfo();
 
-		Unit * owner = clt->game_unit.GetUnit();
-		// Get the target Unit from the zone in which the client (the one that has fired) is
-		Unit * target = zonemgr->getUnit( target_id, clt->zone);
-
-		Unit * temp = UnitFactory::createMissile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed,type.Radius,type.RadialSpeed,type.PulseSpeed/*detonation_radius*/);
-		// Associate a unique serial with the created projectile
-		temp->SetSerial( getUniqueSerial());
-		// Set the AI for the projectile
-		if (target&&target!=owner) {
-			temp->Target (target);
-			temp->EnqueueAI (new AIScript( (type.file+".xai").c_str() ) );
-			temp->EnqueueAI (new Orders::FireAllYouGot);
-		  } else {
-			temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
-			temp->EnqueueAI (new Orders::FireAllYouGot);
-		  }
-		  temp->SetOwner (owner);
-		  temp->Velocity = vel;
-		  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
-		  CopyMatrix (temp->cumulative_transformation_matrix,m);
-		  // Add the projectile in the universe
-		  _Universe->activeStarSystem()->AddUnit(temp);
+		  // THIS IS TO BE DONE IN MOUNT.CPP
 		  // Add the projectile in the client's zone
-		  zonemgr->addUnit( temp, clt->zone);
+		  //zonemgr->addUnit( temp, clt->zone);
 
 		  // Finally send an ack to the creation of the created projectile in order to create them on all the clients in
 		  // the same zone (send the projectile serial)
 		  // We can some day add a check to send only to clients that are in a given range to that projectile
-		  p2.bc_create( packet.getCommand(), temp->GetSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
-		  zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
+		  //p2.bc_create( packet.getCommand(), temp->GetSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
+		  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
 	}
 	break;
     default:
@@ -1090,23 +1049,23 @@ void	NetServer::addClient( Client * clt, string starsys)
 	cout<<">>> SEND ENTERCLIENT =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
+	NetBuffer netbuf;
 
 	if( zonemgr->addClient( clt, starsys))
 	{
-		NetBuffer netbuf( packet.getData(), packet.getDataLength());
+		//NetBuffer netbuf2( packet.getData(), packet.getDataLength());
 		// If the system is loaded, there are people in it -> BROADCAST
-		clt->current_state = netbuf.getClientState();
-		clt->old_state = clt->current_state;
+		//clt->current_state = netbuf2.getClientState();
+		//clt->old_state = clt->current_state;
 
+		netbuf.addString( clt->callsign);
+		//netbuf.addClientState( clt->current_state);
 		// Send savebuffer after clientstate
 		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
-		unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savestr.length()+xmlstr.length();
-		char * savebuf = new char[buflen];
-		memcpy( savebuf, &clt->current_state, sizeof( ClientState));
+		netbuf.addString( savestr);
+		netbuf.addString( xmlstr);
 		// Put the save buffer after the ClientState
-		SaveNetUtil::GetSaveBuffer( savestr, xmlstr, savebuf+sizeof( ClientState));
-		packet2.bc_create( CMD_ENTERCLIENT, clt->serial, savebuf, buflen, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
-		delete savebuf;
+		packet2.bc_create( CMD_ENTERCLIENT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
@@ -1126,18 +1085,14 @@ void	NetServer::addClient( Client * clt, string starsys)
 
 void	NetServer::posUpdate( Client * clt)
 {
-	//Packet	pckt;
-	//pckt.create( CMD_UPDATECLT, clt->serial, (char*) packet.getData(), sizeof( ClientState));
-	//zonemgr->broadcast( clt, pckt );
+	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 
 	// Set old position
-	//memcpy( &clt->old_state, &clt->current_state, sizeof( ClientState));
 	clt->old_state = clt->current_state;
 	// Update client position in client list
-	//memcpy( &clt->current_state, packet.getData(), sizeof( ClientState));
-	clt->current_state = *((ClientState *) packet.getData());
+	clt->current_state = netbuf.getClientState();
+	//clt->current_state = *((ClientState *) packet.getData());
 	// Put deltatime in the delay part of ClientState so that it is send to other clients later
-	clt->current_state.netswap();
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	cp->savegame->SetPlayerLocation( clt->current_state.getPosition());
 	clt->current_state.setDelay( clt->deltatime);
@@ -1172,22 +1127,20 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
     COUT << "enter " << __PRETTY_FUNCTION__ << endl
          << " *** from " << debug_from_file << ":" << debug_from_line << endl;
 
+	NetBuffer netbuf;
+
 	if( acctserver)
 	{
 		// Send a disconnection info to account server
-		char * buf = new char[NAMELEN*2+1];
-		int nbc = strlen( clt->name);
-		memcpy( buf, clt->name, nbc);
-		memcpy( buf+NAMELEN, clt->passwd, NAMELEN);
-		buf[nbc] = 0;
+		netbuf.addString( clt->name);
+		netbuf.addString( clt->passwd);
 		Packet p2;
-		if( p2.send( CMD_LOGOUT, clt->serial, buf, NAMELEN+NAMELEN,
-		             SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+		if( p2.send( CMD_LOGOUT, clt->serial, netbuf.getData(), netbuf.getDataLength(),
+		             SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
         {
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
 		}
 		//p2.display( "", 0);
-		delete buf;
 	}
 
 	// Removes the client from its starsystem
@@ -1230,19 +1183,19 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 void	NetServer::logout( Client * clt)
 {
 	Packet p, p1, p2;
+	NetBuffer netbuf;
 
 	if( acctserver)
 	{
 		// Send a disconnection info to account server
-		char * buf = new char[NAMELEN*2+1];
-		int nbc = strlen( clt->name);
-		memcpy( buf, clt->name, nbc+1);
-		memcpy( buf+NAMELEN, clt->passwd, strlen( clt->passwd));
-		buf[NAMELEN*2] = 0;
-		if( p2.send( CMD_LOGOUT, clt->serial, buf, NAMELEN*2, SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+		netbuf.addString( clt->name);
+		netbuf.addString( clt->passwd);
+		Packet p2;
+		if( p2.send( CMD_LOGOUT, clt->serial, netbuf.getData(), netbuf.getDataLength(),
+		             SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+        {
 			cout<<"ERROR sending LOGOUT to account server"<<endl;
-		//p2.display( "", 0);
-		delete buf;
+		}
 	}
 
 	// Removes the client from its starsystem
@@ -1264,7 +1217,6 @@ void	NetServer::logout( Client * clt)
 	// Broadcast client EXIT zone
 	if( clt->zone>0)
 	{
-		// p.create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->serial);
 		p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 		zonemgr->broadcast( clt, &p );
 	}
@@ -1305,7 +1257,7 @@ void	NetServer::save()
 	FILE * fp=NULL;
 	string xmlstr, savestr;
 	//unsigned int xmllen, savelen, nxmllen, nsavelen;
-	char * buffer;
+	NetBuffer netbuf;
 
 	// Save the Dynamic Universe in the data dir for now
 	string dynuniv_path = datadir+"dynaverse.dat";
@@ -1339,6 +1291,7 @@ void	NetServer::save()
 		{
 			bool found = false;
 			Client * clt;
+			netbuf.Reset();
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
 			for( LI li=udpClients.begin(); li!=udpClients.end(); li++)
 			{
@@ -1358,11 +1311,12 @@ void	NetServer::save()
 				cout<<"Error client not found in save process !!!!"<<endl;
 				exit(1);
 			}
-			buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
-			SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-			if( pckt.send( CMD_SAVEACCOUNTS, clt->serial, buffer, strlen( buffer), SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+			netbuf.addString( savestr);
+			netbuf.addString( xmlstr);
+			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
+			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
+			if( pckt.send( CMD_SAVEACCOUNTS, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
 				cout<<"ERROR sending SAVE to account server"<<endl;
-			delete buffer;
 		}
 	}
 }
