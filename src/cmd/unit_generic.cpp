@@ -151,9 +151,14 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
     //Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
     Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
-	Vector SmallerElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,bignormal)+Inelastic_vf;
-	Vector ThisElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,smallnormal)+Inelastic_vf;
-	
+//	Vector SmallerElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,bignormal)+Inelastic_vf;
+//	Vector ThisElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,smallnormal)+Inelastic_vf;
+	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
+	Vector ThisElastic_vf = (GetVelocity()*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*smalle->GetVelocity());
+	// Make bounce along opposite normals
+	ThisElastic_vf=(ThisElastic_vf.Magnitude())*smallnormal;
+	SmallerElastic_vf=(SmallerElastic_vf.Magnitude())*bignormal;
+
     float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
     float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
     float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
@@ -174,7 +179,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	if (tmag>.000001)
 		thisforce = (thisforce/tmag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 #endif
-	Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
+	Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale/2)+Inelastic_vf*inelastic_scale/2;
 	Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
 	Vector smforce = (SmallerDesiredVelocity-smalle->GetVelocity())*smalle->GetMass()/SIMULATION_ATOM;
 	Vector thisforce = (ThisDesiredVelocity-GetVelocity())*GetMass()/SIMULATION_ATOM;
