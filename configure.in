@@ -466,7 +466,7 @@ else
 fi
 
 saved_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS"
+CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS "
 AC_CHECK_HEADER([expat.h], have_expat_h=yes, have_expat_h=no )
 
 if test "x$have_expat_h" = "xno" ; then
@@ -497,4 +497,4 @@ CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS"
 
-AC_OUTPUT(Makefile src/Makefile)
+AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile)

@@ -1,6 +1,9 @@
 #include "cmd_flybywire.h"
 #include "physics.h"
 #define VELTHRESHOLD .1
+using Orders::MatchLinearVelocity;
+using Orders::MatchVelocity;
+using Orders::MatchAngularVelocity;
 void MatchLinearVelocity::Execute () {
   Vector desired (desired_velocity);
   if (!LocalVelocity) {

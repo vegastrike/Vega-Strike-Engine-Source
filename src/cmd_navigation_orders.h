@@ -20,7 +20,7 @@ class MoveTo : public Order {
   bool Done (const Vector &);
 public:
   MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
-    type = LOCATION;
+    type = LOCATION|MOVEMENT;
     targetlocation = target;
     done=false;
   }
@@ -39,13 +39,14 @@ class ChangeHeading : public Order {
   bool Done (const Vector &);
   void TurnToward (float angle, float ang_vel, float &torque);
  public:
-   ChangeHeading(const Vector &final_heading, int switchback) : Order(), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) { type = 1;}
+   ChangeHeading(const Vector &final_heading, int switchback) : Order(), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) { type = FACING|LOCATION;}
   void SetDest (const Vector&);
   void Execute();
 };
 class FaceTarget : public ChangeHeading {
   float finish;
-  FaceTarget (bool fini, int accuracy = 3):ChangeHeading(Vector(0,0,1),accuracy),finish(fini=false) {}
+public:
+  FaceTarget (bool fini=false, int accuracy = 3):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {type=FACING|TARGET;}
   void Execute();
 };
 

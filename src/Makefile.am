@@ -1,6 +1,7 @@
 #SUBDIRS = gldrv
 bin_PROGRAMS = vegastrike
-
+SUBDIRS = gldrv
+vegastrike_LDADD = gldrv/libgldrv.a
 #	fonts.c					\
 #	fonts.h
 ##	quadtree.cpp				\
@@ -96,21 +97,6 @@ vegastrike_SOURCES =				\
 	gfx_sphere.cpp				\
 	gfxlib.h				\
 	gfxlib_struct.h				\
-	gl_globals.cpp				\
-	gl_globals.h				\
-	gl_init.cpp				\
-	gl_init.h				\
-	gl_light.cpp				\
-	gl_light_pick.cpp			\
-	gl_light_state.cpp			\
-	gl_matrix.h 				\
-	gl_matrix.cpp				\
-	gl_material.cpp				\
-	gl_misc.cpp				\
-	gl_state.cpp				\
-	gl_texture.cpp				\
-	gl_vertex_list.cpp			\
-	gl_quad_list.cpp			\
 	hashtable.h				\
 	hashtable.cpp				\
 	hashtable_3d.h				\

@@ -1,14 +1,14 @@
 #ifndef _CMD_FLYBYWIRE_H_
 #define _CMD_FLYBYWIRE_H_
 #include "cmd_order.h"
-
+namespace Orders {
 class MatchLinearVelocity : public Order {
  protected:
   Vector desired_velocity;//werld space... generally r*speed;
   bool LocalVelocity;//specified in Local or World coordinates
   bool willfinish;
  public:
-  MatchLinearVelocity (const Vector &desired, bool Local, bool fini=true):desired_velocity(desired),LocalVelocity(Local),willfinish(fini) {type = LOCATION;done = false;}
+  MatchLinearVelocity (const Vector &desired, bool Local, bool fini=true):desired_velocity(desired),LocalVelocity(Local),willfinish(fini) {type = MOVEMENT|LOCATION;done = false;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
@@ -18,7 +18,7 @@ class MatchAngularVelocity : public Order {
   bool LocalAng;//specified in Local or World coordinates
   bool willfinish;
  public:
-  MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {type = LOCATION;done = false;}
+  MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {type = FACING|LOCATION;done = false;}
   void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
 };
@@ -30,10 +30,10 @@ class MatchVelocity : public MatchLinearVelocity {
  public:
   MatchVelocity (const Vector &desired,const Vector &desired_ang, bool Local, bool fini=true):MatchLinearVelocity (desired,Local,fini),desired_ang_velocity(desired_ang), LocalAng(Local) {}
   void Execute ();
-  void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
+  void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;type|=FACING;}
 };
-
-class FlyByWire : public MatchVelocity {
+}
+class FlyByWire : public Orders::MatchVelocity {
  protected:
  public:
   FlyByWire ();

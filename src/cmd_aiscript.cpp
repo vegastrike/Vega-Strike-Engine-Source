@@ -1,4 +1,5 @@
 #include "cmd_aiscript.h"
+#include "cmd_navigation_orders.h"
 #include "xml_support.h"
 #include "cmd_flybywire.h"
 #include <stdio.h>
@@ -87,16 +88,17 @@ namespace AiXml {
     EnumMap::Pair ("Float", FFLOAT),
     EnumMap::Pair ("Script", SCRIPT),
     EnumMap::Pair ("Vector", VECTOR),
-	EnumMap::Pair ("Moveto", MOVETO),
-	EnumMap::Pair ("Default", DEFAULT),
-	EnumMap::Pair ("Targetpos", TARGETPOS),
-	EnumMap::Pair ("Targetworld", TARGETWORLD),
-	EnumMap::Pair ("Yourworld", YOURWORLD),
-	EnumMap::Pair ("Targetlocal", TARGETLOCAL),
-	EnumMap::Pair ("Yourlocal", YOURLOCAL),
-	EnumMap::Pair ("Yourpos", YOURPOS),
-	EnumMap::Pair ("ExecuteFor", EXECUTEFOR),
-	EnumMap::Pair ("ChangeHead", CHANGEHEAD),
+    EnumMap::Pair ("Moveto", MOVETO),
+    EnumMap::Pair ("Default", DEFAULT),
+    EnumMap::Pair ("Targetpos", TARGETPOS),
+    EnumMap::Pair ("Targetworld", TARGETWORLD),
+    EnumMap::Pair ("Yourworld", YOURWORLD),
+    EnumMap::Pair ("Targetlocal", TARGETLOCAL),
+    EnumMap::Pair ("Yourlocal", YOURLOCAL),
+    EnumMap::Pair ("Yourpos", YOURPOS),
+    EnumMap::Pair ("FaceTarget", FACETARGET),
+    EnumMap::Pair ("ExecuteFor", EXECUTEFOR),
+    EnumMap::Pair ("ChangeHead", CHANGEHEAD),
     EnumMap::Pair ("MatchLin", MATCHLIN), 
     EnumMap::Pair ("MatchAng", MATCHANG), 
     EnumMap::Pair ("MatchVel", MATCHVEL),
@@ -118,14 +120,14 @@ namespace AiXml {
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
     EnumMap::Pair ("z", Z),
-	EnumMap::Pair ("Time", TIME),
+    EnumMap::Pair ("Time", TIME),
     EnumMap::Pair ("Terminate", TERMINATE), 
     EnumMap::Pair ("Local", LOCAL), 
     EnumMap::Pair ("Value", VALUE)
 
 };
 
-  const EnumMap element_map(element_names, 28);
+  const EnumMap element_map(element_names, 29);
   const EnumMap attribute_map(attribute_names, 9);
 }
 
@@ -189,7 +191,22 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	  }
 	}
 	break;
-
+  case FACETARGET:
+    assert (xml->unitlevel>=1);
+    xml->unitlevel++;
+    xml->acc =3;
+    xml->afterburn = true;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case TERMINATE:
+	xml->afterburn=parse_bool ((*iter).value);
+      case ACCURACY:
+	xml->acc=parse_int((*iter).value);
+	break;
+      }
+    }
+    break;
+    
   case CHANGEHEAD:
     assert (xml->unitlevel>=1);
     xml->unitlevel++;
@@ -216,12 +233,10 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case YOURPOS:
 	  assert(xml->unitlevel>=2);
 	  xml->unitlevel++;
-	  if(this->targets) {
-		  xml->vectors.push(this->parent->Position());
-	  } else {
-		  xml->vectors.push(xml->defaultvec);
-	  }
+	  xml->vectors.push(this->parent->Position());
+	  
 	  break;
+
   case TARGETWORLD:
 	  assert(xml->unitlevel>=2);
 	  xml->unitlevel++;
@@ -264,7 +279,6 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
       }
 	}
 	break;
-
   case MATCHLIN:
   case MATCHANG:
   case MATCHVEL:
@@ -432,12 +446,17 @@ void AIScript::endElement(const string &name) {
 	  break;
   case MATCHANG:
 	  xml->unitlevel--;
-	  xml->orders.push_back(new MatchAngularVelocity(topv(),((bool)xml->acc),xml->afterburn));
+	  xml->orders.push_back(new Orders::MatchAngularVelocity(topv(),((bool)xml->acc),xml->afterburn));
 	  popv();
+	  break;
+  case FACETARGET:
+          xml->unitlevel--;
+          xml->orders.push_back (new Orders::FaceTarget (xml->afterburn, 
+							 (bool)xml->acc));
 	  break;
   case MATCHLIN:
 	  xml->unitlevel--;
-	  xml->orders.push_back(new MatchLinearVelocity(topv(),((bool)xml->acc),xml->afterburn));
+	  xml->orders.push_back(new Orders::MatchLinearVelocity(topv(),((bool)xml->acc),xml->afterburn));
 	  popv();
 	  break;
   case MATCHVEL:
@@ -445,9 +464,9 @@ void AIScript::endElement(const string &name) {
 	  temp=topv();
 	  popv();
 	  if (xml->lin==1) {
-		xml->orders.push_back(new MatchVelocity(topv(),temp,((bool)xml->acc),xml->afterburn));
+		xml->orders.push_back(new Orders::MatchVelocity(topv(),temp,((bool)xml->acc),xml->afterburn));
 	  } else {
-		xml->orders.push_back(new MatchVelocity(temp,topv(),((bool)xml->acc),xml->afterburn));
+		xml->orders.push_back(new Orders::MatchVelocity(temp,topv(),((bool)xml->acc),xml->afterburn));
 	  }
 	  xml->lin=0;
 	  popv();

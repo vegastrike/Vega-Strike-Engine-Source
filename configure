@@ -3118,7 +3118,7 @@ else
 fi
 
 saved_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS"
+CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS "
 ac_safe=`echo "expat.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for expat.h""... $ac_c" 1>&6
 echo "configure:3125: checking for expat.h" >&5
@@ -3288,7 +3288,7 @@ done
 ac_given_srcdir=$srcdir
 ac_given_INSTALL="$INSTALL"
 
-trap 'rm -fr `echo "Makefile src/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile src/Makefile src/gldrv/Makefile config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -3388,7 +3388,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile src/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile src/Makefile src/gldrv/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

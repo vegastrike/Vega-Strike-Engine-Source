@@ -23,8 +23,9 @@
 #include "UnitCollection.h"
 #include "physics.h"
 void Order::Execute () {
-  //  int completed=0;
+  int completed=0;
 //	fprintf (stderr,"size: %d done %d", suborders.size(), (*suborders.begin())->Done());
+  /*
   if(suborders.size()) {
     vector<Order*>::iterator ord = suborders.begin();
     (*ord)->Execute();
@@ -33,13 +34,14 @@ void Order::Execute () {
       ord = suborders.erase(ord);
     }
   }
-  /*
-  for (unsigned int i=0;i<suborders.size();i++) {
+  */
+  vector<Order*>::iterator ord = suborders.begin();
+  for (;ord!=suborders.end();) {
     // huh? why the mask? can't get anything to work with this thing
     // here. i'm not going to bother to figure out what's going on
     // here until later
-
-    if (completed&(*ord)->getType()){
+    
+    if ((completed& ((*ord)->getType()&(MOVEMENT|FACING|WEAPON)))==0) {
       (*ord)->Execute();
       completed|=(*ord)->getType();
       if ((*ord)->Done()) {
@@ -48,9 +50,9 @@ void Order::Execute () {
       } else {
 	ord++;
       }
-      }
-      }
-  */
+    }
+  }
+  
   if (suborders.size()==0) {
     done = true;
   } else{
@@ -67,7 +69,7 @@ Order* Order::ReplaceOrder (Order *ord) {
   int completed=0;
   vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
-    if (!(ord->getType()&(*ordd)->getType())){
+    if (!(ord->getType()&(*ordd)->getType()&(FACING|WEAPON|MOVEMENT))){
       	delete (*ordd);
 	ordd =suborders.erase(ordd);
     } else {
