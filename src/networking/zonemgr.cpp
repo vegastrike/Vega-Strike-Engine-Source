@@ -426,6 +426,7 @@ void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, Clien
 			{
 				// Mark as position+orientation+velocity update
 				netbuf.addChar( CMD_FULLUPDATE);
+				netbuf.addShort( un->GetSerial());
 				// Put the current client state in
 				netbuf.addClientState( un_cs);
 				// Increment the number of clients we send full info about

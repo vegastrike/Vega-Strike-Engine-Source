@@ -39,6 +39,14 @@
 #include "config.h"
 using namespace Orders;
 
+void	Unit::BackupState()
+{
+	this->old_state.setPosition( this->curr_physical_state.position);
+	this->old_state.setOrientation( this->curr_physical_state.orientation);
+	this->old_state.setVelocity( this->Velocity);
+	this->old_state.setAcceleration( this->net_accel);
+}
+
 bool flickerDamage (Unit * un, float hullpercent) {
 	#define damagelevel hullpercent
 		  static double counter=getNewTime();
@@ -1383,7 +1391,6 @@ extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 
-	Vector accel;
 	Transformation old_physical_state = curr_physical_state;
   if (docked&DOCKING_UNITS) {
     PerformDockingOperations();
@@ -1437,7 +1444,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     ((Planet *)this)->gravitate (uc);
   } else {
     if (resolveforces) {
-      accel = ResolveForces (trans,transmat);//clamp velocity
+      net_accel = ResolveForces (trans,transmat);//clamp velocity
       if (fabs (Velocity.i)>VELOCITY_MAX) {
 	Velocity.i = copysign (VELOCITY_MAX,Velocity.i);
       }
@@ -1452,7 +1459,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   float difficulty;
   Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
 
-  this->UpdatePhysics2( trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc);
+  this->UpdatePhysics2( trans, old_physical_state, net_accel, difficulty, transmat, cum_vel, lastframe, uc);
 
   float dist_sqr_to_target=FLT_MAX;
   Unit * target = Unit::Target();

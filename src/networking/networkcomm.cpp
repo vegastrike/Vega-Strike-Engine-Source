@@ -282,6 +282,23 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 // Do not do anything when using JVoIP lib
 }
 
+void	NetworkCommunication::RecvSound( char * sndbuffer, int length)
+{
+#ifdef NETCOMM_PORTAUDIO
+	assert(length<MAXBUFFER);
+	memset( audio_outbuffer, 0, MAXBUFFER);
+	memcpy( audio_outbuffer, sndbuffer, length);
+#endif
+}
+
+void	NetworkCommunication::RecvMessage( string message)
+{
+	// If max log size is reached we remove the oldest message
+	if( this->message_history.size()==this->max_messages)
+		this->message_history.pop_front();
+	this->message_history.push_back( message);
+}
+
 /***************************************************************************************/
 /**** Send a webcam capture                                                         ****/
 /**** Send jpeg_buffer over the network according to the chosen method              ****/

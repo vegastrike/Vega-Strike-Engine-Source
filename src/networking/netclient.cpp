@@ -1094,6 +1094,21 @@ int NetClient::recvMsg( Packet* outpacket )
 			}
 #endif
 			break;
+			case CMD_SOUNDSAMPLE :
+#ifdef NETCOMM
+			{
+				NetComm->RecvSound( p1.getData(), p1.getDataLength());
+			}
+#endif
+			break;
+			case CMD_TXTMESSAGE :
+#ifdef NETCOMM
+			{
+				string msg( p1.getData());
+				NetComm->RecvMessage( msg);
+			}
+#endif
+			break;
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;
@@ -1257,46 +1272,55 @@ void	NetClient::sendPosition( const ClientState* cs )
 void	NetClient::receivePosition( const Packet* packet )
 {
 	// When receiving a snapshot, packet serial is considered as the number of client updates
-	ClientState cs;
-	const char* databuf;
-	ObjSerial   sernum=0;
-	int		nbclts=0, i, j;
-	// int		offset=0;
-	// int		nbclts2=0;
-	// int		cssize = sizeof( ClientState);
-	// int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
-	// int		qfsize = sizeof( double);
+	ClientState		cs;
+	const char*		databuf;
+	ObjSerial   	sernum=0;
+	int				nbclts=0, i, j;
 	unsigned char	cmd;
-	ClientPtr clt;
-	Unit * un;
+	ClientPtr		clt;
+	Unit *			un = NULL;
+	bool			localplayer = false;
 
 	nbclts = packet->getSerial();
-	//nbclts = ntohs( nbclts2);
 	COUT << "Received update for " << nbclts << " clients - LENGTH="
 	     << packet->getDataLength() << endl;
 	databuf = packet->getData();
 	NetBuffer netbuf( packet->getData(), packet->getDataLength());
+
+	// Loop throught received snapshot
 	for( i=0, j=0; (i+j)<nbclts;)
 	{
-		//cmd = *(databuf+offset);
+		// Get the command from buffer
 		cmd = netbuf.getChar();
-		//offset += sizeof( unsigned char);
-		if( cmd == CMD_FULLUPDATE)
+		// Get the serial number of current element
+		sernum = netbuf.getSerial();
+		// Test if it is a client or a unit
+		if( !(clt = Clients.get(sernum)))
 		{
-			cs = netbuf.getClientState();
-			// Do what needed with update
-			COUT<<"Received FULLSTATE ";
-			// Tell we received the ClientState so we can convert byte order from network to host
-			//cs.display();
-			sernum = cs.getSerial();
-			clt = Clients.get(sernum);
-			un = clt->game_unit.GetUnit();
-			// Test if this is a local player
-			// Is it is, ignore position update
-			if( clt && !_Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit()))
+			if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
 			{
+				COUT<<"WARNING : No client, no unit found for this serial ("<<sernum<<")"<<endl;
+			}
+		}
+		// Test if local player
+		else
+			localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
+
+		if( clt && !localplayer || un)
+		{
+			if( clt)
+				un = clt->game_unit.GetUnit();
+
+			if( cmd == CMD_FULLUPDATE)
+			{
+				// Do what needed with update
+				COUT<<"Received FULLSTATE ";
+				// Tell we received the ClientState so we can convert byte order from network to host
+				//cs.display();
+				cs = netbuf.getClientState();
+
 				// Backup old state
-				un->prev_physical_state = un->curr_physical_state;
+				un->BackupState();
 				// Update concerned client directly in network client list
 				un->curr_physical_state.position = cs.getPosition();
 				un->curr_physical_state.orientation = cs.getOrientation();
@@ -1305,39 +1329,22 @@ void	NetClient::receivePosition( const Packet* packet )
 				// In that case, we want cubic spline based interpolation
 				//predict( sernum);
 				//init_interpolation( sernum);
+				i++;
 			}
-			//offset += cssize;
-			i++;
-		}
-		else if( cmd == CMD_POSUPDATE)
-		{
-			// Set the serial #
-			//sernum = *((ObjSerial *) databuf+offset);
-			//sernum = ntohs( sernum);
-			sernum = netbuf.getShort();
-			clt = Clients.get(sernum);
-			COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
-			//offset += sizeof( ObjSerial);
-			if( clt && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
+			else if( cmd == CMD_POSUPDATE)
 			{
-				// Backup old state
-				un->prev_physical_state = un->curr_physical_state;
-				// Update concerned client directly in network client list
-				un->curr_physical_state.position = cs.getPosition();
-				un->curr_physical_state.orientation = cs.getOrientation();
-				un->Velocity = cs.getVelocity();
+				// Get the serial #
+				sernum = netbuf.getShort();
+				clt = Clients.get(sernum);
+				COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 
+				// Backup old state
+				un->BackupState();
 				// Set the new received position in curr_physical_state
 				un->curr_physical_state.position = netbuf.getQVector();
 				//predict( sernum);
+				j++;
 			}
-			else
-			{
-				// QVector tmppos = netbuf.getVector();
-				COUT<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
-			}
-			//offset += sizeof( QVector);
-			j++;
 		}
 	}
 }
@@ -1468,16 +1475,16 @@ void	NetClient::predict( ObjSerial clientid)
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
-	//QVector A( un->prev_physical_state.position);
+	QVector A( un->old_state.getPosition());
 	QVector B( un->curr_physical_state.position);
-	//Vector  VA( un-> ???? OLD VELOCITY ??? );
+	Vector  VA( un->old_state.getVelocity());
 	Vector  VB( un->Velocity);
-	//Vector  AA( un->GetPrevAcceleration() ???? );
+	Vector  AA( un->old_state.getAcceleration());
 	Vector  AB( un->GetAcceleration());
-	//QVector A1( A + VA);
+	QVector A1( A + VA);
 	// A2 is computed from position B and velocity VB
 	QVector A3( B + VB*delay + AB*delay*delay*0.5);
-	//QVector A2( A3 - (VB + AB*delay));
+	QVector A2( A3 - (VB + AB*delay));
 
 	// HERE : Backup the current state ???? --> Not sure
 	un->curr_physical_state.position = A3;
@@ -1497,12 +1504,11 @@ void	NetClient::init_interpolation( ObjSerial clientid)
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
-	QVector A( un->prev_physical_state.position);
-	QVector B( un->curr_physical_state.position);
-	// Should get old velocity in VA here : NOT ACTUAL ONE !!!
-	Vector  VA( un->Velocity);
+	QVector A( un->old_state.getPosition());
+	QVector B( un->old_state.getPosition());
+	Vector  VA( un->old_state.getVelocity());
 	Vector  VB( un->Velocity);
-	//Vector  AA( un->GetPrevAcceleration() ???? );
+	Vector  AA( un->old_state.getAcceleration());
 	Vector  AB( un->GetAcceleration());
 	QVector A1( A + VA);
 	// A2 is computed from position B and velocity VB

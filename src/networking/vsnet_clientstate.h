@@ -35,8 +35,6 @@ class	ClientState
 {
 	unsigned int	delay;
 	ObjSerial		client_serial;
-	//QVector		pos;
-	//Quaternion	orient;
 	Transformation	pos;
 	Vector			veloc;
 	Vector			accel;
@@ -57,16 +55,14 @@ class	ClientState
 		unsigned int	getDelay() { return this->delay;}
 		void		setDelay( unsigned int del) { this->delay = del;}
 		void		setSerial( ObjSerial ser) { this->client_serial = ser;}
-		void		setPosition( QVector posit)
-		{
-			this->pos.position = posit;
-			// memcpy( &this->position, &posit, sizeof( QVector));
-		}
+		void		setPosition( QVector posit) { this->pos.position = posit;}
+		void		setOrientation( Quaternion orient) { this->pos.orientation = orient;}
+		void		setAcceleration( Vector acc) { this->accel = acc;}
+		void		setVelocity( Vector vel) { this->veloc = vel;}
 
-		void		display() const;
+		void	display() const;
 		int		operator==( const ClientState & ctmp);
 		void	netswap();
-		//friend class Client;
 };
 
 #endif

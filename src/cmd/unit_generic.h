@@ -48,6 +48,7 @@ void UncheckUnit (class Unit * un);
 #include "faction_generic.h"
 #include "star_system_generic.h"
 #include "networking/const.h"
+#include "networking/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
 using std::string;
 
@@ -261,18 +262,21 @@ public:
 
 protected:
   // Tell if networked unit
-  bool networked;
-  ObjSerial	serial;
+  bool				networked;
+  ObjSerial			serial;
   unsigned short	zone;
+  Vector			net_accel;
 public:
+  ClientState		old_state;
   enum DAMAGES { NO_DAMAGE=0x00, SHIELD_DAMAGED=0x01, COMPUTER_DAMAGED=0x02, MOUNT_DAMAGED=0x04, CARGOFUEL_DAMAGED=0x08, JUMP_DAMAGED=0x10, CLOAK_DAMAGED=0x20, LIMITS_DAMAGED=0x40, ARMOR_DAMAGED=0x80};
   unsigned short damages;
 
-  void SetNetworkMode( bool mode=true) {this->networked = mode;}
-  ObjSerial GetSerial() { return this->serial;}
-  void		SetSerial( ObjSerial ser) { this->serial = ser;}
+  void				SetNetworkMode( bool mode=true) {this->networked = mode;}
+  ObjSerial 		GetSerial() { return this->serial;}
+  void				SetSerial( ObjSerial ser) { this->serial = ser;}
   unsigned short	GetZone() { return this->zone;}
-  void		SetZone( unsigned short zn) { this->zone = zn;}
+  void				SetZone( unsigned short zn) { this->zone = zn;}
+  void				BackupState();
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/

@@ -1,18 +1,18 @@
 
 *** GENERAL ************************************************************
 
-- Server must be aware of webcam and portaudio client abilities
-- Add text message support to NetworkCommunication class
+- Add text message support to NetworkCommunication class : displaying message has to be added
+- Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
 - Complete jVoIP support
 - PortAudio : tune MAX_PA_CPU_LOAD when support is complete
 - About NetworkCommunications : assign a different freq range for each faction ?
-- Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2
 - NOTE : network communication system is only working when 1 local player
 
 *** ACCOUNT SERVER *****************************************************
 
+- BUG : continuous loop when gameserver connects to accountserver
 - BUG : when account already logged -> game server fails to send info to client
 - In client-to-acctserver mode : Handle case where player has no server affected yet
 
@@ -20,9 +20,8 @@
 
 - In savegame : add stardate loading and saving stuff to dynamic universe
 - Handle a timeout between the time the player logged in and the time he really enters the game
-- Turn mount_num into a char ?
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
-- Sometimes in the future : make server settings with :
+- Sometimes in the future : make admin server settings with :
 							- no AI wingmen for players
 							- do not allow players' capships
 
@@ -36,20 +35,17 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
-- Add the detection ov Video For Linux or Quicktime in configure.in -> if no present disable webcam (add a NETCOMM_NOCAM const)
-MAYBE NOT - Make webcam capture size part of config file (and later part of server config, not client anymore)
-- Check if we received position info about us -> ignore
-- Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
-- Find a way not to use MAXOBJECTS in netclient.h
 - Interpolate(extrapolate) using delatime + the concerned client's current_state delay
 OR
 - Maybe send extrapolated position with deltatime ahead in time
 - and when receiving position updates extrapolate only with concerned client's delay
+MAYBE NOT - Make webcam capture size part of config file (and later part of server config, not client anymore)
 
 
 === GENERAL STUFF =======================================================
 
+DONE - Server must be aware of webcam and portaudio client abilities
 DONE OK - Check if I really send path relative to datadir with filenames to download
 DONE - Implement a download manager -> Carsten is on that one
 DONE - When client starts server send galaxy filename with md5sum or other check system
@@ -110,6 +106,9 @@ DONE - forsee account server unavailability and in that case, deny new logins + 
 
 === CLIENT SIDE =========================================================
 
+DONE - Find the jump call and make it only send a jump request to server
+DONE - Check if we received position info about us -> ignore
+DONE - Add the detection ov Video For Linux or Quicktime in configure.in -> if no present disable webcam (add a NETCOMM_NOCAM const)
 MADE POSSIBLE - Ask directly account server for authentication and get serverip/port to connect to
 DONE - Write the function that receive damage snapshot
 DONE - Do not maintain ClientStates anymore -> maintain Unit members directly
