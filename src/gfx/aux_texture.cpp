@@ -232,10 +232,11 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	}
 	Bind();
  	fclose (fp);
-	setold();
 	if (data)
 	  delete [] data;
 	data = NULL;
+	setold();
+
 }
 
 Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
