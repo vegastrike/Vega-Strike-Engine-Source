@@ -652,6 +652,12 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
 }
 extern char * GetUnitDir (const char *);
 double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
+  if (shield.number==2) {
+    printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
+  }else {
+    printf ("shields before %s %d %d",file.c_str(),shield.fbrl.frontmax,shield.fbrl.backmax);    
+
+  }
 	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
 	static Unit * last_template=NULL;
 	char * unitdir  = GetUnitDir(name.c_str());
@@ -675,7 +681,7 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 	if (up->name!="LOAD_FAILED") {
 	  
 	  for  (int i=0;percentage==0;i++ ) {
-	    if (!this->Upgrade(up,mountoffset, subunitoffset, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ)) {
+	    if (!this->Upgrade(up,mountoffset+i, subunitoffset+i, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ)) {
 	      percentage=0;
 	    }
 	    if (!loop_through_mounts||(i+1>=this->GetNumMounts ())) {
@@ -684,6 +690,13 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 	  }
 	}
 	up->Kill();
+  if (shield.number==2) {
+    printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
+  }else {
+    printf ("shields before %s %d %d",file.c_str(),shield.fbrl.frontmax,shield.fbrl.backmax);    
+
+  }
+
 	return percentage;
 }
 void YoinkNewlines (char * input_buffer) {

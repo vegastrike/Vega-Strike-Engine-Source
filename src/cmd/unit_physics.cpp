@@ -213,6 +213,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     energy -=apply_float_to_short( afterburnenergy*SIMULATION_ATOM);
   }
 
+
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
   static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
@@ -655,8 +656,9 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
   if (!jumpReactToCollision(smalle)) {
 #ifdef NOBOUNCECOLLISION
 #else
-    smalle->ApplyForce (bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-    this->ApplyForce (smallnormal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+    static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
+    smalle->ApplyForce (bignormal*.4*bouncepercent*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+    this->ApplyForce (smallnormal*.4*bouncepercent*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     
     smalle->ApplyDamage (biglocation.Cast(),bignormal,g_game.difficulty*(  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
     this->ApplyDamage (smalllocation.Cast(),smallnormal, g_game.difficulty*(.5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
