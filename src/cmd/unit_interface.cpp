@@ -1087,6 +1087,8 @@ vector <Cargo>&UpgradingInfo::GetCargoList () {
     Unit * relevant=NULL;
     switch (mode) {
     case BUYMODE:
+      relevant=base.GetUnit();
+      break;
     case UPGRADEMODE:
     case ADDMODE:
       relevant = base.GetUnit();
