@@ -85,7 +85,7 @@ void Animation:: SetDimensions(float wid, float hei) {
   width = wid;
   height = hei;
 }
-void Animation:: SetDimensions(float &wid, float &hei) {
+void Animation:: GetDimensions(float &wid, float &hei) {
   wid = width;
   hei = height;
 }
