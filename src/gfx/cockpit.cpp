@@ -112,7 +112,6 @@ void Cockpit::Init (const char * file) {
     Crosshairs->GetPosition (x,y);
     Crosshairs->SetPosition (x,y+viewport_offset);  
   }
-  
 }
 
 void Cockpit::SetParent (Unit * unit) {

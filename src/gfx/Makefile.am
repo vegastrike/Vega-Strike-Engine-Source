@@ -29,6 +29,8 @@ libgfx_a_SOURCES =	\
 	decalqueue.h	\
 	env_map_gent.cpp	\
 	env_map_gent.h	\
+	gauge.cpp	\
+	gauge.h		\
 	halo.cpp	\
 	halo.h		\
 	lerp.cpp	\
