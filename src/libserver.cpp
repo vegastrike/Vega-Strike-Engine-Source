@@ -20,6 +20,6 @@ void	UpdateTerrain() {}
 void	UpdateCameraSnds() {}
 void	NebulaUpdate( StarSystem * ss) {}
 void	TestMusic() {}
-void SwitchUnits2( Unit * nw) {
-}
+void SwitchUnits2( Unit * nw) {}
 void DoCockpitKeys() {}
+

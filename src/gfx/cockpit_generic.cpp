@@ -273,6 +273,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
     ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
     ol->SetVisible (true);
   }
+  SwitchUnits2( nw);
 }
 static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
   static bool FlyStraightInTurret = XMLSupport::parse_bool (vs_config->getVariable("physics","ai_pilot_when_in_turret","true"));
@@ -361,7 +362,6 @@ void Cockpit::Update () {
 	ss->AddUnit (un);
 
 	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
-	//un->SetAI(new FireKeyboard ())
 	SwitchUnits (NULL,un);
 	credits = savegame->GetSavedCredits();
 	DoCockpitKeys();
