@@ -17,10 +17,11 @@ SRCS = 	gl_globals.cpp				\
 	gl_matrix.cpp				\
 	gl_material.cpp				\
 	gl_misc.cpp				\
+	gl_quad_list.cpp			\
 	gl_state.cpp				\
 	gl_texture.cpp				\
-	gl_vertex_list.cpp			\
-	gl_quad_list.cpp			
+	gl_vertex_list.cpp			
+
 
 OBJS = $(SRCS:.cpp=.o)
 

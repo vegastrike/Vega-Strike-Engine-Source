@@ -1,7 +1,7 @@
 #SUBDIRS = gldrv
 bin_PROGRAMS = vegastrike
 SUBDIRS = gfx gldrv
-vegastrike_LDADD = gldrv/libgldrv.a gfx/libgfx.a
+vegastrike_LDADD = gfx/libgfx.a gldrv/libgldrv.a
 
 vegastrike_SOURCES =				\
 	cmd.h					\
