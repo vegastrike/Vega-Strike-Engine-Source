@@ -166,7 +166,8 @@ private:
       USENORMALS,
       REVERSE,
 	  POLYGONOFFSET,
-	  DETAILTEXTURE
+	  DETAILTEXTURE,
+	  DETAILPLANE
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -310,6 +311,7 @@ protected:
   ///The decal relevant to this mesh
   vector <Texture *> Decal;
   Texture * detailTexture;
+  vector <Vector> detailPlanes;
   float polygon_offset;
   ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
   char envMapAndLit;

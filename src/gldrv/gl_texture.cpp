@@ -70,7 +70,7 @@ struct GLTexture{
 //static GLEnum * targets=NULL;
 
 static vector <GLTexture> textures;
-static int activetexture[4]={-1,-1};
+static int activetexture[8]={-1,-1,-1,-1,-1,-1,-1,-1};
 
 static void ConvertPalette(unsigned char *dest, unsigned char *src)
 {

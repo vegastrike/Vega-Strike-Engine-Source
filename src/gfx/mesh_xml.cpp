@@ -70,7 +70,8 @@ const EnumMap::Pair Mesh::XML::element_names[] = {
   EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
   EnumMap::Pair("Vertex", XML::VERTEX),
   EnumMap::Pair("Logo", XML::LOGO),
-  EnumMap::Pair("Ref",XML::REF)
+  EnumMap::Pair("Ref",XML::REF),
+  EnumMap::Pair("DetailPlane",XML::DETAILPLANE)
 };
 
 const EnumMap::Pair Mesh::XML::attribute_names[] = {
@@ -115,7 +116,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
 
 
 
-const EnumMap Mesh::XML::element_map(XML::element_names, 23);
+const EnumMap Mesh::XML::element_map(XML::element_names, 24);
 const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 36);
 
 
@@ -232,14 +233,38 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   xml->state_stack.push_back(elem);
   bool texture_found = false;
   switch(elem) {
+      case XML::DETAILPLANE:
+	  {
+		  Vector vec (detailPlanes.size()>=2?1:0,detailPlanes.size()==1?1:0,detailPlanes.size()==0?1:0);
+		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		    switch(XML::attribute_map.lookup((*iter).name)) {
+			case XML::X:
+				vec.i=XMLSupport::parse_float(iter->value);
+				break;
+			case XML::Y:
+				vec.j=XMLSupport::parse_float(iter->value);
+				break;
+				
+			case XML::Z:
+				vec.k=XMLSupport::parse_float(iter->value);
+				break;
+			}
+		  }
+		  static float detailscale = XMLSupport::parse_float(vs_config->getVariable("graphics","detail_texture_scale",".01"));
+		  if (detailPlanes.size()<6) {
+			  detailPlanes.push_back(vec*detailscale);
+		  }
+
+	  }
+	  break;
 	  case XML::MATERIAL:
 	    //		  assert(xml->load_stage==4);
 		  xml->load_stage=7;
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		    switch(XML::attribute_map.lookup((*iter).name)) {
-                    case XML::USENORMALS:
-                        xml->usenormals = XMLSupport::parse_bool (iter->value);
-                        break;
+			case XML::USENORMALS:
+			  xml->usenormals = XMLSupport::parse_bool (iter->value);
+			  break;
 		    case XML::POWER:
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
@@ -995,6 +1020,9 @@ void Mesh::endElement(const string &name) {
   case XML::MATERIAL:
 	  //assert(xml->load_stage==7);
 	  xml->load_stage=4;
+	  break;
+  case XML::DETAILPLANE:
+	  
 	  break;
   case XML::DIFFUSE:
 	  //assert(xml->load_stage==8);

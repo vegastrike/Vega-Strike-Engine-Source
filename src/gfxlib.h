@@ -259,6 +259,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename);
 //State
 ///Enables and disables given state
 void /*GFXDRVAPI*/ GFXEnable(const enum STATE); void /*GFXDRVAPI*/ GFXDisable(const enum STATE);
+void /*GFXDRVAPI*/ GFXToggleTexture(bool enable,int whichstage);
 ///Sets texture to clamp or wrap texture coordinates
 void /*GFXDRVAPI*/ GFXTextureAddressMode(const ADDRESSMODE);
 

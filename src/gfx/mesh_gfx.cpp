@@ -449,7 +449,7 @@ static void SetupFogState (char cloaked) {
         GFXFogMode (FOG_OFF);
     }    
 }
-bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset,Texture *detailTexture) {
+bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset,Texture *detailTexture,const vector<Vector> &detailPlanes) {
 	if (polygon_offset){
 		float a,b;
 		GFXGetPolygonOffset(&a,&b);
@@ -467,16 +467,22 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
             retval=true;
             if (envMap&&detailTexture==NULL)
                 GFXDisable(TEXTURE1);
-			
+			if (detailTexture==NULL) {
+				GFXToggleTexture(false,2);
+				GFXToggleTexture(false,3);
+			}
             if (decal[0])
                 decal[0]->MakeActive();
 			if (detailTexture) {
-				GFXActiveTexture(1);
-				const float params[4]={1,0,0,0};
-				const float paramt[4]={0,1,0,0};
-				GFXTextureCoordGenMode(OBJECT_LINEAR_GEN,params,paramt);
-				detailTexture->MakeActive();
-				GFXActiveTexture(0);
+				for (unsigned int i=1;i<detailPlanes.size();i+=2) {
+					int stage = (i/2)+1;
+					GFXActiveTexture(stage);
+					const float params[4]={detailPlanes[i-1].i,detailPlanes[i-1].j,detailPlanes[i-1].k,0};
+					const float paramt[4]={detailPlanes[i].i,detailPlanes[i].j,detailPlanes[i].k,0};
+					GFXTextureCoordGenMode(OBJECT_LINEAR_GEN,params,paramt);
+					detailTexture->MakeActive(stage);
+					GFXToggleTexture(true,stage);
+				}
 			}
         }
     }
@@ -488,6 +494,8 @@ void RestoreFirstPassState(Texture * detailTexture ) {
 		GFXActiveTexture(1);
 		GFXTextureCoordGenMode(SPHERE_MAP_GEN,tempo,tempo);
 		_Universe->activeStarSystem()->activateLightMap();
+		GFXToggleTexture(false,2);
+		GFXToggleTexture(false,3);
 	}
 }
 void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX, float polygon_offset) {
@@ -656,7 +664,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 
   switch (whichpass) {
   case 0:
-	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture);
+	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset,detailTexture,detailPlanes);
 	  break;
   case 1:
 	  

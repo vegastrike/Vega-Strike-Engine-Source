@@ -96,6 +96,7 @@ struct Texture{
   bool operator == (Texture &b);
   ///Binds the texture in the GFX library
   virtual void MakeActive();
+  virtual void MakeActive(int stage);
   ///If the texture has loaded properly returns true
   virtual bool LoadSuccess () {
     return (name>=0);

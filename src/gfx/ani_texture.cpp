@@ -18,6 +18,11 @@ void AnimatedTexture::MakeActive () {
     Decal[active%numframes]->MakeActive();
   }
 }
+void AnimatedTexture::MakeActive (int stage) {
+  if (Decal) {
+    Decal[active%numframes]->MakeActive(stage);
+  }
+}
 void AnimatedTexture::UpdateAllPhysics() {
   for (unsigned int i=0;i<myvec.size();i++) {
     myvec[i]->physicsactive-=SIMULATION_ATOM;

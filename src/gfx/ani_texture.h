@@ -19,6 +19,7 @@ class AnimatedTexture: public Texture {
   ~AnimatedTexture();
   virtual Texture * Clone ();
   void MakeActive();
+  void MakeActive(int stage);
   static void UpdateAllPhysics();
   static void UpdateAllFrame();
   //resets the animation to beginning

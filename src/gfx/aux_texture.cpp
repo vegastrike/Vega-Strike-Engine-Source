@@ -850,19 +850,27 @@ int Texture::Bind(int maxdimension,GFXBOOL detailtexture)
 void Texture::Prioritize (float priority) {
   GFXPrioritizeTexture (name, priority);
 }
+void ActivateWhite(int stage) {
+	static Texture * white = new Texture("white.bmp");
+	if (white->LoadSuccess())
+		white->MakeActive(stage);
+}
+void Texture::MakeActive(int stag)
+{
+  static bool missing=false;
+  if (name==-1) {
+	  ActivateWhite(stag);
+  } else {
+    GFXSelectTexture(name,stag);
+  }
+}
 
 void Texture::MakeActive()
 {
   static bool missing=false;
   if (name==-1) {
-    missing=true;
-    GFXDisable(stage==0?TEXTURE0:TEXTURE1);
+	  ActivateWhite(stage);
   } else {
-    if (missing) {
-      missing=false;
-      GFXEnable(stage==0?TEXTURE0:TEXTURE1);
-    }
-    assert(name!=-1);
     GFXSelectTexture(name,stage);
   }
 }

@@ -24,8 +24,8 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <stack>
-GFXBOOL bTex0 = GFXTRUE;
-GFXBOOL bTex1 = GFXTRUE;
+GFXBOOL bTex[8] = {GFXTRUE,GFXTRUE,GFXTRUE,GFXTRUE};
+
 int activeTextureStage=-1;
 extern GFXBOOL GFXLIGHTING;
 void /*GFXDRVAPI*/ GFXEnable (const STATE state)
@@ -46,13 +46,13 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	  glDepthMask(1);
 	  break;
 	case TEXTURE0:
-	  bTex0 = GFXTRUE;
+	  bTex[0] = GFXTRUE;
 	  GFXActiveTexture(0);	
 	  glEnable (GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
 	  if (gl_options.Multitexture) {
-		bTex1 = GFXTRUE;
+		bTex[1] = GFXTRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
 		glEnable (GL_TEXTURE_CUBE_MAP_EXT);
@@ -69,7 +69,16 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 		break;
 	}
 }
-
+void GFXToggleTexture(bool enable,int whichstage) {
+	if (gl_options.Multitexture||whichstage==0) {
+		bTex[whichstage] = enable;
+		GFXActiveTexture (whichstage);
+		if (enable)
+			glEnable (GL_TEXTURE_2D);
+		else
+			glDisable(GL_TEXTURE_2D);
+	}
+}
 void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 {
 	
@@ -86,14 +95,13 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	  glDepthMask(0);
 	  break;
 	case TEXTURE0:
-	  bTex0 = GFXFALSE;
+	  bTex[0] = GFXFALSE;
 	  GFXActiveTexture(0);	
 	  glDisable (GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
 	  if (gl_options.Multitexture) {
-		bTex1 = GFXFALSE;
-		bTex1 = GFXTRUE;
+		bTex[1] = GFXTRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
 		glDisable (GL_TEXTURE_CUBE_MAP_EXT);
