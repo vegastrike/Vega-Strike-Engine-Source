@@ -331,7 +331,11 @@ void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
       }
       break;
     }
+	static int where=0;
     if (smod!=NORMAL) {
+      if (submode==NORMAL) {
+	where=CargoList->GetSelectedItem();
+      }
       switch (smod) {
       case MOUNT_MODE:
 	title="Select On Which Mount To Place Your Weapon";
@@ -349,9 +353,15 @@ void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
     }
     
     COMMIT->ModifyName (ButtonText.c_str());
+	int tmpsubmode=submode;
     mode = mod;
     submode = smod;
     SetupCargoList();
+    if (smod==NORMAL&&tmpsubmode!=NORMAL) {
+      CargoList->SetSelectedItem(where);
+	  lastselected.last=false;
+      where=0;
+    }
 }
 bool UpgradingInfo::beginswith (const vector <std::string> &cat, const std::string &s) {
     if (cat.empty()) {
@@ -378,9 +388,11 @@ void UpgradingInfo::SetupCargoList () {
 	}
 
       }else {
+	bool addedsomething=false;
 	if (!curcategory.empty()) {
-	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) 
-	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
+	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) {
+	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]",NULL,GFXColor(0,1,.5,1));
+	  }
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
 	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].cargo.category.begin(),(*CurrentList)[i].cargo.category.end(),true)) {
 	      if (mode!=UPGRADEMODE&&mode!=DOWNGRADEMODE) (*CurrentList)[i].color=GFXColor(1,1,1,1);
@@ -399,7 +411,7 @@ void UpgradingInfo::SetupCargoList () {
 			  (*CurrentList)[i].cargo.quantity=1;
 			  Unit *bas;
 			  bas=base.GetUnit();
-			  if (mode==UPGRADEMODE||mode==BUYMODE) {
+			  if (mode==BUYMODE) {
 				  if (((*CurrentList)[i].cargo.price>cpt->credits)||(!(un->CanAddCargo((*CurrentList)[i].cargo)))) {
 					  (*CurrentList)[i].color=nomoney;
 				  }
@@ -411,8 +423,8 @@ void UpgradingInfo::SetupCargoList () {
 				  if (!(bas->CanAddCargo((*CurrentList)[i].cargo))) {
 					  (*CurrentList)[i].color=nomoney;
 				  }
-//			  } else if ((mode==DOWNGRADEMODE||mode==BRIEFINGMODE||mode==SAVEMODE||mode==NEWSMODE) {
-				  //do nothing
+//			  } else if ((mode==DOWNGRADEMODE||mode==UPGRADEMODE||mode==BRIEFINGMODE||mode==SAVEMODE||mode==NEWSMODE) {
+				  //do nothing (Upgrades,Downgrades,briefings,saves and news don't take up cargo space)
 			  } else if (mode==MISSIONMODE) {
 				  if (active_missions.size()>=UniverseUtil::maxMissions()) {
 					  (*CurrentList)[i].color=nomoney;
@@ -423,6 +435,7 @@ void UpgradingInfo::SetupCargoList () {
 			  (*CurrentList)[i].color=nomoney;
 		  }
 			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.content).c_str() ,(beautify((*CurrentList)[i].cargo.content)+"("+tostring((*CurrentList)[i].cargo.quantity)+")").c_str(),NULL,(*CurrentList)[i].color);
+			  addedsomething=true;
 	    }
 	  }
 	}
@@ -435,7 +448,14 @@ void UpgradingInfo::SetupCargoList () {
 	      (!match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),true))&&
 	      lev!=curcat) {
 	    CargoList->AddTextItem ((string("x")+lev).c_str(),beautify(lev).c_str(),NULL,GFXColor(0,1,1,1));
+		addedsomething=true;
 	    curcat =lev;
+	  }
+	}
+	if (!addedsomething) {
+	  if (!curcategory.empty()) {
+	    curcategory.pop_back();		     
+	    SetupCargoList();
 	  }
 	}
       }      
@@ -910,7 +930,7 @@ void UpgradingInfo::CompleteTransactionAfterTurretSelect() {
   }
 }
 void UpgradingInfo::SelectLastSelected() {
-  if (lastselected.last) {
+	if (lastselected.last) {
     int ours = CargoList->DoMouse(lastselected.type, lastselected.x, lastselected.y, lastselected.button, lastselected.state);
     if (ours) {
       char *buy_name = CargoList->GetSelectedItemName();

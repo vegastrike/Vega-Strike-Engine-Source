@@ -86,7 +86,8 @@ public:
 	TextArea(void);
 	TextArea(float x, float y, float wid, float hei, int scrollbar);
 	~TextArea(void);
-
+	int GetSelectedItem() {return cur_selected;}
+	void SetSelectedItem(int newh) {cur_selected=newh;}
 	void DoHighlight(int yes);	// DoHighlight(0) to disable mouse highlighting. Also disable clicking on entries
 	void DoMultiline(int yes){do_multiline=yes;}	// DoMultiline(1) to enable multi-line entries
 	void Refresh(void);
