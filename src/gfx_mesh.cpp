@@ -59,6 +59,9 @@ void Mesh::InitUnit()
 	numQuadstrips = 0;
 	stcoords = NULL;
 	Decal = NULL;
+	
+	bspTree = NULL;
+
 	alphalist = NULL;
 	ResetVectors(p,q,r);
 	yrestricted = prestricted = rrestricted = FALSE;
