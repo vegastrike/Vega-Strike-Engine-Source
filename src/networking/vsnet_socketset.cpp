@@ -1,5 +1,6 @@
 #include <config.h>
 
+#include "vsnet_socket.h"
 #include "vsnet_socketset.h"
 #include "const.h"
 
@@ -10,9 +11,14 @@ SocketSet::SocketSet( )
     clear();
 }
 
-void SocketSet::autosetRead( int fd )
+void SocketSet::autosetRead( VsnetSocketBase* s )
 {
-    _autoset.insert( fd );
+    _autoset.insert( s );
+}
+
+void SocketSet::autounsetRead( VsnetSocketBase* s )
+{
+    _autoset.erase( s );
 }
 
 void SocketSet::setRead( int fd )
@@ -61,9 +67,17 @@ int SocketSet::select( timeval* timeout )
     COUT << "enter " << __PRETTY_FUNCTION__ << " fds=";
 #endif
 
-    for( set<int>::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
+    for( set<VsnetSocketBase*>::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
     {
-        setRead( *it );
+        int fd = (*it)->get_fd();
+        if( fd >= 0 )
+        {
+            setRead( fd );
+            if( (*it)->needReadAlwaysTrue() )
+            {
+                setReadAlwaysTrue( fd );
+            }
+        }
     }
 
 #ifdef VSNET_DEBUG

@@ -27,63 +27,30 @@ bool operator==( const ServerSocket& l, const ServerSocket& r )
     return (l._fd == r._fd);
 }
 
-void ServerSocket::disconnect( const char *s, bool fexit )
+void ServerSocket::child_disconnect( const char *s )
 {
     if( _fd > 0 )
     {
         close_socket( _fd );
     }
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
-    if( fexit )
-        exit(1);
 }
 
-bool ServerSocket::set_nonblock( )
-{
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    int datato = 1;
-    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
-    {
-        ::perror( "Error fcntl : ");
-        return false;
-    }
-#else
-    unsigned long datato = 1;
-    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
-    {
-        ::perror( "Error fcntl : ");
-        return false;
-    }
-#endif
-    _noblock = 1;
-    return true;
-}
+ServerSocketTCP::ServerSocketTCP( )
+    : ServerSocket()
+{ }
 
-bool ServerSocket::set_block( )
-{
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    int datato = 0;
-    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
-    {
-        ::perror( "Error fcntl : ");
-        return false;
-    }
-#else
-    unsigned long datato = 0;
-    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
-    {
-        ::perror( "Error fcntl : ");
-        return false;
-    }
-#endif
-    _noblock = 0;
-    return true;
-}
+ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr, SocketSet* set )
+    : ServerSocket( fd, adr, set )
+{ }
 
-bool ServerSocket::get_nonblock( ) const
-{
-    return (_noblock==1);
-}
+ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr )
+    : ServerSocket( fd, adr )
+{ }
+
+ServerSocketTCP::ServerSocketTCP( const ServerSocketTCP& orig )
+    : ServerSocket(orig)
+{ }
 
 /**************************************************************/
 /**** Accept a new connection                              ****/
@@ -92,7 +59,7 @@ bool ServerSocket::get_nonblock( ) const
 // Not used in standard UDP mode
 // Returns channel number in SDL UDP mode
 
-SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
+SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set, bool addToSet )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -102,14 +69,22 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
 #else
     socklen_t          
 #endif
-      len = sizeof( struct sockaddr_in );
+    len = sizeof( struct sockaddr_in );
     if( set.is_set( _fd ) )
     {
         int sock = ::accept( _fd, (sockaddr *)&remote_ip, &len );
         if( sock > 0 )
         {
-            SOCKETALT ret( sock, SOCKETALT::TCP, remote_ip );
-	        return ret;
+            if( addToSet )
+            {
+                SOCKETALT ret( sock, SOCKETALT::TCP, remote_ip, &set );
+	            return ret;
+            }
+            else
+            {
+                SOCKETALT ret( sock, SOCKETALT::TCP, remote_ip );
+	            return ret;
+            }
         }
         else
         {
@@ -125,6 +100,22 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
     }
 }
 
+ServerSocketUDP::ServerSocketUDP( )
+    : ServerSocket()
+{ }
+
+ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr, SocketSet* set )
+    : ServerSocket( fd, adr, set )
+{ }
+
+ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr )
+    : ServerSocket( fd, adr )
+{ }
+
+ServerSocketUDP::ServerSocketUDP( const ServerSocketUDP& orig )
+    : ServerSocket(orig)
+{ }
+
 /**************************************************************/
 /**** Accept a new connection                              ****/
 /**************************************************************/
@@ -132,7 +123,7 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
 // Not used in standard UDP mode
 // Returns channel number in SDL UDP mode
 
-SOCKETALT ServerSocketUDP::acceptNewConn( SocketSet& )
+SOCKETALT ServerSocketUDP::acceptNewConn( SocketSet&, bool )
 {
     SOCKETALT ret( _fd, SOCKETALT::UDP, _srv_ip );
     return ret;

@@ -96,19 +96,8 @@ int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
     return ret;
 }
 
-void VsnetUDPSocket::disconnect( const char *s, bool fexit )
-{
-    if( fexit )
-        exit(1);
-}
-
 void VsnetUDPSocket::dump( std::ostream& ostr ) const
 {
     ostr << "( s=" << _fd << " UDP r=" << _remote_ip << " )";
-}
-
-void VsnetUDPSocket::watch( SocketSet& set )
-{
-    set.setRead(_fd);
 }
 

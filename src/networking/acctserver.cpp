@@ -82,11 +82,14 @@ void	AccountServer::start()
 	// Create and bind socket
 	cout<<"Initializing network..."<<endl;
 	unsigned short tmpport;
+
+	SocketSet set;
+
 	if( vs_config->getVariable( "network", "accountsrvport", "")=="")
 		tmpport = ACCT_PORT;
 	else
 		tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
-	Network = NetworkToClient.createServerSocket( tmpport );
+	Network = NetworkToClient.createServerSocket( tmpport, &set );
 	if( !Network)
 	{
 		cout<<"Error cannot start server... quitting."<<endl;
@@ -94,27 +97,15 @@ void	AccountServer::start()
 	}
 	cout<<"done."<<endl;
 
-	SocketSet set;
-	set.autosetRead( Network->get_tcp_sock() );
-
 	while( keeprun)
 	{
 		//cout<<"Loop"<<endl;
 		// Check for incoming connections
 
         set.clear();
-
-		// Check sockets to be watched
-		LS i;
-		for( i=Socks.begin(); i!=Socks.end(); i++)
-		{
-			cout << "Adding an open connection to select" << endl;
-	    	i->watch( set );
-		}
-
 		set.select( NULL );
 
-		comsock = Network->acceptNewConn( set );
+		comsock = Network->acceptNewConn( set, true );
 		if( comsock.valid() )
 		{
 			Socks.push_back( comsock);
@@ -122,6 +113,7 @@ void	AccountServer::start()
 		}
 
 		// Loop for each active client and process request
+        LS i;
 		for( i=Socks.begin(); i!=Socks.end(); i++)
 		{
 			if( i->isActive( set ) )
@@ -140,7 +132,7 @@ void	AccountServer::start()
 
 	delete CONFIGFILE;
 	delete vs_config;
-	Network->disconnect( "Shutting down.");
+	Network->disconnect( "Shutting down.", true );
 }
 
 void	AccountServer::recvMsg( SOCKETALT sock)

@@ -42,42 +42,68 @@
 #include "vsnet_socketset.h"
 #include "packetmem.h"
 
+class SocketSet;
+
 int close_socket( int fd );
 
-class VsnetSocket
+class VsnetSocketBase
+{
+public:
+    VsnetSocketBase( );
+    VsnetSocketBase( int fd );
+    VsnetSocketBase( int fd, SocketSet* set );
+    VsnetSocketBase( const VsnetSocketBase& orig );
+
+    virtual ~VsnetSocketBase( );
+
+    VsnetSocketBase& operator=( const VsnetSocketBase& orig );
+
+    bool valid() const;
+
+    int  get_fd() const;
+
+    bool set_block( );
+    bool set_nonblock( );
+    bool get_nonblock( ) const;
+
+    void watch( SocketSet& set );
+    void disconnect( const char *s, bool fexit );
+    
+    virtual bool needReadAlwaysTrue( ) const { return false; }
+
+protected:
+    virtual void child_watch( SocketSet& set ) { }
+    virtual void child_disconnect( const char* s ) { }
+
+protected:
+    int        _fd;
+
+private:
+	// bits for boolean operations
+	unsigned   _noblock : 1;
+
+    SocketSet* _set;
+};
+
+class VsnetSocket : public VsnetSocketBase
 {
 protected:
-    int       _fd;
-    AddressIP _remote_ip; // IP address structure of remote server
-
-	// bits for boolean operations
-	unsigned _noblock : 1;
+    AddressIP  _remote_ip; // IP address structure of remote server
 
 public:
     VsnetSocket( );
     VsnetSocket( int sock, const AddressIP& remote_ip );
+    VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet* set );
     VsnetSocket( const VsnetSocket& orig );
-
-    virtual ~VsnetSocket( );
 
     VsnetSocket& operator=( const VsnetSocket& orig );
 
     virtual bool isTcp() const = 0;
 
-    int  get_fd() const;
-    void set_fd( int sock );
-
-    bool valid() const;
-
-    virtual void watch( SocketSet& set ) = 0;
     virtual bool isActive( SocketSet& set ) = 0;
 
     bool eq( const VsnetSocket& r );
     bool sameAddress( const VsnetSocket& r );
-
-    bool set_block( );
-    bool set_nonblock( );
-    bool get_nonblock( ) const;
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
 
@@ -91,7 +117,6 @@ public:
 
     virtual void ack( ) = 0;
 
-    virtual void disconnect( const char *s, bool fexit ) = 0;
 
     friend std::ostream& operator<<( std::ostream& ostr, const VsnetSocket& s );
 
@@ -110,6 +135,7 @@ public:
 public:
     SOCKETALT( );
     SOCKETALT( int sock, bool mode, const AddressIP& remote_ip );
+    SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet* set );
     SOCKETALT( const SOCKETALT& orig );
 
     SOCKETALT& operator=( const SOCKETALT& orig );
@@ -117,8 +143,6 @@ public:
     inline int get_fd() const {
         return (_sock.isNull() ? -1 : _sock->get_fd());
     }
-
-    void set_fd( int sock, bool mode );
 
     inline bool valid() const {
         return (_sock.isNull() ? false : _sock->valid());

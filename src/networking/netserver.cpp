@@ -238,13 +238,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		netbuf.addString( relsys);
 		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
 		delete mdigest;
-		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
-#ifndef _WIN32
-			__LINE__
-#else
-			213
-#endif
-			);
+		packet2.send( LOGIN_ACCEPT, cltserial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(241) );
 		COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
 }
@@ -258,13 +252,7 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
-	packet2.send( LOGIN_ERROR, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, 
-#ifndef _WIN32
-			__LINE__
-#else
-			233
-#endif 
-			);
+	packet2.send( LOGIN_ERROR, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(255) );
 	COUT<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
 }
 
@@ -277,13 +265,7 @@ void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
-	packet2.send( LOGIN_UNAVAIL, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, 
-#ifndef _WIN32
-			__LINE__
-#else
-			252
-#endif
-			);
+	packet2.send( LOGIN_UNAVAIL, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(268) );
 	COUT<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
 }
 
@@ -298,13 +280,7 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-	packet2.send( LOGIN_ALREADY, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			273
-#endif
-			);
+	packet2.send( LOGIN_ALREADY, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(283) );
 	COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 }
 
@@ -345,7 +321,7 @@ Client* NetServer::newConnection_tcp( SocketSet& set )
     if( tcpNetwork->isActive( set ) )
     {
         COUT << " enter " << "newConnection_tcp" << endl;
-        sock = tcpNetwork->acceptNewConn( set );
+        sock = tcpNetwork->acceptNewConn( set, true );
         if( sock.valid() )
         {
             ret = this->addNewClient( sock, true );
@@ -370,8 +346,8 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
         tcpClients.push_back( newclt);
 	else
         udpClients.push_back( newclt);
-    //COUT << "Added client with socket n°" << sock;
-      COUT << " - Actual number of clients : "
+
+    COUT << " - Actual number of clients : "
          << tcpClients.size() + udpClients.size() << endl;
 
     return newclt;
@@ -457,7 +433,7 @@ void	NetServer::start(int argc, char **argv)
 			tmpport = ACCT_PORT;
 		else
 			tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
-		acct_sock = NetUITCP::createSocket( srvip, tmpport );
+		acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
 		if( !acct_sock.valid())
 		{
 			cerr<<"Cannot connect to account server... quitting"<<endl;
@@ -468,12 +444,20 @@ void	NetServer::start(int argc, char **argv)
 
 	// Create and bind sockets
 	COUT << "Initializing TCP server ..." << endl;
-	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
-    _sock_set->autosetRead( tcpNetwork->get_tcp_sock() );
+	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
+    if( tcpNetwork == NULL )
+    {
+        COUT << "Couldn't create TCP server - quitting" << endl;
+        exit( -100 );
+    }
 
 	COUT << "Initializing UDP server ..." << endl;
-	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
-    _sock_set->autosetRead( udpNetwork->get_udp_sock() );
+	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
+    if( udpNetwork == NULL )
+    {
+        COUT << "Couldn't create UDP server - quitting" << endl;
+        exit( -100 );
+    }
 
 	COUT << "done." << endl;
 
@@ -499,7 +483,6 @@ void	NetServer::start(int argc, char **argv)
 
 		// Check received communications
 		prepareCheckMsg( *_sock_set );
-		if( acctserver && acct_con) prepareCheckAcctMsg( *_sock_set );
 		nb = _sock_set->select( NULL );
 		if( nb > 0 )
 		{
@@ -520,7 +503,7 @@ void	NetServer::start(int argc, char **argv)
 			reconnect_time += periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
-			acct_sock = NetUITCP::createSocket( srvip, tmpport );
+			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
 			if( acct_sock.valid())
 			{
 				int nbclients_here = udpClients.size() + tcpClients.size();
@@ -545,13 +528,7 @@ void	NetServer::start(int argc, char **argv)
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
 				// Use the serial packet's field to send the number of clients
-				if( p2.send( CMD_RESYNCACCOUNTS, nbclients_here, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			520
-#endif					
-					) < 0 )
+				if( p2.send( CMD_RESYNCACCOUNTS, nbclients_here, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(524) ) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
@@ -570,13 +547,7 @@ void	NetServer::start(int argc, char **argv)
 		LI j;
 		for ( j=discList.begin(); j!=discList.end(); j++)
 		{
-			this->disconnect( (*j), __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			545
-#endif
-			);
+			this->disconnect( (*j), __FILE__, PSEUDO__LINE__(543) );
 		}
 		discList.clear();
 
@@ -720,11 +691,6 @@ void	NetServer::checkKey( SocketSet & set)
 /**** Check account server activity                        ****/
 /**************************************************************/
 
-void	NetServer::prepareCheckAcctMsg( SocketSet& set )
-{
-    acct_sock.watch( set );
-}
-
 void	NetServer::checkAcctMsg( SocketSet& set )
 {
 	int len=0;
@@ -812,12 +778,14 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 
 void	NetServer::prepareCheckMsg( SocketSet& set )
 {
-	// First add all clients to be watched
-	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
-	{
-		(*i)->sock.watch( set );
-	}
-	udpNetwork->watch( set );
+#if 0
+// 	// First add all clients to be watched
+// 	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
+// 	{
+// 		(*i)->sock.watch( set );
+// 	}
+// 	udpNetwork->watch( set );
+#endif
 }
 
 void	NetServer::checkMsg( SocketSet& set )
@@ -1064,13 +1032,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				// Redirect the login request packet to account server
 				COUT << "Redirecting login request to account server on socket " << acct_sock << endl
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
-				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDANDFORGET, iptmp, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			982
-#endif					
-					) < 0 )
+				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDANDFORGET, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
@@ -1203,13 +1165,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 						if( md5CheckFile( newsystem, client_md5))
 						{
 							// Send an ASKFILE packet with serial == 0 to say file is ok
-							p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-							__LINE__
-#else
-							1186
-#endif
-							);
+							p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 						}
 						else
 						{
@@ -1229,13 +1185,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 					// Send a CMD_JUMP to client with name of system (and md5 string ?)
 					netbuf.Reset();
 					netbuf.addString( newsystem);
-					p2.send( CMD_JUMP, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-						__LINE__
-#else
-						1195
-#endif
-						);
+					p2.send( CMD_JUMP, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1184) );
 				}
 				*/
 			}	
@@ -1362,13 +1312,7 @@ void	NetServer::addClient( Client * clt)
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
 		// Put the save buffer after the ClientState
-		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1171
-#endif
-			);
+		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1311));
 		COUT<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
@@ -1382,13 +1326,7 @@ void	NetServer::addClient( Client * clt)
 	Packet pp;
 	netbuf.Reset();
 	netbuf.addShort( zoneid);
-	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-		__LINE__
-#else
-		1190
-#endif
-		);
+	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );
 
 	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<endl;
 	//delete cltsbuf;
@@ -1450,22 +1388,24 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 
 	if( acctserver)
 	{
-		// Send a disconnection info to account server
-		netbuf.addString( clt->callsign);
-		netbuf.addString( clt->passwd);
-		Packet p2;
-		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
-		             SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1225
-#endif					 
-					 ) < 0 )
+        if( un != NULL )
         {
-			COUT<<"ERROR sending LOGOUT to account server"<<endl;
-		}
-		//p2.display( "", 0);
+		    // Send a disconnection info to account server
+		    netbuf.addString( clt->callsign);
+		    netbuf.addString( clt->passwd);
+		    Packet p2;
+		    if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+		                SENDRELIABLE, NULL, acct_sock, __FILE__,
+                        PSEUDO__LINE__(1395) ) < 0 )
+            {
+			    COUT<<"ERROR sending LOGOUT to account server"<<endl;
+		    }
+		    //p2.display( "", 0);
+        }
+        else
+        {
+            COUT << "Could not get Unit for " << clt->callsign << endl;
+        }
 	}
 
 	// Removes the client from its starsystem
@@ -1474,38 +1414,46 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-	    COUT << "Client " << un->GetSerial() << " disconnected" << endl;
+        if( un )
+        {
+	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;
+        }
+        else
+        {
+	        COUT << "User " << clt->callsign << " disconnected" << endl;
+        }
 	    COUT << "There were "
 	         << tcpClients.size()+udpClients.size() << " clients - ";
 	    tcpClients.remove( clt);
 	}
 	else
 	{
-		Packet p1;
-	    p1.send( CMD_DISCONNECT, un->GetSerial(), NULL, 0,
-		         SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1253
-#endif
-				 );
-	    COUT << "Client " << un->GetSerial() << " disconnected" << endl;
-	    COUT << "There were "
-	         << tcpClients.size()+udpClients.size() << " clients - ";
-	    udpClients.remove( clt);
+        if( un != NULL )
+        {
+		    Packet p1;
+	        p1.send( CMD_DISCONNECT, un->GetSerial(), NULL, 0,
+		             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+                     PSEUDO__LINE__(1432) );
+	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;
+	        COUT << "There were "
+	            << tcpClients.size()+udpClients.size() << " clients - ";
+	        udpClients.remove( clt);
+        }
+        else
+        {
+            COUT << "Could not get Unit for " << clt->callsign << endl;
+        }
 	}
-	// Broadcast client EXIT zone
-	Packet p;
-	p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0,
-	             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1268
-#endif
-				 );
-	zonemgr->broadcast( clt, &p );
+
+    if( un != NULL )
+    {
+	    // Broadcast client EXIT zone
+	    Packet p;
+	    p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0,
+	                SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+                    PSEUDO__LINE__(1526) );
+	    zonemgr->broadcast( clt, &p );
+    }
 	if( clt != NULL)
 	{
 		delete clt;
@@ -1532,12 +1480,7 @@ void	NetServer::logout( Client * clt)
 		Packet p2;
 		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1299
-#endif
-			) < 0 )
+                     PSEUDO__LINE__(1555) ) < 0 )
         {
 			COUT<<"ERROR sending LOGOUT to account server"<<endl;
 		}
@@ -1562,13 +1505,7 @@ void	NetServer::logout( Client * clt)
 	// Broadcast client EXIT zone
 	if( clt->zone>0)
 	{
-		p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1330
-#endif
-			);
+		p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1580) );
 		zonemgr->broadcast( clt, &p );
 	}
 	if( clt != NULL)
@@ -1587,8 +1524,8 @@ void	NetServer::logout( Client * clt)
 
 void	NetServer::closeAllSockets()
 {
-	tcpNetwork->disconnect( "Closing sockets" );
-	udpNetwork->disconnect( "Closing sockets" );
+	tcpNetwork->disconnect( "Closing sockets", false );
+	udpNetwork->disconnect( "Closing sockets", false );
 	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
 	{
 		(*i)->sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -1666,13 +1603,7 @@ void	NetServer::save()
 			netbuf.addString( xmlstr);
 			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
 			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-			if( pckt.send( CMD_SAVEACCOUNTS, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1434
-#endif
-			) < 0 )
+			if( pckt.send( CMD_SAVEACCOUNTS, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1678) ) < 0 )
 				COUT<<"ERROR sending SAVE to account server"<<endl;
 		}
 	}
@@ -1689,13 +1620,7 @@ void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned sh
 	netbuf.addInt32( weapon_index);
 
 	//p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-	p.bc_create( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1457
-#endif		
-		);
+	p.bc_create( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1695) );
 	zonemgr->broadcast( zone, serial, &p );
 }
 
@@ -1705,18 +1630,12 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
 {
 	Packet p;
 	NetBuffer netbuf;
-	bool found = false;
+	// bool found = false;
 
 	netbuf.addInt32( weapon_index);
 	netbuf.addSerial( missile_serial);
 
-	p.bc_create( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1478
-#endif
-		);
+	p.bc_create( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1710) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
 }
@@ -1735,13 +1654,7 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Unit::Shield
 	netbuf.addShield( shield);
 	netbuf.addArmor( armor);
 
-	p.bc_create( CMD_DAMAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1541
-#endif
-		);
+	p.bc_create( CMD_DAMAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1729) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
 }
@@ -1783,13 +1696,7 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 		clt->ingame = false;
 	}
 
-	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__,
-#ifndef _WIN32
-			__LINE__
-#else
-			1553
-#endif
-		);
+	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1771) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
 }

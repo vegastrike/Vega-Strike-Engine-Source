@@ -42,6 +42,7 @@
 #include <set>
 
 class ServerSocket;
+class VsnetSocketBase;
 
 class SocketSet
 {
@@ -50,14 +51,17 @@ class SocketSet
     fd_set _read_set_always_true;
     int    _max_sock_always_true;
 
-    std::set<int> _autoset;
+    std::set<VsnetSocketBase*> _autoset;
 
 public:
     SocketSet( );
 
     /** Once a socket is registered using this function, setRead is
      *  automatically called for it before each select */
-    void autosetRead( int fd );
+    void autosetRead( VsnetSocketBase* s );
+
+    /// Take a socket out of the _autoset
+    void autounsetRead( VsnetSocketBase* s );
 
     void setRead( int fd );
     void setReadAlwaysTrue( int fd );

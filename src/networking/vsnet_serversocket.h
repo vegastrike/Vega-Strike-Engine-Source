@@ -23,68 +23,63 @@
 #include "vsnet_socketset.h"
 #include "vsnet_socket.h"
 
-struct ServerSocket
+struct ServerSocket : public VsnetSocketBase
 {
 protected:
-    int       _fd;
     AddressIP _srv_ip; // own IP address structure of this server
-
-    unsigned _noblock : 1;
 
 public:
     ServerSocket( )
-        : _fd(0)
-        , _noblock(0)
+        : VsnetSocketBase(0)
     { }
 
-    ServerSocket( int fd, const AddressIP& adr )
-        : _fd(fd)
+    ServerSocket( int fd, const AddressIP& adr, SocketSet* set )
+        : VsnetSocketBase( fd, set )
     {
         _srv_ip = adr;
-        set_block( );
+    }
+
+    ServerSocket( int fd, const AddressIP& adr )
+        : VsnetSocketBase( fd )
+    {
+        _srv_ip = adr;
     }
 
     ServerSocket( const ServerSocket& orig )
+        : VsnetSocketBase( orig )
     {
-        _fd      = orig._fd;
         _srv_ip  = orig._srv_ip;
-        _noblock = orig._noblock;
     }
 
     ServerSocket& operator=( const ServerSocket& orig )
     {
-        _fd      = orig._fd;
+        VsnetSocketBase::operator=( orig );
         _srv_ip  = orig._srv_ip;
-        _noblock = orig._noblock;
        	return *this;
     }
 
-    bool set_block( );
-    bool set_nonblock( );
-    bool get_nonblock( ) const;
-
-    inline bool valid() const { return (_fd>0); }
     inline int  get_udp_sock( ) const { return _fd; }
     inline int  get_tcp_sock( ) const { return _fd; }
     inline const AddressIP& get_adr( ) const { return _srv_ip; }
 
-    inline void watch( SocketSet& set ) { set.setRead(_fd); }
     inline bool isActive( SocketSet& set ) const { return set.is_set(_fd); }
 
-    virtual SOCKETALT acceptNewConn( SocketSet& set ) = 0;
-
-    void      disconnect( const char *s, bool fexit = true );
+    virtual SOCKETALT acceptNewConn( SocketSet& set, bool addToSet ) = 0;
 
     friend std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s );
     friend bool operator==( const ServerSocket& l, const ServerSocket& r );
+
+protected:
+    virtual void child_disconnect( const char *s );
 };
 
 class ServerSocketTCP : public ServerSocket
 {
 public:
-    ServerSocketTCP( ) : ServerSocket() { }
-    ServerSocketTCP( int fd, const AddressIP& adr ) : ServerSocket( fd, adr ) { }
-    ServerSocketTCP( const ServerSocketTCP& orig ) : ServerSocket(orig) { }
+    ServerSocketTCP( );
+    ServerSocketTCP( int fd, const AddressIP& adr, SocketSet* set );
+    ServerSocketTCP( int fd, const AddressIP& adr );
+    ServerSocketTCP( const ServerSocketTCP& orig );
 
     ServerSocketTCP& operator=( const ServerSocketTCP& orig )
     {
@@ -93,15 +88,16 @@ public:
     }
 
 	// Accept a new connection
-	virtual SOCKETALT		acceptNewConn( SocketSet& set );
+	virtual SOCKETALT		acceptNewConn( SocketSet& set, bool addToSet );
 };
 
 class ServerSocketUDP : public ServerSocket
 {
 public:
-	ServerSocketUDP( ) : ServerSocket() { }
-	ServerSocketUDP( int fd, const AddressIP& adr ) : ServerSocket( fd, adr ) { }
-	ServerSocketUDP( const ServerSocketUDP& orig ) : ServerSocket(orig) { }
+	ServerSocketUDP( );
+	ServerSocketUDP( int fd, const AddressIP& adr, SocketSet* set );
+	ServerSocketUDP( int fd, const AddressIP& adr );
+	ServerSocketUDP( const ServerSocketUDP& orig );
 
 	ServerSocketUDP& operator=( const ServerSocketUDP& orig )
 	{
@@ -110,7 +106,7 @@ public:
 	}
 
 	// Accept a new connection
-	virtual SOCKETALT		acceptNewConn( SocketSet& set );
+	virtual SOCKETALT		acceptNewConn( SocketSet& set, bool addToSet );
 };
 
 #endif /* VSNET_SERVERSOCKET_H */

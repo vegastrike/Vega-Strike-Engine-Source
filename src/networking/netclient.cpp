@@ -104,7 +104,7 @@ NetClient::NetClient()
     serial = 0;
     for( int i=0; i<MAXCLIENTS; i++)
         Clients[i] = NULL;
-    _sock_set = NULL;
+    _sock_set = new SocketSet;
 }
 
 NetClient::~NetClient()
@@ -407,7 +407,7 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 			timeout = 1;
 		}
     	acct_sock.watch( set );
-		nb = set.select( NULL );
+		nb = set.select( 1, 0 );
 		if( nb > 0 )
 			recv=this->checkAcctMsg( set);
 
@@ -440,7 +440,7 @@ SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
 	     << " with " << addr << ":" << port << endl;
 
 	cout<<"Initializing connection to account server..."<<endl;
-	acct_sock = NetUITCP::createSocket( addr, port );
+	acct_sock = NetUITCP::createSocket( addr, port, NULL );
 	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 
 	return acct_sock;
@@ -466,11 +466,11 @@ SOCKETALT	NetClient::init( char * addr, unsigned short port)
 	nettransport = vs_config->getVariable( "network", "transport", "udp" );
 	if( nettransport == "tcp" )
 	{
-	    this->clt_sock = NetUITCP::createSocket( addr, port );
+	    this->clt_sock = NetUITCP::createSocket( addr, port, _sock_set );
 	}
 	else
 	{
-	    this->clt_sock = NetUIUDP::createSocket( addr, port );
+	    this->clt_sock = NetUIUDP::createSocket( addr, port, _sock_set );
 	}
 	COUT << "created " << (this->clt_sock.isTcp() ? "TCP" : "UDP")
 	     << "socket (" << addr << "," << port << ") -> " << this->clt_sock << endl;
@@ -508,11 +508,11 @@ void	NetClient::start( char * addr, unsigned short port)
 	nettransport = vs_config->getVariable( "network", "transport", "udp" );
 	if( nettransport == "tcp" )
 	{
-	    this->clt_sock = NetUITCP::createSocket( addr, port );
+	    this->clt_sock = NetUITCP::createSocket( addr, port, _sock_set );
 	}
 	else
 	{
-	    this->clt_sock = NetUIUDP::createSocket( addr, port );
+	    this->clt_sock = NetUIUDP::createSocket( addr, port, _sock_set );
 	}
 
 	if( this->authenticate() == -1)
@@ -607,10 +607,8 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
 {
     int ret=0;
 
-    if( _sock_set == NULL ) _sock_set = new SocketSet;
-
     _sock_set->clear();
-    clt_sock.watch( *_sock_set );
+    // clt_sock.watch( *_sock_set ); --- automatic
     if( _sock_set->select( 0, 0 ) > 0 )
     {
         if( clt_sock.isActive( *_sock_set ) )

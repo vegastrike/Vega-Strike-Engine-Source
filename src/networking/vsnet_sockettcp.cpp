@@ -50,6 +50,30 @@ private:
  * VsnetTCPSocket - definition
  ***********************************************************************/
  
+VsnetTCPSocket::VsnetTCPSocket( )
+    : _incomplete_packet( 0 )
+    , _incomplete_len_field( 0 )
+    , _connection_closed( false )
+{ }
+
+VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip )
+    : VsnetSocket( sock, remote_ip )
+    , _incomplete_packet( 0 )
+    , _incomplete_len_field( 0 )
+    , _connection_closed( false )
+{ }
+
+VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet* set )
+    : VsnetSocket( sock, remote_ip, set )
+    , _incomplete_packet( 0 )
+    , _incomplete_len_field( 0 )
+    , _connection_closed( false )
+{ }
+
+VsnetTCPSocket::VsnetTCPSocket( const VsnetTCPSocket& orig )
+    : VsnetSocket( orig )
+{ }
+
 VsnetTCPSocket::~VsnetTCPSocket( )
 {
     while( !_complete_packets.empty() )
@@ -63,6 +87,12 @@ VsnetTCPSocket::~VsnetTCPSocket( )
     {
 	    delete _incomplete_packet;
     }
+}
+
+VsnetTCPSocket& VsnetTCPSocket::operator=( const VsnetTCPSocket& orig )
+{
+    VsnetSocket::operator=( orig );
+    return *this;
 }
 
 int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
@@ -152,7 +182,7 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
     }
 }
 
-void VsnetTCPSocket::disconnect( const char *s, bool fexit )
+void VsnetTCPSocket::child_disconnect( const char *s )
 {
     if( _fd > 0 )
     {
@@ -170,11 +200,6 @@ void VsnetTCPSocket::disconnect( const char *s, bool fexit )
     {
         COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
     }
-
-    if( fexit )
-    {
-        exit(1);
-    }
 }
 
 void VsnetTCPSocket::dump( std::ostream& ostr ) const
@@ -188,14 +213,13 @@ ostream& operator<<( ostream& ostr, const VsnetSocket& s )
     return ostr;
 }
 
-void VsnetTCPSocket::watch( SocketSet& set )
+void VsnetTCPSocket::child_watch( SocketSet& set )
 {
 #ifdef FIND_WIN_NBIO
         COUT << "Wait for data on socket " << (*this) << " ("
              << ( get_nonblock() ? "non-blocking" : "blocking" ) << ")"
              << endl;
 #endif
-    set.setRead( _fd );
     if( _complete_packets.empty() == false )
     {
 #ifdef FIND_WIN_NBIO
@@ -203,6 +227,11 @@ void VsnetTCPSocket::watch( SocketSet& set )
 #endif
         set.setReadAlwaysTrue( _fd );
     }
+}
+
+bool VsnetTCPSocket::needReadAlwaysTrue( ) const
+{
+    return ( !_complete_packets.empty() );
 }
 
 bool VsnetTCPSocket::isActive( SocketSet& set )
@@ -236,7 +265,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
     bool endless   = true;
     bool gotpacket = false;
 
-    if( _noblock == 0 ) endless = false;
+    if( get_nonblock() == false ) endless = false;
 
     do
     {

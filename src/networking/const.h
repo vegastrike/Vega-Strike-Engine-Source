@@ -72,7 +72,7 @@ extern double DAMAGE_ATOM;
 #undef VSNET_DEBUG
 #endif
 
-#undef VSNET_DEBUG
+#define VSNET_DEBUG
 
 #undef FIND_WIN_NBIO
 
@@ -128,6 +128,7 @@ public: \
 #if !defined( _WIN32) || defined( __CYGWIN__)
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
 #define LOCALCONST_DEF(Class,Type,Name,Value)
+#define PSEUDO__LINE__(x) __LINE__
 #else
 #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
 #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
@@ -142,6 +143,8 @@ public: \
 
 #ifndef __LINE__
 #define __LINE__ "<Unknown>"
+
+#define PSEUDO__LINE__(x) x
 #endif
 
 #endif

@@ -40,7 +40,7 @@ static void static_initNetwork( )
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
+SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSet* set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -121,12 +121,12 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
     }
     COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
 
-    SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip );
+    SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip, set );
     COUT << "SOCKETALT n° : " << ret.get_fd() << std::endl;
     return ret;
 }
 
-ServerSocket* NetUITCP::createServerSocket( unsigned short port )
+ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet* set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -175,7 +175,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
     }
     COUT << "Listening on socket " << local_fd << std::endl
          << "*** ServerSocket n° : " << local_fd << std::endl;
-    return new ServerSocketTCP( local_fd, local_ip );
+    return new ServerSocketTCP( local_fd, local_ip, set );
 }
 
 /**************************************************************/
@@ -185,7 +185,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
+SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSet* set )
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
@@ -258,7 +258,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
         return ret;
     }
 
-    SOCKETALT ret( local_fd, SOCKETALT::UDP, remote_ip );
+    SOCKETALT ret( local_fd, SOCKETALT::UDP, remote_ip, set );
 
     if( ret.set_nonblock() == false )
     {
@@ -270,7 +270,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     return ret;
 }
 
-ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
+ServerSocket* NetUIUDP::createServerSocket( unsigned short port, SocketSet* set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
@@ -291,7 +291,7 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( (local_fd = socket( PF_INET, SOCK_DGRAM, 0 ))==sockerr )
     {
         COUT << "Could not create socket" << std::endl;
-    return NULL;
+        return NULL;
     }
 
     memset( &local_ip, 0, sizeof(AddressIP) );
@@ -306,11 +306,11 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
         return NULL;
     }
 
-    ServerSocket* ret = new ServerSocketUDP( local_fd, local_ip );
+    ServerSocket* ret = new ServerSocketUDP( local_fd, local_ip, set );
 
     if( ret->set_nonblock() == false )
     {
-        ret->disconnect( "Setting server socket mode to nonblocking failed" );
+        ret->disconnect( "Setting server socket mode to nonblocking failed", true );
         delete ret;
         return NULL;
     }

@@ -25,6 +25,10 @@ public:
         : VsnetSocket( sock, remote_ip )
     { }
 
+    VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet* set )
+        : VsnetSocket( sock, remote_ip, set )
+    { }
+
     VsnetUDPSocket( const VsnetUDPSocket& orig )
         : VsnetSocket( orig )
     { }
@@ -42,11 +46,8 @@ public:
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
     virtual void ack( );
 
-    virtual void disconnect( const char *s, bool fexit );
-
     virtual void dump( std::ostream& ostr ) const;
 
-    virtual void watch( SocketSet& set );
     virtual bool isActive( SocketSet& set ) { return set.is_set(_fd); }
 };
 
