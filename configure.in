@@ -3,7 +3,7 @@ AC_INIT(src/vegastrike.h)
 AM_INIT_AUTOMAKE(vegastrike, "0.1.0cvs")
 AM_CONFIG_HEADER(config.h)
 
-AC_LANG_CPLUSPLUS
+dnl AC_LANG_CPLUSPLUS
 
 dnl Check system type
 AC_CANONICAL_HOST

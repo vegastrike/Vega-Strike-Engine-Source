@@ -1,3 +1,8 @@
+2001-11-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* uncommented AC_LANG_CPLUSPLUS in configure.in
+
+	
 2001-11-11 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added mission_script.cpp,script_*.cpp to src/Makefile.am
