@@ -57,6 +57,11 @@ void Unit::ApplyForce(Vector Vforce) //applies a force for the whole gameturn up
 {
 	NetForce += Vforce;
 }
+void Unit::Accelerate(Vector Vforce)
+{
+  NetForce += Vforce * mass;
+}
+
 void Unit::ApplyTorque (Vector Vforce, Vector Location)
 {
 	NetForce += Vforce;
@@ -72,22 +77,25 @@ void Unit::ApplyBalancedLocalTorque (Vector Vforce, Vector Location) //usually f
 	NetTorque += Vforce.Cross (Location);
 }
 
-void Unit::ResolveForces ()
+void Unit::ResolveForces () // don't call this 2x
 {
-	Vector temp = NetTorque *GetElapsedTime()*(1.0/MomentOfInertia);//assume force is constant throughout the time
-	Rotate (GetElapsedTime()*(AngularVelocity+ temp*.5));
+  Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);//assume force is constant throughout the time
+  if(AngularVelocity.Magnitude() > 0) {
+    Rotate (SIMULATION_ATOM*(AngularVelocity+ temp*.5));
+  }
 	AngularVelocity+= temp;
-	temp = NetForce * GetElapsedTime()*(1/mass);//acceleration
+	temp = NetForce * SIMULATION_ATOM*(1/mass);//acceleration
 	//now the fuck with it... add relitivity to the picture here
+	/*
 	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
 	{
 		float magvel = Velocity.Magnitude();
 		float y = (1-magvel*magvel*oocc);
 		temp = temp * powf (y,1.5);
-	}
-	pos += (Velocity+.5*temp)*GetElapsedTime();
+		}*/
+	pos += (Velocity+.5*temp)*SIMULATION_ATOM;
 	Velocity += temp;
 	NetForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
-	
+	changed = TRUE;
 }

@@ -12,35 +12,33 @@ class Unit;
 
 class UnitCollection {
  private:
-  class UnitList {
+  class UnitListNode {
   public:
     Unit *unit;
-    UnitList *next;
+    UnitListNode *next;
     
-    UnitList(Unit *unit) : unit(unit), next(0) { }
-    UnitList(Unit *unit, UnitList *next) : unit(unit), next(next) { }
-    ~UnitList() { if(0!=next) delete next; }
-    void insert(Unit *unit);
-    void append(Unit *unit);
-    void remove(Unit *unit);
-  }
-  *units;
+    UnitListNode(Unit *unit) : unit(unit), next(0) { }
+    UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next) { }
+    ~UnitListNode() { if(0!=next) delete next; }
+  } *units, *tail;
 
  public:
-  UnitCollection() : units(0) { }
+  UnitCollection() : units(new UnitListNode(NULL)), tail(0) { }
   ~UnitCollection() { if (units) delete units; }
   class UnitIterator : public Iterator {
   private:
-    UnitList *pos;
+    UnitListNode *pos;
   public:
-    UnitIterator(UnitList *start) : pos(start) {  }
+    UnitIterator(UnitListNode *start) : pos(start) {  }
 
     void insert(Unit *unit);
     Unit *current();
     Unit *advance();
   };
   
-  UnitIterator *createIterator();
+  UnitIterator *createIterator() { 
+    return new UnitIterator(units);
+  } // UnitIterator does not have a nasty destructor, so this should be fine
 };
 
 #endif

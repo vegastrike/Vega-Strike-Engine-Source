@@ -131,7 +131,10 @@ vegastrike_SOURCES =				\
 	star_system.cpp 			\
 	star_system.h 				\
 	planet.h 				\
-	planet.cpp 				
+	planet.cpp 				\
+	iterator.h				\
+	UnitCollection.h			\
+	UnitCollection.cpp			
 
 #	gfx_click_list.h			\
 #	gfx_click_list.cpp			\

@@ -28,6 +28,7 @@ class StarSystem {
   Camera cam[NUM_CAM];
   int active_camera;
 
+  void modelGravity();
  public:
   StarSystem(Planet *primaries);
 
@@ -37,8 +38,8 @@ class StarSystem {
   void AddUnit(Unit *unit);
   void RemoveUnit(Unit *unit);
 
-  void modelPhysics();
   void Draw();
+  void Update(); // update a simulation atom
 };
 
 #endif

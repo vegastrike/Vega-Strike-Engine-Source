@@ -761,14 +761,8 @@ void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vect
 	Draw();
 }
 
-inline ostream &operator<<(ostream &os, const Vector &obj) {
-  os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
-}
-
 void Mesh::UpdateMatrix()
 {
-	if(changed)
-	{
 	  //MultMatrix(transformation, translation, orientation);
 	  cerr << "Update matrix on " << debugName << endl;
 	  cerr << "P: " << p << endl;
@@ -780,7 +774,6 @@ void Mesh::UpdateMatrix()
 		//glGetFloatv(GL_MODELVIEW_MATRIX, stackstate);
 		GFXGetMatrix(MODEL, stackstate);
 		changed = FALSE;
-	}
 	GFXMultMatrix(MODEL, transformation);
 }
 

@@ -13,12 +13,15 @@ ok *
 
 class Texture;
 class Planet;
+class UnitCollection;
+typedef float Matrix[16];
 
 class PlanetaryOrbit : public AI {
  protected:
   double radius;
   double angular_delta;
   double theta;
+
  public:
   PlanetaryOrbit(double radius, double velocity, double initpos) : radius(radius), angular_delta(velocity/radius * SIMULATION_ATOM), theta(initpos) { }
   AI *Execute();
@@ -29,10 +32,14 @@ class PlanetaryOrbit : public AI {
 class Planet : public Unit {
  private:
   float radius;
+  float gravity;
  public:
   Planet(FILE *fp);
   Planet(char *filename);
   ~Planet();
+
+  void gravitate(UnitCollection *units, Matrix t);
+  void gravitate(UnitCollection *units);
 };
 
 #endif

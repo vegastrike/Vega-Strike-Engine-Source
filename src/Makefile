@@ -92,7 +92,7 @@ bin_PROGRAMS = vegastrike
 #	sdl_init.h				\
 #	sdl_init.c				\
 
-vegastrike_SOURCES =  	alglib.c					alglib.h					cmd.h						cmd_ai.cpp					cmd_ai.h					cmd_unit.h					cmd_unit.cpp					cmd_gun.cpp					cmd_gun.h					cmd_node.h					cmd_physics.cpp					cmd_physics.h					debug.c						debug.h						error_util.c					error_util.h					file.h						file_main.h					file_util.c					file_util.h					gauss.c						gauss.h						gfx_aux.h					gfx_aux_logo.cpp				gfx_aux_logo.h					gfx_aux_palette.cpp				gfx_aux_palette.h				gfx_aux_texture.cpp				gfx_aux_texture.h				gfx_background.cpp				gfx_background.h				gfx_bounding_box.cpp				gfx_bounding_box.h				gfx_bsp.cpp					gfx_bsp.h					gfx_camera.cpp					gfx_camera.h					gfx_hud.cpp					gfx_hud.h					gfx_location_select.cpp				gfx_location_select.h				gfx_mesh.cpp					gfx_mesh.h					gfx_primitive.cpp				gfx_primitive.h					gfx_sprite.cpp					gfx_sprite.h					gfx_transform_vector.cpp			gfx_transform_vector.h				gfx_transform_matrix.h				gfx_transform_matrix.cpp			gfx_vertex.h					gfx_sphere.h					gfx_sphere.cpp					gfxlib.h					gfxlib_struct.h					gl_globals.cpp					gl_globals.h					gl_init.cpp					gl_init.h					gl_light.cpp					gl_matrix.cpp					gl_material.cpp					gl_misc.cpp					gl_state.cpp					gl_texture.cpp					gl_vertex_list.cpp				gl_quadstrip.cpp				hash.c						hash.h						hashtable.h					hashtable.cpp					in.h						in_kb.cpp					in_kb.h						in_mouse.cpp					in_mouse.h					in_main.cpp					in_main.h					in_handler.cpp					in_handler.h					lin_time.h					lin_time.cpp				        list.c					        list.h						main.cpp					main_loop.h					main_loop.cpp				        nmrcl.c					        nmrcl.h						pic.c						pic.h						physics.h					physics.cpp					quadgeom.cpp					quadgeom.hpp					screenshot.c					screenshot.h					string_util.c					string_util.h					tex_font_metrics.c				tex_font_metrics.h				wrapgfx.cpp					wrapgfx.h					vegastrike.h					star_system.cpp 				star_system.h 					planet.h 					planet.cpp 				
+vegastrike_SOURCES =  	alglib.c					alglib.h					cmd.h						cmd_ai.cpp					cmd_ai.h					cmd_unit.h					cmd_unit.cpp					cmd_gun.cpp					cmd_gun.h					cmd_node.h					cmd_physics.cpp					cmd_physics.h					debug.c						debug.h						error_util.c					error_util.h					file.h						file_main.h					file_util.c					file_util.h					gauss.c						gauss.h						gfx_aux.h					gfx_aux_logo.cpp				gfx_aux_logo.h					gfx_aux_palette.cpp				gfx_aux_palette.h				gfx_aux_texture.cpp				gfx_aux_texture.h				gfx_background.cpp				gfx_background.h				gfx_bounding_box.cpp				gfx_bounding_box.h				gfx_bsp.cpp					gfx_bsp.h					gfx_camera.cpp					gfx_camera.h					gfx_hud.cpp					gfx_hud.h					gfx_location_select.cpp				gfx_location_select.h				gfx_mesh.cpp					gfx_mesh.h					gfx_primitive.cpp				gfx_primitive.h					gfx_sprite.cpp					gfx_sprite.h					gfx_transform_vector.cpp			gfx_transform_vector.h				gfx_transform_matrix.h				gfx_transform_matrix.cpp			gfx_vertex.h					gfx_sphere.h					gfx_sphere.cpp					gfxlib.h					gfxlib_struct.h					gl_globals.cpp					gl_globals.h					gl_init.cpp					gl_init.h					gl_light.cpp					gl_matrix.cpp					gl_material.cpp					gl_misc.cpp					gl_state.cpp					gl_texture.cpp					gl_vertex_list.cpp				gl_quadstrip.cpp				hash.c						hash.h						hashtable.h					hashtable.cpp					in.h						in_kb.cpp					in_kb.h						in_mouse.cpp					in_mouse.h					in_main.cpp					in_main.h					in_handler.cpp					in_handler.h					lin_time.h					lin_time.cpp				        list.c					        list.h						main.cpp					main_loop.h					main_loop.cpp				        nmrcl.c					        nmrcl.h						pic.c						pic.h						physics.h					physics.cpp					quadgeom.cpp					quadgeom.hpp					screenshot.c					screenshot.h					string_util.c					string_util.h					tex_font_metrics.c				tex_font_metrics.h				wrapgfx.cpp					wrapgfx.h					vegastrike.h					star_system.cpp 				star_system.h 					planet.h 					planet.cpp 					iterator.h					UnitCollection.h				UnitCollection.cpp			
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -101,7 +101,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 
 
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
-CPPFLAGS =    -DTCL_HEADER=\<tcl.h\> 
+CPPFLAGS =    -DTCL_HEADER=\<tcl.h\>
 LDFLAGS = 
 LIBS =    -ltcl8.0 -L/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut
 vegastrike_OBJECTS =  alglib.o cmd_ai.o cmd_unit.o cmd_gun.o \
@@ -114,7 +114,7 @@ gl_matrix.o gl_material.o gl_misc.o gl_state.o gl_texture.o \
 gl_vertex_list.o gl_quadstrip.o hash.o hashtable.o in_kb.o in_mouse.o \
 in_main.o in_handler.o lin_time.o list.o main.o main_loop.o nmrcl.o \
 pic.o physics.o quadgeom.o screenshot.o string_util.o \
-tex_font_metrics.o wrapgfx.o star_system.o planet.o
+tex_font_metrics.o wrapgfx.o star_system.o planet.o UnitCollection.o
 vegastrike_LDADD = $(LDADD)
 vegastrike_DEPENDENCIES = 
 vegastrike_LDFLAGS = 
@@ -133,9 +133,9 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
 GZIP_ENV = --best
-DEP_FILES =  .deps/alglib.P .deps/cmd_ai.P .deps/cmd_gun.P \
-.deps/cmd_physics.P .deps/cmd_unit.P .deps/debug.P .deps/error_util.P \
-.deps/file_util.P .deps/gauss.P .deps/gfx_aux_logo.P \
+DEP_FILES =  .deps/UnitCollection.P .deps/alglib.P .deps/cmd_ai.P \
+.deps/cmd_gun.P .deps/cmd_physics.P .deps/cmd_unit.P .deps/debug.P \
+.deps/error_util.P .deps/file_util.P .deps/gauss.P .deps/gfx_aux_logo.P \
 .deps/gfx_aux_palette.P .deps/gfx_aux_texture.P .deps/gfx_background.P \
 .deps/gfx_bounding_box.P .deps/gfx_bsp.P .deps/gfx_camera.P \
 .deps/gfx_hud.P .deps/gfx_location_select.P .deps/gfx_mesh.P \

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "star_system.h"
 #include "planet.h"
 #include "cmd_unit.h"
@@ -16,9 +17,41 @@ StarSystem::StarSystem(Planet *primaries) :
 ClickList *StarSystem::getClickList() {
 }
 
-void StarSystem::modelPhysics() {
+void StarSystem::modelGravity() {
+  primaries->gravitate(units);
+}
+
+void StarSystem::AddUnit(Unit *unit) {
+  Iterator *iter= units->createIterator();
+  iter->insert(unit);
+  delete iter;
+}
+
+void StarSystem::RemoveUnit(Unit *unit) {
+  assert(0);
 }
 
 void StarSystem::Draw() {
   primaries->Draw();
+
+  Iterator *iter = units->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    unit->TDraw();
+    iter->advance();
+  }
+  delete iter;
+}
+
+void StarSystem::Update() {
+  modelGravity();
+
+  Iterator *iter = units->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    unit->ResolveForces();
+    // Do something with AI state here eventually
+    iter->advance();
+  }
+  delete iter;
 }

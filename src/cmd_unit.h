@@ -143,6 +143,7 @@ public:
 					float FuelSpeed,
 					float FMass);
 	void ApplyForce(Vector Vforce); //applies a force for the whole gameturn upon the center of mass
+	void Accelerate(Vector Vforce); // applies a force that is multipled by the mass of the ship
 	void ApplyTorque (Vector Vforce, Vector Location);
 	void ApplyLocalTorque (Vector Vforce, Vector Location);
 	void ApplyBalancedLocalTorque (Vector Vforce, Vector Location); //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)

@@ -56,8 +56,8 @@ public:
 	AI *Execute()
 	{
 		//parent->Position(); // query the position
-	        parent->ZSlide(0.100F);
-		parent->Pitch(PI/180);
+	  //parent->ZSlide(0.100F);
+	  parent->Pitch(PI/180);
 		count ++;
 		if(30 == count)
 		{
@@ -409,11 +409,16 @@ void createObjects() {
 			       Vector (1,0,0),
 			       Vector (0,-.35,-1));
   //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
-  fighter->SetPosition(Vector(0.0, 0.0, 5.0));
+  fighter->SetPosition(Vector(0.0, 10.0, 0.0));
   fighter->SetAI(new Orbit);
-  fighter->Roll(PI/4);
+  //fighter->Roll(PI/4);
+  fighter->Accelerate(Vector(25,0,0));
   carrier->SetPosition(Vector(0.0, 5.0, 10.0));
   carrier->Pitch(-PI/2);
+  carrier->Accelerate(Vector(0, 25, 0));
+  fighter->Scale(Vector(0.1,0.1,0.1));
+  fighter2->Scale(Vector(0.1,0.1,0.1));
+  carrier->Scale(Vector(0.2,0.2,0.2));
   //t->SetPosition(Vector(0.5, 0.5, 15.0));
   //t->Pitch(PI/2);
   
@@ -451,6 +456,8 @@ void createObjects() {
   //}
 
   star_system = new StarSystem(new Planet("test_system.dat"));
+  star_system->AddUnit(fighter);
+  star_system->AddUnit(carrier);
 }
 
 void destroyObjects() {  
@@ -504,12 +511,7 @@ void main_loop() {
   GFXSetMaterial(0, mat);
   GFXSelectMaterial(0);
   star_system->Draw();
-  
-  GFXEnable(TEXTURE1);  
-    carrier->TDraw();
-    fighter->TDraw();
-  GFXLoadIdentity(MODEL);
-    fighter2->Draw();
+  star_system->Update();
   
   //for(a = 0; a < numf; a++) {
   //fighters[a]->TDraw();

@@ -23,6 +23,7 @@
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
 #include <math.h>
+#include <iostream.h>
 #ifdef __cplusplus
 class Vector;
 void Normalize(Vector &);
@@ -91,7 +92,20 @@ class Vector {
 
 		//friend Vector operator+(const Vector &lval, const Vector &rval);
 		//friend Vector operator+(const Vector &lval, const Vector &rval);
+		inline const Vector Transform(float m1[])
+{
+  return Vector(m1[0] * i + m1[4] * j + m1[8] * k + m1[12],
+		m1[1] * i + m1[5] * j + m1[9] * k + m1[13],
+		m1[2] * i + m1[6] * j + m1[10] * k + m1[14]);
+}
+
+
 };
+
+inline ostream &operator<<(ostream &os, const Vector &obj) {
+  return os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
+}
+
 
 /*
 inline Vector operator+(const Vector &lval, const Vector &rval)

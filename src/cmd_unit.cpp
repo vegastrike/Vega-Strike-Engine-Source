@@ -41,10 +41,10 @@ void Unit::Init()
 	ResetVectors(pp,pq,pr);
 	ppos = Vector(0,0,0);
 	fpos = 0;
-	mass = 0;
+	mass = 1;
 	fuel = 0;
 	
-	MomentOfInertia = 0;
+	MomentOfInertia = 1;
 	AngularVelocity = Vector(0,0,0);
 	Velocity = Vector(0,0,0);
 
