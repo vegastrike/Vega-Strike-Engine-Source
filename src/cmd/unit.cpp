@@ -759,10 +759,19 @@ void Unit::EnqueueAIFirst(Order *newAI) {
   }
 }
 void Unit::ExecuteAI() {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ux%x",this);
+  fflush (stderr);
+#endif
+
   if(aistate) aistate->Execute();
   for(int a=0; a<numsubunit; a++) {
     subunits[a]->ExecuteAI();//like dubya
   }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ux");
+  fflush (stderr);
+#endif
 }
 void Unit::Select() {
   selected = true;

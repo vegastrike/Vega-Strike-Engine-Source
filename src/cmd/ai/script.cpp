@@ -178,11 +178,17 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace AiXml;
-
+//#define BIDBG to do expat
 void AIScript::beginElement(const string &name, const AttributeList &attributes) {
   xml->itts=false;
   Unit * tmp;
+#ifdef AIDBG
+  fprintf (stderr,"0");
+#endif
   Names elem = (Names)element_map.lookup(name);
+#ifdef AIDBG
+  fprintf (stderr,"1%x ",&elem);
+#endif
   AttributeList::const_iterator iter;
   switch(elem) {
   case DEFAULT:
@@ -216,6 +222,9 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	topv().k=parse_float((*iter).value);
 	break;
       case DUPLIC:
+#ifdef AIDBG
+  fprintf (stderr,"1%x ",&elem);
+#endif
 	xml->vectors.pop();//get rid of dummy vector pushed on above
 	xml->vectors.push (xml->vectors.top());
 	break;
@@ -282,6 +291,9 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     }
     break;
   case FACETARGET:
+#ifdef AIDBG
+  fprintf (stderr,"ft");
+#endif
     xml->unitlevel++;
     xml->acc =3;
     xml->itts=false;
@@ -300,6 +312,10 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	break;
       }
     }
+#ifdef AIDBG
+  fprintf (stderr,"eft");
+#endif
+
     break;
     
   case CHANGEHEAD:
@@ -398,10 +414,15 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case MATCHLIN:
   case MATCHANG:
   case MATCHVEL:
+#ifdef AIDBG
+  fprintf (stderr,"mlv");
+#endif
+
     xml->unitlevel++;
     xml->acc = 0;
     xml->afterburn = false;
     xml->terminate=true;
+
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case AFTERBURN:
@@ -415,6 +436,10 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	break;
       }
     }
+#ifdef AIDBG
+  fprintf (stderr,"emlv ");
+#endif
+
     break;
   case CLOAKFOR:
     xml->unitlevel++;
@@ -646,19 +671,35 @@ void AIScript::endElement(const string &name) {
 
 
 void AIScript::LoadXML() {
+#ifdef AIDBG
+  fprintf (stderr,"chd");
+#endif
+
   vschdir ("ai");
   vschdir ("script");
+#ifdef AIDBG
+  fprintf (stderr,"echd");
+#endif
+
   const int chunk_size = 16384;
   FILE * inFile = fopen (filename, "r");
   vscdup();
   vscdup();
+#ifdef AIDBG
+  fprintf (stderr,"backup ");
+#endif
+
   if(!inFile) {
     return;
   }
 #ifndef _WIN32
   //  fprintf (stderr, "Loading AIscript: %s\n", filename);
 #endif
+#ifdef BIDBG
+  fprintf (stderr,"nxml");
+#endif
   xml = new AIScriptXML;
+
   xml->unitlevel=0;
   xml->terminate=true;
   xml->afterburn=true;
@@ -666,31 +707,72 @@ void AIScript::LoadXML() {
   xml->acc=2;
   xml->defaultvec=Vector(0,0,0);
   xml->defaultf=0;
+#ifdef BIDBG
+  fprintf (stderr,"parscrea");
+#endif
   XML_Parser parser = XML_ParserCreate(NULL);
+#ifdef BIDBG
+  fprintf (stderr,"usdat %x",parser);
+#endif
   XML_SetUserData(parser, this);
+#ifdef BIDBG
+  fprintf (stderr,"elha");
+#endif
+
   XML_SetElementHandler(parser, &AIScript::beginElement, &AIScript::endElement);
-  
+#ifdef BIDBG
+  fprintf (stderr,"do");
+#endif
+
   do {
+#ifdef BIDBG
+  fprintf (stderr,"bufget");
+#endif
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+#ifdef BIDBG
+  fprintf (stderr,"%xebufget",buf);
+#endif
     int length;
+
     
     length = fread (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
+#ifdef BIDBG
+  fprintf (stderr,"pars%d",length);
+#endif
     XML_ParseBuffer(parser, length, feof(inFile));
+#ifdef BIDBG
+  fprintf (stderr,"ed");
+#endif
+
   } while(!feof(inFile));
+#ifdef BIDBG
+  fprintf (stderr,"%xxml_free",parser);
+  fflush (stderr);
+#endif
   XML_ParserFree (parser);
+#ifdef BIDBG
+  fprintf (stderr,"xml_freed");
+#endif
   fclose (inFile);
   for (unsigned int i=0;i<xml->orders.size();i++) {
+#ifdef BIDBG
+  fprintf (stderr,"parset");
+#endif
     xml->orders[i]->SetParent(parent);
     EnqueueOrder (xml->orders[i]);
+#ifdef BIDBG
+  fprintf (stderr,"cachunkx");
+#endif
+
   }
-#ifdef ORDERDEBUG
+#ifdef BIDBG
   fprintf (stderr,"xml%x",xml);
   fflush (stderr);
 #endif
 
   delete xml;
-#ifdef ORDERDEBUG
+#ifdef BIDBG
   fprintf (stderr,"\\xml\n");
   fflush (stderr);
 #endif
@@ -726,7 +808,7 @@ void AIScript::Execute () {
     delete [] filename;
     filename = NULL;
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fn\n");
+  fprintf (stderr,"fn");
   fflush (stderr);
 #endif
 	

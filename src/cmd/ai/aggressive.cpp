@@ -105,23 +105,49 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
     if (trueit&&j==i->end()) {
       //do it
       if (inter) {
+#ifdef AGGDEBUG
+  fprintf (stderr,"procerr");
+  fflush (stderr);
+#endif
 	//parent->getAIState()->eraseType (Order::FACING);
 	//parent->getAIState()->eraseType (Order::MOVEMENT);
 	eraseType (Order::FACING);
 	eraseType (Order::MOVEMENT);
+#ifdef AGGDEBUG
+  fprintf (stderr,"endprocerr");
+  fflush (stderr);
+#endif
+
       }
+#ifdef AGGDEBUG
+  fprintf (stderr,"wn ");
+  fflush (stderr);
+#endif
       j = i->begin();
       while (j!=i->end()) {
 	if (ExecuteLogicItem (*j)) {
+#ifdef AGGDEBUG
+  fprintf (stderr,"f00x0r");
+  fflush (stderr);
+#endif
 	  AIEvents::AIEvresult tmp = *j;
 	  i->erase(j);
 	  retval=true;
 	  i->push_back (tmp);
+#ifdef AGGDEBUG
+  fprintf (stderr,"endf00x0r");
+  fflush (stderr);
+#endif
 	  break; 
 	}else {
 	  j++;
 	}
       }
+#ifdef AGGDEBUG
+  fprintf (stderr,"endwn ");
+  fflush (stderr);
+#endif
+
     }
   }
   return retval;
@@ -129,35 +155,66 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
 
 
 void AggressiveAI::Execute () {  
+#ifdef AGRDEBUG
+  fprintf (stderr,"FirE x%x %x ",this,parent);
+  fflush (stderr);
+#endif
   FireAt::Execute();
+#ifdef AGRDEBUG
+  fprintf (stderr," Aggex");
+  fflush (stderr);
+#endif
+
   if (
 #if 1
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
 #endif
       curinter==INTNORMAL) {
 
+#ifdef AGGDEBUG
+  fprintf (stderr," curint ");
+  fflush (stderr);
+#endif
 
     if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
+#ifdef AGGDEBUG
+  fprintf (stderr," proclogcomp%d ",curinter);
+  fflush (stderr);
+#endif
       logic.curtime=interrupts.maxtime;//set it to the time allotted
     }
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
+#ifdef AGGDEBUG
+  fprintf (stderr,"nultype ");
+  fflush (stderr);
+#endif    
      ProcessLogic(logic);
      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
   } else {
     if ((--logic.curtime)==0) {
+#ifdef AGGDEBUG
+  fprintf (stderr,"erase ");
+  fflush (stderr);
+#endif    
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
-      
+#ifdef AGGDEBUG
+  fprintf (stderr,"erasproclog ");
+  fflush (stderr);
+#endif          
       ProcessLogic (logic);
       logic.curtime = logic.maxtime;      
     }
   }
-
+#ifdef AGGDEBUG
+  fprintf (stderr,"endagg");
+  fflush (stderr);
+#endif    
 }  
 
 

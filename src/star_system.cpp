@@ -287,7 +287,7 @@ void StarSystem::SwapOut () {
 }
 bool shouldfog=false;
 extern double interpolation_blend_factor;
-#define UPDATEDEBUG
+//#define UPDATEDEBUG  //for hard to track down bugs
 void StarSystem::Draw() {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"begin Draw");
@@ -439,7 +439,7 @@ void StarSystem::Draw() {
 }
 
 
-#define UPDATEDEBUG
+
 void StarSystem::Update() {
 
   Unit *unit;

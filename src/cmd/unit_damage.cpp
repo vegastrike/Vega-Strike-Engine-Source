@@ -15,7 +15,9 @@ void Unit::UnRef() {
   ucref--;
   if (killed&&ucref==0) {
     Unitdeletequeue.push_back(this);//delete
+#ifdef DESTRUCTDEBUG
     fprintf (stderr,"0x%x - %d\n",this,Unitdeletequeue.size());
+#endif
   }
 }
 
@@ -124,24 +126,28 @@ void Unit::Kill() {
   aistate=NULL;
   if (ucref==0&&!SubUnit) {
     Unitdeletequeue.push_back(this);
+#ifdef DESTRUCTDEBUG
     fprintf (stderr,"0x%x - %d\n",this,Unitdeletequeue.size());
+#endif
   }
 }
 void Unit::ProcessDeleteQueue() {
-#ifndef DISABLE_DELETE
-  if (!Unitdeletequeue.empty()) {
+  while (!Unitdeletequeue.empty()) {
+#ifdef DESTRUCTDEBUG
     fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
     fflush (stderr);
+#endif
     if (Unitdeletequeue.back()->SubUnit) {
       fprintf (stderr,"Double deleting (related to double dipping)");
     }else {
       delete Unitdeletequeue.back();
     }
+#ifdef DESTRUCTDEBUG
     fprintf (stderr,"Completed\n",Unitdeletequeue.back(),Unitdeletequeue.size());
     fflush (stderr);
+#endif
     Unitdeletequeue.pop_back();
   }
-#endif
 }
 
 

@@ -36,7 +36,8 @@
  * is until Execute() time.  Perhaps "SetParent" Should be made virtual so that
  * various variables may be set earlier than at every execution time
  */
-#define ORDERDEBUG
+//#define ORDERDEBUG
+
 class Order {
 protected:
   ///The unit this order is attached to
