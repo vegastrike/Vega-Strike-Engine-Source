@@ -1443,7 +1443,7 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 		netbuf.addString( xmlstr);
 		// Put the save buffer after the ClientState
 		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1311));
-		COUT<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
+		COUT<<"<<< SEND ENTERCLIENT("<<un->GetSerial()<<") TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
 		// Send info about other ships in the system to "clt"

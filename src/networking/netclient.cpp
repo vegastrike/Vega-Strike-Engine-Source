@@ -1178,6 +1178,7 @@ void	NetClient::addClient( const Packet* packet )
 	if( !isLocalSerial( cltserial))
 	{
 		// The save buffer and XML buffer come after the ClientState
+		COUT<<"GETTING SAVES FOR NEW CLIENT"<<endl;
 		vector<string> saves;
 		saves.push_back( netbuf.getString());
 		saves.push_back( netbuf.getString());

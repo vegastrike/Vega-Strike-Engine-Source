@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- PORTAUDIO : add calls to Pa_CloseStream in DestroySession
 - Add text message support to NetworkCommunication class : displaying message has to be added
 - Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
 - Complete jVoIP support

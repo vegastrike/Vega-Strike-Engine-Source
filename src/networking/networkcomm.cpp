@@ -17,6 +17,8 @@
 #define VOIP_PORT	5000
 extern bool cleanexit;
 
+bool use_pa;
+
 #include "gldrv/winsys.h"
 #include "packet.h"
 #include <assert.h>
@@ -34,15 +36,18 @@ void	CheckVOIPError( int val)
 }
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
-void	CheckPAError( PaError err)
+void	CheckPAError( PaError err, const char * fun)
 {
-	if( err==paNoError)
-		return;
-	cerr<<"!!! PORTAUDIO ERROR : "<<Pa_GetErrorText( err)<<endl;
-	if( err==paHostError)
-		cerr<<"!!! PA HOST ERROR : "<<Pa_GetHostError()<<" - "<<Pa_GetErrorText( Pa_GetHostError())<<endl;
-	cleanexit = true;
-	winsys_exit(1);
+	if( use_pa)
+	{
+		if( err==paNoError)
+			return;
+		cerr<<"!!! PORTAUDIO ERROR in "<<fun<<": "<<Pa_GetErrorText( err)<<endl;
+		if( err==paHostError)
+			cerr<<"!!! PA HOST ERROR : "<<Pa_GetHostError()<<" - "<<Pa_GetErrorText( Pa_GetHostError())<<endl;
+		cleanexit = true;
+		winsys_exit(1);
+	}
 }
 
 void	Pa_DisplayInfo( PaDeviceID id)
@@ -118,6 +123,7 @@ NetworkCommunication::NetworkCommunication()
 	this->max_messages = 25;
 	this->method = ClientBroadcast;
 	this->crypt_key = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_key", "0"));
+	use_pa = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_portaudio", "false"));
 
 #ifdef NETCOMM_JVOIP
 
@@ -132,16 +138,23 @@ NetworkCommunication::NetworkCommunication()
 	this->outdev = paNoDevice;
 	this->devinfo = NULL;
 	// Initialize PortAudio lib
-	CheckPAError( Pa_Initialize());
+	if( use_pa)
+		CheckPAError( Pa_Initialize(), "Pa_Initialize");
 
 	// Testing purpose : list devices and display info about them
-	int nbdev = Pa_CountDevices();
-	for( int i=0; i<nbdev; i++)
-		Pa_DisplayInfo( i);
+	if( use_pa)
+	{
+		int nbdev = Pa_CountDevices();
+		for( int i=0; i<nbdev; i++)
+			Pa_DisplayInfo( i);
+	}
 
 	// Get the default devices for input and output streams
-	this->indev = Pa_GetDefaultInputDeviceID();
-	this->outdev = Pa_GetDefaultOutputDeviceID();
+	if( use_pa)
+	{
+		this->indev = Pa_GetDefaultInputDeviceID();
+		this->outdev = Pa_GetDefaultOutputDeviceID();
+	}
 	this->sample_rate = 11025;
 	this->audio_inlength = 0;
 
@@ -263,30 +276,32 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 {
 #ifdef USE_PORTAUDIO
-	Packet p;
-	if( method==ServerUnicast)
+	if( use_pa)
 	{
-		// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
-
 		Packet p;
-		// We don't need that to be reliable in UDP mode
-		p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
-    	        __FILE__, PSEUDO__LINE__(229) );
-	}
-	else if( method==ClientBroadcast)
-	{
-		// SEND INPUT AUDIO BUFFER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
-		CltPtrIterator it;
-		for( it = commClients.begin(); it!=commClients.end(); it++)
+		if( method==ServerUnicast)
 		{
-			if( (*it)->portaudio && (*it)->secured==this->secured)
+			// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+			Packet p;
+			// We don't need that to be reliable in UDP mode
+			p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
+	   		        __FILE__, PSEUDO__LINE__(229) );
+		}
+		else if( method==ClientBroadcast)
+		{
+			// SEND INPUT AUDIO BUFFER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
+			CltPtrIterator it;
+			for( it = commClients.begin(); it!=commClients.end(); it++)
 			{
-				p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
-						__FILE__, PSEUDO__LINE__(244) );
+				if( (*it)->portaudio && (*it)->secured==this->secured)
+				{
+					p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
+							__FILE__, PSEUDO__LINE__(244) );
+				}
 			}
 		}
+		memset( audio_inbuffer, 0, MAXBUFFER);
 	}
-	memset( audio_inbuffer, 0, MAXBUFFER);
 #endif /* USE_PORTAUDIO */
 // Do not do anything when using JVoIP lib
 }
@@ -294,9 +309,12 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 void	NetworkCommunication::RecvSound( char * sndbuffer, int length)
 {
 #ifdef NETCOMM_PORTAUDIO
-	assert(length<MAXBUFFER);
-	memset( audio_outbuffer, 0, MAXBUFFER);
-	memcpy( audio_outbuffer, sndbuffer, length);
+	if( use_pa)
+	{
+		assert(length<MAXBUFFER);
+		memset( audio_outbuffer, 0, MAXBUFFER);
+		memcpy( audio_outbuffer, sndbuffer, length);
+	}
 #endif
 }
 
@@ -358,26 +376,27 @@ int		NetworkCommunication::InitSession( float frequency)
 
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
-
+if( use_pa)
+{
 	// Create the input stream with indev and 1 channel with paInt16 samples
 	CheckPAError( Pa_OpenStream( &this->instream,
 								 this->indev, 1, paInt16, NULL,
 								 paNoDevice, 0, paInt16, NULL,
 								 this->sample_rate, 256, 0, paNoFlag,
-								 Pa_RecordCallback, (void *)this));
+								 Pa_RecordCallback, (void *)this), "Pa_OpenStream(instream)");
 
 	// Create the output stream with outdev and 1 channel with paInt16 samples
 	CheckPAError( Pa_OpenStream( &this->outstream,
 								 paNoDevice, 0, paInt16, NULL,
 								 this->outdev, 1, paInt16, NULL,
 								 this->sample_rate, 256, 0, paNoFlag,
-								 Pa_PlayCallback, (void *)this));
+								 Pa_PlayCallback, (void *)this), "Pa_OpenStream(outstream)");
 
 	if( this->instream)
-		CheckPAError( Pa_StartStream( this->instream));
+		CheckPAError( Pa_StartStream( this->instream), "Pa_StartStream(instream)");
 	if( this->outstream)
-		CheckPAError( Pa_StartStream( this->outstream));
-
+		CheckPAError( Pa_StartStream( this->outstream), "Pa_StartStream(outstream)");
+}
 #endif /* NETCOMM_PORTAUDIO */
 
 #ifndef NETCOMM_NOWEBCAM
@@ -394,8 +413,14 @@ int		NetworkCommunication::DestroySession()
 {
 	this->active = false;
 #ifdef NETCOMM_PORTAUDIO
-	CheckPAError( Pa_StopStream( this->instream));
-	CheckPAError( Pa_StopStream( this->outstream));
+if( use_pa)
+{
+	CheckPAError( Pa_StopStream( this->instream), "Pa_StopStream(instream)");
+	CheckPAError( Pa_StopStream( this->outstream), "Pa_StopStream(outstream)");
+
+	CheckPAError( Pa_CloseStream( this->instream), "Pa_CloseStream(instream)");
+	CheckPAError( Pa_CloseStream( this->outstream), "Pa_CloseStream(outstream)");
+}
 #endif
 #ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->Destroy());
@@ -428,8 +453,8 @@ NetworkCommunication::~NetworkCommunication()
 
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
-
-	CheckPAError( Pa_Terminate());
+if( use_pa)
+	CheckPAError( Pa_Terminate(), "Pa_Terminate");
 
 #endif /* NETCOMM_PORTAUDIO */
 #ifndef NETCOMM_NOWEBCAM
