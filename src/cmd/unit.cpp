@@ -644,9 +644,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     Vector Scale (1,1,enginescale/(cmas));
 #endif
     if (halos.ShouldDraw (enginescale)) 
-      halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+      halos.Draw(this->WarpMatrix(*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHull()>0?damagelevel:1.0,GetVelocity(),faction);
 	int numm = nummesh();
-	if (damagelevel<.99&&numm>0) {
+	if (damagelevel<.99&&numm>0&&GetHull()>0) {
 		unsigned int switcher=(damagelevel>.8)?1:
 			(damagelevel>.6)?2:(damagelevel>.4)?3:(damagelevel>.2)?4:5;
 		const unsigned long thus=(unsigned long)this;

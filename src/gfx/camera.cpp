@@ -230,6 +230,7 @@ void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 	P = p;
 	Q = q;
 	R = r;
+	myPhysics.SetAngularVelocity(Vector(0,0,0));
 	changed = GFXTRUE;
 }
 
