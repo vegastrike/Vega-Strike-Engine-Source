@@ -147,9 +147,9 @@ void LocationSelect:: Draw () {
     Vector tP (t.getP());//the p vector of the plane being selected on
     Vector tQ (t.getQ());//the q vector of the plane being selected on
     ///unused    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
-    //fprintf (stderr,"<%f,%f,%f>",t[0],t[1],t[2]);
-    //fprintf (stderr,"<%f,%f,%f>",t[4],t[5],t[6]);
-    //fprintf (stderr,"<%f,%f,%f>",t[8],t[9],t[10]);
+    //VSFileSystem::Fprintf (stderr,"<%f,%f,%f>",t[0],t[1],t[2]);
+    //VSFileSystem::Fprintf (stderr,"<%f,%f,%f>",t[4],t[5],t[6]);
+    //VSFileSystem::Fprintf (stderr,"<%f,%f,%f>",t[8],t[9],t[10]);
 #ifdef DELTA_MOVEMENT
     float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k; // z val of the parallelogram
 #else
@@ -356,8 +356,6 @@ void LocationSelect:: Draw () {
 
 
   GFXEnd();
-<<<<<<< gfx_location_select.cpp
-  //  GFXPopBlendMode();
 */
 
   GFXPopBlendMode();

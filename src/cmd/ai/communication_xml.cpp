@@ -4,6 +4,7 @@
 #include "vegastrike.h"
 #include "communication.h"
 #include <assert.h>
+#include "vsfilesystem.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -127,11 +128,14 @@ using namespace CommXML;
 
 void FSM::LoadXML(const char * filename) {
  using namespace CommXML;
+ using namespace VSFileSystem;
  unitlevel=0;
-  const int chunk_size = 16384;
+  //const int chunk_size = 16384;
   cout << "CommXML:LoadXML " << filename << endl;
-  FILE * inFile = fopen (filename, "r");
-  if(!inFile) {
+  //FILE * inFile = VSFileSystem::vs_open (filename, "r");
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, CommFile);
+  if(err>Ok) {
 	assert(0);
 	return;
   }
@@ -139,13 +143,16 @@ void FSM::LoadXML(const char * filename) {
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &FSM::beginElement, &FSM::endElement);
  
+  XML_Parse(parser, (f.ReadFull()).c_str(),f.Size(), 1);
+  /*
   do {
 	char buf[chunk_size];
 	int length;
-	length = fread (buf,1, chunk_size,inFile);
+	length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
 	//length = inFile.gcount();
-	XML_Parse(parser, buf,length, feof(inFile));
-  } while(!feof(inFile));
-  fclose (inFile);
+	XML_Parse(parser, buf,length, VSFileSystem::vs_feof(inFile));
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
+  f.Close();
   XML_ParserFree (parser);
 }

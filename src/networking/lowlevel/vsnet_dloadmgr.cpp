@@ -1,11 +1,12 @@
 #include <config.h>
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "networking/lowlevel/vsnet_notify.h"
 #include "networking/lowlevel/vsnet_cmd.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/packet.h"
+#include "vsfilesystem.h"
 
 using namespace std;
 
@@ -68,7 +69,7 @@ Manager::Manager( SocketSet& sets )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
-    _local_search_paths.push_back( datadir );
+    _local_search_paths.push_back( VSFileSystem::datadir );
 }
 
 void Manager::addItem( Item* item )
@@ -491,7 +492,7 @@ Manager::Manager( SocketSet& sets )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
-    _local_search_paths.push_back( datadir );
+    _local_search_paths.push_back( VSFileSystem::datadir );
 }
 
 void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
@@ -814,16 +815,16 @@ int access( const char* name, int mode )
 #ifndef HAVE_LSTAT
 int lstat( const char* name, struct stat* buf )
 {
-    FILE* f = fopen( name , "rb" );
+    FILE* f = VSFileSystem::OpenFile( name , "rb" );
     if( f == NULL ) return -1;
 
     int retval = -1;
-    if( fseek( f, 0, SEEK_END ) == 0 )
+    if( VSFileSystem::Fseek( f, 0, SEEK_END ) == 0 )
     {
-        buf->st_size = ftell( f );
+        buf->st_size = VSFileSystem::Ftell( f );
         if( buf->st_size >= 0 ) retval = 0;
     }
-    fclose( f );
+    VSFileSystem::Close( f );
     return retval;
 }
 #endif /* HAVE_LSTAT */
@@ -847,7 +848,7 @@ const char * getState( State s)
 	}
 }
 
-const char * getError( Error e)
+const char * getError( VSError e)
 {
 	switch( e)
 	{

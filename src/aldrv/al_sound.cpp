@@ -1,6 +1,6 @@
 #include "audiolib.h"
 #include "hashtable.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include <string>
 #include "al_globals.h"
 #include <stdio.h>
@@ -17,16 +17,10 @@
 #include <sys/stat.h>
 //their LoadWav is b0rken seriously!!!!!!
 
-bool MacFixedLoadWAVFile(const char * fname,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
-    int fp = open (fname, O_RDONLY);
-    if (fp <0) {
-        return false;
-    }
-    struct stat sb;
-    fstat (fp,&sb);
-    char * buf = (char *) malloc (sb.st_size);
-    read (fp,buf,sb.st_size);
-    close (fp);
+bool MacFixedLoadWAVFile(VSFileSystem::VSFile & f,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
+	long length = f.Size();
+    char * buf = (char *) malloc (length);
+    f.Read(buf,length);
     alutLoadWAVMemory(buf,format,data,size,freq);
     free(buf);
     return true;
@@ -54,7 +48,7 @@ static int LoadSound (ALuint buffer, bool looping) {
     dirtysounds.pop_back();
     //    assert (sounds[i].buffer==(ALuint)0);
     if (sounds[i].buffer!=(ALuint)0) {
-      fprintf (stderr,"using claimed buffer %d",sounds[i].buffer);
+      VSFileSystem::vs_fprintf (stderr,"using claimed buffer %d",sounds[i].buffer);
     }
     sounds[i].buffer= buffer;
   } else {
@@ -71,83 +65,79 @@ static int LoadSound (ALuint buffer, bool looping) {
 
 }
 #endif
+
+using namespace VSFileSystem;
+
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
-    FILE * fp = fopen (s.c_str(),"rb");
-    bool shared=false;
-    std::string nam (s);
-    if (fp) {
-      fclose (fp);
-    }else {
-      nam = GetSharedSoundPath (s);
-      shared=true;
+	VSFile f;
+	VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
+    bool shared=(error==Shared);
 
-    }
-    ALuint * wavbuf =NULL;
-    std::string hashname;
-    if (!music) {
-      hashname = shared?GetSharedSoundHashName(s):GetHashName (s);
-      wavbuf = soundHash.Get(hashname);
-    }
-    if (wavbuf==NULL) {
-      wavbuf = (ALuint *) malloc (sizeof (ALuint));
-      alGenBuffers (1,wavbuf);
-      ALsizei size;	
-      ALsizei bits;	
-      ALsizei freq;
-      signed char * filename = (signed char *)strdup (nam.c_str());
-      void *wave;
-      ALboolean err=AL_TRUE;
+	if( error <= Ok)
+	{
+	    ALuint * wavbuf =NULL;
+	    std::string hashname;
+	    if (!music)
+		{
+	      hashname = shared?VSFileSystem::GetSharedSoundHashName(s):VSFileSystem::GetHashName (s);
+	      wavbuf = soundHash.Get(hashname);
+	    }
+	    if (wavbuf==NULL)
+		{
+	      wavbuf = (ALuint *) malloc (sizeof (ALuint));
+	      alGenBuffers (1,wavbuf);
+	      ALsizei size;	
+	      ALsizei freq;
+	      void *wave;
+		  ALboolean looping;
+	      ALboolean err=AL_TRUE;
 #ifndef WIN32
 #ifdef __APPLE__
-ALint format;
-	err=MacFixedLoadWAVFile((char *)filename, &format, &wave, &size, &freq);
+		  ALint format;
+		  // MAC OS X
+		  err = false;
+		  if( error<=Ok)
+			err=MacFixedLoadWAVFile( f, &format, &wave, &size, &freq);
 #else
-	
-      ALsizei format;
-      err = alutLoadWAV((char *)filename, &wave, &format, &size, &bits, &freq);
+		  // LINUX
+		  ALsizei format;
+	  	  char * dat = new char[f.Size()];
+	  	  f.Read( dat, f.Size());
+      	  alutLoadWAVMemory((ALbyte *)dat, &format, &wave, &size, &freq, &looping);
+	  	  delete []dat;
 #endif
 #else
-	  ALboolean looping;
-	  ALint format;
-
-  	  fp = fopen ((const char *)filename,"rb");
-
-	  if (fp) {
-
-		fclose (fp);
-
-	  } else {
-
-		free (filename);
-
-        alDeleteBuffers (1,wavbuf);
-
-		free (wavbuf);
-
-		return -1;
-
-	  }
-      alutLoadWAVFile((char *)filename, (int*)&format, &wave, &size, &freq, &looping);
-
-
+		  ALint format;
+	  	  // WIN32
+	  	  char * dat = new char[f.Size()];
+	  	  f.Read( dat, f.Size());
+      	  alutLoadWAVMemory(dat, (int*)&format, &wave, &size, &freq, &looping);
+	  	  delete []dat;
 #endif
-      if(err == AL_FALSE) {
-		free (filename);
-		alDeleteBuffers (1,wavbuf);
-		free (wavbuf);
-		return -1;
-      }
-      alBufferData( *wavbuf, format, wave, size, freq );
-	  free (filename);
-      free(wave);
-      if (!music) {
-	soundHash.Put (hashname,wavbuf);
-	buffers.push_back (*wavbuf);
-      }
+      	  if(err == AL_FALSE)
+		  {
+			alDeleteBuffers (1,wavbuf);
+			free (wavbuf);
+			return -1;
+      	  }
+      	  alBufferData( *wavbuf, format, wave, size, freq );
+      	  free(wave);
+      	  if (!music)
+		  {
+			soundHash.Put (hashname,wavbuf);
+			buffers.push_back (*wavbuf);
+      	  }
+		}
+		f.Close();
+    	return LoadSound (*wavbuf,LOOP);  
     }
-    return LoadSound (*wavbuf,LOOP);  
+	else
+	{
+		// File not found
+		return -1;
+	}
   }
 #endif
   return -1;
@@ -162,46 +152,38 @@ int AUDCreateMusicWAV (const std::string &s, const bool LOOP) {
 int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
-    FILE * fp = fopen (s.c_str(),"rb");
-    bool shared=false;
+	VSFile f;
+	VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
+    bool shared=(error==Shared);
     std::string nam (s);
-    if (fp) {
-      fclose (fp);
-    }else {
-      nam = GetSharedSoundPath (s);
-      shared=true;
-    }
     ALuint * mp3buf=NULL;
     std::string hashname;
     if (!music) {
-      hashname = shared?GetSharedSoundHashName(s):GetHashName (s);
+      hashname = shared?VSFileSystem::GetSharedSoundHashName(s):VSFileSystem::GetHashName (s);
       mp3buf = soundHash.Get (hashname);
     }
+	if( error>Ok)
+		return -1;
 #ifdef _WIN32
 	return -1;
 #endif
     if (mp3buf==NULL) {
-      FILE * fp = fopen (nam.c_str(),"rb");
-      if (!fp)
-	return -1;
-      fseek (fp,0,SEEK_END);
-      long length = ftell (fp);
-      rewind (fp);
-      char *data = (char *)malloc (length);
-      fread (data,1,length,fp);
-      fclose (fp);
+	  char * data = new char[f.Size()];
+	  f.Read( data, f.Size());
       mp3buf = (ALuint *) malloc (sizeof (ALuint));
       alGenBuffers (1,mp3buf);
-      if ((*alutLoadMP3p)(*mp3buf,data,length)!=AL_TRUE) {
-	free (data);
-	return -1;
+      if ((*alutLoadMP3p)(*mp3buf,data,f.Size())!=AL_TRUE) {
+	    delete []data;
+		return -1;
       }
-      free (data);
+	  delete []data;
       if (!music) {
-	soundHash.Put (hashname,mp3buf);
-	buffers.push_back (*mp3buf);
+		soundHash.Put (hashname,mp3buf);
+		buffers.push_back (*mp3buf);
       }
     }
+	else
+		f.Close();
     return LoadSound (*mp3buf,LOOP);
   }
 #endif
@@ -264,7 +246,7 @@ void AUDDeleteSound (int sound, bool music){
       dirtysounds.push_back (sound);
 #ifdef SOUND_DEBUG
     }else {
-      fprintf (stderr,"double delete of sound");
+      VSFileSystem::vs_fprintf (stderr,"double delete of sound");
       return;
     }
 #endif

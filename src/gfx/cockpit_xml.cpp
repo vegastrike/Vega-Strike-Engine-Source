@@ -381,28 +381,33 @@ void GameCockpit::endElement(const string &name) {
 }
 
 
-
+using namespace VSFileSystem;
 void GameCockpit::LoadXML (const char * filename) {
   const int chunk_size = 16384;
 
-  FILE * inFile=NULL;
+  VSFile f;
+  VSError err = Unspecified;
 
   if (filename[0]!='\0') {
-	inFile = fopen (filename, "r");
-
+  	VSError err = f.OpenReadOnly( filename, CockpitFile);
   }
-  if(!inFile) {
+  LoadXML( f);
+}
+
+void GameCockpit::LoadXML ( VSFileSystem::VSFile & f) {
+
+  if(!f.Valid()) {
 	 cockpit_offset=0;
 	 viewport_offset=0;
 	 Panel.push_back(new Sprite ("crosshairs.spr"));
 	 return;
-	
-
   }
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Cockpit::beginElement, &Cockpit::endElement);
   
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+  /*
   do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -411,14 +416,15 @@ void GameCockpit::LoadXML (const char * filename) {
 #endif
     int length;
     
-    length = fread (buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  VSFileSystem::vs_close (inFile);
+  */
   XML_ParserFree (parser);
 }

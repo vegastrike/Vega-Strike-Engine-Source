@@ -58,14 +58,17 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               int         faction,
 		               std::string customizedUnit,
 		               Flightgroup *flightgroup,
-		               int         fg_subnumber, string * netxml)
+		               int         fg_subnumber, string * netxml, ObjSerial netcreate)
 {
-    return new GameUnit<Unit>( filename,
+    Unit * un = new GameUnit<Unit>( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber, netxml);
+	if( netcreate)
+		un->SetSerial( netcreate);
+	return un;
 }
 Unit* UnitFactory::createServerSideUnit( const char *filename,
 		               bool        SubUnit,
@@ -95,13 +98,16 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
                                    bool SubU, 
                                    int faction, 
                                    Flightgroup* fg,
-                                   int fg_snumber )
+                                   int fg_snumber, ObjSerial netcreate )
 {
-    return new GameNebula( unitfile,
+    Nebula * neb = new GameNebula( unitfile,
                        SubU,
                        faction,
                        fg,
                        fg_snumber );
+	if( netcreate)
+		neb->SetSerial( netcreate);
+	return neb;
 }
 
 Unit* UnitFactory::createMissile( const char * filename,
@@ -112,9 +118,9 @@ Unit* UnitFactory::createMissile( const char * filename,
                                      float time,
                                      float radialeffect,
                                      float radmult,
-                                     float detonation_radius )
+                                     float detonation_radius, ObjSerial netcreate )
 {
-    return new GameMissile( filename,
+    Unit * un =new GameMissile( filename,
                         faction,
                         modifications,
                         damage,
@@ -123,6 +129,9 @@ Unit* UnitFactory::createMissile( const char * filename,
                         radialeffect,
                         radmult,
                         detonation_radius );
+	if( netcreate)
+		un->SetSerial( netcreate);
+	return un;
 }
 
 Planet* UnitFactory::createPlanet( )
@@ -146,9 +155,9 @@ Planet* UnitFactory::createPlanet( QVector x,
 				   const std::vector <GFXLightLocal> & ligh,
 				   int faction,
 				   string fullname ,
-				   bool inside_out)
+				   bool inside_out, ObjSerial netcreate)
 {
-    return new GamePlanet( x,
+    Planet * p = new GamePlanet( x,
                        y,
                        vely,
                        rotvel,
@@ -165,6 +174,9 @@ Planet* UnitFactory::createPlanet( QVector x,
                        faction,
                        fullname , 
 		       inside_out);
+	if( netcreate)
+		p->SetSerial( netcreate);
+	return p;
 }
 
 Enhancement* UnitFactory::createEnhancement( const char * filename,
@@ -218,13 +230,16 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                                        int faction,
                                        Flightgroup* fg,
                                        int fg_snumber,
-                                       float difficulty )
+                                       float difficulty, ObjSerial netcreate )
 {
-    return new GameAsteroid( filename,
+    Asteroid * ast = new GameAsteroid( filename,
                          faction,
                          fg,
                          fg_snumber,
                          difficulty );
+	if( netcreate)
+		ast->SetSerial( netcreate);
+	return ast;
 }
 
 Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t)

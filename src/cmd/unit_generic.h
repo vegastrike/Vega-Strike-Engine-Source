@@ -51,6 +51,7 @@ void UncheckUnit (class Unit * un);
 #include "networking/const.h"
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
+#include "vsfilesystem.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -266,7 +267,6 @@ protected:
   // Tell if networked unit
   bool				networked;
   ObjSerial			serial;
-  unsigned short	zone;
   Vector			net_accel;
 public:
   ClientState		old_state;
@@ -276,8 +276,6 @@ public:
   void				SetNetworkMode( bool mode=true) {this->networked = mode;}
   ObjSerial 		GetSerial() { return this->serial;}
   void				SetSerial( ObjSerial ser) { this->serial = ser;}
-  unsigned short	GetZone() { return this->zone;}
-  void				SetZone( unsigned short zn) { this->zone = zn;}
   void				BackupState();
 
 /***************************************************************************************/
@@ -542,6 +540,7 @@ public:
   string WriteUnitString();
   ///Loads a unit from an xml file into a complete datastructure
   void LoadXML(const char *filename, const char * unitModifications="", string * xmlbuffer=NULL);
+  void LoadXML(VSFileSystem::VSFile & f, const char * unitModifications="", string * xmlbuffer=NULL);
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                 ****/
@@ -988,7 +987,7 @@ public:
   bool EnqueueLastPythonAIScript ();
 // Uses Order class but just a poiner so ok
 // Uses AI so only in NetUnit and Unit classes
-  virtual double getMinDis(const QVector &pnt){ return 1;}//for clicklist
+  double getMinDis(const QVector &pnt);//for clicklist
 // Uses AI stuff so only in NetUnit and Unit classes
   void SetTurretAI ();
   void DisableTurretAI ();
@@ -1026,7 +1025,7 @@ public:
 
 // To let only in Unit class
 ///Builds a BSP tree from either the hull or else the current meshdata[] array
-  virtual void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL){}//if hull==NULL, then use meshdata **
+void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL); //if hull==NULL, then use meshdata **
 // Uses mesh stuff (only rSize()) : I have to find something to do
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
@@ -1039,10 +1038,10 @@ public:
   float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0)const;
   float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0)const;
   ///queries the ship with a directed ray
-  virtual float querySphereClickList (const QVector &st, const QVector &dir, float err) const {return 1;}//for click list
+  float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
   ///Queries if this unit is within a given frustum
 // Uses GFX -> defined only Unit class
-  virtual bool queryFrustum (double frustum[6][4]) const {return false;}
+  bool queryFrustum (double frustum[6][4]) const {return false;}
 
   /**
    *Queries bounding box with a point, radius err
@@ -1054,8 +1053,8 @@ public:
    * hits behind.
    * 0 if ray misses 
    */
-  virtual bool queryBoundingBox (const QVector &pnt, float err) {return false;}
-  virtual int queryBoundingBox(const QVector &origin,const Vector &direction, float err) { return 0;}
+  bool queryBoundingBox (const QVector &pnt, float err);
+  int queryBoundingBox(const QVector &origin,const Vector &direction, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   ///queries the sphere for weapons (world space point)

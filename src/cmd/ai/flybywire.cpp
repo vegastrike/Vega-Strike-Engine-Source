@@ -40,7 +40,7 @@ void MatchLinearVelocity::Execute () {
 	if (!suborders.empty()) {
 		static int i=0;
 		if (i++%1000==0) {
-			fprintf (stderr,"cannot execute suborders as Linear Velocity Matcher");//error printout just in case
+			VSFileSystem::vs_fprintf (stderr,"cannot execute suborders as Linear Velocity Matcher");//error printout just in case
 		}
 	}
   MATCHLINVELSETUP()
@@ -59,7 +59,7 @@ void MatchLinearVelocity::Execute () {
 
 MatchLinearVelocity::~MatchLinearVelocity () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mlv%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mlv%x",this);
   fflush (stderr);
 #endif
 }
@@ -113,7 +113,7 @@ void MatchAngularVelocity::Execute () {
 
 MatchAngularVelocity::~MatchAngularVelocity () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mav%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mav%x",this);
   fflush (stderr);
 #endif
 }
@@ -140,7 +140,7 @@ void MatchVelocity::Execute () {
 
 MatchVelocity::~MatchVelocity () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mv%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mv%x",this);
   fflush (stderr);
 #endif
 }
@@ -300,7 +300,7 @@ void FlyByWire::Execute () {
 
 FlyByWire::~FlyByWire () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fbw%x",this);
+  VSFileSystem::vs_fprintf (stderr,"fbw%x",this);
   fflush (stderr);
 #endif
 }

@@ -209,7 +209,7 @@ static void setup_sdl_video_mode()
     if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) ) == 
 	 NULL ) 
     {
-	fprintf( stderr, "Couldn't initialize video: %s", 
+	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
 		 SDL_GetError() );
 	exit(1);
     }
@@ -237,7 +237,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
      * Initialize SDL
      */
     if ( SDL_Init( sdl_flags ) < 0 ) {
-	fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
+	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
 	exit(1);
     }
 #if 1
@@ -435,7 +435,7 @@ void winsys_atexit( winsys_atexit_func_t func )
       static bool called = false;
 
   if ( called != false)
-     fprintf (stderr,"winsys_atexit called twice" );
+     VSFileSystem::vs_fprintf (stderr,"winsys_atexit called twice" );
 
   called = true;
   // atexit_func = func;
@@ -674,7 +674,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
 	glutWindow = glutCreateWindow(window_title);
 
 	if ( glutWindow == 0 ) {
-	    (void) fprintf(stderr, "Couldn't create a window.\n");
+	    (void) VSFileSystem::vs_fprintf(stderr, "Couldn't create a window.\n");
 	    exit(1);
 	}
     }
@@ -766,7 +766,7 @@ void winsys_atexit( winsys_atexit_func_t func )
     static bool called = false;
 
     if (called)
-      fprintf (stderr,"winsys_atexit called twice\n" );
+      VSFileSystem::vs_fprintf (stderr,"winsys_atexit called twice\n" );
 
     called = true;
 

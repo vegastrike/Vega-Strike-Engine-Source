@@ -5,7 +5,9 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "file_main.h"
-//#include "gldrv/winsys.h"
+#include "vsfilesystem.h"
+
+using namespace VSFileSystem;
 
 extern Texture * createTexture( char const * ccc,char const * cc,int k= 0,enum FILTER f1= MIPMAP,enum TEXTURE_TARGET t0=TEXTURE2D,enum TEXTURE_IMAGE_TARGET t=TEXTURE_2D,float f=1,int j=0,unsigned char c=GFXFALSE,int i=65536);
 extern Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, float* rotations, float offset, Texture * Dec, Vector *Ref);
@@ -34,13 +36,13 @@ void Mesh::LoadBinary (const char * filename, int faction) {
   int *Quads;
   GFXBOOL AlphaMap = GFXFALSE;
 
-	FILE* fp = NULL;
 	int jj;
-	fp = fopen (filename, "rb");
-	if (!fp)
+	VSFile fp;
+	VSError err = fp.OpenReadOnly( filename, MeshFile);
+	if (err>Ok)
 	{
-	  fprintf (stderr,"Failed to load file %s",filename);
-	  winsys_exit(1);
+	  VSFileSystem::vs_fprintf (stderr,"Failed to load file %s",filename);
+	  VSExit(1);
 	}
 		
 	TexNameLength = readi(fp);
@@ -54,7 +56,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		
 		objtex = GFXTRUE;
 		TexName = new char [TexNameLength +5];
-		fread (TexName, TexNameLength,1,fp);
+		fp.Read (TexName, TexNameLength);
 		TexName[TexNameLength+4] = '\0';
 		TexName[TexNameLength+0] = '.';
 		TexName[TexNameLength+1] = 'b';
@@ -187,7 +189,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		jj=0;
 		int temp = NumTris*3;
 		//float oo256 = .00390625;
-		/*long pos =*/ ftell(fp);
+		/*long pos =*/ fp.GetPosition();
 		for (ii=0; ii< temp; ii++)
 		{
 			vertexlist[ii].s = readf(fp);//*oo256;  
@@ -444,7 +446,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 
 	squadlogos = createLogo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, FactionUtil::getSquadLogo(faction), Ref);
 	delete [] Ref;
-	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
+	//VSFileSystem::Fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	int vert_offset[2];
 	vert_offset[0]=NumTris*3;
 	vert_offset[1]=NumQuads*4;
@@ -453,9 +455,9 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 	modes[1]=GFXQUAD;
 	vlist = new GFXVertexList(modes,NumTris*3+NumQuads*4, vertexlist,2,vert_offset);
 	//vlist = new GFXVertexList(numtris*4,0,numquads*4, vertexlist+numtris*3);
-	/*long pos =*/ ftell(fp);
+	/*long pos =*/ fp.GetPosition();
 	myMatNum = readi(fp);;
-	fclose(fp);
+	fp.Close();
 
 	// Load the BSP tree
 	//bspTree = new BSPTree((filename + string(".bsp")).c_str());

@@ -4,6 +4,7 @@
 #include "cmd/container.h"
 #include <vector>
 #include "gfx/vec.h"
+#include "vsfilesystem.h"
 using namespace XMLSupport;
 enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
 #define MAXVDUS 12
@@ -55,6 +56,7 @@ protected:
   virtual void LocalToRadar (const Vector & pos, float &s, float &t) {}
 
   virtual void LoadXML (const char *file) {}
+  virtual void LoadXML (VSFileSystem::VSFile & f) {}
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   virtual void beginElement(const string &name, const AttributeList &attributes) {}

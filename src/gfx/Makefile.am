@@ -38,6 +38,9 @@ libgfxserver_a_SOURCES =	$(libgfxgeneric)	\
 	mesh_server.cpp
 
 libgfx_a_SOURCES =	$(libgfxgeneric)\
+	vsimage.h		\
+	vsimage.cpp		\
+	tex_transform.cpp	\
 	jpeg_memory.cpp	\
 	jpeg_memory.h	\
 	mesh_gfx.cpp	\
@@ -53,8 +56,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	aux_palette.h	\
 	aux_texture.cpp	\
 	aux_texture.h	\
-	png_texture.cpp	\
-	png_texture.h	\
 	background.cpp	\
 	background.h	\
 	car_assist.h 	\
@@ -83,7 +84,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	planetary_transform.h	\
 	pipelined_texture.cpp	\
 	pipelined_texture.h		\
-	png_write.cpp	\
 	point_to_cam.h	\
 	particle.cpp	\
 	particle.h		\

@@ -80,7 +80,7 @@ void	NetBuffer::checkBuffer( int len, const char * fun)
 
 void	NetBuffer::addClientState( ClientState cs)
 		{
-			this->addUInt32( cs.delay);
+			//this->addFloat( cs.delay);
 			this->addSerial( cs.client_serial);
 			this->addTransformation( cs.pos);
 			this->addVector( cs.veloc);
@@ -89,7 +89,7 @@ void	NetBuffer::addClientState( ClientState cs)
 ClientState NetBuffer::getClientState()
 		{
 			ClientState cs;
-			cs.delay = this->getUInt32();
+			//cs.delay = this->getFloat();
 			cs.client_serial = this->getSerial();
 			cs.pos = this->getTransformation();
 			cs.veloc = this->getVector();
@@ -428,6 +428,121 @@ string	NetBuffer::getString()
 
 			return str;
 		}
+
+GFXMaterial		NetBuffer::getGFXMaterial()
+{
+	GFXMaterial mat;
+
+	mat.ar = this->getFloat();
+	mat.ag = this->getFloat();
+	mat.ab = this->getFloat();
+	mat.aa = this->getFloat();
+
+	mat.dr = this->getFloat();
+	mat.dg = this->getFloat();
+	mat.db = this->getFloat();
+	mat.da = this->getFloat();
+
+	mat.sr = this->getFloat();
+	mat.sg = this->getFloat();
+	mat.sb = this->getFloat();
+	mat.sa = this->getFloat();
+
+	mat.er = this->getFloat();
+	mat.eg = this->getFloat();
+	mat.eb = this->getFloat();
+	mat.ea = this->getFloat();
+
+	mat.power = this->getFloat();
+
+	return mat;
+}
+
+void	NetBuffer::addGFXMaterial( const GFXMaterial & mat)
+{
+	this->addFloat( mat.ar);
+	this->addFloat( mat.ag);
+	this->addFloat( mat.ab);
+	this->addFloat( mat.aa);
+
+	this->addFloat( mat.dr);
+	this->addFloat( mat.dg);
+	this->addFloat( mat.db);
+	this->addFloat( mat.da);
+
+	this->addFloat( mat.sr);
+	this->addFloat( mat.sg);
+	this->addFloat( mat.sb);
+	this->addFloat( mat.sa);
+
+	this->addFloat( mat.er);
+	this->addFloat( mat.eg);
+	this->addFloat( mat.eb);
+	this->addFloat( mat.ea);
+
+	this->addFloat( mat.power);
+}
+
+GFXLight		NetBuffer::getGFXLight()
+{
+	GFXLight	light;
+	int i=0;
+	light.target = this->getInt32();
+	for( i=0; i<3; i++)
+		light.vect[i] = this->getFloat();
+	light.options = this->getInt32();
+	for( i=0; i<4; i++)
+		light.diffuse[i] = this->getFloat();
+	for( i=0; i<4; i++)
+		light.specular[i] = this->getFloat();
+	for( i=0; i<4; i++)
+		light.ambient[i] = this->getFloat();
+	for( i=0; i<3; i++)
+		light.attenuate[i] = this->getFloat();
+	for( i=0; i<3; i++)
+		light.direction[i] = this->getFloat();
+	light.exp = this->getFloat();
+	light.cutoff = this->getFloat();
+
+	return light;
+}
+
+void	NetBuffer::addGFXLight( const GFXLight & light)
+{
+	int i=0;
+	this->addInt32( light.target);
+	for( i=0; i<3; i++)
+		this->addFloat( light.vect[i]);
+	this->addInt32( light.options);
+	for( i=0; i<4; i++)
+		this->addFloat( light.diffuse[i]);
+	for( i=0; i<4; i++)
+		this->addFloat( light.specular[i]);
+	for( i=0; i<4; i++)
+		this->addFloat( light.ambient[i]);
+	for( i=0; i<3; i++)
+		this->addFloat( light.attenuate[i]);
+	for( i=0; i<3; i++)
+		this->addFloat( light.direction[i]);
+	this->addFloat( light.exp);
+	this->addFloat( light.cutoff);
+}
+
+GFXLightLocal	NetBuffer::getGFXLightLocal()
+{
+	GFXLightLocal light;
+
+	light.ligh = this->getGFXLight();
+	light.islocal = this->getChar();
+
+	return light;
+}
+
+void	NetBuffer::addGFXLightLocal( const GFXLightLocal & light)
+{
+	this->addGFXLight( light.ligh);
+	this->addChar( light.islocal);
+}
 
 int		NetBuffer::getDataLength() { return offset;}
 int		NetBuffer::getSize() { return size;}

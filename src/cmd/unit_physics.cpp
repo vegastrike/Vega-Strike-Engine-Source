@@ -81,7 +81,8 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 	  {
 		  //cout<<"Player number : "<<player<<endl;
 		  // (NetForce + Transform (ship_matrix,NetLocalForce) )/mass = GLOBAL ACCELERATION
-		  curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+
+		  //curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 		  // If we want to inter(extra)polate sent position, DO IT HERE
 		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
 				// We moved so update
@@ -90,8 +91,10 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 				Network[player].sendPosition( &cstmp);
 		  }
 		  else
+		  {
 				// Say we are still alive
 				Network[player].sendAlive();
+		  }
 	  }
 	  else
 	  {
@@ -100,6 +103,11 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 		  if( !this->networked)
 			// Case it is a local unit
  			curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+		  else
+		  {
+		  	// Networked unit so interpolate its position
+			curr_physical_state = Network[0].Interpolate( this, GetElapsedTime());
+		  }
 	  }
   }
   else

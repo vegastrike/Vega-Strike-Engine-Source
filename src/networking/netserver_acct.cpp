@@ -1,6 +1,6 @@
 #include "networking/netserver.h"
 #include "networking/lowlevel/vsnet_debug.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "networking/savenet_util.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/fileutil.h"
@@ -99,6 +99,8 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 // For now it only save units and player saves
 void	NetServer::save()
 {
+	using namespace VSFileSystem;
+
 	Packet pckt;
 	Cockpit * cp;
 	Unit * un;
@@ -108,9 +110,10 @@ void	NetServer::save()
 	NetBuffer netbuf;
 
 	// Save the Dynamic Universe in the data dir for now
-	string dynuniv_path = datadir+"dynaverse.dat";
-	fp = fopen( dynuniv_path.c_str(), "w+b");
-	if( !fp)
+	string dynuniv_path = "dynaverse.dat";
+	VSFile f;
+	VSError err = f.OpenCreateWrite( dynuniv_path, Unknown);
+	if( err>Ok)
 	{
 		cerr<<"Error opening dynamic universe file"<<endl;
 		VSExit(1);
@@ -118,14 +121,8 @@ void	NetServer::save()
 	else
 	{
 		string dyn_univ = globalsave->WriteDynamicUniverse();
-		int wlen = fwrite( dyn_univ.c_str(), sizeof( char), dyn_univ.length(), fp);
-		if( wlen != dyn_univ.length())
-		{
-			cerr<<"Error writing dynamic universe file"<<endl;
-			VSExit(1);
-		}
-		fclose( fp);
-		fp = NULL;
+		f.Write( dyn_univ);
+		f.Close();
 	}
 
 	// Loop through all clients and write saves
@@ -134,7 +131,7 @@ void	NetServer::save()
 		cp = _Universe->AccessCockpit( i);
 		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
 		// Write the save and xml unit
-		FileUtil::WriteSaveFiles( savestr, xmlstr, datadir+"/serversaves", cp->savegame->GetCallsign());
+		//FileUtil::WriteSaveFiles( savestr, xmlstr, VSFileSystem::datadir+"/serversaves", cp->savegame->GetCallsign());
 		// SEND THE BUFFERS TO ACCOUNT SERVER
 		if( acctserver && acct_con)
 		{

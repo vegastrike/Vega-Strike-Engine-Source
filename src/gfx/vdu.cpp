@@ -888,7 +888,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 		else
 			str += " - #FF0000OFF";
 		str += "#000000\n";
-		str += "SD: "+_Universe->current_stardate.GetFullCurrentStarDate();
+		str += "SD: "+_Universe->current_stardate.GetFullTrekDate();
   		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 	}
   }

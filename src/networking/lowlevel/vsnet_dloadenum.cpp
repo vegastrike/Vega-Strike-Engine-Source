@@ -150,7 +150,7 @@ std::ostream& operator<<( std::ostream& ostr, State s )
  * definition VsnetDownload::Client::Error
  *------------------------------------------------------------*/
 
-std::ostream& operator<<( std::ostream& ostr, Error e )
+std::ostream& operator<<( std::ostream& ostr, VSError e )
 {
     switch( e )
     {

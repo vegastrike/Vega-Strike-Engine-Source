@@ -128,6 +128,8 @@ class NetServer
 		void	start( int argc, char ** argv);
 		void	save();
 
+		void	broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command);
+
 		// WEAPON STUFF
 		void	BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone);
 		void	BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, unsigned short zone);

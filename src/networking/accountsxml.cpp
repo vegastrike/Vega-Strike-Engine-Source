@@ -30,6 +30,7 @@
 #include "xml_support.h"
 #include "hashtable.h"
 #include "accountsxml.h"
+#include "vsfilesystem.h"
 
 #include <expat.h>
 
@@ -37,6 +38,8 @@ using std::vector;
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
+
+using namespace VSFileSystem;
 
 /**************************************************************/
 /**** Display an Account's info                            ****/
@@ -134,7 +137,7 @@ namespace accountXML
 	  {
 			switch (attribute_map.lookup ((*iter).name)) {
 			case UNKNOWN:
-			  fprintf (stderr,"Unknown Account Element %s\n",(*iter).name.c_str());
+			  VSFileSystem::vs_fprintf (stderr,"Unknown Account Element %s\n",(*iter).name.c_str());
 			  break;
 			case NAME:
 			  curname = (*iter).value;
@@ -199,12 +202,16 @@ vector<Account *> getAllAccounts() {
 void LoadAccounts(const char *filename)
 {
   const int chunk_size = 16384;
-  FILE * inFile= fopen (filename,"rb");
-  if (!inFile) {
+
+  VSFile f;
+  VSError err = f.OpenReadOnly(filename,Unknown);
+  if (err>Ok) {
     return;
   }
   XML_Parser parser = XML_ParserCreate (NULL);
   XML_SetElementHandler (parser, &beginElement, &endElement);
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+ /*
  do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -213,14 +220,16 @@ void LoadAccounts(const char *filename)
 #endif
     int length;
     
-    length = fread (buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof (inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof (inFile));
 #endif
-  } while(!feof(inFile));
- fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+ VSFileSystem::vs_close (inFile);
+ */
+ f.Close();
  XML_ParserFree (parser);
 }

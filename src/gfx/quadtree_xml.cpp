@@ -3,7 +3,10 @@
 #include "gfxlib.h"
 #include "ani_texture.h"
 #include <assert.h>
-#include "png_texture.h"
+#include "vsfilesystem.h"
+#include "vsimage.h"
+
+using namespace VSFileSystem;
 
 extern enum BLENDFUNC parse_alpha (const char * tmp );
 
@@ -325,8 +328,11 @@ void QuadTree::SetZSizes (int mZ, unsigned int maxZ) {
 void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float Radius) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
-  FILE* inFile = fopen (filename, "r");
-  if(!inFile) {
+  //FILE* inFile = VSFileSystem::vs_open (filename, "r");
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, Unknown);
+
+  if(err>Ok) {
     assert(0);
     return;
   }
@@ -340,6 +346,10 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &QuadTree::beginElement, &QuadTree::endElement);
+
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+
+  /*
   do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -348,15 +358,16 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
 #endif
     int length;
     
-    length = fread(buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read(buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
+  f.Close();
   XML_ParserFree (parser);
   unsigned int i;
   for (i=0;i<textures.size();i++) {
@@ -389,25 +400,28 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
     hm.XOrigin =(int)xml->data[i].OriginX;
     hm.ZOrigin=(int)xml->data[i].OriginY;
     hm.Scale = xml->data[i].scale;
-    int format;int bpp; unsigned char * palette;
-    FILE * fp;
-    fp = fopen (xml->data[i].file.c_str(),"rb");
-    if (fp) {
-      hm.Data = (short *) readImage (fp,bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform,false);
-      fclose (fp);
+    unsigned char * palette;
+    //FILE * fp;
+    //fp = VSFileSystem::vs_open (xml->data[i].file.c_str(),"rb");
+	Texture tex;
+	err = f.OpenReadOnly( xml->data[i].file.c_str(), Unknown);
+    if (err<=Ok) {
+      //hm.Data = (short *) readImage (fp,bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform,false);
+	  hm.Data = (short *) tex.ReadImage( &f, &heightmapTransform, false);
+	  hm.XSize = tex.sizeX;
+	  hm.ZSize = tex.sizeY;
+      f.Close();
     }
 	  //LoadData();
     unsigned long xsize;unsigned long zsize;
-    fp = fopen (xml->data[i].terrainfile.c_str(),"rb");
-    if (fp) {
-      hm.terrainmap = (unsigned char *)readImage (fp,
-						  bpp,
-						  format,
-						  xsize,
-						  zsize,
-						  palette,
-						  &terrainTransform,true);
-      fclose (fp);
+    //fp = VSFileSystem::vs_open (xml->data[i].terrainfile.c_str(),"rb");
+	f.OpenReadOnly( xml->data[i].terrainfile.c_str(), Unknown);
+    if (err<=Ok) {
+      //hm.terrainmap = (unsigned char *)readImage (fp, bpp, format, xsize, zsize, palette, &terrainTransform,true);
+	  hm.terrainmap = (unsigned char *) tex.ReadImage( &f, &terrainTransform, true);
+	  xsize = tex.sizeX;
+	  zsize = tex.sizeY;
+      f.Close();
     }
     if (hm.Data&&hm.terrainmap) {
       assert (xsize==hm.XSize&&zsize==hm.ZSize);

@@ -1,6 +1,6 @@
 #include "nebula_generic.h"
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include <assert.h>
 #include "configxml.h"
 #include "vs_globals.h"
@@ -95,15 +95,17 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 	}
 }
 
+using namespace VSFileSystem;
 void Nebula::LoadXML(const char * filename) {
 	const int chunk_size = 16384;
-	FILE * inFile = fopen (filename, "r");
+	VSFile f;
+	VSError err = f.OpenReadOnly( filename, UnitFile);
 	static bool usefog= XMLSupport::parse_bool (vs_config->getVariable ("graphics","fog","true"));
-        if(!inFile||!usefog) {
-		if (inFile) {
-		  fclose (inFile);
+        if(err>Ok||!usefog) {
+		if (err<=Ok) {
+		  f.Close();
 		}else {
-		  fprintf(stderr,"\nUnit file %s not found\n",filename);
+		  VSFileSystem::vs_fprintf(stderr,"\nUnit file %s not found\n",filename);
 		}
 		fogmode=FOG_OFF;
 		return;
@@ -112,6 +114,8 @@ void Nebula::LoadXML(const char * filename) {
 	XML_SetUserData(parser, this);
 	XML_SetElementHandler(parser, &Nebula::beginElement, &Nebula_endElement);
 
+	XML_Parse(parser, (f.ReadFull()).c_str(),f.Size(), 1);
+	/*
 	do {
 #ifdef BIDBG
 		char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -119,38 +123,26 @@ void Nebula::LoadXML(const char * filename) {
 		char buf[chunk_size];
 #endif
 		int length;
-		length = fread (buf,1, chunk_size,inFile);
+		length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
 		//length = inFile.gcount();
 		
 #ifdef BIDBG
-		XML_ParseBuffer(parser, length, feof(inFile));
+		XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-		XML_Parse(parser, buf,length, feof(inFile));
+		XML_Parse(parser, buf,length, VSFileSystem::vs_feof(inFile));
 #endif
-	} while(!feof(inFile));
-	fclose (inFile);
+	} while(!VSFileSystem::vs_feof(inFile));
+	*/
 	XML_ParserFree (parser);
+	f.Close();
 }
 
 void Nebula::InitNebula(const char * unitfile, bool SubU, int faction,
 	       Flightgroup* fg, int fg_snumber)
 {
   fogme=true;
-  std::string path = GetSharedUnitPath() + "/";
-  std::string file = string(unitfile) + "/" + unitfile + "/" + ".nebula";
-  std::string fullpath = path + file;
-  struct stat info;
-
-  explosiontime=0;
-  if(stat(fullpath.c_str(), &info) != 0)
-    {
-      fullpath = path + FactionUtil::GetFaction(faction) + "/" + file;
-      if(stat(fullpath.c_str(),&info) != 0)
-	{
-	  faction=FactionUtil::GetFaction("neutral");
-	  fullpath = path + "neutral/" + file;
-	}
-    }
+  string fullpath( unitfile);
+  fullpath += ".nebula";
 
   LoadXML(fullpath.c_str());
 }

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 //extern Hashtable<string, Texture,char [127]> texHashTable;
 
@@ -43,28 +43,28 @@ void AnimatedTexture::setTime (double tim) {
 	cumtime=tim;
 	active = ((unsigned int)(cumtime/timeperframe))%numframes;
 }
+using namespace VSFileSystem;
+
 AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm,bool detailtex){
   AniInit();
-  FILE * fp = fopen (file,"r");
-  bool setdir=false;
-  if (!fp) {
-	string str(datadir+DELIM+string("animations")+DELIM+string(file)+DELIM);
-    vssetdir (str.c_str());
-    fp = fopen (file, "r");
+  VSFile f;
+  VSError err = f.OpenReadOnly( file, AnimFile);
+  //bool setdir=false;
+  if (err==Shared) {
     float width,height;
-    if (fp) {
-      fscanf (fp, "%f %f", &width, &height);//it's actually an animation in global animation shares
-    }
-    setdir=true;
+    f.Fscanf("%f %f", &width, &height);//it's actually an animation in global animation shares
+    //setdir=true;
     
-}
-  if (fp){
-    Load (fp,stage,imm,detailtex);
-    fclose (fp);
   }
+  if (err<=Ok){
+    Load (f,stage,imm,detailtex);
+    f.Close();
+  }
+/*
 if (setdir) {
-    vsresetdir();
+    VSFileSystem::vs_resetdir();
 }
+*/
 }
 void AnimatedTexture::AniInit() {
   numframes=1;
@@ -130,6 +130,7 @@ void AnimatedTexture::Reset () {
   active=0;
   physicsactive = numframes*timeperframe;
 }
+/*
 void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER ismipmapped,bool detailtex)
 {
 	myvec.push_back (this);
@@ -160,10 +161,11 @@ void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER i
   }
   original = NULL;
 }
+*/
 
 void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool detailtex) {
   myvec.push_back (this);
-  fscanf (fp,"%d %f",&numframes,&timeperframe);
+  VSFileSystem::vs_fscanf (fp,"%d %f",&numframes,&timeperframe);
   cumtime=0;
   Reset();
 
@@ -182,8 +184,59 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool d
 
   for (;i<numframes;i++) {
     int numgets=0;
-    while (numgets<=0&&!feof (fp)) {
+    while (numgets<=0&&!VSFileSystem::vs_feof (fp)) {
 		if (fgets (temp,511,fp)) {
+			temp[511]='\0';
+			file[0]='z';file[1]='\0';
+			alp[0]='z';alp[1]='\0';//windo	ws crashes on null
+  
+			numgets = sscanf (temp,"%s %s",file,alp);
+		}else break;
+    }
+    if (loadall||i==numframes/2) {
+      if (numgets==2) {
+	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
+      }else {
+	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
+      }    
+    }
+  }
+  if (!loadall) {
+    Texture * dec = Decal[numframes/2];
+    timeperframe*=numframes;
+    numframes=1;
+    if (Decal) {
+      delete [] Decal;
+    }
+    Decal = new Texture * [1];
+    Decal[0]=dec;
+  }
+  original = NULL;
+}
+
+void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) {
+  myvec.push_back (this);
+  f.Fscanf ("%d %f",&numframes,&timeperframe);
+  cumtime=0;
+  Reset();
+
+  active=0;
+  Decal = new Texture * [numframes];
+  char temp[512]="white.bmp";
+  char file[512]="white.bmp";
+  char alp[512]="white.bmp";
+  int i=0;
+  bool loadall=true;
+  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
+    
+    loadall=false;
+  }
+
+
+  for (;i<numframes;i++) {
+    int numgets=0;
+    while (numgets<=0&&!f.Eof()) {
+		if (f.ReadLine(temp,511)==Ok) {
 			temp[511]='\0';
 			file[0]='z';file[1]='\0';
 			alp[0]='z';alp[1]='\0';//windo	ws crashes on null

@@ -164,12 +164,12 @@ enum LIGHT_TARGET {
   POSITION=16,
   EMISSION=32
 };
+
 ///Holds all information for a single light object
 class GFXLight {
- protected:
+ public:
   ///physical GL light its saved in
   int target;
- public:
   ///last is w for positional, otherwise 3 for spec
   float vect[3];
   int options;
@@ -219,6 +219,11 @@ struct GFXTVertex // transformed vertex
 	float u,v;
 };
 
+
+struct GFXLightLocal {
+  GFXLight ligh;
+  bool islocal;
+};
 
 
 enum POLYTYPE {

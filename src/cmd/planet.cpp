@@ -23,7 +23,7 @@
 #include "cmd/script/flightgroup.h"
 #include "gfx/ring.h"
 #include "alphacurve.h"
-#include "gfx/png_texture.h"
+#include "gfx/vsimage.h"
 extern string getCargoUnitName (const char *name);
 
 GamePlanet::GamePlanet()
@@ -60,8 +60,6 @@ public:
 		if (Decal.size()) {
 			if (Decal[0]) {
 				if (f.min_alpha!=0||f.max_alpha!=255||f.concavity!=0 || f.focus!=.5 || f.tail_mode_start!=-1 || f.tail_mode_end!=-1) {
-					changehome();
-					vschdir("backgrounds");
 					int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
 					unsigned char * tex= (unsigned char *) malloc (sizeof(char) *rez*4);
 					for (int i=0;i<rez;++i) {
@@ -73,12 +71,11 @@ public:
 					static int count=0;
 					count++;
 					string nam = f.meshname+XMLSupport::tostring(count)+".png";
-					png_write(nam.c_str(),&tex[0],rez,1,true,8);
+					// Writing in the homedir texture directory
+					VSImage image;
+					image.WriteImage( (char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
 					delete Decal[0];
 					Decal[0]= new Texture(nam.c_str(),nam.c_str());
-					vscdup();
-					returnfromhome();
-						
 				}
 			}
 		}
@@ -285,14 +282,15 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
   tmpname +=temp;
   tmpname +=".bsp";
   
-  FILE * fp = fopen (tmpname.c_str(), "rb");
-  if (!fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( tmpname, BSPFile);
+  if (err>Ok) {
   */
 
 
     /*
       } else {
-      fclose (fp);
+      f.Close();
       }
       bspTree = new BSPTree (tmpname.c_str());
   */
@@ -440,7 +438,7 @@ void GamePlanet::DrawTerrain() {
 
 void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
 #ifdef JUMP_DEBUG
-  fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
+  VSFileSystem::vs_fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
 #endif
 #ifdef FIX_TERRAIN
   if (terrain&&un->isUnit()!=PLANETPTR) {

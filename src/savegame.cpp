@@ -1,7 +1,7 @@
 #include "cmd/unit_generic.h"
 #include "hashtable.h"
 #include <float.h>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include <vector>
 #include <string>
 #include "configxml.h"
@@ -12,9 +12,9 @@
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
 #include "networking/const.h"
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "vsfilesystem.h"
 using namespace std;
+using namespace VSFileSystem;
 
  std::string GetHelperPlayerSaveGame (int num) {
 
@@ -24,28 +24,23 @@ if( Network==NULL)
   static string *res=NULL;
   if (res==NULL) {
     res = new std::string;
-    changehome(false);
     //char c[2]={'\0','\0'};
-    FILE * fp = fopen (("save.4.x.txt"),"r");
-    if (!fp) {
-      fp = fopen ("save.4.x.txt","w");
-      if (fp) {
-	fwrite ("defaultsavegame.4x\n",19,1,fp);
-	fclose (fp);
+	VSFile f;
+	VSError err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
+    if (err>Ok) {
+		err = f.OpenCreateWrite( "save.4.x.txt", SaveFile);
+      if (err>Ok) {
+		f.Write("defaultsavegame.4x\n",19);
+		f.Close();
       }
-      fp = fopen (("save.4.x.txt"),"r");
+	  err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
     }
-    if (fp) {
-	  long length=0;
-	  {
-		  struct stat st;
-		  if (fstat(fileno(fp),&st)==0)
-			length=st.st_size;
-	  }
+    if (err<=Ok) {
+	  long length=f.Size();
       if (length>0) {
       char * temp = (char *)malloc (length+1);
       temp[length]='\0';
-      fread (temp,sizeof(char),length,fp);
+      f.Read (temp,length);
       bool end=true;
       for (int i=length-1;i>=0;i--) {
         if (temp[i]=='\r'||temp[i]=='\n') {
@@ -59,18 +54,18 @@ if( Network==NULL)
       *res = (temp);
       free (temp);
       }
-      fclose (fp);
+      f.Close();
 
     }
 #if 0
-    if (fp) {
-    while (!feof (fp)) {
-      c[0]=fgetc (fp);
-      if (!feof(fp)) {
+    if (err<=Ok) {
+    while (!f.Eof()) {
+      f.Read( &c[0], sizeof( char));
+      if (!f.Eof()) {
         if (c[0]!='\r'&&c[0]!='\n'&&c[0]!='\0') {
           if (c[0]==' ') {
             c[0]='_';
-            if (feof(fp)) {
+            if (f.Eof()) {
               continue;
             }
           }
@@ -80,30 +75,32 @@ if( Network==NULL)
         break;
       }
     }
-    fclose (fp);
+    f.Close();
 #endif
     if (!res->empty()) {
       if (*res->begin()=='~') {
-	fp = fopen (("save.4.x.txt"),"w");
-	if (fp) {
+		err = f.OpenCreateWrite( "save.4.x.txt", SaveFile);
+	if (err<=Ok) {
 	  for (unsigned int i=1;i<res->length();i++) {
-	    fputc (*(res->begin()+i),fp);
+		char cc = *(res->begin()+i);
+	    f.Write ( &cc,sizeof(char));
 	  }
-	  fputc ('\0',fp);
-	  fclose (fp);
+	  char cc=0;
+	  f.Write (&cc,sizeof(char));
+	  f.Close();
 	}
       }
     }
 
     
 #if 0
-    fp = fopen (("save.4.x.txt"),"w");
-    if (fp) {
-      fputc('\0',fp);
-      fclose (fp);
+	err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
+    if (err<=Ok) {
+	  char cc=0;
+      f.Write(&cc,sizeof( char));
+      f.Close();
     }
 #endif
-    returnfromhome();
   }
   if (num==0||res->empty()) {
     cout << "Here";
@@ -142,21 +139,16 @@ std::string GetReadPlayerSaveGame(int num) {
 void FileCopy (const char * src, const char * dst) {
   if (dst[0]!='\0'&&src[0]!='\0') {
 
-  FILE * fp = fopen (src,"r");
+  FILE * fp = VSFileSystem::vs_open (src,"r");
   if (fp) {
-	  long length=0;
-	  {
-	      struct stat st;
-	      if (fstat(fileno(fp), &st)==0)
-	        length=st.st_size;
-	  }
+	  long length=VSFileSystem::vs_getsize( fp);
       char * info = new char [length];
-      fread(info,length,sizeof(char),fp);
-      fclose (fp);
-      fp = fopen (dst,"w");
+      VSFileSystem::vs_read(info,length,sizeof(char),fp);
+      VSFileSystem::vs_close (fp);
+      fp = VSFileSystem::vs_open (dst,"w");
       if (fp) {
-        fwrite (info,length,sizeof(char),fp);
-        fclose(fp);
+        VSFileSystem::vs_write (info,length,sizeof(char),fp);
+        VSFileSystem::vs_close(fp);
       }
       delete [] info;
   }
@@ -195,11 +187,11 @@ string SaveGame::GetOldStarSystem () {
 }
 
 void SaveGame::SetPlayerLocation (const QVector &v) {
-  //fprintf (stderr,"Set Location %f %f %f",v.i,v.j,v.k);
+  //VSFileSystem::vs_fprintf (stderr,"Set Location %f %f %f",v.i,v.j,v.k);
   if ((FINITE (v.i)&&FINITE(v.j)&&FINITE(v.k))) {
     PlayerLocation =v;
   }else {
-    fprintf (stderr,"ERROR saving unit");
+    VSFileSystem::vs_fprintf (stderr,"ERROR saving unit");
     PlayerLocation.Set(1,1,1);
   }
 }
@@ -516,7 +508,7 @@ void SaveGame::ReadStardate( char * &buf)
 {
 	string stardate( AnyStringScanInString( buf));
 	cout<<"Read stardate : "<<stardate<<endl;
-	_Universe->current_stardate.Init( stardate);
+	_Universe->current_stardate.InitTrek( stardate);
 }
 
 void SaveGame::ReadSavedPackets (char * &buf) {
@@ -601,7 +593,7 @@ string SaveGame::WriteDynamicUniverse()
 	if( SERVER)
 	{
 		cerr<<"SAVING STARDATE - SERVER="<<SERVER<<endl;
-		dyn_univ += "\n0 stardate data"+AnyStringWriteString( _Universe->current_stardate.GetFullCurrentStarDate());
+		dyn_univ += "\n0 stardate data"+AnyStringWriteString( _Universe->current_stardate.GetFullTrekDate());
 	}
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"mission","data ");
@@ -636,27 +628,26 @@ string SaveGame::WriteDynamicUniverse()
 	return dyn_univ;
 }
 
+using namespace VSFileSystem;
+
 string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, std::string fact, bool write) {
   savestring = string("");
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
-    changehome();
-    vschdir ("save");
 
 	savestring += WritePlayerData( FP, unitname, systemname, credits, fact);
 	savestring += WriteDynamicUniverse();
 
     if( write){
-	FILE * fp = fopen (outputsavegame.c_str(),"wb");
-		fwrite( savestring.c_str(), sizeof( char), savestring.length(), fp);
-		fclose (fp);
-		if (player_num!=-1) {
-		  last_pickled_data =last_written_pickled_data;
-		  FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
-		}
-    }
-    vscdup();
-    returnfromhome();
+	VSFile f;
+	VSError err = f.OpenCreateWrite( outputsavegame, SaveFile);
+	f.Write( savestring.c_str(), savestring.length());
+	f.Close();
+	if (player_num!=-1) {
+			last_pickled_data =last_written_pickled_data;
+			FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
+	}
+	}
 
   }
   return savestring;
@@ -664,52 +655,37 @@ string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float
 
 static float savedcredits=0;
 float SaveGame::GetSavedCredits () {
-  return savedcredits;
+		return savedcredits;
 }
 void SaveGame::SetSavedCredits (float c) {
-  savedcredits = c;
+		savedcredits = c;
 }
 
 void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read) {
-  char *tempfullbuf=0;
-  int tempfulllength=2048;
-  int readlen=0;
-  if (filename.length()>0)
-    filename=callsign+filename;
-  shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
-  outputsavegame=filename;
-  changehome();
-  vschdir ("save");
-  FILE * fp = NULL;
-  if( read)
-  {
-	  if (filename.length()>0) {
-		if (GetReadPlayerSaveGame(player_num).length()) {
-			  fp = fopen (GetReadPlayerSaveGame(player_num).c_str(),"r");
-		}else {
-		  fp = fopen (filename.c_str(),"r");
+	char *tempfullbuf=0;
+	int tempfulllength=2048;
+	int readlen=0;
+	if (filename.length()>0)
+			filename=callsign+filename;
+	shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
+	outputsavegame=filename;
+	VSFile f;
+	VSError err;
+	if( read)
+	{
+		if (filename.length()>0) {
+				if (GetReadPlayerSaveGame(player_num).length()) {
+						err = f.OpenReadOnly( GetReadPlayerSaveGame(player_num), SaveFile);
+				}else {
+						err = f.OpenReadOnly( filename, SaveFile);
+				}
 		}
-	  }
-	  if( fp)
-	  {
+		if( err<=Ok)
 		{
-		  struct stat st;
-		  if (fstat(fileno(fp),&st)==0) {
-		    tempfulllength=st.st_size;
-		  } else {
-		    tempfulllength=0;
-		  }
+				str = savestring = f.ReadFull();
 		}
-      
-	    tempfullbuf = (char *)malloc (tempfulllength+1);
-	    tempfullbuf[tempfulllength]=0;
-	    fread( tempfullbuf, sizeof( char), tempfulllength, fp);
-	    str = savestring = string( tempfullbuf);
-	  }
   }
-  vscdup();
-  returnfromhome();
-  if( fp || (!read && str!=""))
+  if( err<=Ok || (!read && str!=""))
   {
 	  savestring = str;
 	  if ( savestring.length()>0) {
@@ -769,7 +745,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		delete []deletebuf;
 	  }
 	  if( read)
-	  	fclose (fp);
+	  	f.Close();
   }
 
   if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
@@ -787,8 +763,6 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	FSS = ForceStarSystem;
   }
   SetSavedCredits(credits);
-  if (tempfullbuf)
-    free(tempfullbuf);
   //  return mysav;
 }
 

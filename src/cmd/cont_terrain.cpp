@@ -14,9 +14,9 @@
 ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scales, const float mass) {
 
   float tmass;
-  FILE *fp = fopen (filename,"r");
+  FILE *fp = VSFileSystem::vs_open (filename,"r");
   if (fp) {
-    fscanf (fp,"%d %f\n<%f %f %f>",&width,&tmass,&this->Scales.i,&this->Scales.j,&this->Scales.k);
+    VSFileSystem::vs_fscanf (fp,"%d %f\n<%f %f %f>",&width,&tmass,&this->Scales.i,&this->Scales.j,&this->Scales.k);
     if (mass)
       tmass = mass;
     if (Scales.i&&Scales.j&&Scales.k) {
@@ -32,7 +32,7 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
     for (i=0;i<numcontterr;i++) {
       data[i]=NULL;md[i].mesh =NULL; md[i].collider=NULL;
       char tmp[512];
-      fscanf (fp,"%511s",tmp);
+      VSFileSystem::vs_fscanf (fp,"%511s",tmp);
       tmp[511]='\0';
       for (int k=0;k<512;k++) {
 	if (tmp[k]=='^') {
@@ -52,7 +52,7 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
       }
       filenames[i]=tmp;
     }
-    fclose (fp);
+    VSFileSystem::vs_close (fp);
     
     for (i=0;i<width;i++) {
       for (int j=0;j<width;j++) {
@@ -78,7 +78,7 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
     for (i=0;i<numcontterr;i++) {
       if (data[i]) {
 	if (sizeX!=data[i]->getSizeX()||sizeZ!=data[i]->getSizeZ()) {
-	  fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
+	  VSFileSystem::vs_fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
 	}
 	data[i]->SetTotalSize (sizeX*width,sizeZ*width);
       }
@@ -170,7 +170,7 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans (QVector ShipPos, Vector &norm
       return tmploc;
     }
   }
-  fprintf (stderr,"Can't find %f,%f,%f\n",ShipPos.i,ShipPos.j,ShipPos.k);
+  VSFileSystem::vs_fprintf (stderr,"Can't find %f,%f,%f\n",ShipPos.i,ShipPos.j,ShipPos.k);
   ShipPos.i*=Scales.i;
   ShipPos.j*=Scales.j;
   ShipPos.k*=Scales.k;
@@ -281,7 +281,7 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       if (diff.k<0)
 	diff.k+=sizeZ*width;
       if (!rand()%10)
-	fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
+	VSFileSystem::vs_fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
       diff = Transform (t,diff);
       const csReversibleTransform bigtransform (transform);
       Matrix smallmat=(un->GetTransformation());

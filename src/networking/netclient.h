@@ -76,7 +76,9 @@ class	NetClient
         SOCKETALT			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
+	public:
         ObjSerial			serial;			// Serial # of client
+	private:
         int					nbclients;		// Number of clients in the zone
         int					zone;			// Zone id in universe
         char				keeprun;		// Bool to test client stop
@@ -93,12 +95,12 @@ class	NetClient
 
 		int					enabled;		// Bool to say network is enabled
 		// Time used for refresh - not sure still used
-		int					old_time;
+		//int					old_time;
 		double				cur_time;
-		// Timestamps from packets
-		unsigned int		old_timestamp;
-		unsigned int		latest_timestamp;
-		unsigned int		deltatime;
+		unsigned int		old_timestamp;		// Previous timestamp
+		unsigned int		latest_timestamp;	// Last received timestamp
+		double				deltatime;			// Semi-ping value between this client and server in ms
+		double				elapsed_since_packet;	// Time elapsed since we we received the last SNAPSHOT or PING packet
 		bool				jumpok;
 		bool				ingame;
 		float				current_freq;
@@ -141,7 +143,7 @@ class	NetClient
 
 		/********************* Network stuff **********************/
 		// Get the lag time between us and the server
-		unsigned int	getLag() { return deltatime;}
+		unsigned int	getLag() { return (unsigned int)(deltatime*1000);}
 		// Check if it is time to send our update
 		int		isTime();
 		// Warn the server we are leaving the game
@@ -154,6 +156,8 @@ class	NetClient
 		void	sendAlive();
 		void	inGame();		// Tells the server we are ready to go in game
 		bool	isInGame() { return this->ingame;}
+
+		Transformation	Interpolate( Unit * un, double addtime);
 
 		// void	disable() { enabled=false;}
 		// int		isEnabled() { return enabled; }

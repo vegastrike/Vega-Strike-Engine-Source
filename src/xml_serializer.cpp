@@ -1,13 +1,14 @@
 #include "xml_serializer.h"
 #include "cmd/unit_generic.h"
 #include "cmd/images.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "networking/const.h"
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;
+using namespace VSFileSystem;
 
 std::string intStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring(*input.w.i);
@@ -87,60 +88,47 @@ std::string shortToFloatHandler(const XMLType &input, void *mythis) {
   return XMLSupport::tostring ((float)(((float)(*input.w.s))/32767.));
 }
 
-void XMLElement::Write (FILE * fp, void * mythis) {
-  fprintf (fp," %s=\"%s\"",elem.c_str(),((*handler)(value,mythis)).c_str());
+void XMLElement::Write (VSFileSystem::VSFile & f, void * mythis) {
+  f.Fprintf (" %s=\"%s\"",elem.c_str(),((*handler)(value,mythis)).c_str());
 }
-static void Tab (FILE * fp) {
-  fprintf (fp,"\t");
+static void Tab (VSFileSystem::VSFile & f) {
+  f.Fprintf ("\t");
 }
-static void Tab (FILE * fp, int level) {
+static void Tab (VSFileSystem::VSFile & f, int level) {
   for (int i=0;i<level;i++) {
-    Tab (fp);
+    Tab (f);
   }
 }
-void XMLnode::Write (FILE* fp, void *mythis, int level) {
-  Tab(fp,level);fprintf (fp,"<%s",val.c_str());
+void XMLnode::Write (VSFileSystem::VSFile & f, void *mythis, int level) {
+  Tab(f,level);f.Fprintf ("<%s",val.c_str());
   for (unsigned int i=0;i<elements.size();i++) {
-    elements[i].Write (fp,mythis);
+    elements[i].Write (f,mythis);
   }
   if (subnodes.empty()) {
-    fprintf (fp,"/>\n");    
+    f.Fprintf ("/>\n");    
   } else {
-    fprintf (fp,">\n");
+    f.Fprintf (">\n");
     for (unsigned int i=0;i<subnodes.size();i++) {
-      subnodes[i].Write (fp,mythis,level+1);
+      subnodes[i].Write (f,mythis,level+1);
     }
-    Tab(fp,level);fprintf (fp,"</%s>\n",val.c_str());
+    Tab(f,level);f.Fprintf ("</%s>\n",val.c_str());
   }
 }
 void XMLSerializer::Write (const char * modificationname) {
-  std::string savedunitpath;
   if (modificationname)
     if (strlen(modificationname)!=0) 
       savedir=modificationname;
 
-  // If in network mode on client side we expect saves to be in ./save
-  if( Network==NULL && !SERVER)
-	  savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
-  else if( !SERVER)
-	  savedunitpath = "save";
-  // With account server we expect them in the ./accounts dir
-  else if( SERVER==2)
-	  savedunitpath = "accounts";
-  // With account server we expect them in the ./accountstmp dir
-  else if( SERVER==1)
-	  savedunitpath = "accountstmp";
-
-  MakeSharedPath (savedunitpath);
-  string retdir =MakeSharedPath (savedunitpath+string("/")+savedir);
-  FILE * fp =fopen ((retdir+string("/")+filename).c_str(),"w");
-  if (!fp) {
+  VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir);
+  VSFile f;
+  VSError err = f.OpenCreateWrite( savedir+"/"+filename, UnitFile);
+  if (err>Ok) {
     return;
   }
   for (unsigned int i=0;i<topnode.subnodes.size();i++) {
-    topnode.subnodes[i].Write (fp,mythis,0);
+    topnode.subnodes[i].Write (f,mythis,0);
   }
-  fclose (fp);
+  f.Close();
 }
 
 static string TabString( int level) {

@@ -65,8 +65,8 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	if( !clt )
 	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;
-		un = zonemgr->getUnit( serial, zone);
-		zonemgr->removeUnit( un, zone);
+		//un = zonemgr->getUnit( serial, zone);
+		//zonemgr->removeUnit( un, zone);
 	}
 	else
 	{

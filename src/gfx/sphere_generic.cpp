@@ -3,7 +3,7 @@
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "xml_support.h"
 #ifndef M_PI
 #define M_PI 3.1415926536F
@@ -60,8 +60,8 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   oldmesh = this->orig;
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,Vector(radius,radius,radius),0), oldmesh);
-  //  fprintf (stderr,"\nput %s\n",hash_name.c_str());
+  meshHashTable.Put (hash_name=VSFileSystem::GetSharedMeshHashName(hash_name,Vector(radius,radius,radius),0), oldmesh);
+  //  VSFileSystem::Fprintf (stderr,"\nput %s\n",hash_name.c_str());
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (-radialSize,-radialSize,-radialSize);
   mx = Vector (radialSize,radialSize,radialSize);

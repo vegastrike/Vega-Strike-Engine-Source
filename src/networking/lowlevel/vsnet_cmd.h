@@ -23,104 +23,110 @@
 enum Cmd
 {
 	// Login commands
-    CMD_LOGIN        = 0x01,	// Client side : login request sent to server with name and passwd
-    CMD_LOGOUT       = 0xA1,	// Client side : tells the server we are logging out
+    CMD_LOGIN        ,	// Client side : login request sent to server with name and passwd
+    CMD_LOGOUT       ,	// Client side : tells the server we are logging out
                                 // Server side : remove the client from the game
-    LOGIN_ERROR      = 0xF1,	// Packet sent from account server to client :
+    LOGIN_ERROR      ,	// Packet sent from account server to client :
                                 // a login error (mostly bad name/passwd)
-    LOGIN_ACCEPT     = 0xF0,	// Packet sent from account server to client :
+    LOGIN_ACCEPT     ,	// Packet sent from account server to client :
                                 // login accepted
-	LOGIN_DATA	     = 0xFE,
-    LOGIN_ALREADY    = 0xF6,	// Packet sent from account server to client
+	LOGIN_DATA	     ,
+    LOGIN_ALREADY    ,	// Packet sent from account server to client
                                 // to tell account is already being used
-    LOGIN_NEW        = 0xF7,
-	LOGIN_UNAVAIL	 = 0xF9,	// Packet sent from game server to client :
+    LOGIN_NEW        ,
+	LOGIN_UNAVAIL	 ,	// Packet sent from game server to client :
                                 // account server is unavailable -> no login
 
 	// Character creation stuff (not used yet)
-    CMD_NEWCHAR      = 0x04,		// NOT USED : should get 
+    CMD_NEWCHAR      ,		// NOT USED : should get 
                                     // the new character description for new account
-    CMD_INITIATE     = 0x02,		// NOT USED : should send
+    CMD_INITIATE     ,		// NOT USED : should send
                                     // starting locations for new account
-    CMD_CREATECHAR   = 0x50,
-    CMD_LOCATIONS    = 0x51,
+    CMD_CREATECHAR   ,
+    CMD_LOCATIONS    ,
 
 	// Commands used to add/remove ships in systems
-    CMD_LETSGO       = 0x05,		// NOT USED
-    CMD_ADDCLIENT    = 0x07,		// Client side :
+    CMD_LETSGO       ,		// NOT USED
+    CMD_ADDCLIENT    ,		// Client side :
                                     // request the server to be added in the game
 									// Server side : adds the client to the game
-    CMD_ENTERCLIENT  = 0xF2,		// (Server -> Client) Indicates that a new
+    CMD_ENTERCLIENT  ,		// (Server -> Client) Indicates that a new
                                     // client is entering the current zone
 									// also send the new client's data
-    CMD_EXITCLIENT   = 0xF3,		// (Server -> Client) Indicates that a client
+    CMD_EXITCLIENT   ,		// (Server -> Client) Indicates that a client
                                     // is leaving the current zone
-    CMD_ADDEDYOU     = 0xF5,		// NOT USED
+    CMD_ADDEDYOU     ,		// NOT USED
 
 	// Ships movements data
-    CMD_POSUPDATE    = 0x03,		// On client side (send): containing a ship's
+    CMD_POSUPDATE    ,		// On client side (send): containing a ship's
                                     // data sent to server for position update
 									// On client side (recv) : receive minimal update
                                     // data for a ship
 									// On server side : sending minimal info
                                     // (just position) in case the ship is far from
 									// the one we send other ships' data to
-    CMD_UPDATECLT    = 0x06,
-    CMD_FULLUPDATE   = 0x08,		// On client side (recv) : receive full update
+    CMD_UPDATECLT    ,
+    CMD_FULLUPDATE   ,		// On client side (recv) : receive full update
                                     // info for a ship
-    CMD_PING         = 0x09,		// A packet sending a ping-like command just to
+    CMD_PING         ,		// A packet sending a ping-like command just to
                                     // tell to the server
 									// that the client is still alive
-    CMD_SNAPSHOT     = 0xA0,		// A packet with all the necessary ships' data
+    CMD_SNAPSHOT     ,		// A packet with all the necessary ships' data
                                     // in order to update
 
 	// Weapons commands
-	CMD_FIREREQUEST  = 0x94,		// Fire Request
-	CMD_UNFIREREQUEST= 0x95,		// UnFire Request
-	CMD_BOLT         = 0x90,		// Fire a bolt
-	CMD_BEAM         = 0x91,		// Fire a beam
-	CMD_PROJECTILE   = 0x92,        // Fire a projectile
-	CMD_BALL         = 0x93,		// Fire a ball ?
-	CMD_TARGET       = 0x96,		// Receive a target request (server side)
+	CMD_FIREREQUEST  ,		// Fire Request
+	CMD_UNFIREREQUEST,		// UnFire Request
+	CMD_BOLT         ,		// Fire a bolt
+	CMD_BEAM         ,		// Fire a beam
+	CMD_PROJECTILE   ,      // Fire a projectile
+	CMD_BALL         ,		// Fire a ball ?
+	CMD_TARGET       ,		// Receive a target request (server side)
                                     // or receive target info (client side)
-	CMD_SCAN         = 0x97,		// Receive a scan request (server side)
+	CMD_SCAN         ,		// Receive a scan request (server side)
                                     // or receive target info (client side)
-	CMD_DAMAGE       = 0x98,		// Send damages to apply
-	CMD_DAMAGE1      = 0x99,		// Send damages to apply
-	CMD_SNAPDAMAGE   = 0x82,		// A snapshot of damages
+	CMD_DAMAGE       ,		// Send damages to apply
+	CMD_DAMAGE1      ,		// Send damages to apply
+	CMD_SNAPDAMAGE   ,		// A snapshot of damages
 
-	CMD_KILL         = 0x80,		// Send a kill to clients
-	CMD_JUMP         = 0x81,		// Send a jump request
-	CMD_ASKFILE      = 0x83,		// Ask the server for files (char=number of
+	CMD_KILL         ,		// Send a kill to clients
+	CMD_JUMP         ,		// Send a jump request
+	CMD_ASKFILE      ,		// Ask the server for files (char=number of
                                     // files and string containing the file names)
-	CMD_DOWNLOAD     = 0x84,		// May be identical to CMD_ASKFILE in the end
-	CMD_CAMSHOT      = 0x85,		// This means a webcam-shot just arrived (from client to server and from server to concerned clients)
-	CMD_SOUNDSAMPLE  = 0x88,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
-	CMD_TXTMESSAGE   = 0x89,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
-	CMD_STARTNETCOMM = 0x86,		// A client tells the server he starts a netcomm session
-	CMD_STOPNETCOMM  = 0x87,		// A client tells the server he stops a netcomm session
-	CMD_SECMESSAGE   = 0xB0,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
-	CMD_SECSNDSAMPLE = 0xB1,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
+	CMD_DOWNLOAD     ,		// May be identical to CMD_ASKFILE in the end
+	CMD_CAMSHOT      ,		// This means a webcam-shot just arrived (from client to server and from server to concerned clients)
+	CMD_SOUNDSAMPLE  ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
+	CMD_TXTMESSAGE   ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
+	CMD_STARTNETCOMM ,		// A client tells the server he starts a netcomm session
+	CMD_STOPNETCOMM  ,		// A client tells the server he stops a netcomm session
+	CMD_SECMESSAGE   ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
+	CMD_SECSNDSAMPLE ,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
 
-	CMD_DOCK         = 0xB2,		// Dock request or authorization from server
-	CMD_UNDOCK       = 0xB3,		// Undock request or authorization from server
+	CMD_DOCK         ,		// Dock request or authorization from server
+	CMD_UNDOCK       ,		// Undock request or authorization from server
+
+	CMD_CREATEUNIT   ,		// From server to clients : server unit creation
+	CMD_CREATENEBULA ,		// From server to clients : server unit creation
+	CMD_CREATEPLANET ,		// From server to clients : server unit creation
+	CMD_CREATEASTER  ,		// From server to clients : server unit creation
+	CMD_CREATEMISSILE,		// From server to clients : server unit creation
 
 	// Account management commands
-	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost
+	CMD_RESYNCACCOUNTS ,		// When connection to account server was lost
                                     // and established again :
 									// send the account server a list of active
                                     // client to sync and log out
 									// client that may have quit the game during
                                     // loss of connection
-	CMD_SAVEACCOUNTS = 0xFB,		// Send a client save to account server in order
+	CMD_SAVEACCOUNTS ,		// Send a client save to account server in order
                                     // to do a backup
-    CMD_NEWSUBSCRIBE = 0x40,		// Account server : handle a new account creation
+    CMD_NEWSUBSCRIBE ,		// Account server : handle a new account creation
                                     // (login/passwd) on the web
 
-    CMD_DISCONNECT   = 0xF4,		// UDP : after a problem (not clean exit) to make
+    CMD_DISCONNECT   ,		// UDP : after a problem (not clean exit) to make
                                     // the client exit if still alive
 
-    // CMD_ACK          = 0xFF			// A packet to acknoledge the reception of a packet that was previously sent
+    // CMD_ACK          			// A packet to acknoledge the reception of a packet that was previously sent
 };
 
 enum CmdFlags

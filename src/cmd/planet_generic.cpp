@@ -81,12 +81,14 @@ void PlanetaryOrbit::Execute() {
 }
 string GetElMeshName (string name, string faction,char direction)
 {
+	using namespace VSFileSystem;
 		char strdir[2]={direction,0};
 		string elxmesh=string(strdir)+"_elevator.xmesh";
-		string elevator_mesh =name+"_"+faction+elxmesh;				 
-		string tump = string("meshes/"+elevator_mesh);
-		FILE * fp = fopen (tump.c_str(),"r");
-		if (fp) fclose( fp);
+		string elevator_mesh =name+"_"+faction+elxmesh;
+		VSFile f;
+		VSError err = f.OpenReadOnly( elevator_mesh, MeshFile);
+		if( err>Ok)
+			f.Close();
 		else elevator_mesh=name+elxmesh;
 		return elevator_mesh;
 }
@@ -162,7 +164,7 @@ Planet * Planet::GetTopPlanet (int level) {
 	  if (satiterator.current()->isUnit()==PLANETPTR) {
 	    return ((Planet *)satiterator.current())->GetTopPlanet (level-1);
 	  } else {
-	    fprintf (stderr,"Planets are unable to orbit around units");
+	    VSFileSystem::vs_fprintf (stderr,"Planets are unable to orbit around units");
 	    return NULL;
 	  }
 
@@ -232,7 +234,7 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
 	  if (satiterator.current()->isUnit()==PLANETPTR) {
 		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
 	  } else {
-	    fprintf (stderr,"Planets are unable to orbit around units");
+	    VSFileSystem::vs_fprintf (stderr,"Planets are unable to orbit around units");
 	  }
   } else {
     if (isunit==true) {
@@ -265,6 +267,7 @@ Planet::Planet()
   // Not needed as Unit default constructor is called and already does Init
   //Init();
   terraintrans = NULL;
+  atmospheric = false;
 }
 
 void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
@@ -274,7 +277,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
   if (lights_num){
     radius*=bodyradius;
-    fprintf (stderr,"scaling %s",filename);
+    VSFileSystem::vs_fprintf (stderr,"scaling %s",filename);
   }
   inside =false;
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;

@@ -312,14 +312,17 @@ using namespace FactionXML;
 
 void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
 using namespace FactionXML;
+using namespace VSFileSystem;
   unitlevel=0;
   FILE * inFile;
   const int chunk_size = 16384;
+  VSFile f;
+  VSError err;
   if( buflength==0 || xmlbuffer==NULL)
   {
 	  cout << "FactionXML:LoadXML " << filename << endl;
-	  inFile = fopen (filename, "r");
-	  if(!inFile) {
+	  err = f.OpenReadOnly( filename, Unknown);
+	  if(err>Ok) {
 		cout << "Failed to open '" << filename << "' this probably means it can't find the data directory" << endl;
 		assert(0);
 	  }
@@ -334,6 +337,8 @@ using namespace FactionXML;
   }
   else
   {
+	XML_Parse(parser, (f.ReadFull()).c_str(),f.Size(),1);
+  /*
   do {
 #ifdef BIDBG
 	char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -341,15 +346,16 @@ using namespace FactionXML;
 	char buf[chunk_size];
 #endif
 	int length;
-	length = fread (buf,1, chunk_size,inFile);
+	length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
 	//length = inFile.gcount();
 #ifdef BIDBG
-	XML_ParseBuffer(parser, length, feof(inFile));
+	XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-	XML_Parse(parser, buf,length, feof(inFile));
+	XML_Parse(parser, buf,length, VSFileSystem::vs_feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
+  f.Close();
   }
   XML_ParserFree (parser);
   ParseAllAllies();
@@ -364,14 +370,10 @@ using namespace FactionXML;
 		  }else {
 			  fname = factions[i]->factionname;
 		  }
-		  string f="communications/"+fname+".xml";
-		  FILE * fp = fopen (f.c_str(),"rb");
-		  if (!fp) {
+		  string f=fname+".xml";
+		  if (VSFileSystem::LookForFile( f, CommFile)>Ok)
 			  fname="neutral";
-		  }else {
-			  fclose (fp);
-		  }
-		  factions[i]->faction[j].conversation=getFSM ("communications/" + fname + ".xml");
+		  factions[i]->faction[j].conversation=getFSM (/*"communications/" +*/ fname + ".xml");
       }
     }
   }

@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "faction_generic.h"
+#include "vsfilesystem.h"
 
 using namespace FactionUtil;
 
@@ -77,9 +78,9 @@ unsigned int FactionUtil::GetNumFactions () {
 void FactionUtil::SerializeFaction(FILE * fp) {
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
-      fprintf (fp,"%f ",factions[i]->faction[j].relationship);
+      VSFileSystem::vs_fprintf (fp,"%f ",factions[i]->faction[j].relationship);
     }
-    fprintf(fp,"\n");
+    VSFileSystem::vs_fprintf(fp,"\n");
   }
 }
 string FactionUtil::SerializeFaction() {

@@ -1,5 +1,5 @@
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gauge.h"
@@ -242,7 +242,7 @@ inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vect
       lock_percent=0;
     }
     float max=2.05;
-    //    fprintf (stderr,"lock percent %f\n",lock_percent);
+    //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = 1.05+(max-1.05)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
    
     double rtot = 1./sqrtf(2);
@@ -1528,11 +1528,12 @@ string GameCockpit::getsoundending(int which) {
 
 #include <algorithm>
 string GameCockpit::getsoundfile(string sound) {
-	FILE *fp=NULL;
+	bool ok = false;
 	int i;
 	string lastsound="";
-	for (i=0;i<9&&fp==NULL;i++) {
-		string anothertmpstr=getsoundending(i);
+	string anothertmpstr = "";
+	for (i=0;i<9&&!ok;i++) {
+		anothertmpstr=getsoundending(i);
 		bool foundyet=false;
 		while (1) {
 			std::string::iterator found=std::find(anothertmpstr.begin(),anothertmpstr.end(),'*');
@@ -1547,12 +1548,13 @@ string GameCockpit::getsoundfile(string sound) {
 				break;
 			}
 		}
-		lastsound=GetSharedSoundPath (anothertmpstr);
-		fp=fopen(lastsound.c_str(),"rb");
+		if( VSFileSystem::LookForFile( anothertmpstr, SoundFile) < Ok)
+			ok = true;
 	}
-	if (fp) {
-		fclose(fp);
-		return lastsound;
+	if( ok) 
+	{
+		//return lastsound;
+		return anothertmpstr;
 	} else {
 		return "";
 	}

@@ -400,13 +400,13 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	  }
 	}
       }else if (fg->directive==string("h")||fg->directive==string("H")) {
-	//	fprintf (stderr,"he wnats to help out");
+	//	VSFileSystem::vs_fprintf (stderr,"he wnats to help out");
 	if (fg->directive!=last_directive&&leader) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
-	    //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
+	    //VSFileSystem::vs_fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
 	    Unit * th=NULL;
 	    if ((th=leader->Threat())) {
-	      //fprintf (stderr,"he wnats to help out and he has a threat\n");
+	      //VSFileSystem::vs_fprintf (stderr,"he wnats to help out and he has a threat\n");
 
 	      CommunicationMessage c(parent,leader,NULL,0);
 	      if (parent->InRange(th,true,false)) {
@@ -425,7 +425,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      //Unit * un=NULL;
 	      th= GetThreat(parent,leader);
 	      CommunicationMessage c(parent,leader,NULL,0);
-	      //fprintf (stderr,"he wnats to help out against threat %d",th);
+	      //VSFileSystem::vs_fprintf (stderr,"he wnats to help out against threat %d",th);
 	      if (th) {
 		if (parent->InRange (th,true,false)) {
 		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
@@ -434,7 +434,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		}else {
 		  c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
 		}
-		//fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+		//VSFileSystem::vs_fprintf (stderr,"Helping out kill: %s",th->name.c_str());
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
@@ -469,7 +469,7 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 	    if (parent->Threat()&&(parent->FShieldData()<.2||parent->RShieldData()<.2)){
 	      fg->directive = string("h");
 	      LeadMe (parent,"h","I need help here!");
-	      fprintf (stderr,"he needs help %s",parent->name.c_str());
+	      VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.c_str());
 	    }else {
 	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
 		fg->directive = string("b");
@@ -514,12 +514,12 @@ void AggressiveAI::Execute () {
       if (AIjumpCheat) {
 		  static int i=0;
 		  if (!i) {
-			  fprintf (stderr,"FIXME: warning ship not equipped to jump");
+			  VSFileSystem::vs_fprintf (stderr,"FIXME: warning ship not equipped to jump");
 			  i=1;
 		  }
 		  parent->jump.drive=-1;
       }else {
-	//	fprintf (stderr,"warning ship not equipped to jump");
+	//	VSFileSystem::vs_fprintf (stderr,"warning ship not equipped to jump");
 	parent->Target(NULL);
       }
     }else if (parent->GetJumpStatus().drive<0){
@@ -577,7 +577,7 @@ void AggressiveAI::Execute () {
   }
   }
 #ifdef AGGDEBUG
-  fprintf (stderr,"endagg");
+  VSFileSystem::vs_fprintf (stderr,"endagg");
   fflush (stderr);
 #endif    
   if (getTimeCompression()>3) {

@@ -35,9 +35,9 @@ public:
     return (*orig->Decal[0])==*b.orig->Decal[0];
   }
 };
-class MeshCloser { 
+class Meshvs_closer { 
 public:
-  MeshCloser () {}
+  Meshvs_closer () {}
   static bool FilterCompare (Mesh * a, Mesh * b) {
 	  if (a) {
 		  return a->getBlendDst()==ZERO;
@@ -174,7 +174,7 @@ Mesh::~Mesh()
 				  if (undrawn_meshes[j][k][i].orig==this) {
 					  undrawn_meshes[j][k].erase(undrawn_meshes[j][k].begin()+i);
 					  i--;
-					  fprintf (stderr,"stale mesh found in draw queue--removed!\n");
+					  VSFileSystem::vs_fprintf (stderr,"stale mesh found in draw queue--removed!\n");
 				  }
 			  }
 		  }
@@ -255,7 +255,7 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   origmesh->draw_queue->push_back(c);
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
-    //    fprintf (stderr,"origmesh %x",origmesh);
+    //    VSFileSystem::vs_fprintf (stderr,"origmesh %x",origmesh);
 	for (unsigned int i=0;i<Decal.size()&& i < NUM_PASSES;++i) {
 		if (Decal[i]) {
 			undrawn_meshes[c.mesh_seq][i].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
@@ -329,9 +329,9 @@ void Mesh::ProcessZFarMeshes () {
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   ///sort meshes  
-  //std::sort<OrigMeshVector::iterator,MeshCloser>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
+  //std::sort<OrigMeshVector::iterator,Meshvs_closer>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),Meshvs_closer());
   for (int k=0;k<NUM_PASSES;++k) {
-	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),MeshCloser());
+	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),Meshvs_closer());
 	  
 	  for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ][k].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ][k].end();i++) {
 		  i->orig->ProcessDrawQueue (k,NUM_ZBUF_SEQ);
@@ -611,16 +611,16 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
 void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   //  assert(draw_queue->size());
 	if (whichpass>=(int)Decal.size()) {
-		fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
+		VSFileSystem::vs_fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
 		return;
 	}
 	if (Decal[whichpass]==NULL) {
-		fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
+		VSFileSystem::vs_fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
 		return;
 	}
 
   if (draw_queue->empty()) {
-    fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
     return;
   }
   bool damagepassabort=false;

@@ -3,41 +3,41 @@
 #include <eval.h>
 #include "configxml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "init.h"
 Hashtable <string,PyCodeObject ,char[1023]> compiled_python;
 
 
 char * LoadString (const char * filename) {
-  FILE * fp = fopen (filename,"r");
+  FILE * fp = VSFileSystem::vs_open (filename,"r");
   if (!fp) {
     return NULL;
   }
-  fseek (fp,0,SEEK_END);
-  long len = ftell(fp);
+  VSFileSystem::vs_fseek (fp,0,SEEK_END);
+  long len = VSFileSystem::vs_ftell(fp);
   char * retval = NULL;
-  fseek (fp,0,SEEK_SET);
+  VSFileSystem::vs_fseek (fp,0,SEEK_SET);
   if (len) {
     retval = (char *)malloc ((len+1)*sizeof (char));
-    fread (retval,len,1,fp);
+    VSFileSystem::vs_read (retval,len,1,fp);
     retval[len]='\0';
   }
-  fclose (fp);
+  VSFileSystem::vs_close (fp);
   return retval;
 }
 std::string getCompilingName (const std::string &name) {
-   std::string compiling_name = homedir+DELIMSTR+name+"~";
+   std::string compiling_name = VSFileSystem::homedir+DELIMSTR+name+"~";
    return compiling_name;
 }
 
 void InterpretPython (const std::string &name) {
   
     char * temp = strdup(getCompilingName (name).c_str());
-    FILE * fp =fopen (name.c_str(),"r");
+    FILE * fp =VSFileSystem::vs_open (name.c_str(),"r");
     if (fp) {
       PyRun_SimpleFile(fp,temp);
       Python::reseterrors();
-      fclose (fp);
+      VSFileSystem::vs_close (fp);
     }
     free (temp);
 }

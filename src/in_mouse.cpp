@@ -82,7 +82,7 @@ void DealWithWarp (int x, int y) {
  if (warp_pointer) {
    if (joystick[MOUSE_JOYSTICK]->player<_Universe->numPlayers()) {
     if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
-      //fprintf (stderr,"warped from %d %d to %d %d",mousex,mousey, g_game.x_resolution/2,g_game.y_resolution/2);
+      //VSFileSystem::Fprintf (stderr,"warped from %d %d to %d %d",mousex,mousey, g_game.x_resolution/2,g_game.y_resolution/2);
       
       int delx = -x+g_game.x_resolution/2;
       int dely = -y+g_game.y_resolution/2;

@@ -68,15 +68,15 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
   unsigned char ctemp;
   unsigned char * data;
   FILE *fp = NULL;
-  fp = fopen (FileName, "rb");
+  fp = VSFileSystem::vs_open (FileName, "rb");
 	if (!fp)
 	{
 		return false;
 	}
-	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+	  VSFileSystem::Fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	  long temp;
 	  BITMAPINFOHEADER info;
-	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	  VSFileSystem::Read(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	  sizeX = le32_to_cpu (info.biWidth);
 	  sizeY = le32_to_cpu(info.biHeight);
 
@@ -93,7 +93,7 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 		    {
 				//for (int k=2; k>=0;k--)
 				//{
-		      fread (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
+		      VSFileSystem::Read (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
 		      unsigned char tmp = data[3*j+itimes3width];
 		      data[3*j+itimes3width]= data[3*j+itimes3width+2];
 		      data[3*j+itimes3width+2]=tmp;
@@ -111,7 +111,7 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 	      
 		for(int palcount = 0; palcount < 256; palcount++)
 		  {
-		    fread(paltemp, sizeof(RGBQUAD), 1, fp);
+		    VSFileSystem::Read(paltemp, sizeof(RGBQUAD), 1, fp);
 		    //			ctemp = paltemp[0];//don't reverse
 		    //			paltemp[0] = paltemp[2];
 		    //			paltemp[2] = ctemp;
@@ -124,14 +124,14 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 		  {
 			for (int j=0; j<sizeX;j++)
 			  {
-			    fread (&ctemp,sizeof (unsigned char),1,fp);
+			    VSFileSystem::Read (&ctemp,sizeof (unsigned char),1,fp);
 			    data [3*(i*sizeX+j)+2] = palette[((short)ctemp)*3];	
 			    data [3*(i*sizeX+j)+1] = palette[((short)ctemp)*3+1];
 			    data [3*(i*sizeX+j)] = palette[((short)ctemp)*3+2];
 			  }
 		  }
 	    }
- 	fclose (fp);
+ 	VSFileSystem::vs_close (fp);
 	return data;
 
 }
@@ -139,7 +139,7 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 
 
 void png_write (const char * myfile, unsigned char * data, unsigned int width, unsigned int height, bool alpha, char bpp) {
-  FILE * fp = fopen (myfile, "wb");
+  FILE * fp = VSFileSystem::vs_open (myfile, "wb");
   png_structp png_ptr = png_create_write_struct
     (PNG_LIBPNG_VER_STRING, (png_voidp)NULL,NULL,NULL);
   if (!png_ptr)
@@ -152,7 +152,7 @@ void png_write (const char * myfile, unsigned char * data, unsigned int width, u
   }
   if (setjmp(png_ptr->jmpbuf)) {
     png_destroy_write_struct(&png_ptr, &info_ptr);
-    fclose(fp);
+    VSFileSystem::vs_close(fp);
     return;
   }
   png_init_io(png_ptr, fp);
@@ -191,7 +191,7 @@ void png_write (const char * myfile, unsigned char * data, unsigned int width, u
   png_write_flush(png_ptr);
   png_destroy_write_struct(&png_ptr, &info_ptr);
 
-  fclose (fp);
+  VSFileSystem::vs_close (fp);
   free (data);
   delete [] row_pointers;
 }

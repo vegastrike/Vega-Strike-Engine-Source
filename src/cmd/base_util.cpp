@@ -101,7 +101,7 @@ namespace BaseUtil {
 			if (modearg<BaseComputer::DISPLAY_MODE_COUNT) {
 				newcomp->modes.push_back((BaseComputer::DisplayMode)(modearg));
 			} else {
-				fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
+				VSFileSystem::vs_fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
 			}
 		}
 		delete [] curmode;

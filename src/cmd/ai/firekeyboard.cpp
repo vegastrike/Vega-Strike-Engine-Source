@@ -517,12 +517,12 @@ void FireKeyboard::ChooseNearTargets(bool turret,bool reverse) {
     iter.advance();
   }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i4%x",iter);
+  VSFileSystem::vs_fprintf (stderr,"i4%x",iter);
   fflush (stderr);
 #endif
 
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i4\n");
+  VSFileSystem::vs_fprintf (stderr,"i4\n");
   fflush (stderr);
 #endif
 
@@ -657,13 +657,13 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
 
     //  }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i5%x",iter);
+  VSFileSystem::vs_fprintf (stderr,"i5%x",iter);
   fflush (stderr);
 #endif
 
   
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i5\n");
+  VSFileSystem::vs_fprintf (stderr,"i5\n");
   fflush (stderr);
 #endif
   if (!find) {
@@ -810,7 +810,7 @@ void ChooseSubTargets(Unit * me) {
 
 FireKeyboard::~FireKeyboard () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fkb%x",this);
+  VSFileSystem::vs_fprintf (stderr,"fkb%x",this);
   fflush (stderr);
 #endif
 

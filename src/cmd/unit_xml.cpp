@@ -14,7 +14,7 @@
 #include <assert.h>
 #include "images.h"
 #include "xml_serializer.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "gfx/cockpit_generic.h"
 //#include "unit_bsp.h"
 #include "unit_collide.h"
@@ -26,7 +26,7 @@
 #define VS_PI 3.1415926536
 
 string KillQuadZeros(string inp) {
-	int text = 0;
+	std::string::size_type text = 0;
 	while ((text = inp.find (".000000",text))!=string::npos) {
 		inp = inp.substr(0,text)+inp.substr(text+7);
 	}
@@ -62,7 +62,7 @@ string MakeUnitXMLPretty (string str, Unit * un) {
 //		lookfor.insert ("Hold");
 		lookfor.insert ("Rada");
 	}
-	int foundpos;
+	std::string::size_type foundpos;
 		while ((foundpos = str.find ("<"))!=string::npos) {
 			if (str.size()<=foundpos+1)
 				break;
@@ -1575,7 +1575,7 @@ using namespace UnitXML;
 	xml->unitscale=parse_float((*iter).value);
 	break;
       case COCKPIT:
-	fprintf (stderr,"Cockpit attrib deprecated use tag");
+	VSFileSystem::vs_fprintf (stderr,"Cockpit attrib deprecated use tag");
 	break;
       }
     }
@@ -1722,60 +1722,23 @@ string Unit::WriteUnitString () {
 
 extern std::string GetReadPlayerSaveGame (int);
 
+using namespace VSFileSystem;
+
 void Unit::LoadXML(const char *filename, const char * modifications, string * xmlbuffer)
 {
+}
+void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string * xmlbuffer)
+{
   shield.number=0;
+  string filename( f.GetFilename());
   graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
-  FILE * inFile=NULL;
-  std::string collideTreeHash = GetHashName(string(modifications)+"#"+string(filename));
+  std::string collideTreeHash = VSFileSystem::GetHashName(string(modifications)+"#"+filename);
   cout<<endl;
   //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
   cout<<endl;
-  if( xmlbuffer==NULL)
-  {
-	  if (modifications) {
-		if (strlen(modifications)!=0) {
-		  changehome();
-		  static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
-		  vschdir (savedunitpath.c_str());
-		  string nonautosave=GetReadPlayerSaveGame(_Universe->CurrentCockpit());
-		  // In network mode we only look in the save subdir in HOME
-		  if( Network==NULL && !SERVER)
-		  {
-			  if (nonautosave.empty()) {
-				  vsmkdir (modifications);
-				vschdir (modifications);
-			  }else {
-				  vsmkdir (nonautosave);
-					  
-				vschdir (nonautosave.c_str());
-				
-			  }
-		  }
-		  vschdir( "save");
-
-		  inFile=NULL;
-		  if (filename[0])
-    		    inFile = fopen (filename,"r");
-		  vscdup();
-		  vscdup();
-		  returnfromhome();
-		}
-	  }
-	  if (inFile==NULL)
-	      if (filename[0])
-		inFile = fopen (filename, "r");
-	  if(!inFile) {
-		cout << "Unit file " << filename << " not found" << endl;
-		fprintf (stderr,"Assertion failed unit_xml.cpp:1764 Unit %s not found\n",filename);
-		//assert(0);
-		return;
-	  }
-  }
-
-  image->unitwriter=new XMLSerializer (filename,modifications,this);
+  image->unitwriter=new XMLSerializer (filename.c_str(),modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = &image->unitwriter->randomdata[0];
   float * myscale=&image->unitscale;
@@ -1796,7 +1759,8 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
 	image->unitwriter->AddTag("CockpitDamage");
 	image->unitwriter->AddElement("damage",floatStarHandler,XMLType(&image->cockpit_damage[i]));
 	image->unitwriter->EndTag("CockpitDamage");
-  }}
+  }
+  }
 
   {
     image->unitwriter->AddTag("Defense");
@@ -1905,6 +1869,11 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
   }
   else
   {
+	XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+  }
+  /*
+  else
+  {
 	  do {
 #ifdef BIDBG
 		char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -1912,16 +1881,18 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
 		char buf[chunk_size];
 #endif
 		int length;
-		length = fread (buf,1, chunk_size,inFile);
+		length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
 		//length = inFile.gcount();
 #ifdef BIDBG
-		XML_ParseBuffer(parser, length, feof(inFile));
+		XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-		XML_Parse (parser,buf,length,feof(inFile));
+		XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
-	  } while(!feof(inFile));
-	  fclose (inFile);
+	  } while(!VSFileSystem::vs_feof(inFile));
+	  VSFileSystem::vs_close (inFile);
   }
+  */
+  //f.Close();
   XML_ParserFree (parser);
   // Load meshes into subunit
   image->unitwriter->EndTag ("Unit");

@@ -181,7 +181,7 @@ bool MoveToParent::Execute(Unit * parent, const QVector& targetlocation) {
 }
 MoveTo::~MoveTo () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mt%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mt%x",this);
   fflush (stderr);
 #endif
 }
@@ -282,7 +282,7 @@ void ChangeHeading::Execute() {
 }
 ChangeHeading::~ChangeHeading() {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"ch%x",this);
+  VSFileSystem::vs_fprintf (stderr,"ch%x",this);
   fflush (stderr);
 #endif
 
@@ -300,7 +300,7 @@ FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(QVector(0
 }
 FaceTargetITTS::~FaceTargetITTS () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fti%x",this);
+  VSFileSystem::vs_fprintf (stderr,"fti%x",this);
   fflush (stderr);
 #endif
 }
@@ -349,7 +349,7 @@ void FaceTarget::Execute() {
 
 FaceTarget::~FaceTarget() {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"ft%x",this);
+  VSFileSystem::vs_fprintf (stderr,"ft%x",this);
   fflush (stderr);
 #endif
 }
@@ -380,7 +380,7 @@ void FaceDirection::Execute() {
     SetDest (target->Position());
   }else {
     SetDest(parent->Position()+face.Cast());
-    //fprintf (stderr,"facing...cool");
+    //VSFileSystem::vs_fprintf (stderr,"facing...cool");
   }
   ChangeHeading::Execute();
   if (!finish) {
@@ -391,7 +391,7 @@ void FaceDirection::Execute() {
 
 FaceDirection::~FaceDirection() {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"ft%x",this);
+  VSFileSystem::vs_fprintf (stderr,"ft%x",this);
   fflush (stderr);
 #endif
 }

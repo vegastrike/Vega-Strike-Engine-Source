@@ -52,7 +52,7 @@ int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
   double divisor=pnt.Dot (Normal);
   if (divisor!=0) {
     IntersectXYZ+= (Normal.Dot(lx-eye)/divisor)*pnt;//point of intersection with lx plane
-    //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
+    //VSFileSystem::Fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
     if (OpenWithin (IntersectXYZ,err,0)) 
       return Normal.Dot(lx-eye)*divisor>=0?1:-1;
   }
@@ -60,7 +60,7 @@ int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
   divisor=pnt.Dot(Normal);
   if (divisor!=0) {
     IntersectXYZ = eye+( Normal.Dot(mx-eye)/divisor)*pnt; //point of interscetion with mx plane
-    //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
+    //VSFileSystem::Fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
     if (OpenWithin (IntersectXYZ,err,0)) 
       return Normal.Dot(mx-eye)*divisor>=0?1:-1;
   }
@@ -68,7 +68,7 @@ int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
   divisor = pnt.Dot(Normal);
   if (divisor!=0) {
     IntersectXYZ = eye + (Normal.Dot(ly-eye)/divisor)*pnt;//point of intersection with the ly plane
-    //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
+    //VSFileSystem::Fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
     if (OpenWithin (IntersectXYZ,err,1))
       return Normal.Dot(ly-eye)*divisor>=0?1:-1;
   }
@@ -77,7 +77,7 @@ int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
   if (divisor!=0) {
 
     IntersectXYZ = eye + (Normal.Dot(my-eye)/divisor)*pnt;//point of intersection with my plane
-    //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
+    //VSFileSystem::Fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
     if (OpenWithin (IntersectXYZ,err,1)) 
       return Normal.Dot(my-eye)*divisor>=0?1:-1;
   }
@@ -85,7 +85,7 @@ int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
   divisor = pnt.Dot(Normal);
   if (divisor!=0) {
     IntersectXYZ = eye + (Normal.Dot(lz-eye)/divisor)*pnt;//point of intersection with the ly plane
-    //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
+    //VSFileSystem::Fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
     if (OpenWithin (IntersectXYZ,err,2)) 
       return Normal.Dot(lz-eye)*divisor>=0?1:-1;
   }
@@ -94,7 +94,7 @@ int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
   divisor = pnt.Dot(Normal);
   if (divisor!=0) {
     IntersectXYZ = eye + (Normal.Dot (mz-eye)/divisor)*pnt;//point of intersection with my plane
-    //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
+    //VSFileSystem::Fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
     if (OpenWithin (IntersectXYZ,err,2)) 
       return Normal.Dot(mz-eye)*divisor>=0?1:-1;
   }
@@ -110,7 +110,7 @@ bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich)
   QVector tmp (mx-lx);
   if (excludeWhich!=0){
     if (tquery.Dot (tmp) <err) {
-      //fprintf (stderr,"tqueryreturn mx-lx%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
+      //VSFileSystem::Fprintf (stderr,"tqueryreturn mx-lx%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
       return false;
     }
   }
@@ -118,7 +118,7 @@ bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich)
     tquery = query - mx;
     tmp = lx - mx;
     if (tquery.Dot(tmp)<err){
-      //fprintf (stderr,"tqueryreturn lx-mx, %fExc %d\n",tquery.Dot(tmp),excludeWhich);
+      //VSFileSystem::Fprintf (stderr,"tqueryreturn lx-mx, %fExc %d\n",tquery.Dot(tmp),excludeWhich);
       return false;
     }
   }
@@ -126,7 +126,7 @@ bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich)
     tquery = query - ly;
     tmp = my - ly;
     if (tquery.Dot (tmp)<err) {
-      //fprintf (stderr,"tqueryreturn my-ly%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
+      //VSFileSystem::Fprintf (stderr,"tqueryreturn my-ly%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
       return false;
     }
   }
@@ -134,7 +134,7 @@ bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich)
     tquery = query - my;
     tmp = ly - my;
     if (tquery.Dot (tmp) <err) {
-      //fprintf (stderr,"tqueryreturn ly-my%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
+      //VSFileSystem::Fprintf (stderr,"tqueryreturn ly-my%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
       return false;
     }
   }
@@ -142,7 +142,7 @@ bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich)
     tquery = query - lz;
     tmp = mz - lz;
     if (tquery.Dot (tmp)<err) {
-      //fprintf (stderr,"tqueryreturn mz-lz%f Exc%d\n",tquery.Dot(tmp),excludeWhich);
+      //VSFileSystem::Fprintf (stderr,"tqueryreturn mz-lz%f Exc%d\n",tquery.Dot(tmp),excludeWhich);
       return false;
     }
   }
@@ -150,7 +150,7 @@ bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich)
     tquery = query - mz;
     tmp = lz - mz;
     if (tquery.Dot (tmp) <err) {
-      //fprintf (stderr,"tqueryreturn lz-mz%f Ignore%d\n",tquery.Dot(tmp),excludeWhich);
+      //VSFileSystem::Fprintf (stderr,"tqueryreturn lz-mz%f Ignore%d\n",tquery.Dot(tmp),excludeWhich);
       return false;
     }
   }
@@ -163,37 +163,37 @@ bool BoundingBox::Within (const QVector &query, float err) {
   QVector tquery =query -lx; // now it's in coords with respect to the minimum x;
   QVector tmp = mx-lx;
   if (tquery.Dot (tmp) <err) {
-    //fprintf (stderr,"tqueryreturn mx-lx%f",tquery.Dot(tmp));
+    //VSFileSystem::Fprintf (stderr,"tqueryreturn mx-lx%f",tquery.Dot(tmp));
     return false;
   }
   tquery = query - mx;
   tmp = lx - mx;
   if (tquery.Dot(tmp)<err){
-    //fprintf (stderr,"tqueryreturn lx-mx, %f",tquery.Dot(tmp));
+    //VSFileSystem::Fprintf (stderr,"tqueryreturn lx-mx, %f",tquery.Dot(tmp));
     return false;
   }
   tquery = query - ly;
   tmp = my - ly;
   if (tquery.Dot (tmp)<err) {
-    //fprintf (stderr,"tqueryreturn my-ly%f",tquery.Dot(tmp));
+    //VSFileSystem::Fprintf (stderr,"tqueryreturn my-ly%f",tquery.Dot(tmp));
     return false;
   }
   tquery = query - my;
   tmp = ly - my;
   if (tquery.Dot (tmp) <err) {
-    //fprintf (stderr,"tqueryreturn ly-my%f",tquery.Dot(tmp));
+    //VSFileSystem::Fprintf (stderr,"tqueryreturn ly-my%f",tquery.Dot(tmp));
     return false;
   }
   tquery = query - lz;
   tmp = mz - lz;
   if (tquery.Dot (tmp)<err) {
-    //fprintf (stderr,"tqueryreturn mz-lz%f",tquery.Dot(tmp));
+    //VSFileSystem::Fprintf (stderr,"tqueryreturn mz-lz%f",tquery.Dot(tmp));
     return false;
   }
   tquery = query - mz;
   tmp = lz - mz;
   if (tquery.Dot (tmp) <err) {
-    //fprintf (stderr,"tqueryreturn lz-mz%f",tquery.Dot(tmp));
+    //VSFileSystem::Fprintf (stderr,"tqueryreturn lz-mz%f",tquery.Dot(tmp));
     return false;
   }
   return true; //within bounding box;

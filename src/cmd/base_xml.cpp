@@ -4,7 +4,7 @@
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #ifdef USE_BOOST_129
 #include <boost/python/object.hpp>
 #else
@@ -13,10 +13,10 @@
 
 static FILE * withAndWithout (std::string filename, std::string time_of_day_hint) {
   string with (filename+"_"+time_of_day_hint+BASE_EXTENSION);
-  FILE * fp = fopen (with.c_str(),"r");
+  FILE * fp = VSFileSystem::vs_open (with.c_str(),"r");
   if (!fp) {
     string without (filename+BASE_EXTENSION);
-    fp = fopen (without.c_str(),"r");
+    fp = VSFileSystem::vs_open (without.c_str(),"r");
   }
   return fp;
 }
@@ -36,29 +36,29 @@ void BaseInterface::Load(const char * filename,const char * time_of_day_hint, co
   daynight_filename+=BASE_EXTENSION;
   std::string newfile=daynight_filename;
   cout << "BaseInterface::LoadXML " << full_filename << endl;
-  FILE * inFile = fopen (daynight_filename.c_str(),"r");
+  FILE * inFile = VSFileSystem::vs_open (daynight_filename.c_str(),"r");
   if (!inFile) {
     newfile=full_filename;
-    inFile = fopen (full_filename.c_str(), "r");
+    inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
   }
   if(!inFile) {
     Unit *baseun=this->baseun.GetUnit();
     if (baseun) {
       if (baseun->isUnit()==PLANETPTR){
 	daynight_filename = string("bases/planet_")+time_of_day_hint+string(BASE_EXTENSION);
-	inFile = fopen (daynight_filename.c_str(),"r");
+	inFile = VSFileSystem::vs_open (daynight_filename.c_str(),"r");
 	newfile=daynight_filename;
 	if (!inFile) {
       newfile="bases/planet"BASE_EXTENSION;
-	  inFile=fopen(newfile.c_str(),"r");
+	  inFile=VSFileSystem::vs_open(newfile.c_str(),"r");
 	}
       }else{ 
 	daynight_filename = string("bases/unit_")+time_of_day_hint+string(BASE_EXTENSION);
-	inFile = fopen (daynight_filename.c_str(),"r");
+	inFile = VSFileSystem::vs_open (daynight_filename.c_str(),"r");
 	newfile=daynight_filename;
 	if (!inFile) {
 	  newfile="bases/unit"BASE_EXTENSION;
-	  inFile=fopen(newfile.c_str(),"r");
+	  inFile=VSFileSystem::vs_open(newfile.c_str(),"r");
 	}
       }
     }
@@ -89,5 +89,5 @@ void BaseInterface::Load(const char * filename,const char * time_of_day_hint, co
   PyRun_SimpleFile(inFile,pyfile);
   Python::reseterrors();
   free (pyfile);
-  fclose(inFile);
+  VSFileSystem::vs_close(inFile);
 }

@@ -48,7 +48,7 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 	  vertexs[Vertex[i].vertindex].SetTexCoord (nonlinear_trans->TransformS(v[i].i,(*textures)[Vertex[i].GetTex()].scales),nonlinear_trans->TransformT(v[i].k, (*textures)[Vertex[i].GetTex()].scalet));
 	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->Transform(v[i].Cast()).Cast());
 	  //	  if (vertexs[Vertex[i].vertindex].y>10000||vertexs[Vertex[i].vertindex].z>32768||vertexs[Vertex[i].vertindex].x>32768)
-	  //not important...debug only to catch certain case	    fprintf (stderr,"high %f", vertexs[Vertex[i].vertindex].y);
+	  //not important...debug only to catch certain case	    VSFileSystem::Fprintf (stderr,"high %f", vertexs[Vertex[i].vertindex].y);
 	}
 	return half;  
 }

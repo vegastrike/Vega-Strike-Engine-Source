@@ -1,9 +1,11 @@
 #include "role_bitmask.h"
 #include "xml_support.h"
 #include <map>
+#include "vsfilesystem.h"
 using std::map;
 using std::string;
 using std::pair;
+using namespace VSFileSystem;
 namespace ROLES {
 	int discreteLog (int bitmask) {
 		for (unsigned char i=0;i<sizeof(int)*8;i++) {
@@ -11,7 +13,7 @@ namespace ROLES {
 				return i;
 			}
 		}
-		fprintf (stderr,"undefined discrete log.");
+		VSFileSystem::vs_fprintf (stderr,"undefined discrete log.");
 		return 0;
 	}
 	vector < vector <char > > buildroles ();
@@ -22,14 +24,15 @@ namespace ROLES {
 	}
 	vector <char>& getPriority(unsigned char rolerow) {
 		if (rolerow>getAllRolePriorities().size()) {
-			fprintf (stderr,"FATAL ERROR ROLE OUT OF RANGE");
+			VSFileSystem::vs_fprintf (stderr,"FATAL ERROR ROLE OUT OF RANGE");
 			exit(1);
 		}
 		return getAllRolePriorities()[rolerow];
 	}
 	std::map<string,int> rolemap;
 	vector <std::string> readCSV (std::string s) {
-		vector <std::string> v;int loc;
+		vector <std::string> v;
+		std::string::size_type loc;
 		int sub1=s.find ("\r");
 		s=s.substr(0,sub1);
 		int sub2=s.find("\n");
@@ -38,7 +41,7 @@ namespace ROLES {
 				loc=s.find (",");
 				string t =s.substr (0,loc);
 					if (v.size() >=32) {
-						fprintf (stderr,"ERROR with bitmasking. Only 32 ship types allowed");
+						VSFileSystem::vs_fprintf (stderr,"ERROR with bitmasking. Only 32 ship types allowed");
 					}
 					v.push_back(t);
 				if (loc!=string::npos)
@@ -57,26 +60,25 @@ namespace ROLES {
 	  vector<vector <string> > scripts;
 	  getAllRolePriorities ();
 	  
-	  FILE * fp = fopen("ai/VegaEvents.csv","rb");
-	  if (fp) {
-			fseek (fp,0,SEEK_END);
-			int len = ftell (fp);
+	  VSFile f;
+	  VSError err = f.OpenReadOnly( "VegaEvents.csv", AiFile);
+	  if (err<Ok) {
+			int len = f.Size();
 			char *temp = (char *)malloc (len+1);
 			memset (temp,0,len+1);
-			fseek (fp,0,SEEK_SET);
-			fgets(temp,len,fp);
+			f.ReadLine(temp,len);
 			vector <string> vec=readCSV(temp);
 			if (vec.size()) vec.erase (vec.begin());
 			unsigned int i=0;
 			for (i=0;i<maxRoleValue();i++) {
 			  scripts.push_back (vector<string>());
-			  for (int j=0;j<maxRoleValue();j++) {
+			  for (unsigned int j=0;j<maxRoleValue();j++) {
 			    scripts[i].push_back("default");
 			  }
 			}
-  		    //fseek (fp,0,SEEK_SET);
+  		    //VSFileSystem::vs_seek (fp,0,SEEK_SET);
 			for (i=0;i<vec.size();i++) {
-			  fgets(temp,len,fp);
+			  f.ReadLine(temp,len);
 			  vector <string> strs=readCSV(temp);
 			  if (strs.size()) {
 			    string front = strs.front();
@@ -90,7 +92,7 @@ namespace ROLES {
 			 
 			}
 			free (temp);
-			fclose (fp);
+			f.Close();
 	  }
 	  return scripts;
 	}
@@ -98,33 +100,30 @@ namespace ROLES {
 	  static vector < vector <string> > script = buildscripts();
 	  const static string def="default";
 	  if (ourrole>=script.size()) {
-	    fprintf (stderr,"bad error with getRoleEvetnts (no event specified)");
+	    VSFileSystem::vs_fprintf (stderr,"bad error with getRoleEvetnts (no event specified)");
 	    return def;
 	  }
 	  if (theirs>=script[ourrole].size()) {
-	    fprintf (stderr,"bad error || with getRoleEvetnts (no event specified)");
+	    VSFileSystem::vs_fprintf (stderr,"bad error || with getRoleEvetnts (no event specified)");
 	    return def;
 	  }
 	  return script[ourrole][theirs];
 	}
 	vector < vector <char > > buildroles() {
 		vector <vector <char> >rolePriorities;
-		int count=0;
-		FILE * fp = fopen("ai/VegaPriorities.csv","rb");
-		if (fp) {
-			fseek (fp,0,SEEK_END);
-			int len = ftell (fp);
+		VSFile f;
+		VSError err = f.OpenReadOnly( "VegaPriorities.csv", AiFile);
+		if (err<=Ok) {
+			int len = f.Size();
 			char *temp = (char *)malloc (len+1);
 			memset (temp,0,len+1);
-			fseek (fp,0,SEEK_SET);
-			fgets(temp,len,fp);
+			f.ReadLine(temp,len);
 			vector <string> vec=readCSV(temp);
 			if (vec.size()) vec.erase (vec.begin());
-			//fprintf (stderr," SIZE %d\n",vec.size());
-			int loc;
+			//VSFileSystem::vs_fprintf (stderr," SIZE %d\n",vec.size());
 			unsigned int i;
 			for (i=0;i<vec.size();i++) {
-			  //fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
+			  //VSFileSystem::vs_fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
 				rolemap.insert (pair<string,int>(strtoupper(vec[i]),i));
 			}
 
@@ -133,10 +132,10 @@ namespace ROLES {
 			}
 			for (i=0;i<vec.size();i++) {
 				temp[0]=0;
-				fgets (temp,len,fp);
+				f.ReadLine(temp,len);
 				vector <string> priority = readCSV(temp);
-				int i=InternalGetRole (priority[0]);
-				//fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
+				unsigned int i=InternalGetRole (priority[0]);
+				//VSFileSystem::vs_fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
 				if (i<rolePriorities.size()) {
 					for (unsigned int j=0;j<rolePriorities.size();j++) {
 						if (rolePriorities[i].size()<rolePriorities.size())
@@ -148,7 +147,7 @@ namespace ROLES {
 				}
 			}
 			free( temp);
-			fclose (fp);
+			f.Close();
 		}else {
 		  rolePriorities.push_back(vector <char>());
 		  rolePriorities[0].push_back(0);
@@ -160,12 +159,12 @@ namespace ROLES {
 		return i;
 	}
 	unsigned char getRole (const std::string &s) {
-		int temp = maxRoleValue();
+		//int temp = maxRoleValue();
 		return InternalGetRole(s);
 	}
 	unsigned int readBitmask (const std::string &ss){
 		string s= ss;
-		int loc=string::npos;
+		std::string::size_type loc=string::npos;
 		int ans =0;
 		do{
 			loc=s.find (" ");

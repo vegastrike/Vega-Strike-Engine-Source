@@ -1,5 +1,5 @@
 #include "networking/lowlevel/vsnet_debug.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "networking/netclient.h"
 #include "cmd/unit_generic.h"
 #include "networking/lowlevel/netbuffer.h"
@@ -18,7 +18,7 @@ void	NetClient::scanRequest( Unit * target)
 	NetBuffer netbuf;
 
 	netbuf.addSerial( target->GetSerial());
-	netbuf.addShort( this->zone);
+	netbuf.addShort( this->game_unit.GetUnit()->activeStarSystem->GetZone());
 
 	p.send( CMD_TARGET, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
@@ -64,10 +64,11 @@ bool	NetClient::jumpRequest( string newsystem, ObjSerial jumpserial)
 
 	netbuf.addString( newsystem);
 	netbuf.addSerial( jumpserial);
-	netbuf.addShort( this->zone);
+	netbuf.addShort( this->game_unit.GetUnit()->activeStarSystem->GetZone());
 #ifdef CRYPTO
 	unsigned char * hash = new unsigned char[FileUtil::Hash.DigestSize()];
-	FileUtil::HashFileCompute( datadir+"/"+newsystem+".system", hash);
+	bool autogen;
+	FileUtil::HashFileCompute( VSFileSystem::GetCorrectStarSysPath( newsystem+".system", autogen), hash, SystemFile);
 	netbuf.addBuffer( hash, FileUtil::Hash.DigestSize());
 #endif
 

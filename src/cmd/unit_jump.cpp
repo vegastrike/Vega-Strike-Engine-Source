@@ -41,7 +41,7 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
   if (pendingjump[kk]->orig==activeStarSystem||activeStarSystem==NULL) {
 	  if (Unit::TransferUnitToSystem (pendingjump[kk]->dest)) {
 #ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit removed from star system\n");
+      VSFileSystem::vs_fprintf (stderr,"Unit removed from star system\n");
 #endif
 
       ///eradicating from system, leaving no trace
@@ -80,7 +80,7 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 //	if (v->empty())v->push_back ("v");else (*v)[0]="v";
       }
       if (this==_Universe->AccessCockpit()->GetParent()) {
-	fprintf (stderr,"Unit is the active player character...changing scene graph\n");
+	VSFileSystem::vs_fprintf (stderr,"Unit is the active player character...changing scene graph\n");
 	savedStarSystem->SwapOut();
 	
 	savedStarSystem = pendingjump[kk]->dest;
@@ -133,7 +133,7 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
 	AUDPlay (jumparrive,this->LocalPosition(),this->GetVelocity(),1);
     } else {
 #ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit FAILED remove from star system\n");
+      VSFileSystem::vs_fprintf (stderr,"Unit FAILED remove from star system\n");
 #endif
     }
     if (docked&DOCKING_UNITS) {
@@ -162,6 +162,6 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       }
     }
   }else {
-    fprintf (stderr,"Already jumped\n");
+    VSFileSystem::vs_fprintf (stderr,"Already jumped\n");
   }
 }

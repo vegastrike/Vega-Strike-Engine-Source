@@ -176,7 +176,7 @@ void evaluateViews () {
   rotview[9]=view[9];
   rotview[10]=view[10];
   //    transview[11]=view[11];
-  //      fprintf (stderr,"trans %f,%f,%f",transview[3],transview[7],transview[11]);
+  //      VSFileSystem::Fprintf (stderr,"trans %f,%f,%f",transview[3],transview[7],transview[11]);
 #undef M
 
 }
@@ -428,7 +428,7 @@ void GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
     *n = nnear;
     *f = ffar;
   }
-  //  fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
+  //  VSFileSystem::Fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
 
 }
 

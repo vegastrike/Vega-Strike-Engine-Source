@@ -141,7 +141,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 								if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
 									su->Target(this);
 									su->TargetTurret(this);
-									//fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
+									//VSFileSystem::vs_fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
 
 								}
 							}

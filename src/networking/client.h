@@ -58,13 +58,13 @@ public:
 	// 2 timestamps vals from client time to check receiving old packet after newer ones (UDP only)
 	unsigned int	old_timestamp;
 	unsigned int	latest_timestamp;
-	unsigned int	deltatime;
+	//unsigned int	deltatime;
+	double			deltatime;
 	string			callsign;
 	string			name;
 	string			passwd;
 	//ClientState		old_state;
 	/* In-game parameters */
-	unsigned short	zone;
 	bool			ingame;
 	char			webcam;
 	char			portaudio;

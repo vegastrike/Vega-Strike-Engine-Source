@@ -1,7 +1,7 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "cmd/unit_generic.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "networking/netclient.h"
 #include "savegame.h"
 #include "networking/lowlevel/netbuffer.h"
@@ -195,6 +195,7 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 
 void	NetClient::loginAccept( Packet & p1)
 {
+	using namespace VSFileSystem;
 	NetBuffer netbuf( p1.getData(), p1.getDataLength());
 
 	Packet pckt;
@@ -202,6 +203,11 @@ void	NetClient::loginAccept( Packet & p1)
 	COUT << ">>> LOGIN ACCEPTED =( serial n°" << serial << " )= --------------------------------------" << endl;
 	// Should receive player's data (savegame) from server if there is a save
 	localSerials.push_back( serial);
+	string datestr = netbuf.getString();
+	_Universe->current_stardate.InitTrek( datestr);
+	cerr << "Stardate initialized"<<endl;
+    cerr << "WE ARE ON STARDATE " << datestr << " - converted : "
+         <<_Universe->current_stardate.GetFullTrekDate() << endl;
 	globalsaves.push_back( netbuf.getString());
 	globalsaves.push_back( netbuf.getString());
 	// Get the galaxy file from buffer with relative path to datadir !
@@ -209,10 +215,10 @@ void	NetClient::loginAccept( Packet & p1)
 	unsigned char * digest;
 #ifdef CRYPTO
 	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
-	cerr<<"Initial system = "<<datadir+univfile<<" - File Hash = "<<digest<<endl;
+	cerr<<"Initial system = "<<VSFileSystem::datadir+univfile<<" - File Hash = "<<digest<<endl;
 #endif
 	// Compare to local hash and ask for the good file if we don't have it or bad version
-	if( !FileUtil::HashCompare( univfile, digest))
+	if( !FileUtil::HashCompare( univfile, digest, UniverseFile))
 	{
 		VsnetDownload::Client::NoteFile f( this->clt_sock, univfile);
 		_downloadManagerClient->addItem( &f);
@@ -225,11 +231,13 @@ void	NetClient::loginAccept( Packet & p1)
 
 	// Get the initial system file...
 	string sysfile = netbuf.getString();
+	bool autogen;
+	string fullsys = VSFileSystem::GetCorrectStarSysPath(sysfile, autogen);
 #ifdef CRYPTO
 	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
-	cerr<<"Initial system = "<<datadir+sysfile<<" - File Hash = "<<digest<<endl;
+	cerr<<"Initial system = "<<fullsys<<" - File Hash = "<<digest<<endl;
 #endif
-	if( !FileUtil::HashCompare( sysfile, digest))
+	if( !FileUtil::HashCompare( fullsys, digest, SystemFile))
 	{
 		VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
 		_downloadManagerClient->addItem( &f);

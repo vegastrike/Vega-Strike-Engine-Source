@@ -24,7 +24,7 @@
 #include "camera.h"
 #include "lin_time.h"
 #include <stack>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "point_to_cam.h"
 #include "config_xml.h"
@@ -53,12 +53,13 @@ void Animation::SetFaceCam(bool face) {
     options &= (~ani_up);
   }
 }
+
+using namespace VSFileSystem;
+
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
 {	
   Identity(local_transformation);
   VSCONSTRUCT2('a')
-  vschdir ("animations");
-  vschdir (FileName);
   //  repeat = Rep;
   options=0;
   if (Rep)
@@ -69,29 +70,21 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   if (appear_near_by_radius) {
     options|=ani_close;
   }
-  FILE * fp = fopen (FileName, "r");
-  if (!fp) {
-	string rez(datadir+"/animations/"+FileName);
-	string rezfirst (rez+string("/")+FileName);
-	fp = fopen (rezfirst.c_str(),"r");
-	if (!fp) {
-		fp = fopen (rez.c_str(),"r");
-	}
-  }
-  if (!fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( FileName, AnimFile);
+  if (err>Ok) {
     ; // do something 
   } else {
-    fscanf (fp, "%f %f", &width, &height);
+    f.Fscanf ( "%f %f", &width, &height);
     if (width>0) {
       options|=ani_alpha;
     }
     width = fabs(width*0.5F);
     height = height*0.5F;
-    Load (fp,0,ismipmapped);
-    fclose (fp);
+    Load (f,0,ismipmapped);
+    f.Close();
   }
-  vscdup();
-  vscdup();
+  //VSFileSystem::ResetCurrentPath();
 }
 Animation:: ~Animation () {
   vector <Animation   *>::iterator i;

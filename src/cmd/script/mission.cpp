@@ -55,7 +55,7 @@
 
 /* *********************************************************** */
 Mission::~Mission() {
-  fprintf (stderr,"Mission Cleanup Not Yet Implemented");
+  VSFileSystem::vs_fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital
 }
 double   Mission::gametime=0.0;

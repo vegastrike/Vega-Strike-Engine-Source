@@ -90,24 +90,19 @@ void WarpTrailDraw () {
   wt.Draw();
 }
 Mesh * GetWarpMesh (int faction, warptrails * w) {
+  using namespace VSFileSystem;
   while (faction >= w->factions.size()) {
     w->factions.push_back(NULL);
   }
   string fac = FactionUtil::GetFaction (faction);
   fac+="_warp.xmesh";
-  string filename = string("meshes/"+fac);
-  FILE * fp = fopen (fac.c_str(),"rb");
-  if (!fp){
-    fac = "neutral_warp.xmesh";
-    filename = string("meshes/")+fac;
-    FILE * fp = fopen (filename.c_str(),"rb");
-    if (fp)
-      fclose (fp);
-    else
-      return NULL;
+  VSError err;
+  if( (err=LookForFile( fac, MeshFile))>Ok)
+  {
+	fac = "neutral_warp.xmesh";
+	if( (err=LookForFile( fac, MeshFile))>Ok)
+		return NULL;
   }
-  else
-    fclose (fp);
   if (!w->factions[faction])
     w->factions[faction] = new Mesh (fac.c_str(),Vector(1,1,1),faction,NULL,false);
   return w->factions[faction];

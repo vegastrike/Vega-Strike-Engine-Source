@@ -6,6 +6,7 @@
 #include "networking/savenet_util.h"
 
 extern QVector DockToSavedBases( int n);
+extern StarSystem * GetLoadedStarSystem( const char * system);
 
 /**************************************************************/
 /**** Adds a new client                                    ****/
@@ -40,6 +41,7 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 
 	QVector nullVec( 0, 0, 0);
 	int player = _Universe->whichPlayerStarship( un);
+	cerr<<"ADDING Player number "<<player<<endl;
 	Cockpit * cp = _Universe->AccessCockpit(player);
 	string starsys = cp->savegame->GetStarSystem();
 
@@ -47,7 +49,14 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	// If we return an existing starsystem we broadcast our info to others
 	sts=zonemgr->addClient( clt, starsys, zoneid);
 
-	st2 = _Universe->getStarSystem( starsys);
+	//st2 = _Universe->getStarSystem( starsys);
+	string sysfile = starsys+".system";
+	st2 = GetLoadedStarSystem( sysfile.c_str());
+	if( !st2)
+	{
+		cerr<<"!!! ERROR : star system '"<<starsys<<"' not found"<<endl;
+		VSExit(1);
+	}
 
 	// On server side this is not done in Cockpit::SetParent()
 	cp->activeStarSystem = st2;
@@ -59,6 +68,7 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	{
 		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
 		cerr<<"PLAYER NOT DOCKED - STARTING AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
+		clt->ingame   = true;
 	}
 	else
 		cerr<<"PLAYER DOCKED - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
@@ -85,8 +95,7 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	}
 	// In all case set the zone and send the client the zone which it is in
 	COUT<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
-	un->SetZone( zoneid);
-	clt->ingame   = true;
+	un->activeStarSystem->SetZone( zoneid);
     clt->sock.allowCompress( false );
     if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
     {
@@ -100,13 +109,13 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	netbuf.Reset();
     netbuf.addChar( flags );
 	netbuf.addShort( zoneid);
-	netbuf.addString( _Universe->current_stardate.GetFullCurrentStarDate());
+	//netbuf.addString( _Universe->current_stardate.GetFullTrekDate());
 	un->BackupState();
 	// Add initial position to make sure the client is starting from where we tell him
 	netbuf.addQVector( safevec);
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );
 
-	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<" at STARDATE "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
+	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->game_unit.GetUnit()->activeStarSystem->GetZone()<<" at STARDATE "<<_Universe->current_stardate.GetFullTrekDate()<<endl;
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }

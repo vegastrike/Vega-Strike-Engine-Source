@@ -11,7 +11,7 @@
 #include "python/python_compile.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "pythonai.h"
 using namespace Orders;
 PythonAI * PythonAI::last_ai=NULL;
@@ -48,5 +48,5 @@ void PythonAI::InitModuleAI () {
   
 }
 PythonAI::~PythonAI () {
-  fprintf (stderr,"Destruct called. If called from C++ this is death %d (%x)",this,this);
+  VSFileSystem::vs_fprintf (stderr,"Destruct called. If called from C++ this is death %d (%x)",this,this);
 }

@@ -17,8 +17,12 @@ typedef unsigned char boolean;
 #define XMD_H
 typedef int INT32;
 #endif
+#endif
+
+#if defined( _WIN32) && !defined( __CYGWIN__)
 #include <windows.h>
 #endif
+#include "vsfilesystem.h"
 
 extern "C" { 
 #include <jpeglib.h>

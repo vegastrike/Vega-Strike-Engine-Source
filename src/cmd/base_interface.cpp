@@ -1,6 +1,6 @@
 #include "base.h"
 #include "gldrv/winsys.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "audiolib.h"
 #include "gfx/camera.h"
@@ -24,7 +24,7 @@ static char makingstate=0;
 #endif
 extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked=false;
-
+using namespace VSFileSystem;
 #define NEW_GUI
 
 #ifdef NEW_GUI
@@ -218,51 +218,51 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 			if (ret==1) {
 				if (button==WS_RIGHT_BUTTON) {
 #ifdef _WIN32
-					FILE *fp=fopen("stdin.txt","rt");
+					FILE *fp=VSFileSystem::vs_open("stdin.txt","rt");
 #else
 					FILE *fp=stdin;
 #endif
-					fscanf(fp,"%200s",input);
+					VSFileSystem::vs_fscanf(fp,"%200s",input);
 #ifdef _WIN32
-					fclose(fp);
+					VSFileSystem::vs_close(fp);
 #endif
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
 					int i;
 #ifdef _WIN32
-					FILE *fp=fopen("stdin.txt","rt");
+					FILE *fp=VSFileSystem::vs_open("stdin.txt","rt");
 #else
 					FILE *fp=stdin;
 #endif
-	 				fscanf(fp,"%d",&rmtyp);
+	 				VSFileSystem::vs_fscanf(fp,"%d",&rmtyp);
 					switch(rmtyp) {
 					case 1:
 						links.push_back(new Goto("linkind","link"));
-						fscanf(fp,"%d",&((Goto*)links.back())->index);
+						VSFileSystem::vs_fscanf(fp,"%d",&((Goto*)links.back())->index);
 						break;
 					case 2:
 						links.push_back(new Launch("launchind","launch"));
 						break;
 					case 3:
 						links.push_back(new Comp("compind","comp"));
-						fscanf(fp,"%d",&index);
-						for (i=0;i<index&&(!feof(fp));i++) {
-							fscanf(fp,"%d",&ret);
+						VSFileSystem::vs_fscanf(fp,"%d",&index);
+						for (i=0;i<index&&(!VSFileSystem::vs_feof(fp));i++) {
+							VSFileSystem::vs_fscanf(fp,"%d",&ret);
 							((Comp*)links.back())->modes.push_back((BaseComputer::DisplayMode)ret);
 						}
 						break;
 					default:
 #ifdef _WIN32
-						fclose(fp);
+						VSFileSystem::vs_close(fp);
 						MessageBox(NULL,"warning: invalid basemaker option","Error",MB_OK);
 #endif
 						printf("warning: invalid basemaker option: %d",rmtyp);
 						return;
 					}
-					fscanf(fp,"%200s",input);
+					VSFileSystem::vs_fscanf(fp,"%200s",input);
 					input[200]=input[199]='\0';
 					links.back()->text=string(input);
 #ifdef _WIN32
-					fclose(fp);
+					VSFileSystem::vs_close(fp);
 #endif
 				}
 				if (button==WS_RIGHT_BUTTON) {
@@ -395,7 +395,7 @@ void BaseInterface::GotoLink (int linknum) {
 		drawlinkcursor=false;
 	} else {
 #ifndef BASE_MAKER
-		fprintf(stderr,"\nWARNING: base room #%d tried to go to an invalid index: #%d",curroom,linknum);
+		VSFileSystem::vs_fprintf(stderr,"\nWARNING: base room #%d tried to go to an invalid index: #%d",curroom,linknum);
 		assert(0);
 #else
 		while(rooms.size()<=linknum) {
@@ -411,10 +411,10 @@ void BaseInterface::GotoLink (int linknum) {
 
 BaseInterface::~BaseInterface () {
 #ifdef BASE_MAKER
-	FILE *fp=fopen("bases/NEW_BASE"BASE_EXTENSION,"wt");
+	FILE *fp=VSFileSystem::vs_open("bases/NEW_BASE"BASE_EXTENSION,"wt");
 	if (fp) {
 		EndXML(fp);
-		fclose(fp);
+		VSFileSystem::vs_close(fp);
 	}
 #endif
 	CurrentBase=0;
@@ -477,7 +477,7 @@ double compute_light_dot (Unit * base,Unit *un) {
 	  QVector v2 = (st->Position()-base->Position()).Normalize();
 	  double dot = v1.Dot(v2);
 	  if (dot>ret) {
-	    fprintf (stderr,"dot %lf",dot);
+	    VSFileSystem::vs_fprintf (stderr,"dot %lf",dot);
 	    ret=dot;
 	  }
 	} else {
@@ -534,7 +534,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		}
 	}
 	if (!rooms.size()) {
-		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
+		VSFileSystem::vs_fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
 		rooms.back()->deftext="ERROR: No rooms specified...";
 #ifndef BASE_MAKER
@@ -647,7 +647,7 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 			if (soundfiles[sayindex].size()>0) {
 				int sound = AUDCreateSoundWAV (soundfiles[sayindex],false);
 				if (sound==-1) {
-					fprintf(stderr,"\nCan't find the sound file %s\n",soundfiles[sayindex].c_str());
+					VSFileSystem::vs_fprintf(stderr,"\nCan't find the sound file %s\n",soundfiles[sayindex].c_str());
 				} else {
 //					AUDAdjustSound (sound,_Universe->AccessCamera ()->GetPosition(),Vector(0,0,0));
 					AUDStartPlaying (sound);
@@ -655,7 +655,7 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 				}
 			}
 		} else {
-			fprintf(stderr,"\nThere are no things to say...\n");
+			VSFileSystem::vs_fprintf(stderr,"\nThere are no things to say...\n");
 			assert(0);
 		}
 	}
@@ -679,8 +679,7 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
 			}
 		}
-	}
-}
+	}}
 
 void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
@@ -702,7 +701,7 @@ void BaseInterface::Draw () {
 	Unit *un=caller.GetUnit();
 	Unit *base=baseun.GetUnit();
 	if (un&&(!base)) {
-		fprintf(stderr,"Error: Base NULL");
+		VSFileSystem::vs_fprintf(stderr,"Error: Base NULL");
 		mission->msgcenter->add("game","all","[Computer] Docking unit destroyed. Emergency launch initiated.");
 		for (int i=0;i<un->image->dockedunits.size();i++) {
 			if (un->image->dockedunits[i]->uc.GetUnit()==base) {

@@ -6,7 +6,7 @@
 #include <float.h>
 #include <assert.h>
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "configxml.h"
 //serves to run through a XML file that nests things for "and". 
@@ -111,6 +111,7 @@ namespace AIEvents {
     
   }  
   void LoadAI(const char * filename, ElemAttrMap &result, const string &faction) {//returns obedience
+	using namespace VSFileSystem;
     const int chunk_size = 16384;
     string full_filename;
     result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
@@ -118,13 +119,16 @@ namespace AIEvents {
 								      "obedience",
 								      ".99"));
     result.maxtime=10;
-    full_filename = string("ai/events/") + faction+string("/")+filename;
-    FILE * inFile = fopen (full_filename.c_str(), "r");
-    if (!inFile) {
-      full_filename = string("ai/events/") + filename;
-      inFile = fopen (full_filename.c_str(), "r");
+    //full_filename = string("ai/events/") + faction+string("/")+filename;
+    full_filename = faction+string("/")+filename;
+    //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
+	VSFile f;
+	VSError err = f.OpenReadOnly( full_filename);
+    if (err>Ok) {
+      full_filename = filename;
+      err = f.OpenReadOnly (full_filename, AiFile);
     }
-    if(!inFile) {
+    if(err>Ok) {
       printf("ai file %s not found\n",filename);
       assert(0);
       return;
@@ -132,14 +136,17 @@ namespace AIEvents {
     XML_Parser parser = XML_ParserCreate (NULL);
     XML_SetUserData (parser, &result);
     XML_SetElementHandler (parser, &GeneralAIEventBegin, &GeneralAIEventEnd);
+    XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
+	/*
     do {
       char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
       int length;    
-      length = fread (buf,1, chunk_size,inFile);
-      XML_ParseBuffer(parser, length, feof(inFile));
-    } while(!feof(inFile));
-    fclose (inFile);
-    XML_ParserFree (parser);
+      length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
+      XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
+    } while(!VSFileSystem::vs_feof(inFile));
+	*/
+	f.Close();
+	XML_ParserFree (parser);
 //    assert (result.level==0);
 	if (result.level!=0) {
 		fprintf (stderr,"Error loading AI script %s for faction %s. Final count not zero.\n",filename,faction.c_str());

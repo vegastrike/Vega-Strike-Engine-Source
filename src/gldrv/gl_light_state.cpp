@@ -166,9 +166,9 @@ void gfx_light::ClobberGLLight (const int target) {
     }
 #endif
     this->target = target;
-    //fprintf (stderr,"Target %d had light %d",target, GLLights[target].index);
+    //VSFileSystem::Fprintf (stderr,"Target %d had light %d",target, GLLights[target].index);
     GLLights[target].index = lightNum();
-    //fprintf (stderr," Clobbered with %d\n",lightNum());
+    //VSFileSystem::Fprintf (stderr," Clobbered with %d\n",lightNum());
     GLLights[target].options |= OpenGLL::GLL_ON*enabled()+OpenGLL::GLL_LOCAL*LocalLight();
 }
 
@@ -328,7 +328,7 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
   ffastmathreallysucksd = sqrt(tot_intensity/intensity_cutoff-ambient[0]);
   
   ffastmathreallysucksq = sqrt(attenuate[2]+attenuate[1]) ;
-  //  fprintf (stderr,"q%lf d%lf",ffastmathreallysucksq,ffastmathreallysucksd);
+  //  VSFileSystem::Fprintf (stderr,"q%lf d%lf",ffastmathreallysucksq,ffastmathreallysucksd);
   if (ffastmathreallysucksq==0||ffastmathreallysucksd<=0)
     error=true;
   ffastmathreallysucksd /=ffastmathreallysucksq;

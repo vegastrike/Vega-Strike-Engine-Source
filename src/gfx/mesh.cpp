@@ -32,7 +32,7 @@
 #include <list>
 #include <string>
 #include <fstream>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
@@ -41,6 +41,7 @@
 #include "vegastrike.h"
 #include "sphere.h"
 #include "lin_time.h"
+#include "gldrv/winsys.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -113,17 +114,17 @@ int Mesh::numVertices() const {
 bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction) {
   Mesh * oldmesh;
 
-  hash_name = GetHashName (filehash,scale,faction);
+  hash_name = VSFileSystem::GetHashName (filehash,scale,faction);
   oldmesh = meshHashTable.Get(hash_name);
 
   if (oldmesh==0) {
-    hash_name =GetSharedMeshHashName(filehash,scale,faction);
+    hash_name =VSFileSystem::GetSharedMeshHashName(filehash,scale,faction);
     oldmesh = meshHashTable.Get(hash_name);  
   }
   if(0 != oldmesh) {
     return LoadExistant(oldmesh);
   }
-  //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
+  //  VSFileSystem::Fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
   return false;
 }
 Mesh::Mesh (const Mesh & m) {
@@ -135,7 +136,10 @@ Mesh::Mesh (const Mesh & m) {
     return;
   }
 }
-Mesh:: Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
+
+using namespace VSFileSystem;
+
+Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
   this->orig=NULL;
   InitUnit();
@@ -144,24 +148,34 @@ Mesh:: Mesh(const char * filename,const Vector & scale, int faction, Flightgroup
     return;
   }
   bool shared=false;
-  FILE * fp= fopen (filename,"r");
-  if (fp==NULL) {
-    shared=true;
-  }else {
-    fclose (fp);
+  VSFile f;
+  VSError err=Unspecified;
+  err = f.OpenReadOnly( filename, MeshFile);
+  if( err>Ok)
+  {
+	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+	cleanexit=1;
+	winsys_exit(1);
+	return;
   }
+  shared = (err==Shared);
+
   bool xml=true;
   if(xml) {
-    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg,orig);
+    //LoadXML(filename,scale,faction,fg,orig);
+    LoadXML(f,scale,faction,fg,orig);
     oldmesh = this->orig;
   } else {
     this->xml= NULL;
-    LoadBinary(shared?GetSharedMeshPath(filename).c_str():filename,faction);
+	// This must be changed someday
+    LoadBinary(shared?(VSFileSystem::sharedmeshes+"/"+(filename)).c_str():filename,faction);
     oldmesh = new Mesh[1];
   }
+  if( err<=Ok)
+	  f.Close();
   draw_queue = new vector<MeshDrawContext>;
   if (!orig) {
-    hash_name =shared?GetSharedMeshHashName (filename,scale,faction):GetHashName(filename,scale,faction);
+    hash_name =shared?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
     meshHashTable.Put(hash_name, oldmesh);
     //oldmesh[0]=*this;
     *oldmesh=*this;

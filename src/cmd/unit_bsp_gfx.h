@@ -29,14 +29,14 @@ void GameUnit<UnitType>::BuildBSPTree(const char *filename, bool vplane, Mesh * 
  
  bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
  if (bsp) {
-   changehome();
-   vschdir ("generatedbsp");
-   o = fopen (filename, "wb");
-   vscdup();
-   returnfromhome();
+   VSFileSystem::changehome();
+   VSFileSystem::vs_chdir ("generatedbsp");
+   o = VSFileSystem::vs_open (filename, "wb");
+   VSFileSystem::vs_cdup();
+   VSFileSystem::returnfromhome();
    if (o) {
      write_bsp_tree(bsp,0);
-     fclose (o);
+     VSFileSystem::vs_close (o);
      bsp_stats (bsp);
      FreeBSP (&bsp);
    }

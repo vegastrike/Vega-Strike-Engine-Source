@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
@@ -59,13 +59,13 @@ struct AIScriptXML {
 float& AIScript::topf(){
   if (!xml->floats.size()) {
     xml->floats.push(xml->defaultf);
-    fprintf(stderr,"\nERROR: Float stack is empty... Will return %f\n",xml->defaultf);
+    VSFileSystem::vs_fprintf(stderr,"\nERROR: Float stack is empty... Will return %f\n",xml->defaultf);
   }
   return xml->floats.top();
 }
 void AIScript::popf(){
   if (xml->floats.size()<=0) {
-    fprintf(stderr,"\nERROR: Float stack is empty... Will not delete\n");
+    VSFileSystem::vs_fprintf(stderr,"\nERROR: Float stack is empty... Will not delete\n");
     return;
   }
   xml->floats.pop();
@@ -73,13 +73,13 @@ void AIScript::popf(){
 QVector& AIScript::topv(){
   if (!xml->vectors.size()) {
     xml->vectors.push(xml->defaultvec);
-    fprintf(stderr,"\nERROR: Vector stack is empty... Will return <%f, %f, %f>\n",xml->defaultvec.i,xml->defaultvec.j,xml->defaultvec.k);
+    VSFileSystem::vs_fprintf(stderr,"\nERROR: Vector stack is empty... Will return <%f, %f, %f>\n",xml->defaultvec.i,xml->defaultvec.j,xml->defaultvec.k);
   }
   return xml->vectors.top();
 }
 void AIScript::popv (){
   if (xml->vectors.size()<=0) {
-    fprintf(stderr,"\nERROR: Vector stack is empty... Will not delete\n");
+    VSFileSystem::vs_fprintf(stderr,"\nERROR: Vector stack is empty... Will not delete\n");
     return;
   }
   xml->vectors.pop();
@@ -218,11 +218,11 @@ using namespace AiXml;
   xml->itts=false;
   Unit * tmp;
 #ifdef AIDBG
-  fprintf (stderr,"0");
+  VSFileSystem::vs_fprintf (stderr,"0");
 #endif
   Names elem = (Names)element_map.lookup(name);
 #ifdef AIDBG
-  fprintf (stderr,"1%x ",&elem);
+  VSFileSystem::vs_fprintf (stderr,"1%x ",&elem);
 #endif
   AttributeList::const_iterator iter;
   switch(elem) {
@@ -258,7 +258,7 @@ using namespace AiXml;
 	break;
       case DUPLIC:
 #ifdef AIDBG
-  fprintf (stderr,"1%x ",&elem);
+  VSFileSystem::vs_fprintf (stderr,"1%x ",&elem);
 #endif
 	xml->vectors.pop();//get rid of dummy vector pushed on above
 	xml->vectors.push (xml->vectors.top());
@@ -327,7 +327,7 @@ using namespace AiXml;
     break;
   case FACETARGET:
 #ifdef AIDBG
-  fprintf (stderr,"ft");
+  VSFileSystem::vs_fprintf (stderr,"ft");
 #endif
     xml->unitlevel++;
     xml->acc =3;
@@ -348,7 +348,7 @@ using namespace AiXml;
       }
     }
 #ifdef AIDBG
-  fprintf (stderr,"eft");
+  VSFileSystem::vs_fprintf (stderr,"eft");
 #endif
 
     break;
@@ -450,7 +450,7 @@ using namespace AiXml;
   case MATCHANG:
   case MATCHVEL:
 #ifdef AIDBG
-  fprintf (stderr,"mlv");
+  VSFileSystem::vs_fprintf (stderr,"mlv");
 #endif
 
     xml->unitlevel++;
@@ -472,7 +472,7 @@ using namespace AiXml;
       }
     }
 #ifdef AIDBG
-  fprintf (stderr,"emlv ");
+  VSFileSystem::vs_fprintf (stderr,"emlv ");
 #endif
 
     break;
@@ -641,7 +641,7 @@ using namespace AiXml;
     topv()=-topv();
     break;
   case MOVETO:
-    fprintf (stderr,"Moveto <%f,%f,%f>",topv().i,topv().j,topv().k);
+    VSFileSystem::vs_fprintf (stderr,"Moveto <%f,%f,%f>",topv().i,topv().j,topv().k);
     xml->unitlevel--;
     xml->orders.push_back(new Orders::MoveTo(topv(),xml->afterburn,xml->acc));
     popv();
@@ -716,14 +716,15 @@ using namespace AiXml;
 void AIScript::LoadXML() {
 	static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI","debug_level","0"));
 using namespace AiXml;
+using namespace VSFileSystem;
   string full_filename;
   HardCodedMap::const_iterator iter =  hard_coded_scripts.find (filename);
   if (iter!=hard_coded_scripts.end()) {
-    //    fprintf (stderr,"hcscript %s\n",filename);
+    //    VSFileSystem::vs_fprintf (stderr,"hcscript %s\n",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
 	if (aidebug>1)
-		fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.c_str(),parent->GetComputerData().threatlevel);
+		VSFileSystem::vs_fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.c_str(),parent->GetComputerData().threatlevel);
 	if (_Universe->isPlayerStarship(parent->Target())){
 		float value;
 		static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
@@ -749,35 +750,36 @@ using namespace AiXml;
     return;
   }else {
 	  if (aidebug>1)
-		  fprintf (stderr,"using soft coded script %s",filename);
+		  VSFileSystem::vs_fprintf (stderr,"using soft coded script %s",filename);
 	  if (aidebug>0)
 		  UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel));
-
   }
 #ifdef AIDBG
-  fprintf (stderr,"chd");
+  VSFileSystem::vs_fprintf (stderr,"chd");
 #endif
 
 #ifdef AIDBG
-  fprintf (stderr,"echd");
+  VSFileSystem::vs_fprintf (stderr,"echd");
 #endif
 
   const int chunk_size = 16384;
-  full_filename = string("ai/script/") + filename;
-  FILE * inFile = fopen (full_filename.c_str(), "r");
+  //full_filename = string("ai/script/") + filename;
+  //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, AiFile);
 #ifdef AIDBG
-  fprintf (stderr,"backup ");
+  VSFileSystem::vs_fprintf (stderr,"backup ");
 #endif
 
-  if(!inFile) {
-    fprintf (stderr,"cannot find AI script %s\n",filename);
+  if(err>Ok) {
+    VSFileSystem::vs_fprintf (stderr,"cannot find AI script %s\n",filename);
     return;
   }
 #ifndef _WIN32
-  //  fprintf (stderr, "Loading AIscript: %s\n", filename);
+  //  VSFileSystem::vs_fprintf (stderr, "Loading AIscript: %s\n", filename);
 #endif
 #ifdef BIDBG
-  fprintf (stderr,"nxml");
+  VSFileSystem::vs_fprintf (stderr,"nxml");
 #endif
   xml = new AIScriptXML;
 
@@ -788,73 +790,77 @@ using namespace AiXml;
   xml->acc=2;
   xml->defaultvec=QVector(0,0,0);
   xml->defaultf=0;
+
 #ifdef BIDBG
-  fprintf (stderr,"parscrea");
+  VSFileSystem::vs_fprintf (stderr,"parscrea");
 #endif
   XML_Parser parser = XML_ParserCreate(NULL);
 #ifdef BIDBG
-  fprintf (stderr,"usdat %x",parser);
+  VSFileSystem::vs_fprintf (stderr,"usdat %x",parser);
 #endif
   XML_SetUserData(parser, this);
 #ifdef BIDBG
-  fprintf (stderr,"elha");
+  VSFileSystem::vs_fprintf (stderr,"elha");
 #endif
 
   XML_SetElementHandler(parser, &AIScript::beginElement, &AIScript::endElement);
 #ifdef BIDBG
-  fprintf (stderr,"do");
+  VSFileSystem::vs_fprintf (stderr,"do");
 #endif
 
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+  /*
   do {
 #ifdef BIDBG
-    fprintf (stderr,"bufget");
+    VSFileSystem::vs_fprintf (stderr,"bufget");
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-    fprintf (stderr,"%xebufget",buf);
+    VSFileSystem::vs_fprintf (stderr,"%xebufget",buf);
 #else
     char buf[chunk_size];
 #endif
     int length;
 
     
-    length = fread (buf,1 ,chunk_size,inFile);
+    length = VSFileSystem::vs_read (buf,1 ,chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    fprintf (stderr,"pars%d",length);
-    XML_ParseBuffer(parser, length, feof(inFile));
-    fprintf (stderr,"ed");
+    VSFileSystem::vs_fprintf (stderr,"pars%d",length);
+    XML_ParseBuffer(parser, length, Feof(inFile));
+    VSFileSystem::vs_fprintf (stderr,"ed");
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
 
-  } while(!feof(inFile));
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
 #ifdef BIDBG
-  fprintf (stderr,"%xxml_free",parser);
+  VSFileSystem::vs_fprintf (stderr,"%xxml_free",parser);
   fflush (stderr);
 #endif
   XML_ParserFree (parser);
 #ifdef BIDBG
-  fprintf (stderr,"xml_freed");
+  VSFileSystem::vs_fprintf (stderr,"xml_freed");
 #endif
-  fclose (inFile);
+  f.Close();
   for (unsigned int i=0;i<xml->orders.size();i++) {
 #ifdef BIDBG
-  fprintf (stderr,"parset");
+  VSFileSystem::vs_fprintf (stderr,"parset");
 #endif
     xml->orders[i]->SetParent(parent);
     EnqueueOrder (xml->orders[i]);
 #ifdef BIDBG
-  fprintf (stderr,"cachunkx");
+  VSFileSystem::vs_fprintf (stderr,"cachunkx");
 #endif
 
   }
 #ifdef BIDBG
-  fprintf (stderr,"xml%x",xml);
+  VSFileSystem::vs_fprintf (stderr,"xml%x",xml);
   fflush (stderr);
 #endif
 
   delete xml;
 #ifdef BIDBG
-  fprintf (stderr,"\\xml\n");
+  VSFileSystem::vs_fprintf (stderr,"\\xml\n");
   fflush (stderr);
 #endif
 
@@ -867,14 +873,14 @@ AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACIN
 
 AIScript::~AIScript () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"sc%x",this);
+  VSFileSystem::vs_fprintf (stderr,"sc%x",this);
   fflush (stderr);
 #endif
   if (filename) {
     delete [] filename;
   }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"sc\n");
+  VSFileSystem::vs_fprintf (stderr,"sc\n");
   fflush (stderr);
 #endif
 }
@@ -883,13 +889,13 @@ void AIScript::Execute () {
   if (filename) {
     LoadXML ();
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fn%x",this);
+  VSFileSystem::vs_fprintf (stderr,"fn%x",this);
   fflush (stderr);
 #endif
     delete [] filename;
     filename = NULL;
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fn");
+  VSFileSystem::vs_fprintf (stderr,"fn");
   fflush (stderr);
 #endif
 	

@@ -3,7 +3,7 @@
 #include "universe_generic.h"
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "configxml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
@@ -236,7 +236,7 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   SystemInfo si;
   si.sector =getStarSystemSector (file); 
   si.name =RemoveDotSystem (getStarSystemName (file).c_str()); 
-  si.filename=MakeSharedStarSysPath(file);
+  si.filename=file;
   si.sunradius=parse_float(getVarEitherSectionOrSub(galaxy,si.sector,si.name,"sun_radius",tostring(Ave.sunradius)));
   si.compactness=parse_float(getVarEitherSectionOrSub(galaxy,si.sector,si.name,"compactness",tostring(Ave.compactness)));
   si.numstars=parse_int(getVarEitherSectionOrSub(galaxy,si.sector,si.name,"num_stars",tostring(Ave.numstars)));

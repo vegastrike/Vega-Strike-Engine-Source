@@ -1,8 +1,19 @@
 
 *** GENERAL ************************************************************
 
-- Switch to the usage of the ZoneMgr::Systems map instead of reading file on demand
-- HOW the hell can we assign serials to bases, planets and stuff and having the same on client/server sides
+- Move accounts.xml into datadir/accounts/ dir
+- Fix accounts.xml being written in homedir instead of datadir in acctserver.cpp when account subscription from web
+- Fix the generated BSP save path
+TO TEST - Possibility of specifying a mod
+TO TEST - Add the command line datapath if supplied !
+- Add a ranking system for each faction in factions.xml
+- Have a device (maybe in upgrade list) for networking communications and prevent usage of device if not present on ship
+- About NetworkCommunications : assign a different freq range to different communication devices and some with ability to secure comms
+- Vsnet_dloadmgr -> save starsystems in homedir !!!
+
+- Move the addPosition stuff from zonemgr.cpp::broadcastSnapshot out of the client test
+  (Because for now since systems are not dled, client does not know about a system's units serials)
+- Switch to the usage of the ZoneMgr::Systems map instead of reading file on demand and then send a buffer to buffer download
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
                how can I compute positions between 2 updates with interpolation ?
 - Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
@@ -10,9 +21,8 @@
   - TO TEST with RSA
   - with blowfish
   - with 3des
-- LOW : Complete jVoIP support
+- REMOVE jVoIP support if PortAudio works well
 - PortAudio : tune MAX_PA_CPU_LOAD when support is complete
-- About NetworkCommunications : assign a different freq range for each faction ?
 - NOTE : network communication system is only working when 1 local player
 - NOTE : Only client with crypto can connect correctly to a crypto server and vice-versa
 
@@ -24,8 +34,8 @@
 
 *** GAME SERVER ********************************************************
 
-- Script call unit : broadcast a message to starsystems' client to make them create units created in script_call_unit.cpp
-                     add the created units in the zone's unit list
+- Find a caching system that load all units (and creates not only buffers XML) and meshes
+- On star system loading : make a buffer with all unit/planet/nebula creation corresponding to the system
 - When testing timed out clients if we never received a position update it might be a problem
 - Fix ping computation
 - Depending on ping -> send the player its own info in order to update himself periodicaly (like 1 time per 2 or 3 seconds)
@@ -58,6 +68,19 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE - Use scandir to list all mods found in datadir/mods and homedir/mods
+DONE - Add a vector that keeps track of what FileType use volumes instead of checking everytime against Unknown
+DONE - Always look for the real file in homedir even when using volume
+DONE - Change cmd/music.cpp and LoadMusic() to use VSFile
+DONE - Replace all FileExists() with LookForFile in VS code except in vsfilesystem.cpp
+DONE - Have universes saved and stored in a subdirectory with its name
+DONE - Write the atmosphere texture files in a homdir+"/textures/" subdir
+DONE - Have the sectors saved in homedir saved in fact in homedir+sectors like in data tree
+DONE - Modify vsfilesystem.cpp : vsopen and OpenCreateWrite in order to display info about path when writing to files
+DONE - Write generated systems in homedir/sectors and not in homedir
+DONE - Set the internal path variable of a VSFile when succesfully opened
+DONE - Make all vs_open to look in homedir first
+DONE - Move the stardate received in ADDEDYOU (client side) to LOGIN_ACCEPT
 DONE - Check for netbuf.get* in conditionals -> SHOULD NOT BE IN CONDITIONALS !!
 DONE - Use crypto lib classes instead of the 2 md5 files I'm using now or use sha1
 DONE - Netcomm : Add support for secure channels (encrypt with a key every data send on those channels) add encryption stuff
@@ -109,6 +132,10 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - Make sure that in script_call_unit_generic.cpp serial is passed to UnitFactory call
+DONE - ZoneMgr : use directly star_systems vector and its drawList
+DONE - Script call unit : broadcast a message to starsystems' client to make them create units created in script_call_unit.cpp
+                     add the created units in the zone's unit list
 DONE - Remove unit from star system when docking and add it again when undocking
 DONE - netserver_devices.cpp : broadcast CMD_JUMP
 DONE - Redo jumps :

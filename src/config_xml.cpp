@@ -244,6 +244,11 @@ void GameVegaConfig::initCommandMap(){
   command_map["TimeDec"]=dec_time_compression;
   command_map["TimeReset"]=reset_time_compression;
   // mapping from command string to keyboard handler
+  // Networking bindings
+
+
+  command_map["SwitchWebcam"]=FlyByKeyboard::SwitchWebcam ;
+  command_map["SwitchSecured"]=FlyByKeyboard::SwitchSecured ;
   command_map["ChangeCommStatus"]=FlyByKeyboard::ChangeCommStatus ;
   command_map["UpFreq"]=FlyByKeyboard::UpFreq ;
   command_map["DownFreq"]=FlyByKeyboard::DownFreq ;

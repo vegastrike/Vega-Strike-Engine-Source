@@ -173,6 +173,7 @@ void	NetClient::receivePosition( const Packet* packet )
 	bool			localplayer = false;
 
 	nbclts = packet->getSerial();
+	this->elapsed_since_packet = 0;
 
 	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
 	// We don't want to consider a late snapshot
@@ -181,13 +182,15 @@ void	NetClient::receivePosition( const Packet* packet )
 	{
 	    old_timestamp     = latest_timestamp;
 	    latest_timestamp  = int_ts;
-	    deltatime         = latest_timestamp - old_timestamp;
-		cerr<<"DELTATIME = "<<deltatime<<" --------------------------------"<<endl;
 
 		COUT << "Received update for " << nbclts << " clients - LENGTH="
 		     << packet->getDataLength() << endl;
 		databuf = packet->getData();
 		NetBuffer netbuf( packet->getData(), packet->getDataLength());
+
+		this->deltatime = netbuf.getFloat();
+		cerr<<"DELTATIME = "<<(deltatime*1000)<<" ms"<<endl;
+
 
 		// Loop throught received snapshot
 		for( i=0, j=0; (i+j)<nbclts;)
@@ -196,8 +199,11 @@ void	NetClient::receivePosition( const Packet* packet )
 			cmd = netbuf.getChar();
 			// Get the serial number of current element
 			sernum = netbuf.getSerial();
+			// First test if it is us
+			if( sernum == this->serial)
+				localplayer = true;
 			// Test if it is a client or a unit
-			if( !(clt = Clients.get(sernum)))
+			else if( !(clt = Clients.get(sernum)))
 			{
 				if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
 				{
@@ -208,49 +214,53 @@ void	NetClient::receivePosition( const Packet* packet )
 			else
 				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
 
-			if( clt && !localplayer || un)
+			if( cmd == CMD_FULLUPDATE)
 			{
-				if( clt)
-					un = clt->game_unit.GetUnit();
-	
-				if( cmd == CMD_FULLUPDATE)
+				// Do what needed with update
+				COUT<<"Received FULLSTATE ";
+				// Tell we received the ClientState so we can convert byte order from network to host
+				//cs.display();
+				cs = netbuf.getClientState();
+				if( (!localplayer) && (clt || un))
 				{
-					// Do what needed with update
-					COUT<<"Received FULLSTATE ";
-					// Tell we received the ClientState so we can convert byte order from network to host
-					//cs.display();
-					cs = netbuf.getClientState();
 					cs.display();
-
+					if( clt)
+						un = clt->game_unit.GetUnit();
+					// Get our "semi-ping" from server
+					// We received delay in ms so we convert it into seconds
 					// Backup old state
 					un->BackupState();
 					// Update concerned client with predicted position directly in network client list
 					un->curr_physical_state.position = cs.getPosition();
 					un->curr_physical_state.orientation = cs.getOrientation();
-					prediction->InitInterpolation( clt);
-					un->curr_physical_state = prediction->Interpolate( clt);
+					prediction->InitInterpolation( un, this->deltatime);
+					un->curr_physical_state = prediction->Interpolate( un, this->deltatime);
 					un->Velocity = cs.getVelocity();
 					QVector predpos = un->curr_physical_state.position;
 					cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
-
-					i++;
 				}
-				else if( cmd == CMD_POSUPDATE)
+				else if( localplayer)
+					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+				i++;
+			}
+			else if( cmd == CMD_POSUPDATE)
+			{
+				QVector pos = netbuf.getQVector();
+				if( (!localplayer) && (clt || un))
 				{
-					// Get the serial #
-					sernum = netbuf.getShort();
-					clt = Clients.get(sernum);
-					//COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
-
+					if( clt)
+						un = clt->game_unit.GetUnit();
 					// Backup old state
 					un->BackupState();
 					// Set the new received position in curr_physical_state
-					un->curr_physical_state.position = netbuf.getQVector();
-					prediction->InitInterpolation( clt);
-					un->curr_physical_state.position = prediction->InterpolatePosition( clt);
+					un->curr_physical_state.position = pos;
+					prediction->InitInterpolation( un, this->deltatime);
+					un->curr_physical_state.position = prediction->InterpolatePosition( un, this->deltatime);
 					//predict( sernum);
-					j++;
 				}
+				else if( localplayer)
+					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+				j++;
 			}
 		}
 	}
@@ -289,13 +299,15 @@ void	NetClient::inGame()
 
 void NetClient::sendAlive()
 {
-    if( clt_sock.isTcp() == false )
+    /* WE NEED PING PACKET EVEN IN TCP MODE : THAT ALLOWS US TO COMPUTE A "SEMI-PING" TIME BETWEEN SERVER AND CLIENTS
+	if( clt_sock.isTcp() == false )
     {
+	*/
         Packet	p;
         p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(),
                 (char *)NULL, 0,
                 SENDANDFORGET, NULL, this->clt_sock,
-                __FILE__, PSEUDO__LINE__(1325) );
-    }
+                __FILE__, PSEUDO__LINE__(305) );
+    //}
 }
 

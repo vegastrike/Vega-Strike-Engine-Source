@@ -1,6 +1,5 @@
-
-
-
+#include "vsfilesystem.h"
+using namespace VSFileSystem;
 
 bool NavigationSystem::ParseFile(string filename)
 {
@@ -12,24 +11,27 @@ bool NavigationSystem::ParseFile(string filename)
 	char next = ' ';
 	int totalitems = 0;
 
-	ifstream dataset_file;
-	dataset_file.open("navdata.xml");
+	//ifstream dataset_file;
+	//dataset_file.open("navdata.xml");
+	VSFile f;
+	VSError err = f.OpenReadOnly( "navdata.xml", Unknown);
 
-	if (dataset_file.fail())
+	//if (dataset_file.fail())
+	if( err>Ok)
 	{
 		return 0;
 	}
 
 
-	while (! dataset_file.eof())
+	while (! f.Eof())
 	{
 		if(next == '<')							//	trap <*>
 		{										//	- know what type it is
-			dataset_file.get(next);				//
+			f.Read(&next, 1);				//
 			while(next != '>')					//
 			{									//
 				expression = expression+next;	//
-				dataset_file.get(next);			//
+				f.Read(&next, 1);				//
 			}									//
 
 
@@ -38,7 +40,7 @@ bool NavigationSystem::ParseFile(string filename)
 				while( (expression[expression.size()-1] != '>') || (expression[expression.size()-2] != '-') )
 				{
 					expression = expression+next;
-					dataset_file.get(next);
+					f.Read(&next, 1);
 				}
 				expression = "";
 				continue;
@@ -410,13 +412,13 @@ bool NavigationSystem::ParseFile(string filename)
 				continue;
 		}
 
-		dataset_file.get(next);
+		f.Read(&next, 1);
 		//	do something
 	}
 
 
 
-	dataset_file.close();
+	f.Close();
 	if(totalitems == 0)
 		return 1;	
 	else

@@ -5,47 +5,14 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include "vs_path.h"
-#include "png_texture.h"
+#include "vsfilesystem.h"
+#include "vsimage.h"
+#include "aux_texture.h"
 #ifndef WIN32
-typedef unsigned int DWORD;
-typedef int LONG;
-typedef unsigned short WORD;
-typedef unsigned char BYTE;
-typedef struct {
-        DWORD      biSize;
-        LONG       biWidth;
-        LONG       biHeight;
-        WORD       biPlanes;
-        WORD       biBitCount;
-        DWORD      biCompression;
-        DWORD      biSizeImage;
-        LONG       biXPelsPerMeter;
-        LONG       biYPelsPerMeter;
-        DWORD      biClrUsed;
-        DWORD      biClrImportant;
-} BITMAPINFOHEADER;
-
-typedef struct {
-        WORD    bfType;
-        DWORD   bfSize;
-        WORD    bfReserved1;
-        WORD    bfReserved2;
-        DWORD   bfOffBits;
-} BITMAPFILEHEADER;
-typedef struct {
-        BYTE    rgbBlue;
-        BYTE    rgbGreen;
-        BYTE    rgbRed;
-        BYTE    rgbReserved;
-} RGBQUAD;
-
 #else
 #include <windows.h>
 #include <wingdi.h>
 #endif
-  const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD);
-  const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
 
 #define NumLights 1
 static char *InputName=NULL;
@@ -55,11 +22,15 @@ static float affine=0;
 static float multiplicitive=1;
 static float power=1;
 
+using namespace VSFileSystem;
+
+/*
 struct Vector {
 	float i;
 	float j;
 	float k;
 };
+*/
 struct RGBColor {
 	float r,b,g;
 };
@@ -203,19 +174,26 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 	}
 }
 static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
+using namespace VSFileSystem;
 
   unsigned char ctemp;
-  FILE *fp = NULL;
-  fp = fopen (FileName, "rb");
-  long sizeX;
-  long sizeY;
-	if (!fp)
+  VSFile f;
+  VSError err = f.OpenReadOnly( FileName, Unknown);
+	if (err>Ok)
 	{
 		return false;
 	}
-	int bpp=8;
-	int format=0;
-	unsigned char * palette;
+	Texture tex;
+	unsigned char * data = tex.ReadImage( &f, texTransform, true);
+	int bpp = tex.Depth();
+	int format = tex.Format();
+	bpp/=8;
+	if (format&PNG_HAS_ALPHA) {
+	  bpp*=4;
+	}else {
+	  bpp*=3;
+	}
+	/*
 	unsigned char * data = readImage (fp,bpp,format,*(unsigned long*)&sizeX,*(unsigned long*)&sizeY,palette,texTransform,true);
 	bpp/=8;
 	if (format&PNG_HAS_ALPHA) {
@@ -223,23 +201,11 @@ static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
 	}else {
 	  bpp*=3;
 	}
-	if (data) {
-	  int ii;
-	  int jj;
-	  for (int i=0;i<lmwid;i++) {
-	    ii=(i*sizeY)/lmwid;
-	    for (int j=0;j<lmwid;j++) {
-	      jj= (j*sizeX)/lmwid;
-	      scdata[i][j][0]=data[(ii*sizeX+jj)*bpp];
-	      scdata[i][j][1]=data[(ii*sizeX+jj)*bpp+1];
-	      scdata[i][j][2]=data[(ii*sizeX+jj)*bpp+2];
-	    }
-	  }
 	}else {
-	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+	  VSFileSystem::vs_fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	  //long temp;
 	  BITMAPINFOHEADER info;
-	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	  VSFileSystem::vs_read(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	  sizeX = le32_to_cpu(info.biWidth);
 	  sizeY = le32_to_cpu(info.biHeight);
 
@@ -256,7 +222,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
 		    {
 				//for (int k=2; k>=0;k--)
 				//{
-		      fread (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
+		      VSFileSystem::vs_read (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
 		      unsigned char tmp = data[3*j+itimes3width];
 		      data[3*j+itimes3width]= data[3*j+itimes3width+2];
 		      data[3*j+itimes3width+2]=tmp;
@@ -274,7 +240,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
 	      
 		for(int palcount = 0; palcount < 256; palcount++)
 		  {
-		    fread(paltemp, sizeof(RGBQUAD), 1, fp);
+		    VSFileSystem::vs_read(paltemp, sizeof(RGBQUAD), 1, fp);
 		    //			ctemp = paltemp[0];//don't reverse
 		    //			paltemp[0] = paltemp[2];
 		    //			paltemp[2] = ctemp;
@@ -287,7 +253,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
 		  {
 			for (int j=0; j<sizeX;j++)
 			  {
-			    fread (&ctemp,sizeof (unsigned char),1,fp);
+			    VSFileSystem::vs_read (&ctemp,sizeof (unsigned char),1,fp);
 			    data [3*(i*sizeX+j)+2] = palette[((short)ctemp)*3];	
 			    data [3*(i*sizeX+j)+1] = palette[((short)ctemp)*3+1];
 			    data [3*(i*sizeX+j)] = palette[((short)ctemp)*3+2];
@@ -314,9 +280,25 @@ static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
 		}
 	    }
 	}
-	
-	free  (data);
- 	fclose (fp);
+	*/
+	if (data) {
+	  int ii;
+	  int jj;
+	  for (int i=0;i<lmwid;i++) {
+	    ii=(i*tex.sizeY)/lmwid;
+	    for (int j=0;j<lmwid;j++) {
+	      jj= (j*tex.sizeX)/lmwid;
+	      scdata[i][j][0]=data[(ii*tex.sizeX+jj)*bpp];
+	      scdata[i][j][1]=data[(ii*tex.sizeX+jj)*bpp+1];
+	      scdata[i][j][2]=data[(ii*tex.sizeX+jj)*bpp+2];
+	    }
+	  }
+	  free(data);
+	}
+	else
+		return false;
+
+ 	f.Close();
 	return true;
 }
 struct Texmp
@@ -475,7 +457,8 @@ static void GenerateSphereMap()
 	info.biClrUsed=0;
 	info.biClrImportant=0;
 
-	png_write (OutputName,LightMap,lmwid,lmwid,false,8);
+	VSImage image;
+	image.WriteImage( (char *)OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile);
  
 }
 void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, float m, float p, bool w)
@@ -485,26 +468,33 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
     multiplicitive=m;
     power=p;
     pushdown =w;
-    char * tmp = (char *) malloc (sizeof(char)*strlen(inpt)+40);
+	int size = sizeof(char)*strlen(inpt)+40;
+    char * tmp = (char *) malloc (size);
     strcpy (tmp,inpt);
-    FILE * fp = fopen (strcat (tmp,"_sphere.bmp"),"rb");
-    if (!fp)
-      fp = fopen (strcat (tmp,"_up.bmp"),"rb");
+	VSFile f;
+	VSError err = f.OpenReadOnly( strcat (tmp,"_sphere.bmp"), TextureFile);
+    if (err>Ok)
+	{
+	  memset( tmp, 0, size);
+	  strcpy( tmp, inpt);
+	  VSError err = f.OpenReadOnly( strcat (tmp,"_up.bmp"), TextureFile);
+	}
     //bool share = false;
     std::string s;
-    if (!fp) {
-      s = GetSharedTexturePath (std::string (inpt));
+    if (err>Ok) {
+      //s = VSFileSystem::GetSharedTexturePath (std::string (inpt));
+      s = VSFileSystem::sharedtextures+"/"+string(inpt);
       InputName = (char *) malloc (sizeof (char)*(s.length()+2));
       strcpy (InputName,s.c_str());
     } else {
-      fclose (fp);
+      f.Close();
       InputName = (char *) malloc (sizeof (char)*(strlen(inpt)+2));
       strcpy (InputName,inpt);
     }
     OutputName=strdup (outpt);
     free(tmp);
     tmp=NULL;
-  fprintf (stderr, "input name %s, output name %s\nAffine %f Mult %f Pow %f\n",InputName, OutputName, affine, multiplicitive, power);
+  VSFileSystem::vs_fprintf (stderr, "input name %s, output name %s\nAffine %f Mult %f Pow %f\n",InputName, OutputName, affine, multiplicitive, power);
   GenerateSphereMap();
   free (InputName);
   free (OutputName);
@@ -577,9 +567,7 @@ static void GenerateLightMap ()
 	char tmp [lmwid];
 	assert (0);
 	strcpy (tmp,OutputName);
-	FILE *fp = fopen (strcat (tmp,"1.bmp"), "wb");
 	png_write (strcat (tmp,"1.bmp"),LightMap, lmwid,lmwid,false,8);
-	fclose (fp);
 }
 
 static void GenerateTexMap ()//DEPRECATED
@@ -653,9 +641,10 @@ static void GenerateTexMap ()//DEPRECATED
 	}
 	char tmp [256]="";
 	strcpy (tmp,OutputName);
-	FILE * fp = fopen (strcat (tmp,".bmp"), "wb");
-	fwrite (Disc,256*256*3,1,fp);
-	fclose (fp);
+	VSFile f;
+	VSError err = f.OpenCreateWrite( strcat (tmp,".bmp"), TextureFile);
+	f.Write (Disc,256*256*3);
+	f.Close();
 	delete [] Disc;	
 }
 */

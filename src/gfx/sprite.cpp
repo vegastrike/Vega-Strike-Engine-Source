@@ -20,7 +20,7 @@
  */
 #include <stdlib.h>
 #include <iostream>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "aux_texture.h"
 #include "sprite.h"
 #include "matrix.h"
@@ -34,9 +34,10 @@
 #endif
 static float *mview = NULL;
 
+using namespace VSFileSystem;
+
 Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   VSCONSTRUCT2('S')
-  vschdir ("sprites");
   xcenter = 0;
   ycenter = 0;
   widtho2 = 0;
@@ -44,47 +45,39 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   rotation = 0;
   surface = NULL;
   maxs = maxt =0;
-  FILE *fp = NULL;
+  VSFile f;
+  VSError err = Unspecified;
   if (file[0]!='\0') {
-    fp = fopen(file, "r");
+	err = f.OpenReadOnly( file, SpriteFile);
   }
-  bool changeup=true;
-  if (!fp) {
-    changeup=false;
-	vscdup();
-	if (file[0]!='\0')
-	  fp = fopen(file,"r");
-  }
-  if (fp) {
+  if (err<=Ok) {
     char texture[64]={0};
     char texturea[64]={0};
-    fscanf(fp, "%63s %63s", texture, texturea);
-    fscanf(fp, "%f %f", &widtho2, &heighto2);
-    fscanf(fp, "%f %f", &xcenter, &ycenter);
-    fclose(fp);
+    f.Fscanf( "%63s %63s", texture, texturea);
+    f.Fscanf( "%f %f", &widtho2, &heighto2);
+    f.Fscanf( "%f %f", &xcenter, &ycenter);
     
     widtho2/=2;
     heighto2/=-2;
     surface=NULL;
     if (g_game.use_sprites||force==GFXTRUE) {
       if (texturea[0]=='0') {
-	surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
+		surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
       } else {
-	surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);    
+		surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);    
       }
       
       if (!surface->LoadSuccess()) {
-	delete surface;
-	surface = NULL;
+		delete surface;
+		surface = NULL;
       }
     }
+    // Finally close file
+    f.Close();
   }else {
     widtho2 = heighto2 = 0;
     xcenter = ycenter = 0;
   }
-  if (changeup) {
-	  vscdup();
-  } 
 }	
 
 Sprite::~Sprite()

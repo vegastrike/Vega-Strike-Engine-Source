@@ -1,4 +1,7 @@
 #include "jpeg_memory.h"
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 #ifdef JPEG_SUPPORT
 
@@ -72,7 +75,7 @@ jpeg_compress_to_file(char *src, char *file, int width, int height, int quality)
   JSAMPROW row_pointer;
 
   if ((outfile = fopen(file, "wb"))==NULL) {
-    fprintf(stderr, "can't open %s\n", file);
+    cerr<<"can't open "<<file<<endl;
     return -1;
   }
 
@@ -102,6 +105,7 @@ jpeg_compress_to_file(char *src, char *file, int width, int height, int quality)
 
   /* destroy the compressor handle */
   jpeg_destroy_compress(&cinfo);
+  fclose( outfile);
   return 0;
 }
 
@@ -196,7 +200,7 @@ jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w, int 
   FILE *infile;
 
   if ((infile = fopen(file, "rb"))==NULL) {
-    fprintf(stderr, "can't open %s\n", file);
+    cerr<<"can't open "<<file<<endl;;
     return;
   }
 

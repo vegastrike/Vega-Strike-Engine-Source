@@ -441,7 +441,7 @@ void UpgradingInfo::SetupCargoList () {
 		for (int i=len-1;i>=0;i--) {
 			string tmp = tostring(len-i-1)+" "+getSaveString(playernum,news_name,i);
 			CargoList->AddTextItem(tmp.c_str(),getSaveString(playernum,news_name,i).c_str());
-			fprintf (stderr,"<*>%s",tmp.c_str());
+			VSFileSystem::vs_fprintf (stderr,"<*>%s",tmp.c_str());
 			
 		}
 
@@ -1037,7 +1037,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  if (0==strcmp (input_buffer,"repair")) {
 	    free (input_buffer);
 	    char *unitdir =GetUnitDir(un->name.c_str());
-	    fprintf (stderr,"SOMETHING WENT WRONG WITH REPAIR UPGRADE");
+	    VSFileSystem::vs_fprintf (stderr,"SOMETHING WENT WRONG WITH REPAIR UPGRADE");
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
@@ -1448,7 +1448,7 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   Unit *un=_Universe->AccessCockpit()->GetParent();
   int playernum=UnitUtil::isPlayerStarship(un);
   if (playernum<0) {
-	  fprintf(stderr,"docked ship not a player");
+	  VSFileSystem::vs_fprintf(stderr,"docked ship not a player");
 	  TempCargo.clear();
 	  return TempCargo;
   }
@@ -1578,7 +1578,7 @@ vector <CargoColor>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
       //      curcategory.push_back (string("briefings"));
       return MakeActiveMissionCargo ();
     }
-    fprintf (stderr,"Error in picking cargo lists");
+    VSFileSystem::vs_fprintf (stderr,"Error in picking cargo lists");
     return TempCargo;
   }
 vector <CargoColor>&UpgradingInfo::GetCargoList () {

@@ -1901,7 +1901,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
     Unit* unit = _Universe->AccessCockpit()->GetParent();
     int playerNum = UnitUtil::isPlayerStarship(unit);
     if(playerNum < 0) {
-        fprintf(stderr,"Docked ship not a player.");
+        VSFileSystem::vs_fprintf(stderr,"Docked ship not a player.");
         return;
     }
 

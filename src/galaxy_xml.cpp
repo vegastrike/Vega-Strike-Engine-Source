@@ -25,7 +25,7 @@
 
 #include <expat.h>
 #include "xml_support.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 
 #include "galaxy_xml.h"
@@ -35,6 +35,7 @@
 #endif
 #include <float.h>
 using namespace XMLSupport;
+using namespace VSFileSystem;
 
 namespace GalaxyXML {
 enum GalaxyNames {
@@ -185,60 +186,60 @@ void Galaxy::processGalaxy(string sys) {
 	}
 #endif
 }
-void dotabs (FILE* fp, unsigned int tabs) {
+void dotabs (VSFileSystem::VSFile & f, unsigned int tabs) {
 	for (unsigned int i=0;i<tabs;++i) {
-		fprintf (fp,"\t");
+		f.Fprintf ("\t");
 	}
 }
-void Galaxy::writeSector(FILE * fp, int tabs) {
+void Galaxy::writeSector(VSFileSystem::VSFile & f, int tabs) {
 	for (StringMap::iterator dat = data.begin();dat!=data.end();++dat) {
-		dotabs(fp,tabs);
-		fprintf (fp,"<var name=\"%s\" value=\"%s\"/>\n",(*dat).first.c_str(),(*dat).second.c_str());
+		dotabs(f,tabs);
+		f.Fprintf ("<var name=\"%s\" value=\"%s\"/>\n",(*dat).first.c_str(),(*dat).second.c_str());
 	}
 	if (subheirarchy) {
 		for (SubHeirarchy::iterator it=  subheirarchy->begin();it!=subheirarchy->end();++it) {
-			dotabs(fp,tabs);
-			fprintf (fp,"<%s name=\"%s\">\n",tabs>1?"system":"sector",(*it).first.c_str());
-			(*it).second.writeSector(fp,tabs+1);
-			dotabs(fp,tabs);
-			fprintf (fp,"</%s>\n",tabs>1?"system":"sector");
+			dotabs(f,tabs);
+			f.Fprintf ("<%s name=\"%s\">\n",tabs>1?"system":"sector",(*it).first.c_str());
+			(*it).second.writeSector(f,tabs+1);
+			dotabs(f,tabs);
+			f.Fprintf ("</%s>\n",tabs>1?"system":"sector");
 		}
 	}
 }
 void Galaxy::writeGalaxy(const char * filename) {
-	FILE * fp = fopen (filename,"w");
-	if (fp ) {
-		fprintf (fp,"<galaxy><systems>\n");
-		writeSector(fp,1);
-		fprintf (fp,"</systems></galaxy>\n");
+	VSFile f;
+	VSError err = f.OpenCreateWrite( filename, UniverseFile);
+	if (err<=Ok ) {
+		f.Fprintf ("<galaxy><systems>\n");
+		writeSector(f,1);
+		f.Fprintf ("</systems></galaxy>\n");
 
 	}
 }
 Galaxy::Galaxy(const char *configfile){
+  using namespace VSFileSystem;
   subheirarchy=NULL;
-  FILE * fp = fopen (configfile,"r");
-  string cf = configfile;
-  if (!fp) {
-    
-    //    fp = fopen ((vs_config->getVariable (
-    cf=getUniversePath()+"/"+configfile;
-	fp = fopen (cf.c_str(),"r");
-  }
-  if (fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly(configfile,UniverseFile);
+  if (err<=Ok) {
 	  GalaxyXML::XML x;
 	  x.g=this;
 	  
 	  XML_Parser parser = XML_ParserCreate(NULL);
 	  XML_SetUserData(parser,&x);
 	  XML_SetElementHandler (parser,&GalaxyXML::beginElement,&GalaxyXML::endElement);
+	  XML_Parse(parser,(f.ReadFull()).c_str(),f.Size(),1);
+	  /*
 	  do {
 		  const int chunk_size = 65536;
 		  char buf[chunk_size];
 		  int length;
-		  length = fread (buf,1,chunk_size,fp);
-		  XML_Parse(parser,buf,length,feof(fp));
-	  }while (!feof(fp));
-	  fclose (fp);
+		  length = VSFileSystem::vs_read (buf,1,chunk_size,fp);
+		  XML_Parse(parser,buf,length,VSFileSystem::vs_feof(fp));
+	  }while (!VSFileSystem::vs_feof(fp));
+	  VSFileSystem::vs_close (fp);
+	  */
+	  f.Close();
 
 	  XML_ParserFree(parser);
   }

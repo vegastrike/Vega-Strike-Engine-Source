@@ -1,32 +1,56 @@
 #include <iostream>
+#include <vector>
 #include "stardate.h"
 #include "lin_time.h"
 
 using std::cerr;
 using std::cout;
 using std::endl;
+using std::vector;
+
+class Faction;
+extern vector <Faction *> factions;
 
 StarDate::StarDate()
 {
-	// InitTime should have been called in the beginning of the main server loop
 	initial_time = getNewTime();
+	initial_star_time = NULL;
+}
+
+void	StarDate::Init( double time)
+{
+	initial_time = getNewTime();
+	initial_star_time = new double[factions.size()];
+	for( unsigned int i=0; i<factions.size(); i++)
+		initial_star_time[i] = time;
+}
+
+// Get the current StarDate time in seconds
+double	StarDate::GetCurrentStarTime( int faction)
+{
+	// Get the number of seconds elapsed since the server start
+	double time_since_server_started = getNewTime() - initial_time;
+	// Add them to the current date
+	return (initial_star_time[faction] + time_since_server_started);
+}
+
+/**********************************************************************************/
+/**** Trek Stardate stuff                                                      ****/
+/**********************************************************************************/
+
+void	StarDate::InitTrek( string date)
+{
 	initial_star_time = 0;
-}
-
-StarDate::StarDate( string date)
-{
 	initial_time = getNewTime();
-	initial_star_time = this->ConvertStarDate( date);
-}
-
-void	StarDate::Init( string date)
-{
-	initial_time = getNewTime();
-	initial_star_time = this->ConvertStarDate( date);
+	initial_star_time = new double[factions.size()];
+	double init_time = this->ConvertTrekDate( date);
+	cerr<<"Initializing stardate from a Trek date for "<<factions.size()<<" factions"<<endl;
+	for( unsigned int i=0; i<factions.size(); i++)
+		initial_star_time[i] = init_time;
 }
 
 // Convert a StarDate time into a Stardate string
-string	StarDate::ConvertFullStarDate( double date)
+string	StarDate::ConvertFullTrekDate( double date)
 {
 	unsigned int days, hours, minutes, seconds;
 
@@ -53,7 +77,7 @@ string	StarDate::ConvertFullStarDate( double date)
 	return string( cdate);
 }
 
-string	StarDate::ConvertStarDate( double date)
+string	StarDate::ConvertTrekDate( double date)
 {
 	unsigned int days, hours, minutes, seconds;
 
@@ -72,7 +96,7 @@ string	StarDate::ConvertStarDate( double date)
 }
 
 // Convert a StarDate into a number of seconds
-double	StarDate::ConvertStarDate( string date)
+double	StarDate::ConvertTrekDate( string date)
 {
 	unsigned int days, hours, minutes, seconds, nb, pos;
 	double res;
@@ -97,39 +121,62 @@ double	StarDate::ConvertStarDate( string date)
 	minutes = temphours%100;
 
 	res = days*(24*60*60)+hours*(60*60)+minutes*(60)+seconds;
-	cerr<<"!!! Converted date to = "<<res<<" which stardate is "<<ConvertStarDate(res)<<endl;
+	cerr<<"!!! Converted date to = "<<res<<" which stardate is "<<ConvertTrekDate(res)<<endl;
 	return res;
 }
 
-// Get the current StarDate time in seconds
-double	StarDate::GetCurrentStarTime()
-{
-	// Get the number of seconds elapsed since the server start
-	double time_since_server_started = getNewTime() - initial_time;
-	// Add them to the current date
-	return (initial_star_time + time_since_server_started);
-}
-
 // Get the current StarDate in a string
-string	StarDate::GetFullCurrentStarDate()
+string	StarDate::GetFullTrekDate( int faction)
 {
-	return ConvertFullStarDate( this->GetCurrentStarTime());
+	return ConvertFullTrekDate( this->GetCurrentStarTime( faction));
 }
 
 // Get the current StarDate in a string - short format
-string	StarDate::GetCurrentStarDate()
+string	StarDate::GetTrekDate( int faction)
 {
-	return ConvertStarDate( this->GetCurrentStarTime());
+	return ConvertTrekDate( this->GetCurrentStarTime( faction));
 }
 
 //Convert the string xxxx.y date format into a float representing the same data xxxx.y
-float	StarDate::GetFloatFromDate()
+float	StarDate::GetFloatFromTrekDate( int faction)
 {
 	float float_date;
-	string cur_date = this->GetFullCurrentStarDate();
+	string cur_date = this->GetFullTrekDate( faction);
 	//cout<<"------------------------- STARDATE "<<cur_date<<" --------------------------"<<endl;
 	sscanf( cur_date.c_str(), "%f", &float_date);
 
 	return float_date;
+}
+
+/**********************************************************************************/
+/**** DAN.A Stardate stuff                                                     ****/
+/**********************************************************************************/
+
+void	InitSDate( string date)
+{
+}
+
+string	GetSDate( int faction=0)
+{
+	return string( "");
+}
+
+string	GetFullSDate( int faction=0)
+{
+	return string( "");
+}
+
+/**********************************************************************************/
+/**** String stardate formats conversions                                      ****/
+/**********************************************************************************/
+
+string	SDateFromTrekDate( string trekdate)
+{
+	return string( "");
+}
+
+string	TrekDateFromSDate( string sdate)
+{
+	return string( "");
 }
 

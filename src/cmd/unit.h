@@ -136,20 +136,10 @@ public:
 protected:
   ///fils in corner_min,corner_max and radial_size
   //void calculate_extent(bool update_collide_queue);
-  ///Builds a BSP tree from either the hull or else the current meshdata[] array
-  void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
 
 public:
   ///Updates the collide Queue with any possible change in sectors
-  ///Gets the minimum distance away from the point in 3space
-  double getMinDis(const QVector &pnt);//for clicklist
-  ///queries the ship with a directed ray
-  float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
-  ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true);
-  ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-  Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
   ///Queries if this unit is within a given frustum
   bool queryFrustum (double frustum[6][4]) const;
 

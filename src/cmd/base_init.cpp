@@ -2,7 +2,7 @@
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #ifdef USE_BOOST_129
 #include <boost/python/object.hpp>
 #else
@@ -21,7 +21,7 @@ static boost::python::tuple GetRandomBarMessage () {
 	while (( mission->msgcenter->last(i++,last,who))) {
 		newmsg=last.message;
 		newsound="";
-		int first=newmsg.find_first_of("[");
+		std::string::size_type first=newmsg.find_first_of("[");
 		{
 			int last=newmsg.find_first_of("]");
 			if (first!=string::npos&&(first+1)<newmsg.size()) {

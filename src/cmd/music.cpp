@@ -12,7 +12,7 @@
 #include "lin_time.h"
 #include "collection.h"
 #include "unit_generic.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -31,13 +31,11 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
     maxhull=1;
   }
   int i;
-  changehome();
   const char *listvars [MAXLIST]={"battleplaylist","peaceplaylist","panicplaylist","victoryplaylist","lossplaylist"};
   const char *deflistvars [MAXLIST]={"battle.m3u","peace.m3u","panic.m3u","victory.m3u","loss.m3u"};
   for (i=0;i<MAXLIST;i++) {
     LoadMusic(vs_config->getVariable ("audio",listvars[i],deflistvars[i]).c_str());
   }
-  returnfromhome();
   socket=-1;
   INET_startup();
   for (i=0;(i<10)&&(socket==-1);i++)
@@ -67,17 +65,16 @@ void Music::ChangeVolume (float inc) {
 }
 
 bool Music::LoadMusic (const char *file) {
-  FILE *fp = fopen (file,"r");
-  if (!fp) {
-    string temp (datadir+"/.vegastrike/"+file);
-    fp = fopen (temp.c_str(),"r");
-  }
+	using namespace VSFileSystem;
+	// Loads a playlist so try to open a file in datadir or homedir
+  VSFile f;
+  VSError err = f.OpenReadOnly( file, Unknown);
   char songname[1024];
   this->playlist.push_back(std::vector <std::string> ());
-  if (fp) {
-    while (!feof (fp)) {
+  if (err<=Ok) {
+    while (!f.Eof()) {
       songname[0]='\0';
-      fgets (songname,1022,fp);
+      f.ReadLine(songname,1022);
       int size = strlen(songname);
       if (size>=1) 
 	if (songname[size-1]=='\n') {
@@ -91,7 +88,7 @@ bool Music::LoadMusic (const char *file) {
 	continue;
       this->playlist.back().push_back (std::string(songname));
     }
-    fclose (fp);
+    f.Close();
   }else {
     return false;
   }
@@ -216,9 +213,7 @@ void Music::SkipRandList() {
 }
 
 int Music::Addlist (std::string listfile) {
-	changehome();
 	bool retval=LoadMusic(listfile.c_str());
-	returnfromhome();
 	if (retval) {
 	  return playlist.size()-1;
 	}else {

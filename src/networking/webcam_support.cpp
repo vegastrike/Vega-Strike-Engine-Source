@@ -3,7 +3,7 @@
 #include <iostream>
 #include "webcam_support.h"
 #include "lin_time.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "gldrv/winsys.h"
 
@@ -124,26 +124,26 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			char file[256];
 			memset( file, 0, 256);
 			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".bmp");
-			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
-			string path = datadir+file;
+			//string path = VSFileSystem::datadir+"testcam"+string( ws->nbframes)+".jpg";
+			string path = VSFileSystem::datadir+file;
 			FILE * fp;
-			fp = fopen( path.c_str(), "wb");
+			fp = VSFileSystem::vs_open( path.c_str(), "wb");
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;
 				VSExit(1);
 			}
-			if( fwrite( &BitmapInfo, 1, sizeof(BITMAPINFOHEADER), fp)!=sizeof(BITMAPINFOHEADER))
+			if( VSFileSystem::Write( &BitmapInfo, 1, sizeof(BITMAPINFOHEADER), fp)!=sizeof(BITMAPINFOHEADER))
 			{
 				cerr<<"!!! ERROR : writing jpeg description to file 1"<<endl;
 				VSExit(1);
 			}
-			if( fwrite( pBuffer, 1, BufferLen, fp)!=BufferLen)
+			if( VSFileSystem::Write( pBuffer, 1, BufferLen, fp)!=BufferLen)
 			{
 				cerr<<"!!! ERROR : writing jpeg description to file"<<endl;
 				VSExit(1);
 			}
-			fclose( fp);
+			VSFileSystem::vs_close( fp);
 			*/
 
 			// jpeg_compress doesn't allocate any data so we have to use a buffer for destination
@@ -153,7 +153,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			memset( file, 0, 256);
 			memset( fullfile, 0, 256);
 			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
-			strcat( fullfile, datadir.c_str());
+			strcat( fullfile, VSFileSystem::datadir.c_str());
 			strcat( fullfile, file);
 /*
 METHODDEF(void) init_destination (j_compress_ptr cinfo);
@@ -218,21 +218,21 @@ pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chR
 			char file[256];
 			memset( file, 0, 256);
 			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
-			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
-			string path = datadir+file;
+			//string path = VSFileSystem::datadir+"testcam"+string( ws->nbframes)+".jpg";
+			string path = VSFileSystem::datadir+file;
 			FILE * fp;
-			fp = fopen( path.c_str(), "wb");
+			fp = VSFileSystem::vs_open( path.c_str(), "wb");
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;
 				VSExit(1);
 			}
-			if( fwrite( p, 1, len, fp)!=len)
+			if( VSFileSystem::Write( p, 1, len, fp)!=len)
 			{
 				cerr<<"writing jpeg description to file"<<endl;
 				VSExit(1);
 			}
-			fclose( fp);
+			VSFileSystem::vs_close( fp);
 		}
 		*/
 	}
@@ -865,7 +865,7 @@ char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bm
     cinfo.err = jpeg_std_error(&jerr); //Use default error handling (ugly!)
     jpeg_create_compress(&cinfo);
 
-    if ((pOutFile = fopen(csJpeg.c_str(), "wb")) == NULL)
+    if ((pOutFile = VSFileSystem::vs_open(csJpeg.c_str(), "wb")) == NULL)
 	{
 		cerr<<"opening of jpeg file failed.";
 		VSExit(1);
@@ -900,7 +900,7 @@ char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bm
     }
 
     jpeg_finish_compress(&cinfo); //Always finish
-    fclose(pOutFile);
+    VSFileSystem::vs_close(pOutFile);
     jpeg_destroy_compress(&cinfo); //Free resources
 
 	return NULL;
@@ -1022,7 +1022,7 @@ BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
 
     jpeg_create_compress(&cinfo);
 
-    if ((pOutFile = fopen(csJpeg.c_str(), "wb")) == NULL)
+    if ((pOutFile = VSFileSystem::vs_open(csJpeg.c_str(), "wb")) == NULL)
     {
         *pcsMsg = "Cannot open ";
 		*pcsMsg += csJpeg;
@@ -1070,7 +1070,7 @@ BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
 
     jpeg_finish_compress(&cinfo); //Always finish
 
-    fclose(pOutFile);
+    VSFileSystem::vs_close(pOutFile);
 
     jpeg_destroy_compress(&cinfo); //Free resources
 
@@ -2285,7 +2285,7 @@ int getFrequency(int region, int index)
 {
  if ((region>=0) && (region<NUM_CHANNEL_LISTS)) {
   if ((index>=0) && (index<chanlists[region].count)) {  
-   fprintf(stderr,"Region %s : Channel %s\n",chanlists[region].name,chanlists[region].list[index].name);
+   VSFileSystem::vs_fprintf(stderr,"Region %s : Channel %s\n",chanlists[region].name,chanlists[region].list[index].name);
    return(chanlists[region].list[index].freq);
   }
  }  
@@ -2365,27 +2365,27 @@ int fg_print_info(struct fgdevice *fg)
   
   /* List capabilities */
   
-  fprintf (stderr,"Device Info: ");
-  fprintf (stderr,"%s\n",video_caps.name);
+  VSFileSystem::vs_fprintf (stderr,"Device Info: ");
+  VSFileSystem::vs_fprintf (stderr,"%s\n",video_caps.name);
 
-  fprintf (stderr," Can capture ... : %s  ",BooleanText[((video_caps.type & VID_TYPE_CAPTURE) == 0)]);
-  fprintf (stderr," Can clip ...... : %s  ",BooleanText[((video_caps.type & VID_TYPE_CLIPPING) == 0)]);
-  fprintf (stderr," Channels ...... : %i\n",video_caps.channels);
+  VSFileSystem::vs_fprintf (stderr," Can capture ... : %s  ",BooleanText[((video_caps.type & VID_TYPE_CAPTURE) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Can clip ...... : %s  ",BooleanText[((video_caps.type & VID_TYPE_CLIPPING) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Channels ...... : %i\n",video_caps.channels);
 
-  fprintf (stderr," Has tuner ..... : %s  ",BooleanText[((video_caps.type & VID_TYPE_TUNER) == 0)]);
-  fprintf (stderr," Ovl overwrites  : %s  ",BooleanText[((video_caps.type & VID_TYPE_FRAMERAM) == 0)]);
-  fprintf (stderr," Audio devices . : %i\n",video_caps.audios);
+  VSFileSystem::vs_fprintf (stderr," Has tuner ..... : %s  ",BooleanText[((video_caps.type & VID_TYPE_TUNER) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Ovl overwrites  : %s  ",BooleanText[((video_caps.type & VID_TYPE_FRAMERAM) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Audio devices . : %i\n",video_caps.audios);
 
-  fprintf (stderr," Has teletext .. : %s  ",BooleanText[((video_caps.type & VID_TYPE_TELETEXT) == 0)]);
-  fprintf (stderr," Can scale ..... : %s  ",BooleanText[((video_caps.type & VID_TYPE_SCALES) == 0)]);
-  fprintf (stderr," Width min-max . : %i-%i\n",video_caps.minwidth,video_caps.maxwidth);
+  VSFileSystem::vs_fprintf (stderr," Has teletext .. : %s  ",BooleanText[((video_caps.type & VID_TYPE_TELETEXT) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Can scale ..... : %s  ",BooleanText[((video_caps.type & VID_TYPE_SCALES) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Width min-max . : %i-%i\n",video_caps.minwidth,video_caps.maxwidth);
 
-  fprintf (stderr," Can overlay ... : %s  ",BooleanText[((video_caps.type & VID_TYPE_OVERLAY) == 0)]);
-  fprintf (stderr," Monochrome .... : %s  ",BooleanText[((video_caps.type & VID_TYPE_MONOCHROME) == 0)]);
-  fprintf (stderr," Height min-max  : %i-%i\n",video_caps.minheight,video_caps.maxheight);
+  VSFileSystem::vs_fprintf (stderr," Can overlay ... : %s  ",BooleanText[((video_caps.type & VID_TYPE_OVERLAY) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Monochrome .... : %s  ",BooleanText[((video_caps.type & VID_TYPE_MONOCHROME) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Height min-max  : %i-%i\n",video_caps.minheight,video_caps.maxheight);
   
-  fprintf (stderr," Can chromakey . : %s  ",BooleanText[((video_caps.type & VID_TYPE_CHROMAKEY) == 0)]);
-  fprintf (stderr," Can subcapture  : %s\n",BooleanText[((video_caps.type & VID_TYPE_SUBCAPTURE) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Can chromakey . : %s  ",BooleanText[((video_caps.type & VID_TYPE_CHROMAKEY) == 0)]);
+  VSFileSystem::vs_fprintf (stderr," Can subcapture  : %s\n",BooleanText[((video_caps.type & VID_TYPE_SUBCAPTURE) == 0)]);
   
   /* List input channels */
   
@@ -2396,15 +2396,15 @@ int fg_print_info(struct fgdevice *fg)
     perror ("ioctl (VIDIOCGCHAN)");
     return(-1);
    } else {
-    fprintf (stderr," Channel %i: %s ",i,video_chnl.name);
+    VSFileSystem::vs_fprintf (stderr," Channel %i: %s ",i,video_chnl.name);
     if ((video_chnl.type & VIDEO_TYPE_TV)==0) {
-     fprintf (stderr,"(camera input)\n");
+     VSFileSystem::vs_fprintf (stderr,"(camera input)\n");
     } else {
-     fprintf (stderr,"(TV input)\n");
+     VSFileSystem::vs_fprintf (stderr,"(TV input)\n");
     } 
-    fprintf (stderr,"  Tuners : %i  ",video_chnl.tuners);
+    VSFileSystem::vs_fprintf (stderr,"  Tuners : %i  ",video_chnl.tuners);
     if (video_chnl.tuners>max_tuner) max_tuner=video_chnl.tuners; 
-    fprintf (stderr,"  Has audio : %s\n",BooleanText[((video_chnl.flags & VIDEO_VC_AUDIO) == 0)]);
+    VSFileSystem::vs_fprintf (stderr,"  Has audio : %s\n",BooleanText[((video_chnl.flags & VIDEO_VC_AUDIO) == 0)]);
    }
   }
   
@@ -2415,13 +2415,13 @@ int fg_print_info(struct fgdevice *fg)
     perror ("ioctl (VIDIOCGAUDIO)");
     return(-1);
    } else {
-    fprintf (stderr," Audio %i: %s\n",i,video_aud.name);
-    fprintf (stderr,"  Controllable: ");
-    if ((video_aud.flags & VIDEO_AUDIO_MUTABLE) != 0) fprintf (stderr,"Muting ");
-    if ((video_aud.flags & VIDEO_AUDIO_VOLUME) != 0) fprintf (stderr,"Volume ");
-    if ((video_aud.flags & VIDEO_AUDIO_BASS) != 0) fprintf (stderr,"Bass ");
-    if ((video_aud.flags & VIDEO_AUDIO_TREBLE) != 0) fprintf (stderr,"Treble ");
-    fprintf (stderr,"\n");
+    VSFileSystem::vs_fprintf (stderr," Audio %i: %s\n",i,video_aud.name);
+    VSFileSystem::vs_fprintf (stderr,"  Controllable: ");
+    if ((video_aud.flags & VIDEO_AUDIO_MUTABLE) != 0) VSFileSystem::vs_fprintf (stderr,"Muting ");
+    if ((video_aud.flags & VIDEO_AUDIO_VOLUME) != 0) VSFileSystem::vs_fprintf (stderr,"Volume ");
+    if ((video_aud.flags & VIDEO_AUDIO_BASS) != 0) VSFileSystem::vs_fprintf (stderr,"Bass ");
+    if ((video_aud.flags & VIDEO_AUDIO_TREBLE) != 0) VSFileSystem::vs_fprintf (stderr,"Treble ");
+    VSFileSystem::vs_fprintf (stderr,"\n");
    } 
   }
 
@@ -2431,9 +2431,9 @@ int fg_print_info(struct fgdevice *fg)
    return(-1);
   }
   /* Print memory info */
-  fprintf (stderr,"Memory Map of %i frames: %i bytes\n",fg->vid_mbuf.frames,fg->vid_mbuf.size);
+  VSFileSystem::vs_fprintf (stderr,"Memory Map of %i frames: %i bytes\n",fg->vid_mbuf.frames,fg->vid_mbuf.size);
   for (i=0; i<fg->vid_mbuf.frames; i++) {
-   fprintf (stderr," Offset of frame %i: %i\n",i,fg->vid_mbuf.offsets[i]);
+   VSFileSystem::vs_fprintf (stderr," Offset of frame %i: %i\n",i,fg->vid_mbuf.offsets[i]);
   }
  }
  
@@ -2531,7 +2531,7 @@ int fg_set_channel(struct fgdevice *fg, int channel, int videomode)
   video_chan.channel=channel; 
   if (ioctl (fg->video_dev, VIDIOCSCHAN, &video_chan) == -1) {
    perror ("ioctl (VIDIOCSCHAN)");
-   fprintf (stderr,"Channel was %i\n",channel);
+   VSFileSystem::vs_fprintf (stderr,"Channel was %i\n",channel);
    return(-1);
   } 
  }
@@ -2665,7 +2665,7 @@ int fg_start_grab_image (struct fgdevice *fg, int width, int height, int format)
    depth=4;
    break;
   default:
-   fprintf (stderr,"Unknown format.\n");
+   VSFileSystem::vs_fprintf (stderr,"Unknown format.\n");
    return(-1);
    break; 
  }

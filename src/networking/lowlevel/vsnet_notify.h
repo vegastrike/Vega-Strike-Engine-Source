@@ -118,7 +118,7 @@ class FileSet;
 class Notify
 {
 public:
-    virtual void notify( State s, Error e ) = 0;
+    virtual void notify( State s, VSError e ) = 0;
     virtual void setTotalBytes( int sz ) { }
     virtual void addBytes( int sz ) { }
 };
@@ -135,7 +135,7 @@ public:
     NotifyMe( );
     virtual ~NotifyMe( ) { }
 
-    virtual void notify( State s, Error e );
+    virtual void notify( State s, VSError e );
     virtual void setTotalBytes( int sz );
     virtual void addBytes( int sz );
 
@@ -157,7 +157,7 @@ public:
 
 private:
     State _state;
-    Error _error;
+    VSError _error;
     int   _total;
     int   _offset;
 };
@@ -173,10 +173,10 @@ public:
     virtual ~Item( );
 
     State state( ) const;
-    Error error( ) const;
+    VSError error( ) const;
 
     void changeState( State s );
-    void changeState( State s, Error e );
+    void changeState( State s, VSError e );
 
     void setSize( int len );
     void append( unsigned char* buffer, int bufsize );
@@ -197,7 +197,7 @@ private:
 
     mutable VSMutex _mx;
     State           _state;
-    Error           _error;
+    VSError           _error;
     NotifyPtr       _notify;
 };
 
@@ -355,13 +355,13 @@ private:
 class Notify_f : public Notify
 {
 public:
-    typedef void (*NotifyFunction)( std::string str, State s, Error e, int total, int offset );
+    typedef void (*NotifyFunction)( std::string str, State s, VSError e, int total, int offset );
 
 public:
     Notify_f( std::string filename, NotifyFunction fun );
     virtual ~Notify_f();
 
-    virtual void notify( State s, Error e );
+    virtual void notify( State s, VSError e );
     virtual void setTotalBytes( int sz );
     virtual void addBytes( int sz );
 
@@ -390,7 +390,7 @@ struct Notify_fp : public NotifyPtr
 class VSNotify : public Notify
 {
 	public:
-		void notify( State s, Error e);
+		void notify( State s, VSError e);
     	void setTotalBytes( int sz );
     	void addBytes( int sz );
 };

@@ -346,7 +346,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
       return false;
         static int test=0;
         if (test++%1000==1)
-            fprintf (stderr,"lost target");
+            VSFileSystem::vs_fprintf (stderr,"lost target");
     }
   float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
   missilelock=false;
@@ -360,7 +360,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
 
 FireAt::~FireAt() {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fire%x\n",this);
+  VSFileSystem::vs_fprintf (stderr,"fire%x\n",this);
   fflush (stderr);
 #endif
 

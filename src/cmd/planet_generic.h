@@ -6,15 +6,11 @@
 #include "ai/order.h"
 #include "configxml.h"
 //#include "gfx/planetary_transform.h"
+#include "gfxlib_struct.h"
 #include "images.h"
 class Atmosphere;
 class PlanetaryTransform;
 class ContinuousTerrain;
-
-struct GFXLightLocal {
-  GFXLight ligh;
-  bool islocal;
-};
 
 class PlanetaryOrbit : public Order {
  private:

@@ -1,5 +1,5 @@
 #include "in.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "cockpit_generic.h"
@@ -64,6 +64,7 @@ void Cockpit::Eject() {
   ejecting=true;
 }
 
+using namespace VSFileSystem;
 void Cockpit::Init (const char * file, bool isDisabled) {
   shakin=0;
   autopilot_time=0;
@@ -81,17 +82,10 @@ void Cockpit::Init (const char * file, bool isDisabled) {
     Init (disname.c_str());
     return;
   }
-  string cpdir=vs_config->getVariable("data","cockpits","");
-  if (cpdir.length())
-	  vschdir (cpdir.c_str());  
-  vschdir (file);
-  FILE *tempfp = fopen(file, "rb");
-  vscdup();
-  if (cpdir.length())
-	  vscdup();  
-  if (tempfp) {
-	  fclose(tempfp);
-  } else {
+  VSFile f;
+  VSError err = f.OpenReadOnly( file, CockpitFile);
+  if (err>Ok)
+  {
 	  // File not found...
 	  if (isDisabled==false && (string(file).find("disabled-")==string::npos)) {
 	    Init(file, true);
@@ -104,13 +98,8 @@ void Cockpit::Init (const char * file, bool isDisabled) {
   }
   Delete();
 //  string cpdir=vs_config->getVariable("data","cockpits","");
-  if (cpdir.length())
-	  vschdir (cpdir.c_str());
-  vschdir (file);
-  LoadXML(file);
-  vscdup();
-  if (cpdir.length())
-	  vscdup();
+  LoadXML(f);
+  f.Close();
 } 
 Unit *  Cockpit::GetSaveParent() {
   Unit * un = parentturret.GetUnit();
@@ -163,6 +152,7 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
   fg=NULL;
+  jumpok = 0;
   /*
   for (i=0;i<headlag;i++) {
     headtrans.push_back (Matrix());

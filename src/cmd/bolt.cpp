@@ -209,7 +209,7 @@ Bolt::~Bolt () {
     (*target)[decal].erase(tmp);
   } else {
     //might as well look for potential faults! Doesn't cost us time
-    fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
+    VSFileSystem::vs_fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
     for (vector <vector <Bolt *> > *srch = &q->bolts;srch!=NULL;srch=&q->balls) {
       for (unsigned int mdecal=0;mdecal<(*srch).size();mdecal++) {
 	vector <Bolt *>::iterator mtmp= (*srch)[mdecal].begin();
@@ -217,7 +217,7 @@ Bolt::~Bolt () {
 	  std::find ((*srch)[mdecal].begin(),(*srch)[mdecal].end(),this);       
 	  if (mtmp!=(*srch)[mdecal].end()) {
 	    (*srch)[mdecal].erase (mtmp);
-	    fprintf (stderr,"Bolt Fault Recovered\n");
+	    VSFileSystem::vs_fprintf (stderr,"Bolt Fault Recovered\n");
 	  }
 	}
       }

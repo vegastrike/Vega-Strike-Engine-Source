@@ -1,5 +1,5 @@
 #include <set>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -84,11 +84,6 @@ void NavigationSystem::mouseClick (int button, int state, int x, int y){
 void NavigationSystem::Setup()
 
 {
-
-	string directory = "default";
-	vschdir ("nav"); 
-	vschdir (directory.c_str());
-
 	configmode = 0;
 
 	rotations = 0;
@@ -343,10 +338,6 @@ void NavigationSystem::Setup()
 		system_item_scale *= (screenskipby4[3]-screenskipby4[2]);
 
 	screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1);
-
-
-	vscdup(); 
-	vscdup(); 
 }
 
 //	**********************************

@@ -3,6 +3,7 @@
 #include "xml_support.h"
 #include <vector>
 #include <string>
+#include "vsfilesystem.h"
 using std::string;
 using std::vector;
 struct XMLType {
@@ -76,7 +77,7 @@ struct XMLElement {
     elem = ele;
     handler = hand;
   }
-  void Write (FILE * fp,void *mythis);
+  void Write (VSFileSystem::VSFile & f,void *mythis);
   string WriteString (void *mythis);
 };
 struct XMLnode {
@@ -86,7 +87,7 @@ struct XMLnode {
   vector <XMLnode> subnodes;
   XMLnode () {up=NULL;}
   XMLnode (const std::string &val, XMLnode * newup) {this->val=val;up=newup;}
-  void Write (FILE * fp, void *mythis, int tablevel);
+  void Write (VSFileSystem::VSFile & f, void *mythis, int tablevel);
   string WriteString( void *mythis, int tablevel);
 };
 class XMLSerializer {

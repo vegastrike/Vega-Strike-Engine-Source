@@ -42,7 +42,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "cmd/unit_generic.h"
 
@@ -104,7 +104,6 @@ void Mission::DirectorLoop(){
   RunDirectorScript("gameloop");
 
 }
-extern std::string HOMESUBDIR;
 void Mission::DirectorEnd(){
   if(director==NULL){
     return;
@@ -118,7 +117,7 @@ void Mission::DirectorEnd(){
   pwent=getpwuid(getuid());
   //  printf("home save dir: %s\n",pwent->pw_dir);
 
-  string var_file=string(pwent->pw_dir)+string(DELIMSTR)+HOMESUBDIR+string(DELIMSTR)+string("default-player.variables");
+  string var_file=string(pwent->pw_dir)+string(DELIMSTR)+VSFileSystem::HOMESUBDIR+string(DELIMSTR)+string("default-player.variables");
   //var_out.open("/tmp/default-player.variables");
   var_out.open(var_file.c_str());
 #endif

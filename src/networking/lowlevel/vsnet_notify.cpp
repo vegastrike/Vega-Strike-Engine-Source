@@ -1,7 +1,7 @@
 #include <config.h>
 #include <fstream>
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vsnet_dloadmgr.h"
 #include "vsnet_notify.h"
 #include "vsnet_debug.h"
@@ -25,7 +25,7 @@ NotifyMe::NotifyMe( )
     , _offset( 0 )
 { }
 
-void NotifyMe::notify( State s, Error e )
+void NotifyMe::notify( State s, VSError e )
 {
     _state = s;
     _error = e;
@@ -66,10 +66,10 @@ State Item::state( ) const
     return ret;
 }
 
-Error Item::error( ) const
+VSError Item::error( ) const
 {
     _mx.lock( );
-    Error ret = _error;
+    VSError ret = _error;
     _mx.unlock( );
     return ret;
 }
@@ -90,12 +90,12 @@ void Item::changeState( State s )
 {
     _mx.lock( );
     _state = s;
-    Error e = _error;
+    VSError e = _error;
     _mx.unlock( );
     if( _notify ) _notify->notify( s, e );
 }
 
-void Item::changeState( State s, Error e )
+void Item::changeState( State s, VSError e )
 {
     _mx.lock( );
     _state = s;
@@ -195,7 +195,7 @@ NoteFile::NoteFile( SOCKETALT          sock,
 
 NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename )
-    : File( sock, filename, datadir, NotifyPtr() )
+    : File( sock, filename, VSFileSystem::homedir, NotifyPtr() )
     , _me( new NotifyMe )
 {
     protected_replace_notifier( _me );
@@ -261,7 +261,7 @@ public:
     NotifyConclusion( FileSet* f, std::string s );
     virtual ~NotifyConclusion( );
 
-    virtual void notify( State s, Error e );
+    virtual void notify( State s, VSError e );
 
 private:
     FileSet*    _fileset;
@@ -278,7 +278,7 @@ FileSet::NotifyConclusion::~NotifyConclusion( )
 {
 }
 
-void FileSet::NotifyConclusion::notify( State s, Error e )
+void FileSet::NotifyConclusion::notify( State s, VSError e )
 {
     if( s==Completed ) _fileset->update( _file, (e==Ok) );
 }
@@ -337,7 +337,7 @@ Notify_f::Notify_f( std::string filename, NotifyFunction fun )
 Notify_f::~Notify_f()
 { }
 
-void Notify_f::notify( State s, Error e )
+void Notify_f::notify( State s, VSError e )
 {
     (*_fun)( _filename, s, e, _total, _offset );
 }
@@ -356,7 +356,7 @@ void Notify_f::addBytes( int sz )
  * definition VsnetDownload::Client::VSNotify
  *------------------------------------------------------------*/
 
-void	VSNotify( VsnetDownload::Client::State s, VsnetDownload::Client::Error e)
+void	VSNotify( VsnetDownload::Client::State s, VSFileSystem::VSError e)
 {
 	cerr << "!!! DOWNLOAD ERROR : State="<< s <<" - Error="<< e <<endl;
 }

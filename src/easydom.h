@@ -32,6 +32,8 @@
 #include <stack>
 #include <map>
 #include <stdlib.h>
+#include "vsfilesystem.h"
+using namespace VSFileSystem;
 #include "xml_support.h"
 
 using std::string;
@@ -119,8 +121,16 @@ domNodeType *LoadXML(const char *filename) {
 
   const int chunk_size = 16384;
   topnode=NULL;
-  FILE * inFile = fopen (filename, "r");
-  if(!inFile) {
+  // Not really nice but should do its job
+  unsigned int length = strlen( filename);
+  assert( length > 16);
+  VSFile f;
+  VSError err;
+  if( !memcmp( (filename+length-7), "mission", 7))
+  	err = f.OpenReadOnly( filename, MissionFile);
+  else
+  	err = f.OpenReadOnly( filename, Unknown);
+  if(err>Ok) {
     //cout << "warning: could not open file: " << filename << endl;
     //    assert(0);
     return NULL;
@@ -133,6 +143,8 @@ domNodeType *LoadXML(const char *filename) {
   XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
   XML_SetCharacterDataHandler(parser,&easyDomFactory::charHandler);
   
+  XML_Parse(parser, (f.ReadFull()).c_str(), f.Size(), 1);
+  /*
   do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -149,8 +161,8 @@ domNodeType *LoadXML(const char *filename) {
     XML_Parse(parser, buf, length, feof(inFile));
 #endif
   } while(!feof(inFile));
-
-  fclose (inFile);
+	*/
+  f.Close();
   XML_ParserFree (parser);
   delete xml;
   return (domNodeType *)topnode;

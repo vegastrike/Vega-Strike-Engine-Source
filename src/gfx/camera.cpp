@@ -112,8 +112,8 @@ void Camera::UpdateCameraSounds() {
     /**
     Vector c (planet->InvTransform (Coord));
     Vector tt (planet->Transform (c));
-    fprintf (stderr,"t <%f,%f,%f>\n",tt.i,tt.j,tt.k);
-    fprintf (stderr,"Coord <%f,%f,%f>\n",Coord.i,Coord.j,Coord.k);
+    VSFileSystem::Fprintf (stderr,"t <%f,%f,%f>\n",tt.i,tt.j,tt.k);
+    VSFileSystem::Fprintf (stderr,"Coord <%f,%f,%f>\n",Coord.i,Coord.j,Coord.k);
     Vector p (planet->InvTransform (Coord+P)-c);
     Vector q (planet->InvTransform (Coord+Q)-c);
     Vector r (planet->InvTransform (Coord+R)-c);
@@ -202,7 +202,7 @@ void Camera::SetPosition(const QVector &origin, const Vector & vel,const Vector 
 	Coord = origin;
 	changed= GFXTRUE;
   }else {
-    fprintf (stderr,"fatal error in camera");
+    VSFileSystem::vs_fprintf (stderr,"fatal error in camera");
   }
 }
 

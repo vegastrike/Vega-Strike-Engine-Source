@@ -6,7 +6,7 @@
 #include "beam.h"
 #include "lin_time.h"
 #include "xml_serializer.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "file_main.h"
 #include "universe_util.h"
 #include "unit_util.h"
@@ -33,6 +33,8 @@
 #include "networking/netclient.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_generic.h"
+#include "unit_bsp.h"
+#include "gfx/bounding_box.h"
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -40,56 +42,52 @@
 #include "config.h"
 using namespace Orders;
 
-bool verify_path (const vector<string> &path, bool allowmpl);
-void vschdirs (const vector<string> &path);
-void vscdups (const vector<string> &path);
-vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU);
-
-vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU)
-{
-	char * my_directory=GetUnitDir(filename);
-	vssetdir (GetSharedUnitPath().c_str());
-	vector<string>factionsubdir;
-	static string facsd = vs_config->getVariable("data","unitfactiondir","");
-	if (facsd.length()!=0) {
-		factionsubdir.push_back(facsd);
-	}
-	string facstr (FactionUtil::GetFaction(faction));
-	vector<vector <string> > path;
-	path.push_back (factionsubdir);
-	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
-	{
-		path.push_back(vector<string>());		
-		path.back().push_back("weapons");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(factionsubdir);		
-		path.back().insert(path.back().begin(),"weapons");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	}
-	path.push_back(vector<string>());
-	path.back().push_back(my_directory);path.back().push_back(filename);	
-	path.push_back (factionsubdir);
-	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	if (SubU) {
-		path.push_back(vector<string>());		
-		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(factionsubdir);		
-		path.back().insert(path.back().begin(),"subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	}
-	free(my_directory);	
-	while(!path.empty()) {
-		if (verify_path(path.back(),true))
-			break;
-		path.pop_back();
-	}
-
-	return path;
-}
-
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
 	this->old_state.setOrientation( this->curr_physical_state.orientation);
 	this->old_state.setVelocity( this->Velocity);
 	this->old_state.setAcceleration( this->net_accel);
+}
+
+void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
+  bsp_tree * bsp=NULL;
+  bsp_tree temp_node;
+  vector <bsp_polygon> tri;
+  vector <bsp_tree> triplane;
+  if (hull!=NULL) {
+    hull->GetPolys (tri);
+  } else {
+    for (int j=0;j<nummesh();j++) {
+      meshdata[j]->GetPolys(tri);
+    }
+  }	
+  for (unsigned int i=0;i<tri.size();i++) {
+    if (!Cross (tri[i],temp_node)) {
+      vector <bsp_polygon>::iterator ee = tri.begin();
+      ee+=i;
+      tri.erase(ee);
+      i--;
+      continue;
+    }	
+    // Calculate 'd'
+    temp_node.d = (double) ((temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k));
+    temp_node.d*=-1.0;
+    triplane.push_back(temp_node);
+    //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3); 
+ }
+ 
+ bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
+ if (bsp) {
+   VSError err = fo.OpenReadOnly( filename, BSPFile);
+   if (err<=Ok) {
+     write_bsp_tree(bsp,0);
+     fo.Close();
+     bsp_stats (bsp);
+     FreeBSP (&bsp);
+   }
+ }	
+
 }
 
 bool flickerDamage (Unit * un, float hullpercent) {
@@ -395,19 +393,19 @@ Unit::~Unit()
 {
   free(image->cockpit_damage);
   if ((!killed)) {
-    fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
   if (ucref) {
-    fprintf (stderr,"DISASTER AREA!!!!");
+    VSFileSystem::vs_fprintf (stderr,"DISASTER AREA!!!!");
   }
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"stage %d %x %d\n", 0,this,ucref);
+  VSFileSystem::vs_fprintf (stderr,"stage %d %x %d\n", 0,this,ucref);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 1,planet);
+  VSFileSystem::vs_fprintf (stderr,"%d %x ", 1,planet);
   fflush (stderr);
-  fprintf (stderr,"%d %x\n", 2,image->hudImage);
+  VSFileSystem::vs_fprintf (stderr,"%d %x\n", 2,image->hudImage);
   fflush (stderr);
 #endif
   if (image->unitwriter)
@@ -418,30 +416,30 @@ Unit::~Unit()
   }
 
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x", 3,image);
+  VSFileSystem::vs_fprintf (stderr,"%d %x", 3,image);
   fflush (stderr);
 #endif
   delete image;
   delete sound;
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
+  VSFileSystem::vs_fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 5);
+  VSFileSystem::vs_fprintf (stderr,"%d", 5);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x", 6,&mounts);
+  VSFileSystem::vs_fprintf (stderr,"%d %x", 6,&mounts);
   fflush (stderr);
 #endif
 
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 9, halos);
+  VSFileSystem::vs_fprintf (stderr,"%d %x ", 9, halos);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 1,&mounts);
+  VSFileSystem::vs_fprintf (stderr,"%d %x ", 1,&mounts);
   fflush (stderr);
 #endif
 #ifndef NO_MOUNT_STAR
@@ -454,7 +452,7 @@ Unit::~Unit()
 #endif
 	mounts.clear();
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 0);
+  VSFileSystem::vs_fprintf (stderr,"%d", 0);
   fflush (stderr);
 #endif
   for(unsigned int meshcount = 0; meshcount < meshdata.size(); meshcount++)
@@ -468,11 +466,14 @@ void Unit::Init()
   /*
   static std::map <Unit *, bool> m;
   if (m[this]) {
-    fprintf (stderr,"already called this");
+    VSFileSystem::vs_fprintf (stderr,"already called this");
   }else {
     m[this]=1;
     }*/
-	this->networked=0;
+	if( Network==NULL)
+		this->networked=0;
+	else
+		this->networked=1;
 
 	damages = NO_DAMAGE;
 
@@ -633,33 +634,8 @@ void Unit::Init()
 }
 
 std::string getMasterPartListUnitName();
-bool
-verify_path (const vector<string> &path, bool allowmpl) {
-	string realpath;
-	for (unsigned int i=0;i<path.size();++i) {
-		if (i!=0)
-			realpath+="/";		
-		realpath+=path[i];
-	}
-	FILE * fp = fopen (realpath.c_str(),"r");
-	if (fp)
-		fclose(fp);
-	
-	if (path.size()==2&&fp==NULL&&allowmpl)
-		if (path[1]==getMasterPartListUnitName())
-			return true;
-	return fp!=NULL;
-}
-void vschdirs (const vector<string> &path) {
-	for (unsigned int i=0;i<path.size();++i) {
-		vschdir(path[i].c_str());
-	}
-}
-void vscdups (const vector<string> &path) {
-	for (unsigned int i=0;i<path.size();++i) {
-		vscdup();
-	}
-}
+using namespace VSFileSystem;
+extern std::string GetReadPlayerSaveGame (int);
 
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
@@ -672,30 +648,63 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
 
-	vector<vector <string> > path = lookforUnit( filename, faction, SubU);
+	VSFile f;
+	VSError err = Unspecified;
+  if( netxml==NULL)
+  {
+		if (unitModifications.length()!=0) {
+		  string nonautosave=GetReadPlayerSaveGame(_Universe->CurrentCockpit());
+		  string filepath("");
+		  // In network mode we only look in the save subdir in HOME
+		  if( Network==NULL && !SERVER)
+		  {
+			  if (nonautosave.empty()) {
+				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+unitModifications);
+				  filepath = VSFileSystem::savedunitpath+"/"+unitModifications+"/"+f.GetFilename();
+			  }else {
+				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+nonautosave);
+				  filepath = VSFileSystem::savedunitpath+"/"+nonautosave+"/"+f.GetFilename();
+			  }
+		  }
+		  // This is not necessary as I think... to watch
+		  //VSFileSystem::vs_chdir( "save");
 
-	if (path.empty()) {
-	    fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
+		  // Try to open save
+		  if (filename[0])
+			  err = f.OpenReadOnly( filepath, Unknown);
+		}
+	  // If save was not succesfull we try to open the unit file itself
+	  if( err>Ok)
+	      if (filename[0])
+			err = f.OpenReadOnly (filename, UnitFile);
+	  if(err>Ok) {
+		cout << "Unit file " << filename << " not found" << endl;
+		fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
+
+	    VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
 	    meshdata.clear();
 	    meshdata.push_back(NULL);
 		this->fullname=filename;
 	    this->name=string("LOAD_FAILED");
 		calculate_extent(false);		
 		radial_size=1;
-		
 	    //	    assert ("Unit Not Found"==NULL);
-	}else {
-	  path.back().pop_back();vschdirs(path.back());
-	  name = filename;
-	  if( netxml==NULL)
-		Unit::LoadXML(filename,unitModifications.c_str());
-	  else
-		Unit::LoadXML( filename, "", netxml);
+		//assert(0);
+
+		return;
+	  }
+  }
+
+	name = filename;
+	if( netxml==NULL)
+		Unit::LoadXML(f,unitModifications.c_str());
+	else
+		Unit::LoadXML( f, "", netxml);
 	  calculate_extent(false);
 ///	  ToggleWeapon(true);//change missiles to only fire 1
-	  vscdups(path.back());	  
-	}
-	vsresetdir();
+
+	if( err<=Ok)
+	  f.Close();
 }
 
 vector <Mesh *> Unit::StealMeshes() {
@@ -853,7 +862,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
 					// Including the one who fires to make sure it stops
 					if( SERVER)
-						Server->BroadcastUnfire( this->serial, nm, this->zone);
+						Server->BroadcastUnfire( this->serial, nm, this->activeStarSystem->GetZone());
 					// NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
 					// if( !SERVER && Network==NULL)
 						(*i).UnFire();
@@ -874,7 +883,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 			const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
 			const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
 			if(missile_and_want_to_fire_missiles&&locked_missile){
-				fprintf (stderr,"\n about to fire locked missile \n");
+				VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
 			}
 			if (fire_non_autotrackers||autotracking_gun||locked_missile) {
 				if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
@@ -895,7 +904,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 								else
 									serid = 0;
 								if( SERVER)
-									Server->BroadcastFire( this->serial, nm, serid, this->zone);
+									Server->BroadcastFire( this->serial, nm, serid, this->activeStarSystem->GetZone());
 								// We could only refresh energy on server side or in non-networking mode, on client side it is done with
 								// info the server sends with ack for fire
 								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
@@ -1979,7 +1988,7 @@ void Unit::Rotate (const Vector &axis)
 	  curr_physical_state.orientation.to_matrix (mat);
 	  if (limits.structurelimits.Dot (mat.getR())<limits.limitmin) {
 	    curr_physical_state.orientation=prev_physical_state.orientation;
-		//fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
+		//VSFileSystem::vs_fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
 		
 	  }
 	}
@@ -2007,7 +2016,7 @@ void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole game
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
 		NetForce += Vforce;
 	}else {
-		fprintf (stderr,"fatal force");
+		VSFileSystem::vs_fprintf (stderr,"fatal force");
 	}
 }
 void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
@@ -2015,7 +2024,7 @@ void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
 		NetLocalForce += Vforce;
 	}else {
-		fprintf (stderr,"fatal local force");
+		VSFileSystem::vs_fprintf (stderr,"fatal local force");
 	}
 }
 void Unit::Accelerate(const Vector &Vforce)
@@ -2023,7 +2032,7 @@ void Unit::Accelerate(const Vector &Vforce)
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {	
 		NetForce += Vforce * mass;
 	}else {
-		fprintf (stderr,"fatal force");
+		VSFileSystem::vs_fprintf (stderr,"fatal force");
 	}
 }
 
@@ -2048,7 +2057,7 @@ void Unit::ApplyLocalTorque(const Vector &torque) {
   /*  Vector p,q,r;
   Vector tmp(ClampTorque(torque));
   GetOrientation (p,q,r);
-  fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
+  VSFileSystem::vs_fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
   NetTorque+=tmp.i*p+tmp.j*q+tmp.k*r; 
   */
   NetLocalTorque+= ClampTorque(torque); 
@@ -2427,7 +2436,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   if (MomentOfInertia)
 	  temp1=temp1/MomentOfInertia;
   else
-	  fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
   Vector temp (temp1*SIMULATION_ATOM);
   /*  //FIXME  does this shit happen!
       if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
@@ -2644,7 +2653,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  Vector netpnt = pnt;
 	  Vector netnormal = normal;
 	  GFXColor col( color.r, color.g, color.b, color.a);
-	  Server->sendDamages( this->serial, this->zone, shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
+	  Server->sendDamages( this->serial, this->activeStarSystem->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
 	  //Server->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
 #else
@@ -2974,7 +2983,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   }
 
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
 #endif
   }
 }
@@ -3009,7 +3018,7 @@ void Unit::UnRef() {
     deletedUn.Put ((long)this,this);
     Unitdeletequeue.push_back(this);//delete
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
 #endif
   }
 }
@@ -3079,14 +3088,14 @@ float Unit::RShieldData() const{
 void Unit::ProcessDeleteQueue() {
   while (!Unitdeletequeue.empty()) {
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
     fflush (stderr);
-    fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
 #endif
 #ifdef DESTRUCTDEBUG
     if (Unitdeletequeue.back()->isSubUnit()){
 
-      fprintf (stderr,"Subunit Deleting (related to double dipping)");
+      VSFileSystem::vs_fprintf (stderr,"Subunit Deleting (related to double dipping)");
 
     }
 #endif
@@ -3095,7 +3104,7 @@ void Unit::ProcessDeleteQueue() {
     delete mydeleter;///might modify unitdeletequeue
     
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
     fflush (stderr);
 #endif
 
@@ -3193,7 +3202,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			}
 		  }
 		  if (*targ>biggerthan)
-			  fprintf (stderr,"errore fatale mit den armorn");
+			  VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn");
 		  if (hull <0) {
 			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
 			if (!isSubUnit()&&hull>-hulldamtoeject) {
@@ -3400,7 +3409,7 @@ void Unit::Target (Unit *targ) {
   if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
     computer.target.SetUnit(NULL);
     return;
-    fprintf (stderr,"bad target system");
+    VSFileSystem::vs_fprintf (stderr,"bad target system");
     const int BADTARGETSYSTEM=0;
     assert (BADTARGETSYSTEM);
   }
@@ -3764,7 +3773,7 @@ void Unit::Destroy() {
 	{
   		// The server send a kill notification to all concerned clients but not if it is an upgrade
   		if( SERVER)
-  			Server->sendKill( this->serial, this->zone);
+  			Server->sendKill( this->serial, this->activeStarSystem->GetZone());
   
         Kill();
  	}
@@ -3778,6 +3787,184 @@ void Unit::SetCollisionParent (Unit * name) {
       subunits[i]->SetCollisionParent (name);
     }
 #endif
+}
+
+double Unit::getMinDis (const QVector &pnt) {
+  float minsofar=1e+10;
+  float tmpvar;
+  int i;
+  Vector TargetPoint (cumulative_transformation_matrix.getP());
+
+#ifdef VARIABLE_LENGTH_PQR
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
+#endif
+  for (i=0;i<nummesh();i++) {
+
+    TargetPoint = (Transform(cumulative_transformation_matrix,meshdata[i]->Position()).Cast()-pnt).Cast();
+    tmpvar = sqrtf (TargetPoint.Dot (TargetPoint))-meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+	*SizeScaleFactor
+#endif
+      ;
+    if (tmpvar<minsofar) {
+      minsofar = tmpvar;
+    }
+  }
+  un_fiter ui = SubUnits.fastIterator();
+  Unit * su;
+  while ((su=ui.current())) {
+    tmpvar = su->getMinDis (pnt);
+    if (tmpvar<minsofar) {
+      minsofar=tmpvar;
+    }			
+    ui.advance();
+  }
+  return minsofar;
+}
+
+// This function should not be used on server side
+extern vector<Vector> perplines;
+float Unit::querySphereClickList (const QVector &st, const QVector &dir, float err) const{
+  int i;
+  float retval=0;
+  float adjretval=0;
+  const Matrix * tmpo = &cumulative_transformation_matrix;
+
+  Vector TargetPoint (tmpo->getP());
+  for (i=0;i<nummesh();i++) {
+    TargetPoint = Transform (*tmpo,meshdata[i]->Position());
+    Vector origPoint = TargetPoint;
+
+    perplines.push_back(TargetPoint);
+    //find distance away from the line now :-)
+    //find scale factor of end on start to get line.
+    QVector tst = TargetPoint.Cast()-st;
+    //Vector tst = TargetPoint;
+    float k = tst.Dot (dir);
+    TargetPoint = (tst - k*(dir)).Cast();
+    /*
+    cerr << origPoint << "-" << st << " = " << tst << " projected length " << k << " along direction " << dir << endl;
+    cerr << "projected line " << st << " - " << st + k*dir << endl;
+    cerr << "length of orthogonal projection " << TargetPoint.Magnitude() << ", " << "radius " << meshdata[i]->rSize() << endl;
+    */
+    perplines.push_back(origPoint-TargetPoint);
+    
+    ///      VSFileSystem::vs_fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
+    
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()+2*err*meshdata[i]->rSize()
+	)
+      {
+	if (retval==0) {
+	  retval = k;
+	  adjretval=k;
+	  if (adjretval<0) {
+		adjretval+=meshdata[i]->rSize();
+		if (adjretval>0)
+				adjretval=.001;
+		}
+	}else {
+		if (retval>0&&k<retval&&k>-meshdata[i]->rSize()){
+			retval = k;
+			adjretval=k;
+			if (adjretval<0) {
+				adjretval+=meshdata[i]->rSize();
+				if (adjretval>0)
+					adjretval=.001;
+			}
+		}
+		if (retval<0&&k+meshdata[i]->rSize()>retval) {
+			retval = k;
+			adjretval=k+meshdata[i]->rSize();
+			if (adjretval>0)
+				adjretval=.001;//THRESHOLD;
+		}
+	}
+    }
+  }
+  un_kiter ui = viewSubUnits();
+  const Unit * su;
+  while ((su=ui.current())) {
+    float tmp=su->querySphereClickList (st,dir,err);
+    if (tmp==0) {
+      ui.advance();
+      continue;
+    }
+    if (retval==0) {
+      retval = tmp;
+    }else{
+		if (adjretval>0&&tmp<adjretval) {
+			retval = tmp;
+			adjretval=tmp;
+		}
+		if (adjretval<0&&tmp>adjretval) {
+		    retval = tmp;
+			adjretval=tmp;
+		}
+    }
+    ui.advance();
+  }
+
+  return adjretval;
+}
+
+
+bool Unit::queryBoundingBox (const QVector &pnt, float err) {
+  int i;
+  BoundingBox * bbox=NULL;
+  for (i=0;i<nummesh();i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (cumulative_transformation_matrix);
+    if (bbox->Within(pnt,err)) {
+      delete bbox;
+      return true;
+    }
+    delete bbox;
+  }
+  Unit * su;
+  UnitCollection::UnitIterator ui=getSubUnits();
+  while ((su=ui.current())) {
+    if ((su)->queryBoundingBox (pnt,err)) {
+      return true;
+    }
+    ui.advance();
+  }
+  return false;
+}
+
+int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, float err) {
+  int i;
+  int retval=0;
+  BoundingBox * bbox=NULL;
+  for (i=0;i<nummesh();i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (cumulative_transformation_matrix);
+    switch (bbox->Intersect(origin,direction.Cast(),err)) {
+    case 1:delete bbox;
+      return 1;
+    case -1:delete bbox;
+      retval =-1;
+      break;
+    case 0: delete bbox;
+      break;
+    }
+  }
+  UnitCollection::UnitIterator ui = getSubUnits();
+  Unit  * su;
+  while ((su=ui.current())) {
+    switch (su->queryBoundingBox (origin,direction,err)) {
+    case 1: 
+      return 1;
+    case -1: 
+      retval= -1;
+      break;
+    case 0: 
+      break;
+    }
+    ui.advance();
+  }
+  return retval;
 }
 
 /***********************************************************************************/
@@ -3940,6 +4127,7 @@ else
 	if( playernum>=0)
 		Network[playernum].dockRequest( utdw->serial);
 }
+return 0;
 }
 
 inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
@@ -4215,24 +4403,15 @@ public:
 	VCString(const string & s): string(s){}
 };
 std::map<VCString,VCString> parseTurretSizes () {
+	using namespace VSFileSystem;
 	std::map<VCString,VCString> t;
-	FILE * fp = fopen ("size.txt","r");
-	if (!fp) {
-		fp = fopen ("units/size.txt","r");
-		if (!fp) {
-			fp = fopen("units/subunits/size.txt","r");
-			if (!fp) {
-				fp = fopen ("subunits/size.txt","r");
-			}
-		}
-	}
-	if (fp) {
-		fseek (fp,0,SEEK_END);
-		int siz = ftell (fp);
-		fseek (fp,0,SEEK_SET);
+	VSFile f;
+	VSError err = f.OpenReadOnly( "units/subunits/size.txt", Unknown);
+	if (err<=Ok) {
+		int siz = f.Size();
 		char * filedata= (char *)malloc (siz+1);
 		filedata[siz]=0;
-		while (fgets (filedata,siz,fp)) {
+		while (f.ReadLine(filedata,siz)==Ok) {
 
 			std::string x(filedata);
 			int len= x.find (",");
@@ -4249,7 +4428,7 @@ std::map<VCString,VCString> parseTurretSizes () {
 			}
 		}
 		free(filedata);
-		fclose (fp);
+		f.Close();
 	}
 	return t;
 }
@@ -5549,7 +5728,7 @@ bool Unit::TransferUnitToSystem (StarSystem * Current) {
     activeStarSystem = Current;
     return true;
   }else {
-    fprintf (stderr,"Fatal Error: cannot remove starship from critical system");
+    VSFileSystem::vs_fprintf (stderr,"Fatal Error: cannot remove starship from critical system");
   }
   return false;
 }

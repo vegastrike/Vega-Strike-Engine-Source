@@ -33,7 +33,7 @@ static float offs=1;
 
 void incscl (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"scl:%f",scl);
+    VSFileSystem::Fprintf (stderr,"scl:%f",scl);
     scl+=.1;
   }
 
@@ -41,7 +41,7 @@ void incscl (int, KBSTATE k) {
 
 void decscl (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"scl:%f",scl);
+    VSFileSystem::Fprintf (stderr,"scl:%f",scl);
     scl-=.1;
   }
 
@@ -49,7 +49,7 @@ void decscl (int, KBSTATE k) {
 }
 void incoff (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"off:%f",offs);
+    VSFileSystem::Fprintf (stderr,"off:%f",offs);
     offs+=.1;
   }
 
@@ -58,7 +58,7 @@ void incoff (int, KBSTATE k) {
 
 void decoff (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"off:%f",offs);
+    VSFileSystem::Fprintf (stderr,"off:%f",offs);
     offs-=.1;
   }
 }

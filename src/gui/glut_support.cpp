@@ -33,22 +33,22 @@ GUITexture ReadTex(char *texfile) {
         GUITexture tex;
         if (texfile)
         	if (texfile[0])
-                	file=fopen(texfile,"rb");
-	GLuint name=0;
-        unsigned int width=0,height=0;
-        if (file) {
-        	int bpp,colortype;
-                unsigned char * palette;
-                unsigned char * image=readImage(file,bpp,colortype,width,height,palette);
-                glGenTextures (1,&name);
-                glBindTexture (GL_TEXTURE_2D,name);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-                glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,width,height,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
-                fclose(file);
+					file=VSFileSystem::vs_open(texfile,"rb");
+		GLuint name=0;
+		unsigned int width=0,height=0;
+		if (file) {
+				int bpp,colortype;
+				unsigned char * palette;
+				unsigned char * image=readImage(file,bpp,colortype,width,height,palette);
+				glGenTextures (1,&name);
+				glBindTexture (GL_TEXTURE_2D,name);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,width,height,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
+				VSFileSystem::vs_close(file);
 
 		tex.wid = width;
 		tex.hei = height;
@@ -69,7 +69,7 @@ char * readString (FILE * fp,char endchar) {
         std::vector <char> chr_vec;
         char tmpchr;
         for (int i=0;;i++) {
-                fread(&tmpchr,sizeof(char),1,fp);
+                VSFileSystem::vs_read(&tmpchr,sizeof(char),1,fp);
                 if ((tmpchr==endchar)||(tmpchr=='\0')||feof(fp)) break;
                 chr_vec.push_back(tmpchr);
         }
@@ -95,7 +95,7 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
         png_bytepp row_pointers;
         png_infop info_ptr;
         int     interlace_type;
-        fread(sig, 1, 8, fp);
+        VSFileSystem::vs_read(sig, 1, 8, fp);
         if (!png_check_sig(sig, 8))
                 return NULL;    /* bad signature */
         png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,

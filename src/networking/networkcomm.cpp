@@ -1,6 +1,6 @@
 //#include "cmd/unit_generic.h"
 #include "networking/networkcomm.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #ifdef CRYPTO
 #include <crypto++/filters.h>
@@ -39,6 +39,8 @@ bool use_secured;
 #include "networking/lowlevel/packet.h"
 #include <assert.h>
 #include "xml_support.h"
+
+using namespace VSFileSystem;
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
@@ -198,15 +200,16 @@ NetworkCommunication::NetworkCommunication()
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
 	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
-	pubKeyFilename = datadir+"vsnet_public_"+crypto_method+".key";
-	privKeyFilename = datadir+"vsnet_private_"+crypto_method+".key";
+	pubKeyFilename = VSFileSystem::datadir+"vsnet_public_"+crypto_method+".key";
+	privKeyFilename = VSFileSystem::datadir+"vsnet_private_"+crypto_method+".key";
 	seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
 	// Key length is only used when we need to generate a key
 	this->key_length = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_keylength", "40"));
 	bool create_keys = false;
-	FILE * fp1 = fopen( pubKeyFilename.c_str(), "rb");
-	FILE * fp2 = fopen( privKeyFilename.c_str(), "rb");
-	if( !fp1 || !fp2)
+	VSFile f1, f2;
+	VSError err1 = f1.OpenReadOnly( pubKeyFilename, Unknown);
+	VSError err2 = f2.OpenReadOnly( privKeyFilename, Unknown);
+	if( err1>Ok || err2>Ok)
 	{
 		// There is a file we cannot open so we create keys
 		create_keys = true;
@@ -214,33 +217,13 @@ NetworkCommunication::NetworkCommunication()
 	else
 	{
 		// Read the keys in their buffers
-		fseek( fp1, 0, SEEK_END);
-		unsigned int publength = ftell( fp1);
-		fseek( fp1, 0, SEEK_SET);
-		fseek( fp2, 0, SEEK_END);
-		unsigned int privlength = ftell( fp1);
-		fseek( fp2, 0, SEEK_SET);
-
-		char * pubk = new char[publength];
-		if( fread( pubk, sizeof( char), publength, fp1)!=publength)
-		{
-			cerr<<"!!! ERROR : reading crypto public key"<<endl;
-			VSExit(1);
-		}
-		char * privk = new char[privlength];
-		if( fread( privk, sizeof( char), privlength, fp2)!=privlength)
-		{
-			cerr<<"!!! ERROR : reading crypto private key"<<endl;
-			VSExit(1);
-		}
-		this->pubkey = string( pubk);
-		this->privkey = string( privk);
-		delete pubk;
-		delete privk;
-
-		fclose( fp1);
-		fclose( fp2);
+		this->pubkey = f1.ReadFull();
+		this->privkey = f2.ReadFull();
 	}
+	if( err1<=Ok)
+		f1.Close();
+	if( err2<=Ok)
+		f2.Close();
 	if( create_keys)
 		this->GenerateKey();
 

@@ -44,8 +44,8 @@ void CoordinateSelect::UpdateMouse() {
 
 
     float distance = CamR.Dot ((LocalPosition-CamPos).Cast());//distance out into z...straight line...
-    //    fprintf (stderr, "distance:%f\n",distance);
-    //fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
+    //    VSFileSystem::Fprintf (stderr, "distance:%f\n",distance);
+    //VSFileSystem::Fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
     if (mouseDistance!=0) {
       LocalPosition = mousePoint*(distance/mouseDistance)+CamPos.Cast();
     } else {
@@ -80,7 +80,7 @@ void CoordinateSelect::Draw () {
   GFXLoadIdentity (MODEL);
   
   GFXPushBlendMode();
-  //  fprintf (stderr,"Location: %f %f %f", LocalPosition.i, LocalPosition.j, LocalPosition.k);
+  //  VSFileSystem::Fprintf (stderr,"Location: %f %f %f", LocalPosition.i, LocalPosition.j, LocalPosition.k);
   GFXBlendMode(ONE,ONE);
   LocSelAni.SetPosition(LocalPosition);
   LocSelAni.Draw();

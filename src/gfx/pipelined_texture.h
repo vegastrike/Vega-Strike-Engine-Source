@@ -10,6 +10,7 @@ class PipelinedTexture: public Texture {
   bool operator == (const Texture &b) {return false;}
   bool operator < (const Texture &b) {return true;}
   virtual Texture * Clone ();
+  virtual Texture * Original ();
   PipelinedTexture();
   PipelinedTexture(unsigned int width, unsigned int height, unsigned char * current, unsigned char * last);
   ~PipelinedTexture ();

@@ -163,6 +163,7 @@ double Mount::Percentage (const Mount *newammo) const{
 }
 //bool returns whether to refund the cost of firing
 bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone, int mount_num) {
+	using namespace VSFileSystem;
   if (time_to_lock>0) {
     target=NULL;
   }
@@ -199,10 +200,9 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			case weapon_info::PROJECTILE:
 			{
 				static bool match_speed_with_target = XMLSupport::parse_float (vs_config->getVariable("physics","match_speed_with_target","true"));
-				string skript =string("ai/script/")+type->file+string(".xai");
-				FILE * fp = fopen (skript.c_str(),"r");
-					if (fp) {
-						fclose(fp);
+				string skript =/*string("ai/script/")+*/type->file+string(".xai");
+				VSError err = LookForFile( skript, AiFile);
+					if (err<=Ok) {
 						temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
 						if (!match_speed_with_target) {
 							temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
@@ -219,7 +219,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  if (target&&target!=owner) {
 					temp->Target (target);
 					temp->TargetTurret(target);
-					if (fp) {
+					if (err<=0) {
 						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 						temp->EnqueueAI (new Orders::FireAllYouGot);
 						if (match_speed_with_target)

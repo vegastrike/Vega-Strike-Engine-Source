@@ -2,7 +2,7 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "config_xml.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "xml_support.h"
 #include "ani_texture.h"
 extern int pixelscalesize;//from sphere.cpp
@@ -24,7 +24,7 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
   oldmesh = AllocNewMeshesEachInSizeofMeshSpace(numspheres);//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,Vector(iradius,iradius,iradius),0), oldmesh);
+  meshHashTable.Put (hash_name=VSFileSystem::GetSharedMeshHashName(hash_name,Vector(iradius,iradius,iradius),0), oldmesh);
   this->orig = oldmesh;
   radialSize = oradius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (radialSize,radialSize,radialSize);

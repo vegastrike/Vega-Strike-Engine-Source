@@ -8,7 +8,7 @@
 #include "unit_generic.h"
 #include "beam.h"
 #include "unit_const_cache.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "role_bitmask.h"
 #include "endianness.h"
 /*
@@ -274,7 +274,7 @@ namespace BeamXML {
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
-	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case NAME:
 	  curname = (*iter).value;
@@ -298,7 +298,7 @@ namespace BeamXML {
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
-	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case XFILE:
 	   tmpweapon.file = (*iter).value;
@@ -346,7 +346,7 @@ namespace BeamXML {
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
-	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case CONSUMPTION:
 	  tmpweapon.EnergyRate = XMLSupport::parse_float ((*iter).value);
@@ -375,7 +375,7 @@ namespace BeamXML {
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
-	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case DAMAGE:
 	  tmpweapon.Damage = XMLSupport::parse_float((*iter).value);
@@ -407,7 +407,7 @@ namespace BeamXML {
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
-	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case VOLUME:
 	  tmpweapon.volume = XMLSupport::parse_float ((*iter).value);
@@ -482,6 +482,7 @@ namespace BeamXML {
 }
 
 using namespace BeamXML;
+using namespace VSFileSystem;
 extern string strtolower(const string &foo);
 weapon_info* getTemplate(const string &kkey) {
   string key =strtolower(kkey);
@@ -490,16 +491,11 @@ weapon_info* getTemplate(const string &kkey) {
     if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {
 		static string sharedmountdir = vs_config->getVariable("data","mountlocation","weapons");
 
-		string meshshell=sharedmeshes+sharedmountdir+string ("/") + key;
-		string meshname=meshshell+".xmesh";
-		FILE * fp = fopen (meshname.c_str(),"rb");
-		if (fp) {
-			fclose (fp);
+		//string meshshell=VSFileSystem::sharedmeshes+"/"+sharedmountdir+string ("/") + key;
+		string meshname=key+".xmesh";
+		if (LookForFile( meshname, MeshFile)<=Ok) {
 			WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
-			meshname = meshshell+"_flare.xmesh";
-			fp = fopen (meshname.c_str(),"rb");
-			if (fp) {
-				fclose (fp);
+			if (LookForFile( meshname, MeshFile)<=Ok) {
 				WeaponMeshCache::setCachedMutable (wi->weapon_name+"_flare",wi->gun1=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
 			}
 		}
@@ -509,13 +505,18 @@ weapon_info* getTemplate(const string &kkey) {
 }
 
 void LoadWeapons(const char *filename) {
+  using namespace VSFileSystem;
   const int chunk_size = 16384;
-  FILE * inFile= fopen (filename,"r");
-  if (!inFile) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, Unknown);
+  if (err>Ok) {
     return;
   }
   XML_Parser parser = XML_ParserCreate (NULL);
   XML_SetElementHandler (parser, &beginElement, &endElement);
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+
+  /*
  do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -524,15 +525,16 @@ void LoadWeapons(const char *filename) {
 #endif
     int length;
     
-    length = fread (buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof (inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof (inFile));
 #endif
-  } while(!feof(inFile));
- fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
+ f.Close();
  XML_ParserFree (parser);
 }
 extern enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);

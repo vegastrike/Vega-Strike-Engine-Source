@@ -40,7 +40,7 @@
 #include "cmd/unit_factory.h"
 #include "gfx/matrix.h"
 #include "lin_time.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/role_bitmask.h"
 #include "gfx/cockpit_generic.h"
 #include "gldrv/winsys.h"
@@ -55,6 +55,7 @@
 #include "networking/networkcomm.h"
 #include "posh.h"
 #include "networking/prediction.h"
+#include "fileutil.h"
 
 #ifdef micro_sleep
 #undef micro_sleep
@@ -108,7 +109,7 @@ NetClient::NetClient()
     game_unit = NULL;
     old_timestamp = 0;
     latest_timestamp = 0;
-    old_time = 0;
+    //old_time = 0;
     cur_time = 0;
     enabled = 0;
     nbclients = 0;
@@ -116,8 +117,9 @@ NetClient::NetClient()
 	ingame = false;
 	current_freq = MIN_COMMFREQ;
 	selected_freq = MIN_COMMFREQ;
+	FileUtil::use_crypto = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_crypto", "false"));
 
-	prediction = new CubicSplinePrediction();
+	prediction = new MixedPrediction();
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
 #else
@@ -370,6 +372,7 @@ int NetClient::checkMsg( Packet* outpacket )
 
 int NetClient::recvMsg( Packet* outpacket )
 {
+	using namespace VSFileSystem;
     ObjSerial	packet_serial=0;
 
     // Receive data
@@ -426,17 +429,19 @@ int NetClient::recvMsg( Packet* outpacket )
 				{
 					// Receive the file and write it (trunc if exists)
 					cerr<<"RECEIVING file : "<<filename<<endl;
-					fp = fopen( (datadir+filename).c_str(), "wb");
-					if (!fp)
+					VSFile f;
+					VSError err = f.OpenReadOnly(filename, Unknown);
+					if (err>Ok)
 					{
 						cerr<<"!!! ERROR : opening received file !!!"<<endl;
 						VSExit(1);
 					}
-					if( fwrite( file.c_str(), sizeof( char), file.length(), fp) != file.length())
+					if( f.Write( file) != file.length())
 					{
 						cerr<<"!!! ERROR : writing received file !!!"<<endl;
 						VSExit(1);
 					}
+					f.Close();
 				}
 				else
 				{
@@ -502,10 +507,8 @@ int NetClient::recvMsg( Packet* outpacket )
 				    // Get the zone id in the packet
                     char flags = netbuf.getChar( );
                     if( flags & CMD_CAN_COMPRESS ) clt_sock.allowCompress( true );
-				    this->zone = netbuf.getShort();
-				    _Universe->current_stardate.Init( netbuf.getString());
-				    cout << "WE ARE ON STARDATE "
-                         <<_Universe->current_stardate.GetFullCurrentStarDate() << endl;
+				    this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
+				    //_Universe->current_stardate.InitTrek( netbuf.getString());
                     COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
 					this->game_unit.GetUnit()->SetCurPosition( netbuf.getQVector());
                     //this->getZoneData( &p1 );
@@ -529,7 +532,6 @@ int NetClient::recvMsg( Packet* outpacket )
 				mount_num = netbuf.getInt32();
 				mis = netbuf.getSerial();
 				// Find the unit
-				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
 				if( mis==local_serial) // WE have fired and receive the broadcast
 					un = this->game_unit.GetUnit();
 				else
@@ -888,6 +890,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				un2->UnDock( un);
 			}
+			break;
 			case CMD_POSUPDATE :
 			{
 				// If a client receives that it means the server want to force the client position to be updated
@@ -896,6 +899,130 @@ int NetClient::recvMsg( Packet* outpacket )
 				this->game_unit.GetUnit()->old_state.setPosition( serverpos);
 				this->game_unit.GetUnit()->curr_physical_state.position = serverpos;
 			}
+			break;
+			case CMD_CREATEUNIT :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				bool sub = netbuf.getChar();
+				int faction = netbuf.getInt32();
+				string fname( netbuf.getString());
+				string custom( netbuf.getString());
+				int fg_num = netbuf.getInt32();
+
+				cerr<<"NETCREATE UNIT : "<<file<<endl;
+
+				string facname = FactionUtil::GetFactionName( faction);
+				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+				newunit = UnitFactory::createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
+			case CMD_CREATENEBULA :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				bool sub = netbuf.getChar();
+				int faction = netbuf.getInt32();
+				string fname( netbuf.getString());
+				int fg_num = netbuf.getInt32();
+
+				cerr<<"NETCREATE NEBULA : "<<file<<endl;
+
+				string facname = FactionUtil::GetFactionName( faction);
+				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+				newunit = (Unit*) UnitFactory::createNebula( file.c_str(), sub, faction, fg, fg_num, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
+			case CMD_CREATEPLANET :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				QVector x = netbuf.getQVector();
+				QVector y = netbuf.getQVector();
+				float vely = netbuf.getFloat();
+				const Vector rotvel( netbuf.getVector());
+				float pos = netbuf.getFloat();
+				float gravity = netbuf.getFloat();
+				float radius = netbuf.getFloat();
+
+				string file( netbuf.getString());
+				char sr = netbuf.getChar();
+				char ds = netbuf.getChar();
+
+				vector<char *> dest;
+				unsigned short nbdest = netbuf.getShort();
+				int i=0;
+				for( i=0; i<nbdest; i++)
+				{
+					string tmp( netbuf.getString());
+					char * ctmp = new char[tmp.length()+1];
+					ctmp[tmp.length()] = 0;
+					memcpy( ctmp, tmp.c_str(), tmp.length());
+					dest.push_back( ctmp);
+				}
+
+				const QVector orbitcent( netbuf.getQVector());
+				un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial());
+				GFXMaterial mat = netbuf.getGFXMaterial();
+				
+				vector<GFXLightLocal> lights;
+				unsigned short nblight = netbuf.getShort();
+				for( i=0; i<nblight; i++)
+					lights.push_back( netbuf.getGFXLightLocal());
+
+				int faction = netbuf.getInt32();
+				string fullname( netbuf.getString());
+				char insideout = netbuf.getChar();
+
+				cerr<<"NETCREATE PLANET : "<<file<<endl;
+
+				newunit = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, file.c_str(), (BLENDFUNC)sr, (BLENDFUNC)ds,
+											dest, orbitcent, un, mat, lights, faction, fullname, insideout, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
+			case CMD_CREATEASTER :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				int faction = netbuf.getInt32();
+				string fname( netbuf.getString());
+				int fg_snumber = netbuf.getInt32();
+				float diff = netbuf.getFloat();
+
+				cerr<<"NETCREATE ASTEROID : "<<file<<endl;
+
+				string facname = FactionUtil::GetFactionName( faction);
+				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+				newunit = (Unit *) UnitFactory::createAsteroid( file.c_str(), faction, fg, fg_snumber, diff, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			case CMD_CREATEMISSILE :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				int faction = netbuf.getInt32();
+				string mods( netbuf.getString());
+				const float damage( netbuf.getFloat());
+				float phasedamage = netbuf.getFloat();
+				float time = netbuf.getFloat();
+				float radialeffect = netbuf.getFloat();
+				float radmult = netbuf.getFloat();
+				float detonation_radius = netbuf.getFloat();
+
+				cerr<<"NETCREATE MISSILE : "<<file<<endl;
+
+				const string modifs( mods);
+				newunit = (Unit *) UnitFactory::createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;
@@ -964,5 +1091,11 @@ bool NetClient::Clients::remove( int x )
     if( s == 0 ) return false;
     return true;
     // shared_ptr takes care of delete
+}
+
+Transformation	NetClient::Interpolate( Unit * un, double addtime)
+{
+	elapsed_since_packet += addtime;
+	return prediction->Interpolate( un, this->deltatime+elapsed_since_packet);
 }
 

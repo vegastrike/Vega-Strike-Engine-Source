@@ -98,7 +98,7 @@ bool computeStarColor (float &r, float &g, float &b, Vector luminmax, float dist
 	float dissqr = distance*distance/(maxdistance*maxdistance);
 	float lum = 100*luminmax.i/(luminmax.k*dissqr);
 	lum = log((double)luminmax.i*10./(double)luminmax.j)*luminscale/dissqr;
-//	fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
+//	VSFileSystem::vs_fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
 	float clamp=starcoloraverage+lum/starcolorincrement;
 	if (clamp>1)
 		clamp=1;
@@ -200,7 +200,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 	float mindistance = starmin.Magnitude();
 	if (maxdistance<mindistance)
 		maxdistance=mindistance;
-	fprintf (stderr,"Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
+	VSFileSystem::vs_fprintf (stderr,"Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
 			 starmin.i,starmin.j,starmin.k,starmax.i,starmax.j,starmax.k,minlumin,maxlumin);
 			 
 	for (int y=0;y<num;++y) {
@@ -275,7 +275,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		}
 		j+=incj;
 	}
-	fprintf (stderr,"Read In Star Count %d used: %d\n",starcount,j/2);
+	VSFileSystem::vs_fprintf (stderr,"Read In Star Count %d used: %d\n",starcount,j/2);
 	static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
 	if(StarStreaks) {
 		vlist= new GFXVertexList (GFXLINE,j,tmpvertex, j, true,0);

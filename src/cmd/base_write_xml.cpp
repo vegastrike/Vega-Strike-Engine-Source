@@ -6,51 +6,51 @@
 void begintag(FILE * Fp,const char *tag,int indent) {
 	int i;
 	for (i=0;i<indent;i++) {
-		fwrite("\t",sizeof(char),1,Fp);
+		VSFileSystem::Write("\t",sizeof(char),1,Fp);
 	}
-	fwrite("<",sizeof(char),1,Fp);
-	fwrite(tag,sizeof(char)*strlen(tag),1,Fp);
+	VSFileSystem::Write("<",sizeof(char),1,Fp);
+	VSFileSystem::Write(tag,sizeof(char)*strlen(tag),1,Fp);
 }
 void midxmltag(FILE * Fp,const char *tag,const float value) {
 	char value2 [100]={0};//new char [100];
 	sprintf(value2,"%g",value);
-	fwrite(" ",sizeof(char),1,Fp);
-	fwrite(tag,sizeof(char)*strlen(tag),1,Fp);
-	fwrite("=\"",sizeof(char)*2,1,Fp);
-	fwrite(value2,sizeof(char)*strlen(value2),1,Fp);
-	fwrite("\"",sizeof(char)*1,1,Fp);
+	VSFileSystem::Write(" ",sizeof(char),1,Fp);
+	VSFileSystem::Write(tag,sizeof(char)*strlen(tag),1,Fp);
+	VSFileSystem::Write("=\"",sizeof(char)*2,1,Fp);
+	VSFileSystem::Write(value2,sizeof(char)*strlen(value2),1,Fp);
+	VSFileSystem::Write("\"",sizeof(char)*1,1,Fp);
 //	delete value2;
 }
 void midxmlchar(FILE * Fp,const char *tag,const char * value) {
-	fwrite(" ",sizeof(char),1,Fp);
-	fwrite(tag,sizeof(char)*strlen(tag),1,Fp);
-	fwrite("=\"",sizeof(char)*2,1,Fp);
-	fwrite(value,sizeof(char)*strlen(value),1,Fp);
-	fwrite("\"",sizeof(char)*1,1,Fp);
+	VSFileSystem::Write(" ",sizeof(char),1,Fp);
+	VSFileSystem::Write(tag,sizeof(char)*strlen(tag),1,Fp);
+	VSFileSystem::Write("=\"",sizeof(char)*2,1,Fp);
+	VSFileSystem::Write(value,sizeof(char)*strlen(value),1,Fp);
+	VSFileSystem::Write("\"",sizeof(char)*1,1,Fp);
 }
 void midxmlint(FILE * Fp,const char *tag,const int value) {
 	char value2 [100]={0};
 	sprintf(value2,"%d",value);
-	fwrite(" ",sizeof(char),1,Fp);
-	fwrite(tag,sizeof(char)*strlen(tag),1,Fp);
-	fwrite("=\"",sizeof(char)*2,1,Fp);
-	fwrite(value2,sizeof(char)*strlen(value2),1,Fp);
-	fwrite("\"",sizeof(char)*1,1,Fp);
+	VSFileSystem::Write(" ",sizeof(char),1,Fp);
+	VSFileSystem::Write(tag,sizeof(char)*strlen(tag),1,Fp);
+	VSFileSystem::Write("=\"",sizeof(char)*2,1,Fp);
+	VSFileSystem::Write(value2,sizeof(char)*strlen(value2),1,Fp);
+	VSFileSystem::Write("\"",sizeof(char)*1,1,Fp);
 }
 void midxmlbool(FILE * Fp,const char *tag,const bool value) {
 	char value2 [6];
 	strcpy(value2,value==true?"true":"false");
-	fwrite(" ",sizeof(char),1,Fp);
-	fwrite(tag,sizeof(char)*strlen(tag),1,Fp);
-	fwrite("=\"",sizeof(char)*2,1,Fp);
-	fwrite(value2,sizeof(char)*strlen(value2),1,Fp);
-	fwrite("\"",sizeof(char)*1,1,Fp);
+	VSFileSystem::Write(" ",sizeof(char),1,Fp);
+	VSFileSystem::Write(tag,sizeof(char)*strlen(tag),1,Fp);
+	VSFileSystem::Write("=\"",sizeof(char)*2,1,Fp);
+	VSFileSystem::Write(value2,sizeof(char)*strlen(value2),1,Fp);
+	VSFileSystem::Write("\"",sizeof(char)*1,1,Fp);
 }
 void endtag(FILE * Fp, bool end=false) {
 	if (end==true) {
-		fwrite("/",sizeof(char),1,Fp);
+		VSFileSystem::Write("/",sizeof(char),1,Fp);
 	}
-	fwrite(">\n",sizeof(char)*2,1,Fp);
+	VSFileSystem::Write(">\n",sizeof(char)*2,1,Fp);
 }
 
 void BaseInterface::Room::Link::EndXML (FILE *fp) {

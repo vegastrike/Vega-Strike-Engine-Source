@@ -42,7 +42,7 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "cmd/nebula.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/script/mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
@@ -455,21 +455,21 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   if (k==DOWN) {
     UnitCollection *c = shipList->requestIterator (oldx,oldy,x,y);
     if (c->createIterator()->current()!=NULL)
-      fprintf (stderr,"Select Box Hit single target");
+      VSFileSystem::Fprintf (stderr,"Select Box Hit single target");
     if (c->createIterator()->advance()!=NULL)
-      fprintf (stderr,"Select Box Hit Multiple Targets");
+      VSFileSystem::Fprintf (stderr,"Select Box Hit Multiple Targets");
   }else {
     oldx = x;
     oldy = y;
   }
   if (k==PRESS) {
-    fprintf (stderr,"click?");
+    VSFileSystem::Fprintf (stderr,"click?");
     UnitCollection * c = shipList->requestIterator (x,y);
     if (c->createIterator()->current()!=NULL)
-      fprintf (stderr,"Hit single target");
+      VSFileSystem::Fprintf (stderr,"Hit single target");
     if (c->createIterator()->advance()!=NULL)
-      fprintf (stderr,"Hit Multiple Targets");
-    fprintf (stderr,"\n");
+      VSFileSystem::Fprintf (stderr,"Hit Multiple Targets");
+    VSFileSystem::Fprintf (stderr,"\n");
     
   }
 }
@@ -646,6 +646,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 			if( Network!=NULL && backupcp != NULL)
 			{
 				fighters[a]->SetNetworkMode();
+				fighters[a]->SetSerial(Network[squadnum].serial);
 				Network[squadnum].setUnit( fighters[a]);
 				cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
 			}

@@ -85,6 +85,7 @@ private:
   void LocalToRadar (const Vector & pos, float &s, float &t);
 
   void LoadXML (const char *file);
+  void LoadXML (VSFileSystem::VSFile & f);
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
   ///Destructs cockpit info for new loading

@@ -10,6 +10,7 @@
 #include <vector>
 #include <expat.h>
 #include <iostream>		// needed for cout calls in config_xml.cpp (and other places too i'm sure)
+#include "gfx/vec.h"
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
@@ -87,6 +88,18 @@ namespace XMLSupport {
 	char tmp[256];
 	sprintf (tmp,"%f",num);
 	return string(tmp);
+  }
+  inline string floattostringh (float f) {
+	char c[128];
+	sprintf (c,"%2.2f",f);
+	return string(c);
+  }
+  inline string VectorToString(const Vector & v) {
+	string ret(floattostringh(v.i));
+	if (v.i!=v.j||v.j!=v.k) {
+		ret+=string(",")+floattostringh(v.j)+string(",")+floattostringh(v.k);
+	}
+	return ret;
   }
 /*#else
   template<class T> inline string tostring(T num) {

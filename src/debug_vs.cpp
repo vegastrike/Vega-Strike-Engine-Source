@@ -12,7 +12,7 @@ Hashtable <long,char,char[65535]> constructed;
 Hashtable <long,char,char[65535]> destructed;
 bool DEBUG_ERROR_IN_MY_CODE=true;
 void VS_DEBUG_ERROR () {
-  fprintf(stderr,"WARNING: invalid refcount in vegastrike object\n");
+  VSFileSystem::Fprintf(stderr,"WARNING: invalid refcount in vegastrike object\n");
 #if defined (_MSC_VER) && defined(_DEBUG)
   if (DEBUG_ERROR_IN_MY_CODE) {
     _RPT0(_CRT_ERROR, "WARNING: invalid refcount in vegastrike object\n");

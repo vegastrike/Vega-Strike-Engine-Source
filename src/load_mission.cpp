@@ -129,9 +129,9 @@ std::string PickleAllMissions () {
 int ReadIntSpace (FILE * fp) {
   std::string myint;
   bool toggle=false;
-  while (!feof(fp)) {
+  while (!VSFileSystem::vs_feof(fp)) {
     char c[2]={0,0};
-    if (1==fread (&c[0],sizeof(char),1,fp)) {
+    if (1==VSFileSystem::vs_read (&c[0],sizeof(char),1,fp)) {
       if (c[0]!=' ') {
 	toggle=true;
 	myint+=c;
@@ -173,7 +173,7 @@ std::string UnpickleAllMissions (FILE * fp) {
     char * temp = (char *)malloc (sizeof(char)*(1+picklelength));
     temp[0]=0;
     temp[picklelength]=0;
-    fread (temp,picklelength,1,fp);
+    VSFileSystem::vs_read (temp,picklelength,1,fp);
     retval += temp;
     if (i<active_missions.size()) {
       active_missions[i]->SetUnpickleData (PickledDataSansMissionName(temp));
@@ -196,7 +196,7 @@ std::string UnpickleAllMissions (char * &buf) {
     temp[picklelength]=0;
 	memcpy( temp, buf, picklelength);
 	buf+=picklelength;
-    //fread (temp,picklelength,1,fp);
+    //VSFileSystem::vs_read (temp,picklelength,1,fp);
     retval += temp;
     if (i<active_missions.size()) {
       active_missions[i]->SetUnpickleData (PickledDataSansMissionName(temp));
@@ -211,17 +211,19 @@ void LoadMission (const char * mn, bool loadFirstUnit) {
     LoadMission(mn,string(""),loadFirstUnit);
 }
 void LoadMission (const char * nission_name, const std::string &script, bool loadFirstUnit) {
+	using namespace VSFileSystem;
 	string mission_name(nission_name);
 	if (mission_name.empty()) {
 		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","mission/internal.mission");
 		mission_name=mission_name_def;
 	}
   printf("%s",script.c_str());
-  FILE * fp = fopen (mission_name.c_str(),"r");
-  if (!fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( mission_name, MissionFile);
+  if (err>Ok) {
     return;
   }
-  fclose (fp);
+  f.Close();
   active_missions.push_back (new Mission(mission_name.c_str(),script));
   mission = active_missions.back();
   active_missions.back()->initMission();

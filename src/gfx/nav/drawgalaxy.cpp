@@ -1,5 +1,5 @@
 #include <set>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"

@@ -17,7 +17,7 @@
 #include "load_mission.h"
 #include "configxml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/unit_util.h"
 #include "networking/netserver.h"
 //extern class Music *muzak;
@@ -28,6 +28,7 @@ extern std::string universe_path;
 using std::string;
 
 #define activeSys _Universe->activeStarSystem() //less to write
+using namespace VSFileSystem;
 
 namespace UniverseUtil {
 	Unit * PythonUnitIter::current(){
@@ -282,367 +283,373 @@ namespace UniverseUtil {
 		return _Universe->getGalaxyPropertyDefault(sys,prop,def);
 	}
 #define DEFAULT_FACTION_SAVENAME "FactionTookOver_"
-	string GetGalaxyFaction (string sys) {
-		string fac = _Universe->getGalaxyProperty (sys,"faction");
-		vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
-		if (ans->size()) {
-			fac = (*ans)[0];
-		}
-		return fac;
-	}
-	void SetGalaxyFaction (string sys, string fac) {
-		vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
-		if (ans->size()) {
-			(*ans)[0]=fac;
-		}else {
-			ans->push_back(fac);
-		}
-	}
-	int GetNumAdjacentSystems (string sysname) {
-		return _Universe->getAdjacentStarSystems(sysname).size();
-	}
-	/*
-	int musicAddList(string str) {
-		return muzak->Addlist(str.c_str());
-	}
-	void musicPlaySong(string str) {
-		muzak->GotoSong(str);
-	}
-	void musicPlayList(int which) {
-		muzak->SkipRandSong(which);
-	}
-        void musicLoopList (int numloops) {
-                muzak->loopsleft=numloops;
-        }
-	*/
-	float GetDifficulty () {
-		return g_game.difficulty;
-	}
-	void SetDifficulty (float diff) {
-		g_game.difficulty=diff;
-	}
-	/*
-	void playSound(string soundName, QVector loc, Vector speed) {
-		int sound = AUDCreateSoundWAV (soundName,false);
-		AUDAdjustSound (sound,loc,speed);
-		AUDStartPlaying (sound);
-		AUDDeleteSound(sound);
-	}
-        void cacheAnimation(string aniName) {
-	  static vector <Animation *> anis;
-	  anis.push_back (new Animation(aniName.c_str()));
-        }
-	void playAnimation(string aniName, QVector loc, float size) {
-		AddAnimation(loc,size,true,aniName,1);
-	}
-	void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
-		AddAnimation(loc,size,true,aniName,growpercent);
-	}
-        unsigned int getCurrentPlayer() {
-	  return _Universe->CurrentCockpit();
-        }
-	Unit *getPlayer(){
-		return _Universe->AccessCockpit()->GetParent();;
-	}
-	int getNumPlayers () {
-		return _Universe->numPlayers();
-	}
-	Unit *getPlayerX(int which){
-		if (which>=getNumPlayers()) {
-			return NULL;
-		}
-		return _Universe->AccessCockpit(which)->GetParent();
-	}
-	*/
-	extern void playVictoryTune();
-	void terminateMission(bool Win){
-		if (Win)
-			playVictoryTune();
-		mission->terminateMission();
-	}
-	int addObjective(string objective) {
-		mission->objectives.push_back(Mission::Objective(0,objective));
-		return mission->objectives.size()-1;
-	}
-	void setObjective(int which, string newobjective) {
-		if (which<(int)mission->objectives.size()) {
-			mission->objectives[which].objective=newobjective;
-		}
-	}
-	void setCompleteness(int which, float completeNess) {
-		if (which<(int)mission->objectives.size()) {
-			mission->objectives[which].completeness=completeNess;
-		}
-	}
-	float getCompleteness(int which) {
-		if (which<(int)mission->objectives.size()) {
-			return mission->objectives[which].completeness;
-		} else {
-			return 0;
-		}
-	}
-	void setOwnerII(int which,Unit *owner) {
-		if (which<(int)mission->objectives.size()) {
-			mission->objectives[which].owner=owner;
-		}
-	}
-	Unit* getOwner(int which) {
-		if (which<(int)mission->objectives.size()) {
-			return mission->objectives[which].owner.GetUnit();
-		} else {
-			return 0;
-		}
-	}
-    int numActiveMissions() {
-        return active_missions.size();
-    }
-    void IOmessage(int delay,string from,string to,string message){
-		static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
-		if (to=="news"&&(!news_from_cargolist))
-			_Universe->AccessCockpit(0)->savegame->getMissionStringData("dynamic_news").push_back(string("#")+message);
-		else
-			mission->msgcenter->add(from,to,message,delay);
-	}
-	Unit *GetContrabandList (string faction) {
-		return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
-	}
-        void LoadMission (string missionname) {
-                delayLoadMission (missionname);
-        }
-        void LoadMissionScript (string missionscript) {
-                delayLoadMission ("mission/nothing.mission",missionscript);
-        }
-    
-        void SetAutoStatus (int global_auto, int player_auto) {
-	  if (global_auto==1) {
-	    mission->global_autopilot = Mission::AUTO_ON;
-	  }else if (global_auto==-1) {
-	    mission->global_autopilot = Mission::AUTO_OFF;
-	  }else {
-	    mission->global_autopilot = Mission::AUTO_NORMAL;
-	  }
 
-	  if (player_auto==1) {
-	    mission->player_autopilot = Mission::AUTO_ON;	    
-	  }else if (player_auto==-1) {
-	    mission->player_autopilot = Mission::AUTO_OFF;
-	  }else {
-	    mission->player_autopilot = Mission::AUTO_NORMAL;
-	  }
-        }
-  QVector SafeEntrancePoint (QVector pos, float radial_size) {
-    static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
-    if (radial_size<0)
-      radial_size = def_un_size;
-    
-    for (unsigned int k=0;k<10;k++) {
-      Unit * un;
-      bool collision=false;
-      for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
-	if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
-	  continue;
-	}
-	double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
-	if (dist<0) {
-	  QVector delta  = pos-un->LocalPosition();
-	  double mag = delta.Magnitude();
-	  if (mag>.01){
-	    delta=delta/mag;
-	  }else {
-	    delta.Set(0,0,1);
-	  }
-	  delta = delta.Scale ( dist+un->rSize()+radial_size);
-	  if (k<5) {
-	    pos = pos+delta;
-	    collision=true;
-	  }else {
-	    QVector r(.5,.5,.5);
-	    pos+=(radial_size+un->rSize())*r;
-	    collision=true;
-	  }
-	  
-	}
-      }
-      if (collision==false)
-	break;
-    }
-    return pos;
-  }
-  QVector SafeStarSystemEntrancePoint (StarSystem * sts, QVector pos, float radial_size) {
-    static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
-    if (radial_size<0)
-      radial_size = def_un_size;
-    
-    for (unsigned int k=0;k<10;k++)
-	{
-      Unit * un;
-      bool collision=false;
-      for (un_iter i=sts->getUnitList().createIterator();(un=*i)!=NULL;++i)
-	  {
-			if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR)
-			{
-			  continue;
-			}
-			double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
-			if (dist<0)
-			{
-			  QVector delta  = pos-un->LocalPosition();
-			  double mag = delta.Magnitude();
-			  if (mag>.01)
-			  {
-				delta=delta/mag;
-			  }else {
-				delta.Set(0,0,1);
-			  }
-			  delta = delta.Scale ( dist+un->rSize()+radial_size);
-			  if (k<5) {
-				pos = pos+delta;
-				collision=true;
-			  }else {
-				QVector r(.5,.5,.5);
-				pos+=(radial_size+un->rSize())*r;
-				collision=true;
-	  		  }
-	  
-	        }
-       }
-       if (collision==false)
-	 	 break;
-    }
-    return pos;
-  }
-	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
-		return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
-	}
-	Unit *getPlayer(){
-		return _Universe->AccessCockpit()->GetParent();;
-	}
-	int getNumPlayers () {
-		return _Universe->numPlayers();
-	}
-	Unit *getPlayerX(int which){
-		if (which>=getNumPlayers()) {
-			return NULL;
-		}
-		return _Universe->AccessCockpit(which)->GetParent();
-	}
-	float getPlanetRadiusPercent () {
-		static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
-		return planet_rad_percent;
-	}
-	std::string getVariable(std::string section,std::string name,std::string def) {
-		return vs_config->getVariable(section,name,def);
-	}
-	std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def) {
-		return vs_config->getVariable(section,subsection,name,def);
-	}
-  double timeofday () {return getNewTime();}
-  double sqrt (double x) {return ::sqrt (x);}
-  double log (double x) {return ::log (x);}
-  double exp (double x) {return ::exp (x);}
-  double cos (double x) {return ::cos (x);}
-  double sin (double x) {return ::sin (x);}
-  double acos (double x) {return ::acos (x);}
-  double asin (double x) {return ::asin (x);}
-  double atan (double x) {return ::atan (x);}
-  double tan (double x) {return ::tan (x);}
-  void micro_sleep(int n) {
-    ::micro_sleep(n);
-  }
-
-  void	ComputeSystemSerials( std::string & systempath)
-  {
-		// Read the file
-		std::string systemfile( systempath);
-		FILE * fp = fopen( systemfile.c_str(), "rb");
-		if( fp)
-		{
-			fclose( fp);
-			fp = fopen( systemfile.c_str(), "r+b");
-			cout<<"\t\tcomputing serials for "<<systempath<<"...";
-			fseek( fp, 0, SEEK_END);
-			int readsize = 0;
-			int file_size = ftell( fp);
-			cerr<<"Size = "<<file_size<<" for "<<systempath<<endl;
-			fseek( fp, 0, SEEK_SET);
-			char * systembuf = new char[file_size+1];
-	   	    readsize = fread( systembuf, sizeof( char), file_size, fp);
-	   	    if( readsize!=file_size)
-	        {
-	            cout<<"Error reading system file : "<<systemfile<<" read ("<<readsize<<") -  to be read("<<file_size<<")"<<endl;
-	            exit( 1);
-	        }
-			cerr<<"System file size = "<<readsize<<endl;
-			systembuf[file_size] = 0;
-			string system( systembuf);
-
-			// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
-			std::vector<std::string> search_patterns;
-
-			bool newserials = true;
-			if( system.find( "serial=", 0) != std::string::npos)
-			{
-				newserials = false;
-				cout<<"Found serial in system file : replacing serials..."<<endl;
-			}
-			else
-				cout<<"Found no serial in system file : generating..."<<endl;
-			search_patterns.push_back( "<planet ");
-			search_patterns.push_back( "<Planet ");
-			search_patterns.push_back( "<PLANET ");
-			search_patterns.push_back( "<unit ");
-			search_patterns.push_back( "<Unit ");
-			search_patterns.push_back( "<UNIT ");
-			search_patterns.push_back( "<nebula ");
-			search_patterns.push_back( "<Nebula ");
-			search_patterns.push_back( "<NEBULA ");
-
-			for( std::vector<std::string>::iterator ti=search_patterns.begin(); ti!=search_patterns.end(); ti++)
-			{
-				std::string search( (*ti));
-				//cerr<<"Looking for "<<search<<endl;
-				std::string::size_type search_length = (*ti).length();
-				std::string::size_type curpos = 0;
-				int nboc = 0;
-				//cerr<<"\tLooking for "<<search<<" length="<<search_length<<endl;
-				while( (curpos = system.find( search, curpos))!=std::string::npos)
-				{
-					//cerr<<"\t\tSearch position = "<<curpos<<endl;
-					ObjSerial new_serial = getUniqueSerial();
-					std::string serial_str( (*ti)+"serial=\""+XMLSupport::tostring5( new_serial)+"\" ");
-					// If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
-					// of length search_length + 14 (length of serial="XXXXX")
-					if( newserials)
-						system.replace( curpos, search_length, serial_str);
-					else
-						system.replace( curpos, search_length+14, serial_str);
-					nboc++;
-					curpos += search_length;
+				string GetGalaxyFaction (string sys) {
+						string fac = _Universe->getGalaxyProperty (sys,"faction");
+						vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+						if (ans->size()) {
+								fac = (*ans)[0];
+						}
+						return fac;
 				}
-				cerr<<"\t\tFound "<<nboc<<" occurences of "<<search<<endl;
-			}
+				void SetGalaxyFaction (string sys, string fac) {
+						vector <string> * ans = &(_Universe->AccessCockpit(0)->savegame->getMissionStringData(string(DEFAULT_FACTION_SAVENAME)+sys));
+						if (ans->size()) {
+								(*ans)[0]=fac;
+						}else {
+								ans->push_back(fac);
+						}
+				}
+				int GetNumAdjacentSystems (string sysname) {
+						return _Universe->getAdjacentStarSystems(sysname).size();
+				}
+				/*
+				   int musicAddList(string str) {
+				   return muzak->Addlist(str.c_str());
+				   }
+				   void musicPlaySong(string str) {
+				   muzak->GotoSong(str);
+				   }
+				   void musicPlayList(int which) {
+				   muzak->SkipRandSong(which);
+				   }
+				   void musicLoopList (int numloops) {
+				   muzak->loopsleft=numloops;
+				   }
+				 */
+				float GetDifficulty () {
+						return g_game.difficulty;
+				}
+				void SetDifficulty (float diff) {
+						g_game.difficulty=diff;
+				}
+				/*
+				   void playSound(string soundName, QVector loc, Vector speed) {
+				   int sound = AUDCreateSoundWAV (soundName,false);
+				   AUDAdjustSound (sound,loc,speed);
+				   AUDStartPlaying (sound);
+				   AUDDeleteSound(sound);
+				   }
+				   void cacheAnimation(string aniName) {
+				   static vector <Animation *> anis;
+				   anis.push_back (new Animation(aniName.c_str()));
+				   }
+				   void playAnimation(string aniName, QVector loc, float size) {
+				   AddAnimation(loc,size,true,aniName,1);
+				   }
+				   void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
+				   AddAnimation(loc,size,true,aniName,growpercent);
+				   }
+				   unsigned int getCurrentPlayer() {
+				   return _Universe->CurrentCockpit();
+				   }
+				   Unit *getPlayer(){
+				   return _Universe->AccessCockpit()->GetParent();;
+				   }
+				   int getNumPlayers () {
+				   return _Universe->numPlayers();
+				   }
+				   Unit *getPlayerX(int which){
+				   if (which>=getNumPlayers()) {
+				   return NULL;
+				   }
+				   return _Universe->AccessCockpit(which)->GetParent();
+				   }
+				 */
+				extern void playVictoryTune();
+				void terminateMission(bool Win){
+						if (Win)
+								playVictoryTune();
+						mission->terminateMission();
+				}
+				int addObjective(string objective) {
+						mission->objectives.push_back(Mission::Objective(0,objective));
+						return mission->objectives.size()-1;
+				}
+				void setObjective(int which, string newobjective) {
+						if (which<(int)mission->objectives.size()) {
+								mission->objectives[which].objective=newobjective;
+						}
+				}
+				void setCompleteness(int which, float completeNess) {
+						if (which<(int)mission->objectives.size()) {
+								mission->objectives[which].completeness=completeNess;
+						}
+				}
+				float getCompleteness(int which) {
+						if (which<(int)mission->objectives.size()) {
+								return mission->objectives[which].completeness;
+						} else {
+								return 0;
+						}
+				}
+				void setOwnerII(int which,Unit *owner) {
+						if (which<(int)mission->objectives.size()) {
+								mission->objectives[which].owner=owner;
+						}
+				}
+				Unit* getOwner(int which) {
+						if (which<(int)mission->objectives.size()) {
+								return mission->objectives[which].owner.GetUnit();
+						} else {
+								return 0;
+						}
+				}
+				int numActiveMissions() {
+						return active_missions.size();
+				}
+				void IOmessage(int delay,string from,string to,string message){
+						static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
+						if (to=="news"&&(!news_from_cargolist))
+								_Universe->AccessCockpit(0)->savegame->getMissionStringData("dynamic_news").push_back(string("#")+message);
+						else
+								mission->msgcenter->add(from,to,message,delay);
+				}
+				Unit *GetContrabandList (string faction) {
+						return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
+				}
+				void LoadMission (string missionname) {
+						delayLoadMission (missionname);
+				}
+				void LoadMissionScript (string missionscript) {
+						delayLoadMission ("mission/nothing.mission",missionscript);
+				}
 
-			// Add the system xml string to the server
-			Server->addSystem( systempath, system);
+				void SetAutoStatus (int global_auto, int player_auto) {
+						if (global_auto==1) {
+								mission->global_autopilot = Mission::AUTO_ON;
+						}else if (global_auto==-1) {
+								mission->global_autopilot = Mission::AUTO_OFF;
+						}else {
+								mission->global_autopilot = Mission::AUTO_NORMAL;
+						}
 
-			// Overwrite the system files with the buffer containing serials
-			fseek( fp, 0, SEEK_SET);
-			if( fwrite( system.c_str(), 1, system.length(), fp) != system.length() )
-			{
-				cerr<<"!!! ERROR : writing system file"<<endl;
-				exit(1);
-			}
-			fclose( fp);
+						if (player_auto==1) {
+								mission->player_autopilot = Mission::AUTO_ON;	    
+						}else if (player_auto==-1) {
+								mission->player_autopilot = Mission::AUTO_OFF;
+						}else {
+								mission->player_autopilot = Mission::AUTO_NORMAL;
+						}
+				}
+				QVector SafeEntrancePoint (QVector pos, float radial_size) {
+						static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
+						if (radial_size<0)
+								radial_size = def_un_size;
 
-			cout<<" OK !"<<endl;
-			delete systembuf;
-		}
-		else
-		{
-			cerr<<"ERROR cannot open system file : "<<systempath<<endl;
-			exit(1);
-		}
-  }
+						for (unsigned int k=0;k<10;k++) {
+								Unit * un;
+								bool collision=false;
+								for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
+										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
+												continue;
+										}
+										double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
+										if (dist<0) {
+												QVector delta  = pos-un->LocalPosition();
+												double mag = delta.Magnitude();
+												if (mag>.01){
+														delta=delta/mag;
+												}else {
+														delta.Set(0,0,1);
+												}
+												delta = delta.Scale ( dist+un->rSize()+radial_size);
+												if (k<5) {
+														pos = pos+delta;
+														collision=true;
+												}else {
+														QVector r(.5,.5,.5);
+														pos+=(radial_size+un->rSize())*r;
+														collision=true;
+												}
+
+										}
+								}
+								if (collision==false)
+										break;
+						}
+						return pos;
+				}
+				QVector SafeStarSystemEntrancePoint (StarSystem * sts, QVector pos, float radial_size) {
+						static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
+						if (radial_size<0)
+								radial_size = def_un_size;
+
+						for (unsigned int k=0;k<10;k++)
+						{
+								Unit * un;
+								bool collision=false;
+								for (un_iter i=sts->getUnitList().createIterator();(un=*i)!=NULL;++i)
+								{
+										if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR)
+										{
+												continue;
+										}
+										double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-/*def_un_size-*/radial_size;
+										if (dist<0)
+										{
+												QVector delta  = pos-un->LocalPosition();
+												double mag = delta.Magnitude();
+												if (mag>.01)
+												{
+														delta=delta/mag;
+												}else {
+														delta.Set(0,0,1);
+												}
+												delta = delta.Scale ( dist+un->rSize()+radial_size);
+												if (k<5) {
+														pos = pos+delta;
+														collision=true;
+												}else {
+														QVector r(.5,.5,.5);
+														pos+=(radial_size+un->rSize())*r;
+														collision=true;
+												}
+
+										}
+								}
+								if (collision==false)
+										break;
+						}
+						return pos;
+				}
+				Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
+						return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
+				}
+				Unit *getPlayer(){
+						return _Universe->AccessCockpit()->GetParent();;
+				}
+				int getNumPlayers () {
+						return _Universe->numPlayers();
+				}
+				Unit *getPlayerX(int which){
+						if (which>=getNumPlayers()) {
+								return NULL;
+						}
+						return _Universe->AccessCockpit(which)->GetParent();
+				}
+				float getPlanetRadiusPercent () {
+						static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
+						return planet_rad_percent;
+				}
+				std::string getVariable(std::string section,std::string name,std::string def) {
+						return vs_config->getVariable(section,name,def);
+				}
+				std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def) {
+						return vs_config->getVariable(section,subsection,name,def);
+				}
+				double timeofday () {return getNewTime();}
+				double sqrt (double x) {return ::sqrt (x);}
+				double log (double x) {return ::log (x);}
+				double exp (double x) {return ::exp (x);}
+				double cos (double x) {return ::cos (x);}
+				double sin (double x) {return ::sin (x);}
+				double acos (double x) {return ::acos (x);}
+				double asin (double x) {return ::asin (x);}
+				double atan (double x) {return ::atan (x);}
+				double tan (double x) {return ::tan (x);}
+				void micro_sleep(int n) {
+						::micro_sleep(n);
+				}
+
+				void	ComputeSystemSerials( std::string & systempath)
+				{
+						using namespace VSFileSystem;
+						// Read the file
+						std::string systemfile( systempath);
+						VSFile f;
+						VSError err = f.OpenReadOnly( systemfile, SystemFile);
+						if( err<=Ok)
+						{
+							cout<<"\t\tcomputing serials for "<<systempath<<"...";
+							int readsize = 0;
+							int file_size = f.Size();
+							cerr<<"Size = "<<file_size<<" for "<<systempath<<endl;
+							char * systembuf = new char[file_size+1];
+							readsize = f.Read( systembuf, file_size);
+							if( readsize!=file_size)
+							{
+								cout<<"Error reading system file : "<<systemfile<<" read ("<<readsize<<") -  to be read("<<file_size<<")"<<endl;
+								exit( 1);
+							}
+							cerr<<"System file size = "<<readsize<<endl;
+							systembuf[file_size] = 0;
+							string system( systembuf);
+
+							// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
+							std::vector<std::string> search_patterns;
+
+							bool newserials = true;
+							if( system.find( "serial=", 0) != std::string::npos)
+							{
+								newserials = false;
+								cout<<"Found serial in system file : replacing serials..."<<endl;
+							}
+							else
+								cout<<"Found no serial in system file : generating..."<<endl;
+							search_patterns.push_back( "<planet ");
+							search_patterns.push_back( "<Planet ");
+							search_patterns.push_back( "<PLANET ");
+							search_patterns.push_back( "<unit ");
+							search_patterns.push_back( "<Unit ");
+							search_patterns.push_back( "<UNIT ");
+							search_patterns.push_back( "<nebula ");
+							search_patterns.push_back( "<Nebula ");
+							search_patterns.push_back( "<NEBULA ");
+
+							for( std::vector<std::string>::iterator ti=search_patterns.begin(); ti!=search_patterns.end(); ti++)
+							{
+								std::string search( (*ti));
+								//cerr<<"Looking for "<<search<<endl;
+								std::string::size_type search_length = (*ti).length();
+								std::string::size_type curpos = 0;
+								int nboc = 0;
+								//cerr<<"\tLooking for "<<search<<" length="<<search_length<<endl;
+								while( (curpos = system.find( search, curpos))!=std::string::npos)
+								{
+									//cerr<<"\t\tSearch position = "<<curpos<<endl;
+									ObjSerial new_serial = getUniqueSerial();
+									std::string serial_str( (*ti)+"serial=\""+XMLSupport::tostring5( new_serial)+"\"");
+									// If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
+									// of length search_length + 14 (length of serial="XXXXX")
+									if( newserials)
+										system.replace( curpos, search_length, serial_str);
+									else
+										system.replace( curpos, search_length+14, serial_str);
+									nboc++;
+									curpos += search_length;
+								}
+								cerr<<"\t\tFound "<<nboc<<" occurences of "<<search<<endl;
+							}
+
+							// Add the system xml string to the server
+							Server->addSystem( systempath, system);
+
+							// Overwrite the system files with the buffer containing serials
+							f.Close();
+							// Should generate the modified system file in homedir
+							err = f.OpenCreateWrite( systempath, SystemFile);
+							if( err>Ok)
+							{
+								cerr<<"!!! ERROR : opening "<<systempath<<" for writing"<<endl;
+								VSExit(1);
+							}
+							if( f.Write( system.c_str(), system.length()) != system.length() )
+							{
+								cerr<<"!!! ERROR : writing system file"<<endl;
+								VSExit(1);
+							}
+							f.Close();
+
+							cout<<" OK !"<<endl;
+							delete systembuf;
+						}
+						else
+						{
+							cerr<<"ERROR cannot open system file : "<<systempath<<endl;
+							exit(1);
+						}
+				  }
 
 void	ComputeGalaxySerials( std::vector<std::string> & stak)
 {

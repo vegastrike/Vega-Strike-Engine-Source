@@ -19,6 +19,9 @@
 #ifndef M_PI
 #define M_PI 3.1415926536
 #endif
+#include "vsfilesystem.h"
+
+using namespace VSFileSystem;
 using namespace std;
 static VSRandom starsysrandom(time(NULL));
 static void seedrand(unsigned long seed) {
@@ -181,7 +184,7 @@ float grand () {
   return float (ssrand())/VS_RAND_MAX;
 }
 vector <Color> lights;
-FILE * fp =NULL;
+VSFile f;
 
 float difffunc (float inputdiffuse) {
   return sqrt(((inputdiffuse)));
@@ -191,7 +194,7 @@ void WriteLight (unsigned int i) {
   float ambient =(lights[i].r+lights[i].g+lights[i].b);
   
   ambient*=ambientColorFactor;
-  fprintf (fp,"<Light>\n\t<ambient red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<diffuse red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<specular red=\"%f\" green=\"%f\" blue=\"%f\"/>\n</Light>\n",
+  f.Fprintf ("<Light>\n\t<ambient red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<diffuse red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<specular red=\"%f\" green=\"%f\" blue=\"%f\"/>\n</Light>\n",
 	   ambient,ambient,ambient,
 	   difffunc (lights[i].r),difffunc (lights[i].g),difffunc (lights[i].b),
 	   lights[i].nr,lights[i].ng,lights[i].nb);   
@@ -257,7 +260,7 @@ vector <GradColor> colorGradiant;
 
 void Tab () {
   for (unsigned int i=0;i<radii.size();i++) {
-    fprintf (fp,"\t");
+    f.Fprintf ("\t");
   }
 
 }
@@ -265,10 +268,11 @@ void Tab () {
 
 
 void readColorGrads (vector <string> &entity,const char * file) {
-  FILE * fp = fopen (file,"r");
+  VSFile f;
+  VSError err = f.OpenReadOnly( file, UniverseFile);
   static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","50"));
 
-  if (!fp) {
+  if (err>Ok) {
     printf ("Failed to load %s",file);
     GradColor (g);
     g.minrad=0;
@@ -281,15 +285,15 @@ void readColorGrads (vector <string> &entity,const char * file) {
   char input_buffer[1000];
   char output_buffer[1000];
   GradColor g;
-  while (!feof (fp)) {
-    fgets (input_buffer,999,fp);
+  while (!f.Eof()) {
+    f.ReadLine(input_buffer,999);
     if (sscanf (input_buffer,"%f %f %f %f %f %s",&g.minrad,&g.r,&g.g,&g.b,&g.variance,output_buffer)==6) {
       g.minrad *=radiusscale;
 	  colorGradiant.push_back (g);
       entity.push_back (output_buffer);
     }
   }
-  fclose (fp);
+  f.Close();
 }
 
 
@@ -307,7 +311,7 @@ GradColor whichGradColor (float r,unsigned int &j) {
   unsigned int i;
   if (colorGradiant.empty()) {
 	  vector<string> entity;
-	  string fullpath = vs_config->getVariable("data","universe_path","universe")+"/stars.txt";
+	  string fullpath = "stars.txt";
 	  readColorGrads(entity,fullpath.c_str());
   }
   for (i=1;i<colorGradiant.size();i++) {
@@ -466,23 +470,23 @@ vector <string> parseBigUnit (string input) {
 
 void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vector center, string nebfile, string destination, bool faction, float thisloy=0) {
   Tab();
-  fprintf (fp,"<%s name=\"%s\" file=\"%s\" ",tag.c_str(),name.c_str(),filename.c_str());
+  f.Fprintf ("<%s name=\"%s\" file=\"%s\" ",tag.c_str(),name.c_str(),filename.c_str());
   if (nebfile.length()>0) {
-    fprintf (fp,"nebfile=\"%s\" ",nebfile.c_str());
+    f.Fprintf ("nebfile=\"%s\" ",nebfile.c_str());
   }
 
-  fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
-  fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
+  f.Fprintf ("x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
   float loy = LengthOfYear(r,s);
   if (loy||thisloy) {
-    fprintf (fp,"year= \"%f\" ",thisloy?thisloy:loy);
+    f.Fprintf ("year= \"%f\" ",thisloy?thisloy:loy);
   }
   if (destination.length()) {
-    fprintf (fp, "destination=\"%s\" ",destination.c_str()); 
+    f.Fprintf("destination=\"%s\" ",destination.c_str()); 
   } else if (faction){
-    fprintf (fp,"faction=\"%s\" ",StarSystemGent::faction.c_str());
+    f.Fprintf ("faction=\"%s\" ",StarSystemGent::faction.c_str());
   }
-  fprintf (fp," />\n");
+  f.Fprintf (" />\n");
 }
 string getJumpTo (string s) {
   char tmp[1000]="";
@@ -699,36 +703,36 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
   unsigned int pos = s.find ("^");
   string cname;
   if (pos==string::npos||entitytype==JUMP) {
-    fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
+    f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
   }else {
     string pname= s.substr (0,pos);
     cname = s.substr (pos+1,s.length());
-    fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),pname.c_str());
+    f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),pname.c_str());
   }
-  fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
-  fprintf (fp,"radius=\"%f\" ",radius);
-  fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
+  f.Fprintf ("radius=\"%f\" ",radius);
+  f.Fprintf ("x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
   float loy = LengthOfYear(r,SS);
   float temprandom=.1*fmod(loy,10);//use this so as not to alter state here
   if (loy||thisloy) {
-    fprintf (fp,"year= \"%f\" ",thisloy?thisloy:loy);
+    f.Fprintf ("year= \"%f\" ",thisloy?thisloy:loy);
     temprandom=grand();
     loy =864*temprandom;
     if (loy) {
-      fprintf (fp, "day=\"%f\" ",loy);
+      f.Fprintf ( "day=\"%f\" ",loy);
     }
   }
   if (entitytype==JUMP) {
-    fprintf (fp, "alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" ",getJumpTo(s).c_str(),StarSystemGent::faction.c_str());
+    f.Fprintf ( "alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" ",getJumpTo(s).c_str(),StarSystemGent::faction.c_str());
 
   }
-  fprintf (fp," >\n");
+  f.Fprintf (" >\n");
   if (!cname.empty()) {
     
     int wrapx=1;
     int wrapy=1;
     cname = GetWrapXY(cname,wrapx,wrapy);
-    Tab();fprintf (fp,"<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n",cname.c_str(),wrapx,wrapy);
+    Tab();f.Fprintf ("<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n",cname.c_str(),wrapx,wrapy);
   }
   if (entitytype==PLANET) {
 	  entities[PLANET]=planet_entities;//this will make it so that while you have at least one habitable planet, not all ma
@@ -744,7 +748,7 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
 		float fograd=radius*1.007;
 		if (.007*radius>2500.0)
 			fograd=  radius+2500.0;
-		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),fograd);
+		Tab();f.Fprintf ("<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),fograd);
 	}
 
 	float r=.9,g=.9,b=1,a=1;
@@ -758,10 +762,10 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
 	}
 //	static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
 //	static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
-	Tab();fprintf (fp,"<Fog>\n");
-	Tab();Tab();fprintf (fp,"<FogElement file=\"atmXatm.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
-	Tab();Tab();fprintf (fp,"<FogElement file=\"atmXhalo.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);		
-	Tab();fprintf (fp,"</Fog>\n");
+	Tab();f.Fprintf ("<Fog>\n");
+	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXatm.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXhalo.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);		
+	Tab();f.Fprintf ("</Fog>\n");
 	}
   }
 
@@ -783,7 +787,7 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
       }
       ringname = GetWrapXY(ringname,wrapx,wrapy);
       if (ringrand<(1-dualringprob)) {
-	fprintf (fp,"<Ring file=\"%s\" innerradius=\"%f\" outerradius=\"%f\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
+		f.Fprintf ("<Ring file=\"%s\" innerradius=\"%f\" outerradius=\"%f\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
       }
       if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
 	Vector r,s;
@@ -802,7 +806,7 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
 	inner_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
 	outer_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
 
-	fprintf (fp,"<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
+	f.Fprintf ("<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
       }
     }
     //    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
@@ -825,7 +829,7 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
   }
   radii.pop_back();
 
-  Tab();fprintf (fp,"</Planet>\n"); 
+  Tab();f.Fprintf ("</Planet>\n"); 
 
   ///writes out some pretty planet tags
 }
@@ -847,18 +851,18 @@ void beginStar (float radius, unsigned int which) {
 
   char b[3]=" A";
   b[1]+=which;
-  Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),entities[0][which].c_str());
-  fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
-  fprintf (fp,"radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
+  Tab();f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),entities[0][which].c_str());
+  f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
+  f.Fprintf ("radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
   float loy = LengthOfYear(r,s);
   if (loy) {
-    fprintf (fp,"year= \"%f\" ",loy);
+    f.Fprintf ("year= \"%f\" ",loy);
     loy *=grand();
     if (loy) {
-      fprintf (fp, "day=\"%f\" ",loy);
+      f.Fprintf ("day=\"%f\" ",loy);
     }
   }
-  fprintf (fp," Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[which].r,lights[which].g,lights[which].b,which);
+  f.Fprintf (" Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[which].r,lights[which].g,lights[which].b,which);
 
   radii.push_back (1.5*radius);
   static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrinary",".05"));
@@ -889,7 +893,7 @@ void beginStar (float radius, unsigned int which) {
 
 void endStar () {
   radii.pop_back();
-  Tab();fprintf (fp,"</Planet>\n");
+  Tab();f.Fprintf ("</Planet>\n");
 }
 void CreateStar (float radius, unsigned int which) {
   beginStar (radius,which);
@@ -925,23 +929,24 @@ void CreatePrimaries (float starradius) {
 void CreateStarSystem () {
   assert (!starradius.empty());
   assert (starradius[0]);
-  fprintf (fp,"<system name=\"%s\" background=\"%s\" nearstars=\"%d\" stars=\"%d\" starspread=\"%d\">\n",systemname.c_str(),getRandName(background).c_str(),500,1000,150);
+  f.Fprintf ("<system name=\"%s\" background=\"%s\" nearstars=\"%d\" stars=\"%d\" starspread=\"%d\">\n",systemname.c_str(),getRandName(background).c_str(),500,1000,150);
   CreatePrimaries (starradius[0]);
-  fprintf (fp,"</system>\n");
+  f.Fprintf ("</system>\n");
 }
 
 
 void readentity (vector <string> & entity,const char * filename) {
-  FILE * fp= fopen (filename,"r");
-  if (!fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, UniverseFile);
+  if (err>Ok) {
     return;
   }
   ///warning... obvious vulnerability
   char input_buffer[1000];
-  while (1==fscanf (fp,"%s", input_buffer)) {
+  while (1==f.Fscanf ("%s", input_buffer)) {
     entity.push_back (input_buffer);
   }
-  fclose (fp);
+  f.Close();
 }
 
 
@@ -996,14 +1001,15 @@ string getStarSystemSector (string in) {
     return string (".");
 }
 void readnames (vector <string> &entity, const char * filename) {
-  FILE * fp= fopen (filename,"r");
-  if (!fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, UniverseFile);
+  if (err>Ok) {
     return;
   }
   ///warning... obvious vulnerability
   char input_buffer[1000];
-  while (!feof (fp)) {
-    fgets (input_buffer,999,fp);
+  while (!f.Eof()) {
+    f.ReadLine (input_buffer,999);
     if (input_buffer[0]=='\0'||input_buffer[0]=='\n'||input_buffer[0]=='\r')
       continue;
     for (unsigned int i=0;input_buffer[i]!='\0';i++) {
@@ -1017,7 +1023,7 @@ void readnames (vector <string> &entity, const char * filename) {
     }
     entity.push_back (input_buffer);
   }
-  fclose (fp);
+  f.Close();
 
 }
 
@@ -1063,7 +1069,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
     seedrand (seed);
   else
     seedrand (stringhash(sector+system));
-  fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",numstars,numgasgiants,numrockyplanets,nummoons,numnaturalphenomena,numstarbases); 
+  VSFileSystem::vs_fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",numstars,numgasgiants,numrockyplanets,nummoons,numnaturalphenomena,numstarbases); 
   nument[0]=numstars;
   nument[1]=pushTowardsMean(meangas,numgasgiants);
   nument[2]=pushTowardsMean(meanplanets,numrockyplanets);
@@ -1073,46 +1079,47 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   numun[1]=pushTowardsMean(meanbases,numstarbases);
   static float smallUnitsMultiplier= XMLSupport::parse_float (vs_config->getVariable ("galaxy","SmallUnitsMultiplier","0"));
   numun[1]=(int) (numun[1]*smallUnitsMultiplier);
-  fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
+  VSFileSystem::vs_fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
-  readColorGrads (gradtex,(datapath+starlist).c_str());
-  readentity (entities[PLANET],(datapath+planetlist).c_str());
+  readColorGrads (gradtex,(starlist).c_str());
+  readentity (entities[PLANET],(planetlist).c_str());
   planet_entities=entities[PLANET];
-  string desolate=(string(datapath)+"planets.desolate.txt");
+  string desolate=string ("planets.desolate.txt");
   readentity (planet_entities,desolate.c_str());
-  readentity (entities[1],(datapath+gasgiantlist).c_str());
-  readentity (entities[3],(datapath+moonlist).c_str());
-  readentity (units[1],(datapath+smallunitlist).c_str());
-  readentity (background,(datapath+backgroundlist).c_str());
+  readentity (entities[1],(gasgiantlist).c_str());
+  readentity (entities[3],(moonlist).c_str());
+  readentity (units[1],(smallunitlist).c_str());
+  readentity (background,(backgroundlist).c_str());
 
   if (background.empty()) {
     background.push_back (backgroundlist);
   }
   if (nebulae) {
-    readentity (units[0],(datapath+nebulaelist).c_str());
+    readentity (units[0],(nebulaelist).c_str());
   }
   if (asteroids) {
-    readentity (units[0],(datapath+asteroidlist).c_str());
+    readentity (units[0],(asteroidlist).c_str());
   }
-  readentity(rings,(datapath+ringlist).c_str());
-  readnames (names,(datapath+namelist).c_str());
+  readentity(rings,(ringlist).c_str());
+  readnames (names,(namelist).c_str());
 
-  fp = fopen (outputfile.c_str(),"w");
-  if (fp) {
-    for (unsigned int i=0;i<jumplocations.size();i++) {
-      entities[JUMP].push_back (jumplocations[i]);
-    }
-    nument[JUMP]=entities[JUMP].size();
-    StarSystemGent::faction = factions;
-    CreateStarSystem();
-    fclose (fp);
+  CreateDirectoryHome( VSFileSystem::sharedsectors+"/"+VSFileSystem::universe_name+"/"+sector);
+  VSError err = f.OpenCreateWrite( outputfile, SystemFile);
+  if (err<=Ok) {
+		  for (unsigned int i=0;i<jumplocations.size();i++) {
+				  entities[JUMP].push_back (jumplocations[i]);
+		  }
+		  nument[JUMP]=entities[JUMP].size();
+		  StarSystemGent::faction = factions;
+		  CreateStarSystem();
+  		  f.Close();
   }
 }
 #ifdef CONSOLE_APP
 int main (int argc, char ** argv) {
 
   if (argc<9) {
-    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> <numgasgiants> <numrockyplanets> <nummoons> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
+    VSFileSystem::vs_fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> <numgasgiants> <numrockyplanets> <nummoons> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
     return 1;
   }
   int seed;

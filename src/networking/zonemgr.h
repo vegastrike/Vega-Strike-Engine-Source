@@ -48,8 +48,8 @@ class ZoneMgr
 		vector<ClientWeakList*> zone_list;
 		vector<int>				zone_clients;
 		// List of units in zones (but not Clients)
-		vector<list<Unit *> >	zone_unitlist;
-		vector<int>				zone_units;
+		//vector<list<Unit *> >	zone_unitlist;
+		//vector<int>				zone_units;
 
 	    class Systems
 	    {
@@ -74,8 +74,8 @@ class ZoneMgr
 		void	addSystem( string & sysname, string & system);
 		StarSystem* addZone( string starsys);
 		ClientWeakList* GetZone( int serial);
-		void	addUnit( Unit * un, int zone);
-		void	removeUnit( Unit *un, int zone);
+		//void	addUnit( Unit * un, int zone);
+		//void	removeUnit( Unit *un, int zone);
 		Unit *	getUnit( ObjSerial unserial, unsigned short zone);
 
 		StarSystem *	addClient( ClientWeakPtr clt, string starsys, unsigned short & num_zone);

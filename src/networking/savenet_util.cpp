@@ -56,23 +56,23 @@ void	SaveNetUtil::SaveFiles( string savestr, string xmlstr, string path, string 
 	string savefile;
 	FILE * fp;
 	savefile = path+cp->savegame->GetCallsign()+".xml";
-	fp = fopen( savefile.c_str(), "wb");
+	fp = VSFileSystem::OpenFile( savefile.c_str(), "wb");
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
 		VSExit(1);
 	}
-	fwrite( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
-	fclose( fp);
+	VSFileSystem::Write( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
+	VSFileSystem::Close( fp);
 	// Write the save file
 	savefile = path+cp->savegame->GetCallsign()+".save";
-	fp = fopen( savefile.c_str(), "wb");
+	fp = VSFileSystem::OpenFile( savefile.c_str(), "wb");
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
 		VSExit(1);
 	}
-	fwrite( savestr.c_str(), sizeof( char), savestr.length(), fp);
-	fclose( fp);
+	VSFileSystem::Write( savestr.c_str(), sizeof( char), savestr.length(), fp);
+	VSFileSystem::Close( fp);
 }
 */

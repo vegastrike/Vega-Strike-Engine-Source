@@ -124,7 +124,7 @@ void	NetServer::recvMsg_tcp( ClientPtr clt )
 #endif
 
 		// In TCP we always process
-        this->processPacket( clt, command, ipadr, packet );
+	    this->processPacket( clt, command, ipadr, packet );
     }
 }
 

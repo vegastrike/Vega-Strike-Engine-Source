@@ -308,7 +308,7 @@ void GameUniverse::StartDraw()
 	  delete star_system.back();
 	  star_system.pop_back();
 	} else {
-	  fprintf (stderr,"error with active star system list\n");
+	  VSFileSystem::vs_fprintf (stderr,"error with active star system list\n");
 	}
       }
 	}

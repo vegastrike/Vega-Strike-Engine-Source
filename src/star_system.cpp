@@ -39,8 +39,7 @@
 #include "gfx/env_map_gent.h"
 extern Music *muzak;
 extern Vector mouseline;
-
-vector<Vector> perplines;
+#include "vsfilesystem.h"
 //static SphereMesh *foo;
 //static Unit *earth;
 
@@ -284,12 +283,12 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GFXEnable (DEPTHWRITE);
 
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"begin Draw");
+  VSFileSystem::Fprintf (stderr,"begin Draw");
   fflush (stderr);
 #endif
   interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"ani");
+  VSFileSystem::Fprintf (stderr,"ani");
   fflush (stderr);
 #endif
   GFXColor4f(1,1,1,1);
@@ -302,23 +301,23 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
   GFXDisable (LIGHTING);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"bg");
+  VSFileSystem::Fprintf (stderr,"bg");
   fflush (stderr);
 #endif
   bg->Draw();
 
   UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
-  //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
+  //  VSFileSystem::Fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"cp");
+  VSFileSystem::Fprintf (stderr,"cp");
   fflush (stderr);
 #endif
   Unit * par;
   bool alreadysetviewport=false;
   if ((par=_Universe->AccessCockpit()->GetParent())==NULL) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"cpu");
+  VSFileSystem::Fprintf (stderr,"cpu");
   fflush (stderr);
 #endif
     _Universe->AccessCamera()->UpdateGFX (GFXTRUE);
@@ -336,7 +335,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
   }
 #ifdef UPDATEDEBUG
-  fprintf (stderr,">un<");
+  VSFileSystem::Fprintf (stderr,">un<");
   fflush (stderr);
 #endif
 
@@ -347,14 +346,14 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   }
   WarpTrailDraw();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"fog");
+  VSFileSystem::Fprintf (stderr,"fog");
   fflush (stderr);
 #endif
 
   GFXFogMode (FOG_OFF);
 
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"vp");
+  VSFileSystem::Fprintf (stderr,"vp");
   fflush (stderr);
 #endif
 
@@ -366,7 +365,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"farmsh");
+  VSFileSystem::Fprintf (stderr,"farmsh");
   fflush (stderr);
 #endif
   static bool DrawNearStarsLast =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
@@ -379,7 +378,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   }
   
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"terr");
+  VSFileSystem::Fprintf (stderr,"terr");
   fflush (stderr);
 #endif
   GFXEnable (DEPTHTEST);
@@ -388,7 +387,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GamePlanet::ProcessTerrains();
   Terrain::RenderAll();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"nearmsh");
+  VSFileSystem::Fprintf (stderr,"nearmsh");
   fflush (stderr);
 #endif
   Mesh::ProcessUndrawnMeshes(true);
@@ -408,14 +407,14 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 
   GFXLightContextAmbient(tmpcol);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"halo");
+  VSFileSystem::Fprintf (stderr,"halo");
   fflush (stderr);
 #endif
 
 
   
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"bem");
+  VSFileSystem::Fprintf (stderr,"bem");
   fflush (stderr);
 #endif
 
@@ -424,18 +423,18 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   }
   Beam::ProcessDrawQueue();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"anidq");
+  VSFileSystem::Fprintf (stderr,"anidq");
   fflush (stderr);
 #endif
 
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"bolt");
+  VSFileSystem::Fprintf (stderr,"bolt");
   fflush (stderr);
 #endif
   Bolt::Draw();
 
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"star");
+  VSFileSystem::Fprintf (stderr,"star");
   fflush (stderr);
 #endif
   //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
@@ -447,7 +446,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   ConditionalCursorDraw(false);
   //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"cpDraw");
+  VSFileSystem::Fprintf (stderr,"cpDraw");
   fflush (stderr);
 #endif
   if (DrawCockpit) {
@@ -459,7 +458,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     //    }
   }
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"end Draw\n");
+  VSFileSystem::Fprintf (stderr,"end Draw\n");
   fflush (stderr);
 #endif
 }
@@ -495,7 +494,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"begin Update");
+  VSFileSystem::Fprintf (stderr,"begin Update");
   fflush (stderr);
 #endif
   bool firstframe = true;
@@ -523,26 +522,26 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	if (firstframe&&rand()%2) {
 	  if (this==_Universe->getActiveStarSystem(0)) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"Snd");
+  VSFileSystem::Fprintf (stderr,"Snd");
   fflush (stderr);
 #endif
 	    AUDRefreshSounds();
 	  }
 	}
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"AI");
+  VSFileSystem::Fprintf (stderr,"AI");
   fflush (stderr);
 #endif
   ExecuteUnitAI();
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"TerCol");
+  VSFileSystem::Fprintf (stderr,"TerCol");
   fflush (stderr);
 #endif
 	Terrain::CollideAll();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"Ani");
+  VSFileSystem::Fprintf (stderr,"Ani");
   fflush (stderr);
 #endif
 	AnimatedTexture::UpdateAllPhysics();
@@ -554,7 +553,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  }
 	  //FIXME somehow only works if called once per frame
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"DelQ");
+  VSFileSystem::Fprintf (stderr,"DelQ");
   fflush (stderr);
 #endif
 	  Unit::ProcessDeleteQueue();
@@ -594,7 +593,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 #endif
 	  {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"neb");
+  VSFileSystem::Fprintf (stderr,"neb");
   fflush (stderr);
 #endif
 	  iter = drawList.createIterator();
@@ -604,7 +603,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  }
 	  iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"Coll");
+  VSFileSystem::Fprintf (stderr,"Coll");
   fflush (stderr);
 #endif
 	  while((unit = iter.current())!=NULL) {
@@ -617,7 +616,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"TerU");
+  VSFileSystem::Fprintf (stderr,"TerU");
   fflush (stderr);
 #endif
 	Terrain::UpdateAll(64);	
@@ -633,7 +632,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"muzak");
+  VSFileSystem::Fprintf (stderr,"muzak");
   fflush (stderr);
 #endif
 	if (this==_Universe->getActiveStarSystem(0)) {
@@ -650,7 +649,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  }
 	}
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"unphi");
+  VSFileSystem::Fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
       Unit * owner = _Universe->AccessCockpit()->GetParent();
@@ -666,7 +665,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
       }
       UpdateUnitPhysics(firstframe);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"boltphi");
+  VSFileSystem::Fprintf (stderr,"boltphi");
   fflush (stderr);
 #endif
 	bolts->UpdatePhysics();
@@ -680,14 +679,14 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
     }
   }
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"endupd\n");
+  VSFileSystem::Fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
   UnitCollection::FreeUnusedNodes();
   collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
-  //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
+  //  VSFileSystem::Fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 */
 
@@ -702,12 +701,13 @@ void	GameStarSystem::createBackground( StarSystem::StarXML * xml)
   LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
   LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
 #else
-  string bglight= 
-	  MakeSharedStarSysPath (xml->backgroundname+"_light.bmp");
-  LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  //string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.bmp";
+  string bglight= xml->backgroundname+"_light.bmp";
+  string bgfile = xml->backgroundname+"_light.bmp";
+  LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   if (!LightMap[0]->LoadSuccess()) {
-      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
-      LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+      EnvironmentMapGeneratorMain (bglight.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
+      LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   }
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9,filename);

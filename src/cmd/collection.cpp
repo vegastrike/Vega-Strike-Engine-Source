@@ -37,7 +37,7 @@ void * UnitCollection::PushUnusedNode (UnitListNode * node) {
   static bool cachunk=true;
   if (cachunk) {
     cachunk=false;
-    //fprintf (stderr,"%x %x",&dog,&cat);
+    //VSFileSystem::vs_fprintf (stderr,"%x %x",&dog,&cat);
   }
   static std::vector <UnitCollection::UnitListNode * >dogpile;
   if (node==NULL) {

@@ -27,9 +27,9 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   // 
   int tmp = ship->queryBoundingBox(CamPos,mousePoint,0);
   if (tmp)
-    //fprintf (stderr, "bounding box hit\n");
+    //VSFileSystem::vs_fprintf (stderr, "bounding box hit\n");
   if (ship->querySphereClickList(CamPos,mousePoint.Cast(),0)){  // camera position is not actually the center of the camera
-    //fprintf (stderr, "bounding sphere hit\n");
+    //VSFileSystem::vs_fprintf (stderr, "bounding sphere hit\n");
     
     if (tmp) return true;
   }

@@ -1,4 +1,5 @@
 #include "aux_texture.h"
+#include "vsfilesystem.h"
 #include <stdio.h>
 class AnimatedTexture: public Texture {
   unsigned int numframes;
@@ -20,8 +21,9 @@ class AnimatedTexture: public Texture {
   AnimatedTexture ();
   AnimatedTexture (const char * file, int stage, enum FILTER imm, bool detailtexture=false);
   AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);
-  void Load (char * buffer, int length, int nframe, enum FILTER imm,bool detailtexture=false);
+  //void Load (char * buffer, int length, int nframe, enum FILTER imm,bool detailtexture=false);
   void Load (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);
+  void Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex=false);
   void Destroy();
   virtual Texture *Original();
   ~AnimatedTexture();

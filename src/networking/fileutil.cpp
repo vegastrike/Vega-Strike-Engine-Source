@@ -1,7 +1,7 @@
 #include "fileutil.h"
 #include "vs_globals.h"
 #include "networking/lowlevel/vsnet_headers.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 
 #ifdef _WIN32
 #include <winsock.h> // for ntohl
@@ -12,31 +12,35 @@
 HASHMETHOD	FileUtil::Hash;
 #endif
 
-void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, string name)
+using namespace VSFileSystem;
+
+bool	FileUtil::use_crypto = false;
+
+void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string name)
 {
 	string savefile;
-	FILE * fp;
 
 	// Write the save file
-	savefile = path+name+".save";
-	fp = fopen( savefile.c_str(), "wb");
-	if( !fp)
+	savefile = name+".save";
+	VSFile f;
+	VSError err = f.OpenCreateWrite( savefile, AccountFile);
+	if( err>Ok)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
 		VSExit(1);
 	}
-	fwrite( savestr.c_str(), sizeof( char), savestr.length(), fp);
-	fclose( fp);
+	f.Write( savestr);
+	f.Close();
 	// Write the XML file
-	savefile = path+name+".xml";
-	fp = fopen( savefile.c_str(), "wb");
-	if( !fp)
+	savefile = name+".xml";
+	err = f.OpenCreateWrite( savefile, AccountFile);
+	if( err>Ok)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
 		VSExit(1);
 	}
-	fwrite( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
-	fclose( fp);
+	f.Write( xmlstr);
+	f.Close();
 }
 
 vector<string>	FileUtil::GetSaveFromBuffer( const char * buffer)
@@ -66,12 +70,15 @@ vector<string>	FileUtil::GetSaveFromBuffer( const char * buffer)
 int		FileUtil::HashStringCompute( std::string buffer, unsigned char * digest)
 {
 #ifdef CRYPTO
+if( use_crypto)
+{
 	HASHMETHOD		Hash;
 
 	const int block_size = Hash.OptimalBlockSize();
 	unsigned char * hashbuf = new unsigned char[block_size];
 	const char * buf = buffer.c_str();
-	int nb=0, offset=0;
+	int nb=0;
+	unsigned int offset=0;
 
 	while( offset<buffer.length())
 	{
@@ -91,17 +98,29 @@ int		FileUtil::HashStringCompute( std::string buffer, unsigned char * digest)
 	delete hashbuf;
 
 	return 0;
+}
+else
+	return 0;
 #else
 	return 0;
 #endif
 }
 
-int		FileUtil::HashCompute( const char * filename, unsigned char * digest)
+void	FileUtil::displayHash( unsigned char * hash, unsigned int length)
+{
+	for( unsigned int i=0; i<length; i++)
+		cerr<<hash[i];
+}
+
+int		FileUtil::HashCompute( const char * filename, unsigned char * digest, VSFileType type)
 {
 #ifdef CRYPTO
+if( use_crypto)
+{
 	HASHMETHOD		Hash;
-	FILE * fp = fopen( filename, "rb");
-	if( !fp)
+	VSFile f;
+	VSError err = f.OpenReadOnly( filename, type);
+	if( err>Ok)
 	{
 		if( errno==ENOENT)
 			// Return 1 if file does not exists
@@ -118,63 +137,86 @@ int		FileUtil::HashCompute( const char * filename, unsigned char * digest)
 	unsigned char * buffer = new unsigned char[block_size];
 	int nb=0;
 
-	while( (nb = fread( buffer, sizeof( unsigned char), block_size, fp)) > 0)
+	while( (nb = f.Read( buffer, block_size)) > 0)
 		Hash.Update( buffer, nb);
 
 	Hash.Final( digest);
-	delete buffer;
-	fclose( fp);
+	delete []buffer;
+	f.Close();
 
+	return 0;
+}
+else
 	return 0;
 #else
 	return 0;
 #endif
 }
 
-int		FileUtil::HashCompare( string filename, unsigned char * hashdigest)
+// Warning : now takes an absolute path
+int		FileUtil::HashCompare( string filename, unsigned char * hashdigest, VSFileType type)
 {
 #ifdef CRYPTO
+if( use_crypto)
+{
 	HASHMETHOD		Hash;
-	string full_univ_path = datadir+filename;
+	//string full_univ_path = VSFileSystem::datadir+filename;
 	unsigned char * local_digest = new unsigned char[Hash.DigestSize()];
 	int ret;
-	ret=HashCompute( full_univ_path.c_str(), local_digest);
+	//ret=HashCompute( full_univ_path.c_str(), local_digest);
+	ret=HashCompute( filename.c_str(), local_digest, type);
 	// If the file does not exist or if hashes are !=
 	if( ret)
 	{
-		delete local_digest;
+		delete []local_digest;
 		return 0;
 	}
 	if( memcmp( hashdigest, local_digest, Hash.DigestSize()))
 	{
-		cerr<<"HashDigest does not match : '"<<hashdigest<<"' != '"<<local_digest<<"' for file "<<full_univ_path<<endl;
-		delete local_digest;
+		cerr<<"HashDigest does not match : '";
+		displayHash(hashdigest, Hash.DigestSize());
+		cerr<<"' != '";
+		displayHash(local_digest, Hash.DigestSize());
+		cerr<<"' for file "<<filename<<endl;
+		delete []local_digest;
 		return 0;
 	}
-	cerr<<"HashDigest MATCH : '"<<hashdigest<<"' == '"<<local_digest<<"' for file "<<full_univ_path<<endl;
+	cerr<<"HashDigest MATCH : '";
+	displayHash(hashdigest, Hash.DigestSize());
+	cerr<<"' == '";
+	displayHash(local_digest, Hash.DigestSize());
+	cerr<<"' for file "<<filename<<endl;
 
-	delete local_digest;
+	delete []local_digest;
+	return 1;
+}
+else
 	return 1;
 #else
-	return 0;
+	return 1;
 #endif
 }
 
-int		FileUtil::HashFileCompute( string filename, unsigned char * hashdigest)
+int		FileUtil::HashFileCompute( string filename, unsigned char * hashdigest, VSFileType type)
 {
 #ifdef CRYPTO
+if( use_crypto)
+{
 	HASHMETHOD		Hash;
-	string fulluniv = datadir+filename;
+	//string fulluniv = VSFileSystem::datadir+filename;
 	int ret;
-	if( (ret=HashCompute( fulluniv.c_str(), hashdigest))<0 || ret)
+	if( (ret=HashCompute( filename.c_str(), hashdigest, type))<0 || ret)
 	{
 		cerr<<"!!! ERROR = couldn't get "<<filename<<" HashDigest (not found or error) !!!"<<endl;
-		cerr<<"-- FILE HASH : "<<fulluniv<<" = "<<hashdigest<<" --"<<endl;
+		cerr<<"-- FILE HASH : "<<filename<<" = "<<hashdigest<<" --"<<endl;
 	}
 	else
-		cerr<<"-- FILE HASH : "<<fulluniv<<" = "<<hashdigest<<" --"<<endl;
+		cerr<<"-- FILE HASH : "<<filename<<" = "<<hashdigest<<" --"<<endl;
 
 	return ret;
+}
+else
+	return 0;
 #else
 	return 0;
 #endif

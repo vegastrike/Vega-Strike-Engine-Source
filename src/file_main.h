@@ -22,38 +22,43 @@
 #include <string.h>
 //#include "gfxlib.h"
 #include "endianness.h"
-extern FILE *fpread;
+#include "vsfilesystem.h"
+using namespace VSFileSystem;
+extern VSFile fpread;
 
 /*File utility functions*/
 inline void LoadFile(const char *filename)
 {
-	fpread = fopen(filename, "rb");
+	fpread.OpenReadOnly(filename);
 }
 inline void CloseFile()
 {
-	fclose(fpread);
+	fpread.Close();
 }
 
-inline float readf (FILE *fp) {
+inline float readf (VSFileSystem::VSFile & f) {
 	union { float fval; unsigned int ival; } t;
-	(void) fread (&t.fval, sizeof t.fval, 1, fp);
+	f.Read (&t.fval, sizeof t.fval);
 	t.ival = le32_to_cpu(t.ival);
 	return t.fval;
 }
-inline short reads (FILE *fp) {short temp;	fread (&temp,sizeof(short),1,fp);return le16_to_cpu(temp);}
-inline int readi (FILE * fp) {int i; fread (&i,sizeof(int),1,fp); return le32_to_cpu(i);}
-inline unsigned char readc (FILE *fp) {unsigned char temp;	fread (&temp,sizeof(char),1,fp);return temp;}
+inline short reads (VSFileSystem::VSFile & f)
+{short temp;	f.Read (&temp,sizeof(short));return le16_to_cpu(temp);}
+inline int readi (VSFileSystem::VSFile & f)
+{int i; f.Read (&i,sizeof(int)); return le32_to_cpu(i);}
+inline unsigned char readc (VSFileSystem::VSFile & f)
+{unsigned char temp;	f.Read (&temp,sizeof(char));return temp;}
 
 
 /*Read simple data*/
 inline void ReadInt(int &integer)
 {
-	fread(&integer, sizeof(int), 1, fpread);
+	fpread.Read(&integer, sizeof(int));
 	integer = le32_to_cpu(integer);
 }
 inline void ReadFloat(float &num)
 {
-	fread(&num, sizeof(float), 1, fpread);
+	fpread.Read(&num, sizeof(float));
 	*((int *)&num) = le32_to_cpu(*((int *)&num));
 }
 
@@ -62,7 +67,7 @@ inline void ReadString(char *string)
 	int length = strlen(string);
 
 	ReadInt(length);
-	fread(string, length, 1, fpread);
+	fpread.Read(string, length);
 	string[length] = '\0';
 }
 
@@ -110,11 +115,11 @@ inline void ReadRestriction(int &isrestricted, float &start, float &end)
 
 inline long GetPosition()
 {
-	return ftell(fpread);
+	return fpread.GetPosition();
 }
 
 inline void SetPosition(long position)
 {
-	fseek(fpread,position,SEEK_SET);
+	fpread.GoTo(position);
 }
 

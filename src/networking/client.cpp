@@ -7,7 +7,6 @@ Client::Client()
 	latest_timeout=0;
 	old_timeout=0;
 	deltatime=0;
-	zone = 0;
 	ingame = false;
 	webcam = 0;
 	portaudio = 0;

@@ -32,7 +32,7 @@ void Unit::RemoveFromSystem() {
 	EradicateCollideTable (&CollideInfo,activeStarSystem)
 #ifdef SAFE_COLLIDE_DEBUG 
 	) {
-      fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with unit deletion\n");      
+      VSFileSystem::vs_fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with unit deletion\n");      
     }
 #else
     ;
@@ -43,7 +43,7 @@ void Unit::RemoveFromSystem() {
       _Universe->pushActiveStarSystem(_Universe->star_system[i]);
     
     if (EradicateCollideTable (&CollideInfo,_Universe->star_system[i])) {
-      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%lx %s",(long)((long *)(this)),this->name.c_str());
+      VSFileSystem::vs_fprintf (stderr,"VERY BAD ERROR FATAL! 0x%lx %s",(long)((long *)(this)),this->name.c_str());
     }
     _Universe->popActiveStarSystem();
     }
@@ -226,7 +226,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 													 &smalltransform,
 													 &bigtransform)) {
 	//static int crashcount=0;
-	//      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
+	//      VSFileSystem::vs_fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
 	csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	int numHits = csRapidCollider::numHits;
 	if (numHits) {
@@ -329,7 +329,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 							&bigtransform)) {
       static int crashcount=0;
     
-            fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
+            VSFileSystem::vs_fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
       csCollisionPair * mycollide = csRapidCollider::GetCollisions();
       int numHits = csRapidCollider::numHits;
       if (numHits) {

@@ -103,7 +103,7 @@ bool QuadTree::GetGroundPos (QVector &Location, Vector & norm, const Matrix & tr
   }
   float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,norm);
   if (tmp>-FLT_MAX) {
-    //    fprintf (stderr,"Orig<%f,%f,%f> Now <%f,%f,%f>",Loc.i,Loc.j,Loc.k,Loc.i,tmp,Loc.k);
+    //    VSFileSystem::Fprintf (stderr,"Orig<%f,%f,%f> Now <%f,%f,%f>",Loc.i,Loc.j,Loc.k,Loc.i,tmp,Loc.k);
     Location = Transform (transf,nonlinear_transform->Transform (QVector (TotalTerrainSizeX,tmp,TotalTerrainSizeZ))).Cast();
     norm = TransformNormal (transf,nonlinear_transform->TransformNormal (Location, norm));
     norm.Normalize();
@@ -120,7 +120,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal,  const Matrix& tran
     Location.i= fmod (Location.i,TotalTerrainSizeX);
     Location.k= fmod (Location.k,TotalTerrainSizeZ);
     //if (t1!=Location.i|| t2!=Location.k) {
-    //      fprintf (stderr,"wired");
+    //      VSFileSystem::Fprintf (stderr,"wired");
     // /}
 
     if (Location.i<0)
@@ -131,7 +131,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal,  const Matrix& tran
   float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,normal);
   normal = TransformNormal (transf,nonlinear_transform->TransformNormal (Location, normal));
   normal.Normalize();
-  //  fprintf (stderr,"<%f>",tmp);
+  //  VSFileSystem::Fprintf (stderr,"<%f>",tmp);
   return tmp;
 }
 
@@ -179,9 +179,9 @@ void	QuadTree::LoadData()
 	printf("Loading height grids...\n");
 
 	// Big coarse data, at 128 meter sample spacing.
-	FILE*	fp = fopen("demdata/gc16at128.raw", "rb");
-	fread(hm.Data, sizeof(unsigned short), hm.XSize * hm.ZSize, fp);
-	fclose(fp);
+	FILE*	fp = VSFileSystem::vs_open("demdata/gc16at128.raw", "rb");
+	VSFileSystem::vs_read(hm.Data, sizeof(unsigned short), hm.XSize * hm.ZSize, fp);
+	VSFileSystem::vs_close(fp);
 	printf("Building quadtree data...\n");
 	root->AddHeightMap(RootCornerData, hm);
 	
@@ -189,9 +189,9 @@ void	QuadTree::LoadData()
 	hm.XOrigin = 16384;
 	hm.ZOrigin = 16384;
 	hm.Scale = 6;
-	fp = fopen("demdata/gc16at64.raw", "rb");
-	fread(hm.Data, sizeof(unsigned short), hm.XSize * hm.ZSize, fp);
-	fclose(fp);
+	fp = VSFileSystem::vs_open("demdata/gc16at64.raw", "rb");
+	VSFileSystem::vs_read(hm.Data, sizeof(unsigned short), hm.XSize * hm.ZSize, fp);
+	VSFileSystem::vs_close(fp);
 	printf("Adding quadtree data...\n");
 	root->AddHeightMap(RootCornerData, hm);
 	
@@ -199,9 +199,9 @@ void	QuadTree::LoadData()
 	hm.XOrigin = 24576;
 	hm.ZOrigin = 24576;
 	hm.Scale = 5;
-	fp = fopen("demdata/gc16at32.raw", "rb");
-	fread(hm.Data, sizeof(unsigned short), hm.XSize * hm.ZSize, fp);
-	fclose(fp);
+	fp = VSFileSystem::vs_open("demdata/gc16at32.raw", "rb");
+	VSFileSystem::vs_read(hm.Data, sizeof(unsigned short), hm.XSize * hm.ZSize, fp);
+	VSFileSystem::vs_close(fp);
 	printf("Adding quadtree data...\n");
 	root->AddHeightMap(RootCornerData, hm);
 	

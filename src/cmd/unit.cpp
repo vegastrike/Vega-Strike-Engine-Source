@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
@@ -58,7 +58,7 @@
 #include "unit_customize.cpp"
 #include "unit_damage.cpp"
 #include "unit_physics.cpp"
-#include "unit_bsp_gfx.h"
+#include "unit_bsp.h"
 #include "unit_click.cpp"
 
 //if the PQR of the unit may be variable...for radius size computation
@@ -159,146 +159,6 @@ template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
 	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
 }
-/*
-template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
-	this->Unit::Init();
-	update_ani_cache();
-	//if (!SubU)
-	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
-	SubUnit = SubU;
-	this->faction = faction;
-	SetFg (flightgrp,fg_subnumber);
-	bool doubleup=false;
-	char * my_directory=GetUnitDir(filename);
-	vssetdir (GetSharedUnitPath().c_str());
-	FILE * fp=NULL;
-	if (!fp) {
-	  const char *c;
-	  if ((c=FactionUtil::GetFaction(faction)))
-	    vschdir (c);
-	  else
-	    vschdir ("unknown");
-	  doubleup=true;
-	  vschdir (my_directory);
-	} else {
-	  fclose (fp);
-	}
-	if (filename[0])
-    	    fp = fopen (filename,"r");
-	if (!fp) {
-	  vscdup();
-	  vscdup();
-	  doubleup=false;
-	  vschdir (my_directory);
-	  if (filename[0])
-    	    fp = fopen (filename,"r");
-	}
-
-	if (!fp) {
-	  if (doubleup) {
-	    vscdup();
-	  }
-	  vscdup();
-	  vschdir ("neutral");
-	  faction=FactionUtil::GetFaction("neutral");//set it to neutral
-	  doubleup=true;
-	  vschdir (my_directory);
-	  if (filename[0])
-    	    fp = fopen (filename,"r");
-	  if (fp) fclose (fp); 
-	  else {
-	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
-	    meshdata.clear();
-	    meshdata.push_back(NULL);
-	    this->name=string("LOAD_FAILED");
-	    //	    assert ("Unit Not Found"==NULL);
-	  }
-	}else {
-	  fclose (fp);
-	}
-	free(my_directory);
-	//Insert file loading stuff here
-	if(1&&fp) {
-	  name = filename;
-
-	  Unit::LoadXML(filename,unitModifications.c_str());
-	}
-	if (1) {
-	  calculate_extent(false);
-	  ToggleWeapon(true);//change missiles to only fire 1
-       	  vscdup();
-	  if (doubleup) 
-	    vscdup();
-	  vsresetdir();
-	  return;
-	}
-	LoadFile(filename);
-	int nummesh;
-	ReadInt(nummesh);
-	meshdata.clear();
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		int meshtype;
-		ReadInt(meshtype);
-		char meshfilename[64];
-		float x,y,z;
-		ReadMesh(meshfilename, x,y,z);
-		meshdata.push_back(new Mesh(meshfilename, 1, faction,NULL));
-		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
-	}
-	meshdata.push_back(NULL);
-	int numsubunit;
-	ReadInt(numsubunit);
-	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
-	{
-		char unitfilename[64];
-		float x,y,z;
-		int type;
-		ReadUnit(unitfilename, type, x,y,z);
-		Unit *un;
-		switch(type)
-		{
-		default:
-		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
-
-		}
-		un->SetPosition(QVector(x,y,z));
-	}
-
-	int restricted;
-	float min, max;
-	ReadInt(restricted); //turrets and weapons
-	//ReadInt(restricted); // What's going on here? i hsould have 2, but that screws things up
-
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictYaw(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictPitch(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictRoll(min,max);
-	}
-	float maxspeed, maxaccel, mass;
-	ReadFloat(maxspeed);
-	ReadFloat(maxaccel);
-	ReadFloat(mass);
-
-
-	CloseFile();
-	calculate_extent(false);
-	ToggleWeapon(true);//change missiles to only fire 1
-	vscdup();
-	if (fp) 
-	  vscdup();
-	vsresetdir();
-
-}
-*/
 
 template <class UnitType>
 GameUnit<UnitType>::~GameUnit<UnitType>()
@@ -311,7 +171,7 @@ GameUnit<UnitType>::~GameUnit<UnitType>()
   }
   if (planet)
     delete planet;
-  //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
+  //  VSFileSystem::vs_fprintf (stderr,"Freeing Unit %s\n",name.c_str());
   if (sound->engine!=-1) {
     AUDStopPlaying (sound->engine);
     AUDDeleteSound (sound->engine);
@@ -529,11 +389,11 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       GFXBoxInFrustumModel (ctm);
       int tmp = GFXBoxInFrustum (meshdata[i]->corner_min(),meshdata[i]->corner_max());
       if ((d==0)!=(tmp==0)) {
-	fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
+	VSFileSystem::vs_fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
       }
 #endif
 
-      //      fprintf (stderr,"%s %d ",name.c_str(),i);
+      //      VSFileSystem::vs_fprintf (stderr,"%s %d ",name.c_str(),i);
       float d = GFXSphereInFrustum(TransformedPosition,
 				   minmeshradius+meshdata[i]->clipRadialSize()
 #ifdef VARIABLE_LENGTH_PQR
@@ -541,7 +401,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 #endif 
 				   );
       float lod;
-      //      fprintf (stderr,"\n");
+      //      VSFileSystem::vs_fprintf (stderr,"\n");
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
@@ -588,7 +448,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       if (curun->selected) {
 	float tmpdis;
 	float tmpf = cosAngleFromMountTo (curun, tmpdis);
-        fprintf (stderr,"%s: <%f d: %f\n", curun->name.c_str(), tmpf, tmpdis);
+        VSFileSystem::vs_fprintf (stderr,"%s: <%f d: %f\n", curun->name.c_str(), tmpf, tmpdis);
 
       }
       tmpiter->advance();

@@ -8,7 +8,7 @@ using std::string;
 
 ClientState::ClientState()
 {
-	this->delay=50;
+	//this->delay=50;
 	this->client_serial = 0;
 	this->pos.position.Set( 20400,-35400,84700000.0);
 	this->veloc.Set( 0,0,0);
@@ -30,7 +30,7 @@ ClientState::ClientState( ObjSerial serial)
 	//pos.orientation.Set( 100,0,0);
 	this->veloc.Set( 0,0,0);
 	this->accel.Set( 0,0,0);
-	this->delay = 50;
+	//this->delay = 50;
 }
 
 ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc)
@@ -44,7 +44,7 @@ ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, 
 
 ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, unsigned int del)
 {
-	this->delay = del;
+	//this->delay = del;
 	this->client_serial = serial;
 	this->pos.position = posit;
 	this->pos.orientation = orientat;
@@ -54,7 +54,7 @@ ClientState::ClientState( ObjSerial serial, QVector posit, Quaternion orientat, 
 
 ClientState::ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, unsigned int del)
 {
-	this->delay = del;
+	//this->delay = del;
 	this->client_serial = serial;
 	this->pos = trans;
 	this->veloc = velocity;

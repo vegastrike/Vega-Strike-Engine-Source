@@ -363,7 +363,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  }
 	  break;
   case XML::UNKNOWN:
-   fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
+   VSFileSystem::vs_fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
     break;
   case XML::MESH:
     assert(xml->load_stage == 0);
@@ -467,7 +467,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr, "Unknown attribute '%s' encountered in Location tag\n",(*iter).name.c_str());
+	VSFileSystem::vs_fprintf (stderr, "Unknown attribute '%s' encountered in Location tag\n",(*iter).name.c_str());
 	break;
       case XML::X:
 	assert(!(xml->point_state & XML::P_X));
@@ -509,7 +509,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
+	VSFileSystem::vs_fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
 	break;
       case XML::I:
 	assert(!(xml->point_state & XML::P_I));
@@ -556,11 +556,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf (stderr,"Cannot Flatshade Lines\n");
+	  VSFileSystem::vs_fprintf (stderr,"Cannot Flatshade Lines\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -582,7 +582,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -609,11 +609,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf(stderr,"Cannot Flatshade Linestrips\n");
+	  VSFileSystem::vs_fprintf(stderr,"Cannot Flatshade Linestrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -637,11 +637,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf(stderr,"Cannot Flatshade Tristrips\n");
+	  VSFileSystem::vs_fprintf(stderr,"Cannot Flatshade Tristrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -665,11 +665,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf (stderr,"Cannot Flatshade Trifans\n");
+	  VSFileSystem::vs_fprintf (stderr,"Cannot Flatshade Trifans\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -693,11 +693,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf (stderr, "Cannot Flatshade Quadstrips\n");
+	  VSFileSystem::vs_fprintf (stderr, "Cannot Flatshade Quadstrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -720,7 +720,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -766,7 +766,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::POINT:
 	assert(!(xml->vertex_state & XML::V_POINT));
@@ -834,7 +834,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::TYPE:
 	assert (!(xml->vertex_state&XML::V_TYPE));
@@ -890,7 +890,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::POINT:
 	assert (ttttttt<2);
@@ -911,7 +911,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     assert (ttttttt==3);
     if (!foundindex) {
-      fprintf (stderr,"mesh with uninitalized logo");
+      VSFileSystem::vs_fprintf (stderr,"mesh with uninitalized logo");
     }
     xml->logos[xml->logos.size()-1].refpnt.push_back(ind);
     xml->logos[xml->logos.size()-1].refweight.push_back(indweight);
@@ -932,7 +932,7 @@ void Mesh::endElement(const string &name) {
   unsigned int i;
   switch(elem) {
   case XML::UNKNOWN:
-    fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
     break;
   case XML::POINT:
     assert(xml->point_state & (XML::P_X | 
@@ -1118,18 +1118,30 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
     mn.k = min(ver.z, mn.k);
     mx.k = max(ver.z, mx.k);
 }
+
+using namespace VSFileSystem;
+
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
+
 void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis) {
-  const int chunk_size = 16384;
-  std::vector <unsigned int> ind;  
-  FILE* inFile = fopen (filename, "r");
-  if(!inFile) {
-    fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, MeshFile);
+  if( err>Ok)
+  {
+	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
 	cleanexit=1;
-    winsys_exit(1);
-    return;
+	winsys_exit(1);
+	return;
   }
+  LoadXML( f, scale, faction, fg, origthis);
+  f.Close();
+}
+
+void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction, Flightgroup *fg, bool origthis)
+{
+  const int chunk_size = 16384;
+  std::vector <unsigned int> ind;
 
   xml = new XML;
   xml->fg = fg;
@@ -1146,7 +1158,10 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
-  
+
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+
+  /*
   do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -1155,20 +1170,20 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
 #endif
     int length;
     
-    length = fread(buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read(buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
   XML_ParserFree (parser);
   // Now, copy everything into the mesh data structures
 
   if(xml->load_stage!=5) {
-    fprintf (stderr,"Warning: mesh load possibly failed\n");
+    VSFileSystem::vs_fprintf (stderr,"Warning: mesh load possibly failed\n");
     exit(-1);
   }
   unsigned int i; unsigned int a=0;
@@ -1203,7 +1218,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
 	xml->vertices[i].i/=dis;//renormalize
 	xml->vertices[i].j/=dis;
 	xml->vertices[i].k/=dis;
-	/*	fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
+	/*	VSFileSystem::vs_fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
 		 xml->vertices[i].x,
 		 xml->vertices[i].y,
 		 xml->vertices[i].z,

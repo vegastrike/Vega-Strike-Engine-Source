@@ -2,7 +2,7 @@
 #include "networking/clientptr.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/unit_factory.h"
 #include "networking/fileutil.h"
 
@@ -120,6 +120,9 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		// Put the save parts in buffers in order to load them properly
 		COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 		netbuf.Reset();
+		string datestr = _Universe->current_stardate.GetFullTrekDate();
+		cerr<<"SENDING STARDATE : "<<datestr<<endl;
+		netbuf.addString( datestr);
 		netbuf.addString( saves[0]);
 		netbuf.addString( saves[1]);
 
@@ -147,8 +150,9 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
 
         int saved_faction = FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str());
-		vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
-		if( path.empty())
+		//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
+		bool exist = (VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+		if( !exist)
 		{
 			// We can't find the unit saved for player -> send a login error
 			this->sendLoginError( clt, ipadr);
@@ -179,7 +183,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		netbuf.addString( reluniv);
 #ifdef CRYPTO
 		unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
-		FileUtil::HashFileCompute( reluniv, digest);
+		FileUtil::HashFileCompute( reluniv, digest, UniverseFile);
 		// Add the galaxy filename with relative path to datadir
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 #endif
@@ -192,7 +196,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		// Generate the starsystem before addclient so that it already contains serials
 		zonemgr->addZone( cp->savegame->GetStarSystem());
 #ifdef CRYPTO
-		FileUtil::HashFileCompute( relsys, digest);
+		FileUtil::HashFileCompute( relsys, digest, SystemFile);
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 		delete digest;
 #endif

@@ -69,6 +69,12 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_DOCK         )
     CASE( CMD_UNDOCK       )
 
+    CASE( CMD_CREATEUNIT   )
+    CASE( CMD_CREATEPLANET )
+    CASE( CMD_CREATENEBULA )
+    CASE( CMD_CREATEASTER  )
+    CASE( CMD_CREATEMISSILE)
+
     CASE( CMD_NEWSUBSCRIBE )
 
     CASE( CMD_ENTERCLIENT  )

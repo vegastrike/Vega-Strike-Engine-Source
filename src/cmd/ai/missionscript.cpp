@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 
@@ -60,7 +60,7 @@ AImissionScript::~AImissionScript () {
 
   mission->destroyClassInstance(modulename,classid);
 #ifdef ORDERDEBUG
-  fprintf (stderr,"aims%x",this);
+  VSFileSystem::vs_fprintf (stderr,"aims%x",this);
   fflush (stderr);
 #endif
 }

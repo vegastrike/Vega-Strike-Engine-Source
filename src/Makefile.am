@@ -104,11 +104,13 @@ libroot =		\
 	cg_global.cpp
 
 librootgeneric =				\
-	posh.cpp						\
+	vsfilesystem.cpp			\
+	vsfilesystem.h				\
+	posh.cpp					\
 	posh.h						\
 	stardate.cpp				\
 	stardate.h					\
-	star_system_xml.cpp		\
+	star_system_xml.cpp			\
 	star_system_generic.cpp 	\
 	star_system_generic.h 		\
 	universe_generic.cpp		\
@@ -143,9 +145,9 @@ librootgeneric =				\
 	savegame.cpp				\
 	savegame.h					\
 	vegastrike.h				\
-	vs_globals.cpp				\
-	vs_path.cpp					\
-	vs_path.h
+	pk3.cpp						\
+	pk3.h						\
+	vs_globals.cpp
 
 librootserver =					\
 	gfxlib_struct_server.cpp	\
@@ -155,12 +157,16 @@ librootserver =					\
 	force_feedback_server.cpp	\
 	faction_util_server.cpp
 
-vegaserver_SOURCES =			\
-	$(librootgeneric) $(librootserver) \
+vegaserver_SOURCES =					\
+	$(librootgeneric) $(librootserver)	\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
-	posh.cpp					\
+	vsfilesystem.cpp		\
+	vsfilesystem.h			\
+	pk3.cpp					\
+	pk3.h					\
+	posh.cpp				\
 	libserver.cpp			\
 	configxml.cpp			\
 	configxml.h				\
@@ -172,8 +178,6 @@ accountserver_SOURCES =		\
 	lin_time.h				\
 	endianness.cpp			\
 	endianness.h			\
-	vs_path.cpp				\
-	vs_path.h				\
 	galaxy_gen.cpp			\
 	galaxy_gen.h			\
 	accountserver.cpp
