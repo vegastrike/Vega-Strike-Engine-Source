@@ -163,7 +163,7 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
   }
   int locked = parent->LockMissile();
   
-	if (1||/*remove after testing*/((float(rand())/RAND_MAX)<missileprobability)/**SIMULATION_ATOM*/) {
+	if (((float(rand())/((float)RAND_MAX))<missileprobability)/**SIMULATION_ATOM*/) {
        if(locked==1){
 	 //		fprintf(stderr,"AI firing missile!\n");
 	  	parent->Fire(true);
@@ -171,7 +171,7 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
 	  }
 	}
   if (shouldfire) {
-    if (1||/*remove after testing*/((float(rand())/RAND_MAX)<missileprobability)/**SIMULATION_ATOM*/) {
+    if (((float(rand())/((float)RAND_MAX))<missileprobability)/**SIMULATION_ATOM*/) {
       
       if (locked== -1) {
 		parent->Fire(true);
