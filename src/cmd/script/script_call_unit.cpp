@@ -38,11 +38,11 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
-#include "collection.h"
-#include "iterator.h"
-#include "unit.h"
-#include "ai/order.h"
-#include "ai/aggressive.h"
+#include "cmd/collection.h"
+#include "cmd/iterator.h"
+#include "cmd/unit.h"
+#include "cmd/ai/order.h"
+#include "cmd/ai/aggressive.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -270,15 +270,15 @@ void Mission::call_unit_launch(Flightgroup *fg){
    int faction_nr=_Universe->GetFaction(fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit *units[20];
-
-   for(int u=0;u<fg->nr_ships;u++){
+   int u;
+   for(u=0;u<fg->nr_ships;u++){
      Unit *my_unit=new Unit(fg->type.c_str(),true,false,faction_nr,fg,u);
      units[u]=my_unit;
    }
 
    float fg_radius=units[0]->rSize();
 
-   for(int u=0;u<fg->nr_ships;u++){
+   for(u=0;u<fg->nr_ships;u++){
      Unit *my_unit=units[u];
 
      Vector pox;

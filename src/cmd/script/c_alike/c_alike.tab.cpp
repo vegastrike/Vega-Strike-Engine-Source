@@ -59,7 +59,8 @@
 /*
   c_alike scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include <string>
+using std::string;
 
 #include "c_alike.h"
 

@@ -26,8 +26,7 @@
 
 
 #include "c_alike.h"
-
-string module_string;
+std::string module_string;
 
 %}
 

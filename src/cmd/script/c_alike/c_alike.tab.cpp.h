@@ -1,3 +1,4 @@
+using std::string;
 #ifndef YYSTYPE
 #define YYSTYPE int
 #endif
@@ -29,6 +30,5 @@
 #define	L_VOID	282
 #define	L_METHODCALL	283
 #define	L_INITVALUE	284
-
 
 extern YYSTYPE yylval;

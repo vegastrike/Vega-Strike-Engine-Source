@@ -27,8 +27,8 @@
 
 #include <string>
 
-extern string module_string;
-
+extern std::string module_string;
+#include <iostream>
 extern void yyparse();
 
 void main(int argc,char **argv)
@@ -44,6 +44,6 @@ void main(int argc,char **argv)
 
   yyparse();
 
-  cout << module_string;
+  std::cout << module_string;
 }
 

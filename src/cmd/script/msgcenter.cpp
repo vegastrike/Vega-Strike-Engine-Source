@@ -62,7 +62,7 @@ void MessageCenter::add(string from,string to,string message){
   messages.push_back(msg);
 }
 
-gameMessage *MessageCenter::last(uint n){
+gameMessage *MessageCenter::last(unsigned int n){
   int size=messages.size();
 
   int index=size-1-n;

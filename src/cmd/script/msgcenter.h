@@ -56,7 +56,7 @@ class gameMessage {
 
 class MessageCenter {
  public:
-  gameMessage *last(uint n);
+  gameMessage *last(unsigned int n);
   void add(string from,string to,string message);
 
  private:

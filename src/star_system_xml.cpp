@@ -258,7 +258,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case ATMOSPHERE:
     {
       Atmosphere::Parameters params;
+
       params.radius = 40000;
+
       xml->unitlevel++;
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attribute_map.lookup((*iter).name)) {
@@ -271,15 +273,25 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }  
 
       
+
       params.low_color[0] = GFXColor(0,0.5,0.0);
+
       params.low_color[1] = GFXColor(0,1.0,0.0);
+
       params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+
       params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+
       params.high_color[0] = GFXColor(0.5,0.0,0.0);
+
       params.high_color[1] = GFXColor(1.0,0.0,0.0);
+
       params.high_ambient_color[0] = GFXColor(0,0,0);
+
       params.high_ambient_color[1] = GFXColor(0,0,0);
+
       params.scattering = 5;
+
       Atmosphere * a =  new Atmosphere(params); 
       if (xml->unitlevel>2) {
 	assert(xml->moons.size()!=0);
@@ -384,7 +396,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    if (p) {
 	      xml->ct->DisableDraw();
 	      p->setTerrain (xml->ct);
-	      p->getTerrain((PlanetaryTransform*)xml->parentterrain);
+		  PlanetaryTransform ** tmpp = (PlanetaryTransform**) &xml->parentterrain;
+	      p->getTerrain(*tmpp);
 	    }
 	  } 
 	}

@@ -34,7 +34,7 @@
 
 #define q(x)	("\""+x+"\"")
 
-extern string parseCalike(char const *filename);
+extern std::string parseCalike(char const *filename);
 extern int yyerror(char *);
 extern int yywrap();
 extern int yylex();
@@ -44,7 +44,7 @@ extern int yylex();
 #define YYSTYPE string
 #define YY_SKIP_YYWRAP
 
-extern string module_string;
+extern std::string module_string;
 
 extern	int yylineno;
 extern char *yytext;
