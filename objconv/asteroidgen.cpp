@@ -1,7 +1,7 @@
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <math.h>
 
 using std::vector;
 class Vector {
@@ -23,20 +23,94 @@ public:
     this->s=s;
     this->t=t;
   }
+
+  void Yaw(float rad) //only works with unit vector
+  {
+    float theta;
+    
+    if (i>0)
+      theta = (float)atan(k/i);
+    else if (i<0)
+      theta = M_PI+(float)atan(k/i);
+    else if (k<=0 && i==0)
+      theta = -M_PI/2;
+	else if (k>0 && i==0)
+	  theta = M_PI/2;
+    
+    theta += rad;
+    i = cosf(theta);
+    k = sinf(theta); 
+  }
+  
+  void Roll(float rad)
+  {
+    float theta;
+    
+    if (i>0)
+      theta = (float)atan(j/i);
+    else if (i<0)
+		theta = M_PI+(float)atan(j/i);
+    else if (j<=0 && i==0)
+      theta = -M_PI/2;
+    else if (j>0 && i==0)
+      theta = M_PI/2;
+    
+    theta += rad; 
+    i = cosf(theta);
+    j = sinf(theta); 
+  }
+  
+  void Pitch(float rad)
+  {
+    float theta;
+    
+    if (k>0)
+      theta = (float)atan(j/k);
+    else if (k<0)
+      theta = M_PI+(float)atan(j/k);
+    else if (j<=0 && k==0)
+      theta = -M_PI/2;
+    else if (j>0 && k==0)
+      theta = M_PI/2;
+    
+    theta += rad;
+    k = cosf(theta);
+    j = sinf(theta);
+  }
 };
 class Tri {
 public:
+  bool quad;
   int a;
   float sa,ta;
   int b;
   float sb,tb;
   int c;
   float sc,tc;
-  Tri (int x, int y, int z) {a=x;b=y;c=z;}
+  int d;
+  float sd, td;
+  Tri (int x, int y, int z) {a=x;b=y;c=z; quad=false;}
+  Tri (int x, int y, int z, int w) {a=x;b=y;c=z;d=w;}
+  void Write (FILE * fp) {
+    if (!quad)
+      fprintf (fp,"<Tri>\n");
+    else
+      fprintf (fp,"<Quad>\n");
+    fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",a,sa,ta);
+    fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",b,sb,tb);
+    fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",c,sc,tc);
+    if (!quad) {
+      fprintf (fp,"</Tri>\n");
+    }else {
+      fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",d,sd,td);
+      fprintf (fp,"</Quad>\n");
+    }
+  }
 };
 struct asteroid {
   Vector center;
   float radius;
+  Vector YawPitchRoll;
   int num_polys;
   vector <Vector> points;
   vector <Tri> polygon;
@@ -56,17 +130,48 @@ void determine_centers_and_radii (vector <asteroid> & field, const Vector &cube_
     field[i].num_polys = (int)radiusratio+poly_min;
     if (field[i].num_polys<4)
       field[i].num_polys=4;
+    field[i].YawPitchRoll.i = 2*M_PI*((float)rand())/RAND_MAX;
+    field[i].YawPitchRoll.j = 2*M_PI*((float)rand())/RAND_MAX;
+    field[i].YawPitchRoll.k = 2*M_PI*((float)rand())/RAND_MAX;
+
   }
 }
 
-float R(float minr,float maxr) {
+float getR(float minr,float maxr) {
   return ((maxr-minr)*((float)rand())/RAND_MAX)+minr;
 }
 void generateTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr) {
 
 }
 void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr,int stacks, int slices) {
-  
+  for (unsigned int i=0;i<stacks+2;i++) {
+    for (unsigned int j=0;j<slices;j++) {
+      float tempR = getR (minr,maxr);
+      float projR = sin (M_PI*i/(stacks+1));
+      v.push_back (Vector (projR*cos (M_PI*j/(slices-1)),//i
+			   tempR*cos (M_PI*i/(stacks+1)),//j
+			   projR*sin (M_PI*j/(slices-1)),//k
+			   ((float)j)/(slices-1),//s
+			   ((float)i)/(stacks+1)));//t
+      if (i!=0&&i!=1&&i!=stacks+1) {
+	p.push_back (Tri ((i-1)*slices+j,
+			  i*slices+j,
+			  i*slices+ ((j+1)%slices),
+			  (i-1)*slices+ ((j+1)%slices)));
+      }else if (i==1) {
+	//do top pyr
+	p.push_back (Tri ((i-1)*slices+j,
+			  i*slices+j,
+			  i*slices+ ((j+1)%slices)));
+		
+      } else if (i==stacks+1) {
+	p.push_back (Tri ((i-1)*slices+j,
+			  i*slices+j,
+			  (i-1)*slices+ ((j+1)%slices)));
+	//do bottom pyr
+      }
+    }
+  }
 }
 void generateDoubleTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr, int num) {
   generateNTet (v,p,minr,maxr,1,num);
@@ -112,6 +217,11 @@ void write_mesh (FILE * fp, vector <asteroid> &field) {
       field[i].polygon[j].c+=counter;
       field[i].polygon[j].sc=field[i].points[field[i].polygon[j].c].s;
       field[i].polygon[j].tc=field[i].points[field[i].polygon[j].c].t;
+      if (field[i].polygon[j].quad) {
+	      field[i].polygon[j].d+=counter;
+	      field[i].polygon[j].sd=field[i].points[field[i].polygon[j].d].s;
+	      field[i].polygon[j].td=field[i].points[field[i].polygon[j].d].t;
+      }
     }
     counter+=field[i].points.size();
   }
@@ -119,12 +229,7 @@ void write_mesh (FILE * fp, vector <asteroid> &field) {
   for (i=0;i<field.size();i++) {
     unsigned int j;
     for (j=0;j<field[i].polygon.size();j++) {
-      Tri t = field[i].polygon[j];
-      fprintf (fp,"<Tri>\n");
-      fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",t.a,t.sa,t.ta);
-      fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",t.b,t.sb,t.tb);
-      fprintf (fp,"<Vertex point=\"%d\" s=\"%f\" s=\"%f\"/>\n",t.c,t.sc,t.tc);
-      fprintf (fp,"</Tri>\n");
+      field[i].polygon[j].Write (fp);
     }
   }
   fprintf (fp,"</Polygons>\n<Material reflect=\"%d\">\n<Specular red=\"%f\" green=\"%f\" blue=\"%f\" alpha=\"%f\"/>\n</Material>\n</Mesh>",0,0,0,0,1);
