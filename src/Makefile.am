@@ -83,6 +83,7 @@ vegastrike_SOURCES =				\
 	gfx_mesh.cpp				\
 	gfx_mesh.h				\
 	gfx_mesh_bin.cpp			\
+	gfx_mesh_fx.cpp				\
 	gfx_mesh_xml.cpp 			\
 	gfx_primitive.cpp			\
 	gfx_primitive.h				\

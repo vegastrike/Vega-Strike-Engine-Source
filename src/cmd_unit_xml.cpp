@@ -78,7 +78,8 @@ namespace UnitXML {
       MIN,
       MAXSPEED,
       AFTERBURNER,
-      BSPTREE
+      BSPTREE,
+      SHIELDTIGHT 
     };
 
   const EnumMap::Pair element_names[] = {
@@ -147,11 +148,12 @@ namespace UnitXML {
     EnumMap::Pair ("weapon", WEAPON),
     EnumMap::Pair ("maxspeed", MAXSPEED),
     EnumMap::Pair ("afterburner", AFTERBURNER),
-    EnumMap::Pair ("bsptree",BSPTREE)
+    EnumMap::Pair ("bsptree",BSPTREE),
+    EnumMap::Pair ("tightness",SHIELDTIGHT)
 };
 
   const EnumMap element_map(element_names, 22);
-  const EnumMap attribute_map(attribute_names, 41);
+  const EnumMap attribute_map(attribute_names, 42);
 }
 
 using XMLSupport::EnumMap;
@@ -193,6 +195,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	xml->shieldmesh =(new Mesh((*iter).value.c_str(), true));
+	break;
+      case SHIELDTIGHT: 
+	shieldtight = parse_float ((*iter).value);
 	break;
       }
     }

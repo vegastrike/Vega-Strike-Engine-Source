@@ -50,6 +50,7 @@ class Camera;
 class Halo;
 class BSPTree;
 class PlanetaryOrbit;
+class GFXColor;
 //////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 enum clsptr {
 	UNITPTR,
@@ -101,6 +102,7 @@ friend class PlanetaryOrbit;
   float timeexplode;  
   int nummesh;
   Mesh **meshdata;
+  float shieldtight;//are shields tight to the hull.  zero means bubble
   int numsubunit;
   Unit **subunits; // the new children fun fun stuff
   int numhalos;
@@ -289,8 +291,8 @@ public:
 
   // Help out AI creation
   void ApplyLocalTorque(const Vector &torque); //convenient shortcut
-  void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt);
-  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt);
+  void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, const GFXColor &);
+  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor & );
   Vector ClampThrust(const Vector &thrust, bool afterburn);
   Vector MaxThrust(const Vector &thrust);
   void Thrust(const Vector &amt,bool afterburn = false);

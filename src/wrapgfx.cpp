@@ -104,7 +104,7 @@ void Universe::StartGFX()
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
 	GFXLightContextAmbient (GFXColor (.3,.30,.30,1));
-	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (01,1,1,1),GFXColor(1,1,1,1), GFXColor (.2,.2,.2,1), GFXColor (1,.002,.0001)),false);
+	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (01,1,1,1),GFXColor(1,1,1,1), GFXColor (.2,.2,.2,1), GFXColor (1,.0002,.00004)),false);
 	GFXEnableLight (ligh);
       	GFXEndScene();
 }

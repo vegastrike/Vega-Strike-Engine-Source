@@ -75,6 +75,7 @@ void Unit::Init()
   nummounts=0;
   nummesh=0;
   mounts=NULL;
+  shieldtight=0;//sphere mesh by default
   //    nummounts=1;
     
   //    mounts = new Mount [1];

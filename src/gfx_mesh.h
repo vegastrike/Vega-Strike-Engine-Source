@@ -50,8 +50,8 @@ public:
   float delta;
   float TTL;
   float TTD;
-  MeshFX ():GFXLight(){TTL=0;}
-  MeshFX (const float TTL, const float delta, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0)): GFXLight(enabled,vect,diffuse,specular,ambient,attenuate){this->TTL = TTL; this->TTD = .5*this->TTL; this->delta = delta;}
+  MeshFX ():GFXLight(){TTL=TTD=delta=0;}
+  MeshFX (const float TTL, const float delta, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
   void MergeLights (const MeshFX & other);
   bool Update ();//if false::dead
 };

@@ -142,22 +142,26 @@ void Beam::CollideHuge (const LineCollide & lc) {
 }
 
 
-void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt) {
-  if (meshdata[nummesh]) {
+void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor &color) {
+    float percentage = .1;
+  if (meshdata[nummesh]) {//shields are up
     /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 						      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
 						      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
     //calculate percentage
-    float percentage = .1;
-    meshdata[nummesh]->AddDamageFX(pnt,normal,percentage);
+    meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+  } else {
+    for (int i=0;i<nummesh;i++) {
+      meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
+    }
   }
 }
 
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt) {
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor & color) {
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
-  ApplyLocalDamage(localpnt, localnorm, amt);
+  ApplyLocalDamage(localpnt, localnorm, amt,color);
 }
 
 bool Beam::Collide (Unit * target) {
@@ -174,10 +178,17 @@ bool Beam::Collide (Unit * target) {
     curlength = distance;
     impact|=IMPACT;
     
-
+    GFXColor coltmp (Col);
+    coltmp.r+=.5;
+    coltmp.g+=.5;
+    coltmp.b+=.5;
+    if (coltmp.r>1)coltmp.r=1;
+    if (coltmp.g>1)coltmp.g=1;
+    if (coltmp.b>1)coltmp.b=1;
     float tmp=(curlength/range); 
-    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty));
+    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),coltmp);
     return true;
   }
   return false;
 }
+
