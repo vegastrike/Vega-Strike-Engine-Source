@@ -6,7 +6,7 @@ CFLAGS= -DUNIX -Wall -g  -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
 
 INCLUDES= -I/usr/X11R6/include 
 
-LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat -lefence
+LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat
 
 SRCS = 	cmd_beam.cpp				\
 	cmd_bolt.cpp				\
