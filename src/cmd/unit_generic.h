@@ -321,7 +321,7 @@ public:
 	  unsigned InWarp:1;
 	  unsigned unused1:1;
 	  unsigned unused2:1;
-	  unsigned float WarpFieldStrength;
+	  float WarpFieldStrength;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
 		  FaceCamera=Animating=missilelock=InWarp=unused1=unused2=0;
