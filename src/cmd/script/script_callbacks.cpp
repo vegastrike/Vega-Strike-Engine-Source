@@ -38,6 +38,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
+#include "lin_time.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -58,16 +59,6 @@ void Mission::doCall_toxml(string module,varInst *ovi){
 
 varInst *Mission::doCall(missionNode *node,int mode,string module,string method){
   varInst *vi=NULL;
-#if 0
-  if(node==NULL){
-    node=new missionNode;
-    node->set(NULL,"special",NULL);
-    node->set_attribute("module",module);
-    node->set_attribute("name",method);
-
-    int mode=SCRIPT_RUN;
-  }
-#endif
 
   if(module=="_io"){
     if(method=="PrintFloats"){
@@ -93,6 +84,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method=="getGameTime"){
       vi=callGetGameTime(node,mode);
     }
+    else if(method=="ResetTimeCompression"){
+      vi=callResetTimeCompression(node,mode);
+    }
     else if(method=="getCurrentAIUnit"){
       vi=callGetCurrentAIUnit(node,mode);
     }
@@ -117,6 +111,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
   }
   else if(module=="_olist"){
     vi=call_olist(node,mode);
+  }
+  else if(module=="_omap"){
+    vi=call_omap(node,mode);
   }
   else if(module=="_order"){
     vi=call_order(node,mode);
@@ -188,7 +185,7 @@ varInst *Mission::doCall(missionNode *node,int mode){
 
 }
 
-extern double gametime;
+//extern double gametime;
 
 varInst *Mission::call_isNull(missionNode *node,int mode){
   varInst *ovi=getObjectArg(node,mode);
@@ -268,6 +265,16 @@ varInst *Mission::callGetGameTime(missionNode *node,int mode){
   vi->type=VAR_FLOAT;
   if(mode==SCRIPT_RUN){
     vi->float_val=gametime;
+  }
+  return vi;
+}
+
+varInst *Mission::callResetTimeCompression(missionNode *node,int mode){
+  varInst *vi=newVarInst(VI_TEMP);
+
+  vi->type=VAR_VOID;
+  if(mode==SCRIPT_RUN){
+    setTimeCompression(1.0);
   }
   return vi;
 }

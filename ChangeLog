@@ -1,3 +1,11 @@
+2002-02-17 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added omap object type to scripting (sort of struct)
+	  - added file script_call_omap.cpp, mod. Makefile.am
+	* wrote explore_the_unviverse.c script and missions
+	* wrote random_launch.c
+
+
 2002-02-16 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* modified main.cpp, so that the savegame is only loaded if

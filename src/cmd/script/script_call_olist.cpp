@@ -133,7 +133,27 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	varInst *back_vi=call_olist_at(node,mode,ovi,index);
 	assignVariable(viret,back_vi);
+	//printf("viret type=%d, backvi type=%d\n",viret->type,back_vi->type);
 	deleteVarInst(back_vi);
+      }
+
+      //return viret;
+    }
+    else if(cmd=="set"){
+      debug(3,node,mode,"olist.set");
+
+      missionNode *snode=getArgument(node,mode,1);
+      int index=checkIntExpr(snode,mode);
+      debug(3,snode,mode,"index is in that node");
+
+      missionNode *newvar_node=getArgument(node,mode,2);
+      varInst *new_vi=checkExpression(newvar_node,mode); // should be getObjExpr
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+
+      if(mode==SCRIPT_RUN){
+	call_olist_set(node,mode,ovi,index,new_vi);
+	// we have to delete the old - or not?
       }
 
       //return viret;
@@ -195,6 +215,23 @@ olist_t *Mission::getOListObject(missionNode *node,int mode,varInst *ovi){
 	  }
 	}
 	return(my_object);
+}
+
+void Mission::call_olist_set(missionNode *node,int mode,varInst *ovi,int index,varInst *new_vi){
+  olist_t *olist=getOListObject(node,mode,ovi);
+  	if(index>=olist->size()){
+	  char buffer[200];
+	  sprintf(buffer,"olist.set: index out of range size=%d, index=%d\n",olist->size(),index);
+	  fatalError(node,mode,buffer);
+	  assert(0);
+	}
+
+	varInst *push_vi=newVarInst(VI_IN_OBJECT);
+	push_vi->type=new_vi->type;
+	assignVariable(push_vi,new_vi);
+
+	(*olist)[index]=push_vi;
+	//printf("olist set type=%d push=%d\n",new_vi->type,push_vi->type);
 }
 
 varInst *Mission::call_olist_at(missionNode *node,int mode,varInst *ovi,int index){

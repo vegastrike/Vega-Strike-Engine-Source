@@ -200,6 +200,7 @@ class missionNode : public tagDomNode {
 /* *********************************************************** */
 
 typedef vector<varInst *> olist_t;
+typedef map<string,varInst *> omap_t;
 
 #endif // VS_MIS_SEL
 
@@ -388,6 +389,7 @@ void printNode(missionNode *node,int mode);
  varInst * callRnd(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
+ varInst * callResetTimeCompression(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst *  call_setNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
@@ -416,6 +418,11 @@ varInst * call_olist_at(missionNode *node,int mode,varInst *ovi,int index);
 varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 void  call_olist_toxml(missionNode *node,int mode,varInst *ovi);
  Vector call_olist_tovector(missionNode *node,int mode,varInst *ovi);
+ void call_olist_set(missionNode *node,int mode,varInst *ovi,int index,varInst *new_vi);
+
+varInst* call_omap(missionNode *node,int mode);
+omap_t* getOMapObject(missionNode *node,int mode,varInst *ovi);
+ varInst *call_omap_new(missionNode *node,int mode);
 
  varInst *getObjectArg(missionNode *node,int mode);
 

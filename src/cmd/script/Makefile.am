@@ -13,6 +13,7 @@ libscript_a_SOURCES =				\
 	script_expression.cpp			\
 	script_callbacks.cpp			\
 	script_call_olist.cpp			\
+	script_call_omap.cpp			\
 	script_call_unit.cpp			\
 	script_call_order.cpp			\
 	script_call_string.cpp			\

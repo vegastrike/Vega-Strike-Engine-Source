@@ -29,6 +29,9 @@ void InitTime();
 double GetElapsedTime();
 void UpdateTime();
 
+extern float getTimeCompression();
+extern void setTimeCompression(float tc);
+
 
 
 #endif

@@ -513,8 +513,8 @@ void Mission::call_unit_launch(Flightgroup *fg){
 
      _Universe->activeStarSystem()->AddUnit(my_unit);
 
-     findNextEnemyTarget(my_unit);
-
+     //findNextEnemyTarget(my_unit);
+     my_unit->Target(NULL);
    }
 
    char buffer[200];
