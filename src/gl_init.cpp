@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include "gfxlib.h"
 #else
-
+#include <windows.h>
 #endif
 #include <GL/gl.h>
 #   include <GL/glext.h>
@@ -293,3 +293,4 @@ void GFXShutdown () {
     glutLeaveGameMode();
   }
 }
+
