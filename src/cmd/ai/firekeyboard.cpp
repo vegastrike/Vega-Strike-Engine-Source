@@ -997,7 +997,11 @@ extern std::set <Unit *> arrested_list_do_not_dereference;
 void Arrested (Unit * parent) {
 	std::string fac = UniverseUtil::GetGalaxyFaction ( UniverseUtil::getSystemFile());
 	int own=FactionUtil::GetFactionIndex(fac);
-	bool attack = FactionUtil::GetIntRelation(own,parent->faction)<0;
+	static string po = vs_config->getVariable("galaxy","police_faction","homeland-security");
+	int police= FactionUtil::GetFactionIndex(po);
+	int police2= FactionUtil::GetFactionIndex(po+"_"+fac);
+	float ownrel=FactionUtil::GetIntRelation(own,parent->faction);
+	bool attack = ownrel<0;
 	if (!attack) {
 		Unit * contra =FactionUtil::GetContraband(own);
 		if (contra) {
@@ -1014,11 +1018,26 @@ void Arrested (Unit * parent) {
 			}
 		}
 	}
+	if (!attack) {
+		Unit * un;
+		for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+			 (un=*i)!=NULL;
+			 ++i) {
+			if (un->faction==own||un->faction==police||un->faction==police2) {
+				if (un->Target()==parent||un->getRelation(parent)<0) {
+					FactionUtil::AdjustRelation(fac,FactionUtil::GetFactionName(parent->faction),-ownrel-.1,1);
+					attack=true;
+					break;
+				}
+			}
+		}
+	}
 	if (attack) {
 	static std::string prison_system = vs_config->getVariable ("galaxy","PrisonSystem","enigma_sector/prison");
 	std::string psys = prison_system+"_"+fac;
 	if (UnitUtil::getUnitSystemFile(parent)!=psys) {
 		UnitUtil::JumpTo(parent,psys);
+		UniverseUtil::IOmessage(0,"game","all",parent->name+", you are under arrest!  You will be taken to the prison system and will be tried for your crimes.");
 	}else {
 		Unit * un;
 		Unit * owner=NULL;
@@ -1044,6 +1063,7 @@ void Arrested (Unit * parent) {
 			for (int i = parent->numCargo()-1;i>=0;--i) {
 				parent->RemoveCargo (i,parent->GetCargo((unsigned int)i).quantity,true);
 			}
+			UniverseUtil::IOmessage(0,"game","all",parent->name+", your cargo has been confiscated and scanned. Here your ship will be kept until you complete your reintegration into society through our reprogramming pod(tm) system.");
 			FactionUtil::AdjustIntRelation(own,parent->faction,-FactionUtil::GetIntRelation(own,parent->faction),1);
 		}
 	}
