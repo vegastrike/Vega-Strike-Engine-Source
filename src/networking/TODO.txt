@@ -1,11 +1,7 @@
 
 *** GENERAL ************************************************************
 
-- Add tests in netbuffer.cpp in order to avoid any segfault (only when the protocol gets stable enough)
-- When client starts server send galaxy filename with md5sum or other check system
-	if client has the file and the same md5 -> ok
-	if not server sends the file content and client writes it
-- Do the same for starsystems at enter time on clients side (even if  starsystem has already been loaded once to check for manual changes)
+- Implement a download manager -> Carsten is on that one
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2
@@ -48,6 +44,11 @@ OR
 
 === GENERAL STUFF =======================================================
 
+DONE - When client starts server send galaxy filename with md5sum or other check system
+	if client has the file and the same md5 -> ok
+	if not server sends the file content and client writes it
+DONE - Do the same for starsystems at enter time on clients side (even if  starsystem has already been loaded once to check for manual changes)
+DONE - Add tests in netbuffer.cpp in order to avoid any segfault (only when the protocol gets stable enough)
 DONE - Move the GetUniqueSerial use from accountserver to vegaserver
 DONE - In NetBuffer : turn string size into a u_short instead of int (and assert no string length > 0xFFFF
 DONE - Take a look at RegenShield() and RegenArmor and network enable them

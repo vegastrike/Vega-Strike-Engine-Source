@@ -475,6 +475,7 @@ void	NetServer::start(int argc, char **argv)
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
+	SocketSet	keyset;
 
 	// Server loop
 	while( keeprun)
@@ -484,14 +485,15 @@ void	NetServer::start(int argc, char **argv)
 		UpdateTime();
 
         _sock_set->clear( );
+        keyset.clear( );
 
 		// Check a key press
-		//set.setReadAlwaysTrue( 0);
-		//this->checkKey( set);
+		//keyset.setReadAlwaysTrue( 0);
+		//this->checkKey( keyset);
 
 		// Check received communications
 		prepareCheckMsg( *_sock_set );
-		nb = _sock_set->select( NULL );
+		nb = _sock_set->select( 0, 0);
 		if( nb > 0 )
 		{
 			newConnection_tcp( *_sock_set );
@@ -640,7 +642,7 @@ void	NetServer::checkKey( SocketSet & sets)
 	int		memory_use=0;
 	char	c;
 
-	if( sets.is_set( 0))
+	if( sets.select( 0, 0) && sets.is_set( 0))
 	{
 		if( read( 0, &c, 1)==-1)
 			cerr<<"Error reading char on std input "<<endl;
