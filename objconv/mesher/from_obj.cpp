@@ -211,6 +211,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
             xml.stripelementtemp.s=tex[cp.t].first;
             xml.stripelementtemp.t=tex[cp.t].second;
           }
+          xml.trifans.back().points.push_back(xml.stripelementtemp);
         }
         continue;
       }
