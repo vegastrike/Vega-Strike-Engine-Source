@@ -110,7 +110,7 @@ void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>( int /*dummy*/ ) {
+GameUnit<UnitType>::GameUnit( int /*dummy*/ ) {
 		this->Unit::Init();
 }
 
@@ -151,12 +151,12 @@ VSSprite * GameUnit<UnitType>::getHudImage () const{
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
+GameUnit<UnitType>::GameUnit (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
 
 }
 extern void update_ani_cache();
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
+GameUnit<UnitType>::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
 	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
 }
 
