@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <ctype.h>
 #include <math.h>
 #include "trisort.h"
@@ -129,6 +130,10 @@ void Mesh::write(const char * filename)const {
     fclose (fp);
     }
 }
+static int iswhitespace(int c) {
+    return isspace (c)||c=='\n'||c=='\r';
+}
+
 char * findspace (char *line) {
     while (iswhitespace(line[0])&&line[0])
         line++;

@@ -4,11 +4,6 @@ public:
     Vector (double xx, double yy, double zz):x(xx),y(yy),z(zz) {}
 
 };
-#ifdef __APPLE__
-int iswhitespace(int c) {
-    return isspace (c)||isblank(c)||c=='\n'||c=='\r';
-}
-#endif
 class Index {
 public:
     Vector V;
