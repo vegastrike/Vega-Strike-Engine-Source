@@ -41,6 +41,7 @@ namespace UnitUtil {
 	void setECM (Unit * un, short NewECM);
 	short getECM (Unit * un);
 	void setSpeed (Unit * un, float speed);
+	Unit *owner (Unit *un);
 }
 
 #endif

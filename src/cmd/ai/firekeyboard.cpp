@@ -32,7 +32,7 @@ struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=
-		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=targetkey=
+		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
 		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
 		nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
 #ifdef CAR_SIM
@@ -70,6 +70,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE neartargetkey;
  KBSTATE threattargetkey;
  KBSTATE picktargetkey;
+ KBSTATE subtargetkey;
  KBSTATE targetkey;
  KBSTATE targetskey;
  KBSTATE targetukey;
@@ -251,6 +252,11 @@ void FireKeyboard::PickTargetKey(int, KBSTATE k) {
 void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
   if (g().neartargetkey!=PRESS)
     g().neartargetkey = k;
+
+}
+void FireKeyboard::SubUnitTargetKey(int, KBSTATE k) {
+  if (g().subtargetkey!=PRESS)
+    g().subtargetkey = k;
 
 }
 void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
@@ -729,6 +735,33 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	}
 }
 
+void ChooseSubTargets(Unit * me) {
+	Unit *parent=UnitUtil::owner(me->Target());
+	if (!parent) {
+		return;
+	}
+	un_iter uniter=parent->getSubUnits();
+	if (parent==me->Target()) {
+		if (!uniter.current()) {
+			return;
+		}
+		me->Target(uniter.current());
+		return;
+	}
+	while (uniter.current()) {
+		if (uniter.current()==me->Target()) {
+			uniter.advance();
+			if (uniter.current()) {
+				me->Target(uniter.current());
+			} else {
+				me->Target(parent);
+			}
+			return;
+		}
+		uniter.advance();
+	}
+}
+
 
 FireKeyboard::~FireKeyboard () {
 #ifdef ORDERDEBUG
@@ -1000,6 +1033,11 @@ void FireKeyboard::Execute () {
   if (f().threattargetkey==PRESS) {
     ChooseTargets(parent,TargThreat,false);
     f().threattargetkey=DOWN;
+    refresh_target=true;
+  }
+  if (f().subtargetkey==PRESS) {
+    ChooseSubTargets(parent);
+    f().subtargetkey=DOWN;
     refresh_target=true;
   }
   if(f().rpicktargetkey==PRESS){

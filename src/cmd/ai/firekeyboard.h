@@ -45,6 +45,7 @@ class FireKeyboard: public Order {
   static void TargetKey(int, KBSTATE k);
   static void PickTargetKey(int, KBSTATE k);
   static void NearestTargetKey(int, KBSTATE k);
+  static void SubUnitTargetKey(int, KBSTATE k);
   static void ThreatTargetKey(int, KBSTATE k);
   static void UnitTargetKey(int, KBSTATE k);
   static void SigTargetKey(int, KBSTATE k);

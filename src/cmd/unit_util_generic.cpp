@@ -4,6 +4,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h"
+#include "universe_util.h"
 using std::string;
 
 namespace UnitUtil {
@@ -239,5 +240,25 @@ namespace UnitUtil {
       return 0;
     return my_unit->GetImageInformation().ecm;
   }
-
+	static bool ishere (Unit *par,Unit *look) {
+		for (un_iter uniter=par->getSubUnits();uniter.current();uniter.advance()) {
+			if (uniter.current()==look) {
+				return true;
+			}
+			if (uniter.current()!=par&&ishere(uniter.current(),look)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	Unit *owner (Unit *un) {
+		Unit *found=NULL;
+		for (un_iter uniter=UniverseUtil::getUnitList();uniter.current();uniter.advance()) {
+			if (uniter.current()==un||ishere(uniter.current(),un)) {
+				found=uniter.current();
+				break;
+			}
+		}
+		return found;
+	}
 }

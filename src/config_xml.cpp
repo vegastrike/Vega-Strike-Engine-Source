@@ -296,6 +296,7 @@ void GameVegaConfig::initCommandMap(){
   command_map["LockTargetKey"]=FireKeyboard::LockKey ;
   command_map["ReverseTargetKey"]=FireKeyboard::ReverseTargetKey ;
   command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
+  command_map["SubUnitTargetKey"]=FireKeyboard::SubUnitTargetKey ;
   command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
   command_map["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
   command_map["SigTargetKey"]=FireKeyboard::SigTargetKey ;
