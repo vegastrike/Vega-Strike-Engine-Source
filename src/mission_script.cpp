@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
-
+#include <assert.h>
 #ifndef WIN32
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
@@ -208,7 +208,7 @@ varInst *Mission::lookupLocalVariable(missionNode *asknode){
   contextStack *cstack=runtime.cur_thread->exec_stack.top();
   varInst *defnode=NULL;
 
-  for(uint i=0;i<cstack->contexts.size() && defnode==NULL;i++){
+  for(unsigned int i=0;i<cstack->contexts.size() && defnode==NULL;i++){
     scriptContext *context=cstack->contexts[i];
     varInstMap *map=context->varinsts;
     defnode=(*map)[asknode->script.name];

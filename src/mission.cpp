@@ -105,19 +105,19 @@ void Mission::doOrigin(easyDomNode *node){
 
 /* *********************************************************** */
 
-void Mission::GetOrigin(float pos[3],string &planetname){
+void Mission::GetOrigin(Vector &pos,string &planetname){
   //  float pos[3];
 
   if(origin_node==NULL){
-    pos[0]=pos[1]=pos[2]=0.0;
+    pos.i=pos.j=pos.k=0.0;
     planetname=string();
     return;
   }
 
-  bool ok=doPosition(origin_node,pos);
+  bool ok=doPosition(origin_node,&pos.i);
 
   if(!ok){
-    pos[0]=pos[1]=pos[2]=0.0;
+    pos.i=pos.j=pos.k=0.0;
   }
 
   planetname=origin_node->attr_value("planet");

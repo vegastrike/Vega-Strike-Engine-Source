@@ -16,7 +16,7 @@
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include <assert.h>
-
+#include "images.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -113,7 +113,8 @@ namespace UnitXML {
       SHIELDWAV,
       SHIELDMP3,
       EXPLODEWAV,
-      EXPLODEMP3
+      EXPLODEMP3,
+	  COCKPIT
     };
 
   const EnumMap::Pair element_names[] = {
@@ -208,11 +209,12 @@ namespace UnitXML {
     EnumMap::Pair ("CloakMp3",CLOAKMP3),
     EnumMap::Pair ("CloakWav",CLOAKWAV),
     EnumMap::Pair ("Color",ISCOLOR),
-    EnumMap::Pair ("Restricted", RESTRICTED)
+    EnumMap::Pair ("Restricted", RESTRICTED),
+    EnumMap::Pair ("Cockpit", COCKPIT)
 };
 
   const EnumMap element_map(element_names, 26);
-  const EnumMap attribute_map(attribute_names, 64);
+  const EnumMap attribute_map(attribute_names, 65);
 }
 
 using XMLSupport::EnumMap;
@@ -468,60 +470,60 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case CLOAKWAV:
-	sound.cloak = AUDCreateSoundWAV ((*iter).value,false);
+	sound->cloak = AUDCreateSoundWAV ((*iter).value,false);
 	break;
       case CLOAKMP3:
-	sound.cloak = AUDCreateSoundMP3 ((*iter).value,false);
+	sound->cloak = AUDCreateSoundMP3 ((*iter).value,false);
 	break;
       case ENGINEWAV:
-	sound.engine = AUDCreateSoundWAV ((*iter).value,true);
+	sound->engine = AUDCreateSoundWAV ((*iter).value,true);
 	break;
       case ENGINEMP3:
-	sound.engine = AUDCreateSoundMP3((*iter).value,true); 
+	sound->engine = AUDCreateSoundMP3((*iter).value,true); 
 	break;
       case SHIELDMP3:
-	sound.shield = AUDCreateSoundMP3((*iter).value,false); 
+	sound->shield = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case SHIELDWAV:
-	sound.shield = AUDCreateSoundWAV((*iter).value,false); 
+	sound->shield = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case EXPLODEMP3:
-	sound.explode = AUDCreateSoundMP3((*iter).value,false); 
+	sound->explode = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case EXPLODEWAV:
-	sound.explode = AUDCreateSoundWAV((*iter).value,false); 
+	sound->explode = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case ARMORMP3:
-	sound.armor = AUDCreateSoundMP3((*iter).value,false); 
+	sound->armor = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case ARMORWAV:
-	sound.armor = AUDCreateSoundWAV((*iter).value,false); 
+	sound->armor = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case HULLWAV:
-	sound.hull = AUDCreateSoundWAV((*iter).value,false); 
+	sound->hull = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case HULLMP3:
-	sound.hull = AUDCreateSoundMP3((*iter).value,false); 
+	sound->hull = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       }
     }
-    if (sound.cloak==-1) {
-      sound.cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
+    if (sound->cloak==-1) {
+      sound->cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
     }
-    if (sound.engine==-1) {
-      sound.engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
+    if (sound->engine==-1) {
+      sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
     }
-    if (sound.shield==-1) {
-      sound.shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
+    if (sound->shield==-1) {
+      sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
     }
-    if (sound.armor==-1) {
-      sound.armor=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+    if (sound->armor==-1) {
+      sound->armor=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
     }
-    if (sound.hull==-1) {
-      sound.hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+    if (sound->hull==-1) {
+      sound->hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
     }
-    if (sound.explode==-1) {
-      sound.explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
+    if (sound->explode==-1) {
+      sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
     }
       
     break;    
@@ -831,6 +833,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+	  case COCKPIT:
+		  image->cockpitImage = (*iter).value;
       default:
 	break;
       }
@@ -843,7 +847,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case HUDIMAGE:
-	hudImage = new Sprite ((*iter).value.c_str());
+	image->hudImage = new Sprite ((*iter).value.c_str());
 	break;
       default:
 	break;

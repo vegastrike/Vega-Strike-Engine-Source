@@ -8,6 +8,7 @@
 #include "unit_collide.h"
 #include <float.h>
 #include "audiolib.h"
+#include "images.h"
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
@@ -68,7 +69,7 @@ void Unit::Split (int level) {
   for (i=0;i<nm;i++) {
     subunits[i+numsubunit] = new Unit (old+i,1,true,faction);
     subunits[i+numsubunit]->mass = mass/level;
-    subunits[i+numsubunit]->timeexplode=.1;
+    subunits[i+numsubunit]->image->timeexplode=.1;
     if (subunits[i+numsubunit]->meshdata[0]) {
       Vector loc = subunits[i+numsubunit]->meshdata[0]->Position();
       subunits[i+numsubunit]->ApplyForce(subunits[i+numsubunit]->meshdata[0]->rSize()*10*mass*loc/loc.Magnitude());
@@ -235,16 +236,16 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   }
   percent = damage/(*targ+hull);
   if (damage<*targ) {
-    if (!AUDIsPlaying (sound.armor))
-      AUDPlay (sound.armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+    if (!AUDIsPlaying (sound->armor))
+      AUDPlay (sound->armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
     else
-      AUDAdjustSound (sound.armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
     *targ -= apply_float_to_short (damage);
   }else {
-    if (!AUDIsPlaying (sound.hull))
-      AUDPlay (sound.hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+    if (!AUDIsPlaying (sound->hull))
+      AUDPlay (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
     else
-      AUDAdjustSound (sound.hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
     hull -=damage;
@@ -381,10 +382,10 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   }
   if (!FINITE (percent))
     percent = 0;
-  if (percent&&!AUDIsPlaying (sound.shield))
-	AUDPlay (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+  if (percent&&!AUDIsPlaying (sound->shield))
+	AUDPlay (sound->shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
   else
-	AUDAdjustSound (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+	AUDAdjustSound (sound->shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
 
   return percent;
 }
@@ -420,30 +421,30 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, co
 
 bool Unit::Explode (bool drawit, float timeit) {
   int i;
-  if (explosion==NULL&&timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
-    timeexplode=0;
-    explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
-    explosion->SetDimensions(3*rSize(),3*rSize());
-    AUDPlay (sound.explode,cumulative_transformation.position,Velocity,1);
+  if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
+    image->timeexplode=0;
+    image->explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
+    image->explosion->SetDimensions(3*rSize(),3*rSize());
+    AUDPlay (sound->explode,cumulative_transformation.position,Velocity,1);
   }
   float tmp[16];
   
   float tmp2[16];
-  if (explosion) {
-      timeexplode+=timeit;
+  if (image->explosion) {
+      image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
       //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-      explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
-      if (explosion->Done()) {
-	delete explosion;	
-	explosion=NULL;
+      image->explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
+      if (image->explosion->Done()) {
+	delete image->explosion;	
+	image->explosion=NULL;
       }
-      if (drawit&&explosion) { 
-	explosion->Draw();//puts on draw queue... please don't delete
+      if (drawit&&image->explosion) { 
+	image->explosion->Draw();//puts on draw queue... please don't delete
       }
       
   }
-  bool alldone = explosion?!explosion->Done():false;
+  bool alldone = image->explosion?!image->explosion->Done():false;
   for (i=0;i<numsubunit;i++) {
     alldone |=subunits[i]->Explode(drawit,timeit);
   }

@@ -34,7 +34,6 @@ struct GFXColor;
 #include "xml_support.h"
 
 #include "mission.h"
-
 class Beam;
 class Animation;
 using namespace XMLSupport;
@@ -60,7 +59,8 @@ enum clsptr {
 };
 
 class VDU;
-
+struct UnitImages;
+struct UnitSounds;
 /**
  * Unit contains any physical object that may collide with something
  * And may be physically affected by forces.
@@ -129,14 +129,7 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
-  struct {
-    int engine;
-    int shield;
-    int armor;
-    int hull;
-    int explode;
-    int cloak;
-  } sound;
+  UnitSounds * sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within
@@ -151,10 +144,8 @@ class Unit {
   Vector cumulative_velocity;
   ///The information about the minimum and maximum ranges of this unit. Collide Tables point to this bit of information.
   LineCollide CollideInfo;
-  ///The explosion starts at null, when activated time explode is incremented and ends at null  
-  Animation *explosion; float timeexplode;  
   ///The image that will appear on those screens of units targetting this unit
-  Sprite *hudImage;
+  UnitImages *image;
   ///number of meshes (each with separate texture) this unit has
   int nummesh;
   ///The pointers to the mesh data of this mesh
@@ -320,7 +311,7 @@ class Unit {
   short cloakmin;
   ///Should draw selection box?
   bool selected;  
-  Box *selectionBox;
+
   ///Is dead already?
   bool killed;
   ///Should not be drawn
@@ -430,7 +421,9 @@ public:
   ///What's the size of this unit
   float rSize () {return radial_size;}
   ///What's the HudImage of this unit
-  Sprite * getHudImage (){return hudImage;}
+  Sprite * getHudImage ();
+  ///Returns the cockpit name so that the controller may load a new cockpit
+  std::string getCockpit ();
   ///Draws this unit with the transformation and matrix (should be equiv) separately
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
   ///Deprecated
@@ -496,7 +489,6 @@ public:
   void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
   ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
   void SetPosAndCumPos (const Vector &pos) {SetPosition (pos);cumulative_transformation_matrix[12]=pos.i;cumulative_transformation_matrix[13]=pos.j;cumulative_transformation_matrix[14]=pos.k;cumulative_transformation.position=pos;}
-
   ///Sets the unit-space position
   void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
   ///Sets the state of drawing
@@ -571,7 +563,6 @@ public:
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   ///Return unit-space velocity
   const Vector &GetVelocity() const { return cumulative_velocity; }
-
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
   ///returns the ammt of elasticity of collisions with this unit
@@ -603,3 +594,4 @@ struct Unit::XML {
 
 };
 #endif
+

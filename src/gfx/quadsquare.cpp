@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 #include "quadsquare.h"
 #include "gfxlib.h"
 #include "aux_texture.h"
@@ -161,7 +162,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 
 	//FIXME fill in st!
 
-	for (int i=0;i<5;i++) {
+	for (i=0;i<5;i++) {
 	  //	  v[i].y= Vertex[i].Y;	  
 	  if (unusedvertices->size()) {
 	    (*vertexs)[unusedvertices->back()]= v[i];
@@ -859,6 +860,10 @@ static void TerrainMakeDeactive (Texture *text) {
     GFXEnable (TEXTURE1);
   }
 }
+
+typedef std::vector <TextureIndex> vecTextureIndex;
+typedef std::vector <Texture *> vecTextureStar;
+
 int	quadsquare::Render(const quadcornerdata& cd)
 // Draws the heightfield represented by this tree.
 // Returns the number of triangles rendered.
@@ -870,8 +875,8 @@ int	quadsquare::Render(const quadcornerdata& cd)
   int totsize=0;
   RenderAux(cd, GFX_PARTIALLY_VISIBLE);
 
-  vector <TextureIndex>::iterator i=indices.begin();
-  vector <Texture *>::iterator k;
+  vecTextureIndex::iterator i=indices.begin();
+  vecTextureStar::iterator k;
 
   for (k=textures->begin();k!=textures->end();i++,k++) {
     TerrainMakeActive(*k);
@@ -1298,4 +1303,5 @@ float	HeightMapInfo::Sample(int x, int z) const
 	return (s00 * (1-fx) + s01 * fx) * (1-fz) +
 		(s10 * (1-fx) + s11 * fx) * fz;
 }
+
 

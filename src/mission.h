@@ -147,7 +147,7 @@ class Mission {
 
   string getVariable(string name,string defaultval);
 
-  void GetOrigin(float pos[3],string &planetname);
+  void GetOrigin(Vector &pos,string &planetname);
 
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);

@@ -50,6 +50,7 @@ using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
+Unit **fighters;
 
 
  GFXBOOL capture;
@@ -184,7 +185,7 @@ bool cockpitfront=true;
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0)+((!XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true")))?2:0);
   if(newState==PRESS&&cockpitfront) {
     if (tmp&cockpiton) {
-      _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
+      _Universe->AccessCockpit()->Init (fighters[0]->getCockpit().c_str());	    
     }else {
       _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
@@ -265,7 +266,6 @@ Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
 int numf = 0;
-Unit **fighters;
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
 SphereMesh *bg2=NULL;
@@ -468,10 +468,6 @@ void createObjects() {
   
   
 #endif
-  vschdir ("hornet-cockpit.cpt");
-  tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
-  vscdup();
-
   muzak = new Music (fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
   Inside(0,PRESS);//set up hornet cockpti

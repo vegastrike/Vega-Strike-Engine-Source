@@ -165,6 +165,7 @@ void StarSystem::Draw() {
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   Mesh::ProcessZFarMeshes();
+  qt->Render();
   Mesh::ProcessUndrawnMeshes(true);
   GFXPopGlobalEffects();
   GFXLightContextAmbient(tmpcol);
@@ -174,7 +175,6 @@ void StarSystem::Draw() {
   Bolt::Draw();
 
   stars->Draw();
-  qt->Render();
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
   _Universe->AccessCockpit()->Draw();
   if (doInputDFA) {

@@ -31,6 +31,8 @@
 #include "audiolib.h"
 #include "vs_path.h"
 
+
+
 #include "python/init.h"
 /*
  * Globals 
@@ -94,8 +96,11 @@ int main( int argc, char *argv[] )
 
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
+
 #ifdef HAVE_PYTHON
+
 	Python::init();
+
 #endif
 
     float col[4];
@@ -151,12 +156,12 @@ int main( int argc, char *argv[] )
     */
     _Universe= new Universe(argc,argv);   
 
-    float pos[3];
+    Vector pos;
     string planetname;
   
     mission->GetOrigin(pos,planetname);
 
-    _Universe->Init (mission->getVariable("system","sol.system"),Vector(pos[0],pos[1],pos[2]),planetname);
+    _Universe->Init (mission->getVariable("system","sol.system"),pos,planetname);
     createObjects();
 
        InitializeInput();

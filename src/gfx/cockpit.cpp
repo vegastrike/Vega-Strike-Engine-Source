@@ -221,6 +221,8 @@ void Cockpit::DrawGauges(Unit * un) {
       gauges[i]->Draw(LookupTargetStat (i,un));
     }
   }
+  if (!text)
+	  return;
   text->SetSize (2,-2);
   GFXColorf (textcol);
   for (i=KPS;i<NUMGAUGES;i++) {

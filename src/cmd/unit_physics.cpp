@@ -25,6 +25,7 @@
 #include "beam.h"
 #include "planet.h"
 #include "audiolib.h"
+#include "images.h"
 //#ifdef WIN32
 float copysign (float x, float y) {
 	if (y>0)
@@ -207,12 +208,12 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 void Unit::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);
-  if (afterburn!=AUDIsPlaying (sound.engine)) {
+  if (afterburn!=AUDIsPlaying (sound->engine)) {
     if (afterburn)
-      AUDPlay (sound.engine,cumulative_transformation.position,cumulative_velocity,1);
+      AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
     else
       //    if (Velocity.Magnitude()<computer.max_speed)
-      AUDStopPlaying (sound.engine);
+      AUDStopPlaying (sound->engine);
     
   }
 }
@@ -263,17 +264,17 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
 	energy-=SIMULATION_ATOM*cloakenergy;
       }
       if (cloaking>cloakmin) {
-	AUDAdjustSound (sound.cloak, cumulative_transformation.position,cumulative_velocity);
+	AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
 	if ((cloaking==32767&&cloakrate>0)||(cloaking==cloakmin+1&&cloakrate<0)) {
-	  AUDStartPlaying (sound.cloak);
+	  AUDStartPlaying (sound->cloak);
 	}
 	cloaking-=cloakrate;
 	if (cloaking<=cloakmin&&cloakrate>0) {
-	  //AUDStopPlaying (sound.cloak);
+	  //AUDStopPlaying (sound->cloak);
 	  cloaking=cloakmin;
 	}
 	if (cloaking<0&&cloakrate<0) {
-	  //AUDStopPlaying (sound.cloak);
+	  //AUDStopPlaying (sound->cloak);
 	  cloaking=(short)32768;//wraps
 	}
       }
@@ -356,7 +357,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     UpdateCollideQueue();
 
   if (hull<0) {
-    dead&= (explosion==NULL);    
+    dead&= (image->explosion==NULL);    
     if (dead)
       Kill();
   }
@@ -377,7 +378,7 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
     Velocity += temp;
   } 
 #ifndef PERFRAMESOUND
-  AUDAdjustSound (sound.engine,cumulative_transformation.position, cumulative_velocity); 
+  AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
 #endif
   NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
 

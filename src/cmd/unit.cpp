@@ -39,6 +39,7 @@
 #include "audiolib.h"
 #include "gfx/cockpit.h"
 #include "config_xml.h"
+#include "images.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -67,7 +68,7 @@ void Unit::calculate_extent() {
     corner_min = corner_min.Min(subunits[a]->corner_min);
     corner_max = corner_max.Max(subunits[a]->corner_max);
     }*/
-  selectionBox = new Box(corner_min, corner_max);
+  image->selectionBox = new Box(corner_min, corner_max);
   float tmp1 = corner_min.Magnitude();
   float tmp2 = corner_max.Magnitude();
   radial_size = tmp1>tmp2?tmp1:tmp2;
@@ -91,15 +92,17 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  image = new UnitImages;
+  sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
   cloaking=-1;
   cloakmin=0;
   cloakrate=100;
   cloakenergy=0;
-  sound.engine=-1;  sound.armor=-1;  sound.shield=-1;  sound.hull=-1; sound.explode=-1;
-  sound.cloak=-1;
-  hudImage=NULL;
+  sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
+  sound->cloak=-1;
+  image->hudImage=NULL;
   owner = NULL;
   faction =0;
   resolveforces=true;
@@ -123,8 +126,8 @@ void Unit::Init()
   hull=10;
   shield.number=2;
   
-  explosion=NULL;
-  timeexplode=0;
+  image->explosion=NULL;
+  image->timeexplode=0;
   killed=false;
   ucref=0;
   numhalos = nummounts= nummesh = numsubunit = 0;
@@ -152,7 +155,7 @@ void Unit::Init()
   NetLocalForce=Vector(0,0,0);
 
   selected = false;
-  selectionBox = NULL;
+  image->selectionBox = NULL;
 
   limits.yaw = 25.5;
   limits.pitch = 25.5;
@@ -187,6 +190,13 @@ void Unit::SetVisible(bool invis) {
 Unit::Unit() {
 	Init();
 }
+Sprite * Unit::getHudImage () {
+	return image->hudImage;
+}
+std::string Unit::getCockpit () {
+	return image->cockpitImage;
+}
+
 
 Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   Init ();
@@ -295,23 +305,29 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 
 Unit::~Unit()
 {
-  if (sound.engine!=-1) {
-    AUDDeleteSound (sound.engine);
+  if (sound->engine!=-1) {
+    AUDDeleteSound (sound->engine);
   }
-  if (sound.explode!=-1) {
-    AUDDeleteSound (sound.explode);
+  if (sound->explode!=-1) {
+    AUDDeleteSound (sound->explode);
   }
-  if (sound.shield!=-1) {
-    AUDDeleteSound (sound.shield);
+  if (sound->shield!=-1) {
+    AUDDeleteSound (sound->shield);
   }
-  if (sound.armor!=-1) {
-    AUDDeleteSound (sound.armor);
+  if (sound->armor!=-1) {
+    AUDDeleteSound (sound->armor);
   }
-  if (sound.hull!=-1) {
-    AUDDeleteSound (sound.hull);
+  if (sound->hull!=-1) {
+    AUDDeleteSound (sound->hull);
   }
-  if (hudImage )
-    delete hudImage;
+  if (sound->cloak!=-1) {
+    AUDDeleteSound (sound->cloak);
+  }
+
+  if (image->hudImage )
+    delete image->hudImage;
+  delete image;
+  delete sound;
   if (CollideInfo.object.u)
     KillCollideTable (&CollideInfo);
   if (bspTree)
@@ -538,7 +554,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     if(selected) {
       static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
       if (doInputDFA)
-	selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
+	image->selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
