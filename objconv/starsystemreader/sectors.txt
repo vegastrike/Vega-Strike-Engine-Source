@@ -1,4 +1,3 @@
-enigma,argent
-sol,rlaa
-aeran,blah
-booh,bingnext
+ralath,rawtek,gemini,avalon
+rlaa,vega,sol,hawking
+ridvel,epsilon,enigma,argent

@@ -353,7 +353,7 @@ std::vector<string> readMilkyWayNames( ) {
 			unsigned int quote=  s.find("\"");
 			if (quote!=string::npos) {
 				string newname=s.substr(0,quote);
-				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359"&&newname.find("wolf")==string::npos)
+				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359"&&newname.find("wolf")==string::npos&&newname.find("polaris")==string::npos)
 					retval.push_back(newname);
 			}
 		}
@@ -866,7 +866,7 @@ void processsystems (std::vector <System> & s){
 		std::map <double,string> jumps;
 		if (s[i].habitable)
 		for (unsigned int j=0;j<s.size();++j) {
-			if (j!=i && (s[j].habitable||rand()<RAND_MAX*.001)){
+			if (j!=i && (s[j].habitable||rand()<RAND_MAX*.001||(s[j].interesting&&rand()<RAND_MAX*.5))){
 				float dissqr = sqr(s[i].xyz.x-s[j].xyz.x)+sqr(s[i].xyz.y-s[j].xyz.y)+sqr(s[i].xyz.z-s[j].xyz.z);
 				int desired_size = rand()%5+1;
 				if (jumps.size()>=desired_size) {
