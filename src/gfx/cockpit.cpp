@@ -15,7 +15,7 @@
 #include "lin_time.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
-
+#include "cmd/ai/flykeyboard.h"
 #include <assert.h>	// needed for assert() calls
 
 
@@ -536,10 +536,6 @@ void Cockpit::Draw() {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
 	bool die=true;
   if ((un = parent.GetUnit())) {
-    if (un->Threat()!=NULL) {
-      reset_time_compression(0,PRESS);
-      un->Threaten (NULL,0);
-    }
     if (view==CP_FRONT) {//only draw crosshairs for front view
       DrawGauges(un);
 
@@ -563,8 +559,13 @@ void Cockpit::Draw() {
       }
 
     }
-	if (un->GetHull()>0)
-		die = false;
+    if (un->GetHull()>0)
+      die = false;
+    if (un->Threat()!=NULL) {
+      FlyByKeyboard::StopAutoKey (0,PRESS);
+      reset_time_compression(0,PRESS);
+      un->Threaten (NULL,0);
+    }
   }
   if (die) {
 	static float dietime = 0;

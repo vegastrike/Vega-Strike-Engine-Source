@@ -1,6 +1,7 @@
 #include "in_joystick.h"
 #include "flykeyboard.h"
 #include "cmd/unit.h"
+#include "navigation.h"
 struct StarShipControlKeyboard {
   bool matchspeed;
   bool jumpkey;
@@ -27,8 +28,10 @@ struct StarShipControlKeyboard {
   bool stoppress;
   bool startpress;
   bool dirty;//it wasn't updated...
+  bool autopilot;
+  bool terminateauto;
   int refcount;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=dirty=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=false;}
   StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
@@ -39,27 +42,15 @@ FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
   if (starshipcontrolkeys.refcount==0) {
     // keys are bound in config_xml now
   }
+  autopilot=NULL;
   starshipcontrolkeys.refcount++;
 }
 FlyByKeyboard::~FlyByKeyboard() {
   starshipcontrolkeys.refcount--;
   if (starshipcontrolkeys.refcount==0) {
-    UnbindKey(8);
-    UnbindKey(92);
-    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_UP);
-    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_DOWN);
-    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_LEFT);
-    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_RIGHT);
-    UnbindKey('\t');
-    UnbindKey('+');
-    UnbindKey('=');
-    UnbindKey('-');   
-    UnbindKey('/');
-    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_INSERT);
-    UnbindKey('*');
-    UnbindKey(127);
-    UnbindKey(96);    
   }
+  if (autopilot)
+    delete autopilot;
 }
 
 #define FBWABS(m) (m>=0?m:-m)
@@ -67,6 +58,9 @@ void FlyByKeyboard::Execute () {
   FlyByKeyboard::Execute (true);
 }
 void FlyByKeyboard::Execute (bool resetangvelocity) {
+  if (autopilot) {
+    autopilot->Execute();
+  }
   if (resetangvelocity)
     desired_ang_velocity=Vector(0,0,0);
 #define SSCK starshipcontrolkeys
@@ -172,6 +166,19 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     SheltonSlide(true);
   } else {
     SheltonSlide(false);
+  }
+  if (SSCK.autopilot&&!autopilot) {
+    autopilot = new Orders::FaceTarget (false,1);
+    autopilot->SetParent (parent);
+    SSCK.autopilot=false;
+  }
+  if (SSCK.autopilot||SSCK.terminateauto) {
+    if (autopilot) {
+      delete autopilot;
+      autopilot=NULL;
+    }
+    SSCK.autopilot=false;
+    SSCK.terminateauto=false;
   }
   if (SSCK.matchspeed) {
     SSCK.matchspeed=false;
@@ -290,6 +297,20 @@ void FlyByKeyboard::ABKey (int, KBSTATE k) {
   default:break;
   }
 }
+
+void FlyByKeyboard::AutoKey (int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (k==PRESS) {
+    starshipcontrolkeys.autopilot=true;
+  }
+}
+void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (k==PRESS) {
+    starshipcontrolkeys.terminateauto=true;
+  }
+}
+
 void FlyByKeyboard::StopKey (int,KBSTATE k)  {
   if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
   switch (k) {

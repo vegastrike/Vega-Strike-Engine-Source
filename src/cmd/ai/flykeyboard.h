@@ -5,7 +5,7 @@
 #include "flybywire.h"
 
 class FlyByKeyboard: public FlyByWire {
-
+  Order * autopilot;
  public:
   static void SheltonKey (int,KBSTATE);
   static void StartKey (int,KBSTATE);
@@ -21,6 +21,8 @@ class FlyByKeyboard: public FlyByWire {
   static void RollRightKey (int,KBSTATE);
   static void MatchSpeedKey (int,KBSTATE);
   static void JumpKey (int, KBSTATE);
+  static void AutoKey (int, KBSTATE);
+  static void StopAutoKey (int, KBSTATE);
   FlyByKeyboard (const char *configfile);
   virtual ~FlyByKeyboard();
   void Execute (bool);//should we reset our ang velocity
