@@ -39,7 +39,6 @@ struct Music {
     void Play(float fadeout, float fadein, Music &oldmusic){
         if (!m) return;
         FSOUND_Stream_SetEndCallback(m,endcallback,0);
-        FSOUND_Stream_SetSynchCallback(m, endcallback, 0);
         channel = FSOUND_Stream_PlayEx(FSOUND_FREE, m, NULL, 1);
         FSOUND_SetPaused(channel, 0);
         SetVolume(0);
@@ -85,7 +84,8 @@ struct Music {
         }
         oldmusic.Free();
         if (!fadeout) {
-            channel = FSOUND_Stream_Play(FSOUND_FREE, m);
+	  FSOUND_Stream_SetEndCallback(m,endcallback,0);
+	  channel = FSOUND_Stream_Play(FSOUND_FREE, m);
         }	
   
         SetVolume(1);
@@ -162,7 +162,7 @@ struct Music {
 
 
 
-#include "inet.h"
+#include "inet_file.h"
 int fadeout=0, fadein=0;
 float volume=0;
 int bits=0,done=0;
@@ -265,7 +265,7 @@ void music_finished () {
 	if (sende) {
 		char data='e';
                 e_already_sent=true;
-		INET_Write(mysocket_write,sizeof(char),&data);	
+		fNET_Write(mysocket_write,sizeof(char),&data);	
 		printf("\ne\n[SONG DONE]\n");
                 invalid_string=true;
 	}
@@ -293,7 +293,7 @@ int main(int argc, char **argv)
 	  }
 #endif
 #endif
-	INET_startup();
+	fNET_startup();
 	GetMaxVolume();
 	// initialize sdl mixer, open up the audio device
 #ifdef HAVE_SDL
@@ -308,9 +308,10 @@ int main(int argc, char **argv)
 			bits, audio_channels>1?"stereo":"mono", audio_buffers );
 
 	// load the song
+	printf ("argv %d\n\n\n", argc);
         if (argc!=3) {
 	for (int i=0;i<10&&mysocket_write==-1;i++) {
-            mysocket_write = INET_AcceptFrom(4364,"localhost");
+            mysocket_write = fNET_AcceptFrom(4364,"localhost");
             mysocket_read = mysocket_write;
 	}
 	if (mysocket_write==-1)
@@ -325,19 +326,19 @@ int main(int argc, char **argv)
 //		if ((Mix_PlayingMusic() || Mix_PausedMusic())&&(!done)) {
 		char arg;
 		std::string str;
-		arg=INET_fgetc(mysocket_read);
+		arg=fNET_fgetc(mysocket_read);
 		printf("%c",arg);
 		switch(arg) {
 		case 'p':
 		case 'P':
 			{
-				arg=INET_fgetc(mysocket_read);
+				arg=fNET_fgetc(mysocket_read);
 				while (arg!='\0'&&arg!='\n') {
 					if (arg!='\r') {
 						ministr[0]=arg;
 						str+=ministr;
 					}
-					arg=INET_fgetc(mysocket_read);
+					arg=fNET_fgetc(mysocket_read);
 				}
 				printf("%s",str.c_str());
 				if ((str!=curmus||invalid_string)
@@ -362,13 +363,13 @@ int main(int argc, char **argv)
 		case 'i':
 		case 'I':
 			{
-				arg=INET_fgetc(mysocket_read);
+				arg=fNET_fgetc(mysocket_read);
 				while (arg!='\0'&&arg!='\n') {
 					if (arg!='\r') {
 						ministr[0]=arg;
 						str+=ministr;
 					}
-					arg=INET_fgetc(mysocket_read);
+					arg=fNET_fgetc(mysocket_read);
 				}
 				printf("%s",str.c_str());
 				fadein=atoi(str.c_str());
@@ -378,13 +379,13 @@ int main(int argc, char **argv)
 		case 'o':
 		case 'O':
 			{
-				arg=INET_fgetc(mysocket_read);
+				arg=fNET_fgetc(mysocket_read);
 				while (arg!='\0'&&arg!='\n') {
 					if (arg!='\r') {
 						ministr[0]=arg;
 						str+=ministr;
 					}
-					arg=INET_fgetc(mysocket_read);
+					arg=fNET_fgetc(mysocket_read);
 				}
 				printf("%s",str.c_str());
 				fadeout=atoi(str.c_str());
@@ -394,13 +395,13 @@ int main(int argc, char **argv)
 		case 'v':
 		case 'V':
 			{
-				arg=INET_fgetc(mysocket_read);
+				arg=fNET_fgetc(mysocket_read);
 				while (arg!='\0'&&arg!='\n') {
 					if (arg!='\r') {
 						ministr[0]=arg;
 						str+=ministr;
 					}
-					arg=INET_fgetc(mysocket_read);
+					arg=fNET_fgetc(mysocket_read);
 				}
 				printf("%s",str.c_str());
 				volume=atof(str.c_str());
@@ -411,9 +412,9 @@ int main(int argc, char **argv)
 		case 't':
 		case 'T':
 		case '\0':
-			INET_close (mysocket_read);
+			fNET_close (mysocket_read);
                     if (mysocket_read!=mysocket_write) {
-                        INET_close (mysocket_write);
+                        fNET_close (mysocket_write);
                     }
 			done=true;
 			printf("\n[TERMINATING MUSIC SERVER]\n");
@@ -421,7 +422,7 @@ int main(int argc, char **argv)
 		}
 	}
 	// free & close
-	INET_cleanup();
+	fNET_cleanup();
 #ifdef HAVE_SDL
 	Mix_CloseAudio();
 	SDL_Quit();
