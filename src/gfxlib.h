@@ -100,14 +100,17 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
 
 
 //Light
+BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int &contextnumber);
+BOOL /*GFXDRVAPI*/ GFXDeleteLightContext (int contextnumber);
+BOOL /*GFXDRVAPI*/ GFXSetLightContext (int contextnumber);
+BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light);
+BOOL /*GFXDRVAPI*/ GFXDeleteLight (int light);
 BOOL /*GFXDRVAPI*/ GFXEnableLight(int light);
 BOOL /*GFXDRVAPI*/ GFXDisableLight(int light);
-
-BOOL /*GFXDRVAPI*/ GFXSetLightPosition(int light, const Vector &position);
-BOOL /*GFXDRVAPI*/ GFXSetLightDirection(int light, const Vector &direction);
-BOOL /*GFXDRVAPI*/ GFXSetLightColor(int light, const GFXColor &color);
-BOOL /*GFXDRVAPI*/ GFXSetLightColor(int light, const float num[4]);
-//BOOL GFXSetSpecular(int light, const float &(num[4=));
+BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);//set the intensity cutoff for light
+BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights);
+BOOL /*GFXDRVAPI*/ GFXPickLights (const Vector &loc);//must call this to actually execute gl_enable, etc
+BOOL /*GFXDRVAPI*/ GFXSetLight (int light, enum LIGHT_TARGET lightarg,const GFXColor & color);//actually sets the light properties
 
 
 //Screen capture
