@@ -3880,132 +3880,36 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
     percent = 0;
   return percent;
 }
-
+bool withinShield(const ShieldFacing& facing, float theta, float rho){
+  float theta360=theta+2*3.1415926536;
+  return rho>=facing.rhomin&&rho<facing.rhomax&&((theta>=facing.thetamin&&theta<facing.thetamax)||(theta360>=facing.thetamin&&theta360<facing.thetamax));
+}
 float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   int index;
   float percent=0;
   float * targ=NULL; //short fix
-  
+  float theta = atan2 (pnt.i,pnt.k);
+  float rho=atan(pnt.j/sqrt(pnt.k*pnt.k+pnt.i*pnt.i));
   // ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
-  switch (shield.number){
-  case 2:
-    index=(pnt.k>0)?0:1;
-	if(index){
-		if( shield.shield2fb.backmax!=0)
-			percent = damage/shield.shield2fb.backmax;//comparing with max
-		else
-			percent = 0;
-		if( Network==NULL || SERVER)
-		{
-   			shield.shield2fb.back-=damage;
-			damage =0;
-			if (shield.shield2fb.back<0) {
-				damage = -shield.shield2fb.back;
-				shield.shield2fb.back=0;
-			}
-		}
-	} else {
-		if( shield.shield2fb.frontmax!=0)
-			percent = damage/shield.shield2fb.frontmax;//comparing with max
-		else
-			percent = 0;
-				if( Network==NULL || SERVER)
-		{
-   			shield.shield2fb.front-=damage;
-			damage =0;
-			if (shield.shield2fb.front<0) {
-				damage = -shield.shield2fb.front;
-				shield.shield2fb.front=0;
-			}
-		}
-
-	}
-
-	
-    break;
-  case 8:
-      if (pnt.i>0) {
-		if(pnt.j>0){
-		  if(pnt.k>0){
-			  percent = damage/shield.shield8.frontlefttopmax;
-			  targ=&shield.shield8.frontlefttop;
-		  } else {
-			  percent = damage/shield.shield8.backlefttopmax;
-			  targ=&shield.shield8.backlefttop;
-		  }
-		} else {
-		  if(pnt.k>0){
-			  percent = damage/shield.shield8.frontleftbottommax;
-			  targ=&shield.shield8.frontleftbottom;
-		  } else {
-			  percent = damage/shield.shield8.backleftbottommax;
-			  targ=&shield.shield8.backleftbottom;
-		  }
-		}
-	  } else {
-		if(pnt.j>0){
-		  if(pnt.k>0){
-			  percent = damage/shield.shield8.frontrighttopmax;
-			  targ=&shield.shield8.frontrighttop;
-		  } else {
-			  percent = damage/shield.shield8.backrighttopmax;
-			  targ=&shield.shield8.backrighttop;
-		  }
-		} else {
-		  if(pnt.k>0){
-			  percent = damage/shield.shield8.frontrightbottommax;
-			  targ=&shield.shield8.frontrightbottom;
-		  } else {
-			  percent = damage/shield.shield8.backrightbottommax;
-			  targ=&shield.shield8.backrightbottom;
-		  }
-		}
-	  }
-    
-		
-
-
-	if( Network==NULL || SERVER)
-	{
-      if (damage>*targ) {
-        damage -= *targ;
+  for (int i=0;i<shield.number;++i) {
+    if (withinShield(shield.range[i],theta,rho)) {
+      if (shield.shield.max[i]) {
+        float tmp=damage/shield.shield.max[i];//comparing with max
+        if (tmp>percent) percent=tmp;
+      }
+      targ=&shield.shield.cur[i];
+      if( Network==NULL || SERVER)
+      {
+        if (damage>*targ) {
+          damage -= *targ;
           *targ=0;
-      } else {
+        } else {
           *targ-=damage; //short fix
-        damage = 0;
-      }
-	}
-    break;
-  case 4:
-  default:
-    if (fabs(pnt.k)>fabs (pnt.i)) {
-      if (pnt.k>0) {
-	targ = &shield.shield4fbrl.front;
-	percent = damage/shield.shield4fbrl.frontmax;
-      } else {
-	targ = &shield.shield4fbrl.back;
-	percent = damage/shield.shield4fbrl.backmax;
-      }
-    } else {
-      if (pnt.i>0) {
-	percent = damage/shield.shield4fbrl.leftmax;
-	targ = &shield.shield4fbrl.left;
-      } else {
-	targ = &shield.shield4fbrl.right;
-	percent = damage/shield.shield4fbrl.rightmax;
+          damage = 0;
+          break;
+        }
       }
     }
-	if( Network==NULL || SERVER)
-	{
-      if (damage>*targ) {
-        damage-=*targ;
-          *targ=0;
-      } else {
-          *targ -= (damage); //short fix	
-        damage=0;
-      }
-	}
-    break;
   }
   if (!FINITE (percent))
     percent = 0;

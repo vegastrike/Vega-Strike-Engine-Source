@@ -491,6 +491,15 @@ static int AssignIf(string inp,float &val,float&val1, float&val2) {
   }
   return 0;
 }
+
+static int AssignIfDeg(string inp,float &val) {
+  if (inp.length()) {
+    val=stof(inp)*VS_PI/180;
+    return 1;
+  }
+  return 0;
+}
+
 float getFuelConversion(){
   static float fuel_conversion = XMLSupport::parse_float(vs_config->getVariable("physics","FuelConversion",".00144"));
   return fuel_conversion;
@@ -594,6 +603,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
                         two.shield2fb.back,four.shield4fbrl.left,eight.shield8.backleftbottom);
   shieldcount+=AssignIf(row["Shield_Back_Bottom_Right"],
                         two.shield2fb.back,four.shield4fbrl.right,eight.shield8.backrightbottom);
+
   two.shield2fb.frontmax=two.shield2fb.front;
   two.shield2fb.backmax=two.shield2fb.back;
   four.shield4fbrl.frontmax=four.shield4fbrl.front;
@@ -609,16 +619,119 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   eight.shield8.frontrightbottommax=eight.shield8.frontrightbottom;
   eight.shield8.backrightbottommax=eight.shield8.backrightbottom;
   eight.shield8.backleftbottommax=eight.shield8.backleftbottom;
-  
+  float r45=VS_PI/4;
+  float r90=VS_PI/2;
+  float r135=3*VS_PI/4;
+  float r180=VS_PI;
+  float r225=5*VS_PI/4;
+  float r270=3*VS_PI/2;
+  float r315=7*VS_PI/4;
+  float r360=2*VS_PI;
+  int iter;
+  if (shieldcount>MAX_SHIELD_NUMBER) {
+    shieldcount=MAX_SHIELD_NUMBER;
+  }
+  memset(shield.range,0,sizeof(shield.range));
   if (shieldcount==8) {
-    shield=eight;
+
     shield.number=8;
-    }else if (shieldcount==4){
-    shield=four;
+    shield.shield.cur[0]=shield.shield.max[0]=eight.shield8.frontlefttopmax;
+    shield.range[0].thetamin=0;
+    shield.range[0].thetamax=r90;
+shield.range[0].    rhomin=0;
+shield.range[0].    rhomax=r90;
+
+    shield.shield.cur[1]=shield.shield.max[1]=eight.shield8.backlefttopmax;
+shield.range[1].    thetamin=r90;
+shield.range[1].    thetamax=r180;
+shield.range[1].    rhomin=0;
+shield.range[1].    rhomax=r90;
+
+    shield.shield.cur[2]=shield.shield.max[2]=eight.shield8.frontrighttopmax;
+    shield.range[2].thetamin=r270;
+shield.range[2].    thetamax=r360;
+shield.range[2].    rhomin=0;
+shield.range[2].    rhomax=r90;
+
+    shield.shield.cur[3]=shield.shield.max[3]=eight.shield8.backrighttopmax;
+shield.range[3].    thetamin=r180;
+shield.range[3].    thetamax=r270;
+shield.range[3].    rhomin=0;
+shield.range[3].    rhomax=r90;
+    
+    shield.shield.cur[4]=shield.shield.max[4]=eight.shield8.frontleftbottommax;
+shield.range[4].    thetamin=0;
+shield.range[4].    thetamax=r90;
+shield.range[4].    rhomin=-r90;
+shield.range[4].    rhomax=0;
+
+    shield.shield.cur[5]=shield.shield.max[5]=eight.shield8.backleftbottommax;
+shield.range[5].    thetamin=r90;
+shield.range[5].    thetamax=r180;
+shield.range[5].    rhomin=-r90;
+shield.range[5].    rhomax=0;
+
+    shield.shield.cur[6]=shield.shield.max[6]=eight.shield8.frontrightbottommax;
+shield.range[6].   thetamin=r270;
+shield.range[6].   thetamax=r360;
+shield.range[6].   rhomin=-r90;
+shield.range[6].   rhomax=0;
+
+    shield.shield.cur[7]=shield.shield.max[7]=eight.shield8.backrightbottommax;
+shield.range[7].   thetamin=r180;
+shield.range[7].   thetamax=r270;
+shield.range[7].   rhomin=-r90;
+shield.range[7].   rhomax=0;
+    
+  }else if (shieldcount==4){
     shield.number=4;
+
+    shield.shield.cur[0]=shield.shield.max[0]=four.shield4fbrl.frontmax;
+shield.range[0].   thetamin=r315;
+shield.range[0].   thetamax=r360+r45;
+shield.range[0].   rhomin=-r90;
+shield.range[0].   rhomax=r90;
+
+    shield.shield.cur[1]=shield.shield.max[1]=four.shield4fbrl.backmax;
+shield.range[1].   thetamin=r135;
+shield.range[1].   thetamax=r225;
+shield.range[1].   rhomin=-r90;
+shield.range[1].   rhomax=r90;
+
+    shield.shield.cur[2]=shield.shield.max[2]=four.shield4fbrl.rightmax;
+shield.range[2].   thetamin=r225;
+shield.range[2].   thetamax=r315;
+shield.range[2].   rhomin=-r90;
+shield.range[2].   rhomax=r90;
+
+    shield.shield.cur[3]=shield.shield.max[3]=four.shield4fbrl.leftmax;
+shield.range[3].   thetamin=r45;
+shield.range[3].   thetamax=r225;
+shield.range[3].   rhomin=-r90;
+shield.range[3].   rhomax=r90;
+
   }else {
-    shield=two;
     shield.number=2;
+
+    shield.shield.cur[0]=shield.shield.max[0]=four.shield2fb.frontmax;
+shield.range[0].   thetamin=r270;
+shield.range[0].   thetamax=r360+r90;
+shield.range[0].   rhomin=-r90;
+shield.range[0].   rhomax=r90;
+
+    shield.shield.cur[1]=shield.shield.max[1]=four.shield2fb.backmax;
+shield.range[1].   thetamin=r90;
+shield.range[1].   thetamax=r270;
+shield.range[1].   rhomin=-r90;
+shield.range[1].   rhomax=r90;
+
+  }
+  for (iter =0;iter<shieldcount;++iter) {
+    std::string shieldname= "Shield_"+XMLSupport::tostring(iter);    
+    AssignIfDeg(row[shieldname+"_Min_Theta"],shield.range[iter].thetamin);
+    AssignIfDeg(row[shieldname+"_Max_Theta"],shield.range[iter].thetamax);
+    AssignIfDeg(row[shieldname+"_Min_Rho"],shield.range[iter].rhomin);
+    AssignIfDeg(row[shieldname+"_Max_Rho"],shield.range[iter].rhomax);
   }
   shield.leak = (char)(stof(row["Shield_Leak"])*100.0);
   shield.recharge=stof(row["Shield_Recharge"]);
