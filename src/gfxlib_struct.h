@@ -78,13 +78,13 @@ struct GFXColor
   }
 };
 
-inline const GFXColor &operator*(float s, const GFXColor&c) {
+inline	GFXColor operator*(float s, const GFXColor&c) {
 	return GFXColor(s *c.r, s*c.g, s*c.b, s*c.a);
 }
-inline const GFXColor &operator*(const GFXColor&c, float s) {
+inline GFXColor operator*(const GFXColor&c, float s) {
 	return GFXColor(s *c.r, s*c.g, s*c.b, s*c.a);
 }
-inline const GFXColor &operator+(const GFXColor&c0, const GFXColor&c1) {
+inline GFXColor operator+(const GFXColor&c0, const GFXColor&c1) {
 	return GFXColor(c0.r+c1.r,c0.g+c1.g,c0.b+c1.b,c0.a+c1.a);
 }
 
