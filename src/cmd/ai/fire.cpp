@@ -253,15 +253,15 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     if (isJumpablePlanet (curtarg))
       return;
   Flightgroup * fg = parent->getFlightgroup();;
+  parent->getAverageGunSpeed (gunspeed,gunrange,missilerange);  
+  lastchangedtarg=0;
   if (fg) {
     if (!fg->directive.empty()) {
       if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
-	return;//not allowed to switch targets
+		  return;//not 	allowed to switch targets
       }
     }
   }
-  lastchangedtarg=0;
-  parent->getAverageGunSpeed (gunspeed,gunrange,missilerange);  
 
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
   Unit * un=NULL;
