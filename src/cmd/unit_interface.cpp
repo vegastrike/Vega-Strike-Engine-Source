@@ -1031,7 +1031,9 @@ vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, boo
       len = len<filterthis.length()?len:filterthis.length();
       if ((0==memcmp(un->GetCargo(i).category.c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
 		  if ((!removezero)||un->GetCargo(i).quantity>0) {
+		    if (!un->GetCargo(i).mission) {
 			TempCargo.push_back (un->GetCargo(i));
+		    }
 		  }
       }
     }

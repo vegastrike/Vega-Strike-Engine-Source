@@ -107,7 +107,11 @@ UnitImages &Unit::GetImageInformation() {
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {
-  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+string("\"/>\n");
+  string missioncargo;
+  if (cargo.mission) {
+    missioncargo = string("\" missioncargo=\"")+tostring(cargo.mission);
+  }
+  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+missioncargo+ string("\"/>\n");
 }
 std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   Unit * un = (Unit *)mythis;

@@ -195,7 +195,8 @@ namespace UnitXML {
       SUBUNITOFFSET,
       SLIDE_START,
       SLIDE_END,
-      TRACKINGCONE
+      TRACKINGCONE,
+      MISSIONCARGO
     };
 
   const EnumMap::Pair element_names[35]= {
@@ -236,7 +237,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[91] = {
+  const EnumMap::Pair attribute_names[92] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -327,11 +328,12 @@ namespace UnitXML {
     EnumMap::Pair ("MountOffset",MOUNTOFFSET),
     EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET),
     EnumMap::Pair ("SlideEnd",SLIDE_START),
-    EnumMap::Pair ("SlideStart",SLIDE_END)
+    EnumMap::Pair ("SlideStart",SLIDE_END),
+    EnumMap::Pair ("MissionCargo",MISSIONCARGO)
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 91);
+  const EnumMap attribute_map(attribute_names, 92);
 }
 
 using XMLSupport::EnumMap;
@@ -492,6 +494,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case PRICE:
 	carg.price=parse_float ((*iter).value);
+	break;
+      case MISSIONCARGO:
+	carg.mission=parse_bool((*iter).value);
 	break;
       case XFILE:
 	carg.content = XMLSupport::replace_space((*iter).value);
