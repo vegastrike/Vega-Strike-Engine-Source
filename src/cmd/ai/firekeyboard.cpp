@@ -22,6 +22,7 @@
 //for getatmospheric
 #include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
+  memset (savedTargets,0,sizeof(void*)*NUMSAVEDTARGETS);
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
@@ -30,9 +31,11 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
   sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
 }
 const unsigned int NUMCOMMKEYS=10;
+
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
+
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
@@ -85,6 +88,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE togglewarpdrive;
  KBSTATE toggleanimation;	
  KBSTATE commKeys[NUMCOMMKEYS];
+ KBSTATE saveTargetKeys[NUMSAVEDTARGETS];
+ KBSTATE restoreTargetKeys[NUMSAVEDTARGETS];
  KBSTATE nearturrettargetkey;
  KBSTATE threatturrettargetkey;
  KBSTATE pickturrettargetkey;
@@ -188,6 +193,108 @@ void FireKeyboard::PressComm10Key (int, KBSTATE k) {
     g().commKeys[9]=PRESS;
   }
 }
+void FireKeyboard::SaveTarget1Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[0]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget2Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[1]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget3Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[2]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget4Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[3]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget5Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[4]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget6Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[5]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget7Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[6]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget8Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[7]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget9Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[8]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget10Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[9]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget1Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[0]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget2Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[1]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget3Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[2]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget4Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[3]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget5Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[4]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget6Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[5]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget7Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[6]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget8Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[7]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget9Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[8]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget10Key (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[9]=PRESS;
+  }
+}
+
+
 
 void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
 
@@ -1460,6 +1567,24 @@ void FireKeyboard::Execute () {
       missound.loadsound(str);
     }
     missound.playsound();
+  }
+  for (unsigned int i=0;i<NUMSAVEDTARGETS;i++) {  
+    if (f().saveTargetKeys[i]==PRESS) {
+      f().saveTargetKeys[i]=RELEASE;
+      savedTargets[i]=parent->Target();
+    }
+    if (f().restoreTargetKeys[i]==PRESS) {
+      f().restoreTargetKeys[i]=RELEASE;
+      Unit * un;
+      for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();
+           (un=*u)!=NULL;
+           ++u) {
+        if (un==savedTargets[i]) {
+          parent->Target(un);
+          break;
+        }
+      }
+    }
   }
   for (unsigned int i=0;i<NUMCOMMKEYS;i++) {
     if (f().commKeys[i]==PRESS) {

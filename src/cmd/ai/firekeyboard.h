@@ -5,7 +5,7 @@
 #include "event_xml.h"
 #include "communication.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
-
+#define NUMSAVEDTARGETS 10
 class FireKeyboard: public Order {
   unsigned char sex;
   bool itts;
@@ -39,6 +39,26 @@ class FireKeyboard: public Order {
   static void PressComm8Key (int,KBSTATE);
   static void PressComm9Key (int,KBSTATE);
   static void PressComm10Key (int,KBSTATE);
+  static void SaveTarget1Key (int,KBSTATE);
+  static void SaveTarget2Key (int,KBSTATE);
+  static void SaveTarget3Key (int,KBSTATE);
+  static void SaveTarget4Key (int,KBSTATE);
+  static void SaveTarget5Key (int,KBSTATE);
+  static void SaveTarget6Key (int,KBSTATE);
+  static void SaveTarget7Key (int,KBSTATE);
+  static void SaveTarget8Key (int,KBSTATE);
+  static void SaveTarget9Key (int,KBSTATE);
+  static void SaveTarget10Key (int,KBSTATE);
+  static void RestoreTarget1Key (int,KBSTATE);
+  static void RestoreTarget2Key (int,KBSTATE);
+  static void RestoreTarget3Key (int,KBSTATE);
+  static void RestoreTarget4Key (int,KBSTATE);
+  static void RestoreTarget5Key (int,KBSTATE);
+  static void RestoreTarget6Key (int,KBSTATE);
+  static void RestoreTarget7Key (int,KBSTATE);
+  static void RestoreTarget8Key (int,KBSTATE);
+  static void RestoreTarget9Key (int,KBSTATE);
+  static void RestoreTarget10Key (int,KBSTATE);
   static void RequestClearenceKey(int, KBSTATE);
   static void UnDockKey(int, KBSTATE);
   static void EjectKey(int, KBSTATE);
@@ -83,6 +103,7 @@ class FireKeyboard: public Order {
   static void AttackTarget (int,KBSTATE);
   static void TurretAI (int,KBSTATE);
 protected:
+  void * savedTargets[NUMSAVEDTARGETS];
   float distance;
 #if 0
   void ChooseTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container

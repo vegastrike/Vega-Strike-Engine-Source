@@ -299,6 +299,7 @@ void GameVegaConfig::initCommandMap(){
   command_map["SirenKey"]=FireKeyboard::SirenKey;
 #endif
   command_map["CommBreakForm"]=FireKeyboard::BreakFormation;
+  
   command_map["Comm1Key"]=FireKeyboard::PressComm1Key ;
   command_map["Comm2Key"]=FireKeyboard::PressComm2Key ;
   command_map["Comm3Key"]=FireKeyboard::PressComm3Key ;
@@ -309,6 +310,31 @@ void GameVegaConfig::initCommandMap(){
   command_map["Comm8Key"]=FireKeyboard::PressComm8Key ;
   command_map["Comm9Key"]=FireKeyboard::PressComm9Key ;
   command_map["Comm10Key"]=FireKeyboard::PressComm10Key ;
+
+  command_map["SaveTarget1"]=FireKeyboard::SaveTarget1Key ;
+  command_map["SaveTarget2"]=FireKeyboard::SaveTarget2Key ;
+  command_map["SaveTarget3"]=FireKeyboard::SaveTarget3Key ;
+  command_map["SaveTarget4"]=FireKeyboard::SaveTarget4Key;
+  command_map["SaveTarget5"]=FireKeyboard::SaveTarget5Key ;
+  command_map["SaveTarget6"]=FireKeyboard::SaveTarget6Key ;
+  command_map["SaveTarget7"]=FireKeyboard::SaveTarget7Key ;
+  command_map["SaveTarget8"]=FireKeyboard::SaveTarget8Key ;
+  command_map["SaveTarget9"]=FireKeyboard::SaveTarget9Key ;
+  command_map["SaveTarget10"]=FireKeyboard::SaveTarget10Key ;
+
+  command_map["RestoreTarget1"]=FireKeyboard::RestoreTarget1Key ;
+  command_map["RestoreTarget2"]=FireKeyboard::RestoreTarget2Key ;
+  command_map["RestoreTarget3"]=FireKeyboard::RestoreTarget3Key ;
+  command_map["RestoreTarget4"]=FireKeyboard::RestoreTarget4Key ;
+  command_map["RestoreTarget5"]=FireKeyboard::RestoreTarget5Key ;
+  command_map["RestoreTarget6"]=FireKeyboard::RestoreTarget6Key ;
+  command_map["RestoreTarget7"]=FireKeyboard::RestoreTarget7Key ;
+  command_map["RestoreTarget8"]=FireKeyboard::RestoreTarget8Key ;
+  command_map["RestoreTarget9"]=FireKeyboard::RestoreTarget9Key ;
+  command_map["RestoreTarget10"]=FireKeyboard::RestoreTarget10Key ;
+
+
+
   command_map["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
   command_map["EjectKey"]=FireKeyboard::EjectKey ;
   command_map["SuicideKey"]=SuicideKey ;
