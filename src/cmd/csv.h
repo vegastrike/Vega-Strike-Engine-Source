@@ -6,7 +6,7 @@ namespace VSFileSystem
 {
 	class VSFile;
 }
-std::vector <std::string> readCSV(std::string line);
+std::vector <std::string> readCSV(std::string line, std::string delim=",");
 std::string writeCSV(const std::vector<std::string> &key, const std::vector<std::string> &table);
 class CSVTable {
   

@@ -142,7 +142,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       QVector pos = QVector (0,0,0);
       
       string filename = nextElement(mount);
-      int ammo = stoi(nextElement(mount));      
+      int ammo = stoi(nextElement(mount),-1);      
       int volume = stoi(nextElement(mount));      
       string mountsize=nextElement(mount);
       pos.i = stof(nextElement(mount));
@@ -594,11 +594,11 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   computer.slide_start=stoi(row["Slide_Start"]);
   computer.slide_end=stoi(row["Slide_End"]);
   UpgradeUnit(this,row["Upgrade"]);
-
+  
   this->image->explosion_type = row["Explosion"];
   if (image->explosion_type.length())
     cache_ani (image->explosion_type);
-
+  AddLights(this,xml,row["Light"]);
 
   xml.shieldmesh_str = row["Shield_Mesh"];
   if (xml.shieldmesh_str.length()){
