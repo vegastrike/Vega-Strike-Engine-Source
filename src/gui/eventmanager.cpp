@@ -130,51 +130,53 @@ void EventManager::sendCommand(const EventCommandId& id, Control* control) {
 
 // Send an input event through the responder chain.
 void EventManager::sendInputEvent(const InputEvent& event) {
-   vector <EventResponder*>::reverse_iterator iter;
+	// Record the mouse position.
+	// This is used (at least) to render the cursor.
+	switch(event.type) {
+		case MOUSE_DOWN_EVENT:
+		case MOUSE_UP_EVENT:
+		case MOUSE_MOVE_EVENT:
+		case MOUSE_DRAG_EVENT:
+			m_mouseLoc = event.loc;
+			break;
+	}
 
-   // Record the mouse position.
-   // This is used (at least) to render the cursor.
-   switch(event.type) {
-        case MOUSE_DOWN_EVENT:
-        case MOUSE_UP_EVENT:
-        case MOUSE_MOVE_EVENT:
-        case MOUSE_DRAG_EVENT:
-            m_mouseLoc = event.loc;
-            break;
-   }
-
-   // Loop through the event chain, starting at the end.
-    for(iter = m_responders.rbegin() ; iter != m_responders.rend() ; iter++ ) {
+	// Loop through the event chain, starting at the end.
+	// WARNING:  The functions in this loop can change the responders list.
+	//  Iterate through the list carefully!
+	for(int i = m_responders.size()-1 ; i >= 0 ; i-- ) {
         bool result = false;
-        switch(event.type) {
-            case KEY_DOWN_EVENT:
-                result = (*iter)->processKeyDown(event);
-                break;
-            case KEY_UP_EVENT:
-                result = (*iter)->processKeyUp(event);
-                break;
-            case MOUSE_DOWN_EVENT:
-                result = (*iter)->processMouseDown(event);
-                break;
-            case MOUSE_UP_EVENT:
-                result = (*iter)->processMouseUp(event);
-                break;
-            case MOUSE_MOVE_EVENT:
-                result = (*iter)->processMouseMove(event);
-                break;
-            case MOUSE_DRAG_EVENT:
-                result = (*iter)->processMouseDrag(event);
-                break;
-            default:
-                // Event responder dispatch doesn't handle this type of input event!
-                assert(false);
-                break;
-        }
+		if(i < m_responders.size()) {			// Check this in case responders get deleted.
+			switch(event.type) {
+				case KEY_DOWN_EVENT:
+					result = m_responders[i]->processKeyDown(event);
+					break;
+				case KEY_UP_EVENT:
+					result = m_responders[i]->processKeyUp(event);
+					break;
+				case MOUSE_DOWN_EVENT:
+					result = m_responders[i]->processMouseDown(event);
+					break;
+				case MOUSE_UP_EVENT:
+					result = m_responders[i]->processMouseUp(event);
+					break;
+				case MOUSE_MOVE_EVENT:
+					result = m_responders[i]->processMouseMove(event);
+					break;
+				case MOUSE_DRAG_EVENT:
+					result = m_responders[i]->processMouseDrag(event);
+					break;
+				default:
+					// Event responder dispatch doesn't handle this type of input event!
+					assert(false);
+					break;
+			}
 
-        if(result) {
-            // Somebody handled it!
-            break;
-        }
+			if(result) {
+				// Somebody handled it!
+				break;
+			}
+		}
     }
 }
 
@@ -195,12 +197,15 @@ EventManager::~EventManager(void) {
 #include "cmd/base.h"
 #include "gldrv/winsys.h"
 
+extern void InitCallbacks(void);
+
 
 // Called to revert to old event management.
 void EventManager::checkForShutDownEventManager(void) {
-    if(m_responders.empty()) {
+    if(m_responders.empty() && globalEventManagerPtr != NULL) {
         // There are no more responders.  We assume no more of our windows, and reset mouse callbacks.
-        BaseInterface::CurrentBase->InitCallbacks();
+		// If we don't have a global event manager, we already did this.
+        InitCallbacks();
 
         // Get rid of global event manager object until we need it again.
         delete globalEventManagerPtr;

@@ -238,6 +238,7 @@ void WindowManager::closeWindow(
             m_windows.erase(iter);
             if(deleteWindow) {
 				EventManager::addToDeleteQueue(w);
+				globalEventManager().removeResponder(w);		// Have to do this now.
             }
             break;
         }
@@ -247,8 +248,8 @@ void WindowManager::closeWindow(
 // Close all windows.
 void WindowManager::shutDown(void) {
     while(m_windows.size() > 0) {
-        (*m_windows.begin())->close();
-		m_windows.erase(m_windows.begin());
+        m_windows.back()->close();
+		//m_windows.erase(m_windows.begin());
     }
 }
 

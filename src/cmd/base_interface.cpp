@@ -555,12 +555,18 @@ void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, i
 }
 
 // Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
+void InitCallbacks(void) {
+	if(BaseInterface::CurrentBase) {
+		BaseInterface::CurrentBase->InitCallbacks();
+	}
+}
 void TerminateCurrentBase(void) {
     BaseInterface::CurrentBase->Terminate();
 }
 void CurrentBaseUnitSet(Unit * un) {
-	if (BaseInterface::CurrentBase) 
+	if (BaseInterface::CurrentBase) {
 		BaseInterface::CurrentBase->caller.SetUnit(un);
+	}
 }
 // end NEW_GUI.
 
