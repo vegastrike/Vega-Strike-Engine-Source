@@ -2142,7 +2142,9 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 			UniverseUtil::cacheAnimation (insys_jump_ani);
 			docache=false;
 		}
-		UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
+                static float insys_jump_ani_size = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_animation_size","4"));
+                static float insys_jump_ani_growth = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_animation_growth",".99"));
+		UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*insys_jump_ani_size,insys_jump_ani_growth);
 
 
       Vector v(GetVelocity());
