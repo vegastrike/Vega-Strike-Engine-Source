@@ -36,7 +36,6 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_LETSGO       )
     CASE( CMD_UPDATECLT    )
     CASE( CMD_ADDCLIENT    )
-    CASE( CMD_FULLUPDATE   )
     CASE( CMD_PING         )
     CASE( CMD_SNAPSHOT     )
 

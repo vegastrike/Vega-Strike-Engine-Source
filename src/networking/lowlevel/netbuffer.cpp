@@ -79,24 +79,25 @@ void	NetBuffer::checkBuffer( int len, const char * fun)
 // NOTE : IMPORTANT - I ONLY INCREMENT OFFSET IN PRIMARY DATATYPES SINCE ALL OTHER ARE COMPOSED WITH THEM
 
 void	NetBuffer::addClientState( ClientState cs)
-		{
-			//this->addFloat( cs.delay);
-			this->addSerial( cs.client_serial);
-			this->addTransformation( cs.pos);
-			this->addVector( cs.veloc);
-			this->addVector( cs.accel);
-		}
-ClientState NetBuffer::getClientState()
-		{
-			ClientState cs;
-			//cs.delay = this->getFloat();
-			cs.client_serial = this->getSerial();
-			cs.pos = this->getTransformation();
-			cs.veloc = this->getVector();
-			cs.accel = this->getVector();
+{
+    //this->addFloat( cs.delay);
+    this->addSerial( cs.client_serial);
+    this->addTransformation( cs.pos);
+    this->addVector( cs.veloc);
+    this->addVector( cs.accel);
+}
 
-			return cs;
-		}
+ClientState NetBuffer::getClientState()
+{
+    ClientState cs;
+    //cs.delay = this->getFloat();
+    cs.client_serial = this->getSerial();
+    cs.pos = this->getTransformation();
+    cs.veloc = this->getVector();
+    cs.accel = this->getVector();
+
+    return cs;
+}
 
 void	NetBuffer::addVector( Vector v)
 		{

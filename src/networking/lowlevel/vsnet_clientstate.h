@@ -60,12 +60,15 @@ class	ClientState
 		void		setAcceleration( Vector acc) { this->accel = acc;}
 		void		setVelocity( Vector vel) { this->veloc = vel;}
 
+		void	display( std::ostream& ostr ) const;
 		void	display() const;
 		int		operator==( const ClientState & ctmp);
 		void	netswap();
 
 		friend	class NetBuffer;
 };
+
+std::ostream& operator<<( std::ostream& ostr, const ClientState& cs );
 
 #endif
 

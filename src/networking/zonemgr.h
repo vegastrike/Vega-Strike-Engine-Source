@@ -43,6 +43,21 @@ class NetBuffer;
 
 class ZoneMgr
 {
+    public:
+        /* SnapshotSubCommand removes a double interpretation from
+         * CMD_POSUPDATE and replaces CMD_FULLUPDATE.
+         */
+        enum SnapshotSubCommand
+        {
+            PosUpdate, // On client side (send): containing a ship's
+                       // data sent to server for position update
+                       // On client side (recv) : receive minimal update
+                       // data for a ship
+            FullUpdate // On client side (recv) : receive full update
+                       // info for a ship
+        };
+
+    private:
 		//vector<StarSystem *> starsystems;
 		// List of clients in zones
 		vector<ClientWeakList*> zone_list;
@@ -63,7 +78,7 @@ class ZoneMgr
 		Systems			Systems;
 
 		void	addDamage( NetBuffer & netbuf, Unit * un);
-		void	addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, ClientState & un_cs);
+		bool	addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs);
 
 	public:
 

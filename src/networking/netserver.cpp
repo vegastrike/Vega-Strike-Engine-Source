@@ -517,7 +517,7 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 		// A packet's timestamp is in ms whereas getNewTime is in seconds
 		unsigned int int_ts = p.getTimestamp();
 
-		cerr<<"GOT TIMESTAMP="<<int_ts<<" latest is="<<clt->getLatestTimestamp()<<endl;
+		cerr<<"GOT TIMESTAMP="<<int_ts<<" latest is="<<clt->getLatestTimestamp() << " in " << p.getCommand() << endl;
 		double curtime = getNewTime();
 		// Check for late packet : compare received timestamp to the latest we have
 		assert( int_ts >= clt->getLatestTimestamp());

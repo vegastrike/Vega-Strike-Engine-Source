@@ -13,7 +13,6 @@
 #include "vsnet_debug.h"
 #include "lin_time.h"
 
-static  unsigned int microtime;
 LOCALCONST_DEF(Packet,unsigned short,header_length,sizeof( struct Header))
 
 #if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
@@ -279,17 +278,26 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
                      const AddressIP* dst, const SOCKETALT& sock,
                      const char* caller_file, int caller_line )
 {
-#ifdef VSNET_DEBUG
-    COUT << "enter " << __PRETTY_FUNCTION__ << endl
-	     << "*** from " << caller_file << ":" << caller_line << endl;
-#endif
-    COUT << "*** send " << cmd << " ser=" << nserial << ", "
-         << length << " bytes to socket " << sock << endl;
+    unsigned int microtime;
 
     // Get a timestamp for packet (used for interpolation on client side)
     double curtime = getNewTime();
     microtime = (unsigned int) (floor(curtime*1000));
     h.timestamp = microtime;
+
+#ifdef VSNET_DEBUG
+    COUT << "enter " << __PRETTY_FUNCTION__ << endl
+         << "    *** from " << caller_file << ":" << caller_line << endl
+         << "    *** send " << cmd << " ser=" << nserial << ", " << length
+                 << " bytes to socket " << sock << endl
+         << "    *** curtime " << curtime
+                 << " microtime " << microtime
+                 << " timestamp " << h.timestamp << endl;
+#else
+    COUT << "*** send " << cmd << " ser=" << nserial << ", "
+         << length << " bytes to socket " << sock << endl;
+#endif
+
     h.command   = cmd;
     h.flags     = prio;
 

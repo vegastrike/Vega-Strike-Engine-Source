@@ -66,8 +66,6 @@ enum Cmd
                                     // (just position) in case the ship is far from
 									// the one we send other ships' data to
     CMD_UPDATECLT    ,
-    CMD_FULLUPDATE   ,		// On client side (recv) : receive full update
-                                    // info for a ship
     CMD_PING         ,		// A packet sending a ping-like command just to
                                     // tell to the server
 									// that the client is still alive

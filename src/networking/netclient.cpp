@@ -404,11 +404,6 @@ int NetClient::recvMsg( Packet* outpacket )
 	        *outpacket = p1;
 	    }
         packet_serial     = p1.getSerial();
-		/*
-        old_timestamp     = latest_timestamp;
-        latest_timestamp = p1.getTimestamp();
-        deltatime         = latest_timestamp - old_timestamp;
-		*/
 	    Cmd cmd           = p1.getCommand( );
 	    COUT << "Rcvd: " << cmd << " ";
         switch( cmd )
@@ -486,9 +481,21 @@ int NetClient::recvMsg( Packet* outpacket )
                 this->receiveLocations( &p1 );
                 break;
             case CMD_SNAPSHOT :
-                // Should update another client's position
-                //COUT<<"Received a SNAPSHOT from server"<<endl;
-                this->receivePosition( &p1 );
+                {
+                    COUT << "CMD_SNAPSHOT received" << endl;
+                    // Should update another client's position
+                    // Zone hack:
+	                // When receiving a snapshot, packet serial is considered as the
+                    // number of client updates.
+                    unsigned int numUnits  = p1.getSerial( );
+                    unsigned int timestamp = p1.getTimestamp( );
+                    double       deltatime = netbuf.getFloat( );
+
+                    COUT << "   *** #units=" << numUnits << " ts=" << timestamp << " delta-t=" << deltatime << endl;
+
+                    this->receivePositions( numUnits, timestamp, netbuf, deltatime );
+                    COUT << "   *** CMD_SNAPSHOT DONE" << endl;
+                }
                 break;
             case CMD_ENTERCLIENT :
                 COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial n°"

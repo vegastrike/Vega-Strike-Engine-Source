@@ -371,7 +371,6 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 {
 	unsigned int i=0;
 	CWLI k;
-	NetBuffer netbuf;
 
 	for( i=0; i<_Universe->star_system.size(); i++)
 	{
@@ -385,26 +384,29 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 		// Check if system contains player(s)
 		if( zone_clients[i]>0)
 		{
-			int	nbunits=0;
-			Packet pckt;
-
-			cerr<<"BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
+			COUT << "BROADCAST SNAPSHOTS = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
-				nbunits=0;
                 ClientPtr cltk( *k );
 				// If that client is ingame we send to it position info
 				if( cltk->ingame==true)
 				{
-					netbuf.Reset();
-					// This also means clients will receive info about themselves which they should ignore
-					// or take into account sometimes (according to their ping value)
+				    int       nbunits=0;
+			        Packet    pckt;
+                    NetBuffer netbuf;
+
+                    COUT << "CLEAN NETBUF" << endl;
+
+					// This also means clients will receive info about themselves
+                    // which they should ignore or take into account sometimes
+                    // (according to their ping value)
 					UnitCollection::UnitIterator iter = (_Universe->star_system[i]->getUnitList()).createIterator();
-					Unit * unit;
+					Unit* unit;
 
 					// Add the client we send snapshot to its own deltatime (semi-ping)
 					netbuf.addFloat( cltk->getDeltatime() );
+                    COUT << "   *** deltatime " << cltk->getDeltatime() << endl;
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					while( (unit=iter.current()) != NULL)
 					{
@@ -420,19 +422,15 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 								//cs.setDelay( cltl->getDeltatime() );
 								// This should be moved out of the 'if' when download manager is working
 							//}
-							double delay = cltk->getDeltatime();
-							this->addPosition( netbuf, unit, cltk->game_unit.GetUnit(), cs);
-							nbunits++;
+							bool added = addPosition( netbuf, unit, cs);
+                            if( added )
+							    nbunits++;
 						}
 						iter.advance();
 					}
 			/************************* START CLIENTS BROADCAST ***************************/
 				/*
 				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
-                if( (*k).expired() ) continue;
-                ClientPtr cltk( *k );
-				if( cltk->ingame )
-				{
 					nbclients = zone_clients[i]-1;
 					netbuf.Reset();
 					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
@@ -446,7 +444,9 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 							ClientState cs( un);
 							// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
 							cs.setDelay( cltl->getDeltatime());
-							this->addPosition( netbuf, un, cltk->game_unit.GetUnit(), cs);
+							bool added = addPosition( netbuf, un, cs);
+                            if( added )
+							    nbunits++;
 						}
 						// Else : always send back to clients their own info or just ignore ?
 						// Ignore for now
@@ -465,7 +465,9 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 						{
 							// Create a client state with a delta time too ?? WHICH ONE ???
 							ClientState cs( (*m));
-							this->addPosition( netbuf, (*m), cltk->game_unit.GetUnit(), cs);
+							bool added = addPosition( netbuf, (*m), cs);
+                            if( added )
+							    nbunits++;
 							// Else : always send back to clients their own info or just ignore ?
 							// Ignore for now
 						}
@@ -487,10 +489,11 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 	}
 }
 
-void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, ClientState & un_cs)
+bool ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, ClientState & un_cs)
 {
 	// This test may be wrong for server side units -> may cause more traffic than needed
-	if( !(un->old_state.getPosition()==un->curr_physical_state.position) || !(un->old_state.getOrientation()==un->curr_physical_state.orientation))
+	if( 1 /* !(un->old_state.getPosition()==un->curr_physical_state.position) ||
+             !(un->old_state.getOrientation()==un->curr_physical_state.orientation) */ )
 	{
 		// Unit 'un' can see Unit 'iter'
 		// For now only check if the 'iter' client is in front of Unit 'un')
@@ -502,26 +505,46 @@ void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, Clien
 			//ratio = radius/distance;
 			if( 1 /* ratio > XX client not too far */)
 			{
+                COUT << "   *** FullUpdate ser=" << un->GetSerial() << " cs=" << un_cs << endl;
 				// Mark as position+orientation+velocity update
-				netbuf.addChar( CMD_FULLUPDATE);
+				netbuf.addChar( ZoneMgr::FullUpdate );
 				netbuf.addShort( un->GetSerial());
 				// Put the current client state in
 				netbuf.addClientState( un_cs);
-				un_cs.display();
 				// Increment the number of clients we send full info about
 			}
 			// Here find a condition for which sending only position would be enough
 			else if( 0 /* ratio>=1 far but still visible */)
 			{
+                COUT << "   *** PosUpdate ser=" << un->GetSerial()
+                     << " pos=" << un_cs.getPosition().i
+                     << "," << un_cs.getPosition().j
+                     << "," << un_cs.getPosition().k << endl;
 				// Mark as position update only
-				netbuf.addChar( CMD_POSUPDATE);
+				netbuf.addChar( ZoneMgr::PosUpdate );
 				// Add the client serial
 				netbuf.addShort( un->GetSerial());
 				netbuf.addQVector( un_cs.getPosition());
 				// Increment the number of clients we send limited info about
 			}
+            else
+            {
+                COUT << "Client counted but not sent because of ratio!" << endl;
+                return false;
+            }
 		}
+        else
+        {
+            COUT << "Client counted but not sent because of distance!" << endl;
+            return false;
+        }
 	}
+    else
+    {
+        COUT << "Client counted but not sent because of position/orientation test!" << endl;
+        return false;
+    }
+    return true;
 }
 
 /************************************************************************************************/

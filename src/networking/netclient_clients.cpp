@@ -2,6 +2,7 @@
 #include "networking/client.h"
 #include "networking/netclient.h"
 #include "networking/lowlevel/netbuffer.h"
+#include "networking/zonemgr.h"
 #include "networking/lowlevel/packet.h"
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "cmd/unit_generic.h"
@@ -160,51 +161,45 @@ void	NetClient::sendPosition( const ClientState* cs )
 /**** Update another client position                       ****/
 /**************************************************************/
 
-void	NetClient::receivePosition( const Packet* packet )
+void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, NetBuffer& netbuf, double delta_t )
 {
-	// When receiving a snapshot, packet serial is considered as the number of client updates
-	ClientState		cs;
-	const char*		databuf;
-	ObjSerial   	sernum=0;
-	int				nbclts=0, i, j;
-	unsigned char	cmd;
-	ClientPtr		clt;
-	Unit *			un = NULL;
-	bool			localplayer = false;
-
-	nbclts = packet->getSerial();
 	this->elapsed_since_packet = 0;
 
 	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
 	// We don't want to consider a late snapshot
-	unsigned int int_ts = packet->getTimestamp();
 	if( latest_timestamp < int_ts)
 	{
-	    old_timestamp     = latest_timestamp;
-	    latest_timestamp  = int_ts;
+        COUT << "   *** SNAPSHOT is not late - evaluating" << endl;
 
-		COUT << "Received update for " << nbclts << " clients - LENGTH="
-		     << packet->getDataLength() << endl;
-		databuf = packet->getData();
-		NetBuffer netbuf( packet->getData(), packet->getDataLength());
-
-		this->deltatime = netbuf.getFloat();
-		cerr<<"DELTATIME = "<<(deltatime*1000)<<" ms"<<endl;
-
+	    this->old_timestamp    = this->latest_timestamp;
+	    this->latest_timestamp = int_ts;
+		this->deltatime        = delta_t;
 
 		// Loop throught received snapshot
-		for( i=0, j=0; (i+j)<nbclts;)
+        int i = 0;
+        int j = 0;
+		while( (i+j)<numUnits )
 		{
-			// Get the command from buffer
-			cmd = netbuf.getChar();
+            ObjSerial       sernum = 0;
+            unsigned char   cmd;
+	        bool			localplayer = false;
+	        ClientPtr		clt;
+	        Unit *			un = NULL;
+
+			// Get the ZoneMgr::SnapshotSubCommand from buffer
+			cmd    = netbuf.getChar();
+
 			// Get the serial number of current element
-			sernum = netbuf.getSerial();
+			sernum = netbuf.getShort();
+
 			// First test if it is us
 			if( sernum == this->serial)
+            {
 				localplayer = true;
-			// Test if it is a client or a unit
+            }
 			else if( !(clt = Clients.get(sernum)))
 			{
+			    // Test if it is a client or a unit
 				if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
 				{
 					COUT<<"WARNING : No client, no unit found for this serial ("<<sernum<<")"<<endl;
@@ -212,15 +207,22 @@ void	NetClient::receivePosition( const Packet* packet )
 			}
 			// Test if local player
 			else
+            {
 				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
+            }
 
-			if( cmd == CMD_FULLUPDATE)
+			if( cmd == ZoneMgr::FullUpdate )
 			{
+                COUT << "   *** SubCommand is FullUpdate ser=" << sernum << endl;
+
+	            ClientState	cs;
+
 				// Do what needed with update
-				COUT<<"Received FULLSTATE ";
+				COUT<<"Received ZoneMgr::FullUpdate ";
 				// Tell we received the ClientState so we can convert byte order from network to host
-				//cs.display();
 				cs = netbuf.getClientState();
+                COUT << "   *** cs=" << cs << endl;
+
 				if( (!localplayer) && (clt || un))
 				{
 					cs.display();
@@ -240,12 +242,16 @@ void	NetClient::receivePosition( const Packet* packet )
 					cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
 				}
 				else if( localplayer)
+                {
 					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+                }
 				i++;
 			}
-			else if( cmd == CMD_POSUPDATE)
+			else if( cmd == ZoneMgr::PosUpdate )
 			{
+                COUT << "   *** SubCommand is PosUpdate ser=" << sernum << endl;
 				QVector pos = netbuf.getQVector();
+                COUT << "   *** pos=" << pos.i << "," << pos.j << "," << pos.k << endl;
 				if( (!localplayer) && (clt || un))
 				{
 					if( clt)
@@ -259,11 +265,23 @@ void	NetClient::receivePosition( const Packet* packet )
 					//predict( sernum);
 				}
 				else if( localplayer)
+                {
 					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+                }
 				j++;
 			}
+            else
+            {
+                COUT << "   *** SubCommand is neither FullUpdate nor PosUpdate" << endl
+                     << "   *** TERMINATING ***" << endl;
+                VSExit( 1 );
+            }
 		}
 	}
+    else
+    {
+        COUT << "   *** SNAPSHOT is late - ignoring" << endl;
+    }
 }
 
 /*************************************************************/

@@ -32,6 +32,7 @@
 #include "networking/lowlevel/vsnet_socket.h"
 #include "networking/lowlevel/vsnet_socketset.h"
 #include "networking/lowlevel/vsnet_cmd.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
 
@@ -115,7 +116,10 @@ class	NetClient
 		int		checkAcctMsg( );
 
 		void	receiveLocations( const Packet* packet );
-		void	receivePosition( const Packet* packet );
+		void	receivePositions( unsigned int numUnits,
+                                  unsigned int timestamp,
+                                  NetBuffer&   netbuf,
+                                  double       deltat );
 		void	addClient( const Packet* packet );
 		void	removeClient( const Packet* packet );
 

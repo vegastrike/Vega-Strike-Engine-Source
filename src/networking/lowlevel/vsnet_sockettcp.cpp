@@ -95,8 +95,7 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP*, int pcktflags 
     _sq_mx.lock( );
     bool e = _sq.empty();
 
-    _sq.push( SqPair(idx,packet) );
-    _sq_count[idx]++;
+    _sq.push( idx, packet );
     _sq_mx.unlock( );
 
     if( e ) _set.wakeup( );
@@ -132,7 +131,7 @@ int VsnetTCPSocket::optPayloadSize( ) const
 int VsnetTCPSocket::queueLen( int pri )
 {
     _sq_mx.lock( );
-    int retval = _sq_count[pri];
+    int retval = _sq.getLength(pri);
     _sq_mx.unlock( );
     return retval;
 }
@@ -149,11 +148,11 @@ int VsnetTCPSocket::lower_sendbuf( )
         }
         else
         {
-            Header h( _sq.top().second.len() );
+            PacketMem m;
+            _sq.pop( m );
+            Header h( m.len() );
             _sq_current.push( PacketMem( &h, sizeof(Header) ) );
-            _sq_current.push( _sq.top().second );
-            _sq_count[_sq.top().first]--;
-            _sq.pop( );
+            _sq_current.push( m );
             _sq_off = 0;
         }
     }
@@ -406,5 +405,73 @@ void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
     _cpq_mx.unlock( );
     _set.add_pending( _sq_fd );
     delete b;
+}
+
+/***********************************************************************
+ * VsnetTCPSocket::SqPair
+ ***********************************************************************/
+
+void VsnetTCPSocket::SqPair::push( PacketMem m )
+{
+    first++;
+    second.push( m );
+}
+
+void VsnetTCPSocket::SqPair::pop( PacketMem& m )
+{
+    first--;
+    m = second.front();
+    second.pop();
+}
+
+int VsnetTCPSocket::SqPair::length( ) const
+{
+    return first;
+}
+
+/***********************************************************************
+ * VsnetTCPSocket::SqQueues
+ ***********************************************************************/
+
+VsnetTCPSocket::SqQueues::SqQueues( )
+{
+    _ct = 0;
+}
+
+bool VsnetTCPSocket::SqQueues::empty( ) const
+{
+    return (_ct == 0);
+}
+
+void VsnetTCPSocket::SqQueues::push( int idx, PacketMem m )
+{
+    _q[idx].push( m );
+    _ct++;
+}
+
+int VsnetTCPSocket::SqQueues::getLength( int idx )
+{
+    if( _q.find(idx) == _q.end() ) return 0;
+    return _q[idx].length( );
+}
+
+void VsnetTCPSocket::SqQueues::pop( PacketMem& r )
+{
+    /* We need the reverse iterators because in this code, higher numbers
+     * indicate higher priorities, and those are further "back" in the
+     * map.
+     */
+    assert( _ct > 0 );
+    std::map<int,SqPair>::reverse_iterator it;
+    for( it=_q.rbegin(); it!=_q.rend(); it-- )
+    {
+        if( it->first != 0 )
+        {
+            it->second.pop( r );
+            _ct--;
+            return;
+        }
+    }
+    assert( 0 );
 }
 

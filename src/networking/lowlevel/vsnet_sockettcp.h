@@ -5,6 +5,7 @@
 
 #include "vsnet_headers.h"
 
+#include <assert.h>
 #include <map>
 #include <list>
 #include <queue>
@@ -102,8 +103,6 @@ private:
      */
     int         _incomplete_header;
     Header      _header;
-    // int         _incomplete_len_field;
-    // char        _len_field[4];
 
     /** Closed connections are noticed in isActive but evaluated by the
      *  application after recvbuf. So, we remember the situation here until
@@ -119,25 +118,46 @@ private:
     /** TCP may refuse to send all bytes at once, hence we have to queue packets
      *  for sending. In addition, we use the same thread for sending and receiving,
      *  thus it would be advantageous to use asynchronous sending. For both, we
-     *  need a send queue. _sq is the initial queue, sorted by priority (not yet).
+     *  need a send queue. _sq is the a of priority queues.
      *  _sq_current is the queue (with up to two entries) for sending the current
      *  packet, which consists of the packet length and the packet payload.
      *  _sq.off is the number of bytes that have already been sent from
      *  PacketMem _sq_current.front(). _sq_mx protects the queues.
      */
-    typedef std::pair<int,PacketMem>    SqPair;
+    typedef std::queue<PacketMem>  SqQueue;
 
-    struct SqPairLess
+    class SqPair
     {
-        bool operator()( const SqPair& l, const SqPair& r ) {
-            return l.first < r.first; }
+        int     first;
+        SqQueue second;
+
+    public:
+        void push( PacketMem m );
+        void pop( PacketMem& m );
+
+        int length( ) const;
     };
 
-    typedef std::priority_queue<SqPair,std::vector<SqPair>,SqPairLess> SqQueue;
+    class SqQueues
+    {
+    public:
+        SqQueues( );
 
-    std::map<int,int>     _sq_count;
-    SqQueue               _sq;
-    std::queue<PacketMem> _sq_current;
+        bool empty( ) const;
+        int  getLength( int idx );
+        void push( int idx, PacketMem m );
+        void pop( PacketMem& m );
+
+    private:
+        std::map<int,SqPair> _q;
+        int                  _ct;
+
+        SqQueues( const SqQueues& );
+        SqQueues& operator=( const SqQueues& );
+    };
+
+    SqQueues              _sq;
+    SqQueue               _sq_current;
     size_t                _sq_off;
     VSMutex               _sq_mx;
     int                   _sq_fd;
