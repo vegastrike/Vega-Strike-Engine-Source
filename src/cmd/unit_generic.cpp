@@ -1879,8 +1879,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   return ok;
 }
 extern void ActivateAnimation(Unit * jp);
-void TurnJumpOKLightOn(Unit * un) {
-	Cockpit * cp = _Universe->isPlayerStarship(un);
+void TurnJumpOKLightOn(Unit * un, Cockpit * cp) {
 	if (cp) {
 		if (un->GetWarpEnergy()>=un->GetJumpStatus().energy) {
 			if (un->GetJumpStatus().drive>-2) {
@@ -1890,10 +1889,16 @@ void TurnJumpOKLightOn(Unit * un) {
 	}
 }
 bool Unit::jumpReactToCollision (Unit * smalle) {
+	static bool ai_jump_cheat=XMLSupport::parse_bool(vs_config->getVariable("AI","jump_without_energy","false"));
   if (!GetDestinations().empty()) {//only allow big with small
-	  TurnJumpOKLightOn(smalle);
+	  Cockpit * cp = _Universe->isPlayerStarship(smalle);
+	  TurnJumpOKLightOn(smalle,cp);
 	  //ActivateAnimation(this);
-    if (((smalle->GetJumpStatus().drive>=0&&smalle->warpenergy>=smalle->GetJumpStatus().energy)||image->forcejump)){
+	  if ((smalle->GetJumpStatus().drive>=0&&
+		   (smalle->warpenergy>=smalle->GetJumpStatus().energy
+			||(ai_jump_cheat&&cp==NULL)
+			   ))
+		  ||image->forcejump){
 		smalle->warpenergy-=smalle->GetJumpStatus().energy;
 		int dest = smalle->GetJumpStatus().drive;
 		if (dest<0)
@@ -1915,9 +1920,14 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
     return true;
   }
   if (!smalle->GetDestinations().empty()) {
-	  TurnJumpOKLightOn(this);	  
+	  Cockpit * cp = _Universe->isPlayerStarship(this);	  
+	  TurnJumpOKLightOn(this,cp);	  
 	  //  ActivateAnimation(smalle);	  
-    if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
+    if ((GetJumpStatus().drive>=0&&
+		   (warpenergy>=GetJumpStatus().energy
+			||(ai_jump_cheat&&cp==NULL)
+				))
+		||smalle->image->forcejump){
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
       _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));

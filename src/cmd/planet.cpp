@@ -223,26 +223,39 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  if (rand()>RAND_MAX*.99)
 		  stab = ".unstable";
 	  string wormholename = wormhole_unit+stab;
-	  
-	  Unit * jump = UnitFactory::createUnit (wormholename.c_str(),true,faction);
+	  string wormholeneutralname = wormhole_unit+".neutral"+stab;
+	  Unit * jum = UnitFactory::createUnit (wormholename.c_str(),true,faction);
 	  static int neutralfaction=FactionUtil::GetFaction("neutral");
 	  faction = neutralfaction;
-	  if (jump->name=="LOAD_FAILED") {
-		  wormhole=false;
-	  }else {
-		  radius = jump->rSize();
-		  this->meshdata = jump->meshdata;
-		  jump->meshdata.clear();
-		  un_iter i;
-		  Unit * su;
-		  for (i=jump->getSubUnits();(su=*i)!=NULL;++i) {
+	  
+	  Unit * neujum = UnitFactory::createUnit (wormholeneutralname.c_str(),true,neutralfaction);
+	  Unit * jump=jum;
+	  bool anytrue=false;
+	  while (jump!=NULL) {
+		  if (jump->name!="LOAD_FAILED") {
+			  anytrue=true;
+			  radius = jump->rSize();
+			  while (jump->meshdata.size()) {
+				  this->meshdata.push_back(jump->meshdata.back());
+				  jump->meshdata.pop_back();
+			  }
+			  un_iter i;
+			  Unit * su;
+			  for (i=jump->getSubUnits();(su=*i)!=NULL;++i) {
 			  SubUnits.prepend (su);
+			  }
+			  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
+				  i.remove();
+			  }
 		  }
-		  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
-			  i.remove();
+		  jump->Kill();
+		  if (jump!=neujum) {
+			  jump=neujum;
+		  }else{
+			  jump=NULL;
 		  }
 	  }
-	  jump->Kill();
+	  wormhole = anytrue;
   }
   if (!wormhole) {
 	  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));

@@ -481,6 +481,7 @@ void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
 }
 void AggressiveAI::Execute () {  
   jump_time_check++;//just so we get a nicely often wrapping var;
+  jump_time_check%=5;
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
   FireAt::Execute();
