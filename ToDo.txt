@@ -3,6 +3,7 @@ Goals for 0.4.2 release
 Warp:
 Rename warp to ... think of something cool
 Warp energy use
+Time Compression back for devels
 
 Universe/system generation:
 fix systems to have jump points only outside the "slow-zone"
