@@ -219,7 +219,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   bool alpha_found = false;
   switch(elem) {
 	  case XML::MATERIAL:
-		  assert(xml->load_stage==4);
+	    //		  assert(xml->load_stage==4);
 		  xml->load_stage=7;
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		    switch(XML::attribute_map.lookup((*iter).name)) {
