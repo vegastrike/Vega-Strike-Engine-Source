@@ -53,7 +53,7 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
 	  for (un_iter ui=getSubUnits();s==0||((*ui)!=NULL);++ui,++s) {
 	    double percent=1;
 	    if (canDowngrade (NewPart,m,s,percent)) {
-	      if (percent>0) {
+	      if (percent>.9) {
 		removethis=false;
 		break;
 	      }
