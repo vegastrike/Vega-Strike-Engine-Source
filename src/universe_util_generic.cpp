@@ -376,6 +376,10 @@ namespace UniverseUtil {
   double asin (double x) {return ::asin (x);}
   double atan (double x) {return ::atan (x);}
   double tan (double x) {return ::tan (x);}
+  void micro_sleep(int n) {
+    ::micro_sleep(n);
+  }
+
 }
 
 #undef activeSys

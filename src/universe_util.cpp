@@ -64,8 +64,5 @@ namespace UniverseUtil {
 	static const int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
 		return max_missions;
 	}
-	void micro_sleep(int n) {
-		::micro_sleep(n);
-	}
 }
 #undef activeSys
