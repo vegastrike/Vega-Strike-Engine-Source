@@ -621,7 +621,7 @@ void NavigationSystem::DrawMission()
 		string relationtext (XMLSupport::tostring (percent));
 		if (i<killlist->size()) {
 			relationtext+=" | ";
-			relationtext = XMLSupport::tostring ((int)(*killlist)[i]);
+			relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
 		}
 
 		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
