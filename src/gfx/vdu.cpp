@@ -6,6 +6,49 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
 
+///ALERT to change must change enum in class
+const std::string vdu_modes [] = {"Target","Nav","Weapon","Damage","Shield","View","Message"};
+
+int vdu_lookup (char * &s) {
+#ifdef _WIN32
+#define strcasecmp stricmp
+#endif
+  int retval=0;
+  char * t = strdup (s);
+  int i;
+  for (i=0;t[i]!='\0';i++) {
+    if (isspace(t[i])) {
+      s+=i+1;
+      break;
+    }
+  } 
+  if (t[i]=='\0') {
+    s[0]='\0';
+  }
+  t[i]='\0';
+
+  for (unsigned int i=0;i<((sizeof (vdu_modes)/sizeof (std::string)));i++) {
+    if (0==strcasecmp (t,vdu_modes[i].c_str())) {
+      retval|=(1<<i);
+    }
+  }
+  free(t);
+  return retval;
+}
+int parse_vdu_type (const char * x) {
+  char * mystr = strdup (x);
+  char *s = mystr;
+  int retval=0;
+  while (s[0]!='\0') {
+    retval|=vdu_lookup (s);
+  }
+  free (mystr);
+  return retval;
+}
+
+
+
+
 VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
   StartArmor = ma;
   maxhull = mh;

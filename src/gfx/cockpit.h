@@ -30,7 +30,7 @@ class Cockpit {
   Sprite *Pit [4];
   Sprite *Radar;
   ///Video Display Units (may need more than 2 in future)
-  VDU *vdu [2];
+  std::vector <VDU *> vdu;
   ///Color of cockpit default text
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color

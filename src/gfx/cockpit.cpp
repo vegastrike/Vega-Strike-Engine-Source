@@ -458,22 +458,20 @@ void Cockpit::Delete () {
     delete Radar;
     Radar = NULL;
   }
-  if (vdu[0]) {
-    delete vdu[0];
-    vdu[0]=NULL;
+  unsigned int j;
+  for (j=0;j<vdu.size();j++) {
+    if (vdu[j]) {
+      delete vdu[j];
+      vdu[j]=NULL;
+    }
   }
-  if (vdu[1]) {
-    delete vdu[1];
-    vdu[1]=NULL;
-  }
-  for (unsigned int j=0;j<Panel.size();j++) {
+  for (j=0;j<Panel.size();j++) {
     assert (Panel[j]);
     delete Panel[j];
   }
   Panel.clear();
 }
 Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
-  vdu[0]=vdu[1]=NULL;
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   for (int i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
@@ -532,15 +530,14 @@ void Cockpit::Draw() {
 	bool die=true;
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
-      if (vdu[0]) {
-	vdu[0]->Draw(un);
-	//process VDU 0:targetting VDU
-      }
       DrawGauges(un);
-      if (vdu[1]) {
-      vdu[1]->Draw(un);
-      //process VDU, damage VDU, targetting VDU
+      for (unsigned int vd=0;vd<vdu.size();vd++) {
+	if (vdu[vd]) {
+	  vdu[vd]->Draw(un);
+	  //process VDU, damage VDU, targetting VDU
+	}
       }
+
       if (Radar) {
 	Radar->Draw();
 	if(radar_type=="Elite"){
@@ -588,8 +585,10 @@ void Cockpit::SetView (const enum VIEWSTYLE tmp) {
   view = tmp;
 }
 void Cockpit::VDUSwitch (int vdunum) {
-  if (vdu[vdunum]) {
-    vdu[vdunum]->SwitchMode();
+  if (vdunum<vdu.size()) {
+    if (vdu[vdunum]) {
+      vdu[vdunum]->SwitchMode();
+    }
   }
 }
 

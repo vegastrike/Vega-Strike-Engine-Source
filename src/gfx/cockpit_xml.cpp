@@ -18,6 +18,8 @@ namespace CockpitXML {
       RADAR,
       LVDU,
       RVDU,
+      AVDU,
+      VDUTYPE,
       PANEL,
       ROWS,
       COLS,
@@ -65,6 +67,7 @@ namespace CockpitXML {
     EnumMap::Pair ("Cockpit", COCKPIT),
     EnumMap::Pair ("Radar", RADAR),
     EnumMap::Pair ("LeftVDU", LVDU),
+    EnumMap::Pair ("VDU", AVDU),
     EnumMap::Pair ("RightVDU", RVDU),
     EnumMap::Pair ("Panel", PANEL),
     EnumMap::Pair ("Crosshairs", CROSSHAIRS),
@@ -110,12 +113,12 @@ namespace CockpitXML {
     EnumMap::Pair ("TextCols", COLS),
     EnumMap::Pair ("r", RED),
     EnumMap::Pair ("g", GREEN),
-    EnumMap::Pair ("b", BLUE)
-
+    EnumMap::Pair ("b", BLUE),
+    EnumMap::Pair ("type", VDUTYPE)
 
   };
 
-  const EnumMap element_map(element_names, 23);
+  const EnumMap element_map(element_names, 24);
   const EnumMap attribute_map(attribute_names, 24);
 }
 
@@ -124,6 +127,8 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace CockpitXML;
 
+
+
 void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Cockpit*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -131,7 +136,6 @@ void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char 
 void Cockpit::endElement(void *userData, const XML_Char *name) {
   ((Cockpit*)userData)->endElement(name);
 }
-
 void Cockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
@@ -265,8 +269,19 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     }
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
-  case LVDU: newvdu = &vdu[0];mymodes=VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
-  case RVDU: newvdu = &vdu[1];mymodes=VDU::NAV|VDU::TARGET|VDU::MSG;goto loadsprite;
+  case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
+  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::NAV|VDU::TARGET|VDU::MSG;goto loadsprite;
+  case AVDU:vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MSG;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
+      switch (attribute_map.lookup((*iter).name)) {
+      case VDUTYPE:
+	mymodes=parse_vdu_type ((*iter).value.c_str());
+	break;
+      default:
+	break;
+      }
+    }
+    goto loadsprite;
   loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {

@@ -1,3 +1,9 @@
+2002-01-28 Daniel Horn <hellcatv@hotmail.com>
+	* Added jump sounds on exit and entrance (jumparrive jumpleave in config)
+	* Fixed it so jump star did not draw unless the event (leaving or arriving) happened in teh system with the current Cockpit's parent
+	* Fixed ancient ~Beam bug that would cause segfault at null pointer if all beams with a certain texture were deleted.
+	* Fixed bug that caused clipping to incorrectly clip after 'host' camera starship destroyed
+
 2002-01-28 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* New ship (the Revoker).....unit file not finished

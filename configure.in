@@ -607,6 +607,8 @@ done
 dnl --------------------------------------------------------------------------
 dnl Check for OpenAL headers
 dnl --------------------------------------------------------------------------
+USEROPENAL="1"
+AC_ARG_ENABLE(nosound,[  --enable-nosound Use if you do not wish to have sound],USEROPENAL="0")
 
 AC_ARG_WITH(al-inc,   [  --with-al-inc=DIR       OpenAL header file location])
 
@@ -654,8 +656,12 @@ else
         Place it in the directory /usr/include/AL.
         *****************************************************************])
       fi
-      echo "Configuring with OpenAL support!"
-      TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1"    
+      if test $USEROPENAL = "1" ; then
+        echo "Configuring with OpenAL support!"
+        TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1" 
+      else
+        echo "Disabling OpenAL on user request"
+      fi   
     fi
 fi
 

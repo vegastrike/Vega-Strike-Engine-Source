@@ -2,7 +2,7 @@
 #define _GFX_VDU_H_
 
 #include "sprite.h"
-
+#include <string>
 
 
 class Unit;
@@ -41,6 +41,7 @@ class VDU: public Sprite {
   ///Draws the sprite representing the current starship. Returns proper location and size for future use (with weaps and damage display)
   void DrawTargetSpr(Sprite * s,float percent, float &x, float &y, float &w, float &h);
 public:
+  ///Alert! To add a mode must change const array on the bottom
   enum VDU_MODE {TARGET=0x1,NAV=0x2,WEAPON=0x4, DAMAGE=0x8, SHIELD=0x10, VIEW=0x20, MSG=0x40};
   VDU(const char *file, TextPlane *textp,unsigned char modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
@@ -48,4 +49,7 @@ public:
   ///Changes the mode of the current VDU to another legal mode
   void SwitchMode();
 };
+
+int parse_vdu_type (const char * s);
+
 #endif
