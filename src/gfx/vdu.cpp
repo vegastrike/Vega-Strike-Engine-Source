@@ -378,7 +378,8 @@ bool VDU::SetCommAnimation (Animation * ani) {
     if (posmodes&COMM) {
       thismode.push_back(COMM);
       comm_ani = ani;
-      ani->Reset();
+      if (ani)
+	ani->Reset();
       return true;
     }
   }

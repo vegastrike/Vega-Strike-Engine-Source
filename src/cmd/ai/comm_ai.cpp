@@ -49,7 +49,22 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
 
 void CommunicatingAI::TerminateContrabandSearch() {
   //reports success or failure
-  
+  Unit * un;
+  if ((un=contraband_searchee.GetUnit())) {
+    CommunicationMessage c(parent,un,comm_face);
+    if (contraband_detected) {
+      c.SetCurrentState(c.fsm->GetContrabandDetectedNode());
+      CommunicationMessage hit (un,parent,NULL);
+      hit.fsm->GetHitNode();
+      static int numHitsPerContrabandFail=3;
+      for (unsigned int i=0;i<numHitsPerContrabandFail;i++) {
+	ProcessCommMessage(hit);
+      }
+    }else {
+      c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode());      
+    }
+    un->getAIState()->Communicate(c);
+  }
 }
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
@@ -61,8 +76,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     contraband_detected=false;
     SpeedAndCourse = u->GetVelocity();
     CommunicationMessage c(parent,u,comm_face);
-
-    
+    c.SetCurrentState(c.fsm->GetContrabandInitiateNode());
+    u->getAIState()->Communicate (c);
   }
 }
 

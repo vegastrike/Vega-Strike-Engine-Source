@@ -20,6 +20,7 @@ class CommunicatingAI:public Order{
   void RandomInitiateCommunication (float PlayerProbability, float TargetProbability);
   void TerminateContrabandSearch();
   void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
+  void UpdateContrabandSearch();
    CommunicatingAI (int ttype, float anger=-.5, float moodswingyness=.2, float randomnessresponse=.8,float mood=0);
    virtual void ProcessCommMessage (class CommunicationMessage &c); 
    virtual void AdjustRelationTo (Unit * un, float factor);

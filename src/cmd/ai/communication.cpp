@@ -10,11 +10,17 @@ FSM::FSM (const char * filename) {
   nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
   nodes.push_back (Node("i 0wnz j00, b17c#",-.08));
   nodes.push_back (Node("Fuck you!",-.1));
+
+
+  nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
+  nodes.push_back (Node("No contraband detected: You may proceed.",0));
+  nodes.push_back (Node("Contraband detected! All units close and engage!",0));
+  nodes.push_back (Node("Your Course is deviating! Maintain Course!",0));
   nodes.push_back (Node("Request Clearence To Land.",0));
   nodes.push_back (Node("*hit*",-.2));
   vector <unsigned int> edges;
   unsigned int i;
-  for (i=0;i<nodes.size()-2;i++) {
+  for (i=0;i<nodes.size()-6;i++) {
     edges.push_back (i);
   }
   for (i=0;i<nodes.size();i++) {
@@ -22,6 +28,20 @@ FSM::FSM (const char * filename) {
   }
   
 }
+int FSM::GetContrabandInitiateNode() {
+  return nodes.size()-6;
+}
+int FSM::GetContrabandUnDetectedNode() {
+  return nodes.size()-5;
+}
+int FSM::GetContrabandDetectedNode() {
+  return nodes.size()-4;
+}
+int FSM::GetContrabandWobblyNode() {
+  return nodes.size()-3;
+}
+
+
 int FSM::GetRequestLandNode () {
   return nodes.size()-2;
 }

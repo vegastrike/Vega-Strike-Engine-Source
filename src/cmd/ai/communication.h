@@ -16,8 +16,10 @@ class FSM {
   int getDefaultState (float relationship) const;
   int GetHitNode ();
   int GetRequestLandNode();
-  int GetContrabandNode();
-
+  int GetContrabandInitiateNode();
+  int GetContrabandUnDetectedNode();
+  int GetContrabandDetectedNode();
+  int GetContrabandWobblyNode();
 };
 class CommunicationMessage {
   void Init (Unit * send, Unit * recv, Animation * ani);
