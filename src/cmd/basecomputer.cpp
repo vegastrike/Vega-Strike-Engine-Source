@@ -2172,7 +2172,13 @@ int BaseComputer::maxQuantityForPlayer(const Cargo& item, int suggestedQuantity)
 
 	return result;
 }
-
+static void eliminateZeroCargo(Unit * un) {
+  for (int i=un->numCargo();i>=0;--i) {
+    if (un->GetCargo(i).quantity==0)
+      un->RemoveCargo(i,1,true);
+  }
+  
+}
 // Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
 bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Unit* playerUnit = m_player.GetUnit();
@@ -2187,6 +2193,7 @@ bool BaseComputer::buySelectedCargo(int requestedQuantity) {
 		int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
 		quantity = maxQuantityForPlayer(*item, quantity);
         playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
+        eliminateZeroCargo(playerUnit);
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
@@ -2233,7 +2240,7 @@ bool BaseComputer::sellSelectedCargo(int requestedQuantity) {
         }else {
           playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
         }
-
+        eliminateZeroCargo(playerUnit);
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
