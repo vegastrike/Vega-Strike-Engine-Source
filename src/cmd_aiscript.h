@@ -10,6 +10,7 @@ class AIScript : public Order {
 	  int unitlevel;
 	  int acc;
 	  int executefor;
+          bool itts;
 	  bool afterburn;
 	  char lin;
 	  Vector defaultvec;

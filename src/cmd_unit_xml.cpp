@@ -603,48 +603,48 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case YAW:
-	  yprrestricted+=YRESTR;
-	assert (xml->unitlevel==2);
-	xml->unitlevel++;
+    xml->yprrestricted+=Unit::XML::YRESTR;
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
-	ymax=parse_float((*iter).value)*(VS_PI/180);
+	xml->ymax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
-	ymin=parse_float((*iter).value)*(VS_PI/180);
+	xml->ymin=parse_float((*iter).value)*(VS_PI/180);
 	break;
     }
     }
     break;
 
   case PITCH:
-    yprrestricted+=PRESTR;
+    xml->yprrestricted+=Unit::XML::PRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
-	pmax=parse_float((*iter).value)*(VS_PI/180);
+	xml->pmax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
-	pmin=parse_float((*iter).value)*(VS_PI/180);
+	xml->pmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
       }
     }
     break;
 
   case ROLL:
-    yprrestricted+=RRESTR;
+    xml->yprrestricted+=Unit::XML::RRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
-	rmax=parse_float((*iter).value)*(VS_PI/180);
+	xml->rmax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
-	rmin=parse_float((*iter).value)*(VS_PI/180);
+	xml->rmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
       }
     }

@@ -6,6 +6,7 @@
 namespace Orders {
 
 class FireAt: public Order {
+  bool itts;
   float rxntime;
   float delay;
   float agg;
@@ -13,7 +14,7 @@ class FireAt: public Order {
 protected:
   void ChooseTargets(int num);//chooses n targets and puts the best to attack in unit's target container
 public:
-  FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
+  FireAt (float reaction_time, float aggressivitylevel, bool itts);//weapon prefs?
   virtual void Execute();
 };
 

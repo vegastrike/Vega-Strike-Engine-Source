@@ -6,7 +6,7 @@
 using Orders::FireAt;
 using Orders::AggressiveAI;
 
-FireAt::FireAt (float reaction_time, float aggressivitylevel): Order (WEAPON|TARGET), rxntime (reaction_time), delay(0), agg (aggressivitylevel){
+FireAt::FireAt (float reaction_time, float aggressivitylevel, bool itts): Order (WEAPON|TARGET), itts(itts), rxntime (reaction_time), delay(0), agg (aggressivitylevel){
   
   
 }
@@ -24,7 +24,7 @@ void FireAt::ChooseTargets (int num) {
 }
 bool FireAt::ShouldFire(Unit * targ) {
   float dist;
-  float angle = parent->cosAngleFromMountTo (targ, dist);
+  float angle = parent->cosAngleTo (targ, dist,itts?0.001:FLT_MAX);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
   
   return (dist<.8*agg&&angle>1/agg);
@@ -69,7 +69,7 @@ void FireAt::Execute () {
 }
 
 
-AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6)  {
+AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6,false)  {
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);

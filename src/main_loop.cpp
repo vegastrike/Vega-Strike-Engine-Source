@@ -520,8 +520,8 @@ void createObjects() {
   }
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
-  fighters[1]->EnqueueAI(new Orders::FireAt (0,1.2));
-  fighters[1]->Target (fighters[0]);
+  //  fighters[1]->EnqueueAI(new Orders::FireAt (0,1.2));
+  //fighters[1]->Target (fighters[0]);
 
   //_Universe->activeStarSystem()->AddUnit(fighter);
   //_Universe->activeStarSystem()->AddUnit(carrier);

@@ -103,12 +103,12 @@ void Unit::Init()
   mass = 1;
   fuel = 0;
 
-  //  yrestricted = prestricted = rrestricted = FALSE;
+  /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;
   ymax = pmax = rmax = PI;
   ycur = pcur = rcur = 0;
-
+  */
   MomentOfInertia = 1;
   AngularVelocity = Vector(0,0,0);
   Velocity = Vector(0,0,0);
@@ -117,7 +117,6 @@ void Unit::Init()
   NetForce = Vector(0,0,0);
   NetLocalForce=Vector(0,0,0);
 
-  calculatePhysics = true;
   selected = false;
   selectionBox = NULL;
 
@@ -220,17 +219,17 @@ Unit::Unit(const char *filename, bool xml) {
 	//ReadInt(restricted); // What's going on here? i hsould have 2, but that screws things up
 
 	ReadRestriction(restricted, min, max);
-	if(restricted)
-		RestrictYaw(min,max);
-
+	if(restricted) {
+	  //RestrictYaw(min,max);
+	}
 	ReadRestriction(restricted, min, max);
-	if(restricted)
-		RestrictPitch(min,max);
-
+	if(restricted) {
+	  //RestrictPitch(min,max);
+	}
 	ReadRestriction(restricted, min, max);
-	if(restricted)
-		RestrictRoll(min,max);
-
+	if(restricted) {
+	  //RestrictRoll(min,max);
+	}
 	float maxspeed, maxaccel, mass;
 	ReadFloat(maxspeed);
 	ReadFloat(maxaccel);
@@ -284,27 +283,55 @@ Unit::~Unit()
 	}
 */
 }
-
-
+void Unit::getAverageGunSpeed(float & speed, float &range) {
+   if (nummounts) {
+     for (int i=0;i<nummounts;i++) {
+       range+=mounts[i].type.Range;
+       speed+=mounts[i].type.Speed;
+     }
+     range/=nummounts;
+     speed/=nummounts;
+   }
+  
+}
+Vector Unit::PositionITTS (const Vector & posit, float speed) {
+  Vector retval = Position()-posit;
+  speed = retval.Magnitude()/speed;
+  retval = Position()+Velocity*speed;
+  return retval;
+}
+float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
+   Vector Normal (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]);
+   getAverageGunSpeed(speed,range);
+   Vector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity))));
+   totarget = totarget-cumulative_transformation.position;
+   float tmpcos = Normal.Dot (totarget);
+   dist = totarget.Magnitude();
+   if (tmpcos>0) {
+      tmpcos = dist*dist - tmpcos*tmpcos;
+      tmpcos = targ->rSize()/tmpcos;//one over distance perpendicular away from straight ahead times the size...high is good
+    } else {
+      tmpcos /= dist;
+    }
+    dist /= range;
+    return tmpcos;
+}
 float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
   float retval = -1;
   dist = FLT_MAX;
-  float tmpdist;
   float tmpcos;
   Matrix mat;
   for (int i=0;i<nummounts;i++) {
+    float tmpdist = .001;
     Transformation finaltrans (mounts[i].GetMountLocation());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
-    Vector totarget (targ->Position()-finaltrans.position);
     Vector Normal (mat[8],mat[9],mat[10]);
-
-    tmpdist = totarget.Magnitude();    
-    //do approx ITTS calculation:
-    //    fprintf (stderr, "old tt %f %f %f\n", totarget.i, totarget.j, totarget.k);
-    //ITTSBORKENtotarget = totarget + targ->GetVelocity()*(tmpdist/mounts[i].type.Speed);//warning subunit not safe
-    //    fprintf (stderr, "new tt %f %f %f\n", totarget.i, totarget.j, totarget.k);
+    
+    Vector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type.Speed));
+    
     tmpcos = Normal.Dot (totarget);
+    tmpdist = totarget.Magnitude();
     if (tmpcos>0) {
       tmpcos = tmpdist*tmpdist - tmpcos*tmpcos;
       tmpcos = targ->rSize()/tmpcos;//one over distance perpendicular away from straight ahead times the size...high is good
@@ -687,15 +714,6 @@ void Unit::Select() {
 }
 void Unit::Deselect() {
   selected = false;
-}
-void Unit::RestrictYaw(float min, float max) {
-  ymin = min; ymax = max;
-}
-void Unit::RestrictPitch(float min, float max) {
-  pmin = min, pmax = max;
-}
-void Unit::RestrictRoll(float min, float max) {
-  rmin = min, rmax = max;
 }
 
 

@@ -37,15 +37,9 @@ using std::string;
 class Beam;
 class Animation;
 using namespace XMLSupport;
-//#include "Gun.h"
-//#include "Warhead.h"
-/*EXPLANATION OF TERMS:
- * Weapon: the weapon as on a ship
- * Damager: the active weapon after launch/firing
- */
-class Gun;
+
+
 class Order;
-class Warhead;
 class Box;
 class Mesh;
 class Camera;
@@ -53,7 +47,7 @@ class Halo;
 class BSPTree;
 class PlanetaryOrbit;
 class UnitCollection;
-//////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
+
 enum clsptr {
 	UNITPTR,
 	PLANETPTR,
@@ -91,11 +85,6 @@ friend class PlanetaryOrbit;
 
  protected:
 
-  BSPTree *bspTree;
-  int ucref;
-  bool killed;
-  bool invisible;
-  //used for physics
   Transformation prev_physical_state;
   Transformation curr_physical_state;
   Matrix cumulative_transformation_matrix;
@@ -134,7 +123,6 @@ friend class PlanetaryOrbit;
     bool Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
   } *mounts;
   
-  //static int refcount; for the inherited classes
   struct {
     unsigned short right, left, front, back;
   } armor;
@@ -155,13 +143,9 @@ friend class PlanetaryOrbit;
     };
   } shield;
   float hull;
-  int faction;
-  float DealDamageToShield (const Vector & pnt, float &Damage);
-  float DealDamageToHull (const Vector &pnt, float Damage);
-  //  bool active;
+
   
-  //Vector pp, pq, pr, ppos;
-  void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
+
   Order *aistate;
   float accel;
   float recharge;
@@ -176,13 +160,15 @@ friend class PlanetaryOrbit;
   Vector AngularVelocity;
   Vector Velocity;
   int slerp_direction;
+  /*
   enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
-  char resolveforces;
+
   char yprrestricted;
 
   float ymin, ymax, ycur;
   float pmin, pmax, pcur;
   float rmin, rmax, rcur;
+  */
   long fpos;
   // thrusting limits
   struct Limits {
@@ -196,17 +182,27 @@ friend class PlanetaryOrbit;
     float retro;
     float afterburn;
   } limits;
+  int faction;
   Computer computer;
-  bool calculatePhysics; // physics have an effect on this object (set to false for planets)
-
+  char resolveforces;
   bool selected;
+  bool killed;
+  bool invisible;
+  int ucref;
   float radial_size;
-  Vector corner_min, corner_max; // corners of object
-  void calculate_extent();
+  Vector corner_min, corner_max; // corners of object  
   Box *selectionBox;
-  int getFaction() {return faction;}
+  BSPTree *bspTree;
+  void calculate_extent();
+  float DealDamageToShield (const Vector & pnt, float &Damage);
+  float DealDamageToHull (const Vector &pnt, float Damage);
   void SetCollisionParent (Unit *name);
+  void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
+  int getFaction() {return faction;}
+  void getAverageGunSpeed (float & speed, float & range);
+  Vector PositionITTS (const Vector & local_posit, float speed);
+  float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001);
   float cosAngleFromMountTo (Unit * target, float & distance);
   void UpdateCollideQueue();
   string name;
@@ -234,24 +230,6 @@ public:
   void Fire();
   void UnFire();
   Computer & GetComputerData () {return computer;}
-	/*COMMAND*/
-	/*
-	virtual void ChangeTarget(Unit *target) = 0; // sent by the flight commander, supercommand AI, or player; tells it to switch to this new target HANDLETHIS BY REPLACE/ENQUEUE ORDER after having primed orders
-	virtual void ChangeAggression(enum Aggression aggression) = 0; // same as above
-	virtual void AddNav(const Vector &pos) = 0; // same as above; tells it to add this position to the navpoint list
-	virtual void MoveTo(const Vector &pos) = 0; // same as above; clears the navpoint list and GOES there 
-	*/
-
-	/*INTERACTION*/
-	/*
-	virtual void LockOn(Unit *shooter) = 0; // sent by the shooter
-	virtual void Launch(Unit *shooter, Warhead *warhead) = 0; // sent by the shooter
-	virtual void HitTarget(Unit *target) = 0; // sent by the damager that hit the target
-	virtual void Damaged(Unit *shooter) = 0; // sent by the damager that hit it
-	*/
-  void RestrictYaw(float min, float max);
-  void RestrictPitch(float min, float max);
-  void RestrictRoll(float min, float max);
 
   void UpdateHudMatrix();
   Order *getAIState() {return aistate;}
@@ -319,7 +297,6 @@ public:
   void RollTorque(float amt);
   void UpdatePhysics (const Transformation &trans, const Matrix transmat, bool ResolveLast, UnitCollection *uc=NULL);
   void ResolveForces (const Transformation &, const Matrix);
-  //  void ResolveLast(const Transformation &, const Matrix); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   Vector UpCoordinateLevel(const Vector &v) const;
   Vector ToLocalCoordinates(const Vector &v) const;
@@ -332,7 +309,6 @@ public:
   float GetElasticity ();
   const Limits &Limits() const { return limits; }
   void SetResolveForces(bool);
-  inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
 };
 struct Unit::XML {
@@ -344,5 +320,13 @@ struct Unit::XML {
   vector<Unit*> units;
   int unitlevel;
   bool hasBSP;
+  enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
+
+  char yprrestricted;
+
+  float ymin, ymax, ycur;
+  float pmin, pmax, pcur;
+  float rmin, rmax, rcur;
+
 };
 #endif

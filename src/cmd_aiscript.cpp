@@ -46,7 +46,7 @@ namespace AiXml {
       SCRIPT,
       MOVETO,
       VECTOR,
-	  FFLOAT,
+      FFLOAT,
       X,
       Y,
       Z,
@@ -74,6 +74,7 @@ namespace AiXml {
       FROMF,
       TOF,
       FACETARGET,
+      ITTTS,
       TARGETPOS,
       THREATPOS,
       YOURPOS,
@@ -129,12 +130,12 @@ namespace AiXml {
     EnumMap::Pair ("Time", TIME),
     EnumMap::Pair ("Terminate", TERMINATE), 
     EnumMap::Pair ("Local", LOCAL), 
-    EnumMap::Pair ("Value", VALUE)
-
-};
+    EnumMap::Pair ("Value", VALUE),
+    EnumMap::Pair ("ITTS", ITTTS)
+  };
 
   const EnumMap element_map(element_names, 31);
-  const EnumMap attribute_map(attribute_names, 9);
+  const EnumMap attribute_map(attribute_names, 10);
 }
 
 using XMLSupport::EnumMap;
@@ -143,6 +144,7 @@ using XMLSupport::AttributeList;
 using namespace AiXml;
 
 void AIScript::beginElement(const string &name, const AttributeList &attributes) {
+  xml->itts=false;
   Unit * tmp;
   Names elem = (Names)element_map.lookup(name);
   AttributeList::const_iterator iter;
@@ -202,6 +204,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     assert (xml->unitlevel>=1);
     xml->unitlevel++;
     xml->acc =3;
+    xml->itts=false;
     xml->afterburn = true;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -209,6 +212,9 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	xml->afterburn=parse_bool ((*iter).value);
       case ACCURACY:
 	xml->acc=parse_int((*iter).value);
+	break;
+      case ITTTS:
+	xml->itts=parse_bool ((*iter).value);
 	break;
       }
     }
@@ -496,8 +502,13 @@ void AIScript::endElement(const string &name) {
 	  break;
   case FACETARGET:
           xml->unitlevel--;
+	  if (xml->itts) {
+          xml->orders.push_back (new Orders::FaceTargetITTS (xml->afterburn, 
+							     (bool)xml->acc));
+	  }else {
           xml->orders.push_back (new Orders::FaceTarget (xml->afterburn, 
 							 (bool)xml->acc));
+	  }
 	  break;
   case MATCHLIN:
 	  xml->unitlevel--;

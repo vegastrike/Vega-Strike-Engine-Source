@@ -8,7 +8,7 @@
 
 using XMLSupport::tostring;
 
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip, const BLENDFUNC a, const BLENDFUNC b) : Mesh() {
+SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip, const BLENDFUNC a, const BLENDFUNC b, bool envMapping) : Mesh() {
 
   SphereMesh *oldmesh;
   char ab[3];
@@ -120,7 +120,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 		Decal = new Texture (texture);
    }
    
-   centered?envMap = FALSE:envMap=TRUE;
+   centered?envMap = FALSE:envMap=envMapping;
    
    if(centered) {
      draw_sequence=0;

@@ -89,7 +89,6 @@ Planet::Planet()  : Unit(), radius(0.0f), satellites() {
 }
 
 Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent) : Unit(), radius(0.0f),  satellites() {
-  calculatePhysics=false;
   destination=dest;
   Init();
   killed=false;
@@ -157,7 +156,7 @@ void Planet::gravitate(UnitCollection *uc) {
     Vector vec(0,0,0);
     
     while((unit = iterator->current())!=NULL) {
-      if(unit->queryCalculatePhysics()) {
+      if(unit->type()!=PLANETPTR) {
 	Vector r = (unit->Position() - (vec.Transform(t)));
 	//      cerr << "Unit (" << unit << "): " << endl;
 	//      cerr << "Gravity source: " << vec.Transform(t) << "\nUnit position: " << unit->Position() << "\nDelta: " << r << endl;

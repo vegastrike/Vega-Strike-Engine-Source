@@ -201,6 +201,34 @@ void ChangeHeading::Execute() {
   parent->ApplyLocalTorque (torque);
 }
 
+FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
+  type=FACING|TARGET;
+  speed=0;
+}
+
+void FaceTargetITTS::Execute() {
+  Unit * target = parent->Target();
+  if (target==NULL){
+    done = GFXTRUE;
+    return;
+  }
+  if (speed==0) {
+    float range;
+    parent->getAverageGunSpeed(speed,range);
+  }
+  SetDest(target->PositionITTS(parent->Position(),speed+parent->GetVelocity().Dot((target->Position()-parent->Position()).Normalize())));
+  ChangeHeading::Execute();
+  if (!finish) {
+    ResetDone();
+  } 
+}
+
+
+FaceTarget::FaceTarget (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
+  type=FACING|TARGET;
+  
+}
+
 void FaceTarget::Execute() {
   Unit * target = parent->Target();
   if (target==NULL){

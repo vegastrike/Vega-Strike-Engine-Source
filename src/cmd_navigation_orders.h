@@ -45,10 +45,19 @@ protected:
   void SetDest (const Vector&);
   void Execute();
 };
+
 class FaceTarget : public ChangeHeading {
   float finish;
 public:
-  FaceTarget (bool fini=false, int accuracy = 3):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {type=FACING|TARGET;}
+  FaceTarget (bool fini=false, int accuracy =3);
+  void Execute ();
+};
+
+class FaceTargetITTS : public ChangeHeading {
+  bool finish;
+  float speed;
+public:
+  FaceTargetITTS (bool fini=false, int accuracy = 3);
   void Execute();
 };
 
