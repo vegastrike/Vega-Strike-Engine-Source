@@ -15,7 +15,7 @@ using namespace XMLSupport;
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using std::sort;
+//using std::sort;
 using std::map;
 static FSM * getFSM (const std::string & value) {
   static Hashtable <std::string, FSM, char[16]> fsms;
