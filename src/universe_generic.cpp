@@ -220,6 +220,10 @@ void Universe::Generate1( const char * file, const char * jumpback)
   }
   if( SERVER && syspath.length()!=0)
   {
+	if( !count)
+		cerr<<"Found exact file : "<<syspath<<endl;
+	else
+		cerr<<"Found file after "<<count<<" tries - generated : "<<syspath<<endl;
 	string filestr( file);
 	UniverseUtil::ComputeSystemSerials( filestr, syspath);
   }

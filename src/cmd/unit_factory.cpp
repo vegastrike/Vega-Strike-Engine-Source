@@ -28,6 +28,8 @@
 #include "planet.h"
 #include "asteroid.h"
 #include "building.h"
+#include "terrain.h"
+#include "cont_terrain.h"
 extern Unit * _masterPartList;
 std::string getMasterPartListUnitName() {
 	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
@@ -223,5 +225,21 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                          fg,
                          fg_snumber,
                          difficulty );
+}
+
+Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t)
+{
+	  Terrain * tt;
+	  tt = new Terrain (file,scale,position,radius);
+	  tt->SetTransformation( t);
+	  return tt;
+}
+
+ContinuousTerrain*	UnitFactory::createContinuousTerrain( const char * file, Vector scale, float position, Matrix & t)
+{
+	  ContinuousTerrain * ct;
+	  ct = new ContinuousTerrain (file,scale,position);
+	  ct->SetTransformation (t);
+	  return ct;
 }
 

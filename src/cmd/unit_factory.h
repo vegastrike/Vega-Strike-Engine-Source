@@ -128,6 +128,9 @@ public:
 				     Flightgroup* fg=NULL,
 				     int fg_snumber=0,
 				     float difficulty=.01 );
+
+	static Terrain*	createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t);
+	static ContinuousTerrain*	createContinuousTerrain( const char * file, Vector scale, float position, Matrix & t);
 };
 
 #endif /* _UNIT_FACTORY_H_ */

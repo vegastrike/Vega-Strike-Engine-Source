@@ -4,6 +4,7 @@
 #include <expat.h>
 #include <string>
 #include "xml_support.h"
+#include "gfxlib_struct.h"
 using std::string;
 #include "gfx/vec.h"
 #include "cmd/collection.h"
@@ -38,24 +39,14 @@ using XMLSupport::AttributeList;
  * Per-Frame Drawing & Physics simulation
  **/
 class StarSystem {
- public:
-  StarSystem();
-  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
-  virtual ~StarSystem();
- protected:
-  ///Physics is divided into 3 stages spread over 3 frames
-  enum PHYSICS_STAGE {PHY_AI,TERRAIN_BOLT_COLLIDE,MISSION_SIMULATION,PHY_COLLIDE, PHY_TERRAIN, PHY_RESOLV,PHY_NUM} current_stage;
-  
-  ///Stars, planets, etc. Orbital mechanics precalculated 
-
- private:
+  protected:
   ///Starsystem XML Struct For use with XML loading
-  struct StarXMLstring {
-    //Terrain * parentterrain;
-    //ContinuousTerrain * ct;
+  struct StarXML {
+    Terrain * parentterrain;
+    ContinuousTerrain * ct;
     int unitlevel;
-    //std::vector <GFXLight> lights;
-    std::vector <string> moons;
+    std::vector <GFXLight> lights;
+    std::vector <Planet *> moons;
     string backgroundname;
     Vector systemcentroid;
     Vector cursun;
@@ -66,13 +57,26 @@ class StarSystem {
     bool fade;
     float starsp;
     float scale;
-	std::vector <AtmosphericFogMesh> fog;
+	vector <AtmosphericFogMesh> fog;
 	int fogopticalillusion;
-  } *xml_string;
+  } *xml;
+  void LoadXML(const char*, const Vector & centroid, const float timeofyear);
+  void beginElement(const string &name, const AttributeList &attributes);
+  void endElement(const string &name);
+
+ public:
+  StarSystem();
+  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
+  virtual ~StarSystem();
+ protected:
+  ///Physics is divided into 3 stages spread over 3 frames
+  enum PHYSICS_STAGE {PHY_AI,TERRAIN_BOLT_COLLIDE,MISSION_SIMULATION,PHY_COLLIDE, PHY_TERRAIN, PHY_RESOLV,PHY_NUM} current_stage;
+  
+  ///Stars, planets, etc. Orbital mechanics precalculated 
 
  protected:
-  //std::vector <Terrain *> terrains;
-  //std::vector <ContinuousTerrain *>contterrains;
+  std::vector <Terrain *> terrains;
+  std::vector <ContinuousTerrain *>contterrains;
   /// Everything to be drawn. Folded missiles in here oneday
   UnitCollection drawList; 
   /// Objects subject to global gravitron physics (disabled)   
@@ -121,11 +125,8 @@ class StarSystem {
   void ExecuteUnitAI();
   class CollideTable *collidetable;
   class bolt_draw *bolts;
-  virtual void LoadXML(const char*, const Vector & centroid, const float timeofyear) {}
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
-  virtual void beginElement(const string &name, const AttributeList &attributes) {}
-  virtual void endElement(const string &name) {}
   string getFileName();
   string getName();
   ///Loads the star system from an XML file
@@ -142,6 +143,7 @@ class StarSystem {
   virtual void DoJumpingComeSightAndSound(Unit * un){}
   virtual int DoJumpingLeaveSightAndSound (Unit * un){return -1;}
   //friend class Atmosphere;
+  virtual void	createBackground( StarSystem::StarXML * xml) {}
 };
 bool PendingJumpsEmpty();
 #endif

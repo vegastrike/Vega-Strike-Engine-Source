@@ -25,32 +25,6 @@ class Atmosphere;
  **/
 class GameStarSystem: public StarSystem {
  private:
-  ///Starsystem XML Struct For use with XML loading
-  struct StarXML {
-    Terrain * parentterrain;
-    ContinuousTerrain * ct;
-    int unitlevel;
-    std::vector <GFXLight> lights;
-    std::vector <Planet *> moons;
-    string backgroundname;
-    Vector systemcentroid;
-    Vector cursun;
-    float timeofyear;
-    float reflectivity;
-    int numnearstars;
-    int numstars;
-    bool fade;
-    float starsp;
-    float scale;
-	vector <AtmosphericFogMesh> fog;
-	int fogopticalillusion;
-  } *xml;
-  void LoadXML(const char*, const Vector & centroid, const float timeofyear);
-  void beginElement(const string &name, const AttributeList &attributes);
-  void endElement(const string &name);
-
-  std::vector <Terrain *> terrains;
-  std::vector <ContinuousTerrain *>contterrains;
   /// Objects subject to global gravitron physics (disabled)   
   ///Process global clicks for input/output
   InputDFA * systemInputDFA;
@@ -90,6 +64,7 @@ class GameStarSystem: public StarSystem {
   virtual void DoJumpingComeSightAndSound (Unit * un);
   virtual int DoJumpingLeaveSightAndSound (Unit * un);
   friend class Atmosphere;
+  void	createBackground( StarSystem::StarXML * xml);
 };
 
 #endif

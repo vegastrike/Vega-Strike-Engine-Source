@@ -182,3 +182,14 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
 {
     return new Asteroid( filename, faction, fg, fg_snumber, difficulty);
 }
+
+Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t)
+{
+	  return NULL;
+}
+
+ContinuousTerrain*	UnitFactory::createContinuousTerrain( const char * file, Vector scale, float position, Matrix & t)
+{
+	  return NULL;
+}
+

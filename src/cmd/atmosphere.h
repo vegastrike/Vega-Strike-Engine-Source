@@ -1,5 +1,7 @@
 #include <vector>
 #include "gfxlib.h"
+#include "gfx/matrix.h"
+#include "gfx/mesh.h"
 
 class Mesh;
 class Atmosphere {

@@ -35,9 +35,9 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
 	UniverseUtil::ComputeSystemSerials( starsys, starsysfile);
-	sts = new StarSystem( starsysfile.c_str(), Vector(0,0,0));
-	_Universe->Generate2( sts);
-	//sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));
+	//sts = new StarSystem( starsysfile.c_str(), Vector(0,0,0));
+	//_Universe->Generate2( sts);
+	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));
 	zone_list.push_back( lst);
 	zone_unitlist.push_back( ulst);
 	// Add zero as number of clients in zone since we increment in ZoneMgr::addClient()

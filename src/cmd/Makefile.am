@@ -12,6 +12,7 @@ SUBDIRS = ai script collide
 libcmdgeneric =			\
 	unit_generic.h					\
 	unit_generic.cpp				\
+	atmosphere_generic.cpp			\
 	asteroid_generic.cpp			\
 	asteroid_generic.h			\
 	nebula_generic.cpp			\
@@ -56,6 +57,7 @@ libcmdgeneric =			\
 	role_bitmask.h
 
 libcmdserver_a_SOURCES =$(libcmdgeneric)			\
+	atmosphere_server.cpp			\
 	unit_util_server.cpp			\
 	unit_functions_server.cpp			\
 	bolt_server.cpp			\

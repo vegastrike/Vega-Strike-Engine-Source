@@ -36,6 +36,7 @@
 #include "gfx/particle.h"
 #include "gfx/lerp.h"
 #include "gfx/warptrail.h"
+#include "gfx/env_map_gent.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -681,4 +682,29 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 */
+
+void	GameStarSystem::createBackground( StarSystem::StarXML * xml)
+{
+#ifdef NV_CUBE_MAP
+  printf("using NV_CUBE_MAP\n");
+  LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+  LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
+  LightMap[2]=new Texture ((xml->backgroundname+"_up_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
+  LightMap[3]=new Texture ((xml->backgroundname+"_down_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
+  LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
+  LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
+#else
+  string bglight= 
+	  MakeSharedStarSysPath (xml->backgroundname+"_light.bmp");
+  LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  if (!LightMap[0]->LoadSuccess()) {
+      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
+      LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  }
+#endif
+  bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9,filename);
+  stars = new Stars (xml->numnearstars, xml->starsp);
+  stars->SetBlend (XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")),  
+		   XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")));
+}
 

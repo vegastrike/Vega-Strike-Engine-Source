@@ -89,7 +89,6 @@ libroot =		\
 	physics.cpp				\
 	resizable.h				\
 	star_system_jump.cpp	\
-	star_system_xml.cpp		\
 	star_system.cpp 		\
 	star_system.h 			\
 	universe.cpp			\
@@ -109,6 +108,7 @@ librootgeneric =				\
 	posh.h						\
 	stardate.cpp				\
 	stardate.h					\
+	star_system_xml.cpp		\
 	star_system_generic.cpp 	\
 	star_system_generic.h 		\
 	universe_generic.cpp		\

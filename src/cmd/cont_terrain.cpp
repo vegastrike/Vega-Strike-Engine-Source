@@ -376,3 +376,9 @@ Vector ContinuousTerrain::GetUpVector (const Vector & pos) {
     data[0]->GetUpVector(pos):
     Vector (transformation.getQ());
 }
+
+void	disableTerrainDraw( ContinuousTerrain *ct)
+{
+	ct->DisableDraw();
+}
+
