@@ -202,7 +202,8 @@ int SocketSet::private_select( timeval* timeout )
 #ifndef USE_NO_THREAD
         if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
         {
-            private_wakeup( );
+            char c;
+            _thread_wakeup.read( &c, 1 );
         }
 #endif
     }

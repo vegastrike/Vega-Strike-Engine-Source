@@ -16,13 +16,8 @@ public:
     bool ok( ) const;
 
 private:
-    bool   _failed;
-#ifdef _WIN32
-    HANDLE _readPipe;
-    HANDLE _writePipe;
-#else
+    bool _failed;
     int  _pipe[2];
-#endif
 };
 
 #endif /* VSNET_PIPE_H */

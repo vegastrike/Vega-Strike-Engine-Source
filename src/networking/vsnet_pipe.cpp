@@ -2,70 +2,70 @@
 #include <sstream>
 
 #include "vsnet_pipe.h"
+#include "vsnet_socket.h"
 
 #if defined( _WIN32) && !defined(__CYGWIN__)
 
 VSPipe::VSPipe( )
+    : _failed( false )
 {
-	SECURITY_ATTRIBUTES sec_attr; //don't know what it is for.
-	sec_attr.nLength=sizeof(SECURITY_ATTRIBUTES);
-	sec_attr.bInheritHandle=FALSE;
-	sec_attr.lpSecurityDescriptor=NULL;
-	BOOL isPipe=CreatePipe(&_readPipe,&_writePipe,&sec_attr,0);
-	if (!isPipe)
+    int                retval;
+    struct sockaddr_in addr;
+
+    _pipe[0] = ::socket( PF_INET, SOCK_DGRAM, 0 );
+    if( _pipe[0] == INVALID_SOCKET )
+    {
         _failed = true;
-    else
-        _failed = false;
+        return;
+    }
+
+    memset( &addr, 0, sizeof(struct sockaddr_in) );
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port        = 0;
+    addr.sin_family      = AF_INET;
+    retval = ::bind( _pipe[0], (sockaddr *)&addr, sizeof(addr) );
+    if( retval == SOCKET_ERROR )
+    {
+        close_socket( _pipe[0] );
+        _failed = true;
+        return;
+    }
+
+    socklen_t addrlen = sizeof(addr);
+    retval = ::getsockname( _pipe[0], (sockaddr *)&addr, &addrlen );
+    if( retval == SOCKET_ERROR )
+    {
+        close_socket( _pipe[0] );
+        _failed = true;
+        return;
+    }
+
+    _pipe[1] = ::socket( PF_INET, SOCK_DGRAM, 0 );
+    if( _pipe[1] == INVALID_SOCKET )
+    {
+        close_socket( _pipe[1] );
+        _failed = true;
+        return;
+    }
+
+    retval = ::connect( _pipe[1], (sockaddr *)&addr, addrlen );
+    if( retval == SOCKET_ERROR )
+    {
+        close_socket( _pipe[1] );
+        close_socket( _pipe[0] );
+        _failed = true;
+        return;
+    }
 }
 
 int VSPipe::write( const char* buf, int size )
 {
-	unsigned long numwritten;
-	BOOL worked=WriteFile(_writePipe,(LPVOID)buf, size, &numwritten,NULL);
-	if (!worked)
-		return -1;
-	if (numwritten>INT_MAX)
-		numwritten=INT_MAX;
-	return numwritten;
+    return ::send( _pipe[1], buf, size, 0 );
 }
 
 int VSPipe::read( char* buf, int size )
 {
-	unsigned long numread;
-	BOOL worked=ReadFile(_readPipe,(LPVOID)buf, size, &numread,NULL);
-	if (!worked)
-		return -1;
-	if (numread>INT_MAX)
-		numread=INT_MAX;
-	return numread;
-}
-
-int VSPipe::closewrite( )
-{
-	int retVal=0;
-	BOOL worked=CloseHandle(_writePipe);
-	if (!worked)
-		retVal=-1;
-	return retVal;
-}
-
-int VSPipe::closeread( )
-{
-	int retVal=0;
-	BOOL worked=CloseHandle(_readPipe);
-	if (!worked)
-		retVal=-1;
-	return retVal;
-}
-
-int VSPipe::getread( ) const
-{
-    return (int)_readPipe;
-}
-
-bool VSPipe::ok( ) const
-{
-    return !_failed;
+    return ::recv( _pipe[0], buf, size, 0 );
 }
 
 #else
@@ -81,16 +81,6 @@ VSPipe::VSPipe( )
         _failed = false;
 }
 
-int VSPipe::closewrite( )
-{
-    return ::close( _pipe[1] );
-}
-
-int VSPipe::closeread( )
-{
-    return ::close( _pipe[0] );
-}
-
 int VSPipe::write( const char* buf, int size )
 {
     return ::write( _pipe[1], buf, size );
@@ -99,6 +89,18 @@ int VSPipe::write( const char* buf, int size )
 int VSPipe::read( char* buf, int size )
 {
     return ::read( _pipe[0], buf, size );
+}
+
+#endif
+
+int VSPipe::closewrite( )
+{
+    return ::close_socket( _pipe[1] );
+}
+
+int VSPipe::closeread( )
+{
+    return ::close_socket( _pipe[0] );
 }
 
 int VSPipe::getread( ) const
@@ -110,6 +112,4 @@ bool VSPipe::ok( ) const
 {
     return !_failed;
 }
-
-#endif
 
