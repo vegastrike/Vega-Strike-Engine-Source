@@ -72,7 +72,7 @@ class StarSystem {
   ///The Light Map corresponding for the BP for spheremapping
   Texture *LightMap[6]; 
   void AddStarsystemToUniverse(const string &filename);
-
+  int lightcontext;
  public:
   class CollideTable *collidetable;
   class bolt_draw *bolts;

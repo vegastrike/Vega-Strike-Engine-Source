@@ -53,7 +53,7 @@ class gfx_light: public GFXLight {
   inline void FinesseClobberLight (const GLenum target, const int original);
 
   ///replaces target GL light, copying all state sets this->target!
-  inline void ContextSwitchClobberLight (const GLenum target);
+  inline void ContextSwitchClobberLight (const GLenum target, const int original);
 
   /**
    * for global lights, clobbers SOMETHING for sure, calls GLenable

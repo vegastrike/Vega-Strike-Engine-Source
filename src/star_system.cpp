@@ -51,6 +51,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const string 
   ///adds to jumping table;
   name = NULL;
   _Universe->pushActiveStarSystem (this);
+  GFXCreateLightContext (lightcontext);
   bolts = new bolt_draw;
   collidetable = new CollideTable;
   cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
@@ -186,6 +187,7 @@ StarSystem::~StarSystem() {
   delete [] primaries;
   delete bolts;
   delete collidetable;
+  GFXDeleteLightContext (lightcontext);
 }
 
 UnitCollection * StarSystem::getUnitList () {
@@ -240,6 +242,8 @@ bool StarSystem::RemoveUnit(Unit *un) {
   return removed;
 }
 void StarSystem::SwapIn () {
+  GFXSetLightContext (lightcontext);
+  /*
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
@@ -249,6 +253,7 @@ void StarSystem::SwapIn () {
     iter->advance();
   }
   delete iter;  
+  */
   unsigned int i;
   for (i=0;i<terrains.size();i++) {
     //gotta push this shit somehow
@@ -260,6 +265,7 @@ void StarSystem::SwapIn () {
 }
 
 void StarSystem::SwapOut () {
+  /*
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
@@ -269,6 +275,7 @@ void StarSystem::SwapOut () {
     iter->advance();
   }
   delete iter;
+  */
   unsigned int i;
   for (i=0;i<terrains.size();i++) {
     //terrains[i]->DisableDraw();

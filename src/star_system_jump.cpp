@@ -136,6 +136,7 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
       ss = new StarSystem (ssys.c_str(),Vector (0,0,0),un->name);
       _Universe->LoadStarSystem (ss);
       ss->SwapOut();
+      _Universe->activeStarSystem()->SwapIn();
     }
   }
   if(ss) {

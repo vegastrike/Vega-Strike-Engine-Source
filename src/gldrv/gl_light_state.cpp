@@ -88,7 +88,8 @@ void gfx_light::SendGLPosition (const GLenum target) {
   glLightfv (target,GL_POSITION,v);
 }  
 
-inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {
+inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg, const int original) {
+  
 
   glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
   glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
@@ -98,6 +99,11 @@ inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {
   glLightfv (gltarg,GL_DIFFUSE, diffuse);
   glLightfv (gltarg,GL_SPECULAR, specular);
   glLightfv (gltarg,GL_AMBIENT, ambient);
+  if (original!=-1) {
+    gfx_light * orig = &((*_llights)[GLLights[original].index]);
+    orig->target = -1;
+    GLLights[original].index=-1;
+  }
 }
 
 inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int original) {
@@ -148,7 +154,7 @@ void gfx_light::ClobberGLLight (const int target) {
 #ifdef GFX_HARDWARE_LIGHTING
     if (GLLights[target].index==-1) {
 #endif
-	ContextSwitchClobberLight (GL_LIGHT0+target);
+      ContextSwitchClobberLight (GL_LIGHT0+target,GLLights[target].index);
 #ifdef GFX_HARDWARE_LIGHTING
     }else {
 	FinesseClobberLight (GL_LIGHT0+target,GLLights[target].index);
@@ -220,6 +226,7 @@ void gfx_light::TrashFromGLLights () {
   assert ((&(*_llights)[GLLights[target].index])==this);
   GLLights[target].index = -1;
   GLLights[target].options= OpenGLL::GLL_LOCAL;
+  target = -1;
 }
 void gfx_light::AddToTable() {
   LineCollideStar tmp;
@@ -302,6 +309,7 @@ void gfx_light::Disable() {
 // d= (-B + sqrtf (B*B + 4*C*(tot/i-A)))/ (2C)
 
 LineCollide gfx_light::CalculateBounds (bool &error) {
+  error = false;
   float tot_intensity = ((specular[0]+specular[1]+specular[2])*specular[3]+
 			 (diffuse[0]+diffuse[1]+diffuse[2])*diffuse[3]+ 
 			 (ambient[0]+ambient[1]+ambient[2])*ambient[3])*.33;
@@ -315,7 +323,7 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
   ffastmathreallysucksq = sqrt(attenuate[2]+attenuate[1]) ;
   //  fprintf (stderr,"q%lf d%lf",ffastmathreallysucksq,ffastmathreallysucksd);
   if (ffastmathreallysucksq==0||ffastmathreallysucksd<=0)
-    error=1;
+    error=true;
   ffastmathreallysucksd /=ffastmathreallysucksq;
 
   Vector st (vect[0]-ffastmathreallysucksd,vect[1]-ffastmathreallysucksd,vect[2]-ffastmathreallysucksd);
