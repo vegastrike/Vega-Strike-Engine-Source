@@ -1,3 +1,5 @@
+#include "networkcomm.h"
+
 #ifdef NETCOMM
 
 #include <config.h>
@@ -15,7 +17,6 @@
 extern bool cleanexit;
 
 #include "gldrv/winsys.h"
-#include "networkcomm.h"
 #include "packet.h"
 #include <assert.h>
 
@@ -414,6 +415,10 @@ NetworkCommunication::~NetworkCommunication()
 
 char *	NetworkCommunication::GetWebcamCapture()
 {
+#ifdef NETCOMM
 	return Webcam->jpeg_buffer;
+#else
+	return NULL; // We have no choice :-/
+#endif
 }
 
