@@ -483,6 +483,8 @@ float getFuelConversion(){
 void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Unit::XML xml;
   xml.unitModifications=modification.c_str();
+  xml.data=xml.shieldmesh=xml.bspmesh=xml.rapidmesh=NULL;//was uninitialized memory
+  
   string tmpstr;
   csvRow = row[0];
   //
