@@ -1064,7 +1064,7 @@ int main (int argc, char** argv) {
 	Outputfile=fopen(argv[2],"wb+"); //create file for BFXM output
   } else if(reverse){
 	FILE* Inputfile=fopen(argv[1],"rb");
-	Outputfile=fopen(argv[2],"wb+"); //create file for text output
+	Outputfile=fopen(argv[2],"w+"); //create file for text output
 	ReverseToFile(Inputfile,Outputfile);
 	exit(0);
   } else {
@@ -1236,8 +1236,19 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Blue
   floatbuf= VSSwapHostFloatToLittle(memfile.material.sa);
   runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
+  intbuf= VSSwapHostIntToLittle(memfile.cullface);
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Cullface
+  intbuf= VSSwapHostIntToLittle(memfile.lighting);
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//lighting
+  intbuf= VSSwapHostIntToLittle(memfile.reflect);
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//reflect
+  intbuf= VSSwapHostIntToLittle(memfile.usenormals);
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//usenormals
   //END HEADER
   //Begin Variable sized Attributes
+  int VSAstart=runningbytenum;
+  intbuf= VSSwapHostFloatToLittle(0); // Temp value will overwrite later
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of Variable sized attribute section in bytes
   //Detail texture
   { 
 	int namelen=memfile.detailtexture.name.size();
@@ -1353,7 +1364,7 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 	}
 
   //End Variable sized Attributes
-
+  int VSAend=runningbytenum;
   //GEOMETRY
   intbuf= VSSwapHostIntToLittle(memfile.vertices.size());
   runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices
@@ -1488,6 +1499,10 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   intbuf=runningbytenum;
   intbuf= VSSwapHostIntToLittle(intbuf);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total mesh
+  fseek(Outputfile,(-1*(runningbytenum-VSAstart)),SEEK_END);
+  intbuf=VSAend-VSAstart;
+  intbuf= VSSwapHostIntToLittle(intbuf);
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for Variable Sized Attribute section
   fseek(Outputfile,0,SEEK_END);
   return runningbytenum;
 }
@@ -1545,7 +1560,82 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 		  int meshheaderlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record header in bytes
 	      word32index+=1;
 	      int meshlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record in bytes
+		  float scale=VSSwapHostFloatToLittle(inmemfile[meshbeginword+2].f32val);//scale
+		  int reverse=VSSwapHostIntToLittle(inmemfile[meshbeginword+3].i32val);//reverse flag
+		  int forcetexture=VSSwapHostIntToLittle(inmemfile[meshbeginword+4].i32val);//force texture flag
+		  int sharevert=VSSwapHostIntToLittle(inmemfile[meshbeginword+5].i32val);//share vertex flag
+		  float polygonoffset=VSSwapHostFloatToLittle(inmemfile[meshbeginword+6].f32val);//polygonoffset
+		  int bsrc=VSSwapHostIntToLittle(inmemfile[meshbeginword+7].i32val);//Blendmode source
+		  int bdst=VSSwapHostIntToLittle(inmemfile[meshbeginword+8].i32val);//Blendmode destination
+		  float	power=VSSwapHostFloatToLittle(inmemfile[meshbeginword+9].f32val);//Specular: power
+		  float	ar=VSSwapHostFloatToLittle(inmemfile[meshbeginword+10].f32val);//Ambient: red
+		  float	ag=VSSwapHostFloatToLittle(inmemfile[meshbeginword+11].f32val);//Ambient: green
+		  float	ab=VSSwapHostFloatToLittle(inmemfile[meshbeginword+12].f32val);//Ambient: blue
+		  float	aa=VSSwapHostFloatToLittle(inmemfile[meshbeginword+13].f32val);//Ambient: Alpha
+		  float	dr=VSSwapHostFloatToLittle(inmemfile[meshbeginword+14].f32val);//Diffuse: red
+		  float	dg=VSSwapHostFloatToLittle(inmemfile[meshbeginword+15].f32val);//Diffuse: green
+		  float	db=VSSwapHostFloatToLittle(inmemfile[meshbeginword+16].f32val);//Diffuse: blue
+		  float	da=VSSwapHostFloatToLittle(inmemfile[meshbeginword+17].f32val);//Diffuse: Alpha
+		  float	er=VSSwapHostFloatToLittle(inmemfile[meshbeginword+18].f32val);//Emmissive: red
+		  float	eg=VSSwapHostFloatToLittle(inmemfile[meshbeginword+19].f32val);//Emmissive: green
+		  float	eb=VSSwapHostFloatToLittle(inmemfile[meshbeginword+20].f32val);//Emmissive: blue
+		  float	ea=VSSwapHostFloatToLittle(inmemfile[meshbeginword+21].f32val);//Emmissive: Alpha
+		  float	sr=VSSwapHostFloatToLittle(inmemfile[meshbeginword+22].f32val);//Specular: red
+		  float	sg=VSSwapHostFloatToLittle(inmemfile[meshbeginword+23].f32val);//Specular: green
+		  float	sb=VSSwapHostFloatToLittle(inmemfile[meshbeginword+24].f32val);//Specular: blue
+		  float	sa=VSSwapHostFloatToLittle(inmemfile[meshbeginword+25].f32val);//Specular: Alpha
+		  int cullface=VSSwapHostIntToLittle(inmemfile[meshbeginword+26].i32val);//CullFace
+		  int lighting=VSSwapHostIntToLittle(inmemfile[meshbeginword+27].i32val);//lighting
+		  int reflect=VSSwapHostIntToLittle(inmemfile[meshbeginword+28].i32val);//reflect
+		  int usenormals=VSSwapHostIntToLittle(inmemfile[meshbeginword+29].i32val);//usenormals
+		  //End Header
+		  // Go to Arbitrary Length Attributes section
+		  word32index=meshbeginword+(meshheaderlength/4);
+		  int VSAbeginword=word32index;
+		  int LengthOfArbitraryLengthAttributes=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Length of Arbitrary length attributes section in bytes
+		  word32index+=1;
+		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%d %d\" <Material power=\"%f\" ar=\"%f\" ag=\"%f\" ab=\"%f\" aa=\"%f\" dr=\"%f\" dg=\"%f\" db=\"%f\" da=\"%f\" er=\"%f\" eg=\"%f\" eb=\"%f\" ea=\"%f\" sr=\"%f\" sg=\"%f\" sb=\"%f\" sa=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\"/>",scale,reverse,forcetexture,sharevert,polygonoffset,bsrc,bdst,power,ar,ag,ab,aa,dr,dg,db,da,er,eg,eb,ea,sr,sg,sb,sa,cullface,lighting,reflect,usenormals);
+		  
+		  string detailtexturename="";
+		  int detailtexturenamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//detailtexture name length
+		  word32index+=1;
+		  int stringindex=0;
+		  for(stringindex=0;stringindex<detailtexturenamelen;stringindex++){
+			for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
+				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
+			    detailtexturename+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
+			  }
+			}
+			word32index+=1;
+		  }
+		  fprintf(Outputfile," detailtexture=\"%s\" ",detailtexturename.c_str());
+
+		  vector <XML::vec3f> Detailplanes; //store detail planes until finish printing mesh attributes
+		  int numdetailplanes=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of detailplanes
+		  word32index+=1;
+		  for(int detailplane=0;detailplane<numdetailplanes;detailplane++){
+			float x=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//x-coord
+			float y=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//y-coord
+			float z=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//z-coord
+			word32index+=3;
+			XML::vec3f temp;
+			temp.x=x;
+			temp.y=y;
+			temp.z=z;
+			Detailplanes.push_back(temp);
+		  } //End detail planes
+		  //Textures
+		  int numtextures=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of textures
+		  word32index+=1;
+		  for(int tex=0;tex<numtextures;tex++){
+		  }
+		  //End Textures
+		  //End VSA
+		  //go to geometry
+		  word32index=VSAbeginword+(LengthOfArbitraryLengthAttributes/4);
+		  //End Geometry
 		  //go to next mesh
+		  fprintf(Outputfile,"</Mesh>\n");
 		  word32index=meshbeginword+(meshlength/4);
 	  }	
 	  //go to next record
