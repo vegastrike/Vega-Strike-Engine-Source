@@ -116,7 +116,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
 }
 
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
-
+const float densityOfJumpPoint = 100;
 Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites() {
   inside=false;
   Init();
@@ -142,7 +142,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   fullname=fgid;
   this->radius=radius;
   this->gravity=gravity;
-  hull = (4./3)*M_PI*radius*radius*radius*densityOfRock;
+  hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
   meshdata = new Mesh*[2];
