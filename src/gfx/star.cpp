@@ -403,7 +403,7 @@ void Stars::Draw() {
   GFXDisable (TEXTURE1);
   GFXEnable (DEPTHTEST);
   static bool near_stars_alpha=XMLSupport::parse_bool(vs_config->getVariable("graphics","near_stars_alpha","false"));
-  static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","stars_alpha_test_cutoff",".8"));
+  static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","stars_alpha_test_cutoff",".2"));
 	
   if (near_stars_alpha) {
 	  GFXAlphaTest (GREATER,AlphaTestingCutoff);
