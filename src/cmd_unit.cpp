@@ -210,6 +210,10 @@ Unit::Unit(const char *filename, bool xml) {
 
 Unit::~Unit()
 {
+  for (int beamcount=0;beamcount<nummounts;beamcount++) {
+    if (mounts[beamcount].gun)
+      delete mounts[beamcount].gun;//hope we're not killin' em twice...they don't go in gunqueue
+  }
 	if(meshdata&&nummesh>0)
 	{
 		for(int meshcount = 0; meshcount < nummesh; meshcount++)

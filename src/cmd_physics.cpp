@@ -22,7 +22,7 @@
 #include "cmd_unit.h"
 #include "lin_time.h"
 #include "physics.h"
-
+#include "cmd_beam.h"
 // the rotation should be applied in world coordinates
 void Unit:: Rotate (const Vector &axis)
 {
@@ -170,8 +170,9 @@ void Unit::RollTorque(float amt) {
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
 
-void Unit::ResolveForces () // don't call this 2x
+void Unit::ResolveForces (const Transformation &trans, const Matrix transmat ) // don't call this 2x
 {
+  
   // Torque is modeled as a perfect impulse at the beginning of a game
   // turn, for simplicity
   Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);
@@ -179,11 +180,11 @@ void Unit::ResolveForces () // don't call this 2x
   if(AngularVelocity.Magnitude() > 0) {
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
-	Vector p, q, r;
-	GetOrientation(p,q,r);
+  Vector p, q, r;
+  GetOrientation(p,q,r);
 //	cerr << "Orientation: " << p << q << r << endl;
-	temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
-	Velocity += temp; // modelled as an impulse
+  temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
+  Velocity += temp; // modelled as an impulse
 	//now the fuck with it... add relitivity to the picture here
 	/*
 	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
@@ -192,15 +193,31 @@ void Unit::ResolveForces () // don't call this 2x
 		float y = (1-magvel*magvel*oocc);
 		temp = temp * powf (y,1.5);
 		}*/
-	curr_physical_state.position += Velocity*SIMULATION_ATOM;
-	NetForce = NetLocalForce = Vector(0,0,0);
-	NetTorque = Vector(0,0,0);
-	//cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
+	
+  curr_physical_state.position += Velocity*SIMULATION_ATOM;
+  cumulative_transformation = curr_physical_state;
+  cumulative_transformation.Compose (trans,transmat);
+  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
+  int i;
+  for (i=0;i<nummounts;i++) {
+    if (mounts[i].type.type==weapon_info::BEAM) {
+      if (mounts[i].gun&&mounts[i].gun->Dissolved()) {
+	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+	//check for impact!!!???!!!  err prolly later on since we space position and direction
+      }
+    }
+  }
+  for (i=0;i<numsubunit;i++) {
+    subunits[i]->ResolveLast(cumulative_transformation,cumulative_transformation_matrix);
+  }
+  NetForce = NetLocalForce = Vector(0,0,0);
+  NetTorque = Vector(0,0,0);
+  //cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
 }
 
-void Unit::ResolveLast() {
+void Unit::ResolveLast(const Transformation &trans, const Matrix transmat ) {// don't call this 2x{
   prev_physical_state = curr_physical_state;
-  ResolveForces();
+  ResolveForces(trans,transmat);
 }
 
 void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {

@@ -85,10 +85,10 @@ protected:
   Unit **subunits; // the new children fun fun stuff
   //Gun **weapons; // the guns
   class Mount {
-    Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
     Transformation LocalPosition;
-    enum {ACTIVE, INACTIVE, DESTROYED} status;
   public:
+    Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
+    enum {ACTIVE, INACTIVE, DESTROYED} status;
     weapon_info type;
     Mount():gun(NULL),type(weapon_info::BEAM){}
     void Activate () {
@@ -261,8 +261,8 @@ public:
   void PitchTorque(float amt);
   void RollTorque(float amt);
 
-  void ResolveForces ();
-  void ResolveLast(); // used for lerp
+  void ResolveForces (const Transformation &, const Matrix);
+  void ResolveLast(const Transformation &, const Matrix); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   Vector ToLocalCoordinates(const Vector &v) const;
   const Vector &GetAngularVelocity() const { return AngularVelocity; }

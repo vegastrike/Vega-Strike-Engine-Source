@@ -216,9 +216,9 @@ void StarSystem::Update() {
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually
 	if(time>2.0) 
-	  unit->ResolveForces();
+	  unit->ResolveForces(identity_transformation,identity_matrix);
 	else
-	  unit->ResolveLast();
+	  unit->ResolveLast(identity_transformation,identity_matrix);
 	iter->advance();
       }
       delete iter;
