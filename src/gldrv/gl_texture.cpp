@@ -75,12 +75,6 @@ struct GLTexture{
   GLenum textureformat;
   GLenum targets;
   enum FILTER mipmapped;
-  GLTexture() {
-	palette=NULL;
-	alive=GFXFALSE;
-	name=-1;
-	width=height=1;
-  }
 };
 //static GLTexture *textures=NULL;
 //static GLEnum * targets=NULL;
@@ -113,6 +107,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   if ((*handle)==textures.size()) {
     fprintf (stderr,"!");
     textures.push_back(GLTexture());
+    textures.back().palette=NULL;
+    textures.back().alive=GFXTRUE;
+    textures.back().name=-1;
+    textures.back().width=textures.back().height=1;
   }
   GLenum WrapMode;
   switch (texture_target) {
