@@ -1814,6 +1814,7 @@ void Unit::AddVelocity(float difficulty) {
   Vector v=Velocity;
    Unit * planet;
    for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
+     if (_Universe->isPlayerStarship(planet)) continue;
      static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
      float effectiverad = autopilot_term_distance+planet->rSize()*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
 

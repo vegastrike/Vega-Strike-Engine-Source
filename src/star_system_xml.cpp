@@ -1318,6 +1318,7 @@ using namespace StarXML;
       Unit * un;
       while ((un = iter->current())) {
 	drawList.prepend(un);
+        units.prepend(un);
 	iter->advance();
       }
       delete iter;
