@@ -1,11 +1,13 @@
 #include <png.h>
 #include <stdlib.h>
-
+#include "png_texture.h"
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
 
-typedef unsigned char * (textureTransform) (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** row_pointers);
+int PNG_HAS_PALETTE =1;
+int PNG_HAS_COLOR=2;
+int PNG_HAS_ALPHA=4;
 
 unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** row_pointers) {
   unsigned short * dat = (unsigned short *) malloc (sizeof (unsigned short)*width*height);
@@ -51,13 +53,67 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
       }	
     }
   }
+  bpp = 16;
+  color_type = PNG_COLOR_TYPE_GRAY;
   return (unsigned char *)dat;
 }
 
 
-unsigned char * readTexture (const char * name, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt) {
+unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** row_pointers) {
+  unsigned char * dat = (unsigned char *) malloc (sizeof (unsigned char)*width*height);
+  if ((bpp==8&&color_type==PNG_COLOR_TYPE_RGB_ALPHA)||color_type==PNG_COLOR_TYPE_GRAY ||color_type==PNG_COLOR_TYPE_GRAY_ALPHA) {
+    if (bpp==8&&color_type==PNG_COLOR_TYPE_GRAY) {
+      for (unsigned int i=0;i<height;i++) {
+	memcpy (&dat[i*width],&row_pointers[i], sizeof (unsigned char)*width);
+      }
+    } else {
+      if ((bpp==16&&color_type==PNG_COLOR_TYPE_GRAY)||(bpp==8&&color_type==PNG_COLOR_TYPE_GRAY_ALPHA)) {
+	for (unsigned int i=0;i<height;i++) {
+	  unsigned int iwid = i*width;
+	  for (unsigned int j=0;j<width;j++) {
+	    dat[iwid+j] = (row_pointers[i])[j*2];
+	  }
+	}
+      } else {
+	//type is RGBA32 or GrayA32
+	for (unsigned int i=0;i<height;i++) {
+	  unsigned int iwid = i*width;
+	  for (unsigned int j=0;j<width;j++) {
+	    dat[iwid+j]= ((row_pointers[i])[j*4]);
+	  }
+	}
+      }
+    }
+  } else {
+    if (color_type==PNG_COLOR_TYPE_RGB) {
+      unsigned int coloffset = (bpp==8)?3:6;
+      for (unsigned int i=0;i<height;i++) {
+	unsigned int iwid = i*width;
+	for (unsigned int j=0;j<width;j++) {
+	  dat[iwid+j]= * ((unsigned char *)(&(row_pointers[i][j*coloffset])));
+	}
+      }
+      
+    }else if (color_type== PNG_COLOR_TYPE_RGB_ALPHA) {///16 bit colors...take Red
+      for (unsigned int i=0;i<height;i++) {
+	unsigned int iwid = i*width;
+	for (unsigned int j=0;j<width;j++) {
+	  dat[iwid+j]= (((unsigned short *)row_pointers[i])[j*4])/256;
+	}
+      }	
+    }
+  }
+  bpp = 8;
+  color_type = PNG_COLOR_TYPE_GRAY;
+
+  return (unsigned char *)dat;
+}
+
+
+unsigned char * readImage (const char * name, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt) {
+  palette = NULL;
   png_structp png_ptr;
-  unsigned char ** row_pointers;
+  png_bytepp row_pointers;
   png_infop info_ptr;
   unsigned int sig_read = 0;
   int bit_depth, interlace_type;
@@ -89,8 +145,7 @@ unsigned char * readTexture (const char * name, int & bpp, int &color_type, unsi
    
    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
 row_pointers = png_get_rows(png_ptr, info_ptr);
-   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type,
-       &interlace_type, NULL, NULL);
+   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
    unsigned char * result = (*tt) (bpp,color_type,width,height,row_pointers);
    png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 
@@ -99,14 +154,14 @@ row_pointers = png_get_rows(png_ptr, info_ptr);
    return result;
 }
 
-
+#if 0
 int main () {
   const char nam []="test.png"; int  bpp; int channels; unsigned int width; unsigned int height; unsigned char * palette;
-  unsigned char * tmp = readTexture(nam,bpp,channels,width,height,palette, &heightmapTransform);
-
-
-
+  unsigned char * tmp = readImage(nam,bpp,channels,width,height,palette, &heightmapTransform);
   free (tmp);
   
+  tmp = readTexture(nam,bpp,channels,width,height,palette, &terrainTransform);
+  free (tmp);
 
 }
+#endif

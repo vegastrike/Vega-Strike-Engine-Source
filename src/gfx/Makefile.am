@@ -45,6 +45,8 @@ libgfx_a_SOURCES =	\
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
+	png_texture.h	\
+	png_texture.cpp	\
 	quadtree.cpp	\
 	quadsquare.cpp	\
 	star.h		\

@@ -27,6 +27,7 @@ libcmd_a_SOURCES =				\
 	planet.h 				\
 	planet.cpp 				\
 	iterator.h				\
+	images.h		\
 	collection.h			\
 	collection.cpp			\
 	container.h				\

@@ -15,6 +15,24 @@
 #include "vec.h"
 #include "gfxlib.h"
 #include <vector>
+
+struct Texture;
+struct TerrainTexture {
+  BLENDFUNC blendSrc;
+  BLENDFUNC blendDst;
+  int color;
+  GFXMaterial material;
+  bool reflect;
+  union {
+    char * filename;
+    Texture * t;
+  }tex;
+  TerrainTexture () {
+    tex.filename = NULL;
+    GFXGetMaterial (0, material);//by default it's the default material;
+  }
+};
+
 struct HeightMapInfo {
 	short*	Data;
 	int	XOrigin, ZOrigin;
@@ -60,7 +78,7 @@ struct	VertInfo {
   unsigned short GetTex() const;
 };
 
-struct Texture;
+
 class quadsquare;
 
 /**
@@ -107,7 +125,7 @@ class quadsquare {
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
 	static Vector MakeLightness (float xslope, float zslope);
-  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <Texture *> *texturelist );
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <TerrainTexture> *texturelist );
 	
 private:
   static void tri (unsigned int Aind, unsigned short Atex, unsigned int Bind, unsigned short Btex, unsigned int Cind, unsigned short Ctex);
@@ -134,7 +152,7 @@ private:
 	static GFXVertexList *vertices;
 	static GFXVertexList *blendVertices;
 	static std::vector <unsigned int> *unusedvertices;
-	static std::vector <Texture  *> *textures;
+	static std::vector <TerrainTexture> *textures;
 	static std::vector <TextureIndex> indices;
 };
 

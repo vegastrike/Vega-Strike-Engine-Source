@@ -42,7 +42,7 @@ GFXVertexList *quadsquare::blendVertices=NULL;
 std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
-std::vector <Texture *> *quadsquare::textures;
+std::vector <TerrainTexture> *quadsquare::textures;
 
 void TextureIndex::Clear() {
   q.clear();
@@ -838,33 +838,20 @@ unsigned int	ColorArray[9];
 unsigned char	VertList[24];
 
 
-static void TerrainMakeActive (Texture *text) {
-  if (text==(Texture *)1||text==(Texture *)2) {
-    GFXPushBlendMode();
-    GFXBlendMode (ONE,ONE);
-	GFXDisable(TEXTURE0);
-	GFXDisable (TEXTURE1);
-  }
-  if (text==(Texture *)0||text==(Texture *)2){
-    GFXEnable (TEXTURE1);
-    GFXDisable (TEXTURE0);
-  } else if (text!=(Texture *)0&&text!=(Texture *)1&&text!=(Texture *)2){
-    text->MakeActive();
+static void TerrainMakeActive (const TerrainTexture &text) {
+  if (text.tex.t) {
+    text.tex.t->MakeActive();
   }
 
 }
-static void TerrainMakeDeactive (Texture *text) {
-  if (text==(Texture *)1||text==(Texture *)2) {
-    GFXPopBlendMode();
-  }
-  if (text==(Texture *)0||text==(Texture *)1||text==(Texture *)2) {
-    GFXEnable (TEXTURE0);
-    GFXDisable (TEXTURE1);
+static void TerrainMakeDeactive (const TerrainTexture text) {
+  if (text.tex.t){ 
+
   }
 }
 
 typedef std::vector <TextureIndex> vecTextureIndex;
-typedef std::vector <Texture *> vecTextureStar;
+typedef std::vector <TerrainTexture> vecTextureStar;
 
 int	quadsquare::Render(const quadcornerdata& cd)
 // Draws the heightfield represented by this tree.
@@ -1163,7 +1150,7 @@ unsigned short VertInfo::GetTex () const {
   //  return Tex/texmultiply + (((Tex%texmultiply)>texmultiply/2)?1:0);
 }
 
-void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <Texture *> *tex ) {
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <TerrainTexture> *tex ) {
   if (quadsquare::blendVertices==NULL) {
     GFXColorVertex tmp[3];
     blendVertices = new GFXVertexList (GFXTRI,3,tmp,3,true);

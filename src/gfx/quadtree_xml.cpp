@@ -6,17 +6,6 @@
 extern enum BLENDFUNC parse_alpha (char * tmp );
 
 
-struct TerrainTexture {
-	BLENDFUNC blendSrc;
-	BLENDFUNC blendDst;
-	int color;
-	GFXMaterial material;
-	bool reflect;
-	std::string file;
-	TerrainTexture () {
-		GFXGetMaterial (0, material);//by default it's the default material;
-	}
-};
 struct TerrainData {
 	float scale;
 	float OriginX;
@@ -130,7 +119,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case FFILE:
-				xml->tex.back().file=(*iter).value;
+				xml->tex.back().file=strdup ((*iter).value.c_str());
 				break;
 			case BLEND:
 				sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
@@ -251,4 +240,34 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 }
 
 void QuadTree::endElement(const string &name) {
+}
+
+void QuadTree::LoadXML (const char *filename) {
+  const int chunk_size = 16384;
+  std::vector <unsigned int> ind;  
+  FILE* inFile = fopen (filename, "r");
+  if(!inFile) {
+    assert(0);
+    return;
+  }
+  xml = new TerraXML;
+  xml->level = 15;
+  xml->detail=20;
+  XML_Parser parser = XML_ParserCreate(NULL);
+  XML_SetUserData(parser, this);
+  XML_SetElementHandler(parser, &QuadTree::beginElement, &QuadTree::endElement);
+  do {
+    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+    int length;
+    
+    length = fread(buf,1, chunk_size,inFile);
+    //length = inFile.gcount();
+    XML_ParseBuffer(parser, length, feof(inFile));
+  } while(!feof(inFile));
+  fclose (inFile);
+  XML_ParserFree (parser);
+
+
+
+  delete xml;
 }

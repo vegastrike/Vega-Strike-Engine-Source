@@ -28,11 +28,13 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   
 
   VertexAllocated = VertexCount = 4;
-  textures.push_back ((Texture *)0);
+  textures.push_back (TerrainTexture());
   for (int i=1;i<10;i++) {
     char name[]="terrainX.bmp";
     name[7] = '0'+i;
-    textures.push_back (new Texture (name));
+    TerrainTexture tmp;
+    tmp.tex.t = new Texture (name);
+    textures.push_back (tmp);
   }
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
   root = new quadsquare (&RootCornerData);

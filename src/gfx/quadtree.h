@@ -14,12 +14,13 @@ class QuadTree {
   Matrix transformation;
   quadcornerdata RootCornerData;
   quadsquare *root;
-  std::vector <Texture *> textures;
+  std::vector <TerrainTexture> textures;
   std::vector <unsigned int> unusedvertices;
   GFXVertexList vertices;
   unsigned int VertexAllocated;
   unsigned int VertexCount;
   void LoadData();
+  void LoadXML (const char * filename);
   TerraXML * xml;
  public:
   QuadTree ();
