@@ -430,6 +430,7 @@ void InitializeInput() {
 	//	BindKey(',', SlideLeft);
 	//	BindKey('.',SlideRight);
 	BindKey('~', Quit);
+	BindKey('q', Quit);
 	BindKey ('c',reCenter);
 	/*	BindKey('a', FighterYawLeft);
 	BindKey('d', FighterYawRight);
