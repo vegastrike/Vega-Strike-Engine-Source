@@ -25,6 +25,7 @@ class FireKeyboard: public Order {
   static void SirenKey (int,KBSTATE);
 #endif
   static void ToggleGlow (int,KBSTATE);
+  static void ToggleWarpDrive (int,KBSTATE);
   static void ToggleAnimation (int,KBSTATE);	
   static void PressComm1Key (int,KBSTATE);
   static void PressComm2Key (int,KBSTATE);

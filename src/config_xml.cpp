@@ -282,6 +282,7 @@ void GameVegaConfig::initCommandMap(){
   command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
   command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
   command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;
+  command_map["ToggleWarpDrive"]=FireKeyboard::ToggleWarpDrive;
   command_map["ToggleAnimation"]=FireKeyboard::ToggleAnimation;  
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
   

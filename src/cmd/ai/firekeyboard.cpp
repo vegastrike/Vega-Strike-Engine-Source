@@ -32,7 +32,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
 		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
 		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
@@ -80,6 +80,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE targetukey;
  KBSTATE turretaikey;
  KBSTATE toggleglow;
+ KBSTATE togglewarpdrive;
  KBSTATE toggleanimation;	
  KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
@@ -105,6 +106,13 @@ void FireKeyboard::ToggleGlow (int,KBSTATE k) {
 		g().toggleglow=PRESS;
 	}
 }
+
+void FireKeyboard::ToggleWarpDrive (int,KBSTATE k) {
+	if (k==PRESS) {
+		g().togglewarpdrive=PRESS;
+	}
+}
+
 void FireKeyboard::ToggleAnimation (int,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleanimation=PRESS;
@@ -1306,6 +1314,12 @@ void FireKeyboard::Execute () {
 	  isvis=!isvis;
 	  parent->SetGlowVisible (isvis);
   }
+
+  if (f().togglewarpdrive == PRESS) {
+	  f().togglewarpdrive=DOWN;
+	  parent->graphicOptions.InWarp=1-parent->graphicOptions.InWarp;
+  }
+
   if (f().misk==PRESS||f().rmisk==PRESS) {
     bool forward;
     if (f().misk==PRESS) {
