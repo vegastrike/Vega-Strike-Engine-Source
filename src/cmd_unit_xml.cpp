@@ -75,7 +75,8 @@ namespace UnitXML {
       MAX,
       MIN,
       MAXSPEED,
-      AFTERBURNER
+      AFTERBURNER,
+      BSPTREE
     };
 
   const EnumMap::Pair element_names[] = {
@@ -142,12 +143,12 @@ namespace UnitXML {
     EnumMap::Pair ("min", MIN),
     EnumMap::Pair ("weapon", WEAPON),
     EnumMap::Pair ("maxspeed", MAXSPEED),
-    EnumMap::Pair ("afterburner", AFTERBURNER)
-
+    EnumMap::Pair ("afterburner", AFTERBURNER),
+    EnumMap::Pair ("bsptree",BSPTREE)
 };
 
   const EnumMap element_map(element_names, 21);
-  const EnumMap attribute_map(attribute_names, 40);
+  const EnumMap attribute_map(attribute_names, 41);
 }
 
 using XMLSupport::EnumMap;
@@ -555,9 +556,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case PITCH:
-	  yprrestricted+=PRESTR;
-	assert (xml->unitlevel==2);
-	xml->unitlevel++;
+    yprrestricted+=PRESTR;
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
@@ -566,14 +567,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case MIN:
 	pmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
-    }
+      }
     }
     break;
 
   case ROLL:
-	  yprrestricted+=RRESTR;
-	assert (xml->unitlevel==2);
-	xml->unitlevel++;
+    yprrestricted+=RRESTR;
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
@@ -582,34 +583,44 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case MIN:
 	rmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
-    }
+      }
     }
     break;
 
   case UNIT:
 	assert (xml->unitlevel==0);
 	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case BSPTREE:
+	if (!bspTree)
+	  bspTree = new BSPTree ((*iter).value.c_str());
 	break;
+      default:
+	break;
+      }
+    }
+    break;
 
   case DEFENSE:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
-	break;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    break;
 
   case THRUST:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
-	break;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    break;
 
   case ENERGY:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
-	break;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    break;
 
   case RESTRICTED:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
-	break;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    break;
 	
   default:
 	
@@ -692,17 +703,21 @@ fclose (inFile);
   }
 
   calculate_extent();
-  
-  string tmpname (filename);
-  tmpname += ".bsp";
-  FILE * fp = fopen (tmpname.c_str(),"r+b");
-  if (!fp) {
-    BuildBSPTree (tmpname.c_str());
-  }else {
-    fclose (fp);
+  if (!bspTree) {
+    string tmpname (filename);
+    tmpname += ".bsp";
+    FILE * fp = fopen (tmpname.c_str(),"r+b");
+    if (!fp) {
+      BuildBSPTree (tmpname.c_str());
+    }else {
+      fclose (fp);
+    }
+    fp = fopen (tmpname.c_str(),"r+b");
+    if (fp) {
+      fclose (fp);
+      bspTree = new BSPTree (tmpname.c_str());
+    }	
   }
-  bspTree = new BSPTree (tmpname.c_str());
-
   delete xml;
 }
 

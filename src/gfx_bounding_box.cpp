@@ -193,3 +193,4 @@ bool BoundingBox::Within (const Vector &query, float err) {
   }
   return true; //within bounding box;
 }
+

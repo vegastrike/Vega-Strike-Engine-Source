@@ -52,8 +52,9 @@ AI * Order::Execute () {
       }
   */
   if (suborders.size()==0) {
-    delete this;
-    return new Order;
+    done = true;
+  } else{
+    done = false;
   }
   return this;
 }

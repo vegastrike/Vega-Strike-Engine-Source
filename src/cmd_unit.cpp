@@ -506,7 +506,7 @@ float Unit::queryBSP (const Vector &start, const Vector & end) {
   if (!bspTree)
       return true;
   Vector st (InvTransform (cumulative_transformation_matrix,start));
-  Vector ed (InvTransform (cumulative_transformation_matrix,start));
+  Vector ed (InvTransform (cumulative_transformation_matrix,end));
   if (tmp = bspTree->intersects (st,ed))
       return tmp;
 

@@ -538,7 +538,7 @@ void createObjects() {
     //fighters[a]->EnqueueAI(new MatchVelocity(Vector(0,0,-1),Vector (0,0,.4),true,true));
     //fighters[a]->EnqueueAI(new ExecuteFor(new FlyByKeyboard (),7));
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(),20));
-    fighters[a]->EnqueueAI(new ExecuteFor(new AIScript("aitest.xml"),10));
+    fighters[a]->EnqueueAI(new AIScript("aitest.xml"));
 	fighters[a]->EnqueueAI(new FlyByKeyboard ());
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);

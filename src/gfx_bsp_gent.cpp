@@ -213,11 +213,13 @@ void Unit::BuildBSPTree(const char *filename) {
  }
  
  bsp = buildbsp (bsp,tri,triplane);
- o = fopen (filename, "w+b");
- write_bsp_tree(bsp,0);
- fclose (o);
- bsp_stats (bsp);
- FreeBSP (&bsp);
+ if (bsp) {
+   o = fopen (filename, "w+b");
+   write_bsp_tree(bsp,0);
+   fclose (o);
+   bsp_stats (bsp);
+   FreeBSP (&bsp);
+ }	
  fprintf (stderr,"HighestLevel, BSP Tree %d",highestlevel);
 }
 static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane);
