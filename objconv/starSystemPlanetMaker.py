@@ -59,6 +59,19 @@ planets= g.getElementsByTagName('planet')
 systems = g.getElementsByTagName('system')
 stardata=None
 starcoords=[]
+
+def CombineTables(Prob,Mult,fac,newkey,ret):
+	tot=0	
+	ret[(fac,newkey)]=Prob[fac].copy();
+	for i in ret[(fac,newkey)]:
+		if (i in Mult):
+			ret[(fac,newkey)][i]=ret[(fac,newkey)][i]*Prob[fac][i];
+		tot+=ret[(fac,newkey)][i]
+	for i in Prob[fac]:
+		ret[(fac,newkey)][i]/=tot;
+	return ret;
+	
+
 if (stardatafile):
 	fsd = open(stardatafile)
 	stardatalines=fsd.readlines()
@@ -97,7 +110,156 @@ if (stardata):
 				s.insertBefore(newchild,s.firstChild)
 				break;
 
-#################fixme Insert code to do probability distribution and add planets##################
+starplanetmult={(70,0):{'Ice':8,
+					 'Aera_Ice':8,
+					 'Rocky':8,
+					 'Uninhabitable_Dwarf_Gas_Giant':4},
+		(70,1):{'Ice':8,
+					 'Aera_Ice':4,
+					 'Rocky':4,
+					 'Uninhabitable_Medium_Gas_Giant':4},
+		(70,2):{'Ice':8,
+					 'Aera_Ice':4,
+					 'Rocky':4,
+					 'Oceanic':2,
+					 'Uninhabitable_Medium_Gas_Giant':2,
+					 'Uninhabitable_Dwarf_Gas_Giant':2,
+					 'Uninhabitable_Dwarf_Gas_Giant':4},
+		(60,0):{'Ice':3,
+					 'Oceanic':2,
+					 'Aera_Ice':3,
+					 'Bio_Simple':2,
+					 'Bio_Simple_Methane':2,
+					 'Rocky':3,
+					 'Overgrown':2,
+					 'Overgrown_Methane':2},
+		(60,1):{'Ice':3,
+					 'Oceanic':2,
+					 'Aera_Ice':3,
+					 'Bio_Simple':2,
+					 'Bio_Simple_Methane':2,
+					 'Rocky':3,
+					 'Uninhabitable_Dwarf_Gas_Giant':2,
+					 'Uninhabitable_Medium_Gas_Giant':4},
+		(60,2):{'Ice':3,
+					 'Oceanic':2,
+					 'Aera_Ice':3,
+					 'Bio_Simple':2,
+					 'Bio_Simple_Methane':2,
+					 'Rocky':3,
+					 'Uninhabitable_Dwarf_Gas_Giant':4,
+					 'Uninhabitable_Medium_Gas_Giant':4,
+					 'Uninhabitable_Gas_Giant':2},
+		(50,0):{'Trantor_Class':2,
+					 'Bio_Diverse':4,
+					 'University':2,
+					 'Tropical':2,
+					 'Oceanic':4,
+					 'Oceanic_Ammonia':2,
+					 'Rlaan_Trantor':2,
+					 'Bio_Diverse_Methane':2,
+					 'Rocky':2,
+					 'Overgrown':4,
+					 'Overgrown_Methane':2},
+		(50,1):{'Trantor_Class':2,
+					 'Bio_Diverse':2,
+					 'Bio_Simple':4,
+					 'University':2,
+					 'Tropical':2,
+					 'Oceanic':2,
+					 'Oceanic_Ammonia':2,
+					 'Rlaan_Trantor':2,
+					 'Bio_Diverse_Methane':4,
+					 'Rocky':2,
+					 'Overgrown':4,
+					 'Overgrown_Methane':4,
+					 'Uninhabitable_Gas_Giant':2},
+		(50,2):{'Bio_Simple':4,
+					 'University':2,
+					 'Tropical':2,
+					 'Oceanic':2,
+					 'Oceanic_Ammonia':2,
+					 'Rlaan_Trantor':2,
+					 'Rocky':4,
+					 'Bio_Diverse_Methane':4,
+					 'Overgrown':4,
+					 'Overgrown_Methane':4,
+					 'Uninhabitable_Gas_Giant':2},
+		(40,0):{'Arid':4,
+					 'Arid_Methane':4,
+					 'Volcanic':4,
+					 'Bio_Simple_Methane':6,
+					 'Bio_Simple':8,
+					 'Uninhabitable_Dwarf_Gas_Giant':2},
+		(40,1):{'Arid':8,
+					 'Arid_Methane':8,
+					 'Volcanic':8,
+					 'Bio_Simple_Methane':6,
+					 'Bio_Simple':8,
+					 'Uninhabitable_Gas_Giant':2,
+					 'Uninhabitable_Medium_Gas_Giant':4,
+					 'Uninhabitable_Dwarf_Gas_Giant':2},
+		(40,2):{'Arid':10,
+					 'Arid_Methane':8,
+					 'Volcanic':8,
+					 'Bio_Simple_Methane':2,
+					 'Bio_Simple':2,
+					 'Uninhabitable_Gas_Giant':4,
+					 'Uninhabitable_Medium_Gas_Giant':4,
+					 'Uninhabitable_Dwarf_Gas_Giant':2},
+		(30,0):{'Arid':4,
+					 'Arid_Methane':4,
+					 'Volcanic':4,
+					 'Molten':1./32,
+					 'Uninhabitable_Gas_Giant':4,
+					 'Uninhabitable_Dwarf_Gas_Giant':2},
+		(30,1):{'Arid':4,
+					 'Arid_Methane':4,
+					 'Volcanic':4,
+					 'Molten':4,
+					 'Uninhabitable_Gas_Giant':8,
+					 'Uninhabitable_Medium_Gas_Giant':2},
+		(30,2):{'Arid':4,
+					 'Arid_Methane':4,
+					 'Volcanic':4,
+					 'Molten':4,
+					 'Uninhabitable_Gas_Giant':8},
+		(20,0):{'Arid':8,
+					 'Arid_Methane':8,
+					 'Volcanic':4,
+					 'Molten':8,
+					 'Uninhabitable_Dwarf_Gas_Giant':4},
+		(20,1):{'Arid':8,
+					 'Arid_Methane':8,
+					 'Volcanic':4,
+					 'Molten':8,
+					 'Uninhabitable_Dwarf_Gas_Giant':4,
+					 'Uninhabitable_Medium_Gas_Giant':2},
+		(20,2):{'Arid':8,
+					 'Arid_Methane':8,
+					 'Volcanic':8,
+					 'Molten':8,
+					 'Uninhabitable_Medium_Gas_Giant':4,
+					 'Uninhabitable_Dwarf_Gas_Giant':4,
+					 'Uninhabitable_Gas_Giant':8},
+		(10,0):{'Arid':8,
+					 'Arid_Methane':12,
+					 'Volcanic':12,
+					 'Molten':12,
+					 'Uninhabitable_Medium_Gas_Giant':4,
+					 'Uninhabitable_Dwarf_Gas_Giant':4},
+		(10,1):{'Arid':16,
+					 'Arid_Methane':16,
+					 'Volcanic':12,
+					 'Molten':32,
+					 'Uninhabitable_Gas_Giant':12},
+		(10,2):{'Arid':16,
+					 'Arid_Methane':12,
+					 'Volcanic':12,
+					 'Molten':32,
+					 'Uninhabitable_Gas_Giant':12}
+}
+	
 planetprob={'rlaan':{'Trantor_Class':1./1024,
 					 'Arid':1./128,
 					 'Arid_Methane':1./32,
@@ -242,14 +404,30 @@ ordering={'Trantor_Class':4,
 		  'Uninhabitable_Medium_Gas_Giant':5,
 		  'Uninhabitable_Dwarf_Gas_Giant':4,
 		  None:4}
+combined_planet_prob={}
+
 def planets_compare(x,y):
 	return ordering[x]-ordering[y];
 import random
 rak=random.Random(31337)
-def getPlanet(fac):
+def getPlanet(fac,radpair=None):
+	global combined_planet_prob
 	if not fac in planetprob:
 		fac=None
-	plist=planetprob[fac]
+	if not (fac,radpair) in combined_planet_prob:
+		if (radpair in starplanetmult):
+			combined_planet_prob=CombineTables(planetprob,starplanetmult[radpair],fac,radpair,combined_planet_prob)
+		else:
+			radpair=None		
+	if (radpair==None):
+		plist=planetprob[fac]
+	else:
+		plist = combined_planet_prob[(fac,radpair)]
+		#print str( (fac,radpair) )+" plist: " +str(plist)
+		#tot=0
+		#for i in plist:
+		#	tot+=plist[i];
+		#print "total: "+str(tot);
 	rfloat=rak.random()
 	for i in plist:
 		if (rfloat<plist[i]):
@@ -273,7 +451,7 @@ def abbreviate(l,planets):
 			
 def getPlanets(fac,planets, sun_radius):
 	import starCodes
-	#print "Sun Radius "+str(sun_radius)+" str(StarColorType) "+str(starCodes.sizeToNum(sun_radius))
+	pair=starCodes.sizeToNum(sun_radius)
 	numplan=rak.randint(0,5)
 	if (numplan>=4):
 		numplan = rak.randint(1,10)
@@ -282,7 +460,7 @@ def getPlanets(fac,planets, sun_radius):
 	moonindex=[]
 	j=0
 	for i in range(numplan):
-		plan=getPlanet(fac)
+		plan=getPlanet(fac,pair)
 		plist.append(plan)
 		mi=[]
 		if (plan in moonprob):
