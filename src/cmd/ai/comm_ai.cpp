@@ -7,6 +7,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
+#include "cmd/unit_util.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank>665&&rank<667) {
@@ -165,12 +166,15 @@ void CommunicatingAI::UpdateContrabandSearch () {
 		}
 	}
 }
+static bool isDockedAtAll(Unit * un) {
+  return (un->docked&(Unit::DOCKED_INSIDE|Unit::DOCKED))!=0;
+}
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
     Unit * un =FactionUtil::GetContraband (parent->faction);
     if (un) {
-    if (un->numCargo()>0) {
+    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(un)==UnitUtil::getUnitSystemFile(parent)&&!isDockedAtAll(un)) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
@@ -246,14 +250,16 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
 void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
   Unit * target = GetRandomUnit(playaprob,targprob);
   if (target!=NULL) {
-    for (std::list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {   
-      Unit * un=(*i)->sender.GetUnit();
-      if (un==target) {
-	return;
+    if (UnitUtil::getUnitSystemFile(target)==UnitUtil::getUnitSystemFile(parent)&&!isDockedAtAll(target)) {
+      for (std::list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {   
+        Unit * un=(*i)->sender.GetUnit();
+        if (un==target) {
+          return;
+        }
       }
+      //ok we're good to put a default msg in the queue as a fake message;
+      messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
     }
-    //ok we're good to put a default msg in the queue as a fake message;
-    messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
   }
 }
 
@@ -275,7 +281,7 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
   Order::ProcessCommMessage(c);
   FSM *tmpfsm = c.fsm;
   Unit * targ = c.sender.GetUnit();
-  if (targ) {
+  if (targ&&UnitUtil::getUnitSystemFile(targ)==UnitUtil::getUnitSystemFile(parent)&&!isDockedAtAll(targ)) {
     c.fsm  =FactionUtil::GetConversation (parent->faction,targ->faction);
     FSM::Node * n = c.getCurrentState ();
     if (n) {
