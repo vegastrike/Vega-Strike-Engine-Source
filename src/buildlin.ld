@@ -1,4 +1,4 @@
-ld    -nomultidefs  -o vegastrike debug_vs.o			\
+/home/daniel/install/binutils-2.15/ld/ld-new    -nomultidefs  -o vegastrike debug_vs.o			\
 	gfxlib_struct.o		\
 	in_joystick.o			\
 	force_feedback.o		\
