@@ -158,9 +158,11 @@ int main(int argc, char **argv)
 			bits, audio_channels>1?"stereo":"mono", audio_buffers );
 
 	// load the song
-	while (mysocket==-1) {
+	for (int i=0;i<10&&mysocket==-1;i++) {
 		mysocket = INET_AcceptFrom(4364,"localhost");
 	}
+	if (mysocket==-1)
+		return 1;
 	printf("\n[CONNECTED]\n");
 	char ministr[2]={'\0','\0'};
 	while (!done) {
