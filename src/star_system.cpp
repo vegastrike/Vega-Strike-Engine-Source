@@ -114,7 +114,7 @@ void StarSystem::Update() {
 
       ClearCollideQueue();
       modelGravity();
-      Iterator *iter = drawList->createIterator();
+      Iterator *iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->CollideAll();
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
@@ -123,7 +123,7 @@ void StarSystem::Update() {
       delete iter;
 
       DABEAM->UpdatePhysics(identity_transformation);
-      units->createIterator();
+      iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually
 	//	if(time/SIMULATION_ATOM>2.0) 
