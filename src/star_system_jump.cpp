@@ -12,6 +12,7 @@
 #include "gfx/cockpit.h"
 #include "audiolib.h"
 #include "cmd/images.h"
+#include "cmd/script/flightgroup.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
@@ -145,6 +146,13 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	if (unit->Target()==this) {
 	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
 	  unit->ActivateJumpDrive (0);
+	}else {
+	  if (unit->getFlightgroup()!=NULL&&unit->getFlightgroup()==getFlightgroup()) {
+	    if (unit->getFlightgroup()->leader.GetUnit()==this&&(unit->getFlightgroup()->directive=="f"||unit->getFlightgroup()->directive=="F")) {
+	      unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+	      unit->ActivateJumpDrive (0);
+	    }
+	  }
 	}
 	iter.advance();
       }

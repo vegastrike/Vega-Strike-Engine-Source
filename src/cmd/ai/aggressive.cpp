@@ -29,6 +29,7 @@ const EnumMap::Pair element_names[] = {
 const EnumMap AggressiveAIel_map(element_names, 12);
 static float aggressivity=2.01;
 AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,2), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+  last_time_insys=true;
   obedient = true;
   if (aggressivity==2.01)
     aggressivity = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
@@ -190,87 +191,95 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	Unit * targ = fg->leader.GetUnit();
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
-	  Vector vec;
-	  CommunicationMessage c(parent,leader,NULL,0);
-	  if (parent->InRange (targ,vec)) {
-	    parent->Target (targ);
-	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-	  }else {
-	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-	  }
-	  if (fg->directive!=last_directive) {
-	    leader->getAIState()->Communicate(c);
-	  }
-	}
-      }else if (fg->directive==string("f")||fg->directive==string("F")) {
-	retval=true;
-	if (leader!=NULL) {
-	  if (fg->directive!=last_directive) {
-	    
-	    CommunicationMessage c(parent,leader,NULL,0);
-	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-	    //}else {
-	    //	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-	    //	}
-	    leader->getAIState()->Communicate(c);
-	    float left= parent->getFgSubnumber()%2?1:-1;
-	    static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
-										      "Targetting",
-										      "EscortDistance",
-										      "2.0"));
-	    static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
-										      "Targetting",
-										      "TurnLeaderDist",
-										      "5.0"));
-
-	    float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
-	    Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
-	    ord->SetParent (parent);
-	    ReplaceOrder (ord);
-	    ord = new Orders::FaceDirection(dist*turn_leader);
-	    ord->SetParent (parent);
-	    ReplaceOrder (ord);
-	  }
-	}
-	for (unsigned int i=0;i<suborders.size();i++) {
-	  suborders[i]->AttachSelfOrder (leader);
-	}
-      }else if (fg->directive==string("h")||fg->directive==string("H")) {
-	//	fprintf (stderr,"he wnats to help out");
-	if (fg->directive!=last_directive&&leader) {
-	  //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
-	  Unit * th=NULL;
-	  if ((th=leader->Threat())) {
-	    //fprintf (stderr,"he wnats to help out and he has a threat\n");
+	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    Vector vec;
 	    CommunicationMessage c(parent,leader,NULL,0);
-	    if (parent->InRange(th,vec)) {
-	      parent->Target(th);
+	    if (parent->InRange (targ,vec)) {
+	      parent->Target (targ);
 	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	    }else {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    }
-	    leader->getAIState()->Communicate(c);
-	  }else {
-	    bool targetted=false;
-	    float mindist;
-	    Unit * un=NULL;
-	    th= GetThreat(parent,leader);
-	    CommunicationMessage c(parent,leader,NULL,0);
-	    //fprintf (stderr,"he wnats to help out against threat %d",th);
-	    if (th) {
-	      Vector vec;
-	      if (parent->InRange (th,vec)) {
-		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-		parent->Target (th);
-	      }else {
-		c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
-	      }
-	      //fprintf (stderr,"Helping out kill: %s",th->name.c_str());
-	    }else {
-	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	    if (fg->directive!=last_directive) {
+	      leader->getAIState()->Communicate(c);
 	    }
-	    leader->getAIState()->Communicate(c);
+	  }
+	}
+      }else if (fg->directive==string("f")||fg->directive==string("F")) {
+	if (leader!=NULL) {
+	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	    retval=true;
+	    if (fg->directive!=last_directive||(!last_time_insys)) {
+	      last_time_insys=true;
+	      CommunicationMessage c(parent,leader,NULL,0);
+	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	    //}else {
+	      //	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	      //	}
+	      leader->getAIState()->Communicate(c);
+	      float left= parent->getFgSubnumber()%2?1:-1;
+	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"Targetting",
+											"EscortDistance",
+											"2.0"));
+	      static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"Targetting",
+											"TurnLeaderDist",
+											"5.0"));
+	      
+	      float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
+	      Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
+	      ord->SetParent (parent);
+	      ReplaceOrder (ord);
+	      ord = new Orders::FaceDirection(dist*turn_leader);
+	      ord->SetParent (parent);
+	      ReplaceOrder (ord);
+	    }
+	  } else {
+	    last_time_insys=false;
+	  }
+	  for (unsigned int i=0;i<suborders.size();i++) {
+	    suborders[i]->AttachSelfOrder (leader);
+	  }
+	}
+      }else if (fg->directive==string("h")||fg->directive==string("H")) {
+	//	fprintf (stderr,"he wnats to help out");
+	if (fg->directive!=last_directive&&leader) {
+	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	    //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
+	    Unit * th=NULL;
+	    if ((th=leader->Threat())) {
+	      //fprintf (stderr,"he wnats to help out and he has a threat\n");
+	      Vector vec;
+	      CommunicationMessage c(parent,leader,NULL,0);
+	      if (parent->InRange(th,vec)) {
+		parent->Target(th);
+		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	      }else {
+		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	      }
+	      leader->getAIState()->Communicate(c);
+	    }else {
+	      bool targetted=false;
+	      float mindist;
+	      Unit * un=NULL;
+	      th= GetThreat(parent,leader);
+	      CommunicationMessage c(parent,leader,NULL,0);
+	      //fprintf (stderr,"he wnats to help out against threat %d",th);
+	      if (th) {
+		Vector vec;
+		if (parent->InRange (th,vec)) {
+		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+		  parent->Target (th);
+		}else {
+		  c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
+		}
+		//fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+	      }else {
+		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	      }
+	      leader->getAIState()->Communicate(c);
+	    }
 	  }
 	}
       }
