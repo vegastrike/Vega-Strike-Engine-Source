@@ -3659,6 +3659,44 @@ void Unit::ProcessDeleteQueue() {
 
   }
 }
+Unit * makeBlankUpgrade (string templnam, int faction) {
+  Unit * bl =  UnitFactory::createServerSideUnit (templnam.c_str(),true,faction);
+  for (int i= bl->numCargo()-1;i>=0;i--) {
+    int q =bl->GetCargo (i).quantity;
+    bl->RemoveCargo (i,q);
+  }
+  bl->Mass=0;
+  return bl;
+}
+
+
+const Unit * makeFinalBlankUpgrade (string name, int faction) {
+  char * unitdir = GetUnitDir(name.c_str());
+  string limiternam = name;
+  if (unitdir!=name)
+	  limiternam=string(unitdir)+string(".blank");
+  free (unitdir);
+  const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
+  if (!lim)
+    lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),makeBlankUpgrade(limiternam,faction));
+  return lim;
+}
+const Unit * makeTemplateUpgrade (string name, int faction) {
+  char * unitdir = GetUnitDir(name.c_str());
+  string limiternam = string(unitdir)+string(".template");
+  free (unitdir);
+  const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
+  if (!lim)
+    lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
+  return lim;
+}
+const Unit * loadUnitByCache(std::string name,int faction) {
+      const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(name,faction));
+      if (!temprate)
+		  temprate = UnitConstCache::setCachedConst(StringIntKey(name,faction),UnitFactory::createUnit(name.c_str(),true,faction));
+	  return temprate;
+}
+
 bool DestroySystem (float hull, float maxhull, float numhits) {
 	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".005"));
 	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
@@ -3739,6 +3777,11 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0) {
 						int lenupgrades = strlen("upgrades/");
 						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).category.substr(lenupgrades);
+                                                const Unit * downgrade=loadUnitByCache(GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
+                                                if (downgrade) {
+                                                  double percentage=0;
+                                                  this->Downgrade(downgrade,0,0,percentage,NULL);
+                                                }
 					}
 				}
 			}
@@ -5729,43 +5772,6 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       }
   }
   return cancompletefully;
-}
-Unit * makeBlankUpgrade (string templnam, int faction) {
-  Unit * bl =  UnitFactory::createServerSideUnit (templnam.c_str(),true,faction);
-  for (int i= bl->numCargo()-1;i>=0;i--) {
-    int q =bl->GetCargo (i).quantity;
-    bl->RemoveCargo (i,q);
-  }
-  bl->Mass=0;
-  return bl;
-}
-
-
-const Unit * makeFinalBlankUpgrade (string name, int faction) {
-  char * unitdir = GetUnitDir(name.c_str());
-  string limiternam = name;
-  if (unitdir!=name)
-	  limiternam=string(unitdir)+string(".blank");
-  free (unitdir);
-  const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
-  if (!lim)
-    lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),makeBlankUpgrade(limiternam,faction));
-  return lim;
-}
-const Unit * makeTemplateUpgrade (string name, int faction) {
-  char * unitdir = GetUnitDir(name.c_str());
-  string limiternam = string(unitdir)+string(".template");
-  free (unitdir);
-  const Unit * lim= UnitConstCache::getCachedConst (StringIntKey(limiternam,faction));
-  if (!lim)
-    lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
-  return lim;
-}
-const Unit * loadUnitByCache(std::string name,int faction) {
-      const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(name,faction));
-      if (!temprate)
-		  temprate = UnitConstCache::setCachedConst(StringIntKey(name,faction),UnitFactory::createUnit(name.c_str(),true,faction));
-	  return temprate;
 }
 bool Unit::ReduceToTemplate() {
 	vector <Cargo> savedCargo;
