@@ -577,6 +577,7 @@ double gametime=0.0;
 int total_nr_frames=0;
 int getmicrosleep () {
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
+  return microsleep;
 }
 void main_loop() {
 

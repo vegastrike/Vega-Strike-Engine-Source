@@ -453,7 +453,7 @@ bool StarSystem::JumpTo (Unit * un, const std::string &system) {
       if (!fp)
 	return false;
       fclose (fp);
-      ss = new StarSystem (ssys.c_str(),un->Position(),un->name);
+      ss = new StarSystem (ssys.c_str(),Vector (0,0,0),un->name);
       _Universe->LoadStarSystem (ss);
     }
   }

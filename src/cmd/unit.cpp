@@ -96,7 +96,7 @@ void Unit::SetResolveForces (bool ys) {
 }
 
 
-void Unit::ActivateJumpDrive (int destination=0) {
+void Unit::ActivateJumpDrive (int destination) {
   if (jumpdrive!=-2) {
     jumpdrive = destination;
   }
