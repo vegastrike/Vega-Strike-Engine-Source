@@ -10,11 +10,16 @@ class CommunicatingAI:public Order{
   float randomresponse;
   float mood;
   Animation * comm_face;
-
+  UnitContainer contraband_searchee;
+  bool contraband_detected;
+  Vector SpeedAndCourse;
   relationmap effective_relationship;
  public:
   float GetEffectiveRelationship (const Unit * target) const;
+  Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);
   void RandomInitiateCommunication (float PlayerProbability, float TargetProbability);
+  void TerminateContrabandSearch();
+  void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
    CommunicatingAI (int ttype, float anger=-.5, float moodswingyness=.2, float randomnessresponse=.8,float mood=0);
    virtual void ProcessCommMessage (class CommunicationMessage &c); 
    virtual void AdjustRelationTo (Unit * un, float factor);

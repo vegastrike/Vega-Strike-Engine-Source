@@ -46,6 +46,26 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   }
   return _Universe->GetRelation (parent->faction,target->faction)+rel;
 }
+
+void CommunicatingAI::TerminateContrabandSearch() {
+  //reports success or failure
+  
+}
+void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
+  Unit *u= GetRandomUnit (playaprob,targprob);
+  if (u) {
+    if (contraband_searchee.GetUnit()) {
+      TerminateContrabandSearch();
+    }
+    contraband_searchee.SetUnit (u);
+    contraband_detected=false;
+    SpeedAndCourse = u->GetVelocity();
+    CommunicationMessage c(parent,u,ani);
+
+    
+  }
+}
+
 void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   Order::AdjustRelationTo(un,factor);
   //now we do our magik  insert 0 if nothing's there... and add on our faction
@@ -57,7 +77,7 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   mood+=factor*moodswingyness;
 }
 
-void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
+Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   float a =rand ();
   Unit * target=NULL;
   if (a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
@@ -66,15 +86,19 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
   if (a>RAND_MAX*(1-targprob)) {
     target = parent->Target();
   }
-  if (target==NULL) {
+  Vector localcoord;
+  if (target==NULL?true:(!parent->InRange (target,localcoord))) {
     for (un_iter ui=_Universe->activeStarSystem()->getUnitList().createIterator();
 	 (*ui)!=NULL; ++ui) {
-      Vector localcoord;
       if (parent->InRange ((*ui),localcoord)) {
 	target = *ui;
       }
     }
   }
+  return target;
+}
+void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
+  Unit * target = GetRandomUnit(playaprob,targprob);
   if (target!=NULL) {
     for (unsigned int i=0;i<messagequeue.size();i++) {   
       Unit * un=messagequeue[i]->sender.GetUnit();

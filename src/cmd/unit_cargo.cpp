@@ -6,7 +6,7 @@
 #include "config_xml.h"
 #include <assert.h>
 Unit& GetUnitMasterPartList () {
-  static Unit MasterPartList ("master_part_list",false,_Universe->GetFaction("upgrades"));
+  static Unit MasterPartList ("master_part_list",true,_Universe->GetFaction("upgrades"));
   return MasterPartList;
 }
 

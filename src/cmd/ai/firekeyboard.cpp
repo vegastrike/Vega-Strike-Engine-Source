@@ -6,6 +6,7 @@
 #include "cmd/unit.h"
 #include "communication.h"
 #include "gfx/cockpit.h"
+#include "gfx/animation.h"
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
 
@@ -365,11 +366,17 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   if (un) {
     AdjustRelationTo(un,c.getCurrentState()->messagedelta);
     mission->msgcenter->add ("game","all",un->name+string(": ")+c.getCurrentState()->message);
+    if (parent==_Universe->AccessCockpit()->GetParent()) {
+      _Universe->AccessCockpit()->SetCommAnimation (c.ani);
+    }
+
   }else {
     mission->msgcenter->add ("game","all",string("[static]: ")+c.getCurrentState()->message);
-  }
-  if (parent==_Universe->AccessCockpit()->GetParent()) {
-    _Universe->AccessCockpit()->SetCommAnimation (c.ani);
+    if (parent==_Universe->AccessCockpit()->GetParent()) {
+      Animation Statuc ("static.ani");
+      _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
+    }
+
   }
 }
 
@@ -479,11 +486,15 @@ void FireKeyboard::Execute () {
       if (targ) {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,messagequeue);       
 	if (mymsg==NULL) {
-	  targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,i,NULL));
+	  CommunicationMessage c(parent,targ,i,NULL);
+	  mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
+	  targ->getAIState ()->Communicate (c);
 	}else {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
-	    targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,*mymsg,i,NULL));
+	    CommunicationMessage c(parent,targ,*mymsg,i,NULL);
+	    mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
+	    targ->getAIState ()->Communicate (c);
 	  }
 	}
       }

@@ -89,7 +89,9 @@ void cleanup(void)
   //  write_saved_games();
   AUDDestroy();
   destroyObjects();
+  Unit::ProcessDeleteQueue();
   delete _Universe;
+  
 }
 
 VegaConfig *vs_config;
@@ -297,6 +299,7 @@ void bootstrap_main_loop () {
     delete SplashScreen;
     SplashScreen= NULL;
     SetStarSystemLoading (false);
+    _Universe->LoadContrabandLists();
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }

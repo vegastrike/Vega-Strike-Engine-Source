@@ -401,8 +401,6 @@ void VDU::DrawComm (const GFXColor & c) {
     GFXDisable (TEXTURE1);
     GFXEnable (TEXTURE0);
     GFXDisable(LIGHTING);
-    GFXDisable (DEPTHWRITE);
-    GFXDisable (DEPTHTEST);
 
     comm_ani->DrawAsSprite(this);
     if (comm_ani->Done()) {
@@ -418,6 +416,8 @@ void VDU::DrawComm (const GFXColor & c) {
       comm_ani=NULL;
     }
     GFXDisable (TEXTURE0);
+
+
   }else {
     GFXColorf (c);
     tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  

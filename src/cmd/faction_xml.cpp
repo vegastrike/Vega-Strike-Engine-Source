@@ -27,7 +27,8 @@ namespace FactionXML {
 	FRIEND,
 	ENEMY,
 	CONVERSATION,
-	COMM_ANIMATION
+	COMM_ANIMATION,
+	CONTRABAND
   };
 
   const EnumMap::Pair element_names[] = {
@@ -45,12 +46,13 @@ namespace FactionXML {
 	EnumMap::Pair ("logoRGB", LOGORGB), 
 	EnumMap::Pair ("logoA", LOGOA), 
 	EnumMap::Pair ("relation",RELATION),
-	EnumMap::Pair ("Conversation", CONVERSATION)
+	EnumMap::Pair ("Conversation", CONVERSATION),
+	EnumMap::Pair ("Contraband",CONTRABAND)
 };
 
 
   const EnumMap element_map(element_names, 7);
-  const EnumMap attribute_map(attribute_names, 6);
+  const EnumMap attribute_map(attribute_names, 7);
 
 }
 
@@ -100,10 +102,13 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
-		thisuni->factions[thisuni->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
-		strcpy(thisuni->factions[thisuni->factions.size()-1]->factionname,(*iter).value.c_str());
+	thisuni->factions[thisuni->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
+	strcpy(thisuni->factions[thisuni->factions.size()-1]->factionname,(*iter).value.c_str());
 		break;
 
+      case CONTRABAND:
+	contrabandlists.back()= ((*iter).value);
+	break;
       case LOGORGB:
 		if (RGBfirst==0||RGBfirst==1) {
 			RGBfirst=1;
@@ -240,6 +245,7 @@ float Universe::GetRelation (const int Myfaction, const int TheirFaction) {
 }
 Universe::Faction::Faction() {
 	logo=NULL;
+	contraband=NULL;
 	factionname=NULL;
 }
 Universe::Faction::~Faction() {
@@ -248,6 +254,9 @@ Universe::Faction::~Faction() {
   }
   delete logo;
   delete [] factionname;
+  if (contraband) {
+    contraband->Kill();;
+  }
 }
 
 void Universe::Faction::ParseAllAllies(Universe * thisuni) {
@@ -353,5 +362,13 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   }
 }
 void Universe::LoadContrabandLists() {
-
+  for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
+    if (contrabandlists[i].length()>0) {
+      factions[i]->contraband = new Unit (contrabandlists[i].c_str(),true,i);
+    }
+  }
+  contrabandlists.clear();
+}
+Unit* Universe::GetContraband(int faction){
+  return factions[faction]->contraband;
 }
