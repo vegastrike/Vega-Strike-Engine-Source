@@ -142,9 +142,10 @@ Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TAR
 	}
 	//	this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
-	this->texfilename = texfilename;
 	if(checkold(texfilename))
 		return;
+	this->texfilename = new char [texfilename.length()+1];
+	strcpy(this->texfilename,texfilename.c_str());
 
 	if(info.biBitCount == 24)
 	{
@@ -232,9 +233,11 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, bo
 	string texfilename = string(FileNameRGB) + string(FileNameA);
 	//this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
-	this->texfilename = texfilename;
+
 	if(checkold(texfilename))
 		return;
+	this->texfilename = new char [texfilename.length()+1];
+	strcpy(this->texfilename,texfilename.c_str());
 
 	if (FileNameA)
 	{
@@ -389,10 +392,11 @@ Texture::~Texture()
 			if(data != NULL)
 			{
 				delete [] data;
+
 				data = NULL;
-				texHashTable.Delete (texfilename);
+				texHashTable.Delete (string(texfilename));
 				GFXDeleteTexture(name);
-				
+				delete []texfilename;				
 				//glDeleteTextures(1, &name);
 			}
 			if (palette !=NULL) {

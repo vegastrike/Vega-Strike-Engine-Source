@@ -31,7 +31,7 @@
 using namespace std;
 
 struct Texture{
-  string texfilename;
+  char * texfilename;
   //  char filename[64];
   bool ismipmapped;
 	unsigned int sizeX;
