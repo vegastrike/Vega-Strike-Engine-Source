@@ -191,7 +191,7 @@ class ChangeHeading : public Order {
     Vector p,q,r;
     parent->GetOrientation(p,q,r);
     
-    fprintf (stderr,"local heading: %s\n",local_heading );
+    fprintf (stderr,"local heading:  (%f %f %f)\n",local_heading.i,local_heading.j,local_heading.k );
 
     Vector ang_vel_norm = ang_vel;
     float ang_speed = ang_vel.Magnitude();
@@ -213,7 +213,7 @@ class ChangeHeading : public Order {
     */
     Vector turning;
     CrossProduct(local_heading, Vector(0,0,1), turning);
-    fprintf(stderr,"turning: %s\n", turning);
+    fprintf(stderr,"turning: (%f, %f, %f)\n", turning.i, turning.j, turning.k);
     float angle = asin(turning.Magnitude());
 
     if(fabs(angle) < THRESHOLD) { // handle case where we're really close to the target (or 180 degrees away)
@@ -238,7 +238,7 @@ class ChangeHeading : public Order {
 	angle = -PI - angle;
       }
     }
-    fprintf (stderr, "angle: %d", angle );
+    fprintf (stderr, "angle: %f", angle );
     if(fabs(angle) > THRESHOLD) {
       Vector turning_norm = turning;
       turning_norm.Normalize();
@@ -254,10 +254,10 @@ class ChangeHeading : public Order {
       angular_velocity = angular_velocity - torque / parent->GetMoment() * SIMULATION_ATOM;
 
       float angular_speed = angular_velocity * turning_norm;
-      fprintf (stderr,"Current angular speed: %s\n", angular_speed );
+      fprintf (stderr,"Current angular speed: %f\n", angular_speed );
       angular_velocity = turning_norm * (angular_speed);
       angle = angle - angular_speed * SIMULATION_ATOM; // how much we want to try to conver in the next frame
-      fprintf (stderr, "angle after adjustment: %s\n", angle) ;
+      fprintf (stderr, "angle after adjustment: %f\n", angle) ;
 
       float max_accel = parent->MaxTorque(turning_norm).Magnitude()/parent->GetMoment();
       Vector max_retro_torque = parent->MaxTorque(-turning_norm);
@@ -267,10 +267,10 @@ class ChangeHeading : public Order {
       
       if(angle > 0) {
      	// Figure out maximum torque in deceleration direction
-	fprintf (stderr,"max accel distance: %s\n", max_accel_distance );
+	fprintf (stderr,"max accel distance: %f\n", max_accel_distance );
 	int n = fabs(floor(angular_speed / (retro_torque/parent->GetMoment()))); // n = # of turns needed to kill all speed
 	float braking_distance = fabs(max_accel_distance) * (((n+1)*(n)/2) );
-	fprintf (stderr,"Need %s turns to kill all speed, distance of %d\n",n ,braking_distance) ;
+	fprintf (stderr,"Need %d turns to kill all speed, distance of %f\n",n ,braking_distance) ;
 	// n*(n+1)/2
       // figure out how far we can get while braking (discrete
 	// summation since everything is done with impulses
@@ -296,19 +296,16 @@ class ChangeHeading : public Order {
                                 // cover this distance
       delta_v -= angular_speed; // adjust speed downward
       Vector more_torque = turning_norm * (delta_v / SIMULATION_ATOM * parent->GetMoment());
-#ifndef WIN32
-      cerr << "Torque for turning towards target " << more_torque << endl;
-      cerr << "clamped torque " << parent->ClampTorque(more_torque) << endl;
-#endif
+      fprintf (stderr,"Torque for turning towards target (%f,%f,%f)\n",more_torque.i,more_torque.j,more_torque.k);
+      fprintf (stderr,"clamped torque (%f,%f,%f)\n", parent->ClampTorque(more_torque).i, parent->ClampTorque(more_torque).j, parent->ClampTorque(more_torque).k);
       torque += more_torque;
     } else {
       // Kill angular momentum
       Vector angular_velocity = parent->GetAngularVelocity();
       Vector more_torque = Vector(-angular_velocity.i, -angular_velocity.j, 0);
       more_torque = more_torque * parent->GetMoment() / SIMULATION_ATOM;
-#ifndef WIN32
-      cerr << "Killing angular momentum " << more_torque << endl;
-#endif
+
+      fprintf (stderr, "Killing angular momentum (%f,%f,%f)\n",more_torque.i,more_torque.j,more_torque.k);
       torque += more_torque;
       if(torque.Magnitude() < THRESHOLD) {
 	done = true;
