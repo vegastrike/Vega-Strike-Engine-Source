@@ -31,7 +31,11 @@ int hash_sound (const int buffer) {
   return buffer%hashsize;
 }
 float AUDDistanceSquared(const int sound) {
+#ifdef HAVE_AL
   return (sounds[sound].pos-mylistener.pos).MagnitudeSquared();
+#else
+  return 0.0;
+#endif
 }
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain) {
 #ifdef HAVE_AL
