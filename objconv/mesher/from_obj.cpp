@@ -23,6 +23,8 @@ vector<string> splitWhiteSpace(string inp) {
       ret.push_back(inp.substr(0,where));
     inp = inp.substr(where+1);
   }
+  if (inp.length()&&where==string::npos)
+    ret.push_back(inp);
   return ret;
 }
 IntRef parsePoly(string inp) {
@@ -188,6 +190,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
       GFXVertex temp;
       if (5== sscanf(buf,"f %s %s %s %s %s",str,str1,str2,str3,str4)) {
         vector<string> splitwhite = splitWhiteSpace(buf+1);        
+        //        printf ("split white %d %s %s %s %s %s\n",splitwhite.size(),str,str1,str2,str3,str4);
         xml.trifans.push_back(strip());
         IntRef first=parsePoly(str);
         
