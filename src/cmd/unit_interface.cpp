@@ -426,7 +426,7 @@ void UpgradingInfo::SetupCargoList () {
         CargoList->AddTextItem ("Load","Load");
       }else
       if (mode==NEWSMODE) {
-	static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","true"));
+	static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
 	if (news_from_cargolist) {
 		gameMessage last;
 		int i=0;
