@@ -631,6 +631,8 @@ void restore_main_loop() {
 
 }
 void main_loop() {
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
   _Universe->StartDraw();
   if(myterrain){
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
