@@ -822,8 +822,8 @@ void MakePlanet(float radius, int entitytype, string texturename, int texturenum
 	
 	Tab();f.Fprintf ("<Fog>\n");
 	xmllevel++;
-	Tab();f.Fprintf ("<FogElement file=\"atmXatm.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
-	Tab();f.Fprintf ("<FogElement file=\"atmXhalo.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	Tab();f.Fprintf ("<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	Tab();f.Fprintf ("<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
 	xmllevel--;
 	Tab();f.Fprintf ("</Fog>\n");
 	}
