@@ -33,7 +33,7 @@
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
-
+#include "cmd/unit_factory.h"
 #include <expat.h>
 #include "xml_support.h"
 
@@ -61,6 +61,7 @@
 #include "cmd/unit_factory.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
+extern int GetModeFromName (const char *);
 /* *********************************************************** */
 
 extern Unit& GetUnitMasterPartList ();
@@ -1000,6 +1001,32 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
+    }
+    else if (method_id==CMT_UNIT_upgrade) {
+      string file = getStringArgument (node,mode,1);
+      double percentage=0;
+      bool force=true;
+      int mountoffset = getIntArg(node,mode,2);      
+      int subunitoffset = getIntArg(node,mode,3);      
+      if (node->subnodes.size()>4) {
+        force = getBoolArg(node,mode,4);
+      }
+      if (mode==SCRIPT_RUN) {
+	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
+	Unit * templ = UnitFactory::createUnit ((my_unit->name+".template").c_str(),true,my_unit->faction);
+	if (up->name!="LOAD_FAILED") {
+	  if (!my_unit->Upgrade(up,mountoffset, subunitoffset, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ)) {
+	    percentage=0;
+	  }
+	}
+	templ->Kill();
+	up->Kill();
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=percentage;
+      
     }
     else if(method_id==CMT_UNIT_incrementCargo){
       float percentagechange= getFloatArg(node,mode,1);

@@ -11,6 +11,8 @@
 #include "savegame.h"
 #include "cmd/script/mission.h"
 #include "gfx/hud.h"
+
+#include "config_xml.h"
 #include "gldrv/winsys.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
