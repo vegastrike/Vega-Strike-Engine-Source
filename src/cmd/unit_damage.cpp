@@ -40,7 +40,7 @@ void GameUnit<UnitType>::Kill(bool eraseFromSave)
     if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
       delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
-  Unit::Kill(eraseFromSave);
+  UnitType::Kill(eraseFromSave);
 }
 
 template<class UnitType>
@@ -129,7 +129,7 @@ void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
 
 template <class UnitType>
 float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
-  float percent = Unit::DealDamageToShield( pnt, damage);
+  float percent = UnitType::DealDamageToShield( pnt, damage);
   if (percent&&!AUDIsPlaying (sound->shield))
 	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
   else
@@ -153,7 +153,7 @@ float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & n
   }
   //  #endif
   float percentage=0;
-  percentage = Unit::ApplyLocalDamage( pnt, normal, amt, affectedUnit, color, phasedamage);
+  percentage = UnitType::ApplyLocalDamage( pnt, normal, amt, affectedUnit, color, phasedamage);
   float leakamt = phasedamage+amt*.01*shield.leak;
   if( percentage==-1)
 	return -1;
