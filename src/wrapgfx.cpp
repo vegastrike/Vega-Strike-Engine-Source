@@ -154,8 +154,9 @@ BOOL WrapGFX::StartGFX()
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
 	GFXCreateLight (ligh);
-	GFXSetLight (ligh, POSITION, GFXColor (10,10,10,0));
-	GFXSetLight (ligh, DIFFUSE, GFXColor (.8,.3,.8,1));
+	GFXSetLight (ligh, POSITION, GFXColor (2,2,2,0));
+	//	GFXSetLight (ligh, ATTENUATE, GFXColor (.3,0,1));
+	GFXSetLight (ligh, DIFFUSE, GFXColor (1,1,1,1));
 	GFXEnableLight (ligh);
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix

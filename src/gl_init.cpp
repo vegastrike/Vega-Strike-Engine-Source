@@ -222,7 +222,7 @@ BOOL GFXInit (int argc, char ** argv){
 //	glPushMatrix();
 
     glEnable(GL_LIGHTING);
-    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, TRUE);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
     glDisable(GL_NORMALIZE);
     int con;
     GFXCreateLightContext (con);
