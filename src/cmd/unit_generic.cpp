@@ -405,7 +405,6 @@ void Unit::Init()
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
-  radial_size=1;
   jump.energy = 100;
   jump.delay=5;
   jump.damage=0;
@@ -624,6 +623,8 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	    meshdata.push_back(NULL);
 		this->fullname=filename;
 	    this->name=string("LOAD_FAILED");
+		radial_size=1;
+		
 	    //	    assert ("Unit Not Found"==NULL);
 	}else {
 	  path.back().pop_back();vschdirs(path.back());
