@@ -1,4 +1,4 @@
-#ifdef HAVE_PYTHON
+#ifdef HAVE_BOOST
 #include <stdio.h>
 #include <Python.h>
 #include "init.h"

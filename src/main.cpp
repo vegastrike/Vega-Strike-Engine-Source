@@ -107,7 +107,7 @@ int main( int argc, char *argv[] )
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
 
-#ifdef HAVE_PYTHON
+#ifdef HAVE_BOOST
 
     //	Python::init();
 
