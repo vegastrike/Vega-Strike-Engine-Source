@@ -348,7 +348,7 @@ void Unit::SetRecursiveOwner(Unit *target) {
     UnitCollection::UnitIterator iter = getSubUnits();
     Unit * su;
     while ((su=iter.current())) {
-      su->SetOwner (target);
+      su->SetRecursiveOwner (target);
       iter.advance();
     }
   }
