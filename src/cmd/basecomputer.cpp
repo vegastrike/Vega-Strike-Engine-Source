@@ -3810,9 +3810,12 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		if(!subunitlevel){
 			PRETTY_ADDU(statcolor+"Warp capacitor bank storage: #-c",playerUnit->GetWarpEnergy()*RSconverter*Wconv,0,"MJ");
 
+			text+="#n##n##c0:1:.5#"+prefix+"[SPEC SUBSYSTEM]#n##-c";
+
+			PRETTY_ADDU(statcolor+"Active SPEC Energy Requirements: #-c",uj.insysenergy*RSconverter*Wconv/warpbleed,0,"MJ/s");
+
     		text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
 			
-			PRETTY_ADDU(statcolor+"Energy cost for insystem jump: #-c",uj.insysenergy*RSconverter*Wconv,0,"MJ");
 			if (uj.drive==-2) {
 				text+="#n##c1:.3:.3#No outsystem jump drive present#-c"; // fixed??
 			} else {
