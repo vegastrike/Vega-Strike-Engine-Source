@@ -11,6 +11,8 @@
 inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
   if (dock.used)
     return false;
+  double rad=dock.radius+radius;
+  return (pos-dock.pos).MagnitudeSquared()<rad*rad;
   if (dock.internal) {
     if ((pos.i+radius<dock.max.i)&&
 	(pos.j+radius<dock.max.j)&&

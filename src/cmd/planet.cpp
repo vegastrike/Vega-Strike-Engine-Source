@@ -19,6 +19,7 @@
 #include "gfx/halo.h"
 #include "gfx/animation.h"
 #include "cmd/script/flightgroup.h"
+#include "gfx/ring.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -90,14 +91,14 @@ void Planet::AddSatellite (Unit * orbiter) {
 	orbiter->SetOwner (this);
 }
 extern Flightgroup * getStaticBaseFlightgroup(int faction);
-Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,const char * citylights,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
+Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname, bool inside_out){
   //this function is OBSOLETE
   Unit * un=NULL;
   if (level>2) {
     UnitCollection::UnitIterator satiterator = satellites.createIterator();
 	  assert(satiterator.current()!=NULL);
 	  if (satiterator.current()->isUnit()==PLANETPTR) {
-		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,citylights,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
+		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
@@ -113,7 +114,7 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
       satiterator.current()->SetOwner (this);
     }else {
       Planet * p;
-      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,citylights,blendSrc,blendDst,dest, QVector (0,0,0), this, ourmat, ligh, faction,fullname,inside_out));
+      satellites.prepend(p=UnitFactory::createPlanet(x,y,vely,rotvel,pos,gravity,radius,filename,blendSrc,blendDst,dest, QVector (0,0,0), this, ourmat, ligh, faction,fullname,inside_out));
       un = p;
       p->SetOwner (this);
     }
@@ -155,16 +156,64 @@ string getCargoUnitName (const char * textname) {
   free(tmp2);
   return retval;
 }
+void Planet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out){
+  if (meshdata.empty()) {
+    meshdata.push_back(NULL);
+  }
+  Mesh * shield = meshdata.back();
+  meshdata.pop_back();
+  GFXMaterial m;
+  m.ar=m.ag=m.ab=m.aa=1.0;
+  m.dr=m.dg=m.db=m.da=0.0;
+  m.sr=m.sg=m.sb=m.sa=0.0;
+  m.er=m.eg=m.eb=m.ea=m.power=0.0;
+  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
+  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE));
+  meshdata.back()->setEnvMap (GFXFALSE);
+  meshdata.back()->SetMaterial (m);
 
 
+  meshdata.push_back(shield);
+}
+
+void Planet::AddAtmosphere(const std::string & texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
+  if (meshdata.empty()) {
+    meshdata.push_back(NULL);
+  }
+  Mesh * shield = meshdata.back();
+  meshdata.pop_back();
+  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
+  meshdata.push_back(new SphereMesh(radius, stacks, stacks, texture.c_str(), NULL,false,blendSrc,blendDst));  
+  meshdata.push_back(shield);
+}
+void Planet::AddRing(const std::string &texture,float iradius,float oradius, const QVector &R,const QVector &S,  int slices, int wrapx, int wrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
+  if (meshdata.empty()) {
+    meshdata.push_back(NULL);
+  }
+  Mesh * shield = meshdata.back();
+  meshdata.pop_back();
+  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
+  if (slices>0) {
+    stacks = stacks;
+    if (stacks<3)
+      stacks=3;
+    for (int i=0;i<slices;i++) {
+      meshdata.push_back(new RingMesh(iradius,oradius ,stacks,texture.c_str(),R,S,wrapx, wrapy,  blendSrc,blendDst,false,i*(2*M_PI)/((float)slices),(i+1)*(2*M_PI)/((float)slices)));  
+    }
+  }
+  meshdata.push_back(shield);  
+}
 
 extern vector <char *> ParseDestinations (const string &value);
-Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,const char * citylights,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
+Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,const char * textname,BLENDFUNC blendSrc, BLENDFUNC blendDst, vector <char *> dest, const QVector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid, bool inside_out)
     : Unit( 0 )
     , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
 {
-  static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".5"));
-  radius*=bodyradius;
+  static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
+  if (!ligh.empty()){
+    radius*=bodyradius;
+    fprintf (stderr,"scaling %s",textname);
+  }
   inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
@@ -194,26 +243,10 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
   //  BLENDFUNC blendSrc=SRCALPHA;
   //  BLENDFUNC blendDst=INVSRCALPHA;
   atmospheric=!(blendSrc==ONE&&blendDst==ZERO);
-  if ((!citylights)?true:(citylights[0]=='\0')) {
-    meshdata = new Mesh*[2];
-    nummesh = 1;
-  }else {
-    meshdata = new Mesh *[3];
-    GFXMaterial m;
-    m.ar=m.ag=m.ab=m.aa=1.0;
-    m.dr=m.dg=m.db=m.da=0.0;
-    m.sr=m.sg=m.sb=m.sa=0.0;
-    m.er=m.eg=m.eb=m.ea=0.0;
-    meshdata[1]= new CityLights (radius,stacks,stacks, citylights, NULL, inside_out,ONE, ONE);
-    meshdata[1]->setEnvMap (GFXFALSE);
-    meshdata[1]->SetMaterial (m);
-    nummesh = 2;
-  }
-  meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst);
-  meshdata[0]->setEnvMap(GFXFALSE);
-  meshdata[0]->SetMaterial (ourmat);
-
-
+  meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
+  meshdata.back()->setEnvMap(GFXFALSE);
+  meshdata.back()->SetMaterial (ourmat);
+  meshdata.push_back(NULL);
   calculate_extent(false);
 
   /*stupid Sphere BSP when intersection should do
@@ -226,17 +259,9 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
   FILE * fp = fopen (tmpname.c_str(), "rb");
   if (!fp) {
   */
-#ifdef RAPIDCOLLIDEPLANET
-  meshdata[nummesh]= new SphereMesh (radius,8,8,textname, alpha);
-  std::vector <bsp_polygon> spherepolys;
-  meshdata[nummesh]->GetPolys (spherepolys);
-  colTree = new csRapidCollider (spherepolys);
-  //BuildBSPTree (tmpname.c_str(),true,meshdata[1]);
-  delete meshdata[nummesh];
-#else
   colTrees= NULL;
-#endif
-  meshdata[nummesh]=NULL;
+
+
     /*
       } else {
       fclose (fp);
@@ -262,7 +287,6 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
 
     static bool drawstar = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_body","true"));
     static float glowradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_glow_radius","1.33"))/bodyradius;
-    static bool far_shine = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow_halo","false"));
     if (drawglow) {
       GFXColor c(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea);
       static bool spec = XMLSupport::parse_bool(vs_config->getVariable ("graphics","glow_ambient_star_light","false"));
@@ -282,8 +306,8 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
     
       if (!drawstar) {
 	delete meshdata[0];
-	meshdata[0]=NULL;
-	nummesh=0;
+	meshdata.clear();
+	meshdata.push_back(NULL);
       }
     }
   }
@@ -463,7 +487,19 @@ string Planet::getHumanReadablePlanetType () const{
 	    temp = "Ice Colony";
 	  }else if (temp=="carribean") {
 	    temp="Pleasure";
-	  }else {
+	  }else if (temp=="tundra") {
+	    temp = "Rlaan_Ice_Agriculture";
+	  }else if (temp=="n_class") {
+	    temp = "Aera_Industrial";
+	  }else if (temp=="j_class") {
+	    temp = "Aera_Ice_Colony";
+	  }else if (temp=="k_class") {
+	    temp = "Aera_Agriculture";
+	  }else if (temp=="n_class") {
+	    temp = "Aera_Industrial";
+	  }else if (temp=="Lava") {
+	    temp = "Rlaan_Industrial";
+	  }else{
 	    temp="";
 	  }
 	  return temp;

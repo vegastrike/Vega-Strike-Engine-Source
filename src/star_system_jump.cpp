@@ -156,6 +156,7 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	  if (unit->getFlightgroup()!=NULL&&unit->getFlightgroup()==getFlightgroup()) {
 	    if (unit->getFlightgroup()->leader.GetUnit()==this&&(unit->getFlightgroup()->directive=="f"||unit->getFlightgroup()->directive=="F")) {
 	      unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+	      unit->getFlightgroup()->directive="F";
 	      unit->ActivateJumpDrive (0);
 	    }
 	  }
@@ -205,6 +206,23 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	if (NULL!=(unut=image->dockedunits[i]->uc.GetUnit())) {
 	  unut->TransferUnitToSystem (kk,savedStarSystem,dosightandsound);
 	}
+      }
+    }
+    if (docked&(DOCKED|DOCKED_INSIDE)) {
+      Unit * un = image->DockedTo.GetUnit();
+      if (!un) {
+	docked &= (~(DOCKED|DOCKED_INSIDE));
+      }else {
+	Unit * targ=NULL;
+	for (un_iter i=pendingjump[kk]->dest->getUnitList().createIterator();
+	     (targ = (*i));
+	     ++i) {
+	  if (targ==un) {
+	    break;
+	  }
+	}
+	if (targ!=un)
+	  UnDock (un);
       }
     }
   }else {
@@ -301,7 +319,18 @@ extern StarSystem *GetLoadedStarSystem(const char * system) {
   }
   return ss;
 }
+void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::string &system) {
+  for (unsigned int i=0;i<pendingjump.size();i++) {
+    if (pendingjump[i]->un.GetUnit()==un) {
+      return;
+    }
+  }
+  ss->JumpTo (un,jumppoint,system);
+}
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
+  if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
+    return false;
+  }
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif
@@ -329,7 +358,21 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
       AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
     }
     pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
-
+#if 0
+    UnitImages * im=  &un->GetImageInformation();
+    for (unsigned int i=0;i<=im->dockedunits.size();i++) {
+      Unit* unk =NULL;
+      if (i<im->dockedunits.size()) {
+	im->dockedunits[i]->uc.GetUnit();
+      }else {
+	unk = im->DockedTo.GetUnit();
+      }
+      if (unk!=NULL) {
+	TentativeJumpTo (this,unk,jumppoint,system);
+      }
+    }
+    
+#endif
   } else {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Failed to retrieve!\n");

@@ -7,11 +7,13 @@
 #include "gfx/decalqueue.h"
 using std::vector;
 #include "audiolib.h"
+#include "config_xml.h"
 #include "images.h"
 static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
 Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+  VSCONSTRUCT2('B')
 #ifdef PERBOLTSOUND
   sound = AUDCreateSound (clne.sound,true);
 #else
@@ -65,6 +67,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   lastthick=0;
   curthick = SIMULATION_ATOM*radialspeed;
   GFXColorVertex beam[32];
+  memset(beam,0,sizeof(GFXColorVertex)*32);
   GFXColorVertex * calah=beam;
   calah[0].r=0;calah[0].g=0;calah[0].b=0;calah[0].a=0;
   calah[1].r=calah[1].g=calah[1].b=calah[1].a=0;
@@ -104,6 +107,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 }
 
 Beam::~Beam () {
+  VSDESTRUCT2
   //  fprintf (stderr,"Deleting %x",this);
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
@@ -200,7 +204,12 @@ void Beam::ProcessDrawQueue() {
     GFXDisable (CULLFACE);//don't want lighting on this baby
     GFXDisable (DEPTHWRITE);
     GFXPushBlendMode();
-    GFXBlendMode(ONE,ONE);
+    static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
+    if (blendbeams==true) {
+      GFXBlendMode(ONE,ONE);
+    }else {
+      GFXBlendMode(ONE,ZERO);
+    }
 
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
@@ -357,7 +366,10 @@ bool Beam::Collide (Unit * target) {
 
   Unit * colidee;
   if ((colidee = target->queryBSP(center,end,normal,distance))) { 
-    
+  //  QVector pos;
+  //  double dis=distance;
+  //  if ((colidee = target->BeamInsideCollideTree(center,end,pos,normal,dis))) { 
+  //    distance=dis;
     curlength = distance;
     impact|=IMPACT;
     

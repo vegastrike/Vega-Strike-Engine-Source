@@ -29,9 +29,6 @@
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 
-#if defined( HAVE_SDL_MIXER )
-#   include "SDL_mixer.h"
-#endif
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -229,7 +226,7 @@ static void setup_sdl_video_mode()
 void winsys_init( int *argc, char **argv, char *window_title, 
 		  char *icon_title )
 {
-	Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
+	Uint32 sdl_flags = SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
@@ -325,7 +322,6 @@ void winsys_process_events()
 
 	SDL_LockAudio();
 	SDL_UnlockAudio();
-
 	while ( SDL_PollEvent( &event ) ) {
 	    
 	    switch ( event.type ) {
@@ -378,7 +374,7 @@ void winsys_process_events()
 		break;
 
 	    case SDL_VIDEORESIZE:
-	      
+#if !(defined(_WIN32)&&defined(SDL_WINDOWING))
 		g_game.x_resolution=event.resize.w;
 		g_game.y_resolution=event.resize.h;
 		setup_sdl_video_mode();
@@ -386,7 +382,7 @@ void winsys_process_events()
 		    (*reshape_func)( event.resize.w,
 				     event.resize.h );
 		}
-		
+#endif
 		break;
 	    }
 

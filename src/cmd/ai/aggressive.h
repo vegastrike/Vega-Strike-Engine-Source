@@ -1,5 +1,5 @@
 #include "fire.h"
-
+class Flightgroup;
 namespace Orders {
 class AggressiveAI: public FireAt {
   enum INTERCUR {INTERR,INTNORMAL,INTRECOVER} curinter;

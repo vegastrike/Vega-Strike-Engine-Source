@@ -4,9 +4,11 @@
 #include <assert.h>
 #include "config_xml.h"
 #include "vs_globals.h"
-
+#include <sys/stat.h>
 #include "xml_support.h"
 #include "gfx/mesh.h"
+#undef BOOST_NO_CWCHAR
+
 namespace NebulaXML {
 	FOGMODE parse_fogmode (string val) {
 		if (val=="exp") {
@@ -197,42 +199,29 @@ void Nebula::PutInsideCam(int i) {
   _Universe->AccessCamera(i)->SetNebula (this);
 }
 
-Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
-  Unit (unitfile,SubU,faction,string(""),fg,fg_snumber) {
+Nebula::Nebula(const char * unitfile, bool SubU, int faction,
+	       Flightgroup* fg, int fg_snumber) :
+  Unit (unitfile,SubU,faction,string(""),fg,fg_snumber)
+{
+  std::string path = GetSharedUnitPath() + "/";
+  std::string file = string(unitfile) + "/" + unitfile + "/" + ".nebula";
+  std::string fullpath = path + file;
+  struct stat info;
 
-  vssetdir (GetSharedUnitPath().c_str());
-  vschdir (unitfile);
-  string nebulafile (string(unitfile)+string(".nebula"));
   explosiontime=0;
-  FILE *fp = fopen (nebulafile.c_str(),"r");
-  bool uptwice=false;
-  if (!fp) {
-    uptwice=true;
-    vscdup();
-    const char *c;
-    if ((c=_Universe->GetFaction(faction)))
-      vschdir (c);
-    else
-      vschdir ("unknown");
-    vschdir (unitfile);
-    fp = fopen (nebulafile.c_str(),"r");
-    if (fp) {
-      fclose (fp);
-    } else {
-      vscdup();
-      vscdup();
-      vschdir ("neutral");
-      vschdir (unitfile);
-      faction=_Universe->GetFaction("neutral");
+
+  if(stat(fullpath.c_str(), &info) != 0)
+    {
+      fullpath = path + _Universe->GetFaction(faction) + "/" + file;
+      if(stat(fullpath.c_str(),&info) != 0)
+	{
+	  faction=_Universe->GetFaction("neutral");
+	  fullpath = path + "neutral/" + file;
+	}
     }
-  } else {
-    fclose (fp);
-  }
-  LoadXML(nebulafile.c_str());
-  vscdup();
-  if (uptwice) 
-    vscdup();
-  vsresetdir();
+
+  LoadXML(fullpath.c_str());
+
 }
 void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)
@@ -259,8 +248,8 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
     }
   }
   }
-  if (nummesh) {
-    i = rand()%nummesh;
+  if (nummesh()>0) {
+    i = rand()%(nummesh());
     Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());
     if (((int)(explosiontime/SIMULATION_ATOM))!=0) 
       if (!(rand()%((int)(explosiontime/SIMULATION_ATOM)))) 

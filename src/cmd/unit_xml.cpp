@@ -195,7 +195,8 @@ namespace UnitXML {
       SUBUNITOFFSET,
       SLIDE_START,
       SLIDE_END,
-      TRACKINGCONE
+      TRACKINGCONE,
+      MISSIONCARGO
     };
 
   const EnumMap::Pair element_names[35]= {
@@ -236,7 +237,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[91] = {
+  const EnumMap::Pair attribute_names[92] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -327,11 +328,12 @@ namespace UnitXML {
     EnumMap::Pair ("MountOffset",MOUNTOFFSET),
     EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET),
     EnumMap::Pair ("SlideEnd",SLIDE_START),
-    EnumMap::Pair ("SlideStart",SLIDE_END)
+    EnumMap::Pair ("SlideStart",SLIDE_END),
+    EnumMap::Pair ("MissionCargo",MISSIONCARGO)
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 91);
+  const EnumMap attribute_map(attribute_names, 92);
 }
 
 using XMLSupport::EnumMap;
@@ -492,6 +494,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case PRICE:
 	carg.price=parse_float ((*iter).value);
+	break;
+      case MISSIONCARGO:
+	carg.mission=parse_bool((*iter).value);
 	break;
       case XFILE:
 	carg.content = XMLSupport::replace_space((*iter).value);
@@ -1584,6 +1589,9 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   {
     image->unitwriter->AddTag("Defense");
     image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
+    if (image->explosion_type.length()){
+      image->unitwriter->AddElement("ExplosionAni",stringStarHandler,XMLType(&image->explosion_type));
+    }
     image->unitwriter->AddElement("RepairDroid",ucharStarHandler,XMLType(&image->repair_droid));
     image->unitwriter->AddElement("ECM",shortToFloatHandler,XMLType(&image->ecm));
     {
@@ -1691,25 +1699,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   XML_ParserFree (parser);
   // Load meshes into subunit
   image->unitwriter->EndTag ("Unit");
-  nummesh = xml->meshes.size();
+  meshdata= xml->meshes;
+  meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   *myhudim =xml->hudimage;
   int a;
-  meshdata = new Mesh*[nummesh+1];
-  for(a=0; a < nummesh; a++) {
-    meshdata[a] = xml->meshes[a];
-  }
-#if 0
-  numhalos = xml->halos.size();
-  if(numhalos)
-    halos = new Halo*[numhalos];
-  else
-    halos=NULL;
-  for(a=0; a < numhalos; a++) {
-    halos[a]=xml->halos[a];
-  }
-#endif
   nummounts = xml->mountz.size();
   if (nummounts)
     mounts = new Mount [nummounts];
@@ -1729,7 +1724,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
 	  b=a+1;
       mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
     } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
-      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,false);      
+      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+    }
+    if (a>0) {
+      if (mounts[a].sound==mounts[a-1].sound&&mounts[a].sound!=-1) {
+	printf ("error");
+      }
     }
   }
   for( a=0; a<(int)xml->units.size(); a++) {
@@ -1752,16 +1752,16 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   csRapidCollider *colShield=NULL;
   csRapidCollider *colTree=NULL;
   if (xml->shieldmesh) {
-    meshdata[nummesh] = xml->shieldmesh;
+    meshdata.back() = xml->shieldmesh;
     if (!colTrees) {
       if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
-	BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
+	BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata.back());
       }
       if (CheckBSP ((tmpname+"_shield.bsp").c_str())) {
 	bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
       }
-      if (meshdata[nummesh]) {
-	meshdata[nummesh]->GetPolys(polies);
+      if (meshdata.back()) {
+	meshdata.back()->GetPolys(polies);
 	colShield = new csRapidCollider (polies);
       }
     }
@@ -1781,11 +1781,11 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
     tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
     
-    meshdata[nummesh] = tmp;
+    meshdata.back() = tmp;
     bspShield=NULL;
     colShield=NULL;
   }
-  meshdata[nummesh]->EnableSpecialFX();
+  meshdata.back()->EnableSpecialFX();
   if (!colTrees) {
     if (xml->hasBSP) {
       tmpname += ".bsp";
@@ -1800,7 +1800,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     }
     polies.clear();  
     if (!xml->bspmesh) {
-      for (int j=0;j<nummesh;j++) {
+      for (int j=0;j<nummesh();j++) {
 	meshdata[j]->GetPolys(polies);
       }
     }else {

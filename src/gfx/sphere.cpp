@@ -10,7 +10,7 @@
 #endif
 
 using XMLSupport::tostring;
-const int pixelscalesize=30;
+int pixelscalesize=30;
 float SphereMesh::GetT (float rho, float rho_min, float rho_max) {
  return 1-(rho-rho_min)/ (rho_max-rho_min);  
 }
@@ -157,10 +157,10 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       }
       if (!found_texture) {
 	if (alpha) {
-	  Decal = new Texture(texture, alpha,0,mipmap);
+	  Decal = new Texture(texture, alpha,0,mipmap,TEXTURE2D,TEXTURE_2D,1,0,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
 	  
 	}else {
-	  Decal = new Texture (texture,0,mipmap);
+	  Decal = new Texture (texture,0,mipmap,TEXTURE2D,TEXTURE_2D,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
 	}
       }
       Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);
@@ -234,14 +234,14 @@ void CityLights::ProcessDrawQueue(int whichdrawqueue) {
 float CityLights::wrapx=1;
 float CityLights::wrapy=1;
 
-CityLights::CityLights (float radius, int stacks, int slices, const char *texture, const char *alpha, bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max):SphereMesh() { 
-    wrapx=wrapy=1;
-    if (texture!=NULL) {
+CityLights::CityLights (float radius, int stacks, int slices, const char *texture, int zzwrapx, int zzwrapy,  bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max):SphereMesh() { 
+  wrapx = zzwrapx;
+  wrapy = zzwrapy;
+  /*    if (texture!=NULL) {
       string wrap = string(texture);
       int pos =wrap.find ("wrapx");
       if (pos!=string::npos) {
 	string Wrapx = wrap.substr (pos+5,wrap.length());
-	float numwraps=1;
 	sscanf(Wrapx.c_str(),"%f",&wrapx);
 	pos = Wrapx.find ("wrapy");
 	if (pos!=string::npos) {
@@ -249,8 +249,8 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
 	  sscanf (Wrapy.c_str(),"%f",&wrapy);
 	}
       }
-    }
+    }*/
     FILTER filter = (FILTER)XMLSupport::parse_int(vs_config->getVariable ("graphics","CityLightFilter",XMLSupport::tostring(((int)TRILINEAR))));    
-    InitSphere(radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter);
+    InitSphere(radius,stacks,slices,texture,NULL,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter);
 
 }

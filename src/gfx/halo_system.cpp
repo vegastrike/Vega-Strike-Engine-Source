@@ -10,6 +10,7 @@
 #include "xml_support.h"
 #include "config_xml.h"
 HaloSystem::HaloSystem() {
+  VSCONSTRUCT2('h')
   mesh=NULL;
 }
 
@@ -47,6 +48,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
   }
 }
 HaloSystem::~HaloSystem() {
+  VSDESTRUCT2
   if (mesh) {
     delete mesh;
   }

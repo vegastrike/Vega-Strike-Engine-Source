@@ -112,7 +112,13 @@ namespace StarXML {
     SCALEATMOS,
     SCALESYSTEM,
     CITYLIGHTS,
-    INSIDEOUT
+    INSIDEOUT,
+    INNERRADIUS,
+    OUTERRADIUS,
+    NUMSLICES,
+    RING,
+    WRAPX,
+    WRAPY
   };
 
   const EnumMap::Pair element_names[] = {
@@ -133,7 +139,9 @@ namespace StarXML {
     EnumMap::Pair ("Vehicle",VEHICLE),
     EnumMap::Pair ("Atmosphere",ATMOSPHERE),
     EnumMap::Pair ("Nebula",NEBULA),
-    EnumMap::Pair ("Asteroid",ASTEROID)
+    EnumMap::Pair ("Asteroid",ASTEROID),
+    EnumMap::Pair ("RING",RING),
+    EnumMap::Pair ("citylights",CITYLIGHTS)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -145,7 +153,6 @@ namespace StarXML {
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
-    EnumMap::Pair ("citylights",CITYLIGHTS),
     EnumMap::Pair ("destination", DESTINATION), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
@@ -175,14 +182,20 @@ namespace StarXML {
     EnumMap::Pair ("Mass", MASS),
     EnumMap::Pair ("ScaleX", SCALEX),
     EnumMap::Pair ("NumWraps", NUMWRAPS),
+    EnumMap::Pair ("NumSlices", NUMSLICES),
     EnumMap::Pair ("Difficulty", DIFFICULTY),
     EnumMap::Pair ("ScaleAtmosphereHeight", SCALEATMOS),
     EnumMap::Pair ("ScaleSystem",SCALESYSTEM),
-    EnumMap::Pair ("InsideOut",INSIDEOUT)
+    EnumMap::Pair ("InsideOut",INSIDEOUT),
+    EnumMap::Pair ("InnerRadius",INNERRADIUS),
+    EnumMap::Pair ("OuterRadius",OUTERRADIUS),
+    EnumMap::Pair ("WrapX",WRAPX),
+    EnumMap::Pair ("WrapY",WRAPY)
+    
   };
 
-  const EnumMap element_map(element_names, 18);
-  const EnumMap attribute_map(attribute_names, 43);
+  const EnumMap element_map(element_names, 20);
+  const EnumMap attribute_map(attribute_names, 47);
 }
 
 using XMLSupport::EnumMap;
@@ -274,6 +287,28 @@ static Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference.
   return (Unit *)0x31337;
 }
 extern BLENDFUNC parse_alpha (const char *);
+void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blendDst) {
+  blendSrc=ONE;
+  blendDst=ZERO;
+  if (alpha==NULL) {  
+  }else if (alpha[0]=='\0') {
+  }else {
+      char *s=strdup (alpha);
+      char *d=strdup (alpha);
+      blendSrc=SRCALPHA;
+      blendDst=INVSRCALPHA;
+      if (2==sscanf (alpha,"%s %s",s,d)) {
+	if (strcmp(s,"true")!=0) {
+	  blendSrc = parse_alpha (s);
+	  blendDst = parse_alpha (d);
+	}
+      }
+      free (s);
+      free (d);
+    }
+}
+
+
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
   static int neutralfaction=_Universe->GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
@@ -304,7 +339,6 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   float scalex=1;
   vector <char *>dest;
   char * filename =NULL;
-  char * alpha = NULL;
   string fullname="unknw";
   float gravity=0;
   float velocity=0;
@@ -367,25 +401,149 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
 
     break;
+  case RING:
+    {
+      xml->unitlevel++;
+      std::string myfile("planets/ring.png");
+
+      blendSrc=SRCALPHA;
+      blendDst=INVSRCALPHA;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL)
+	if (p->isUnit()==PLANETPTR) {
+	  int wrapx = 1;
+	  int wrapy = 1;
+	  int numslices=8;
+	  float iradius = p->rSize()*1.25;
+	  float oradius = p->rSize()*1.75;
+	  R.Set(1,0,0);
+	  S.Set(0,1,0);
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+	    case XFILE:
+	      myfile = (*iter).value;
+	      break;
+	    case ALPHA:
+	      parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
+	      break;
+	    case INNERRADIUS:
+	      iradius = parse_float ((*iter).value)*xml->scale;	  
+	      break;
+	    case OUTERRADIUS:
+	      oradius = parse_float ((*iter).value)*xml->scale;	  
+	      break;
+	    case NUMSLICES:
+	      numslices = parse_int ((*iter).value);
+	      break;
+	    case WRAPX:
+	      wrapx = parse_int ((*iter).value);
+	      break;
+	    case WRAPY:
+	      wrapy = parse_int ((*iter).value);
+	      break;
+	    case RI:
+	      R.i=parse_float((*iter).value);
+	      break;
+	    case RJ:
+	      R.j=parse_float((*iter).value);
+	      break;
+	    case RK:
+	      R.k=parse_float((*iter).value);
+	      break;
+	    case SI:
+	      S.i=parse_float((*iter).value);
+	      break;
+	    case SJ:
+	      S.j=parse_float((*iter).value);
+	      break;
+	    case SK:
+	      S.k=parse_float((*iter).value);
+	      break;
+
+	    default:
+	      break;
+	    }
+	  }
+	  if (p!=NULL) {
+	    ((Planet *)p)->AddRing (myfile,iradius,oradius,R,S,numslices,wrapx, wrapy,blendSrc,blendDst);
+	  }
+	}
+      break;
+    }
+  case CITYLIGHTS:
+    {
+      std::string myfile("planets/Dirt_light.png");
+      xml->unitlevel++;
+      blendSrc=SRCALPHA;
+      blendDst=ONE;
+      int wrapx=1;
+      bool inside_out=false;
+      int wrapy=1;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL)
+	if (p->isUnit()==PLANETPTR) {
+	  float radius = p->rSize();
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+	    case XFILE:
+	      myfile = (*iter).value;
+	      break;
+	    case ALPHA:
+	      parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
+	      break;
+	    case RADIUS:
+	      radius = parse_float ((*iter).value)*xml->scale;	  
+	      break;
+	    case WRAPX:
+	      wrapx = parse_int ((*iter).value);
+	      break;
+	    case WRAPY:
+	      wrapy = parse_int ((*iter).value);
+	      break;
+	    case INSIDEOUT:
+	      inside_out=parse_bool((*iter).value);
+	      break;
+	    default:
+	      break;
+	    }
+	  }
+	  ((Planet *)p)->AddCity (myfile,radius,wrapx,wrapy,blendSrc,blendDst,inside_out);
+	}
+      break;
+    }
+    
   case ATMOSPHERE:
     {
-      Atmosphere::Parameters params;
-
-      params.radius = 40000;
-
+      std::string myfile("sol/earthcloudmaptrans.png");
       xml->unitlevel++;
-      for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-	switch(attribute_map.lookup((*iter).name)) {
-	case RADIUS:
-	  params.radius = parse_float ((*iter).value);	  
-	  break;
-	default:
-	  break;
+      blendSrc=SRCALPHA;
+      blendDst=INVSRCALPHA;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
+      if (p!=NULL)
+	if (p->isUnit()==PLANETPTR) {
+	  float radius = p->rSize()*1.075;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+	    case XFILE:
+	      myfile = (*iter).value;
+	      break;
+	    case ALPHA:
+	      parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
+	      break;
+	    case RADIUS:
+	      radius = parse_float ((*iter).value)*xml->scale;	  
+	      break;
+	    default:
+	      break;
+	    }
+	  }
+	  ((Planet *)p)->AddAtmosphere (myfile,radius,blendSrc,blendDst);
 	}
-      }  
-
-      
-
+      break;
+    }
+    {
+      Atmosphere::Parameters params;
+      //NOTHING NEED TO RECODE
       params.low_color[0] = GFXColor(0,0.5,0.0);
 
       params.low_color[1] = GFXColor(0,1.0,0.0);
@@ -570,9 +728,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     R = QVector (0,0,1);
     filename = new char [1];
     filename[0]='\0';
-    alpha=new char[1];
     citylights=string("");
-    alpha[0]='\0';
+    blendSrc=ONE;
+    blendDst=ZERO;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
@@ -590,13 +748,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	isdest=true;
 	break;
       case ALPHA:
-	delete []alpha;
-	alpha = new char [strlen((*iter).value.c_str())+1];
-	strcpy(alpha,(*iter).value.c_str());
+	parse_dual_alpha ((*iter).value.c_str(),blendSrc,blendDst);
 	break;
       case CITYLIGHTS:
 	citylights = (*iter).value;
 	break;
+
       case INSIDEOUT:
 	insideout=XMLSupport::parse_bool ((*iter).value);
 	break;
@@ -679,40 +836,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     if (isdest==false) {
       radius*=xml->scale;
     }
-    if (alpha[0]==0) {
-      delete [] alpha;
-      alpha=NULL;
-      blendSrc=ONE;
-      blendDst=ZERO;
-    }else {
-      char *s=strdup (alpha);
-      char *d=strdup (alpha);
-      if (2==sscanf (alpha,"%s %s",s,d)) {
-	if (strcmp(s,"true")==0) {
-	  blendSrc=SRCALPHA;
-	  blendDst=INVSRCALPHA;
-	}else {
-	  blendSrc = parse_alpha (s);
-
-	  blendDst = parse_alpha (d);
-	}
-      }else {
-	blendSrc=SRCALPHA;
-	blendDst=INVSRCALPHA;
-      }
-      free (s);
-      free (d);
-    }
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,citylights.c_str(),blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
+      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
       if (un) {
 	un->SetOwner (getTopLevelOwner());
       }
     } else {
 
       
-      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,citylights.c_str(),blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
+      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
 
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
       xml->moons.back()->SetOwner (getTopLevelOwner());
@@ -1005,7 +1138,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   }else {
     fclose (tempo);
   }
-  LightMap[0] = new Texture(bglight.c_str(), 1);
+  LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
   stars = new Stars (xml->numnearstars, xml->starsp);

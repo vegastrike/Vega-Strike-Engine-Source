@@ -7,6 +7,7 @@ class AnimatedTexture: public Texture {
   Texture ** Decal;
   unsigned int active;
   double physicsactive;
+  void AniInit();
  public:
   AnimatedTexture ();
   AnimatedTexture (const char * file, int stage, enum FILTER imm);

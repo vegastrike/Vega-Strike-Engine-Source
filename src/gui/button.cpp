@@ -39,7 +39,9 @@ void Button::ModifyName (const char *newname) {
   }
 }
 Button::~Button(void) {
-
+  if (label) {
+    free (label);
+  }
 }
 
 void Button::Refresh(void) {

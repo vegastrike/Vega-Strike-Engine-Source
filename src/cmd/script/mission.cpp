@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
+#include <Python.h>
 #ifndef WIN32
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
@@ -41,6 +42,10 @@
 #include "mission.h"
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
+#ifdef HAVE_PYTHON
+#include "Python.h"
+#endif
+#include "python/python_class.h"
 //#include "easydom.h"
 
 //#include "msgcenter.h"
@@ -53,11 +58,14 @@ Mission::~Mission() {
   fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital
 }
-Mission::Mission(char *configfile, bool loadscripts){
+Mission::Mission(const char *configfile, bool loadscripts){
+  player_autopilot=global_autopilot=AUTO_NORMAL;
   briefing=NULL;
+  director=NULL;
   number_of_flightgroups=0;
   number_of_ships=0;
-
+  runtime.pymissions=NULL;
+  nextpythonmission=NULL;
   easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
 
  top=domf->LoadXML(configfile);
@@ -91,16 +99,12 @@ Mission::Mission(char *configfile, bool loadscripts){
 #endif
 
 }
-
+MessageCenter * Mission::msgcenter=NULL;
 void Mission::initMission(bool loadscripts){
   if (!top)
     return;
-  static bool begin=true;
-  if (begin) {
+  if (msgcenter==NULL) {
     msgcenter=new MessageCenter();
-    begin=false;
-  }else {
-    msgcenter=active_missions[0]->msgcenter;
   }
   //  msgcenter->add("game","all","Welcome to Vegastrike");
   /*
@@ -110,6 +114,10 @@ void Mission::initMission(bool loadscripts){
   msgcenter->add("game","news","4 hero is born.                That day, in teh news hero was born without even boring the born of bachunkuphe threw his last baseball throw he chewed his last hay the man was a hero a heayrinagia sf of a hero...who knw that ith all things iblicatedly obfusictaroed he arced his bunko bunka\nbachunk!jtkgjdfljg fdlg fdj glkdf jglkdfj glkdf jgjfd lkgj dflkg jlfkdjg ldjg  j");
   */
   checkMission(top,loadscripts);
+  mission_name = getVariable("mission_name","");
+  //  objectives.push_back (Objective(0.0,"cachunk"));
+  //  objectives.push_back (Objective(1,"cachunk.org"));
+  //  objectives.push_back (Objective(-1,"cachunk.com"));
 }
 
 /* *********************************************************** */
@@ -137,8 +145,24 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
       if (loadscripts) {
 	DirectorStart((missionNode *)*siter);
       }
-    }
-    else{
+    } else if (((*siter)->Name()=="python")){ //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
+      const char *constdumbstr=(*siter)->attr_value(textAttr).c_str(); //get the text XML attribute
+      int i=strlen(constdumbstr); //constdumbstr is the string I wish to copy... i is its length.
+      char *dumbstr=new char [i+2]; //allocate 2 extra bytes for a double-null-terminated string.
+      strncpy(dumbstr,constdumbstr,i); //i copy constdumbstr to dumbstr.
+      dumbstr[i]='\0'; //I make sure that it has 2 null bytes at the end.
+      dumbstr[i+1]='\0'; //I am allowed to use i+1 because I allocated 2 extra bytes
+      for (i-=1;i>=0;i--) { //start from the end-1, or i-1 and set i to that value(i-=1)
+        if (dumbstr[i]=='\t'||dumbstr[i]==' '||dumbstr[i]=='\r'||dumbstr[i]=='\n') { //I check if dumbstr[i] contains whitespace
+          dumbstr[i]='\0'; //if so, I truncate the string
+        } else {
+          dumbstr[i+1]='\n'; //otherwise I add a new line (python sometimes gets mad...)
+          dumbstr[i+2]='\0'; //and add a null byte (If i is at the end of the allocated memory, I will use the extra byte
+          break; //get out of the loop so that it doesn't endlessly delete the newlines that I added.
+        }
+      }
+	  this->nextpythonmission=dumbstr;
+    } else{
       cout << "warning: Unknown tag: " << (*siter)->Name() << endl;
     }
   }

@@ -189,6 +189,7 @@ void /*GFXDRVAPI*/ GFXEnd()
 }
 
 int GFXCreateList() {
+  glGetError();
   int list = glGenLists(1);
   glNewList(list, GL_COMPILE);
   return list;
@@ -209,7 +210,9 @@ void GFXCallList(int list) {
 }
 
 void GFXDeleteList (int list) {
+  if (glIsList(list)) {
     glDeleteLists (list,1);
+  }
 }
 
 void GFXSubwindow(int x, int y, int xsize, int ysize) {

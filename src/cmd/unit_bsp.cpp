@@ -218,7 +218,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
   if (hull!=NULL) {
     hull->GetPolys (tri);
   } else {
-    for (int j=0;j<nummesh;j++) {
+    for (int j=0;j<nummesh();j++) {
       meshdata[j]->GetPolys(tri);
     }
   }	

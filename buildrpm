@@ -1,0 +1,21 @@
+#! /bin/sh
+
+# Attempt to automatically update this directory and build a RPM file
+# Must be root
+
+cvs -z3 up -d
+make distclean
+
+cp vegastrike.spec /usr/src/RPM/SPECS/
+cp vegastrike.xpm /usr/src/RPM/SOURCES/
+# Make tar file
+cd ..
+tar -zcf vegastrike.tar.gz vegastrike
+
+cp vegastrike.tar.gz /usr/src/RPM/SOURCES/
+
+# Now make RPM
+cd /usr/src/RPM/SPECS
+rpm -ba vegastrike.spec
+
+echo Hopefully you have just built an RPM file.

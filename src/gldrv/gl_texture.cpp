@@ -382,7 +382,7 @@ void /*GFXDRVAPI*/ GFXDeleteTexture (int handle) {
     glDeleteTextures(1, &textures[handle].name);
   }
   if (textures[handle].palette) {
-    delete [] textures[handle].palette;
+    free  (textures[handle].palette);
     textures[handle].palette=0;
   }
   textures[handle].alive = GFXFALSE;

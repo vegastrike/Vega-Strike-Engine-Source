@@ -43,8 +43,7 @@ class UnitFactory
 public:
     static Unit* createUnit( );
 
-    static Unit* createUnit( Mesh** meshes,
-                             int num,
+    static Unit* createUnit( std::vector<Mesh*> &meshes,
 			     bool Subunit,
 			     int faction);
 
@@ -81,7 +80,6 @@ public:
 				 float gravity,
 				 float radius,
 				 const char * filename,
-				 const char *citylights,
 				 BLENDFUNC blendsrc,
 				 BLENDFUNC blenddst,
 				 vector<char *> dest,

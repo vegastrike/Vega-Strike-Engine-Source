@@ -8,23 +8,23 @@
 #include "cmd/script/flightgroup.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
-  if (rank==666) {
+  if (rank>665&&rank<667) {
     static float ran = XMLSupport::parse_float(vs_config->getVariable ("AI","DefaultRank",".01"));
     this->rank = ran;
   }
-  if (appease==666) {
+  if (appease>665&&appease<667) {
     static float appeas = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAppease",".5"));
     this->appease = appeas;    
   }
-  if (anger==666) {
+  if ((anger>665&&anger<667)||(anger >-667&&anger <-665)) {
     static float ang = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAnger","-.5"));
     this->anger = ang;
   }
-  if (moodswingyness==666) {
+  if (moodswingyness>665&&moodswingyness<667) {
     static float ang1 = XMLSupport::parse_float(vs_config->getVariable ("AI","MoodSwingLevel",".2"));
     this->moodswingyness = ang1;
   }
-  if (randomresp==666) {
+  if (randomresp>665&&moodswingyness<667) {
     static float ang2 = XMLSupport::parse_float(vs_config->getVariable ("AI","RandomResponseRange",".8"));
     this->randomresponse = ang2;
   }

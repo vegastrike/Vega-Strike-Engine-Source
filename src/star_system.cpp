@@ -29,9 +29,10 @@
 #include "hashtable.h"
 #include "cmd/nebula.h"
 #include "galaxy_gen.h"
-
+#include "cmd/script/mission.h"
 #include "in_kb.h"
 #include "cmd/script/flightgroup.h"
+#include "load_mission.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -556,14 +557,21 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
+	    unsigned int curcockpit= _Universe->CurrentCockpit();
 	    for (unsigned int i=0;i<active_missions.size();i++) {
 	      if (active_missions[i]) {
-		mission=active_missions[i];
-		active_missions[i]->DirectorLoop();
-		active_missions[i]->DirectorBenchmark();
+			  _Universe->SetActiveCockpit(active_missions[i]->player_num);
+			   StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
+			  if (ss) _Universe->pushActiveStarSystem(ss);
+			  mission=active_missions[i];
+			  active_missions[i]->DirectorLoop();
+			  active_missions[i]->DirectorBenchmark();
+			  if (ss)_Universe->popActiveStarSystem();
 	      }
 	    }
+		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
+		processDelayedMissions();
 	  }
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	}
@@ -620,7 +628,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (this==_Universe->getActiveStarSystem(0)) {
 	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
 	  if (muzak)
-	    muzak->Listen();
+		  muzak->Listen();
 	}
 	if (_Universe->AccessCockpit()->activeStarSystem==this){
 	  Nebula * neb;
@@ -648,7 +656,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       while((unit = iter.current())!=NULL) {
 #ifdef OLD_AUTOPILOT
 	if (owner) 
-	  if (_Universe->GetRelation(owner->faction,unit->faction)<0) {
+	  if (owner->getRelation(unit)<0) {
 	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {

@@ -20,7 +20,7 @@
  */
 #include <string>
 #include "vec.h"
-
+#include "gfxlib_struct.h"
 struct Texture;
 
 class TextPlane {
@@ -36,7 +36,8 @@ class TextPlane {
 	} myGlyphPos[256];
 	*/
 public:
-	TextPlane();
+	GFXColor col,bgcol;
+	TextPlane(const struct GFXColor &col=GFXColor(1,1,1,1),const struct GFXColor &bgcol=GFXColor(0,0,0,0));
 	~TextPlane();
 	void SetPos (float x, float y) {
 	  myFontMetrics.k = y;
@@ -58,8 +59,8 @@ public:
 	  myDims.i = x;
 	  myDims.j = y;
 	}
-	void Draw(int offset=0);
-	void Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false);
+	int Draw(int offset=0);//returns number of lines
+	int Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false);
 	void SetText(const std::string &newText) {
 		myText = newText;
 	}

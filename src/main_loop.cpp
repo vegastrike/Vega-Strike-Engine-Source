@@ -50,7 +50,7 @@
 #include "cmd/cont_terrain.h"
 #include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
-
+#include "universe_util.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -486,7 +486,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	    strcpy(fightername,fighter0name[squadnum].c_str());
 	  if (mission->getVariable ("savegame","").length()>0) {
 		  if (savedloc[squadnum].i!=FLT_MAX) {
-			pox = LaunchUnitNear(savedloc[squadnum]);
+			pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
 		  }
 	    fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","")+mission->getVariable("savegame",""));
 	  }else {
@@ -542,24 +542,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       // cout << "before ai" << endl;
       
       if (benchmark>0.0  || (s!=0||squadnum>=(int)fighter0name.size())) {
-	if(ainame[0]!='_'){
-	  string ai_agg=ainame+".agg.xml";
-	  string ai_int=ainame+".int.xml";
-	  
-	  char ai_agg_c[1024];
-	  char ai_int_c[1024];
-	  strcpy(ai_agg_c,ai_agg.c_str());
-	  strcpy(ai_int_c,ai_int.c_str());
-	  //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
-	  
-	  fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-	}
-	else{
-	  string modulename=ainame.substr(1);
-	  
-	  fighters[a]->EnqueueAI( new AImissionScript(modulename));
-	  //fighters[a]->SetAI( new AImissionScript(modulename));
-	}
+	fighters[a]->LoadAIScript(ainame);
 	fighters[a]->SetTurretAI ();
       }
       a++;
@@ -608,8 +591,9 @@ void AddUnitToSystem (const SavedUnits *su) {
     un = UnitFactory::createUnit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
-    un->SetPosition (QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
-
+    if (_Universe->AccessCockpit()->GetParent()) {
+      un->SetPosition (_Universe->AccessCockpit()->GetParent()->Position()+QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
+    }
     break;
   }
   _Universe->activeStarSystem()->AddUnit(un);
@@ -641,6 +625,11 @@ void restore_main_loop() {
 
 }
 void main_loop() {
+  /*  static int i=0;
+  setTimeCompression(i);
+  i++;
+  if (i>1000)
+  i=0;*/
   _Universe->StartDraw();
   if(myterrain){ 
     myterrain->AdjustTerrain(_Universe->activeStarSystem());

@@ -25,12 +25,13 @@
 #include "beam.h"
 #include "planet.h"
 #include "audiolib.h"
-#include "images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 //#ifdef WIN32
 #include "gfx/planetary_transform.h"
 #include "gfx/cockpit.h"
+#include "unit_util.h"
+#include "cmd/script/mission.h"
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
@@ -293,7 +294,7 @@ static int applyto (unsigned short &shield, const unsigned short max, const floa
 }
 
 float Unit::MaxShieldVal() const{
-  float maxshield;
+  float maxshield=0;
   switch (shield.number) {
   case 2:
     maxshield = .5*(shield.fb[2]+shield.fb[3]);
@@ -473,7 +474,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   int i;
   if (lastframe) {
     char tmp=0;
-    for (i=0;i<=nummesh;i++) {
+    for (i=0;i<meshdata.size();i++) {
       if (!meshdata[i])
 	continue;
       tmp |=meshdata[i]->HasBeenDrawn();
@@ -571,7 +572,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
 	autotrack = computer.itts?2:1;
       }
-      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,target,autotrack, computer.radar.trackingcone);
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
       if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE) {
 	ToggleWeapon (true);
       }
@@ -724,6 +725,11 @@ Vector Unit::UpCoordinateLevel (const Vector &v) const {
 		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
 #undef M
 }
+Vector Unit::DownCoordinateLevel (const Vector &v) const {
+  Matrix m;
+  curr_physical_state.to_matrix(m);
+  return TransformNormal(m,v);
+}
 
 Vector Unit::ToLocalCoordinates(const Vector &v) const {
   //Matrix m;
@@ -755,7 +761,7 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   if (un->faction==upgradefaction) {
     return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
   }
-  float rel=_Universe->GetRelation(un->faction,orig->faction);
+  float rel=un->getRelation(orig);
   if (orig == un->Target())
 	rel-=1.5;
   if (rel>.1||un->faction==neutral) {
@@ -767,10 +773,34 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 	  return ignore_friend?-FLT_MAX:neutral_autodist;
   }
 }
+static signed char  ComputeAutoGuarantee (Unit * un) {
+  Cockpit * cp;
+  int cpnum=-1;
+  if ((cp =_Universe->isPlayerStarship (un))) {
+    cpnum = cp-_Universe->AccessCockpit(0);
+  }else {
+    return Mission::AUTO_ON;
+  }
+  unsigned int i;
+  for (i=0;i<active_missions.size();i++) {
+    if(active_missions[i]->player_num==cpnum&&active_missions[i]->player_autopilot!=Mission::AUTO_NORMAL) {
+      return active_missions[i]->player_autopilot;
+    }
+  }
+  for (i=0;i<active_missions.size();i++) {
+    if(active_missions[i]->global_autopilot!=Mission::AUTO_NORMAL) {
+      return active_missions[i]->global_autopilot;
+    }
+  }
+  return Mission::AUTO_NORMAL;
+}
 bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
+  signed char Guaranteed = ComputeAutoGuarantee (this);
+  if (Guaranteed==Mission::AUTO_OFF) {
+    return false;
+  }
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
-  static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
   if (SubUnit) {
     return false;//we can't auto here;
   }
@@ -784,7 +814,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-    float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*planet_rad_percent):autopilot_term_distance;
+	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UnitUtil::getPlanetRadiusPercent()):autopilot_term_distance;
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
     if (percent>1) {
       end=start;
@@ -793,21 +823,23 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
     }
   }
   bool ok=true;
-  for (un_iter i=ss->getUnitList().createIterator();
-       (un=*i)!=NULL; 
-       ++i) {
-    if (un->isUnit()!=NEBULAPTR) {
-     
-    if (un!=this&&un!=target) {
-      if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
-	return false;
+  if (Guaranteed==Mission::AUTO_NORMAL) {
+    for (un_iter i=ss->getUnitList().createIterator();
+	 (un=*i)!=NULL; 
+	 ++i) {
+      if (un->isUnit()!=NEBULAPTR) {
+	
+	if (un!=this&&un!=target) {
+	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
+	    return false;
+	  }
+	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
+	  if (intersection>0) {
+	    end = start+ (end-start)*intersection;
+	    ok=false;
+	  }
+	}
       }
-      float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
-      if (intersection>0) {
-	end = start+ (end-start)*intersection;
-	ok=false;
-      }
-    }
     }
   }
   if (this!=target) {

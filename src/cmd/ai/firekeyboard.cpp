@@ -12,7 +12,11 @@
 #include "cmd/images.h"
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
+#include "cmd/script/mission.h"
+#include "vs_globals.h"
+
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
+  this->cloaktoggle=false;
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
@@ -22,7 +26,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
     doc=und=req=0;
   }
@@ -38,6 +42,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE weapk;
  KBSTATE misk;
  KBSTATE eject;
+ KBSTATE lockkey;
  KBSTATE ejectcargo;
  KBSTATE cloakkey;
  KBSTATE ECMkey;
@@ -177,6 +182,12 @@ void FireKeyboard::CloakKey(int, KBSTATE k) {
       g().cloakkey = k;      
     }
 }
+void FireKeyboard::LockKey(int, KBSTATE k) {
+
+    if (k==PRESS) {
+      g().lockkey = k;      
+    }
+}
 void FireKeyboard::ECMKey(int, KBSTATE k) {
 
     if (k==PRESS) {
@@ -231,7 +242,7 @@ void DoSpeech (Unit * un, const string &speech) {
   if (un) {
     myname= un->name;
   }
-  mission->msgcenter->add ("game","all",myname+string(": ")+speech);
+  mission->msgcenter->add (myname,"all",speech);
 }
 void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {
@@ -546,7 +557,7 @@ FireKeyboard::~FireKeyboard () {
 
 }
 bool FireKeyboard::ShouldFire(Unit * targ) {
-  float dist;
+  float dist=FLT_MAX;
   if (gunspeed==.0001) {
     parent->getAverageGunSpeed (gunspeed,gunrange);
   }
@@ -555,32 +566,61 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
   if (targ==parent->Target()) {
     distance = dist;
   }
-  return (dist<.8*agg&&angle>1/agg);
+  return (dist<.8&&angle>1);
 }
-
+static bool UnDockNow (Unit* me, Unit * targ) {
+  bool ret=false;
+  Unit * un;
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (un = *i)!=NULL;
+       ++i) {
+    if (un->isDocked (me)) {
+      if (me->UnDock (un)) {
+	ret=true;
+      }
+    }
+  }
+  return ret;
+}
+static Unit * getAtmospheric (Unit * targ) {
+  if (targ) {
+    Unit * un;
+    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+	 (un=*i)!=NULL;
+	 ++i) {
+      if (un->isUnit()==PLANETPTR) {
+	if ((targ->Position()-un->Position()).Magnitude()<targ->rSize()*.5) {
+	  if (!(((Planet *)un)->isAtmospheric())) {
+	    return un;
+	  }
+	}
+      }
+    }
+  }
+  return NULL;
+  
+}
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
-    if (vectorOfKeyboardInput[playa].req) {
+  static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+    if (vectorOfKeyboardInput[playa].doc) {
       if (targ->isUnit()==PLANETPTR) {
-	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
-	if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	targ = getAtmospheric (targ);
+	if (!targ) {
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
 	  return;
 	}
+	parent->Target(targ);
       }
-      //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
-      CommunicationMessage c(parent,targ,NULL,sex);
-      c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
-      targ->getAIState()->Communicate (c);
-      vectorOfKeyboardInput[playa].req=false;
-    }
-    if (vectorOfKeyboardInput[playa].doc) {
+      }
       CommunicationMessage c(targ,parent,NULL,0);
 
       bool hasDock = parent->Dock(targ);
       if (hasDock) {
 	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
+	  vectorOfKeyboardInput[playa].req=true;
       }else {
-        if (parent->UnDock(targ)) {
+        if (UnDockNow(parent,targ)) {
 	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
         }else {
           //docking is unsuccess
@@ -589,11 +629,34 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       }
       parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].doc=false;
+
     }
+    if (vectorOfKeyboardInput[playa].req) {
+      if (targ->isUnit()==PLANETPTR) {
+
+	if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	  targ = getAtmospheric (targ);
+	  if (!targ) {
+	    mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	    return;
+	  }
+	  parent->Target(targ);
+	}
+      }
+      //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
+      CommunicationMessage c(parent,targ,NULL,sex);
+      c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
+      targ->getAIState()->Communicate (c);
+      vectorOfKeyboardInput[playa].req=false;
+    }
+
     if (vectorOfKeyboardInput[playa].und) {
-      parent->UnDock(targ);
       CommunicationMessage c(targ,parent,NULL,0);
-      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      if (UnDockNow(parent,targ)) {
+	c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      }else {
+	c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+      }
       parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].und=0;
     }
@@ -669,11 +732,15 @@ void FireKeyboard::Execute () {
     j().jfirekey=UP;
     parent->UnFire();
   }
-  if (f().cloakkey==PRESS) {
-    static bool toggle=true;
+  if (f().lockkey==PRESS) {
+
     f().cloakkey=DOWN;
-    parent->Cloak(toggle);
-    toggle=!toggle;
+    parent->Cloak(cloaktoggle);
+    cloaktoggle=!cloaktoggle;
+  }
+  if (f().lockkey==PRESS) {
+    f().lockkey=DOWN;
+    parent->LockTarget(!parent->TargetLocked());
   }
   if (f().ECMkey==PRESS) {
     parent->GetImageInformation().ecm=-parent->GetImageInformation().ecm;
@@ -781,7 +848,7 @@ void FireKeyboard::Execute () {
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
       if (mymsg==NULL) {
 	FSM *fsm =_Universe->GetConversation (parent->faction,targ->faction);
-	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(_Universe->GetRelation(parent->faction,targ->faction)));
+	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
       }else {
        _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
       }

@@ -54,8 +54,6 @@ void MessageCenter::add(string from,string to,string message,double delay){
   msg->to=to;
   msg->message=message;
 
-  msg->ufrom=NULL;
-  msg->uto=NULL;
 
   msg->time=mission->getGametime()+delay;
 

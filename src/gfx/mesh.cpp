@@ -592,8 +592,8 @@ bool Mesh::queryBoundingBox (const QVector & eye, const QVector & end, const flo
     if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
       return true;
   }
+  k=((mn.j-eye.j)/slope.j);
   if (k>=0) {
-    k=((mn.j-eye.j)/slope.j);
     IntersectXYZ = eye + k*slope;
     if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y))
       return true;

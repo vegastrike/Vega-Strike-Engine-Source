@@ -68,6 +68,7 @@
 #include "garray.h"
 #include "gfx/mesh.h"
 #include "cmd/collide/csgeom/transfrm.h"
+#include "debug_vs.h"
 #define CD_MAX_COLLISION    1000
 
 // This array contains the colliding pairs
@@ -99,6 +100,7 @@ Moment *Moment::stack = NULL;
 
 csRapidCollider::csRapidCollider (const std::vector <bsp_polygon> &polygons)
 {
+  VSCONSTRUCT1('c')
   SCF_CONSTRUCT_IBASE (NULL);
   GeometryInitialize (polygons);
 }
@@ -158,6 +160,7 @@ void csRapidCollider::GeometryInitialize (const std::vector <bsp_polygon> &polyg
 
 csRapidCollider::~csRapidCollider ()
 {
+  VSDESTRUCT1
   if (m_pCollisionModel)
   {
     delete m_pCollisionModel;

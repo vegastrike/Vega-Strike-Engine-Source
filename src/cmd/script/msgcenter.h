@@ -44,7 +44,7 @@
 #include "vegastrike.h"
 
 #include "mission.h"
-#include "easydom.h"
+//#include "easydom.h"
 
 
 //#include "vs_globals.h"
@@ -53,8 +53,6 @@
 class gameMessage {
  public:
   string from,to,message;
-  Unit *ufrom;
-  Unit *uto;
   double time;
 };
 

@@ -120,6 +120,7 @@ struct GFXColorVertex  {
   GFXColorVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
   GFXColorVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
   GFXColorVertex &SetColor (const GFXColor &col) {r = col.r;g=col.g;b=col.b;a=col.a; return *this;}
+  Vector GetNormal () {return Vector (i,j,k);}
   void SetVtx (const GFXVertex & vv) {s = vv.s;t=vv.t;i=vv.i;j=vv.j;k=vv.k;x=vv.x;y=vv.y;z=vv.z;}
 };
 
@@ -289,6 +290,8 @@ class /*GFXDRVAPI*/ GFXVertexList {
   ///Propagates modifications to the display list
   void RefreshDisplayList();
   void Draw (GLenum *poly, const INDEX index, const int numLists, const int *offsets);
+  void RenormalizeNormals();
+
 public:
   ///creates a vertex list with 1 polytype and a given number of vertices
   inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=NULL){Init (&poly, numVertices, vertices,NULL, 1,&numindices, Mutable,index);}

@@ -69,7 +69,8 @@ static inline bool picklight (const LineCollide& light, const Vector & center, c
 typedef vector <LineCollideStar> veclinecol;
 void GFXPickLights (const Vector & center, const float radius) {
     QVector tmp;
-    void * rndvar = (void *)rand();
+	// Beware if re-using rndvar !! Because rand returns an int and on 64 bits archs sizeof( void*) != sizeof( int) !!!
+    // void * rndvar = (void *)rand();
     const int sizeget=2;
     int lightsenabled = _GLLightsEnabled;
     LineCollide tmpcollide;

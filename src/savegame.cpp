@@ -8,9 +8,13 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "savegame.h"
+#include "load_mission.h"
 #include <algorithm>
+#include "cmd/script/mission.h"
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
+
+    cout << "Hi helper play " << num << endl;
   static string *res=NULL;
   if (res==NULL) {
     res = new std::string;
@@ -85,6 +89,7 @@ using namespace std;
     returnfromhome();
   }
   if (num==0||res->empty()) {
+    cout << "Here";
     return (*res);  
   }
   return (*res)+XMLSupport::tostring(num);
@@ -130,41 +135,6 @@ void FileCopy (const char * src, const char * dst) {
   }
   }
 }
-QVector LaunchUnitNear (QVector pos) {
-  static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
-  for (unsigned int k=0;k<10;k++) {
-    Unit * un;
-    bool collision=false;
-    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
-      if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
-	continue;
-      }
-      double dist = (pos-un->Position()).Magnitude()-un->rSize()-def_un_size;
-      if (dist<0) {
-	QVector delta  = pos-un->Position();
-        double mag = delta.Magnitude();
-        if (mag>.01){
-	  delta=delta/mag;
-        }else {
-          delta.Set(0,0,1);
-        }
-	delta = delta.Scale ( dist+def_un_size);
-	if (k<5) {
-	  pos = pos+delta;
-	  collision=true;
-	}else {
-	  QVector r(.5,.5,.5);
-	  pos+=un->rSize()*r;
-	  collision=true;
-	}
-	
-      }
-    }
-    if (collision==false)
-      break;
-  }
-  return pos;
-}
 
 SaveGame::SaveGame(const std::string &pilot) {
   callsign=pilot;
@@ -192,11 +162,11 @@ QVector SaveGame::GetPlayerLocation () {
   return PlayerLocation;
 }
 
-Hashtable<int,SavedUnits,char[47]> SaveGame::savedunits;
-void SaveGame::RemoveUnitFromSave (int address) {
+Hashtable<long,SavedUnits,char[47]> *SaveGame::savedunits = new Hashtable<long,SavedUnits,char[47]>();
+void SaveGame::RemoveUnitFromSave (long address) {
   SavedUnits *tmp;
-  if (NULL!=(tmp =savedunits.Get (address))) {
-    savedunits.Delete (address);
+  if (NULL!=(tmp =savedunits->Get (address))) {
+    savedunits->Delete (address);
     delete tmp;
   }
 }
@@ -254,11 +224,11 @@ void SaveGame::ReadNewsData (FILE * fp) {
     }
   }
 }
-void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
+void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, long address) {
   string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);
-    savedunits.Put (address,new SavedUnits (filename,type,faction));
+    savedunits->Put (address,new SavedUnits (filename,type,faction));
   }
 }
 olist_t &SaveGame::getMissionData(const std::string &magic_number) {
@@ -320,6 +290,8 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
       _Universe->LoadSerializedFaction(fp);
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(fp);
+    }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
+      last_written_pickled_data=last_pickled_data=UnpickleAllMissions(fp);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
       ReadNewsData(fp);
     }else {
@@ -331,8 +303,9 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
 void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
+ extern bool STATIC_VARS_DESTROYED;
 void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname, int player_num) {
-  vector<SavedUnits *> myvec = savedunits.GetAll();
+  vector<SavedUnits *> myvec = savedunits->GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
     changehome();
@@ -346,17 +319,22 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
-      delete myvec.back();
       myvec.pop_back();
     }
     fprintf (fp,"\n%d %s %s",0,"mission","data ");
     WriteMissionData(fp);
+    if (!STATIC_VARS_DESTROYED)
+      last_written_pickled_data=PickleAllMissions(); 
+
+    fprintf (fp,"\n%d %s %s %s ",0,"python","data",last_written_pickled_data.c_str());
+
     fprintf (fp,"\n%d %s %s",0,"news","data ");
     WriteNewsData(fp);
     fprintf (fp,"\n%d %s %s",0,"factions","begin ");
     _Universe->SerializeFaction(fp);
     fclose (fp);
     if (player_num!=-1) {
+      last_pickled_data =last_written_pickled_data;
       FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
     }
     vscdup();

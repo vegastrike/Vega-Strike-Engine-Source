@@ -87,12 +87,12 @@ bool QuadTree::GetGroundPos (QVector &Location, Vector & norm, const Matrix & tr
   QVector Loc = nonlinear_transform->InvTransform (InvScaleTransform (transf,Location));
   if (TotalTerrainSizeX) {
     float tmpx = Loc.i;
-    Loc.i= fmod (Loc.i,TotalTerrainSizeX);
+    Loc.i= fmod ((double) Loc.i,(double) TotalTerrainSizeX);
     if (Loc.i<0)
       Loc.i+=TotalTerrainSizeX;
     TotalTerrainSizeX = tmpx;
     tmpx = Loc.k;
-    Loc.k= fmod (Loc.k,TotalTerrainSizeZ);
+    Loc.k= fmod ((double) Loc.k,(double) TotalTerrainSizeZ);
     if (Loc.k<0)
       Loc.k+=TotalTerrainSizeZ;
     TotalTerrainSizeZ = tmpx;

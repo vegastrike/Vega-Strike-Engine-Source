@@ -18,17 +18,49 @@ Cargo * GetMasterPartList(const char *input_buffer){
 
 void Unit::ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev) {
   unsigned int numcarg = GetUnitMasterPartList().numCargo();
+  float minprice=FLT_MAX;
+  float maxprice=0;
+  for (unsigned int j=0;j<numcarg;++j) {
+    if (GetUnitMasterPartList().GetCargo(j).category==category) {
+      float price = GetUnitMasterPartList().GetCargo(j).price;
+      if (price < minprice)
+	minprice = price;
+      else if (price > maxprice)
+	maxprice = price;
+    }
+  }
   for (unsigned int i=0;i<numcarg;i++) {
     Cargo c= GetUnitMasterPartList().GetCargo (i);
     if (c.category==category) {
+
+      static float aveweight = fabs(XMLSupport::parse_float (vs_config->getVariable ("cargo","price_recenter_factor","0")));
       c.quantity=quantity-quantdev;
+      float baseprice=c.price;
       c.price*=price-pricedev;
+
       //stupid way
       c.quantity+=(quantdev*2+1)*((double)rand())/(((double)RAND_MAX)+1);
       c.price+=pricedev*2*((float)rand())/RAND_MAX;
       c.price=fabs(c.price);
-      if (c.quantity<0) {
+      c.price=(c.price +(baseprice*aveweight))/ (aveweight+1);
+      if (c.quantity<=0) {
 	c.quantity=0;
+      }else {
+	//quantity more than zero
+	if (maxprice>minprice+.01) {
+	  float renormprice = (baseprice-minprice)/(maxprice-minprice);
+	  static float maxpricequantadj = XMLSupport::parse_float (vs_config->getVariable ("cargo","max_price_quant_adj","5"));
+	  static float minpricequantadj = XMLSupport::parse_float (vs_config->getVariable ("cargo","min_price_quant_adj","1"));
+	  static float powah = XMLSupport::parse_float (vs_config->getVariable ("cargo","price_quant_adj_power","1"));
+	  renormprice = pow(renormprice,powah);
+	  renormprice *= (maxpricequantadj-minpricequantadj);
+	  renormprice+=1;
+	  if (renormprice>.001) {
+	    c.quantity/=renormprice;
+	    if (c.quantity<1)
+	      c.quantity=1;
+	  }
+	}
       }
       if (c.price <.01)
 	c.price=.01;
@@ -84,7 +116,7 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
 }
 
 vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
-	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("physics","filter_expensive_cargo","false"));
+	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
 	Cockpit * cp = _Universe->isPlayerStarship (this);
   if (cp) {
@@ -107,7 +139,11 @@ UnitImages &Unit::GetImageInformation() {
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {
-  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+string("\"/>\n");
+  string missioncargo;
+  if (cargo.mission) {
+	  missioncargo = string("\" missioncargo=\"")+XMLSupport::tostring(cargo.mission);
+  }
+  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+missioncargo+ string("\"/>\n");
 }
 std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   Unit * un = (Unit *)mythis;
@@ -129,6 +165,7 @@ void Unit::SortCargo() {
       tmpmass/=un->image->cargo[i].quantity;
       tmpvolume/=un->image->cargo[i].quantity;
       un->image->cargo[i].volume=tmpvolume;
+	  un->image->cargo[i].mission = (un->image->cargo[i].mission||un->image->cargo[i+1].mission);
       un->image->cargo[i].mass=tmpmass;
       un->image->cargo.erase(un->image->cargo.begin()+(i+1));//group up similar ones
       i--;
@@ -250,12 +287,28 @@ void Unit::EjectCargo (unsigned int index) {
     tmp = &GetCargo (index);
   }
   if (tmp) {
+    string tmpcontent=tmp->content;
+    if (tmp->mission)
+      tmpcontent="Mission_Cargo";
+
     if (tmp->quantity>0) {
       const int sslen=strlen("starships");
       Unit * cargo = NULL;
       if (tmp->category.length()>=sslen) {
-	if (memcmp (tmp->category.c_str(),"starships",sslen)==0) {
-	  cargo = UnitFactory::createUnit (tmp->content.c_str(),false,faction);
+	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
+	  string ans = tmpcontent;
+	  unsigned int blank = ans.find (".blank");
+	  if (blank != string::npos) {
+	    ans = ans.substr (0,blank);
+	  }
+	  Flightgroup * fg = this->getFlightgroup();
+	  int fgsnumber=0;
+	  if (fg!=NULL) {
+	    fgsnumber=fg->nr_ships;
+	    fg->nr_ships++;
+	    fg->nr_ships_left++;
+	  }
+	  cargo = UnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber);
 	  cargo->PrimeOrders();
 	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
 	  cargo->SetTurretAI();	  
@@ -263,7 +316,7 @@ void Unit::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-	cargo = UnitFactory::createUnit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,_Universe->GetFaction("upgrades"));
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
@@ -280,7 +333,7 @@ void Unit::EjectCargo (unsigned int index) {
 	  cargo->name=name;
 	} else {
 	  if (tmp) {
-	    cargo->name=tmp->content;
+	    cargo->name=tmpcontent;
 	  }
 	}
 	if (cp&&_Universe->numPlayers()==1) {

@@ -2,6 +2,7 @@
 
 #include "mission.h"
 #include "flightgroup.h"
+#include "cmd/unit.h"
 #include <stdio.h>
 Flightgroup::Flightgroup ():pos(0,0,0) {//betterto have a flightgroup constructor
   fprintf (stderr,"constructing FG 0x%x\n",this);

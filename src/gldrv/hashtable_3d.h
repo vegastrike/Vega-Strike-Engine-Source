@@ -130,7 +130,7 @@ public:
   }
   static bool removeFromVector (std::vector <T> &myvector, T &objectToKill) {
     bool ret=false;
-    std::vector<T>::iterator removal = myvector.begin();
+    typename std::vector<T>::iterator removal = myvector.begin();
     while (removal!=myvector.end()) {
       removal = std::find (removal,myvector.end(),objectToKill);
       if (removal!=myvector.end()) {

@@ -122,6 +122,7 @@ static GLenum PolyLookup (POLYTYPE poly) {
 }
 
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
+  VSCONSTRUCT1('v')
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
   mode = new GLenum [numlists];
@@ -143,7 +144,7 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
       data.vertices=NULL;
       data.colors = NULL;
   }
-  
+
   this->offsets = new int [numlists];
   memcpy(this->offsets, offsets, sizeof(int)*numlists);
   int i;
@@ -181,11 +182,13 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   }
   
   changed |= stride;
+  RenormalizeNormals ();  
   RefreshDisplayList();
   if (Mutable)
     changed |= CHANGE_MUTABLE;//for display lists
   else
     changed &= (~CHANGE_CHANGE);
+
 }
 
 int GFXVertexList::numTris () {
@@ -231,6 +234,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
   if (!(changed&CHANGE_MUTABLE)) {
     changed |= CHANGE_CHANGE;
   }
+  RenormalizeNormals ();
   RefreshDisplayList();
   if (changed&CHANGE_CHANGE) {
     changed&=(~CHANGE_CHANGE);
@@ -238,6 +242,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
   if (newvertexsize) {
     numVertices = newvertexsize;
   }
+
 }
 
 
@@ -302,6 +307,7 @@ void GFXVertexList::RefreshDisplayList () {
 }
 
 GFXVertexList::~GFXVertexList() {
+  VSDESTRUCT1
   if (display_list)
     GFXDeleteList (display_list); //delete dis
   if (offsets)
@@ -329,6 +335,45 @@ void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
   }
 }
 
+void GFXVertexList::RenormalizeNormals () {
+
+  if (numVertices>0) {
+    Vector firstNormal;
+    if (changed&HAS_COLOR) {
+      firstNormal=    data.colors[0].GetNormal();
+    }else {
+      firstNormal=    data.vertices[0].GetNormal();
+    }
+    float mag = firstNormal.Magnitude();
+    if (mag>GFX_SCALE/1.5&&mag<GFX_SCALE*1.5) {
+      return;
+    }
+    if (mag<GFX_SCALE/100&&mag<.00001) {
+      firstNormal.Set(1,0,0);
+    }
+    firstNormal.Normalize();
+    if (changed&HAS_COLOR) {
+      data.colors[0].SetNormal(firstNormal);
+    }else {
+      data.vertices[0].SetNormal(firstNormal);
+    }
+    if (changed&HAS_COLOR) {
+      for (int i=0;i<numVertices;i++) {
+	//	data.colors[i].SetNormal(data.colors[i].GetNormal().Normalize());
+	data.colors[i].i*=GFX_SCALE;
+	data.colors[i].j*=GFX_SCALE;
+	data.colors[i].k*=GFX_SCALE;
+      }
+    }else {
+      for (int i=0;i<numVertices;i++) {
+	//	data.vertices[i].SetNormal(data.vertices[i].GetNormal().Normalize());
+	data.vertices[i].i*=GFX_SCALE;
+	data.vertices[i].j*=GFX_SCALE;
+	data.vertices[i].k*=GFX_SCALE;
+      }
+    }
+  }
+}
 unsigned int GFXVertexList::GetIndex (int offset) const {
   return (changed&sizeof(unsigned char))
       ? (unsigned int) (index.b[offset]) 

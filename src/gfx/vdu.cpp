@@ -12,7 +12,7 @@
 #include "xml_support.h"
 #include "gfx/animation.h"
 ///ALERT to change must change enum in class
-const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
+const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
 
 
@@ -270,7 +270,7 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
 
 }
 
-void VDU::DrawVDUShield (Unit * parent, const GFXColor &c) {
+void VDU::DrawVDUShield (Unit * parent) {
   float fs = parent->FShieldData();
   float rs = parent->RShieldData();
   float ls = parent->LShieldData();
@@ -306,8 +306,9 @@ Sprite * getPlanetImage () {
   return &s;
 }
 
-void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
+void VDU::DrawTarget(Unit * parent, Unit * target) {
   float x,y,w,h;
+
   float fs = target->FShieldData();
   float rs = target->RShieldData();
   float ls = target->LShieldData();
@@ -321,11 +322,9 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
 
-
-
-  
-  GFXColorf (c);
   tp->Draw (MangleString (getUnitNameAndFgNoBase(target).c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+  double mm=0;
+  if (parent->InRange(target,mm,true,false,false)) {  
   int i=0;
   char st[1024];
   for (i=0;i<rows-1&&i<128;i++) {
@@ -341,9 +340,13 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   GFXColor4f (.4,.4,1,1);
   DrawShield (fs,rs,ls,bs,x,y,w,h);
   GFXColor4f (1,1,1,1);
+  }else {
+  tp->Draw (MangleString ("\n[OutOfRange]",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);      
+
+  }
 }
 
-void VDU::DrawMessages(Unit *target, const GFXColor & c){
+void VDU::DrawMessages(Unit *target){
   string fullstr;
 
   char st[256];
@@ -376,6 +379,8 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   vector <std::string> whoNOT;
   whoNOT.push_back ("briefing");
   whoNOT.push_back ("news");
+  whoNOT.push_back ("bar");
+
   vector <std::string> message_people;//should be "all", parent's name
   gameMessage *lastmsg=mc->last(0,message_people,whoNOT);
   for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && lastmsg!=NULL;i++){
@@ -387,9 +392,13 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
 	int sendtime_mins=(int)(sendtime/60.0);
 	int sendtime_secs=(int)(sendtime - sendtime_mins*60);
 
-	sprintf(timebuf,"%2d.%02d ",sendtime_mins,sendtime_secs);
-
-	string mymsg=timebuf+lastmsg->message;
+	sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
+	string mymsg;
+ 	if (lastmsg->from!="game") {
+		mymsg=lastmsg->from+" ("+timebuf+"): "+lastmsg->message;
+	} else {
+		mymsg=string(timebuf)+": "+lastmsg->message;
+	}
 	int msglen=mymsg.size();
 	int rows_needed=msglen/cols;
 	fullstr=mymsg+"\n"+fullstr;
@@ -402,7 +411,6 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   }
 
   fullstr=targetstr+fullstr;
-  GFXColorf (c);
   tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 bool VDU::SetCommAnimation (Animation * ani) {
@@ -418,19 +426,18 @@ bool VDU::SetCommAnimation (Animation * ani) {
   }
   return false;
 }
-void VDU::DrawNav (const Vector & nav, const GFXColor & c) {
+void VDU::DrawNav (const Vector & nav) {
   char nothing[]="none";
   Unit * you = _Universe->AccessCockpit()->GetParent();
   Unit * targ = you!=NULL?you->Target():NULL;
   char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude()/game_speed);
-  GFXColorf (c);
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
 
 }
-void VDU::DrawComm (const GFXColor & c) {
+void VDU::DrawComm () {
   if (comm_ani!=NULL) {
     GFXDisable (TEXTURE1);
     GFXEnable (TEXTURE0);
@@ -453,12 +460,11 @@ void VDU::DrawComm (const GFXColor & c) {
 
 
   }else {
-    GFXColorf (c);
     tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
   }
 }
 
-void VDU::DrawManifest (Unit * parent, Unit * target, const GFXColor &c) {
+void VDU::DrawManifest (Unit * parent, Unit * target) {
   string retval ("Manifest\n");
   if (target!=parent) {
     retval+=string ("Tgt: ")+target->name+string("\n");
@@ -469,7 +475,6 @@ void VDU::DrawManifest (Unit * parent, Unit * target, const GFXColor &c) {
   for (unsigned int i=0;i<numCargo;i++) {
     retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
   }
-  GFXColorf (c);
   tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
@@ -551,7 +556,7 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
   }
   
 }
-void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
+void VDU::DrawDamage(Unit * parent) {
   float x,y,w,h;
   float th;
   char st[1024];
@@ -560,7 +565,6 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
-  GFXColorf (c);
   sprintf (st,"%s\nHull: %.3f",getUnitNameAndFgNoBase(parent).c_str(),parent->GetHull());
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   int k=strlen(st);
@@ -607,7 +611,7 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
 void VDU::SetViewingStyle(VIEWSTYLE vs) {
   viewStyle = vs;
 }
-void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target, const GFXColor &c) {
+void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target) {
 
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
@@ -634,7 +638,6 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXDisable(DEPTHWRITE);   
 
   char buf[1024];
-  GFXColorf(c);
   if (target) {
     sprintf(buf,"%s\n",getUnitNameAndFgNoBase(target).c_str());
   } else {
@@ -645,7 +648,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 }
 
 
-void VDU::DrawWeapon (Unit * parent, const GFXColor& c) {
+void VDU::DrawWeapon (Unit * parent) {
     
   float x,y,w,h;
   const float percent = .6;
@@ -693,11 +696,62 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
   if (mbuf.length()!=mlen) {
     buf+=mbuf;
   }
-  GFXColorf(c);
   tp->Draw (buf,0,true);
 }
+using std::vector;
+static GFXColor GetColorFromSuccess (float suc){ 
+  suc +=1.;
+  suc/=2.;
+  return GFXColor(1-suc,suc,0);    
+}
+int VDU::DrawVDUObjective (void * obj, int offset) {
 
+  if (offset>=0) {
+    Mission::Objective * mo = (Mission::Objective *)obj;
+    tp->col=(GetColorFromSuccess(mo->completeness));
+    std::string rez;
+    for (int i=0;i<offset;i++) {
+      rez+="\n";
+    }
+    rez+=mo->objective;
+    return tp->Draw (rez,0,true);  
+  }
+  return offset+1;
+}
+void VDU::DrawVDUObjectives (Unit *parent) {
+  GFXColor col (tp->col);
+  int offset = scrolloffset;
+  for (unsigned int i=0;i<active_missions.size();++i){
+    if (!active_missions[i]->objectives.empty()) {
+      if (offset>=0) {
+	tp->col=GFXColor(1,1,1,1);
+	std::string rez;
+	for (int k=0;k<offset;k++) {
+	  rez+="\n";
+	}
+	if (active_missions[i]->mission_name.empty()) {
+	  rez+="Mission "+XMLSupport::tostring((int)i)+"\n";
+	}else {
+	  rez+=active_missions[i]->mission_name+"\n";
+	}
+	offset=tp->Draw (rez,0,true);  	
+      }else {
+	offset++;
+      }
+
+      
+      vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
+      for (;j!=active_missions[i]->objectives.end();++j) {
+	if (j->owner==NULL||j->owner==parent) {
+	  offset=DrawVDUObjective (j,offset);
+	}
+      }
+    }
+  }
+  tp->col=col;
+}
 void VDU::Draw (Unit * parent, const GFXColor & color) {
+  tp->col=color;
   GFXDisable(LIGHTING);
   Sprite::Draw();
   if (!parent) {
@@ -722,37 +776,40 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   switch (thismode.back()) {
   case TARGET:
     if (targ)
-      DrawTarget(parent,targ,color);
+      DrawTarget(parent,targ);
     break;
   case MANIFEST:
-    DrawManifest (parent,parent,color);
+    DrawManifest (parent,parent);
     break;
   case TARGETMANIFEST:
     if (targ)
-      DrawManifest(parent,targ,color);
+      DrawManifest(parent,targ);
     break;
   case VIEW:
     GetPosition (x,y);
     GetSize (w,h);
-    DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle,parent,targ,color);
+    DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle,parent,targ);
     break;
   case NAV:
-    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()),color);
+    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()));
     break;
   case MSG:
-    DrawMessages(targ,color);
+    DrawMessages(targ);
     break;
   case COMM:
-    DrawComm(color);
+    DrawComm();
     break;
   case DAMAGE:
-    DrawDamage(parent,color);
+    DrawDamage(parent);
     break;
   case WEAPON:
-    DrawWeapon(parent,color);
+    DrawWeapon(parent);
     break;
   case SHIELD:
-    DrawVDUShield (parent,color);
+    DrawVDUShield (parent);
+    break;
+  case OBJECTIVES:
+    DrawVDUObjectives (parent);
     break;
   }
 

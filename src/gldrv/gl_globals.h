@@ -137,6 +137,8 @@ typedef struct {
   int color_depth;
   int cubemap;  
   int compression;
+  char wireframe;
+  char smooth_shade;
   bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;
@@ -148,3 +150,4 @@ extern gl_options_t gl_options;
 
 // Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048
+#define GFX_SCALE 1./1024.

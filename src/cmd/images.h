@@ -15,7 +15,7 @@ struct DockingPorts {
 	this->pos=(pos); this->radius=(radius);
     min=Vector(pos-Vector (radius,radius,radius));
     max=Vector(pos+Vector (radius,radius,radius));
-    internal=(internal);
+    this->internal=(internal);
     used=false;
   }
   DockingPorts (const Vector &min, const Vector &max, bool internal=true):radius((max-min).Magnitude()*.5) {
@@ -34,7 +34,8 @@ struct DockedUnits {
 };
 
 
-struct Cargo {
+class Cargo {
+public:
   int quantity;
   std::string content;
   std::string category;
@@ -42,7 +43,33 @@ struct Cargo {
   float mass;
   float volume;
   char * description;//mem leak... for the master part list (global var, no prob)
-  Cargo () {mass=0; volume=0;price=0;quantity=1;description=NULL;}
+  bool mission;
+  Cargo () {mass=0; volume=0;price=0;quantity=1;description=NULL;mission=false;}
+  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) {
+	quantity=qq;
+	content=name;
+	category=cc;
+	price=pp;
+	mass = mm;
+	volume=vv;
+	description=NULL;
+	mission=false;
+  }
+  void SetMissionFlag(bool flag){this->mission=flag;}
+  bool GetMissionFlag() {return this->mission;}
+  void SetPrice (float price) {this->price=price;}
+  void SetMass (float mass) {this->mass=mass;}
+  void SetVolume (float vol) {this->volume=vol;}
+  void SetQuantity (int quantity) {this->quantity=quantity;}
+  void SetContent (std::string content) {this->content = content;}
+  void SetCategory (std::string category) {this->category = category;}
+  std::string GetCategory () {return category;}
+  std::string GetContent () {return content;}
+  int GetQuantity() {return quantity;}
+  float GetVolume () {return volume;}
+  float GetMass() {return mass;}
+  float GetPrice () {return price;}
+  std::string GetDescription() {if (description!=NULL) {return description;}return std::string("");}
   bool operator == (const Cargo & other) const {
     return content==other.content;
   }
@@ -52,6 +79,12 @@ struct Cargo {
 };
 
 struct UnitImages {
+  UnitImages() {
+    VSCONSTRUCT1('i')
+  }
+  ~UnitImages() {
+    VSDESTRUCT1
+  }
   std::string cockpitImage;
   std::string explosion_type;
   Vector CockpitCenter;

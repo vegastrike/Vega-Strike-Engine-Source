@@ -5,7 +5,9 @@
 
 
 class CommunicatingAI:public Order{
+
   typedef std::map<const Unit*,float> relationmap;
+ protected:
   unsigned char sex;//male female robot???
   float anger;//how easily he will target you if you taunt him enough (-.00001 is always -.4 is often -.6 is normal
   float appease;//how easily he will switch from you if you silence his will to kill (-.5)
@@ -21,7 +23,7 @@ class CommunicatingAI:public Order{
   void GetMadAt (Unit * which, int howMad);
  protected:
   float getAnger (const Unit * un)const;
-  virtual vector <Animation *> *getCommFaces(unsigned char &sex);
+  virtual std::vector <Animation *> *getCommFaces(unsigned char &sex);
  public:
   virtual float GetEffectiveRelationship (const Unit * target) const;
   Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);

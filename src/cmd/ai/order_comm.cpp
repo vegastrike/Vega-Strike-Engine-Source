@@ -38,7 +38,14 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
 float Order::GetEffectiveRelationship (const Unit * target)const {
-  return _Universe->GetRelation (parent->faction,target->faction);
+  float staticrel =  _Universe->GetRelation (parent->faction,target->faction);
+  for (unsigned int i=0;i<suborders.size();i++) {
+    float effrel = suborders[i]->GetEffectiveRelationship(target);
+    if (effrel !=staticrel) {
+      return effrel;
+    }
+  }
+  return staticrel;
 }
 void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed) {
   float time = AICommresponseTime/SIMULATION_ATOM;

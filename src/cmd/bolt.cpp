@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "unit.h"
 #include "audiolib.h"
+#include "config_xml.h"
 using std::vector;
 using std::string;
 GFXVertexList * bolt_draw::boltmesh=NULL;
@@ -71,7 +72,14 @@ void Bolt::Draw () {
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
-  GFXBlendMode (ONE,ONE);
+
+  static bool blendbeams = XMLSupport::parse_bool (vs_config->getVariable("graphics","BlendGuns","true"));
+  if (blendbeams==true) {
+    GFXBlendMode (ONE,ONE);
+  }else {
+    GFXBlendMode (ONE,ZERO);
+  }
+
   //  GFXDisable(DEPTHTEST);
   GFXDisable(DEPTHWRITE);
   GFXDisable(TEXTURE1);
@@ -133,6 +141,7 @@ void Bolt::Draw () {
 
 
 Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
+  VSCONSTRUCT2('t')
   bolt_draw *q= _Universe->activeStarSystem()->bolts;
   prev_position= cur_position;
   this->owner = owner;
@@ -157,7 +166,11 @@ Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector
     decal = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
     if (decal>=(int)q->bolts.size()) {
       q->bolts.push_back (vector <Bolt *>());
-      q->cachedecals.push_back (q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP));
+      int blargh = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
+      if (blargh>=(int)q->bolts.size()) {
+	q->bolts.push_back (vector <Bolt *>());	
+      }
+      q->cachedecals.push_back (blargh);
     }
     q->bolts[decal].push_back (this);
   } else {
@@ -232,6 +245,10 @@ bool Bolt::Collide (Unit * target) {
   float distance;
   Unit * affectedSubUnit;
   if ((affectedSubUnit =target->queryBSP (prev_position,cur_position,normal,distance))) {//ignore return
+  //  QVector pos;
+  //  double dis=distance;
+  //  if ((affectedSubUnit = target->BeamInsideCollideTree(prev_position,cur_position,pos,normal,dis))) { 
+  //    distance=dis;
     QVector tmp = (cur_position-prev_position).Normalize();
     tmp = tmp.Scale(distance);
     distance = curdist/range;
@@ -256,6 +273,7 @@ bool Bolt::Collide (Unit * target) {
 
 
 Bolt::~Bolt () {
+  VSDESTRUCT2
   bolt_draw *q = _Universe->activeStarSystem()->bolts;
   vector <vector <Bolt *> > *target;
   if (type==weapon_info::BOLT) { 

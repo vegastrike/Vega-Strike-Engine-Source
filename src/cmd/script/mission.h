@@ -100,6 +100,9 @@ enum callback_module_std_type {
   CMT_STD_playSound,
   CMT_STD_playAnimation,
   CMT_STD_getGalaxyProperty,
+  CMT_STD_musicAddList,
+  CMT_STD_musicPlaySong,
+  CMT_STD_musicPlayList,
   CMT_STD_terminateMission
 };
 enum callback_module_briefing_type {
@@ -279,7 +282,6 @@ enum tag_type {
   DTAG_RETURN,
   DTAG_IMPORT
 };
-
 enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_INT,VAR_OBJECT,VAR_VOID,VAR_ANY };
 
 enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
@@ -360,11 +362,20 @@ class contextStack {
 
 class missionNode;
 
-class missionThread {
+class NopeNadaNothingYoureLettingYourImaginationRunWild {
  public:
+  int i;
+};
+class missionThread {
+
+
+ protected:
+ public:
+  virtual ~missionThread(){}
   vector<contextStack *> exec_stack;
   vector<missionNode *> module_stack;
   vector<unsigned int>  classid_stack;
+
 };
 
 /* *********************************************************** */
@@ -398,14 +409,36 @@ class missionNode : public tagDomNode {
 
 /* *********************************************************** */
 
-
+class pythonMission;
+class PythonMissionBaseClass;
 #endif // VS_MIS_SEL
 
 
 class Mission {
-  class Briefing * briefing;
  public:
-  Mission(char *configfile, bool loadscripts=true);
+  enum MISSION_AUTO {AUTO_OFF=-1,AUTO_NORMAL=0, AUTO_ON=1};
+  unsigned int player_num;
+  MISSION_AUTO player_autopilot;
+  MISSION_AUTO global_autopilot;
+  struct Objective {
+    float completeness;
+	std::string objective;
+	UnitContainer owner;
+	Objective () {completeness=0;}
+	Objective (float complete,std::string obj) {completeness=complete;objective=obj;}
+  };
+  vector <Objective> objectives;
+  void SetUnpickleData(std::string dat) {
+	unpickleData=dat;
+  }
+  class Briefing * briefing;
+  double gametime;
+  string mission_name;
+  void terminateMission();
+ Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
+  Mission(const char *configfile, bool loadscripts=true);
+  std::string Pickle ();//returns filename\npickleddata
+  void UnPickle (std::string pickled);//takes in pickeddata
   void AddFlightgroup(Flightgroup * fg);
   void initMission(bool loadscripts=true);
   ///alex Please help me make this function...this is called between mission loops
@@ -452,7 +485,7 @@ unsigned int  createClassInstance(string modulename);
 varInst* lookupClassVariable(string modulename,string varname,unsigned int classid);
 void destroyClassInstance(string modulename,unsigned int classid);
 
-  MessageCenter *msgcenter;
+  static MessageCenter *msgcenter;
 
 void call_vector_into_olist(varInst *vec_vi,QVector vec3);
 void  deleteVarInst(varInst *vi,bool del_local=false);
@@ -476,7 +509,6 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   bool do_trace;
   int tracelevel;//unusued
 
-  double gametime;
   int total_nr_frames;
 
   ofstream var_out;
@@ -487,9 +519,12 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   easyDomFactory<missionNode> *importf;
 
   tagMap tagmap;
+  char *nextpythonmission;
+  std::string unpickleData;
 
   struct Runtime {
     vector<missionThread *> threads;
+	PythonMissionBaseClass * pymissions;
     map<string,missionNode *> modules;
     int thread_nr;
     missionThread *cur_thread;
@@ -497,7 +532,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
     varInstVec global_varvec;
     //    vector<const void *()> callbacks;
   } runtime;
-
+  friend void UnpickleMission (std::string pickled);
   // used only for parsing
   vector<missionNode *> scope_stack;
   missionNode *current_module;
@@ -631,6 +666,9 @@ varInst *  call_setNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
 varInst * callGetCurrentAIUnit(missionNode *node,int mode);
 varInst * callGetCurrentAIOrder(missionNode *node,int mode);
+varInst * call_musicAddList(missionNode *node,int mode);
+varInst * call_musicPlaySong(missionNode *node,int mode);
+varInst * call_musicPlayList(missionNode *node,int mode);
 
  varInst *call_int_cast(missionNode *node,int mode);
  varInst *call_float_cast(missionNode *node,int mode);
@@ -667,7 +705,6 @@ omap_t* getOMapObject(missionNode *node,int mode,varInst *ovi);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
- Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
 
  void call_unit_toxml(missionNode *node,int mode,varInst *ovi);
 
@@ -690,7 +727,7 @@ varInst *newVarInst(scope_type scopetype);
 
 void deleteVarMap(varInstMap *vmap);
   //pushes this mission onto a destruct queue for future destruction and removes from activeMission
-  varInst * terminateMission(missionNode *node, int mode);
+  varInst * call_terminateMission(missionNode *node, int mode);
 
 varInst * call_order(missionNode *node,int mode);
 Order * getOrderObject(missionNode *node,int mode,varInst *ovi);

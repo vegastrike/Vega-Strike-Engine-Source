@@ -161,6 +161,22 @@ void Unit::Mount::UnFire () {
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
+
+int Unit::LockMissile() const{
+  bool missilelock=false;
+  bool dumblock=false;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+      missilelock=true;
+    }else {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
+	dumblock=true;
+      }
+    }    
+  }
+  return (missilelock?1:(dumblock?-1:0));
+}
+
 static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
@@ -265,13 +281,14 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
   }
   return false;
 }
-Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
+Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;ref.gun=NULL; sound=-1;}
 Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon_info::NOWEAP),ammo(ammo),sound(-1){
   static weapon_info wi(weapon_info::BEAM);
   type = &wi;
   this->volume=volume;
   ref.gun = NULL;
   status=(UNCHOSEN);
+  processed=Mount::PROCESSED;
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;
@@ -318,6 +335,7 @@ void Unit::Target (Unit *targ) {
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
         computer.target.SetUnit(targ);
+	LockTarget(false);
       }
     }else {
       if (jump.drive!=-1) {
@@ -348,7 +366,7 @@ void Unit::SetRecursiveOwner(Unit *target) {
     UnitCollection::UnitIterator iter = getSubUnits();
     Unit * su;
     while ((su=iter.current())) {
-      su->SetOwner (target);
+      su->SetRecursiveOwner (target);
       iter.advance();
     }
   }

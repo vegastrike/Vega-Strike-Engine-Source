@@ -8,6 +8,8 @@
 using namespace Orders;
 #include "lin_time.h"
 #include "cmd/script/flightgroup.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -110,9 +112,9 @@ void MoveTo::Execute(){
 
   Vector local_vel (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
-  terminatingX += (copysign(1.0F,local_vel.i)!=copysign(1.0F,last_velocity.i)||(!local_vel.i));
-  terminatingY += (copysign(1.0F,local_vel.j)!=copysign(1.0F,last_velocity.j)||(!local_vel.j));
-  terminatingZ += (copysign(1.0F,local_vel.k)!=copysign(1.0F,last_velocity.k)||(!local_vel.k));
+  terminatingX += ((local_vel.i>0)!=(last_velocity.i>0)||(!local_vel.i));
+  terminatingY += ((local_vel.j>0)!=(last_velocity.j>0)||(!local_vel.j));
+  terminatingZ += ((local_vel.k>0)!=(last_velocity.k>0)||(!local_vel.k));
 
   last_velocity = local_vel;
   Vector heading = parent->ToLocalCoordinates((targetlocation-parent->Position()).Cast());
@@ -211,27 +213,49 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
   return false;
 }
 void ChangeHeading::Execute() {
-  Vector local_heading (parent->UpCoordinateLevel(parent->GetAngularVelocity()));
-  terminatingX += (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i));
-  terminatingY += (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j));
+  Vector ang_vel=parent->GetAngularVelocity();
+  Vector local_velocity (parent->UpCoordinateLevel(ang_vel));
+  Vector local_heading (parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast()));
+  //Vector local_heading (parent->UpCoordinateLevel(ang_vel));
+  char xswitch = ((local_heading.i>0)!=(last_velocity.i>0)||(!local_heading.i))?1:0;
+  char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))?1:0;
+  static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
+  if (AICheat) {
+    if (xswitch||yswitch) {   
+
+      if (xswitch) {
+	if (yswitch) {
+	  local_velocity.j=local_velocity.i =0.0;
+	}else {
+	  local_velocity.i=0.0;;
+	}
+      }else if (yswitch) {
+	  local_velocity.j=0.0;;
+      }
+      
+      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_velocity));
+    }
+  }
+  terminatingX += xswitch;
+  terminatingY += yswitch;
   last_velocity = local_heading;
-  local_heading = parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast());
-  if (done) return ;
+
+  if (done||(xswitch&&yswitch)) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
-    if (Done (last_velocity)) {
+    if (Done (local_velocity)) {
       done = true;
       return;
     }
-    torque= (-parent->GetMoment()/SIMULATION_ATOM)*last_velocity;
+    torque= (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;
   } else {
-    TurnToward (atan2(local_heading.j, local_heading.k),last_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch/*/getTimeCompression()*/,last_velocity.i,torque.i);
+    TurnToward (atan2(local_heading.j, local_heading.k),local_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch/*/getTimeCompression()*/,local_velocity.i,torque.i);
     
-    TurnToward (atan2 (local_heading.i, local_heading.k), -last_velocity.j, torque.j);
+    TurnToward (atan2 (local_heading.i, local_heading.k), -local_velocity.j, torque.j);
     torque.j=-torque.j;
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,last_velocity.j,torque.j);
-    torque.k  =-parent->GetMoment()*last_velocity.k/SIMULATION_ATOM;//try to counteract roll;
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,local_velocity.j,torque.j);
+    torque.k  =-parent->GetMoment()*local_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
   parent->ApplyLocalTorque (torque);
 }

@@ -7,13 +7,23 @@
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
 using Orders::FireAt;
-
-FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
+void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
+  static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
+  missileprobability = missileprob;  
   gunspeed=float(.0001);
   gunrange=float(.0001);
-  static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
-  missileprobability = missileprob;
-  
+  delay=0;
+  agg = aggressivitylevel;
+  rxntime = reaction_time;
+  distance=1;
+}
+FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
+  ReInit (reaction_time,aggressivitylevel);
+}
+FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
+  static float reaction = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","ReactionTime",".2"));
+  static float aggr = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","Aggressivity","15"));
+  ReInit (reaction,aggr);
 }
 //temporary way of choosing
 void FireAt::ChooseTargets (int numtargs, bool force) {
@@ -34,7 +44,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     relation = GetEffectiveRelationship (un);
-    bool tmp = parent->InRange (un,dist,false,false);
+    bool tmp = parent->InRange (un,dist,false,false,true);
     if (tmp&&((relation<worstrelation||(relation==worstrelation&&dist<range)))) {
       worstrelation = relation;
       range = dist;
@@ -136,6 +146,18 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     parent->UnFire();
   }
 }
+
+bool FireAt::isJumpablePlanet(Unit * targ) {
+    bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;
+    if (istargetjumpableplanet) {
+      istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
+      if (!istargetjumpableplanet) {
+	ChooseTargets(1);
+      }
+    }
+    return istargetjumpableplanet;
+}
+
 void FireAt::Execute () {
   bool missilelock=false;
   bool tmp = done;
@@ -169,13 +191,7 @@ void FireAt::Execute () {
   //    shouldfire |=DealWithMultipleTargets();
 
   if ((targ = parent->Target())) {
-    bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;
-    if (istargetjumpableplanet) {
-      istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
-      if (!istargetjumpableplanet) {
-	ChooseTargets(1);
-      }
-    }
+    bool istargetjumpableplanet = isJumpablePlanet (targ);
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
       if (parent->GetNumMounts()>0) {
 	if (!istargetjumpableplanet)

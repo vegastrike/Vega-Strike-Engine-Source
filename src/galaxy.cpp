@@ -63,6 +63,7 @@ struct SystemInfo {
   string smallun;
   string nebulaelist;
   string asteroidslist;
+  string ringlist;
   string backgrounds;
   vector <string> jumps;
   int numjumps;
@@ -77,7 +78,7 @@ string getUniversePath () {
 
 void MyLoadSystem (SystemInfo si) {
 
-  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.jumps,si.names,si.stars,si.planets,si.gasgiants,si.moons,si.smallun,si.nebulaelist,si.asteroidslist,si.backgrounds,si.force);
+  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.jumps,si.names,si.stars,si.planets,si.gasgiants,si.moons,si.smallun,si.nebulaelist,si.asteroidslist,si.ringlist,si.backgrounds,si.force);
 
 }
 string getVarEitherSectionOrSub (Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
@@ -136,6 +137,7 @@ SystemInfo GetSystemXProp (Galaxy * galaxy, std::string sector, std::string minm
   si.moons=getVarEitherSectionOrSub(galaxy,sector,minmax,"moonlist","moons.txt");  
   si.smallun=getVarEitherSectionOrSub(galaxy,sector,minmax,"unitlist","smallunits.txt");  
   si.asteroidslist=getVarEitherSectionOrSub(galaxy,sector,minmax,"asteroidlist","asteroids.txt");  
+  si.ringlist=getVarEitherSectionOrSub(galaxy,sector,minmax,"ringlist","rings.txt");  
   si.nebulaelist=getVarEitherSectionOrSub(galaxy,sector,minmax,"nebulalist","nebulae.txt");  
   si.backgrounds=getVarEitherSectionOrSub(galaxy,sector,minmax,"backgroundlist","background.txt");  
   si.force=parse_bool (getVarEitherSectionOrSub (galaxy,sector,minmax,"force","false"));
@@ -233,6 +235,7 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   si.moons=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"moonlist",Ave.moons);  
   si.smallun=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"unitlist",Ave.smallun);  
   si.asteroidslist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"asteroidlist",Ave.asteroidslist);  
+  si.ringlist=getVarEitherSectionOrSub(galaxy,si.sector,si.ringlist,"ringlist", Ave.ringlist);
   si.nebulaelist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"nebulalist",Ave.nebulaelist);  
   si.backgrounds=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"backgroundlist",Ave.backgrounds);  
   si.force=parse_bool (getVarEitherSectionOrSub(galaxy,si.sector,si.name,"force",Ave.force?"true":"false"));    
@@ -265,51 +268,7 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   }
   MyLoadSystem (si);
 }
-#ifdef _WIN32
-#include <windows.h>
-static HWND hWnd;
-static HINSTANCE hInst;								// current instance
-LRESULT CALLBACK DLOG_start(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
-	switch (message) {
-	case WM_INITDIALOG:
-		return TRUE;
-	case WM_CLOSE:
-		DestroyWindow(hWnd);
-		return TRUE;
-	case WM_DESTROY:
-		return FALSE;
-	}
-    return FALSE;
-}
-#include "../resource.h"
 
-
-volatile HANDLE hMutex; // Global hMutex Object
-DWORD WINAPI DrawStartupDialog(
-  LPVOID lpParameter   // thread data
-  ) {
-	int dumbi;
-	MSG msg;
-
-	hWnd=CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_START),NULL, (DLGPROC)DLOG_start, 0);
-	ShowWindow(hWnd, SW_SHOW);
-//	for (dumbi=0;dumbi<6;dumbi++) {
-	for (;;) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
-
-			if(GetMessage(&msg, NULL, 0, 0)) {
-				DispatchMessage(&msg);
-			} else {
-				break;
-			}
-		}
-		Sleep(100);
-		if (WaitForSingleObject(hMutex,100)==WAIT_OBJECT_0) break; // wait for ownership
-	}
-	DestroyWindow(hWnd);
-	return 0;
-}
-#endif
 std::string Universe::getGalaxyProperty (const std::string & sys, const std::string & prop) {
   string sector = getStarSystemSector (sys);
   string name = RemoveDotSystem (getStarSystemName (sys).c_str());
@@ -327,21 +286,6 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   if ((tmpcache =GetLoadedStarSystem(file))) {
     return tmpcache;
   }
-  if (!firsttime) {
-#ifdef _WIN32
-  hMutex=CreateMutex(NULL,FALSE,NULL); // nameless mutex object
-  WaitForSingleObject(hMutex,INFINITE); // wait for ownership + print
-  DWORD id;
-  HANDLE hThr=CreateThread(NULL,  // pointer to security attributes
-		0,                         // initial thread stack size
-	    DrawStartupDialog,     // pointer to thread function
-        NULL,                        // argument for new thread
-        0,                     // creation flags
-        &id                         // pointer to receive thread ID
-         );
-//	DialogBox (hInst,(LPCTSTR)IDD_START,hWnd,(DLGPROC)DLOG_start);
-#endif
-  }
   int count=0;
   SetStarSystemLoading (true);
   while (GetCorrectStarSysPath (file).length()==0) {
@@ -354,7 +298,9 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   LoadStarSystem (ss);
 
   pushActiveStarSystem(ss);
-  for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=.001+GetElapsedTime()) {
+  int blah=0;
+  for (float tume=0;tume<=4*SIMULATION_ATOM||blah<10;tume+=.001+GetElapsedTime()) {
+    blah++;
     //make sure the planets are aligned right before calling director
     ss->Update(1,false);
   }
@@ -387,9 +333,6 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   if (firsttime) {
   	firsttime=false;
   }else {
-#ifdef _WIN32
-    ReleaseMutex(hMutex);
-#endif
   }
   SetStarSystemLoading (false);
   return ss;

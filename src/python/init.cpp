@@ -1,53 +1,116 @@
-#ifdef HAVE_BOOST
+
+#ifdef HAVE_PYTHON
 #include <stdio.h>
 #include <Python.h>
-#include "init.h"
+#include <pyerrors.h>
+#include <pythonrun.h>
+#include <compile.h>
+#include <eval.h>
 #include <boost/python/class_builder.hpp>
+#include <boost/python/detail/extension_class.hpp>
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "vs_path.h"
 #include <strstream>
+#include "init.h"
+#include "python_compile.h"
+#include "python_class.h"
+#include "cmd/unit.h"
+#ifdef WIN32
+#include <direct.h>
+#endif
+class Unit;
+//FROM_PYTHON_SMART_POINTER(Unit)
+#ifdef OLD_PYTHON_TEST
+     class hello {
+		 std::string country;
+      public:
+         hello(const std::string& country) { this->country = country; }
+         virtual std::string greet() const { return "Hello from " + country; }
+         virtual ~hello(){fprintf (stderr,"NO HELLO %d",this);} // Good practice 
+     };
+	 struct hello_callback : hello
+     {
+         // hello constructor storing initial self_ parameter
+         hello_callback(PyObject* self_, const std::string& x) // 2
+             : hello(x), self(self_) {}
 
-class PythonConfig {
-	void foo();
+         // In case hello is returned by-value from a wrapped function
+         hello_callback(PyObject* self_, const hello& x) // 3
+             : hello(x), self(self_) {}
+
+         // Override greet to call back into Python
+         std::string greet() const // 4
+             { return boost::python::callback<std::string>::call_method(self, "greet"); }
+             virtual ~hello_callback () {fprintf (stderr,"NO CALLBAC %d",this);}
+         // Supplies the default implementation of greet
+         static std::string default_greet(const hello& self_) //const // 5
+             { return self_.hello::greet(); }
+      private:
+         PyObject* self; // 1
+     };
+class MyBaseClass {
+private:
+protected:
+	int val;
+public:
+	MyBaseClass(int set) {val=set;}
+	virtual void foo(int set){val=0;}
+	virtual int get(){return -4364;}
+	virtual ~MyBaseClass() {}
 };
 
-enum Sections {
-	NONE=0,
-	DATA=1
+class MyDerivedClass : MyBaseClass {
+private:
+public:
+	MyDerivedClass(int set) :MyBaseClass(set) {val=4364;}
+	virtual void foo(int set) {val=set;}
+	virtual int get(){return val;}
+	virtual ~MyDerivedClass() {}
 };
-const std::string Sections[] = {"","data"};
-const std::string SubSections[] = {"","data"};
 
 /* Simple Python configuration modifier. It modifies the attributes 
 in the config_xml DOM; currently only works for variables in section
 'data', and doesn't create new variables if necessary */
 
-template <enum Sections SecNum, enum Sections SubSecNum=NONE>
 class PythonVarConfig {
 public:
-	static void setVariable(PythonVarConfig &self,const std::string& name,const std::string& value) {
-		std::string Section = Sections[SecNum];
-		std::string SubSection = Sections[SubSecNum];
-		if(SubSection.length()) {
-			vs_config->setVariable(Section,SubSection,name,value);
+	struct myattr {
+		std::string name;
+		std::string value;
+		myattr(std::string nam,std::string val) {name=nam;value=val;}
+	};
+	std::vector <myattr> myvar;
+	std::string MyGetVariable(std::string name,int &loc) const {
+		std::vector<myattr>::const_iterator iter=myvar.begin();
+		std::string value="";
+		if (iter) {
+		while (iter!=myvar.end()) {
+			if ((*iter).name==name) {
+				value=(*iter).value;
+				break;
+			}
+			iter++;
 		}
-		else {
-			vs_config->setVariable(Section,name,value);
 		}
+		return value;
 	}
-	static std::string getVariable(PythonVarConfig &self,const std::string& name) {
-		std::string Section = Sections[SecNum];
-		std::string SubSection = Sections[SubSecNum];
-
-		std::string rval;
-		if(SubSection.length()) {
-			rval = vs_config->getVariable(Section,SubSection,name,string("NOVALUE"));
-		}
-		else {
-			rval = vs_config->getVariable(Section,name,string("NOVALUE"));
-		}
-		return rval;
+	void setVariable(const std::string& name,const std::string& value) {
+		printf("variable %s set to %s.\n",name.c_str(),value.c_str());
+		int loc;
+		std::string newval=MyGetVariable(name,loc);
+		if (newval.empty())
+			myvar.push_back(myattr(name,value));
+		else
+			myvar[loc].value=value;
+	}
+	std::string getVariable(const std::string& name) const {
+		int loc;
+		std::string value=MyGetVariable(name,loc);
+		if (value.empty())
+			value="<UNDEFINED>";
+		printf("variable %s is %s\n",name.c_str(),value.c_str());
+		return value;
 	}
 };
 
@@ -81,30 +144,38 @@ def_read_write(pointer-to-member, name) // read/write access to the member via a
 
   */
 
+#include "cmd/ai/fire.h"
+class MyFA : public CommunicatingAI {
+public:
+	MyFA() :CommunicatingAI(0,0){}
+	virtual void Execute() {printf("CommAI\n");}
+	virtual ~MyFA(){}
+};
+
 BOOST_PYTHON_MODULE_INIT(Vegastrike)
 {
 	/* Create a new module VS in python */
-    boost::python::module_builder vs("VS");
+	boost::python::module_builder vs("VS");
 
-	/* Map class PythonConfig to python class "Config"
-	*/
-    boost::python::class_builder<PythonConfig>
-        Config(vs, "Config");
-
-	/* Map class PythonVarConfig<DATA> to python class "Var"
-	*/
-    boost::python::class_builder<PythonVarConfig<DATA> >
+/*	boost::python::class_builder<hello,hello_callback> BaseClass(vs, "hello");
+	BaseClass.def(boost::python::constructor<std::string>());
+	BaseClass.def(hello::greet,"greet",hello_callback::default_greet);
+*/
+/*    boost::python::class_builder<PythonVarConfig>
         Var(vs, "Var");
-	/* Define a constructor. To define a constructor with multiple arguments,
-	do <classbuilder_type>.def(boost::python::constructor<type1,type2,...>() */
+	//Define a constructor. To define a constructor with multiple arguments,
+	//do <classbuilder_type>.def(boost::python::constructor<type1,type2,...>() 
 	Var.def(boost::python::constructor<>());
 	
-	/* Override __getattr__ and __setattr__ so that assignments to unbound variables in 
-	a Var will be redirected to the config assignment functions */
-	Var.def(PythonVarConfig<DATA>::getVariable,"__getattr__");
-	Var.def(PythonVarConfig<DATA>::setVariable,"__setattr__");
+	// Override __getattr__ and __setattr__ so that assignments to unbound variables in 
+	//a Var will be redirected to the config assignment functions 
+	Var.def(PythonVarConfig::getVariable,"__getattr__");
+	Var.def(PythonVarConfig::setVariable,"__setattr__");
 
-	/* ... */
+*/
+	boost::python::class_builder<MyFA> FA(vs, "CommAI");
+	FA.def(&MyFA::Execute,"Execute");
+	FA.def(boost::python::constructor<>());
 	boost::python::class_builder<PythonIOString >
 		IO(vs, "IO");
 	IO.def(boost::python::constructor<>());
@@ -113,14 +184,79 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 	can be used to redirect input */
 	IO.def(PythonIOString::write,"write");
 }
+//boost::python::detail::extension_instance::wrapped_objects
 
+/*Orders::FireAt & from_python(PyObject *p,boost::python::type<Orders::FireAt &>) {
+	return from_python(p,boost::python::type<Orders::FireAt &>());
+}*/
+#endif
+void Python::initpaths(){
+  char pwd[2048];
+  getcwd (pwd,2047);
+  pwd[2047]='\0';
+  for (int i=0;pwd[i]!='\0';i++) {
+	  if (pwd[i]=='\\')
+		  pwd[i]=DELIM;
+  }
+  std::string changepath ("import sys\nsys.path += ["
+         "'"+std::string(pwd)+DELIMSTR"modules'"
+         ",'"+std::string(pwd)+DELIMSTR"bases'"
+	 ",'"+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin'"
+		 "]\n");
+  fprintf (stderr,"running %s",changepath.c_str());
+  char * temppython = strdup(changepath.c_str());
+  PyRun_SimpleString(temppython);	
+  Python::reseterrors();
+  free (temppython);
+}
+
+void Python::reseterrors() {
+  if (PyErr_Occurred()) {
+    PyErr_Print();
+    PyErr_Clear();
+    fflush(stderr);
+
+  fflush(stdout);
+  }
+  fflush(stderr);
+}
+/*
+//PYTHON_INIT_GLOBALS(VS,UnitContainer);
+PYTHON_INIT_GLOBALS(VS,Unit);
+PYTHON_BEGIN_MODULE(VS)
+PYTHON_BASE_BEGIN_CLASS(VS,UnitContainer,"StoredUnit")
+Class.def(boost::python::constructor<Unit*>());
+Class.def(&UnitContainer::SetUnit,"Set");
+Class.def(&UnitContainer::GetUnit,"Get");
+PYTHON_END_CLASS(VS,UnitContainer)
+PYTHON_BASE_BEGIN_CLASS(VS,Unit,"Unit")
+Class.def(boost::python::constructor<int>());
+//Class.def(&UnitContainer::SetUnit,"Set");
+//Class.def(&UnitContainer::GetUnit,"Get");
+PYTHON_END_CLASS(VS,Unit)
+PYTHON_END_MODULE(VS)
+TO_PYTHON_SMART_POINTER(Unit) 
+*/
 void Python::init() {
-	/* initialize python library */
-	Py_Initialize();
+
+  static bool isinit=false;
+  if (isinit) {
+    return;
+  }
+  isinit=true;
+// initialize python library
+  Py_Initialize();
+	InitBriefing ();
+	InitVS ();
+	InitDirector ();
+	InitBase ();
+//  InitVegastrike();
+}
+void Python::test() {
 
 	/* initialize vegastrike module so that 
 	'import VS' works in python */
-	initVegastrike();
+
 	/* There should be a python script automatically executed right after 
 	   initVegastrike to rebind some of the objects into a better hierarchy,
 	   and to install wrappers for class methods, etc.
@@ -149,34 +285,57 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
   This would be the preferred mode of operation for AI scripts
 */
 
+#if 0//defined(WIN32)
 	FILE *fp = fopen("config.py","r");
 
-#ifdef WIN32
 	freopen("stderr","w",stderr);
 	freopen("stdout","w",stdout);
-#endif
 	changehome(true);
 	FILE *fp1 = fopen("config.py","r");
 	returnfromhome();
+	if (fp1==NULL) {
+	  fp1=fp;
+	}
 	if(fp1!=NULL) {
 		PyRun_SimpleFile(fp, "config.py");
 		fclose(fp1);
 	}
-	else if(fp!=NULL) {
-	  /*PyRun_SimpleFile(fp1, "config.py");*/
-	  PyRun_SimpleString(
-"import VS\n"
-"import sys\n"
-"sys.stderr.write('asdf')\n"
-);
-		fclose(fp);
-	}
-	char buffer[128];
-	PythonIOString::buffer << endl << '\0';
-	fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
-	fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
+#endif
+#ifdef OLD_PYTHON_TEST
+	//CompileRunPython ("simple_test.py");
+    //		PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
+    //		PyObject * res = PyEval_CallObject(po, arglist);
+    //		Py_DECREF(arglist);
+		//		Py_XDECREF(res);
+
+
+		PyRun_SimpleString(
+	   "import VS\n"
+	   "import sys\n"
+	   "sys.stderr.write('asdf')\n"
+//	   "VSConfig=VS.Var()\n"
+//	   "VSConfig.test='hi'\n"
+//	   "print VSConfig.test\n"
+//	   "print VSConfig.undefinedvar\n"
+//	   "VSConfig.__setattr__('undefined','An undefined variable')\n"
+//	   "print VSConfig.__getattr__('undefined')\n"
+	   "class MyAI(VS.CommAI):\n"
+	   "   def Execute(self):\n"
+	   "      sys.stdout.write('MyAI\\n')\n"
+	   "hi2 = MyAI()\n"
+	   "hi1 = VS.CommAI()\n"
+	   "print hi1.Execute()\n"
+	   "print hi2.Execute()\n"
+	);
+#endif
+//	char buffer[128];
+//	PythonIOString::buffer << endl << '\0';
+//	vs_config->setVariable("data","test","NULL");
+//	fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
+//	fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
 	fflush(stderr);
 	fflush(stdout);
 }
 
 #endif
+

@@ -26,6 +26,7 @@
 #endif
 #ifdef _WIN32
 #include <direct.h>
+#include <process.h>
 #endif
 #include "gfxlib.h"
 #include "in_kb.h"
@@ -63,6 +64,12 @@ TextPlane *bs_tp=NULL;
 void setup_game_data ( ){ //pass in config file l8r??
   g_game.audio_frequency_mode=4;//22050/16
   g_game.sound_enabled =1;
+  g_game.use_textures =1;
+  g_game.use_ship_textures =0;
+  g_game.use_planet_textures =0;
+  g_game.use_sprites =1;
+  g_game.use_animations =1;
+  g_game.use_logos =1;
   g_game.music_enabled=1;
   g_game.sound_volume=1;
   g_game.music_volume=1;
@@ -75,9 +82,11 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.MouseSensitivityY=4;
 
 }
+bool STATIC_VARS_DESTROYED=false;
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
+  STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
   _Universe->WriteSaveGame(true);
   winsys_shutdown();
@@ -93,7 +102,7 @@ void cleanup(void)
 
 VegaConfig *vs_config;
 Mission *mission;
-vector <Mission *> active_missions;
+LeakVector<Mission *> active_missions;
 double benchmark=-1.0;
 
 char mission_name[1024];
@@ -158,15 +167,38 @@ int main( int argc, char *argv[] )
 		
     initpaths();
     //can use the vegastrike config variable to read in the default mission
+  g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
+  if (g_game.music_enabled) {
+#ifdef _WIN32
+    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+#else
+    int pid=fork();
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+    pid=execlp("./soundserver","./soundserver",NULL);
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+#endif
+  }
     if (mission_name[0]=='\0')
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
 
-#ifdef HAVE_BOOST
-
-    //	Python::init();
-
+#ifdef HAVE_PYTHON
+    Python::init();
+    Python::initpaths();
+    Python::test();
 #endif
+
+    
 
 #if defined(HAVE_SDL)
     // && defined(HAVE_SDL_MIXER)
@@ -239,15 +271,18 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXLoadIdentity(VIEW);
   GFXLoadMatrixModel (tmp);
   GFXBeginScene();
+
   bs_tp->SetPos (x,y);
   bs_tp->SetCharSize (.4,.8);
   ScaleMatrix (tmp,Vector (7,7,0));
   GFXLoadMatrixModel (tmp);
+  GFXHudMode (GFXTRUE);
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
   }
   bs_tp->Draw (message);  
+  GFXHudMode (GFXFALSE);
   GFXEndScene();
 
 }
@@ -383,7 +418,17 @@ void bootstrap_main_loop () {
 } 
 
 
-
+const char helpmessage[] =
+"Command line options for vegastrike\n"
+"\n"
+" -D -d     Specify data directory\n"
+" -M -m     Number of players\n"
+" -S -s     Enable sound\n"
+" -P -p     Specify player location\n"
+" -A -A     Normal resolution (800x600)\n"
+" -H -h     High resolution (1024x768)\n"
+" -V -v     Super high resolution (1280x1024)\n"
+"\n";
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
@@ -391,7 +436,21 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
-      case 'r':
+    case 'd':
+    case 'D': {
+      // Specifying data directory
+        if(lpCmdLine[i][2] == 0) {
+            cout << "Option -D requires an argument" << endl;
+            exit(1);
+        }
+ 		string datadir = &lpCmdLine[i][2];
+        cout << "Using data dir " << datadir << endl;
+        if(chdir(datadir.c_str())) {
+            cout << "Error changing to specified data dir" << endl;
+            exit(1);
+         }
+        }
+	  case 'r':
       case 'R':
 	break;
       case 'M':
@@ -433,9 +492,6 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	g_game.y_resolution = 1024;
 	g_game.x_resolution = 1280;
 	break;
-      case 'D':
-      case 'd':
-	break;
       case 'G':
       case 'g':
 	//viddrv = "GLDRV.DLL";
@@ -447,6 +503,10 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	  benchmark=atof(lpCmdLine[i+1]);
 	  i++;
 	}
+    else if(strcmp(lpCmdLine[i], "--help")==0) {
+        cout << helpmessage;
+        exit(0);
+    }
       }
     }
     else{

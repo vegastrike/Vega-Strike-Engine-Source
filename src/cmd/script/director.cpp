@@ -52,23 +52,81 @@
 
 #include "vs_globals.h"
 #include "config_xml.h"
-
+#include "savegame.h"
 #include "msgcenter.h"
 #include "cmd/briefing.h"
+#include "pythonmission.h"
 #ifdef HAVE_PYTHON
 #include "Python.h"
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
+#include "python/python_class.h"
+#include <boost/python/detail/extension_class.hpp>
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
-
 /* *********************************************************** */
+float getSaveData (int whichcp, string key, unsigned int num) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  if (num >=ans->size()) {
+    return 0;
+  }
+  return (*ans)[num]->float_val;
+}
+unsigned int getSaveDataLength (int whichcp, string key) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  return ans->size();
+}
+unsigned int pushSaveData (int whichcp, string key, float val) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
+  vi->type = VAR_FLOAT;
+  vi->float_val=val;
+  ans->push_back (vi);
+  return ans->size()-1;
 
+}
+void putSaveData (int whichcp, string key, unsigned int num, float val) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return;
+  }
+  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  if (num<ans->size()) {
+    (*ans)[num]->float_val = val;
+  }
+}
+
+PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
+//ADD_FROM_PYTHON_FUNCTION(pythonMission)
+PYTHON_BEGIN_MODULE(Director)
+PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")
+  Class.def(&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
+  Class.def(&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
+  Class.def(&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
+PYTHON_END_CLASS(Director,pythonMission)
+  Director.def (&putSaveData,"putSaveData");
+  Director.def (&pushSaveData,"pushSaveData");
+  Director.def (&getSaveData,"getSaveData");
+  Director.def (&getSaveDataLength,"getSaveDataLength");
+PYTHON_END_MODULE(Director)
+
+void InitDirector() {
+	Python::reseterrors();
+	PYTHON_INIT_MODULE(Director);
+	Python::reseterrors();
+}
 
 void Mission::DirectorStart(missionNode *node){
-
   cout << "DIRECTOR START" << endl;
 
   debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
@@ -84,16 +142,19 @@ void Mission::DirectorStart(missionNode *node){
 
   string_counter=0;
   old_string_counter=0;
-
-  missionThread *main_thread=new missionThread;
+  missionThread *main_thread= new missionThread;
   runtime.thread_nr=0;
   runtime.threads.push_back(main_thread);
   runtime.cur_thread=main_thread;
 
   director=NULL;
-
   //  msgcenter->add("game","all","parsing programmed mission");
-
+  std::string doparse = node->attr_value ("do_parse");
+  if (!doparse.empty()) {
+    if (XMLSupport::parse_bool (doparse)==false) {
+      return;
+    }
+  }
   cout << "parsing declarations for director" << endl;
 
   parsemode=PARSE_DECL;
@@ -123,23 +184,31 @@ void Mission::DirectorStart(missionNode *node){
 }
 
 void Mission::DirectorInitgame(){
+  this->player_num=(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
+  if (nextpythonmission) {
+    runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
+    delete [] nextpythonmission; //delete the allocated memory
+    nextpythonmission=NULL;
+	if (!this->unpickleData.empty()) {
+		if (runtime.pymissions) {
+			runtime.pymissions->UnPickle(unpickleData);
+			unpickleData="";
+		}
+	}
+  }
   if(director==NULL){
     return;
   }
-#ifdef HAVE_PYTHON
-  Py_Initialize();
-  PyRun_SimpleString("import test1");  //  PyRun_SimpleString("director=VSdirector()");
-#endif
   RunDirectorScript("initgame");
 }
 
 void Mission::DirectorLoop(){
+  if (runtime.pymissions)
+    runtime.pymissions->Execute();
+  BriefingLoop();
   if(director==NULL){
     return;
   }
-#ifdef HAVE_PYTHON
-  PyRun_SimpleString("test1.director.gameloop()");
-#endif
 
   if(vi_counter!=old_vi_counter){
     char buf[200];
@@ -162,7 +231,7 @@ void Mission::DirectorLoop(){
   }
   old_string_counter=string_counter;
   RunDirectorScript("gameloop");
-  BriefingLoop();
+
 }
 void Mission::DirectorEnd(){
   if(director==NULL){
@@ -192,7 +261,17 @@ void Mission::DirectorEnd(){
   var_out.close();
 
 }
-
+std::string Mission::Pickle () {
+  if (!runtime.pymissions) {
+    return "";
+  }else {
+    return runtime.pymissions->Pickle();
+  }
+}
+void Mission::UnPickle (string pickled) {
+  if (runtime.pymissions)
+    runtime.pymissions->UnPickle(pickled);  
+}
 void Mission::loadModule(string modulename){
   missionNode *node=director;
 
@@ -310,8 +389,12 @@ bool Mission::runScript(missionNode *module_node,const string &scriptname,unsign
 
 
 void Mission::DirectorBenchmark(){
-
+  double oldgametime=gametime;
   gametime+=SIMULATION_ATOM;//elapsed;
+  if (getTimeCompression()>=.1) {
+    if (gametime<=oldgametime)
+      gametime=SIMULATION_ATOM;
+  }
   total_nr_frames++;
 
   //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
@@ -391,7 +474,9 @@ void Mission::BriefingStart() {
     BriefingEnd();
   }
   briefing = new Briefing();
-  RunDirectorScript ("initbriefing");
+  if (runtime.pymissions)
+	runtime.pymissions->callFunction("initbriefing");
+  //RunDirectorScript ("initbriefing");
 }
 void Mission::BriefingUpdate() {
   if (briefing){
@@ -401,7 +486,9 @@ void Mission::BriefingUpdate() {
 
 void Mission::BriefingLoop() {
   if (briefing) {
-    RunDirectorScript ("loopbriefing");
+    if (runtime.pymissions)
+      runtime.pymissions->callFunction("loopbriefing");
+    //RunDirectorScript ("loopbriefing");
   }
 }
 class TextPlane * Mission::BriefingRender() {
@@ -426,7 +513,9 @@ class TextPlane * Mission::BriefingRender() {
 
 void Mission::BriefingEnd() {
   if (briefing) {
-    RunDirectorScript ("endbriefing");      
+	if (runtime.pymissions)
+		runtime.pymissions->callFunction("endbriefing");
+	//RunDirectorScript ("endbriefing");      
     delete briefing;
     briefing = NULL;
   }

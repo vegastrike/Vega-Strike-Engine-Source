@@ -59,7 +59,6 @@ class Planet : public Unit {
   bool atmospheric;//then users can go inside!
   float radius;
   float gravity;
-  UnitCollection satellites;
   UnitCollection insiders;
   std::vector <int> lights;
   Animation *shine;
@@ -68,20 +67,23 @@ protected:
   Planet();
 
     /// constructor - only to be called by UnitFactory
-    Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename,const char *citylights, BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
+    Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
 
     friend class UnitFactory;
 
 public:
+  UnitCollection satellites;
   virtual ~Planet();
-
+  void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
+  void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
+  void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false);
   void DisableLights ();
   void EnableLights();
   void AddSatellite (Unit * orbiter);
   void endElement();
   string getCargoUnitName () const {return getFullname();}
   string getHumanReadablePlanetType () const ;
-  Unit * beginElement(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename,const char * citylights,BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname, bool inside_out);
+  Unit * beginElement(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname, bool inside_out);
   Planet * GetTopPlanet (int level);
   virtual enum clsptr isUnit() {return PLANETPTR;}
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
@@ -136,7 +138,7 @@ public:
   };
   Iterator *createIterator() { return new PlanetIterator(this);}
   bool isAtmospheric  () {
-    return atmospheric;
+    return hasLights()||atmospheric;
   }
 
   bool hasLights() { return !lights.empty(); }

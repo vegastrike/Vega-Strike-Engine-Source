@@ -1,10 +1,12 @@
 #include "ani_texture.h"
+
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include "lin_time.h"
 #include "vegastrike.h"
 #include "vs_path.h"
+#include "vs_globals.h"
 //extern Hashtable<string, Texture,char [127]> texHashTable;
 
 static vector <AnimatedTexture *> myvec;
@@ -34,7 +36,7 @@ bool AnimatedTexture::Done() {
 }
 
 AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm){
-  Decal=NULL;
+  AniInit();
   FILE * fp = fopen (file,"r");
   bool setdir=false;
   if (!fp) {
@@ -55,36 +57,48 @@ if (setdir) {
     vsresetdir();
 }
 }
-
-AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
+void AnimatedTexture::AniInit() {
+  numframes=1;
+  timeperframe=1;
   Decal=NULL;
+  physicsactive=0;
+  name=-1;
+  active=0;
+  original = NULL;
+}
+AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
+  AniInit();
   if (fp)
     Load (fp,stage,imm);
 }
 
 Texture *AnimatedTexture::Original(){
-  return Decal[active]->Original();
+  return Decal?Decal[active]->Original():this;
 }
 
 Texture *AnimatedTexture::Clone () {
-  AnimatedTexture * retval = new AnimatedTexture ();
-  *retval = *this;
-  retval->Decal = new Texture * [numframes];
-  for (int i=0;i<numframes;i++) {
-    retval->Decal[i]= Decal[i]->Clone ();
+  if (Decal) {
+    AnimatedTexture * retval = new AnimatedTexture ();
+    *retval = *this;
+    retval->Decal = new Texture * [numframes];
+    for (int i=0;i<numframes;i++) {
+      retval->Decal[i]= Decal[i]->Clone ();
+    }
+    myvec.push_back (retval);
+    return retval;
+  }else {
+    return new AnimatedTexture();
   }
-  myvec.push_back (retval);
-  return retval;
 }
 
 AnimatedTexture::~AnimatedTexture () {
   Destroy();
   data= NULL;
+  active=0;
   palette=NULL;
 }
 AnimatedTexture::AnimatedTexture () {
-  Decal=NULL;
-  original = NULL;
+  AniInit();
 }
 
 void AnimatedTexture::Destroy() {
@@ -98,7 +112,7 @@ void AnimatedTexture::Destroy() {
     for (i=0;i<numframes;i++) {
       delete Decal[i];
     }
-    delete Decal;
+    delete []Decal;
     Decal=NULL;
   }
 }
@@ -118,7 +132,15 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
   char temp[512];
   char file[512];
   char alp[512];
-  for (int i=0;i<numframes;i++) {
+  int i=0;
+  bool loadall=true;
+  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
+    
+    loadall=false;
+  }
+
+
+  for (;i<numframes;i++) {
     int numgets=0;
     while (numgets<=0&&!feof (fp)) {
       fgets (temp,511,fp);
@@ -128,11 +150,23 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
   
       numgets = sscanf (temp,"%s %s",file,alp);
     }
-    if (numgets==2) {
-      Decal[i]=new Texture (file,alp,stage,ismipmapped);
-    }else {
-      Decal[i]=new Texture (file,stage,ismipmapped);
-    }    
+    if (loadall||i==numframes/2) {
+      if (numgets==2) {
+	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+      }else {
+	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+      }    
+    }
+  }
+  if (!loadall) {
+    Texture * dec = Decal[numframes/2];
+    timeperframe*=numframes;
+    numframes=1;
+    if (Decal) {
+      delete [] Decal;
+    }
+    Decal = new Texture * [1];
+    Decal[0]=dec;
   }
   original = NULL;
 }

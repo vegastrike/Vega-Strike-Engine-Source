@@ -1,12 +1,19 @@
 noinst_LIBRARIES = libcmd.a
 SUBDIRS = ai script collide
-INCLUDES = -I ../
+INCLUDES = -I ../ -I../boost/
 
 libcmd_a_SOURCES =				\
 	atmosphere.h			\
 	atmosphere.cpp			\
 	asteroid.cpp			\
 	asteroid.h			\
+	base.h				\
+	base_interface.cpp		\
+	base_xml.cpp			\
+	base_util.cpp			\
+	base_util.h			\
+	base_write_xml.cpp		\
+	base_write_python.cpp		\
 	beam.h				\
 	beam.cpp				\
 	briefing.h			\
@@ -21,6 +28,8 @@ libcmd_a_SOURCES =				\
 	click_list.h			\
 	unit_collide.cpp				\
 	unit_collide.h				\
+	unit_util.h			\
+	unit_util.cpp			\
 	faction_xml.cpp			\
 	music.cpp			\
 	enhancement.h			\
@@ -56,3 +65,4 @@ libcmd_a_SOURCES =				\
 	missile.h			\
 	missile.cpp
 
+#unit_util.cpp is #included in python/unit_wrapper.cpp due to gcc-3.1 compiler bug

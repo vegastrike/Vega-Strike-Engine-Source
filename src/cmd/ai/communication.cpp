@@ -189,7 +189,7 @@ float FSM::getDeltaRelation (int prevstate, int current_state) const{
 void CommunicationMessage::Init (Unit * send, Unit * recv) {
   fsm = _Universe->GetConversation (send->faction,recv->faction);
   sender.SetUnit (send);
-  this->prevstate=this->curstate = fsm->getDefaultState(_Universe->GetRelation(send->faction,recv->faction));
+  this->prevstate=this->curstate = fsm->getDefaultState(send->getRelation(recv));
 }
 float myround (float i) {
 	float j= floor(i);
@@ -232,7 +232,7 @@ void CommunicationMessage::SetCurrentState (int msg,std::vector <Animation *>*an
 
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice, std::vector <Animation *>* ani, unsigned char sex) {
   Init (send,recv);
-  prevstate=fsm->getDefaultState (_Universe->GetRelation (send->faction,recv->faction));
+  prevstate=fsm->getDefaultState (send->getRelation (recv));
   if (fsm->nodes[prevstate].edges.size()) {
     curstate = fsm->nodes[prevstate].edges[messagechoice%fsm->nodes[prevstate].edges.size()];
   }

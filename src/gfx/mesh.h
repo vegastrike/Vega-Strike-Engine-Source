@@ -135,6 +135,7 @@ private:
       LIGHTINGON,
       FLATSHADE,
       TEXTURE,
+      FORCETEXTURE,
       ALPHAMAP,
       SHAREVERT,
       ALPHA,
@@ -207,6 +208,7 @@ private:
     vector<Names> state_stack;
     bool sharevert;
     bool reverse;
+    bool force_texture;
     int load_stage;
     int point_state;
     int vertex_state;
@@ -364,6 +366,7 @@ public:
   bool queryBoundingBox (const QVector &start, const QVector & end, const float err); 
   ///returns the radial size of this 
   float rSize () {return radialSize;}
+  virtual float clipRadialSize() {return radialSize;}
   ///based on TTL, etc, updates shield effects
   void UpdateFX(float ttime);
   ///Adds a new damage effect with %age damage to the part of the unit. Color specifies the shield oclor

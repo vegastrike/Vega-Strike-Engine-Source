@@ -20,8 +20,10 @@
  */
 #ifndef _UNIT_H_
 #define _UNIT_H_
-
-
+#define CONTAINER_DEBUG
+#ifdef CONTAINER_DEBUG
+void CheckUnit(class Unit *);
+#endif
 struct GFXColor;
 #include "vegastrike.h"
 
@@ -112,6 +114,7 @@ class Unit
   friend class VDU;
   friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
+  enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
   void DamageRandSys (float dam,const Vector &vec);
   void SetNebula (Nebula *neb) {
     nebula = neb;
@@ -148,6 +151,7 @@ class Unit
       float mintargetsize;
       ///does this radar support IFF?
       bool color;
+      bool locked;
     } radar;
     ///The nav point the unit may be heading for
     Vector NavPoint;
@@ -191,7 +195,7 @@ class Unit
   StarSystem * activeStarSystem;//the star system I'm in
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
-  
+
   void SetPlanetHackTransformation (Transformation *&ct, Matrix *&ctm);
 
   UnitSounds * sound;
@@ -212,16 +216,15 @@ class Unit
   ///The image that will appear on those screens of units targetting this unit
   UnitImages *image;
   ///number of meshes (each with separate texture) this unit has
-  int nummesh;
-  ///The pointers to the mesh data of this mesh
-  Mesh **meshdata;
+  std::vector <Mesh *> meshdata;
+  int nummesh()const {return ((int)meshdata.size())-1;}
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
   HaloSystem halos;
   ///NUmber of weapons on this unit
-  int nummounts;
+
   /** 
    * Contains information about a particular Mount on a unit.
    * And the weapons it has, where it is, where it's aimed, 
@@ -254,7 +257,6 @@ class Unit
     ///The sound this mount makes when fired
     const weapon_info *type;
     int sound;
-    
     float time_to_lock;
     Mount();
     Mount(const std::string& name, short int ammo=-1, short int volume=-1);
@@ -277,6 +279,7 @@ class Unit
     bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
     bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
+  int nummounts;
   ///Mount may access unit
   friend class Unit::Mount;
   ///Activates all guns of that size
@@ -393,7 +396,7 @@ class Unit
   ///Should not be drawn
   bool invisible;
   
-  enum {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4} DOCKENUM;
+
   unsigned char docked;
   ///How many lists are referencing us
   int ucref;
@@ -420,7 +423,10 @@ class Unit
   //0 in additive is reaplce  1 is add 2 is mult
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
 public:
-  int LockMissile();//-1 is no lock necessary 1 is locked
+  int LockMissile() const;//-1 is no lock necessary 1 is locked
+  void LockTarget(bool myboo){computer.radar.locked=myboo;}
+  bool TargetLocked()const {return computer.radar.locked;}
+  char DockedOrDocking()const {return docked;}
   float TrackingGuns(bool &missileLock);
 
   void EjectCargo (unsigned int index);
@@ -452,6 +458,7 @@ public:
   ///Does a one way collision between smaller target and this
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
   int GetNumMounts ()const  {return nummounts;}
+
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
@@ -494,7 +501,7 @@ protected:
   /** Constructor that creates aa mesh with meshes as submeshes (number
    *  of them) as either as subunit with faction faction
    */
-  Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
+  Unit (std::vector <Mesh *> &meshes  , bool Subunit, int faction);
 
   /** Constructor that creates a mesh from an XML file If it is a
    *  customizedUnit, it will check in that directory in the home dir for
@@ -525,6 +532,7 @@ public:
   void Split (int level);
   bool TransferUnitToSystem (StarSystem *NewSystem);
   void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
+    StarSystem * getStarSystem();
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   void ActivateJumpDrive (int destination=0);
@@ -540,17 +548,22 @@ public:
   }
   bool InRange (Unit *target, bool cone=true, bool cap=true) const{
     double mm;
-    return InRange( target,mm,cone,cap);
+    return InRange( target,mm,cone,cap,true);
   }
-  bool InRange (Unit *target, double & mm, bool cone, bool cap) const{
+  bool InRange (Unit *target, double & mm, bool cone, bool cap, bool lock) const{
     if (this==target||target->CloakVisible()<.8)
       return false;
-    if (cone&&computer.radar.maxcone>-.99) {
-	QVector delta( target->Position()-Position());
-	mm = delta.Magnitude();
-	if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/mm)<computer.radar.maxcone&&cone) {
-	  return false;
+    if (cone&&computer.radar.maxcone>-.98){
+      QVector delta( target->Position()-Position());
+      mm = delta.Magnitude();
+      if ((!lock)||(!(TargetLocked()&&computer.target==target))) {
+	double tempmm =mm-target->rSize();
+	if (tempmm>0.0001) {
+	  if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/tempmm)<computer.radar.maxcone&&cone) {
+	    return false;
+	  }
 	}
+      }
     }else {
       mm = (target->Position()-Position()).Magnitude();
     }
@@ -577,7 +590,12 @@ public:
   ///Takes out of the collide table for this system.
   void RemoveFromSystem ();
   ///Low level list function to reference the unit as being the target of a UnitContainer or Colleciton
-  inline void Ref() {ucref++;}
+  inline void Ref() {
+#ifdef CONTAINER_DEBUG
+    CheckUnit(this);
+#endif
+    ucref++;
+  }
   ///Releases the unit from this reference of UnitContainer or Collection
   void UnRef();
   ///Gets the average gun speed of the unit::caution SLOW
@@ -632,6 +650,7 @@ public:
   std::string getCockpit ()const;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
+  virtual void DrawNow(const Matrix &m = identity_matrix, float lod=1000000000);
   ///Deprecated
   //virtual void ProcessDrawQueue();
   ///Gets the minimum distance away from the point in 3space
@@ -669,6 +688,7 @@ public:
   void Deselect();
   ///Sets up a null queue for orders
   void PrimeOrders();
+  void PrimeOrders(Order * newAI);
   ///Sets the AI to be a specific order
   void SetAI(Order *newAI);
   ///Enqueues an order to the unit's order queue
@@ -676,9 +696,12 @@ public:
   ///EnqueuesAI first
   void EnqueueAIFirst (Order * newAI);
   ///num subunits
-
+  void LoadAIScript (const std::string &aiscript);
+  bool LoadLastPythonAIScript ();
+  bool EnqueueLastPythonAIScript ();
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
+  Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance);
   bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
@@ -767,6 +790,8 @@ public:
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;
+  ///Transforms a orientation vector Down a coordinate level. Does not take position into account
+  Vector DownCoordinateLevel(const Vector &v) const;
   ///Transforms a orientation vector from world space to local space. Does not take position into account 
   Vector ToLocalCoordinates(const Vector &v) const;
   ///Transforms a orientation vector to world space. Does not take position into account
@@ -779,7 +804,8 @@ public:
   class Cockpit * GetVelocityDifficultyMult(float &) const;
   void SetVelocity (const Vector & v) {Velocity = v;}
   void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
-  
+   ///Erases all orders that bitwise OR with that type
+  void eraseOrderType (unsigned int type);
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
   ///returns the ammt of elasticity of collisions with this unit
@@ -832,7 +858,6 @@ public:
   ///not used yet
   void ReTargetFg(int which_target=0);
   ///not used yet
-  int getNumAttackers();
 
   bool isStarShip(){ if(isUnit()==UNITPTR){ return true;} return false; };
   bool isPlanet(){ if(isUnit()==PLANETPTR){ return true;} return false; };
@@ -841,7 +866,7 @@ public:
   bool isEnemy(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)<0.0){ return true; } return false; };
   bool isFriend(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)>0.0){ return true; } return false; };
   bool isNeutral(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)==0.0){ return true; } return false; };
-  float getRelation(Unit *other){ return(_Universe->GetRelation(this->faction,other->faction)); };
+  float getRelation(Unit *other);
 
   // for scanning purposes
  private:
@@ -881,11 +906,15 @@ inline void UnitCollection::UnitIterator::GetNextValidUnit () {
 inline Unit * UnitContainer::GetUnit() {
   if (unit==NULL)
     return NULL;
+#ifdef CONTAINER_DEBUG
+  CheckUnit(unit);
+#endif
   if (unit->Killed()) {
     unit->UnRef();
     unit = NULL;
     return NULL;
   }
+
   return unit;
 }
 

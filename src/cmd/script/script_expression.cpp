@@ -672,7 +672,7 @@ bool Mission::doTest(missionNode *node,int mode){
 	assert(0);
       }
       
-    if(SCRIPT_RUN){
+    if(mode==SCRIPT_RUN){
       if(arg1_vi->type==VAR_FLOAT){
 	double arg1=arg1_vi->float_val;
 	double arg2=arg2_vi->float_val;

@@ -174,7 +174,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture((*iter).value.c_str(),tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture((*iter).value.c_str(),tmpstr,0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);
 		}
 		break;
 	  case LOGOA:
@@ -184,7 +184,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str());
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);
 		}
 		break;
       case SECLOGORGB:
@@ -201,18 +201,18 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=NULL;
     if (!secString.empty()) {
       if (secStringAlph.empty()) {
-	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str());
+	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);;
       }else {
-	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),secStringAlph.c_str());
+	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),secStringAlph.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);;
       }
 
     }
 	assert (RGBfirst!=0);
 	if (RGBfirst==1) {
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
 	}
 	if (RGBfirst==2) {
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,tmpstr,0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);
 	}
 	if (tmpstr!=NULL) {
 		delete []tmpstr; 
@@ -321,7 +321,16 @@ FSM* Universe::GetConversation(int Myfaction, int TheirFaction) {
 }
 void Universe::AdjustRelation(const int Myfaction, const int TheirFaction, float factor, float rank) {
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
-  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
+  if (strcmp (factions[Myfaction]->factionname,"neutral")!=0) {
+    if (strcmp (factions[Myfaction]->factionname,"upgrades")!=0) {
+      if (strcmp (factions[TheirFaction]->factionname,"neutral")!=0) {
+	if (strcmp (factions[TheirFaction]->factionname,"upgrades")!=0) {
+	  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
+	}
+      }
+    }
+
+  }
 }
 
 void Universe::SerializeFaction(FILE * fp) {
@@ -333,7 +342,7 @@ void Universe::SerializeFaction(FILE * fp) {
   }
 }
 int numnums (const char * str) {
-  int count;
+  int count=0;
   for (int i=0;str[i];i++) {
     count+=isdigit (str[i])?1:0;
   }
@@ -465,8 +474,8 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   cout << "FactionXML:LoadXML " << filename << endl;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
-	assert(0);
-	return;
+    cout << "Failed to open '" << filename << "' this probably means it can't find the data directory" << endl;
+    assert(0);
   }
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, thisuni);

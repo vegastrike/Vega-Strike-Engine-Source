@@ -34,13 +34,11 @@ Unit* UnitFactory::createUnit( )
     return new Unit( 0 );
 }
 
-Unit* UnitFactory::createUnit( Mesh** meshes,
-		               int num,
+Unit* UnitFactory::createUnit( vector <Mesh*> & meshes,
 		               bool Subunit,
 		               int faction )
 {
     return new Unit( meshes,
-                     num,
                      Subunit,
                      faction );
 }
@@ -107,7 +105,6 @@ Planet* UnitFactory::createPlanet( QVector x,
 				   float gravity,
 				   float radius,
 				   const char * filename,
-				   const char *alpha,
 				   BLENDFUNC sr, BLENDFUNC ds,
 				   vector<char *> dest,
 				   const QVector &orbitcent,
@@ -126,7 +123,6 @@ Planet* UnitFactory::createPlanet( QVector x,
                        gravity,
                        radius,
                        filename,
-                       alpha,
 		       sr,ds,
                        dest,
                        orbitcent,

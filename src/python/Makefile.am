@@ -1,11 +1,16 @@
 noinst_LIBRARIES = libpython.a
 
 
-INCLUDES = -I ../ 
+INCLUDES = -I ../ -I../boost  -I/usr/include/python2.2
 
 
 libpython_a_SOURCES =				\
 	init.cpp \
-	init.h
+	init.h	\
+	python_class.h	\
+	python_compile.h	\
+	python_compile.cpp	\
+	unit_wrapper.cpp	\
+	briefing_wrapper.cpp	
 
 

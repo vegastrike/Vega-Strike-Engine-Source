@@ -135,10 +135,6 @@ static ALCcontext * context_id=NULL;
 #endif
 bool AUDInit () {
   g_game.sound_enabled = false;
-  g_game.music_enabled = false;
-#ifdef _WIN32
-  g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
-#endif
 #ifdef HAVE_AL
   usedoppler = XMLSupport::parse_bool (vs_config->getVariable ("audio","Doppler","false"));
   usepositional = XMLSupport::parse_bool (vs_config->getVariable ("audio","Positional","true"));
@@ -150,7 +146,6 @@ bool AUDInit () {
   maxallowedsingle = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxSingleSounds","8"));
   maxallowedtotal = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxTotalSounds","20"));
   g_game.sound_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Sound","true"));
-  g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
 	int attrlist[] = { ALC_FREQUENCY, g_game.audio_frequency_mode, 0 };
 #ifdef _WIN32
 	dev = alcOpenDevice ((ALubyte*)"DirectSound3D");

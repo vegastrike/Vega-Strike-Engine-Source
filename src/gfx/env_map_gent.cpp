@@ -1,3 +1,4 @@
+#include "endianness.h"
 #include <float.h>
 #include <stdio.h>
 #include <math.h>
@@ -277,8 +278,8 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	{
 		return false;
 	}
-	int bpp;
-	int format;
+	int bpp=8;
+	int format=0;
 	unsigned char * palette;
 	unsigned char * data = readImage (fp,bpp,format,*(unsigned int*)&sizeX,*(unsigned int*)&sizeY,palette,texTransform,true);
 	bpp/=8;
@@ -304,13 +305,13 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	  long temp;
 	  BITMAPINFOHEADER info;
 	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	  sizeX = info.biWidth;
-	  sizeY = info.biHeight;
+	  sizeX = le32_to_cpu(info.biWidth);
+	  sizeY = le32_to_cpu(info.biHeight);
 
-	  if(info.biBitCount == 24)
+	  if(le16_to_cpu(info.biBitCount) == 24)
 	    {
 	      data = NULL;
-	      data= new unsigned char [3*sizeY*sizeX];
+	      data= (unsigned char *)malloc(3*sizeY*sizeX);
 	      if (!data)
 		return false;
 	      for (int i=sizeY-1; i>=0;i--)
@@ -329,10 +330,10 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 		    }
 		}
 	    }
-	  else if(info.biBitCount == 8)
+	  else if(le16_to_cpu(info.biBitCount) == 8)
 	    {
 	      data = NULL;
-	      data= new unsigned char [sizeY*sizeX*3];
+	      data= (unsigned char *)malloc(sizeY*sizeX*3);
 	      unsigned char palette[256*3+1];
 	      unsigned char * paltemp = palette;
 	      
@@ -376,7 +377,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	    }
 	}
 	
-	delete [] data;
+	free  (data);
  	fclose (fp);
 	return true;
 }
@@ -490,8 +491,8 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 			{
 				tup = .001;
 			}*/
-			float NumPixs = sright-sleft;
-			float NumPixt = tdown - tup; //bitmpas are top/down
+		  //			float NumPixs = sright-sleft;
+			//			float NumPixt = tdown - tup; //bitmpas are top/down
 			float r =0;
 			float g =0;
 			float b = 0;
@@ -641,7 +642,7 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 
 
 
-	delete Data;
+	delete []Data;
 }
 static void GenerateSphereMap()
 {

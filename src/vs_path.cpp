@@ -3,6 +3,9 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+
+#include "common/common.h"
+
 #ifdef _WIN32
 #include <direct.h>				// definitions of getcwd() and chdir() on win32
 #else
@@ -12,6 +15,7 @@
 #include <sys/types.h>
 #endif
 #include "galaxy_gen.h"
+
 float simulation_atom_var=(float)(1.0/10.0);
 char *CONFIGFILE;
 
@@ -21,6 +25,7 @@ std::string sharedunits;
 std::string sharedsounds;
 std::string sharedmeshes;
 std::string datadir;
+std::string homedir;
 std::vector <std::string> curdir;//current dir starting from datadir
 std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
 void changehome(bool makehomedir) {
@@ -35,6 +40,9 @@ void changehome(bool makehomedir) {
 #endif
   if (makehomedir) {
   getcwd (pw_dir,1998);
+#ifndef _WIN32
+  vsresetdir();
+#endif
   vssetdir (pw_dir);
   if (chdir (HOMESUBDIR)==-1) {
       //      system ("mkdir " HOMESUBDIR);
@@ -78,39 +86,12 @@ void returnfromhome() {
   vsresetdir();
 }
 
+
 char pwd[65536];
 void initpaths () {
-  char tmppwd[65536];
-  getcwd (tmppwd,32768);
-
-  chdir(tmppwd);
-  FILE *tfp1=fopen(CONFIGFILE,"r");
-  if(tfp1){
-    // we have a config file in the current directory
-    // so the current directory is the one with data
-    datadir=string(tmppwd);
-    fclose(tfp1);
-  }
-  else{
-    // search for the config file in the DATA_DIR define
-#ifdef DATA_DIR
-    chdir(DATA_DIR);
-    FILE *tfp2=fopen(CONFIGFILE,"r");
-    if(!tfp2){
-      cerr << "Didn't find data directory in either the current dir (" << tmppwd << ")" << endl;
-      cerr << "Or the install directory " << DATA_DIR << endl;
-      datadir=string(tmppwd);
-    }
-    else{
-      datadir=string(DATA_DIR);
-    }
-#else
-    // we can't find a data dir
-    cerr << "current directory is not data directory" << endl;
-    datadir=string(tmppwd);
+#ifndef _WIN32
+  datadir = getdatadir();
 #endif
-  }
-
   sharedsounds = datadir;
 
   cerr << "Data directory is " << datadir << endl;
@@ -118,6 +99,10 @@ void initpaths () {
 
   //check if we have a config file in home dir
   changehome(true);
+  char myhomedir[8192];
+  getcwd (myhomedir,8191);
+  myhomedir[8191]='\0';
+  homedir = myhomedir;
   FILE *fp1= fopen (CONFIGFILE,"r");
   if (fp1) {
     //  we have a config file in home directory
@@ -131,11 +116,14 @@ void initpaths () {
 
     fclose (fp);
     fp =NULL;
+    returnfromhome();
     vs_config = new VegaConfig (CONFIGFILE);
     cout << "using config file in data dir " << datadir << endl;
+    changehome();
   } else {
+
     // no config file in home dir or data dir
-    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",tmppwd,CONFIGFILE,CONFIGFILE);
+    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",datadir.c_str(),CONFIGFILE,CONFIGFILE);
     exit (-1);
   }
   if (fp)
@@ -143,7 +131,9 @@ void initpaths () {
   returnfromhome();
 
   simulation_atom_var=atof(vs_config->getVariable("general","simulation_atom","0.1").c_str());
-
+  char mycwd [256];
+  getcwd(mycwd,255);
+  mycwd[254]=mycwd[255]=0;
   cout << "SIMULATION_ATOM: " << SIMULATION_ATOM << endl;
 
   string config_datadir = vs_config->getVariable ("data","directory",datadir);
@@ -151,25 +141,24 @@ void initpaths () {
     cout << "using data dir " << config_datadir << " from config file" << endl;
     datadir=config_datadir;
   }
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());
+  vschdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());
   getcwd (pwd,8191);
   sharedtextures = string (pwd);
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedsounds","sounds").c_str());
+  vscdup();
+  vschdir (vs_config->getVariable ("data","sharedsounds","sounds").c_str());
   getcwd (pwd,8191);
   sharedsounds = string (pwd);
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedmeshes","meshes").c_str());
+  vscdup();
+  vschdir (vs_config->getVariable ("data","sharedmeshes","meshes").c_str());
   getcwd (pwd,8191);
   sharedmeshes = string (pwd);
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedunits","units").c_str());
+  vscdup();
+  vschdir (vs_config->getVariable ("data","sharedunits","units").c_str());
   getcwd (pwd,8191);
   sharedunits = string (pwd);
 
 
-  chdir (datadir.c_str());
+  vscdup();
   if (datadir.end()!=datadir.begin()) {
     if (*(datadir.end()-1)!='/'&&*(datadir.end()-1)!='\\') {
       datadir+=DELIM;
@@ -295,7 +284,7 @@ void vschdir (const char *path) {
   if (chdir (path)!=-1) {
     std::string tpath = path;
     if (tpath.end()!=tpath.begin())
-      if ((*(tpath.end()-1)!='/')&&((*tpath.end()-1)!='\\'))
+      if ((*(tpath.end()-1)!='/')&&((*(tpath.end()-1))!='\\'))
 	tpath+='/';
     curdir.push_back (tpath);
   } else {

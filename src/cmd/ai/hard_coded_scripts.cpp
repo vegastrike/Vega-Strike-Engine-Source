@@ -4,9 +4,79 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "tactics.h"
+#include "fire.h"
+#include "order.h"
+#include "python/python_class.h"
+using Orders::FireAt;
+
+BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
+
+extern PyObject *to_python (Unit *x);
+
+BOOST_PYTHON_END_CONVERSION_NAMESPACE
+
 void AddOrd (Order *aisc, Unit * un, Order * ord) {
   ord->SetParent (un);
   aisc->EnqueueOrder (ord);
+}
+void ReplaceOrd (Order *aisc, Unit * un, Order * ord) {
+  ord->SetParent (un);
+  aisc->ReplaceOrder (ord);
+}
+static Order * lastOrder=NULL;
+void FireAt::AddReplaceLastOrder (bool replace) {
+	if (lastOrder) {
+		if (replace) {
+			ReplaceOrd (this,parent,lastOrder);
+		}else {
+			AddOrd (this,parent,lastOrder);
+		}
+		lastOrder=NULL;
+	}
+}
+void FireAt::ExecuteLastScriptFor(float time) {
+	if (lastOrder) {
+		lastOrder = new ExecuteFor(lastOrder,time);
+	}
+}
+void FireAt::FaceTarget (bool end) {
+	lastOrder = new Orders::FaceTarget(end,4);
+}
+void FireAt::FaceTargetITTS (bool end) {
+	lastOrder  = new Orders::FaceTargetITTS(end,4);
+}
+void FireAt::MatchLinearVelocity(bool terminate, Vector vec, bool afterburn, bool local) {
+	lastOrder  = new Orders::MatchLinearVelocity(parent->ClampVelocity(vec,afterburn),terminate,afterburn,local);
+}
+void FireAt::MatchAngularVelocity(bool terminate, Vector vec, bool local) {
+	lastOrder  = new Orders::MatchAngularVelocity(parent->ClampAngVel(vec),terminate,local);
+}
+void FireAt::ChangeHeading(QVector vec) {
+	lastOrder  = new Orders::ChangeHeading (vec,3);
+}
+void FireAt::ChangeLocalDirection(Vector vec) {
+	lastOrder  = new Orders::ChangeHeading (((parent->Position().Cast())+parent->ToWorldCoordinates(vec)).Cast(),3);
+}
+void FireAt::MoveTo(QVector vec, bool afterburn) {
+	lastOrder  = new Orders::MoveTo(vec,afterburn,3);
+}
+void FireAt::MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local) {
+	lastOrder  = new Orders::MatchVelocity(parent->ClampVelocity(vec,afterburn),parent->ClampAngVel(angvel),terminate,afterburn,local);
+}
+void FireAt::Cloak(bool enable,float seconds) {
+	lastOrder  = new CloakFor(enable,seconds);
+}
+void FireAt::FormUp(QVector pos) {
+	lastOrder  = new Orders::FormUp(pos);
+}
+void FireAt::FaceDirection (float distToMatchFacing, bool finish) {
+	lastOrder  = new Orders::FaceDirection (distToMatchFacing, finish, 3);
+}
+void FireAt::XMLScript (string script) {
+	lastOrder  = new AIScript (script.c_str());
+}
+void FireAt::LastPythonScript () {
+	lastOrder = PythonAI<Orders::FireAt>::LastPythonClass();
 }
 
 void AfterburnTurnTowards (Order * aisc, Unit * un) {
@@ -25,11 +95,17 @@ void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
 }
 
 void Evade(Order * aisc, Unit * un) {
-  Order * ord = new Orders::ChangeHeading (un->Position()+QVector(1,0,1),2);
+  QVector v(un->Position());
+  QVector u(v);
+  Unit * targ =un->Target();
+  if (targ) {
+    u=targ->Position();
+  }
+  Order *ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (-10000,0,10000),true),false,true,true);
   AddOrd (aisc,un,ord);
-  ord = new Orders::ChangeHeading (un->Position()+QVector(-1,0,1),2);
+  ord = new Orders::FaceTargetITTS(false,3);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),true),false, true,true);  
   AddOrd (aisc,un,ord);

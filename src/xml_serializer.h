@@ -47,6 +47,9 @@ XMLHandler fabsFloatStarHandler;
 XMLHandler absShortStarHandler;
 XMLHandler absIntStarHandler;
 
+XMLHandler speedStarHandler;
+XMLHandler accelStarHandler;
+
 XMLHandler scaledFloatStarHandler;
 XMLHandler angleStarHandler;
 XMLHandler negationFloatStarHandler;

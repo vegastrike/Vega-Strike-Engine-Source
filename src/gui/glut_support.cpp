@@ -19,6 +19,9 @@
 #include "gfx/sprite.h"
 #include "vs_globals.h"
 #include "gfx/aux_texture.h"
+#include "vs_globals.h"
+#include "config_xml.h"
+
 float colors[] = {1, 1, 1, 1};
 
 GUITexture ReadTex(char *texfile) {
@@ -227,11 +230,20 @@ void ShowImage(float x, float y, float wid, float hei, GUITexture image, int til
         glEnd();
 	glDisable(GL_TEXTURE_2D);
 }
-
+float word_length(const char * str) {
+  float length=0;
+  while (*str&&(!isspace(*str))) {
+    char mychar = *str++;
+    length+=glutStrokeWidth (GLUT_STROKE_ROMAN,mychar);
+  }
+  return length/2500;
+}
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-  float font_size_float=4./100;
+  static float rescale_font = XMLSupport::parse_float (vs_config->getVariable("graphics","gui_font_scale",".75"));
+  float font_size_float=rescale_font*5./100;
+
         int cur;
-        float font_size = size;
+        float font_size = size*rescale_font;
 	float width = 0;
 	float cur_width = 0;
 	float end = 0;
@@ -241,9 +253,10 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         glLoadIdentity();
         glEnable(GL_LINE_SMOOTH);
 	glLineWidth(wid);
+	float page_wid=wid/rescale_font;
 	glTranslatef(x,y,0);
 	glScalef(font_size,font_size,1);
-	end = glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
+	end = no_end?0:glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
 	end /= 2500;
 	//	if (no_end == 1) { end = 0; }
 	int h=0;
@@ -251,7 +264,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
 		cur_width /= 2500;
 		width += cur_width;
-		if (width+end > wid && str[cur+1] != '\0' ) {
+		if (width+end+word_length(str+cur+1) > page_wid && str[cur+1] != '\0' ) {
 		  if (no_end==0) {
 		    for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
 		    break;
@@ -293,29 +306,38 @@ void StartGUIFrame(GFXBOOL clr) {
   GFXColor4f (1,1,1,1);
 
   GFXDisable (DEPTHTEST);
-  GFXDisable (DEPTHWRITE);
+  GFXEnable (DEPTHWRITE);
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
   GFXClear (clr);
+  GFXDisable(DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);
 }
-static void DrawMouse(int mousex, int mousey) {
-  static Sprite MouseSprite ("mouse.spr",BILINEAR);
+static void DrawMouse(int mousex, int mousey, bool drawmouseover) {
+  static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
   GFXColor4f (1,1,1,1);
   GFXEnable(TEXTURE0);
-  GFXBlendMode (ONE,ONE);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
   float sizex,sizey;
-  MouseSprite.GetSize(sizex,sizey);
-  MouseSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
-  MouseSprite.Draw();
+  if (drawmouseover) {
+    static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
+    MouseOverSprite.GetSize(sizex,sizey);
+    MouseOverSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
+    MouseOverSprite.Draw();
+  } else {
+    static Sprite MouseSprite ("mouse.spr",BILINEAR,GFXTRUE);
+    MouseSprite.GetSize(sizex,sizey);
+    MouseSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
+    MouseSprite.Draw();
+  }
 }
 
-void EndGUIFrame(void) {
-  static Texture dummy ("white.bmp");
+void EndGUIFrame(bool drawmouseover) {
+  static Texture dummy ("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   dummy.MakeActive();
-  DrawMouse(mmx,mmy);
+  DrawMouse(mmx,mmy,drawmouseover);
   //  GFXEndScene();bad things...only call this once
   GFXHudMode(false);
   GFXEnable (CULLFACE);

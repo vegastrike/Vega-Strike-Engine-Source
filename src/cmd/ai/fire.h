@@ -7,7 +7,6 @@ namespace Orders {
 
 class FireAt: public CommunicatingAI {
 
-
   bool ShouldFire(Unit * targ,bool &missilelock);
 protected:
   float missileprobability;
@@ -20,9 +19,34 @@ protected:
   void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
   void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
+  bool isJumpablePlanet(Unit *);
+  void ReInit (float rxntime, float agglevel);
 public:
+  //Other new Order functions that can be called from Python.
+  void AddReplaceLastOrder (bool replace);
+  void ExecuteLastScriptFor(float time);
+  void FaceTarget (bool end);
+  void FaceTargetITTS (bool end);
+  void MatchLinearVelocity(bool terminate, Vector vec, bool afterburn, bool local);
+  void MatchAngularVelocity(bool terminate, Vector vec, bool local);
+  void ChangeHeading(QVector vec);
+  void ChangeLocalDirection(Vector vec);
+  void MoveTo(QVector, bool afterburn);
+  void MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local);
+  void Cloak(bool enable,float seconds);
+  void FormUp(QVector pos);
+  void FaceDirection (float distToMatchFacing, bool finish);
+  void XMLScript (string script);
+  void LastPythonScript();
+  virtual void SetParent (Unit * parent) {
+	  CommunicatingAI::SetParent (parent);
+  }
+  Unit * GetParent() {return CommunicatingAI::GetParent();}
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
+  FireAt();
   virtual void Execute();
+  virtual std::string Pickle() {return std::string();}//these are to serialize this AI
+  virtual void UnPickle(std::string) {}
   virtual ~FireAt();
 };
 

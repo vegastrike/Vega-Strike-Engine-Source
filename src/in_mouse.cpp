@@ -41,6 +41,10 @@ static MouseHandler mouseBindings [NUM_BUTTONS+1];
 
 int mousex=0;
 int mousey=0;
+void GetMouseXY(int &mx, int &my) {
+  mx = mousex;
+  my= mousey;
+}
 int getMouseButtonStatus() {
   int ret=0;
   for (int i=0;i<NUM_BUTTONS;i++) {

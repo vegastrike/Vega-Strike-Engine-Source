@@ -52,15 +52,17 @@
 #include "collide/rapcol.h"
 #include "savegame.h"
 #include "xml_serializer.h"
+#include "python/python_class.h"
+#include "cmd/ai/missionscript.h"
+#include "cmd/ai/aggressive.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
 //#define DESTRUCTDEBUG
 #include "beam.h"
-
+#include "python/init.h"
 
 double interpolation_blend_factor;
-
 
 #define PARANOIA .4
 void Unit::Threaten (Unit * targ, float danger) {
@@ -80,7 +82,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
   corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
 
-  for(a=0; a<nummesh; a++) {
+  for(a=0; a<nummesh(); a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
   }/* have subunits now in table*/
@@ -110,7 +112,13 @@ void Unit::calculate_extent(bool update_collide_queue) {
     radial_size = corner_max.i;
   }
 }
-
+float Unit::getRelation (Unit * targ) {
+  if (aistate) {
+    return aistate->GetEffectiveRelationship (targ);
+  }else {
+    return _Universe->GetRelation (faction,targ->faction);
+  }
+}
 //FIXME Daughter units should be able to be turrets (have y/p/r)
 void Unit::SetResolveForces (bool ys) {
   resolveforces = ys;
@@ -161,14 +169,20 @@ void Unit::DeactivateJumpDrive () {
   }
 }
 float capship_size=500;
+
+extern void UncheckUnit (Unit * un);
 void Unit::Init()
 {
+#ifdef CONTAINER_DEBUG
+  UncheckUnit (this);
+#endif
   static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
   capship_size=capsize;
   activeStarSystem=NULL;
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
+
   jump.energy = 100;
   jump.delay=5;
   jump.damage=0;
@@ -223,8 +237,8 @@ void Unit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  nummounts= nummesh=0;
-  mounts = NULL;meshdata = NULL;
+  nummounts=0;
+  mounts = NULL;
   aistate = NULL;
   SetAI (new Order());
   Identity(cumulative_transformation_matrix);
@@ -242,7 +256,7 @@ void Unit::Init()
   MomentOfInertia = .01;
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   AngularVelocity = myang;
-  Velocity = Vector(0,0,0);
+  cumulative_velocity=Velocity = Vector(0,0,0);
   
   NetTorque =NetLocalTorque = Vector(0,0,0);
   NetForce = Vector(0,0,0);
@@ -263,6 +277,7 @@ void Unit::Init()
   Target(NULL);
   VelocityReference(NULL);
   computer.threat.SetUnit (NULL);
+  computer.threatlevel=0;
   computer.slide_start=computer.slide_end=0;
   computer.set_speed=0;
   computer.max_speed=1;
@@ -274,6 +289,7 @@ void Unit::Init()
   computer.itts = false;
   static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   computer.radar.maxrange=rr;
+  computer.radar.locked=false;
   computer.radar.maxcone=-1;
   static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",
@@ -310,14 +326,13 @@ std::string Unit::getCockpit () const{
 }
 
 
-Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
+Unit::Unit (std::vector <Mesh *>& meshes, bool SubU, int faction) {
   Init ();
   this->faction = faction;
   SubUnit = SubU;
-  meshdata = (Mesh **)malloc ((1+num)*sizeof (Mesh *));
-  memcpy (meshdata,meshes,(num)*sizeof (Mesh *));
-  nummesh = num;
-  meshdata[nummesh]=NULL;//turn off shield
+  meshdata = meshes;
+  meshes.clear();
+  meshdata.push_back(NULL);
   calculate_extent(false);
 }
 char * GetUnitDir (const char * filename) {
@@ -344,21 +359,16 @@ void Unit::GetCargoCat (const std::string &cat, vector <Cargo> &cats) {
 }
 vector <Mesh *> Unit::StealMeshes() {
   vector <Mesh *>ret;
-  Mesh * shield = meshdata[nummesh];
-  for (int i=0;i<nummesh;i++) {
+  
+  Mesh * shield = meshdata.empty()?NULL:meshdata.back();
+  for (int i=0;i<nummesh();i++) {
     ret.push_back (meshdata[i]);
   }
-  delete []meshdata;
-  meshdata = new Mesh *[1];
-  meshdata[0]= shield;
-  nummesh=0;
+  meshdata.clear();
+  meshdata.push_back(shield);
+  
   return ret;
 }
-#if 0
-Unit * _1800GetGod () {
-  return UnitFactory::get_static_1800God( );
-}
-#endif
 
 void Unit::SetFg(Flightgroup * fg, int fg_subnumber) {
   flightgroup=fg;
@@ -371,7 +381,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	Init();
 	update_ani_cache();
 	if (!SubU)
-	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
+	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(long)this);
 	SubUnit = SubU;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
@@ -412,9 +422,8 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  if (fp) fclose (fp); 
 	  else {
 	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
-	    meshdata = new Mesh * [1];
-	    meshdata[0]=NULL;
-	    nummesh=0;
+	    meshdata.clear();
+	    meshdata.push_back(NULL);
 	    this->name=string("LOAD_FAILED");
 	    //	    assert ("Unit Not Found"==NULL);
 	  }
@@ -438,9 +447,9 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  return;
 	}
 	LoadFile(filename);
+	int nummesh;
 	ReadInt(nummesh);
-	meshdata = new Mesh*[nummesh+1];
-	meshdata[nummesh]=0;
+	meshdata.clear();
 	for(int meshcount = 0; meshcount < nummesh; meshcount++)
 	{
 		int meshtype;
@@ -448,11 +457,11 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		char meshfilename[64];
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
-
-		meshdata[meshcount] = new Mesh(meshfilename, 1, faction,NULL);
+		meshdata.push_back(new Mesh(meshfilename, 1, faction,NULL));
 
 		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}
+	meshdata.push_back(NULL);
 	int numsubunit;
 	ReadInt(numsubunit);
 	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
@@ -591,15 +600,11 @@ Unit::~Unit()
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
-#ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 7,meshdata);
-  fflush (stderr);
-#endif
-  if(meshdata&&nummesh>0) {
-    for(int meshcount = 0; meshcount < nummesh; meshcount++)
+  for(int meshcount = 0; meshcount < meshdata.size(); meshcount++)
+    if (meshdata[meshcount])
       delete meshdata[meshcount];
-    delete [] meshdata;
-  }
+  meshdata.clear();
+  
 
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x ", 9, halos);
@@ -619,6 +624,8 @@ Unit::~Unit()
 }
 void Unit::getAverageGunSpeed(float & speed, float &range) const {
    if (nummounts) {
+     range=0;
+     speed=0;
      int nummt = nummounts;
      for (int i=0;i<nummounts;i++) {
        if (mounts[i].type->type!=weapon_info::PROJECTILE) {
@@ -635,7 +642,19 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
    }
   
 }
+StarSystem * Unit::getStarSystem () {
 
+  if (activeStarSystem) {
+    return activeStarSystem;
+  }else {
+    Cockpit * cp=_Universe->isPlayerStarship(this);
+    if (cp) {
+      if (cp->activeStarSystem)
+	return cp->activeStarSystem;
+    }
+  }
+  return _Universe->activeStarSystem();
+}
 float Unit::TrackingGuns(bool &missilelock) {
   float trackingcone = 0;
   missilelock=false;
@@ -648,20 +667,6 @@ float Unit::TrackingGuns(bool &missilelock) {
     }
   }
   return trackingcone;
-}
-int Unit::LockMissile() {
-  bool missilelock=false;
-  bool dumblock=false;
-  for (int i=0;i<nummounts;i++) {
-    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
-      missilelock=true;
-    }else {
-      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
-	dumblock=true;
-      }
-    }    
-  }
-  return (missilelock?1:(dumblock?-1:0));
 }
 QVector Unit::PositionITTS (const QVector & posit, float speed) const{
   QVector retval = Position()-posit;
@@ -739,7 +744,7 @@ bool Unit::queryFrustum(float frustum [6][4]) const{
 #else
   Vector TargetPoint;
 #endif
-  for (i=0;i<nummesh;i++) {
+  for (i=0;i<nummesh();i++) {
         TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position());
 	
 	if (GFXSphereInFrustum (frustum, 
@@ -808,6 +813,60 @@ void Unit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
     }
   }  
 }
+short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass) {
+    if (cloak<0&&cloakrate<0) {
+      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
+    }
+    if ((cloak&0x1)&&!cloakglass) {
+      cloak-=1;
+    }
+    if ((cloak&0x1)==0&&cloakglass) {
+      cloak+=1;
+    }
+    if (cloak<cloakmin&&cloakrate>0)
+      cloak=cloakmin;
+    return cloak;
+    
+}
+
+void Unit::DrawNow (const Matrix & mat, float lod) {
+  unsigned int i;
+  short cloak=cloaking;
+  if (cloaking>cloakmin) {
+    cloak = cloakVal (cloak,cloakmin,image->cloakrate, image->cloakglass);
+  }
+  for (i=0;i<nummesh();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+    if (meshdata[i]==NULL) 
+      continue;
+    Vector TransformedPosition = Transform (mat,
+					    meshdata[i]->Position());
+      float d = GFXSphereInFrustum(TransformedPosition,
+				   meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+				   *SizeScaleFactor
+#endif 
+				   );
+      if (d) {  //d can be used for level of detail 
+	meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+      }
+    }
+    un_fiter iter =SubUnits.fastIterator();
+    Unit * un;
+    while ((un = iter.current())) {
+      Matrix temp;
+      un->curr_physical_state.to_matrix (temp);
+      Matrix submat;
+      MultMatrix (submat,mat,temp);
+      un->DrawNow (submat,lod);
+      iter.advance();
+    }
+    float haloalpha=1;
+    if (cloak>=0) {
+      haloalpha=((float)cloak)/32767;
+    }
+    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
+    halos.Draw(mat,Scale,cloak,0);
+}
 void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
 
@@ -826,19 +885,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   short cloak=cloaking;
   if (cloaking>cloakmin) {
     cloak = (short)(cloaking-interpolation_blend_factor*image->cloakrate*SIMULATION_ATOM);
-    if (cloak<0&&image->cloakrate<0) {
-      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
-    }
-    if ((cloak&0x1)&&!image->cloakglass) {
-      cloak-=1;
-    }
-    if ((cloak&0x1)==0&&image->cloakglass) {
-      cloak+=1;
-    }
-    if (cloak<cloakmin&&image->cloakrate>0)
-      cloak=cloakmin;
-
-
+    cloak = cloakVal ( cloak,cloakmin,image->cloakrate,image->cloakglass);
   }
   
   int i;
@@ -847,10 +894,10 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   }
   bool On_Screen=false;
   if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
-    for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+    for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
-	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
+	  if (i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
       Vector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position());
@@ -862,15 +909,15 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 	fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
       }
 #endif
-
+      //      fprintf (stderr,"%s %d ",name.c_str(),i);
       float d = GFXSphereInFrustum(TransformedPosition,
-				   meshdata[i]->rSize()
+				   meshdata[i]->clipRadialSize()
 #ifdef VARIABLE_LENGTH_PQR
 				   *SizeScaleFactor
 #endif 
 				   );
       float lod;
-
+      //      fprintf (stderr,"\n");
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
@@ -929,9 +976,74 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
   }
 }
+using Orders::FireAt;
+
+
+
+ 
+void Unit::LoadAIScript(const std::string & s) {
+  static bool init=false;
+  //  static bool initsuccess= initPythonAI();
+  if (s.find (".py")!=string::npos) {
+    Order * ai = PythonClass <FireAt>::Factory (s);
+    PrimeOrders (ai);
+    return;
+  }else {
+    if (s.length()>0) {
+      if (*s.begin()=='_') {
+	mission->addModule (s.substr (1));
+	PrimeOrders (new AImissionScript (s.substr(1)));
+      }else {
+	string ai_agg=s+".agg.xml";
+	string ai_int=s+".int.xml";
+	PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
+      }
+    }else {
+      PrimeOrders();
+    }
+  }
+}
+void Unit::eraseOrderType (unsigned int type) {
+	if (aistate) {
+		aistate->eraseType(type);
+	}
+}
+bool Unit::LoadLastPythonAIScript() {
+  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
+  if (pyai) {
+    PrimeOrders (pyai);
+  }else if (!aistate) {
+    PrimeOrders();
+    return false;
+  }
+  return true;
+}
+bool Unit::EnqueueLastPythonAIScript() {
+  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
+  if (pyai) {
+    EnqueueAI (pyai);
+  }else if (!aistate) {
+    return false;
+  }
+  return true;
+}
+
+
+void Unit::PrimeOrders (Order * newAI) {
+  if (newAI) {
+    if (aistate) {
+      aistate->Destroy();
+    }
+    aistate = newAI;
+    newAI->SetParent (this);
+  }else {
+    PrimeOrders();
+  }
+}
 void Unit::PrimeOrders () {
   if (aistate) {
-    delete aistate;
+    aistate->Destroy();
+    aistate=NULL;
   }
   aistate = new Order; //get 'er ready for enqueueing
   aistate->SetParent (this);
@@ -953,14 +1065,25 @@ void Unit::SwapInHalos() {
   }
 }
 #endif
+static bool CheckAccessory (Unit * tur) {
+  bool accessory = tur->name.find ("accessory")!=string::npos;
+  if (accessory) {
+    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
+							   tur->GetComputerData().max_yaw,
+							   tur->GetComputerData().max_roll)));
+  }
+  return accessory;
+}
 void Unit::SetTurretAI () {
   static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
   if (talkinturrets) {
     UnitCollection::UnitIterator iter = getSubUnits();
     Unit * un;
     while (NULL!=(un=iter.current())) {
-      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      if (!CheckAccessory(un)) {
+	un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+	un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      }
       un->SetTurretAI ();
       iter.advance();
     }
@@ -968,11 +1091,13 @@ void Unit::SetTurretAI () {
     UnitCollection::UnitIterator iter = getSubUnits();
     Unit * un;
     while (NULL!=(un=iter.current())) {
-      if (un->aistate) {
-	delete un->aistate;
+      if (!CheckAccessory(un)) {
+	if (un->aistate) {
+	  un->aistate->Destroy();
+	}
+	un->aistate = (new Orders::TurretAI());
+	un->aistate->SetParent (un);
       }
-      un->aistate = (new Orders::TurretAI());
-      un->aistate->SetParent (un);
       un->SetTurretAI ();
       iter.advance();
     }    
@@ -983,7 +1108,7 @@ void Unit::DisableTurretAI () {
   Unit * un;
   while (NULL!=(un=iter.current())) {
     if (un->aistate) {
-      delete un->aistate;
+      un->aistate->Destroy();
     }
     un->aistate = new Order; //get 'er ready for enqueueing
     un->aistate->SetParent (un);

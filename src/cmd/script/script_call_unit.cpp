@@ -1025,7 +1025,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	}
       }
       if (mode==SCRIPT_RUN) {
-	printf ("upgrading %s %s %d %d %c\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts);
+	printf ("upgrading %s %s %d %d %s\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
         fflush (stdout);
 	percentage=my_unit->Upgrade (file,mountoffset,subunitoffset,force,loop_through_mounts);
 	my_unit->SetTurretAI();
@@ -1037,7 +1037,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       
     }
     else if(method_id==CMT_UNIT_incrementCargo){
-      float percentagechange= getFloatArg(node,mode,1);
+      double percentagechange= getFloatArg(node,mode,1);
       int quantity= getIntArg(node,mode,2);
       if(mode==SCRIPT_RUN){
 	if (my_unit->numCargo()>0) {
@@ -1069,7 +1069,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_getSaveData){
+    else if(method_id==CMT_UNIT_getSaveData){//<>
       std::string magic_num;
       void * my_obj=NULL;
       magic_num= getStringArgument(node,mode,1);
@@ -1223,7 +1223,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        bsrc[0]='\0';//have at least 1 char
        bdst[0]='\0';
        citylights[0]='\0';
-       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s %s",&radius,tex,bsrc,bdst, citylights);
+       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s",&radius,tex,bsrc,bdst);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
       
@@ -1233,7 +1233,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	 d=parse_alpha (bdst);
        if (bsrc[0]!='\0') 
 	 s=parse_alpha (bsrc);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,citylights,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
 
        free (bsrc);
        free (bdst);
@@ -1259,7 +1259,8 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      pox.k=fg->fg->pos.k+u*fg_radius*3;
 
      my_unit->SetPosAndCumPos(pox);
-
+     my_unit->LoadAIScript (fg->fg->ainame);
+#if 0
      if(fg->fg->ainame[0]!='_'){
        string ai_agg=fg->fg->ainame+".agg.xml";
        string ai_int=fg->fg->ainame+".int.xml";
@@ -1286,7 +1287,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	      }
 	      //fighters[a]->SetAI( new AImissionScript(modulename));
      }
-
+#endif
      my_unit->SetTurretAI ();
 
      //     cout << fg->name << endl;
@@ -1313,12 +1314,9 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
       Unit *unit=uiter.current();
       Unit *target_unit=NULL;
       //      int my_faction=_Universe->GetFaction(my_unit->getFlightgroup()->faction.c_str());
-      int my_faction=my_unit->faction;
       while(unit!=NULL){
 	//	int other_faction=_Universe->GetFaction(unit->getFlightgroup()->faction.c_str());
-	int other_faction=unit->faction;
-
-	if(_Universe->GetRelation(my_faction,other_faction)<0.0){
+	if(my_unit->getRelation(unit)<0.0){
 	  target_unit=uiter.current();
 	  unit=NULL;
 	}

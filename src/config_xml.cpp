@@ -205,7 +205,7 @@ extern void  SuicideKey (int i, KBSTATE a);
 extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
-
+extern void MapKey(int i, KBSTATE a);
   using namespace CockpitKeys;
 
 void VegaConfig::initCommandMap(){
@@ -271,6 +271,7 @@ void VegaConfig::initCommandMap(){
   command_map["FireKey"]=FireKeyboard::FireKey ;
   command_map["MissileKey"]=FireKeyboard::MissileKey ;
   command_map["TargetKey"]=FireKeyboard::TargetKey ;
+  command_map["LockTargetKey"]=FireKeyboard::LockKey ;
   command_map["ReverseTargetKey"]=FireKeyboard::ReverseTargetKey ;
   command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
   command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
@@ -300,6 +301,7 @@ void VegaConfig::initCommandMap(){
  command_map["Cockpit::InsideRight"]=CockpitKeys::InsideRight;
  command_map["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
  command_map["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
+ command_map["Cockpit::MapKey"]=MapKey;
  command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
  command_map["Cockpit::SwitchMVDU"]=CockpitKeys::SwitchMVDU;
  command_map["Cockpit::SwitchURVDU"]=CockpitKeys::SwitchURVDU;
@@ -456,10 +458,10 @@ bool VegaConfig::checkColor(configNode *node){
       cout << "neither name nor r,g,b given for color " << node->Name() << endl;
       return false;
     }
-    float rf=atof(r.data());
-    float gf=atof(g.data());
-    float bf=atof(b.data());
-    float af=atof(a.data());
+    float rf=atof(r.c_str());
+    float gf=atof(g.c_str());
+    float bf=atof(b.c_str());
+    float af=atof(a.c_str());
 
     color=new vColor;
 
@@ -557,8 +559,8 @@ void VegaConfig::doAxis(configNode *node){
     return;
   }
 
-  int joy_nr=atoi(joystick.data());
-  int axis_nr=atoi(axis.data());
+  int joy_nr=atoi(joystick.c_str());
+  int axis_nr=atoi(axis.c_str());
 
   // no checks for correct number yet 
 

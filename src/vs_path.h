@@ -16,6 +16,7 @@ extern std::string sharedsounds;
 extern std::string sharedmeshes;
 extern std::string sharedunits;
 extern std::string datadir;
+extern std::string homedir;//including subdir
 ///gets the hash name for an item with name in curdir
 std::string GetHashName (const std::string &name);
 std::string GetHashName (const std::string &name,float scale);

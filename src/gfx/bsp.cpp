@@ -63,18 +63,36 @@ float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm)
 #endif
 	// n = normal, u = origin, v = direction vector
 	if(peq1==0 && peq2==0) { // on the plane; shouldn't collide unless the plane is a virtual plane
-	    return 
-	      ((front!=NULL)?front->intersects(start, end,norm):0)||
-	      ((back!=NULL)?back->intersects(start, end,norm):LITTLEVALUE);		
+	  float retval=0;
+	  norm=n;
+	  if (front!=NULL) 
+	    retval=front->intersects(start, end,norm);
+	  if (back!=NULL&&retval==0) {
+	    retval=back->intersects(start, end,norm);
+	  }
+	  if (retval==0&&back==NULL) {
+	    retval= LITTLEVALUE;
+	  }
+	  return retval;
 	}
 
 	if((peq1<=-LITTLEVALUE && peq2<=LITTLEVALUE) ||
 	   (peq1<=LITTLEVALUE&&peq2<=-LITTLEVALUE)) {
-		return (back!=NULL)?back->intersects(start, end, norm):(start-end).Magnitude()+LITTLEVALUE; // if lies completely within a back leaf, then its inside the object
+	  if (back!=NULL) {
+	    return back->intersects(start, end, norm);
+	  }else {
+	    norm=n;
+	    return (start-end).Magnitude()+LITTLEVALUE; // if lies completely within a back leaf, then its inside the object
+	  }
 	}
 	else if((peq1>=-LITTLEVALUE && peq2>=LITTLEVALUE)||
 		(peq1>=LITTLEVALUE &&peq2>=-LITTLEVALUE)) {
-		return (front!=NULL)?front->intersects(start, end, norm):false; // if lies completely on the outside of a front leaf, then outside object
+	  if (front!=NULL) {
+	    return front->intersects(start, end, norm);
+	  }else {
+	    norm =n;
+	    return false; // if lies completely on the outside of a front leaf, then outside object
+	  }
 	}
 	else {
 	  norm = n;
@@ -136,6 +154,7 @@ bool BSPTree::intersects(const BSPTree *t1) const {
 }
 
 BSPTree::BSPTree(BSPDiskNode *input) {
+  VSCONSTRUCT2('s')
   BSPDiskNode * inp = input;
   root = new BSPNode(&inp);
 }
@@ -153,6 +172,7 @@ bool CheckBSP (const char * filename) {
   return false;
 }
 BSPTree::BSPTree(const char *filename) {
+  VSCONSTRUCT2('s')
   changehome();
   vschdir ("generatedbsp");
   FILE *fp = fopen(filename, "rb");

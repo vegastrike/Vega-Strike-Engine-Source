@@ -76,9 +76,10 @@ void Universe::SetupCockpits(vector  <string> playerNames) {
 	  cockpit.push_back( new Cockpit ("",NULL,playerNames[i]));
 	}
 }
+static void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn);
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
-  
+  SortStarSystems(star_system,s);//dont' want instadie
 }
 bool Universe::StillExists (StarSystem * s) {
   return std::find (star_system.begin(),star_system.end(),s)!=star_system.end();
@@ -109,6 +110,7 @@ Universe::~Universe()
   }
   cockpit.clear();
   GFXShutdown();
+  _Universe=NULL;
 	//delete mouse;
 }
 //sets up all the stuff... in this case the ships to be rendered
@@ -160,6 +162,11 @@ void Universe::StartGFX()
       	GFXEndScene();
 }
 void Universe::SetActiveCockpit (int i) {
+#ifdef VS_DEBUG
+  if (i<0||i>=cockpit.size()) {
+    fprintf (stderr,"ouch invalid cockpit %d",i);
+  }
+#endif 
   current_cockpit=i;
 }
 void Universe::SetActiveCockpit (Cockpit * cp) {
@@ -185,7 +192,7 @@ void Universe::Loop(void main_loop()) {
 }
 extern void micro_sleep (unsigned int howmuch);
 extern int getmicrosleep ();
-void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
+static void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
   if ((*ss.begin())==drawn) {
     return;
   }

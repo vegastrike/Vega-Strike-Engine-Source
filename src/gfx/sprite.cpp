@@ -26,6 +26,7 @@
 #include "matrix.h"
 #include "gfxlib.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 #include <assert.h>
 #include <math.h>
 #ifndef M_PI_2
@@ -33,7 +34,8 @@
 #endif
 static float *mview = NULL;
 
-Sprite::Sprite(const char *file, enum FILTER texturefilter) {
+Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
+  VSCONSTRUCT2('S')
   vschdir ("sprites");
   xcenter = 0;
   ycenter = 0;
@@ -46,6 +48,12 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter) {
   if (file[0]!='\0') {
     fp = fopen(file, "r");
   }
+  bool changeup=true;
+  if (!fp) {
+    changeup=false;
+	vscdup();
+	fp = fopen(file,"r");
+  }
   if (fp) {
     char texture[64]={0};
     char texturea[64]={0};
@@ -56,25 +64,31 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter) {
     
     widtho2/=2;
     heighto2/=-2;
-    if (texturea[0]=='0') {
-      surface = new Texture(texture,0,texturefilter);    
-    } else {
-      surface = new Texture(texture,texturea,0,texturefilter);    
-    }
-    
-    if (!surface->LoadSuccess()) {
-    delete surface;
-    surface = NULL;
+    surface=NULL;
+    if (g_game.use_sprites||force==GFXTRUE) {
+      if (texturea[0]=='0') {
+	surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
+      } else {
+	surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);    
+      }
+      
+      if (!surface->LoadSuccess()) {
+	delete surface;
+	surface = NULL;
+      }
     }
   }else {
     widtho2 = heighto2 = 0;
     xcenter = ycenter = 0;
   }
-  vscdup();
+  if (changeup) {
+	  vscdup();
+  } 
 }	
 
 Sprite::~Sprite()
 {
+  VSDESTRUCT2
   if(surface!=NULL)
     delete surface;
 }
