@@ -10,6 +10,11 @@ SocketSet::SocketSet( )
     clear();
 }
 
+void SocketSet::autosetRead( int fd )
+{
+    _autoset.insert( fd );
+}
+
 void SocketSet::setRead( int fd )
 {
     FD_SET( fd, &_read_set_select );
@@ -54,6 +59,14 @@ int SocketSet::select( timeval* timeout )
 {
 #ifdef VSNET_DEBUG
     COUT << "enter " << __PRETTY_FUNCTION__ << " fds=";
+#endif
+
+    for( set<int>::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
+    {
+        setRead( *it );
+    }
+
+#ifdef VSNET_DEBUG
     for( int i=0; i<_max_sock_select; i++ )
     {
         if( FD_ISSET(i,&_read_set_select) ) cout << i << " ";

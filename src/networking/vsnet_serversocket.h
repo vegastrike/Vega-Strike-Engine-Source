@@ -71,7 +71,6 @@ public:
     inline void watch( SocketSet& set ) { set.setRead(_fd); }
     inline bool isActive( SocketSet& set ) const { return set.is_set(_fd); }
 
-    virtual void      watchForNewConn( SocketSet& set, int ) = 0;
     virtual SOCKETALT acceptNewConn( SocketSet& set ) = 0;
 
     void      disconnect( const char *s, bool fexit = true );
@@ -94,7 +93,6 @@ public:
     }
 
 	// Accept a new connection
-	virtual void            watchForNewConn( SocketSet& set, int );
 	virtual SOCKETALT		acceptNewConn( SocketSet& set );
 };
 
@@ -112,7 +110,6 @@ public:
 	}
 
 	// Accept a new connection
-	virtual void            watchForNewConn( SocketSet& set, int );
 	virtual SOCKETALT		acceptNewConn( SocketSet& set );
 };
 

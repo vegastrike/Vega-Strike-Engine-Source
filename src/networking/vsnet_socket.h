@@ -42,7 +42,7 @@
 #include "vsnet_socketset.h"
 #include "packetmem.h"
 
-void close_socket( int fd );
+int close_socket( int fd );
 
 class VsnetSocket
 {

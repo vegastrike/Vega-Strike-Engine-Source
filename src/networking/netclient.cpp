@@ -91,8 +91,29 @@ Unit * getNetworkUnit( ObjSerial cserial)
 	return NULL;
 }
 
+NetClient::NetClient()
+    : save("")
+{
+    game_unit = NULL;
+    old_timestamp = 0;
+    current_timestamp = 0;
+    old_time = 0;
+    cur_time = 0;
+    enabled = 0;
+    nbclients = 0;
+    serial = 0;
+    for( int i=0; i<MAXCLIENTS; i++)
+        Clients[i] = NULL;
+    _sock_set = NULL;
+}
+
 NetClient::~NetClient()
 {
+    if( _sock_set )
+    {
+        delete _sock_set;
+    }
+
     /*
 	for( int i=0; i<MAXCLIENTS; i++)
     {
@@ -294,7 +315,8 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	     << "   - buffer length : " << packet2.getDataLength() << endl
 	     << "   - buffer: " << netbuf.getData() << endl;
 	// Now the loop
-	int timeout=0, recv=0, ret=0;
+	int timeout=0, recv=0;
+	// int ret=0;
 	UpdateTime();
 
 	Packet packet;
@@ -358,7 +380,8 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	     << "   - buffer length : " << packet2.getDataLength() << endl
 	     << "   - buffer: " << netbuf.getData() << endl;
 	// Now the loop
-	int timeout=0, recv=0, ret=0;
+	int timeout=0, recv=0;
+	// int ret=0;
 	UpdateTime();
 
 	Packet packet;
@@ -584,11 +607,13 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
 {
     int ret=0;
 
-    SocketSet set;
-    clt_sock.watch( set );
-    if( set.select( 0, 0 ) > 0 )
+    if( _sock_set == NULL ) _sock_set = new SocketSet;
+
+    _sock_set->clear();
+    clt_sock.watch( *_sock_set );
+    if( _sock_set->select( 0, 0 ) > 0 )
     {
-        if( clt_sock.isActive( set ) )
+        if( clt_sock.isActive( *_sock_set ) )
         {
             ret = recvMsg( netbuffer, packet );
         }
@@ -1179,11 +1204,12 @@ void	NetClient::receivePosition( const Packet* packet )
 	ClientState cs;
 	const char* databuf;
 	ObjSerial   sernum=0;
-	int		nbclts=0, i, j, offset=0;;
+	int		nbclts=0, i, j;
+	// int		offset=0;
 	// int		nbclts2=0;
-	int		cssize = sizeof( ClientState);
-	//int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
-	int		qfsize = sizeof( double);
+	// int		cssize = sizeof( ClientState);
+	// int		smallsize = sizeof( ObjSerial) + sizeof( QVector);
+	// int		qfsize = sizeof( double);
 	unsigned char	cmd;
 	Client * clt;
 	Unit * un;
@@ -1251,7 +1277,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			}
 			else
 			{
-				QVector tmppos = netbuf.getVector();
+				// QVector tmppos = netbuf.getVector();
 				COUT<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
 			}
 			//offset += sizeof( QVector);

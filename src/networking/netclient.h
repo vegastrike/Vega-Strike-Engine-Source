@@ -24,19 +24,19 @@
 #include <string>
 #include <vector>
 
+#include "savegame.h"
 #include "networking/const.h"
 #include "networking/vsnet_socket.h"
 #include "networking/vsnet_cmd.h"
+#include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
-#include "cmd/container.h"
-#include "cmd/weapon_xml.h"
-#include "savegame.h"
-#include "networking/client.h"
 
 class Packet;
 class Unit;
+class Client;
 class ClientState;
 class NetUI;
+class SocketSet;
 
 using std::vector;
 using std::string;
@@ -50,7 +50,8 @@ class	NetClient
 		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
 		SOCKETALT			clt_sock;		// Comm. socket
-		SOCKETALT			acct_sock;				// Connection socket for account server
+		SOCKETALT			acct_sock;		// Connection socket for account server
+        SocketSet*          _sock_set;      // Encapsulates select()
 		SaveGame			save;
 		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
@@ -78,23 +79,11 @@ class	NetClient
 		int		checkAcctMsg( SocketSet & set);
 
 	public:
-		NetClient():save("")
-		{
-			game_unit = NULL;
-			old_timestamp = 0;
-			current_timestamp = 0;
-			old_time = 0;
-			cur_time = 0;
-			enabled = 0;
-			nbclients = 0;
-			serial = 0;
-			for( int i=0; i<MAXCLIENTS; i++)
-				Clients[i] = NULL;
-		}
+		NetClient();
 		~NetClient();
 
 		int		authenticate();
-		bool	PacketLoop( Cmd command);
+		bool	PacketLoop( Cmd command );
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
 		vector<string>	loginAcctLoop( string str_callsign, string str_passwd);
 		SOCKETALT	init( char * addr, unsigned short port);

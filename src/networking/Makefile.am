@@ -24,6 +24,10 @@ libnetgeneric = \
 	vsnet_address.h			\
 	vsnet_socket.cpp		\
 	vsnet_socket.h			\
+	vsnet_socketudp.cpp		\
+	vsnet_socketudp.h		\
+	vsnet_sockettcp.cpp		\
+	vsnet_sockettcp.h		\
 	vsnet_socketset.cpp		\
 	vsnet_socketset.h		\
 	vsnet_cmd.cpp			\

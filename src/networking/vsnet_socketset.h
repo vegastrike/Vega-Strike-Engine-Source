@@ -39,14 +39,25 @@
 #endif
 #include "const.h"
 
+#include <set>
+
+class ServerSocket;
+
 class SocketSet
 {
     fd_set _read_set_select;
     int    _max_sock_select;
     fd_set _read_set_always_true;
     int    _max_sock_always_true;
+
+    std::set<int> _autoset;
+
 public:
     SocketSet( );
+
+    /** Once a socket is registered using this function, setRead is
+     *  automatically called for it before each select */
+    void autosetRead( int fd );
 
     void setRead( int fd );
     void setReadAlwaysTrue( int fd );

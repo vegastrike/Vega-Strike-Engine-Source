@@ -93,13 +93,17 @@ void	AccountServer::start()
 		exit(1);
 	}
 	cout<<"done."<<endl;
+
+	SocketSet set;
+	set.autosetRead( Network->get_tcp_sock() );
+
 	while( keeprun)
 	{
 		//cout<<"Loop"<<endl;
 		// Check for incoming connections
-		SocketSet set;
 
-		Network->watchForNewConn( set, 0 );
+        set.clear();
+
 		// Check sockets to be watched
 		LS i;
 		for( i=Socks.begin(); i!=Socks.end(); i++)
@@ -586,7 +590,7 @@ void	AccountServer::removeDeadSockets()
 	for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
 	{
 		bool found=false;
-		cout<<">>>>>>> Closing socket number "<<(*j)<<endl;
+		COUT << ">>>>>>> Closing socket number "<<(*j)<<endl;
 		// Disconnect all of that server clients
 		for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
 		{

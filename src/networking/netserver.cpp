@@ -83,12 +83,14 @@ NetServer::NetServer()
 	// Here 500 could be something else between 1 and 0xFFFF
 	serial_seed = (ObjSerial) (rand()*(500./(((double)(RAND_MAX))+1)));
 	globalsave = new SaveGame("");
+    _sock_set = new SocketSet;
 }
 
 NetServer::~NetServer()
 {
 	delete zonemgr;
 	delete globalsave;
+    if( _sock_set ) delete _sock_set;
 }
 
 /**************************************************************/
@@ -467,8 +469,12 @@ void	NetServer::start(int argc, char **argv)
 	// Create and bind sockets
 	COUT << "Initializing TCP server ..." << endl;
 	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
+    _sock_set->autosetRead( tcpNetwork->get_tcp_sock() );
+
 	COUT << "Initializing UDP server ..." << endl;
 	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()) );
+    _sock_set->autosetRead( udpNetwork->get_udp_sock() );
+
 	COUT << "done." << endl;
 
 	// Create the _Universe telling it we are on server side
@@ -481,29 +487,28 @@ void	NetServer::start(int argc, char **argv)
 	// Server loop
 	while( keeprun)
 	{
-		SocketSet set;
 		int       nb;
 
 		UpdateTime();
 
+        _sock_set->clear( );
+
 		// Check a key press
 		//set.setReadAlwaysTrue( 0);
 		//this->checkKey( set);
-		// Handle new connections in TCP mode
-		tcpNetwork->watchForNewConn( set, 0 );
 
 		// Check received communications
-		prepareCheckMsg( set );
-		if( acctserver && acct_con) prepareCheckAcctMsg( set );
-		nb = set.select( NULL );
+		prepareCheckMsg( *_sock_set );
+		if( acctserver && acct_con) prepareCheckAcctMsg( *_sock_set );
+		nb = _sock_set->select( NULL );
 		if( nb > 0 )
 		{
-			newConnection_tcp( set );
-			checkMsg( set );
-			if( acctserver && acct_con)
+			newConnection_tcp( *_sock_set );
+			checkMsg( *_sock_set );
+			if( acctserver && acct_con )
 			{
 				// Listen for account server answers
-				checkAcctMsg( set );
+				checkAcctMsg( *_sock_set );
 				// And send to it the login request we received
 				// Then send clients confirmations or errors
 			}

@@ -43,12 +43,14 @@ typedef list<Client *>::iterator LI;
 typedef vector<Account *>::iterator VI;
 
 struct ServerSocket;
+class SocketSet;
 
 /** Class Netserver : runs the "game server" */
 class NetServer
 {
         ServerSocket*   tcpNetwork;
         ServerSocket*   udpNetwork;
+        SocketSet*      _sock_set;              // Capsule for select()
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 

@@ -92,12 +92,6 @@ bool ServerSocket::get_nonblock( ) const
 // Not used in standard UDP mode
 // Returns channel number in SDL UDP mode
 
-void ServerSocketTCP::watchForNewConn( SocketSet& set, int )
-{
-    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
-    set.setRead( _fd );
-}
-
 SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
@@ -137,10 +131,6 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
 // Returns the connection socket or 0 if failed or if no activity
 // Not used in standard UDP mode
 // Returns channel number in SDL UDP mode
-
-void ServerSocketUDP::watchForNewConn( SocketSet& , int )
-{
-}
 
 SOCKETALT ServerSocketUDP::acceptNewConn( SocketSet& )
 {
