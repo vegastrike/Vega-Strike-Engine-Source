@@ -56,6 +56,10 @@ void Animation::SetFaceCam(bool face) {
 
 using namespace VSFileSystem;
 
+Animation::Animation (VSFileSystem::VSFile * f, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
+{
+}
+
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
 {	
   Identity(local_transformation);

@@ -80,6 +80,18 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   }
 }	
 
+void	Sprite::ReadTexture( VSFileSystem::VSFile * f)
+{
+	if( !f->Valid())
+	{
+    	widtho2 = heighto2 = 0;
+    	xcenter = ycenter = 0;
+		cerr<<"Sprite::ReadTexture error : VSFile not valid"<<endl;
+		return;
+	}
+	surface = new Texture( f);
+}
+
 Sprite::~Sprite()
 {
   VSDESTRUCT2

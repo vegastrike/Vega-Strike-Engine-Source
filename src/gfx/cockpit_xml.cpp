@@ -1,3 +1,4 @@
+#include "config.h"
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
@@ -294,6 +295,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case RADAR: newsprite = &Radar[0];goto loadsprite;
   case REARRADAR: newsprite = &Radar[1];goto loadsprite;
   case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;
+#ifdef NETCOMM_WEBCAM
+		mymodes = mymodes | VDU::WEBCAM;
+#endif
   	if( Network!=NULL)
 		mymodes = mymodes | VDU::NETWORK;
 	goto loadsprite;

@@ -25,6 +25,10 @@
 
 #include "quaternion.h"
 
+namespace VSFileSystem
+{
+	class VSFile;
+};
 
 struct Texture;
 class Sprite {
@@ -51,6 +55,7 @@ public:
         void GetSize (float &x1, float &y1);
 	void SetRotation(const float &rot);
 	void GetRotation(float &rot);
+	void ReadTexture( VSFileSystem::VSFile * f);
 	//float &Rotation(){return rotation;};
 };
 

@@ -194,7 +194,7 @@ class	NetClient
 		void	stopCommunication();
 		void	sendWebcamPicture();
 		char *	getWebcamCapture();
-		char *	getWebcamFromNetwork();
+		char *	getWebcamFromNetwork( int & length);
 		void	increaseFrequency();
 		void	decreaseFrequency();
 		float	getSelectedFrequency();

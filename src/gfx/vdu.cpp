@@ -11,6 +11,8 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "gfx/animation.h"
+#include "gfx/vsimage.h"
+
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 string reformatName (string nam) {
@@ -827,6 +829,48 @@ void VDU::DrawVDUObjectives (Unit *parent) {
   tp->Draw(rez,offset);
 }
 
+bool VDU::SetWebcamAnimation ( ) {
+  if (comm_ani==NULL) {
+    if (posmodes&WEBCAM) {
+      comm_ani = new Animation();
+	  thismode.push_back(WEBCAM);
+	  comm_ani->Reset();
+	  return true;
+    }
+  }
+  return false;
+}
+void VDU::DrawWebcam( Unit * parent)
+{
+	int length;
+	char * netcam;
+	int playernum = _Universe->whichPlayerStarship( parent);
+	if( Network[playernum].hasWebcam())
+	{
+		netcam = Network[playernum].getWebcamFromNetwork( length);
+		if( netcam)
+		{
+			// Delete the previous displayed webcam shot if any
+			if( this->webcam)
+				delete webcam;
+			// Read the new one
+		    VSFile f( netcam, length, JPEGBuffer);
+			this->webcam = new Animation( &f);
+			delete netcam;
+		    GFXDisable (TEXTURE1);
+		    GFXEnable (TEXTURE0);
+		    GFXDisable(LIGHTING);
+			// Draw it
+		    webcam->DrawAsSprite(this);
+ 		    GFXDisable (TEXTURE0);
+		}
+	}
+	else
+	{
+	    tp->Draw (MangleString ("No webcam to view",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
+	}
+}
+
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->col=color;
   GFXDisable(LIGHTING);
@@ -902,19 +946,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   {
   	if( Network!=NULL)
 	{
-		char * netcam;
-		int playernum = _Universe->whichPlayerStarship( parent);
-		if( Network[playernum].hasWebcam())
-		{
-			netcam = Network[playernum].getWebcamFromNetwork();
-			if( netcam)
-			{
-				// Now display the JPEG buffer in the VDU
-				// HOW ? ;)
-
-				delete netcam;
-			}
-		}
+		DrawWebcam( parent);
 	}
   }
   case SCANNING:

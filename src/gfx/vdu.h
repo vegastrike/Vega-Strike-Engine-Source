@@ -9,7 +9,6 @@
 class Unit;
 class TextPlane;
 
-
 /**
  * Holds information for dedicated computer output
  * on a fighter craft. Can print out target info, local damage info
@@ -18,6 +17,7 @@ class TextPlane;
 class VDU: public Sprite {
  private:
   class Animation * comm_ani;
+  class Animation *	webcam;
   VIEWSTYLE viewStyle;
   unsigned short * StartArmor;
   float *maxhull;
@@ -34,6 +34,8 @@ class VDU: public Sprite {
   // We received a packet with taret data by network : we update then the concerned UNIT
 // DrawVDUObjective is outdated
 //  int DrawVDUObjective (void * obj, int offset);//obj is of type Mission::Objective
+  bool SetWebcamAnimation ( );
+  void DrawWebcam( Unit * parent);
   ///Draws all of the objectives created by missions.
   void DrawVDUObjectives(Unit * parent);
   ///Draws a shield display in the VDU

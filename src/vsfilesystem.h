@@ -61,6 +61,7 @@ namespace VSFileSystem
 						AccountFile,	// Loaded from datadir/accounts and written in datadir/accounts
 						// Buffer types
 						ZoneBuffer,		// Indicates a ZoneInfo buffer coming from server
+						JPEGBuffer,		// Indicates a JPEG buffer coming from network
 						// Unknown
 						Unknown			// Loaded from homedir or datadir and written in homedir
 					};

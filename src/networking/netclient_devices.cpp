@@ -236,10 +236,10 @@ char *	NetClient::getWebcamCapture()
 	return NULL; // We have no choice...
 }
 
-char *	NetClient::getWebcamFromNetwork()
+char *	NetClient::getWebcamFromNetwork( int & length)
 {
 	if( NetComm != NULL)
-		return NetComm->GetWebcamFromNetwork();
+		return NetComm->GetWebcamFromNetwork( length);
 	return NULL; // We have no choice...
 }
 

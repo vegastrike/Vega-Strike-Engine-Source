@@ -91,15 +91,12 @@ unsigned char *	VSImage::ReadImage( VSFile * f, textureTransform * t, bool strip
 	switch( this->img_type)
 	{
 		case PngImage :
-			this->img_type = PngImage;
 			ret = this->ReadPNG();
 		break;
 		case JpegImage :
-			this->img_type = JpegImage;
 			ret = this->ReadJPEG();
 		break;
 		case BmpImage :
-			this->img_type = BmpImage;
 			ret = this->ReadBMP();
 		break;
 		default :

@@ -170,9 +170,31 @@ void Texture::setbad( const string & s)
 	badtexHashTable.Put( VSFileSystem::GetSharedTextureHashName(s), b);
 }
 
-Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture)
+Texture::Texture(VSFile * f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture)
 {
 
+  data = NULL;
+  ismipmapped  = mipmap;
+  InitTexture();
+  palette = NULL;
+  texture_target =target;
+  image_target=imagetarget;
+  this->stage = stage;
+  data = this->ReadImage( f, NULL, true, NULL);
+
+	if (data)
+	{
+		Bind(maxdimension,detailtexture);
+		free(data);
+		data = NULL;
+		setold();
+	}
+	else
+		FileNotFound(texfilename);
+}
+
+Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension,GFXBOOL detailtexture)
+{
   data = NULL;
   ismipmapped  = mipmap;
   InitTexture();

@@ -613,7 +613,7 @@ char *	NetworkCommunication::GetWebcamCapture()
 	return NULL; // We have no choice :-/
 }
 
-char *	NetworkCommunication::GetWebcamFromNetwork()
+char *	NetworkCommunication::GetWebcamFromNetwork( int & length)
 {
 	char * wshot=NULL;
 #ifdef NETCOMM_WEBCAM
@@ -624,6 +624,7 @@ char *	NetworkCommunication::GetWebcamFromNetwork()
 		else
 		{
 			// Re add the buf to get another webcam shot
+			length = bufitem->getSize();
 			wshot = new char[bufitem->getSize()+1];
 			memcpy( wshot, bufitem->getBuffer().get(), bufitem->getSize());
 			wshot[bufitem->getSize()]=0;
