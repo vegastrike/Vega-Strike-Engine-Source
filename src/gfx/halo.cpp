@@ -45,7 +45,7 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   float hei = sizey;
   float rad =(wid>hei?wid:hei);
   offset*=1./offmag;
-  if (offmag<.5*g_game.zfar) {
+  if (offmag<rad+.5*g_game.zfar) {
     offset*=HaloOffset*rad;
   }else {
     offset *= (offmag-.5*g_game.zfar);
