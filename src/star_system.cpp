@@ -285,7 +285,7 @@ void StarSystem::SwapOut () {
   }
 
 }
-bool shouldfog=false;
+
 extern double interpolation_blend_factor;
 //#define UPDATEDEBUG  //for hard to track down bugs
 void StarSystem::Draw() {
@@ -311,7 +311,6 @@ void StarSystem::Draw() {
 
   Iterator *iter = drawList->createIterator();
   Unit *unit;
-  shouldfog=false;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cp");
@@ -338,16 +337,8 @@ void StarSystem::Draw() {
   fflush (stderr);
 #endif
 
-  if (shouldfog) {
+  GFXFogMode (FOG_OFF);
 
-    GFXFogMode (FOG_EXP2);
-    GFXFogDensity (.0005);
-    GFXFogLimits (1,1000);
-    GFXFogIndex (0);
-    GFXFogColor (GFXColor(.5,.5,.5,.5));
-  }else {
-    GFXFogMode (FOG_OFF);
-  }
 #ifdef UPDATEDEBUG
   fprintf (stderr,"vp");
   fflush (stderr);
@@ -373,9 +364,6 @@ void StarSystem::Draw() {
 #endif
   Mesh::ProcessUndrawnMeshes(true);
   Nebula * neb;
-  if ((neb = _Universe->AccessCamera()->GetNebula())) {
-    neb->SetFogState();
-  }
 
   Matrix ident;
 
@@ -396,20 +384,22 @@ void StarSystem::Draw() {
   fflush (stderr);
 #endif
 
-  Halo::ProcessDrawQueue();
-  if (shouldfog)
-    GFXFogMode (FOG_EXP2);
+
   
 #ifdef UPDATEDEBUG
   fprintf (stderr,"bem");
   fflush (stderr);
 #endif
+  Animation::ProcessDrawQueue();
+  if ((neb = _Universe->AccessCamera()->GetNebula())) {
+    neb->SetFogState();
+  }
   Beam::ProcessDrawQueue();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"anidq");
   fflush (stderr);
 #endif
-  Animation::ProcessDrawQueue();
+
 #ifdef UPDATEDEBUG
   fprintf (stderr,"bolt");
   fflush (stderr);
@@ -420,11 +410,12 @@ void StarSystem::Draw() {
   fprintf (stderr,"star");
   fflush (stderr);
 #endif
+  if (_Universe->AccessCamera()->GetNebula()!=NULL)
+    GFXFogMode (FOG_OFF);
 
+  Halo::ProcessDrawQueue();
   stars->Draw();
 
-  if (_Universe->AccessCamera()->GetNebula()!=NULL||shouldfog)
-    GFXFogMode (FOG_OFF);
 
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
 #ifdef UPDATEDEBUG

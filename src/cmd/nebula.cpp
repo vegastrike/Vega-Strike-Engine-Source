@@ -181,6 +181,7 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
 	vsresetdir();
 }
 void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
+  Setnebula(this);
   smaller->Setnebula(this);
 }
 
