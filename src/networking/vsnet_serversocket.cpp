@@ -13,7 +13,7 @@ using std::hex;
 	//#warning "Win32 platform"
 	#include <winsock.h>
 #else
-    #include <fcntl.h>
+    #include <sys/ioctl.h>
 #endif
 
 std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s )
@@ -41,7 +41,8 @@ void ServerSocket::disconnect( const char *s, bool fexit )
 bool ServerSocket::set_nonblock( )
 {
 #if !defined(_WIN32) || defined(__CYGWIN__)
-    if( ::fcntl( _fd, F_SETFL, O_NONBLOCK) == -1)
+    int datato = 1;
+    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
     {
         ::perror( "Error fcntl : ");
         return false;
@@ -55,6 +56,27 @@ bool ServerSocket::set_nonblock( )
     }
 #endif
     _noblock = 1;
+    return true;
+}
+
+bool ServerSocket::set_block( )
+{
+#if !defined(_WIN32) || defined(__CYGWIN__)
+    int datato = 0;
+    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#else
+    unsigned long datato = 0;
+    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#endif
+    _noblock = 0;
     return true;
 }
 

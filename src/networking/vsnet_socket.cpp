@@ -1,10 +1,19 @@
 #include <config.h>
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    //#warning "Win32 platform"
+    #include <winsock.h>
+#else
+    #include <sys/ioctl.h>
+#endif
+
 #include <list>
-#include <fcntl.h>
+
 #include "const.h"
 #include "vsnet_socket.h"
 #include "vsnet_err.h"
+
+using namespace std;
 
 void close_socket( int fd )
 {
@@ -54,7 +63,7 @@ public:
 
     virtual void disconnect( const char *s, bool fexit );
 
-    virtual void dump( std::ostream& ostr );
+    virtual void dump( std::ostream& ostr ) const;
 
     virtual void watch( SocketSet& set );
     virtual bool isActive( SocketSet& set ) { return set.is_set(_fd); }
@@ -101,7 +110,7 @@ public:
 
     virtual void disconnect( const char *s, bool fexit );
 
-    virtual void dump( std::ostream& ostr );
+    virtual void dump( std::ostream& ostr ) const;
 
     virtual void watch( SocketSet& set );
     virtual bool isActive( SocketSet& set );
@@ -259,15 +268,15 @@ VsnetSocket::VsnetSocket( )
 VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip )
     : _fd( sock )
     , _remote_ip( remote_ip )
-    , _noblock(0)
 {
+    set_block( );
 }
 
 VsnetSocket::VsnetSocket( const VsnetSocket& orig )
     : _fd( orig._fd )
     , _remote_ip( orig._remote_ip )
-    , _noblock(0)
 {
+    set_block( );
 }
 
 VsnetSocket::~VsnetSocket( )
@@ -312,20 +321,43 @@ bool VsnetSocket::set_nonblock( )
 {
     assert( valid() );
 #if !defined(_WIN32) || defined(__CYGWIN__)
-    if( fcntl( _fd, F_SETFL, O_NONBLOCK) == -1)
+    int datato = 1;
+    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
     {
-        perror( "Error fcntl : ");
+        ::perror( "Error fcntl : ");
         return false;
     }
 #else
     unsigned long datato = 1;
-    if( ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
+    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
     {
-        perror( "Error fcntl : ");
+        ::perror( "Error fcntl : ");
         return false;
     }
 #endif
     _noblock = 1;
+    return true;
+}
+
+bool VsnetSocket::set_block( )
+{
+    assert( valid() );
+#if !defined(_WIN32) || defined(__CYGWIN__)
+    int datato = 0;
+    if( ::ioctl( _fd, FIONBIO, &datato ) == -1)
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#else
+    unsigned long datato = 0;
+    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#endif
+    _noblock = 0;
     return true;
 }
 
@@ -417,7 +449,7 @@ void VsnetUDPSocket::disconnect( const char *s, bool fexit )
         exit(1);
 }
 
-void VsnetUDPSocket::dump( std::ostream& ostr )
+void VsnetUDPSocket::dump( std::ostream& ostr ) const
 {
     ostr << "( s=" << _fd << " UDP r=" << _remote_ip << " )";
 }
@@ -547,16 +579,30 @@ void VsnetTCPSocket::disconnect( const char *s, bool fexit )
     }
 }
 
-void VsnetTCPSocket::dump( std::ostream& ostr )
+void VsnetTCPSocket::dump( std::ostream& ostr ) const
 {
     ostr << "( s=" << _fd << " TCP r=" << _remote_ip << " )";
 }
 
+ostream& operator<<( ostream& ostr, const VsnetSocket& s )
+{
+    s.dump( ostr );
+    return ostr;
+}
+
 void VsnetTCPSocket::watch( SocketSet& set )
 {
+#ifdef FIND_WIN_NBIO
+        COUT << "Wait for data on socket " << (*this) << " ("
+             << ( get_nonblock() ? "non-blocking" : "blocking" ) << ")"
+             << endl;
+#endif
     set.setRead( _fd );
     if( _complete_packets.empty() == false )
     {
+#ifdef FIND_WIN_NBIO
+        COUT << "Socket " << (*this) << " has completed packets" << endl;
+#endif
         set.setReadAlwaysTrue( _fd );
     }
 }

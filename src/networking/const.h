@@ -74,6 +74,8 @@ extern double DAMAGE_ATOM;
 
 #undef VSNET_DEBUG
 
+#undef FIND_WIN_NBIO
+
 /* --- BEGIN memory debugging macros --- */
 /** The following macros are intended for default versions a class validity
  *  debugging. The idea is to increase the likelyhood that uninitialized

@@ -75,6 +75,7 @@ public:
     bool eq( const VsnetSocket& r );
     bool sameAddress( const VsnetSocket& r );
 
+    bool set_block( );
     bool set_nonblock( );
     bool get_nonblock( ) const;
 
@@ -92,7 +93,9 @@ public:
 
     virtual void disconnect( const char *s, bool fexit ) = 0;
 
-    virtual void dump( std::ostream& ostr ) = 0;
+    friend std::ostream& operator<<( std::ostream& ostr, const VsnetSocket& s );
+
+    virtual void dump( std::ostream& ostr ) const = 0;
 };
 
 

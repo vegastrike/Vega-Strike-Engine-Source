@@ -39,9 +39,9 @@ public:
 
     ServerSocket( int fd, const AddressIP& adr )
         : _fd(fd)
-        , _noblock(0)
     {
         _srv_ip = adr;
+        set_block( );
     }
 
     ServerSocket( const ServerSocket& orig )
@@ -59,6 +59,7 @@ public:
        	return *this;
     }
 
+    bool set_block( );
     bool set_nonblock( );
     bool get_nonblock( ) const;
 
