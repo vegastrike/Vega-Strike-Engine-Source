@@ -1752,7 +1752,8 @@ void GameCockpit::ScrollAllVDU (int howmuch) {
 }
 
 void GameCockpit::SetStaticAnimation () {
-  static Animation Statuc ("static.ani");
+  static string comm_static = vs_config->getVariable("graphics","comm_static","static.ani");
+  static Animation Statuc (comm_static.c_str());
   for (unsigned int i=0;i<vdu.size();i++) {
     if (vdu[i]->getMode()==VDU::COMM) {
       vdu[i]->SetCommAnimation (&Statuc,true);
