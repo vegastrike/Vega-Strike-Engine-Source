@@ -106,6 +106,7 @@ bool	ZoneMgr::addClient( Client * clt)
 void	ZoneMgr::removeClient( Client * clt)
 {
 	StarSystem * sts;
+	Unit * un = clt->game_unit.GetUnit();
 	if( zone_list[clt->zone].empty())
 	{
 		cout<<"Trying to remove on an empty list !!"<<endl;
@@ -115,7 +116,8 @@ void	ZoneMgr::removeClient( Client * clt)
 	zone_list[clt->zone].remove( clt);
 	zone_clients[clt->zone]--;
 	sts = _Universe->star_system[clt->zone];
-	sts->RemoveUnit( clt->game_unit.GetUnit());
+	sts->RemoveUnit( un);
+	un->Kill();
 }
 
 // Broadcast a packet to a client's zone clients

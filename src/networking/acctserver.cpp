@@ -151,6 +151,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 	len = MAXBUFFER;
 	if( (recvcount = sock.recvbuf( buffer, len, &ipadr))>0)
 	{
+		cout<<"Socket : "<<endl<<sock<<endl;
 		Packet p( buffer, recvcount );
 
 		packet = p;
@@ -245,9 +246,68 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< NEW CHAR REQUEST -------------------------------------------------------"<<endl;
 			break;
 			case CMD_NEWSUBSCRIBE :
+			{
 				cout<<">>> SUBSRIBE REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				// Should receive a new subscription
+				strcpy( name, buf);
+				strcpy( passwd, buf+NAMELEN);
+				// Loop through accounts to see if the required callsign already exists
+				bool found = false;
+				Packet	packet2;
+				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
+				{
+					elem = *j;
+					if( !elem->compareName( name))
+					{
+						// We found an account with the requested name
+						found = true;
+						if( packet2.send( LOGIN_ERROR, packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+						{
+							cout<<"ERROR sending authorization"<<endl;
+							exit( 1);
+						}
+					}
+				}
+				if( !found)
+				{
+					// Add the account at the end of accounts.xml
+					FILE * fp = fopen( "./accounts.xml", "r+");
+					if( fp==NULL)
+					{
+						cout<<"ERROR opening accounts file";
+						exit(1);
+					}
+					else
+					{
+						cout<<"Account file opened"<<endl;
+						//fseek( fp, 0, SEEK_SET);
+						char * fbuf = new char[MAXBUFFER];
+						int i=0;
+						// Read a line per account and one line for the "<ACCOUNTS>" tag
+						for( i=0; i<Cltacct.size()+1; i++)
+						{
+							fbuf=fgets( fbuf, MAXBUFFER, fp);
+							cout<<"Read line : "<<fbuf<<endl;
+						}
+						string acctstr = "\t<PLAYER name=\""+string(name)+"\"\tpassword=\""+string(passwd)+"\" />\n"+"</ACCOUNTS>\n";
+						cout<<"Adding to file : "<<acctstr<<endl;
+						if( fputs( acctstr.c_str(), fp) < 0)
+						{
+							cout<<"ERROR writing new account to account file"<<endl;
+							exit(1);
+						}
+						fclose( fp);
+						Cltacct.push_back( new Account( name, passwd));
+					}
+					if( packet2.send( packet.getCommand(), packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+					{
+						cout<<"ERROR sending authorization"<<endl;
+						exit( 1);
+					}
+				}
+				//DeadSocks.push_back( sock);
 				cout<<"<<< SUBSRIBE REQUEST --------------------------------------"<<endl;
+			}
 			break;
 			case CMD_RESYNCACCOUNTS:
 			{
@@ -448,9 +508,11 @@ void	AccountServer::save()
 void	AccountServer::removeDeadSockets()
 {
 	VI vi;
+	int nbc_disc = 0;
+	int nbs_disc = 0;
 	for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
 	{
-		int nbc_disc = 0;
+		bool found=false;
 		cout<<">>>>>>> Closing socket number "<<(*j)<<endl;
 		// Disconnect all of that server clients
 		for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
@@ -465,12 +527,16 @@ void	AccountServer::removeDeadSockets()
 			{
 				(*vi)->setConnected( false);
 				nbc_disc++;
+				found=true;
 			}
 		}
-		cout<<"\tDisconnected "<<nbc_disc<<" clients associated with that server socket"<<endl;
+		if( !found)
+			nbs_disc++;
 		j->disconnect( "\tclosing socket", false );
 		Socks.remove( (*j));
 	}
+	cout<<"\tDisconnected "<<nbc_disc<<" clients associated with that server socket"<<endl;
+	cout<<"\tDisconnected "<<nbs_disc<<" non-clients sockets"<<endl;
 	DeadSocks.clear();
 }
 
