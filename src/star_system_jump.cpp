@@ -69,10 +69,10 @@ static std::vector <unorigdest *> pendingjump;
 static std::vector <unsigned int> AnimationNulls;
 static std::vector <Animation *>JumpAnimations;
 static std::vector <Animation *>VolatileJumpAnimations;
-static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
+unsigned int AddAnimation (const Vector & pos, const float size, bool mvolatile, const std::string &name ) {
   std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
 
-  Animation * ani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
+  Animation * ani=new Animation (name.c_str(),true,.1,MIPMAP,false);
   unsigned int i;
   if (mvolatile||AnimationNulls.empty()){
     i = ja->size();
@@ -87,6 +87,10 @@ static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool
   (*ja)[i]->SetPosition (pos);
   return i;
 }
+static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false) {
+  return AddAnimation (pos,size,mvolatile,vs_config->getVariable("graphics","jumpgate","warp.ani"));
+}
+
 void DealPossibleJumpDamage (Unit *un) {
   float speed = un->GetVelocity().Magnitude();
   float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;

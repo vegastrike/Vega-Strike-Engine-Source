@@ -99,6 +99,7 @@ enum callback_module_std_type {
   CMT_STD_setDifficulty,
   CMT_STD_getDifficulty,
   CMT_STD_playSound,
+  CMT_STD_playAnimation,
   CMT_STD_terminateMission
 };
 enum callback_module_briefing_type {

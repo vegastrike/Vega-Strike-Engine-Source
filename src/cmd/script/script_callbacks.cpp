@@ -66,7 +66,7 @@ string varToString (varInst * vi) {
   }
 }
 
-
+extern unsigned int AddAnimation (const Vector & pos, const float size, bool mvolatile, const std::string &name );
 void Mission::doCall_toxml(string module,varInst *ovi){
   if(module=="_olist"){
     call_olist_toxml(NULL,SCRIPT_RUN,ovi);
@@ -163,6 +163,18 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
 	AUDAdjustSound (sound,loc,speed);
 	AUDStartPlaying (sound);
 	AUDDeleteSound(sound);//won't actually toast it until it stops
+      }
+      vi = newVarInst (VI_TEMP);
+      vi->type=VAR_VOID;
+    }else if (method_id==CMT_STD_playAnimation) {
+      std::string aniName= getStringArgument(node,mode,0);     
+      Vector loc(0,0,0);
+      loc.i= getFloatArg(node,mode,1);     
+      loc.j= getFloatArg(node,mode,2);     
+      loc.k= getFloatArg(node,mode,3);     
+      float size = getFloatArg(node,mode,4);
+      if (mode==SCRIPT_RUN) {
+	AddAnimation(loc,size,true,aniName);
       }
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
@@ -901,6 +913,7 @@ void Mission::initCallbackMaps(){
   module_std_map["setDifficulty"]=CMT_STD_setDifficulty;
   module_std_map["playSound"]=CMT_STD_playSound;
   module_std_map["terminateMission"]=CMT_STD_terminateMission;
+  module_std_map["playAnimation"]=CMT_STD_playAnimation ;
 
   module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;
   module_order_map["newMoveTo"]=CMT_ORDER_newMoveTo ;
@@ -1026,6 +1039,7 @@ void Mission::initCallbackMaps(){
     module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
     module_unit_map["communicateTo"]=CMT_UNIT_communicateTo ;
     module_unit_map["commAnimation"]=CMT_UNIT_commAnimation ;
+
     module_unit_map["switchFg"]=CMT_UNIT_switchFg ;
 
 
