@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- Replace the string from Systems map with a string *
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
 - Add a ranking system for each faction in factions.xml
 LOPRI - Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuff look for that

@@ -275,7 +275,7 @@ void	NetServer::start(int argc, char **argv)
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
 			NetBuffer netbuf;
-			curtime += periodrecon;
+			reconnect_time += periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
 			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
@@ -598,12 +598,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
             else
             {
+	  			char flags = netbuf.getChar();
 				SOCKETALT tmpsock;
 				const AddressIP* iptmp;
+				WaitListEntry entry;
 				if( clt )
 				{
 					// This must be a TCP client
-					WaitListEntry entry;
 					entry.tcp = true;
 					entry.t   = clt;
 					this->waitList.push( entry );
@@ -612,17 +613,22 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				}
 				else
 				{
-					WaitListEntry entry;
 					entry.tcp = false;
 					entry.u   = ipadr;
 					this->waitList.push( entry );
 					iptmp = &ipadr;
 					COUT << "Waiting authorization for client IP : " << ipadr << endl;
 				}
+
+			    if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
+					entry.canCompress = CMD_CAN_COMPRESS;
+				else
+	        		entry.canCompress &= ~CMD_CAN_COMPRESS;
+
 				// Redirect the login request packet to account server
 				COUT << "Redirecting login request to account server on socket " << acct_sock << endl
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
-				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDANDFORGET, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
+				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDRELIABLE, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
@@ -636,7 +642,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Add the client to the game
 			COUT<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			//COUT<<"Received ADDCLIENT request"<<endl;
-			this->addClient( clt, netbuf.getChar() );
+			this->addClient( clt);
 			COUT<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
 			break;
 		case CMD_POSUPDATE:

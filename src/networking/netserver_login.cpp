@@ -16,6 +16,7 @@ extern vector<vector <string> > lookforUnit( const char * filename, int faction,
 /**** Authenticate a connected client                      ****/
 /**************************************************************/
 
+// Not used anymore
 void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 {
 	Packet	packet2;
@@ -25,6 +26,7 @@ void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 	Account *	elem = NULL;
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 
+	char flags = 0;
 	// Get the callsign/passwd from network
 	callsign = netbuf.getString();
 	passwd = netbuf.getString();
@@ -44,9 +46,9 @@ void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 	else
 	{
 		if( elem->isNew())
-			sendLoginAccept( clt, ipadr, 1);
+			sendLoginAccept( clt, ipadr, 1, flags);
 		else
-			sendLoginAccept( clt, ipadr, 0);
+			sendLoginAccept( clt, ipadr, 0, flags);
 	}
 }
 
@@ -72,7 +74,7 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 	return clt;
 }
 
-void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
+void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, char flags)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -97,6 +99,10 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 			VSExit(1);
 		}
 	}
+	if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
+		clt->sock.allowCompress( true);
+	else
+		clt->sock.allowCompress( false);
 
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	clt->callsign = callsign;
@@ -120,6 +126,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		// Put the save parts in buffers in order to load them properly
 		COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 		netbuf.Reset();
+
 		string datestr = _Universe->current_stardate.GetFullTrekDate();
 		cerr<<"SENDING STARDATE : "<<datestr<<endl;
 		netbuf.addString( datestr);
@@ -202,7 +209,11 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		// Generate the starsystem before addclient so that it already contains serials
 		zonemgr->addZone( cp->savegame->GetStarSystem());
 #ifdef CRYPTO
-		FileUtil::HashFileCompute( relsys, digest, SystemFile);
+		string sysxml;
+		if( (sysxml=zonemgr->getSystem( relsys))!="")
+			FileUtil::HashStringCompute( sysxml, digest);
+		else
+			FileUtil::HashFileCompute( relsys, digest, SystemFile);
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 		delete digest;
 #endif

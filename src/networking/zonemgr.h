@@ -87,6 +87,7 @@ class ZoneMgr
 		//~ZoneMgr();
 		// Serial is the zone id
 		void	addSystem( string & sysname, string & system);
+		string	getSystem( string & name);
 		StarSystem* addZone( string starsys);
 		ClientWeakList* GetZone( int serial);
 		//void	addUnit( Unit * un, int zone);

@@ -39,6 +39,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				exit( 1);
 			}
             WaitListEntry entry( waitList.front() );
+			char flags = entry.canCompress;
 			if( entry.tcp )
 			{
 			    clt = entry.t;
@@ -58,13 +59,13 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				case LOGIN_NEW :
 					COUT << ">>> NEW LOGIN =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 					// We received a login authorization for a new account (no ship created)
-					this->sendLoginAccept( clt, ipadr, 1);
+					this->sendLoginAccept( clt, ipadr, 1, flags);
 					COUT << "<<< NEW LOGIN ----------------------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ACCEPT :
 					// Login is ok
 					COUT<<">>> LOGIN ACCEPTED =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-					sendLoginAccept( clt, ipadr, 0);
+					sendLoginAccept( clt, ipadr, 0, flags);
 					COUT<<"<<< LOGIN ACCEPTED -----------------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ERROR :

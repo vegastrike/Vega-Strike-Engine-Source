@@ -203,6 +203,8 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 }
             break;
             case CMD_LOGIN :
+			{
+				char flags = netbuf.getChar();
                 callsign = netbuf.getString();
                 passwd = netbuf.getString();
                 cout<<">>> LOGIN REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
@@ -246,6 +248,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                     }
                 }
                 cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
+			}
             break;
             case CMD_LOGOUT :
                 callsign = netbuf.getString();

@@ -69,8 +69,7 @@ void	NetClient::addClient( const Packet* packet )
 		// Parse the save buffer
 		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, saves[0], false);
 
-		// WE DON'T STORE FACTION IN SAVE YET
-		string PLAYER_FACTION_STRING( "privateer");
+		string PLAYER_FACTION_STRING( save.GetPlayerFaction());
 
 		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
 		// Use the first ship if there are more than one -> we don't handle multiple ships for now
@@ -293,8 +292,6 @@ void	NetClient::inGame()
 	Packet    packet2;
 	NetBuffer netbuf;
     char      flags = 0;
-    if( canCompress() ) flags |= CMD_CAN_COMPRESS;
-    netbuf.addChar( flags );
 
 	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
@@ -304,8 +301,7 @@ void	NetClient::inGame()
                   SENDRELIABLE, NULL, this->clt_sock,
                   __FILE__, PSEUDO__LINE__(1307) );
 	this->game_unit.GetUnit()->SetSerial( this->serial);
-	COUT << "Sending ingame with serial n°" << this->serial
-         << " " << (canCompress() ? "(compress)" : "(no compress)") <<endl;
+	COUT << "Sending ingame with serial n°" << this->serial << endl;
 	this->ingame = true;
 	Unit * un = this->game_unit.GetUnit();
 	cerr<<"STARTING LOCATION : x="<<un->Position().i<<",y="<<un->Position().j<<",z="<<un->Position().k<<endl;

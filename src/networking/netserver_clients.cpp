@@ -29,7 +29,7 @@ ClientPtr NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
-void	NetServer::addClient( ClientPtr clt, char flags )
+void	NetServer::addClient( ClientPtr clt)
 {
 	Unit * un = clt->game_unit.GetUnit();
 	COUT<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
@@ -96,18 +96,8 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	// In all case set the zone and send the client the zone which it is in
 	COUT<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	un->activeStarSystem->SetZone( zoneid);
-    clt->sock.allowCompress( false );
-    if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
-    {
-        clt->sock.allowCompress( true );
-    }
-    else
-    {
-        flags &= ~CMD_CAN_COMPRESS;
-    }
 	Packet pp;
 	netbuf.Reset();
-    netbuf.addChar( flags );
 	netbuf.addShort( zoneid);
 	//netbuf.addString( _Universe->current_stardate.GetFullTrekDate());
 	un->BackupState();

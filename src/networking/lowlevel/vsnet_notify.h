@@ -252,7 +252,8 @@ public:
 			  VSFileSystem::VSFileType ft,
               std::string        localbasepath );
     NoteFile( SOCKETALT          sock,
-              const std::string& filename );
+              const std::string& filename,
+			  VSFileSystem::VSFileType ft );
 
     virtual ~NoteFile( );
 

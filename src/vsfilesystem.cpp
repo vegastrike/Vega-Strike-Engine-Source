@@ -1581,6 +1581,7 @@ namespace VSFileSystem
 		{
 			string dirpath( sharedsectors+"/"+universe_name);
 			CreateDirectoryHome( dirpath);
+			CreateDirectoryHome( dirpath+"/"+getStarSystemSector( filename));
 			string fpath( homedir+"/"+dirpath+"/"+filename);
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)

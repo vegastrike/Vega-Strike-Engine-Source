@@ -69,6 +69,9 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	NetBuffer netbuf;
 
 	//memset( buffer, 0, tmplen+1);
+	char flags;
+    if( canCompress() ) flags |= CMD_CAN_COMPRESS;
+    netbuf.addChar( flags );
 	netbuf.addString( str_callsign);
 	netbuf.addString( str_passwd);
 
@@ -83,7 +86,8 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
-	     << "   - buffer: " << netbuf.getData() << endl;
+	     << "   - buffer: " << netbuf.getData() << endl
+         << " " << (canCompress() ? "(compress)" : "(no compress)") <<endl;
 	// Now the loop
 	int timeout=0, recv=0;
 	// int ret=0;
@@ -203,6 +207,7 @@ void	NetClient::loginAccept( Packet & p1)
 	COUT << ">>> LOGIN ACCEPTED =( serial n°" << serial << " )= --------------------------------------" << endl;
 	// Should receive player's data (savegame) from server if there is a save
 	localSerials.push_back( serial);
+
 	string datestr = netbuf.getString();
 	_Universe->current_stardate.InitTrek( datestr);
 	cerr << "Stardate initialized"<<endl;
@@ -220,7 +225,7 @@ void	NetClient::loginAccept( Packet & p1)
 	// Compare to local hash and ask for the good file if we don't have it or bad version
 	if( !FileUtil::HashCompare( univfile, digest, UniverseFile))
 	{
-		VsnetDownload::Client::NoteFile f( this->clt_sock, univfile);
+		VsnetDownload::Client::NoteFile f( this->clt_sock, univfile, VSFileSystem::UniverseFile);
 		_downloadManagerClient->addItem( &f);
 		while( !f.done())
 		{
@@ -239,7 +244,7 @@ void	NetClient::loginAccept( Packet & p1)
 #endif
 	if( !FileUtil::HashCompare( fullsys, digest, SystemFile))
 	{
-		VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
+		VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, VSFileSystem::SystemFile);
 		_downloadManagerClient->addItem( &f);
 		while( !f.done())
 		{

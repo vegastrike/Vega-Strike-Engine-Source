@@ -504,11 +504,9 @@ int NetClient::recvMsg( Packet* outpacket )
                     COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
                          << packet_serial << " )= --------------------------------------" << endl;
 				    // Get the zone id in the packet
-                    char flags = netbuf.getChar( );
-                    if( flags & CMD_CAN_COMPRESS ) clt_sock.allowCompress( true );
 				    this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
 				    //_Universe->current_stardate.InitTrek( netbuf.getString());
-                    COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
+                    //COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
 					this->game_unit.GetUnit()->SetCurPosition( netbuf.getQVector());
                     //this->getZoneData( &p1 );
                 }
@@ -779,7 +777,7 @@ int NetClient::recvMsg( Packet* outpacket )
 						Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
 						sts->JumpTo( un, jumpun, newsystem, true);
 						string sysfile( newsystem+".system");
-						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
+						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, SystemFile);
    		             	_downloadManagerClient->addItem( &f);
 						while( !f.done())
 						{

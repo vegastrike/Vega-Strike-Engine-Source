@@ -27,7 +27,11 @@ void			ZoneMgr::addSystem( string & sysname, string & system)
 {
 	Systems.insert( sysname, system);
 }
-	
+
+string			ZoneMgr::getSystem( string & name)
+{
+	return Systems.get( name);
+}
 
 StarSystem *	ZoneMgr::addZone( string starsys)
 {

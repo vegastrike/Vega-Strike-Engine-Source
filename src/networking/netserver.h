@@ -87,6 +87,7 @@ class NetServer
 	        bool tcp;
 	        ClientPtr t; // Client connections waiting for login response
 		    AddressIP u; // Client addresses waiting for login response
+			char	  canCompress;
 	    };
 
         queue<WaitListEntry> waitList;
@@ -98,7 +99,7 @@ class NetServer
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( ClientPtr clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( ClientPtr clt);		// Update a client position
-		void			addClient( ClientPtr clt, char flags );		// Add the client in the game
+		void			addClient( ClientPtr clt);		// Add the client in the game
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
 		void			checkSystem( ClientPtr clt);		// Check if the client has the good system file
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
@@ -117,7 +118,7 @@ class NetServer
         ClientPtr       addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
 		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
-		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew);
+		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
 		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
 		ClientPtr       getClientFromSerial( ObjSerial serial);
 

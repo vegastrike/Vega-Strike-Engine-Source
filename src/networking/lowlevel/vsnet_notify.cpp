@@ -207,8 +207,9 @@ NoteFile::NoteFile( SOCKETALT          sock,
 }
 
 NoteFile::NoteFile( SOCKETALT          sock,
-                    const std::string& filename )
-    : File( sock, filename, VSFileSystem::homedir, VSFileSystem::Unknown, NotifyPtr() )
+                    const std::string& filename,
+					VSFileSystem::VSFileType ft )
+    : File( sock, filename, VSFileSystem::homedir, ft, NotifyPtr() )
     , _me( new NotifyMe )
 {
     protected_replace_notifier( _me );
