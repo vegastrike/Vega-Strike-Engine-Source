@@ -21,6 +21,7 @@
 
 
 #include "animation.h"
+#include "aux_texture.h"
 #include "camera.h"
 #include "lin_time.h"
 #include <stack>
@@ -28,7 +29,7 @@ using std::stack;
 
 static stack<Animation *> animationdrawqueue;
 
-Animation::Animation ():Primitive()
+Animation::Animation ()
 {
 	cumtime = 0;
 	numframes = 0;
@@ -38,7 +39,7 @@ Animation::Animation ():Primitive()
 	Decal = NULL;
 }
 
-Animation::Animation (char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient):Primitive()
+Animation::Animation (char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient)
 {	
   repeat = Rep;
 	cumtime = 0;
@@ -93,6 +94,21 @@ Animation:: ~Animation ()
     delete Decal[i];
   delete [] Decal;
   
+}
+void Animation::SetPosition (float x,float y, float z) {
+  local_transformation.position = Vector (x,y,z);
+}
+void Animation::SetPosition (const Vector &k) {
+  local_transformation.position = k;
+}
+void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
+{	
+  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
+}
+
+Vector &Animation::Position()
+{
+	return local_transformation.position;
 }
 
 void Animation:: SetDimensions(float wid, float hei) {

@@ -38,8 +38,6 @@ libgfx_a_SOURCES =	\
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
-	primitive.cpp	\
-	primitive.h	\
 	sphere.cpp	\
 	sphere.h	\
 	sprite.cpp	\

@@ -21,12 +21,12 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 #include "lin_time.h"
-#include "primitive.h"
 #include "vec.h"
 
 #include "quaternion.h"
 
-class Animation:public Primitive {	
+class Animation {
+  Transformation local_transformation;
   Texture **Decal; 
   bool camup;
   int numframes;
@@ -45,6 +45,10 @@ public:
   static void ProcessDrawQueue();
   void SetDimensions(float wid, float hei);
   bool Done();
+  Vector &Position();
+  void SetPosition (float, float, float);
+  void SetPosition (const Vector &);
+  void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 };
 
 #endif
