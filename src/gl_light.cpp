@@ -25,45 +25,32 @@
 #include <queue>
 using std::priority_queue;
 
-static int _currentContext=0;
-static vector <vector <gfx_light> > _local_lights_dat;
-static vector <GFXColor> _ambient_light;
-static vector <gfx_light> * _llights=NULL;
+int _currentContext=0;
+vector <vector <gfx_light> > _local_lights_dat;
+vector <GFXColor> _ambient_light;
+vector <gfx_light> * _llights=NULL;
 
 //currently stored GL lights!
-static OpenGLLights* GLLights=NULL;//{-1,-1,-1,-1,-1,-1,-1,-1};
+OpenGLLights* GLLights=NULL;//{-1,-1,-1,-1,-1,-1,-1,-1};
 
 //table to store local lights, numerical pointers to _llights (eg indices)
-static Hashtable3d <LineCollide*, char[20],char[200]> lighttable;
+Hashtable3d <LineCollide*, char[20],char[200]> lighttable;
 
 //optimization globals
-static float intensity_cutoff=.05;//something that would normally round down
-static float optintense=.2;
-static float optsat = .95;
+float intensity_cutoff=.05;//something that would normally round down
+float optintense=.2;
+float optsat = .95;
 
 
 GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular, const GFXColor &ambient, const GFXColor &attenuate) {
   target = -1;
   options = 0;
   memcpy (this->vect,&vect,sizeof(float)*3);
-  if (diffuse.r||diffuse.g||diffuse.g||(diffuse.a!=1)) {
-    options |=GFX_DIFFUSE;
-    memcpy (this->diffuse,&diffuse,sizeof(float)*4);
-  }
-  if (specular.r||specular.g||specular.b||(specular.a!=1)) {
-    options |=GFX_SPECULAR;
-    memcpy (this->specular,&specular,sizeof(float)*4);
-  }
-  if (ambient.r||ambient.g||ambient.b||(ambient.a!=1)) {
-    options |= GFX_AMBIENT;
-    memcpy (this->ambient,&ambient,sizeof(float)*4);
-  }
-  if ((attenuate.r!=1)||attenuate.g||attenuate.b) {
-    options |= GFX_ATTENUATED;
-    memcpy (this->attenuate,&attenuate,sizeof(float)*3);
-    this->vect[3]=1;
-  }
-  changed = options;
+  memcpy (this->diffuse,&diffuse,sizeof(float)*4);
+  memcpy (this->specular,&specular,sizeof(float)*4);
+  memcpy (this->ambient,&ambient,sizeof(float)*4);
+  memcpy (this->attenuate,&attenuate,sizeof(float)*3);
+  apply_attenuate (attenuated());
   if (enabled)
     this->enable();
   else
@@ -71,27 +58,14 @@ GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &dif
 }
 void GFXLight::disable () {options &= (~GFX_LIGHT_ENABLED);}
 void GFXLight::enable (){options |= GFX_LIGHT_ENABLED;}
+bool GFXLight::attenuated() {return (attenuate[0]!=1)||(attenuate[1]!=0)||(attenuate[2]!=0); }
+void GFXLight::apply_attenuate (bool attenuated) {
+  options = attenuated
+    ? (options|GFX_ATTENUATED)
+    : (options&(~GFX_ATTENUATED));
+}
 
 void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-  changed |=lighttarg;
-  if (lighttarg==ATTENUATE) {
-    if (color.r==1&color.g==color.b&&color.b==0) {
-      options &=(~lighttarg);
-    }else {
-      target |= (lighttarg);
-    }
-  }else {
-    if (color.r==color.g&&color.g==color.b&&color.b==0&&color.a==1) {
-      options &= (~lighttarg);
-    } else {
-      options |= (lighttarg);
-    }
-  }
-  if (options&GFX_ATTENUATED) {
-    vect[3]=1;
-  } else {
-    vect[3]=0;
-  }
   switch (lighttarg) {
   case DIFFUSE:
     diffuse[0]=color.r;
@@ -122,6 +96,7 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
     attenuate[2]=color.b;
     break;
   }
+  apply_attenuate (attenuated());
 }
 
 int gfx_light::lightNum() {
@@ -184,8 +159,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(GFXBOOL spec) {
 #endif
 	return GFXTRUE;
 }
-
-
 
 void /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
   int i;
@@ -346,30 +319,96 @@ bool gfx_light::Create (const GFXLight & temp, bool global) {
 }
 void gfx_light::Kill() {
     Disable();//first disables it...which may remove it from the light table.
-    
+    if (target!=-1) {
+      GLLights[target].index = -1;
+      GLLights[target].options = OpenGLLights::GLL_LOCAL;
+    }
+    target=-2;
+    options = 0;
+}
+/** ClobberGLLight ****
+ ** most OpenGL implementation dirty lighting if any info is changed at all
+ ** having two different lights with the same stats and pos is unlikely at best
+ */
+
+void gfx_light::SendGLPosition (const GLenum target) {
+  int tmp = options;
+  w = (float)(attenuated()!=0);
+  glLightfv (target,GL_POSITION,vect);
+  options = tmp;
 }
 void gfx_light::ClobberGLLight (const int target) {
-
+  GLenum gltarg = GL_LIGHT0+target;
+  if (attenuated()) {
+    glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
+    glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
+    glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
+  }
+  SendGLPosition (gltarg);
+  glLightfv (gltarg,GL_DIFFUSE, diffuse);
+  glLightfv (gltarg,GL_SPECULAR, specular);
+  glLightfv (gltarg,GL_AMBIENT, ambient);
 }
-void gfx_light::ContextSwitchEnableLight (const int target) {
 
+void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXColor &color) {
+  
+  switch (light_targ) {
+  case DIFFUSE:
+    diffuse[0]= color.r;diffuse[1]=color.g;diffuse[2]=color.b;diffuse[3]=color.a;
+    if (target<0)
+      break;
+    glLightfv (GL_LIGHT0+target,GL_DIFFUSE,diffuse);
+    break;
+  case SPECULAR:
+    specular[0]= color.r;specular[1]=color.g;specular[2]=color.b;specular[3]=color.a;    
+    if (target<0)
+      break;
+    glLightfv (GL_LIGHT0+target,GL_SPECULAR,specular);
+    break;
+  case AMBIENT:
+    ambient[0]= color.r;ambient[1]=color.g;ambient[2]=color.b;ambient[3]=color.a;    
+    if (target<0)
+      break;
+    glLightfv (GL_LIGHT0+target,GL_AMBIENT,ambient);    
+    break;
+  case POSITION:
+    vect[0]=color.r;vect[1]=color.g;vect[2]=color.b;
+    if (target<0)
+      break;
+    glLightfv (GL_LIGHT0+target,GL_POSITION,vect);
+    break;
+  case ATTENUATE:
+    attenuate[0]=color.r; attenuate[1]=color.g; attenuate[2]=color.b;
+    apply_attenuate(attenuated());
+    if (target<0)
+      break;
+    SendGLPosition (GL_LIGHT0+target);
+    glLightf (GL_LIGHT0+target,GL_CONSTANT_ATTENUATION, attenuate[0]);
+    glLightf (GL_LIGHT0+target,GL_LINEAR_ATTENUATION, attenuate[1]);
+    glLightf (GL_LIGHT0+target,GL_QUADRATIC_ATTENUATION, attenuate[2]);
+    break;
+  }
 }
+
+
+
+//unimplemented
 void gfx_light::Enable() {
 
 }
-
+//unimplemented
 void gfx_light::Disable() {
 
 }
-void gfx_light::ResetProperties (const enum LIGHT_TARGET, const GFXColor &color) {
 
-}
 LineCollide gfx_light::CalculateBounds () {
 
 }
 void GFXPickLights (const float *) {
 
 }
+
+
 #ifdef MIRACLESAVESDAY
 inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for relatively small source 
   float dis, dissqr;

@@ -71,19 +71,21 @@ struct GFXColor
 };
 
 enum LIGHT_TARGET {
-  DIFFUSE=1,
-  SPECULAR=2,
-  AMBIENT=4,
-  POSITION=8,
-  ATTENUATE=16
+  ATTENUATE=1,//important ATTENUATE STAYS AT ONE...for w compat.
+  DIFFUSE=2,
+  SPECULAR=4,
+  AMBIENT=8,
+  POSITION=16,
 };
 
 class GFXLight {
  protected:
   int target;
-  char options;
-  char changed;
-  float vect[4];//last is w for positional, otherwise 3 for spec
+  float vect[3];//last is w for positional, otherwise 3 for spec
+  union {
+    float w;//also may be referred to as vect[3];
+    int options;
+  };
   float diffuse [4];
   float specular[4];
   float ambient[4];
@@ -94,7 +96,7 @@ class GFXLight {
     attenuate[0]=attenuate[1]=attenuate[2]=0;
     diffuse[0]=diffuse[1]=diffuse[2]=0;//openGL defaults
     specular[0]=specular[1]=specular[2]=0;//openGL defaults
-    ambient[0]=ambient[1]=ambient[2]=changed=options=0;
+    ambient[0]=ambient[1]=ambient[2]=options=0;
     diffuse[3]=specular[3]=ambient[3]=1;
     target =-1;//physical GL light its saved in
   }
@@ -102,6 +104,8 @@ class GFXLight {
   void SetProperties (enum LIGHT_TARGET, const GFXColor & color);
   void disable ();
   void enable ();
+  bool attenuated ();
+  void apply_attenuate (bool attenuated);
 };
 struct GFXTVertex // transformed vertex
 {

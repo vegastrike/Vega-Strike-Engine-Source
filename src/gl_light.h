@@ -5,11 +5,11 @@
 int GFX_MAX_LIGHTS=8;
 int GFX_OPTIMAL_LIGHTS=4;
 GFXBOOL GFXLIGHTING=GFXFALSE;
-#define GFX_DIFFUSE 1
-#define GFX_SPECULAR 2
-#define GFX_AMBIENT 4
-#define GFX_LIGHT_POS 8
-#define GFX_ATTENUATED 16
+#define GFX_ATTENUATED 1
+//#define GFX_DIFFUSE 2
+//#define GFX_SPECULAR 4
+//#define GFX_AMBIENT 8
+//#define GFX_LIGHT_POS 16
 #define GFX_LIGHT_ENABLED 32
 #define GFX_LOCAL_LIGHT 64
 
@@ -24,9 +24,10 @@ class gfx_light: public GFXLight {
   bool Create (const GFXLight &, bool global);//if global, puts it into GLlights (if space ||enabled) <clobber?>
   //for local lights, if enabled, call Enable().
   void Kill (); // Disables it (may remove from table), trashes it from GLlights. sets target to -2 (dead)  
-
+  void SendGLPosition (const GLenum target);//properly utilizes union.
   void ClobberGLLight (const int target);//replaces target GL light in the implementation. Sets this->target! Checks for -1 and calls ContextSwitch to clobber completely
-  void ContextSwitchEnableLight (const int target);//replaces target GL light, copying all state sets this->target!
+  
+  //depreciated!void ContextSwitchEnableLight (const int target);//replaces target GL light, copying all state sets this->target!
   void Enable ();//for global lights, clobbers SOMETHING for sure, calls GLenable
   //for local lights, puts it into the light table
   void Disable ();// for global lights, GLdisables it.
@@ -47,5 +48,23 @@ struct OpenGLLights {
   } options;
 };
 
+
+
+
+extern int _currentContext;
+extern vector <vector <gfx_light> > _local_lights_dat;
+extern vector <GFXColor> _ambient_light;
+extern vector <gfx_light> * _llights;
+
+//currently stored GL lights!
+extern OpenGLLights* GLLights;
+
+//table to store local lights, numerical pointers to _llights (eg indices)
+extern Hashtable3d <LineCollide*, char[20],char[200]> lighttable;
+
+//optimization globals
+extern float intensity_cutoff;//something that would normally round down
+extern float optintense;
+extern float optsat;
 
 #endif
