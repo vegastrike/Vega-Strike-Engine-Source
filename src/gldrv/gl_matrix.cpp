@@ -332,6 +332,7 @@ void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 {
     znear *=GFX_SCALE;
     zfar *=GFX_SCALE;
+    cockpit_offset*=GFX_SCALE;
   //  gluPerspective (fov,aspect,znear,zfar);
 
 
