@@ -59,6 +59,7 @@ typedef struct {
         BYTE    rgbRed;
         BYTE    rgbReserved;
 } RGBQUAD;
+
 #else
 #include <windows.h>
 #include <wingdi.h>
@@ -67,6 +68,7 @@ typedef struct {
 #endif
 const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD);
 const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
+const int SIZEOF_RGBQUAD=sizeof(BYTE)*4;
 
 static Hashtable<string, Texture> texHashTable;
 
@@ -170,7 +172,7 @@ Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TE
 		unsigned char ctemp;
 		for(int palcount = 0; palcount < 256; palcount++)
 		{
-			fread(paltemp, sizeof(RGBQUAD), 1, fp);
+		  fread(paltemp, SIZEOF_RGBQUAD, 1, fp);
 			ctemp = paltemp[0];
 			paltemp[0] = paltemp[2];
 			paltemp[2] = ctemp;

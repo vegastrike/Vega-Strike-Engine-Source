@@ -75,8 +75,7 @@ void Sprite::Draw()
 {
 	if(surface!=NULL)
 	{
-	  //GFXPushBlendMode();
-	  //	  GFXBlendMode(ONE, ONE);
+
 		GFXDisable(LIGHTING);
 		GFXDisable(DEPTHWRITE);
 		GFXDisable(DEPTHTEST);
@@ -84,6 +83,9 @@ void Sprite::Draw()
 		UpdateHudMatrix();
 		GFXEnable(TEXTURE0);
 		surface->MakeActive();
+
+		GFXPushBlendMode();
+		GFXBlendMode(ONE, ONE);
 
 		//GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
 		//GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
@@ -106,7 +108,8 @@ void Sprite::Draw()
 		GFXEnable(LIGHTING);
 		GFXEnable(DEPTHWRITE);
 		GFXEnable(DEPTHTEST);
-		//		GFXPopBlendMode();
+
+		GFXPopBlendMode();
 	}
 }
 

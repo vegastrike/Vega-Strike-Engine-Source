@@ -331,7 +331,7 @@ void LocationSelect:: Draw () {
 
 
   GFXEnd();
-  //  GFXPopBlendMode();
+  GFXPopBlendMode();
 
 }
 

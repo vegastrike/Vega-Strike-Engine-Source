@@ -32,6 +32,8 @@ struct GLTexture{
 	GLuint name;
 	BOOL alive;
 	TEXTUREFORMAT textureformat;
+
+  bool shared_palette;
 	GLTexture ()
 	{
 		alive = FALSE;
@@ -40,6 +42,7 @@ struct GLTexture{
 		height = 0;
 		texture = NULL;
 		palette = NULL;
+		shared_palette = true;
 	}
 	~GLTexture()
 	{
@@ -57,8 +60,10 @@ static GLenum targets [MAX_TEXTURES];
 
 static void ConvertPalette(unsigned char *dest, unsigned char *src)
 {
-	for(int a=0; a<256; a++, dest+=3, src+=4)
+  for(int a=0; a<256; a++, dest+=4, src+=4) {
 		memcpy(dest, src, 3);
+		dest[3] = 255;
+  }
 
 }
 
@@ -116,7 +121,7 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	textures[*handle].height = height;
 	if (palette&&textureformat == PALETTE8)
 	{
-		textures[*handle].palette = new GLubyte [769];
+		textures[*handle].palette = new GLubyte [1024];
 		ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
 		//memcpy (textures[*handle].palette,palette,768);
 	}
@@ -194,19 +199,27 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	case PALETTE8:
 		if (g_game.PaletteExt)
 		{
-			
-			glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, textures[handle].palette);//shit on TNT
+			glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, 
+				     GL_RGBA, 
+				     256, 
+				     GL_RGBA, 
+				     GL_UNSIGNED_BYTE, 
+				     textures[handle].palette);//shit on TNT
 			error = glGetError();
+			glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
 			if (error) 
 			{
-				glColorTable(targets[handle], GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, textures[handle].palette);
+			  textures[handle].shared_palette = false;
+			  cerr << "texture error 0\n";
+				glColorTable(targets[handle], GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
 				error = glGetError();
 				if (error)
 					return FALSE;
 			}
+			//memset(buffer, 0, textures[handle].width*textures[handle].height);
 			glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
 			error = glGetError();
-			if (error)
+			if (error) 
 				return FALSE;
 		}
 		else
@@ -232,7 +245,7 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 		}
 		break;
 	}
-	glBindTexture(targets[handle], textures[handle].name);
+	//glBindTexture(targets[handle], textures[handle].name);
 	return TRUE;
 
 }
@@ -269,20 +282,32 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 			break;
 		}
 		glBindTexture(targets[handle], textures[handle].name);
+	
+		if(g_game.PaletteExt&&textures[handle].textureformat == PALETTE8) {
+		  //memset(textures[handle].palette, 255, 1024);
+		  if(textures[handle].shared_palette) {
+		    glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, 
+				 GL_RGBA, 
+				 256, 
+				 GL_RGBA, 
+				 GL_UNSIGNED_BYTE, 
+				 textures[handle].palette);
+		  }
+		}
+
 		//float ccolor[4] = {1.0,1.0,1.0,1.0};
 		switch(textures[handle].texturestage)
 		{
 		case 0:
 			glActiveTextureARB(GL_TEXTURE0_ARB);	
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glActiveTextureARB(GL_TEXTURE0_ARB);	
 			break;
 		case 1:
 			glActiveTextureARB(GL_TEXTURE0_ARB);	
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glActiveTextureARB(GL_TEXTURE1_ARB);	
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			glActiveTextureARB(GL_TEXTURE1_ARB);	
+			glEnable (targets[handle]);		
 			break;
 		default:
 			glActiveTextureARB(GL_TEXTURE0_ARB);		
@@ -312,10 +337,6 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		float ccolor[4] = {1.0,1.0,1.0,1.0};
 		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ccolor);
 	}
-	
-	if(g_game.PaletteExt&&textures[handle].textureformat == PALETTE8)
-		glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, textures[handle].palette);
-
 	return TRUE;
 }
 
