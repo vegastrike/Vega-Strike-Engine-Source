@@ -22,13 +22,14 @@
 #include "gfxlib.h"
 #include "gl_globals.h"
 #include "vs_globals.h"
-#define  MAX_TEXTURES 256
 
+#define  MAX_TEXTURES 256
+static int MAX_TEXTURE_SIZE;
 struct GLTexture{
   //  unsigned char *texture;
   GLubyte * palette;
-  unsigned int width;
-  unsigned int height;
+  int width;
+  int height;
   int texturestage;
   GLuint name;
   GFXBOOL alive;
@@ -116,8 +117,41 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   ConvertPalette(textures[handle].palette, palette);
   //memcpy (textures[handle].palette,palette,768);
 }
+static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle) {
+  int i,j,k,l,m;
+  float *temp = (float *)malloc (pixsize*sizeof(float));
+  int newwidth = width>height?width:height;
+  int scale = newwidth / MAX_TEXTURE_SIZE;
+  int newheight = height / scale;
+  newwidth = width/scale;
+  *newbuf = (unsigned char*)malloc (newwidth*newheight*pixsize*sizeof(unsigned char));
+  for (i=0;i<newheight;i++) {
+    for (j=0;j<newwidth;j++) {
+      for (m=0;m<pixsize;m++) {
+	temp[m]=0;
+      }
+      for (k=0;k<scale;k++) {
+	for (l=0;l<scale;l++) {
+	  for (m=0;m<pixsize;m++) {
+	    temp[m] += oldbuf[m+pixsize*(j*scale+l+width*(i*scale+k))];
+	  }
+	}
+      }
+      for (m=0;m<pixsize;m++) {
+	(*newbuf)[m+pixsize*(j+i*newwidth)] = temp[m]/(scale*scale);
+      }
+    }
+  }
+  free (temp);
+  textures[handle].width=newwidth;
+  textures[handle].height=newheight;
+} 
+
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum TEXTURE_IMAGE_TARGET imagetarget)
 {	
+  int error;
+  unsigned char * tempbuf = NULL;
+  unsigned char * tbuf =NULL;
   GLenum image2D;
   switch (imagetarget) {
   case TEXTURE_2D:
@@ -145,9 +179,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
   if (image2D!=GL_TEXTURE_2D) {
     fprintf (stderr, "gotcha %d", imagetarget);
   }	
-  int error;
-  glBindTexture(textures[handle].targets, textures[handle].name);
 
+  glBindTexture(textures[handle].targets, textures[handle].name);
+  if (textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
+    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(textures[handle].textureformat==PALETTE8?1:4)* sizeof(unsigned char ), handle);
+    buffer = tempbuf;
+  }
   switch(textures[handle].textureformat){
   case DUMMY:
   case RGB24:
@@ -182,20 +219,25 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
       error = glGetError();
       glColorTable(textures[handle].targets, GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
       error = glGetError();
-      if (error)
+      if (error) {
+	if (tempbuf)
+	  free(tempbuf);
 	return GFXFALSE;
+      }
       if (textures[handle].mipmapped&&g_game.mipmap>1)
 	gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
       else
 	glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
       break;
       error = glGetError();
-      if (error) 
+      if (error) {
+	if (tempbuf)
+	  free(tempbuf);
 	return GFXFALSE;
+      }
     } else{
       int nsize = 4*textures[handle].height*textures[handle].width;
-      unsigned char * tbuf = NULL;
-      tbuf = new unsigned char [nsize];
+      tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
       //      textures[handle].texture = tbuf;
       int j =0;
       for (int i=0; i< nsize; i+=4)
@@ -212,12 +254,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
       
       //unashiehized			glTexImage2D(image2D,0,3,textures[handle].width, textures[handle].height,0,GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
-      delete [] tbuf;
+      free (tbuf);
       //delete [] buffer;
       //buffer = tbuf;
     }
     break;
   }
+  if (tempbuf)
+    free(tempbuf);
   return GFXTRUE;
 }
 void /*GFXDRVAPI*/ GFXDeleteTexture (int handle) {
@@ -241,6 +285,7 @@ void GFXInitTextureManager() {
     textures[handle].targets=0;
     textures[handle].mipmapped=NEAREST;
   }
+  glGetIntegerv (GL_MAX_TEXTURE_SIZE,&MAX_TEXTURE_SIZE);
 }
 void GFXDestroyAllTextures () {
   for (int handle=0;handle<MAX_TEXTURES;handle++) {

@@ -119,12 +119,11 @@ void init_opengl_extensions()
     g_game.zfar = 100000.00F;
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {
- 		fscanf (fp,"fov %f\n",&g_game.fov);
- 		fscanf (fp,"aspect %f\n",&g_game.aspect);
- 		fscanf (fp,"znear %f\n",&g_game.znear);
- 		fscanf (fp,"zfar %f\n",&g_game.zfar);
- 	
- 		fclose (fp);
+      fscanf (fp,"fov %f\n",&g_game.fov);
+      fscanf (fp,"aspect %f\n",&g_game.aspect);
+      fscanf (fp,"znear %f\n",&g_game.znear);
+      fscanf (fp,"zfar %f\n",&g_game.zfar);
+      fclose (fp);
     }
  }
 
@@ -274,10 +273,11 @@ void GFXLoop(void main_loop()) {
   //never make it here;
 
 }
-
+extern void GFXDestroyAllLights();
 
 void GFXShutdown () {
   GFXDestroyAllTextures();
+  GFXDestroyAllLights();
   if ( g_game.fullscreen ) {
     glutLeaveGameMode();
   }

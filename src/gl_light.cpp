@@ -32,7 +32,7 @@ using std::priority_queue;
 #define GFX_ATTENUATED 32;
 
 
-#define GFX_MAX_LIGHTS 8
+int GFX_MAX_LIGHTS=8;
 int GFX_OPTIMAL_LIGHTS=4;
 GFXBOOL GFXLIGHTING=GFXFALSE;
 //for OpenGL
@@ -75,8 +75,10 @@ struct gfx_light_data {
 
 static int _currentContext=0;
 
-int GLLights[GFX_MAX_LIGHTS]={-1,-1,-1,-1,-1,-1,-1,-1};
-int GLLightState[GFX_MAX_LIGHTS]={0};//0 off 1 on 2=processed
+int* GLLights=NULL;//{-1,-1,-1,-1,-1,-1,-1,-1};
+int* GLLightState=NULL;//0 off 1 on 2=processed
+int* newQ=NULL;
+float* AttenuateQ=NULL;
 
 vector <vector <gfx_light_loc> > _local_lights_loc;
 vector <vector <gfx_light_data> > _local_lights_dat;
@@ -87,6 +89,16 @@ vector <gfx_light_data> * _llights_dat=NULL;
 float intensity_cutoff=.05;//something that would normally round down
 float optintense=.2;
 float optsat = .95;
+void GFXDestroyAllLights () {
+  if (GLLights)
+    free (GLLights);
+  if (GLLightState)
+    free (GLLightState);
+  if (newQ)
+    free(newQ);
+  if (AttenuateQ)
+    free (AttenuateQ);
+}
 GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float ttcutoff) {
   if (ttcutoff<0) 
     return GFXFALSE;
@@ -161,11 +173,29 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(GFXBOOL spec) {
 	return GFXTRUE;
 }
 void /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
+  int i;
   static GFXBOOL LightInit=GFXFALSE;
   if (!LightInit) {
     LightInit = GFXTRUE;
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
     //
+    glGetIntegerv(GL_MAX_LIGHTS,&GFX_MAX_LIGHTS);
+    if (!GLLights) {
+      GLLights= (int *)malloc (sizeof(int)*GFX_MAX_LIGHTS);
+      for (i=0;i<GFX_MAX_LIGHTS;i++) {
+	GLLights[i]=-1;
+      }
+    }
+    if (!GLLightState){
+      GLLightState= (int *)malloc (sizeof(int)*GFX_MAX_LIGHTS);
+      for (i=0;i<GFX_MAX_LIGHTS;i++) {
+	GLLightState[i]=0;
+      }
+    }
+    if (!newQ)
+      newQ= (int*)malloc (sizeof(int)*GFX_MAX_LIGHTS);
+    if (!AttenuateQ)
+      AttenuateQ=(float *)malloc (sizeof(float)*GFX_MAX_LIGHTS);
   }
   con_number = _local_lights_loc.size();
   _currentContext= con_number;
@@ -263,8 +293,6 @@ void ForceEnableAttenuated (unsigned int, float, unsigned int &, unsigned int&);
 
 
 int newQsize=0;
-int newQ [GFX_MAX_LIGHTS];
-float AttenuateQ[GFX_MAX_LIGHTS];
 static float AttTmp[4];
 static float VecT[4];
 
