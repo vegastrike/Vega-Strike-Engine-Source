@@ -36,7 +36,7 @@
 
 #include "glut_support.h"
 
-#define DIR_TEXT "data/images/gui/text_area/"
+#define DIR_TEXT "data/textures/gui/"
 
 // These defines are used by the image loader
 #define TEXT_AREA_00 DIR_TEXT ## "button_down.png"
