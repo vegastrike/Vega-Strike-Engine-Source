@@ -194,12 +194,13 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 	  s->GetSize (nw,nh);
 	  w= fabs(nw*h/nh);
 	  s->SetSize (w,invertsprite?-h:h);
-	  if (drawsprite) {
+	  Texture * spritetex=s->getTexture();
+	  if (drawsprite&&spritetex) {
   		static const float middle_point = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","armor_hull_size",".55"));
                 static bool top_view = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","top_view","false"));
   		float middle_point_small=1-middle_point;
   		Vector ll,lr,ur,ul,mll,mlr,mur,mul;
-  		s->getTexture()->MakeActive();
+  		spritetex->MakeActive();
   		GFXDisable (CULLFACE);
   		s->DrawHere(ll,lr,ur,ul);
  		mll=middle_point*ll+middle_point_small*ur;
