@@ -17,7 +17,7 @@ static int LoadSound (ALuint buffer, bool looping) {
   if (!dirtysounds.empty()) {
     i = dirtysounds.back();
     dirtysounds.pop_back();
-    assert (sounds[i].buffer==-1);
+    assert (sounds[i].buffer==(ALuint)-1);
     sounds[i].buffer= buffer;
   } else {
     i=sounds.size();
@@ -58,6 +58,13 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #endif
   return -1;
 }
+int AUDCreateSoundWAV (const std::string &s, const bool LOOP) {
+  AUDCreateSoundWAV (s,false,LOOP);
+}
+int AUDCreateMusicWAV (const std::string &s, const bool LOOP) {
+  AUDCreateSoundWAV (s,true,LOOP);
+}
+
 int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   ALuint * mp3buf=NULL;
@@ -89,6 +96,14 @@ int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #endif
   return -1;
 }
+
+int AUDCreateSoundMP3 (const std::string &s, const bool LOOP) {
+  AUDCreateSoundMP3 (s,false,LOOP);
+}
+int AUDCreateMusicMP3 (const std::string &s, const bool LOOP) {
+  AUDCreateSoundMP3 (s,true,LOOP);
+}
+
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP=false){
 #ifdef HAVE_AL
@@ -97,13 +112,18 @@ int AUDCreateSound (int sound,const bool LOOP=false){
 #endif
   return -1;
 }
-void AUDDeleteSound (int sound){
+void AUDDeleteSound (int sound, bool music){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
+    if (AUDIsPlaying (sound)) {
+      AUDStopPlaying (sound);
+    }
     dirtysounds.push_back (sound);
     alDeleteSources(1,&sounds[sound].source);
-    sounds[sound].buffer=-1;
-    //if refcount 0, delete buffer? I think we save that for deinit
+    if (music) {
+      alDeleteBuffers (1,&sounds[sound].buffer);
+    }
+    sounds[sound].buffer=(ALuint)-1;
   }
 #endif
 }

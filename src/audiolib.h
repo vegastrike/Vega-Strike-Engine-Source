@@ -11,10 +11,14 @@ void AUDListenerGain (const float gain);
 int AUDCreateSoundWAV (const std::string &, const bool LOOP=false);
 ///creates a buffer for an mp3 sound if one doesn't already exist, then creates a source
 int AUDCreateSoundMP3 (const std::string &, const bool LOOP=false);
+///creates a buffer if one doesn't already exists, and then creates a source
+int AUDCreateMusicWAV (const std::string &, const bool LOOP=false);
+///creates a buffer for an mp3 sound if one doesn't already exist, then creates a source
+int AUDCreateMusicMP3 (const std::string &, const bool LOOP=false);
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP=false);
 ///deletes a given sound
-void AUDDeleteSound (int sound);
+void AUDDeleteSound (int sound, bool music=false);
 ///Changes the velocity and/or position of a given sound
 void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel);
 ///Changes the gain of a loaded sound

@@ -5,7 +5,7 @@
 #include <vector>
 struct OurSound{
   ALuint source;
-  ALint buffer;
+  ALuint buffer;
   OurSound(ALuint source, ALuint buffername) {buffer=buffername;};
 };
 
