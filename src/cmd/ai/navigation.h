@@ -2,7 +2,7 @@
 #define _CMD_NAVIGATION_ORDERS_H_
 
 
-#include "cmd/order.h"
+#include "order.h"
 #include "vegastrike.h"
 
 namespace Orders {
