@@ -17,6 +17,10 @@
 
 #include "selector.h"
 
+char* EXT_MISSION = "*.mission";
+char* EXT_CAMPAIGN = "*.campaign";
+char* DIR_MISSION = "mission";
+
 int main(int argc, char *argv[]) {
 	int i = 0;
 	for (i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/';i--) {

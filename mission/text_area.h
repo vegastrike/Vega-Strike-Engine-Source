@@ -31,8 +31,13 @@
 // There are places where a float is converted to an int. This define takes extra steps to convert without a warning (float -> char -> int)
 #define NO_WARNINGS
 
-#include <GL/glut.h>
-#include <GL/gl.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+    #include <GLUT/glut.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glut.h>
+#endif
 #include <iostream.h>
 
 #include "glut_support.h"

@@ -21,7 +21,7 @@
 #include <SDL/SDL.h>
 #endif
 
-#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif
 
@@ -92,9 +92,12 @@ char mission_name[1024];
 
 void bootstrap_main_loop();
 
+#if defined(WITH_MACOSX_BUNDLE)
+ #undef main
+#endif
 int main( int argc, char *argv[] ) 
 {
-#if defined(WITH_MACOSX_BUNDLE) && !defined(HAVE_SDL)
+#if defined(WITH_MACOSX_BUNDLE)
     // We need to set the path back 2 to make everything ok.
     char parentdir[MAXPATHLEN];
     char *c;

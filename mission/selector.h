@@ -23,8 +23,13 @@
 #define MISSION_PROGRAM "Vega Strike"
 
 #include <expat.h>
-#include <GL/glut.h>
-#include <GL/gl.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+    #include <GLUT/glut.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glut.h>
+#endif
 #include <iostream.h>
 #include <map>
 #include <stdlib.h>
@@ -55,10 +60,10 @@
 #define MAX_READ 1024	// Maximum number of characters to read from a line
 #endif
 
-#define EXT_MISSION "*.mission"
-#define EXT_CAMPAIGN "*.campaign"
+extern char* EXT_MISSION;
+extern char* EXT_CAMPAIGN;
 
-#define DIR_MISSION "mission"
+extern char* DIR_MISSION;
 char *Start(int run_vegastrike);
 void RunMission(void);
 

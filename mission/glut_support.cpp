@@ -29,7 +29,7 @@ Texture ReadTex(char *texfile) {
         if (texfile)
         	if (texfile[0])
                 	file=fopen(texfile,"rb");
-	unsigned int name=0;
+	GLuint name=0;
         unsigned int width=0,height=0;
         if (file) {
         	int bpp,colortype;

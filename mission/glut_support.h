@@ -21,9 +21,13 @@
 /* If you have functions that perform the same operation, but use different parameters,
  * It may be best if you replace the following functions with wrappers to your own functions
  */
-
-#include <GL/gl.h>
-#include <GL/glut.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+    #include <GLUT/glut.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glut.h>
+#endif
 #include <png.h>
 #include <stdio.h>
 #include <vector.h>

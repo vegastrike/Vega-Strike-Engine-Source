@@ -24,8 +24,13 @@
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
  */
 
-#include <GL/glut.h>
-#include <GL/gl.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+    #include <GLUT/glut.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glut.h>
+#endif
 #include <iostream.h>
 
 #include "glut_support.h"

@@ -227,7 +227,7 @@ void AddMissionsToTree(char *path, char *parent) {
         // For some reason, glob(,,GLOB_ONLYDIR,) doesn't seem to only match directories,
         // so FindDirs() currently returns everything. Check the last char for a /
         // That will be the directory.
-
+            
         search = FindDirs(path);
         max = search->gl_pathc - 1;     // search->gl_pathc is a uint. If there's no files, it's 0.
         for (count = 0; count <= max; count++) {

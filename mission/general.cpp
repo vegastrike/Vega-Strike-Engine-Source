@@ -19,6 +19,9 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
+#if defined(__APPLE__) || defined(MACOSX)
+#include <sys/param.h>
+#endif
 
 #ifdef _G_RANDOM
 int RANDOMIZED = 0;
@@ -431,15 +434,23 @@ int isdir(const char *file) {
 glob_t *FindPath(char *path, int type) {
 	glob_t *FILES = new glob_t;
 	string mypath(path);
-	char thispath[800000], *curpath = 0;
+#if defined(__APPLE__) || defined(MACOSX)
+	char thispath[MAXPATHLEN];
+#else
+	char thispath[800000];
+#endif
+        char* curpath = 0;
 	DIR *dir;
 	vector <string> result;
 	vector <string> pathlist;
 	dirent *entry;
 	unsigned int cur;
 	char *newpath = 0;
-
+#if defined(__APPLE__) || defined(MACOSX)
+	getcwd(thispath, MAXPATHLEN);
+#else
 	getcwd(thispath, 790000);
+#endif
 	pathlist.push_back((string(thispath)+SEPERATOR+mypath).c_str());
 	for (cur = 0; cur < pathlist.size(); cur++) {
 		curpath = strdup(pathlist[cur].c_str());
