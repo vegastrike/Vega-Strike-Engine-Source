@@ -12,7 +12,7 @@
   struct Shield {
     ///How much the shield recharges per second
     float recharge;
-    
+    float efficiency;
 	//A union containing the different shield values and max values depending on number
     union {
       ///if shield is 2 big, 2 floats make this shield up, and 2 floats for max {front,back,frontmax,backmax}

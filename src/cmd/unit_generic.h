@@ -868,6 +868,7 @@ protected:
   ///the current order
   ///how much the energy recharges per second
   float recharge;
+
   ///maximum energy
   float maxenergy;
   ///current energy

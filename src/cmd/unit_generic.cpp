@@ -2708,7 +2708,7 @@ void Unit::RegenShields () {
   }
 // GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
   if(!graphicOptions.InWarp){
-    energy-=shield.recharge*VSD/100/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
+    energy-=shield.recharge*VSD/(100*shield.efficiency)/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
 	if(energy<0){
 		velocity_discharge=true;
 		energy=0;
@@ -2813,7 +2813,7 @@ void Unit::RegenShields () {
 	maxshield=0;
   }
   if (max_shield_lowers_recharge) {
-     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/100;
+     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/(100*shield.efficiency);
   }
   if (!max_shield_lowers_capacitance) {
     maxshield=0;
@@ -5457,8 +5457,11 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(armor.backrightbottom,up->armor.backrightbottom,templ->armor.backrightbottom,0);
   STDUPGRADE(armor.frontleftbottom,up->armor.frontleftbottom,templ->armor.frontleftbottom,0);
   STDUPGRADE(armor.backleftbottom,up->armor.backleftbottom,templ->armor.backleftbottom,0);
-
+  float tmp=shield.recharge;
   STDUPGRADE(shield.recharge,up->shield.recharge,templ->shield.recharge,0);
+  bool upgradedrecharge=false;
+  if (tmp!=shield.recharge)
+    upgradedrecharge=true;
   STDUPGRADE(hull,up->hull,templ->hull,0);
   if (maxhull<hull) {
     if (hull!=0) 
@@ -5516,6 +5519,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       }
     }
   }
+  bool upgradedshield=false;
   if (shield.number==up->shield.number) {
     switch (shield.number) {
     case 2:
@@ -5533,19 +5537,30 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       STDUPGRADE(shield.shield8.backrighttopmax,up->shield.shield8.backrighttopmax,templ->shield.shield8.backrighttopmax,0);
       STDUPGRADE(shield.shield8.frontlefttopmax,up->shield.shield8.frontlefttopmax,templ->shield.shield8.frontlefttopmax,0);
       STDUPGRADE(shield.shield8.backlefttopmax,up->shield.shield8.backlefttopmax,templ->shield.shield8.backlefttopmax,0);
-	  STDUPGRADE(shield.shield8.frontrightbottommax,up->shield.shield8.frontrightbottommax,templ->shield.shield8.frontrightbottommax,0);
+      STDUPGRADE(shield.shield8.frontrightbottommax,up->shield.shield8.frontrightbottommax,templ->shield.shield8.frontrightbottommax,0);
       STDUPGRADE(shield.shield8.backrightbottommax,up->shield.shield8.backrightbottommax,templ->shield.shield8.backrightbottommax,0);
       STDUPGRADE(shield.shield8.frontleftbottommax,up->shield.shield8.frontleftbottommax,templ->shield.shield8.frontleftbottommax,0);
       STDUPGRADE(shield.shield8.backleftbottommax,up->shield.shield8.backleftbottommax,templ->shield.shield8.backleftbottommax,0);
-      break;     
+      break;           
+    }
+    if (touchme&&retval==UPGRADEOK){
+      upgradedshield=true;
     }
   }else {
     if (up->FShieldData()>0||up->RShieldData()>0|| up->LShieldData()>0||up->BShieldData()>0) {
       cancompletefully=false;
     }
+  }  
+  if (upgradedshield||upgradedrecharge) {
+    if (up->shield.efficiency) {
+      shield.efficiency=up->shield.efficiency;
+      if (templ) {
+        if (shield.efficiency>templ->shield.efficiency) {
+          shield.efficiency=templ->shield.efficiency;
+        }
+      }
+    }    
   }
-  
-
   computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
   computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing); 
   ///do the two reversed ones below

@@ -374,7 +374,8 @@ namespace BeamXML {
 	}
       }      
       break;
-    case DAMAGE:
+    case DAMAGE: {
+      static float damagemodifier = XMLSupport::parse_float(vs_config->getVariable("physics","weapon_damage_efficiency","1.0"));
       assert (level==1);
       level++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
@@ -383,7 +384,7 @@ namespace BeamXML {
 	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case DAMAGE:
-	  tmpweapon.Damage = XMLSupport::parse_float((*iter).value);
+	  tmpweapon.Damage = damagemodifier*XMLSupport::parse_float((*iter).value);
 	  break;
 	case RADIUS:
 	  tmpweapon.Radius = XMLSupport::parse_float ((*iter).value);
@@ -392,10 +393,10 @@ namespace BeamXML {
 	  tmpweapon.RadialSpeed = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case PHASEDAMAGE:
-	  tmpweapon.PhaseDamage = XMLSupport::parse_float((*iter).value);
+	  tmpweapon.PhaseDamage = damagemodifier*XMLSupport::parse_float((*iter).value);
 	  break;
 	case RATE:
-	  tmpweapon.Damage = XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.Damage = damagemodifier*XMLSupport::parse_float ((*iter).value);
 	  break;
 	case LONGRANGE:
 	  tmpweapon.Longrange = XMLSupport::parse_float ((*iter).value);
@@ -406,6 +407,7 @@ namespace BeamXML {
 	}
       }
       break;
+    }
     case DISTANCE:
       assert (level==1);
       level++;

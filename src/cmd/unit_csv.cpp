@@ -599,6 +599,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   }
   shield.leak = (char)(stof(row["Shield_Leak"])*100.0);
   shield.recharge=stof(row["Shield_Recharge"]);
+  shield.efficiency=stof(row["Shield_Efficiency"],1.0);
   maxwarpenergy=warpenergy=stof(row["Warp_Capacitor"]);
   maxenergy=energy=stof(row["Primary_Capacitor"]);
   recharge=stof(row["Reactor_Recharge"]);
@@ -1026,6 +1027,7 @@ string Unit::WriteUnitString () {
         }
         unit["Shield_Leak"]=tos(shield.leak/100.0);
         unit["Shield_Recharge"]=tos(shield.recharge);
+        unit["Shield_Efficiency"]=tos(shield.efficiency);
         unit["Warp_Capacitor"]=tos(maxwarpenergy);
         unit["Primary_Capacitor"]=tos(maxenergy);
         unit["Reactor_Recharge"]=tos(recharge);
