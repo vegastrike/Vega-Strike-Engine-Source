@@ -106,7 +106,7 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
     v2.z = x.v[1].z-x.v[0].z;
     result.a = v1.y * v2.z - v1.z * v2.y;
     result.b = v1.z * v2.x - v1.x * v2.z;
-    result.c = v1.x * v2.y  - v1.y * v2.z;     
+    result.c = v1.x * v2.y  - v1.y * v2.x;     
     size = result.a*result.a+result.b*result.b+result.c*result.c;
   }
   if (size)
