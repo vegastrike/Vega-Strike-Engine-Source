@@ -214,48 +214,48 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
 }
 void ChangeHeading::Execute() {
   Vector ang_vel=parent->GetAngularVelocity();
-  Vector local_heading (parent->UpCoordinateLevel(ang_vel));
+  Vector local_velocity (parent->UpCoordinateLevel(ang_vel));
+  Vector local_heading (parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast()));
+  //Vector local_heading (parent->UpCoordinateLevel(ang_vel));
   char xswitch = (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i))?1:0;
   char yswitch = (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j))?1:0;
   static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
   if (AICheat) {
-    
-    if (xswitch) {
-      if (yswitch) {
-	local_heading = Vector (copysign (.00000001,local_heading.i),
-				copysign (.00000001,local_heading.j),
-				copysign (.00000001,local_heading.k));
-      }else {
+    if (xswitch||yswitch) {   
 
-	local_heading.i=copysign (.0000001,local_heading.i);
+      if (xswitch) {
+	if (yswitch) {
+	  local_velocity.j=local_velocity.i =0.0;
+	}else {
+	  local_velocity.i=0.0;;
+	}
+      }else if (yswitch) {
+	  local_velocity.j=0.0;;
       }
-    }else if (yswitch) {
-      local_heading.j=copysign (.0000001,local_heading.j);
-    }
-    if (xswitch||yswitch) {
-	parent->SetAngularVelocity(parent->DownCoordinateLevel (local_heading));
+      
+      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_velocity));
     }
   }
   terminatingX += xswitch;
   terminatingY += yswitch;
   last_velocity = local_heading;
-  local_heading = parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast());
+
   if (done||(xswitch&&yswitch)) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
-    if (Done (last_velocity)) {
+    if (Done (local_velocity)) {
       done = true;
       return;
     }
-    torque= (-parent->GetMoment()/SIMULATION_ATOM)*last_velocity;
+    torque= (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;
   } else {
-    TurnToward (atan2(local_heading.j, local_heading.k),last_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch/*/getTimeCompression()*/,last_velocity.i,torque.i);
+    TurnToward (atan2(local_heading.j, local_heading.k),local_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch/*/getTimeCompression()*/,local_velocity.i,torque.i);
     
-    TurnToward (atan2 (local_heading.i, local_heading.k), -last_velocity.j, torque.j);
+    TurnToward (atan2 (local_heading.i, local_heading.k), -local_velocity.j, torque.j);
     torque.j=-torque.j;
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,last_velocity.j,torque.j);
-    torque.k  =-parent->GetMoment()*last_velocity.k/SIMULATION_ATOM;//try to counteract roll;
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,local_velocity.j,torque.j);
+    torque.k  =-parent->GetMoment()*local_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
   parent->ApplyLocalTorque (torque);
 }
