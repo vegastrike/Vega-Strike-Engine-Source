@@ -36,9 +36,9 @@ oldincludedir = /usr/include
 
 DESTDIR =
 
-pkgdatadir = $(datadir)/vegastrike
-pkglibdir = $(libdir)/vegastrike
-pkgincludedir = $(includedir)/vegastrike
+pkgdatadir = $(datadir)/tuxracer
+pkglibdir = $(libdir)/tuxracer
+pkgincludedir = $(includedir)/tuxracer
 
 top_builddir = ..
 
@@ -64,16 +64,16 @@ host_triplet = i686-pc-linux-gnu
 CC = gcc
 CXX = c++
 MAKEINFO = makeinfo
-PACKAGE = vegastrike
+PACKAGE = tuxracer
 RANLIB = ranlib
 SDL_CFLAGS = -I/usr/include/SDL -D_REENTRANT
 SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
-TR_CFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_CPPFLAGS =   -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1  
-TR_CXXFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CXXFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_LIBS =   -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut
-VERSION = 0.0.1
+VERSION = 0.60.3
 
 bin_PROGRAMS = vegastrike
 
@@ -100,11 +100,11 @@ physics.o quadgeom.o screenshot.o string_util.o tex_font_metrics.o
 vegastrike_LDADD = $(LDADD)
 vegastrike_DEPENDENCIES = 
 vegastrike_LDFLAGS = 
-CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CXXFLAGS =  -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
-CFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CFLAGS =  -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@

@@ -10,14 +10,8 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #define TIME_WITH_SYS_TIME 1
 
-/* Define if you have the SDL_JoystickOpen function.  */
-#define HAVE_SDL_JOYSTICKOPEN 1
-
 /* Define if you have the _finite function.  */
 /* #undef HAVE__FINITE */
-
-/* Define if you have the _isnan function.  */
-/* #undef HAVE__ISNAN */
 
 /* Define if you have the finite function.  */
 #define HAVE_FINITE 1
@@ -31,8 +25,14 @@
 /* Define if you have the glXGetProcAddressARB function.  */
 #define HAVE_GLXGETPROCADDRESSARB 1
 
+/* Define if you have the _isnan function.  */
+/* #undef HAVE__ISNAN */
+
 /* Define if you have the isnan function.  */
 #define HAVE_ISNAN 1
+
+/* Define if you have the SDL_JoystickOpen function.  */
+#define HAVE_SDL_JOYSTICKOPEN 1
 
 /* Define if you have the strdup function.  */
 #define HAVE_STRDUP 1
@@ -53,8 +53,8 @@
 #define HAVE_UNISTD_H 1
 
 /* Name of package */
-#define PACKAGE "vegastrike"
+#define PACKAGE "tuxracer"
 
 /* Version number of package */
-#define VERSION "0.0.1"
+#define VERSION "0.60.3"
 
