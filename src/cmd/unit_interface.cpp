@@ -698,7 +698,71 @@ void UpgradingInfo::StopBriefing() {
 }
 
 extern char * GetUnitDir (const char *);
+string BasicRepair (Unit * parent, string title) {
+  if (parent) {
+    string newtitle;
+    static float repair_price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","1000"));
+    if (UnitUtil::getCredits(parent)>repair_price) {
+      if (parent->RepairUpgrade()) {
+	UnitUtil::addCredits (parent,-repair_price);
+	newtitle= "Successfully Repaired Damage";
+      }else {
+	newtitle = "Nothing To Repair";
+      }
+    }else newtitle = "Not Enough Credits to Repair";
+    return newtitle;
+  }
+  return title;
+}
+Cargo GetCargoForOwnerStarship (Cockpit * cp, int i);
+Cargo GetCargoForOwnerStarshipName (Cockpit * cp, std::string nam, int & ind);
+
+
+
+void SwapInNewShipName(Cockpit * cp,std::string newfilename,int SwappingShipsIndex) {
+	  Unit * parent= cp->GetParent();
+	  if (parent) {
+	    WriteSaveGame(cp,false);
+	    if (SwappingShipsIndex!=-1) {
+	      
+	      while (cp->unitfilename.size()<=SwappingShipsIndex+1) {
+		cp->unitfilename.push_back("");
+	      } 
+	      cp->unitfilename[SwappingShipsIndex]=parent->name;
+	      cp->unitfilename[SwappingShipsIndex+1]=_Universe->activeStarSystem()->getFileName();
+	      for (unsigned int i=1;i<cp->unitfilename.size();i+=2) {
+		if(cp->unitfilename[i]==newfilename) {
+		  cp->unitfilename.erase(cp->unitfilename.begin()+i);
+		  if (i<cp->unitfilename.size()) {
+		    cp->unitfilename.erase(cp->unitfilename.begin()+i);//get rid of system
+		  }
+		  i-=2;//then +=2;
+		}
+	      }
+	    }else {
+	      cp->unitfilename.push_back(parent->name);
+	      cp->unitfilename.push_back(_Universe->activeStarSystem()->getFileName());
+	    }
+	  }else if (SwappingShipsIndex!=-1) {//if parent is dead
+	    if (cp->unitfilename.size()>SwappingShipsIndex) {//erase the ship we have
+	      cp->unitfilename.erase(cp->unitfilename.begin()+SwappingShipsIndex);
+	    }
+	    if (cp->unitfilename.size()>SwappingShipsIndex) {
+	      cp->unitfilename.erase(cp->unitfilename.begin()+SwappingShipsIndex);
+	    }
+	  }
+	  cp->unitfilename.front()= newfilename;
+}
+
+
 void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
+  if (strcmp (inp_buf,"Basic Repair")==0) {
+    string newtitle = BasicRepair( buyer.GetUnit(),title);
+    title=newtitle;
+    SetupCargoList();
+    title=newtitle;
+    return;
+  }
   Unit * un;
   Unit * base;
   unsigned int offset;
@@ -713,9 +777,23 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case SHIPDEALERMODE:
     {
       Cargo *part = base->GetCargo (string(input_buffer), offset);
+      Cargo my_fleet_part;
+      int SwappingShipsIndex=-1;
+      if (std::find (curcategory.begin(),curcategory.end(),string("My_Fleet"))!=curcategory.end()) {
+	printf ("found my starship");
+	part = &my_fleet_part;
+	my_fleet_part = GetCargoForOwnerStarshipName(_Universe->AccessCockpit(),input_buffer,SwappingShipsIndex);
+	if (part->content=="") {
+	  part=NULL;
+	  SwappingShipsIndex=-1;
+	}
+      }
       if (part) {
 	float usedprice = usedPrice (base->PriceCargo (_Universe->AccessCockpit()->GetUnitFileName()));
+	usedprice=0;//!!!!KEEP THE OLD SHIP NOW
 	if (part->price<=usedprice+_Universe->AccessCockpit()->credits) {
+
+
 	  Flightgroup * fg = un->getFlightgroup();
 	  int fgsnumber=0;
 	  if (fg!=NULL) {
@@ -723,8 +801,11 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    fg->nr_ships++;
 	    fg->nr_ships_left++;
 	  }
-
-	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction,"",fg,fgsnumber);
+	  string newmodifications="";
+	  if (SwappingShipsIndex!=-1) {//if we're swapping not buying load the olde one
+	    newmodifications = _Universe->AccessCockpit()->GetUnitModifications();
+	  }
+	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction,newmodifications,fg,fgsnumber);
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    if (NewPart->nummesh()>0) {
@@ -732,7 +813,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	      NewPart->curr_physical_state=un->curr_physical_state;
 	      NewPart->prev_physical_state=un->prev_physical_state;
 	      _Universe->activeStarSystem()->AddUnit (NewPart);
-	      
+	      SwapInNewShipName(_Universe->AccessCockpit(),input_buffer,SwappingShipsIndex);
 	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 
 	      SwitchUnits (NULL,NewPart);
@@ -1038,23 +1119,12 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			SetupCargoList();
 		      }
                     }else if (0==strcmp (buy_name,"Basic Repair")) {
-                        Unit * parent = buyer.GetUnit();
-                        if (parent) {
-                            string newtitle;
-                            static float repair_price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","1000"));
-                            if (UnitUtil::getCredits(parent)>repair_price) {
-                                if (parent->RepairUpgrade()) {
-                                    UnitUtil::addCredits (parent,-repair_price);
-                                    newtitle= "Successfully Repaired Damage";
-                                }else {
-				  newtitle = "Nothing To Repair";
-                                }
-                            }else newtitle = "Not Enough Credits to Repair";
-                            title = newtitle;
-                            SetupCargoList();
-                            title = newtitle;
-                        }
-                            
+		      static string repair_price = "price: "+vs_config->getVariable("physics","repair_price","1000");
+                      CargoInfo->ChangeTextItem ("name","Basic Repair");
+		      CargoInfo->ChangeTextItem ("price",repair_price.c_str());
+		      CargoInfo->ChangeTextItem("volume","Volume: N/A");
+		      CargoInfo->ChangeTextItem("mass","Mass: N/A");
+		      CargoInfo->ChangeTextItem("description","Description: Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.");
                     }else {
 		      if (buy_name[0]!='x') {
 			  lastselected.type=type;
@@ -1153,12 +1223,11 @@ vector <CargoColor>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis
     }
     return TempCargo;
 }
-void AddOwnerStarships (Cockpit * cp, vector <CargoColor> &l) {
-  for (unsigned int i=1;i<cp->unitfilename.size();i+=2) {
-    CargoColor c;
-    c.cargo.quantity=1;
-    c.cargo.volume=1;
-    c.cargo.price=0;
+Cargo GetCargoForOwnerStarship (Cockpit * cp, int i) {
+  Cargo c;
+  c.quantity=1;
+  c.volume=1;
+  c.price=0;
     bool hike_price=true;
     if (i+1<cp->unitfilename.size()) {
       if (cp->unitfilename[i+1]==_Universe->activeStarSystem()->getFileName()) {
@@ -1167,10 +1236,26 @@ void AddOwnerStarships (Cockpit * cp, vector <CargoColor> &l) {
     }
     if (hike_price) {
       static float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","6000"));
-      c.cargo.price=shipping_price;
+      c.price=shipping_price;
     }
-    c.cargo.content=cp->unitfilename[i];
-    c.cargo.category=string("starships/My_Fleet");  
+    c.content=cp->unitfilename[i];
+    c.category=string("starships/My_Fleet");  
+    return c;
+}
+Cargo GetCargoForOwnerStarshipName (Cockpit * cp, std::string nam, int & ind) {
+  for (unsigned int i=1;i<cp->unitfilename.size();i+=2) {
+    if (cp->unitfilename[i]==nam) {
+      ind = i;
+      return GetCargoForOwnerStarship (cp,i);
+    }
+  }
+  return Cargo();//no name;
+}
+
+void AddOwnerStarships (Cockpit * cp, vector <CargoColor> &l) {
+  for (unsigned int i=1;i<cp->unitfilename.size();i+=2) {
+    CargoColor c;
+    c.cargo=GetCargoForOwnerStarship(cp,i);
     l.push_back(c);
   }
 }
