@@ -134,11 +134,6 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
 
 GFXColor /*GFXDRVAPI*/ GFXLight::GetProperties(enum LIGHT_TARGET lighttarg) const{
   switch (lighttarg) {
-  case DIFFUSE:
-    return GFXColor (diffuse[0],
-		     diffuse[1],
-		     diffuse[2],
-		     diffuse[3]);
   case SPECULAR:
     return GFXColor(specular[0],
 		    specular[1],
@@ -159,6 +154,13 @@ GFXColor /*GFXDRVAPI*/ GFXLight::GetProperties(enum LIGHT_TARGET lighttarg) cons
 		     attenuate[0],
 		     attenuate[1],
 		     attenuate[2]);
+  case DIFFUSE:
+  default://just for kicks
+    return GFXColor (diffuse[0],
+		     diffuse[1],
+		     diffuse[2],
+		     diffuse[3]);
+	
   }
 }
 

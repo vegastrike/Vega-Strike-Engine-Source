@@ -146,7 +146,7 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
 
 void gfx_light::ClobberGLLight (const int target) {
   this->target = target;
-  if (enabled()!=(GLLights[target].options&OpenGLL::GL_ENABLED)) {
+  if (enabled()!=((GLLights[target].options&OpenGLL::GL_ENABLED)!=0))  {
     if (enabled()) {
       glEnable (GL_LIGHT0+target);
       GLLights[target].options|=OpenGLL::GL_ENABLED;
