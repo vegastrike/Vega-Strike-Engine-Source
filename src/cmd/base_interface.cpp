@@ -109,8 +109,11 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
 		GFXDisable(LIGHTING);
+                GFXDisable(TEXTURE1);
+                GFXEnable(TEXTURE0);
 		_Universe->AccessCamera()->setCockpitOffset(co);
 		_Universe->AccessCamera()->UpdateGFX();
+                
 //		_Universe->AccessCockpit()->SetView (CP_PAN);
 		GFXHudMode (GFXTRUE);
 	}

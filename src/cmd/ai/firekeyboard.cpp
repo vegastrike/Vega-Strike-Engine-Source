@@ -1139,6 +1139,15 @@ static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severit
   }
   return isDone;
 }
+static bool ExecuteRequestClearenceKey(Unit * parent, Unit * endt) {
+  bool tmp=endt->RequestClearance(parent);
+  if (endt->getRelation(parent)>=0) {
+    if (endt->graphicOptions.InWarp)
+      endt->graphicOptions.WarpRamping=1;
+    endt->graphicOptions.InWarp=0;
+  }
+  return tmp;
+}
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
   static int maxseverity=XMLSupport::parse_bool(vs_config->getVariable("AI","dock_to_area","false"))?2:1;
   Unit * endt=targ;
@@ -1179,15 +1188,16 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       }
     }
     if (!isDone) {
-      if (endt)
-        endt->RequestClearance(parent);
+      if (endt) {
+        ExecuteRequestClearenceKey(parent,endt);
+      }
       abletodock(0);
     }
     vectorOfKeyboardInput[playa].doc=false;
     
   }
   if (vectorOfKeyboardInput[playa].req) {
-    bool request=RequestClearence(parent,targ,sex);
+    bool request=ExecuteRequestClearenceKey(parent,targ);
     if (!request) {
       mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantidisabal object, target another object and retry.");
       abletodock(0);
