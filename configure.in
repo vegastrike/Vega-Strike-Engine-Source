@@ -1208,6 +1208,7 @@ TESTNETCOMM_PORTAUDIO="0"
 
 	if test "$is_macosx" = "yes" ; then
 		CHECK_FOR_QT_H
+		TR_CPPFLAGS="$saved_TR_CPPFLAGS"
 		if test "x$have_qt_h" = "xyes" ; then
 			TESTNETCOMM_NOWEBCAM="0"
    			LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
@@ -1219,7 +1220,6 @@ TESTNETCOMM_PORTAUDIO="0"
 		fi
 
 	fi
-	TR_CPPFLAGS="$saved_TR_CPPFLAGS"
 
 AM_CONDITIONAL(NETCOMM, test "$TESTNETCOMM" = "1")
 AM_CONDITIONAL(NETCOMM_NOSOUND, test "$TESTNETCOMM_NOSOUND" = "1")
