@@ -302,6 +302,9 @@ class Unit {
   bool SubUnit;
   ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32767 being visible)
   short cloaking;
+  short cloakrate;
+  float cloakenergy;
+  short cloakmin;
   ///Should draw selection box?
   bool selected;  
   Box *selectionBox;

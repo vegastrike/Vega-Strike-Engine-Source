@@ -96,6 +96,12 @@ void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE ptype)
 void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col) {
   glColor4fv (&col.r);
 }
+
+void /*GFXDRVAPI*/ GFXBlendColor (const GFXColor &col) {
+  glBlendColor (col.r,col.g,col.b,col.a);
+}
+
+
 void /*GFXDRVAPI*/ GFXColor4f(const float r, const float g, const float b, const float a)
 {
 	glColor4f(r,g,b,a);

@@ -262,7 +262,8 @@ void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE);
 
 ///Specifies a color for henceforth drawn vertices to share
 void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col); 
-
+///specifies the current blend color
+void /*GFXDRVAPI*/ GFXBlendColor (const GFXColor &col);
 ///Specifies a color for henceforth drawn vertices to share
 void /*GFXDRVAPI*/ GFXColor4f(const float r, const float g, const float b, const float a = 1.0);
 

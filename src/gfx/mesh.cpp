@@ -213,12 +213,17 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, short cl
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
   c.mesh_seq=draw_sequence;
-  if (cloak>=0&&cloak<32767) {
-    c.cloaked=true;
-    c.mesh_seq=MESH_SPECIAL_FX_ONLY;
+  c.cloaked=MeshDrawContext::NONE;
+  if (cloak>=0) {
+    c.cloaked|=MeshDrawContext::CLOAK;
+    if (cloak<16384)
+      c.cloaked|=MeshDrawContext::NEARINVIS;
+    c.mesh_seq=2;//draw near the end with lights
     float tmp = ((float)cloak)/32767;
-    c.CloakNebFX.SetProperties (AMBIENT,GFXColor (tmp,tmp,tmp,tmp));
-    c.CloakNebFX.enable();
+    c.CloakFX.r = tmp;
+    c.CloakFX.g = tmp;
+    c.CloakFX.b = tmp;
+    c.CloakFX.a = tmp;
     /*
     c.CloakNebFX.ambient[0]=((float)cloak)/32767;
     c.CloakNebFX.ag=((float)cloak)/32767;
@@ -252,7 +257,7 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
     tmp.position = pos;
     GFXLoadMatrix (MODEL,m1);    
   } else {	
-    if (o->draw_sequence!=MESH_SPECIAL_FX_ONLY&&(cloak==-1||cloak==32767)) {
+    if (o->draw_sequence!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
       GFXPickLights (Vector (m[12],m[13],m[14]),rSize());
     }
@@ -266,20 +271,18 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
     specialfxlight.push_back(ligh);
   }
 
-  if (cloak>=0&&cloak<32767) {
-    GFXDisable (TEXTURE1);
-    GFXLight CloakNebFX;
-    int ligh;
-    float tmp = ((float)cloak)/32767;
-    CloakNebFX.SetProperties (AMBIENT,GFXColor (tmp,tmp,tmp,tmp));
-    GFXCreateLight (ligh,CloakNebFX,true);
-    //could use ambient light, but may want to add more directional? fx l8r
-    specialfxlight.push_back(ligh);
-  }
   GFXSelectMaterial(o->myMatNum);
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXDisable(DEPTHWRITE);
   GFXBlendMode(blendSrc, blendDst);
+  if (cloak>=0) {
+    int ligh;
+    float tmp = ((float)cloak)/32767;
+    GFXColor CloakNebFX(tmp,tmp,tmp,tmp);
+    GFXBlendColor (CloakNebFX);
+    GFXBlendMode(CONSTALPHA,INVCONSTALPHA);
+  }
+
   if (o->Decal)
     o->Decal->MakeActive();
   o->vlist->DrawOnce();
@@ -359,14 +362,15 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
       GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
-    } else {
-      if (c.cloaked) {
-	GFXDisable (TEXTURE1);
-	GFXPushBlendMode ();
-	//	GFXColor4f (1,1,1,.25);
-	//	GFXBlendMode (CONSTALPHA,INVCONSTALPHA);
-	GFXBlendMode (ONE,ONE);
-      }
+    }
+    if (c.cloaked&MeshDrawContext::CLOAK) {
+      //      if (c.cloaked&MeshDrawContext::NEARINVIS)
+      //	GFXDisable (TEXTURE1);
+      GFXPushBlendMode ();
+      //	GFXColor4f (1,1,1,.25);
+      GFXBlendColor (c.CloakFX);
+      GFXBlendMode (CONSTALPHA,INVCONSTALPHA);
+      //GFXBlendMode (ONE,ONE);
     }
     GFXLoadMatrix(MODEL, c.mat);
     vector <int> specialfxlight;
@@ -376,23 +380,23 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
       specialfxlight.push_back(ligh);
     }
+#if 0
     if (c.cloaked) {
       int ligh;
       GFXCreateLight (ligh,c.CloakNebFX,true);
       specialfxlight.push_back (ligh);
     }
+#endif
     vlist->Draw();
 
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
-    if (whichdrawqueue==MESH_SPECIAL_FX_ONLY) {
-      if (c.cloaked) {
-	//	GFXColor4f (1,1,1,1);
-	if (envMap)
-	  GFXEnable (TEXTURE1);
-	GFXPopBlendMode ();
-      }
+    if (c.cloaked&MeshDrawContext::CLOAK) {
+      GFXBlendColor (GFXColor(1,1,1,1));
+      //      if (envMap)
+      //	GFXEnable (TEXTURE1);
+      GFXPopBlendMode ();
     }
     if(0!=forcelogos) {
       forcelogos->Draw(c.mat);

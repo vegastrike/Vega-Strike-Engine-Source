@@ -76,10 +76,11 @@ struct MeshDrawContext {
   float mat[16];
   ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
-  GFXLight CloakNebFX;
-  bool cloaked;
+  GFXColor CloakFX;
+  enum CLK {NONE=0x0,CLOAK=0x1,FOG=0x2, NEARINVIS=0x4};
+  char cloaked;
   char mesh_seq;
-  MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
+  MeshDrawContext(const float m[16]):CloakFX(1,1,1,1) { memcpy(mat, m, sizeof(float[16])); }
 };
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;

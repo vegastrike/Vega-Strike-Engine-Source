@@ -200,13 +200,13 @@ void GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst)
 	  break;
 	  #ifndef _WIN32
 
-	case CONSTALPHA:   	sfactor=GL_CONSTANT_ALPHA;
+	case CONSTALPHA:   	dfactor=GL_CONSTANT_ALPHA;
 	  break;
-	case INVCONSTALPHA:	sfactor=GL_ONE_MINUS_CONSTANT_ALPHA;
+	case INVCONSTALPHA:	dfactor=GL_ONE_MINUS_CONSTANT_ALPHA;
 	  break;
-	case CONSTCOLOR:	sfactor=GL_CONSTANT_COLOR;
+	case CONSTCOLOR:	dfactor=GL_CONSTANT_COLOR;
 	  break;
-	case INVCONSTCOLOR:	sfactor=GL_ONE_MINUS_CONSTANT_COLOR;
+	case INVCONSTCOLOR:	dfactor=GL_ONE_MINUS_CONSTANT_COLOR;
 	  break;
 
 	case DESTCOLOR:		
