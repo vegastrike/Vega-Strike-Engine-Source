@@ -91,6 +91,8 @@ void Bolt::Draw () {
       cur->SetDimensions ((*j)->radius,(*j)->radius);
       //      cur->DrawNow(result);
       GFXLoadMatrix (MODEL,(*j)->drawmat);
+      if ((*j)->sound!=-1)
+	AUDAdjustSound ((*j)->sound,Vector ((*j)->drawmat[12],(*j)->drawmat[13],(*j)->drawmat[14]),(*j)->ShipSpeed+(*j)->speed*Vector ((*j)->drawmat[8],(*j)->drawmat[9],(*j)->drawmat[10]));
       GFXColorf ((*j)->col);
       cur->DrawNoTransform();
     }
@@ -162,10 +164,15 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
     }
     balls[decal].push_back (this);
   }
-  AUDPlayOnce (typ.sound,cur_position,shipspeed+speed*Vector (drawmat[8],drawmat[9],drawmat[10]));
+  sound = AUDCreateSound (typ.sound,false);
+  AUDAdjustSound (sound,cur_position,shipspeed+speed*Vector (drawmat[8],drawmat[9],drawmat[10]));
 }
 
 bool Bolt::Update () {
+  if (!AUDIsPlaying(sound)) {
+    AUDDeleteSound (sound);
+    sound=-1;
+  }
   curdist +=speed*SIMULATION_ATOM;
   prev_position = cur_position;
   cur_position.i+=(ShipSpeed.i+drawmat[8]*speed)*SIMULATION_ATOM;//the r vector I believe;
@@ -229,6 +236,7 @@ Bolt::~Bolt () {
   if (tmp!=(*target)[decal].end()) {
     (*target)[decal].erase(tmp);
   }
-
-
+  if (sound!=-1) {
+    AUDDeleteSound (sound);
+  }
 }

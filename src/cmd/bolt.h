@@ -19,6 +19,7 @@ class Bolt {
   float damage, curdist,longrange;
   float speed, range,radius;
   Vector ShipSpeed;
+  int sound;
   bool Collide (Unit * target);
  public:
   Bolt(const weapon_info &type, const Matrix orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt

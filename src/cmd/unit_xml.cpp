@@ -92,8 +92,16 @@ namespace UnitXML {
       RANGE,
       ISCOLOR,
       RADAR,
+      ENGINEWAV,
       ENGINEMP3,
-      ENGINEWAV
+      HULLWAV,
+      HULLMP3,
+      ARMORWAV,
+      ARMORMP3,
+      SHIELDWAV,
+      SHIELDMP3,
+      EXPLODEWAV,
+      EXPLODEMP3
     };
 
   const EnumMap::Pair element_names[] = {
@@ -173,12 +181,19 @@ namespace UnitXML {
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("EngineMp3",ENGINEMP3),
     EnumMap::Pair ("EngineWav",ENGINEWAV),
+    EnumMap::Pair ("HullMp3",HULLMP3),
+    EnumMap::Pair ("HullWav",HULLWAV),
+    EnumMap::Pair ("ArmorMp3",ARMORMP3),
+    EnumMap::Pair ("ArmorWav",ARMORWAV),
+    EnumMap::Pair ("ShieldMp3",SHIELDMP3),
+    EnumMap::Pair ("ShieldWav",SHIELDWAV),
+    EnumMap::Pair ("ExplodeMp3",EXPLODEMP3),
+    EnumMap::Pair ("ExplodeWav",EXPLODEWAV),
     EnumMap::Pair ("Color",ISCOLOR)
-
 };
 
   const EnumMap element_map(element_names, 25);
-  const EnumMap attribute_map(attribute_names, 50);
+  const EnumMap attribute_map(attribute_names, 58);
 }
 
 using XMLSupport::EnumMap;
@@ -424,10 +439,34 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case ENGINEWAV:
-	enginesound = AUDCreateSoundWAV ((*iter).name.c_str(),true);
+	sound.engine = AUDCreateSoundWAV ((*iter).name,true);
 	break;
       case ENGINEMP3:
-	enginesound = AUDCreateSoundMP3((*iter).name.c_str(),true); 
+	sound.engine = AUDCreateSoundMP3((*iter).name,true); 
+	break;
+      case SHIELDMP3:
+	sound.shield = AUDCreateSoundMP3((*iter).name,false); 
+	break;
+      case SHIELDWAV:
+	sound.shield = AUDCreateSoundWAV((*iter).name,false); 
+	break;
+      case EXPLODEMP3:
+	sound.explode = AUDCreateSoundMP3((*iter).name,false); 
+	break;
+      case EXPLODEWAV:
+	sound.explode = AUDCreateSoundWAV((*iter).name,false); 
+	break;
+      case ARMORMP3:
+	sound.armor = AUDCreateSoundMP3((*iter).name,false); 
+	break;
+      case ARMORWAV:
+	sound.armor = AUDCreateSoundWAV((*iter).name,false); 
+	break;
+      case HULLWAV:
+	sound.hull = AUDCreateSoundWAV((*iter).name,false); 
+	break;
+      case HULLMP3:
+	sound.hull = AUDCreateSoundMP3((*iter).name,false); 
 	break;
       }
     }

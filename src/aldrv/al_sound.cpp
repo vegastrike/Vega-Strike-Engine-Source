@@ -1,10 +1,12 @@
 #include "audiolib.h"
+#include "hashtable.h"
+#include <string>
 
-int AUDCreateSoundWAV (const char *, const bool LOOP=false){
+int AUDCreateSoundWAV (const std::string &, const bool LOOP=false){
 #ifdef HAVE_AL
 #endif
 }
-int AUDCreateSoundMP3 (const char *, const bool LOOP=false){
+int AUDCreateSoundMP3 (const std::string &, const bool LOOP=false){
 #ifdef HAVE_AL
 #endif
 }
@@ -21,14 +23,7 @@ void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
 #ifdef HAVE_AL
 #endif
 }
-void AUDPlayOnce(int sound, const Vector &pos, const Vector &vel){
-#ifdef HAVE_AL
-#endif
-}
-void AUDPlayOnce (const char *sound, const Vector &pos, const Vector &vel){
-#ifdef HAVE_AL
-#endif
-}
+
 bool AUDIsPlaying (const int sound){
 #ifdef HAVE_AL
 #endif

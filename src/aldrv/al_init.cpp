@@ -3,10 +3,18 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
+#include <stdlib.h>
 #include <stdio.h>
-
+#include "al_globals.h"
 
 static void fixup_function_pointers(void) {
+  alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
+  if(alutLoadMP3p == NULL) {
+    fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
+    exit(-4);
+  }
+
+
   /* UNCOMMENT AS NEEDED
 	talcGetAudioChannel = (ALfloat (*)(ALuint channel))
 				GP("alcGetAudioChannel_LOKI");

@@ -126,7 +126,13 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
-  int enginesound;
+  struct {
+    int engine;
+    int shield;
+    int armor;
+    int hull;
+    int explode;
+  } sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within

@@ -88,7 +88,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
-  enginesound=-1;
+  sound.engine=-1;  sound.armor=-1;  sound.shield=-1;  sound.hull=-1; sound.explode=-1;
   hudImage=NULL;
   owner = NULL;
   faction =0;
@@ -262,8 +262,20 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 
 Unit::~Unit()
 {
-  if (enginesound!=-1) {
-    AUDDeleteSound (enginesound);
+  if (sound.engine!=-1) {
+    AUDDeleteSound (sound.engine);
+  }
+  if (sound.explode!=-1) {
+    AUDDeleteSound (sound.explode);
+  }
+  if (sound.shield!=-1) {
+    AUDDeleteSound (sound.shield);
+  }
+  if (sound.armor!=-1) {
+    AUDDeleteSound (sound.armor);
+  }
+  if (sound.hull!=-1) {
+    AUDDeleteSound (sound.hull);
   }
   if (hudImage )
     delete hudImage;
@@ -608,8 +620,8 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  if (enginesound!=-1)
-    AUDAdjustSound (enginesound,cumulative_transformation.position,Velocity);
+  if (sound.engine!=-1)
+    AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
   int i;
   if (hull <0) {
     Explode(true, GetElapsedTime());
