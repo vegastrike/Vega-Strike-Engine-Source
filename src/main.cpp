@@ -153,7 +153,10 @@ void cleanup(void)
 				Network[i].logout();
 		delete [] Network;
   }
-
+  if (muzak) {
+    delete muzak;
+    muzak=NULL;
+  }
   winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
@@ -583,13 +586,13 @@ void bootstrap_main_loop () {
 			str=vs_config->getVariable ("general","intro2","The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 auto pilots there. Time");
 			if (!str.empty()) {
 				UniverseUtil::IOmessage (4,"game","all",str);
-				str=vs_config->getVariable ("general","intro3","Compression: #8080FFF9; F10#000000 resets. Buy a jump drive & fly to a blue ball & press #8080FFj#000000");
+				str=vs_config->getVariable ("general","intro3","Compression: #8080FFF9; F10#000000 resets. Buy a jump drive for 10000 fly to a blue ball and");
 				if (!str.empty()) {
 					UniverseUtil::IOmessage (8,"game","all",str);
-					str = vs_config->getVariable ("general","intro4","to warp to a near star. Target a base or planet & press #8080FF0#000000 to request landing");
+					str = vs_config->getVariable ("general","intro4","press #8080FFj#000000 to warp to a near star. Target a base or planet;");
 					if (!str.empty()) {
 						UniverseUtil::IOmessage (12,"game","all",str);
-						str=vs_config->getVariable ("general","intro5","clearence. Inside the green box #8080FFd#000000 will land. When you launch, press #8080FFu#000000 to undock.");
+						str=vs_config->getVariable ("general","intro5","When you get close a green box will appear. Inside the box, #8080FFd#000000 will land.");
 						if (!str.empty())
 							UniverseUtil::IOmessage (16,"game","all",str);
 					}

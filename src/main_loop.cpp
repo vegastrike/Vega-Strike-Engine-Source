@@ -731,7 +731,6 @@ void destroyObjects() {
     delete myterrain;
   Terrain::DeleteAll();
   delete tmpcockpittexture;
-  delete muzak;
   //  delete cockpit;
   delete [] fighters;
   delete locSel;

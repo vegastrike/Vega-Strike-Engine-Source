@@ -80,7 +80,7 @@ bool current_client_dead (pid_t p) {
   return true;
 }
 void changehome (bool,bool);
-pid_t F0rkProcess (int &write, int &read) {
+pid_t F0rkProcess (int close_this_socket,int &write, int &read) {
   char writer_str[65536]; writer_str[0]=0;
   char reader_str[65536]; reader_str[0]=0;
   {
@@ -108,6 +108,9 @@ pid_t F0rkProcess (int &write, int &read) {
     fNET_Write (write,strlen(mystr),mystr);//don't write null
     return retval;
   }
+  close (read);
+  close (write);
+  close(close_this_socket);
   execlp("./soundserver.child","./soundserver.child",writer_str,reader_str,NULL);
   //trashed!
 }
@@ -127,7 +130,7 @@ int main (int argc , char ** argv) {
       return 1;
     bool done=false;
     while (!done&&!quit) {
-      pid_t mypid = F0rkProcess (mysocket_write,mysocket_read);
+      pid_t mypid = F0rkProcess (fd,mysocket_write,mysocket_read);
       while ((!done) && (!current_client_dead(mypid))) {
 	done = !ForwardBytes (fd,mysocket_write,buf);
 	if (!done)
