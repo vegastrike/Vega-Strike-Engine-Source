@@ -1,4 +1,3 @@
-#include <set>
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -37,13 +36,8 @@
 #include "navscreen.h"
 #include "gfx/masks.h"
 #include "navscreenoccupied.h"
-using std::set;
 using std::string;
 using std::vector;
-static GFXColor GetColor(std::string source) {
-		const float * col = (FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(source))));
-		return GFXColor (col[0],col[1],col[2],col[3]);
-}
 void Beautify (string systemfile, string & sector, string & system) {
 	string::size_type slash = systemfile.find ("/");
 	if (slash==string::npos) {
@@ -61,6 +55,102 @@ void Beautify (string systemfile, string & sector, string & system) {
 
 float SYSTEM_DEFAULT_SIZE=.05;
 const int systemambiguous=0;
+
+
+
+static GFXColor GrayColor(.5,.5,.5,.5);
+
+
+float GrayColorArray[4]={.5,.5,.5,.5};
+
+
+
+static void DrawNodeDescription(string text, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas, const GFXColor &col, navscreenoccupied * screenoccupation) {	//	take the head and stick it in the back
+	if(text.size() == 0)
+		return;
+	TextPlane displayname;	//	will be used to display shits names
+	displayname.col = col;
+	
+	int length = text.size();
+	float offset = (float(length)*0.005);
+	if(ignore_occupied_areas) {
+		displayname.SetPos((x_-offset), y_);
+		displayname.SetText(text);
+		displayname.SetCharSize(size_x, size_y);
+		displayname.Draw();
+	} else {
+		float new_y = screenoccupation->findfreesector(x_, y_);
+		displayname.SetPos((x_-offset), new_y);
+		displayname.SetText(text);
+		displayname.SetCharSize(size_x, size_y);
+		displayname.Draw();
+	}
+}
+
+static char GetSystemColor(string source) {
+	//FIXME: update me!!!
+	vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData ("visited_"+source);
+	if (v->size()){
+		string k = (*v)[0];
+		if (k.length())
+			return k[0];
+		
+	}
+	return 'v';
+}
+
+static void DrawNode(int type,float size,float x, float y, std::string source,navscreenoccupied * screenoccupation, bool moused, GFXColor race, bool mouseover=false, bool willclick=false) {
+	char color=GetSystemColor(source);
+	if (moused)
+		return;
+	if (willclick==true&&mouseover==false) {
+		// Perhaps some key binding or mouseclick will be set in the future to do this.
+		mouseover=true;
+	}
+
+	static bool inited=false;
+	static GFXColor highlighted_tail_col;
+	static GFXColor highlighted_tail_text;
+	if (!inited) {
+		float col1[4]={1,.3,.3,.8};
+		vs_config->getColor("nav", "highlighted_unit_on_tail", col1, true);
+		highlighted_tail_col=GFXColor(col1[0],col1[1],col1[2],col1[3]);
+
+		float col2[4]={1,1,.7,1};
+		vs_config->getColor("nav", "highlighted_text_on_tail", col2, true);
+		highlighted_tail_text=GFXColor(col2[0],col2[1],col2[2],col2[3]);
+		inited=true;
+	}
+
+
+	if (color=='m') {
+		race=GrayColor;
+				
+	}
+	if (mouseover) {
+		if (willclick) {
+			race=highlighted_tail_col;
+		} else {
+			// Leave just a faint resemblence of the original color,
+			// but also make it look whiteish.
+			race.r+=.75;
+			race.g+=.75;
+			race.b+=.75;
+		}
+	}
+//		race=GFXColor (1,1,1,1);
+	NavigationSystem::DrawCircle(x, y, size, race);
+	if ((!mouseover)||(willclick)) {
+		if (willclick) {
+			race=highlighted_tail_text;
+		}
+		string blah,nam;
+		Beautify (source,blah,nam);
+			
+		DrawNodeDescription (nam,x,y,1.0,1.0,0,race,screenoccupation);
+	}
+}
+
 class systemdrawnode {
 public:
 	bool operator < (const systemdrawnode & a)const {
@@ -74,115 +164,28 @@ public:
 	float x;
 	float y;
 	std::string source;
-	std::vector<std::string> *dest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
+	// Vector of indicies
+//	std::vector<int> *dest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
+//	std::vector<string> *stringdest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
 	bool moused;
 	char color;
+	GFXColor race;
 	navscreenoccupied * screenoccupation;
-	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused, std::vector<std::string> *dest):type(type),size(size),x(x),y(y),source(source),dest(dest) {
-		screenoccupation = so;
-		this->moused=moused;
-		color = 'v';
-		vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData ("visited_"+source);
-		if (v->size()){
-			string k = (*v)[0];
-			if (k.length())
-				color=k[0];
-			
-		}
-		
+	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused, GFXColor race)
+			:type(type),size(size),x(x),y(y),source(source), moused(moused), color(GetSystemColor(source)), race(race), screenoccupation(so) {
 		
 	}
-	systemdrawnode () : dest(NULL){
-		size=SYSTEM_DEFAULT_SIZE;
-		x=y=0;
-		type=0;
-		source="";
-	}	
-	void drawdescription(string text, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas, const GFXColor &col) const {	//	take the head and stick it in the back
-	if(text.size() == 0)
-		return;
-	TextPlane displayname;	//	will be used to display shits names
-	displayname.col = col;
+	systemdrawnode () : size(SYSTEM_DEFAULT_SIZE), x(0),y(0), moused(false), color('v'), race(GrayColor), screenoccupation(NULL) {}
+
+	void draw(bool mouseover=false, bool willclick=false) {
+		DrawNode(type,size,x,y,source,screenoccupation,moused,race,mouseover,willclick);
+	}
 	
-	int length = text.size();
-	float offset = (float(length)*0.005);
-	if(ignore_occupied_areas)
-		{
-			displayname.SetPos((x_-offset), y_);
-			displayname.SetText(text);
-			displayname.SetCharSize(size_x, size_y);
-			displayname.Draw();
-		}
-	else
-		{
-			float new_y = screenoccupation->findfreesector(x_, y_);
-			displayname.SetPos((x_-offset), new_y);
-			displayname.SetText(text);
-			displayname.SetCharSize(size_x, size_y);
-			displayname.Draw();
-		}
-	}
-
-	void draw(bool mouseover=false, bool willclick=false)const {
-		if (moused)
-			return;
-		if (willclick==true&&mouseover==false) {
-			// Perhaps some key binding or mouseclick will be set in the future to do this.
-			mouseover=true;
-		}
-		GFXColor race(GetColor (source));
-
-
-		static bool inited=false;
-		static GFXColor highlighted_tail_col;
-		static GFXColor highlighted_tail_text;
-		if (!inited) {
-			float col1[4]={1,.3,.3,.8};
-			vs_config->getColor("nav", "highlighted_unit_on_tail", col1, true);
-			highlighted_tail_col=GFXColor(col1[0],col1[1],col1[2],col1[3]);
-
-			float col2[4]={1,1,.7,1};
-			vs_config->getColor("nav", "highlighted_text_on_tail", col2, true);
-			highlighted_tail_text=GFXColor(col2[0],col2[1],col2[2],col2[3]);
-			inited=true;
-		}
-
-
-		if (color=='m') {
-			race.r=.5;
-			race.g=.5;
-			race.b=.5;
-			race.a=.5;
-				
-		}
-		if (mouseover) {
-			if (willclick) {
-				race=highlighted_tail_col;
-			} else {
-				// Leave just a faint resemblence of the original color,
-				// but also make it look whiteish.
-				race.r+=.75;
-				race.g+=.75;
-				race.b+=.75;
-			}
-		}
-//		race=GFXColor (1,1,1,1);
-		NavigationSystem::DrawCircle(x, y, size, race);
-		if ((!mouseover)||(willclick)) {
-			if (willclick) {
-				race=highlighted_tail_text;
-			}
-			string blah,nam;
-			Beautify (source,blah,nam);
-			
-			drawdescription (nam,x,y,1.0,1.0,0,race);
-		}
-	}
 };
 
-typedef set <systemdrawnode> systemdrawset;
+
 typedef vector <systemdrawnode> systemdrawlist;
-typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
+//typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
 
 bool testandset (bool &b,bool val) {
 	bool tmp = b;
@@ -222,7 +225,7 @@ QVector NavigationSystem::SystemIterator::Position () {
 			k += (k * 128) + *start;
 		}
 		k %= 200000;
-		float y = (k-100000)/(200000.);
+//		float y = (k-100000)/(200000.);
 		return QVector(ratio*cos(locatio*2*3.1415926536),ratio*sin(locatio*2*3.1415926536),0)*screensmash;
 	}
 }
@@ -244,7 +247,7 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 				string n = UniverseUtil::GetAdjacentSystem(vstack[i],j);
 				if (!testandset(visited[n],true)) {
 					string key (string("visited_")+n);
-					static bool dontbothervisiting = !XMLSupport::parse_bool (vs_config->getVariable ("graphics","explore_for_map","true"));
+					static bool dontbothervisiting = !XMLSupport::parse_bool (vs_config->getVariable ("graphics","explore_for_map","false"));
 					vector <string> * v = &_Universe->AccessCockpit()->savegame->getMissionStringData(key);
 					if (dontbothervisiting||v->size()>0) {
 						newsys.push_back(n);
@@ -262,6 +265,23 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 	return *this;
 }
 
+NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const NavigationSystem::CachedSystemIterator *csi)
+		: name(name), position(position), col(((!name.empty())&&(name!="-"))?FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(name))):&(GrayColorArray[0])) {
+	// Eww... double for loop!
+	if (csi) {
+		for (int i=0;i<destinations.size();++i) {
+			for (int j=0;j<csi->systems.size();++j) {
+				if ((*csi)[j].name==destinations[i]) {
+					lowerdestinations.push_back(j);
+					// Push the destination back.
+					// Tasty....
+					// Mmm.......
+					// Destination tastes like chicken
+				}
+			}
+		}
+	}
+}
 
 
 
@@ -269,7 +289,7 @@ void NavigationSystem::CachedSystemIterator::init (string current_system, unsign
 	systems.clear();
 	NavigationSystem::SystemIterator iter (current_system, max_systems);
 	for (;!iter.done();++iter) {
-		systems.push_back(SystemInfo(*iter, iter.Position(), _Universe->getAdjacentStarSystems(*iter)));
+		systems.push_back(SystemInfo(*iter, iter.Position(), _Universe->getAdjacentStarSystems(*iter),this));
 	}
 }
 
@@ -294,46 +314,69 @@ bool NavigationSystem::CachedSystemIterator::seek(unsigned position) {
 unsigned NavigationSystem::CachedSystemIterator::getIndex() const{
 	return currentPosition;
 }
+unsigned NavigationSystem::CachedSystemIterator::size() const{
+	return systems.size();
+}
 bool NavigationSystem::CachedSystemIterator::done ()const {
 	return currentPosition>=systems.size();
 }
-static NavigationSystem::CachedSystemIterator::SystemInfo nullPair ("-", QVector(0,0,0), std::vector<std::string> ());
+static NavigationSystem::CachedSystemIterator::SystemInfo nullPair ("-", QVector(0,0,0), std::vector<std::string> (),NULL);
 NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) {
-	if (done())
+	if (pos>=size())
 		return nullPair;
 	return systems[pos];
 }
 const NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) const{
-	if (done())
+	if (pos>=size())
 		return nullPair;
 	return systems[pos];
 }
-string &NavigationSystem::CachedSystemIterator::operator* () {
+NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator* () {
 	if (done())
-		return nullPair.name;
-	return systems[currentPosition].name;
+		return nullPair;
+	return systems[currentPosition];
 }
-const string &NavigationSystem::CachedSystemIterator::operator* () const{
+const NavigationSystem::CachedSystemIterator::SystemInfo &NavigationSystem::CachedSystemIterator::operator* () const{
 	if (done())
-		return nullPair.name;
-	return systems[currentPosition].name;
+		return nullPair;
+	return systems[currentPosition];
 }
-QVector NavigationSystem::CachedSystemIterator::Position () const{
+NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator-> () {
 	if (done())
-		return nullPair.position;
-	return systems[currentPosition].position;
+		return &nullPair;
+	return &systems[currentPosition];
+}
+const NavigationSystem::CachedSystemIterator::SystemInfo *NavigationSystem::CachedSystemIterator::operator-> () const{
+	if (done())
+		return &nullPair;
+	return &systems[currentPosition];
+}
+string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName () {
+	return name;
 }
 
-std::vector<std::string> &NavigationSystem::CachedSystemIterator::Destinations () {
-	if (done())
-		return nullPair.destinations;
-	return systems[currentPosition].destinations;
+const string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName () const{
+	return name;
 }
 
-const std::vector<std::string> &NavigationSystem::CachedSystemIterator::Destinations () const {
-	if (done())
-		return nullPair.destinations;
-	return systems[currentPosition].destinations;
+QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position () {
+	return position;
+}
+
+const QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position () const{
+	return position;
+}
+
+unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationIndex (unsigned index) const{
+	return lowerdestinations[index];
+}
+
+unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationSize () const {
+	return lowerdestinations.size();
+}
+
+GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor() const {
+	return GFXColor (col[0],col[1],col[2],col[3]);
 }
 
 NavigationSystem::CachedSystemIterator & NavigationSystem::CachedSystemIterator::next () {
@@ -350,15 +393,13 @@ NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::o
 }
 
 
-
-
-static systemdrawhashtable jumptable;
+// static systemdrawhashtable jumptable;
 float vsmax(float x, float y) {
 	return x>y?x:y;
 }
 void NavigationSystem::DrawGalaxy()
 {
-	systemdrawset mainlist;//(0, screenoccupation, factioncolours);		//	lists of items to draw
+	systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 	
 	systemdrawlist mouselist;//(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 
@@ -374,7 +415,7 @@ void NavigationSystem::DrawGalaxy()
 	//what's my name
 	//***************************
 	TextPlane systemname;	//	will be used to display shits names
-	string systemnamestring = "Current System : " + csystem + " in the " + csector;
+	string systemnamestring = "Current System : " + csystem + " in the " + csector + " Sector.";
 
 //	int length = systemnamestring.size();
 //	float offset = (float(length)*0.005);
@@ -391,11 +432,12 @@ void NavigationSystem::DrawGalaxy()
 	QVector pos_flat;	//	item position flat on plane
 
 	float zdistance = 0.0;
-	float zscale = 0.0;
+	float zscale = 1.0;
+	int l;
 
 	Adjust3dTransformation(galaxy_3d, 0);
 
-	pos = systemIter.Position();
+	pos = systemIter->Position();
 	ReplaceAxes(pos);
 
 	//Modify by old rotation amount
@@ -415,7 +457,7 @@ void NavigationSystem::DrawGalaxy()
 	float min_z = (float)pos.k;
 
 //	float themaxvalue = fabs(pos.i);
-	float themaxvalue = 0.0;
+	float themaxvalue = 10.0;
 
 
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
@@ -437,17 +479,17 @@ void NavigationSystem::DrawGalaxy()
 	//**********************************
 	while (!systemIter.done())	//	this goes through one time to get the major components locations, and scales its output appropriately
 	{
-		pos = systemIter.Position();
+		pos = systemIter->Position();
 		ReplaceAxes(pos);
 
 
 		//Modify by old rotation amount
 		//*************************
-//		if(galaxy_3d)
-//		{
-//			pos = dxyz(pos, 0, ry, 0);
-//			pos = dxyz(pos, rx, 0, 0);
-//		}
+		if(galaxy_3d)
+		{
+			pos = dxyz(pos, 0, ry, 0);
+			pos = dxyz(pos, rx, 0, 0);
+		}
 		//*************************
 		//*************************
 
@@ -467,6 +509,8 @@ void NavigationSystem::DrawGalaxy()
 	center_y = (min_y + max_y)/2;
 	center_z = (min_z + max_z)/2;
 	//**********************************
+
+
 /*	min_x = (min_x+center_x)/2;
 	min_y = (min_y+center_y)/2;
 	min_z = (min_z+center_z)/2;
@@ -476,36 +520,67 @@ void NavigationSystem::DrawGalaxy()
 	//Set Camera Distance
 	//**********************************
 
-//#define SQRT3 1.7320508
-//	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-//	themaxvalue = SQRT3*themaxvalue;
+#define SQRT3 1.7320508
+	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
+	themaxvalue = SQRT3*themaxvalue;
 
 
 
-//	{
-//		float half_x;//=(0.5*(max_x - min_x));
-//		float half_y;//=(0.5*(max_y - min_y));
-//		float half_z;//=(0.5*(max_z - min_z));
-//		half_x = vsmax(max_x-center_x,center_x-min_x);
-//		half_y = vsmax(max_y-center_y,center_y-min_y);
-//		half_z = vsmax(max_z-center_z,center_z-min_z);
+	{
+		float half_x;//=(0.5*(max_x - min_x));
+		float half_y;//=(0.5*(max_y - min_y));
+		float half_z;//=(0.5*(max_z - min_z));
+		half_x = vsmax(max_x-center_x,center_x-min_x);
+		half_y = vsmax(max_y-center_y,center_y-min_y);
+		half_z = vsmax(max_z-center_z,center_z-min_z);
 
 //		float half_x =(0.5*(max_x - min_x));
 //		float half_y =(0.5*(max_y - min_y));
 //		float half_z =(0.5*(max_z - min_z));
 
-//		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
-
-//		float halfmax = 0.5*themaxvalue;
-//		camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
+		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+		
+		float halfmax = 0.5*themaxvalue;
+		camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
 		camera_z = 4.0*themaxvalue;
-//	}
+	}
 
-//	camera_z = themaxvalue;
+	camera_z = themaxvalue;
 
 	//**********************************
 
 	DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
+
+
+
+
+
+
+
+
+
+	//	Adjust mouse list for 'n' kliks
+	//	**********************************
+	//	STANDARD	: (1 3 2) ~ [0] [2] [1]
+	//	VS			: (1 2 3) ~ [0] [1] [2]	<-- use this
+	if(mouselist.size() > 0)	//	mouse is over a target when this is > 0
+	{
+		if(mouse_wentdown[2]== 1)	//	mouse button went down for mouse button 2(standard)
+			rotations += 1;
+	}
+
+
+	if(rotations >= mouselist.size())	//	dont rotate more than there is
+		rotations = 0;
+
+
+	systemdrawlist tmpv;
+	int siz = mouselist.size();
+	for (l=0;l<siz;++l) {
+		tmpv.push_back(mouselist[((unsigned int)(l+rotations))%((unsigned int)siz)]);
+	}
+	mouselist.swap(tmpv);
+	//	**********************************
 
 
 
@@ -518,21 +593,45 @@ void NavigationSystem::DrawGalaxy()
 
 		//	Retrieve unit data
 		//	**********************************
-		string temp = (*systemIter);
+		string temp = (*systemIter).GetName();
 			
 
 
-		pos = systemIter.Position();
+		pos = systemIter->Position();
+
+
+	
 		ReplaceAxes(pos);	//	poop
 
 		float the_x, the_y, system_item_scale_temp;
 		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp, 0);
+		GFXColor col=systemIter->GetColor();
 
 
 		//IGNORE OFF SCREEN
 		//**********************************
 		if(	!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y))
 		{
+			unsigned destsize=systemIter->GetDestinationSize();
+			if (destsize!=0) {
+				GFXBegin(GFXLINE);
+				for (unsigned i=0;i<destsize;++i) {
+					CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
+					QVector posoth=oth.Position();
+					ReplaceAxes(posoth);
+					float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat, the_clipped_x=the_x,the_clipped_y=the_y;
+					// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
+					TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
+					if (TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_new_x, the_new_y)) {
+						IntersectBorder(the_clipped_x,the_clipped_y,the_new_x,the_new_y);
+						GFXColorf (col);
+						GFXVertex3f(the_clipped_x,the_clipped_y,0);
+						GFXColorf (oth.GetColor());
+						GFXVertex3f(the_new_x,the_new_y,0);
+					}
+				}
+				GFXEnd();
+			}
 			++systemIter;
 			continue;
 		}
@@ -565,93 +664,42 @@ void NavigationSystem::DrawGalaxy()
 
 		bool moused = false;
 		if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
-			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,false,&systemIter.Destinations()));
+			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,false, col));
 			moused=true;
 		}
 			
 		
-		jumptable.Put(temp,&(*mainlist.insert(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,moused,&systemIter.Destinations())).first));
+//		systemdrawnode it (insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
 
 
 
-		++systemIter;
-
-	}
-
-	//	**********************************	//	done enlisting items and attributes
-
-
-
-
-
-
-
-
-
-	//	Adjust mouse list for 'n' kliks
-	//	**********************************
-	//	STANDARD	: (1 3 2) ~ [0] [2] [1]
-	//	VS			: (1 2 3) ~ [0] [1] [2]	<-- use this
-	if(mouselist.size() > 0)	//	mouse is over a target when this is > 0
-	{
-		if(mouse_wentdown[2]== 1)	//	mouse button went down for mouse button 2(standard)
-			rotations += 1;
-	}
-
-
-	if(rotations >= mouselist.size())	//	dont rotate more than there is
-		rotations = 0;
-
-
-	systemdrawlist tmpv;
-	int siz = mouselist.size();
-	for (int l=0;l<siz;++l) {
-		tmpv.push_back(mouselist[((unsigned int)(l+rotations))%((unsigned int)siz)]);
-	}
-	mouselist.swap(tmpv);
-	//	**********************************
-
-
-
-
-
-
-	//	Draw the damn shit
-	//	**********************************
-	for (systemdrawset::iterator it = mainlist.begin();it !=mainlist.end();++it) {
-	   (*it).draw();
-		string sys = (*it).source;
-
-		std::vector <std::string>* dest=(*it).dest;
-		if (dest!=NULL) {
-			GFXBegin(GFXLINE);	
-		
-			for (int i=0;i<dest->size();++i) {
-				std::string oth=(*dest)[i];
-				if (sys<oth) {
-					const systemdrawnode *j = jumptable.Get (oth);
-					if (j!=NULL) {
-						GFXColorf (GetColor (sys));
-						GFXVertex3f((*it).x,(*it).y,0);
-						GFXColorf (GetColor(oth));
-						GFXVertex3f((*j).x,(*j).y,0);
-//					} else {
-//						// Happens whenever there's a system not drawn, which is every frame, so printing this is useless.
-//						printf("Warning: System %s in %s's jump list not found.\n",oth,sys);
-					}
-					
-				}
+		DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
+//		string sys = it.source;
+//
+		unsigned destsize=systemIter->GetDestinationSize();
+		if (destsize!=0) {
+			GFXBegin(GFXLINE);
+			for (unsigned i=0;i<destsize;++i) {
+				CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
+				QVector posoth=oth.Position();
+				ReplaceAxes(posoth);
+				float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
+				// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
+				TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
+				IntersectBorder(the_new_x,the_new_y,the_x,the_y);
+				GFXColorf (col);
+				GFXVertex3f(the_x,the_y,0);
+				GFXColorf (oth.GetColor());
+				GFXVertex3f(the_new_x,the_new_y,0);
 			}
 			GFXEnd();
-//			(*it).dest=NULL; // just in case, since it will die later on.
-			// GCC won't let me set it to NULL for some silly reason... so I'll just leave it as is...
 		}
-		jumptable.Delete(sys); // Won't ever reference this again, since it checks for less than.
-	   
-	}
-	mainlist.clear();	//	whipe the list
-	//	**********************************
+//		jumptable.Delete(sys); // Won't ever reference this again, since it checks for less than.
 
+		
+		++systemIter;
+	}
+	//	**********************************
 
 
 

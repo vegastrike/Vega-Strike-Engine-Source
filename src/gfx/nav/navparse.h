@@ -658,7 +658,7 @@ bool NavigationSystem::ParseFile(string filename)
 
 
 
-					for(int k = 0; k < FactionUtil::GetNumFactions(); k++)
+					for(unsigned int k = 0; k < FactionUtil::GetNumFactions(); k++)
 
 					{
 

@@ -114,7 +114,7 @@ void NavigationSystem::Setup()
 	galaxy_multi_dimensional = 1;
 
 	zshiftmultiplier = 2.5;	//	shrink the output
-	item_zscalefactor = 2.0;	//	camera distance prespective multiplier for affecting item sizes
+	item_zscalefactor = 1.0;	//	camera distance prespective multiplier for affecting item sizes
 
 
 
@@ -139,7 +139,8 @@ void NavigationSystem::Setup()
 	mouse_x_previous = (-1+float(mousex)/(.5*g_game.x_resolution));
 	mouse_y_previous = (1+float(-1*mousey)/(.5*g_game.y_resolution));
 
-
+	currentsystem=UniverseUtil::getSystemFile();
+	systemIter.init(currentsystem,100);
 
 	buttonstates = 0;
 	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
@@ -152,7 +153,7 @@ void NavigationSystem::Setup()
 	unselectedalpha = 1.0;
 
 
-	int p;
+	unsigned int p;
 	for( p=0; p < FactionUtil::GetNumFactions(); p++)
 	{
 		factioncolours[p].r = 1;
@@ -935,7 +936,7 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 
 void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
 	currentsystem = newCurrentSystem;
-	systemIter.init(currentsystem);
+//	systemIter.init(currentsystem);
 }
 
 
@@ -1254,16 +1255,84 @@ void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float 
 
 
 
+template <class T> static inline bool intersect(T x0,T y0,T x1,T y1,T sx0,T sy0,T sx1,T sy1,T & ansx, T & ansy)
+{
+	bool fxy=false;
+	if (((x1==x0)&&(sx1==sx0))||((x1==x0)&&(y1==y0))||((sx1==sx0)&&(sy1==sy0))) {
+		// If both lines are vertical, then act as if they don't intersect.
+		// If either one is a point, then for all practical purposes they do not intersect.
+		return false;
+	}
+	if ((x1==x0)&&(sy1==sy0)) {
+		// Line 1 vertical, line 2 horizontal.
+		ansx=x1;
+		ansy=sy1;
+		return ((sx0<=x1&&x1<=sx1)||(sx1<=x1&&x1<=sx0))&&((y0<=sy1&&sy1<=y1)||(y1<=sy1&&sy1<=y0));
+	}
+	if ((sx1==sx0)&&(y1==y0)) {
+		// line 1 horizontal, Line 2 vertical.
+		ansx=sx1;
+		ansy=y1;
+		return ((x0<=sx1&&sx1<=x1)||(x1<=sx1&&sx1<=x0))&&((sy0<=y1&&y1<=sy1)||(sy1<=y1&&y1<=sy0));
+	}
+	// If either line is vertical (both was handled above), then flip the coordinate plane to prevent division by zero.
+	if ((x1==x0)||(sx1==sx0)) {
+		T temp=x0;
+		x0=y0;
+		y0=temp;
+		temp=x1;
+		x1=y1;
+		y1=temp;
+		fxy=true;
+		temp=sx0;
+		sx0=sy0;
+		sy0=temp;
+		temp=sx1;
+		sx1=sy1;
+		sy1=temp;
+		fxy=true;
+	}
+	// Now we can be sure that no vertical lines exist.
+	// Proceed with the operation.
+	T m=(y1-y0)/(x1-x0);
+	T sm=(sy1-sy0)/(sx1-sx0);
+	if (m==sm) {
+		// Parallel Lines
+		return false;
+	}
+	ansx=(m*x1-sm*sx1-y1+sy1)/(m-sm);
+	ansy=(y1-m*x1+m*ansx);
+	if (((x0<=ansx&&ansx<=x1)||(x1<=ansx&&ansx<=x0))&&((sx0<=ansx&&ansx<=sx1)||(sx1<=ansx&&ansx<=sx0))) {
+		// Inside the line segment.
+		if (fxy) {
+			// Deswapify them!
+			T temp=ansx;
+			ansx=ansy;
+			ansy=temp;
+		}
+		return true;
+	}
+	// Too bad. They are outside the line segment
+	return false;
+}
 
 
 
 
+void NavigationSystem::IntersectBorder(float & x, float & y, const float & x1, const float & y1) const
+{
+	float ansx;
+	float ansy;
+	if (intersect(x,y,x1,y1,screenskipby4[1],screenskipby4[3],screenskipby4[0],screenskipby4[3],ansx,ansy)||
+			intersect(x,y,x1,y1,screenskipby4[0],screenskipby4[2],screenskipby4[0],screenskipby4[3],ansx,ansy)||
+			intersect(x,y,x1,y1,screenskipby4[0],screenskipby4[2],screenskipby4[1],screenskipby4[2],ansx,ansy)||
+			intersect(x,y,x1,y1,screenskipby4[1],screenskipby4[3],screenskipby4[1],screenskipby4[2],ansx,ansy)) {
+		x=ansx;
+		y=ansy;
+	}
+}
 
-
-
-
-
-
+	
 
 
 //	tests if given are in the range
@@ -1814,13 +1883,8 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 
 
 
-
-
-
-
-
-void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue
-		, float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy)
+void NavigationSystem::TranslateCoordinates(QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue, float zscale,
+	float zdistance, float &the_x, float &the_y, float &the_x_flat, float &the_y_flat, float &system_item_scale_temp, bool system_not_galaxy)
 {
 	float itemscale = CalculatePerspectiveAdjustment(zscale, zdistance, pos, pos_flat, system_item_scale_temp, system_not_galaxy);
 
@@ -1828,8 +1892,8 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 	//**********************************
 	the_x = (float)pos.i;
 	the_y = (float)pos.j;
-	float the_x_flat = (float)pos_flat.i;
-	float the_y_flat = (float)pos_flat.j;
+	the_x_flat = (float)pos_flat.i;
+	the_y_flat = (float)pos_flat.j;
 
 	the_x = (the_x / (themaxvalue));
 	the_y = (the_y / (themaxvalue));
@@ -1851,8 +1915,17 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 	the_y_flat = (the_y_flat * navscreen_small_delta);
 	the_y_flat = the_y_flat + center_nav_y;
 	//**********************************
+}
 
 
+
+void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue
+		, float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy)
+{
+	float the_x_flat;
+	float the_y_flat;
+	TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
+			the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
 
 	//Draw orientation lines
 	//**********************************
@@ -1869,59 +1942,75 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 
 	GFXColorf(GFXColor(0,1,0,.3));
 
+	bool display_flat_circle=true;
+		
 	if(the_y_flat > screenskipby4[3])
 	{
-		the_y_flat = screenskipby4[3];
+//		the_y_flat = screenskipby4[3];
 		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
 	}
 
 	if(the_y_flat < screenskipby4[2])
 	{
-		the_y_flat = screenskipby4[2];
+//		the_y_flat = screenskipby4[2];
 		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
 	}
-
+	
 	if(the_x_flat > screenskipby4[1])
 	{
-		the_x_flat = screenskipby4[1];
+//		the_x_flat = screenskipby4[1];
 		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
 	}
 
 	if(the_x_flat < screenskipby4[0])
 	{
-		the_x_flat = screenskipby4[0];
+//		the_x_flat = screenskipby4[0];
 		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
 	}
 
+	bool display_flat=true;
+		
 	if(the_x > screenskipby4[1])
 	{
-		the_x = screenskipby4[1];
+//		the_x = screenskipby4[1];
 		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
 	}
 
 	if(the_x < screenskipby4[0])
 	{
-		the_x = screenskipby4[0];
+//		the_x = screenskipby4[0];
 		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
 	}
 
 	if(the_y > screenskipby4[3])
 	{
-		the_y = screenskipby4[3];
+//		the_y = screenskipby4[3];
 		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
 	}
 
 	if(the_y < screenskipby4[2])
 	{
-		the_y = screenskipby4[2];
+//		the_y = screenskipby4[2];
 		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
 	}
-
-	GFXVertex3f(the_x_flat,	the_y_flat	,0);
-	GFXVertex3f(the_x,		the_y		,0);
-
-	DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
-
+	
+	if (display_flat) {
+		IntersectBorder(the_x_flat,the_y_flat,the_x,the_y);
+		GFXVertex3f(the_x_flat,	the_y_flat	,0);
+		GFXVertex3f(the_x,		the_y		,0);
+		if (display_flat_circle) {
+			DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
+		}
+	}
+	
 	GFXEnd();
 	GFXEnable(TEXTURE0);
 	//**********************************

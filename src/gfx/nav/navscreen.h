@@ -43,36 +43,41 @@ public:
 		struct SystemInfo {
 			string name;
 			QVector position;
-			std::vector<std::string> destinations;
-			SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations)
-
-					: name(name), position(position), destinations(destinations) {
-			}
+			std::vector<unsigned> lowerdestinations;
+			const float * col;
+			string &GetName();
+			const string &GetName() const;
+			QVector &Position ();
+			const QVector &Position () const;
+			unsigned GetDestinationIndex (unsigned index) const;
+			unsigned GetDestinationSize() const;
+			GFXColor GetColor() const;
+			SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const CachedSystemIterator *csi);
 		};
 
 	private:
 
 		vector<SystemInfo> systems;
 		unsigned currentPosition;
+		CachedSystemIterator(const CachedSystemIterator &other); // May be really slow. Don't try this at home.
+		CachedSystemIterator operator ++ (int); // Also really slow because it has to use the copy constructor.
 
 	public:
 		CachedSystemIterator();
 		CachedSystemIterator (string current_system, unsigned max_systems = 2);
-		CachedSystemIterator(const CachedSystemIterator &other);
 		void init(string current_system, unsigned max_systems = 2);
 		bool seek(unsigned position=0);
 		unsigned getIndex() const;
+		unsigned size() const;
 		bool done () const;
 		SystemInfo & operator[] (unsigned pos);
 		const SystemInfo & operator[] (unsigned pos) const;
-		string &operator* ();
-		const string &operator* () const;
-		QVector Position () const;
-		std::vector<std::string> &Destinations ();
-		const std::vector<std::string> &Destinations () const;
+		SystemInfo &operator* ();
+		const SystemInfo &operator* () const;
+		SystemInfo *operator-> ();
+		const SystemInfo *operator-> () const;
 		CachedSystemIterator & next ();
 		CachedSystemIterator & operator ++ ();
-		CachedSystemIterator operator ++ (int);
 	};
 
 
@@ -170,6 +175,9 @@ void DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool syste
 float CalculatePerspectiveAdjustment(float &zscale, float &zdistance,
 	QVector &pos, QVector &pos_flat, float &system_item_scale_temp, bool system_not_galaxy);
 
+void TranslateCoordinates(QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue, float zscale,
+	float zdistance, float &the_x, float &the_y, float &the_x_flat, float &the_y_flat, float &system_item_scale_temp, bool system_not_galaxy);
+
 void TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue,
 	float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy);
 
@@ -212,6 +220,7 @@ void DrawMission();
 void DrawShip();
 void SetMouseFlipStatus();
 void ScreenToCoord(float &x);
+void IntersectBorder(float & x, float & y, const float & x1, const float & y1) const;
 void Draw();
 void Setup();
 void SetDraw(bool n);
