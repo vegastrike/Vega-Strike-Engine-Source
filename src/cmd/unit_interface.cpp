@@ -29,6 +29,8 @@ extern int GetModeFromName (const char *);
 extern unsigned int getSaveStringLength (int whichcp, string key);
 extern unsigned int eraseSaveString (int whichcp, string key, unsigned int num);
 extern std::string getSaveString (int whichcp, string key, unsigned int num);
+extern void putSaveString (int whichcp, string key, unsigned int num,std::string s);
+
 static const char *miss_script="mission_scripts";
 static const char *miss_name="mission_names";
 static const char *miss_desc="mission_descriptions";
@@ -1307,6 +1309,16 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   int len=getSaveStringLength(playernum,miss_script);
   assert(len==getSaveStringLength(playernum,miss_name)&&len==getSaveStringLength(playernum,miss_desc));
   for (unsigned int i=0;i<len;i++) {
+	  string m = getSaveString(playernum,miss_name,i);
+	  int count=1;
+	  for (unsigned int j=i+1;j<len;++j) {
+		  string n = getSaveString(playernum,miss_name,j);
+		  if (n==m) {
+				putSaveString(playernum,miss_name,i,n+"_"+tostring(count++));
+		  }
+	  }
+  }
+  for (unsigned int i=0;i<len;i++) {
     CargoColor c;
     c.cargo.quantity=1;
     c.cargo.volume=1;
@@ -1324,11 +1336,11 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
     TempCargo.push_back (c);
   }
   std::sort(TempCargo.begin(),TempCargo.end(),CargoColorSort());
-  for (unsigned int i=0;i<TempCargo.size();i++) {
-    for (unsigned int nexti=i+1;nexti<TempCargo.size()&&TempCargo[i].cargo.content==TempCargo[nexti].cargo.content;nexti++) {
-		TempCargo[nexti].cargo.content+="_"+XMLSupport::tostring(nexti-i);
-    }
-  }
+  //for (unsigned int i=0;i<TempCargo.size();i++) {
+  //  for (unsigned int nexti=i+1;nexti<TempCargo.size()&&TempCargo[i].cargo.content==TempCargo[nexti].cargo.content;nexti++) {
+//		TempCargo[nexti].cargo.content+="_"+XMLSupport::tostring(nexti-i);
+ //   }
+ // }
   return TempCargo;
 }
 
