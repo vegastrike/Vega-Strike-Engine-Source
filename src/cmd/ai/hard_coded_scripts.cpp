@@ -95,11 +95,17 @@ void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
 }
 
 void Evade(Order * aisc, Unit * un) {
-  Order * ord = new Orders::ChangeHeading (un->Position()+QVector(1,0,1),2);
+  QVector v(un->Position());
+  QVector u(v);
+  Unit * targ =un->Target();
+  if (targ) {
+    u=targ->Position();
+  }
+  Order *ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (-10000,0,10000),true),false,true,true);
   AddOrd (aisc,un,ord);
-  ord = new Orders::ChangeHeading (un->Position()+QVector(-1,0,1),2);
+  ord = new Orders::FaceTargetITTS(false,3);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),true),false, true,true);  
   AddOrd (aisc,un,ord);
