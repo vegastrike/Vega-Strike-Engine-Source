@@ -51,15 +51,16 @@ class IdentityTransform {
 };
 
 struct	VertInfo {
-  static unsigned short texmultiply;
   unsigned short Y;
-  unsigned short Tex;
+  unsigned char Tex;
+  unsigned char Rem;
+  
   unsigned int vertindex;
   void SetTex(float);
   unsigned short GetTex() const;
 };
 
-class Texture;
+struct Texture;
 class quadsquare;
 
 /**
@@ -74,7 +75,7 @@ struct quadcornerdata {
 	int	xorg, zorg;
 	VertInfo	Verts[4];	// ne, nw, sw, se
 };
-class Texture;
+
 /**
  * A node in the quad tree
  * holds its own relevant vertex data (middle and either even or odd 4 sets of data (corners or diagonals

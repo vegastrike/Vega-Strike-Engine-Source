@@ -44,7 +44,7 @@ std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <Texture *> *quadsquare::textures;
-unsigned short VertInfo::texmultiply;
+
 void TextureIndex::Clear() {
   q.clear();
   c.clear();
@@ -83,11 +83,15 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 // | | |
 // +-4-+
 static void InterpolateTextures (VertInfo res[5], VertInfo  in[4]) {
-  res[0].Tex = (unsigned short) (0.25 * (((float)in[0].Tex) + in[1].Tex + in[2].Tex + in[3].Tex));
-  res[1].Tex = (unsigned short) (0.5 * (((float)in[3].Tex) + in[0].Tex));
-  res[2].Tex = (unsigned short) (0.5 * (((float)in[0].Tex) + in[1].Tex));
-  res[3].Tex = (unsigned short) (0.5 * (((float)in[1].Tex) + in[2].Tex));
-  res[4].Tex = (unsigned short) (0.5 * (((float)in[2].Tex) + in[3].Tex));
+  float tmp;
+  res[0].SetTex(0.25 * ((((float)in[0].Rem)+in[1].Rem+in[2].Rem+in[3].Rem)/256.+ in[0].Tex + in[1].Tex + in[2].Tex + in[3].Tex));
+  res[1].SetTex(0.5 * ((((float)in[0].Rem)+in[3].Rem)/256.+ (in[3].Tex) + in[0].Tex));
+
+  res[2].SetTex(0.5 * ((((float)in[0].Rem)+in[1].Rem)/256.+ (in[0].Tex) + in[1].Tex));
+
+  res[3].SetTex(0.5 * ((((float)in[1].Rem)+in[2].Rem)/256.+ (in[1].Tex) + in[2].Tex));
+
+  res[4].SetTex(0.5 * ((((float)in[2].Rem)+in[3].Rem)/256.+ (in[2].Tex) + in[3].Tex));
 
 
   res[0].Y = (unsigned short) (0.25 * (((float)in[0].Y) + in[1].Y + in[2].Y + in[3].Y));
@@ -1134,10 +1138,12 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 }
 
 void VertInfo::SetTex (float t) {
-  Tex = (unsigned short)t*texmultiply;
+  Tex = t;
+  Rem = t-Tex;
 }
 unsigned short VertInfo::GetTex () const {
-  return Tex/texmultiply + (((Tex%texmultiply)>texmultiply/2)?1:0);
+  return (Rem>127)?(Tex+1):Tex;
+  //  return Tex/texmultiply + (((Tex%texmultiply)>texmultiply/2)?1:0);
 }
 
 void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <Texture *> *tex ) {
@@ -1151,8 +1157,7 @@ void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int 
   quadsquare::unusedvertices = unvert;
   nonlinear_trans = nlt;
   textures = tex;
-  VertInfo::texmultiply = 32768 / tex->size();
-  
+
   if (indices.size()<tex->size()) {
     while (indices.size()<tex->size()) {
       indices.push_back (TextureIndex ());
