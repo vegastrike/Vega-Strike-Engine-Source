@@ -354,7 +354,9 @@ NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::o
 
 
 static systemdrawhashtable jumptable;
-
+float vsmax(float x, float y) {
+	return x>y?x:y;
+}
 void NavigationSystem::DrawGalaxy()
 {
 	systemdrawset mainlist;//(0, screenoccupation, factioncolours);		//	lists of items to draw
@@ -466,10 +468,12 @@ void NavigationSystem::DrawGalaxy()
 	//**********************************
 
 	{
-		float half_x=(0.5*(max_x - min_x));
-		float half_y=(0.5*(max_y - min_y));
-		float half_z=(0.5*(max_z - min_z));
-	
+		float half_x;//=(0.5*(max_x - min_x));
+		float half_y;//=(0.5*(max_y - min_y));
+		float half_z;//=(0.5*(max_z - min_z));
+		half_x = vsmax(max_x-center_x,center_x-min_x);
+		half_y = vsmax(max_y-center_y,center_y-min_y);
+		half_z = vsmax(max_z-center_z,center_z-min_z);
 		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + 0*( half_z * half_z ));
 	
 	}
