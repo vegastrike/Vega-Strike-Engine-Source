@@ -786,15 +786,20 @@ bool Unit::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
   Unit *un=_Universe->AccessCockpit()->GetParent();
-  if (un) {
-    if (un->getRelation(this)>=0)
+  if (isUnit()==UNITPTR) {
+  if (un ) {
+    static float badrel=XMLSupport::parse_float(vs_config.getVariable("AI","bad_relationship","-.1"))
+    static float goodrel=XMLSupport::parse_float(vs_config.getVariable("AI","good_relationship",".5"))
+	float rel=un->getRelation(this);
+    if (rel>goodrel) {
       muzak->SkipRandSong(Music::LOSSLIST);
-    else
+    } else if (rel < badrel) {
       muzak->SkipRandSong(Music::VICTORYLIST);
+	}
   } else {
     muzak->SkipRandSong(Music::LOSSLIST);
   }
-
+  }
   // notify the director that a ship got destroyed
   mission->DirectorShipDestroyed(this);
 
