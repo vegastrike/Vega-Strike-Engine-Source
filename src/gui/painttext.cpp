@@ -723,14 +723,9 @@ void PaintText::calcLayout(void) {
         return;
     }
 
-    // Vertical scaling factor:
-    m_verticalScaling = m_font.size() / REFERENCE_LINE_SPACING;
-
-    // Horizontal scaling factor.  Same as vertical, except we need to make the coord system
-    //  the same distance in all directions, so we need to apply the ratio of vert / horiz
-    //  resolution.  Otherwise the fonts are slightly stretched horizontally -- there
-    //  are more pixels horizontally than vertically per unit in the identity coord space.
-    m_horizontalScaling = (m_verticalScaling * g_game.y_resolution) / g_game.x_resolution;
+    // Scaling factors.
+    m_verticalScaling = m_font.verticalScaling();
+    m_horizontalScaling = m_font.horizontalScaling();
 
     // Max line width in character reference space.
     const float maxLineWidth = m_rect.size.width / m_horizontalScaling;
@@ -752,7 +747,7 @@ void PaintText::calcLayout(void) {
         // SINGLE LINE.
         currentLine->height = m_rect.size.height;
         currentLine->baseLine = (currentLine->height-m_font.size())/2.0
-            + m_verticalScaling*(REFERENCE_LINE_SPACING-REFERENCE_BASELINE_POS);
+            + m_verticalScaling*REFERENCE_FONT_ASCENDER;
 
         int ignorePos = 0;
         bool ellipsis = (m_widthExceeded == ELLIPSIS);

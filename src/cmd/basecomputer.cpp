@@ -326,7 +326,7 @@ void BaseComputer::constructControls(void) {
     baseTitle->setText("ERROR");
     baseTitle->setTextColor(GFXColor(.4,1,.4));
     baseTitle->setColor(GUI_CLEAR);
-    baseTitle->setFont( Font(.07, BLACK_STROKE) );
+    baseTitle->setFont( Font(.07, 1.75) );
     baseTitle->setId("BaseInfoTitle");
     // Put it on the window.
     window()->addControl(baseTitle);
@@ -336,7 +336,7 @@ void BaseComputer::constructControls(void) {
     playerTitle->setRect( Rect(-.96, .69, 1.9, .07) );
     playerTitle->setTextColor(GFXColor(.7,1,.7));
     playerTitle->setColor(GUI_CLEAR);
-    playerTitle->setFont( Font(.06, BLACK_STROKE) );
+    playerTitle->setFont( Font(.06, BOLD_STROKE) );
     playerTitle->setId("PlayerInfoTitle");
     // Put it on the window.
     window()->addControl(playerTitle);
@@ -395,7 +395,7 @@ void BaseComputer::constructControls(void) {
         sellLabel->setText("Seller");
         sellLabel->setTextColor(GUI_OPAQUE_WHITE);
         sellLabel->setColor(GUI_CLEAR);
-        sellLabel->setFont( Font(.09, BOLD_STROKE) );
+        sellLabel->setFont( Font(.08, BOLD_STROKE) );
         sellLabel->setJustification(CENTER_JUSTIFY);
         cargoGroup->addChild(sellLabel);
 
@@ -486,10 +486,10 @@ void BaseComputer::constructControls(void) {
 		buy->setDownColor( GFXColor(0,1,1,.4) );
 		buy->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy->setVariableBorderCycleTime(1.0);
-		buy->setBorderColor( GFXColor(.1,.1,.1) );
+		buy->setBorderColor( GFXColor(.2,.2,.2) );
 		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
 		buy->setShadowWidth(2.0);
-        buy->setFont(Font(.1, BLACK_STROKE));
+        buy->setFont(Font(.1, BOLD_STROKE));
         buy->setId("CommitAll");
         cargoGroup->addChild(buy);
 
@@ -501,10 +501,10 @@ void BaseComputer::constructControls(void) {
 		buy10->setDownColor( GFXColor(0,1,1,.4) );
 		buy10->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy10->setVariableBorderCycleTime(1.0);
-		buy10->setBorderColor( GFXColor(.1,.1,.1) );
+		buy10->setBorderColor( GFXColor(.2,.2,.2) );
 		buy10->setEndBorderColor( GFXColor(.4,.4,.4) );
 		buy10->setShadowWidth(2.0);
-        buy10->setFont(Font(.08, BLACK_STROKE));
+        buy10->setFont(Font(.08, BOLD_STROKE));
         buy10->setId("Commit10");
         cargoGroup->addChild(buy10);
 
@@ -516,10 +516,10 @@ void BaseComputer::constructControls(void) {
 		buy1->setDownColor( GFXColor(0,1,1,.4) );
 		buy1->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy1->setVariableBorderCycleTime(1.0);
-		buy1->setBorderColor( GFXColor(.1,.1,.1) );
+		buy1->setBorderColor( GFXColor(.2,.2,.2) );
 		buy1->setEndBorderColor( GFXColor(.4,.4,.4) );
 		buy1->setShadowWidth(2.0);
-        buy1->setFont(Font(.08, BLACK_STROKE));
+        buy1->setFont(Font(.08, BOLD_STROKE));
         buy1->setId("Commit");
         cargoGroup->addChild(buy1);
 
@@ -632,10 +632,10 @@ void BaseComputer::constructControls(void) {
 		buy->setDownColor( GFXColor(0,1,1,.4) );
 		buy->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy->setVariableBorderCycleTime(1.0);
-		buy->setBorderColor( GFXColor(.1,.1,.1) );
+		buy->setBorderColor( GFXColor(.2,.2,.2) );
 		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
 		buy->setShadowWidth(2.0);
-        buy->setFont(Font(.1, BLACK_STROKE));
+        buy->setFont(Font(.1, BOLD_STROKE));
         buy->setId("Commit");
         upgradeGroup->addChild(buy);
 
@@ -786,10 +786,10 @@ void BaseComputer::constructControls(void) {
 		accept->setDownColor( GFXColor(0,1,1,.4) );
 		accept->setDownTextColor( GFXColor(.2,.2,.2) );
 		accept->setVariableBorderCycleTime(1.0);
-		accept->setBorderColor( GFXColor(.1,.1,.1) );
+		accept->setBorderColor( GFXColor(.2,.2,.2) );
 		accept->setEndBorderColor( GFXColor(.4,.4,.4) );
 		accept->setShadowWidth(2.0);
-        accept->setFont(Font(.08, BLACK_STROKE));
+        accept->setFont(Font(.08, BOLD_STROKE));
         accept->setId("Commit");
         missionsGroup->addChild(accept);
 	}
@@ -858,10 +858,10 @@ void BaseComputer::constructControls(void) {
 		buy->setDownColor( GFXColor(0,1,1,.4) );
 		buy->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy->setVariableBorderCycleTime(1.0);
-		buy->setBorderColor( GFXColor(.1,.1,.1) );
+		buy->setBorderColor( GFXColor(.2,.2,.2) );
 		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
 		buy->setShadowWidth(2.0);
-        buy->setFont(Font(.08, BLACK_STROKE));
+        buy->setFont(Font(.08, BOLD_STROKE));
         buy->setId("Commit");
         shipDealerGroup->addChild(buy);
     }
@@ -1235,7 +1235,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		// Total price display.
 		const double totalPrice = item.price * maxQuantity;
 		char tempString[100];
-		sprintf(tempString, "Total: #b4#%.2f#-b", totalPrice);
+		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
 		StaticDisplay* totalDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 		assert(totalDisplay != NULL);
 		totalDisplay->setText(tempString);
@@ -1248,7 +1248,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 			maxForPlayer->setText("");
 		} else {
 			char maxString[100];
-			sprintf(maxString, "Max: #b4#%d#-b", maxQuantity);
+			sprintf(maxString, "Max: #b#%d#-b", maxQuantity);
 			maxForPlayer->setText(maxString);
 		}
 	} else {
@@ -1278,7 +1278,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		// Total price display.
 		const double totalPrice = item.price * item.quantity;
 		char tempString[100];
-		sprintf(tempString, "Total: #b4#%.2f#-b", totalPrice);
+		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
 		StaticDisplay* totalDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 		assert(totalDisplay != NULL);
 		totalDisplay->setText(tempString);
@@ -1374,9 +1374,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
-                    sprintf(tempString, "#b4#Transport cost: %.2f#-b#n1.5#", item.price);
+                    sprintf(tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price);
                 } else {
-                    sprintf(tempString, "Price: #b4#%.2f#-b#n#", baseUnit->PriceCargo(item.content));
+                    sprintf(tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo(item.content));
                     descString += tempString;
                     sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
                 }
@@ -1391,9 +1391,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 					if (playerUnit) {
 						multiplier = playerUnit->RepairCost();
 					}
-                    sprintf(tempString, "Price: #b4#%.2f#-b#n1.5#", basicRepairPrice()*multiplier);
+                    sprintf(tempString, "Price: #b#%.2f#-b#n1.5#", basicRepairPrice()*multiplier);
                 } else {
-                    sprintf(tempString, "Price: #b4#%.2f#-b#n1.5#", baseUnit->PriceCargo(item.content));
+                    sprintf(tempString, "Price: #b#%.2f#-b#n1.5#", baseUnit->PriceCargo(item.content));
                 }
                 descString += tempString;
                 break;
@@ -1401,23 +1401,23 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
-                    sprintf(tempString, "#b4#Transport cost: %.2f#-b#n1.5#", item.price);
+                    sprintf(tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price);
                 } else {
-                    sprintf(tempString, "Price: #b4#%.2f#-b#n#", baseUnit->PriceCargo(item.content));
+                    sprintf(tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo(item.content));
                     descString += tempString;
                     sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
                 }
                 descString += tempString;
                 break;
             case SELL_CARGO:
-                sprintf(tempString, "Value: #b4#%.2f#-b, purchased for %.2f#n#",
+                sprintf(tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
                     baseUnit->PriceCargo(item.content), item.price);
                 descString += tempString;
                 sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
                 descString += tempString;
                 break;
             case SELL_UPGRADE:
-                sprintf(tempString, "Used value: #b4#%.2f#-b, purchased for %.2f#n1.5#",
+                sprintf(tempString, "Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
                     usedValue(baseUnit->PriceCargo(item.content)), item.price);
                 descString += tempString;
                 break;
@@ -1940,7 +1940,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
         }
 
         // Description gets name at the top.
-        c.cargo.description = "#b4#" + beautify(c.cargo.content) + ":#-b#n1.75#" + 
+        c.cargo.description = "#b#" + beautify(c.cargo.content) + ":#-b#n1.75#" + 
             getSaveString(playerNum, MISSION_DESC_LABEL, i);
 
         tlist.masterList.push_back(c);
@@ -3014,13 +3014,13 @@ static std::string factionColorTextString(int faction) {
 // Show the player's basic information.
 bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* control) {
     // Heading.
-    string text = "#b4#Factions:#-b#n1.7#";
+    string text = "#b#Factions:#-b#n1.7#";
 
     // Number of kills for each faction.
     vector<float>* killList = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
 
 	// Make everything bold.
-	text += "#b4#";
+	text += "#b#";
 
     // A line for each faction.
     const int numFactions = FactionUtil::GetNumFactions();
@@ -3049,7 +3049,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
 
     // Total Kills if we have it.
     if (i < killList->size()) {
-        text += "#n##b4#Total Kills: " + XMLSupport::tostring((int)(*killList)[i]) + "#-b#";							
+        text += "#n##b#Total Kills: " + XMLSupport::tostring((int)(*killList)[i]) + "#-b#";							
     }
     // Put this in the description.
     StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );

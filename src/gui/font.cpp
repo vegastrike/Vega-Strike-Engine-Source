@@ -38,10 +38,6 @@ static const double GLUT_WIDTH_HACK = 0.6;
 // The width of the space character in the outline font is too big, so we make it a special case.
 static const char SPACE_CHAR = ' ';
 
-// The GLUT characters are too close together.  Add this factor to the width of each
-//  character to space them out more.  This is in reference units.
-static const double EXTRA_WIDTH = 6.0;
-
 
 // Calculate the metrics for this font.
 // This does the real work, and doesn't check whether it needs to be done.
@@ -51,29 +47,40 @@ void Font::calcMetrics(void) {
     //  higher.  (Currently, this is linear, which doesn't work well at small sizes.)
     // We also make sure the stroke width is at least 1.0.  Otherwise antialiasing causes
     //  some font features to fade out.
-    const double referenceStrokeWidth = 7.0;              // Best width for a font size of 1.0 (big).
-    const double referenceStrokeWidthResolution = 800;    // X-resolution stroke width measured in.
+	// My OpenGL (Windows XP) has a max line width of 10.  So we get stroke width truncation for font
+	//  size over 0.5.  This is OK because the curves look really ugly that big anyway.
+    const double referenceStrokeWidth = 20.0;				// Best width for a font size of 1.0 (big).
+    const double referenceStrokeWidthResolution = 800;		// X-resolution stroke width measured in.
     const double minimumStrokeWidth = 1.0;
-    const double nonClippedStrokeWidth = size() * referenceStrokeWidth * strokeWeight() *
-        (g_game.x_resolution / referenceStrokeWidthResolution);
 
-    // This is like a cache.  We modify the protected variables, but we
-    //  aren't modifying the public state of the object.
-    Font& thisObject = *const_cast<Font*>(this);
+	const double nonClippedStrokeWidth = size() * referenceStrokeWidth * strokeWeight() *
+		(g_game.x_resolution / referenceStrokeWidthResolution);
 
-    thisObject.m_strokeWidth = guiMax( minimumStrokeWidth, nonClippedStrokeWidth );
-    thisObject.m_needMetrics = false;
+    m_strokeWidth = guiMax( minimumStrokeWidth, nonClippedStrokeWidth );
+    m_needMetrics = false;
+
+    // Vertical scaling factor:
+    m_verticalScaling = size() / REFERENCE_LINE_SPACING;
+
+    // Horizontal scaling factor.  Same as vertical, except we need to make the coord system
+    //  the same distance in all directions, so we need to apply the ratio of vert / horiz
+    //  resolution.  Otherwise the fonts are slightly stretched horizontally -- there
+    //  are more pixels horizontally than vertically per unit in the identity coord space.
+    m_horizontalScaling = (m_verticalScaling * g_game.y_resolution) / g_game.x_resolution;
+
+	// The size of a horizontal pixel in reference space.
+	const double horizPixelInRefSpace = REFERENCE_LINE_SPACING / (g_game.x_resolution/2) / size();
 
     // Recalculate the extra char width.
-    thisObject.m_extraCharWidth = m_strokeWidth * EXTRA_WIDTH;
+    m_extraCharWidth = horizPixelInRefSpace * m_strokeWidth;
 
     // Space character width should be the same as a number.
     // Numbers are generally all the same width so you can assume they will go into columns.
-    // We use '8' because if the numbers aren't all the same width, '8 is a good, wide number.
-    // What we calculate here is the horiontal translation to get from the outline font width
-    //  to the space char width we want.
-    const double eightWidth = glutStrokeWidth(GLUT_STROKE_ROMAN, '8');
-    thisObject.m_spaceCharFixup = eightWidth - glutStrokeWidth(GLUT_STROKE_ROMAN, SPACE_CHAR);
+    // We use '8' because if the numbers aren't all the same width, '8' is a good, wide number.
+    // What we calculate here is the horizontal translation to get from the actual outline font
+	//  space char width to the space char width we want.
+    const double eightWidth = glutStrokeWidth(GLUT_STROKE_ROMAN, '8') + m_extraCharWidth;
+    m_spaceCharFixup = eightWidth - glutStrokeWidth(GLUT_STROKE_ROMAN, SPACE_CHAR);
 }
 
 // Check whether we need to recalc the metrics, and do it in const object.
@@ -130,4 +137,18 @@ double Font::strokeWidth(void) const {
     calcMetricsIfNeeded();
 
     return m_strokeWidth;
+}
+
+// Vertical scaling factor to be used to image this font.
+double Font::verticalScaling(void) const {
+    calcMetricsIfNeeded();
+
+    return m_verticalScaling;
+}
+
+// Horizontal scaling factor to be used to image this font.
+double Font::horizontalScaling(void) const {
+    calcMetricsIfNeeded();
+
+    return m_horizontalScaling;
 }
