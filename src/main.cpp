@@ -485,9 +485,10 @@ void bootstrap_main_loop () {
 		}
 	  }
 		/************* NETWORK PART ***************/
-	  saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
-      playersaveunit.push_back(psu);
-      _Universe->AccessCockpit(k)->credits=credits;
+	  saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+	  
+	  playersaveunit.push_back(_Universe->AccessCockpit()->GetUnitFileName());
+	  _Universe->AccessCockpit(k)->credits=credits;
   	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
 	  if (setplayerXloc) {
 	   	  playerNloc.push_back(pos);

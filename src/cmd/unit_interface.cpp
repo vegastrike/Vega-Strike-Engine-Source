@@ -605,8 +605,10 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].cargo.content.c_str());
-	float oldprice;
-        oldprice=bas->PriceCargo((*CurrentList)[cargonumber].cargo.content);
+	float oldprice=(*CurrentList)[cargonumber].cargo.price;
+	if ((*CurrentList)[cargonumber].cargo.category.find("My_Fleet")==std::string::npos) {
+	  oldprice=bas->PriceCargo((*CurrentList)[cargonumber].cargo.content);
+	}
         if (mode==DOWNGRADEMODE) {
 	  oldprice =usedPrice(oldprice);
 	}
@@ -1138,6 +1140,27 @@ vector <CargoColor>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis
     }
     return TempCargo;
 }
+void AddOwnerStarships (Cockpit * cp, vector <CargoColor> &l) {
+  for (unsigned int i=1;i<cp->unitfilename.size();i+=2) {
+    CargoColor c;
+    c.cargo.quantity=1;
+    c.cargo.volume=1;
+    c.cargo.price=0;
+    bool hike_price=true;
+    if (i+1<cp->unitfilename.size()) {
+      if (cp->unitfilename[i+1]==_Universe->activeStarSystem()->getFileName()) {
+	hike_price=false;
+      }
+    }
+    if (hike_price) {
+      static float shipping_price = XMLSupport::parse_float (vs_config->getVariable ("physics","shipping_price","6000"));
+      c.cargo.price=shipping_price;
+    }
+    c.cargo.content=cp->unitfilename[i];
+    c.cargo.category=string("starships/My_Fleet");  
+    l.push_back(c);
+  }
+}
 vector <CargoColor>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     switch (mode) {
     case BUYMODE:
@@ -1153,7 +1176,11 @@ vector <CargoColor>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     case SHIPDEALERMODE:
       //      curcategory.clear();
       //      curcategory.push_back(string("starships"));
-      return FilterCargo (un,"starships",true,true);
+      {
+      vector <CargoColor> * pntr =&FilterCargo (un,"starships",true,true);
+      AddOwnerStarships (_Universe->AccessCockpit(),*pntr);
+      return *pntr;
+      }
     case MISSIONMODE:
       //      curcategory.clear();
       //      curcategory.push_back(string("missions"));

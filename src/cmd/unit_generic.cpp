@@ -3082,7 +3082,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
   bool ccf = cancompletefully;
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100);
   if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
   
   myleak = 1-computer.radar.maxcone;
@@ -3197,6 +3197,8 @@ bool Unit::RepairUpgrade () {
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
         success = Upgrade(temprate,0,0,0,true,pct,NULL);
+	if (pct>0)
+	  success=true;
     }
     UnitImages * im= &GetImageInformation();
     for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {

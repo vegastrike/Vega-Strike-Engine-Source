@@ -38,7 +38,6 @@ protected:
   ///4 views f/r/l/b
   float shakin;
   ///Video Display Units (may need more than 2 in future)
-  std::string unitfilename;
   std::string unitmodname;
   ///Color of cockpit default text
   ///The font that the entire cockpit will use. Currently without color
@@ -78,6 +77,7 @@ protected:
   float cockpit_time;
   bool ejecting;
  public:
+  std::vector<std::string> unitfilename;
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp) {view = tmp;}
   enum VIEWSTYLE GetView () {return view;}
@@ -88,7 +88,7 @@ protected:
   void RestoreGodliness();
  ///Restores the view from the IDentity Matrix needed to draw sprites
   virtual void RestoreViewPort() {}
-  std::string GetUnitFileName () {return unitfilename;}
+  std::string& GetUnitFileName () {if ( unitfilename.empty()) unitfilename.push_back(""); return unitfilename.front();}
   std::string GetUnitModifications() {return unitmodname;}
   std::string communication_choices;
   float credits;//how much money player has

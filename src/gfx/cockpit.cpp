@@ -1456,11 +1456,11 @@ void GameCockpit::Update () {
 	  fg->nr_ships++;
 	  fg->nr_ships_left++;
 	}
-	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
+	Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
 	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
 	ss->AddUnit (un);
 
-	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
+	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 	//un->SetAI(new FireKeyboard ())
 	SwitchUnits (NULL,un);
 	credits = savegame->GetSavedCredits();
@@ -1494,7 +1494,7 @@ void GameCockpit::Update () {
 	      SwitchUnitsTurret(par,un);
 	      parentturret.SetUnit(par);
 	      Unit * finalunit = GetFinalTurret(un);
-	      this->SetParent(finalunit,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	      this->SetParent(finalunit,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	      break;
 	    }
 	  }
@@ -1506,7 +1506,7 @@ void GameCockpit::Update () {
 	Unit * un = parentturret.GetUnit();
 	if (un&&(!_Universe->isPlayerStarship(un))) {
 	  
-	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	  SetParent (un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  SwitchUnits (NULL,un);
 	  parentturret.SetUnit(NULL);
 	  un->SetTurretAI();
@@ -1546,7 +1546,7 @@ void GameCockpit::Update () {
 	  index++;
 	  Unit * k=GetParent(); 
 	  SwitchUnits (k,un);
-	  this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	  this->SetParent(un,GetUnitFileName().c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  //un->SetAI(new FireKeyboard ())
 	  break;
 	}

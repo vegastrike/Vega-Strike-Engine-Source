@@ -201,6 +201,26 @@ void SaveGame::WriteNewsData (FILE * fp) {
     free (msg);
   }
 }
+vector <string> parsePipedString(string s) {
+  int loc;
+  vector <string> ret;
+  while ((loc = s.find("|"))!=string::npos) {
+    ret.push_back( s.substr (0,loc));
+    s = s.substr (loc+1);
+  }
+  if (s.length())
+    ret.push_back(s);
+  return ret;
+}
+string createPipedString(vector <string> s) {
+  string ret;
+  for (unsigned int i=0;i<s.size()-1;i++) {
+    ret += s[i]+"|";
+  }
+  if (s.size())
+    ret+=s.back();
+  return ret;
+}
 void WriteSaveGame (Cockpit * cp,bool auto_save) {
   int player_num= cp-_Universe->AccessCockpit(0);
   Unit * un = cp->GetSaveParent();
@@ -208,7 +228,7 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
     return;
   }
   if (un->GetHull()>0) {
-    cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->GetUnitFileName().c_str(),auto_save?-1:player_num);
+    cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,auto_save?-1:player_num);
     un->WriteUnit(cp->GetUnitModifications().c_str());
     if (GetWritePlayerSaveGame(player_num).length()&&!auto_save) {
       cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
@@ -313,7 +333,7 @@ void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
  extern bool STATIC_VARS_DESTROYED;
-void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname, int player_num) {
+void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num) {
   vector<SavedUnits *> myvec = savedunits->GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
@@ -324,7 +344,8 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
 //    if (originalsystem!=systemname) {
       FighterPos=FP;
 //    }
-    fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
+      string pipedunitname = createPipedString(unitname);
+    fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
@@ -360,7 +381,7 @@ void SaveGame::SetSavedCredits (float c) {
 }
 
 
-vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, string &savedstarship, int player_num) {
+vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num) {
   if (filename.length()>0)
     filename=callsign+filename;
   vector <SavedUnits> mysav;
@@ -389,7 +410,8 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
 	  for (int k=j+1;tmp2[k]!='\0';k++) {
 	    if (tmp2[k]=='^') {
 	      tmp2[k]='\0';
-	      savedstarship=string(tmp2+k+1);
+	      savedstarship.clear();
+	      savedstarship=parsePipedString(tmp2+k+1);
 	      break;
 	    }
 	  }

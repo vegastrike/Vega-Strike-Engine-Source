@@ -50,11 +50,11 @@ class SaveGame {
   void SetStarSystem (string sys);
   string GetStarSystem();
   void WriteSavedUnit (FILE *, SavedUnits *su);
-  void WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::string unitname, int player_num);
+  void WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num);
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, enum clsptr type, const char * faction, long address);
   void RemoveUnitFromSave (long address);//cast it to an long
-  vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, string &originalunit, int player_num);
+  vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num);
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
 

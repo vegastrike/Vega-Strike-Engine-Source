@@ -84,7 +84,8 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
   parent.SetUnit (unit);
   savegame->SetPlayerLocation(pos);
   if (filename[0]!='\0') {
-    this->unitfilename=std::string(filename);
+    if (this->unitfilename.empty()) this->unitfilename.push_back("");
+    this->unitfilename[0]=std::string(filename);
     this->unitmodname=std::string(unitmodname);
   }
   if (unit) {
@@ -114,8 +115,8 @@ void Cockpit::InitStatic () {
   cockpit_time=0;
 }
 
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
-  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
+Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent), view(CP_FRONT),cockpit_offset(0), viewport_offset(0), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+  //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
   fg=NULL;
   /*
@@ -221,7 +222,7 @@ int Cockpit::Autopilot (Unit * target) {
 	static double averagetime = GetElapsedTime()/getTimeCompression();
 	static double numave = 1.0;
 	averagetime+=GetElapsedTime()/getTimeCompression();
-	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+	//	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
 	numave++;
 	/*
 	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
