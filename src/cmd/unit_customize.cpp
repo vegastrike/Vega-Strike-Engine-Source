@@ -444,8 +444,9 @@ void StartFrame(void) {
 }
 
 void EndFrame(void) {
-  GFXHudMode(false);
   GFXEndScene();
+  GFXHudMode(false);
+  GFXEnable (CULLFACE);
 }
 
 void ProcessMouseClick(int button, int state, int x, int y) {
