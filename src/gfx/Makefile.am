@@ -16,7 +16,6 @@ libgfxgeneric_a_SOURCES =  \
 libgfx_a_SOURCES =	\
 	ani_texture.h	\
 	ani_texture.cpp	\
-	navscreen.cpp	\
 	animation.cpp	\
 	animation.h	\
 	aux_logo.cpp	\
