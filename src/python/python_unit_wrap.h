@@ -22,7 +22,7 @@
   voidWRAPPED1(ToggleWeapon,bool,Missile)
   voidWRAPPED1(SelectAllWeapon,bool,Missile)
   voidWRAPPED1( Split ,int, level)
-  WRAPPED1(bool,TransferUnitToSystem,class StarSystem *,NewSystem,false)
+
   voidWRAPPED0(Init)
   voidWRAPPED1( ActivateJumpDrive ,int ,destination)
   voidWRAPPED0( DeactivateJumpDrive )
