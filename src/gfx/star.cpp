@@ -92,7 +92,7 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 		Vector vpoint (v[i+1].x,v[i+1].y,v[i+1].z);
 		Vector recenter =(vpoint-center.Cast());
 		float scale= recenter.Magnitude();
-   		scale*=torquestreakscale;
+   		scale*=-torquestreakscale;
 		if (roll) {
 			vpoint = Transform(rollMatrix,recenter)+center.Cast();
 		}
