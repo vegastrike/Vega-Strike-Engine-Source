@@ -31,7 +31,6 @@
 	* Fixed ancient ~Beam bug that would cause segfault at null pointer if all beams with a certain texture were deleted.
 	* Fixed bug that caused clipping to incorrectly clip after 'host' camera starship destroyed
 
->>>>>>> 1.107
 2002-01-28 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* New ship (the Revoker).....unit file not finished
