@@ -27,8 +27,8 @@ vegastrike_SOURCES =				\
 	cmd_collide.h				\
 	cmd_input_dfa.h				\
 	cmd_input_dfa.cpp			\
-	cmd_flybyewire.h			\
-	cmd_flybyewire.cpp			\
+	cmd_flybywire.h			\
+	cmd_flybywire.cpp			\
 	cmd_order.cpp				\
 	cmd_order.h				\
 	cmd_unit.h				\
