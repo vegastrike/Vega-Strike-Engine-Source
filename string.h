@@ -52,6 +52,7 @@ class string : public vector <char> {
     if (n+pos>a.size())
       n=a.size()-pos;
     reallocstr (a.c_str()+pos,n);
+    return *this;
   }
   string&assign (const char *str, const size_type len) {
     reallocstr(str,len);
@@ -82,10 +83,11 @@ class string : public vector <char> {
     retval.pop_back();
     retval.allocstr(str,strlen(str));
   }
-  string &operator+ (const string &str)const {
+  string operator+ (const string &str)const {
     string retval (*this);
     retval.pop_back();
     retval.allocstr(str.c_str(),str.size());
+    return retval;
   }
   string &operator += (const string & a) {
     string tmp(*this + a);
