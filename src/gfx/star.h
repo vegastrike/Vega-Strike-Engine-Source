@@ -8,6 +8,7 @@ const int STARnumvlist = 27;
 
 class StarVlist {
 	GFXVertexList * vlist;
+	GFXVertexList * nonstretchvlist;
 	float spread;
 	Vector newcamr;
 	Vector newcamq;
@@ -17,9 +18,9 @@ class StarVlist {
 public:
 	StarVlist (int num, float spread,const std::string &our_system_name);
 	~StarVlist();
-	void BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch);
-	void Draw();
-	void EndDrawState();
+	bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch);
+	void Draw(bool);
+	void EndDrawState(bool);
 	void UpdateGraphics();
 };
 class Stars {

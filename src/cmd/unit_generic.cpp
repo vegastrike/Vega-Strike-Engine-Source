@@ -758,9 +758,7 @@ void Unit::Init()
 std::string getMasterPartListUnitName();
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame (int);
-Vector Unit::GetWarpVelocity() const {
-	return cumulative_velocity*graphicOptions.WarpFieldStrength;
-}
+
 
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {

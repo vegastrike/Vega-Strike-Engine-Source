@@ -222,12 +222,12 @@ public:
 		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 		static float cutoffcutoff=  cutoff*cutoff;
 		
-		if (GetVelocity().MagnitudeSquared()<cutoffcutoff) {
+		if (GetWarpVelocity().MagnitudeSquared() < cutoffcutoff) {
 			return ctm;
 		}else {
 			Matrix k(ctm);
 			
-			float speed = GetVelocity().Magnitude()*graphicOptions.WarpFieldStrength;
+			float speed = GetWarpVelocity().Magnitude();
 			//Matrix scalar=identity_matrix;
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
