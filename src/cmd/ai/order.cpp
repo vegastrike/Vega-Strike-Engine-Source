@@ -184,8 +184,7 @@ bool Order::AttachOrder (UnitCollection *targets1) {
     }
     return false;
   }
-  if (targets)
- {
+  if (targets) {
 #ifdef ORDERDEBUG
   fprintf (stderr,"targ%x",targets);
   fflush (stderr);
