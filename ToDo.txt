@@ -15,6 +15,11 @@ Goals for 0.4.2 release
 ** Add cargo pics
 ** Warp vs. Auto graphic
 
+* AI:
+** Fix AI range trigger happiness
+
+* Graphics:
+** fix ugly ass damage dots
 
 Goals for 'Sometime over the rainbow'
 * File loading: 
