@@ -6106,7 +6106,6 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds){
   }
   AddCargo (carg);
   creds-=carg.quantity*carg.price;
-  Mass+=carg.quantity*carg.mass;
   return true;
 }
 bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds) {
