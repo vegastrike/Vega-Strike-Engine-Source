@@ -122,7 +122,7 @@ GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
   Texture *oldtex= texHashTable.Get (hashname);
   if(oldtex!=NULL) {
 	  //*this = *oldtex;//will be obsoleted--unpredictable results with string()
-    memcpy (this, oldtex, sizeof (Texture));
+    *this = *oldtex;
     original = oldtex;
     original->refcount++;
     return GFXTRUE;
@@ -152,7 +152,8 @@ Texture::Texture () {
 void Texture::setold()
 {
   //	*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
-  memcpy (original, this, sizeof (Texture));
+  *original = *this;
+  //memcpy (original, this, sizeof (Texture));
 	original->original = NULL;
 	original->refcount++;
 }
