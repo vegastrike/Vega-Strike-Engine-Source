@@ -27,7 +27,7 @@ class Background;
 class StarSystem {
  private:
   ///Physics is divided into 3 stages spread over 3 frames
-  enum PHYSICS_STAGE {PHY_AI,PHY_COLLIDE,PHY_RESOLV,PHY_NUM} current_stage;
+  enum PHYSICS_STAGE {PHY_AI,TERRAIN_BOLT_COLLIDE,PHY_COLLIDE, PHY_TERRAIN, PHY_RESOLV,PHY_NUM} current_stage;
   
   ///Stars, planets, etc. Orbital mechanics precalculated 
   int numprimaries; Unit **primaries; 

@@ -188,38 +188,31 @@ void StarSystem::Draw() {
 extern double interpolation_blend_factor;
 
 void StarSystem::Update() {
-  static int numframes;
+
   Unit *unit;
-
-
-  
   UpdateTime();
   time += GetElapsedTime();
-  //clog << "time: " << time << "\n";
-  //time = SIMULATION_ATOM+SIMULATION_ATOM/2.0;
   bool firstframe = true;
-  if(time/SIMULATION_ATOM>=.33333333) {
-    while(time/SIMULATION_ATOM >= .333333333) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
-      // Handle AI in pass 2 to maintain consistency
-
+  if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
+    while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       Iterator *iter;
       if (current_stage==PHY_AI) {
-      iter = drawList->createIterator();
-      if (firstframe&&rand()%2) {
-	AUDRefreshSounds();
-      }
-
-      while((unit = iter->current())!=NULL) {
-	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
-	unit->ResetThreatLevel();
-	iter->advance();
-      }
-      delete iter;
-      current_stage=PHY_COLLIDE;
-      } else
-      if (current_stage==PHY_COLLIDE) {
-	static int stage=0;
-	qt->Update(64,((stage++)%64));
+	iter = drawList->createIterator();
+	if (firstframe&&rand()%2) {
+	  AUDRefreshSounds();
+	}
+	while((unit = iter->current())!=NULL) {
+	  unit->ExecuteAI(); 
+	  unit->ResetThreatLevel();
+	  iter->advance();
+	}
+	delete iter;
+	current_stage=TERRAIN_BOLT_COLLIDE;
+      } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
+	Bolt::UpdatePhysics();
+	current_stage=PHY_COLLIDE;
+      } else if (current_stage==PHY_COLLIDE) {
+	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds
 	if (numframes>2/(SIMULATION_ATOM)) {
 	  iter = drawList->createIterator();
@@ -229,32 +222,28 @@ void StarSystem::Update() {
 	  }
 	  delete iter;
 	}
+	current_stage=PHY_TERRAIN;
+      } else if (current_stage==PHY_TERRAIN) {
+	static unsigned int stage=0;
+	qt->Update(64,((stage++)%64));	
 	current_stage=PHY_RESOLV;
-      } else
-      if (current_stage==PHY_RESOLV) {
-      iter = drawList->createIterator();
-      AccessCamera()->UpdateCameraSounds();
-	  muzak->Listen();
-      while((unit = iter->current())!=NULL) {
-
-	unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
-	iter->advance();
+      } else if (current_stage==PHY_RESOLV) {
+	iter = drawList->createIterator();
+	AccessCamera()->UpdateCameraSounds();
+	muzak->Listen();
+	while((unit = iter->current())!=NULL) {
+	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
+	  iter->advance();
+	}
+	delete iter;
+	current_stage=PHY_AI;
+	firstframe = false;
       }
-      delete iter;
-      
-      
-      Bolt::UpdatePhysics();
-      current_stage=PHY_AI;
-      firstframe = false;
-      }
-      time -= .3333333333*SIMULATION_ATOM;
-
+      time -= (1./PHY_NUM)*SIMULATION_ATOM;
     }
-    //    UpdateTime();
   }
-  interpolation_blend_factor = .333333*((3*time)/SIMULATION_ATOM+current_stage);
+  interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
-  //clog << "blend factor: " << interpolation_blend_factor << "\n";
 }
 
 
