@@ -452,6 +452,7 @@ namespace VSFileSystem
 		data_paths.push_back( "..");
 		data_paths.push_back( "../data");
 		data_paths.push_back( "../../data");
+		data_paths.push_back( "../Resources");
 		data_paths.push_back( "../Resources/data");
 		data_paths.push_back( "/usr/share/local/vegastrike/data");
 		data_paths.push_back( "/usr/local/share/vegastrike/data");

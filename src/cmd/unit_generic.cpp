@@ -6008,9 +6008,19 @@ void Unit::EjectCargo (unsigned int index) {
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
       }else {
-	cargo->SetPosAndCumPos (Position()+randVector(-rSize(), rSize()));
+        Vector tmpvel=-Velocity();
+        if (tmpvel.MagnitudeSquared()<.00001) {
+          tmpvel=randVector(-rSize(),rSize());
+          if (tmpvel.MagnitudeSquared()<.00001) {
+            tmpvel=Vector(1,1,1);
+          }
+        }
+        tmpvel.Normalize();
+        
+	cargo->SetPosAndCumPos (Position()+tmpvel*1.5*rSize()+randVector(-.5*rSize(), .5*rSize());
 	cargo->SetOwner (this);
-	cargo->SetVelocity(Velocity+randVector(-.25,.25).Cast());
+        static float velmul=XMLSupport::parse_float(vs_config->getVariable("physics","eject_cargo_speed","1"));
+	cargo->SetVelocity(Velocity*velmul+randVector(-.25,.25).Cast());
 	cargo->Mass = tmp->mass;
 	if (name.length()>0) {
 	  cargo->name=name;

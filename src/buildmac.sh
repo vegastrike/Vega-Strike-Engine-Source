@@ -1,4 +1,12 @@
-gcc -Xlinker -force_flat_namespace  -Xlinker -nomultidefs  -o vegastrike debug_vs.o			\
+g++ -o replace ../objconv/replace.cpp
+#sed -e 's/__ZNSs6assignEPKcm/__ZNSs6assi6nEPKcm/g' cmd/ai/libai.a >cmd/ai/libai.bak
+#sed -e 's/__ZNSs6assignEPKcm/__ZNSs6assi7nEPKcm/g' cmd/libcmd.a >cmd/libcmd.bak#mv cmd/ai/libai.bak cmd/ai/libai.a
+#mv cmd/libcmd.bak cmd/libcmd.a
+./replace __ZNSs6assignEPKcm __ZNSs6assi6nEPKcm cmd/ai/libai.a cmd/ai/libai.a
+./replace __ZNSs6assignEPKcm __ZNSs6assi7nEPKcm cmd/libcmd.a cmd/libcmd.a
+ranlib cmd/ai/libai.a >&/dev/null
+ranlib cmd/libcmd.a >&/dev/null
+gcc -Xlinker -force_flat_namespace  -Xlinker -multiply_defined -Xlinker warning  -o vegastrike debug_vs.o			\
 	gfxlib_struct.o		\
 	in_joystick.o			\
 	force_feedback.o		\

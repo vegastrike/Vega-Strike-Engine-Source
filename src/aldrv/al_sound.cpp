@@ -21,7 +21,8 @@ bool MacFixedLoadWAVFile(VSFileSystem::VSFile & f,ALenum *format,ALvoid **data,A
 	long length = f.Size();
     char * buf = (char *) malloc (length);
     f.Read(buf,length);
-    alutLoadWAVMemory(buf,format,data,size,freq);
+    ALboolean bleh=false;
+    alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq,&bleh);
     free(buf);
     return true;
 }

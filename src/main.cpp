@@ -193,9 +193,37 @@ void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 }
 int main( int argc, char *argv[] ) 
 {
+#if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
+  {
+    char *parentdir;
+    int pathlen=strlen(argv[0]);
+    parentdir=new char[pathlen+1];
+    char *c;
+    strncpy ( parentdir, argv[0], pathlen+1 );
+    c = (char*) parentdir;
+    while (*c != '\0')     /* go to end */
+      c++;
+    
+    while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
+      c--;
+    
+    *c = '\0';             /* cut off last part (binary name) */
+    if (strlen (parentdir)>0) {  
+      chdir (parentdir);/* chdir to the binary app's parent */
+    }
+    delete []parentdir;
+  }    
+#endif
 	CONFIGFILE=0;
 	mission_name[0]='\0';
-
+#if defined (WITH_MACOSX_BUNDLE)
+        {
+          //chdir("../Resources");
+          char pwd[8192]="";
+          getcwd(pwd,8191);
+          printf (" In path %s\n",pwd);
+        }
+#endif
     /* Print copyright notice */
 	printf("Vega Strike "  " \n"
 		   "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
@@ -768,8 +796,9 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'P':
       case 'p':
-	sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
-	SetPlayerLoc (PlayerLocation,true);
+	if (3==sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k)) {
+          SetPlayerLoc (PlayerLocation,true);
+        }
 	break;
       case 'J':
       case 'j'://low rez
