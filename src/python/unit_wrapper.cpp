@@ -75,6 +75,7 @@ public:
   UnitWrapper(UnitContainer cont) : UnitContainer(cont){}
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
   operator Unit* () {return unit;}
+  bool isNull () {return GetUnit()==0;}
 };
 PYTHON_BEGIN_MODULE(VS)
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -106,6 +107,8 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 #undef voidWRAPPED2
 #undef voidWRAPPED3
 //End of Macro City 2
+  Class.def(boost::python::operators<boost::python::op_eq | boost::python::op_ne>(), boost::python::right_operand<UnitWrapper>());
+  Class.def(&UnitWrapper::isNull,"isNull");
   Class.def(&UnitWrapper::Kill,"Kill");
   Class.def(&UnitWrapper::SetTarget,"SetTarget");
   Class.def(&UnitWrapper::GetTarget,"GetTarget");
@@ -145,7 +148,10 @@ class Unit:
 #define UnitWrapper Unit
 #include "python_unit_wrap.h"
 
+  WRAPPED1(bool,__eq__,UnitWrapper,oth,false);
+  WRAPPED1(bool,__ne__,UnitWrapper,oth,true);
   voidWRAPPED0(Kill);
+  voidWRAPPED0(isNull);
   voidWRAPPED1(SetTarget,UnitWrapper,un);
   WRAPPED0(UnitWrapper, GetTarget,UnitWrapper(0));
   WRAPPED0(UnitWrapper, GetVelocityReference,UnitWrapper(0))

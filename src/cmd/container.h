@@ -17,6 +17,8 @@ class UnitContainer {
     SetUnit (a.unit);
     return a;
   }
+  bool operator== (const UnitContainer oth) const {return unit==oth.unit;}
+  bool operator!= (const UnitContainer oth) const {return unit!=oth.unit;}
   ~UnitContainer();
   void SetUnit (Unit *);
   inline Unit * GetUnit();
