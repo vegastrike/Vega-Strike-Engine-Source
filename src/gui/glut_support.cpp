@@ -253,7 +253,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         glLoadIdentity();
         glEnable(GL_LINE_SMOOTH);
 	glLineWidth(wid);
-	wid/=rescale_font;
+	float page_wid=wid/rescale_font;
 	glTranslatef(x,y,0);
 	glScalef(font_size,font_size,1);
 	end = no_end?0:glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
@@ -264,7 +264,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
 		cur_width /= 2500;
 		width += cur_width;
-		if (width+end+word_length(str+cur+1) > wid && str[cur+1] != '\0' ) {
+		if (width+end+word_length(str+cur+1) > page_wid && str[cur+1] != '\0' ) {
 		  if (no_end==0) {
 		    for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
 		    break;
