@@ -4,7 +4,7 @@
 #include "galaxy_xml.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#include "universe_util.h"
 
 char * getnoslash (char * inp) {
   char * tmp=inp;
@@ -291,8 +291,8 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   inside =false;
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;
   Init();
-
-  this->faction = faction;
+  static int neutralfaction=FactionUtil::GetFaction("neutral");
+  this->faction = neutralfaction;
   killed=false;
   bool destempty=dest.empty();
   while (!dest.empty()) {
@@ -330,7 +330,13 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   string tempname = (::getCargoUnitName (filename));
   setFullname(tempname);
  
-  Unit * un = UnitFactory::createUnit (tempname.c_str(),true,FactionUtil::GetFaction("planets"));
+  int tmpfac=faction;
+  if (UniverseUtil::LookupUnitStat(tempname,FactionUtil::GetFactionName(faction),"Cargo_Import").length()==0) {
+    tmpfac=FactionUtil::GetFaction("planets");
+  }
+  Unit * un = UnitFactory::createUnit (tempname.c_str(),true,tmpfac);
+ 
+
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
     image->CargoVolume=un->GetImageInformation().CargoVolume;

@@ -534,7 +534,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   this->image->CargoVolume=stof(row["Hold_Volume"]);
   this->image->UpgradeVolume=stof(row["Upgrade_Storage_Volume"]);
   this->image->equipment_volume=stof(row["Equipment_Space"]);
-  ImportCargo(this,row["Cargo_Import"]);
+  ImportCargo(this,row["Cargo_Import"]);//if this changes change planet_generic.cpp
   AddCarg(this,row["Cargo"]);
   AddSounds(this,row["Sounds"]);
   

@@ -328,9 +328,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   char * nebfile;
   bool insideout=false;
   int faction=0;
+  string truncatedfilename=this->filename; 
+  {
+    string::size_type tmp;
+    if ((tmp=truncatedfilename.find(".system"))!=string::npos) {
+      truncatedfilename=truncatedfilename.substr(0,tmp);
+    }
+  }
   BLENDFUNC blendSrc=ONE;
   BLENDFUNC blendDst=ZERO;
   bool isdest=false;
+  
   xml->cursun.k=0;	
   static bool useAtmosphere = XMLSupport::parse_bool(vs_config->getVariable("graphics","usePlanetAtmosphere","true"));
   static bool useFog = XMLSupport::parse_bool(vs_config->getVariable("graphics","usePlanetFog","true"));
@@ -481,7 +489,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
       if (p!=NULL)
 	if (p->isUnit()==PLANETPTR) {
-	  string faction(UniverseUtil::GetGalaxyFaction (this->filename));
+	  string faction(UniverseUtil::GetGalaxyFaction (truncatedfilename));
 	  char direction='b';
 	  
 	  R.Set(1,0,0);
@@ -497,8 +505,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 			break;
 		case FACTION:
 			faction = (*iter).value;
-			if (faction==UniverseUtil::GetGalaxyProperty (this->filename,"faction")) {
-				string ownerfaction = UniverseUtil::GetGalaxyFaction (this->filename);
+			if (faction==UniverseUtil::GetGalaxyProperty (truncatedfilename,"faction")) {
+				string ownerfaction = UniverseUtil::GetGalaxyFaction (truncatedfilename);
 				faction = ownerfaction;
 			}
 			break;
@@ -895,10 +903,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case FACTION:
 	  {
-		  int originalowner = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyProperty (this->filename,"faction"));
+		  int originalowner = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyProperty (truncatedfilename,"faction"));
 		  faction = FactionUtil::GetFactionIndex ((*iter).value);
 		  if (faction==originalowner) {
-			  int ownerfaction = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction (this->filename));
+			  int ownerfaction = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction (truncatedfilename));
 			  faction = ownerfaction;
 		  }
 	  }
@@ -980,7 +988,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     if (xml->unitlevel>2)
 	{
       assert(xml->moons.size()!=0);
-      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
+      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction!=0?faction:FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction (truncatedfilename)),fullname,insideout);
       if (un)
 	  {
 		un->SetOwner (getTopLevelOwner());
@@ -989,7 +997,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	else
 	{
 	  Planet * planet;
-      xml->moons.push_back((planet=UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout)));
+      xml->moons.push_back((planet=UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction!=0?faction:FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction (truncatedfilename)),fullname,insideout)));
 
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
       xml->moons.back()->SetOwner (getTopLevelOwner());
@@ -1038,7 +1046,15 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	dest=ParseDestinations((*iter).value);
 	break;
       case FACTION:
-	faction = FactionUtil::GetFaction ((*iter).value.c_str());
+        faction = FactionUtil::GetFactionIndex ((*iter).value);
+        {
+          int originalowner = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyProperty (truncatedfilename,"faction"));          
+          if (faction==originalowner) {
+            int ownerfaction = FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction (truncatedfilename));
+            faction = ownerfaction;
+          }
+        }
+
 	break;
       case RI:
 	R.i=parse_float((*iter).value)*xml->scale*ScaleOrbitDist(xml->fade);
