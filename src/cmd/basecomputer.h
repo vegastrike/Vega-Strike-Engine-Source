@@ -94,8 +94,16 @@ protected:
     bool pickerChangedSelection(const EventCommandId& command, Control* control);
     // Buy an item from the cargo list.
     bool buyCargo(const EventCommandId& command, Control* control);
+    // Buy an item (quantity 10) from the cargo list.
+    bool buy10Cargo(const EventCommandId& command, Control* control);
+    // Buy all of an item from the cargo list.
+    bool buyAllCargo(const EventCommandId& command, Control* control);
     // Sell an item from ship's cargo.
     bool sellCargo(const EventCommandId& command, Control* control);
+    // Sell an item (quantity 10) from ship's cargo.
+    bool sell10Cargo(const EventCommandId& command, Control* control);
+    // Sell all of an item from ship's cargo.
+    bool sellAllCargo(const EventCommandId& command, Control* control);
     // Buy a ship upgrade.
     bool buyUpgrade(const EventCommandId& command, Control* control);
     // Sell an upgrade on your ship.
@@ -127,7 +135,7 @@ protected:
     void recalcTitle(void);
 
     // Return whether or not this transaction is possible for the player now.
-    bool isTransactionOK(const Cargo& originalItem, TransactionType transType);
+    bool isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity = 1);
 
     // Create whatever cells are needed to add a category to the picker.
     SimplePickerCell* createCategoryCell(SimplePickerCells& cells, const string& category, bool skipFirstCategory);
@@ -144,13 +152,25 @@ protected:
     void updateTransactionControls(const Cargo& item, bool skipFirstCategory = false);
 
     // Update the controls when the selection for a transaction changes.
-    void updateTransactionControlsForSelection(TransactionList* list, const Cargo& cargo = Cargo());
+    void updateTransactionControlsForSelection(TransactionList* list);
+
+	// Hide the button(s) that commit transactions.
+	void hideCommitButtons(void);
+
+	// Update the commit buttons in the Cargo screen, since we have three of them.
+	void configureCargoCommitButtons(const Cargo& item, TransactionType trans);
 
     // Make sure the info in the transaction lists is gone.
     void resetTransactionLists(void);
 
     // Load the controls for the CARGO display.
     void loadCargoControls(void);
+
+	// Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+	bool buySelectedCargo(int requestedQuantity);
+
+	// Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+	bool sellSelectedCargo(int requestedQuantity);
 
     // Load the controls for the MISSIONS display.
     void loadShipDealerControls(void);

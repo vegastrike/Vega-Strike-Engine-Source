@@ -66,6 +66,12 @@ static const float MODE_BUTTON_SPACE = 0.03;
 // Default color in CargoColor.
 static const GFXColor DEFAULT_UPGRADE_COLOR = GFXColor(1,1,1,1);
 
+// Quantity of items that turns on "Buy All" button.
+static const int MIN_BUY_ALL_QUANTITY = 2;
+// Quantity of items that turns on "Buy 10" button.
+static const int MIN_BUY_10_QUANTITY = 11;			// "Buy All" works if there are exactly 10 items.
+
+
 
 // Some mission declarations.
 // These should probably be in a header file somewhere.
@@ -150,7 +156,11 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
     BaseComputer::WctlTableEntry ( modeInfo[PLAYER_INFO].command, "", &BaseComputer::changeToPlayerInfoMode ),
     BaseComputer::WctlTableEntry ( "BuyCargo", "", &BaseComputer::buyCargo ),
+    BaseComputer::WctlTableEntry ( "Buy10Cargo", "", &BaseComputer::buy10Cargo ),
+    BaseComputer::WctlTableEntry ( "BuyAllCargo", "", &BaseComputer::buyAllCargo ),
     BaseComputer::WctlTableEntry ( "SellCargo", "", &BaseComputer::sellCargo ),
+    BaseComputer::WctlTableEntry ( "Sell10Cargo", "", &BaseComputer::sell10Cargo ),
+    BaseComputer::WctlTableEntry ( "SellAllCargo", "", &BaseComputer::sellAllCargo ),
     BaseComputer::WctlTableEntry ( "BuyUpgrade", "", &BaseComputer::buyUpgrade ),
     BaseComputer::WctlTableEntry ( "SellUpgrade", "", &BaseComputer::sellUpgrade ),
     BaseComputer::WctlTableEntry ( "BuyShip", "", &BaseComputer::buyShip ),
@@ -405,7 +415,7 @@ void BaseComputer::constructControls(void) {
 
         // Buy button.
         NewButton* buy = new NewButton;
-        buy->setRect( Rect(-.11, .2, .22, .13) );
+        buy->setRect( Rect(-.11, .3, .22, .13) );
         buy->setColor( GFXColor(0,1,1,.1) );
         buy->setTextColor(GUI_OPAQUE_WHITE);
 		buy->setDownColor( GFXColor(0,1,1,.4) );
@@ -417,6 +427,38 @@ void BaseComputer::constructControls(void) {
         buy->setFont(Font(.1, BLACK_STROKE));
         buy->setId("Commit");
         cargoGroup->addChild(buy);
+
+        // "Buy All" button.
+        NewButton* buyAll = new NewButton;
+		buyAll->setLabel("Buy All");
+        buyAll->setRect( Rect(-.11, .1, .22, .1) );
+        buyAll->setColor( GFXColor(0,1,1,.1) );
+        buyAll->setTextColor(GUI_OPAQUE_WHITE);
+		buyAll->setDownColor( GFXColor(0,1,1,.4) );
+		buyAll->setDownTextColor( GFXColor(.2,.2,.2) );
+		buyAll->setVariableBorderCycleTime(1.0);
+		buyAll->setBorderColor( GFXColor(.1,.1,.1) );
+		buyAll->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buyAll->setShadowWidth(2.0);
+        buyAll->setFont(Font(.08, BLACK_STROKE));
+        buyAll->setId("CommitAll");
+        cargoGroup->addChild(buyAll);
+
+        // "Buy 10" button.
+        NewButton* buy10 = new NewButton;
+		buy10->setLabel("Buy 10");
+        buy10->setRect( Rect(-.11, -.1, .22, .1) );
+        buy10->setColor( GFXColor(0,1,1,.1) );
+        buy10->setTextColor(GUI_OPAQUE_WHITE);
+		buy10->setDownColor( GFXColor(0,1,1,.4) );
+		buy10->setDownTextColor( GFXColor(.2,.2,.2) );
+		buy10->setVariableBorderCycleTime(1.0);
+		buy10->setBorderColor( GFXColor(.1,.1,.1) );
+		buy10->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buy10->setShadowWidth(2.0);
+        buy10->setFont(Font(.08, BLACK_STROKE));
+        buy10->setId("Commit10");
+        cargoGroup->addChild(buy10);
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
@@ -1049,8 +1091,84 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
     return false;
 }
 
+// Hide the button(s) that commit transactions.
+void BaseComputer::hideCommitButtons(void) {
+    NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+    commitButton->setHidden(true);
+    NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
+    if(commit10Button != NULL) commit10Button->setHidden(true);
+    NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
+    if(commitAllButton != NULL) commitAllButton->setHidden(true);
+}
+
+// Update the commit buttons in the Cargo screen, since we have three of them.
+void BaseComputer::configureCargoCommitButtons(const Cargo& item, TransactionType trans) {
+	if(trans == BUY_CARGO) {
+		// "Buy" button.
+		NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+		assert(commitButton != NULL);
+		commitButton->setHidden(false);
+		commitButton->setLabel("Buy");
+		commitButton->setCommand("BuyCargo");
+
+		// "Buy 10" button.
+		NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
+		assert(commit10Button != NULL);
+		if(item.quantity >= MIN_BUY_10_QUANTITY && isTransactionOK(item, trans, 10)) {
+			commit10Button->setHidden(false);
+			commit10Button->setLabel("Buy 10");
+			commit10Button->setCommand("Buy10Cargo");
+		} else {
+			commit10Button->setHidden(true);
+		}
+
+		// "Buy All" button.
+		NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
+		assert(commitAllButton != NULL);
+		if(item.quantity >= MIN_BUY_ALL_QUANTITY && isTransactionOK(item, trans, item.quantity)) {
+			commitAllButton->setHidden(false);
+			commitAllButton->setLabel("Buy All");
+			commitAllButton->setCommand("BuyAllCargo");
+		} else {
+			commitAllButton->setHidden(true);
+		}
+	} else {
+		assert(trans == SELL_CARGO);
+
+		// "Sell" button.
+		NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+		assert(commitButton != NULL);
+		commitButton->setHidden(false);
+		commitButton->setLabel("Sell");
+		commitButton->setCommand("SellCargo");
+
+		// "Sell 10" button.
+		NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
+		assert(commit10Button != NULL);
+		if(item.quantity >= MIN_BUY_10_QUANTITY && isTransactionOK(item, trans, 10)) {
+			commit10Button->setHidden(false);
+			commit10Button->setLabel("Sell 10");
+			commit10Button->setCommand("Sell10Cargo");
+		} else {
+			commit10Button->setHidden(true);
+		}
+
+		// "Sell All" button.
+		NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
+		assert(commitAllButton != NULL);
+		if(item.quantity >= MIN_BUY_ALL_QUANTITY && isTransactionOK(item, trans, item.quantity)) {
+			commitAllButton->setHidden(false);
+			commitAllButton->setLabel("Sell All");
+			commitAllButton->setCommand("SellAllCargo");
+		} else {
+			commitAllButton->setHidden(true);
+		}
+
+	}
+}
+
 // Update the controls when the selection for a transaction changes.
-void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist, const Cargo& item) {
+void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist) {
     // Get the controls we need.
     NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
     assert(commitButton != NULL);
@@ -1060,7 +1178,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist,
     if(!tlist) {
         // We have no selection.  Turn off UI that commits a transaction.
         m_selectedList = NULL;
-        commitButton->setHidden(true);
+		hideCommitButtons();
         desc->setText("");
         // Make sure there is no selection.
         if(m_transList1.picker) m_transList1.picker->selectCell(NULL);
@@ -1077,17 +1195,22 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist,
     TransactionList& otherList = ( (&m_transList1==m_selectedList)? m_transList2 : m_transList1 );
     if(otherList.picker) otherList.picker->selectCell(NULL);
 
+    // They selected a cell that has a description.
+    // The selected item.
+	const PickerCell* cell = tlist->picker->selectedCell();
+	assert(cell != NULL);
+    Cargo& item = tlist->masterList[cell->tag()].cargo;
+
     if(!isTransactionOK(item, tlist->transaction)) {
         // We can't do the transaction. so hide the transaction button.
         // This is an odd state.  We have a selection, but no transaction is possible.
-        commitButton->setHidden(true);
+        hideCommitButtons();
     } else {
         // We can do the transaction.
         commitButton->setHidden(false);
         switch(tlist->transaction) {
             case BUY_CARGO:
-                commitButton->setLabel("Buy");
-                commitButton->setCommand("BuyCargo");
+				configureCargoCommitButtons(item, BUY_CARGO);
                 break;
             case BUY_UPGRADE:
                 commitButton->setLabel("Buy");
@@ -1098,8 +1221,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist,
                 commitButton->setCommand("BuyShip");
                 break;
             case SELL_CARGO:
-                commitButton->setLabel("Sell");
-                commitButton->setCommand("SellCargo");
+				configureCargoCommitButtons(item, SELL_CARGO);
                 break;
             case SELL_UPGRADE:
                 commitButton->setLabel("Sell");
@@ -1213,11 +1335,8 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
             // They just selected a category.  Clear the selection no matter what.
             updateTransactionControlsForSelection(NULL);
         } else {
-            // They selected a cell that has a description.
-            // The selected item.
-            Cargo& item = tlist->masterList[cell->tag()].cargo;
             // Make the controls right for this item.
-            updateTransactionControlsForSelection(tlist, item);
+            updateTransactionControlsForSelection(tlist);
         }
     }
 
@@ -1225,7 +1344,7 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
 }
 
 // Return whether or not this 
-bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType) {
+bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity) {
     // Make sure we have somewhere to put stuff.
     Unit* playerUnit = m_player.GetUnit();
     if(!playerUnit) return false;
@@ -1234,12 +1353,12 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
 
     // Need to fix item so there is only one for cost calculations.
     Cargo item = originalItem;
-    item.quantity = 1;
+    item.quantity = quantity;
     Unit* baseUnit = m_base.GetUnit();
     switch(transType) {
         case BUY_CARGO:
             // Enough credits and room for the item in the ship.
-	    if(item.price <= cockpit->credits && playerUnit->CanAddCargo(item)) {
+	    if(item.price*quantity <= cockpit->credits && playerUnit->CanAddCargo(item)) {
 	        return true;
 	    }
             break;
@@ -1253,7 +1372,7 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             // Either you are buying this ship for your fleet, or you already own the
             //  ship and it will be transported to you.
             if(baseUnit) {
-				if(item.price <= cockpit->credits) {
+				if(item.price*quantity <= cockpit->credits) {
 					return true;
 				}
             }
@@ -1268,7 +1387,7 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
 			return true; // You can always sell upgrades, no matter what!
         case BUY_UPGRADE:
             // cargo.mission == true means you can't do the transaction.
-            if(item.price <= cockpit->credits && !item.mission) {
+            if(item.price*quantity <= cockpit->credits && !item.mission) {
                 return true;
             }
             break;
@@ -1455,25 +1574,25 @@ void BaseComputer::updateTransactionControls(const Cargo& item, bool skipFirstCa
 
     if(success) {
         // We selected the item successfully.
-        updateTransactionControlsForSelection(m_selectedList, item);
+        updateTransactionControlsForSelection(m_selectedList);
     } else {
         // Didn't find item.  Clear the selection.
         updateTransactionControlsForSelection(NULL);
     }
 }
 
-// Buy an item from the cargo list.
-bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
+// Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Unit* playerUnit = m_player.GetUnit();
     Unit* baseUnit = m_base.GetUnit();
     if(!(playerUnit && baseUnit)) {
         return true;
     }
 
-    const int quantity = 1;
     Cargo* item = selectedItem();
     if(item) {
         Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+		const int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
         playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
@@ -1485,19 +1604,34 @@ bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
     return true;
 }
 
-// Sell an item from ship's cargo.
-bool BaseComputer::sellCargo(const EventCommandId& command, Control* control) {
+// Buy an item from the cargo list.
+bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
+	return buySelectedCargo(1);
+}
+
+// Buy an item (quantity 10) from the cargo list.
+bool BaseComputer::buy10Cargo(const EventCommandId& command, Control* control) {
+	return buySelectedCargo(10);
+}
+
+// Buy all of an item from the cargo list.
+bool BaseComputer::buyAllCargo(const EventCommandId& command, Control* control) {
+	return buySelectedCargo(-1);
+}
+
+// Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+bool BaseComputer::sellSelectedCargo(int requestedQuantity) {
     Unit* playerUnit = m_player.GetUnit();
     Unit* baseUnit = m_base.GetUnit();
     if(!(playerUnit && baseUnit)) {
         return true;
     }
 
-    const int quantity = 1;
     Cargo* item = selectedItem();
     if(item) {
         Cargo itemCopy = *item;     // Not sure what "sold" has in it.  Need copy of sold item.
- 	Cargo sold;
+ 		Cargo sold;
+		const int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
         playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
 
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
@@ -1508,6 +1642,21 @@ bool BaseComputer::sellCargo(const EventCommandId& command, Control* control) {
     }
 
     return true;
+}
+
+// Sell an item from ship's cargo.
+bool BaseComputer::sellCargo(const EventCommandId& command, Control* control) {
+	return sellSelectedCargo(1);
+}
+
+// Sell an item (quantity 10) from the cargo list.
+bool BaseComputer::sell10Cargo(const EventCommandId& command, Control* control) {
+	return sellSelectedCargo(10);
+}
+
+// Sell all of an item from the cargo list.
+bool BaseComputer::sellAllCargo(const EventCommandId& command, Control* control) {
+	return sellSelectedCargo(-1);
 }
 
 // Change controls to NEWS mode.
@@ -2276,8 +2425,11 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 		Unit * playerUnit = m_player.GetUnit();
 		if(item->content == BASIC_REPAIR_NAME) {
 			if (playerUnit) {
+				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 				BasicRepair(playerUnit);
 				assert(m_selectedList != NULL);				
+				loadUpgradeControls();
+				updateTransactionControls(itemCopy, true);
 				m_selectedList->picker->selectCell(NULL);       // Turn off selection.
 			}
 			return true;
@@ -2286,11 +2438,12 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 			if (playerUnit) {
 				Unit * baseUnit = m_base.GetUnit();
 				if (baseUnit) {
+					Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 					const int quantity=1;
 					playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
 					RecomputeUnitUpgrades(playerUnit);
 					loadUpgradeControls();
-					updateTransactionControls(*item);
+					updateTransactionControls(itemCopy, true);
 				}
 			}
 			return true;
@@ -2314,10 +2467,11 @@ bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) 
 			Unit * playerUnit = m_player.GetUnit();
 			Unit * baseUnit = m_base.GetUnit();
 			if (baseUnit&&playerUnit) {
+				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 				playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
 				RecomputeUnitUpgrades(playerUnit);
 				loadUpgradeControls();
-				updateTransactionControls(*item);				
+				updateTransactionControls(itemCopy, true);				
 			}
 			return true;
 		}
@@ -2528,6 +2682,7 @@ bool BaseComputer::changeToPlayerInfoMode(const EventCommandId& command, Control
         switchToControls(PLAYER_INFO);
         // Initialize description with player info.
         window()->sendCommand("ShowPlayerInfo", NULL);
+		recalcTitle();
     }
     return true;
 }
