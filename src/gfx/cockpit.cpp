@@ -788,7 +788,7 @@ void Cockpit::Draw() {
 	headtrans.push_back (MyMat());
 	VectorAndPositionToMatrix(headtrans.back().m,P,Q,R,Vector(0,0,0));
 	static float theta=0;
-	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed",".5"));
+	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed","10"));
 	theta+=shake_speed*GetElapsedTime();
 	static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction",".01"));
 
