@@ -110,7 +110,8 @@ void micro_sleep(unsigned int n) {
 void micro_sleep(unsigned int n) {
 	struct timeval tv = { 0, 0 };
 
-	tv.tv_usec = n;
+	tv.tv_usec = n%1000000;
+	tv.tv_sec=n/1000000;
 	select(0, NULL, NULL, NULL, &tv);
 
 	return;
