@@ -12,7 +12,7 @@ SUBDIRS = \
     cmd gfx gldrv aldrv python gui networking boost common boost129
 
 vegastrike_LDADD =  				\
-networking/netserver.o 				\
+networking/netserver_devices.o		\
 aldrv/libaldrv.a 					\
 common/libvscommon.a 				\
 networking/libnetclient.a 			\
@@ -35,6 +35,7 @@ gfx/nav/libnav.a 					\
 -lpthread -lz
 
 vegaserver_LDADD =  			\
+networking/netserver_devices.o	\
 cmd/script/director_server.o 	\
 cmd/unit_util_generic.o 		\
 cmd/unit_util_server.o 			\

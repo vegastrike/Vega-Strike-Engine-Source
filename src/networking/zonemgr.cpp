@@ -429,6 +429,7 @@ void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, Clien
 				netbuf.addShort( un->GetSerial());
 				// Put the current client state in
 				netbuf.addClientState( un_cs);
+				un_cs.display();
 				// Increment the number of clients we send full info about
 			}
 			// Here find a condition for which sending only position would be enough
@@ -473,7 +474,7 @@ void	ZoneMgr::broadcastDamage( )
 			Packet pckt;
 			Unit * un;
 
-			cerr<<"BROADCAST DAMAGE = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
+			//cerr<<"BROADCAST DAMAGE = "<<zone_clients[i]<<" clients in zone "<<i<<endl;
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
@@ -496,7 +497,7 @@ void	ZoneMgr::broadcastDamage( )
 					}
 			/************************* END CLIENTS BROADCAST ***************************/
 			/************************* START UNITS BROADCAST ***************************/
-					cerr<<"BROADCAST DAMAGE = "<<zone_units[i]<<" units in zone "<<i<<endl;
+					//cerr<<"BROADCAST DAMAGE = "<<zone_units[i]<<" units in zone "<<i<<endl;
 					nbunits = zone_units[i];
 					//netbuf.Reset();
 					for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)

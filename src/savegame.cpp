@@ -186,7 +186,7 @@ string SaveGame::GetOldStarSystem () {
 }
 
 void SaveGame::SetPlayerLocation (const QVector &v) {
-  fprintf (stderr,"Set Location %f %f %f",v.i,v.j,v.k);
+  //fprintf (stderr,"Set Location %f %f %f",v.i,v.j,v.k);
   if ((FINITE (v.i)&&FINITE(v.j)&&FINITE(v.k))) {
     PlayerLocation =v;
   }else {

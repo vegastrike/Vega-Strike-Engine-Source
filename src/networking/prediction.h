@@ -10,44 +10,47 @@ enum	interpolationMethod { Linear, Spline };
 class Prediction
 {
 	protected:
-		virtual QVector			InterpolatePosition( ClientPtr, double blend) = 0;
-		virtual Quaternion		InterpolateOrientation( ClientPtr clt, double blend) = 0;
+		// A2 is the predicted position after InitInterpolation()
+		QVector					A0, B, A1, A2, A3;
+		Vector					VA, VB, AA, AB;
 
 	public:
 		Prediction();
 		virtual ~Prediction();
-		virtual void			InitInterpolation( ClientPtr clt) = 0;
-		virtual Transformation	Interpolate( ClientPtr clt, double blend);
+		virtual void			InitInterpolation( ClientPtr clt);
+		virtual QVector			InterpolatePosition( ClientPtr) = 0;
+		virtual Quaternion		InterpolateOrientation( ClientPtr clt) = 0;
+		virtual Transformation	Interpolate( ClientPtr clt);
+};
+
+class NullPrediction : public Prediction
+{
+	public:
+		virtual void			InitInterpolation( ClientPtr clt);
+		virtual QVector			InterpolatePosition( ClientPtr clt);
+		virtual Quaternion		InterpolateOrientation( ClientPtr clt);
 };
 
 class LinearPrediction : public Prediction
 {
-	protected:
-		virtual QVector			InterpolatePosition( ClientPtr, double blend);
-		virtual Quaternion		InterpolateOrientation( ClientPtr clt, double blend);
-
 	public:
-		virtual void InitInterpolation( ClientPtr clt);
-		virtual Transformation	Interpolate( ClientPtr clt, double blend);
+		virtual QVector			InterpolatePosition( ClientPtr);
+		virtual Quaternion		InterpolateOrientation( ClientPtr clt);
+		virtual Transformation	Interpolate( ClientPtr clt);
 };
 
 class CubicSplinePrediction : public Prediction, public CubicSpline
 {
-	protected:
-		virtual QVector			InterpolatePosition( ClientPtr, double blend);
-		virtual Quaternion		InterpolateOrientation( ClientPtr clt, double blend);
-
 	public:
-		virtual void InitInterpolation( ClientPtr clt);
+		virtual void			InitInterpolation( ClientPtr clt);
+		virtual QVector			InterpolatePosition( ClientPtr);
+		virtual Quaternion		InterpolateOrientation( ClientPtr clt);
 };
 
 class MixedPrediction : public LinearPrediction, public CubicSplinePrediction
 {
-	protected:
-
 	public:
-		virtual void InitInterpolation( ClientPtr clt);
-		virtual Transformation	Interpolate( ClientPtr clt, double blend);
+		virtual Transformation	Interpolate( ClientPtr clt);
 };
 
 #endif

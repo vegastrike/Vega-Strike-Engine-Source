@@ -55,6 +55,7 @@
 #include "networking/networkcomm.h"
 #include "posh.h"
 #include "md5.h"
+#include "prediction.h"
 
 #ifdef micro_sleep
 #undef micro_sleep
@@ -70,6 +71,7 @@ extern vector<string> globalsaves;
 extern vector<unorigdest *> pendingjump;
 extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
 typedef vector<Client *>::iterator VC;
+typedef vector<ObjSerial>::iterator ObjI;
 
 /*************************************************************/
 /**** Tool functions                                      ****/
@@ -115,6 +117,8 @@ NetClient::NetClient()
 	ingame = false;
 	current_freq = MIN_COMMFREQ;
 	selected_freq = MIN_COMMFREQ;
+
+	prediction = new CubicSplinePrediction();
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
 #else
@@ -131,6 +135,8 @@ NetClient::NetClient()
 
 NetClient::~NetClient()
 {
+	if( prediction)
+		delete prediction;
 #ifdef NETCOMM
 	if( NetComm!=NULL)
 		delete NetComm;
@@ -503,6 +509,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				    cout << "WE ARE ON STARDATE "
                          <<_Universe->current_stardate.GetFullCurrentStarDate() << endl;
                     COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
+					this->game_unit.GetUnit()->SetCurPosition( netbuf.getQVector());
                     //this->getZoneData( &p1 );
                 }
                 break;

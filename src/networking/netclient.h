@@ -43,6 +43,7 @@ class Client;
 class ClientState;
 class NetUI;
 class NetworkCommunication;
+class Prediction;
 
 namespace VsnetDownload {
   namespace Client {
@@ -84,6 +85,7 @@ class	NetClient
 		// This unit array has to be changed into a map too !!
         // Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 	    // a vector because always accessed by their IDs
+		Prediction *		prediction;
 
 	    NetworkCommunication*	NetComm;
 
@@ -187,8 +189,6 @@ class	NetClient
     private:
         bool canCompress() const;
 };
-
-typedef vector<ObjSerial>::iterator ObjI;
 
 Unit * getNetworkUnit( ObjSerial cserial);
 bool isLocalSerial( ObjSerial sernum);

@@ -72,12 +72,14 @@ bool Packet::packet_uncompress( PacketMem& outpacket, const unsigned char* src, 
 	    outpacket = mem;
 	    header.data_length = ulen_s;
 
+#ifdef VSNET_DEBUG
 	    COUT << "Parsed a compressed packet with"
 	         << " cmd=" << Cmd(header.command) << "(" << (int)header.command << ")"
 	         << " ser=" << header.serial
 	         << " ts=" << header.timestamp
 	         << " len=" << header.data_length
 	         << endl;
+#endif
         return true;
     }
 }
@@ -122,12 +124,14 @@ Packet::Packet( const void* buffer, size_t sz )
             PacketMem mem( buffer, sz );
             _packet = mem;
 
+#ifdef VSNET_DEBUG
 	        COUT << "Parsed a packet with"
 	             << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
 	             << " ser=" << h.serial
 	             << " ts=" << h.timestamp
 	             << " len=" << h.data_length
 	             << endl;
+#endif
 	    }
     }
     else
@@ -172,12 +176,14 @@ Packet::Packet( PacketMem& buffer )
 	    {
             _packet = buffer;
 
+#ifdef VSNET_DEBUG
 	        COUT << "Parsed a packet with"
 	             << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
 	             << " ser=" << h.serial
 	             << " ts=" << h.timestamp
 	             << " len=" << h.data_length
 	             << endl;
+#endif
 	    }
     }
     else
@@ -273,9 +279,11 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
                      const AddressIP* dst, const SOCKETALT& sock,
                      const char* caller_file, int caller_line )
 {
+#ifdef VSNET_DEBUG
     COUT << "enter " << __PRETTY_FUNCTION__ << endl
-	     << "*** from " << caller_file << ":" << caller_line << endl
-         << "*** send " << cmd << " ser=" << nserial << ", "
+	     << "*** from " << caller_file << ":" << caller_line << endl;
+#endif
+    COUT << "*** send " << cmd << " ser=" << nserial << ", "
          << length << " bytes to socket " << sock << endl;
 
     // Get a timestamp for packet (used for interpolation on client side)
@@ -341,8 +349,10 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
         char* c = _packet.getVarBuf( );
         h.hton( c );
         memcpy( &c[header_length], buf, length );
+#ifdef VSNET_DEBUG
         COUT << "Created a packet of length "
              << length+header_length << " for sending" << endl;
+#endif
         //_packet.dump( cout, 0 );
 #ifdef HAVE_ZLIB_H
     }
@@ -437,7 +447,9 @@ int Packet::send( )
     }
     else
     {
+#ifdef VSNET_DEBUG
 	COUT << "packet after sendbuf: " << endl;
+#endif
         h.ntoh( _packet.getConstBuf() );
 
 	PacketMem m( _packet.getVarBuf(), _packet.len(), PacketMem::LeaveOwnership );

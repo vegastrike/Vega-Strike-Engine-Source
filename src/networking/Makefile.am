@@ -63,6 +63,11 @@ libnetgeneric = \
 	netclient_devices.cpp \
 	netclient.cpp		\
 	netclient.h		\
+	netserver_acct.cpp \
+	netserver_clients.cpp \
+	netserver_devices.cpp \
+	netserver_net.cpp \
+	netserver_login.cpp \
 	netserver.cpp		\
 	netserver.h		\
 	netui.cpp		\

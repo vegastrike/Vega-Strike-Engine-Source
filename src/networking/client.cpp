@@ -1,5 +1,4 @@
 #include "client.h"
-#include "prediction.h"
 
 Client::Client()
 {
@@ -16,12 +15,6 @@ Client::Client()
 	jumpfile="";
     _disconnectReason = "none";
 	comm_freq = MIN_COMMFREQ;
-	prediction = new CubicSplinePrediction();
-}
-
-Client::Client( Prediction * pred)
-{
-	Client::Client(); this->prediction = pred;
 }
 
 Client::Client( SOCKETALT& s, bool tcp )
@@ -29,5 +22,9 @@ Client::Client( SOCKETALT& s, bool tcp )
 	    , sock(s)
 {
 	Client::Client();
+}
+
+Client::~Client()
+{
 }
 

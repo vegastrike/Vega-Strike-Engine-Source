@@ -329,7 +329,7 @@ unsigned short	NetBuffer::getShort()
 			unsigned short s;
 			checkBuffer( sizeof( s), "getShort");
 			s = POSH_ReadU16FromBig( this->buffer+offset);
-			cerr<<"getShort :: offset="<<offset<<" - length="<<sizeof( s)<<" - value="<<s<<endl;
+			//cerr<<"getShort :: offset="<<offset<<" - length="<<sizeof( s)<<" - value="<<s<<endl;
 			offset+=sizeof(s);
 			return s;
 		}
@@ -419,7 +419,7 @@ string	NetBuffer::getString()
 			unsigned short s;
 			s = this->getShort();
 			checkBuffer( s, "getString");
-			cerr<<"getString :: offset="<<offset<<" - length="<<s<<endl;
+			//cerr<<"getString :: offset="<<offset<<" - length="<<s<<endl;
 			char c = buffer[offset+s];
 			buffer[offset+s]=0;
 			string str( buffer+offset);

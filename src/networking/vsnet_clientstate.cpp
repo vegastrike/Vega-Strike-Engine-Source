@@ -144,11 +144,11 @@ ClientState::ClientState( ObjSerial serial, Transformation trans, Vector velocit
 
 void		ClientState::display() const
 {
-	cout<<"SERIAL="<<this->client_serial;
-	cout<<" - Position="<<pos.position.i<<","<<pos.position.j<<","<<pos.position.k;
-	cout<<" - Orientation="<<pos.orientation.v.i<<","<<pos.orientation.v.j<<","<<pos.orientation.v.k;
-	cout<<" - Velocity="<<veloc.i<<","<<veloc.j<<","<<veloc.k;
-	cout<<" - Acceleration="<<accel.i<<","<<accel.j<<","<<accel.k<<endl;
+	cerr<<"SERIAL="<<this->client_serial;
+	cerr<<" - Position="<<pos.position.i<<","<<pos.position.j<<","<<pos.position.k;
+	cerr<<" - Orientation="<<pos.orientation.v.i<<","<<pos.orientation.v.j<<","<<pos.orientation.v.k;
+	cerr<<" - Velocity="<<veloc.i<<","<<veloc.j<<","<<veloc.k;
+	cerr<<" - Acceleration="<<accel.i<<","<<accel.j<<","<<accel.k<<endl;
 }
 
 int		ClientState::operator==( const ClientState & ctmp)

@@ -109,8 +109,6 @@ class NetServer
 		void			recvMsg_tcp( ClientPtr clt);		// Receive network messages
 		void			recvMsg_udp( );					// Receive network messages
 		void			processPacket( ClientPtr clt, unsigned char cmd, const AddressIP& ipadr, Packet& packet ); // Process received packet info
-		void			recvNewChar( ClientPtr clt);		// Receive a new character
-		void			sendLocations( ClientPtr clt);	// Send the start locations
 		void			startMsg();						// Startup showing text
 		void			disconnect( ClientPtr clt, const char* debug_from_file, int debug_from_line );		// Disconnect a client
 		void			logout( ClientPtr clt);			// Clean disconnect a client

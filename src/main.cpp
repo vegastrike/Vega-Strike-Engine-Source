@@ -686,7 +686,8 @@ void bootstrap_main_loop () {
 			}
 		}
 	}
-	if (mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
+	// Always dock on load in networking if it was said so in the save file
+	if (/*Network!=NULL ||*/ mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
 		for (int i=0;i<_Universe->numPlayers();i++) {
 			DockToSavedBases(i);
 		}

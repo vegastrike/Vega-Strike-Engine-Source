@@ -36,7 +36,6 @@
 
 class Unit;
 class UnitContainer;
-class Prediction;
 
 extern VegaConfig *vs_config;
 int		md5SumFile( const char * filename, unsigned char * digest);
@@ -52,7 +51,7 @@ public:
 	/* Network and identification properties */
 	UnitContainer	game_unit;
 	AddressIP		cltadr;
-	Prediction *	prediction;
+	//Prediction *	prediction;
 	bool            is_tcp;
 	SOCKETALT		sock;
 	//ObjSerial		serial;
@@ -80,8 +79,8 @@ public:
     string          _disconnectReason;
 
 	Client();
-	Client( Prediction * pred);
 	Client( SOCKETALT& s, bool tcp );
+	~Client();
 
 	inline bool isTcp( ) const { return is_tcp; }
 	inline bool isUdp( ) const { return !is_tcp; }

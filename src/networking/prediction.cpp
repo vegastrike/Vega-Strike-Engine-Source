@@ -3,36 +3,6 @@
 #include "gfx/lerp.h"
 #include "cmd/unit_generic.h"
 
-// OLD NetClient::predict( ObjSerial clientid) function
-/*
-	// This function is to call after the state have been updated (which should be always the case)
-
-	// This function computes 4 splines points needed for a spline creation
-	//    - compute a point on the current spline using blend as t value
-	//    - parameter A and B are old_position and new_position (received in the latest packet)
-
-	Unit * un = Clients.get(clientid)->game_unit.GetUnit();
-	unsigned int del = Clients.get(clientid)->deltatime;
-	double delay = del;
-	// A is last known position and B is the position we just received
-	// A1 is computed from position A and velocity VA
-	QVector A( un->old_state.getPosition());
-	QVector B( un->curr_physical_state.position);
-	Vector  VA( un->old_state.getVelocity());
-	Vector  VB( un->Velocity);
-	Vector  AA( un->old_state.getAcceleration());
-	Vector  AB( un->GetAcceleration());
-	QVector A1( A + VA);
-	// A2 is computed from position B and velocity VB
-	QVector A3( B + VB*delay + AB*delay*delay*0.5);
-	QVector A2( A3 - (VB + AB*delay));
-
-	// HERE : Backup the current state ???? --> Not sure
-	un->curr_physical_state.position = A3;
-*/
-
-// blend = time
-
 /*************************************************************************************/
 /**** Prediction virtual class                                                    ****/
 /*************************************************************************************/
@@ -44,48 +14,7 @@ Prediction::~Prediction()
 {
 }
 
-Transformation Prediction::Interpolate( ClientPtr clt, double blend)
-{
-	return Transformation( InterpolateOrientation( clt, blend), InterpolatePosition( clt, blend));
-}
-
-/*************************************************************************************/
-/**** LinearPrediction class : based on lerp.c stuff also used in non networking  ****/
-/*************************************************************************************/
-
-void		LinearPrediction::InitInterpolation( ClientPtr clt)
-{
-}
-
-QVector		LinearPrediction::InterpolatePosition( ClientPtr clt, double blend)
-{
-	QVector position;
-	return position;
-}
-
-Quaternion	LinearPrediction::InterpolateOrientation( ClientPtr clt, double blend)
-{
-	Quaternion orient;
-	return orient;
-}
-
-Transformation LinearPrediction::Interpolate( ClientPtr clt, double blend)
-{
-	Unit * un = clt->game_unit.GetUnit();
-
-	// Only interpolate between old position and current one -> should prolly first extrapolate the next new position
-	// and then interpolate between current position and the next new one
-	const Transformation old_pos( un->old_state.getOrientation(), un->old_state.getPosition());
-	const Transformation cur_pos( un->curr_physical_state.orientation, un->curr_physical_state.position);
-
-	return linear_interpolate(  old_pos, cur_pos, blend);
-}
-
-/*************************************************************************************/
-/**** CubicSplinePrediction class : based on cubic spline interpolation           ****/
-/*************************************************************************************/
-
-void		CubicSplinePrediction::InitInterpolation( ClientPtr clt)
+void		Prediction::InitInterpolation( ClientPtr clt)
 {
 	// This function is to call after the state have been updated (which should be always the case)
 
@@ -99,31 +28,99 @@ void		CubicSplinePrediction::InitInterpolation( ClientPtr clt)
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
-	QVector A( un->old_state.getPosition());
-	QVector B( un->curr_physical_state.position);
-	Vector  VA( un->old_state.getVelocity());
-	Vector  VB( un->Velocity);
-	Vector  AA( un->old_state.getAcceleration());
-	Vector  AB( un->GetAcceleration());
-	QVector A1( A + VA);
+	A0 = un->old_state.getPosition();
+	B = un->curr_physical_state.position;
+	VA = un->old_state.getVelocity();
+	VB = un->Velocity;
+	AA = un->old_state.getAcceleration();
+	AB = un->GetAcceleration();
+	A1 = A0 + VA;
 	// A2 is computed from position B and velocity VB
-	QVector A3( B + VB*delay + AB*delay*delay*0.5);
-	QVector A2( A3 - (VB + AB*delay));
-
-	//Clients.get(clientid)->spline.createSpline( A, A1, A2, A3);
+	A3 = B + VB*delay + AB*delay*delay*0.5;
+	A2 = A3 - (VB + AB*delay);
 }
 
-Quaternion	CubicSplinePrediction::InterpolateOrientation( ClientPtr clt, double blend)
+Transformation Prediction::Interpolate( ClientPtr clt)
 {
-	Quaternion orient;
-
-	return orient;
+	return Transformation( InterpolateOrientation( clt), InterpolatePosition( clt));
 }
 
-QVector		CubicSplinePrediction::InterpolatePosition( ClientPtr clt, double blend)
+/*************************************************************************************/
+/**** NullPrediction class : doesn't do any prediction/interpolation              ****/
+/*************************************************************************************/
+
+void		NullPrediction::InitInterpolation( ClientPtr clt)
+{
+}
+
+QVector		NullPrediction::InterpolatePosition( ClientPtr clt)
+{
+	return clt->game_unit.GetUnit()->curr_physical_state.position;
+}
+
+Quaternion	NullPrediction::InterpolateOrientation( ClientPtr clt)
+{
+	return clt->game_unit.GetUnit()->curr_physical_state.orientation;
+}
+
+/*************************************************************************************/
+/**** LinearPrediction class : based on lerp.c stuff also used in non networking  ****/
+/*************************************************************************************/
+
+QVector		LinearPrediction::InterpolatePosition( ClientPtr clt)
+{
+	Unit * un = clt->game_unit.GetUnit();
+	// USE PREDICTED POSITION
+	const Transformation old_pos( un->curr_physical_state);
+	const Transformation new_pos( un->old_state.getOrientation(), A2);
+	/*
+	const Transformation old_pos( un->old_state.getOrientation(), un->old_state.getPosition());
+	const Transformation cur_pos( un->curr_physical_state.orientation, un->curr_physical_state.position);
+	*/
+	return (linear_interpolate(  old_pos, new_pos, clt->deltatime)).position;
+}
+
+Quaternion	LinearPrediction::InterpolateOrientation( ClientPtr clt)
+{
+	Unit * un = clt->game_unit.GetUnit();
+	return un->curr_physical_state.orientation;
+	//return (linear_interpolate(  old_pos, cur_pos, clt->deltatime)).orientation;
+}
+
+Transformation LinearPrediction::Interpolate( ClientPtr clt)
+{
+	Unit * un = clt->game_unit.GetUnit();
+
+	// USE PREDICTED POSITION
+	const Transformation old_pos( un->curr_physical_state);
+	const Transformation new_pos( un->old_state.getOrientation(), A2);
+	/*
+	const Transformation old_pos( un->old_state.getOrientation(), un->old_state.getPosition());
+	const Transformation cur_pos( un->curr_physical_state.orientation, un->curr_physical_state.position);
+	*/
+	return linear_interpolate(  old_pos, new_pos, clt->deltatime);
+}
+
+/*************************************************************************************/
+/**** CubicSplinePrediction class : based on cubic spline interpolation           ****/
+/*************************************************************************************/
+
+void		CubicSplinePrediction::InitInterpolation( ClientPtr clt)
+{
+	Prediction::InitInterpolation( clt);
+
+	this->createSpline( A0, A1, A2, A3);
+}
+
+Quaternion	CubicSplinePrediction::InterpolateOrientation( ClientPtr clt)
+{
+	return clt->game_unit.GetUnit()->curr_physical_state.orientation;
+}
+
+QVector		CubicSplinePrediction::InterpolatePosition( ClientPtr clt)
 {
 	// There should be another function called when received a new position update and creating the spline
-	QVector pos( this->computePoint( blend));
+	QVector pos( this->computePoint( clt->deltatime));
 	return pos;
 }
 
@@ -131,22 +128,22 @@ QVector		CubicSplinePrediction::InterpolatePosition( ClientPtr clt, double blend
 /**** MixedPrediction class : Linear for orientation, CubicSpline for position    ****/
 /*************************************************************************************/
 
-Transformation MixedPrediction::Interpolate( ClientPtr clt, double blend)
+Transformation MixedPrediction::Interpolate( ClientPtr clt)
 {
-	Transformation linear( LinearPrediction::Interpolate( clt, blend));
-	linear.position = CubicSplinePrediction::InterpolatePosition( clt, blend);
+	Transformation linear( LinearPrediction::Interpolate( clt));
+	linear.position = CubicSplinePrediction::InterpolatePosition( clt);
 	return linear;
 }
 
 /*
-QVector			MixedPrediction::InterpolatePosition( ClientPtr, double blend)
+QVector			MixedPrediction::InterpolatePosition( ClientPtr)
 { 
-	return CubicSplinePrediction::InterpolatePosition( clt, blend);
+	return CubicSplinePrediction::InterpolatePosition( clt);
 }
 
-Orientation		MixedPrediction::InterpolateOrientation( ClientPtr clt, double blend)
+Orientation		MixedPrediction::InterpolateOrientation( ClientPtr clt)
 {
-	return LinearPrediction::InterpolateOrientation( clt, blend);
+	return LinearPrediction::InterpolateOrientation( clt);
 }
 */
 
