@@ -45,7 +45,7 @@ extern string GetUnitDir( string filename);
 
 int	selectdirs( const struct dirent * entry)
 {
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32)
 	// Have to check if we have the full path or just relative (which would be a problem)
 	cerr<<"Read directory entry : "<<entry->d_name<<endl;
 	struct stat s;

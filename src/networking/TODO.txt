@@ -1,7 +1,7 @@
 
 *** GENERAL ************************************************************
 
-- Fix the generated BSP save path
+- Wait for the client to ask to be added after a jump so he can have the time to load its data
 TO TEST - Possibility of specifying a mod
 TO TEST - Add the command line datapath if supplied !
 - Add a ranking system for each faction in factions.xml
@@ -66,6 +66,7 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE - Fix the generated BSP save path
 DONE - Move accounts.xml into datadir/accounts/ dir
 DONE - Fix accounts.xml being written in homedir instead of datadir in acctserver.cpp when account subscription from web
 DONE - Use scandir to list all mods found in datadir/mods and homedir/mods
