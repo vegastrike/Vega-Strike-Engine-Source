@@ -3261,9 +3261,11 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	PRETTY_ADDU(statcolor+"Mass: #-c",playerUnit->mass,0,"metric tons");
 	// Irrelevant to player as is proportional to mass in our physics system.
 	// PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m²");
+	if(!subunitlevel){
 	PRETTY_ADDU(statcolor+"Hold volume: #-c",playerUnit->EmptyCargoVolume(),0,"cubic meters");
 	//following line somewhat borken
 	PRETTY_ADDU(statcolor+"Fuel Capacity: #-c",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
+	}
 	const Unit::Computer uc=playerUnit->ViewComputerData();
     	text+="#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
     	text+="#n#"+prefix+statcolor+"Turning Response: #-c";	
@@ -3279,6 +3281,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 		PRETTY_ADDN(statcolor+"  roll #-c",playerUnit->limits.roll/(playerUnit->GetMoment()),2);
 		text+=" radians/second^2";
 	}
+	if(!subunitlevel){
 	PRETTY_ADDU(statcolor+"Fore acceleration: #-c",playerUnit->limits.forward/(10*playerUnit->mass),2,"gravities");
 	PRETTY_ADDU(statcolor+"Aft acceleration: #-c",playerUnit->limits.retro/(10*playerUnit->mass),2,"gravities")
 	if (playerUnit->limits.lateral==playerUnit->limits.vertical) {
@@ -3297,6 +3300,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	PRETTY_ADDU(statcolor+"Max combat speed: #-c",uc.max_speed()*3.6,0,"km/h");
 	PRETTY_ADDU(statcolor+"Max afterburner combat speed: #-c",uc.max_ab_speed()*3.6,0,"km/h");
 	PRETTY_ADDU(statcolor+"Max non-combat speed: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
+	}
 	if (uc.max_yaw==uc.max_pitch &&uc.max_yaw==uc.max_roll) {
 		PRETTY_ADD(statcolor+"Max turn rate: #-c",uc.max_yaw,2);
 		text+=" Radians/second "+statcolor+"(yaw, pitch, roll)#-c";
@@ -3319,13 +3323,13 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	}
 	PRETTY_ADDU(statcolor+"Assisted targeting cone: #-c",acos(uc.radar.trackingcone)*2,2,"Radians");
 	PRETTY_ADDU(statcolor+"Missile locking cone: #-c",acos(uc.radar.lockcone)*2,2,"Radians");
-	
+	if(!subunitlevel){
 	// Always zero PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
 	text+="#n#"+prefix+statcolor+"ITTS (Intelligent Target Tracking System) support: #-c";
 	if (uc.itts) text+="yes"; else text+="no";
 	text+="#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
 	if (uc.radar.color) text+="yes"; else text+="no";
-
+	}
 
 	text.append("#n##n##c0:1:.5#"+prefix+"[ENERGY SUBSYSTEM]#n##-c");
 	float shieldsum=0;
@@ -3351,6 +3355,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	PRETTY_ADDU(statcolor+"Recharge: #-c",playerUnit->EnergyRechargeData()*RSconverter,0,"MJ/s");
 	PRETTY_ADDU(statcolor+"Weapon capacitor bank storage: #-c",(playerUnit->MaxEnergyData()*RSconverter)-(shieldsum/5),0,"MJ");
 	//note: I found no function to get max warp energy, but since we're docked they are the same
+	if(!subunitlevel){
 	PRETTY_ADDU(statcolor+"Warp capacitor bank storage: #-c",playerUnit->GetWarpEnergy()*RSconverter*Wconv,0,"MJ");
 
     	text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
@@ -3369,7 +3374,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 			PRETTY_ADDU(statcolor+"Damage to outsystem jump drive: #-c",uj.damage*VSDM,0,"MJ");
 		}
 	}
-	
+	}
 	text+="#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
 	text+="#n#"+prefix+statcolor+"Armor damage resistance:#-c";
 	PRETTY_ADDU(statcolor+"  fore - #-c",playerUnit->armor.front*VSDM,0,"MJ");
@@ -3546,13 +3551,14 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	//handle SubUnits
 	un_iter ki=playerUnit->getSubUnits(); //can't use kiter, MakeUnitXMLPretty takes non-const Unit
 	{	int i=1;
-	Unit *sub;	
-	while (sub=ki.next()) {
-		if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS]#n##-c";
-		PRETTY_ADD("#n##n#"+prefix+"<sub unit ",i,0);
-		text+=">#n##n#";
+	Unit *sub=ki.current();
+	while (sub) {
+		if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS]#-c";
+		PRETTY_ADD("#n#"+prefix+"#c0:1:.2#<#-csub unit ",i,0);
+		text+="#c0:1:.2#>#-c#n#";
 		showUnitStats(sub,text,subunitlevel+1);
 		i++;
+		sub=ki.next();
 	}}
 
 }
