@@ -39,15 +39,9 @@ Missile::Missile(char *filename):Unit(filename)
 
 Gun::Gun(char *filename)
 {
-	num_proj = 0;
-#ifdef WIN32
-	ZeroMemory(&projectiles, sizeof(projectiles));
-#else
-	bzero (&projectiles,sizeof(projectiles));
-#endif
-	FILE *fp = fopen(filename, "r");
-	fscanf(fp, "%s", missilename);
-	fclose(fp);
+  //FILE *fp = fopen(filename, "r");
+	//fscanf(fp, "%s", missilename);
+  //fclose(fp);
 	
 	/*
 	fp = fopen(missilename, "r");
@@ -59,8 +53,8 @@ Gun::Gun(char *filename)
 void Gun::Draw()
 {
 	Unit::Draw();
-	int proj_index;
-	for(proj_index = 0; proj_index < num_proj; proj_index++)
+	unsigned int proj_index;
+	for(proj_index = 0; proj_index < projectiles.size(); proj_index++)
 	{
 		Missile* currproj = projectiles[proj_index];
 		if(currproj)

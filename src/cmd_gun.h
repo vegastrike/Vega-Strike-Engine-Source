@@ -26,19 +26,35 @@ public:
 };
 
 class Gun:public Unit{
-	Missile *projectiles[2048];  //every gun keeps track of its bullets like so
-								//Maximum of 2048
-	int num_proj;
-	char missilename[64];
-
+  vector <Missile *> projectiles;  //every gun keeps track of its bullets like so
+  string side;
+  enum MOUNT {
+    LIGHT =1, 
+    MEDIUM =2, 
+    HEAVY =4, 
+    SUPERHEAVY=8,
+    CAPSHIPLIGHT=16, 
+    CAPSHIPMED=32, 
+    CAPSHIPHEAVY=64
+  };
+  int mount;
+  class Stats {
+    float damage;
+    float refire;
+    float range;
+    char name[64];
+    float radius;
+    int tracktype;
+  };
+  Gun::Stats *type;
 public:
 	Gun(char *filename);
 	~Gun()
 	{
-		for(int proj_index = 0; proj_index<2048; proj_index++)
-			if(projectiles[proj_index])
-				delete projectiles[proj_index];
-	}
+	  for(unsigned int proj_index = 0; proj_index<projectiles.size(); proj_index++)
+	    if(projectiles[proj_index])
+	      delete projectiles[proj_index];
+	}	
 
 	void Draw();
 	void Fire();

@@ -49,7 +49,7 @@ struct Transformation {
  
   inline void to_matrix(Matrix m) const {
     orientation.to_matrix(m);
-    m[12] = position.i;
+    m[12] = position.i;//FIXME???
     m[13] = position.j;
     m[14] = position.k;
   }

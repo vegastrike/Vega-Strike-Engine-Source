@@ -52,6 +52,7 @@ class Unit {
   struct XML {
     vector<Mesh*> meshes;
     vector<Unit*> units;
+    
   } *xml;
   
   void LoadXML(const char *filename);

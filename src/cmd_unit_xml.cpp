@@ -23,21 +23,41 @@ namespace UnitXML {
       UNIT,
       SUBUNIT,
       MESHFILE,
-      XFILE
+      XFILE,
+      X,
+      Y,
+      Z,
+      RI,
+      RJ,
+      RK,
+      QI,
+      QJ,
+      QK
     };
 
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
-    EnumMap::Pair ("MeshFile", MESHFILE) };
+    EnumMap::Pair ("MeshFile", MESHFILE) 
+  };
 
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
-    EnumMap::Pair ("file", XFILE) };
+    EnumMap::Pair ("file", XFILE), 
+    EnumMap::Pair ("x", X), 
+    EnumMap::Pair ("y", Y), 
+    EnumMap::Pair ("z", Z), 
+    EnumMap::Pair ("ri", RI), 
+    EnumMap::Pair ("rj", RJ), 
+    EnumMap::Pair ("rk", RK), 
+    EnumMap::Pair ("qi", QI),     
+    EnumMap::Pair ("qj", QJ),     
+    EnumMap::Pair ("qk", QK)     
+};
 
   const EnumMap element_map(element_names, 4);
-  const EnumMap attribute_map(attribute_names, 2);
+  const EnumMap attribute_map(attribute_names, 11);
 }
 
 using XMLSupport::EnumMap;
@@ -46,7 +66,13 @@ using XMLSupport::AttributeList;
 using namespace UnitXML;
 
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
+    string filename;
+    Vector Q;
+    Vector R;
+    Vector pos;
+
   Names elem = (Names)element_map.lookup(name);
+
 	AttributeList::const_iterator iter;
   switch(elem) {
   case UNKNOWN:
@@ -62,12 +88,52 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case SUBUNIT:
+
+    Q = Vector (0,1,0);
+    R = Vector (0,0,1);
+    pos = Vector (0,0,0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
-	xml->units.push_back(new Unit((*iter).value.c_str(), true));
+	filename = (*iter).value;
+	break;
+      case X:
+	pos.i=parse_float((*iter).value);
+	break;
+      case Y:
+	pos.j=parse_float((*iter).value);
+	break;
+      case Z:
+	pos.k=parse_float((*iter).value);
+	break;
+      case RI:
+	R.i=parse_float((*iter).value);
+	break;
+      case RJ:
+	R.j=parse_float((*iter).value);
+	break;
+      case RK:
+	R.k=parse_float((*iter).value);
+	break;
+      case QI:
+	Q.i=parse_float((*iter).value);
+	break;
+      case QJ:
+	Q.j=parse_float((*iter).value);
+	break;
+      case QK:
+	Q.k=parse_float((*iter).value);
 	break;
       }
+
+      Q.Normalize();
+      R.Normalize();
+      Vector P;
+      CrossProduct (Q,R,P);
+      int indx = xml->units.size();
+      xml->units.push_back(new Unit (filename.c_str(), true));
+      xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
+      xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     }
     break;    break;
   default:
