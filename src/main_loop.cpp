@@ -422,7 +422,7 @@ void InitializeInput() {
 	BindKey('w', FighterPitchDown);
 	BindKey('s', FighterPitchUp);*/
 }
-
+Sprite * s;
 void createObjects() {
 
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -471,8 +471,8 @@ void createObjects() {
   GFXSetMaterial(0, mat);
   GFXSelectMaterial(0);
   
-  //Sprite *s = new Sprite("carrier.spr");
-  //s->SetPosition(0,0);
+  s = new Sprite("carrier.spr");
+  s->SetPosition(0,0);
   
   textplane = new TextPlane("9x12.fon");
   textplane->SetText(string("This is a test of the emergency broadcast system"));
@@ -516,6 +516,7 @@ void destroyObjects() {
   delete fighter2;
   delete fighter;
   delete bg;
+  delete s;
 }
 
 void main_loop() {
@@ -556,13 +557,15 @@ void main_loop() {
 
 
   _GFX->activeStarSystem()->Draw();
+  //s->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();
   //ProcessMouse();  
+  
   GFXDisable(TEXTURE1);
-  _GFX->AccessHudCamera()->UpdateGFX(false);
+  //  _GFX->AccessHudCamera()->UpdateGFX(false);
   textplane->Draw();
-  _GFX->AccessCamera()->UpdateGFX(false);
+  //  _GFX->AccessCamera()->UpdateGFX(false);
 
   //for(a = 0; a < numf; a++) {
   //fighters[a]->TDraw();

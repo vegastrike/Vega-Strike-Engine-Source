@@ -48,6 +48,30 @@ inline void VectorToMatrix(float matrix[], const Vector &v1, const Vector &v2, c
 	matrix[15] = 1;
 }
 
+inline void VectorAndPositionToMatrix(float matrix[], const Vector &v1, const Vector &v2, const Vector &v3, const Vector &pos) {
+
+	matrix[0] = v1.i;
+	matrix[1] = v1.j;
+	matrix[2] = v1.k;
+	matrix[3] = 0;
+
+	matrix[4] = v2.i;
+	matrix[5] = v2.j;
+	matrix[6] = v2.k;
+	matrix[7] = 0;
+
+	matrix[8] = v3.i;
+	matrix[9] = v3.j;
+	matrix[10] = v3.k;
+	matrix[11] = 0;
+	
+	matrix[12] = pos.i;
+	matrix[13] = pos.j;
+	matrix[14] = pos.k;
+	matrix[15] = 1;
+  
+}
+
 /** zeros out a 4x4 matrix quickly
  */
 inline void Zero(float matrix[])

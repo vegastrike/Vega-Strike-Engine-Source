@@ -25,7 +25,7 @@
 class HUDElement: public Unit {
 public:
 	HUDElement(char *filename);
-
+        void UpdateHudMatrix();
 	void Draw();
 };
 using namespace std ;
@@ -48,7 +48,7 @@ class TextPlane: public HUDElement {
 public:
 	TextPlane(char *filename);
 	~TextPlane();
-
+       
 	void Draw();
 	void SetText(const string &newText) {
 		myText = newText;

@@ -28,36 +28,36 @@ float *mview = NULL;
 HUDElement::HUDElement(char *filename):Unit(filename) {
 	static Matrix view;
 	//myMesh = mesh;
-	if(mview==NULL) {
-	  //	  fprintf (stderr,"I am very l337");
-		mview = view;
-		GFXLoadIdentity(VIEW);
-		GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
-		GFXGetMatrix(VIEW, mview);
-	}
 }
 
+void HUDElement::UpdateHudMatrix() {
+
+  Matrix tmatrix;
+  Vector camp,camq,camr;
+  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+  
+	//GFXIdentity(MODEL);
+	//Identity (tmatrix);
+	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
+	//	GFXLoadMatrix(MODEL,tmatrix);
+  VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.1*camr);//FIXME!!! WHY 1.1 
+  GFXLoadMatrix(MODEL,tmatrix);
+  UpdateMatrix();
+}
+
+
 void HUDElement::Draw() {
-	Matrix tmatrix;
-	GFXGetMatrix(VIEW, tmatrix);
-	GFXLoadMatrix(VIEW, mview);
+  UpdateHudMatrix();
 	
 	Unit::Draw();
-
-	GFXLoadMatrix(VIEW, tmatrix);
 }
 
 TextPlane::TextPlane(char *filename):HUDElement(filename),myColor(0,0,0)
 {
-	static Matrix view;
+  //static Matrix view;
 	//myMesh = mesh;
-	if(mview==NULL) {
-		mview = view;
-		GFXLoadIdentity(VIEW);
-		GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
-		GFXGetMatrix(VIEW, mview);
-	}
-	colpos = rowpos = 0;
+
+  	colpos = rowpos = 0;
 
 	::LoadFile(filename);
 	::SetPosition(fpos);
@@ -95,11 +95,10 @@ TextPlane::~TextPlane()
 void TextPlane::Draw()
 {
 	time += GetElapsedTime();
-	UpdateMatrix();
+	UpdateHudMatrix();
 	Matrix tmatrix;
-	GFXGetMatrix(MODEL, tmatrix);
+
 	for (int i=0;i<nummesh;i++) {
-	  GFXLoadMatrix (MODEL,tmatrix);
 	  meshdata[i]->Draw();
 	}
 
@@ -184,8 +183,8 @@ void TextPlane::Draw()
 	GFXPopBlendMode();
 
 	for(int subcount = 0; subcount < numsubunit; subcount++) {
-	  GFXLoadMatrix (MODEL,tmatrix);
 	  subunits[subcount]->Draw();
+	  //UpdateHudMatrix();
 	}
 	if(aistate)
 		aistate = aistate->Execute();
