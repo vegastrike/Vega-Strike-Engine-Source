@@ -15,9 +15,13 @@
 #include "init.h"
 #include "python_compile.h"
 #include "python_class.h"
+#include "cmd/unit.h"
 #ifdef WIN32
 #include <direct.h>
 #endif
+class Unit;
+//FROM_PYTHON_SMART_POINTER(Unit)
+#ifdef OLD_PYTHON_TEST
      class hello {
 		 std::string country;
       public:
@@ -185,6 +189,7 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 /*Orders::FireAt & from_python(PyObject *p,boost::python::type<Orders::FireAt &>) {
 	return from_python(p,boost::python::type<Orders::FireAt &>());
 }*/
+#endif
 void Python::initpaths(){
   char pwd[2048];
   getcwd (pwd,2047);
@@ -204,6 +209,22 @@ void Python::reseterrors() {
   }
 }
 
+//PYTHON_INIT_GLOBALS(VS,UnitContainer);
+PYTHON_INIT_GLOBALS(VS,Unit);
+PYTHON_BEGIN_MODULE(VS)
+PYTHON_BASE_BEGIN_CLASS(VS,UnitContainer,"StoredUnit")
+Class.def(boost::python::constructor<Unit*>());
+Class.def(&UnitContainer::SetUnit,"Set");
+Class.def(&UnitContainer::GetUnit,"Get");
+PYTHON_END_CLASS(VS,UnitContainer)
+PYTHON_BASE_BEGIN_CLASS(VS,Unit,"Unit")
+Class.def(boost::python::constructor<int>());
+//Class.def(&UnitContainer::SetUnit,"Set");
+//Class.def(&UnitContainer::GetUnit,"Get");
+PYTHON_END_CLASS(VS,Unit)
+PYTHON_END_MODULE(VS)
+TO_PYTHON_SMART_POINTER(Unit) 
+
 void Python::init() {
 
   static bool isinit=false;
@@ -213,7 +234,8 @@ void Python::init() {
   isinit=true;
   /* initialize python library */
   Py_Initialize();
-  initVegastrike();
+  PYTHON_INIT_MODULE(VS);
+//  initVegastrike();
 }
 void Python::test() {
 
@@ -264,6 +286,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		fclose(fp1);
 	}
 #endif
+#ifdef OLD_PYTHON_TEST
 	//CompileRunPython ("simple_test.py");
     //		PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
     //		PyObject * res = PyEval_CallObject(po, arglist);
@@ -271,7 +294,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		//		Py_XDECREF(res);
 
 
-	/*	PyRun_SimpleString(
+		PyRun_SimpleString(
 	   "import VS\n"
 	   "import sys\n"
 	   "sys.stderr.write('asdf')\n"
@@ -289,7 +312,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 	   "print hi1.Execute()\n"
 	   "print hi2.Execute()\n"
 	);
-	*/
+#endif
 //	char buffer[128];
 //	PythonIOString::buffer << endl << '\0';
 //	vs_config->setVariable("data","test","NULL");

@@ -1,4 +1,12 @@
 #include <Python.h>
+/*namespace boost{namespace python{
+template <class T> struct type;
+}}
+#define DEC_FROM_PYTHON_SMART_POINTER(Pointer) \
+class Pointer *from_python(PyObject *p,boost::python::type<class Pointer *>);
+class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
+//DEC_FROM_PYTHON_SMART_POINTER(Unit)
+*/
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
 #include "python/init.h"
@@ -6,13 +14,19 @@
 #include <eval.h>
 #include "python/python_compile.h"
 #include "cmd/ai/fire.h"
+#include <memory>
 /*
 These following #defines will create a module for python
 call them with:
 
 PYTHON_BEGIN_MODULE(VS)
-	PYTHON_INIT_CLASS(VS,FireAt,"PythonFire")
-	PYTHON_INIT_CLASS(VS,BaseClass,"PythonClassName")
+	PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonFire")
+	PYTHON_END_CLASS(VS,FireAt)
+	PYTHON_BEGIN_INHERIT_CLASS(VS,BaseClass,"PythonClassName")
+	PYTHON_END_CLASS(VS,BaseClass)
+	PYTHON_BEGIN_CLASS(VS,MyClass,"PythonClassName")
+	Class.def(&MyClass::MyFunc,"FunctionName");
+	PYTHON_END_CLASS(VS,MyClass)
 PYTHON_END_MODULE(VS)
 ...
 int main (int argc,char *argv[]) {
@@ -23,6 +37,12 @@ int main (int argc,char *argv[]) {
 }
 
 */
+std::auto_ptr<boost::python::detail::instance_holder_base>::~auto_ptr() {printf("autoptrdestructor");}
+#define TO_PYTHON_SMART_POINTER(Pointer) \
+BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
+PyObject* to_python(class Pointer* x) {return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x);} \
+PyObject* to_python(const class Pointer* p) {return to_python(const_cast<class Pointer*>(p));} \
+BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #ifdef _WIN32
 //		return from_python(p,boost::python::type<SuperClass &>());
 //	namespace boost{namespace python{
@@ -46,19 +66,25 @@ int main (int argc,char *argv[]) {
         return *((SuperClass*)0); \
 	}
 //non_null_from_python
-#define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
+#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
 	ADD_FROM_PYTHON_FUNCTION(SuperClass)
+#define PYTHON_INIT_GLOBALS(name,Class) ADD_FROM_PYTHON_FUNCTION(Class)
 #else
-#define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
+#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
+#define PYTHON_INIT_GLOBALS(name,Class) 
 #endif
 //These two functions purposely have opening/closing braces that don't match up
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
-#define PYTHON_BEGIN_CLASS(name,SuperClass,myclass) { \
+#define PYTHON_BEGIN_INHERIT_CLASS(name,SuperClass,myclass) { \
     boost::python::class_builder <SuperClass,PythonClass< SuperClass > > Class (name,myclass); \
     Class.def (boost::python::constructor<>()); \
     Class.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute);
+#define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
+    boost::python::class_builder <CLASS> Class (name,myclass);
+#define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
+    Class.def (boost::python::constructor<>());
 #define PYTHON_END_CLASS(name,SuperClass) }
 //    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
 //    boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); 
