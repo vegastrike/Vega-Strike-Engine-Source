@@ -11,7 +11,7 @@
 #include "unit_xml.h"
 #include "gfx/quaternion.h"
 #include "role_bitmask.h"
-#define VS_PI 3.1415926536
+#define VS_PI 3.1415926535897931
 
 using namespace std;
 extern int GetModeFromName (const char * input_buffer);
@@ -575,9 +575,9 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   computer.itts = XMLSupport::parse_bool(row["ITTS"]);
   computer.radar.color=XMLSupport::parse_bool(row["Radar_Color"]);
   computer.radar.maxrange=XMLSupport::parse_float(row["Radar_Range"]);
-  computer.radar.maxcone=cos(stof(row["Max_Cone"])*VS_PI/180.);
+  computer.radar.maxcone=cos(stof(row["Max_Cone"])*VS_PI/180);
   computer.radar.trackingcone=cos(stof(row["Tracking_Cone"])*VS_PI/180);
-  computer.radar.lockcone=cos(stof(row["Lock_Cone"])*VS_PI/180.);
+  computer.radar.lockcone=cos(stof(row["Lock_Cone"])*VS_PI/180);
   cloakmin=(int)(stof(row["Cloak_Min"])*100);
   if (!XMLSupport::parse_bool(row["Can_Cloak"]))
     cloaking=-1;
