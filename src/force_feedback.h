@@ -1,7 +1,7 @@
 
 #ifndef _FORCE_FEEDBACK_H_
 #define _FORCE_FEEDBACK_H_
-
+#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#endif
 #include <stdio.h>
 
 #if HAVE_FORCE_FEEDBACK

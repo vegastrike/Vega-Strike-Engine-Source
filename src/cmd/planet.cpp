@@ -125,6 +125,32 @@ Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), sa
   terraintrans = NULL;
   SetAI(new Order()); // no behavior
 }
+char * getnoslash (char * inp) {
+  char * tmp=inp;
+  for (unsigned int i=0;inp[i]!='\0';i++) {
+    if (inp[i]=='/'||inp[i]=='\\') {
+      tmp=inp+i+1;
+    }
+  }  
+  return tmp;
+}
+string getCargoUnitName (const char * textname) {
+  char * tmp2 = strdup (textname);
+  char * tmp = getnoslash(tmp2);
+  unsigned int i;
+  for (i=0;tmp[i]!='\0'&&isalpha(tmp[i]);i++) {
+    
+  }
+  if (tmp[i]!='\0') {
+    tmp[i]='\0';
+  }
+  string retval(tmp);
+  free(tmp);
+  return retval;
+}
+
+
+
 
 Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL) {
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".5"));
@@ -241,7 +267,14 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
       }
     }
   }
-
+  string cargounitname =getCargoUnitName (textname);
+ 
+  Unit * un = new Unit (cargounitname.c_str(),false,_Universe->GetFaction("planets"));
+  if (un->name!=string("LOAD_FAILED")) {
+    image->cargo=un->GetImageInformation().cargo;
+    image->cargo_volume=un->GetImageInformation().cargo_volume;
+  }
+  un->Kill();
 }
 extern bool shouldfog;
 
