@@ -1,4 +1,10 @@
 2002-01-17 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* removed more data
+	* added parts of the homepage to vegastrike/doc
+	
+
+2002-01-17 Alexander Rawass <alexannika@users.sourceforge.net>
 	tag: after_data_removal_stage1
 	
 	* removed all data which might upset lawyers from CVS
