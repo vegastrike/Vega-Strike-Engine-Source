@@ -31,10 +31,10 @@
 const int KEYMAP_SIZE =WSK_LAST;
 //#endif
 
-
+unsigned int getModifier(const char* mod_name);
 void ProcessKB(unsigned int player);
-void BindKey(int key, unsigned int player, KBHandler handler);
-void UnbindKey(int key);
+void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler);
+void UnbindKey(int key,unsigned int modifiers);
 void InitKB ();
 void RestoreKB ();
 #endif

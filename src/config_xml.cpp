@@ -225,7 +225,6 @@ extern void VolDown(int i, KBSTATE a);
   using namespace CockpitKeys;
 
 void GameVegaConfig::initCommandMap(){
-#if 1
   //  I don't knwo why this gives linker errors!
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
@@ -235,7 +234,6 @@ void GameVegaConfig::initCommandMap(){
   command_map["VolumeDec"]=VolDown;
   command_map["MusicVolumeInc"]=incmusicvol;
   command_map["MusicVolumeDec"]=decmusicvol;
-#endif
   command_map["SetShieldsOneThird"]=FireKeyboard::SetShieldsOneThird;
   command_map["SetShieldsTwoThird"]=FireKeyboard::SetShieldsTwoThird;
   command_map["SwitchControl"]=GameCockpit::SwitchControl;
@@ -512,7 +510,9 @@ void GameVegaConfig::checkBind(configNode *node){
     cout << "not a bind node " << endl;
     return;
   }
-
+  std::string tmp=node->attr_value("modifier");
+  int modifier=getModifier(tmp.c_str());
+  
   string cmdstr=node->attr_value("command");
   string player_bound=node->attr_value("player");
   if (player_bound.empty())
@@ -546,7 +546,7 @@ void GameVegaConfig::checkBind(configNode *node){
     // normal keyboard key
       // now map the command to a callback function and bind it
     if(keystr.length()==1){
-      BindKey(keystr[0],XMLSupport::parse_int(player_bound), handler);
+      BindKey(keystr[0],modifier,XMLSupport::parse_int(player_bound), handler);
     }
     else{
       int glut_key=key_map[keystr];
@@ -554,7 +554,7 @@ void GameVegaConfig::checkBind(configNode *node){
 	cout << "No such special key: " << keystr << endl;
 	return;
       }
-      BindKey(glut_key,XMLSupport::parse_int(player_bound),handler);
+      BindKey(glut_key,modifier,XMLSupport::parse_int(player_bound),handler);
     }
 
     //    cout << "bound key " << keystr << " to " << cmdstr << endl;

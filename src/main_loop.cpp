@@ -459,7 +459,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 void InitializeInput() {
 
-	BindKey(27,0, Quit); // always have quit on esc
+	BindKey(27,0,0, Quit); // always have quit on esc
 }
 
 //Cockpit *cockpit;
