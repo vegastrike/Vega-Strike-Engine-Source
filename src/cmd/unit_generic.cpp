@@ -3107,6 +3107,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
   Vector localnorm (ToLocalCoordinates (normal));
   // Only call when on servre side or non-networking
   // If networking damages are applied as they are received
+  static float hull_percent_for_comm=XMLSupport::parse_float(vs_config->getVariable("AI","HullPercentForComm",".75"));
   if( SERVER || Network==NULL)
 	ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
   if (hull<0) {
@@ -3121,7 +3122,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
               }
             }
           }
-  }else if (hullpercent>=.9999&&((float)GetHullPercent())<.9999&&(cp||_Universe->isPlayerStarship(this))) {
+  }else if (hullpercent>=hull_percent_for_comm&&((float)GetHullPercent())<hull_percent_for_comm&&(cp||_Universe->isPlayerStarship(this))) {
     Unit * computerai=this;
     Unit * player = ownerDoNotDereference;//dangerous, but overwritten if cp==NULL
     if (!cp) {
