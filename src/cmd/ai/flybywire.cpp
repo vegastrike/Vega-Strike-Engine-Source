@@ -6,9 +6,10 @@ using Orders::MatchVelocity;
 using Orders::MatchAngularVelocity;
 #define MATCHLINVELSETUP()   Vector desired (desired_velocity);   if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 #define MATCHLINVELEXECUTE()   parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn);
-//don't need to clamp thrust since the Thrust does it for you
-//caution might change 
-
+/**
+ * don't need to clamp thrust since the Thrust does it for you
+ * caution might change 
+ */
 void MatchLinearVelocity::Execute () {
   MATCHLINVELSETUP()
   if (willfinish) {

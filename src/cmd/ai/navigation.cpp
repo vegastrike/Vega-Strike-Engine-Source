@@ -4,18 +4,19 @@
 #include <assert.h>
 #endif
 using namespace Orders;
-//the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
-// vslowdown - decel * t = 0               t = vslowdown/decel
-// finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = 1.5 * v^2 / decel + slowdownx 
-// slowdownx =  .5 accel * t^2 + v0 * t + initx
-// finalx = (.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
-// Length = (.5*accel^2*t^2+accel*t*v0+ .5 *v0^2)/decel + .5 accel * t^2 + v0*t
+/**
+ * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
+ * vslowdown - decel * t = 0               t = vslowdown/decel
+ * finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = 1.5 * v^2 / decel + slowdownx 
+ * slowdownx =  .5 accel * t^2 + v0 * t + initx
+ * finalx = (.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
+ * Length = (.5*accel^2*t^2+accel*t*v0+ .5 *v0^2)/decel + .5 accel * t^2 + v0*t
 
-//balanced thrust equation
-// Length = accel * t^2 +  2*t*v0 + .5*v0^2/accel
-// t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel)) 
-// t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
-
+ * balanced thrust equation
+ * Length = accel * t^2 +  2*t*v0 + .5*v0^2/accel
+ * t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel)) 
+ * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
+ */
 static float CalculateBalancedDecelTime (float l, float v, float &F, float mass) {
 
   float accel = F/mass;
@@ -26,19 +27,19 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
   }
   return (-v+sqrtf(.5*v*v+l*accel))/accel;
 } 
+/**
+ * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
+ * vslowdown - decel * t = 0               t = vslowdown/decel
+ * finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = .5 * v^2 / decel + slowdownx 
+ * slowdownx =  .5 accel * t^2 + v0 * t + initx
+ * finalx = (.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
+ * Length = (.5*accel^2*t^2+accel*t*v0+ .5 *v0^2)/decel + .5 accel * t^2 + v0*t
 
-//the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
-// vslowdown - decel * t = 0               t = vslowdown/decel
-// finalx = -.5 decel ( v/decel)^2 + v^2 / decel + slowdownx = .5 * v^2 / decel + slowdownx 
-// slowdownx =  .5 accel * t^2 + v0 * t + initx
-// finalx = (.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
-// Length = (.5*accel^2*t^2+accel*t*v0+ .5 *v0^2)/decel + .5 accel * t^2 + v0*t
-
-//imbalanced thrust equation
-// Length = .5*(accel+accel*accel/decel) * t^2 +  t*v0(1+accel/decel) + .5*v0^2/decel
-// t = ( -v0*(1+accel/decel) (+/-) sqrtf (v0^2*(1+accel/decel)^2 - 2*(accel+accel*accel/decel)*(.5*v0^2/decel-Length)))/2*.5*(accel+accel*accel/decel);
-// t = (-v0 (+/-) sqrtf (v0^2 - 2*(accel/(1+accel/decel))*(.5*v0^2/decel-Length)))/accel
-
+ * imbalanced thrust equation
+ * Length = .5*(accel+accel*accel/decel) * t^2 +  t*v0(1+accel/decel) + .5*v0^2/decel
+ * t = ( -v0*(1+accel/decel) (+/-) sqrtf (v0^2*(1+accel/decel)^2 - 2*(accel+accel*accel/decel)*(.5*v0^2/decel-Length)))/2*.5*(accel+accel*accel/decel);
+ * t = (-v0 (+/-) sqrtf (v0^2 - 2*(accel/(1+accel/decel))*(.5*v0^2/decel-Length)))/accel
+ */
 static float CalculateDecelTime (float l, float v, float &F, float D,  float mass) {
   float accel = F/mass;
   float decel = D/mass;
@@ -144,8 +145,10 @@ bool ChangeHeading::OptimizeAngSpeed (float optimal_speed,float v, float &a) {
   return false;
 }
 
-//uses CalculateBalancedDecelTime to figure out which way (left or righT) is best to aim for.
-//works for both pitch and yaw axis if you pass in the -ang_vel.j for the y
+/**
+ * uses CalculateBalancedDecelTime to figure out which way (left or righT) is best to aim for.
+ * works for both pitch and yaw axis if you pass in the -ang_vel.j for the y
+ */
 void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) {
   float t = CalculateBalancedDecelTime (atancalc, ang_veli, torquei, parent->GetMoment());//calculate when we should decel
   if (t<0) {//if it can't make it: try the other way
@@ -159,17 +162,17 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
   } else {
     torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;//clamping should take care of it
   }
-  //  fprintf (stderr," angle: %f\n", atancalc);
 }
 void ChangeHeading::SetDest (const Vector &target) {
   final_heading = target;
   ResetDone();
 }
 float TURNTHRESHOLD=SIMULATION_ATOM/1.9;
+///if velocity is lower than threshold
 bool ChangeHeading::Done(const Vector & ang_vel) {
     if (fabs(ang_vel.i) < THRESHOLD&&
 	fabs(ang_vel.j) < THRESHOLD&&
-	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
+	fabs(ang_vel.k) < THRESHOLD) { 
       return true;
     }
   return false;

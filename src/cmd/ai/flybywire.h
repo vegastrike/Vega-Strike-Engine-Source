@@ -2,10 +2,18 @@
 #define _CMD_FLYBYWIRE_H_
 #include "order.h"
 namespace Orders {
+  /**
+   * This class attempts to match a given
+   * Linear velocity given a desired velocity
+   * That velocity can be local ("all ahead full")
+   * or in world space ("lets fire thrusters towards planet")
+   */
 class MatchLinearVelocity : public Order {
  protected:
-  Vector desired_velocity;//werld space... generally r*speed;
-  bool LocalVelocity;//specified in Local or World coordinates
+  ///werld space... generally r*speed or local space
+  Vector desired_velocity;
+  ///specified in Local or World coordinates
+  bool LocalVelocity;
   bool willfinish;
   bool afterburn;
  public:
@@ -13,20 +21,34 @@ class MatchLinearVelocity : public Order {
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
+
+/**
+ *  This class attempts to match given turning velocity through firing minimum ammt of thrusters
+ */
 class MatchAngularVelocity : public Order {
  protected:
-  Vector desired_ang_velocity;//werld space... generally r*speed;
-  bool LocalAng;//specified in Local or World coordinates
+  ///werld space or local space (pitch = 1 on the x axis) 
+  Vector desired_ang_velocity;
+  ///specified in Local or World coordinates
+  bool LocalAng;
+  ///Whether this script should terminate upon reaching desired angular velocity
   bool willfinish;
  public:
   MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):Order (FACING|LOCATION), desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {done = false;}
   void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
 };
-
+/**
+ * This class matches both angular and linear velocity.
+ * It cannot have multiple inheritance because
+ * of the colliding virtual "Execute" functions, I believe
+ * Use a #define to "share code" between them
+ */
 class MatchVelocity : public MatchAngularVelocity {
  protected:
-  Vector desired_velocity;//werld space... generally r*speed;
+  ///werld space... generally r*speed or local space
+  Vector desired_velocity;
+  ///Is the above in world space?
   bool LocalVelocity;
   bool afterburn;
  public:
@@ -35,18 +57,30 @@ class MatchVelocity : public MatchAngularVelocity {
   void SetDesiredVelocity (const Vector &desired, const bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
 }
+/**
+ * This class uses a parent's computer struct 
+ * to set the appropriate desired linear 
+ * and angular velocity based on 
+ * what the user input may be
+ */
 class FlyByWire : public Orders::MatchVelocity {
  protected:
+  ///If shelton slide, do not have the computer match linear
   bool sheltonslide;
  public:
   FlyByWire ();
+  ///Turns on or off velocity resolution
   void SheltonSlide (bool onoff);
+  ///Stops... sets desired velocity to 0
   void Stop (float percentage);
-  void Right (float percentage);//pass in the percentage of the turn they were turnin right.  -%age indicates left
-  void Up (float percentage);//pass in the percentage of the turn they were turning up
-  void RollRight (float percentage);
+  ///pass in the percentage of the turn they were turnin right.  -%age indicates left
+  void Right (float percentage);
+  ///pass in the percentage of the turn they were turning up
+  void Up (float percentage);  void RollRight (float percentage);
+  ///Specifies match speed to use afterbuner and gives in higher velocity
   void Afterburn (float percentage);
-  void Accel (float percentage);//negative is decel... 0 = nothing
+  ///negative is decel... 0 = nothing
+  void Accel (float percentage);
   void Execute();
 };
 #endif

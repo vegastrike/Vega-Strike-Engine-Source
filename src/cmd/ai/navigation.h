@@ -6,19 +6,28 @@
 #include "vegastrike.h"
 
 namespace Orders {
-  // This moveto always attempts to move in a straight line (unaware of strafing)
   const float bleed_threshold = 0.0001;
   const float THRESHOLD = 0.01;
   const unsigned char ABURN = 1;
+  /**
+   * The moveto order attempts to calculate the best way to apply thrust (within the computer bound limits) to get a starship to place B and stopped.
+   * It uses an integral of acceleration and velocity over time to solve for 
+   * time when to decelerate.  Is  inaccurate within 1 physics frame, and must
+   * use switchbacks and then once they have been met sets terminating X,Y, and Z 
+   * to figure out how many switchbacks it has made
+   * , missing the target and coming back over it.
+   */
 class MoveTo : public Order {
   unsigned char afterburnAndSwitchbacks;//don't need the lowest order bit
   unsigned char terminatingX;
   unsigned char terminatingY;
   unsigned char terminatingZ;
+  ///The last_velocity keeps track of the previous velocity so the script may determine if it has crossed over 0 this frame or not
   Vector last_velocity;
   bool OptimizeSpeed (float v, float &a);
   bool Done (const Vector &);
 public:
+  ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
   MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(LOCATION|MOVEMENT), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
     targetlocation = target;
     done=false;
@@ -26,7 +35,13 @@ public:
   void SetDest (const Vector&);
   void Execute();
 };
-
+/**
+ * This AI script attempts to change headings to face a given direction
+ * again it is inaccurate to within 1 physics frame, though calculating thrust
+ * at 1/3 the way through a physics frame has made this effect of wobbling
+ * all but subside! switchbacks keep track of how many times it has almost
+ * but passed over target destination
+ */
 class ChangeHeading : public Order {
   unsigned char switchbacks;//don't need the lowest order bit
   unsigned char terminatingX;
@@ -41,21 +56,30 @@ protected:
   void ResetDone () {done = false; terminatingX=terminatingY=0;}
  
  public:
+  ///takes in the destination target, and the ammount of accuracy (how many times it should miss destination and come back) should be used
    ChangeHeading(const Vector &final_heading, int switchback) : Order(FACING|LOCATION), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
   void SetDest (const Vector&);
   void Execute();
 };
-
+/**
+ * This class analyzes a Unit's position and adjusts ChangeHeading to face
+ * that target's center
+ */
 class FaceTarget : public ChangeHeading {
   float finish;
 public:
   FaceTarget (bool fini=false, int accuracy =3);
   void Execute ();
 };
-
+/**
+ * This class analyzes a Unit's position and adjusts ChangeHeading to face
+ * that target's ITTS indicator for best firing solution
+ */
 class FaceTargetITTS : public ChangeHeading {
   bool finish;
+  ///The average speed of this target's guns
   float speed;
+  ///The range of this target's guns
   float range;
 public:
   FaceTargetITTS (bool fini=false, int accuracy = 3);
