@@ -384,12 +384,11 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
     terrain->Collide (un,top);      
   }
   jumpReactToCollision(un);
-#if 0
   //screws with earth having an atmosphere... blahrgh
-  if (!terrain) {//no place to go and acts like a ship
+  if (!terrain&&GetDestinations().empty()) {//no place to go and acts like a ship
     Unit::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
-#endif
+
   //nothing happens...you fail to do anythign :-)
   //maybe air reisstance here? or swithc dynamics to atmos mode
 }

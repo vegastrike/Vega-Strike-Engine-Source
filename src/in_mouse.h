@@ -25,6 +25,7 @@
 
 extern int mousex, mousey;
 void InitMouse();
+void RestoreMouse();
 void ProcessMouse();
 typedef void (*MouseHandler)(KBSTATE,int x, int y, int delx, int dely, int mod);
 void BindKey(int key,MouseHandler handler);

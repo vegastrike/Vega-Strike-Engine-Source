@@ -651,6 +651,13 @@ int getmicrosleep () {
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
   return microsleep;
 }
+
+void restore_main_loop() {
+  RestoreKB();
+  RestoreMouse();
+  GFXLoop (main_loop);
+
+}
 void main_loop() {
 
 

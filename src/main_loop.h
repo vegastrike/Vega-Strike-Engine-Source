@@ -39,7 +39,7 @@ void createObjects();
 void destroyObjects();
 void InitializeInput();
 void main_loop();
-
+void restore_main_loop();
 
 
 

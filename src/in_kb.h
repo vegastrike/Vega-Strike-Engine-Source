@@ -44,4 +44,5 @@ void ProcessKB();
 void BindKey(int key, KBHandler handler);
 void UnbindKey(int key);
 void InitKB ();
+void RestoreKB ();
 #endif

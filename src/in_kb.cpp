@@ -67,7 +67,13 @@ static void glut_special_up_cb( int key, int x, int y )
   //  fprintf (stderr,"keyboard s up %d",key);
     kbGetInput( 128+key, 1, 1, x, y );
 }
+void RestoreKB() {
+  glutKeyboardFunc( glut_keyboard_cb );
 
+  glutKeyboardUpFunc( glut_keyboard_up_cb );
+  glutSpecialFunc( glut_special_cb );
+  glutSpecialUpFunc( glut_special_up_cb );
+}
 
 void InitKB()
 {
@@ -75,12 +81,7 @@ void InitKB()
     keyState[a] = UP;
     UnbindKey(a);
   }
-
-  glutKeyboardFunc( glut_keyboard_cb );
-
-  glutKeyboardUpFunc( glut_keyboard_up_cb );
-  glutSpecialFunc( glut_special_cb );
-  glutSpecialUpFunc( glut_special_up_cb );
+  RestoreKB();
 }
 
 

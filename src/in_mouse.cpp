@@ -119,6 +119,13 @@ void BindKey (int key, MouseHandler handler) {
   mouseBindings[key]=handler;
   handler (RESET,mousex,mousey,0,0,0);
 }
+void RestoreMouse() {
+  glutMouseFunc(mouseClickQueue);
+  glutMotionFunc(mouseDragQueue);
+  glutPassiveMotionFunc(mouseMotionQueue);
+
+}
+
 void InitMouse(){
   for (int a=0;a<NUM_BUTTONS+1;a++) {
     UnbindMouse (a);
@@ -128,10 +135,9 @@ void InitMouse(){
   glutMotionFunc(mouseDrag);
   glutPassiveMotionFunc(mouseMotion);
   */
-  glutMouseFunc(mouseClickQueue);
-  glutMotionFunc(mouseDragQueue);
-  glutPassiveMotionFunc(mouseMotionQueue);
-}				
+  RestoreMouse();
+}
+				
 void ProcessMouse () {
   while(eventQueue.size()) {
     MouseEvent e = eventQueue.front();
