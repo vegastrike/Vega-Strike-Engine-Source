@@ -72,10 +72,21 @@ public:
 	float y;
 	std::string source;
 	bool moused;
+	char color;
 	navscreenoccupied * screenoccupation;
 	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused):type(type),size(size),x(x),y(y),source(source) {
 		screenoccupation = so;
 		this->moused=moused;
+		color = 'v';
+		vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData ("visited_"+source);
+		if (v->size()){
+			string k = (*v)[0];
+			if (k.length())
+				color=k[0];
+			
+		}
+		
+		
 	}
 	systemdrawnode () {
 		size=SYSTEM_DEFAULT_SIZE;
@@ -111,7 +122,15 @@ public:
 	void draw()const {
 		if (moused)
 			return;
+	   
 		GFXColor race(GetColor (source));
+		if (color=='m') {
+			race.r=.5;
+			race.g=.5;
+			race.b=.5;
+			race.a=.5;
+				
+		}
 //		race=GFXColor (1,1,1,1);
 		NavigationSystem::DrawCircle(x, y, size, race);
 		string blah,nam;
