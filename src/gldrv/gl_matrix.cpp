@@ -528,8 +528,12 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    M(3,0) = 0.0;   M(3,1) = 0.0;   M(3,2) = 0.0;   M(3,3) = 1.0;
 
    float tm[16];
-#ifdef WIN32	
+
+#if defined(WIN32)
    ZeroMemory(tm, sizeof(tm));
+
+#elif defined(IRIX)	// ANSI standard function, available on Windows also ...
+	(void) memset(tm, 0, sizeof tm);
 #else
    bzero (tm, sizeof (tm));
 #endif
