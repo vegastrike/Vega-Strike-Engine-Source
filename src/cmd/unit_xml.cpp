@@ -25,6 +25,11 @@
 #include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
 
+/*ADDED FOR FUTURE USE */
+int current_unit_load_mode = 0;
+
+
+
 string KillQuadZeros(string inp) {
 	std::string::size_type text = 0;
 	while ((text = inp.find (".000000",text))!=string::npos) {
@@ -677,8 +682,10 @@ using namespace UnitXML;
 				  texturestarttime = parse_float((*iter).value);
 		  }
 	  }
-	  pushMesh( xml, file.c_str(), xml->unitscale, faction,flightgroup,startframe,texturestarttime);
-	  
+	  switch(current_unit_load_mode){
+	  case 1: break;
+	  default: pushMesh( xml, file.c_str(), xml->unitscale, faction,flightgroup,startframe,texturestarttime);
+	  }
   }
   break;
   case UPGRADE:

@@ -46,6 +46,7 @@
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
+#include "unit_xml.h"
 
 using namespace std;
 
@@ -108,11 +109,18 @@ extern void TerminateCurrentBase(void);
 extern void CurrentBaseUnitSet(Unit * un);
 // For ships stats.
 extern string MakeUnitXMLPretty(std::string, Unit*);
-
+extern float totalShieldEnergyCapacitance (const Shield & shield); 
 // For Options menu.
 extern void RespawnNow(Cockpit* cockpit);
 
 
+//headers for fonciton used internaly
+//add to text a nicely-formated description of the unit and its subunits
+void showUnitStats(Unit * playerUnit,string &text,int subunitlevel);
+//build the previous description from a cargo item
+string buildShipDescription(Cargo &item);
+//put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
+void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter);
 
 // "Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair";
@@ -1292,6 +1300,7 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 	}
 }
 
+string buildShipDescription(Cargo &item);
 // Update the controls when the selection for a transaction changes.
 void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist) {
     // Get the controls we need.
@@ -1400,6 +1409,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 descString += tempString;
                 break;
             case BUY_SHIP:
+		if (item.description=="") item.description=buildShipDescription(item);
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
@@ -2880,6 +2890,26 @@ void SwapInNewShipName(Cockpit* cockpit, const std::string& newFileName, int swa
 }
 
 
+string buildShipDescription(Cargo &item) {
+	//load the Unit
+      	string newModifications;
+      	if(item.category.find("My_Fleet") != string::npos) {
+        	// Player owns this starship.
+		newModifications = _Universe->AccessCockpit()->GetUnitModifications();
+     	 	}
+      	Flightgroup* flightGroup=new Flightgroup();
+      	int fgsNumber=0;
+		current_unit_load_mode=1;
+      	Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, 0, newModifications,
+					      flightGroup,fgsNumber);
+		current_unit_load_mode=0;
+	string str;
+	showUnitStats(newPart,str,0);
+	delete newPart;
+	return str;	
+}
+
+
 // Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls(void) {
     // Make sure there's nothing in the transaction lists.
@@ -2889,6 +2919,7 @@ void BaseComputer::loadShipDealerControls(void) {
 	std::vector<std::string> filtervec;
 	filtervec.push_back("starships");
     loadMasterList(m_base.GetUnit(), filtervec, std::vector<std::string>(), true, m_transList1);
+    
     // Add in the starships owned by this player.
     Cockpit* cockpit = _Universe->AccessCockpit();
     for (int i=1; i<cockpit->unitfilename.size(); i+=2) {
@@ -2896,6 +2927,14 @@ void BaseComputer::loadShipDealerControls(void) {
         cargoColor.cargo=CreateCargoForOwnerStarship(cockpit, i);
         m_transList1.masterList.push_back(cargoColor);
     }
+    
+    //remove the descriptions, we don't build them all here, it is a time consuming operation
+    vector<CargoColor>* items = &m_transList1.masterList;
+    for (vector<CargoColor>::iterator it=items->begin();it!=items->end();it++) {
+	(*it).cargo.description="";
+      	
+    	}
+
 
     // Load the picker from the master list.
     SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("Ships") );
@@ -3085,13 +3124,351 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     return true;
 }
 
+
+
+//does not work with negative numbers!!
+void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter) {
+	float dbgval=f;
+	int bufferPos=0;
+	float temp=f;
+	int before=0;
+	while (temp>=1.0f) {
+ 		before++;
+		temp/=10.0f;
+		}
+	//printf("before=%i\n",before);
+	while (before<digitsBefore) {
+		buffer[bufferPos++]='0';
+		digitsBefore--;
+	}
+	if (before) {
+		for (int p=before;p>0;p--) {
+		temp=f;
+		float substractor=1;
+		for (int i=0;i<p-1;i++) { temp/=10.0f;  substractor*=10.0 ; }//whe cant't cast to int before in case of overflow
+		int digit= ((int)temp)%10 ;
+		buffer[bufferPos++]='0' + digit;
+		//reason for the folowing line: otherwise the  "((int)temp)%10" may overflow when converting 
+		f=f-((float)digit*substractor); 
+		if ( (p!=1) && (p%3 ==1) ) buffer[bufferPos++]=',';		
+		}
+	
+	}
+	else {
+		buffer[bufferPos++]='0';
+	}
+	if (digitsAfter==0) {
+		buffer[bufferPos]=0;
+		return;
+	}
+ 	buffer[bufferPos++]='.';
+	temp=f;
+	for (int i=0;i<digitsAfter;i++) {
+		temp*=10;
+		buffer[bufferPos++]='0'+ (  ((int)temp)%10 );
+	}
+	buffer[bufferPos]=0;
+	//printf("******************* %f is, I think %s\n",dbgval,buffer);
+}
+
+#define PRETTY_ADD(str,val,digits) \
+	text+="#n#";  \
+	text+=prefix; \
+	text+=str; \
+    	prettyPrintFloat(conversionBuffer,val,0,digits); \
+    	text+=conversionBuffer;
+
+#define PRETTY_ADDN(str,val,digits) \
+	text+=str; \
+    	prettyPrintFloat(conversionBuffer,val,0,digits); \
+    	text+=conversionBuffer;
+
+#define PRETTY_ADDU(str,val,digits,unit) \
+	text+="#n#";  \
+	text+=prefix; \
+	text+=str; \
+    	prettyPrintFloat(conversionBuffer,val,0,digits); \
+    	text+=conversionBuffer; \
+	text+=" "; \
+	text+=unit;
+
+
+
+static const char *WeaponTypeStrings[]= {
+	"UNKNOWN",
+	"BEAM",
+	"BALL",
+	"BOLT",
+	"PROJECTILE"
+	};
+void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
+
+	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
+	char conversionBuffer[30];
+	string prefix="";
+	for (int i=0;i<subunitlevel;i++) prefix+="   ";
+	//we display evrything in MegaJoules, get the conversion factor
+	float VSDM = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"))/1000.0;
+	float totalWeaponEnergyUsage=0;
+	float totalWeaponDamage=0;
+    	text+="#c0:1:.5#"+prefix+"[GENERAL INFORMATIONS]#n##-c";
+    	text+= "#n#"+prefix+"Name: "+playerUnit->name;
+    	text+= " " + playerUnit->getFullname();
+    	Flightgroup *fg = playerUnit->getFlightgroup();
+    	if (fg && fg->name!="") {
+     		text+= " Designation " +fg->name+ " "+ XMLSupport::tostring (playerUnit->getFgSubnumber());
+    	}
+    	
+	PRETTY_ADDU("Mass: ",playerUnit->mass,0,"tons");
+	PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m²");
+	PRETTY_ADDU("Fuel: ",playerUnit->FuelData()/1000.0f,2,"MJ");
+	const Unit::Computer uc=playerUnit->ViewComputerData();
+    	text+="#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
+    	text+="#n#"+prefix+"Maneuver: ";	
+    	if (playerUnit->limits.yaw==playerUnit->limits.pitch &&playerUnit->limits.yaw==playerUnit->limits.roll) {
+		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw*180.0/PI,0,2);
+		printf("**%f\n",playerUnit->limits.yaw*180.0/PI);
+    		text+=conversionBuffer;
+		text+=" tons.deg/m² (yaw, pitch, roll)";
+	    }
+	else {
+		PRETTY_ADDN(" yaw ",playerUnit->limits.yaw*180.0/PI,2);
+		PRETTY_ADDN("  pitch ",playerUnit->limits.pitch*180.0/PI,2);
+		PRETTY_ADDN("  roll ",playerUnit->limits.roll*180.0/PI,2);
+		text+=" tons.deg/m²";
+	}
+	PRETTY_ADDU("Forward thrust: ",playerUnit->limits.forward,2,"tons.m/s^2");
+	PRETTY_ADDU("Backward thrust: ",playerUnit->limits.retro,2,"tons.m/s^2")
+	if (playerUnit->limits.lateral==playerUnit->limits.vertical) {
+		PRETTY_ADDU("Side thrust: ",playerUnit->limits.vertical,2,"tons.m/s^2");
+    		text+=" (vertical and horizontal)";
+    	}		
+    	else {
+		PRETTY_ADDN(" horizontal ",playerUnit->limits.lateral,2);
+		PRETTY_ADDN("  vertical ",playerUnit->limits.vertical,2);
+		text+="tons.m/s²";
+    	}
+	PRETTY_ADDU("Afterburner: ",playerUnit->limits.afterburn,2,"tons.m/s^2");
+    	text+="#n#"+prefix+"Computer manoeuver limit: ";
+	if (uc.max_yaw==uc.max_pitch &&uc.max_yaw==uc.max_roll) {
+		prettyPrintFloat(conversionBuffer,uc.max_yaw*180.0f/PI,0,2);
+    		text+=conversionBuffer;
+		text+=" deg/s (yaw, pitch, roll)";
+	    }
+	else {
+		PRETTY_ADDN(" yaw ",uc.max_yaw*180.0/PI,2);
+		PRETTY_ADDN("  pitch ",uc.max_pitch*180.0/PI,2);
+		PRETTY_ADDN("  roll ",uc.max_roll*180.0/PI,2);
+		text+=" deg/s";
+	}
+	PRETTY_ADDU("Computer max combat speed: ",uc.max_speed(),2,"m/s");
+	PRETTY_ADDU("Computer max absolute combat speed: ",uc.max_ab_speed(),2,"m/s");
+
+	text.append("#n##n##c0:1:.5#"+prefix+"[ENERGY SUBSYSTEM]#n##-c");
+	PRETTY_ADDU("Recharge: ",playerUnit->EnergyRechargeData()*VSDM,2,"MJ/s");
+	PRETTY_ADDU("Max energy: ",playerUnit->MaxEnergyData()*VSDM,2,"MJ");
+	//note: I found no function to get max warp energy, but since we're docked they are the same
+	PRETTY_ADDU("Max warp energy: ",playerUnit->GetWarpEnergy()*VSDM,2,"MJ");
+
+    	text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
+	const Unit::UnitJump uj = playerUnit->GetJumpStatus(); 
+	if (!uj.drive) {
+		text+="#c1:.3:.3#No jump drive present#-c"; //trouble here, seems to never happen
+	}
+	else {
+		PRETTY_ADDU("Insystem energy: ",uj.insysenergy*VSDM,2,"MJ");
+		PRETTY_ADDU("Outsystem energy: ",uj.energy*VSDM,2,"MJ");
+		if (uj.delay) {
+			PRETTY_ADDU("Delay: ",uj.delay,0,"s");
+		}
+		if (uj.damage) {
+			PRETTY_ADDU("Damage: ",uj.damage*VSDM,0,"MJ");
+		}
+	}
+	
+	text+="#n##n##c0:1:.5#"+prefix+"[DEFENSE SUBSYSTEM]#n##-c";
+	text+="#n#"+prefix+"Armor: ";
+	PRETTY_ADDN(" front ",playerUnit->armor.front*VSDM,2);
+	PRETTY_ADDN("  back ",playerUnit->armor.back*VSDM,2); 
+	PRETTY_ADDN("  left ",playerUnit->armor.left*VSDM,2);
+	PRETTY_ADDN("  right ",playerUnit->armor.right*VSDM,2);
+	text+=" MJ";
+	PRETTY_ADDU("Hull: ",playerUnit->GetHull()*VSDM,2,"MJ");
+	if (playerUnit->GetHull()!=playerUnit->GetHullPercent()) {
+		PRETTY_ADDN("  (",playerUnit->GetHullPercent()*100,2);
+		text+=" %  ok)";
+	}	
+	PRETTY_ADD("Shield type: shield ",playerUnit->shield.number,0);
+	text+="#n#"+prefix+"Shield energy: ";
+	switch (playerUnit->shield.number) {
+		case 2:
+			PRETTY_ADDN(" front ",playerUnit->shield.fb[2]*VSDM,2);
+			PRETTY_ADDN("  back ",playerUnit->shield.fb[3]*VSDM,2);
+			text+=" MJ";
+			break;
+		case 4:
+			PRETTY_ADDN(" front ",playerUnit->shield.fbrl.frontmax*VSDM,2);
+			PRETTY_ADDN("  back ",playerUnit->shield.fbrl.backmax*VSDM,2);
+			PRETTY_ADDN("  left ",playerUnit->shield.fbrl.leftmax*VSDM,2);
+			PRETTY_ADDN("  right ",playerUnit->shield.fbrl.rightmax*VSDM,2);
+			text+=" MJ";
+			break;
+		case 6:
+			PRETTY_ADDN(" front and back",playerUnit->shield.fbrltb.fbmax*VSDM,2);
+			PRETTY_ADDN("  left, right, top, bottom  ",playerUnit->shield.fbrltb.rltbmax*VSDM,2);
+			text+=" MJ";
+			break;
+		default:
+			text+="#c1:.3:.3#Shield model unrecognized#-c";
+			break;
+	}
+	PRETTY_ADDU("Shield recharge speed: ",playerUnit->shield.recharge*VSDM,2,"MJ/s"); 
+	//cloaking device? If we don't have one, no need to mention it ever exists, right?
+	if( playerUnit->cloaking!=-1) {
+		PRETTY_ADDU("Cloaking device available, energy usage: ",playerUnit->image->cloakenergy*VSDM,2,"MJ/s");
+	}
+	text+="#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
+	PRETTY_ADDU("Radar range: ",uc.radar.maxrange,2,"m");
+	PRETTY_ADD("Radar cone: ",acos(uc.radar.maxcone)*360.0/PI,2);
+	text+=" (planar angle: 360 means full space)";
+	PRETTY_ADD("Radar tracking cone: ",acos(uc.radar.trackingcone)*360.0/PI,2);
+	PRETTY_ADD("Radar locking cone: ",acos(uc.radar.lockcone)*360.0/PI,2);
+	PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
+	text+="#n#"+prefix+"ITTF (target track with lead) support: ";
+	if (uc.itts) text+="yes"; else text+="no";
+	text+="#n#"+prefix+"IFFF (friend or foe) support: ";
+	if (uc.radar.color) text+="yes"; else text+="no";
+
+	text+="#n##n##c0:1:.5#"+prefix+"[OFFENSIVE SUBSYSTEM]#n##-c";
+	//let's go through all mountpoints
+	{	for (int i=0;i<playerUnit->GetNumMounts();i++) {
+		PRETTY_ADD("<Mount point ",i+1,0);
+		text+=">";
+		const weapon_info * wi=playerUnit->mounts[i].type;
+		text+="#n#"+prefix+"   Mount capability: ";
+		text+=lookupMountSize(playerUnit->mounts[i].size);
+		text+="#n#"+prefix+"   Mounted weapon: ";
+		if ( (!wi) ||  (wi->weapon_name=="") ) {
+			text+="none";
+		}
+		else {
+			text+=wi->weapon_name;
+			//let's display some weapon informations
+			int s=1;
+			int off=0;
+			text+="#n#"+prefix+"   Weapon mount type: ";
+			text+=lookupMountSize(wi->size);
+			text+="#n#"+prefix+"   Weapon type: ";
+			text+=WeaponTypeStrings[wi->type];
+			PRETTY_ADDU("   Weapon range: ",wi->Range,0,"m");
+			if (wi->Damage<0) text+="#n#"+prefix+"   Weapon damage: special";
+			else {
+				PRETTY_ADDU("   Weapon damage: ",wi->Damage*VSDM,2,"MJ");
+			}
+			PRETTY_ADDU("   Weapon energy usage: ",wi->EnergyRate*VSDM,2,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
+			totalWeaponEnergyUsage+=wi->EnergyRate;
+			PRETTY_ADDU("   Weapon refire delay: ",wi->Refire,4,"s");
+			if (wi->PhaseDamage) {
+				PRETTY_ADDU("   Phase damage: ",wi->PhaseDamage*VSDM,2,"MJ");
+			}
+			
+			
+			/*I don't see the point in displaying those
+			PRETTY_ADD("   Pulse speed: ",wi->PulseSpeed,2);
+			PRETTY_ADD("   Radial speed: ",wi->RadialSpeed,2);
+			PRETTY_ADD("   Radius: ",wi->Radius,2);
+			PRETTY_ADD("   Length: ",wi->Length,2);			
+			PRETTY_ADD("   Long range: ",wi->Longrange,2);
+			
+			*/
+			//display infos specific to some weapons type			
+			switch ( wi->type) {
+				case weapon_info::BALL: //need ammo
+				case weapon_info::BOLT:
+					if (wi->Damage>0)
+						totalWeaponDamage+=(wi->Damage/wi->Refire); //damage per second
+					PRETTY_ADDU("   Speed: ",wi->Speed,2,"s");
+					PRETTY_ADD("   Ammunitions: ",playerUnit->mounts[i].ammo,0);
+					break;
+				case weapon_info::PROJECTILE: //need ammo
+					PRETTY_ADD("   Lock time factor: ",wi->LockTime,2);
+					PRETTY_ADD("   Ammunitions: ",playerUnit->mounts[i].ammo,0);
+					break;
+				case weapon_info::BEAM:
+					if (wi->Damage>0)
+						totalWeaponDamage+=wi->Damage;
+					PRETTY_ADDU("   Stability: ",wi->Stability,2,"s");
+					break;
+				default:
+					break;
+			}
+		}
+			
+	}}//end mountpoint list
+	//handle SubUnits
+	un_iter ki=playerUnit->getSubUnits(); //can't use kiter, MakeUnitXMLPretty takes non-const Unit
+	{	int i=1;
+	Unit *sub;	
+	while (sub=ki.next()) {
+		if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS INFORMATIONS]#n##-c";
+		PRETTY_ADD("#n##n#"+prefix+"<sub unit ",i,0);
+		text+=">#n##n#";
+		showUnitStats(sub,text,subunitlevel+1);
+		i++;
+	}}
+	if (subunitlevel==0) {
+		text+="#n##n##c0:1:.5#"+prefix+"[KEY FIGURES]#n##-c";
+		/*
+		this does not work, I have no idea why...
+		PRETTY_ADDU("Time to reach full speed: ",playerUnit->mass*uc.max_ab_speed()/playerUnit->limits.forward,2,"s");
+		*/
+		//reactor
+		PRETTY_ADDU("Reactor nominal replenish time: ",playerUnit->MaxEnergyData()/playerUnit->EnergyRechargeData(),2,"s");
+		//shield related stuff
+		//code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
+		static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
+  		float maxshield=totalShieldEnergyCapacitance(playerUnit->shield);
+		if (playerUnit->MaxEnergyData()-maxshield<low_power_mode) {
+		text+="#n##c1:.3:.3#"+prefix+"WARNING: Power supply is overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#c-";
+		}
+		else {
+		/*	PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
+		}
+		
+		if (playerUnit->shield.recharge>playerUnit->EnergyRechargeData()) {
+			text+="#n##c1:.3:.3#"+prefix+"WARNING: reactor recharge rate is less than shield recharge rate.#n#";
+			text+="Your shields won't be able to regenerate at their optimal speed!#-c";
+		}
+		else {
+			text+="#n#"+prefix+"Reactor recharge slowdown caused by shield recharge: ";
+			sprintf(conversionBuffer,"%.2f",playerUnit->shield.recharge*100.0/playerUnit->EnergyRechargeData());
+			text+=conversionBuffer;
+			text+=" %.";
+		}
+		PRETTY_ADDU("Cumulative weapon energy usage: ",totalWeaponEnergyUsage*VSDM,2,"MJ/s");
+		if (totalWeaponEnergyUsage<playerUnit->EnergyRechargeData()) {
+			//waouh, impressive...
+			text+="#n##c0:1:.2#"+prefix+"Your reactor produces more energy that your weapons can use!#-c";
+		}
+		else {
+			PRETTY_ADDU("Reactor energy depletion time if weapons in continus use: ",playerUnit->MaxEnergyData()/(totalWeaponEnergyUsage-playerUnit->EnergyRechargeData()),2,"s");	
+		}
+	PRETTY_ADDU("Cumulative non-missile weapon damage: ",totalWeaponDamage*VSDM,2,"MJ/s");
+	}
+}
 // Show the stats on the player's current ship.
 bool BaseComputer::showShipStats(const EventCommandId& command, Control* control) {
-    Unit* playerUnit = m_player.GetUnit();
-    const string rawText = MakeUnitXMLPretty(playerUnit->WriteUnitString(), playerUnit);
+	current_unit_load_mode=1;
+	Unit* playerUnit = m_player.GetUnit();
+	current_unit_load_mode=0;
+	const string rawText = MakeUnitXMLPretty(playerUnit->WriteUnitString(), playerUnit);
 
-    // Need to translate some characters to make it even prettier.
-    string text;
+    	// Need to translate some characters to make it even prettier.
+    	string text;
+	text="";
+    	showUnitStats(playerUnit,text,0);
+    	text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
 	bool inQuote = false;
 	bool newLine = false;
     for(string::const_iterator i=rawText.begin(); i!=rawText.end(); i++) {

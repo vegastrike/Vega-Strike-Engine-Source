@@ -13,4 +13,7 @@ Sprite * createSprite(const char *file);
 
 void cache_ani (string s);
 
+/* ADDED FOR FUTURE USE */ 
+extern int current_unit_load_mode;
+
 #endif
