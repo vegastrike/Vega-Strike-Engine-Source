@@ -926,6 +926,7 @@ void Mission::initCallbackMaps(){
     module_unit_map["getRSize"]=CMT_UNIT_getRSize ;
     module_unit_map["isStarShip"]=CMT_UNIT_isStarShip ;
     module_unit_map["isPlanet"]=CMT_UNIT_isPlanet ;
+    module_unit_map["isSun"]=CMT_UNIT_isSun ;
     module_unit_map["isJumppoint"]=CMT_UNIT_isJumppoint ;
     module_unit_map["getRelation"]=CMT_UNIT_getRelation ;
     module_unit_map["Jump"]=CMT_UNIT_Jump ;

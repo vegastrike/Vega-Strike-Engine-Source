@@ -247,6 +247,11 @@ Flightgroup *getStaticBaseFlightgroup (int faction) {
   setStaticFlightgroup (fg,"Base",faction);
   return fg[faction];
 }
+Flightgroup *getStaticStarFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
+  setStaticFlightgroup (fg,"Base",faction);
+  return fg[faction];
+}
 
 Flightgroup *getStaticNebulaFlightgroup (int faction) {
   static vector <Flightgroup *> fg;

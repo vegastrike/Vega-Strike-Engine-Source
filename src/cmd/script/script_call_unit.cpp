@@ -40,7 +40,7 @@
 #include "vegastrike.h"
 #include "cmd/collection.h"
 #include "cmd/iterator.h"
-#include "cmd/unit.h"
+#include "cmd/planet.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/missionscript.h"
@@ -593,6 +593,21 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       bool res=false;
       if(mode==SCRIPT_RUN){
 	res=my_unit->isPlanet();
+	if (res) {
+	  res = !(((Planet *)my_unit)->hasLights());
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
+    }
+    else if(method_id==CMT_UNIT_isSun){
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->isPlanet();
+	if (res) {
+	  res = ((Planet *)my_unit)->hasLights();
+	}
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_BOOL;
