@@ -1329,7 +1329,8 @@ void Unit::RegenShields () {
     rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
   }
   bool velocity_discharge=false;
-  if (GetVelocity().MagnitudeSquared()>(computer.max_ab_speed()*computer.max_ab_speed()*1.1)) {
+  static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
+  if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
     rec=0;
     velocity_discharge=true;
   }

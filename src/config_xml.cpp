@@ -203,6 +203,7 @@ void GameVegaConfig::initKeyMap(){
 
 /* *********************************************************** */
 extern void  inc_time_compression (int i, KBSTATE a);
+extern void  JoyStickToggleKey (int i, KBSTATE a);
 extern void  SuicideKey (int i, KBSTATE a);
 extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
@@ -239,7 +240,7 @@ void GameVegaConfig::initCommandMap(){
   command_map["ThrustDown"]=FlyByKeyboard::KThrustDown ;
   command_map["ThrustUp"]=FlyByKeyboard::KThrustUp ;
 
-
+  command_map["JoyStickToggleKey"]=JoyStickToggleKey;
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;
   command_map["PauseKey"]=pause_key;

@@ -53,7 +53,7 @@ static StarShipControlKeyboard &g() {
   return starshipcontrolkeys [_Universe->CurrentCockpit()];
 }
 
-
+extern void JoyStickToggleDisable();
 FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire (),axis_key(0,0,0) {
   
   this->whichplayer=whichplayer;
@@ -382,6 +382,7 @@ void FlyByKeyboard::UpKey(int, KBSTATE k) {
   case DOWN:g().uppress=FBWABS(g().uppress)+1;
     break;
   case PRESS: g().uppress=FBWABS(g().uppress);
+    JoyStickToggleDisable();
     break;
   case RELEASE: g().uppress=-FBWABS(g().uppress);
     break;
@@ -469,6 +470,7 @@ void FlyByKeyboard::DownKey (int,KBSTATE k) {
   case DOWN:g().downpress=FBWABS(g().downpress)+1;
     break;
   case PRESS: g().downpress=FBWABS(g().downpress);
+    JoyStickToggleDisable();
     break;
   case RELEASE: g().downpress=-FBWABS(g().downpress);
     break;
@@ -485,6 +487,7 @@ void FlyByKeyboard::LeftKey (int, KBSTATE k) {
   case DOWN:g().leftpress=FBWABS(g().leftpress)+1;
     break;
   case PRESS: g().leftpress=FBWABS(g().leftpress);
+    JoyStickToggleDisable();
     break;
   case RELEASE: g().leftpress=-FBWABS(g().leftpress);
     break;
@@ -509,6 +512,7 @@ void FlyByKeyboard::RightKey (int,KBSTATE k) {
   case DOWN:g().rightpress=FBWABS(g().rightpress)+1;
     break;
   case PRESS: g().rightpress=FBWABS(g().rightpress);
+    JoyStickToggleDisable();
     break;
   case RELEASE: g().rightpress=-FBWABS(g().rightpress);
     break;

@@ -1,8 +1,6 @@
 #include "planet_generic.h"
 #include "unit_factory.h"
 
-const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
-const float densityOfJumpPoint = 100000;
 
 char * getnoslash (char * inp) {
   char * tmp=inp;
@@ -217,7 +215,11 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   this->fullname=name;
   this->radius=radius;
   this->gravity=gravity;
+  static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point",".01"));
+  static  float densityOfJumpPoint = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point","100000"));
+  static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
   hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
+  mass = massofplanet;
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
 

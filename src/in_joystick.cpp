@@ -55,18 +55,30 @@ void modifyDeadZone(JoyStick * j) {
         }
     }
 }
+static bool JoyStickToggle=true;
+void JoyStickToggleDisable() {
+  JoyStickToggle=false;
+}
+void JoyStickToggleKey (int key, KBSTATE a) {
+  if (a==PRESS) {
+    JoyStickToggle=!JoyStickToggle;
+  }
+}
 void myGlutJoystickCallback (unsigned int buttonmask, int x, int y, int z) {
     //printf ("joy %d x %d y %d z %d",buttonmask, x,y,z);
-    joystick[0]->joy_buttons=buttonmask;
     unsigned int i;
     for (i=0;i<MAX_AXES;i++) joystick[0]->joy_axis[i]=0.0;
-    if (joystick[0]->nr_of_axes>0)
+    joystick[0]->joy_buttons=0;
+    if (JoyStickToggle) {
+      joystick[0]->joy_buttons=buttonmask;
+      if (joystick[0]->nr_of_axes>0)
         joystick[0]->joy_axis[0]=((float)x)/1000.0;
-    if (joystick[0]->nr_of_axes>1)
+      if (joystick[0]->nr_of_axes>1)
         joystick[0]->joy_axis[1]=((float)y)/1000.0;
-    if (joystick[0]->nr_of_axes>2)
+      if (joystick[0]->nr_of_axes>2)
         joystick[0]->joy_axis[2]=((float)z)/1000.0;
-    modifyDeadZone(joystick[0]);
+      modifyDeadZone(joystick[0]);
+    }
 }
 
 JoyStick::JoyStick () {
