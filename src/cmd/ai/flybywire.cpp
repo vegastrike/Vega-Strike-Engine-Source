@@ -144,14 +144,17 @@ MatchVelocity::~MatchVelocity () {
   fflush (stderr);
 #endif
 }
-
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!XMLSupport::parse_bool (vs_config->getVariable ("physics","CarControl",
+static bool getControlType() {
+  static bool control=XMLSupport::parse_bool (vs_config->getVariable ("physics","CarControl",
 #ifdef CAR_SIM
-"true"
+                                                                 "true"
 #else
-"false"
+                                                                 "false"
 #endif
-))){
+                                                ));
+  return control;
+}
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!getControlType()){
   DesiredThrust= Vector(0,0,0);
   stolen_setspeed=false;
   stolen_setspeed_value=0;
