@@ -30,6 +30,11 @@
 #include <windows.h>
 #endif
 #include <GL/gl.h>
+#ifdef GL_EXT_compiled_vertex_array
+# ifndef PFNGLLOCKARRAYSEXTPROC
+#  undef GL_EXT_compiled_vertex_array
+# endif
+#endif
 #   include <GL/glext.h>
 #include <stdio.h>
 #include "gl_init.h"

@@ -50,6 +50,11 @@ struct GFXStats{
 #ifdef WIN32
 #include <windows.h>
 #include <GL/gl.h>
+#ifdef GL_EXT_compiled_vertex_array
+# ifndef PFNGLLOCKARRAYSEXTPROC
+#  undef GL_EXT_compiled_vertex_array
+# endif
+#endif
 #include <GL/glext.h>
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
@@ -78,18 +83,20 @@ extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCOLORTABLEEXTPROC glColorTable;
-//extern PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
-//extern PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
-//extern PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
 #else
 #include <GL/glut.h>
+#ifdef GL_EXT_compiled_vertex_array
+# ifndef PFNGLLOCKARRAYSEXTPROC
+//Somtimes they define GL_EXT_compiled_vertex_array without
+//Defining the PFN function pointer (dumb)
+#  undef GL_EXT_compiled_vertex_array
+# endif
+#endif
 #include <GL/glext.h>
+#endif
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 
-//extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-//extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-#endif
 //extern int sharedcolortable;
 extern GLenum GFXStage0;
 extern GLenum GFXStage1;
