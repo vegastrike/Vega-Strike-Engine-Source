@@ -24,7 +24,7 @@
 			<Maneuver yaw="6643.200050" pitch="8098.600151" roll="6643.200050"/>
 
 </Thrust>
-<Defense>
+<Defense HudImage="hornet-top.spr">
 	<Armor front="35"
 	       back="30"
 	       left="30"
