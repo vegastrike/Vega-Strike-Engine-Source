@@ -2323,14 +2323,22 @@ bool BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
 		return false; // kill the window.
     } else {
         m_selectedMount = index;
-        if(*playerUnit->getSubUnits() != NULL && m_newPart->viewSubUnits().current() != NULL) {
-            // Need to get selected turret.
-            showTurretPicker();
-			return false;
-        } else {
-            // No turrets.  Proceed with the transaction.
+        if(m_newPart->viewSubUnits().current() == NULL) {
+            // Not a turret.  Proceed with the transaction.
             return checkTransaction();
-        }
+		} else {
+			// Is a turret.
+			if(*playerUnit->getSubUnits() != NULL) {
+				// Need to get selected turret.
+				showTurretPicker();
+				return false;
+			} else {
+				// Ship can't take turrets.
+				finish();
+				showAlert("Your ship hasn't got the capability to add turrets.");
+				return false; // kill the window.
+			}
+		}
     }
 }
 
