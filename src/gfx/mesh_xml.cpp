@@ -104,13 +104,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Offset",XML::OFFSET),
   EnumMap::Pair("meshfile",XML::LODFILE),
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
+  EnumMap::Pair ("Reverse",XML::REVERSE),
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 30);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 31);
 
 
 
@@ -330,6 +331,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::ANIMATEDTEXTURE:
 	xml->animated_name = (*iter).value;
 	texture_found=true;
+	break;
+      case XML::REVERSE:
+	xml->reverse = XMLSupport::parse_bool((*iter).value);
 	break;
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
@@ -710,6 +714,16 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->vertex.t = t;
     xml->active_list->push_back(xml->vertex);
     xml->active_ind->push_back(index);
+    if (xml->reverse) {
+      for (unsigned int i=xml->active_ind->size()-1;i>0;i--) {
+	(*xml->active_ind)[i]=(*xml->active_ind)[i-1];
+      }
+      (*xml->active_ind)[0]=index;
+      for (unsigned int i=xml->active_list->size()-1;i>0;i--) {
+	(*xml->active_list)[i]=(*xml->active_list)[i-1];
+      }
+      (*xml->active_list)[0]=xml->vertex;
+    }
     xml->num_vertices--;
     break;
   case XML::LOGO: 
@@ -1011,6 +1025,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
 
   xml = new XML;
   xml->fg = fg;
+  xml->reverse=false;
   xml->sharevert=false;
   xml->faction = faction;
   GFXGetMaterial (0, xml->material);//by default it's the default material;

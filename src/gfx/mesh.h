@@ -156,8 +156,8 @@ private:
       WEIGHT,
       SIZE,
       OFFSET,
-      ANIMATEDTEXTURE
-
+      ANIMATEDTEXTURE,
+      REVERSE
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -206,6 +206,7 @@ private:
     vector <ZeLogo> logos;
     vector<Names> state_stack;
     bool sharevert;
+    bool reverse;
     int load_stage;
     int point_state;
     int vertex_state;
