@@ -427,7 +427,7 @@ void Mission::doReturn(missionNode *node,int mode){
       vi->bool_val=res;
     }
     else if(script->script.vartype==VAR_FLOAT){
-      float res=checkFloatExpr(expr,mode);
+      double res=checkFloatExpr(expr,mode);
       vi->float_val=res;
     }
     else if(script->script.vartype==VAR_INT){
@@ -562,7 +562,7 @@ varInst *Mission::doExec(missionNode *node,int mode){
 
     if(defnode->script.vartype==VAR_FLOAT){
       debug(4,node,mode,"doExec checking floatExpr");
-      float res=checkFloatExpr(callnode,mode);
+      double res=checkFloatExpr(callnode,mode);
       vi->float_val=res;
     }
     else if(defnode->script.vartype==VAR_INT){
