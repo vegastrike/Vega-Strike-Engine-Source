@@ -339,9 +339,19 @@ int parseMountSizes (const char * str) {
   }
   return ans;
 }
-
+std::string accelStarHandler (const XMLType &input,void *mythis) {
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+  static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
+  return XMLSupport::tostring(*input.w.f/(game_speed*game_accel));
+}
+std::string speedStarHandler (const XMLType &input,void *mythis) {
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+  return XMLSupport::tostring((*input.w.f)/game_speed);
+}
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+  static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   Cargo carg;
   short volume=-1;
   string filename;
@@ -1118,25 +1128,25 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	//accel=parse_float((*iter).value);
 	break;
       case FORWARD:
-	limits.forward=parse_float((*iter).value);
+	limits.forward=game_speed*game_accel*parse_float((*iter).value);
 	break;
       case RETRO:
-	limits.retro=parse_float((*iter).value);
+	limits.retro=game_speed*game_accel*parse_float((*iter).value);
 	break;
       case AFTERBURNER:
-	limits.afterburn=parse_float ((*iter).value);
+	limits.afterburn=game_speed*game_accel*parse_float ((*iter).value);
 	break;
       case LEFT:
-	limits.lateral=parse_float((*iter).value);
+	limits.lateral=game_speed*game_accel*parse_float((*iter).value);
 	break;
       case RIGHT:
-	limits.lateral=parse_float((*iter).value);
+	limits.lateral=game_speed*game_accel*parse_float((*iter).value);
 	break;
       case TOP:
-	limits.vertical=parse_float((*iter).value);
+	limits.vertical=game_speed*game_accel*parse_float((*iter).value);
 	break;
       case BOTTOM:
-	limits.vertical=parse_float((*iter).value);
+	limits.vertical=game_speed*game_accel*parse_float((*iter).value);
 	break;
     }
     }
@@ -1150,12 +1160,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAXSPEED:
-	computer.max_speed=parse_float((*iter).value);
-	ADDELEMF (computer.max_speed);
+	computer.max_speed=game_speed*parse_float((*iter).value);
+	ADDELEM(accelStarHandler,XMLType(&computer.max_speed));
 	break;
       case AFTERBURNER:
-	computer.max_ab_speed=parse_float((*iter).value);
-	ADDELEMF (computer.max_ab_speed);
+	computer.max_ab_speed=game_speed*parse_float((*iter).value);
+	ADDELEM(accelStarHandler,XMLType(&computer.max_ab_speed));
 	break;
       case YAW:
 	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
@@ -1581,13 +1591,13 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     }
     {
       image->unitwriter->AddTag ("Engine");    
-      image->unitwriter->AddElement("forward",floatStarHandler,XMLType(&limits.forward));      
-      image->unitwriter->AddElement("retro",floatStarHandler,XMLType(&limits.retro));      
-      image->unitwriter->AddElement("left",floatStarHandler,XMLType(&limits.lateral));     
-      image->unitwriter->AddElement("right",floatStarHandler,XMLType(&limits.lateral));      
-      image->unitwriter->AddElement("top",floatStarHandler,XMLType(&limits.vertical));      
-      image->unitwriter->AddElement("bottom",floatStarHandler,XMLType(&limits.vertical));      
-      image->unitwriter->AddElement("afterburner",floatStarHandler,XMLType(&limits.afterburn));      
+      image->unitwriter->AddElement("forward",accelStarHandler,XMLType(&limits.forward));      
+      image->unitwriter->AddElement("retro",accelStarHandler,XMLType(&limits.retro));      
+      image->unitwriter->AddElement("left",accelStarHandler,XMLType(&limits.lateral));     
+      image->unitwriter->AddElement("right",accelStarHandler,XMLType(&limits.lateral));      
+      image->unitwriter->AddElement("top",accelStarHandler,XMLType(&limits.vertical));      
+      image->unitwriter->AddElement("bottom",accelStarHandler,XMLType(&limits.vertical));      
+      image->unitwriter->AddElement("afterburner",accelStarHandler,XMLType(&limits.afterburn));      
       image->unitwriter->EndTag ("Engine");    
     }
     image->unitwriter->EndTag ("Thrust");    

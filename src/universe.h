@@ -97,6 +97,8 @@ private:
     ///char * of the name
     char * factionname; 
     std::vector <std::vector <class Animation *> > comm_faces;
+    std::vector <class Animation *> explosion;
+    std::vector <std::string> explosion_name;
     std::vector <unsigned char> comm_face_sex;
     Unit * contraband;
     ///Figures out the relationships of each faction with each other
@@ -116,6 +118,7 @@ private:
   vector <Faction *> factions; //the factions
   
  public:
+  Animation * getRandAnimation (int whichfaction,std::string&which);
   Cockpit * isPlayerStarship (Unit* fighter);
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
   bool StillExists(StarSystem * ss);

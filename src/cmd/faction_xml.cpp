@@ -85,6 +85,21 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 	assert (unitlevel==0);
 	unitlevel++;
 	break;
+  case EXPLOSION:
+    assert (unitlevel==2);
+    unitlevel++;
+    thisuni->factions.back()->explosion.push_back (NULL);
+    thisuni->factions.back()->explosion_name.push_back ("");
+      case NAME:
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+
+	thisuni->factions.back()->explosion.push_back (new Animation ((*iter).value.c_str()));
+	thisuni->factions.back()->explosion_name.push_back ((*iter).value);
+	break;
+      }
+    }      
+    break;
   case COMM_ANIMATION:
     assert (unitlevel==2);
     unitlevel++;
@@ -383,6 +398,16 @@ void Universe::Faction::ParseAllies (Universe * thisuni, unsigned int thisfactio
 		faction[i].stats.index=i;
 	}
 	*/
+}
+Animation * Universe::getRandAnimation (int whichfaction, std::string &which) {
+  if (whichfaction<factions.size()) {
+    if (factions[whichfaction]->explosion_name.size()) {
+      int whichexp = rand()%factions[whichfaction]->explosion_name.size();
+      which = factions[whichfaction]->explosion_name[whichexp];
+      return factions[whichfaction]->explosion[whichexp];
+    }
+  }
+  return NULL;
 }
 void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   unitlevel=0;
