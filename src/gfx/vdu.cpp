@@ -521,12 +521,16 @@ bool VDU::SetCommAnimation (Animation * ani) {
   static bool override=XMLSupport::parse_bool (vs_config->getVariable("graphics","override_comm_screen","true"));
   if (comm_ani==NULL||override) {
     if (posmodes&COMM) {
+      if (ani!=NULL&&comm_ani==NULL)
+        thismode.push_back(COMM);
+      else if (comm_ani==NULL&&thismode.size())
+        thismode.back()=COMM;
       comm_ani = ani;
       if (ani){
-	      thismode.push_back(COMM);
-		  ani->Reset();
-	  }
-	  return true;
+        
+        ani->Reset();
+      }
+      return true;
     }
   }
   return false;

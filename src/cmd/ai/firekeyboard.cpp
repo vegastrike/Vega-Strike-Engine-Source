@@ -1407,6 +1407,15 @@ static void PowerDownShield(Shield *shield, float howmuch){
   }
 
 }
+
+static void ForceChangeTarget(Unit*  parent) {
+  Unit * curtarg = parent->Target();
+  ChooseTargets(parent,TargThreat,false);
+  if (parent->Target()==curtarg)
+    ChooseTargets(parent,TargNear,false);
+  if (parent->Target()==curtarg)
+    ChooseTargets(parent,TargAll,false);
+}
 void FireKeyboard::Execute () {
 	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
@@ -1418,16 +1427,11 @@ void FireKeyboard::Execute () {
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
     if (targ->GetHull()<0) {
-      ChooseTargets(parent,TargAll,false);
+      ForceChangeTarget(parent);
       refresh_target=true;
     }
   } else {
-    ChooseTargets(parent,TargThreat,false);
-    if (parent->Target()==NULL)
-      ChooseTargets(parent,TargNear,false);
-    if (parent->Target()==NULL)
-      ChooseTargets(parent,TargAll,false);
-    
+    ForceChangeTarget(parent);
     refresh_target=true;
   }
   if (f().shieldpowerstate!=1) {
