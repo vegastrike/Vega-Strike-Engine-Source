@@ -62,6 +62,31 @@ bool FireAt::PursueTarget (Unit * un, bool leader) {
     return rand()<.2*RAND_MAX;
   return false;
 }
+
+bool CanFaceTarget (Unit * su, Unit *targ,const Matrix & matrix) {
+	float limitmin = su->Limits().limitmin;
+	if (limitmin>-.99) {
+		QVector pos = (targ->Position()- su ->Position()).Normalize();
+		QVector pnorm = pos.Cast();
+		Vector structurelimits = su->Limits().structurelimits;
+		Vector ournorm = TransformNormal(matrix,pnorm);
+		if (ournorm.Dot (structurelimits)<limitmin) {
+			return false;
+		}
+		
+	}
+	Unit * ssu;
+	for (un_iter i = su->getSubUnits();
+		 (ssu = *i)!=NULL;
+		 ++i) {
+		if (!CanFaceTarget (ssu,targ,su->cumulative_transformation_matrix)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
   missileprobability = missileprob;  
@@ -101,6 +126,7 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
   if(gunrange <=0){
 	  static float mountless_gunrange = XMLSupport::parse_float (vs_config->getVariable("AI","Targetting","MountlessGunRange","300000000"));
 	  gunrange= mountless_gunrange;
+	  //rangetotarget;
   }//probably a mountless capship. 50000 is chosen arbitrarily
   float inertial_priority=0;
   {
@@ -152,7 +178,7 @@ struct TurretBin{
   bool operator < (const TurretBin & o) const{
     return (maxrange>o.maxrange);
   }
-  void AssignTargets(const TargetAndRange &finalChoice) {
+  void AssignTargets(const TargetAndRange &finalChoice, const Matrix & pos) {
     //go through modularly assigning as you go;
     int count=0;
     const unsigned int lotsize[2]={listOfTargets[0].size(),listOfTargets[1].size()};
@@ -167,9 +193,11 @@ struct TurretBin{
 		  }
 		  */
 	    if (finalChoice.range<uniter->gunrange&&ROLES::getPriority (uniter->tur->combatRole())[finalChoice.t->combatRole()]<31) {
-	      uniter->tur->Target(finalChoice.t);
-	      uniter->tur->TargetTurret(finalChoice.t);
-	      foundfinal=true;
+			if (CanFaceTarget(uniter->tur,finalChoice.t,pos)) {
+				uniter->tur->Target(finalChoice.t);
+				uniter->tur->TargetTurret(finalChoice.t);
+				foundfinal=true;
+			}
 		}
       }
       if (!foundfinal) {
@@ -177,11 +205,13 @@ struct TurretBin{
 	for (unsigned int i=0;i<lotsize[f];i++) {
 	  const int index =(count+i)%lotsize[f];
 	  if (listOfTargets[f][index].range<uniter->gunrange) {
-	    uniter->tur->Target(listOfTargets[f][index].t);
-	    uniter->tur->TargetTurret(listOfTargets[f][index].t);
-	    count++;
-	    foundfinal=true;
-	    break;
+		  if (CanFaceTarget(uniter->tur,finalChoice.t,pos)) {
+			  uniter->tur->Target(listOfTargets[f][index].t);
+			  uniter->tur->TargetTurret(listOfTargets[f][index].t);
+			  count++;
+			  foundfinal=true;
+			  break;
+		  }
 	  }
 	}
 	}
@@ -259,7 +289,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       float relationship = GetEffectiveRelationship (un);
       float tmp=Priority (parent,un, gunrange,rangetotarget, relationship);
       if (tmp>priority) {
-	mytarg = un;
+		  mytarg = un;
+		  priority=tmp;
       }
       for (vector <TurretBin>::iterator k=tbin.begin();k!=tbin.end();++k) {
 	if (rangetotarget>k->maxrange) {
@@ -285,7 +316,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   }
   TargetAndRange my_target (mytarg,mytargrange,efrel);
   for (vector <TurretBin>::iterator k =  tbin.begin();k!=tbin.end();++k) {
-    k->AssignTargets(my_target);
+    k->AssignTargets(my_target,parent->cumulative_transformation_matrix);
   } 
   SignalChosenTarget();
   parent->Target (mytarg);
