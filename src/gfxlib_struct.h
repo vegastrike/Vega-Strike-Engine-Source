@@ -160,7 +160,7 @@ public:
 };
 struct MeshDrawContext {
   float mat[16];
-  MeshDrawContext(float m[16]) { memcpy(mat, m, sizeof(float[16])); }
+  MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
 };
 
 struct DrawContext {

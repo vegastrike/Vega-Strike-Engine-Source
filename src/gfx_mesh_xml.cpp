@@ -11,6 +11,7 @@
 #endif
 #include "xml_support.h"
 #include "gfx_transform_vector.h"
+#include "gfx_bsp.h"
 #ifdef max
 #undef max
 #endif
@@ -1273,9 +1274,15 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   }
   */
 
-  
-  //TODO: add force handling
-  //Add Logos in:
+  string tmpname (filename);
+  tmpname += ".bsp";
+  FILE * fp = fopen (tmpname.c_str(),"r+b");
+  if (!fp) {
+    BuildBSPTree (tmpname.c_str());
+  }else {
+    fclose (fp);
+  }
+  bspTree = new BSPTree (tmpname.c_str());
   CreateLogos(x_center,y_center,z_center);
   // Calculate bounding sphere
   

@@ -196,16 +196,18 @@ void Unit::CollideAll() {
 }
 
 bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat) {
-  Transformation cumulative_transformation = local_transformation;
-  cumulative_transformation.Compose(cumtrans, cumtransmat);
-  //cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  //cumulative_transformation.position//rSize()
+  Transformation cumulative_transformation(cumtrans);
+  cumulative_transformation.position = local_pos.Transform (cumtransmat);
+
   if (target->querySphere (cumulative_transformation.position,rSize())&&
-      target->queryBoundingBox (cumulative_transformation.position,rSize())
-      //&&IntersectBSP (cumulative_transformation.position,rSize())//bsp
-      )
-    return true;
-  //
+      target->queryBoundingBox (cumulative_transformation.position,rSize())) {
+    float localTrans [16];// {1,0,0,0,0,1,0,0,0,0,1,0,target->Position().i,target->Position.j,target->Position().k,1};
+    cumulative_transformation.Invert();
+    cumulative_transformation.to_matrix(localTrans);
+    if (intersects (target->Position().Transform (localTrans),target->rSize())) {//bsp      
+      return true;
+    }
+  }
   return false;
 }
 
@@ -251,15 +253,19 @@ bool Beam::Collide (Unit * target) {
   if (target==owner) 
     return false;
   float distance = target->querySphere (center,direction,0);
-  if (distance<0||distance>curlength) {
+  if (distance<0||distance>curlength+target->rSize()) {
     return false;
   }
-  if (target->queryBoundingBox(center,direction,0)==0)
-    return false;
-  curlength = distance;
-  impact|=IMPACT;
-  fprintf (stderr,"BEAM DELIVERS DAMAGE TO %s\n",target->name.c_str());
+  //  if (target->queryBoundingBox(center,direction,0)==0)
+  //    return false;
+  if (distance = target->queryBSP(center,center+direction*curlength)) { 
 
-  //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
-  return true;
+    curlength = distance;
+    impact|=IMPACT;
+    fprintf (stderr,"BEAM DELIVERS DAMAGE TO %s\n",target->name.c_str());
+    
+    //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
+    return true;
+  }
+  return false;
 }

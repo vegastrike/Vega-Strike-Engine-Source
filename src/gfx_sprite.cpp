@@ -29,8 +29,9 @@
 #include <assert.h>
 static float *mview = NULL;
 
-Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)
+Sprite::Sprite(char *file, bool trackzoom):local_transformation(),track_zoom(trackzoom)
 {
+
   local_transformation.position = Vector(0,0,1.0001);
 
   xcenter = 0;

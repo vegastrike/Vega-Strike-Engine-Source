@@ -60,6 +60,8 @@ vegastrike_SOURCES =				\
 	gfx_bounding_box.h			\
 	gfx_box.h 				\
 	gfx_box.cpp 				\
+	gfx_bspgent.cpp				\
+	gfx_bspgent.h				\
 	gfx_bsp.cpp				\
 	gfx_bsp.h				\
 	gfx_camera.cpp				\

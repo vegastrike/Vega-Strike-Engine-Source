@@ -1,6 +1,6 @@
 #include <stdio.h>
-
-
+#include <stdlib.h>
+#include "gfx_mesh.h"
 #define TRUE 1
 #define FALSE 0
 
@@ -9,19 +9,63 @@
 #define INTERSECT 0
 
 
-int unknown=0;
+/*
+Thanks a lot, it looks great! :)) I think the Y axis is inverted but i
+can fix that with no trouble at all :) 
 
-long getsize (char * name)
+About the collisions, here's how they are defined in WCP:
 
-{
-FILE *f;
-long size;
-f=fopen (name,"rb");
-fseek (f,0L,SEEK_END);
-size= ftell (f);
-fclose (f);
-return size;
-}
+Fighter/fighter: Sphere collision
+Capship/capship: Sphere collision
+Capship/asteroid(or corvette): Not defined! That's why you see that
+asteroid going through the Kraken in that WCP recon mission:)
+Fighter/capship: BSP Tree
+
+The whole concept of a BSP Tree is that any plane (since it has an
+infinite surface) divides the space in two parts: "in front" of the
+plane and "behind" the plane (in fact BSP stands for Binary Space
+Partition). So a BSP Tree's node, which has the values A,B,C and D of
+the plane equation (Ax+By+Cz+d=0), a flag ("in front","behind" or
+"undetermined" and two pointers (for the two sub-trees), the left
+pointer and the right pointer. TIP: I always use the face normals as the
+plane normal.. this way you know the plane equation always has the
+correct value:)
+
+To build a BSP tree, you start with an empty tree (NULL). Then calculate
+a plane (from a poly) and put it in the tree. After this you must add
+the other polys: if they are behind the plane or on the plane, take the
+left pointer. If they are in front of the plane, take the right pointer.
+If the node has a plane equation, put the flag the value of
+"undetermined", otherwise put "behind" or "front" as needed. A very
+important note: if a given plane intersects a polygon, you must add that
+poly's plane both to the left and right subtree (see the recursive
+function called put_plane_in_tree3 to see what i mean..
+put_plane_in_tree4 is the same, except it handles quadrilaters(sp?) ).
+
+After the tree is built, the game should test the tree for collisions:
+supply the ship's coordinates to the BSP Tree test routine and follow
+the appropriate paths (left or right). If you reach a "front" value,
+then there is no collision. If you reach the "behind" value, then a
+collision just occurred and VS should deal with it appropriately:)
+
+Here's a proposed form for the node:
+
+struct BSP_Node
+        {
+        char flag;
+        float a,b,c,d;
+        struct BSP_Node * left;
+        struct BSP_Node * right;
+        }
+
+
+
+I'm sending you a small BMP along with the source code to demonstrate
+how should a tree be built and tested. If there's anything you don't
+understand, e-mail me back and i'll try to explain things a bit better:)
+
+Seeya!:)
+*/
 
 
 struct bsp_tree
@@ -33,14 +77,13 @@ struct bsp_tree
 
 typedef struct bsp_tree BSP_TREE;
 
-struct vector
+struct bsp_vector
         {
         float x,y,z;
-        struct vector * next;
+        struct bsp_vector * next;
         };
 
-typedef struct vector VECTOR;
-
+typedef struct bsp_vector VECTOR;
 
 struct polygon3
         {
@@ -56,464 +99,145 @@ struct polygon4
 
 typedef struct polygon4 POLYGON4;
 
-
-struct face
-        {
-        long normal_number;
-        long unknown1;
-        long texture;
-        long face_number;
-        long number_of_vertices;
-        long unknown2;
-        long end;
-        struct face * next;
-        };
-
-typedef struct face FACE;
-
-struct fvrt
-        {
-        long vert;
-        long light;
-        float x;
-        float y;
-        struct fvrt * next;
-        };
-
-typedef struct fvrt FVRT;
-
-void load (VECTOR ** vertices, VECTOR ** normals, FACE ** _face, FVRT ** _fvrt);
-void add_to_vector_list (VECTOR ** vertices, float x,float y,float z);
-void add_to_face_list (FACE ** _face,long normal_number,long  unknown1,long  texture,long face_number,long number_of_vertices,long unknown2,long end);
-void add_to_fvrt_list (FVRT ** _fvrt,long vert,long light,float fx,float fy);
-void build_bsp_tree(BSP_TREE ** bsp,VECTOR * vertices,VECTOR * normals,FACE * _face,FVRT * _fvrt);
-BSP_TREE * put_plane_in_tree3(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON3 * temp_poly3);
-BSP_TREE * put_plane_in_tree4(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON4 * temp_poly4);
-int where_is_poly3(BSP_TREE * temp_node,POLYGON3 * temp_poly3);
-int where_is_poly4(BSP_TREE * temp_node,POLYGON4 * temp_poly4);
-void display_bsp_tree(BSP_TREE * tree);
-
-void main (void)
-
-{
-BSP_TREE * bsp=NULL;
-VECTOR * vertices=NULL;
-VECTOR * normals=NULL;
-FACE * _face=NULL;
-FVRT * _fvrt=NULL;
-
-printf ("Wing Commander Prophecy - TREE Builder - Version 0.1 by Mario \"HCl\" Brito\n");
-
-load(&vertices, &normals, &_face, &_fvrt);
-
-build_bsp_tree(&bsp,vertices,normals,_face,_fvrt);
-
-printf ("TREE calculated. Displaying...\n");
-
-display_bsp_tree(bsp);
-printf ("counter = %d\n",unknown);
+static void Cross (const polygon3 &x, BSP_TREE &result) {
+  Vector v1 (x.c.x-x.a.x,x.c.y-x.a.y,x.c.z-x.a.z);
+  Vector v2 (x.b.x-x.a.x,x.b.y-x.a.y,x.b.z-x.a.z);
+    result.a = v1.j * v2.k - v1.k * v2.j;
+    result.b = v1.k * v2.i - v1.i * v2.k;
+    result.c = v1.i * v2.j  - v1.j * v2.i;     
+    float size = result.a*result.a+result.b*result.b+result.c*result.c;
+    size = ((float)1)/sqrtf (size);
+    result.a *=size;
+    result.b *=size;
+    result.c *=size;
 }
-
-void load (VECTOR ** vertices, VECTOR ** normals, FACE ** _face, FVRT ** _fvrt)
-
-{
-FILE *f;
-long size;
-float x,y,z;
-        long normal_number;
-        long unknown1;
-        long texture;
-        long face_number;
-        long number_of_vertices;
-        long unknown2;
-        long end;
-
-long vert,light;
-float fx,fy;
-
-long i;
-// Loading VERT ...
-
-size = getsize ("vert.wcp");
-
-f=fopen ("vert.wcp","rb");
-if (f == NULL)
-        {
-        printf ("Cannot open file\n");
-        //getch();
-        }
-
-for (i=0;i<size;i+=12)
-        {
-        fread (&x,4,1,f);
-        fread (&y,4,1,f);
-        fread (&z,4,1,f);
-        
-        add_to_vector_list (vertices,x,y,z);
-        }
-
-fclose (f);
-// Loading VTNM ...
-
-size = getsize ("vtnm.wcp");
-
-f=fopen ("vtnm.wcp","rb");
-if (f == NULL)
-        {
-        printf ("Cannot open file\n");
-        //getch();
-        }
-
-for (i=0;i<size;i+=12)
-        {
-        fread (&x,4,1,f);
-        fread (&y,4,1,f);
-        fread (&z,4,1,f);
-        
-        add_to_vector_list (normals,x,y,z);
-        }
-fclose (f);
-// Loading FACE ...
-
-size = getsize ("face.wcp");
-
-f=fopen ("face.wcp","rb");
-if (f == NULL)
-        {
-        printf ("Cannot open file\n");
-        //getch();
-        }
-
-for (i=0;i<size;i+=28)
-        {
-
-        long normal_number;
-        long unknown1;
-        long texture;
-        long face_number;
-        long number_of_vertices;
-        long unknown2;
-        long end;
-
-        fread (&normal_number,4,1,f);
-        fread (&unknown1,4,1,f);
-        fread (&texture,4,1,f);
-        fread (&face_number,4,1,f);
-        fread (&number_of_vertices,4,1,f);
-        fread (&unknown2,4,1,f);
-        fread (&end,4,1,f);
-
-        add_to_face_list (_face,normal_number, unknown1, texture,face_number,number_of_vertices,unknown2,end);
-        }
-
-fclose (f);
-// Loading FVRT ...
-
-size = getsize ("fvrt.wcp");
-
-f=fopen ("fvrt.wcp","rb");
-if (f == NULL)
-        {
-        printf ("Cannot open file\n");
-        //getch();
-        }
-
-for (i=0;i<size;i+=16)
-        {
-        fread (&vert,4,1,f);
-        fread (&light,4,1,f);
-        fread (&fx,4,1,f);
-        fread (&fy,4,1,f);
-        
-        add_to_fvrt_list (_fvrt,vert,light,fx,fy);
-        }
-
-fclose (f);
-
-}
-
-void add_to_vector_list (VECTOR ** vertices,float x,float y,float z)
-
-{
-VECTOR * temp, *aux;
-
-temp = (VECTOR *) malloc (sizeof(VECTOR));
-
-temp->x=x;
-temp->y=y;
-temp->z=z;
-temp->next = NULL;
-
-if ((*vertices) == NULL)
-        {
-        *vertices = temp;
-        return;
-        }
-else
-        {
-        aux = (*vertices);
-        while (1)
-                {
-                if (aux->next == NULL)
-                        {
-                        aux->next = temp;
-                        return;
-                        }
-                else
-                        aux=aux->next;
-                }
-
-        }
-
-}
-
-void add_to_face_list (FACE ** _face,long normal_number,long  unknown1,long  texture,long face_number,long number_of_vertices,long unknown2,long end)
-{
-FACE * temp, *aux;
-
-temp = (FACE *) malloc (sizeof(FACE));
-
-temp->normal_number=normal_number;
-temp->unknown1=unknown1;
-temp->texture = texture;
-temp->face_number=face_number;
-temp->number_of_vertices=number_of_vertices;
-temp->unknown2=unknown2;
-temp->end=end;
-temp->next = NULL;
-
-if ((*_face) == NULL)
-        {
-        *_face = temp;
-        return;
-        }
-else
-        {
-        aux = (*_face);
-        while (1)
-                {
-                if (aux->next == NULL)
-                        {
-                        aux->next = temp;
-                        return;
-                        }
-                else
-                        aux=aux->next;
-                }
-
-        }
-
+static void Cross (const polygon4 &x, BSP_TREE & result) {
+  polygon3 tmp;
+  memcpy (&tmp,&x,sizeof (polygon3));
+  Cross (tmp,result);
 }
 
 
-void add_to_fvrt_list (FVRT ** _fvrt,long vert,long light,float fx,float fy)
 
-{
-FVRT * temp, *aux;
+static FILE * o;
+int highestlevel=0;
+static BSP_TREE * put_plane_in_tree3(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON3 * temp_poly3);
+static BSP_TREE * put_plane_in_tree4(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON4 * temp_poly4);
+static int where_is_poly3(BSP_TREE * temp_node,POLYGON3 * temp_poly3);
+static int where_is_poly4(BSP_TREE * temp_node,POLYGON4 * temp_poly4);
+static void display_bsp_tree(BSP_TREE * tree);
+static void write_bsp_tree (BSP_TREE *tree,int level=0);//assume open file
 
-temp = (FVRT *) malloc (sizeof(FVRT));
 
-temp->vert = vert;
-temp->light = light;
-temp->x=fx;
-temp->y=fy;
-temp->next = NULL;
 
-if ((*_fvrt) == NULL)
-        {
-        *_fvrt = temp;
-        return;
-        }
-else
-        {
-        aux = (*_fvrt);
-        while (1)
-                {
-                if (aux->next == NULL)
-                        {
-                        aux->next = temp;
-                        return;
-                        }
-                else
-                        aux=aux->next;
-                }
-
-        }
-
+void FreeBSP (BSP_TREE ** tree) {
+  if ((*tree)->right)
+    FreeBSP(&(*tree)->right);
+  if ((*tree)->left)
+    FreeBSP(&(*tree)->left);
+  free ( (*tree));
+  *tree = NULL;
 }
 
 
-void build_bsp_tree(BSP_TREE ** bsp,VECTOR * vertices,VECTOR * normals,FACE * _face,FVRT * _fvrt)
+void Mesh::BuildBSPTree(const char *filename)
 
 {
+  o = fopen (filename, "w+b");
+  BSP_TREE * bsp=NULL;
+unsigned int i;
 
-long i;
-long normal;
-long counter; //debug
 BSP_TREE temp_node;
 
 POLYGON3 temp_poly3;
 POLYGON4 temp_poly4;
-
-VECTOR * vert_aux, * vtnm_aux;
-FACE * face_aux;
-FVRT * fvrt_aux;
-
-vert_aux = vertices;
-vtnm_aux = normals;
-face_aux = _face;
-fvrt_aux = _fvrt;
-
-while (face_aux != NULL)
-        {
-        if (face_aux->number_of_vertices == 3)
+ vector <int> tris;
+ vector <int> quads;
+ for (i=0;i<xml->triind.size();i++) {
+   tris.push_back (xml->triind[i]);
+ }
+ for (i=0;i<xml->nrmltristrip.size();i++) {
+   tris.push_back(xml->nrmltristrip[i]);
+ }
+ for (i=0;i<xml->nrmltrifan.size();i++) {
+   tris.push_back(xml->nrmltrifan[i]);
+ }
+ for (i=0;i<xml->quadind.size();i++) {
+   quads.push_back (xml->quadind[i]);
+ }
+ for (i=0;i<xml->nrmlquadstrip.size();i++) {
+   quads.push_back(xml->nrmlquadstrip[i]);
+ }
+ 
+ for (i=0;i<tris.size();i+=3) 
                 {
                 temp_node.a=0;  // clean temp values...
                 temp_node.b=0;
                 temp_node.c=0;
                 temp_node.d=0;
 
-                normal = face_aux->normal_number;
-                for (i=0;i<normal;i++)          // search for normals
-                        {
-                        vtnm_aux=vtnm_aux->next;
-                        }
-                temp_node.a=vtnm_aux->x;     
-                temp_node.b=vtnm_aux->y;
-                temp_node.c=vtnm_aux->z;
+                temp_poly3.a.x = xml->vertices[tris[i]].x;
+                temp_poly3.a.y = xml->vertices[tris[i]].y;
+                temp_poly3.a.z = xml->vertices[tris[i]].z;
 
-                vtnm_aux = normals;
-                                              // Find vertices
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly3.a.x = vert_aux->x;
-                temp_poly3.a.y = vert_aux->y;
-                temp_poly3.a.z = vert_aux->z;
+                temp_poly3.b.x = xml->vertices[tris[i+1]].x;
+                temp_poly3.b.y = xml->vertices[tris[i+1]].y;
+                temp_poly3.b.z = xml->vertices[tris[i+1]].z;
 
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
+                temp_poly3.c.x = xml->vertices[tris[i+2]].x;
+                temp_poly3.c.y = xml->vertices[tris[i+2]].y;
+                temp_poly3.c.z = xml->vertices[tris[i+2]].z;
 
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly3.b.x = vert_aux->x;
-                temp_poly3.b.y = vert_aux->y;
-                temp_poly3.b.z = vert_aux->z;
-
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
-
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly3.c.x = vert_aux->x;
-                temp_poly3.c.y = vert_aux->y;
-                temp_poly3.c.z = vert_aux->z;
-
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
-
-
-
+		Cross (temp_poly3,temp_node);
                                               // Calculate 'd'
-
                 temp_node.d = (float) ((temp_node.a*temp_poly3.a.x)+(temp_node.b*temp_poly3.a.y)+(temp_node.c*temp_poly3.a.z));
                 temp_node.d*=-1.0;
 
-                //printf ("3-Plane calculated (%ld)\n",counter);
-                (*bsp)=put_plane_in_tree3((*bsp),&temp_node,&temp_poly3);
+                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3);
 
                 }
-
-        else if (face_aux->number_of_vertices == 4)
+ for (i=0;i<quads.size();i+=4) 
                 {
                 temp_node.a=0;  // clean temp values...
                 temp_node.b=0;
                 temp_node.c=0;
                 temp_node.d=0;
 
-                normal = face_aux->normal_number;
-                for (i=0;i<normal;i++)          // search for normals
-                        {
-                        vtnm_aux=vtnm_aux->next;
-                        }
-                temp_node.a=vtnm_aux->x;     
-                temp_node.b=vtnm_aux->y;
-                temp_node.c=vtnm_aux->z;
+                temp_poly4.a.x = xml->vertices[quads[i]].x;
+                temp_poly4.a.y = xml->vertices[quads[i]].y;
+                temp_poly4.a.z = xml->vertices[quads[i]].z;
 
-                vtnm_aux = normals;
-                                              // Find vertices
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly4.a.x = vert_aux->x;
-                temp_poly4.a.y = vert_aux->y;
-                temp_poly4.a.z = vert_aux->z;
+                temp_poly4.b.x = xml->vertices[quads[i+1]].x;
+                temp_poly4.b.y = xml->vertices[quads[i+1]].y;
+                temp_poly4.b.z = xml->vertices[quads[i+1]].z;
 
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
+                temp_poly4.c.x = xml->vertices[quads[i+2]].x;
+                temp_poly4.c.y = xml->vertices[quads[i+2]].y;
+                temp_poly4.c.z = xml->vertices[quads[i+2]].z;
 
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly4.b.x = vert_aux->x;
-                temp_poly4.b.y = vert_aux->y;
-                temp_poly4.b.z = vert_aux->z;
-
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
-
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly4.c.x = vert_aux->x;
-                temp_poly4.c.y = vert_aux->y;
-                temp_poly4.c.z = vert_aux->z;
-
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
-
-                for (i=0;i<fvrt_aux->vert;i++)
-                        {
-                        vert_aux=vert_aux->next;
-                        }
-                temp_poly4.d.x = vert_aux->x;
-                temp_poly4.d.y = vert_aux->y;
-                temp_poly4.d.z = vert_aux->z;
-
-                vert_aux = vertices;
-                fvrt_aux = fvrt_aux->next;
+                temp_poly4.d.x = xml->vertices[quads[i+3]].x;
+                temp_poly4.d.y = xml->vertices[quads[i+3]].y;
+                temp_poly4.d.z = xml->vertices[quads[i+3]].z;
 
 
+		Cross (temp_poly4,temp_node);
                                               // Calculate 'd'
                 temp_node.d = (float)((temp_node.a*temp_poly4.a.x)+(temp_node.b*temp_poly4.a.y)+(temp_node.c*temp_poly4.a.z));
                 temp_node.d*=-1.0;
 
-                //printf ("4-Plane calculated (%ld)\n",counter);
-                (*bsp)=put_plane_in_tree4((*bsp),&temp_node,&temp_poly4);
+                bsp=put_plane_in_tree4(bsp,&temp_node,&temp_poly4);
 
                 }
-        else
-                {
-                printf ("ERROR: Can only deal with 3 or 4 sided polys\n");
-                //getch();
-                }
-        face_aux=face_aux->next;
-        counter++;
-        }
+ write_bsp_tree(bsp,0);
+ fclose (o);
+ FreeBSP (&bsp);
+ fprintf (stderr,"HighestLevel, BSP Tree %d",highestlevel);
 }
 
-BSP_TREE * put_plane_in_tree3(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON3 * temp_poly3)
+static BSP_TREE * put_plane_in_tree3(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON3 * temp_poly3)
 {
 int flag;
-BSP_TREE * aux, *temp, ** aux2;
+BSP_TREE * aux, *temp;
 
 aux = bsp;
 
@@ -548,11 +272,12 @@ else
                 aux->right = put_plane_in_tree3(aux->right,temp_node,temp_poly3);
                 return aux;
                 }
+	return NULL;
         }
 }
 
 
-BSP_TREE * put_plane_in_tree4(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON4 * temp_poly4)
+static BSP_TREE * put_plane_in_tree4(BSP_TREE * bsp,BSP_TREE * temp_node,POLYGON4 * temp_poly4)
 {
 int flag;
 BSP_TREE * aux, *temp;
@@ -590,20 +315,19 @@ else
                 aux->right = put_plane_in_tree4(aux->right,temp_node,temp_poly4);
                 return aux;
                 }
+	return NULL;
         }
 }
 
 
-int where_is_poly3(BSP_TREE * temp_node,POLYGON3 * temp_poly3)
+static int where_is_poly3(BSP_TREE * temp_node,POLYGON3 * temp_poly3)
 
 {
 int flag[3]={0,0,0};
-int eval;
-int i;
 
-flag[0] = ((temp_node->a)*(temp_poly3->a.x))+((temp_node->b)*(temp_poly3->a.y))+((temp_node->c)*(temp_poly3->a.z))+(temp_node->d);
-flag[1] = ((temp_node->a)*(temp_poly3->b.x))+((temp_node->b)*(temp_poly3->b.y))+((temp_node->c)*(temp_poly3->b.z))+(temp_node->d);
-flag[2] = ((temp_node->a)*(temp_poly3->c.x))+((temp_node->b)*(temp_poly3->c.y))+((temp_node->c)*(temp_poly3->c.z))+(temp_node->d);
+flag[0] = (int)((temp_node->a)*(temp_poly3->a.x))+((temp_node->b)*(temp_poly3->a.y))+((temp_node->c)*(temp_poly3->a.z))+(temp_node->d);
+flag[1] = (int)((temp_node->a)*(temp_poly3->b.x))+((temp_node->b)*(temp_poly3->b.y))+((temp_node->c)*(temp_poly3->b.z))+(temp_node->d);
+flag[2] = (int)((temp_node->a)*(temp_poly3->c.x))+((temp_node->b)*(temp_poly3->c.y))+((temp_node->c)*(temp_poly3->c.z))+(temp_node->d);
 
 if (flag[0] <=0 && flag[1] <=0 && flag[2] <=0)
         return BACK;
@@ -614,17 +338,15 @@ else
 
 }
 
-int where_is_poly4(BSP_TREE * temp_node,POLYGON4 * temp_poly4)
+static int where_is_poly4(BSP_TREE * temp_node,POLYGON4 * temp_poly4)
 
 {
 int flag[4]={0,0,0,0};
-int eval;
-int i;
 
-flag[0] = ((temp_node->a)*(temp_poly4->a.x))+((temp_node->b)*(temp_poly4->a.y))+((temp_node->c)*(temp_poly4->a.z))+(temp_node->d);
-flag[1] = ((temp_node->a)*(temp_poly4->b.x))+((temp_node->b)*(temp_poly4->b.y))+((temp_node->c)*(temp_poly4->b.z))+(temp_node->d);
-flag[2] = ((temp_node->a)*(temp_poly4->c.x))+((temp_node->b)*(temp_poly4->c.y))+((temp_node->c)*(temp_poly4->c.z))+(temp_node->d);
-flag[3] = ((temp_node->a)*(temp_poly4->d.x))+((temp_node->b)*(temp_poly4->d.y))+((temp_node->c)*(temp_poly4->d.z))+(temp_node->d);
+flag[0] = (int)((temp_node->a)*(temp_poly4->a.x))+((temp_node->b)*(temp_poly4->a.y))+((temp_node->c)*(temp_poly4->a.z))+(temp_node->d);
+flag[1] = (int)((temp_node->a)*(temp_poly4->b.x))+((temp_node->b)*(temp_poly4->b.y))+((temp_node->c)*(temp_poly4->b.z))+(temp_node->d);
+flag[2] = (int)((temp_node->a)*(temp_poly4->c.x))+((temp_node->b)*(temp_poly4->c.y))+((temp_node->c)*(temp_poly4->c.z))+(temp_node->d);
+flag[3] = (int)((temp_node->a)*(temp_poly4->d.x))+((temp_node->b)*(temp_poly4->d.y))+((temp_node->c)*(temp_poly4->d.z))+(temp_node->d);
 
 if (flag[0] <=0 && flag[1] <=0 && flag[2] <=0 && flag[3]<=0)
         return BACK;
@@ -635,12 +357,9 @@ else
 
 }
 
-void display_bsp_tree(BSP_TREE * tree)
+static void display_bsp_tree(BSP_TREE * tree)
 
 {
-float x;
-char * c;
-int i;
 if (tree !=NULL)
         {
         printf ("CHNK \"DATA\"\n");
@@ -737,4 +456,55 @@ printf ("}\n");
 
         }
 
+}
+
+
+static void wrtf (float f) {fwrite (&f,sizeof (float),1,o);}
+static void wrtb (bool b) {fwrite (&b,sizeof (bool),1,o);}
+
+static void write_bsp_tree (BSP_TREE *tree,int level)//assume open file
+{
+	level++;
+	wrtf (tree->a);
+	wrtf (tree->b);
+	wrtf (tree->c);
+	wrtf (tree->d);
+	if (tree->right)
+		wrtb (true);
+	else
+		wrtb(false);
+	if (tree->left)
+		wrtb(true);
+	else
+		wrtb(false);
+	if (tree->right)
+		write_bsp_tree (tree->right,level);
+	else
+	{
+		if (tree->left) 
+		{
+			wrtf (0);
+			wrtf (0);
+			wrtf (0);
+			wrtf (0);
+			wrtb (false);
+			wrtb (false);
+		}
+	}
+	if (tree->left)
+		write_bsp_tree (tree->left,level);
+	else
+	{
+		if (tree->right)
+		{
+			wrtf (0);
+			wrtf (0);
+			wrtf (0);
+			wrtf (0);
+			wrtb (false);
+			wrtb (false);
+		}
+	}
+	if (level > highestlevel)
+		highestlevel = level;
 }

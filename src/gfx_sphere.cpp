@@ -58,6 +58,11 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
    
    GFXVertex *vl = vertexlist;
    enum POLYTYPE *modes= new enum POLYTYPE [numQuadstrips];   
+   /*   SetOrientation(Vector(1,0,0),
+		    Vector(0,0,-1),
+		    Vector(0,1,0));//that's the way prop*///taken care of in loading
+
+
    for (i = imin; i < imax; i++) {
      GFXVertex *vertexlist = vl + (i * (slices+1)*2);
      rho = i * drho;
@@ -70,13 +75,13 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
        z = nsign * cos(rho);
        
        vertexlist[j*2+fir].i = x * nsign;
-       vertexlist[j*2+fir].j = y * nsign;
-       vertexlist[j*2+fir].k = z * nsign;
+       vertexlist[j*2+fir].k = y * nsign;
+       vertexlist[j*2+fir].j = -z * nsign;
        vertexlist[j*2+fir].s = insideout?1-s:s;
        vertexlist[j*2+fir].t = t;
        vertexlist[j*2+fir].x = x * radius;
-       vertexlist[j*2+fir].y = y * radius;
-       vertexlist[j*2+fir].z = z * radius;
+       vertexlist[j*2+fir].z = y * radius;
+       vertexlist[j*2+fir].y = -z * radius;
 
 
        x = -sin(theta) * sin(rho + drho);
@@ -84,13 +89,13 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
        z = nsign * cos(rho + drho);
 
        vertexlist[j*2+sec].i = x * nsign;
-       vertexlist[j*2+sec].j = y * nsign;
-       vertexlist[j*2+sec].k = z * nsign;
+       vertexlist[j*2+sec].k = y * nsign;
+       vertexlist[j*2+sec].j = -z * nsign;
        vertexlist[j*2+sec].s = insideout?1-s:s;
        vertexlist[j*2+sec].t = t - dt;
        vertexlist[j*2+sec].x = x * radius;
-       vertexlist[j*2+sec].y = y * radius;
-       vertexlist[j*2+sec].z = z * radius;
+       vertexlist[j*2+sec].z = y * radius;
+       vertexlist[j*2+sec].y = -z * radius;
 
        s += ds;
      }
@@ -117,9 +122,6 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
    if(centered) {
      draw_sequence=0;
    }
-   SetOrientation(Vector(1,0,0),
-		    Vector(0,0,-1),
-		    Vector(0,1,0));//that's the way prop
    
    meshHashTable.Put(hash_key, this);
    orig = this;
@@ -171,7 +173,7 @@ void SphereMesh::ProcessDrawQueue() {
     Matrix tmp2;
     Identity (tmp);
     if (!centered){
-        VectorToMatrix (tmp,Vector (cos (theta),sin(theta),0), Vector (-sin (theta),cos(theta),0),Vector(0,0,1));
+        VectorToMatrix (tmp,Vector (cos (theta),sin(theta),0),Vector(0,0,1), Vector (-sin (theta),0,cos(theta)));
     }
     MultMatrix (tmp2, c.mat, tmp);
     GFXLoadMatrix(MODEL, tmp2);

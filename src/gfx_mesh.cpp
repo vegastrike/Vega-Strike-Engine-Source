@@ -49,14 +49,10 @@ Vector mouseline;
 
 
 void Mesh::SetPosition (float x,float y, float z) {
-  local_transformation.position = Vector (x,y,z);
+  local_pos = Vector (x,y,z);
 }
 void Mesh::SetPosition (const Vector &k) {
-  local_transformation.position = k;
-}
-void Mesh::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
-{	
-  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
+  local_pos = k;
 }
 
 void Mesh::ProcessUndrawnMeshes() {
@@ -85,7 +81,7 @@ void Mesh::InitUnit()
 	forcelogos = NULL;
 	squadlogos = NULL;
 
-	local_transformation = identity_transformation;
+	local_pos = Vector (0,0,0);
 	blendSrc=ONE;
 	blendDst=ZERO;
 	changed = GFXTRUE;
@@ -656,11 +652,11 @@ float const ooPI = 1.00F/3.1415926535F;
 
 void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
-  Matrix cumulative_transformation_matrix;
-  Transformation cumulative_transformation = local_transformation;
-  cumulative_transformation.Compose(trans, m);
-  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  MeshDrawContext c(cumulative_transformation_matrix);
+  Vector pos = local_pos.Transform(m);
+  MeshDrawContext c(m);
+  c.mat[12]=pos.i;
+  c.mat[13]=pos.j;
+  c.mat[14]=pos.k;
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
@@ -713,21 +709,22 @@ void Mesh::Destroy()
 {
 }
 
-bool Mesh::intersects(const Vector &start, const Vector &end) {
-	return bspTree->intersects(start, end);
+float Mesh::intersects(const Vector &start, const Vector &end) {
+  if (!bspTree)
+    return (start-end).Magnitude();
+  return bspTree->intersects(start-local_pos, end-local_pos);
 }
 
 
 BoundingBox * Mesh::getBoundingBox() {
   
-  BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0),Vector (maxSizeX,0,0),
-					Vector (0,minSizeY,0),Vector (0,maxSizeY,0),
-					Vector (0,0,minSizeZ),Vector (0,0,maxSizeZ));
-  tbox->Transform (local_transformation);
+  BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0)+local_pos,Vector (maxSizeX,0,0)+local_pos,
+					Vector (0,minSizeY,0)+local_pos,Vector (0,maxSizeY,0)+local_pos,
+					Vector (0,0,minSizeZ)+local_pos,Vector (0,0,maxSizeZ)+local_pos);
   return tbox;
 }
 
-bool Mesh::intersects(const Vector &pt/*, Transformation cumulative_transformation*/) {
+bool Mesh::intersects(const Vector &pt,float err/*, Transformation cumulative_transformation*/) {
 
   /*
   Transformation tmp = cumulative_transformation;
@@ -739,10 +736,14 @@ bool Mesh::intersects(const Vector &pt/*, Transformation cumulative_transformati
   Vector a = pt;
   a = a.Transform(t);
   */
-  return bspTree->intersects(/*a*/pt);
+  if (!bspTree)
+    return true;
+  return bspTree->intersects(/*a*/pt-local_pos,err);
 }
 
 bool Mesh::intersects(Mesh *mesh) {
+  if (!bspTree)
+    return true;
   // Needs to adapt coordinate systems
 	return bspTree->intersects(mesh->bspTree);
 }

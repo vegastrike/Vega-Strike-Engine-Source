@@ -26,8 +26,8 @@
 #include "gfx_mesh.h"
 #include "quaternion.h"
 
-class Sprite:public Mesh {
-  
+class Sprite {
+        Transformation local_transformation;
 	float xcenter;
 	float ycenter;
 	float width;

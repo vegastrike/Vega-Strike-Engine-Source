@@ -179,6 +179,7 @@ private:
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);
+  void BuildBSPTree (const char *filename);
   void CreateLogos(float x_center,float y_center, float z_center);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -188,7 +189,7 @@ private:
 
 protected:
  
-  Transformation local_transformation; 
+  Vector local_pos; 
   enum BLENDFUNC blendSrc;
   enum BLENDFUNC blendDst;
 
@@ -236,7 +237,7 @@ public:
   void SetPosition (float,float,float);
   void SetPosition (const Vector&);
   void SetOrientation (const Vector &, const Vector &, const Vector&);
-  Vector &Position() {return local_transformation.position;}
+  Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}
   void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
   virtual void ProcessDrawQueue();
@@ -250,8 +251,8 @@ public:
   // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}
-  bool intersects(const Vector &start, const Vector &end);
-  bool intersects(const Vector &pt);
+  float intersects(const Vector &start, const Vector &end);//zero or length
+  bool intersects(const Vector &pt, float err);
   bool intersects(Mesh *mesh);
 };
 #endif

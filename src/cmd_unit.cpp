@@ -192,10 +192,7 @@ Unit::Unit(const char *filename, bool xml) {
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
 
-		if(meshtype == 0)
-			meshdata[meshcount] = new Mesh(meshfilename);
-		else
-			meshdata[meshcount] = new Sprite(meshfilename);
+		meshdata[meshcount] = new Mesh(meshfilename);
 
 		meshdata[meshcount]->SetPosition(x,y,z);
 	}
@@ -495,6 +492,40 @@ bool Unit::Explode () {
   }
   return alldone;
 }
+
+bool Unit::queryBSP (const Vector &pt, float err) {
+  int i;
+  float tmp;
+  Vector st (ToLocalCoordinates(pt)-Position());
+
+  for (i=0;i<nummesh;i++) {
+    if ((meshdata[i]->intersects (st,err)))
+      return true;
+  }
+  for (i=0;i<numsubunit;i++) {
+    if ((subunits[i]->queryBSP(pt,err)))
+      return true;
+  }
+  return false;
+}
+
+float Unit::queryBSP (const Vector &start, const Vector & end) {
+  int i;
+  float tmp;
+  Vector st (ToLocalCoordinates(start)-Position());
+  Vector ed (ToLocalCoordinates(end)-Position());
+
+  for (i=0;i<nummesh;i++) {
+    if ((tmp = meshdata[i]->intersects (st,ed)))
+      return tmp;
+  }
+  for (i=0;i<numsubunit;i++) {
+    if ((tmp = subunits[i]->queryBSP(start,end)))
+      return tmp;
+  }
+  return false;
+}
+
 
 bool Unit::queryBoundingBox (const Vector &pnt, float err) {
   int i;
