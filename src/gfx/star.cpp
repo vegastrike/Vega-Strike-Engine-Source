@@ -76,6 +76,31 @@ public:
 		}
 	}
 };
+//bool shouldwedraw
+static void saturate(float &r, float &g, float &b) {
+	r = pow(r,.33333);
+	g = pow(g,.33333);
+	b = pow(b,.33333);	
+	
+}
+bool computeStarColor (float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance){
+	saturate(r,g,b);
+	float dissqr = distance*distance/(maxdistance*maxdistance);
+	float lum = 100*luminmax.i/(luminmax.k*dissqr);
+	lum = log((double)luminmax.i*10./(double)luminmax.j)*.001/dissqr;
+	fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
+	r*=lum;
+	g*=lum;
+	b*=lum;
+	if (r>1)
+		r=1;
+	if (g>1)
+		g=1;
+	if (b>1)
+		b=1;
+	
+	return lum>.05;
+}
 namespace StarSystemGent {
 extern GFXColor getStarColorFromRadius(float radius);
 }
@@ -96,6 +121,56 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 	StarIter si;
 	int starcount=0;
 	int j=0;
+	float xcent=0;
+	float ycent=0;
+	float zcent=0;
+	Vector starmin(0,0,0);
+	Vector starmax(0,0,0);
+	float minlumin=1;
+	float maxlumin=1;
+	if (our_system_name.size()>0) {
+		sscanf (_Universe->getGalaxyProperty(our_system_name,"xyz").c_str(),
+				"%f %f %f",
+				&xcent,
+				&ycent,
+				&zcent);
+		
+		for (StarIter i;!i.Done();++i) {
+			float xx,yy,zz;
+			if (3==sscanf((*i.Get())["xyz"].c_str(),"%f %f %f",&xx,&yy,&zz)) {
+				xx-=xcent;
+				yy-=ycent;
+				zz-=zcent;
+				if (xx<starmin.i)
+					starmin.i=xx;
+				if (yy<starmin.j)
+					starmin.j=yy;
+				if (zz<starmin.k)
+					starmin.k=zz;
+				if (xx>starmax.i)
+					starmax.i=xx;
+				if (yy>starmax.j)
+					starmax.j=yy;
+				if (zz>starmax.k)
+					starmax.k=zz;
+				float lumin;
+				if (1==sscanf((*i.Get())["luminosity"].c_str(),"%f",&lumin)) {
+					if (lumin>maxlumin) {
+						maxlumin=lumin;
+					}
+					if (lumin<minlumin)
+						minlumin=lumin;
+				}
+			}
+		}
+	}
+	float maxdistance = starmax.Magnitude();
+	float mindistance = starmin.Magnitude();
+	if (maxdistance<mindistance)
+		maxdistance=mindistance;
+	fprintf (stderr,"Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
+			 starmin.i,starmin.j,starmin.k,starmax.i,starmax.j,starmax.k,minlumin,maxlumin);
+			 
 	for (int y=0;y<num;++y) {
 		
 		tmpvertex[j+1].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
@@ -118,12 +193,6 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 						   &xorig,
 						   &yorig,
 						   &zorig)) {
-				float xcent=0,ycent=0,zcent=0;
-				sscanf (_Universe->getGalaxyProperty(our_system_name,"xyz").c_str(),
-						"%f %f %f",
-						&xcent,
-						&ycent,
-						&zcent);
 				if (xcent!=xorig) {				
 					tmpvertex[j+1].x=xorig-xcent;
 				}
@@ -142,6 +211,19 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 				tmpvertex[j+1].g=suncolor.g;
 				tmpvertex[j+1].b=suncolor.b;
 			}
+			float lumin=1;
+			sscanf((*si.Get())["luminosity"].c_str(),"%f",&lumin);
+			
+			float distance = Vector(tmpvertex[j+1].x,
+									tmpvertex[j+1].y,
+									tmpvertex[j+1].z).Magnitude();
+			if (!computeStarColor(tmpvertex[j+1].r,
+								  tmpvertex[j+1].g,
+								  tmpvertex[j+1].b,
+								  Vector(lumin,minlumin,maxlumin),
+								  distance,maxdistance)) {
+				incj=0;
+			}
 			++si;
 		}
 		
@@ -156,7 +238,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 		tmpvertex[j].b=0;
 		j+=incj;
 	}
-	fprintf (stderr,"Read In Star Count %d\n",starcount);
+	fprintf (stderr,"Read In Star Count %d used: %d\n",starcount,j/2);
 	vlist= new GFXVertexList (GFXLINE,j,tmpvertex, j, true,0);  
 	delete []tmpvertex;
 }

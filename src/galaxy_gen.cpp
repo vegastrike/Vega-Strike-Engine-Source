@@ -314,7 +314,8 @@ Color StarColor (float radius, unsigned int &entityindex) {
 }
 GFXColor getStarColorFromRadius(float radius) {
 	unsigned int myint=0;
-	Color tmp = StarColor(radius,myint);
+	static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","50"));	
+	Color tmp = StarColor(radius*radiusscale,myint);
 	return GFXColor(tmp.r,tmp.g,tmp.b,1);
 }
 float LengthOfYear (Vector r,Vector s) {
