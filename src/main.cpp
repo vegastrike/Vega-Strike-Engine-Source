@@ -52,6 +52,7 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+#include <time.h>
 #if defined (_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
@@ -414,11 +415,22 @@ bool SetPlayerSystem (std::string &sys, bool set) {
     return isset;
   }
 }
+vector<string> parse_space_string(std::string s) {
+	vector<string> ret;
+	int index=0;
+	while ((index =s.find(" "))!=string::npos) {
+		ret.push_back (s.substr(0,index));
+		s = s.substr (index+1);
+	}
+	ret.push_back(s);
+	return ret;
+}
 void bootstrap_first_loop() {
   static int i=0;
-  std::string ss=vs_config->getVariable ("graphics","splash_screen","vega_splash.ani");
+  static std::string ss=vs_config->getVariable ("graphics","splash_screen","vega_splash.ani");
   if (i==0) {
-    SplashScreen = new Animation (ss.c_str(),0);
+	vector<string> s = parse_space_string(ss);
+    SplashScreen = new Animation (s[time(NULL)%s.size()].c_str(),0);
     bs_tp=new TextPlane();
   }
   bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
