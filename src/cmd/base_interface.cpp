@@ -86,13 +86,13 @@ void Base::Room::BaseTalk::Draw (Base *base) {
 	GFXEnd();*/
 	if (hastalked) return;
 	if (curchar<message.size()) {
-		curtime+=GetElapsedTime();
+		curtime+=GetElapsedTime()/getTimeCompression();
 		if (curtime>.025) {
 			base->othtext.SetText(message.substr(0,++curchar));
 			curtime=0;
 		}
 	} else {
-		curtime+=GetElapsedTime();
+		curtime+=GetElapsedTime()/getTimeCompression();
 		if (curtime>((.01*message.size())+2)) {
 			curtime=0;
 			BaseObj * self=this;
