@@ -399,6 +399,7 @@ void gfx_light::RemoveFromTable() {
 
 void gfx_light::TrashFromGLLights () {
   assert (target>0);
+  assert ((GLLights[target].options&GLL_ON)==0);//better be disabled
   assert ((&(*_llights)[GLLights[target].index])==this);
   GLLights[target].index = -1;
   GLLights[target].options= OpenGLLights::GLL_LOCAL;
