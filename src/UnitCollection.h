@@ -21,15 +21,16 @@ class UnitCollection {
     UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next) { }
     ~UnitListNode() { if(0!=next) delete next; }
   } *units;
-
+  bool persist;
  public:
-  UnitCollection() : units(new UnitListNode(NULL)) { }
-  ~UnitCollection() { if (units) delete units; }
+  UnitCollection(bool persistant=false) : units(new UnitListNode(NULL)),persist(persistant) { }
+  ~UnitCollection();
   class UnitIterator : public Iterator {
   private:
     UnitListNode *pos;
+    bool persist;
   public:
-    UnitIterator(UnitListNode *start) : pos(start) {  }
+    UnitIterator(UnitListNode *start, bool persistant) : pos(start), persist(persistant) {  }
     ~UnitIterator() { }
 
     void remove();
@@ -42,44 +43,13 @@ class UnitCollection {
   friend UnitCollection::UnitIterator;
   
   UnitIterator *createIterator() { 
-    return new UnitIterator(units);
+    return new UnitIterator(units,persist);
   }
-  void prepend(Unit *unit) { units->next = new UnitListNode(unit, units->next); }
-  void prepend(Iterator *iter) {
-    UnitListNode *n = units;
-
-    while(iter->current()!=NULL) {
-      n->next = new UnitListNode(iter->current(), n->next);
-      iter->advance();
-    }
-  }
-
-  void append(Unit *unit) { 
-    UnitListNode *n = units;
-    while(n->next!=NULL) n = n->next;
-    n->next = new UnitListNode(unit, NULL);
-  }
-  void append(Iterator *iter) {
-    UnitListNode *n = units;
-    while(n->next!=NULL) n = n->next;
-
-    while(iter->current()!=NULL) {
-      n->next = new UnitListNode(iter->current(), NULL);
-
-      n = n->next;
-      iter->advance();
-    }
-  }
-
-  Unit *item(unsigned i) {
-    UnitListNode *n = units->next;
-    while(n!=NULL) {
-      if(i==0) return n->unit;
-      n=n->next;
-      i--;
-    }
-    return NULL;
-  }
+  void prepend(Unit *unit);
+  void prepend(Iterator *iter);
+  void append(Unit *unit);
+  void append(Iterator *iter);
+  ///  Unit *item(unsigned i); //USELESS WITH PERSISTANT LISTS
 };
 
 #endif

@@ -27,6 +27,9 @@
 #include <iostream>
 #include <string>
 
+
+
+using std::queue;
 #include "xml_support.h"
 
 using namespace XMLSupport;
@@ -49,6 +52,8 @@ enum Aggression{
 };
 class Unit {
  private:
+
+  
   struct XML {
     vector<Mesh*> meshes;
     vector<Unit*> units;
@@ -64,6 +69,10 @@ class Unit {
   void endElement(const string &name);
 
 protected:
+
+  int ucref;
+  bool killed;
+  
   //used for physics
   Transformation prev_physical_state;
   Transformation curr_physical_state;
@@ -81,7 +90,7 @@ protected:
   
   Aggression aggression;
   
-  bool active;
+  //  bool active;
   
   //Vector pp, pq, pr, ppos;
   AI *aistate;
@@ -128,8 +137,12 @@ public:
   Unit();
   Unit(const char *filename, bool xml=false);
   virtual ~Unit();
+  static void ProcessDeleteQueue();
   void Init();
-  
+  void Destroy();
+  inline bool Killed() {return killed;}
+  inline void Ref() {ucref++;}
+  void UnRef();
   Unit *&Target(){return target;}; // Accessor for target; probably shouldn't use it
 
 	/*COMMAND*/
@@ -185,9 +198,9 @@ public:
   void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
   prev_physical_state.position = curr_physical_state.position = Vector(x,y,z);}
 
-  void Destroy(){active = false;};
+  //  void Destroy(){active = false;};
   virtual void Fire(){};
-
+  /*
   Unit *Update() {
     if(active) {
       return this;
@@ -197,7 +210,7 @@ public:
       return NULL;
     }
   }
-
+  */
   void Rotate(const Vector &axis);
   void FireEngines (const Vector &Direction, /*unit vector... might default to "r"*/
 					float FuelSpeed,

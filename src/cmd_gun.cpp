@@ -60,7 +60,8 @@ void Gun::Draw()
 		if(currproj)
 		{
 			currproj->Draw();
-			currproj = (Missile *)currproj->Update();
+			//check if DEAD bullet
+			//			currproj = (Missile *)currproj->Update();
 		}
 	}
 	while(projectiles[proj_index-1] == NULL) // decrement proj_index

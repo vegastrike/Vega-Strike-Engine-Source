@@ -41,6 +41,9 @@ Vector MouseCoordinate (int mouseX, int mouseY);
 
 double interpolation_blend_factor;
 
+
+static list<Unit*> Unitdeletequeue;
+
 void Unit::calculate_extent() {  
 	int a;
 	for(a=0; a<nummesh; a++) {
@@ -56,51 +59,68 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
-	meshdata = NULL;
-	subunits = NULL;
-	aistate = NULL;
-	//weapons = NULL;
-	numsubunit = 0;
-	active = TRUE;
+  killed==false;
+  ucref=0;
+  meshdata = NULL;
+  subunits = NULL;
+  aistate = NULL;
+  //weapons = NULL;
+  numsubunit = 0;
 
-	Identity(cumulative_transformation_matrix);
-	curr_physical_state = prev_physical_state = identity_transformation;
-	fpos = 0;
-	mass = 1;
-	fuel = 0;
 
-	yrestricted = prestricted = rrestricted = FALSE;
-	ymin = pmin = rmin = -PI;
-	ymax = pmax = rmax = PI;
-	ycur = pcur = rcur = 0;
+  Identity(cumulative_transformation_matrix);
+  curr_physical_state = prev_physical_state = identity_transformation;
+  fpos = 0;
+  mass = 1;
+  fuel = 0;
+
+  yrestricted = prestricted = rrestricted = FALSE;
+  ymin = pmin = rmin = -PI;
+  ymax = pmax = rmax = PI;
+  ycur = pcur = rcur = 0;
 	
-	MomentOfInertia = 1;
-	AngularVelocity = Vector(0,0,0);
-	Velocity = Vector(0,0,0);
+  MomentOfInertia = 1;
+  AngularVelocity = Vector(0,0,0);
+  Velocity = Vector(0,0,0);
+  
+  NetTorque = Vector(0,0,0);
+  NetForce = Vector(0,0,0);
+  NetLocalForce=Vector(0,0,0);
 
-	NetTorque = Vector(0,0,0);
-	NetForce = Vector(0,0,0);
-	NetLocalForce=Vector(0,0,0);
+  calculatePhysics = true;
+  selected = false;
+  selectionBox = NULL;
 
-	calculatePhysics = true;
-	selected = false;
-	selectionBox = NULL;
-
-	limits.yaw = 0.15;
-	limits.pitch = 0.15;
-	limits.roll = 0.15;
+  limits.yaw = 0.15;
+  limits.pitch = 0.15;
+  limits.roll = 0.15;
 	
-	limits.lateral = 0.1;
-	limits.vertical = 0.1;
-	limits.longitudinal = 1;
+  limits.lateral = 0.1;
+  limits.vertical = 0.1;
+  limits.longitudinal = 1;
+}
+void Unit::UnRef() {
+  ucref--;
+  if (killed&&ucref==0) {
+    Unitdeletequeue.push_back(this);//delete
+  }
+}
+void Unit::Destroy() {
+  killed = true;
+  if (ucref==0)
+    Unitdeletequeue.push_back(this);
+}
+void Unit::ProcessDeleteQueue() {
+  while (Unitdeletequeue.size()) {
+    delete Unitdeletequeue.back();
+    Unitdeletequeue.pop_back();
+  }
 }
 
-Unit::Unit()
-{
+Unit::Unit() {
 	Init();
 }
-Unit::Unit(const char *filename, bool xml)
-{
+Unit::Unit(const char *filename, bool xml) {
 	Init();
 
 	name = filename + string(" - Unit");
