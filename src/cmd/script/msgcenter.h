@@ -23,6 +23,10 @@
   MessageCenter written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
+#ifndef _MSGCENTER_H_
+
+#define _MSGCENTER_H_
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -62,3 +66,5 @@ class MessageCenter {
  private:
   vector<gameMessage *> messages;
 };
+
+#endif // _MSGCENTER_H_

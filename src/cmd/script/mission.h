@@ -31,22 +31,33 @@
 #include <string>
 #include <fstream>
 
-#include "xml_support.h"
+//#include "xml_support.h"
 #include "easydom.h"
+
+#ifndef VS_MIS_SEL
+#include "vegastrike.h"
 #include "vs_globals.h"
+#include "msgcenter.h"
+
+class Unit;
+class Order;
+class MessageCenter;
+#endif
+
 #include <assert.h>
 using std::string;
 
 using XMLSupport::AttributeList;
 
-class Unit;
-class Order;
-class MessageCenter;
 
 #define qu(x)	("\""+x+"\"")
 
 
 /* *********************************************************** */
+
+#ifdef VS_MIS_SEL
+#define missionNode easyDomNode
+#endif
 
 class Flightgroup {
  public:
@@ -67,6 +78,8 @@ class Flightgroup {
 
   map<string,string> ordermap;
 };
+
+#ifndef VS_MIS_SEL
 
 /* *********************************************************** */
 
@@ -188,6 +201,9 @@ class missionNode : public tagDomNode {
 
 typedef vector<varInst *> olist_t;
 
+#endif // VS_MIS_SEL
+
+
 class Mission {
  public:
   Mission(char *configfile);
@@ -200,6 +216,8 @@ class Mission {
 
   string getVariable(string name,string defaultval);
 
+
+#ifndef VS_MIS_SEL
   void GetOrigin(Vector &pos,string &planetname);
 
   void DirectorLoop();
@@ -220,9 +238,15 @@ varInst* lookupClassVariable(string modulename,string varname,unsigned int class
 void call_vector_into_olist(varInst *vec_vi,Vector vec3);
 void  deleteVarInst(varInst *vi,bool del_local=false);
 
+#endif // VS_MIS_SEL
+
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
+  easyDomNode *variables;
+  easyDomNode *origin_node;
+
+#ifndef VS_MIS_SEL
   Unit *current_ai_unit;
   Order *current_ai_order;
 
@@ -232,9 +256,6 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   ofstream var_out;
 
   parsemode_type parsemode;
-
-  easyDomNode *variables;
-  easyDomNode *origin_node;
 
   missionNode *director;
   easyDomFactory<missionNode> *importf;
@@ -259,6 +280,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
   void saveVariables(const ostream& out);
   void initTagMap();
+#endif // VS_MIS_SEL
 
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
@@ -272,7 +294,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   void doSettings(easyDomNode *node);
 
 
-
+#ifndef VS_MIS_SEL
 void  doModule(missionNode *node,int mode);
 
  scriptContext * addContext(missionNode *node);
@@ -422,6 +444,8 @@ Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
  float getIntArg(missionNode *node,int mode,int arg_nr);
  bool getBoolArg(missionNode *node,int mode,int arg_nr);
 Unit * getUnitArg(missionNode *node,int mode,int arg_nr);
+
+#endif // VS_MIS_SEL
 };
 
 #endif // _MISSION_H_

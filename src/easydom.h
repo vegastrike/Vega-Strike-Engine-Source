@@ -46,7 +46,7 @@ class easyDomNode {
  public:
   easyDomNode();
 
-  void set(easyDomNode *parent,string name,  AttributeList *attributes);
+  void set(easyDomNode *parent,string name,const XML_Char **atts  );
   void printNode(ostream& out,int recurse_level,int level);
 
   void addChild(easyDomNode *child);
@@ -216,15 +216,16 @@ domNodeType *LoadCalike(const char *filename) {
 
 
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts){
-  ((easyDomFactory*)userData)->beginElement(name, AttributeList(atts));
+  ((easyDomFactory*)userData)->beginElement(name,atts);
 };
   static void endElement(void *userData, const XML_Char *name){
   ((easyDomFactory*)userData)->endElement(name);
 }
 ;
 
-  void beginElement(const string &name, const AttributeList &attributes){
-  AttributeList::const_iterator iter;
+  //  void beginElement(const string &name, const AttributeList &attributes){
+  void beginElement(const string &name, const XML_Char **atts ){
+    //  AttributeList::const_iterator iter;
 
   domNodeType *parent;
 
@@ -236,11 +237,8 @@ domNodeType *LoadCalike(const char *filename) {
   }
 
   domNodeType *thisnode=new domNodeType();
-  thisnode->set(parent,name,(AttributeList *) &attributes);
+  thisnode->set(parent,name,atts);
 
-  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-    //cout <<  name << "::" << (*iter).name << endl;
-  }
 
   if(parent==NULL){
     topnode=thisnode;

@@ -34,15 +34,15 @@
 #include <unistd.h>
 #endif
 
-#include <expat.h>
-#include "xml_support.h"
+//#include <expat.h>
+//#include "xml_support.h"
 
-#include "vegastrike.h"
+//#include "vegastrike.h"
 #include <assert.h>
 #include "mission.h"
-#include "easydom.h"
+//#include "easydom.h"
 
-#include "msgcenter.h"
+//#include "msgcenter.h"
 
 //#include "vs_globals.h"
 //#include "vegastrike.h"
@@ -70,6 +70,8 @@ Mission::Mission(char *configfile){
 
   variables=NULL;
   origin_node=NULL;
+
+#ifndef VS_MIS_SEL
   director=NULL;
 
   initTagMap();
@@ -78,6 +80,7 @@ Mission::Mission(char *configfile){
 
   msgcenter=new MessageCenter();
   msgcenter->add("game","all","Welcome to Vegastrike");
+#endif
 
   checkMission(top);
 }
@@ -104,10 +107,12 @@ bool Mission::checkMission(easyDomNode *node){
     }
     else if(((*siter)->Name()=="module")){
       //      doModule(*siter);
+#ifndef VS_MIS_SEL
       DirectorStart((missionNode *)*siter);
+#endif
     }
     else{
-      cout << "Unknown tag: " << (*siter)->Name() << endl;
+      cout << "warning: Unknown tag: " << (*siter)->Name() << endl;
     }
   }
   return true;
@@ -121,6 +126,7 @@ void Mission::doOrigin(easyDomNode *node){
 
 /* *********************************************************** */
 
+#ifndef VS_MIS_SEL
 void Mission::GetOrigin(Vector &pos,string &planetname){
   //  float pos[3];
 
@@ -139,6 +145,7 @@ void Mission::GetOrigin(Vector &pos,string &planetname){
   planetname=origin_node->attr_value("planet");
 }
 
+#endif
 /* *********************************************************** */
 
 void Mission::doSettings(easyDomNode *node){
@@ -288,7 +295,9 @@ void Mission::checkFlightgroup(easyDomNode *node){
   }
 
   if(ainame[0]=='_'){
+#ifndef VS_MIS_SEL
     addModule(ainame.substr(1));
+#endif
   }
 
   flightgroups.push_back(fg);

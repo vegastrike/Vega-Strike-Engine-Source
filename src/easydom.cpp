@@ -25,25 +25,26 @@
 
 
 #include <expat.h>
-#include "xml_support.h"
+//#include "xml_support.h"
 #include "easydom.h"
 
 #include <assert.h>	/// needed for assert() calls.
 
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
+//using XMLSupport::EnumMap;
+//using XMLSupport::Attribute;
+//using XMLSupport::AttributeList;
 
 
 easyDomNode::easyDomNode(){
 }
 
-void easyDomNode::set(easyDomNode *_parent,string _name, AttributeList  *_attributes){
+void easyDomNode::set(easyDomNode *_parent,string _name,const XML_Char **atts ){
   parent=_parent;
-  attributes=_attributes;
+  //  attributes=_attributes;
 
-  if(_attributes!=NULL){
-    for(AttributeList::const_iterator iter = _attributes->begin(); iter!=_attributes->end(); iter++) {
+  if(atts!=NULL){
+    for(;*atts!=NULL;atts+=2) {
+    //    for(AttributeList::const_iterator iter = _attributes->begin(); iter!=_attributes->end(); iter++) {
     //    cout <<  _name << "::" << (*iter).name << endl;
     //    printf("iter=%x *iter=%x\n",iter,*iter);
     //cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
@@ -51,7 +52,8 @@ void easyDomNode::set(easyDomNode *_parent,string _name, AttributeList  *_attrib
       att_name.push_back((*iter).name);
       att_value.push_back((*iter).value);
 #endif
-      attribute_map[(*iter).name]=(*iter).value;
+      //      attribute_map[(*iter).name]=(*iter).value;
+      attribute_map[atts[0]]=atts[1];
     }
   }
 

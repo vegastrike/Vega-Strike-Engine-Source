@@ -1,3 +1,10 @@
+2002-02-03 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified easydom.cpp/h and mission.cpp/h
+	  so that these classes can be used without the rest
+	  of Vegastrike (for the mission selector)
+	
+	
 2002-02-02 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* Added textures to merchant ship
