@@ -131,7 +131,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
 	drawnow=true;
       }
       if (typ==CAR::HEADLIGHTS) {
-	if (scale.j>=CAR::ON_NO_BLINKEN||(bitwise<8&&bitwise>0&&(bitwise&CAR::FORWARD_BLINKEN))) {
+	if (scale.j>=CAR::ON_NO_BLINKEN||(bitwise<CAR::ON_NO_BLINKEN&&bitwise>0&&(bitwise&CAR::FORWARD_BLINKEN))) {
 	  drawnow = true;
 	}
       }
