@@ -284,7 +284,7 @@ void vschdir (const char *path) {
   if (chdir (path)!=-1) {
     std::string tpath = path;
     if (tpath.end()!=tpath.begin())
-      if ((*(tpath.end()-1)!='/')&&((*tpath.end()-1)!='\\'))
+      if ((*(tpath.end()-1)!='/')&&((*(tpath.end()-1))!='\\'))
 	tpath+='/';
     curdir.push_back (tpath);
   } else {

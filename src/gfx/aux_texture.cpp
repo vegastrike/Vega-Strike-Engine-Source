@@ -132,8 +132,8 @@ GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
 }
 void Texture::modold (string s, bool shared, string & hashname) {
   hashname = shared?GetSharedTextureHashName(s):GetHashName(s);
-  Texture * oldtex = (Texture*)malloc(sizeof(Texture));
-  oldtex->InitTexture();
+  Texture * oldtex = new Texture;
+  //  oldtex->InitTexture();new calls this
   oldtex->name=-1;
   oldtex->refcount=1;
   oldtex->original=NULL;
@@ -272,7 +272,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
 	    mode=_8BIT;
 	    if (!(format&PNG_HAS_COLOR)){
-	      palette = new unsigned char [256*4+1];
+	      palette = (unsigned char *) malloc(sizeof(unsigned char)*(256*4+1));
 	      for (unsigned int i =0;i<256;i++) {
 		palette[i*4]=i;
 		palette[i*4+1]=i;
@@ -320,7 +320,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	      if(fp2)
 		mode = _24BITRGBA;
 	      data = NULL;
-	      data= new unsigned char [4*sizeY*sizeX]; // all bitmap data needs to be 32 bits
+	      data= (unsigned char *)malloc (sizeof(unsigned char)*4*sizeY*sizeX); // all bitmap data needs to be 32 bits
 	      if (!data)
 		return;
 	      for (int i=sizeY-1; i>=0;i--)
@@ -344,8 +344,8 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	    {
 	      mode = _8BIT;
 	      data = NULL;
-	      data= new unsigned char [sizeY*sizeX];
-	      palette = new unsigned char [256*4+1];
+	      data= (unsigned char *)malloc(sizeof(unsigned char)*sizeY*sizeX);
+	      palette = (unsigned char *)malloc(sizeof(unsigned char)* (256*4+1));
 	      unsigned char *paltemp = palette;
 	      unsigned char ctemp;
 		for(int palcount = 0; palcount < 256; palcount++)
@@ -373,7 +373,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	if (fp2)
 	  fclose (fp2);
 	if (data)
-	  delete [] data;
+	  free(data);
 	data = NULL;
 	setold();
 	fprintf (stderr," Load Success\n");
@@ -429,7 +429,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
 	    mode=_8BIT;
 	    if (!(format&PNG_HAS_COLOR)){
-	      palette = new unsigned char [256*4+1];
+	      palette = (unsigned char *)malloc (sizeof(unsigned char)*(256*4+1));
 	      for (unsigned int i =0;i<256;i++) {
 		palette[i*4]=i;
 		palette[i*4+1]=i;
@@ -509,7 +509,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	    }
 	  if(le16_to_cpu(info.biBitCount) == 24) {
 	    mode = _24BITRGBA;
-	    data= new unsigned char [4*sizeY*sizeX];
+	    data= (unsigned char *)malloc( sizeof (unsigned char)*4*sizeY*sizeX);
 	    for (int i=sizeY-1; i>=0;i--)
 	      {
 		int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
@@ -543,8 +543,8 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	    unsigned char index = 0;
 	    mode = _24BITRGBA;
 	    data = NULL;
-	    data= new unsigned char [4*sizeY*sizeX];
-	    palette = new unsigned char [256*4+1];
+	    data= (unsigned char *)malloc(sizeof(unsigned char)*4*sizeY*sizeX);
+	    palette = (unsigned char *)malloc (sizeof (unsigned char)*(256*4+1));
 	    unsigned char *paltemp = palette;
 	    unsigned char ctemp;
 	    for(int palcount = 0; palcount < 256; palcount++) {
@@ -630,7 +630,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  fclose (fp1);
 	}
 	if (data)
-	  delete [] data;
+	  free(data);
 	data = NULL;
 	setold();
 	fprintf (stderr,"Load Success\n");
@@ -656,7 +656,7 @@ Texture::~Texture()
 				//glDeleteTextures(1, &name);
 			
 			if (palette !=NULL) {
-			  delete []palette;
+			  free(palette);
 			  palette = NULL;
 			}
 		}

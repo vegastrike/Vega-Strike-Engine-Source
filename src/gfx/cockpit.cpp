@@ -772,7 +772,7 @@ void Cockpit::Delete () {
 }
 void Cockpit::RestoreGodliness() {
   static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics","player_godliness","0"));
-  godliness += maxgodliness;
+  godliness = maxgodliness;
   if (godliness>maxgodliness)
     godliness=maxgodliness;
 }

@@ -457,10 +457,10 @@ bool VegaConfig::checkColor(configNode *node){
       cout << "neither name nor r,g,b given for color " << node->Name() << endl;
       return false;
     }
-    float rf=atof(r.data());
-    float gf=atof(g.data());
-    float bf=atof(b.data());
-    float af=atof(a.data());
+    float rf=atof(r.c_str());
+    float gf=atof(g.c_str());
+    float bf=atof(b.c_str());
+    float af=atof(a.c_str());
 
     color=new vColor;
 
@@ -558,8 +558,8 @@ void VegaConfig::doAxis(configNode *node){
     return;
   }
 
-  int joy_nr=atoi(joystick.data());
-  int axis_nr=atoi(axis.data());
+  int joy_nr=atoi(joystick.c_str());
+  int axis_nr=atoi(axis.c_str());
 
   // no checks for correct number yet 
 
