@@ -1287,7 +1287,7 @@ using namespace UnitXML;
 	recharge=parse_float((*iter).value);
 	break;
       case WARPENERGY:
-	warpenergy=CLAMP_SHORT(parse_float ((*iter).value));
+	maxwarpenergy=CLAMP_SHORT(parse_float ((*iter).value));
 	break;
       case LIMIT:
 	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
