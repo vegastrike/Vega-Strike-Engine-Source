@@ -52,9 +52,15 @@ varInst *Mission::call_omap(missionNode *node,int mode){
   //varInst *viret=new varInst;
   varInst *viret=NULL;
 
-  string cmd=node->attr_value("name");
+  if(mode==SCRIPT_PARSE){
+    string cmd=node->attr_value("name");
+    node->script.method_id=module_omap_map[cmd];
+  }
 
-  if(cmd=="new"){
+   callback_module_omap_type method_id=(callback_module_omap_type) node->script.method_id;
+
+
+  if(method_id==CMT_OMAP_new){
     
     viret=call_omap_new(node,mode);
 
@@ -64,7 +70,7 @@ varInst *Mission::call_omap(missionNode *node,int mode){
     varInst *ovi=getObjectArg(node,mode);
     omap_t *my_object=getOMapObject(node,mode,ovi);
 
-    if(cmd=="delete"){
+    if(method_id==CMT_OMAP_delete){
       if(mode==SCRIPT_RUN){
 
 	omap_t::iterator iter;
@@ -80,7 +86,7 @@ varInst *Mission::call_omap(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="set"){
+    else if(method_id==CMT_OMAP_set){
       missionNode *snode=getArgument(node,mode,2);
       //varInst *vi=doVariable(snode,mode); // should be getObjExpr
       varInst *var_vi=checkExpression(snode,mode); // should be getObjExpr
@@ -103,7 +109,7 @@ varInst *Mission::call_omap(missionNode *node,int mode){
       viret->type=VAR_VOID;
       //return viret;
     }
-    else if(cmd=="get"){
+    else if(method_id==CMT_OMAP_get){
       debug(3,node,mode,"omap.get");
 
       string name=getStringArgument(node,mode,1);
@@ -121,7 +127,7 @@ varInst *Mission::call_omap(missionNode *node,int mode){
 	deleteVarInst(back_vi); // this won't delete it
       }
     }
-    else if(cmd=="toxml"){
+    else if(method_id==CMT_OMAP_toxml){
       if(node->subnodes.size()!=1){
 	fatalError(node,mode,"olist.toxml needs no arguments");
 	assert(0);
@@ -136,7 +142,7 @@ varInst *Mission::call_omap(missionNode *node,int mode){
       viret =newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="size"){
+    else if(method_id==CMT_OMAP_size){
       if(node->subnodes.size()!=1){
 	fatalError(node,mode,"olist.size needs one arguments");
 	assert(0);
@@ -155,7 +161,7 @@ varInst *Mission::call_omap(missionNode *node,int mode){
       //return viret;
     }
     else{
-      fatalError(node,mode,"unknown command "+cmd+" for callback omap");
+      fatalError(node,mode,"unknown command "+node->script.name+" for callback omap");
       assert(0);
     }
     

@@ -99,10 +99,12 @@ class Flightgroup {
 enum parsemode_type { PARSE_FULL,PARSE_DECL };
 
 enum callback_module_type {
+  CMT_UNKNOWN=0,
   CMT_IO,CMT_STD,CMT_STRING,CMT_OLIST,CMT_OMAP,CMT_ORDER,CMT_UNIT 
 };
 
 enum callback_module_std_type {
+  CMT_STD_UNKNOWN=0,
   CMT_STD_Rnd ,
   CMT_STD_getGameTime ,
   CMT_STD_ResetTimeCompression ,
@@ -115,6 +117,119 @@ enum callback_module_std_type {
   CMT_STD_Int ,
   CMT_STD_Float
 };
+
+enum callback_module_olist_type {
+  CMT_OLIST_UNKNOWN=0,
+  CMT_OLIST_new ,
+  CMT_OLIST_delete ,
+    CMT_OLIST_push_back ,
+    CMT_OLIST_pop_back ,
+    CMT_OLIST_back ,
+    CMT_OLIST_at ,
+    CMT_OLIST_set ,
+    CMT_OLIST_toxml ,
+    CMT_OLIST_size 
+};
+
+enum callback_module_omap_type {
+  CMT_OMAP_UNKNOWN=0,
+  CMT_OMAP_new ,
+    CMT_OMAP_delete ,
+    CMT_OMAP_set ,
+    CMT_OMAP_get ,
+    CMT_OMAP_toxml ,
+    CMT_OMAP_size 
+};
+
+enum callback_module_order_type {
+  CMT_ORDER_UNKNOWN=0,
+  CMT_ORDER_newAggressiveAI ,
+  CMT_ORDER_newMoveTo ,
+  CMT_ORDER_newChangeHeading ,
+  CMT_ORDER_newFaceTarget ,
+  CMT_ORDER_newFireAt ,
+  CMT_ORDER_newExecuteFor ,
+  CMT_ORDER_newCloakFor ,
+  CMT_ORDER_newMatchVelocity ,
+  CMT_ORDER_newMatchAngularVelocity ,
+  CMT_ORDER_newMatchLinearVelocity ,
+  CMT_ORDER_newFlyToWaypoint ,
+  CMT_ORDER_newFlyToWaypointDefend ,
+  CMT_ORDER_newFlyToJumppoint ,
+  CMT_ORDER_newPatrol ,
+  CMT_ORDER_newOrderList ,
+  CMT_ORDER_newSuperiority ,
+
+    CMT_ORDER_enqueueOrder ,
+    CMT_ORDER_enqueueOrderFirst ,
+    CMT_ORDER_eraseOrder ,
+    CMT_ORDER_findOrder ,
+    CMT_ORDER_SteerUp ,
+    CMT_ORDER_SteerRight ,
+    CMT_ORDER_SteerRollRight ,
+    CMT_ORDER_SteerStop ,
+    CMT_ORDER_SteerAccel ,
+    CMT_ORDER_SteerAfterburn ,
+    CMT_ORDER_SteerSheltonSlide ,
+    CMT_ORDER_print 
+};
+
+enum callback_module_string_type {
+  CMT_STRING_UNKNOWN=0,
+  CMT_STRING_new ,
+  CMT_STRING_delete ,
+  CMT_STRING_print ,
+  CMT_STRING_equal ,
+  CMT_STRING_begins 
+};
+
+enum callback_module_unit_type {
+  CMT_UNIT_UNKNOWN=0,
+  CMT_UNIT_getUnit ,
+  CMT_UNIT_getPlayer ,
+  CMT_UNIT_launch ,
+    CMT_UNIT_getPosition ,
+    CMT_UNIT_getFaction ,
+    CMT_UNIT_getVelocity ,
+    CMT_UNIT_getTarget ,
+    CMT_UNIT_getThreat ,
+    CMT_UNIT_setTarget ,
+    CMT_UNIT_getMinDis ,
+    CMT_UNIT_getAngle ,
+    CMT_UNIT_getAngleToPos ,
+    CMT_UNIT_getFShieldData ,
+    CMT_UNIT_getRShieldData ,
+    CMT_UNIT_getLShieldData ,
+    CMT_UNIT_getBShieldData ,
+    CMT_UNIT_getEnergyData ,
+    CMT_UNIT_getHullData ,
+    CMT_UNIT_getRSize ,
+    CMT_UNIT_isStarShip ,
+    CMT_UNIT_isPlanet ,
+    CMT_UNIT_isJumppoint ,
+    CMT_UNIT_getRelation ,
+    CMT_UNIT_Jump ,
+    CMT_UNIT_getOrientationP ,
+    CMT_UNIT_getOrder ,
+    CMT_UNIT_removeFromGame ,
+    CMT_UNIT_getFgID ,
+    CMT_UNIT_getFgName ,
+    CMT_UNIT_getFgSubnumber ,
+    CMT_UNIT_scanSystem ,
+    CMT_UNIT_scannerNearestEnemy ,
+    CMT_UNIT_scannerNearestFriend ,
+    CMT_UNIT_scannerNearestShip ,
+    CMT_UNIT_scannerLeader ,
+    CMT_UNIT_scannerNearestEnemyDist ,
+    CMT_UNIT_scannerNearestFriendDist ,
+    CMT_UNIT_scannerNearestShipDist ,
+  CMT_UNIT_getFgId ,
+  CMT_UNIT_toxml 
+};
+
+
+
+
 
 enum tag_type { 
   DTAG_UNKNOWN,
@@ -339,6 +454,11 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
   vector<string> import_stack;
 
+  map<string,callback_module_string_type> module_string_map;
+  map<string,callback_module_omap_type> module_omap_map;
+  map<string,callback_module_olist_type> module_olist_map;
+  map<string,callback_module_order_type> module_order_map;
+  map<string,callback_module_unit_type> module_unit_map;
   map<string,callback_module_std_type> module_std_map;
   map<string,callback_module_type> module_map;
 

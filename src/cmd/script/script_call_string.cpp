@@ -52,9 +52,15 @@ varInst *Mission::call_string(missionNode *node,int mode){
   //varInst *viret=new varInst;
   varInst *viret=NULL;
 
-  string cmd=node->attr_value("name");
+  if(mode==SCRIPT_PARSE){
+    string cmd=node->attr_value("name");
+    node->script.method_id=module_string_map[cmd];
+  }
 
-  if(cmd=="new"){
+   callback_module_string_type method_id=(callback_module_string_type) node->script.method_id;
+
+
+  if(method_id==CMT_STRING_new){
     viret=call_string_new(node,mode,"");
 
     return viret;
@@ -63,7 +69,7 @@ varInst *Mission::call_string(missionNode *node,int mode){
     varInst *ovi=getObjectArg(node,mode);
     string *my_string=getStringObject(node,mode,ovi);
     
-    if(cmd=="delete"){
+    if(method_id==CMT_STRING_delete){
       if(mode==SCRIPT_RUN){
 	delete my_string;
 	string_counter--;
@@ -71,7 +77,7 @@ varInst *Mission::call_string(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="print"){
+    else if(method_id==CMT_STRING_print){
       
       if(mode==SCRIPT_RUN){
 	call_string_print(node,mode,ovi);
@@ -81,7 +87,7 @@ varInst *Mission::call_string(missionNode *node,int mode){
       viret->type=VAR_VOID;
       //return viret;
     }
-    else if(cmd=="equal"){
+    else if(method_id==CMT_STRING_equal){
       missionNode *other_node=getArgument(node,mode,1);
       varInst *other_vi=checkObjectExpr(other_node,mode);
 
@@ -100,7 +106,7 @@ varInst *Mission::call_string(missionNode *node,int mode){
       viret->type=VAR_BOOL;
       viret->bool_val=res;
     }
-     else if(cmd=="begins"){
+     else if(method_id==CMT_STRING_begins){
        // test if s1 begins with s2
       missionNode *other_node=getArgument(node,mode,1);
       varInst *other_vi=checkObjectExpr(other_node,mode);
@@ -122,7 +128,7 @@ varInst *Mission::call_string(missionNode *node,int mode){
       viret->bool_val=res;
     }
     else{
-      fatalError(node,mode,"unknown command "+cmd+" for callback string");
+      fatalError(node,mode,"unknown command "+node->script.name+" for callback string");
       assert(0);
     }
     

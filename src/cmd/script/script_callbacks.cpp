@@ -753,4 +753,102 @@ void Mission::initCallbackMaps(){
   module_std_map["Int"]=CMT_STD_Int;
   module_std_map["Float"]=CMT_STD_Float;
 
+
+  module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;
+  module_order_map["newMoveTo"]=CMT_ORDER_newMoveTo ;
+  module_order_map["newChangeHeading"]=CMT_ORDER_newChangeHeading ;
+  module_order_map["newFaceTarget"]=CMT_ORDER_newFaceTarget ;
+  module_order_map["newFireAt"]=CMT_ORDER_newFireAt ;
+  module_order_map["newExecuteFor"]=CMT_ORDER_newExecuteFor ;
+  module_order_map["newCloakFor"]=CMT_ORDER_newCloakFor ;
+  module_order_map["newMatchVelocity"]=CMT_ORDER_newMatchVelocity ;
+  module_order_map["newMatchAngularVelocity"]=CMT_ORDER_newMatchAngularVelocity ;
+  module_order_map["newMatchLinearVelocity"]=CMT_ORDER_newMatchLinearVelocity ;
+  module_order_map["newFlyToWaypoint"]=CMT_ORDER_newFlyToWaypoint ;
+  module_order_map["newFlyToWaypointDefend"]=CMT_ORDER_newFlyToWaypointDefend ;
+  module_order_map["newFlyToJumppoint"]=CMT_ORDER_newFlyToJumppoint ;
+  module_order_map["newPatrol"]=CMT_ORDER_newPatrol ;
+  module_order_map["newOrderList"]=CMT_ORDER_newOrderList ;
+  module_order_map["newSuperiority"]=CMT_ORDER_newSuperiority ;
+
+    module_order_map["enqueueOrder"]=CMT_ORDER_enqueueOrder ;
+    module_order_map["enqueueOrderFirst"]=CMT_ORDER_enqueueOrderFirst ;
+    module_order_map["eraseOrder"]=CMT_ORDER_eraseOrder ;
+    module_order_map["findOrder"]=CMT_ORDER_findOrder ;
+    module_order_map["SteerUp"]=CMT_ORDER_SteerUp ;
+    module_order_map["SteerRight"]=CMT_ORDER_SteerRight ;
+    module_order_map["SteerRollRight"]=CMT_ORDER_SteerRollRight ;
+    module_order_map["SteerStop"]=CMT_ORDER_SteerStop ;
+    module_order_map["SteerAccel"]=CMT_ORDER_SteerAccel ;
+    module_order_map["SteerAfterburn"]=CMT_ORDER_SteerAfterburn ;
+    module_order_map["SteerSheltonSlide"]=CMT_ORDER_SteerSheltonSlide ;
+    module_order_map["print"]=CMT_ORDER_print ;
+
+  module_olist_map["new"]=CMT_OLIST_new ;
+  module_olist_map["delete"]=CMT_OLIST_delete ;
+    module_olist_map["push_back"]=CMT_OLIST_push_back ;
+    module_olist_map["pop_back"]=CMT_OLIST_pop_back ;
+    module_olist_map["back"]=CMT_OLIST_back ;
+    module_olist_map["at"]=CMT_OLIST_at ;
+    module_olist_map["set"]=CMT_OLIST_set ;
+    module_olist_map["toxml"]=CMT_OLIST_toxml ;
+    module_olist_map["size"]=CMT_OLIST_size; 
+
+  module_omap_map["new"]=CMT_OMAP_new ;
+    module_omap_map["delete"]=CMT_OMAP_delete ;
+    module_omap_map["set"]=CMT_OMAP_set ;
+    module_omap_map["get"]=CMT_OMAP_get ;
+    module_omap_map["toxml"]=CMT_OMAP_toxml ;
+    module_omap_map["size"]=CMT_OMAP_size ;
+
+  module_string_map["new"]=CMT_STRING_new ;
+  module_string_map["delete"]=CMT_STRING_delete ;
+  module_string_map["print"]=CMT_STRING_print ;
+  module_string_map["equal"]=CMT_STRING_equal ;
+  module_string_map["begins"]=CMT_STRING_begins; 
+
+  module_unit_map["getUnit"]=CMT_UNIT_getUnit ;
+  module_unit_map["getPlayer"]=CMT_UNIT_getPlayer ;
+  module_unit_map["launch"]=CMT_UNIT_launch ;
+    module_unit_map["getPosition"]=CMT_UNIT_getPosition ;
+    module_unit_map["getFaction"]=CMT_UNIT_getFaction ;
+    module_unit_map["getVelocity"]=CMT_UNIT_getVelocity ;
+    module_unit_map["getTarget"]=CMT_UNIT_getTarget ;
+    module_unit_map["getThreat"]=CMT_UNIT_getThreat ;
+    module_unit_map["setTarget"]=CMT_UNIT_setTarget ;
+    module_unit_map["getMinDis"]=CMT_UNIT_getMinDis ;
+    module_unit_map["getAngle"]=CMT_UNIT_getAngle ;
+    module_unit_map["getAngleToPos"]=CMT_UNIT_getAngleToPos ;
+    module_unit_map["getFShieldData"]=CMT_UNIT_getFShieldData ;
+    module_unit_map["getRShieldDat"]=CMT_UNIT_getRShieldData ;
+    module_unit_map["getLShieldData"]=CMT_UNIT_getLShieldData ;
+    module_unit_map["getBShieldData"]=CMT_UNIT_getBShieldData ;
+    module_unit_map["getEnergyData"]=CMT_UNIT_getEnergyData ;
+    module_unit_map["getHullData"]=CMT_UNIT_getHullData ;
+    module_unit_map["getRSize"]=CMT_UNIT_getRSize ;
+    module_unit_map["isStarShip"]=CMT_UNIT_isStarShip ;
+    module_unit_map["isPlanet"]=CMT_UNIT_isPlanet ;
+    module_unit_map["isJumppoint"]=CMT_UNIT_isJumppoint ;
+    module_unit_map["getRelation"]=CMT_UNIT_getRelation ;
+    module_unit_map["Jump"]=CMT_UNIT_Jump ;
+    module_unit_map["getOrientationP"]=CMT_UNIT_getOrientationP ;
+    module_unit_map["getOrder"]=CMT_UNIT_getOrder ;
+    module_unit_map["removeFromGame"]=CMT_UNIT_removeFromGame ;
+    module_unit_map["getFgID"]=CMT_UNIT_getFgId ;
+    module_unit_map["getFgId"]=CMT_UNIT_getFgId ;
+    module_unit_map["getFgName"]=CMT_UNIT_getFgName ;
+    module_unit_map["getFgSubnumber"]=CMT_UNIT_getFgSubnumber ;
+    module_unit_map["scanSystem"]=CMT_UNIT_scanSystem ;
+    module_unit_map["scannerNearestEnemy"]=CMT_UNIT_scannerNearestEnemy ;
+    module_unit_map["scannerNearestFriend"]=CMT_UNIT_scannerNearestFriend ;
+    module_unit_map["scannerNearestShip"]=CMT_UNIT_scannerNearestShip ;
+    module_unit_map["scannerLeader"]=CMT_UNIT_scannerLeader ;
+    module_unit_map["scannerNearestEnemyDist"]=CMT_UNIT_scannerNearestEnemyDist ;
+    module_unit_map["scannerNearestFriendDist"]=CMT_UNIT_scannerNearestFriendDist ;
+    module_unit_map["scannerNearestShipDist"]=CMT_UNIT_scannerNearestShipDist ;
+  module_unit_map["toxml"]=CMT_UNIT_toxml ;
+
+
+
+
 }

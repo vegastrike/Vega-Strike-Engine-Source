@@ -1,6 +1,12 @@
 2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* Interpreter:
+	  - faster lookup for other callback modules
+	
+
+2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* Interpreter:
 	  - faster callback module lookup
 	  - faster lookup of callback module std (others will follow)
 

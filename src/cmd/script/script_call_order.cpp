@@ -64,9 +64,15 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
   varInst *viret=NULL;
 
-  string cmd=node->attr_value("name");
 
-  if(cmd=="newAggressiveAI"){
+  if(mode==SCRIPT_PARSE){
+    string cmd=node->attr_value("name");
+    node->script.method_id=module_order_map[cmd];
+  }
+
+   callback_module_order_type method_id=(callback_module_order_type) node->script.method_id;
+
+  if(method_id==CMT_ORDER_newAggressiveAI){
     string filestr=getStringArgument(node,mode,0);
     string intstr=getStringArgument(node,mode,1);
 
@@ -84,7 +90,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newMoveTo"){
+  else if(method_id==CMT_ORDER_newMoveTo){
     missionNode *pos_node=getArgument(node,mode,0);
     varInst *pos_vi=checkObjectExpr(pos_node,mode);
     olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
@@ -113,7 +119,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newChangeHeading"){
+  else if(method_id==CMT_ORDER_newChangeHeading){
     missionNode *pos_node=getArgument(node,mode,0);
     varInst *pos_vi=checkObjectExpr(pos_node,mode);
     olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
@@ -138,7 +144,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newFaceTarget"){
+  else if(method_id==CMT_ORDER_newFaceTarget){
     missionNode *itts_node=getArgument(node,mode,0);
     bool itts=checkBoolExpr(itts_node,mode);
 
@@ -167,7 +173,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newFireAt"){
+  else if(method_id==CMT_ORDER_newFireAt){
     missionNode *reaction_node=getArgument(node,mode,0);
     float reaction=checkFloatExpr(reaction_node,mode);
 
@@ -187,7 +193,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newExecuteFor"){
+  else if(method_id==CMT_ORDER_newExecuteFor){
       missionNode *enq_node=getArgument(node,mode,0);
       varInst *enq_vi=checkObjectExpr(enq_node,mode);
       Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
@@ -210,7 +216,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newCloakFor"){
+  else if(method_id==CMT_ORDER_newCloakFor){
       missionNode *val_node=getArgument(node,mode,0);
       bool res=checkBoolExpr(val_node,mode);
 
@@ -230,7 +236,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newMatchVelocity"){
+  else if(method_id==CMT_ORDER_newMatchVelocity){
     missionNode *des_node=getArgument(node,mode,0);
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
@@ -268,7 +274,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newMatchAngularVelocity"){
+  else if(method_id==CMT_ORDER_newMatchAngularVelocity){
     missionNode *des_node=getArgument(node,mode,0);
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
@@ -297,7 +303,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newMatchLinearVelocity"){
+  else if(method_id==CMT_ORDER_newMatchLinearVelocity){
     missionNode *des_node=getArgument(node,mode,0);
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
@@ -329,7 +335,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newFlyToWaypoint"){
+  else if(method_id==CMT_ORDER_newFlyToWaypoint){
     missionNode *des_node=getArgument(node,mode,0);
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
@@ -357,7 +363,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newFlyToWaypointDefend"){
+  else if(method_id==CMT_ORDER_newFlyToWaypointDefend){
     missionNode *des_node=getArgument(node,mode,0);
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
@@ -386,7 +392,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newFlyToJumppoint"){
+  else if(method_id==CMT_ORDER_newFlyToJumppoint){
     missionNode *des_node=getArgument(node,mode,0);
     varInst *des_vi=checkObjectExpr(des_node,mode);
     Unit *des_unit=getUnitObject(des_node,mode,des_vi);
@@ -413,7 +419,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newPatrol"){
+  else if(method_id==CMT_ORDER_newPatrol){
     int patrol_mode=getIntArg(node,mode,0);
 
     missionNode *des_node=getArgument(node,mode,1);
@@ -448,7 +454,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newOrderList"){
+  else if(method_id==CMT_ORDER_newOrderList){
     missionNode *unit_node=getArgument(node,mode,0);
     varInst *unit_vi=checkObjectExpr(unit_node,mode);
     olist_t *orderlist=getOListObject(unit_node,mode,unit_vi);
@@ -469,7 +475,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
-  else if(cmd=="newSuperiority"){
+  else if(method_id==CMT_ORDER_newSuperiority){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
@@ -498,7 +504,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     }
     }
 
-    if(cmd=="enqueueOrder"){
+    if(method_id==CMT_ORDER_enqueueOrder){
       missionNode *enq_node=getArgument(node,mode,1);
       varInst *enq_vi=checkObjectExpr(enq_node,mode);
       Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
@@ -513,7 +519,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="enqueueOrderFirst"){
+    else if(method_id==CMT_ORDER_enqueueOrderFirst){
       missionNode *enq_node=getArgument(node,mode,1);
       varInst *enq_vi=checkObjectExpr(enq_node,mode);
       Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
@@ -528,7 +534,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="eraseOrder"){
+    else if(method_id==CMT_ORDER_eraseOrder){
       missionNode *enq_node=getArgument(node,mode,1);
       varInst *enq_vi=checkObjectExpr(enq_node,mode);
       Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
@@ -543,7 +549,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="findOrder"){
+    else if(method_id==CMT_ORDER_findOrder){
       missionNode *enq_node=getArgument(node,mode,1);
       varInst *enq_vi=checkObjectExpr(enq_node,mode);
       Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
@@ -560,7 +566,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
       deleteVarInst(enq_vi);
     }
-    else if(cmd=="SteerUp"){
+    else if(method_id==CMT_ORDER_SteerUp){
       missionNode *val_node=getArgument(node,mode,1);
       float val=checkFloatExpr(val_node,mode);
 
@@ -573,7 +579,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="SteerRight"){
+    else if(method_id==CMT_ORDER_SteerRight){
       missionNode *val_node=getArgument(node,mode,1);
       float val=checkFloatExpr(val_node,mode);
 
@@ -586,7 +592,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="SteerRollRight"){
+    else if(method_id==CMT_ORDER_SteerRollRight){
       missionNode *val_node=getArgument(node,mode,1);
       float val=checkFloatExpr(val_node,mode);
 
@@ -600,7 +606,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="SteerStop"){
+    else if(method_id==CMT_ORDER_SteerStop){
       missionNode *val_node=getArgument(node,mode,1);
       float val=checkFloatExpr(val_node,mode);
 
@@ -613,7 +619,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="SteerAccel"){
+    else if(method_id==CMT_ORDER_SteerAccel){
       missionNode *val_node=getArgument(node,mode,1);
       float val=checkFloatExpr(val_node,mode);
 
@@ -626,7 +632,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="SteerAfterburn"){
+    else if(method_id==CMT_ORDER_SteerAfterburn){
       missionNode *val_node=getArgument(node,mode,1);
       float val=checkFloatExpr(val_node,mode);
 
@@ -639,7 +645,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="SteerSheltonSlide"){
+    else if(method_id==CMT_ORDER_SteerSheltonSlide){
       missionNode *val_node=getArgument(node,mode,1);
       bool res=checkBoolExpr(val_node,mode);
 
@@ -652,7 +658,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(cmd=="print"){
+    else if(method_id==CMT_ORDER_print){
       if(mode==SCRIPT_RUN){
 	printf("print: order=%x\n",(int)my_order);
       }
@@ -660,7 +666,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret->type=VAR_VOID;
     }
     else{
-      fatalError(node,mode,"no such method "+cmd);
+      fatalError(node,mode,"no such method "+node->script.name);
       assert(0);
     }
 
