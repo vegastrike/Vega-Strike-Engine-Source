@@ -8,7 +8,7 @@ AC_CANONICAL_HOST()
 AC_CANONICAL_TARGET()
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(vegastrike, "0.3.5")
+AM_INIT_AUTOMAKE(vegastrike, "0.4.0")
 
 dnl Check for compilers.  We set CFLAGS and CXXFLAGS to null if unset, so
 dnl that these macros won't set them to default values that we don't want.
@@ -70,8 +70,8 @@ dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
-TR_CFLAGS="-pipe -O3 -fexpensive-optimizations -fomit-frame-pointer -Wall -ffast-math "
-TR_CXXFLAGS="-pipe -O3 -fexpensive-optimizations -fomit-frame-pointer -Wall -ffast-math"
+TR_CFLAGS="-pipe -O2 -fexpensive-optimizations -fomit-frame-pointer -Wall -ffast-math "
+TR_CXXFLAGS="-pipe -O2 -fexpensive-optimizations -fomit-frame-pointer -Wall -ffast-math"
 TR_LIBS=""
 
 if test "x$falign" = "xyes"; then
@@ -130,11 +130,11 @@ esac
 
 AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [TR_CFLAGS="$DEBUG_FLAGS -Wall "; TR_CXXFLAGS="$DEBUG_FLAGS -Wall"])
 
-AC_ARG_ENABLE(debug-rel, AC_HELP_STRING([--enable-debug-rel], [Produce an executable with debugging symbols and optimizations]), [TR_CFLAGS="$DEBUG_FLAGS -O3 -Wall -ffast-math $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS -Wall -O3 -ffast-math $TR_ALIGN $USER_FLAGS"])
+AC_ARG_ENABLE(debug-rel, AC_HELP_STRING([--enable-debug-rel], [Produce an executable with debugging symbols and optimizations]), [TR_CFLAGS="$DEBUG_FLAGS -O2 -Wall -ffast-math $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS -Wall -O2 -ffast-math $TR_ALIGN $USER_FLAGS"])
 
  AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce a profiled executable]),  [TR_CFLAGS="$DEBUG_FLAGS -pg $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS  -pg $USER_FLAGS"])
 
-AC_ARG_ENABLE(debug-profile, AC_HELP_STRING([--enable-debug-profile], [Produce a profiled, debuggable, and optimized executable]),  [TR_CFLAGS="$DEBUG_FLAGS -O3 -Wall -ffast-math -pg $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS -O3 -Wall -ffast-math  -pg $TR_ALIGN $USER_FLAGS"])
+AC_ARG_ENABLE(debug-profile, AC_HELP_STRING([--enable-debug-profile], [Produce a profiled, debuggable, and optimized executable]),  [TR_CFLAGS="$DEBUG_FLAGS -O2 -Wall -ffast-math -pg $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="$DEBUG_FLAGS -O2 -Wall -ffast-math  -pg $TR_ALIGN $USER_FLAGS"])
 
 AC_ARG_ENABLE(pedantic, AC_HELP_STRING([--enable-pedantic], [Enable -pedantic (and -ansi for C) modes]), TR_CFLAGS="$TR_CFLAGS -ansi -pedantic"; TR_CXXFLAGS="$TR_CXXFLAGS -pedantic")
 

@@ -210,7 +210,12 @@ void GameStarSystem::modelGravity(bool lastframe) {
   }
 }	
 */
-
+void ConditionalCursorDraw(bool tf) {
+	static bool hardware_cursor = XMLSupport::parse_bool (vs_config->getVariable("graphics","hardware_cursor","false"));
+	if (hardware_cursor) {
+		winsys_show_cursor(tf);
+	}
+}
 void GameStarSystem::SwapIn () {
   GFXSetLightContext (lightcontext);
 
@@ -439,7 +444,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   Halo::ProcessDrawQueue();
   particleTrail.DrawAndUpdate();
   GameStarSystem::DrawJumpStars();
-
+  ConditionalCursorDraw(false);
   //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cpDraw");
@@ -458,9 +463,9 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 }
-
+extern void update_ani_cache();
 void	UpdateAnimatedTexture()
-{ AnimatedTexture::UpdateAllPhysics();}
+{ AnimatedTexture::UpdateAllPhysics();		update_ani_cache();}
 void	TerrainCollide()
 { Terrain::CollideAll();}
 void	UpdateTerrain()

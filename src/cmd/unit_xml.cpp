@@ -1148,7 +1148,9 @@ using namespace UnitXML;
     if (sound->explode==-1) {
       sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
     }
-      
+    if (sound->jump==-1) {
+      sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);
+    }      
     break;    
   case CLOAK:
     //serialization covered elsewhere
@@ -1620,7 +1622,6 @@ using namespace UnitXML;
 	  image->explosion_type = (*iter).value;
 	  {
 	    cache_ani (image->explosion_type);
-
 	  }
 	}
 	break;

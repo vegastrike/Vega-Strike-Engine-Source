@@ -175,7 +175,7 @@ Window::~Window(void) {
 
 ///////////////////  WINDOW MANAGER  /////////////////////////
 
-
+extern void	ConditionalCursorDraw(bool);
 // Draw all visible windows.
 void WindowManager::draw() {
     vector <Window*>::iterator iter;
@@ -205,7 +205,8 @@ void WindowManager::draw() {
     // Emulate EndGUIFrame.
     static Sprite MouseSprite("mouse.spr",BILINEAR,GFXTRUE);
     static Texture dummy("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
-
+	GFXDisable(CULLFACE);
+	ConditionalCursorDraw(true);
    // Figure position of cursor sprite.
     float sizex=0.0, sizey=0.0;
     const Point loc = globalEventManager().mouseLoc();

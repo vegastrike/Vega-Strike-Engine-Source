@@ -334,15 +334,18 @@ void DrawGlutMouse(int mousex, int mousey, Sprite * spr) {
   spr->SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
   spr->Draw();
 }
-
+extern void	ConditionalCursorDraw(bool);
 void EndGUIFrame(bool drawmouseover) {
   static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
   static Sprite MouseSprite ("mouse.spr",BILINEAR,GFXTRUE);
   static Texture dummy ("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   dummy.MakeActive();
+  GFXDisable(CULLFACE);
   DrawGlutMouse(mmx,mmy,drawmouseover?&MouseOverSprite:&MouseSprite);
   //  GFXEndScene();bad things...only call this once
   GFXHudMode(false);
   GFXEnable (CULLFACE);
+  ConditionalCursorDraw(true);
+	
 
 }

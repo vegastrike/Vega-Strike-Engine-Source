@@ -342,7 +342,6 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
       return;
     }
   }
-  bootstrap_draw("Loading "+string(FileName));
 
   fprintf (stderr,"1.Loading bmp file %s ",FileName);
 	char *t= strdup (FileName);
@@ -391,6 +390,9 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 		}
 		return;
 	}
+	if (texfilename.find("white")==string::npos)
+		bootstrap_draw("Loading "+string(FileName));
+	
 	//	strcpy(filename, FileName);
 	int bpp;
 	int format;
@@ -851,7 +853,7 @@ void Texture::Prioritize (float priority) {
   GFXPrioritizeTexture (name, priority);
 }
 void ActivateWhite(int stage) {
-	static Texture * white = new Texture("white.bmp");
+	static Texture * white = new Texture("white.bmp",0,MIPMAP,TEXTURE2D,TEXTURE_2D, 1 );
 	if (white->LoadSuccess())
 		white->MakeActive(stage);
 }
