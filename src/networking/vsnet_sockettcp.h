@@ -11,8 +11,10 @@
 #endif
 
 #include <list>
+#include <queue>
 
 #include "vsnet_socket.h"
+#include "packetmem.h"
 
 /***********************************************************************
  * VsnetTCPSocket - declaration
@@ -28,7 +30,6 @@ public:
     virtual bool isTcp() const { return true; }
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
-    // virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from);
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
     virtual void ack( );
 
@@ -54,8 +55,8 @@ private:
      *  the application processes them one at a time, the received, unprocessed
      *  packets are stored in the list.
      */
-    std::list<Blob*> _complete_packets;
-    Blob*            _incomplete_packet;
+    Blob*                 _incomplete_packet;
+    std::queue<PacketMem> _cpq;
 
     /** We send 4 bytes as a packet length indicator. Unfortunately, even these
      *  4 bytes may be split by TCP. These two variables are needed for
@@ -73,6 +74,8 @@ private:
     bool        _connection_closed;
 
     /* --- END section for nonblocking receive support --- */
+
+    void inner_complete_a_packet( Blob* b );
 
 private:
     VsnetTCPSocket( );

@@ -59,24 +59,11 @@ VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet&
 
 VsnetTCPSocket::~VsnetTCPSocket( )
 {
-    while( !_complete_packets.empty() )
-    {
-        Blob* b = _complete_packets.front();
-	    _complete_packets.pop_front();
-	    delete b;
-    }
-
     if( _incomplete_packet )
     {
 	    delete _incomplete_packet;
     }
 }
-
-// VsnetTCPSocket& VsnetTCPSocket::operator=( const VsnetTCPSocket& orig )
-// {
-//     VsnetSocket::operator=( orig );
-//     return *this;
-// }
 
 int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 {
@@ -112,55 +99,21 @@ void VsnetTCPSocket::ack( )
     /* meaningless, TCP is reliable */
 }
 
-// int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
-// {
-//     if( _complete_packets.empty() == false )
-//     {
-//         Blob* b = _complete_packets.front();
-//         _complete_packets.pop_front();
-//         assert( b );
-//         assert( b->present_len == b->expected_len );
-//         if( len > b->present_len ) len = b->present_len;
-//         memcpy( buffer, b->buf, len );
-//         delete b;
-// 	    assert( len > 0 );
-//         return len;
-//     }
-//     else
-//     {
-//         if( _connection_closed )
-// 	    {
-// 	        COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
-// 	        return 0;
-// 	    }
-//         return -1;
-//     }
-// }
-
 int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
 {
-    if( _complete_packets.empty() == false )
+    if( _cpq.empty() == false )
     {
-	    unsigned int ret;
-        Blob* b = _complete_packets.front();
-        _complete_packets.pop_front();
-        assert( b );
-        assert( b->present_len == b->expected_len );
-
-	    ret = b->present_len;
-	    buffer.set( b->buf, ret, PacketMem::TakeOwnership );
-	    b->buf = NULL;
-        delete b;
-        return ret;
+        buffer = _cpq.front();
+        _cpq.pop();
+    }
+    else if( _connection_closed )
+    {
+        _fd = -1;
+        COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
+        return 0;
     }
     else
     {
-        if( _connection_closed )
-        {
-	        _fd = -1;
-            COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
-            return 0;
-        }
         return -1;
     }
 }
@@ -198,7 +151,7 @@ ostream& operator<<( ostream& ostr, const VsnetSocket& s )
 
 bool VsnetTCPSocket::needReadAlwaysTrue( ) const
 {
-    return ( !_complete_packets.empty() );
+    return ( !_cpq.empty() );
 }
 
 bool VsnetTCPSocket::isActive( )
@@ -212,7 +165,7 @@ bool VsnetTCPSocket::isActive( )
      */
     if( _connection_closed ) return true;
 
-    if( _complete_packets.empty() == false ) return true;
+    if( _cpq.empty() == false ) return true;
 
     return false;
 }
@@ -221,13 +174,10 @@ void VsnetTCPSocket::lower_selected( )
 {
     if( _connection_closed )
     {
-        /* Pretty sure that recv will return 0.
-         */
-        return;
+        return; /* Pretty sure that recv will return 0.  */
     }
 
     bool endless   = true;
-    bool gotpacket = false;
 
     if( get_nonblock() == false ) endless = false;
 
@@ -283,8 +233,7 @@ void VsnetTCPSocket::lower_selected( )
 	        {
 		        assert( _incomplete_packet->expected_len ==
                         _incomplete_packet->present_len );
-                _complete_packets.push_back( _incomplete_packet );
-		        gotpacket = true;
+                inner_complete_a_packet( _incomplete_packet );
 #ifdef VSNET_DEBUG
                 //
                 // DEBUG block - remove soon
@@ -303,5 +252,16 @@ void VsnetTCPSocket::lower_selected( )
         }
     }
     while( endless );  // exit only for EWOULDBLOCK or closed socket
+}
+
+void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
+{
+    assert( b );
+    assert( b->present_len == b->expected_len );
+
+    PacketMem mem( b->buf, b->present_len, PacketMem::TakeOwnership );
+    b->buf = NULL;
+    _cpq.push( mem );
+    delete b;
 }
 
