@@ -117,10 +117,10 @@ public:
 
   void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
-  float rSize () {return radialSize;}
-	bool intersects(const Vector &start, const Vector &end);
-	bool intersects(const Vector &pt);
-	bool intersects(Mesh *mesh);
+  float rSizeSquared ();
+  bool intersects(const Vector &start, const Vector &end);
+  bool intersects(const Vector &pt);
+  bool intersects(Mesh *mesh);
 };
 #endif
 

@@ -14,7 +14,8 @@
 #include "gfxlib.h"
 #include "gfx_location_select.h"
 #include <string>
-
+#include "gfx_click_list.h"
+#include "UnitCollection.h"
 #include "star_system.h"
 #include "planet.h"
 
@@ -316,6 +317,20 @@ Background * bg = NULL;
 TextPlane *textplane = NULL;
 
 StarSystem *star_system = NULL;
+ClickList *shipList =NULL;
+
+void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
+  
+  if (k==PRESS) {
+    fprintf (stderr,"click?");
+    UnitCollection * c = shipList->requestIterator (x,y);
+    if (c->createIterator()->current()!=NULL)
+      fprintf (stderr,"Hit single target");
+    if (c->createIterator()->advance()!=NULL)
+      fprintf (stderr,"Hit Multiple Targets");
+  }
+}
+
 
 static void FighterPitchDown(KBSTATE newState) {
 	static Vector Q = fighter->Q();
@@ -405,9 +420,10 @@ void createObjects() {
 		Vector (0,-.4,-1));
 //GOOD!!
   *************/
-  locSel = new LocationSelect (Vector (0,-1,5),
-			       Vector (1,0,0),
-			       Vector (0,-.35,-1));
+  //locSel = new LocationSelect (Vector (0,-1,5),
+  //			       Vector (1,0,0),
+  //			       Vector (0,-.35,-1));
+
   //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
   fighter->SetPosition(Vector(0.0, 10.0, 0.0));
   fighter->SetAI(new Orbit);
@@ -458,13 +474,15 @@ void createObjects() {
   star_system = new StarSystem(new Planet("test_system.dat"));
   star_system->AddUnit(fighter);
   star_system->AddUnit(carrier);
+  shipList = star_system->getClickList();
+  BindKey (0,clickhandler);
 }
 
 void destroyObjects() {  
   //	for(a = 0; a < numf; a++)
   //	delete fighters[a];
   delete textplane;
-  delete locSel;
+  //delete locSel;
   //delete t;
   //delete s;
   delete carrier;
@@ -529,7 +547,7 @@ void main_loop() {
   
   //t->TDraw();
   //s->Yaw(PI/180);
-  locSel->Draw();
+  //////////locSel->Draw();
   _GFX->EndDraw();
   /*carrier->Rotate(Vector(0.010F,0.010F,0.000F));
   

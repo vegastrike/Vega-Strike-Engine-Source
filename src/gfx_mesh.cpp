@@ -196,7 +196,8 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		k[ii] = readf (fp);
 		
 	}
-	radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
+	//below, the square fo teh radial size, because sqrtf will be useless l8r
+	radialSize = max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ));
 	
 	NumTris = readi (fp);
 
@@ -764,11 +765,11 @@ void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vect
 void Mesh::UpdateMatrix()
 {
 	  //MultMatrix(transformation, translation, orientation);
-	  cerr << "Update matrix on " << debugName << endl;
-	  cerr << "P: " << p << endl;
-	  cerr << "Q: " << q << endl;
-	  cerr << "R: " << r << endl;
-	  cerr << "Translation vector: " << p * pos.i + q * pos.j + r * pos.k << endl;
+  //cerr << "Update matrix on " << debugName << endl;
+  //	  cerr << "P: " << p << endl;
+  //  cerr << "Q: " << q << endl;
+  //  cerr << "R: " << r << endl;
+  //  cerr << "Translation vector: " << p * pos.i + q * pos.j + r * pos.k << endl;
 	  Translate(translation, pos);
 	  MultMatrix(transformation, translation, orientation);
 		//glGetFloatv(GL_MODELVIEW_MATRIX, stackstate);
@@ -945,7 +946,13 @@ bool Mesh::intersects(const Vector &start, const Vector &end) {
 	return bspTree->intersects(start, end);
 }
 
+float Mesh::rSizeSquared() {
+  return radialSize*p.Dot(p);
+
+}
+
 BoundingBox * Mesh::getBoundingBox() {
+  
   BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0),Vector (maxSizeX,0,0),
 					Vector (0,minSizeY,0),Vector (0,maxSizeY,0),
 					Vector (0,0,minSizeZ),Vector (0,0,maxSizeZ));

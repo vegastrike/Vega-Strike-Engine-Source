@@ -9,7 +9,7 @@ class ClickList {
   UnitCollection *parentIter;
  public:
 
-  bool queryShip (int mouseX,int mouseY, Unit *, float [16]);//returns if the ship's in iterator utilizes
+  bool queryShip (int mouseX,int mouseY, Unit *);//returns if the ship's in iterator utilizes
   ClickList (UnitCollection *parentIter);
   UnitCollection * requestIterator (int mouseX, int mouseY);
 };

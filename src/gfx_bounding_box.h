@@ -18,7 +18,9 @@ class BoundingBox {
   float ZCenter () {
     return .166666666666666666F*(mx.k+lx.k+my.k+ly.k+mz.k+lz.k);
   }
-  bool Within (Vector query,float err);
+  bool Within (const Vector &query,float err);
+  bool OpenWithin (const Vector &query,float err, int exclude);
+  int Intersect (const Vector &eye, const Vector &pnt, float err);
 };
 
 #endif

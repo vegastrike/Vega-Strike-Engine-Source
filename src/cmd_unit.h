@@ -114,15 +114,22 @@ public:
 	virtual void TDraw(){GFXLoadIdentity(MODEL); Draw();};
 	virtual void Draw(Matrix tmatrix);
 	virtual void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
-	virtual bool querySphere (const Vector &pnt, float err);
-	virtual bool querySphere (Matrix,const Vector &pnt, float err);
-	virtual bool queryBoundingBox(const Vector &pnt, float err);
-	virtual bool queryBoundingBox(Matrix,const Vector &, float);
+	bool querySphere (const Vector &pnt, float err);
+	bool querySphere (Matrix,const Vector &pnt, float err);
+	bool queryBoundingBox(const Vector &pnt, float err);
+	bool queryBoundingBox(Matrix,const Vector &, float);
 
-	virtual bool querySphere (int,int, float err);
-	virtual bool querySphere (Matrix,int,int, float err,Matrix);
-	virtual bool queryBoundingBox(int,int, float err);
-	virtual bool queryBoundingBox(Matrix,int,int, float,Matrix);
+
+  /**Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
+   * hits behind.
+   * 0 if ray misses */
+	int queryBoundingBox(const Vector &origin,const Vector &direction, float err);
+	int queryBoundingBox(Matrix,const Vector &, const Vector &pnt, float err);
+
+	bool querySphere (int,int, float err);
+	bool querySphere (Matrix,int,int, float err,Matrix);
+	bool queryBoundingBox(int,int, float err);
+	bool queryBoundingBox(Matrix,int,int, float);
 
 	void SetAI(AI *newAI);
 	Vector &Position(){return pos;};

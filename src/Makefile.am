@@ -9,14 +9,6 @@ bin_PROGRAMS = vegastrike
 #	gfx_hud.h				\
 #	gfx_light.cpp				\
 #	gfx_light.h				\
-#	joystick.c				\
-#	joystick.h				\
-#	sdl_audio.c				\
-#	sdl_audio.h				\
-#	sdl_audio_data.c			\
-#	sdl_audio_data.h			\
-#	sdl_init.h				\
-#	sdl_init.c				\
 
 
 
@@ -134,7 +126,14 @@ vegastrike_SOURCES =				\
 	planet.cpp 				\
 	iterator.h				\
 	UnitCollection.h			\
-	UnitCollection.cpp			
-
-#	gfx_click_list.h			\
-#	gfx_click_list.cpp			\
+	UnitCollection.cpp			\
+	gfx_click_list.h			\
+	gfx_click_list.cpp			\
+	sdl_audio.c				\
+	sdl_audio.h				\
+	sdl_audio_data.c			\
+	sdl_audio_data.h			\
+	sdl_init.h				\
+	sdl_init.c				\
+	joystick.c				\
+	joystick.h				\

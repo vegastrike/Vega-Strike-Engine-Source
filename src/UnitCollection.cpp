@@ -3,7 +3,7 @@
 
 void UnitCollection::UnitIterator::insert(Unit *unit) {
   if(pos->next!=NULL)
-    pos->next->next = new UnitListNode(unit, NULL);
+    pos->next->next = new UnitListNode(unit, pos->next->next);
   else
     pos->next = new UnitListNode(unit, NULL);
 }

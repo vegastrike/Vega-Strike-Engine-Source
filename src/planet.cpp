@@ -61,11 +61,11 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   Vector vec(0,0,0);
   while((unit = iterator->current())!=NULL) {
     Vector r = (unit->Position() - (vec.Transform(t)));
-    cerr << "Gravity source: " << vec.Transform(t) << "\nUnit position: " << unit->Position() << "\nDelta: " << r << endl;
+    //cerr << "Gravity source: " << vec.Transform(t) << "\nUnit position: " << unit->Position() << "\nDelta: " << r << endl;
     float _r_ = r.Magnitude();
     r = r * (1.0/_r_);
     r =  r * -(gravity/(_r_*_r_));
-    cerr << "Distance: " << _r_ << "\nGravity force vector: " << r << endl;
+    //cerr << "Distance: " << _r_ << "\nGravity force vector: " << r << endl;
 
     if(_r_ > radius) {
       unit->Accelerate(r);
