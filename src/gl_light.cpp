@@ -94,12 +94,6 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
   apply_attenuate (attenuated());
 }
 
-int gfx_light::lightNum() {
-  int tmp =  (this-_llights->begin());
-  if (tmp<0||tmp>(int)_llights->size())
-    return -1;
-  return tmp;
-}//which number it is in the main scheme of things
 
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float ttcutoff) {
@@ -173,87 +167,28 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET lt, const GFXColo
   
   return GFXTRUE;
 }
-GFXLight gfx_light::operator = (const GFXLight &tmp) {
-    memcpy (this,&tmp,sizeof (GFXLight));
-    return tmp;
-}
 
-/** ClobberGLLight ****
- ** most OpenGL implementation dirty lighting if any info is changed at all
- ** having two different lights with the same stats and pos is unlikely at best
- */
-
-void gfx_light::SendGLPosition (const GLenum target) {
-  int tmp = options;
-  w = (float)(attenuated()!=0);
-  glLightfv (target,GL_POSITION,vect);
-  options = tmp;
-}
-void gfx_light::ClobberGLLight (const int target) {
-  GLenum gltarg = GL_LIGHT0+target;
-  if (attenuated()) {
-    glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
-    glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
-    glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
+GFXBOOL /*GFXDRVAPI*/ GFXEnableLight (int light) {
+  assert (light>=0&&light<=_llights->size()); 
+  //    return FALSE;
+  if ((*_llights)[light].Target()==-2) {
+    return GFXFALSE;
   }
-  SendGLPosition (gltarg);
-  glLightfv (gltarg,GL_DIFFUSE, diffuse);
-  glLightfv (gltarg,GL_SPECULAR, specular);
-  glLightfv (gltarg,GL_AMBIENT, ambient);
+  (*_llights)[light].Enable();
+  return GFXTRUE;
 }
 
+GFXBOOL /*GFXDRVAPI*/ GFXDisableLight (int light) {
+  assert (light>=0&&light<=_llights->size()); 
 
-void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXColor &color) {
-  if (LocalLight()) {
-    RemoveFromTable();
-    TrashFromGLLights();
+  if ((*_llights)[light].Target()==-2) {
+    return GFXFALSE;
   }
-  switch (light_targ) {
-  case DIFFUSE:
-    diffuse[0]= color.r;diffuse[1]=color.g;diffuse[2]=color.b;diffuse[3]=color.a;
-    if (target<0)
-      break;
-    glLightfv (GL_LIGHT0+target,GL_DIFFUSE,diffuse);
-    break;
-  case SPECULAR:
-    specular[0]= color.r;specular[1]=color.g;specular[2]=color.b;specular[3]=color.a;    
-    if (target<0)
-      break;
-    glLightfv (GL_LIGHT0+target,GL_SPECULAR,specular);
-    break;
-  case AMBIENT:
-    ambient[0]= color.r;ambient[1]=color.g;ambient[2]=color.b;ambient[3]=color.a;    
-    if (target<0)
-      break;
-    glLightfv (GL_LIGHT0+target,GL_AMBIENT,ambient);    
-    break;
-  case POSITION:
-    vect[0]=color.r;vect[1]=color.g;vect[2]=color.b;
-    if (target<0)
-      break;
-    glLightfv (GL_LIGHT0+target,GL_POSITION,vect);
-    break;
-  case ATTENUATE:
-    attenuate[0]=color.r; attenuate[1]=color.g; attenuate[2]=color.b;
-    apply_attenuate(attenuated());
-    if (target<0)
-      break;
-    SendGLPosition (GL_LIGHT0+target);
-    glLightf (GL_LIGHT0+target,GL_CONSTANT_ATTENUATION, attenuate[0]);
-    glLightf (GL_LIGHT0+target,GL_LINEAR_ATTENUATION, attenuate[1]);
-    glLightf (GL_LIGHT0+target,GL_QUADRATIC_ATTENUATION, attenuate[2]);
-    break;
-  }
+  (*_llights)[light].Disable();
+  return GFXTRUE;
 }
 
-void gfx_light::TrashFromGLLights () {
-  assert (target>0);
-  assert ((GLLights[target].options&OpenGLLights::GLL_ON)==0);//better be disabled so we know it's not in the table, etc
-  assert ((&(*_llights)[GLLights[target].index])==this);
-  GLLights[target].index = -1;
-  GLLights[target].options= OpenGLLights::GLL_LOCAL;
-  
-}
+
 static void SetupGLLightGlobals();
 
 void /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
