@@ -28,10 +28,13 @@ void Unit::UpdateCollideQueue () {
     if (CollideInfo.object!=NULL)
       KillCollideTable(&CollideInfo);
     CollideInfo.object = this;
+    CollideInfo.Mini= Puffmin;
+    CollideInfo.Maxi=Puffmax;
     AddCollideQueue (CollideInfo);
+  } else {
+    CollideInfo.Mini= Puffmin;
+    CollideInfo.Maxi=Puffmax;
   }
-  CollideInfo.Mini= Puffmin;
-  CollideInfo.Maxi=Puffmax;
 }
 
 void Unit::CollideAll() {

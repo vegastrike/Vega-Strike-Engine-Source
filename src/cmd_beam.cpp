@@ -283,9 +283,12 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
       KillCollideTable (&CollideInfo);
     }
     CollideInfo.object = this;
+    CollideInfo.Mini= tmpMini;
+    CollideInfo.Maxi= tmpvec;
     AddCollideQueue (CollideInfo);
+  } else {
+    CollideInfo.Mini= tmpMini;
+    CollideInfo.Maxi= tmpvec;
   }
-  CollideInfo.Mini= tmpMini;
-  CollideInfo.Maxi= tmpvec;
   //Check if collide...that'll change max beam length REAL quick
 }
