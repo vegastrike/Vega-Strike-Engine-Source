@@ -12,6 +12,7 @@
 # Jan 12, 2002:   1.3 - Added support for $do_c and $do_cpp (both default to 1)
 # Jan 14, 2002:   1.4 - Fixed bug where binary would be .cpp
 # Feb 05, 2002:   1.5 - Added new parameter: define <value to define>. does -D
+# Feb 06, 2002:   1.6 - Added warnings for older Config.pl files (which have a missing variable)
 
 use POSIX;
 
@@ -33,7 +34,14 @@ sub ShowLine;
 
 $start_time = strftime "%s", localtime;
 $clean = 0; $do_install = 0; $sent_parm = 0;
-unless ($exec_bin) { $exec_bin = "gcc"; }
+unless ($exec_bin) {
+	print "Warning: Config.pl does not have a \$exec_bin variable\n";
+	print "         Add the following line: \$exec_bin = \"gcc\";\n";
+	print "         If you want to use g++, replace gcc with g++\n";
+	print "         Default of g++ being used\n";
+	print "-----------------------------------------------------\n";
+	$exec_bin = "g++";
+}
 
 @AVAIL_PARMS = ("Clean","Install","Details","NoLink");
 

@@ -19,17 +19,18 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include "central.h"
 #include "easydom.h"
 #include "general.h"
-#include "glob.h"
+#include "hashtable.h"
+#include "selector.h"
+#include "xml_support.h"
 #include <vector>
 #include <list.h>
 #include <string.h>
 #include <string>
 using namespace std;
 void FindMissions(char *path);
-void LoadMission(char *filename);
+int LoadMission(char *filename);
 void ScanNode (string *parent, easyDomNode *node);
 void CheckVar(string parent, string current, string name, string value);
 

@@ -3,7 +3,7 @@
  *                           ----------------------------
  *                           begin                : December 28, 2001
  *                           copyright            : (C) 2001 by David Ranger
- *                           email                : reliant@canshell.com
+ *                           email                : ussreliant@users.sourceforge.net
  **************************************************************************/
 
 /***************************************************************************
@@ -15,20 +15,23 @@
  *                                                                         *
  **************************************************************************/
 
-// Version 2.2
+// Version 2.31
+
+// Feb 20, 2002: Imported changes made by Daniel Horn & ace123 for (Vega Strike). Replaces the glob() with portable calls
+//               This adds isdir() and FindPath() and changes FindFiles() and FindDirs() to wrappers to FindPath()
 
 #ifndef GENERAL_H
 #define GENERAL_H
 
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
-#define _G_ALL		// Enable everything except _G_DEBUG
+//#define _G_ALL		// Enable everything except _G_DEBUG
 
 //#define _G_DEBUG		// Debug Messaging
 //#define _G_ERROR		// Error Messaging (internal and external)
 //#define _G_GLIB		// use GLIB for string allocation
-//#define _G_GLOB		// Enable the GLOB file searching
 //#define _G_NUMBER		// Number processing
+//#define _G_PATH               // Functions that deal with directories
 //#define _G_RANDOM		// Enable Random Number
 //#define _G_STRING_MANAGE	// Enable String Management
 //#define _G_STRING_PARSE	// Enable the String Parsing
@@ -47,7 +50,7 @@
 #ifdef _G_ALL
 #define _G_ERROR
 #define _G_GLIB
-#define _G_GLOB
+#define _G_PATH
 #define _G_NUMBER
 #define _G_RANDOM
 #define _G_STRING_MANAGE
@@ -61,10 +64,19 @@
 #include <glib.h>
 #endif    // _G_GLIB
 
-#ifdef _G_GLOB
-#include <glob.h>
+#ifdef _G_PATH
+
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/dir.h>
 #include <stdio.h>
-#endif    // _G_GLIB
+#include <unistd.h>
+#endif    // _WIN32
+
+#include <string>
+#include <vector>
+#endif    // _G_PATH
 
 #ifdef _G_ERROR
 #include <stdio.h>
@@ -80,11 +92,9 @@
 #include <time.h>
 #endif    // _G_RANDOM
 
-#ifdef _G_DEBUG
-#ifdef __cplusplus		//iostream is only used in debugging
-#include <iostream.h>
-#endif    // __cplusplus
-#endif    // _G_DEBUG
+#if defined _G_DEBUG && defined __cplusplus
+#include <iostream.h>           // iostream is only used in debugging
+#endif    // _G_DEBUG && __cplusplus
 
 #ifndef MAX_READ
 #define MAX_READ 1024
@@ -144,9 +154,18 @@ char *xml_pre_chomp_comment(char *string);
 char *xml_chomp_comment(char *string);
 #endif    // _G_XML
 
-#ifdef _G_GLOB
+#ifdef _G_PATH
+// Emulate the glob_t struct without having to include glob.h
+typedef struct {
+	size_t gl_pathc;
+	char **gl_pathv;
+	size_t gl_offs;
+} glob_t;
+
+int isdir(const char *file);
+glob_t *FindPath(char *path, int type);
 glob_t *FindFiles(char *path, char *extension);
 glob_t *FindDirs(char *path);
-#endif    // _G_GLOB
+#endif    // _G_PATH
 
 #endif    // GENERAL_H

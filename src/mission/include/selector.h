@@ -1,7 +1,7 @@
 /***************************************************************************
- *                           central.h  -  description
+ *                           selector.h  -  description
  *                           ----------------------------
- *                           begin                : January 18, 2002
+ *                           begin                : February 20, 2002
  *                           copyright            : (C) 2002 by David Ranger
  *                           email                : sabarok@start.com.au
  **************************************************************************/
@@ -16,28 +16,40 @@
  **************************************************************************/
 
 // Check to see if we're already loaded
-#ifndef CENTRAL_H
-#define CENTRAL_H
+#ifndef SELECTOR_H
+#define SELECTOR_H
 
-#define MISSION_VERSION "1.0"
+#define MISSION_VERSION "2.0"
 #define MISSION_PROGRAM "Vega Strike"
 
 #include <expat.h>
-#include <glob.h>
-#include <gtk/gtk.h>
+#include <GL/glut.h>
+#include <GL/gl.h>
+#include <iostream.h>
 #include <map>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef _WIN32
+
+#ifdef _WIN32
+#include <direct.h>
 #include <unistd.h>
-#endif
-#include "general.h"
-#include "display_gtk.h"
-#include "file.h"
+#include <windows.h>
+#else
+#include <stdio.h>
+#include <sys/dir.h>
+#include <unistd.h>
+#endif    // _WIN32
+
+
+
+#include "button.h"
 #include "easydom.h"
-#include "xml_support.h"
+#include "file.h"
+#include "general.h"
+#include "graphics.h"
 #include "hashtable.h"
+#include "text_area.h"
+#include "xml_support.h"
 
 #ifndef MAX_READ
 #define MAX_READ 1024	// Maximum number of characters to read from a line
@@ -61,4 +73,4 @@ struct mission_data {
 extern glob_t *MISSIONS;
 extern struct mission_data DATA;
 
-#endif    //CENTRAL_H
+#endif    //SELECTOR_H

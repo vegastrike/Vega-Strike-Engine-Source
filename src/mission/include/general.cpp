@@ -3,7 +3,7 @@
  *                           ----------------------------
  *                           begin                : December 28, 2001
  *                           copyright            : (C) 2001 by David Ranger
- *                           email                : reliant@canshell.com
+ *                           email                : ussreliant@users.sourceforge.net
  **************************************************************************/
 
 /***************************************************************************
@@ -19,16 +19,7 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
-#ifdef _WIN32
-#include <direct.h>
-#else
-#include <sys/dir.h>
-#include <stdio.h>
-#include <unistd.h>
-#endif
-#include <string>
-#include <vector>
-using namespace std;
+
 #ifdef _G_RANDOM
 int RANDOMIZED = 0;
 #endif    // _G_RANDOM
@@ -120,11 +111,8 @@ char *pre_chomp(char *line) {
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
 	int length, dif, calc;
+	char chr_new[LENGTH+1], current[LENGTH+1];
 	char *ptr_new, *location;
-
-	char *chr_new,*current;
-	chr_new = (char *) malloc (sizeof (char)*LENGTH);
-	current = (char *) malloc (sizeof (char)*LENGTH);
 	calc = strlen(line) - strlen(search) + strlen(replace);
 	if (calc > LENGTH) { return line; }
 	length = strlen(line);
@@ -132,7 +120,7 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 	while ((location = strstr(current, search)) > 0) {
 		chr_new[0] = '\0';
 		calc = strlen(current) - strlen(search) + strlen(replace);
-		if (calc > LENGTH) { strcpy(line, current); free(current); free(chr_new); return line; }
+		if (calc > LENGTH) { strcpy(line, current); return line; }
 		dif = location - current;
 		strncat(chr_new, current, dif);
 		strncat(chr_new, replace, strlen(replace));
@@ -141,11 +129,8 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 		strcpy(current, chr_new); 
 	}
 	strcpy(line, current);
-	free(chr_new);
-	free(current);
 	return line;
 }
-
 
 char *strmov(char *to, char *from) {
 	char *end;
@@ -295,7 +280,7 @@ double pwer(double start, long end) {
 void btoa(char *dest, char *string) {
 	int max, cur, pos, new_val;
 	char *ptr_char, cur_char[1];
-	char *new_string= (char *)malloc(strlen(string)+1);
+	char new_string[strlen(string)+1];
 	max = 7;
 	cur = 7;
 	pos = 0;
@@ -310,7 +295,6 @@ void btoa(char *dest, char *string) {
 	}
 	new_string[pos] = '\0';
 	strcpy(dest, new_string);
-	free (new_string);
 	return;
 }
 
@@ -424,73 +408,68 @@ char *xml_chomp_comment(char *string) {
 
 #endif    // _G_XML
 
-#ifdef _G_GLOB
+#ifdef _G_PATH
 
-// Uses glob to look for dirs and files.
-// Please note: These functions have not been tested with C, only with C++
-// Reminder: Add an error control function for glob()
-
-
-int isdir (const char * file) {
-	int tmp = strlen(file);
-	if (tmp==0) return -1;
-	if (file[tmp-1]=='.') {
-		if (tmp==1)
-			return -1;
-		if (file[tmp-2]=='.'||file[tmp-2]=='/'||file[tmp-2]=='\\')
-			return -1;
+int isdir(const char *file) {
+	int length = strlen(file);
+	if (length == 0) { return -1; }
+	if (file[length-1] == '.') {
+		if (length == 1) { return -1; }
+		if (file[length-2] == '.' || file[length-2] == SEPERATOR || file[length-2] == '\\') { return -1; }
 	}
-	
-	if (-1==chdir ((string(file)+"/").c_str())) {
-		return 0;
-	}else {
-		chdir ("..");
+
+	if (-1 == chdir((string(file)+SEPERATOR).c_str())) { return 0; }
+	else {
+		chdir("..");
 		return 1;
 	}
 }
 
-glob_t *FindFiles(char *path, char *extension) {
-	glob_t *FILES;
-	char *pattern;
+// type = 0: file
+// type = 1: dirs
 
-#ifdef __cplusplus
-	FILES = new glob_t;
-	pattern = new char[strlen(path) + strlen(extension) + 1];
-#else
-	FILES = (glob_t *)malloc(sizeof(glob_t));
-	pattern = (char *)malloc(strlen(path) + strlen(extension) + 1);
-	if (FILES == NULL || pattern == NULL) { ShowError("Out of memory", "G03", 1); return NULL; }
-#endif    // __cplusplus
-
-	sprintf(pattern, "%s%s", path, extension);
-
-	//glob(pattern, GLOB_MARK, NULL, FILES);
+glob_t *FindPath(char *path, int type) {
+	glob_t *FILES = new glob_t;
 	string mypath(path);
 	char thispath[800000];
-	getcwd (thispath,790000);
-	chdir (path);
-	DIR * dir=opendir(".");
-	chdir (thispath);
+	DIR *dir;
 	vector <string> result;
+	dirent *entry;
+	unsigned int cur;
+
+	getcwd(thispath, 790000);
+	chdir(path);
+	dir = opendir(".");
+	chdir(thispath);
 	if (dir) {
-		dirent *blah;
-		while (NULL!=(blah=readdir(dir))) {	
-			if (0==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
-				result.push_back (mypath+blah->d_name);
+		entry = 0;
+		while ((entry = readdir(dir)) != NULL) {
+			if (isdir((string(thispath)+SEPERATOR+mypath+SEPERATOR+entry->d_name).c_str()) == type) {
+				result.push_back(mypath+entry->d_name);
 			}
-			chdir (thispath);
+			chdir(thispath);
 		}
-		closedir (dir);
+		closedir(dir);
 	}
-	FILES->gl_pathc=result.size();
-	FILES->gl_pathv=new char*[result.size()];
-	for (unsigned int i=0;i<result.size();i++) {
-		FILES->gl_pathv[i]=new char [result[i].size()+1];
-		strcpy(FILES->gl_pathv[i],result[i].c_str());
+
+	FILES->gl_pathc = result.size();
+#ifdef __cplusplus
+	FILES->gl_pathv = new char*[FILES->gl_pathc];
+#else
+	FILES->gl_pathv = (char *)malloc(sizof(char *) * FILES->gl_pathc);
+	if (FILES->gl_pathv == 0) { ShowError("Out of memory", "G04", 1); return NULL; }
+#endif
+	for (cur = 0; cur < FILES->gl_pathc; cur++) {
+		FILES->gl_pathv[cur] = strdup(result[cur].c_str());
 	}
+
 	return FILES;
 }
 
+glob_t *FindFiles(char *path, char *extension) { return FindPath(path, 0); }
+glob_t *FindDirs(char *path) { return FindPath(path, 1); }
+
+/*
 glob_t *FindDirs(char *path) {
 	glob_t *DIRS;
 	char *pattern;
@@ -505,32 +484,9 @@ glob_t *FindDirs(char *path) {
 #endif    // __cplusplus
 
 	sprintf(pattern, "%s*", path);
-
-	//glob(pattern, GLOB_MARK, NULL, DIRS);
-	char thispath[800000];
-	getcwd (thispath,790000);
-	chdir(path);
-	string mypath(path);
-	DIR * dir=opendir(".");
-	chdir (thispath);
-	vector <string> result;
-	if (dir) {
-		dirent *blah;
-		while (NULL!=(blah=readdir(dir))) {	
-			if (1==isdir ((string(thispath)+"/"+mypath+"/"+blah->d_name).c_str())) {
-				result.push_back (mypath+blah->d_name+"/");
-				chdir (thispath);
-			}
-		}
-		closedir (dir);
-	}
-	DIRS->gl_pathc=result.size();
-	DIRS->gl_pathv=new char*[result.size()];
-	for (unsigned int i=0;i<result.size();i++) {
-		DIRS->gl_pathv[i]=new char [result[i].size()+1];
-		strcpy(DIRS->gl_pathv[i],result[i].c_str());
-	}
+	glob(pattern, GLOB_MARK, NULL, DIRS);
 	return DIRS;
 }
+*/
 
-#endif    // _G_GLOB
+#endif    // _G_PATH

@@ -22,7 +22,7 @@ void FindMissions(char *path) {
 	return;
 }
 
-void LoadMission(char *filename) {
+int LoadMission(char *filename) {
 	char *file, *name;
 	easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
 	missionNode *top=domf->LoadXML(filename);
@@ -43,11 +43,12 @@ void LoadMission(char *filename) {
 
 	free(file);
 
-	if (top == NULL) { cout << "Unable to load mission file\n"; return; }
+	if (top == NULL) { cout << "Unable to load mission file\n"; return 1; }
 
 	read = top;
 
 	ScanNode(NULL, top);
+	return 0;
 }
 
 void ScanNode (string *parent, easyDomNode *node) {

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                           central.cpp  -  description
+ *                           selector.cpp  -  description
  *                           ----------------------------
- *                           begin                : January 18, 2002
+ *                           begin                : February 20, 2002
  *                           copyright            : (C) 2002 by David Ranger
  *                           email                : sabarok@start.com.au
  **************************************************************************/
@@ -15,16 +15,8 @@
  *                                                                         *
  **************************************************************************/
 
-#include "central.h"
-#ifdef _WIN32
-#include <windows.h>
-#include <process.h>
-#include <direct.h>
-#else
-#include <sys/dir.h>
-#include <stdio.h>
-#include <unistd.h>
-#endif
+#include "selector.h"
+
 glob_t *MISSIONS;
 struct mission_data DATA;
 
@@ -38,8 +30,14 @@ char *Start(int run_vegastrike) {
 	DATA.briefing = NewString("");
 	DATA.path = NewString("");
 
-	ShowMain(1);
-	gtk_main();
+	glutMouseFunc(ProcessMouseClick);
+	glutMotionFunc(ProcessMouseMoveActive);
+	glutPassiveMotionFunc(ProcessMouseMovePassive);
+	glutReshapeFunc(ChangeSize);
+	glutDisplayFunc(show_main);
+
+	glutMainLoop();
+	
 	return DATA.path;
 }
 
