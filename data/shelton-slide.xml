@@ -1,0 +1,50 @@
+<SCRIPT>
+ <DEFAULT>
+   <ADD>
+   <VECTOR Position="v"/>
+   <VECTOR x="1" y="0" z="0"/>
+   </ADD>
+   <FLOAT value="1"/>
+ </DEFAULT>
+ <MatchLin Afterburn="true" terminate="1" local="0">
+ <SCALE>
+ <SUB>
+ <ADD>
+   <SCALE>
+    <Normalize>
+     <CROSS>
+      <VECTOR TargetV="s"/>
+      <SUB>
+        <VECTOR Position="v"/>
+        <VECTOR TargetPos="u"/>
+      </SUB>
+     </CROSS>
+    </Normalize>
+    <DOT> 
+      <VECTOR Dup="s"/>
+      <SUB>
+        <VECTOR Position="v"/>
+        <VECTOR TargetPos="u"/>
+      </SUB>
+    </DOT>
+   </SCALE>
+   <VECTOR TargetPos="u"/>
+ </ADD>
+   <Vector Position=""/>
+   </SUB>
+ <FLOAT value="1000"/>
+ </SCALE>
+ <Vector Dup="PerpendicuarPoint"/>
+ </MatchLin>
+ <ExecuteFor time="1.5">
+ <ChangeHead>
+<!-- vector is already duped, and change heading already subtracts local position anyhow-->
+  <ADD>
+    <VECTOR Position=""/>
+  <ADD>
+ </ChangeHead>
+ </ExecuteFor>
+ <FaceTarget terminate="0">
+ </FaceTarget>
+
+</SCRIPT>

@@ -1,0 +1,36 @@
+<AggressiveAI time="6">
+
+<!-- distance less than .1-->
+<distance max=".15" script="turnaway.xml"> 
+  <threat max=".3" script="afterburnerslide.xml">
+  </threat>
+</distance>
+<distance max=".1"> 
+</distance>
+<distance max=".1" script="turnaway.xml"> 
+  <threat min=".3" script="evade.xml">
+<!--   <threat min=".3" script="afterburnerslide.xml">
+   </threat>-->
+  </threat>
+</distance>
+<!-- distance midrange .1-->
+<distance min=".15" max=".8">
+  <threat max=".5" script="turntowards.xml">
+  </threat>
+</distance>
+<distance min=".1" max=".6">
+  <threat min=".5"  script="afterburnerslide.xml">
+  </threat>
+</distance>
+
+<!-- distance far out-->
+<distance min=".8">
+  <threat max=".8" script="afterburn-turntowards.xml">
+  </threat>
+</distance>
+<distance min=".6" script="evade.xml">
+  <threat min=".8"  script="afterburn-turntowards.xml">
+  </threat>
+</distance>
+
+</AggressiveAI>

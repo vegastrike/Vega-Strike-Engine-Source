@@ -1,0 +1,3 @@
+<Cockpit front="hornet-cockpit.spr" ViewOffset=".2857" CockpitOffset=".6666">
+	<Crosshairs file="crosshairs.spr"/>
+</Cockpit>

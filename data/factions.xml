@@ -1,0 +1,32 @@
+<Factions>
+	<Faction name="confed" logoRGB="TerranPriRGB.bmp" logoA="TerranPriA.bmp">
+		<stats name="kilrathi" relation="-1"/>
+		<stats name="retro" relation="-.4"/>
+		<stats name="militia" relation=".9"/>
+		<stats name="merchant" relation =".3"/>
+	</Faction>
+	<Faction name="kilrathi" logoRGB="KilrathiPriRGB.bmp" logoA="KilrathiPriA.bmp">
+		<stats name="confed" relation="-1"/>
+		<stats name="retro" relation=".2"/>
+		<stats name="militia" relation="-.6"/>
+		<stats name="merchant" relation =".3"/>
+	</Faction>
+	<Faction name="merchant" logoRGB="KilrathiPriRGB.bmp" logoA="KilrathiPriA.bmp">
+		<stats name="confed" relation="-1"/>
+		<stats name="retro" relation=".2"/>
+		<stats name="militia" relation="-.6"/>
+		<stats name="merchant" relation =".3"/>
+	</Faction>
+	<Faction name="retro" logoRGB="KilrathiPriRGB.bmp" logoA="KilrathiPriA.bmp">
+		<stats name="confed" relation="-1"/>
+		<stats name="retro" relation=".2"/>
+		<stats name="militia" relation="-.6"/>
+		<stats name="merchant" relation =".3"/>
+	</Faction>
+	<Faction name="militia" logoRGB="KilrathiPriRGB.bmp" logoA="KilrathiPriA.bmp">
+		<stats name="confed" relation="-1"/>
+		<stats name="retro" relation=".2"/>
+		<stats name="militia" relation="-.6"/>
+		<stats name="merchant" relation =".3"/>
+	</Faction>
+</Factions>

@@ -1,0 +1,11 @@
+<AggressiveAI close=".05">
+  <hull max = ".5" script="evade.xml">
+   <threat min=".4" script="afterburnerslide.xml">
+   </threat>
+  </hull>
+
+  <distance max=".03" script="turnaway.xml">
+  <!-- distance less than .1-->
+  </distance>
+  
+</AggressiveAI>

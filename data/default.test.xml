@@ -1,0 +1,11 @@
+<AggressiveAI> 
+
+<!-- distance less than .1-->
+<distance max=".1" script="kickstop.xml"/> 
+
+<distance min=".1" max=".6"  script="afterburn-slide.xml">
+</distance>
+
+<distance min=".6" script="afterburn-turntowards.xml">
+</distance>
+</AggressiveAI>
