@@ -83,7 +83,7 @@ void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units) {
     glDisable (GL_POLYGON_OFFSET_FILL);
     glPolygonOffset (0,0);
   } else {
-    glPolygonOffset (factor*4,units*4);
+    glPolygonOffset (factor,units);
     glEnable (GL_POLYGON_OFFSET_FILL);
   }
 
