@@ -212,6 +212,10 @@ void VegaConfig::initCommandMap(){
   command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
   command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
+  command_map["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;
+  command_map["CommHelpMeOutFaction"]=FireKeyboard::HelpMeOutFaction;
+  command_map["JoinFlightgroup"]=FireKeyboard::JoinFg;
+  command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
   command_map["CommHelpMeOut"]=FireKeyboard::HelpMeOut;
   command_map["CommFormUp"]=FireKeyboard::FormUp;
   command_map["CommBreakForm"]=FireKeyboard::BreakFormation;

@@ -52,6 +52,10 @@ class FireKeyboard: public Order {
   static void CloakKey (int, KBSTATE);
   static void ECMKey (int,KBSTATE);
   static void HelpMeOut (int,KBSTATE);
+  static void HelpMeOutFaction (int,KBSTATE);
+
+  static void HelpMeOutCrit (int,KBSTATE);
+  static void JoinFg (int,KBSTATE);
   static void BreakFormation (int,KBSTATE);
   static void FormUp (int,KBSTATE);
   static void AttackTarget (int,KBSTATE);

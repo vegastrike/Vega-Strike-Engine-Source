@@ -143,6 +143,26 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
   return retval;
 }
 
+Unit * GetThreat (Unit * parent, Unit * leader) {
+  Unit * th=NULL;
+  Unit * un=NULL;
+  bool targetted=false;
+  float mindist= FLT_MAX;
+	  for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
+	       (un = *ui);
+	       ++ui) {
+	    if (_Universe->GetRelation (parent->faction,un->faction)<0) {
+	      float d = (un->Position()-leader->Position()).Magnitude();
+	      bool thistargetted = (un->Target()==leader);
+	      if (!th||(thistargetted&&!targetted)||((thistargetted||(!targetted))&&d<mindist)) {
+		th = un;
+		targetted=thistargetted;
+		mindist = d;
+	      }
+	    }
+	  }
+	  return th;
+}
 bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
   bool retval=false;
   if (fg !=NULL) {
@@ -157,13 +177,26 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       targ = targ!=NULL?targ->Target():NULL;
       if (targ) {
 	Vector vec;
-	if (parent->InRange (targ,vec))
+	CommunicationMessage c(parent,leader,NULL,0);
+	if (parent->InRange (targ,vec)) {
 	  parent->Target (targ);
+	  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	}else {
+	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	}
+	leader->getAIState()->Communicate(c);
       }
     }else if (fg->directive==string("f")) {
       retval=true;
       if (leader!=NULL) {
 	if (fg->directive!=last_directive) {
+
+	CommunicationMessage c(parent,leader,NULL,0);
+	c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	//}else {
+	//	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	//	}
+	leader->getAIState()->Communicate(c);
 	  float left= parent->getFgSubnumber()%2?1:-1;
 	  static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
 										    "Targetting",
@@ -186,30 +219,28 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	Unit * th=NULL;
 	if ((th=leader->Threat())) {
 	  Vector vec;
+	  CommunicationMessage c(parent,leader,NULL,0);
 	  if (parent->InRange(th,vec)) {
 	    parent->Target(th);
+	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	  }else {
+	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	  }
+	  leader->getAIState()->Communicate(c);
 	}else {
 	  bool targetted=false;
 	  float mindist;
 	  Unit * un=NULL;
-	  for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
-	       (un = *ui);
-	       ++ui) {
-	    if (_Universe->GetRelation (parent->faction,un->faction)<0) {
-	      float d = (un->Position()-leader->Position()).Magnitude();
-	      bool thistargetted = (un->Target()==leader);
-	      if (!th||(thistargetted&&!targetted)||((thistargetted||(!targetted))&&d<mindist)) {
-		th = un;
-		targetted=thistargetted;
-		mindist = d;
-	      }
-	    }
-	  }
+	  th= GetThreat(parent,leader);
+	  CommunicationMessage c(parent,leader,NULL,0);
 	  if (th) {
+	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	    parent->Target (th);
 	    fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+	  }else {
+	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	  }
+	  leader->getAIState()->Communicate(c);
 	}
       }
     } 

@@ -24,6 +24,8 @@ class FSM {
   float getDeltaRelation (int prevstate, int curstate) const;
   int getCommMessageMood(int curstate, float mood, float randomresponsefactor) const;
   int getDefaultState (float relationship) const;
+  int GetYesNode ();
+  int GetNoNode();
   int GetHitNode ();
   int GetRequestLandNode();
   int GetContrabandInitiateNode();

@@ -222,6 +222,55 @@ static void LeadMe (string directive, string speech) {
     }
   }
 }
+extern Unit * GetThreat (Unit * par, Unit * leader);
+void HelpOut (bool crit, std::string conv) {
+  Unit * un = _Universe->AccessCockpit()->GetParent();
+  if (un) {
+    Unit * par=NULL;
+    DoSpeech(  un,conv);
+    for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
+	 (par = (*ui));
+	 ++ui) {
+      if ((crit&&_Universe->GetRelation(par->faction,un->faction)>0)||par->faction==un->faction) {
+	Unit * threat = GetThreat (par,un);
+	CommunicationMessage c(par,un,NULL,0);
+	if (threat) {
+	  par->Target(threat);
+	  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	} else {
+	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	}
+	un->getAIState()->Communicate (c);
+      }
+    }
+  }
+}
+void FireKeyboard::JoinFg (int, KBSTATE k) {
+  if (k==PRESS) {
+    Unit * un = _Universe->AccessCockpit()->GetParent();
+    if (un) {
+      Unit * targ = un->Target();
+      if (targ) {
+	if (targ->faction==un->faction) {
+	  Flightgroup * fg = targ->getFlightgroup();
+	  if (fg) {
+	    if (fg!=un->getFlightgroup()) {
+	      if (un->getFlightgroup()) {
+		un->getFlightgroup()->Decrement(un);
+	      }
+	      fg->nr_ships_left++;
+	      fg->nr_ships++;
+	      un->SetFg(fg,fg->nr_ships_left-1);
+	    }
+	  }
+	}
+      }
+
+    }
+  }
+
+}
+
 void FireKeyboard::AttackTarget (int, KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("a","Attack my target!");
@@ -232,6 +281,17 @@ void FireKeyboard::HelpMeOut (int, KBSTATE k) {
     LeadMe ("h","Help me out!");
   }
 }
+void FireKeyboard::HelpMeOutFaction (int, KBSTATE k) {
+  if (k==PRESS) {
+    HelpOut (false,"Help me out! I need critical assistance!");
+  }
+}
+void FireKeyboard::HelpMeOutCrit (int, KBSTATE k) {
+  if (k==PRESS) {
+    HelpOut (true,"Help me out! Systems going critical!");
+  }
+}
+
 void FireKeyboard::FormUp (int, KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("f","Form on my wing.");

@@ -30,6 +30,13 @@ FSM::FSM (const char * filename) {
     LoadXML(filename);
   }
 }
+int FSM::GetNoNode() {
+  return nodes.size()-8;
+}
+int FSM::GetYesNode() {
+  return nodes.size()-7;
+}
+
 int FSM::GetContrabandInitiateNode() {
   return nodes.size()-6;
 }
