@@ -368,7 +368,12 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   st[i]='\0';
   char qr[256];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  sprintf (qr,"Dis %.4f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
+  static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
+  if(lie){
+	  sprintf (qr,"Distance: %.2f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
+  } else {
+	sprintf (qr,"Distance: %.0f Meters",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0)));
+  }
   strcat (st,qr);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
