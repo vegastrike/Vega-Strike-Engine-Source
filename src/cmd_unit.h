@@ -116,7 +116,7 @@ public:
 
 	void SetAI(AI *newAI);
 	Vector &Position(){return pos;};
-        Vector &Nose(){return pr};
+        Vector &Nose(){return pr;};
 	float GetTime(){return time;};
 
 	void Destroy(){active = FALSE;};
