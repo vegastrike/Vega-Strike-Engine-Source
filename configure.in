@@ -1134,13 +1134,36 @@ TESTNETCOMM_PORTAUDIO="0"
 
 if test "$TESTNETCOMM" = "1" ; then
 	dnl check for oss headers under Linux
-	saved_CPPFLAGS="$CPPFLAGS"
 
 	if test "$TESTNETCOMM_NOSOUND" = "0"; then
 		AC_DEFUN( CHECK_FOR_OSS_H, [
 		    AC_MSG_CHECKING([for sys/soundcard.h])
 		    AC_TRY_CPP( [ #include <sys/soundcard.h> ], have_oss_h=yes, have_oss_h=no )
 		    AC_MSG_RESULT([$have_oss_h])
+		])
+
+		AC_DEFUN( CHECK_FOR_JVOIP_H, [
+		    AC_MSG_CHECKING([for jvoiplib/jvoipsession.h])
+		    AC_TRY_CPP( [ #include <jvoiplib/jvoipsession.h> ], have_jvoip_h=yes, have_jvoip_h=no )
+		    AC_MSG_RESULT([$have_jvoip_h])
+		])
+
+		AC_DEFUN( CHECK_FOR_JTHREAD_H, [
+		    AC_MSG_CHECKING([for jthread/jthread.h])
+		    AC_TRY_CPP( [ #include <jthread/jthread.h> ], have_jthread_h=yes, have_jthread_h=no )
+		    AC_MSG_RESULT([$have_jthread_h])
+		])
+
+		AC_DEFUN( CHECK_FOR_JRTP_H, [
+		    AC_MSG_CHECKING([for jrtp/rtpsession.h])
+		    AC_TRY_CPP( [ #include <jrtp/rtpsession.h> ], have_jrtp_h=yes, have_jrtp_h=no )
+		    AC_MSG_RESULT([$have_jrtp_h])
+		])
+
+		AC_DEFUN( CHECK_FOR_COREAUDIO_H, [
+		    AC_MSG_CHECKING([for CoreAudio/CoreAudio.h])
+		    AC_TRY_CPP( [ #include <CoreAudio/CoreAudio.h> ], have_core_audio_h=yes, have_core_audio_h=no )
+		    AC_MSG_RESULT([$have_core_audio_h])
 		])
 
 		if test "$LINUX" = "1" ; then
@@ -1150,12 +1173,6 @@ if test "$TESTNETCOMM" = "1" ; then
 				TESTNETCOMM_PORTAUDIO="0"
 			fi
 		fi
-
-		AC_DEFUN( CHECK_FOR_COREAUDIO_H, [
-		    AC_MSG_CHECKING([for CoreAudio/CoreAudio.h])
-		    AC_TRY_CPP( [ #include <CoreAudio/CoreAudio.h> ], have_core_audio_h=yes, have_core_audio_h=no )
-		    AC_MSG_RESULT([$have_core_audio_h])
-		])
 
 		if test "x$is_macosx" = "xyes" ; then
 			if test "$TESTNETCOMM_JVOIP" = "1" ; then
@@ -1169,11 +1186,33 @@ if test "$TESTNETCOMM" = "1" ; then
 			fi
 		fi
 
+		saved_CPPFLAGS="$CPPFLAGS"
 		dnl Add the CFLAGS that correspond to sound choice
 		if test "$TESTNETCOMM_JVOIP" = "1" ; then
-	   		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_JVOIP"
-	   		AC_DEFINE(NETCOMM_JVOIP,1,[enable JVoIP library for sound support with NETCOMM])
-			echo "VoIP support enabled."
+		dnl THIS DOESN'T WORK BECAUSE JVOIP HEADERS INCLUDE C++ IOSTREAM AND STRING HEADERS
+		dnl	JLIBS_FLAGS="-I/usr/include -I/usr/local/include -I/usr/local/include/jrtplib -I/usr/local/include/jthread -I/usr/local/include/jvoiplib"
+		dnl	CPPFLAGS="$saved_CPPFLAGS $JLIBS_FLAGS"
+		dnl	CHECK_FOR_JVOIP_H
+		dnl	if test "x$have_jvoip_h" = "xno" ; then
+		dnl		TESTNETCOMM_JVOIP=0
+		dnl		echo "JVoIP lib headers not found : disabling JVoIP support"
+		dnl	else
+		dnl		CHECK_FOR_JTHREAD_H
+		dnl		if test "x$have_jthread_h" = "xno" ; then
+		dnl			TESTNETCOMM_JVOIP=0
+		dnl			echo "JThread lib headers not found : disabling JVoIP support"
+		dnl		else
+		dnl			CHECK_FOR_JRTP_H
+		dnl			if test "x$have_jrtp_h" = "xno" ; then
+		dnl				TESTNETCOMM_JVOIP=0
+		dnl				echo "JRtp lib headers not found : disabling JVoIP support"
+		dnl			else
+					  	TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_JVOIP"
+					   	AC_DEFINE(NETCOMM_JVOIP,1,[enable JVoIP library for sound support with NETCOMM])
+						echo "VoIP support enabled."
+		dnl			fi
+		dnl		fi
+		dnl	fi
 		else
 			if test "$TESTNETCOMM_PORTAUDIO" = "1" ; then
    				TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_PORTAUDIO"
@@ -1183,6 +1222,7 @@ if test "$TESTNETCOMM" = "1" ; then
 				echo "VoIP support disabled."
 			fi
 		fi
+		CPPFLAGS="$saved_CPPFLAGS"
 	else
 		echo "No sound support for networking communications"
 		TESTNETCOMM_JVOIP="0"

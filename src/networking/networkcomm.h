@@ -28,6 +28,12 @@ class NetworkCommunication
 		int		max_messages;
 		// List of clients we are communicating with
 		list<ClientPtr>	commClients;
+#ifdef HYBRID_PROTO
+		// Socket list -> one for each client we are communicating with
+		list<SOCKETALT>	sockClients;
+		SocketSet		_sock_set;
+		SocketSet		_serversock_set;
+#endif /* HYBRID_PROTO */
 		// The current communication frequency
 		float	freq;
 		bool	active;

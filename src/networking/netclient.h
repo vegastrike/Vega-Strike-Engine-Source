@@ -81,6 +81,7 @@ class	NetClient
         char				keeprun;		// Bool to test client stop
         string				callsign;		// Callsign of the networked player
         Clients 			Clients;		// Clients in the same zone
+		// This unit array has to be changed into a map too !!
         // Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 	    // a vector because always accessed by their IDs
 

@@ -696,7 +696,6 @@ int NetClient::recvMsg( Packet* outpacket )
 					*/
 					// Loop until the download is complete
 				}
-				//globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
 
 				/*
                 VsnetDownload::Client::TestItem* t;

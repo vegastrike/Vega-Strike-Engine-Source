@@ -161,9 +161,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 
     string callsign;
     string passwd;
-    //char * buf = packeta.getData();
-    //strcpy( name, buf);
-    //strcpy( passwd, buf+NAMELEN);
+
 	NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
 	ObjSerial cltserial;
 	callsign = netbuf.getString();

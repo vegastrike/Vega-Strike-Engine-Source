@@ -14,6 +14,7 @@ extern bool cleanexit;
 typedef void* (*VoidVoidFuncType)( void* );
 
 #ifdef DSHOW
+#include "gfx/jpeg_memory.h"
 /**************************************************************************************************/
 /**** DirectShow Callback : SampleGrabberCallback                                              ****/
 /**************************************************************************************************/
@@ -62,6 +63,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 				return VFW_E_INVALIDMEDIATYPE;
 			}
 
+			/*
 			VIDEOINFOHEADER *pVideoHeader = (VIDEOINFOHEADER*)MediaType.pbFormat; 
 			if (pVideoHeader == NULL) 
 				return E_FAIL; 
@@ -77,7 +79,8 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			HBITMAP hBitmap = ::CreateDIBSection(0, &BitmapInfo, DIB_RGB_COLORS, (void **)&pBuffer, 
                                      NULL, 0);
 			// Copy the image into the buffer. 
-			long size = 0; 
+			long size = 0;
+			*/
 			/*
 			hr = ws->pSampleGrabber->GetCurrentBuffer(&size,(long *)buffer);   
 			if (FAILED(hr)) 
@@ -115,6 +118,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 				ws->old_size = ws->jpeg_size;
 			}
 			
+			/*
 			// Write p to a file for testing
 			char file[256];
 			memset( file, 0, 256);
@@ -139,9 +143,33 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 				exit(1);
 			}
 			fclose( fp);
+			*/
 
-			// JpegFromBmp should allocate the needed buffer;
-			//ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
+			// jpeg_compress doesn't allocate any data so we have to use a buffer for destination
+			// Here we can't 
+			char file[256];
+			memset( file, 0, 256);
+			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
+			strcat( file, datadir.c_str());
+/*
+METHODDEF(void) init_destination (j_compress_ptr cinfo);
+METHODDEF(boolean) empty_output_buffer (j_compress_ptr cinfo);
+METHODDEF(void) term_destination (j_compress_ptr cinfo);
+GLOBAL(void) jpeg_memory_dest(j_compress_ptr cinfo, JOCTET *buffer,int bufsize);
+int jpeg_compress(char *dst, char *src, int width, int height, int dstsize, int quality);
+int jpeg_compress_to_file(char *src, char *file, int width, int height, int quality);
+extern void jpeg_memory_src(j_decompress_ptr cinfo, unsigned char *ptr, size_t size);
+void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, int *h);
+void jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w, int *h);
+*/
+			char * tmpBuffer = new char[MAXBUFFER];
+			ws->jpeg_size = jpeg_compress( tmpBuffer, (char *)pBuffer, ws->width, ws->height, MAXBUFFER, ws->jpeg_quality);
+			cerr<<"\tCompressed into "<<ws->jpeg_size<<" bytes"<<endl;
+			jpeg_compress_to_file( (char *)pBuffer, file, ws->width, ws->height, ws->jpeg_quality);
+			ws->jpeg_buffer = new char[ws->jpeg_size];
+			memcpy( ws->jpeg_buffer, tmpBuffer, ws->jpeg_size);
+			
+			//ws->jpeg_buffer = JpegFromCapture( hBitmap, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
 			//FreeMediaType(MediaType);
 		}
 
@@ -868,6 +896,87 @@ char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bm
     fclose(pOutFile);
     jpeg_destroy_compress(&cinfo); //Free resources
 
+	return NULL;
+}
+
+char * JpegFromCapture(HANDLE     hDib, BYTE * bmpBuffer, long bmpLength, int jpegLength, int nQuality,
+				 std::string    csJpeg)
+{
+    //Basic sanity checks...
+    if (nQuality < 0 || nQuality > 100 ||
+        hDib   == NULL ||
+        (!csJpeg.size()))
+    {
+		cerr<<"!!! ERROR JpegFromDib : Bad Parameters"<<endl;
+		winsys_exit(1);
+    }
+
+    LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)hDib;
+
+    JOCTET *jpegBuffer = NULL;
+
+    //Use libjpeg functions to write scanlines to disk in JPEG format
+    struct jpeg_decompress_struct cdinfo;
+    struct jpeg_compress_struct cinfo;
+    struct jpeg_error_mgr       jerr;
+
+    FILE*      pOutFile;     //Target file 
+    int        nSampsPerRow; //Physical row width in image buffer 
+    JSAMPARRAY jsmpArray;    //Pixel RGB buffer for JPEG file
+
+    cinfo.err = jpeg_std_error(&jerr); //Use default error handling (ugly!)
+
+    init_destination(&cinfo);
+
+	// This one causes problem but we are not using that JpegFromCapture function anyway
+	//empty_output_buffer(&cinfo);
+
+    jpeg_memory_dest(&cinfo, jpegBuffer, jpegLength);
+
+	/* Try with jpeg_memory stuff */
+	jpeg_memory_src(&cdinfo, bmpBuffer, bmpLength);
+
+	/*
+    cinfo.image_width      = lpbi->biWidth;  //Image width and height, in pixels 
+    cinfo.image_height     = lpbi->biHeight;
+    cinfo.input_components = 3;              //Color components per pixel
+                                             //(RGB_PIXELSIZE - see jmorecfg.h)
+    cinfo.in_color_space   = JCS_RGB; 	     //Colorspace of input image
+
+    jpeg_set_defaults(&cinfo);
+
+    jpeg_set_quality(&cinfo,
+                     nQuality, //Quality: 0-100 scale
+                     TRUE);    //Limit to baseline-JPEG values
+
+    jpeg_start_compress(&cinfo, TRUE);
+
+    //JSAMPLEs per row in output buffer
+    nSampsPerRow = cinfo.image_width * cinfo.input_components; 
+
+    //Allocate array of pixel RGB values
+    jsmpArray = (*cinfo.mem->alloc_sarray)
+                ((j_common_ptr) &cinfo,
+                 JPOOL_IMAGE,
+                 nSampsPerRow,
+                 cinfo.image_height);
+
+    if (DibToSamps(hDib,
+                   nSampsPerRow,
+                   cinfo,
+                   jsmpArray,
+                   pcsMsg))
+    {
+        //Write the array of scan lines to the JPEG file
+        (void)jpeg_write_scanlines(&cinfo,
+                                   jsmpArray,
+                                   cinfo.image_height);
+    }
+
+    jpeg_finish_compress(&cinfo); //Always finish
+
+    jpeg_destroy_compress(&cinfo); //Free resources
+	*/
 	return NULL;
 }
 

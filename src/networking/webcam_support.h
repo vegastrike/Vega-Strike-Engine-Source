@@ -319,6 +319,7 @@ extern "C" {
 #include "jpeglib.h" 
 }
 
+char * JpegFromCapture(HANDLE     hDib, BYTE * bmpBuffer, long bmpLength, int * jpegLength, int nQuality, std::string csJpeg="");
 char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int * jpglength, int quality, std::string csJpeg);
 BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
                  int        nQuality, //JPEG quality (0-100)

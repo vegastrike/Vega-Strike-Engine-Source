@@ -1,60 +1,6 @@
-#ifdef JPEG_SUPPORT
-
-#include <stdio.h>
-#include <string.h>
-
 #include "jpeg_memory.h"
 
-/*--------------
-  A hack to hijack JPEG's innards to write into a memory buffer
-----------------
-/  this defines a new destination manager to store images in memory
-/  derived by jdatadst.c */
-typedef struct {
-  struct jpeg_destination_mgr pub;      /* public fields */
-  JOCTET *buffer;                                       /* start of buffer */
-  int bufsize;                                          /* buffer size */
-  int datacount;                                        /* finale data size */
-} memory_destination_mgr;
-
-typedef memory_destination_mgr *mem_dest_ptr;
-
-/*----------------------------------------------------------------------------
-  /  Initialize destination --- called by jpeg_start_compress before any data is actually written. */
-
-METHODDEF(void)
-init_destination (j_compress_ptr cinfo)
-{
-  mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-  dest->pub.next_output_byte = dest->buffer;
-  dest->pub.free_in_buffer = dest->bufsize;
-  dest->datacount=0;
-}
-
-/*----------------------------------------------------------------------------
-  /  Empty the output buffer --- called whenever buffer fills up. */
-METHODDEF(boolean)
-empty_output_buffer (j_compress_ptr cinfo)
-{
-  mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-  dest->pub.next_output_byte = dest->buffer;
-  dest->pub.free_in_buffer = dest->bufsize;
-
-  return TRUE;
-}
-
-/*----------------------------------------------------------------------------
-  /  Terminate destination --- called by jpeg_finish_compress
-  /  after all data has been written.  Usually needs to flush buffer. */
-METHODDEF(void)
-term_destination (j_compress_ptr cinfo)
-{
-  /* expose the finale compressed image size */
-  
-  mem_dest_ptr dest = (mem_dest_ptr) cinfo->dest;
-  dest->datacount = dest->bufsize - dest->pub.free_in_buffer;
-  
-}
+#ifdef JPEG_SUPPORT
 
 GLOBAL(void)
 jpeg_memory_dest(j_compress_ptr cinfo, JOCTET *buffer,int bufsize)
@@ -149,7 +95,7 @@ jpeg_compress_to_file(char *src, char *file, int width, int height, int quality)
   jpeg_start_compress(&cinfo, TRUE);
   /* compress each scanline one-at-a-time */
   while (cinfo.next_scanline < cinfo.image_height) {
-    row_pointer = &src[cinfo.next_scanline*3*width];
+    row_pointer = (JSAMPROW) &src[cinfo.next_scanline*3*width];
     jpeg_write_scanlines(&cinfo, &row_pointer, 1);
   }
   jpeg_finish_compress(&cinfo);

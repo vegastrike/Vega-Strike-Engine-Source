@@ -30,12 +30,11 @@
 #define ACCOUNTSERVER_VERSION 0.2
 #define NETCLIENT_VERSION 0.2
 
-#define MAXCLIENTS	512
-#define MAXOBJECTS	1024 // Maximum number of objects in a zone - HAVE TO FIND A WAY NOT TO LIMIT THAT
 #define SERVER_PORT 6777
 #define CLIENT_PORT	6778
 #define ACCT_PORT	6779
-#define NAMELEN		32
+#define VIDEO_PORT	6776
+
 #define MAXBUFFER	16384
 
 // Communication freq range

@@ -533,7 +533,6 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
             cleanup();
         }
         // Put the name and passwd of the player in the packet
-        //memcpy( buf, packet.getData(), NAMELEN*2);
         netbuf.addString( acct->callsign);
         netbuf.addString( acct->passwd);
         netbuf.addString( acct->serverip);

@@ -123,6 +123,10 @@ NetworkCommunication::NetworkCommunication()
 	}
 
 #endif /* NETCOMM_NOWEBCAM */
+#ifdef HYBRID_PROTO
+	// Create a server socket to receive video data ?
+	videoSocket = NetUIUDP::createServerSocket( VIDEO_PORT, _serversock_set);
+#endif /* HYBRID_PROTO */
 }
 
 NetworkCommunication::NetworkCommunication( int nb)
@@ -137,6 +141,9 @@ void	NetworkCommunication::AddToSession( ClientPtr clt)
 #ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
 #endif /* NETCOMM_JVOIP */
+#ifdef HYBRID_PROTO
+	this->sockClients.push_back( NetUIUDP::createSocket( clt->cltadr, VIDEO_PORT, this->_sock_set));
+#endif /* HYBRID_PROTO */
 }
 
 void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
@@ -154,7 +161,9 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
 		this->message_history.pop_front();
 	this->message_history.push_back( message);
 
-	// Send the text message according to method
+	// Send the text message according to the chosen method (HYBRID_PROTO or SERVER_PROTO)
+#ifdef HYBRID_PROTO
+#endif /* HYBRID_PROTO */
 }
 
 // Send sound sample
