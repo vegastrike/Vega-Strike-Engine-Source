@@ -158,13 +158,36 @@ void Picker::selectCell(PickerCell* cell, bool scroll) {
 
     // If the cell has children, flip whether the children are displayed.
     if(cell != NULL) {
-        const PickerCells* list = cell->children();
+        PickerCells* list = cell->children();
         if(list != NULL && list->count() > 0) {
-            cell->setHideChildren(!cell->hideChildren());
-            setMustRecalc();
+			const bool hideChildren = !cell->hideChildren();
+            cell->setHideChildren(hideChildren);
+			if(!hideChildren) {
+				recalcDisplay();
+				// Make sure the children are visible.
+				PickerCells* loopList = list;
+				PickerCell* lastChild = NULL;
+				while(true) {
+					lastChild = loopList->cellAt(loopList->count()-1);
+					if(lastChild->hideChildren()) {
+						// Can't see children below this.  Done.
+						break;
+					}
+					loopList = lastChild->children();
+					if(loopList == NULL || loopList->count() == 0) {
+						// lastChild has no children.
+						break;
+					}
+				}
+				scrollToCell(lastChild);
+				// Now make sure the original parent is still visible.
+				scrollToCell(cell);
+			} else {
+				setMustRecalc();
+			}
         }
         if(scroll) {
-            // Put this cell in the middle of the display.
+            // Make sure the cell is visible.
             scrollToCell(cell);
         }
     }
@@ -215,19 +238,22 @@ void Picker::recalcDisplay(void) {
 }
 
 // Make sure the cell is visible in the scroll area.  If it is, nothing
-//  happens.  If it's not, we try to put it in the middle of the area.
+//  happens.  If it's not, we move it into the visible section.
 // If NULL, this routine does nothing.
-void Picker::scrollToCell(PickerCell* cell) {
+void Picker::scrollToCell(const PickerCell* cell) {
     if(!cell || !m_scroller) return;
 
     for(int i=0; i<m_displayCells.size(); i++) {
         if(cell == m_displayCells[i].cell) {
             const int visibleCells = m_rect.size.height / totalCellHeight();
-            if(i < m_scrollPosition || i >= m_scrollPosition + visibleCells) {
-                // Cell is not visible.  Scroll to it.
-                m_scroller->setScrollPosition(i + visibleCells/2);
-            }
-        }
+            if(i < m_scrollPosition) {
+                // Cell is too "high".  Move it to the top line.
+                m_scroller->setScrollPosition(i);
+			} else if(i >= m_scrollPosition + visibleCells) {
+				// Cell is too "low".  Move it to the botom line.
+                m_scroller->setScrollPosition(i-visibleCells+1);
+			}
+       }
     }
 }
 

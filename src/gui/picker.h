@@ -98,9 +98,9 @@ public:
     virtual int selectedItem(void);
 
     // Make sure the cell is visible in the scroll area.  If it is, nothing
-    //  happens.  If it's not, we try to put it in the middle of the area.
+    //  happens.  If it's not, we move it into the visible section.
     // If NULL, this routine does nothing.
-    virtual void scrollToCell(PickerCell* cell);
+    virtual void scrollToCell(const PickerCell* cell);
 
     // This should be called when the lists of cells have been changed
     //  in some way -- added to, "hide children" changed, etc.
