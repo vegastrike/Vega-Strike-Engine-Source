@@ -114,6 +114,10 @@ int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColor * color) {
   fprintf (stderr,"Error adding quads");
 }
 void GFXQuadList::DelQuad (int which ) {
+  if (quadassignments[which]>=numQuads) {
+    fprintf (stderr,"error del");
+    return;
+  }
   if (which <0||which>=numVertices/4||quadassignments[which]==-1)
     return;
   Dirty++;

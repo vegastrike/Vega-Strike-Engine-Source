@@ -246,8 +246,15 @@ void Beam::ProcessDrawQueue() {
 
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curlength += SIMULATION_ATOM*speed;
-  if (curlength<0)
+  if (curlength<0) {
+    if (vlist[0]!=-1) {
+      for (int i=0;i<8;i++) {
+	quadlists[decal]->DelQuad(vlist[i]);
+      }
+      vlist[0] = -1;
+    }
     curlength=0;
+  }
   if (curlength > range)
     curlength=range;
   if (curthick ==0) {
