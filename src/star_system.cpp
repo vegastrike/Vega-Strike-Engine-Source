@@ -54,7 +54,7 @@ string StarSystem::getName () {
 
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
 
-  no_collision_time=(int)(1+2.000/SIMULATION_ATOM);
+  no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
   _Universe->pushActiveStarSystem (this);
@@ -259,7 +259,7 @@ bool StarSystem::RemoveUnit(Unit *un) {
 }
 void StarSystem::SwapIn () {
   GFXSetLightContext (lightcontext);
-  Unit * un;
+
   /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapInHalos();
@@ -288,7 +288,7 @@ void StarSystem::SwapIn () {
 }
 
 void StarSystem::SwapOut () {
-  Unit * un;
+
   /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapOutHalos();
@@ -475,7 +475,35 @@ void StarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 }
-
+void StarSystem::ExecuteUnitAI () {
+  un_iter iter = this->getUnitList().createIterator();
+  Unit * unit=NULL;
+	while((unit = iter.current())!=NULL) {
+	  unit->ExecuteAI(); 
+	  unit->ResetThreatLevel();
+	  iter.advance();
+	}
+}
+void StarSystem::UpdateUnitPhysics (bool firstframe) {
+  un_iter iter = this->getUnitList().createIterator();
+  Unit * unit=NULL;
+	while((unit = iter.current())!=NULL) {
+#ifdef OLD_AUTOPILOT
+	if (owner) 
+	  if (owner->getRelation(unit)<0) {
+	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
+	    Vector diff (owner->Position()-unit->Position());
+	    if (diff.Dot(diff)<neardist*neardist) {
+	      if (getTimeCompression!=.0000001) {//if not paused
+		reset_time_compression(0,PRESS);
+	      }
+	    }
+	  }
+#endif
+	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());
+	  iter.advance();
+	}
+}
 
 extern float getTimeCompression();
 void StarSystem::Update(float priority , bool executeDirector) {
@@ -500,14 +528,13 @@ void StarSystem::Update(float priority , bool executeDirector) {
   time += GetElapsedTime();
   _Universe->pushActiveStarSystem(this);
   //WARNING PERFORMANCE HACK!!!!!
-  if (time>2*SIMULATION_ATOM) {
-    time = 2*SIMULATION_ATOM;
-  }
+    if (time>2*SIMULATION_ATOM) {
+      time = 2*SIMULATION_ATOM;
+    }
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       UnitCollection::UnitIterator iter;
       if (current_stage==PHY_AI) {
-	iter = drawList.createIterator();
 	if (firstframe&&rand()%2) {
 	  if (this==_Universe->getActiveStarSystem(0)) {
 #ifdef UPDATEDEBUG
@@ -521,11 +548,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"AI");
   fflush (stderr);
 #endif
-	while((unit = iter.current())!=NULL) {
-	  unit->ExecuteAI(); 
-	  unit->ResetThreatLevel();
-	  iter.advance();
-	}
+  ExecuteUnitAI();
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
 #ifdef UPDATEDEBUG
@@ -579,9 +602,12 @@ void StarSystem::Update(float priority , bool executeDirector) {
 
 	current_stage=PHY_COLLIDE;
       }else if (current_stage==PHY_COLLIDE) {
+#ifdef NO_COLLISION_TIME
 	if (no_collision_time) {
 	  no_collision_time--;//don't resolve physics until 2 seconds
-	}else {
+	}else 
+#endif
+	  {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"neb");
   fflush (stderr);
@@ -611,7 +637,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 #endif
 	Terrain::UpdateAll(64);	
 	unsigned int i=_Universe->CurrentCockpit();
-	for (unsigned int j=0;j<_Universe->numPlayers();j++) {
+	for (int j=0;j<_Universe->numPlayers();j++) {
 	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
 	    _Universe->SetActiveCockpit(j);
 	    _Universe->AccessCockpit(j)->Update();
@@ -653,22 +679,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 	}
       }
-      while((unit = iter.current())!=NULL) {
-#ifdef OLD_AUTOPILOT
-	if (owner) 
-	  if (owner->getRelation(unit)<0) {
-	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
-	    Vector diff (owner->Position()-unit->Position());
-	    if (diff.Dot(diff)<neardist*neardist) {
-	      if (getTimeCompression!=.0000001) {//if not paused
-		reset_time_compression(0,PRESS);
-	      }
-	    }
-	  }
-#endif
-	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&units);
-	  iter.advance();
-	}
+      UpdateUnitPhysics(firstframe);
 #ifdef UPDATEDEBUG
   fprintf (stderr,"boltphi");
   fflush (stderr);

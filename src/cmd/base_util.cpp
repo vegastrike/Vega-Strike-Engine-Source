@@ -39,22 +39,32 @@ namespace BaseUtil {
 		room->links.back()->text=text;
 	}
 	void Link (int room, std::string index, float x, float y, float wid, float hei, std::string text, int to) {
+		LinkPython (room, index, "",x, y,wid, hei, text, to);
+	}
+	void LinkPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text, int to) {
 		Base::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Goto (index));
+		newroom->links.push_back(new Base::Room::Goto (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
 		((Base::Room::Goto*)newroom->links.back())->index=to;
 	}
 	void Launch (int room, std::string index, float x, float y, float wid, float hei, std::string text) {
+		LaunchPython (room, index,"", x, y, wid, hei, text);
+	}
+	void LaunchPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text) {
 		Base::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Launch (index));
+		newroom->links.push_back(new Base::Room::Launch (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
 	}
-	void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes) { 
+	void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes) {
+	  CompPython(room, index,"", x, y, wid, hei, text,modes) ;
+ 
+	}
+	void CompPython(int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text, std::string modes) { 
 		Base::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		Base::Room::Comp *newcomp=new Base::Room::Comp (index);
+		Base::Room::Comp *newcomp=new Base::Room::Comp (index,pythonfile);
 		newroom->links.push_back(newcomp);
 		BaseLink(newroom,x,y,wid,hei,text);
 		static const EnumMap::Pair modelist [UpgradingInfo::MAXMODE+1] = {
@@ -99,7 +109,7 @@ namespace BaseUtil {
 		//instead of "Talk"/"Say" tags
 		Base::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Python (pythonfile,index));
+		newroom->links.push_back(new Base::Room::Python (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
 	}
 	void Message(std::string text) {

@@ -20,11 +20,12 @@ public:
 	public:
 		class Link {
 		public:
+			std::string pythonfile;
 			float x,y,wid,hei;
 			std::string text;
 			const std::string index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			explicit Link (std::string ind) : index(ind) {}
+			explicit Link (std::string ind,std::string pfile) : pythonfile(pfile),index(ind) {}
 			virtual ~Link(){} 
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -35,7 +36,7 @@ public:
 			int index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Goto () {}
-			explicit Goto (std::string ind) : Link(ind) {}
+			explicit Goto (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -45,7 +46,7 @@ public:
 			vector <UpgradingInfo::BaseMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Comp () {}
-			explicit Comp (std::string ind) : Link(ind) {}
+			explicit Comp (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -54,7 +55,7 @@ public:
 		public:
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Launch () {}
-			explicit Launch (std::string ind) : Link(ind) {}
+			explicit Launch (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -67,7 +68,7 @@ public:
 			int index;
 			int curroom;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			explicit Talk (std::string ind);
+			explicit Talk (std::string ind, std::string pythonfile);
 			virtual ~Talk () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -77,7 +78,7 @@ public:
 		public:
 			std::string file;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			Python(std::string pythonfile,std::string ind);
+			Python(std::string ind,std::string pythonfile);
 			virtual ~Python () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);

@@ -358,8 +358,8 @@ void Unit::UpgradeInterface(Unit * baseun) {
 	}
 }
 
-Base::Room::Talk::Talk (std::string ind)
-		: Base::Room::Link(ind) {
+Base::Room::Talk::Talk (std::string ind,std::string pythonfile)
+		: Base::Room::Link(ind,pythonfile) {
 	index=-1;
 #ifndef BASE_MAKER
 	gameMessage * last;
@@ -382,8 +382,8 @@ Base::Room::Talk::Talk (std::string ind)
 	}
 #endif
 }
-Base::Room::Python::Python (std::string pythonfile,std::string ind)
-		: Base::Room::Link(ind), file (pythonfile) {
+Base::Room::Python::Python (std::string ind,std::string pythonfile)
+		: Base::Room::Link(ind,pythonfile) {
 }
 double compute_light_dot (Unit * base,Unit *un) {
   StarSystem * ss =base->getStarSystem ();
@@ -461,14 +461,17 @@ Base::Base (const char *basefile, Unit *base, Unit*un)
 	GotoLink(0);
 }
 
-void Base::Room::Link::Click (Base *base,float x, float y, int button, int state) {
+void Base::Room::Python::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
+		Link::Click(base,x,y,button,state);
 //		Do nothing...
+
 	}
 }
 
 void Base::Room::Comp::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
+		Link::Click(base,x,y,button,state);
 		Unit *un=base->caller.GetUnit();
 		Unit *baseun=base->baseun.GetUnit();
 		if (un&&baseun) {
@@ -485,18 +488,21 @@ void Base::Terminate() {
 }
 void Base::Room::Launch::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
+	  Link::Click(base,x,y,button,state);
 	  base->Terminate();
 	}
 }
 
 void Base::Room::Goto::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
+		Link::Click(base,x,y,button,state);
 		base->GotoLink(index);
 	}
 }
 
 void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
+		Link::Click(base,x,y,button,state);
 		if (index>=0) {
 			delete base->rooms[curroom]->objs[index];
 			base->rooms[curroom]->objs[index]=NULL;
@@ -526,9 +532,9 @@ void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state
 	}
 }
 
-void Base::Room::Python::Click (Base *base,float x, float y, int button, int state) {
+void Base::Room::Link::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
-		const char * filnam=this->file.c_str();
+		const char * filnam=this->pythonfile.c_str();
 		if (filnam[0]) {
 			FILE *fp=fopen(filnam,"r");
 			if (fp) {
