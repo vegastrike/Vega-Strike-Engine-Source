@@ -19,7 +19,10 @@ using std::endl;
 	#include <winsock.h>
 	#else
 	#define SOCKET_ERROR -1
+
+#ifndef __APPLE__
 	#include <error.h>
+#endif
 	#include <netdb.h>
 	#include <string.h>
 	#include <sys/socket.h>

@@ -399,7 +399,7 @@ inline SOCKETALT	NETCLASS::acceptNewConn( AddressIP * ipadr)
 			SOCKETALT bsock;
 			struct sockaddr_in clt_addr;
 			int s;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__APPLE__)
 			int len;
 #else
 			socklen_t len;
@@ -566,7 +566,7 @@ inline int		NETCLASS::recvbuf( SOCKETALT bsock, char *buffer, unsigned int &len,
 		len = ret;
 		#endif
 		#ifdef _UDP_PROTO
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__APPLE__)
 			int len1;
 #else
 			socklen_t len1;
@@ -697,7 +697,7 @@ inline void	NETCLASS::showIP( SOCKET socket)
 {
 #ifndef HAVE_SDLnet
 	struct sockaddr_in tmp;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__APPLE__)
 	int ulen;
 #else
 	unsigned int ulen;

@@ -5,7 +5,9 @@
 #define SOCKET_ERROR -1
 #include <sys/time.h>
 #include <sys/types.h>
+#ifndef __APPLE__
 #include <error.h>
+#endif
 #include <netdb.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -115,7 +117,7 @@ int INET_listen (unsigned short port, const char * hostname) {
   int listenqueue=5;
   int hServerSocket; // so signal can be caught;
   struct sockaddr_in Address; //Internet socket address stuct
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__APPLE__)
   int
 #else
   socklen_t
@@ -151,7 +153,7 @@ int INET_listen (unsigned short port, const char * hostname) {
 }
 int INET_Accept (int hServerSocket) {
   sockaddr_in Address;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__APPLE__)
   int 
 #else
     socklen_t
