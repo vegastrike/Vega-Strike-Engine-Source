@@ -1920,10 +1920,15 @@ void Unit::AddVelocity(float difficulty) {
 		 }
 	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime)):(graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime);
 	   }
+           static float warpMultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplier","0"));
+           static float warpMultiplierMax=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMax","300000000"));
+           if (warpMultiplier==0) {
+             warpMultiplier=PI*PI*PI;
+           }
 	   minmultiplier*=rampmult;
-	   if(minmultiplier<PI*PI*PI) {
+	   if(minmultiplier<warpMultiplier) {
 	     if(graphicOptions.InWarp==1|graphicOptions.RampCounter!=0){
-		   minmultiplier=PI*PI*PI;
+		   minmultiplier=warpMultiplier;
 		 } else {
 		   minmultiplier=1;
 		 }
@@ -1933,8 +1938,8 @@ void Unit::AddVelocity(float difficulty) {
 	   }
 	   v*=minmultiplier;
 	   float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
-	   if(vmag>PI*PI*PI*300000000.0){
-		   v*=PI*PI*PI*300000000/vmag; // HARD LIMIT
+	   if(vmag>warpMultiplier*warpMultiplierMax){
+		   v*=warpMultiplier*warpMultiplierMax/vmag; // HARD LIMIT
 	   }
 	   graphicOptions.WarpFieldStrength=minmultiplier;
    } else {

@@ -425,7 +425,7 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
   if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    
     GFXDisable(DEPTHWRITE);
-    if (blendSrc!=SRCALPHA||getCullFaceForcedOn()) {
+    if (blendSrc!=SRCALPHA||getCullFaceForcedOff()) {
       GFXDisable(CULLFACE);
     }
   }
