@@ -78,8 +78,10 @@ void PlanetaryOrbit::Execute() {
   parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
   //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
   const float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","velocity_max","10000"));
-  if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
+  float v2=parent->Velocity.Dot (parent->Velocity);
+  if (v2>Unreasonable_value*Unreasonable_value||v2>velocity*velocity*(x_size+y_size)*(x_size+y_size)*4*PI*PI) {
     parent->Velocity.Set (0,0,0);
+    parent->cumulative_velocity.Set (0,0,0);
     parent->SetCurPosition (origin-focus+x_offset+y_offset);
   }
 }

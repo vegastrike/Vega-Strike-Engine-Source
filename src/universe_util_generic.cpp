@@ -127,9 +127,26 @@ namespace UniverseUtil {
 	void SetTimeCompression () {
 		setTimeCompression(1.0);
 	}
+	static UnitContainer scratch_unit;
+	static QVector scratch_vector;
+
 	Unit *GetMasterPartList () {
 		return UnitFactory::getMasterPartList();
 	}
+	Unit *getScratchUnit () {
+		return scratch_unit.GetUnit();
+	}
+        void setScratchUnit (Unit * un) {
+		return scratch_unit.SetUnit(un);
+	}
+
+	QVector getScratchVector () {
+		return scratch_vector;
+	}
+        void setScratchVector (QVector un) {
+		scratch_vector=un;
+	}
+
 	void pushSystem (string name) {
 		StarSystem * ss = _Universe->GenerateStarSystem (name.c_str(),"",Vector(0,0,0));
 		_Universe->pushActiveStarSystem(ss);

@@ -50,6 +50,8 @@ PYTHON_BEGIN_MODULE(VS)
 #define EXPORT_FACTION(name,aff) PYTHON_DEFINE_GLOBAL(VS,&FactionUtil::name,#name);
 #define voidEXPORT_FACTION(name) EXPORT_FACTION(name,0)
 EXPORT_UTIL(getUnitList,un_iter())
+EXPORT_UTIL(getScratchUnit,Unit())
+voidEXPORT_UTIL(setScratchUnit)
 EXPORT_UTIL(getNumPlayers,1)
 EXPORT_UTIL(getVariable,"")
 EXPORT_UTIL(getSubVariable,"")

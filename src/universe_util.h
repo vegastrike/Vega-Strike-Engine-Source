@@ -48,6 +48,10 @@ public:
 	PythonUnitIter getUnitList();
 ///This function gets a unit given a number (how many iterations to go down in the iterator)
 	Unit *getUnit(int index);
+	Unit *getScratchUnit();
+	void setScratchUnit(Unit *);
+        QVector getScratchVector();
+        void setScratchVector(QVector);
 	int getNumUnits();
 	void cacheAnimation (string anim);
 ///this function launches a wormhole or ajump point.
