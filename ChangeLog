@@ -1,3 +1,11 @@
+2001-10-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added data/vegastrike.config (not used yet)
+	* added src/vegaconfig.h  (not used yet)
+	* added src/vegaconfig.cpp (not used yet)
+	* changed data/Makefile.am from pattern to list
+	
+	
 2001-10-14 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added data/Makefile.am
