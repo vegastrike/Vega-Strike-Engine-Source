@@ -246,9 +246,9 @@ void WindowManager::closeWindow(
     for(iter = m_windows.begin() ; iter != m_windows.end() ; iter++ ) {
         if((*iter) == w) {
             m_windows.erase(iter);
+	    globalEventManager().removeResponder(w);		// Have to do this now.
             if(deleteWindow) {
-				EventManager::addToDeleteQueue(w);
-				globalEventManager().removeResponder(w);		// Have to do this now.
+	        EventManager::addToDeleteQueue(w);
             }
             break;
         }

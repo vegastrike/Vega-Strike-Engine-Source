@@ -1733,7 +1733,9 @@ void FireKeyboard::Execute () {
     f().freeslave=RELEASE;
   }
   if (f().ejectcargo==PRESS||f().ejectnonmissioncargo==PRESS) {
-    bool missiontoo=(f().ejectnonmissioncargo==PRESS);
+    bool missiontoo=(f().ejectcargo==PRESS);
+    f().ejectnonmissioncargo=RELEASE;
+    f().ejectcargo=RELEASE;
     int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
     if (offset<3) {
       offset=0;
