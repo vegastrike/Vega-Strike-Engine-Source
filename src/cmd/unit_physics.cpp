@@ -158,7 +158,7 @@ Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
-  float abfuelclamp= (fuel<=0||(energy<1+afterburnenergy*SIMULATION_ATOM))?staticabfuelclamp:1;
+  float abfuelclamp= (fuel<=0||(energy<afterburnenergy))?staticabfuelclamp:1;
   float limit = afterburn?(abfuelclamp*(computer.max_ab_speed-computer.max_speed)+(fuelclamp*computer.max_speed)):fuelclamp*computer.max_speed;
   float tmp = velocity.Magnitude();
   if (tmp>fabs(limit)) {
@@ -206,7 +206,7 @@ Vector Unit::ClampThrust(const Vector &amt1){
 
 Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   Vector Res=amt1;
-  if (energy<1+afterburnenergy*SIMULATION_ATOM) {
+  if (energy<afterburnenergy) {
     afterburn=false;
   }
   if (afterburn) {
@@ -313,6 +313,11 @@ void Unit::RegenShields () {
   energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
 
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
+  if (_Universe->isPlayerStarship(this)==NULL) {
+    rec*=g_game.difficulty;
+  }else {
+    rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
+  }
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
     float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;
@@ -426,7 +431,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
   if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
-  curr_physical_state.position = curr_physical_state.position + QVector (Velocity*SIMULATION_ATOM);
+  float difficulty =1;
+  if (_Universe->isPlayerStarship(this)!=NULL) {
+    difficulty = sqrtf (g_game.difficulty);
+  }
+  curr_physical_state.position = curr_physical_state.position + QVector (Velocity*SIMULATION_ATOM*difficulty);
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
     Matrix basis;

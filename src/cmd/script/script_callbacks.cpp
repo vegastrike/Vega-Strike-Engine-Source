@@ -146,6 +146,19 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_Int){
       vi=call_int_cast(node,mode);
     }
+    else if (method_id==CMT_STD_getDifficulty) {
+      vi = newVarInst (VI_TEMP);
+      vi->type=VAR_FLOAT;
+      vi->float_val=g_game.difficulty;
+    }
+    else if (method_id==CMT_STD_setDifficulty) {
+      float diff= getFloatArg(node,mode,0);     
+      if (mode==SCRIPT_RUN) {
+	g_game.difficulty=diff;
+      }
+      vi = newVarInst (VI_TEMP);
+      vi->type=VAR_VOID;
+    }
     else if(method_id==CMT_STD_terminateMission){
       vi=terminateMission(node,mode);
     }
@@ -853,6 +866,8 @@ void Mission::initCallbackMaps(){
   module_std_map["equal"]=CMT_STD_equal;
   module_std_map["Int"]=CMT_STD_Int;
   module_std_map["Float"]=CMT_STD_Float;
+  module_std_map["getDifficulty"]=CMT_STD_getDifficulty;
+  module_std_map["setDifficulty"]=CMT_STD_setDifficulty;
   module_std_map["terminateMission"]=CMT_STD_terminateMission;
 
   module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;

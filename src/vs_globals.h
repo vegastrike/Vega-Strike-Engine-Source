@@ -18,6 +18,7 @@ typedef struct {
   float zfar ;
   float fov ;
   float aspect ;
+  float difficulty;
 } game_data_t;
 
 extern game_data_t g_game;

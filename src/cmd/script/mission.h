@@ -119,6 +119,8 @@ enum callback_module_std_type {
   CMT_STD_equal ,
   CMT_STD_Int ,
   CMT_STD_Float,
+  CMT_STD_setDifficulty,
+  CMT_STD_getDifficulty,
   CMT_STD_terminateMission
 };
 

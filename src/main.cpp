@@ -295,6 +295,7 @@ void bootstrap_main_loop () {
     }
     _Universe->SetupCockpits(playername);
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
+    g_game.difficulty=XMLSupport::parse_float (mission->getVariable("difficulty","1"));
     string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
     vector <string> playersaveunit;

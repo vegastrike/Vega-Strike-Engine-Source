@@ -638,6 +638,12 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 }
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  //  #ifdef REALLY_EASY
+  if (_Universe->isPlayerStarship(this)!=NULL) {
+    phasedamage*= (g_game.difficulty);
+    amt*=(g_game.difficulty);
+  }
+  //  #endif
   if (affectedUnit!=this) {
     affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
     return;
