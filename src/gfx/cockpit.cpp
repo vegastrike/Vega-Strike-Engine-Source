@@ -1541,6 +1541,7 @@ void GameCockpit::Draw() {
   }
   if (QuitAllow) {
 	  static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+	  GFXEnable(TEXTURE0);
 	  QuitSprite.Draw();	  
   }
   GFXAlphaTest (ALWAYS,0);  
