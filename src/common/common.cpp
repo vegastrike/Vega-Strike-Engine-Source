@@ -19,7 +19,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
-
+using std::string;
 #include "common.h"
 
 
@@ -58,9 +58,9 @@ string getdatadir()
     }
 
     if(i >= sizeof(datadirs) / sizeof(datadirs[0])) {
-        cout << "Unable to find data directory" << endl;
+      printf ("Unable to find data directory\n");
         for(i = 0; i < (sizeof(datadirs) / sizeof(datadirs[0])); i++)
-            cout << "Tried " << datadirs[i] << endl;
+            printf ( "Tried %s\n",datadirs[i]);
         datadir = tmppwd;
         chdir(tmppwd);
     }
