@@ -1136,7 +1136,7 @@ if test "$TESTNETCOMM" = "1" ; then
 	dnl check for oss headers under Linux
 	saved_CPPFLAGS="$CPPFLAGS"
 
-	if test "$TESTCOMM_NOSOUND" = "0"; then
+	if test "$TESTNETCOMM_NOSOUND" = "0"; then
 		AC_DEFUN( CHECK_FOR_OSS_H, [
 		    AC_MSG_CHECKING([for sys/soundcard.h])
 		    AC_TRY_CPP( [ #include <sys/soundcard.h> ], have_oss_h=yes, have_oss_h=no )
