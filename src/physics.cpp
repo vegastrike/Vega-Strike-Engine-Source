@@ -89,7 +89,7 @@ void PhysicsSystem::ResistiveForce (float ResistiveForceCoef)
 void PhysicsSystem::Update () {
 	//ResistiveForce (-10);
 	//ResistiveTorque(-10);
-	ApplyImpulses(GetElapsedTime());
+	ApplyImpulses(GetElapsedTime()/getTimeCompression());
 	NetForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
 }
