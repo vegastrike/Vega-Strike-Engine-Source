@@ -1293,15 +1293,11 @@ dnl --------------------------------------------------------------------------
 dnl Choosing networking threading approach
 dnl --------------------------------------------------------------------------
 AC_ARG_ENABLE(net-threads,
-  AC_HELP_STRING([--enable-net-threads=TYPE], [TYPE=none (default), posix, j]),
+  AC_HELP_STRING([--enable-net-threads=TYPE], [TYPE=none (default), posix]),
   [ case "$enableval" in
       "n" | "no" | "none")
         use_net_thread=NONE
         AC_DEFINE(USE_NET_THREAD_NONE,1,[Use no threads])
-	;;
-      "j" | "jthread")
-        use_net_thread=J
-        AC_DEFINE(USE_NET_THREAD_J,1,[Use JThreads])
 	;;
       "p" | "posix"|"yes"|*)
         use_net_thread=POSIX

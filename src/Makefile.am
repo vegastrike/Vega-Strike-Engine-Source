@@ -12,10 +12,10 @@ SUBDIRS = \
     cmd gfx gldrv aldrv python gui networking boost common boost129
 
 if NETCOMM_JVOIP
-extra_ldadd = -ljvoip -ljrtp -ljthread
+extraldadd = -ljvoip -ljrtp -ljthread
 endif
 if NETCOMM_PORTAUDIO
-extra_ldadd = -lportaudio
+extraldadd = -lportaudio
 endif
 
 vegastrike_LDADD =  				\
