@@ -5,6 +5,7 @@
 #include "audiolib.h"
 #include "gfx/camera.h"
 #include "gfx/cockpit_generic.h"
+#include "python/init.h"
 #include "planet_generic.h"
 #include <Python.h>
 #include <algorithm>
@@ -558,8 +559,12 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 				char *newfile=new char[length+1];
 				strncpy(newfile,filnam,length);
 				newfile[length]='\0';
+				::Python::reseterrors();
 				PyRun_SimpleFile(fp,newfile);
+				::Python::reseterrors();
 				fclose(fp);
+			} else {
+				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
 			}
 		}
 	}
