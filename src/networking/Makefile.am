@@ -7,15 +7,6 @@ endif
 incl = \
 	 -I$(top_srcdir)/src
 
-if USEBOOST128
-INCLUDES= $(incl) $(incl2)	\
-	 -I$(top_srcdir)/src	\
-	 -I$(top_srcdir)/src/boost
-else
-INCLUDES= $(incl) $(incl2)	\
-	 -I$(top_srcdir)/src	\
-	 -I$(top_srcdir)/src/boost129
-endif
 
 noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
