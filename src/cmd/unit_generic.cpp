@@ -2378,7 +2378,7 @@ Vector Unit::ClampTorque (const Vector &amt1) {
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
   static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
-  fuel-=GetFuelUsage(false)*(SIMULATION_ATOM*SIMULATION_ATOM*Res.Magnitude()*Res.Magnitude())/(2*mass*fuelenergytomassconversionconstant);
+  fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004;//HACK this forces the reaction to be deut-deut fusion with efficiency governed by the getFuelUsage function
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -2482,7 +2482,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k =-limits.retro;
   //energy = 1/2t^2*Force^2/mass
   static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
-  fuel-=GetFuelUsage(afterburn)*(SIMULATION_ATOM*SIMULATION_ATOM*Res.Magnitude()*Res.Magnitude())/(2*mass*fuelenergytomassconversionconstant);
+  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004;//HACK this forces the reaction to be deut-deut fusion with efficiency governed by the getFuelUsage function
   return Res;
 }
 
