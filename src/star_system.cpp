@@ -245,7 +245,7 @@ void StarSystem::Draw() {
   GFXFogMode (FOG_OFF);
   Matrix ident;
   Identity(ident);
-  Atmosphere::ProcessDrawQueue();
+  //Atmosphere::ProcessDrawQueue();
   //theAtmosphere->Draw(Vector(0,1,0),ident);
 
   GFXPopGlobalEffects();
@@ -296,6 +296,7 @@ void StarSystem::Update() {
 	delete iter;
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
+	unsigned int i;
 	Terrain::CollideAll();
 	current_stage=PHY_COLLIDE;
 	AnimatedTexture::UpdateAllPhysics();

@@ -33,6 +33,7 @@ libcmd_a_SOURCES =				\
 	weapon_xml.cpp			\
 	weapon_xml.h			\
 	planet.h 				\
+	planet_transform.h			\
 	planet.cpp 				\
 	iterator.h				\
 	images.h		\

@@ -22,6 +22,13 @@ class ContinuousTerrain {
   ~ContinuousTerrain();
   void DisableDraw();
   void EnableDraw();
+  void DisableUpdate();
+  void EnableUpdate();
+  void Draw();
   Vector GetGroundPos(Vector ShipPos, Vector & norm);
   Vector GetUpVector (const Vector & pos);
+  void Collide (Unit * un, Matrix trans);
+  void Collide (Unit * un);
+  void Collide ();
+  void GetTotalSize (float &X, float &Z) {X = sizeX;Z = sizeZ;}
 };

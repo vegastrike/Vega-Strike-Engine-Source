@@ -29,6 +29,7 @@ class SphericalTransform:public IdentityTransform {
   SphericalTransform (float a,float b, float c):IdentityTransform() {SetXZ (a,c); SetR (b);}
   void SetXZ (float x,float z) {this->scalex = 2*M_PI/x;this->scalez= M_PI/z;}//x ranges from 0 to 2PI x ranges from -PI/2 to PI/2
   void SetR (float rr) {r =rr;}
+  float GetR() {return r;}
   float GetX () {return 2*M_PI/scalex;}
   float GetZ () {return M_PI/scalez;} 
   Vector Transform (const Vector &v) {
@@ -48,18 +49,10 @@ class SphericalTransform:public IdentityTransform {
   CLIPSTATE BoxInFrustum (Vector &min, Vector &max, const Vector & campos) {
     const float rendermin=3;
     /*
-    float tmpx = fabs(campos.i-min.i);
-      float maxx = fabs(campos.i-max.i);
-    if (tmpx>.35*GetX()&&tmpx<.65*GetX()&&maxx>.25*GetX()&&maxx<.75*GetX()) {
-      return GFX_NOT_VISIBLE;
-    }
-    tmpx = fabs(campos.k-min.k);
-    maxx = fabs(campos.k-max.k);
-
-    if (tmpx>.25*GetZ()&&tmpx<.75*GetZ()&&maxx>.25*GetZ()&&maxx<.75*GetZ()) {
-      return GFX_NOT_VISIBLE;//i/f it's on the other side of the hemisphere
-    }
-    */
+    float tmpx = fabs(campos.i-min.i);float maxx = fabs(campos.i-max.i);
+    if (tmpx>.35*GetX()&&tmpx<.65*GetX()&&maxx>.25*GetX()&&maxx<.75*GetX()) {return GFX_NOT_VISIBLE;}
+    tmpx = fabs(campos.k-min.k); maxx = fabs(campos.k-max.k);
+    if (tmpx>.25*GetZ()&&tmpx<.75*GetZ()&&maxx>.25*GetZ()&&maxx<.75*GetZ()) {      return GFX_NOT_VISIBLE;//i/f it's on the other side of the hemisphere} */
     if (SphereTransformRenderlevel<rendermin) {
       return GFX_PARTIALLY_VISIBLE;
     }
@@ -71,4 +64,29 @@ class SphericalTransform:public IdentityTransform {
     return GFXSpherePartiallyInFrustum (tmax,rad);
   }
 };
+/*
+class PlanetaryTransform:public SphericalTransform {
+  Vector Origin;
+ public:
+  PlanetaryTransform (Vector loc, float r, float scalex, float scaley): SphericalTransform (float r,float scalex, float scaley), origin(loc) {}  
+  void SetOrigin (const Vector &t) {Origin = t;}
+  ~PlanetaryTransform () {while (1);}
+  Vector Transform (const Vector & v) {return Origin+SphericalTransform::Transform(v);}
+  Vector TransformNormal (const Vector &p, const vector & n){return SphericalTransform::TransformNormal (p,n);}
+  Vector InvTransform (const Vector &v) {return SphericalTransform::InvTransform (v-Origin);}  
+  void GrabPerpendicularOrigin (const Vector &m, Matrix trans){
+    Vector norm (m-Origin);
+    Normalize(norm);
+    Vector Intersection (norm*r);
+    
+
+
+  }
+  CLIPSTATE BoxInFrustum (Vector &min, Vector &max, const Vector & campos) {
+    min = min-Origin;
+    max = max-Origin;
+    return SphericalTransform::BoxInFrustum(min,max,campos-Origin);
+  }  
+};
+*/
 #endif

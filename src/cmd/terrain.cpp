@@ -21,7 +21,7 @@ Terrain::Terrain (const char * filename, const Vector & scales, const float mass
 
   this->updatetransform = updatetransform;
   allterrains.push_back (this);
-  draw=true;
+  draw=TERRAINRENDER|TERRAINUPDATE;
   //  this->mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
 }
 
@@ -43,22 +43,31 @@ void Terrain::ApplyForce (Unit * un, const Vector & normal, float dist) {
   un->ApplyForce (normal*.4*un->GetMass()*fabs(normal.Dot ((un->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM)));
   un->ApplyDamage (un->Position()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
 }
-
-void Terrain::Collide (Unit *un) {
+void Terrain::Collide (Unit *un, Matrix t) {
   Vector norm;
   if (un->isUnit()==BUILDINGPTR) {
     return;
   }
-  float dist =GetHeight (un->Position(),norm,TotalSizeX,TotalSizeZ)-un->rSize();
+  float dist =GetHeight (un->Position(),norm,t,TotalSizeX,TotalSizeZ)-un->rSize();
   if (dist < 0) {
     ApplyForce (un,norm,-dist);
-  } 
+  }   
+}
+void Terrain::Collide (Unit *un) {
+  Collide (un,transformation);
+}
+void Terrain::DisableUpdate () {
+  draw&=(~TERRAINUPDATE);
+}
+
+void Terrain::EnableUpdate() {
+  draw|=TERRAINUPDATE;
 }
 void Terrain::DisableDraw() {
-  draw=false;
+  draw&=(~TERRAINRENDER);
 }
 void Terrain::EnableDraw() {
-  draw=true;
+  draw|=(TERRAINRENDER);
 }
 void Terrain::Collide () {
   Iterator *iter;
@@ -78,7 +87,7 @@ static GFXColor getTerrainColor() {
 void Terrain::CollideAll () {
 
   for (unsigned int i=0;i<allterrains.size();i++) {
-    if (allterrains[i]->draw) {
+    if (allterrains[i]->draw&TERRAINRENDER) {
       allterrains[i]->Collide();
     }
   }
@@ -88,14 +97,21 @@ void Terrain::DeleteAll () {
     delete allterrains.front();
   }
 }
-
+void Terrain::Render () {
+  static GFXColor terraincolor (getTerrainColor ());
+  GFXColor tmpcol (0,0,0,1);
+  GFXGetLightContextAmbient(tmpcol);
+  GFXLightContextAmbient(terraincolor);  
+  QuadTree::Render();
+  GFXLightContextAmbient(tmpcol);  
+}
 void Terrain::RenderAll () {
   static GFXColor terraincolor (getTerrainColor ());
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(terraincolor);  
   for (unsigned int i=0;i<allterrains.size();i++) {
-    if (allterrains[i]->draw) {
+    if (allterrains[i]->draw&TERRAINRENDER) {
       allterrains[i]->Render();
     }
   }
@@ -111,7 +127,7 @@ void Terrain::UpdateAll (int resolution ) {
     }
   }
   for (unsigned int i=0;i<allterrains.size();i++) {
-    if (allterrains[i]->draw) {
+    if (allterrains[i]->draw&TERRAINUPDATE) {
       allterrains[i]->Update (res,allterrains[i]->whichstage%res,allterrains[i]->updatetransform);
       allterrains[i]->whichstage++;
     }

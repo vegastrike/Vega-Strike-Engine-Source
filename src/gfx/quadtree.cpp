@@ -93,7 +93,7 @@ bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float TotalTerrain
     if (Loc.k<0)
       Loc.k+=TotalTerrainSizeZ;
   }
-  float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,  norm);
+  float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,norm);
   if (tmp>-FLT_MAX) {
     Location = Transform (transformation,nonlinear_transform->Transform (Vector (Loc.i,tmp,Loc.k)));
     norm = TransformNormal (transformation,nonlinear_transform->TransformNormal (Location, norm));
@@ -103,8 +103,8 @@ bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float TotalTerrain
   }
   return false;
 }
-float QuadTree::GetHeight (Vector Location, Vector & normal, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
-  Location = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
+float QuadTree::GetHeight (Vector Location, Vector & normal,  float * transf, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
+  Location = nonlinear_transform->InvTransform (InvScaleTransform (transf,Location));
   if (TotalTerrainSizeX) {
     //float t1=Location.i; 
     //float t2=Location.k;
@@ -119,9 +119,10 @@ float QuadTree::GetHeight (Vector Location, Vector & normal, float TotalTerrainS
     if (Location.k<0)
       Location.k+=TotalTerrainSizeZ;
   }
-  float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,  normal);
+  float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,normal);
   normal = TransformNormal (transformation,nonlinear_transform->TransformNormal (Location, normal));
   normal.Normalize();
+  //  fprintf (stderr,"<%f>",tmp);
   return tmp;
 }
 

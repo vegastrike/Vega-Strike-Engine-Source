@@ -48,9 +48,10 @@ struct GFXLightLocal {
   bool islocal;
 };
 class ContinuousTerrain;
-
+class PlanetaryTransform;
 class Planet : public Unit {
  private:
+  PlanetaryTransform * terraintrans;
   Atmosphere * atmosphere;
   ContinuousTerrain *terrain;
   Vector TerrainUp;
@@ -60,6 +61,7 @@ class Planet : public Unit {
   float gravity;
   vector <char *> destination;
   UnitCollection satellites;
+  UnitCollection insiders;
   std::vector <int> lights;
  public:
   Planet();

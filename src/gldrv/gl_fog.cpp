@@ -5,7 +5,7 @@ void GFXFogMode (const FOGMODE fog) {
   switch (fog) {
   case FOG_OFF:
     glDisable (GL_FOG);
-    break;
+    return;
   case FOG_EXP:
     glEnable(GL_FOG);
     glFogi (GL_FOG_MODE,GL_EXP);
@@ -19,6 +19,7 @@ void GFXFogMode (const FOGMODE fog) {
     glFogi (GL_FOG_MODE,GL_LINEAR);
     break;
   }
+  //glHint (GL_FOG_HINT,GL_NICEST );
 }
 void GFXFogDensity (const float fogdensity) {
   glFogf (GL_FOG_DENSITY,fogdensity); 

@@ -89,7 +89,16 @@ ContinuousTerrain::~ContinuousTerrain() {
   if (data)
     delete []data;
 }
-
+void ContinuousTerrain::Collide () {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->Collide();
+  }
+}
+void ContinuousTerrain::Collide (Unit * un) {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->Collide(un);
+  }
+}
 Vector ContinuousTerrain::GetGroundPos (Vector ShipPos, Vector & norm) {
   for (int i=0;i<numcontterr;i++) {
     if (data[i]->GetGroundPos (ShipPos,norm,sizeX*width,sizeZ*width)) {
@@ -103,12 +112,27 @@ void ContinuousTerrain::DisableDraw () {
     data[i]->DisableDraw();
   }
 }
+void ContinuousTerrain::DisableUpdate () {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->DisableUpdate();
+  }
+}
 void ContinuousTerrain::EnableDraw () {
   for (int i=0;i<numcontterr;i++) {
     data[i]->EnableDraw();
   }
 }
+void ContinuousTerrain::EnableUpdate() {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->EnableUpdate();
+  }
+}
 
+void ContinuousTerrain::Draw() {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->Render();
+  }  
+}
 void ContinuousTerrain::SetTransformation(Matrix transformation) {
   CopyMatrix (this->transformation,transformation);
   ScaleMatrix (this->transformation, Scales);
@@ -135,6 +159,19 @@ bool ContinuousTerrain::checkInvScale (float &pos, float campos, float size) {
   }
   return retval;
 }
+void ContinuousTerrain::Collide (Unit * un, Matrix t) {
+  Matrix transform;
+  ScaleMatrix (t, Scales);
+  CopyMatrix (transform,t);
+  for (int i=0;i<numcontterr;i++) {
+    Vector tmp  (Transform (t,location[i]-Vector ((data[i])->getminX()+.5*(data[i])->getSizeX(),0,(data[i])->getminZ()+.5*(data[i])->getSizeZ())));
+    transform[12]=tmp.i;
+    transform[13]=tmp.j;
+    transform[14]=tmp.k;
+    data[i]->Collide(un,transform);
+  }
+}
+
 void ContinuousTerrain::AdjustTerrain(StarSystem * ss) {
   Matrix transform;
 
@@ -142,7 +179,7 @@ void ContinuousTerrain::AdjustTerrain(StarSystem * ss) {
   for (int i=0;i<numcontterr;i++) {
     dirty[i]|=checkInvScale (location[i].i,campos.i,sizeX);
     dirty[i]|=checkInvScale (location[i].k,campos.k,sizeZ);
-    if (dirty[i]) {
+    if (1||dirty[i]) {
       CopyMatrix (transform,transformation);
       Vector tmp  (Transform (transformation,location[i]-Vector ((data[i])->getminX()+.5*(data[i])->getSizeX(),0,(data[i])->getminZ()+.5*(data[i])->getSizeZ())));
       transform[12]=tmp.i;

@@ -169,6 +169,7 @@ Texture *Texture::Clone () {
 }
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
+  fprintf (stderr,"Loading bmp file %s ",FileName);
   data = NULL;
   ismipmapped  = mipmap;
   InitTexture();
@@ -179,10 +180,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   string texfilename = string(FileName);
   string tempstr;
   if(checkold(texfilename,false,tempstr)) {
+    fprintf (stderr,"Duplicate bmp file found\n");
     return;
   } else {
     texfilename = string(FileName);
     if (checkold(texfilename,true,tempstr)) {
+      fprintf (stderr,"Duplicate bmp file found\n");
       return;
     }
   }
@@ -287,6 +290,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 			}
 		}
 	}
+	fprintf (stderr,"Bind... ");
 	Bind();
  	fclose (fp);
 	if (fp2)
@@ -295,11 +299,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  delete [] data;
 	data = NULL;
 	setold();
-
+	fprintf (stderr," Load Success\n");
 }
 
 Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
+  fprintf (stderr,"Loading bmp file %s alp %s ",FileNameRGB,FileNameA);
   data = NULL;
   ismipmapped  = mipmap;
   InitTexture();
@@ -312,9 +317,11 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	string texfilename = string(FileNameRGB) + string(FileNameA);
 	string tempstr;
 	if(checkold(texfilename,false,tempstr)) {
+	  fprintf (stderr,"Duplicate Found.\n");
 	  return;
 	} else {
 	  if (checkold(texfilename,true,tempstr)) {
+	    fprintf (stderr,"Duplicate Found.\n");
 	    return;
 	  }
 	}
@@ -499,6 +506,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  }
 	  
 	}
+	fprintf (stderr,"Bind... ");
 	Bind();
 	if (fp)
 	  fclose(fp);
@@ -509,7 +517,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  delete [] data;
 	data = NULL;
 	setold();
-
+	fprintf (stderr,"Load Success\n");
 }
 Texture::~Texture()
 	{

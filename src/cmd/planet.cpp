@@ -12,6 +12,7 @@
 #include <assert.h>
 #include "cont_terrain.h"
 #include "atmosphere.h"
+#include "planet_transform.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -107,6 +108,7 @@ const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
 Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites() {
   inside=false;
   Init();
+  terraintrans = NULL;
   SetAI(new Order()); // no behavior
 }
 
@@ -128,7 +130,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   this->gravity=gravity;
   hull = (4./3)*M_PI*radius*radius*radius*densityOfRock;
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
-
+  terraintrans=NULL;
   meshdata = new Mesh*[2];
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
   meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha,false,alpha!=NULL?SRCALPHA:ONE,alpha!=NULL?INVSRCALPHA:ZERO);
@@ -159,26 +161,32 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 extern bool shouldfog;
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
+  // if cam inside don't draw?
+  //  if(!inside) {
+  Unit::Draw(quat,m);
+  //  }
+
   if (inside&&terrain) {
     Matrix tmp;
-    Vector p(-TerrainH.Cross (TerrainUp));
-    VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,cumulative_transformation.position);
+    terraintrans->GrabPerpendicularOrigin (_Universe->AccessCamera()->GetPosition(),tmp);
+    //    fprintf (stderr,"<%f,%f,%f>",tmp[12],tmp[13],tmp[14]);
     terrain->SetTransformation (tmp);
+    terrain->AdjustTerrain(_Universe->activeStarSystem());
+    terrain->Draw();
     if (atmosphere) {
+      Vector tup (tmp[4],tmp[5],tmp[6]);
+      //Vector p(-TerrainH.Cross (TerrainUp));
+      //VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,cumulative_transformation.position);
       Vector p = (_Universe->AccessCamera()->GetPosition());
       Vector blah = p-Vector (tmp[12],tmp[13],tmp[14]);
-      blah = p - (blah.Dot (TerrainUp))*TerrainUp;
+      blah = p - (blah.Dot (tup))*tup;
       tmp[12]=blah.i;
       tmp[13]=blah.j;
-      tmp[14]=blah.k;
-      
+      tmp[14]=blah.k;      
       atmosphere->SetMatricesAndDraw (_Universe->AccessCamera()->GetPosition(),tmp);
     }
   }
-  // if cam inside don't draw?
-  if(!inside) {
-    Unit::Draw(quat,m);
-  }
+    
   GFXLoadIdentity (MODEL);
   for (unsigned int i=0;i<lights.size();i++) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
@@ -194,28 +202,40 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
       Normalize (TerrainH);
       inside =true;
       if (terrain)
-	terrain->EnableDraw();
+	terrain->EnableUpdate();
     }
-  }
-  if (inside) {
-    if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
+    //    shouldfog=true;
+  } else {
+    if (inside) {
+      //if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
       inside=false;
       ///somehow warp unit to reasonable place outisde of planet
       if (terrain) {
 	
-	terrain->DisableDraw();
+	terrain->DisableUpdate();
       }
-    } else {
-      shouldfog=true;
     }
   }
+  
 }
 
 
 
 
 
-void Planet::reactToCollision (Unit *, const Vector & normal, float dist) {
+void Planet::reactToCollision (Unit *un, const Vector & normal, float dist) {
+  if (terrain&&un->isUnit()!=PLANETPTR) {
+    Matrix top;
+    terraintrans->GrabPerpendicularOrigin(un->Position(),top);
+    static int tmp=0;
+    /*    if (tmp) {
+      terrain->SetTransformation (top);
+      terrain->AdjustTerrain (_Universe->activeStarSystem());
+      terrain->Collide (un);
+      }else {*/
+      terrain->Collide (un,top);
+      //    }
+  }
   //nothing happens...you fail to do anythign :-)
   //maybe air reisstance here? or swithc dynamics to atmos mode
 }
@@ -246,10 +266,22 @@ Planet::~Planet() {
 	for (i=0;i<(int)this->lights.size();i++) {
 	  GFXDeleteLight (lights[i]);
 	}
+	if (terraintrans) {
+	  float * tmp = (float *) malloc (sizeof(float)*16);
+	  memcpy (tmp,cumulative_transformation_matrix,sizeof(float)*16);
+	  terraintrans->SetTransformation (tmp);
+	  //FIXME
+	  //We're losing memory here...but alas alas... planets don't die that often
+	}
 }
 
 void Planet::setTerrain (ContinuousTerrain * t) {
   terrain = t;
+  terrain->DisableDraw();
+  float x,z;
+  t->GetTotalSize (x,z);
+  terraintrans = new PlanetaryTransform (.366666*corner_max.i,x*4,z,2);
+  terraintrans->SetTransformation (cumulative_transformation_matrix);
 }
 void Planet::setAtmosphere (Atmosphere *t) {
   atmosphere = t;
