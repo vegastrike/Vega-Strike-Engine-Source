@@ -1011,7 +1011,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  if (1==un->RemoveCargo(index,1,true)) {
 	    std::string myscript;
 	    title= ((string("Accepted Mission ")+input_buffer).c_str());
-	    static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVarible("cargo","missions_from_cargolist","true"));
+	    static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
 	    if (!miss_from_cargolist) {
 		int playernum=UnitUtil::isPlayerStarship(this->buyer.GetUnit());
 		int len=getSaveStringLength(playernum,miss_name);
@@ -1261,7 +1261,7 @@ vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
 }
 
 vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *un) {
-  static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVarible("cargo","missions_from_cargolist","true"));
+  static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
   if (miss_from_cargolist) {
     return FilterCargo (un,"missions",true,true);
   }
