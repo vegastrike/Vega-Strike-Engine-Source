@@ -9,6 +9,7 @@ class AggressiveAI: public FireAt {
   bool last_time_insys;
   char jump_time_check;
   float last_jump_distance;
+  float last_jump_time;
   float currentpriority;
   float creationtime;
 protected:

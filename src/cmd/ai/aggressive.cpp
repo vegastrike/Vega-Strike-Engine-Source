@@ -204,6 +204,7 @@ static float aggressivity=2.01;
 static int randomtemp;
 AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,"default",randomtemp=rand())) {
   currentpriority=0;
+  last_jump_time=0;
   nav=QVector(0,0,0);
   personalityseed=randomtemp;
   last_jump_distance=FLT_MAX;
@@ -884,10 +885,13 @@ void AggressiveAI::ExecuteNoEnemies() {
 
 void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
   AfterburnTurnTowards(this,parent);
+  last_jump_time+=SIMULATION_ATOM;
+  static float jump_time_limit=XMLSupport::parse_float (vs_config->getVariable ("AI","force_jump_after_time","120"));
   if (jump_time_check==0) {
     float dist = (target->Position()- parent->Position()).MagnitudeSquared();
-    if (last_jump_distance<dist) {
+    if (last_jump_distance<dist||last_jump_time>jump_time_limit) {
       //force jump
+      last_jump_time=0;
       if (target->GetDestinations().size()) {
 	string dest= target->GetDestinations()[0];
 	UnitUtil::JumpTo(parent,dest);
@@ -907,7 +911,7 @@ void AggressiveAI::Execute () {
   Unit * target = parent->Target();
 
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
-
+  
   if (!ProcessCurrentFgDirective (fg)) {
   if (isjumpable) {
   if (parent->GetJumpStatus().drive<0) {
@@ -932,6 +936,8 @@ void AggressiveAI::Execute () {
       }
     }
   }
+  }else {
+    last_jump_time=0;
   }
   if ((!isjumpable) &&interruptcurtime<=0&&target) {
 //	  fprintf (stderr,"i");
