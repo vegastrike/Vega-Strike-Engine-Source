@@ -301,7 +301,7 @@ void StarSystem::Draw() {
   shouldfog=false;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   if (_Universe->AccessCockpit()->GetParent()==NULL) {
-    _Universe->AccessCockpit()->SetupViewPort();
+    AccessCamera()->UpdateGFX (GFXTRUE);
   }
   while((unit = iter->current())!=NULL) {
     unit->Draw();
