@@ -876,9 +876,11 @@ void Cockpit::Draw() {
 void Cockpit::Update () {
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
-    if (autopilot_time<0) {
+    if (autopilot_time<=2*SIMULATION_ATOM&&autopilot_time>SIMULATION_ATOM) {
       AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
       CockpitKeys::Inside(0,PRESS);
+    }
+    if (autopilot_time<=0) {
       autopilot_time=0;
       Unit * par = GetParent();
       if (par) {
