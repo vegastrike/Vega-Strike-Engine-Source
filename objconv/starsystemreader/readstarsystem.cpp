@@ -1013,7 +1013,7 @@ void processsystems (std::vector <System> & s){
 	simulateFactionTurns(s); // Simulates the factions starting with one homeworld, and expands their territories.x
 	if (1) {
 		for (unsigned int i=0;i<s.size();++i) {
-			if (s[i]["faction"]!="aera"&&s[i]["faction"]!="rlaan"&&s[i].jumps.size()) {
+			if ((s[i].sector.find("ega")!=string::npos||s[i].sector.find("Sol")!=string::npos||s[i].sector=="Solace"||s[i].sector=="Torkelsen"||s[i].sector=="Redemption"||s[i].sector=="Rhubarb"||s[i].sector=="Plymouth"||s[i].sector=="Rust"||s[i].sector=="Diaspora"||s[i].sector=="Beckett"||s[i].sector.find("RBL")!=string::npos)&&s[i]["faction"]!="aera"&&s[i]["faction"]!="rlaan"&&s[i].jumps.size()) {
 				float mult = 1;
 				if (!s[i].habitable) {
 					mult=20;
