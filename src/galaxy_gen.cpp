@@ -71,7 +71,7 @@ int rnd(int lower, int upper) {
 	  return lower+ ssrand()%(upper-lower); 
 	  else return lower;
 	  
-	  // ( lower+ (((float(upper-lower))*ssrand())/(float (RAND_MAX)+1.))); WE THINK THIS IS BUGGY
+	  // ( lower+ (((float(upper-lower))*ssrand())/(float (VS_RAND_MAX)+1.))); WE THINK THIS IS BUGGY
 }
 const char nada[1]="";
 string  getGenericName(vector<string> &s) {
@@ -178,7 +178,7 @@ public:
 };
 
 float grand () {
-  return float (ssrand())/RAND_MAX;
+  return float (ssrand())/VS_RAND_MAX;
 }
 vector <Color> lights;
 FILE * fp =NULL;

@@ -148,7 +148,7 @@ public:
 		static float loopdisv=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_vertical","4.0"));
 		static float loopdisl=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_lateral","4.0"));
 		rr.Set(loopdisl*vsr.uniformInc(-1,1),loopdisv*vsr.uniformInc(-1,1),1.0+loopdisd*vsr.uniformInc(0,1));
-		if (vsr.rand()<RAND_MAX/2) {
+		if (vsr.rand()<VS_RAND_MAX/2) {
 			qq = vsr.uniformInc(-1,1);
 			rr.j=qq;
 			if (qq>0)

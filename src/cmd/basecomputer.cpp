@@ -3046,7 +3046,11 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     const int numFactions = FactionUtil::GetNumFactions();
     int i = 0;
     for(; i<numFactions; i++) {
-        float relation = FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
+		Unit *currentplayer=UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
+		float relation=0;
+		if (currentplayer) {
+	        relation = FactionUtil::GetIntRelation(i, currentplayer->faction );
+		}
 //        relation = relation * 0.5;
 //        relation = relation + 0.5;
         const int percent = (int)(relation * 100.0);

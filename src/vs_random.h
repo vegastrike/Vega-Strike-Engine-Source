@@ -37,7 +37,7 @@
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
-
+#define VS_RAND_MAX 0x7fffffffUL
 
 class VSRandom {
   unsigned long mt[N]; /* the array for the state vector  */
