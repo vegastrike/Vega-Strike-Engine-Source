@@ -1,4 +1,5 @@
 /* example-start entry entry.c */
+#include <string>
 #if defined(_WIN32) && _MSC_VER > 1300 
 #define __restrict
 #endif
@@ -38,6 +39,7 @@ static const char * helps [NUM_HELPS] = {
   "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game.",
   "|OPTIONS BUTTON|\nThis button will start up the configurator to allow you to\nselect your preferred options."
 };
+std::string HOMESUBDIR= ".vegastrike";
 
 
 char * prog_arg=0;
@@ -331,7 +333,7 @@ void hello( GtkWidget *widget, gpointer   data ) {
 		int pid=spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
 		if (pid==-1) {
 			if (chdir("bin")==0) {
-				spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+				spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/bin/Setup.exe").c_str(),NULL);
 				chdir("..");
 			}
 		}
@@ -377,6 +379,23 @@ int main( int   argc,
 #else
     getdatadir(); // Will change to the data dir which makes selecting missions easier.
 #endif
+	FILE *version=fopen("Version.txt","r");
+	if (!version)
+		version=fopen("../Version.txt","r");
+	if (version) {
+		std::string hsd="";
+		int c;
+		while ((c=fgetc(version))!=EOF) {
+			if (isspace(c))
+				break;
+			hsd+=(char)c;
+		}
+		fclose(version);
+		if (hsd.length()) {
+			HOMESUBDIR=hsd;
+			//fprintf (STD_OUT,"Using %s as the home directory\n",hsd.c_str());
+		}			
+	}
     //    chdir ("./.vegastrike/save");
     gtk_init (&argc, (char***)(&argv));
     GtkWidget *window;
@@ -421,19 +440,17 @@ int main( int   argc,
 #include <wchar.h>
 #endif
 char *makeasc(wchar_t *str) {
-	const int WCHAR_SIZE=(sizeof(wchar_t)/sizeof(char));
-	char *mystr=(char*)str;
-	int i;
-	for (i=0;mystr[i]!='\0'&&mystr[i+1]!='\0';i+=WCHAR_SIZE) {
+	const int WCHAR_SIZE=4;//(sizeof(wchar_t)/sizeof(char));
+	int *ptr=(int*)str;
+    char * cptr = (char*)str;
+	while (*ptr) {
+		*cptr = (char)*ptr;
+		if (*cptr=='\0')
+			break;
+		++cptr;++ptr;
 	}
-	int len=i/WCHAR_SIZE;
-	char *newstr=new char [len+WCHAR_SIZE];
-	int j;
-	for (i=0,j=0;mystr[i]!='\0';i+=WCHAR_SIZE,j++) {
-		newstr[j]=mystr[i];
-	}
-	newstr[j]='\0';
-	return newstr;
+	*cptr='\0';
+	return (char*)str;
 }
 
 #include "general.h"
@@ -855,7 +872,6 @@ void LoadMissionDialog (char * Filename,int i) {
   //  fprintf (stderr,mypwd);
   LoadSaveFunction (Filename,"Select the mission, then run by clicking new or load game.",i,(GtkSignalFunc) file_mission_sel,my_mission.c_str(),true);
 }
-#define HOMESUBDIR ".vegastrike"
 void changehome() {
   static char pw_dir[2000];
 #ifndef _WIN32
@@ -865,13 +881,13 @@ void changehome() {
 #else
   GoToParentDir ();
 #endif
-  if (chdir (HOMESUBDIR)==-1) {
-    mkdir (HOMESUBDIR
+  if (chdir (HOMESUBDIR.c_str())==-1) {
+    mkdir (HOMESUBDIR.c_str()
 #ifndef _WIN32		  
 	     , 0xFFFFFFFF
 #endif		  
 	     );
-    chdir (HOMESUBDIR);
+    chdir (HOMESUBDIR.c_str());
   }
   if (chdir ("save")==-1) {
     mkdir ("save"

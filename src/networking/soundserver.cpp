@@ -68,7 +68,7 @@ void cleanExit(char *str,...)
 #endif
 	exit(1);
 }
-
+std::string HOMESUBDIR=".vegastrike";
 /******************************************************************************/
 /* The main function                                                          */
 void changehome (bool to, bool linuxhome=true) {
@@ -85,7 +85,7 @@ void changehome (bool to, bool linuxhome=true) {
 	   chdir (pwent->pw_dir);
 	 }
 #endif
-	chdir (".vegastrike");
+	chdir (HOMESUBDIR.c_str());
   }else {
 	  if (!paths.empty()) {
 		chdir (paths.back().c_str());
@@ -182,6 +182,27 @@ int main(int argc, char **argv) {
         getcwd(origpath,65534);
         fprintf(STD_OUT,"Final Path %s\n",origpath);
 	}
+
+
+		FILE *version=fopen("Version.txt","r");
+		
+		if (version) {
+			std::string hsd="";
+			int c;
+			while ((c=fgetc(version))!=EOF) {
+				if (isspace(c))
+					break;
+				hsd+=(char)c;
+			}
+			fclose(version);
+			if (hsd.length()) {
+				HOMESUBDIR=hsd;
+				fprintf (STD_OUT,"Using %s as the home directory\n",hsd.c_str());
+			}			
+		}
+		
+
+
 
 	Mix_Music *music=NULL;
 	int audio_rate,audio_channels,
