@@ -20,7 +20,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   ab[2]='\0';
   ab[1]=b+'0';
   ab[0]=a+'0';
-  hash_name = string("@@Sphere") + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) +  ab + "#" + tostring(rho_min) + "#" + tostring(rho_max);
+  hash_name = string("@@Sphere") + "#" + texture + "#" + XMLSupport::tostring(stacks) + "#" + XMLSupport::tostring(slices) +  ab + "#" + XMLSupport::tostring(rho_min) + "#" + XMLSupport::tostring(rho_max);
   if (LoadExistant (hash_name.c_str(),radius)) {
     return;
   } else {
@@ -191,4 +191,5 @@ void SphereMesh::ProcessDrawQueue(int whichdrawqueue) {
   Mesh::ProcessDrawQueue (whichdrawqueue);
   GFXLightContextAmbient(tmpcol);
 }
+
 

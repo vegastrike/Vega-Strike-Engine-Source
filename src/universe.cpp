@@ -98,7 +98,7 @@ Universe::~Universe()
   for (i=0;i<this->factions.size();i++) {
     delete factions[i];
   }
-  for (unsigned int i=0;i<cockpit.size();i++) {
+  for (i=0;i<cockpit.size();i++) {
     delete cockpit[i];
   }
   cockpit.clear();

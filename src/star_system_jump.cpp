@@ -91,6 +91,7 @@ void DealPossibleJumpDamage (Unit *un) {
   float speed = un->GetVelocity().Magnitude();
   float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
   float dam =speed*(damage/10);
+  if (dam>100) dam=100;
   if (dam>1) {
     un->ApplyDamage (un->Position()+un->GetVelocity(),
 		     un->GetVelocity(), 

@@ -221,13 +221,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		    switch(XML::attribute_map.lookup((*iter).name)) {
 		    case XML::POWER:
-		      xml->material.power=parse_float((*iter).value);
+		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      setEnvMap ( parse_bool((*iter).value.c_str()));
+		      setEnvMap ( XMLSupport::parse_bool((*iter).value.c_str()));
 		      break;
 		    case XML::LIGHTINGON:
-		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||parse_bool((*iter).value)); 
+		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
 		      break;
 		    }
 		  }
@@ -238,16 +238,16 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
 		  case XML::RED:
-			  xml->material.dr=parse_float((*iter).value);
+			  xml->material.dr=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::BLUE:
-			  xml->material.db=parse_float((*iter).value);
+			  xml->material.db=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::ALPHA:
-			  xml->material.da=parse_float((*iter).value);
+			  xml->material.da=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::GREEN:
-			  xml->material.dg=parse_float((*iter).value);
+			  xml->material.dg=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
@@ -258,16 +258,16 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
 		  case XML::RED:
-			  xml->material.er=parse_float((*iter).value);
+			  xml->material.er=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::BLUE:
-			  xml->material.eb=parse_float((*iter).value);
+			  xml->material.eb=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::ALPHA:
-			  xml->material.ea=parse_float((*iter).value);
+			  xml->material.ea=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::GREEN:
-			  xml->material.eg=parse_float((*iter).value);
+			  xml->material.eg=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
@@ -278,16 +278,16 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
 		  case XML::RED:
-			  xml->material.sr=parse_float((*iter).value);
+			  xml->material.sr=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::BLUE:
-			  xml->material.sb=parse_float((*iter).value);
+			  xml->material.sb=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::ALPHA:
-			  xml->material.sa=parse_float((*iter).value);
+			  xml->material.sa=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::GREEN:
-			  xml->material.sg=parse_float((*iter).value);
+			  xml->material.sg=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
@@ -298,16 +298,16 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
 		  case XML::RED:
-			  xml->material.ar=parse_float((*iter).value);
+			  xml->material.ar=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::BLUE:
-			  xml->material.ab=parse_float((*iter).value);
+			  xml->material.ab=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::ALPHA:
-			  xml->material.aa=parse_float((*iter).value);
+			  xml->material.aa=XMLSupport::parse_float((*iter).value);
 			  break;
 		  case XML::GREEN:
-			  xml->material.ag=parse_float((*iter).value);
+			  xml->material.ag=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
@@ -339,10 +339,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	alpha_found = true;
 	break;
       case XML::SCALE:
-	xml->scale *=  parse_float ((*iter).value);
+	xml->scale *=  XMLSupport::parse_float ((*iter).value);
 	break;
       case XML::SHAREVERT:
-	xml->sharevert = (parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
+	xml->sharevert = (XMLSupport::parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
       case XML::BLENDMODE:
 	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
@@ -372,27 +372,27 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case XML::X:
 	assert(!(xml->point_state & XML::P_X));
-	xml->vertex.x = parse_float((*iter).value);
+	xml->vertex.x = XMLSupport::parse_float((*iter).value);
 	xml->vertex.i = 0;
 	xml->point_state |= XML::P_X;
 	break;
       case XML::Y:
 	assert(!(xml->point_state & XML::P_Y));
-	xml->vertex.y = parse_float((*iter).value);
+	xml->vertex.y = XMLSupport::parse_float((*iter).value);
 	xml->vertex.j = 0;
 	xml->point_state |= XML::P_Y;
 	break;
      case XML::Z:
 	assert(!(xml->point_state & XML::P_Z));
-	xml->vertex.z = parse_float((*iter).value);
+	xml->vertex.z = XMLSupport::parse_float((*iter).value);
 	xml->vertex.k = 0;
 	xml->point_state |= XML::P_Z;
 	break;
       case XML::S:
-	xml->vertex.s = parse_float ((*iter).value);
+	xml->vertex.s = XMLSupport::parse_float ((*iter).value);
 	break;
       case XML::T:
-	xml->vertex.t = parse_float ((*iter).value);
+	xml->vertex.t = XMLSupport::parse_float ((*iter).value);
 	break;
       default:
 	assert(0);
@@ -414,17 +414,17 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case XML::I:
 	assert(!(xml->point_state & XML::P_I));
-	xml->vertex.i = parse_float((*iter).value);
+	xml->vertex.i = XMLSupport::parse_float((*iter).value);
 	xml->point_state |= XML::P_I;
 	break;
       case XML::J:
 	assert(!(xml->point_state & XML::P_J));
-	xml->vertex.j = parse_float((*iter).value);
+	xml->vertex.j = XMLSupport::parse_float((*iter).value);
 	xml->point_state |= XML::P_J;
 	break;
       case XML::K:
 	assert(!(xml->point_state & XML::P_K));
-	xml->vertex.k = parse_float((*iter).value);
+	xml->vertex.k = XMLSupport::parse_float((*iter).value);
 	xml->point_state |= XML::P_K;
 	break;
       default:
@@ -646,7 +646,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->lod.push_back(new Mesh ((*iter).value.c_str(),true,xml->faction,true));//make orig mesh
 	break;
       case XML::SIZE:
-	flotsize = parse_float ((*iter).value);
+	flotsize = XMLSupport::parse_float ((*iter).value);
 	break;
       }
     }
@@ -669,17 +669,17 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::POINT:
 	assert(!(xml->vertex_state & XML::V_POINT));
 	xml->vertex_state |= XML::V_POINT;
-	index = parse_int((*iter).value);
+	index = XMLSupport::parse_int((*iter).value);
 	break;
       case XML::S:
 	assert(!(xml->vertex_state & XML::V_S));
 	xml->vertex_state |= XML::V_S;
-	s = parse_float((*iter).value);
+	s = XMLSupport::parse_float((*iter).value);
 	break;
       case XML::T:
 	assert(!(xml->vertex_state & XML::V_T));
 	xml->vertex_state |= XML::V_T;
-	t = parse_float((*iter).value);
+	t = XMLSupport::parse_float((*iter).value);
 	break;
       default:
 	assert(0);
@@ -726,24 +726,24 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::TYPE:
 	assert (!(xml->vertex_state&XML::V_TYPE));
 	xml->vertex_state|=XML::V_TYPE;
-	typ = parse_int((*iter).value);
+	typ = XMLSupport::parse_int((*iter).value);
 	
 	break;
       case XML::ROTATE:
 	assert (!(xml->vertex_state&XML::V_ROTATE));
 	xml->vertex_state|=XML::V_ROTATE;
-	rot = parse_float((*iter).value);
+	rot = XMLSupport::parse_float((*iter).value);
 
 	break;
       case XML::SIZE:
 	assert (!(xml->vertex_state&XML::V_SIZE));
 	xml->vertex_state|=XML::V_SIZE;
-	siz = parse_float((*iter).value);
+	siz = XMLSupport::parse_float((*iter).value);
 	break;
       case XML::OFFSET:
 	assert (!(xml->vertex_state&XML::V_OFFSET));
 	xml->vertex_state|=XML::V_OFFSET;
-	offset = parse_float ((*iter).value);
+	offset = XMLSupport::parse_float ((*iter).value);
 	break;
       default:
 	assert(0);
@@ -780,14 +780,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::POINT:
 	assert (ttttttt<2);
 	xml->vertex_state |= XML::V_POINT;
-	ind = parse_int((*iter).value);
+	ind = XMLSupport::parse_int((*iter).value);
 	ttttttt+=2;
 	break;
       case XML::WEIGHT:
 	assert ((ttttttt&1)==0);
 	ttttttt+=1;
 	xml->vertex_state |= XML::V_S;
-	indweight = parse_float((*iter).value);
+	indweight = XMLSupport::parse_float((*iter).value);
 	break;
       default:
 	assert(0);

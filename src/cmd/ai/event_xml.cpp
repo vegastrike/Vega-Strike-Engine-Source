@@ -19,10 +19,15 @@ using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
   AIEvresult::AIEvresult (int type, float const min, const float max, const std::string &aiscript) {
+
 	 this->type = type; 
+
 	 this->max = max; 
+
 	 this->min = min; 
+
 	 this->script = aiscript;
+
   }
 
   const int  AIUNKNOWN=0;
@@ -53,7 +58,7 @@ namespace AIEvents {
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
-	  eam->curtime=eam->maxtime=(short)(parse_float((*iter).value)/SIMULATION_ATOM);
+	  eam->curtime=eam->maxtime=(short)(XMLSupport::parse_float((*iter).value)/SIMULATION_ATOM);
 	  break;
 	}
       }
@@ -68,10 +73,10 @@ namespace AIEvents {
 	  elem = -elem;//since elem can't be 0 (see above) this will save the "not" info
 	  break;
 	case AIMIN:
-	  min=parse_float((*iter).value);
+	  min=XMLSupport::parse_float((*iter).value);
 	  break;
 	case AIMAX:
-	  max = parse_float ((*iter).value);
+	  max = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case AISCRIPT:
 	  aiscriptname = (*iter).value;
