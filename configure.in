@@ -424,7 +424,7 @@ Place it in the directory /usr/include/GL.
 *****************************************************************])
 fi
 
-CPPFLAGS="$saved_CPPFLAGS" 
+CPPFLAGS="$saved_CPPFLAGS"
 TR_CPPFLAGS="$TR_CPPFLAGS $GL_CPPFLAGS"
 
 
@@ -444,11 +444,11 @@ AC_DEFUN( CHECK_FOR_GLUT_LIB, [
     if test "x$is_macosx" = "xyes" ; then
         LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -framework GLUT"
     else
-        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME" -lXi -lXmu
+        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME -lXi -lXmu"
     fi
     AC_TRY_LINK( , , have_glut_lib=yes, have_glut_lib=no )
     AC_MSG_RESULT([$have_glut_lib])
-]) 
+])
 
 saved_LIBS="$LIBS"
 
@@ -466,11 +466,11 @@ if test "x$have_glut_lib" = "xno" ; then
     AC_MSG_ERROR([GLUT library not found or too old version. 3.7 (beta) or later required.])
 fi
 
-LIBS="$saved_LIBS"
+LIBS="$saved_LIBS -lXi -lXmu"
 if test "x$is_macosx" = "xyes" ; then
     TR_LIBS="$TR_LIBS $GLUT_LDOPTS -framework GLUT"
 else
-    TR_LIBS="$TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+    TR_LIBS="$TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME  -lXi -lXmu"
 fi
 
 
