@@ -2247,6 +2247,7 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 			||(ai_jump_cheat&&cp==NULL)
 				))
 		||smalle->image->forcejump){
+	  warpenergy-=GetJumpStatus().energy;		
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
       _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
