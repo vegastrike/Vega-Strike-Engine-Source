@@ -47,14 +47,18 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     t = sounds[target1].pos-mylistener.pos;
       //steal sound!
     if (sounds[target1].buffer==sounds[sound].buffer) {
-      if (t.Dot(t)>2*mag) {	
+      if (t.Dot(t)>mag) {	
 	ALuint tmpsrc = sounds[target1].source;
 	//	fprintf (stderr,"stole sound %d %f\n", target1,mag);
 	sounds[target1].source = sounds[sound].source;
 	sounds[sound].source = tmpsrc;
 	playingbuffers[hashed][target].soundname = sound;
-	fprintf (stderr,"stole %d",tmpsrc);
-	return 2;
+	if (tmpsrc==0) {
+	  playingbuffers[hashed].erase(playingbuffers[hashed].begin()+target);
+	}else {
+	  fprintf (stderr,"stole %d",tmpsrc);
+	  return 2;
+	}
       }
     }
   }
@@ -70,6 +74,9 @@ void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
   totalplaying++;
   if (sounds[sound].buffer!=(ALuint)0) {
     int h= hash_sound(sounds[sound].buffer);
+    if (sounds[sound].source==0) {
+      fprintf (stderr,"adding null sound"); 
+    }
     playingbuffers[h].push_back (ApproxSound());
     playingbuffers[h].back().soundname = sound;
     //    fprintf (stderr,"pushingback %f",(pos-mylistener.pos).Magnitude());

@@ -337,6 +337,9 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
       if (tmp!=2){
 		AUDAddWatchedPlayed (sound,pos.Cast());
 		alSourcePlay( sounds[sound].source );
+		//AUDAdjustSound (sound,pos,vel);
+		//alSourcef(sounds[sound].source,AL_GAIN,gain);    
+
       }
 
     }
