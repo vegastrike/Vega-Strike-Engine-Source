@@ -9,6 +9,7 @@
 
 #include "gfx_sphere.h"
 extern Vector mouseline;
+vector<Vector> perplines;
 static SphereMesh *foo;
 static Unit *earth;
 
@@ -41,14 +42,14 @@ StarSystem::StarSystem(Planet *primaries) :
   cam[1].SetPosition(Vector(0,5,0));
   cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
   //cam[1].SetPosition(Vector(0,5,-2.5));
-  cam[1].SetSubwindow(0,0,0.25,0.25);
+  cam[1].SetSubwindow(0,0,0.10,0.10);
 
   cam[2].SetProjectionType(Camera::PARALLEL);
   cam[2].SetZoom(10.0);
   cam[2].SetPosition(Vector(5,0,0));
   cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
   //cam[2].SetPosition(Vector(5,0,-2.5));
-  cam[2].SetSubwindow(0.25,0,0.25,0.25);
+  cam[2].SetSubwindow(0.10,0,0.10,0.10);
 }
 
 StarSystem::~StarSystem() {
@@ -119,6 +120,7 @@ void StarSystem::Draw() {
 
   GFXBlendMode(ONE,ZERO);
   GFXDisable(DEPTHTEST);
+  GFXDisable(LIGHTING);
   GFXDisable(CULLFACE);
   GFXLoadIdentity(MODEL);
   glBegin(GL_POINTS);
@@ -132,7 +134,13 @@ void StarSystem::Draw() {
   glBegin(GL_LINES);
   glColor4f(0,1,0,1);
   glVertex3f(pos.i,pos.j,pos.k);
-  glVertex3f(pos.i+mouseline.i*10,pos.j+mouseline.j*10,pos.k+mouseline.k*10);
+  glVertex3f(mouseline.i + (mouseline.i-pos.i)*8,mouseline.j + (mouseline.j-pos.j)*8,mouseline.k + (mouseline.k-pos.k)*8);
+
+  glColor4f(1,0,0,1);
+  for(int a=0; a<perplines.size(); a+=2) {
+    glVertex3f(perplines[a].i, perplines[a].j, perplines[a].k);
+    glVertex3f(perplines[a+1].i, perplines[a+1].j, perplines[a+1].k);
+  }
   glEnd();
 
   GFXEnable(DEPTHTEST);
@@ -176,11 +184,18 @@ void StarSystem::Draw() {
   glBegin(GL_LINES);
   glColor4f(0,1,0,1);
   glVertex3f(pos.i,pos.j,pos.k);
-  glVertex3f(pos.i+mouseline.i*10,pos.j+mouseline.j*10,pos.k+mouseline.k*10);
+  glVertex3f(pos.i+mouseline.i*8,pos.j+mouseline.j*8,pos.k+mouseline.k*8);
+
+  glColor4f(1,0,0,1);
+  for(int a=0; a<perplines.size(); a+=2) {
+    glVertex3f(perplines[a].i, perplines[a].j, perplines[a].k);
+    glVertex3f(perplines[a+1].i, perplines[a+1].j, perplines[a+1].k);
+  }
   glEnd();
 
   GFXEnable(DEPTHTEST);
   GFXEnable(CULLFACE);
+  GFXEnable(LIGHTING);
 
   currentcamera=0;
   SetViewport();

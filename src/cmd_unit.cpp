@@ -32,6 +32,7 @@
 //#define VARIABLE_LENGTH_PQR
 
 extern Vector mouseline;
+extern vector<Vector> perplines;
 
 
 void Unit::calculate_extent() {  
@@ -310,6 +311,7 @@ int Unit::querySphere (const Vector &start, const Vector &end, float err) {
   return querySphere(NULL, start, end, err);
 }
 
+// dir must be normalized
 int Unit::querySphere (float * t,const Vector &st, const Vector &dir, float err) {
   UpdateMatrix();
   int i;
@@ -325,12 +327,22 @@ int Unit::querySphere (float * t,const Vector &st, const Vector &dir, float err)
 #endif
   for (i=0;i<nummesh;i++) {
     TargetPoint = Transform (tmpo,meshdata[i]->Position());
+    Vector origPoint = TargetPoint;
+
+    perplines.push_back(TargetPoint);
     //find distance away from the line now :-)
     //find scale factor of end on start to get line.
-    Vector tst (TargetPoint-st);
-    float k = tst.Dot (dir)/ (dir).Dot (dir);
+    Vector tst = TargetPoint-st;
+    //Vector tst = TargetPoint;
+    float k = tst.Dot (dir);
     TargetPoint = tst - k*(dir);
+    cerr << origPoint << "-" << st << " = " << tst << " projected length " << k << " along direction " << dir << endl;
+    cerr << "projected line " << st << " - " << st + k*dir << endl;
+    cerr << "length of orthogonal projection " << TargetPoint.Magnitude() << ", " << "radius " << meshdata[i]->rSize() << endl;
+    perplines.push_back(origPoint-TargetPoint);
+    
     ///      fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
+    
     if (TargetPoint.Dot (TargetPoint)< 
 	err*err+
 	meshdata[i]->rSize()*meshdata[i]->rSize()

@@ -78,7 +78,7 @@ void CoordinateSelect::Draw () {
   GFXLoadIdentity (MODEL);
   
   GFXPushBlendMode();
-  fprintf (stderr,"Location: %f %f %f", LocalPosition.i, LocalPosition.j, LocalPosition.k);
+  //  fprintf (stderr,"Location: %f %f %f", LocalPosition.i, LocalPosition.j, LocalPosition.k);
   GFXBlendMode(ONE,ONE);
   LocSelAni.SetPosition(LocalPosition);
   LocSelAni.Draw();

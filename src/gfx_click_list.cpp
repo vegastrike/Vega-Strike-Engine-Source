@@ -3,6 +3,8 @@
 #include "cmd_unit.h"
 
 extern Vector mouseline;
+extern vector<Vector> perplines;
+
 Vector MouseCoordinate (int mouseX, int mouseY) {
   float l, r, b, t , n, f;
   GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
@@ -20,10 +22,8 @@ Vector MouseCoordinate (int mouseX, int mouseY) {
 
 
 bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
-  
-  
   Vector mousePoint = MouseCoordinate (mouseX, mouseY);
-  mouseline =mousePoint;
+
   cerr << "Mousepoint: " << mousePoint << endl;
     //mousePoint.k= -mousePoint.k;
   Vector CamP,CamQ,CamR;
@@ -32,7 +32,9 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   cerr << "Transformed Mousepoint: " << mousePoint << endl;
   _GFX->AccessCamera()->GetPosition(CamP);    
   //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
-  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
+  mousePoint.Normalize();
+  mouseline =mousePoint + CamP;
+  if (ship->querySphere(CamP+CamR,mousePoint,0)){  // camera position is not actually the center of the camera
       return true;
 						//  if (ship->queryBoundingBox(CamP,mousePoint,0)) {
     }
@@ -77,7 +79,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
 }
 
 UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
-
+  perplines = vector<Vector>();
     UnitCollection * uc = new UnitCollection;
     UnitCollection::UnitIterator * UAye = uc->createIterator();
     UnitCollection::UnitIterator * myParent = parentIter->createIterator();
