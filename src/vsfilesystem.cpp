@@ -125,7 +125,7 @@ namespace VSFileSystem
 			CASE( VSFileSystem::MusicFile)
 			CASE( VSFileSystem::AccountFile)
 			CASE( VSFileSystem::ZoneBuffer)
-			CASE( VSFileSystem::Unknown)
+			CASE( VSFileSystem::UnknownFile)
 			default: ostr << "VSFileSystem::<undefined VSFileType>"; break;
 		}
 	}
@@ -657,7 +657,7 @@ namespace VSFileSystem
 		current_path.push_back( "");
 		current_directory.push_back( "");
 		current_subdirectory.push_back( "");
-		current_type.push_back( Unknown);
+		current_type.push_back( UnknownFile);
 
 		int i;
 		for( i=0; i<=Unknown; i++)
@@ -1213,7 +1213,7 @@ namespace VSFileSystem
 		pk3_extracted_file = NULL;
 		offset = 0;
 		valid  = false;
-		file_type   = alt_type = Unknown;
+		file_type   = alt_type = UnknownFile;
 		file_index  = -1;
 		volume_type = None;
 	}
@@ -2049,7 +2049,7 @@ std::string   nameof( VSFileSystem::VSFileType type )
 		CASE( VSFileSystem::MusicFile)
 		CASE( VSFileSystem::AccountFile)
 		CASE( VSFileSystem::ZoneBuffer)
-		CASE( VSFileSystem::Unknown)
+		CASE( VSFileSystem::UnknownFile)
 		default : return "VSFileSystem::<undefined VSFileType>"; break;
 	}
 #undef CASE

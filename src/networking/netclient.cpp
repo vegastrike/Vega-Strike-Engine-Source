@@ -418,7 +418,7 @@ int NetClient::recvMsg( Packet* outpacket )
 					// Receive the file and write it (trunc if exists)
 					cerr<<"RECEIVING file : "<<filename<<endl;
 					VSFile f;
-					VSError err = f.OpenReadOnly(filename, Unknown);
+					VSError err = f.OpenReadOnly(filename, ::VSFileSystem::UnknownFile);
 					if (err>Ok)
 					{
 						cerr<<"!!! ERROR : opening received file !!!"<<endl;

@@ -27,10 +27,10 @@ if( Network==NULL)
     //char c[2]={'\0','\0'};
 	VSFile f;
 	// TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
-	VSError err = f.OpenReadOnly( "save.4.x.txt", Unknown);
+	VSError err = f.OpenReadOnly( "save.4.x.txt", UnknownFile);
     if (err>Ok) {
 	  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
-	  err = f.OpenCreateWrite( "save.4.x.txt", Unknown);
+	  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
       if (err<=Ok) {
 		f.Write("default\n",8);
 		f.Close();
@@ -40,7 +40,7 @@ if( Network==NULL)
 	  	fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str());
 		exit(1);
 	  }
-	  err = f.OpenReadOnly( "save.4.x.txt", Unknown);
+	  err = f.OpenReadOnly( "save.4.x.txt", UnknownFile);
 	  if( err>Ok)
 	  {
 	  	fprintf( stderr, "!!! ERROR : Opening the default save we just created\n");
@@ -94,7 +94,7 @@ if( Network==NULL)
 	  // Set filetype to Unknown so that it is searched in homedir/
       if (*res->begin()=='~')
 	  {
-		err = f.OpenCreateWrite( "save.4.x.txt", Unknown);
+		  err = f.OpenCreateWrite( "save.4.x.txt", VSFileSystem::UnknownFile);
 		if (err<=Ok) {
 	  	for (unsigned int i=1;i<res->length();i++)
 		{

@@ -266,7 +266,7 @@ void Buffer::childAppend( unsigned char* buffer, int bufsize )
  *------------------------------------------------------------*/
 
 TestItem::TestItem( SOCKETALT sock, const string& filename )
-    : Item( sock, filename, VSFileSystem::Unknown, NotifyPtr(this) )
+    : Item( sock, filename, VSFileSystem::UnknownFile, NotifyPtr(this) )
 {
     COUT << "Created TestItem for downloading " << filename << endl;
 }
@@ -320,7 +320,7 @@ FileSet::FileSet( boost::shared_ptr<Manager> mgr,
     {
         _files.insert( std::pair<std::string,int>( *cit, -1 ) );
         NotifyPtr ptr( new NotifyConclusion( this, *cit ) );
-        items.push_back( new File( sock, *cit, path, VSFileSystem::Unknown, ptr ) );
+        items.push_back( new File( sock, *cit, path, VSFileSystem::UnknownFile, ptr ) );
         _to_go++;
     }
 

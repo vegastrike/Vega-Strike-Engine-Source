@@ -280,7 +280,7 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       diff.k = fmod ((double) diff.k,(double) sizeZ*width);
       if (diff.k<0)
 	diff.k+=sizeZ*width;
-      if (!rand()%10)
+      if (!(rand()%10))
 	VSFileSystem::vs_fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
       diff = Transform (t,diff);
       const csReversibleTransform bigtransform (transform);

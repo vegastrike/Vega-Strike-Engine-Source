@@ -4539,7 +4539,7 @@ std::map<VCString,VCString> parseTurretSizes () {
 	using namespace VSFileSystem;
 	std::map<VCString,VCString> t;
 	VSFile f;
-	VSError err = f.OpenReadOnly( "units/subunits/size.txt", Unknown);
+	VSError err = f.OpenReadOnly( "units/subunits/size.txt", UnknownFile);
 	if (err<=Ok) {
 		int siz = f.Size();
 		char * filedata= (char *)malloc (siz+1);

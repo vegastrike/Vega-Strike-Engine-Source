@@ -330,7 +330,7 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
   std::vector <unsigned int> ind;  
   //FILE* inFile = VSFileSystem::vs_open (filename, "r");
   VSFile f;
-  VSError err = f.OpenReadOnly( filename, Unknown);
+  VSError err = f.OpenReadOnly( filename, UnknownFile);
 
   if(err>Ok) {
     assert(0);
@@ -404,7 +404,7 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
     //FILE * fp;
     //fp = VSFileSystem::vs_open (xml->data[i].file.c_str(),"rb");
 	Texture tex;
-	err = f.OpenReadOnly( xml->data[i].file.c_str(), Unknown);
+	err = f.OpenReadOnly( xml->data[i].file.c_str(), UnknownFile);
     if (err<=Ok) {
       //hm.Data = (short *) readImage (fp,bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform,false);
 	  hm.Data = (short *) tex.ReadImage( &f, &heightmapTransform, false);
@@ -415,7 +415,7 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
 	  //LoadData();
     unsigned long xsize;unsigned long zsize;
     //fp = VSFileSystem::vs_open (xml->data[i].terrainfile.c_str(),"rb");
-	f.OpenReadOnly( xml->data[i].terrainfile.c_str(), Unknown);
+	f.OpenReadOnly( xml->data[i].terrainfile.c_str(), UnknownFile);
     if (err<=Ok) {
       //hm.terrainmap = (unsigned char *)readImage (fp, bpp, format, xsize, zsize, palette, &terrainTransform,true);
 	  hm.terrainmap = (unsigned char *) tex.ReadImage( &f, &terrainTransform, true);

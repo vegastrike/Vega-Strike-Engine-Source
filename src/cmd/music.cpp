@@ -68,9 +68,9 @@ bool Music::LoadMusic (const char *file) {
 	using namespace VSFileSystem;
 	// Loads a playlist so try to open a file in datadir or homedir
   VSFile f;
-  VSError err = f.OpenReadOnly(file, Unknown);
+  VSError err = f.OpenReadOnly(file, UnknownFile);
   if (err>Ok)
-     err = f.OpenReadOnly( string(".vegastrike/")+file, Unknown);
+     err = f.OpenReadOnly( string(".vegastrike/")+file, UnknownFile);
 
   char songname[1024];
   this->playlist.push_back(std::vector <std::string> ());

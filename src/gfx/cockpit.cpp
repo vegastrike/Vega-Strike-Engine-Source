@@ -787,10 +787,11 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	  if (target->graphicOptions.missilelock)
 		  return 1;
 	  return 0;
-  case UnitImages::COLLISION:
+  case UnitImages::COLLISION:{
 	  static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
 	  return (getNewTime()-TimeOfLastCollision)<collidepanic;
 	  break;
+  }
   case UnitImages::ECM:
 	  return target->GetImageInformation().ecm>0?1:0;
   case UnitImages::JUMP:

@@ -129,10 +129,10 @@ domNodeType *LoadXML(const char *filename) {
   if( !memcmp( (filename+length-7), "mission", 7))
   	err = f.OpenReadOnly( filename, MissionFile);
   else {
-  	err = f.OpenReadOnly( filename, Unknown);
+  	err = f.OpenReadOnly( filename, UnknownFile);
         if (err>Ok) {
            string rootthis = string("/")+filename;
-           err = f.OpenReadOnly(rootthis,Unknown);
+           err = f.OpenReadOnly(rootthis,UnknownFile);
         }
   }
   if(err>Ok) {

@@ -171,7 +171,7 @@ private:
 class Item
 {
 public:
-    Item( SOCKETALT sock, const std::string& filename, VSFileSystem::VSFileType=VSFileSystem::Unknown, NotifyPtr notify = NotifyPtr() );
+    Item( SOCKETALT sock, const std::string& filename, VSFileSystem::VSFileType=VSFileSystem::UnknownFile, NotifyPtr notify = NotifyPtr() );
     virtual ~Item( );
 
     State state( ) const;

@@ -321,7 +321,7 @@ using namespace VSFileSystem;
   if( buflength==0 || xmlbuffer==NULL)
   {
 	  cout << "FactionXML:LoadXML " << filename << endl;
-	  err = f.OpenReadOnly( filename, Unknown);
+	  err = f.OpenReadOnly( filename, UnknownFile);
 	  if(err>Ok) {
 		cout << "Failed to open '" << filename << "' this probably means it can't find the data directory" << endl;
 		assert(0);

@@ -23,7 +23,6 @@ extern ObjSerial	serial_seed;
 ObjSerial			getUniqueSerial();
 #define DELIM '/'
 #define DELIMSTR "/"
-
 namespace VSFileSystem
 {
 	class VSFile;
@@ -64,7 +63,7 @@ namespace VSFileSystem
 						ZoneBuffer,		// Indicates a ZoneInfo buffer coming from server
 						JPEGBuffer,		// Indicates a JPEG buffer coming from network
 						// Unknown
-						Unknown			// Loaded from homedir or datadir and written in homedir
+						UnknownFile		// Loaded from homedir or datadir and written in homedir
 					};
 
 	enum VSVolumeType { None, Split, Big };
@@ -234,14 +233,14 @@ namespace VSFileSystem
 	bool	DirectoryExists( string filename);
 	// Returns positive int or index in archive if found or -1 if not found
 	// Test if a file exists (absolute path)
-	int		FileExists( string root, const char * filename, VSFileType type=Unknown, bool lookinvolume=true);
-	int		FileExists( string root, string filename, VSFileType type=Unknown, bool lookinvolume=true);
+	int		FileExists( string root, const char * filename, VSFileType type=UnknownFile, bool lookinvolume=true);
+	int		FileExists( string root, string filename, VSFileType type=UnknownFile, bool lookinvolume=true);
 	// Test if a file exists relative to home_path
-	int		FileExistsHome( const char * filename, VSFileType type=Unknown);
-	int		FileExistsHome( string filename, VSFileType type=Unknown);
+	int		FileExistsHome( const char * filename, VSFileType type=UnknownFile);
+	int		FileExistsHome( string filename, VSFileType type=UnknownFile);
 	// Test if a file exists relative to data_path
-	int		FileExistsData( const char * filename, VSFileType type=Unknown);
-	int		FileExistsData( string filename, VSFileType type=Unknown);
+	int		FileExistsData( const char * filename, VSFileType type=UnknownFile);
+	int		FileExistsData( string filename, VSFileType type=UnknownFile);
 
 	VSError	GetError(char * str=NULL);
 
@@ -283,8 +282,8 @@ namespace VSFileSystem
 		public:
 			VSFile();
 			VSFile( const char * buffer, long size, VSFileType type=ZoneBuffer, VSFileMode=ReadOnly);
-			VSFile( const char * filename, VSFileType type=Unknown, VSFileMode=ReadOnly);
-			VSFile( string filename, VSFileType type=Unknown) { VSFile::VSFile( filename.c_str(), type); }
+			VSFile( const char * filename, VSFileType type=UnknownFile, VSFileMode=ReadOnly);
+			VSFile( string filename, VSFileType type=UnknownFile) { VSFile::VSFile( filename.c_str(), type); }
   			~VSFile();
 
 			FILE *	GetFP() { return this->fp; } // This is still needed for special cases (when loading PNG files)
@@ -292,14 +291,14 @@ namespace VSFileSystem
 
 			/********************************** OPEN A FILE *********************************/
 			// Open an existing file read only
-			VSError	OpenReadOnly( const char * filename, VSFileType type=Unknown);
-			VSError	OpenReadOnly( string filename, VSFileType type=Unknown) { return OpenReadOnly( filename.c_str(), type); }
+			VSError	OpenReadOnly( const char * filename, VSFileType type=UnknownFile);
+			VSError	OpenReadOnly( string filename, VSFileType type=UnknownFile) { return OpenReadOnly( filename.c_str(), type); }
 			// Open an existing file read/write
-			VSError	OpenReadWrite( const char * filename, VSFileType type=Unknown);
-			VSError	OpenReadWrite( string filename, VSFileType type=Unknown) { return OpenReadWrite( filename.c_str(), type); }
+			VSError	OpenReadWrite( const char * filename, VSFileType type=UnknownFile);
+			VSError	OpenReadWrite( string filename, VSFileType type=UnknownFile) { return OpenReadWrite( filename.c_str(), type); }
 			// Open (truncate) or create a file read/write
-			VSError	OpenCreateWrite( const char * filename, VSFileType type=Unknown);
-			VSError	OpenCreateWrite( string filename, VSFileType type=Unknown) { return OpenCreateWrite( filename.c_str(), type); }
+			VSError	OpenCreateWrite( const char * filename, VSFileType type=UnknownFile);
+			VSError	OpenCreateWrite( string filename, VSFileType type=UnknownFile) { return OpenCreateWrite( filename.c_str(), type); }
 			// Close the file
 			void	Close();
 

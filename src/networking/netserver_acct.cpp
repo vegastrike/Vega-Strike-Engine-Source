@@ -115,7 +115,7 @@ void	NetServer::save()
 	// Save the Dynamic Universe in the data dir for now
 	string dynuniv_path = "dynaverse.dat";
 	VSFile f;
-	VSError err = f.OpenCreateWrite( dynuniv_path, Unknown);
+	VSError err = f.OpenCreateWrite( dynuniv_path, ::VSFileSystem::UnknownFile);
 	if( err>Ok)
 	{
 		cerr<<"Error opening dynamic universe file"<<endl;

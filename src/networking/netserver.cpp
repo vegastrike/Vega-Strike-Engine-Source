@@ -242,7 +242,7 @@ void	NetServer::start(int argc, char **argv)
 	// Loads dynamic universe
 	string dynpath = "dynaverse.dat";
 	VSFile f;
-	VSError err = f.OpenReadOnly( dynpath, Unknown);
+	VSError err = f.OpenReadOnly( dynpath, ::VSFileSystem::UnknownFile);
 	if( err>Ok)
 	{
 		cerr<<"!!! ERROR : opening dynamic universe file " << dynpath.c_str() << " !!!"<<endl;
@@ -735,7 +735,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			string newsystem = netbuf.getString();
 			ObjSerial jumpserial = netbuf.getSerial();
 			unsigned short zonenum = netbuf.getShort();
-			unsigned char * client_hash;
+			unsigned char * client_hash=0;
 			unsigned char * server_hash;
 #ifdef CRYPTO
 			server_hash = new unsigned char[FileUtil::Hash.DigestSize()];

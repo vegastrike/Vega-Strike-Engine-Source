@@ -1,11 +1,9 @@
 #include <config.h>
-
-#include "vsnet_serversocket.h"
 #include "vsnet_socket.h"
+#include "vsnet_serversocket.h"
 #include "vsnet_oss.h"
 #include "vsnet_debug.h"
 #include "vsnet_err.h"
-
 using std::cout;
 using std::cerr;
 using std::endl;

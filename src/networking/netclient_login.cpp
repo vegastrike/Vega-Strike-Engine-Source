@@ -216,7 +216,7 @@ void	NetClient::loginAccept( Packet & p1)
 	// Set the zone number
 	// Get the galaxy file from buffer with relative path to datadir !
 	string univfile = netbuf.getString();
-	unsigned char * digest;
+	unsigned char * digest=0;
 #ifdef CRYPTO
 	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
 	cerr<<"Initial system = "<<VSFileSystem::datadir+univfile<<" - File Hash = "<<digest<<endl;

@@ -128,7 +128,7 @@ class VSImage
 		// f2 is needed for bmp loading
 		unsigned char*	ReadImage( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);
 		VSError	WriteImage( char * filename, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
-							bool alpha=1, char bpp=16, VSFileType ft=Unknown);
+							bool alpha=1, char bpp=16, VSFileType ft=::VSFileSystem::UnknownFile);
 		VSError	WriteImage( VSFile * pf, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
 							bool alpha=1, char bpp=16);
 

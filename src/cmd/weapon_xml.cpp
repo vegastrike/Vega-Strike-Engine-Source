@@ -523,7 +523,7 @@ void LoadWeapons(const char *filename) {
   using namespace VSFileSystem;
   const int chunk_size = 16384;
   VSFile f;
-  VSError err = f.OpenReadOnly( filename, Unknown);
+  VSError err = f.OpenReadOnly( filename, UnknownFile);
   if (err>Ok) {
     return;
   }
