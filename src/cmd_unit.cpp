@@ -27,6 +27,7 @@
 #include "gfx_hud.h"
 #include "gfx_bounding_box.h"
 #include "cmd_ai.h"
+#include "cmd_order.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -810,21 +811,37 @@ void Unit::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector
 	*/
 	Draw();
 }
-
+void Unit::PrimeOrders () {
+  if (aistate) {
+    aistate = aistate->ReplaceOrder (new Order);
+  } else {
+    aistate = new Order; //get 'er ready for enqueueing
+  }
+}
 void Unit::SetAI(AI *newAI)
 {
-	if(aistate)
-		delete aistate;
-	aistate = newAI;
-	aistate->SetParent(this);
+  newAI->SetParent(this);
+  if (aistate) {
+    aistate = aistate->ReplaceOrder (newAI);
+  }else {
+    aistate = newAI;
+  }
 }
-
+void Unit::EnqueueAI(AI *newAI) {
+  newAI->SetParent(this);
+  if (aistate) {
+    aistate = aistate->ReplaceOrder (newAI);
+  }else {
+    aistate = newAI;
+  }
+}
 void Unit::ExecuteAI() {
   if(aistate) aistate->Execute();
   for(int a=0; a<numsubunit; a++) {
     subunits[a]->ExecuteAI();
   }
 }
+
 
 void Unit::Select() {
   selected = true;

@@ -38,9 +38,9 @@ KBSTATE keyState [KEYMAP_SIZE];
 
 static void kbGetInput(int key, int special, int release, int x, int y){
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
-    keyBindings[key](PRESS);
+    keyBindings[key](key,PRESS);
   if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)
-    keyBindings[key](RELEASE);
+    keyBindings[key](key,RELEASE);
   keyState[key] = release?UP:DOWN;
 }
 
@@ -99,16 +99,16 @@ void ProcessKB()
     //empty & analyze to see which one deserves to be activated
     }*/
   for(int a=0; a<KEYMAP_SIZE; a++) {
-    keyBindings[a](keyState[a]);
+    keyBindings[a](a,keyState[a]);
   }
 }	
 
 void BindKey(int key, KBHandler handler) {
 	keyBindings[key] = handler;
-	handler(RESET);
+	handler(key,RESET);
 }
 
-static void DefaultKBHandler(KBSTATE newState) {
+static void DefaultKBHandler(int key, KBSTATE newState) {
 	// do nothing
 	return;
 }

@@ -12,11 +12,12 @@ public:
 	virtual AI *Execute() {return this;}
 	virtual bool Done() {return false;}
         virtual int getType(){ return 0;}
-	//        virtual bool AppendOrder (Order * tmp) {return false;}
+	virtual AI* EnqueueOrder (AI * tmp) {delete this; return tmp;}
+	virtual AI* ReplaceOrder (AI * tmp) {delete this; return tmp;}
 };
 class AIFactory {
 public:
-  AIFactory();
+  AIFactory(){}
   virtual AI* newAI() {return new AI;}
 };
 

@@ -98,7 +98,7 @@ AI *Line::Execute()
 
 const float timek = .01;
 bool _Slew = true;
-static void Slew (KBSTATE newState){
+static void Slew (int,KBSTATE newState){
 	
 	if (newState==PRESS) {
 		_Slew = !_Slew;
@@ -106,7 +106,7 @@ static void Slew (KBSTATE newState){
 	else if (newState==RELEASE)
 	  ;
 }
-static void PitchDown(KBSTATE newState) {
+static void PitchDown(int,KBSTATE newState) {
 	static Vector Q;
 	static Vector R;
 	if(newState==PRESS) {
@@ -121,7 +121,7 @@ static void PitchDown(KBSTATE newState) {
 	}
 }
 
-static void PitchUp(KBSTATE newState) {
+static void PitchUp(int,KBSTATE newState) {
 	
 	static Vector Q;
 	static Vector R;
@@ -138,7 +138,7 @@ static void PitchUp(KBSTATE newState) {
 	}
 }
 
-static void YawLeft(KBSTATE newState) {
+static void YawLeft(int,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector R;
@@ -155,7 +155,7 @@ static void YawLeft(KBSTATE newState) {
 	}
 }
 
-static void YawRight(KBSTATE newState) {
+static void YawRight(int,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector R;
@@ -171,7 +171,7 @@ static void YawRight(KBSTATE newState) {
 	}
 }
 
-static void RollLeft(KBSTATE newState) {
+static void RollLeft(int,KBSTATE newState) {
 	static Vector P;
 	static Vector Q;
 	
@@ -188,7 +188,7 @@ static void RollLeft(KBSTATE newState) {
 	}
 }
 
-static void RollRight(KBSTATE newState) {
+static void RollRight(int,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector Q;
@@ -206,7 +206,7 @@ static void RollRight(KBSTATE newState) {
 }
 
 
-static void SlideForward(KBSTATE newState) {
+static void SlideForward(int,KBSTATE newState) {
 	
 	static Vector R;
 	if(newState==PRESS) {
@@ -220,7 +220,7 @@ static void SlideForward(KBSTATE newState) {
 	}
 }
 
-static void SlideBackward(KBSTATE newState) {
+static void SlideBackward(int,KBSTATE newState) {
 	
 	static Vector R;
 	if(newState==PRESS) {
@@ -234,7 +234,7 @@ static void SlideBackward(KBSTATE newState) {
 	}
 }
 
-static void SlideUp(KBSTATE newState) {
+static void SlideUp(int,KBSTATE newState) {
 	
 	static Vector Q;
 	if(newState==PRESS){
@@ -250,7 +250,7 @@ static void SlideUp(KBSTATE newState) {
 	}
 }
 
-static void SlideDown(KBSTATE newState) {
+static void SlideDown(int,KBSTATE newState) {
 	
 	static Vector Q;
 	if(newState==PRESS) {
@@ -264,7 +264,7 @@ static void SlideDown(KBSTATE newState) {
 	}
 }
 
-static void SlideLeft(KBSTATE newState) {
+static void SlideLeft(int,KBSTATE newState) {
 	
 	static Vector P;
 	if(newState==PRESS) {
@@ -278,7 +278,7 @@ static void SlideLeft(KBSTATE newState) {
 	}
 }
 
-static void SlideRight(KBSTATE newState) {
+static void SlideRight(int,KBSTATE newState) {
        
 	static Vector P;
 	if(newState==PRESS) {
@@ -291,7 +291,7 @@ static void SlideRight(KBSTATE newState) {
 		//a=0;
 	}
 }
-static void Stop (KBSTATE newState) {
+static void Stop (int,KBSTATE newState) {
 
 	if (newState==PRESS) {
 		_GFX->AccessCamera()->myPhysics.SetAngularVelocity (Vector (0,0,0));
@@ -303,7 +303,7 @@ static void Stop (KBSTATE newState) {
 	else if (newState==RELEASE) 
 			;
 }
-static void Quit(KBSTATE newState) {
+static void Quit(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
 		exit(0);
 	}
@@ -356,7 +356,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 }
 */
 
-static void FighterPitchDown(KBSTATE newState) {
+static void FighterPitchDown(int,KBSTATE newState) {
 	static Vector Q = fighter->Q();
 	static Vector R = fighter->R();
 	if(newState==PRESS) {
@@ -368,7 +368,7 @@ static void FighterPitchDown(KBSTATE newState) {
 	}
 }
 
-static void FighterPitchUp(KBSTATE newState) {
+static void FighterPitchUp(int,KBSTATE newState) {
 	
 	static Vector Q = fighter->P();
 	static Vector R = fighter->R();
@@ -380,7 +380,7 @@ static void FighterPitchUp(KBSTATE newState) {
 	}
 }
 
-static void FighterYawLeft(KBSTATE newState) {
+static void FighterYawLeft(int,KBSTATE newState) {
 	
 	static Vector P = fighter->P();
 	static Vector R = fighter->R();
@@ -392,7 +392,7 @@ static void FighterYawLeft(KBSTATE newState) {
 	}
 }
 
-static void FighterYawRight(KBSTATE newState) {
+static void FighterYawRight(int,KBSTATE newState) {
 	
 	static Vector P = fighter->P();
 	static Vector R = fighter->R();

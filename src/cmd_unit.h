@@ -114,7 +114,7 @@ public:
 
 	/*COMMAND*/
 	/*
-	virtual void ChangeTarget(Unit *target) = 0; // sent by the flight commander, supercommand AI, or player; tells it to switch to this new target
+	virtual void ChangeTarget(Unit *target) = 0; // sent by the flight commander, supercommand AI, or player; tells it to switch to this new target HANDLETHIS BY REPLACE/ENQUEUE ORDER after having primed orders
 	virtual void ChangeAggression(enum Aggression aggression) = 0; // same as above
 	virtual void AddNav(const Vector &pos) = 0; // same as above; tells it to add this position to the navpoint list
 	virtual void MoveTo(const Vector &pos) = 0; // same as above; clears the navpoint list and GOES there 
@@ -153,8 +153,9 @@ public:
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphere (int,int, float err, Camera *activeCam);
   bool querySphere (Matrix,int,int, float err,Camera *,Matrix);
-  
+  void PrimeOrders();
   void SetAI(AI *newAI);
+  void EnqueueAI(AI *newAI);
   Vector &Position(){return pos;};
   Vector &Nose(){return pr;};
   float GetTime(){return time;};

@@ -25,6 +25,8 @@
 #define _CMD_ORDER_H
 
 #include "cmd_ai.h"
+
+#include "UnitCollection.h"
 #include <vector>
 const int LOCATION =1;
 const int TARGET = 2;
@@ -36,16 +38,17 @@ protected:
   UnitCollection *group;
   UnitCollection *targets;
   Vector targetlocation;
-  vector<Order*> suborders;
+  vector<AI*> suborders;
 public:
   Order (): AI(), targetlocation(0,0,0){group =targets=NULL;type=0;done=false;}
   Order(int ttype):AI(), targetlocation(0,0,0){targets=NULL;type = ttype;done=false;}
+  virtual ~Order () {}
   virtual AI *Execute();
   bool AttachOrder (UnitCollection *targets);
   bool AttachOrder (Vector target);
   bool AttachSelfOrder (UnitCollection *targets=NULL);
-  bool EnqueueOrder (Order * ord);
-  bool ReplaceOrder (Order * ord);
+  AI* EnqueueOrder (AI * ord);
+  AI* ReplaceOrder (AI * ord);
   bool Done() {return done;}
   int getType() {return type;}
 };
@@ -64,21 +67,7 @@ class FlyStraight:public AI{
 public:
 	FlyStraight(float speed1, float time1) {parent = NULL; speed = speed1; time = time1;};
 	
-	AI *Execute()
-	{
-		if(parent->GetTime() > time)
-		{
-			parent->Destroy();
-			delete this;
-			return NULL;
-		}
-		else
-		{
-			parent->YSlide(speed);
-			return this;
-		}
-	}
-	
+	AI *Execute();
 	bool Done() {return false;}
 	int getType() {return 0;}
         bool AppendOrder (Order * tmp) {return false;}

@@ -23,7 +23,7 @@
 #include "UnitCollection.h"
 AI * Order::Execute () {
   int completed=0;
-  vector<Order*>::iterator ord = suborders.begin();
+  vector<AI*>::iterator ord = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
     if (completed&(*ord)->getType()){
       (*ord)->Execute();
@@ -43,13 +43,13 @@ AI * Order::Execute () {
   return this;
 }
 
-bool Order::EnqueueOrder (Order *ord) {
+AI* Order::EnqueueOrder (AI *ord) {
   suborders.push_back (ord);
-  return true;
+  return this;
 }
-bool Order::ReplaceOrder (Order *ord) {
+AI* Order::ReplaceOrder (AI *ord) {
   int completed=0;
-  vector<Order*>::iterator ordd = suborders.begin();
+  vector<AI*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
     if (!(ord->getType()&(*ordd)->getType())){
       	delete (*ordd);
@@ -59,7 +59,7 @@ bool Order::ReplaceOrder (Order *ord) {
     }
   }
   suborders.push_back(ord);
-  return true;
+  return this;
 }
 
 bool Order::AttachOrder (UnitCollection *targets1) {
@@ -103,4 +103,19 @@ bool Order::AttachOrder (Vector targetv) {
   }
   targetlocation = targetv;
   return true;
+}
+
+
+AI* FlyStraight::Execute() {
+	if(parent->GetTime() > time)
+		{
+			parent->Destroy();
+			delete this;
+			return NULL;
+		}
+		else
+		{
+			parent->YSlide(speed);
+			return this;
+		}
 }

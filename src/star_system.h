@@ -10,12 +10,12 @@
 
 
 #include "gfx_camera.h"
-#include "cmd_input_dfa.h"
 class Planet;
 class UnitCollection;
 class ClickList;
 class Unit;
 class TextPlane;
+class InputDFA;
 #define NUM_CAM		12
 
 class StarSystem {

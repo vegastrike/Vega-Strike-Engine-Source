@@ -3,13 +3,37 @@
 #include "gfx_sprite.h"
 #include "vegastrike.h"
 #include "cmd_unit.h"
+#include "cmd_order.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 
 #define ACTIVE_SHIFT               1
 #define ACTIVE_CTRL                2
 #define ACTIVE_ALT                 4
+OrderFactory *orderbindings [KEYMAP_SIZE]={NULL};
+void InputDFA::OrderHandler (int key, KBSTATE k) {
+  if (k==PRESS) {
+    if (k<='Z'&&k>='A')
+      CurDFA->queueOrder=true;
+    else
+      CurDFA->queueOrder=false;
+    CurDFA->SetOrder(orderbindings[key]);
+  }
+}
 
+void BindOrder (int key, OrderFactory *ofac){
+  /*  if (orderbindings[KEYMAP_SIZE]) 
+    delete orderbindings[KEYMAP_SIZE];
+  */
+  orderbindings[key]= ofac;
+  BindKey (key,InputDFA::OrderHandler);
+}
+void InputDFA::SetOrder (OrderFactory *ofac) {
+  if (orderfac) {
+    ///no don't delete!!! will still be bound to a key?    delete orderfac;
+  }
+  orderfac = ofac;
+}
 //Equiv of nonselect, but for Targets instead of selected ships
 void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod) {
   if (k==RESET)
@@ -27,12 +51,12 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
       Unit * un;
       while (un = tmp->current()) {
 	fprintf (stderr,"Execute orders on target! %x\n",un);
+	
 	tmp->advance();
       }
       delete tmp;
       delete CurDFA->targetted;
-      CurDFA->targetted=NULL;
-      
+      CurDFA->targetted=NULL;      
     }
     CurDFA->SetStateNone(); //go back up the heirarchy;
   }
@@ -50,7 +74,16 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     CurDFA->prevx=x;
     CurDFA->prevy=y;
   }
-  if (kmod&ACTIVE_CTRL/*||condition of bound orders matchedFIXME*/) {
+  if (kmod&ACTIVE_CTRL/*Do something similar with special right mouse button*/) {
+    //CurDFA->SetOrder (new AttackOrderFactory);
+    if (kmod&ACTIVE_SHIFT) {
+      CurDFA->queueOrder =true;
+    } else {
+      CurDFA->queueOrder = false;
+    }
+    CurDFA->SetOrder (new OrderFactory());
+  }
+  if (CurDFA->orderfac!=NULL) {
     TargetSelect(k,x,y,delx,dely,kmod);//add some provision for binding keys to orders
     return;
   }
@@ -171,7 +204,6 @@ InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr"), SelectBox("sele
   clickList = parentSystem->getClickList();
   state = NONE;
   ContextAcquire();//binds keys, etc
-  curorder=0;
   Selecting=false;
   selected = NULL;
   targetted = NULL;

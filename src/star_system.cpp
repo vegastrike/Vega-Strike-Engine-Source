@@ -5,7 +5,7 @@
 #include "UnitCollection.h"
 #include "gfx_click_list.h"
 #include "gfx_hud.h"
-
+#include "cmd_input_dfa.h"
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
   units(new UnitCollection()), 

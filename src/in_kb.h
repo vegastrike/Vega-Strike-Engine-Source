@@ -30,7 +30,7 @@ enum KBSTATE {
 	RESET
 };
 
-typedef void (*KBHandler)(KBSTATE);
+typedef void (*KBHandler)(int, KBSTATE);
 
 void ProcessKB();
 void BindKey(int key, KBHandler handler);
