@@ -792,3 +792,20 @@ bool VegaConfig::setVariable(string section,string name,string value){
   }
   return false;
 }
+
+bool VegaConfig::setVariable(string section,string subsection,string name,string value){
+  configNode *sectionnode=findSection(section,variables);
+  if(sectionnode!=NULL){
+    configNode *subnode=findSection(name,sectionnode);
+
+	if(subnode!=NULL) {
+		configNode *varnode=findEntry(name,subnode);
+		if(varnode!=NULL){
+			// now set the thing
+			setVariable(varnode,value);
+			return true;
+		}
+	}
+  }
+  return false;
+}

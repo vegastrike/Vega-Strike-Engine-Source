@@ -74,6 +74,7 @@ class VegaConfig {
 
   void setVariable(configNode *entry,string value);
   bool setVariable(string section,string name,string value);
+  bool setVariable(string section,string subsection,string name,string value);
 
   void bindKeys();
 
