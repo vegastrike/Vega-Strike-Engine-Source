@@ -12,6 +12,18 @@ namespace UnitUtil {
 		if (!my_unit)return "";
 		return _Universe->GetFaction(my_unit->faction);
     }
+	int getFactionIndex (Unit *my_unit) {
+		if (!my_unit)return 0;
+		return my_unit->faction;
+    }
+	void setFactionIndex (Unit *my_unit,int factionname) {
+		if (!my_unit)return;
+		my_unit->SetFaction(factionname);
+    }
+	void setFactionName (Unit *my_unit,string factionname) {
+		if (!my_unit)return;
+		my_unit->SetFaction(_Universe->GetFaction(factionname.c_str()));
+    }
 	string getName(Unit *my_unit){
 		if (!my_unit)return "";
 		return my_unit->name;

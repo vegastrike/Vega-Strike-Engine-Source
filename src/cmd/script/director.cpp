@@ -422,6 +422,8 @@ void Mission::BriefingStart() {
     BriefingEnd();
   }
   briefing = new Briefing();
+  if (!runtime.threads.empty())
+	runtime.threads[0]->callFunction("initbriefing");
   RunDirectorScript ("initbriefing");
 }
 void Mission::BriefingUpdate() {
@@ -433,6 +435,8 @@ void Mission::BriefingUpdate() {
 void Mission::BriefingLoop() {
   if (briefing) {
     RunDirectorScript ("loopbriefing");
+	if (!runtime.threads.empty())
+		runtime.threads[0]->callFunction("loopbriefing");
   }
 }
 class TextPlane * Mission::BriefingRender() {
@@ -457,6 +461,8 @@ class TextPlane * Mission::BriefingRender() {
 
 void Mission::BriefingEnd() {
   if (briefing) {
+	if (!runtime.threads.empty())
+		runtime.threads[0]->callFunction("endbriefing");
     RunDirectorScript ("endbriefing");      
     delete briefing;
     briefing = NULL;

@@ -152,6 +152,21 @@ namespace UniverseUtil {
 	void terminateMission(){
 		mission->terminateMission();
 	}
+	Unit *getPlayer(){
+		return _Universe->AccessCockpit()->GetParent();;
+	}
+	Unit *getPlayerX(int which){
+		int j=0;
+		for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+			Unit * un;
+			if ((un=_Universe->AccessCockpit(i)->GetParent())) {
+				if (j==which) {
+					return un;
+				}
+				j++;
+			}
+		}
+	}
 }
 
 #undef activeSys

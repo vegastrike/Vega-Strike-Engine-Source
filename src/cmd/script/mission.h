@@ -373,6 +373,7 @@ class missionThread {
  protected:
   virtual void Destructor () {delete this;}
  public:
+  virtual void callFunction (std::string str) {}
   virtual ~missionThread(){}//call me and DIE
   vector<contextStack *> exec_stack;
   vector<missionNode *> module_stack;
@@ -419,8 +420,8 @@ class missionNode : public tagDomNode {
 
 
 class Mission {
-  class Briefing * briefing;
  public:
+  class Briefing * briefing;
   double gametime;
   void terminateMission();
  Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);

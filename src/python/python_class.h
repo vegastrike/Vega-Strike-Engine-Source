@@ -1,3 +1,5 @@
+#ifndef __PYTHON_CLASS_H__
+#define __PYTHON_CLASS_H__
 #include <Python.h>
 /*namespace boost{namespace python{
 template <class T> struct type;
@@ -20,13 +22,25 @@ These following #defines will create a module for python
 call them with:
 
 PYTHON_BEGIN_MODULE(VS)
-	PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonFire")
+	PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonFire") //begins an inherited class with a virtual Execute function...
+	//You can call any other virtual functions by defining:
+	//	void callFunction(std::string name){}
+	//in your base class...  To use it, use:
+	//	MyClass->callFunction("Execute").
+	//That will do the same thing as:
+	//	"MyClass->Execute()"
+	//
 	PYTHON_END_CLASS(VS,FireAt)
-	PYTHON_BEGIN_INHERIT_CLASS(VS,BaseClass,"PythonClassName")
+	PYTHON_BEGIN_INHERIT_CLASS(VS,BaseClass,"PythonVirtualClassName")
 	PYTHON_END_CLASS(VS,BaseClass)
-	PYTHON_BEGIN_CLASS(VS,MyClass,"PythonClassName")
+	PYTHON_BASE_BEGIN_CLASS(VS,MyClass,"PythonClassName")
+	Class.def(boost::python::constructor<int,float,string>); //this will define a constructor that takes an int, float and a string.
 	Class.def(&MyClass::MyFunc,"FunctionName");
 	PYTHON_END_CLASS(VS,MyClass)
+	PYTHON_BEGIN_CLASS(VS,MyOtherClass,"DefaultConstructorPythonClassName") //this will automaticly define a default constructor
+	Class.def(&MyOtherClass::MyOtherFunc,"FunctionName");
+	PYTHON_END_CLASS(VS,MyOtherClass)
+	VS.def(&MyGlobalFunction,"GlobalFunc") //the global functions are easiest; you can call these in python with VS.globalfunc
 PYTHON_END_MODULE(VS)
 ...
 int main (int argc,char *argv[]) {
@@ -37,7 +51,6 @@ int main (int argc,char *argv[]) {
 }
 
 */
-std::auto_ptr<boost::python::detail::instance_holder_base>::~auto_ptr() {printf("autoptrdestructor");}
 #define TO_PYTHON_SMART_POINTER(Pointer) \
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 PyObject* to_python(class Pointer* x) {return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x);} \
@@ -110,6 +123,9 @@ template <class SuperClass> class PythonClass:public SuperClass {
     Py_XINCREF(self);
     last_instance=this;
   }
+  virtual void callFunction (std::string str) {
+	  boost::python::callback<void>::call_method(self,str.c_str());
+  }
   virtual void Execute () {
     boost::python::callback <void>::call_method (self,"Execute");
   }
@@ -139,3 +155,5 @@ template <class SuperClass> class PythonClass:public SuperClass {
     fprintf (stderr,"Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
   }
 };
+
+#endif

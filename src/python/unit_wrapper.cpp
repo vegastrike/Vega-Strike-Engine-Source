@@ -1,6 +1,7 @@
 #ifndef PYTHON_STUB
 #include "cmd/container.h"
 #include <string>
+#include "init.h"
 #include "gfx/vec.h"
 #include "cmd/unit.h"
 #include "python_class.h"
@@ -9,8 +10,9 @@
 #include "universe_util.h"
 #include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
+
 using Orders::FireAt;
-BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
+/*BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 PyObject *to_python (Vector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
 }
@@ -28,7 +30,7 @@ QVector from_python(PyObject *p,boost::python::type<QVector>) {
 	PyArg_ParseTuple(p,"ddd",&vec.i,&vec.j,&vec.k);
 	return vec;
 }
-BOOST_PYTHON_END_CONVERSION_NAMESPACE
+BOOST_PYTHON_END_CONVERSION_NAMESPACE*/
 
 using std::string;
 //WARNING: Macro City ahead.  Please skip this section if you don't like macros.
@@ -42,6 +44,7 @@ const char* error="\nERROR: NULL Unit used in Python script; returning default v
 #define voidWRAPPED1(name,atype,a) void name ( atype a){{CHECKME;} me -> name ( a );}  
 #define voidWRAPPED2(name,atype,a,btype,b) void name ( atype a, btype b ){{CHECKME;} me -> name ( a , b );}  
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b, ctype c ){{CHECKME;} me -> name ( a , b , c );}  
+#define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) void name ( atype a, btype b, ctype c , dtype d , etype e ){{CHECKME;} me -> name ( a , b , c , d , e );}  
 #define EXPORT_UTIL(name,aff)
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 //End of Macro City
@@ -115,6 +118,8 @@ voidEXPORT_UTIL(SetDifficulty)
 voidEXPORT_UTIL(playSound)
 voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
+EXPORT_UTIL(getPlayer,Unit)
+EXPORT_UTIL(getPlayerX,Unit)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -146,6 +151,7 @@ PYTHON_END_CLASS(VS,Cargo)
 #undef voidWRAPPED1
 #undef voidWRAPPED2
 #undef voidWRAPPED3
+#undef voidWRAPPED5
 #define WRAPPED0(type,name,nada) Class.def(&UnitWrapper::name,#name);
 #define WRAPPED1(type,name,atype,a,def) WRAPPED0(type,name,def)
 #define WRAPPED2(type,name,atype,a,btype,b,def) WRAPPED0(type,name,def)
@@ -154,6 +160,7 @@ PYTHON_END_CLASS(VS,Cargo)
 #define voidWRAPPED1(name,atype,a) WRAPPED0(void,name,0)
 #define voidWRAPPED2(name,atype,a,btype,b) WRAPPED0(void,name,0)
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) WRAPPED0(void,name,0)
+#define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) WRAPPED0(void,name,0)
 #define EXPORT_UTIL(name,aff) Class.def(&UnitUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 #include "python_unit_wrap.h"
@@ -165,6 +172,7 @@ PYTHON_END_CLASS(VS,Cargo)
 #undef voidWRAPPED1
 #undef voidWRAPPED2
 #undef voidWRAPPED3
+#undef voidWRAPPED5
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 //End of Macro City 2
@@ -214,6 +222,9 @@ Unit * from_python(PyObject *p,boost::python::type<Unit *>) {
 }
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
+void InitVS() {
+	PYTHON_INIT_MODULE(VS);
+}
 
 
 
@@ -228,6 +239,8 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 ///////////////////////////////////////////////
 //below replace ~ with enter
 #else
+#define false 0
+#define true 1
 #define MYPRINT(nam) print #nam
 #define WRAPPED0(type,name,aff) def name(self):~    MYPRINT(name) ~    return aff
 #define WRAPPED1(type,name,atype,a,aff) def name(self,a): ~    MYPRINT(name)  ~    return aff
@@ -237,6 +250,7 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #define voidWRAPPED1(name,atype,a) def name(self,a): ~    MYPRINT(name)
 #define voidWRAPPED2(name,atype,a,btype,b) def name(self,a,b): ~    MYPRINT(name)
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) def name(self,a,b,c): ~    MYPRINT(name)
+#define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) def name(self,a,b,c,d,e): ~    MYPRINT(name)
 #define voidEXPORT_UTIL(name) def name(self,a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
 voidEXPORT_UTIL(pushSystem)
@@ -265,6 +279,9 @@ voidEXPORT_UTIL(SetDifficulty)
 voidEXPORT_UTIL(playSound)
 voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
+EXPORT_UTIL(getPlayer,Unit)
+EXPORT_UTIL(getPlayerX,Unit)
+
 def string ():
   return ''
 class Unit:
