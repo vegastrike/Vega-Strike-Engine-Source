@@ -181,8 +181,11 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+
   RecalculateVertices();
+
   beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
+
 }
 
 void Beam::ProcessDrawQueue() {
@@ -220,25 +223,29 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0)
     curlength=0;
-  if (curlength > range)
-    curlength=range;
   if (curthick ==0) {
     refiretime +=SIMULATION_ATOM;
     return;
   }
+  if (stability&&numframes*SIMULATION_ATOM>stability)
+    impact|=UNSTABLE;
+
   numframes++;
   Matrix cumulative_transformation_matrix;
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   //to help check for crashing.
-  if (stability&&numframes*SIMULATION_ATOM>stability)
-    impact|=UNSTABLE;
+  center = cumulative_transformation.position;
+  direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
   
   curthick+=(impact&UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
   if (curthick > thickness)
     curthick = thickness;
+
+
   if (curthick<=0) {
+
     curthick =0;//die die die
     if (CollideInfo.object!=NULL) {
       KillCollideTable (&CollideInfo);
@@ -246,14 +253,22 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     }
     
   } else {
+
     CollideHuge(CollideInfo);
     
-    center = cumulative_transformation.position;
-    direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
+    if (!(curlength<range&&curlength>0)) {//if curlength just happens to be nan
+      if (curlength>range)
+	curlength=range;
+      else
+	curlength=0;
+    }
     Vector tmpvec (center + direction*curlength);
     Vector tmpMini = center.Min(tmpvec);
+
+
     tmpvec = center.Max (tmpvec);
     if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object==NULL)) {
+      
       if (CollideInfo.object !=NULL) {
 	KillCollideTable (&CollideInfo);
       }
@@ -270,6 +285,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 }
 
 bool Beam::Collide (Unit * target) {
+
   float distance;
   Vector normal;//apply shields
   Vector end (center+direction*curlength);
@@ -277,9 +293,9 @@ bool Beam::Collide (Unit * target) {
     return false;
   
 
-
+  
   if ((distance = target->queryBSP(center,end,normal))) { 
-
+    
     curlength = distance;
     impact|=IMPACT;
     
@@ -293,6 +309,8 @@ bool Beam::Collide (Unit * target) {
     float tmp=(curlength/range); 
     target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),coltmp);
     return true;
+    
   }
+  
   return false;
 }

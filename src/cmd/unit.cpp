@@ -318,7 +318,7 @@ void Unit::getAverageGunSpeed(float & speed, float &range) {
 }
 Vector Unit::PositionITTS (const Vector & posit, float speed) {
   Vector retval = Position()-posit;
-  speed = retval.Magnitude()/speed;
+  speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
   retval = Position()+Velocity*speed;
   return retval;
 }
@@ -333,12 +333,12 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
    dist = totarget.Magnitude();
    if (tmpcos>0) {
       tmpcos = dist*dist - tmpcos*tmpcos;
-      tmpcos = targ->rSize()/sqrtf(tmpcos);//one over distance perpendicular away from straight ahead times the size...high is good
-    } else {
-      tmpcos /= dist;
-    }
-    dist /= range;
-    return tmpcos;
+      tmpcos = targ->rSize()/sqrtf(tmpcos);//one over distance perpendicular away from straight ahead times the size...high is good WARNING POTENTIAL DIV/0
+   } else {
+     tmpcos /= dist;
+   }
+   dist /= range;//WARNING POTENTIAL DIV/0
+   return tmpcos;
 }
 float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
   float retval = -1;
@@ -358,11 +358,11 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
     tmpdist = totarget.Magnitude();
     if (tmpcos>0) {
       tmpcos = tmpdist*tmpdist - tmpcos*tmpcos;
-      tmpcos = targ->rSize()/tmpcos;//one over distance perpendicular away from straight ahead times the size...high is good
+      tmpcos = targ->rSize()/tmpcos;//one over distance perpendicular away from straight ahead times the size...high is good WARNING POTENTIAL DIV/0
     } else {
       tmpcos /= tmpdist;
     }
-    tmpdist /= mounts[i].type.Range;
+    tmpdist /= mounts[i].type.Range;//UNLIKELY DIV/0
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
@@ -428,9 +428,10 @@ float Unit::querySphere (const Vector &start, const Vector &end) {
     a = dir.Dot(dir);
     //b^2-4ac
     c = b*b - 4*a*c;
-    if (c<0)
+    if (c<0||a==0)
       continue;
     a *=2;
+      
     tmp = (-b + sqrtf (c))/a;
     c = (-b - sqrtf (c))/a;
     if (tmp>0&&tmp<=1) {
