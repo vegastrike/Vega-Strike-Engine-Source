@@ -440,15 +440,19 @@ void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
     if (cloak>=0) {
       haloalpha=((float)cloak)/32767;
     }
+    float enginescale = GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
     float cmas=computer.max_ab_speed()*computer.max_ab_speed();
     if (cmas==0)
       cmas =1;
-    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(cmas));
+    if (enginescale>cmas)
+      enginescale=cmas;
+    Vector Scale (1,1,enginescale/(cmas));
 #endif
-    halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
+    if (halos.ShouldDraw (enginescale)) 
+      halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
 }
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
@@ -570,15 +574,19 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     haloalpha=((float)cloak)/32767;
   }
   if (On_Screen) {
+    float enginescale = GetVelocity().MagnitudeSquared();
 #ifdef CAR_SIM
     Vector Scale (1,image->ecm,computer.set_speed);
 #else
-    float cmas = computer.max_ab_speed()*computer.max_ab_speed();
+    float cmas=computer.max_ab_speed()*computer.max_ab_speed();
     if (cmas==0)
-      cmas=1;
-    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/cmas);
+      cmas =1;
+    if (enginescale>cmas)
+      enginescale=cmas;
+    Vector Scale (1,1,enginescale/(cmas));
 #endif
-    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+    if (halos.ShouldDraw (enginescale)) 
+      halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
   }
 }
 using Orders::FireAt;

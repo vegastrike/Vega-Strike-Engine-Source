@@ -75,6 +75,7 @@ namespace UnitXML {
       GREEN,
       BLUE,
       ALPHA,
+      ACTIVATIONSPEED,
       MOUNTSIZE,
       WEAPON,
       DEFENSE,
@@ -221,7 +222,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION)
     
   };
-  const EnumMap::Pair attribute_names[97] = {
+  const EnumMap::Pair attribute_names[98] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -234,6 +235,7 @@ namespace UnitXML {
     EnumMap::Pair ("qi", QI),     
     EnumMap::Pair ("qj", QJ),     
     EnumMap::Pair ("qk", QK),
+    EnumMap::Pair ("activationSpeed",ACTIVATIONSPEED),
     EnumMap::Pair ("red",RED),
     EnumMap::Pair ("green",GREEN),
     EnumMap::Pair ("blue",BLUE),    
@@ -322,7 +324,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 97);
+  const EnumMap attribute_map(attribute_names, 98);
 }
 
 using XMLSupport::EnumMap;
@@ -338,6 +340,7 @@ using namespace UnitXML;
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
   static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   Cargo carg;
+  float act_speed=0;
   short volume=-1;
   string filename;
   QVector P;
@@ -659,6 +662,9 @@ using namespace UnitXML;
 	ADDDEFAULT;
 	filename = (*iter).value;
 	break;
+      case ACTIVATIONSPEED:
+	act_speed=  parse_float ((*iter).value);
+	break;
       case MOUNTSIZE:
 	ADDDEFAULT;
 	P.i=xml->unitscale*parse_float((*iter).value);
@@ -667,7 +673,7 @@ using namespace UnitXML;
 	break;
       }
     }
-	addHalo( filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type);
+	addHalo( filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type,act_speed);
     break;
   case MOUNT:
     ADDTAG;

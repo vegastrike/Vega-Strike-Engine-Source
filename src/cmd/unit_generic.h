@@ -290,7 +290,7 @@ protected:
   virtual void Split (int level){}
   //  void SwapOutHalos();
   //  void SwapInHalos();
-  virtual void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type) {}
+  virtual void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type, float activation) {}
 
 // Uses Mesh -> in NetUnit and Unit only
   vector <Mesh *> StealMeshes();

@@ -140,9 +140,9 @@ public:
   virtual void DrawNow(const Matrix &m = identity_matrix, float lod=1000000000);
   ///Deprecated
   //virtual void ProcessDrawQueue() {}
-  void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type)
+  void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type,float halo_speed)
   {
-	 halos.AddHalo (filename,loc,size,col,halo_type);
+	 halos.AddHalo (filename,loc,size,col,halo_type,halo_speed);
   }
 
 /***************************************************************************************/
