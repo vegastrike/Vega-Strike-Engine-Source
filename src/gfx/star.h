@@ -18,7 +18,7 @@ public:
   StarVlist(float spread);
   void UpdateGraphics();
   virtual ~StarVlist(){}
-  virtual bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch, int whichTexture){}
+  virtual bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch, int whichTexture){return false;}
   virtual void Draw(bool,int whichtex){}
   virtual void EndDrawState(bool, int whichtex){}
   virtual int NumTextures() {return 1;}

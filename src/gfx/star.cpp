@@ -287,7 +287,7 @@ PointStarVlist::PointStarVlist (int num ,float spread,const std::string &sysnam)
 	//if(StarStreaks) {
         vlist= new GFXVertexList (GFXLINE,num,tmpvertex, num, true,0);
 	//}else {
-		for (unsigned int i=0;i<num/2;++i) {
+		for (int i=0;i<num/2;++i) {
 			tmpvertex[i]=tmpvertex[i*2+1];
 		}
 		nonstretchvlist= new GFXVertexList (GFXPOINT,num/2,tmpvertex, num/2, false,0);
@@ -383,7 +383,6 @@ Stars::Stars(int num, float spread): vlist(NULL),spread(spread){
   }else {
     vlist = new SpriteStarVlist((num/STARnumvlist)+1,spread,"",starspritetextures,starspritesize);
   }
-  int curnum = num/STARnumvlist+1;
   fade = blend=true;
   ResetPosition(QVector(0,0,0));
 }
@@ -515,7 +514,7 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
     std::string::size_type where=texturenames.find(" ");
     string texturename=texturenames.substr(0,where);
     if (where!=string::npos) {
-      texturenames=texturenames.substr(where);
+      texturenames=texturenames.substr(where+1);
     }else texturenames="";
     
     if (texturename.find(".ani")!=string::npos) {
