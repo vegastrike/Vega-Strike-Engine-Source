@@ -3515,16 +3515,19 @@ public:
   }
 };
 std::map <int, DoubleName> downgrademap;
-void AddToDowngradeMap (std::string name,double value, int unitoffset) {
+bool AddToDowngradeMap (std::string name,double value, int unitoffset,std::map <int,DoubleName> &tempdowngrademap) {
   using std::map;
   map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
   if (i!=downgrademap.end()) {
     if ((*i).second.d<=value) {
-      (*i).second= DoubleName (name,value);
+        tempdowngrademap[unitoffset] = DoubleName (name,value);
+        return true;
     }
   }else {
-    downgrademap[unitoffset]=DoubleName (name,value);
+      tempdowngrademap[unitoffset] = DoubleName (name,value);      
+      return true;
   }
+  return false;
 }
 void ClearDowngradeMap () {
   downgrademap.clear();
@@ -3549,7 +3552,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   adder Adder;
   comparer Comparer;
   percenter Percenter;
-
+  std::map <int, DoubleName> tempdownmap;
   float tmax_speed = up->computer.max_combat_speed;
   float tmax_ab_speed = up->computer.max_combat_ab_speed;
   float tmax_yaw = up->computer.max_yaw;
@@ -3600,7 +3603,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   int retval;
   double temppercent;
   static Unit * blankship = UnitFactory::createServerSideUnit ("blank",true,FactionUtil::GetFaction("upgrades"));
-#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;float MyPercentMin = ComputeMinDowngradePercent();if (downgrade && temppercent > MyPercentMin) {AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this);}} else {if (retval!=NOTTHERE) cancompletefully=false;}
+#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this,tempdownmap);} else {if (retval!=NOTTHERE) cancompletefully=false;}
 
   
 #define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false,this->my)
@@ -3779,6 +3782,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (MomentOfInertia<(templ?templ->MomentOfInertia:0.00000001)) {
       MomentOfInertia=(templ?templ->MomentOfInertia:0.00000001);
     }
+  }
+  float MyPercentMin = ComputeMinDowngradePercent();
+  if (downgrade && percentage > MyPercentMin) {
+      for (std::map<int,DoubleName>::iterator i = tempdownmap.begin();i!=tempdownmap.end();++i) {
+          downgrademap[(*i).first]=(*i).second;
+      }
   }
   return cancompletefully;
 }

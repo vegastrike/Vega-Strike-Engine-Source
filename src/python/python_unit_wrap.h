@@ -152,5 +152,5 @@
 	voidEXPORT_UTIL1(setSpeed, float,speed)
 	EXPORT_UTIL0(float,maxSpeed)
 	EXPORT_UTIL0(float,maxAfterburnerSpeed)
-
+	voidEXPORT_UTIL5(orbit,UnitWrapper,orbitee,float,speed,QVector,R,QVector,S,QVector,center)
 #endif

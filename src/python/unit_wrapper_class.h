@@ -20,7 +20,8 @@ static char* error="\nERROR: NULL Unit used in Python script; returning default 
 #define voidEXPORT_UTIL0(name) void name (){UnitUtil::name (GetUnit());}  
 #define voidEXPORT_UTIL1(name,atype,a) void name ( atype a ) {UnitUtil::name ( GetUnit(), a );}  
 #define voidEXPORT_UTIL2(name,atype,a,btype,b) void name ( atype a, btype b ){UnitUtil::name ( GetUnit(), a , b );}  
-#define voidEXPORT_UTIL3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b , ctype c ){UnitUtil::name ( GetUnit(), a , b , c );}  
+#define voidEXPORT_UTIL3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b , ctype c ){UnitUtil::name ( GetUnit(), a , b , c );}
+#define voidEXPORT_UTIL5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) void name ( atype a, btype b , ctype c, dtype d, etype e){UnitUtil::name ( GetUnit(), a , b , c, d, e );}  
 //#define EXPORT_UTIL(name,aff)
 //#define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 //End of Macro City
@@ -90,3 +91,4 @@ public:
 #undef voidEXPORT_UTIL1
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
+#undef voidEXPORT_UTIL5
