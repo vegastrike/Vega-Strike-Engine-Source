@@ -67,8 +67,6 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 	Unit *un=base->caller.GetUnit();
 	if (un) {
 		GFXHudMode (GFXFALSE);
-		GFXEnable (DEPTHTEST);
-		GFXEnable (DEPTHWRITE);
 		Vector p,q,r;
 		_Universe->AccessCamera()->GetOrientation (p,q,r);
 		int co=_Universe->AccessCamera()->getCockpitOffset();
@@ -83,9 +81,17 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		newmat.p.i*=newmat.p.k;
 		newmat.p.j*=newmat.p.k;
 		MultMatrix (final,cam,newmat);
+		GFXClear(GFXFALSE);//clear the zbuf
+		GFXEnable (DEPTHTEST);
+		GFXEnable (DEPTHWRITE);
+		GFXEnable(LIGHTING);
+		int light=0;
+		GFXCreateLight(light,GFXLight(true,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(.1,.1,.1,1),GFXColor(1,0,0),GFXColor(1,1,1,0),24),true);
 		(un)->DrawNow(final);
+		GFXDeleteLight(light);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
+		GFXDisable(LIGHTING);
 		_Universe->AccessCamera()->setCockpitOffset(co);
 		_Universe->AccessCamera()->UpdateGFX();
 //		_Universe->AccessCockpit()->SetView (CP_PAN);
