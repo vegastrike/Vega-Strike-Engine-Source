@@ -55,11 +55,10 @@ void Base::Room::BaseShip::Draw (Base *base) {
 		Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
 		Matrix final;
 		Matrix newmat = mat;
-		newmat.p.i*=un->rSize();
-		newmat.p.j*=un->rSize();
 		newmat.p.k*=un->rSize();
 		newmat.p+=QVector(0,0,g_game.znear);
-
+		newmat.p.i*=newmat.p.k;
+		newmat.p.j*=newmat.p.k;
 		MultMatrix (final,cam,newmat);
 		un->DrawNow(final);
 		GFXDisable (DEPTHTEST);
@@ -217,7 +216,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 				}
 				if (button==WS_RIGHT_BUTTON) {
 					input[200]=input[199]='\0';
-					objs.push_back(new BaseSprite("tex",input));
+					objs.push_back(new BaseSprite(input,"tex"));
 					((BaseSprite*)objs.back())->texfile=string(input);
 					((BaseSprite*)objs.back())->spr.SetPosition(x,y);
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
@@ -312,7 +311,7 @@ void Base::GotoLink (int linknum) {
 
 Base::~Base () {
 #ifdef BASE_MAKER
-	FILE *fp=fopen("bases/NEW_BASE.xbase","wt");
+	FILE *fp=fopen("bases/NEW_BASE"BASE_EXTENSION,"wt");
 	if (fp) {
 		EndXML(fp);
 		fclose(fp);
@@ -425,7 +424,7 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 		rooms.push_back(new Room ());
 		rooms.back()->deftext="ERROR: No rooms specified...";
 #ifndef BASE_MAKER
-		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75),"default room"));
+		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,2),"default room"));
 		BaseUtil::Launch(0,"default room",-1,-1,1,2,"ERROR: No rooms specified... - Launch");
 		BaseUtil::Comp(0,"default room",0,-1,1,2,"ERROR: No rooms specified... - Computer",
 				"BUYMODE SELLMODE UPGRADEMODE DOWNGRADEMODE NEWSMODE SHIPMODE MISSIONMODE BRIEFINGMODE");

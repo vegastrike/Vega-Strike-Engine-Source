@@ -13,6 +13,7 @@ libcmd_a_SOURCES =				\
 	base_util.cpp			\
 	base_util.h			\
 	base_write_xml.cpp		\
+	base_write_python.cpp		\
 	beam.h				\
 	beam.cpp				\
 	briefing.h			\

@@ -21,7 +21,7 @@ namespace BaseUtil {
 #endif
 		((Base::Room::BaseSprite*)newroom->objs.back())->spr.SetPosition(x,y);
 	}
-	void Ship (int room, std::string index,QVector pos,Vector R, Vector Q) {
+	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		Base::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
 		Vector P = R.Cross(Q);
