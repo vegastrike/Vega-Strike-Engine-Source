@@ -427,11 +427,15 @@ void StarSystem::Update() {
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
-
+extern Unit ** fighters;
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
       pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
+      if (pendingjump[kk].un==fighters[0]) {
+	_Universe->popActiveStarSystem();
+	_Universe->pushActiveStarSystem(pendingjump[kk].dest);
+      }
     }
   }
   pendingjump.clear();

@@ -50,7 +50,6 @@ Universe::Universe(int argc, char** argv)
 
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
-  active_star_system[0]=s;//this one will get drawn...is this a good idea? ask john.  WHo's john? beats me!
 }
 void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
