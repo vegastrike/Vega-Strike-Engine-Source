@@ -1098,7 +1098,8 @@ dnl --------------------------------------------------------------------------
 
 dnl CHANGE JVOIP SUPPORT TO EXTERNAL LIB LINK (Compile lib separatly)
 
-TESTNETCOMM_NOSOUND="0"
+TESTNETCOMM="0"
+TESTNETCOMM_NOSOUND="1"
 TESTNETCOMM_NOWEBCAM="1"
 TESTNETCOMM_JVOIP="0"
 TESTNETCOMM_PORTAUDIO="0"
@@ -1107,75 +1108,85 @@ TESTNETCOMM_PORTAUDIO="0"
 	dnl        AND IT GOES THE SAME FOR PORTAUDIO
 	AC_ARG_ENABLE(	netcomm,
 				AC_HELP_STRING([--enable-netcomm=TYPE],
-				[Enable hazardous network communications (TYPE=none (default), jvoip, portaudio)]),
+				[Enable hazardous network communications (TYPE=nosound (default), jvoip, portaudio)]),
 				[
     				AC_DEFINE(NETCOMM,1,[enable hazardous network communications (Webcam and VoIP)])
-					TESTNETCOMM="1"
    					TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
 					case "$enableval" in
-						"n" | "none" | "no")
-						echo "No sound support for networking communications"
+						"n" | "none" | "nosound")
+							TESTNETCOMM="1"
 					;;
 						"j" | "jvoip")
+							TESTNETCOMM_NOSOUND="0"
 							TESTNETCOMM_JVOIP="1"
+							TESTNETCOMM="1"
 							echo "Trying to enable JVoIP support... "
 					;;
 						"pa" | "portaudio")
+							TESTNETCOMM_NOSOUND="0"
 							TESTNETCOMM_PORTAUDIO="1"
+							TESTNETCOMM="1"
 							echo "Trying to enable PortAudio support... "
 					;;
 					esac
 				],
 				[])
 
+if test "$TESTNETCOMM" = "1" ; then
 	dnl check for oss headers under Linux
 	saved_CPPFLAGS="$CPPFLAGS"
 
-	AC_DEFUN( CHECK_FOR_OSS_H, [
-	    AC_MSG_CHECKING([for sys/soundcard.h])
-	    AC_TRY_CPP( [ #include <sys/soundcard.h> ], have_oss_h=yes, have_oss_h=no )
-	    AC_MSG_RESULT([$have_oss_h])
-	])
+	if test "$TESTCOMM_NOSOUND" = "0"; then
+		AC_DEFUN( CHECK_FOR_OSS_H, [
+		    AC_MSG_CHECKING([for sys/soundcard.h])
+		    AC_TRY_CPP( [ #include <sys/soundcard.h> ], have_oss_h=yes, have_oss_h=no )
+		    AC_MSG_RESULT([$have_oss_h])
+		])
 
-	if test "$LINUX" = "1" ; then
-		CHECK_FOR_OSS_H
-		if test "x$have_oss_h" = "xno" ; then
-			TESTNETCOMM_JVOIP="0"
-			TESTNETCOMM_PORTAUDIO="0"
-		fi
-	fi
-
-	AC_DEFUN( CHECK_FOR_COREAUDIO_H, [
-	    AC_MSG_CHECKING([for CoreAudio/CoreAudio.h])
-	    AC_TRY_CPP( [ #include <CoreAudio/CoreAudio.h> ], have_core_audio_h=yes, have_core_audio_h=no )
-	    AC_MSG_RESULT([$have_core_audio_h])
-	])
-
-	if test "x$is_macosx" = "xyes" ; then
-		if test "$TESTNETCOMM_JVOIP" = "1" ; then
-			CHECK_FOR_COREAUDIO_H
-			TESTNETCOMM_JVOIP="0"
-			echo "JVoIP lib does not support MacOS X yet"
-		else
-			if test "x$have_core_audio_h" = "xno" ; then
+		if test "$LINUX" = "1" ; then
+			CHECK_FOR_OSS_H
+			if test "x$have_oss_h" = "xno" ; then
+				TESTNETCOMM_JVOIP="0"
 				TESTNETCOMM_PORTAUDIO="0"
 			fi
 		fi
-	fi
 
-	dnl Add the CFLAGS that correspond to sound choice
-	if test "$TESTNETCOMM_JVOIP" = "1" ; then
-   		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_JVOIP"
-   		AC_DEFINE(NETCOMM_JVOIP,1,[enable JVoIP library for sound support with NETCOMM])
-		echo "VoIP support enabled."
-	else
-		if test "$TESTNETCOMM_PORTAUDIO" = "1" ; then
-   			TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_PORTAUDIO"
-   			AC_DEFINE(NETCOMM_PORTAUDIO,1,[enable PortAudio library for sound support with NETCOMM])
+		AC_DEFUN( CHECK_FOR_COREAUDIO_H, [
+		    AC_MSG_CHECKING([for CoreAudio/CoreAudio.h])
+		    AC_TRY_CPP( [ #include <CoreAudio/CoreAudio.h> ], have_core_audio_h=yes, have_core_audio_h=no )
+		    AC_MSG_RESULT([$have_core_audio_h])
+		])
+
+		if test "x$is_macosx" = "xyes" ; then
+			if test "$TESTNETCOMM_JVOIP" = "1" ; then
+				CHECK_FOR_COREAUDIO_H
+				TESTNETCOMM_JVOIP="0"
+				echo "JVoIP lib does not support MacOS X yet"
+			else
+				if test "x$have_core_audio_h" = "xno" ; then
+					TESTNETCOMM_PORTAUDIO="0"
+				fi
+			fi
+		fi
+
+		dnl Add the CFLAGS that correspond to sound choice
+		if test "$TESTNETCOMM_JVOIP" = "1" ; then
+	   		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_JVOIP"
+	   		AC_DEFINE(NETCOMM_JVOIP,1,[enable JVoIP library for sound support with NETCOMM])
 			echo "VoIP support enabled."
 		else
-			echo "VoIP support disabled."
+			if test "$TESTNETCOMM_PORTAUDIO" = "1" ; then
+   				TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_PORTAUDIO"
+	   			AC_DEFINE(NETCOMM_PORTAUDIO,1,[enable PortAudio library for sound support with NETCOMM])
+				echo "VoIP support enabled."
+			else
+				echo "VoIP support disabled."
+			fi
 		fi
+	else
+		echo "No sound support for networking communications"
+		TESTNETCOMM_JVOIP="0"
+		TESTNETCOMM_PORTAUDIO="0"
 	fi
 
 	dnl Check for video for linux headers under linux
@@ -1225,6 +1236,7 @@ TESTNETCOMM_PORTAUDIO="0"
 		fi
 
 	fi
+fi
 
 AM_CONDITIONAL(NETCOMM, test "$TESTNETCOMM" = "1")
 AM_CONDITIONAL(NETCOMM_NOSOUND, test "$TESTNETCOMM_NOSOUND" = "1")
