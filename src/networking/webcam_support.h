@@ -7,6 +7,7 @@
 #if defined( _WIN32) && !defined( __CYGWIN__)
 #include <windows.h>
 #include <vfw.h>
+//#include <afx.h>
 #endif
 #ifdef __APPLE__
 #include <QuickTimeComponents.h>
@@ -89,14 +90,20 @@ class	WebcamSupport
 #include "jpeglib.h"
 BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
                  int        nQuality, //JPEG quality (0-100)
-                 CString    csJpeg,   //Pathname to target jpeg file
-                 CString*   pcsMsg);  //Error msg to return
+                 class CString    csJpeg,   //Pathname to target jpeg file
+                 class CString*   pcsMsg);  //Error msg to return
 
 BOOL BuildSamps(HANDLE                      hDib,
                 int                         nSampsPerRow,
                 struct jpeg_compress_struct cinfo,
                 JSAMPARRAY                  jsmpArray,
-                CString*                    pcsMsg);
+                class CString*                    pcsMsg);
+
+BOOL DibToSamps(HANDLE                      hDib,
+                int                         nSampsPerRow,
+                struct jpeg_compress_struct cinfo,
+                JSAMPARRAY                  jsmpPixels,
+                class CString*                    pcsMsg);
 
 RGBQUAD QuadFromWord(WORD b16);
 #endif

@@ -1,3 +1,17 @@
+#ifndef HAVE_BOOLEAN
+#define HAVE_BOOLEAN
+#define FALSE 0
+#define TRUE 1;
+typedef unsigned char boolean;
+#endif
+#ifndef XMD_H
+#define XMD_H
+typedef int INT32;
+#endif
+#ifdef _WIN32
+#include <afx.h>
+#include <windows.h>
+#endif
 #include <iostream>
 #include "webcam_support.h"
 #include "lin_time.h"
@@ -421,7 +435,7 @@ char *	WebcamSupport::CaptureImage()
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	// Open and empty the clipboard
-	if ( !OpenClipboard() )
+	if ( !OpenClipboard(NULL) )
 	{
 		cerr<<"!!! ERROR opening windows clipboard !!!"<<endl;
 		exit(1);
@@ -444,10 +458,10 @@ char *	WebcamSupport::CaptureImage()
 	capEditCopy( hwndCap);
 
 	// Get the bitmap from clipboard
-	//HGLOBAL img_buffer = GetClipBoardData( CF_BITMAP);
-	//HGLOBAL pal_buffer = GetClipBoardData( CF_PALETTE);
+	//HGLOBAL img_buffer = GetClipboardData( CF_BITMAP);
+	//HGLOBAL pal_buffer = GetClipboardData( CF_PALETTE);
     
-	HANDLE  hDib = GetClipBoardData( CF_DIB);
+	HANDLE  hDib = GetClipboardData( CF_DIB);
 	/*
 	HANDLE  hDib = DDBToDIB((HBITMAP)img_buffer,
                              BI_RGB,
@@ -536,14 +550,13 @@ void	WebcamSupport::Shutdown()
 extern "C"
 {
 #include "jpeglib.h"
+#include <setjmp.h>
 }
-         
-#include 
 
 struct ima_error_mgr
 {
-  struct  jpeg_error_mgr pub; //"public" fields
-  jmp_buf setjmp_buffer;	  //for return to caller
+  struct jpeg_error_mgr pub;  //"public" fields
+  jmp_buf setjmp_buffer;      //for return to caller
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -768,7 +781,7 @@ BOOL DibToSamps(HANDLE                      hDib,
 
                int nNibbles = (p < nNibbles;n++) 
                { 
-                  bytCTEnt=lpPixels[nByte] << (n*4); bytCTEnt=bytCTEnt > > (4-(n*4));
+                  bytCTEnt=lpPixels[nByte] << (n*4); bytCTEnt=bytCTEnt >> (4-(n*4));
 
                   jsmpPixels[r][q+0] = pCTab[bytCTEnt].rgbRed;
                   jsmpPixels[r][q+1] = pCTab[bytCTEnt].rgbGreen;
@@ -822,7 +835,7 @@ BOOL DibToSamps(HANDLE                      hDib,
                        nBytesWide;
          nBytesWide += nUnused;
 
-         for (r=0;r biHeight;r++)
+         for (r=0;r<pbBmHdr->biHeight;r++)
          {
             for (p=0,q=0;p < (nBytesWide-nUnused); p+=3,q+=3)
             { 

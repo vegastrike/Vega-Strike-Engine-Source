@@ -8,10 +8,14 @@
 #include <list>
 #include <queue>
 #include <vector>
+#include <sys/types.h>
 
 #include "vsnet_socket.h"
 #include "vsnet_thread.h"
 #include "packetmem.h"
+
+typedef unsigned char u_int8_t;
+typedef unsigned int u_int32_t;
 
 /***********************************************************************
  * VsnetTCPSocket - declaration
