@@ -82,9 +82,11 @@ signed char  ComputeAutoGuarantee ( Unit * un) {
 }
 
 float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
-  static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
-  static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
-  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
+  static float gamespeed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+  
+  static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","00"))*gamespeed;
+  static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","0"))*gamespeed;
+  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","1000"))*gamespeed;
   static int upgradefaction = FactionUtil::GetFaction("upgrades");
   static int neutral = FactionUtil::GetFaction("neutral");
 
