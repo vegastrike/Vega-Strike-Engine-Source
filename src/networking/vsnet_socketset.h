@@ -42,6 +42,7 @@
 #include <set>
 
 #include "vsnet_thread.h"
+#include "vsnet_pipe.h"
 
 class ServerSocket;
 class VsnetSocketBase;
@@ -52,7 +53,7 @@ class SocketSet : public VSThread
 
     Set    _autoset;
 
-    int     _thread_wakeup[2];
+    VSPipe  _thread_wakeup;
     VSMutex _thread_mx;
     VSCond  _thread_cond;
     bool    _thread_end;

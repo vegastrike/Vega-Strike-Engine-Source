@@ -6,51 +6,8 @@
 #endif
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
+#include "vsnet_pipe.h"
 #include "const.h"
-
-#ifdef _WIN32
-#include <windows.h>
-//std::multimap<int,HANDLE> pipeMap;
-
-int close(int file) {
-	int retVal=0;
-	BOOL worked=CloseHandle((HANDLE)file);
-	if (!worked)
-		retVal=-1;
-	return retVal;
-}
-int read(int file, void *buf, int size) {
-	unsigned long numread;
-	BOOL worked=ReadFile((HANDLE)file,(LPVOID)buf, size, &numread,NULL);
-	if (!worked)
-		return -1;
-	if (numread>INT_MAX)
-		numread=INT_MAX;
-	return numread;
-}
-int write(int file, const void *buf, int size) {
-	unsigned long numwritten;
-	BOOL worked=WriteFile((HANDLE)file,(LPVOID)buf, size, &numwritten,NULL);
-	if (!worked)
-		return -1;
-	if (numwritten>INT_MAX)
-		numwritten=INT_MAX;
-	return numwritten;
-}
-int pipe(int *file) {
-	HANDLE readPipe,writePipe;
-	SECURITY_ATTRIBUTES sec_attr; //don't know what it is for.
-	sec_attr.nLength=sizeof(SECURITY_ATTRIBUTES);
-	sec_attr.bInheritHandle=FALSE;
-	sec_attr.lpSecurityDescriptor=NULL;
-	BOOL isPipe=CreatePipe(&readPipe,&writePipe,&sec_attr,0);
-	if (!isPipe)
-		return -1;
-	file[0]=(int)readPipe;
-	file[1]=(int)writePipe;
-	return 0;
-}
-#endif
 
 using namespace std;
 
@@ -59,7 +16,6 @@ SocketSet::SocketSet( bool blockmainthread )
     , _blockmain( blockmainthread )
     , _blockmain_pending( 0 )
 {
-    ::pipe( _thread_wakeup );
     _thread_end = false;
 }
 
@@ -68,9 +24,9 @@ SocketSet::~SocketSet( )
     _thread_mx.lock( );
     _thread_end = true;
     _blockmain  = false; // signalling would be dangerous
-    ::close( _thread_wakeup[1] );
+    _thread_wakeup.closewrite();
     _thread_cond.wait( _thread_mx );
-    ::close( _thread_wakeup[0] );
+    _thread_wakeup.closeread();
     _thread_mx.unlock( );
 }
 
@@ -160,7 +116,7 @@ int SocketSet::private_select( timeval* timeout )
     }
 
 #ifdef VSNET_DEBUG
-    ostr << _thread_wakeup[0] << "(w)";
+    ostr << _thread_wakeup.getread() << "(w)";
     if( timeout )
         ostr << " t=" << timeout->tv_sec << ":" << timeout->tv_usec;
     else
@@ -169,9 +125,9 @@ int SocketSet::private_select( timeval* timeout )
     if( !timeout || timeout->tv_sec >= 1 ) COUT << ostr.str() << endl;
 #endif
 
-    FD_SET( _thread_wakeup[0], &read_set_select );
-    if( _thread_wakeup[0] > max_sock_select )
-        max_sock_select = _thread_wakeup[0] + 1;
+    FD_SET( _thread_wakeup.getread(), &read_set_select );
+    if( _thread_wakeup.getread() > max_sock_select )
+        max_sock_select = _thread_wakeup.getread() + 1;
 
     int ret = ::select( max_sock_select, &read_set_select, 0, 0, timeout );
 
@@ -213,13 +169,13 @@ int SocketSet::private_select( timeval* timeout )
             }
         }
 
-        if( FD_ISSET( _thread_wakeup[0], &read_set_select ) )
+        if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
         {
 #ifdef VSNET_DEBUG
-            ostr << _thread_wakeup[0] << "(w)";
+            ostr << _thread_wakeup.getread() << "(w)";
 #endif
             char c;
-            read( _thread_wakeup[0], &c, 1 );
+            _thread_wakeup.read( &c, 1 );
         }
 
 #ifdef VSNET_DEBUG
@@ -236,7 +192,7 @@ void SocketSet::private_wakeup( )
     COUT << "calling wakeup" << endl;
 #endif
     char c = 'w';
-    write( _thread_wakeup[1], &c, 1 );
+    _thread_wakeup.write( &c, 1 );
 }
 
 #ifdef USE_NO_THREAD
