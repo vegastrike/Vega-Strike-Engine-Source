@@ -22,15 +22,10 @@
  */
 
 #include <iostream>
-// #include <errno.h>
-// #include <assert.h>
-// #include "networking/const.h"
 
 #include "vsnet_debug.h"
-// #include "vsnet_headers.h"
 #include "vsnet_address.h"
 #include "vsnet_socketset.h"
-// #include "packetmem.h"
 
 class SocketSet;
 class Packet;
@@ -38,13 +33,13 @@ class SOCKETALT;
 class PacketMem;
 
 // Number of times we resend a "reliable" packet in UDP mode
-#define NUM_RESEND 3
+// #define NUM_RESEND 3
 
 class VsnetSocketBase
 {
     DECLARE_VALID
 public:
-    VsnetSocketBase( int fd, SocketSet& set );
+    VsnetSocketBase( int fd, const char* socktype, SocketSet& set );
 
     virtual ~VsnetSocketBase( );
 
@@ -52,6 +47,8 @@ public:
 
     int  get_fd() const;
     int  close_fd( );
+
+    const char* get_socktype() const;
 
     bool set_block( );
     bool set_nonblock( );
@@ -77,6 +74,9 @@ protected:
 
 private:
     int        _fd;
+
+    /// variable meant to figure out what type of socket triggered select
+    char*      _socktype;
 protected:
     SocketSet& _set;
 
@@ -93,7 +93,10 @@ private:
 class VsnetSocket : public VsnetSocketBase
 {
 public:
-    VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& set );
+    VsnetSocket( int              sock,
+                 const AddressIP& remote_ip,
+                 const char*      socktype,
+                 SocketSet&       set );
     virtual ~VsnetSocket( );
 
     virtual bool isTcp() const = 0;

@@ -21,7 +21,7 @@ using std::endl;
  ***********************************************************************/
  
 VsnetUDPSocket::VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet& socketset )
-    : VsnetSocket( sock, remote_ip, socketset )
+    : VsnetSocket( sock, remote_ip, "VsnetUDPSocket", socketset )
     , _mtu_size_estimation( 1024 )
 {
     _negotiated_max_size = MAXBUFFER;

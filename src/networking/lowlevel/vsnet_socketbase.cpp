@@ -15,8 +15,8 @@ using namespace std;
  * VsnetSocket - definition
  ***********************************************************************/
 
-VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& sets )
-    : VsnetSocketBase( sock, sets )
+VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, const char* socktype, SocketSet& sets )
+    : VsnetSocketBase( sock, socktype, sets )
     , _remote_ip( remote_ip )
 {
 }
@@ -61,11 +61,22 @@ bool VsnetSocket::sameAddress( const VsnetSocket& r) const
  * VsnetSocketBase - definition
  ***********************************************************************/
 
-VsnetSocketBase::VsnetSocketBase( int fd, SocketSet& sets )
+VsnetSocketBase::VsnetSocketBase( int fd, const char* socktype, SocketSet& sets )
     : _fd( fd )
     , _set( sets )
 {
     MAKE_VALID
+
+    char buf[100];
+
+    sprintf( buf, "%d", fd );
+    int len = strlen(socktype) + strlen(buf) + 4;
+    _socktype = new char[len];
+
+    sprintf( _socktype, "%s (%s)", buf, socktype );
+
+    assert( strlen(_socktype) == len-1 );
+
     set_block( );
     sets.set( this );
 }
@@ -74,7 +85,13 @@ VsnetSocketBase::~VsnetSocketBase( )
 {
     CHECK_VALID
     _set.unset( this );
+    delete [] _socktype;
     MAKE_INVALID
+}
+
+const char* VsnetSocketBase::get_socktype() const
+{
+    return _socktype;
 }
 
 bool VsnetSocketBase::valid() const

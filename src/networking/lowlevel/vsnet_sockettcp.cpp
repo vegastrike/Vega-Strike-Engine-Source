@@ -56,7 +56,7 @@ private:
  ***********************************************************************/
  
 VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet& sets )
-    : VsnetSocket( sock, remote_ip, sets )
+    : VsnetSocket( sock, remote_ip, "VsnetTCPSocket", sets )
     , _incomplete_packet( 0 )
     , _incomplete_header( 0 )
     , _connection_closed( false )

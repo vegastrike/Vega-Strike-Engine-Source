@@ -68,7 +68,7 @@ void ServerSocketTCP::lower_selected( )
 }
 
 ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr, SocketSet& set )
-    : ServerSocket( fd, adr, set )
+    : ServerSocket( fd, adr, "ServerSocketTCP", set )
 { }
 
 bool ServerSocketTCP::isActive( )
@@ -101,7 +101,7 @@ SOCKETALT ServerSocketTCP::acceptNewConn( )
 }
 
 ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr, SocketSet& set )
-    : ServerSocket( fd, adr, set )
+    : ServerSocket( fd, adr, "ServerSocketUDP", set )
 { }
 
 bool ServerSocketUDP::isActive( )

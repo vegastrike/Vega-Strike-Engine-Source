@@ -32,8 +32,8 @@ protected:
     AddressIP _srv_ip; // own IP address structure of this server
 
 public:
-    ServerSocket( int fd, const AddressIP& adr, SocketSet& set )
-        : VsnetSocketBase( fd, set )
+    ServerSocket( int fd, const AddressIP& adr, const char* socktype, SocketSet& set )
+        : VsnetSocketBase( fd, socktype, set )
     {
         _srv_ip = adr;
     }

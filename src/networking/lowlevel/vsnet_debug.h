@@ -13,9 +13,6 @@
 
 #undef VSNET_DEBUG
 
-#ifdef VSNET_DEBUG
-#endif
-
 #if !defined( COUT)
 	#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
 	    #define COUT std::clog << __FILE__ << ":"
