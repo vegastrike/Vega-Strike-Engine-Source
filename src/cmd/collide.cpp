@@ -42,7 +42,7 @@ csRapidCollider * collideTrees::colTree(Unit * un) {
 		pow=collideTreesMaxTrees-1;
 	
 	int val = 1<<pow;
-//	fprintf (stderr,"%d %d\n",pow,val);
+	fprintf (stderr,"%s %d %d\n",un->name.c_str(),pow,val);
 
 	if (rapidColliders[pow]==NULL) {
 		rapidColliders[pow]=un->getCollideTree(Vector(1,1,val));

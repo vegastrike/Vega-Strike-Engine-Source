@@ -254,7 +254,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     }
     UnitCollection::UnitIterator i;
     static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
-    if (!bigger->SubUnits.empty()) {
+    if (bigger->SubUnits.empty()==false&&(bigger->RecurseIntoSubUnitsOnCollision==true||bigger->isUnit()==ASTEROIDPTR)) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
 	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
@@ -267,7 +267,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	}
       }
     }
-    if (!smaller->SubUnits.empty()) {
+    if (smaller->SubUnits.empty()==false&&(smaller->RecurseIntoSubUnitsOnCollision==true||smaller->isUnit()==ASTEROIDPTR)) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
 	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
