@@ -343,16 +343,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case XML::BLENDMODE:
 	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
-	blendSrc = parse_alpha (csrc);
-	blendDst = parse_alpha (cdst);
-	if (blendDst==blendSrc&&blendSrc==ZERO) {
-	  blendSrc=ONE;
-	}
-	if (blendDst!=ZERO) {
-	  draw_sequence++;
-	  if (blendDst!=ONE)
-	    draw_sequence++;
-	}
+	SetBlendMode (parse_alpha (csrc),parse_alpha (cdst));
 	break;
       }
     }

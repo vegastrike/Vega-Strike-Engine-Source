@@ -326,6 +326,7 @@ public:
   unsigned int numFX () {return LocalFX.size();}
   ///Turns on SpecialFX
   void EnableSpecialFX();
+  void SetBlendMode (BLENDFUNC src, BLENDFUNC dst);
   ///Gets all polygons in this mesh for BSP computation
   void GetPolys(vector <bsp_polygon> &);
   ///Sets the material of this mesh to mat (affects original as well)

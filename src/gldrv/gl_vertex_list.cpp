@@ -472,8 +472,10 @@ void GFXVertexList::EndDrawState(GFXBOOL lock) {
   } else
 #endif
     {
-      if (lock&&glUnlockArraysEXT_p)
+      if (lock&&glUnlockArraysEXT_p) {
+	//	glFlush();
 	(*glUnlockArraysEXT_p) ();
+      }
     }
   if (changed&HAS_COLOR) {
     GFXColor4f(1,1,1,1);

@@ -298,7 +298,21 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
   }
 }
 
-
+void Mesh::SetBlendMode (BLENDFUNC src, BLENDFUNC dst) {
+  blendSrc = src;
+  blendDst = dst;
+  draw_sequence=0;
+  if (blendDst!=ZERO) {
+    draw_sequence++;
+    if (blendDst!=ONE)
+      draw_sequence++;
+  }
+  if (orig) {
+    orig->draw_sequence = draw_sequence;
+    orig->blendSrc = src;
+    orig->blendDst = dst;
+  }
+}
 static GFXColor getMeshColor () {
    float color[4];
   vs_config->getColor ("unit", "ship_ambient",color);

@@ -100,7 +100,7 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
-#if 0
+#if 1
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")) {
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );

@@ -131,7 +131,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 
   meshdata = new Mesh*[2];
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha);
+  meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha,false,alpha!=NULL?SRCALPHA:ONE,alpha!=NULL?INVSRCALPHA:ZERO);
   meshdata[0]->setEnvMap(GFXFALSE);
   meshdata[0]->SetMaterial (ourmat);
   nummesh = 1;
@@ -183,35 +183,35 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   for (unsigned int i=0;i<lights.size();i++) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
   }
+  Vector t (_Universe->AccessCamera()->GetPosition()-Position());
   static int counter=0;
-  if ((counter++)>100) { 
-    Vector t (_Universe->AccessCamera()->GetPosition()-Position());
-    if (t.Magnitude()<corner_max.i) {
-      if (!inside) {
-	TerrainUp = t;
-	Normalize(TerrainUp);
-	TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
-	Normalize (TerrainH);
-	inside =true;
-	if (terrain)
-	  terrain->EnableDraw();
-      }
-    }
-    if (inside) {
-      if (t.Dot (TerrainH)>corner_max.i) {
-	inside=false;
-	///somehow warp unit to reasonable place outisde of planet
-	if (terrain) {
-	  
-	  terrain->DisableDraw();
-	}
-      } else {
-	shouldfog=true;
-      }
+  if (counter ++>100)
+  if (t.Magnitude()<corner_max.i) {
+    if (!inside) {
+      TerrainUp = t;
+      Normalize(TerrainUp);
+      TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
+      Normalize (TerrainH);
+      inside =true;
+      if (terrain)
+	terrain->EnableDraw();
     }
   }
-
+  if (inside) {
+    if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
+      inside=false;
+      ///somehow warp unit to reasonable place outisde of planet
+      if (terrain) {
+	
+	terrain->DisableDraw();
+      }
+    } else {
+      shouldfog=true;
+    }
+  }
 }
+
+
 
 
 

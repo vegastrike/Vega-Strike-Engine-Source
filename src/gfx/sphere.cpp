@@ -126,13 +126,11 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       delete [] vertexlist;
       delete [] modes;
       delete [] QSOffsets;
+      SetBlendMode (a,b);
       if (alpha) {
-	blendSrc = SRCALPHA;
-	blendDst = INVSRCALPHA;
 	Decal = new Texture(texture, alpha);
+	
       }else {
-	blendSrc = a;
-	blendDst = b;
 	Decal = new Texture (texture);
       }
       

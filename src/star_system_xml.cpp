@@ -143,7 +143,7 @@ namespace StarXML {
     EnumMap::Pair ("Red", EMRED),
     EnumMap::Pair ("Green", EMGREEN),
     EnumMap::Pair ("Blue", EMBLUE),
-    EnumMap::Pair ("Alpha", EMALPHA),
+    EnumMap::Pair ("Alfa", EMALPHA),
     EnumMap::Pair ("faction", FACTION),
     EnumMap::Pair ("Light", LIGHT),
     EnumMap::Pair ("Mass", MASS)
