@@ -175,7 +175,6 @@ public:
   const LineCollide &GetCollideInfo () {return CollideInfo;}
   ///Takes out of the collide table for this system.
   void RemoveFromSystem ();
-  //bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
   void Target (Unit * targ);
   void TargetTurret (Unit * targ);
   ///Fires all active guns that are or arent Missiles

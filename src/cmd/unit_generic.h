@@ -268,7 +268,7 @@ protected:
   ///Takes out of the collide table for this system.
 // SHOULD COME BACK HERE
   virtual void RemoveFromSystem (){}
-  virtual bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
+  bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
  std::vector <string> meshdata_string;
   virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
 //void FixGauges();
