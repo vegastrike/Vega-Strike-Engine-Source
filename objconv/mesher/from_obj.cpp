@@ -74,6 +74,11 @@ void wordtoupper(char *buf){
 textureholder makeTextureHolder(std::string str, int which) {
   textureholder ret;
   ret.type=TEXTURE;
+  if (str.find(".ani")!=string::npos) {
+    ret.type=ANIMATION;
+  }
+
+  
   ret.index=which;
   ret.name.insert(ret.name.begin(),str.begin(),str.end());
   return ret;
