@@ -9,7 +9,9 @@ print STDERR $sysname;
 $sysname =~ s/system$//;
 $sysname =~ s{[/.]}{}g;
 $red = $green = $blue = 0;
+$sr = $sg = $sb = 0;
 @colors = (\$red, \$green, \$blue);
+
 #      srand(time());
 while($foo=<>) {
   @tokens = split //,$foo;
@@ -23,6 +25,8 @@ while($foo=<>) {
       $state=-1;
 
       ($red,$green,$blue) = @{$color_table[floor(rand(1)*@color_table)]};
+      $sr = sqrt ($red);
+      $sg = sqrt ($green);      $sb = sqrt ($blue);
 if(0) {
       ${$colors[floor(rand(3))]} = 1;
       for $colorref (@colors) {
@@ -35,7 +39,7 @@ if(0) {
       print <<FOO
 <Light>
 <ambient red=".3" green=".3" blue=".3"/>
-<diffuse red="$red" green="$green" blue="$blue"/>
+<diffuse red="$sr" green="$sg" blue="$sb"/>
 <specular red="$red" green="$green" blue="$blue"/>
 </Light>
 
