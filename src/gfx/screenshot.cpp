@@ -1,7 +1,11 @@
 #include "in_kb.h"
 #include "vs_globals.h"
 #include "vsimage.h"
-#include <GL/gl.h>
+#ifndef __APPLE__
+#include <GL/glut.h>
+#else
+#include <GLUT/glut.h>
+#endif
 void Screenshot (const KBData&, KBSTATE state) {
   if (state==PRESS) {
     GLint xywh[4]={0,0,0,0};
