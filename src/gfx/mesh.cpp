@@ -401,6 +401,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   GFXEnable(DEPTHTEST);
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
+
   for(int a=0; a<NUM_ZBUF_SEQ; a++) {
     if (a==MESH_SPECIAL_FX_ONLY) {
       
@@ -435,7 +436,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
 }
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   //  assert(draw_queue->size());
-	
+
   if (draw_queue->empty()) {
     fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
     return;
@@ -455,6 +456,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     GFXSelectMaterial(myMatNum);
   }else {
     GFXDisable (LIGHTING);
+    GFXColor4f(1,1,1,1);
   }
   if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    
