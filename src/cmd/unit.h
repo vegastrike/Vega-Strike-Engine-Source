@@ -193,10 +193,12 @@ friend class PlanetaryOrbit;
   Vector corner_min, corner_max; // corners of object  
   Box *selectionBox;
   BSPTree *bspTree;
+  BSPTree *bspShield;
   void calculate_extent();
   float DealDamageToShield (const Vector & pnt, float &Damage);
   float DealDamageToHull (const Vector &pnt, float Damage);
   void SetCollisionParent (Unit *name);
+  bool ShieldUp (const Vector &);
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
   void getAverageGunSpeed (float & speed, float & range);

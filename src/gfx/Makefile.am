@@ -19,7 +19,6 @@ libgfx_a_SOURCES =	\
 	box.h		\
 	bsp.cpp		\
 	bsp.h		\
-	bsp_gent.cpp	\
 	camera.cpp	\
 	camera.h	\
 	coord_select.cpp	\

@@ -18,11 +18,11 @@ void InputDFA::OrderHandler (int key, KBSTATE k) {
       CurDFA->queueOrder=true;
     else
       CurDFA->queueOrder=false;
-    if (orderbindings[key]->type()&LOCATION) {
+    if (orderbindings[key]->type()&Order::LOCATION) {
       CurDFA->NewLocationSelect(); //set up us the location select
     }
     CurDFA->SetOrder(orderbindings[key]);
-    if (orderbindings[key]->type()&LOCATION) {
+    if (orderbindings[key]->type()&Order::LOCATION) {
       CurDFA->SetState (LOCATION_SELECT);
       CurDFA->ContextAcquire();
     }
@@ -153,11 +153,11 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 
 
   if (CurDFA->orderfac!=NULL) {
-    if (CurDFA->orderfac->type()&LOCATION) {
+    if (CurDFA->orderfac->type()&Order::LOCATION) {
       LocSelect (k,x,y,delx,dely,kmod);
       return;
     }
-    if (CurDFA->orderfac->type()&TARGET||CurDFA->orderfac->type()&SELF) {
+    if (CurDFA->orderfac->type()&Order::TARGET||CurDFA->orderfac->type()&Order::SELF) {
       TargetSelect(k,x,y,delx,dely,kmod);//add some provision for binding keys to orders
       return;
     }

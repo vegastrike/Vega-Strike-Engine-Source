@@ -9,7 +9,7 @@
 struct AIScriptXML {
   int unitlevel;
   int acc;
-  int executefor;
+  float executefor;
   bool itts;
   bool afterburn;
   bool terminate;
@@ -167,7 +167,7 @@ namespace AiXml {
   };
 
   const EnumMap element_map(element_names, 31);
-  const EnumMap attribute_map(attribute_names, 17);
+  const EnumMap attribute_map(attribute_names, 18);
 }
 
 using XMLSupport::EnumMap;
@@ -418,7 +418,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case TIME:
-	xml->executefor=parse_int((*iter).value);
+	xml->executefor=parse_float((*iter).value);
 	break;
       }
     }
@@ -493,7 +493,9 @@ void AIScript::endElement(const string &name) {
 
   case NORMALIZE:
     xml->unitlevel--;
-    topv().Normalize();
+    if (topv().i||topv().j||topv().k) {
+      topv().Normalize();
+    }
     break;
   case SCALE:
     xml->unitlevel--;
@@ -655,7 +657,7 @@ void AIScript::LoadXML() {
   }
   delete xml;
 }
-AIScript::AIScript (const char * scriptname):Order (MOVEMENT|FACING){
+AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACING){
   filename = new char [strlen (scriptname)+1];
   strcpy(filename,scriptname);
 

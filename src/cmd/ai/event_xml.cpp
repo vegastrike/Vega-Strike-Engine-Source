@@ -5,6 +5,7 @@
 #include <list>
 #include <float.h>
 #include <assert.h>
+#include "vegastrike.h"
 //serves to run through a XML file that nests things for "and". 
 
 
@@ -24,12 +25,14 @@ namespace AIEvents {
   const int AIMAX =2;
   const int AISCRIPT =3;
   const int AINOT=4;
+  const int TIMEIT=5;
   const XMLSupport::EnumMap::Pair AIattribute_names[] = {
     EnumMap::Pair ("UNKNOWN", AIUNKNOWN),
     EnumMap::Pair ("min", AIMIN), 
     EnumMap::Pair ("max", AIMAX),
     EnumMap::Pair ("not", AINOT),
-    EnumMap::Pair ("Script", AISCRIPT)
+    EnumMap::Pair ("Script", AISCRIPT),
+    EnumMap::Pair ("time", TIMEIT)
   };
   const XMLSupport::EnumMap attr_map(AIattribute_names, 5);
 
@@ -42,7 +45,13 @@ namespace AIEvents {
     AttributeList::const_iterator iter;
     eam->level++;
     if (elem==0) {
-
+      for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	switch(attr_map.lookup((*iter).name)) {
+	case TIMEIT:
+	  eam->curtime=eam->maxtime=parse_float((*iter).value)/SIMULATION_ATOM;
+	  break;
+	}
+      }
     }else {
       assert (eam->level!=1);//might not have a back on result();
       if (eam->level==2) 
@@ -75,6 +84,7 @@ namespace AIEvents {
   }  
   void LoadAI(const char * filename, ElemAttrMap &result) {
     const int chunk_size = 16384;
+    result.curtime=result.maxtime=10/SIMULATION_ATOM;
     FILE * inFile = fopen (filename, "r+b");
     if(!inFile) {
       assert(0);

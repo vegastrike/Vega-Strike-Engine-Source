@@ -20,7 +20,7 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 11);
 
-AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map), count (rand()%10) {
+AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map) {
   
   if (target !=NULL) {
     UnitCollection tmp;
@@ -66,11 +66,10 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     value = parent->RShieldData();
     break;
   case FACING:
-    return parent->getAIState()->queryType (FACING)==NULL;
+    return parent->getAIState()->queryType (Order::FACING)==NULL;
   case MOVEMENT:
-    return parent->getAIState()->queryType (MOVEMENT)==NULL;
-  case AGGAI:
-  case UNKNOWN:
+    return parent->getAIState()->queryType (Order::MOVEMENT)==NULL;
+  default:
     return false;
   }
   return item.Eval(value);
@@ -107,17 +106,16 @@ void AggressiveAI::ProcessLogic () {
 
 
 void AggressiveAI::Execute () {  
-  const int maxcount=10;//num sec before it rechecks AI	
   FireAt::Execute();
-  if (parent->getAIState()->queryType (FACING)==NULL&&parent->getAIState()->queryType (MOVEMENT)==NULL) { 
+  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
     ProcessLogic();
   } else {
-    if ( (--count)==0) {
-      parent->getAIState()->eraseType (FACING);
-      parent->getAIState()->eraseType (MOVEMENT);
+    if ( (--logic.curtime)==0) {
+      parent->getAIState()->eraseType (Order::FACING);
+      parent->getAIState()->eraseType (Order::MOVEMENT);
       
       ProcessLogic ();
-      count +=(short)(maxcount/SIMULATION_ATOM);      
+      logic.curtime = logic.maxtime;      
     }
   }
 }  

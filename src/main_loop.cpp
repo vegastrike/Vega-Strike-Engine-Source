@@ -27,6 +27,7 @@
 #include  "gfx/halo.h"
 #include "gfx/matrix.h"
 #include "cmd/ai/flykeyboard.h"
+#include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/script.h"
 
 
@@ -412,7 +413,7 @@ void InitializeInput() {
 	BindKey('~', Quit);
 	BindKey('q', Quit);
 	BindKey ('c',reCenter);
-	BindKey (' ',Fire);
+	//	BindKey (' ',Fire);
 	/*	BindKey('a', FighterYawLeft);
 	BindKey('d', FighterYawRight);
 	BindKey('w', FighterPitchDown);
@@ -475,6 +476,7 @@ void createObjects() {
  
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
+  fighters[0]->EnqueueAI(new FireKeyboard ());
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
 }

@@ -27,12 +27,6 @@
 #include "cmd/unit.h"
 #include "cmd/collection.h"
 #include <vector>
-const int MOVEMENT =1;
-const int FACING = 2;
-const int WEAPON = 4;
-const int LOCATION = 8;
-const int TARGET = 16;
-const int SELF = 32; 
 class Order {
 protected:
   Unit * parent;
@@ -43,6 +37,8 @@ protected:
   Vector targetlocation;
   vector<Order*> suborders;
 public:
+  enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, LOCATION = 8, TARGET = 16, SELF = 32 }; 
+
   Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;done=false;}
   Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false;}
   virtual ~Order () {}
@@ -71,7 +67,7 @@ class ExecuteFor:  public Order {
   float time;
   float maxtime;
  public:
-  ExecuteFor (Order * chld, float seconds): Order(),child(chld),time(0),maxtime(seconds) {}
+  ExecuteFor (Order * chld, float seconds): Order(chld->getType()),child(chld),time(0),maxtime(seconds) {}
   void Execute ();
   ~ExecuteFor () {delete child;}
 };

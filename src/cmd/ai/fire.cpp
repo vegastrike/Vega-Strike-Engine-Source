@@ -9,7 +9,29 @@ FireAt::FireAt (float reaction_time, float aggressivitylevel, bool itts): Order 
   
   
 }
-
+//temporary way of choosing
+void FireAt::ChooseTargets (int ) {
+  UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  Unit * un ;
+  while ((un = iter->current())) {
+    //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
+    if (un==parent->Target()) {
+      iter->advance();
+      break;
+    }
+    iter->advance();
+  }
+  if ((un = iter->current())) {
+    parent->Target (un);
+  }
+  delete iter;
+  if (!un) {
+    UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+    parent->Target (iter->current());//cycle through for now;
+    delete iter;
+  }
+}
+/* Proper choosing of targets
 void FireAt::ChooseTargets (int num) {
   UnitCollection tmp;
   UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
@@ -21,6 +43,8 @@ void FireAt::ChooseTargets (int num) {
   delete iter;
   AttachOrder (&tmp);
 }
+
+*/
 bool FireAt::ShouldFire(Unit * targ) {
   float dist;
   float angle = parent->cosAngleTo (targ, dist,itts?0.001:FLT_MAX);

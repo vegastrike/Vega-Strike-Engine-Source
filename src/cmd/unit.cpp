@@ -77,7 +77,8 @@ void Unit::Init()
   resolveforces=true;
   CollideInfo.object = NULL;
   CollideInfo.type = LineCollide::UNIT;
-  bspTree = NULL;
+  bspShield = bspTree = NULL;
+
   invisible=false;
   //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
@@ -448,9 +449,10 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
   }
   if (!temp)
     return false;
-  if (!bspTree)
+  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  if (!(*tmpBsp))
       return true;
-  if (bspTree->intersects (st,err,norm,dist)) {
+  if ((*tmpBsp)->intersects (st,err,norm,dist)) {
     norm = ToWorldCoordinates (norm);
     return true;
   }
@@ -465,7 +467,9 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
     if ((tmp = subunits[i]->queryBSP(start,end,norm))!=0)
       return tmp;
   }
-  if (!bspTree) {
+  Vector st (InvTransform (cumulative_transformation_matrix,start));
+  BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  if (!(*tmpBsp)) {
     tmp = querySphere (start,end);
     norm = (tmp * (start-end));
     tmp = norm.Magnitude();
@@ -473,7 +477,6 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
     norm.Normalize();//normal points out from center
     return tmp;
   }
-  Vector st (InvTransform (cumulative_transformation_matrix,start));
   Vector ed (InvTransform (cumulative_transformation_matrix,end));
   bool temp=false;
   for (i=0;i<nummesh&&!temp;i++) {
@@ -481,7 +484,7 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
   }
   if (!temp)
     return false;
-  if ((tmp = bspTree->intersects (st,ed,norm))!=0) {
+  if ((tmp = (*tmpBsp)->intersects (st,ed,norm))!=0) {
     norm = ToWorldCoordinates (norm);
     return tmp;
   }

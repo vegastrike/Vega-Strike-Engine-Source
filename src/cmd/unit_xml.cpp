@@ -765,16 +765,26 @@ fclose (inFile);
   }
 
   calculate_extent();
+  string tmpname (filename);
+
+
   if (xml->shieldmesh) {
     meshdata[nummesh] = xml->shieldmesh;
+    FILE * fp = fopen ((tmpname+"_shield.bsp").c_str(),"r+b");
+    if (!fp) {
+      BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
+    }else {
+      fclose (fp);
+    }
+    bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
   }else {
     SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp", NULL, false,false,ONE, ONE);
     meshdata[nummesh] = tmp;
+    bspShield=NULL;
   }
 
   meshdata[nummesh]->EnableSpecialFX();
   if (xml->hasBSP) {
-    string tmpname (filename);
     tmpname += ".bsp";
     FILE * fp = fopen (tmpname.c_str(),"r+b");
     if (!fp) {

@@ -11,6 +11,8 @@ libai_a_SOURCES =	\
 	flykeyboard.cpp	\
 	navigation.h	\
 	fire.cpp	\
+	firekeyboard.cpp \
+	firekeyboard.h	\
 	flykeyboard.h	\
 	order.cpp	\
 	aggressive.cpp	\

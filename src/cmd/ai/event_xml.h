@@ -25,11 +25,11 @@ namespace AIEvents {
   };
   struct ElemAttrMap {
     XMLSupport::EnumMap element_map;
-    int level;
+    int level; short curtime; short maxtime;
     std::vector <std::list <AIEvresult> >result;
     ElemAttrMap (const XMLSupport::EnumMap &el):
       element_map (el), level(0) { } 
   };
-  void LoadAI (const char * filename, ElemAttrMap &result);
+  void LoadAI (const char * filename, ElemAttrMap &result);//num seconds
 }
 #endif

@@ -217,6 +217,54 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
     percent = 0;
   return percent;
 }
+bool Unit::ShieldUp (const Vector &pnt) {
+  const int shieldmin=5;
+  int index;
+  switch (shield.number){
+  case 2:
+    index = (pnt.k>0)?0:1;
+    return shield.fb[index]>shieldmin;
+    break;
+  case 6:
+    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
+      if (pnt.i>0) {
+	index = 3;//left
+      } else {
+	index = 2;//right
+      }
+    }else if (fabs(pnt.j)>fabs (pnt.k)) {
+      if (pnt.j>0) {
+	index = 4;//top;
+      } else {
+	index = 5;//bot;
+      }
+    } else {
+      if (pnt.k>0) {
+	index = 0;
+      } else {
+	index = 1;
+      }
+    }
+    return shield.fbrltb.v[index]>shieldmin;
+    break;
+  case 4:
+  default:
+    if (fabs(pnt.k)>fabs (pnt.i)) {
+      if (pnt.k>0) {
+	return shield.fbrl.front>shieldmin;
+      } else {
+	return shield.fbrl.back>shieldmin;
+      }
+    } else {
+      if (pnt.i>0) {
+	return shield.fbrl.left>shieldmin;
+      } else {
+	return shield.fbrl.right>shieldmin;
+      }
+    }
+    return false;
+  }
+}
 float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   int index;
   float percent=0;

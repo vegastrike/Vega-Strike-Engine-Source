@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifndef PROPHECY
-#include "mesh.h"
-#include "cmd/unit.h"
+#include "gfx/mesh.h"
+#include "unit.h"
 #else
 #include <vector>
 using std::vector;
