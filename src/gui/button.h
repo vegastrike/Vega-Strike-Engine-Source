@@ -41,7 +41,7 @@
 
 class Button {
 public:
-	Button(float x, float y, float wid, float hei, char *name);
+	Button(float x, float y, float wid, float hei, const char *name);
 	~Button(void);
 
 	void Refresh(void);
@@ -50,7 +50,7 @@ public:
 	int MouseMove(float x, float y);
 	int MouseMoveClick(float x, float y);
 	int DoMouse(int type, float x, float y, int button, int state);
-
+	void ModifyName (const char * newname);
 private:
 	// Stores the location and label of the button
 	float xcoord;

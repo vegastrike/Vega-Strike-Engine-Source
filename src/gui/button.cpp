@@ -18,7 +18,7 @@
 #include "button.h"
 
 //Button::Button(float x, float y, float wid, float hei, char *name) { ; }
-Button::Button(float x, float y, float wid, float hei, char *name) {
+Button::Button(float x, float y, float wid, float hei, const char *name) {
 
 	// Initialize the variables
 	xcoord = x;
@@ -30,7 +30,14 @@ Button::Button(float x, float y, float wid, float hei, char *name) {
 
 	Refresh();
 }
-
+void Button::ModifyName (const char *newname) {
+  if (label&&newname) {
+    free (label);
+  }
+  if (newname) {
+    label = strdup (newname);
+  }
+}
 Button::~Button(void) {
 
 }
