@@ -9,11 +9,6 @@
 #include <AL/alext.h>
 #include <AL/alut.h>
 #include <vector>
-struct OurSound{
-  ALuint source;
-  ALint buffer;
-  OurSound(ALuint source, ALuint buffername) {buffer=buffername;};
-};
 std::vector <unsigned int> dirtysounds;
 std::vector <OurSound> sounds;
 std::vector <ALuint> buffers;
@@ -34,9 +29,12 @@ static int LoadSound (ALuint buffer, bool looping) {
   return i;
 }
 
-int AUDCreateSoundWAV (const std::string &s, const bool LOOP=false){
+int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
-  ALuint * wavbuf = soundHash.Get(s);
+  
+  ALuint * wavbuf =NULL;
+  if (!music)
+    wavbuf = soundHash.Get(s);
   if (wavbuf==NULL) {
     wavbuf = (ALuint *) malloc (sizeof (ALuint));
     alGenBuffers (1,wavbuf);
@@ -51,16 +49,20 @@ int AUDCreateSoundWAV (const std::string &s, const bool LOOP=false){
     }
     alBufferData( *wavbuf, format, wave, size, freq );
     free(wave);
-    soundHash.Put (s,wavbuf);
-    buffers.push_back (*wavbuf);
+    if (!music) {
+      soundHash.Put (s,wavbuf);
+      buffers.push_back (*wavbuf);
+    }
   }
   return LoadSound (*wavbuf,LOOP);  
 #endif
   return -1;
 }
-int AUDCreateSoundMP3 (const std::string &s, const bool LOOP=false){
+int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
-  ALuint * mp3buf = soundHash.Get (s);
+  ALuint * mp3buf=NULL;
+  if (!music)
+    mp3buf = soundHash.Get (s);
   if (mp3buf==NULL) {
     FILE * fp = fopen (s.c_str(),"rb");
     if (!fp)
@@ -78,8 +80,10 @@ int AUDCreateSoundMP3 (const std::string &s, const bool LOOP=false){
       return -1;
     }
     free (data);
-    soundHash.Put (s,mp3buf);
-    buffers.push_back (*mp3buf);
+    if (!music) {
+      soundHash.Put (s,mp3buf);
+      buffers.push_back (*mp3buf);
+    }
   }
   return LoadSound (*mp3buf,LOOP);
 #endif
@@ -109,6 +113,14 @@ void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
     float p []= {pos.i,pos.j,pos.k};
     float v []= {vel.i,vel.j,vel.k};
     alSourcefv(sounds[sound].source,AL_POSITION,p);
+    //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
+  }
+#endif
+}
+void AUDSoundGain (const int sound, const float gain) {
+#ifdef HAVE_AL
+  if (sound>=0&&sound<(int)sounds.size()) {
+    alSourcef(sounds[sound].source,AL_GAIN,gain);
     //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
 #endif

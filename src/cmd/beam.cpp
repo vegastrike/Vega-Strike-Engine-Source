@@ -182,6 +182,7 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
+  AUDSoundGain (sound,curthick*curthick/(thickness*thickness));
   RecalculateVertices();
 
   beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));

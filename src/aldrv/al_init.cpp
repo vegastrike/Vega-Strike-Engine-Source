@@ -111,7 +111,7 @@ bool AUDInit () {
 	return false;
 }
 
-extern std::vector<ALuint> buffers;
+
 void AUDDestroy() {
 #ifdef HAVE_AL
   //Go through and delete all loaded wavs
