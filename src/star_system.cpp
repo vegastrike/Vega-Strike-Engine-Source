@@ -159,14 +159,14 @@ void StarSystem::Update() {
       // Handle AI in pass 2 to maintain consistency
 
 
-      modelGravity();
+
       Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
 	iter->advance();
       }
       delete iter;
-
+      modelGravity();
       iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->ResolveForces(identity_transformation,identity_matrix,firstframe);

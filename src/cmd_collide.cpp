@@ -41,7 +41,7 @@ void Unit::CollideAll() {
   bool huge = collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
   for (i=0;i<COLQ.size();i++) {
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if (COLQ[i]->object>this||(!huge&&i<collidetable.GetHuge().size()))//the first stuffs are in the huge array
+    if ((!huge||(huge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!huge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
       if (
 	  Position().i+radial_size>COLQ[i]->Mini.i&&
 	  Position().i-radial_size<COLQ[i]->Maxi.i&&
@@ -112,9 +112,9 @@ bool Unit::Collide (Unit * target) {
   //  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
   //  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-  //fprintf (stderr,"Collidison %s %s",name.c_str(),target->name.c_str());
-  smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  fprintf (stderr,"Collidison %s %s",name.c_str(),target->name.c_str());
+  //GOODsmaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  //GOODbigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
@@ -148,7 +148,7 @@ bool Beam::Collide (Unit * target) {
 
     curlength = distance;
     impact|=IMPACT;
-    
+    fprintf (stderr, "beam delivers damage to %s", target->name.c_str());
     //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
     return true;
   }

@@ -497,6 +497,7 @@ void createObjects() {
       break;
     case 0:
       fighters[a] = new Unit("hornet.xunit", true);
+      fighters[a]->SetPosition (1000,100,100);
       break;
     case 2:
       fighters[a] = new Unit("Heavycorvette.xunit", true);
