@@ -83,8 +83,10 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     return;
   }
   x = new Mesh;
-  y = new Mesh;
+  x->forceCullFace(GFXFALSE);
 
+  y = new Mesh;
+  y->forceCullFace(GFXFALSE);
   x->forcelogos = x->squadlogos = NULL;
   x->numforcelogo = x->numsquadlogo =0;
   while (x->Decal.size()<Decal.size())
@@ -130,8 +132,9 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   y->mn = ymin;
   y->mx = ymax;
   x->orig= new Mesh[1];
+  x->forceCullFace(GFXFALSE);
   y->orig= new Mesh[1];
-
+  y->forceCullFace(GFXFALSE);
   x->draw_queue = new vector<MeshDrawContext>;
   y->draw_queue = new vector<MeshDrawContext>;
   *y->orig = *y;

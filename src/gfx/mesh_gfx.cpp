@@ -439,6 +439,10 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     GFXDisable(DEPTHWRITE);
   }
   SelectCullFace(whichdrawqueue);
+  if (getCullFaceForcedOn())
+    GFXEnable(CULLFACE);
+  if (getCullFaceForcedOff())
+    GFXDisable(CULLFACE);
   GFXBlendMode(blendSrc, blendDst);
   GFXEnable(TEXTURE0);
   if(Decal[0])

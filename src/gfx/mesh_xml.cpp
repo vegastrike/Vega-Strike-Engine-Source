@@ -106,6 +106,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
   EnumMap::Pair ("Reverse",XML::REVERSE),
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
+  EnumMap::Pair ("CullFace",XML::CULLFACE),
   EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
   EnumMap::Pair ("UseNormals",XML::USENORMALS)
 };
@@ -113,7 +114,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 33);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 34);
 
 
 
@@ -234,6 +235,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      break;
 		    case XML::LIGHTINGON:
 		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
+		      break;
+		    case XML::CULLFACE:
+		      forceCullFace (XMLSupport::parse_bool((*iter).value)); 
 		      break;
 		    }
 		  }

@@ -134,6 +134,7 @@ private:
       //attributes
       POWER,
       REFLECT,
+      CULLFACE,
       LIGHTINGON,
       FLATSHADE,
       TEXTURE,
@@ -362,6 +363,9 @@ public:
   ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   ///Sets whether or not this unit should be environment mapped
+  void forceCullFace (GFXBOOL newValue) {if (newValue) envMapAndLit = (envMapAndLit|0x4); if (!newValue) envMapAndLit = (envMapAndLit|0x8);}
+  GFXBOOL getCullFaceForcedOn() {return ((envMapAndLit&0x4)!=0);}
+  GFXBOOL getCullFaceForcedOff() {return ((envMapAndLit&0x8)!=0);}
   void setEnvMap(GFXBOOL newValue) {envMapAndLit = (newValue?(envMapAndLit|0x1):(envMapAndLit&(~0x1)));}
   GFXBOOL getEnvMap() {return ((envMapAndLit&0x1)!=0);}
   void setLighting(GFXBOOL newValue){envMapAndLit = (newValue?(envMapAndLit|0x2):(envMapAndLit&(~0x2)));}
