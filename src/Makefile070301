@@ -1,0 +1,80 @@
+MAIN=vegastrike
+
+CC=g++
+
+CFLAGS= -DUNIX -Wall -g  -DTCL_HEADER=\<tcl.h\> -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
+
+INCLUDES= 
+
+LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat -ltcl8.3
+
+SRCS = 	cmd_beam.cpp				\
+	cmd_gun.cpp				\
+	cmd_collide.cpp				\
+	cmd_input_dfa.cpp			\
+	cmd_flybywire.cpp			\
+	cmd_order.cpp				\
+	cmd_unit.cpp				\
+	cmd_unit_xml.cpp  			\
+	cmd_physics.cpp				\
+	cmd_weapon_xml.cpp			\
+	gfx_animation.cpp			\
+	gfx_aux_logo.cpp			\
+	gfx_aux_palette.cpp			\
+	gfx_aux_texture.cpp			\
+	gfx_background.cpp			\
+	gfx_bounding_box.cpp			\
+	gfx_box.cpp 				\
+	gfx_bsp.cpp				\
+	gfx_camera.cpp				\
+	gfx_click_list.cpp			\
+	gfx_coordinate_select.cpp		\
+	gfx_halo.cpp				\
+	gfx_hud.cpp				\
+	gfx_lerp.cpp 				\
+	gfx_location_select.cpp			\
+	gfx_mesh.cpp				\
+	gfx_mesh_xml.cpp 			\
+	gfx_primitive.cpp			\
+	gfx_sprite.cpp				\
+	gfx_transform_vector.cpp		\
+	gfx_transform_matrix.cpp		\
+	gfx_sphere.cpp				\
+	gl_globals.cpp				\
+	gl_init.cpp				\
+	gl_light.cpp				\
+	gl_matrix.cpp				\
+	gl_material.cpp				\
+	gl_misc.cpp				\
+	gl_state.cpp				\
+	gl_texture.cpp				\
+	gl_vertex_list.cpp			\
+	gl_quad_list.cpp			\
+	hashtable.cpp				\
+	in_ai.cpp				\
+	in_kb.cpp				\
+	in_mouse.cpp				\
+	in_main.cpp				\
+	in_handler.cpp				\
+	lin_time.cpp				\
+	main.cpp				\
+	main_loop.cpp				\
+	planet.cpp 				\
+	physics.cpp				\
+	quaternion.cpp				\
+	star_system.cpp 			\
+	UnitCollection.cpp			\
+	UnitContainer.cpp			\
+	wrapgfx.cpp				\
+	xml_support.cpp				
+
+
+OBJS = $(SRCS:.cpp=.o)
+
+$(MAIN):  $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(MAIN) $(LFLAGS)
+.cpp.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<
+
+clean:
+	rm -f *.o *~ $(MAIN)
