@@ -195,8 +195,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	if (targ) {
 	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    CommunicationMessage c(parent,leader,NULL,0);
-	    if (parent->InRange (targ)) {
+	    if (parent->InRange (targ,true,false)) {
 	      parent->Target (targ);
+	      parent->TargetTurret(targ);
 	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	    }else {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
@@ -253,8 +254,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      //fprintf (stderr,"he wnats to help out and he has a threat\n");
 
 	      CommunicationMessage c(parent,leader,NULL,0);
-	      if (parent->InRange(th)) {
+	      if (parent->InRange(th,true,false)) {
 		parent->Target(th);
+		parent->TargetTurret(th);
 		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
@@ -268,9 +270,10 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      CommunicationMessage c(parent,leader,NULL,0);
 	      //fprintf (stderr,"he wnats to help out against threat %d",th);
 	      if (th) {
-		if (parent->InRange (th)) {
+		if (parent->InRange (th,true,false)) {
 		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 		  parent->Target (th);
+		  parent->TargetTurret (th);
 		}else {
 		  c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
 		}
