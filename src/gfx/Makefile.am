@@ -48,6 +48,7 @@ libgfx_a_SOURCES =	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
 	nonlinear_transform.h \
+	planetary_transform.h	\
 	pipelined_texture.cpp	\
 	pipelined_texture.h	\
 	png_texture.h	\

@@ -166,6 +166,29 @@ inline void Translate(float matrix[], float x, float y, float z)
 	matrix[15] = 1;
 }
 
+inline void RotateAxisAngle(float tmp[], const Vector &axis, const float angle) {
+  float c = cosf (angle);
+  float s = sinf (angle);
+#define M(a,b) (tmp[b*4+a])
+                M(0,0)=axis.i*axis.i*(1-c)+c;
+                M(0,1)=axis.i*axis.j*(1-c)-axis.k*s;
+                M(0,2)=axis.i*axis.k*(1-c)+axis.j*s;
+                M(0,3)=0;
+                M(1,0)=axis.j*axis.i*(1-c)+axis.k*s;
+                M(1,1)=axis.j*axis.j*(1-c)+c;
+                M(1,2)=axis.j*axis.k*(1-c)-axis.i*s;
+                M(1,3)=0;
+                M(2,0)=axis.i*axis.k*(1-c)-axis.j*s;
+                M(2,1)=axis.j*axis.k*(1-c)+axis.i*s;
+                M(2,2)=axis.k*axis.k*(1-c)+c;
+                M(2,3)=0;
+                M(3,0)=0;
+                M(3,1)=0;
+                M(3,2)=0;
+                M(3,3)=1;
+#undef M
+}
+
 inline void Translate(float matrix[], const Vector &v) {
   Translate(matrix, v.i, v.j, v.k);
 }
@@ -298,7 +321,46 @@ inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
 #undef h
 #undef i
 }
+inline void InvertMatrix (Matrix o, Matrix trans) {
+#define a (trans[0])
+#define b (trans[4])
+#define c (trans[8])
+#define d (trans[1])
+#define e (trans[5])
+#define f (trans[9])
+#define g (trans[2])
+#define h (trans[6])
+#define i (trans[10])
+  float factor = 1.0F/(-c*e*g+ b*f*g + c*d*h - a*f*h - b*d*i + a*e*i);
+  o[0]=factor*(e*i- f*h);
+  o[4]=factor*(c*h-b*i);
+  o[8]=factor*(b*f-c*e);
+  o[1]=factor*(f*g-d*i);
+  o[5]=factor*(a*i-c*g);
+  o[9]=factor*(c*d-a*f);
+  o[2]=factor*(d*h-e*g);
+  o[6]=factor*(b*g-a*h);
+  o[10]=factor*(a*e-b*d);
+  o[3]=0;
+  o[7]=0;
+  o[11]=0;
+#undef a
+#undef b
+#undef c
+#undef d
+#undef e
+#undef f
+#undef g
+#undef h
+#undef i
 
+  Vector pos (TransformNormal (o,Vector (-trans[12],-trans[13],-trans[14])));
+  o[12]=pos.i;
+  o[13]=pos.j;
+  o[14]=pos.k;
+  o[15]=1;
+
+}
 
 inline void Rotate (Matrix tmp, const Vector &axis, float angle) {
                 double c = cos (angle);

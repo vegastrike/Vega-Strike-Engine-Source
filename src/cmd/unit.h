@@ -30,7 +30,6 @@ struct GFXColor;
 #include "linecollide.h"
 #include "container.h"
 #include "gfx/vdu.h"
-
 #include "xml_support.h"
 
 class Flightgroup;
@@ -71,7 +70,10 @@ struct UnitSounds;
  * Units may have any number of weapons which, themselves may be units
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
+class PlanetaryTransform;
+struct PlanetaryOrbitData;
 class Unit {
+  PlanetaryOrbitData * planet;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
   friend class PlanetaryOrbit;
   ///VDU needs mount data to draw weapon displays
@@ -338,6 +340,8 @@ class Unit {
   ///Builds a BSP tree from either the hull or else the current meshdata[] array
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
+  void SetPlanetOrbitData (PlanetaryTransform *trans);
+  PlanetaryTransform *GetPlanetOrbit ();
   ///Updates the collide Queue with any possible change in sectors
   void UpdateCollideQueue();
   ///The name of this unit

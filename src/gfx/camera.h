@@ -24,7 +24,9 @@
 
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
+class PlanetaryTransform;
 class Camera{
+
 	Vector Coord;
 	Matrix view;
 	GFXBOOL changed;
@@ -41,9 +43,11 @@ public:
 	
 private:
 	ProjectionType projectionType;
-
+	PlanetaryTransform * planet;
 public:
 	Vector P,Q,R;
+	PlanetaryTransform * GetPlanetaryTransform() {return planet;}
+	void SetPlanetaryTransform(PlanetaryTransform * t) {planet=t;}
 	PhysicsSystem myPhysics;
 	///This function updates the sound if sound is not updated on a per frame basis
 	void UpdateCameraSounds();
@@ -52,6 +56,7 @@ public:
         const Vector & GetR () {return R;}
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
 	void UpdateGFX(GFXBOOL clip= GFXTRUE, GFXBOOL updateFrustum=GFXTRUE);
+	void UpdatePlanetGFX(Matrix updated);//clip true, frustum true at all times
 	void UpdateGLCenter();
 
 	void SetPosition(const Vector &origin);

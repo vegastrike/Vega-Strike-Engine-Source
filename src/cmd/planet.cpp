@@ -12,7 +12,7 @@
 #include <assert.h>
 #include "cont_terrain.h"
 #include "atmosphere.h"
-#include "planet_transform.h"
+#include "gfx/planetary_transform.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -168,15 +168,20 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 
   if (inside&&terrain) {
     Matrix tmp;
+    _Universe->AccessCamera()->UpdatePlanetGFX(tmp);
+    Camera * cc = _Universe->AccessCamera();
+    //    VectorAndPositionToMatrix (tmp,cc->P,cc->Q,cc->R,cc->GetPosition()+cc->R*100);
+    terrain->SetTransformation (tmp);
+    terrain->AdjustTerrain(_Universe->activeStarSystem());
+    terrain->Draw();
+#ifdef PLANETARYTRANSFORM
+
     terraintrans->GrabPerpendicularOrigin (_Universe->AccessCamera()->GetPosition(),tmp);
-    //    fprintf (stderr,"<%f,%f,%f>",tmp[12],tmp[13],tmp[14]);
     terrain->SetTransformation (tmp);
     terrain->AdjustTerrain(_Universe->activeStarSystem());
     terrain->Draw();
     if (atmosphere) {
       Vector tup (tmp[4],tmp[5],tmp[6]);
-      //Vector p(-TerrainH.Cross (TerrainUp));
-      //VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,cumulative_transformation.position);
       Vector p = (_Universe->AccessCamera()->GetPosition());
       Vector blah = p-Vector (tmp[12],tmp[13],tmp[14]);
       blah = p - (blah.Dot (tup))*tup;
@@ -185,6 +190,7 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
       tmp[14]=blah.k;      
       atmosphere->SetMatricesAndDraw (_Universe->AccessCamera()->GetPosition(),tmp);
     }
+#endif
   }
     
   GFXLoadIdentity (MODEL);
@@ -196,23 +202,29 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   if (counter ++>100)
   if (t.Magnitude()<corner_max.i) {
     if (!inside) {
+      _Universe->AccessCamera()->SetPlanetaryTransform (terraintrans);
+      inside =true;
+      if (terrain)
+	terrain->EnableUpdate();
+#ifdef PLANETARYTRANSFORM
       TerrainUp = t;
       Normalize(TerrainUp);
       TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
       Normalize (TerrainH);
-      inside =true;
-      if (terrain)
-	terrain->EnableUpdate();
+#endif
     }
+
     //    shouldfog=true;
   } else {
     if (inside) {
+      _Universe->AccessCamera()->SetPlanetaryTransform (NULL);
       //if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
       inside=false;
       ///somehow warp unit to reasonable place outisde of planet
       if (terrain) {
-	
+#ifdef PLANETARYTRANSFORM
 	terrain->DisableUpdate();
+#endif
       }
     }
   }
@@ -225,7 +237,16 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 
 void Planet::reactToCollision (Unit *un, const Vector & normal, float dist) {
   if (terrain&&un->isUnit()!=PLANETPTR) {
+    un->SetPlanetOrbitData (terraintrans);
     Matrix top;
+    Identity(top);
+    Vector posRelToTerrain = terraintrans->InvTransform(un->Position());
+    top[12]=un->Position().i- posRelToTerrain.i;
+    top[13]=un->Position().j- posRelToTerrain.j;
+    top[14]=un->Position().k- posRelToTerrain.k;
+
+#ifdef PLANETARYTRANSFORM
+
     terraintrans->GrabPerpendicularOrigin(un->Position(),top);
     static int tmp=0;
     /*    if (tmp) {
@@ -233,8 +254,10 @@ void Planet::reactToCollision (Unit *un, const Vector & normal, float dist) {
       terrain->AdjustTerrain (_Universe->activeStarSystem());
       terrain->Collide (un);
       }else {*/
-      terrain->Collide (un,top);
+
       //    }
+#endif
+    terrain->Collide (un,top);      
   }
   //nothing happens...you fail to do anythign :-)
   //maybe air reisstance here? or swithc dynamics to atmos mode
@@ -280,7 +303,7 @@ void Planet::setTerrain (ContinuousTerrain * t) {
   terrain->DisableDraw();
   float x,z;
   t->GetTotalSize (x,z);
-  terraintrans = new PlanetaryTransform (.366666*corner_max.i,x*4,z,2);
+  terraintrans = new PlanetaryTransform (.43*corner_max.i,x*2,z,4);
   terraintrans->SetTransformation (cumulative_transformation_matrix);
 }
 void Planet::setAtmosphere (Atmosphere *t) {

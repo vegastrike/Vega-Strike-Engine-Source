@@ -362,7 +362,9 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       Kill();
   }
 }
-
+void Unit::SetPlanetOrbitData (PlanetaryTransform *) {
+  //
+}
 void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
   Vector p, q, r;
   GetOrientation(p,q,r);

@@ -58,6 +58,7 @@ void Unit::Threaten (Unit * targ, float danger) {
   }
 
 }
+
 void Unit::calculate_extent() {  
   int a;
   for(a=0; a<nummesh; a++) {

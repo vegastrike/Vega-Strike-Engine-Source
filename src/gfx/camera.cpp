@@ -28,7 +28,7 @@
 #include "lin_time.h"
 
 #include <assert.h>	// needed for assert() calls
-
+#include "planetary_transform.h"
 //const float PI=3.1415926536;
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
 {
@@ -100,6 +100,40 @@ void Camera::UpdateCameraSounds() {
   AUDListener (Coord,GetVelocity());
   AUDListenerOrientation (P,Q,R);
 #endif
+}
+#ifdef OLDUPDATEPLANEGFX
+    /**
+    Vector c (planet->InvTransform (Coord));
+    Vector tt (planet->Transform (c));
+    fprintf (stderr,"t <%f,%f,%f>\n",tt.i,tt.j,tt.k);
+    fprintf (stderr,"Coord <%f,%f,%f>\n",Coord.i,Coord.j,Coord.k);
+    Vector p (planet->InvTransform (Coord+P)-c);
+    Vector q (planet->InvTransform (Coord+Q)-c);
+    Vector r (planet->InvTransform (Coord+R)-c);
+    r.Normalize();
+    
+    //    p= q.Cross (r);
+//	  q = r.Cross (p);
+    p.Normalize();
+    q.Normalize();
+    q = q-q.Dot (r)*r;
+    q.Normalize();
+    */
+
+#endif
+void Camera::UpdatePlanetGFX (Matrix updated) {
+
+  if (planet) {
+    Matrix t;
+    Matrix inv;
+    planet->InvTransformBasis(updated,P,Q,R,Coord);
+
+    InvertMatrix (inv,updated);
+    VectorAndPositionToMatrix (t,P,Q,R,Coord);
+    MultMatrix (updated,t,inv);
+  } else {
+    Identity (updated);
+  }
 }
 
 void Camera::UpdateGLCenter()
