@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libscript.a libscriptserver.a
 SUBDIRS = c_alike
-INCLUDES = -I../ -I../.. -I../../boost/
+INCLUDES = -I../ -I../.. 
 
 libscriptgeneric =			\
 	mission.cpp					\

@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libcmd.a libcmdserver.a
 SUBDIRS = ai script collide
-INCLUDES = -I ../ -I../boost/
+INCLUDES = -I ../
 
 libcmdgeneric =			\
 	unit_generic.h					\

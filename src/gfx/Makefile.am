@@ -1,5 +1,5 @@
 noinst_LIBRARIES = libgfx.a libgfxserver.a
-INCLUDES = -I ../ -I../boost/
+INCLUDES = -I ../ 
 
 libgfxgeneric =  \
 	cockpit_generic.h	\
