@@ -3,7 +3,7 @@
 #include "universe_util.h"
 #include "config_xml.h"
 float max_allowable_travel_time () {
-  static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","100"));
+  static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","1000"));
   return mat;
 }
 bool DistanceWarrantsWarpTo (Unit * parent, float dist){
@@ -35,10 +35,10 @@ void WarpToP(Unit * parent, Unit * target) {
   float dist =UnitUtil::getSignificantDistance(parent,target);
   if (DistanceWarrantsWarpTo (parent,dist)) {
     static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
-    if(parent->GetWarpEnergy()>parent->GetJumpStatus().energy*insys_jump_cost) {
-      if (TargetWorthPursuing(parent,target)){
-	parent->AutoPilotTo(target,false);
-      }
+	if(parent->GetWarpEnergy()>parent->GetJumpStatus().insysenergy) {
+		if (TargetWorthPursuing(parent,target)){
+			parent->AutoPilotTo(target,false);
+		}
     }
   }
 }

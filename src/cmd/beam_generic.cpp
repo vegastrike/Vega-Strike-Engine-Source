@@ -368,7 +368,7 @@ bool Beam::Collide (Unit * target) {
 	for (;(un=*ui)!=NULL;++ui) {
 	  if (((void *)un)==owner) {
 	    static float nbig = .1;
-	    if (target->faction==FactionUtil::GetFaction("upgrades")||un->rSize()>nbig*target->rSize()) {
+	    if (target->faction==FactionUtil::GetFaction("upgrades")||un->rSize()*nbig>target->rSize()) {
 	      //we have our man!
 	      //lets add our cargo to him
 	      Cargo *c = GetMasterPartList (target->name.c_str());

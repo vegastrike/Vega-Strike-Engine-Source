@@ -830,14 +830,17 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
   }
 }
 
-QVector Unit::PositionITTS (const QVector & posit, float speed) const{
-  QVector retval = Position()-posit;
-  if(speed==0){
-    speed=0.000000001;  //FIX ME Krufty and ugly 
-  }
-  speed = retval.Magnitude()/speed;
-  retval = Position()+GetVelocity().Cast().Scale(speed);
-  return retval;
+QVector Unit::PositionITTS (QVector  posit, float speed) const{
+	posit= posit-this->Position();
+	QVector curguess(posit);
+	for (unsigned int i=0;i<3;++i) {
+		float time = 0;
+		if(speed>0.001){
+			time = curguess.Magnitude()/speed;
+		}	 
+		curguess = posit+GetVelocity().Cast().Scale(time);
+	}
+	return curguess+this->Position();
 }
 
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
@@ -1527,12 +1530,18 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	  }
 	  
   }
+  bool nowhere=false;
+	
   if (this!=target) {
     warpenergy-=totpercent*jump.insysenergy;
     QVector sep (UniverseUtil::SafeEntrancePoint(end,rSize()));
     if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
       sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
     }
+    if ((sep-RealPosition(target)).MagnitudeSquared()>(RealPosition(this)-RealPosition(target)).MagnitudeSquared()) {
+		sep= RealPosition(this);
+		nowhere=true;
+	}
 
     static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","auto_turn_towards","true"));
     if (auto_turn_towards) {
@@ -1551,13 +1560,12 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	}
       }
     }
-	bool nowhere=false;
-    if ((sep-RealPosition(target)).MagnitudeSquared()>(RealPosition(this)-RealPosition(target)).MagnitudeSquared()) {
-		sep= RealPosition(this);
-		nowhere=true;
-	}
     static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
-    if (insys_jump_ani.length()) {
+    if (
+
+		//nowhere==false&&
+
+		insys_jump_ani.length()) {
       UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
 
 

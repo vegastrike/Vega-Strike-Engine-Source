@@ -132,28 +132,31 @@ static bool InList (std::string item, Unit * un) {
   return false;
 }
 void CommunicatingAI::UpdateContrabandSearch () {
-  Unit * u = contraband_searchee.GetUnit();
-  if (u) {
-    if (which_cargo_item<(int)u->numCargo()) {
-      std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
-      static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
-      if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
-	CommunicationMessage c(parent,u,comm_face,sex);
-	c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
-	Order * o;
-	if ((o=u->getAIState()))
-		o->Communicate (c);
-	GetMadAt(u,1);
-	SpeedAndCourse=u->GetVelocity();
-      }
-      if (InList (item,FactionUtil::GetContraband(parent->faction))) {
-	TerminateContrabandSearch(true);
-      }
-    }else {
-      TerminateContrabandSearch(false);
-
-    }
-  }
+	Unit * u = contraband_searchee.GetUnit();
+	if (u) {
+		if (which_cargo_item<(int)u->numCargo()) {
+			if (u->getCargo(which).quantity>0) {
+				std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
+				
+				static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
+				if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
+					CommunicationMessage c(parent,u,comm_face,sex);
+					c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
+					Order * o;
+					if ((o=u->getAIState()))
+						o->Communicate (c);
+					GetMadAt(u,1);
+					SpeedAndCourse=u->GetVelocity();
+				}
+				if (InList (item,FactionUtil::GetContraband(parent->faction))) {
+					TerminateContrabandSearch(true);
+				}
+			}
+		}else {
+			TerminateContrabandSearch(false);
+			
+		}
+	}
 }
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
