@@ -1,8 +1,12 @@
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129
+endif
+
 noinst_LIBRARIES = libaldrv.a
-
-
-INCLUDES = -I ../ 
-
 
 libaldrv_a_SOURCES =				\
 	al_init.cpp				\

@@ -10,15 +10,15 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 //DEC_FROM_PYTHON_SMART_POINTER(Unit)
 */
 #ifdef USE_BOOST_129
-#include <boost/python/object.hpp>
-#include <boost/python/class.hpp>
-#include <boost/python/call_method.hpp>
-#include <boost/python.hpp>///module.hpp>
+#include "boost/python/object.hpp"
+#include "boost/python/class.hpp"
+#include "boost/python/call_method.hpp"
+#include "boost/python.hpp"///module.hpp>
 #define class_builder class_
 #else
-#include <boost/python/objects.hpp>
-#include <boost/python/class_builder.hpp>
-#include <boost/python/detail/extension_class.hpp>
+#include "boost/python/objects.hpp"
+#include "boost/python/class_builder.hpp"
+#include "boost/python/detail/extension_class.hpp"
 #endif
 
 #include "init.h"

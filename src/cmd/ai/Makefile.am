@@ -1,6 +1,12 @@
-noinst_LIBRARIES = libai.a libaiserver.a
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129
+endif
 
-INCLUDES = -I ../../ 
+noinst_LIBRARIES = libai.a libaiserver.a
 
 libaigeneric =	\
 	comm_ai.h			\

@@ -1,6 +1,13 @@
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129
+endif
+
 noinst_LIBRARIES = libcmd.a libcmdserver.a
 SUBDIRS = ai script collide
-INCLUDES = -I ../
 
 libcmdgeneric =			\
 	unit_generic.h					\
@@ -101,4 +108,4 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 #	unit_customize.cpp			\
 #	unit_damage.cpp				\
 #	unit_physics.cpp			\
-#	unit.cpp				\
+#	unit.cpp

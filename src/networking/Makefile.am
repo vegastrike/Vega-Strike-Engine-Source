@@ -1,7 +1,14 @@
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129
+endif
+
 # noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
-INCLUDES = -I ../
 
 soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp

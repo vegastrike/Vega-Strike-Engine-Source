@@ -1,6 +1,12 @@
-noinst_LIBRARIES = libvscommon.a
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129
+endif
 
-INCLUDES = -I ../ 
+noinst_LIBRARIES = libvscommon.a
 
 libvscommon_a_SOURCES =	\
 	common.cpp	\

@@ -1,6 +1,14 @@
-noinst_LIBRARIES = libpython.a libpythonserver.a
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost \
+	 -I/usr/include/python2.2
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129 \
+	 -I/usr/include/python2.2
+endif
 
-INCLUDES = -I ../  -I/usr/include/python2.2
+noinst_LIBRARIES = libpython.a libpythonserver.a
 
 libpythongeneric =				\
 	init.cpp \

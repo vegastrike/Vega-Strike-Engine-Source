@@ -1,3 +1,11 @@
+if USEBOOST128
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost
+else
+INCLUDES=-I$(top_srcdir)/src \
+	 -I$(top_srcdir)/src/boost129
+endif
+
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
