@@ -87,23 +87,26 @@ class	WebcamSupport
 
 // Windows specific stuff to convert images formats
 #if defined( _WIN32) && !defined( __CYGWIN__)
-#include "jpeglib.h"
+extern "C" { 
+#include "jpeglib.h" 
+}
+
 BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
                  int        nQuality, //JPEG quality (0-100)
-                 class CString    csJpeg,   //Pathname to target jpeg file
-                 class CString*   pcsMsg);  //Error msg to return
+                 std::string    csJpeg,   //Pathname to target jpeg file
+                 std::string*   pcsMsg);  //Error msg to return
 
 BOOL BuildSamps(HANDLE                      hDib,
                 int                         nSampsPerRow,
                 struct jpeg_compress_struct cinfo,
                 JSAMPARRAY                  jsmpArray,
-                class CString*                    pcsMsg);
+                std::string*                    pcsMsg);
 
 BOOL DibToSamps(HANDLE                      hDib,
                 int                         nSampsPerRow,
                 struct jpeg_compress_struct cinfo,
                 JSAMPARRAY                  jsmpPixels,
-                class CString*                    pcsMsg);
+                std::string*                    pcsMsg);
 
 RGBQUAD QuadFromWord(WORD b16);
 #endif

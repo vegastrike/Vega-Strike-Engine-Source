@@ -1,7 +1,7 @@
 #ifndef HAVE_BOOLEAN
 #define HAVE_BOOLEAN
 #define FALSE 0
-#define TRUE 1;
+#define TRUE 1
 typedef unsigned char boolean;
 #endif
 #ifndef XMD_H
@@ -9,7 +9,6 @@ typedef unsigned char boolean;
 typedef int INT32;
 #endif
 #ifdef _WIN32
-#include <afx.h>
 #include <windows.h>
 #endif
 #include <iostream>
@@ -472,10 +471,10 @@ char *	WebcamSupport::CaptureImage()
     //Turn DIB into JPEG file
     if (hDib != NULL)
     {
-		CString  csMsg = "";
+		std::string  csMsg = "";
         if (!JpegFromDib(hDib, 70/*Quality*/, "c:\temp\vstest.jpg", &csMsg))
         {
-            cerr<<csMsg<<endl;
+            cerr<<csMsg.c_str()<<endl;
         }
 
         else
@@ -595,14 +594,14 @@ struct ima_error_mgr
 /////////////////////////////////////////////////////////////////////////////
 BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
                  int        nQuality, //JPEG quality (0-100)
-                 CString    csJpeg,   //Pathname to jpeg file
-                 CString*   pcsMsg)   //Error msg to return
+				 std::string    csJpeg,   //Pathname to jpeg file
+				 std::string*   pcsMsg)   //Error msg to return
 {
     //Basic sanity checks...
     if (nQuality < 0 || nQuality > 100 ||
         hDib   == NULL ||
         pcsMsg == NULL ||
-        csJpeg == "")
+        (!csJpeg.size()))
     {
         if (pcsMsg != NULL)
             *pcsMsg = "Invalid input data";
@@ -628,7 +627,7 @@ BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
 
     jpeg_create_compress(&cinfo);
 
-    if ((pOutFile = fopen(csJpeg, "wb")) == NULL)
+    if ((pOutFile = fopen(csJpeg.c_str(), "wb")) == NULL)
     {
         *pcsMsg = "Cannot open ";
 		*pcsMsg += csJpeg;
@@ -680,7 +679,7 @@ BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
 
     jpeg_destroy_compress(&cinfo); //Free resources
 
-    if (*pcsMsg != "")
+    if (pcsMsg->size())
         return FALSE;
 
     else
@@ -702,7 +701,7 @@ BOOL DibToSamps(HANDLE                      hDib,
                 int                         nSampsPerRow,
                 struct jpeg_compress_struct cinfo,
                 JSAMPARRAY                  jsmpPixels,
-                CString*                    pcsMsg)
+				std::string*                    pcsMsg)
 {
    //Sanity...
    if (hDib == NULL    ||
@@ -774,7 +773,7 @@ BOOL DibToSamps(HANDLE                      hDib,
                nRow=(pbBmHdr->biHeight-r-1) * nBytesWide;
                nByte =  nRow + p;
 
-               int nBUsed = (p <(nUsed 1)) ? 8 : nLastBits; for(b=0; b < nBUsed;b++) 
+               int nBUsed = (p <(nUsed-1)) ? 8 : nLastBits; for(b=0; b < nBUsed;b++) 
                { 
                   bytCTEnt = lpPixels[nByte] << b; 
                   bytCTEnt = bytCTEnt >> 7;
@@ -801,16 +800,16 @@ BOOL DibToSamps(HANDLE                      hDib,
             { 
                nRow=(pbBmHdr->biHeight-r-1) * nBytesWide;
                nByte = nRow + p;
-
-               int nNibbles = (p < nNibbles;n++) 
-               { 
-                  bytCTEnt=lpPixels[nByte] << (n*4); bytCTEnt=bytCTEnt >> (4-(n*4));
-
-                  jsmpPixels[r][q+0] = pCTab[bytCTEnt].rgbRed;
-                  jsmpPixels[r][q+1] = pCTab[bytCTEnt].rgbGreen;
-                  jsmpPixels[r][q+2] = pCTab[bytCTEnt].rgbBlue;
-
-                  q += 3;
+               int nNibbles = (p < nUsed - 1) ?
+                  2 : nLastNibs;
+               for(n=0;n < nNibbles;n++)
+               {
+                   bytCTEnt = lpPixels[nByte] << (n*4);
+                   bytCTEnt = bytCTEnt >> (4-(n*4));
+                   jsmpPixels[r][q+0] = pCTab[bytCTEnt].rgbRed;
+                   jsmpPixels[r][q+1] = pCTab[bytCTEnt].rgbGreen;
+                   jsmpPixels[r][q+2] = pCTab[bytCTEnt].rgbBlue;
+                   q += 3;
                }
             }
          }
