@@ -18,7 +18,10 @@ protected:
         : GameUnit<Missile> (filename,false,faction,modifications)
     {
 		this->InitMissile( time, damage, phasedamage, radialeffect, radmult, detonation_radius, false, -1);
-		maxhull*=10;
+		static bool missilesparkle = XMLSupport::parse_bool (vs_config->getVariable("graphics","missilesparkle","false"));
+		if (missilesparkle) {
+			maxhull*=4;
+		}
 	}
 
   friend class UnitFactory;

@@ -15,7 +15,7 @@ extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missilepr
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
   if (range==-1) {
-	float mrange;
+	  range=mrange=speed=0;
     parent->getAverageGunSpeed (speed, range,mrange);
     float tspeed, trange,tmrange;
     Unit * gun;
@@ -25,10 +25,15 @@ void TurretAI::Execute () {
     for (un_iter i=parent->getSubUnits();(gun=*i)!=NULL;++i) {
       (*i)->getAverageGunSpeed(tspeed,trange,tmrange);
       if (trange>range) {
-	speed=tspeed;
-	range=trange;
+		  speed=tspeed;
+		  range=trange;
+		  mrange=tmrange;
       }
     }
+	if (range==0) {
+		range=mrange;
+		speed = FLT_MAX;
+	}
   }
   if (targ) {
     static float dot_cutoff = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","TurretDotCutoff",".4"));

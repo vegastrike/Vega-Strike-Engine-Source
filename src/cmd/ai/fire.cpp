@@ -99,7 +99,8 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
   if(rangetotarget<.5*gunrange)
     rangetotarget=.5*gunrange;
   if(gunrange <=0){
-	gunrange= 50000;
+	  static mountless_gunrange = XMLSupport::parse_float (vs_config->getVariable("AI","Targetting","MountlessGunRange","300000000"));
+	  gunrange= mountless_gunrange;
   }//probably a mountless capship. 50000 is chosen arbitrarily
   float inertial_priority=0;
   {
