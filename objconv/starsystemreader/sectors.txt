@@ -1,8 +1,8 @@
-RBL-1,RBL-2,RBL-3,Eyenjgylk,RBL-4,RBL-5,RBL-6,RBL-7
-RBL-8,10,11,Aeneth,13,14,RBL-9,RBL-10
-RBL-11,18,19,20,21,22,RBL-12,RBL-13
-RBL-14,26,27,28,29,30,31,32
-Thanatos,Rust,Argent,Redemption,Ingatwa,Ahbz,Pzzaztahber,Bzzeen
+RBL-1,RBL-2,RBL-3,Eeyenjylk,RBL-4,RBL-5,RBL-6,RBL-7
+RBL-8,Gohthuhthuh,Uulmm,Aeneth,Uumghemm,Eeruu,RBL-9,RBL-10
+RBL-11,Alleethuh,Ouulneh,Gohallruu,Mahgoh,Thuhtmaah,RBL-12,RBL-13
+RBL-14,Iyn,Maeell,Eilthut,Eilgohall,Miyeeldah,Ibzazz,Zzyqqh
+Thanatos,Rust,Solace,Redemption,Ingatwa,Ahbz,Pzzaztahber,Bzzeen
 Diaspora,Torkelsen,Magellan,Crucible,Bribztkaber,Bztutpt,Aantlbzz,Aantutpt
-Vormund,Vega,Sol,Beckett,53,54,55,56
-Rhubarb,Plymouth,Baja,Caldera,61,62,63,64
+Vormund,Vega,Sol,Beckett,Izzptipt,Bzzahbtktk,Ibpzez,Ahbzeentk
+Rhubarb,Plymouth,Baja,Caldera,Tutbzzaz,Eebzpt,Ohzzz,Ailzzptpt
