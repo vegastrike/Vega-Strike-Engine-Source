@@ -64,7 +64,8 @@ int	selectdirs( const struct dirent * entry)
 	// Have to check if we have the full path or just relative (which would be a problem)
 	cerr<<"Read directory entry : "<<(curmodpath+entry->d_name)<<endl;
 	struct stat s;
-	if( stat( (curmodpath+entry->d_name).c_str(), &s)<0)
+	std::string tmp=curmodpath+entry->d_name;
+	if( stat( tmp.c_str(), &s)<0)
 		return false;
 	if( (s.st_mode & S_IFDIR) && string( entry->d_name)!="." && string( entry->d_name)!="..")
 	{

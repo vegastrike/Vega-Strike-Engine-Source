@@ -64,7 +64,7 @@ struct dirent { char d_name[1]; };
 #include <sys/types.h>
 #include <dirent.h>
 #endif
-
+#include <sys/stat.h>
 //end for directory thing
 
 
@@ -2272,8 +2272,10 @@ static int	nodirs( const struct dirent * entry)
 {
 #if defined(_WIN32)
 	// Have to check if we have the full path or just relative (which would be a problem)
-	cerr<<"Read directory entry : "<<(curmodpath+entry->d_name)<<endl;
 	struct stat s;
+	std::string tmp=VSFileSystem::homedir+"/save/"+entry->d_name;
+	if( stat( tmp.c_str(), &s)<0)
+		return string( entry->d_name)!="." && string( entry->d_name)!="..";
 	if( (s.st_mode & S_IFDIR)==0 && string( entry->d_name)!="." && string( entry->d_name)!="..")
 	{
 		return 1;
