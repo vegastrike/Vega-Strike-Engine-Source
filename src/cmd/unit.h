@@ -268,7 +268,13 @@ class Unit {
   ///fuel of this unit
   float fuel;
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
-  int jumpdrive;
+  struct UnitJump {
+    char drive;
+    unsigned char delay;
+    unsigned char damage;
+    //negative means fuel
+    char energy;
+  } jump;
   ///Moment of intertia of this unit
   float MomentOfInertia;
   ///The force applied from outside accrued over the whole physics frame
@@ -382,7 +388,7 @@ public:
   void Init();
   void ActivateJumpDrive (int destination=0);
   void DeactivateJumpDrive ();
-  int JumpDrive ();//-1 returns off, otherwise returns destination
+  const UnitJump &GetJumpStatus() {return jump;}
   ///Begin and continue explosion
   bool Explode(bool draw, float timeit);
   ///explodes then deletes

@@ -2,7 +2,7 @@
 #include "fire.h"
 #include "flybywire.h"
 #include "navigation.h"
-
+#include "cmd/planet.h"
 using Orders::FireAt;
 
 FireAt::FireAt (float reaction_time, float aggressivitylevel): Order (WEAPON|TARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
@@ -86,18 +86,25 @@ void FireAt::Execute () {
 
   }
   if ((targ = parent->Target())) {
+    bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;
+    if (istargetjumpableplanet) {
+      istargetjumpableplanet=((Planet*)targ)->GetDestinations().size()&&parent->GetJumpStatus().drive>=0;
+    }
+    
     if (targ->CloakVisible()>.8) {
-      shouldfire |= ShouldFire (targ);
+      if (!istargetjumpableplanet)
+	shouldfire |= ShouldFire (targ);
       if (targ->GetHull()<0) {
 	ChooseTargets(1);
       }
     }else {
       ChooseTargets(1);
     }
+    if (!(istargetjumpableplanet)&&(float(rand())/RAND_MAX)<.5*missileprobability*SIMULATION_ATOM) {
+      ChooseTargets(1);
+    }
+
   } else {
-    ChooseTargets(1);
-  }
-  if ((float(rand())/RAND_MAX)<.5*missileprobability*SIMULATION_ATOM) {
     ChooseTargets(1);
   }
   if (shouldfire) {

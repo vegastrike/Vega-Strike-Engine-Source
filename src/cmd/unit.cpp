@@ -97,21 +97,26 @@ void Unit::SetResolveForces (bool ys) {
 
 
 void Unit::ActivateJumpDrive (int destination) {
-  if (jumpdrive!=-2) {
-    jumpdrive = destination;
+  const int jumpfuelratio=1;
+  if (jump.drive!=-2&&(energy>jump.energy&&(jump.energy>=0||fuel>-jump.energy))) {
+    jump.drive = destination;
+    if (jump.energy>0)
+      energy-=jump.energy;
+    else
+      fuel += jump.energy*mass*jumpfuelratio;
   }
 }
 void Unit::DeactivateJumpDrive () {
-  if (jumpdrive>=0) {
-    jumpdrive=-1;
+  if (jump.drive>=0) {
+    jump.drive=-1;
   }
-}
-int Unit::JumpDrive () {
-  return jumpdrive;
 }
 void Unit::Init()
 {
-  jumpdrive=-1;//off but not disabled
+  jump.energy = 100;
+  jump.delay=5;
+  jump.damage=0;
+  jump.drive=-2;// disabled
   planet=NULL;
   image = new UnitImages;
   sound = new UnitSounds;

@@ -71,12 +71,15 @@ class StarSystem {
   Stars *stars;
   ///The Light Map corresponding for the BP for spheremapping
   Texture *LightMap[6]; 
+  void AddStarsystemToUniverse(const string &filename);
+
  public:
   class CollideTable *collidetable;
   class bolt_draw *bolts;
   Background* getBackground() {return bg;}
   ///activates the light map texture
   void activateLightMap();
+  static void DrawJumpStars();
   Terrain * getTerrain (unsigned int which) {return terrains[which];}
   unsigned int numTerrain () {return terrains.size();}
   ContinuousTerrain * getContTerrain (unsigned int which) {return contterrains[which];}

@@ -273,9 +273,9 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
 #endif
     terrain->Collide (un,top);      
   }
-  if (!destination.empty()&&un->JumpDrive()>=0) {
+  if (!destination.empty()&&un->GetJumpStatus().drive>=0) {
     un->DeactivateJumpDrive();
-    _Universe->activeStarSystem()->JumpTo (un, this, std::string(destination[un->JumpDrive()%destination.size()]));
+    _Universe->activeStarSystem()->JumpTo (un, this, std::string(destination[un->GetJumpStatus().drive%destination.size()]));
   }
 #if 0
   //screws with earth having an atmosphere... blahrgh

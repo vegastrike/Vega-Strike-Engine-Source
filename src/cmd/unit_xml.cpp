@@ -116,7 +116,11 @@ namespace UnitXML {
       SHIELDMP3,
       EXPLODEWAV,
       EXPLODEMP3,
-	  COCKPIT
+      COCKPIT,
+      JUMP,
+      DELAY,
+      JUMPENERGY,
+      JUMPWAV
     };
 
   const EnumMap::Pair element_names[] = {
@@ -146,7 +150,8 @@ namespace UnitXML {
     EnumMap::Pair ("Roll", ROLL),
     EnumMap::Pair ("Mount", MOUNT),
     EnumMap::Pair ("Radar", RADAR),
-    EnumMap::Pair ("Cockpit", COCKPIT)
+    EnumMap::Pair ("Cockpit", COCKPIT),
+    EnumMap::Pair ("Jump", JUMP)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -214,11 +219,14 @@ namespace UnitXML {
     EnumMap::Pair ("CloakWav",CLOAKWAV),
     EnumMap::Pair ("Color",ISCOLOR),
     EnumMap::Pair ("Restricted", RESTRICTED),
+    EnumMap::Pair ("Delay", DELAY),
+    EnumMap::Pair ("JumpEnergy", JUMPENERGY),
+    EnumMap::Pair ("JumpWav", JUMPWAV)
 
 };
 
-  const EnumMap element_map(element_names, 27);
-  const EnumMap attribute_map(attribute_names, 65);
+  const EnumMap element_map(element_names, 28);
+  const EnumMap attribute_map(attribute_names, 68);
 }
 
 using XMLSupport::EnumMap;
@@ -468,6 +476,24 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units[indx]->limits.limitmin=fbrltb[0];
     
     break;
+  case JUMP:
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    jump.drive = -1;//activate the jump unit
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case JUMPENERGY:
+	jump.energy = parse_int ((*iter).value);
+	break;
+      case DELAY:
+	jump.delay = parse_int ((*iter).value);
+	break;
+      case FUEL:
+	jump.energy = -parse_int ((*iter).value);
+	break;
+      }
+    }
+    break;
   case SOUND:
     assert (xml->unitlevel==1);
     xml->unitlevel++;
@@ -475,6 +501,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case CLOAKWAV:
 	sound->cloak = AUDCreateSoundWAV ((*iter).value,false);
+	break;
+      case JUMPWAV:
+	sound->jump = AUDCreateSoundWAV ((*iter).value,false);
 	break;
       case CLOAKMP3:
 	sound->cloak = AUDCreateSoundMP3 ((*iter).value,false);

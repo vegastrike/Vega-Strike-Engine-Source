@@ -17,10 +17,11 @@ struct UnitImages {
 };
 
 struct UnitSounds {
-    int engine;
-    int shield;
-    int armor;
-    int hull;
-    int explode;
-    int cloak;
-  };
+  int engine;
+  int shield;
+  int armor;
+  int hull;
+  int explode;
+  int cloak;
+  int jump;
+};

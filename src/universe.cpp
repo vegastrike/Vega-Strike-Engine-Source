@@ -134,6 +134,7 @@ void Universe::StartDraw()
 	GFXBeginScene();
 
   _Universe->activeStarSystem()->Draw();
+  StarSystem::DrawJumpStars();
   UpdateTime();
   for (int i=0;i<star_system.size();i++) {
     star_system[i]->Update();
