@@ -122,6 +122,7 @@ int main( int argc, char *argv[] )
 //	*TEST_STUFF='0';//MAKE IT CRASH
 #if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
     // We need to set the path back 2 to make everything ok.
+	{
     char *parentdir;
 	int pathlen=strlen(argv[0]);
 	parentdir=new char[pathlen+1];
@@ -139,6 +140,8 @@ int main( int argc, char *argv[] )
     if (strlen (parentdir)>0) {  
       chdir (parentdir);/* chdir to the binary app's parent */
     }
+	delete []parentdir;
+	}
 #if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */
 #endif
@@ -223,7 +226,7 @@ int main( int argc, char *argv[] )
 #endif
     */
     _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
-	delete []parentdir;
+
     _Universe->Loop(bootstrap_main_loop);
     return 0;
 }
