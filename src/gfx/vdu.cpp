@@ -480,10 +480,14 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
 void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   float x,y,w,h;
   float th;
-  char st[256];
+  char st[1024];
   Unit * thr = parent->Threat();
-  sprintf (st,"\nHull: %.3f",parent->GetHull());
   GFXColorf (c);
+  if (parent->getFgID()==parent->name.c_str()) {
+    sprintf (st,"\n%s\nHull: %.3f",parent->name.c_str(),parent->GetHull());
+  }else {
+    sprintf (st,"\n%s:%s\nHull: %.3f",parent->getFgID().c_str(),parent->name.c_str(),parent->GetHull());
+  }
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
   int k=strlen(st);
   if (thr) {
