@@ -21,7 +21,7 @@
 
 #ifndef __GUITEXTURE_H__
 #define __GUITEXTURE_H__
-
+#include <string>
 #include "guidefs.h"
 
 // The GuiTexture class encapsulates an OpenGL 2D texture.
