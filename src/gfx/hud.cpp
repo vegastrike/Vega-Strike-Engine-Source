@@ -146,10 +146,11 @@ bool doNewLine(string::const_iterator begin,
                string::const_iterator end,
                float cur_pos,
                float end_pos,
-               float metrics) {
+               float metrics, 
+               bool last_row) {
   if (*begin=='\n')
     return true;
-  if (*begin==' ') {
+  if (*begin==' '&&!last_row) {
     cur_pos+=charWidth(*begin,metrics);
     *begin++;
     for (;begin!=end&&cur_pos<=end_pos&&!isspace(*begin);begin++) {
@@ -289,7 +290,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/std_wid;
       }
     }
-    if(doNewLine(text_it,newText.end(),col,myDims.i, myFontMetrics.i)){
+    if(doNewLine(text_it,newText.end(),col,myDims.i, myFontMetrics.i,row-rowheight<=myDims.j)){
       GetPos (tmp,col);
       row -= rowheight;
       glPopMatrix();
