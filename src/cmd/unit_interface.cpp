@@ -450,7 +450,7 @@ void UpgradingInfo::SetupCargoList () {
       }else {
 	bool addedsomething=false;
 	if (curcategory.empty()) {
-	  int pos=title.find("Category: ",0);
+	  string::size_type pos=title.find("Category: ",0);
 	  if (pos!=string::npos) {
 	    title=title.substr(0,pos);
 	  }
@@ -463,7 +463,7 @@ void UpgradingInfo::SetupCargoList () {
 	  }
 	}
 	if (!curcategory.empty()) {
-	  int pos=title.find("Category: ",0);
+	  string::size_type pos=title.find("Category: ",0);
 	  if (pos!=string::npos) {
 	    title=title.substr(0,pos);
 	  }
@@ -524,7 +524,7 @@ void UpgradingInfo::SetupCargoList () {
 			  string printstr;
 			  if (mode==MISSIONMODE) {
 				  string tmpstr ((*CurrentList)[i].cargo.content);
-				  int pos=tmpstr.rfind("/",tmpstr.size()-2);
+				  string::size_type pos=tmpstr.rfind("/",tmpstr.size()-2);
 				  if (pos!=string::npos) {
 					  tmpstr=tmpstr.substr(pos+1,tmpstr.size()-(pos+1));
 					  tmpstr[0]=toupper(tmpstr[0]);
@@ -1473,7 +1473,7 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
     c.cargo.price=0;
     c.cargo.content=getSaveString(playernum,miss_name,i);
 	c.cargo.description=getSaveString(playernum,miss_desc,i);
-	int index=c.cargo.content.rfind("/");
+	string::size_type index=c.cargo.content.rfind("/");
 	if (index==std::string::npos) {
 		c.cargo.category=std::string("missions");
 	} else {

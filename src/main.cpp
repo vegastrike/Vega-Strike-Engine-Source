@@ -396,7 +396,7 @@ bool SetPlayerSystem (std::string &sys, bool set) {
 }
 vector<string> parse_space_string(std::string s) {
 	vector<string> ret;
-	int index=0;
+	string::size_type index=0;
 	while ((index =s.find(" "))!=string::npos) {
 		ret.push_back (s.substr(0,index));
 		s = s.substr (index+1);

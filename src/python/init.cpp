@@ -233,7 +233,7 @@ void Python::initpaths(){
 		  modpaths+= ",";
   }
   /*
-  unsigned int backslash;
+  string::size_type backslash;
   while ((backslash=modpaths.find("\\"))!=std::string::npos) {
      modpaths[backslash]='/';
      }*/

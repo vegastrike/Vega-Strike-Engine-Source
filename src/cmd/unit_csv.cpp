@@ -15,12 +15,12 @@ void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int 
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 static void UpgradeUnit (Unit * un, std::string upgrades) {
   while (upgrades.length()) {
-    unsigned int where = upgrades.find(":");
+    string::size_type where = upgrades.find(":");
     unsigned int mountoffset=0;
     unsigned int subunitoffset=0;
     string upgrade = upgrades.substr(0,where);
-    unsigned int where1 = upgrade.find(";");
-    unsigned int where2 = upgrade.rfind(";");
+    string::size_type where1 = upgrade.find(";");
+    string::size_type where2 = upgrade.rfind(";");
     if (where1!=string::npos) {
       mountoffset=XMLSupport::parse_int(upgrade.substr(where1+1,where2!=where1?where2:upgrade.length()));      
       if (where2!=where1&&where2!=string::npos) {
@@ -46,7 +46,7 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
   }  
 }
 static void AddMeshes(Unit::XML& xml, std::string meshes,string meshStartFrame, string textureStartTime,int faction,Flightgroup *fg){
-  unsigned int where,wheresf,wherest;
+  string::size_type where,wheresf,wherest;
   while (meshes.length()) {
     where=meshes.find(":");
     wheresf = meshStartFrame.find(":");

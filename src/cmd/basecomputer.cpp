@@ -1137,7 +1137,7 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
 
     // Walk through the category list(s).
     if(item.category.size() > 0 ) {     // Make sure we have a category.
-        int categoryStart = 0;
+        string::size_type categoryStart = 0;
         if(skipFirstCategory) {
             // We need to skip the first category in the string.
             // Generally need to do this when there's a category level that's not in the UI, like
@@ -1147,7 +1147,7 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
         }
         while(true) {
             // See if we have multiple categories left.
-            const int categoryEnd = item.category.find(CATEGORY_SEP, categoryStart);
+            const string::size_type categoryEnd = item.category.find(CATEGORY_SEP, categoryStart);
             const string currentCategory = item.category.substr(categoryStart, categoryEnd-categoryStart);
 
             PickerCell* cell = cells->cellWithId(currentCategory);
@@ -1468,12 +1468,12 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
     }
 
     // Change the description control.
-    unsigned int pic;
+    string::size_type pic;
     StaticImageDisplay* descimage = static_cast<StaticImageDisplay*>( window()->findControlById("DescriptionImage") );
     if ((pic=descString.find("@"))!=string::npos){
        std::string texture = descString.substr(pic+1);
        descString = descString.substr(0,pic);
-       unsigned int picend = texture.find("@");
+       string::size_type picend = texture.find("@");
        if (picend!=string::npos) {
           descString+=texture.substr(picend+1);
           texture = texture.substr(0,picend);          
@@ -1583,7 +1583,7 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
     string category = origCategory;
     if(skipFirstCategory) {
         // Skip over the first category piece.
-        const int sepLoc = category.find(CATEGORY_SEP);
+        const string::size_type sepLoc = category.find(CATEGORY_SEP);
         if(sepLoc == string::npos) {
             // No category separator.  At most one category.
             category.erase(0, category.size());
@@ -1598,7 +1598,7 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
         return NULL;
     }
     // Create or reuse a cell for the first part of the category.
-    const int loc = category.find(CATEGORY_SEP);
+    const string::size_type loc = category.find(CATEGORY_SEP);
     const string currentCategory = category.substr(0, loc);
     if(cells.count() > 0 && cells.cellAt(cells.count()-1)->id() == currentCategory) {
         // Re-use the category we have.
@@ -1987,7 +1987,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
 
         // Take any categories out of the name and put them in the cargo.category.
         const string originalName = getSaveString(playerNum, MISSION_NAMES_LABEL, i);
-        const int lastCategorySep = originalName.rfind(CATEGORY_SEP);
+        const string::size_type lastCategorySep = originalName.rfind(CATEGORY_SEP);
         if(lastCategorySep != string::npos) {
             // We have a category.
             c.cargo.content = originalName.substr(lastCategorySep + 1);
@@ -2642,7 +2642,7 @@ static bool matchCargoToWeapon(const std::string& cargoName, const std::string& 
 
 	// Take off "_ammo" if it's there.
 	int end = cargoName.size();
-	const int ammoOffset = cargoName.rfind("_ammo");
+	const string::size_type ammoOffset = cargoName.rfind("_ammo");
 	if(ammoOffset != std::string::npos) {
 		end = ammoOffset;
 	}
@@ -2959,14 +2959,14 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
         if (newPart->getHudImage()) {
            if (newPart->getHudImage()->getTexture()) {
               hudimage = newPart->getHudImage()->getTexture()->texfilename;
-              unsigned int doublepng = hudimage.find(".png");
+              string::size_type doublepng = hudimage.find(".png");
               if (doublepng==string::npos) doublepng=hudimage.find(".jpg");
               if (doublepng!=string::npos) {
                  std::string shipname= hudimage.substr(doublepng+4);
                  if (shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
                     hudimage = hudimage.substr(0,doublepng+4-shipname.length());
                     string shipnoblank = item.content.substr(0,item.content.find("."));
-                    unsigned int ship = hudimage.rfind(shipnoblank);
+                    string::size_type ship = hudimage.rfind(shipnoblank);
                     if (ship!=string::npos) {
                        texturedescription="../units/"+shipnoblank+"/"+shipname;
                     }else {

@@ -763,8 +763,8 @@ extern std::string GetReadPlayerSaveGame (int);
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readLast, bool &read);
 #if 0
 static std::string csvUnit(std::string un) {
-  unsigned int i=un.find_last_of(".");
-  unsigned int del=un.find_last_of("/\\:");
+  string::size_type i=un.find_last_of(".");
+  string::size_type del=un.find_last_of("/\\:");
   if (i==std::string::npos) {
     return un+".csv";
   }
@@ -4814,7 +4814,7 @@ std::map<VCString,VCString> parseTurretSizes () {
 		while (f.ReadLine(filedata,siz)==Ok) {
 
 			std::string x(filedata);
-			int len= x.find (",");
+			string::size_type len= x.find (",");
 			if (len!=std::string::npos) {
 				std::string y = x.substr (len+1);
 				x = x.substr(0,len);				
@@ -5730,7 +5730,7 @@ void Unit::EjectCargo (unsigned int index) {
       if (tmp->category.length()>=(unsigned int)sslen) {
 	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
 	  string ans = tmpcontent;
-	  unsigned int blank = ans.find (".blank");
+	  string::size_type blank = ans.find (".blank");
 	  if (blank != string::npos) {
 	    ans = ans.substr (0,blank);
 	  }

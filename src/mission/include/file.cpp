@@ -53,7 +53,7 @@ void LoadMission(char *filename) {
 	ScanNode(NULL, top, filename);
 }
 string ClassName (string pythonfilename) {
-  unsigned int where=pythonfilename.find_last_of ("/");
+  string::size_type where=pythonfilename.find_last_of ("/");
   if (where!=string::npos) {
     pythonfilename = pythonfilename.substr (where+1,pythonfilename.length()-(where+1));
   }
@@ -113,7 +113,7 @@ void LoadPythonModule(string fn,string pythn) {
     fclose (fp);
     string wholefile (temp);
     free (temp);
-    unsigned int where;
+    string::size_type where;
     if (wholefile.find ("python")!=string::npos) {
       return;
     }

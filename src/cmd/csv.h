@@ -27,7 +27,7 @@ class CSVTable {
 };
 
 class CSVRow {
-  unsigned int iter;
+  std::string::size_type iter;
   CSVTable * parent;
 public:
   std::string getRoot();

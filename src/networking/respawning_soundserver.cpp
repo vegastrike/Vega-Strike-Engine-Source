@@ -20,7 +20,7 @@ float fadeout=0;
 float volume=1;
 bool scanChar (string s, char c, float & val) {
   char cc[2]={c,0};
-  int loc;
+  string::size_type loc;
   bool anyvalid=false;
   while ((loc=s.find(cc))!=string::npos) {
     bool valid = (loc==0);

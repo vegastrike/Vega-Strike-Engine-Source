@@ -139,7 +139,7 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
 }
 void AggressiveAI::SetParent (Unit * parent1) {
   FireAt::SetParent(parent1);
-  unsigned int which = last_directive.find("|");
+  string::size_type which = last_directive.find("|");
   string filename (string("default.agg.xml"));
   string interruptname (string("default.int.xml"));
   if (which!=string::npos) {

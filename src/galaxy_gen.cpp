@@ -108,7 +108,7 @@ static unsigned int ssrand()
 static std::string GetWrapXY(std::string cname, int & wrapx, int & wrapy){
     std::string wrap = cname;
     wrapx=wrapy=1;
-    unsigned int pos =wrap.find ("wrapx");
+    string::size_type pos =wrap.find ("wrapx");
     if (pos!=string::npos) {
       string Wrapx = wrap.substr (pos+5,wrap.length());
       cname = cname.substr (0,pos);
@@ -753,7 +753,7 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
     }
   }
   Tab();
-  unsigned int atmos = s.find ("~");
+  string::size_type atmos = s.find ("~");
   string atmosphere;
   if (atmos!=string::npos) {
     atmosphere = s.substr (atmos+1,s.length());
@@ -762,7 +762,7 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
     }
     s = s.substr (0,atmos);
   }
-  unsigned int pos = s.find ("^");
+  string::size_type pos = s.find ("^");
   string cname;
   if (pos==string::npos||entitytype==JUMP) {
     f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
@@ -1147,7 +1147,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   //Under construction
   //readentity (entities[PLANET],(planetlist).c_str());
   static map<string,string> planetcodes = readPlanetTypes("./universe/planet_abbrev.xml");
-	unsigned int where;
+	string::size_type where;
 	do {
 		where = planetlist.find("_");
 		string newone = planetlist.substr(0,where);

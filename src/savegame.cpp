@@ -254,7 +254,7 @@ string SaveGame::WriteNewsData () {
   return ret;
 }
 vector <string> parsePipedString(string s) {
-  unsigned int loc;
+  string::size_type loc;
   vector <string> ret;
   while ((loc = s.find("|"))!=string::npos) {
     ret.push_back( s.substr (0,loc));

@@ -16,14 +16,14 @@
 #include "savegame.h"
 #include "load_mission.h"
 std::string PickledDataSansMissionName (std::string pickled) {
-  unsigned int newline = pickled.find ("\n");
+  string::size_type newline = pickled.find ("\n");
   if (newline!=string::npos)
     return pickled.substr(newline+1,pickled.length()-(newline+1));
   else
     return pickled;
 }
 std::string PickledDataOnlyMissionName (std::string pickled) {
-  unsigned int newline = pickled.find ("\n");
+  string::size_type newline = pickled.find ("\n");
   return pickled.substr (0,newline);  
 }
 int ReadIntSpace (std::string &str) {

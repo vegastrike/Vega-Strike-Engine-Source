@@ -132,7 +132,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		if (lumi.length()==0||strtod(lumi.c_str(),NULL)==0) {
 			our_system_name="";
 		}else {
-		unsigned int slash =our_system_name.find("/");
+		string::size_type slash =our_system_name.find("/");
 		if (slash!=string::npos) {
 			string sec = our_system_name.substr(0,slash);
 			if (allowedSectors.find(sec)==string::npos) {

@@ -31,7 +31,7 @@ float CityLights::GetS (float theta, float theta_min, float theta_max) {
   return wrapx * SphereMesh::GetS(theta,theta_min,theta_max);
 }
 string truncateByPipe (string & input) {
-  int i=input.find ("|");
+  string::size_type i=input.find ("|");
   string ret=input;
   if (i!=string::npos) {
     ret=input.substr (0,i);
@@ -236,7 +236,7 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
   wrapy = zzwrapy;
   /*    if (texture!=NULL) {
       string wrap = string(texture);
-      int pos =wrap.find ("wrapx");
+      string::size_type pos =wrap.find ("wrapx");
       if (pos!=string::npos) {
 	string Wrapx = wrap.substr (pos+5,wrap.length());
 	sscanf(Wrapx.c_str(),"%f",&wrapx);

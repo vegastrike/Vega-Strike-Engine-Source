@@ -45,7 +45,7 @@ static GFXColor GetColor(std::string source) {
 		return GFXColor (col[0],col[1],col[2],col[3]);
 }
 void Beautify (string systemfile, string & sector, string & system) {
-	int slash = systemfile.find ("/");
+	string::size_type slash = systemfile.find ("/");
 	if (slash==string::npos) {
 		sector="";
 		system=systemfile;

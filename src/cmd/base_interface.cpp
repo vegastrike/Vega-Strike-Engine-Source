@@ -446,9 +446,9 @@ BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
 	while (( mission->msgcenter->last(i++,last,who))) {
 		newmsg=last.message;
 		newsound="";
-		int first=newmsg.find_first_of("[");
+		string::size_type first=newmsg.find_first_of("[");
 		{
-			int last=newmsg.find_first_of("]");
+			string::size_type last=newmsg.find_first_of("]");
 			if (first!=string::npos&&(first+1)<newmsg.size()) {
 				newsound=newmsg.substr(first+1,last-first-1);
 				newmsg=newmsg.substr(0,first);
