@@ -1234,6 +1234,7 @@ void GameCockpit::Draw() {
 		radar_ani.DrawAsSprite(Radar);	
 	}*/
 	float damage =(un->GetImageInformation().cockpit_damage[0]);
+	if (damage<.985) {
       if (radar_time>=0) {
         if (damage>.001&&(cockpit_time>radar_time+(1-damage))) {
 	  if (rand01()>SWITCH_CONST) {
@@ -1250,6 +1251,7 @@ void GameCockpit::Draw() {
           }
         }
       }
+	}
       }
 
       DrawGauges(un);
@@ -1264,6 +1266,7 @@ void GameCockpit::Draw() {
 	  vdu[vd]->Draw(un,textcol);
 	  GFXColor4f (1,1,1,1);
 	  float damage = un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)];
+	if (damage<.985) {
 	  if (vdu_time[vd]>=0) {
 	    if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
 	      if (rand01()>SWITCH_CONST) {
@@ -1281,6 +1284,7 @@ void GameCockpit::Draw() {
 	      }
 	    }
 	  }
+	}
 	  //process VDU, damage VDU, targetting VDU
 	}
       }
