@@ -693,9 +693,9 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
       char *unitdir =GetUnitDir(un->name.c_str());
       std::string templnam = (string(unitdir)+string(".template"));
       
-      const Unit * temprate= getCachedConstUnit (templnam,un->faction);
+      const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(templnam,un->faction));
       if (!temprate)
-	temprate = setCachedConstUnit(templnam,un->faction,UnitFactory::createUnit (templnam.c_str(),true,un->faction));
+	temprate = UnitConstCache::setCachedConst(StringIntKey(templnam,un->faction),UnitFactory::createUnit (templnam.c_str(),true,un->faction));
       free(unitdir);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
@@ -726,17 +726,17 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
-	  NewPart = getCachedConstUnit (input_buffer,FactionUtil::GetFaction("upgrades"));
+	  NewPart = UnitConstCache::getCachedConst (StringIntKey (input_buffer,FactionUtil::GetFaction("upgrades")));
 	  if (!NewPart) {
-	    NewPart = setCachedConstUnit (input_buffer,
-					  FactionUtil::GetFaction("upgrades"),
+	    NewPart = UnitConstCache::setCachedConst (StringIntKey (input_buffer,
+								    FactionUtil::GetFaction("upgrades")),
 					  UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades")));
 	  }
 	  if (NewPart->name==string("LOAD_FAILED")) {
-	    NewPart = getCachedConstUnit (input_buffer,un->faction);
+	    NewPart = UnitConstCache::getCachedConst (StringIntKey(input_buffer,un->faction));
 	    if (!NewPart) {
-	      NewPart = setCachedConstUnit (input_buffer,
-					    un->faction,
+	      NewPart = UnitConstCache::setCachedConst (StringIntKey(input_buffer,
+									 un->faction),
 					    UnitFactory::createUnit (input_buffer,true,un->faction));
 	    }
 	  }

@@ -40,17 +40,17 @@ double GameUnit::Upgrade (const std::string &file, int mountoffset, int subunito
 
   }
 #endif
-  const Unit * up = getCachedConstUnit (file,FactionUtil::GetFaction("upgrades"));
+  const Unit * up = UnitConstCache::getCachedConst (StringIntKey(file,FactionUtil::GetFaction("upgrades")));
   if (!up) {
-    up = setCachedConstUnit (file,
-			     FactionUtil::GetFaction("upgrades"),
+    up = UnitConstCache::setCachedConst (StringIntKey (file,
+						       FactionUtil::GetFaction("upgrades")),
 			     UnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades")));
   }
   char * unitdir  = GetUnitDir(name.c_str());
   string templnam = string(unitdir)+".template";	  
-  const Unit * templ = getCachedConstUnit (templnam,faction);
+  const Unit * templ = UnitConstCache::getCachedConst (StringIntKey(templnam,faction));
 	if (templ==NULL) {
-	  templ = setCachedConstUnit (templnam,faction,UnitFactory::createUnit (templnam.c_str(),true,this->faction));
+	  templ = UnitConstCache::setCachedConst (StringIntKey(templnam,faction),UnitFactory::createUnit (templnam.c_str(),true,this->faction));
 	}
 	free (unitdir);
 	double percentage=0;

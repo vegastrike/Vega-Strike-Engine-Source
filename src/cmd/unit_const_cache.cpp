@@ -2,23 +2,11 @@
 #include <string>
 #include <vector>
 #include "unit_generic.h"
-class keyval {
-  std::string key;
-  int fac;
-public:
-  keyval (std::string k, int f) {
-    key=k;
-    fac=f;
-  }
-  bool operator < (const keyval &b) const {
-    if (fac!=b.fac)
-      return fac<b.fac;
-    return key < b.key;
-  }
-};
-
+#include "unit_const_cache.h"
+std::map <StringIntKey,Unit*> UnitConstCache::unit_cache;
+std::map <std::string, Mesh*> WeaponMeshCache::unit_cache;
+#if 0
 typedef std::map <keyval, Unit *> UnitCacheType;
-
 static UnitCacheType unit_cache;
 const Unit * getCachedConstUnit (std::string name, int faction) {
   keyval kv (name,faction);
@@ -38,3 +26,4 @@ void purgeCache( ) {
     }
     unit_cache.clear();
 }
+#endif

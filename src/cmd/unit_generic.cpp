@@ -1255,9 +1255,18 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     AngularVelocity += temp;
   }
   Vector temp2 = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ))/mass; //acceleration
+
   temp = temp2*SIMULATION_ATOM;
   if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
     Velocity += temp;
+    static float air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("air_resistance","0"));
+    float velmag = Velocity.Magnitude();
+    Vector AirResistance = Velocity*(air_res_coef*velmag/mass)*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+    if (AirResistance.Magnitude()>velmag) {
+      Velocity.Set(0,0,0);
+    }else {
+      Velocity = Velocity-AirResistance;
+    }
   } 
   NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
 

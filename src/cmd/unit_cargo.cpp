@@ -17,15 +17,15 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist, bool dow
     bool removethis=staticrem;
     int mode=GetModeFromName(mylist[i].content.c_str());
     if (mode!=2 || (!downgrade)) {
-      const Unit * NewPart = getCachedConstUnit (mylist[i].content.c_str(),FactionUtil::GetFaction("upgrades"));
+       const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].content.c_str(),FactionUtil::GetFaction("upgrades")));
       if (!NewPart){
-	NewPart= setCachedConstUnit (mylist[i].content,FactionUtil::GetFaction("upgrades"),UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades")));
+	NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].content,FactionUtil::GetFaction("upgrades")),UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades")));
       }
       if (NewPart->name==string("LOAD_FAILED")) {
-	const Unit * NewPart = getCachedConstUnit (mylist[i].content.c_str(),faction);
+	const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (mylist[i].content.c_str(),faction));
 	if (!NewPart){
-	  NewPart= setCachedConstUnit (mylist[i].content,
-				       faction,
+	  NewPart= UnitConstCache::setCachedConst (StringIntKey (mylist[i].content,
+								 faction),
 				       UnitFactory::createUnit(mylist[i].content.c_str(),false,faction));
 	}
       }
