@@ -100,7 +100,7 @@ void FireAt::Execute () {
     }else {
       ChooseTargets(1);
     }
-    if (!(istargetjumpableplanet)&&(float(rand())/RAND_MAX)<.5*missileprobability*SIMULATION_ATOM) {
+    if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<.5*missileprobability*SIMULATION_ATOM) {
       ChooseTargets(1);
     }
 

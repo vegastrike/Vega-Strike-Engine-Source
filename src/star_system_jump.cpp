@@ -74,6 +74,11 @@ static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool
   (*ja)[i]->SetPosition (pos);
   return i;
 }
+void DealPossibleJumpDamage (Unit *un) {
+  float speed = un->GetVelocity().Magnitude();
+  float damage = un->GetJumpStatus().damage;
+}
+
 static void VolitalizeJumpAnimation (const unsigned int ani) {
   VolatileJumpAnimations.push_back (JumpAnimations[ani]);
   JumpAnimations[ani]=NULL;
@@ -181,6 +186,7 @@ void StarSystem::ProcessPendingJumps() {
 	un->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
 	jumpdest+=23231;
       }
+      DealPossibleJumpDamage (un);
     } else {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit FAILED remove from star system\n");
