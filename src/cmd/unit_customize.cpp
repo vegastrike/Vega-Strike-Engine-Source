@@ -176,7 +176,14 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 	    cancompletefully=false;//since we cannot fit the mount in the slot we cannot complete fully
 	  }
 	}else {
-	  if ((up->mounts[i].size&mounts[jmod].size)!=(mounts[i].size)) {
+	  unsigned int siz=0;
+	  siz = ~siz;
+	  if (templ) {
+	    if (templ->nummounts>jmod) {
+	      siz = templ->mounts[jmod].size;
+	    }
+	  }
+	  if (((siz&up->mounts[i].size)|mounts[jmod].size)!=mounts[jmod].size) {
 	    if (touchme) {
 	      mounts[jmod].size|=up->mounts[i].size;
 	    }
