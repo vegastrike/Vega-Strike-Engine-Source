@@ -35,6 +35,35 @@ struct GFXMaterial
 	float power; 
 };
 
+struct line{
+	bool flatshade;
+	int indexref[2];
+	float s[2];
+	float t[2];
+
+};
+
+struct triangle{
+	bool flatshade;
+	int indexref[3];
+	float s[3];
+	float t[3];
+	
+};
+
+struct quad{
+	bool flatshade;
+	int indexref[4];
+	float s[4];
+	float t[4];
+};
+
+enum polytype{ //FIXME
+	LINE,
+	TRIANGLE,
+	QUAD
+};
+
 
 struct XML {
   enum Names {
@@ -157,6 +186,16 @@ struct XML {
     vector<Names> state_stack;
     vector<GFXVertex> vertices;
 
+	vector<line> lines;
+    vector<triangle> tris;
+    vector<quad> quads;
+	//FIXME - strips not currently supported
+    vector <vector<GFXVertex> > linestrips;
+    vector <vector<GFXVertex> > tristrips;
+    vector <vector<GFXVertex> > trifans;
+    vector <vector<GFXVertex> > quadstrips;
+	//END FIXME
+
 	vector <ZeLogo> logos;
 	bool sharevert;
     bool usenormals;
@@ -164,20 +203,25 @@ struct XML {
     bool force_texture;
 	bool recalc_norm;
 	bool shouldreflect;
-    vector<GFXVertex> lines;
-    vector<GFXVertex> tris;
-    vector<GFXVertex> quads;
-    vector <vector<GFXVertex> > linestrips;
-    vector <vector<GFXVertex> > tristrips;
-    vector <vector<GFXVertex> > trifans;
-    vector <vector<GFXVertex> > quadstrips;
+    
 	
 	vec3f detailplane;
 	bool reflect;
 	bool lighting;
 	bool cullface;
+	float polygon_offset;
+	int blend_src;
+	int blend_dst;
+	int point_state;
 
     GFXVertex vertex;
+
+	int curpolytype;
+	int curpolyindex;
+	
+	line linetemp;
+	triangle triangletemp;
+	quad quadtemp;
 	GFXMaterial material;
     float scale;
   };
@@ -391,110 +435,253 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		  }
 		  break;
   case XML::DIFFUSE:
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.dr=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.db=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.da=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.dg=XMLSupport::parse_float((*iter).value);
+			  break;
+		  }
+	  }
 	  break;
   case XML::EMISSIVE:
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.er=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.eb=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.ea=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.eg=XMLSupport::parse_float((*iter).value);
+			  break;
+		  }
+	  }
 	  break;
   case XML::SPECULAR:
+	   for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.sr=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.sb=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.sa=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.sg=XMLSupport::parse_float((*iter).value);
+			  break;
+		  }
+	  }
 	  break;
   case XML::AMBIENT:
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(XML::attribute_map.lookup((*iter).name)) {
+		  case XML::RED:
+			  xml->material.ar=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::BLUE:
+			  xml->material.ab=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::ALPHA:
+			  xml->material.aa=XMLSupport::parse_float((*iter).value);
+			  break;
+		  case XML::GREEN:
+			  xml->material.ag=XMLSupport::parse_float((*iter).value);
+			  break;
+		  }
+	  }
 	  break;
   case XML::UNKNOWN:
    fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
     break;
   case XML::MESH:
+	memset(&xml->material, 0, sizeof(xml->material));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::ANIMATEDTEXTURE:
-	break;
-      case XML::REVERSE:
-	break;
+	  case XML::REVERSE:
+		xml->reverse = XMLSupport::parse_bool((*iter).value);
+		break;
       case XML::FORCETEXTURE:
-	break;
-      case XML::TEXTURE:
-	break;
-      case XML::ALPHAMAP:
-	break;
-      case XML::SCALE:
-	break;
-      case XML::SHAREVERT:
-	break;
-      case XML::BLENDMODE:
-	break;
+		xml->force_texture=XMLSupport::parse_bool ((*iter).value);
+		break;
+	  case XML::SCALE:
+		xml->scale =  XMLSupport::parse_float ((*iter).value);
+		break;
+	  case XML::SHAREVERT:
+		xml->sharevert = XMLSupport::parse_bool ((*iter).value);
+		break;
+	  case XML::POLYGONOFFSET:
+	    xml->polygon_offset = XMLSupport::parse_float ((*iter).value);
+	    break;
+	  case XML::BLENDMODE:
+		{
+		char *csrc=strdup ((*iter).value.c_str());
+		char *cdst=strdup((*iter).value.c_str());
+		sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
+		xml->blend_src=parse_alpha (csrc);
+		xml->blend_dst=parse_alpha (cdst);
+		free (csrc);
+		free (cdst);
+		}
+		break;
+	  case XML::DETAILTEXTURE: //FIXME
+		break;
+      case XML::TEXTURE: //FIXME
+		break;
+      case XML::ALPHAMAP: //FIXME
+		break;
+      case XML::ANIMATEDTEXTURE: //FIXME
+		break;
+	  case XML::UNKNOWN: //FIXME
+		break;
       }
-    }break;
+    }
+	break;
   case XML::POINTS:
     break;
   case XML::POINT:
- //   assert(top==XML::POINTS);
+	memset(&xml->vertex, 0, sizeof(xml->vertex));
     break;
   case XML::LOCATION:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::X:
-	xml->vertex.x = XMLSupport::parse_float((*iter).value);
-	break;
+	    xml->vertex.x = XMLSupport::parse_float((*iter).value);
+	    break;
       case XML::Y:
-	xml->vertex.y = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.y = XMLSupport::parse_float((*iter).value);
+		break;
      case XML::Z:
-	xml->vertex.z = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.z = XMLSupport::parse_float((*iter).value);
+		break;
       case XML::S:
-	xml->vertex.s = XMLSupport::parse_float ((*iter).value);
-	break;
+		xml->vertex.s = XMLSupport::parse_float ((*iter).value);
+		break;
       case XML::T:
-	xml->vertex.t = XMLSupport::parse_float ((*iter).value);
-	break;
+		xml->vertex.t = XMLSupport::parse_float ((*iter).value);
+		break;
       }
     }
     break;
   case XML::NORMAL:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
-	break;
       case XML::I:
-	xml->vertex.i = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.i = XMLSupport::parse_float((*iter).value);
+		break;
       case XML::J:
-	xml->vertex.j = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.j = XMLSupport::parse_float((*iter).value);
+		break;
       case XML::K:
-	xml->vertex.k = XMLSupport::parse_float((*iter).value);
-	break;
+		xml->vertex.k = XMLSupport::parse_float((*iter).value);
+		break;
       }
+
     }
     break;
   case XML::POLYGONS:
     break;
   case XML::LINE:
+	memset(&xml->linetemp, 0, sizeof(xml->linetemp));
+	xml->curpolytype=LINE;
+	xml->curpolyindex=0;
+	xml->linetemp.flatshade=0;
     break;
   case XML::TRI:
+	memset(&xml->triangletemp, 0, sizeof(xml->triangletemp));
+	xml->curpolytype=TRIANGLE;
+	xml->curpolyindex=0;
+	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::FLATSHADE:
+		if ((*iter).value=="Flat") {
+			xml->triangletemp.flatshade=1;
+		}else {
+			xml->triangletemp.flatshade=0;
+		}break;
+	  }
+	}
     break;
-  case XML::LINESTRIP:
-    break;
-
-  case XML::TRISTRIP:
-    break;
-
-  case XML::TRIFAN:
-    break;
-
-  case XML::QUADSTRIP:
-    break;
-   
   case XML::QUAD:
+	memset(&xml->quadtemp, 0, sizeof(xml->quadtemp));
+	xml->curpolytype=QUAD;
+	xml->curpolyindex=0;
+	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::FLATSHADE:
+		if ((*iter).value=="Flat") {
+			xml->quadtemp.flatshade=1;
+		}else {
+			xml->quadtemp.flatshade=0;
+		}break;
+	  }
+	}
     break;
-  case XML::LOD: 
+  case XML::LINESTRIP: //FIXME
+    break;
+  case XML::TRISTRIP: //FIXME
+    break;
+  case XML::TRIFAN: //FIXME
+    break;
+  case XML::QUADSTRIP: //FIXME
     break;
   case XML::VERTEX:
+	unsigned int index;
+    float s, t;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::POINT:
+		index = XMLSupport::parse_int((*iter).value);
+		break;
+      case XML::S:
+		s = XMLSupport::parse_float((*iter).value);
+		break;
+      case XML::T:
+		t = XMLSupport::parse_float((*iter).value);
+		break;
+     }
+    }
+	switch(xml->curpolytype){
+	case LINE:
+		xml->linetemp.indexref[xml->curpolyindex]=index;
+		xml->linetemp.s[xml->curpolyindex]=s;
+		xml->linetemp.t[xml->curpolyindex]=t;
+		break;
+	case TRIANGLE:
+		xml->triangletemp.indexref[xml->curpolyindex]=index;
+		xml->triangletemp.s[xml->curpolyindex]=s;
+		xml->triangletemp.t[xml->curpolyindex]=t;
+		break;
+	case QUAD:
+		xml->triangletemp.indexref[xml->curpolyindex]=index;
+		xml->triangletemp.s[xml->curpolyindex]=s;
+		xml->triangletemp.t[xml->curpolyindex]=t;
+		break;
+	}
+	xml->curpolyindex+=1;	
     break;
-  case XML::LOGO: 
+  case XML::LOD: //FIXME
     break;
-  case XML::REF:
+  case XML::LOGO: //FIXME
     break;
-      }
+  case XML::REF: //FIXME
+    break;
+  }
     
 }
 
@@ -508,29 +695,34 @@ void endElement(const string &name, XML * xml) {
     fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
     break;
   case XML::POINT:
-    xml->vertices.push_back (xml->vertex*xml->scale);
+    xml->vertices.push_back (xml->vertex);
     break;
+  case XML::VERTEX:
+	break;
   case XML::POINTS:
     break;
   case XML::LINE:
+	xml->lines.push_back(xml->linetemp);
     break;
   case XML::TRI:
+	xml->tris.push_back (xml->triangletemp);
     break;
   case XML::QUAD:
+	xml->quads.push_back (xml->quadtemp);
     break;
-  case XML::LINESTRIP:
+  case XML::LINESTRIP://FIXME
     break;
-  case XML::TRISTRIP:
+  case XML::TRISTRIP://FIXME
     break;
-  case XML::TRIFAN:
+  case XML::TRIFAN://FIXME
     break;
-  case XML::QUADSTRIP://have to fix up nrmlquadstrip so that it 'looks' like a quad list for smooth shading
+  case XML::QUADSTRIP://FIXME
     break;
   case XML::POLYGONS:
     break;
-  case XML::REF:
+  case XML::REF://FIXME
     break;
-  case XML::LOGO:
+  case XML::LOGO: //FIXME
     break;
   case XML::MATERIAL:
 	  break;
@@ -575,6 +767,7 @@ XML LoadXML(const char *filename, float unitscale) {
   XML_SetUserData(parser, &xml);
   XML_SetElementHandler(parser, &beginElement, &endElement);
   
+	
   do {
     char buf[chunk_size];
     int length;
@@ -599,12 +792,17 @@ int main (int argc, char** argv) {
 		exit(-1);
 	}
 
-  XML stub =(LoadXML(argv[1],1));
+  XML memfile =(LoadXML(argv[1],1));
+  fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
   FILE * Outputfile=fopen(argv[2],"w"); 
+  int intbuf;
+  float floatbuf;
   float versionnumber=(1.0)/(16.0);
-  int numvertsstub= stub.vertices.size();
-  fwrite(&versionnumber,4,1,Outputfile);
-  fwrite(&numvertsstub,4,1,Outputfile);
+  fwrite(&versionnumber,sizeof(float),1,Outputfile);// VERSION number for BinaryFormattedXMesh
+  floatbuf = memfile.scale;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
+  intbuf= memfile.vertices.size();
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices
   return 0;
 }
 
