@@ -15,6 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <png.h>
 #include "glut_support.h"
 #include "gfx/sprite.h"
 #include "vs_globals.h"

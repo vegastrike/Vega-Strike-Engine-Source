@@ -31,7 +31,7 @@
     #include <GL/gl.h>
     #include <GL/glut.h>
 #endif
-#include <png.h>
+//#include <png.h>
 #include <stdio.h>
 #include <vector>
 #include "gfxlib.h"
@@ -48,7 +48,7 @@ struct GUITexture {
 GUITexture ReadTex(char *texfile);
 char * readString (FILE * fp,char endchar);
 
-void png_cexcept_error(png_structp png_ptr, png_const_charp msg);
+//void png_cexcept_error(png_structp png_ptr, png_const_charp msg);
 unsigned char *readImage (FILE *fp, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette);
 
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
