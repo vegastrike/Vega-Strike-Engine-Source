@@ -512,7 +512,7 @@ void AggressiveAI::Execute () {
   }
   }
   if ((!isjumpable) &&interruptcurtime<=0) {
-	  fprintf (stderr,"i");
+//	  fprintf (stderr,"i");
 	  ProcessLogic (*interrupts, true);
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 

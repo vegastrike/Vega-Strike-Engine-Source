@@ -25,6 +25,7 @@ CCScript TurnTowards;
 CCScript BarrelRoll;
 CCScript EvadeThrust;
 CCScript LoopAround;
+CCScript AggressiveLoopAround;
 
 #endif
 

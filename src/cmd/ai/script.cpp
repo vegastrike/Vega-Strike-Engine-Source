@@ -17,6 +17,7 @@ HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
   tmp.insert (MyPair ("loop around",&LoopAround));
+  tmp.insert (MyPair ("aggressive loop around",&AggressiveLoopAround));  
   tmp.insert (MyPair ("barrel roll",&BarrelRoll));
   tmp.insert (MyPair ("veer away",&VeerAway));
   tmp.insert (MyPair ("veer away itts",&VeerAwayITTS));

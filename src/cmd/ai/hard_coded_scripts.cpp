@@ -124,8 +124,10 @@ class LoopAround: public Orders::FaceTargetITTS{
 	Orders::MoveToParent m;
 	float qq;
 	float rr;
+	bool aggressive;
 public:
-	LoopAround():FaceTargetITTS(false,3),m(false,2,false) {
+	LoopAround(bool aggressive):FaceTargetITTS(false,3),m(false,2,false) {
+		this->aggressive=aggressive;
 		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","1"));
 		qq=rr=0;
 		
@@ -155,10 +157,14 @@ public:
 			}else {
 				done=false;
 				m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
-				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(rr*(parent->rSize()+targ->rSize()));
+				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(rr*(parent->rSize()+targ->rSize()));								
 				QVector dest =targ->Position()+scala;
-				SetDest(dest);
-				ChangeHeading::Execute();
+				if (aggressive){
+					SetDest(dest);
+					FaceTargetITTS::Execute();
+				}else{
+					ChangeHeading::Execute();
+				}
 				m.Execute(parent,dest+scala);
 			}
 		}
@@ -166,7 +172,12 @@ public:
 };
 }
 void LoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround;
+	Order* broll = new Orders::LoopAround(false);
+	AddOrd(aisc,un,broll);
+	
+}
+void AggressiveLoopAround(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(true);
 	AddOrd(aisc,un,broll);
 	
 }
