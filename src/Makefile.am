@@ -55,7 +55,6 @@ boost/libboost_python.a	        \
 -lz
 
 accountserver_LDADD =           \
-common/libvscommon.a            \
 networking/libnetacct.a 		\
 networking/lowlevel/libnetlowlevel.a \
 -lz
