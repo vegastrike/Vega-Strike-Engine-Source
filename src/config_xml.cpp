@@ -265,12 +265,12 @@ void GameVegaConfig::initCommandMap(){
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
   command_map["CommHelpMeOut"]=FireKeyboard::HelpMeOut;
   command_map["CommFormUp"]=FireKeyboard::FormUp;
-
+#ifdef CAR_SIM
   command_map["BlinkLeftKey"]=FireKeyboard::BlinkLeftKey;
   command_map["BlinkRightKey"]=FireKeyboard::BlinkRightKey;
   command_map["HeadlightKey"]=FireKeyboard::HeadlightKey;
   command_map["SirenKey"]=FireKeyboard::SirenKey;
-
+#endif
   command_map["CommBreakForm"]=FireKeyboard::BreakFormation;
   command_map["Comm1Key"]=FireKeyboard::PressComm1Key ;
   command_map["Comm2Key"]=FireKeyboard::PressComm2Key ;
@@ -297,6 +297,13 @@ void GameVegaConfig::initCommandMap(){
   command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
   command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
   command_map["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
+  command_map["SigTargetKey"]=FireKeyboard::SigTargetKey ;
+  command_map["UnitTargetKey"]=FireKeyboard::UnitTargetKey ;
+  command_map["ReversePickTargetKey"]=FireKeyboard::ReversePickTargetKey ;
+  command_map["ReverseNearestTargetKey"]=FireKeyboard::ReverseNearestTargetKey ;
+  command_map["ReverseThreatTargetKey"]=FireKeyboard::ReverseThreatTargetKey ;
+  command_map["ReverseSigTargetKey"]=FireKeyboard::ReverseSigTargetKey ;
+  command_map["ReverseUnitTargetKey"]=FireKeyboard::ReverseUnitTargetKey ;
   command_map["TurretTargetKey"]=FireKeyboard::TargetTurretKey ;
   command_map["TurretPickTargetKey"]=FireKeyboard::PickTargetTurretKey ;
   command_map["TurretNearestTargetKey"]=FireKeyboard::NearestTargetTurretKey ;

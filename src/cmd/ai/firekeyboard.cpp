@@ -16,6 +16,9 @@
 #include "vs_globals.h"
 #include "gfx/car_assist.h"
 #include "cmd/unit_util.h"
+#include <algorithm>
+
+
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
@@ -28,21 +31,31 @@ const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
-    eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
-
+    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=
+		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=targetkey=
+		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
+		nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+#ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
+#endif
     doc=und=req=0;
   }
  KBSTATE firekey;
  bool doc;
  bool und;
  bool req;
+#ifdef CAR_SIM
   KBSTATE blinkleftkey;
   KBSTATE blinkrightkey;
   KBSTATE headlightkey;
   KBSTATE sirenkey;
-
+#endif
+ KBSTATE rneartargetkey;
+ KBSTATE rthreattargetkey;
+ KBSTATE rpicktargetkey;
  KBSTATE rtargetkey;
+ KBSTATE rtargetskey;
+ KBSTATE rtargetukey;
  KBSTATE missilekey;
  KBSTATE jfirekey;
  KBSTATE jtargetkey;
@@ -58,6 +71,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE threattargetkey;
  KBSTATE picktargetkey;
  KBSTATE targetkey;
+ KBSTATE targetskey;
+ KBSTATE targetukey;
  KBSTATE turretaikey;
 
   KBSTATE commKeys[NUMCOMMKEYS];
@@ -225,6 +240,34 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
     g().targetkey=PRESS;
   }
 }
+void FireKeyboard::PickTargetKey(int, KBSTATE k) {
+  if (g().picktargetkey!=PRESS)
+    g().picktargetkey = k;
+  if (k==RESET) {
+    g().picktargetkey=PRESS;
+  }
+}
+
+void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
+  if (g().neartargetkey!=PRESS)
+    g().neartargetkey = k;
+
+}
+void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
+  if (g().threattargetkey!=PRESS)
+    g().threattargetkey = k;
+}
+
+void FireKeyboard::UnitTargetKey(int, KBSTATE k) {
+  if (g().targetukey!=PRESS)
+    g().targetukey = k;
+}
+
+void FireKeyboard::SigTargetKey(int, KBSTATE k) {
+  if (g().targetskey!=PRESS)
+    g().targetskey = k;
+}
+
 void FireKeyboard::ReverseTargetKey(int, KBSTATE k) {
   if (g().rtargetkey!=PRESS)
     g().rtargetkey = k;
@@ -232,6 +275,35 @@ void FireKeyboard::ReverseTargetKey(int, KBSTATE k) {
     g().rtargetkey=PRESS;
   }
 }
+void FireKeyboard::ReversePickTargetKey(int, KBSTATE k) {
+  if (g().rpicktargetkey!=PRESS)
+    g().rpicktargetkey = k;
+  if (k==RESET) {
+    g().rpicktargetkey=PRESS;
+  }
+}
+void FireKeyboard::ReverseNearestTargetKey(int, KBSTATE k) {
+  if (g().rneartargetkey!=PRESS)
+    g().rneartargetkey = k;
+
+}
+void FireKeyboard::ReverseThreatTargetKey(int, KBSTATE k) {
+  if (g().rthreattargetkey!=PRESS)
+    g().rthreattargetkey = k;
+}
+
+void FireKeyboard::ReverseUnitTargetKey(int, KBSTATE k) {
+  if (g().rtargetukey!=PRESS)
+    g().rtargetukey = k;
+}
+
+void FireKeyboard::ReverseSigTargetKey(int, KBSTATE k) {
+  if (g().rtargetskey!=PRESS)
+    g().rtargetskey = k;
+}
+
+
+#ifdef CAR_SIM
 void FireKeyboard::BlinkLeftKey(int, KBSTATE k) {
     if (k==PRESS) {
       g().blinkleftkey = k;      
@@ -266,19 +338,7 @@ void FireKeyboard::HeadlightKey(int, KBSTATE k) {
       g().headlightkey = k;
     }
 }
-void FireKeyboard::PickTargetKey(int, KBSTATE k) {
-  if (g().picktargetkey!=PRESS)
-    g().picktargetkey = k;
-  if (k==RESET) {
-    g().picktargetkey=PRESS;
-  }
-}
-
-void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
-  if (g().neartargetkey!=PRESS)
-    g().neartargetkey = k;
-
-}
+#endif
 extern void DoSpeech (Unit * un, const string &speech);
 extern void LeadMe (Unit * un, string directive, string speech);
 
@@ -367,10 +427,6 @@ void FireKeyboard::BreakFormation(int, KBSTATE k) {
     LeadMe ("b","Break formation and open fire!");
   }
 }
-void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
-  if (g().threattargetkey!=PRESS)
-    g().threattargetkey = k;
-}
 
 
 void FireKeyboard::TargetTurretKey(int, KBSTATE k) {
@@ -413,7 +469,8 @@ void FireKeyboard::MissileKey(int, KBSTATE k) {
   if (g().missilekey!=PRESS)
    g().missilekey = k;
 }
-void FireKeyboard::ChooseNearTargets(bool turret) {
+#if 0
+void FireKeyboard::ChooseNearTargets(bool turret,bool reverse) {
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un;
   float range=FLT_MAX;
@@ -440,15 +497,42 @@ void FireKeyboard::ChooseNearTargets(bool turret) {
 #endif
 
 }
-void FireKeyboard::ChooseThreatTargets(bool turret) {
-  Unit * threat = parent->Threat();
-  if (threat) 
-    parent->Target(threat);
-  if (turret&&threat)
-    parent->TargetTurret(threat);
+void FireKeyboard::ChooseThreatTargets(bool turret,bool reverse) {
+	static int index=0;
+	UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
+	un_iter iter = drawlist->createIterator();
+	Unit *target;
+	std::vector <Unit *> vec; //not saving across frames
+	Unit *threat=parent->Threat();
+	if (target) {
+		vec.push_back(threat);
+	}
+	while ((target = iter.current())!=NULL) {
+		if (target->Target()==parent&&target!=threat) {
+			vec.push_back(target);
+		}
+		iter.advance();
+	}
+	if (!vec.empty()) {
+		if (reverse) {
+			index--;
+			if (index<0) {
+				index=vec.size()-index;
+				if (index<0) {
+					index=0;
+				}
+			}
+		} else {
+			index++;
+		}
+		target=vec[index%vec.size()];
+		parent->Target(target);
+		if (turret)
+			parent->TargetTurret(target);
+	}
 }
 
-void FireKeyboard::PickTargets(bool Turrets){
+void FireKeyboard::PickTargets(bool Turrets,bool reverse){
   UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList().createIterator();
 
   float smallest_angle=PI;
@@ -476,7 +560,7 @@ void FireKeyboard::PickTargets(bool Turrets){
   parent->Target(found_unit);
 
 }
-void FireKeyboard::ChooseRTargets (bool turret) {
+void FireKeyboard::ChooseRTargets (bool turret,bool significant) {
   Unit * targ =parent->Target();
   Unit * oldun=NULL;
   Unit * un=NULL;
@@ -487,7 +571,7 @@ void FireKeyboard::ChooseRTargets (bool turret) {
     if (un==targ) {
       break;
     }else {
-      if (un!=parent) {
+      if (un!=parent&&parent->InRange(un,true,significant)) {
 	oldun=un;
       }
     }
@@ -507,7 +591,11 @@ void FireKeyboard::ChooseRTargets (bool turret) {
   }
 }
 
-void FireKeyboard::ChooseTargets (bool turret) {
+void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
+  if (reverse) {
+    ChooseRTargets(turret,significant);
+    return;
+  }
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un ;
   bool found=false;
@@ -521,7 +609,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
       found=true;
       continue;
     }
-    if (!parent->InRange(un)) {
+    if (!parent->InRange(un,true,significant)) {
       iter.advance();
       continue;
     }
@@ -568,6 +656,67 @@ void FireKeyboard::ChooseTargets (bool turret) {
     }
   }
 }
+#endif
+
+bool TargUn (Unit *me,Unit *target) {
+	return me->InRange(target,true,false);
+}
+bool TargSig (Unit *me,Unit *target) {
+	return me->InRange(target,true,true);
+}
+bool TargAll (Unit *me,Unit *target) {
+	return TargUn(me,target)||TargSig(me,target);
+}
+bool TargNear (Unit *me,Unit *target) {
+	return me->getRelation(target)<0&&TargAll(me,target);
+}
+bool TargFront (Unit *me,Unit *target) {
+	float dist;
+	if (me->cosAngleTo(target,dist)>.6) {
+		return true;
+	}
+	return false;
+}
+bool TargThreat (Unit *me,Unit *target) {
+	if (target->Target()==me) {
+		return true;
+	}
+	if (me->Threat()==target) {
+		return true;
+	}
+	return false;
+}
+
+void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
+	UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
+	un_iter iter = drawlist->createIterator();
+	vector <Unit *> vec;
+	Unit *target;
+	while ((target = iter.current())!=NULL) {
+		vec.push_back(target);
+		iter.advance();
+	}
+	if (reverse) {
+		std::reverse (vec.begin(),vec.end());
+	}
+	std::vector <Unit *>::const_iterator veciter=std::find(vec.begin(),vec.end(),me->Target());
+	int cur=0;
+	while (1) {
+		while (veciter!=vec.end()) {
+			if (((*veciter)!=me)&&typeofunit(me,(*veciter))) {
+				me->Target(*veciter);
+				return;
+			}
+			veciter++;
+		}
+		cur++;
+		if (cur>=2)
+			break;
+		veciter=vec.begin();
+	}
+}
+
+
 FireKeyboard::~FireKeyboard () {
 #ifdef ORDERDEBUG
   fprintf (stderr,"fkb%x",this);
@@ -734,7 +883,7 @@ void FireKeyboard::Execute () {
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
   } else {
-    ChooseTargets(false);
+    ChooseTargets(parent,TargAll,false);
     refresh_target=true;
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN) 
@@ -807,27 +956,62 @@ void FireKeyboard::Execute () {
   if (f().targetkey==PRESS||j().jtargetkey==PRESS) {
     f().targetkey=DOWN;
     j().jtargetkey=DOWN;
-    ChooseTargets(false);
+    ChooseTargets(parent,TargAll,false);
     refresh_target=true;
   }
   if (f().rtargetkey==PRESS) {
     f().rtargetkey=DOWN;
-    ChooseRTargets(false);
+    ChooseTargets(parent,TargAll,true);
+    refresh_target=true;
+  }
+  if (f().targetskey==PRESS) {
+    f().targetskey=DOWN;
+    ChooseTargets(parent,TargSig,false);
+    refresh_target=true;
+  }
+  if (f().targetukey==PRESS) {
+    f().targetukey=DOWN;
+    ChooseTargets(parent,TargUn,false);
     refresh_target=true;
   }
   if(f().picktargetkey==PRESS){
     f().picktargetkey=DOWN;
-    PickTargets(false);
+    ChooseTargets(parent,TargFront,false);
     refresh_target=true;
   }
   if (f().neartargetkey==PRESS) {
-    ChooseNearTargets (false);
+    ChooseTargets(parent,TargNear,false);
     f().neartargetkey=DOWN;
     refresh_target=true;
   }
   if (f().threattargetkey==PRESS) {
-    ChooseThreatTargets (false);
+    ChooseTargets(parent,TargThreat,false);
     f().threattargetkey=DOWN;
+    refresh_target=true;
+  }
+  if(f().rpicktargetkey==PRESS){
+    f().rpicktargetkey=DOWN;
+    ChooseTargets(parent,TargFront,true);
+    refresh_target=true;
+  }
+  if (f().rneartargetkey==PRESS) {
+    ChooseTargets(parent,TargNear,true);
+    f().rneartargetkey=DOWN;
+    refresh_target=true;
+  }
+  if (f().rthreattargetkey==PRESS) {
+    ChooseTargets(parent,TargThreat,true);
+    f().rthreattargetkey=DOWN;
+    refresh_target=true;
+  }
+  if (f().rtargetskey==PRESS) {
+    f().rtargetskey=DOWN;
+    ChooseTargets(parent,TargSig,true);
+    refresh_target=true;
+  }
+  if (f().rtargetukey==PRESS) {
+    f().rtargetukey=DOWN;
+    ChooseTargets(parent,TargUn,true);
     refresh_target=true;
   }
 

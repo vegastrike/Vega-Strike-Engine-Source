@@ -19,11 +19,12 @@ class FireKeyboard: public Order {
   bool ShouldFire(Unit * targ);
   std::list <CommunicationMessage> resp;
  public:
+#ifdef CAR_SIM
   static void BlinkLeftKey (int,KBSTATE);
   static void BlinkRightKey (int,KBSTATE);
   static void HeadlightKey (int,KBSTATE);
   static void SirenKey (int,KBSTATE);
-
+#endif
   static void PressComm1Key (int,KBSTATE);
   static void PressComm2Key (int,KBSTATE);
   static void PressComm3Key (int,KBSTATE);
@@ -41,11 +42,18 @@ class FireKeyboard: public Order {
   static void DockKey(int, KBSTATE);
   static void FireKey(int, KBSTATE);
   static void MissileKey(int, KBSTATE);
-  static void NearestTargetKey (int, KBSTATE);
-  static void ThreatTargetKey (int, KBSTATE);
-  static void TargetKey(int, KBSTATE);
-  static void ReverseTargetKey(int, KBSTATE);
-  static void PickTargetKey(int, KBSTATE);
+  static void TargetKey(int, KBSTATE k);
+  static void PickTargetKey(int, KBSTATE k);
+  static void NearestTargetKey(int, KBSTATE k);
+  static void ThreatTargetKey(int, KBSTATE k);
+  static void UnitTargetKey(int, KBSTATE k);
+  static void SigTargetKey(int, KBSTATE k);
+  static void ReverseTargetKey(int, KBSTATE k);
+  static void ReversePickTargetKey(int, KBSTATE k);
+  static void ReverseNearestTargetKey(int, KBSTATE k);
+  static void ReverseThreatTargetKey(int, KBSTATE k);
+  static void ReverseUnitTargetKey(int, KBSTATE k);
+  static void ReverseSigTargetKey(int, KBSTATE k);
   static void NearestTargetTurretKey (int, KBSTATE);
   static void ThreatTargetTurretKey (int, KBSTATE);
   static void TargetTurretKey(int, KBSTATE);
@@ -69,12 +77,13 @@ class FireKeyboard: public Order {
   static void TurretAI (int,KBSTATE);
 protected:
   float distance;
-
+#if 0
   void ChooseTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseRTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseNearTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseThreatTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void PickTargets(bool targetturrets); // chooses the target which is nearest to the center of the screen
+#endif
   unsigned int whichplayer;
   unsigned int whichjoystick;
   struct FIREKEYBOARDTYPE &f();
