@@ -1,14 +1,21 @@
-Before Release
+Goals for 0.4.2 release
+
+Warp:
+Rename warp to ... think of something cool
 Warp energy use
-Warp vs. Auto graphic
-Add cargo pics
+
+Universe/system generation:
 fix systems to have jump points only outside the "slow-zone"
 fix a bit of the system generation code: so we can specify everything in the milky_way.xml
+
+Resource management/organization:
 make un-modded units appear in 1 big table, not dozens of xml files
 
+UI:
+Add cargo pics
+Warp vs. Auto graphic
 
-After Release
-
+Goals for 'Sometime over the rainbow'
 
 Load balance hash-table
 support full expressivity of BFXM animations
