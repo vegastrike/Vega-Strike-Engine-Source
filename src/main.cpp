@@ -253,6 +253,7 @@ int main( int argc, char *argv[] )
 
     Python::test();
 #endif
+    std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     // && defined(HAVE_SDL_MIXER)
