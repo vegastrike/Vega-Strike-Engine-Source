@@ -498,7 +498,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
     if (ownerDoNotDereference) {
       //now we can dereference it because we checked it against the parent
       CommunicationMessage c(ownerDoNotDereference,this,NULL);
-      c.SetCurrentState(c.fsm->GetHitNode());
+      c.SetCurrentState(c.fsm->GetHitNode(),NULL);
       this->getAIState()->Communicate (c);      
     }
   }
