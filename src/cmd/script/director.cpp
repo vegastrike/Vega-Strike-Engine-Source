@@ -425,7 +425,13 @@ void Mission::DirectorShipDestroyed(Unit *unit){
       // launch new wave
       fg->nr_waves_left-=1;
       fg->nr_ships_left=fg->nr_ships;
-      fg->orderlist=unit->getAIState()->getOrderList();
+
+      Order *order=unit->getAIState()->findOrderList();
+      fg->orderlist=NULL;
+      if(order){
+	printf("found an orderlist\n");
+	fg->orderlist=order->getOrderList();
+      }
 
       call_unit_launch(fg);
     }

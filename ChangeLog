@@ -1,4 +1,12 @@
 2002-03-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* director:
+	  ai_orderlist now remembers order when re-launched
+	* added findOrderList to Order
+	* replaced messy vegastrike.config with older version
+
+
+2002-03-09 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* fixed crosshairs in firefly/hornet cockpit
 	* interpreter:

@@ -58,7 +58,7 @@ Mission::Mission(char *configfile){
  top=domf->LoadXML(configfile);
 
   if(top==NULL){
-    cout << "Panic exit - mission file not found" << endl;
+    cout << "Panic exit - mission file " << configfile << " not found" << endl;
     exit(0);
   }
   //top->walk(0);

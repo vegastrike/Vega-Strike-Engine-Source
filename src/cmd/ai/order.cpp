@@ -281,3 +281,17 @@ void Order::eraseOrder(Order *ord){
 
   
 }
+Order* Order::findOrderList(){
+  olist_t *orderlist=getOrderList();
+
+  if(orderlist){
+    return this;
+  }
+
+  Order *found_order=NULL;
+  for (unsigned int i=0;i<suborders.size() && found_order==NULL;i++) {
+    found_order=suborders[i]->findOrderList();
+  }
+
+  return found_order;
+}

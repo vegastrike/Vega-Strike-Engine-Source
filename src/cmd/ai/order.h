@@ -93,8 +93,10 @@ public:
   void eraseOrder(Order *ord);
   /// enqueue order as first order
   Order* EnqueueOrderFirst (Order *ord);
-
+  /// returns the orderlist (NULL for orders that haven't got any)
   virtual olist_t* getOrderList(){ return NULL;};
+  ///searches the suborders recursively for the first order that has an orderlist
+  Order *findOrderList();
 };
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {
