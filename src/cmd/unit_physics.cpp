@@ -242,8 +242,6 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   RegenShields();
   if (lastframe)
     prev_physical_state = curr_physical_state;//the AIscript should take care
-  if (!SubUnit)
-    CollideAll(); 
   if (isUnit()==PLANETPTR) {
     ((Planet *)this)->gravitate (uc);
   } else {

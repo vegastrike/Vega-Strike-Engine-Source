@@ -29,7 +29,7 @@ StarSystem::StarSystem(char * filename) :
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
   missiles(new UnitCollection) {
-  
+  current_stage=PHY_AI;
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
   LoadXML(filename);
@@ -171,32 +171,49 @@ void StarSystem::Update() {
   //clog << "time: " << time << "\n";
   //time = SIMULATION_ATOM+SIMULATION_ATOM/2.0;
   bool firstframe = true;
-  if(time/SIMULATION_ATOM>=1.0) {
-    while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
+  if(time/SIMULATION_ATOM>=.33333333) {
+    while(time/SIMULATION_ATOM >= .333333333) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       // Handle AI in pass 2 to maintain consistency
 
-
-
-      Iterator *iter = drawList->createIterator();
+      Iterator *iter;
+      if (current_stage==PHY_AI) {
+      iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
 	unit->ResetThreatLevel();
 	iter->advance();
       }
       delete iter;
+      current_stage=PHY_COLLIDE;
+      } else
+      if (current_stage==PHY_COLLIDE) {
       iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
+	unit->CollideAll();
+	iter->advance();
+      }
+      delete iter;
+      current_stage=PHY_RESOLV;
+      } else
+      if (current_stage==PHY_RESOLV) {
+      iter = drawList->createIterator();
+      while((unit = iter->current())!=NULL) {
+
 	unit->UpdatePhysics(identity_transformation,identity_matrix,firstframe,units);
 	iter->advance();
       }
       delete iter;
+      
+      
       Bolt::UpdatePhysics();
-      time -= SIMULATION_ATOM;
+      current_stage=PHY_AI;
+      }
+      time -= .3333333333*SIMULATION_ATOM;
       firstframe = false;
     }
     UpdateTime();
   }
-  interpolation_blend_factor = time/SIMULATION_ATOM;
+  interpolation_blend_factor = .333333*((3*time)/SIMULATION_ATOM+current_stage);
   //clog << "blend factor: " << interpolation_blend_factor << "\n";
 }
 

@@ -48,7 +48,8 @@ void Unit::UpdateCollideQueue () {
 }
 
 void Unit::CollideAll() {
-
+  if (SubUnit)
+    return;
   vector <LineCollide*>::const_iterator i;
   vector <LineCollide*> * colQ [HUGEOBJECT+1];
   int sizecolq = collidetable.Get (&CollideInfo,colQ);

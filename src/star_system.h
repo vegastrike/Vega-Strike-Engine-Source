@@ -25,6 +25,8 @@ struct Texture;
 class Background;
 class StarSystem {
  private:
+  enum PHYSICS_STAGE {PHY_AI,PHY_COLLIDE,PHY_RESOLV,PHY_NUM};
+  PHYSICS_STAGE current_stage;
   int numprimaries;
   Unit **primaries; // Stars, planets, etc. Orbital mechanics  // pre-calculated. Cannot be 
   struct StarXML { //Starsystem XML Struct
