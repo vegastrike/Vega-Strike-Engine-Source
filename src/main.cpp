@@ -29,6 +29,7 @@
 #include "config_xml.h"
 #include "mission.h"
 #include "audiolib.h"
+#include "vs_path.h"
 /*
  * Globals 
  */
@@ -84,9 +85,9 @@ int main( int argc, char **argv )
     srand( time(NULL) );
     setup_game_data(); 
 
-    // preliminary for me to test
-    vs_config=new VegaConfig("vegastrike.config"); // move config to global or some other struct
-
+    // loads the configuration file .vegastrikerc from home dir if such exists
+    initpaths();
+    
     Mission *mission=new Mission("test1.mission");
 
     //            exit(0);

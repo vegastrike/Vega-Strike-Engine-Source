@@ -85,6 +85,10 @@
 
         </colors>
 	<variables>
+		<section name="data">
+			<var name="sharedtextures" value="textures"/>
+			<var name="sharedsounds" value="sounds"/>
+		</section>
         	<section name="graphics">
 			<var name="x_resolution" value="1024"/>
 			<var name="y_resolution" value="768"/>

@@ -48,5 +48,7 @@ vegastrike_SOURCES =				\
 	easydom.h				\
 	profile.h 				\
 	vegastrike.h				\
-	vs_globals.h 				
+	vs_globals.h 				\
+	vs_path.cpp				\
+	vs_path.h				
 
