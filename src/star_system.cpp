@@ -9,7 +9,9 @@
 #include "lin_time.h"
 #include "cmd_beam.h"
 #include "gfx_sphere.h"
+#include "cmd_collide.h"
 extern Vector mouseline;
+
 vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -208,17 +210,19 @@ void StarSystem::Update() {
   time += GetElapsedTime();
   //clog << "time: " << time << "\n";
   //time = SIMULATION_ATOM+SIMULATION_ATOM/2.0;
+  bool firstframe = true;
   if(time/SIMULATION_ATOM>=1.0) {
     while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
+      ClearCollideQueue();
       modelGravity();
       DABEAM->UpdatePhysics(identity_transformation);
       Iterator *iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually
-	if(time>2.0) 
-	  unit->ResolveForces(identity_transformation,identity_matrix);
-	else
-	  unit->ResolveLast(identity_transformation,identity_matrix);
+	//	if(time/SIMULATION_ATOM>2.0) 
+	unit->ResolveForces(identity_transformation,identity_matrix,firstframe);
+	  //else
+	  //	  unit->ResolveLast(identity_transformation,identity_matrix);
 	iter->advance();
       }
       delete iter;
@@ -226,10 +230,12 @@ void StarSystem::Update() {
       // Handle AI in pass 2 to maintain consistency
       iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
-	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast saves the 2nd to last position for proper interpolation)
+	unit->CollideAll();
+	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
 	iter->advance();
       }
       time -= SIMULATION_ATOM;
+      firstframe = false;
     }
     UpdateTime();
   }

@@ -170,9 +170,9 @@ void Unit::RollTorque(float amt) {
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
 
-void Unit::ResolveForces (const Transformation &trans, const Matrix transmat ) // don't call this 2x
-{
-  
+void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bool lastframe) {
+  if (lastframe)
+    prev_physical_state = curr_physical_state;  
   // Torque is modeled as a perfect impulse at the beginning of a game
   // turn, for simplicity
   Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);
@@ -203,21 +203,15 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat ) /
     if (mounts[i].type.type==weapon_info::BEAM) {
       if (mounts[i].gun&&!mounts[i].gun->Dissolved()) {
 	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
-	//check for impact!!!???!!!  err prolly later on since we space position and direction
       }
     }
   }
   for (i=0;i<numsubunit;i++) {
-    subunits[i]->ResolveLast(cumulative_transformation,cumulative_transformation_matrix);
+    subunits[i]->ResolveForces(cumulative_transformation,cumulative_transformation_matrix,lastframe);
   }
   NetForce = NetLocalForce = Vector(0,0,0);
   NetTorque = Vector(0,0,0);
   //cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
-}
-
-void Unit::ResolveLast(const Transformation &trans, const Matrix transmat ) {// don't call this 2x{
-  prev_physical_state = curr_physical_state;
-  ResolveForces(trans,transmat);
 }
 
 void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {

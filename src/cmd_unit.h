@@ -268,8 +268,8 @@ public:
   void PitchTorque(float amt);
   void RollTorque(float amt);
 
-  void ResolveForces (const Transformation &, const Matrix);
-  void ResolveLast(const Transformation &, const Matrix); // used for lerp
+  void ResolveForces (const Transformation &, const Matrix,bool ResolveLast);
+  //  void ResolveLast(const Transformation &, const Matrix); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   Vector ToLocalCoordinates(const Vector &v) const;
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
