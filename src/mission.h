@@ -26,6 +26,7 @@
 #ifndef _MISSION_H_
 #define _MISSION_H_
 
+#include <map>
 #include <expat.h>
 #include <string>
 #include "xml_support.h"
@@ -35,35 +36,42 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
+
 class Flightgroup {
  public:
   string name,faction,type,ainame;
   int waves,nr_ships;
   float pos[3];
   float rot[3];
+
+  int flightgroup_nr;
+  int ship_nr;
+
+  easyDomNode *domnode;
+
+  map<string,string> ordermap;
 };
 
 class Mission {
  public:
   Mission(char *configfile);
 
-  int number_of_flightgroups;
+  int number_of_flightgroups,number_of_ships;
 
   vector<Flightgroup *> flightgroups;
 
-  Flightgroup *findFlightgroup(string offset_name);
+  Flightgroup *findFlightgroup(string fg_name);
 
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   easyDomNode *variables;
 
-
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
   void checkVar(easyDomNode *node);
   void doFlightgroups(easyDomNode *node);
-  void doOrder(easyDomNode *node);
+  void doOrder(easyDomNode *node,Flightgroup *fg);
   void checkFlightgroup(easyDomNode *node);
   bool doPosition(easyDomNode *node,float pos[3]);
   bool doRotation(easyDomNode *node,float rot[3]);

@@ -157,6 +157,7 @@ easyDomNode *easyDomFactory::LoadXML(const char *filename) {
 
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
+    cout << "error: could not open file: " << filename << endl;
     assert(0);
     return NULL;
   }

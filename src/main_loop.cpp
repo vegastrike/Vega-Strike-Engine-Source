@@ -328,6 +328,8 @@ void createObjects() {
 
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
+
+  map<string,int> targetmap;
   
   char fightername [1024]="hornet.xunit";
   int a=0;
@@ -337,9 +339,14 @@ void createObjects() {
   for(siter= fg.begin() ; siter!=fg.end() ; siter++,a++){
     Vector pox (1000+150*a,100*a,100);
 
+    //cout << "loop " << endl;
+
     Flightgroup *fg=*siter;
 
+    string fg_name=fg->name;
     string fullname=fg->type;// + ".xunit";
+
+    //cout << "loop " << fg_name << endl;
 
     strcpy(fightername,fullname.c_str());
 	//	strcat(fightername,".xunit");
@@ -352,6 +359,27 @@ void createObjects() {
 
 	tmptarget[a]=1; // that should not be in xml?
 
+	easyDomNode *dom=fg->domnode;
+
+#if 0
+	string strtarget=fg->ordermap["tmptarget"];
+	if(strtarget.empty()){
+	  cout << "WARNING: tmptarget set to 1" << endl;
+	}
+	else{
+	  Flightgroup *target_fg=mission->findFlightgroup(strtarget);
+	  if(target_fg==NULL){
+	    cout << "flightgroup " << strtarget << " not found to be a target for fg " << fg_name << endl;
+	  }
+	  else{
+	    cout << "setting tmptarget of " << fg_name << " to " << strtarget << " index " << target_fg->ship_nr << endl;
+	    tmptarget[a]=target_fg->ship_nr;
+	  }
+	  cout << "tmptarget = " << tmptarget[a] << endl;
+	}
+
+#endif
+
       if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
 	pox.i=rand()*10000./RAND_MAX-5000;
 	pox.j=rand()*10000./RAND_MAX-5000;
@@ -359,12 +387,15 @@ void createObjects() {
 
       }
 
-
+      //cout << "before unit" << endl;
 
     fighters[a] = new Unit(fightername, true, false,tmptarget[a]);
     fighters[a]->SetPosition (pox);
     
     //    fighters[a]->SetAI(new Order());
+
+    // cout << "before ai" << endl;
+
     if (a!=0) {
       string ai_agg=ainame+".agg.xml";
       string ai_int=ainame+".int.xml";

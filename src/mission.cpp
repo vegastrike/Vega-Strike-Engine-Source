@@ -43,6 +43,7 @@
 
 Mission::Mission(char *configfile){
   number_of_flightgroups=0;
+  number_of_ships=0;
 
   easyDomFactory *domf = new easyDomFactory();
 
@@ -147,6 +148,8 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
   rot[0]=rot[1]=rot[2]=0.0;
 
+  Flightgroup *fg=new Flightgroup();
+
   vector<easyDomNode *>::const_iterator siter;
 
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
@@ -157,12 +160,13 @@ void Mission::checkFlightgroup(easyDomNode *node){
       have_rot=doRotation(*siter,rot);
     }
     else if((*siter)->Name()=="order"){
-      doOrder(*siter);
+      doOrder(*siter,fg);
     }
   }
 
   if(!have_pos){
     cout << "don;t have a position in flightgroup " << name << endl;
+    delete fg;
     return;
   }
 
@@ -172,13 +176,15 @@ void Mission::checkFlightgroup(easyDomNode *node){
   cout << "   rot: " << rot[0] << " " << rot[1] << " " << rot[2] << " " << endl;
 #endif
 
-  Flightgroup *fg=new Flightgroup();
 
   fg->name=name;
   fg->faction=faction;
   fg->type=type;
   fg->ainame=ainame;
-  
+  fg->flightgroup_nr=number_of_flightgroups;
+  fg->ship_nr=number_of_ships;
+  fg->domnode=node;
+
   for(int i=0;i<3;i++){
     fg->pos[i]=pos[i];
     fg->rot[i]=rot[i];
@@ -187,6 +193,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
   flightgroups.push_back(fg);
 
   number_of_flightgroups++;
+  number_of_ships++;
 }
 
 bool Mission::doPosition(easyDomNode *node,float pos[3]){
@@ -226,7 +233,9 @@ Flightgroup *Mission::findFlightgroup(string offset_name){
   vector<Flightgroup *>::const_iterator siter;
 
   for(siter= flightgroups.begin() ; siter!=flightgroups.end() ; siter++){
+    // cout << "checking " << offset_name << " against " << (*siter)->name << endl;
     if((*siter)->name==offset_name){
+      //cout << "found " << offset_name << " against " << (*siter)->name << endl;
       return *siter;
     }
   }
@@ -238,6 +247,17 @@ bool Mission::doRotation(easyDomNode *node,float rot[3]){
   return true;
 }
 
-void Mission::doOrder(easyDomNode *node){
+void Mission::doOrder(easyDomNode *node,Flightgroup *fg){
   // nothing yet
+  string order=node->attr_value("order");
+  string target=node->attr_value("target");
+
+  if(order.empty() || target.empty()){
+    cout << "you have to give an order and a target" << endl;
+    return;
+  }
+
+  // the tmptarget is evaluated later
+  // because the target may be a flightgroup that's not yet defined
+  fg->ordermap[order]=target;
 }
