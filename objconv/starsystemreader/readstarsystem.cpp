@@ -310,12 +310,13 @@ void processsystems (vector <System> & s){
 	for (unsigned int i=0;i<s.size();++i) {
 		s[i].sector=getSector(s[i],min,max);
 		map <double,string> jumps;
+		if (s[i].habitable)
 		for (unsigned int j=0;j<s.size();++j) {
-			if (j!=i){
+			if (j!=i && (s[j].habitable||rand()<RAND_MAX*.001)){
 				float dissqr = sqr(s[i].xyz.x-s[j].xyz.x)+sqr(s[i].xyz.y-s[j].xyz.y)+sqr(s[i].xyz.z-s[j].xyz.z);
 				int desired_size = rand()%7+1;
 				if (jumps.size()>=desired_size) {
-					if (jumps.upper_bound(dissqr)!=jumps.end()) {
+					if (jumps.upper_bound(dissqr)!=jumps.end() && rand()<RAND_MAX*.995) {
 						jumps[dissqr]=s[j].fullName();
 						map<double,string>::iterator k = jumps.end();
 						k--;
