@@ -708,8 +708,8 @@ if test "x$have_python_lib" = "xyes" ; then
 AC_DEFUN( CHECK_FOR_BOOST_LIB, [
     AC_MSG_CHECKING([for $BOOST_LIB_NAME library])
     LIBS="$PYTHON_LDOPTS -l$BOOST_LIB_NAME"
-    AC_TRY_LINK( , , have_python_lib=yes, have_python_lib=no )
-    AC_MSG_RESULT([$have_python_lib])
+    AC_TRY_LINK( , , have_boost_lib=yes, have_boost_lib=no )
+    AC_MSG_RESULT([$have_boost_lib])
 ]) 
 
 saved_LIBS="$RRLIBS"
@@ -731,7 +731,7 @@ done
 fi
 
 dnl --------------------------------------------------------------------------
-dnl Check for Python headers
+dnl Check for Python & boost headers
 dnl --------------------------------------------------------------------------
 
 AC_ARG_WITH(python-inc,   [  --with-python-inc=DIR       Python header file location])
@@ -755,7 +755,8 @@ AC_DEFUN( CHECK_FOR_PYTHON_H, [
    #if PY_MAJOR_VERSION <= 2 && PY_MINOR_VERSION <1
      #error "Vegastrike needs Python version >= 2.1"
    #endif
-    ], [have_python_h=yes AC_MSG_RESULT([yes])] ,[ AC_MSG_RESULT([Need version >= 2.1])]))
+    ], [have_python_h=yes
+AC_MSG_RESULT([yes])] ,[ AC_MSG_RESULT([Need version >= 2.1])]))
 ])
 
 CHECK_FOR_PYTHON_H
@@ -763,38 +764,61 @@ CHECK_FOR_PYTHON_H
 CPPFLAGS="$saved_CPPFLAGS" 
 TR_CPPFLAGS="$TR_CPPFLAGS $PYTHON_CPPFLAGS"
 
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
 AC_ARG_WITH(boost-inc,   [  --with-boost-inc=DIR       Boost header file location])
 
 if test "x$have_python_h" != "x" ; then
 if test "x$with_boost_inc" != "x" ; then
-    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS -I$with_boost_inc"
+    BOOST_CPPFLAGS="-I$with_boost_inc"
 fi
 
-    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $TR_CPPFLAGS"
+    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS $TR_CPPFLAGS"
 
     AC_MSG_CHECKING([for <boost/python/module_builder.hpp>])
+AC_LANG_CPLUSPLUS
     AC_TRY_CPP( [ #include <boost/python/module_builder.hpp> ], 
-    [have_python_h=yes], [have_python_h=no])
-    AC_MSG_RESULT([$have_python_h])
+    [have_boost_h=yes], [have_boost_h=no])
+    AC_MSG_RESULT([$have_boost_h])
 fi
+AC_LANG_RESTORE
 
 if test "x$have_python_lib" = "xno" ; then
     AC_MSG_WARN([
 **************
-Python or boost libraries not found
+Python libraries not found
 **************
 ])
 else
     if test "x$have_python_h" = "xno" ; then
     AC_MSG_WARN([
 **************
-Python or boost headers not found
+Python headers not found
 **************
 ])
     else
     PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS -DHAVE_PYTHON=1"
     fi
 fi
+
+if test "x$have_boost_lib" = "xno" ; then
+    AC_MSG_WARN([
+**************
+Boost libraries not found
+**************
+])
+else
+    if test "x$have_boost_h" = "xno" ; then
+    AC_MSG_WARN([
+**************
+Boost headers not found
+**************
+])
+    else
+    BOOST_CPPFLAGS="$BOOST_CPPFLAGS -DHAVE_BOOST=1"
+    fi
+fi
+
 CPPFLAGS="$saved_CPPFLAGS" 
 
 
@@ -816,8 +840,9 @@ AC_SUBST(TR_CFLAGS)
 AC_SUBST(TR_CXXFLAGS)
 AC_SUBST(TR_LIBS)
 AC_SUBST(PYTHON_CPPFLAGS)
+AC_SUBST(BOOST_CPPFLAGS)
 
-CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS"
 CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS"
