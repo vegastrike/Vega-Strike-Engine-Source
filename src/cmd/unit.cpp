@@ -54,6 +54,7 @@
 #include "xml_serializer.h"
 #include "python/python_class.h"
 #include "cmd/ai/missionscript.h"
+#include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
@@ -831,7 +832,6 @@ short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass) {
     return cloak;
     
 }
-
 void Unit::DrawNow (const Matrix & mat, float lod) {
   unsigned int i;
   short cloak=cloaking;
@@ -868,7 +868,7 @@ void Unit::DrawNow (const Matrix & mat, float lod) {
       haloalpha=((float)cloak)/32767;
     }
     Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-    halos.Draw(mat,Scale,cloak,0);
+    halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity());
 }
 void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
@@ -978,12 +978,12 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 	if( computer.max_ab_speed!= 0)
 	{
 	    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
+	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity());
 	}
 	else
 	{
 	    Vector Scale (1,1,0);
-	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
+	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity());
 	}
   }
 }

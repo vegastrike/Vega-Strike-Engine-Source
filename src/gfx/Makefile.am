@@ -56,6 +56,8 @@ libgfx_a_SOURCES =	\
 	png_texture.cpp	\
 	png_write.cpp	\
 	point_to_cam.h	\
+	particle.cpp	\
+	particle.h	\
 	quadtree.cpp	\
 	quadtree.h	\
 	quadsquare.cpp	\
