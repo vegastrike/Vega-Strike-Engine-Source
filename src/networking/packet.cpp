@@ -326,7 +326,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
 
     if( packet_filled == false )
     {
-#else /* HAVE_ZLIB */
+#endif /* HAVE_ZLIB */
 	h.flags &= ( ~COMPRESSED );    // make sure that it's never set here
         h.data_length = length;
 
@@ -337,7 +337,6 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
         COUT << "Created a packet of length "
 	     << length+header_length << " for sending" << endl;
         //_packet.dump( cout, 0 );
-#endif /* HAVE_ZLIB */
 #ifdef HAVE_ZLIB
     }
 #endif /* HAVE_ZLIB */
