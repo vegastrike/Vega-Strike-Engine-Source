@@ -8,7 +8,7 @@
 namespace Orders {
   // This moveto always attempts to move in a straight line (unaware of strafing)
   const float bleed_threshold = 0.0001;
-  const float THRESHOLD = 0.001;
+  const float THRESHOLD = 0.004;
   
 class MoveTo : public Order {
   bool afterburn;

@@ -69,17 +69,12 @@ bool MoveTo::OptimizeSpeed (float v, float &a) {
   return false;
 }
 
-float MOVETHRESHOLD=.05;
+float MOVETHRESHOLD=SIMULATION_ATOM/1.9;
 bool MoveTo::Done(const Vector & local_heading, const Vector & ang_vel) {
   if (fabs(local_heading.i) < MOVETHRESHOLD&&//and local heading is close to the front
       fabs(local_heading.j) < MOVETHRESHOLD&&
       fabs(local_heading.k) < MOVETHRESHOLD) {
     terminating = true;
-    if (fabs(ang_vel.i) < THRESHOLD&&
-	fabs(ang_vel.j) < THRESHOLD&&
-	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
-      return true;
-    }
   }else {
     if (terminating&& (
 	fabs(local_heading.k) > 2*MOVETHRESHOLD||
@@ -87,6 +82,13 @@ bool MoveTo::Done(const Vector & local_heading, const Vector & ang_vel) {
 	fabs(local_heading.j) > 2*MOVETHRESHOLD)) 
       terminating=false;
   }
+  if (terminating&&
+      fabs(ang_vel.i) < THRESHOLD&&
+      fabs(ang_vel.j) < THRESHOLD&&
+      fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
+      return true;
+  }
+
   return false;
 }
 
@@ -167,17 +169,12 @@ void ChangeHeading::SetDest (const Vector &target) {
   final_heading = target;
   done = false;
 }
-float TURNTHRESHOLD=.05;
+float TURNTHRESHOLD=SIMULATION_ATOM/1.9;
 bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
   if (fabs(local_heading.i) < TURNTHRESHOLD&&//and local heading is close to the front
       fabs(local_heading.j) < TURNTHRESHOLD&&
       local_heading.k>0) {
     terminating = true;
-    if (fabs(ang_vel.i) < THRESHOLD&&
-	fabs(ang_vel.j) < THRESHOLD&&
-	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
-      return true;
-    }
   }else {
     if (terminating&&(
 	fabs(local_heading.i) > 2*TURNTHRESHOLD||//and local heading is close to the front
@@ -185,6 +182,13 @@ bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
 	local_heading.k<0)) 
       terminating=false;
   }
+    if (terminating&&
+	fabs(ang_vel.i) < THRESHOLD&&
+	fabs(ang_vel.j) < THRESHOLD&&
+	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
+      return true;
+    }
+
   return false;
 }
 AI * ChangeHeading::Execute() {

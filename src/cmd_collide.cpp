@@ -238,7 +238,7 @@ bool Unit::Collide (Unit * target) {
       return false;
   }
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-  fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",name.c_str(),target->name.c_str());
+  //  fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",name.c_str(),target->name.c_str());
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
@@ -256,7 +256,7 @@ bool Beam::Collide (Unit * target) {
     return false;
   curlength = distance;
   impact|=IMPACT;
-  fprintf (stderr,"BEAM DELIVERS DAMAGE TO \n");//%s",target->name.c_str());
+  //  fprintf (stderr,"BEAM DELIVERS DAMAGE TO \n");//%s",target->name.c_str());
   //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
   return true;
 }
