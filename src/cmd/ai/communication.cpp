@@ -41,43 +41,52 @@ FSM::FSM (const char * filename) {
   }
 }
 int FSM::GetUnDockNode() const{
-  return nodes.size()-13;
+  return nodes.size()-16;
 }
 int FSM::GetFailDockNode()const {
-  return nodes.size()-12;
+  return nodes.size()-15;
 }
 int FSM::GetDockNode() const{
-  return nodes.size()-11;
-}
-int FSM::GetAbleToDockNode() const{
-  return nodes.size()-9;
+  return nodes.size()-14;
 }
 int FSM::GetUnAbleToDockNode() const{
-  return nodes.size()-10;
+  return nodes.size()-13;
+}
+int FSM::GetAbleToDockNode() const{
+  return nodes.size()-12;
 }
 int FSM::GetNoNode() const{
-  return nodes.size()-8;
+  return nodes.size()-11;
 }
 int FSM::GetYesNode() const{
-  return nodes.size()-7;
+  return nodes.size()-10;
 }
 int FSM::GetContrabandInitiateNode() const{
-  return nodes.size()-6;
+  return nodes.size()-9;
 }
 int FSM::GetContrabandUnDetectedNode() const{
-  return nodes.size()-5;
+  return nodes.size()-8;
 }
 int FSM::GetContrabandDetectedNode() const{
-  return nodes.size()-4;
+  return nodes.size()-7;
 }
 int FSM::GetContrabandWobblyNode() const{
-  return nodes.size()-3;
+  return nodes.size()-6;
 }
 int FSM::GetRequestLandNode () const{
-  return nodes.size()-2;
+  return nodes.size()-5;
 }
 int FSM::GetHitNode () const{
   return nodes.size()-1;
+}
+int FSM::GetDamagedNode () const{
+  return nodes.size()-2;
+}
+int FSM::GetDealtDamageNode () const{
+  return nodes.size()-3;
+}
+int FSM::GetScoreKillNode () const{
+  return nodes.size()-4;
 }
 static float sq (float i) {return i*i;}
 bool nonneg (float i) {return i>=0;}

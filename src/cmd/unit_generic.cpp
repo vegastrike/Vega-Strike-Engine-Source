@@ -221,8 +221,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	}
 /*    smalle->curr_physical_state = smalle->prev_physical_state;
 	  this->curr_physical_state = this->prev_physical_state;*/
-    smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
-    this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),NULL);
+    smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),this->owner!=NULL?this->owner:this);
+    this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),smalle->owner!=NULL?smalle->owner:smalle);
 
     //OLDE METHODE
     //    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
@@ -3080,12 +3080,21 @@ void	Unit::ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float pperc
 	}
   }
 }
-
-extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
+Unit * findUnitInStarsystem (Unit * unitDoNotDereference) {
+  Unit * un;
+  for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=*i)!=NULL;
+       ++i) {
+    if (un==unitDoNotDereference)
+      return un;
+  }
+  return NULL;
+}
+extern void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit);
 // Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
 void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
   Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
-
+  float hullpercent=GetHullPercent();
   // Only on client side
   if (!SERVER && cp) {
       //now we can dereference it because we checked it against the parent
@@ -3104,10 +3113,30 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
   if (hull<0) {
 	  ClearMounts();
 	  if (!mykilled) {
-		  if (cp) {
-			  ScoreKill (cp,ownerDoNotDereference,faction);
-		  }
-	  }
+            if (cp) {
+              ScoreKill (cp,ownerDoNotDereference,this);
+            }else {
+              Unit * tmp;
+              if ((tmp=findUnitInStarsystem(ownerDoNotDereference))!=NULL) {
+                ScoreKill(NULL,tmp,this);
+              }
+            }
+          }
+  }else if (hullpercent>=.9999&&((float)GetHullPercent())<.9999&&(cp||_Universe->isPlayerStarship(this))) {
+    Unit * computerai=this;
+    Unit * player = ownerDoNotDereference;//dangerous, but overwritten if cp==NULL
+    if (!cp) {
+      computerai=findUnitInStarsystem(ownerDoNotDereference);
+      player = this;
+    }
+    if (computerai&&player&&computerai->getAIState()&&player->getAIState()&&computerai->isUnit()==UNITPTR&&player->isUnit()==UNITPTR) {
+		
+      unsigned char sex;
+      vector <Animation *>* anim = computerai->getAIState()->getCommFaces(sex);
+      CommunicationMessage c(computerai,player,anim,sex);
+      c.SetCurrentState(cp?c.fsm->GetDamagedNode():c.fsm->GetDealtDamageNode(),anim,sex);
+      player->getAIState()->Communicate(c);                             
+    }
   }
 }
 
@@ -5438,7 +5467,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   
 
   computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
-  computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing);
+  computer.itts=UpgradeBoolval(computer.itts,up->computer.itts,touchme,downgrade,numave,percentage,force_change_on_nothing); 
   ///do the two reversed ones below
   
   double myleak=100-shield.leak;

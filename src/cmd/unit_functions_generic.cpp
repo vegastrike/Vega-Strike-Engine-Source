@@ -2,6 +2,7 @@
 #include "gfx/vec.h"
 #include "gfx/cockpit_generic.h"
 #include "faction_generic.h"
+#include "ai/communication.h"
 #include "savegame.h"
 #include "xml_support.h"
 #include "unit_factory.h"
@@ -59,10 +60,13 @@ void SetShieldZero(Unit * un) {
 }
 
 //un scored a faction kill
-void ScoreKill (Cockpit * cp, Unit * un, int faction) {
+void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
+  if (un->isUnit()!=UNITPTR||killedUnit->isUnit()!=UNITPTR)
+	return;
   static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
+  int faction= killedUnit->faction;
   FactionUtil::AdjustIntRelation(faction,un->faction,KILL_FACTOR,1);
-  static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));
+  static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));  
   for (unsigned int i=0;i<FactionUtil::GetNumFactions();i++) {
     float relation;
     if (faction!=(int)i&&un->faction!=(int)i) {
@@ -71,14 +75,28 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
         FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
-  vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
-  while (killlist->size()<=FactionUtil::GetNumFactions()) {
-    killlist->push_back ((float)0.0);
+  if (cp!=NULL) {
+    vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
+    while (killlist->size()<=FactionUtil::GetNumFactions()) {
+      killlist->push_back ((float)0.0);
+    }
+    if ((int)killlist->size()>faction) {
+      (*killlist)[faction]++;
+    }
+    killlist->back()++;
+  }else {
+    int whichcp= rand()%_Universe->numPlayers();
+    Unit * whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
+    if (whichrecv!=NULL) {
+      if (un->getAIState()&&whichrecv->getAIState()) {      
+        unsigned char sex;
+        vector< Animation *>* anim = un->getAIState()->getCommFaces(sex);
+        CommunicationMessage c(un,whichrecv,anim,sex);
+        c.SetCurrentState(c.fsm->GetScoreKillNode(),anim,sex);
+        whichrecv->getAIState()->Communicate (c);
+      }
+    }
   }
-  if ((int)killlist->size()>faction) {
-    (*killlist)[faction]++;
-  }
-  killlist->back()++;
 }
 
 //From unit_physics.cpp

@@ -393,7 +393,11 @@ void Cockpit::Update () {
 		string newsystem;QVector pos; bool setplayerXloc;
                 savegame->SetStarSystem("");
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
-		newsystem= savegame->GetStarSystem()+".system";
+		if (savegame->GetStarSystem()!="") {
+			newsystem= savegame->GetStarSystem()+".system";
+		}else {
+			newsystem = _Universe->activeStarSystem()->getFileName();
+		}
 		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
 		_Universe->getActiveStarSystem(0)->SwapOut();
 		this->activeStarSystem=ss;

@@ -33,6 +33,9 @@ class FSM {
   int GetYesNode ()const;
   int GetNoNode()const;
   int GetHitNode ()const;
+  int GetDamagedNode() const;
+  int GetDealtDamageNode() const;
+  int GetScoreKillNode() const;
   int GetRequestLandNode()const;
   int GetContrabandInitiateNode()const;
   int GetContrabandUnDetectedNode()const;
@@ -55,7 +58,7 @@ class CommunicationMessage {
   CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   void SetCurrentState(int message, std::vector <class Animation *> *ani,unsigned char sex);
-  FSM::Node * getCurrentState() {if (curstate<fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
+  FSM::Node * getCurrentState() {if (curstate<(int)fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}
 };
