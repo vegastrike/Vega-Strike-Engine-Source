@@ -49,14 +49,9 @@ int close_socket( int fd );
 class VsnetSocketBase
 {
 public:
-    VsnetSocketBase( );
-    VsnetSocketBase( int fd );
-    VsnetSocketBase( int fd, SocketSet* set );
-    VsnetSocketBase( const VsnetSocketBase& orig );
+    VsnetSocketBase( int fd, SocketSet& set );
 
     virtual ~VsnetSocketBase( );
-
-    VsnetSocketBase& operator=( const VsnetSocketBase& orig );
 
     bool valid() const;
 
@@ -66,23 +61,29 @@ public:
     bool set_nonblock( );
     bool get_nonblock( ) const;
 
-    void watch( SocketSet& set );
+    virtual bool isActive( ) { return _set.is_set(_fd); }
+
     void disconnect( const char *s, bool fexit );
     
     virtual bool needReadAlwaysTrue( ) const { return false; }
 
+    virtual void lower_selected( ) { }
+
 protected:
-    virtual void child_watch( SocketSet& set ) { }
     virtual void child_disconnect( const char* s ) { }
 
 protected:
     int        _fd;
+    SocketSet& _set;
 
 private:
 	// bits for boolean operations
 	unsigned   _noblock : 1;
 
-    SocketSet* _set;
+private:
+    VsnetSocketBase( );
+    VsnetSocketBase( const VsnetSocketBase& orig );
+    VsnetSocketBase& operator=( const VsnetSocketBase& orig );
 };
 
 class VsnetSocket : public VsnetSocketBase
@@ -91,19 +92,17 @@ protected:
     AddressIP  _remote_ip; // IP address structure of remote server
 
 public:
-    VsnetSocket( );
-    VsnetSocket( int sock, const AddressIP& remote_ip );
-    VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet* set );
-    VsnetSocket( const VsnetSocket& orig );
-
-    VsnetSocket& operator=( const VsnetSocket& orig );
+    VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& set );
 
     virtual bool isTcp() const = 0;
 
-    virtual bool isActive( SocketSet& set ) = 0;
-
     bool eq( const VsnetSocket& r );
     bool sameAddress( const VsnetSocket& r );
+
+    /// pretty useless pass-through for broken compilers
+    virtual bool isActive( ) {
+        return VsnetSocketBase::isActive();
+    }
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
 
@@ -121,6 +120,11 @@ public:
     friend std::ostream& operator<<( std::ostream& ostr, const VsnetSocket& s );
 
     virtual void dump( std::ostream& ostr ) const = 0;
+
+private:
+    VsnetSocket( );
+    VsnetSocket( const VsnetSocket& orig );
+    VsnetSocket& operator=( const VsnetSocket& orig );
 };
 
 
@@ -134,9 +138,9 @@ public:
 
 public:
     SOCKETALT( );
-    SOCKETALT( int sock, bool mode, const AddressIP& remote_ip );
-    SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet* set );
     SOCKETALT( const SOCKETALT& orig );
+    // SOCKETALT( int sock, bool mode, const AddressIP& remote_ip );
+    SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet& set );
 
     SOCKETALT& operator=( const SOCKETALT& orig );
 
@@ -148,16 +152,12 @@ public:
         return (_sock.isNull() ? false : _sock->valid());
     }
 
-    inline void watch( SocketSet& set ) {
-        if(!_sock.isNull()) _sock->watch(set);
-    }
-
     inline bool isTcp( ) {
         return (_sock.isNull() ? false : _sock->isTcp());
     }
 
-    inline bool isActive( SocketSet& set ) {
-        return (_sock.isNull() ? false : _sock->isActive(set));
+    inline bool isActive( ) {
+        return (_sock.isNull() ? false : _sock->isActive());
     }
 
     inline int  sendbuf( PacketMem& packet, const AddressIP* to) {

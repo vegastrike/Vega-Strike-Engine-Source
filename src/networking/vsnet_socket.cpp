@@ -33,15 +33,15 @@ SOCKETALT::SOCKETALT( )
 {
 }
 
-SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip )
-{
-    if( mode == TCP )
-        _sock = new VsnetTCPSocket( sock, remote_ip );
-    else
-        _sock = new VsnetUDPSocket( sock, remote_ip );
-}
+// SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip )
+// {
+//     if( mode == TCP )
+//         _sock = new VsnetTCPSocket( sock, remote_ip, NULL );
+//     else
+//         _sock = new VsnetUDPSocket( sock, remote_ip, NULL );
+// }
 
-SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet* set )
+SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet& set )
 {
     if( mode == TCP )
         _sock = new VsnetTCPSocket( sock, remote_ip, set );
@@ -103,35 +103,18 @@ bool SOCKETALT::sameAddress( const SOCKETALT& l )
  * VsnetSocket - definition
  ***********************************************************************/
 
-VsnetSocket::VsnetSocket( )
-    : VsnetSocketBase( )
-{
-}
-
-VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet* set )
+VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& set )
     : VsnetSocketBase( sock, set )
     , _remote_ip( remote_ip )
 {
 }
 
-VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip )
-    : VsnetSocketBase( sock )
-    , _remote_ip( remote_ip )
-{
-}
-
-VsnetSocket::VsnetSocket( const VsnetSocket& orig )
-    : VsnetSocketBase( orig )
-    , _remote_ip( orig._remote_ip )
-{
-}
-
-VsnetSocket& VsnetSocket::operator=( const VsnetSocket& orig )
-{
-    VsnetSocketBase::operator=( orig );
-    _remote_ip = orig._remote_ip;
-    return *this;
-}
+// VsnetSocket& VsnetSocket::operator=( const VsnetSocket& orig )
+// {
+    // VsnetSocketBase::operator=( orig );
+    // _remote_ip = orig._remote_ip;
+    // return *this;
+// }
 
 bool VsnetSocket::eq( const VsnetSocket& r )
 {
@@ -149,45 +132,17 @@ bool VsnetSocket::sameAddress( const VsnetSocket& r)
  * VsnetSocketBase - definition
  ***********************************************************************/
 
-VsnetSocketBase::VsnetSocketBase( )
-    : _fd( -1 )
-    , _noblock( 0 )
-    , _set( NULL )
-{ }
-
-VsnetSocketBase::VsnetSocketBase( int fd )
-    : _fd( fd )
-    , _set( NULL )
-{
-    set_block( );
-}
-
-VsnetSocketBase::VsnetSocketBase( int fd, SocketSet* set )
+VsnetSocketBase::VsnetSocketBase( int fd, SocketSet& set )
     : _fd( fd )
     , _set( set )
 {
     set_block( );
-    if( set ) set->autosetRead( this );
-}
-
-VsnetSocketBase::VsnetSocketBase( const VsnetSocketBase& orig )
-    : _fd( orig._fd )
-    , _noblock( orig._noblock )
-    , _set( orig._set )
-{
+    set.set( this );
 }
 
 VsnetSocketBase::~VsnetSocketBase( )
 {
-    if( _set ) _set->autounsetRead( this );
-}
-
-VsnetSocketBase& VsnetSocketBase::operator=( const VsnetSocketBase& orig )
-{
-    _fd      = orig._fd;
-    _noblock = orig._noblock;
-    _set     = orig._set;
-    return *this;
+    _set.unset( this );
 }
 
 bool VsnetSocketBase::valid() const
@@ -253,11 +208,7 @@ void VsnetSocketBase::disconnect( const char *s, bool fexit )
 {
     if( _fd > 0 )
     {
-        if( _set )
-        {
-            _set->autounsetRead( this );
-            _set = NULL;
-        }
+        _set.unset( this );
     }
 
     child_disconnect( s );
@@ -266,11 +217,5 @@ void VsnetSocketBase::disconnect( const char *s, bool fexit )
     {
         exit(1);
     }
-}
-
-void VsnetSocketBase::watch( SocketSet& set )
-{
-    set.setRead(_fd);
-    child_watch( set );
 }
 

@@ -19,25 +19,9 @@
 class VsnetUDPSocket : public VsnetSocket
 {
 public:
-    VsnetUDPSocket( ) { }
-
-    VsnetUDPSocket( int sock, const AddressIP& remote_ip )
-        : VsnetSocket( sock, remote_ip )
-    { }
-
-    VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet* set )
+    VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet& set )
         : VsnetSocket( sock, remote_ip, set )
     { }
-
-    VsnetUDPSocket( const VsnetUDPSocket& orig )
-        : VsnetSocket( orig )
-    { }
-
-    VsnetUDPSocket& operator=( const VsnetUDPSocket& orig )
-    {
-        VsnetSocket::operator=( orig );
-        return *this;
-    }
 
     virtual bool isTcp() const { return false; }
 
@@ -48,7 +32,10 @@ public:
 
     virtual void dump( std::ostream& ostr ) const;
 
-    virtual bool isActive( SocketSet& set ) { return set.is_set(_fd); }
+private:
+    VsnetUDPSocket( );
+    VsnetUDPSocket( const VsnetUDPSocket& orig );
+    VsnetUDPSocket& operator=( const VsnetUDPSocket& orig );
 };
 
 #endif /* VSNET_SOCKET_UDP_H */

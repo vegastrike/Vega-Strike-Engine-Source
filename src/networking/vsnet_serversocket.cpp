@@ -36,32 +36,15 @@ void ServerSocket::child_disconnect( const char *s )
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
 }
 
-ServerSocketTCP::ServerSocketTCP( )
-    : ServerSocket()
-{ }
-
-ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr, SocketSet* set )
-    : ServerSocket( fd, adr, set )
-{ }
-
-ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr )
-    : ServerSocket( fd, adr )
-{ }
-
-ServerSocketTCP::ServerSocketTCP( const ServerSocketTCP& orig )
-    : ServerSocket(orig)
-{ }
-
-/**************************************************************/
-/**** Accept a new connection                              ****/
-/**************************************************************/
-// Returns the connection socket or 0 if failed or if no activity
-// Not used in standard UDP mode
-// Returns channel number in SDL UDP mode
-
-SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set, bool addToSet )
+void ServerSocketTCP::lower_selected( )
 {
-    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
+    COUT << endl
+         << endl
+         << "------------------------------------------" << endl
+         << "ServerSocketTCP for " << _fd << " selected" << endl
+         << "------------------------------------------" << endl
+         << endl
+         << endl;
 
     struct sockaddr_in remote_ip;
 #if defined (__APPLE__) || defined (_WIN32) 
@@ -70,62 +53,47 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set, bool addToSet )
     socklen_t          
 #endif
     len = sizeof( struct sockaddr_in );
-    if( set.is_set( _fd ) )
+    int sock = ::accept( _fd, (sockaddr *)&remote_ip, &len );
+    if( sock > 0 )
     {
-        int sock = ::accept( _fd, (sockaddr *)&remote_ip, &len );
-        if( sock > 0 )
-        {
-            if( addToSet )
-            {
-                SOCKETALT ret( sock, SOCKETALT::TCP, remote_ip, &set );
-	            return ret;
-            }
-            else
-            {
-                SOCKETALT ret( sock, SOCKETALT::TCP, remote_ip );
-	            return ret;
-            }
-        }
-        else
-        {
-            COUT << "Error accepting new conn: " << vsnetLastError() << endl;
-            SOCKETALT ret( 0, SOCKETALT::TCP, remote_ip );
-	        return ret;
-        }
+        COUT << "accepted" << endl;
+        SOCKETALT newsock( sock, SOCKETALT::TCP, remote_ip, _set );
+	    _accepted_connections.push( newsock );
     }
     else
     {
-        SOCKETALT ret( 0, SOCKETALT::TCP, _srv_ip );
-	    return ret;
+        COUT << "accept failed" << endl;
+        COUT << "Error accepting new conn: " << vsnetLastError() << endl;
     }
 }
 
-ServerSocketUDP::ServerSocketUDP( )
-    : ServerSocket()
-{ }
-
-ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr, SocketSet* set )
+ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr, SocketSet& set )
     : ServerSocket( fd, adr, set )
 { }
 
-ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr )
-    : ServerSocket( fd, adr )
-{ }
-
-ServerSocketUDP::ServerSocketUDP( const ServerSocketUDP& orig )
-    : ServerSocket(orig)
-{ }
-
-/**************************************************************/
-/**** Accept a new connection                              ****/
-/**************************************************************/
-// Returns the connection socket or 0 if failed or if no activity
-// Not used in standard UDP mode
-// Returns channel number in SDL UDP mode
-
-SOCKETALT ServerSocketUDP::acceptNewConn( SocketSet&, bool )
+SOCKETALT ServerSocketTCP::acceptNewConn( )
 {
-    SOCKETALT ret( _fd, SOCKETALT::UDP, _srv_ip );
+    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
+    if( !_accepted_connections.empty() )
+    {
+        SOCKETALT ret( _accepted_connections.front() );
+        _accepted_connections.pop();
+        return ret;
+    }
+    else
+    {
+        SOCKETALT ret;
+        return ret;
+    }
+}
+
+ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr, SocketSet& set )
+    : ServerSocket( fd, adr, set )
+{ }
+
+SOCKETALT ServerSocketUDP::acceptNewConn( )
+{
+    SOCKETALT ret( _fd, SOCKETALT::UDP, _srv_ip, _set );
     return ret;
 }
 

@@ -27,6 +27,7 @@
 #include "savegame.h"
 #include "networking/const.h"
 #include "networking/vsnet_socket.h"
+#include "networking/vsnet_socketset.h"
 #include "networking/vsnet_cmd.h"
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
@@ -36,7 +37,6 @@ class Unit;
 class Client;
 class ClientState;
 class NetUI;
-class SocketSet;
 
 using std::vector;
 using std::string;
@@ -49,7 +49,7 @@ class	NetClient
 
 		SOCKETALT			clt_sock;		// Comm. socket
 		SOCKETALT			acct_sock;		// Connection socket for account server
-        SocketSet*          _sock_set;      // Encapsulates select()
+        SocketSet           _sock_set;      // Encapsulates select()
 		SaveGame			save;
 		//ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
@@ -76,7 +76,7 @@ class	NetClient
 		void	createChar();
 		int		recvMsg( char* netbuffer, Packet* outpacket );
 		void	disconnect();
-		int		checkAcctMsg( SocketSet & set);
+		int		checkAcctMsg( );
 
 	public:
 		NetClient();

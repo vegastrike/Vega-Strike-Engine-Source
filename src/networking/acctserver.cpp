@@ -83,13 +83,11 @@ void	AccountServer::start()
 	cout<<"Initializing network..."<<endl;
 	unsigned short tmpport;
 
-	SocketSet set;
-
 	if( vs_config->getVariable( "network", "accountsrvport", "")=="")
 		tmpport = ACCT_PORT;
 	else
 		tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
-	Network = NetworkToClient.createServerSocket( tmpport, &set );
+	Network = NetworkToClient.createServerSocket( tmpport, _sock_set );
 	if( !Network)
 	{
 		cout<<"Error cannot start server... quitting."<<endl;
@@ -102,10 +100,9 @@ void	AccountServer::start()
 		//cout<<"Loop"<<endl;
 		// Check for incoming connections
 
-        set.clear();
-		set.select( NULL );
+		_sock_set.select( NULL );
 
-		comsock = Network->acceptNewConn( set, true );
+		comsock = Network->acceptNewConn( );
 		if( comsock.valid() )
 		{
 			Socks.push_back( comsock);
@@ -116,7 +113,7 @@ void	AccountServer::start()
         LS i;
 		for( i=Socks.begin(); i!=Socks.end(); i++)
 		{
-			if( i->isActive( set ) )
+			if( i->isActive( ) )
 			{
 				this->recvMsg( (*i));
 			}
@@ -312,7 +309,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 						cout<<"Account file opened"<<endl;
 						//fseek( fp, 0, SEEK_SET);
 						char * fbuf = new char[MAXBUFFER];
-						int i=0;
+						size_t i=0;
 						// Read a line per account and one line for the "<ACCOUNTS>" tag
 						for( i=0; i<Cltacct.size()+1; i++)
 						{

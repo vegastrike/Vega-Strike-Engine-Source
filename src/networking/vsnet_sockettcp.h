@@ -21,14 +21,9 @@
 class VsnetTCPSocket : public VsnetSocket
 {
 public:
-    VsnetTCPSocket( );
-    VsnetTCPSocket( int sock, const AddressIP& remote_ip );
-    VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet* set );
-    VsnetTCPSocket( const VsnetTCPSocket& orig );
+    VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet& set );
 
     virtual ~VsnetTCPSocket( );
-
-    VsnetTCPSocket& operator=( const VsnetTCPSocket& orig );
 
     virtual bool isTcp() const { return true; }
 
@@ -39,12 +34,11 @@ public:
 
     virtual void dump( std::ostream& ostr ) const;
 
-    virtual bool isActive( SocketSet& set );
+    virtual bool isActive( );
 
     virtual bool needReadAlwaysTrue( ) const;
 
 protected:
-    virtual void child_watch( SocketSet& set );
     virtual void child_disconnect( const char *s );
 
 private:
@@ -77,6 +71,11 @@ private:
     bool        _connection_closed;
 
     /* --- END section for nonblocking receive support --- */
+
+private:
+    VsnetTCPSocket( );
+    VsnetTCPSocket( const VsnetTCPSocket& orig );
+    VsnetTCPSocket& operator=( const VsnetTCPSocket& orig );
 };
 
 #endif /* VSNET_SOCKET_TCP_H */

@@ -30,15 +30,15 @@ class SocketSet;
 class NetUITCP
 {
 public:
-    static SOCKETALT		createSocket( char * host, unsigned short port, SocketSet* set );
-    static ServerSocket*	createServerSocket( unsigned short port, SocketSet* set );
+    static SOCKETALT     createSocket( char* host, unsigned short port, SocketSet& set );
+    static ServerSocket* createServerSocket( unsigned short port, SocketSet& set );
 };
 
 class NetUIUDP
 {
 public:
-    static SOCKETALT		createSocket( char * host, unsigned short port, SocketSet* set );
-    static ServerSocket*	createServerSocket( unsigned short port, SocketSet* set );
+    static SOCKETALT		createSocket( char * host, unsigned short port, SocketSet& set );
+    static ServerSocket*	createServerSocket( unsigned short port, SocketSet& set );
 };
 
 #endif /* VS_NETUI_H */

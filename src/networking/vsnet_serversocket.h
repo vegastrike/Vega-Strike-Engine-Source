@@ -23,90 +23,68 @@
 #include "vsnet_socketset.h"
 #include "vsnet_socket.h"
 
+#include <queue>
+
 struct ServerSocket : public VsnetSocketBase
 {
 protected:
     AddressIP _srv_ip; // own IP address structure of this server
 
 public:
-    ServerSocket( )
-        : VsnetSocketBase(0)
-    { }
-
-    ServerSocket( int fd, const AddressIP& adr, SocketSet* set )
+    ServerSocket( int fd, const AddressIP& adr, SocketSet& set )
         : VsnetSocketBase( fd, set )
     {
         _srv_ip = adr;
     }
 
-    ServerSocket( int fd, const AddressIP& adr )
-        : VsnetSocketBase( fd )
-    {
-        _srv_ip = adr;
-    }
-
-    ServerSocket( const ServerSocket& orig )
-        : VsnetSocketBase( orig )
-    {
-        _srv_ip  = orig._srv_ip;
-    }
-
-    ServerSocket& operator=( const ServerSocket& orig )
-    {
-        VsnetSocketBase::operator=( orig );
-        _srv_ip  = orig._srv_ip;
-       	return *this;
-    }
-
-    inline int  get_udp_sock( ) const { return _fd; }
-    inline int  get_tcp_sock( ) const { return _fd; }
     inline const AddressIP& get_adr( ) const { return _srv_ip; }
 
-    inline bool isActive( SocketSet& set ) const { return set.is_set(_fd); }
+    virtual SOCKETALT acceptNewConn( ) = 0;
 
-    virtual SOCKETALT acceptNewConn( SocketSet& set, bool addToSet ) = 0;
-
-    friend std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s );
+    friend std::ostream& operator<<( std::ostream& ostr,
+                                     const ServerSocket& s );
     friend bool operator==( const ServerSocket& l, const ServerSocket& r );
 
 protected:
     virtual void child_disconnect( const char *s );
+
+private:
+    ServerSocket( );
+    ServerSocket( const ServerSocket& orig );
+    ServerSocket& operator=( const ServerSocket& orig );
 };
 
 class ServerSocketTCP : public ServerSocket
 {
 public:
-    ServerSocketTCP( );
-    ServerSocketTCP( int fd, const AddressIP& adr, SocketSet* set );
-    ServerSocketTCP( int fd, const AddressIP& adr );
-    ServerSocketTCP( const ServerSocketTCP& orig );
-
-    ServerSocketTCP& operator=( const ServerSocketTCP& orig )
-    {
-        ServerSocket::operator=( orig );
-        return *this;
-    }
+    ServerSocketTCP( int fd, const AddressIP& adr, SocketSet& set );
 
 	// Accept a new connection
-	virtual SOCKETALT		acceptNewConn( SocketSet& set, bool addToSet );
+	virtual SOCKETALT acceptNewConn( );
+
+    virtual void lower_selected( );
+
+private:
+    std::queue<SOCKETALT> _accepted_connections;
+
+private:
+    ServerSocketTCP( );
+    ServerSocketTCP( const ServerSocketTCP& orig );
+    ServerSocketTCP& operator=( const ServerSocketTCP& orig );
 };
 
 class ServerSocketUDP : public ServerSocket
 {
 public:
-	ServerSocketUDP( );
-	ServerSocketUDP( int fd, const AddressIP& adr, SocketSet* set );
-	ServerSocketUDP( int fd, const AddressIP& adr );
-	ServerSocketUDP( const ServerSocketUDP& orig );
-
-	ServerSocketUDP& operator=( const ServerSocketUDP& orig )
-	{
-		ServerSocket::operator=( orig );
-		return *this;
-	}
+	ServerSocketUDP( int fd, const AddressIP& adr, SocketSet& set );
 
 	// Accept a new connection
-	virtual SOCKETALT		acceptNewConn( SocketSet& set, bool addToSet );
+	virtual SOCKETALT acceptNewConn( );
+
+private:
+	ServerSocketUDP( );
+	ServerSocketUDP( const ServerSocketUDP& orig );
+	ServerSocketUDP& operator=( const ServerSocketUDP& orig );
 };
 
 #endif /* VSNET_SERVERSOCKET_H */

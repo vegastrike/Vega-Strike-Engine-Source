@@ -46,28 +46,25 @@ class VsnetSocketBase;
 
 class SocketSet
 {
+    typedef std::set<VsnetSocketBase*>  Set;
+
     fd_set _read_set_select;
     int    _max_sock_select;
-    fd_set _read_set_always_true;
-    int    _max_sock_always_true;
 
-    std::set<VsnetSocketBase*> _autoset;
+    Set    _autoset;
 
 public:
     SocketSet( );
 
     /** Once a socket is registered using this function, setRead is
      *  automatically called for it before each select */
-    void autosetRead( VsnetSocketBase* s );
+    void set( VsnetSocketBase* s );
 
     /// Take a socket out of the _autoset
-    void autounsetRead( VsnetSocketBase* s );
+    void unset( VsnetSocketBase* s );
 
-    void setRead( int fd );
-    void setReadAlwaysTrue( int fd );
     bool is_set( int fd ) const;
-    bool is_setRead( int fd ) const;
-    void clear( );
+//     bool is_setRead( int fd ) const;
 
     int select( timeval* timeout );
     int select( long sec, long usec );

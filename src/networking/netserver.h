@@ -34,6 +34,7 @@
 #include "zonemgr.h"
 #include "client.h"
 #include "savegame.h"
+#include "networking/vsnet_socketset.h"
 struct GFXColor;
 
 extern VegaConfig *vs_config;
@@ -48,9 +49,10 @@ class SocketSet;
 /** Class Netserver : runs the "game server" */
 class NetServer
 {
+        SocketSet       _sock_set;              // Capsule for select()
+
         ServerSocket*   tcpNetwork;
         ServerSocket*   udpNetwork;
-        SocketSet*      _sock_set;              // Capsule for select()
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 
@@ -67,8 +69,7 @@ class NetServer
 		timeval				srvtimeout;			// timer
 
 		vector<Account *>	Cltacct;			// Client accounts
-        list<Client *>      tcpClients;         // Active TCP client connections
-        list<Client *>      udpClients;         // Active UDP client connections
+        list<Client *>      allClients;         // Active TCP and UDP client connections
 		list<Client *>		discList;			// Client connections to be disconnected
 		list<Client *>		logoutList;			// Client connections that logged out
 
@@ -89,10 +90,8 @@ class NetServer
 		void			removeClient( Client * clt);		// Remove the client from the game
 		void			checkSystem( Client * clt);		// Check if the client has the good system file
 		Client *		newConnection_udp( const AddressIP& ipadr);
-		Client *		newConnection_tcp( SocketSet& set );
-		void			prepareCheckAcctMsg( SocketSet& set );	// Check for account server message to receive
+		Client *		newConnection_tcp( );
 		void			checkAcctMsg( SocketSet& set );			// Check for account server message to receive
-		void			prepareCheckMsg( SocketSet& set );		// Check for network message to receive
 		void			checkMsg( SocketSet& set );				// Check for network message to receive
 		void			checkKey( SocketSet& set);						// Check for keyboard input
 		void			recvMsg_tcp( Client * clt);		// Receive network messages

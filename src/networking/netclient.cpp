@@ -105,17 +105,11 @@ NetClient::NetClient()
 	jumpok = false;
     for( int i=0; i<MAXCLIENTS; i++)
         Clients[i] = NULL;
-    _sock_set = new SocketSet;
 	ingame = false;
 }
 
 NetClient::~NetClient()
 {
-    if( _sock_set )
-    {
-        delete _sock_set;
-    }
-
     /*
 	for( int i=0; i<MAXCLIENTS; i++)
     {
@@ -231,7 +225,7 @@ bool	NetClient::PacketLoop( Cmd command)
 /**** Login loop                                          ****/
 /*************************************************************/
 
-int		NetClient::checkAcctMsg( SocketSet & sets)
+int		NetClient::checkAcctMsg( )
 {
 	int len=0;
 	AddressIP	ip2;
@@ -240,7 +234,7 @@ int		NetClient::checkAcctMsg( SocketSet & sets)
 
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock.isActive( sets ))
+	if( acct_sock.isActive( ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
@@ -391,7 +385,6 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	double initial = getNewTime();
 	double newtime=0;
 	double elapsed=0;
-	SocketSet set;
 	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
 	int login_to = atoi( login_tostr.c_str());
 	int nb=0;
@@ -408,10 +401,9 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 			globalsaves.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
 			timeout = 1;
 		}
-    	acct_sock.watch( set );
-		nb = set.select( 1, 0 );
+		nb = _sock_set.select( 1, 0 );
 		if( nb > 0 )
-			recv=this->checkAcctMsg( set);
+			recv = checkAcctMsg( );
 
 		micro_sleep( 40000);
 	}
@@ -442,7 +434,7 @@ SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
 	     << " with " << addr << ":" << port << endl;
 
 	cout<<"Initializing connection to account server..."<<endl;
-	acct_sock = NetUITCP::createSocket( addr, port, NULL );
+	acct_sock = NetUITCP::createSocket( addr, port, _sock_set );
 	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 
 	return acct_sock;
@@ -577,11 +569,9 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
 {
     int ret=0;
 
-    _sock_set->clear();
-    // clt_sock.watch( *_sock_set ); --- automatic
-    if( _sock_set->select( 0, 0 ) > 0 )
+    if( _sock_set.select( 0, 0 ) > 0 )
     {
-        if( clt_sock.isActive( *_sock_set ) )
+        if( clt_sock.isActive( ) )
         {
             ret = recvMsg( netbuffer, packet );
         }

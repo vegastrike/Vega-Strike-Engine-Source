@@ -9,50 +9,31 @@ using namespace std;
 
 SocketSet::SocketSet( )
 {
-    clear();
 }
 
-void SocketSet::autosetRead( VsnetSocketBase* s )
+void SocketSet::set( VsnetSocketBase* s )
 {
     _autoset.insert( s );
 }
 
-void SocketSet::autounsetRead( VsnetSocketBase* s )
+void SocketSet::unset( VsnetSocketBase* s )
 {
     _autoset.erase( s );
 }
 
-void SocketSet::setRead( int fd )
-{
-    FD_SET( fd, &_read_set_select );
-    if( fd >= _max_sock_select ) _max_sock_select = fd+1;
-}
-
-void SocketSet::setReadAlwaysTrue( int fd )
-{
-    FD_SET( fd, &_read_set_always_true );
-    if( fd >= _max_sock_always_true ) _max_sock_always_true = fd+1;
-}
-
 bool SocketSet::is_set( int fd ) const
 {
+#ifdef VSNET_DEBUG
     COUT << "adding " << fd << " to set" << endl;
-    return ( FD_ISSET( fd, &_read_set_select ) ||
-             FD_ISSET( fd, &_read_set_always_true ) );
+#endif
+    if( FD_ISSET( fd, &_read_set_select ) ) return true;
+    return false;
 }
 
-bool SocketSet::is_setRead( int fd ) const
-{
-    return ( FD_ISSET( fd, &_read_set_select ) );
-}
-
-void SocketSet::clear( )
-{
-    FD_ZERO( &_read_set_select );
-    _max_sock_select = 0;
-    FD_ZERO( &_read_set_always_true );
-    _max_sock_always_true = -1;
-}
+// bool SocketSet::is_setRead( int fd ) const
+// {
+//     return ( FD_ISSET( fd, &_read_set_select ) );
+// }
 
 int SocketSet::select( long sec, long usec )
 {
@@ -64,29 +45,40 @@ int SocketSet::select( long sec, long usec )
 
 int SocketSet::select( timeval* timeout )
 {
-    for( set<VsnetSocketBase*>::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
-    {
-        int fd = (*it)->get_fd();
-        if( fd >= 0 )
-        {
-            setRead( fd );
-            if( (*it)->needReadAlwaysTrue() )
-            {
-                setReadAlwaysTrue( fd );
-            }
-        }
-    }
+    bool   have_always_true = false;
+    fd_set always_set;
+    int    always_set_max;
+
+    FD_ZERO( &_read_set_select );
+    _max_sock_select = 0;
+    FD_ZERO( &always_set );
+    always_set_max = 0;
 
 #ifdef VSNET_DEBUG
     std::ostringstream ostr;
     ostr << "calling select with fds=";
-    for( int i=0; i<_max_sock_select; i++ )
-    {
-        if( FD_ISSET(i,&_read_set_select) ) ostr << i << " ";
-    }
 #endif
+    for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
+    {
+        int fd = (*it)->get_fd();
+        if( fd >= 0 )
+        {
+#ifdef VSNET_DEBUG
+            ostr << fd << " ";
+#endif
+            FD_SET( fd, &_read_set_select );
+            if( fd >= _max_sock_select ) _max_sock_select = fd+1;
 
-    if( _max_sock_always_true > 0 )
+            if( have_always_true==false && (*it)->needReadAlwaysTrue() )
+            {
+                have_always_true = true;
+                FD_SET( fd, &always_set );
+                if( fd >= always_set_max ) always_set_max = fd + 1;
+            }
+        }
+    }
+
+    if( have_always_true )
     {
         /* There is pending data in the read queue. We must not wait until
          * more data arrives. It is dumb that dontwait needs reinitialization
@@ -97,12 +89,7 @@ int SocketSet::select( timeval* timeout )
         dontwait.tv_usec = 0;
 	    timeout = &dontwait;
 #ifdef VSNET_DEBUG
-        ostr << " t=0:0 (packet pending on";
-        for( int i=0; i<_max_sock_always_true; i++ )
-        {
-            if( FD_ISSET(i,&_read_set_always_true) ) ostr << " " << i;
-        }
-        ostr << ")";
+        ostr << " t=0:0 (packets pending)";
 #endif
     }
 #ifdef VSNET_DEBUG
@@ -110,7 +97,7 @@ int SocketSet::select( timeval* timeout )
     {
         if( timeout )
             ostr << " t=" << timeout->tv_sec << ":"
-                        << timeout->tv_usec;
+                          << timeout->tv_usec;
         else
             ostr << " t=NULL (blocking)";
     }
@@ -128,22 +115,42 @@ int SocketSet::select( timeval* timeout )
         perror( "Select failed : ");
 #endif
     }
-#ifdef VSNET_DEBUG
     else if( ret == 0 )
     {
-        COUT << "select timed out" << endl;
     }
     else
     {
+#ifdef VSNET_DEBUG
         std::ostringstream ostr;
-        for( int i=0; i<_max_sock_select; i++ )
+#endif
+        for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
         {
-            if( FD_ISSET(i,&_read_set_select) ) ostr << i << " ";
+            int fd = (*it)->get_fd();
+            if( fd >= 0 && FD_ISSET(fd,&_read_set_select) )
+            {
+#ifdef VSNET_DEBUG
+                ostr << fd << " ";
+#endif
+                (*it)->lower_selected( );
+            }
         }
+#ifdef VSNET_DEBUG
         ostr << ends;
         COUT << "select saw activity on fds=" << ostr.str() << endl;
-    }
 #endif
+    }
+
+    if( have_always_true )
+    {
+        for( int i=0; i<always_set_max; i++ )
+        {
+            if( FD_ISSET( i, &always_set ) )
+            {
+                FD_SET( i, &_read_set_select );
+                ret++;
+            }
+        }
+    }
     return ret;
 }
 

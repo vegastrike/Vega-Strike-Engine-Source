@@ -50,28 +50,11 @@ private:
  * VsnetTCPSocket - definition
  ***********************************************************************/
  
-VsnetTCPSocket::VsnetTCPSocket( )
-    : _incomplete_packet( 0 )
-    , _incomplete_len_field( 0 )
-    , _connection_closed( false )
-{ }
-
-VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip )
-    : VsnetSocket( sock, remote_ip )
-    , _incomplete_packet( 0 )
-    , _incomplete_len_field( 0 )
-    , _connection_closed( false )
-{ }
-
-VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet* sets )
+VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet& sets )
     : VsnetSocket( sock, remote_ip, sets )
     , _incomplete_packet( 0 )
     , _incomplete_len_field( 0 )
     , _connection_closed( false )
-{ }
-
-VsnetTCPSocket::VsnetTCPSocket( const VsnetTCPSocket& orig )
-    : VsnetSocket( orig )
 { }
 
 VsnetTCPSocket::~VsnetTCPSocket( )
@@ -89,11 +72,11 @@ VsnetTCPSocket::~VsnetTCPSocket( )
     }
 }
 
-VsnetTCPSocket& VsnetTCPSocket::operator=( const VsnetTCPSocket& orig )
-{
-    VsnetSocket::operator=( orig );
-    return *this;
-}
+// VsnetTCPSocket& VsnetTCPSocket::operator=( const VsnetTCPSocket& orig )
+// {
+//     VsnetSocket::operator=( orig );
+//     return *this;
+// }
 
 int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 {
@@ -213,28 +196,12 @@ ostream& operator<<( ostream& ostr, const VsnetSocket& s )
     return ostr;
 }
 
-void VsnetTCPSocket::child_watch( SocketSet& sets )
-{
-#ifdef FIND_WIN_NBIO
-        COUT << "Wait for data on socket " << (*this) << " ("
-             << ( get_nonblock() ? "non-blocking" : "blocking" ) << ")"
-             << endl;
-#endif
-    if( _complete_packets.empty() == false )
-    {
-#ifdef FIND_WIN_NBIO
-        COUT << "Socket " << (*this) << " has completed packets" << endl;
-#endif
-        sets.setReadAlwaysTrue( _fd );
-    }
-}
-
 bool VsnetTCPSocket::needReadAlwaysTrue( ) const
 {
     return ( !_complete_packets.empty() );
 }
 
-bool VsnetTCPSocket::isActive( SocketSet& sets )
+bool VsnetTCPSocket::isActive( )
 {
     COUT << "enter " << "isActive" << endl;
 
@@ -248,7 +215,7 @@ bool VsnetTCPSocket::isActive( SocketSet& sets )
         return true;
     }
 
-    if( sets.is_setRead(_fd) == false )
+    if( VsnetSocket::isActive( ) == false )
     {
         if( _complete_packets.empty() == false )
         {

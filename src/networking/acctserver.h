@@ -7,6 +7,7 @@
 #include "accountsxml.h"
 #include "packet.h"
 #include "netui.h"
+#include "networking/vsnet_socketset.h"
 
 typedef vector<Account *>::iterator VI;
 
@@ -25,6 +26,8 @@ typedef list<SOCKETALT>::iterator LS;
 
 class AccountServer
 {
+        SocketSet           _sock_set;
+
 		NetUITCP			NetworkToClient;
 		ServerSocket*		Network;
 		// TCPNetUI *		Network;	// Network Interface

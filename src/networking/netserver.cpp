@@ -83,14 +83,12 @@ NetServer::NetServer()
 	// Here 500 could be something else between 1 and 0xFFFF
 	serial_seed = (ObjSerial) (rand()*(500./(((double)(RAND_MAX))+1)));
 	globalsave = new SaveGame("");
-    _sock_set = new SocketSet;
 }
 
 NetServer::~NetServer()
 {
 	delete zonemgr;
 	delete globalsave;
-    if( _sock_set ) delete _sock_set;
 }
 
 /**************************************************************/
@@ -134,18 +132,13 @@ Client * NetServer::getClientFromSerial( ObjSerial serial)
 	Client * clt = NULL;
 	bool	found = false;
 
-	for( LI li=udpClients.begin(); li!=udpClients.end(); li++)
+	for( LI li=allClients.begin(); li!=allClients.end(); li++)
 	{
 		if( serial == (clt=(*li))->game_unit.GetUnit()->GetSerial())
+        {
 			found = true;
-		if( !found)
-		{
-			for( LI li=tcpClients.begin(); li!=tcpClients.end(); li++)
-			{
-				if( (clt=(*li))->game_unit.GetUnit()->GetSerial() == serial)
-					found = true;
-			}
-		}
+            break;
+        }
 		if (!found)
 		{
 			cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
@@ -329,7 +322,7 @@ Client* NetServer::newConnection_udp( const AddressIP& ipadr )
 {
     COUT << " enter " << "NetServer::newConnection_udp" << endl;
 
-    SOCKETALT sock( udpNetwork->get_udp_sock(), SOCKETALT::UDP, ipadr );
+    SOCKETALT sock( udpNetwork->get_fd(), SOCKETALT::UDP, ipadr, _sock_set );
 
     Client* ret = addNewClient( sock, false );
     nbclients++;
@@ -337,32 +330,23 @@ Client* NetServer::newConnection_udp( const AddressIP& ipadr )
     return ret;
 }
 
-Client* NetServer::newConnection_tcp( SocketSet& sets )
+Client* NetServer::newConnection_tcp( )
 {
-    SOCKETALT	sock;
     Client*		ret = NULL;
 
-    // Just ignore the client for now
-
     // Get new connections if there are - do nothing in standard UDP mode
-    if( tcpNetwork->isActive( sets ) )
+    bool valid = false;
+    do
     {
-#ifdef VSNET_DEBUG
-        COUT << "Checking activity on TCP server socket: " << tcpNetwork->get_fd() << "+" << endl;
-#endif
-        sock = tcpNetwork->acceptNewConn( sets, true );
-        if( sock.valid() )
+        SOCKETALT sock = tcpNetwork->acceptNewConn( );
+        valid = sock.valid();
+        if( valid )
         {
             ret = this->addNewClient( sock, true );
             nbclients++;
         }
     }
-#ifdef VSNET_DEBUG
-    else
-    {
-        COUT << "Checking activity on TCP server socket: " << tcpNetwork->get_fd() << "-" << endl;
-    }
-#endif
+    while( valid );
     return ret;
 }
 
@@ -376,14 +360,9 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
     // New client -> now registering it in the active client list "Clients"
     // Store the associated socket
 
-    // Adds the client
-	if( is_tcp )
-        tcpClients.push_back( newclt);
-	else
-        udpClients.push_back( newclt);
+    allClients.push_back( newclt);
 
-    COUT << " - Actual number of clients : "
-         << tcpClients.size() + udpClients.size() << endl;
+    COUT << " - Actual number of clients : " << allClients.size() << endl;
 
     return newclt;
 }
@@ -503,7 +482,6 @@ void	NetServer::start(int argc, char **argv)
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
-	SocketSet	keyset;
 
 	// Server loop
 	while( keeprun)
@@ -512,24 +490,20 @@ void	NetServer::start(int argc, char **argv)
 
 		UpdateTime();
 
-        _sock_set->clear( );
-        keyset.clear( );
-
 		// Check a key press
 		//keyset.setReadAlwaysTrue( 0);
 		//this->checkKey( keyset);
 
 		// Check received communications
-		prepareCheckMsg( *_sock_set );
-		nb = _sock_set->select( 0, 0);
+		nb = _sock_set.select( 0, 0);
 		if( nb > 0 )
 		{
-			newConnection_tcp( *_sock_set );
-			checkMsg( *_sock_set );
+			newConnection_tcp( );
+			checkMsg( _sock_set );
 			if( acctserver && acct_con )
 			{
 				// Listen for account server answers
-				checkAcctMsg( *_sock_set );
+				checkAcctMsg( _sock_set );
 				// And send to it the login request we received
 				// Then send clients confirmations or errors
 			}
@@ -544,22 +518,17 @@ void	NetServer::start(int argc, char **argv)
 			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
 			if( acct_sock.valid())
 			{
-				int nbclients_here = udpClients.size() + tcpClients.size();
+				int nbclients_here = allClients.size();
 				LI i;
 				int j=0;
 				COUT <<">>> Reconnected accountserver on socket "<<acct_sock<<" done."<<endl;
 				// Send a list of ingame clients
 				// Build a buffer with number of clients and client serials
-				int listlen = (tcpClients.size()+udpClients.size())*sizeof(ObjSerial);
+				int listlen = allClients.size()*sizeof(ObjSerial);
 				char * buflist = new char[listlen];
 				// Put first the number of clients
 				//netbuf.addShort( nbclients);
-				for( j=0, i = tcpClients.begin(); i!=tcpClients.end(); i++, j++)
-				{
-					// Add the current client's serial to the buffer
-					netbuf.addSerial((*i)->game_unit.GetUnit()->GetSerial());
-				}
-				for( i = udpClients.begin(); i!=udpClients.end(); i++, j++)
+				for( j=0, i = allClients.begin(); i!=allClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
 					netbuf.addSerial((*i)->game_unit.GetUnit()->GetSerial());
@@ -693,9 +662,8 @@ void	NetServer::checkKey( SocketSet & sets)
 				cout<<"| Server stats                                |"<<endl;
 				cout<<"-----------------------------------------------"<<endl<<endl;
 				cout<<"\tNumber of loaded and active star systems :\t"<<_Universe->star_system.size()<<endl;
-				cout<<"\tNumber of players in all star systems :\t\t"<<(tcpClients.size()+udpClients.size())<<endl;
-				cout<<"\t\tTCP clients : "<<tcpClients.size()<<endl;
-				cout<<"\t\tUDP clients : "<<udpClients.size()<<endl;
+				cout<<"\tNumber of players in all star systems :\t\t"<<allClients.size()<<endl;
+				cout<<"\t\tClients : "<<allClients.size()<<endl;
 				cout<<"\tNumber of clients waiting for authorization :\t"<<waitList.size()<<endl<<endl;;
 				zonemgr->displayStats();
 				cout<<"-----------------------------------------------"<<endl;
@@ -712,7 +680,7 @@ void	NetServer::checkKey( SocketSet & sets)
 				memory_use = sizeof( ServerSocket)*2 + sizeof( class Packet)*2 + sizeof( class SaveGame) + sizeof( class ZoneMgr);
 				memory_use += sizeof( int)*5 + sizeof( SOCKETALT) + sizeof( struct timeval);
 				// List of clients
-				memory_use += sizeof( Client *)*tcpClients.size() + sizeof( Client *)*udpClients.size() + discList.size()*sizeof( Client *) + waitList.size()*sizeof( struct WaitListEntry);
+				memory_use += sizeof( Client *)*allClients.size() + discList.size()*sizeof( Client *) + waitList.size()*sizeof( struct WaitListEntry);
 				cout<<"\tSize of NetServer variables :\t"<<(memory_use/1024)<<" KB ("<<memory_use<<" bytes)"<<endl;
 				memory_use += zonemgr->displayMemory();
 				cout<<"\t========== TOTAL MEMORY USAGE = "<<(memory_use/1024)<<" KB ("<<memory_use<<" bytes) ==========="<<endl<<endl;
@@ -738,7 +706,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 
 	// Watch account server socket
 	// Get the number of active clients
-	if( acct_sock.isActive( sets ))
+	if( acct_sock.isActive( ))
 	{
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
@@ -814,41 +782,33 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 /**** Check which clients are sending data to the server   ****/
 /**************************************************************/
 
-void	NetServer::prepareCheckMsg( SocketSet& sets )
-{
-#if 0
-// 	// First add all clients to be watched
-// 	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
-// 	{
-// 		(*i)->sock.watch( set );
-// 	}
-// 	udpNetwork->watch( set );
-#endif
-}
-
 void	NetServer::checkMsg( SocketSet& sets )
 {
 #ifdef VSNET_DEBUG
     ostringstream ostr;
     ostr << "Checking activity on sockets, TCP=";
 #endif
-	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
+	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-		if( (*i)->sock.isActive( sets ) )
-		{
-#ifdef VSNET_DEBUG
-            ostr << (*i)->sock.get_fd() << "+ ";
-#endif
-			this->recvMsg_tcp( (*i));
-		}
-#ifdef VSNET_DEBUG
-        else
+        Client* cl = *i;
+        if( cl->isTcp() )
         {
-            ostr << (*i)->sock.get_fd() << "- ";
-        }
+		    if( cl->sock.isActive( ) )
+		    {
+#ifdef VSNET_DEBUG
+                ostr << cl->sock.get_fd() << "+ ";
 #endif
+			    this->recvMsg_tcp( cl );
+		    }
+#ifdef VSNET_DEBUG
+            else
+            {
+                ostr << cl->sock.get_fd() << "- ";
+            }
+#endif
+        }
 	}
-	if( udpNetwork->isActive( sets ) )
+	if( udpNetwork->isActive( ) )
 	{
 #ifdef VSNET_DEBUG
         ostr << "UDP=" << udpNetwork->get_fd() << "+" << ends;
@@ -874,26 +834,30 @@ void	NetServer::checkTimedoutClients_udp()
 	/********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
 	double curtime = (unsigned int) getNewTime();
 	double deltatmp = 0;
-	Unit * un;
-	for (LI i=udpClients.begin(); i!=udpClients.end(); i++)
+	for (LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-		deltatmp = (fabs(curtime - (*i)->latest_timeout));
-		if( (*i)->latest_timeout!=0)
-		{
-			//COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
-			// Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
-			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
-			// side -> when timestamp has grown enough to became bigger than what an u_int can store
-			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
-			{
-				un = (*i)->game_unit.GetUnit();
-				cerr<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
-				COUT<<"\t\tCurrent time : "<<curtime<<endl;
-				COUT<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
-				COUT<<"t\tDifference : "<<deltatmp<<endl;
-				discList.push_back( *i);
-			}
-		}
+        Client* cl = *i;
+        if( cl->isUdp() )
+        {
+		    deltatmp = (fabs(curtime - cl->latest_timeout));
+		    if( cl->latest_timeout!=0)
+		    {
+			    //COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
+			    // Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
+			    // This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
+			    // side -> when timestamp has grown enough to became bigger than what an u_int can store
+			    if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+			    {
+	                Unit * un;
+				    un = cl->game_unit.GetUnit();
+				    cerr<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
+				    COUT<<"\t\tCurrent time : "<<curtime<<endl;
+				    COUT<<"\t\tLatest timeout : "<<(cl->latest_timeout)<<endl;
+				    COUT<<"t\tDifference : "<<deltatmp<<endl;
+				    discList.push_back( cl );
+			    }
+		    }
+        }
 	}
 }
 
@@ -944,7 +908,7 @@ void	NetServer::recvMsg_tcp( Client * clt )
 
 void NetServer::recvMsg_udp( )
 {
-    SOCKETALT sockclt( udpNetwork->get_udp_sock(), SOCKETALT::UDP, udpNetwork->get_adr() );
+    SOCKETALT sockclt( udpNetwork->get_fd(), SOCKETALT::UDP, udpNetwork->get_adr(), _sock_set );
     Client*   clt = NULL;
     AddressIP ipadr;
 	bool process = true;
@@ -955,7 +919,7 @@ void NetServer::recvMsg_udp( )
     if( ret > 0 )
     {
         Packet packet( mem );
-	packet.setNetwork( &ipadr, sockclt );
+	    packet.setNetwork( &ipadr, sockclt );
 
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is
         char      command = packet.getCommand();
@@ -965,10 +929,10 @@ void NetServer::recvMsg_udp( )
         // Find the corresponding client
         Client* tmp   = NULL;
 		bool    found = false;
-        for( LI i=udpClients.begin(); i!=udpClients.end(); i++)
+        for( LI i=allClients.begin(); i!=allClients.end(); i++)
         {
             tmp = (*i);
-            if( tmp->game_unit.GetUnit()->GetSerial() == nserial)
+            if( tmp->isUdp() && tmp->game_unit.GetUnit()->GetSerial() == nserial)
             {
                 clt = tmp;
                 found = 1;
@@ -1504,9 +1468,8 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 			COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
 			exit(1);
         }
-	    COUT << "There were "
-	         << tcpClients.size()+udpClients.size() << " clients - ";
-	    tcpClients.remove( clt);
+	    COUT << "There were " << allClients.size() << " clients - ";
+	    allClients.remove( clt);
 	}
 	else
 	{
@@ -1517,9 +1480,8 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 		             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
                      PSEUDO__LINE__(1432) );
 	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;
-	        COUT << "There were "
-	            << tcpClients.size()+udpClients.size() << " clients - ";
-	        udpClients.remove( clt);
+	        COUT << "There were " << allClients.size() << " clients - ";
+	        allClients.remove( clt);
         }
         else
         {
@@ -1529,7 +1491,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 	}
 	delete clt;
 	clt = NULL;
-	COUT << tcpClients.size()+udpClients.size() << " clients left" << endl;
+	COUT << allClients.size() << " clients left" << endl;
 	nbclients--;
 }
 
@@ -1562,18 +1524,18 @@ void	NetServer::logout( Client * clt)
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
 	    COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
-	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
-	    tcpClients.remove( clt );
+	    COUT <<"There was "<< allClients.size() <<" clients - ";
+	    allClients.remove( clt );
 	}
 	else
 	{
 	    COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
-	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
-	    udpClients.remove( clt );
+	    COUT <<"There was "<< allClients.size() <<" clients - ";
+	    allClients.remove( clt );
 	}
 	delete clt;
 	clt = NULL;
-	COUT << udpClients.size()+tcpClients.size() <<" clients left"<<endl;
+	COUT << allClients.size() <<" clients left"<<endl;
 	nbclients--;
 }
 
@@ -1585,9 +1547,11 @@ void	NetServer::closeAllSockets()
 {
 	tcpNetwork->disconnect( "Closing sockets", false );
 	udpNetwork->disconnect( "Closing sockets", false );
-	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
+	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-		(*i)->sock.disconnect( __PRETTY_FUNCTION__, false );
+        Client* cl = *i;
+        if( cl->isTcp() )
+		    cl->sock.disconnect( __PRETTY_FUNCTION__, false );
 	}
 }
 
@@ -1642,21 +1606,6 @@ void	NetServer::save()
 			bool found = false;
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
 			clt = getClientFromSerial( cp->GetParent()->GetSerial());
-			/*
-			for( LI li=udpClients.begin(); li!=udpClients.end(); li++)
-			{
-				if( (clt=(*li))->game_unit.GetUnit() == un)
-					found = true;
-			}
-			if( !found)
-			{
-				for( LI li=tcpClients.begin(); li!=tcpClients.end(); li++)
-				{
-					if( (clt=(*li))->game_unit.GetUnit() == un)
-						found = true;
-				}
-			}
-			*/
 			if (clt==NULL)
 			{
 				cerr<<"Error client not found in save process !!!!"<<endl;
@@ -1731,29 +1680,6 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	clt = this->getClientFromSerial( serial);
-	/*
-	for( LI li=udpClients.begin(); !found && li!=udpClients.end(); li++)
-	{
-		un = (*li)->game_unit.GetUnit();
-		if( un->GetSerial() == serial)
-		{
-			clt = (*li);
-			found = true;
-		}
-	}
-	if( !found)
-	{
-		for( LI li=tcpClients.begin(); !found && li!=tcpClients.end(); li++)
-		{
-			un = (*li)->game_unit.GetUnit();
-			if( un->GetSerial() == serial)
-			{
-				clt = (*li);
-				found = true;
-			}
-		}
-	}
-	*/
 	if( clt==NULL)
 	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;

@@ -40,7 +40,7 @@ static void static_initNetwork( )
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSet* set )
+SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSet& set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -59,7 +59,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSe
     if( (local_fd = socket( PF_INET, SOCK_STREAM, 0))==sockerr)
     {
         COUT << "Could not create socket" << std::endl;
-        SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+        SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
         return ret;
     }
 
@@ -77,7 +77,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSe
         {
             COUT << "Could not resolve hostname" << std::endl;
             close_socket( local_fd );
-            SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+            SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
             return ret;
         }
         memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
@@ -90,7 +90,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSe
         {
             COUT << "Error inet_addr" << std::endl;
             close_socket( local_fd );
-            SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+            SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
             return ret;
         }
 #else           
@@ -98,7 +98,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSe
         {
             COUT << "Error inet_aton" << std::endl;
             close_socket( local_fd );
-            SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+            SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
             return ret;
         }
 #endif
@@ -116,7 +116,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSe
     {
         perror( "Can't connect to server ");
         close_socket( local_fd );
-        SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+        SOCKETALT ret; // ( -1, SOCKETALT::TCP, remote_ip );
         return ret;
     }
     COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
@@ -126,7 +126,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSe
     return ret;
 }
 
-ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet* set )
+ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -185,7 +185,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet* set 
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSet* set )
+SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSet& set )
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
@@ -207,7 +207,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSe
     if( (local_fd = socket( PF_INET, SOCK_DGRAM, 0))==sockerr)
     {
         perror( "Could not create socket");
-        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
 
@@ -221,7 +221,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSe
         {
             COUT << "Could not resolve hostname" << std::endl;
             close_socket( local_fd );
-            SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+            SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
             return ret;
         }
         memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
@@ -237,7 +237,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSe
         {
             COUT << "Error inet_aton" << std::endl;
             close_socket( local_fd );
-            SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+            SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
             return ret;
         }
     }
@@ -254,7 +254,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSe
     {
         perror( "Can't bind socket" );
         close_socket( local_fd );
-        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
 
@@ -263,14 +263,14 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSe
     if( ret.set_nonblock() == false )
     {
         ret.disconnect( "Could not set socket to nonblocking state" );
-        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        SOCKETALT ret; // ( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
     COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
 }
 
-ServerSocket* NetUIUDP::createServerSocket( unsigned short port, SocketSet* set )
+ServerSocket* NetUIUDP::createServerSocket( unsigned short port, SocketSet& set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );
