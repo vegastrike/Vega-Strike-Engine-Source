@@ -57,6 +57,7 @@
 
 /* *********************************************************** */
 
+extern Unit& GetUnitMasterPartList ();
 
 #if 0
 NEVER NEVER NEVER use Unit* to save a unit across frames
@@ -140,6 +141,54 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     printVarInst(3,viret);
 
     return viret;
+
+  }
+  else if(method_id==CMT_UNIT_getRandCargo){
+    int quantity= getIntArg(node,mode,0);
+    Unit *my_unit=NULL;
+	varInst *vireturn=NULL;
+    if(mode==SCRIPT_RUN){
+		Cargo *ret=NULL;
+		Unit *mpl = &GetUnitMasterPartList();
+		unsigned int max=mpl->numCargo();
+		if (max>0) {
+			ret = &mpl->GetCargo(rand()%max);
+		}else {
+			ret = new Cargo();//mem leak--won't happen
+		}
+		ret->quantity=quantity;
+		vireturn=call_olist_new(node,mode);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_INT;
+		viret->int_val=quantity;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_OBJECT;
+		viret->objectname="string";
+		viret->object=&ret->content;
+ 		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_OBJECT;
+		viret->objectname="string";
+		viret->object=&ret->category;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_FLOAT;
+		viret->float_val=ret->price;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_FLOAT;
+		viret->float_val=ret->mass;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_FLOAT;
+		viret->float_val=ret->volume;
+		((olist_t *)vireturn->object)->push_back(viret);				
+    }
+    debug(3,node,mode,"unit getRandCargo: ");
+    printVarInst(3,vireturn);
+
+    return vireturn;
 
   }
   else if(method_id==CMT_UNIT_launch){
