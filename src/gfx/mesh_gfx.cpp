@@ -33,10 +33,19 @@ public:
 class MeshCloser { 
 public:
   MeshCloser () {}
+  static bool FilterCompare (Mesh * a, Mesh * b) {
+	  if (a) {
+		  return a->getBlendDst()==ZERO;
+	  }
+	  return false;
+  }
   ///approximate closness based on center o matrix (which is gonna be center for spheres and convex objects most likely)
   bool operator () (const OrigMeshContainer & a, const OrigMeshContainer & b) {
+	float tmp = a.d-b.d;
+	if (tmp*tmp<.001)
+		return FilterCompare(a.orig,b.orig);
     //    return a.d+a.orig->rSize() > b.d+b.orig->rSize();//draw from outside in :-)
-    return a.d > b.d;//draw from outside in :-)
+    return tmp>0.0;//draw from outside in :-)
   }
 };
 
