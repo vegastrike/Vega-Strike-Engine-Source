@@ -13,7 +13,7 @@ protected:
 
  public:
 	
-	virtual void UpdatePhysics2 (const Transformation &trans, const Transformation &oldtranssmat, const Matrix & m, float, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);	
+	virtual void UpdatePhysics2 (const Transformation &trans, const Transformation &oldtranssmat, const Vector &, float, const Matrix & ,const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);	
 protected:
     /// default constructor forbidden
     GameBuilding( );
