@@ -28,6 +28,7 @@
 #include "in_ai.h"
 #include "cmd_aiscript.h"
 
+
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -599,4 +600,5 @@ void main_loop() {
       
   ProcessInput();
 }
+
 
