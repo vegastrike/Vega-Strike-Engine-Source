@@ -1106,6 +1106,7 @@ Vector Unit::MaxTorque(const Vector &torque) {
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
+  static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   if (fabs(amt1.i)>fuelclamp*limits.pitch)
     Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
@@ -1113,7 +1114,7 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
-  fuel-=Res.Magnitude()*SIMULATION_ATOM;
+  fuel-=Res.Magnitude()*SIMULATION_ATOM*normalfuelusage;
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -1194,6 +1195,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
+  static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
   static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
@@ -1210,7 +1212,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
-  fuel-=(afterburn?abfuelusage:1)*Res.Magnitude();
+  fuel-=(afterburn?abfuelusage:normalfuelusage)*Res.Magnitude();
   return Res;
 }
 
