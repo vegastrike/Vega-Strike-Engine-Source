@@ -785,9 +785,9 @@ void Cockpit::Respawn (int,KBSTATE k) {
 }
 
 static void FaceTarget (Unit * un) {
-  Unit * targ = Target();
+  Unit * targ = un->Target();
   if (targ) {
-    QVector dir (Target->Position()-un->Position());
+    QVector dir (targ->Position()-un->Position());
     dir.Normalize();
     Vector p,q,r;
     un->GetOrientation(p,q,r);
