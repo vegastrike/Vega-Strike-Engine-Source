@@ -46,8 +46,8 @@ dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
-TR_CFLAGS="-O2 -g -Wall -ffast-math -fexpensive-optimizations"
-TR_CXXFLAGS="-O2 -g -Wall  -ffast-math -fexpensive-optimizations"
+TR_CFLAGS="-pipe -O2 -fomit-frame-pointer  -Wall -ffast-math -fexpensive-optimizations"
+TR_CXXFLAGS="-pipe -O2 -fomit-frame-pointer  -Wall -ffast-math -fexpensive-optimizations"
 TR_LIBS=""
 
 case "$host" in
@@ -103,6 +103,8 @@ if test "x$is_macosx" = "xyes" ; then
     GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
     with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
     with_gl_libs=/System/Library/Frameworks/OpenGL.framework/Libraries
+    with_al_inc=/Library/Frameworks/OpenAL.framework/
+    with_al_libs=/Library/Frameworks/OpenAL.framework/
     with_expat_libs=/sw/lib
     with_png_libs=/sw/lib
     with_jpeg_libs=/sw/lib
@@ -922,7 +924,12 @@ if test "$USEROPENAL" = "1" ; then
 
     AC_DEFUN( CHECK_FOR_OPENAL_LIB, [
         AC_MSG_CHECKING([for $OPENAL_LIB_NAME library])
-        LIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+            if test "x$is_macosx" = "xno" ; then
+	            LIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+	    else
+		    LIBS="$OPENAL_LDOPTS -framework OpenAL"
+	    fi
+
         AC_TRY_LINK( , , have_openal_lib=yes, have_openal_lib=no )
         AC_MSG_RESULT([$have_openal_lib])
     ]) 
@@ -993,13 +1000,6 @@ else
       dnl Check for alext.h 
       AC_CHECK_HEADERS( "AL/alext.h", have_alext_h=yes, have_alext_h=no )
 
-      if test "x$have_alext_h" = "xno" ; then
-      AC_MSG_ERROR([
-        *****************************************************************
-        You are missing the file alext.h.
-        Place it in the directory /usr/include/AL.
-        *****************************************************************])
-      fi
       if test $USEROPENAL = "1" ; then
         echo "Configuring with OpenAL support!"
         TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1" 
