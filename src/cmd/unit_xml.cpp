@@ -1795,7 +1795,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
     delete xml->bspmesh;
   }
   if (xml->rapidmesh) {
-    delete xml->bspmesh;
+    delete xml->rapidmesh;
   }
   delete xml;
 }
