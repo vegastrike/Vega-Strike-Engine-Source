@@ -319,16 +319,25 @@ TextPlane *textplane = NULL;
 StarSystem *star_system = NULL;
 ClickList *shipList =NULL;
 
+int oldx =0;
+int  oldy=0;
+void startselect (KBSTATE k, int x,int y, int delx, int dely, int mod) {
+  if (k==PRESS) {
+    oldx = x;
+    oldy = y;
+  }
+}
+
 void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
-  static int oldx=0, oldy=0;
+
   if (k==DOWN) {
     UnitCollection *c = shipList->requestIterator (oldx,oldy,x,y);
     if (c->createIterator()->current()!=NULL)
       fprintf (stderr,"Select Box Hit single target");
     if (c->createIterator()->advance()!=NULL)
       fprintf (stderr,"Select Box Hit Multiple Targets");
-  } else{
-    oldx= x;
+  }else {
+    oldx = x;
     oldy = y;
   }
   if (k==PRESS) {
@@ -487,7 +496,7 @@ void createObjects() {
   star_system->AddUnit(fighter);
   star_system->AddUnit(carrier);
   shipList = star_system->getClickList();
-  
+  BindKey (1,startselect);
   BindKey (0,clickhandler);
 }
 

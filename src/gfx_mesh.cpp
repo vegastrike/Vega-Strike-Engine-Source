@@ -36,9 +36,6 @@ using namespace std;
 #include "vegastrike.h"
 static Hashtable<string, Mesh> meshHashTable;
 
-//GFXDRVAPI BOOL Multitex;
-BOOL Multitex = TRUE;
-
 void DrawVector(const Vector &start, const Vector &vect)
 { 
   //float x = start.i, y = start.j, z = start.k;

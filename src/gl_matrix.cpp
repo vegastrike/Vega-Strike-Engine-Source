@@ -237,7 +237,9 @@ BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 }
 #include <stdio.h>
 static void gl_Frustum (float left,float right, float bottom, float top, float nearval,float farval){
+  GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
   GFXFrustum (projection,invprojection,left,right,bottom,top,nearval,farval);
+
   
 }
 BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
@@ -257,6 +259,7 @@ BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
     *n = near;
     *f = far;
   }
+  //  fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
 
 }
 
@@ -266,7 +269,7 @@ BOOL GFXFrustum(float * m,float *i,
 	 	 float bottom, float top,
 		 float nearval, float farval )
 {
-  GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
+
    GLfloat x, y, a, b, c, d;
    x = (((float)2.0)*nearval) / (right-left);
    y = (((float)2.0)*nearval) / (top-bottom);
