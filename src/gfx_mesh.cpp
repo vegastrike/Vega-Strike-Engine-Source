@@ -745,6 +745,7 @@ void Mesh::ProcessDrawQueue() {
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	
 	GFXEnable(TEXTURE0);
+	GFXEnable(CULLFACE);
 	if(envMap) {
 	  Reflect();
 	  GFXEnable(TEXTURE1);

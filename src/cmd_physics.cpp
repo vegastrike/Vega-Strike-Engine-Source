@@ -31,6 +31,7 @@ void Unit:: Rotate (const Vector &axis)
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
 	local_transformation.orientation *= rot;
+	//local_transformation.orientation.Normalize();
 }
 
 void Unit:: FireEngines (Vector Direction/*unit vector... might default to "r"*/,

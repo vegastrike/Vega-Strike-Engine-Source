@@ -23,7 +23,7 @@ StarSystem::StarSystem(Planet *primaries) :
   systemInputDFA = new InputDFA (this);
   primaries->SetPosition(0,0,5);
   Iterator *iter = primaries->createIterator();
-  //drawList->prepend(iter);
+  drawList->prepend(iter);
 
   delete iter;
   iter = primaries->createIterator();

@@ -213,6 +213,8 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 	  MultMatrix(t, model, matrix);
 	  CopyMatrix(model, t);
 		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(-centerx, -centery, -centerz);
 		glMultMatrixf(matrix);
 		break;
 	case VIEW:
@@ -248,7 +250,7 @@ BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(-centerx,-centery,-centerz);
-		glMultMatrixf(matrix);
+		glMultMatrixf(model);
 		break;
 	case VIEW:
 		CopyMatrix(view, matrix);

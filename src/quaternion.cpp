@@ -1,5 +1,11 @@
+#include "quaternion.h"
 
-inline void Quaternion::to_matrix(Matrix mat) const {
+ostream &operator<<(ostream &os, const Quaternion &v) {
+  os << "(" << v.s << ", " << v.v << ")";
+  return os;
+}
+
+void Quaternion::to_matrix(Matrix mat) const {
   float W = s, X = v.i, Y = v.j, Z = v.k;
     
   float xx      = X * X;
@@ -18,19 +24,28 @@ inline void Quaternion::to_matrix(Matrix mat) const {
   mat[1]  =     2 * ( xy + zw );
   mat[2]  =     2 * ( xz - yw );
 
-  mat[4]  =     2 * ( xy + zw );
-  mat[5]  = 1 - 2 * ( xx - zz );
+  mat[4]  =     2 * ( xy - zw );
+  mat[5]  = 1 - 2 * ( xx + zz );
   mat[6]  =     2 * ( yz + xw );
 
   mat[8]  =     2 * ( xz + yw );
   mat[9]  =     2 * ( yz - xw );
-  mat[10] = 1 - 2 * ( xx - yy );
+  mat[10] = 1 - 2 * ( xx + yy );
 
   mat[3]  = mat[7] = mat[11] = mat[12] = mat[13] = mat[14] = 0;
   mat[15] = 1;
+
+  /*
+  clog << "Quaternion " << *this << " converted to matrix: \n";
+  float *temp = mat;
+  for(int a=0; a<3; a++, temp++) {
+    clog.form("%f %f %f\n", temp[0], temp[4], temp[8]);
+  }
+  clog << endl;
+  */
 }
 
-inline Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Vector &v3) {
+Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Vector &v3) {
   float T = v1.i + v2.j + v3.k + 1, S, W, X, Y, Z;
   
   if(T>=0) {
@@ -83,7 +98,7 @@ inline Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, c
   return Quaternion(W, Vector(X,Y,Z));
 }
 
-inline Quaternion Quaternion::from_axis_angle(const Vector &axis, float angle) {
+Quaternion Quaternion::from_axis_angle(const Vector &axis, float angle) {
   float sin_a = sin( angle / 2 );
   float cos_a = cos( angle / 2 );
   

@@ -154,4 +154,6 @@ vegastrike_SOURCES =				\
 	gfx_box.cpp \
 	gfx_lerp.cpp \
 	gfx_lerp.h \
-	quaternion.h
+	quaternion.h \
+	quaternion.cpp
+

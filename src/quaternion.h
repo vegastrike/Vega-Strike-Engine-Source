@@ -21,16 +21,18 @@ struct Quaternion {
     return *this = *this * rval;
   }
   Quaternion Normalize() { v = v * (1.0/Magnitude()); s /= Magnitude(); return *this;}
-  inline void to_matrix(Matrix mat) const;
+  void to_matrix(Matrix mat) const;
 
-  inline static Quaternion from_vectors(const  Vector &v1, const Vector &v2, const Vector &v3);
+  static Quaternion from_vectors(const  Vector &v1, const Vector &v2, const Vector &v3);
   static Quaternion from_axis_angle(const Vector &axis, float angle);
 };
+
+const Quaternion identity_quaternion(1, Vector(0,0,0));
 
 struct Transformation {
   Quaternion orientation;
   Vector position;
-  inline Transformation() { }
+  inline Transformation() { orientation = identity_quaternion; position = Vector(0,0,0); }
   inline Transformation(const Quaternion &orient, const Vector &pos) : orientation(orient), position(pos) { }
  
   inline void to_matrix(Matrix m) const {
@@ -41,7 +43,7 @@ struct Transformation {
   }
   inline void Compose(const Transformation &b, const Matrix m) {
     orientation*=b.orientation;
-    position = position.Transform(m) + b.position;
+    position = position.Transform(m);
   }
   inline void Invert() {
     orientation = orientation.Conjugate();
@@ -49,9 +51,7 @@ struct Transformation {
   }
 };
 
-const Quaternion identity_quaternion(1, Vector(0,0,0));
 const Transformation identity_transformation(identity_quaternion,Vector(0,0,0));
 
-#include "quaternion.cpp"
 #endif
 

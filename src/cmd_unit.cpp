@@ -493,8 +493,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
                                       *SizeScaleFactor
 #endif 
 				 );
-    //if (d) {  //d can be used for level of detail shit
-    if(1) {
+    if (d) {  //d can be used for level of detail shit
       meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
   }
