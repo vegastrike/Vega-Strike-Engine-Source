@@ -241,12 +241,14 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     }
     else if(cmd=="getFaction"){
       if(mode==SCRIPT_RUN){
-	string factionname=_Universe->GetFaction(my_unit->faction);
-	varInst *str_vi=call_string_new(node,mode,factionname);
-	viret=str_vi;
+	    varInst *ovi=getObjectArg(node,mode);
+	    Unit *my_unit=getUnitObject(node,mode,ovi);
+		string factionname=_Universe->GetFaction(my_unit->faction);
+		varInst *str_vi=call_string_new(node,mode,factionname);
+		viret=str_vi;
       }else {
-	varInst *str_vi=call_string_new(node,mode,"");
-	viret =str_vi;
+		varInst *str_vi=call_string_new(node,mode,"");
+		viret =str_vi;
       }
       return viret;
     }
