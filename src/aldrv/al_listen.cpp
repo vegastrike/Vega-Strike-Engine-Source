@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include "al_globals.h"
+using std::vector;
 struct Listener {
   Vector pos;
   Vector vel;
@@ -18,8 +19,8 @@ const int hashsize = 47;
 struct ApproxSound {
   int soundname;
 };
-static std::vector <ApproxSound> playingbuffers [hashsize];
-using std::vector;
+typedef std::vector<ApproxSound> ApproxSoundVec;
+static ApproxSoundVec playingbuffers [hashsize];
 int hash_sound (const int buffer) {
   return buffer%hashsize;
 }
@@ -72,15 +73,16 @@ void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
   }
 #endif
 }
-
-std::vector <int> soundstodelete;
+typedef std::vector<int> vecint;
+vecint soundstodelete;
 void AUDRefreshSounds () {
 #ifdef HAVE_AL
   for (int i=0;i<hashsize;i++) {
     for (unsigned int j=0;j<playingbuffers[i].size();j++) {
       if (!AUDIsPlaying (playingbuffers[i][j].soundname)) {
 	totalplaying--;
-	vector<ApproxSound>::iterator k = playingbuffers[i].begin()+j;
+	ApproxSoundVec::iterator k = playingbuffers[i].begin();
+	k+=j;
 	playingbuffers[i].erase (k);
 	j--;
       }
@@ -88,7 +90,7 @@ void AUDRefreshSounds () {
   }
   for (int j=soundstodelete.size()-1;j>=0;j--) {//might not get every one every time
     int tmp = soundstodelete[j];
-    vector<int>::iterator stdel=soundstodelete.begin();
+	std::vector<int>::iterator stdel=soundstodelete.begin();
     stdel+=j;
     soundstodelete.erase (stdel);
     AUDDeleteSound (tmp,false);

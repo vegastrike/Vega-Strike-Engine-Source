@@ -33,11 +33,12 @@
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 
 void InitJoystick(){
+  int i;
 
 #ifdef HAVE_SDL
   //  SDL_EventState (SDL_KEYDOWN,SDL_ENABLE);
   //  SDL_EventState (SDL_KEYUP,SDL_ENABLE);
-  for (int i=0;i<NUMJBUTTONS;i++) {
+  for (i=0;i<NUMJBUTTONS;i++) {
     for (int j=0;j<MAX_JOYSTICKS;j++) {
       UnbindJoyKey (j,i);
     }
@@ -55,7 +56,7 @@ void InitJoystick(){
   printf("The names of the joysticks are:\n");
 #endif
 
-  for(int i=0; i < MAX_JOYSTICKS; i++ )  {
+  for(i=0; i < MAX_JOYSTICKS; i++ )  {
 #ifdef HAVE_SDL
     if (i<num_joysticks){
       //      SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
@@ -132,8 +133,8 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     int numaxes = SDL_JoystickNumAxes (joy);
 
     Sint16 axi[8];
-
-    for(int a=0;a<numaxes;a++){
+    int a;
+    for(a=0;a<numaxes;a++){
       axi[a] = SDL_JoystickGetAxis(joy,a);
     }
 #if 0
@@ -157,7 +158,7 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
    }
     joy_buttons = buttons;
 
-    for(int a=0;a<numaxes;a++){
+    for(a=0;a<numaxes;a++){
       joy_axis[a]=((float)axi[a]/32768.0);
       if(fabs(joy_axis[a])<=deadzone){
 	joy_axis[a]=0.0;

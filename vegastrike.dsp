@@ -2,7 +2,7 @@
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
-# TARGTYPE "Win32 (x86) Console Application" 0x0103
+# TARGTYPE "Win32 (x86) Application" 0x0101
 
 CFG=vegastrike - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
@@ -17,8 +17,8 @@ CFG=vegastrike - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "vegastrike - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "vegastrike - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "vegastrike - Win32 Release" (based on "Win32 (x86) Application")
+!MESSAGE "vegastrike - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -26,6 +26,7 @@ CFG=vegastrike - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
+MTL=midl.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "vegastrike - Win32 Release"
@@ -41,44 +42,45 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /w /W0 /GX /O2 /Ob1 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# SUBTRACT CPP /Fr
+# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "vc98" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "HAVE_AL" /D "HAVE_SDL" /YX /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib expat.lib /nologo /subsystem:console /machine:I386
-# SUBTRACT LINK32 /debug
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib expat.lib SDL.lib glut32.lib openal32.lib alut.lib alu.lib /nologo /subsystem:windows /machine:I386 /libpath:"vc98"
 
 !ELSEIF  "$(CFG)" == "vegastrike - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "Debug"
-# PROP BASE Intermediate_Dir "Debug"
+# PROP BASE Output_Dir "vegastrike___Win32_Debug"
+# PROP BASE Intermediate_Dir "vegastrike___Win32_Debug"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir "vegastrike___Win32_Debug"
+# PROP Intermediate_Dir "vegastrike___Win32_Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /w /W0 /GX /Oa /Ow /Oi /Oy /Ob2 /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# SUBTRACT CPP /Ot /Og
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /w /W0 /Gm /GX /ZI /Od /I "vc98" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "HAVE_AL" /D "HAVE_SDL" /Fp"Debug/vegastrike.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib expat.lib /nologo /subsystem:console /incremental:no /machine:I386 /pdbtype:sept
-# SUBTRACT LINK32 /debug
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib expat.lib SDL.lib glut32.lib openal32.lib alut.lib alu.lib SDLmain.lib /nologo /subsystem:windows /debug /machine:I386 /nodefaultlib:"msvcrt.lib" /out:"Debug/vegastrike.exe" /pdbtype:sept /libpath:"vc98"
+# SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
 
@@ -89,179 +91,6 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Source File
-
-SOURCE=.\src\hashtable.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_handler.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_kb.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_main.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_mouse.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\lin_time.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\main.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\main_loop.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\physics.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\star_system.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\star_system_xml.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\universe.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\xml_support.cpp
-# End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\src\cmd.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\endianness.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\file.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\file_main.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\gfxlib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\gfxlib_struct.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\hashtable.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\hashtable_3d.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_handler.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_kb.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_main.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\in_mouse.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\iterator.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\lin_time.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\main_loop.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\physics.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\profile.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\star_system.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\UnitCollection.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\UnitContainer.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\universe.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\vegastrike.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\vs_globals.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\xml_support.h
-# End Source File
-# End Group
-# Begin Group "Resource Files"
-
-# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-# Begin Source File
-
-SOURCE=.\resource.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\Resources.rc
-# End Source File
-# Begin Source File
-
-SOURCE=.\ts.ico
-# End Source File
-# End Group
 # Begin Group "cmd"
 
 # PROP Default_Filter "*.*"
@@ -310,6 +139,14 @@ SOURCE=.\src\cmd\ai\flybywire.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\cmd\ai\flyjoystick.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\cmd\ai\flyjoystick.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\cmd\ai\flykeyboard.cpp
 # End Source File
 # Begin Source File
@@ -347,6 +184,14 @@ SOURCE=.\src\cmd\ai\script.cpp
 # Begin Source File
 
 SOURCE=.\src\cmd\ai\script.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\cmd\ai\tactics.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\cmd\ai\tactics.h
 # End Source File
 # End Group
 # Begin Source File
@@ -395,15 +240,15 @@ SOURCE=.\src\cmd\faction_xml.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\cmd\hud.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\cmd\hud.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\cmd\iterator.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\cmd\music.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\cmd\music.h
 # End Source File
 # Begin Source File
 
@@ -447,6 +292,10 @@ SOURCE=.\src\cmd\unit_physics.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\cmd\unit_weapon.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\cmd\unit_xml.cpp
 # End Source File
 # Begin Source File
@@ -456,6 +305,102 @@ SOURCE=.\src\cmd\weapon_xml.cpp
 # Begin Source File
 
 SOURCE=.\src\cmd\weapon_xml.h
+# End Source File
+# End Group
+# Begin Group "gldrv"
+
+# PROP Default_Filter "*.*"
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_globals.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_init.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_init.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_light.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_light.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_light_pick.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_light_state.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_material.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_matrix.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_matrix.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_misc.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_pick.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_quad_list.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_state.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_texture.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gldrv\gl_vertex_list.cpp
+# End Source File
+# End Group
+# Begin Group "aldrv"
+
+# PROP Default_Filter "*.*"
+# Begin Source File
+
+SOURCE=.\src\aldrv\al_globals.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\aldrv\al_globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\aldrv\al_init.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\aldrv\al_listen.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\aldrv\al_sound.cpp
 # End Source File
 # End Group
 # Begin Group "gfx"
@@ -535,11 +480,27 @@ SOURCE=.\src\gfx\camera.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gfx\cockpit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\cockpit.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\cockpit_xml.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gfx\coord_select.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gfx\coord_select.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\decalqueue.h
 # End Source File
 # Begin Source File
 
@@ -551,11 +512,27 @@ SOURCE=.\src\gfx\env_map_gent.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gfx\gauge.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\gauge.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gfx\halo.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\gfx\halo.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\hud.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\hud.h
 # End Source File
 # Begin Source File
 
@@ -639,6 +616,14 @@ SOURCE=.\src\gfx\star.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gfx\vdu.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfx\vdu.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gfx\vec.cpp
 # End Source File
 # Begin Source File
@@ -650,77 +635,206 @@ SOURCE=.\src\gfx\vec.h
 SOURCE=.\src\gfx\vertex.h
 # End Source File
 # End Group
-# Begin Group "gfxdrv"
-
-# PROP Default_Filter "*.*"
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_globals.cpp
+SOURCE=.\src\config_xml.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_globals.h
+SOURCE=.\src\easydom.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_init.cpp
+SOURCE=.\src\hashtable.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_init.h
+SOURCE=.\src\in_handler.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_light.cpp
+SOURCE=.\src\in_joystick.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_light.h
+SOURCE=.\src\in_kb.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_light_pick.cpp
+SOURCE=.\src\in_main.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_light_state.cpp
+SOURCE=.\src\in_mouse.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_material.cpp
+SOURCE=.\src\in_sdl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_matrix.cpp
+SOURCE=.\src\lin_time.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_matrix.h
+SOURCE=.\src\main.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_misc.cpp
+SOURCE=.\src\main_loop.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_pick.cpp
+SOURCE=.\src\mission.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_quad_list.cpp
+SOURCE=.\src\physics.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_state.cpp
+SOURCE=.\src\star_system.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_texture.cpp
+SOURCE=.\src\star_system_xml.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gldrv\gl_vertex_list.cpp
+SOURCE=.\src\universe.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vs_path.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xml_support.cpp
 # End Source File
 # End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\src\audiolib.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\config_xml.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\easydom.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\endianness.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\file_main.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfxlib.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\gfxlib_struct.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\hashtable.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\hashtable_3d.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\in.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\in_handler.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\in_joystick.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\in_kb.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\in_main.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\in_mouse.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\lin_time.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\linecollide.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\main_loop.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mission.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\physics.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\profile.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\star_system.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\universe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vegastrike.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vs_globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\vs_path.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\xml_support.h
+# End Source File
+# End Group
+# Begin Group "Resource Files"
+
+# PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# End Group
+# Begin Source File
+
+SOURCE=.\vc98\SDL.lib
+# End Source File
+# Begin Source File
+
+SOURCE=.\vc98\SDLmain.lib
+# End Source File
 # End Target
 # End Project

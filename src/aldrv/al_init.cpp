@@ -89,7 +89,12 @@ static void fixup_function_pointers(void) {
 
 ///I don't think we'll need to switch contexts or devices in vegastrike
 static ALCdevice *dev=NULL;
-static void *context_id=NULL;
+
+#ifndef _WIN32
+static ALvoid *context_id=NULL;
+#else
+static ALCcontext * context_id=NULL;
+#endif
 #endif
 bool AUDInit () {
 
@@ -103,7 +108,11 @@ bool AUDInit () {
   g_game.sound_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Sound","true"));
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
 	int attrlist[] = { ALC_FREQUENCY, g_game.audio_frequency_mode, 0 };
+#ifdef _WIN32
+	dev = alcOpenDevice ((ALubyte*)"DirectSound3D");
+#else
 	dev = alcOpenDevice( NULL );
+#endif
 	if( dev == NULL ) {
 		return false;
 	}

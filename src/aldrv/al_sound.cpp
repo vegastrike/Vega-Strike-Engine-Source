@@ -5,6 +5,7 @@
 #include "al_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #ifdef HAVE_AL
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -30,6 +31,7 @@ static int LoadSound (ALuint buffer, bool looping) {
     sounds.push_back (OurSound (0,buffer));
   }
   alGenSources( 1, &sounds[i].source);
+  int tmp = sounds[i].source;
   alSourcei(sounds[i].source, AL_BUFFER, buffer );
   alSourcei(sounds[i].source, AL_LOOPING, looping ?AL_TRUE:AL_FALSE);
   return i;
@@ -59,14 +61,29 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
       alGenBuffers (1,wavbuf);
       ALsizei size;	
       ALsizei bits;	
-      ALsizei freq;	
-      ALsizei format;
+      ALsizei freq;
+	  ALboolean looping;
+	  signed char * filename = (signed char *)strdup (nam.c_str());
       void *wave;
-      ALboolean err = alutLoadWAV(nam.c_str(), &wave, &format, &size, &bits, &freq);
+	  ALboolean err=AL_TRUE;
+#ifndef WIN32
+#ifdef MACOS
+ALint format;
+	  alutLoadWAVFile(filename, &format, &wave, &size, &freq);
+#else
+	
+      ALsizei format;
+      err = alutLoadWAV(filename, &wave, &format, &size, &bits, &freq);
+#endif
+#else
+	  ALint format;
+      alutLoadWAVFile((char *)filename, (int*)&format, &wave, &size, &freq, &looping);
+#endif
       if(err == AL_FALSE) {
-	return -1;
+		return -1;
       }
       alBufferData( *wavbuf, format, wave, size, freq );
+	  free (filename);
       free(wave);
       if (!music) {
 	soundHash.Put (hashname,wavbuf);
@@ -210,7 +227,13 @@ bool AUDIsPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
     ALint state;
+#ifdef _WIN32
+    alGetSourcei(sounds[sound].source,AL_SOURCE_STATE, &state);  //Obtiene el estado de la fuente para windows
+#endif
+#ifdef _LINUX
     alGetSourceiv(sounds[sound].source, AL_SOURCE_STATE, &state);
+#endif
+
     return (state==AL_PLAYING);
   }
 #endif

@@ -79,7 +79,7 @@ Mission *mission;
 
 char mission_name[1024];
 
-int main( int argc, char **argv ) 
+int main( int argc, char *argv[] ) 
 {
 
   
@@ -144,10 +144,6 @@ int main( int argc, char **argv )
     // never makes it here
     return 0;
 } 
-
-
-
-
 
 
 
