@@ -795,7 +795,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   if (ol&&(!pointingtool)) {
     Unit * oltarg = ol->Target();
     if (oltarg) {
-      if (_Universe->getRelationship (ol->faction,oltarg->faction)>=0) {
+      if (_Universe->getRelation (ol->faction,oltarg->faction)>=0) {
 	ol->Target(NULL);
       }
     }
