@@ -23,17 +23,18 @@ extern void my_sleep (int i);
 void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
-#define NUM_TITLES 8
-static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Help","Exit Launcher"};
+#define NUM_TITLES 9
+static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Options","Help","Exit Launcher"};
 std::string my_mission ("mission/exploration/explore_universe.mission");
-#define NUM_HELPS 6
+#define NUM_HELPS 7
 static const char * helps [NUM_HELPS] = {
   "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
   "|START A NEW GAME BUTTON|\nStart a new game in the Vegastrike universe.\nYou start with a dinged up old wayfarer\nand head from the vega sector with the hope of finding\nprofit and adventure on the frontier.\nTo begin afresh you must choose a new saved game.",
   "|LOAD GAME BUTTON|\nThis opens up a saved game you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
   "|RECOVER AUTOSAVE BUTTON|\nThis button allows a player to recover their most recently\nplayed game into the selected save game upon next run.\nIf the player quits or the player docks, and then dies,\nit will restore to the last saved position.",
   "|LAUNCH LAST SAVEGAME BUTTON|\nUse this button to launch Vegastrike with from a saved\ngame or mission. If you do not choose a mission, you\nwill start in the standard trading/bounty hunting mission.",
-  "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game."
+  "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game.",
+  "|OPTIONS BUTTON|\nThis button will start up the configurator to allow you to\nselect your preferred options."
 };
 
 
@@ -267,9 +268,19 @@ void hello( GtkWidget *widget, gpointer   data ) {
       launch_mission();
       break;
     case 6:
-      help_func(NULL,-1);
+#ifdef _WIN32
+		spawnl(P_NOWAIT,"./Setup.exe","./Setup.exe",NULL);
+#else
+		int pid=fork()
+		if (pid==-1) {
+			execlp("vssetup","vssetup",NULL);
+		}
+#endif
       break;
     case 7:
+      help_func(NULL,-1);
+      break;
+    case 8:
       gtk_main_quit();
       break;
     default:
