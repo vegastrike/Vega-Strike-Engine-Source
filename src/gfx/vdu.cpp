@@ -69,7 +69,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
   }else {
     GFXBlendMode (ONE,ZERO);
-    GFXAlphaTest(GREATER,.1);
+    GFXAlphaTest(GREATER,.4);
   }
   GetPosition (sx,sy);
   GetSize (w,h);
