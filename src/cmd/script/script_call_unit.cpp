@@ -223,16 +223,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     debug(3,node,mode,"unit getUnit: ");
 
     return viret;
-  }else if (method_id==CMT_UNIT_getCredits) {
-     viret=newVarInst(VI_TEMP);
-     viret->type=VAR_FLOAT;
-     viret->float_val=0;
-     if (mode==SCRIPT_RUN) {
-       viret->float_val=_Universe->AccessCockpit()->credits;
-     }
-     return viret;
-
-   }   
+  }   
   else if(method_id==CMT_UNIT_getRandCargo){
     missionNode *nr_node=getArgument(node,mode,0);
     int quantity=doIntVar(nr_node,mode);
@@ -283,17 +274,6 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     return vireturn;
 
   }
-  else if (method_id==CMT_UNIT_addCredits) {
-     missionNode *nr_node=getArgument(node,mode,0);
-     float credits=doFloatVar(nr_node,mode);
-     if (mode==SCRIPT_RUN) {
-       _Universe->AccessCockpit()->credits+=credits;
-     }
-     viret=newVarInst(VI_TEMP);
-     viret->type=VAR_VOID;
-     return viret;
-
-   }
   else{
     varInst *ovi=getObjectArg(node,mode);
     Unit *my_unit=getUnitObject(node,mode,ovi);
@@ -624,6 +604,33 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_FLOAT;
       viret->float_val=res;
     }
+    else if (method_id==CMT_UNIT_getCredits) {
+     viret=newVarInst(VI_TEMP);
+     viret->type=VAR_FLOAT;
+     viret->float_val=0;
+     if (mode==SCRIPT_RUN) {
+       Cockpit * tmp;
+       if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+	 viret->float_val=tmp->credits;
+       }
+     }
+     return viret;
+
+   }
+  else if (method_id==CMT_UNIT_addCredits) {
+     missionNode *nr_node=getArgument(node,mode,1);
+     float credits=doFloatVar(nr_node,mode);
+     if (mode==SCRIPT_RUN) {
+       Cockpit * tmp;
+       if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+	 tmp->credits+=credits;
+       }
+     }
+     viret=newVarInst(VI_TEMP);
+     viret->type=VAR_VOID;
+     return viret;
+
+   }
     else if(method_id==CMT_UNIT_Jump){
       if(mode==SCRIPT_RUN){
 	my_unit->ActivateJumpDrive();
