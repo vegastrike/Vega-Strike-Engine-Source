@@ -238,6 +238,8 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   if (stability&&numframes*SIMULATION_ATOM>stability)
     impact=UNSTABLE;
   curlength += SIMULATION_ATOM*speed;
+  if (curlength<0)
+    curlength=0;
   if (curlength > range)
     curlength=range;
   
@@ -247,8 +249,8 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   if (curthick <0)
     curthick =0;//die die die
   center = cumulative_transformation.position;
-  direction = Transform (cumulative_transformation_matrix,Vector(0,0,1));
-  Vector tmpvec = center+direction*curlength;
+  direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
+  Vector tmpvec = center + direction*curlength;
 
   AddCollideQueue (LineCollide (this,LineCollide::BEAM,center.Min(tmpvec),center.Max(tmpvec)));
 				       

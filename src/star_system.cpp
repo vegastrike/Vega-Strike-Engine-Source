@@ -119,7 +119,6 @@ void StarSystem::Update() {
       DABEAM->UpdatePhysics (identity_transformation);
       Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
-	unit->CollideAll();
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
 	iter->advance();
       }
@@ -130,14 +129,14 @@ void StarSystem::Update() {
 	unit->ResolveForces(identity_transformation,identity_matrix,firstframe);
 	iter->advance();
       }
-      delete iter;/*
+      delete iter;
       iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->CollideAll();
 	iter->advance();
       }
       delete iter;
-		  */
+		  
       time -= SIMULATION_ATOM;
       firstframe = false;
     }
