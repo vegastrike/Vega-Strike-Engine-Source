@@ -34,11 +34,24 @@ bool TargetWorthPursuing (Unit * parent, Unit * target) {
 void WarpToP(Unit * parent, Unit * target) {
   float dist =UnitUtil::getSignificantDistance(parent,target);
   if (DistanceWarrantsWarpTo (parent,dist)) {
-    static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
-	if(parent->GetWarpEnergy()>parent->GetJumpStatus().insysenergy) {
-		if (TargetWorthPursuing(parent,target)){
-			parent->AutoPilotTo(target,false);
+	 if (TargetWorthPursuing(parent,target)){
+		    static bool auto_valid = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
+			if(auto_valid){
+			  parent->AutoPilotTo(target,false);
+			} else {
+				Vector vel = parent->GetVelocity();
+				vel.Normalize();
+				Vector dir = parent->Position()-target->Position();
+				dir.Normalize();
+				float dirveldot=dir.Dot(vel);
+				if(dirveldot>.86){
+					parent->graphicOptions.InWarp=1;
+				} else {
+					parent->graphicOptions.InWarp=0;
+				}
+			}
 		}
-    }
+  } else {
+	parent->graphicOptions.InWarp=0;
   }
 }
