@@ -196,7 +196,8 @@ protected:
     void configureCargoCommitControls(const Cargo& item, TransactionType trans);
 
     // Update the commit controls in the Cargo screen, since we have three of them.
-    void configureUpgradeCommitControls(const Cargo& item, TransactionType trans);
+    // returns the state of whether the description should have a warning.
+    bool configureUpgradeCommitControls(const Cargo& item, TransactionType trans);
 
     // Make sure the info in the transaction lists is gone.
     void resetTransactionLists(void);

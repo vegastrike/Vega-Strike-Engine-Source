@@ -1691,7 +1691,8 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 }
 
 // Update the commit controls in the Cargo screen, since we have three of them.
-void BaseComputer::configureUpgradeCommitControls(const Cargo& item, TransactionType trans) {
+bool BaseComputer::configureUpgradeCommitControls(const Cargo& item, TransactionType trans) {
+        bool damaged_mode=false; 
 	if(trans == BUY_UPGRADE)	//	base inventory
 	{
 		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
@@ -1715,14 +1716,16 @@ void BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                   bool CanDoSell=true;
                   Unit* player = m_player.GetUnit();                  
                   unsigned int numc=player->numCargo();
-                  for (unsigned int i=0;i<numc;++i) {
-                    Cargo * c = &player->GetCargo(i);
-                    if (c->category.find("upgrades/")==0&&!isWeapon(c->category)) {
-                      float po=PercentOperational(player,c->content,c->category);
-                      if (po>.02&&po<.98) {
-                        static bool must_fix_first = XMLSupport::parse_bool(vs_config->getVariable("physics","must_repair_to_sell","true"));
-                        
-                        CanDoSell=(emergency_downgrade_mode.length()!=0||must_fix_first==false);
+                  if (!isWeapon(item.category)){//weapons can always be sold
+                    for (unsigned int i=0;i<numc;++i) {
+                      Cargo * c = &player->GetCargo(i);
+                      if (c->category.find("upgrades/")==0&&!isWeapon(c->category)) {
+                        float po=PercentOperational(player,c->content,c->category);
+                        if (po>.02&&po<.98) {
+                          static bool must_fix_first = XMLSupport::parse_bool(vs_config->getVariable("physics","must_repair_to_sell","true"));
+                          
+                          CanDoSell=(emergency_downgrade_mode.length()!=0||must_fix_first==false);
+                        }
                       }
                     }
                   }
@@ -1731,7 +1734,8 @@ void BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                     commitButton->setLabel("Sell");
                     commitButton->setCommand("SellUpgrade");
                   }else {
-                    commitButton->setHidden(false);
+                    damaged_mode=true;
+                    commitButton->setHidden(true);
                     commitButton->setLabel("Fix1st");
                     commitButton->setCommand("");
                   }
@@ -1753,6 +1757,7 @@ void BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                 
                 }
 	}
+        return damaged_mode;
 }
 
 
@@ -1838,7 +1843,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 	const PickerCell* cell = tlist->picker->selectedCell();
 	assert(cell != NULL);
     Cargo& item = tlist->masterList[cell->tag()].cargo;
-
+    bool damaged_mode=false;
     if(!isTransactionOK(item, tlist->transaction)) {
         // We can't do the transaction. so hide the transaction button.
         // This is an odd state.  We have a selection, but no transaction is possible.
@@ -1874,7 +1879,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
             case SELL_UPGRADE:
                 //commitButton->setLabel("Sell");
                 //commitButton->setCommand("SellUpgrade");
-				configureUpgradeCommitControls(item, SELL_UPGRADE);
+				damaged_mode=configureUpgradeCommitControls(item, SELL_UPGRADE);
                 break;
              case ACCEPT_MISSION:
                if (item.category.find("Active_Missions")!=string::npos) {
@@ -1995,12 +2000,16 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                         usedValue(baseUnit->PriceCargo(item.content)), item.price);
                 descString += tempString;
               }
+                if (damaged_mode) {
+                  descString+="#c1:0:0#b#Warning: Because pieces of your ship are damaged, you will not be able to sell this item until you fix those damaged items in this column and allow the mechanics to remove this item. Your starship must hence be fully operational.#-c#-b#n1.5#";
+                }
 //********************************************************************************************
                 
                 if(item.description==""||item.description[0]!='#'){
                   item.description=buildUpgradeDescription(item);
                 }
               }
+               
               break;
             default:
                 assert(false);      // Missed transaction enum in switch statement.
