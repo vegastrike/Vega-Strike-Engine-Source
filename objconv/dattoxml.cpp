@@ -23,6 +23,14 @@ short readf (FILE *fp)
   fread (&n, sizeof (n), 1, fp);
   return n;
 }
+
+int readi (FILE *fp)
+{
+  int n;
+  fread (&n, sizeof (n), 1, fp);
+  return n;
+}
+
 float rf (FILE *fp) {
   float n;
   fread (&n, sizeof (n), 1, fp);
@@ -217,7 +225,7 @@ int main (int argc, char ** argv)
 	  strcat (meshname, ".xmesh");
 	  char tmp [255];
 	  fp = fopen (meshname,"w+b");
-	  short texfilenamesize =readf (shp);
+	  short texfilenamesize = vegaclassic?readf (shp):readi (shp);
 	  if (texfilenamesize>0)
   {
     DrawDat.DecalFileName = DecalFileName = new char [texfilenamesize+5];//.3df/0
@@ -403,7 +411,7 @@ int main (int argc, char ** argv)
 	      }
 	} else {
 	  //vega advanced
-	  DrawDat.NumPoints = readf (shp);
+	  DrawDat.NumPoints = readi (shp);
 	  DrawDat.VarP = new point [DrawDat.NumPoints];
 	  DrawDat.FixP = new point [DrawDat.NumPoints];
 	  for (i=0;i<DrawDat.NumPoints;i++) {
@@ -422,51 +430,52 @@ int main (int argc, char ** argv)
 	    Tab(1);ETag ("Point");
 	  }
 	  ETag ("Points");
-	  DrawDat.NumTris = readf (shp);
+	  DrawDat.NumTris = readi (shp);
 	  DrawDat.Tris = new short * [DrawDat.NumTris];
 	  for (i=0; i<DrawDat.NumTris; i++)
 	    DrawDat.Tris[i] = new short [3];
 	  for (i=0; i<DrawDat.NumTris; i++)
 	    for (int j=0; j<3; j++)
-	      DrawDat.Tris[i][j] = readf(shp);
+	      DrawDat.Tris[i][j] = readi(shp);
 	  
-	  DrawDat.NumQuads = readf (shp);
+	  DrawDat.NumQuads = readi (shp);
 	  DrawDat.Quads = new short * [DrawDat.NumQuads];
 	  for (i=0; i<DrawDat.NumQuads; i++)
 	    DrawDat.Quads[i] = new short [4];
 	  for (i=0; i<DrawDat.NumQuads; i++)
 	    for (int j=0; j<4; j++)
-	      DrawDat.Quads[i][j] = readf(shp);
-	  
-	  DrawDat.NumPents = readf (shp);
+	      DrawDat.Quads[i][j] = readi(shp);
+	  /*
+	  DrawDat.NumPents = readi (shp);
 	  DrawDat.Pents = new short * [DrawDat.NumPents];
 	  for (i=0; i<DrawDat.NumPents; i++)
 	    DrawDat.Pents[i] = new short [5];
 	  for (i=0; i<DrawDat.NumPents; i++)
 	    for (int j=0; j<5; j++)
-	      DrawDat.Pents[i][j] = readf(shp);
+	      DrawDat.Pents[i][j] = readi(shp);
 	  
-	  DrawDat.NumHexs = readf (shp);
+	  DrawDat.NumHexs = readi (shp);
 	  DrawDat.Hexs = new short * [DrawDat.NumHexs];
 	  for (i=0; i<DrawDat.NumHexs; i++)
 	    DrawDat.Hexs[i] = new short [6];
 	  for (i=0; i<DrawDat.NumHexs; i++)
 	    for (int j=0; j<6; j++)
-	      DrawDat.Hexs[i][j] = readf(shp);	
+	      DrawDat.Hexs[i][j] = readi(shp);	
 	  
-	  DrawDat.NumLines = readf (shp);
+	  DrawDat.NumLines = readi (shp);
 	  DrawDat.Lins = new short * [DrawDat.NumLines];
 	  for (i=0; i<DrawDat.NumLines; i++)
 	    DrawDat.Lins[i] = new short [2];
 	  for (i=0; i<DrawDat.NumLines; i++) {
-	    DrawDat.Lins[i][0] = readf(shp);
-	    DrawDat.Lins[i][1] = readf(shp);
+	    DrawDat.Lins[i][0] = readi(shp);
+	    DrawDat.Lins[i][1] = readi(shp);
 	  }
 	  Stat.NumGuns = DrawDat.NumLines;
 	  Stat.GunType = new unsigned char [Stat.NumGuns];
 	  for (i=0; i<Stat.NumGuns; i++)
 	    Stat.GunType[i] = 14;//laser
 	  Stat.GunOffset = new LVector [Stat.NumGuns];
+	  */
 	  for (i=0;i<Stat.NumGuns;i++)
 	    {
 	      if (DrawDat.FixP[DrawDat.Lins[i][0]].Vertex.z>DrawDat.FixP[DrawDat.Lins[i][1]].Vertex.z) {
@@ -500,18 +509,18 @@ int main (int argc, char ** argv)
 		for (i=0; i<DrawDat.NumHexs + DrawDat.NumRevHexs;i++)
 		  DrawDat.HexTexture[i] = new unsigned char [12];
 		//each polygon has a texture with these coords
+		float cachunk;
 		for (i=0; i<(DrawDat.NumTris + DrawDat.NumRevTris); i++)
-		  for (int j=0; j<6; j++)
-		    fread (&DrawDat.TriTexture[i][j],sizeof (unsigned char),1,shp);
+		  for (int j=0; j<6; j++) {
+		    fread (&cachunk,sizeof (float),1,shp);
+		    DrawDat.TriTexture[i][j]=(unsigned char)( cachunk*256);
+		  }
 		for (i=0; i<(DrawDat.NumQuads + DrawDat.NumRevQuads); i++)
-		  for (int j=0; j<8; j++)
-		    fread (&DrawDat.QuadTexture[i][j],sizeof (unsigned char),1,shp);
-		for (i=0; i<(DrawDat.NumPents + DrawDat.NumRevPents); i++)
-		  for (int j=0; j<10; j++)
-		    fread (&DrawDat.PentTexture[i][j],sizeof (unsigned char),1,shp);
-		for (i=0; i<(DrawDat.NumHexs + DrawDat.NumRevHexs); i++)
-		  for (int j=0; j<12; j++)
-		    fread (&DrawDat.HexTexture[i][j],sizeof (unsigned char),1,shp);
+		  for (int j=0; j<8; j++) {
+		    
+		    fread (&cachunk,sizeof (float),1,shp);
+		    DrawDat.QuadTexture[i][j]=(unsigned char) (cachunk*256);
+		  }
 	      }
 
 	  
@@ -852,7 +861,7 @@ int main (int argc, char ** argv)
 		}
 		printf ("Shield Recharge: \n");
 		
-		scanf ("%d",&Stat.ShieldRecharge);
+		scanf ("%f",&Stat.ShieldRecharge);
 		for (i=0; i<4; i++) {
 		  int tmp;
 		  printf ("Max Armor %d:",i);
@@ -1030,7 +1039,7 @@ int main (int argc, char ** argv)
 	ypr.i = 2.3*Stat.Yaw*180/3.1415926536;
 	ypr.j = 2.3*Stat.Pitch*180/3.1415926536;
 	ypr.k = 2.3*Stat.Roll*180/3.1415926536;
-	float shrch = Stat.ShieldRecharge/6;
+	float shrch = Stat.ShieldRecharge;
 	Tab(2);fprintf (fp,"<Engine Afterburner=\"%f\" Forward=\"%f\" Retro=\"%f\" Left=\"%f\" Right=\"%f\" Top=\"%f\" Bottom=\"%f\"/>\n",10*abspeed,8*nspeed,7*nspeed,4*nspeed,4*nspeed,4*nspeed,4*nspeed);
 	Tab(2);fprintf (fp,"<Maneuver yaw=\"%f\" pitch=\"%f\" roll=\"%f\"/>\n",ypr.i*33, ypr.j*33, ypr.k*33);
 	Tab();ETag("Thrust");

@@ -128,11 +128,11 @@ unsigned short apply_float_to_short (float tmp) {
   return ans;
 }
 
-static bool applyto (unsigned short &shield, const unsigned short max, const float amt) {
+static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
   shield+=apply_float_to_short(amt);
   if (shield>max)
     shield=max;
-  return shield>max;
+  return (shield>=max)?1:0;
 }
 
 float Unit::FShieldData() {
@@ -184,11 +184,9 @@ float Unit::RShieldData() {
 }
 
 void Unit::RegenShields () {
-  bool rechargesh=true;
+  int rechargesh=1;
   energy +=apply_float_to_short (recharge*SIMULATION_ATOM);
-  if (energy>maxenergy)
-    energy=maxenergy;  
-  float rec = shield.recharge*SIMULATION_ATOM;
+  float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
   switch (shield.number) {
   case 2:
     shield.fb[0]+=rec;
@@ -196,29 +194,27 @@ void Unit::RegenShields () {
     if (shield.fb[0]>shield.fb[2]) {
       shield.fb[0]=shield.fb[2];
     } else {
-      rechargesh=false;
+      rechargesh=0;
     }
     if (shield.fb[1]>shield.fb[3]) {
       shield.fb[1]=shield.fb[3];
 
     } else {
-      rechargesh=false;
+      rechargesh=0;
     }
     break;
   case 4:
-    rechargesh = (applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)&&applyto (shield.fbrl.back,shield.fbrl.backmax,rec)&&applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)&&applyto (shield.fbrl.left,shield.fbrl.leftmax,rec));
+    rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
     break;
   case 6:
-    rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec)&&
-		  applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)&&
-		  applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)&&
-		  applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)&&
-		  applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)&&
-		  applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec));
+    rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
     break;
   }
-  if (!rechargesh)
-    energy-=shield.recharge*SIMULATION_ATOM;
+  if (rechargesh==0)
+    energy-=rec;
+  if (energy>maxenergy)//allow shields to absorb xtra power
+    energy=maxenergy;  
+
 }
 
 float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
