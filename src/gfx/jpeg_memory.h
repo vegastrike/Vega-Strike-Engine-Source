@@ -1,9 +1,8 @@
+#include <stdio.h>
 #define JPEG_SUPPORT
 #ifdef JPEG_SUPPORT
 #ifndef __JPEG_MEMORY_H
 #define __JPEG_MEMORY_H
-
-#include <stdio.h>
 #include <string.h>
 /* BAD BAD!!
 #if defined( _WIN32) && !defined( __CYGWIN__)
@@ -23,14 +22,17 @@ typedef int INT32;
 #include <windows.h>
 #endif
 #include "vsfilesystem.h"
-
-extern "C" {
+#ifdef _WIN32
 #define XMD_H
+#undef HAVE_BOOLEAN
+#define boolean boolean1
+#endif
+extern "C" {
+//#define XMD_H
 #include <jconfig.h>
 #include <jmorecfg.h>
 #include <jpeglib.h>
 }
-
 /*--------------
   A hack to hijack JPEG's innards to write into a memory buffer
 ----------------
