@@ -24,7 +24,7 @@ class Projectile: public Primitive {
 public:
 	Projectile();
 };
-
+ 
 class Gun{
   vector <Projectile *> projectiles;  //every gun keeps track of its bullets like so
   string side;

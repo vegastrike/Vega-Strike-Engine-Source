@@ -26,7 +26,7 @@
 #include "gfx_lerp.h"
 #include <iostream>
 #include <string>
-
+#include "cmd_weapon_xml.h"
 
 
 using std::queue;
@@ -83,7 +83,12 @@ protected:
   Mesh **meshdata;
   Unit **subunits; // the new children fun fun stuff
   //Gun **weapons; // the guns
-  
+  class Mount {
+    void *gun;
+    weapon_info type;
+  public:
+    Mount():gun(NULL),type(weapon_info::BEAM){}
+  } *mounts;
   int numsubunit;
   
   //static int refcount; for the inherited classes

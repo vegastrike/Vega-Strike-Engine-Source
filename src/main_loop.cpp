@@ -441,7 +441,7 @@ Animation *sss=NULL;
 Animation *Preload = NULL;
 void createObjects() {
   DABEAM = new Beam (identity_transformation,
-		     weapon_info(2),
+		     weapon_info(weapon_info::BEAM),
 		     NULL);
   ss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
   Preload = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
