@@ -1065,7 +1065,8 @@ Unit * Unit::makeMasterPartList() {
     carg.category=row["categoryname"];
     carg.volume=stof(row["volume"],1);
     carg.mass=stof(row["mass"],1);
-    carg.quantity=stoi(row["quantity"],0);
+	carg.quantity=1;
+    carg.price=stoi(row["price"],1);
     carg.description=row["description"];    
     ret->GetImageInformation().cargo.push_back(carg);
   } 
