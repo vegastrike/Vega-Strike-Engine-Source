@@ -416,6 +416,7 @@ Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
 
  Vector getVec3Arg(missionNode *node,int mode,int arg_nr);
  float getFloatArg(missionNode *node,int mode,int arg_nr);
+ float getIntArg(missionNode *node,int mode,int arg_nr);
  bool getBoolArg(missionNode *node,int mode,int arg_nr);
 Unit * getUnitArg(missionNode *node,int mode,int arg_nr);
 };

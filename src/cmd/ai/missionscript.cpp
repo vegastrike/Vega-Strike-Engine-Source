@@ -108,4 +108,23 @@ AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : A
   vi_vel->bool_val=aburn;
 
 
-};
+}
+
+
+
+AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit) : AImissionScript("ai_patrol") {
+
+  varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);
+  mission->call_vector_into_olist(vi_wp,area);
+
+  varInst *vi_range=mission->lookupClassVariable(modulename,"range",classid);
+  vi_range->float_val=range;
+
+  varInst *vi_mode=mission->lookupClassVariable(modulename,"patrol_mode",classid);
+  vi_mode->int_val=mode;
+
+  varInst *vi_unit=mission->lookupClassVariable(modulename,"around_unit",classid);
+  vi_unit->objectname="unit";
+  vi_unit->object=around_unit;
+
+}

@@ -397,10 +397,12 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 
 	if(mode==SCRIPT_RUN){
 	  my_object=(Unit *)ovi->object;
+#if 0
 	  if(my_object==NULL){
 	    fatalError(node,mode,"unit: no object");
 	    assert(0);
 	  }
+#endif
 	}
 
 	return(my_object);

@@ -342,6 +342,37 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
+  else if(cmd=="newPatrol"){
+    int patrol_mode=getIntArg(node,mode,0);
+
+    missionNode *des_node=getArgument(node,mode,1);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    olist_t *des_olist=getOListObject(des_node,mode,des_vi);
+
+    float range=getFloatArg(node,mode,2);
+
+    missionNode *unit_node=getArgument(node,mode,3);
+    varInst *unit_vi=checkObjectExpr(unit_node,mode);
+    Unit *around_unit=getUnitObject(unit_node,mode,unit_vi);
+
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      printf("mode=%d,range=%f\n",patrol_mode,range);
+
+      my_order=new AIPatrol(patrol_mode,des3,range,around_unit);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
   else{
     varInst *ovi=getObjectArg(node,mode);
     Order *my_order=getOrderObject(node,mode,ovi);

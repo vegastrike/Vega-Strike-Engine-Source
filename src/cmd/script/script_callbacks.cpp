@@ -631,6 +631,11 @@ float Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
   float res=checkFloatExpr(val_node,mode);
   return res;
 }
+float Mission::getIntArg(missionNode *node,int mode,int arg_nr){
+  missionNode *val_node=getArgument(node,mode,arg_nr);
+  int res=checkIntExpr(val_node,mode);
+  return res;
+}
 
 Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
   missionNode *unit_node=getArgument(node,mode,arg_nr);

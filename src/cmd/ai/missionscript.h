@@ -55,4 +55,9 @@ class AIFlyToWaypoint : public AImissionScript {
   bool aburn;
 };
 
+class AIPatrol : public AImissionScript {
+ public:
+  AIPatrol(int mode,Vector area,float range,Unit *around_unit);
+};
+
 #endif
