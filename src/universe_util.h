@@ -164,7 +164,7 @@ namespace UniverseUtil {
 	double atan (double);
 	double tan (double);
 	void micro_sleep(int n);
-
+	void addParticle (QVector loc, Vector velocity, Vector color);
 }
 
 #undef activeSys
