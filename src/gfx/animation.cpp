@@ -102,7 +102,7 @@ void Animation::ProcessDrawQueue () {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   GFXDisable (DEPTHWRITE);	
-  ProcessDrawQueue (animationdrawqueue,-1);
+  ProcessDrawQueue (animationdrawqueue,-FLT_MAX);
 }
 void Animation::ProcessFarDrawQueue (float farval) {
   //set farshit

@@ -1245,17 +1245,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case REACTOR:
-    ADDTAG;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case RECHARGE:
-	ADDELEMF(recharge);
 	recharge=parse_float((*iter).value);
 	break;
       case LIMIT:
-	ADDELEM(ushortStarHandler,&maxenergy);
 	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
 	break;
     }
@@ -1403,14 +1400,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case ENERGY:
-    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case AFTERBURNENERGY:
 	afterburnenergy =CLAMP_SHORT(parse_float((*iter).value)); 
-	ADDELEM(ushortStarHandler,&afterburnenergy);
 	break;
       default:
 	break;
@@ -1606,6 +1601,18 @@ void Unit::LoadXML(const char *filename, const char * modifications)
 
     image->unitwriter->EndTag("Defense");
   }
+  {
+    image->unitwriter->AddTag ("Energy");
+    image->unitwriter->AddElement("afterburnerenergy",ushortStarHandler,XMLType(&afterburnenergy));
+    image->unitwriter->AddTag ("Reactor");
+    image->unitwriter->AddElement ("recharge",floatStarHandler, XMLType (&recharge) );
+    image->unitwriter->AddElement ("limit",ushortStarHandler, XMLType (&maxenergy) );
+    image->unitwriter->EndTag ("Reactor");
+    
+    image->unitwriter->EndTag ("Energy");      
+    
+  }
+
   {
     image->unitwriter->AddTag ("Stats");    
     image->unitwriter->AddElement("mass",massSerializer,XMLType(&mass));
