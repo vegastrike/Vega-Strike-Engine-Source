@@ -1328,8 +1328,10 @@ void Unit::RegenShields () {
   }else {
     rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
   }
+  bool velocity_discharge=false;
   if (GetVelocity().MagnitudeSquared()>(computer.max_ab_speed()*computer.max_ab_speed()*1.1)) {
     rec=0;
+    velocity_discharge=true;
   }
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
@@ -1344,6 +1346,8 @@ void Unit::RegenShields () {
     static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
     rec *=nebshields;
   }
+  static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".95"));
+  const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
   switch (shield.number) {
   case 2:
 
@@ -1360,13 +1364,31 @@ void Unit::RegenShields () {
     } else {
       rechargesh=0;
     }
+    if (velocity_discharge) {
+      shield.fb[1]*=dischargerate;
+      shield.fb[0]*=dischargerate;
+    }
     break;
   case 4:
 
     rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
+    if (velocity_discharge) {
+      shield.fbrl.front*=dischargerate;
+      shield.fbrl.left*=dischargerate;
+      shield.fbrl.back*=dischargerate;
+      shield.fbrl.right*=dischargerate;
+    }
     break;
   case 6:
     rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
+    if (velocity_discharge) {
+      shield.fbrltb.v[0]*=dischargerate;
+      shield.fbrltb.v[1]*=dischargerate;
+      shield.fbrltb.v[2]*=dischargerate;
+      shield.fbrltb.v[3]*=dischargerate;
+      shield.fbrltb.v[4]*=dischargerate;
+      shield.fbrltb.v[5]*=dischargerate;
+    }
     break;
   }
   if (rechargesh==0)
