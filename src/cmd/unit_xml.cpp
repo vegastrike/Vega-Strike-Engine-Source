@@ -1695,7 +1695,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   int a;
   nummounts = xml->mountz.size();
   if (nummounts)
-    mounts = new Mount [nummounts];
+    mounts = new GameMount [nummounts];
   else
     mounts = NULL;
   char parity=0;
