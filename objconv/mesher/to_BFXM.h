@@ -236,6 +236,7 @@ struct XML {
     static const EnumMap attribute_map;
     vector<Names> state_stack;
     vector<GFXVertex> vertices;
+    vector<int> num_vertex_references;
 	vector<line> lines;
     vector<triangle> tris;
     vector<quad> quads;

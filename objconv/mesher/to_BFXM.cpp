@@ -93,8 +93,42 @@ const EnumMap XML::element_map(XML::element_names, 27);
 const EnumMap XML::attribute_map(XML::attribute_names, 40);
 
 
+void CopyNormal (GFXVertex &outp,
+                const GFXVertex &inp) {
+  outp.i=inp.i;
+  outp.j=inp.j;
+  outp.k=inp.k;
+}
+void AddNormal (GFXVertex &outp,
+                const GFXVertex &inp) {
+  outp.i+=inp.i;
+  outp.j+=inp.j;
+  outp.k+=inp.k;
+}
 
 
+void SetNormal (GFXVertex &outp,
+                const GFXVertex &a,
+                const GFXVertex &b,
+                const GFXVertex &c) {
+  GFXVertex left,right;
+  left.i=b.x-a.x;
+  left.j=b.y-a.y;
+  left.k=b.z-a.z;
+  right.i=c.x-a.x;
+  right.j=c.y-a.y;
+  right.k=c.z-a.z;
+  outp.i = left.j*right.k-left.k*right.j;//xpd
+  outp.j = left.k*right.i-left.i*right.k;
+  outp.k = left.i*right.j-left.j*right.i;
+  float len = sqrt (outp.i*outp.i+outp.j*outp.j+outp.k*outp.k);
+  if (len>.00001) {
+    outp.i/=len;
+    outp.j/=len;
+    outp.k/=len;
+  }
+}
+                
 
 
 enum BLENDFUNC parse_alpha (const char * tmp ) {
@@ -479,21 +513,75 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		break;
      }
     }
+    if (index<xml->num_vertex_references.size()){
+      if (xml->num_vertex_references[index]==0)
+        xml->vertices[index].i=xml->vertices[index].j=xml->vertices[index].k=0;
+      xml->num_vertex_references[index]++;
+      
+    }
 	switch(xml->curpolytype){
 	case LINE:
 		xml->linetemp.indexref[xml->curpolyindex]=index;
 		xml->linetemp.s[xml->curpolyindex]=s;
 		xml->linetemp.t[xml->curpolyindex]=t;
+                if (xml->curpolyindex==1) {
+                  float x = 
+                    xml->vertices[xml->linetemp.indexref[1]].x-
+                    xml->vertices[xml->linetemp.indexref[0]].x;
+                  float y = 
+                    xml->vertices[xml->linetemp.indexref[1]].y-
+                    xml->vertices[xml->linetemp.indexref[0]].y;
+                  float z = 
+                    xml->vertices[xml->linetemp.indexref[1]].z-
+                    xml->vertices[xml->linetemp.indexref[0]].z;
+                  float len = sqrt(x*x+y*y+z*z);
+                  if (len>.0001) {x/=len;y/=len;z/=len;}                    
+                  xml->vertices[xml->linetemp.indexref[0]].i=-x;
+                  xml->vertices[xml->linetemp.indexref[0]].j=-y;
+                  xml->vertices[xml->linetemp.indexref[0]].k=-z;
+                  xml->vertices[xml->linetemp.indexref[1]].i=x;
+                  xml->vertices[xml->linetemp.indexref[1]].j=y;
+                  xml->vertices[xml->linetemp.indexref[1]].k=z                  ;
+                    }
+                
 		break;
 	case TRIANGLE:
 		xml->triangletemp.indexref[xml->curpolyindex]=index;
 		xml->triangletemp.s[xml->curpolyindex]=s;
 		xml->triangletemp.t[xml->curpolyindex]=t;
+                if (xml->curpolyindex==2) {
+                  GFXVertex temp;
+                  SetNormal(temp,
+                            xml->vertices[xml->triangletemp.indexref[0]],
+                            xml->vertices[xml->triangletemp.indexref[1]],
+                            xml->vertices[xml->triangletemp.indexref[2]]);
+                  AddNormal(xml->vertices[xml->triangletemp.indexref[0]],
+                            temp);
+                  AddNormal(xml->vertices[xml->triangletemp.indexref[1]],
+                            temp);
+                  AddNormal(xml->vertices[xml->triangletemp.indexref[2]],
+                            temp);
+                }
 		break;
 	case QUAD:
 		xml->quadtemp.indexref[xml->curpolyindex]=index;
 		xml->quadtemp.s[xml->curpolyindex]=s;
 		xml->quadtemp.t[xml->curpolyindex]=t;
+                if (xml->curpolyindex==3) {
+                  GFXVertex temp;
+                  SetNormal(temp,
+                            xml->vertices[xml->quadtemp.indexref[0]],
+                            xml->vertices[xml->quadtemp.indexref[1]],
+                            xml->vertices[xml->quadtemp.indexref[2]]);
+                  AddNormal(xml->vertices[xml->quadtemp.indexref[0]],
+                            temp);
+                  AddNormal(xml->vertices[xml->quadtemp.indexref[1]],
+                            temp);
+                  AddNormal(xml->vertices[xml->quadtemp.indexref[2]],
+                            temp);
+                  AddNormal(xml->vertices[xml->quadtemp.indexref[3]],
+                            temp);                            
+                }
 		break;
 	case LINESTRIP:
 	case TRISTRIP:
@@ -504,6 +592,27 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		xml->stripelementtemp.s=s;
 		xml->stripelementtemp.t=t;
 		xml->striptemp.points.push_back(xml->stripelementtemp);
+                if (xml->striptemp.points.size()>2
+                    &&(xml->curpolytype!=QUADSTRIP||
+                       xml->striptemp.points.size()%2==0)) {
+                  GFXVertex temp;
+                  bool rev = ((xml->striptemp.points.size()%2==0)&&
+                              xml->curpolytype==TRISTRIP)
+                    || xml->curpolytype==QUADSTRIP;
+                  SetNormal(temp,
+                            xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-(rev?2:3)].indexref],
+                            xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-(rev?3:2)].indexref],
+                            xml->vertices[xml->striptemp.points.back().indexref]);
+                  AddNormal(xml->vertices[xml->striptemp.points.back().indexref],
+                            temp);
+                  AddNormal(xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-2].indexref],
+                            temp);
+                  AddNormal(xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-3].indexref],
+                            temp);
+                  if (xml->curpolytype==QUADSTRIP) 
+                    AddNormal(xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-4].indexref],
+                              temp);
+                }
 		break;
 	}
 	xml->curpolyindex+=1;	
@@ -633,20 +742,21 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 void endElement(const string &name, XML * xml) {
   xml->state_stack.pop_back();
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
-
+ 
   switch(elem) {
   case XML::UNKNOWN:
     fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
     break;
   case XML::POINT:
     xml->vertices.push_back (xml->vertex);
+    xml->num_vertex_references.push_back (0);
     break;
   case XML::VERTEX:
 	break;
   case XML::POINTS:
     break;
   case XML::LINE:
-	xml->lines.push_back(xml->linetemp);
+	xml->lines.push_back(xml->linetemp);        
     break;
   case XML::TRI:
 	xml->tris.push_back (xml->triangletemp);
@@ -1033,6 +1143,14 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of vertices
   for(int32bit verts=0;verts<memfile.vertices.size();verts++){
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].x);
+          float normallen = sqrt(memfile.vertices[verts].i*memfile.vertices[verts].i+
+                                 memfile.vertices[verts].j*memfile.vertices[verts].j+
+                                 memfile.vertices[verts].k*memfile.vertices[verts].k);
+          if (normallen>.0001) {
+            memfile.vertices[verts].i/=normallen;
+            memfile.vertices[verts].j/=normallen;
+            memfile.vertices[verts].k/=normallen;
+          }
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:x
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].y);
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:y
