@@ -130,7 +130,13 @@ void MoveTo::Execute(){
       terminatingY>numswitchbacks&&
       terminatingZ>numswitchbacks) {
     if (Done(last_velocity)) {
-      done = true;
+      if (selfterminating) {
+	done = true;
+      }else {
+	terminatingX=0;
+	terminatingY=0;
+	terminatingZ=0;
+      }	
       return;
     }
     thrust = (-parent->GetMass()/SIMULATION_ATOM)*last_velocity;
@@ -249,7 +255,12 @@ void ChangeHeading::Execute() {
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
     if (Done (local_velocity)) {
-      done = true;
+      if (this->terminating) {
+	done = true;
+      }else {
+	terminatingX=0;
+	terminatingY=0;
+      }
       return;
     }
     torque= (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;

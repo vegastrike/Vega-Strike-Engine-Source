@@ -46,6 +46,7 @@ namespace UnitUtil {
 	Unit *owner (Unit *un);
 	float maxSpeed (Unit *un);
 	float maxAfterburnerSpeed (Unit *un);
+	void performDockingOperations (Unit * un, Unit * unitToDockWith);
 }
 
 #endif

@@ -5,6 +5,8 @@ INCLUDES = -I ../../
 libaigeneric =	\
 	comm_ai.h			\
 	comm_ai.cpp			\
+	docking.h			\
+	docking.cpp			\
 	communication.h		\
 	communication.cpp 	\
 	communication_xml.cpp	\

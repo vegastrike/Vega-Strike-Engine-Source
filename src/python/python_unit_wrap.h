@@ -110,6 +110,8 @@
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
   WRAPPED0(int,DockedOrDocking,0)
   WRAPPED0(int,GetNumMounts,0)
+  EXPORT_UTIL0(UnitWrapper,owner)
+  voidEXPORT_UTIL1(performDockingOperations,UnitWrapper,unitToDockWith)
 
 	EXPORT_UTIL0(string,getFactionName)
 	EXPORT_UTIL0(int,getFactionIndex)

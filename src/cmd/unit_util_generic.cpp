@@ -5,6 +5,7 @@
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_util.h"
+#include "cmd/ai/docking.h"
 using std::string;
 
 namespace UnitUtil {
@@ -282,5 +283,12 @@ namespace UnitUtil {
 			}
 		}
 		return found;
+	}
+        void performDockingOperations (Unit * un, Unit * unitToDockWith) {
+	  if (un && unitToDockWith) {
+	    Order * ai = un->aistate;
+	    un->aistate = NULL;
+	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai));
+	  }
 	}
 }
