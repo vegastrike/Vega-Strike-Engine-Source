@@ -15,6 +15,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) 
   string texname (clne.file);
   Texture * tmpDecal = Texture::Exists(texname);
   unsigned int i=0;
+  int nullio=-1;
   if (tmpDecal) {
     for (;i<BeamDecal.size();i++) {
       if (BeamDecal[i]==tmpDecal) {
@@ -22,13 +23,21 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) 
 	DecalRef[i]++;
 	break;
       }
+      if (!BeamDecal[i]&&DecalRef[i]==0)
+	nullio=i;
     }
   }
   if (!tmpDecal||i==BeamDecal.size()) { //make sure we have our own to delete upon refcount =0
-    decal = BeamDecal.size();
-    BeamDecal.push_back(new Texture (texname.c_str(),0,TRILINEAR));
-    beamdrawqueue.push_back (vector<DrawContext>());
-    DecalRef.push_back (1);
+    if (nullio!=-1) {
+      decal = nullio;
+      BeamDecal[nullio]=new Texture (texname.c_str(),0,TRILINEAR);
+      DecalRef[nullio]=1;
+    } else{
+      decal = BeamDecal.size();
+      BeamDecal.push_back(new Texture (texname.c_str(),0,TRILINEAR));
+      beamdrawqueue.push_back (vector<DrawContext>());
+      DecalRef.push_back (1);
+    }
   }
   Init(trans,clne,own);
 }
@@ -113,15 +122,7 @@ Beam::~Beam () {
   DecalRef[decal]--;
   if (DecalRef[decal]<=0) {
     delete BeamDecal[decal];
-    vector <Texture *>::iterator iter = BeamDecal.begin();
-    iter+=decal;
-    BeamDecal.erase(iter);
-    vector <vector <DrawContext> >::iterator iter1 = beamdrawqueue.begin();
-    iter1+=decal;
-    beamdrawqueue.erase(iter1);
-    vector <int>::iterator iter2 = DecalRef.begin();
-    iter2+=decal;
-    DecalRef.erase (iter2);
+    BeamDecal[decal]=NULL;
   }
 
 }

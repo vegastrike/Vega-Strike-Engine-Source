@@ -10,6 +10,7 @@ Halo::Halo (const char * txtr, const GFXColor &col, const Vector &pos,float sizx
   string texname (txtr);
   Texture * tmpDecal = Texture::Exists(texname);
   unsigned int i=0;
+  int nullio=-1;
   if (tmpDecal) {
     for (;i<HaloDecal.size();i++) {
       if (HaloDecal[i]==tmpDecal) {
@@ -17,13 +18,22 @@ Halo::Halo (const char * txtr, const GFXColor &col, const Vector &pos,float sizx
 	HaloDecalRef[i]++;
 	break;
       }
+      if (HaloDecal[i]==NULL&&HaloDecalRef[i]==0)
+	nullio=i;
     }
   }
   if (!tmpDecal||i==HaloDecal.size()) {
-    decal = HaloDecal.size();
-    HaloDecal.push_back(new Texture (texname.c_str()));//make sure we have our very own texture to delete in case some other dude is using it
-    halodrawqueue.push_back (new GFXQuadList(GFXTRUE));
-    HaloDecalRef.push_back (1);
+    if (nullio!=-1) {
+      decal=nullio;
+      HaloDecal[nullio]=new Texture (texname.c_str());
+      HaloDecalRef[nullio]=1;
+      halodrawqueue[nullio]=new GFXQuadList(GFXTRUE);
+    }else {
+      decal = HaloDecal.size();
+      HaloDecal.push_back(new Texture (texname.c_str()));//make sure we have our very own texture to delete in case some other dude is using it
+      halodrawqueue.push_back (new GFXQuadList(GFXTRUE));
+      HaloDecalRef.push_back (1);
+    }
   }
   GFXColor coltmp [4] = {GFXColor(col),GFXColor(col),GFXColor(col),GFXColor(col)};
   quadnum = halodrawqueue[decal]->AddQuad (NULL,coltmp);  
@@ -33,16 +43,9 @@ Halo::~Halo () {
   HaloDecalRef[decal]--;
   if (HaloDecalRef[decal]<=0) {
     delete HaloDecal[decal];
-    vector <Texture *>::iterator iter = HaloDecal.begin();
-    iter+=decal;
-    HaloDecal.erase(iter);
+    HaloDecal[decal]=NULL;
     delete halodrawqueue[decal];//deletes the quad 
-    vector <GFXQuadList*>::iterator iter1 = halodrawqueue.begin();
-    iter1+=decal;
-    halodrawqueue.erase(iter1);
-    vector <int>::iterator iter2 = HaloDecalRef.begin();
-    iter2+=decal;
-    HaloDecalRef.erase (iter2);
+    halodrawqueue[decal]=NULL;
   }
 }
 void Halo::Draw (const Transformation &quat, const Matrix m) {

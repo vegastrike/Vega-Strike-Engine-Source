@@ -332,6 +332,12 @@ TextPlane *textplane = NULL;
 Beam * DABEAM;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
+static void Fire (int, KBSTATE newState) {
+  if (newState==PRESS) {
+    fighters[0]->Fire();
+  }
+}
+
 /*
 int oldx =0;
 int  oldy=0;
@@ -415,6 +421,7 @@ static void FighterYawRight(int,KBSTATE newState) {
 	}
 }
 */
+
 void InitializeInput() {
 	BindKey(GLUT_KEY_F1, Slew);
 	BindKey(GLUT_KEY_F12,Stop);
@@ -433,6 +440,7 @@ void InitializeInput() {
 	BindKey('~', Quit);
 	BindKey('q', Quit);
 	BindKey ('c',reCenter);
+	BindKey (' ',Fire);
 	/*	BindKey('a', FighterYawLeft);
 	BindKey('d', FighterYawRight);
 	BindKey('w', FighterPitchDown);
