@@ -14,6 +14,13 @@ FSM::FSM (const char * filename) {
     nodes.push_back (Node("i 0wnz j00",-.08));
     nodes.push_back (Node("I hate you!",-.1));
 
+    nodes.push_back (Node("Docking operation complete.",0));
+    nodes.push_back (Node("Please move to a white docking box and press d.",0));
+    nodes.push_back (Node("Docking operation begun.",0));
+    nodes.push_back (Node("Clearance denied.",0));
+    nodes.push_back (Node("Clearance granted.",0));
+    nodes.push_back (Node("No.",0));
+    nodes.push_back (Node("Yes.",0));
     nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
     nodes.push_back (Node("No contraband detected: You may proceed.",0));
     nodes.push_back (Node("Contraband detected! All units close and engage!",0));
@@ -22,7 +29,7 @@ FSM::FSM (const char * filename) {
     nodes.push_back (Node("*hit*",-.2));
     vector <unsigned int> edges;
     unsigned int i;
-    for (i=0;i<nodes.size()-6;i++) {
+    for (i=0;i<nodes.size()-13;i++) {
       edges.push_back (i);
     }
     for (i=0;i<nodes.size();i++) {
@@ -32,13 +39,27 @@ FSM::FSM (const char * filename) {
     LoadXML(filename);
   }
 }
+int FSM::GetUnDockNode() {
+  return nodes.size()-13;
+}
+int FSM::GetFailDockNode() {
+  return nodes.size()-12;
+}
+int FSM::GetDockNode() {
+  return nodes.size()-11;
+}
+int FSM::GetAbleToDockNode() {
+  return nodes.size()-9;
+}
+int FSM::GetUnAbleToDockNode() {
+  return nodes.size()-10;
+}
 int FSM::GetNoNode() {
   return nodes.size()-8;
 }
 int FSM::GetYesNode() {
   return nodes.size()-7;
 }
-
 int FSM::GetContrabandInitiateNode() {
   return nodes.size()-6;
 }
@@ -51,8 +72,6 @@ int FSM::GetContrabandDetectedNode() {
 int FSM::GetContrabandWobblyNode() {
   return nodes.size()-3;
 }
-
-
 int FSM::GetRequestLandNode () {
   return nodes.size()-2;
 }
@@ -160,7 +179,7 @@ std::string FSM::GetEdgesString (int curstate) {
   for (unsigned int i=0;i<nodes[curstate].edges.size();i++) {
     retval+= tostring ((int)((i+1)%10))+"."+nodes[nodes[curstate].edges[i]].message+"\n";
   }
-  retval+= "0 Request Docking Clearence";
+  retval+= "0. Request Docking Clearence";
   return retval;
 }
 float FSM::getDeltaRelation (int prevstate, int current_state) const{

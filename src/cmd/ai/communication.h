@@ -24,6 +24,11 @@ class FSM {
   float getDeltaRelation (int prevstate, int curstate) const;
   int getCommMessageMood(int curstate, float mood, float randomresponsefactor) const;
   int getDefaultState (float relationship) const;
+  int GetUnDockNode();
+  int GetFailDockNode();
+  int GetDockNode();
+  int GetAbleToDockNode();
+  int GetUnAbleToDockNode();
   int GetYesNode ();
   int GetNoNode();
   int GetHitNode ();

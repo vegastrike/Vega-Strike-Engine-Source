@@ -566,12 +566,27 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       vectorOfKeyboardInput[playa].req=false;
     }
     if (vectorOfKeyboardInput[playa].doc) {
-      if (!parent->Dock(targ))
-	parent->UnDock(targ);
+      CommunicationMessage c(targ,parent,NULL,0);
+
+      bool hasDock = parent->Dock(targ);
+      if (hasDock) {
+	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
+      }else {
+        if (parent->UnDock(targ)) {
+	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+        }else {
+          //docking is unsuccess
+	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+        }
+      }
+      parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].doc=false;
     }
     if (vectorOfKeyboardInput[playa].und) {
-      fprintf (stderr,"udock %d", parent->UnDock(targ));
+      parent->UnDock(targ);
+      CommunicationMessage c(targ,parent,NULL,0);
+      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].und=0;
     }
 }
