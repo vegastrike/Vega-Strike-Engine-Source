@@ -164,7 +164,7 @@ public:
 			return bestChoice;
 		}
 	}
-	System () {}
+	System () {takenover=0;}
 	bool habitable;
 	bool interesting;
 	string sector;
@@ -173,6 +173,7 @@ public:
 	float distance;
 	float ascension;
 	float declination;
+	float takenover;
 	vector<string> jumps;
 	vec3 xyz;
 	float luminosity;//in sun
@@ -414,7 +415,7 @@ class FactionInfo {
 	unsigned numsystems;
 	unsigned startingyear;
 	std::vector<System*> borderSystems;
-	std::vector<System*> developingSystems;
+	std::set<System*> developingSystems;
 	std::set<System*> systems; // for quick access.
 	
 public:
@@ -426,18 +427,18 @@ public:
 	}
 	void developBorderSystems() {
 		// reserve memory to increse speed.
-		developingSystems.reserve(developingSystems.size()+borderSystems.size());
 		for (int i=borderSystems.size()-1;i>=0;i--) {
-			developingSystems.push_back(borderSystems[i]);
+			developingSystems.insert(borderSystems[i]);
 //			borderSystems.erase(borderSystems.begin()+i);
 		}
-		borderSystems.clear();
+		//DANNY RUINEDborderSystems.clear();
 	}
 	void addNewSystems(const vector<System*> &newSystems) {
 		developBorderSystems();
-		borderSystems=newSystems;
-		for (int i=0;i<borderSystems.size();i++) {
-			systems.insert(borderSystems[i]);
+//DANNY RUINED		borderSystems=newSystems;
+		for (int i=0;i<newSystems.size();i++) {
+			borderSystems.push_back(newSystems[i]);
+			systems.insert(newSystems[i]);
 		}
 		numsystems+=newSystems.size();
 	}
@@ -493,18 +494,27 @@ public:
 			numsystems=maxsystems;
 		}
 		for (int i=0;i<borderSystems.size();i++) {
+			bool foundvalidplacetogo=false;
 			std::vector<std::string>::const_iterator end=borderSystems[i]->jumps.end();
 			for (std::vector<std::string>::const_iterator iter=borderSystems[i]->jumps.begin();iter!=end;++iter) {
 				System *jump=System::findSystem(s,*iter);
 				if (jump!=NULL&&systems.find(jump)==systems.end()) {
 					// not in our territory! and it is valid.
 					if (((*jump)["faction"]=="unknown"
-							&& (((float)genrand_int32())/GENRAND_MAX)<takeneutralprob)
+						 && (jump->takenover+=takeneutralprob)>1)
 							|| ((((float)genrand_int32())/GENRAND_MAX)<takeoverprob&&allowTakeover)) {
 						(*jump)["faction"]=name;
 						systemsToAdd.push_back(jump);
+						jump->takenover=0;
+					}else if ((*jump)["faction"]=="unknown"){
+						foundvalidplacetogo=true;
+						//fprintf(stderr,"jump probability %f",jump->takenover);
 					}
 				}
+			}
+			if (!foundvalidplacetogo) {
+				borderSystems.erase(borderSystems.begin()+i);
+				i--;
 			}
 		}
 		addNewSystems(systemsToAdd);
