@@ -4,14 +4,8 @@
 Gauge::Gauge (const char *file, DIRECTION up): Sprite(file) {
   dir = up;
   float sx,sy;
-  if (dir==GAUGE_UP) {
-    Sprite::GetSize(sx,sy);
-    Sprite::SetSize (sx,-sy);
-  }
-  if (dir==GAUGE_LEFT) {
-    Sprite::GetSize (sx,sy);
-    Sprite::SetSize (-sx,sy);
-  }
+  Sprite::GetSize(sx,sy);
+  SetSize (-sx,-sy);
 }
 void Gauge::SetSize (float x, float y) {
   if (dir==GAUGE_UP) {

@@ -11,7 +11,7 @@ static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
-  t = pos.j/t;
+  t = -pos.j/t;
 }
 
 static GFXColor relationToColor (float relation) {
@@ -156,6 +156,7 @@ void Cockpit::SetParent (Unit * unit) {
 }
 void Cockpit::Delete () {
   int i;
+  viewport_offset=cockpit_offset=0;
   for (i=0;i<4;i++) {
     if (Pit[i]) {
       delete Pit[i];

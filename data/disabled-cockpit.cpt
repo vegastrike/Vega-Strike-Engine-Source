@@ -1,0 +1,12 @@
+<Cockpit>
+	<Crosshairs file="crosshairs.spr" xcent="0" ycent="0"/>
+	<Radar file="radar.spr"/>
+	<ShieldF file="shieldf.spr"/>
+	<ShieldB file="shieldf.spr" xcent="-.3" ycent="-.92" GaugeDown="1"/>
+	 <ArmorF file="armorf.spr" />
+	<ArmorB file="armorf.spr" xcent="-.3" ycent="-.87"  GaugeDown="1"/>
+	<ArmorL file="armorl.spr"  GaugeLeft="1"/>
+	<ArmorR file="armorl.spr" xcent="-.22" ycent="-.835" GaugeRight="1"/>
+	<Fuel file="fuelstat.spr"/>
+	<Energy file="blasterpower.spr"/>
+<										/Cockpit>

@@ -5,8 +5,8 @@
 	<ShieldB file="shieldf.spr" xcent="-.277" ycent="-.663" width=".197" height=".044"  GaugeDown="1"/>
 	 <ArmorF file="armorf.spr" xcent="-.277" ycent="-.48" width=".1" height=".0425"/>
 	<ArmorB file="armorf.spr" xcent="-.277" ycent="-.61" width=".1" height=".0425" GaugeDown="1"/>
-	<ArmorL file="armorl.spr" xcent="-.205" ycent="-.545" width=".027" height=".13" GaugeRight="1"/>
-	<ArmorR file="armorl.spr" xcent="-.353" ycent="-.545" width=".027" height=".125" GaugeLeft="1"/>
+	<ArmorL file="armorl.spr" xcent="-.205" ycent="-.545" width=".027" height=".13" GaugeLeft="1"/>
+	<ArmorR file="armorl.spr" xcent="-.353" ycent="-.545" width=".027" height=".125" GaugeRight="1"/>
 	<Fuel file="fuelstat.spr" xcent=".36" ycent="-.55" width=".045" height=".3"/>
 	<Energy file="blasterpower.spr" xcent="0" ycent="-.17" width=".25" height=".09" GaugeLeft="1"/>
 <										/Cockpit>
