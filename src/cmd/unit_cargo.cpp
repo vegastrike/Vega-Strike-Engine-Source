@@ -180,6 +180,8 @@ void GameUnit<UnitType>::EjectCargo (unsigned int index) {
       if (!cargo) {
 		  if (tmpcontent=="eject") {
 			  cargo = UnitFactory::createUnit ("eject",false,faction);
+			  int fac = FactionUtil::GetFaction("neutral");
+			  cargo->faction=fac;//set it back to neutral so that no one will bother with 'im
 		  }else {
 			  string tmpnam = tmpcontent+".cargo";
 			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));

@@ -594,26 +594,38 @@ bool RefreshInterface(void) {
 
 void UpgradingInfo::ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
-  int cur = _Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
-  upgr->ProcessMouse(1, x, y, button, state);
-  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  if (upgr) {
+	  int cur = _Universe->CurrentCockpit();
+	  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+	  upgr->ProcessMouse(1, x, y, button, state);
+	  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  }else {
+//		Navigationinfo::mouseClick(button,state,x,y);	  
+  }
 }
 
 void UpgradingInfo::ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
-  int cur = _Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
-  upgr->ProcessMouse(2, x, y, 0, 0);
-  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  if (upgr) {
+	  int cur = _Universe->CurrentCockpit();
+	  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+	  upgr->ProcessMouse(2, x, y, 0, 0);
+	  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  }else {
+//		Navigationinfo::mouseDrag(x,y);
+  }
 }
 
 void UpgradingInfo::ProcessMousePassive(int x, int y) {
-  SetSoftwareMousePosition(x,y);
-  int cur = _Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
-  upgr->ProcessMouse(3, x, y, 0, 0);
-  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+	SetSoftwareMousePosition(x,y);
+	if (upgr) {
+		int cur = _Universe->CurrentCockpit();
+		_Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+		upgr->ProcessMouse(3, x, y, 0, 0);
+		_Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+	}else {
+//		Navigationinfo::mouseMotion(x,y);
+	}
 }
 void UpgradeCompInterface(Unit *un,Unit * base, vector <UpgradingInfo::BaseMode> modes) {
   if (upgr) {
@@ -750,6 +762,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	} else {
       CommitItem (item,0,buttonstate);
     }
+	break;
   case NEWSMODE:
     {
 	int cargonumber;
@@ -1296,13 +1309,49 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 
 	}
 }
-
+extern string MakeUnitXMLPretty (string, Unit *);
 std::string GetShipStats(Unit *un) {
-	return "Stat name=\"Value\"\nStta2 namerawrerqqds=\"hoho\"\n";
+	return MakeUnitXMLPretty (un->WriteUnitString(),un);
 }
 
 std::string GetNumKills(Unit *un) {
-	return "You don't have any kills!\nMua ha ha ha ha ha ha\nJust kidding :-)";
+//	return "You don't have any kills!\nMua ha ha ha ha ha ha\nJust kidding :-)";
+	string text = "Relations";
+	vector <float> * killlist = &_Universe->AccessCockpit()->savegame->getMissionData (string("kills"));
+	if (killlist->size()>0) {
+		text+=" | Kills";
+	}
+	text+="\n";
+	int numfactions = FactionUtil::GetNumFactions();
+	int i = 0;
+	string factionname = "factionname";
+	float relation = 0.0;
+
+	while(i < numfactions)
+	{
+		factionname = FactionUtil::GetFactionName(i);
+		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
+
+		//	draw faction name
+		text+=FactionUtil::GetFactionName(i)+"  ";
+		relation = relation * 0.5;
+		relation = relation + 0.5;
+		int percent = relation * 100.0;
+		text+=(XMLSupport::tostring (percent));
+		if (i<killlist->size()) {
+			text+=" | ";
+			text += XMLSupport::tostring ((int)(*killlist)[i]);
+		}
+		text+="\n";
+		i+=1;
+	}
+	if (i<killlist->size()) {
+		text+=("Total Kills: ");
+		relation=1;
+		text += XMLSupport::tostring ((int)(*killlist)[i]);							
+	}
+	return text;
+
 }
 
 vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {

@@ -33,6 +33,7 @@
 #include "networking/netclient.h"
 #include "audiolib.h"
 #include "save_util.h"
+#include "cmd/base.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -987,9 +988,10 @@ void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
     {
      (_Universe->AccessCockpit())->SetDrawNavSystem(1);
      //UniverseUtil::IOmessage(0,"game","all","DRAWNAV - ON");
-	 winsys_set_mouse_func(NavigationSystem::mouseClick);
-	 winsys_set_motion_func(NavigationSystem::mouseDrag);
-	 winsys_set_passive_motion_func(NavigationSystem::mouseMotion);
+	 
+	 winsys_set_mouse_func(BaseInterface::ClickWin);
+	 winsys_set_motion_func(BaseInterface::ActiveMouseOverWin);
+	 winsys_set_passive_motion_func(BaseInterface::PassiveMouseOverWin);
 
 
 //	 _Universe->AccessCockpit()->ThisNav.currentsystem=_Universe->AccessCockpit()->ThisNav.selectedsystem=UniverseUtil::getSystemFile();

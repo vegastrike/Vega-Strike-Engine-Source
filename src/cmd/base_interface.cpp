@@ -13,6 +13,7 @@
 #include "config_xml.h"
 #include "save_util.h"
 #include "unit_util.h"
+#include "gfx/cockpit.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -325,6 +326,8 @@ void BaseInterface::ClickWin (int button, int state, int x, int y) {
 		} else {
 			CurrentBase->Click(x,y,button,state);
 		}
+	}else {
+		NavigationSystem::mouseClick(button,state,x,y);	  
 	}
 }
 
@@ -337,6 +340,8 @@ void BaseInterface::PassiveMouseOverWin (int x, int y) {
 	 	} else {
 			CurrentBase->MouseOver(x,y);
 		}
+	}else {
+		NavigationSystem::mouseMotion(x,y);
 	}
 }
 
@@ -348,6 +353,8 @@ void BaseInterface::ActiveMouseOverWin (int x, int y) {
 		} else {
 			CurrentBase->MouseOver(x,y);
 		}
+	}else {
+		NavigationSystem::mouseDrag(x,y);
 	}
 }
 
