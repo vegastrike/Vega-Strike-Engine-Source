@@ -28,6 +28,18 @@
 #include "planet.h"
 #include "asteroid.h"
 #include "building.h"
+extern Unit * _masterPartList;
+
+Unit* UnitFactory::getMasterPartList( )
+{
+    if( _masterPartList == NULL )
+    {
+        _masterPartList = new GameUnit( "master_part_list",
+	                            true,
+				    FactionUtil::GetFaction("upgrades") );
+    }
+    return _masterPartList;
+}
 
 Unit* UnitFactory::createUnit( )
 {

@@ -279,34 +279,9 @@ void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
     g().neartargetkey = k;
 
 }
-void DoSpeech (Unit * un, const string &speech) {
-  string myname ("[Static]");
-  if (un) {
-    myname= un->name;
-  }
-  mission->msgcenter->add (myname,"all",speech);
-}
-void LeadMe (Unit * un, string directive, string speech) { 
-  if (un!=NULL) {
-    for (int i=0;i<_Universe->numPlayers();i++) {
-      Unit * pun =_Universe->AccessCockpit(i)->GetParent();
-      if (pun) {
-	if (pun->getFlightgroup()==un->getFlightgroup()){
-	  DoSpeech (un, speech);	
-	}
-      }
-    }
-    Flightgroup * fg = un->getFlightgroup();
-    if (fg) {
-      if (fg->leader.GetUnit()!=un) {
-		  if ((!_Universe->isPlayerStarship(fg->leader.GetUnit()))||_Universe->isPlayerStarship(un)) {
-			fg->leader.SetUnit (un);
-		  }
-      }
-      fg->directive = directive;
-    }
-  }
-}
+extern void DoSpeech (Unit * un, const string &speech);
+extern void LeadMe (Unit * un, string directive, string speech);
+
 static void LeadMe (string directive, string speech) {
   Unit * un= _Universe->AccessCockpit()->GetParent();
   LeadMe (un,directive,speech);

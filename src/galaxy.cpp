@@ -224,7 +224,6 @@ vector <string> ParseStringyDestinations (vector <char *> v) {
   }
   return retval;
 }
-extern void SetStarSystemLoading (bool value);
 
 void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom) {
 
@@ -297,67 +296,4 @@ vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) 
   string sector =getStarSystemSector (file); 
   string name =RemoveDotSystem (getStarSystemName (file).c_str()); 
   return ParseStringyDestinations (ParseDestinations (galaxy->getVariable (sector,name,"jumps","")));  
-}
-extern StarSystem *GetLoadedStarSystem(const char * file);
-StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
-  static bool firsttime=true;
-  StarSystem *tmpcache;
-  if ((tmpcache =GetLoadedStarSystem(file))) {
-    return tmpcache;
-  }
-  int count=0;
-  SetStarSystemLoading (true);
-  while (GetCorrectStarSysPath (file).length()==0) {
-    MakeStarSystem(file, galaxy,RemoveDotSystem (jumpback),count);
-    count++;
-  }
-
-  StarSystem * ss = new GameStarSystem (file,center);
-
-  LoadStarSystem (ss);
-
-  pushActiveStarSystem(ss);
-  for (int tume=0;tume<=6;++tume) {
-    fprintf (stderr,"star system ex ai\n");
-    fflush(stderr);
-    ss->ExecuteUnitAI();
-    fprintf (stderr,"star system up phys\n");
-    fflush(stderr);
-    ss->UpdateUnitPhysics(true);    
-    fprintf (stderr,"star system done up phys\n");
-    fflush(stderr);
-  }
-  // notify the director that a new system is loaded (gotta have at least one active star system)
-  StarSystem *old_script_system=script_system;
-
-  script_system=ss;
-  fprintf (stderr,"Loading Star System %s",ss->getFileName().c_str());
-  vector <std::string> adjacent = getAdjacentStarSystems(ss->getFileName());
-  for (unsigned int i=0;i<adjacent.size();i++) {
-    fprintf (stderr,"\n Next To: %s",adjacent[i].c_str());
-    vector <std::string> adj = getAdjacentStarSystems(adjacent[i]);
-    for (unsigned int j=0;j<adj.size();j++) {
-      fprintf (stderr,"\n\tNext To %s",adj[j].c_str()); 
-    }
-  }
-  static bool first=true;
-  if (!first) {
-    mission->DirectorStartStarSystem(ss);
-  }
-  first=false;
-  script_system=old_script_system;
-  popActiveStarSystem();
-  if (active_star_system.empty()) {
-    pushActiveStarSystem (ss);
-  } else {
-    ss->SwapOut();
-    activeStarSystem()->SwapIn();
-  }
-  if (firsttime) {
-  	firsttime=false;
-  }else {
-  }
-  SetStarSystemLoading (false);
-  return ss;
-
 }

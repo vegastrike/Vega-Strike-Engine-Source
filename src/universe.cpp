@@ -259,6 +259,19 @@ void GameUniverse::WriteSaveGame (bool auto_save)
   }
 }
 
+extern StarSystem *GetLoadedStarSystem(const char * system);
+
+StarSystem * GameUniverse::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
+  StarSystem *tmpcache;
+  if ((tmpcache =GetLoadedStarSystem(file))) {
+    return tmpcache;
+  }
+  this->Generate1( file, jumpback);
+  StarSystem * ss = new GameStarSystem (file,center);
+  this->Generate2( ss);
+  return ss;
+}
+
 /************************************************************************
 extern char *viddrv;
 

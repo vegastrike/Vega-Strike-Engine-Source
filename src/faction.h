@@ -14,11 +14,10 @@ class GameFaction: public Faction {
     ~GameFaction(); //destructor
  };
 
-namespace GameFactionUtil {
+namespace FactionUtil {
 		Animation * createAnimation( const char * anim);
 		Texture * createTexture( const char * tex, const char * tmp, bool force=false);
 		Texture * createTexture( const char * tex, bool force=false);
-		std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
 		std::vector <class Animation *> * GetAnimation(int faction, int n, unsigned char &sex);
 		Animation * getRandAnimation (int whichfaction,std::string&which);
 		void LoadFactionPlaylists();

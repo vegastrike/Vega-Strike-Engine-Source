@@ -37,7 +37,7 @@ vector <Animation *> *CommunicatingAI::getCommFaces(unsigned char &sex) {
 
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
-  comm_face = GameFactionUtil::GetRandAnimation(par->faction,sex);
+  comm_face = FactionUtil::GetRandAnimation(par->faction,sex);
 }
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 

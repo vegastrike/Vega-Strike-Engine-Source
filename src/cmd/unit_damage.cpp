@@ -345,7 +345,7 @@ bool GameUnit::Explode (bool drawit, float timeit) {
 
     string bleh=image->explosion_type;
     if (bleh.empty()) {
-      GameFactionUtil::getRandAnimation(faction,bleh);
+      FactionUtil::getRandAnimation(faction,bleh);
     }
     if (bleh.empty()) {
       static Animation cache(expani.c_str(),false,.1,BILINEAR,false);

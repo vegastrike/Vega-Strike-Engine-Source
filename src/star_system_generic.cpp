@@ -486,7 +486,7 @@ void StarSystem::RemoveStarsystemFromUniverse () {
   star_system_table.Delete (filename);
 }
 
-extern StarSystem *GetLoadedStarSystem(const char * system) {
+StarSystem *GetLoadedStarSystem(const char * system) {
   StarSystem *ss = star_system_table.Get(string(system));
   std::string ssys (string(system)+string(".system"));
   if (!ss) {

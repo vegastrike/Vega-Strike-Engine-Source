@@ -72,6 +72,7 @@ struct Texture;
 extern  vector <Faction *> factions; //the factions
 
 namespace FactionUtil {
+		std::vector <class Animation *>* GetRandAnimation(int faction, unsigned char &sex);
 		void SerializeFaction (FILE * file);
 		void LoadSerializedFaction (FILE * file);
 		int numnums (const char * str);

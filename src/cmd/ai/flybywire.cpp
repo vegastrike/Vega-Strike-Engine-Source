@@ -4,11 +4,11 @@
 
 #include <math.h>
 #include <stdio.h>
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "lin_time.h"
 
-#include "gfx/cockpit.h"
-#include "force_feedback.h"
+#include "gfx/cockpit_generic.h"
+//#include "force_feedback.h"
 #include "vs_globals.h"
 #include "config_xml.h"
 #define VELTHRESHOLD .1
@@ -138,25 +138,8 @@ MatchVelocity::~MatchVelocity () {
 #endif
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!XMLSupport::parse_bool (vs_config->getVariable ("physics","CarControl","false"))){
   DesiredThrust= Vector(0,0,0);
-
-
 }
 
 void FlyByWire::Stop (float per) {
@@ -202,7 +185,8 @@ void FlyByWire::Afterburn (float per){
 
   if(parent==_Universe->AccessCockpit()->GetParent()){
     //printf("afterburn is %d\n",afterburn);
-    forcefeedback->playAfterburner(afterburn);
+	// COMMENTED BECAUSE OF SERVER -- NEED TO REINTEGRATE IT IN ANOTHER WAY
+    //forcefeedback->playAfterburner(afterburn);
   }
 }
 

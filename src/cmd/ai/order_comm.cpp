@@ -99,7 +99,7 @@ extern float myroundclamp(float i);
 Animation * Order::getCommFace(float mood, unsigned char & sex) {
   vector <Animation *> *ani = getCommFaces (sex);
   if (ani==NULL) {
-    ani = GameFactionUtil::GetRandAnimation(parent->faction,sex);
+    ani = FactionUtil::GetRandAnimation(parent->faction,sex);
     if (ani==NULL) {
       return NULL;
     }

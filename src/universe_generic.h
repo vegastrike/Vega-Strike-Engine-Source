@@ -99,9 +99,11 @@ private:
   unsigned int getNumActiveStarSystem() {return active_star_system.size();}
   void LoadStarSystem(StarSystem * ss);
   void UnloadStarSystem(StarSystem * ss);
-  StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
+  void Generate1( const char * file, const char * jumpback);
+  void Generate2( StarSystem * ss);
+  virtual StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
   ///Loads and parses factions
-  void LoadFactionXML (const char * factfile) {
+  virtual void LoadFactionXML (const char * factfile) {
     Faction::LoadXML (factfile);
   }
   //void SetupCockpits (std::vector <std::string> players);

@@ -25,6 +25,7 @@
 #include "gfx/camera.h"
 #include "star_system.h"
 #include "gfx/cockpit.h"
+#include "faction.h"
 
 /**
  * Class GameUniverse Deals with universal constants. It is a global, 
@@ -50,6 +51,7 @@ private:
   ///A list of all factions 
   
  public:
+  StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
   void WriteSaveGame(bool auto_save);
   void SetupCockpits (std::vector <std::string> players);
   void activateLightMap();
@@ -88,6 +90,9 @@ private:
   ///Wrapper function for star system
   void SetViewport() {
     AccessCockpit()->SetViewport();
+  }
+  void LoadFactionXML (const char * factfile) {
+    GameFaction::LoadXML (factfile);
   }
 };
 
