@@ -1783,12 +1783,7 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 			dest=0;
 		smalle->DeactivateJumpDrive();
 		Unit * jumppoint = this;
-		if( Network==NULL || SERVER)
-			// Only do real jump here in non-networking or on server side
-			_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
-		else
-			// If networking do a jump request to server
-			Network->jumpRequest( std::string( GetDestinations()[dest%GetDestinations().size()]));
+		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
 		return true;
     }
     return true;

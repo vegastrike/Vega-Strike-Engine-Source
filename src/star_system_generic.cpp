@@ -36,6 +36,7 @@
 //extern Vector mouseline;
 #include "cmd/unit_collide.h"
 #include "savegame.h"
+#include "networking/netclient.h"
 //vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -686,7 +687,9 @@ bool PendingJumpsEmpty() {
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
-      pendingjump[kk]->delay-=GetElapsedTime();
+	  // Only decrease delay when non networking - in networking we wait for a network ack that will set delay to 0
+	  if( Network==NULL)
+      	pendingjump[kk]->delay-=GetElapsedTime();
       continue;
     } else {
 #ifdef JUMP_DEBUG
@@ -695,7 +698,7 @@ void StarSystem::ProcessPendingJumps() {
       _Universe->activeStarSystem()->VolitalizeJumpAnimation (pendingjump[kk]->animation);
     }
     Unit * un=pendingjump[kk]->un.GetUnit();
-    
+ 
     if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
@@ -756,6 +759,8 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
       ani=_Universe->activeStarSystem()->DoJumpingLeaveSightAndSound (un);
     }
     pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
+	if( Network!=NULL && !SERVER)
+		Network->jumpRequest( system);
 #if 0
     UnitImages * im=  &un->GetImageInformation();
     for (unsigned int i=0;i<=im->dockedunits.size();i++) {

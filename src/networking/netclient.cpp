@@ -55,6 +55,8 @@ using std::cin;
 
 double NETWORK_ATOM;
 vector<string> globalsaves;
+extern vector<unorigdest *> pendingjump;
+extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
 
 /*************************************************************/
 /**** Tool funcitons                                      ****/
@@ -828,10 +830,37 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				else
 					cout<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
 			break;
+			// CMD_JUMP IS NOT USED ANYMORE !!!!
 			case CMD_JUMP :
 			{
+				StarSystem * sts;
+				bool found = false;
+				int i=0;
+				// Set the delay of the pending jump to 0
 				string newsystem = netbuf.getString();
-				UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
+				// Get the pointer to the new star system
+				if( !(sts=star_system_table.Get( newsystem)))
+				{
+					cout<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
+					exit(1);
+				}
+				for( i=0; !found && i<pendingjump.size(); i++)
+				{
+					// Find the corresponding destination
+					if( pendingjump[i]->dest == sts)
+						found = true;
+				}
+				if( !found)
+				{
+					cout<<"!!! ERROR : Jump with destination "<<newsystem<<" not found !!!"<<endl;
+					exit(1);
+				}
+				else
+				{
+					// Set the ddelay to 0 so that it will be executed next time ProcessPendingJump is called
+					pendingjump[i]->delay = 0;
+				}
+				//UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
 			}
 			break;
             default :

@@ -1155,45 +1155,59 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		break;
 		case CMD_JUMP :
 		{
+			vector<string>	adjacent;
 			string newsystem = netbuf.getString();
 			unsigned char * client_md5;
 			unsigned char * md5 = new unsigned char[MD5_DIGEST_SIZE];
+			bool found = false;
 
 			StarSystem * sts;
 			Cockpit * cp;
 			
 			un = clt->game_unit.GetUnit();
+			cp = _Universe->isPlayerStarship( un);
 			if( un==NULL)
 				cout<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
 			else
 			{
-				// Verify if there really is a jump point to the new starsystem
-				// Then activate jump drive to say we want to jump
-				un->ActivateJumpDrive();
-				// The jump reply will be sent in StarSystem::JumpTo()
-				// In the meantime we create the star system if it isn't loaded yet
-				if( !(sts = _Universe->getStarSystem( newsystem+".system")))
-					zonemgr->addZone( newsystem+".system");
-				// And remove the player from its old starsystem and set it out of game
-				zonemgr->removeClient( clt);
-				clt->ingame = false;
-
-				client_md5 = netbuf.getBuffer( MD5_DIGEST_SIZE);
-				if( md5CheckFile( newsystem, client_md5))
-				{
-					// Send an ASKFILE packet with serial == 0 to say file is ok
-					p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+					// Verify if there really is a jump point to the new starsystem
+					adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
+					for( int i=0; !found && i<adjacent.size(); i++)
+					{
+						if( adjacent[i]==newsystem)
+							found = true;
+					}
+					if( found)
+					{
+						// Then activate jump drive to say we want to jump
+						un->ActivateJumpDrive();
+						// The jump reply will be sent in StarSystem::JumpTo()
+						// In the meantime we create the star system if it isn't loaded yet
+						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
+							zonemgr->addZone( newsystem+".system");
+						// And remove the player from its old starsystem and set it out of game
+						zonemgr->removeClient( clt);
+						clt->ingame = false;
+						// Have to set new starsystem here
+						cp->savegame->SetStarSystem( newsystem);
+	
+						client_md5 = netbuf.getBuffer( MD5_DIGEST_SIZE);
+						if( md5CheckFile( newsystem, client_md5))
+						{
+							// Send an ASKFILE packet with serial == 0 to say file is ok
+							p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
-						__LINE__
+							__LINE__
 #else
-						1186
+							1186
 #endif
-						);
-				}
-				else
-				{
-					// Add that file to download queue with client serial !!
-				}
+							);
+						}
+						else
+						{
+							// Add that file to download queue with client serial !!
+						}
+					}
 				/*
 				if( UnitUtil::JumpTo( un, newsystem))
 				{
