@@ -11,14 +11,14 @@
 #define sqrtf sqrt
 #endif
 bool nearzero (double fb) {
-    const float eps = .0000001;
+    const float eps = .0001;
     return fabs (fb) < eps||fb ==0;
 }
-bool Plane::inFront (const Vector &v) const{
+POLYGON_RELATION Plane::inFront (const Vector &v) const{
     double fb = frontBack (v);
     if (nearzero(fb)||nearzero(c))
-        return true;
-    return (fb>0)==(c>0);
+        return UNKNOWN;
+    return ((fb>0)==(c>0))?FRONT:BACK;
 }
 
 const int RIGHT_HANDED=1;
@@ -48,12 +48,21 @@ bool Face::Cross (Plane & result)const {
     return true;
 }
 
-bool Face::inFront (const Plane &p)const {
+POLYGON_RELATION Face::inFront (const Plane &p)const {
+    POLYGON_RELATION retval = UNKNOWN;
     for (unsigned int i=0;i<this->p.size();i++) {
-        if (!p.inFront (this->p[i].V))
-            return false;
+        POLYGON_RELATION pr = p.inFront (this->p[i].V);
+        if (pr==FRONT) {
+            if (retval==UNKNOWN||retval==FRONT) {
+                retval=FRONT;
+            }else return UNKNOWN;
+        }else if (pr==BACK){
+            if (retval==UNKNOWN||retval==BACK) {
+                retval=BACK;
+            }else return UNKNOWN;
+        }
     }
-    return true;
+    return retval;
 }
 Plane Face::planeEqu() const{
     if (p.empty())
@@ -70,22 +79,23 @@ bool Face::operator < (const Face &b) const{
     //printf ("comparing %d %d\n",id,b.id);
     Plane bpe (b.planeEqu());
     Plane ape (planeEqu());
-    bool bfronta = inFront (bpe);
-    bool afrontb = b.inFront (ape);
-    if (bfronta&&afrontb) {
+    POLYGON_RELATION bfronta = inFront (bpe);
+    POLYGON_RELATION afrontb = b.inFront (ape);
+    
+    if (bfronta== FRONT||afrontb==BACK) {
         return false;
-        return (this->id<b.id);
-    }else if (afrontb!=bfronta) {
-        return afrontb;
-    }
-    static int errcount =0;
-    errcount++;
-    if (errcount<10||errcount%50==0) {
-        fprintf (stderr,"polygon intersection detected %d\n",errcount);
-       
+    }else if ((bfronta==BACK||afrontb==FRONT)) {
+        return true;
+    }else if (afrontb==UNKNOWN&&bfronta==UNKNOWN) {
+        static int errcount=0;
+        errcount++;
+        if (errcount<10||errcount%2==1) {
+            fprintf (stderr,"polygon intersection detected %d\n",errcount);
+
+        }
+        return false;
     }
     return false;
-    return id < b.id;
 }
 
 void Mesh::sort () {
