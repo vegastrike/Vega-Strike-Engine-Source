@@ -21,6 +21,8 @@ UnitCollection::UnitListNode::~UnitListNode() {
   if(NULL!=unit) {
     unit->UnRef(); 	
   }
+  unit = NULL;
+  next = NULL;
 }
 void UnitCollection::destr() {
   UnitListNode *tmp;
@@ -28,7 +30,9 @@ void UnitCollection::destr() {
     tmp = u.next;
     u.next = u.next->next;
     delete tmp;
-  }  
+  }
+  u.unit = NULL;
+  u.next = NULL;
 }
 
 void * UnitCollection::PushUnusedNode (UnitListNode * node) {

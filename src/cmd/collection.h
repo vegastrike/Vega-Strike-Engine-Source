@@ -28,6 +28,11 @@ class UnitCollection {
     void Remove ();
     UnitListNode(Unit *unit, UnitListNode *next);
     ~UnitListNode();
+
+  private:
+    UnitListNode( );
+    UnitListNode( const UnitListNode& );
+    UnitListNode& operator=( const UnitListNode& );
   } u;
   ///Destroys the list until init is called. Functions will segfault.
   void destr ();
@@ -48,11 +53,21 @@ class UnitCollection {
     ///Finds the next unit (or NULL) that isn't Killed()
     inline void GetNextValidUnit();
   public:
-    UnitIterator(){pos=NULL;}
+    UnitIterator() :pos(NULL) { }
     ///Creates this unit iterator
-    UnitIterator(UnitListNode *start) : pos(start) {GetNextValidUnit();}
-	bool isDone(){return current()==NULL;}
-	bool notDone() {return current()!=NULL;}
+    UnitIterator(UnitListNode *start) : pos(start) {
+        GetNextValidUnit();
+    }
+    UnitIterator( const UnitIterator& orig ) : pos(orig.pos) { }
+    UnitIterator& UnitIterator::operator=( const UnitIterator& orig ) {
+        pos = orig.pos; return *this;
+    }
+    ~UnitIterator() {
+        pos = NULL;
+    }
+
+    bool isDone(){return current()==NULL;}
+    bool notDone() {return current()!=NULL;}
     ///removes something after pos.  eg the first valid unit. or current()
     void remove();
     ///inserts in front of current
@@ -73,9 +88,17 @@ class UnitCollection {
     const UnitListNode *pos;
     void GetNextValidUnit();
   public:
-    ConstIterator() {}
+    ConstIterator() : pos(NULL) { }
+    ConstIterator( const ConstIterator& orig ) : pos( orig.pos ) { }
     ConstIterator(const UnitListNode *start):pos(start) {
       GetNextValidUnit();
+    }
+    ConstIterator& ConstIterator::operator=( const ConstIterator& orig ) {
+        pos = orig.pos;
+        return *this;
+    }
+    ~ConstIterator( ) {
+        pos = NULL;
     }
     const Unit * next() {advance();return current();}	  	  
     const Unit *current() const  {return pos->next->unit;}
@@ -87,19 +110,24 @@ class UnitCollection {
     inline const Unit * operator * ()const {return current();}
   };
 
-  class ConstFastIterator{
+  class ConstFastIterator {
     private:
     const UnitListNode *pos;
   public:
-    ConstFastIterator(){}
+    ConstFastIterator() :pos(NULL) {}
+    ConstFastIterator( const ConstFastIterator& orig ) : pos( orig.pos ) {}
     ConstFastIterator(const UnitListNode *start):pos(start) {}
+    ~ConstFastIterator() { pos=NULL; }
     const Unit *current()const {return pos->next->unit;}
     void advance() {pos = pos->next;}
     inline const Unit * operator ++() {advance();return current();}
     inline const Unit * operator ++(int) {const Unit * un=current();advance();return un;}
     inline const Unit * operator * ()const {return current();}
     const Unit * next() {advance();return current();}
+  private:
+    ConstFastIterator& operator=( const ConstFastIterator& );
   };
+
   class FastIterator {
     private:
     UnitListNode *pos;
@@ -111,14 +139,18 @@ class UnitCollection {
     void preinsert(Unit *unit){pos->next = new UnitListNode(unit, pos->next);}
     /// inserts after current
     void postinsert(Unit *unit);
-    FastIterator(){}
+    FastIterator() : pos(NULL) {}
+    FastIterator( const FastIterator& orig ) : pos(orig.pos) {}
     FastIterator(UnitListNode *start):pos(start) {}
+    ~FastIterator() { pos = NULL; }
     Unit *current() {return pos->next->unit;}
     void advance() {pos = pos->next;}
     inline Unit * operator ++(int) {Unit * un = current();advance();return un;}
     inline Unit * operator ++() {advance();return current();}
     inline Unit * operator * () {return current();}
     Unit * next() {advance();return current();}	  	  
+  private:
+    FastIterator& operator=( const FastIterator& );
   };
   static void FreeUnusedNodes();//not allowed to happen if any lists are traversing    
   static void * PushUnusedNode(UnitListNode * node);
