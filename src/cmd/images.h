@@ -52,6 +52,7 @@ struct Cargo {
 
 struct UnitImages {
   std::string cockpitImage;
+  std::string explosion_type;
   Vector CockpitCenter;
   Sprite * hudImage;
   ///The explosion starts at null, when activated time explode is incremented and ends at null  

@@ -686,6 +686,8 @@ float Unit::ExplosionRadius() {
   static float expsize=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_size","3"));
   return expsize*rSize();
 }
+extern Animation * getRandomCachedAni() ;
+extern std::string getRandomCachedAniString() ;
 bool Unit::Explode (bool drawit, float timeit) {
 
 
@@ -695,8 +697,12 @@ bool Unit::Explode (bool drawit, float timeit) {
   mission->DirectorShipDestroyed(this);
 
     image->timeexplode=0;
-	static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
-    image->explosion= new Animation (expani.c_str(),false,.1,BILINEAR,false);
+    static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
+    string bleh = getRandomCachedAniString();
+    if (bleh.size()==0) {
+      bleh = expani;
+    }
+    image->explosion= new Animation (bleh.c_str(),false,.1,BILINEAR,false);
     image->explosion->SetDimensions(ExplosionRadius(),ExplosionRadius());
 	if (!SubUnit){
 		Vector exploc = cumulative_transformation.position;

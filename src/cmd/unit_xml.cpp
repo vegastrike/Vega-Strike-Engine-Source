@@ -22,6 +22,7 @@
 #include "unit_collide.h"
 #include "vs_path.h"
 #include "gfx/cockpit.h"
+#include "gfx/animation.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -30,7 +31,33 @@ void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **a
 void Unit::endElement(void *userData, const XML_Char *name) {
   ((Unit*)userData)->endElement(name);
 }
+using std::map;
+static std::map<std::string,Animation *> cached_ani;
+std::string getRandomCachedAniString () {
+  if (cached_ani.size()) {
+    unsigned int rn = rand()%cached_ani.size();
+    map<std::string,Animation *>::iterator j=cached_ani.begin();
+    for (unsigned int i=0;i<rn;i++) {
+      j++;
+    }
+    return (*j).first;
+  }else{
+    return "";
+  }  
 
+}
+Animation* getRandomCachedAni () {
+  if (cached_ani.size()) {
+    unsigned int rn = rand()%cached_ani.size();
+    map<std::string,Animation *>::iterator j=cached_ani.begin();
+    for (unsigned int i=0;i<rn;i++) {
+      j++;
+    }
+    return (*j).second;
+  }else{
+    return NULL;
+  }
+}
 
 namespace UnitXML {
     enum Names {
@@ -121,6 +148,7 @@ namespace UnitXML {
       SHIELDMP3,
       EXPLODEWAV,
       EXPLODEMP3,
+      EXPLOSIONANI,
       COCKPIT,
       JUMP,
       DELAY,
@@ -190,7 +218,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[86] = {
+  const EnumMap::Pair attribute_names[87] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -236,6 +264,7 @@ namespace UnitXML {
     EnumMap::Pair ("itts",ITTS),
     EnumMap::Pair ("ammo", AMMO),
     EnumMap::Pair ("HudImage",HUDIMAGE),
+    EnumMap::Pair ("ExplosionAni",EXPLOSIONANI),
     EnumMap::Pair ("MaxCone",MAXCONE),
     EnumMap::Pair ("MinTargetSize",MINTARGETSIZE),
     EnumMap::Pair ("Range",RANGE),
@@ -280,7 +309,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 86);
+  const EnumMap attribute_map(attribute_names, 87);
 }
 
 using XMLSupport::EnumMap;
@@ -1288,6 +1317,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	if ((*iter).value.length()){
 	  image->hudImage = new Sprite ((*iter).value.c_str());
 	  xml->hudimage=(*iter).value;
+	}
+	break;
+      case EXPLOSIONANI:
+	if ((*iter).value.length()) {
+	  image->explosion_type = (*iter).value;
+	  {
+
+	    if (cached_ani.find (image->explosion_type)==cached_ani.end()) {
+	      cached_ani.insert (pair <std::string,Animation *>(image->explosion_type,new Animation (image->explosion_type.c_str(),false,.1,BILINEAR,false)));
+
+	    }
+
+	  }
 	}
 	break;
       case REPAIRDROID:
