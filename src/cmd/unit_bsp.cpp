@@ -1,6 +1,22 @@
 #include "endianness.h"
 #include <assert.h>
+
+#ifndef PROPHECY
 #include "unit_bsp.h"
+#include "config_xml.h"
+#include "vs_globals.h"
+#else
+#include <vector>
+
+using std::vector;
+struct Vector {
+  double i,j,k;
+};
+
+struct bsp_polygon {
+  vector <bsp_vector> v;
+};
+#endif
 
 bool Cross (const bsp_polygon &x, bsp_tree &result) {
   double size =0;
@@ -293,7 +309,12 @@ bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> 
   unsigned int select= tri.size();
   temp = (bsp_tree *) malloc (sizeof (bsp_tree));
   if (!(vplane&VPLANE_ALL)) {
-    select = select_plane (tri, triplane);
+    static bool use_heuristic=XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_bsp_heuristic","false"));
+    if (use_heuristic) {
+      select = select_plane (tri, triplane);
+    }else {
+      select = rand()%tri.size();
+    }
     if (select >=tri.size()) {
       fprintf (stderr,"Error Selecting tri for splittage");
       return NULL;
