@@ -70,10 +70,22 @@ struct strip{
 };
 
 
-struct LODholder{
+struct LODholder{ // Holds 1 LOD entry
 	float FPS;
 	float size;
 	vector<unsigned char> name;
+};
+
+struct textureholder{ // Holds 1 texture entry
+	int type;
+	int index;
+	vector<unsigned char> name;
+};
+
+enum textype{
+	ALPHAMAP,
+	ANIMATION,
+	TEXTURE
 };
 
 enum polytype{ 
@@ -242,6 +254,9 @@ struct XML {
 	int point_state;
 
     GFXVertex vertex;
+	textureholder texturetemp;
+	vector<textureholder> textures;
+	textureholder detailtexture;
 
 	int curpolytype;
 	int curpolyindex;
@@ -591,19 +606,55 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		free (cdst);
 		}
 		break;
-	  case XML::DETAILTEXTURE: //FIXME
+	  case XML::DETAILTEXTURE:
+		  {
+		string detnametmp=(*iter).value.c_str();
+		xml->detailtexture.type=TEXTURE;
+		xml->detailtexture.index=0;
+		for(int detnamelen=0;detnamelen<detnametmp.size();detnamelen++){
+			xml->detailtexture.name.push_back(detnametmp[detnamelen]);
+		}
+		  }
 		break;
-      case XML::TEXTURE: //FIXME
+      case XML::TEXTURE: 
+	  case XML::ALPHAMAP: 
+	  case XML::ANIMATEDTEXTURE:
+	  case XML::UNKNOWN: //FIXME?
+		 {
+          XML::Names whichtype = XML::UNKNOWN;
+          int strsize=0;
+          if (strtoupper(iter->name).find("ANIMATION")==0) {
+              xml->texturetemp.type=ANIMATION;
+			  whichtype = XML::ANIMATEDTEXTURE;
+              strsize = strlen ("ANIMATION");
+          }
+          if (strtoupper(iter->name).find("TEXTURE")==0){
+              xml->texturetemp.type=TEXTURE;
+			  whichtype= XML::TEXTURE;
+              strsize = strlen ("TEXTURE");
+          }
+          if (strtoupper(iter->name).find("ALPHAMAP")==0){
+              xml->texturetemp.type=ALPHAMAP;
+			  whichtype=XML::ALPHAMAP;
+              strsize= strlen ("ALPHAMAP");
+          }
+          if (whichtype!=XML::UNKNOWN) {
+              unsigned int texindex =0;
+              string ind(iter->name.substr (strsize));
+              if (!ind.empty()){
+				texindex=atoi(ind.c_str());
+			  }
+			  xml->texturetemp.index=texindex;
+			  string nomdujour=iter->value.c_str();
+			  for(int tni=0;tni<nomdujour.size();tni++){
+				xml->texturetemp.name.push_back(nomdujour[tni]);
+			  }
+			xml->textures.push_back(xml->texturetemp);
+		  }
+		 }
 		break;
-      case XML::ALPHAMAP: //FIXME
-		break;
-      case XML::ANIMATEDTEXTURE: //FIXME
-		break;
-	  case XML::UNKNOWN: //FIXME
-		break;
-      }
-    }
-	break;
+	  }
+	}
   case XML::POINTS:
     break;
   case XML::POINT:
@@ -766,7 +817,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		case XML::LODFILE:
 		  string lodname = (*iter).value.c_str();
 		  for(int index=0;index<lodname.size();index++){
-		  xml->lodtemp.name.push_back(lodname[index]);
+			xml->lodtemp.name.push_back(lodname[index]);
 		  }
 		  break;
 		}
@@ -897,7 +948,7 @@ int main (int argc, char** argv) {
   FILE * Outputfile=fopen(argv[2],"wb"); 
   unsigned int intbuf;
   float floatbuf;
-  int versionnumber=3;
+  int versionnumber=4;
   unsigned char bytebuf;
 
   //HEADER
@@ -910,7 +961,7 @@ int main (int argc, char** argv) {
   fwrite(&bytebuf,1,1,Outputfile);
   bytebuf='M';
   fwrite(&bytebuf,1,1,Outputfile);
-
+  
   fwrite(&versionnumber,sizeof(int),1,Outputfile);// VERSION number for BinaryFormattedXMesh
   floatbuf = VSSwapHostFloatToLittle(memfile.scale);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
@@ -962,7 +1013,22 @@ int main (int argc, char** argv) {
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
   //END HEADER
   //Begin Variable sized Attributes
-  
+  //Detail texture
+  { 
+	int namelen=memfile.detailtexture.name.size();
+	intbuf= VSSwapHostFloatToLittle(namelen);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of detail texture
+	for(int nametmp=0;nametmp<namelen;nametmp++){
+		bytebuf= memfile.detailtexture.name[nametmp];
+		fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char name of detail texture
+	}
+	int padlength=(namelen%sizeof(int));
+	for(nametmp=0;nametmp<padlength;nametmp++){
+		bytebuf=0;
+		fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
+	}
+  }
+  //Detail Planes
   intbuf= VSSwapHostIntToLittle(memfile.detailplanes.size());
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of detail planes
   for(int plane=0;plane<memfile.detailplanes.size();plane++){
@@ -973,6 +1039,51 @@ int main (int argc, char** argv) {
 	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].z);
 	fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Z
   }
+  //Textures
+  {
+  intbuf= VSSwapHostIntToLittle(memfile.textures.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of textures
+  for(int texnum=0;texnum<memfile.textures.size();texnum++){
+	intbuf= VSSwapHostFloatToLittle(memfile.textures[texnum].type);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//texture # texnum: type
+	intbuf= VSSwapHostFloatToLittle(memfile.textures[texnum].index);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//texture # texnum: index
+	int namelen=memfile.textures[texnum].name.size();
+	intbuf= VSSwapHostFloatToLittle(namelen);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of texture # texnum
+	for(int nametmp=0;nametmp<namelen;nametmp++){
+		bytebuf= memfile.textures[texnum].name[nametmp];
+		fwrite(&bytebuf,sizeof(char),1,Outputfile);//Name of texture # texnum
+	}
+	int padlength=(namelen%sizeof(int));
+	for(nametmp=0;nametmp<padlength;nametmp++){
+		bytebuf=0;
+		fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
+	}
+  }
+  }
+  //LODs
+  intbuf= VSSwapHostIntToLittle(memfile.LODs.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of LODs
+  for(int lod=0;lod<memfile.LODs.size();lod++){
+	floatbuf= VSSwapHostFloatToLittle(memfile.LODs[lod].FPS);
+	fwrite(&floatbuf,sizeof(float),1,Outputfile);//LOD # lod: FPS
+	floatbuf= VSSwapHostFloatToLittle(memfile.LODs[lod].size);
+	fwrite(&floatbuf,sizeof(float),1,Outputfile);//LOD # lod: size
+	int namelen=memfile.LODs[lod].name.size();
+	intbuf= VSSwapHostFloatToLittle(namelen);
+	fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of LOD # lod
+	for(int nametmp=0;nametmp<namelen;nametmp++){
+		bytebuf= memfile.LODs[lod].name[nametmp];
+		fwrite(&bytebuf,sizeof(char),1,Outputfile);//Name of LOD # lod
+	}
+	int padlength=(namelen%sizeof(int));
+	for(nametmp=0;nametmp<padlength;nametmp++){
+		bytebuf=0;
+		fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
+	}
+  }
+
   //End Variable sized Attributes
 
   //GEOMETRY
