@@ -397,11 +397,12 @@ void createObjects() {
 #else
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
-
+  
   for (int kk=0;kk<fighters[0]->getNumSubUnits();kk++) {
     fighters[0]->EnqueueAI (new Orders::FireAt(.2,15),kk);
     fighters[0]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
   }
+  
 #endif
   vschdir ("hornet-cockpit.cpt");
   tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
