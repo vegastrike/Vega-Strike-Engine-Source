@@ -345,7 +345,7 @@ static void DoDockingOps (Unit * parent, Unit * targ) {
     if (req) {
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
       CommunicationMessage c(parent,targ,NULL);
-      c.SetCurrentState(c.fsm->GetRequestLandNode());
+      c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL);
       targ->getAIState()->Communicate (c);
       req=false;
     }

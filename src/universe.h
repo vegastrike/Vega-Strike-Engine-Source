@@ -95,7 +95,7 @@ private:
     Texture * logo;
     ///char * of the name
     char * factionname; 
-    std::vector <class Animation *> comm_faces;
+    std::vector <std::vector <class Animation *> > comm_faces;
     Unit * contraband;
     ///Figures out the relationships of each faction with each other
     static void ParseAllAllies(Universe * thisuni);
@@ -129,8 +129,8 @@ private:
   ///returns the index of the faction with that name
   int GetFaction (const char *factionname);
   int GetNumAnimation(int faction);
-  Animation * GetRandAnimation(int faction);
-  Animation * GetAnimation(int faction, int n);
+  std::vector <class Animation *>* GetRandAnimation(int faction);
+  std::vector <class Animation *> * GetAnimation(int faction, int n);
   const char * GetFaction (int faction);
   class Unit * GetContraband(int faction);
   void LoadContrabandLists();

@@ -28,6 +28,7 @@ namespace FactionXML {
 	ENEMY,
 	CONVERSATION,
 	COMM_ANIMATION,
+	MOOD_ANIMATION,
 	CONTRABAND
   };
 
@@ -38,7 +39,8 @@ namespace FactionXML {
 	EnumMap::Pair ("Friend", FRIEND),
 	EnumMap::Pair ("Enemy", ENEMY),
   	EnumMap::Pair ("Stats", STATS),
-  	EnumMap::Pair ("CommAnimation", COMM_ANIMATION)
+  	EnumMap::Pair ("CommAnimation", COMM_ANIMATION),
+  	EnumMap::Pair ("MoodAnimation", MOOD_ANIMATION)
   };
   const EnumMap::Pair attribute_names[] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -51,7 +53,7 @@ namespace FactionXML {
 };
 
 
-  const EnumMap element_map(element_names, 7);
+  const EnumMap element_map(element_names, 8);
   const EnumMap attribute_map(attribute_names, 7);
 
 }
@@ -84,10 +86,15 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   case COMM_ANIMATION:
     assert (unitlevel==2);
     unitlevel++;
+    thisuni->factions.back()->comm_faces.push_back (std::vector<Animation *>());
+    break;
+  case MOOD_ANIMATION:
+    assert (unitlevel==3);
+    unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
-	thisuni->factions.back()->comm_faces.push_back(new Animation ((*iter).value.c_str()));
+	thisuni->factions.back()->comm_faces.back().push_back(new Animation ((*iter).value.c_str()));
 	break;
       }
     }

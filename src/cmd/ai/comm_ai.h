@@ -1,5 +1,6 @@
 #include "order.h"
 #include <map>
+#include <vector>
 /// this class is meant to be inherited by AI wishing to process comm messages
 
 
@@ -9,7 +10,7 @@ class CommunicatingAI:public Order{
   float moodswingyness;
   float randomresponse;
   float mood;
-  Animation * comm_face;
+  std::vector <class Animation *> *comm_face;
   UnitContainer contraband_searchee;
   Vector SpeedAndCourse;
   int which_cargo_item;

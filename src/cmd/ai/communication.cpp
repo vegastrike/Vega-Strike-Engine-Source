@@ -48,7 +48,6 @@ int FSM::GetRequestLandNode () {
 int FSM::GetHitNode () {
   return nodes.size()-1;
 }
-
 int FSM::getDefaultState (float relationship) const{
   return 0;
 }
@@ -64,37 +63,54 @@ float FSM::getDeltaRelation (int prevstate, int current_state) const{
   return nodes[current_state].messagedelta;
 }
 
-void CommunicationMessage::Init (Unit * send, Unit * recv, Animation * ani) {
-  this->ani = ani;
+void CommunicationMessage::Init (Unit * send, Unit * recv) {
   fsm = _Universe->GetConversation (send->faction,recv->faction);
   sender.SetUnit (send);
   this->prevstate=this->curstate = fsm->getDefaultState(_Universe->GetRelation(send->faction,recv->faction));
 }
-
-void CommunicationMessage::SetCurrentState (int msg) {
-  curstate = msg;
+void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
+  float mood= fsm->getDeltaRelation(this->prevstate,this->curstate);
+  mood+=1;
+  mood*=ani->size()/2.;
+  unsigned int index=(unsigned int)mood;
+  if (index>=ani->size()) {
+    index=ani->size()-1;
+  }
+  if (ani){ 
+    this->ani=(*ani)[index];
+  }else {
+    this->ani=NULL;
+  }
 }
 
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice, Animation * ani) {
-  Init (send,recv,ani);
+void CommunicationMessage::SetCurrentState (int msg,std::vector <Animation *>*ani) {
+  curstate = msg;
+  SetAnimation(ani);
+}
+
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice, std::vector <Animation *>* ani) {
+  Init (send,recv);
   prevstate=fsm->getDefaultState (_Universe->GetRelation (send->faction,recv->faction));
   if (fsm->nodes[prevstate].edges.size()) {
     curstate = fsm->nodes[prevstate].edges[messagechoice%fsm->nodes[prevstate].edges.size()];
   }
+  SetAnimation(ani);
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int laststate, int thisstate, Animation * ani) {
-  Init (send,recv,ani);
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int laststate, int thisstate, std::vector <Animation *>* ani) {
+  Init (send,recv);
   prevstate=laststate;
   curstate = thisstate;
+  SetAnimation(ani);
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv,Animation * ani) {
-  Init (send,recv,ani);
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv,std::vector<Animation *>* ani) {
+  Init (send,recv);
+  SetAnimation(ani);
 }
-CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate, int curstate, Animation * ani) {
-  Init (send,recv,ani);
+CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate, int curstate, std::vector<Animation *>* ani) {
+  Init (send,recv);
   this->prevstate = prevstate.curstate;
   if (fsm->nodes[this->prevstate].edges.size()) {
     this->curstate = fsm->nodes[this->prevstate].edges[curstate%fsm->nodes[this->prevstate].edges.size()];
   }
-
+  SetAnimation(ani);
 }

@@ -22,18 +22,19 @@ class FSM {
   int GetContrabandWobblyNode();
 };
 class CommunicationMessage {
-  void Init (Unit * send, Unit * recv, Animation * ani);
+  void Init (Unit * send, Unit * recv);
+  void SetAnimation (std::vector <class Animation *>*ani);
  public:
   FSM *fsm;//the finite state that this communcation stage is in
   class Animation * ani;
   int prevstate;
   int curstate;
   UnitContainer sender;
-  CommunicationMessage(Unit * send, Unit * recv, Animation * ani);
-  CommunicationMessage(Unit * send, Unit * recv, int curstate, Animation * ani);
-  CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, Animation * ani);
-  CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, Animation * ani);
-  void SetCurrentState(int message);
+  CommunicationMessage(Unit * send, Unit * recv, std::vector <class Animation *>* ani);
+  CommunicationMessage(Unit * send, Unit * recv, int curstate, std::vector <class Animation *>* ani);
+  CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani);
+  CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani);
+  void SetCurrentState(int message, std::vector <class Animation *> *ani);
   FSM::Node * getCurrentState() {return &fsm->nodes[curstate];}
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}

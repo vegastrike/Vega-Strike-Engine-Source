@@ -55,11 +55,11 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
   if ((un=contraband_searchee.GetUnit())) {
     CommunicationMessage c(parent,un,comm_face);
     if (contraband_detected) {
-      c.SetCurrentState(c.fsm->GetContrabandDetectedNode());
+      c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face);
       static int numHitsPerContrabandFail=3;
       GetMadAt (un,numHitsPerContrabandFail);
     }else {
-      c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode());      
+      c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face);      
     }
     un->getAIState()->Communicate(c);
   }
@@ -69,7 +69,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
 void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
 
       CommunicationMessage hit (un,parent,NULL);
-      hit.SetCurrentState(hit.fsm->GetHitNode());
+      hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face);
       for (         int i=0;i<numHitsPerContrabandFail;i++) {
 	parent->getAIState()->Communicate(hit);
       }
@@ -93,7 +93,7 @@ void CommunicatingAI::UpdateContrabandSearch () {
       static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
       if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
 	CommunicationMessage c(parent,u,comm_face);
-	c.SetCurrentState(c.fsm->GetContrabandWobblyNode());
+	c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face);
 	u->getAIState()->Communicate (c);
 	GetMadAt(u,1);
 	SpeedAndCourse=u->GetVelocity();
@@ -120,7 +120,7 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     contraband_searchee.SetUnit (u);
     SpeedAndCourse = u->GetVelocity();
     CommunicationMessage c(parent,u,comm_face);
-    c.SetCurrentState(c.fsm->GetContrabandInitiateNode());
+    c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face);
     u->getAIState()->Communicate (c);
     which_cargo_item = 0;
   }
