@@ -42,8 +42,28 @@ void TextPlane::Draw (int offset) {
   Draw (myText,offset,true);
 }
 
+static char * CreateLists() {
+  static char lists[256]={0};
+  void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
+  static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
+  bool use_display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","text_display_lists","true"));
+  if (use_display_lists) {
+    for (unsigned char i=32;i<128;i++){
+      lists[i]= GFXCreateList();
+      if (use_bit)
+	glutBitmapCharacter (fnt,i);
+      else
+	glutStrokeCharacter (GLUT_STROKE_ROMAN,i);
+      if (!GFXEndList ()) {
+	lists[i]=0;
+      }
+    }
+  }  
+  return lists;
+}
 void TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
 {
+  static char * display_lists=CreateLists ();
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
   static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
@@ -100,10 +120,15 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
   while(text_it != newText.end() && row>myDims.j) {
     if(*text_it>=32) {//always true
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
-      if (use_bit)
-	glutBitmapCharacter (fnt,*text_it);
-      else
-	glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
+      int lists = display_lists[*text_it];
+      if (lists) {
+	GFXCallList(lists);
+      }else{
+	if (use_bit)
+	  glutBitmapCharacter (fnt,*text_it);
+	else
+	  glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
+      }
     }  
     
     if(*text_it=='\t') {
