@@ -1,3 +1,4 @@
+#include "endianness.h"
 #include <float.h>
 #include <stdio.h>
 #include <math.h>
@@ -304,10 +305,10 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	  long temp;
 	  BITMAPINFOHEADER info;
 	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	  sizeX = info.biWidth;
-	  sizeY = info.biHeight;
+	  sizeX = le32_to_cpu(info.biWidth);
+	  sizeY = le32_to_cpu(info.biHeight);
 
-	  if(info.biBitCount == 24)
+	  if(le16_to_cpu(info.biBitCount) == 24)
 	    {
 	      data = NULL;
 	      data= new unsigned char [3*sizeY*sizeX];
@@ -329,7 +330,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 		    }
 		}
 	    }
-	  else if(info.biBitCount == 8)
+	  else if(le16_to_cpu(info.biBitCount) == 8)
 	    {
 	      data = NULL;
 	      data= new unsigned char [sizeY*sizeX*3];
