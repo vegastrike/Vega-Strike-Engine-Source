@@ -3777,10 +3777,13 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0) {
 						int lenupgrades = strlen("upgrades/");
 						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).category.substr(lenupgrades);
-                                                const Unit * downgrade=loadUnitByCache(GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
-                                                if (downgrade) {
-                                                  double percentage=0;
-                                                  this->Downgrade(downgrade,0,0,percentage,NULL);
+                                                static bool NotActuallyDowngrade=XMLSupport::parse_bool(vs_config->getVariable("physics","separate_system_flakiness_component","false"));
+                                                if (!NotActuallyDowngrade) {
+                                                  const Unit * downgrade=loadUnitByCache(GetCargo(which).content,FactionUtil::GetFactionIndex("upgrades"));
+                                                  if (downgrade) {
+                                                    double percentage=0;
+                                                    this->Downgrade(downgrade,0,0,percentage,NULL);
+                                                  }
                                                 }
 					}
 				}
