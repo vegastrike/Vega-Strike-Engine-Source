@@ -100,10 +100,13 @@ void Universe::StartGFX()
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
 	GFXLightContextAmbient (GFXColor (0,0,0,1));
+	/*
+	  ///now planets make light
 	GFXCreateLight (ligh, GFXLight(true,GFXColor (0.001,0.001,.001),GFXColor (01,1,1,1),GFXColor(0,0,0,1), GFXColor (.2,.2,.2,1), GFXColor (1,0,0)),true);
 	//GFXEnableLight (ligh);
 	//	GFXCreateLight (ligh, GFXLight(true,GFXColor (0.001,0.001,.001),GFXColor (1,1,.6,1),GFXColor(1,1,1,1), GFXColor (0,0,0,1), GFXColor (1,.0000,.000000004)),false);
 	GFXEnableLight (ligh);
+	*/
       	GFXEndScene();
 }
 

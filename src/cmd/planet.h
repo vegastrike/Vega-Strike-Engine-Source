@@ -12,6 +12,7 @@ ok *
 //#include "physics.h"
 #include "collection.h"
 #include "iterator.h"
+#include <vector>
 struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
@@ -28,10 +29,13 @@ class PlanetaryOrbit : public Order {
   Vector x_size;
   Vector y_size;
   Vector focus;
+ protected:
+  ///A vector containing all lihgts currently activated on current planet
+  std::vector <int> lights;
 
  public:
 
-  PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector &Centre, Unit * target=NULL); 
+  PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector &Centre, Unit *target=NULL); 
   ~PlanetaryOrbit();
   void Execute();
 
@@ -43,15 +47,15 @@ class Planet : public Unit {
   float gravity;
   vector <char *> destination;
   UnitCollection satellites;
-
+  std::vector <int> lights;
  public:
   Planet();
   void endElement();
-  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, bool isunit, int faction);
-  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, int faction);
+  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLight> &ligh, bool isunit, int faction);
+  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLight> &, int faction);
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
-
+  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
 //  void InitPlanet(FILE *fp);
   virtual void Kill();
   void gravitate(UnitCollection *units);

@@ -32,6 +32,7 @@ StarSystem::StarSystem(char * filename) :
   current_stage=PHY_AI;
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
+  numprimaries=0;
   LoadXML(filename);
 //  primaries[0]->SetPosition(0,0,0);
   int i;

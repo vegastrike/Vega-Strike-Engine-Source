@@ -18,67 +18,79 @@ void StarSystem::endElement(void *userData, const XML_Char *name) {
 }
 
 vector <char *> ParseDestinations (const string &value) {
-	vector <char *> tmp;
-	int i;
-	int j;
-	int k;
-	for (j=0;value[j]!=0;){
-		for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
-		}
-		tmp.push_back(new char [i+1]);
-		for (k=0;k<i;k++) {
-			tmp[tmp.size()-1][k]=value[k+j-i];
-		}
-		tmp[tmp.size()-1][i]='\0';
-		if (value[j]!=0)
-			j++;
-	}
-	return tmp;
+  vector <char *> tmp;
+  int i;
+  int j;
+  int k;
+  for (j=0;value[j]!=0;){
+    for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
+    }
+    tmp.push_back(new char [i+1]);
+    for (k=0;k<i;k++) {
+      tmp[tmp.size()-1][k]=value[k+j-i];
+    }
+    tmp[tmp.size()-1][i]='\0';
+    if (value[j]!=0)
+      j++;
+  }
+  return tmp;
 }
 
 namespace StarXML {
-    enum Names {
-      UNKNOWN,
-      XFILE,
-      X,
-      Y,
-      Z,
-      RI,
-      RJ,
-      RK,
-      SI,
-      SJ,
-      SK,
-      NAME,
-      RADIUS,
-      GRAVITY,
-      VELOCITY,
-      PPOSITION,
-      SYSTEM,
-      PLANET,
-      UNIT,
-      EMMISIVR,
-      EMMISIVG,
-      EMMISIVB,
-      EMMISIVA,
-      BACKGROUND,
-      STARS,
-      STARSPREAD,
-      NEARSTARS,
-      FADESTARS,
-      REFLECTIVITY,
-      ALPHA,
-      DESTINATION,
-      JUMP,
-      FACTION
-    };
+  enum Names {
+    UNKNOWN,
+    XFILE,
+    X,
+    Y,
+    Z,
+    RI,
+    RJ,
+    RK,
+    SI,
+    SJ,
+    SK,
+    NAME,
+    RADIUS,
+    GRAVITY,
+    VELOCITY,
+    PPOSITION,
+    SYSTEM,
+    PLANET,
+    UNIT,
+    EMR,
+    EMG,
+    EMB,
+    EMA,
+    BACKGROUND,
+    STARS,
+    STARSPREAD,
+    NEARSTARS,
+    FADESTARS,
+    REFLECTIVITY,
+    ALPHA,
+    DESTINATION,
+    JUMP,
+    FACTION,
+    LIGHT,
+    COLL,
+    ATTEN,
+    DIFF,
+    SPEC,
+    AMB
+  };
 
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("System", SYSTEM),
-	EnumMap::Pair ("Unit", UNIT),
-	EnumMap::Pair ("Jump", JUMP)
+    EnumMap::Pair ("Unit", UNIT),
+    EnumMap::Pair ("Jump", JUMP),
+    EnumMap::Pair ("Light", LIGHT),
+    EnumMap::Pair ("Attenuated",ATTEN),
+    EnumMap::Pair ("Diffuse",DIFF),
+    EnumMap::Pair ("Specular",SPEC),
+    EnumMap::Pair ("Ambient",AMB)
+
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -105,15 +117,16 @@ namespace StarXML {
     EnumMap::Pair ("gravity", GRAVITY),
     EnumMap::Pair ("velocity", VELOCITY),
     EnumMap::Pair ("position", PPOSITION),
-    EnumMap::Pair ("emmisiveR", EMMISIVR),
-    EnumMap::Pair ("emmisiveG", EMMISIVG),
-    EnumMap::Pair ("emmisiveB", EMMISIVB),
-    EnumMap::Pair ("emmisiveA", EMMISIVA),
-    EnumMap::Pair ("faction", FACTION)
-};
+    EnumMap::Pair ("Red", EMR),
+    EnumMap::Pair ("Green", EMG),
+    EnumMap::Pair ("Blue", EMB),
+    EnumMap::Pair ("Alpha", EMA),
+    EnumMap::Pair ("faction", FACTION),
+    EnumMap::Pair ("Light", LIGHT)
+  };
 
-  const EnumMap element_map(element_names, 5);
-  const EnumMap attribute_map(attribute_names, 28);
+  const EnumMap element_map(element_names, 10);
+  const EnumMap attribute_map(attribute_names, 30);
 }
 
 using XMLSupport::EnumMap;
@@ -121,9 +134,28 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace StarXML;
 
-void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
-  xml->cursun.i=0;
 
+static void GetLights (const vector <GFXLight> &origlights, vector <GFXLight> &curlights, const char *str) {
+  int tint;
+  char * tmp=strdup (str);
+  char * st =tmp;
+  while (1==sscanf (st,"%d",&tint)) {
+    assert (tint<origlights.size());
+    curlights.push_back (origlights[tint]);
+    while (isspace(*st) )
+      st++;
+    while (*st>='0'&&*st<='9') {
+      st++;
+    }
+  }
+  free (tmp);
+} 
+
+void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
+  vector <GFXLight> curlights;
+  xml->cursun.i=0;
+  GFXColor tmpcol(0,0,0,1);
+  LIGHT_TARGET tmptarg= POSITION;
   xml->cursun.j=0;
   int faction=0;
   xml->cursun.k=0;	
@@ -141,23 +173,23 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   AttributeList::const_iterator iter;
   switch(elem) {
   case UNKNOWN:
-	xml->unitlevel++;
+    xml->unitlevel++;
 
-//    cerr << "Unknown element start tag '" << name << "' detected " << endl;
+    //    cerr << "Unknown element start tag '" << name << "' detected " << endl;
     return;
 
   case SYSTEM:
-	assert (xml->unitlevel==0);
-	xml->unitlevel++;
+    assert (xml->unitlevel==0);
+    xml->unitlevel++;
     pos = Vector (0,0,0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-  case REFLECTIVITY:
-    xml->reflectivity=parse_float ((*iter).value);
-    break;
-  case BACKGROUND:
-    xml->backgroundname=(*iter).value;
-    break;
+      case REFLECTIVITY:
+	xml->reflectivity=parse_float ((*iter).value);
+	break;
+      case BACKGROUND:
+	xml->backgroundname=(*iter).value;
+	break;
       case NEARSTARS:
 	xml->numnearstars = parse_int((*iter).value);
 	break;
@@ -170,7 +202,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case FADESTARS:
 	xml->fade = parse_bool ((*iter).value);
 	break;
-   case NAME:
+      case NAME:
 	this->name = new char [strlen((*iter).value.c_str())+1];
 	strcpy(this->name,(*iter).value.c_str());
 	break;
@@ -188,45 +220,88 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
 
     break;
-
+  case LIGHT: 
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    xml->lights.push_back (GFXLight (true,Vector(0,0,0)));
+    break;
+  case ATTEN:
+    tmptarg=ATTENUATE;
+    goto addlightprop;
+  case AMB:
+    tmptarg=AMBIENT;
+    goto addlightprop;
+  case SPEC:
+    tmptarg=SPECULAR;
+    goto addlightprop;
+  case DIFF:
+    tmptarg=DIFFUSE;
+    goto addlightprop;
+  addlightprop:
+    assert (xml->unitlevel==2);
+    assert (xml->lights.size());
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case EMR:
+	tmpcol.r=parse_float ((*iter).value);
+	break;
+      case EMG:
+	tmpcol.g=parse_float ((*iter).value);
+	break;
+      case EMB:
+	tmpcol.b=parse_float ((*iter).value);
+	break;
+      case EMA:
+	tmpcol.a=parse_float ((*iter).value);
+	break;
+      }
+    }
+    xml->lights.back().SetProperties (tmptarg,tmpcol);
+    break;
   case JUMP:
   case PLANET:
-	assert (xml->unitlevel>0);
-	xml->unitlevel++;
+    assert (xml->unitlevel>0);
+    xml->unitlevel++;
     S = Vector (0,1,0);
     R = Vector (0,0,1);
-	filename = new char [1];
-	filename[0]='\0';
-	alpha=new char[1];
-	alpha[0]='\0';
+    filename = new char [1];
+    filename[0]='\0';
+    alpha=new char[1];
+    alpha[0]='\0';
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	delete []filename;
-    filename = new char [strlen((*iter).value.c_str())+1];
+	filename = new char [strlen((*iter).value.c_str())+1];
 	strcpy(filename,(*iter).value.c_str());
 	break;
-	  case DESTINATION:
+      case DESTINATION:
 	dest=ParseDestinations((*iter).value);
 	break;
-	  case ALPHA:
+      case ALPHA:
 	delete []alpha;
-    alpha = new char [strlen((*iter).value.c_str())+1];
+	alpha = new char [strlen((*iter).value.c_str())+1];
 	strcpy(alpha,(*iter).value.c_str());
+	break;
+      case LIGHT:
+	GetLights (xml->lights,curlights,(*iter).value.c_str());
+		//assert (parse_int ((*iter).value)<xml->lights.size());
+	//curlights.push_back (xml->lights[parse_int ((*iter).value)]);
 	break;
       case FACTION:
 	faction = _Universe->GetFaction ((*iter).value.c_str());
 	break;
-      case EMMISIVR:
+      case EMR:
 	ourmat.er = parse_float((*iter).value);
 	break;
-      case EMMISIVG:
+      case EMG:
 	ourmat.eg = parse_float((*iter).value);
 	break;
-      case EMMISIVB:
+      case EMB:
 	ourmat.eb = parse_float((*iter).value);
 	break;
-      case EMMISIVA:
+      case EMA:
 	ourmat.ea = parse_float((*iter).value);
       case RI:
 	R.i=parse_float((*iter).value);
@@ -282,17 +357,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }
 
     }
-	if (alpha[0]==0) {
-		delete [] alpha;
-		alpha=NULL;
-	}
+    if (alpha[0]==0) {
+      delete [] alpha;
+      alpha=NULL;
+    }
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,false,faction);
+      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun, NULL, ourmat,faction));
+      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun, NULL, ourmat,curlights,faction));
       xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun);
-	}
+    }
     delete []filename;
     break;
   case UNIT:
@@ -360,7 +435,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }  
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,0,vector <char *>(),xml->unitlevel-1,ourmat,true,faction);
+      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-1,ourmat,curlights,true,faction);
     } else {
       xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
       xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun, NULL));
@@ -380,28 +455,28 @@ void StarSystem::endElement(const string &name) {
 
   switch(elem) {
   case UNKNOWN:
-	  xml->unitlevel--;
-//    cerr << "Unknown element end tag '" << name << "' detected " << endl;
+    xml->unitlevel--;
+    //    cerr << "Unknown element end tag '" << name << "' detected " << endl;
     break;
   default:
-	  xml->unitlevel--;
+    xml->unitlevel--;
     break;
   }
-	if (xml->unitlevel==0) {
-		numprimaries = xml->moons.size();
-		this->primaries=new Unit * [xml->moons.size()];
-		for(unsigned int i=0;i<xml->moons.size();i++) {
+  if (xml->unitlevel==0) {
+    numprimaries = xml->moons.size();
+    this->primaries=new Unit * [xml->moons.size()];
+    for(unsigned int i=0;i<xml->moons.size();i++) {
 			
-			primaries[i]=xml->moons[i];
-		}
-	}
+      primaries[i]=xml->moons[i];
+    }
+  }
 }
 
 
 void StarSystem::LoadXML(const char *filename) {
-//  shield.number=0;
+  //  shield.number=0;
   const int chunk_size = 16384;
- // rrestricted=yrestricted=prestricted=false;
+  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
     assert(0);
@@ -431,20 +506,20 @@ void StarSystem::LoadXML(const char *filename) {
   fclose (inFile);
   XML_ParserFree (parser);
 #ifdef NV_CUBE_MAP
-	LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
-	LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
-	LightMap[2]=new Texture ((xml->backgroundname+"_up_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
-	LightMap[3]=new Texture ((xml->backgroundname+"_down_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
-	LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
-	LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
+  LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
+  LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
+  LightMap[2]=new Texture ((xml->backgroundname+"_up_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);
+  LightMap[3]=new Texture ((xml->backgroundname+"_down_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Y);
+  LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
+  LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
 #else
-	FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"rb");
-	if (!tempo) {
-		EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
-	}else {
-		fclose (tempo);
-	}
-	LightMap[0] = new Texture((xml->backgroundname+"_light.bmp").c_str(), 1);
+  FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"rb");
+  if (!tempo) {
+    EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
+  }else {
+    fclose (tempo);
+  }
+  LightMap[0] = new Texture((xml->backgroundname+"_light.bmp").c_str(), 1);
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
   stars = new Stars (xml->numnearstars, xml->starsp);

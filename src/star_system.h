@@ -34,7 +34,8 @@ class StarSystem {
   ///Starsystem XML Struct For use with XML loading
   struct StarXML { 
   int unitlevel;
-    vector<Planet *> moons;
+    std::vector <GFXLight> lights;
+    std::vector <Planet *> moons;
     string backgroundname;
     Vector cursun;
     float reflectivity;
