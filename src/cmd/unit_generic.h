@@ -212,6 +212,7 @@ protected:
   ///no collision table presence.
   bool SubUnit;
   bool RecurseIntoSubUnitsOnCollision;
+  bool FaceCamera;
 public:
   bool isSubUnit() {return SubUnit;}
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min);
@@ -266,7 +267,6 @@ protected:
   }
   inline Nebula * GetNebula () const{return nebula;}
   ///Should draw selection box?
-  bool selected;  
   ///Process all meshes to be deleted
   static void ProcessDeleteQueue();
   ///Returns the cockpit name so that the controller may load a new cockpit
@@ -383,6 +383,7 @@ public:
     unsigned char damage;
     //negative means fuel
   } jump;
+  bool selected;  
  
   const UnitJump &GetJumpStatus() const {return jump;}
   float CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse)const ;

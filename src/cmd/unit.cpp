@@ -53,7 +53,7 @@
 #include "cmd/base.h"
 //#include "unit_template.h"
 //#include "gfx/animation.h"
-
+#include "gfx/point_to_cam.h"
 #include "unit_jump.cpp"
 #include "unit_cargo.cpp"
 #include "unit_customize.cpp"
@@ -420,8 +420,17 @@ void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
 extern bool flickerDamage (Unit * un, float hullpercent);   
 extern short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass);
 template <class UnitType>
-void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
+void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   unsigned int i;
+  Matrix mat(mato);
+  if (FaceCamera){
+	  Vector p,q,r;
+	  QVector pos (mato.p);
+	  float wid,hei;
+	  CalculateOrientation(pos,p,q,r,wid,hei,0,false,&mat);
+	  pos=mato.p;
+	  VectorAndPositionToMatrix(mat,p,q,r,pos);
+  }
   short cloak=cloaking;
   if (cloaking>cloakmin) {
     cloak = cloakVal (cloak,cloakmin,image->cloakrate, image->cloakglass);
@@ -475,11 +484,22 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 
   cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   Matrix *ctm;
+  Matrix invview;//not used unless FaceCamera
   Transformation * ct;
   cumulative_transformation.Compose(parent, parentMatrix);
   ctm =&cumulative_transformation_matrix;
   ct = &cumulative_transformation;
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  if (FaceCamera) {
+	  Vector p,q,r;
+	  QVector pos (ctm->p);
+	  float wid,hei;
+	  CalculateOrientation(pos,p,q,r,wid,hei,0,false,ctm);
+	  VectorAndPositionToMatrix(invview,p,q,r,ctm->p);
+//	  _Universe->AccessCamera()->GetView(invview);
+
+	  ctm = &invview;	  
+  }
   SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND

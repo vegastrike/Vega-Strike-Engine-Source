@@ -179,7 +179,9 @@ namespace UnitXML {
       LIGHTTYPE,
       COMBATROLE,
       RECURSESUBUNITCOLLISION,
-      WARPENERGY
+      WARPENERGY,
+	  FACECAMERA
+	  
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -222,7 +224,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION)
     
   };
-  const EnumMap::Pair attribute_names[98] = {
+  const EnumMap::Pair attribute_names[99] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -320,11 +322,12 @@ namespace UnitXML {
     EnumMap::Pair ("Maximum",MAXIMUM),
     EnumMap::Pair ("LightType",LIGHTTYPE),
     EnumMap::Pair ("CombatRole",COMBATROLE),
-    EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION)
+    EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION),
+    EnumMap::Pair ("FaceCamera",FACECAMERA)	
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 98);
+  const EnumMap attribute_map(attribute_names, 99);
 }
 
 using XMLSupport::EnumMap;
@@ -1342,6 +1345,9 @@ using namespace UnitXML;
 	ADDDEFAULT;
 	RecurseIntoSubUnitsOnCollision= XMLSupport::parse_bool (iter->value);
 	break;
+	  case FACECAMERA:
+		  FaceCamera=XMLSupport::parse_bool(iter->value);
+		  break;
       case COMBATROLE:
 		  ADDDEFAULT;
 		  xml->calculated_role=true;

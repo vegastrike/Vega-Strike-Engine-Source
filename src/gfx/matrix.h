@@ -45,6 +45,17 @@ class Matrix {
     r[8]=r8;
     p=pos;
   }
+  void InvertRotationInto (Matrix & result) const{
+    result.r[0]=r[0];
+    result.r[1]=r[3];
+    result.r[2]=r[6];
+    result.r[3]=r[1];
+    result.r[4]=r[4];
+    result.r[5]=r[7];
+    result.r[6]=r[2];
+    result.r[7]=r[5];	
+    result.r[8]=r[8];
+  }
   Matrix(const Vector &v1, const Vector &v2, const Vector &v3):p(0,0,0) {
     this->r[0] = v1.i;
     this->r[1] = v1.j;

@@ -409,6 +409,7 @@ void Unit::Init()
   jump.energy = 100;
   jump.delay=5;
   jump.damage=0;
+  FaceCamera=false;
   jump.drive=-2;// disabled
   afterburnenergy=0;
   planet=NULL;
