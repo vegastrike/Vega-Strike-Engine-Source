@@ -6,12 +6,14 @@
 void CloakFor::Execute() {
   if (time==0) {
     parent->Cloak (enable);
+    fprintf (stderr,"\ncloaking %f\n",maxtime);
   }
   time +=SIMULATION_ATOM;
   if (time>maxtime) {
     done = true;
     if (maxtime!=0) {
       parent->Cloak (!enable);
+    fprintf (stderr,"\ndecloaking%f\n",maxtime);
     }
     return;
   }
