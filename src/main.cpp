@@ -73,7 +73,7 @@ int main( int argc, char **argv )
 {
 
     /* Print copyright notice */
-    fprintf( stderr, "Vega Strike " VERSION " -- Final Conflict\n"
+  fprintf( stderr, "Vega Strike " VERSION " \n";
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
     srand( time(NULL) );
