@@ -51,13 +51,23 @@
 
 #include "vs_globals.h"
 #include "config_xml.h"
-
+#include "gfx/cockpit.h"
 //#include "vegastrike.h"
 
 /* *********************************************************** */
 
 
+#if 0
+NEVER NEVER NEVER use Unit* to save a unit across frames
 extern Unit *player_unit;
+BAD BAD BAD
+
+Better:
+extern UnitContainer player_unit;
+
+Best:
+_Universe->AccessCockpit()->GetParent();
+#endif
 
 varInst *Mission::call_unit(missionNode *node,int mode){
 #ifdef ORDERDEBUG
@@ -117,7 +127,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     Unit *my_unit=NULL;
 
     if(mode==SCRIPT_RUN){
-      my_unit=player_unit;
+      my_unit=_Universe->AccessCockpit()->GetParent();;
     }
 
     viret=newVarInst(VI_TEMP);

@@ -380,9 +380,17 @@ void InitializeInput() {
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
 
-
+#if 0
+NEVER EVER EVER USE THIS
 Unit *player_unit;
+BAD BAD
+if anything use
+UnitContainer player_unit;
+but that may change over time
 
+use
+_Universe->AccessCockpit()->GetParent();
+#endif
 void createObjects() {
   //  GFXFogMode (FOG_OFF);
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
@@ -596,7 +604,7 @@ void createObjects() {
   fighters[0]->SetTurretAI ();
 #endif
 
-  player_unit=fighters[0];
+  //  player_unit=fighters[0];
   
 
   shipList = _Universe->activeStarSystem()->getClickList();
