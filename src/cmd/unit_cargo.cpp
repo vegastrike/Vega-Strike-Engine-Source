@@ -18,17 +18,49 @@ Cargo * GetMasterPartList(const char *input_buffer){
 
 void Unit::ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev) {
   unsigned int numcarg = GetUnitMasterPartList().numCargo();
+  float minprice=FLT_MAX;
+  float maxprice=0;
+  for (unsigned int j=0;j<numcarg;++j) {
+    if (GetUnitMasterPartList().GetCargo(j).category==category) {
+      float price = GetUnitMasterPartList().GetCargo(j).price;
+      if (price < minprice)
+	minprice = price;
+      else if (price > maxprice)
+	maxprice = price;
+    }
+  }
   for (unsigned int i=0;i<numcarg;i++) {
     Cargo c= GetUnitMasterPartList().GetCargo (i);
     if (c.category==category) {
+
+      static float aveweight = fabs(XMLSupport::parse_float (vs_config->getVariable ("cargo","price_recenter_factor","0")));
       c.quantity=quantity-quantdev;
+      float baseprice=c.price;
       c.price*=price-pricedev;
+
       //stupid way
       c.quantity+=(quantdev*2+1)*((double)rand())/(((double)RAND_MAX)+1);
       c.price+=pricedev*2*((float)rand())/RAND_MAX;
       c.price=fabs(c.price);
-      if (c.quantity<0) {
+      c.price=(c.price +(baseprice*aveweight))/ (aveweight+1);
+      if (c.quantity<=0) {
 	c.quantity=0;
+      }else {
+	//quantity more than zero
+	if (maxprice>minprice+.01) {
+	  float renormprice = (baseprice-minprice)/(maxprice-minprice);
+	  static float maxpricequantadj = XMLSupport::parse_float (vs_config->getVariable ("cargo","max_price_quant_adj","5"));
+	  static float minpricequantadj = XMLSupport::parse_float (vs_config->getVariable ("cargo","min_price_quant_adj","1"));
+	  static float powah = XMLSupport::parse_float (vs_config->getVariable ("cargo","price_quant_adj_power","1"));
+	  renormprice = pow(renormprice,powah);
+	  renormprice *= (maxpricequantadj-minpricequantadj);
+	  renormprice+=1;
+	  if (renormprice>.001) {
+	    c.quantity/=renormprice;
+	    if (c.quantity<1)
+	      c.quantity=1;
+	  }
+	}
       }
       if (c.price <.01)
 	c.price=.01;
@@ -84,7 +116,7 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
 }
 
 vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
-	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("physics","filter_expensive_cargo","false"));
+	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
 	Cockpit * cp = _Universe->isPlayerStarship (this);
   if (cp) {

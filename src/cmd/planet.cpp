@@ -487,7 +487,19 @@ string Planet::getHumanReadablePlanetType () const{
 	    temp = "Ice Colony";
 	  }else if (temp=="carribean") {
 	    temp="Pleasure";
-	  }else {
+	  }else if (temp=="tundra") {
+	    temp = "Rlaan_Ice_Agriculture";
+	  }else if (temp=="n_class") {
+	    temp = "Aera_Industrial";
+	  }else if (temp=="j_class") {
+	    temp = "Aera_Ice_Colony";
+	  }else if (temp=="k_class") {
+	    temp = "Aera_Agriculture";
+	  }else if (temp=="n_class") {
+	    temp = "Aera_Industrial";
+	  }else if (temp=="Lava") {
+	    temp = "Rlaan_Industrial";
+	  }else{
 	    temp="";
 	  }
 	  return temp;

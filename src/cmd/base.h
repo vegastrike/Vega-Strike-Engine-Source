@@ -6,7 +6,7 @@
 #include "gfx/hud.h"
 #include <stdio.h>
 
-#define BASE_MAKER
+//#define BASE_MAKER
 //#define BASE_XML //in case you want to write out XML instead...
 
 #define BASE_EXTENSION ".py"
