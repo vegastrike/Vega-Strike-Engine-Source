@@ -31,6 +31,7 @@ using std::priority_queue;
 #define GFX_SPOTLIGHT 8;
 #define GFX_ATTENUATED 32;
 
+//#define PER_MESH_ATTENUATE
 
 int GFX_MAX_LIGHTS=8;
 int GFX_OPTIMAL_LIGHTS=4;
@@ -326,15 +327,18 @@ void /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
 	  break;
       }
       newQsize++;
+#ifdef PER_MESH_ATTENUATE
       if ((*_llights_loc)[i].vect[3]) {
 	//intensity now has become the attenuation factor
 	newQ[i]= tmpvar.number;
 	AttenuateQ[i]=tmpvar.intensity_key/(*_llights_loc)[i].intensity;
       }else {
+#endif
 	newQ[i]= tmpvar.number;
+#ifdef PER_MESH_ATTENUATE
 	AttenuateQ[i]=0;
       }
-
+#endif
     } else {
       break;
     }
@@ -344,10 +348,13 @@ void /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
   for (i=0;i<newQsize;i++) {
     light = newQ[i];
     if ((*_llights_dat)[light].target>=0) {
+#ifdef PER_MESH_ATTENUATE
       if (AttenuateQ[i]) 
 	EnableExistingAttenuated (light,AttenuateQ[i]);
       else
+#endif
 	EnableExisting (newQ[i]);
+      /***daniel 081901
       AttTmp[0]=(*_llights_loc)[light].vect[0]-loc.i;
       AttTmp[1]=(*_llights_loc)[light].vect[1]-loc.j;
       AttTmp[2]=(*_llights_loc)[light].vect[2]-loc.k;
@@ -355,7 +362,9 @@ void /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
       VecT[0]=AttTmp[0]*transform[0]+AttTmp[1]*transform[1]+AttTmp[2]*transform[2];
       VecT[1]=AttTmp[0]*transform[4]+AttTmp[1]*transform[5]+AttTmp[2]*transform[6];
       VecT[2]=AttTmp[0]*transform[8]+AttTmp[1]*transform[9]+AttTmp[2]*transform[10];
+      
       glLightfv (GL_LIGHT0+(*_llights_dat)[light].target, GL_POSITION, VecT);
+      ****/
     }
   }
   for (i=0;i<GFX_MAX_LIGHTS;i++) {
@@ -409,12 +418,14 @@ void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) 
 	glLightfv (GL_LIGHT0+tmp,GL_DIFFUSE, (*_llights_dat)[light].diffuse);
 	glLightfv (GL_LIGHT0+tmp, GL_SPECULAR, (*_llights_dat)[light].specular);
 	glLightfv (GL_LIGHT0+tmp, GL_AMBIENT, (*_llights_dat)[light].ambient);
-	//POS//	glLightfv (GL_LIGHT0+tmp, GL_POSITION, (*_llights_loc)[light].vect);
+	glLightfv (GL_LIGHT0+tmp, GL_POSITION, (*_llights_loc)[light].vect);
       	glLightfv (GL_LIGHT0+tmp, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
       	glLightf (GL_LIGHT0+tmp,GL_SPOT_EXPONENT, (*_llights_dat)[light].exp);
-       	////glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
-       	////glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
-       	////glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);//they appear to be broken...anyhow they are of great cost...possibly better to just do a per-model attenuation
+#ifndef PER_MESH_ATTENUATE
+       	glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+       	glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+       	glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);//they appear to be broken...anyhow they are of great cost...possibly better to just do a per-model attenuation
+#endif
 	(*_llights_dat)[light].target=tmp;
 	(*_llights_dat)[light].changed=0;
 	GLLights[tmp]=light;//set pointer and backpointer
