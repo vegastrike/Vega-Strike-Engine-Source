@@ -4527,12 +4527,13 @@ bool Unit::ReduceToTemplate() {
 
 int Unit::RepairCost () {
 	int cost =1;
-	for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
+	unsigned int i;
+	for (i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
         if (image->cockpit_damage[i]!=1) {
 			cost++;
 		}
 	}
-	for (unsigned int i=0;i<numCargo();++i) {
+	for (i=0;i<numCargo();++i) {
 		if (GetCargo(i).category.find(DamagedCategory)==0)
 			cost++;
 	}
