@@ -1,3 +1,6 @@
+#ifndef _PATRICK_AND_DANNY_STRING_H_
+#define _PATRICK_AND_DANNY_STRING_H_
+
 #include <vector>
 #include <iostream>
 #ifdef __APPLE__
@@ -18,12 +21,10 @@
 namespace std {
 
 class string : public vector <char> {
-  typedef size_t size_type;
-  const static size_type npos=static_cast<size_type> (-1);
   void allocstr (const char *str, size_type len) {
     if (len==npos)
       len=strlen(str);
-    for (int i=0;i<len;i++) {
+    for (unsigned int i=0;i<len;i++) {
       vector<char>::push_back(str[i]);
     }
     vector<char>::push_back('\0');
@@ -33,6 +34,9 @@ class string : public vector <char> {
     allocstr(str,len);
   }
  public:
+  typedef size_t size_type;
+  const static size_type npos=static_cast<size_type> (-1);
+
   void clear () {
     *this = "";
   }
@@ -70,6 +74,57 @@ class string : public vector <char> {
   string & assign (const string &str) {
     reallocstr(str.c_str(),str.size());
     return *this;
+  }
+  string& replace (size_type pos1, size_type n1, const string& str, size_type pos2 = 0, size_type n2 = npos) {
+    basic_string <char> bastr (this->c_str());
+    basic_string <char> strstr (str.c_str());
+    bastr.replace(pos1,n1,strstr,pos2,n2);
+    return ((*this)=bastr.c_str());
+  }    
+  string& replace (size_type pos, size_type n1, const char* s, size_type n2) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(pos,n1,s,n2);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (size_type pos, size_type n1, const char* s) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(pos,n1,s);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (size_type pos, size_type n1, size_type n2, char c) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(pos,n1,n2,c);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (size_type pos, size_type n, char c) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(pos,n,c);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (iterator i1, iterator i2, const string& str) {
+    basic_string <char> bastr (this->c_str());
+    basic_string <char> strstr (str.c_str());
+    bastr.replace(i1,i2,strstr);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (iterator i1, iterator i2, const char* s, size_type n) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(i1,i2,s,n);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (iterator i1, iterator i2, const char* s) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(i1,i2,s);
+    return ((*this)=bastr.c_str());
+  }
+  string& replace (iterator i1, iterator i2, size_type n, char c) {
+    basic_string <char> bastr (this->c_str());
+    bastr.replace(i1,i2,n,c);
+    return ((*this)=bastr.c_str());
+  }
+  size_type copy (char *buf, size_type n, size_type pos=0) const {
+    basic_string <char> bastr ((*this).c_str());
+    return bastr.copy(buf,n,pos);
   }
   ~string () {
   }
@@ -373,3 +428,4 @@ operator>= (const string& lhs,
 }
 
 }
+#endif
