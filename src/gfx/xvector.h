@@ -43,9 +43,9 @@ class XVector {
   friend class AIScript;
   friend class PlanetaryTransform;
   friend class SphericalTransform;
-  inline XVector (const YVector &);
   inline YVector operator = (const YVector &);
  public:
+  inline XVector (const YVector &);
   inline YVector Cast() const;
   XVector(QFLOAT i,QFLOAT j,QFLOAT k) {
     this->i = i;
