@@ -210,6 +210,17 @@ Note that this is only a debugging aid. Once DTD is written, there
 will be no need for this sort of checking
  */
 
+
+bool shouldreflect (string r) {
+    if (strtoupper(r)=="FALSE")
+		return false;
+	int i;
+	for (i=0;i<(int)r.length();++i) {
+		if (r[i]!='0'&&r[i]!='.'&&r[i]!='+'&&r[i]!='e')
+			return true;
+	}
+	return false;
+}
 void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   //static bool flatshadeit=false;
   AttributeList::const_iterator iter;
@@ -232,7 +243,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      setEnvMap ( (*iter).value!="false"&&(*iter).value!="0");
+		      setEnvMap ( shouldreflect((*iter).value));
 		      break;
 		    case XML::LIGHTINGON:
 		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
