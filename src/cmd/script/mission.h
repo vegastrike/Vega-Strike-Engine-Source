@@ -203,6 +203,7 @@ enum callback_module_unit_type {
     CMT_UNIT_getFaction ,
     CMT_UNIT_getVelocity ,
     CMT_UNIT_getTarget ,
+    CMT_UNIT_getName ,
     CMT_UNIT_getThreat ,
     CMT_UNIT_setTarget ,
     CMT_UNIT_getDistance ,

@@ -435,6 +435,16 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="unit";
       viret->object=res_unit;
     }
+    else if(method_id==CMT_UNIT_getName){
+      string *res_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	res_unit=&my_unit->name;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="string";
+      viret->object=(void*)res_unit;
+    }
     else if(method_id==CMT_UNIT_getThreat){
       Unit *res_unit=NULL;
       if(mode==SCRIPT_RUN){
