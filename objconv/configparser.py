@@ -3,9 +3,18 @@ import sys
 import os
 import fnmatch
 import string
+from xml.dom.minidom import *
 
 global varlines
 varlines = list()
+
+global config
+config = Document()
+
+
+#----------------
+# Parsing functions
+#----------------
 
 def add(filelist, dirname, filenames):
     """Adds any .cpp files in the directory to filelist."""
@@ -77,13 +86,9 @@ def cleanSection(word,onlywhitespace=False):
     for char in word:
         if quoted != str():
             if char == quoted[len(quoted)-1]:
-#                print "Changing quoted from : "+quoted,
                 quoted = quoted[:len(quoted)-1]
-#                print "To : "+quoted+" Char : "+char
                 if newword[len(newword)-1] == char:
-#                    print "Changing newword from : "+newword,
                     newword = newword[:len(newword)-1]
-#                    print "To : "+newword
                 else:
                     newword+=char
             else:
@@ -99,12 +104,7 @@ def cleanSection(word,onlywhitespace=False):
                     newword+="\"\""
                 newword+=char
             except:
-
-#                print "\tCannot clean section:\n\t"+word
                 pass
-#                (etype, eobj, etb) = sys.exc_info()
-                # eobj is the SIDL exception object
-#                print eobj  # show the exception comment
     if len(newword) > 1 and newword[len(newword)-1] == ",":
         newword+="\"\""
     return newword
@@ -123,34 +123,21 @@ def formatDuplicate(varone,vartwo):
     return finalform
 
 def removeComments(parsable,comment):
-#    print 'Parsing '+parsable
     while 1:
-        closeloc = parsable.find("*/")#Lets search for a single block quote
+        closeloc = parsable.find("*/")
         openloc = parsable.find("/*")
         lineloc = parsable.find("//")
 
         opened = openloc != -1
         closed = closeloc != -1
         linedout = lineloc != -1
-#        print 'Comment '+str(comment)
-#        print closeloc
-#        print openloc
-#        print lineloc
-
-#        print closed
-#        print opened
-#        print linedout
-#        print parsable
 
         if comment:
             if closed:
-#                print 'Is closed : ',
                 parsable = parsable[closeloc+2:]
-#                print parsable
                 comment = False
                 continue
             else:
-#                print 'Given up'
                 break
 
         elif (not opened) and (not linedout):
@@ -194,49 +181,9 @@ def printDuplicates():
                 if varlines[i][2] != varlines[i+1][2]:
                     print "\nNon-Identical Duplicate:\n"+formatDuplicate(varlines[i],varlines[i+1])+"\n"
 
-
 #----------------
-# The start of the script
+# XML creation functions
 #----------------
-
-arg = sys.argv
-print arg
-
-srcpath = os.curdir
-if len(arg) > 1:
-    srcpath=arg[1]
-
-srcpath=srcpath+os.sep
-
-print os.getcwd()
-print srcpath
-
-print 'Grepping files'
-
-filelist = list()
-
-os.path.walk(srcpath, add, filelist)
-
-print 'Parsing list'
-
-for filename in filelist:
-    a = file(filename)
-    comment = False
-    while 1:
-        line = a.readline()
-        if not line:
-            break
-#        print comment
-        parsable, comment = removeComments(line,comment)
-#        print filename
-        parseLine(parsable, filename)
-    a.close()
-
-varlines.sort()
-
-printDuplicates()
-
-print 'Creating XML'
 
 def createSection(currnode,section):
     for sec in section:
@@ -281,19 +228,56 @@ def shouldOverwrite(element,new):
         print 'Overwriting %s with %s'%(current,new)
         return True
 
-from xml.dom.minidom import *
-global config
-config = Document()
+
+#----------------
+# The start of the script
+#----------------
+
+arg = sys.argv
+
+srcpath = os.curdir
+if len(arg) > 1:
+    srcpath=arg[1]
+
+print 'Using source in '+srcpath
+
+srcpath=srcpath+os.sep
+
+print 'Grepping files'
+
+filelist = list()
+
+os.path.walk(srcpath, add, filelist)
+
+print 'Parsing list'
+
+for filename in filelist:
+    a = file(filename)
+    comment = False
+    while 1:
+        line = a.readline()
+        if not line:
+            break
+        parsable, comment = removeComments(line,comment)
+        parseLine(parsable, filename)
+    a.close()
+
+varlines.sort()
+
+printDuplicates()
+
+print 'Creating XML'
+
 config.appendChild(config.createElement('vegaconfig'))
 for [section, var, default, cpp] in varlines:
     node = createSection(config.firstChild,section)
     createVar(node, var, default)
 
-a = open('pygrep','w')
-for line in varlines:
-    a.write(str(line)+"\n")
-a.close()
+#a = open('pygrep','w')
+#for line in varlines:
+#    a.write(str(line)+"\n")
+#a.close()
 
-a = open('pyconfig','w')
+a = open('pygrep.config','w')
 a.write(config.toprettyxml('    '))
 a.close()
