@@ -138,7 +138,7 @@ bool AUDInit () {
   g_game.music_enabled = false;
 
 
-#ifdef hAVE_AL
+#ifdef HAVE_AL
   usedoppler = XMLSupport::parse_bool (vs_config->getVariable ("audio","Doppler","false"));
   usepositional = XMLSupport::parse_bool (vs_config->getVariable ("audio","Positional","true"));
 

@@ -91,7 +91,7 @@ VegaConfig::VegaConfig(char *configfile){
 /*
 for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; done
  */
-#if 0
+#if 1
 const float volinc = 1;
 const float dopinc = .1;
 void incvol (int i, KBSTATE a) {
@@ -163,7 +163,7 @@ void VegaConfig::initKeyMap(){
   using namespace CockpitKeys;
 
 void VegaConfig::initCommandMap(){
-#if 0
+#if 1
   //  I don't knwo why this gives linker errors!
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
