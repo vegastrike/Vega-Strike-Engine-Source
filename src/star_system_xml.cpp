@@ -14,6 +14,7 @@
 #include <assert.h>	/// needed for assert() calls.
 #include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
+#include "cmd/atmosphere.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -89,7 +90,8 @@ namespace StarXML {
     CONTTERRAIN,
     MASS,
     BUILDING,
-    VEHICLE
+    VEHICLE,
+    ATMOSPHERE
   };
 
   const EnumMap::Pair element_names[] = {
@@ -106,7 +108,8 @@ namespace StarXML {
     EnumMap::Pair ("Terrain",TERRAIN),
     EnumMap::Pair ("ContinuousTerrain",CONTTERRAIN),
     EnumMap::Pair ("Building",BUILDING),
-    EnumMap::Pair ("Vehicle",VEHICLE)
+    EnumMap::Pair ("Vehicle",VEHICLE),
+    EnumMap::Pair ("Atmosphere",ATMOSPHERE)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -145,7 +148,7 @@ namespace StarXML {
     EnumMap::Pair ("Mass", MASS)
   };
 
-  const EnumMap element_map(element_names, 14);
+  const EnumMap element_map(element_names, 15);
   const EnumMap attribute_map(attribute_names, 34);
 }
 
@@ -251,8 +254,30 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
 
     break;
+  case ATMOSPHERE:
+    {
+      xml->unitlevel++;
+      for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	switch(attribute_map.lookup((*iter).name)) {
+	default:
+	  break;
+	}
+      }  
+      Atmosphere * a = new Atmosphere();
+      if (xml->unitlevel>2) {
+	assert(xml->moons.size()!=0);
+	Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
+	if (p)
+	  p->setAtmosphere (a);
+	else
+	  fprintf (stderr,"atmosphere loose. no planet for it");
+      } 
+      
+    }
+    break;
   case TERRAIN:
   case CONTTERRAIN:
+    xml->unitlevel++;
     S = Vector (0,1,0);
     R = Vector (0,0,1);
     pos = Vector (0,0,0);
@@ -336,6 +361,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  contterrains.push_back (new ContinuousTerrain (myfile.c_str(),TerrainScale,position));
 	  xml->ct =contterrains.back();;
 	  contterrains.back()->SetTransformation (t);
+	  if (xml->unitlevel>2) {
+	    assert(xml->moons.size()!=0);
+	    Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
+	    if (p)
+	      p->setTerrain (xml->ct);
+	  } 
 	}
       }
     }
@@ -519,20 +550,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	S.k=parse_float((*iter).value);
 	break;
       case X:
- 	assert(xml->unitlevel==2);
-
  	xml->cursun.i=parse_float((*iter).value);
 
  	break;
       case Y:
- 	assert(xml->unitlevel==2);
-
  	xml->cursun.j=parse_float((*iter).value);
 
  	break;
       case Z:
- 	assert(xml->unitlevel==2);
-
  	xml->cursun.k=parse_float((*iter).value);
 
  	break;
@@ -546,18 +571,20 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }
 
     }  
-    if (xml->unitlevel>((xml->parentterrain==NULL&&xml->ct==NULL)?2:3)) {
+    if ((xml->parentterrain==NULL&&xml->ct==NULL)&&xml->unitlevel>((xml->parentterrain==NULL&&xml->ct==NULL)?2:3)) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-1,ourmat,curlights,true,faction);
+      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
     } else {
       if (xml->parentterrain!=NULL) {
-	xml->moons.push_back ((Planet *)new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction));
-	xml->moons.back()->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
-	xml->moons.back()->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction);
+	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
+	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	AddUnit (b);
       }else if (xml->ct!=NULL) {
-	xml->moons.push_back ((Planet *)new Building (xml->ct,elem==VEHICLE,filename,true,false,faction));
-	xml->moons.back()->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
-	xml->moons.back()->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,true,false,faction);
+	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
+	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	AddUnit (b);
       }else {
 	xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
 	xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));

@@ -10,6 +10,8 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include <assert.h>
+#include "cont_terrain.h"
+#include "atmosphere.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -61,7 +63,22 @@ void PlanetaryOrbit::Execute() {
 
 void Planet::endElement() {  
 }
+Planet * Planet::GetTopPlanet (int level) {
+  if (level>2) {
+    UnitCollection::UnitIterator * satiterator = satellites.createIterator();
+	  assert(satiterator->current()!=NULL);
+	  if (satiterator->current()->isUnit()==PLANETPTR) {
+	    return ((Planet *)satiterator->current())->GetTopPlanet (level-1);
+	  } else {
+	    fprintf (stderr,"Planets are unable to orbit around units");
+	    return NULL;
+	  }
 
+  } else {
+    return this;
+  }
+  
+}
 void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {
@@ -87,12 +104,12 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
 
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
 
-Planet::Planet()  : Unit(), radius(0.0f), satellites() {
+Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites() {
   Init();
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction) : Unit(), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
     GFXCreateLight (l,ligh[i].ligh,!ligh[i].islocal);
@@ -156,6 +173,12 @@ void Planet::DisableLights () {
   }
 }
 Planet::~Planet() { 
+  if (terrain) {
+    delete terrain;
+  }
+  if (atmosphere){
+     delete atmosphere;
+  }
 	unsigned int i;
 	if (bspTree)
 	  delete bspTree;
@@ -166,6 +189,14 @@ Planet::~Planet() {
 	  GFXDeleteLight (lights[i]);
 	}
 }
+
+void Planet::setTerrain (ContinuousTerrain * t) {
+  terrain = t;
+}
+void Planet::setAtmosphere (Atmosphere *t) {
+  atmosphere = t;
+}
+
 
 void Planet::Kill() {
 	UnitCollection::UnitIterator * iter;

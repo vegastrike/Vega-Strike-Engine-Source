@@ -13,10 +13,12 @@ ok *
 #include "collection.h"
 #include "iterator.h"
 #include <vector>
+
 struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
 struct Texture;
+class Atmosphere;
 class Planet;
 typedef float Matrix[16];
 
@@ -45,9 +47,12 @@ struct GFXLightLocal {
   GFXLight ligh;
   bool islocal;
 };
+class ContinuousTerrain;
 
 class Planet : public Unit {
  private:
+  Atmosphere * atmosphere;
+  ContinuousTerrain *terrain;
   float radius;
   float gravity;
   vector <char *> destination;
@@ -60,11 +65,17 @@ class Planet : public Unit {
   void endElement();
   void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction);
   Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction);
+  Planet * GetTopPlanet (int level);
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
 //  void InitPlanet(FILE *fp);
   virtual void Kill();
+  void setTerrain (ContinuousTerrain *); 
+  ContinuousTerrain * getTerrain() {return terrain;}
+  void setAtmosphere (Atmosphere *);
+  Atmosphere * getAtmosphere () {return atmosphere;}
+  
   void gravitate(UnitCollection *units);
 
   class PlanetIterator : public Iterator {
