@@ -112,6 +112,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     textures.back().name=-1;
     textures.back().width=textures.back().height=1;
   }
+
   GLenum WrapMode;
   switch (texture_target) {
   case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
@@ -153,6 +154,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
   textures[*handle].width = width;
   textures[*handle].height = height;
+  textures[*handle].palette=NULL;
   if (palette&&textureformat == PALETTE8){
     fprintf (stderr," palette ");  
     textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
