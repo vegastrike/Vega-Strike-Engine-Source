@@ -61,6 +61,8 @@ void Mission::DirectorStart(missionNode *node){
   runtime.threads.push_back(main_thread);
   runtime.cur_thread=main_thread;
 
+  director=NULL;
+
   parsemode=PARSE_DECL;
 
   doModule(node,SCRIPT_PARSE);
@@ -143,12 +145,14 @@ void Mission::DirectorStart(missionNode *node){
     runtime.cur_thread->module_stack.pop_back();
   }
 
+#if 0
   while(true){
     DirectorLoop();
 #ifndef _WIN32
     sleep(1);
 #endif
   }
+#endif
 }
 
 void Mission::DirectorLoop(){
@@ -331,6 +335,8 @@ varInst * Mission::doScript(missionNode *node,int mode, varInstMap *varmap){
 	fatalError(node,mode,"you have to give a script name");
       }
       current_module->script.scripts[node->script.name]=node;
+      debug(0,node,mode,"added to module "+current_module->script.name+" : script ="+node->script.name);
+
       node->script.nr_arguments=0;
 
       string retvalue=node->attr_value("return");
@@ -598,6 +604,8 @@ varInst *Mission::doExec(missionNode *node,int mode){
 
       if(script==NULL){
 	fatalError(node,mode,"script "+name+" not found in module "+use_modstr);
+	printModules();
+
 	assert(0);
       }
     

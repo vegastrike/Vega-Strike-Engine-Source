@@ -550,6 +550,8 @@ void destroyObjects() {
 }
 extern void micro_sleep (unsigned int n);
 
+extern double gametime;
+
 double gametime=0.0;
 int total_nr_frames=0;
 
@@ -587,7 +589,8 @@ void main_loop() {
     cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
     exit(0);
   }
-    
+
+  mission->DirectorLoop();
 }
 
 

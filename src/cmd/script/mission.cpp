@@ -68,6 +68,7 @@ Mission::Mission(char *configfile){
 
   variables=NULL;
   origin_node=NULL;
+  director=NULL;
 
   initTagMap();
 

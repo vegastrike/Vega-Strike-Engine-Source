@@ -1,4 +1,10 @@
 2001-12-11 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter runs now while the game goes on
+	* added callback 'getGameTime'
+
+	
+2001-12-11 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* interpreter can use c_alike module files
 

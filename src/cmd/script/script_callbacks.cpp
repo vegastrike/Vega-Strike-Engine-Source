@@ -69,6 +69,9 @@ varInst *Mission::doCall(missionNode *node,int mode){
     if(node->script.name=="Rnd"){
       vi=callRnd(node,mode);
     }
+    else if(node->script.name=="getGameTime"){
+      vi=callGetGameTime(node,mode);
+    }
   }
   else if(module=="_olist"){
     vi=call_olist(node,mode);
@@ -83,8 +86,17 @@ varInst *Mission::doCall(missionNode *node,int mode){
 
 }
 
+extern double gametime;
 
+varInst *Mission::callGetGameTime(missionNode *node,int mode){
+  varInst *vi=new varInst;
 
+  vi->type=VAR_FLOAT;
+  if(mode==SCRIPT_RUN){
+    vi->float_val=gametime;
+  }
+  return vi;
+}
 
 
 
@@ -165,7 +177,7 @@ varInst *Mission::call_olist(missionNode *node,int mode){
   	olist_t *my_object=(olist_t *)ovi->object;
 	if(mode==SCRIPT_RUN){
 	  if(my_object==NULL){
-	    fatalError(node,mode,"olist.pushback: no object");
+	    fatalError(node,mode,"olist: no object");
 	    assert(0);
 	  }
 	}
@@ -244,7 +256,7 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       debug(3,snode,mode,"index is in that node");
 
 
-      viret->type=VAR_FLOAT;
+      viret->type=VAR_OBJECT;
 
       if(mode==SCRIPT_RUN){
 	int index=(int)findex;
@@ -310,3 +322,4 @@ varInst *Mission::call_olist(missionNode *node,int mode){
   }
   return NULL; // never reach
 }
+

@@ -179,6 +179,8 @@ class Mission {
 
   void GetOrigin(Vector &pos,string &planetname);
 
+  void DirectorLoop();
+
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
@@ -212,7 +214,6 @@ class Mission {
   void saveVariables(ostream& out);
   void initTagMap();
   void DirectorStart(missionNode *node);
-  void DirectorLoop();
 
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
@@ -295,6 +296,7 @@ void printNode(missionNode *node,int mode);
  void saveVarInst(varInst *vi,ostream &out);
  void printVarInst(int dbg_level,varInst *vi);
  void printGlobals(int dbg_level);
+ void printModules();
 
  string modestring(int mode);
 
@@ -302,6 +304,7 @@ void printNode(missionNode *node,int mode);
 
  varInst * callRnd(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
+ varInst * callGetGameTime(missionNode *node,int mode);
 
  varInst *call_olist(missionNode *node,int mode);
 };

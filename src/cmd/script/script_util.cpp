@@ -51,7 +51,12 @@
 
 string Mission::modestring(int mode){
   if(mode==SCRIPT_PARSE){
-    return "parse";
+    if(parsemode==PARSE_DECL){
+      return "parsedecl";
+    }
+    else{
+      return "parsefull";
+    }
   }
   else{
     return "run";
@@ -198,6 +203,28 @@ void Mission::printVarmap(const varInstMap & vmap){
 
     printVarInst(vi);
   }
+}
+
+/* *********************************************************** */
+
+void Mission::printModules(){
+  map<string,missionNode *>::iterator iter;
+
+  for(iter=runtime.modules.begin();iter!=runtime.modules.end();iter++){
+    cout << "  module " << (*iter).first ;
+    missionNode *mnode=(*iter).second;
+    printNode(mnode,0);
+    cout << "        scripts" << endl;
+
+    map<string,missionNode *>::iterator iter2;
+
+    for(iter2=mnode->script.scripts.begin();iter2!=mnode->script.scripts.end();iter2++){
+      cout << "  script " << (*iter2).first ;
+      missionNode *snode=(*iter2).second;
+      printNode(snode,0);
+    }
+  }
+
 }
 
 /* *********************************************************** */
