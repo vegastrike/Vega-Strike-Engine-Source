@@ -96,6 +96,7 @@ void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
 void  /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
 void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
 void /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
+float /*GFXDRVAPI*/ GFXGetZPerspective (float z);
 float /*GFXDRVAPI*/GFXGetXInvPerspective();
 float /*GFXDRVAPI*/GFXGetYInvPerspective();
 void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);

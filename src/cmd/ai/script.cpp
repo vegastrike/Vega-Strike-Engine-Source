@@ -631,7 +631,7 @@ void AIScript::LoadXML() {
     return;
   }
 #ifndef _WIN32
-  fprintf (stderr, "Loading AIscript: %s\n", filename);
+  //fprintf (stderr, "Loading AIscript: %s\n", filename);
 #endif
   xml = new AIScriptXML;
   xml->unitlevel=0;

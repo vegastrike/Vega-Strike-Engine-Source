@@ -188,11 +188,17 @@ void getInverseProjection (float *& inv) {
  * | xs 0  a 0 |[x]   [xs + az]          [1/xs 0   0  a/xs][x]   [x/xs+ aw/xs]
  * | 0  ys b 0 |[y] = [ys + bz]    ^-1   [ 0  1/ys 0  b/ys][y] = [y/ys+ bw/ys]
  * | 0  0  c d |[z]   [cz + dw]          [ 0   0   0  -1  ][z]   [0          ]
- * | 0  0 -1 0 |[w]   [-w     ]          [ 0   0  1/d c/d ][w]   [z/d + cw/d ]
+ * | 0  0 -1 0 |[w]   [-z     ]          [ 0   0  1/d c/d ][w]   [z/d + cw/d ]
  * therefore   return 1/(xs *d) and 1/(ys * d) 
  * I'm not good with matrix math...tell me if I should ret 1/xs+c/d instead
  * for test cases I can think of, it doesn't matter--- */
-
+float GFXGetZPerspective (float z) {
+  float left,right,bottom,top,nearval,farval;
+  GFXGetFrustumVars(true,&left,&right,&bottom,&top,&nearval,&farval);
+   float c = (farval+nearval) / ( farval-nearval);
+   float d = (farval*(right-left)) / (farval-nearval);  /* error? */
+   return c*z+d;
+}
 float GFXGetXInvPerspective () {
   return /*invprojection[11]*  */invprojection[0];//invprojection[15];//should be??  c/d == invproj[15]
 }

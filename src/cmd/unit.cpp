@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
 #include "beam.h"
@@ -570,15 +571,20 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 		continue;
 	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
-      float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
-					      meshdata[i]->Position()),
+      Vector TransformedPosition = Transform (cumulative_transformation_matrix,
+					      meshdata[i]->Position());
+      float d = GFXSphereInFrustum(TransformedPosition,
 				   meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
 				   *SizeScaleFactor
 #endif 
 				   );
       if (d) {  //d can be used for level of detail shit
-	meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+	if (g_game.x_resolution*meshdata[i]->rSize()/GFXGetZPerspective(d)>=.4) {//if the radius is at least half a pixel
+	  meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+	} else {
+
+	}
       }
     }
     
