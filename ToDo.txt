@@ -1,4 +1,4 @@
-Goals for 0.4.2 release:
+Goals for 0.4.3 release:
 * MUST TEST:
 ** Upgrades, especially repair on milspec and known previous troublemakers
 ** Fix systems to have jump points only outside the "slow-zone"
@@ -8,37 +8,28 @@ Goals for 0.4.2 release:
 ** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
 )
 
-*Clydesdale
-http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
-Apparently upgrade system doesn't quite work right and jump drive doesn't quite install right and cargo sometimes grows without bounds...
-ECM apparently causes some of these problems
-Jump drive goes away after selling it can't buy it back
+*MAKE 0.4.3 Available as a patch.
+
+*Bases
+**Add new bases
 
 * Music
 **Delete NEWe joke
 **put up cosmostation, industrialmixed, space navy, SteelG  for consideration
 
-*Base Interface
-**Need to allow purchase of larger ammounts of ammo in one go
-
 *Map
-we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
-the circles could deal with being, at least on the galaxy view, even a bit smaller
-(12:43:37) Jack: there needs to be some way to control which names get printed so as not to clutter the entire screen with overlapping text
-(12:44:02) Jack: there should be some color cue that highlights the jumps out of the selected system
-
-*Damage
-** Fix System Damage so it happens with reasonable frequency
+**ADD PATCHES!!!
 
 * AI:
 ** Fix AI range trigger happiness
 ** Fix ITTS to use more iterations of Newton's method
+** Fix SPEC thrashing
 
-* Cockpit
-Highlight weapons in range in the gun VDU
+*Ships
+**Add stats for new ships
 
-* News
-** Get formatted date back.
+*Fix up starting system.
+
 ----------------------------------------------------------------------------
 
 Goals for 'Sometime over the rainbow'
@@ -73,6 +64,7 @@ Goals for 'Sometime over the rainbow'
 
 *AI
 ** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
+** AI spec drive use, escorts...
 
 Scripting Goals:
 * Flightgroups
@@ -88,9 +80,30 @@ Scripting Goals:
 	     side that will classify flightgroups in a reasonable way - thus, 
 	     if the lead ship is a dodo it shouldn't be a _fleet_
 
+*Clydesdale
+http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
+Apparently upgrade system doesn't quite work right and jump drive doesn't quite install right and cargo sometimes grows without bounds...
+ECM apparently causes some of these problems
+Jump drive goes away after selling it can't buy it back
+
+*Damage
+** Fix System Damage so it happens with reasonable frequency
+
+* Cockpit
+**Highlight weapons in range in the gun VDU
+
+* News
+** Get formatted date back.
 
 
 Emacs mode info:
 Local Variables:
 mode: outline
 End:
+
+
+
+
+
+
+
