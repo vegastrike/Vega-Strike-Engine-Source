@@ -8,16 +8,21 @@
 #include "enhancement_generic.h"
 
 extern Unit * _masterPartList;
+std::string getMasterPartListUnitName() {
+	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+	return mpl;
+}
 
 Unit* UnitFactory::getMasterPartList( )
 { 
-	std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+	
 char tmp[2048];
 tmp[2047]=0;
 getcwd (tmp,2046);
 
     if( _masterPartList == NULL )
     {
+		std::string mpl=getMasterPartListUnitName();
         _masterPartList = new Unit(mpl.c_str(),
 	                            true,
 				    FactionUtil::GetFaction("upgrades") );

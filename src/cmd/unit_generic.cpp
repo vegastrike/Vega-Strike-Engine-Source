@@ -546,8 +546,9 @@ void Unit::Init()
   //  Fire();
 
 }
+std::string getMasterPartListUnitName();
 bool
-verify_path (const vector<string> &path) {
+verify_path (const vector<string> &path, bool allowmpl=false) {
 	string realpath;
 	for (unsigned int i=0;i<path.size();++i) {
 		if (i!=0)
@@ -557,6 +558,10 @@ verify_path (const vector<string> &path) {
 	FILE * fp = fopen (realpath.c_str(),"r");
 	if (fp)
 		fclose(fp);
+	
+	if (path.size()==2&&fp==NULL&&allowmpl)
+		if (path[1]==getMasterPartListUnitName())
+			return true;
 	return fp!=NULL;
 }
 void vschdirs (const vector<string> &path) {
@@ -605,7 +610,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	}
 	free(my_directory);	
 	while(!path.empty()) {
-		if (verify_path(path.back()))
+		if (verify_path(path.back(),true))
 			break;
 		path.pop_back();
 	}

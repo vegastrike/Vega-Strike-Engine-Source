@@ -29,13 +29,16 @@
 #include "asteroid.h"
 #include "building.h"
 extern Unit * _masterPartList;
-
+std::string getMasterPartListUnitName() {
+	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+	return mpl;
+}
 Unit* UnitFactory::getMasterPartList( )
 {
 
     if( _masterPartList == NULL )
     {
-		static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");		
+		std::string mpl=getMasterPartListUnitName();
         _masterPartList = new GameUnit<Unit>( mpl.c_str(),
 	                            true,
 				    FactionUtil::GetFaction("upgrades") );
