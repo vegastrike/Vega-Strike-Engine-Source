@@ -220,6 +220,9 @@ void VegaConfig::initCommandMap(){
  command_map["Cockpit::YawLeft"]=CockpitKeys::YawLeft;
  command_map["Cockpit::YawRight"]=CockpitKeys::YawRight;
  command_map["Cockpit::Inside"]=CockpitKeys::Inside;
+ command_map["Cockpit::ViewTarget"]=CockpitKeys::ViewTarget;
+ command_map["Cockpit::OutsideTarget"]=CockpitKeys::OutsideTarget;
+ command_map["Cockpit::PanTarget"]=CockpitKeys::PanTarget;
  command_map["Cockpit::ZoomOut"]=CockpitKeys::ZoomOut ;
  command_map["Cockpit::ZoomIn"]=CockpitKeys::ZoomIn ;
  command_map["Cockpit::InsideLeft"]=CockpitKeys::InsideLeft;
@@ -227,6 +230,10 @@ void VegaConfig::initCommandMap(){
  command_map["Cockpit::InsideBack"]=CockpitKeys::InsideBack;
  command_map["Cockpit::SwitchLVDU"]=CockpitKeys::SwitchLVDU;
  command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
+ command_map["Cockpit::SwitchMVDU"]=CockpitKeys::SwitchMVDU;
+ command_map["Cockpit::SwitchURVDU"]=CockpitKeys::SwitchURVDU;
+ command_map["Cockpit::SwitchULVDU"]=CockpitKeys::SwitchULVDU;
+ command_map["Cockpit::SwitchUMVDU"]=CockpitKeys::SwitchUMVDU;
  command_map["Cockpit::Behind"]=CockpitKeys::Behind;
  command_map["Cockpit::Pan"]=CockpitKeys::Pan;
  command_map["Cockpit::SkipMusicTrack"]=CockpitKeys::SkipMusicTrack;

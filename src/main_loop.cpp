@@ -240,6 +240,29 @@ bool cockpitfront=true;
 	  _Universe->AccessCockpit()->SetView (CP_RIGHT);
 	}
 }
+  void PanTarget(int,KBSTATE newState) {
+
+	if(newState==PRESS||newState==DOWN) {
+	    cockpitfront=false;
+	  _Universe->AccessCockpit()->SetView (CP_PANTARGET);
+	}
+  }
+  void ViewTarget(int,KBSTATE newState) {
+
+	if(newState==PRESS||newState==DOWN) {
+	    cockpitfront=false;
+	  _Universe->AccessCockpit()->SetView (CP_VIEWTARGET);
+	}
+  }
+  void OutsideTarget(int,KBSTATE newState) {
+
+	if(newState==PRESS||newState==DOWN) {
+	    cockpitfront=false;
+	  _Universe->AccessCockpit()->SetView (CP_TARGET);
+	}
+  }
+
+
   void InsideBack(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
@@ -253,13 +276,37 @@ bool cockpitfront=true;
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (0);
 	}
-}
+  }
   void SwitchRVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (1);
 	}
-}
+  }
+  void SwitchMVDU(int,KBSTATE newState) {
+
+	if(newState==PRESS) {
+	  _Universe->AccessCockpit()->VDUSwitch (2);
+	}
+  }
+  void SwitchULVDU(int,KBSTATE newState) {
+
+	if(newState==PRESS) {
+	  _Universe->AccessCockpit()->VDUSwitch (3);
+	}
+  }
+  void SwitchURVDU(int,KBSTATE newState) {
+
+	if(newState==PRESS) {
+	  _Universe->AccessCockpit()->VDUSwitch (4);
+	}
+  }
+  void SwitchUMVDU(int,KBSTATE newState) {
+
+	if(newState==PRESS) {
+	  _Universe->AccessCockpit()->VDUSwitch (5);
+	}
+  }
 
   void Behind(int,KBSTATE newState) {
 
@@ -272,7 +319,7 @@ bool cockpitfront=true;
 
 	if(newState==PRESS||newState==DOWN) {
 	  cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_PANTARGET);
+	  _Universe->AccessCockpit()->SetView (CP_PAN);
 	}
 }
 

@@ -198,7 +198,8 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   if (Inside (_Universe->AccessCamera()->GetPosition(),0,t1,dis)) {
     _Universe->AccessCamera()->SetNebula (this);
   }
-  for (unsigned int i=0;i<nummesh;i++) {
+  unsigned int i = rand()%nummesh;
+  {
     Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());
     if (((int)(explosiontime/SIMULATION_ATOM))!=0) 
       if (!(rand()%((int)(explosiontime/SIMULATION_ATOM)))) 

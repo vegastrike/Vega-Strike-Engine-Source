@@ -508,6 +508,9 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
 
   Init (file);
 }
+void Cockpit::SelectProperCamera () {
+    _Universe->activeStarSystem()->SelectCamera(view);
+}
 void Cockpit::Draw() { 
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
@@ -537,12 +540,6 @@ void Cockpit::Draw() {
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
       DrawGauges(un);
-      for (unsigned int vd=0;vd<vdu.size();vd++) {
-	if (vdu[vd]) {
-	  vdu[vd]->Draw(un);
-	  //process VDU, damage VDU, targetting VDU
-	}
-      }
 
       if (Radar) {
 	Radar->Draw();
@@ -553,11 +550,16 @@ void Cockpit::Draw() {
 	  DrawBlips(un);
 	}
       }
-    }
-    if (view==CP_FRONT) {
       for (unsigned int j=1;j<Panel.size();j++) {
 	Panel[j]->Draw();
       }
+      for (unsigned int vd=0;vd<vdu.size();vd++) {
+	if (vdu[vd]) {
+	  vdu[vd]->Draw(un);
+	  //process VDU, damage VDU, targetting VDU
+	}
+      }
+
     }
 	if (un->GetHull()>0)
 		die = false;
@@ -653,18 +655,22 @@ void Cockpit::SetupViewPort (bool clip) {
       r.Normalize();
       CrossProduct (r,q,tmp);
       CrossProduct (tmp,r,q);
+      _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
       _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
       _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
+      ShoveCamBehindUnit (CP_TARGET,tgt,zoomfactor);
     }else {
+      un->UpdateHudMatrix (CP_VIEWTARGET);
       un->UpdateHudMatrix (CP_TARGET);
       un->UpdateHudMatrix (CP_PANTARGET);
     }
     ShoveCamBehindUnit (CP_CHASE,un,zoomfactor);
     ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
+
     ShoveCamBehindUnit (CP_PAN,un,zoomfactor);
 
     un->SetVisible(view>=CP_CHASE);
-    _Universe->activeStarSystem()->SelectCamera(view);
+
   }
   _Universe->activeStarSystem()->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
     

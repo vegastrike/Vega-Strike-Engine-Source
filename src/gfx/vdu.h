@@ -3,7 +3,7 @@
 
 #include "sprite.h"
 #include <string>
-
+enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
 
 class Unit;
 class TextPlane;
@@ -16,6 +16,7 @@ class TextPlane;
  */
 class VDU: public Sprite {
  private:
+  VIEWSTYLE viewStyle;
   int scrolloffset;
   unsigned short * StartArmor;
   float *maxhull;
@@ -49,6 +50,7 @@ public:
   void Draw(Unit * parent);
   ///Changes the mode of the current VDU to another legal mode
   void SwitchMode();
+  void SetViewingStyle (VIEWSTYLE vm);
   void Scroll (int howmuch);
 };
 

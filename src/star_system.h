@@ -113,7 +113,7 @@ class StarSystem {
   bool RemoveUnit(Unit *unit);
   bool JumpTo (Unit * unit, Planet * jumppoint, const std::string &system);
   ///Draws a frame of action, interpolating between physics frames
-  void Draw();
+  void Draw(bool DrawCockpit=true);
   /// update a simulation atom
   void Update(); 
   ///re-enables the included lights and terrains

@@ -10,8 +10,8 @@ class TextPlane;
 class Sprite;
 class Gauge;
 class Unit;
-class VDU;
-enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_TARGET, CP_CHASE, CP_PAN,  CP_PANTARGET};
+#include "vdu.h"
+
 
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
@@ -103,5 +103,6 @@ class Cockpit {
   void VDUSwitch (int vdunum);
   void ScrollVDU (int vdunum, int howmuch);
   void ScrollAllVDU (int howmuch);
+  void SelectProperCamera ();
 };
 #endif

@@ -288,7 +288,7 @@ void StarSystem::SwapOut () {
 
 extern double interpolation_blend_factor;
 //#define UPDATEDEBUG  //for hard to track down bugs
-void StarSystem::Draw() {
+void StarSystem::Draw(bool DrawCockpit) {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"begin Draw");
   fflush (stderr);
@@ -298,9 +298,11 @@ void StarSystem::Draw() {
   fprintf (stderr,"ani");
   fflush (stderr);
 #endif
-  AnimatedTexture::UpdateAllFrame();
-  for (unsigned int i=0;i<contterrains.size();i++) {
-    contterrains[i]->AdjustTerrain(this);
+  if (DrawCockpit) {
+    AnimatedTexture::UpdateAllFrame();
+    for (unsigned int i=0;i<contterrains.size();i++) {
+      contterrains[i]->AdjustTerrain(this);
+    }
   }
   GFXDisable (LIGHTING);
 #ifdef UPDATEDEBUG
@@ -343,7 +345,8 @@ void StarSystem::Draw() {
   fprintf (stderr,"vp");
   fflush (stderr);
 #endif
-  _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  if (DrawCockpit)
+    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
@@ -415,18 +418,20 @@ void StarSystem::Draw() {
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   stars->Draw();
-
+  StarSystem::DrawJumpStars();
 
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cpDraw");
   fflush (stderr);
 #endif
-  _Universe->AccessCockpit()->Draw();
-  if (doInputDFA) {
-    GFXHudMode (true);
-    systemInputDFA->Draw();
-    GFXHudMode (false);
+  if (DrawCockpit) {
+    _Universe->AccessCockpit()->Draw();
+    if (doInputDFA) {
+      GFXHudMode (true);
+      systemInputDFA->Draw();
+      GFXHudMode (false);
+    }
   }
 #ifdef UPDATEDEBUG
   fprintf (stderr,"end Draw\n");
@@ -528,6 +533,7 @@ void StarSystem::Update() {
   fflush (stderr);
 #endif
 	Terrain::UpdateAll(64);	
+	StarSystem::ProcessPendingJumps();
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList->createIterator();

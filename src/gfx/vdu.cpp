@@ -2,7 +2,7 @@
 #include "cmd/unit.h"
 #include "hud.h"
 #include "vs_globals.h"
-
+#include "cockpit.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
 
@@ -50,6 +50,7 @@ int parse_vdu_type (const char * x) {
 
 
 VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
+  viewStyle = CP_TARGET;
   StartArmor = ma;
   maxhull = mh;
   SwitchMode();
@@ -430,6 +431,23 @@ void VDU::DrawDamage(Unit * parent) {
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   
 }
+void VDU::SetViewingStyle(VIEWSTYLE vs) {
+  viewStyle = vs;
+}
+void DrawStarSystemAgain (float x,float y,float h,float w, VIEWSTYLE viewStyle) {
+  VIEWSTYLE which=viewStyle;
+  _Universe->AccessCamera(which)->SetSubwindow (x,y,h,w);
+  _Universe->SelectCamera(which);
+  _Universe->AccessCamera(which)->UpdateGFX (true,true);
+  GFXClear (GFXTRUE);
+  _Universe->activeStarSystem()->Draw(false);
+  _Universe->AccessCamera (which)->SetSubwindow (0,0,1,1);
+  _Universe->AccessCamera(which)->UpdateGFX (false,false);
+  GFXLoadIdentity(MODEL);
+  GFXLoadIdentityView();
+  // _Universe->AccessCockpit()->RestoreViewPort();
+}
+
 
 void VDU::DrawWeapon (Unit * parent) {
     
@@ -487,6 +505,11 @@ void VDU::Draw (Unit * parent) {
     if (targ)
       DrawTarget(parent,targ);
     break;
+  case VIEW:
+    GetPosition (x,y);
+    GetSize (h,w);
+    DrawStarSystemAgain (x,y,fabs(h/2),fabs(w/2),viewStyle);
+    break;
   case NAV:
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()));
     break;
@@ -505,14 +528,46 @@ void VDU::Draw (Unit * parent) {
   }
 
 }
-
+void UpdateViewstyle (VIEWSTYLE &vs) {
+  switch (vs) {
+  case CP_FRONT:
+    vs = CP_TARGET;
+    break;
+  case CP_BACK:
+    vs = CP_FRONT;
+    break;
+  case CP_LEFT:
+    vs=CP_BACK;
+    break;
+  case CP_RIGHT:
+    vs=CP_LEFT;
+    break;
+  case CP_CHASE:
+    vs = CP_RIGHT;
+    break;
+  case CP_PAN:
+    vs = CP_CHASE;
+    break;
+  case CP_PANTARGET:
+    vs=CP_PAN;
+    break;
+  case CP_TARGET:
+    vs=CP_PANTARGET;
+    break;
+  }
+}
 void VDU::SwitchMode() {
-  thismode<<=1;
-  while (!(thismode&posmodes)) {
-    if (thismode>posmodes) {
-      thismode=0x1;
-    } else {
-      thismode<<=1;
+  if (thismode==VIEW&&viewStyle!=CP_BACK&&(thismode&posmodes)) {
+    UpdateViewstyle (viewStyle);
+  }else {
+    viewStyle = CP_TARGET;
+    thismode<<=1;
+    while (!(thismode&posmodes)) {
+      if (thismode>posmodes) {
+	thismode=0x1;
+      } else {
+	thismode<<=1;
+      }
     }
   }
 }
