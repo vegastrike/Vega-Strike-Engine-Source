@@ -212,7 +212,7 @@ void /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, 
  * trilinear troubles, and it might be a memory constraint)
  * Texture target defines the type of texture it is for eventual cube mapping
  */
-GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
+GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT externaltextureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
 
 ///Sets the priority of the texture for memory management.
 void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
@@ -225,7 +225,9 @@ void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
  * in previously specified format. Scales texture approrpiately to
  * Max texture sizes gotten from vid card
  */
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTUREFORMAT internalformat, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
+
+GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle, int x, int y, unsigned int width, unsigned int height, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
 
 ///Deletes the texture from the graphics card
 void /*GFXDRVAPI*/ GFXDeleteTexture(int handle);

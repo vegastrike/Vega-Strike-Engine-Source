@@ -37,6 +37,22 @@
 
 #define  MAX_TEXTURES 256
 static int MAX_TEXTURE_SIZE=256;
+
+GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat) {
+  switch (textureformat) {
+  case RGB32:
+    return GL_RGB;
+  case RGBA32:
+    return GL_RGBA;
+  case RGBA16:
+    return GL_RGBA16;
+  case RGB16:
+    return GL_RGB16;
+  default:
+    return GL_RGBA;
+  }
+}
+
 struct GLTexture{
   //  unsigned char *texture;
   GLubyte * palette;
@@ -45,7 +61,7 @@ struct GLTexture{
   int texturestage;
   GLuint name;
   GFXBOOL alive;
-  TEXTUREFORMAT textureformat;
+  GLenum textureformat;
   GLenum targets;
   enum FILTER mipmapped;
 };
@@ -118,7 +134,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
       textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
       ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
     }
-  textures[*handle].textureformat = textureformat;
+  textures[*handle].textureformat = GetUncompressedTextureFormat(textureformat);
+  //  GFXActiveTexture(0);
   return GFXTRUE;
 }
 void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority) {
@@ -150,7 +167,7 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
 	}
       }
       for (m=0;m<pixsize;m++) {
-	(*newbuf)[m+pixsize*(j+i*newwidth)] = temp[m]/(scaleheight*scalewidth);
+	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)(temp[m]/(scaleheight*scalewidth));
       }
     }
   }
@@ -188,12 +205,25 @@ static GLenum RGBACompressed (GLenum internalformat) {
     }
     return internalformat;
 }
-GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum TEXTURE_IMAGE_TARGET imagetarget)
-{	
-  int error;
-  unsigned char * tempbuf = NULL;
-  unsigned char * tbuf =NULL;
-  GLenum internalformat;
+
+GLenum GetTextureFormat (TEXTUREFORMAT textureformat) {
+  switch(textureformat){
+  case RGB32:
+    return RGBCompressed (GL_RGB);
+  case RGBA32:
+    return RGBACompressed(GL_RGBA);
+  case RGBA16:
+    return RGBACompressed (GL_RGBA16);
+  case RGB16:
+    return RGBCompressed (GL_RGB16);
+  default:
+  case DUMMY:
+  case RGB24:
+    fprintf (stderr,"RGB24 bitmaps not yet supported");
+    return GL_RGB;
+  }
+}
+GLenum GetImageTarget (TEXTURE_IMAGE_TARGET imagetarget) {
   GLenum image2D;
   switch (imagetarget) {
   case TEXTURE_2D:
@@ -218,41 +248,36 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
     image2D=GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT;
     break;
   }
-  if (image2D!=GL_TEXTURE_2D) {
-    fprintf (stderr, "gotcha %d", imagetarget);
-  }	
+  return image2D;
+}
+GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle, int x, int y, unsigned int width, unsigned int height, enum TEXTURE_IMAGE_TARGET imagetarget) {
+  GLenum image2D=GetImageTarget (imagetarget);
+  glBindTexture(textures[handle].targets, textures[handle].name);
+  
+  //  internalformat = GetTextureFormat (handle);
+  glTexSubImage2D(image2D, 0, x,y,width,height,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
+  return GFXTRUE;
+}
 
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget)
+{	
+  int error;
+  unsigned char * tempbuf = NULL;
+  unsigned char * tbuf =NULL;
+  GLenum internalformat;
+  GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
   if (textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
-    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(textures[handle].textureformat==PALETTE8?1:4)* sizeof(unsigned char ), handle);
+    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:4)* sizeof(unsigned char ), handle);
     buffer = tempbuf;
   }
-  switch(textures[handle].textureformat){
-  case DUMMY:
-  case RGB24:
-    fprintf (stderr,"RGB24 bitmaps not yet supported");
-    break;
-  case RGB32:
-    internalformat = RGBCompressed (3/*GL_RGB*/);
-    goto texgenericload;
-  case RGBA32:
-    internalformat = RGBACompressed(4/*GL_RGBA*/);
-    goto texgenericload;
-  case RGBA16:
-    internalformat = RGBACompressed (GL_RGBA16);
-    goto texgenericload;
-  case RGB16:
-    internalformat= RGBCompressed (GL_RGB16);
-    goto texgenericload;
-
-  texgenericload:
+  if (internformat!=PALETTE8) {
+    internalformat = GetTextureFormat (internformat);
     if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-      gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+      gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
     else
-      glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    break;
-
-  case PALETTE8:
+      glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+  }else {
 #if defined(GL_COLOR_INDEX8_EXT)	// IRIX has no GL_COLOR_INDEX8 extension
     if (gl_options.PaletteExt) {
       error = glGetError();
@@ -267,13 +292,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
       else
 	glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
-      break;
+#if 0
       error = glGetError();
       if (error) {
 	if (tempbuf)
 	  free(tempbuf);
 	return GFXFALSE;
       }
+#endif
     } else
 #endif
     {
@@ -299,7 +325,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
       //delete [] buffer;
       //buffer = tbuf;
     }
-    break;
+ 
   }
   if (tempbuf)
     free(tempbuf);
@@ -339,36 +365,16 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
   //FIXME? is this legit?
   if (activetexture[stage]==handle) {
-    GFXActiveTexture(textures[handle].texturestage);
+    GFXActiveTexture(stage);
     return ;
   } else
     activetexture[stage] = handle;
   if (gl_options.Multitexture) {
-    GFXActiveTexture(textures[handle].texturestage);
+    GFXActiveTexture(stage);
     glBindTexture(textures[handle].targets, textures[handle].name);
-    /*		if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&gl_options.mipmap>=2) {
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		if (textures[handle].mipmapped&TRILINEAR) {
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		}else {
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		}
-		} else {
-		if (textures[handle].mipmapped==NEAREST||gl_options.mipmap==0) {
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		} else {
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		}
-		}*/
-
-    if(gl_options.PaletteExt&&textures[handle].textureformat == PALETTE8) {
-      //memset(textures[handle].palette, 255, 1024);
-    }
   } else {
     Stage0Texture = GFXTRUE;
-    if (textures[handle].texturestage) {
+    if (stage) {
       Stage1Texture = GFXTRUE;
       Stage1TextureName = textures[handle].name;
     } else {
