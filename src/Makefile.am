@@ -40,6 +40,7 @@ cmd/collide/libcollide.a \
 boost129/libboost_python.a boost/libboost_python.a
 
 accountserver_LDADD =  \
+common/libvscommon.a \
 networking/libnetacct.a
 
 
@@ -147,6 +148,10 @@ accountserver_SOURCES =		\
 	lin_time.h					\
 	endianness.cpp				\
 	endianness.h				\
+	vs_path.cpp				\
+	vs_path.h				\
+	galaxy_gen.cpp				\
+	galaxy_gen.h				\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\

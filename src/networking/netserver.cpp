@@ -33,6 +33,7 @@
 #include "netserver.h"
 #include "vsnet_serversocket.h"
 #include "savenet_util.h"
+#include "vs_path.h"
 
 VegaConfig * vs_config;
 double	clienttimeout;
@@ -362,6 +363,7 @@ void	NetServer::start(int argc, char **argv)
 
 	startMsg();
 
+	initpaths();
 	cout<<"Loading server config...";
 	vs_config = new VegaConfig( SERVERCONFIGFILE);
 	cout<<" config loaded"<<endl;
@@ -375,9 +377,9 @@ void	NetServer::start(int argc, char **argv)
 		periodrecon = 60;
 	else
 		periodrecon = atoi( strperiodrecon.c_str());
-	tmpdir = vs_config->getVariable( "server", "tmpdir", "");
+	tmpdir = datadir + vs_config->getVariable( "server", "tmpdir", "");
 	if( strperiod=="")
-		tmpdir = "./tmp/";
+		tmpdir = datadir + "/tmp/";
 	strtimeout = vs_config->getVariable( "server", "clienttimeout", "");
 	if( strtimeout=="")
 		clienttimeout = 20;

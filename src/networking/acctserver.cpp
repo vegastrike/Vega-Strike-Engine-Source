@@ -4,6 +4,7 @@
 #include "packet.h"
 #include "lin_time.h"
 #include "vsnet_serversocket.h"
+#include "vs_path.h"
 
 VegaConfig * vs_config;
 string acctdir;
@@ -53,14 +54,15 @@ void	AccountServer::start()
 
 	startMsg();
 
+	initpaths();
 	cout<<"Loading config file...";
 	vs_config = new VegaConfig( ACCTCONFIGFILE);
 	cout<<" done."<<endl;
 	InitTime();
 	UpdateTime();
-	acctdir = vs_config->getVariable( "server", "accounts_dir", "");
+	acctdir = datadir + vs_config->getVariable( "server", "accounts_dir", "");
 	if( acctdir=="")
-		acctdir = "./accounts/";
+		acctdir = datadir + "/accounts/";
 	strperiod = vs_config->getVariable( "server", "saveperiod", "");
 	int period;
 	if( strperiod=="")
