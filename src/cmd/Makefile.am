@@ -30,6 +30,7 @@ libcmd_a_SOURCES =				\
 	unit.h				\
 	unit.cpp				\
 	unit_bsp.cpp			\
+	unit_cargo.cpp			\
 	unit_customize.cpp		\
 	unit_damage.cpp			\
 	unit_dock.cpp			\

@@ -30,6 +30,23 @@ struct DockedUnits {
   unsigned int whichdock;
   DockedUnits (Unit * un, unsigned int w): uc(un),whichdock(w) {}
 };
+
+
+struct Cargo {
+  int quantity;
+  std::string content;
+  float price;
+  float mass;
+  float volume;
+  Cargo () {mass=0; volume=0;price=0;quantity=1;}
+  bool operator == (const Cargo & other) const {
+    return content==other.content;
+  }
+  bool operator < (const Cargo &other)const {
+    return content<other.content;
+  }
+};
+
 struct UnitImages {
   std::string cockpitImage;
   Vector CockpitCenter;
@@ -47,7 +64,8 @@ struct UnitImages {
   bool cloakglass;
   ///if the unit is a wormhole
   bool forcejump;
-
+  float cargo_volume;///mass just makes you turn worse
+  std::vector <Cargo> cargo;
   std::vector <char *> destination;
   std::vector <DockingPorts> dockingports;
   ///warning unreliable pointer, never dereference!

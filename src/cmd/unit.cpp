@@ -161,6 +161,7 @@ void Unit::Init()
   limits.limitmin=-1;
   cloaking=-1;
   image->cloakglass=false;
+  image->cargo_volume=0;
   image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
   image->cloakrate=100;

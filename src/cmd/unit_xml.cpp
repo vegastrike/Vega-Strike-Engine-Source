@@ -131,7 +131,12 @@ namespace UnitXML {
       USEBSP,
       AFTERBURNENERGY,
       MISSING,
-      UNITSCALE
+      UNITSCALE,
+      PRICE,
+      VOLUME,
+      QUANTITY,
+      CARGO,
+      HOLD
     };
 
   const EnumMap::Pair element_names[] = {
@@ -163,7 +168,9 @@ namespace UnitXML {
     EnumMap::Pair ("Radar", RADAR),
     EnumMap::Pair ("Cockpit", COCKPIT),
     EnumMap::Pair ("Jump", JUMP),
-    EnumMap::Pair ("Dock", DOCK)
+    EnumMap::Pair ("Dock", DOCK),
+    EnumMap::Pair ("Hold",HOLD),
+    EnumMap::Pair ("Cargo",CARGO)
 
   };
   const EnumMap::Pair attribute_names[] = {
@@ -241,11 +248,15 @@ namespace UnitXML {
     EnumMap::Pair ("RAPID", RAPID),
     EnumMap::Pair ("BSP", USEBSP),
     EnumMap::Pair ("Wormhole", WORMHOLE),
-    EnumMap::Pair ("Scale", UNITSCALE)
+    EnumMap::Pair ("Scale", UNITSCALE),
+    EnumMap::Pair ("Price",PRICE),
+    EnumMap::Pair ("Volume",VOLUME),
+    EnumMap::Pair ("Quantity",QUANTITY)
+    
 };
 
-  const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 75);
+  const EnumMap element_map(element_names, 31);
+  const EnumMap attribute_map(attribute_names, 78);
 }
 
 using XMLSupport::EnumMap;
@@ -264,6 +275,7 @@ int parseMountSizes (const char * str) {
 }
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
+  Cargo carg;
   string filename;
   Vector P;
   int indx;
@@ -325,7 +337,47 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
-
+  case HOLD:
+    ADDTAG;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case VOLUME:
+	ADDDEFAULT;
+	image->cargo_volume=parse_float ((*iter).value);
+	break;
+      }
+    }
+    image->unitwriter->AddTag ("Cargo");
+    image->unitwriter->AddElement ("mass",Unit::cargoSerializer,XMLType ((int)0));
+    break;
+  case CARGO:
+    ///handling taken care of above;
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case QUANTITY:
+	carg.quantity=parse_int ((*iter).value);
+	break;
+      case MASS:
+	carg.mass=parse_float ((*iter).value);
+	break;
+      case VOLUME:
+	carg.volume=parse_float ((*iter).value);
+	break;
+      case PRICE:
+	carg.price=parse_float ((*iter).value);
+	break;
+      case XFILE:
+	carg.content = ((*iter).value);
+	break;
+      }
+    }
+    if (carg.mass!=0)
+      AddCargo (carg);
+    break;
   case MESHFILE:
     ADDTAG;
     assert (xml->unitlevel==1);
@@ -1203,6 +1255,7 @@ std::string Unit::shieldSerializer (const XMLType &input, void * mythis) {
   }
   return string("");
 }
+
 std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
   Unit * un=(Unit *)mythis;
   int i=input.w.hardint;

@@ -70,6 +70,7 @@ enum clsptr {
 class VDU;
 struct UnitImages;
 struct UnitSounds;
+struct Cargo;
 /**
  * Unit contains any physical object that may collide with something
  * And may be physically affected by forces.
@@ -151,6 +152,11 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
+  bool CanAddCargo (const Cargo &carg) const;
+  void AddCargo (const Cargo &carg);
+  void RemoveCargo (unsigned int i);
+
+
   void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
 
   UnitSounds * sound;
@@ -376,6 +382,13 @@ class Unit {
   void SetRecursiveOwner(Unit *target);
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
 public:
+  float PriceCargo (const std::string &s);
+  Cargo & GetCargo (unsigned int i);
+  unsigned int numCargo ()const;
+  bool SellCargo (unsigned int i, float &creds, Cargo & carg, Unit *buyer);
+  bool SellCargo (const std::string &s, float & creds, Cargo &carg, Unit *buyer);
+  bool BuyCargo (const Cargo &carg, float & creds);
+
   bool RequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);
   bool UnDock (Unit * unitToDockWith);
@@ -647,6 +660,7 @@ public:
   string target_fgid[3];
 
  protected:
+  static std::string cargoSerializer(const struct XMLType &input, void*mythis);
   static std::string mountSerializer(const struct XMLType &input, void*mythis);
   static std::string shieldSerializer(const struct XMLType &input, void*mythis);
   static std::string subunitSerializer(const struct XMLType &input, void*mythis);

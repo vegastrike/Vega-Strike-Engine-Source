@@ -1,6 +1,8 @@
 2002-02-27 Daniel Horn <hellcatv@hotmail.com>
 	* Added caching to the collision data structures
 	* Added caching to sphere meshes (shields were taking long time to load)
+	* Added cargo to a unit...you can buy and sell cargo at places. Havenot added to interface yet
+	* Cargo only makes you heavier right now...soon you will be able to sell for profit-- when you have money that is
 	
 2002-02-27 Alexander Rawass <alexannika@users.sourceforge.net>
 
