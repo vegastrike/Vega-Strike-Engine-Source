@@ -256,6 +256,18 @@ int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length,
     return send( );
 }
 
+int Packet::send( Cmd cmd, ObjSerial nserial, const char * buf, unsigned int length,
+                  int prio, const AddressIP* dst,
+		          const SOCKETALT& sock, const char* caller_file,
+		          int caller_line )
+{
+	char * buffer = new char[length];
+	memcpy( buffer, buf, length);
+    create( cmd, nserial, buf, length, prio, dst, sock, caller_file, caller_line );
+	delete buffer;
+    return send( );
+}
+
 void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
                      unsigned int length, int prio,
                      const AddressIP* dst, const SOCKETALT& sock,

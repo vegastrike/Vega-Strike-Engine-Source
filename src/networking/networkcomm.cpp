@@ -301,20 +301,27 @@ void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial, string message)
 {
 	Packet p;
+	string encrypted;
 	// If max log size is reached we remove the oldest message
 	if( this->message_history.size()==this->max_messages)
 		this->message_history.pop_front();
 	this->message_history.push_back( message);
 
 	// Send the text message according to the chosen method
-	char * msg = new char[message.length()+1];
-	memcpy( msg, message.c_str(), message.length());
-	msg[message.length()] = 0;
 	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
-		p.send( CMD_TXTMESSAGE, serial, msg, message.length(), SENDRELIABLE, NULL, send_sock,
-    	        __FILE__, PSEUDO__LINE__(229) );
+		if( this->secured)
+		{
+			encrypted = this->EncryptBuffer( message.c_str(), message.length());
+			p.send( CMD_TXTMESSAGE, serial, encrypted.c_str(), message.length(), SENDRELIABLE, NULL, send_sock,
+					__FILE__, PSEUDO__LINE__(244) );
+		}
+		else
+		{
+			p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, send_sock,
+					__FILE__, PSEUDO__LINE__(244) );
+		}
 	}
 	else if( method==ClientBroadcast)
 	{
@@ -322,12 +329,19 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
-			if( (*it)->secured==this->secured)
-				p.send( CMD_TXTMESSAGE, serial, msg, message.length(), SENDRELIABLE, NULL, (*it)->sock,
+			if( this->secured)
+			{
+				encrypted = this->EncryptBuffer( message.c_str(), message.length());
+				p.send( CMD_TXTMESSAGE, serial, encrypted.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
+			}
+			else
+			{
+				p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
+						__FILE__, PSEUDO__LINE__(244) );
+			}
 		}
 	}
-	delete msg;
 }
 
 /***************************************************************************************/
@@ -337,6 +351,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 {
 #ifdef USE_PORTAUDIO
+	string encrypted;
 	if( use_pa)
 	{
 		Packet p;
@@ -345,8 +360,17 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 			Packet p;
 			// We don't need that to be reliable in UDP mode
-			p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
-	   		        __FILE__, PSEUDO__LINE__(229) );
+			if( this->secured)
+			{
+				encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
+				p.send( CMD_SOUNDSAMPLE, serial, encrypted.c_str(), encrypted.length(), SENDANDFORGET, NULL, sock,
+					__FILE__, PSEUDO__LINE__(244) );
+			}
+			else
+			{
+				p.send( CMD_SECSNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
+					__FILE__, PSEUDO__LINE__(244) );
+			}
 		}
 		else if( method==ClientBroadcast)
 		{
@@ -354,10 +378,19 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			CltPtrIterator it;
 			for( it = commClients.begin(); it!=commClients.end(); it++)
 			{
-				if( (*it)->portaudio && (*it)->secured==this->secured)
+				if( (*it)->portaudio)
 				{
-					p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
+					if( this->secured)
+					{
+						encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
+						p.send( CMD_SOUNDSAMPLE, serial, encrypted.c_str(), encrypted.length(), SENDANDFORGET, NULL, (*it)->sock,
 							__FILE__, PSEUDO__LINE__(244) );
+					}
+					else
+					{
+						p.send( CMD_SECSNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
+							__FILE__, PSEUDO__LINE__(244) );
+					}
 				}
 			}
 		}
@@ -367,23 +400,38 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 // Do not do anything when using JVoIP lib
 }
 
-void	NetworkCommunication::RecvSound( char * sndbuffer, int length)
+void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypted)
 {
 #ifdef NETCOMM_PORTAUDIO
 	if( use_pa)
 	{
-		assert(length<MAXBUFFER);
+		string decrypted;
+		assert( length<MAXBUFFER);
 		memset( audio_outbuffer, 0, MAXBUFFER);
-		memcpy( audio_outbuffer, sndbuffer, length);
+		if( encrypted)
+		{
+			decrypted = DecryptBuffer( sndbuffer, length);
+			memcpy( audio_outbuffer, decrypted.c_str(), decrypted.length());
+		}
+		else
+			memcpy( audio_outbuffer, sndbuffer, length);
 	}
 #endif
 }
 
-void	NetworkCommunication::RecvMessage( string message)
+void	NetworkCommunication::RecvMessage( string message, bool encrypted)
 {
 	// If max log size is reached we remove the oldest message
 	if( this->message_history.size()==this->max_messages)
 		this->message_history.pop_front();
+
+	string decrypted;
+	if( encrypted)
+	{
+		decrypted = DecryptBuffer( message.c_str(), message.length());
+		message = decrypted;
+	}
+
 	this->message_history.push_back( message);
 	// Display message
 	string color;

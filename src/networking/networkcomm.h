@@ -110,8 +110,8 @@ class NetworkCommunication
 		//void	SendImage( SOCKETALT & send_sock);
 		void	SendSound( SOCKETALT & send_sock, ObjSerial serial);
 		void	SendMessage( SOCKETALT & send_sock, ObjSerial serial, string message);
-		void	RecvSound( char * sndbuffer, int length);
-		void	RecvMessage( string message);
+		void	RecvSound( char * sndbuffer, int length, bool encrypted=false);
+		void	RecvMessage( string message, bool encrypted=false);
 		int		DestroySession();
 
 		void	AddToSession( ClientPtr clt);

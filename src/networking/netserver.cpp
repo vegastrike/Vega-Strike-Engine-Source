@@ -280,7 +280,7 @@ void	NetServer::sendLoginError( ClientPtr clt, AddressIP ipadr )
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
-	packet2.send( LOGIN_ERROR, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(255) );
+	packet2.send( LOGIN_ERROR, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(255) );
 	COUT<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
 }
 
@@ -293,7 +293,7 @@ void	NetServer::sendLoginUnavailable( ClientPtr clt, AddressIP ipadr )
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
-	packet2.send( LOGIN_UNAVAIL, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(268) );
+	packet2.send( LOGIN_UNAVAIL, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(268) );
 	COUT<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
 }
 
@@ -308,7 +308,7 @@ void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
 		sockclt = clt->sock;
 	//COUT<<"Creating packet... ";
 	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-	packet2.send( LOGIN_ALREADY, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(283) );
+	packet2.send( LOGIN_ALREADY, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(283) );
 	COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 }
 
@@ -1596,7 +1596,7 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
         if( un != NULL )
         {
 		    Packet p1;
-	        p1.send( CMD_DISCONNECT, un->GetSerial(), NULL, 0,
+	        p1.send( CMD_DISCONNECT, un->GetSerial(), (char *)NULL, 0,
 		             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
                      PSEUDO__LINE__(1432) );
 	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;

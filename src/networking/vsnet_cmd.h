@@ -99,6 +99,8 @@ enum Cmd
 	CMD_TXTMESSAGE   = 0x89,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
 	CMD_STARTNETCOMM = 0x86,		// A client tells the server he starts a netcomm session
 	CMD_STOPNETCOMM  = 0x87,		// A client tells the server he stops a netcomm session
+	CMD_SECMESSAGE   = 0xB0,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
+	CMD_SECSNDSAMPLE = 0xB1,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
 
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost

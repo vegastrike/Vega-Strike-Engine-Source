@@ -1113,7 +1113,14 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_SOUNDSAMPLE :
 #ifdef NETCOMM
 			{
-				NetComm->RecvSound( p1.getData(), p1.getDataLength());
+				NetComm->RecvSound( p1.getData(), p1.getDataLength(), false);
+			}
+#endif
+			break;
+			case CMD_SECSNDSAMPLE :
+#ifdef NETCOMM
+			{
+				NetComm->RecvSound( p1.getData(), p1.getDataLength(), true);
 			}
 #endif
 			break;
@@ -1121,7 +1128,14 @@ int NetClient::recvMsg( Packet* outpacket )
 #ifdef NETCOMM
 			{
 				string msg( p1.getData());
-				NetComm->RecvMessage( msg);
+				NetComm->RecvMessage( msg, false);
+			}
+#endif
+			case CMD_SECMESSAGE :
+#ifdef NETCOMM
+			{
+				string msg( p1.getData());
+				NetComm->RecvMessage( msg, true);
 			}
 #endif
 			break;
@@ -1402,7 +1416,7 @@ void NetClient::sendAlive()
     {
         Packet	p;
         p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(),
-                NULL, 0,
+                (char *)NULL, 0,
                 SENDANDFORGET, NULL, this->clt_sock,
                 __FILE__, PSEUDO__LINE__(1325) );
     }
@@ -1459,7 +1473,7 @@ void	NetClient::logout()
 	keeprun = 0;
 	Packet p;
 	p.send( CMD_LOGOUT, this->game_unit.GetUnit()->GetSerial(),
-            NULL, 0,
+            (char *)NULL, 0,
             SENDRELIABLE, NULL, this->clt_sock,
             __FILE__, PSEUDO__LINE__(1382) );
 	clt_sock.disconnect( "Closing connection to server", false );

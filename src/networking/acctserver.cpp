@@ -302,7 +302,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                     {
                         // We found an account with the requested name
                         found = true;
-                        if( packet2.send( LOGIN_ERROR, packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+                        if( packet2.send( LOGIN_ERROR, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
                         {
                             cout<<"ERROR sending authorization"<<endl;
                             exit( 1);
@@ -317,7 +317,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                     if( fp==NULL)
                     {
                         cout<<"ERROR opening accounts file";
-                        if( packet2.send( (Cmd) 0, packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+                        if( packet2.send( (Cmd) 0, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
                             cout<<"ERROR sending errormsg to subscription website"<<endl;
                         exit(1);
                     }
@@ -363,7 +363,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                         fclose( fp);
                         Cltacct.push_back( new Account( callsign, passwd));
                     }
-                    if( packet2.send( packet.getCommand(), packet.getSerial(), NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+                    if( packet2.send( packet.getCommand(), packet.getSerial(), (char*)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
                     {
                         cout<<"ERROR sending authorization"<<endl;
                         exit( 1);

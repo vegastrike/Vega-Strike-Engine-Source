@@ -13,14 +13,20 @@ int		NetworkCommunication::DestroySession() { return 0;}
 //void	NetworkCommunication::SendImage( SOCKETALT & socket) {}
 void	NetworkCommunication::SendSound( SOCKETALT & socket, ObjSerial serial) {}
 void	NetworkCommunication::SendMessage( SOCKETALT & socket, ObjSerial serial, string message) {}
-void	NetworkCommunication::RecvSound( char * sndbuffer, int length) {}
-void	NetworkCommunication::RecvMessage( string message) {}
+void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypted) {}
+void	NetworkCommunication::RecvMessage( string message, bool encrypted) {}
 
 char *	NetworkCommunication::GetWebcamCapture() { return NULL;}
-char	NetworkCommunication::HasWebcam() {}
-char	NetworkCommunication::HasPortaudio() {}
+char	NetworkCommunication::HasWebcam() { return 0;}
+char	NetworkCommunication::HasPortaudio() { return 0;}
 void	NetworkCommunication::SwitchWebcam() {}
 void	NetworkCommunication::SwitchSecured() {}
+
+#ifdef CRYPTO
+void	NetworkCommunication::GenerateKey() {}
+string	NetworkCommunication::EncryptBuffer( const char * buffer, unsigned int length) { return string("");}
+string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int length) { return string("");}
+#endif
 
 #endif
 

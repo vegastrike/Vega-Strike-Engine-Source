@@ -70,6 +70,11 @@ class Packet
                   int flags,
                   const AddressIP* dst, const SOCKETALT& sock,
                   const char* caller_file, int caller_line );
+        int send( Cmd cmd, ObjSerial nserial,
+                  const char * buf, unsigned int length,
+                  int flags,
+                  const AddressIP* dst, const SOCKETALT& sock,
+                  const char* caller_file, int caller_line );
 
 	/// flags is a bitwise OR of PCKTFLAGS
         inline void bc_create( Cmd cmd, ObjSerial nserial,
