@@ -6,11 +6,12 @@
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;
-
+#include "audiolib.h"
 static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
 Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+  sound = AUDCreateSound (clne.sound,true);
   decal = beamdecals.AddTexture (clne.file.c_str(),TRILINEAR);
   if (decal>=beamdrawqueue.size()) {
     beamdrawqueue.push_back (vector<DrawContext>());
@@ -100,10 +101,11 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
   memcpy (&calah[16],&calah[0],sizeof(GFXColorVertex)*16);    
   vlist = new GFXVertexList (GFXQUAD,32,calah,32,true);//mutable color contained list
-
+  AUDStartPlaying (sound);
 }
 
 Beam::~Beam () {
+  AUDDeleteSound (sound);
   if (CollideInfo.object.b!=NULL) {
     KillCollideTable (&CollideInfo);
   }
@@ -172,14 +174,14 @@ void Beam::RecalculateVertices() {
 
 
 void Beam::Draw (const Transformation &trans, const float* m) {//hope that the correct transformation is on teh stack
-  if (curthick==0)
+  if (curthick==0) 
     return;
   Matrix cumulative_transformation_matrix;
   local_transformation.to_matrix(cumulative_transformation_matrix);
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-
+  AUDAdjustSound (cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
   RecalculateVertices();
 
   beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
@@ -219,8 +221,10 @@ void Beam::ProcessDrawQueue() {
 
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curlength += SIMULATION_ATOM*speed;
-  if (curlength<0)
+  if (curlength<0) {
+    AUDStopPlaying (sound);
     curlength=0;
+  }
   if (curthick ==0) {
     refiretime +=SIMULATION_ATOM;
     return;

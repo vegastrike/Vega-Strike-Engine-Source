@@ -35,6 +35,7 @@
 #include "bolt.h"
 #include "gfx/lerp.h"
 #include "gfx/bsp.h"
+#include "audiolib.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -87,6 +88,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  enginesound=-1;
   hudImage=NULL;
   owner = NULL;
   faction =0;
@@ -256,6 +258,9 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 
 Unit::~Unit()
 {
+  if (enginesound!=-1) {
+    AUDDeleteSound (enginesound);
+  }
   if (hudImage )
     delete hudImage;
   if (CollideInfo.object.u)
@@ -599,6 +604,8 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  if (enginesound!=-1)
+    AUDAdjustSound (enginesound,cumulative_transformation.position,Velocity);
   int i;
   if (hull <0) {
     Explode(true, GetElapsedTime());

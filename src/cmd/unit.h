@@ -116,6 +116,7 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
+  int enginesound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within

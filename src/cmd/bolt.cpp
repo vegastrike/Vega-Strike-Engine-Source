@@ -9,6 +9,7 @@
 #include <string>
 #include <algorithm>
 #include "unit.h"
+#include "audiolib.h"
 using std::vector;
 using std::string;
 namespace bolt_draw {
@@ -43,8 +44,10 @@ inline void BlendTrans (float * drawmat, const Vector & cur_position, const Vect
     drawmat[12] = prev_position.i*(1-interpolation_blend_factor) + cur_position.i*interpolation_blend_factor;
     drawmat[13] = prev_position.j*(1-interpolation_blend_factor) + cur_position.j*interpolation_blend_factor;
     drawmat[14] = prev_position.k*(1-interpolation_blend_factor) + cur_position.k*interpolation_blend_factor;
+    
 }
 void Bolt::Cleanup() {
+  AUDDeleteSound(sound);
   unsigned int i;
   if (boltmesh)
     delete boltmesh;
@@ -160,6 +163,7 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
     }
     balls[decal].push_back (this);
   }
+  AUDPlayOnce (typ.sound,sound,cur_position,shipspeed+speed*Vector (drawmat[8],drawmat[9],drawmat[10]));
 }
 
 bool Bolt::Update () {

@@ -84,7 +84,8 @@ namespace UnitXML {
       SHIELDTIGHT,
       ITTS,
       AMMO,
-      HUDIMAGE
+      HUDIMAGE,
+      SOUND
     };
 
   const EnumMap::Pair element_names[] = {
@@ -110,7 +111,8 @@ namespace UnitXML {
     EnumMap::Pair ("Yaw", YAW),
     EnumMap::Pair ("Pitch", PITCH),
     EnumMap::Pair ("Roll", ROLL),
-    EnumMap::Pair ("Mount", MOUNT)
+    EnumMap::Pair ("Mount", MOUNT),
+    EnumMap::Pair ("Sound",SOUND)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -156,11 +158,12 @@ namespace UnitXML {
     EnumMap::Pair ("tightness",SHIELDTIGHT),
     EnumMap::Pair ("itts",ITTS),
     EnumMap::Pair ("ammo", AMMO),
+    EnumMap::Pair ("engine",ENGINE),
     EnumMap::Pair ("HudImage",HUDIMAGE)
 };
 
-  const EnumMap element_map(element_names, 23);
-  const EnumMap attribute_map(attribute_names, 44);
+  const EnumMap element_map(element_names, 24);
+  const EnumMap attribute_map(attribute_names, 45);
 }
 
 using XMLSupport::EnumMap;
@@ -400,45 +403,18 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     
     break;
-
-  case ARMOR:
-	assert (xml->unitlevel==2);
-	xml->unitlevel++;
-    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(attribute_map.lookup((*iter).name)) {
-      case FRONT:
-	armor.front = CLAMP_SHORT(parse_float((*iter).value));
-	break;
-      case BACK:
-	armor.back= CLAMP_SHORT(parse_float((*iter).value));
-	break;
-      case LEFT:
-	armor.left= CLAMP_SHORT(parse_float((*iter).value));
-	break;
-      case RIGHT:
-	armor.right= CLAMP_SHORT(parse_float((*iter).value));
-	break;
-      }
-    }
-
- 
-    break;
-  case SHIELDS:
-    assert (xml->unitlevel==2);
+  case SOUND:
+    assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-      case FRONT:
-	fbrltb[0] = parse_float((*iter).value);
-	shield.number++;
+      case ENGINE:
+	enginesound = AUDCreateSound((*iter).value.c_str(),true);
 	break;
-      case BACK:
-	fbrltb[1]=parse_float((*iter).value);
-	shield.number++;
-	break;
-      case LEFT:
-	fbrltb[3]=parse_float((*iter).value);
-	shield.number++;
+      }
+    }    
+    break;
+  case ARMOR:
 	break;
       case RIGHT:
 	fbrltb[2]=parse_float((*iter).value);

@@ -13,6 +13,7 @@ using std::vector;
 
 class Beam {
 private:
+  int sound;
   Transformation local_transformation;
   unsigned int decal;
   GFXVertexList *vlist;

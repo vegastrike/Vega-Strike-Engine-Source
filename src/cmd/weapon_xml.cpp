@@ -47,6 +47,7 @@ namespace BeamXML {
     DISTANCE,
     //attributes
     NAME,
+    SOUND,
     WEAPSIZE,
     XFILE,
     RED,
@@ -86,6 +87,7 @@ namespace BeamXML {
     EnumMap::Pair ("Name",NAME),
     EnumMap::Pair ("MountSize",WEAPSIZE),
     EnumMap::Pair ("file",XFILE),
+    EnumMap::Pair ("sound",SOUND),
     EnumMap::Pair ("r",RED),
     EnumMap::Pair ("g",GREEN),
     EnumMap::Pair ("b",BLUE),
@@ -107,7 +109,7 @@ namespace BeamXML {
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 20);
+  const EnumMap attribute_map(attribute_names, 21);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -176,6 +178,9 @@ namespace BeamXML {
 	  break;
 	case XFILE:
 	   tmpweapon.file = (*iter).value;
+	  break;
+	case SOUND:
+	  tmpweapon.sound = AUDCreateSound((*iter).value.c_str(),tmpweapon.type==weapon_info::BEAM);
 	  break;
 	case RED:
 	  tmpweapon.r = XMLSupport::parse_float ((*iter).value);
