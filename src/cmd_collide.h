@@ -5,11 +5,11 @@ struct LineCollide {
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
   Vector Mini;
   Vector Maxi;
-  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {object=objec;type=typ;Mini=st;Maxi=en;}
+  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;}
   LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;}      
 };
 
-void AddCollideQueue(LineCollide);
+void AddCollideQueue(const LineCollide &);
 void ClearCollideQueue();
 
 

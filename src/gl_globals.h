@@ -82,8 +82,9 @@ extern PFNGLCOLORTABLEEXTPROC glColorTable;
 //extern PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
 //extern PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
 #else
-extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+#include <GL/glext.h>
+//extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
+//extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif
 //extern int sharedcolortable;
 extern GLenum GFXStage0;

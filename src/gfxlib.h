@@ -28,9 +28,11 @@
 #define GFXDRVAPI  __declspec(dllimport)
 #endif
 */
-#include <GL/gl.h>
+#include <GL/glut.h>
 #include <vector>
+#ifndef BOOL
 typedef int BOOL;
+#endif
 #define TRUE 1
 #define FALSE 0
 
@@ -42,9 +44,9 @@ using std::vector;
 #include "gfxlib_struct.h"
 
 //Init functions
-BOOL /*GFXDRVAPI*/ GFXInit(int, char **);
-BOOL /*GFXDRVAPI*/ GFXLoop(void main_loop ());
-BOOL /*GFXDRVAPI*/ GFXShutdown();
+void  /*GFXDRVAPI*/ GFXInit(int, char **);
+void /*GFXDRVAPI*/ GFXLoop(void main_loop ());
+void /*GFXDRVAPI*/ GFXShutdown();
 
 //Misc functions
 BOOL /*GFXDRVAPI*/ GFXBeginScene();

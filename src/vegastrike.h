@@ -62,9 +62,6 @@ extern "C"
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-#ifdef HAVE_GL_GLX_H
-#   include <GL/glx.h>
-#endif
 
   //#include TCL_HEADER
 #ifndef PI
@@ -141,7 +138,8 @@ tmp |= ((x) >> 8)  & 0x00ff; \
 
 #include "vs_globals.h"
 
-typedef int BOOL;
+//typedef int BOOL;//FIXME!!!SUX)
+
 #endif
 
 #ifdef __cplusplus

@@ -17,8 +17,6 @@ bin_PROGRAMS = vegastrike
 
 
 vegastrike_SOURCES =				\
-	alglib.c				\
-	alglib.h				\
 	cmd.h					\
 	cmd_ai.h				\
 	cmd_beam.h				\
@@ -39,16 +37,6 @@ vegastrike_SOURCES =				\
 	cmd_physics.h				\
 	cmd_weapon_xml.cpp			\
 	cmd_weapon_xml.h			\
-	debug.c					\
-	debug.h					\
-	error_util.c				\
-	error_util.h				\
-	file.h					\
-	file_main.h				\
-	file_util.c				\
-	file_util.h				\
-	gauss.c					\
-	gauss.h					\
 	gfx_animation.cpp			\
 	gfx_aux.h				\
 	gfx_aux_logo.cpp			\
@@ -105,8 +93,6 @@ vegastrike_SOURCES =				\
 	gl_state.cpp				\
 	gl_texture.cpp				\
 	gl_vertex_list.cpp			\
-	hash.c					\
-	hash.h					\
 	hashtable.h				\
 	hashtable.cpp				\
 	in.h					\
@@ -120,27 +106,15 @@ vegastrike_SOURCES =				\
 	in_handler.h				\
 	lin_time.h				\
 	lin_time.cpp				\
-        list.c					\
-        list.h					\
 	main.cpp				\
 	main_loop.h				\
 	main_loop.cpp				\
-        nmrcl.c					\
-        nmrcl.h					\
-	pic.c					\
-	pic.h					\
 	planet.h 				\
 	planet.cpp 				\
 	physics.h				\
 	physics.cpp				\
 	quaternion.h 				\
 	quaternion.cpp				\
-	screenshot.c				\
-	screenshot.h				\
-	string_util.c				\
-	string_util.h				\
-	tex_font_metrics.c			\
-	tex_font_metrics.h			\
 	star_system.cpp 			\
 	star_system.h 				\
 	iterator.h				\
@@ -148,14 +122,6 @@ vegastrike_SOURCES =				\
 	UnitCollection.cpp			\
 	wrapgfx.cpp				\
 	wrapgfx.h				\
-	sdl_audio.c				\
-	sdl_audio.h				\
-	sdl_audio_data.c			\
-	sdl_audio_data.h			\
-	sdl_init.h				\
-	sdl_init.c				\
-	joystick.c				\
-	joystick.h				\
 	xml_support.h  				\
 	xml_support.cpp				\
 	profile.h 				\

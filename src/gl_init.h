@@ -27,7 +27,7 @@ extern "C"
 #ifndef _GL_INIT_H_
 #define _GL_INIT_H_
 
-#include "vegastrike.h"
+  //#include "vegastrike.h"
 
 /* Hack to fix compiling problem with old gl.h's, reported by Steve
    Baker <sjbaker1@airmail.net>.  Some old gl.h's don't include glext.h, but
@@ -52,6 +52,7 @@ extern "C"
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */
 
+#include <GL/glut.h>
 #include <GL/glext.h>
 
 #if !defined(GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6

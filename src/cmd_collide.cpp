@@ -2,13 +2,14 @@
 #include "cmd_beam.h"
 #include "gfx_mesh.h"
 #include "cmd_collide.h"
-vector <LineCollide> collidequeue;
+vector <LineCollide*> collidequeue;
 const int COLLIDETABLESIZE=20;//cube root of entries
 const float COLLIDETABLEACCURACY=.005;// "1/largeness of sectors"
 #define _USE_COLLIDE_TABLE
 class CollideTable {
-  vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
+  vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
+
   inline void hash_vec (const Vector & tmp, int &x, int &y, int &z) {
     x = ((int)(tmp.i*COLLIDETABLEACCURACY));
     y = ((int)(tmp.j*COLLIDETABLEACCURACY));
@@ -58,8 +59,16 @@ public:
     maxaccessx=0;
     maxaccessy=0;
     maxaccessz=0;
+    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
+      int cachunkcachunk=1;
+    }
+
   }
-  void Get (const Vector &Min, const Vector & Max, vector <LineCollide> &retval) {    
+  void Get (const Vector &Min, const Vector & Max, vector <LineCollide*> &retval) {    
+    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
+      int cachunkcachunk=1;
+    }
+
     int minx,miny,minz,maxx,maxy,maxz;
     hash_vec(Min,minx,miny,minz);
     hash_vec(Max,maxx,maxy,maxz);
@@ -72,7 +81,7 @@ public:
 	  if (k==COLLIDETABLESIZE) k=0;	  
 	  //	  table[i][j][k].push_back(target);
 	  for (unsigned int l=0;l<table[i][j][k].size();l++) {
-	    retval.push_back (LineCollide(*((table[i][j][k])[l])));
+	    retval.push_back ((table[i][j][k])[l]);
 	  }
 	  if (k==maxx) 
 	    break;
@@ -87,6 +96,9 @@ public:
   }
   
   void Put(LineCollide* target) {
+    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
+      int cachunkcachunk=1;
+    }
     int minx,miny,minz,maxx,maxy,maxz;
     hash_vec(target->Mini,minx,miny,minz);
     hash_vec(target->Maxi,maxx,maxy,maxz);
@@ -114,15 +126,22 @@ public:
       if (i==maxz)
 	break;
     }
+    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
+      int cachunkcachunk=1;
+    }
 
   }
-
 } collidetable;
 
-void AddCollideQueue (LineCollide tmp) {
-  collidequeue.push_back (tmp);
+void AddCollideQueue (const LineCollide &tmp) {
+  int size = collidequeue.size();
+  collidequeue.push_back (new LineCollide(tmp));
 #ifdef _USE_COLLIDE_TABLE
-  collidetable.Put (&(collidequeue[collidequeue.size()-1]));
+  if (size==0)
+    int cachunkcachunk=1;
+  if (size==1)
+    int cachunkcachunk=2;
+  collidetable.Put (collidequeue[size]);
 #endif
 
   
@@ -131,7 +150,10 @@ void ClearCollideQueue() {
 #ifdef _USE_COLLIDE_TABLE
   collidetable.Clear();//blah might take some time
 #endif
-  collidequeue = vector<LineCollide>();
+  for (int i=0;i<collidequeue.size();i++) {
+    delete collidequeue[i];
+  }
+  collidequeue = vector<LineCollide*>();
 }
 
 void Unit::CollideAll() {
@@ -141,25 +163,25 @@ void Unit::CollideAll() {
   //target->curr_physical_state.position;, rSize();
 #ifdef _USE_COLLIDE_TABLE
   #define COLQ colQ
-  vector <LineCollide> colQ;
+  vector <LineCollide*> colQ;
   collidetable.Get (minx,maxx,colQ);
 #else
   #define COLQ collidequeue
 #endif
   for (i=0;i<COLQ.size();i++) {
-    if (Position().i+radial_size>COLQ[i].Mini.i&&
-	Position().i-radial_size<COLQ[i].Maxi.i&&
-	Position().j+radial_size>COLQ[i].Mini.j&&
-	Position().j-radial_size<COLQ[i].Maxi.j&&
-	Position().k+radial_size>COLQ[i].Mini.k&&
-	Position().k-radial_size<COLQ[i].Maxi.k) {
+    if (Position().i+radial_size>COLQ[i]->Mini.i&&
+	Position().i-radial_size<COLQ[i]->Maxi.i&&
+	Position().j+radial_size>COLQ[i]->Mini.j&&
+	Position().j-radial_size<COLQ[i]->Maxi.j&&
+	Position().k+radial_size>COLQ[i]->Mini.k&&
+	Position().k-radial_size<COLQ[i]->Maxi.k) {
       //continue;
-      switch (COLQ[i].type) {
+      switch (COLQ[i]->type) {
       case LineCollide::UNIT://other units!!!
-	((Unit*)COLQ[i].object)->Collide(this);
+	((Unit*)COLQ[i]->object)->Collide(this);
 	return;
       case LineCollide::BEAM:
-	((Beam*)COLQ[i].object)->Collide(this);
+	((Beam*)COLQ[i]->object)->Collide(this);
 	break;
       case LineCollide::BALL:
 	break;

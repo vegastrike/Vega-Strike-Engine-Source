@@ -1,7 +1,7 @@
 #include "cmd_input_dfa.h"
 #include "gfx_click_list.h"
 #include "gfx_sprite.h"
-#include "vegastrike.h"
+//#include "vegastrike.h"
 #include "cmd_unit.h"
 #include "cmd_order.h"
 #include "gfx_coordinate_select.h"

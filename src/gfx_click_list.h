@@ -1,7 +1,7 @@
 #ifndef _GFX_CLICK_LIST_H_
 #define _GFX_CLICK_LIST_H_
 
-#include "vegastrike.h"
+//#include "vegastrike.h"
 #include "gfx_transform_matrix.h"
 #include "UnitCollection.h"
 #include "star_system.h"

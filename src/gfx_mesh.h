@@ -235,7 +235,7 @@ public:
   Vector &Position() {return local_transformation.position;}
   //  const char *get_name(){return name}
   void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
-  void ProcessDrawQueue();
+  virtual void ProcessDrawQueue();
   static void ProcessUndrawnMeshes();
     void setEnvMap(BOOL newValue) {envMap = newValue;}
   void Destroy();

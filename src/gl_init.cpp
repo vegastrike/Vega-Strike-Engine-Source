@@ -19,13 +19,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#include "vegastrike.h"
-#include "gl_globals.h"
-#if defined( HAVE_GL_GLX_H )
+#include "vs_globals.h"
+//#include "gl_globals.h"
+
+#ifndef WIN32
+#   include <GL/gl.h>
+#include <GL/glu.h>
 #   include <GL/glx.h>
 #   include <GL/glext.h>
 #endif /* defined( HAVE_GL_GLX_H ) */
 
+#include <stdio.h>
 #include "gl_init.h"
 #include "gfxlib.h"
 #define WINDOW_TITLE "Vega Strike "VERSION
@@ -102,7 +106,7 @@ void init_opengl_extensions()
 
     }
 }
-BOOL GFXInit (int argc, char ** argv){
+void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
      
 #ifdef USE_STENCIL_BUFFER
@@ -123,7 +127,7 @@ BOOL GFXInit (int argc, char ** argv){
 	/* Set the initial window size */
 	glutInitWindowSize(g_game.x_resolution, g_game.y_resolution );
 	glutInitWindowPosition( 0, 0 );
-	glutWindow = glutCreateWindow( "Vegastrike "VERSION );
+	glutWindow = glutCreateWindow( "Vegastrike " );
 	if ( glutWindow == 0 ) {
 	    fprintf( stderr, "Couldn't create a window.\n" );
 	    exit(1);
@@ -236,21 +240,20 @@ BOOL GFXInit (int argc, char ** argv){
     glutSetCursor(GLUT_CURSOR_NONE );
     //glutSetCursor(GLUT_CURSOR_INHERIT );
     //GFXPerspective(78,1.33,0.5,20);
-    return TRUE;
+
 }
 
-BOOL GFXLoop(void main_loop()) {
+void GFXLoop(void main_loop()) {
   glutDisplayFunc(main_loop);
   glutIdleFunc (main_loop);
   glutMainLoop();
   //never make it here;
-  return TRUE;
+
 }
 
 
-BOOL GFXShutdown () {
+void GFXShutdown () {
   if ( g_game.fullscreen ) {
     glutLeaveGameMode();
   }
-  return TRUE;
 }
