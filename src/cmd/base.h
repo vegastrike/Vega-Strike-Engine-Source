@@ -127,9 +127,10 @@ class Base {
 	int curlinkindex;
 	bool drawlinkcursor;
 	TextPlane curtext;
-	int curroom;
+
 	int unitlevel;
 public:
+	int curroom;
 	std::vector <Room*> rooms;
 	TextPlane othtext;
 
