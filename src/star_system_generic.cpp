@@ -35,6 +35,7 @@
 //extern Music *muzak;
 //extern Vector mouseline;
 #include "cmd/unit_collide.h"
+#include "savegame.h"
 //vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -283,8 +284,26 @@ Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever.
   return (Unit *)0x31337;
 }
 
+void CarSimUpdate (Unit *un, float height) {
+	un->SetVelocity(Vector(un->GetVelocity().i,0,un->GetVelocity().k));
+	un->curr_physical_state.position= QVector(un->curr_physical_state.position.i
+											  ,height,
+											  un->curr_physical_state.position.k);
+	
+	
+	
+
+}
+
+
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   un_iter iter = this->getUnitList().createIterator();
+#ifdef CAR_SIM
+  float unitheight=0;  
+  if (_Universe->AccessCockpit(0)->savegame->getMissionData("unitheight").empty())
+	  _Universe->AccessCockpit(0)->savegame->getMissionData("unitheight").push_back(0);
+																						   unitheight=_Universe->AccessCockpit(0)->savegame->getMissionData("unitheight")[0];
+#endif
   Unit * unit=NULL;
 	while((unit = iter.current())!=NULL) {
 #ifdef OLD_AUTOPILOT
@@ -300,6 +319,17 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	  }
 #endif
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());
+#ifdef CAR_SIM
+	  Cockpit * cp = _Universe->isPlayerStarship(unit);
+	  float tmp=0;
+	  if (cp) {
+		  if (cp->savegame->getMissionData("unitheight").empty())
+			  cp->savegame->getMissionData("unitheight").push_back(0);
+		  tmp= cp->savegame->getMissionData("unitheight")[0];
+	  }
+	  static string s = vs_config->getVariable ("physics","seeker","skart");
+	  CarSimUpdate(unit,unit->name==s?unitheight:tmp);
+#endif
 	  iter.advance();
 	}
 }
@@ -428,7 +458,6 @@ void StarSystem::Update( float priority)
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
-
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
