@@ -31,7 +31,30 @@ string getUnitNameAndFgNoBase (Unit * target) {
   }else if (target->isUnit()==UNITPTR){
 	if (fg) {
 	  if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
-		  return fg->name+":"+target->getFullname();
+		  char* fgnum;
+		  vector<char> stack;
+		  int tempint=target->getFgSubnumber();
+		  do{
+			  stack.push_back((char)((tempint%10)+48));
+			  tempint/=10;
+		  }while(tempint);
+		  fgnum=(char*)malloc(sizeof(char)*(stack.size()+1));
+		  fgnum[stack.size()]=0;
+		  int offset=0;
+		  int end=stack.size()-1;
+		  while(end-offset>=0){
+			fgnum[offset]=(char)(stack[end-offset]);
+			offset++;
+          }
+		  string fgnstring=string(fgnum);
+		  free(fgnum);
+		  fgnum=NULL;
+		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","printFGsubID","false"));
+		  if(confignums){
+			return fg->name+" ="+fgnstring+"= : "+reformatName(target->getFullname());
+		  } else {
+			return fg->name+" : "+reformatName(target->getFullname());
+		  }
 	  } else if(fg->name=="Base"){
 		  if(reformatName(target->name)==(reformatName(target->getFullname()))){
 		    return reformatName(target->name);
