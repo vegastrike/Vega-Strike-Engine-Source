@@ -112,7 +112,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 31);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 32);
 
 
 
