@@ -12,6 +12,7 @@
 #include <strstream>
 #include "init.h"
 #include "python_compile.h"
+#include "python_class.h"
 #ifdef WIN32
 #include <direct.h>
 #endif
@@ -178,6 +179,11 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 	IO.def(PythonIOString::write,"write");
 }
 //boost::python::detail::extension_instance::wrapped_objects
+
+PYTHON_BEGIN_MODULE(AI)
+	PYTHON_INIT_CLASS(AI,Orders::FireAt,"PythonAI")
+PYTHON_END_MODULE(AI)
+
 void Python::initpaths(){
   char pwd[2048];
   getcwd (pwd,2047);
@@ -189,6 +195,7 @@ void Python::initpaths(){
 }
 
 void Python::init() {
+  PYTHON_INIT_MODULE(AI);
   static bool isinit=false;
   if (isinit) {
     return;

@@ -40,7 +40,7 @@ void PythonAI::InitModuleAI () {
   boost::python::class_builder <FireAt,PythonAI> BaseClass (ai_builder,"FireAt");
 
   BaseClass.def (boost::python::constructor<float,float>());
-//  BaseClass.def (&FireAt::Execute,"PythonAI",PythonAI::default_Execute);
+  BaseClass.def (&FireAt::Execute,"PythonAI",PythonAI::default_Execute);
   
 }
 PythonAI::~PythonAI () {

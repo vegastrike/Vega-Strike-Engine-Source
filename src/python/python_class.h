@@ -5,16 +5,46 @@
 #include <compile.h>
 #include <eval.h>
 #include "python/python_compile.h"
-#define INIT_PYTHON_CLASS(superclass,mymodule,myclass) PythonClass< superclass > *PythonClass<superclass>::last_instance = NULL; static bool initsuccess=PythonClass< superclass >::InitModule (mymodule,myclass); 
+#include "cmd/ai/fire.h"
+/*
+These following #defines will create a module for python
+call them with:
+
+PYTHON_BEGIN_MODULE(VS)
+	PYTHON_INIT_CLASS(VS,FireAt,"PythonFire")
+	PYTHON_INIT_CLASS(VS,BaseClass,"PythonClassName")
+PYTHON_END_MODULE(VS)
+...
+int main (int argc,char *argv[]) {
+	...
+	PYTHON_INIT_MODULE(VS);
+	...
+	return 0;
+}
+
+*/
+
+//These two functions purposely have opening/closing braces that don't match up
+#define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
+#define PYTHON_END_MODULE(name) }
+#define PYTHON_INIT_MODULE(name) init##name()
+#define PYTHON_INIT_CLASS(name,SuperClass,myclass) { \
+	PythonClass< SuperClass >::last_instance = NULL; \
+    boost::python::class_builder <SuperClass,PythonClass< SuperClass > > BaseClass (name,myclass); \
+    BaseClass.def (boost::python::constructor<>()); \
+    BaseClass.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute); \
+}
+
+//__declspec(dllexport) class Orders::FireAt;
 
 template <class SuperClass> class PythonClass:public SuperClass {
   PyObject * self;
-  static PythonClass * last_instance;
  protected:
   virtual void Destructor() {
     Py_XDECREF(self);
   }
  public:
+  static PythonClass< SuperClass > * last_instance;
   PythonClass (PyObject * self_):SuperClass() {
     self = self_;
     Py_XINCREF(self);
@@ -25,14 +55,6 @@ template <class SuperClass> class PythonClass:public SuperClass {
   }
   static void default_Execute(SuperClass & self_) {
     (self_).SuperClass::Execute();
-  }
-  static bool InitModule (std::string mymodule, std::string myclass) {
-    Python::init();
-    boost::python::module_builder ai_builder(mymodule.c_str());
-    boost::python::class_builder <SuperClass,PythonClass> BaseClass (ai_builder,myclass.c_str());
-    BaseClass.def (boost::python::constructor<>());
-    BaseClass.def (&SuperClass::Execute,myclass.c_str(),PythonClass::default_Execute);
-    return true;
   }
   static PythonClass * LastPythonClass(){
     PythonClass * myclass = last_instance;

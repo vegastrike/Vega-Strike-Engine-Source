@@ -980,8 +980,6 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   }
 }
 
-INIT_PYTHON_CLASS(Orders::FireAt,"AI","PythonAI");
-
 void Unit::LoadAIScript(const std::string & s) {
 
   if (s.find (".py")!=string::npos) {
