@@ -176,8 +176,83 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
   longjmp(myerr->setjmp_buffer, 1);
 }
 unsigned char * readVSJpeg2 (char *buffer, int length, int & bpp, int &color_type, unsigned long &width, unsigned long &height, textureTransform * tt) {
-	printf( "Error : reading JPEG from memory is not implemented yet");
-	return NULL;
+	FILE * fp = fopen( "./temp.jpg", "w+");
+	if( !fp)
+	{
+		fprintf( stderr, "!!! ERROR : opening temporary JPEG file !!!\n");
+		exit(1);
+	}
+	int written=0;
+	if( (written=fwrite( buffer, 1, length, fp))!=length)
+	{
+		fprintf( stderr, "!!! ERROR : writing %d bytes to temporary JPEG file (only %d written) !!!\n", length, written);
+		exit(1);
+	}
+	fseek( fp, 0, SEEK_SET);
+	fclose( fp);
+	bpp = 8;
+   jpeg_decompress_struct cinfo;
+
+   my_error_mgr jerr;
+   JSAMPARRAY row_pointers=NULL;// Output row buffer
+
+   cinfo.err = jpeg_std_error(&jerr.pub);
+   jerr.pub.error_exit = my_error_exit;
+   if (setjmp(jerr.setjmp_buffer)) {
+       // If we get here, the JPEG code has signaled an error.
+       // We need to clean up the JPEG object, close the input file, and return.
+     jpeg_destroy_decompress(&cinfo);
+     return NULL;
+   }
+
+   jpeg_create_decompress(&cinfo);
+
+   jpeg_stdio_src((j_decompress_ptr)&cinfo, fp);
+
+   (void) jpeg_read_header(&cinfo, TRUE);
+   width = cinfo.image_width;
+   height = cinfo.image_height;
+
+   (void) jpeg_start_decompress(&cinfo);
+
+
+   color_type = PNG_COLOR_TYPE_RGB;
+   if (cinfo.output_components == 1)
+     color_type = PNG_COLOR_TYPE_GRAY;
+   else if (cinfo.output_components==4)
+     color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+   else if (cinfo.output_components== 2)
+     color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+   
+   row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) * cinfo.image_height);
+
+   bpp=8;
+   int numchan =cinfo.output_components;
+
+   unsigned long stride = numchan*sizeof (unsigned char)*bpp/8;
+   unsigned char * image = (unsigned char *) malloc (stride*cinfo.image_width*cinfo.image_height);
+
+   for (unsigned int i=0;i<cinfo.image_height;i++) {
+     row_pointers[i] = &image[i*stride*cinfo.image_width];
+
+   }
+   int count=0;
+   while (count<height) {
+     count+= jpeg_read_scanlines(&cinfo,&( row_pointers[count]), height-count);
+   }
+
+
+   (void) jpeg_finish_decompress(&cinfo);
+
+   jpeg_destroy_decompress(&cinfo);
+
+   unsigned char * result=image;
+   if (tt) {
+     result = (*tt) (bpp,color_type,width,height,row_pointers);
+     free (image);
+   }
+   free (row_pointers);
+   return result;
 }
 
 #else
