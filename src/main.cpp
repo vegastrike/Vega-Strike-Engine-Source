@@ -457,7 +457,7 @@ void bootstrap_first_loop() {
 }
 void SetStartupView(Cockpit * cp) {
       static std::string startupview = vs_config->getVariable("graphics","startup_cockpit_view","front");
-      cp->SetView(startupview=="view_target"?CP_VIEWTARGET:(startupview=="back"?CP_BACK:(startupview=="chase"?CP_CHASE:CP_FRONT)));
+      cp->SetView(startupview=="view_target"?CP_TARGET:(startupview=="back"?CP_BACK:(startupview=="chase"?CP_CHASE:CP_FRONT)));
 }
 void bootstrap_main_loop () {
 
