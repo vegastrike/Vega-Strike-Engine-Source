@@ -165,7 +165,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       Accel (-((float)FBWABS(SSCK.decelpress))/(FBWABS(SSCK.decelpress)+SSCK.decelrelease));
     }
     if (SSCK.ABpress||SSCK.ABrelease) {
-      Afterburn (((float)FBWABS(SSCK.ABpress))/(FBWABS(SSCK.ABpress)+SSCK.ABrelease));
+      Afterburn ((SSCK.ABpress>SSCK.ABrelease)?1:0);
     }
   }
   if (SSCK.stoppress) {
