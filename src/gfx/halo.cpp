@@ -40,20 +40,25 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
   pos=  position.Transform(m);
   offset = (_Universe->AccessCamera()->GetPosition()-pos);
+  _Universe->AccessCamera()->GetPQR(p,q,r);
   //Matrix HACK  pos = -offset;
   float offmag = offset.Magnitude();
+  float offz = -r.Dot (offset);
   float wid = sizex;
   float hei = sizey;
   float rad =(wid>hei?wid:hei);
   offset*=1./offmag;
-  if (offmag<rad+.4*g_game.zfar) {
+  if (offz<rad+.4*g_game.zfar) {
+    if (offz-HaloOffset*rad<2*g_game.znear) {
+      rad = (offz-2*g_game.znear)/HaloOffset;
+    }
     offset*=HaloOffset*rad;
   }else {
-    offset *= (offmag-2*g_game.znear);//-rad-.4*g_game.zfar);
-    wid/=((offmag)/(kkkk*g_game.znear));//it's 1 time away from znear 
-    hei/=((offmag)/(kkkk*g_game.znear));
+    offset *= (offmag/offz)*(offz-2*g_game.znear);//-rad-.4*g_game.zfar);
+    wid/=((offz)/(kkkk*g_game.znear));//it's 1 time away from znear 
+    hei/=((offz)/(kkkk*g_game.znear));
   }
-  _Universe->AccessCamera()->GetPQR(p,q,r);
+
   p=p*wid;
   r =-r;
   q=q*hei;
