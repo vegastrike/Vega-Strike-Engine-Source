@@ -148,12 +148,12 @@ static void Quit(int,KBSTATE newState) {
 }
 static void Inside(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
-	  _Universe->AccessCockpit()->SetView (CP_INSIDE);
+	  _Universe->AccessCockpit()->SetView (CP_FRONT);
 	}
 }
 static void Behind(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
-	  _Universe->AccessCockpit()->SetView (CP_BEHIND);
+	  _Universe->AccessCockpit()->SetView (CP_CHASE);
 	}
 }
 static void Pan(int,KBSTATE newState) {

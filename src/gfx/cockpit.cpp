@@ -42,7 +42,7 @@ void Cockpit::Draw() {
   GFXBlendMode (ONE,ZERO);
   GFXAlphaTest (GREATER,.1);
   RestoreViewPort();
-  if (Pit)
+  if (Pit) 
     Pit->Draw();
   GFXHudMode (false);
   GFXAlphaTest (ALWAYS,0);
@@ -65,14 +65,22 @@ void Cockpit::SetupViewPort () {
   if ((un = parent.GetUnit())) {
     if (view!=CP_PAN) {
       un->UpdateHudMatrix();
-      if (view==CP_BEHIND) {
+      if (view==CP_CHASE) {
 	_Universe->AccessCamera()->SetPosition(_Universe->AccessCamera()->GetPosition()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
-     }
+      } else  {
+	if (view==CP_LEFT) {
+	
+	} else if (view==CP_RIGHT) {
+	
+	} else if (view==CP_BACK) {
+
+	}
+      }
     }else {
       _Universe->AccessCamera()->SetPosition (un->Position()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
     }
     _Universe->activeStarSystem()->SetViewport();
-    un->SetVisible(view!=CP_INSIDE);
+    un->SetVisible(view>=CP_CHASE);
     
   }
  
