@@ -16,7 +16,7 @@ class MoveTo : public Order {
   float max_speed;
 public:
   MoveTo(const Vector &target, float max_velocity) : Order(), state(0), max_speed(max_velocity) {
-    type = 1;
+    type = LOCATION;
     targetlocation = target;
   }
   AI *Execute() {
