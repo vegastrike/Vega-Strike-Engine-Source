@@ -3,13 +3,15 @@
 #include "universe_util.h"
 #include "config_xml.h"
 float max_allowable_travel_time () {
-  static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","60"));
+  static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","15"));
   return mat;
 }
 bool DistanceWarrantsWarpTo (Unit * parent, float dist){
   //first let us decide whether the target is far enough to warrant using warp
   //  double dist =UnitUtil::getSignificantDistance(parent,target);
-  float timetolive = dist/parent->GetComputerData().max_combat_ab_speed;
+  float diff = g_game.difficulty;
+  if (diff>1)diff=1;
+  float timetolive = dist/(diff*parent->GetComputerData().max_combat_speed);
   if (timetolive>max_allowable_travel_time()) {
     return true;
   }
@@ -18,7 +20,9 @@ bool DistanceWarrantsWarpTo (Unit * parent, float dist){
 bool DistanceWarrantsTravelTo (Unit * parent, float dist){
   //first let us decide whether the target is far enough to warrant using warp
   //  double dist =UnitUtil::getSignificantDistance(parent,target);
-  float timetolive = dist/parent->GetComputerData().max_combat_speed;
+  float diff = g_game.difficulty;
+  if (diff>1)diff=1;
+  float timetolive = dist/(diff*parent->GetComputerData().max_combat_speed);
   if (timetolive>max_allowable_travel_time()) {
     return true;
   }
