@@ -96,6 +96,8 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   x->numforcelogo = x->numsquadlogo =0;
   x->setLighting(getLighting());
   x->setEnvMap(getEnvMap());
+  x->blendSrc = y->blendSrc = blendSrc;
+  x->blendDst = y->blendDst = blendDst;
   while (x->Decal.size()<Decal.size())
     x->Decal.push_back (NULL);
   {for (unsigned int i=0;i<Decal.size();i++) {
