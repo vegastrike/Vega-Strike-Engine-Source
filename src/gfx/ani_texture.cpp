@@ -40,7 +40,8 @@ AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm){
   FILE * fp = fopen (file,"r");
   bool setdir=false;
   if (!fp) {
-    vssetdir ((datadir+DELIM+string("animations")+DELIM+string(file)+DELIM).c_str());
+	string str(datadir+DELIM+string("animations")+DELIM+string(file)+DELIM);
+    vssetdir (str.c_str());
     fp = fopen (file, "r");
     float width,height;
     if (fp) {

@@ -71,6 +71,15 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   }
   FILE * fp = fopen (FileName, "r");
   if (!fp) {
+	string rez(datadir+"/animations/"+FileName);
+
+	fp = fopen (rez.c_str(),"r");
+	if (!fp) {
+		rez+=string("/")+FileName;
+		fp = fopen (rez.c_str(),"r");
+	}
+  }
+  if (!fp) {
     ; // do something 
   } else {
     fscanf (fp, "%f %f", &width, &height);

@@ -91,6 +91,10 @@ char pwd[65536];
 void initpaths () {
 #ifndef _WIN32
   datadir = getdatadir();
+#else
+  getcwd(pwd,65534);
+  pwd[65534]=0;
+  datadir=pwd;
 #endif
   sharedsounds = datadir;
 
