@@ -3,43 +3,20 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "aux_texture.h"
+#include "decalqueue.h"
 
-static vector <Texture *> HaloDecal;
-static vector <int> HaloDecalRef;
+
+static DecalQueue halodecal;
 static vector <GFXQuadList *> halodrawqueue;
 
 Halo::  Halo (const char * texture, const GFXColor &col, const Vector & pos, float sizx, float sizy ){
   string texname (texture);
   position = pos;
-	sizex = sizx;
-	sizey = sizy;
-
-  Texture * tmpDecal = Texture::Exists(texname);
-  unsigned int i=0;
-  int nullio=-1;
-  if (tmpDecal) {
-    for (;i<HaloDecal.size();i++) {
-      if ((*HaloDecal[i])==(*tmpDecal)) {
-	decal = i;
-	HaloDecalRef[i]++;
-	break;
-      }
-      if (HaloDecal[i]==NULL&&HaloDecalRef[i]==0)
-	nullio=i;
-    }
-  }
-  if (!tmpDecal||i==HaloDecal.size()) {
-    if (nullio!=-1) {
-      decal=nullio;
-      HaloDecal[nullio]=new Texture (texname.c_str());
-      HaloDecalRef[nullio]=1;
-      halodrawqueue[nullio]=new GFXQuadList(GFXTRUE);
-    }else {
-      decal = HaloDecal.size();
-      HaloDecal.push_back(new Texture (texname.c_str()));//make sure we have our very own texture to delete in case some other dude is using it
-      halodrawqueue.push_back (new GFXQuadList(GFXTRUE));
-      HaloDecalRef.push_back (1);
-    }
+  sizex = sizx;
+  sizey = sizy;
+  decal = halodecal.AddTexture (texture,MIPMAP);
+  if (decal>=halodrawqueue.size()) {
+    halodrawqueue.push_back (new GFXQuadList(GFXTRUE));
   }
   GFXColor coltmp [4] = {GFXColor(col),GFXColor(col),GFXColor(col),GFXColor(col)};
   quadnum = halodrawqueue[decal]->AddQuad (NULL,coltmp);  
@@ -47,10 +24,7 @@ Halo::  Halo (const char * texture, const GFXColor &col, const Vector & pos, flo
 
 Halo::~Halo () {
   halodrawqueue[decal]->DelQuad (quadnum);
-  HaloDecalRef[decal]--;
-  if (HaloDecalRef[decal]<=0) {
-    delete HaloDecal[decal];
-    HaloDecal[decal]=NULL;
+  if (halodecal.DelTexture (decal)) {
     delete halodrawqueue[decal];//deletes the quad 
     halodrawqueue[decal]=NULL;
   }
@@ -87,8 +61,8 @@ void Halo::ProcessDrawQueue() {
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
   for (unsigned int decal = 0;decal < halodrawqueue.size();decal++) {
-    if (HaloDecal[decal]) {
-      HaloDecal[decal]->MakeActive();
+    if (halodecal.GetTexture (decal)) {
+      halodecal.GetTexture(decal)->MakeActive();
       halodrawqueue[decal]->Draw(); 
     }   
   }

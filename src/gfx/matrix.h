@@ -31,6 +31,19 @@ const Matrix identity_matrix = {1,0,0,0,
 				    0,0,0,1};
 
 /** moves a vector struct to a matrix */
+
+inline void ScaleMatrix(float matrix[], const Vector &scale) {
+  matrix[0]*=scale.i;
+  matrix[4]*=scale.i;
+  matrix[8]*=scale.i;
+  matrix[1]*=scale.j;
+  matrix[5]*=scale.j;
+  matrix[9]*=scale.j;
+  matrix[2]*=scale.k;
+  matrix[6]*=scale.k;
+  matrix[10]*=scale.k;
+}
+
 inline void VectorToMatrix(float matrix[], const Vector &v1, const Vector &v2, const Vector &v3)
 {
 	matrix[0] = v1.i;

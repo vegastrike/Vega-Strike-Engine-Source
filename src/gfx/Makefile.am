@@ -23,6 +23,7 @@ libgfx_a_SOURCES =	\
 	camera.h	\
 	coord_select.cpp	\
 	coord_select.h	\
+	decalqueue.h	\
 	env_map_gent.cpp	\
 	env_map_gent.h	\
 	halo.cpp	\

@@ -44,7 +44,7 @@ dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
 TR_CFLAGS="-O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations"
-TR_CXXFLAGS="-O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations"
+TR_CXXFLAGS="-O2 -Wall -fomit-frame-pointer  -ffast-math -fexpensive-optimizations"
 TR_LIBS=""
 
 case "$host" in
@@ -52,12 +52,13 @@ i*86-*-*) TR_CFLAGS="$TR_CFLAGS -malign-loops=2 -malign-jumps=2 -malign-function
           TR_CXXFLAGS="$TR_CXXFLAGS -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
 esac
 
-AC_ARG_ENABLE(debug,     [  --enable-debug          Produce an executable with debugging symbols], [TR_CFLAGS="-g -Wall"; TR_CXXFLAGS="-g -Wall"])
+AC_ARG_ENABLE(debug,     [  --enable-debug          Produce an executable with debugging symbols], [TR_CFLAGS="-g -Wall "; TR_CXXFLAGS="-g -Wall"])
+
+AC_ARG_ENABLE(debug,     [  --debug-release          Produce an executable with debugging symbols], [TR_CFLAGS="-g -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"; TR_CXXFLAGS="-g -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"])
+
+AC_ARG_ENABLE(profile,[  --enable-profile      Produce a profiled executable],  [TR_CFLAGS="-g -pg"; TR_CXXFLAGS="-g  -pg"])
 
 AC_ARG_ENABLE(pedantic,  [  --enable-pedantic       Enable -pedantic (and -ansi for C) when compiling], TR_CFLAGS="$TR_CFLAGS -ansi -pedantic"; TR_CXXFLAGS="$TR_CXXFLAGS -pedantic")
-
-AC_ARG_ENABLE(profile,[  --enable-profile        Produce a profiled executable],  [TR_CFLAGS="$TR_CFLAGS -pg"; TR_CXXFLAGS="$TR_CXXFLAGS -pg"])
-
 
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Win32
