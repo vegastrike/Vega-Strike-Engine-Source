@@ -10,6 +10,7 @@
 #include "gfx/animation.h"
 
 #if defined(CG_SUPPORT)
+#include "gldrv/gl_light.h"
 #include "cg_global.h"
 #endif
 
@@ -382,9 +383,10 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
 			}else
 				GFXColorf(CloakFX);
         }
+
 #if defined(CG_SUPPORT)
-	    cgGLSetParameter2f(cloak_cg->VecBlendParams, SRCALPHA, INVSRCALPHA);
-	     cgGLEnableProfile(cloak_cg->vertexProfile);
+		cgGLSetParameter2f(cloak_cg->VecBlendParams, 0.0f, CloakFX.a);
+		cgGLEnableProfile(cloak_cg->vertexProfile);
 #endif
 
     }else if (hulldamage) {
@@ -588,26 +590,18 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   cgGLBindProgram(cloak_cg->vertexProgram);
 
  cgGLSetStateMatrixParameter(cloak_cg->ModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
- cgGLSetStateMatrixParameter(cloak_cg->ModelViewIT, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE);
- cgGLSetStateMatrixParameter(cloak_cg->ModelViewIT, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_TRANSPOSE);
+ cgGLSetStateMatrixParameter(cloak_cg->ModelViewIT, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE_TRANSPOSE);
  cgGLSetStateMatrixParameter(cloak_cg->ModelView, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY );
- cgGLSetParameter4f(cloak_cg->MaterialDiffuse, this->xml->material.dr,  this->xml->material.dg, this->xml->material.db, this->xml->material.da);
- cgGLSetParameter4f(cloak_cg->MaterialAmbient, this->xml->material.ar, this->xml->material.ag, this->xml->material.ab, this->xml->material.aa);
- cgGLSetParameter4f(cloak_cg->MaterialSpecular, this->xml->material.sr, this->xml->material.sg, this->xml->material.sb, this->xml->material.sa);
- cgGLSetParameter4f(cloak_cg->MaterialEmissive, this->xml->material.er, this->xml->material.eg, this->xml->material.eb, this->xml->material.ea);
+ cgGLSetParameter4f(cloak_cg->MaterialDiffuse, this->GetMaterial().dr,  this->GetMaterial().dg, this->GetMaterial().db, this->GetMaterial().da);
+ cgGLSetParameter4f(cloak_cg->MaterialAmbient, this->GetMaterial().ar, this->GetMaterial().ag, this->GetMaterial().ab, this->GetMaterial().aa);
+ cgGLSetParameter4f(cloak_cg->MaterialSpecular, this->GetMaterial().sr, this->GetMaterial().sg, this->GetMaterial().sb, this->GetMaterial().sa);
+ cgGLSetParameter4f(cloak_cg->MaterialEmissive, this->GetMaterial().er, this->GetMaterial().eg, this->GetMaterial().eb, this->GetMaterial().ea);
 
-cgGLSetParameter3f(cloak_cg->VecEye, _Universe->AccessCamera()->GetPosition().i, _Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k);
+ cgGLSetParameter3f(cloak_cg->VecEye, _Universe->AccessCamera()->GetPosition().i, _Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k);
+ cgGLSetParameter3f(cloak_cg->VecCenter,this->Position().i, this->Position().j, this->Position().k);
 
-cgGLSetParameter3f(cloak_cg->VecCenter,this->Position().i, this->Position().j, this->Position().k);
-
-//cgGLSetParameter2f(cloak_cg->VecLightDir, CloakFX.vect[0], CloakFX.vect[1], CloakFX.vect[2]);
-
-
-  for (int i = 0; i <= vlist->GetNumVertices(); i++)
-    {
-cgGLSetParameter3f(cloak_cg->VecPosition, vlist->GetVertex(i)->x,  vlist->GetVertex(i)->y,  vlist->GetVertex(i)->z);
-cgGLSetParameter3f(cloak_cg->VecNormal, vlist->GetVertex(i)->i ,  vlist->GetVertex(i)->j, vlist->GetVertex(i)->i );
-    }
+ cgGLSetParameter3f(cloak_cg->VecPower, this->GetMaterial().power, 0.0f, 0.0f);
+ cgGLSetParameter3f(cloak_cg->VecLightDir, 0.0f, 1.0f, 1.0f);
 
   cgGLSetOptimalOptions(cloak_cg->vertexProfile);
 #endif

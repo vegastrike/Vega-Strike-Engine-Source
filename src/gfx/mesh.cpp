@@ -51,7 +51,7 @@ using std::list;
 Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
 Vector mouseline;
 
-
+extern vector <GFXMaterial> materialinfo;
 
 void Mesh::InitUnit() {
 	polygon_offset=0;
@@ -180,6 +180,11 @@ void Mesh::SetMaterial (const GFXMaterial & mat) {
     }
   }
 }
+
+const GFXMaterial &Mesh::GetMaterial () {
+   return (materialinfo[myMatNum]);
+}
+
 Mesh * Mesh::getLOD (float lod) {
   if (!orig)
     return this;

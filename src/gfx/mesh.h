@@ -353,6 +353,8 @@ public:
   int numVertices()const;
   ///Sets the material of this mesh to mat (affects original as well)
   void SetMaterial (const GFXMaterial & mat);
+  // Gets the material back from the mesh.
+  const GFXMaterial &GetMaterial ();
   ///If it has already been drawn this frame
   GFXBOOL HasBeenDrawn() {return will_be_drawn;} 
   ///so one can query if it has or not been drawn
