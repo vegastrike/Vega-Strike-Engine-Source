@@ -233,6 +233,9 @@ Unit::~Unit()
 			delete subunits[subcount];
 		delete [] subunits;
 	}
+	if (mounts) {
+	  delete []mounts;
+	}
 	if(aistate)
 		delete aistate;
 /*
@@ -723,9 +726,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit
   return true;
 }
 Unit::Mount::Mount(const string& filename) :gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),type(weapon_info::BEAM){
-  weapon_info * temp = getTemplate (filename);
- 
-  
+  weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;
   }else {

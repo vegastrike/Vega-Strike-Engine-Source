@@ -90,7 +90,7 @@ protected:
   public:
     Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
-    enum weapon_info::MOUNT_SIZE size;
+    short size;
     weapon_info type;
     Mount():gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),type(weapon_info::BEAM){}
     Mount(const string& name);

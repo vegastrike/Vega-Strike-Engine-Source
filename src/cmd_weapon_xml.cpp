@@ -69,12 +69,12 @@ namespace BeamXML {
     //ROLL
   };
   const EnumMap::Pair element_names[] = {
-    EnumMap::Pair ("UNKNOWN",UNKNOWN),
-    EnumMap::Pair ("Weapons",WEAPONS),
+    EnumMap::Pair ("UNKNOWN",UNKNOWN),//don't add anything until below missile so it maps to enum WEAPON_TYPE
     EnumMap::Pair ("Beam",BEAM),
     EnumMap::Pair ("Ball",BALL),
     EnumMap::Pair ("Bolt",BOLT),
     EnumMap::Pair ("Missile", PROJECTILE),
+    EnumMap::Pair ("Weapons",WEAPONS),
     EnumMap::Pair ("Appearance", APPEARANCE),
     //    EnumMap::Pair ("Maneuver",MANEUVER),
     EnumMap::Pair ("Energy",ENERGY),
@@ -114,6 +114,8 @@ namespace BeamXML {
   int level=-1;
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
+    weapon_info * debugtmp = &tmpweapon;
+    enum weapon_info::WEAPON_TYPE weaptyp;
     Names elem = (Names) element_map.lookup(string (name));
     AttributeList::const_iterator iter;
     switch (elem) {
@@ -129,8 +131,24 @@ namespace BeamXML {
     case PROJECTILE:
       assert (level==0);
       level++;
-   
-      tmpweapon.Type((enum weapon_info::WEAPON_TYPE)elem);
+      switch(elem) {
+      case BOLT:
+	weaptyp = weapon_info::BOLT;
+	break;
+      case BEAM:
+	weaptyp=weapon_info::BEAM;
+	break;
+      case BALL:
+	weaptyp=weapon_info::BALL;
+	break;
+      case PROJECTILE:
+	weaptyp=weapon_info::PROJECTILE;
+	break;
+      default:
+	weaptyp=weapon_info::UNKNOWN;
+	break;
+      }
+      tmpweapon.Type(weaptyp);
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
@@ -279,7 +297,7 @@ namespace BeamXML {
     case PROJECTILE:
       assert (level==1);
       level--;
-      lookuptable.Put (curname,new weapon_info (tmpweapon));
+      lookuptable.Put (EnumMap::strtoupper(curname),new weapon_info (tmpweapon));
       tmpweapon.init();
       break;
     case ENERGY:
@@ -299,7 +317,7 @@ namespace BeamXML {
 using namespace BeamXML;
 
 weapon_info* getTemplate(const string &key) {
-  return lookuptable.Get(key);
+  return lookuptable.Get(EnumMap::strtoupper(key));
 }
 
 void LoadWeapons(const char *filename) {

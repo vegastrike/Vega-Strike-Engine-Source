@@ -70,12 +70,12 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace UnitXML;
 
-enum weapon_info::MOUNT_SIZE parseMountSizes (const char * str) {
+int parseMountSizes (const char * str) {
   char tmp[13][50];
-  enum weapon_info::MOUNT_SIZE ans = weapon_info::NOWEAP;
+  int ans = weapon_info::NOWEAP;
   int num= sscanf (str,"%s %s %s %s %s %s %s %s %s %s %s %s %s",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5],tmp[6],tmp[7],tmp[8],tmp[9],tmp[10],tmp[11],tmp[12]);
   for (int i=0;i<num;i++) {
-    ans = (enum weapon_info::MOUNT_SIZE)(ans|lookupMountSize (tmp[i]));
+    ans |= lookupMountSize (tmp[i]);
   }
   return ans;
 }
@@ -89,9 +89,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Vector R;
     Vector pos;
     bool tempbool;
-  Names elem = (Names)element_map.lookup(name);
-    enum weapon_info::MOUNT_SIZE mntsiz=weapon_info::NOWEAP;
-	AttributeList::const_iterator iter;
+    Names elem = (Names)element_map.lookup(name);
+    int mntsiz=weapon_info::NOWEAP;
+    AttributeList::const_iterator iter;
   switch(elem) {
   case UNKNOWN:
 //    cerr << "Unknown element start tag '" << name << "' detected " << endl;
@@ -163,7 +163,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     CrossProduct (P,R,Q);
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
-    indx = xml->units.size();
+    indx = xml->mountz.size();
     xml->mountz.push_back(new Mount (filename.c_str()));
     xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
     if (tempbool)
@@ -273,9 +273,20 @@ fclose (inFile);
   for( a=0; a<nummesh; a++) {
     meshdata[a] = xml->meshes[a];
   }
-
+  nummounts = xml->mountz.size();
+  if (nummounts)
+    mounts = new Mount [nummounts];
+  else
+    mounts = NULL;
+  for (a=0;a<nummounts;a++) {
+    mounts[a]=*xml->mountz[a];
+    delete xml->mountz[a];//do it stealthily... no cons/destructor
+  }
   numsubunit = xml->units.size();
-  subunits = new Unit*[numsubunit];
+  if (numsubunit)
+    subunits = new Unit*[numsubunit];
+  else
+    subunits=NULL;
   for( a=0; a<numsubunit; a++) {
     subunits[a] = xml->units[a];
   }

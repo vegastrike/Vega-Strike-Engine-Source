@@ -34,11 +34,12 @@ namespace XMLSupport {
   int parse_int(const string &str);
 
   class EnumMap {
-    static inline string strtoupper(const string &foo);
+
     //    static inline double parse_float (const string &str) {return ::parse_float (str)};
     Hashtable<string,const int,char [1001]> forward;
     Hashtable<string,const string, char [1001]> reverse;
   public:
+    static inline string strtoupper(const string &foo);
     struct Pair {
       string name;
       int val;
