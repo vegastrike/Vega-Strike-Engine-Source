@@ -7,6 +7,8 @@ using namespace Orders;
 TurretAI::TurretAI ():FaceTargetITTS (false) {
   type|=WEAPON;
   range=-1;
+  speed=1;
+  mrange=1;
 }
 void TurretAI::getAverageGunSpeed (float &speed, float & range, float &mrange) const {
   speed=this->speed;range=this->range;mrange=this->mrange;

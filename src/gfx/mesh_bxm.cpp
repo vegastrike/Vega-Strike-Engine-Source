@@ -392,8 +392,9 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 	        int32bit numrefs=VSSwapHostIntToLittle(inmemfile[word32index+4].i32val);//number of reference points
 			fprintf(Outputfile,"<Logo type=\"%d\" rotate=\"%f\" size=\"%f\" offset=\"%f\">\n",type,rotation,size,offset);
                         struct MeshXML::ZeLogo l;
+                        l.type=type;l.rotate=rotation;l.size=size;l.offset=offset;
                         xml.logos.push_back(l);
-                        xml.logos.back().type=type;
+                        xml.logos.back().type=type;//and again!
                         xml.logos.back().rotate=rotation;
                         xml.logos.back().size=size;
                         xml.logos.back().offset=offset;

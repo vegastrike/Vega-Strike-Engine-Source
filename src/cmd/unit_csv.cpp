@@ -483,6 +483,17 @@ float getFuelConversion(){
 void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Unit::XML xml;
   xml.unitModifications=modification.c_str();
+  xml.randomstartframe=((float)rand())/RAND_MAX;
+  xml.randomstartseconds=0;
+  xml.calculated_role=false;
+  xml.damageiterator=0;
+  xml.shieldmesh = NULL;
+  xml.bspmesh = NULL;
+  xml.rapidmesh = NULL;
+  xml.hasBSP = true;
+  xml.hasColTree=true;
+  xml.unitlevel=0;
+  xml.unitscale=1;
   xml.data=xml.shieldmesh=xml.bspmesh=xml.rapidmesh=NULL;//was uninitialized memory
   
   string tmpstr;
