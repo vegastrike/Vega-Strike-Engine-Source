@@ -1,9 +1,21 @@
+
+2001-11-08 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified vegastrike.spec
+	* added data/vegastrike-data.spec
+	* set version in configure.in to 0.1.0cvs
+	* added data/Makefile.dist
+	* added variable joystick/deadband to vegastrike.config
+	* using now this variable in in_joystick
+	
+
 2001-11-08 Daniel Horn <hellcatv@hotmail.com>
 	* made lights resolution even less so that the sun's melting light won't take up all space
 	* fixme lights should have more levels of grainulairty in the future
 	* added TargetNearest and TargetThreat commands
 	* fixed some problems near the end of the range of the zbuffer....
 	* fixed AI to target near starships and to change targets every now and then for inaccessible stuff (eg missiles)
+
 
 2001-11-07 Daniel Horn <hellcatv@hotmail.com>
 	
@@ -13,6 +25,7 @@
 	* now objects in the distance are sorted in order and drawn w/o zbuf (painter algorithm
 	* FIXME painters order does not respect multiple objects sharing a mesh--though planets do not share meshes so this does not affect large planets in distance
 	
+
 2001-11-02 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added file src/mission_script.cpp (not yet compilable)

@@ -24,6 +24,8 @@
 */
 
 #include "vegastrike.h"
+#include "vs_globals.h"
+
 //#include "glob.h"
 //#include "dbg.h"
 #include "in_handler.h"
@@ -78,7 +80,7 @@ void DeInitJoystick() {
 }
 
 JoyStick::JoyStick(int which) {
-  deadzone=0.01;
+  deadzone=atoi(vs_config->getVariable("joystick","deadband","0.05").c_str());
 
   joy_available = 0;
 

@@ -45,257 +45,268 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
-void Mission::doDirector(tagDomNode *node,int mode){
-  director=node;
+/* *********************************************************** */
+
+void Mission::fatalError(string message){
+  cout << "fatalError: " << message << endl;
+}
+
+/* *********************************************************** */
+
+void Mission::doModule(missionNode *node,int mode){
+  if(mode==SCRIPT_PARSE){
+    string name=node->attr_value("name");
+  
+    if(name.empty()){
+      fatalError("you have to give a module name");
+      assert(0);
+    }
+
+    if(runtime.modules[name]!=NULL){
+      fatalError("there can only be one module with name "+name);
+      assert(0);
+    }
+
+    if(name=="director"){
+      director=node;
+    }
+ 
+    node->script.name=name;
+
+    runtime.modules[name]=node; // add this module to the list of known modules
+
+    scope_stack.push(node);
+  }
 
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    tagDomNode *snode=*siter;
+    missionNode *snode=*siter;
     if(snode->tag==DTAG_SCRIPT){
       doScript(snode,mode);
     }
   }
 }
 
-void Mission::doScript(tagDomNode *node,int mode){
-  if(mode==SCRIPT_PARSE){
-    script.name=node->attr_value("name");
+/* *********************************************************** */
 
-    if(script.name.empty()){
+scriptContext *Mission::makeContext(missionNode *node){
+  
+}
+
+/* *********************************************************** */
+
+scriptContext *Mission::addContext(missionNode *node)
+{
+  scriptContext *context=makeContext(node);
+  contextStack *stack=cur_thread->exec_stack.top();
+  stack->push_back(context);
+}
+
+/* *********************************************************** */
+
+void Mission::removeContext()
+{
+  scriptContext *old=cur_thread->context_stack.pop(context);
+  delete old;
+}
+
+/* *********************************************************** */
+
+void Mission::doScript(missionNode *node,int mode){
+  if(mode==SCRIPT_PARSE){
+    node->script.name=node->attr_value("name");
+
+    if(node->script.name.empty()){
       fatalError("you have to give a script name");
     }
+    scope_stack.push(node);
+  }
+  if(mode==SCRIPT_RUN){
+    addContext(node);
   }
 
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    tagDomNode *snode=*siter;
+    missionNode *snode=*siter;
     checkStatement(snode,mode);
   }
-}
 
-void Mission::checkStatement(tagDomNode *node,int mode){
-    if(node->tag==DTAG_IF){
-      doIf(node,mode);
-    }
-    else if(node->tag==DTAG_BLOCK){
-      doBlock(node,mode);
-    }
-    else if(node->tag==DTAG_SETVAR){
-      doSetVar(node,mode);
-    }
-    else if(node->tag==DTAG_EXEC){
-      doExec(node,mode);
-    }
-    else if(node->tag==DTAG_CALL){
-      doCall(node,mode);
-    }
-    else if(node->tag==DTAG_WHILE){
-      doWhile(node,mode);
-    }
-}
-
-void Mission::doIf(tagDomNode *node,int mode){
-  if(mode==SCRIPT_PARSE){
-    vector<easyDomNode *>::const_iterator siter;
-  
-    int i=0;
-    for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && i<3; siter++){
-      tagDomNode *snode=*siter;
-      if_block[i]=snode;
-    }
-    if(i<3){
-      fatalError("an if-statement needs exact three subnodes");
-    }
-  }
-
-  bool ok=checkBoolExpr(if_block[0],mode);
-
-  if(mode==SCRIPT_PARSE){
-    checkStatement(if_block[1],mode);
-    checkStatement(if_block[2],mode);
+  if(mode==SCRIPT_RUN){
+    removeContext();
   }
   else{
-    if(ok){
-      checkStatement(if_block[1],mode);
+    scope_stack.pop();
+  }
+}
+
+/* *********************************************************** */
+
+void Mission::doBlock(missionNode *node,int mode){
+  if(mode==SCRIPT_PARSE){
+    scope_stack.push(node);
+  }
+  if(mode==SCRIPT_RUN){
+    addContext(node);
+  }
+
+    vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    missionNode *snode=*siter;
+    checkStatement(snode,mode);
+  }
+  if(mode==SCRIPT_RUN){
+    removeContext();
+  }
+}
+
+/* *********************************************************** */
+
+bool Mission::doBooleanVar(missionNode *node,int mode){
+  scriptVariable *var=doVariable(node,mode);
+
+  bool ok=checkVarType(var,VAR_BOOL);
+
+  if(!ok){
+    runtimeFatal("expected a bool variable - got a different type");
+    assert(0);
+  }
+
+  return var->bool_val;
+}
+
+/* *********************************************************** */
+
+scriptVariable *Mission::lookupLocalVariable(missionNode *asknode){
+  contextStack *cstack=cur_thread->exec_stack.top();
+  missionNode *defnode=NULL;
+
+  for(int i=0;i<stack->size() && defnode==NULL;i++){
+    scriptContext *context=cstack[i];
+    defnode=context[asknode->script.name];
+  }
+  if(defnode==NULL){
+    return NULL;
+  }
+
+  return defnode->script.var;
+}
+
+/* *********************************************************** */
+
+varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
+  // only when runtime
+  missionNode *module_node=runtime.modules[mname];
+
+  if(module_node==NULL){
+    return NULL;
+  }
+
+  vector<missionNode *>::const_iterator siter;
+  
+  for(siter= module_node->subnodes.begin() ; siter!=module_node->subnodes.end() ; siter++){
+    missionNode *varnode=*siter;
+    if(varnode->name==asknode->name){
+      return varinst;
+    }
+  }
+
+  return NULL;
+
+}
+
+/* *********************************************************** */
+
+varInst *Mission::lookupModuleVariable(missionNode *asknode){
+  // only when runtime
+  missionNode *module=cur_thread->module_stack.top();
+
+  string mname=module->name;
+
+  varInst *var=lookupModuleVariable(mname,asknode);
+
+
+  return var;
+
+}
+
+/* *********************************************************** */
+
+varInst *Mission::lookupGlobalVariable(missionNode *asknode){
+  missionNode *varnode=runtime.global_variables[asknode->name];
+
+  if(varnode==NULL){
+    return NULL;
+  }
+
+  return varnode->varinst;
+}
+
+/* *********************************************************** */
+
+scriptVariable *Mission::doVariable(missionNode *node,int mode){
+  if(mode==SCRIPT_RUN){
+    scriptVariable *var=lookupLocalVariable(node);
+    if(var==NULL){
+      // search in module namespace
+      var=lookupModuleVariable(node);
+      if(var==NULL){
+	// search in global namespace
+	var=lookupGlobalVariable(node);
+	if(var==NULL){
+	  fatalRuntime("did not find variable");
+	  assert(0);
+	}
+      }
+    }
+    return var;
+  }
+  else{
+    // SCRIPT_PARSE
+    script.name=node->attr_value("name");
+    if(script.name.empty()){
+      fatalError("you have to give a variable name");
+      assert(0);
+    }
+
+  }
+}
+
+/* *********************************************************** */
+
+void Mission:doDefVar(missionNode *node,int mode){
+  if(SCRIPT_RUN){
+    return;
+  }
+
+  node->script.name=node->attr_value("name");
+    if(node->script.name.empty()){
+      fatalError("you have to give a variable name");
+    }
+
+    string type=node->attr_value("type");
+    //    node->initval=node->attr_value("init");
+
+    if(type=="float"){
+      node->vartype=VAR_FLOAT;
+    }
+    else if(type=="string"){
+      node->vartype=VAR_STRING;
+    }
+    else if(type=="vector"){
+      node->vartype=VAR_VECTOR;
+    }
+    else if(type=="object"){
+      node->vartype=VAR_OBJECT;
     }
     else{
-      checkStatement(if_block[2],mode);
-    }
-  }
-}
-
-bool Mission::checkBoolExpr(tagDomNode *node,int mode){
-  bool ok;
-
-    if(node->tag==DTAG_AND_EXPR){
-      ok=doAndOr(node,mode);
-    }
-    else if(node->tag==DTAG_OR_EXPR){
-      ok=doAndOr(node,mode);
-    }
-    else if(node->tag==DTAG_NOT_EXPR){
-      ok=doNot(node,mode);
-    }
-    else if(node->tag==DTAG_TEST_EXPR){
-      ok=doTest(node,mode);
-    }
-    else if(node->tag==DTAG_VAR_EXPR){
-      ok=doBooleanVar(node,mode);
-    }
-}
-
-bool Mission::doAndOr(tagDomNode *node,int mode){
-  bool ok;
-  if(node->tag==DTAG_AND_EXPR){
-    ok=true;
-  }
-  else if(node->tag==DTAG_OR_EXPR){
-    ok=false;
-  }
-
-  vector<easyDomNode *>::const_iterator siter;
-  
-  int i=0;
-  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++,i++){
-    tagDomNode *snode=*siter;
-    bool res=checkBoolExpr(snode,mode);
-
-    if(node->tag==DTAG_AND_EXPR){
-      ok=ok && res;
-    }
-    else if(node->tag==DTAG_OR_EXPR){
-      ok=ok || res;
-    }
-
-  }
-
-  if(mode==SCRIPT_PARSE){
-    if(i<2){
-      warning("less than two arguments for and/or");
-    }
-  }
-  return ok;
-}
-
-bool Mission::doNot(tagDomNode *node,int mode){
-  bool ok;
-
-  tagDomNode *snode=node->subnodes.begin();
-  
-  ok=checkBoolExpr(node,mode);
-
-  return !ok;
-}
-
-bool Mission::doTest(tagDomNode *node,int mode){
-  if(mode==SCRIPT_PARSE){
-    string teststr=node->attr_value("test");
-    if(teststr.empty()){
-      fatalError("you have to give test an argument what to test");
+      fatalError("unknown variable type");
       assert(0);
     }
 
-    if(teststr=="gt"){
-      script.tester=TEST_GT;
-    }
-    else if(teststr=="lt"){
-      script.tester=TEST_LT;
-    }
-    else if(teststr=="eq"){
-      script.tester=TEST_EQ;
-    }
-    else if(teststr=="ge"){
-      script.tester=TEST_GE;
-    }
-    else if(teststr=="le"){
-      script.tester=TEST_LE;
-    }
-#if 0
-    else if(teststr=="between"){
-      script.tester=TEST_BETWEEN;
-    }
-#endif
-    else {
-      fatalError("unknown test argument for test");
-      assert(0);
-    }
-
-    int i=0;
-    for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && i<2; siter++){
-      tagDomNode *snode=*siter;
-      test_arg[i]=snode;
-    }
-    if(i<2){
-      fatalError("a test-expr needs exact two subnodes");
-      assert(0);
-    }
-
-  }
-
-    float arg1=checkFloatExpr(test_arg[0]);
-    float arg2=checkFloatExpr(test_arg[1]);
-    bool res=false;
-
-    if(SCRIPT_RUN){
-      switch(script.tester){
-      case TEST_GT:
-	res=(arg1>arg2);
-	break;
-      case TEST_LT:
-	res=(arg1<arg2);
-	break;
-      case TEST_EQ:
-	res=(arg1==arg2);
-	break;
-      case TEST_GE:
-	res=(arg1>=arg2);
-	break;
-      case TEST_LE:
-	res=(arg1<=arg2);
-	break;
-      default:
-	fatalError("no valid tester");
-	assert(0);
-      }
-
-      return res;
-    }
-}
-
-void Mission::doBlock(tagDomNode *node,int mode){
-    vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    tagDomNode *snode=*siter;
-    checkStatement(snode,mode);
-  }
-
-}
-
-void Mission::doWhile(tagDomNode *node,int mode){
-
-  if(SCRIPT_PARSE){
-    int i=0;
-    for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && i<2; siter++){
-      tagDomNode *snode=*siter;
-      while_arg[i]=snode;
-    }
-
-    if(i<2){
-      fatalError("a while-expr needs exact two subnodes");
-      assert(0);
-    }
-
-    bool res=doBoolExpr(while_arg[0],mode);
-
-    checkStatement(while_arg[1],mode);
-  }
-  else{
-    // runtime
-    while(doBoolExpr(while_arg[0],mode)){
-      checkStatement(while_arg[1],mode);
-    }
-  }
+    missionNode *scope=scope_stack.top();
+    
+    scope->variables.push_back(node);
 }

@@ -36,6 +36,7 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
+/* *********************************************************** */
 
 class Flightgroup {
  public:
@@ -55,15 +56,78 @@ class Flightgroup {
   map<string,string> ordermap;
 };
 
+/* *********************************************************** */
+
+#define SCRIPT_PARSE 0
+#define SCRIPT_RUN 1
+
+enum tag_type { 
+  DTAG_UNKNOWN,
+  DTAG_MODULE, DTAG_SCRIPT, DTAG_IF, DTAG_BLOCK,
+  DTAG_SETVAR, DTAG_EXEC, DTAG_CALL, DTAG_WHILE,
+  DTAG_AND,DTAG_OR,DTAG_NOT,DTAG_TEST,
+  DTAG_FMATH,DTAG_VMATH
+};
+
+enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
+
+/* *********************************************************** */
+
+class varInst {
+ public:
+  string name;
+  var_type type;
+
+  float  float_val;
+  bool   bool_val;
+  vector<varInst> vector_val;
+  string string_val;
+};
+
+/* *********************************************************** */
+
+class varInstMap : public map<string,varInst *> {
+};
+
+/* *********************************************************** */
+
+class scriptContext {
+  varInstMap *varinsts;
+};
+
+/* *********************************************************** */
+
+class contextStack {
+ vector<scriptContext> contexts;
+};
+
+/* *********************************************************** */
+
+class missionNode;
+
+class missionThread {
+ public:
+  stack<contextStack *> exec_stack;
+  stack<missionNode *> module_stack;
+};
+
+/* *********************************************************** */
+
 class missionNode : public tagDomNode {
  public:
   struct script_t {
-    string name; // script
+    string name; // script,defvar,module
+    vector<missionNode *> variables; // script,module
+    varInst *varinst; // defvar
     tagDomNode *if_block[3]; // if
     int tester; // test
     tagDomNode *test_arg[2]; // test
+    enum var_type vartype; // defvar
+    string initval;
   } script;
 };
+
+/* *********************************************************** */
 
 class Mission {
  public:
@@ -83,6 +147,17 @@ class Mission {
   easyDomNode *variables;
   tagDomNode *director;
 
+  struct Runtime {
+    vector<missionThread *> threads;
+    map<string,missionNode *> modules;
+    int thread_nr;
+    missionThread *cur_thread;
+    map<string,missionNode *> global_variables;
+  } runtime;
+
+  // used only for parsing
+  stack<missionNode *> scope_stack;
+
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
   void checkVar(easyDomNode *node);
@@ -91,6 +166,36 @@ class Mission {
   void checkFlightgroup(easyDomNode *node);
   bool doPosition(easyDomNode *node,float pos[3]);
   bool doRotation(easyDomNode *node,float rot[3]);
+
+
+void  doModule(missionNode *node,int mode);
+ scriptContext * addContext(missionNode *node);
+  void  removeContext();
+void  doScript(missionNode *node,int mode);
+void  doBlock(missionNode *node,int mode);
+bool  doBooleanVar(missionNode *node,int mode);
+varInst * lookupLocalVariable(missionNode *asknode);
+varInst * lookupModuleVariable(string mname,missionNode *asknode);
+varInst * lookupModuleVariable(missionNode *asknode);
+varInst * lookupGlobalVariable(missionNode *asknode);
+varInst * doVariable(missionNode *node,int mode);
+void  checkStatement(missionNode *node,int mode);
+void  doIf(missionNode *node,int mode);
+void  doWhile(missionNode *node,int mode);
+bool  checkBoolExpr(missionNode *node,int mode);
+bool  doAndOr(missionNode *node,int mode);
+bool  doNot(missionNode *node,int mode);
+bool  doTest(missionNode *node,int mode);
+
+ void fatalError(string message);
+
+
+
+
+
+
+
+
 };
 
 #endif // _MISSION_H_
