@@ -224,24 +224,67 @@ static unsigned int calculatestage (unsigned int numstages, unsigned int whichst
 }
 
 ///transforms our stages to little endian notation so most significant half-byte is on the right :-)
-static unsigned int transformstage (unsigned int stage) {
+static unsigned int transformstage (unsigned int stage, updateparity * updateorder) {
   int tmp;
   unsigned int transformedstage=0;
   while ((tmp=(stage&(1|2|4|8)))!=0) {
     stage >>=4;
     transformedstage <<=4;
-    transformedstage |=tmp;
+    transformedstage |=((*updateorder)(tmp));
   }
   
   return transformedstage;
 }
+int identityparity (int i) {
+  return i;
+}
+int sideparityodd (int i) {
+  switch (i) {
+  case 1:
+    return 2;
+  case 2:
+    return 1;
+  case 4:
+    return 8;
+  case 8:
+    return 4;
+  }
+  return 0;
+}
+int upparityodd (int i) {
+  switch (i) {
+  case 1:
+    return 4;
+  case 2:
+    return 8;
+  case 4:
+    return 1;
+  case 8:
+    return 2;
+  }
+  return 0;
+}
+int sideupparityodd (int i) {
+  switch (i) {
+  case 8:
+    return 1;
+  case 4:
+    return 2;
+  case 2:
+    return 4;
+  case 1:
+    return 8;
+  }
+  return 0;
+}
+
 
 /// Refresh the vertex enabled states in the tree, according to the
 /// location of the viewer.  May force creation or deletion of qsquares
 /// in areas which need to be interpolated.
-void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage) {
+void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage, updateparity * par) {
   DetailThreshold = Detail;
-  UpdateAux(cd, ViewerLocation, 0,transformstage(calculatestage (numstages,whichstage)));
+  UpdateAux(cd, ViewerLocation, 0,transformstage(calculatestage (numstages,whichstage),par));
 
 }
 

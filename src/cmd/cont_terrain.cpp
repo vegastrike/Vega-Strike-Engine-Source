@@ -7,8 +7,19 @@ ContinuousTerrain::ContinuousTerrain (char ** filenames, const int numwidth, con
   numcontterr= numwidth*numwidth;
   int i;
   data = new Terrain *[numcontterr];
-  for (i=0;i<numcontterr;i++) {
-    data[i] = new Terrain (filenames[i],Scales,mass,0);
+  for (i=0;i<width;i++) {
+    for (int j=0;j<width;j++) {
+      updateparity * up = &identityparity;
+      if (i%2&&j%2) {
+	up = &sideupparityodd;
+      } else if (j%2) {
+	up = &sideparityodd;
+      } else if (i%2) {
+	up = &upparityodd;
+      }
+      
+      data[i*width+j] = new Terrain (filenames[i*width+j],Scales,mass,0,up);
+    }
   }
   location = new Vector [numcontterr];
   dirty = new bool [numcontterr];

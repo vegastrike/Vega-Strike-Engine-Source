@@ -12,7 +12,12 @@
 #include "collection.h"
 static std::vector <Terrain *> allterrains;
 
-Terrain::Terrain (const char * filename, const Vector & scales, const float mass, const float radius):QuadTree (filename, scales,radius), mass(mass), whichstage (0){
+
+
+
+
+Terrain::Terrain (const char * filename, const Vector & scales, const float mass, const float radius,updateparity *updatetransform):QuadTree (filename, scales,radius), mass(mass), whichstage (0){
+  this->updatetransform = updatetransform;
   allterrains.push_back (this);
   draw=true;
   //  this->mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
@@ -94,7 +99,7 @@ void Terrain::UpdateAll (int resolution ) {
     }
   }
   for (unsigned int i=0;i<allterrains.size();i++) {
-    allterrains[i]->Update (res,allterrains[i]->whichstage%res);
+    allterrains[i]->Update (res,allterrains[i]->whichstage%res,allterrains[i]->updatetransform);
     allterrains[i]->whichstage++;
   }
   

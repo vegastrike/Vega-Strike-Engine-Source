@@ -39,6 +39,11 @@ struct TerrainTexture {
     blendDst =ZERO;
   }
 };
+typedef int (updateparity) (int);
+updateparity identityparity;
+updateparity sideparityodd;
+updateparity upparityodd;
+updateparity sideupparityodd;
 
 struct HeightMapInfo {
   short* Data;
@@ -114,7 +119,7 @@ class quadsquare {
 	float	RecomputeErrorAndLighting(const quadcornerdata& cd);
 	int	CountNodes();
   ///Make sure to translate into Quadtree Space
-	void	Update(const quadcornerdata& cd, const Vector &ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage);
+	void	Update(const quadcornerdata& cd, const Vector &ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage, updateparity * whichordertoupdate);
 	int	Render(const quadcornerdata& cd, const Vector &camera);
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
