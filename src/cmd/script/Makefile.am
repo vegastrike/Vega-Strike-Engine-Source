@@ -13,7 +13,9 @@ libscript_a_SOURCES =				\
 	script_callbacks.cpp			\
 	script_call_olist.cpp			\
 	script_call_unit.cpp			\
-	script_call_string.cpp
+	script_call_string.cpp			\
+	msgcenter.cpp				\
+	msgcenter.h
 
 
 

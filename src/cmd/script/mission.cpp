@@ -42,6 +42,8 @@
 #include "mission.h"
 #include "easydom.h"
 
+#include "msgcenter.h"
+
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
@@ -73,6 +75,9 @@ Mission::Mission(char *configfile){
   initTagMap();
 
   top->Tag(&tagmap);
+
+  msgcenter=new MessageCenter();
+  msgcenter->add("game","all","Welcome to Vegastrike");
 
   checkMission(top);
 }

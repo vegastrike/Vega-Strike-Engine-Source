@@ -37,6 +37,7 @@ using std::string;
 using XMLSupport::AttributeList;
 
 class Unit;
+class MessageCenter;
 
 /* *********************************************************** */
 
@@ -185,6 +186,8 @@ class Mission {
 
   void DirectorLoop();
 
+  MessageCenter *msgcenter;
+
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
@@ -312,6 +315,9 @@ void printNode(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst * call_io_printf(missionNode *node,int mode);
 
+varInst * call_io_message(missionNode *node,int mode);
+varInst * call_io_printmsglist(missionNode *node,int mode);
+
 string method_str(missionNode *node);
  missionNode *getArgument(missionNode *node,int mode,int arg_nr);
 
@@ -335,6 +341,7 @@ varInst * call_unit(missionNode *node,int mode);
 void  call_string_print(missionNode *node,int mode,varInst *ovi);
 varInst * call_string_new(missionNode *node,int mode,string initstring);
  string *getStringObject(missionNode *node,int mode,varInst *ovi);
+string call_string_getstring(missionNode *node,int mode,varInst *ovi);
 
  void findNextEnemyTarget(Unit *my_unit);
 };

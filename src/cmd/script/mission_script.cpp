@@ -45,6 +45,8 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
+#include "msgcenter.h"
+
 //#include "vegastrike.h"
 
 
@@ -63,6 +65,8 @@ void Mission::DirectorStart(missionNode *node){
   runtime.cur_thread=main_thread;
 
   director=NULL;
+
+  msgcenter->add("game","all","parsing programmed mission");
 
   parsemode=PARSE_DECL;
 
@@ -145,6 +149,8 @@ void Mission::DirectorStart(missionNode *node){
 
     runtime.cur_thread->module_stack.pop_back();
   }
+
+  msgcenter->add("game","all","initialization of programmed missions done");
 
   if(debuglevel>=1 && start_game==false){
     while(true){

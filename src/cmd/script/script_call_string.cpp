@@ -83,6 +83,19 @@ varInst *Mission::call_string(missionNode *node,int mode){
   return NULL; // never reach
 }
 
+string Mission::call_string_getstring(missionNode *node,int mode,varInst *ovi){
+   if(ovi->type!=VAR_OBJECT || (ovi->type==VAR_OBJECT && ovi->objectname!="string")){
+      fatalError(node,mode,"call_string_getstring needs string object as arg");
+      assert(0);
+    }
+
+  string *my_string=getStringObject(node,mode,ovi);
+
+  string ret=*my_string;
+
+  return ret;
+}
+
 void Mission::call_string_print(missionNode *node,int mode,varInst *ovi){
 
   string *my_string =getStringObject(node,mode,ovi);

@@ -42,6 +42,8 @@
 #include "mission.h"
 #include "easydom.h"
 
+#include "msgcenter.h"
+
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
@@ -93,6 +95,12 @@ varInst *Mission::doCall(missionNode *node,int mode){
     }
     else if(node->script.name=="printf"){
       vi=call_io_printf(node,mode);
+    }
+    else if(node->script.name=="message"){
+      vi=call_io_message(node,mode);
+    }
+    else if(node->script.name=="printMsgList"){
+      vi=call_io_printmsglist(node,mode);
     }
   }
   else if(module=="_std"){
@@ -146,6 +154,51 @@ varInst *Mission::callGetGameTime(missionNode *node,int mode){
     vi->float_val=gametime;
   }
   return vi;
+}
+
+varInst *Mission::call_io_printmsglist(missionNode *node,int mode){
+
+  int i=0;
+
+  if(mode==SCRIPT_RUN){
+    gameMessage *msg=msgcenter->last(i);
+  
+    while(msg!=NULL && i<7.0){
+      cout << "MESSAGE" << msg->message << endl;
+      i++;
+      msg=msgcenter->last(i);
+    }
+  }
+
+  varInst *viret=new varInst;
+  viret->type=VAR_VOID;
+
+  return viret;
+
+}
+
+varInst *Mission::call_io_message(missionNode *node,int mode){
+  missionNode *args[3];
+  varInst *args_vi[3];
+  string args_str[3];
+
+  for(int i=0;i<3;i++){
+    args[i]=getArgument(node,mode,i);
+    args_vi[i]=checkObjectExpr(args[i],mode);
+    if(mode==SCRIPT_RUN){
+      args_str[i]=call_string_getstring(node,mode,args_vi[i]);
+    }
+   }
+
+  if(mode==SCRIPT_RUN){
+    msgcenter->add(args_str[0],args_str[1],args_str[2]);
+  }
+
+  varInst *viret=new varInst;
+  viret->type=VAR_VOID;
+
+  return viret;
+
 }
 
 varInst *Mission::call_io_printf(missionNode *node,int mode){
