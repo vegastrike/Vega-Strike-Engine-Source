@@ -766,7 +766,7 @@ using namespace VSFileSystem;
 	  if (aidebug>1)
 		  VSFileSystem::vs_fprintf (stderr,"using soft coded script %s",filename);
 	  if (aidebug>0)
-		  UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel));
+		  UniverseUtil::IOmessage(0,parent->name,"all",string("FAILED(or missile) script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel));
   }
 #ifdef AIDBG
   VSFileSystem::vs_fprintf (stderr,"chd");
