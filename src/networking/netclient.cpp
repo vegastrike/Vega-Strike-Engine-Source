@@ -1057,10 +1057,13 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_STARTNETCOMM :
 #ifdef NETCOMM
 			{
+				Client * clt;
 				// Check this is not us
 				if( packet_serial != this->serial)
 				{
 					// Add the client to netcomm list in NetComm ?
+					clt = Clients[packet_serial];
+					NetComm->AddToSession( clt);
 				}
 			}
 #endif
@@ -1068,10 +1071,13 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_STOPNETCOMM :
 #ifdef NETCOMM
 			{
+				Client * clt;
 				// Check this is not us
 				if( packet_serial != this->serial)
 				{
 					// Remove the client to netcomm list in NetComm
+					clt = Clients[packet_serial];
+					NetComm->RemoveFromSession( clt);
 				}
 			}
 #endif
@@ -1586,9 +1592,15 @@ bool	NetClient::jumpRequest( string newsystem)
 /*** COMMUNICATION STUFF                                                               ****/
 /******************************************************************************************/
 
+bool	NetClient::IsNetcommActive()
+{
+	return this->netcomm_active;
+}
+
 void	NetClient::startCommunication()
 {
 #ifdef NETCOMM
+	netcomm_active = true;
 	selected_freq = current_freq;
 	NetBuffer netbuf;
 	netbuf.addFloat( selected_freq);
@@ -1606,6 +1618,7 @@ void	NetClient::startCommunication()
 void	NetClient::stopCommunication()
 {
 #ifdef NETCOMM
+	netcomm_active = false;
 	NetBuffer netbuf;
 	netbuf.addFloat( selected_freq);
 	Packet p;

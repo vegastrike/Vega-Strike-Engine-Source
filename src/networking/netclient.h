@@ -66,6 +66,10 @@ class	NetClient
 
 #ifdef NETCOMM
 		NetworkCommunication *	NetComm;
+		bool					netcomm_active;
+	public:
+		bool					IsNetcommActive();
+	private:
 #endif
 
 		int					enabled;		// Bool to say network is enabled

@@ -1300,14 +1300,13 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
 			zonemgr->broadcast( clt->zone, packet_serial, &p2);
-			//zonemgr->broadcastCamshot( clt->zone, clt->serial, &p2);
 		}
 		break;
 		case CMD_STOPNETCOMM :
 		{
 			float freq = netbuf.getFloat();
 			// Broadcast players with same frequency that this client is leaving the comm session
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDANDFORGET, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
+			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
 			zonemgr->broadcast( clt->zone, packet_serial, &p2);
 		}

@@ -40,6 +40,9 @@ class NetworkCommunication
 		int		DestroySession();
 		bool	WebcamEnabled();
 		bool	WebcamTime();
+
+		void	AddToSession( Client * clt);
+		void	RemoveFromSession( Client * clt);
 };
 
 #endif

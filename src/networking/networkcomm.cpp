@@ -33,6 +33,16 @@ NetworkCommunication::NetworkCommunication()
 #endif
 }
 
+void	NetworkCommunication::AddToSession( Client * clt)
+{
+	this->commClients.push_back( clt);
+}
+
+void	NetworkCommunication::RemoveFromSession( Client * clt)
+{
+	this->commClients.remove( clt);
+}
+
 string	NetworkCommunication::GrabImage()
 {
 	string jpeg_str( "");
@@ -55,6 +65,8 @@ int		NetworkCommunication::InitSession( float frequency)
 	this->session = new JVOIPSession;
 	this->params = new JVOIPSessionParams;
 	this->rtpparams = new JVOIPRTPTransmissionParams;
+
+	this->session.Create( this->params);
 #endif
 
 #ifndef NETCOMM_NOWEBCAM
@@ -69,6 +81,8 @@ int		NetworkCommunication::InitSession( float frequency)
 int		NetworkCommunication::DestroySession()
 {
 #ifndef NETCOMM_NOSOUND
+	this->session.Destroy();
+
 	if( this->session)
 		delete this->session;
 	if( this->params)
