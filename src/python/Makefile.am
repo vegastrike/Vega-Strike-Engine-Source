@@ -1,7 +1,7 @@
 noinst_LIBRARIES = libpython.a
 
 
-INCLUDES = -I ../ 
+INCLUDES = -I ../ -I../boost  -I/usr/include/python2.2
 
 
 libpython_a_SOURCES =				\

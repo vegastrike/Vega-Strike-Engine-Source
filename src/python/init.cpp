@@ -1,3 +1,4 @@
+#define HAVE_BOOST
 #ifdef HAVE_BOOST
 #include <stdio.h>
 #include <Python.h>
@@ -9,6 +10,7 @@
 #include <strstream>
 
 class PythonConfig {
+public:
 	void foo();
 };
 
@@ -158,19 +160,18 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 	changehome(true);
 	FILE *fp1 = fopen("config.py","r");
 	returnfromhome();
+	if (fp1==NULL) {
+	  fp1=fp;
+	}
 	if(fp1!=NULL) {
 		PyRun_SimpleFile(fp, "config.py");
 		fclose(fp1);
 	}
-	else if(fp!=NULL) {
-	  /*PyRun_SimpleFile(fp1, "config.py");*/
-	  PyRun_SimpleString(
-"import VS\n"
-"import sys\n"
-"sys.stderr.write('asdf')\n"
-);
-		fclose(fp);
-	}
+	PyRun_SimpleString(
+			   "import VS\n"
+			   "import sys\n"
+			   "sys.stderr.write('asdf')\n"
+			   );
 	char buffer[128];
 	PythonIOString::buffer << endl << '\0';
 	fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
