@@ -88,9 +88,9 @@ SimplePickerCells::SimplePickerCells(void) {
 }
 
 void SimplePickerCells::clear(void) {
-  for(vector<PickerCell*>::iterator i=m_cells.begin(); i<m_cells.end(); ++i)
-    delete (*i);
-  
+  for (size_t i =0;i<m_cells.size();++i) {
+    delete m_cells[i];
+  }
   m_cells.clear();
 } 
 
