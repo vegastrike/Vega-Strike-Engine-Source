@@ -70,6 +70,7 @@ float CommunicatingAI::getAnger(const Unit * target)const {
     static bool good=true;
     if (cachedCargoNum!=target->numCargo()) {
       cachedCargoNum=target->numCargo();
+      good=true;
       for (unsigned int i=0;i<cachedCargoNum;++i) {
         Cargo * c=&target->image->cargo[i];
         if (c->quantity!=0||c->category.find("upgrades")!=0){
@@ -290,7 +291,10 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * 
     else
       return 0;
   }else {
-    return selectCommunicationMessageMood (c,.5*mood+.5*getAnger (un));
+    static float moodmul = XMLSupport::parse_float(vs_config->getVariable ("AI","MoodAffectsRespose","0"));
+    static float angermul = XMLSupport::parse_float(vs_config->getVariable ("AI","AngerAffectsRespose","1"));
+    static float staticrelmul = XMLSupport::parse_float(vs_config->getVariable ("AI","StaticRelationshipAffectsResponse","1"));
+    return selectCommunicationMessageMood (c,moodmul*mood+angermul*getAnger (un)+staticrelmul*Order::GetEffectiveRelationship(un));
   }
 }
 
