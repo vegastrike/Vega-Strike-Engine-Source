@@ -1,8 +1,8 @@
-noinst_LIBRARIES = libscript.a libscriptgeneric.a libscriptserver.a
+noinst_LIBRARIES = libscript.a libscriptserver.a
 SUBDIRS = c_alike
 INCLUDES = -I../ -I../.. -I../../boost/
 
-libscriptgeneric_a_SOURCES =			\
+libscriptgeneric =			\
 	mission.cpp					\
 	mission.h					\
 	mission_script.cpp			\
@@ -22,13 +22,13 @@ libscriptgeneric_a_SOURCES =			\
 	msgcenter.cpp					\
 	msgcenter.h
 
-libscriptserver_a_SOURCES =			\
+libscriptserver_a_SOURCES =	$(libscriptgeneric)		\
 	flightgroup_server.cpp		\
 	flightgroup.h		\
 	director_server.cpp					\
 	script_call_unit_server.cpp
 
-libscript_a_SOURCES =				\
+libscript_a_SOURCES = $(libscriptgeneric) \
 	flightgroup.cpp					\
 	flightgroup.h					\
 	director.cpp					\

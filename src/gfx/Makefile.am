@@ -1,7 +1,7 @@
-noinst_LIBRARIES = libgfx.a libgfxgeneric.a
+noinst_LIBRARIES = libgfx.a libgfxserver.a
 INCLUDES = -I ../ -I../boost/
 
-libgfxgeneric_a_SOURCES =  \
+libgfxgeneric =  \
 	cockpit_generic.h	\
 	cockpit_generic.cpp	\
 	matrix.cpp	\
@@ -12,8 +12,9 @@ libgfxgeneric_a_SOURCES =  \
 	quaternion.h	\
 	vertex.h		
 
+libgfxserver_a_SOURCES =	$(libgfxgeneric)
 
-libgfx_a_SOURCES =	\
+libgfx_a_SOURCES =	$(libgfxgeneric)\
 	ani_texture.h	\
 	ani_texture.cpp	\
 	animation.cpp	\

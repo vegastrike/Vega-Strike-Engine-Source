@@ -1,4 +1,4 @@
-noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a
+noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
 INCLUDES = -I ../
 
@@ -9,31 +9,30 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
-libnetclient_a_SOURCES =	\
-	client.h	\
-	clientstructs.cpp	\
-	const.h		\
+libnetclient_a_SOURCES = $(libnetgeneric)	\
 	netclient.cpp	\
 	netclient.h	\
-	netui.h		\
-	netclass.h	\
-	packet.cpp	\
-	packet.h	\
 	cubicsplines.cpp	\
 	cubicsplines.h
 
-libnetserver_a_SOURCES =	\
+libnetgeneric =	\
 	accountsxml.cpp	\
 	accountsxml.h	\
 	client.h	\
 	clientstructs.cpp	\
 	const.h		\
-	netserver.cpp	\
-	netserver.h	\
 	netui.h		\
 	netclass.h	\
 	packet.cpp	\
-	packet.h	\
+	packet.h
+
+libnetacct_a_SOURCES = $(libnetgeneric)	\
+	acctserver.cpp \
+	acctserver.h
+
+libnetserver_a_SOURCES = $(libnetgeneric)	\
+	netserver.cpp	\
+	netserver.h	\
 	cubicsplines.cpp	\
 	cubicsplines.h		\
 	zonemgr.cpp	\

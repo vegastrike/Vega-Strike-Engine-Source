@@ -1,8 +1,8 @@
-noinst_LIBRARIES = libai.a libaigeneric.a
+noinst_LIBRARIES = libai.a libaiserver.a
 
 INCLUDES = -I ../../ -I../../boost/
 
-libaigeneric_a_SOURCES =	\
+libaigeneric =	\
 	comm_ai.h			\
 	comm_ai.cpp			\
 	communication.h		\
@@ -35,7 +35,9 @@ libaigeneric_a_SOURCES =	\
 	turretai.cpp 		\
 	turretai.h
 
-libai_a_SOURCES =	\
+libaiserver_a_SOURCES = $(libaigeneric)
+
+libai_a_SOURCES = $(libaigeneric)	\
 	flykeyboard.cpp	\
 	firekeyboard.cpp \
 	firekeyboard.h	\

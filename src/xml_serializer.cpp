@@ -108,11 +108,23 @@ void XMLnode::Write (FILE* fp, void *mythis, int level) {
   }
 }
 void XMLSerializer::Write (const char * modificationname) {
+  std::string savedunitpath;
   if (modificationname)
     if (strlen(modificationname)!=0) 
       savedir=modificationname;
 
-  std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
+  // If in network mode on client side we expect saves to be in ./save
+  if( Network==NULL && !SERVER)
+	  savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
+  else if( !SERVER)
+	  savedunitpath = "save";
+  // With account server we expect them in the ./accounts dir
+  else if( SERVER==2)
+	  savedunitpath = "accounts";
+  // With account server we expect them in the ./accountstmp dir
+  else if( SERVER==1)
+	  savedunitpath = "accountstmp";
+
   MakeSharedPath (savedunitpath);
   string retdir =MakeSharedPath (savedunitpath+string("/")+savedir);
   FILE * fp =fopen ((retdir+string("/")+filename).c_str(),"w");
@@ -124,8 +136,14 @@ void XMLSerializer::Write (const char * modificationname) {
   }
   fclose (fp);
 }
-XMLSerializer::XMLSerializer (const char * filename, const char *modificationname, void *mythis):filename(filename), savedir(modificationname), mythis(mythis) {
+XMLSerializer::XMLSerializer (const char * filename, const char *modificationname, void *mythis): savedir(modificationname), mythis(mythis) {
   curnode=&topnode;
+  // In network mode we don't care about saving filename, we want always to save with modification
+  // name since we only work with savegames
+  if( Network!=NULL)
+	  this->filename = string( modificationname);
+  else
+	  this->filename = string( filename);
 }
 void XMLSerializer::AddTag (const std::string &tag) {
   curnode->subnodes.push_back (XMLnode(tag,curnode));

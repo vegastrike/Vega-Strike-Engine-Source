@@ -1,8 +1,8 @@
-noinst_LIBRARIES = libcmd.a libcmdgeneric.a libcmdserver.a
+noinst_LIBRARIES = libcmd.a libcmdserver.a
 SUBDIRS = ai script collide
 INCLUDES = -I ../ -I../boost/
 
-libcmdgeneric_a_SOURCES =			\
+libcmdgeneric =			\
 	unit_generic.h					\
 	unit_generic.cpp				\
 	asteroid_generic.cpp			\
@@ -32,13 +32,13 @@ libcmdgeneric_a_SOURCES =			\
 	unit_const_cache.cpp \
 	unit_const_cache.h
 
-libcmdserver_a_SOURCES =			\
+libcmdserver_a_SOURCES =$(libcmdgeneric)			\
 	unit_util_server.cpp			\
 	unit_functions_server.cpp			\
 	unit_factory_server.cpp
 
 
-libcmd_a_SOURCES =				\
+libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	atmosphere.h			\
 	atmosphere.cpp			\
 	asteroid.cpp			\

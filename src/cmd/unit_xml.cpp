@@ -1496,10 +1496,16 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
 				vschdir (nonautosave.c_str());
 			  }
 		  }
+		  // If in network mode on client side we expect saves to be in ./save
 		  else if( !SERVER)
 			  vschdir( "save");
-		  else
+		  // With account server we expect them in the ./accounts dir
+		  else if( SERVER==2)
 			  vschdir( "accounts");
+		  // With account server we expect them in the ./accountstmp dir
+		  else if( SERVER==1)
+			  vschdir( "accountstmp");
+
 
 		  inFile=NULL;
 		  if (filename[0])
