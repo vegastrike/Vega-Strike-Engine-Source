@@ -905,13 +905,15 @@ void VDU::DrawVDUObjectives (Unit *parent) {
 	}
       vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
       for (;j!=active_missions[i]->objectives.end();++j) {
-	if (j->owner==NULL||j->owner==parent) {
-	  rez+=GetColorFromSuccess((*j).completeness);
-	  rez+=(*j).objective;
-	  rez+='\n';
+	if (j->getOwner()==NULL||j->getOwner()==parent) {
+          if ((*j).objective.length()) {
+            rez+=GetColorFromSuccess((*j).completeness);
+            rez+=(*j).objective;
+            rez+='\n';
+          }
 	}
       }
-	  rez+='\n';
+      rez+='\n';
     }
   }
   tp->Draw(rez,offset);

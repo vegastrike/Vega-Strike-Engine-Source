@@ -422,10 +422,12 @@ class Mission {
   MISSION_AUTO global_autopilot;
   struct Objective {
     float completeness;
-	std::string objective;
-	UnitContainer owner;
-	Objective () {completeness=0;}
-	Objective (float complete,std::string obj) {completeness=complete;objective=obj;}
+    std::string objective;
+    Unit* getOwner();
+    void setOwner(Unit*u ){Owner.SetUnit(u);}
+    UnitContainer Owner;
+    Objective () {completeness=0;}
+    Objective (float complete,std::string obj) {completeness=complete;objective=obj;}
   };
   vector <Objective> objectives;
   void SetUnpickleData(std::string dat) {

@@ -402,12 +402,12 @@ namespace UniverseUtil {
 				}
 				void setOwnerII(int which,Unit *owner) {
 						if (which<(int)mission->objectives.size()) {
-								mission->objectives[which].owner=owner;
+								mission->objectives[which].setOwner(owner);
 						}
 				}
 				Unit* getOwner(int which) {
 						if (which<(int)mission->objectives.size()) {
-								return mission->objectives[which].owner.GetUnit();
+								return mission->objectives[which].getOwner();
 						} else {
 								return 0;
 						}
