@@ -17,8 +17,10 @@
 #include <windows.h>
 #endif
 #include "music.h"
+#include "base.h"
 #include "networking/inet.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
+  lastlist=PEACELIST;
   if (parent) {
     maxhull = parent->GetHull();
   }else {
@@ -68,10 +70,20 @@ void Music::LoadMusic (const char *file) {
 }
 
 inline int randInt (int max) {
-	return int((((double)rand())/((double)RAND_MAX))*max);
+	int ans= int((((double)rand())/((double)RAND_MAX))*max);
+	if (ans==max) {
+	  return max-1;
+	}
+	return ans;
 }
 
 int Music::SelectTracks(int &whichlist) {
+  if (Base::CurrentBase&&lastlist < playlist.size()&&lastlist>=0) {
+    if (!playlist[whichlist].empty()) {
+      whichlist=lastlist;
+      return rand()%playlist[whichlist].size();
+    }
+  }
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
   Unit * un=_Universe->AccessCockpit()->GetParent();
   if (un==NULL) {
@@ -147,11 +159,13 @@ void Music::GotoSong (int whichlist,int whichsong,bool skip) {
 
 void Music::SkipRandSong(int whichlist) {
 	if (this!=NULL) {
-	if (whichlist!=NOLIST)
-		GotoSong(whichlist,randInt(playlist[whichlist].size()),true);
-	else
-		SkipRandList();
+	  if (whichlist!=NOLIST&&whichlist>=0&&whichlist<(int)playlist.size()){
+	    lastlist = whichlist;
+	    GotoSong(whichlist,randInt(playlist[whichlist].size()),true);
+	    return;
+	  }
 	}
+	SkipRandList();
 }
 
 void Music::SkipRandList() {

@@ -11,6 +11,7 @@ class Music {
   int socket;
   UnitContainer p;
   int song;//currently playing song
+  int lastlist;
   int SelectTracks(int &i);
   void LoadMusic (const char *file);
   std::vector <std::vector <std::string> > playlist;

@@ -59,7 +59,6 @@ class Planet : public Unit {
   bool atmospheric;//then users can go inside!
   float radius;
   float gravity;
-  UnitCollection satellites;
   UnitCollection insiders;
   std::vector <int> lights;
   Animation *shine;
@@ -73,7 +72,7 @@ protected:
     friend class UnitFactory;
 
 public:
-
+  UnitCollection satellites;
   virtual ~Planet();
   void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);

@@ -389,6 +389,7 @@ double compute_light_dot (Unit * base,Unit *un) {
   StarSystem * ss =base->getStarSystem ();
   double ret=-1;
   Unit * st;
+  Unit * base_owner=NULL;
   if (ss) {
     _Universe->pushActiveStarSystem (ss);
     un_iter ui = ss->getUnitList().createIterator();
@@ -402,12 +403,24 @@ double compute_light_dot (Unit * base,Unit *un) {
 	    fprintf (stderr,"dot %lf",dot);
 	    ret=dot;
 	  }
+	} else {
+	  un_iter ui = ((Planet *)st)->satellites.createIterator();
+	  Unit * ownz=NULL;
+	  for (;(ownz=*ui);++ui) {
+	    if (ownz==base) {
+	      base_owner = st;
+	    }
+	  }
 	}
       }
     }
     _Universe->popActiveStarSystem();
   }else return 1;
-  return ret;
+  if (base_owner==NULL||base->isUnit()==PLANETPTR) {
+    return ret;
+  }else {
+    return compute_light_dot(base_owner,un);
+  }
 }
 
 const char * compute_time_of_day (Unit * base,Unit *un) {
