@@ -797,6 +797,9 @@ void Cockpit::Draw() {
 	headtrans.front().m[14]=0;//AccessCamera()->GetPosition().k;
 	if (shakin>0) {
 	  shakin-=GetElapsedTime()*shake_reduction;
+	  if (shakin<=0) {
+	    shaking=0;
+	  }
 	}
 
 	mesh->DrawNow(1,true,headtrans.front().m);
