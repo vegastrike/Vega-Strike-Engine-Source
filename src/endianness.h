@@ -42,7 +42,7 @@ unsigned short VSSwapHostShortToLittle (unsigned short x);
                             (((uint32_t)(x) >> 8) & 0x0000FF00) | \
                             ((uint32_t)(x) >> 24))
     #  define le16_to_cpu(x) (((x&0xFF)<<8) | ((unsigned short)(x)>>8))
-    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittle(x))
+    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittleEndian(x))
     # else
     #  define le32_to_cpu(x) (x)
     #  define le16_to_cpu(x) (x)
@@ -53,7 +53,7 @@ unsigned short VSSwapHostShortToLittle (unsigned short x);
     # include <byteswap.h>
     # define le32_to_cpu(x) (bswap_32(x))
     # define le16_to_cpu(x) (bswap_16(x))
-    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittle(x))
+    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittleEndian(x))
     #else
     # define le32_to_cpu(x) (x)
     # define le16_to_cpu(x) (x)
