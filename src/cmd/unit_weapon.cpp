@@ -288,17 +288,15 @@ void Unit::TargetTurret (Unit * targ) {
 		un_iter iter = getSubUnits();
 		Unit * su;
 		Vector localcoord;
-		while ((su=iter.current())) {
-			bool inrange=true;
-			if (targ) {
-				inrange =su->InRange (targ,localcoord);
-			}
-			if (inrange) {
-				su->Target (targ);
-				su->TargetTurret(targ);
-			}
+                if (InRange (targ,localcoord)) {
+                while ((su=iter.current())) {
+			su->Target (targ);
+			su->TargetTurret(targ);
 			iter.advance();
 		}
+                }
+                
+
 	}
 
 }

@@ -377,7 +377,7 @@ Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
   difficulty=1;
   Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
   if ((player_cockpit)==NULL) {
-    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".4"));
+    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
     difficulty = pow(g_game.difficulty,exp);
   }
   return player_cockpit;

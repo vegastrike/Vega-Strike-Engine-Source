@@ -1020,7 +1020,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	}
       }
       if (mode==SCRIPT_RUN) {
-	fprintf (stderr,"upgrading %s %s %d %d %c\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts);
+	printf ("upgrading %s %s %d %d %c\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts);
+        fflush (stdout);
 	percentage=my_unit->Upgrade (file,mountoffset,subunitoffset,force,loop_through_mounts);
       }
 

@@ -753,6 +753,15 @@ static vector <int> respawnunit;
 static vector <int> switchunit;
 static vector <int> turretcontrol;
 static vector <int> suicide;
+void RespawnNow (Cockpit * cp) {
+  while (respawnunit.size()<=_Universe->numPlayers())
+    respawnunit.push_back(0);
+  for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+    if (_Universe->AccessCockpit(i)==cp) {
+      respawnunit[i]=1;
+    }
+  }
+}
 void Cockpit::SwitchControl (int,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())

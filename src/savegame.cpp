@@ -24,7 +24,12 @@ QVector LaunchUnitNear (QVector pos) {
       double dist = (pos-un->Position()).Magnitude()-un->rSize()-def_un_size;
       if (dist<0) {
 	QVector delta  = pos-un->Position();
-	delta.Normalize();
+        double mag = delta.Magnitude();
+        if (mag>.01){
+	  delta=delta/mag;
+        }else {
+          delta.Set(0,0,1);
+        }
 	delta = delta.Scale ( dist+def_un_size);
 	if (k<5) {
 	  pos = pos+delta;
@@ -57,7 +62,13 @@ string SaveGame::GetStarSystem () {
 }
 
 void SaveGame::SetPlayerLocation (const QVector &v) {
-  PlayerLocation =v;
+  fprintf (stderr,"Set Location %lf %lf %lf",v.i,v.j,v.k);
+  if ((FINITE (v.i)&&FINITE(v.j)&&FINITE(v.k))) {
+    PlayerLocation =v;
+  }else {
+    fprintf (stderr,"ERROR saving unit");
+    PlayerLocation.Set(1,1,1);
+  }
 }
 QVector SaveGame::GetPlayerLocation () {
   return PlayerLocation;

@@ -103,6 +103,7 @@ extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
 extern Unit&GetUnitMasterPartList();
 class UpgradingInfo {
+  void DoDone();
 public:
   Mission * briefingMission;//do not dereference! instead scan through activve_missions
   TextArea *CargoList, *CargoInfo;
@@ -122,7 +123,7 @@ public:
   vector <Cargo> TempCargo;//used to store cargo list
   vector <Cargo> * CurrentList;
   enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE, STOP_MODE}submode;
-  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,BRIEFINGMODE,NEWSMODE,SHIPDEALERMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE, MAXMODE} mode;
+  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,BRIEFINGMODE,NEWSMODE,SHIPDEALERMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE, SAVEMODE, MAXMODE} mode;
   bool multiplicitive;
   Button *Modes[MAXMODE];
   string title;
@@ -137,6 +138,10 @@ public:
     //    std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
     if (submode==NORMAL) {
+      if (mode==SAVEMODE) {
+        CargoList->AddTextItem ("Save","Save");
+        CargoList->AddTextItem ("Load","Load");
+      }else
       if (mode==NEWSMODE) {
 	gameMessage * last;
 	int i=0;
@@ -213,24 +218,28 @@ public:
     }
     string ButtonText;
     switch (mod) {
+    case SAVEMODE:
+      title = "Save and Load        ";
+      ButtonText="";
+      break;
     case BRIEFINGMODE:
-      title="Mission Briefings - Select Mission ";
+      title="Mission Briefings      ";
       ButtonText="End";
       break;
     case NEWSMODE:
-      title="GNN Galaxy News Network      ";
+      title="GNN Galaxy News Network  ";
       ButtonText="ReadNews";
       break;
     case BUYMODE:
-      title = "Purchase Cargo             ";
+      title = "Purchase Cargo        ";
       ButtonText= "BuyCargo";
       break;
     case SELLMODE:
-      title = "Sell Cargo                 ";
+      title = "Sell Cargo          ";
       ButtonText= "SellCargo";
       break;
     case UPGRADEMODE:
-      title = "Upgrade/Repair Starship        ";
+      title = "Upgrade/Repair Starship ";
       ButtonText="Upgrade";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -238,7 +247,7 @@ public:
       }
       break;
     case ADDMODE:
-      title = "Enhance Starship          ";
+      title = "Enhance Starship    ";
       ButtonText="Add Stats";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -246,7 +255,7 @@ public:
       }
       break;
     case DOWNGRADEMODE:
-      title = "Downgrade Starship           ";
+      title = "Downgrade Starship       ";
       ButtonText= "SellPart";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -255,7 +264,7 @@ public:
       break;
     case MISSIONMODE:
       if (title.find ("Mission BBS")==title.length()) {
-	title = "Mission BBS               ";
+	title = "Mission BBS          ";
       }
       ButtonText="Accept";
       if (!beginswith (curcategory,"missions")) {
@@ -264,7 +273,7 @@ public:
       }
       break;
     case SHIPDEALERMODE:
-      title = "Purchase Starship            ";
+      title = "Purchase Starship        ";
       ButtonText="BuyShip";
       if (!beginswith (curcategory,"starships")) {
 	curcategory.clear();
@@ -307,7 +316,6 @@ public:
 	if (cp) {
 	  _Universe->SetActiveCockpit(cp);
 	}
-	WriteSaveGame(cp);
 	NewPart=NULL;//no ship to upgrade
 	templ=NULL;//no template
 	//	CargoList->AddTextItem("a","Just a test item");
@@ -319,13 +327,14 @@ public:
 	CargoInfo->AddTextItem("description", "");
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
-	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","Briefing","GNN News", "ShipDealer","UpgradeShip","Unimplemented","Downgrade"};
+	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","Briefing","GNN News", "ShipDealer","UpgradeShip","Unimplemented","Downgrade","Save/Load"};
 	float beginx = -.4;
 	float lastx = beginx;
 	float size=.32;
 	for (int i=0;i<MAXMODE;i++) {
-	  if (i!=ADDMODE) {
-	    if (i<MAXMODE/2) {
+          if (i!=SAVEMODE) {
+          if (i!=ADDMODE) {
+	    if (i<(MAXMODE-1)/2) {
 	      Modes[i]= new Button (lastx,-.82,size,0.07,MyButtonModes[i]);
 	    }else {
 	      Modes[i]= new Button (beginx,-.91,size,0.07,MyButtonModes[i]);
@@ -335,6 +344,10 @@ public:
 	  }else {
 	    Modes[i]=new Button (0,0,0,0,"Unimplemented");
 	  }
+          } else {
+            Modes[i]=new Button (.68,.98,.3,.07,MyButtonModes[i]);
+
+          }
 	}
 	CargoList->RenderText();
 	CargoInfo->RenderText();	
@@ -389,7 +402,7 @@ public:
       ShowColor(0,0,0,0, 1,1,1,1);
       char floatprice [100];
       sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
-      ShowText(-0.98, 0.93, 2, 4, (title+ string("       Credits: ")+floatprice).c_str(), 0);
+      ShowText(-0.98, 0.93, 2, 4, (title+ string("  Credits: ")+floatprice).c_str(), 0);
       CargoList->Refresh();
       CargoInfo->Refresh();
     }
@@ -488,7 +501,7 @@ void CargoToMission (const char * item,TextArea * ta) {
   ta->ChangeTextItem ("volume","");
   ta->ChangeTextItem ("description",temp.getVariable("description","").c_str());  
 }
-
+extern void RespawnNow (Cockpit * cp);
 void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	char floatprice [100];
   switch (mode) {
@@ -506,6 +519,24 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	  }
 	}
       }
+    }
+    break;
+  case SAVEMODE:
+    
+    if (item) {
+     Unit * buy = buyer.GetUnit();
+     if (buy!=NULL) {
+      Cockpit * cp = _Universe->isPlayerStarship(buy);
+      if (cp) {
+       if (item[0]=='S') {
+           WriteSaveGame(cp);
+       }else if (item[0]=='L') {
+        buy->Kill();
+        RespawnNow(cp);
+        DoDone();
+      }
+     }
+    }
     }
     break;
   case BUYMODE:
@@ -565,6 +596,17 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   }
 
 }
+void UpgradingInfo::DoDone() {
+			for (unsigned int i=0;i<upgr.size();i++) {
+			  if (upgr[i]==this) {
+			    delete upgr[i];
+			    upgr.erase (upgr.begin()+i);
+			    player_upgrading.erase (player_upgrading.begin()+i);
+			    restore_main_loop();
+			  }
+			}
+}
+
 void UpgradingInfo::StopBriefing() {
     if (submode==STOP_MODE) {
       for (unsigned int i=0;i<active_missions.size();i++) {
@@ -898,15 +940,9 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 		ours = OK->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
 			printf ( "You clicked done\n");
-			for (unsigned int i=0;i<upgr.size();i++) {
-			  if (upgr[i]==this) {
-			    delete upgr[i];
-			    upgr.erase (upgr.begin()+i);
-			    player_upgrading.erase (player_upgrading.begin()+i);
-			    restore_main_loop();
-			  }
-			}
-		}
+                        DoDone();
+                
+                }
 	}	
 	if (ours == 0) {
 		ours = COMMIT->DoMouse(type, cur_x, cur_y, 0/*button*/, state);
