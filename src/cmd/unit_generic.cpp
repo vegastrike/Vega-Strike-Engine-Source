@@ -5260,7 +5260,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
-
+  static bool bleh=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
+  if (bleh){
   STDUPGRADE(image->fireControlFunctionality,image->fireControlFunctionality,image->fireControlFunctionality,0);
   STDUPGRADE(image->fireControlFunctionalityMax,image->fireControlFunctionalityMax,image->fireControlFunctionalityMax,0);
   STDUPGRADE(image->SPECDriveFunctionality,image->SPECDriveFunctionality,image->SPECDriveFunctionality,0);
@@ -5269,6 +5270,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(image->CommFunctionalityMax,image->CommFunctionalityMax,image->CommFunctionalityMax,0);
   STDUPGRADE(image->LifeSupportFunctionality,image->LifeSupportFunctionality,image->LifeSupportFunctionality,0);
   STDUPGRADE(image->LifeSupportFunctionalityMax,image->LifeSupportFunctionalityMax,image->LifeSupportFunctionalityMax,0);
+  }
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
   STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
   image->ecm = abs(image->ecm);
