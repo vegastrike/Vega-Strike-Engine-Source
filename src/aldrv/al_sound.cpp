@@ -8,7 +8,7 @@
 #ifdef HAVE_AL
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <AL/alext.h>
+//#include <AL/alext.h>
 #include <AL/alut.h>
 #endif
 #include <vector>
@@ -72,9 +72,9 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
       void *wave;
       ALboolean err=AL_TRUE;
 #ifndef WIN32
-#ifdef MACOS
+#ifdef __APPLE__
 ALint format;
-	  alutLoadWAVFile(filename, &format, &wave, &size, &freq);
+	  alutLoadWAVFile((char *)filename, &format, &wave, &size, &freq);
 #else
 	
       ALsizei format;
@@ -276,7 +276,7 @@ bool AUDIsPlaying (const int sound){
 	if (!sounds[sound].source) 
 		return false;
     ALint state;
-#ifdef _WIN32
+#if defined (_WIN32) || defined (__APPLE__)
     alGetSourcei(sounds[sound].source,AL_SOURCE_STATE, &state);  //Obtiene el estado de la fuente para windows
 #else
     alGetSourceiv(sounds[sound].source, AL_SOURCE_STATE, &state);
