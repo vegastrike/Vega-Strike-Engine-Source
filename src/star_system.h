@@ -83,6 +83,7 @@ class GameStarSystem: public StarSystem {
   void SwapIn ();
   ///Disables included lights and terrains
   void SwapOut ();
+  bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system);
   static void ProcessPendingJumps ();
 
   friend class Atmosphere;

@@ -3,8 +3,10 @@
 
 #include <string>
 #include <vector>
-
+#include "configxml.h"
 extern char *CONFIGFILE;
+extern VegaConfig * createVegaConfig( char * file);
+
 #define HOMESUBDIR ".vegastrike"
 #define DELIM '/'
 #define DELIMSTR "/"

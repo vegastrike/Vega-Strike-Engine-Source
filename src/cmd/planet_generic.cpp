@@ -182,7 +182,8 @@ Planet::Planet()
     , radius(0.0f), satellites()
 {
   inside=false;
-  Init();
+  // Not needed as Unit default constructor is called and already does Init
+  //Init();
   terraintrans = NULL;
   SetAI(new Order()); // no behavior
 }

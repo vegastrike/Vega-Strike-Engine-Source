@@ -1,6 +1,5 @@
 #include <string>
 #include "cmd/unit_generic.h"
-#include "config_xml.h"
 #include "cmd/unit_util.h"
 #include "configxml.h"
 #include "vs_globals.h"

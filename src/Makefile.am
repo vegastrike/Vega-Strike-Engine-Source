@@ -1,17 +1,89 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
-SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common
-vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a networking/libnet.a boost/libboost_python.a common/libvscommon.a networking/libnetclient.a -lpthread cmd/unit_util.o cmd/base_init.o vs_globals.o 
+noinst_LIBRARIES = libroot.a librootgeneric.a librootserver.a
 
-vegaserver_LDADD = networking/libnetserver.a cmd/libcmdserver.a cmd/ai/libaiserver.a cmd/script/libscriptserver.a python/libpython.a vs_globals_server.o
-accountserver_LDADD = networking/libnetserver.a
+SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common
+vegastrike_LDADD =  \
+libxml.a libroot.a librootgeneric.a \
+aldrv/libaldrv.a \
+cmd/collide/libcollide.a \
+common/libvscommon.a \
+networking/libnetclient.a \
+cmd/script/script_call_briefing.o \
+cmd/script/libscript.a cmd/script/libscriptgeneric.a \
+cmd/script/c_alike/libc_alike.a \
+python/briefing_wrapper.o \
+cmd/libcmd.a cmd/libcmdgeneric.a \
+cmd/base_init.o \
+cmd/unit_util.o \
+universe_util.o \
+python/libpython.a python/libpythongeneric.a \
+boost/libboost_python.a \
+gfx/libgfx.a gfx/libgfxgeneric.a \
+cmd/ai/libaigeneric.a cmd/ai/libai.a \
+gldrv/libgldrv.a \
+gui/libgui.a \
+networking/libnet.a \
+-lpthread
+
+vegaserver_LDADD =  \
+libxml.a \
+networking/libnetserver.a \
+cmd/libcmdserver.a cmd/libcmdgeneric.a \
+cmd/ai/libaigeneric.a \
+cmd/script/libscriptserver.a cmd/script/libscriptgeneric.a \
+cmd/script/c_alike/libc_alike.a \
+gfx/libgfxgeneric.a \
+python/libpython.a python/libpythongeneric.a \
+boost/libboost_python.a \
+librootserver.a librootgeneric.a
+
+accountserver_LDADD =  \
+networking/libnetserver.a
+
 INCLUDES = -Iboost/
 
-vs_globals.o : vs_globals.cpp vs_globals.h
-	$(COMPILE) -c vs_globals.cpp -o vs_globals.o
-vs_globals_server.o : vs_globals.cpp vs_globals.h
-	$(COMPILE) -c vs_globals.cpp -o vs_globals_server.o
+libroot_a_SOURCES =			\
+	debug_vs.h				\
+	debug_vs.cpp			\
+	gfxlib.h				\
+	gfxlib_struct.h			\
+	linecollide.h			\
+	in_joystick.cpp			\
+	in_joystick.h			\
+	faction.cpp				\
+	faction.h				\
+	force_feedback.cpp		\
+	force_feedback.h		\
+	in_kb.cpp				\
+	in_kb.h					\
+	in_sdl.cpp				\
+	in_mouse.cpp			\
+	in_mouse.h				\
+	in_main.cpp				\
+	in_main.h				\
+	in_handler.cpp			\
+	in_handler.h			\
+	main_loop.h				\
+	main_loop.cpp			\
+	physics.h				\
+	physics.cpp				\
+	resizable.h				\
+	star_system_jump.cpp	\
+	star_system_xml.cpp		\
+	star_system.cpp 		\
+	star_system.h 			\
+	universe.cpp			\
+	universe.h				\
+	universe_util.h			\
+	universe_util.cpp		\
+	config_xml.cpp			\
+	config_xml.h			\
+	profile.h 				\
+	audiolib.h				\
+    macosx_math.cpp			\
+    macosx_math.h
 
-vegaserver_SOURCES =			\
+librootgeneric_a_SOURCES =			\
 	star_system_generic.cpp 	\
 	star_system_generic.h 		\
 	universe_generic.cpp		\
@@ -25,110 +97,57 @@ vegaserver_SOURCES =			\
 	galaxy_gen.h				\
 	faction_generic.cpp			\
 	faction_generic.h			\
-	xml_serializer.cpp			\
-	vs_globals.h				\
 	hashtable.h					\
 	hashtable.cpp				\
 	configxml.cpp				\
 	configxml.h					\
-	xml_support.h  				\
-	xml_support.cpp				\
 	easydom.cpp					\
 	easydom.h					\
+	xml_serializer.cpp		\
+	xml_serializer.h		\
+	xml_support.h  			\
+	xml_support.cpp			\
 	lin_time.cpp				\
 	lin_time.h					\
+	endianness.cpp			\
+	endianness.h			\
+	file_main.h				\
+	in.h					\
+	faction_util.cpp		\
+	load_mission.cpp		\
+	savegame.cpp			\
+	savegame.h				\
+	universe_generic.cpp	\
+	universe_generic.h		\
+	universe_util_generic.h	\
+	universe_util_generic.cpp	\
+	star_system_generic.cpp \
+	star_system_generic.h 	\
+	vegastrike.h			\
+	vs_path.cpp				\
+	vs_path.h
+
+librootserver_a_SOURCES =			\
+	libserver.cpp				\
+	faction_util_server.cpp
+
+vegaserver_SOURCES =			\
+	vs_globals.cpp			\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
-	hashtable.h				\
-	hashtable.cpp			\
-	configxml.cpp			\
-	configxml.h				\
+	configxml.cpp				\
+	configxml.h					\
+	easydom.cpp					\
+	easydom.h					\
 	xml_support.h  			\
 	xml_support.cpp			\
-	easydom.cpp				\
-	easydom.h				\
-	lin_time.cpp			\
-	lin_time.h				\
+	lin_time.cpp				\
+	lin_time.h					\
+	vs_globals.cpp			\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\
-	endianness.cpp			\
-	debug_vs.h				\
-	debug_vs.cpp			\
-	endianness.h			\
-	file_main.h				\
-	galaxy.cpp				\
-	galaxy_xml.cpp			\
-	galaxy_xml.h			\
-	galaxy_gen.cpp			\
-	galaxy_gen.h			\
-	gfxlib.h				\
-	gfxlib_struct.h			\
-	hashtable.h				\
-	hashtable.cpp			\
-	linecollide.h			\
-	in.h					\
-	in_joystick.cpp			\
-	in_joystick.h			\
-	faction.h				\
-	faction.cpp				\
-	faction_generic.h		\
-	faction_generic.cpp		\
-	faction_util.cpp		\
-	force_feedback.cpp		\
-	force_feedback.h		\
-	in_kb.cpp				\
-	in_kb.h					\
-	in_sdl.cpp				\
-	in_mouse.cpp			\
-	in_mouse.h				\
-	in_main.cpp				\
-	in_main.h				\
-	in_handler.cpp			\
-	in_handler.h			\
-	lin_time.h				\
-	lin_time.cpp			\
-	load_mission.cpp		\
-	main.cpp				\
-	main_loop.h				\
-	main_loop.cpp			\
-	savegame.cpp			\
-	savegame.h				\
-	physics.h				\
-	physics.cpp				\
-	resizable.h				\
-	star_system_jump.cpp	\
-	star_system_xml.cpp		\
-	star_system.cpp 		\
-	star_system.h 			\
-	star_system_generic.cpp \
-	star_system_generic.h 	\
-	universe.cpp			\
-	universe.h				\
-	universe_generic.cpp	\
-	universe_generic.h		\
-	universe_util.h			\
-	universe_util.cpp		\
-	universe_util_generic.h	\
-	universe_util_generic.cpp	\
-	xml_support.h  			\
-	xml_support.cpp			\
-	xml_serializer.cpp		\
-	xml_serializer.h		\
-	config_xml.cpp			\
-	config_xml.h			\
-	configxml.cpp			\
-	configxml.h				\
-	easydom.cpp				\
-	easydom.h				\
-	profile.h 				\
-	vegastrike.h			\
-	vs_globals.h 			\
-	vs_path.cpp				\
-	vs_path.h				\
-	audiolib.h				\
-    macosx_math.cpp			\
-    macosx_math.h
-
+	vs_globals.cpp			\
+	main.cpp
 

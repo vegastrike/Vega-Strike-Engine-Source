@@ -1,4 +1,4 @@
-#include "faction.h"
+#include "faction_generic.h"
 #include <assert.h>
 
 using namespace FactionUtil;

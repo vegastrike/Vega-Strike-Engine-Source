@@ -120,8 +120,8 @@ class StarSystem {
   void AddUnit(Unit *unit);
   ///Removes from draw list
   bool RemoveUnit(Unit *unit);
-  bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system);
-  static void ProcessPendingJumps ();
+  virtual bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system) { return false;}
+  static void ProcessPendingJumps () {}
 
   //friend class Atmosphere;
 };

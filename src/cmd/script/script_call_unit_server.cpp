@@ -46,7 +46,7 @@
 #include "cmd/ai/missionscript.h"
 #include "mission.h"
 #include "easydom.h"
-#include "msgcenter.h"_generic.h"
+#include "msgcenter.h"
 #include "vs_globals.h"
 #include "configxml.h"
 #include "gfx/cockpit_generic.h"

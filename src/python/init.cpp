@@ -8,7 +8,7 @@
 #include <eval.h>
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 #include "vs_path.h"
 #include <strstream>

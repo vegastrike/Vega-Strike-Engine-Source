@@ -2,7 +2,7 @@
 #include "star_system_generic.h"
 #include "gfx/vec.h"
 //#include "cmd/planet.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 //#include "cmd/unit_collide.h"
 #include "cmd/collection.h"
 //#include "cmd/click_list.h"
@@ -15,7 +15,7 @@
 //#include "cmd/bolt.h"
 #include <expat.h>
 //#include "cmd/music.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 //#include "cmd/cont_terrain.h"
 #include "vegastrike.h"
@@ -152,6 +152,53 @@ StarSystem::~StarSystem() {
   
 }
 /********* FROM STAR SYSTEM XML *********/
+void setStaticFlightgroup (vector<Flightgroup *> &fg, const std::string &nam,int faction) {
+  while (faction>=(int)fg.size()) {
+    fg.push_back(new Flightgroup());
+    fg.back()->nr_ships=0;
+  }
+  if (fg[faction]->nr_ships==0) {
+    fg[faction]->flightgroup_nr=faction;
+    fg[faction]->pos.i=fg[faction]->pos.j=fg[faction]->pos.k=0;
+    //    fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
+    fg[faction]->nr_ships=0;
+    fg[faction]->ainame="default";
+     fg[faction]->faction=FactionUtil::GetFaction(faction);
+    fg[faction]->type="Base";
+    fg[faction]->nr_waves_left=0;
+    fg[faction]->nr_ships_left=0;
+    fg[faction]->name=nam;
+  }
+  fg[faction]->nr_ships++;
+  fg[faction]->nr_ships_left++;
+}
+Flightgroup *getStaticBaseFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
+  setStaticFlightgroup (fg,"Base",faction);
+  return fg[faction];
+}
+Flightgroup *getStaticStarFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
+  setStaticFlightgroup (fg,"Base",faction);
+  return fg[faction];
+}
+
+Flightgroup *getStaticNebulaFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;
+  setStaticFlightgroup (fg,"Nebula",faction);
+  return fg[faction];
+}
+Flightgroup *getStaticAsteroidFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;
+  setStaticFlightgroup (fg,"Asteroid",faction);
+  return fg[faction];
+}
+Flightgroup *getStaticUnknownFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;
+  setStaticFlightgroup (fg,"Unknown",faction);
+  return fg[faction];
+}
+
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }

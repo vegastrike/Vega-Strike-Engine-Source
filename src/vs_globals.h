@@ -15,6 +15,7 @@ extern Universe * _Universe;
 #endif
 */
 
+extern bool STATIC_VARS_DESTROYED;
 extern int	loop_count;
 extern double	avg_loop;
 extern int	nb_checks;

@@ -101,7 +101,7 @@ void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix
 
 template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType>( int /*dummy*/ ) {
-	Init();
+		this->GameUnit::Init();
 }
 
 #define PARANOIA .4
@@ -203,7 +203,7 @@ vector <Mesh *> GameUnit<UnitType>::StealMeshes() {
 extern void update_ani_cache();
 template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
-	Init();
+	this->GameUnit::Init();
 	update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);

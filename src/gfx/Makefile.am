@@ -1,6 +1,17 @@
-noinst_LIBRARIES = libgfx.a
+noinst_LIBRARIES = libgfx.a libgfxgeneric.a
+INCLUDES = -I ../ -I../boost/
 
-INCLUDES = -I ../ -I ../boost
+libgfxgeneric_a_SOURCES =  \
+	cockpit_generic.h	\
+	cockpit_generic.cpp	\
+	matrix.cpp	\
+	matrix.h	\
+	vec.h	\
+	vec.cpp	\
+	quaternion.cpp	\
+	quaternion.h	\
+	vertex.h		
+
 
 libgfx_a_SOURCES =	\
 	ani_texture.h	\
@@ -26,8 +37,6 @@ libgfx_a_SOURCES =	\
 	bsp.h		\
 	camera.cpp	\
 	camera.h	\
-	cockpit_generic.h	\
-	cockpit_generic.cpp	\
 	cockpit.h	\
 	cockpit.cpp	\
 	cockpit_xml.cpp	\
@@ -77,12 +86,6 @@ libgfx_a_SOURCES =	\
 	sphere.h	\
 	sprite.cpp	\
 	sprite.h	\
-	matrix.cpp	\
-	matrix.h	\
 	vdu.cpp		\
-	vdu.h		\
-	vec.h	\
-	vec.cpp	\
-	quaternion.cpp	\
-	quaternion.h	\
-	vertex.h		
+	vdu.h
+

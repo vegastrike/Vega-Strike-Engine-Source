@@ -1,7 +1,7 @@
 #include "cmd/script/mission.h"
-#include "universe_util_generic.h"
+#include "universe_util.h"
 #include "universe_generic.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 //#include "cmd/unit_interface.h"
 #include "cmd/unit_factory.h" //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"

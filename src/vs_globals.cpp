@@ -13,6 +13,7 @@ float simulation_atom_var=(float)(1.0/10.0);
 Mission *mission=NULL;
 
 double benchmark=-1.0;
+bool STATIC_VARS_DESTROYED=false;
 
 /* for speed test */
 int loop_count=0;

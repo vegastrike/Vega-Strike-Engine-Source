@@ -45,8 +45,8 @@
 #include "vs_path.h"
 #include "lin_time.h"
 #include "cmd/unit_generic.h"
-#include "cmd/ai/order.h"
 
+#include "cmd/ai/order.h"
 #include "mission.h"
 #include "easydom.h"
 
@@ -107,7 +107,6 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
   }
 }
 
-PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 PYTHON_BEGIN_MODULE(Director)
 PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")

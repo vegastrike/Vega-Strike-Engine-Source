@@ -26,7 +26,7 @@
 #define NUM_FORCES	64
 
 #include "star_system_generic.h"
-#include "faction.h"
+#include "faction_generic.h"
 class Cockpit;
 class Camera;
 class Unit;

@@ -109,7 +109,7 @@ void GameStarSystem::DrawJumpStars() {
 }
 
 
-void StarSystem::ProcessPendingJumps() {
+void GameStarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
       pendingjump[kk]->delay-=GetElapsedTime();
@@ -160,7 +160,7 @@ void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::s
   }
   ss->JumpTo (un,jumppoint,system);
 }
-bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
+bool GameStarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
   }

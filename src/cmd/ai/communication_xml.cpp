@@ -4,7 +4,6 @@
 #include "vegastrike.h"
 #include "communication.h"
 #include <assert.h>
-#include "audiolib.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -49,6 +48,7 @@ void FSM::beginElement(void *userData, const XML_Char *names, const XML_Char **a
 	((FSM*)userData)->beginElement(names, AttributeList(atts));
 }
 
+extern int createSound( string file, bool val);
 void FSM::beginElement(const string &name, const AttributeList attributes) {
 using namespace CommXML;
 	AttributeList::const_iterator iter;
@@ -65,7 +65,7 @@ using namespace CommXML;
 			  sexe =XMLSupport::parse_int ((*iter).value);
 			  break;
 			case FILENAME:
-			  sound=AUDCreateSoundWAV((*iter).value,false);
+			  sound=createSound((*iter).value,false);
 			  break;
 			}
 		}

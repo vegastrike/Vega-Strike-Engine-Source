@@ -178,6 +178,12 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 
+extern Flightgroup *getStaticBaseFlightgroup (int faction);
+extern Flightgroup *getStaticStarFlightgroup (int faction);
+extern Flightgroup *getStaticNebulaFlightgroup (int faction);
+extern Flightgroup *getStaticAsteroidFlightgroup (int faction);
+extern Flightgroup *getStaticUnknownFlightgroup (int faction);
+
 static Vector ComputeRotVel (float rotvel, const QVector &r, const QVector & s) {
   if ((r.i||r.j||r.k)&&(s.i||s.j||s.k)) {
     QVector retval = r.Cross (s);
@@ -211,52 +217,6 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
   }
   free (tmp);
 } 
-void setStaticFlightgroup (vector<Flightgroup *> &fg, const std::string &nam,int faction) {
-  while (faction>=(int)fg.size()) {
-    fg.push_back(new Flightgroup());
-    fg.back()->nr_ships=0;
-  }
-  if (fg[faction]->nr_ships==0) {
-    fg[faction]->flightgroup_nr=faction;
-    fg[faction]->pos.i=fg[faction]->pos.j=fg[faction]->pos.k=0;
-    //    fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
-    fg[faction]->nr_ships=0;
-    fg[faction]->ainame="default";
-     fg[faction]->faction=FactionUtil::GetFaction(faction);
-    fg[faction]->type="Base";
-    fg[faction]->nr_waves_left=0;
-    fg[faction]->nr_ships_left=0;
-    fg[faction]->name=nam;
-  }
-  fg[faction]->nr_ships++;
-  fg[faction]->nr_ships_left++;
-}
-Flightgroup *getStaticBaseFlightgroup (int faction) {
-  static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
-  setStaticFlightgroup (fg,"Base",faction);
-  return fg[faction];
-}
-Flightgroup *getStaticStarFlightgroup (int faction) {
-  static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
-  setStaticFlightgroup (fg,"Base",faction);
-  return fg[faction];
-}
-
-Flightgroup *getStaticNebulaFlightgroup (int faction) {
-  static vector <Flightgroup *> fg;
-  setStaticFlightgroup (fg,"Nebula",faction);
-  return fg[faction];
-}
-Flightgroup *getStaticAsteroidFlightgroup (int faction) {
-  static vector <Flightgroup *> fg;
-  setStaticFlightgroup (fg,"Asteroid",faction);
-  return fg[faction];
-}
-Flightgroup *getStaticUnknownFlightgroup (int faction) {
-  static vector <Flightgroup *> fg;
-  setStaticFlightgroup (fg,"Unknown",faction);
-  return fg[faction];
-}
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
 static Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
   return (Unit *)0x31337;

@@ -4,9 +4,8 @@
 #include "vs_path.h"
 #include <vector>
 #include <string>
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
-#include "config_xml.h"
 #include "savegame.h"
 #include "load_mission.h"
 #include <algorithm>

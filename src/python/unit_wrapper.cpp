@@ -9,7 +9,7 @@
 #include <boost/python/objects.hpp>
 #include "universe_util.h"
 #include "cmd/unit_util.h"
-#include "faction.h"
+#include "faction_generic.h"
 #include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
 using namespace UnitUtil;

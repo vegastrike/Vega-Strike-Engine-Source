@@ -8,7 +8,7 @@
 #include "vegastrike.h"
 #include "vs_path.h"
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 //serves to run through a XML file that nests things for "and". 
 
 

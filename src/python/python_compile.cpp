@@ -1,7 +1,7 @@
 #include "python_compile.h"
 #include <compile.h>
 #include <eval.h>
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 #include "vs_path.h"
 #include "init.h"

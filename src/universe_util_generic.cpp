@@ -13,7 +13,7 @@
 #include "gfx/cockpit_generic.h"
 #include "lin_time.h"
 #include "load_mission.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );

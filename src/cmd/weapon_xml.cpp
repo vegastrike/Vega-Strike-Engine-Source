@@ -407,38 +407,4 @@ void LoadWeapons(const char *filename) {
  fclose (inFile);
  XML_ParserFree (parser);
 }
-enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
-  int i;
-  char tmp[384];
-  for (i=0;i<383&&str[i]!='\0';i++) {
-    tmp[i]=(char)toupper(str[i]);
-  }
-  tmp[i]='\0';
-  if (strcmp ("LIGHT",tmp)==0)
-    return weapon_info::LIGHT;
-  if (strcmp ("MEDIUM",tmp)==0)
-    return weapon_info::MEDIUM;
-  if (strcmp ("HEAVY",tmp)==0)
-    return weapon_info::HEAVY;
-    if (strcmp ("CAPSHIP-LIGHT",tmp)==0)
-    return weapon_info::CAPSHIPLIGHT;
-  if (strcmp ("CAPSHIP-HEAVY",tmp)==0)
-    return weapon_info::CAPSHIPHEAVY;
-  if (strcmp ("SPECIAL",tmp)==0)
-    return weapon_info::SPECIAL;
-  if (strcmp ("LIGHT-MISSILE",tmp)==0)
-    return weapon_info::LIGHTMISSILE;
-  if (strcmp ("MEDIUM-MISSILE",tmp)==0)
-    return weapon_info::MEDIUMMISSILE;
-  if (strcmp ("HEAVY-MISSILE",tmp)==0)
-    return weapon_info::HEAVYMISSILE;
-  if (strcmp ("LIGHT-CAPSHIP-MISSILE",tmp)==0)
-    return weapon_info::CAPSHIPLIGHTMISSILE;
-  if (strcmp ("HEAVY-CAPSHIP-MISSILE",tmp)==0)
-    return weapon_info::CAPSHIPHEAVYMISSILE;
-  if (strcmp ("SPECIAL-MISSILE",tmp)==0)
-    return weapon_info::SPECIALMISSILE;
-  if (strcmp ("AUTOTRACKING",tmp)==0)
-    return weapon_info::AUTOTRACKING;
-  return weapon_info::NOWEAP;
-}
+extern enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);

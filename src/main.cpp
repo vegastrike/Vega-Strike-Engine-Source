@@ -35,6 +35,7 @@
 #include "config_xml.h"
 #include "cmd/script/mission.h"
 #include "audiolib.h"
+#include "config_xml.h"
 #include "vs_path.h"
 #include "vs_globals.h"
 #include "gfx/animation.h"
@@ -81,7 +82,11 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.MouseSensitivityY=4;
 
 }
-bool STATIC_VARS_DESTROYED=false;
+VegaConfig * createVegaConfig( char * file)
+{
+	return new GameVegaConfig( file);
+}
+
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {

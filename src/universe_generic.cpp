@@ -4,7 +4,7 @@
 #include "universe_generic.h"
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "cmd/unit_generic.h"
 #include "vs_globals.h"
 #include "xml_support.h"
