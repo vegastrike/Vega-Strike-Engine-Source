@@ -393,7 +393,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
   }
-  radialSize = sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
+  radialSize = .5*sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
   vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),
 			    xml->tris.size()/3, xml->quads.size()/4,
 			    vertexlist);

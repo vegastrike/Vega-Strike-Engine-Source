@@ -196,8 +196,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 		
 	}
 	//below, the square fo teh radial size, because sqrtf will be useless l8r
-	radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
-
+	radialSize = .5*sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));	
 	NumTris = readi (fp);
 	Tris = new int [NumTris*3];
 
