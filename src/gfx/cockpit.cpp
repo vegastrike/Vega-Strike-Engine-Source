@@ -667,6 +667,7 @@ void Cockpit::Draw() {
 	      this->SetParent(tur,this->unitfilename.c_str(),unitlocation);
 	      ++uj;
 	    }
+	    break;
 	  }
 	  ++ui;
 	}
