@@ -80,15 +80,19 @@ class XVector {
   QFLOAT Dot(const XVector &b) const {return DotProduct(*this, b);}
   QFLOAT Magnitude() const {return XSQRT(i*i+j*j+k*k);};
   QFLOAT MagnitudeSquared() const { return i*i + j*j + k*k; };
-  
+  XVector Vabs()const {
+    return XVector(i>=0?i:-i,
+				   j>=0?j:-j,
+				   k>=0?k:-k);
+  }
   inline const XVector Transform(const class Matrix  &m1) const;
 
-  XVector Min(const XVector &other) {
+  XVector Min(const XVector &other) const{
     return XVector((i<other.i)?i:other.i,
 		  (j<other.j)?j:other.j,
 		  (k<other.k)?k:other.k);
   }
-  XVector Max(const XVector &other) {
+  XVector Max(const XVector &other) const{
     return XVector((i>other.i)?i:other.i,
 		  (j>other.j)?j:other.j,
 		  (k>other.k)?k:other.k);

@@ -129,13 +129,12 @@ Vector Vabs (const Vector &in) {
 				   in.k>=0?in.k:-in.k);
 }
 
-Matrix WarpMatrix (Unit * un) {
-	if (0&&un->GetVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
-		return un->cumulative_transformation_matrix;
+Matrix WarpMatrixForCollisions (Unit * un, const Matrix& ctm) {
+	if (un->GetVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
+		return ctm;
 	}else {
-		Matrix k(un->cumulative_transformation_matrix);
-//		const Vector v(Vector(1,1,1)+Vabs(un->GetVelocity().Scale(100*SIMULATION_ATOM/un->rSize())));
-		const Vector v(Vector(1,1,1).Scale(1+SIMULATION_ATOM*2*un->GetVelocity().Magnitude()));
+		Matrix k(ctm);
+		const Vector v(Vector(1,1,1)+Vabs(ctm.getR()*ctm.getR().Dot(un->GetVelocity().Scale(100*SIMULATION_ATOM/un->rSize()))));
 		
 /*		k.r[0]*=v.i;
 		k.r[1]*=v.i;
@@ -143,7 +142,7 @@ Matrix WarpMatrix (Unit * un) {
 
 		k.r[3]*=v.j;
 		k.r[4]*=v.j;
-		k.r[5]*=v.j;
+s		k.r[5]*=v.j;
 
 		k.r[6]*=v.k;
 		k.r[7]*=v.k;
@@ -205,8 +204,8 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
       //printf ("um >1 for %s with %s\n",bigger->name.c_str(),smaller->name.c_str());
     }
 #endif
-    const csReversibleTransform bigtransform (/*WarpMatrix(bigger)*/bigger->cumulative_transformation_matrix);
-	const csReversibleTransform smalltransform (/*WarpMatrix(smaller)*/smaller->cumulative_transformation_matrix);
+    const csReversibleTransform bigtransform (/*WarpMatrixForCollisions(bigger)*/bigger->cumulative_transformation_matrix);
+	const csReversibleTransform smalltransform (/*WarpMatrixForCollisions(smaller)*/smaller->cumulative_transformation_matrix);
 #ifdef SUPERCOLLIDER
     for (int iter=1;iter<=/*um*/1;++iter) 
 #endif

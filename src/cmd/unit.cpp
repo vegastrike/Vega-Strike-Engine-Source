@@ -461,7 +461,47 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
     if (halos.ShouldDraw (enginescale)) 
       halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
 }
-extern Matrix WarpMatrix(Unit *);
+Matrix WarpMatrix (Unit * un, const Matrix& ctm) {
+	static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"));
+	static float cutoffcutoff=  cutoff*cutoff;
+	
+	if (un->GetVelocity().MagnitudeSquared()<cutoffcutoff) {
+		return ctm;
+	}else {
+		Matrix k(ctm);
+		float speed = un->GetVelocity().Magnitude();
+		float stretchlength = (speed-cutoff)/cutoff;
+		static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
+		if (stretchlength>maxstretch)
+			stretchlength= maxstretch;
+		Vector v(Vector(1,1,1)+ctm.getR().Scale(stretchlength).Vabs());
+		
+/*		k.r[0]*=v.i;
+		k.r[1]*=v.i;
+		k.r[2]*=v.i;
+
+		k.r[3]*=v.j;
+		k.r[4]*=v.j;
+s		k.r[5]*=v.j;
+
+		k.r[6]*=v.k;
+		k.r[7]*=v.k;
+		k.r[8]*=v.k;*/
+		k.r[0]*=v.i;
+		k.r[1]*=v.j;
+		k.r[2]*=v.k;
+
+		k.r[3]*=v.i;
+		k.r[4]*=v.j;
+		k.r[5]*=v.k;
+
+		k.r[6]*=v.i;
+		k.r[7]*=v.j;
+		k.r[8]*=v.k;		
+		return k;
+	}
+
+}
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
@@ -547,7 +587,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula
+	  meshdata[i]->Draw(lod,WarpMatrix(this,*ctm),d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula
 	  On_Screen=true;
 	} else {
 
@@ -597,7 +637,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       Mesh * gun = mahnt->type->gun;	  
       if (gun) {
 		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
-		  mountLocation.Compose (*ct,*ctm);
+		  mountLocation.Compose (*ct,WarpMatrix(this,*ctm));
 		  Matrix mat;
 		  mountLocation.to_matrix(mat);
 
@@ -609,7 +649,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 	}
     if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->Draw(*ct,*ctm,((mounts[i].size&weapon_info::AUTOTRACKING)&&mounts[i].time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
+	mounts[i].ref.gun->Draw(*ct,WarpMatrix(this,*ctm),((mounts[i].size&weapon_info::AUTOTRACKING)&&mounts[i].time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
       }
     }
   }
@@ -630,7 +670,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     Vector Scale (1,1,enginescale/(cmas));
 #endif
     if (halos.ShouldDraw (enginescale)) 
-      halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+      halos.Draw(WarpMatrix(this,*ctm),Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	int numm = nummesh();
 	if (damagelevel<.99&&numm>0) {
 		unsigned int switcher=(damagelevel>.8)?1:

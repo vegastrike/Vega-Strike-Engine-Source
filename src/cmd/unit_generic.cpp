@@ -271,11 +271,9 @@ std::string lookupMountSize (int s) {
   }
   return result;
 }
-
 /***********************************************************************************/
 /**** UNIT STUFF                                                            */
 /***********************************************************************************/
-
 Unit::Unit( int /*dummy*/ ) {
   image = new UnitImages;
   sound = new UnitSounds;
