@@ -54,8 +54,6 @@ class Mesh
 {
 private:
   // Display list hack
-  static int dlist_count;
-  int dlist;
   struct XML {
     enum Names {
       //elements
@@ -146,7 +144,7 @@ private:
     int load_stage;
     int point_state;
     int vertex_state;
-
+    float scale;
     string decal_name;
     string alpha_name;
     bool recalc_norm;
@@ -185,8 +183,8 @@ private:
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);
-
-  void CreateLogos(float x_center,float y_center, float z_center);
+  void LoadBinary (const char * filename, Mesh * oldmesh);
+  void CreateLogos();
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   
@@ -196,8 +194,6 @@ private:
 protected:
  
   Vector local_pos; 
-  enum BLENDFUNC blendSrc;
-  enum BLENDFUNC blendDst;
 
   static Hashtable<string, Mesh,char[513]> meshHashTable;
   int refcount;
@@ -211,50 +207,35 @@ protected:
   Logo *squadlogos;
   int numsquadlogo;
   
-  int numvertex;
-  //GFXVertex *vertexlist;
-  float *stcoords;
-  //GFXVertex *alphalist;
-  GFXVertex *vertexlist;
-  
   GFXVertexList *vlist;//tri,quad,line
   
   unsigned int myMatNum;
-  
-  GFXBOOL objtex;
-  Texture *Decal;
+  Texture *Decal;  
   GFXBOOL envMap;
-  
-  GFXBOOL changed;
-  void InitUnit();
-  
-  string *hash_name;
+  GFXBOOL will_be_drawn;  
+  enum BLENDFUNC blendSrc;
+  enum BLENDFUNC blendDst;
   // Support for reorganized rendering
-  bool will_be_drawn;
   vector<MeshDrawContext> *draw_queue;
   int draw_sequence;
+  string hash_name;
+  void InitUnit();
 public:
 
-  //  bool Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat);
   Mesh();
   Mesh(const char *filename, bool xml=false);
   ~Mesh();
   void GetPolys(vector <bsp_polygon> &);
-  void SetPosition (float,float,float);
   void SetPosition (const Vector&);
-  void SetOrientation (const Vector &, const Vector &, const Vector&);
   Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}
   void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
   virtual void ProcessDrawQueue();
   static void ProcessUndrawnMeshes();
-    void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
-  void Destroy();
+  void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
   void UpdateHudMatrix();//puts an object on the hud with the matrix
-  void Rotate(const Vector &torque);
   Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
   Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
-  // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}
 

@@ -38,39 +38,8 @@
 //extern float _CamTransConst;
 
 
-/*FLOATING POINT ASSEMBLY NOTES*
- *FLDCW load control word
- */
-float DotProduct(const Vector &a,const Vector &b)
-{
-	return (a.i*b.i+a.j*b.j+a.k*b.k);
-}
 
-void CrossProduct(const Vector &a,const Vector &b, Vector &RES) 
-{
-		RES.i = a.j*b.k-a.k*b.j; 
-    	RES.j = a.k*b.i-a.i*b.k;
-    	RES.k = a.i*b.j-a.j*b.i;
-}
 
-void ScaledCrossProduct(const Vector &a, const Vector &b, Vector &r) 
-{
-	r.i = a.j*b.k-a.k*b.j; 
-    	r.j = a.k*b.i-a.i*b.k;
-    	r.k = a.i*b.j-a.j*b.i;
-	float size = sqrtf(r.i*r.i+r.j*r.j+r.k*r.k);
-	r.i /= size;
-	r.j /= size;
-	r.k /= size;
-}
-
-void Normalize(Vector &r)
-{
-	float size = sqrtf(DotProduct (r,r));
-	r.i /= size;
-	r.j /= size;
-	r.k /= size;
-}
 
 
 /////////////////////////////////////////////////////////////
@@ -202,7 +171,6 @@ void MakeRVector (Vector &p,Vector &q, Vector &r) {
   ScaledCrossProduct (p,q,r);
   ScaledCrossProduct (r,p,q);
   Normalize (p);
-fprintf (stderr,"p:<%f,%f,%f>",p.i,p.j,p.k);
 
 }
 void Orthogonize(Vector &p, Vector &q, Vector &r)

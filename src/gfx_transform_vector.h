@@ -28,14 +28,6 @@
 #endif
 #ifdef __cplusplus
 class Vector;
-void Normalize(Vector &);
-float DotProduct(const Vector &,const Vector &);
-
-void CrossProduct(const Vector &, const Vector &, Vector &);
-
-
-
-void ScaledCrossProduct(const Vector &, const Vector &, Vector &); 
 
 inline Vector operator* (const Vector &lval, const float obj);
 
@@ -43,78 +35,54 @@ inline Vector operator* (const float obj, const Vector &rval);
 
 inline Vector operator+= (Vector &lval, const Vector &obj);
 
+inline float DotProduct (const Vector &a, const Vector &b);
+inline void Normalize(Vector &r);
+
 class Vector {
-	private:
-		
-	public:
-		Vector()
-		{
-			i = 0;
-			j = 0;
-			k = 0;
-		}
-		Vector(float i,float j,float k)
-		{
-			this->i = i;
-			this->j = j;
-			this->k = k;
-		}
-		float i,j,k;
-		void Yaw(float rad);
-		void Roll(float rad);
-		void Pitch(float rad);
-
-		Vector Transform ( const Vector &p, const Vector &q, const Vector &r)
-		{
-			Vector tvect = Vector ( DotProduct(*this, p), DotProduct(*this,q), DotProduct(*this,r));
-			*this = tvect;
-			return *this;
-		}
-			
-		//Vector operator= (const Vector &obj) {i = obj.i; j = obj.j; k = obj.k; return *this;}
-		Vector operator+ (const Vector &obj) const {Vector retval(i + obj.i, j + obj.j, k + obj.k); return retval;}
-		//Vector operator+= (const Vector &obj) {i += obj.i; j += obj.j; k += obj.k; return *this;}
-		Vector operator- (const Vector &obj) const {Vector retval(i - obj.i, j - obj.j, k - obj.k); return retval;}
-		//Vector operator* (const float obj) const {Vector retval(i * obj, j * obj, k * obj); return retval;}
-		Vector Normalize(){::Normalize (*this); return *this;};
-		Vector operator- () const {Vector retval(-i, -j, -k); return retval;}
-
-		Vector Cross(const Vector &v) const {Vector t; CrossProduct(*this, v, t); return t;};
-		
-		float operator* (const Vector &b) const {return (i*b.i+j*b.j+k*b.k);};
-		//Vector operator* (const Vector &b) {return Vector(i*b.i, j*b.j, k*b.k);};
-		float Dot(const Vector &b) const {return *this * b;};
-		//float Dot(const Vector &b) {return i*b.i+j*b.j+k*b.k;};
-
-		/*
-		Vector operator/(const Vector &b) {return Vector(i*b.i, );};
-		Vector Transform(const Vector &b) {return *this / b;};
-		*/
-
-		float Magnitude() const {return sqrtf(i*i+j*j+k*k);};
-		float MagnitudeSquared() const { return i*i + j*j + k*k; };
-
-
-		//friend Vector operator+(const Vector &lval, const Vector &rval);
-		//friend Vector operator+(const Vector &lval, const Vector &rval);
-		inline const Vector Transform(const float m1[16]) const
-{
-  return Vector(m1[0] * i + m1[4] * j + m1[8] * k + m1[12],
-		m1[1] * i + m1[5] * j + m1[9] * k + m1[13],
-		m1[2] * i + m1[6] * j + m1[10] * k + m1[14]);
-}
-
-		Vector Min(const Vector &other) {
-		  return Vector((i<other.i)?i:other.i,
-				(j<other.j)?j:other.j,
-				(k<other.k)?k:other.k);
-		}
-
-		Vector Max(const Vector &other) {
-		  return Vector((i>other.i)?i:other.i,
-				(j>other.j)?j:other.j,
-				(k>other.k)?k:other.k);
-		}
+ public:
+  float i,j,k;
+  Vector () {}
+  Vector(float i,float j,float k) {
+    this->i = i;
+    this->j = j;
+    this->k = k;
+  }
+  inline void Set (float x, float y, float z) {i=x;j=y;k=z;}
+  void Yaw(float rad);
+  void Roll(float rad);
+  void Pitch(float rad);
+  Vector Transform ( const Vector &p, const Vector &q, const Vector &r) {
+    Vector tvect = Vector ( DotProduct(*this, p), DotProduct(*this,q), DotProduct(*this,r));
+    *this = tvect;
+    return *this;
+  }
+  Vector operator+ (const Vector &obj) const {return Vector (i + obj.i, j + obj.j, k + obj.k);}
+  Vector operator- (const Vector &obj) const {return Vector (i - obj.i, j - obj.j, k - obj.k);}
+  Vector Normalize(){::Normalize (*this); return *this;};
+  Vector operator- () const {return Vector (-i, -j, -k);}
+  Vector Cross(const Vector &v) const {return Vector ( this->j*v.k-this->k*v.j, 
+						       this->k*v.i-this->i*v.k,
+						       this->i*v.j-this->j*v.i);}
+  float operator* (const Vector &b) const {return (i*b.i+j*b.j+k*b.k);};
+  float Dot(const Vector &b) const {return DotProduct(*this, b);}
+  float Magnitude() const {return sqrtf(i*i+j*j+k*k);};
+  float MagnitudeSquared() const { return i*i + j*j + k*k; };
+  
+  inline const Vector Transform(const float m1[16]) const {
+    return Vector(m1[0] * i + m1[4] * j + m1[8] * k + m1[12],
+		  m1[1] * i + m1[5] * j + m1[9] * k + m1[13],
+		  m1[2] * i + m1[6] * j + m1[10] * k + m1[14]);
+  }
+  Vector Min(const Vector &other) {
+    return Vector((i<other.i)?i:other.i,
+		  (j<other.j)?j:other.j,
+		  (k<other.k)?k:other.k);
+  }
+  Vector Max(const Vector &other) {
+    return Vector((i>other.i)?i:other.i,
+		  (j>other.j)?j:other.j,
+		  (k>other.k)?k:other.k);
+  }
 };
 #ifndef WIN32
 inline ostream &operator<<(ostream &os, const Vector &obj) {
@@ -122,13 +90,6 @@ inline ostream &operator<<(ostream &os, const Vector &obj) {
 }
 #endif
 
-/*
-inline Vector operator+(const Vector &lval, const Vector &rval)
-{
-	Vector retval = lval; 
-	return retval+rval;
-}
-*/
 inline Vector operator* (const Vector &lval, const float obj) {Vector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
 
 inline Vector operator/ (const Vector &lval, const float obj) {Vector retval(lval.i / obj, lval.j / obj, lval.k / obj); return retval;}
@@ -139,25 +100,33 @@ inline Vector operator+= (Vector &lval, const Vector &obj) {lval.i += obj.i; lva
 
 inline Vector operator*= (Vector &lval, const float &obj) {lval.i *= obj; lval.j *= obj, lval.k *= obj; return lval;}
 
-/*
-inline Vector operator*(const Vector &lval, const float &rval)
+inline void Normalize(Vector &r)
 {
-	return Vector(lval.i * rval, lval.j * rval, lval.k * rval);
+	float size = sqrtf(r.i*r.i+r.j*r.j+r.k*r.k);
+	r.i /= size;
+	r.j /= size;
+	r.k /= size;
 }
 
-inline Vector operator*(const float &lval, const Vector &rval)
+inline float DotProduct(const Vector &a,const Vector &b)
 {
-	return rval * lval;
+	return (a.i*b.i+a.j*b.j+a.k*b.k);
 }
-*/
-/*
-struct Light {
-	float Red;
-	float Green;
-	float Blue;
-	Vector Direction;
-};
-*/
+
+
+
+
+
+inline void ScaledCrossProduct(const Vector &a, const Vector &b, Vector &r) {
+	r.i = a.j*b.k-a.k*b.j; 
+    	r.j = a.k*b.i-a.i*b.k;
+    	r.k = a.i*b.j-a.j*b.i;
+	float size = sqrtf(r.i*r.i+r.j*r.j+r.k*r.k);
+	r.i /= size;
+	r.j /= size;
+	r.k /= size;
+}
+
 
 inline Vector PolygonNormal(Vector v1, Vector v2, Vector v3)
 {
@@ -179,6 +148,8 @@ inline Vector CrossProduct(const Vector& v1, const Vector& v2) {
     result.k = v1.i * v2.j  - v1.j * v2.i;     
 	return result;
 }
+inline void CrossProduct(const Vector & a, const Vector & b, Vector & RES) {RES = a.Cross(b);}
+
 void Yaw (float rad, Vector &p,Vector &q, Vector &r);
 void Pitch (float rad,Vector &p, Vector &q, Vector &r);
 void Roll (float rad,Vector &p, Vector &q, Vector &r);

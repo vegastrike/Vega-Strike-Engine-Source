@@ -66,7 +66,7 @@ FlyByKeyboard::~FlyByKeyboard() {
 #define FBWABS(m) (m>=0?m:-m)
 
 AI * FlyByKeyboard::Execute () {
-  desired_ang_velocity=Vector();
+  desired_ang_velocity=Vector(0,0,0);
 #define SSCK starshipcontrolkeys
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame

@@ -6,10 +6,7 @@
 struct Quaternion {
   float s;
   Vector v;
-  inline Quaternion() {
-    s = 0;
-    v = Vector(0,0,0);
-  }
+  inline Quaternion(): s(0),v(0,0,0){}
   inline Quaternion(float s, Vector v) {this->s = s; this->v = v;};
 
   inline Quaternion Conjugate() const {return Quaternion(s, Vector(-v.i, -v.j, -v.k));};
@@ -44,7 +41,7 @@ const Quaternion identity_quaternion(1, Vector(0,0,0));
 struct Transformation {
   Quaternion orientation;
   Vector position;
-  inline Transformation() { orientation = identity_quaternion; position = Vector(0,0,0); }
+  inline Transformation():orientation(identity_quaternion), position(0,0,0) { }
   inline Transformation(const Quaternion &orient, const Vector &pos) : orientation(orient), position(pos) { }
  
   inline void to_matrix(Matrix m) const {

@@ -195,7 +195,7 @@ Unit::Unit(const char *filename, bool xml) {
 
 		meshdata[meshcount] = new Mesh(meshfilename);
 
-		meshdata[meshcount]->SetPosition(x,y,z);
+		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}
 
 	ReadInt(numsubunit);

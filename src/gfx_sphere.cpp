@@ -53,8 +53,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
    int *QSOffsets = new int [numQuadstrips];
    
    // draw intermediate stacks as quad strips 
-   numvertex=stacks*(slices+1)*2;
-   vertexlist = new GFXVertex[numvertex];
+   int numvertex=stacks*(slices+1)*2;
+   GFXVertex *vertexlist = new GFXVertex[numvertex];
    
    GFXVertex *vl = vertexlist;
    enum POLYTYPE *modes= new enum POLYTYPE [numQuadstrips];   
@@ -106,6 +106,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
    }
 
    vlist = new GFXVertexList(modes,numvertex, vertexlist, numQuadstrips ,QSOffsets);
+   delete [] vertexlist;
    delete [] modes;
    delete [] QSOffsets;
    if (alpha) {

@@ -30,7 +30,6 @@ static inline float min(float x, float y) {
   else return y;
 }
 
-float scale=1;
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -297,7 +296,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	alpha_found = true;
 	break;
       case XML::SCALE:
-	scale =  parse_float ((*iter).value);
+	xml->scale =  parse_float ((*iter).value);
 	break;
       case XML::BLENDMODE:
 	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
@@ -1137,7 +1136,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   }
 
   index =0;
-  vertexlist = new GFXVertex[totalvertexsize];
+  GFXVertex *vertexlist = new GFXVertex[totalvertexsize];
 
   minSizeX = minSizeY = minSizeZ = FLT_MAX;
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
@@ -1219,20 +1218,20 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
   }
-  minSizeX *=scale;
-  maxSizeX *=scale;
-  minSizeY *=scale;
-  maxSizeY *=scale;
-  minSizeZ *=scale;
-  maxSizeZ *=scale;
+  minSizeX *=xml->scale;
+  maxSizeX *=xml->scale;
+  minSizeY *=xml->scale;
+  maxSizeY *=xml->scale;
+  minSizeZ *=xml->scale;
+  maxSizeZ *=xml->scale;
   float x_center = (minSizeX + maxSizeX)/2.0,
     y_center = (minSizeY + maxSizeY)/2.0,
     z_center = (minSizeZ + maxSizeZ)/2.0;
-  SetPosition(x_center, y_center, z_center);
+  SetPosition(Vector (x_center, y_center, z_center));
   for(a=0; a<totalvertexsize; a++) {
-    vertexlist[a].x*=scale;//FIXME
-    vertexlist[a].y*=scale;
-    vertexlist[a].z*=scale;
+    vertexlist[a].x*=xml->scale;//FIXME
+    vertexlist[a].y*=xml->scale;
+    vertexlist[a].z*=xml->scale;
 
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
@@ -1240,13 +1239,13 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   }
   for (a=0;a<xml->vertices.size();a++) {
-    xml->vertices[a].x*=scale;//FIXME
-    xml->vertices[a].y*=scale;
-    xml->vertices[a].z*=scale;
+    xml->vertices[a].x*=xml->scale;//FIXME
+    xml->vertices[a].y*=xml->scale;
+    xml->vertices[a].z*=xml->scale;
 
     xml->vertices[a].x -= x_center;
     xml->vertices[a].y -= y_center;
-    xml->vertices[a].z -= z_center; //BSP generation requires the vertices NOT be centered!
+    xml->vertices[a].z -= z_center; //BSP generation and logos require the vertices NOT be centered!
  
   }
   minSizeX -= x_center;
@@ -1280,7 +1279,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     index+= xml->quadstrips[a].size();
   }
   */
-  CreateLogos(x_center,y_center,z_center);
+  CreateLogos();
   // Calculate bounding sphere
   
   this->orig = oldmesh;
@@ -1328,7 +1327,7 @@ void Mesh::GetPolys (vector <bsp_polygon> & polys) {
     free (tmpres);
 }
 
-void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
+void Mesh::CreateLogos() {
   numforcelogo=numsquadlogo =0;
   int index;
   for (index=0;index<xml->logos.size();index++) {
@@ -1386,8 +1385,8 @@ void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
 	//Cent.k-=z_center;
 	Ref[ri]=norm2;
 	PolyNormal[ri]=norm;
-	center[ri] = Cent*scale-Vector (x_center,y_center,z_center);;
-	sizes[ri]=xml->logos[ind].size*scale;
+	center[ri] = Cent;
+	sizes[ri]=xml->logos[ind].size*xml->scale;
 	rotations[ri]=xml->logos[ind].rotate;
 	offset[ri]=xml->logos[ind].offset;
 	ri++;
