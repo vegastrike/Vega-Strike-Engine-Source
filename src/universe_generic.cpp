@@ -173,7 +173,11 @@ void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
 }
 StarSystem * Universe::Init (string systemfile, const Vector & centr,const string planetname) {
-  LoadFactionXML("factions.xml");	
+	static bool firsttime=false;
+	if (!firsttime) {
+		LoadFactionXML("factions.xml");
+		firsttime=true;
+	}
   string fullname=systemfile+".system";
   return GenerateStarSystem((char *)fullname.c_str(),"",centr);
 }
