@@ -15,9 +15,13 @@
 #define strcasecmp stricmp
 #endif
 void Unit::Mount::SwapMounts (Unit::Mount &other) {
+  short thisvol = volume;
+  short othervol = other.volume;
   Mount mnt = *this;
   *this=other;
   other=mnt;
+  volume=thisvol;
+  other.volume=othervol;//volumes stay the same even if you swap out
   Transformation t =this->GetMountLocation();
   this->SetMountPosition(other.GetMountLocation());
   other.SetMountPosition (t);  
@@ -114,7 +118,7 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
       int jmod=j%nummounts;//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
 	if (up->mounts[i].type.size==(up->mounts[i].type.size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
-	  if (up->mounts[i].type.weapon_name!=mounts[i].type.weapon_name) {
+	  if (up->mounts[i].type.weapon_name!=mounts[jmod].type.weapon_name) {
 	    numave++;//ok now we can compute percentage of used parts
 	    if (templ) {
 	      if (templ->nummounts>jmod) {
@@ -134,25 +138,33 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 	      mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
 	    }
 	  }else {
+	    int tmpammo = mounts[jmod].ammo;
 	    if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
-	      mounts [jmod].ammo+=up->mounts[i].ammo;
+	      tmpammo+=up->mounts[i].ammo;
 	      if (templ) {
 		if (templ->nummounts>jmod) {
 		  if (templ->mounts[jmod].ammo!=-1) {
-		    if (templ->mounts[jmod].ammo>mounts[jmod].ammo) {
-		      mounts[jmod].ammo=templ->mounts[jmod].ammo;
+		    if (templ->mounts[jmod].ammo>tmpammo) {
+		      tmpammo=templ->mounts[jmod].ammo;
 		    }
 		  }
 		  if (templ->mounts[jmod].volume!=-1) {
-		    if (templ->mounts[jmod].volume>mounts[jmod].type.volume*mounts[jmod].ammo) {
-		      mounts[jmod].ammo=templ->mounts[jmod].volume/mounts[jmod].type.volume;
+		    if (templ->mounts[jmod].volume>mounts[jmod].type.volume*tmpammo) {
+		      tmpammo=templ->mounts[jmod].volume/mounts[jmod].type.volume;
 		    }
 		  }
 		  
 		}
 	      } 
-	      if (mounts[jmod].ammo*mounts[jmod].type.volume>mounts[jmod].volume) {
-		mounts[jmod].ammo = mounts[jmod].volume/mounts[jmod].type.volume;
+	      if (tmpammo*mounts[jmod].type.volume>mounts[jmod].volume) {
+		tmpammo = mounts[jmod].volume/mounts[jmod].type.volume;
+	      }
+	      if (tmpammo>mounts[jmod].ammo) {
+		cancompletefully=true;
+		if (touchme)
+		  mounts[jmod].ammo = tmpammo;
+	      }else {
+		cancompletefully=false;
 	      }
 	    }
 	    
