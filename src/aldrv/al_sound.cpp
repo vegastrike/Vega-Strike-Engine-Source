@@ -79,7 +79,17 @@ ALint format;
 #else
 	  ALboolean looping;
 	  ALint format;
+  	  fp = fopen ((const char *)filename,"rb");
+	  if (fp) {
+		fclose (fp);
+	  } else {
+		free (filename);
+        alDeleteBuffers (1,wavbuf);
+		free (wavbuf);
+		return -1;
+	  }
       alutLoadWAVFile((char *)filename, (int*)&format, &wave, &size, &freq, &looping);
+
 #endif
       if(err == AL_FALSE) {
 		return -1;

@@ -38,7 +38,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
-
+#include <assert.h>
 #include "mission.h"
 #include "easydom.h"
 

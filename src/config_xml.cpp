@@ -27,6 +27,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
+#include <assert.h>
 
 #include "config_xml.h"
 #include "easydom.h"
@@ -36,7 +37,6 @@
 #include "gfx/loc_select.h"
 #include "audiolib.h"
 #include "in_joystick.h"
-
 #include "main_loop.h" // for CockpitKeys
 
 
