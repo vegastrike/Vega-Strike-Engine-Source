@@ -53,12 +53,20 @@ static float CalculateDecelTime (float l, float v, float &F, float D,  float mas
 } 
 
 
+bool MoveTo::OptimizeSpeed (float v, float &a) {
+  v += (a/parent->GetMass())*SIMULATION_ATOM;
+  if (!max_speed||fabs(v)<=max_speed) {
+    return true;
+  }
+  float deltaa = parent->GetMass()*(fabs(v)-max_speed)/SIMULATION_ATOM;//clamping should take care of it
+  a += (v>0) ? -deltaa : deltaa;
+  return false;
+}
+void MoveToward (float dis, float vel, float &force) {
+  
 
-
-
-
+}
 AI* MoveTo::Execute(){
-
   Vector local_location = targetlocation - parent->GetPosition();
   Vector heading = parent->ToLocalCoordinates(local_location);
   Vector velocity = parent->UpCoordinateLevel(parent->GetVelocity());
@@ -73,6 +81,7 @@ AI* MoveTo::Execute(){
       thrust.k+= (SIMULATION_ATOM-t)*(thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward))/SIMULATION_ATOM;
     }
   }
+  OptimizeSpeed (velocity.k,thrust.k);
   t = CalculateBalancedDecelTime(heading.i, velocity.i, thrust.i,parent->GetMass());
   if (t<THRESHOLD) {
     thrust.i = -thrust.i;
@@ -81,6 +90,7 @@ AI* MoveTo::Execute(){
       thrust.i *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
     }
   }
+  OptimizeSpeed (velocity.i,thrust.i);
   t = CalculateBalancedDecelTime(heading.j, velocity.j, thrust.j,parent->GetMass());
   if (t<THRESHOLD) {
     thrust.j = -thrust.j;
@@ -89,63 +99,61 @@ AI* MoveTo::Execute(){
       thrust.j *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
     }
   }
+  OptimizeSpeed (velocity.j,thrust.j);
   parent->ApplyLocalForce (thrust);
   return this;
 }
-
-
-
-
-static float CalculateAngDecelTime (float x, float y, float w, float &F, float mass) { //(x=1,y=0 is base)
-  return CalculateBalancedDecelTime (atan2(y,x), w, F, mass);
+bool ChangeHeading::OptimizeAngSpeed (float v, float &a) {
+  v += (a/parent->GetMoment())*SIMULATION_ATOM;
+  if (!optimal_speed||fabs(v)<=optimal_speed) {
+    return true;
+  }
+  float deltaa = parent->GetMoment()*(fabs(v)-optimal_speed)/SIMULATION_ATOM;//clamping should take care of it
+  a += (v>0) ? -deltaa : deltaa;
+  return false;
 }
 
+//uses CalculateBalancedDecelTime to figure out which way (left or righT) is best to aim for.
+//works for both pitch and yaw axis if you pass in the -ang_vel.j for the y
+void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) {
+  float t = CalculateBalancedDecelTime (atancalc, ang_veli, torquei, parent->GetMoment());//calculate when we should decel
+  if (t<0) {//if it can't make it: try the other way
+    torquei = fabs(torquei);//copy sign again
+    t = CalculateBalancedDecelTime (atancalc>0?atancalc-2*PI:atancalc+2*PI,ang_veli, torquei, parent->GetMoment());
+  }
+  if (t>THRESHOLD) {
+    if (t<SIMULATION_ATOM) {
+      torquei *= ((t/SIMULATION_ATOM)-((SIMULATION_ATOM-t)/SIMULATION_ATOM));
+    }
+  } else {
+    torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;//clamping should take care of it
+  }
+  fprintf (stderr," angle: %f\n", atancalc);
+}
+bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
+  return (fabs(ang_vel.i) < THRESHOLD&&
+	  fabs(ang_vel.j) < THRESHOLD&&
+	  ang_vel.k>0&& //if velocity is lower than threshold
+	  fabs(local_heading.i) < THRESHOLD&&//and local heading is close to the front
+	  fabs(local_heading.j) < THRESHOLD);
+}
 AI * ChangeHeading::Execute() {
   Vector local_heading = parent->ToLocalCoordinates (final_heading);
   Vector ang_vel = parent->UpCoordinateLevel(parent->GetAngularVelocity());
-  if(fabs(ang_vel.i) < THRESHOLD&&
-     fabs(ang_vel.j) < THRESHOLD&&
-     ang_vel.k>0&& //if velocity is lower than threshold
-     fabs(local_heading.i) < THRESHOLD&&//and local heading is close to the front
-     fabs(local_heading.j) < THRESHOLD) {
-    done = true;
-    fprintf (stderr, "Done\n");
-  }
+
+  done =  Done (local_heading,ang_vel);
   if (done) return NULL;
+
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
-  float atancalc = atan2(local_heading.j, local_heading.k);// find angle away from axis 0,0,1 in yz plane
-  float t = CalculateBalancedDecelTime (atancalc, ang_vel.i, torque.i, parent->GetMoment());//calculate when we should decel
-  if (t<0) {//if it can't make it: try the other way
-    torque.i = fabs(torque.i);//copy sign again
-    t = CalculateBalancedDecelTime (atancalc>0?atancalc-2*PI:atancalc+2*PI,ang_vel.i, torque.i, parent->GetMoment());
-  }
-  if (t>THRESHOLD) {
-    if (t<SIMULATION_ATOM) {
-      torque.i *= ((t/SIMULATION_ATOM)-((SIMULATION_ATOM-t)/SIMULATION_ATOM));
-    }
-  } else {
-    torque.i = -parent->GetMoment()*ang_vel.i/SIMULATION_ATOM;//clamping should take care of it
-  }
-  fprintf (stderr,"pitch angle: %f", atancalc);
 
+  TurnToward (atan2(local_heading.j, local_heading.k),ang_vel.i,torque.i);// find angle away from axis 0,0,1 in yz plane
+  OptimizeAngSpeed(ang_vel.i,torque.i);
 
-  atancalc = atan2 (local_heading.i, local_heading.k);//find angle away from axis 0,0,1 in xz plane
-  t = CalculateBalancedDecelTime (atancalc,-ang_vel.j,torque.j,parent->GetMoment());
-  if (t<0) {//if it can't make it: try the other way;
-    torque.j = fabs(torque.j);//copy sign again
-    t = CalculateBalancedDecelTime (atancalc>0?atancalc-2*PI:atancalc+2*PI,-ang_vel.j,torque.j, parent->GetMoment());
-  }
-  if (t>THRESHOLD) {
-    if (t<SIMULATION_ATOM) {
-      torque.j *= ((t/SIMULATION_ATOM)-((SIMULATION_ATOM-t)/SIMULATION_ATOM));
-    }
-  } else {
-    torque.j = -parent->GetMoment()*ang_vel.j/SIMULATION_ATOM;//clamping should take care of it
-  }
-  //torque.i=-torque.i;
+  TurnToward (atan2 (local_heading.i, local_heading.k), -ang_vel.j, torque.j);
   torque.j=-torque.j;
+  OptimizeAngSpeed(ang_vel.j,torque.j);
   torque.k  =-parent->GetMoment()*ang_vel.k/SIMULATION_ATOM;//try to counteract roll;
-  fprintf (stderr,"yaw angle: %f\n", atancalc);
+
   parent->ApplyLocalTorque (torque);
   return this;
 }
