@@ -1,4 +1,4 @@
-gcc -static -Xlinker -export-dynamic -Xlinker   -ovegastrike debug_vs.o			\
+gcc -Xlinker -export-dynamic -Xlinker   -ovegastrike debug_vs.o			\
 	gfxlib_struct.o		\
 	in_joystick.o			\
 	force_feedback.o		\

@@ -3,4 +3,4 @@ ld -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 /usr/lib/crt1.o /usr/lib/crti.
 /usr/lib/libglut.a /usr/lib/libexpat.a /usr/lib/libjpeg.a /usr/lib/python2.2/config/libpython2.2.a /usr/lib/libpng.a /usr/lib/libz.a /usr/lib/libSDL.a /usr/lib/libopenal.a /usr/lib/libGLU.a /usr/lib/libutil.a /usr/lib/gcc-lib/i386-linux/2.95.4/libstdc++.a \
 /home/daniel/install/Mesa-6.2/lib/libGL.so \
 -ldl /usr/lib/libpthread.a /usr/lib/gcc-lib/i386-linux/2.95.4/libgcc.a \
--lgcc -lc -lgcc /usr/lib/gcc-lib/i386-linux/2.95.4/crtend.o /usr/lib/crtn.o
+-lc /usr/lib/gcc-lib/i386-linux/2.95.4/crtend.o /usr/lib/crtn.o
