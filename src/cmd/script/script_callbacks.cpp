@@ -405,12 +405,12 @@ varInst *Mission::call_io_printmsglist(missionNode *node,int mode){
   int i=0;
 
   if(mode==SCRIPT_RUN){
-    gameMessage *msg=msgcenter->last(i);
+    gameMessage *msg=msgcenter->last(i,std::vector <std::string>());
   
     while(msg!=NULL && i<7.0){
       cout << "MESSAGE" << msg->message << endl;
       i++;
-      msg=msgcenter->last(i);
+      msg=msgcenter->last(i,std::vector<std::string>());
     }
   }
 

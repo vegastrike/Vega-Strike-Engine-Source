@@ -258,7 +258,7 @@ void TextArea::AddTextItem(const char *name, const char *description, const char
 	else { master->AddChild(name, description); }
 }
 
-void TextArea::ChangeTextItem(const char *name, const char *description) {
+void TextArea::ChangeTextItem(const char *name, const char *description,bool wrap) {
 	TextAreaItem *search;
 	search = ItemList->FindChild(name);
 	if (search == 0) { return; }

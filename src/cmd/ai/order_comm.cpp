@@ -40,28 +40,30 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
   float time = AICommresponseTime/SIMULATION_ATOM;
   if (time<=.001)
     time+=.001;
-  if ((((float)rand())/RAND_MAX)<(1/time)) {
-    if (messagequeue.size()) {
-      FSM::Node *n;
-      if ((n=messagequeue.back()->getCurrentState())) {
+  if (!messagequeue.empty()) {
+    bool cleared=false;
 	if (messagequeue.back()->curstate==messagequeue.back()->fsm->GetRequestLandNode()) {
+	  cleared=true;
 	  Unit * un=messagequeue.back()->sender.GetUnit();
 	  if (un) {
 	    if (GetEffectiveRelationship(un)>=0) {
 	      parent->RequestClearance (un);
 	    }
 	  }  
-	}else {
-	  ProcessCommMessage(*messagequeue.back());
 	}
-      }
-      if (RemoveMessageProcessed) {
-	delete messagequeue.back();
-	messagequeue.pop_back();
-      }else {
-	messagequeue.push_front (messagequeue.back());
-	messagequeue.pop_back();
-      }
-    }
+	if (cleared||(((float)rand())/RAND_MAX)<(1/time)) {
+	  
+	  FSM::Node *n;
+	  if ((n=messagequeue.back()->getCurrentState())) {
+	    ProcessCommMessage(*messagequeue.back());
+	  }
+	  if (RemoveMessageProcessed) {
+	    delete messagequeue.back();
+	    messagequeue.pop_back();
+	  }else {
+	    messagequeue.push_front (messagequeue.back());
+	    messagequeue.pop_back();
+	  }
+	}
   }
 }

@@ -362,8 +362,8 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   MessageCenter *mc=mission->msgcenter;
   
   int rows_used=rows_needed+1;
-
-  gameMessage *lastmsg=mc->last(0);
+  vector <std::string> message_people;//should be "all", parent's name
+  gameMessage *lastmsg=mc->last(0,message_people);
   for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && lastmsg!=NULL;i++){
     lastmsg=mc->last(i);
     if(lastmsg!=NULL){

@@ -54,7 +54,7 @@ struct UpgradingInfo {
   vector <Cargo> TempCargo;//used to store cargo list
   vector <Cargo> * CurrentList;
   enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE}submode;
-  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE,SHIPDEALERMODE, MAXMODE} mode;
+  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE,SHIPDEALERMODE, NEWSMODE,MAXMODE} mode;
   bool multiplicitive;
   Button *Modes[MAXMODE];
   string title;
@@ -67,20 +67,31 @@ struct UpgradingInfo {
     //    std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
     if (submode==NORMAL) {
-      if (curcategory.length()!=0) {
-	if (mode==BUYMODE||mode==SELLMODE) 
-	  CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
-	for (unsigned int i=0;i<CurrentList->size();i++) {
-	  if ((*CurrentList)[i].category==curcategory)
-	    CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,((*CurrentList)[i].content+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
+      if (mode==NEWSMODE) {
+	gameMessage * last;
+	int i=0;
+	vector <std::string> who;
+	who.push_back ("news");
+	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
+	  CargoList->AddTextItem ((tostring(i-1)+" "+last->message).c_str(),last->message.c_str());
 	}
-      } else {
-	string curcat=("");
-	CargoList->AddTextItem ("","");
-	for (unsigned int i=0;i<CurrentList->size();i++) {
-	  if ((*CurrentList)[i].category!=curcat) {
-	    CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
-	    curcat =((*CurrentList)[i].category);
+
+      }else {
+	if (curcategory.length()!=0) {
+	  if (mode==BUYMODE||mode==SELLMODE) 
+	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
+	  for (unsigned int i=0;i<CurrentList->size();i++) {
+	    if ((*CurrentList)[i].category==curcategory)
+	      CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,((*CurrentList)[i].content+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
+	  }
+	} else {
+	  string curcat=("");
+	  CargoList->AddTextItem ("","");
+	  for (unsigned int i=0;i<CurrentList->size();i++) {
+	    if ((*CurrentList)[i].category!=curcat) {
+	      CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
+	      curcat =((*CurrentList)[i].category);
+	    }
 	  }
 	}      
       }
@@ -118,6 +129,10 @@ struct UpgradingInfo {
       curcategory="";
     string ButtonText;
     switch (mod) {
+    case NEWSMODE:
+      title="GNN Galaxy News Network";
+      ButtonText="AbsorbNews";
+      break;
     case BUYMODE:
       title = "Purchase Cargo Mode";
       ButtonText= "BuyCargo";
@@ -156,6 +171,7 @@ struct UpgradingInfo {
 	title="Select On Which Turret Mount To Place Your Turret";
 	break;
       case CONFIRM_MODE:
+	title="This may not entirely fit on your ship. Are You Sure you wish to proceed?";
 	break;
       }
     }
@@ -168,6 +184,7 @@ struct UpgradingInfo {
     
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
+	CargoInfo->DoMultiline(1);
 	Cockpit * cp = _Universe->isPlayerStarship(un);
 	Cockpit * tmpcockpit = _Universe->AccessCockpit();
 	if (cp) {
@@ -181,12 +198,13 @@ struct UpgradingInfo {
 	CargoInfo->AddTextItem("price", "");
 	CargoInfo->AddTextItem("mass", "");
 	CargoInfo->AddTextItem("volume", "");
+	CargoInfo->AddTextItem("description", "");
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
-	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","UpgradeShip","Unimplemented","Downgrade", "ShipDealer"};
+	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","UpgradeShip","Unimplemented","Downgrade", "ShipDealer","GNN News"};
 	float beginx = -.4;
 	float lastx = beginx;
-	float size=.4;
+	float size=.32;
 	for (int i=0;i<MAXMODE;i++) {
 	  if (i!=ADDMODE) {
 	    if (i<MAXMODE/2) {
@@ -319,7 +337,10 @@ void CargoToMission (const char * item,TextArea * ta) {
   free (item1);
   temp.initMission();
   ta->ChangeTextItem ("name",temp.getVariable ("mission_name","").c_str());
-  ta->ChangeTextItem ("price",temp.getVariable("description","").c_str());  
+  ta->ChangeTextItem ("price","");
+  ta->ChangeTextItem ("mass","");
+  ta->ChangeTextItem ("volume","");
+  ta->ChangeTextItem ("description",temp.getVariable("description","").c_str());  
 }
 
 void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
@@ -337,13 +358,39 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
-	sprintf(floatprice,"%.2f",(*CurrentList)[cargonumber].price);
+	sprintf(floatprice,"Price: %.2f",(*CurrentList)[cargonumber].price);
 	CargoInfo->ChangeTextItem ("price",floatprice);
+	sprintf(floatprice,"Mass: %.2f",(*CurrentList)[cargonumber].mass);
+	CargoInfo->ChangeTextItem ("mass",floatprice);
+	sprintf(floatprice,"Cargo Volume: %.2f",(*CurrentList)[cargonumber].volume);
+	CargoInfo->ChangeTextItem ("volume",floatprice);
+	if ((*CurrentList)[cargonumber].description!=NULL) {
+	  CargoInfo->ChangeTextItem ("description",(*CurrentList)[cargonumber].description,true);
+	}else {
+	  CargoInfo->ChangeTextItem ("description","");
+	}
       }
       break;
     default:
       CommitItem (item,0,buttonstate);
       break;
+    }
+    break;
+  case NEWSMODE:
+    {
+	int cargonumber;
+	sscanf (item,"%d",&cargonumber);
+     	gameMessage * last;
+	vector <std::string> who;
+	CargoInfo->ChangeTextItem ("name","");
+	who.push_back ("news");
+	if ((last= mission->msgcenter->last(cargonumber,who))!=NULL) {
+	  CargoInfo->ChangeTextItem ("description",last->message.c_str(),true);
+	} 
+	CargoInfo->ChangeTextItem ("price","");
+	CargoInfo->ChangeTextItem ("mass","");
+	CargoInfo->ChangeTextItem ("volume","");
+
     }
     break;
   case MISSIONMODE:
@@ -888,6 +935,8 @@ vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     case MISSIONMODE:
       curcategory=string("missions");
       return FilterCargo (un,"missions",true,true);
+    case NEWSMODE:
+      return TempCargo;
     }
     fprintf (stderr,"Error in picking cargo lists");
     return TempCargo;

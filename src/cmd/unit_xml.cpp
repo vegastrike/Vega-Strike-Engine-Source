@@ -145,7 +145,8 @@ namespace UnitXML {
       DAMAGE,
       COCKPITDAMAGE,
       REPAIRDROID,
-      ECM
+      ECM,
+      DESCRIPTION
     };
 
   const EnumMap::Pair element_names[34] = {
@@ -185,7 +186,7 @@ namespace UnitXML {
 	EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE)
 
   };
-  const EnumMap::Pair attribute_names[83] = {
+  const EnumMap::Pair attribute_names[84] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -268,12 +269,13 @@ namespace UnitXML {
     EnumMap::Pair ("QuantityStdDev",QUANTITYSTDDEV),
     EnumMap::Pair ("Damage",DAMAGE),
     EnumMap::Pair ("RepairDroid",REPAIRDROID),
-    EnumMap::Pair ("ECM",ECM)
+    EnumMap::Pair ("ECM",ECM),
+    EnumMap::Pair ("Description",DESCRIPTION)
 
   };
 
   const EnumMap element_map(element_names, 34);
-  const EnumMap attribute_map(attribute_names, 83);
+  const EnumMap attribute_map(attribute_names, 84);
 }
 
 using XMLSupport::EnumMap;
@@ -427,6 +429,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case XFILE:
 	carg.content = XMLSupport::replace_space((*iter).value);
+	break;
+      case DESCRIPTION:
+	carg.description= strdup ((*iter).value.c_str());//mem leak...but hey--only for mpl
 	break;
       }
     }

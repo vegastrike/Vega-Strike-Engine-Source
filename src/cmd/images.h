@@ -40,7 +40,8 @@ struct Cargo {
   float price;
   float mass;
   float volume;
-  Cargo () {mass=0; volume=0;price=0;quantity=1;}
+  char * description;//mem leak... for the master part list (global var, no prob)
+  Cargo () {mass=0; volume=0;price=0;quantity=1;description=NULL;}
   bool operator == (const Cargo & other) const {
     return content==other.content;
   }

@@ -43,7 +43,7 @@
 #include "easydom.h"
 
 #include "msgcenter.h"
-
+#include <algorithm>
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
@@ -62,15 +62,31 @@ void MessageCenter::add(string from,string to,string message,double delay){
   messages.push_back(msg);
 }
 
-gameMessage *MessageCenter::last(unsigned int n){
-  int size=messages.size();
-
-  int index=size-1-n;
-
-  if(index>=0){
-    return messages[index];
-  }
-  else{
-    return NULL;
+gameMessage *MessageCenter::last(unsigned int n, const std::vector <std::string> & who){
+  if (who.empty()) {
+    int size=messages.size();
+    
+    int index=size-1-n;
+    
+    if(index>=0){
+      return messages[index];
+    }
+    else{
+      return NULL;
+    }
+  }else {
+    int j=0;
+    int i=0;
+    for (i=messages.size()-1;i>=0;i--) {
+      if (std::find (who.begin(),who.end(),messages[i]->to)!=who.end()) {
+	if (j==n)
+	  break;
+	j++;
+	
+      }
+    }
+    if (i<0)
+      return NULL;
+    return messages[i];
   }
 }

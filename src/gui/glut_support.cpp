@@ -229,6 +229,7 @@ void ShowImage(float x, float y, float wid, float hei, GUITexture image, int til
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
+  float font_size_float=4./100;
         int cur;
         float font_size = size;
 	float width = 0;
@@ -244,15 +245,24 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 	glScalef(font_size,font_size,1);
 	end = glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
 	end /= 2500;
-	if (no_end == 1) { end = 0; }
-
+	//	if (no_end == 1) { end = 0; }
+	int h=0;
         for (cur = 0; str[cur] != '\0'; cur++) {
 		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
 		cur_width /= 2500;
 		width += cur_width;
-		if (width+end > wid && str[cur+1] != '\0' && no_end == 0) {
-			for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
-			break;
+		if (width+end > wid && str[cur+1] != '\0' ) {
+		  if (no_end==0) {
+		    for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
+		    break;
+		  }else {
+		    width=0;
+		    glLoadIdentity();
+		    glEnable(GL_LINE_SMOOTH);
+		    glLineWidth(wid);
+		    glTranslatef(x,y-(++h)*font_size_float,0);
+		    glScalef(font_size,font_size,1);
+		  }
 		}
 		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[cur]);
         }

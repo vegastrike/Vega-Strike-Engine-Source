@@ -87,12 +87,12 @@ public:
 	~TextArea(void);
 
 	void DoHighlight(int yes);	// DoHighlight(0) to disable mouse highlighting. Also disable clicking on entries
-	void DoMultiline(int yes);	// DoMultiline(1) to enable multi-line entries
+	void DoMultiline(int yes){do_multiline=yes;}	// DoMultiline(1) to enable multi-line entries
 	void Refresh(void);
 	void RenderText(void);
 	void AddTextItem(const char *name, const char *description);
 	void AddTextItem(const char *name, const char *description, const char *parent_name);
-	void ChangeTextItem(const char *name, const char *description);
+	void ChangeTextItem(const char *name, const char *description, bool wrap=false);
 	void SetText(const char *text);	// Sets the text. Enables Multiline and disables highlighting
 	void ClearList(void);
 	// Returns the char of the currently selected item. NULL if nothing is selected
