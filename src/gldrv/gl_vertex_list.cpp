@@ -143,7 +143,7 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
       data.vertices=NULL;
       data.colors = NULL;
   }
-  
+
   this->offsets = new int [numlists];
   memcpy(this->offsets, offsets, sizeof(int)*numlists);
   int i;
@@ -181,11 +181,13 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   }
   
   changed |= stride;
+  RenormalizeNormals ();  
   RefreshDisplayList();
   if (Mutable)
     changed |= CHANGE_MUTABLE;//for display lists
   else
     changed &= (~CHANGE_CHANGE);
+
 }
 
 int GFXVertexList::numTris () {
@@ -231,6 +233,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
   if (!(changed&CHANGE_MUTABLE)) {
     changed |= CHANGE_CHANGE;
   }
+  RenormalizeNormals ()
   RefreshDisplayList();
   if (changed&CHANGE_CHANGE) {
     changed&=(~CHANGE_CHANGE);
@@ -238,6 +241,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
   if (newvertexsize) {
     numVertices = newvertexsize;
   }
+
 }
 
 
@@ -328,7 +332,44 @@ void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
       SetVertex (Vector (thus->data.colors[i+offset].x,thus->data.colors[i+offset].y,thus->data.colors[i+offset].z));
   }
 }
-
+void GFXVertexList::ReNormalize(int which) {
+  Vector firstNormal;
+}
+void GFXVertexList::RenormalizeNormals () {
+  if (numVertices>0) {
+    Vector firstNormal;
+    if (changed&HAS_COLOR) {
+      firstNormal=    data.colors[0].GetNormal(firstNormal);
+    }else {
+      firstNormal=    data.vertices[0].GetNormal(firstNormal);
+    }
+    if (firstNormal.Magnitude()>GL_SCALE/1.5&&firstNormal.Magnitude()<GL_SCALE*1.5) {
+      return;
+    }
+    if (firstNormal.Magnitude()<GL_SCALE/100) {
+      firstNormal.Set(1,0,0);
+    }
+    firstNormal.Normalize();
+    if (changed&HAS_COLOR) {
+      data.colors[0].SetNormal(firstNormal);
+    }else {
+      data.vertices[0].SetNormal(firstNormal);
+    }
+    if (changed&HAS_COLOR) {
+      for (int i=0;i<numVertices;i++) {
+	data.colors[0].i/=GFX_SCALE;
+	data.colors[0].j/=GFX_SCALE;
+	data.colors[0].k/=GFX_SCALE;
+      }
+    }else {
+      for (int i=0;i<numVertices;i++) {
+	data.vertex[0].i/=GFX_SCALE;
+	data.vertex[0].j/=GFX_SCALE;
+	data.vertex[0].k/=GFX_SCALE;
+      }
+    }
+  }
+}
 unsigned int GFXVertexList::GetIndex (int offset) const {
   return (changed&sizeof(unsigned char))
       ? (unsigned int) (index.b[offset]) 

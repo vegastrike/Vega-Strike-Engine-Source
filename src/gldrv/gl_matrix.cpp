@@ -51,7 +51,8 @@ float GFXGetXInvPerspective () {
 float GFXGetYInvPerspective() {
   return /*invprojection[11]*  */invprojection[5];//invprojection[15];//should be??  c/d == invproj[15]
 }
-static void MatrixToDoubles (double t[],const Matrix & m) {
+
+void MatrixToDoubles (double t[],const Matrix & m) {
   t[0]=m.r[0];//possible performance hit?!?!
   t[1]=m.r[1];
   t[2]=m.r[2];
@@ -71,10 +72,23 @@ static void MatrixToDoubles (double t[],const Matrix & m) {
 }
 inline void ViewToModel () {
   double t [16];
-  MatrixToDoubles (t,model);
-  t[12]=(model.p.i-view.p.i);
-  t[13]=(model.p.j-view.p.j);
-  t[14]=(model.p.k-view.p.k);
+  t[0]=model.r[0]*GFX_SCALE;//possible performance hit?!?!
+  t[1]=model.r[1]*GFX_SCALE;
+  t[2]=model.r[2]*GFX_SCALE;
+  t[3]=0;
+  t[4]=model.r[3]*GFX_SCALE;
+  t[5]=model.r[4]*GFX_SCALE;
+  t[6]=model.r[5]*GFX_SCALE;
+  t[7]=0;
+  t[8]=model.r[6]*GFX_SCALE;
+  t[9]=model.r[7]*GFX_SCALE;
+  t[10]=model.r[8]*GFX_SCALE;
+  t[11]=0;
+  t[12]=(model.p.i-view.p.i)*GFX_SCALE;
+  t[13]=(model.p.j-view.p.j)*GFX_SCALE;
+  t[14]=(model.p.k-view.p.k)*GFX_SCALE;
+  t[15]=1;
+  //  MatrixToDoubles (t,model);
   glMatrixMode (GL_MODELVIEW);
   glLoadMatrixd (t);
 }
@@ -105,22 +119,23 @@ void MultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
   dest[15] = m1[3]*m2.p.i + m1[7]*m2.p.j + m1[11]*m2.p.k + m1[15];
 
 }
+
 static void RotateFloatMatrix(float dest[], const float m1[], const Matrix &m2)
 {
-  dest[0] = m1[0]*m2.r[0] + m1[4]*m2.r[1] + m1[8]*m2.r[2];
-  dest[1] = m1[1]*m2.r[0] + m1[5]*m2.r[1] + m1[9]*m2.r[2];
-  dest[2] = m1[2]*m2.r[0] + m1[6]*m2.r[1] + m1[10]*m2.r[2];
-  dest[3] = m1[3]*m2.r[0] + m1[7]*m2.r[1] + m1[11]*m2.r[2];
+  dest[0] = (m1[0]*m2.r[0] + m1[4]*m2.r[1] + m1[8]*m2.r[2]);
+  dest[1] = (m1[1]*m2.r[0] + m1[5]*m2.r[1] + m1[9]*m2.r[2]);
+  dest[2] = (m1[2]*m2.r[0] + m1[6]*m2.r[1] + m1[10]*m2.r[2]);
+  dest[3] = (m1[3]*m2.r[0] + m1[7]*m2.r[1] + m1[11]*m2.r[2]);
 
-  dest[4] = m1[0]*m2.r[3] + m1[4]*m2.r[4] + m1[8]*m2.r[5];
-  dest[5] = m1[1]*m2.r[3] + m1[5]*m2.r[4] + m1[9]*m2.r[5];
-  dest[6] = m1[2]*m2.r[3] + m1[6]*m2.r[4] + m1[10]*m2.r[5];
-  dest[7] = m1[3]*m2.r[3] + m1[7]*m2.r[4] + m1[11]*m2.r[5];
+  dest[4] = (m1[0]*m2.r[3] + m1[4]*m2.r[4] + m1[8]*m2.r[5]);
+  dest[5] = (m1[1]*m2.r[3] + m1[5]*m2.r[4] + m1[9]*m2.r[5]);
+  dest[6] = (m1[2]*m2.r[3] + m1[6]*m2.r[4] + m1[10]*m2.r[5]);
+  dest[7] = (m1[3]*m2.r[3] + m1[7]*m2.r[4] + m1[11]*m2.r[5]);
 
-  dest[8] = m1[0]*m2.r[6] + m1[4]*m2.r[7] + m1[8]*m2.r[8];
-  dest[9] = m1[1]*m2.r[6] + m1[5]*m2.r[7] + m1[9]*m2.r[8];
-  dest[10] = m1[2]*m2.r[6] + m1[6]*m2.r[7] + m1[10]*m2.r[8];
-  dest[11] = m1[3]*m2.r[6] + m1[7]*m2.r[7] + m1[11]*m2.r[8];
+  dest[8] = (m1[0]*m2.r[6] + m1[4]*m2.r[7] + m1[8]*m2.r[8]);
+  dest[9] = (m1[1]*m2.r[6] + m1[5]*m2.r[7] + m1[9]*m2.r[8]);
+  dest[10] = (m1[2]*m2.r[6] + m1[6]*m2.r[7] + m1[10]*m2.r[8]);
+  dest[11] = (m1[3]*m2.r[6] + m1[7]*m2.r[7] + m1[11]*m2.r[8]);
 
   dest[12] = m1[12];
   dest[13] = m1[13];
@@ -290,7 +305,6 @@ void GFXFrustum(float * m,float *i,
 	 	 float bottom, float top,
 		 float nearval, float farval )
 {
-
    GLfloat x, y, a, b, c, d;
    x = (((float)2.0)*nearval) / (right-left);
    y = (((float)2.0)*nearval) / (top-bottom);
@@ -314,7 +328,8 @@ void GFXFrustum(float * m,float *i,
 }
 void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset)
 {
-
+    znear *=GFX_SCALE;
+    zfar *=GFX_SCALE;
   //  gluPerspective (fov,aspect,znear,zfar);
 
 
