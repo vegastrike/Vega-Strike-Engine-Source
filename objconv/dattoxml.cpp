@@ -1,11 +1,13 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
-#include <stdio.h>
-#include <iostream.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
+
 #include <string.h>
 #include <math.h>
+using namespace std;
 char FileName[256];
 struct LVector {
   float i;
