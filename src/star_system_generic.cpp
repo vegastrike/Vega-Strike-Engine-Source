@@ -37,7 +37,7 @@
 #include "cmd/unit_collide.h"
 #include "savegame.h"
 #include "networking/netclient.h"
-
+#include "in_kb_data.h"
 #ifndef USE_BOOST_128
 
 #if defined (_MSC_VER) && _MSC_VER<=1200
@@ -385,7 +385,7 @@ extern void UpdateCameraSnds();
 extern void NebulaUpdate( StarSystem * ss);
 extern void TestMusic();
 
-extern void reset_time_compression (const std::string&,KBSTATE);
+extern void reset_time_compression (const KBData&,KBSTATE);
 
 extern float getTimeCompression();
 void StarSystem::Update( float priority)
@@ -679,7 +679,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  if (0&&getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
-	      reset_time_compression(std::string(),PRESS);
+	      reset_time_compression(KBData(),PRESS);
 	    }
 	  }
 	}

@@ -34,6 +34,7 @@
 #include "audiolib.h"
 #include "save_util.h"
 #include "cmd/base.h"
+#include "in_kb_data.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -1054,10 +1055,10 @@ extern vector <int> suicide;
 
 void DoCockpitKeys()
 {
-	CockpitKeys::Pan(std::string(),PRESS);
-	CockpitKeys::Inside(std::string(),PRESS);
+	CockpitKeys::Pan(KBData(),PRESS);
+	CockpitKeys::Inside(KBData(),PRESS);
 }
-void GameCockpit::NavScreen (const std::string&,KBSTATE k) // scheherazade
+void GameCockpit::NavScreen (const KBData&,KBSTATE k) // scheherazade
 {
    if (k==PRESS)
      {
@@ -1117,7 +1118,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void GameCockpit::SwitchControl (const std::string&,KBSTATE k) {
+void GameCockpit::SwitchControl (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
@@ -1125,7 +1126,7 @@ void GameCockpit::SwitchControl (const std::string&,KBSTATE k) {
   }
 
 }
-void SuicideKey (const std::string&,KBSTATE k) {
+void SuicideKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (suicide.size()<=_Universe->CurrentCockpit())
       suicide.push_back(0);
@@ -1167,7 +1168,7 @@ public:
   }
 };
 std::vector <UnivMap> univmap;
-void MapKey (const std::string&,KBSTATE k) {
+void MapKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     static VSSprite ul("upper-left-map.spr");
     static VSSprite ur("upper-right-map.spr");
@@ -1184,7 +1185,7 @@ void MapKey (const std::string&,KBSTATE k) {
 }
 
 
-void GameCockpit::TurretControl (const std::string&,KBSTATE k) {
+void GameCockpit::TurretControl (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (turretcontrol.size()<=_Universe->CurrentCockpit())
       turretcontrol.push_back(0);
@@ -1192,7 +1193,7 @@ void GameCockpit::TurretControl (const std::string&,KBSTATE k) {
   }
 
 }
-void GameCockpit::Respawn (const std::string&,KBSTATE k) {
+void GameCockpit::Respawn (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);
@@ -1268,7 +1269,7 @@ int GameCockpit::Autopilot (Unit * target) {
   }
   return retauto;
 }
-extern void reset_time_compression(const std::string&, KBSTATE a);
+extern void reset_time_compression(const KBData&, KBSTATE a);
 void GameCockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
   static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","20"));

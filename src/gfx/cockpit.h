@@ -116,7 +116,7 @@ private:
   void DrawArrowToTarget(Unit *, Unit *);
  public:
   void	ReceivedTargetInfo();
-  static void NavScreen (const std::string&, KBSTATE k); // scheherazade
+  static void NavScreen (const KBData&,KBSTATE k); // scheherazade
   static string getsoundending(int which=0);
   static string getsoundfile(string filename);
   void InitStatic ();
@@ -143,9 +143,9 @@ private:
   int getScrollOffset (unsigned int whichtype);
   void SelectProperCamera ();
   void Eject ();
-  static void Respawn (const std::string&,KBSTATE);
-  static void SwitchControl (const std::string&,KBSTATE);
-  static void TurretControl (const std::string&,KBSTATE);
+  static void Respawn (const KBData&,KBSTATE);
+  static void SwitchControl (const KBData&,KBSTATE);
+  static void TurretControl (const KBData&,KBSTATE);
   void SetSoundFile (std::string sound);
   int GetSoundFile () {return soundfile;}
   void SetCommAnimation (Animation * ani);

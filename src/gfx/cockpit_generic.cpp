@@ -224,7 +224,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void Cockpit::SwitchControl (const std::string&,KBSTATE k) {
+void Cockpit::SwitchControl (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
@@ -233,7 +233,7 @@ void Cockpit::SwitchControl (const std::string&,KBSTATE k) {
 
 }
 
-void Cockpit::Respawn (const std::string&,KBSTATE k) {
+void Cockpit::Respawn (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);

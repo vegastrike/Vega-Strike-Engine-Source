@@ -54,7 +54,7 @@
 #include "universe_util.h"
 #include "networking/netclient.h"
 #include "save_util.h"
-
+#include "in_kb_data.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -62,8 +62,8 @@ using namespace std;
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
 Unit **fighters;
-  void SuicideKey(const std::string&,KBSTATE newState);
-//  void Respawn(const std::string&,KBSTATE newState);
+  void SuicideKey(const KBData&,KBSTATE newState);
+//  void Respawn(const KBData&,KBSTATE newState);
 
 
  GFXBOOL capture;
@@ -103,7 +103,7 @@ public:
 
 const float timek = .001;
 bool _Slew = true;
- void VolUp(const std::string&,KBSTATE newState) {
+ void VolUp(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      float gain=AUDGetListenerGain();
      if (gain<.9375) {
@@ -112,7 +112,7 @@ bool _Slew = true;
      }
    }
  }
- void VolDown(const std::string&,KBSTATE newState) {
+ void VolDown(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      float gain=AUDGetListenerGain();
      if (gain>.0625) {
@@ -168,14 +168,14 @@ namespace CockpitKeys {
     }
     
   }
- void SkipMusicTrack(const std::string&,KBSTATE newState) {
+ void SkipMusicTrack(const KBData&,KBSTATE newState) {
    if(newState==PRESS){
      printf("skipping\n");
     muzak->Skip();
    }
  }
 
- void PitchDown(const std::string&,KBSTATE newState) {
+ void PitchDown(const KBData&,KBSTATE newState) {
 	static Vector Q;
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
@@ -194,7 +194,7 @@ namespace CockpitKeys {
 	}	
 }
 
- void PitchUp(const std::string&,KBSTATE newState) {
+ void PitchUp(const KBData&,KBSTATE newState) {
 	
 	static Vector Q;
 	static Vector R;
@@ -211,7 +211,7 @@ namespace CockpitKeys {
 	}
 	}}
 
-  void YawLeft(const std::string&,KBSTATE newState) {
+  void YawLeft(const KBData&,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector R;
@@ -229,7 +229,7 @@ namespace CockpitKeys {
 	}
 }
 
-  void YawRight(const std::string&,KBSTATE newState) {
+  void YawRight(const KBData&,KBSTATE newState) {
 		for (int i=0;i<NUM_CAM;i++) {
 	static Vector P;
 	static Vector R;
@@ -245,7 +245,7 @@ namespace CockpitKeys {
 		}
 }
 
-  void Quit(const std::string&,KBSTATE newState) {
+  void Quit(const KBData&,KBSTATE newState) {
 	if(newState==PRESS) {
 	  if (QuitAllow) {
             /*
@@ -265,17 +265,17 @@ namespace CockpitKeys {
   }
 
 bool cockpitfront=true;
-  void Inside(const std::string&,KBSTATE newState) {
+  void Inside(const KBData&,KBSTATE newState) {
     {
       static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
       _Universe->activeStarSystem()->getBackground()->EnableBG(back);
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   if(newState==PRESS&&cockpitfront) {
-      YawLeft (std::string(),RELEASE);
-      YawRight (std::string(),RELEASE);
-      PitchUp(std::string(),RELEASE);
-      PitchDown (std::string(),RELEASE);
+      YawLeft (KBData(),RELEASE);
+      YawRight (KBData(),RELEASE);
+      PitchUp(KBData(),RELEASE);
+      PitchDown (KBData(),RELEASE);
 	  string cockpit="disabled-cockpit.cpt";
 	  if (_Universe->AccessCockpit()->GetParent())
 		  cockpit=_Universe->AccessCockpit()->GetParent()->getCockpit();
@@ -287,19 +287,19 @@ bool cockpitfront=true;
     _Universe->AccessCockpit()->SetView (CP_FRONT);
   }
 }
-  void ZoomOut (const std::string&,KBSTATE newState) {
+  void ZoomOut (const KBData&,KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime()/getTimeCompression();  
 }
   static float scrolltime=0;
-  void ScrollUp (const std::string&,KBSTATE newState) {
+  void ScrollUp (const KBData&,KBSTATE newState) {
    scrolltime+=GetElapsedTime();
    if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
      scrolltime=0;
      _Universe->AccessCockpit()->ScrollAllVDU (-1);
    }    
   }
-  void ScrollDown (const std::string&,KBSTATE newState) {
+  void ScrollDown (const KBData&,KBSTATE newState) {
    scrolltime+=GetElapsedTime();
    if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
      scrolltime=0;
@@ -307,12 +307,12 @@ bool cockpitfront=true;
    }    
 
   }
-  void ZoomIn (const std::string&,KBSTATE newState) {
+  void ZoomIn (const KBData&,KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime()/getTimeCompression();  
 }
 
-  void InsideLeft(const std::string&,KBSTATE newState) {
+  void InsideLeft(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
       YawLeft (std::string(),RELEASE);
@@ -324,21 +324,21 @@ bool cockpitfront=true;
 	  _Universe->AccessCockpit()->SetView (CP_LEFT);
 	}
 }
-  void InsideRight(const std::string&,KBSTATE newState) {
+  void InsideRight(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	    cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_RIGHT);
 	}
 }
-  void PanTarget(const std::string&,KBSTATE newState) {
+  void PanTarget(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	    cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_PANTARGET);
 	}
   }
-  void ViewTarget(const std::string&,KBSTATE newState) {
+  void ViewTarget(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
       YawLeft (std::string(),RELEASE);
@@ -350,7 +350,7 @@ bool cockpitfront=true;
 	  _Universe->AccessCockpit()->SetView (CP_VIEWTARGET);
 	}
   }
-  void OutsideTarget(const std::string&,KBSTATE newState) {
+  void OutsideTarget(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
       YawLeft (std::string(),RELEASE);
@@ -364,7 +364,7 @@ bool cockpitfront=true;
   }
 
 
-  void InsideBack(const std::string&,KBSTATE newState) {
+  void InsideBack(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
       YawLeft (std::string(),RELEASE);
@@ -376,81 +376,81 @@ bool cockpitfront=true;
 	  _Universe->AccessCockpit()->SetView (CP_BACK);
 	}
 }
-  void CommModeVDU(const std::string&,KBSTATE newState){
+  void CommModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::COMM);
   }
-  void ScanningModeVDU(const std::string&,KBSTATE newState){
+  void ScanningModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::SCANNING);
   }
-  void ObjectiveModeVDU(const std::string&,KBSTATE newState){
+  void ObjectiveModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::OBJECTIVES);
   }
-  void TargetModeVDU(const std::string&,KBSTATE newState){
+  void TargetModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::TARGET);
   }
-  void ViewModeVDU(const std::string&,KBSTATE newState){
+  void ViewModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::VIEW);
   }
-  void DamageModeVDU(const std::string&,KBSTATE newState){
+  void DamageModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::DAMAGE);
   }
-  void ManifestModeVDU(const std::string&,KBSTATE newState){
+  void ManifestModeVDU(const KBData&,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::MANIFEST);
   }
-  void GunModeVDU(const std::string&s,KBSTATE newState){
+  void GunModeVDU(const KBData&s,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
     FireKeyboard::WeapSelKey(s,newState);
   }
-  void ReverseGunModeVDU(const std::string&s,KBSTATE newState){
+  void ReverseGunModeVDU(const KBData&s,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
     FireKeyboard::ReverseWeapSelKey(s,newState);
   }
-  void MissileModeVDU(const std::string&s,KBSTATE newState){
+  void MissileModeVDU(const KBData&s,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
     FireKeyboard::MisSelKey(s,newState);
   }
-  void ReverseMissileModeVDU(const std::string&s,KBSTATE newState){
+  void ReverseMissileModeVDU(const KBData&s,KBSTATE newState){
     if (newState==PRESS) SwitchVDUTo(VDU::WEAPON);
     FireKeyboard::ReverseMisSelKey(s,newState);
   }
-  void SwitchLVDU(const std::string&,KBSTATE newState) {
+  void SwitchLVDU(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (0);
 	}
   }
-  void SwitchRVDU(const std::string&,KBSTATE newState) {
+  void SwitchRVDU(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (1);
 	}
   }
-  void SwitchMVDU(const std::string&,KBSTATE newState) {
+  void SwitchMVDU(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (2);
 	}
   }
-  void SwitchULVDU(const std::string&,KBSTATE newState) {
+  void SwitchULVDU(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (3);
 	}
   }
-  void SwitchURVDU(const std::string&,KBSTATE newState) {
+  void SwitchURVDU(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (4);
 	}
   }
-  void SwitchUMVDU(const std::string&,KBSTATE newState) {
+  void SwitchUMVDU(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS) {
 	  _Universe->AccessCockpit()->VDUSwitch (5);
 	}
   }
 
-  void Behind(const std::string&,KBSTATE newState) {
+  void Behind(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
       YawLeft (std::string(),RELEASE);
@@ -462,7 +462,7 @@ bool cockpitfront=true;
 	  _Universe->AccessCockpit()->SetView (CP_CHASE);
 	}
 }
-  void Pan(const std::string&,KBSTATE newState) {
+  void Pan(const KBData&,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
       YawLeft (std::string(),RELEASE);
@@ -525,7 +525,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 void InitializeInput() {
 
-	BindKey(27,0,0, Quit,std::string()); // always have quit on esc
+	BindKey(27,0,0, Quit,KBData()); // always have quit on esc
 }
 
 //Cockpit *cockpit;
@@ -543,7 +543,7 @@ void IncrementStartupVariable () {
 		putSaveData(0,"436457r1K3574r7uP71m35",0,var+1);
 	}
 	if (var<=XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
-		GameCockpit::NavScreen(std::string(),PRESS);
+          GameCockpit::NavScreen(KBData(),PRESS);//HELP FIXME
 		
 	}
 }

@@ -60,7 +60,7 @@ static bool JoyStickToggle=true;
 void JoyStickToggleDisable() {
   JoyStickToggle=false;
 }
-void JoyStickToggleKey (const std::string& key, KBSTATE a) {
+void JoyStickToggleKey (const KBData& key, KBSTATE a) {
   if (a==PRESS) {
     JoyStickToggle=!JoyStickToggle;
   }

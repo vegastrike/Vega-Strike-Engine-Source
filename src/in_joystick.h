@@ -22,7 +22,7 @@
 /*
   Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include "in_kb_data.h"
 #ifndef _JOYSTICK_H_
 #define _JOYSTICK_H_
 
@@ -44,9 +44,6 @@ class JoyStick;
 extern void ProcessJoystick(int whichjoystick);
 extern void InitJoystick();
 extern void DeInitJoystick();
-
-extern void BindButton(int button,KBHandler handler);
-extern void UnbindButton(int button) ;
 
 const int MAX_JOYSTICKS=11;
 const int MOUSE_JOYSTICK = MAX_JOYSTICKS-1;
@@ -104,13 +101,13 @@ class JoyStick {
 
 extern JoyStick *joystick[MAX_JOYSTICKS];
 typedef void (*JoyHandler)(KBSTATE,float x, float y, int mod);
-void BindJoyKey (int key, int joystick, KBHandler handler, const std::string&data);
+void BindJoyKey (int key, int joystick, KBHandler handler, const KBData&data);
 void UnbindJoyKey (int joystick, int key);
 
 void UnbindHatswitchKey (int hatswitch, int val_index);
-void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler, const std::string&data);
+void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler, const KBData&data);
 
-void BindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index, KBHandler handler, const std::string&data);
+void BindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index, KBHandler handler, const KBData&data);
 void UnbindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index);
 
 

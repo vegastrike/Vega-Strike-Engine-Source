@@ -40,7 +40,7 @@
 #include "in_joystick.h"
 #include "main_loop.h" // for CockpitKeys
 #include "gfx/cockpit.h"
-
+#include "in_kb_data.h"
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
@@ -87,10 +87,10 @@ for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; 
 #if 1
 const float volinc = 1;
 const float dopinc = .1;
-void incmusicvol (const std::string&,KBSTATE a);
-void decmusicvol (const std::string&,KBSTATE a);
+void incmusicvol (const KBData&,KBSTATE a);
+void decmusicvol (const KBData&,KBSTATE a);
 
-void incvol (const std::string&,KBSTATE a) {
+void incvol (const KBData&,KBSTATE a) {
 #ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeVolume (AUDGetVolume()+volinc);
@@ -98,21 +98,21 @@ void incvol (const std::string&,KBSTATE a) {
 #endif
 }
 
-void decvol (const std::string&,KBSTATE a) {
+void decvol (const KBData&,KBSTATE a) {
 #ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeVolume (AUDGetVolume()-volinc);
 	}
 #endif
 }
-void mute (const std::string&,KBSTATE a) { 
+void mute (const KBData&,KBSTATE a) { 
 #ifdef HAVE_AL
 //	if (a==PRESS)
 //		AUDChangeVolume (0);broken
 #endif
 }
 
-void incdop (const std::string&,KBSTATE a) {
+void incdop (const KBData&,KBSTATE a) {
 #ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeDoppler (AUDGetDoppler()+dopinc);
@@ -120,7 +120,7 @@ void incdop (const std::string&,KBSTATE a) {
 
 #endif
 }
-void decdop (const std::string&,KBSTATE a) {
+void decdop (const KBData&,KBSTATE a) {
 #ifdef HAVE_AL
 	if (a==DOWN) {
 		AUDChangeDoppler (AUDGetDoppler()-dopinc);
@@ -212,15 +212,15 @@ void GameVegaConfig::initKeyMap(){
 #endif
 
 /* *********************************************************** */
-extern void  inc_time_compression (const std::string&,KBSTATE a);
-extern void  JoyStickToggleKey (const std::string&,KBSTATE a);
-extern void  SuicideKey (const std::string&,KBSTATE a);
-extern void pause_key (const std::string&,KBSTATE a);
-extern void dec_time_compression(const std::string&,KBSTATE a);
-extern void reset_time_compression(const std::string&,KBSTATE a);
-extern void MapKey(const std::string&,KBSTATE a);
-extern void VolUp(const std::string&,KBSTATE a);
-extern void VolDown(const std::string&,KBSTATE a);
+extern void  inc_time_compression (const KBData&,KBSTATE a);
+extern void  JoyStickToggleKey (const KBData&,KBSTATE a);
+extern void  SuicideKey (const KBData&,KBSTATE a);
+extern void pause_key (const KBData&,KBSTATE a);
+extern void dec_time_compression(const KBData&,KBSTATE a);
+extern void reset_time_compression(const KBData&,KBSTATE a);
+extern void MapKey(const KBData&,KBSTATE a);
+extern void VolUp(const KBData&,KBSTATE a);
+extern void VolDown(const KBData&,KBSTATE a);
 
   using namespace CockpitKeys;
 
@@ -586,7 +586,7 @@ void GameVegaConfig::checkBind(configNode *node){
     // normal keyboard key
       // now map the command to a callback function and bind it
     if(keystr.length()==1){
-      BindKey(keystr[0],modifier,XMLSupport::parse_int(player_bound), handler,additional_data);
+      BindKey(keystr[0],modifier,XMLSupport::parse_int(player_bound), handler,KBData(additional_data));
     }
     else{
       int glut_key=key_map[keystr];
@@ -594,7 +594,7 @@ void GameVegaConfig::checkBind(configNode *node){
 	cout << "No such special key: " << keystr << endl;
 	return;
       }
-      BindKey(glut_key,modifier,XMLSupport::parse_int(player_bound),handler,additional_data);
+      BindKey(glut_key,modifier,XMLSupport::parse_int(player_bound),handler,KBData(additional_data));
     }
 
     //    cout << "bound key " << keystr << " to " << cmdstr << endl;
@@ -613,7 +613,7 @@ void GameVegaConfig::checkBind(configNode *node){
 
 	int hatswitch_nr=atoi(hat_str.c_str());
 
-	BindHatswitchKey(hatswitch_nr,button_nr,handler,additional_data);
+	BindHatswitchKey(hatswitch_nr,button_nr,handler,KBData(additional_data));
 	
 	//	cout << "Bound hatswitch nr " << hatswitch_nr << " button: " << button_nr << " to " << cmdstr << endl;
       }
@@ -630,7 +630,7 @@ void GameVegaConfig::checkBind(configNode *node){
 	  // yet to check for correct buttons/joy-nr
 
 
-	  BindJoyKey(joystick_nr,button_nr,handler,additional_data);
+	  BindJoyKey(joystick_nr,button_nr,handler,KBData(additional_data));
 
 	//cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
 	}
@@ -691,7 +691,7 @@ void GameVegaConfig::checkBind(configNode *node){
 	return;
       }
 
-      BindDigitalHatswitchKey(joy_nr,hsw_nr,dir_index,handler,additional_data);
+      BindDigitalHatswitchKey(joy_nr,hsw_nr,dir_index,handler,KBData(additional_data));
 
       cout << "Bound joy " << joy_nr << " hatswitch " << hsw_nr << " dir_index " << dir_index << " to command " << cmdstr << endl;
 

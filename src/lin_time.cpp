@@ -55,7 +55,7 @@ class NetClient;
 extern NetClient * Network;
 int timecount;
 
-void inc_time_compression (const std::string&, KBSTATE a) {
+void inc_time_compression (const KBData&, KBSTATE a) {
 if( Network==NULL)
 {
   if (a==PRESS) {
@@ -64,7 +64,7 @@ if( Network==NULL)
   }
 }
 }
-void dec_time_compression (const std::string&, KBSTATE a) {
+void dec_time_compression (const KBData&, KBSTATE a) {
 if( Network==NULL)
 {
   if (a==PRESS) {
@@ -73,7 +73,7 @@ if( Network==NULL)
   }
 }
 }
-void reset_time_compression (const std::string&, KBSTATE a) {
+void reset_time_compression (const KBData&, KBSTATE a) {
 if( Network==NULL)
 {
   if (a==PRESS) {
@@ -82,7 +82,7 @@ if( Network==NULL)
   }
 }
 }
-void pause_key (const std::string&s, KBSTATE a) {
+void pause_key (const KBData&s, KBSTATE a) {
   static bool paused=false;
   if (a==PRESS) {
     if (paused==false) {

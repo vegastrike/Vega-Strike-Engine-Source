@@ -34,7 +34,7 @@ const int LAST_MODIFIER=3;
 
 unsigned int getModifier(const char* mod_name);
 void ProcessKB(unsigned int player);
-void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const std::string& data);
+void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData& data);
 void UnbindKey(int key,unsigned int modifiers);
 void InitKB ();
 void RestoreKB ();

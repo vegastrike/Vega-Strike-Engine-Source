@@ -27,6 +27,7 @@
 #include "in_kb.h"
 #include "in_handler.h"
 #include "gldrv/winsys.h"
+#include "in_kb_data.h"
 //#include "cmd_unit.h"
 /*
 extern queue<InputListener*> activationreqqueue;
@@ -34,13 +35,13 @@ extern list<InputListener*> listeners;
 
 extern InputListener* activelistener;
 */
-static void DefaultKBHandler(const std::string&,KBSTATE newState) {
+static void DefaultKBHandler(const KBData&,KBSTATE newState) {
 	// do nothing
 	return;
 }
 struct HandlerCall{
   KBHandler function;
-  std::string data;
+  KBData data;
   HandlerCall() {
     function=DefaultKBHandler;
   }
@@ -270,7 +271,7 @@ void ProcessKB(unsigned int player)
   }
 }	
 
-void BindKey(int key,unsigned int mod, unsigned int player, KBHandler handler, const std::string&data) {
+void BindKey(int key,unsigned int mod, unsigned int player, KBHandler handler, const KBData&data) {
 	keyBindings[mod][key].function = handler;
 	keyBindings[mod][key].data = data;
 	playerBindings[mod][key]=player;

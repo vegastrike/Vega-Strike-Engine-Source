@@ -6,6 +6,7 @@
 #include "order.h"
 #include "gfx/coord_select.h"
 #include "vs_globals.h"
+#include "in_kb_data.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 
@@ -21,8 +22,8 @@ static float GetY (float x) {
   return 1-((float)2*x)/g_game.y_resolution;
 }
 
-void InputDFA::OrderHandler (const std::string& keys, KBSTATE k) {
-  int key = atoi(keys.c_str());
+void InputDFA::OrderHandler (const KBData& keys, KBSTATE k) {
+  int key = atoi(keys.data.c_str());
   if (k==PRESS) {
     if (k<='Z'&&k>='A')
       CurDFA->queueOrder=true;

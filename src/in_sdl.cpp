@@ -1,18 +1,18 @@
 #include "in_joystick.h"
 #include "vs_globals.h"
 #include "config_xml.h"
-
+#include "in_kb_data.h"
 #include <assert.h>	/// needed for assert() calls.
-void DefaultJoyHandler (const std::string&, KBSTATE newState) {
+void DefaultJoyHandler (const KBData&, KBSTATE newState) {
   //  VSFileSystem::Fprintf (stderr,"STATE: %d", st);
 }
 struct JSHandlerCall {
   KBHandler function;
-  std::string data;
+  KBData data;
   JSHandlerCall() {
     function=DefaultJoyHandler;
   }
-  JSHandlerCall(KBHandler function, std::string data) {
+  JSHandlerCall(KBHandler function, const KBData& data) {
     this->function=function;
     this->data=data;
   }
@@ -33,10 +33,10 @@ static void GenUnbindJoyKey (JSSwitches whichswitch, int joystick, int key) {
   JoystickState[whichswitch][joystick][key]=UP;
 }
 
-static void GenBindJoyKey (JSSwitches whichswitch,int joystick, int key, KBHandler handler, const std::string &data) {
+static void GenBindJoyKey (JSSwitches whichswitch,int joystick, int key, KBHandler handler, const KBData &data) {
   assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
   JoystickBindings[JOYSTICK_SWITCH][joystick][key]=JSHandlerCall(handler,data);
-  handler (std::string(),RESET);
+  handler (KBData(),RESET);
 }
 
 
@@ -44,7 +44,7 @@ void UnbindJoyKey (int joystick, int key) {
   GenUnbindJoyKey(JOYSTICK_SWITCH,joystick,key);
 }
 
-void BindJoyKey (int joystick, int key, KBHandler handler, const std::string &data) {
+void BindJoyKey (int joystick, int key, KBHandler handler, const KBData &data) {
   GenBindJoyKey(JOYSTICK_SWITCH,joystick,key,handler,data);
 }
 
@@ -52,7 +52,7 @@ void UnbindHatswitchKey (int joystick, int key) {
   GenUnbindJoyKey(HATSWITCH,joystick,key);
 }
 
-void BindHatswitchKey (int joystick, int key, KBHandler handler, const std::string &data) {
+void BindHatswitchKey (int joystick, int key, KBHandler handler, const KBData &data) {
   GenBindJoyKey(HATSWITCH,joystick,key,handler,data);
 }
 
@@ -60,7 +60,7 @@ void UnbindDigitalHatswitchKey (int joystick, int key, int dir) {
   GenUnbindJoyKey(DIGHATSWITCH,joystick,key*MAX_DIGITAL_VALUES+dir);
 }
 
-void BindDigitalHatswitchKey (int joystick, int key, int dir, KBHandler handler, const std::string &data) {
+void BindDigitalHatswitchKey (int joystick, int key, int dir, KBHandler handler, const KBData &data) {
   GenBindJoyKey(DIGHATSWITCH,joystick,key*MAX_DIGITAL_VALUES+dir,handler,data);
 }
 
