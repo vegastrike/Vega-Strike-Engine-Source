@@ -2899,10 +2899,10 @@ string buildShipDescription(Cargo &item) {
      	 	}
       	Flightgroup* flightGroup=new Flightgroup();
       	int fgsNumber=0;
-		current_unit_load_mode=1;
+		current_unit_load_mode=NO_MESH;
       	Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, 0, newModifications,
 					      flightGroup,fgsNumber);
-		current_unit_load_mode=0;
+		current_unit_load_mode=DEFAULT;
 	string str;
 	showUnitStats(newPart,str,0);
 	delete newPart;
@@ -3459,9 +3459,9 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 }
 // Show the stats on the player's current ship.
 bool BaseComputer::showShipStats(const EventCommandId& command, Control* control) {
-	current_unit_load_mode=1;
+	current_unit_load_mode=NO_MESH;
 	Unit* playerUnit = m_player.GetUnit();
-	current_unit_load_mode=0;
+	current_unit_load_mode=DEFAULT;
 	const string rawText = MakeUnitXMLPretty(playerUnit->WriteUnitString(), playerUnit);
 
     	// Need to translate some characters to make it even prettier.

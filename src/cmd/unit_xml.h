@@ -13,7 +13,12 @@ Sprite * createSprite(const char *file);
 
 void cache_ani (string s);
 
-/* ADDED FOR FUTURE USE */ 
-extern int current_unit_load_mode;
+/* ADDED FOR extensible use of unit pretty print and unit loading */ 
+
+enum UNITLOADTYPE {DEFAULT,NO_MESH};
+
+extern UNITLOADTYPE current_unit_load_mode;
+
+
 
 #endif

@@ -25,8 +25,8 @@
 #include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
 
-/*ADDED FOR FUTURE USE */
-int current_unit_load_mode = 0;
+/*ADDED FOR extensible use of unit pretty print and unit load */
+UNITLOADTYPE current_unit_load_mode = DEFAULT;
 
 
 
@@ -683,7 +683,7 @@ using namespace UnitXML;
 		  }
 	  }
 	  switch(current_unit_load_mode){
-	  case 1: break;
+	  case NO_MESH: break;
 	  default: pushMesh( xml, file.c_str(), xml->unitscale, faction,flightgroup,startframe,texturestarttime);
 	  }
   }
