@@ -4006,7 +4006,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			text+=wi->weapon_name+": #c0:1:1#"+lookupMountSize(wi->size)+"#-c#c.9:.9:.5#"+WeaponTypeStrings[wi->type]+" #-c";
 			if (wi->Damage<0) text+="#n#"+prefix+statcolor+"   Damage:#-c special";
 			else {
-				PRETTY_ADDU(statcolor+"   Damage: #-c",wi->Damage*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"   Damage: #-c",wi->Damage*VSDM,0,wi->type==weapon_info::BEAM?"MJ/s":"MJ");
 			}
 			PRETTY_ADDU(statcolor+"   Range: #-c",wi->Range,0,"meters");
 			PRETTY_ADDU(statcolor+"   Energy usage: #-c",wi->EnergyRate*RSconverter,0,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
