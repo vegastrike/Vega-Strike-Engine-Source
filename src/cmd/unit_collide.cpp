@@ -145,8 +145,47 @@ bool Unit::Inside (const Vector &target, const float radius, Vector & normal, fl
 
   return false;
 }
+bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal, Vector & smallpos, Vector & smallNormal) {
 
-
+    csRapidCollider::CollideReset();
+    Unit * bigger =this;
+    const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
+    const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
+    if (smaller->colTree->Collide (*bigger->colTree,
+				  &smalltransform,
+				  &bigtransform)) {
+      //static int crashcount=0;
+      //      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
+      csCollisionPair * mycollide = csRapidCollider::GetCollisions();
+      int numHits = csRapidCollider::numHits;
+      if (numHits) {
+	smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
+		     (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
+		     (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
+	smallpos = Transform (smaller->cumulative_transformation_matrix,smallpos);
+	bigpos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,  
+		   (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,  
+		   (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
+	bigpos = Transform (bigger->cumulative_transformation_matrix,bigpos);
+	csVector3 sn, bn;
+	sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
+	bn.Cross (mycollide[0].b2-mycollide[0].a2,mycollide[0].c2-mycollide[0].a2);
+	sn.Normalize();
+	bn.Normalize();
+	smallNormal.Set (sn.x,sn.y,sn.z);
+	bigNormal.Set (bn.x,bn.y,bn.z);
+	smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
+	bigNormal = TransformNormal (bigger->cumulative_transformation_matrix,bigNormal);
+	return true;
+      }
+    }
+    for (int i=0;i<bigger->numsubunit;i++) {
+      if (bigger->subunits[i]->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
+	return true;
+      }
+    }
+    return false;
+}
 bool Unit::Collide (Unit * target) {
   if (target==this||owner==target||target->owner==this||(owner!=NULL&&target->owner==owner)) 
     return false;
@@ -168,40 +207,9 @@ bool Unit::Collide (Unit * target) {
     smaller = target;
   }
   if (colTree&&target->colTree) {
-    csRapidCollider::CollideReset();
-    const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
-    const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
-    if (smaller->colTree->Collide (*bigger->colTree,
-				  &smalltransform,
-				  &bigtransform)) {
-      //static int crashcount=0;
-      //      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
-      csCollisionPair * mycollide = csRapidCollider::GetCollisions();
-      int numHits = csRapidCollider::numHits;
-      if (numHits) {
-	Vector smallpos((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
-			(mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
-			(mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
-	smallpos = Transform (smaller->cumulative_transformation_matrix,smallpos);
-	Vector bigpos((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,  
-		      (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,  
-		      (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
-	bigpos = Transform (bigger->cumulative_transformation_matrix,bigpos);
-	csVector3 sn, bn;
-	sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
-	bn.Cross (mycollide[0].b2-mycollide[0].a2,mycollide[0].c2-mycollide[0].a2);
-	sn.Normalize();
-	bn.Normalize();
-	Vector smallNormal (sn.x,sn.y,sn.z);
-	Vector bigNormal (bn.x,bn.y,bn.z);
-	smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
-	bigNormal = TransformNormal (bigger->cumulative_transformation_matrix,bigNormal);
-	bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );	
-      }else {
-	return false;
-      }
-    } else {
-      return false;
+    Vector bigpos,smallpos,bigNormal,smallNormal;
+    if (bigger->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
+      bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );	
     }
   } else {
     if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {

@@ -143,6 +143,7 @@ class Unit {
 
  protected:
   void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
+
   UnitSounds * sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
@@ -514,6 +515,7 @@ public:
   void SetAI(Order *newAI, int subun);
   ///Enqueues an order to the unit's order queue
   void EnqueueAI(Order *newAI, int subun);
+  bool InsideCollideTree (Unit * smaller, Vector & bigpos, Vector & bigNormal, Vector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
   ///Does a collision between this and another unit
   bool Collide(Unit * target);
