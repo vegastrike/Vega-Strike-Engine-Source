@@ -90,8 +90,9 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
 }
 
 
-void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg){
+vector<unsigned int> AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg){
   string::size_type where,wheresf,wherest;
+  vector <unsigned int> counts;
   while ((where=meshes.find("{"))!=string::npos) {
     meshes=meshes.substr(where+1);
     where=meshes.find("}");//matching closing brace
@@ -111,9 +112,11 @@ void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randoms
     }    
     int startframe = startf=="RANDOM"?-1:(startf=="ASYNC"?-1:atoi(startf.c_str()));
     float starttime = startt=="RANDOM"?-1.0f:atof(startt.c_str());
-    
+    unsigned int s=xmeshes.size();
     pushMesh(xmeshes,randomstartframe,randomstartseconds,mesh.c_str(),unitscale,faction,fg,startframe,starttime);
+	counts.push_back(xmeshes.size()-s);
   }
+  return counts;
 }
 static string nextElement (string&inp) {
   string::size_type where=inp.find(";");

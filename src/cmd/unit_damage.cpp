@@ -29,7 +29,6 @@
 //#define DESTRUCTDEBUG
 #include "base.h"
 extern unsigned int apply_float_to_unsigned_int (float tmp);  //Short fix
-extern void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg);
 extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>
@@ -54,8 +53,9 @@ void GameUnit<UnitType>::Split (int level) {
   Mesh * shield=old.back();
   old.pop_back();
   std::string fac = FactionUtil::GetFaction(this->faction);
-  CSVRow unit_stats(LookupUnitRow(name,fac));
+  CSVRow unit_stats(LookupUnitRow(this->name,fac));
   unsigned int num_chunks = unit_stats.success()?atoi(unit_stats["Num_Chunks"].c_str()):0;
+  vector <unsigned int> meshsizes;
   if (num_chunks&&unit_stats.success()) {
     size_t i;
     std::vector<Mesh *> nw;   
@@ -69,7 +69,7 @@ void GameUnit<UnitType>::Split (int level) {
     std::string scalestr=UniverseUtil::LookupUnitStat(name,fac,"Unit_Scale");
     int scale=atoi(scalestr.c_str());
     if (scale==0) scale=1;
-    AddMeshes(nw,randomstartframe,randomstartseconds,scale,chunkname,faction,this->getFlightgroup());
+    meshsizes=AddMeshes(nw,randomstartframe,randomstartseconds,scale,chunkname,this->faction,this->getFlightgroup());
     VSFileSystem::current_type.pop_back();
     VSFileSystem::current_subdirectory.pop_back();    
     VSFileSystem::current_path.pop_back();
@@ -99,15 +99,21 @@ void GameUnit<UnitType>::Split (int level) {
       }
       old = nw;
     }
+    for (size_t i=0;i<old.size();++i){
+      meshsizes.push_back(1);
+    }
   }
   old.push_back(NULL);//push back shield
   if (shield)
     delete shield;
   nm = old.size()-1;
-  for (i=0;i<nm;i++) {
+  unsigned int k=0;
+  for (i=0;i<meshsizes.size();i++) {
     Unit * splitsub;
     std::vector<Mesh *> tempmeshes;
-    tempmeshes.push_back (old[i]);
+    for (unsigned int j=0;j<meshsizes[i]&&k<old.size();++j,++k){
+      tempmeshes.push_back (old[k]);
+    }
     this->SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,this->faction));
     splitsub->hull = 1000;
     splitsub->Mass = debrismassmult*splitsub->Mass/level;

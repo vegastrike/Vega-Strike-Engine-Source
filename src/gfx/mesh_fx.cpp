@@ -3,7 +3,7 @@
 #define MAXLOCALFX 6
 static float startpotency = 20;
 static float endpotency = 4;
-static float flickertime = 5;
+static float flickertime = 3.5;
 const float mindamage=.1;
 static void AvLights (float target[4], const float  other[4]) {
   target[0] = .5*(target[0] + other[0]);
