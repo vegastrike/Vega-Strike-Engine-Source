@@ -96,6 +96,8 @@ protected:
   int nummesh()const {return ((int)meshdata.size())-1;}
 
 public:
+
+	
   //vector <Mesh *> StealMeshes();
   ///Process all meshes to be deleted
   ///Split this mesh with into 2^level submeshes at arbitrary planes
@@ -226,6 +228,36 @@ public:
 	  int damageiterator;
 	};
 	*/
+	inline Matrix WarpMatrix ( const Matrix& ctm) const{
+		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"));
+		static float cutoffcutoff=  cutoff*cutoff;
+		
+		if (GetVelocity().MagnitudeSquared()<cutoffcutoff) {
+			return ctm;
+		}else {
+			Matrix k(ctm);
+			float speed = GetVelocity().Magnitude();
+			float stretchlength = (speed-cutoff)/cutoff;
+			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
+			if (stretchlength>maxstretch)
+				stretchlength= maxstretch;
+			Vector v(Vector(1,1,1)+ctm.getR().Scale(stretchlength).Vabs());
+			
+			k.r[0]*=v.i;
+			k.r[1]*=v.j;
+			k.r[2]*=v.k;
+			
+			k.r[3]*=v.i;
+			k.r[4]*=v.j;
+			k.r[5]*=v.k;
+			
+			k.r[6]*=v.i;
+			k.r[7]*=v.j;
+			k.r[8]*=v.k;		
+			return k;
+		}
+	}
+
 };
 
 /****************************************************************************/
