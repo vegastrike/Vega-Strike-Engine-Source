@@ -75,9 +75,9 @@ void NavigationSystem::mouseMotion (int x, int y){
 void NavigationSystem::mouseClick (int button, int state, int x, int y){
 	mousex=x;
 	mousey=y;
-	if (state==WS_MOUSE_DOWN)
+	if (state==WS_MOUSE_DOWN) {
 		mousestat|=(1<<lookupMouseButton(button));
-	else
+	}else if (button!=WS_WHEEL_UP&&button!=WS_WHEEL_DOWN)
 		mousestat&= (~(1<<lookupMouseButton(button)));
 }
 
@@ -124,12 +124,18 @@ void NavigationSystem::Setup()
 	mouse_previous_state[0] = 0;	//	could have used a loop, but this way the system uses immediate instead of R type.
 	mouse_previous_state[1] = 0;
 	mouse_previous_state[2] = 0;
+	mouse_previous_state[3] = 0;
+	mouse_previous_state[4] = 0;
 	mouse_wentup[0] = 0;
 	mouse_wentup[1] = 0;
 	mouse_wentup[2] = 0;
+	mouse_wentup[3] = 0;
+	mouse_wentup[4] = 0;
 	mouse_wentdown[0] = 0;
 	mouse_wentdown[1] = 0;
 	mouse_wentdown[2] = 0;
+	mouse_wentdown[3] = 0;
+	mouse_wentdown[4] = 0;
 	mouse_x_previous = (-1+float(mousex)/(.5*g_game.x_resolution));
 	mouse_y_previous = (1+float(-1*mousey)/(.5*g_game.y_resolution));
 
@@ -803,18 +809,20 @@ void NavigationSystem::SetMouseFlipStatus()
 //	getMouseButtonStatus()&1 = mouse button 1 standard = button 1 VS
 //	getMouseButtonStatus()&2 = mouse button 3 standard = button 2 VS
 //	getMouseButtonStatus()&4 = mouse button 2 standard = button 3 VS
+//	getMouseButtonStatus()&8 = mouse wheel up
+//	getMouseButtonStatus()&16 = mouse wheel down
 
-	//	use the VS scheme, (1 2 3) , instead of standard (1 3 2)
+	//	use the VS scheme, (1 2 3 4 5) , instead of standard (1 3 2 4 5)
 	//	state 0 = up
 	//	state 1 = down
 
 
 	bool status = 0;
 	int i;
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < 5; i++)
 	{
 
-		status = ( getMouseButtonStatus()&(1<<i) );
+		status = ( getMouseButtonStatus()&(1<<i) )?1:0;
 
 		if( (status == 1)&&(mouse_previous_state[i] == 0) )
 		{
@@ -832,11 +840,14 @@ void NavigationSystem::SetMouseFlipStatus()
 		{
 			mouse_wentup[i] = 0;
 			mouse_wentdown[i] = 0;
+			if (i==3||i==4)
+				mousestat&= (~(1<<i));
+
 		}
 	}
 
 
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < 5; i++)
 	{
 		mouse_previous_state[i] = (getMouseButtonStatus()&(1<<i));	//	button 'i+1' state VS
 	}
@@ -1445,11 +1456,17 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
 
 	//	Set the prespective zoom level
 	//	**********************************
-	if(	(mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current, mouse_y_current))
+	if(	((mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current, mouse_y_current)) || (mouse_wentdown[3]||mouse_wentdown[4]))
 	{
 		if(system_vs_galaxy)
 		{
-			zoom_s = zoom_s + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
+			if (mouse_wentdown[3]) {
+				zoom_s += 1.2;
+			} else if (mouse_wentdown[4]) {
+				zoom_s -= 1.2;
+			} else {
+				zoom_s = zoom_s + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
+			}
 	//		if(zoom < 1.0)
 	//			zoom = 1.0;
 			static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
@@ -1460,7 +1477,13 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
 		}
 		else
 		{
-			zoom = zoom + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
+			if (mouse_wentdown[3]) {
+				zoom += 1.2;
+			} else if (mouse_wentdown[4]) {
+				zoom -= 1.2;
+			} else {
+				zoom = zoom + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
+			}
 	//		if(zoom < 1.0)
 	//			zoom = 1.0;
 			static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));

@@ -120,9 +120,9 @@ float mouse_y_previous;
 float mouse_x_current;
 float mouse_y_current;
 signed char draw;
-bool mouse_previous_state[3];
-bool mouse_wentup[3];
-bool mouse_wentdown[3];
+bool mouse_previous_state[5];
+bool mouse_wentup[5];
+bool mouse_wentdown[5];
 UnitContainer currentselection;
 GFXColor* factioncolours;
 
