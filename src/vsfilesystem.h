@@ -101,6 +101,7 @@ namespace VSFileSystem
 
 	extern vector< vector <string> >	SubDirectories;		// Subdirectories where we should look for VSFileTypes files
 	extern vector<string>				Directories;
+	extern vector<string>				Rootdir;			// Root directories where we should look for VSFileTypes files
 
 	extern vector<int>					UseVolumes;			// Tells us for which VSFileType we will use volumes
 															// 0 tells FileType doesn't use volumes
