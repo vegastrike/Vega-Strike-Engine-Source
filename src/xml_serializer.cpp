@@ -101,7 +101,7 @@ void XMLSerializer::Write (const char * modificationname) {
 
   static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
   
-  MakeSharedStarSysPath (savedunitpath);
+  MakeSharedPath (savedunitpath);
   string retdir =MakeSharedPath (savedunitpath+string("/")+savedir);
   FILE * fp =fopen ((retdir+string("/")+filename).c_str(),"w");
   if (!fp) {

@@ -335,7 +335,8 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   }
   string targetstr=string(st)+"\n";
   int msglen=targetstr.size();
-  int rows_needed=msglen/cols;
+  
+  int rows_needed=msglen/(cols>0?cols:1);
 
   MessageCenter *mc=mission->msgcenter;
   

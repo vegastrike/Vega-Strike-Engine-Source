@@ -23,39 +23,58 @@ std::string datadir;
 std::vector <std::string> curdir;//current dir starting from datadir
 std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
 void changehome(bool makehomedir) {
+  static char pw_dir[2000];
 #ifndef _WIN32
   struct passwd *pwent;
   pwent = getpwuid (getuid());
   vssetdir (pwent->pw_dir);
+#else
+  if (!makehomedir)
+    vssetdir (pw_dir);
+#endif
   if (makehomedir) {
-    if (chdir (HOMESUBDIR)==-1) {
+  getcwd (pw_dir,1998);
+  vssetdir (pw_dir);
+  if (chdir (HOMESUBDIR)==-1) {
       //      system ("mkdir " HOMESUBDIR);
-      mkdir (HOMESUBDIR, 0xFFFFFFFF);
+      mkdir (HOMESUBDIR
+#ifndef _WIN32		  
+		  , 0xFFFFFFFF
+#endif		  
+		  );
     } else {
       chdir ("..");
     }
+
     if (chdir (HOMESUBDIR "/generatedbsp")==-1) {
-      mkdir (HOMESUBDIR "/generatedbsp", 0xFFFFFFFF);
-      //system ("mkdir " HOMESUBDIR "/generatedbsp");
+		mkdir (HOMESUBDIR "/generatedbsp"
+#ifndef _WIN32
+			, 0xFFFFFFFF
+#endif
+		);
+
+		
+		//system ("mkdir " HOMESUBDIR "/generatedbsp");
     }else {
-      chdir (pwent->pw_dir);
+		chdir (pw_dir);
     }
 
     if (chdir (HOMESUBDIR "/save")==-1) {
-      mkdir (HOMESUBDIR "/save", 0xFFFFFFFF);
+      mkdir (HOMESUBDIR "/save"
+#ifndef _WIN32
+		  , 0xFFFFFFFF
+#endif		  
+		  );
       //system ("mkdir " HOMESUBDIR "/generatedbsp");
     }else {
-      chdir (pwent->pw_dir);
+      chdir (pw_dir);
     }
   }
   vschdir (HOMESUBDIR);
-#endif
 }
 void returnfromhome() {
-#ifndef _WIN32
   vscdup();
   vsresetdir();
-#endif
 }
 
 char pwd[65536];
@@ -191,11 +210,7 @@ std::string MakeSharedPathReturnHome (const std::string &newpath) {
   }
   returnfromhome();
   return 
-#ifndef _WIN32
-    string(pwd)+string("/");
-#else
-    string ("./");
-#endif	  
+    string(pwd)+string("/");	  
 }
 std::string MakeSharedPath (const std::string &s) {
   return MakeSharedPathReturnHome (s)+s;
