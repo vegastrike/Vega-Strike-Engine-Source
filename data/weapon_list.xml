@@ -1,14 +1,14 @@
 <Weapons>
-<Beam name="Laser" mountsize="light"> 
+<Bolt name="Laser" mountsize="light"> 
 <Energy rate=".1" stability="4" refire=".2">
 </Energy>
 <Damage rate="36" damage="36" longrange="1">
 </Damage>
 <Distance speed="140" radialspeed="1" radius=".5" length="1.5" pulsespeed="15" range="800" >
 </Distance>
-<Appearance file="bolt.bmp" soundwav="bolt.wav" r="1" g="0" b="0" a="1" >
+<Appearance file="bolt.bmp" soundwav="sfx07.wav" r="1" g="0" b="0" a="1" >
 </Appearance>
-</Beam>
+</Bolt>
 
 <Missile name="Dumbfire" mountsize="light-missile">
 <Locktime time="3">
@@ -19,11 +19,11 @@
 </Damage>
 <Distance speed="150" radialspeed=".8" radius=".3" pulsespeed="15" range="2000" >
 </Distance>
-<Appearance file="Dumbfire.xunit" >
+<Appearance file="Dumbfire.xunit" soundwav="sfx00.wav">
 </Appearance>
 </Missile>
 
-<Missile name="HeatSeeker" size="Medium-Missile">
+<Missile name="HeatSeeker" mountsize="Medium-Missile">
 <Locktime time= "3">
 </Locktime>
 <Energy rate="0" stability="6" refire=".3">

@@ -15,10 +15,7 @@
 		<Engine Afterburner="1300.000000" Forward="359.466675" Retro="314.533340" Left="179.733337" Right="179.733337" Top="179.733337" Bottom="179.733337"/>
 		<Maneuver yaw="4554.000000" pitch="4554.000000" roll="4554.000000"/>
 	</Thrust>
-<!--	<Sound enginewav="bolt.wav">
-
-	</Sound>
--->
+	<Sound>	</Sound>
 	<Defense HudImage="rapier-top.spr">
 		<Armor front="50" right="30" left="30" back="40"/>
 		<Shields front="80" back="70" recharge="5.500000"/>
