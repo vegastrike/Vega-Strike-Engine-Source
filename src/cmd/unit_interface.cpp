@@ -1310,8 +1310,15 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 	}
 }
 extern string MakeUnitXMLPretty (string, Unit *);
+string replaceNewline (string s) {
+	for (string::iterator i= s.begin();i!=s.end();++i) {
+		if (*i=='\n')
+			*i='/';
+	}
+	return s;
+}
 std::string GetShipStats(Unit *un) {
-	return MakeUnitXMLPretty (un->WriteUnitString(),un);
+	return replaceNewline(MakeUnitXMLPretty (un->WriteUnitString(),un));
 }
 
 std::string GetNumKills(Unit *un) {
@@ -1321,7 +1328,7 @@ std::string GetNumKills(Unit *un) {
 	if (killlist->size()>0) {
 		text+=" | Kills";
 	}
-	text+="\n";
+	text+="\\";
 	int numfactions = FactionUtil::GetNumFactions();
 	int i = 0;
 	string factionname = "factionname";
@@ -1342,7 +1349,7 @@ std::string GetNumKills(Unit *un) {
 			text+=" | ";
 			text += XMLSupport::tostring ((int)(*killlist)[i]);
 		}
-		text+="\n";
+		text+="\\";
 		i+=1;
 	}
 	if (i<killlist->size()) {

@@ -287,8 +287,12 @@ FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(QVector(0
   type=FACING;
   subtype = STARGET;
   speed=float(.00001);
-
-  
+  useitts=true;
+  static bool alwaysuseitts = XMLSupport::parse_bool(vs_config->getVariable ("AI","always_use_itts","false"));
+  if (!alwaysuseitts) {
+	  if (rand()>=g_game.difficulty*RAND_MAX)
+		  useitts=false;
+  }
 }
 FaceTargetITTS::~FaceTargetITTS () {
 #ifdef ORDERDEBUG
@@ -311,7 +315,7 @@ void FaceTargetITTS::Execute() {
 		  speed = FLT_MAX;
 	  }
   }
-  SetDest(target->PositionITTS(parent->Position(),parent->cumulative_velocity,speed));
+  SetDest(useitts?target->PositionITTS(parent->Position(),parent->cumulative_velocity,speed):target->Position());
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();

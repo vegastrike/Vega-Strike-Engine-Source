@@ -484,6 +484,8 @@ void InitializeInput() {
 //Cockpit *cockpit;
 
 void IncrementStartupVariable () {
+	if (mission->getVariable ("savegame","").length()==0)
+		return;
 	int len=getSaveDataLength (0,"436457r1K3574r7uP71m35");
 	float var=FLT_MAX;
 	if (len<=0) {

@@ -653,10 +653,18 @@ void NavigationSystem::DrawMission()
 //	float love_from_aera = FactionUtil::getRelation(3);
 
 
+	TextPlane displayname;
+	displayname.col = GFXColor(1,1,1,1);
+	displayname.SetSize (.65,-.8);
+	displayname.SetPos(originx+ (.1*deltax)+.4,   originy/*+(1*deltay)*/);
+	displayname.SetText ("Welcome to #00FFFFVega Strike#000000\nUse #8080FFTab#000000 to afterburn\n#8080FF+,-#000000 act as cruise controll\nYour ship undocks stopped;\nhit #8080FF+ or /#000000 to go to full speed,\n#8080FFarrows#000000 steer your ship.\nThe #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them\nThe #8080FFA or a#000000 key activates insystem warp\n to cross immense distances to your target.\nTime Compression: #8080FFF9; F10#000000 resets.\nBuy a jump drive for 10000\nand then fly to a blue ball and press #8080FFj#000000 to warp\nto a near star.\nTarget a base or planet.\nWhen you get close a green box will appear.\nInside the box, #8080FFd#000000 will land.\nBe sure to click save/load at the base,\nand select the Save option.\n\nTo exit this help menu press #8080FFshift-M#000000\n#8080FFShift-M#000000 will bring up this help menu\nany time.\nThe buttons to the right are used to access\nThe galaxy map and system map.");
+	displayname.SetCharSize (1,1);
+	displayname.Draw();
+
+
 	GFXEnable(TEXTURE0);
 }
 //	**********************************
-
 
 
 
@@ -688,6 +696,7 @@ void NavigationSystem::DrawShip()
 	
 	TextPlane displayname;
 	displayname.col = GFXColor(.3,1,.3,1);
+	displayname.SetSize (.65,-.8);
 	displayname.SetPos(originx+ (.1*deltax),   originy/*+(1*deltay)*/);
 	displayname.SetText (writethis);
 	displayname.SetCharSize (1,1);
