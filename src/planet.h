@@ -69,7 +69,7 @@ class Planet : public Unit {
     UnitCollection planetStack;
     Iterator *pos;
   public:
-    PlanetIterator(Planet *p) : planetStack() { 
+    PlanetIterator(Planet *p) : planetStack(true) { 
       planetStack.append(p);
       pos = planetStack.createIterator();
     }

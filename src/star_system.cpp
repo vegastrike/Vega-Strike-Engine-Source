@@ -16,9 +16,9 @@ static Unit *earth;
 
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
-  drawList(new UnitCollection()),
-  units(new UnitCollection()), 
-  missiles(new UnitCollection()), tp(new TextPlane("9x12.fon")) {
+  drawList(new UnitCollection(true)),//what the hell is this...maybe FALSE FIXME
+  units(new UnitCollection(true)), 
+  missiles(new UnitCollection(true)), tp(new TextPlane("9x12.fon")) {
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
   primaries->SetPosition(0,0,0);

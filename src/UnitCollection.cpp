@@ -94,18 +94,19 @@ void UnitCollection::UnitIterator::postinsert(Unit *unit) {
 }
 
 void UnitCollection::UnitIterator::remove() {
-  if(pos->next!=NULL) {
-    delete pos->next;
+  if(pos->next!=NULL&&pos->unit!=NULL) {
     pos->next = pos->next->next;
+    free (pos->next);
   }
 }
 
 Unit *UnitCollection::UnitIterator::current() {
   if(pos->next!=NULL) {
     if (persist) {
-      while (pos->next->unit->Killed()) {
+      while (pos->next&&pos->next->unit->Killed()) {
 	pos->next->unit->UnRef();
 	remove();
+	pos->next = pos->next->next;
 	if (pos->next==NULL)
 	  return NULL;
       }

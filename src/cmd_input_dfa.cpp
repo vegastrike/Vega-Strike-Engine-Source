@@ -170,7 +170,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   CurDFA->SelectBox.SetPosition (v.i, v.j);
     Unit * sel = CurDFA->clickList->requestShip(x,y);
     if (sel!=NULL) {
-      UnitCollection *tmpcollection=new UnitCollection;
+      UnitCollection *tmpcollection=new UnitCollection(true);
       tmpcollection->append(sel);
       if (mod&ACTIVE_SHIFT) {      
 	CurDFA->appendCollection(tmpcollection);
@@ -241,7 +241,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     CurDFA->prevy=y;
     Unit * sel = CurDFA->clickList->requestShip(x,y);
     if (sel!=NULL) {
-      UnitCollection *tmpcollection=new UnitCollection;
+      UnitCollection *tmpcollection=new UnitCollection(true);
       tmpcollection->append(sel);
       fprintf (stderr,"None::replacing Single Unit");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target\n");else fprintf (stderr," to select\n");
 

@@ -59,7 +59,7 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
-  killed==false;
+  killed=false;
   ucref=0;
   meshdata = NULL;
   subunits = NULL;

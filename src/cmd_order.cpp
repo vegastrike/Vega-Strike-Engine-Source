@@ -85,7 +85,7 @@ bool Order::AttachOrder (UnitCollection *targets1) {
   if (targets)
     delete targets;
   
-  targets = new UnitCollection();
+  targets = new UnitCollection(true);
   UnitCollection::UnitIterator *iter = targets1->createIterator();
   Unit *u;
   while(0!=(u = iter->current())) {
@@ -103,7 +103,7 @@ bool Order::AttachSelfOrder (UnitCollection *targets1) {
   if (targets1==NULL) {
     group = NULL;
   } else {
-    group = new UnitCollection();
+    group = new UnitCollection(true);
     UnitCollection::UnitIterator *iter = targets1->createIterator();
     Unit *u;
     while(0!=(u = iter->current())) {

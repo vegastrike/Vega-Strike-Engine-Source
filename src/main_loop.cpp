@@ -571,7 +571,8 @@ void destroyObjects() {
 
 void main_loop() {
   static int state = 0;
-
+  if ((rand()%1000)==29)
+    fighters[0]->Destroy();
   _GFX->StartDraw();
   
   //bg2->Draw();

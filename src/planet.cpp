@@ -67,6 +67,7 @@ Planet::Planet()  : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSa
 
 Planet::Planet(char *filename) : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
   Init();
+  killed=false;
 
   FILE *fp = fopen(filename, "r");
   InitPlanet(fp);

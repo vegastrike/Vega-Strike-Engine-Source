@@ -42,7 +42,7 @@ ClickList::ClickList ( StarSystem *parSystem, UnitCollection *parIter) {
 
 UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int maxY) {
  
-    UnitCollection * uc = new UnitCollection;
+  UnitCollection * uc = new UnitCollection(true);///arrgh dumb last collection thing to cycel through ships
     if (minX==maxX||minY==maxY)
       return uc;//nothing in it
     UnitCollection::UnitIterator * UAye = uc->createIterator();
@@ -71,7 +71,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
 
 UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
   perplines = vector<Vector>();
-    UnitCollection * uc = new UnitCollection;
+    UnitCollection * uc = new UnitCollection (true);
     UnitCollection::UnitIterator * UAye = uc->createIterator();
     UnitCollection::UnitIterator * myParent = parentIter->createIterator();
     Unit * un;

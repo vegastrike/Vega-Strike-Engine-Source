@@ -23,7 +23,7 @@ class UnitCollection {
   } *units;
   bool persist;
  public:
-  UnitCollection(bool persistant=false) : units(new UnitListNode(NULL)),persist(persistant) { }
+  UnitCollection(bool persistant) : units(new UnitListNode(NULL)),persist(persistant) { }
   ~UnitCollection();
   class UnitIterator : public Iterator {
   private:
