@@ -3872,8 +3872,10 @@ const Unit * makeTemplateUpgrade (string name, int faction) {
     lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
   return lim;
 }
+extern const Unit * loadUnitByCache(std::string name,int faction);
 bool Unit::RepairUpgrade () {
-  const Unit * temprate = makeFinalBlankUpgrade (name,faction);
+	int upfac = FactionUtil::GetFaction("upgrades");
+	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
@@ -3889,7 +3891,25 @@ bool Unit::RepairUpgrade () {
             pct = 1;
         }
     }
-    return success && pct>0;
+	bool ret = success && pct>0;
+	if (ret) {
+		Unit * mpl = UnitFactory::getMasterPartList();
+		for (unsigned int i=0;i<mpl->numCargo();++i) {
+			if (mpl->GetCargo(i).category.find("upgrades")==0) {
+				const Unit * up = loadUnitByCache(mpl->GetCargo(i).content,upfac);
+				//now we analyzify up!
+				if (up->MaxShieldVal()==MaxShieldVal()&&up->shield.recharge>shield.recharge) {
+					shield.recharge = up->shield.recharge;
+					
+				}
+				if (up->maxenergy==maxenergy&&up->recharge>recharge){
+					recharge = up->recharge;
+				}
+			}
+		}
+		
+	}
+    return ret;
 }
 /***********************************************************************************/
 /**** UNIT_CARGO STUFF                                                            */

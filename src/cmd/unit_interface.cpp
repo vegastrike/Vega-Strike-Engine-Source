@@ -36,6 +36,13 @@ static const char *miss_desc="mission_descriptions";
 using std::string;
 extern const Unit * makeFinalBlankUpgrade (string name, int faction);
 extern const Unit * makeTemplateUpgrade (string name, int faction);
+const Unit * loadUnitByCache(std::string name,int faction) {
+      const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(name,faction));
+      if (!temprate)
+		  temprate = UnitConstCache::setCachedConst(StringIntKey(name,faction),UnitFactory::createUnit(name.c_str(),true,faction));
+	  return temprate;
+}
+
 static string beautify (const std::string &input) {
   string ret = input;
   string::iterator i=ret.begin();
