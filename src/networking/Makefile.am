@@ -40,11 +40,14 @@ libnetgeneric = \
 	accountsxml.cpp		\
 	accountsxml.h		\
 	acctserver.h		\
+	client.cpp		\
 	client.h		\
-	clientstructs.cpp		\
+	vsnet_clientstate.cpp		\
 	const.h		\
 	cubicsplines.cpp		\
 	cubicsplines.h		\
+	prediction.cpp		\
+	prediction.h		\
 	GCPtr.h		\
 	inet.cpp		\
 	inet.h		\

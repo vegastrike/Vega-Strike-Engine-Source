@@ -158,11 +158,6 @@ class	NetClient
 		// int		isEnabled() { return enabled; }
 		// void	setNetworkedMode( bool mode) { enabled = mode;}
 
-		/********************* Prediction stuff **********************/
-		void			predict( ObjSerial clientid);
-		void			init_interpolation( ObjSerial clientid);
-		Transformation	spline_interpolate( ObjSerial clientid, double blend);
-
 		/********************* Weapon stuff **********************/
 		// Functions called when we receive a firing order from the server (other clients or ai or us)
 		void	scanRequest( Unit * target);

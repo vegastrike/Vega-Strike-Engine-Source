@@ -36,6 +36,7 @@
 
 class Unit;
 class UnitContainer;
+class Prediction;
 
 extern VegaConfig *vs_config;
 int		md5SumFile( const char * filename, unsigned char * digest);
@@ -50,8 +51,8 @@ class	Client
 public:
 	/* Network and identification properties */
 	UnitContainer	game_unit;
-	CubicSpline		spline;
 	AddressIP		cltadr;
+	Prediction *	prediction;
 	bool            is_tcp;
 	SOCKETALT		sock;
 	//ObjSerial		serial;
@@ -78,39 +79,12 @@ public:
 
     string          _disconnectReason;
 
-	Client()
-	{
-		//memset( &old_state, 0, sizeof( ClientState));
-		latest_timestamp=0;
-		old_timestamp=0;
-		latest_timeout=0;
-		old_timeout=0;
-		deltatime=0;
-		zone = 0;
-		ingame = false;
-		webcam = 0;
-		portaudio = 0;
-		secured = 0;
-		jumpfile="";
-        _disconnectReason = "none";
-		comm_freq = MIN_COMMFREQ;
-	}
+	Client();
+	Client( Prediction * pred);
+	Client( SOCKETALT& s, bool tcp );
 
-	Client( SOCKETALT& s, bool tcp )
-	    : is_tcp(tcp)
-	    , sock(s)
-	{
-		Client::Client();
-	}
-
-	inline bool isTcp( ) const {
-	    return is_tcp;
-	}
-
-	inline bool isUdp( ) const {
-	    return !is_tcp;
-	}
-
+	inline bool isTcp( ) const;
+	inline bool isUdp( ) const;
 	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
 
 private:
