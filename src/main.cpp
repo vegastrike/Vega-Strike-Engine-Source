@@ -80,11 +80,12 @@ void cleanup(void)
 {
   printf ("Thank you for playing!\n");
   _Universe->WriteSaveGame();
+  winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
   //destroyObjects();
-  Unit::ProcessDeleteQueue();
-//  delete _Universe;
+  //Unit::ProcessDeleteQueue();
+  delete _Universe;
     delete [] CONFIGFILE;
 
   
