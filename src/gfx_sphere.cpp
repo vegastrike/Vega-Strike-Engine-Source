@@ -80,8 +80,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
        vertexlist[j*2+fir].s = insideout?1-s:s;
        vertexlist[j*2+fir].t = t;
        vertexlist[j*2+fir].x = x * radius;
-       vertexlist[j*2+fir].z = y * radius;
-       vertexlist[j*2+fir].y = -z * radius;
+       vertexlist[j*2+fir].z = -y * radius;
+       vertexlist[j*2+fir].y = z * radius;
 
 
        x = -sin(theta) * sin(rho + drho);
@@ -94,8 +94,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
        vertexlist[j*2+sec].s = insideout?1-s:s;
        vertexlist[j*2+sec].t = t - dt;
        vertexlist[j*2+sec].x = x * radius;
-       vertexlist[j*2+sec].z = y * radius;
-       vertexlist[j*2+sec].y = -z * radius;
+       vertexlist[j*2+sec].z = -y * radius;
+       vertexlist[j*2+sec].y = z * radius;
 
        s += ds;
      }
@@ -173,7 +173,7 @@ void SphereMesh::ProcessDrawQueue() {
     Matrix tmp2;
     Identity (tmp);
     if (!centered){
-        VectorToMatrix (tmp,Vector (cos (theta),sin(theta),0),Vector(0,0,1), Vector (-sin (theta),0,cos(theta)));
+        VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)),Vector(0,1,0), Vector (-sin (theta),0,cos(theta)));
     }
     MultMatrix (tmp2, c.mat, tmp);
     GFXLoadMatrix(MODEL, tmp2);
