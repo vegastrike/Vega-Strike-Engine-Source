@@ -14,7 +14,7 @@ AI *PlanetaryOrbit::Execute() {
 
 /* Move this into a Sphere class!!! */
 
-Planet::Planet(FILE *fp) : Unit(), radius(0.0f) {
+void Planet::InitPlanet(FILE *fp) {
   InitUnit();
 
   double orbital_radius, orbital_velocity, orbital_position;
@@ -31,7 +31,8 @@ Planet::Planet(FILE *fp) : Unit(), radius(0.0f) {
   subunits = new Unit*[numsubunit];
 
   for(a=0; a<numsubunit; a++) {
-    subunits[a] = new Planet(fp);
+    subunits[a] = new Planet();
+    ((Planet*)subunits[a])->InitPlanet(fp);
   }
   
   meshdata = new Mesh*[1];
@@ -40,11 +41,17 @@ Planet::Planet(FILE *fp) : Unit(), radius(0.0f) {
   fpos = ftell(fp);
 }
 
+Planet::Planet()  : Unit(), radius(0.0f) {
+  InitUnit();
+
+  SetAI(new AI()); // no behavior
+}
+
 Planet::Planet(char *filename) : Unit(), radius(0.0f) {
   InitUnit();
 
   FILE *fp = fopen(filename, "r");
-  *this = *(new Planet(fp)); // Take this out!!!
+  InitPlanet(fp);
   SetAI(new AI()); // no behavior
   cerr << "\nPlanet: " << this << endl;
   fclose(fp);

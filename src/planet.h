@@ -34,9 +34,11 @@ class Planet : public Unit {
   float radius;
   float gravity;
  public:
-  Planet(FILE *fp);
+  Planet();
   Planet(char *filename);
   ~Planet();
+
+  void InitPlanet(FILE *fp);
 
   void gravitate(UnitCollection *units, Matrix t);
   void gravitate(UnitCollection *units);
