@@ -162,9 +162,10 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	{
 		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << clt->serial << " )= --------------------------------------" << endl;
 		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
-		// Get the save parts in the buffer
+		// Get the save parts in a string array
 		vector<string> saves;
 		saves = FileUtil::GetSaveFromBuffer( packeta.getData()+2*NAMELEN);
+		// Put the save parts in buffers in order to load them properly
 		char * savebuf = new char[saves[1].length()+1];
 		memcpy( savebuf, saves[1].c_str(), saves[1].length());
 		savebuf[saves[1].length()] = 0;
@@ -172,6 +173,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		memcpy( xmlbuf, saves[0].c_str(), saves[0].length());
 		xmlbuf[saves[0].length()] = 0;
 		cout<<"XML="<<saves[0].length()<<" bytes - SAVE="<<saves[1].length()<<" bytes"<<endl;
+
 		string PLAYER_CALLSIGN( clt->name);
 		QVector tmpvec( 0, 0, 0), safevec;
 		bool update = true;
@@ -215,14 +217,6 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cp->SetParent( un,"","",safevec);
 		cout<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 		// The Unit will be added in the addClient function
-
-		//string strname( name);
-		// Write temp XML file for unit
-		//string tmp;
-		//tmp = tmpdir+name+".xml";
-		//WriteXMLUnit( tmp.c_str(), xml, xml_size);
-		// Then load it in the Unit struct
-		//LoadXMLUnit( clt->game_unit, tmp.c_str(), NULL);
 
         Packet packet2;
 		packet2.send( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
