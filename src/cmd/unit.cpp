@@ -903,7 +903,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   }
   if (On_Screen) {
     Vector Scale (1,1,Velocity.MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-    halos.Draw(*ctm,Scale,haloalpha);
+    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
   }
 }
 void Unit::PrimeOrders () {

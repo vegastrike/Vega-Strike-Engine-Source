@@ -97,7 +97,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_ResetTimeCompression){
       vi=callResetTimeCompression(node,mode);
     }
-    else if(method_id==CMT_STD_getSystemName){
+    else if(0) {
       vi=callGetSystemName(node,mode);
     }
     else if(method_id==CMT_STD_getSystemFile){
@@ -411,15 +411,17 @@ varInst *Mission::callGetSystemName(missionNode *node,int mode){
   }
   return vi;
 }
-varInst *Mission::callGetSystemFile (missionNode *node,int mode) {
+varInst *Mission::callGetSystemFile (missionNode *node,int mode, StarSystem * ss) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_OBJECT;
   vi->objectname="string";
 
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    StarSystem *ssystem=_Universe->activeStarSystem();
-    string sysname=ssystem->getFileName();
+    if (ss==NULL) {
+      ss=_Universe->activeStarSystem();
+    }
+    string sysname=ss->getFileName();
     vi=call_string_new(node,mode,sysname);
   }
   return vi;
@@ -912,8 +914,7 @@ void Mission::initCallbackMaps(){
   module_std_map["Rnd"]=CMT_STD_Rnd;
   module_std_map["getGameTime"]=CMT_STD_getGameTime;
   module_std_map["ResetTimeCompression"]=CMT_STD_ResetTimeCompression;
-  module_std_map["GetSystemName"]=CMT_STD_getSystemName;
-  module_std_map["getSystemName"]=CMT_STD_getSystemName;
+  module_std_map["GetSystemName"]=CMT_STD_getSystemFile;
   module_std_map["getNumAdjacentSystems"]=CMT_STD_getNumAdjacentSystems;
   module_std_map["getGalaxyProperty"]=CMT_STD_getGalaxyProperty;
   module_std_map["getAdjacentSystem"]=CMT_STD_getAdjacentSystem;
@@ -1056,7 +1057,7 @@ void Mission::initCallbackMaps(){
     module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
     module_unit_map["communicateTo"]=CMT_UNIT_communicateTo ;
     module_unit_map["commAnimation"]=CMT_UNIT_commAnimation ;
-
+    module_unit_map["correctStarSystem"]=  CMT_UNIT_correctStarSystem ;//useful when comparing _jumps_
     module_unit_map["switchFg"]=CMT_UNIT_switchFg ;
 
 

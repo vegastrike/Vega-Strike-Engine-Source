@@ -742,6 +742,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="order";
       viret->object=(void *)my_order;
     }
+    else if(method_id==CMT_UNIT_correctStarSystem){
+      bool ret=false;
+      if(mode==SCRIPT_RUN){
+	ret = my_unit->InCorrectStarSystem(_Universe->activeStarSystem());
+	
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=ret;
+
+    }
     else if(method_id==CMT_UNIT_removeFromGame){
 
       if(mode==SCRIPT_RUN){

@@ -245,7 +245,7 @@ inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const 
     const vector <DockingPorts> d = target->DockingPortLocations();
     for (unsigned int i=0;i<d.size();i++) {
       float rad = d[i].radius/sqrt(2.0);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast()),rad ,CamP, CamQ, CamR,1);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-un->Position(),rad ,CamP, CamQ, CamR,1);
     }
   }
 }

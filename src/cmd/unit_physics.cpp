@@ -485,10 +485,12 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   Unit * target = Target();
   bool increase_locking=false;
   if (target&&cloaking<0/*-1 or -32768*/) {
-    Vector TargetPos (ToLocalCoordinates ((target->Position()-Position()).Cast())); 
-    TargetPos.Normalize(); 
-    if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
-      increase_locking=true;
+    if (target->isUnit()!=PLANETPTR) {
+      Vector TargetPos (ToLocalCoordinates ((target->Position()-Position()).Cast())); 
+      TargetPos.Normalize(); 
+      if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
+	increase_locking=true;
+      }
     }
   }
   static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");

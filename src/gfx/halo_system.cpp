@@ -34,7 +34,7 @@ void HaloSystem::SetSize (unsigned int which, const Vector &size) {
 void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
   halo[which].loc = loc;
 }
-void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha) {
+void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist) {
   if (scale.k>0) {
     vector<MyIndHalo>::iterator i = halo.begin();
     for (;i!=halo.end();++i) {
@@ -42,7 +42,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       Matrix m = trans;
       ScaleMatrix (m,Vector (scale.i*i->size.i,scale.j*i->size.j,scale.k*i->size.k));
       m.p = Transform (trans,i->loc);
-      mesh->Draw(50000000000000,m);    
+      mesh->Draw(50000000000000,m,1,halo_alpha,nebdist);    
     }
   }
 }

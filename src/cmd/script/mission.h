@@ -85,7 +85,6 @@ enum callback_module_std_type {
   CMT_STD_Rnd ,
   CMT_STD_getGameTime ,
   CMT_STD_ResetTimeCompression ,
-  CMT_STD_getSystemName ,
   CMT_STD_getSystemFile ,//useful when comparing _jumps_
   CMT_STD_getNumAdjacentSystems,
   CMT_STD_getAdjacentSystem,
@@ -250,6 +249,7 @@ enum callback_module_unit_type {
     CMT_UNIT_scannerNearestEnemyDist ,
     CMT_UNIT_scannerNearestFriendDist ,
     CMT_UNIT_scannerNearestShipDist ,
+  CMT_UNIT_correctStarSystem ,//useful when comparing _jumps_
   CMT_UNIT_getFgId ,
   CMT_UNIT_communicateTo ,
   CMT_UNIT_commAnimation ,
@@ -620,7 +620,7 @@ void printNode(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
  varInst * callResetTimeCompression(missionNode *node,int mode);
 varInst * callGetSystemName(missionNode *node,int mode);
-varInst * callGetSystemFile(missionNode *node,int mode);
+varInst * callGetSystemFile(missionNode *node,int mode, StarSystem * ss =NULL);
 varInst * callGetNumAdjacentSystems(missionNode *node,int mode);
 varInst * callGetGalaxyProperty(missionNode *node,int mode);
 varInst * callGetAdjacentSystem(missionNode *node,int mode);

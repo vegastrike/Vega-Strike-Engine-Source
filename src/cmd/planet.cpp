@@ -236,9 +236,14 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
   meshdata[1]=NULL;
   SetAngularVelocity (rotvel);
   static int numdock = XMLSupport::parse_int(vs_config->getVariable ("physics","num_planet_docking_port","4"));
-  static float planetdockportsize= XMLSupport::parse_float(vs_config->getVariable ("physics","plane_port_size","1.2"));
+  static float planetdockportsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_size","1.2"));
+  static float planetdockportminsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_min_size","300"));
   for (int pdp=0;pdp<numdock;pdp++) {
-    image->dockingports.push_back (DockingPorts (Vector(0,0,0),radius*planetdockportsize,true));
+    float dock = radius*planetdockportsize;
+    if (dock-radius<planetdockportminsize) {
+      dock = radius+planetdockportminsize;
+    }
+    image->dockingports.push_back (DockingPorts (Vector(0,0,0),dock,true));
   }
   if (ligh.size()>0) {
     static bool drawglow = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow","true"));
