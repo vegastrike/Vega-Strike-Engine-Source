@@ -664,7 +664,7 @@ string dodad (int which) {
 vector<string> shuffle (const vector<string> & inp) {
 	vector<string> retval;
 	for (unsigned int i=0;i<inp.size();++i) {
-		int index = genrand_int32()%(retval.size()+1);
+		int index = rand()%(retval.size()+1);
 		if (std::find(retval.begin(),retval.end(),inp[i])==retval.end()) {
 			retval.insert(retval.begin()+index,inp[i]);
 		}
