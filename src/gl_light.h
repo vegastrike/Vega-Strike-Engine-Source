@@ -35,6 +35,8 @@ class gfx_light: public GFXLight {
   void ResetProperties (const enum LIGHT_TARGET, const GFXColor&color);//sets properties, making minimum GL state changes for global,
   //for local lights, removes it from table, trashes it from GLlights, 
   //if enabled, puts it bakc in table.
+  void RemoveFromTable();
+  void TrashFromGLLights();
   LineCollide CalculateBounds ();//calculates bounds for the table!
 };
 struct OpenGLLights {

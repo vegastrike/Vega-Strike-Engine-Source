@@ -318,10 +318,9 @@ bool gfx_light::Create (const GFXLight & temp, bool global) {
     return foundclobberable!=-1;
 }
 void gfx_light::Kill() {
-    Disable();//first disables it...which may remove it from the light table.
+    Disable();//first disables it...which _will_ remove it from the light table.
     if (target!=-1) {
-      GLLights[target].index = -1;
-      GLLights[target].options = OpenGLLights::GLL_LOCAL;
+      TrashFromGLLights();//then if not already done, trash from GLlights;
     }
     target=-2;
     options = 0;
@@ -350,8 +349,12 @@ void gfx_light::ClobberGLLight (const int target) {
   glLightfv (gltarg,GL_AMBIENT, ambient);
 }
 
+
 void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXColor &color) {
-  
+  if (options & GFX_LOCAL_LIGHT) {
+    RemoveFromTable();
+    TrashFromGLLights();
+  }
   switch (light_targ) {
   case DIFFUSE:
     diffuse[0]= color.r;diffuse[1]=color.g;diffuse[2]=color.b;diffuse[3]=color.a;
@@ -390,7 +393,17 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
   }
 }
 
+void gfx_light::RemoveFromTable() {
 
+}
+
+void gfx_light::TrashFromGLLights () {
+  assert (target>0);
+  assert ((&(*_llights)[GLLights[target].index])==this);
+  GLLights[target].index = -1;
+  GLLights[target].options= OpenGLLights::GLL_LOCAL;
+  
+}
 
 //unimplemented
 void gfx_light::Enable() {
