@@ -1331,9 +1331,9 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   while (Decal.size()<xml->decals.size())
       Decal.push_back(NULL);
   Decal[0]=(TempGetTexture(0,factionname));
-  for (unsigned int i=1;i<xml->decals.size();i++) {
+  {for (unsigned int i=1;i<xml->decals.size();i++) {
       Decal[i]=(TempGetTexture(i,factionname));
-  }
+  }}
   while (Decal.back()==NULL&&Decal.size()>1) {
       Decal.pop_back();
   }
