@@ -13,7 +13,7 @@ class BoundingBox {
   void Transform (const Matrix &t);
   void Transform (const Transformation &transform);
   QVector Center (){
-    return QVector (.16666666666666666F*((mx+lx)+(my+ly)+(mz+lz)));
+    return QVector (((mx+lx)+(my+ly)+(mz+lz))).Scale(.16666666666666666);
   }
   float ZCenter () {
     return .166666666666666666F*(mx.k+lx.k+my.k+ly.k+mz.k+lz.k);
@@ -24,3 +24,4 @@ class BoundingBox {
 };
 
 #endif
+

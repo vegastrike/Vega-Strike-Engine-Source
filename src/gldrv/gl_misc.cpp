@@ -173,6 +173,10 @@ void /*GFXDRVAPI*/ GFXVertex3f(const double x, const double y, const double z)
 {
   glVertex3d(x,y,z);
 }
+void /*GFXDRVAPI*/ GFXVertex3d(const double x, const double y, const double z)
+{
+  glVertex3d(x,y,z);
+}
 void GFXVertexf (const Vector &v) {
   glVertex3f(v.i,v.j,v.k);
 }

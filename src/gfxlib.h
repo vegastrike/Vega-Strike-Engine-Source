@@ -312,6 +312,8 @@ void /*GFXDRVAPI*/ GFXNormal(const Vector &n);
 ///Specifies a vertex with 3 floats
 void /*GFXDRVAPI*/ GFXVertex3f(const float x, const float y, const float z = 1.0);
 void /*GFXDRVAPI*/ GFXVertex3f(const double x, const double y, const double z = 1.0);
+void /*GFXDRVAPI*/ GFXVertex3d(const double x, const double y, const double z = 1.0);
+
 ///Specifies a vertex with a vector
 void /*GFXDRVAPI*/ GFXVertexf (const Vector &v);
 void /*GFXDRVAPI*/ GFXVertexf (const QVector &v);

@@ -56,6 +56,7 @@ class XVector {
   void Yaw(QFLOAT rad);
   void Roll (QFLOAT rad);
   void Pitch(QFLOAT rad);
+  XVector Scale (QFLOAT s)const  {return XVector (s*i,s*j,s*k);}
   XVector Transform ( const XVector &p, const XVector &q, const XVector &r) {
     XVector tvect = XVector ( DotProduct(*this, p), DotProduct(*this,q), DotProduct(*this,r));
     *this = tvect;
@@ -87,11 +88,8 @@ class XVector {
   }
 };
 
-inline XVector operator* (const XVector &lval, const QFLOAT obj) {XVector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
 
 inline XVector operator/ (const XVector &lval, const QFLOAT obj) {XVector retval(lval.i / obj, lval.j / obj, lval.k / obj); return retval;}
-
-inline XVector operator* (const QFLOAT obj, const XVector &rval) {XVector retval(rval.i * obj, rval.j * obj, rval.k * obj); return retval;}
 
 inline XVector operator+= (XVector &lval, const XVector &obj) {lval.i += obj.i; lval.j += obj.j; lval.k += obj.k; return lval;}
 
@@ -110,6 +108,15 @@ inline QFLOAT DotProduct(const XVector &a,const XVector &b)
 	return (a.i*b.i+a.j*b.j+a.k*b.k);
 }
 
+inline XVector operator* (const XVector &lval, const double obj) {XVector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
+inline XVector operator* (const XVector &lval, const float obj) {XVector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
+
+inline XVector operator* (const double obj, const XVector &rval) {return XVector(rval.i * obj, rval.j * obj, rval.k * obj); }
+
+inline XVector operator* (const float obj, const XVector &rval) {return XVector(rval.i * obj, rval.j * obj, rval.k * obj); }
+inline XVector operator* (const XVector &lval, const int obj) {XVector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
+
+inline XVector operator* (const int obj, const XVector &rval) {return XVector(rval.i * obj, rval.j * obj, rval.k * obj); }
 
 
 

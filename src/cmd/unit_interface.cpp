@@ -212,23 +212,23 @@ public:
     string ButtonText;
     switch (mod) {
     case BRIEFINGMODE:
-      title="Mission Briefings:: Select Mission";
-      ButtonText="EndBriefing";
+      title="Mission Briefings - Select Mission ";
+      ButtonText="End";
       break;
     case NEWSMODE:
-      title="GNN Galaxy News Network";
-      ButtonText="AbsorbNews";
+      title="GNN Galaxy News Network      ";
+      ButtonText="ReadNews";
       break;
     case BUYMODE:
-      title = "Purchase Cargo Mode";
+      title = "Purchase Cargo             ";
       ButtonText= "BuyCargo";
       break;
     case SELLMODE:
-      title = "Sell Cargo Mode";
+      title = "Sell Cargo                 ";
       ButtonText= "SellCargo";
       break;
     case UPGRADEMODE:
-      title = "Upgrade/Repair Starship";
+      title = "Upgrade/Repair Starship        ";
       ButtonText="Upgrade";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -236,7 +236,7 @@ public:
       }
       break;
     case ADDMODE:
-      title = "Enhance Starship Mode";
+      title = "Enhance Starship          ";
       ButtonText="Add Stats";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -244,7 +244,7 @@ public:
       }
       break;
     case DOWNGRADEMODE:
-      title = "Downgrade Starship Mode";
+      title = "Downgrade Starship           ";
       ButtonText= "SellPart";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -252,7 +252,7 @@ public:
       }
       break;
     case MISSIONMODE:
-      title = "Mission BBS";
+      title = "Mission BBS               ";
       ButtonText="Accept";
       if (!beginswith (curcategory,"missions")) {
 	curcategory.clear();
@@ -260,7 +260,7 @@ public:
       }
       break;
     case SHIPDEALERMODE:
-      title = "Purchase Starship";
+      title = "Purchase Starship            ";
       ButtonText="BuyShip";
       if (!beginswith (curcategory,"starships")) {
 	curcategory.clear();
@@ -277,10 +277,10 @@ public:
 	title="Select On Which Turret Mount To Place Your Turret";
 	break;
       case CONFIRM_MODE:
-	title="This may not entirely fit on your ship. Are You Sure you wish to proceed?";
+	title="This may not entirely fit on your ship. Continue anyway?";
 	break;
       case STOP_MODE:
-	title="Viewing Mission Briefing. Press EndBriefing to exit.";
+	title="Viewing Mission Briefing. Press End to exit.";
 	break;
       }
     }
@@ -385,7 +385,7 @@ public:
       ShowColor(0,0,0,0, 1,1,1,1);
       char floatprice [100];
       sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
-      ShowText(-0.98, 0.93, 2, 4, (title+ string(" Credits: ")+floatprice).c_str(), 0);
+      ShowText(-0.98, 0.93, 2, 4, (title+ string("       Credits: ")+floatprice).c_str(), 0);
       CargoList->Refresh();
       CargoInfo->Refresh();
     }
@@ -575,7 +575,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   Unit * un;
   Unit * base;
   unsigned int offset;
-  int quantity=(button==0)?1:(button==1?10000:10);
+  int quantity=(button==WS_LEFT_BUTTON)?1:(button==WS_MIDDLE_BUTTON?10000:10);
   int index;
   char * input_buffer = strdup (inp_buf);
   sscanf (inp_buf,"%d %s",&index,input_buffer);
@@ -945,10 +945,11 @@ vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     case SELLMODE:
       return FilterCargo (un,"missions",false,true);//anything but a mission
     case UPGRADEMODE:
-    case DOWNGRADEMODE:
     case ADDMODE:
       //      curcategory.clear();
       //      curcategory.push_back(string("upgrades"));
+      return FilterCargo (un,"upgrades",true,true);
+    case DOWNGRADEMODE:
       return FilterCargo (un,"upgrades",true,false);
     case SHIPDEALERMODE:
       //      curcategory.clear();

@@ -138,9 +138,11 @@ void Unit::DeactivateJumpDrive () {
     jump.drive=-1;
   }
 }
+float capship_size=500;
 void Unit::Init()
 {
-
+  static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
+  capship_size=capsize;
   activeStarSystem=NULL;
   xml=NULL;
   docked=NOT_DOCKED;
@@ -642,7 +644,7 @@ int Unit::LockMissile() {
 QVector Unit::PositionITTS (const QVector & posit, float speed) const{
   QVector retval = Position()-posit;
   speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
-  retval = Position()+Velocity.Cast()*speed;
+  retval = Position()+Velocity.Cast().Scale(speed);
   return retval;
 }
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{

@@ -51,7 +51,7 @@ void InputDFA::NewLocationSelect(){
     ui->advance();
   }
   if (cnt==0) return;
-  RunningTotal = (1./cnt)*(RunningTotal);
+  RunningTotal = (RunningTotal.Scale((1./cnt)));
   if (locsel)
     delete locsel;
 
@@ -560,3 +560,4 @@ void InputDFA::ContextSwitch (){
     break;
   }
 }
+

@@ -68,7 +68,7 @@ void SheltonSlide(AIScript * aisc, Unit * un) {
   QVector perp = targetv.Cross (-difference);
   perp.Normalize();
   perp=perp*(targetv.Dot(difference*-1./(difference.Magnitude())));
-  perp =(perp+difference)*10000;
+  perp =(perp+difference)*10000.;
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),true),false,true,true);  
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));

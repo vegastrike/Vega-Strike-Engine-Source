@@ -40,7 +40,7 @@ using std::string;
 
 class Flightgroup;
 class Nebula;
-
+extern float capship_size;
 //#include "mission.h"
 class Beam;
 class Animation;
@@ -534,7 +534,9 @@ public:
     localcoord =ToLocalCoordinates(Vector (delta.i,delta.j,delta.k));
     float mm= localcoord.Magnitude();
     if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||((localcoord.k/mm)<computer.radar.maxcone&&cone)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
-      return false;
+		
+		if (target->rSize()<capship_size) 
+			return false;
     }
     return true;
   }

@@ -95,7 +95,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 	}
 }
 Vector Camera::GetVelocity() {
-	return ((Coord-lastpos)/SIMULATION_ATOM).Cast();
+	return ((Coord-lastpos)*(1./SIMULATION_ATOM)).Cast();
 }
 void Camera::UpdateCameraSounds() {
 #ifndef PERFRAMESOUND
