@@ -53,7 +53,7 @@ using std::list;
 Hashtable<std::string, Mesh, 127> Mesh::meshHashTable;
 Hashtable<std::string, std::vector<int>, 127> Mesh::animationSequences;
 Vector mouseline;
-int Mesh::getNumAnimationFrames(string which="")const {
+int Mesh::getNumAnimationFrames(string which)const {
    if (which.empty()) {
       vector<int>* animSeq = animationSequences.Get(hash_name);
       if (animSeq) return animSeq->size();
