@@ -237,7 +237,7 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Mat
       break;
     }
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
-    if ((!use_separate_sound)||type->type==weapon_info::BEAM) {
+    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!_Universe->isPlayerStarship(owner)))&&(type->type!=weapon_info::PROJECTILE)) {
     if (!AUDIsPlaying (sound)) {
       AUDPlay (sound,tmp.position,velocity,1);
     }else {
@@ -254,6 +254,9 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Mat
   return false;
 }
 bool Unit::Mount::Fire (Unit * owner, bool Missile) {
+  if (ammo==0) {
+    processed=UNFIRED;
+  }
   if (processed==FIRED||status!=ACTIVE||(Missile!=(type->type==weapon_info::PROJECTILE))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
