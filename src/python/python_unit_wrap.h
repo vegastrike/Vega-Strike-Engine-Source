@@ -50,6 +50,7 @@
   WRAPPED0(float, FuelData,0)
   WRAPPED0(float, EnergyData,0)
   WRAPPED0(float, GetHull,0)
+  WRAPPED0(float, GetHullPercent,0)
   WRAPPED0(float, rSize ,0)
   WRAPPED1(double, getMinDis,QVector,pnt,0)//for clicklist
   WRAPPED3(float, querySphere, QVector,start, QVector ,end, float ,my_unit_radius,0)

@@ -13,7 +13,7 @@ class Music {
   int song;//currently playing song
   int lastlist;
   float vol;
-  int SelectTracks(int &i);
+  int SelectTracks();
   bool LoadMusic (const char *file);
   std::vector <std::vector <std::string> > playlist;
  public:

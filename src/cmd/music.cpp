@@ -19,6 +19,7 @@
 #include "music.h"
 #include "base.h"
 #include "networking/inet.h"
+#include "python/python_compile.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   loopsleft=0;
   if (!g_game.music_enabled)
@@ -50,7 +51,7 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
     this->vol=XMLSupport::parse_float(vs_config->getVariable("audio","music_volume",".5"));
 	ChangeVolume();
   }
-  Skip();
+
 }
 
 void Music::ChangeVolume (float inc) {
@@ -105,16 +106,21 @@ inline int randInt (int max) {
 	return ans;
 }
 
-int Music::SelectTracks(int &whichlist) {
+int Music::SelectTracks(void) {
   if ((Base::CurrentBase||loopsleft>0)&&lastlist < playlist.size()&&lastlist>=0) {
     if (loopsleft>0) {
       loopsleft--;
     }
     if (!playlist[lastlist].empty()) {
-      whichlist=lastlist;
-      return rand()%playlist[whichlist].size();
+      int whichsong=rand()%playlist[lastlist].size();
+      GotoSong (lastlist,whichsong,true);
+      return whichsong;
     }
   }
+  CompileRunPython (vs_config->getVariable("sound","dj_script","modules/dj.py"));
+  
+  return 0;
+  int whichlist=0;
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
   Unit * un=_Universe.AccessCockpit()->GetParent();
   if (un==NULL) {
@@ -123,6 +129,9 @@ int Music::SelectTracks(int &whichlist) {
       return NOLIST;
     return randInt((playlist[PEACELIST].size()));
   }
+  
+
+
   bool perfect=true;
   un_iter iter = _Universe.activeStarSystem()->getUnitList().createIterator();
   Unit *target;
@@ -219,9 +228,7 @@ int Music::Addlist (std::string listfile) {
 
 void Music::Skip() {
 	if (g_game.music_enabled) {
-		int whichlist;
-		int whichsong=SelectTracks(whichlist);
-		GotoSong(whichlist,whichsong,true);
+	  SelectTracks();
 	}
 }
 Music::~Music() {
