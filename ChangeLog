@@ -1,3 +1,11 @@
+2002-02-07 Daniel Horn <hellcatv@hotmail.com>
+	* Completed VIEW VDU segment
+	* Completed Asteroids that don't crash with anything but units
+	* Worked on Debug options for geometry-corrupting vertex arrays
+	* Finished Asteroid generator
+	* Added more camera views
+	* Added more VDU options
+
 2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* set the color of planets in the radar to blue
