@@ -117,12 +117,17 @@ private:
     vector<GFXVertex> lines;
     vector<GFXVertex> tris;
     vector<GFXVertex> quads;
+    vector <vector<GFXVertex> > linestrips;
     vector <vector<GFXVertex> > tristrips;
     vector <vector<GFXVertex> > trifans;
     vector <vector<GFXVertex> > quadstrips;
     int tstrcnt;
     int tfancnt;
     int qstrcnt;
+    int lstrcnt;
+    vector<int> lineind;
+    vector<int> nrmllinstrip;
+    vector<int> linestripind;
     vector<int> triind;//for possible normal computation
     vector<int> nrmltristrip;
     vector<int> tristripind;

@@ -211,6 +211,33 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
     xml->load_stage = 4;
     break;
+
+  case XML::LINE:
+    assert(top==XML::POLYGONS);
+    assert(xml->load_stage==4);
+    xml->num_vertices=2;
+    xml->active_list = &xml->lines;
+    xml->active_ind = &xml->lineind;
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  cerr << "Cannot Flatshade Lines" << endl;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    //ignored -- already done
+	  }
+	}
+	break;
+      default:
+	assert (0);
+      }
+    }
+    break;
+
   case XML::TRI:
     assert(top==XML::POLYGONS);
     assert(xml->load_stage==4);
@@ -229,6 +256,34 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    xml->trishade[xml->trishade.size()-1]=0;
+	  }
+	}
+	break;
+      default:
+	assert (0);
+      }
+    }
+    break;
+
+  case XML::LINESTRIP:
+    assert(top==XML::POLYGONS);
+    assert(xml->load_stage==4);
+    xml->num_vertices=2;
+    xml->linestrips.push_back (vector<GFXVertex>());
+    xml->active_list = &(xml->linestrips[xml->linestrips.size()-1]);
+    xml->lstrcnt = xml->linestripind.size();
+    xml->active_ind = &xml->linestripind;
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  cerr << "Cannot Flatshade Linestrips" << endl;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    //ignored -- already done
 	  }
 	}
 	break;
@@ -350,7 +405,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case XML::VERTEX:
-    assert(top==XML::TRI || top==XML::QUAD || top ==XML::TRISTRIP || top ==XML::TRIFAN||top ==XML::QUADSTRIP);
+    assert(top==XML::TRI || top==XML::QUAD || top==XML::LINE ||top ==XML::TRISTRIP || top ==XML::TRIFAN||top ==XML::QUADSTRIP || top==XML::LINESTRIP);
     assert(xml->load_stage==4);
 
     xml->vertex_state = 0;
@@ -378,7 +433,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       default:
 	assert(0);
-      }
+     }
     }
     assert(xml->vertex_state & (XML::V_POINT|
 				XML::V_S|
@@ -450,11 +505,21 @@ void Mesh::endElement(const string &name) {
     clog << endl;
     */
     break;
+  case XML::LINE:
+    assert (xml->num_vertices==0);
+    break;
   case XML::TRI:
     assert(xml->num_vertices==0);
     break;
   case XML::QUAD:
     assert(xml->num_vertices==0);
+    break;
+  case XML::LINESTRIP:
+    assert (xml->num_vertices<=0);
+    for (i=xml->lstrcnt+1;i<xml->linestripind.size();i++) {
+      xml->nrmllinstrip.push_back (xml->linestripind[i-1]);
+      xml->nrmllinstrip.push_back (xml->linestripind[i]);
+    }
     break;
   case XML::TRISTRIP:
     assert(xml->num_vertices<=0);   
@@ -532,6 +597,22 @@ void SumNormals (int trimax, int t3vert,
   int a=0;
   int i=0;
   int j=0;
+  if (t3vert==2) {//oh man we have a line--what to do, what to do!
+    for (i=0;i<trimax;i++,a+=t3vert) {
+      Vector Cur (vertices[triind[a]].x-vertices[triind[a+1]].x,
+		  vertices[triind[a]].y-vertices[triind[a+1]].y,
+		  vertices[triind[a]].z-vertices[triind[a+1]].z);
+      Normalize (Cur);
+      vertices[triind[a+1]].i += Cur.i/vertexcount[triind[a+1]];
+      vertices[triind[a+1]].j += Cur.j/vertexcount[triind[a+1]];
+      vertices[triind[a+1]].k += Cur.k/vertexcount[triind[a+1]];
+
+      vertices[triind[a]].i -= Cur.i/vertexcount[triind[a]];
+      vertices[triind[a]].j -= Cur.j/vertexcount[triind[a]];
+      vertices[triind[a]].k -= Cur.k/vertexcount[triind[a]];
+    }
+    return; //bye bye mrs american pie 
+  }
   for (i=0;i<trimax;i++,a+=t3vert) {
     for (j=0;j<t3vert;j++) {
       if (vertrw[triind[a+j]]) {
@@ -554,8 +635,14 @@ void SumNormals (int trimax, int t3vert,
   }
 }
 
-
-
+void updateMax (float &minSizeX, float &maxSizeX, float &minSizeY, float &maxSizeY, float &minSizeZ, float &maxSizeZ, const GFXVertex &ver) {
+    minSizeX = min(ver.x, minSizeX);
+    maxSizeX = max(ver.x, maxSizeX);
+    minSizeY = min(ver.y, minSizeY);
+    maxSizeY = max(ver.y, maxSizeY);
+    minSizeZ = min(ver.z, minSizeZ);
+    maxSizeZ = max(ver.z, maxSizeZ);
+}
 void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   const int chunk_size = 16384;
   
@@ -600,10 +687,11 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     }
     SumNormals (xml->tris.size()/3,3,xml->vertices, xml->triind,xml->vertexcount, vertrw);
     SumNormals (xml->quads.size()/4,4,xml->vertices, xml->quadind,xml->vertexcount, vertrw);
+    SumNormals (xml->lines.size()/2,2,xml->vertices,xml->lineind,xml->vertexcount,vertrw);
     SumNormals (xml->nrmltristrip.size()/3,3,xml->vertices, xml->nrmltristrip,xml->vertexcount, vertrw);
     SumNormals (xml->nrmltrifan.size()/3,3,xml->vertices, xml->nrmltrifan,xml->vertexcount, vertrw);
     SumNormals (xml->nrmlquadstrip.size()/4,4,xml->vertices, xml->nrmlquadstrip,xml->vertexcount, vertrw);
-
+    SumNormals (xml->nrmllinstrip.size()/2,2,xml->vertices, xml->nrmllinstrip,xml->vertexcount, vertrw);
     delete []vertrw;
     for (i=0;i<xml->vertices.size();i++) {
       float dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
@@ -735,7 +823,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   int index = 0;
 
-  unsigned int totalvertexsize = xml->tris.size()+xml->quads.size();
+  unsigned int totalvertexsize = xml->tris.size()+xml->quads.size()+xml->lines.size();
   for (index=0;index<xml->tristrips.size();index++) {
     totalvertexsize += xml->tristrips[index].size();
   }
@@ -745,17 +833,15 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   for (index=0;index<xml->quadstrips.size();index++) {
     totalvertexsize += xml->quadstrips[index].size();
   }
+  for (index=0;index<xml->linestrips.size();index++) {
+    totalvertexsize += xml->linestrips[index].size();
+  }
 
   index =0;
   vertexlist = new GFXVertex[totalvertexsize];
 
   minSizeX = minSizeY = minSizeZ = FLT_MAX;
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
-  if (xml->tris.size()==0&&xml->quads.size()==0) {
-    minSizeX = minSizeY = minSizeZ = 0;
-    maxSizeX = maxSizeY = maxSizeZ = 0;
-    fprintf (stderr, "uhoh");
-  }
   radialSize = 0;
   enum POLYTYPE * polytypes= new (enum POLYTYPE)[totalvertexsize];//overkill but what the hell
   int *poly_offsets  = new int [totalvertexsize];
@@ -770,40 +856,36 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     poly_offsets[o_index]=xml->quads.size();
     o_index++;
   }
+  if (xml->lines.size()) {
+    polytypes[o_index]=GFXLINE;
+    poly_offsets[o_index]=xml->lines.size();
+    o_index++;
+  }
   /*
   if (xml->lines.size())
     polytypes[o_index]=GFXLINE;
     poly_offsets[o_index]=xml->lines.size()*2;  
     o_index++;
   */
+
   for(a=0; a<xml->tris.size(); a++, index++) {
-    vertexlist[index] = xml->tris[a];
-    minSizeX = min(vertexlist[index].x, minSizeX);
-    maxSizeX = max(vertexlist[index].x, maxSizeX);
-    minSizeY = min(vertexlist[index].y, minSizeY);
-    maxSizeY = max(vertexlist[index].y, maxSizeY);
-    minSizeZ = min(vertexlist[index].z, minSizeZ);
-    maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    vertexlist[index] = xml->tris[a];		
+    updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
   }
   for(a=0; a<xml->quads.size(); a++, index++) {
     vertexlist[index] = xml->quads[a];
-    minSizeX = min(vertexlist[index].x, minSizeX);
-    maxSizeX = max(vertexlist[index].x, maxSizeX);
-    minSizeY = min(vertexlist[index].y, minSizeY);
-    maxSizeY = max(vertexlist[index].y, maxSizeY);
-    minSizeZ = min(vertexlist[index].z, minSizeZ);
-    maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
   }
+  for(a=0; a<xml->lines.size(); a++, index++) {
+    vertexlist[index] = xml->lines[a];		
+    updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
+  }
+
   for (a=0;a<xml->tristrips.size();a++) {
 
     for (int m=0;m<xml->tristrips[a].size();m++,index++) {
       vertexlist[index] = xml->tristrips[a][m];
-      minSizeX = min(vertexlist[index].x, minSizeX);
-      maxSizeX = max(vertexlist[index].x, maxSizeX);
-      minSizeY = min(vertexlist[index].y, minSizeY);
-      maxSizeY = max(vertexlist[index].y, maxSizeY);
-      minSizeZ = min(vertexlist[index].z, minSizeZ);
-      maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
     }
     polytypes[o_index]= GFXTRISTRIP;
     poly_offsets[o_index]=xml->tristrips[a].size();
@@ -812,12 +894,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   for (a=0;a<xml->trifans.size();a++) {
     for (int m=0;m<xml->trifans[a].size();m++,index++) {
       vertexlist[index] = xml->trifans[a][m];
-      minSizeX = min(vertexlist[index].x, minSizeX);
-      maxSizeX = max(vertexlist[index].x, maxSizeX);
-      minSizeY = min(vertexlist[index].y, minSizeY);
-      maxSizeY = max(vertexlist[index].y, maxSizeY);
-      minSizeZ = min(vertexlist[index].z, minSizeZ);
-      maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
     }
     polytypes[o_index]= GFXTRIFAN;
     poly_offsets[o_index]=xml->trifans[a].size();
@@ -827,15 +904,20 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   for (a=0;a<xml->quadstrips.size();a++) {
     for (int m=0;m<xml->quadstrips[a].size();m++,index++) {
       vertexlist[index] = xml->quadstrips[a][m];
-      minSizeX = min(vertexlist[index].x, minSizeX);
-      maxSizeX = max(vertexlist[index].x, maxSizeX);
-      minSizeY = min(vertexlist[index].y, minSizeY);
-      maxSizeY = max(vertexlist[index].y, maxSizeY);
-      minSizeZ = min(vertexlist[index].z, minSizeZ);
-      maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
     }
     polytypes[o_index]= GFXQUADSTRIP;
     poly_offsets[o_index]=xml->quadstrips[a].size();
+    o_index++;
+  }
+  for (a=0;a<xml->linestrips.size();a++) {
+
+    for (int m=0;m<xml->linestrips[a].size();m++,index++) {
+      vertexlist[index] = xml->linestrips[a][m];
+      updateMax (minSizeX,maxSizeX,minSizeY,maxSizeY,minSizeZ,maxSizeZ,vertexlist[index]);
+    }
+    polytypes[o_index]= GFXLINESTRIP;
+    poly_offsets[o_index]=xml->linestrips[a].size();
     o_index++;
   }
 
@@ -890,7 +972,14 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   *oldmesh=*this;
   oldmesh->orig = NULL;
   oldmesh->refcount++;
+  if (minSizeX==FLT_MAX) {
+    minSizeX = minSizeY = minSizeZ = 0;
+    maxSizeX = maxSizeY = maxSizeZ = 0;
+    fprintf (stderr, "uhoh");
+  }
+
   fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
   delete [] vertexlist;
+  delete []poly_offsets;
   delete xml;
 }
