@@ -827,12 +827,19 @@ void Cockpit::Autopilot (Unit * target) {
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 	if (face_target_on_auto) {
 	  FaceTarget(un);
-	}
+	}	  
+	static double averagetime = GetElapsedTime();
+	static double numave = 1.0;
+	averagetime+=GetElapsedTime();
+	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+	numave++;
+	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
 							      _Universe->AccessCamera()->R,
-							      GetElapsedTime()/100);
+							      averagetime*autospeed/(numave));
 	zoomfactor=1.5;
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
+
 	autopilot_time=autotime;
 	autopilot_target.SetUnit (target);
       }
