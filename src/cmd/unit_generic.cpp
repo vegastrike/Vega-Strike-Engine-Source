@@ -2386,15 +2386,16 @@ void Unit::RegenShields () {
     RechargeEnergy();
   }
   static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
-  if (maxenergy-maxshield<low_power_mode) {
-	  maxenergy=maxshield+low_power_mode;
-	  if (rand()<.0025*RAND_MAX)
+  float menergy = maxenergy;
+  if (menergy-maxshield<low_power_mode) {
+	  menergy=maxshield+low_power_mode;
+	  if (rand()<.00005*RAND_MAX)
 		  UniverseUtil::IOmessage(0,"game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
-  if (maxenergy>maxshield) {
-    if (energy>maxenergy-maxshield) {//allow shields to absorb xtra power
-      float excessenergy = energy - (maxenergy-maxshield);
-      energy=maxenergy-maxshield;  
+  if (menergy>maxshield) {
+    if (energy>menergy-maxshield) {//allow shields to absorb xtra power
+      float excessenergy = energy - (menergy-maxshield);
+      energy=menergy-maxshield;  
       if (excessenergy >0) {
 		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
 		  short mwe = maxwarpenergy;
@@ -4644,7 +4645,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0||force_change_on_nothing) {
       numave++;
       if (touchme) afterburnenergy=up->afterburnenergy;
-    }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
+    }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>=0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
       cancompletefully=false;
     }
     if (jump.drive==-2&&up->jump.drive>=-1||force_change_on_nothing) {
