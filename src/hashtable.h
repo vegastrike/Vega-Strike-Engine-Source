@@ -27,6 +27,8 @@
 #include <vector>
 #include <map>
 
+#include <iostream>
+
 using namespace std;
 
 template<typename KEY, int SIZ> struct ValueHashtableKey
@@ -78,11 +80,19 @@ template <typename VALUE> struct ValueHashtableValue<VALUE*>
 
 template<typename KEY, class VALUE, int SIZ> class ValueHashtable
 {
-    typedef VALUE                                              HashElement;
-    typedef std::map<KEY,HashElement>                          Slot;
-    typedef typename std::map<KEY,HashElement>::iterator       SlotIt;
-    typedef typename std::map<KEY,HashElement>::const_iterator SlotCit;
-    typedef std::pair<KEY,HashElement>                         SlotPair;
+    typedef VALUE                         HashElement;
+    typedef std::pair<KEY,VALUE>          SlotPair;
+    typedef std::vector<SlotPair>         Slot;
+    typedef typename Slot::iterator       SlotIt;
+    typedef typename Slot::const_iterator SlotCit;
+
+    struct SlotEqPred {
+        KEY key;
+        SlotEqPred( const KEY& k ) : key(k) { }
+        bool operator()(const SlotPair& p ) {
+            return ( p.first == key );
+        }
+    };
 
     Slot table[SIZ];
 
@@ -121,9 +131,10 @@ public:
 
 	VALUE Get(const KEY &key) const
 	{
+        SlotEqPred eq( key );
 		int hashval = hash(key);
 		SlotCit iter;
-        iter = table[hashval].find(key);
+        iter = find_if( table[hashval].begin(), table[hashval].begin(), eq );
         if( iter != table[hashval].end() ) {
             return iter->second;
         } else {
@@ -133,9 +144,10 @@ public:
 
 	VALUE Get(const KEY &key, const KEY& backupkey ) const
 	{
+        SlotEqPred eq( key );
         int hashval = hash(key);
 		SlotCit iter;
-        iter = table[hashval].find(key);
+        iter = find_if( table[hashval].begin(), table[hashval].begin(), eq );
         if( iter != table[hashval].end() ) {
             return iter->second;
         } else {
@@ -146,14 +158,15 @@ public:
 	void Put(const KEY &key, VALUE value)
 	{
 		int hashval = hash(key);
-		table[hashval].insert( SlotPair(key,value) );
+		table[hashval].push_back( SlotPair(key,value) );
 	}
 
 	void Delete(const KEY &key)
 	{
+        SlotEqPred eq( key );
 		int hashval = hash(key);
 		SlotIt iter;
-        iter = table[hashval].find(key);
+        iter = find_if( table[hashval].begin(), table[hashval].begin(), eq );
         if( iter != table[hashval].end() ) {
 			table[hashval].erase(iter);
         }
