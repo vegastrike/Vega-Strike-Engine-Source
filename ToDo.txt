@@ -25,6 +25,7 @@ Scripting Goals:
 ** Flightgroups should have subsets of ships that spawn together (combined arms)
 
 * News
+** make news use new naming scheme
 ** Fix news to report stories depending on import (fleet lead by dodo=wrong)
 	--Is this a problem with news, or the dynamic universe that calls
 	  the news?  If story is reported correctly, there's no problem.
