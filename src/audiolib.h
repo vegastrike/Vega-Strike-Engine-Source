@@ -24,6 +24,9 @@ int AUDCreateMusicMP3 (const std::string &, const bool LOOP=false);
 int AUDCreateSound (int sound,const bool LOOP=false);
 ///guesses the type of sound by extension
 int AUDCreateSound (const std::string &,const bool LOOP=false);
+///guesses the type of sound by extension
+int AUDCreateMusic (const std::string &,const bool LOOP=false);
+
 ///deletes a given sound
 void AUDDeleteSound (int sound, bool music=false);
 ///Changes the velocity and/or position of a given sound

@@ -147,6 +147,17 @@ int AUDCreateSound (const std::string &s,const bool LOOP) {
   }
   return -1;
 }
+int AUDCreateMusic (const std::string &s,const bool LOOP) {
+  if (s.end()-1>=s.begin()){
+    if (*(s.end()-1)=='v') {
+      return AUDCreateMusicWAV (s,LOOP);
+    } else {
+      return AUDCreateMusicMP3 (s,LOOP);
+    }
+  }
+  return -1;
+}
+
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP=false){
 #ifdef HAVE_AL

@@ -388,7 +388,7 @@ void createObjects() {
   vschdir ("hornet-cockpit.cpt");
   tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
   vscdup();
-  muzak = new Music ("programming.m3u",fighters[0]);
+  muzak = new Music (fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);

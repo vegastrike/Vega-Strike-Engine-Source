@@ -3,13 +3,17 @@
 #include "container.h"
 #include <vector>
 #include <string>
+
 class Music {
-  std::vector <std::string> playlist;
+  bool random;
+  float maxhull;
+  std::vector <std::string> playlist [3];
   UnitContainer p;
   int song;//currently playing song
-  int SelectTracks();
+  int SelectTracks(int &i);
+  void LoadMusic (int which, const char *file);
  public:
-  Music (const char * playlist, Unit * parent);
+  Music (Unit * parent);
   void Skip();
   void Listen();
   ~Music();
