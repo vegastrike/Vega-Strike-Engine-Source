@@ -386,7 +386,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);
-  static Animation explosion("explosion_orange.ani",false,.1,BILINEAR,false);
+
 
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
 
