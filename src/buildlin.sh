@@ -43,8 +43,13 @@ gcc -Xlinker -export-dynamic -Xlinker   -ovegastrike debug_vs.o			\
 	pk3.o					\
 aldrv/libaldrv.a gfx/nav/libnav.a common/libvscommon.a networking/libnetclient.a cmd/unit_generic.o cmd/script/script_call_briefing.o cmd/script/libscript.a cmd/script/c_alike/libc_alike.a python/briefing_wrapper.o cmd/libcmd.a cmd/base_init.o python/libpython.a gfx/libgfx.a cmd/ai/libai.a gldrv/libgldrv.a gui/libgui.a networking/libnet.a networking/lowlevel/libnetlowlevel.a  cmd/collide/libcollide.a  boost/libboost_python.a    /usr/lib/libglut.a /usr/lib/libexpat.a /usr/lib/libjpeg.a /usr/lib/python2.2/config/libpython2.2.a /usr/lib/libpng.a /usr/lib/libz.a  /usr/lib/libSDL.a /usr/lib/libopenal.a /usr/lib/libGLU.a /usr/lib/libutil.a /usr/lib/gcc-lib/i386-linux/2.95.4/libstdc++.a /usr/lib/libGL.so -ldl -lpthread  /usr/lib/gcc-lib/i386-linux/2.95.4/libgcc.a 
 g++  -DHAVE_SDL -osoundserver networking/soundserver.cpp networking/inet.cpp networking/inet_file.cpp -I.. -I. -Inetworking  /usr/lib/libSDL_mixer.a /usr/lib/libSDL.a /usr/lib/libsmpeg.a  /usr/lib/libvorbisfile.a /usr/lib/libvorbis.a  /usr/lib/libogg.a -lpthread /usr/lib/libX11.a /usr/lib/libXext.a /usr/lib/libdl.a /usr/lib/gcc-lib/i386-linux/2.95.4/libstdc++.a 
+cp soundserver networking/
 g++ -static  -ovslauncher ../launcher/saveinterface.cpp ../launcher/general.cpp common/common.cpp `gtk-config --cflags` `glib-config --cflags` -I.. -I. -I../launcher  /usr/lib/libgtk.a /usr/lib/libgdk.a -lm /usr/lib/libglib.a /usr/lib/libgmodule.a /usr/lib/libX11.a /usr/lib/libXext.a /usr/lib/libXi.a   /usr/lib/libdl.a  /usr/lib/gcc-lib/i386-linux/2.95.4/libstdc++.a /usr/lib/gcc-lib/i386-linux/2.95.4/libgcc.a 
+cp launcher ../launcher/vslauncher
 g++ -static  -ovssetup ../../vssetup/src/include/central.cpp ../../vssetup/src/include/display_gtk.cpp ../../vssetup/src/include/file.cpp ../../vssetup/src/include/general.c ../../vssetup/src/c/setup.cpp -DGTK  `gtk-config --cflags` `glib-config --cflags` -I.. -I. -I../launcher  /usr/lib/libgtk.a /usr/lib/libgdk.a -lm /usr/lib/libglib.a /usr/lib/libgmodule.a /usr/lib/libX11.a /usr/lib/libXext.a /usr/lib/libXi.a   /usr/lib/libdl.a  /usr/lib/gcc-lib/i386-linux/2.95.4/libstdc++.a /usr/lib/gcc-lib/i386-linux/2.95.4/libgcc.a 
+cp vssetup ../../vssetup/src/bin/
+cp vssetup ../../vssetup/src/bin/setup
+
 
 #/usr/lib/gcc-lib/i386-linux/2.95.4/libstdc++.a  /usr/lib/libdl.a   -lpthread
 # /usr/lib/gcc-lib/i386-linux/2.95.4/crtbegin.o /usr/lib/gcc-lib/i386-linux/2.95.4/crtend.o 
