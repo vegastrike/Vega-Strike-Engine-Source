@@ -44,6 +44,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("afterburn turn away",&AfterburnTurnAway));      
   tmp.insert (MyPair ("turn towards",&TurnTowards));      
   tmp.insert (MyPair ("turn towards itts",&TurnTowardsITTS));      
+  tmp.insert (MyPair ("drop cargo",&DropCargo));   
   return tmp;
 }
 

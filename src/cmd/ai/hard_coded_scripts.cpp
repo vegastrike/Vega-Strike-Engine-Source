@@ -436,3 +436,20 @@ void TurnTowardsITTS(Order * aisc, Unit * un) {
   AddOrd (aisc,un,ord);    
 
 }
+void DropCargo(Order*aisc, Unit * un) {
+      if (un->numCargo() > 0)
+      {
+              int dropcount=(un->numCargo()/10)+1;
+
+              {for(int i=0; i<dropcount; i++)
+              {
+                      un->EjectCargo(0);  
+              }}
+              Stop(aisc,un);
+      }
+      else
+      {
+              TurnAway(aisc, un);
+      }
+}
+

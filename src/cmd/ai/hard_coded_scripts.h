@@ -31,7 +31,7 @@ CCScript LoopAroundFast;
 CCScript AggressiveLoopAroundFast;
 CCScript LoopAroundSlow;
 CCScript AggressiveLoopAroundSlow;
-
+CCScript DropCargo;
 #endif
 
 
