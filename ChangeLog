@@ -1,3 +1,29 @@
+2002-04-20 Daniel Horn <hellcatv@hotmail.com>
+	* Added Secondary Logos as part of the flightgroup class
+	* Added optional arguments to _unit.launch for primary (and possibly secondary) texture
+	* Added point-click to the texturizer
+
+2002-04-19 Daniel Horn <hellcatv@hotmail.com>
+&Before
+	* mounts can have volume which limit the number of ammo they can purchase of any given weapon
+	* "news" messages can be sent to the message center...they may be browsed while docked and get reloaded upon save and load of savegame
+	* .templates load from the units/upgrades/god/god file before their stats are replaced...so teh default template with nothing in it will have the maximum values for all stats (so things don't start to wrap)
+	* missions look for AI scripts in all active missions
+	* upgrades have been tested for almost all stats...they seem to work fine :-)
+	* added a selling minimum so you cannot buy low end stuff and sell it as damaged high end stuff  (you have to repair stuff mostly before selling it)
+	* Missiels have blast radius ....  damage is computed as damage/(r/radialspeed)^2 where r/radialspeed is clamped to 1 (no less)
+	* mucho data has been changed...and most relevant upgrades have been added for purchase.....  templates are being worked on
+	* comms have been started by Ri- from #wing-commander
+	* docking response is instantaneous and they talk back sometimes
+	* any AI scripts can be ported to C++... it checks for C++ (hard coded) ai scripts in cmd/ai/hard_coded_scripts.cpp before it looks for the soft coded ones...that way we can pull in user-written XML code in the next release as fast C++ that above bottleneck along with many others have been reduced...performance has been improved a lot
+	* all known crashing bugs have been destroyed (by use of unitcollections in collide table...and removal of beams there)
+	* several cool missions have been written...scan for contraband, escort cargo ship (which triggered the aforementioned collide table bug), attack, patrol, etc missions...all of them discover the system they work in and decide where to go from there.....
+	* jamming ship mission will be added: nebulas can be added by missions (for radio jamming ships for instance) starships can be moved by missions (to be used by aforementioned mission)
+
+	* more cargo has been added by Fire Hawk
+
+	* ^asa^ fixed many weapons to have volume
+
 2002-04-07 Daniel Horn <hellcatv@hotmail.com>
 	* Changed collide table to use UnitCollection (should be reasonably fast and certainly safer)
 	
