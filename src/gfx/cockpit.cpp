@@ -690,16 +690,6 @@ void Cockpit::RestoreGodliness() {
 }
 
 void Cockpit::InitStatic () {  
-  int i;
-  for (i=0;i<NUMGAUGES;i++) {
-    gauges[i]=NULL;
-  }
-  for (i=0;i<NUMGAUGES;i++) {
-    gauge_time[i]=0;
-  }
-  for (i=0;i<MAXVDUS;i++) {
-    vdu_time[i]=0;
-  }
   radar_time=0;
   cockpit_time=0;
 }
@@ -711,6 +701,17 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
     headtrans.push_back (Matrix());
     Identity(headtrans.back());
   }
+  int i;
+  for (i=0;i<NUMGAUGES;i++) {
+    gauges[i]=NULL;
+  }
+  for (i=0;i<NUMGAUGES;i++) {
+    gauge_time[i]=0;
+  }
+  for (i=0;i<MAXVDUS;i++) {
+    vdu_time[i]=0;
+  }
+
   InitStatic();
   mesh=NULL;
   ejecting=false;
