@@ -24,7 +24,7 @@
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
 extern std::string universe_path;
-
+extern int num_delayed_missions();
 using std::string;
 
 #define activeSys _Universe->activeStarSystem() //less to write
@@ -396,7 +396,7 @@ namespace UniverseUtil {
 						}
 				}
 				int numActiveMissions() {
-						return active_missions.size();
+						return active_missions.size()+::num_delayed_missions();
 				}
 				void IOmessage(int delay,string from,string to,string message){
 						static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));

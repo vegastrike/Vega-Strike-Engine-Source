@@ -508,6 +508,24 @@ void ExecuteDirector () {
 		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 		processDelayedMissions();
+	    for (unsigned int i=1;i<active_missions.size();) {
+              if (active_missions[i]) {
+                if(active_missions[i]->runtime.pymissions) {
+                  i++;
+                }else {
+                  int w=active_missions.size();
+                  active_missions[i]->terminateMission();
+                  if (w==active_missions.size()) {
+                    printf ("MISSION NOT ERASED\n");
+                    break;
+                  }
+                }
+              }else {
+                active_missions.Get()->erase(active_missions.Get()->begin()+i);
+                
+              }
+            }
+
 }
 void StarSystem::Update(float priority , bool executeDirector) {
 

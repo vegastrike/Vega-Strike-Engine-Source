@@ -57,6 +57,9 @@ struct delayed_mission {
   }
 };
 vector <delayed_mission> delayed_missions;
+int num_delayed_missions(){
+  return delayed_missions.size();
+}
 
 void processDelayedMissions() {
   while (!delayed_missions.empty()) {
