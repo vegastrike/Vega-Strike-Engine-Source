@@ -100,7 +100,7 @@ friend class PlanetaryOrbit;
   Matrix cumulative_transformation_matrix;
   Transformation cumulative_transformation;
   LineCollide CollideInfo;
-  Animation **explosion;
+  Animation *explosion;
   float timeexplode;  
   int nummesh;
   Mesh **meshdata;

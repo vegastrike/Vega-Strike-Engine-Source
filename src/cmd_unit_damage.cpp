@@ -54,6 +54,7 @@ void Unit::Split (int level) {
   for (int i=0;i<nm;i++) {
     subunits[i+numsubunit] = new Unit (old+i,1);
     subunits[i+numsubunit]->mass = mass/level;
+    subunits[i+numsubunit]->timeexplode=.1;
   }
   numsubunit = numsubunit+nm;
   if (bspTree) {
@@ -130,8 +131,8 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
     hull -=damage;
   }
   if (hull <0) {
-    Split (rand()%3+1);
     Destroy();
+    Split (rand()%3+1);
   }
   if (!FINITE (percent))
     percent = 0;
@@ -246,43 +247,30 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, co
 
 bool Unit::Explode (bool drawit) {
   int i;
-  if (explosion==NULL&&timeexplode==0&&nummesh) {	//no explosion in unit data file && explosions haven't started yet
-    explosion = new Animation * [nummesh];
+  if (explosion==NULL&&timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
     timeexplode=0;
-    for (i=0;i<nummesh;i++){
-      explosion[i]= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
-      explosion[i]->SetDimensions(4*meshdata[i]->rSize(),4*meshdata[i]->rSize());
-    }    
+    explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
+    explosion->SetDimensions(3*rSize(),3*rSize());
+        
   }
   float tmp[16];
   
   float tmp2[16];
-  bool alldone =false;
   if (explosion) {
-    for (i=0;i<nummesh;i++) {
-      if (!explosion[i])
-	continue;
       timeexplode+=GetElapsedTime();
-      Translate (tmp,meshdata[i]->Position());
-      MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-      explosion[i]->SetPosition(tmp2[12],tmp2[13],tmp2[14]);
-      if (explosion[i]->Done()) {
-	delete explosion[i];	
-	explosion[i]=NULL;
-      }else {
-	alldone=true;
+      //Translate (tmp,meshdata[i]->Position());
+      //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
+      explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
+      if (explosion->Done()) {
+	delete explosion;	
+	explosion=NULL;
       }
-      if (timeexplode>i*.5){
-	if (drawit&&explosion[i]) { 
-	  explosion[i]->Draw();//puts on draw queue... please don't delete
-	}
+      if (drawit&&explosion) { 
+	explosion->Draw();//puts on draw queue... please don't delete
       }
-    }
-    if (!alldone){
-      delete [] explosion;
-      explosion = NULL;
-    }
+      
   }
+  bool alldone = explosion?!explosion->Done():false;
   for (i=0;i<numsubunit;i++) {
     alldone |=subunits[i]->Explode();
   }

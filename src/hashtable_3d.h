@@ -6,7 +6,7 @@
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 
-const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge and better to check against everything.
+const int HUGEOBJECT=160; //objects that go over 16 sectors are considered huge and better to check against everything.
 
 template <class T, class CTSIZ, class CTACCURACY> class Hashtable3d {
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
