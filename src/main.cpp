@@ -432,7 +432,7 @@ void bootstrap_main_loop () {
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
   if (g_game.music_enabled) {
 #ifdef _WIN32
-	  static bool isconsole=XMLSupport::parse_bool(vs_config->getVariable("audio","music_in_console","false");
+	  static bool isconsole=XMLSupport::parse_bool(vs_config->getVariable("audio","music_in_console","false"));
 	  if (isconsole) {
 	    int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
         if (pid<=32) {
