@@ -134,6 +134,11 @@ void Atmosphere::SetMatricesAndDraw(const Vector &pos, const Matrix mat) {
 }
 
 void Atmosphere::ProcessDrawQueue () {
+  GFXEnable (LIGHTING);
+  GFXDisable (TEXTURE1);
+  GFXDisable (TEXTURE0);
+  GFXDisable (DEPTHWRITE);
+  
   while (!draw_queue.empty()) {
     draw_queue.back()->Draw();
     draw_queue.pop_back();
