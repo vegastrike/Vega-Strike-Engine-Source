@@ -118,9 +118,9 @@ bool Unit::Collide (Unit * target) {
     csRapidCollider::CollideReset();
     const csReversibleTransform bigtransform (cumulative_transformation_matrix);
     const csReversibleTransform smalltransform (target->cumulative_transformation_matrix);
-    if (colTree->Collide (*target->colTree,
-				  &bigtransform,
-				  &smalltransform)) {
+    if (target->colTree->Collide (*colTree,
+				  &smalltransform,
+				  &bigtransform)) {
       static int crashcount=0;
       fprintf (stderr,"%s Crashez to %s %d\n", this->name.c_str(), target->name.c_str(),crashcount++);
     }

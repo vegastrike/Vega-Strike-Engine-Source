@@ -3,7 +3,10 @@ INCLUDES = -I ../ -I ../../
 SUBDIRS = csgeom 
 libcollide_a_SOURCES =				\
 	prapid.cpp			\
+	collider.h			\
 	cs_compat.h			\
+	garray.h			\
+	qint.h				\
 	qsqrt.h				\
 	pbuild.cpp			\
 	peigen.cpp			\
