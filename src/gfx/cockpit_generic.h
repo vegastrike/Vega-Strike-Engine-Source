@@ -24,7 +24,10 @@ protected:
   float radar_time;
   float gauge_time [UnitImages::NUMGAUGES];
   /// 4 armor vals and 1 for startfuel
+
+    /// 4 armor vals and 1 for startfuel
   unsigned short StartArmor[5];
+
   ///saved values to compare with current values (might need more for damage)
   float maxfuel, maxhull;
   ///this is the parent that Cockpit will read data from

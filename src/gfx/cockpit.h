@@ -22,8 +22,6 @@ class GameCockpit: public Cockpit {
 private:
   Camera cam[NUM_CAM];
   float vdu_time [MAXVDUS];
-  /// 4 armor vals and 1 for startfuel
-  unsigned short StartArmor[5];
   ///saved values to compare with current values (might need more for damage)
   std::list <Matrix> headtrans;
   class Mesh * mesh;
@@ -31,8 +29,6 @@ private:
   Sprite *Radar;
   ///Video Display Units (may need more than 2 in future)
   std::vector <VDU *> vdu;
-  std::string unitfilename;
-  std::string unitmodname;
   ///Color of cockpit default text
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color
@@ -102,7 +98,6 @@ private:
   static void SwitchControl (int,KBSTATE);
   static void TurretControl (int, KBSTATE);
   void SetCommAnimation (Animation * ani);
-  class SaveGame * savegame;
   ///Accesses the current camera
   Camera *AccessCamera() {return &cam[currentcamera];}
   ///Returns the passed in cam
