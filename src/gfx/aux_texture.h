@@ -29,6 +29,8 @@
 #include <string.h>
 #endif
 
+using std::string;	// needed for access to std::string
+
 /**
  *  The texture class defines a method of loading bitmap textures
  *  It also defines a hash table in which textures are kept and looked up
@@ -97,4 +99,5 @@ public:
   ///Changes priority of texture
   void Prioritize (float);
 };
+
 #endif

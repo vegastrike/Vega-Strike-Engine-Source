@@ -157,13 +157,13 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	myfont = (*iter).value;
 	break;
       case RED:
-	textcol.r = parse_float ((*iter).value);
+	textcol.r = XMLSupport::parse_float ((*iter).value);
 	break;
       case GREEN:
-	textcol.g = parse_float ((*iter).value);
+	textcol.g = XMLSupport::parse_float ((*iter).value);
 	break;
       case BLUE:
-	textcol.b = parse_float ((*iter).value);
+	textcol.b = XMLSupport::parse_float ((*iter).value);
 	break;
       case VIEWOFFSET:
 		  viewport_offset = XMLSupport::parse_float ((*iter).value);
@@ -342,9 +342,12 @@ void Cockpit::endElement(const string &name) {
 
 void Cockpit::LoadXML (const char * filename) {
   const int chunk_size = 16384;
+
   FILE * inFile=NULL;
+
   if (filename[0]!='\0') {
 	inFile = fopen (filename, "r");
+
   }
   if(!inFile) {
 	 cockpit_offset=0;
@@ -352,6 +355,7 @@ void Cockpit::LoadXML (const char * filename) {
 	 Panel.push_back(new Sprite ("crosshairs.spr"));
 	 return;
 	
+
   }
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);

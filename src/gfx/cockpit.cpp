@@ -14,6 +14,9 @@
 #include "config_xml.h"
 
 
+#include <assert.h>	// needed for assert() calls
+
+
 
 static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
@@ -211,6 +214,7 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   return 1;
 }
 void Cockpit::DrawGauges(Unit * un) {
+
   int i;
   for (i=0;i<KPS;i++) {
     if (gauges[i]) {

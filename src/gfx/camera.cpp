@@ -26,6 +26,9 @@
 #include "vs_globals.h"
 #include "audiolib.h"
 #include "lin_time.h"
+
+#include <assert.h>	// needed for assert() calls
+
 //const float PI=3.1415926536;
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
 {
