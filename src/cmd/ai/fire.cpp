@@ -5,8 +5,9 @@
 
 using Orders::FireAt;
 
-FireAt::FireAt (float reaction_time, float aggressivitylevel, bool itts): Order (WEAPON|TARGET), itts(itts), rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
-  
+FireAt::FireAt (float reaction_time, float aggressivitylevel): Order (WEAPON|TARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
+  gunspeed=float(.0001);
+  gunrange=float(.0001);
   
 }
 //temporary way of choosing
@@ -47,7 +48,7 @@ void FireAt::ChooseTargets (int num) {
 */
 bool FireAt::ShouldFire(Unit * targ) {
   float dist;
-  float angle = parent->cosAngleTo (targ, dist,itts?0.001:FLT_MAX);
+  float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,parent->GetComputerData().itts?gunrange:FLT_MAX);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
   if (targ==parent->Target()) {
     distance = dist;
@@ -59,7 +60,9 @@ bool FireAt::ShouldFire(Unit * targ) {
 void FireAt::Execute () {
   bool tmp = done;
   Order::Execute();	
-  
+  if (gunspeed==float(.0001)) {
+    parent->getAverageGunSpeed (gunspeed,gunrange);  
+  }
   done = tmp;
   Unit * targ;
   bool shouldfire=false;
@@ -86,7 +89,7 @@ void FireAt::Execute () {
   }
   if (shouldfire) {
     if (delay>rxntime)
-      parent->Fire();
+      parent->Fire(false);
     else
       delay +=SIMULATION_ATOM;
   } else {

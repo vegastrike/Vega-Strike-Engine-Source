@@ -7,7 +7,7 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * of the License, or (at your option any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,6 +30,8 @@
 
 
 #include "ai/order.h"
+#include "ai/flybywire.h"
+#include "ai/navigation.h"
 #include "gfx/box.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
@@ -83,6 +85,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  owner = NULL;
   faction =0;
   resolveforces=true;
   CollideInfo.object = NULL;
@@ -112,7 +115,7 @@ void Unit::Init()
   numhalos = nummounts= nummesh = numsubunit = 0;
   halos = NULL; mounts = NULL;meshdata = NULL;subunits = NULL;
   aistate = NULL;
-
+  SetAI (new Order());
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
@@ -155,6 +158,7 @@ void Unit::Init()
   computer.max_pitch=100;
   computer.max_roll=100;
   computer.NavPoint=Vector(0,0,0);
+  computer.itts = true;
   //  Fire();
 }
 
@@ -304,12 +308,19 @@ Unit::~Unit()
 }
 void Unit::getAverageGunSpeed(float & speed, float &range) {
    if (nummounts) {
+     int nummt = nummounts;
      for (int i=0;i<nummounts;i++) {
-       range+=mounts[i].type.Range;
-       speed+=mounts[i].type.Speed;
+       if (mounts[i].type.type!=weapon_info::PROJECTILE) {
+	 range+=mounts[i].type.Range;
+	 speed+=mounts[i].type.Speed;
+       } else {
+	 nummt--;
+       }
      }
-     range/=nummounts;
-     speed/=nummounts;
+     if (nummt) {
+       range/=nummt;
+       speed/=nummt;
+     }
    }
   
 }
@@ -321,9 +332,9 @@ Vector Unit::PositionITTS (const Vector & posit, float speed) {
 }
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
    Vector Normal (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]);
-   if (range!=FLT_MAX) {
-     getAverageGunSpeed(speed,range);
-   }
+   //   if (range!=FLT_MAX) {
+   //     getAverageGunSpeed(speed,range);
+   //   }
    Vector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity))));
    totarget = totarget-cumulative_transformation.position;
    float tmpcos = Normal.Dot (totarget);
@@ -685,7 +696,7 @@ void Unit::UnFire () {
     mounts[i].UnFire();//turns off beams;
   }
 }
-void Unit::Fire () {
+void Unit::Fire (bool Missile) {
   for (int i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
       if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy)
@@ -694,7 +705,7 @@ void Unit::Fire () {
       if (mounts[i].type.EnergyRate>energy) 
 	continue;
     }
-    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,Velocity,this)) {//FIXME turrets
+    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,Velocity,this,Target(),Missile)) {//FIXME turrets
     energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate;
     }//unfortunately cumulative transformation not generated in physics atom
   }
@@ -704,8 +715,9 @@ void Unit::Mount::UnFire () {
     return;
   gun->Destabilize();
 }
-bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner) {
-  if (status!=ACTIVE) 
+bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool Missile) {
+  Unit * temp;
+  if (status!=ACTIVE||(Missile&&type.type!=weapon_info::PROJECTILE)||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
     if (gun==NULL)
@@ -717,6 +729,8 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	return false;//can't fire an active beam
   }else { 
     if (refire>type.Refire) {
+      if (ammo>0)
+	ammo--;
       refire =0;
       Matrix mat;
       Transformation tmp = LocalPosition;
@@ -727,12 +741,22 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity
 	break;
       case weapon_info::BOLT:
-	
 	new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work
 	break;
       case weapon_info::PROJECTILE:
-      
-	//new Missile (tmp, type, owner);
+	if (Missile) {
+	  temp = new Unit (type.file.c_str(),true,false);
+	  if (target&&target!=owner) {
+	    temp->Target (target);
+	    temp->EnqueueAI (new Orders::FaceTarget ());
+	  }
+	  temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
+	  temp->SetOwner (owner);
+	  temp->Velocity = velocity;
+	  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = Cumulative;
+	  CopyMatrix (temp->cumulative_transformation_matrix,m);
+	  _Universe->activeStarSystem()->AddUnit(temp);
+	}
 	break;
       default: 
 	break;
@@ -741,7 +765,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
   }
   return true;
 }
-Unit::Mount::Mount(const string& filename) :gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),type(weapon_info::BEAM){
+Unit::Mount::Mount(const string& filename, short ammo) :gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM){
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;

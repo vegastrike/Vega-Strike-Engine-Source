@@ -56,6 +56,7 @@ public:
 class FaceTargetITTS : public ChangeHeading {
   bool finish;
   float speed;
+  float range;
 public:
   FaceTargetITTS (bool fini=false, int accuracy = 3);
   void Execute();

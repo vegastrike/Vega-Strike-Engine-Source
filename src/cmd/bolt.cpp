@@ -193,7 +193,14 @@ bool Bolt::Collide (Unit * target) {
     Vector tmp = (cur_position-prev_position).Normalize();
     tmp = tmp*distance;
     distance = curdist/range;
-    target->ApplyDamage (prev_position+tmp,normal, damage* ((1-distance)+distance*longrange),col);
+    GFXColor coltmp (col);
+    coltmp.r+=.5;
+    coltmp.g+=.5;
+    coltmp.b+=.5;
+    if (coltmp.r>1)coltmp.r=1;
+    if (coltmp.g>1)coltmp.g=1;
+    if (coltmp.b>1)coltmp.b=1;
+    target->ApplyDamage (prev_position+tmp,normal, damage* ((1-distance)+distance*longrange),coltmp);
     return true;
   }
   return false;

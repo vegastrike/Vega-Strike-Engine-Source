@@ -6,17 +6,24 @@
 
 
 FireKeyboard::FireKeyboard (): Order (WEAPON){
+  gunspeed = gunrange = .0001;
+
   BindKey(' ',FireKeyboard::FireKey);
+  BindKey(';',FireKeyboard::MissileKey);
   BindKey('t',FireKeyboard::TargetKey);
 
 }
 static KBSTATE firekey=UP;
 static KBSTATE targetkey=UP;
+static KBSTATE missilekey = UP;
 void FireKeyboard::FireKey(int, KBSTATE k) {
   firekey = k;
 }
 void FireKeyboard::TargetKey(int, KBSTATE k) {
   targetkey = k;
+}
+void FireKeyboard::MissileKey(int, KBSTATE k) {
+  missilekey = k;
 }
 
 
@@ -43,7 +50,10 @@ void FireKeyboard::ChooseTargets () {
 }
 bool FireKeyboard::ShouldFire(Unit * targ) {
   float dist;
-  float angle = parent->cosAngleTo (targ, dist,itts?0.001:FLT_MAX);
+  if (gunspeed==.0001) {
+    parent->getAverageGunSpeed (gunspeed,gunrange);
+  }
+  float angle = parent->cosAngleTo (targ, dist,gunspeed,gunrange);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
   if (targ==parent->Target()) {
     distance = dist;
@@ -60,7 +70,9 @@ void FireKeyboard::Execute () {
     ChooseTargets();
   }
   if (firekey==DOWN) 
-    parent->Fire();
+    parent->Fire(false);
+  if (missilekey==DOWN)
+    parent->Fire(true);
   else if (firekey==UP) {
     parent->UnFire();
   }

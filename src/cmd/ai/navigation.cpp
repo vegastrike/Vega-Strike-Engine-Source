@@ -202,7 +202,10 @@ void ChangeHeading::Execute() {
 
 FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
   type=FACING|TARGET;
-  speed=0;
+  speed=float(.00001);
+  range=float(.00001);
+
+  
 }
 
 void FaceTargetITTS::Execute() {
@@ -211,9 +214,11 @@ void FaceTargetITTS::Execute() {
     done = GFXTRUE;
     return;
   }
-  if (speed==0) {
-    float range;
+  if (speed == float(.00001)) {
     parent->getAverageGunSpeed(speed,range);
+    if (speed ==float (.00001)) {
+      speed = range=FLT_MAX;
+    }
   }
   SetDest(target->PositionITTS(parent->Position(),speed+parent->GetVelocity().Dot((target->Position()-parent->Position()).Normalize())));
   ChangeHeading::Execute();

@@ -579,7 +579,7 @@ void AIScript::endElement(const string &name) {
     break;
   case FACETARGET:
     xml->unitlevel--;
-    if (xml->itts) {
+    if (xml->itts||parent->GetComputerData().itts) {
       xml->orders.push_back (new Orders::FaceTargetITTS (xml->terminate, 
 							 (bool)xml->acc));
     }else {

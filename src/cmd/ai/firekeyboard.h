@@ -8,11 +8,14 @@
 
 class FireKeyboard: public Order {
   bool itts;
+  float gunspeed;
+  float gunrange;
   float rxntime;
   float delay;
   float agg;
   bool ShouldFire(Unit * targ);
   static void FireKey(int, KBSTATE);
+  static void MissileKey(int, KBSTATE);
   static void TargetKey(int, KBSTATE);
 
 protected:

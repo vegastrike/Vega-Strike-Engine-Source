@@ -10,14 +10,15 @@ class FireAt: public Order {
 
   bool ShouldFire(Unit * targ);
 protected:
-  bool itts;
   float rxntime;
   float delay;
   float agg;
   float distance;
+  float gunspeed;
+  float gunrange;
   void ChooseTargets(int num);//chooses n targets and puts the best to attack in unit's target container
 public:
-  FireAt (float reaction_time, float aggressivitylevel, bool itts);//weapon prefs?
+  FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
   virtual void Execute();
 };
 

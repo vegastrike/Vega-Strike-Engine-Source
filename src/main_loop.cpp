@@ -302,15 +302,16 @@ SphereMesh *bg2=NULL;
 Animation *  explosion= NULL;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
+/*
 static void Fire (int, KBSTATE newState) {
   if (newState==DOWN) {
-    fighters[0]->Fire();
+    fighters[0]->Fire(false);
   }
   if (newState==RELEASE) {
     fighters[0]->UnFire();
   }
 }
-
+*/
 /*
 int oldx =0;
 int  oldy=0;
@@ -470,7 +471,7 @@ void createObjects() {
     fighters[a] = new Unit(fightername, true, false);
     fighters[a]->SetPosition (pox);
     
-    fighters[a]->SetAI(new Order());
+    //    fighters[a]->SetAI(new Order());
     if (a!=0) {
       fighters[a]->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 

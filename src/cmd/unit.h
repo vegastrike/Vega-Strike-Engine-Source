@@ -68,6 +68,7 @@ friend class PlanetaryOrbit;
     float max_yaw;
     float max_pitch;
     float max_roll;
+    bool itts;
   };
 
  private:
@@ -85,7 +86,7 @@ friend class PlanetaryOrbit;
   void endElement(const string &name);
 
  protected:
-
+  Unit *owner;
   Transformation prev_physical_state;
   Transformation curr_physical_state;
   Matrix cumulative_transformation_matrix;
@@ -108,11 +109,12 @@ friend class PlanetaryOrbit;
       Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
       float refire;
     };
-    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     short size;
+    short ammo;//-1 is infinite
     weapon_info type;
-    Mount():gun(NULL),status(UNCHOSEN),size(weapon_info::NOWEAP),type(weapon_info::BEAM){}
-    Mount(const string& name);
+    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
+    Mount():size(weapon_info::NOWEAP),ammo(-1),type(weapon_info::BEAM),status(UNCHOSEN){gun=NULL;}
+    Mount(const string& name, short int ammo=-1);
     void Activate () {
       if (status==INACTIVE)
 	status = ACTIVE;
@@ -124,9 +126,9 @@ friend class PlanetaryOrbit;
     void SetMountPosition (const Transformation &t) {LocalPosition = t;}
     Transformation &GetMountLocation () {return LocalPosition;}
     void UnFire();
-    bool Fire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner);
+    bool Fire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, bool Missile=false);
   } *mounts;
-  
+  friend class Unit::Mount;
   struct {
     unsigned short right, left, front, back;
   } armor;
@@ -148,7 +150,6 @@ friend class PlanetaryOrbit;
   } shield;
   void RegenShields();
   float hull;
-
   Order *aistate;
   float accel;
   float recharge;
@@ -201,6 +202,7 @@ friend class PlanetaryOrbit;
   float DealDamageToShield (const Vector & pnt, float &Damage);
   float DealDamageToHull (const Vector &pnt, float Damage);
   void SetCollisionParent (Unit *name);
+  void SetOwner(Unit *target) {owner=target;}//won't collide with owner
   bool ShieldUp (const Vector &);
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
@@ -234,7 +236,7 @@ public:
   void Target (Unit * targ) {computer.target.SetUnit(targ);}
   void Threaten (Unit * targ, float danger);
   void ResetThreatLevel() {computer.threatlevel=0;}
-  void Fire();
+  void Fire(bool Missile);
   void UnFire();
   Computer & GetComputerData () {return computer;}
   float FShieldData();  float RShieldData();  float LShieldData();  float BShieldData();

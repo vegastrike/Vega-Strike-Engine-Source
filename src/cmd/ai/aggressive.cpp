@@ -21,7 +21,7 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 12);
 
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,15,false), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,15), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);

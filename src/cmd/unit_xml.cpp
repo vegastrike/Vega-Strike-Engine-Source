@@ -80,7 +80,9 @@ namespace UnitXML {
       MIN,
       MAXSPEED,
       AFTERBURNER,
-      SHIELDTIGHT 
+      SHIELDTIGHT,
+      ITTS,
+      AMMO
     };
 
   const EnumMap::Pair element_names[] = {
@@ -150,11 +152,13 @@ namespace UnitXML {
     EnumMap::Pair ("weapon", WEAPON),
     EnumMap::Pair ("maxspeed", MAXSPEED),
     EnumMap::Pair ("afterburner", AFTERBURNER),
-    EnumMap::Pair ("tightness",SHIELDTIGHT)
+    EnumMap::Pair ("tightness",SHIELDTIGHT),
+    EnumMap::Pair ("itts",ITTS),
+    EnumMap::Pair ("ammo", AMMO)
 };
 
   const EnumMap element_map(element_names, 23);
-  const EnumMap attribute_map(attribute_names, 41);
+  const EnumMap attribute_map(attribute_names, 43);
 }
 
 using XMLSupport::EnumMap;
@@ -176,6 +180,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     string filename;
     Vector P;
     int indx;
+    short ammo=-1;
     Vector Q;
     Vector R;
     Vector pos;
@@ -281,6 +286,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case WEAPON:
 	filename = (*iter).value;
 	break;
+      case AMMO:
+	ammo = parse_int ((*iter).value);
       case MOUNTSIZE:
 	tempbool=true;
 	mntsiz=parseMountSizes((*iter).value.c_str());
@@ -328,7 +335,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(new Mount (filename.c_str()));
+    xml->mountz.push_back(new Mount (filename.c_str(), ammo));
     xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
     //xml->mountz[indx]->Activate();
     if (tempbool)
@@ -582,6 +589,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case ROLL:
 	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
 	break;
+      case ITTS:
+	computer.itts=parse_bool ((*iter).value);
       }
     }
     break;
