@@ -199,8 +199,8 @@ void Python::initpaths(){
 		  pwd[i]=DELIM;
   }
   std::string changepath ("import sys\nsys.path = ["
-	 ",\""+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin\""
-         "\""+std::string(pwd)+DELIMSTR"modules\""
+	 "\""+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin\""
+         ",\""+std::string(pwd)+DELIMSTR"modules\""
          ",\""+std::string(pwd)+DELIMSTR"bases\""
 		 "]+sys.path\n");
   fprintf (stderr,"running %s",changepath.c_str());
