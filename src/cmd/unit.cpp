@@ -644,7 +644,7 @@ int Unit::LockMissile() {
 QVector Unit::PositionITTS (const QVector & posit, float speed) const{
   QVector retval = Position()-posit;
   speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
-  retval = Position()+Velocity.Cast().Scale(speed);
+  retval = Position()+GetVelocity().Cast().Scale(speed);
   return retval;
 }
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
@@ -652,7 +652,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   QVector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity.Cast()))));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (GetVelocity().Cast()))));
    totarget = totarget-cumulative_transformation.position;
    double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
@@ -799,7 +799,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND
-  AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
+  AUDAdjustSound (sound.engine,cumulative_transformation.position,GetVelocity());
 #endif
   short cloak=cloaking;
   if (cloaking>cloakmin) {
@@ -902,7 +902,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     haloalpha=((float)cloak)/32767;
   }
   if (On_Screen) {
-    Vector Scale (1,1,Velocity.MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
+    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
     halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
   }
 }
