@@ -334,7 +334,11 @@ void createObjects() {
     if (fp) {      
       if (!feof(fp))
 	fscanf (fp, "%s %f %f %f %d\n",fightername,&pox.i, &pox.j, &pox.k,&tmptarget[a]);
-
+      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
+	pox.i=rand()*10000./RAND_MAX-5000;
+	pox.j=rand()*10000./RAND_MAX-5000;
+	pox.k=rand()*10000./RAND_MAX-5000;
+      }
     }
     //    if (tmptarget[a]<0||tmptarget[a]>numf)
     //      tmptarget[a]=0;
