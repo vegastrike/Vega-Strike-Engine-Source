@@ -1547,7 +1547,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       //    dead &=(subunits[i]->hull<0);
     }
   }
-  if (hull<0) {
+  // Really kill the unit only in non-networking or on server side
+  if ((Network==NULL || SERVER) && hull<0) {
     dead&= (image->explosion==NULL);    
     if (dead)
       Kill();
@@ -2415,7 +2416,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  Vector netpnt = pnt;
 	  Vector netnormal = normal;
 	  GFXColor col( color.r, color.g, color.b, color.a);
-	  Server->sendDamages( this->serial, this->zone, this->shieldSerializer( XMLType((void *)&shield), this), shield.recharge, shield.leak, armor.back, armor.front, armor.left, armor.right, ppercentage, spercentage, amt, netpnt, netnormal, col);
+	  Server->sendDamages( this->serial, this->zone, shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
 	  //Server->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
   }
@@ -2660,6 +2661,10 @@ void Unit::Kill(bool erasefromsave) {
 
   //if (erasefromsave)
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
+
+  // The server send a kill notification to all concerned clients
+  if( SERVER)
+  	Server->sendKill( this->serial, this->zone);
   
   if (this->colTrees)
     this->colTrees->Dec();//might delete
@@ -2703,10 +2708,11 @@ void Unit::Kill(bool erasefromsave) {
   //God I can't believe this next line cost me 1 GIG of memory until I added it
   computer.threat.SetUnit (NULL);
   computer.velocity_ref.SetUnit(NULL);
-  if(aistate) {
-    aistate->ClearMessages();
-    aistate->Destroy();
-  }
+
+	  if(aistate) {
+	    aistate->ClearMessages();
+	    aistate->Destroy();
+	  }
   aistate=NULL;
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit *un;

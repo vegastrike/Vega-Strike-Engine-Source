@@ -263,13 +263,13 @@ protected:
   // Tell if networked unit
   bool networked;
   ObjSerial	serial;
-  int		zone;
+  unsigned short	zone;
 public:
   void SetNetworkMode( bool mode=true) {this->networked = mode;}
   ObjSerial GetSerial() { return this->serial;}
   void		SetSerial( ObjSerial ser) { this->serial = ser;}
-  int		GetZone() { return this->zone;}
-  void		SetZone( int zn) { this->zone = zn;}
+  unsigned short	GetZone() { return this->zone;}
+  void		SetZone( unsigned short zn) { this->zone = zn;}
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/
@@ -774,13 +774,13 @@ protected:
   void RegenShields();
 public:
   ///Armor values: how much damage armor can withhold before internal damage accrues
-  struct {
+  struct Armor {
     unsigned short front, back, right, left;
   } armor;
   ///Shielding Struct holding values of current shields
-  struct {
+  struct Shield {
     ///How much the shield recharges per second
-    float recharge; 
+    float recharge;
     ///A union containing the different shield values and max values depending on number
     union {
       ///if shield is 2 big, 2 floats make this shield up, and 2 floats for max {front,back,frontmax,backmax}

@@ -1,28 +1,25 @@
 
 *** GENERAL ************************************************************
 
-- Consider handle damages to docked ships if they can be hit
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2
-DONE ? Carsten - Compress sent data in Packet (_packetmem member)
 
 *** ACCOUNT SERVER *****************************************************
-
-- Compress the save files before sending them to game server
 
 
 *** GAME SERVER ********************************************************
 
-- Each time a ship is hit => send to all clients that are targeting it its data
+- Load whole system description when generating a system (if not already done)
+- Transfer system description when a player enter in a system (planets, bases, ...)
+- Turn mount_num into a char
 - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
 - Add the player faction to SaveGame
-- Transmit data only for ships, missiles, bolt : send only direction ?
+- Add position stuff transmission for other units than clients (ai, missiles);
+- Add position stuff transmission for planets (with high update period) and for bases if needed
 - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 - Think about transfering config data such as difficulty, physics...
 - Find all the used vars in Unit stuff and integrate them in the serverconfig
-- When another player is targeted, get his data (damage level, shield, weapons if we have the appropriate sensors)
-  -> at least the name (got from unit name... to see)
 
 TO TEST - try to reconnect to account server periodicaly if connection lost
 TO LOOK AT - When receiving a packet : look at timestamp and compare it to latest receive timestamp for that client
@@ -35,14 +32,12 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 OR
 - Maybe send extrapolated position with deltatime ahead in time
 - and when receiving position updates extrapolate only with concerned client's delay
-DONE - When receiving position update, test if local player
-DONE - When receiving a packet : look at timestamp and compare it to latest receive timestamp from the server
-DONE - when one exits from VS -> send a quit msg
-DONE - Use a NETWORK_ATOM to check if it's time to send position update
 
 
 === GENERAL STUFF =======================================================
 
+DONE ? Carsten - Compress sent data in Packet (_packetmem member)
+DONE - Consider handle damages to docked ships if they can be hit
 DONE - split asteroids, enhancement, building, nebula into 2 classes
 DANIEL DONE in endianness.cpp - add htond and htond for doubles : they are completely reversed
 DONE - Remove the isPlayer function and related data
@@ -60,6 +55,7 @@ NO BECAUSE DEFAULT TO ZLIB - Put some negociation stage to check that client sup
 
 === ACCOUNT SERVER ======================================================
 
+DONE - Compress the save files before sending them to game server
 DONE - Then transfert unit description with login acceptance
 DONE - Fix the bug when transmitting name for disconnection ??
 DONE : made a StarSystem::Update() method for server - Move StarSystem::Loop to server side
@@ -70,10 +66,17 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE AUTOMATICALLY - When another player is targeted, get his data (damage level, shield, weapons if we have the appropriate sensors)
+DONE - Each time a ship is hit => send to all clients in the same zone a damage notification
 DONE - when server savetime comes, send unit xml to account server for each client
   compressed? in a single packet with serials or names
 DONE - Load StarSystems on demand (when a player enters an empty starsystem)
 DONE - forsee account server unavailability and in that case, deny new logins + send msg to client
 
 === CLIENT SIDE =========================================================
+
+DONE - When receiving position update, test if local player
+DONE - When receiving a packet : look at timestamp and compare it to latest receive timestamp from the server
+DONE - when one exits from VS -> send a quit msg
+DONE - Use a NETWORK_ATOM to check if it's time to send position update
 

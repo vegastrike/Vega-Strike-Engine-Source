@@ -768,7 +768,7 @@ void	NetServer::checkTimedoutClients_udp()
 			// Here considering a delta > 0xFFFFFFFF*X where X should be at least something like 0.9
 			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
 			// side -> when timestamp has grown enough to became bigger than what an u_int can store
-			if( (*i)->zone>-1 && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
+			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
 			{
 				cout<<"ACTIVITY TIMEOUT for client number "<<(*i)->serial<<endl;
 				cout<<"\t\tCurrent time : "<<curtime<<endl;
@@ -776,18 +776,6 @@ void	NetServer::checkTimedoutClients_udp()
 				cout<<"t\tDifference : "<<deltatmp<<endl;
 				discList.push_back( *i);
 			}
-			else if( !(*i)->zone>-1 && deltatmp > logintimeout)
-			{
-				cout<<"LOGIN TIMEOUT for client number "<<(*i)->serial<<endl;
-				cout<<"\t\tCurrent time : "<<curtime<<endl;
-				cout<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
-				cout<<"t\tDifference : "<<deltatmp<<endl;
-				discList.push_back( *i);
-			}
-			/*
-			else
-				cout<<"CLIENT "<<(*i)->serial<<" - DELTA="<<deltatmp<<endl;
-			*/
 		}
 	}
 }
@@ -928,7 +916,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
     Packet p2;
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 	int mount_num;
-	int zone;
+	unsigned short zone;
 	char mis;
 	// Find the unit
 	Unit * un = NULL;
@@ -1041,7 +1029,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		// target_serial is in fact the serial of the firing unit (client itself or turret)
 		target_serial = netbuf.getSerial();
 		mount_num = netbuf.getInt32();
-		zone = netbuf.getInt32();
+		zone = netbuf.getShort();
 		mis = netbuf.getChar();
 		// Find the unit
 		un = zonemgr->getUnit( target_serial, zone);
@@ -1068,7 +1056,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		// Received a target scan request
 		// WE SHOULD FIND A WAY TO CHECK THAT THE CLIENT HAS THE RIGHT SCAN SYSTEM FOR THAT
 		target_serial = netbuf.getSerial();
-		zone = netbuf.getInt32();
+		zone = netbuf.getShort();
 		un = zonemgr->getUnit( target_serial, zone);
 		// Get the un Unit data and send it in a packet
 		// Here we should get what a scanner could get on the target ship
@@ -1134,13 +1122,19 @@ void	NetServer::addClient( Client * clt)
 	Packet packet2;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
+	StarSystem * sts;
 
 	QVector safevec;
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	string starsys = cp->savegame->GetStarSystem();
 
-	// NOW : I AM NOT SURE WHICH STAR SYSTEM IS THE ACTIVE ONE HERE !!!
-	safevec = UniverseUtil::SafeEntrancePoint( cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+
+	unsigned short zoneid;
+	// If we return an existing starsystem we broadcast our info to others
+	sts=zonemgr->addClient( clt, starsys, zoneid);
+
+	// Cannot use sts pointer since it may be NULL if the system was just created
+	safevec = UniverseUtil::SafeStarSystemEntrancePoint( _Universe->getStarSystem( starsys+".system"), cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
 	cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
 	// Setup the clientstates
@@ -1149,14 +1143,8 @@ void	NetServer::addClient( Client * clt)
 	clt->current_state.setPosition( cp->savegame->GetPlayerLocation());
 	clt->current_state.setSerial( clt->serial);
 
-	int zoneid;
-	if( zonemgr->addClient( clt, starsys, zoneid))
+	if( sts)
 	{
-		//NetBuffer netbuf2( packet.getData(), packet.getDataLength());
-		// If the system is loaded, there are people in it -> BROADCAST
-		//clt->current_state = netbuf2.getClientState();
-		//clt->old_state = clt->current_state;
-
 		netbuf.addString( clt->callsign);
 		//netbuf.addClientState( clt->current_state);
 		// Send savebuffer after clientstate
@@ -1168,7 +1156,7 @@ void	NetServer::addClient( Client * clt)
 #ifndef _WIN32
 			__LINE__
 #else
-			1138
+			1171
 #endif
 			);
 		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
@@ -1180,14 +1168,15 @@ void	NetServer::addClient( Client * clt)
 	// In all case set the zone and send the client the zone which it is in
 	cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	clt->game_unit.GetUnit()->SetZone( zoneid);
+	clt->ingame = true;
 	Packet pp;
 	netbuf.Reset();
-	netbuf.addInt32( zoneid);
+	netbuf.addShort( zoneid);
 	pp.send( CMD_ADDEDYOU, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 		__LINE__
 #else
-		1151
+		1190
 #endif
 		);
 
@@ -1476,7 +1465,7 @@ void	NetServer::save()
 
 // WEAPON STUFF
 
-void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, int zone)
+void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone)
 {
 	Packet p;
 	NetBuffer netbuf;
@@ -1497,7 +1486,7 @@ void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, int zone)
 
 // In BroadcastFire we must use the provided serial because it may not be the client's serial
 // but may be a turret serial
-void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, int zone)
+void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial missile_serial, unsigned short zone)
 {
 	Packet p;
 	NetBuffer netbuf;
@@ -1517,7 +1506,7 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
 	zonemgr->broadcast( zone, serial, &p );
 }
 
-void	NetServer::sendDamages( ObjSerial serial, int zone, string shields, float recharge, char leak, unsigned short ab, unsigned short af, unsigned short al, unsigned short ar, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
+void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Unit::Shield shield, Unit::Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
 {
 	Packet p;
 	NetBuffer netbuf;
@@ -1528,13 +1517,8 @@ void	NetServer::sendDamages( ObjSerial serial, int zone, string shields, float r
 	netbuf.addVector( pnt);
 	netbuf.addVector( normal);
 	netbuf.addColor( color);
-	netbuf.addShort( ab);
-	netbuf.addShort( af);
-	netbuf.addShort( al);
-	netbuf.addShort( ar);
-	netbuf.addFloat( recharge);
-	netbuf.addChar( leak);
-	netbuf.addString( shields);
+	netbuf.addShield( shield);
+	netbuf.addArmor( armor);
 
 	p.bc_create( CMD_DAMAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
 #ifndef _WIN32
@@ -1546,3 +1530,49 @@ void	NetServer::sendDamages( ObjSerial serial, int zone, string shields, float r
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
 }
+
+void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
+{
+	Packet p;
+	bool found = false;
+	Client * clt;
+
+	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
+	for( LI li=udpClients.begin(); !found && li!=udpClients.end(); li++)
+	{
+		if( (*li)->serial == serial)
+		{
+			clt = (*li);
+			found = true;
+		}
+	}
+	if( !found)
+	{
+		for( LI li=tcpClients.begin(); !found && li!=tcpClients.end(); li++)
+		{
+			if( (*li)->serial == serial)
+			{
+				clt = (*li);
+				found = true;
+			}
+		}
+	}
+	if( !found)
+		cout<<"Killed a non client Unit = "<<serial<<endl;
+	else
+	{
+		cout<<"Killed client serial = "<<serial<<endl;
+		clt->ingame = false;
+	}
+
+	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__,
+#ifndef _WIN32
+			__LINE__
+#else
+			1553
+#endif
+		);
+	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
+	zonemgr->broadcast( zone, serial, &p );
+}
+

@@ -9,6 +9,7 @@
 using std::string;
 
 class Unit;
+class StarSystem;
 
 namespace UniverseUtil {
 	Unit * GetUnitFromSerial( ObjSerial serial);
@@ -120,6 +121,7 @@ namespace UniverseUtil {
 	void LoadMission (string missionname);
 	void LoadMissionScript (string scriptcontents);    
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
+	QVector SafeStarSystemEntrancePoint (StarSystem *sts, QVector,float radial_size=-1);
 	float getPlanetRadiusPercent ();
 
 	void cacheAnimation (string anim);

@@ -3,7 +3,6 @@
 #include "endianness.h"
 #include "gfxlib_struct.h"
 
-
 NetBuffer::NetBuffer()
 		{
 			buffer = new char[MAXBUFFER];
@@ -151,6 +150,97 @@ Transformation	NetBuffer::getTransformation()
 			t.netswap();
 			return t;
 		}
+
+void	NetBuffer::addShield( SHIELD shield)
+{
+	this->addChar( shield.number);
+	this->addChar( shield.leak);
+	this->addFloat( shield.recharge);
+	switch( shield.number)
+	{
+		case 2 :
+			this->addFloat( shield.fb[0]);	
+			this->addFloat( shield.fb[1]);	
+			this->addFloat( shield.fb[2]);	
+			this->addFloat( shield.fb[3]);	
+		break;
+		case 4 :
+			this->addShort( shield.fbrl.front);
+			this->addShort( shield.fbrl.back);
+			this->addShort( shield.fbrl.right);
+			this->addShort( shield.fbrl.left);
+			this->addShort( shield.fbrl.frontmax);
+			this->addShort( shield.fbrl.backmax);
+			this->addShort( shield.fbrl.rightmax);
+			this->addShort( shield.fbrl.leftmax);
+		break;
+		case 6 :
+			this->addShort( shield.fbrltb.v[0]);
+			this->addShort( shield.fbrltb.v[1]);
+			this->addShort( shield.fbrltb.v[2]);
+			this->addShort( shield.fbrltb.v[3]);
+			this->addShort( shield.fbrltb.v[4]);
+			this->addShort( shield.fbrltb.v[5]);
+			this->addShort( shield.fbrltb.fbmax);
+			this->addShort( shield.fbrltb.rltbmax);
+		break;
+	}
+}
+SHIELD	NetBuffer::getShield()
+{
+	Unit::Shield shield;
+	shield.number = this->getChar();
+	shield.leak = this->getChar();
+	shield.recharge = this->getFloat();
+	switch( shield.number)
+	{
+		case 2 :
+			shield.fb[0]=this->getFloat();
+			shield.fb[1]=this->getFloat();
+			shield.fb[2]=this->getFloat();
+			shield.fb[3]=this->getFloat();
+		break;
+		case 4 :
+			shield.fbrl.front = this->getShort();
+			shield.fbrl.back = this->getShort();
+			shield.fbrl.right = this->getShort();
+			shield.fbrl.left = this->getShort();
+			shield.fbrl.frontmax = this->getShort();
+			shield.fbrl.backmax = this->getShort();
+			shield.fbrl.rightmax = this->getShort();
+			shield.fbrl.leftmax = this->getShort();
+		break;
+		case 6 :
+			shield.fbrltb.v[0] = this->getShort();
+			shield.fbrltb.v[1] = this->getShort();
+			shield.fbrltb.v[2] = this->getShort();
+			shield.fbrltb.v[3] = this->getShort();
+			shield.fbrltb.v[4] = this->getShort();
+			shield.fbrltb.v[5] = this->getShort();
+			shield.fbrltb.fbmax = this->getShort();
+			shield.fbrltb.rltbmax = this->getShort();
+		break;
+	}
+
+	return shield;
+}
+void		NetBuffer::addArmor( ARMOR armor)
+{
+	this->addShort( armor.front);
+	this->addShort( armor.back);
+	this->addShort( armor.right);
+	this->addShort( armor.left);
+}
+ARMOR	NetBuffer::getArmor()
+{
+	Unit::Armor armor;
+	armor.front = this->getShort();
+	armor.back = this->getShort();
+	armor.right = this->getShort();
+	armor.left = this->getShort();
+
+	return armor;
+}
 
 void	NetBuffer::addSerial( ObjSerial serial)
 		{

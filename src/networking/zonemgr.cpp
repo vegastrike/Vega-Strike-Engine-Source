@@ -74,7 +74,7 @@ void	ZoneMgr::removeUnit( Unit * un, int zone)
 }
 
 // Returns NULL if no corresponding Unit was found
-Unit *	ZoneMgr::getUnit( ObjSerial unserial, int zone)
+Unit *	ZoneMgr::getUnit( ObjSerial unserial, unsigned short zone)
 {
 	LUI i;
 	Unit * un = NULL;
@@ -87,14 +87,14 @@ Unit *	ZoneMgr::getUnit( ObjSerial unserial, int zone)
 	return un;
 }
 
-bool	ZoneMgr::addClient( Client * clt, string starsys, int & num_zone)
+StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & num_zone)
 {
 	// Remove the client from old starsystem if needed and add it in the new one
 	/*
 	string oldstarsys = clt->save.GetOldStarSystem();
 	*/
-	bool ret = true;
-	StarSystem * sts;
+	StarSystem * sts=NULL;
+	StarSystem * ret=NULL;
 	//Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	//string starsys = cp->savegame->GetStarSystem();
 	// TO BE DONE IN JUMP HANDLING !!!
@@ -108,7 +108,7 @@ bool	ZoneMgr::addClient( Client * clt, string starsys, int & num_zone)
 		// SOMEDAY TEST IF THE STARSYSTEM WE WANT TO GO IN IS REACHABLE FROM THE OLD ONE
 	}
 	*/
-	if( !(sts = _Universe->getStarSystem( starsys+".system")))
+	if( !(ret = sts = _Universe->getStarSystem( starsys+".system")))
 	{
 		// Add a network zone (StarSystem equivalent) and create the new StarSystem
 		// StarSystem is not loaded so we generate it
@@ -116,7 +116,6 @@ bool	ZoneMgr::addClient( Client * clt, string starsys, int & num_zone)
 		sts = this->addZone( starsys);
 		// It also mean that there is nobody in that system so no need to send update
 		// Return false since the starsystem didn't contain any client
-		ret = false;
 		num_zone = _Universe->star_system.size()-1;
 	}
 	else

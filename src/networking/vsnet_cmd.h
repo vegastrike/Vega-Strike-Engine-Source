@@ -70,6 +70,8 @@ enum Cmd
 	CMD_DAMAGE       = 0x98,		// Send damages to apply
 	CMD_DAMAGE1      = 0x99,		// Send damages to apply
 
+	CMD_KILL         = 0x80,		// Send a kill
+
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost and established again :
 									// send the account server a list of active client to sync and log out

@@ -495,7 +495,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 cout << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
 				// Get the zone id in the packet
-				this->zone = netbuf.getInt32();
+				this->zone = netbuf.getShort();
                 //this->getZoneData( &p1 );
                 break;
             case CMD_DISCONNECT :
@@ -570,7 +570,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				cp = _Universe->isPlayerStarship( this->game_unit.GetUnit());
 				cp->ReceivedTargetInfo();
 			break;
-			case CMD_DAMAGE1 :
+			case CMD_DAMAGE :
 			{
 				float amt = netbuf.getFloat();
 				float ppercentage = netbuf.getFloat();
@@ -579,18 +579,13 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				Vector normal = netbuf.getVector();
 				GFXColor col = netbuf.getColor();
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
-				un->armor.back = netbuf.getShort();
-				un->armor.front = netbuf.getShort();
-				un->armor.left = netbuf.getShort();
-				un->armor.right = netbuf.getShort();
-				un->shield.recharge = netbuf.getFloat();
-				un->shield.leak = netbuf.getChar();
-				string shields = netbuf.getString();
+				un->shield = netbuf.getShield();
+				un->armor = netbuf.getArmor();
 				// Apply the damage
 				un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
 			}
 			break;
-			case CMD_DAMAGE :
+			case CMD_DAMAGE1 :
 			{
 				/*
 				float amt = netbuf.getFloat();
@@ -602,6 +597,10 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				un->ApplyLocalDamage( pnt, normal, amt, NULL, col, phasedamage);
 				*/
 			}
+			break;
+			case CMD_KILL :
+				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				un->Kill();
 			break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
@@ -1110,7 +1109,7 @@ void	NetClient::scanRequest( Unit * target)
 	NetBuffer netbuf;
 
 	netbuf.addSerial( target->GetSerial());
-	netbuf.addInt32( this->zone);
+	netbuf.addShort( this->zone);
 
 	p.send( CMD_TARGET, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
@@ -1130,7 +1129,7 @@ void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
 
 	netbuf.addSerial( serial);
 	netbuf.addInt32( mount_index);
-	netbuf.addInt32( this->zone);
+	netbuf.addShort( this->zone);
 	netbuf.addChar( mis);
 
 	p.send( CMD_FIREREQUEST, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 

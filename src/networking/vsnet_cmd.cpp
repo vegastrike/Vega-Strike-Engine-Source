@@ -53,6 +53,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_SCAN         )
     CASE( CMD_DAMAGE       )
     CASE( CMD_DAMAGE1      )
+    CASE( CMD_KILL         )
 
     CASE( CMD_NEWSUBSCRIBE )
 

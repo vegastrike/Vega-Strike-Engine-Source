@@ -56,15 +56,15 @@ struct	Client
 	unsigned int	old_timestamp;
 	unsigned int	latest_timestamp;
 	unsigned int	deltatime;
-	int				sdl_channel;
 	string			callsign;
 	string			name;
 	string			passwd;
 	ClientState		old_state;
 	ClientState		current_state;
 	/* In-game parameters */
-	int				zone;
+	unsigned short	zone;
 	//char			localplayer;
+	bool			ingame;
 
 	Client()
 	{
@@ -75,7 +75,7 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
-		zone = -1;
+		zone = 0;
 	}
 
 	Client( SOCKETALT& s, bool tcp )
@@ -89,7 +89,8 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
-		zone = -1;
+		zone = 0;
+		ingame = false;
 	}
 
 	inline bool isTcp( ) const {
