@@ -133,6 +133,7 @@ public:
   virtual void TDraw(){GFXLoadIdentity(MODEL); Draw();};
   virtual void Draw(Matrix tmatrix);
   virtual void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
+  virtual void ProcessDrawQueue();
   float getMinDis(const Vector &pnt);
   float getMinDis(Matrix t, const Vector &pnt);
   bool querySphere (const Vector &pnt, float err);

@@ -39,7 +39,18 @@ using namespace std;
 #include "vegastrike.h"
 
 #include <GL/gl.h>
-static Hashtable<string, Mesh> meshHashTable;
+
+Hashtable<string, Mesh> Mesh::meshHashTable;
+static list<Mesh*> undrawn_meshes;
+
+void Mesh::ProcessUndrawnMeshes() {
+  while(undrawn_meshes.size()) {
+    Mesh *m = undrawn_meshes.back();
+    undrawn_meshes.pop_back();
+    m->ProcessDrawQueue();
+    m->will_be_drawn = false;
+  }
+}
 
 int Mesh::dlist_count = 1;
 
@@ -88,6 +99,7 @@ void Mesh::InitUnit()
 	dlist = 0;
 	draw_queue = NULL;
 	hash_name = NULL;
+	will_be_drawn = false;
 }
 
 Mesh::Mesh():Primitive()
@@ -707,86 +719,14 @@ void Mesh::Reflect()
 
 void Mesh::Draw()
 {
-	GFXSelectMaterial(myMatNum);
-	//static float rot = 0;
-	GFXColor(1.0, 1.0, 1.0, 1.0);
-	UpdateMatrix();
-	
-	GFXEnable(TEXTURE0);
-	if(envMap) {
-	  Reflect();
-	  GFXEnable(TEXTURE1);
-	} else {
-	  GFXDisable(TEXTURE1);
-	}
-	Decal->MakeActive();
-	GFXBlendMode(ONE, ZERO);
-
-	GFXSelectTexcoordSet(0, 0);
-	if(envMap) {
-	  //_GFX->getLightMap()->MakeActive();
-	  _GFX->activateLightMap();
-	  GFXSelectTexcoordSet(1, 1);
-	  }
-	vlist->Draw();
-	if(quadstrips!=NULL) {
-	  for(int a=0; a<numQuadstrips; a++)
-	    quadstrips[a]->Draw()
-	    ;
-	}
-
-	if(0!=forcelogos) {
-	  forcelogos->Draw();
-	  squadlogos->Draw();
-	}
-	//GFXSelectTexcoordSet(1, 0);
-
-	/*
-	static float rot = 0;
-	GFXColor(1.0, 1.0, 1.0, 1.0);
-
-	UpdateMatrix();
-	Reflect();
-	GFXBlendMode(ONE, ZERO);
-
-	Decal->MakeActive();
-	GFXSelectTexcoordSet(0, 0);
-	vlist->Draw();
-
-	GFXBlendMode(ONE, ONE);
-	LightMap->MakeActive();
-	GFXSelectTexcoordSet(0, 1);
-	vlist->Draw();
-
-
-	GFXSelectTexcoordSet(0, 0);
-
-	GFXBlendMode(ONE, ZERO);
-
-	*/
-	/*else
-	{
-		static float rot = 0;
-		GFXColor(1.0, 1.0, 1.0, 1.0);
-
-		UpdateMatrix();
-		Reflect();
-		GFXBlendMode(ONE, ZERO);
-
-		Decal->MakeActive();
-		GFXSelectTexcoordSet(0, 0);
-		vlist->Draw();
-	
-		GFXBlendMode(ONE, ONE);
-		LightMap->MakeActive();
-		GFXSelectTexcoordSet(0, 1);
-		vlist->Draw();
-
-
-		GFXSelectTexcoordSet(0, 0);
-
-		GFXBlendMode(ONE, ZERO);
-	}*/
+  DrawContext c;
+  UpdateMatrix();
+  GFXGetMatrix(MODEL, c.m);
+  orig->draw_queue->push_back(c);
+  if(!orig->will_be_drawn) {
+    orig->will_be_drawn = true;
+    undrawn_meshes.push_back(orig);
+  }
 }
 
 void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos)
@@ -799,10 +739,45 @@ void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vect
 }
 
 void Mesh::ProcessDrawQueue() {
+  if(!draw_queue->size()) return;
+	GFXSelectMaterial(myMatNum);
+	//static float rot = 0;
+	GFXColor(1.0, 1.0, 1.0, 1.0);
+	
+	GFXEnable(TEXTURE0);
+	if(envMap) {
+	  Reflect();
+	  GFXEnable(TEXTURE1);
+	} else {
+	  GFXDisable(TEXTURE1);
+	}
+	if(Decal)
+	  Decal->MakeActive();
+	GFXBlendMode(ONE, ZERO);
+
+	GFXSelectTexcoordSet(0, 0);
+	if(envMap) {
+	  //_GFX->getLightMap()->MakeActive();
+	  _GFX->activateLightMap();
+	  GFXSelectTexcoordSet(1, 1);
+	  }
+
   while(draw_queue->size()) {
     DrawContext c;
     c = draw_queue->back();
     draw_queue->pop_back();
+    GFXLoadMatrix(MODEL, c.m);
+	vlist->Draw();
+	if(quadstrips!=NULL) {
+	  for(int a=0; a<numQuadstrips; a++)
+	    quadstrips[a]->Draw()
+	    ;
+	}
+
+	if(0!=forcelogos) {
+	  forcelogos->Draw();
+	  squadlogos->Draw();
+	}
   }
 }
 

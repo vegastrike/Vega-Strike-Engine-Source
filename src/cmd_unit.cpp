@@ -811,6 +811,16 @@ void Unit::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector
 	*/
 	Draw();
 }
+
+void Unit::ProcessDrawQueue() {
+  for(int a=0; a<nummesh; a++) {
+    meshdata[a]->ProcessDrawQueue();
+  }
+  for(int a=0; a<numsubunit; a++) {
+    subunits[a]->ProcessDrawQueue();
+  }
+}
+
 void Unit::PrimeOrders () {
   if (aistate) {
     aistate = aistate->ReplaceOrder (new Order);

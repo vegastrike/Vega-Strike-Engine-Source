@@ -38,5 +38,6 @@ namespace XMLSupport {
 
   double parse_float(const string &str);
   int parse_int(const string &str);
+  string int_to_string(int num);
 }
 #endif

@@ -10,6 +10,7 @@ class SphereMesh : public Mesh {
   SphereMesh(float radius, int stacks, int slices, char *texture, bool insideout=false,bool centeredOnShip=false);
   void Draw();
   void Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
+  void ProcessDrawQueue();
 };
 
 #endif

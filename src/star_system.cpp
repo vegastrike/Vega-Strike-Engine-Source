@@ -59,6 +59,9 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
+  // slightly inefficient and stupid, but it's a quick hack to test caching effects
+
+  Mesh::ProcessUndrawnMeshes();
   systemInputDFA->Draw();
 
   /*

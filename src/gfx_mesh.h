@@ -120,7 +120,8 @@ private:
   virtual void endElement(const string &name);
 
 protected:
-	int refcount;
+  static Hashtable<string, Mesh> meshHashTable;
+  int refcount;
 	float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
 	float radialSize;
 	Mesh *orig;
@@ -171,6 +172,7 @@ protected:
 
 	string *hash_name;
 	// Support for reorganized rendering
+	bool will_be_drawn;
 	struct DrawContext {
 	  Matrix m;
 	  DrawContext() { }
@@ -185,6 +187,7 @@ public:
 	virtual void Draw();
 	virtual void Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
 	virtual void ProcessDrawQueue();
+	static void ProcessUndrawnMeshes();
 
 	void setEnvMap(BOOL newValue) {envMap = newValue;}
 

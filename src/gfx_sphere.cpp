@@ -1,10 +1,25 @@
 #include "gfx_sphere.h"
 #include "vegastrike.h"
+
+#include "xml_support.h"
 #ifndef M_PI
 #define M_PI 3.1415926536F
 #endif
+
+using XMLSupport::int_to_string;
+
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool Insideout,bool centeredOnShip) : Mesh() {
   strcpy(name, "Sphere");
+
+  SphereMesh *oldmesh;
+  string hash_key = string("Sphere") + "#" + int_to_string(radius) + "#" + texture + "#" + int_to_string(stacks) + "#" + int_to_string(slices) + "#" + (Insideout?"yes":"no");
+  if(0 != (oldmesh = (SphereMesh*)meshHashTable.Get(hash_key)))
+    {
+      *this = *oldmesh;
+      oldmesh->refcount++;
+      orig = oldmesh;
+      return;
+    }
 
   insideout= Insideout;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
@@ -87,19 +102,68 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
       }
       Decal = new Texture(texture, 0);
       centered?envMap = FALSE:envMap=TRUE;
-      orig = this;
+
+  meshHashTable.Put(hash_key, this);
+  orig = this;
+  refcount++;
+  draw_queue = new vector<DrawContext>;
 }
 void SphereMesh::Draw() {
+  if (centered) {
+    GFXLoadIdentity(MODEL);
+    SetPosition(_GFX->AccessCamera()->GetPosition());
+  }	
+
+  Mesh::Draw();
+}
+
+void SphereMesh::ProcessDrawQueue() {
+	GFXSelectMaterial(myMatNum);
+	//static float rot = 0;
+	GFXColor(1.0, 1.0, 1.0, 1.0);
+	
+	GFXEnable(TEXTURE0);
+	if(envMap) {
+	  Reflect();
+	  GFXEnable(TEXTURE1);
+	} else {
+	  GFXDisable(TEXTURE1);
+	}
+	Decal->MakeActive();
+	GFXBlendMode(ONE, ZERO);
+
+	GFXSelectTexcoordSet(0, 0);
+	if(envMap) {
+	  //_GFX->getLightMap()->MakeActive();
+	  _GFX->activateLightMap();
+	  GFXSelectTexcoordSet(1, 1);
+	  }
+
   if (insideout) 
     GFXDisable (CULLFACE);
   if (centered) {
     GFXDisable(LIGHTING);
-    GFXLoadIdentity(MODEL);
-    SetPosition(_GFX->AccessCamera()->GetPosition());
     GFXDisable(DEPTHWRITE);
   }	
   
-  Mesh::Draw();
+  while(draw_queue->size()) {
+    DrawContext c;
+    c = draw_queue->back();
+    draw_queue->pop_back();
+    GFXLoadMatrix(MODEL, c.m);
+	vlist->Draw();
+	if(quadstrips!=NULL) {
+	  for(int a=0; a<numQuadstrips; a++)
+	    quadstrips[a]->Draw()
+	    ;
+	}
+
+	if(0!=forcelogos) {
+	  forcelogos->Draw();
+	  squadlogos->Draw();
+	}
+  }
+
   if (insideout)
     GFXEnable(CULLFACE);
   if (centered) {
@@ -107,6 +171,7 @@ void SphereMesh::Draw() {
     GFXEnable(DEPTHWRITE);
   }
 }
+
 void SphereMesh::Draw (const Vector &x, const Vector &y, const Vector &z, const Vector & pos) {
   if (insideout) {
     GFXDisable (CULLFACE);
