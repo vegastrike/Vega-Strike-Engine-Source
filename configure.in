@@ -262,7 +262,7 @@ dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING([for Win32 platform])
 AC_EGREP_CPP(yes,
 [ 
-#if defined(WIN32) || defined(__CYGWIN__)
+#if defined(WIN32) || defined(_WIN32)
   yes
 #endif
 ], is_win32=yes, is_win32=no )
@@ -279,7 +279,16 @@ if test "x${is_win32}" = "xyes" ; then
 	WIN32="1"
 fi
 
-AC_MSG_CHECKING([for Mingw32 build])
+AC_MSG_CHECKING([for CygWin platform])
+AC_EGREP_CPP(yes,
+[ 
+#if defined(__CYGWIN__)
+  yes
+#endif
+], is_cygwin=yes, is_cygwin=no )
+AC_MSG_RESULT(${is_cygwin})
+
+AC_MSG_CHECKING([for Mingw32 platform])
 AC_EGREP_CPP(yes,
 [ 
 #if defined(__MINGW32__)
@@ -288,8 +297,7 @@ AC_EGREP_CPP(yes,
 ], is_mingw=yes, is_mingw=no )
 AC_MSG_RESULT(${is_mingw})
 if test "x${is_mingw}" = "xyes" ; then
-	echo "Compiling for mingw32 : adding -lwsock32"
-	VS_LIBS="${VS_LIBS} -lwsock32"
+	VS_LIBS="${VS_LIBS} -L/usr/lib/w32api -lwsock32"
 fi
 
 dnl --------------------------------------------------------------------------
@@ -1123,7 +1131,7 @@ if test "x$sdl_sound" != "xno" ; then
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"
     	    VS_LIBS="$VS_LIBS $MACORPCLIBS"
-			if test "x${is_mingw}" = "xyes" ; then
+			if test "x${is_win32}" = "xyes" ; then
     	    VS_LIBS="$VS_LIBS -lwinmm"
 			fi
             break;
