@@ -402,9 +402,9 @@ class missionNode : public tagDomNode {
 class Mission {
   class Briefing * briefing;
  public:
-  Mission(char *configfile);
+  Mission(char *configfile, bool loadscripts=true);
   void AddFlightgroup(Flightgroup * fg);
-  void initMission();
+  void initMission(bool loadscripts=true);
   ///alex Please help me make this function...this is called between mission loops
   ~Mission();
   //deletes missions pushed back onto a delete queue at a *safe time*
@@ -517,7 +517,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   void initCallbackMaps();
 #endif // VS_MIS_SEL
 
-  bool checkMission(easyDomNode *node);
+  bool checkMission(easyDomNode *node,bool loadscripts);
   void doVariables(easyDomNode *node);
   void checkVar(easyDomNode *node);
   void doFlightgroups(easyDomNode *node);

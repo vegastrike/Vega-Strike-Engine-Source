@@ -24,11 +24,14 @@ void Unit::ImportPartList (const std::string& category, float price, float price
       c.quantity=quantity-quantdev;
       c.price*=price-pricedev;
       //stupid way
-      c.quantity+=quantdev*2*((float)rand())/RAND_MAX;
+      c.quantity+=(quantdev+1)*2*((double)rand())/(((double)RAND_MAX)+1);
       c.price+=pricedev*2*((float)rand())/RAND_MAX;
       c.price=fabs(c.price);
+      if (c.quantity<0) {
+	c.quantity=0;
+      }
       if (c.price <.01)
-	c.price+=.01;
+	c.price=.01;
       c.quantity=abs (c.quantity);
       AddCargo(c,false);
     }

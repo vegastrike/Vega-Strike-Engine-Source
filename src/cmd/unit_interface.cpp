@@ -471,9 +471,9 @@ void CargoToMission (const char * item,TextArea * ta) {
   char * item1 = strdup (item);
   int tmp;
   sscanf (item,"%d %s",&tmp,item1);
-  Mission temp (item1);
+  Mission temp (item1,false);
   free (item1);
-  temp.initMission();
+  temp.initMission(false);
   ta->ChangeTextItem ("name",temp.getVariable ("mission_name","").c_str());
   ta->ChangeTextItem ("price","");
   ta->ChangeTextItem ("mass","");
