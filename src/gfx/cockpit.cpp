@@ -20,6 +20,7 @@
 #include "cmd/ai/flyjoystick.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
+#include "main_loop.h"
 #include <assert.h>	// needed for assert() calls
 #include "savegame.h"
 
@@ -688,6 +689,8 @@ void Cockpit::Draw() {
 	  //un->SetAI(new FireKeyboard ())
 	  SwitchUnits (NULL,un);
 	  credits = GetSavedCredits();
+	  CockpitKeys::Pan(0,PRESS);
+	  CockpitKeys::Inside(0,PRESS);
 	}
   }
   if (turretcontrol) {
