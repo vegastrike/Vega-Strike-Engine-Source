@@ -4,7 +4,10 @@
   ///Armor values: how much damage armor can withhold before internal damage accrues
   struct Armor {
     unsigned short front, back, right, left;
+
+    Armor( ) : front(0), back(0), right(0), left(0) { }
   };
+
   ///Shielding Struct holding values of current shields
   struct Shield {
     ///How much the shield recharges per second
@@ -23,11 +26,14 @@
 	unsigned short v[6];
 	unsigned short fbmax,rltbmax;
       }fbrltb;
+
     };
     ///the number of shields in the current shielding struct
     signed char number;
     ///What percentage leaks (divide by 100%)
     char leak; 
+
+    Shield( ) : recharge(0), number(0), leak(0) { }
   };
 
 #endif

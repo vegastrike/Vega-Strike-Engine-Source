@@ -614,6 +614,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 					pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
 				}
 				fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign",""));
+				fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum);
 			  }
 			  else
 			  {

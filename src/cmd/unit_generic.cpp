@@ -378,6 +378,7 @@ std::string lookupMountSize (int s) {
 /**** UNIT STUFF                                                            */
 /***********************************************************************************/
 Unit::Unit( int /*dummy*/ ) {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -386,6 +387,7 @@ Unit::Unit( int /*dummy*/ ) {
   Init();
 }
 Unit::Unit() {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -395,6 +397,7 @@ Unit::Unit() {
 }
 
 Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -413,6 +416,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
 
 extern void update_ani_cache();
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -491,6 +495,91 @@ Unit::~Unit()
     if (meshdata[meshcount])
       delete meshdata[meshcount];
   meshdata.clear();
+}
+
+void Unit::ZeroAll( )
+{
+    sound            = NULL;
+    ucref            = 0;
+    networked        = false;
+    serial           = 0;
+    net_accel.i      = 0;
+    net_accel.j      = 0;
+    net_accel.k      = 0;
+    // old_state has a constructor
+    damages          = NO_DAMAGE;
+    // SubUnits has a constructor
+    combat_role      = 0;
+    nebula           = NULL;
+    planet           = NULL;
+    activeStarSystem = NULL;
+    // computer has a constructor
+    // jump needs fixing
+    selected         = false;
+    // scanner needs fixing
+    xml              = NULL;
+    owner            = NULL;
+    // prev_physical_state has a constructor
+    // curr_physical_state has a constructor
+    // cumulative_transformation_matrix has a constructor
+    // cumulative_transformation has a constructor
+    cumulative_velocity.i = 0;
+    cumulative_velocity.j = 0;
+    cumulative_velocity.k = 0;
+    NetForce.i            = 0;
+    NetForce.j            = 0;
+    NetForce.k            = 0;
+    NetLocalForce.i       = 0;
+    NetLocalForce.j       = 0;
+    NetLocalForce.k       = 0;
+    NetTorque.i           = 0;
+    NetTorque.j           = 0;
+    NetTorque.k           = 0;
+    NetLocalTorque.i      = 0;
+    NetLocalTorque.j      = 0;
+    NetLocalTorque.k      = 0;
+    AngularVelocity.i     = 0;
+    AngularVelocity.j     = 0;
+    AngularVelocity.k     = 0;
+    Velocity.i            = 0;
+    Velocity.j            = 0;
+    Velocity.k            = 0;
+    image                 = NULL;
+    mass                  = 0;
+    shieldtight           = 0;
+    fuel                  = 0;
+    afterburnenergy       = 0;
+    MomentOfInertia       = 0;
+    // limits has a constructor
+    cloaking              = 0;
+    cloakmin              = 0;
+    radial_size           = 0;
+    killed                = false;
+    invisible             = 0;
+    corner_min.i          = 0;
+    corner_min.j          = 0;
+    corner_min.k          = 0;
+    corner_max.i          = 0;
+    corner_max.j          = 0;
+    corner_max.k          = 0;
+    resolveforces         = false;
+    // armor has a constructor
+    // shield has a constructor
+    hull                  = 0;
+    maxhull               = 0;
+    recharge              = 0;
+    maxenergy             = 0;
+    energy                = 0;
+    maxwarpenergy         = 0;
+    warpenergy            = 0;
+    // target_fgid has a constructor
+    aistate               = NULL;
+    // CollideInfo has a constructor
+    colTrees              = NULL;
+    docked                = NOT_DOCKED;
+    faction               = 0;
+    flightgroup           = NULL;
+    flightgroup_subnumber = 0;
 }
 
 void Unit::Init()
@@ -692,10 +781,10 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		  {
 			  if (nonautosave.empty()) {
 				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+unitModifications);
-				  filepath = VSFileSystem::savedunitpath+"/"+unitModifications+"/"+f.GetFilename();
+				  filepath = VSFileSystem::savedunitpath+"/"+unitModifications+"/"+string(filename);
 			  }else {
 				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+nonautosave);
-				  filepath = VSFileSystem::savedunitpath+"/"+nonautosave+"/"+f.GetFilename();
+				  filepath = VSFileSystem::savedunitpath+"/"+nonautosave+"/"+string(filename);
 			  }
 		  }
 		  // This is not necessary as I think... to watch

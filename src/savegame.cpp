@@ -26,8 +26,10 @@ if( Network==NULL)
     res = new std::string;
     //char c[2]={'\0','\0'};
 	VSFile f;
+	// TRY TO OPEN THE save.4.x.txt FILE WHICH SHOULD CONTAIN THE NAME OF THE SAVE TO USE
 	VSError err = f.OpenReadOnly( "save.4.x.txt", Unknown);
     if (err>Ok) {
+	  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
 	  err = f.OpenCreateWrite( "save.4.x.txt", Unknown);
       if (err<=Ok) {
 		f.Write("default\n",8);
@@ -35,7 +37,7 @@ if( Network==NULL)
       }
 	  else
 	  {
-	  	fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath());
+	  	fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath().c_str());
 		exit(1);
 	  }
 	  err = f.OpenReadOnly( "save.4.x.txt", Unknown);
@@ -87,21 +89,24 @@ if( Network==NULL)
     }
     f.Close();
 #endif
-    if (!res->empty()) {
+    if (!res->empty())
+	{
 	  // Set filetype to Unknown so that it is searched in homedir/
-      if (*res->begin()=='~') {
+      if (*res->begin()=='~')
+	  {
 		err = f.OpenCreateWrite( "save.4.x.txt", Unknown);
-	if (err<=Ok) {
-	  for (unsigned int i=1;i<res->length();i++) {
-		char cc = *(res->begin()+i);
-	    f.Write ( &cc,sizeof(char));
+		if (err<=Ok) {
+	  	for (unsigned int i=1;i<res->length();i++)
+		{
+			char cc = *(res->begin()+i);
+	    	f.Write ( &cc,sizeof(char));
+	  	}
+	 	char cc=0;
+	  	f.Write (&cc,sizeof(char));
+	  	f.Close();
 	  }
-	  char cc=0;
-	  f.Write (&cc,sizeof(char));
-	  f.Close();
-	}
-      }
     }
+  } 
 
     
 #if 0
@@ -147,22 +152,25 @@ std::string GetReadPlayerSaveGame(int num) {
   return ret;
 }
 
+// Used only to copy a savegame to a different named one
 void FileCopy (const char * src, const char * dst) {
   if (dst[0]!='\0'&&src[0]!='\0') {
 
-  FILE * fp = VSFileSystem::vs_open (src,"r");
-  if (fp) {
-	  long length=VSFileSystem::vs_getsize( fp);
-      char * info = new char [length];
-      VSFileSystem::vs_read(info,length,sizeof(char),fp);
-      VSFileSystem::vs_close (fp);
-      fp = VSFileSystem::vs_open (dst,"w");
-      if (fp) {
-        VSFileSystem::vs_write (info,length,sizeof(char),fp);
-        VSFileSystem::vs_close(fp);
+  VSFile f;
+  VSError err = f.OpenReadOnly( src, SaveFile);
+  if (err<=Ok) {
+      string savecontent = f.ReadFull();
+	  f.Close();
+      err = f.OpenCreateWrite( dst, SaveFile);
+      if (err<=Ok) {
+		f.Write( savecontent);
+	    f.Close();
       }
-      delete [] info;
+	  else
+	  	fprintf( stderr, "WARNING : couldn't open savegame to copy to : %s as SaveFile", dst);
   }
+  else
+  	fprintf(stderr, "WARNING : couldn't find the savegame to copy : %s as SaveFile", src);
   }
 }
 class MissionStringDat {
@@ -652,9 +660,11 @@ string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float
     if( write){
 	VSFile f;
 	VSError err = f.OpenCreateWrite( outputsavegame, SaveFile);
+	// WRITE THE SAVEGAME TO THE MISSION SAVENAME
 	f.Write( savestring.c_str(), savestring.length());
 	f.Close();
 	if (player_num!=-1) {
+			// AND THEN COPY IT TO THE SPECIFIED SAVENAME (from save.4.x.txt)
 			last_pickled_data =last_written_pickled_data;
 			FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
 	}
@@ -679,16 +689,20 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	if (filename.length()>0)
 			filename=callsign+filename;
 	shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
+	// WE WILL ALWAYS SAVE THE CURRENT SAVEGAME IN THE MISSION SAVENAME (IT WILL BE COPIED TO THE SPECIFIED SAVENAME)
 	outputsavegame=filename;
 	VSFile f;
 	VSError err=FileNotFound;
 	if( read)
 	{
 		if (filename.length()>0) {
-				if (GetReadPlayerSaveGame(player_num).length()) {
-						err = f.OpenReadOnly( GetReadPlayerSaveGame(player_num), SaveFile);
+				// TRY TO GET THE SPECIFIED SAVENAME TO LOAD
+				string plsave = GetReadPlayerSaveGame(player_num);
+				if (plsave.length()) {
+					err = f.OpenReadOnly( plsave, SaveFile);
 				}else {
-						err = f.OpenReadOnly( filename, SaveFile);
+					// IF NONE SIMPLY LOAD THE MISSION DEFAULT ONE
+					err = f.OpenReadOnly( filename, SaveFile);
 				}
 		}
 		if( err<=Ok)
@@ -702,6 +716,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	  if ( savestring.length()>0) {
 	    char * buf = new char[str.length()+1];
 		buf[str.length()]='\0';
+
 		memcpy( buf, str.c_str(), str.length());
 		char * deletebuf = buf;
 		char *tmp2= (char *)malloc(savestring.length()+2);

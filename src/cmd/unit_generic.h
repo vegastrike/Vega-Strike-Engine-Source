@@ -246,6 +246,13 @@ public:
        std::string customizedUnit=string(""),
        Flightgroup *flightgroup=NULL,
        int         fg_subnumber=0, string * netxml=NULL);
+
+private:
+  /** Fix all those uninitialized variables by calling this from every
+   *  constructor.  */
+  void ZeroAll( );
+
+public:
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   void Init( const char *filename,
@@ -455,6 +462,9 @@ public:
       ///does this radar support IFF?
       bool color;
       bool locked;
+
+      RADARLIM() : maxrange(0), maxcone(0), lockcone(0), trackingcone(0),
+      		mintargetsize(0), color(false), locked(false) { }
     } radar;
     ///The nav point the unit may be heading for
     Vector NavPoint;
@@ -479,6 +489,11 @@ public:
     bool itts;
     //tells whether the speed is clamped draconian-like or not
     bool combat_mode;
+
+    Computer() : NavPoint(0,0,0) , threatlevel(0) , set_speed(0)
+        , max_combat_speed(0) , max_combat_ab_speed(0)
+        , max_yaw(0) , max_pitch(0) , max_roll(0) , slide_start(0) , slide_end(0)
+        , itts(false) , combat_mode(false) { }
   };
   Computer computer;
   void SwitchCombatFlightMode();
@@ -607,6 +622,10 @@ public:
     Vector structurelimits;
     ///the minimum dot that the current heading can have with the structurelimit
     float limitmin;
+
+    Limits( )
+       : yaw(0) , pitch(0) , roll(0) , lateral(0) , vertical(0) , forward(0)
+       , retro(0) , afterburn(0) , structurelimits(0,0,0) , limitmin(0) { }
   } limits;
 
 public:

@@ -1,6 +1,8 @@
 
 *** GENERAL ************************************************************
 
+- Maybe use a "not found sounds" hashtable just as for the textures so they are cached too
+- Find why whsk.xmesh is loaded several times -> caching problem ?
 - Replace the string from Systems map with a string *
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
 LOPRI - Add a ranking system for each faction in factions.xml
