@@ -14,6 +14,7 @@
 
 
 void visitSystem (class Cockpit * cp, std::string systemname) ;
+void Beautify (string systemfile, string & sector, string & system);
 
 class NavigationSystem
 {
@@ -45,6 +46,7 @@ public:
 			QVector position;
 			std::vector<unsigned> lowerdestinations;
 			GFXColor col;
+		        bool part_of_path;
 			void UpdateColor();
 			string &GetName();
 			const string &GetName() const;
@@ -54,12 +56,14 @@ public:
 			unsigned GetDestinationIndex (unsigned index) const;
 			unsigned GetDestinationSize() const;
 			GFXColor GetColor();
-			SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const CachedSystemIterator *csi);
+			SystemInfo(const string &name);
+		        SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const CachedSystemIterator *csi);
+		        void loadData(map<string, unsigned> * index_table);
 		};
 
 	private:
-          friend class SystemInfo;//inner class needs to be friend in gcc-295
-		vector<SystemInfo> systems;
+                friend class SystemInfo;//inner class needs to be friend in gcc-295
+ 		vector<SystemInfo> systems;
 		unsigned currentPosition;
 		CachedSystemIterator(const CachedSystemIterator &other); // May be really slow. Don't try this at home.
 		CachedSystemIterator operator ++ (int); // Also really slow because it has to use the copy constructor.
@@ -82,13 +86,56 @@ public:
 		CachedSystemIterator & operator ++ ();
 	};
 
+	class CachedSectorIterator {
+
+	public:
+		class SectorInfo {
+		public:
+			string name;
+			std::vector<unsigned> subsystems;
+			string &GetName();
+			const string &GetName() const;
+			unsigned GetSubsystemIndex (unsigned index) const;
+			unsigned GetSubsystemSize() const;
+			SectorInfo(const string &name);
+		        void AddSystem(unsigned index);
+		};
+
+	private:
+          friend class SectorInfo;//inner class needs to be friend in gcc-295
+		vector<SectorInfo> sectors;
+		unsigned currentPosition;
+		CachedSectorIterator(const CachedSectorIterator &other); // May be really slow. Don't try this at home.
+		CachedSectorIterator operator ++ (int); // Also really slow because it has to use the copy constructor.
+
+	public:
+		CachedSectorIterator();
+		CachedSectorIterator (CachedSystemIterator &systemIter);
+		void init(CachedSystemIterator &systemIter);
+		bool seek(unsigned position=0);
+		unsigned getIndex() const;
+		unsigned size() const;
+		bool done () const;
+		SectorInfo & operator[] (unsigned pos);
+		const SectorInfo & operator[] (unsigned pos) const;
+		SectorInfo &operator* ();
+		const SectorInfo &operator* () const;
+		SectorInfo *operator-> ();
+		const SectorInfo *operator-> () const;
+		CachedSectorIterator & next ();
+		CachedSectorIterator & operator ++ ();
+	};
 
 
 
 private:
-std::string currentsystem;//FIXME
-std::string systemselection;
+unsigned currentsystemindex;
+unsigned destinationsystemindex;
+unsigned systemselectionindex;
+unsigned sectorselectionindex;
 CachedSystemIterator systemIter;
+CachedSectorIterator sectorIter;
+std::vector<unsigned> path;
 class navscreenoccupied* screenoccupation;
 class Mesh * mesh[NAVTOTALMESHCOUNT];
 int reverse;
@@ -117,6 +164,9 @@ enum ViewType {VIEW_2D, VIEW_ORTHO, VIEW_3D, VIEW_MAX};
 int system_view;
 int galaxy_view;
 
+int path_view;
+enum PathType {PATH_OFF, PATH_ON, PATH_ONLY, PATH_MAXIMUM};
+
 bool system_multi_dimensional;
 bool galaxy_multi_dimensional;
 
@@ -135,14 +185,21 @@ bool mouse_wentup[5];
 bool mouse_wentdown[5];
 UnitContainer currentselection;
 GFXColor* factioncolours;
+GFXColor currentcol;
+GFXColor destinationcol;
+GFXColor selectcol;
+GFXColor pathcol;
 
 
-
+//DrawSectorList's scroll control variables
+unsigned sectorOffset;
+unsigned systemOffset;
 
 int whattodraw;
 //	bit 0 = undefined
 //	bit	1 = draw system screen / mission screen
-//	bit 2 = draw galaxy screen
+//	bit 2 = draw galaxy/system ship/mission screen
+//	bit 3 = draw sector list screen in mission mode
 
 
 							//	coordinates done 'over left->right' by 'up bottom->top'
@@ -189,6 +246,10 @@ void TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, f
 void DisplayOrientationLines (float the_x, float the_y, float the_x_flat, float the_y_flat, bool system_not_galaxy);
 
 bool CheckForSelectionQuery();
+void setCurrentSystemIndex(unsigned newSystemIndex);
+
+bool BFS(unsigned originIndex, unsigned destIndex);
+bool DoubleRootedBFS(unsigned originIndex, unsigned destIndex);
 //*************************
 
 
@@ -210,6 +271,7 @@ static void DrawMissile(float x, float y, float size, const GFXColor &col );
 static void DrawTargetCorners(float x, float y, float size, const GFXColor &col );
 static void DrawNavCircle(float x, float y, float rot_x, float rot_y, float size, const GFXColor &col );
 void setCurrentSystem(string newSystem);
+std::string getCurrentSystem();
 
 void DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline);
 void DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col);
@@ -225,6 +287,7 @@ void DrawSystem();
 void DrawGalaxy();
 void DrawMission();
 void DrawShip();
+void DrawSectorList();
 void SetMouseFlipStatus();
 void ScreenToCoord(float &x);
 void IntersectBorder(float & x, float & y, const float & x1, const float & y1) const;
@@ -232,6 +295,7 @@ void Draw();
 void Setup();
 void SetDraw(bool n);
 void ClearPriorities();
+void updatePath();
 
 static int mousex;
 static int mousey;

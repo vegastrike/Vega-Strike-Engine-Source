@@ -108,6 +108,7 @@ void NavigationSystem::Setup()
 	center_y = 0.0;	//	updated after a pass
 	center_z = 0.0;	//	updated after a pass
 
+	path_view = PATH_ON;
 	galaxy_view = VIEW_2D;
 	system_view = VIEW_2D;
 	system_multi_dimensional = 1;
@@ -139,8 +140,13 @@ void NavigationSystem::Setup()
 	mouse_x_previous = (-1+float(mousex)/(.5*g_game.x_resolution));
 	mouse_y_previous = (1+float(-1*mousey)/(.5*g_game.y_resolution));
 
-	currentsystem=UniverseUtil::getSystemFile();
-	systemIter.init(currentsystem,100);
+	systemIter.init(UniverseUtil::getSystemFile(), XMLSupport::parse_int(vs_config->getVariable ("graphics","max_map_nodes","256000")));
+	sectorIter.init(systemIter);
+	systemselectionindex=0;
+	sectorselectionindex=0;
+	destinationsystemindex=0;
+	setCurrentSystemIndex(0);
+
 
 	buttonstates = 0;
 	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
@@ -152,6 +158,7 @@ void NavigationSystem::Setup()
 	factioncolours = new GFXColor[FactionUtil::GetNumFactions()];
 	unselectedalpha = 1.0;
 
+	sectorOffset=systemOffset=0;
 
 	unsigned int p;
 	for( p=0; p < FactionUtil::GetNumFactions(); p++)
@@ -360,6 +367,20 @@ void NavigationSystem::Setup()
 		system_item_scale *= (screenskipby4[3]-screenskipby4[2]);
 
 	screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1);
+
+	// Get special colors from the config
+	float tempcol1[4]={1, 0.3, 0.3, 1.0};
+	vs_config->getColor("nav", "current_system", tempcol1, true);
+	currentcol=GFXColor(tempcol1[0],tempcol1[1],tempcol1[2],tempcol1[3]);
+	float tempcol2[4]={1, 0.77, 0.3, 1.0};
+	vs_config->getColor("nav", "destination_system", tempcol2, true);
+	destinationcol=GFXColor(tempcol2[0],tempcol2[1],tempcol2[2],tempcol2[3]);
+	float tempcol3[4]={0.3, 1, 0.3, 1.0};
+	vs_config->getColor("nav", "selection_system", tempcol3, true);
+	selectcol=GFXColor(tempcol3[0],tempcol3[1],tempcol3[2],tempcol3[3]);
+	float tempcol4[4]={1, 0.3, 0.3, 1.0};
+	vs_config->getColor("nav", "path_system", tempcol4 , true);
+	pathcol=GFXColor(tempcol4[0],tempcol4[1],tempcol4[2],tempcol4[3]);
 }
 
 //	**********************************
@@ -535,7 +556,9 @@ void NavigationSystem::Draw()
 
 	else
 	{
-		if (checkbit(whattodraw,2))
+		if (checkbit(whattodraw,3))
+			DrawSectorList();
+		else if (checkbit(whattodraw,2))
 			DrawShip();
 		else
 			DrawMission();
@@ -556,7 +579,7 @@ void NavigationSystem::Draw()
 
 	DrawButton(buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, outlinebuttons);
 	DrawButton(buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, outlinebuttons);
-//	DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
+	DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
 	DrawButton(buttonskipby4_4[0], buttonskipby4_4[1], buttonskipby4_4[2], buttonskipby4_4[3], 4, outlinebuttons);
 	DrawButton(buttonskipby4_5[0], buttonskipby4_5[1], buttonskipby4_5[2], buttonskipby4_5[3], 5, outlinebuttons);
 	DrawButton(buttonskipby4_6[0], buttonskipby4_6[1], buttonskipby4_6[2], buttonskipby4_6[3], 6, outlinebuttons);
@@ -752,6 +775,185 @@ void NavigationSystem::DrawShip()
 	GFXEnable(TEXTURE0);
 }
 
+void NavigationSystem::DrawSectorList()
+{
+  
+	GFXDisable(TEXTURE0);
+	GFXDisable(LIGHTING);
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+
+	float deltax = screenskipby4[1] - screenskipby4[0];
+	float deltay = screenskipby4[3] - screenskipby4[2];
+	float originx = screenskipby4[0]; // left
+	float originy = screenskipby4[3]; // top	
+	float width=(deltax/6);
+	float height=(0.031*deltay);
+	const unsigned numRows=26;
+	float the_x, the_y, the_x1, the_y1, the_x2, the_y2;
+	GFXColor color;
+	unsigned count, index, row;
+
+	//Draw Title of Column
+	drawdescription("Sectors", originx + (0.5*width), originy - (0.0*deltay), 1, 1, 1, screenoccupation, GFXColor(.3,1,.3,1));
+
+	//Draw Scroll Pieces
+	color=GFXColor(0.7,0.3,0.3,1.0);
+
+	the_x=width*(0.5)+originx;
+	the_y=originy-(0.05*deltay);
+	the_x1=the_x-width/2;
+	the_y1=the_y-height;
+	the_x2=the_x+width/2;
+	the_y2=the_y;
+	if (TestIfInRange(the_x1, the_x2, the_y1, the_y2, mouse_x_current, mouse_y_current) ) {
+	        if(mouse_wentdown[0]== 1) {	//	mouse button went down for mouse button 1
+			if(sectorOffset>0)
+			        --sectorOffset;
+		}
+	}
+	drawdescription("Up", the_x, the_y, 1, 1, 1, screenoccupation, color);
+
+	the_x=width*(0.5)+originx;
+	the_y=originy-(0.05*deltay)-height*(29);
+	the_x1=the_x-width/2;
+	the_y1=the_y-height;
+	the_x2=the_x+width/2;
+	the_y2=the_y;
+	if (TestIfInRange(the_x1, the_x2, the_y1, the_y2, mouse_x_current, mouse_y_current) ) {
+	        if(mouse_wentdown[0]== 1) {	//	mouse button went down for mouse button 1
+		        if(sectorOffset<(sectorIter.size()-numRows))
+			        ++sectorOffset;
+		}
+	}
+	drawdescription("Down", the_x, the_y, 1, 1, 1, screenoccupation, color);
+	
+	count=0;
+	for(sectorIter.seek();!sectorIter.done();++sectorIter)
+	{
+	        bool drawable=false;
+	        for(unsigned i=0;i<sectorIter->GetSubsystemSize();i++) {
+		        if(systemIter[sectorIter->GetSubsystemIndex(i)].isDrawable()) {
+			        drawable=true;
+				break;
+			}
+		}
+		
+		if(!drawable)
+		        continue;
+
+		if(((count-sectorOffset)<0) || ((count-sectorOffset)>=numRows)) {
+		        ++count;
+			continue;
+		}
+		  
+		row=(count-sectorOffset)%numRows;
+		the_x=width*(0.5)+originx;
+		the_y=originy-(0.05*deltay)-height*(row+2);
+		the_x1=the_x-width/2;
+		the_y1=the_y-height;
+		the_x2=the_x+width/2;
+		the_y2=the_y;
+		if (TestIfInRange(the_x1, the_x2, the_y1, the_y2, mouse_x_current, mouse_y_current) ) {
+		        if(mouse_wentdown[0]== 1) {	//	mouse button went down for mouse button 1
+			        sectorselectionindex=sectorIter.getIndex();
+				systemOffset=0;
+			}
+			      
+		}
+
+	        if(sectorIter.getIndex()==sectorselectionindex)
+		        color=selectcol;
+		else
+		        color=GFXColor(0.7,0.3,0.3,1.0);
+		  
+		drawdescription(sectorIter->GetName(), the_x, the_y, 1, 1, 1, screenoccupation, color);
+		++count;
+	}
+
+
+
+	drawdescription("Systems", originx + (1.5)*width,originy - (0.0*deltay), 1, 1, 1, screenoccupation, GFXColor(.3,1,.3,1));
+
+	//Draw Scroll Pieces
+	color=GFXColor(0.7,0.3,0.3,1.0);
+
+	the_x=width*(1.5)+originx;
+	the_y=originy-(0.05*deltay);
+	the_x1=the_x-width/2;
+	the_y1=the_y-height;
+	the_x2=the_x+width/2;
+	the_y2=the_y;
+	if (TestIfInRange(the_x1, the_x2, the_y1, the_y2, mouse_x_current, mouse_y_current) ) {
+	        if(mouse_wentdown[0]== 1) {	//	mouse button went down for mouse button 1
+			if(systemOffset>0)
+			        --systemOffset;
+		}
+	}
+	drawdescription("Up", the_x, the_y, 1, 1, 1, screenoccupation, color);
+
+	the_x=width*(1.5)+originx;
+	the_y=originy-(0.05*deltay)-height*(29);
+	the_x1=the_x-width/2;
+	the_y1=the_y-height;
+	the_x2=the_x+width/2;
+	the_y2=the_y;
+	if (TestIfInRange(the_x1, the_x2, the_y1, the_y2, mouse_x_current, mouse_y_current) ) {
+	        if(mouse_wentdown[0]== 1) {	//	mouse button went down for mouse button 1
+		        if(systemOffset<(sectorIter[sectorselectionindex].GetSubsystemSize()-numRows))
+			        ++systemOffset;
+		}
+	}
+	drawdescription("Down", the_x, the_y, 1, 1, 1, screenoccupation, color);
+	
+	count=0;
+	sectorIter.seek(sectorselectionindex);
+	for(unsigned i=0; i<sectorIter->GetSubsystemSize();++i)
+	{
+		index=sectorIter->GetSubsystemIndex(i);
+
+	        if(!systemIter[index].isDrawable())
+		        continue;
+
+		if(((count-systemOffset)<0) || ((count-systemOffset)>=numRows)) {
+		        ++count;
+			continue;
+		}
+
+	        row=(count-systemOffset)%numRows;		  
+		the_x=width*(1.5)+originx;
+		the_y=originy-(0.05*deltay)-height*(row+2);
+		the_x1=the_x-width/2;
+		the_y1=the_y-height;
+		the_x2=the_x+width/2;
+		the_y2=the_y;
+		
+		if (TestIfInRange(the_x1, the_x2, the_y1, the_y2, mouse_x_current, mouse_y_current) ) {
+		        if(mouse_wentdown[0]== 1) {	//	mouse button went down for mouse button 1
+			        unsigned oldselection = systemselectionindex;
+			        systemselectionindex=index;
+				
+				if(systemselectionindex==oldselection) {
+			                setCurrentSystemIndex(systemselectionindex);
+				}
+			}
+		}
+
+	        if(index==destinationsystemindex)
+		        color=destinationcol;
+	        else if(index==currentsystemindex)
+		        color=currentcol;
+	        else if(index==systemselectionindex)
+		        color=selectcol;
+		else
+		        color=GFXColor(0.7,0.3,0.3,1.0);
+
+		string csector, csystem;
+		Beautify(systemIter[index].GetName(), csector, csystem);
+		  
+		drawdescription(csystem, the_x, the_y, 1, 1, 1, screenoccupation, color);
+		++count;
+	}	
+}
 
 
 
@@ -939,8 +1141,19 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 
 
 
-void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
-	currentsystem = newCurrentSystem;
+void NavigationSystem::setCurrentSystem(string newSystem) {
+        for(unsigned i=0;i<systemIter.size();++i)
+	{
+	        if(systemIter[i].GetName()==newSystem)
+		{
+		        setCurrentSystemIndex(i);
+			break;
+		}
+	}
+}
+
+void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
+	currentsystemindex = newSystemIndex;
 	themaxvalue=0;
 	if (galaxy_view!=VIEW_3D) {
 		// This resets the panning position when not in 3d view.
@@ -950,11 +1163,12 @@ void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
 		rz = 0.0;
 	}
 	camera_z=0; // calculate camera distance again... it may have changed.
-//	systemIter.init(currentsystem);
+	updatePath();
 }
 
-
-
+std::string NavigationSystem::getCurrentSystem() {
+        return systemIter[currentsystemindex].GetName();
+}
 
 
 
@@ -983,49 +1197,63 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 	float my = mouse_y_current;
 	bool inrange = TestIfInRange(x1, x2, y1, y2, mx, my);
 
-
-	if (1)
-//	if(inrange == 1)
+	string label;
+	if(button_number == 1)
 	{
-		string label;
-		if(button_number == 1)
+	        label = "Nav/Info";
+	}
+	else if(button_number == 3)
+	{
+	        label = "Target Selected";
+	}
+	else if(button_number == 6)
+	{
+	        label = "Axis Swap";
+	}
+	else if(button_number == 7)
+	{
+	        label = "2D/Ortho/3D";
+	}
+	else if(checkbit(whattodraw, 1))
+	{
+	        if(button_number == 2)
 		{
-			label = "Navigation";
+		        label = "Path On/Off/Only";
 		}
-		else if(button_number == 2)
-		{
-			label = "Information";
-		}
-//		else if(button_number == 3)
-//		{
-//			label = "Choose Target (disabled)"; // It's disabled, so why show it?
-//		}
 		else if(button_number == 4)
 		{
-			label = "Up";
+		        label = "Up";
 		}
 		else if(button_number == 5)
 		{
-			label = "Down";
+		        label = "Down";
 		}
-		else if(button_number == 6)
-		{
-			label = "Axis Swap";
-		}
-		else if(button_number == 7)
-		{
-			label = "2D/Ortho/3D";
-		}
-		TextPlane a_label;
-		a_label.col = GFXColor(1,1,1,1);
-		int length = label.size();
-		float offset = (float(length)*0.0065);
-		float xl = (x1+x2)/2.0;
-		float yl = (y1+y2)/2.0;
-		a_label.SetPos((xl-offset)-(checkbit(buttonstates,button_number-1)?0.006:0), (yl+0.025));
-		a_label.SetText(label);
-		a_label.Draw();
 	}
+	else
+	{
+	        if(button_number == 2)
+		{
+		        label = "Sectors";
+		}
+		else if(button_number == 4)
+		{
+		        label = "Ship";
+		}
+		else if(button_number == 5)
+		{
+		        label = "Mission";
+		}
+	}
+	
+	TextPlane a_label;
+	a_label.col = GFXColor(1,1,1,1);
+	int length = label.size();
+	float offset = (float(length)*0.0065);
+	float xl = (x1+x2)/2.0;
+	float yl = (y1+y2)/2.0;
+	a_label.SetPos((xl-offset)-(checkbit(buttonstates,button_number-1)?0.006:0), (yl+0.025));
+	a_label.SetText(label);
+	a_label.Draw();
 
 	//!!! DEPRESS !!!
 	if((inrange == 1)&&(mouse_wentdown[0] == 1))
@@ -1034,27 +1262,11 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		currentselection = NULL;	//	any new button depression means no depression on map, no selection made
 
 		//******************************************************
-		//**                 ALL BUTTONS DROP (except 2)      **	SOME OTHER KEY PRESSED, FUNCTION #2 DIES
+		//**                 DEPRESS FUNCTION                 **	DEPRESS ALL
 		//******************************************************
-		if( (button_number != 3) && ( checkbit(buttonstates, 2)) )	//	unset select if start soemthing else
-		{
-			unsetbit(buttonstates, 2);
-		}
-		//******************************************************
-
-
-
-
-
-		//******************************************************
-		//**                 BUTTON 2 FUNCTION                **	DEPRESS ALL, TOGGLE #2
-		//******************************************************
-		if(button_number == 3)	//	toggle select, toggle map rezoom
-		{
-			flipbit(buttonstates, (button_number-1));
-		}
-		else
-			dosetbit(buttonstates, (button_number-1));	//	all other buttons go down
+		
+		dosetbit(buttonstates, (button_number-1));	//	all buttons go down
+		
 		//******************************************************
 	}
 
@@ -1072,6 +1284,10 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		{
 			unsetbit(buttonstates, (button_number-1));	// all are up in mission mode
 		}
+		else
+		{
+			unsetbit(buttonstates, (button_number-1));	// all are up in navigation mode
+		}
 		//******************************************************
 
 
@@ -1084,7 +1300,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		//******************************************************
 		if(button_number == 1)	//	releasing #1, toggle the draw (nav / mission)
 		{
-			dosetbit(whattodraw, 1);
+			flipbit(whattodraw, 1);
 		}
 		//******************************************************
 
@@ -1093,11 +1309,18 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 		
 		//******************************************************
-		//**                 BUTTON 2 FUNCTION                **	NAV-INFO vs STATUS-INFO
+		//**                 BUTTON 2 FUNCTION                **	PATH options
 		//******************************************************
-		if(button_number == 2)	//	releasing #2, toggle the draw (nav / mission)
+		if(button_number == 2)	//	releasing #2, toggle the path viewing settings(off/on/only)
 		{
-			unsetbit(whattodraw, 1);
+			if((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2)))
+			{
+				path_view=(path_view+1)%PATH_MAXIMUM;
+			}
+			else if(!checkbit(whattodraw, 1))
+			{
+			        dosetbit(whattodraw, 3);
+			}
 		}
 		//******************************************************
 
@@ -1106,11 +1329,16 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 
 		//******************************************************
-		//**                 BUTTON 3 FUNCTION NULLIFICATION  **	SOME OTHER KEY RELEASED, FUNCTION #2 DIES
+		//**                 BUTTON 3 FUNCTION                **	TARGET SELECTED SYSTEM
 		//******************************************************
-		if(button_number != 3)	//	#3 is for select. do not deactivate untill something is (selected)
+		if(button_number == 3)	//      hit --TARGET--
 		{
-			unsetbit(buttonstates, (button_number-1));	//	all but 3 go up, all are up in mission mode
+		        if(((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2))) ||       //Nav-Galaxy Mode
+			   ((!checkbit(whattodraw, 1)) && (checkbit(whattodraw, 3))))        //Mission-Sector Mode
+			{
+			        destinationsystemindex=systemselectionindex;
+				updatePath();
+			}
 		}
 		//******************************************************
 
@@ -1126,11 +1354,13 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			if(checkbit(whattodraw, 1)) // if in nav system NOT mission
 			{
 				dosetbit(whattodraw, 2);	//	draw galaxy
-				setCurrentSystem(systemselection= UniverseUtil::getSystemFile());
+				setCurrentSystem(UniverseUtil::getSystemFile());
+				systemselectionindex=currentsystemindex;
 				
 			}
 			else	//	if in mission mode
 			{
+			        unsetbit(whattodraw, 3);
 				dosetbit(whattodraw, 2);	//	draw shipstats	
 			}
 		}
@@ -1151,6 +1381,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 			else	//	if in mission mode
 			{
+			        unsetbit(whattodraw, 3);
 				unsetbit(whattodraw, 2);	//	draw system
 			}
 		}
@@ -1206,20 +1437,11 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 	// !!! OUT OF BOUNDS !!!
 	//******************************************************
-	//**                 OUT OF RANGE	                  **	ALL DIE, but #2
+	//**                 OUT OF RANGE	                  **	ALL DIE
 	//******************************************************
 	if(inrange == 0)
 	{
-		if(button_number != 3)	//	#2 is for select. do not deactivate untill something is (selected), leave 5 too 
-		{
-			unsetbit(buttonstates, (button_number-1));
-		}
-
-
-		if(!checkbit(whattodraw, 1))	//	unset in mission mode !!
-		{
-			unsetbit(buttonstates, (button_number-1));
-		}
+		unsetbit(buttonstates, (button_number-1));
 	}
 	//******************************************************
 
@@ -2029,3 +2251,17 @@ void NavigationSystem::DisplayOrientationLines (float the_x, float the_y, float 
 	//**********************************
 }
 
+void Beautify (string systemfile, string & sector, string & system) {
+	string::size_type slash = systemfile.find ("/");
+	if (slash==string::npos) {
+		sector="";
+		system=systemfile;
+	}else {
+		sector = systemfile.substr(0,slash);
+		system = systemfile.substr(slash+1);
+	}
+	if (sector.size())
+		sector[0]=toupper(sector[0]);
+	if (system.size())
+		system[0]=toupper(system[0]);
+}

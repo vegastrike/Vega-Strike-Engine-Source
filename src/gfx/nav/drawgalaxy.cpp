@@ -38,20 +38,6 @@
 #include "navscreenoccupied.h"
 using std::string;
 using std::vector;
-void Beautify (string systemfile, string & sector, string & system) {
-	string::size_type slash = systemfile.find ("/");
-	if (slash==string::npos) {
-		sector="";
-		system=systemfile;
-	}else {
-		sector = systemfile.substr(0,slash);
-		system = systemfile.substr(slash+1);
-	}
-	if (sector.size())
-		sector[0]=toupper(sector[0]);
-	if (system.size())
-		system[0]=toupper(system[0]);
-}
 
 float SYSTEM_DEFAULT_SIZE=.05;
 const int systemambiguous=0;
@@ -161,6 +147,7 @@ public:
 	float size;
 	float x;
 	float y;
+        unsigned index;
 	std::string source;
 	// Vector of indicies
 //	std::vector<int> *dest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
@@ -169,8 +156,8 @@ public:
 	char color;
 	GFXColor race;
 	navscreenoccupied * screenoccupation;
-	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused, GFXColor race)
-			:type(type),size(size),x(x),y(y),source(source), moused(moused), color(GetSystemColor(source)), race(race), screenoccupation(so) {
+	systemdrawnode(int type,float size,float x, float y, std::string source, unsigned index, navscreenoccupied * so, bool moused, GFXColor race)
+			:type(type),size(size),x(x),y(y),source(source), index(index), moused(moused), color(GetSystemColor(source)), race(race), screenoccupation(so) {
 		
 	}
 	systemdrawnode () : size(SYSTEM_DEFAULT_SIZE), x(0),y(0), moused(false), color('v'), race(GrayColor), screenoccupation(NULL) {}
@@ -275,26 +262,61 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 	return *this;
 }
 
+//************************************************
+//
+//                SYSTEM SECTION
+//
+//************************************************
+
 void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor() {
 	const float *tcol=((!name.empty())&&(name!="-"))?FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(name))):&(GrayColorArray[0]);
 	col=GFXColor(tcol[0],tcol[1],tcol[2],tcol[3]);
 }
 
+//May generate incorrect links to destinations, if called before destinations have been added.
+//Since links are bidirectional, one WILL have to be created before the other
+//It is recommended that placeholders are created and links updated later
 NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const NavigationSystem::CachedSystemIterator *csi)
-		: name(name), position(position) {
-	// Eww... double for loop!
+                : name(name), position(position), part_of_path(false) {
+        // Eww... double for loop!
+        UpdateColor();
+        if (csi) {
+                for (int i=0;i<destinations.size();++i) {
+                        for (int j=0;j<csi->systems.size();++j) {
+                                if ((*csi)[j].name==destinations[i]) {
+                                        lowerdestinations.push_back(j);
+                                        // Push the destination back.
+                                        // Tasty....
+                                        // Mmm.......
+                                        // Destination tastes like chicken
+                                }
+                        }
+                }
+        }
+}
+
+
+//Create a placeholder to avoid the problem described above
+NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name)
+  : name(name), part_of_path(false) {}
+
+void NavigationSystem::CachedSystemIterator::SystemInfo::loadData(map<string, unsigned> * index_table) {
+	string xyz=_Universe->getGalaxyProperty(name,"xyz");
+	QVector pos;
+	if (xyz.size() && (sscanf(xyz.c_str(), "%lf %lf %lf", &pos.i, &pos.j, &pos.k)>=3)) {
+		pos.j=-pos.j;
+	} else {	        
+		pos.i=0;
+		pos.j=0;
+		pos.k=0;
+	}
+	position=pos;
+        
 	UpdateColor();
-	if (csi) {
-		for (int i=0;i<destinations.size();++i) {
-			for (int j=0;j<csi->systems.size();++j) {
-				if ((*csi)[j].name==destinations[i]) {
-					lowerdestinations.push_back(j);
-					// Push the destination back.
-					// Tasty....
-					// Mmm.......
-					// Destination tastes like chicken
-				}
-			}
+	vector <std::string> destinations = _Universe->getAdjacentStarSystems(name);
+	for (int i=0;i<destinations.size();++i) {
+	        if(index_table->count(destinations[i]) != 0) {
+		        lowerdestinations.push_back((*index_table)[destinations[i]]);
 		}
 	}
 }
@@ -303,9 +325,30 @@ NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &nam
 
 void NavigationSystem::CachedSystemIterator::init (string current_system, unsigned max_systems) {
 	systems.clear();
-	NavigationSystem::SystemIterator iter (current_system, max_systems);
-	for (;!iter.done();++iter) {
-		systems.push_back(SystemInfo(*iter, iter.Position(), _Universe->getAdjacentStarSystems(*iter),this));
+	unsigned count=0;
+	string sys;
+
+	map<string, unsigned> index_table;
+	deque<std::string> frontier;
+	frontier.push_back(current_system);
+	systems.push_back(SystemInfo(current_system));
+	index_table[current_system]=0;
+
+	while(!frontier.empty()) {
+                sys = frontier.front();
+		frontier.pop_front();
+
+		int nas = UniverseUtil::GetNumAdjacentSystems(sys);
+		for (int j=0;j<nas && count<max_systems;++j) {
+	                string n = UniverseUtil::GetAdjacentSystem(sys,j);
+			if (index_table.count(n) == 0) {
+		                frontier.push_back(n);
+				index_table[n] = systems.size();
+				systems.push_back(SystemInfo(n));
+				++count;
+			}
+		}
+		systems[index_table[sys]].loadData(&index_table);
 	}
 }
 
@@ -417,6 +460,126 @@ NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::o
 	return iter;
 }
 
+//************************************************
+//
+//                SECTOR SECTION
+//
+//************************************************
+
+NavigationSystem::CachedSectorIterator::SectorInfo::SectorInfo(const string &name)
+  : name(name) {}
+
+string &NavigationSystem::CachedSectorIterator::SectorInfo::GetName () {
+	return name;
+}
+
+const string &NavigationSystem::CachedSectorIterator::SectorInfo::GetName () const{
+	return name;
+}
+
+unsigned NavigationSystem::CachedSectorIterator::SectorInfo::GetSubsystemIndex (unsigned index) const{
+	return subsystems[index];
+}
+
+unsigned NavigationSystem::CachedSectorIterator::SectorInfo::GetSubsystemSize () const {
+	return subsystems.size();
+}
+
+void NavigationSystem::CachedSectorIterator::SectorInfo::AddSystem (unsigned index) {
+        subsystems.push_back(index);
+}
+ 
+NavigationSystem::CachedSectorIterator::CachedSectorIterator () {}
+
+NavigationSystem::CachedSectorIterator::CachedSectorIterator (CachedSystemIterator &systemIter) {
+	init(systemIter);
+}
+void NavigationSystem::CachedSectorIterator::init (CachedSystemIterator &systemIter) {
+	map<string, unsigned> index_table;
+	sectors.clear();
+
+	string sys, csector,csystem;
+	unsigned index;
+
+	systemIter.seek();
+	while(!systemIter.done()) {
+	        sys=systemIter->GetName();
+	        Beautify (sys,csector,csystem);
+		if(index_table.count(csector)==0) {
+		        index_table[csector]=sectors.size();
+		        sectors.push_back(SectorInfo(csector));
+		}
+		index=index_table[csector];
+		sectors[index].AddSystem(systemIter.getIndex());
+		++systemIter;
+	}
+}
+NavigationSystem::CachedSectorIterator::CachedSectorIterator(const CachedSectorIterator &other)
+	: sectors(other.sectors),
+	  currentPosition(other.currentPosition) {
+}
+
+bool NavigationSystem::CachedSectorIterator::seek(unsigned position) {
+	if (position<sectors.size()) {
+		currentPosition=position;
+		return true;
+	} else {
+		return false;
+	}
+}
+unsigned NavigationSystem::CachedSectorIterator::getIndex() const{
+	return currentPosition;
+}
+unsigned NavigationSystem::CachedSectorIterator::size() const{
+	return sectors.size();
+}
+bool NavigationSystem::CachedSectorIterator::done ()const {
+	return currentPosition>=sectors.size();
+}
+static NavigationSystem::CachedSectorIterator::SectorInfo nullSectorPair ("-");
+
+NavigationSystem::CachedSectorIterator::SectorInfo& NavigationSystem::CachedSectorIterator::operator[] (unsigned pos) {
+	if (pos>=size())
+		return nullSectorPair;
+	return sectors[pos];
+}
+const NavigationSystem::CachedSectorIterator::SectorInfo& NavigationSystem::CachedSectorIterator::operator[] (unsigned pos) const{
+	if (pos>=size())
+		return nullSectorPair;
+	return sectors[pos];
+}
+NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator* () {
+	if (done())
+		return nullSectorPair;
+	return sectors[currentPosition];
+}
+const NavigationSystem::CachedSectorIterator::SectorInfo &NavigationSystem::CachedSectorIterator::operator* () const{
+	if (done())
+		return nullSectorPair;
+	return sectors[currentPosition];
+}
+NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator-> () {
+	if (done())
+		return &nullSectorPair;
+	return &sectors[currentPosition];
+}
+const NavigationSystem::CachedSectorIterator::SectorInfo *NavigationSystem::CachedSectorIterator::operator-> () const{
+	if (done())
+		return &nullSectorPair;
+	return &sectors[currentPosition];
+}
+NavigationSystem::CachedSectorIterator & NavigationSystem::CachedSectorIterator::next () {
+	return ++(*this);
+}
+NavigationSystem::CachedSectorIterator& NavigationSystem::CachedSectorIterator::operator ++ () {
+	++currentPosition;
+	return *this;
+}
+NavigationSystem::CachedSectorIterator NavigationSystem::CachedSectorIterator::operator ++ (int) {
+	NavigationSystem::CachedSectorIterator iter(*this);
+	++(*this);
+	return iter;
+}
 
 // static systemdrawhashtable jumptable;
 float vsmax(float x, float y) {
@@ -429,12 +592,9 @@ void NavigationSystem::DrawGalaxy()
 	
 	systemdrawlist mouselist;//(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 
-	if (currentsystem.empty()) {
-		setCurrentSystem(UniverseUtil::getSystemFile());
-	}
 	string csector,csystem;
 
-	Beautify (currentsystem,csector,csystem);
+	Beautify (getCurrentSystem(),csector,csystem);
 	//what's my name
 	//***************************
 	TextPlane systemname;	//	will be used to display shits names
@@ -477,15 +637,12 @@ void NavigationSystem::DrawGalaxy()
 		float min_z=0.0;
 				
 				
-		int currentsystemindex=-1;
-		
 //		themaxvalue = fabs(pos.i);
 		themaxvalue = 0.0;
 
-		systemIter.seek();
-		while (!systemIter.done()) {
-			if (systemIter->GetName()==currentsystem) {
-				currentsystemindex=systemIter.getIndex();
+		{
+			{
+			        systemIter.seek(currentsystemindex);
 				pos=systemIter->Position();
 				ReplaceAxes(pos);
 //				if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
@@ -516,38 +673,8 @@ void NavigationSystem::DrawGalaxy()
 						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
 					}
 				}
-				break;
 			}
-			++systemIter;
 		}
-		
-		//Retrieve system data min/max
-		//**********************************
-		
-		systemIter.seek();
-		while (!systemIter.done())	//	this goes through one time to get the major components locations, and scales its output appropriately
-		{
-			unsigned destsize=systemIter->GetDestinationSize();
-			if (destsize!=0) {
-				for (unsigned i=0;i<destsize;++i) {
-					if (systemIter->GetDestinationIndex(i)==currentsystemindex) {
-						QVector posoth = systemIter->Position();
-						ReplaceAxes(posoth);
-						//Modify by old rotation amount
-						//*************************
-//						if(galaxy_view=VIEW_3D){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
-						//*************************
-						//*************************
-						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
-						break;
-					}
-				}
-			}
-			++systemIter;
-		}
-		
-		//**********************************
-		
 		
 		//Find Centers
 		//**********************************
@@ -595,7 +722,6 @@ void NavigationSystem::DrawGalaxy()
 	
 	}
 
-	
 	DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
 	
 	//	Enlist the items and attributes
@@ -603,10 +729,19 @@ void NavigationSystem::DrawGalaxy()
 	systemIter.seek();
 	while (!systemIter.done())	//	this draws the points
 	{
+		//IGNORE UNDRAWABLE SYSTEMS
+		//**********************************
+		if(!systemIter->isDrawable())
+		{
+			++systemIter;
+			continue;
+		}
+		//**********************************
+
 
 		//	Retrieve unit data
 		//	**********************************
-		string temp = (*systemIter).GetName();
+		unsigned temp = systemIter.getIndex();
 			
 
 
@@ -650,36 +785,10 @@ void NavigationSystem::DrawGalaxy()
 		}
 */
 		
-		//IGNORE OFF SCREEN
+		//IGNORE DIM AND OFF SCREEN SYETEMS
 		//**********************************
-		if((col.a<.05)||(!systemIter->isDrawable())||(!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)))
+		if((col.a<.05)||(!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)))
 		{
-			unsigned destsize=systemIter->GetDestinationSize();
-			if (destsize!=0) {
-				GFXBegin(GFXLINE);
-				for (unsigned i=0;i<destsize;++i) {
-					CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
-					if (oth.isDrawable()) {
-						QVector posoth=oth.Position();
-						ReplaceAxes(posoth);
-						Vector oldposoth=posoth;
-						float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat, the_clipped_x=the_x,the_clipped_y=the_y;
-						// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
-						TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
-						GFXColor othcol = oth.GetColor();
-						othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
-						//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
-						if (TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_new_x, the_new_y)) {
-							IntersectBorder(the_clipped_x,the_clipped_y,the_new_x,the_new_y);
-							GFXColorf (col);
-							GFXVertex3f(the_clipped_x,the_clipped_y,0);
-							GFXColorf (othcol);
-							GFXVertex3f(the_new_x,the_new_y,0);
-						}
-					}
-				}
-				GFXEnd();
-			}
 			++systemIter;
 			continue;
 		}
@@ -697,34 +806,37 @@ void NavigationSystem::DrawGalaxy()
 
 		insert_size *= system_item_scale_temp/3;
 
-		if (currentsystem==temp)
+		if (currentsystemindex==temp)
 		{
-			// Get a color from the config
-			static float col[4]={1, 0.3, 0.3, 0.8};
-			static bool init = false;
-			if (!init) {
-				vs_config->getColor("nav", "current_system", col, true);
-				init=true;
-			}
-
-			DrawTargetCorners(the_x, the_y, (insert_size), GFXColor(col[0],col[1],col[2],col[3]));
+		        DrawTargetCorners(the_x, the_y, (insert_size), currentcol);
+		}
+		if (destinationsystemindex==temp)
+		{
+		        DrawTargetCorners(the_x, the_y, (insert_size)*1.2, destinationcol);
+		}
+		if (systemselectionindex==temp)
+		{
+		        DrawTargetCorners(the_x, the_y, (insert_size)*1.4, selectcol);
 		}
 
 		bool moused = false;
 		if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
-			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,false, col));
+			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, col));
 			moused=true;
 		}
 			
 		
-//		systemdrawnode it (insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
+//		systemdrawnode it (insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,moused,col);
 
+                if((path_view != PATH_OFF) && systemIter->part_of_path) {
+		        DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,pathcol);
+			DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
 
-
-		DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
-		DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
-//		string sys = it.source;
-//
+		}
+                else if(path_view != PATH_ONLY) {
+		        DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
+			DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
+		}
 		unsigned destsize=systemIter->GetDestinationSize();
 		if (destsize!=0) {
 			GFXBegin(GFXLINE);
@@ -741,22 +853,33 @@ void NavigationSystem::DrawGalaxy()
 					othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
 					//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
 					IntersectBorder(the_new_x,the_new_y,the_x,the_y);
-					GFXColorf (col);
-					GFXVertex3f(the_x,the_y,0);
-					GFXColorf (othcol);
-					GFXVertex3f(the_new_x,the_new_y,0);
+                                        
+                                        if((path_view != PATH_OFF) && systemIter->part_of_path && oth.part_of_path)
+                                        {
+                                                GFXColorf (pathcol);
+						GFXVertex3f(the_x,the_y,0);
+						GFXColorf (pathcol);
+						GFXVertex3f(the_new_x,the_new_y,0);
+					}
+					else if(path_view != PATH_ONLY)
+					{
+ 
+					        GFXColorf (col);
+						GFXVertex3f(the_x,the_y,0);
+						GFXColorf (othcol);
+						GFXVertex3f(the_new_x,the_new_y,0);
+					}
 				}
 			}
 			GFXEnd();
 		}
 //		jumptable.Delete(sys); // Won't ever reference this again, since it checks for less than.
 
+
 		
 		++systemIter;
 	}
 	//	**********************************
-
-
 
 
 
@@ -787,23 +910,20 @@ void NavigationSystem::DrawGalaxy()
 
 
 
-	//	Check for selection query
-	//	give back the selected tail IF there is one
-	//	IF given back, undo the selection state
+	//	Give back the selected tail IF there is one
 	//	**********************************
-	if(1||checkbit(buttonstates, 1))	//	button #2 is down, wanting a (selection)
+	if(mouselist.size() > 0)	//	mouse is over a target when this is > 0
 	{
-		if(mouselist.size() > 0)	//	mouse is over a target when this is > 0
-		{
-			if(mouse_wentdown[0]== 1)	//	mouse button went down for mouse button 1
-			{
-				systemselection = mouselist.back().source;
-				unsetbit(buttonstates, 1);
-
-				// JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
-				setCurrentSystem(systemselection);
-			}
-		}
+		if(mouse_wentdown[0]== 1)	//	mouse button went down for mouse button 1
+		  {
+		          unsigned oldselection = systemselectionindex;
+		          systemselectionindex = mouselist.back().index;
+			  
+			  // JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
+			  if(systemselectionindex==oldselection) {
+			          setCurrentSystemIndex(systemselectionindex);
+			  }
+		  }
 	}
 	//	**********************************
 
@@ -823,11 +943,160 @@ void NavigationSystem::DrawGalaxy()
 }
 //	**********************************
 
+void NavigationSystem::updatePath()
+{
+        //Erase old path
+	//*************************
+        for(unsigned i=0;i<path.size();++i) {
+	        systemIter[path[i]].part_of_path=false;
+	}
+	path.clear();
 
 
+	//Calculate new path
+	//*************************
+	DoubleRootedBFS(currentsystemindex, destinationsystemindex);
+ 
+	//Inscribe new path
+	//*************************
+	for(unsigned i=0;i<path.size();++i) {
+	        systemIter[path[i]].part_of_path=true;
+	}
+}
+
+bool NavigationSystem::BFS(unsigned originIndex, unsigned destIndex) {
+        vector<unsigned> prev(systemIter.size());
+        vector<bool> visited(systemIter.size(),false);
+        deque<unsigned> frontier;
+	bool found=false;
+
+	frontier.push_back(originIndex);
+	visited[originIndex]=true;
+
+	do {
+	        unsigned index=frontier.front();
+		frontier.pop_front();
 
 
+		for(unsigned adjs=0; adjs<systemIter[index].GetDestinationSize(); ++adjs) {
+		        unsigned adjIndex=systemIter[index].GetDestinationIndex(adjs);
+			if(!visited[adjIndex] && systemIter[adjIndex].isDrawable()) {
+			        visited[adjIndex]=true;
+				prev[adjIndex]=index;
+				frontier.push_back(adjIndex);
 
+				if(adjIndex==destIndex) {
+				        found = true;
+					break;
+				}
 
+			}
+		}
+	}
+	while(!frontier.empty() && !found);
 
+	if(found) {
+		unsigned index=destIndex;
+		while(index != originIndex) {
+		        path.push_back(index);
+			index=prev[index];
+		}
+		path.push_back(originIndex);		
+	}
+	return found;
+}
+
+bool NavigationSystem::DoubleRootedBFS(unsigned originIndex, unsigned destIndex) {
+        if(originIndex==destIndex) {
+	        path.push_back(originIndex);
+		return true;
+	}
+
+        vector<unsigned> prev(systemIter.size());
+        vector<unsigned> visited(systemIter.size(), 0);
+        deque<unsigned> oriFront, destFront;
+	bool found=false;
+	unsigned midNode;
+	unsigned midNodePrevOri;
+	unsigned midNodePrevDest;
+
+	bool oriTurn=true;
+	deque<unsigned> * front;
+	unsigned visitMark;
+
+	oriFront.push_back(originIndex);
+	visited[originIndex]=1;
+	destFront.push_back(destIndex);
+	visited[destIndex]=2;
+
+	while(!oriFront.empty() && !destFront.empty() && !found)
+	{
+	        if(oriTurn) {
+		        front=&oriFront;
+			visitMark=1;
+		}
+		else {
+		        front=&destFront;
+			visitMark=2;
+		}
+
+	        unsigned index=front->front();
+		front->pop_front();
+
+		for(unsigned adjs=0; adjs<systemIter[index].GetDestinationSize(); ++adjs) {
+		        unsigned adjIndex=systemIter[index].GetDestinationIndex(adjs);
+			if(systemIter[adjIndex].isDrawable()) {
+			        if(visited[adjIndex]==0) {
+			                visited[adjIndex]=visitMark;
+					prev[adjIndex]=index;
+					front->push_back(adjIndex);
+				}
+				else if(visited[adjIndex]!=visitMark) {
+				        midNode=adjIndex;
+					if(oriTurn) {
+					        midNodePrevDest=prev[adjIndex];
+						midNodePrevOri=index;
+					}
+					else {
+					        midNodePrevOri=prev[adjIndex];
+						midNodePrevDest=index;
+					}				
+					found = true;
+					break;
+				}
+			}
+		}
+		oriTurn=!oriTurn;
+	}
+
+	if(found) {
+	        list<unsigned> tempPath;
+		unsigned index=midNodePrevOri;
+		while(index != originIndex) {
+		        tempPath.push_front(index);
+			index=prev[index];
+		}
+		tempPath.push_front(originIndex);
+		
+		if(destIndex==midNode) {
+		        tempPath.push_back(destIndex);
+		}
+		else {
+		        tempPath.push_back(midNode);
+			
+			unsigned index=midNodePrevDest;
+			while(index != destIndex) {
+			        tempPath.push_back(index);
+				index=prev[index];
+			}
+			tempPath.push_back(destIndex);
+		}
+
+		while(!tempPath.empty()) {
+		        path.push_back(tempPath.back());
+			tempPath.pop_back();
+		}
+	}
+	return found;
+}
 
