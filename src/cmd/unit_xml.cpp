@@ -560,7 +560,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
       }
     }    
     GameUnit *upgradee =UnitFactory::createUnit(filename.c_str(),true,FactionUtil::GetFaction("upgrades"));
-	Unit::Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
+	Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
     upgradee->Kill();
     }
     break;
