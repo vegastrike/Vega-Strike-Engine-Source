@@ -24,8 +24,6 @@ void AnimatedTexture::UpdateAllFrame() {
     myvec[i]->cumtime+=GetElapsedTime();
     if (myvec[i]->timeperframe) {
       myvec[i]->active = ((int)(myvec[i]->cumtime/myvec[i]->timeperframe))%myvec[i]->numframes;
-      //if (i>0)
-      //myvec[i]->original = myvec[i]->Decal[myvec[i]->active]->Original();
     }
   }
 }
@@ -77,8 +75,9 @@ void AnimatedTexture::Destroy() {
   int i;
   if (Decal) {
     for (i=0;i<(int)myvec.size();i++) {
-      if (myvec[i]==this)
+      if (myvec[i]==this) {
 	myvec.erase (myvec.begin()+i);
+      }
     }
     for (i=0;i<numframes;i++) {
       delete Decal[i];
