@@ -447,10 +447,12 @@ void Cockpit::Update () {
   if (autoclear&&par) {
     Unit *targ=par->Target();
 	if (targ) {
-		static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));		
-    if ((dockingdistance(targ,par)<autopilot_term_distance||(UnitUtil::getSignificantDistance(targ,par)<=0))&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
+		static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
+		float doubled=dockingdistance(targ,par);
+    if ((doubled<autopilot_term_distance||(UnitUtil::getSignificantDistance(targ,par)<=0))&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
+		
       RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
-    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
+    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))&&(doubled>=autopilot_term_distance)) {
       par->EndRequestClearance(targ);
       targ->EndRequestClearance(par);
 	}

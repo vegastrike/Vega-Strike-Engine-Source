@@ -405,7 +405,7 @@ void Unit::Init()
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
-
+  radial_size=1;
   jump.energy = 100;
   jump.delay=5;
   jump.damage=0;
@@ -1457,7 +1457,11 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   if (!FINITE(totallength)) {
     nanspace=true;
     start=QVector(100000000.0,100000000.0,10000000000000.0);
-    float totallength = (start-end).Magnitude();  
+    totallength = (start-end).Magnitude();
+	if (!FINITE(totallength)) {
+		end=QVector(200000000.0,100000000.0,10000000000000.0);;
+		totallength=(start-end).Magnitude();
+	}
   }
   float totpercent=1;
   if (totallength>1) {
