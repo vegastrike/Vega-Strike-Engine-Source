@@ -74,14 +74,19 @@ void Bolt::Draw () {
   vector <Animation *>::iterator k = animations.begin();
   for (i=balls.begin();i!=balls.end();i++,k++) {
     Animation * cur= *k;
-    Matrix result;
-    cur->CalculateOrientation (result);
+    //Matrix result;
+    //FIXME::MuST USE DRAWNOTRANSFORMNOW    cur->CalculateOrientation (result);
     for (j=i->begin();j!=i->end();j++) {//don't update time more than once
       BlendTrans ((*j)->drawmat,(*j)->cur_position,(*j)->prev_position);
-      result[12]=(*j)->drawmat[12];
-      result[13]=(*j)->drawmat[13];
-      result[13]=(*j)->drawmat[14];
-      cur->DrawNow(result);
+      //result[12]=(*j)->drawmat[12];
+      //result[13]=(*j)->drawmat[13];
+      //result[13]=(*j)->drawmat[14];
+      //            cur->SetPosition (result[12],result[13],result[14]);
+      cur->SetDimensions ((*j)->radius,(*j)->radius);
+      //      cur->DrawNow(result);
+      GFXLoadMatrix (MODEL,(*j)->drawmat);
+      GFXColorf ((*j)->col);
+      cur->DrawNoTransform();
     }
     cur->UpdateTime (GetElapsedTime());//update the time of the animation;
   }
@@ -110,14 +115,15 @@ void Bolt::Draw () {
 }
 
 using namespace bolt_draw;
-Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos, Unit *owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos[12],orientationpos[13],orientationpos[14]) {
+Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos[12],orientationpos[13],orientationpos[14]), ShipSpeed (shipspeed) {
   prev_position= cur_position;
   this->owner = owner;
   type = typ.type;
   damage = typ.Damage;
   longrange = typ.Longrange;
-  speed = typ.Speed/typ.Length;//will scale it by length long!
-  range = typ.Range/typ.Length;
+  radius = typ.Radius;
+  speed = typ.Speed/(type==weapon_info::BOLT?typ.Length:typ.Radius);//will scale it by length long!
+  range = typ.Range/(type==weapon_info::BOLT?typ.Length:typ.Radius);
   curdist = 0;
   CopyMatrix (drawmat,orientationpos);
   
@@ -135,13 +141,14 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos, Unit *owner): 
     decal=-1;
     for (unsigned int i=0;i<animationname.size();i++) {
       if (typ.file==animationname[i]) {
-	decal=1;
+	decal=i;
       }
     }
     if (decal==-1) {
       decal = animations.size();
       animationname.push_back (typ.file);
       animations.push_back (new Animation (typ.file.c_str(), true,.1,MIPMAP,false));//balls have their own orientation
+      animations.back()->SetPosition (cur_position);
       balls.push_back (vector <Bolt *> ());
     }
     balls[decal].push_back (this);
@@ -151,9 +158,9 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos, Unit *owner): 
 bool Bolt::Update () {
   curdist +=speed*SIMULATION_ATOM;
   prev_position = cur_position;
-  cur_position.i+=drawmat[8]*speed*SIMULATION_ATOM;//the r vector I believe;
-  cur_position.j+=drawmat[9]*speed*SIMULATION_ATOM;
-  cur_position.k+=drawmat[10]*speed*SIMULATION_ATOM;
+  cur_position.i+=(ShipSpeed.i+drawmat[8]*speed)*SIMULATION_ATOM;//the r vector I believe;
+  cur_position.j+=(ShipSpeed.j+drawmat[9]*speed)*SIMULATION_ATOM;
+  cur_position.k+=(ShipSpeed.k+drawmat[10]*speed)*SIMULATION_ATOM;
   if (curdist>range) {
     delete this;//risky
     return false;

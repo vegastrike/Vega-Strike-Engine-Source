@@ -694,7 +694,7 @@ void Unit::Fire () {
       if (mounts[i].type.EnergyRate>energy) 
 	continue;
     }
-    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,this)) {
+    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,Velocity,this)) {//FIXME turrets
     energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate;
     }//unfortunately cumulative transformation not generated in physics atom
   }
@@ -704,7 +704,7 @@ void Unit::Mount::UnFire () {
     return;
   gun->Destabilize();
 }
-bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, Unit * owner) {
+bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner) {
   if (status!=ACTIVE) 
     return false;
   if (type.type==weapon_info::BEAM) {
@@ -724,11 +724,11 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, Unit 
       tmp.to_matrix (mat);
       switch (type.type) {
       case weapon_info::BALL:
-	new Bolt (type, mat,  owner);
+	new Bolt (type, mat, velocity, owner);//FIXME turrets! Velocity
 	break;
       case weapon_info::BOLT:
 	
-	new Bolt (type,mat,  owner);
+	new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work
 	break;
       case weapon_info::PROJECTILE:
       

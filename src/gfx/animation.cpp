@@ -176,6 +176,42 @@ void Animation::DrawNow(const Matrix &final_orientation) {
    
   }
 }
+void Animation::DrawNoTransform() {
+ int framenum = (int)(cumtime/timeperframe);
+  if (!Done()) {
+    Decal[framenum]->MakeActive();
+    GFXBegin (QUADS);
+    GFXTexCoord2f (0.00F,1.00F);
+    GFXVertex3f (-width,-height,0.00F);  //lower left
+    GFXTexCoord2f (1.00F,1.00F);
+    GFXVertex3f (width,-height,0.00F);  //upper left
+    GFXTexCoord2f (1.00F,0.00F);
+    GFXVertex3f (width,height,0.00F);  //upper right
+    GFXTexCoord2f (0.00F,0.00F);
+    GFXVertex3f (-width,height,0.00F);  //lower right
+
+    GFXTexCoord2f (0.00F,1.00F);
+    GFXVertex3f (-width,0.00F,-height);  //lower left
+    GFXTexCoord2f (1.00F,1.00F);
+    GFXVertex3f (width,0,-height);  //upper left
+    GFXTexCoord2f (1.00F,0.00F);
+    GFXVertex3f (width,0,height);  //upper right
+    GFXTexCoord2f (0.00F,0.00F);
+    GFXVertex3f (-width,0,height);  //lower right
+
+    GFXTexCoord2f (0.00F,1.00F);    
+    GFXVertex3f (0,-height,-height);  //lower left
+    GFXTexCoord2f (1.00F,1.00F);
+    GFXVertex3f (0,height,-height);  //upper left
+    GFXTexCoord2f (1.00F,0.00F);
+    GFXVertex3f (0,height,height);  //upper right
+    GFXTexCoord2f (0.00F,0.00F);
+    GFXVertex3f (0,-height,height);  //lower right
+    
+    GFXEnd ();
+   
+  }
+}
 void Animation::UpdateTime( float elapsedtime)
 {  
   int framenum = (int)(cumtime/timeperframe);

@@ -124,7 +124,7 @@ friend class PlanetaryOrbit;
     void SetMountPosition (const Transformation &t) {LocalPosition = t;}
     Transformation &GetMountLocation () {return LocalPosition;}
     void UnFire();
-    bool Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
+    bool Fire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner);
   } *mounts;
   
   struct {

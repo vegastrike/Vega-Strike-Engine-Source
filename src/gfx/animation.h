@@ -44,6 +44,7 @@ public:
   void UpdateTime (float time);
   void CalculateOrientation (Matrix &result);
   void DrawNow(const Matrix & final_orientation);
+  void DrawNoTransform ();
   static void ProcessDrawQueue();
   void SetDimensions(float wid, float hei);
   bool Done();

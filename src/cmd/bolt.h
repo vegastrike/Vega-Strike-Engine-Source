@@ -17,10 +17,11 @@ class Bolt {
   int decal;//which image it uses
   Unit *owner;
   float damage, curdist,longrange;
-  float speed, range;
+  float speed, range,radius;
+  Vector ShipSpeed;
   bool Collide (Unit * target);
  public:
-  Bolt(const weapon_info &type, const Matrix orientationpos, Unit *owner);//makes a bolt
+  Bolt(const weapon_info &type, const Matrix orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
   ~Bolt();
   static void Cleanup();
   static void Draw();
