@@ -560,5 +560,42 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 #undef M
 
 }
-
-
+static float getAutoRSize (Unit * un) {
+  return 0;
+}
+bool Unit::AutoPilotTo (Unit * target) {
+  if (SubUnit) {
+    return false;//we can't auto here;
+  }
+  Unit * un=NULL;
+  Vector start (Position());
+  Vector end (target->Position());
+  float totallength = (start-end).Magnitude();
+  if (totallength>1) {
+    float percent = (getAutoRSize(this)+rSize()+target->rSize()+getAutoRSize (target))/totallength;
+    if (percent>1) {
+      end=start;
+    }else {
+      end = start*percent+end*(1-percent);
+    }
+  }
+  bool ok=true;
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=*i)!=NULL; 
+       ++i) {
+    if (un!=this&&un!=target) {
+      if ((start-un->Position()).Magnitude()-rSize()-un->rSize()-getAutoRSize(un)<=0) {
+	return false;
+      }
+      float intersection = un->querySphere (start,end,getAutoRSize (un));
+      if (intersection>0) {
+	end = start+ (end-start)*intersection;
+	ok=false;
+      }
+    }
+  }
+  if (this!=target) {
+    SetCurPosition(end);
+  }
+  return ok;
+}

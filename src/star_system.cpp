@@ -579,7 +579,14 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
 	Terrain::UpdateAll(64);	
-
+	unsigned int i=_Universe->CurrentCockpit();
+	for (unsigned int j=0;j<_Universe->numPlayers();j++) {
+	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
+	    _Universe->SetActiveCockpit(j);
+	    _Universe->AccessCockpit(j)->Update();
+	  }
+	}
+	_Universe->SetActiveCockpit(i);
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();

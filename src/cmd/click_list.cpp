@@ -26,7 +26,7 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   int tmp = ship->queryBoundingBox(CamP,mousePoint,0);
   if (tmp)
     //fprintf (stderr, "bounding box hit\n");
-  if (ship->querySphere(CamP,mousePoint,0)){  // camera position is not actually the center of the camera
+  if (ship->querySphereClickList(CamP,mousePoint,0)){  // camera position is not actually the center of the camera
     //fprintf (stderr, "bounding sphere hit\n");
     
     if (tmp) return true;

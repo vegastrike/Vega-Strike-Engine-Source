@@ -540,11 +540,11 @@ public:
   float getMinDis(const Vector &pnt);//for clicklist
   ///queries the sphere for weapons (world space point)
   bool querySphere (const Vector &pnt, float err) const;
-  ///queries the sphere for beams (world space start,end)
-  float querySphere (const Vector &start, const Vector & end) const;
-  float querySphereNoRecurse (const Vector &start, const Vector &end) const ;
+  ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius
+  float querySphere (const Vector &start, const Vector & end, float my_unit_radius=0) const;
+  float querySphereNoRecurse (const Vector &start, const Vector &end, float my_unit_radius=0) const ;
   ///queries the ship with a directed ray
-  float querySphere (const Vector &st, const Vector &dir, float err) const;//for click list
+  float querySphereClickList (const Vector &st, const Vector &dir, float err) const;//for click list
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
   Unit * queryBSP (const Vector &st, const Vector & end, Vector & normal, float &distance, bool ShieldBSP=true);
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
@@ -564,7 +564,7 @@ public:
   int queryBoundingBox(const Vector &origin,const Vector &direction, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
-  bool querySphere (int,int, float err, Camera *activeCam);
+  bool querySphereClickList (int,int, float err, Camera *activeCam);
   ///Turns on selection box
   void Select();
   ///Turns off selection box
@@ -707,6 +707,8 @@ public:
   string fullname;
   void SortCargo();
  public:
+  ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
+  bool AutoPilotTo(Unit * un);
   void WriteUnit(const char * modificationname="");
   void SetTurretAI ();
   ///get the flightgroup description

@@ -32,7 +32,8 @@ struct StarShipControlKeyboard {
   bool dirty;//it wasn't updated...
   bool autopilot;
   bool terminateauto;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=setunvel=setnulvel=false;}
+  bool realauto;
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=setunvel=setnulvel=realauto=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -69,6 +70,10 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.setnulvel) {
     SSCK.setnulvel=false;
     parent->VelocityReference( NULL);
+  }
+  if (SSCK.realauto) {
+    _Universe->AccessCockpit()->Autopilot (parent->Target());
+    SSCK.realauto=false;
   }
   if (autopilot) {
     autopilot->Execute();
@@ -333,13 +338,14 @@ void FlyByKeyboard::ABKey (int, KBSTATE k) {
 void FlyByKeyboard::AutoKey (int, KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
-    g().autopilot=true;
+    g().realauto=true;
   }
 }
 void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
+  
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
-    g().terminateauto=true;
+    g().autopilot=true;
   }
 }
 

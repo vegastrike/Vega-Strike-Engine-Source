@@ -38,7 +38,7 @@ float Unit::getMinDis (const Vector &pnt) {
   return minsofar;
 }
 
-float Unit::querySphere (const Vector &st, const Vector &dir, float err) const{
+float Unit::querySphereClickList (const Vector &st, const Vector &dir, float err) const{
   int i;
   float retval=0;
   float adjretval=0;
@@ -100,7 +100,7 @@ float Unit::querySphere (const Vector &st, const Vector &dir, float err) const{
   un_kiter ui = viewSubUnits();
   const Unit * su;
   while ((su=ui.current())) {
-    float tmp=su->querySphere (st,dir,err);
+    float tmp=su->querySphereClickList (st,dir,err);
     if (tmp==0) {
       ui.advance();
       continue;
@@ -183,7 +183,7 @@ int Unit::queryBoundingBox (const Vector &origin, const Vector &direction, float
 }
 
 
-bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
+bool Unit::querySphereClickList (int mouseX, int mouseY, float err, Camera * activeCam) {
   int i;
   Matrix vw;
   _Universe->AccessCamera()->GetView (vw);
@@ -231,7 +231,7 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
   UnitCollection::UnitIterator ui = getSubUnits();
   Unit * su;
   while ((su=ui.current())) {
-    if (su->querySphere (mouseX,mouseY,err,activeCam)) {
+    if (su->querySphereClickList (mouseX,mouseY,err,activeCam)) {
       return true;
     }
     ui.advance();

@@ -427,21 +427,21 @@ bool Unit::querySphere (const Vector &pnt, float err) const{
 
 
 
-float Unit::querySphere (const Vector &start, const Vector &end) const{
+float Unit::querySphere (const Vector &start, const Vector &end, float min_radius) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
       float tmp;
-      if ((tmp=un->querySphere (start,end))!=0) {
+      if ((tmp=un->querySphere (start,end,min_radius))!=0) {
 	return tmp;
       }
     }
   }
  
-  return querySphereNoRecurse (start,end);
+  return querySphereNoRecurse (start,end,min_radius);
 }
 
-float Unit::querySphereNoRecurse (const Vector & start, const Vector & end) const {
+float Unit::querySphereNoRecurse (const Vector & start, const Vector & end, float min_radius) const {
   int i;
   float tmp;
   Vector st,dir;
@@ -451,7 +451,7 @@ float Unit::querySphereNoRecurse (const Vector & start, const Vector & end) cons
     dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
-    c = st.Dot (st) - meshdata[i]->rSize()*meshdata[i]->rSize()
+    c = st.Dot (st) - (min_radius+meshdata[i]->rSize())*(meshdata[i]->rSize()+min_radius)
 #ifdef VARIABLE_LENGTH_PQR
       *SizeScaleFactor*SizeScaleFactor
 #endif

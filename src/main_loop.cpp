@@ -143,7 +143,9 @@ namespace CockpitKeys {
 	
 	static Vector P;
 	static Vector R;
-
+	if (newState==RELEASE) {
+	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	}
 	if(newState==PRESS) {
 		P = _Universe->AccessCamera()->P;
 		R = _Universe->AccessCamera()->R;

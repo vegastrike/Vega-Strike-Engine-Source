@@ -494,6 +494,7 @@ void Cockpit::DrawGauges(Unit * un) {
   GFXColor4f (1,1,1,1);
 }
 void Cockpit::Init (const char * file) {
+  autopilot_time=0;
   if (strlen(file)==0) {
     Init ("disabled-cockpit.cpt");
     return;
@@ -640,7 +641,22 @@ void Cockpit::Respawn (int,KBSTATE k) {
   }
 
 }
-
+void Cockpit::Autopilot (Unit * target) {
+  if (target) {
+    Unit * un=NULL;
+    if (un=GetParent()) {
+      if (un->AutoPilotTo(un)) {//can he even start to autopilot
+	CockpitKeys::Pan(0,PRESS);
+	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
+							      _Universe->AccessCamera()->R,
+							      GetElapsedTime()/100);
+	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
+	autopilot_time=autotime;
+	autopilot_target.SetUnit (target);
+      }
+    }
+  }
+}
 void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
   bool pointingtonw=false;
@@ -854,8 +870,26 @@ void Cockpit::Draw() {
 	zoomfactor=dietime*10;
 
   }
+  GFXAlphaTest (ALWAYS,0);  
+  GFXHudMode (false);
 }
 void Cockpit::Update () {
+  if (autopilot_time!=0) {
+    autopilot_time-=SIMULATION_ATOM;
+    if (autopilot_time<0) {
+      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+      CockpitKeys::Inside(0,PRESS);
+      autopilot_time=0;
+      Unit * par = GetParent();
+      if (par) {
+	Unit * autoun = autopilot_target.GetUnit();
+	autopilot_target.SetUnit(NULL);
+	if (autoun) {
+	  par->AutoPilotTo(autoun);
+	}
+      }
+    }
+  }
   Unit * par=GetParent();
   if (!par) {
     if (respawnunit.size()>_Universe->CurrentCockpit())
@@ -951,8 +985,7 @@ void Cockpit::Update () {
     if (!found)
       index=0;
   }
-  GFXAlphaTest (ALWAYS,0);  
-  GFXHudMode (false);
+
 
 }
 Cockpit::~Cockpit () {
@@ -1054,8 +1087,10 @@ void Cockpit::SetupViewPort (bool clip) {
     ShoveCamBehindUnit (CP_CHASE,un,zoomfactor);
     ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
 
-    ShoveCamBehindUnit (CP_PAN,un,zoomfactor);
 
+
+
+    ShoveCamBehindUnit (CP_PAN,un,zoomfactor);
     un->SetVisible(view>=CP_CHASE);
 
   }

@@ -264,10 +264,9 @@ void Universe::StartDraw()
   StarSystem::ProcessPendingJumps();
   for (i=0;i<cockpit.size();i++) {
     SetActiveCockpit(i);
-	pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
-    cockpit[i]->Update();
-    ProcessInput(i);
-	popActiveStarSystem();
+    pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
+    ProcessInput(i);//input neesd to be taken care of;
+    popActiveStarSystem();
   }
   //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();

@@ -52,6 +52,9 @@ private:
   Gauge *gauges[NUMGAUGES];
   ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
   std::vector <Sprite *> Panel;
+  //0 means no autopilot...positive autopilto in progress
+  float autopilot_time;
+  UnitContainer autopilot_target;//usually null
   /**  
    * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
    */
@@ -97,6 +100,7 @@ private:
   float cockpit_time;
  public:
   float godliness;
+  void Autopilot (Unit * target);
   void RestoreGodliness();
  ///Restores the view from the IDentity Matrix needed to draw sprites
   void RestoreViewPort();
