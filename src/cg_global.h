@@ -1,8 +1,15 @@
 #ifndef _CG_GLOBAL_
 #define _CG_GLOBAL_
-
+#ifndef _WIN32
+#define UNIX
+#endif
 #if defined(CG_SUPPORT)
 #include "gldrv/gl_globals.h"
+#ifdef UNIX
+#include <GL/glx.h>
+#include "gldrv/glx_undefined_extensions.h"
+#include <GL/glxext.h>
+#endif
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
 
@@ -10,9 +17,8 @@
 "GL_NV_texture_shader " \
 "GL_ARB_vertex_program " \
 "GL_SGIS_generate_mipmap "
-
 #include <glh/glh_extensions.h>
-#include <glh/glh_genext.h>
+
 #include <glh/glh_obs.h>
 #include <glh/glh_cube_map.h>
 using namespace glh;

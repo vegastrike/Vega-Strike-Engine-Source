@@ -8,8 +8,10 @@
 #endif
 
 #include <iostream>
-
+#include <string>
+using std::string;
 #if defined(CG_SUPPORT)
+
 #include "cg_global.h"
 #include <shared/data_path.h>
 
