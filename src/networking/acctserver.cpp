@@ -206,6 +206,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 						elem->setConnected( true);
 					}
 				}
+			break;
 			case CMD_LOGIN :
 				callsign = netbuf.getString();
 				passwd = netbuf.getString();
@@ -219,11 +220,6 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 						// We found the client in the account list
 						found = 1;
 						cout<<"Found player : "<<elem->callsign<<":"<<elem->passwd<<endl;
-						if( elem->isConnected())
-						{
-							// and he is connected
-							connected = 1;
-						}
 					}
 				}
 				if( !found)
@@ -234,10 +230,10 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				}
 				else
 				{
-					if( connected)
+					if( !elem->isConnected())
 					{
-						cout<<"Login already connected !"<<endl;
-						this->sendAlreadyConnected( sock, elem);
+						cout<<"Client didn't ask for its account data"<<endl;
+						this->sendUnauthorized( sock, elem);
 					}
 					else
 					{
@@ -558,6 +554,7 @@ void	AccountServer::sendServerData( SOCKETALT sock, Account * acct)
 	NetBuffer netbuf;
 	netbuf.addString( acct->serverip);
 	netbuf.addString( acct->serverport);
+	cout<<"-- sending SERVERIP="<<acct->serverip<<" - SERVERPORT="<<acct->serverport<<endl;
 	packet2.send( LOGIN_DATA, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN DATA SENT for <"<<acct->callsign<<">:<"<<acct->passwd<<">"<<endl;
 }

@@ -781,10 +781,10 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 					COUT<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ALREADY :
-					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN -> serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+					COUT<<">>> LOGIN ALREADY =( ALREADY LOGGED IN -> serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 					// Client already logged in -> disconnect
 					this->sendLoginAlready( clt, ipadr);
-					COUT<<"<<< LOGIN ERROR --------------------------------------------------------------"<<endl;
+					COUT<<"<<< LOGIN ALREADY --------------------------------------------------------------"<<endl;
 				break;
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<cmd<<" )= --------------------------------------"<<endl;

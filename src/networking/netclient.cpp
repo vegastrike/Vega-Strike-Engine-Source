@@ -245,20 +245,22 @@ int		NetClient::checkAcctMsg( SocketSet & set)
 				break;
 				case LOGIN_ALREADY :
 					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
-					ret = -1;
+					ret = -2;
 				break;
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<packeta.getSerial()<<" )= --------------------------------------"<<endl;
-					ret = -1;
+					ret = -3;
 			}
 		}
 		else
 		{
 			cerr<<"Connection to account server lost !!"<<endl;
 			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
-			ret = -1;
+			ret = -4;
 		}
 	}
+	else
+		ret = 0;
 	return ret;
 }
 
@@ -345,7 +347,7 @@ int		NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	netbuf.addString( str_callsign);
 	netbuf.addString( str_passwd);
 
-	COUT << "Buffering to send with CMD_LOGIN: " << endl;
+	COUT << "Buffering to send with LOGIN_DATA: " << endl;
 	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
 	m.dump( cerr, 3 );
 
@@ -389,25 +391,28 @@ int		NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 		nb = set.select( NULL );
 		if( nb > 0 )
 			ret=this->checkAcctMsg( set);
-		if( ret>0)
+		if( ret!=0 && ret!=-4)
 		{
 			COUT<<"Got a response"<<endl;
 			recv = 1;
 		}
-		else if( ret<0)
+		else if( ret == -4)
 		{
 			cerr<<"Error, dead connection to server"<<endl;
-			recv=-1;
+			recv = 1;
 		}
 
 		micro_sleep( 40000);
 	}
 	COUT<<"End of login loop"<<endl;
-	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_ALREADY)
+	if( ret!=0 && ret!=-4 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_ALREADY)
 	{
 		//this->callsign = str_callsign;
 		//savefiles = globalsaves;
-		char * server_ip = new char[serverip.length()];
+		COUT<<"Trying to connect to game server..."<<endl<<"\tIP="<<serverip<<":"<<serverport<<endl;
+		char * server_ip = new char[serverip.length()+1];
+		memset( server_ip, 0, serverip.length());
+		server_ip[serverip.length()] = 0;
 		memcpy( server_ip, serverip.c_str(), serverip.length());
 		this->init( server_ip, atoi( serverport.c_str()));
 		delete server_ip;
@@ -424,22 +429,10 @@ SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
     COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
 
-	char srvip[256];
-	unsigned short tmpport;
-
 	cout<<"Initializing connection to account server..."<<endl;
-	if( vs_config->getVariable( "network", "accountsrvip", "")=="")
-	{
-		cout<<"Account server IP not specified, exiting"<<endl;
-		cleanup();
-	}
-	memset( srvip, 0, 256);
-	memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), 256);
-	string tport = vs_config->getVariable( "network", "accountsrvport", "ACCT_PORT");
-	tmpport = atoi( tport.c_str());
-
-	acct_sock = NetUITCP::createSocket( srvip, tmpport );
+	acct_sock = NetUITCP::createSocket( addr, port );
 	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
+
 	return acct_sock;
 }
 

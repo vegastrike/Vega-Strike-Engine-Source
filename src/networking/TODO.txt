@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- Add tests in netbuffer.cpp in order to avoid any segfault (only when the protocol gets stable enough)
 - When client starts server send galaxy filename with md5sum or other check system
 	if client has the file and the same md5 -> ok
 	if not server sends the file content and client writes it
@@ -11,6 +12,8 @@
 
 *** ACCOUNT SERVER *****************************************************
 
+- BUG : when account already logged -> game server fails to send info to client
+- Handle case where player has no server affected yet
 - Web-based account creation enhancements : fully create an initial savegame
 	- has to read faction.xml
 	- has to know about a few basic ships (specified by hand ?)

@@ -463,7 +463,7 @@ void bootstrap_main_loop () {
     mission->GetOrigin(pos,planetname);
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
-	string srvip = vs_config->getVariable("network","server_ip","");
+	string srvip = vs_config->getVariable("network","account_server_ip","");
 	int numplayers;
 	/*
 	string nbplayers = vs_config->getVariable("network","nbplayers","1");
@@ -519,7 +519,7 @@ void bootstrap_main_loop () {
 		// Initiate the network if in networking play mode for each local player
 		if( srvip != "")
 		{
-			string srvport = vs_config->getVariable("network","server_port", "6777");
+			string srvport = vs_config->getVariable("network","account_server_port", "6779");
 			// Get the number of local players
 			Network = new NetClient[_Universe->numPlayers()];
 
@@ -569,23 +569,42 @@ void bootstrap_main_loop () {
 		}
 		//sleep( 3);
 		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-		if( !Network[k].loginAcctLoop( (*it), (*jt)))
+		int ret = 0;
+		if( (ret=Network[k].loginAcctLoop( (*it), (*jt)))<=0)
 		{
-			cout<<"No account server response, cannot connect, exiting"<<endl;
-			cleanexit=true;
-			winsys_exit(1);
-		}
-		savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
-		if( savefiles[k].empty())
-		{
-			cout<<"No game server response, cannot connect, exiting"<<endl;
-			cleanexit=true;
-			winsys_exit(1);
+			if( ret == -1)
+			{
+				cout<<"Account specified does not exist !!!!"<<endl;
+				cleanexit=true;
+				winsys_exit(1);
+			}
+			else if( ret == -2)
+			{
+				cout<<"Account already in use !!!!"<<endl;
+				cleanexit=true;
+				winsys_exit(1);
+			}
+			else
+			{
+				cout<<"No account server response, cannot connect, exiting"<<endl;
+				cleanexit=true;
+				winsys_exit(1);
+			}
 		}
 		else
 		{
-			cout<<" logged in !"<<endl;
-			//savegamefile = homedir+"/save/"+(*it)+".save";
+			savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
+			if( savefiles[k].empty())
+			{
+				cout<<"No game server response, cannot connect, exiting"<<endl;
+				cleanexit=true;
+				winsys_exit(1);
+			}
+			else
+			{
+				cout<<" logged in !"<<endl;
+				//savegamefile = homedir+"/save/"+(*it)+".save";
+			}
 		}
 	  }
 		/************* NETWORK PART ***************/
