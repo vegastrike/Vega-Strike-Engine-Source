@@ -142,7 +142,7 @@ int		NetClient::authenticate()
 
 vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 {
-	COUT << "enter " << __FUNCTION__ << endl;
+	COUT << "enter " << "NetClient::loginLoop" << endl;
 
 	Packet	packet2;
 	int tmplen = NAMELEN*2;

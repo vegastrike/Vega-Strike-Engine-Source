@@ -116,8 +116,12 @@ public: \
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
 #define LOCALCONST_DEF(Class,Type,Name,Value)
 #else
+#ifndef __PRETTY_FUNCTION
 #define __PRETTY_FUNCTION__ "<Unknown>"
+#endif
+#ifndef __FUNCTION
 #define __FUNCTION__ "<Unknown>"
+#endif
 #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
 #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
 #endif

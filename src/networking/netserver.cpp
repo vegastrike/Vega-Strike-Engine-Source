@@ -291,7 +291,7 @@ void	NetServer::startMsg()
 
 Client* NetServer::newConnection_udp( const AddressIP& ipadr )
 {
-    COUT << " enter " << __FUNCTION__ << endl;
+    COUT << " enter " << "NetServer::newConnection_udp" << endl;
 
     SOCKETALT sock( udpNetwork->get_udp_sock(), SOCKETALT::UDP, ipadr );
 
@@ -311,7 +311,7 @@ Client* NetServer::newConnection_tcp( SocketSet& set )
     // Get new connections if there are - do nothing in standard UDP mode
     if( tcpNetwork->isActive( set ) )
     {
-        COUT << " enter " << __FUNCTION__ << endl;
+        COUT << " enter " << "newConnection_tcp" << endl;
         sock = tcpNetwork->acceptNewConn( set );
         if( sock.valid() )
         {

@@ -536,7 +536,7 @@ void VsnetTCPSocket::watch( SocketSet& set )
 
 bool VsnetTCPSocket::isActive( SocketSet& set )
 {
-    COUT << "enter " << __FUNCTION__ << endl;
+    COUT << "enter " << "isActive" << endl;
 
     /* True is the correct answer when the connection is closed:
      * the app must call recvbuf once after this to receive 0
@@ -544,7 +544,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
      */
     if( _connection_closed )
     {
-        COUT << "leave " << __FUNCTION__ << endl;
+        COUT << "leave " << "isActive" << endl;
         return true;
     }
 
@@ -552,12 +552,12 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
     {
         if( _complete_packets.empty() == false )
         {
-            COUT << "leave " << __FUNCTION__ << endl;
+            COUT << "leave " << "isActive" << endl;
             return true;
         }
         else
     {
-        COUT << "leave " << __FUNCTION__ << endl;
+        COUT << "leave " << "isActive" << endl;
         return false;
     }
     }
@@ -599,17 +599,17 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
 	        if( ret == 0 )
 		{
 		    _connection_closed = true;
-                    COUT << "leave " << __FUNCTION__ << endl;
+                    COUT << "leave " << "isActive" << endl;
 		    return ( _complete_packets.empty() == false );
 		}
                 if( vsnetEWouldBlock() )
 		{
-                    COUT << "leave " << __FUNCTION__ << endl;
+                    COUT << "leave " << "isActive"  << endl;
 		    return ( _complete_packets.empty() == false );
 		}
 		else
 		{
-                    COUT << "leave " << __FUNCTION__ << endl;
+                    COUT << "leave " << "isActive" << endl;
 	            return false;
 		}
 	    }
@@ -632,17 +632,17 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
 	        if( ret == 0 )
 		{
 		    _connection_closed = true;
-                    COUT << "leave " << __FUNCTION__ << endl;
+                    COUT << "leave " << "isActive" << endl;
 		    return ( _complete_packets.empty() == false );
 		}
                 if( vsnetEWouldBlock() )
 		{
-                    COUT << "leave " << __FUNCTION__ << endl;
+                    COUT << "leave " << "isActive" << endl;
 		    return ( _complete_packets.empty() == false );
 		}
 		else
 		{
-                    COUT << "leave " << __FUNCTION__ << endl;
+                    COUT << "leave " << "isActive" << endl;
 	            return false;
 		}
 	    }
@@ -670,7 +670,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
     }
     while( endless );  // exit only for EWOULDBLOCK or closed socket
 
-    COUT << "leave " << __FUNCTION__ << " blocking socket" << endl;
+    COUT << "leave " << "isActive" << " blocking socket" << endl;
 
     return gotpacket;
 }
