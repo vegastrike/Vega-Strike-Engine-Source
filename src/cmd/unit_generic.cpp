@@ -2598,9 +2598,8 @@ float currentTotalShieldVal (const Shield & shield) {
 
 float totalShieldEnergyCapacitance (const Shield & shield) {
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
-        static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","true"));
-        
-	return shieldenergycap * use_max_shield_value?totalShieldVal(shield):currentTotalShieldVal(shield);
+    static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","true"));
+    return shieldenergycap * use_max_shield_value?totalShieldVal(shield):currentTotalShieldVal(shield);
 }
 float Unit::MaxShieldVal() const{
   float maxshield=0;
@@ -2639,14 +2638,25 @@ void Unit::RechargeEnergy() {
 #endif
 }
 void Unit::RegenShields () {
-  int rechargesh=1; // used ... oddly
-  float maxshield=totalShieldEnergyCapacitance(shield);
+  static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
   static bool apply_difficulty_shields = XMLSupport::parse_bool (vs_config->getVariable("physics","difficulty_based_shield_recharge","true"));
+  static float shield_maintenance_cost=XMLSupport::parse_float(vs_config->getVariable("physics","shield_maintenance_charge",".25"));
+  static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_power","true"));
+  static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".25"));
+  const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
+  static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));
+  static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
+  static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
+  
+  int rechargesh=1; // used ... oddly
+  float maxshield=totalShieldEnergyCapacitance(shield);
+  bool velocity_discharge=false;
+
   if (!energy_before_shield) {
     RechargeEnergy();
   }
-  float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
+  float rec = (shield.recharge*SIMULATION_ATOM*shield.number)>energy?energy/shield.number:shield.recharge*SIMULATION_ATOM;
   if (apply_difficulty_shields) {
     if (!_Universe->isPlayerStarship(this)) {
       rec*=g_game.difficulty;
@@ -2654,8 +2664,6 @@ void Unit::RegenShields () {
       rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
     }
   }
-  bool velocity_discharge=false;
-  static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
   /*
   if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
       rec=0;
@@ -2679,10 +2687,6 @@ void Unit::RegenShields () {
     static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
     rec *=nebshields;
   }
-  static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".95"));
-  const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
-  static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));
-
   switch (shield.number) {
   case 2:
 
@@ -2705,6 +2709,7 @@ void Unit::RegenShields () {
       if (shield.shield2fb.front>min_shield_discharge*shield.shield2fb.frontmax)
 	shield.shield2fb.front*=dischargerate;
     }
+	rec=rec*2*shieldenergycap;
     break;
   case 4:
     rechargesh = applyto (shield.shield4fbrl.front,shield.shield4fbrl.frontmax,rec)*(applyto (shield.shield4fbrl.back,shield.shield4fbrl.backmax,rec))*applyto (shield.shield4fbrl.right,shield.shield4fbrl.rightmax,rec)*applyto (shield.shield4fbrl.left,shield.shield4fbrl.leftmax,rec);
@@ -2718,6 +2723,7 @@ void Unit::RegenShields () {
       if (shield.shield4fbrl.right>min_shield_discharge*shield.shield4fbrl.rightmax)
 	shield.shield4fbrl.right*=dischargerate;
     }
+	rec=rec*4*shieldenergycap;
     break;
   case 8:
     rechargesh = applyto (shield.shield8.frontrighttop,shield.shield8.frontrighttopmax,rec)*(applyto (shield.shield8.backrighttop,shield.shield8.backrighttopmax,rec))*applyto (shield.shield8.frontlefttop,shield.shield8.frontlefttopmax,rec)*applyto (shield.shield8.backlefttop,shield.shield8.backlefttopmax,rec)*applyto (shield.shield8.frontrightbottom,shield.shield8.frontrightbottommax,rec)*(applyto (shield.shield8.backrightbottom,shield.shield8.backrightbottommax,rec))*applyto (shield.shield8.frontleftbottom,shield.shield8.frontleftbottommax,rec)*applyto (shield.shield8.backleftbottom,shield.shield8.backleftbottommax,rec);
@@ -2739,31 +2745,27 @@ void Unit::RegenShields () {
 	  if (shield.shield8.backleftbottom>min_shield_discharge*shield.shield8.backleftbottommax)
 		shield.shield8.backleftbottom*=dischargerate;
     }
+	rec=rec*8*shieldenergycap;
     break;
   }
-  if (rechargesh==0)
+  if (rechargesh==0){
     energy-=rec;
-  static float max_shield_lowers_recharge=XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
-  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","true"));
-  if (max_shield_lowers_recharge) {
-    energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield;
+  }
+  if (shields_require_power) {
+    energy-=rec*shield_maintenance_cost;
+	maxshield=0;
   }
   if (energy_before_shield) {
     RechargeEnergy();
   }
-  if (!max_shield_lowers_capacitance) {
-    maxshield=0;
-  }
-  static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
   float menergy = maxenergy;
+  
   if (menergy-maxshield<low_power_mode) {
 	  menergy=maxshield+low_power_mode;
 	  if (_Universe->isPlayerStarship(this))
 		  if (rand()<.00005*RAND_MAX)
 			  UniverseUtil::IOmessage(0,"	game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
-  static int modcounter=0;
-  
   if(graphicOptions.InWarp){ //FIXME FIXME FIXME
 	  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","20"));
 	  float bleed=jump.insysenergy/bleedfactor*SIMULATION_ATOM;
@@ -2775,7 +2777,7 @@ void Unit::RegenShields () {
   }
 
   if (menergy>maxshield) {
-    if (energy>menergy-maxshield) {//allow shields to absorb xtra power
+    if (energy>menergy-maxshield) {//allow warp caps to absorb xtra power
       float excessenergy = energy - (menergy-maxshield);
       energy=menergy-maxshield;  
       if (excessenergy >0) {

@@ -3352,6 +3352,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
 	static float warpenratio = XMLSupport::parse_float (vs_config->getVariable("physics","warp_energy_multiplier","0.12"));
 	static float warpbleed = XMLSupport::parse_float (vs_config->getVariable("physics","warpbleed","1"));
+    static float shield_maintenance_cost=XMLSupport::parse_float(vs_config->getVariable("physics","shield_maintenance_charge",".25"));
+    static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_power","true"));
+	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
+
 	float Wconv= (1.0/warpenratio); // converts from reactor to warp energy scales
 	char conversionBuffer[2048];
 	string prefix="";
@@ -3775,37 +3779,15 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 				break;
 		}
 	}
-	
-	float shieldsum=0;
-		switch (playerUnit->shield.number) {
-		case 2:
-			shieldsum+=playerUnit->shield.shield2fb.frontmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield2fb.frontmax*RSconverter;
-			break;
-		case 4:
-			shieldsum+=playerUnit->shield.shield4fbrl.frontmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield4fbrl.backmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield4fbrl.leftmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield4fbrl.rightmax*RSconverter;
-			break;
-		case 8:
-			shieldsum+=playerUnit->shield.shield8.frontlefttopmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.backlefttopmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.frontrighttopmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.backrighttopmax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.frontleftbottommax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.backleftbottommax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.frontrightbottommax*RSconverter;
-			shieldsum+=playerUnit->shield.shield8.backrightbottommax*RSconverter;
-			break;
-		default:
-			break;
-	}
 	const Unit::UnitJump uj = playerUnit->GetJumpStatus();
 	const Unit::UnitJump buj = blankUnit->GetJumpStatus();
 	if(!mode){
+		float maxshield=totalShieldEnergyCapacitance(playerUnit->shield);
+		if(shields_require_power){
+			maxshield=0;
+		}
 		PRETTY_ADDU(statcolor+"Recharge: #-c",playerUnit->EnergyRechargeData()*RSconverter,0,"MJ/s");
-		PRETTY_ADDU(statcolor+"Weapon capacitor bank storage: #-c",(playerUnit->MaxEnergyData()*RSconverter)-(shieldsum/5),0,"MJ");
+		PRETTY_ADDU(statcolor+"Weapon capacitor bank storage: #-c",((playerUnit->MaxEnergyData()-maxshield)*RSconverter),0,"MJ");
 		//note: I found no function to get max warp energy, but since we're docked they are the same
 		if(!subunitlevel){
 			PRETTY_ADDU(statcolor+"Warp capacitor bank storage: #-c",playerUnit->GetWarpEnergy()*RSconverter*Wconv,0,"MJ");
@@ -4136,39 +4118,48 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	}
 	if (subunitlevel==0 && mode==0) {
 		text+="#n##n##c0:1:.5#"+prefix+"[KEY FIGURES]#n##-c";
-		
+		float maxshield=totalShieldEnergyCapacitance(playerUnit->shield);
+		if(shields_require_power){
+			maxshield=0;
+		}
 		PRETTY_ADDU(statcolor+"Minimum time to reach full afterburner speed: #-c",playerUnit->GetMass()*uc.max_ab_speed()/playerUnit->limits.afterburn,2,"seconds");
 		//reactor
-		PRETTY_ADDU(statcolor+"Reactor nominal replenish time: #-c",((playerUnit->MaxEnergyData()*RSconverter)-(shieldsum/5))/(playerUnit->EnergyRechargeData()*RSconverter),2,"seconds");
+		PRETTY_ADDU(statcolor+"Reactor nominal replenish time: #-c",((playerUnit->MaxEnergyData()-maxshield)*RSconverter)/((playerUnit->EnergyRechargeData()-(shields_require_power)?(playerUnit->shield.recharge*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0)*RSconverter),2,"seconds");
 		//shield related stuff
 		//code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
 		static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
-  		float maxshield=totalShieldEnergyCapacitance(playerUnit->shield);
-		if (playerUnit->MaxEnergyData()-maxshield<low_power_mode) {
-		text+="#n##c1:.3:.3#"+prefix+"WARNING: Power supply is overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
+  		if (playerUnit->MaxEnergyData()-maxshield<low_power_mode) {
+		text+="#n##c1:.3:.3#"+prefix+"WARNING: Capacitor banks are overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
 		}
 		else {
 		/*	PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
 		}
 		
-		if (playerUnit->shield.recharge>playerUnit->EnergyRechargeData()) {
-			text+="#n##c1:.3:.3#"+prefix+"WARNING: reactor recharge rate is less than shield recharge rate.#n#";
+		if (playerUnit->shield.recharge*playerUnit->shield.number*shieldenergycap>playerUnit->EnergyRechargeData()) {
+			text+="#n##c1:1:.1#"+prefix+"WARNING: reactor recharge rate is less than combined shield recharge rate.#n#";
 			text+="Your shields won't be able to regenerate at their optimal speed!#-c";
 		}
-		else {
-			text+="#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield recharge: #-c";
-			sprintf(conversionBuffer,"%.2f",playerUnit->shield.recharge*100.0/playerUnit->EnergyRechargeData());
+		if(shields_require_power){
+			text+="#n#"+prefix+statcolor+"Reactor recharge slowdown caused by shield maintenance: #-c";
+			sprintf(conversionBuffer,"%.2f",playerUnit->shield.recharge*100.0*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/playerUnit->EnergyRechargeData());
 			text+=conversionBuffer;
 			text+=" %.";
+			float maint_draw_percent=playerUnit->shield.recharge*100.0*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number/playerUnit->EnergyRechargeData();
+			if (maint_draw_percent>60) {
+		      text+="#n##c1:1:.1#"+prefix+"WARNING: Reactor power is heavily consumed by passive shield maintenance: consider downgrading shield or upgrading reactor.#-c";
+			} else if(maint_draw_percent>95){
+			  text+="#n##c1:.3:.3#"+prefix+"SEVERE WARNING: Reactor power is overdrawn! Unsustainable power is being consumed by passive shield maintenance: downgrade shield or upgrade reactor immediately!#-c";
+			}
 		}
 		totalWeaponEnergyUsage=totalWeaponEnergyUsage*RSconverter;
+		float maint_draw=(shields_require_power)?(playerUnit->shield.recharge*shieldenergycap*shield_maintenance_cost*playerUnit->shield.number):0;
 		PRETTY_ADDU(statcolor+"Combined weapon energy usage: #-c",totalWeaponEnergyUsage,0,"MJ/s");
-		if (totalWeaponEnergyUsage<playerUnit->EnergyRechargeData()*RSconverter) {
+		if (totalWeaponEnergyUsage<(playerUnit->EnergyRechargeData()-maint_draw)*RSconverter) {
 			//waouh, impressive...
-			text+="#n##c0:1:.2#"+prefix+"Your reactor produces more energy that your weapons can use!#-c";
+			text+="#n##c0:1:.2#"+prefix+"Your reactor produces more energy than your weapons can use!#-c";
 		}
 		else {
-			PRETTY_ADDU(statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",(playerUnit->MaxEnergyData()*RSconverter)/(totalWeaponEnergyUsage-(playerUnit->EnergyRechargeData()*RSconverter)),2,"seconds");	
+			PRETTY_ADDU(statcolor+"Reactor energy depletion time if weapons in continuous use: #-c",(playerUnit->MaxEnergyData()*RSconverter)/(totalWeaponEnergyUsage-((playerUnit->EnergyRechargeData()-maint_draw)*RSconverter)),2,"seconds");	
 		}
 	PRETTY_ADDU(statcolor+"Combined (non-missile) weapon damage: #-c",totalWeaponDamage*VSDM,0,"MJ/s");
 	}
