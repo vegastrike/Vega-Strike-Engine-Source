@@ -12,14 +12,16 @@ Cockpit::Cockpit (const char * file): Pit(NULL),Crosshairs(NULL),cockpit_offset(
 void Cockpit::Draw() {
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
-  GFXBlendMode (ONE,ZERO);
-  GFXAlphaTest (GREATER,.1);
+  GFXBlendMode (ONE,ONE);
   if (Crosshairs)
     Crosshairs->Draw();
+  GFXBlendMode (ONE,ZERO);
+  GFXAlphaTest (GREATER,.1);
   RestoreViewPort();
   if (Pit)
     Pit->Draw();
   GFXHudMode (false);
+  GFXAlphaTest (ALWAYS,0);
 }
 Cockpit::~Cockpit () {
   if (Pit)
