@@ -649,7 +649,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	  else
 		Unit::LoadXML( "", "", netxml);
 	  calculate_extent(false);
-	  ToggleWeapon(true);//change missiles to only fire 1
+///	  ToggleWeapon(true);//change missiles to only fire 1
 	  vscdups(path.back());	  
 	}
 	vsresetdir();
@@ -1528,7 +1528,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       }
       mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
       if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE, i) {
-		ToggleWeapon (true);
+//		  if (isPlayerStarship(this))
+//			  ToggleWeapon (true);
       }
     }else if (mounts[i].processed==Mount::UNFIRED) {
       mounts[i].PhysicsAlignedUnfire();
@@ -3230,7 +3231,7 @@ void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   for (int j=0;j<2;j++) {
     for (int i=0;i<GetNumMounts();i++) {
       if (mounts[i].type==sz) {
-	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
+	if (mounts[i].status<Mount::DESTROYED&&mounts[i].ammo!=0&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
 	  mounts[i].Activate(ms);
 	}else {
 	  sz = mounts[(i+1)%GetNumMounts()].type;
@@ -3251,7 +3252,7 @@ void Unit::ToggleWeapon (bool Missile) {
     return;
   sz = mounts[0].type;
   for (int i=0;i<GetNumMounts();i++) {
-    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
+	  if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
       totalcount++;
       lasttotal=false;
       if (mounts[i].status==Mount::ACTIVE) {
@@ -3298,7 +3299,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }
   }
   if (totalcount==activecount) {
-    ActivateGuns (mounts[0].type,Missile);
+	  ActivateGuns (mounts[0].type,Missile);	
   } else {
     if (lasttotal) {
       SelectAllWeapon(Missile);
