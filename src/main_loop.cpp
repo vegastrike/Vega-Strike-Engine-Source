@@ -328,7 +328,7 @@ QuadTree * qt;
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
-  qt = new QuadTree();
+  qt = new QuadTree("terrain.xml");
   qt->Update();
   /****** 
   locSel = new LocationSelect(Vector (0,-2,2),

@@ -108,10 +108,21 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
 
   return (unsigned char *)dat;
 }
+static 
+png_cexcept_error(png_structp png_ptr, png_const_charp msg)
+{
+   if(png_ptr)
+     ;
+#ifndef PNG_NO_CONSOLE_IO
+   fprintf(stderr, "libpng error: %s\n", msg);
+#endif
 
+}
 
 unsigned char * readImage (const char * name, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt) {
   palette = NULL;
+  unsigned char sig[8];
+
   png_structp png_ptr;
   png_bytepp row_pointers;
   png_infop info_ptr;
@@ -119,8 +130,12 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    FILE *fp;
    if ((fp = fopen(name, "rb")) == NULL)
       return NULL;
-   png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,NULL,NULL,NULL);
-   if (png_ptr == NULL)
+   fread(sig, 1, 8, fp);
+  if (!png_check_sig(sig, 8))
+       return NULL;   /* bad signature */
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
+      (png_error_ptr)png_cexcept_error, (png_error_ptr)NULL);
+	if (png_ptr == NULL)
    {
       fclose(fp);
       return NULL;
@@ -140,11 +155,12 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
       return NULL;
    }
    png_init_io(png_ptr, fp);
-   png_set_sig_bytes(png_ptr, 0);
-   
+   png_set_sig_bytes(png_ptr, 8);
+   png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
+   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+
    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
 row_pointers = png_get_rows(png_ptr, info_ptr);
-   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
    unsigned char * result = (*tt) (bpp,color_type,width,height,row_pointers);
    png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 

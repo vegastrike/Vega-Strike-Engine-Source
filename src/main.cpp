@@ -239,7 +239,8 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
     }
     else{
       // no "-" before it - it's the mission name
-      strcpy (mission_name,lpCmdLine[i]);
+      strncpy (mission_name,lpCmdLine[i],1023);
+	  mission_name[1023]='\0';
     }
   }
   //FILE *fp = fopen("vid.cfg", "rb");

@@ -2,7 +2,9 @@
 #include "xml_support.h"
 #include "gfxlib.h"
 #include "aux_texture.h"
+#include <assert.h>
 #include "png_texture.h"
+
 extern enum BLENDFUNC parse_alpha (char * tmp );
 
 
@@ -285,7 +287,8 @@ void QuadTree::LoadXML (const char *filename) {
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);
-  for (unsigned int i=0;i<textures.size();i++) {
+  unsigned int i;
+  for (i=0;i<textures.size();i++) {
     if (textures[i].tex.filename) {
       Texture * tex = new Texture (textures[i].tex.filename);
       free (textures[i].tex.filename);
@@ -295,15 +298,17 @@ void QuadTree::LoadXML (const char *filename) {
       textures[i].tex.t = NULL;
     }
 
-  }
+  } 
   root = new quadsquare (&RootCornerData);
-  for (unsigned int i=0;i<xml->data.size();i++) {
+  for (i=0;i<xml->data.size();i++) {
     HeightMapInfo hm;
     hm.XOrigin =xml->data[i].OriginX;
     hm.ZOrigin=xml->data[i].OriginY;
     hm.Scale = xml->data[i].scale;
     int format;int bpp; unsigned char * palette;
     hm.Data = (short *) readImage (xml->data[i].file.c_str(),bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform);
+	  //LoadData();
+
     if (hm.Data) {
       hm.RowWidth = hm.XSize;
       root->AddHeightMap (RootCornerData,hm);
@@ -311,6 +316,6 @@ void QuadTree::LoadXML (const char *filename) {
     }
   }
   
-  root->StaticCullData (RootCornerData,xml->detail);
+ // root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
 }
