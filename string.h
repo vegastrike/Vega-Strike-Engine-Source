@@ -55,10 +55,103 @@ class string : public vector <char> {
   bool empty () const {
     return !length();
   }
-  unsigned int find (const string& findstr, const unsigned int loc)const  {
+  size_type find (const string& findstr, size_type loc=0)const  {
     const basic_string <char> strstr (this.c_str());
     return strstr.find(findstr,loc);
   }
+  size_type find (const char* s, size_type pos, size_type n) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find(s,pos,n);
+  }
+  size_type find (const char* s, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find(s,pos);
+  }
+  size_type find (char c, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find(c,pos);
+  }
+  size_type rfind (const string& str, size_type pos = npos) const{
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find(str,pos);
+  }
+  size_type rfind (const char* s, size_type pos, size_type n) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.rfind(s,pos,n);
+  }
+  size_type rfind (const char* s, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.rfind(s,pos);
+  }
+  size_type rfind (char c, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.rfind(c,pos);
+  }
+  size_type find_first_of (const string& findstr, size_type loc=0)const  {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_of(findstr,loc);
+  }
+  size_type find_first_of (const char* s, size_type pos, size_type n) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_of(s,pos,n);
+  }
+  size_type find_first_of (const char* s, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_of(s,pos);
+  }
+  size_type find_first_of (char c, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_of(c,pos);
+  }
+  size_type find_last_of (const string& findstr, size_type loc=0)const  {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_of(findstr,loc);
+  }
+  size_type find_last_of (const char* s, size_type pos, size_type n) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_of(s,pos,n);
+  }
+  size_type find_last_of (const char* s, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_of(s,pos);
+  }
+  size_type find_last_of (char c, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_of(c,pos);
+  }
+  size_type find_first_not_of (const string& findstr, size_type loc=0)const  {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_not_of(findstr,loc);
+  }
+  size_type find_first_not_of (const char* s, size_type pos, size_type n) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_not_of(s,pos,n);
+  }
+  size_type find_first_not_of (const char* s, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_not_of(s,pos);
+  }
+  size_type find_first_not_of (char c, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_first_not_of(c,pos);
+  }
+  size_type find_last_not_of (const string& findstr, size_type loc=0)const  {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_not_of(findstr,loc);
+  }
+  size_type find_last_not_of (const char* s, size_type pos, size_type n) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_not_of(s,pos,n);
+  }
+  size_type find_last_not_of (const char* s, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_not_of(s,pos);
+  }
+  size_type find_last_not_of (char c, size_type pos = 0) const {
+    const basic_string <char> strstr (this.c_str());
+    return strstr.find_last_not_of(c,pos);
+  }
+
 };
 }
     
