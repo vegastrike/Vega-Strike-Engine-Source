@@ -1,6 +1,5 @@
 #ifndef _PATRICK_AND_DANNY_STRING_H_
 #define _PATRICK_AND_DANNY_STRING_H_
-
 #include <vector>
 #include <iostream>
 #ifdef __APPLE__
@@ -17,20 +16,21 @@
 #else
 #include <std/bastring.h>
 #endif
+#define olde_string basic_strung
 
 namespace std {
-
-class string : public vector <char> {
+typedef vector <char,malloc_alloc> pandd_vector;
+class string : public pandd_vector {
   void allocstr (const char *str, size_type len) {
     if (len==npos)
       len=strlen(str);
     for (unsigned int i=0;i<len;i++) {
-      vector<char>::push_back(str[i]);
+      pandd_vector::push_back(str[i]);
     }
-    vector<char>::push_back('\0');
+    pandd_vector::push_back('\0');
   }
   void reallocstr (const char *str, const size_type len) {
-    vector<char>::clear();
+    pandd_vector::clear();
     allocstr(str,len);
   }
  public:
@@ -50,7 +50,7 @@ class string : public vector <char> {
     assign (str);
   }
   string () {
-    push_back('\0');
+    pandd_vector::push_back('\0');
   }
   string (const string &str) {
     reallocstr(str.c_str(),str.size());
@@ -76,54 +76,54 @@ class string : public vector <char> {
     return *this;
   }
   string& replace (size_type pos1, size_type n1, const string& str, size_type pos2 = 0, size_type n2 = npos) {
-    basic_string <char> bastr (this->c_str());
-    basic_string <char> strstr (str.c_str());
+    olde_string <char> bastr (this->c_str());
+    olde_string <char> strstr (str.c_str());
     bastr.replace(pos1,n1,strstr,pos2,n2);
     return ((*this)=bastr.c_str());
   }    
   string& replace (size_type pos, size_type n1, const char* s, size_type n2) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(pos,n1,s,n2);
     return ((*this)=bastr.c_str());
   }
   string& replace (size_type pos, size_type n1, const char* s) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(pos,n1,s);
     return ((*this)=bastr.c_str());
   }
   string& replace (size_type pos, size_type n1, size_type n2, char c) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(pos,n1,n2,c);
     return ((*this)=bastr.c_str());
   }
   string& replace (size_type pos, size_type n, char c) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(pos,n,c);
     return ((*this)=bastr.c_str());
   }
   string& replace (iterator i1, iterator i2, const string& str) {
-    basic_string <char> bastr (this->c_str());
-    basic_string <char> strstr (str.c_str());
+    olde_string <char> bastr (this->c_str());
+    olde_string <char> strstr (str.c_str());
     bastr.replace(i1,i2,strstr);
     return ((*this)=bastr.c_str());
   }
   string& replace (iterator i1, iterator i2, const char* s, size_type n) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(i1,i2,s,n);
     return ((*this)=bastr.c_str());
   }
   string& replace (iterator i1, iterator i2, const char* s) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(i1,i2,s);
     return ((*this)=bastr.c_str());
   }
   string& replace (iterator i1, iterator i2, size_type n, char c) {
-    basic_string <char> bastr (this->c_str());
+    olde_string <char> bastr (this->c_str());
     bastr.replace(i1,i2,n,c);
     return ((*this)=bastr.c_str());
   }
   size_type copy (char *buf, size_type n, size_type pos=0) const {
-    basic_string <char> bastr ((*this).c_str());
+    olde_string <char> bastr ((*this).c_str());
     return bastr.copy(buf,n,pos);
   }
   ~string () {
@@ -150,6 +150,10 @@ class string : public vector <char> {
     retval.allocstr(str.c_str(),str.size());
     return retval;
   }
+  string operator+ (char c)const {	
+    char temp[2]={c,0};
+    return *this+temp;
+  }
   string &operator += (const string & a) {
     string tmp(*this + a);
     *this=tmp;
@@ -172,120 +176,120 @@ class string : public vector <char> {
   string & append (const char * c) {
     return *this += string (c);
   }
-  iterator end() {return vector<char>::end()-1;}
-  const_iterator end()const {return vector<char>::end()-1;}
+  iterator end() {return pandd_vector::end()-1;}
+  const_iterator end()const {return pandd_vector::end()-1;}
   size_type size () const {
-    return vector<char>::size()-1;
+    return pandd_vector::size()-1;
   }
   size_type length () const {
-    return vector<char>::size()-1;
+    return pandd_vector::size()-1;
   }
   bool empty () const {
     return !length();
   }
   size_type find (const string& findstr, size_type loc=0)const  {
-    const basic_string <char> strstr (this->c_str());
-    const basic_string <char> fstrstr (findstr.c_str());
+    const olde_string <char> strstr (this->c_str());
+    const olde_string <char> fstrstr (findstr.c_str());
     return strstr.find(fstrstr,loc);
   }
   string substr (size_type pos = 0, size_type n = npos) const{ 
     return string(*this,pos,n);
   }
   size_type find (const char* s, size_type pos, size_type n) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find(s,pos,n);
   }
   size_type find (const char* s, size_type pos = 0) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find(s,pos);
   }
   size_type find (char c, size_type pos = 0) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find(c,pos);
   }
   size_type rfind (const string& str, size_type pos = npos) const{
-    const basic_string <char> strstr (this->c_str());
-    const basic_string <char> fstrstr (str.c_str());
+    const olde_string <char> strstr (this->c_str());
+    const olde_string <char> fstrstr (str.c_str());
     return strstr.find(fstrstr,pos);
   }
   size_type rfind (const char* s, size_type pos, size_type n) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.rfind(s,pos,n);
   }
   size_type rfind (const char* s, size_type pos = npos) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.rfind(s,pos);
   }
   size_type rfind (char c, size_type pos = npos) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.rfind(c,pos);
   }
   size_type find_first_of (const string& findstr, size_type loc=0)const  {
-    const basic_string <char> strstr (this->c_str());
-    const basic_string <char> fstrstr (findstr.c_str());
+    const olde_string <char> strstr (this->c_str());
+    const olde_string <char> fstrstr (findstr.c_str());
     return strstr.find_first_of(fstrstr,loc);
   }
   size_type find_first_of (const char* s, size_type pos, size_type n) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_first_of(s,pos,n);
   }
   size_type find_first_of (const char* s, size_type pos = 0) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_first_of(s,pos);
   }
   size_type find_first_of (char c, size_type pos = 0) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_first_of(c,pos);
   }
   size_type find_last_of (const string& findstr, size_type loc=npos)const  {
-    const basic_string <char> strstr (this->c_str());
-    const basic_string <char> fstrstr (findstr.c_str());
+    const olde_string <char> strstr (this->c_str());
+    const olde_string <char> fstrstr (findstr.c_str());
     return strstr.find_last_of(fstrstr,loc);
   }
   size_type find_last_of (const char* s, size_type pos, size_type n) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_last_of(s,pos,n);
   }
   size_type find_last_of (const char* s, size_type pos = npos) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_last_of(s,pos);
   }
   size_type find_last_of (char c, size_type pos = npos) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_last_of(c,pos);
   }
   size_type find_first_not_of (const string& findstr, size_type loc=0)const  {
-    const basic_string <char> strstr (this->c_str());
-    const basic_string <char> fstrstr (findstr.c_str());
+    const olde_string <char> strstr (this->c_str());
+    const olde_string <char> fstrstr (findstr.c_str());
     return strstr.find_first_not_of(fstrstr,loc);
   }
   size_type find_first_not_of (const char* s, size_type pos, size_type n) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_first_not_of(s,pos,n);
   }
   size_type find_first_not_of (const char* s, size_type pos = 0) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_first_not_of(s,pos);
   }
   size_type find_first_not_of (char c, size_type pos = 0) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_first_not_of(c,pos);
   }
   size_type find_last_not_of (const string& findstr, size_type loc=npos)const  {
-    const basic_string <char> strstr (this->c_str());
-    const basic_string <char> fstrstr (findstr.c_str());
+    const olde_string <char> strstr (this->c_str());
+    const olde_string <char> fstrstr (findstr.c_str());
     return strstr.find_last_not_of(fstrstr,loc);
   }
   size_type find_last_not_of (const char* s, size_type pos, size_type n) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_last_not_of(s,pos,n);
   }
   size_type find_last_not_of (const char* s, size_type pos = npos) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_last_not_of(s,pos);
   }
   size_type find_last_not_of (char c, size_type pos = npos) const {
-    const basic_string <char> strstr (this->c_str());
+    const olde_string <char> strstr (this->c_str());
     return strstr.find_last_not_of(c,pos);
   }
 
@@ -297,8 +301,8 @@ class string : public vector <char> {
   }
   */
   void push_back (char c) {
-    vector<char>::operator[](vector<char>::size()-1)=c;
-    vector<char>::push_back('\0');
+    pandd_vector::operator[](pandd_vector::size()-1)=c;
+    pandd_vector::push_back('\0');
   }
   char &at (size_type pos) {
     return (*this)[pos];
@@ -308,12 +312,12 @@ class string : public vector <char> {
   }
 };
  inline  istream&
-   operator>> (istream& i, string&s) {basic_string<char> b; i >> b; s = string (b.c_str());return i;  }
+   operator>> (istream& i, string&s) {olde_string<char> b; i >> b; s = string (b.c_str());return i;  }
  inline ostream&
-   operator<< (ostream& o, const string &s) {basic_string<char>b(s.c_str());o<<b;return o;}
+   operator<< (ostream& o, const string &s) {olde_string<char>b(s.c_str());o<<b;return o;}
  inline   istream&
    getline (istream& i, string& s, char delim = '\n'){
-   basic_string <char> b; getline (i,b,delim);s=b.c_str();
+   olde_string <char> b; getline (i,b,delim);s=b.c_str();
    return i;
  }
 inline bool
