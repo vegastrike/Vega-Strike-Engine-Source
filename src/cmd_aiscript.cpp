@@ -1,6 +1,37 @@
 #include "cmd_aiscript.h"
 #include "xml_support.h"
 #include "cmd_flybywire.h"
+#include <stdio.h>
+
+float& AIScript::topf(){
+	if (!xml->floats.size()) {
+		xml->floats.push(0);
+		fprintf(stderr,"\nERROR: Float stack is empty... Will return 0\n");
+	}
+	return xml->floats.top();
+}
+void AIScript::popf(){
+	if (xml->floats.size()<=0) {
+		fprintf(stderr,"\nERROR: Float stack is empty... Will not delete\n");
+		return;
+	}
+	xml->floats.pop();
+}
+Vector& AIScript::topv(){
+	if (!xml->vectors.size()) {
+		xml->vectors.push(Vector (0,0,0));
+		fprintf(stderr,"\nERROR: Vector stack is empty... Will return 0\n");
+	}
+	return xml->vectors.top();
+}
+void AIScript::popv (){
+	if (xml->vectors.size()<=0) {
+		fprintf(stderr,"\nERROR: Vector stack is empty... Will not delete\n");
+		return;
+	}
+	xml->vectors.pop();
+}
+
 void AIScript::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((AIScript*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -14,7 +45,7 @@ namespace AiXml {
       SCRIPT,
       MOVETO,
       VECTOR,
-      TARGET,
+	  FLOAT,
       X,
       Y,
       Z,
@@ -30,11 +61,22 @@ namespace AiXml {
 	  ANGULAR,
 	  LINEAR,
 	  LOCAL,
-	  TERMINATE
+	  TERMINATE,
+	  VALUE,
+	  ADD,
+	  NORMALIZE,
+	  SCALE,
+	  CROSS,
+	  DOT,
+	  MULTF,
+	  ADDF,
+	  FROMF,
+	  TOF
     };
 
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
+    EnumMap::Pair ("Float", FLOAT),
     EnumMap::Pair ("Script", SCRIPT),
     EnumMap::Pair ("Vector", VECTOR),
 	EnumMap::Pair ("Moveto", MOVETO),
@@ -45,6 +87,15 @@ namespace AiXml {
     EnumMap::Pair ("MatchAng", MATCHANG), 
     EnumMap::Pair ("MatchVel", MATCHVEL),
     EnumMap::Pair ("Angular", ANGULAR), 
+    EnumMap::Pair ("Add", ADD),
+    EnumMap::Pair ("Normalize", NORMALIZE),
+    EnumMap::Pair ("Scale", SCALE),
+    EnumMap::Pair ("Cross", CROSS),
+    EnumMap::Pair ("Dot", DOT),
+    EnumMap::Pair ("Multf", MULTF),
+    EnumMap::Pair ("Addf", ADDF),
+    EnumMap::Pair ("Fromf", FROMF),
+    EnumMap::Pair ("Tof", TOF),
     EnumMap::Pair ("Linear", LINEAR)
   };
   const EnumMap::Pair attribute_names[] = {
@@ -55,12 +106,13 @@ namespace AiXml {
     EnumMap::Pair ("z", Z),
 	EnumMap::Pair ("Time", TIME),
     EnumMap::Pair ("Terminate", TERMINATE), 
-    EnumMap::Pair ("Local", LOCAL) 
+    EnumMap::Pair ("Local", LOCAL), 
+    EnumMap::Pair ("Value", VALUE)
 
 };
 
-  const EnumMap element_map(element_names, 12);
-  const EnumMap attribute_map(attribute_names, 8);
+  const EnumMap element_map(element_names, 22);
+  const EnumMap attribute_map(attribute_names, 9);
 }
 
 using XMLSupport::EnumMap;
@@ -84,43 +136,26 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     break;
 
   case LINEAR:
+    xml->lin=1;
+  case ANGULAR:
   case VECTOR:
 	assert (xml->unitlevel>=2);
 	xml->unitlevel++;
-	xml->vec=Vector(0,0,0);
+	xml->vectors.push(Vector(0,0,0));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:
- 	xml->vec.i=parse_float((*iter).value);
+ 	topv().i=parse_float((*iter).value);
  	break;
       case Y:
- 	xml->vec.j=parse_float((*iter).value);
+ 	topv().j=parse_float((*iter).value);
  	break;
       case Z:
- 	xml->vec.k=parse_float((*iter).value);
+ 	topv().k=parse_float((*iter).value);
  	break;
       }
 	}
 	break;
-  case ANGULAR:
-	assert (xml->unitlevel>=2);
-	xml->unitlevel++;
-	xml->ang=Vector(0,0,0);
-    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(attribute_map.lookup((*iter).name)) {
-      case X:
- 	xml->ang.i=parse_float((*iter).value);
- 	break;
-      case Y:
- 	xml->ang.j=parse_float((*iter).value);
- 	break;
-      case Z:
- 	xml->ang.k=parse_float((*iter).value);
- 	break;
-      }
-
-    }
-    break;
   case MOVETO:
     assert (xml->unitlevel>=1);
     xml->unitlevel++;
@@ -148,6 +183,32 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	xml->acc=parse_int((*iter).value);
 	break;
 	  }
+	}
+	break;
+
+  case NORMALIZE:
+  case SCALE:
+  case CROSS:
+  case DOT:
+  case MULTF:
+  case ADDF:
+  case FROMF:
+  case TOF:  
+  case ADD:
+	assert(xml->unitlevel>2);
+	xml->unitlevel++;
+	break;
+
+  case FLOAT:
+	assert(xml->unitlevel>3);
+	xml->unitlevel++;
+	xml->floats.push(0);
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case VALUE:
+ 	topf()=parse_float((*iter).value);
+ 	break;
+      }
 	}
 	break;
 
@@ -189,6 +250,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 }
 
 void AIScript::endElement(const string &name) {
+  Vector temp (0,0,0);
   Names elem = (Names)element_map.lookup(name);
 
   switch(elem) {
@@ -196,25 +258,107 @@ void AIScript::endElement(const string &name) {
 	  xml->unitlevel--;
 //    cerr << "Unknown element end tag '" << name << "' detected " << endl;
     break;
+
+// Vector 
+  case NORMALIZE:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	topv().Normalize();
+	break;
+  case SCALE:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	topv() *= topf();
+	popf();
+	break;
+  case CROSS:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	temp = topv();
+	popv();
+	topv() = CrossProduct(topv(),temp);
+	break;
+  case DOT:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	xml->floats.push(0);
+	temp = topv();
+	popv();
+	topf() = DotProduct(topv(),temp);
+	popv();
+	break;
+  case MULTF:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	temp.i = topf();
+	popf();
+	topf()*=temp.i;
+	break;
+  case ADDF:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	temp.i = topf();
+	popf();
+	topf()+=temp.i;
+	break;
+  case FROMF:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	temp.i = topf();
+	popf();
+	temp.j = topf();
+	popf();
+	xml->vectors.push(Vector(temp.i,temp.j,topf()));
+	popf();
+	break;
+  case TOF:  
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	xml->floats.push(topv().i);
+	xml->floats.push(topv().j);
+	xml->floats.push(topv().k);
+	popv();
+	break;
+  case ADD:
+	assert(xml->unitlevel>3);
+	xml->unitlevel--;
+	temp = topv();
+	popv();
+	topv()+=temp;
+	break;
+
   case MOVETO:
+	  fprintf (stderr,"Moveto <%f,%f,%f>",topv().i,topv().j,topv().k);
 	  xml->unitlevel--;
-	  xml->orders.push_back(new Orders::MoveTo(xml->vec,xml->afterburn,xml->acc));
+	  xml->orders.push_back(new Orders::MoveTo(topv(),xml->afterburn,xml->acc));
+	  popv();
 	  break;
   case CHANGEHEAD:
 	  xml->unitlevel--;
-	  xml->orders.push_back(new Orders::ChangeHeading(xml->vec,xml->acc));
+	  xml->orders.push_back(new Orders::ChangeHeading(topv(),xml->acc));
+	  popv();
 	  break;
   case MATCHANG:
 	  xml->unitlevel--;
-	  xml->orders.push_back(new MatchAngularVelocity(xml->ang,((bool)xml->acc),xml->afterburn));
+	  xml->orders.push_back(new MatchAngularVelocity(topv(),((bool)xml->acc),xml->afterburn));
+	  popv();
 	  break;
   case MATCHLIN:
 	  xml->unitlevel--;
-	  xml->orders.push_back(new MatchLinearVelocity(xml->vec,((bool)xml->acc),xml->afterburn));
+	  xml->orders.push_back(new MatchLinearVelocity(topv(),((bool)xml->acc),xml->afterburn));
+	  popv();
 	  break;
   case MATCHVEL:
 	  xml->unitlevel--;
-	  xml->orders.push_back(new MatchVelocity(xml->vec,xml->ang,((bool)xml->acc),xml->afterburn));
+	  temp=topv();
+	  popv();
+	  if (xml->lin==1) {
+		xml->orders.push_back(new MatchVelocity(topv(),temp,((bool)xml->acc),xml->afterburn));
+	  } else {
+		xml->orders.push_back(new MatchVelocity(temp,topv(),((bool)xml->acc),xml->afterburn));
+	  }
+	  xml->lin=0;
+	  popv();
 	  break;
   case EXECUTEFOR:
 	  xml->unitlevel--;
@@ -241,7 +385,6 @@ void AIScript::LoadXML() {
   xml->unitlevel=0;
   xml->executefor=0;
   xml->acc=2;
-  xml->vec=Vector(0,0,0);
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &AIScript::beginElement, &AIScript::endElement);
