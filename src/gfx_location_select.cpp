@@ -19,9 +19,11 @@ void MouseMoveHandle (KBSTATE,int x, int y, int delx, int dely, int mod) {
   if (keyState['z']==DOWN) {
     DeltaPosition.k+=dely;
   } else {
-    changed=true;
-    DeltaPosition.i=delx;
-    DeltaPosition.j=dely;
+    if (delx||dely) {
+      changed=true;
+      DeltaPosition.i=delx;
+      DeltaPosition.j=dely;
+    }
   }
 }
 
