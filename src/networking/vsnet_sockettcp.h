@@ -141,6 +141,8 @@ private:
 
     void inner_complete_a_packet( Blob* b );
 
+    void private_nothread_conditional_write( );
+
 private:
     VsnetTCPSocket( );
     VsnetTCPSocket( const VsnetTCPSocket& orig );

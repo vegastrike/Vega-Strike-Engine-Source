@@ -81,8 +81,13 @@ public:
     void wakeup( );
 
 private:
-    int private_select( timeval* timeout );
+    int  private_select( timeval* timeout );
+    void private_addset( int fd, fd_set& fds, int& maxfd );
     void private_wakeup( );
+
+    void private_test_dump_active_sets( const fd_set& read_set_select,
+                                        const fd_set& write_set_select );
+    void private_test_dump_request_sets( timeval* timeout );
 
 private:
     SocketSet( const SocketSet& ); // forbidden copy constructor

@@ -106,6 +106,14 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP*, int pcktflags 
     return packet.len();
 }
 
+void VsnetTCPSocket::private_nothread_conditional_write( )
+{
+#ifdef USE_NO_THREAD
+    if( _connection_closed ) return;
+    _set.waste_time( 0, 0 ); // waste zero time, but check sockets
+#endif
+}
+
 bool VsnetTCPSocket::need_test_writable( )
 {
     _sq_mx.lock( );
@@ -121,8 +129,6 @@ int VsnetTCPSocket::get_write_fd( ) const
 
 int VsnetTCPSocket::lower_sendbuf( )
 {
-    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
-
     _sq_mx.lock( );
     if( _sq_current.empty() )
     {
@@ -266,16 +272,22 @@ bool VsnetTCPSocket::isActive( )
      */
     if( _connection_closed ) return true;
 
+    bool retval = false;
+
     _cpq_mx.lock( );
     if( _cpq.empty() == false )
     {
-        _cpq_mx.unlock( );
-        return true;
+        retval = true;
     }
-    _set.rem_pending( _sq_fd );
+    else
+    {
+        _set.rem_pending( _sq_fd );
+    }
     _cpq_mx.unlock( );
 
-    return false;
+    private_nothread_conditional_write( );
+
+    return retval;
 }
 
 void VsnetTCPSocket::lower_selected( )

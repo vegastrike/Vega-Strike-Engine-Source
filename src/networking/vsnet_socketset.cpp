@@ -123,6 +123,12 @@ void SocketSet::rem_pending( int fd )
     }
 }
 
+void SocketSet::private_addset( int fd, fd_set& fds, int& maxfd )
+{
+    FD_SET( fd, &fds );
+    if( fd >= maxfd ) maxfd = fd+1;
+}
+
 int SocketSet::private_select( timeval* timeout )
 {
     fd_set read_set_select;
@@ -132,41 +138,27 @@ int SocketSet::private_select( timeval* timeout )
     FD_ZERO( &read_set_select );
     FD_ZERO( &write_set_select );
 
-#ifdef VSNET_DEBUG
-    std::ostringstream ostr;
-    ostr << "calling select with fds=";
-#endif
+    private_test_dump_request_sets( timeout );
+
     for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
     {
 	    VsnetSocketBase* b = (*it);
         int fd = b->get_fd();
         if( fd >= 0 )
         {
-#ifdef VSNET_DEBUG
-            ostr << fd << " ";
-#endif
-            FD_SET( fd, &read_set_select );
-            if( fd >= max_sock_select ) max_sock_select = fd+1;
+            private_addset( fd, read_set_select, max_sock_select );
 	        if( b->need_test_writable( ) )
 	        {
-	            FD_SET( b->get_write_fd(), &write_set_select );
+                private_addset( b->get_write_fd(),
+                                write_set_select,
+                                max_sock_select );
 	        }
         }
     }
 
-#ifdef VSNET_DEBUG
-    ostr << _thread_wakeup.getread() << "(w)";
-    if( timeout )
-        ostr << " t=" << timeout->tv_sec << ":" << timeout->tv_usec;
-    else
-        ostr << " t=NULL (blocking)";
-    ostr << ends;
-    if( !timeout || timeout->tv_sec >= 1 ) COUT << ostr.str() << endl;
-#endif
-
-    FD_SET( _thread_wakeup.getread(), &read_set_select );
-    if( _thread_wakeup.getread() > max_sock_select )
-        max_sock_select = _thread_wakeup.getread() + 1;
+    private_addset( _thread_wakeup.getread(),
+                    read_set_select,
+                    max_sock_select );
 
     int ret = ::select( max_sock_select,
 	                &read_set_select, &write_set_select, 0, timeout );
@@ -185,9 +177,8 @@ int SocketSet::private_select( timeval* timeout )
     }
     else
     {
-#ifdef VSNET_DEBUG
-        std::ostringstream ostr;
-#endif
+        private_test_dump_active_sets( read_set_select, write_set_select );
+
         for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
         {
 	        VsnetSocketBase* b = (*it);
@@ -195,32 +186,18 @@ int SocketSet::private_select( timeval* timeout )
 	        if( fd >= 0 )
 	        {
                 if( FD_ISSET(fd,&read_set_select) )
-                {
-#ifdef VSNET_DEBUG
-                    ostr << fd << " ";
-#endif
                     b->lower_selected( );
-                }
+
                 if( FD_ISSET(b->get_write_fd(),&write_set_select) )
-	            {
                     b->lower_sendbuf( );
-	            }
 	        }
         }
 
         if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
         {
-#ifdef VSNET_DEBUG
-            ostr << _thread_wakeup.getread() << "(w)";
-#endif
             char c;
             _thread_wakeup.read( &c, 1 );
         }
-
-#ifdef VSNET_DEBUG
-        ostr << ends;
-        COUT << "select saw activity on fds=" << ostr.str() << endl;
-#endif
     }
 
     if( _blockmain )
@@ -276,5 +253,80 @@ void SocketSet::run( )
     _thread_mx.lock( );
     _thread_cond.signal( );
     _thread_mx.unlock( );
+}
+
+void SocketSet::private_test_dump_active_sets( const fd_set& read_set_select,
+                                               const fd_set& write_set_select )
+{
+#ifdef VSNET_DEBUG
+    std::ostringstream ostr;
+    for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
+    {
+        VsnetSocketBase* b = (*it);
+        int fd = b->get_fd();
+        if( fd >= 0 )
+        {
+            if( FD_ISSET(fd,&read_set_select) )
+            {
+                ostr << fd << " ";
+            }
+            if( FD_ISSET(b->get_write_fd(),&write_set_select) )
+            {
+                ostr << "+" << b->get_write_fd() << " ";
+            }
+        }
+    }
+
+    if( FD_ISSET( _thread_wakeup.getread(), &read_set_select ) )
+    {
+        ostr << _thread_wakeup.getread() << "(w)";
+    }
+
+    ostr << ends;
+    COUT << "select saw activity on fds=" << ostr.str() << endl;
+#endif
+}
+
+void SocketSet::private_test_dump_request_sets( timeval* timeout )
+{
+#ifdef VSNET_DEBUG
+    std::ostringstream ostr;
+    ostr << "calling select with fds=";
+    for( Set::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
+    {
+	    VsnetSocketBase* b = (*it);
+        int fd = b->get_fd();
+        if( fd >= 0 )
+        {
+            ostr << fd << " ";
+	        if( b->need_test_writable( ) )
+	        {
+                ostr << "+" << b->get_write_fd() << " ";
+	        }
+        }
+    }
+
+    ostr << _thread_wakeup.getread() << "(w)";
+    if( timeout )
+        ostr << " t=" << timeout->tv_sec << ":" << timeout->tv_usec;
+    else
+        ostr << " t=NULL (blocking)";
+    ostr << ends;
+
+    if( !timeout || timeout->tv_sec >= 1 )
+    {
+        COUT << ostr.str() << endl;
+    }
+    else
+    {
+        static long waitabit = 0;
+        waitabit += 1;
+        if( waitabit > 100 )
+        {
+            COUT << ostr.str() << endl;
+            waitabit = 0;
+        }
+    }
+#endif
 }
 
