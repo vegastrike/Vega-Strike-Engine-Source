@@ -46,6 +46,7 @@ namespace UniverseUtil {
 	void terminateMission();
 	Unit *getPlayer();
 	Unit *getPlayerX(int which);
+	int getNumPlayers ();
 }
 
 #undef activeSys

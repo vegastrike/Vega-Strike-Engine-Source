@@ -167,17 +167,10 @@ namespace UniverseUtil {
 		return _Universe->AccessCockpit()->GetParent();;
 	}
 	Unit *getPlayerX(int which){
-		int j=0;
-		for (int i=0;i<_Universe->numPlayers();i++) {
-			Unit * un;
-			if ((un=_Universe->AccessCockpit(i)->GetParent())) {
-				if (j==which) {
-					return un;
-				}
-				j++;
-			}
-		}
-		return NULL;
+		return _Universe->AccessCockpit(which)->GetParent();
+	}
+	int getNumPlayers () {
+		return _Universe->numPlayers();
 	}
 }
 

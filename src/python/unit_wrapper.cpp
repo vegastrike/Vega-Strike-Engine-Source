@@ -122,6 +122,7 @@ voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
 EXPORT_UTIL(getPlayer,Unit())
 EXPORT_UTIL(getPlayerX,Unit())
+EXPORT_UTIL(getNumPlayers,1)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -304,6 +305,7 @@ voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
 EXPORT_UTIL(getPlayer,Unit())
 EXPORT_UTIL(getPlayerX,Unit())
+EXPORT_UTIL(int getNumPlayers (),1)
 
 def string ():
   return ''
