@@ -1,6 +1,27 @@
 Mission Scripting Tutorial:
 
+Table Of Contents
+-------------------
+Chapter 1: Introduction
+Chapter 2: Basic XML integration
+Chapter 3: Python Inheritance In Missions
+Chapter 4: Python Inheritence With AI Scripts
+Chapter 5: Suppery about python-Vegastrike class relationships
+Chapter 6: Python - Vega Strike Bindings
+Chapter 7: Writing Add On Adventures 
+Chapter 8: Conclusion
+
+
+-------------------------------------------
+Chapter 1: Introduction
+-------------------------------------------
+
 Vega Strike has a powerful missions scripting interface that allows you to nearly modify Vega Strike at whatever level you choose, from the AI scripts (and the physics thereof) to the missions... to the overall plot and goal of the game.
+
+
+-------------------------------------------
+Chapter 2: Basic XML integration
+-------------------------------------------
 
 First let me start by explaining how to run a python class... in this case we start with the prebuild "privateer.py" script to run our mission.
 Open up mission/exploration/explore_universe.mission
@@ -42,6 +63,10 @@ my_obj=privateer(20000,40000,500,3,2,.6,.25,.02,400000,2000)
 You have to be careful about newlines, etc in the XML, but it shoudl usually work just dandy.   You notice that the mission may pass in arguments to the privateer module that can make slight changes in teh gameplay.  This allows many cargo missions to use the same module in order to change the parameters of the cargo missions.  
 In this case the values I have selected appear to work relatively well.
 
+-------------------------------------------
+Chapter 3: Python Inheritance In Missions
+-------------------------------------------
+
 Ok lets dig further into the privateer.py module:
 
 It is a very short module written in more or less pure python... I say more or less for a very specific reason:  it inherits from a C++ class!
@@ -81,7 +106,9 @@ With the exception of AI modules from here on out it's straight python.
 I will go over some of hte functions you can call inside Vega Strike in a minute.
 
 
-
+----------------------------------------------------
+Chapter 4: Python Inheritence With AI Scripts
+----------------------------------------------------
 
 Let me talk about AI scripts briefly.
 
@@ -104,6 +131,11 @@ However if you are too lazy to write AI's you can use the most excellent default
 VS.launch (fgname,type,faction,"unit","default",nr_ships,nr_waves,vec,logo)
 
 
+
+---------------------------------------------------------------
+Chapter 5: Suppery about python-Vegastrike class relationships
+---------------------------------------------------------------
+
 Summary:
 Missions must inherit from Director.Mission
 AI's must inherit from VS.PythonAI
@@ -119,6 +151,9 @@ Both AI's and Missions may have an Execute(self) function that does somethign ea
 Missions may have a Pickle and Unpickle function  in order to save and load the state of a campaign (this can be incredibly complex!)
 
 
+------------------------------------------------------------------
+Chapter 6 Python Vegastrike Bindings
+------------------------------------------------------------------
 
 Vegastrike Utility Functions:
 
@@ -876,5 +911,96 @@ class PythonAI:
    print "LastPythonScript"
 
 
+--------------------------------------------------------------------
+Chapter 7: Writing Add On Adventures 
+--------------------------------------------------------------------
+Honestly you merely need a basic understanding of python in order
+to craft your own add on adventures...but I decided to write a framework
+for consistently and speedily adding adventures to the general exploration
+of Vega Strike.
+
+I will define adventure as follows:
+A minature mission that gets triggered by a player who goes in its system.
+This mission may either be persistent or nonpersistent... a persistent mission
+will reload the next time the triggering player launched it until the player 
+beats the mission.
+
+THE QUEST CLASS: THE ACTUAL QUEST LOGIC GOES HERE
+
+
+the quest, quest_factory and lastly the adventure modules take care of most of the dirty work...
+all an quest class has to do is the following:
+
+
+class quest_my(quest.quest):
+      def __init__ (self):
+	  #do anything you need here
+      def Execute (self):
+	  #do anything you need here...and return 1 if you wish to execute again, zero if you wish to terminate yourself
+
+That's it.... Though there are some useful functions you may wish to call in your superclass
+self.removeQuest()    #this prevents your player from EVER encountering the quest again in his life
+self.makeQuestPersistent()    #this causes the quest to be loaded the next time your player jumps in after rebooting vegastrike
+
+generally before returing 0 (temrinating self) in a mission you may wish to make the quest either persistent (comes back next time he starts game) or removed... though you could also leave the quest the way it is and the next time the player goes to the system after rebooting vegastrike he'll get the same quest again :-)
+
+but in order for your quest to be complete you must have two more components
+
+THE QUEST FACTORY: A CLASS THAT RETURNS THE QUEST NEEDED
+
+each quest must have a factory that inherits from quest.quest_factory.  and must define both an init, and a create function.
+optionally there's a conditional function called precondition.... That returns a boolean whether or not the quest is ripe for creation (when a player encounters it in its native system that is)
+
+
+class quest_my_factory (quest.quest_factory):
+    def __init__ (self):
+        quest.quest_factory.__init__ (self,"quest_my")
+    def create (self):
+        return quest_my()
+    def precondition(self,playernum):
+	return Director.getSaveData(playernum,"talked_to_sandra",0)>0
+
+The factory must have 2 and can have all 3 of the above functions
+first is the init function... y9ou must call your superclass's init with your name.
+second is the create function... this must simply return the quest class you painstakingly created above
+third is the precondition...this is optional (by default it returns 1...always true)
+
+the precondition can look in the save variables and see if you have done a task (set by some other quest perhaps) and only then return 1... :-) in that case when a player encounters it for the first time it will check the precondition before launchign the quest....
+note the precondition does NOT get checked once the mission has been turned into a persistent mission.... this is because the mission already made the decision to make itself persistent
+I don't expect many missions to need to be persistent.... I expect more lighthearted adventures that don't drag out if a player quits, etc.
+
+Anyhow... a good example is the persistent quest known as the quest_drone  (quest_drone.py)
+that quest checks to see if you're near an unknown_derelect and if so it launches the badguy drone.... it makes the drone jump and follow you wherever you go until it is destroyed...it is persistent and launches the drone every time you rerun the game....
+Luckily if you're close to the derelect chances are you'll find the gun that you can use to kill the drone.... which brings me right smack into my next point:  location location location!
+
+THE LOCATION AND PERSISTENCE OF A GIVEN QUEST (i.e. HOOKING IT INTO privateer.py)
+adventure.py has the master list of all possible quests in vega strike....
+right now there are two (but one is stupid and will be removed soon enough...that's the default one)
+
+
+adventures = {"gemini_sector/delta_prime":quest_drone.quest_drone_factory(),
+              "sol_sector/celeste":quest.quest_factory("default_quest",0)}
+
+persistent_adventures = [quest_drone.quest_drone_factory()]
+
+These are the only 2 lists that will ever need to be changed in the modules that are already there.
+adventures contains a map of location to adventure. Note that there can be only 1 adventure per location (hey players need to be encouraged to actually EXPLORE)
+the second list lists all possible persistent adventures (though they are only loaded from if the given adventure has gotten around to calling self.makeQuestPersistent)
+
+Anyhow just adding more cool missions to this list will make it a lot more fun to explore around and encounter strang epeople, strange news, and a bunch 'o cash :-P
+
+Note that we should eventually make the news reports line up with the quests... :-) I have some ideas how to do that
+Basically you can call 
+VS.IOmessage ("game","news","A drone was sighted in the delta prime...blah blah blah")
+and then epople will see it in the game when they click on GNN
+likewise if you send it to 
+VS.IOmessage ("game","bar","A drone was sighted in the delta prime...blah blah blah")
+then you can hear it when you talk to the bartender :-)
+
+-------------------------------------------------------------------------
+Chapter 8: Conclusion
+-------------------------------------------------------------------------
 
 Well this is the best I can do so far... please read this documentation over and let me know if you have any suggestions or clarifications...adn best yet give it a shot and try it out-- and at least look at  modules/cargo_mission.py (whcih is called from a number of missions I think) as well as modules/privateer.py (called by mission/exploration/explore_universe.mission  )
+And certainly try to understand modules/quest_drone.py
+before trying to write a quest (or while trying to write one)
