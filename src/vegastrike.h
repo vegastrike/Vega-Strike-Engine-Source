@@ -45,7 +45,7 @@ extern "C"
 #include <string.h>
 #include <limits.h>
 #include <stdarg.h>
-
+#include "vs_types.h"
 #if defined( WIN32 ) || defined( __CYGWIN__ )
     /* Note that this will define WIN32 for us, if it isn't defined already
      */
@@ -62,8 +62,6 @@ extern "C"
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-
-  //#include TCL_HEADER
 #ifndef PI
 #   define PI 3.14159265358979323846
 #endif
@@ -73,72 +71,18 @@ extern "C"
 #define TRUE 1
 #define FALSE 0
 #define EPS 1e-13
-  //#define GL_TEXTURE0_ARB 0x84C0
-  //#define GL_TEXTURE1_ARB 0x84C1
-#include "string_util.h"
-#include "file_util.h"
-  //#include "vs_types.h"
-#include "alglib.h"
-#include "debug.h"
-#include "error_util.h"
 
 #define PROG_NAME "vegastrike"
 
-/* Macros and include files for non-standard math routines */
-#ifdef HAVE_IEEEFP_H
-#   include <ieeefp.h>
-#endif
 #include <float.h>
 
 #ifdef HAVE_FINITE
 #   define FINITE(x) (finite(x))
-#elif HAVE__FINITE
-#   define FINITE(x) (_finite(x))
-#elif HAVE_ISNAN
-#   define FINITE(x) (!isnan(x))
-#elif HAVE__ISNAN
-#   define FINITE(x) (!_isnan(x))
-#elif WIN32
-#   define FINITE(x) (!_isnan(x))
-#else
-#   error "You don't have finite(), _finite(), isnan(), or _isnan() on your system!"
 #endif
 
-/* Macros for swapping bytes */
-#define SWAP_WORD(x) \
-{ \
-unsigned long tmp; \
-tmp  = ((x) >> 24) & 0x000000ff; \
-tmp |= ((x) >> 8)  & 0x0000ff00; \
-tmp |= ((x) << 8)  & 0x00ff0000; \
-tmp |= ((x) << 24) & 0xff000000; \
-(x) = tmp; \
-}
-
-#define SWAP_SHORT(x) \
-{ \
-unsigned short tmp; \
-tmp  = ((x) << 8)  & 0xff00; \
-tmp |= ((x) >> 8)  & 0x00ff; \
-(x) = tmp; \
-}
-
-
-/* define this to turn off all debugging checks and messages */
-/* #define VEGASTRIKE_NO_DEBUG */
-
-/* Directory separator */
-#ifdef WIN32
-#   define DIR_SEPARATOR "\\"
-#else
-#   define DIR_SEPARATOR "/"
-#endif
 
 #define BUFF_LEN 512
 
-//#include "vs_globals.h"
-
-//typedef int BOOL;//FIXME!!!SUX)
 
 #endif
 

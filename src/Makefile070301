@@ -2,11 +2,11 @@ MAIN=vegastrike
 
 CC=g++
 
-CFLAGS= -DUNIX -Wall -g  -DTCL_HEADER=\<tcl.h\> -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
+CFLAGS= -DUNIX -Wall -g  -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
 
 INCLUDES= 
 
-LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat -ltcl8.3
+LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat 
 
 SRCS = 	cmd_beam.cpp				\
 	cmd_gun.cpp				\
