@@ -52,7 +52,7 @@ vector <std::string> readCSV (std::string s,std::string delim) {
 	sem = s.find(delim);	
 	while (sem!=string::npos){
           string::size_type equot=0;
-          while (quot<sem && quot!=-1){
+          while (quot<sem && quot!=string::npos){
             if (trip){
               equot=findQuot(s,"\"\"\"",quot+1);
             }else{
@@ -65,6 +65,8 @@ vector <std::string> readCSV (std::string s,std::string delim) {
             if (quot3==string::npos || (quot1!=string::npos && quot1<quot3)){
               quot=quot1;
               trip=0;
+              if (equot==string::npos)
+                break;
             }
           }
           sem = s.substr(equot).find(delim);

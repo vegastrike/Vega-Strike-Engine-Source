@@ -2740,7 +2740,7 @@ void Unit::RegenShields () {
   }
   if (rechargesh==0)
     energy-=rec;
-  static float max_shield_lowers_recharge=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
+  static float max_shield_lowers_recharge=XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
   static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","true"));
   if (max_shield_lowers_recharge) {
     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield;
@@ -3432,10 +3432,15 @@ float Unit::WarpEnergyData() const {
     return ((float)warpenergy)/((float)jump.energy);
 }
 float Unit::EnergyData() const{
-  if (maxenergy<=totalShieldEnergyCapacitance(shield)) {
-    return 0;
+  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","true"));
+  if (max_shield_lowers_capacitance) {
+    if (maxenergy<=totalShieldEnergyCapacitance(shield)) {
+      return 0;
+    }
+    return ((float)energy)/(maxenergy-totalShieldEnergyCapacitance(shield));
+  }else {
+    return ((float)energy)/maxenergy;
   }
-  return ((float)energy)/(maxenergy-totalShieldEnergyCapacitance(shield));
 }
 
 float Unit::FShieldData() const{
