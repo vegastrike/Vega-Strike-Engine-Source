@@ -92,14 +92,52 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 #endif
 
 }
+#ifdef CAR_SIM
+#define NUM_BRAKE 3
+#define NUM_REVERSE 2
+#define NUM_LEFT 2
+#define NUM_RIGHT 2
+#define FORWARD_BLINKEN 1
+#define LEFT_BLINKEN 2
+#define RIGHT_BLINKEN 4
+#define ON_NO_BLINKEN 8
+#define HEADLIGHT_INDEX  (NUM_BRAKE+NUM_REVERSE+NUM_LEFT+NUM_RIGHT)
+#define RIGHT_BLINK_INDEX  (NUM_BRAKE+NUM_REVERSE+NUM_LEFT)
+#define LEFT_BLINK_INDEX  (NUM_BRAKE+NUM_REVERSE)
+
+#endif
 void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
 #ifdef CAR_SIM
     for (unsigned int i=0;i<ani.size();++i) {
-      if ((i<3&&scale.k<.01&&scale.k>-.01)||(i>=3&&i<5&&scale.k<=-.01)||(i>=5&&scale.j>0)) {
+      bool      drawnow=false;
+      int bitwise = scale.j;
+      if ((i<NUM_BRAKE&&scale.k<.01&&scale.k>-.01)||(i>=NUM_BRAKE&&i<NUM_REVERSE&&scale.k<=-.01)) {
+	drawnow=true;
+      }
+      if (i>=HEADLIGHT_INDEX) {
+	if (scale.j>=ON_NO_BLINKEN||(bitwise<8&&bitwise>0&&(bitwise&FORWARD_BLINKEN))) {
+	  drawnow = true;
+	}
+      }
+      float blink_prob=.8;
+      if ((i>=RIGHT_BLINK_INDEX)&&(i-RIGHT_BLINK_INDEX<NUM_RIGHT)) {
+	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&RIGHT_BLINKEN)) {
+	  if (rand()<RAND_MAX*blink_prob) 
+	    drawnow=true;
+	}
+      }
+      if (i>=LEFT_BLINK_INDEX&&i-LEFT_BLINK_INDEX<NUM_LEFT) {
+	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&LEFT_BLINKEN)) {
+	  if (rand()<RAND_MAX*blink_prob) 
+	    drawnow=true;
+	}
+      }
+      if (drawnow) {
 	ani[i]->SetPosition (Transform (trans,halo[i].loc));
 	ani[i]->SetDimensions (scale.i,scale.i);
 	ani[i]->Draw();
       }
+
     }
 #else
   if (scale.k>0) {
