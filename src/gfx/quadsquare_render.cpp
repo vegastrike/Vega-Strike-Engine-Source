@@ -40,7 +40,7 @@ typedef std::vector <TerrainTexture> vecTextureStar;
 int	quadsquare::Render(const quadcornerdata& cd, const Vector &camvec) {
   quadsquare::camerapos = camvec;
   vertices->LoadDrawState();
-  vertices->BeginDrawState (GFXTRUE);
+  vertices->BeginDrawState (GFXFALSE);
 
   int totsize=0;
   RenderAux(cd, GFX_PARTIALLY_VISIBLE);
