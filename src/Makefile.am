@@ -43,6 +43,7 @@ vegaserver_SOURCES =			\
 accountserver_SOURCES =		\
 	hashtable.h				\
 	hashtable.cpp			\
+	endianness.cpp			\
 	configxml.cpp			\
 	configxml.h				\
 	xml_support.h  			\

@@ -1,5 +1,10 @@
 #ifndef _ENDIANNESS_H
 #define _ENDIANNESS_H
+double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
+
+
+double NXSwapHostDoubleToLittle (double x);
+float NXSwapHostFloatToLittle (float x);
 
 #if defined(__APPLE__) || defined(MACOSX)
     #include<machine/endian.h>
@@ -22,9 +27,11 @@
     # include <machine/byte_order.h>
     # define le32_to_cpu(x) (NXSwapHostLongToLittle(x))
     # define le16_to_cpu(x) (NXSwapHostShortToLittle(x))
+    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittle(x))
     #else
     # define le32_to_cpu(x) (x)
     # define le16_to_cpu(x) (x)
+    # define le64_to_cpu(x) (x)
     #endif
 #else
     #if defined(IRIX)
@@ -34,18 +41,22 @@
                             (((uint32_t)(x) >> 8) & 0x0000FF00) | \
                             ((uint32_t)(x) >> 24))
     #  define le16_to_cpu(x) (((x&0xFF)<<8) | ((unsigned short)(x)>>8))
+    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittle(x))
     # else
     #  define le32_to_cpu(x) (x)
     #  define le16_to_cpu(x) (x)
+    #  define le64_to_cpu(x) (x)
     # endif
     
     #elif __BYTE_ORDER == __BIG_ENDIAN
     # include <byteswap.h>
     # define le32_to_cpu(x) (bswap_32(x))
     # define le16_to_cpu(x) (bswap_16(x))
+    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittle(x))
     #else
     # define le32_to_cpu(x) (x)
     # define le16_to_cpu(x) (x)
+    #  define le64_to_cpu(x) (x)
     #endif
 #endif
 #endif	// _ENDIANNESS_H
