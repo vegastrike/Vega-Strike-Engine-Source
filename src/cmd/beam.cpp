@@ -3,17 +3,19 @@
 #include "beam.h"
 #include "unit.h"
 #include "unit_collide.h"
+#include "gfxlib.h"
+#include "gfxlib_struct.h"
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;
 
 static DecalQueue beamdecals;
-static vector <vector <DrawContext> > beamdrawqueue;
+static vector <GFXQuadList *> quadlists;
 extern double interpolation_blend_factor;
-Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(-1), Col(clne.r,clne.g,clne.b,clne.a){
   decal = beamdecals.AddTexture (clne.file.c_str(),TRILINEAR);
-  if (decal>=beamdrawqueue.size()) {
-    beamdrawqueue.push_back (vector<DrawContext>());
+  if (decal>=quadlists.size()) {
+    quadlists.push_back (new GFXQuadList());
   }
   Init(trans,clne,own);
 }
@@ -39,8 +41,6 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   //Matrix m;
   CollideInfo.object = NULL;
   CollideInfo.type = LineCollide::BEAM;
-  if (vlist)
-    delete vlist;
   local_transformation = trans;//location on ship
   //  cumalative_transformation =trans; 
   //  trans.to_matrix (cumalative_transformation_matrix);
@@ -101,7 +101,21 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
 
   memcpy (&calah[16],&calah[0],sizeof(GFXColor)*16);    
-  vlist = new GFXVertexList (GFXQUAD,32,beam,calah,true);//mutable color contained list
+  if (vlist==-1) {
+    vlist = quadlists[decal]->AddQuad (beam,calah);
+    quadlists[decal]->AddQuad (beam+4,calah+4);
+    quadlists[decal]->AddQuad (beam+8,calah+8);
+    quadlists[decal]->AddQuad (beam+12,calah+12);
+    quadlists[decal]->AddQuad (beam+16,calah+16);
+    quadlists[decal]->AddQuad (beam+20,calah+20);
+    quadlists[decal]->AddQuad (beam+24,calah+24);
+    quadlists[decal]->AddQuad (beam+28,calah+28);
+  }else {
+    for (int i=0;i<8;i++) {
+      quadlists[decal]->ModQuad (vlist+i,beam+i*4,calah+i*4);
+    }
+  }
+  //  vlist = new GFXVertexList (GFXQUAD,32,beam,calah,true);//mutable color contained list
   free (calah);
 }
 
@@ -109,12 +123,14 @@ Beam::~Beam () {
   if (CollideInfo.object!=NULL) {
     KillCollideTable (&CollideInfo);
   }
-  delete vlist;
+  for (int i=0;i<8;i++) {
+    quadlists[decal]->DelQuad (vlist+i);
+  }
   beamdecals.DelTexture(decal);
 }
-void Beam::RecalculateVertices() {
-  GFXVertex * beam = vlist->BeginMutate(0);
-  
+void Beam::RecalculateVertices(Matrix t) {
+  //GFXVertex * beam = vlist->BeginMutate(0);
+  GFXVertex beam [32];
   float leftex = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
   float righttex = leftex+curlength/curthick;//how long compared to how wide!
   float len = (impact==ALIVE)?(curlength!=range?curlength - speed*SIMULATION_ATOM*(1-interpolation_blend_factor):range):curlength+thickness;
@@ -122,8 +138,9 @@ void Beam::RecalculateVertices() {
   float fadetex = leftex + (righttex-leftex)*.85;
   float thick = curthick!=thickness?curthick-radialspeed*SIMULATION_ATOM*(1-interpolation_blend_factor):thickness;
   int a=0;
-#define V(xx,yy,zz,ss,tt) { beam[a].x = xx; beam[a].y = yy; beam[a].z = zz; beam[a].s=ss; beam[a].t=tt;a++; }
-
+  Vector tmp;
+#define V(xx,yy,zz,ss,tt) { tmp = Transform (t,Vector (xx,yy,zz)); beam[a].x = tmp.i; beam[a].y = tmp.j; beam[a].z = tmp.k; beam[a].s=ss; beam[a].t=tt;a++; }
+  
   V(0,thick,0,leftex,1);
   V(0,thick,fadelen,fadetex,1);
   V(0,0,fadelen,fadetex,.5);
@@ -146,30 +163,32 @@ void Beam::RecalculateVertices() {
 
 
 
-#undef V//reverse the notation for the rest of the identical vertices
-#define QV(yy,xx,zz,ss,tt) { beam[a].x = xx; beam[a].y = yy; beam[a].z = zz; beam[a].s=ss; beam[a].t=tt;a++; }
-  QV(0,thick,0,leftex,1);
-  QV(0,thick,fadelen,fadetex,1);
-  QV(0,0,fadelen,fadetex,.5);
-  QV(0,0,0,leftex,.5);
-  QV(0,0,0,leftex,.5);
-  QV(0,0,fadelen,fadetex,.5);
-  QV(0,-thick,fadelen,fadetex,0);
-  QV(0,-thick,0,leftex,0);
+  //#define QV(yy,xx,zz,ss,tt) { beam[a].x = xx; beam[a].y = yy; beam[a].z = zz; beam[a].s=ss; beam[a].t=tt;a++; }
+  V(0,thick,0,leftex,1);
+  V(0,thick,fadelen,fadetex,1);
+  V(0,0,fadelen,fadetex,.5);
+  V(0,0,0,leftex,.5);
+  V(0,0,0,leftex,.5);
+  V(0,0,fadelen,fadetex,.5);
+  V(0,-thick,fadelen,fadetex,0);
+  V(0,-thick,0,leftex,0);
 
-  QV(0,thick,fadelen,fadetex,1);
-  QV(0,thick,len,righttex,1);
-  QV(0,0,len,righttex,.5);
-  QV(0,0,fadelen,fadetex,.5);
-  QV(0,-thick,fadelen,fadetex,0);
-  QV(0,-thick,len,righttex,0);
-  QV(0,0,len,righttex,.5);
-  QV(0,0,fadelen,fadetex,.5);
-
+  V(0,thick,fadelen,fadetex,1);
+  V(0,thick,len,righttex,1);
+  V(0,0,len,righttex,.5);
+  V(0,0,fadelen,fadetex,.5);
+  V(0,-thick,fadelen,fadetex,0);
+  V(0,-thick,len,righttex,0);
+  V(0,0,len,righttex,.5);
+  V(0,0,fadelen,fadetex,.5);
 
 
-#undef QV
-  vlist->EndMutate();
+
+#undef V
+  for (int i=0;i<8;i++) {
+    quadlists[decal]->ModQuad (i+vlist,beam+4*i,NULL);
+  }
+  //  vlist->EndMutate();
 }
 
 
@@ -181,22 +200,24 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  RecalculateVertices();
-  beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
+  RecalculateVertices(cumulative_transformation_matrix);
+
 }
 
 void Beam::ProcessDrawQueue() {
-    GFXDisable (LIGHTING);
-    GFXDisable (CULLFACE);//don't want lighting on this baby
-    GFXDisable (DEPTHWRITE);
-    GFXPushBlendMode();
-    GFXBlendMode(ONE,ONE);
-
+  GFXDisable (LIGHTING);
+  GFXDisable (CULLFACE);//don't want lighting on this baby
+  GFXDisable (DEPTHWRITE);
+  GFXPushBlendMode();
+  GFXBlendMode(ONE,ONE);
+  GFXLoadIdentity (MODEL);
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
-  DrawContext c;
-  for (unsigned int decal = 0;decal < beamdrawqueue.size();decal++) {	
+  //DrawContext c;
+  for (unsigned int decal = 0;decal < quadlists.size();decal++) {	
     beamdecals.GetTexture(decal)->MakeActive();
+    quadlists[decal]->Draw();
+    /*
     if (beamdrawqueue[decal].size()) {
       beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
       while (beamdrawqueue[decal].size()) {
@@ -208,6 +229,7 @@ void Beam::ProcessDrawQueue() {
 	c.vlist->EndDrawState(GFXFALSE);
       }
     }
+    */
   }
   //  GFXEnable (TEXTURE1);
   GFXEnable (DEPTHWRITE);
