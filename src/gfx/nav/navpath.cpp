@@ -377,13 +377,13 @@ bool NavPath::evaluate() {
 	while(index != destIndex) {
 	  path.push_back(index);
 	  index=prev[index];
+          if (path.size()>=max_size) {//this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
+            path.clear();
+            found=false;
+            return false;
+          }
 	}
 	path.push_back(destIndex);
-        if (path.size()>=max_size) {//this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
-          path.clear();
-          found=false;
-          return false;
-        }
       }
     }
     return found;
@@ -436,7 +436,7 @@ bool NavPath::evaluate() {
       do{
 	  index=prev[index];
 	  path.push_front(index);
-          if (path.size()>max_size) {//this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
+          if (path.size()>=max_size) {//this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
             path.clear();
             found=false;
             return false;
