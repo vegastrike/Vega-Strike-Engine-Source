@@ -53,7 +53,7 @@ static std::vector <Animation *>JumpAnimations;
 static std::vector <Animation *>VolatileJumpAnimations;
 static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
   std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
-  Animation * ani=new Animation ("explosion_orange.ani",true,.1,MIPMAP,true);
+  Animation * ani=new Animation (vs_config->getVariable ("graphics","jumpanimation","explosion_orange.ani").c_str(),true,.1,MIPMAP,true);
   unsigned int i;
   if (mvolatile||AnimationNulls.empty()){
     i = ja->size();
