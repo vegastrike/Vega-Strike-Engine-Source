@@ -1,6 +1,6 @@
-noinst_LIBRARIES = libpython.a libpythonserver.a
+boostnoinst_LIBRARIES = libpython.a libpythonserver.a
 
-INCLUDES = -I ../ -I../boost  -I/usr/include/python2.2
+INCLUDES = -I ../  -I/usr/include/python2.2
 
 libpythongeneric =				\
 	init.cpp \

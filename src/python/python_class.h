@@ -106,11 +106,13 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) boost::python::def (funname,fun)
 #define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::make_tuple(a,b,c)
 #define VS_BOOST_MAKE_TUPLE_2(a,b) boost::python::make_tuple(a,b)
+#define VS_BOOST_MAKE_TUPLE_4(a,b,c,d) boost::python::make_tuple(a,b,c,d)
 #else
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) modul.def (fun,funname)
 #define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::tuple(a,b,c)
 #define VS_BOOST_MAKE_TUPLE_2(a,b) boost::python::tuple(a,b)
+#define VS_BOOST_MAKE_TUPLE_4(a,b,c,d) boost::python::tuple(a,b,c,d)
 #endif
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
@@ -126,6 +128,7 @@ boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (
 #define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
 );
 #define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (funname,fun)
+#define PYTHON_DEFINE_METHOD_DEFAULT(modul,fun,funname,default) modul.def (funname,fun,default)
 #else
 
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
@@ -138,6 +141,7 @@ boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (
 #define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
     Class.def (boost::python::constructor<>());
 #define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (fun,funname)
+#define PYTHON_DEFINE_METHOD_DEFAULT(modul,fun,funname,defaultfun) modul.def (fun,funname,defaultfun)
 #endif
 #define PYTHON_END_CLASS(name,SuperClass) }
 /*    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \

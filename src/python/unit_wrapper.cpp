@@ -9,7 +9,7 @@
 #include "cmd/unit_generic.h"
 #include "python_class.h"
 #ifdef USE_BOOST_129
-#include <boost/python/object.hpp>
+#include <boost/python.hpp>
 #else
 #include <boost/python/objects.hpp>
 #endif
@@ -72,7 +72,7 @@ public:
   boost::python::tuple cosAngleTo (UnitWrapper target) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleTo(target,dist);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
   boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
   boost::python::tuple getAverageGunSpeed () {{CHECKME VS_BOOST_MAKE_TUPLE_2 (0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return VS_BOOST_MAKE_TUPLE_2(speed,range);}
-  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup= VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(bigpos.i,bigpos.j,bigpos.k),VS_BOOST_MAKE_TUPLE(bigNormal.i,bigNormal.j,bigNormal.k),VS_BOOST_MAKE_TUPLE(smallpos.i,smallpos.j,smallpos.k),VS_BOOST_MAKE_TUPLE(smallNormal.i,smallNormal.j,smallNormal.k)); return tup;}
+  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup= VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(bigpos.i,bigpos.j,bigpos.k),VS_BOOST_MAKE_TUPLE(bigNormal.i,bigNormal.j,bigNormal.k),VS_BOOST_MAKE_TUPLE(smallpos.i,smallpos.j,smallpos.k),VS_BOOST_MAKE_TUPLE(smallNormal.i,smallNormal.j,smallNormal.k)); return tup;}
 //  UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
   UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
   void setFlightgroupLeader (Unit * un) {{CHECKME;}Flightgroup *group=unit->getFlightgroup();if (group) group->leader.SetUnit(un);}
@@ -273,9 +273,9 @@ PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
 PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
 typedef PythonAI<FireAt> PythonAIFireAt;
 PYTHON_BEGIN_INHERIT_CLASS(VS,PythonAIFireAt ,FireAt,"PythonAI")
-  PYTHON_DEFINE_METHOD(Class,&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);
-  PYTHON_DEFINE_METHOD(Class,&FireAt::ChooseTarget,"ChooseTarget",PythonAI< FireAt >::default_ChooseTarget);
-  PYTHON_DEFINE_METHOD(Class,&FireAt::SetParent,"init",PythonAI< FireAt >::default_SetParent);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&FireAt::ChooseTarget,"ChooseTarget",PythonAI< FireAt >::default_ChooseTarget);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&FireAt::SetParent,"init",PythonAI< FireAt >::default_SetParent);
   PYTHON_DEFINE_METHOD(Class,&FireAt::GetParent,"GetParent");
   PYTHON_DEFINE_METHOD(Class,&FireAt::AddReplaceLastOrder,"AddReplaceLastOrder");
   PYTHON_DEFINE_METHOD(Class,&FireAt::ExecuteLastScriptFor,"ExecuteLastScriptFor");
