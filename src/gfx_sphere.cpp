@@ -12,7 +12,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
   strcpy(name, "Sphere");
 
   SphereMesh *oldmesh;
-  string hash_key = string("Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
+  string hash_key = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
   if(0 != (oldmesh = (SphereMesh*)meshHashTable.Get(hash_key)))
     {
       *this = *oldmesh;

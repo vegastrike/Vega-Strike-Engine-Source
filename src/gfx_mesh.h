@@ -45,6 +45,8 @@ class BoundingBox;
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
 
+#define NUM_MESH_SEQUENCE 4
+
 class Mesh:public Primitive
 {
 private:
@@ -179,6 +181,7 @@ protected:
 	  DrawContext(Matrix a) { memcpy(m, a, sizeof(Matrix));}
 	};
 	vector<DrawContext> *draw_queue;
+	int draw_sequence;
 public:
 	Mesh();
 	Mesh(const char *filename,  bool xml=false);

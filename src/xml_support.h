@@ -1,10 +1,14 @@
 #ifndef _XML_SUPPORT_H_
 #define _XML_SUPPORT_H_
 
-#include <string.h>
+#include <string>
+#include <strstream>
 #include "hashtable.h"
 #include <vector.h>
 #include <expat.h>
+
+using std::string;
+using std::ostrstream;
 
 namespace XMLSupport {
 
@@ -38,7 +42,12 @@ namespace XMLSupport {
 
   double parse_float(const string &str);
   int parse_int(const string &str);
-  string tostring(int num);
-  string tostring(float num);
+  /*
+    string tostring(int num);
+    string tostring(float num);
+  */
+  template<class T> inline string tostring(T num) {
+    return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
+  }
 }
 #endif

@@ -28,6 +28,7 @@
 #include "gfx_bounding_box.h"
 #include "cmd_ai.h"
 #include "cmd_order.h"
+#include "gfx_box.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -44,6 +45,7 @@ void Unit::calculate_extent() {
     corner_min = corner_min.Min(subunits[a]->corner_min);
     corner_max = corner_max.Max(subunits[a]->corner_max);
   }
+  selectionBox = new Box(corner_min, corner_max);
 }
 
 void Unit::Init()
@@ -72,6 +74,7 @@ void Unit::Init()
 
 	calculatePhysics = true;
 	selected = false;
+	selectionBox = NULL;
 }
 
 Unit::Unit()
@@ -705,16 +708,7 @@ void Unit::Draw()
 	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	}
 	if(selected) {
-	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
-	  //cerr << name << " selected\n";
-	  GFXDisable(TEXTURE0);
-	  GFXDisable(TEXTURE1);
-	  GFXDisable(LIGHTING);
-	  GFXDisable(CULLFACE);
-	  realDrawBoundingBox();
-	  GFXEnable(LIGHTING);
-	  GFXEnable(CULLFACE);
-	  //GFXEnable(DEPTHWRITE);
+	  selectionBox->Draw();
 	}
 }
 

@@ -41,15 +41,17 @@ using namespace std;
 #include <GL/gl.h>
 
 Hashtable<string, Mesh> Mesh::meshHashTable;
-static list<Mesh*> undrawn_meshes;
+list<Mesh*> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
 Vector mouseline;
 
 void Mesh::ProcessUndrawnMeshes() {
-  while(undrawn_meshes.size()) {
-    Mesh *m = undrawn_meshes.back();
-    undrawn_meshes.pop_back();
-    m->ProcessDrawQueue();
-    m->will_be_drawn = false;
+  for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
+    while(undrawn_meshes[a].size()) {
+      Mesh *m = undrawn_meshes[a].back();
+      undrawn_meshes[a].pop_back();
+      m->ProcessDrawQueue();
+      m->will_be_drawn = false;
+    }
   }
 }
 
@@ -101,6 +103,7 @@ void Mesh::InitUnit()
 	draw_queue = NULL;
 	hash_name = NULL;
 	will_be_drawn = false;
+	draw_sequence = 0;
 }
 
 Mesh::Mesh():Primitive()
@@ -726,7 +729,7 @@ void Mesh::Draw()
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
-    undrawn_meshes.push_back(orig);
+    undrawn_meshes[draw_sequence].push_back(orig);
   }
 }
 

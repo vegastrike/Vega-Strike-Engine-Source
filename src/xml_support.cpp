@@ -6,6 +6,7 @@
 #include "xml_support.h"
 
 namespace XMLSupport {
+  /*
   string tostring(int num) {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
   }
@@ -13,7 +14,7 @@ namespace XMLSupport {
   string tostring(float num) {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
   }
-
+  */
   string EnumMap::strtoupper(const string &foo) {
     string rval;
     string::const_iterator src = foo.begin();

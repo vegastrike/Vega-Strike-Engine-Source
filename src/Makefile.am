@@ -149,5 +149,7 @@ vegastrike_SOURCES =				\
 	gfx_coordinate_select.cpp		\
 	gfx_coordinate_select.h			\
 	gl_matrix.h \
-	vs_globals.h
+	vs_globals.h \
+	gfx_box.h \
+	gfx_box.cpp
 

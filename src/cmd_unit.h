@@ -33,6 +33,7 @@
 class Gun;
 class Warhead;
 class AI;
+class Box;
 /*
 class MeshGroup{
 	Mesh **meshes; // "siblings"
@@ -102,6 +103,7 @@ protected:
   bool selected;
   Vector corner_min, corner_max; // corners of object
   void calculate_extent();
+  Box *selectionBox;
 
   void realDrawBoundingBox();
 public:
