@@ -193,6 +193,25 @@ void FireAt::getAverageGunSpeed (float & speed, float & range, float &mmrange) c
   range= gunrange;
   mmrange=missilerange;
 }
+void AssignTBin (Unit * su, vector <TurretBin> & tbin) {
+    unsigned int bnum=0;
+    for (;bnum<tbin.size();bnum++) {
+      if (su->combatRole()==tbin[bnum].turret[0].tur->combatRole())
+	break;
+    }
+    if (bnum>=tbin.size()) {
+      tbin.push_back (TurretBin());
+    }
+    float gspeed, grange, mrange;
+    grange=FLT_MAX;
+	Order * o = su->getAIState();
+	if (o) 
+		o->getAverageGunSpeed (gspeed,grange,mrange);
+    if (tbin [bnum].maxrange<grange) {
+      tbin [bnum].maxrange=grange;
+    }
+    tbin[bnum].turret.push_back (RangeSortedTurrets (su,grange));
+}
 void FireAt::ChooseTargets (int numtargs, bool force) {
   static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
   if (lastchangedtarg+mintimetoswitch>0) 
@@ -221,23 +240,16 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   Unit * su=NULL;
   un_iter subun = parent->getSubUnits();
   for (;(su = *subun)!=NULL;++subun) {
-    unsigned int bnum=0;
-    for (;bnum<tbin.size();bnum++) {
-      if (su->combatRole()==tbin[bnum].turret[0].tur->combatRole())
-	break;
-    }
-    if (bnum>=tbin.size()) {
-      tbin.push_back (TurretBin());
-    }
-    float gspeed, grange, mrange;
-    grange=FLT_MAX;
-	Order * o = su->getAIState();
-	if (o) 
-		o->getAverageGunSpeed (gspeed,grange,mrange);
-    if (tbin [bnum].maxrange<grange) {
-      tbin [bnum].maxrange=grange;
-    }
-    tbin[bnum].turret.push_back (RangeSortedTurrets (su,grange));
+	  static int inert = ROLES::getRole ("INERT");
+	  if (su->combatRole()!=inert) {
+		  AssignTBin (su,tbin);
+	  }else {
+		  Unit * ssu=NULL;
+		  for (un_iter subturret = su->getSubUnits();(ssu =(*subturret));++subturret) {
+			  AssignTBin(ssu ,tbin);
+		  }
+	  }
+	  
   }
   std::sort (tbin.begin(),tbin.end());
   while ((un = iter.current())) {
