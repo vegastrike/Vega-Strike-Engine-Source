@@ -214,7 +214,7 @@ public:
 };
 
 const int tablehuge=10;
-const int coltableacc = 200;
+const int coltableacc = 10000;
 const int coltablesize=20;
 class CollideTable {
   unsigned int blocupdate;
