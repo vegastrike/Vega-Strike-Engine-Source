@@ -16,6 +16,8 @@ private:
 public:
 	virtual void reactToCollision (Unit *un, const Vector & normal, float dist);
 	Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg=NULL, int fg_snumber=0);
+	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+
 };
 
 #endif

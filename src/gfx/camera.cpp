@@ -124,6 +124,13 @@ void Camera::UpdateCameraSounds() {
 void Camera::GetView (Matrix vw) {
   GFXGetMatrix (VIEW,vw);
 }
+void Camera::SetNebula (Nebula * neb) {
+  nebula.SetUnit ((Unit*)neb);
+}
+Nebula *Camera::GetNebula() {
+  return (Nebula *) nebula.GetUnit();
+}
+
 void Camera::UpdatePlanetGFX () {
 
   if (planet) {

@@ -168,3 +168,12 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
 void Nebula::reactToCollision(class Unit * un,class Vector const &,float) {
 	un->Setnebula(this);
 }
+
+void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
+  Unit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
+  Vector t1;
+  float dis;
+  if (Inside (_Universe->AccessCamera()->GetPosition(),0,t1,dis)) {
+    _Universe->AccessCamera()->SetNebula (this);
+  }
+}

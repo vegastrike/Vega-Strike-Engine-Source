@@ -364,6 +364,7 @@ void StarSystem::Update() {
 	iter = drawList->createIterator();
 	AccessCamera()->UpdateCameraSounds();
 	muzak->Listen();
+	AccessCamera()->SetNebula(NULL);//Update physics should set this
 	while((unit = iter->current())!=NULL) {
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
 	  iter->advance();

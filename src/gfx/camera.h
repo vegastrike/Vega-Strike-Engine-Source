@@ -25,8 +25,10 @@
 #ifndef _CAMERA_H_
 #define _CAMERA_H_
 class PlanetaryTransform;
+#include "cmd/container.h"
+class Nebula;
 class Camera{
-
+  
 	Vector Coord;
 	Matrix planetview;
 	GFXBOOL changed;
@@ -34,6 +36,7 @@ class Camera{
 	float x, y, xsize, ysize;
 	float zoom;
 	float cockpit_offset;
+        UnitContainer nebula;
 public:
 	void setCockpitOffset (float c) {cockpit_offset = c;changed=GFXTRUE;} 
 	enum ProjectionType {
@@ -46,6 +49,8 @@ private:
 	PlanetaryTransform * planet;
 public:
 	Vector P,Q,R;
+	void SetNebula(Nebula * neb);
+	Nebula * GetNebula();
 	PlanetaryTransform * GetPlanetaryTransform() {return planet;}
 	void SetPlanetaryTransform(PlanetaryTransform * t) {planet=t;}
 	PhysicsSystem myPhysics;
