@@ -161,6 +161,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 		}
 	}
 	Modes[i]=0;
+	readnews=false;
 	if (modes.size()) {
 		CargoList->RenderText();
 		CargoInfo->RenderText();	
@@ -321,6 +322,10 @@ void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
       }
       break;
     }
+	if (mode==NEWSMODE&&mod!=NEWSMODE&&readnews) {
+		muzak->Skip();
+		readnews=false;
+	}
 	static int where=0;
     if (smod!=NORMAL) {
       if (submode==NORMAL) {
@@ -681,6 +686,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	  CargoInfo->ChangeTextItem ("description",last->message.c_str(),true);
 	  static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
 	  muzak->GotoSong(newssong);
+	  readnews=true;
 	} 
 	CargoInfo->ChangeTextItem ("price","");
 	CargoInfo->ChangeTextItem ("mass","");
@@ -695,6 +701,10 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   return false;
 }
 void UpgradingInfo::DoDone() {
+	if (mode==NEWSMODE&&readnews) {
+		muzak->Skip();
+		readnews=false;
+	}
 	BaseInterface::CurrentBase->InitCallbacks();
 	BaseInterface::CallComp=false;
 	if (upgr==this) {

@@ -15,6 +15,7 @@ extern Unit&GetUnitMasterPartList();
 class UpgradingInfo {
   void DoDone();
 public:
+  bool readnews;
   bool drawovermouse;
   Mission * briefingMission;//do not dereference! instead scan through activve_missions
   TextArea *CargoList, *CargoInfo;
