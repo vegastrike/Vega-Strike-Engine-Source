@@ -189,7 +189,7 @@ void Unit::RegenShields () {
 float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   float percent;
   unsigned short * targ;
-  if (fabs (pnt.k)>fabs(pnt.i)) {
+  if (fabs  (pnt.k)>fabs(pnt.i)) {
     if (pnt.k>0) {
       targ = &armor.front;
     }else {
