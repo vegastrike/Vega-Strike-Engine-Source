@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include "gfx/cockpit.h"
 #include "savegame.h"
+
+#include "gui/text_area.h"
+#include "gui/button.h"
+
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -392,7 +396,72 @@ bool Quit (const char *input_buffer) {
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
 
+TextArea *CargoList, *CargoInfo;
+Button *OK;
 
+void Unit::UpgradeInterface(Unit * base) {
+cout << "Starting docking\n";
+	glutMouseFunc(ProcessMouseClick);
+	glutMotionFunc(ProcessMouseActive);
+	glutPassiveMotionFunc(ProcessMousePassive);
+	glutDisplayFunc(RefreshGUI);
+
+	                      //(x, y, width, height, with scrollbar)
+	CargoList = new TextArea(-1, 1, 1, 1.8, 1);
+	CargoInfo = new TextArea(0, 1, 1, 1.8, 1);
+
+	CargoList->AddTextItem("a","Just a test item");
+	CargoList->AddTextItem("b","And another just to be sure");
+
+	OK = new Button(-0.94, -0.85, 0.12, 0.1, "Done");
+
+	glutMainLoop();
+}
+
+void RefreshGUI(void) {
+	StartFrame();
+	// Black background
+	ShowColor(-1,-1,2,2, 0,0,0,1);
+	CargoList->Refresh();
+	CargoInfo->Refresh();
+	OK->Refresh();
+	EndFrame();
+}
+
+void StartFrame(void) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode (GL_MODELVIEW);
+	glPushMatrix();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void EndFrame(void) {
+	glPopMatrix();
+	glutSwapBuffers();
+	glFlush();
+}
+
+void ProcessMouseClick(int button, int state, int x, int y) {
+	ProcessMouse(1, x, y, button, state);
+}
+
+void ProcessMouseActive(int x, int y) {
+	ProcessMouse(2, x, y, 0, 0);
+}
+
+void ProcessMousePassive(int x, int y) {
+	ProcessMouse(3, x, y, 0, 0);
+}
+
+// type=1 is mouse click
+// type=2 is mouse drag
+// type=3 is mouse movement
+void ProcessMouse(int type, int x, int y, int button, int state) {
+
+}
+
+/*
 void Unit::UpgradeInterface (Unit * base) {
   Unit * temprate = new Unit ((name+string(".template")).c_str(),false,faction);
   Unit * templ=NULL;
@@ -562,3 +631,4 @@ void Unit::UpgradeInterface (Unit * base) {
   temprate->Kill();
   
 }
+*/
