@@ -840,6 +840,8 @@ int main (int argc, char ** argv)
 	Tab(2);fprintf (fp,"<Engine Afterburner=\"%f\" Forward=\"%f\" Retro=\"%f\" Left=\"%f\" Right=\"%f\" Top=\"%f\" Bottom=\"%f\"/>\n",10*abspeed,8*nspeed,7*nspeed,4*nspeed,4*nspeed,4*nspeed,4*nspeed);
 	Tab(2);fprintf (fp,"<Maneuver yaw=\"%f\" pitch=\"%f\" roll=\"%f\"/>\n",ypr.i*33, ypr.j*33, ypr.k*33);
 	Tab();ETag("Thrust");
+	Tab();Tag("Sound");
+	Tab();ETag("Sound");
 	Tab();Tag ("Defense");
 	Tab(2);fprintf (fp,"<Armor front=\"%d\" right=\"%d\" left=\"%d\" back=\"%d\"/>\n", Stat.Armor[0],Stat.Armor[1],Stat.Armor[2],Stat.Armor[3]);
 	if (Stat.NumShieldFacing==2) {
