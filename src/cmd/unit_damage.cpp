@@ -16,6 +16,7 @@
 #include "savegame.h"
 #include "gfx/cockpit.h"
 #include "cmd/script/mission.h"
+#include "missile.h"
 #include "cmd/ai/communication.h"
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
@@ -718,6 +719,9 @@ bool Unit::Explode (bool drawit, float timeit) {
     }
     image->explosion= new Animation (bleh.c_str(),false,.1,BILINEAR,false);
     image->explosion->SetDimensions(ExplosionRadius(),ExplosionRadius());
+    if (isUnit()!=MISSILEPTR) {
+      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position(),MaxShieldVal(),0,ExplosionRadius(),ExplosionRadius()/4));
+    }
 	if (!SubUnit){
 		Vector exploc = cumulative_transformation.position;
 		Unit * un;
