@@ -21,7 +21,7 @@ public:
 	void InitNebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber);
 	float getFade() {return fadeinvalue;}
 	virtual void PutInsideCam(int) {}
-	virtual enum clsptr isUnit() {return NEBULAPTR;}
+	virtual enum clsptr isUnit()const {return NEBULAPTR;}
 	virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   
 protected:

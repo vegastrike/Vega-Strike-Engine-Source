@@ -30,7 +30,7 @@ class Missile:public Unit {
   signed char retarget;
  public:
   void Discharge();
-  virtual enum clsptr isUnit() {return MISSILEPTR;}
+  virtual enum clsptr isUnit()const {return MISSILEPTR;}
 
 protected:
     /// constructor only to be called by UnitFactory

@@ -21,7 +21,7 @@ protected:
   friend class UnitFactory;
 
  public:
-  virtual enum clsptr isUnit () {return BUILDINGPTR;}
+  virtual enum clsptr isUnit () const{return BUILDINGPTR;}
   virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL) {}
   bool ownz (void * parent) {return (this->parent.terrain == (Terrain *)parent);}
 

@@ -4,7 +4,7 @@
 class Asteroid: public Unit {
   public:
 	void Init( float difficulty);
-	virtual enum clsptr isUnit() {return ASTEROIDPTR;}
+	virtual enum clsptr isUnit()const {return ASTEROIDPTR;}
 	virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   
 	//virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);

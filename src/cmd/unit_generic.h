@@ -944,6 +944,7 @@ public:
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
   enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
   int CanDockWithMe (Unit * dockingunit) ;
+  bool ForceDock (Unit * utdw, int whichdockport);
   void PerformDockingOperations();
   void FreeDockingPort(unsigned int whichport);
   virtual const vector <struct DockingPorts> &DockingPortLocations() { return image->dockingports;}
@@ -996,7 +997,7 @@ public:
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   ///Is this class a unit
-  virtual enum clsptr isUnit() {return UNITPTR;}
+  virtual enum clsptr isUnit()const {return UNITPTR;}
   inline void Ref() {
 #ifdef CONTAINER_DEBUG
     CheckUnit(this);

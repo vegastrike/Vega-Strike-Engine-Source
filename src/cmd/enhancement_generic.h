@@ -6,7 +6,7 @@ class Enhancement : public Unit
 {
 protected:
   std::string filename;
-  virtual enum clsptr isUnit() {return ENHANCEMENTPTR;}
+  virtual enum clsptr isUnit() const{return ENHANCEMENTPTR;}
 
   /// constructor only to be called by UnitFactory
   Enhancement(const char * filename, int faction, const string &modifications,Flightgroup * flightgrp=NULL, int fg_subnumber=0)
