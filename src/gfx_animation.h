@@ -22,7 +22,7 @@
 #define ANIMATION_H
 #include "lin_time.h"
 #include "gfx_primitive.h"
-
+#include "gfx_transform_vector.h"
 class Animation:public Primitive
 {
 	Texture **Decal;
@@ -39,7 +39,8 @@ public:
 	Animation();
 	Animation(char *);
 	~Animation();
-
+  void SetPosition (float x,float y,float z);
+  void SetPosition(const Vector &k);
 	void Draw();
 };
 

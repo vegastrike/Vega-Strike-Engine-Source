@@ -83,6 +83,13 @@ Animation:: ~Animation ()
 		delete [] Decal;
 	//}
 }
+void Animation:: SetPosition (float x,float y, float z) {
+  pos = Vector (x,y,z);
+}
+void Animation::SetPosition (const Vector &k) {
+  pos = k;
+}
+
 void Animation:: Draw()
 {
 		cumtime += GetElapsedTime();

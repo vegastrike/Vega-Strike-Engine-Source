@@ -423,6 +423,7 @@ void InitializeInput() {
 	BindKey('s', FighterPitchUp);*/
 }
 Animation * s;
+Sprite *fihneCarriah;
 void createObjects() {
 
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -435,6 +436,7 @@ void createObjects() {
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
   s = new Animation ("explode.ani");
+  fihneCarriah = new Sprite ("carrier.spr");
   bg = new Background("cube");
   //HUDElement *t = new HUDElement("ucarrier.dat");
   /*************
@@ -473,7 +475,8 @@ void createObjects() {
   GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
-  //  s->SetPosition(0,0);
+  s->SetPosition(0,0,1.5);
+  fihneCarriah->SetPosition (-.5,.8);
   
   textplane = new TextPlane("9x12.fon");
   textplane->SetText(string("This is a test of the emergency broadcast system"));
@@ -510,7 +513,6 @@ void destroyObjects() {
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
   delete textplane;
-  ///////delete s; s terminates itself, biotshhhhhhhhhhhhhhhhhhh
   //delete locSel;
   //delete t;
   //delete s;
@@ -519,6 +521,7 @@ void destroyObjects() {
   delete fighter;
   delete bg;
   delete s;
+  delete fihneCarriah;
 }
 
 void main_loop() {
@@ -560,6 +563,7 @@ void main_loop() {
 
   _GFX->activeStarSystem()->Draw();
   s->Draw();
+  fihneCarriah->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();
   //ProcessMouse();  
