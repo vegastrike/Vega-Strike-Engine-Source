@@ -7,6 +7,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "cmd/ai/flybywire.h"
+#include "gfx/cockpit.h"
 inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
   if (dock.used)
     return false;
@@ -109,6 +110,9 @@ void Unit::PerformDockingOperations () {
     un->NetLocalTorque=Vector (0,0,0);
     un->AngularVelocity=Vector (0,0,0);
     un->Velocity=Vector (0,0,0);
+    if (un==_Universe->AccessCockpit()->GetParent()) {
+      ///CHOOSE NEW MISSION
+    }
     //now we know the unit's still alive... what do we do to him *G*
     ///force him in a box...err where he is
   }
