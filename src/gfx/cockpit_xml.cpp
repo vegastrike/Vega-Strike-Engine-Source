@@ -19,6 +19,8 @@ namespace CockpitXML {
       LVDU,
       RVDU,
       PANEL,
+      ROWS,
+      COLS,
       XFILE,
       XCENT,
       YCENT,
@@ -98,12 +100,14 @@ namespace CockpitXML {
     EnumMap::Pair ("GaugeUp",G_UP),
     EnumMap::Pair ("GaugeDown",G_DOWN),
     EnumMap::Pair ("GaugeLeft",G_LEFT),
-    EnumMap::Pair ("GaugeRight",G_RIGHT)
-
+    EnumMap::Pair ("GaugeRight",G_RIGHT),
+    EnumMap::Pair ("TextRows", ROWS),
+    EnumMap::Pair ("TextCols", COLS)
+    
   };
 
   const EnumMap element_map(element_names, 22);
-  const EnumMap attribute_map(attribute_names, 19);
+  const EnumMap attribute_map(attribute_names, 21);
 }
 
 using XMLSupport::EnumMap;
@@ -133,6 +137,8 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
   float leftx=-10;  float rightx=-10;
   float topy=-10; float boty = -10;
+  short rows=13;
+  short cols=15;
   switch (elem) {
   case COCKPIT:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
@@ -250,7 +256,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	  (*newsprite) = new Sprite ((*iter).value.c_str());
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
-	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes);
+	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols);
 	  adjsprite = *newvdu;
 	}
 	break;
@@ -278,6 +284,13 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       case YCENT:
 	ycent = XMLSupport::parse_float ((*iter).value);
 	break;
+      case ROWS:
+	rows =  XMLSupport::parse_int ((*iter).value);
+	break;
+      case COLS:
+	cols = XMLSupport::parse_int ((*iter).value);
+	break;
+
       }
     }
     if (adjsprite) {

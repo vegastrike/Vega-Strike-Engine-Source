@@ -13,6 +13,6 @@
 	<Energy file="blasterpower.spr" GaugeRight="1"/>
 	<Lock file="locklight.spr"/>
 	<Eject file="eject.spr"/>
-	<LeftVDU file="lvdu.spr"/>
-	<RightVDU file="rvdu.spr"/>
+	<LeftVDU TextRows="13" TextCols="18" file="lvdu.spr" />
+	<RightVDU  TextRows="13" TextCols="18" file="rvdu.spr"/>
 </Cockpit>

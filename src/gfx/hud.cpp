@@ -89,7 +89,7 @@ void TextPlane::Draw(const string & newText)
       col+=myFontMetrics.i*5;
     else
       col+=myFontMetrics.i;
-    if(col+myFontMetrics.i>myDims.i||*text_it == '\n') {
+    if(col+myFontMetrics.i/10>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
       row -= myFontMetrics.j;
     }

@@ -1,7 +1,7 @@
 #include "vdu.h"
 #include "cmd/unit.h"
 #include "hud.h"
-VDU::VDU (const char * file, TextPlane *textp, unsigned char modes):Sprite (file),tp(textp),posmodes(modes),thismode(WEAPON){
+VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls) :Sprite (file),tp(textp),posmodes(modes),thismode(WEAPON), rows(rwws), cols(clls){
   SwitchMode();
 
 };
@@ -23,8 +23,6 @@ void VDU::DrawWeapon (Unit * parent) {
 
 void VDU::Draw (Unit * parent) {
   Sprite::Draw();
-  const int desiredrows=10;
-  const int desiredcols=10;
   if (!parent) {
     return;
   }
@@ -33,7 +31,9 @@ void VDU::Draw (Unit * parent) {
   float h,w;
   GetSize (w,h);
   GetPosition (x,y);
-  h/=2;  w/=2;
+  tp->SetCharSize (fabs(w/cols),fabs(h/rows));
+  
+  h=fabs(h/2);  w=fabs (w/2);
   tp->SetPos (x-w,y+h);
   tp->SetSize (x+w,y-h);
   switch (thismode) {
