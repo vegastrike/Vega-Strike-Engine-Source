@@ -13,7 +13,7 @@ using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace CockpitXML {
     enum Names {
-      UNKNOWN,
+      UNKNOWN=UnitImages::NUMGAUGES,
       COCKPIT,
       MESH,
       CROSSHAIRS,
@@ -43,7 +43,8 @@ namespace CockpitXML {
       BACK,
       LEFT,
       RIGHT,
-      KARMORF,
+//    use the UnitImages enum for the gauge values instead!
+/*    KARMORF,
       KARMORB,
       KARMORR,
       KARMORL,
@@ -57,15 +58,16 @@ namespace CockpitXML {
       KEJECT,
       KLOCK,
       KHULL,
-      WENERGY,
+      KWARPENERGY,
       KKPS,
       KSETKPS,
       KFPS,
+	  COCKPIT_LAG,
+*/
       G_UP,
       G_DOWN,
       G_LEFT,
-      G_RIGHT,
-	  COCKPIT_LAG
+      G_RIGHT
     };
 
   const EnumMap::Pair element_names[] = {
@@ -77,24 +79,24 @@ namespace CockpitXML {
     EnumMap::Pair ("RightVDU", RVDU),
     EnumMap::Pair ("Panel", PANEL),
     EnumMap::Pair ("Crosshairs", CROSSHAIRS),
-    EnumMap::Pair ("ArmorF", KARMORF),
-    EnumMap::Pair ("ArmorR", KARMORR),
-    EnumMap::Pair ("ArmorL", KARMORL),
-    EnumMap::Pair ("ArmorB", KARMORB),
-    EnumMap::Pair ("ShieldF", KSHIELDF),
-    EnumMap::Pair ("ShieldR", KSHIELDR),
-    EnumMap::Pair ("ShieldL", KSHIELDL),
-    EnumMap::Pair ("ShieldB", KSHIELDB),
-    EnumMap::Pair ("Fuel", KFUEL),
-    EnumMap::Pair ("Energy", KENERGY),
-    EnumMap::Pair ("Eject", KEJECT),
-    EnumMap::Pair ("Lock", KLOCK),
-    EnumMap::Pair ("Hull", KHULL),
-    EnumMap::Pair ("WarpEnergy", WENERGY),
-    EnumMap::Pair ("Speed", KKPS),
-    EnumMap::Pair ("SetSpeed", KSETKPS),
-    EnumMap::Pair ("Auto", KAUTO),
-    EnumMap::Pair ("FPS", KFPS)
+    EnumMap::Pair ("ArmorF", UnitImages::ARMORF),
+    EnumMap::Pair ("ArmorR", UnitImages::ARMORR),
+    EnumMap::Pair ("ArmorL", UnitImages::ARMORL),
+    EnumMap::Pair ("ArmorB", UnitImages::ARMORB),
+    EnumMap::Pair ("ShieldF", UnitImages::SHIELDF),
+    EnumMap::Pair ("ShieldR", UnitImages::SHIELDR),
+    EnumMap::Pair ("ShieldL", UnitImages::SHIELDL),
+    EnumMap::Pair ("ShieldB", UnitImages::SHIELDB),
+    EnumMap::Pair ("Fuel", UnitImages::FUEL),
+    EnumMap::Pair ("Energy", UnitImages::ENERGY),
+    EnumMap::Pair ("Eject", UnitImages::EJECT),
+    EnumMap::Pair ("Lock", UnitImages::LOCK),
+    EnumMap::Pair ("Hull", UnitImages::HULL),
+	EnumMap::Pair ("WarpEnergy", UnitImages::WARPENERGY),
+    EnumMap::Pair ("Speed", UnitImages::KPS),
+    EnumMap::Pair ("SetSpeed", UnitImages::SETKPS),
+    EnumMap::Pair ("Auto", UnitImages::AUTO),
+    EnumMap::Pair ("FPS", UnitImages::FPS)
 
   };
   const EnumMap::Pair attribute_names[] = {
@@ -199,24 +201,24 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     }
     text = new TextPlane ();
     break;
-  case KARMORF:
-  case KARMORR:
-  case KARMORL:
-  case KARMORB:
-  case KFUEL:
-  case KSHIELDF:
-  case KSHIELDL:
-  case KSHIELDR:
-  case KSHIELDB:
-  case KENERGY:
-  case WENERGY:
-  case KEJECT:
-  case KLOCK:
-  case KHULL:
-  case KKPS:
-  case KSETKPS:
-  case KAUTO:
-  case KFPS:
+  case UnitImages::ARMORF:
+  case UnitImages::ARMORR:
+  case UnitImages::ARMORL:
+  case UnitImages::ARMORB:
+  case UnitImages::FUEL:
+  case UnitImages::SHIELDF:
+  case UnitImages::SHIELDL:
+  case UnitImages::SHIELDR:
+  case UnitImages::SHIELDB:
+  case UnitImages::ENERGY:
+  case UnitImages::WARPENERGY:
+  case UnitImages::EJECT:
+  case UnitImages::LOCK:
+  case UnitImages::HULL:
+  case UnitImages::KPS:
+  case UnitImages::SETKPS:
+  case UnitImages::AUTO:
+  case UnitImages::FPS:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -260,16 +262,16 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 	break;
       }
     }
-    gauges[elem-KARMORF] = new Gauge (gaugename.c_str(), tmpdir);
+    gauges[elem] = new Gauge (gaugename.c_str(), tmpdir);
     if (xsize!=-1) {
-      gauges[elem-KARMORF]->SetSize (xsize,ysize);
+      gauges[elem]->SetSize (xsize,ysize);
     }
     if (xcent!=FLT_MAX) {
-      gauges[elem-KARMORF]->SetPosition (xcent,ycent);
+      gauges[elem]->SetPosition (xcent,ycent);
     }
     if (leftx!=-10&&rightx!=-10&&topy!=-10&&boty!=-10) {
-      gauges[elem-KARMORF]->SetPosition (.5*(leftx+rightx),.5*(topy+boty));
-      gauges[elem-KARMORF]->SetSize (fabs(leftx-rightx),fabs(topy-boty));
+      gauges[elem]->SetPosition (.5*(leftx+rightx),.5*(topy+boty));
+      gauges[elem]->SetSize (fabs(leftx-rightx),fabs(topy-boty));
     }
     break;
   case CROSSHAIRS:
