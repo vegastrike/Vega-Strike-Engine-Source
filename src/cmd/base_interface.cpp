@@ -7,6 +7,7 @@
 #include <Python.h>
 #include <algorithm>
 #include "base_util.h"
+#include "config_xml.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -74,6 +75,13 @@ void Base::Room::Draw (Base *base) {
 			objs[i]->Draw(base);
 	}
 }
+static Base::Room::BaseTalk * only_one_talk=NULL;
+
+Base::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
+	if (only_one) {
+		only_one_talk=this;
+	}
+}
 
 void Base::Room::BaseTalk::Draw (Base *base) {
 /*	GFXColor4f(1,1,1,1);
@@ -84,16 +92,22 @@ void Base::Room::BaseTalk::Draw (Base *base) {
 		GFXVertex3f(caller->x,caller->y+caller->hei,0);
 		GFXVertex3f(caller->x,caller->y,0);
 	GFXEnd();*/
+	if (only_one_talk!=NULL&&only_one_talk!=this) {
+		curchar = message.size();
+		curtime=999999;
+	}
 	if (hastalked) return;
 	if (curchar<message.size()) {
 		curtime+=GetElapsedTime()/getTimeCompression();
-		if (curtime>.025) {
+		static float inbetween=XMLSupport::parse_float(vs_config->getVariable("graphics","text_speed",".025"));
+		if (curtime>inbetween) {
 			base->othtext.SetText(message.substr(0,++curchar));
 			curtime=0;
 		}
 	} else {
 		curtime+=GetElapsedTime()/getTimeCompression();
-		if (curtime>((.01*message.size())+2)) {
+		static float delay=XMLSupport::parse_float(vs_config->getVariable("graphics","text_delay",".05"));
+		if (curtime>((delay*message.size())+2)) {
 			curtime=0;
 			BaseObj * self=this;
 			std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
@@ -512,7 +526,7 @@ void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state
 			curroom=base->curroom;
 //			index=base->rooms[curroom]->objs.size();
 			int sayindex=rand()%say.size();
-			base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex],"currentmsg"));
+			base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex],"currentmsg",true));
 //			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->sayindex=(sayindex);
 //			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->curtime=0;
 			if (soundfiles[sayindex].size()>0) {

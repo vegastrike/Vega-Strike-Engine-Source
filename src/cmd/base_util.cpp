@@ -112,9 +112,9 @@ namespace BaseUtil {
 		newroom->links.push_back(new Base::Room::Python (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
 	}
-	void Message(std::string text) {
+	void Message(std::string text, bool enqueue) {
 		if (!Base::CurrentBase) return;
-		Base::CurrentBase->rooms[Base::CurrentBase->curroom]->objs.push_back(new Base::Room::BaseTalk(text,"currentmsg"));
+		Base::CurrentBase->rooms[Base::CurrentBase->curroom]->objs.push_back(new Base::Room::BaseTalk(text,"currentmsg",enqueue));
 	}
 	void EraseLink (int room, std::string index) {
 		Base::Room *newroom=CheckRoom(room);

@@ -129,7 +129,7 @@ public:
 			virtual ~BaseTalk () {}
 			std::string message;
 //			BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
-			BaseTalk (std::string msg,std::string ind) :BaseObj(ind), curchar (0), curtime (0), message(msg) {}
+			BaseTalk (std::string msg,std::string ind, bool only_one_talk);
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp) {}
 #endif

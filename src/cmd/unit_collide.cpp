@@ -145,33 +145,52 @@ void Unit::UpdateCollideQueue () {
 }
 
 void Unit::CollideAll() {
+  fprintf (stderr,"'begcoll");
+  fflush(stderr);
+
   if (SubUnit||killed)
     return;
+  fprintf (stderr,"'noreturns");
+  fflush(stderr);
 
   UnitCollection * colQ [tablehuge+1];
   int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ);
+  fprintf (stderr,"'collidetableget");
+  fflush(stderr);
   int j = 0;
   for (;j<sizecolq;j++) {
     Unit *un;
     for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {//warning CANNOT use iterator (except for this sort of collide queue now that I fixed the list
+  fprintf (stderr,"'collideiter");
+  fflush(stderr);
       //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!!       //BUG TERMINATED!
       LineCollide * tmp = &un->CollideInfo;
-      if (tmp->lastchecked==this)
-	continue;//ignore duplicates
+      if (tmp->lastchecked==this) {
+	continue;  fprintf (stderr,"'lastchked==this");
+	fflush(stderr);}
+//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
 
-      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0)))){//the first stuffs are in the huge array
+  fprintf (stderr,"'if1");
+  fflush(stderr);
 	if (Position().i+radial_size>tmp->Mini.i&&
 	    Position().i-radial_size<tmp->Maxi.i&&
 	    Position().j+radial_size>tmp->Mini.j&&
 	    Position().j-radial_size<tmp->Maxi.j&&
 	    Position().k+radial_size>tmp->Mini.k&&
 	    Position().k-radial_size<tmp->Maxi.k) {
+  fprintf (stderr,"'if2");
+  fflush(stderr);
 	  un->Collide(this);
+  fprintf (stderr,"'if2done");
+  fflush(stderr);
 	}
-    
+	  }
     }
   }
+  fprintf (stderr,"'endcoll");
+  fflush(stderr);
 }
 
 bool Unit::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
@@ -379,14 +398,18 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 
 
 bool Unit::Collide (Unit * target) {
-  if (target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
+	if (target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner)))){
+  fprintf (stderr,"''firstbigif");
+  fflush(stderr);
     return false;
-
+	}
   //unit v unit? use point sampling?
   //now first make sure they're within bubbles of each other...
-  if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
+	if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size){
+  fprintf (stderr,"''secondbigif");
+  fflush(stderr);
     return false;
-  //now do some serious checks
+	}  //now do some serious checks
   Vector normal(-1,-1,-1);
   float dist;
   Unit * bigger;
@@ -398,10 +421,14 @@ bool Unit::Collide (Unit * target) {
     bigger = this;
     smaller = target;
   }
+  fprintf (stderr,"''donesizchk");
+  fflush(stderr);
   bool usecoltree =(colTrees&&target->colTrees)
     ?colTrees->colTree&&target->colTrees->colTree
     : false;
   if (usecoltree) {
+  fprintf (stderr,"''usecoltre");
+  fflush(stderr);
     QVector bigpos,smallpos;
     Vector bigNormal,smallNormal;
     if (bigger->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
@@ -410,6 +437,8 @@ bool Unit::Collide (Unit * target) {
       } else return false;
     } else return false;
   } else {
+  fprintf (stderr,"''nousecoltre");
+  fflush(stderr);
     if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {
       if (normal.i==-1&&normal.j==-1) {
 	normal = (smaller->Position()-bigger->Position()).Cast();
@@ -418,9 +447,13 @@ bool Unit::Collide (Unit * target) {
       }
       if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
 	bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
-      }else return false;
+      }else {return false;  fprintf (stderr,"''retfalse");
+	  fflush(stderr);}
+
     }else {
-      return false;      
+        fprintf (stderr,"''retfalse");
+  fflush(stderr);
+return false;      
     }
   }
   //UNUSED BUT GOOD  float elast = .5*(smallcsReversibleTransform (cumulative_transformation_matrix),er->GetElasticity()+bigger->GetElasticity());
@@ -430,6 +463,8 @@ bool Unit::Collide (Unit * target) {
   //deal damage similarly to beam damage!!  Apply some sort of repel force
 
   //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
+  fprintf (stderr,"''rettrue");
+  fflush(stderr);
   return true;
 }
 

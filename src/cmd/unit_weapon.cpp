@@ -70,10 +70,11 @@ void Unit::ToggleWeapon (bool Missile) {
   int activecount=0;
   int totalcount=0;
   bool lasttotal=true;
-  weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
+//  weapon_info::MOUNT_SIZE sz = weapon_info::NOWEAP;
+  const weapon_info * sz=NULL;
   if (nummounts<1)
     return;
-  sz = mounts[0].type->size;
+  sz = mounts[0].type;
   for (int i=0;i<nummounts;i++) {
     if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
       totalcount++;
@@ -83,9 +84,9 @@ void Unit::ToggleWeapon (bool Missile) {
 	lasttotal=true;
 	mounts[i].DeActive (Missile);
 	if (i==nummounts-1) {
-	  sz=mounts[0].type->size;
+	  sz=mounts[0].type;
 	}else {
-	  sz =mounts[i+1].type->size;
+	  sz =mounts[i+1].type;
 	}
       }
     }
@@ -96,9 +97,9 @@ void Unit::ToggleWeapon (bool Missile) {
 	if (lasttotal) {
 	  totalcount=(i+1)%nummounts;
 	  if (i==nummounts-1) {
-	    sz = mounts[0].type->size;
+	    sz = mounts[0].type;
 	  }else {
-	    sz =mounts[i+1].type->size;
+	    sz =mounts[i+1].type;
 	  }
 	}
 	lasttotal=false;
@@ -109,12 +110,12 @@ void Unit::ToggleWeapon (bool Missile) {
     int i=totalcount;
     for (int j=0;j<2;j++) {
       for (;i<nummounts;i++) {
-	if (mounts[i].type->size==sz) {
+	if (mounts[i].type==sz) {
 	  if ((mounts[i].type->type==weapon_info::PROJECTILE)) {
 	    mounts[i].Activate(true);
 	    return;
 	  }else {
-	    sz = mounts[(i+1)%nummounts].type->size;
+	    sz = mounts[(i+1)%nummounts].type;
 	  }
 	}
       }
@@ -122,7 +123,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }
   }
   if (totalcount==activecount) {
-    ActivateGuns (mounts[0].type->size,Missile);
+    ActivateGuns (mounts[0].type,Missile);
   } else {
     if (lasttotal) {
       SelectAllWeapon(Missile);
@@ -133,14 +134,14 @@ void Unit::ToggleWeapon (bool Missile) {
 }
 
 ///cycles through the loop twice turning on all matching to ms weapons of size or after size
-void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
+void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   for (int j=0;j<2;j++) {
     for (int i=0;i<nummounts;i++) {
-      if (mounts[i].type->size==sz) {
+      if (mounts[i].type==sz) {
 	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
 	  mounts[i].Activate(ms);
 	}else {
-	  sz = mounts[(i+1)%nummounts].type->size;
+	  sz = mounts[(i+1)%nummounts].type;
 	}
       }
     }

@@ -283,7 +283,7 @@ class Unit
   ///Mount may access unit
   friend class Unit::Mount;
   ///Activates all guns of that size
-  void ActivateGuns (weapon_info::MOUNT_SIZE, bool Missile);
+  void ActivateGuns (const weapon_info *, bool Missile);
   ///Armor values: how much damage armor can withhold before internal damage accrues
   struct {
     unsigned short front, back, right, left;

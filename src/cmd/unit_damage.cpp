@@ -785,21 +785,7 @@ extern std::string getRandomCachedAniString() ;
 bool Unit::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
-  Unit *un=_Universe->AccessCockpit()->GetParent();
-  if (isUnit()==UNITPTR) {
-  if (un ) {
-    static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
-    static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
-	float rel=un->getRelation(this);
-    if (rel>goodrel) {
-      muzak->SkipRandSong(Music::LOSSLIST);
-    } else if (rel < badrel) {
-      muzak->SkipRandSong(Music::VICTORYLIST);
-	}
-  } else {
-    muzak->SkipRandSong(Music::LOSSLIST);
-  }
-  }
+
   // notify the director that a ship got destroyed
   mission->DirectorShipDestroyed(this);
 
@@ -832,6 +818,21 @@ bool Unit::Explode (bool drawit, float timeit) {
 		}
 	    AUDPlay (sound->explode,exploc,Velocity,1);
 
+	  un=_Universe->AccessCockpit()->GetParent();
+	  if (isUnit()==UNITPTR) {
+		  if (un ) {
+			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
+			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
+			float rel=un->getRelation(this);
+			if (rel>goodrel) {
+			  muzak->SkipRandSong(Music::LOSSLIST);
+			} else if (rel < badrel) {
+			  muzak->SkipRandSong(Music::VICTORYLIST);
+			}
+		  } else {
+			muzak->SkipRandSong(Music::LOSSLIST);
+		  }
+	  }
 	}
   }
   if (image->explosion) {
