@@ -668,7 +668,7 @@ void beginStar (float radius, unsigned int which) {
     MakeBigUnit();
   }
   MakeMoons (100+grand()*300,JUMP,STAR);
-  if ((int)which==nument[STAR]-1) {
+  if ((int)which+1>=nument[STAR]) {
     while (!entities[JUMP].empty()) {
       MakeMoons (300+grand()*800,JUMP,STAR);
     }
