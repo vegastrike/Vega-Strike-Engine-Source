@@ -12,6 +12,8 @@ vegastrike_SOURCES =				\
 	hashtable.cpp				\
 	hashtable_3d.h				\
 	in.h					\
+	in_joystick.cpp				\
+	in_joystick.h				\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_mouse.cpp				\

@@ -1,1 +1,12 @@
+2001-10-10 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* modified doxyConfig:
+	  replaced absolute path with relative
+	  (documentation is generated in ./doxygen)
+	  added alphabetical listing
+	* added files in_joystick.{cpp,h}
+	* modified Makefile.am to compile in_joystick
+	* uncommented SDL_Init in main.cpp
+	* calling Process/InitJoystick in in_main.cpp
+	* yet only debug-output is done, joystick has no effect yet
+	* had to convert modified files from dos to unix

@@ -29,6 +29,7 @@ using namespace std;
 
 #include "in_kb.h"
 #include "in_mouse.h"
+#include "in_joystick.h"
 #include "in_handler.h"
 
 extern KBSTATE keyState[KEYMAP_SIZE];
@@ -61,11 +62,13 @@ void RemoveListener(InputListener *il) {
 void ProcessInput() {
   ProcessKB();
   ProcessMouse();
+  ProcessJoystick();
 }
 
 void InitInput()
 {
 	InitKB();
 	InitMouse();
+	InitJoystick();
 }
 

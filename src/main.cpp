@@ -17,6 +17,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#if defined(HAVE_SDL)
+#include <SDL/SDL.h>
+#endif
+
 #include "vs_globals.h"
 #include "gfxlib.h"
 #include "in_kb.h"
@@ -73,11 +77,17 @@ int main( int argc, char **argv )
     setup_game_data(); 
     //read_config_file();
     //init_debug("");
-    /*
-#if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
-    sdl_init();
+
+#if defined(HAVE_SDL)
+    // && defined(HAVE_SDL_MIXER)
+  if (  SDL_Init( SDL_INIT_JOYSTICK ))
+    {
+        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
+        exit(1);
+    }
+
 #endif
-    */
+
     InitTime();
     UpdateTime();
     ParseCommandLine(argc,argv);
