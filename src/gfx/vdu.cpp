@@ -484,7 +484,7 @@ void VDU::DrawMessages(Unit *target){
   for(int i=scrolloffset<0?-scrolloffset-1:0;rows_used<((scrolloffset<0||num_messages>rows)?rows:num_messages)&&mc->last(i,lastmsg,message_people,whoNOT);i++){
       char timebuf[100];
       double sendtime=lastmsg.time;
-      if (scrolloffset==0&&sendtime<nowtime-oldtime*4){
+      if (scrolloffset>=0&&sendtime<nowtime-oldtime*4){
         break;
       }
       if(sendtime<=nowtime&&(sendtime>nowtime-oldtime||scrolloffset<0)){
