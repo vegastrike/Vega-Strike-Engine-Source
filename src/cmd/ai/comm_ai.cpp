@@ -4,7 +4,11 @@
 #include "gfx/cockpit.h"
 
 CommunicatingAI::CommunicatingAI (int ttype, float anger, float moodswingyness, float randomresp, float mood) :Order (ttype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
-  
+  comm_face=NULL;
+}
+void CommunicatingAI::SetParent (Unit * par) {
+  Order::SetParent(par);
+  comm_face = _Universe->GetRandAnimation(par->faction);
 }
 static float sq (float i) {return i*i;}
 bool nonneg (float i) {return i>=0;}
@@ -79,7 +83,7 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
       }
     }
     //ok we're good to put a default msg in the queue as a fake message;
-    messagequeue.push_back (new CommunicationMessage (target,this->parent));
+    messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face));
   }
 }
 
@@ -103,7 +107,7 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
       int b = selectCommunicationMessage (c);
       Unit * un = c.sender.GetUnit();
       if (un) {
-	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b));
+	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face));
       }
     }
   }

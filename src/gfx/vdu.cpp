@@ -9,6 +9,7 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "xml_support.h"
+#include "gfx/animation.h"
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
@@ -53,6 +54,7 @@ int parse_vdu_type (const char * x) {
 
 
 VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(MSG), rows(rwws), cols(clls){
+  comm_ani=NULL;
   viewStyle = CP_TARGET;
   StartArmor = ma;
   maxhull = mh;
@@ -370,7 +372,17 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   GFXColorf (c);
   tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);
 }
+bool VDU::SetCommAnimation (Animation * ani) {
+  if (comm_ani==NULL) {
+    if (posmodes&COMM) {
 
+      comm_ani = ani;
+      ani->Reset();
+      return true;
+    }
+  }
+  return false;
+}
 void VDU::DrawNav (const Vector & nav, const GFXColor & c) {
   char nothing[]="none";
   Unit * you = _Universe->AccessCockpit()->GetParent();
@@ -384,9 +396,21 @@ void VDU::DrawNav (const Vector & nav, const GFXColor & c) {
 
 }
 void VDU::DrawComm (const GFXColor & c) {
-  GFXColorf (c);
-  tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+  if (comm_ani!=NULL) {
+    GFXDisable (TEXTURE1);
+    GFXEnable (TEXTURE0);
+    GFXDisable(LIGHTING);
+    GFXDisable (DEPTHWRITE);
+    GFXDisable (DEPTHTEST);
 
+    comm_ani->DrawAsSprite(this);
+    if (comm_ani->Done())
+      comm_ani=NULL;
+    GFXDisable (TEXTURE0);
+  }else {
+    GFXColorf (c);
+    tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+  }
 }
 
 void VDU::DrawManifest (Unit * parent, Unit * target, const GFXColor &c) {

@@ -624,8 +624,6 @@ void Cockpit::Draw() {
 	bool die=true;
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
-      DrawGauges(un);
-      
       if (Radar) {
 	Radar->Draw();
 	if(radar_type=="Elite"){
@@ -635,6 +633,9 @@ void Cockpit::Draw() {
 	  DrawBlips(un);
 	}
       }
+
+      DrawGauges(un);
+      
       GFXColor4f(1,1,1,1);
       for (unsigned int j=1;j<Panel.size();j++) {
 	Panel[j]->Draw();
@@ -792,6 +793,15 @@ void Cockpit::ScrollVDU (int vdunum, int howmuch) {
 void Cockpit::ScrollAllVDU (int howmuch) {
   for (unsigned int i=0;i<vdu.size();i++) {
     ScrollVDU (i,howmuch);
+  }
+}
+
+
+void Cockpit::SetCommAnimation (Animation * ani) {
+  for (unsigned int i=0;i<vdu.size();i++) {
+    if (vdu[i]->SetCommAnimation (ani)) {
+      break;
+    }
   }
 }
 void Cockpit::RestoreViewPort() {

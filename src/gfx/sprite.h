@@ -42,7 +42,7 @@ public:
 	~Sprite();
 
 	void Draw();
-
+	void DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul);
 	void Rotate(const float &rad){ rotation += rad;};
 	void SetST (const float s, const float t);
 	void SetPosition(const float &x1, const float &y1);

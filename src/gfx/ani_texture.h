@@ -19,5 +19,7 @@ class AnimatedTexture: public Texture {
   void MakeActive();
   static void UpdateAllPhysics();
   static void UpdateAllFrame();
+  //resets the animation to beginning
+  void Reset();
   bool Done();
 };

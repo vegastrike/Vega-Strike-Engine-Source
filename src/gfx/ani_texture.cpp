@@ -87,11 +87,17 @@ void AnimatedTexture::Destroy() {
     Decal=NULL;
   }
 }
+void AnimatedTexture::Reset () {
+  cumtime=0;
+  active=0;
+  physicsactive = numframes*timeperframe;
+}
 void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
   myvec.push_back (this);
   fscanf (fp,"%d %f",&numframes,&timeperframe);
   cumtime=0;
-  physicsactive = numframes*timeperframe;
+  Reset();
+
   active=0;
   Decal = new Texture * [numframes];
   char temp[512];

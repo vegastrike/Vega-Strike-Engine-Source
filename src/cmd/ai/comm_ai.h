@@ -9,7 +9,7 @@ class CommunicatingAI:public Order{
   float moodswingyness;
   float randomresponse;
   float mood;
-
+  Animation * comm_face;
 
   relationmap effective_relationship;
  public:
@@ -21,4 +21,5 @@ class CommunicatingAI:public Order{
    virtual ~CommunicatingAI ();
    virtual int selectCommunicationMessage (class CommunicationMessage &c);
    virtual int selectCommunicationMessageMood (CommunicationMessage &c, float mood);
+   virtual void SetParent (Unit * parent1);
 };

@@ -83,18 +83,7 @@ void Sprite::SetST (const float s, const float t) {
   maxs = s;
   maxt = t;
 }
-
-void Sprite::Draw()
-{
-  if (surface){//don't do anything if no surface
-    GFXDisable(LIGHTING);
-    GFXDisable(DEPTHWRITE);
-    GFXDisable(DEPTHTEST);
-    GFXEnable(TEXTURE0);
-    GFXDisable(TEXTURE1);
-    surface->MakeActive();
-    GFXDisable (CULLFACE);
-    GFXBegin(GFXQUAD);
+void Sprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
       const float cw = widtho2*cos(rotation);
       const float sw = widtho2*sin(rotation);
@@ -102,29 +91,35 @@ void Sprite::Draw()
       const float sh = heighto2*sin(M_PI_2+rotation);
       const float wnew = cw+ch;
       const float hnew = sw+sh;
-      GFXTexCoord2f(maxs, 1);
-      GFXVertex3f(xcenter-wnew, ycenter+hnew, 0.00f);
-      GFXTexCoord2f(1, 1);
-      GFXVertex3f(xcenter+wnew, ycenter+hnew, 0.00f);
-      GFXTexCoord2f(1, maxt);
-      GFXVertex3f(xcenter+wnew, ycenter-hnew, 0.00f);
-      GFXTexCoord2f(maxs, maxt);
-      GFXVertex3f(xcenter-wnew, ycenter-hnew, 0.00f);
+      ll=Vector(xcenter-wnew, ycenter+hnew, 0.00f);
+      lr=Vector(xcenter+wnew, ycenter+hnew, 0.00f);
+      ur=Vector(xcenter+wnew, ycenter-hnew, 0.00f);
+      ul=Vector(xcenter-wnew, ycenter-hnew, 0.00f);
     } else {
-      GFXTexCoord2f(maxs, 1);
-      GFXVertex3f(xcenter-widtho2, ycenter+heighto2, 0.00f);
-      GFXTexCoord2f(1, 1);
-      GFXVertex3f(xcenter+widtho2, ycenter+heighto2, 0.00f);
-      GFXTexCoord2f(1, maxt);
-      GFXVertex3f(xcenter+widtho2, ycenter-heighto2, 0.00f);
-      GFXTexCoord2f(maxs, maxt);
-      GFXVertex3f(xcenter-widtho2, ycenter-heighto2, 0.00f);
+      ll=Vector(xcenter-widtho2, ycenter+heighto2, 0.00f);
+      lr=Vector(xcenter+widtho2, ycenter+heighto2, 0.00f);
+      ur=Vector(xcenter+widtho2, ycenter-heighto2, 0.00f);
+      ul=Vector(xcenter-widtho2, ycenter-heighto2, 0.00f);
     }
+}
+void Sprite::Draw()
+{
+  if (surface){//don't do anything if no surface
+    surface->MakeActive();
+    GFXDisable (CULLFACE);
+    GFXBegin(GFXQUAD);
+    Vector ll,lr,ur,ul;
+    DrawHere (ll,lr,ur,ul);
+    GFXTexCoord2f(maxs, 1);
+    GFXVertexf(ll);
+    GFXTexCoord2f(1, 1);
+    GFXVertexf(lr);
+    GFXTexCoord2f(1, maxt);
+    GFXVertexf(ur);
+    GFXTexCoord2f(maxs, maxt);
+    GFXVertexf(ul);
     GFXEnd();
     GFXEnable (CULLFACE);
-    GFXEnable(LIGHTING);
-    GFXEnable(DEPTHWRITE);
-    GFXEnable(DEPTHTEST);
   }
 }
 

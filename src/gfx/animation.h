@@ -40,6 +40,7 @@ public:
   void CalculateOrientation (Matrix &result);
   void DrawNow(const Matrix & final_orientation);
   void DrawNoTransform ();
+  void DrawAsSprite (class Sprite *spr);
   static void ProcessDrawQueue(std::stack <Animation *> &);
   static void ProcessDrawQueue();
   static void ProcessFarDrawQueue();

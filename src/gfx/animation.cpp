@@ -29,6 +29,7 @@
 #include "point_to_cam.h"
 #include "config_xml.h"
 #include "xml_support.h"
+#include "sprite.h"
 using std::stack;
 static stack<Animation *> far_animationdrawqueue;
 static stack<Animation *> animationdrawqueue;
@@ -172,6 +173,30 @@ void Animation::DrawNow(const Matrix &final_orientation) {
     GFXEnd ();
    
   }
+}
+void Animation::DrawAsSprite (Sprite * spr) {
+  unsigned char alphamaps=ani_alpha;
+  GFXPushBlendMode();
+  if (options&ani_alpha)
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  else
+    GFXBlendMode (ONE, ZERO);
+  MakeActive();
+  GFXDisable(CULLFACE);
+  GFXBegin(GFXQUAD);
+  Vector ll,lr,ur,ul;
+  spr->DrawHere(ll,lr,ur,ul);
+  GFXTexCoord2f(0, 1);
+  GFXVertexf(ll);
+  GFXTexCoord2f(1, 1);
+  GFXVertexf(lr);
+  GFXTexCoord2f(1, 0);
+  GFXVertexf(ur);
+  GFXTexCoord2f(0, 0);
+  GFXVertexf(ul);
+  GFXEnd();
+  GFXEnable(CULLFACE);
+  GFXPopBlendMode();
 }
 void Animation::DrawNoTransform() {
   if (!Done()||(options&ani_repeat)) {

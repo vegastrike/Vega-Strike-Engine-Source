@@ -19,6 +19,7 @@ class Unit;
  * The ones starting from KPS are digital with text readout
  */
 class Cockpit {
+
   enum GAGUES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, FPS, NUMGAUGES};
   /// 4 armor vals and 1 for startfuel
   unsigned short StartArmor[5];
@@ -117,5 +118,6 @@ class Cockpit {
   static void Respawn (int,KBSTATE);
   static void SwitchControl (int,KBSTATE);
   static void TurretControl (int, KBSTATE);
+  void SetCommAnimation (Animation * ani);
 };
 #endif

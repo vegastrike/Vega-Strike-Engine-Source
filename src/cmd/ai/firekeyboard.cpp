@@ -343,7 +343,7 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
 static void DoDockingOps (Unit * parent, Unit * targ) {
     if (req) {
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
-      CommunicationMessage c(parent,targ);
+      CommunicationMessage c(parent,targ,NULL);
       c.SetCurrentState(c.fsm->GetRequestLandNode());
       targ->getAIState()->Communicate (c);
       req=false;
@@ -367,6 +367,9 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     mission->msgcenter->add ("game","all",un->name+string(": ")+c.getCurrentState()->message);
   }else {
     mission->msgcenter->add ("game","all",string("[static]: ")+c.getCurrentState()->message);
+  }
+  if (parent==_Universe->AccessCockpit()->GetParent()) {
+    _Universe->AccessCockpit()->SetCommAnimation (c.ani);
   }
 }
 
@@ -476,11 +479,11 @@ void FireKeyboard::Execute () {
       if (targ) {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,messagequeue);       
 	if (mymsg==NULL) {
-	  targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,i));
+	  targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,i,NULL));
 	}else {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
-	    targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,*mymsg,i));
+	    targ->getAIState ()->Communicate (CommunicationMessage (parent,targ,*mymsg,i,NULL));
 	  }
 	}
       }

@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <algorithm>
 #include "ai/communication.h"
-
+#include "gfx/animation.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -26,7 +26,8 @@ namespace FactionXML {
 	STATS,
 	FRIEND,
 	ENEMY,
-	CONVERSATION
+	CONVERSATION,
+	COMM_ANIMATION
   };
 
   const EnumMap::Pair element_names[] = {
@@ -35,7 +36,8 @@ namespace FactionXML {
 	EnumMap::Pair ("Faction", FACTION),
 	EnumMap::Pair ("Friend", FRIEND),
 	EnumMap::Pair ("Enemy", ENEMY),
-  	EnumMap::Pair ("Stats", STATS)
+  	EnumMap::Pair ("Stats", STATS),
+  	EnumMap::Pair ("CommAnimation", COMM_ANIMATION)
   };
   const EnumMap::Pair attribute_names[] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -47,7 +49,7 @@ namespace FactionXML {
 };
 
 
-  const EnumMap element_map(element_names, 6);
+  const EnumMap element_map(element_names, 7);
   const EnumMap attribute_map(attribute_names, 6);
 
 }
@@ -65,6 +67,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   Names elem = (Names)element_map.lookup(name);
   char * tmpstr=NULL;
   char RGBfirst=0;
+
   switch(elem) {
   case UNKNOWN:
 	unitlevel++;
@@ -76,18 +79,30 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 	assert (unitlevel==0);
 	unitlevel++;
 	break;
+  case COMM_ANIMATION:
+    assert (unitlevel==2);
+    unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case NAME:
+	thisuni->factions.back()->comm_faces.push_back(new Animation ((*iter).value.c_str()));
+	break;
+      }
+    }
+    break;
   case FACTION:
-	assert (unitlevel==1);
-	unitlevel++;
-	thisuni->factions.push_back(new Faction ());
-	assert(thisuni->factions.size()>0);
-//	thisuni->factions[thisuni->factions.size()-1];
+    assert (unitlevel==1);
+    unitlevel++;
+    thisuni->factions.push_back(new Faction ());
+    assert(thisuni->factions.size()>0);
+    //	thisuni->factions[thisuni->factions.size()-1];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
 		thisuni->factions[thisuni->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
 		strcpy(thisuni->factions[thisuni->factions.size()-1]->factionname,(*iter).value.c_str());
 		break;
+
       case LOGORGB:
 		if (RGBfirst==0||RGBfirst==1) {
 			RGBfirst=1;
@@ -196,6 +211,19 @@ Texture * Universe::getForceLogo (int faction) {
 //fixme--add squads in here
 Texture *Universe::getSquadLogo (int faction) {
   return getForceLogo (faction);
+}
+Animation * Universe::GetAnimation (int faction, int n) {
+  return factions[faction]->comm_faces[n];
+}
+int Universe::GetNumAnimation (int faction) {
+  return factions[faction]->comm_faces.size();
+}
+Animation * Universe::GetRandAnimation(int faction) {
+  if (factions[faction]->comm_faces.size()>0) {
+    return factions[faction]->comm_faces[rand()%factions[faction]->comm_faces.size()];
+  }else {
+    return NULL;
+  }
 }
 
 FSM* Universe::GetConversation(int Myfaction, int TheirFaction) {

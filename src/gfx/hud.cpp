@@ -82,10 +82,14 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
     GFXBlendMode (ONE,ZERO);
     glDisable (GL_LINE_SMOOTH);
   }
+
   GFXDisable (DEPTHTEST);
   GFXDisable (CULLFACE);
+
   GFXDisable (LIGHTING);
+
   GFXDisable (TEXTURE0);
+
   glPushMatrix();
   glRasterPos2f(0,0);
   int entercount=0;
@@ -141,6 +145,8 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
   }
   glDisable(GL_LINE_SMOOTH);
   glPopMatrix();
+
+  
   GFXPopBlendMode();
 
 }
