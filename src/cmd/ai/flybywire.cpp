@@ -10,7 +10,7 @@
 #include "gfx/cockpit.h"
 #include "force_feedback.h"
 #include "vs_globals.h"
-
+#include "config_xml.h"
 #define VELTHRESHOLD .1
 
 using Orders::MatchLinearVelocity;
@@ -153,7 +153,7 @@ MatchVelocity::~MatchVelocity () {
 
 
 
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(true){
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!XMLSupport::parse_bool (vs_config->getVariable ("physics","CarControl","false"))){
   DesiredThrust= Vector(0,0,0);
 
 
