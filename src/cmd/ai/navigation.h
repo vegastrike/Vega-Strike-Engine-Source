@@ -101,6 +101,19 @@ public:
   virtual ~FaceTarget();
 };
 /**
+ * This class analyzes a Unit's position and adjusts ChangeHeading to
+ * SPEC towards target
+ */
+class AutoLongHaul : public ChangeHeading {
+  bool finish;
+public:
+  AutoLongHaul (bool fini=false, int accuracy =1);
+  virtual void Execute ();
+  virtual void SetParent(Unit* parent1);
+  virtual string getOrderDescription() { return "ASAP"; };
+  virtual ~AutoLongHaul();
+};
+/**
  * This class analyzes a Unit's position and adjusts ChangeHeading to face
  * that target's ITTS indicator for best firing solution
  */

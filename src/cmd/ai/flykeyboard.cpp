@@ -42,6 +42,7 @@ struct StarShipControlKeyboard {
   bool dirty;//it wasn't updated...
   bool autopilot;
   bool switch_combat_mode;
+  bool ASAP;
   bool terminateauto;
   bool realauto;
   bool startcomm;
@@ -50,7 +51,7 @@ struct StarShipControlKeyboard {
   bool switchsecured;
   bool freq_increase;
   bool freq_decrease;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;freq_increase=false;freq_decrease=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=ASAP=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;freq_increase=false;freq_decrease=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -69,6 +70,7 @@ FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire (),axis_key(0
     starshipcontrolkeys.push_back (StarShipControlKeyboard());
   }
   autopilot=NULL;
+  inauto=false;
 }
 float FlyByKeyboard::clamp_axis (float v) {
   static int axis_scale =XMLSupport::parse_int (vs_config->getVariable ("physics","slide_start","3"));
@@ -202,6 +204,18 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.switch_combat_mode) {
     SSCK.switch_combat_mode=false;
     parent->SwitchCombatFlightMode();
+  }
+  if (SSCK.ASAP) {
+    SSCK.ASAP=false;
+	if(FlyByKeyboard::inauto){
+		this->eraseType(FACING|MOVEMENT);
+		FlyByKeyboard::inauto=false;
+	} else {
+		Orders::AutoLongHaul* temp = new Orders::AutoLongHaul();
+		temp->SetParent(parent);
+		Order::EnqueueOrderFirst(temp);
+		FlyByKeyboard::inauto=true;
+    }
   }
   bool enteredautopilot=false;
   if (SSCK.realauto) {
@@ -373,7 +387,11 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   SSCK.dirty=true;
 #undef SSCK
 
-  FlyByWire::Execute();
+  if(FlyByKeyboard::inauto){
+	  Order::Execute();
+  } else {
+	  FlyByWire::Execute();
+  }
 
 }
 
@@ -689,6 +707,14 @@ void FlyByKeyboard::AutoKey (const KBData&,KBSTATE k) {
     g().realauto=true;
   }
 }
+
+void FlyByKeyboard::EngageSpecAuto (const KBData&,KBSTATE k) {
+  if (g().dirty)  g().UnDirty();
+  if (k==PRESS) {
+    g().ASAP=true;
+  }
+}
+
 void FlyByKeyboard::SwitchCombatModeKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {

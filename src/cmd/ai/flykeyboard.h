@@ -47,10 +47,12 @@ class FlyByKeyboard: public FlyByWire {
   static void JumpKey (const KBData&,KBSTATE);
   static void AutoKey (const KBData&,KBSTATE);
   static void SwitchCombatModeKey (const KBData&,KBSTATE);
+  static void EngageSpecAuto (const KBData&,KBSTATE);
   static void StopAutoKey (const KBData&,KBSTATE);
   static void SetVelocityRefKey (const KBData&,KBSTATE);
   static void SetNullVelocityRefKey (const KBData&,KBSTATE);
   int whichplayer;
+  bool inauto;
   FlyByKeyboard (unsigned int whichplayer);
   virtual void Destroy();
   virtual ~FlyByKeyboard();

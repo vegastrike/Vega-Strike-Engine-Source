@@ -11,6 +11,7 @@ using namespace Orders;
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "warpto.h"
+#include "flybywire.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -251,6 +252,9 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
 }
 
 void ChangeHeading::Execute() {
+  bool temp=done;
+  Order::Execute();
+  done=temp;
   Vector ang_vel=parent->GetAngularVelocity();
   Vector local_velocity (parent->UpCoordinateLevel(ang_vel));
   Vector local_heading (parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast()));
@@ -405,7 +409,39 @@ FaceTarget::~FaceTarget() {
 #endif
 }
 
+AutoLongHaul::AutoLongHaul (bool fini, int accuracy):ChangeHeading(QVector(0,0,1),accuracy),finish(fini) {
+  type=FACING|MOVEMENT;
+  subtype =STARGET;
+  
+}
 
+void AutoLongHaul::SetParent(Unit *parent1){
+	ChangeHeading::SetParent(parent1);
+	MatchLinearVelocity *temp = new MatchLinearVelocity(Vector(0,0,parent1->GetComputerData().max_ab_speed()),true,true,false);
+	temp->SetParent(parent1);
+	Order::EnqueueOrder(temp);
+}
+
+void AutoLongHaul::Execute() {
+  Unit * target = parent->Target();
+  if (target==NULL){
+    done = finish;
+    return;
+  }
+  SetDest(target->isSubUnit()?target->Position():target->LocalPosition());
+  ChangeHeading::Execute();
+  if (!finish) {
+    ResetDone();
+  } 
+}
+
+
+AutoLongHaul::~AutoLongHaul() {
+#ifdef ORDERDEBUG
+  VSFileSystem::vs_fprintf (stderr,"ft%x",this);
+  fflush (stderr);
+#endif
+}
 
 void FaceDirection::SetParent(Unit * un) {
   if (un->getFlightgroup()) {

@@ -625,7 +625,8 @@ CommandMap initGlobalCommandMap() {
   commandMap["ToggleWarpDrive"]=FireKeyboard::ToggleWarpDrive;
   commandMap["ToggleAnimation"]=FireKeyboard::ToggleAnimation;  
   commandMap["CommAttackTarget"]=FireKeyboard::AttackTarget;
-  
+  commandMap["ASAP"]=FlyByKeyboard::EngageSpecAuto;
+
   commandMap["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;
   commandMap["CommHelpMeOutFaction"]=FireKeyboard::HelpMeOutFaction;
   commandMap["JoinFlightgroup"]=FireKeyboard::JoinFg;
