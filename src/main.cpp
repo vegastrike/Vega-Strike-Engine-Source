@@ -60,6 +60,7 @@
 #include "cg_global.h"
 #endif
 
+
 int nadanixnuthin() {
   float a=0;
   int test=0;

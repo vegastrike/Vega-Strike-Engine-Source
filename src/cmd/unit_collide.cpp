@@ -1,3 +1,4 @@
+
 #include "vegastrike.h"
 //#include "unit.h"
 #include "beam.h"
@@ -122,7 +123,45 @@ void Unit::CollideAll() {
   }
 }
 
+Vector Vabs (const Vector &in) {
+	return Vector (in.i>=0?in.i:-in.i,
+				   in.j>=0?in.j:-in.j,
+				   in.k>=0?in.k:-in.k);
+}
 
+Matrix WarpMatrix (Unit * un) {
+	if (0&&un->GetVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
+		return un->cumulative_transformation_matrix;
+	}else {
+		Matrix k(un->cumulative_transformation_matrix);
+//		const Vector v(Vector(1,1,1)+Vabs(un->GetVelocity().Scale(100*SIMULATION_ATOM/un->rSize())));
+		const Vector v(Vector(1,1,1).Scale(1+SIMULATION_ATOM*2*un->GetVelocity().Magnitude()));
+		
+/*		k.r[0]*=v.i;
+		k.r[1]*=v.i;
+		k.r[2]*=v.i;
+
+		k.r[3]*=v.j;
+		k.r[4]*=v.j;
+		k.r[5]*=v.j;
+
+		k.r[6]*=v.k;
+		k.r[7]*=v.k;
+		k.r[8]*=v.k;*/
+		k.r[0]*=v.i;
+		k.r[1]*=v.j;
+		k.r[2]*=v.k;
+
+		k.r[3]*=v.i;
+		k.r[4]*=v.j;
+		k.r[5]*=v.k;
+
+		k.r[6]*=v.i;
+		k.r[7]*=v.j;
+		k.r[8]*=v.k;		
+		return k;
+	}
+}
 bool Unit::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   if (!querySphere(target,radius)) {
     return false;;
@@ -146,14 +185,16 @@ static float tmpmax (float a, float b) {
 bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
   if (smaller->colTrees==NULL||this->colTrees==NULL)
     return false;
-  if (smaller->colTrees->colTree==NULL||this->colTrees->colTree==NULL)
+  if (smaller->colTrees->usingColTree()==false||this->colTrees->usingColTree()==false)
     return false;
 
     csRapidCollider::CollideReset();
     //    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
     Unit * bigger =this;
+
 #ifdef SUPERCOLLIDER
-    float unitsmovement = tmpmax((bigger->curr_physical_state.position-bigger->prev_physical_state.position).Cast().Magnitude()/bigger->rSize(),(smaller->curr_physical_state.position-smaller->prev_physical_state.position).Cast().Magnitude()/smaller->rSize())/2;
+    float unitsmovement = tmpmax((bigger->curr_physical_state.position-bigger->prev_physical_state.position).Cast().Magnitude()/bigger->rSize(),(smaller->curr_physica
+																																				 l_state.position-smaller->prev_physical_state.position).Cast().Magnitude()/smaller->rSize())/2;
     static float max_collision_accuracy = XMLSupport::parse_float (vs_config->getVariable("physics","max_collision_accuracy","10"));
     if (unitsmovement>max_collision_accuracy)
       unitsmovement=max_collision_accuracy;
@@ -164,8 +205,8 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
       //printf ("um >1 for %s with %s\n",bigger->name.c_str(),smaller->name.c_str());
     }
 #endif
-    const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
-    const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
+    const csReversibleTransform bigtransform (/*WarpMatrix(bigger)*/bigger->cumulative_transformation_matrix);
+	const csReversibleTransform smalltransform (/*WarpMatrix(smaller)*/smaller->cumulative_transformation_matrix);
 #ifdef SUPERCOLLIDER
     for (int iter=1;iter<=/*um*/1;++iter) 
 #endif
@@ -182,14 +223,15 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	smalltransform.SetOrigin(smallorig.Cast());
       }
 #endif
-      if (smaller->colTrees->colTree->Collide (*bigger->colTrees->colTree,
-					       &smalltransform,
-					       &bigtransform)) {
+      if (smaller->colTrees->colTree(smaller)->Collide (*bigger->colTrees->colTree(bigger),
+													 &smalltransform,
+													 &bigtransform)) {
 	//static int crashcount=0;
 	//      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
 	csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	int numHits = csRapidCollider::numHits;
 	if (numHits) {
+		printf ("%s hit %s\n",smaller->name.c_str(),bigger->name.c_str());
 	  smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
 		       (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
 		       (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
@@ -254,7 +296,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
     bool temp=true;
     if (this->colTrees==NULL) {
       temp=true;
-    }else if (this->colTrees->colTree==NULL) {
+    }else if (this->colTrees->colTree(this)==NULL) {
       temp=true;
     }
     if (temp) {
@@ -283,9 +325,9 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
   vector <bsp_polygon> mesh;
   mesh.push_back(tri);
   csRapidCollider smallColTree(mesh);
-  if (smallColTree.Collide (*(this->colTrees)->colTree,
-				  &smalltransform,
-				  &bigtransform)) {
+  if (smallColTree.Collide (*(this->colTrees)->colTree(this),
+							&smalltransform,
+							&bigtransform)) {
       static int crashcount=0;
     
             fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
@@ -377,7 +419,7 @@ bool Unit::Collide (Unit * target) {
     smaller = target;
   }
   bool usecoltree =(this->colTrees&&target->colTrees)
-    ?this->colTrees->colTree&&target->colTrees->colTree
+	  ?this->colTrees->colTree(this)&&target->colTrees->colTree(this)
     : false;
   if (usecoltree) {
     QVector bigpos,smallpos;

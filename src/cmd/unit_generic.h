@@ -971,6 +971,7 @@ public:
 /***************************************************************************************/
 
 public:
+  class csRapidCollider * getCollideTree(const Vector &scale=Vector(1,1,1),const std::vector<struct bsp_polygon> * = NULL);
   // Because accessing in daughter classes member function from Unit * instances
   Order *aistate;
   Order *getAIState() const{return aistate;}

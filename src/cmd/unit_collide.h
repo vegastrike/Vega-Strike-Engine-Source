@@ -276,14 +276,16 @@ bool EradicateCollideTable (LineCollide* lc, StarSystem * ss);
 
 class csRapidCollider;
 class BSPTree;
-
+const int collideTreesMaxTrees=8;
 struct collideTrees {
   std::string hash_key;
   ///The bsp tree of this unit (used when shields down/unit-unit collisions)
   BSPTree *bspTree;
-  csRapidCollider *colTree;
+  BSPTree *bspShield;	
+  csRapidCollider *rapidColliders[collideTreesMaxTrees];
+  bool usingColTree()const {return rapidColliders[0]!=NULL;}
+  csRapidCollider *colTree(Unit *un);//gets the appropriately scaled unit collide tree
   ///The bsp tree of the shields of this unit (used for beams)
-  BSPTree *bspShield;
   csRapidCollider *colShield;
   int refcount;
   collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS);

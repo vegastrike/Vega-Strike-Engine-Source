@@ -1949,20 +1949,31 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
     } else {
       bspTree = NULL;
     }
-    polies.clear();  
-    if (!xml->rapidmesh) {
-      for (int j=0;j<nummesh();j++) {
-	meshdata[j]->GetPolys(polies);
-      }
-    }else {
-      xml->rapidmesh->GetPolys (polies);
-    }
-    if (xml->hasColTree ) {
-      colTree = new csRapidCollider (polies);    
-    }else {
-      colTree=NULL;
-    }
-    this->colTrees = new collideTrees (collideTreeHash,bspTree,bspShield,colTree,colShield);
+    polies.clear();
+	if (xml->rapidmesh) {
+		xml->rapidmesh->GetPolys(polies);
+	}
+	csRapidCollider * csrc=NULL;
+	if (xml->hasColTree) {
+		csrc=getCollideTree(Vector(1,1,1),
+							xml->rapidmesh?
+							&polies:NULL);
+	}
+    this->colTrees = new collideTrees (collideTreeHash,
+									   bspTree,
+									   bspShield,
+									   csrc,
+									   colShield);
+	if (xml->rapidmesh&&xml->hasColTree) {//if we have a speciaal rapid mesh we need to generate things now
+		for (int i=1;i<collideTreesMaxTrees;++i) {
+			if (!this->colTrees->rapidColliders[i]) {
+				unsigned int which = 1<<i;
+				this->colTrees->rapidColliders[i]= getCollideTree(Vector (which,which,which),
+																  &polies);
+			}
+		}
+	}
+									   
   }
   if (xml->bspmesh) {
     delete xml->bspmesh;
@@ -1972,4 +1983,24 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
   }
 #endif
   delete xml;
+}
+csRapidCollider * Unit::getCollideTree (const Vector & scale, const std::vector<bsp_polygon> * pol) {
+	vector <bsp_polygon> polies;
+	if (!pol) {
+		for (int j=0;j<nummesh();j++) {
+			meshdata[j]->GetPolys(polies);
+		}
+    }else {
+		polies = *pol;
+    }
+	if (scale.i!=1||scale.j!=1||scale.k!=1) {
+		for (vector<bsp_polygon>::iterator i=polies.begin();i!=polies.end();++i) {
+			for (unsigned int j=0;j<i->v.size();++j) {
+				i->v[j].i*=scale.i;
+				i->v[j].j*=scale.j;
+				i->v[j].k*=scale.k;
+			}
+		}
+	}
+	return new csRapidCollider (polies);
 }

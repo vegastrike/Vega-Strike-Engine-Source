@@ -15,9 +15,39 @@
 #include "vs_globals.h"
 #include "configxml.h"
 static Hashtable <std::string,collideTrees,char[127]> unitColliders;
-collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), colTree(cT), bspShield(bS), colShield(cS) {
-  refcount=1;
-  unitColliders.Put (hash_key,this);
+collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), bspShield(bS), colShield(cS) {
+	for (int i=0;i<collideTreesMaxTrees;++i) {
+		rapidColliders[i]=NULL;
+	}
+	rapidColliders[0]=cT;
+	
+	refcount=1;
+	unitColliders.Put (hash_key,this);
+}
+float loge2 = log(2);
+csRapidCollider * collideTrees::colTree(Unit * un) {
+	const float const_factor=1;
+	float speedsquared =const_factor*const_factor*un->GetVelocity().MagnitudeSquared(); 
+	if (un->rSize()*un->rSize()>SIMULATION_ATOM*SIMULATION_ATOM*speedsquared) {
+		return rapidColliders[0];
+	}
+	if (rapidColliders[0]==NULL)
+		return NULL;
+	float movement = sqrtf (speedsquared)*SIMULATION_ATOM;
+	int pow =(int)ceil(log (movement/un->rSize())/loge2);
+//	pow=collideTreesMaxTrees-1;
+	if (pow<0)
+		pow=0;
+	if (pow>=collideTreesMaxTrees)
+		pow=collideTreesMaxTrees-1;
+	
+	int val = 1<<pow;
+	fprintf (stderr,"%d %d\n",pow,val);
+
+	if (rapidColliders[pow]==NULL) {
+		rapidColliders[pow]=un->getCollideTree(Vector(1,1,val));
+	}
+	return rapidColliders[pow];
 }
 collideTrees* collideTrees::Get(const std::string &hash_key) {
   return unitColliders.Get(hash_key);
@@ -28,8 +58,10 @@ void collideTrees::Dec() {
     unitColliders.Delete (hash_key);
     if (bspTree)
       delete bspTree;
-    if (colTree) 
-      delete colTree;
+	for (int i=0;i<collideTreesMaxTrees;++i) {
+		if (rapidColliders[i])
+			delete rapidColliders[i];
+	}
     if (bspShield)
       delete bspShield;
     if (colShield)

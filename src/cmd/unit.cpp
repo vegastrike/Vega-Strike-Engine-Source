@@ -461,17 +461,25 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
     if (halos.ShouldDraw (enginescale)) 
       halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
 }
+extern Matrix WarpMatrix(Unit *);
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
 
   cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   Matrix *ctm;
-  Matrix invview;//not used unless FaceCamera
+#ifdef DRAW_STRETCH
+  Matrix invview(WarpMatrix(this));//not used unless FaceCamera
+#else
+  Matrix invview;
+#endif
   Transformation * ct;
   cumulative_transformation.Compose(parent, parentMatrix);
   ctm =&cumulative_transformation_matrix;
   ct = &cumulative_transformation;
+#ifdef DRAW_STRETCH
+  ctm = &invview;
+#endif
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   if (FaceCamera) {
 	  Vector p,q,r;
