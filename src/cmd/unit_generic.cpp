@@ -2836,6 +2836,7 @@ void Unit::RegenShields () {
 		    warpenergy-=bleed;
 	  } else {
 		  graphicOptions.InWarp=0;
+		  graphicOptions.WarpRamping=1;
 	  }
   }
 
