@@ -2,6 +2,7 @@
 #include "cmd_beam.h"
 #include "gfx_mesh.h"
 #include "cmd_collide.h"
+#include "physics.h"
 vector <LineCollide*> collidequeue;
 const int COLLIDETABLESIZE=20;//cube root of entries
 const int COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
@@ -210,20 +211,23 @@ bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtra
   return false;
 }
 */
-bool Unit::OneWayCollide (Unit * target) {//do each of these bubbled subunits collide with the other unit?
+bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   int i;
 
   for (i=0;i<nummesh;i++) {
   //query-sphery
   }
-  Vector normal;
-  float dist;
-  if (queryBSP(target->Position(), target->rSize(), normal,dist))
-      return true;
+  if (queryBSP(target->Position(), target->rSize(), normal,dist)) {
+    //    target->ApplyForce (normal*fabs(target->GetMass()*normal.Dot(GetVelocity()-target->GetVelocity())/SIMULATION_ATOM));
+    //    ApplyForce (normal*fabs(GetMass()*normal.Dot(target->GetVelocity()-GetVelocity())/SIMULATION_ATOM));
+    normal = ToWorldCoordinates (normal);
+    return true;
+  }
   for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->OneWayCollide(target))
+    if (subunits[i]->OneWayCollide(target,normal,dist))
       return true;
   }
+
   return false;
 }
 
@@ -235,17 +239,28 @@ bool Unit::Collide (Unit * target) {
   if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
     return false;
   //now do some serious checks
+  Vector normal;
+  float dist;
+  Unit * bigger;
+  Unit * smaller;
   if (radial_size<target->radial_size) {
-    if ((!target->OneWayCollide(this))/*||(!OneWayCollide(target))*/)
-      return false;
-  }else {
-    if ((!OneWayCollide(target))/*||(!target->OneWayCollide(this))*/)
-      return false;
+    bigger = target;
+    smaller = this;
+  } else {
+    bigger = this;
+    smaller = target;
   }
+  if (!bigger->OneWayCollide(smaller,normal,dist))
+    return false;
+  float elast = .5*(smaller->GetElasticity()+bigger->GetElasticity());
+  //  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
+  //  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
+  //  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-
-  fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",name.c_str(),target->name.c_str());
-
+  smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",bigger->name.c_str(),smaller->name.c_str());
+  
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }

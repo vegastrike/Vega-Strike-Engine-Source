@@ -213,13 +213,13 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bo
   // turn, for simplicity
   Vector p, q, r;
   GetOrientation(p,q,r);
-  Vector temp = (NetTorque+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
+  Vector temp = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
   AngularVelocity += temp;
   if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
 //	cerr << "Orientation: " << p << q << r << endl;
-  temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
+  temp = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
   Velocity += temp; // modelled as an impulse
   /*
     if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)

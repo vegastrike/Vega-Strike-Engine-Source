@@ -245,11 +245,11 @@ public:
 
   void Select();
   void Deselect();
-
+  
   void PrimeOrders();
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
-  bool OneWayCollide (Unit *target);
+  bool OneWayCollide (Unit *target, Vector & normal, float &dist);
   bool Collide(Unit * target);
   void CollideAll();//checks for collisions with all beams and other units roughly
   Vector Position(){return cumulative_transformation.position;};
@@ -310,6 +310,7 @@ public:
 
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
+  float GetElasticity ();
   const Limits &Limits() const { return limits; }
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }

@@ -656,7 +656,7 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
   }
   return false;
 }
-
+float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix() {
   //FIXME
   Matrix tmatrix;
