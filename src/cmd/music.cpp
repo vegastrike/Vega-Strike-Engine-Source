@@ -20,6 +20,8 @@
 #include "base.h"
 #include "networking/inet.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
+  if (!g_game.music_enabled)
+	  return;
   lastlist=PEACELIST;
   if (parent) {
     maxhull = parent->GetHull();

@@ -550,13 +550,13 @@ void Base::Draw () {
 	rooms[curroom]->Draw(this);
 	float x,y;
 	curtext.GetCharSize(x,y);
-	curtext.SetPos(-1+x,-1+(y*1.5));
+	curtext.SetPos(-.99,-1+(y*1.5));
 //	if (!drawlinkcursor)
 //		GFXColor4f(0,1,0,1);
 //	else
 //		GFXColor4f(1,.333333,0,1);
 	curtext.Draw();
-	othtext.SetPos(-1+x,1);
+	othtext.SetPos(-.99,1);
 //	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
 	EndGUIFrame (drawlinkcursor);

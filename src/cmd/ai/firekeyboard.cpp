@@ -242,7 +242,7 @@ void DoSpeech (Unit * un, const string &speech) {
   if (un) {
     myname= un->name;
   }
-  mission->msgcenter->add ("game","all",myname+string(": ")+speech);
+  mission->msgcenter->add (myname,"all",speech);
 }
 void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {

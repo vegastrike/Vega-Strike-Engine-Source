@@ -392,9 +392,13 @@ void VDU::DrawMessages(Unit *target){
 	int sendtime_mins=(int)(sendtime/60.0);
 	int sendtime_secs=(int)(sendtime - sendtime_mins*60);
 
-	sprintf(timebuf,"%2d.%02d ",sendtime_mins,sendtime_secs);
-
-	string mymsg=timebuf+lastmsg->message;
+	sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
+	string mymsg;
+ 	if (lastmsg->from!="game") {
+		mymsg=lastmsg->from+" ("+timebuf+"): "+lastmsg->message;
+	} else {
+		mymsg=string(timebuf)+": "+lastmsg->message;
+	}
 	int msglen=mymsg.size();
 	int rows_needed=msglen/cols;
 	fullstr=mymsg+"\n"+fullstr;
