@@ -50,10 +50,10 @@ extern void UnbindButton(int button) ;
 
 const int MAX_JOYSTICKS=10;
 const int MAX_BUTTONS=32;
-
+/*
 static KBHandler joyBindings[MAX_BUTTONS];
 extern KBSTATE buttonState[MAX_BUTTONS];
-
+*/
 
 extern JoyStick *joystick[MAX_JOYSTICKS];
 
@@ -83,7 +83,7 @@ class JoyStick {
 }
 ;
 
-const int MAX_JOYSTICKS=10;
+
 extern JoyStick *joystick[MAX_JOYSTICKS];
 typedef void (*JoyHandler)(KBSTATE,float x, float y, int mod);
 void BindJoyKey (int key, int joystick, JoyHandler handler);
