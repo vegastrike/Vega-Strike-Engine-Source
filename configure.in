@@ -332,10 +332,10 @@ AC_EGREP_CPP(yes,
 #endif
 ], [is_freebsd=yes], [is_freebsd=no] )
 AC_MSG_RESULT([${is_freebsd}])
-if test "x$is_freebsd" = "xyes" ; then
-    VS_LIBS="$VS_LIBS -lutil"
-fi
-
+#if test "x$is_freebsd" = "xyes" ; then
+#    VS_LIBS="$VS_LIBS -lutil"
+#fi
+VS_LIBS="$VS_LIBS -lutil"
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for MacOSX
 dnl --------------------------------------------------------------------------
