@@ -114,9 +114,9 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 PYTHON_BEGIN_MODULE(Director)
 PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")
-  PYTHON_DEFINE_METHOD(Class,&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
-  PYTHON_DEFINE_METHOD(Class,&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
-  PYTHON_DEFINE_METHOD(Class,&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
+  PYTHON_DEFINE_METHOD_DEFAULT(Class,&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
 PYTHON_END_CLASS(Director,pythonMission)
   PYTHON_DEFINE_GLOBAL(Director,&putSaveData,"putSaveData");
   PYTHON_DEFINE_GLOBAL(Director,&pushSaveData,"pushSaveData");
