@@ -445,7 +445,7 @@ void createObjects() {
     fscanf (fp, "%d\n", &numf);
   }	
   fighters = new Unit * [numf];
-  
+  int * tmptarget = new int [numf];
 
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
@@ -453,23 +453,31 @@ void createObjects() {
 
   
   char fightername [1024]="hornet.xunit";
-  for(int a = 0; a < numf; a++) {
-    int targetnum =0;
+  int a;
+  for(a = 0; a < numf; a++) {
+
     Vector pox (1000+150*a,100*a,100);
     if (fp) {      
       if (!feof(fp))
-	fscanf (fp, "%s %f %f %f %d\n",fightername,&pox.i, &pox.j, &pox.k,&targetnum);
+	fscanf (fp, "%s %f %f %f %d\n",fightername,&pox.i, &pox.j, &pox.k,&tmptarget[a]);
+
     }
+    if (tmptarget[a]<0||tmptarget[a]>numf)
+      tmptarget[a]=0;
     fighters[a] = new Unit(fightername, true);
     fighters[a]->SetPosition (pox);
     
     fighters[a]->SetAI(new Order());
     if (a!=0) {
       fighters[a]->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
-      fighters[a]->Target (fighters[targetnum]);
+
     }
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
   }
+  for (a=0;a<numf;a++) {
+      fighters[a]->Target (fighters[tmptarget[a]]);
+  }
+  delete [] tmptarget;
   if (fp)
       fclose (fp);
  

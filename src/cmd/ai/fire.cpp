@@ -15,7 +15,7 @@ void FireAt::ChooseTargets (int ) {
   Unit * un ;
   while ((un = iter->current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-    if (un==parent->Target()) {
+    if (un==parent->Target()||un==parent) {
       iter->advance();
       break;
     }
@@ -76,9 +76,13 @@ void FireAt::Execute () {
       iter->advance();
     }
     delete iter;  
+  } else {
+
   }
   if ((targ = parent->Target())) {
     shouldfire |= ShouldFire (targ);
+  } else {
+    ChooseTargets(1);
   }
   if (shouldfire) {
     if (delay>rxntime)
