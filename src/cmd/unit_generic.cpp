@@ -3903,7 +3903,7 @@ void Unit::Cloak (bool loak) {
   if (loak) {
     if (image->cloakenergy<warpenergy) {
       image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
-      if (cloaking==(-2147483647-1)) { //short fix
+      if (cloaking<-1) { //short fix
 	cloaking=2147483647; //short fix
       } else {
        
