@@ -880,7 +880,7 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
 #endif
 
 bool TargAll (Unit *me,Unit *target) {
-	return me->InRange(target,true,false)||me->InRange(target,true,true);
+	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&!UnitUtil::isSun(target);
 }
 bool TargUn (Unit *me,Unit *target) {
 	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR);
@@ -923,7 +923,7 @@ bool TargThreat (Unit *me,Unit *target) {
 	return false;
 }
 bool TargNear (Unit *me,Unit *target) {
-	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR;
+	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&!UnitUtil::isSun(target);
 }
 
 void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
