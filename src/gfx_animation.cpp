@@ -19,12 +19,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//#include "wrapgfx.h"
+
 #include "gfx_animation.h"
 #include "gfx_camera.h"
-//#include "glob.h"
-//#include "win.h"
 #include "lin_time.h"
+#include <stack>
+using std::stack;
+
+static stack<Animation *> animationdrawqueue;
+
 Animation::Animation ():Primitive()
 {
 	cumtime = 0;
@@ -86,12 +89,10 @@ Animation::Animation (char * FileName, bool Rep,  float priority,enum FILTER ism
 }
 Animation:: ~Animation ()
 {
-	//if(!copied)
-	//{
-		for (int i=0; i< numframes; i++)
-			delete Decal[i];
-		delete [] Decal;
-	//}
+  for (int i=0; i< numframes; i++)
+    delete Decal[i];
+  delete [] Decal;
+  
 }
 
 void Animation:: SetDimensions(float wid, float hei) {
@@ -99,22 +100,26 @@ void Animation:: SetDimensions(float wid, float hei) {
   height = hei;
 }
 
-void Animation:: Draw(const Transformation &dtrans, const Matrix m)
-{
-  float eee;
+void Animation::ProcessDrawQueue () {
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXDisable (LIGHTING);
+  GFXEnable(TEXTURE0);
+  GFXDisable(TEXTURE1);
+  GFXDisable (DEPTHWRITE);
+  while (!animationdrawqueue.empty()) {
+    animationdrawqueue.top()->DrawNow();
+    animationdrawqueue.pop();
+  }
+}
+
+void Animation::DrawNow() {
   Matrix orientation;
   Vector pos = local_transformation.position;
-
-  //  cumulative_transformation = local_transformation;
-  //  cumulative_transformation.Compose(dtrans, m);
 
   local_transformation.orientation.to_matrix(orientation);
   int framenum = (int)(cumtime/timeperframe);
   if (!Done()) {
-    GFXDisable (LIGHTING);
-    GFXEnable(TEXTURE0);
-    GFXDisable(TEXTURE1);
-    //glMatrixMode(GL_MODELVIEW);
+
     Vector p1,q1,r1;
     Vector camp,camq,camr;
     Camera* TempCam = _Universe->AccessCamera();
@@ -146,8 +151,7 @@ void Animation:: Draw(const Transformation &dtrans, const Matrix m)
     MultMatrix(transformation, translation, ShipMat);
     
     GFXLoadMatrix (MODEL, transformation);
-    //glDisable(GL_TEXTURE_2D);
-    //Decal[framenum]->Transfer();//frame stuff needs to be done
+
     Decal[framenum]->MakeActive();
     GFXBegin (QUADS);
     GFXTexCoord2f (0.00F,1.00F);
@@ -159,18 +163,21 @@ void Animation:: Draw(const Transformation &dtrans, const Matrix m)
     GFXTexCoord2f (0.00F,0.00F);
     GFXVertex3f (-width,height,0.00F);  //lower right
     GFXEnd ();
-    //glEnable(GL_TEXTURE_2D);
-    GFXEnable (LIGHTING);
+   
   }
   
-  if (cumtime==0&&GetElapsedTime()>=timeperframe)
+  if (GetElapsedTime()>=timeperframe)
     cumtime +=timeperframe;
   else
     cumtime += GetElapsedTime();
   if (repeat&&framenum>=numframes)
     cumtime =0;
-  
+}    
+
+void Animation:: Draw(const Transformation &, const float *) {
+  animationdrawqueue.push (this);
 }
+
 bool Animation::Done () {
   int framenum = (int)(cumtime/timeperframe);
   return (framenum>=numframes);

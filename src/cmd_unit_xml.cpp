@@ -57,6 +57,7 @@ namespace UnitXML {
       BOTTOM,
       SHIELDS,
       RECHARGE,
+      LEAK,
       HULL,
       STRENGTH,
       STATS,
@@ -134,6 +135,7 @@ namespace UnitXML {
     EnumMap::Pair ("top", TOP),
     EnumMap::Pair ("bottom", BOTTOM),
     EnumMap::Pair ("recharge", RECHARGE),
+    EnumMap::Pair ("leak", LEAK),
     EnumMap::Pair ("strength", STRENGTH),
     EnumMap::Pair ("mass", MASS),
     EnumMap::Pair ("momentofinertia", MOMENTOFINERTIA),
@@ -142,7 +144,6 @@ namespace UnitXML {
     EnumMap::Pair ("pitch", PITCH),
     EnumMap::Pair ("roll", ROLL),
     EnumMap::Pair ("accel", AACCEL),
-    EnumMap::Pair ("recharge", RECHARGE),
     EnumMap::Pair ("limit", LIMIT),
     EnumMap::Pair ("max", MAX),
     EnumMap::Pair ("min", MIN),
@@ -170,7 +171,7 @@ int parseMountSizes (const char * str) {
   }
   return ans;
 }
-
+static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
     string filename;
     Vector P;
@@ -179,6 +180,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Vector R;
     Vector pos;
     bool tempbool;
+    float fbrltb[6];
     Names elem = (Names)element_map.lookup(name);
     int mntsiz=weapon_info::NOWEAP;
     AttributeList::const_iterator iter;
@@ -313,8 +315,6 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
 
     }
-
-     
     Q.Normalize();
     if (fabs(Q.i)==fabs(R.i)&&fabs(Q.j)==fabs(R.j)&&fabs(Q.k)==fabs(R.k)){
       Q.i=-1;
@@ -419,34 +419,64 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case FRONT:
-	shield.front = parse_float((*iter).value);
+	fbrltb[0] = parse_float((*iter).value);
 	shield.number++;
 	break;
       case BACK:
-	shield.back=parse_float((*iter).value);
+	fbrltb[1]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case LEFT:
-	shield.left=parse_float((*iter).value);
+	fbrltb[3]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case RIGHT:
-	shield.right=parse_float((*iter).value);
+	fbrltb[2]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case TOP:
-	shield.top=parse_float((*iter).value);
+	fbrltb[4]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case BOTTOM:
-	shield.bottom=parse_float((*iter).value);
+	fbrltb[5]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case RECHARGE:
 	shield.recharge=parse_float((*iter).value);
 	break;
+      case LEAK:
+	shield.leak = parse_int ((*iter).value);
+	break;
       }
     }
+    if (fbrltb[0]>65535||fbrltb[1]>65535)
+      shield.number=2;
+
+    switch (shield.number) {
+    case 2:
+      shield.fb[2]=shield.fb[0]=fbrltb[0];
+      shield.fb[3]=shield.fb[1]=fbrltb[1];
+      break;
+    case 6:
+      shield.fbrltb.v[0]=CLAMP_SHORT(fbrltb[0]);
+      shield.fbrltb.v[1]=CLAMP_SHORT(fbrltb[1]);
+      shield.fbrltb.v[2]=CLAMP_SHORT(fbrltb[2]);
+      shield.fbrltb.v[3]=CLAMP_SHORT(fbrltb[3]);
+      shield.fbrltb.v[4]=CLAMP_SHORT(fbrltb[4]);
+      shield.fbrltb.v[5]=CLAMP_SHORT(fbrltb[5]);
+      shield.fbrltb.fbmax= CLAMP_SHORT((fbrltb[0]+fbrltb[1])*.5);
+      shield.fbrltb.rltbmax= CLAMP_SHORT((fbrltb[2]+fbrltb[3]+fbrltb[4]+fbrltb[5])*.25);
+      
+      break;
+    case 4:
+    default:
+      shield.fbrl.frontmax = shield.fbrl.front = CLAMP_SHORT(fbrltb[0]);
+      shield.fbrl.backmax = shield.fbrl.back = CLAMP_SHORT(fbrltb[1]);
+      shield.fbrl.rightmax = shield.fbrl.right = CLAMP_SHORT(fbrltb[2]);
+      shield.fbrl.leftmax = shield.fbrl.left = CLAMP_SHORT(fbrltb[3]);
+    }
+
     break;
   case HULL:
 	assert (xml->unitlevel==2);

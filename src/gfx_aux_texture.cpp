@@ -72,9 +72,15 @@ const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*siz
 const int SIZEOF_RGBQUAD=sizeof(BYTE)*4;
 
 static Hashtable<string, Texture,char [1001]> texHashTable;
-
+Texture * Texture::Exists (string s, string a) {
+  return Texture::Exists (s+a);
+}
 Texture * Texture::Exists (string s) {
-    return texHashTable.Get(s);
+    Texture * tmp = texHashTable.Get(s);
+    if (tmp)
+      if (tmp->original)
+	return tmp->original;
+    return tmp;
 }
 
 GFXBOOL Texture::checkold(const string &s)

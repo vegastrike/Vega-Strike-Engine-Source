@@ -52,6 +52,7 @@ class Camera;
 class Halo;
 class BSPTree;
 class PlanetaryOrbit;
+class UnitCollection;
 //////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 enum clsptr {
 	UNITPTR,
@@ -133,13 +134,27 @@ friend class PlanetaryOrbit;
   
   //static int refcount; for the inherited classes
   struct {
-	float right, left, front, back;
+    unsigned short right, left, front, back;
   } armor;
   struct {
-	  float front, back, right, left, top, bottom, recharge; int number;
+    int  number;
+    int leak; 
+    float recharge; 
+    union {
+      float fb[4];
+      struct {
+	unsigned short front, back, right, left;
+	unsigned short frontmax, backmax, rightmax, leftmax;
+      }fbrl;
+      struct {
+	unsigned short v[6];
+	unsigned short fbmax,rltbmax;
+      }fbrltb;
+    };
   } shield;
   float hull;
- 
+  float DealDamageToShield (const Vector & pnt, float &Damage);
+  float DealDamageToHull (const Vector &pnt, float Damage);
   //  bool active;
   
   //Vector pp, pq, pr, ppos;
@@ -198,9 +213,9 @@ public:
   virtual enum clsptr isUnit() {return UNITPTR;}
   static void ProcessDeleteQueue();
   void Init();
-  bool Explode();
+  bool Explode(bool draw=true);
   void Destroy();//explodes then deletes
-  void Kill();//deletes
+  virtual void Kill();//deletes
   inline bool Killed() {return killed;}
   inline void Ref() {ucref++;}
   void UnRef();
@@ -306,8 +321,8 @@ public:
   void YawTorque(float amt);
   void PitchTorque(float amt);
   void RollTorque(float amt);
-
-  void ResolveForces (const Transformation &, const Matrix,bool ResolveLast);
+  void UpdatePhysics (const Transformation &trans, const Matrix transmat, bool ResolveLast, UnitCollection *uc=NULL);
+  void ResolveForces (const Transformation &, const Matrix);
   //  void ResolveLast(const Transformation &, const Matrix); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   Vector UpCoordinateLevel(const Vector &v) const;

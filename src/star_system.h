@@ -41,7 +41,6 @@ class StarSystem {
   Camera cam[NUM_CAM];
   int currentcamera;
   InputDFA * systemInputDFA;
-  void modelGravity();
   double time;
   Background * bg;
   Texture *LightMap[6]; //type Texture

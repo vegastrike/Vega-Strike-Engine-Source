@@ -1,3 +1,4 @@
+#include "vegastrike.h"
 #include "cmd_unit.h"
 #include "cmd_beam.h"
 #include "gfx_mesh.h"
@@ -142,29 +143,6 @@ void Beam::CollideHuge (const LineCollide & lc) {
     }
   }
 
-}
-
-
-void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor &color) {
-    float percentage = .1;
-  if (meshdata[nummesh]) {//shields are up
-    /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
-						      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
-						      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
-						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
-    //calculate percentage
-meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
-  } else {
-    for (int i=0;i<nummesh;i++) {
-meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
-    }
-  }
-}
-
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor & color) {
-  Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
-  Vector localnorm (ToLocalCoordinates (normal));
-  ApplyLocalDamage(localpnt, localnorm, amt,color);
 }
 
 bool Beam::Collide (Unit * target) {

@@ -23,6 +23,7 @@
 #include "lin_time.h"
 #include "physics.h"
 #include "cmd_beam.h"
+#include "planet.h"
 //#ifdef WIN32
 float copysign (float x, float y) {
 	if (y>0)
@@ -205,12 +206,46 @@ void Unit::RollTorque(float amt) {
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
-
-void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bool lastframe/*, bool round_two*/) {
+void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bool lastframe, UnitCollection *uc) {
   if (lastframe)
-    prev_physical_state = curr_physical_state;  
-  // Torque is modeled as a perfect impulse at the beginning of a game
-  // turn, for simplicity
+    prev_physical_state = curr_physical_state;//the AIscript should take care
+  CollideAll(); 
+  if (isUnit()==PLANETPTR) {
+    ((Planet *)this)->gravitate (uc);
+  } else {
+    ResolveForces (trans,transmat);
+  } 
+    
+  curr_physical_state.position += Velocity*SIMULATION_ATOM;
+  cumulative_transformation = curr_physical_state;
+  cumulative_transformation.Compose (trans,transmat);
+  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
+  UpdateCollideQueue();
+  int i;
+  for (i=0;i<nummounts;i++) {
+    if (mounts[i].type.type==weapon_info::BEAM) {
+      if (mounts[i].gun) {
+	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+      }
+    }
+  }
+  bool dead=true;
+  for (i=0;i<numsubunit;i++) {
+    subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc);
+    dead &=subunits[i]->Killed();
+  }
+  if (hull<0) {
+    if (timeexplode==0) {
+      Explode(false);
+    }
+    dead&= (explosion==NULL);
+    
+    if (dead)
+      Kill();
+  }
+}
+
+void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
   Vector p, q, r;
   GetOrientation(p,q,r);
   Vector temp = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
@@ -218,37 +253,14 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bo
   if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
-//	cerr << "Orientation: " << p << q << r << endl;
   temp = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
-  Velocity += temp; // modelled as an impulse
+  Velocity += temp; 
+  NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
   /*
-    if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
-    {
-    float magvel = Velocity.Magnitude();
-    float y = (1-magvel*magvel*oocc);
+    if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10) {
+    float magvel = Velocity.Magnitude(); float y = (1-magvel*magvel*oocc);
     temp = temp * powf (y,1.5);
     }*/
-	
-  curr_physical_state.position += Velocity*SIMULATION_ATOM;
-  cumulative_transformation = curr_physical_state;
-  cumulative_transformation.Compose (trans,transmat);
-  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-  UpdateCollideQueue();
-  int i;
-  //  if (round_two) {
-    for (i=0;i<nummounts;i++) {
-      if (mounts[i].type.type==weapon_info::BEAM) {
-	if (mounts[i].gun) {
-	  mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
-	}
-      }
-    }
-    //  }
-  for (i=0;i<numsubunit;i++) {
-    subunits[i]->ResolveForces(cumulative_transformation,cumulative_transformation_matrix,lastframe/*,round_two*/);
-  }
-  NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
-  //cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
 }
 
 void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
@@ -289,7 +301,6 @@ Vector Unit::ToLocalCoordinates(const Vector &v) const {
 }
 
 Vector Unit::ToWorldCoordinates(const Vector &v) const {
-  //#define M(B,A) cumulative_transformatioN_matrix[B*4+A]
   return TransformNormal(cumulative_transformation_matrix,v); 
 #undef M
 

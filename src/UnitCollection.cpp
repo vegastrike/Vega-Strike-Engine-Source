@@ -3,26 +3,37 @@
 #include "cmd_unit.h"
 
 
-UnitCollection::~UnitCollection() {
-  UnitListNode *tmp =units;
-  if (persist){
-    while (tmp) {
-      if (tmp->unit)
-	tmp->unit->UnRef();
-      tmp = tmp->next;
-    }
+UnitCollection::UnitListNode::UnitListNode (Unit *unit):unit(unit), next(NULL){
+  if (unit) {
+    unit->Ref();
   }
-  if (units) 
-    delete units; 
+}
+UnitCollection::UnitListNode::UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next) { 
+  if (unit) {
+    unit->Ref();
+  }
+}
 
+UnitCollection::UnitListNode::~UnitListNode() { 
+  if(NULL!=unit) {
+    unit->UnRef(); 	
+  }
+}
+void UnitCollection::clear() {
+  UnitListNode *tmp;
+  while (units) {
+    tmp = units;
+    units = units->next;
+    delete tmp;
+  }  
+}
+UnitCollection::~UnitCollection() {
+  clear();
 }
 
 void UnitCollection::prepend(Unit *unit) { 
-  if (persist) {
-    if (unit->Killed()) {
-      return;
-    }
-    unit->Ref();
+  if (unit->Killed()) {
+    return;
   }
   units->next = new UnitListNode(unit, units->next); 
 }
@@ -30,14 +41,7 @@ void UnitCollection::prepend(Unit *unit) {
 void UnitCollection::prepend(Iterator *iter) {
   UnitListNode *n = units;
   Unit * tmp;
-  while(tmp=iter->current()) {
-    if (persist) {
-      if (tmp->Killed()){
-	iter->advance();
-	continue;
-      }
-      tmp->Ref();
-    }
+  while(tmp=iter->current()) {//iter->current checks for killed()
     n->next = new UnitListNode(tmp, n->next);
     iter->advance();
   }
@@ -47,47 +51,28 @@ void UnitCollection::append(Iterator *iter) {
   while(n->next!=NULL) n = n->next;
   Unit * tmp;
   while(tmp=iter->current()) {
-    if (persist) {
-      if (tmp->Killed()) {
-	iter->advance();
-	continue;
-      }
-      tmp->Ref();
-    }
     n->next = new UnitListNode(tmp, NULL);
     n = n->next;
     iter->advance();
   }
 }
 void UnitCollection::append(Unit *unit) { 
-  if (persist) {
-    if (unit->Killed()){
-      return;//don't do anything with dead units...buah
-    }
-    unit->Ref();
+  if (unit->Killed()){
+    return;//don't do anything with dead units...buah
   }
   UnitListNode *n = units;
   while(n->next!=NULL) n = n->next;
   n->next = new UnitListNode(unit, NULL);
 }	
 void UnitCollection::UnitIterator::preinsert(Unit *unit) {
-  if (persist) {
-    if (unit->Killed())
-      return;
-    unit->Ref();
-  }
-  if(pos->next!=NULL)
-    pos->next = new UnitListNode(unit, pos->next);
-  else
-    pos->next = new UnitListNode(unit, NULL);
+  if (unit->Killed())
+    return;
+  pos->next = new UnitListNode(unit, pos->next);
 }
 
 void UnitCollection::UnitIterator::postinsert(Unit *unit) {
-  if (persist) {
-    if (unit->Killed())
-      return;
-    unit->Ref();
-  }
+  if (unit->Killed())
+    return;
   if(pos->next!=NULL)
     pos->next->next = new UnitListNode(unit, pos->next->next);
   else
@@ -95,26 +80,22 @@ void UnitCollection::UnitIterator::postinsert(Unit *unit) {
 }
 
 void UnitCollection::UnitIterator::remove() {
-  if(pos->next!=NULL&&pos->unit!=NULL) {
-    pos->next = pos->next->next;
-    free (pos->next);
+  if (pos->next) {
+    UnitListNode * tmp = pos->next->next;
+    delete pos->next; //takes care of unref!
+    pos->next = tmp;
   }
 }
 
 Unit *UnitCollection::UnitIterator::current() {
-  if(pos->next!=NULL) {
-    if (persist) {
-      while (pos->next&&pos->next->unit->Killed()) {
-	pos->next->unit->UnRef();
-	remove();
-	pos->next = pos->next->next;
-	if (pos->next==NULL)
-	  return NULL;
-      }
+  while (pos->next) {
+    if (pos->next->unit->Killed()) {
+      remove();
+    }	else {
+      break;//unit not dead, return it!
     }
-    return pos->next->unit;
   }
-  else return NULL;
+  return pos->next?pos->next->unit:NULL;//if pos->next return that unit, otherwise NULL;
 }
 
 Unit *UnitCollection::UnitIterator::advance() {
@@ -126,16 +107,3 @@ Unit *UnitCollection::UnitIterator::advance() {
   }
 }
 
-
-
-/*
-Unit *UnitCollection::item(unsigned i){
-  UnitListNode *n = units->next;
-  while(n!=NULL) {
-    if(i==0) return n->unit;
-    n=n->next;
-    i--;
-  }
-  return NULL;
-}
-*/

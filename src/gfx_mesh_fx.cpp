@@ -1,9 +1,10 @@
 #include "gfx_mesh.h"
 #include "lin_time.h"
-#define MAXLOCALFX 4
+#define MAXLOCALFX 6
 static float startpotency = 20;
 static float endpotency = 4;
 static float flickertime = 5;
+const float mindamage=.1;
 static void AvLights (float target[4], const float  other[4]) {
   target[0] = .5*(target[0] + other[0]);
   target[1] = .5*(target[1] + other[1]);
@@ -17,7 +18,7 @@ MeshFX::MeshFX (const float TTL, const float delta, const bool enabled, const GF
 }
 void MeshFX::MergeLights (const MeshFX & other) {
   //  if (TTL>0) {
-    delta = (other.delta + this->delta) *.5;
+    delta = .5*(other.delta + this->delta);
     /*  TTL = (TTL>other.TTL)
 	?
 	(.666667*TTL+.33333*other.TTL)
@@ -70,7 +71,7 @@ bool MeshFX::Update() {
 }
 
 void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float damage, const GFXColor &col) {
-
+  
   Vector loc(pnt+norm);
   if (!(norm.i||norm.j||norm.k)) {
     loc = pnt;
@@ -79,7 +80,7 @@ void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float dama
   }
 
   GFXColor tmp (col.r,col.g,col.b,col.a);
-  float numsec = flickertime*damage;
+  float numsec = flickertime*(damage < mindamage)?mindamage:damage;;
   MeshFX newFX (numsec, (startpotency-endpotency)/(numsec*rSize()*rSize()) ,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,startpotency/(rSize()*rSize())));
   if (LocalFX.size()>=MAXLOCALFX) {
     LocalFX[(rand()%(LocalFX.size()))].MergeLights (newFX);

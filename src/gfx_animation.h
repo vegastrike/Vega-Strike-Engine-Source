@@ -29,10 +29,9 @@
 class Animation:public Primitive {	
   Texture **Decal; 
   bool camup;
-  short numframes;
+  int numframes;
   float timeperframe;
   scalar_t cumtime;
-  int texturename[2];
   float height; //half the height so you can do fancy vector translatons to campspace
   float width;
   bool repeat;
@@ -41,9 +40,9 @@ public:
   Animation();
   Animation(char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false);
   ~Animation();
-  //  void SetPosition (float x,float y,float z);
-  //  void SetPosition(const Vector &k);
-  void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
+  void Draw(const Transformation & t=identity_transformation, const float *m=identity_matrix );
+  void DrawNow();
+  static void ProcessDrawQueue();
   void SetDimensions(float wid, float hei);
   bool Done();
 };

@@ -51,8 +51,7 @@ class Planet : public Unit {
   float radius;
   float gravity;
   vector <char *> destination;
-  Unit **satellites;
-  int numSatellites;
+  UnitCollection satellites;
 
  public:
   Planet();
@@ -63,14 +62,14 @@ class Planet : public Unit {
   virtual enum clsptr isUnit() {return PLANETPTR;}
 
 //  void InitPlanet(FILE *fp);
-
+  virtual void Kill();
   void gravitate(UnitCollection *units);
 
   class PlanetIterator : public Iterator {
     UnitCollection planetStack;
     Iterator *pos;
   public:
-    PlanetIterator(Planet *p) : planetStack(true) { 
+    PlanetIterator(Planet *p) : planetStack() { 
       planetStack.append(p);
       pos = planetStack.createIterator();
     }
@@ -95,9 +94,11 @@ class Planet : public Unit {
 	
       Unit *currentPlanet = pos->current();
 	  if (currentPlanet->isUnit()==PLANETPTR) {
-	    for(int a=0; a<((Planet*)currentPlanet)->numSatellites; a++) {
-			planetStack.append(((Planet *)currentPlanet)->satellites[a]);
+	    UnitCollection::UnitIterator * tmp;
+	    for(tmp = ((Planet *)currentPlanet)->satellites.createIterator(); tmp->current()!=NULL; tmp->advance()) {
+			planetStack.append(tmp->current());
 		}
+	    delete tmp;
 	  }
       return pos->advance();
     }

@@ -84,9 +84,11 @@ void Halo::ProcessDrawQueue() {
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
-  for (unsigned int decal = 0;decal < halodrawqueue.size();decal++) {	
-    HaloDecal[decal]->MakeActive();
-    halodrawqueue[decal]->Draw();    
+  for (unsigned int decal = 0;decal < halodrawqueue.size();decal++) {
+    if (HaloDecal[decal]) {
+      HaloDecal[decal]->MakeActive();
+      halodrawqueue[decal]->Draw(); 
+    }   
   }
 
   GFXEnable (DEPTHWRITE);

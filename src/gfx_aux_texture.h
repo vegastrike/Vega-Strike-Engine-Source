@@ -61,6 +61,8 @@ public:
 	Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
   ~Texture();
   static Texture * Exists (string s);
+  static Texture * Exists (string s, string a);
+
 	int Bind();
 	void Transfer();
 	void MakeActive();

@@ -12,6 +12,7 @@
 #include "cmd_collide.h"
 #include "gfx_halo.h"
 #include "gfx_background.h"
+#include "gfx_animation.h"
 #include <expat.h>
 extern Vector mouseline;
 
@@ -21,9 +22,9 @@ vector<Vector> perplines;
 
 StarSystem::StarSystem(char * filename) : 
 //  primaries(primaries), 
-  drawList(new UnitCollection(true)),//what the hell is this...maybe FALSE FIXME
-  units(new UnitCollection(true)), 
-  missiles(new UnitCollection(true)), tp(new TextPlane("9x12.fon")) {
+  drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
+  units(new UnitCollection), 
+  missiles(new UnitCollection), tp(new TextPlane("9x12.fon")) {
   
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
@@ -106,16 +107,13 @@ ClickList *StarSystem::getClickList() {
   return new ClickList (this, drawList);
 
 }
-
-void StarSystem::modelGravity() {
+/**OBSOLETE!
+void StarSystem::modelGravity(bool lastframe) {
   for (int i=0;i<numprimaries;i++) {
-    if (primaries[i]->isUnit ()==PLANETPTR) 
-      ((Planet *)primaries[i])->gravitate(units);
-    else
-      ((Unit *)primaries[i])->ResolveForces (identity_transformation,identity_matrix,false); 
-  }   
+    primaries[i]->UpdatePhysics (identity_transformation,identity_matrix,lastframe,units)
+  }
 }	
-
+*/
 void StarSystem::AddUnit(Unit *unit) {
   units->prepend(unit);
   drawList->prepend(unit);
@@ -144,6 +142,7 @@ void StarSystem::Draw() {
   Mesh::ProcessUndrawnMeshes();
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
+  Animation::ProcessDrawQueue();
   systemInputDFA->Draw();
 }
 
@@ -168,16 +167,9 @@ void StarSystem::Update() {
 	iter->advance();
       }
       delete iter;
-      modelGravity();
-      iter = units->createIterator();
-      while((unit = iter->current())!=NULL) {
-	unit->ResolveForces(identity_transformation,identity_matrix,firstframe);
-	iter->advance();
-      }
-      delete iter;
       iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
-	unit->CollideAll(); //Goes in an endless loop...
+	unit->UpdatePhysics(identity_transformation,identity_matrix,firstframe,units);
 	iter->advance();
       }
       delete iter;

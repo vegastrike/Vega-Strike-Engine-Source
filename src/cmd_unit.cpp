@@ -30,7 +30,7 @@
 #include "cmd_ai.h"
 #include "cmd_order.h"
 #include "gfx_box.h"
-#include "gfx_animation.h"
+
 #include "gfx_lerp.h"
 #include "gfx_bsp.h"
 //if the PQR of the unit may be variable...for radius size computation
@@ -43,7 +43,7 @@
 double interpolation_blend_factor;
 
 
-static list<Unit*> Unitdeletequeue;
+
 
 void Unit::calculate_extent() {  
   int a;
@@ -70,28 +70,22 @@ void Unit::Init()
   origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
-  numhalos=0;
-  halos=NULL;
-  nummounts=0;
-  nummesh=0;
-  mounts=NULL;
+  
   shieldtight=0;//sphere mesh by default
-  //    nummounts=1;
-    
-  //    mounts = new Mount [1];
-  //    mounts[0].Activate();
-    //  mounts[0].Fire(identity_transformation,identity_matrix,this);
   energy=10000;
+  recharge = .01;
+  shield.recharge=shield.leak=0;
+  shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
+  hull=10;
+  shield.number=2;
+ 
   explosion=NULL;
   timeexplode=0;
   killed=false;
   ucref=0;
-  meshdata = NULL;
-  subunits = NULL;
+  numhalos = nummounts= nummesh = numsubunit = 0;
+  halos = NULL; mounts = NULL;meshdata = NULL;subunits = NULL;
   aistate = NULL;
-  //weapons = NULL;
-  numsubunit = 0;
-
 
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
@@ -153,28 +147,6 @@ void Unit::SetCameraToCockpit() {
 						    cumulative_transformation_matrix[9],
 						    cumulative_transformation_matrix[10]));
 						    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);*/
-}
-void Unit::UnRef() {
-  ucref--;
-  if (killed&&ucref==0) {
-    Unitdeletequeue.push_back(this);//delete
-  }
-}
-void Unit::Kill() {
-  killed = true;
-  if (CollideInfo.object) {
-    KillCollideTable (&CollideInfo);
-    CollideInfo.object=NULL;
-  }
-  Target((Unit *)NULL);
-  if (ucref==0)
-    Unitdeletequeue.push_back(this);
-}
-void Unit::ProcessDeleteQueue() {
-  while (Unitdeletequeue.size()) {
-    delete Unitdeletequeue.back();
-    Unitdeletequeue.pop_back();
-  }
 }
 
 Unit::Unit() {
@@ -272,8 +244,12 @@ Unit::~Unit()
 			delete subunits[subcount];
 		delete [] subunits;
 	}
-	if (halos&&numhalos)
+	if (halos) {
+	  for (int hc=0;hc<numhalos;hc++) {
+	    delete halos[hc];
+	  }
 	  delete [] halos;
+	}
 	if (mounts) {
 	  delete []mounts;
 	}
@@ -327,7 +303,6 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 }
 
 
-// dir must be normalized
 
 float Unit::querySphere (const Vector &start, const Vector &end) {
   int i;
@@ -374,49 +349,6 @@ void Unit::Destroy() {
       Kill();
 }
 
-bool Unit::Explode () {
-  int i;
-  if (explosion==NULL&&timeexplode==0&&nummesh) {	//no explosion in unit data file && explosions haven't started yet
-    explosion = new Animation * [nummesh];
-    timeexplode=0;
-    for (i=0;i<nummesh;i++){
-      explosion[i]= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
-    }    
-  }
-  float tmp[16];
-  
-  float tmp2[16];
-  bool alldone =false;
-  if (explosion) {
-    GFXDisable(DEPTHWRITE);
-    for (i=0;i<nummesh;i++) {
-      if (!explosion[i])
-	continue;
-      timeexplode+=GetElapsedTime();
-      Translate (tmp,meshdata[i]->Position());
-      MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-      explosion[i]->SetPosition(tmp2[12],tmp2[13],tmp2[14]);
-      if (timeexplode>i*.5){
-	explosion[i]->Draw();
-      }
-      if (explosion[i]->Done()) {
-	delete explosion[i];	
-	explosion[i]=NULL;
-      }else {
-	alldone=true;
-      }
-      GFXEnable (DEPTHWRITE);
-    }
-    if (!alldone){
-      delete [] explosion;
-      explosion = NULL;
-    }
-  }
-  for (i=0;i<numsubunit;i++) {
-    alldone |=subunits[i]->Explode();
-  }
-  return alldone;
-}
 
 bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
   int i;
@@ -445,7 +377,7 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
   float tmp;
 
   for (i=0;i<numsubunit;i++) {
-    if (tmp = subunits[i]->queryBSP(start,end,norm))
+    if ((tmp = subunits[i]->queryBSP(start,end,norm))!=0)
       return tmp;
   }
   if (!bspTree) {
@@ -530,11 +462,14 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
         Vector MeshCenter;
 #endif
   int i;
+  if (hull <0) {
+    Explode();
+  }
   if (!invisible) {
     for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
-	  if (i==nummesh&&meshdata[i]->numFX()==0) 
+	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
       float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
 					      meshdata[i]->Position()),

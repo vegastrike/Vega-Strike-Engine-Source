@@ -40,6 +40,7 @@ vegastrike_SOURCES =				\
 	cmd_order.h				\
 	cmd_unit.h				\
 	cmd_unit.cpp				\
+	cmd_unit_damage.cpp			\
 	cmd_unit_xml.cpp  			\
 	cmd_unit_click.cpp			\
 	cmd_node.h				\

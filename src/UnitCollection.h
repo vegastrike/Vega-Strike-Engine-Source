@@ -17,20 +17,18 @@ class UnitCollection {
     Unit *unit;
     UnitListNode *next;
     
-    UnitListNode(Unit *unit) : unit(unit), next(0) { }
-    UnitListNode(Unit *unit, UnitListNode *next) : unit(unit), next(next) { }
-    ~UnitListNode() { if(0!=next) delete next; }
+    UnitListNode(Unit *unit);
+    UnitListNode(Unit *unit, UnitListNode *next);
+    ~UnitListNode();
   } *units;
-  bool persist;
  public:
-  UnitCollection(bool persistant) : units(new UnitListNode(NULL)),persist(persistant) { }
+  UnitCollection() : units(new UnitListNode(NULL)) { }
   ~UnitCollection();
   class UnitIterator : public Iterator {
   private:
     UnitListNode *pos;
-    bool persist;
   public:
-    UnitIterator(UnitListNode *start, bool persistant) : pos(start), persist(persistant) {  }
+    UnitIterator(UnitListNode *start) : pos(start) {  }
     ~UnitIterator() { }
 
     void remove();
@@ -43,13 +41,13 @@ class UnitCollection {
   friend class UnitCollection::UnitIterator;
   
   UnitIterator *createIterator() { 
-    return new UnitIterator(units,persist);
+    return new UnitIterator(units);
   }
   void prepend(Unit *unit);
   void prepend(Iterator *iter);
   void append(Unit *unit);
   void append(Iterator *iter);
-  ///  Unit *item(unsigned i); //USELESS WITH PERSISTANT LISTS
+  void clear ();
 };
 
 #endif
