@@ -179,7 +179,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.startpress) {
     Stop(1);
   }
-  if (SSCK.sheltonpress>SSCK.sheltonrelease) {
+  if (SSCK.sheltonpress>0) {
     SheltonSlide(true);
   } else {
     SheltonSlide(false);
