@@ -1344,6 +1344,8 @@ void GameCockpit::Draw() {
         Panel.front()->GetPosition(x,y);
         DrawCrosshairs(x,y,wid,hei,textcol);
       } else {
+        GFXBlendMode(SRCALPHA,INVSRCALPHA);
+        GFXEnable (TEXTURE0);
         Panel.front()->Draw();//draw crosshairs
       }
     }
