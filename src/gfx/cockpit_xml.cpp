@@ -227,7 +227,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case RIGHT:
         {
           std::string tmp=getRes((*iter).value);
-          Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+          Pit[attr-FRONT] = new VSSprite (tmp.c_str(),cockpit_smooth?BILINEAR:NEAREST);
           if (!Pit[attr-FRONT]->LoadSuccess()) {
             delete Pit[attr-FRONT];
             Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
