@@ -834,9 +834,6 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 
 	if (flags == 0) return;
 
-//	// xxx debug color.
-//	glColor3f(cd.Level * 10 / 255.0, ((cd.Level & 3) * 60 + ((cd.zorg >> cd.Level) & 255)) / 255.0, ((cd.Level & 7) * 30 + ((cd.xorg >> cd.Level) & 255)) / 255.0);
-	
 	// Init vertex data.
 	InitVert(0, cd.xorg + half, Vertex[0].Y, cd.zorg + half);
 	InitVert(1, cd.xorg + whole, Vertex[1].Y, cd.zorg + half);
@@ -848,19 +845,6 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 	InitVert(7, cd.xorg + half, Vertex[4].Y, cd.zorg + whole);
 	InitVert(8, cd.xorg + whole, cd.Verts[3].Y, cd.zorg + whole);
 
-	/*
-	if (!Textured) {
-		ColorArray[0] = MakeColor(Vertex[0].Lightness);
-		ColorArray[1] = MakeColor(Vertex[1].Lightness);
-		ColorArray[2] = MakeColor(cd.Verts[0].Lightness);
-		ColorArray[3] = MakeColor(Vertex[2].Lightness);
-		ColorArray[4] = MakeColor(cd.Verts[1].Lightness);
-		ColorArray[5] = MakeColor(Vertex[3].Lightness);
-		ColorArray[6] = MakeColor(cd.Verts[2].Lightness);
-		ColorArray[7] = MakeColor(Vertex[4].Lightness);
-		ColorArray[8] = MakeColor(cd.Verts[3].Lightness);
-	}
-	*/
 	int	vcount = 0;
 	
 // Local macro to make the triangle logic shorter & hopefully clearer.
