@@ -22,13 +22,10 @@ void BindJoyKey (int key, int joystick, JoyHandler handler) {
 }
 
 void ProcessJoystick () {
-  SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
-  SDL_Event event;
-  float x,y,z;
-  int buttons;
 
 
 #ifdef SDLEVENTSNOW
+  SDL_Event event;
   while(SDL_PollEvent(&event)){
     switch(event.type){
     case SDL_JOYBUTTONDOWN:
@@ -66,22 +63,23 @@ void ProcessJoystick () {
     }
   }
 #endif
+  float x,y,z;
+  int buttons;
+  SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     buttons=0;
-    if (joystick[i]->isAvailable()) {
-      joystick[i]->GetJoyStick (x,y,z,buttons);
-    }
+    joystick[i]->GetJoyStick (x,y,z,buttons);
     for (int j=0;j<NUMJBUTTONS;j++) {
       if (buttons&(1<<j)) {
 	if (JoystickState[i][j]==UP) {
 	  (*JoystickBindings [i][j])(PRESS,x,y,buttons);		  
 	  JoystickState[i][j]=DOWN;
-	}else {
-	  if (JoystickState[i][j]==DOWN) {
-	    (*JoystickBindings [i][j])(RELEASE,x,y,buttons);		    
-	  }
-	  JoystickState[i][j]=UP;
 	}
+      }else {
+	if (JoystickState[i][j]==DOWN) {
+	  (*JoystickBindings [i][j])(RELEASE,x,y,buttons);		    
+	}
+	JoystickState[i][j]=UP;
       }
       (*JoystickBindings [i][j])(JoystickState[i][j],x,y,buttons);	
     }
