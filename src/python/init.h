@@ -34,6 +34,7 @@ inline QVector from_python(PyObject *p,boost::python::type<QVector>) {
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 void InitBriefing ();
+void InitDirector ();
 void InitVS ();
 
 #endif

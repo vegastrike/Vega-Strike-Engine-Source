@@ -50,7 +50,9 @@ Briefing.def(&BriefingUtil::setCloak,"setCloak");
 PYTHON_END_MODULE(Briefing)
 
 void InitBriefing() {
+	Python::reseterrors();
 	PYTHON_INIT_MODULE(Briefing);
+	Python::reseterrors();
 }
 
 

@@ -58,11 +58,12 @@ Mission::~Mission() {
   fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital
 }
-Mission::Mission(char *configfile, bool loadscripts){
+Mission::Mission(const char *configfile, bool loadscripts){
   briefing=NULL;
   number_of_flightgroups=0;
   number_of_ships=0;
-
+  runtime.pymissions=NULL;
+  nextpythonmission=NULL;
   easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
 
  top=domf->LoadXML(configfile);
@@ -139,7 +140,6 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
 	DirectorStart((missionNode *)*siter);
       }
     } else if (((*siter)->Name()=="python")){ //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
-      Python::reseterrors(); //print any previous errors so that they don't get overwritten
       const char *constdumbstr=(*siter)->attr_value(textAttr).c_str(); //get the text XML attribute
       int i=strlen(constdumbstr); //constdumbstr is the string I wish to copy... i is its length.
       char *dumbstr=new char [i+2]; //allocate 2 extra bytes for a double-null-terminated string.
@@ -155,10 +155,7 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
           break; //get out of the loop so that it doesn't endlessly delete the newlines that I added.
         }
       }
-      PyRun_SimpleString(dumbstr); //run it!
-      delete [] dumbstr; //delete the allocated memory
-      Python::reseterrors(); //print the errors (if any)
-      fflush(stdout); //if the program's init printed anything...
+	  this->nextpythonmission=dumbstr;
     } else{
       cout << "warning: Unknown tag: " << (*siter)->Name() << endl;
     }

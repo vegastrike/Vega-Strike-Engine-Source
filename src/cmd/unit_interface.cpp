@@ -492,7 +492,7 @@ void CargoToMission (const char * item,TextArea * ta) {
   ta->ChangeTextItem ("description",temp.getVariable("description","").c_str());  
 }
 extern void RespawnNow (Cockpit * cp);
-void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
+bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	char floatprice [640];
   switch (mode) {
   case BRIEFINGMODE:
@@ -528,6 +528,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
         RespawnNow(cp);
         DoDone();
 	Base::CurrentBase->Terminate();
+	return true;
       }
      }
     }
@@ -598,7 +599,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     CargoToMission (item,CargoInfo);
     break;
   }
-
+  return false;
 }
 void UpgradingInfo::DoDone() {
 	Base::CurrentBase->InitCallbacks();
@@ -952,7 +953,7 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			  lastselected.button=button;
 			  lastselected.state=state;
 			  lastselected.last=true;
-			  SelectItem (buy_name,button,state);//changes state/side bar price depedning on submode
+			  if (SelectItem (buy_name,button,state)) return;//changes state/side bar price depedning on submode
 
 			//CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); 
 			//CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");

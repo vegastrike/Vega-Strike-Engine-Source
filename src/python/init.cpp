@@ -194,6 +194,10 @@ void Python::initpaths(){
   char pwd[2048];
   getcwd (pwd,2047);
   pwd[2047]='\0';
+  for (int i=0;pwd[i]!='\0';i++) {
+	  if (pwd[i]=='\\')
+		  pwd[i]=DELIM;
+  }
   std::string changepath ("import sys\nsys.path=sys.path + ['"+std::string(pwd)+DELIMSTR+"modules']\n");
   char * temppython = strdup(changepath.c_str());
   PyRun_SimpleString(temppython);	
@@ -205,6 +209,9 @@ void Python::reseterrors() {
   if (PyErr_Occurred()) {
     PyErr_Print();
     PyErr_Clear();
+    fflush(stderr);
+
+  fflush(stdout);
   }
   fflush(stderr);
 }
@@ -236,6 +243,7 @@ void Python::init() {
   Py_Initialize();
 	InitBriefing ();
 	InitVS ();
+	InitDirector ();
 //  initVegastrike();
 }
 void Python::test() {

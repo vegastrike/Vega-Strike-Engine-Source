@@ -55,6 +55,7 @@
 #include "savegame.h"
 #include "msgcenter.h"
 #include "cmd/briefing.h"
+#include "pythonmission.h"
 #ifdef HAVE_PYTHON
 #include "Python.h"
 #endif
@@ -104,18 +105,25 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
   }
 }
 
-PYTHON_INIT_INHERIT_GLOBALS(Director,missionThread);
+PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
+ADD_FROM_PYTHON_FUNCTION(pythonMission)
 PYTHON_BEGIN_MODULE(Director)
-PYTHON_BEGIN_INHERIT_CLASS(Director,PythonMission,missionThread,"Mission")
-  Class.def (&missionThread::Pickle,"Pickle",PythonMission::default_Pickle);
-  Class.def (&missionThread::UnPickle,"UnPickle",PythonMission::default_UnPickle);
-  Class.def (&missionThread::Execute,"Execute",PythonMission::default_Execute);
-PYTHON_END_CLASS(Director,missionThread)
+PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")
+  Class.def(&pythonMission::Pickle,"Pickle",pythonMission::default_Pickle);
+  Class.def(&pythonMission::UnPickle,"UnPickle",pythonMission::default_UnPickle);
+  Class.def(&pythonMission::Execute,"Execute",pythonMission::default_Execute);
+PYTHON_END_CLASS(Director,pythonMission)
   Director.def (&putSaveData,"putSaveData");
   Director.def (&pushSaveData,"pushSaveData");
   Director.def (&getSaveData,"getSaveData");
   Director.def (&getSaveDataLength,"getSaveDataLength");
 PYTHON_END_MODULE(Director)
+
+void InitDirector() {
+	Python::reseterrors();
+	PYTHON_INIT_MODULE(Director);
+	Python::reseterrors();
+}
 
 void Mission::DirectorStart(missionNode *node){
   cout << "DIRECTOR START" << endl;
@@ -133,31 +141,12 @@ void Mission::DirectorStart(missionNode *node){
 
   string_counter=0;
   old_string_counter=0;
-  bool returnnow=true;
-  missionThread *main_thread=NULL;
-  std::string python = node->attr_value ("python");
-  if (!python.empty()) {
-    static bool init=false;
-    if (!init) {
-      init=true;
-      Python::reseterrors();
-      PYTHON_INIT_MODULE(Director);
-      Python::reseterrors();
-    }
-    main_thread = PythonClass <missionThread>::Factory (python);
-    Python::reseterrors();
-  }
-  if (main_thread==NULL) {
-    returnnow=false;
-    main_thread= new missionThread;
-  }
+  missionThread *main_thread= new missionThread;
   runtime.thread_nr=0;
   runtime.threads.push_back(main_thread);
   runtime.cur_thread=main_thread;
 
   director=NULL;
-  if (returnnow)
-      return;
   //  msgcenter->add("game","all","parsing programmed mission");
   std::string doparse = node->attr_value ("do_parse");
   if (!doparse.empty()) {
@@ -194,6 +183,17 @@ void Mission::DirectorStart(missionNode *node){
 }
 
 void Mission::DirectorInitgame(){
+  if (nextpythonmission) {
+    runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
+    delete [] nextpythonmission; //delete the allocated memory
+    nextpythonmission=NULL;
+	if (!this->unpickleData.empty()) {
+		if (runtime.pymissions) {
+			runtime.pymissions->UnPickle(unpickleData);
+			unpickleData="";
+		}
+	}
+  }
   if(director==NULL){
     return;
   }
@@ -201,8 +201,8 @@ void Mission::DirectorInitgame(){
 }
 
 void Mission::DirectorLoop(){
-  if (!runtime.threads.empty())
-    runtime.threads[0]->Execute();  
+  if (runtime.pymissions)
+    runtime.pymissions->Execute();
   if(director==NULL){
     return;
   }
@@ -259,15 +259,15 @@ void Mission::DirectorEnd(){
 
 }
 std::string Mission::Pickle () {
-  if (runtime.threads.empty()) {
+  if (!runtime.pymissions) {
     return "";
   }else {
-    return runtime.threads[0]->Pickle();
+    return runtime.pymissions->Pickle();
   }
 }
 void Mission::UnPickle (string pickled) {
-  if (!runtime.threads.empty())
-    runtime.threads[0]->UnPickle(pickled);  
+  if (runtime.pymissions)
+    runtime.pymissions->UnPickle(pickled);  
 }
 void Mission::loadModule(string modulename){
   missionNode *node=director;
@@ -467,8 +467,8 @@ void Mission::BriefingStart() {
     BriefingEnd();
   }
   briefing = new Briefing();
-  if (!runtime.threads.empty())
-	runtime.threads[0]->callFunction("initbriefing");
+  if (runtime.pymissions)
+	runtime.pymissions->callFunction("initbriefing");
   RunDirectorScript ("initbriefing");
 }
 void Mission::BriefingUpdate() {
@@ -480,8 +480,8 @@ void Mission::BriefingUpdate() {
 void Mission::BriefingLoop() {
   if (briefing) {
     RunDirectorScript ("loopbriefing");
-	if (!runtime.threads.empty())
-		runtime.threads[0]->callFunction("loopbriefing");
+	if (runtime.pymissions)
+		runtime.pymissions->callFunction("loopbriefing");
   }
 }
 class TextPlane * Mission::BriefingRender() {
@@ -506,8 +506,8 @@ class TextPlane * Mission::BriefingRender() {
 
 void Mission::BriefingEnd() {
   if (briefing) {
-	if (!runtime.threads.empty())
-		runtime.threads[0]->callFunction("endbriefing");
+	if (runtime.pymissions)
+		runtime.pymissions->callFunction("endbriefing");
     RunDirectorScript ("endbriefing");      
     delete briefing;
     briefing = NULL;

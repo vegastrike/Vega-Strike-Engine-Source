@@ -1,5 +1,6 @@
 #include "config_xml.h"
 #include "cmd/script/mission.h"
+#include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
 #include "gfxlib.h"
 #include "star_system.h"
@@ -66,15 +67,9 @@ void UnpickleMission (std::string pickled) {
   std::string file= PickledDataOnlyMissionName(pickled);
   pickled = PickledDataSansMissionName(pickled);
   if (pickled.length()) {
-    active_missions.push_back (new Mission("generic.mission"));
+    active_missions.push_back (new Mission(file.c_str()));
     active_missions.back()->initMission();
-    if (active_missions.back()->runtime.threads.empty()) {
-      active_missions.back()->runtime.threads.push_back (NULL);
-    }else {
-      delete active_missions.back()->runtime.threads.back();
-    }
-    active_missions.back()->runtime.threads.back()= PythonMission::Factory (file);
-    active_missions.back()->UnPickle (pickled);
+    active_missions.back()->SetUnpickleData(pickled);
   }
 }
 std::string lengthify (std::string tp) {
@@ -125,7 +120,7 @@ std::string UnpickleAllMissions (FILE * fp) {
     fread (temp,picklelength,1,fp);
     retval += temp;
     if (i<active_missions.size()) {
-      active_missions[i]->UnPickle (PickledDataSansMissionName(temp));
+      active_missions[i]->SetUnpickleData (PickledDataSansMissionName(temp));
     }else {
       UnpickleMission(temp);
     }

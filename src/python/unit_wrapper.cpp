@@ -97,8 +97,8 @@ PYTHON_BEGIN_MODULE(VS)
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
-EXPORT_UTIL(getFileName,"")
-EXPORT_UTIL(getName,"")
+EXPORT_UTIL(getSystemFile,"")
+EXPORT_UTIL(getSystemName,"")
 EXPORT_UTIL(getUnitList,un_iter())
 EXPORT_UTIL(getUnit,Unit())
 EXPORT_UTIL(launchJumppoint,Unit())
@@ -247,7 +247,9 @@ Unit * from_python(PyObject *p,boost::python::type<Unit *>) {
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 void InitVS() {
+	Python::reseterrors();
 	PYTHON_INIT_MODULE(VS);
+	Python::reseterrors();
 }
 
 
@@ -280,10 +282,12 @@ void InitVS() {
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
 #define Vector
 #define QVector
+import random
+
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
-EXPORT_UTIL(getFileName,"")
-EXPORT_UTIL(getName,"")
+EXPORT_UTIL(getSystemFile,"")
+EXPORT_UTIL(getSystemName,"")
 EXPORT_UTIL(getUnitList,un_iter())
 EXPORT_UTIL(getUnit,Unit())
 EXPORT_UTIL(launchJumppoint,Unit())
@@ -303,14 +307,14 @@ EXPORT_UTIL(musicAddList,0)
 
 voidEXPORT_UTIL(musicPlaySong)
 voidEXPORT_UTIL(musicPlayList)
-EXPORT_UTIL(GetDifficulty,1)
+EXPORT_UTIL(GetDifficulty,.88)
 voidEXPORT_UTIL(SetDifficulty)
 voidEXPORT_UTIL(playSound)
 voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
 EXPORT_UTIL(getPlayer,Unit())
 EXPORT_UTIL(getPlayerX,Unit())
-EXPORT_UTIL(getNumPlayers,1)
+EXPORT_UTIL(getNumPlayers,2)
 
 def string ():
   return ''
@@ -324,8 +328,8 @@ class Unit:
   WRAPPED1(bool,__ne__,UnitWrapper,oth,true);
   voidWRAPPED0(Kill);
   voidWRAPPED0(setNull);
-  WRAPPED0(int,__nonzero__,0);
-  WRAPPED0(int,isNull,1);
+  WRAPPED0(int,__nonzero__,random.randrange(0,2));
+  WRAPPED0(int,isNull,random.randrange(0,2));
   voidWRAPPED1(SetTarget,UnitWrapper,un);
   WRAPPED0(UnitWrapper, GetTarget,Unit());
   WRAPPED0(UnitWrapper, GetVelocityReference,Unit())

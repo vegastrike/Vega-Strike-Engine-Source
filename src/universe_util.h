@@ -10,8 +10,8 @@ class Unit;
 namespace UniverseUtil {
 	void pushSystem (string name);
 	void popSystem ();
-	string getFileName();
-	string getName();
+	string getSystemFile();
+	string getSystemName();
 	un_iter getUnitList();
 	Unit *getUnit(int index);
 	Unit *launchJumppoint(string name_string,

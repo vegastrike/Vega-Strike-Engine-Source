@@ -25,10 +25,10 @@ namespace UniverseUtil {
 	void popSystem () {
 		_Universe->popActiveStarSystem();
 	}
-	string getFileName() {
+	string getSystemFile() {
 		return activeSys->getFileName();
 	}
-	string getName() {
+	string getSystemName() {
 		return activeSys->getName();
 	}
 	un_iter getUnitList() {
@@ -166,11 +166,14 @@ namespace UniverseUtil {
 	Unit *getPlayer(){
 		return _Universe->AccessCockpit()->GetParent();;
 	}
-	Unit *getPlayerX(int which){
-		return _Universe->AccessCockpit(which)->GetParent();
-	}
 	int getNumPlayers () {
 		return _Universe->numPlayers();
+	}
+	Unit *getPlayerX(int which){
+		if (which>=getNumPlayers()) {
+			return NULL;
+		}
+		return _Universe->AccessCockpit(which)->GetParent();
 	}
 }
 

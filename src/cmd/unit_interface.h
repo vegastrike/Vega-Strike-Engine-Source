@@ -52,7 +52,7 @@ public:
   ~UpgradingInfo();
   void Render();
   void SelectLastSelected();
-  void SelectItem (const char * str, int button, int state);
+  bool SelectItem (const char * str, int button, int state);
   void CommitItem (const char * str, int button, int state);
   //this function is called after the mount is selected and stored in selected mount
   void CompleteTransactionAfterMountSelect();

@@ -44,7 +44,7 @@
 #include "easydom.h"
 
 #include "msgcenter.h"
-
+#include "pythonmission.h"
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
@@ -341,14 +341,9 @@ void Mission::terminateMission(){
 	if (this!=(*active_missions)[0]) {
 		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
 	}
-	if (!runtime.threads.empty()) {
-		missionThread * temp =runtime.threads[0];
-		runtime.threads[0]= new missionThread(*temp);//invoke copy constructor
-		temp->Destroy();
-		if (runtime.cur_thread==temp) {
-			runtime.cur_thread=runtime.threads[0];
-		}
-	}
+	if (runtime.pymissions)
+		runtime.pymissions->Destroy();
+	runtime.pymissions=NULL;
 }
 
 varInst *Mission::call_float_cast(missionNode *node,int mode){

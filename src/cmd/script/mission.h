@@ -282,7 +282,6 @@ enum tag_type {
   DTAG_RETURN,
   DTAG_IMPORT
 };
-
 enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_INT,VAR_OBJECT,VAR_VOID,VAR_ANY };
 
 enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
@@ -371,18 +370,12 @@ class missionThread {
 
 
  protected:
-  virtual void Destructor () {delete this;}
  public:
-	 virtual void SetParent (int){}
-  virtual void callFunction (std::string str) {}
-  virtual ~missionThread(){}//call me and DIE
+  virtual ~missionThread(){}
   vector<contextStack *> exec_stack;
   vector<missionNode *> module_stack;
   vector<unsigned int>  classid_stack;
-  virtual void Execute() {}
-  virtual void Destroy () {Destructor();}
-  virtual std::string Pickle() {return std::string();}
-  virtual void UnPickle(std::string) {}
+
 };
 
 /* *********************************************************** */
@@ -416,17 +409,22 @@ class missionNode : public tagDomNode {
 
 /* *********************************************************** */
 
-
+class pythonMission;
+class PythonMissionBaseClass;
 #endif // VS_MIS_SEL
 
 
 class Mission {
  public:
+  void SetUnpickleData(std::string dat) {
+	unpickleData=dat;
+  }
   class Briefing * briefing;
   double gametime;
+
   void terminateMission();
  Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
-  Mission(char *configfile, bool loadscripts=true);
+  Mission(const char *configfile, bool loadscripts=true);
   std::string Pickle ();//returns filename\npickleddata
   void UnPickle (std::string pickled);//takes in pickeddata
   void AddFlightgroup(Flightgroup * fg);
@@ -509,9 +507,12 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   easyDomFactory<missionNode> *importf;
 
   tagMap tagmap;
+  char *nextpythonmission;
+  std::string unpickleData;
 
   struct Runtime {
     vector<missionThread *> threads;
+	PythonMissionBaseClass * pymissions;
     map<string,missionNode *> modules;
     int thread_nr;
     missionThread *cur_thread;
