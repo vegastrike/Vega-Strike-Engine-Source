@@ -356,7 +356,7 @@ void Cockpit::UpdAutoPilot()
 }
 
 extern void DoCockpitKeys();
-extern void DockToSavedBases (int playernum);
+extern QVector DockToSavedBases (int playernum);
 static float dockingdistance (Unit* port, Unit * un) {
 	vector<DockingPorts>::const_iterator i =port->GetImageInformation().dockingports.begin();
 	vector<DockingPorts>::const_iterator end =port->GetImageInformation().dockingports.end();
