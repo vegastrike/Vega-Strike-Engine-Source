@@ -10,7 +10,7 @@
 #include "ai/navigation.h"
 #include "ai/flybywire.h"
 #include "images.h"
-
+#include "missile.h"
 
 
 void Unit::UnFire () {
@@ -175,7 +175,7 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
       new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work      
       break;
     case weapon_info::PROJECTILE:
-      temp = new Unit (type.file.c_str(),false,owner->faction);
+      temp = new Missile (type.file.c_str(),owner->faction,"",type.Damage,type.Range/type.Speed);
       if (target&&target!=owner) {
 	temp->Target (target);
 	temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));

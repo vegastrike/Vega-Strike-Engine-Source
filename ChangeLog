@@ -2,6 +2,7 @@
 	* Added option for swithcing cockpits when units change
 	* Added option for AI to not pilot ship you turret
 	* Fixed UnitContainer bug in player_unit
+	* Fixed up missiels to deal damage in the list and self destruct
 	
 2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
 	

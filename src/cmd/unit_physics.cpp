@@ -473,7 +473,8 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
   return false;
 }
 void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist) {
-  if (smalle->isUnit()==ENHANCEMENTPTR) {
+  clsptr smltyp = smalle->isUnit();
+  if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
     smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
     return;
   }	       
