@@ -226,8 +226,16 @@ void Mission::doFlightgroups(easyDomNode *node){
   }
 
 }
+Flightgroup::Flightgroup () {//betterto have a flightgroup constructor
+  fprintf (stderr,"constructing FG 0x%x\n",this);
+  squadLogo=NULL;
+  orderlist=NULL;
+  domnode=NULL;
+  nr_waves_left=nr_ships_left=ship_nr=flightgroup_nr=waves=nr_ships=terrain_nr=0;
+}
 
 Flightgroup::~Flightgroup() {
+  fprintf (stderr,"deleting FG 0x%x %s %s\n",this,name.c_str(),faction.c_str());
   if (squadLogo){
     delete squadLogo;
   }

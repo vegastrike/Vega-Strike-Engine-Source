@@ -423,6 +423,15 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     }
   
   }else {
+    if (touchme) {
+      for (unsigned int i=0;i<up->image->cargo.size();i++) {
+	if (CanAddCargo(up->image->cargo[i])) {
+	  AddCargo(up->image->cargo[i],false);
+	}
+
+      }
+
+    }
     /*    if (image->cargo_volume<up->image->cargo_volume) {
       
       if (templ!=NULL?up->image->cargo_volume+image->cargo_volume<templ->image->cargo_volume:true) {
