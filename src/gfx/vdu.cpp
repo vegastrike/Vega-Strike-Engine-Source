@@ -429,10 +429,11 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
 
 void VDU::DrawMessages(Unit *target){
   string fullstr;
+  double nowtime=mission->getGametime();
 
+  /*
   char st[256];
   //  sprintf (st,"\n%s",target->name.c_str());
-    double nowtime=mission->getGametime();
   if(target){
     string ainame;
     if(target->getFlightgroup()){
@@ -450,25 +451,30 @@ void VDU::DrawMessages(Unit *target){
   else{
     sprintf(st,"no target");
   }
-  string targetstr=string(st)+"\n";
+*/
+  string targetstr;
   int msglen=targetstr.size();
   
-  int rows_needed=msglen/(cols>0?cols:1);
+  int rows_needed=0;//msglen/(cols>0?cols:1);
 
   MessageCenter *mc=mission->msgcenter;
   
-  int rows_used=rows_needed+1;
+  int rows_used=rows_needed;
   vector <std::string> whoNOT;
   whoNOT.push_back ("briefing");
   whoNOT.push_back ("news");
   whoNOT.push_back ("bar");
-
+  static float oldtime = XMLSupport::parse_float(vs_config->getVariable("graphics","last_message","5"));
+  static int num_messages=XMLSupport::parse_int(vs_config->getVariable("graphics","num_messages","2"));
   vector <std::string> message_people;//should be "all", parent's name
   gameMessage lastmsg;
-  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && mc->last(i,lastmsg,message_people,whoNOT);i++){
+  for(int i=scrolloffset<0?-scrolloffset-1:0;rows_used<((scrolloffset<0||num_messages>rows)?rows:num_messages)&&mc->last(i,lastmsg,message_people,whoNOT);i++){
       char timebuf[100];
       double sendtime=lastmsg.time;
-      if(sendtime<=nowtime){
+      if (scrolloffset==0&&sendtime<nowtime-oldtime*4){
+        break;
+      }
+      if(sendtime<=nowtime&&(sendtime>nowtime-oldtime||scrolloffset<0)){
 		  int sendtime_mins=(int)(sendtime/60.0);
 		  int sendtime_secs=(int)(sendtime - sendtime_mins*60);
 		  
