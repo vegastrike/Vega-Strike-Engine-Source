@@ -212,6 +212,7 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
 } 
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
+  static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
   vector <GFXLightLocal> curlights;
   xml->cursun.i=0;
@@ -617,7 +618,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     filename = new char [1];
     filename[0]='\0';
     fullname="unkn-unit";
-    scalex = .01;
+    scalex = asteroiddiff;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
