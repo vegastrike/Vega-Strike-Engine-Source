@@ -23,6 +23,7 @@
 
 #include "font.h"
 
+#include "guidefs.h"
 #include "vs_globals.h"
 
 // For some reason, the cumulative width of GLUT strings is smaller than the
@@ -60,7 +61,7 @@ void Font::calcMetrics(void) {
     //  aren't modifying the public state of the object.
     Font& thisObject = *const_cast<Font*>(this);
 
-    thisObject.m_strokeWidth = max( minimumStrokeWidth, nonClippedStrokeWidth );
+    thisObject.m_strokeWidth = guiMax( minimumStrokeWidth, nonClippedStrokeWidth );
     thisObject.m_needMetrics = false;
 
     // Recalculate the extra char width.

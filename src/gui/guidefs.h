@@ -210,4 +210,10 @@ void drawLowRightShadow(const Rect& rect, const GFXColor& color, float lineWidth
 void drawFilledPolygon(const std::vector<Point>& coords, const GFXColor& color);
 
 
+//////////////////   MIN AND MAX FUNCTIONS   ////////////////////
+
+#define guiMin(a, b) ((a) < (b)? (a) : (b))
+#define guiMax(a, b) ((a) > (b)? (a) : (b))
+
+
 #endif   // __GUIDEFS_H__

@@ -107,18 +107,13 @@ void Slider::setRect(const Rect& r) {
 static bool isColorLight(const GFXColor& c) {
     return( c.r>.6 || c.g>.6 || c.b>.6 );
 }
-static double mymax(double a, double b) {
-	return a>b?a:b;
-}
-static double mymin(double a, double b) {
-	return a<b?a:b;
-}
+
 // Make a color somewhat darker.
 static GFXColor darkenColor(const GFXColor& c, const float factor) {
     GFXColor result;
-    result.r = mymax(0, c.r - factor);
-    result.g = mymax(0, c.g - factor);
-    result.b = mymax(0, c.b - factor);
+    result.r = guiMax(0, c.r - factor);
+    result.g = guiMax(0, c.g - factor);
+    result.b = guiMax(0, c.b - factor);
     result.a = c.a;
 
     return result;
@@ -127,9 +122,9 @@ static GFXColor darkenColor(const GFXColor& c, const float factor) {
 // Make a color somewhat darker.
 static GFXColor lightenColor(const GFXColor& c, const float factor) {
     GFXColor result;
-    result.r = mymin(1.0, c.r + factor);
-    result.g = mymin(1.0, c.g + factor);
-    result.b = mymin(1.0, c.b + factor);
+    result.r = guiMin(1.0, c.r + factor);
+    result.g = guiMin(1.0, c.g + factor);
+    result.b = guiMin(1.0, c.b + factor);
     result.a = c.a;
 
     return result;

@@ -706,7 +706,7 @@ void BaseComputer::constructControls(void) {
         ms->setRect( Rect(-.96, -.95, 1.87, 1.4) );
         ms->setColor( GFXColor(0,1,1,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        ms->setFont( Font(.06) );
+        ms->setFont( Font(.07) );
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE);
         ms->setTextMargins(Size(.02,.01));
@@ -2350,6 +2350,20 @@ bool BaseComputer::changeToPlayerInfoMode(const EventCommandId& command, Control
     return true;
 }
 
+
+// Given a faction number, return a PaintText color command for the faction.
+// This lightens up the faction colors to make them more easily seen on the dark background.
+static std::string factionColorTextString(int faction) {
+		// The following gets the spark (faction) color.
+		const float *spark = FactionUtil::GetSparkColor(faction);
+		
+		// Brighten up the raw colors by multiplying each channel by 2/3, then adding back 1/3.
+		// The darker colors are too hard to read.
+		std::string result = colorsToCommandString(spark[0]/1.5+1.0/3, spark[1]/1.5+1.0/3, spark[2]/1.5+1.0/3);
+
+		return result;
+}
+
 // Show the player's basic information.
 bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* control) {
     // Heading.
@@ -2357,6 +2371,9 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
 
     // Number of kills for each faction.
     vector<float>* killList = &_Universe->AccessCockpit()->savegame->getMissionData(string("kills"));
+
+	// Make everything bold.
+	text += "#b4#";
 
     // A line for each faction.
     const int numFactions = FactionUtil::GetNumFactions();
@@ -2367,25 +2384,15 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
 //        relation = relation + 0.5;
         const int percent = (int)(relation * 100.0);
 
-		// The following gets the spark (faction) color.
-		const float *spark;
-		spark=FactionUtil::GetSparkColor(i);
-		text += "#c" + XMLSupport::tostring(spark[0]) + ':' + XMLSupport::tostring(spark[1]) +
-			':' + XMLSupport::tostring(spark[2]) + '#' + FactionUtil::GetFactionName(i) + "#-c  -  ";
-		
-		// The following code will make the text brighter, but then confed is hard to tell apart from the background.
-//		text += "#c" + XMLSupport::tostring(spark[0]/1.5f + .333f) + ':' + XMLSupport::tostring(spark[1]/1.5f+.333f) +
-//			':' + XMLSupport::tostring(spark[2]/1.5f+.333f) + '#' + FactionUtil::GetFactionName(i) + "#-c  -  ";
+		// Faction name.
+		text += factionColorTextString(i) + FactionUtil::GetFactionName(i) + ":#-c  ";
 
-		// Now we get the relation color.
-		float rel01 = ( relation + 1 ) / 2;
-		if (rel01 >= 1) {
-			text += "#c0.0:1.0:0.0#";
-		} else if (rel01 <= 0) {
-			text += "#c1.0:0.0:0.0#";
-		} else {
-			text += std::string("#c") + XMLSupport::tostring(1-rel01) + ':' + XMLSupport::tostring(rel01) + ":0.0#";
-		}
+		// Relation color.
+		float normRelation = ( relation + 1 ) / 2;			// Move relation value into 0-1 range.
+		normRelation = guiMax(0, guiMin(1, normRelation));	// Make *sure* it's in the right range.
+		text += colorsToCommandString(1-normRelation, normRelation, guiMin(1-normRelation, normRelation));
+
+		// End the line.
 		text += XMLSupport::tostring(percent) + "#-c";
         if (i < killList->size()) {
             text += ", kills: " + XMLSupport::tostring((int)(*killList)[i]);
@@ -2419,13 +2426,13 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
             case '\n':
                 text.append("#n#");
 				if (!newLine) {
-					text.append("#c0.0:1.0:0.5#");
+					text.append("#c0:1:.5#");
 					newLine = true;
 				}
                 break;
             case '"':
 				if (!inQuote) {
-					text.append("#c1.0:0.5:0.5#");
+					text.append("#c1:.3:.3#");
 					inQuote=true;
 				} else {
 					text.append("#-c");

@@ -69,6 +69,10 @@
 //     See font and color examples above.
 //  #!{bc}:  "Reset" font/color to the original version.  Same parameters as "#-".
 
+// Helper function.  Pass in RGB values, get out a color command string for those values.
+std::string colorsToCommandString(float r, float g, float b, float a = 1.0);
+
+// Class.
 class PaintText
 {
 public:

@@ -65,11 +65,8 @@ void Scroller::setScrollPosition(int pos) {
 }
 
 // Parameters for the scrolling range:  Max value, visible values, optional min value.
-static int mymax (int a, int b) {
-	return a>b?a:b;
-}
 void Scroller::setRangeValues(int max, int visible, int min) {
-    const int newMax = mymax(min, max - visible + 1);
+    const int newMax = guiMax(min, max - visible + 1);
     if(newMax != m_maxValue || min != m_minValue || visible != m_visible) {
         m_maxValue = newMax;
         m_minValue = min;
@@ -81,7 +78,7 @@ void Scroller::setRangeValues(int max, int visible, int min) {
         const float thumbLength = (float)visible / (max-min+1);
         // Note that impossible thumb lengths turn off the thumb.
         slider->setThumbLength(thumbLength);
-        slider->setPageSize(mymax(1,visible-1));
+        slider->setPageSize(guiMax(1,visible-1));
     }
 }
 
