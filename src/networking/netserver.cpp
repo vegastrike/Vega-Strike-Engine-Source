@@ -418,6 +418,26 @@ void	NetServer::start(int argc, char **argv)
 	unsigned short tmpport;
 	stracct = vs_config->getVariable( "server", "useaccountserver", "");
 	acctserver = ( stracct=="true");
+
+	// Create and bind sockets
+	COUT << "Initializing TCP server ..." << endl;
+	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
+    if( tcpNetwork == NULL )
+    {
+        COUT << "Couldn't create TCP server - quitting" << endl;
+        exit( -100 );
+    }
+
+	COUT << "Initializing UDP server ..." << endl;
+	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
+    if( udpNetwork == NULL )
+    {
+        COUT << "Couldn't create UDP server - quitting" << endl;
+        exit( -100 );
+    }
+
+	COUT << "done." << endl;
+
 	if( !acctserver)
 	{
 		// Read data files ;)
@@ -449,25 +469,6 @@ void	NetServer::start(int argc, char **argv)
 		}
 		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
-
-	// Create and bind sockets
-	COUT << "Initializing TCP server ..." << endl;
-	tcpNetwork = NetUITCP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
-    if( tcpNetwork == NULL )
-    {
-        COUT << "Couldn't create TCP server - quitting" << endl;
-        exit( -100 );
-    }
-
-	COUT << "Initializing UDP server ..." << endl;
-	udpNetwork = NetUIUDP::createServerSocket( atoi((vs_config->getVariable( "network", "serverport", "")).c_str()), _sock_set );
-    if( udpNetwork == NULL )
-    {
-        COUT << "Couldn't create UDP server - quitting" << endl;
-        exit( -100 );
-    }
-
-	COUT << "done." << endl;
 
 	// Create the _Universe telling it we are on server side
 	universe_file = vs_config->getVariable ("server","galaxy","milky_way.xml");

@@ -434,13 +434,13 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	// Try to open save file
 		string acctfile = acctdir+acct->callsign+".save";
 		cerr<<"Trying to open : "<<acctfile<<endl;
-		FILE *fp = fopen( acctfile.c_str(), "r");
+		FILE *fp = fopen( acctfile.c_str(), "rb");
 		if( fp == NULL)
 		{
 			cerr<<"Account save file does not exists... sending default one to game server"<<endl;
 			acctfile = acctdir+"default.save";
 			cerr<<"Trying to open : "<<acctfile<<endl;
-			fp = fopen( acctfile.c_str(), "r");
+			fp = fopen( acctfile.c_str(), "rb");
 		}
 		else
 			cout<<"... done !"<<endl;
@@ -451,7 +451,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			acctsave = acctdir+"default.xml";
 		acctsave = acctdir+acct->callsign+".xml";
 		cerr<<"Trying to open : "<<acctsave<<endl;
-		FILE * fp2 = fopen( acctsave.c_str(), "r");
+		FILE * fp2 = fopen( acctsave.c_str(), "rb");
 		if( fp2 == NULL)
 		{
 			cout<<"XML save file does not exists... sending default one to game server"<<endl;
@@ -464,9 +464,9 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 				cerr<<"Default XML Loaded -> reload the default save !"<<endl;
 				acctfile = acctdir+"default.save";
 				cerr<<"Trying to open : "<<acctfile<<endl;
-				fp = fopen( acctfile.c_str(), "r");
+				fp = fopen( acctfile.c_str(), "rb");
 			}
-			fp2 = fopen( acctsave.c_str(), "r");
+			fp2 = fopen( acctsave.c_str(), "rb");
 		}
 		else
 			cout<<"... done !"<<endl;

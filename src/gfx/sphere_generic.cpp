@@ -31,7 +31,7 @@ float CityLights::GetS (float theta, float theta_min, float theta_max) {
   return wrapx * SphereMesh::GetS(theta,theta_min,theta_max);
 }
 string truncateByPipe (string & input) {
-  unsigned int i=input.find ("|");
+  int i=input.find ("|");
   string ret=input;
   if (i!=string::npos) {
     ret=input.substr (0,i);
