@@ -23,7 +23,7 @@ void StarSystem::UpdateMissiles() {
 void MissileEffect::ApplyDamage (Unit * smaller) {
   float rad =(smaller->Position().Cast()-pos).Magnitude()-smaller->rSize();
   float orig = rad;
-  if(rad==0) rad =0.001;
+  if(rad<.001) rad =.001;
   rad=rad*rad;
   if (smaller->isUnit()!=MISSILEPTR&&rad<radius*radius) {
 	if(rad<(radialmultiplier*radialmultiplier)){
