@@ -41,8 +41,7 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
 
   Unit * targ = c.sender.GetUnit();
   if (targ) {
-    float relation = _Universe->GetRelation(parent->faction,targ->faction);
-    mood+=(1-randomresponse)*relation;
+    mood+=(1-randomresponse)*GetEffectiveRelationship(targ);
   }
   return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse);
 
@@ -191,7 +190,7 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
 }
 
 int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c) {
-  if (mood==0) {
+  if (0&&mood==0) {
     FSM::Node * n = c.getCurrentState ();  
     if (n)
       return rand()%n->edges.size();
