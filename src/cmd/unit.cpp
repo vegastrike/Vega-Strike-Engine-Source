@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "vs_globals.h"
+#include "vs_path.h"
 #include "file_main.h"
 #include "gfx/halo.h"
 #include "beam.h"
@@ -192,12 +193,30 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 	Init();
 	SubUnit = SubU;
 	this->faction = faction;
-	name = filename + string(" - Unit");
+	vssetdir (GetSharedUnitPath().c_str());
+	vschdir (filename);
+	FILE *fp = fopen (filename,"r");
+	if (!fp) {
+	  vscdup();
+	  const char *c;
+	  if (c=_Universe->GetFaction(faction))
+	    vschdir (c);
+	  else
+	    vschdir ("unknown");
+	  vschdir (filename);
+	} else {
+	  fclose (fp);
+	}
+	name = filename;
 	/*Insert file loading stuff here*/
 	if(xml) {
 	  LoadXML(filename);
 	  calculate_extent();
 	  ToggleWeapon(true);//change missiles to only fire 1
+	  vscdup();
+	  if (fp) 
+	    vscdup();
+	  vsresetdir();
 	  return;
 	}
 	LoadFile(filename);
@@ -258,6 +277,11 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 	CloseFile();
 	calculate_extent();
 	ToggleWeapon(true);//change missiles to only fire 1
+	vscdup();
+	if (fp) 
+	  vscdup();
+	vsresetdir();
+
 }
 
 Unit::~Unit()

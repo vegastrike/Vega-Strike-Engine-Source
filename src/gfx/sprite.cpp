@@ -20,7 +20,7 @@
  */
 #include <stdlib.h>
 #include <iostream.h>
-
+#include "vs_path.h"
 #include "aux_texture.h"
 #include "sprite.h"
 #include "matrix.h"
@@ -34,9 +34,7 @@
 static float *mview = NULL;
 
 Sprite::Sprite(const char *file, enum FILTER texturefilter) {
-
-
-
+  vschdir ("sprites");
   xcenter = 0;
   ycenter = 0;
   widtho2 = 0;
@@ -72,6 +70,7 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter) {
     widtho2 = heighto2 = 0;
     xcenter = ycenter = 0;
   }
+  vscdup();
 }	
 
 Sprite::~Sprite()

@@ -1,5 +1,6 @@
 #include "audiolib.h"
 #include "hashtable.h"
+#include "vs_path.h"
 #include <string>
 #include "al_globals.h"
 #include <stdio.h>
@@ -38,9 +39,21 @@ static int LoadSound (ALuint buffer, bool looping) {
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
+    FILE * fp = fopen (s.c_str(),"rb");
+    bool shared=false;
+    std::string nam (s);
+    if (fp) {
+      fclose (fp);
+    }else {
+      nam = GetSharedSoundPath (s);
+      shared=true;
+    }
     ALuint * wavbuf =NULL;
-    if (!music)
-      wavbuf = soundHash.Get(s);
+    std::string hashname;
+    if (!music) {
+      hashname = shared?GetSharedSoundHashName(s):GetHashName (s);
+      wavbuf = soundHash.Get(hashname);
+    }
     if (wavbuf==NULL) {
       wavbuf = (ALuint *) malloc (sizeof (ALuint));
       alGenBuffers (1,wavbuf);
@@ -49,14 +62,14 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
       ALsizei freq;	
       ALsizei format;
       void *wave;
-      ALboolean err = alutLoadWAV(s.c_str(), &wave, &format, &size, &bits, &freq);
+      ALboolean err = alutLoadWAV(nam.c_str(), &wave, &format, &size, &bits, &freq);
       if(err == AL_FALSE) {
 	return -1;
       }
       alBufferData( *wavbuf, format, wave, size, freq );
       free(wave);
       if (!music) {
-	soundHash.Put (s,wavbuf);
+	soundHash.Put (hashname,wavbuf);
 	buffers.push_back (*wavbuf);
       }
     }
@@ -75,11 +88,23 @@ int AUDCreateMusicWAV (const std::string &s, const bool LOOP) {
 int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
+    FILE * fp = fopen (s.c_str(),"rb");
+    bool shared=false;
+    std::string nam (s);
+    if (fp) {
+      fclose (fp);
+    }else {
+      nam = GetSharedSoundPath (s);
+      shared=true;
+    }
     ALuint * mp3buf=NULL;
-    if (!music)
-      mp3buf = soundHash.Get (s);
+    std::string hashname;
+    if (!music) {
+      hashname = shared?GetSharedSoundHashName(s):GetHashName (s);
+      mp3buf = soundHash.Get (hashname);
+    }
     if (mp3buf==NULL) {
-      FILE * fp = fopen (s.c_str(),"rb");
+      FILE * fp = fopen (nam.c_str(),"rb");
       if (!fp)
 	return -1;
       fseek (fp,0,SEEK_END);
@@ -96,7 +121,7 @@ int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
       }
       free (data);
       if (!music) {
-	soundHash.Put (s,mp3buf);
+	soundHash.Put (hashname,mp3buf);
 	buffers.push_back (*mp3buf);
       }
     }

@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 extern std::vector <std::string> curdir;//current dir starting from datadir
+extern std::vector <std::string> savedpwd;
 extern std::string sharedtextures;
 extern std::string sharedsounds;
 extern std::string sharedmeshes;
+extern std::string sharedunits;
 extern std::string datadir;
 ///gets the hash name for an item with name in curdir
 std::string GetHashName (const std::string &name);
@@ -16,6 +18,8 @@ std::string GetSharedTextureHashName(const std::string &);
 std::string GetSharedSoundHashName(const std::string&);
 std::string GetSharedMeshPath (const std::string &name);
 std::string GetSharedMeshHashName(const std::string &);
+std::string GetSharedUnitPath ();
+
 
 ///sets up the data dir and loads VS config
 void initpaths();
@@ -26,5 +30,6 @@ void vschdir (const char *path);
 //Goes up one level, and changes the directory accordingly
 void vscdup();
 
-
+void vssetdir (const char * path);
+void vsresetdir ();
 #endif

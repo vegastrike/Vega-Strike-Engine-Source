@@ -12,8 +12,9 @@
 
 #define CONFIGFILE ".vegastrikerc"
 #define DELIM '/'
-
+std::vector <std::string> savedpwd;
 std::string sharedtextures;
+std::string sharedunits;
 std::string sharedsounds;
 std::string sharedmeshes;
 std::string datadir;
@@ -26,9 +27,9 @@ void changehome() {
 #endif
 }
 
-
+char pwd[8192];
 void initpaths () {
-  char pwd[8192];
+
   getcwd (pwd,8191);
   datadir= string (pwd);
   sharedsounds = datadir;
@@ -63,6 +64,12 @@ void initpaths () {
   getcwd (pwd,8191);
   sharedmeshes = string (pwd);
   chdir (datadir.c_str());
+  chdir (vs_config->getVariable ("data","sharedunits","units").c_str());
+  getcwd (pwd,8191);
+  sharedunits = string (pwd);
+
+
+  chdir (datadir.c_str());
   if (datadir.end()!=datadir.begin()) {
     if (*(datadir.end()-1)!='/'&&*(datadir.end()-1)!='\\') {
       datadir+=DELIM;
@@ -76,6 +83,11 @@ void initpaths () {
   if (sharedmeshes.end()!=sharedmeshes.begin()) {
     if (*(sharedmeshes.end()-1)!='/'&&*(sharedmeshes.end()-1)!='\\') {
       sharedmeshes+=DELIM;
+    }
+  }
+  if (sharedunits.end()!=sharedunits.begin()) {
+    if (*(sharedunits.end()-1)!='/'&&*(sharedunits.end()-1)!='\\') {
+      sharedunits+=DELIM;
     }
   }
   if (sharedsounds.end()!=sharedsounds.begin()) {
@@ -94,6 +106,9 @@ std::string GetHashName (const std::string &name) {
 }
 std::string GetSharedMeshPath (const std::string &name) {
   return sharedmeshes+name;
+}
+std::string GetSharedUnitPath () {
+  return sharedunits;
 }
 std::string GetSharedMeshHashName (const std::string &name) {
   return (string ("#smsh#")+name);
@@ -129,6 +144,16 @@ void vschdir (const char *path) {
     curdir.push_back (string("~"));
   }
 }
+void vssetdir (const char * path) {
+  getcwd (pwd,8191);
+  savedpwd.push_back (string (pwd));
+  chdir (path);
+}
+void vsresetdir () {
+  chdir (savedpwd.back().c_str());
+  savedpwd.pop_back();
+}
+
 void vscdup() {
   if (!curdir.empty()) {
     if ((*curdir.back().begin())!='~') {

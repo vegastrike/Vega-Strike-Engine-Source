@@ -25,6 +25,7 @@
 #include "camera.h"
 #include "lin_time.h"
 #include <stack>
+#include "vs_path.h"
 using std::stack;
 
 static stack<Animation *> animationdrawqueue;
@@ -41,6 +42,8 @@ Animation::Animation ()
 
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient)
 {	
+  vschdir ("animations");
+  vschdir (FileName);
   repeat = Rep;
 	cumtime = 0;
 	camup = camorient;
@@ -87,6 +90,8 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
 	    }*/
 	}
 	fclose (fp);
+	vscdup();
+	vscdup();
 }
 Animation:: ~Animation ()
 {

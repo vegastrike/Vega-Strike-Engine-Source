@@ -106,6 +106,7 @@ private:
 	}
 	///returns the index of the faction with that name
 	int GetFaction (const char *factionname);
+	const char * GetFaction (int faction);
 	/**
 	* Returns the relationship between myfaction and theirfaction
 	* 1 is happy. 0 is neutral (btw 1 and 0 will not attack)

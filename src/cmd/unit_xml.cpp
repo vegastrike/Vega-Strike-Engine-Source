@@ -885,11 +885,20 @@ void Unit::LoadXML(const char *filename) {
   for (a=0;a<nummounts;a++) {
     mounts[a]=*xml->mountz[a];
     delete xml->mountz[a];//do it stealthily... no cons/destructor
+#define HALF_MOUNT_SOUNDS 
+#ifdef HALF_MOUNT_SOUNDS
     if (a%2==parity) {
       int b=a;
-      if (a%4==2&&a<nummounts-1) b=a+1;
+      if (a%4==2&&a<nummounts-1) 
+	if (mounts[a].type.type!=weapon_info::PROJECTILE&&mounts[a+1].type.type!=weapon_info::PROJECTILE)
+	  b=a+1;
       mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type==weapon_info::BEAM);
+    } else if (mounts[a].type.type==weapon_info::PROJECTILE) {
+#endif
+      mounts[a].sound = AUDCreateSound (mounts[a].type.sound,false);      
+#ifdef HALF_MOUNT_SOUNDS
     }
+#endif
   }
   numsubunit = xml->units.size();
   if (numsubunit)
