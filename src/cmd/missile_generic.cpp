@@ -72,9 +72,11 @@ void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, con
   if (doesmissilebounce) {
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
-  Discharge();
-  if (!killed)
-    DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
+  if (smaller->isUnit()!=MISSILEPTR) {//2 missiles in a row can't hit each other
+    Discharge();
+    if (!killed)
+      DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
+  }
   
 }
 
