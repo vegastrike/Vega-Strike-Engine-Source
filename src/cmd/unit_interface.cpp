@@ -140,7 +140,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 	CargoInfo->AddTextItem("description", "");
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
-	const char  MyButtonModes[][128] = {"Buy Cargo","Sell Cargo","Mission BBS","Briefings","GNN News", "Ship Dealer","Upgrade Ship","Unimplemented","Downgrade Ship","Save/Load"};
+	const char  MyButtonModes[][128] = {"Merchant's Inventory","My Inventory","Mission BBS","Briefings","GNN News", "Ship Dealer","Upgrade Ship","Unimplemented","Downgrade Ship","Save/Load"};
 	float beginx = -.4;
 	float lastx = beginx;
 	float sizeb;
@@ -299,11 +299,11 @@ void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
       break;
     case BUYMODE:
       title = "Buy Cargo  ";
-      ButtonText= "BuyCargo";
+      ButtonText= "Buy";
       break;
     case SELLMODE:
       title = "Sell Cargo  ";
-      ButtonText= "SellCargo";
+      ButtonText= "Sell";
       break;
     case UPGRADEMODE:
       title = "Upgrade Ship ";
