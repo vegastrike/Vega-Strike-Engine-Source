@@ -40,6 +40,8 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "vs_path.h"
+#include "xml_support.h"
+#include "config_xml.h"
 using namespace std;
 
 static Music * muzak=NULL;
@@ -415,7 +417,7 @@ void destroyObjects() {
 }
 extern void micro_sleep (unsigned int n);
 void main_loop() {
-  
+  static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
 
   _Universe->StartDraw();
   muzak->Listen();
@@ -426,7 +428,7 @@ void main_loop() {
 
 
   _Universe->activeStarSystem()->Update();
-  micro_sleep (2000);//so we don't starve the audio thread  
+  micro_sleep (microsleep);//so we don't starve the audio thread  
   GFXEndScene();
       
   ProcessInput();
