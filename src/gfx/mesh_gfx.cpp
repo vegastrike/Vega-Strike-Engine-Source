@@ -421,6 +421,13 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
 void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight, unsigned char hulldamage) {
     if (cloaked&MeshDrawContext::CLOAK) {
         GFXPushBlendMode ();
+		GFXDisable(CULLFACE);
+/**/
+		GFXEnable(LIGHTING);
+		GFXEnable(TEXTURE0);
+		GFXEnable(TEXTURE1);
+		
+/**/
         if (cloaked&MeshDrawContext::GLASSCLOAK) {
             GFXDisable (TEXTURE1);
             int ligh;
@@ -428,6 +435,7 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
             specialfxlight.push_back (ligh);
             GFXBlendMode (ONE,ONE);
         }else {
+			GFXEnable(TEXTURE1);
             if (cloaked&MeshDrawContext::NEARINVIS) {      
                 //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
             }
@@ -735,6 +743,8 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 		continue;
     }
 	if (c.damage==0&&whichpass==DAMAGE_PASS)
+		continue;
+	if ((c.cloaked&MeshDrawContext::CLOAK)&&whichpass!=0)
 		continue;
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
