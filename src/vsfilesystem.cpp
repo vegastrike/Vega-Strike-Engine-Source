@@ -387,7 +387,7 @@ namespace VSFileSystem
 
 		std::string MakeSharedPathReturnHome (const std::string &newpath) {
 		  CreateDirectoryHome( newpath);
-		  newpath+string("/");	  
+		  return newpath+string("/");	  
 		}
 		std::string MakeSharedPath (const std::string &s) {
 		  VSFileSystem::vs_fprintf (stderr,"MakingSharedPath %s",s.c_str());

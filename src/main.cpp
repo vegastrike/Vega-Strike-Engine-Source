@@ -423,7 +423,7 @@ void bootstrap_main_loop () {
 #if defined( _WIN32) && !defined( __CYGWIN__)
       int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
       if (pid==-1) {
-		 VSFileSystem::vs_chdir("bin");
+		 chdir("bin");
 	int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
 	if (pid==-1) {
 	  g_game.music_enabled=false;
