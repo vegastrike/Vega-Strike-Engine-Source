@@ -94,6 +94,9 @@ varInst * Mission::doObjectVar(missionNode *node,int mode){
 
   bool ok=checkVarType(var,VAR_OBJECT);
 
+  debug(3,node,mode,"doObjectVar got variable :");
+  printVarInst(3,var);
+
   if(!ok){
     fatalError(node,mode,"expected a object variable - got a different type");
     assert(0);
@@ -362,7 +365,7 @@ void Mission::doSetVar(missionNode *node,int mode){
     }
   }
 
-  debug(5,node,mode,"trying to set variable "+node->script.name);
+  debug(3,node,mode,"trying to set variable "+node->script.name);
 
   //    varInst *var_expr=checkExpression((missionNode *)node->subnodes[0],mode);
 
@@ -394,7 +397,12 @@ void Mission::doSetVar(missionNode *node,int mode){
       float res=checkFloatExpr(expr,mode);
     }
     else if(vi->type==VAR_OBJECT){
+      debug(3,node,mode,"setvar object");
       varInst *ovi=checkObjectExpr(expr,mode);
+    }
+    else{
+      fatalError(node,mode,"unsupported type in setvar");
+      assert(0);
     }
   }
 
@@ -415,8 +423,12 @@ void Mission::doSetVar(missionNode *node,int mode){
       var_inst->float_val=res;
     }
     else if(var_inst->type==VAR_OBJECT){
+      debug(3,node,mode,"setvar object (before)");
       varInst *ovi=checkObjectExpr(expr,mode);
       assignVariable(var_inst,ovi);
+      debug(3,node,mode,"setvar object left,right");
+      printVarInst(3,var_inst);
+      printVarInst(3,ovi);
     }
     else{
       fatalError(node,mode,"unsupported datatype");
@@ -501,12 +513,20 @@ varInst *Mission::doConst(missionNode *node,int mode){
 void Mission::assignVariable(varInst *v1,varInst *v2){
   if(v1->type!=v2->type){
     fatalError(NULL,SCRIPT_RUN,"wrong types in assignvariable");
+    saveVarInst(v1,cout);
+    saveVarInst(v2,cout);
     assert(0);
   }
   if(v1->type==VAR_OBJECT){
-    if(v1->objectname!=v2->objectname){
-      fatalError(NULL,SCRIPT_RUN,"wrong object types in assignment");
-      assert(0);
+    if(v1->objectname.empty()){
+      // the object has not been set
+      // we set it below
+    }
+    else{
+      if(v1->objectname!=v2->objectname){
+	fatalError(NULL,SCRIPT_RUN,"wrong object types in assignment ("+v1->objectname+" , "+v2->objectname);
+	assert(0);
+      }
     }
   }
   v1->float_val=v2->float_val;

@@ -88,7 +88,7 @@ int main( int argc, char *argv[] )
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
 
-    strcpy(mission_name,"test1.mission");
+    strcpy(mission_name,"mission/test/test1.mission");
 
     ParseCommandLine(argc,argv);
 

@@ -292,6 +292,7 @@ void printNode(missionNode *node,int mode);
  void printVarmap(const varInstMap & vmap);
  void printVarInst(varInst *vi);
  void saveVarInst(varInst *vi,ostream &out);
+ void printVarInst(int dbg_level,varInst *vi);
  void printGlobals(int dbg_level);
 
  string modestring(int mode);

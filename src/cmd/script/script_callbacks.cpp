@@ -125,47 +125,182 @@ typedef vector<varInst *> olist_t;
 
 varInst *Mission::call_olist(missionNode *node,int mode){
 
-  varInst *vi=NULL;
+  varInst *viret=new varInst;
 
   string cmd=node->attr_value("cmd");
 
   if(cmd=="new"){
     olist_t *my_object=new olist_t;
 
-    vi=new varInst;
-    vi->type=VAR_OBJECT;
-    vi->objectname="olist";
+    viret->type=VAR_OBJECT;
+    viret->objectname="olist";
     
-    vi->object=(void *)my_object;
-    return vi;
+    viret->object=(void *)my_object;
+
+    debug(3,node,mode,"olist new object: ");
+    printVarInst(3,viret);
+
+    return viret;
   }
   else{
 
+      if(node->subnodes.size()<1){
+	fatalError(node,mode,"olist methods need arguments");
+	assert(0);
+      }
 
+      missionNode *snode=(missionNode *)node->subnodes[0];
+      varInst *ovi=doObjectVar(snode,mode);
+
+      debug(3,node,mode,"olist object: ");
+      printVarInst(3,ovi);
+
+
+  	olist_t *my_object=(olist_t *)ovi->object;
+	if(mode==SCRIPT_RUN){
+	  if(my_object==NULL){
+	    fatalError(node,mode,"olist.pushback: no object");
+	    assert(0);
+	  }
+	}
+    
     if(cmd=="push_back"){
       if(node->subnodes.size()!=2){
 	fatalError(node,mode,"olist.pushback needs two arguments");
 	assert(0);
       }
-      missionNode *snode=(missionNode *)node->subnodes[0];
-      varInst *ovi=doObjectVar(snode,mode);
 
       snode=(missionNode *)node->subnodes[1];
       varInst *vi=doVariable(snode,mode);
+      
+      debug(3,node,mode,"olist.push_back pushing variable");
+      printf("vi is 0x%x\n",vi);
+      printVarInst(2,vi);
 
-      olist_t *my_object=(olist_t *)ovi->object;
+      if(mode==SCRIPT_RUN){
+	olist_t *my_object=(olist_t *)ovi->object;
 
-      if(my_object==NULL){
-	fatalError(node,mode,"olist.pushback: no object");
+	if(my_object==NULL){
+	  fatalError(node,mode,"olist.pushback: no object");
+	  assert(0);
+	}
+	varInst *push_vi=new varInst;
+	push_vi->type=vi->type;
+	assignVariable(push_vi,vi);
+	my_object->push_back(push_vi);
+      }
+
+      viret->type=VAR_VOID;
+      return viret;
+    }
+    else if(cmd=="pop_back"){
+      if(node->subnodes.size()!=1){
+	fatalError(node,mode,"olist.pop_back needs one arguments");
 	assert(0);
       }
-      my_object->push_back(vi);
 
-      return NULL;
-      
+      debug(3,node,mode,"olist.pop");
+
+      if(mode==SCRIPT_RUN){
+	my_object->pop_back();
+      }
+
+      viret->type=VAR_VOID;
+      return viret;
+    }
+    else if(cmd=="back"){
+      if(node->subnodes.size()!=1){
+	fatalError(node,mode,"olist.back needs one arguments");
+	assert(0);
+      }
+
+      debug(3,node,mode,"olist.back");
+
+      viret->type=VAR_OBJECT;
+
+      if(mode==SCRIPT_RUN){
+	varInst *back_vi=my_object->back();
+	assignVariable(viret,back_vi);
+      }
+
+      return viret;
+    }
+    else if(cmd=="at"){
+      if(node->subnodes.size()!=2){
+	fatalError(node,mode,"olist.at needs two arguments");
+	assert(0);
+      }
+
+      debug(3,node,mode,"olist.at");
+
+      snode=(missionNode *)node->subnodes[1];
+      float findex=doFloatVar(snode,mode);
+      debug(3,snode,mode,"index is in that node");
+
+
+      viret->type=VAR_FLOAT;
+
+      if(mode==SCRIPT_RUN){
+	int index=(int)findex;
+	if(index>=my_object->size()){
+	  char buffer[200];
+	  sprintf(buffer,"olist.at: index out of range size=%d, index=%d\n",my_object->size(),index);
+	  fatalError(node,mode,buffer);
+	  assert(0);
+	}
+	varInst *back_vi=(*my_object)[index];
+	assignVariable(viret,back_vi);
+      }
+
+      return viret;
+    }
+    else if(cmd=="toxml"){
+      if(node->subnodes.size()!=1){
+	fatalError(node,mode,"olist.toxml needs no arguments");
+	assert(0);
+      }
+
+      debug(3,node,mode,"olist.toxml");
+
+      if(mode==SCRIPT_RUN){
+	int len=my_object->size();
+	
+	for(int i=0;i<len;i++){
+	  varInst *vi=(*my_object)[i];
+	  char buffer[200];
+	  sprintf(buffer,"index=\"%d\"",i);
+	  debug(3,node,mode,buffer);
+	  cout << buffer << " " ;
+	  saveVarInst(vi,cout);
+	}
+      }
+
+      viret->type=VAR_VOID;
+      return viret;
+    }
+    else if(cmd=="size"){
+      if(node->subnodes.size()!=1){
+	fatalError(node,mode,"olist.size needs one arguments");
+	assert(0);
+      }
+
+      debug(3,node,mode,"olist.size");
+
+      if(mode==SCRIPT_RUN){
+	int len=my_object->size();
+	viret->float_val=(float)len;
+      }
+
+      viret->type=VAR_FLOAT;
+      return viret;
+    }
+
+    else{
+      fatalError(node,mode,"unknown command "+cmd+" for callback olist");
+      assert(0);
     }
     
-    return NULL;
+    return NULL; // never reach
   }
-  return NULL;
+  return NULL; // never reach
 }

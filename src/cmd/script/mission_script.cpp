@@ -150,7 +150,7 @@ void Mission::DirectorLoop(){
 
   cout << "DIRECTOR LOOP" << endl;
 
-  saveVariables(cout);
+  //  saveVariables(cout);
 
   missionNode *gameloop=director->script.scripts["gameloop"];
 
@@ -346,16 +346,21 @@ varInst * Mission::doScript(missionNode *node,int mode, varInstMap *varmap){
 
   vector<easyDomNode *>::const_iterator siter;
 
-  node->script.nr_arguments=0;
-  node->script.argument_node=NULL;
+     if(mode==SCRIPT_PARSE && parsemode==PARSE_DECL){
+       node->script.nr_arguments=0;
+       node->script.argument_node=NULL;
+     }
 
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && !have_return(mode) ; siter++){
     missionNode *snode=(missionNode *)*siter;
     if(snode->tag==DTAG_ARGUMENTS){
-      doArguments(snode,mode,varmap);
+	doArguments(snode,mode,varmap);
       if(mode==SCRIPT_PARSE && parsemode==PARSE_DECL){
 	node->script.argument_node=snode;
       }
+      char buffer[200];
+      sprintf(buffer,"nr of arguments=%d",node->script.nr_arguments);
+      debug(3,node,mode,buffer);
     }
     else{
       if(mode==SCRIPT_PARSE && parsemode==PARSE_DECL){
@@ -507,7 +512,10 @@ void Mission::doReturn(missionNode *node,int mode){
     }
     else if(script->script.vartype==VAR_OBJECT){
       varInst *vi2=checkObjectExpr(expr,mode);
-      assignVariable(vi,vi2);
+      vi->type=VAR_OBJECT;
+      //      if(mode==SCRIPT_RUN){
+	assignVariable(vi,vi2);
+	//      }
     }
     else{
       fatalError(node,mode,"unkown variable type");
@@ -602,7 +610,9 @@ varInst *Mission::doExec(missionNode *node,int mode){
   int nr_exec_args=node->subnodes.size();
 
   if(nr_arguments!=nr_exec_args){
-    fatalError(node,mode,"wrong nr of arguments in doExec");
+    char buffer[200];
+    sprintf(buffer,"wrong nr of arguments in doExec=%d doScript=%d",nr_exec_args,nr_arguments);
+    fatalError(node,mode,buffer);
     assert(0);
   }
 
@@ -629,9 +639,12 @@ varInst *Mission::doExec(missionNode *node,int mode){
       vi->bool_val=ok;
     }
     else if(defnode->script.vartype==VAR_OBJECT){
-      debug(4,node,mode,"doExec checking objectExpr");
+      debug(3,node,mode,"doExec checking objectExpr");
       varInst *ovi=checkObjectExpr(callnode,mode);
-      assignVariable(vi,ovi);
+      vi->type=VAR_OBJECT;
+      if(mode==SCRIPT_RUN){
+	assignVariable(vi,ovi);
+      }
     }
     else{
       fatalError(node,mode,"unsupported vartype in doExec");

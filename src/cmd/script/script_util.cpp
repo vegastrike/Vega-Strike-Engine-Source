@@ -158,6 +158,15 @@ void Mission::printVarInst(varInst *vi){
 
 /* *********************************************************** */
 
+void Mission::printVarInst(int dbg_level,varInst *vi){
+
+  if(dbg_level<=debuglevel){
+    saveVarInst(vi,cout);
+  }
+}
+
+/* *********************************************************** */
+
 void Mission::saveVarInst(varInst *vi,ostream& my_out){
 
     char buffer[100];
@@ -171,8 +180,11 @@ void Mission::saveVarInst(varInst *vi,ostream& my_out){
       else if(vi->type==VAR_FLOAT){
 	sprintf(buffer,"type=\"float\"  value=\"%f\" ",vi->float_val);
       }
+      else if(vi->type==VAR_OBJECT){
+	sprintf(buffer,"type=\"object\"  object=\"%s\" value=\"%x\" ", vi->objectname.c_str(),vi->object);
+      }
     }
-    my_out  << buffer ;
+    my_out  << buffer << endl;
 }
 
 /* *********************************************************** */
