@@ -700,6 +700,11 @@ void Unit::ExecuteAI() {
     subunits[a]->ExecuteAI();//like dubya
   }
 }
+void Unit::UnFire () {
+  for (int i=0;i<nummounts;i++) {
+    mounts[i].UnFire();//turns off beams;
+  }
+}
 void Unit::Fire () {
   for (int i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
@@ -713,9 +718,12 @@ void Unit::Fire () {
     energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyConsumption;
     }//unfortunately cumulative transformation not generated in physics atom
   }
-  
 }
-
+void Unit::Mount::UnFire () {
+  if (status!=ACTIVE||gun==NULL||type.type!=weapon_info::BEAM)
+    return;
+  gun->Destabilize();
+}
 bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, Unit * owner) {
   if (status!=ACTIVE) 
     return false;

@@ -113,6 +113,7 @@ protected:
 	status = INACTIVE;
     }
     void SetMountPosition (const Transformation &t) {LocalPosition = t;}
+    void UnFire();
     bool Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
   } *mounts;
   
@@ -187,6 +188,7 @@ public:
   Unit *Target(){return computer.target.GetUnit();}
   void Target (Unit * targ) {computer.target.SetUnit(targ);}
   void Fire();
+  void UnFire();
   Computer & GetComputerData () {return computer;}
 	/*COMMAND*/
 	/*

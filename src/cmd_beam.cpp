@@ -248,9 +248,9 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   //to help check for crashing.
   
   if (stability&&numframes*SIMULATION_ATOM>stability)
-    impact=UNSTABLE;
+    impact|=UNSTABLE;
   
-  curthick+=(impact==UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
+  curthick+=(impact&UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
   if (curthick > thickness)
     curthick = thickness;
   if (curthick <0)

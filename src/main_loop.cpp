@@ -336,6 +336,9 @@ static void Fire (int, KBSTATE newState) {
   if (newState==DOWN) {
     fighters[0]->Fire();
   }
+  if (newState==RELEASE) {
+    fighters[0]->UnFire();
+  }
 }
 
 /*

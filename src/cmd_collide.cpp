@@ -30,13 +30,6 @@ public:
     maxaccessz=0;    
   }
   void Clear () {
-    int tminx = minaccessx;
-    int tminy = minaccessy;
-    int tminz = minaccessz;
-
-    int tmaxx = maxaccessx;
-    int tmaxy = maxaccessy;
-    int tmaxz = maxaccessz;
 
     for (int i=minaccessx;i<=maxaccessx;i++) {
     for (int j=minaccessy;j<=maxaccessy;j++) {
@@ -52,6 +45,7 @@ public:
     maxaccessx=0;
     maxaccessy=0;
     maxaccessz=0;
+    /*
     for (int l=0;l<COLLIDETABLESIZE;l++) {
       for (int m=0;m<COLLIDETABLESIZE;m++) {
 	for (int n=0;n<COLLIDETABLESIZE;n++) {
@@ -60,7 +54,7 @@ public:
 	}
       }
 
-    }
+      }*/
 
   }
   void Get (const Vector &Min, const Vector & Max, vector <LineCollide*> &retval) {    
@@ -249,7 +243,7 @@ bool Beam::Collide (Unit * target) {
   if (target->queryBoundingBox(center,direction,0)==0)
     return false;
   curlength = distance;
-  impact=IMPACT;
+  impact|=IMPACT;
   fprintf (stderr,"BEAM DELIVERS DAMAGE TO \n");//%s",target->name.c_str());
   //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
   return true;
