@@ -81,6 +81,8 @@ namespace AiXml {
     TERMINATE,
     VALUE,
     ADD,
+    SUB,
+    NEG,
     NORMALIZE,
     SCALE,
     CROSS,
@@ -127,6 +129,8 @@ namespace AiXml {
     EnumMap::Pair ("MatchVel", MATCHVEL),
     EnumMap::Pair ("Angular", ANGULAR), 
     EnumMap::Pair ("Add", ADD),
+    EnumMap::Pair ("Neg", NEG),
+    EnumMap::Pair ("Sub", SUB),    
     EnumMap::Pair ("Normalize", NORMALIZE),
     EnumMap::Pair ("Scale", SCALE),
     EnumMap::Pair ("Cross", CROSS),
@@ -162,7 +166,7 @@ namespace AiXml {
 
   };
 
-  const EnumMap element_map(element_names, 29);
+  const EnumMap element_map(element_names, 31);
   const EnumMap attribute_map(attribute_names, 17);
 }
 
@@ -307,6 +311,9 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     xml->terminate = true;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case TERMINATE:
+	xml->terminate=parse_bool ((*iter).value);
+	break;
       case ACCURACY:
 	xml->acc=parse_int((*iter).value);
 	break;
@@ -377,6 +384,8 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case FROMF:
   case TOF:  
   case ADD:
+  case SUB:
+  case NEG:
     assert(xml->unitlevel>2);
     xml->unitlevel++;
     break;
@@ -404,7 +413,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case MATCHVEL:
     assert (xml->unitlevel>=1);
     xml->unitlevel++;
-    xml->acc = 2;
+    xml->acc = 0;
     xml->afterburn = false;
     xml->terminate=true;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -573,9 +582,18 @@ void AIScript::endElement(const string &name) {
     popv();
     topv()+=temp;
     break;
-
-
-
+  case SUB:
+    assert(xml->unitlevel>3);
+    xml->unitlevel--;
+    temp = topv();
+    popv();
+    topv()=topv()-temp;
+    break;
+  case NEG:
+    assert(xml->unitlevel>3);
+    xml->unitlevel--;
+    topv()=-topv();
+    break;
   case MOVETO:
     fprintf (stderr,"Moveto <%f,%f,%f>",topv().i,topv().j,topv().k);
     xml->unitlevel--;
