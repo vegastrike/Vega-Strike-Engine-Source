@@ -48,7 +48,7 @@ Halo::~Halo () {
 void Halo::Draw (const Transformation &quat, const Matrix m) {
   Vector pos,p,q,r;
   _GFX->AccessCamera()->GetPQR(p,q,r);
-  pos=  quat.position+position.Transform(m);
+  pos=  position.Transform(m);
   p=p*sizex;
   r =-r;
   q=q*sizey;

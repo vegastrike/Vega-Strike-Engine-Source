@@ -207,7 +207,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	pos.j=parse_float((*iter).value);
 	break;
       case Z:
-	pos.i=parse_float((*iter).value);
+	pos.k=parse_float((*iter).value);
 	break;
       case RED:
 	Q.i=parse_float((*iter).value);
