@@ -1,11 +1,18 @@
 #include "cmd/ai/order.h"
+
 #include "configxml.h"
 #include "gfx/cockpit_generic.h"
 #ifdef HAVE_PYTHON
+
 #include "Python.h"
+
 #endif
+
 #include "python/python_class.h"
+
 #include <boost/python/detail/extension_class.hpp>
+
+
 
 #include "pythonmission.h"
 #include "mission.h"
@@ -204,10 +211,12 @@ void Mission::DirectorStart(missionNode *node){
   }
 }
 void Mission::DirectorInitgame(){
+
   this->player_num=(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
   if (nextpythonmission) {
 	// CAUSES AN UNRESOLVED EXTERNAL SYMBOL FOR PythonClass::last_instance ?!?!
-	//runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
+
+	runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
     delete [] nextpythonmission; //delete the allocated memory
     nextpythonmission=NULL;
 	if (!this->unpickleData.empty()) {
