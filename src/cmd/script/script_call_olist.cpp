@@ -104,12 +104,11 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       }
       return viret;
     }
-#if 1
     else if(cmd=="at"){
       debug(3,node,mode,"olist.at");
 
       missionNode *snode=getArgument(node,mode,1);
-      float findex=checkFloatExpr(snode,mode);
+      int index=checkIntExpr(snode,mode);
       debug(3,snode,mode,"index is in that node");
 
 
@@ -117,7 +116,6 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       viret->type=VAR_ANY;
 
       if(mode==SCRIPT_RUN){
-	int index=(int)findex;
 	varInst *back_vi=call_olist_at(node,mode,ovi,index);
 	assignVariable(viret,back_vi);
       }
@@ -152,13 +150,12 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 
       if(mode==SCRIPT_RUN){
 	int len=my_object->size();
-	viret->float_val=(float)len;
+	viret->int_val=len;
       }
 
-      viret->type=VAR_FLOAT;
+      viret->type=VAR_INT;
       return viret;
     }
-#endif
     else{
       fatalError(node,mode,"unknown command "+cmd+" for callback olist");
       assert(0);

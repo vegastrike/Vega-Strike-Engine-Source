@@ -33,6 +33,14 @@ bool have_yy_error;
 
 //string module_string;
 
+string lineno(){
+char buffer[100];
+
+	sprintf(buffer," line=\"%d\" ",yylineno+1);
+
+	return buffer;
+}
+
 %}
 
 
@@ -53,7 +61,7 @@ bool have_yy_error;
 %%
 
 module:		L_MODULE  L_ID '{' module_body '}'	{
-	string module="<module name=" + q($2) + " >\n"+$4+"\n</module>\n";
+	string module="<module  "+lineno()+" name=" + q($2) + " >\n"+$4+"\n</module>\n";
 	module_string=module;
 };
 module_body:	/* empty */   { $$=""; }
@@ -63,7 +71,7 @@ module_body:	/* empty */   { $$=""; }
 module_statement:	script  { $$=$1; } | defvar {$$=$1} | import { $$=$1 } | globals { $$=$1; };
 
 globals:	L_GLOBALS '{' globals_body '}' {
-	$$="<globals>\n"+$3+"\n</globals>\n";
+	$$="<globals "+lineno()+" >\n"+$3+"\n</globals>\n";
 };
 globals_body:	/* empty */   { $$=""; }
 		| globals_body global_statement ';' {
@@ -71,7 +79,7 @@ globals_body:	/* empty */   { $$=""; }
 };
 global_statement:	defvar { $$=$1; };
 import:		L_IMPORT L_ID 	{
-	$$="<import name="+q($2)+"/>";
+	$$="<import  "+lineno()+" name="+q($2)+"/>";
  };
 vartype:	inttype {$$=$1;} | floattype {$$=$1;}
 		| booltype {$$=$1;} | objecttype {$$=$1}
@@ -88,13 +96,13 @@ argvar:		vartype L_ID {
 }
 
 defvar:		vartype L_ID L_INITVALUE init_val {
-	$$="<defvar name="+q($2)+" type="+q($1)+" initvalue="+q($4)+" />\n";
+	$$="<defvar  "+lineno()+" name="+q($2)+" type="+q($1)+" initvalue="+q($4)+" />\n";
 }
 		| vartype L_ID '=' expr {
-	$$="<defvar name="+q($2)+" type="+q($1)+" />\n"+"<setvar name="+q($2)+" >\n"+$4+"\n</setvar>";
+	$$="<defvar  "+lineno()+" name="+q($2)+" type="+q($1)+" />\n"+"<setvar name="+q($2)+" >\n"+$4+"\n</setvar>";
 }
 		| vartype L_ID	{
-	$$="<defvar name="+q($2)+" type="+q($1)+"/>\n";
+	$$="<defvar  "+lineno()+" name="+q($2)+" type="+q($1)+"/>\n";
 //	printf("DEVFAR %s\n",$2.c_str());
 }
 		| vartype L_ID ',' nonnull_idlist {
@@ -124,7 +132,7 @@ script:		script_header '{' script_body '}'	{
 	$$=$1+"\n"+$3+"\n</script>\n";
 };
 script_header:	vartype L_ID '(' arguments ')'	{
-	$$="<script name="+q($2)+" return="+q($1)+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
+	$$="<script  "+lineno()+" name="+q($2)+" return="+q($1)+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
 };
 var_or_voidtype:	vartype { printf("var_or_voidtype\n"); $$=$1;}
 	| voidtype {$$=$1;};
@@ -157,29 +165,29 @@ script_statement:	if_statement { $$=$1; }
 			| ';' { $$=" ";};
 
 return_statement: 	L_RETURN	{
-	$$="<return/>\n";
+	$$="<return "+lineno()+" />\n";
 }
 			| L_RETURN expr {
-	$$="<return>\n"+$2+"\n</return>\n";
+	$$="<return "+lineno()+" >\n"+$2+"\n</return>\n";
 }
 
 while_statement: L_WHILE expr block_statement	{
-	$$="<while>\n"+$2+"\n"+$3+"\n</while>\n";
+	$$="<while "+lineno()+" >\n"+$2+"\n"+$3+"\n</while>\n";
 };
 call_void:	L_ID '.' L_ID '(' attributes call_arglist ')'	{
 	if($1[0]=='_'){
-		$$="<call module="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</call>\n";
+		$$="<call  "+lineno()+" module="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</call>\n";
 	}
 	else{	
-		$$="<exec module="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</exec>\n";
+		$$="<exec  "+lineno()+" module="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</exec>\n";
 	}
 }
 
 		| L_ID L_METHODCALL L_ID '(' attributes call_arglist ')'	{
-		$$="<call object="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</call>\n";
+		$$="<call  "+lineno()+" object="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</call>\n";
 }
 		| L_ID '(' call_arglist ')'	{
-	$$="<exec name="+q($1)+" >\n"+$3+"\n</exec>\n";
+	$$="<exec  "+lineno()+" name="+q($1)+" >\n"+$3+"\n</exec>\n";
 };
 call_arglist:	/* empty */	{ $$="\n"; }
 	| nonnull_arglist  { $$=$1;}
@@ -199,24 +207,24 @@ attribute:	':' L_ID '=' string_constant 	 {
 
 
 setvar:			L_ID '=' expr   {
-	$$="<setvar name="+q($1)+" >\n"+$3+"\n</setvar>\n";
+	$$="<setvar name="+q($1)+lineno()+" >\n"+$3+"\n</setvar>\n";
 }
 if_statement:	L_IF '(' expr ')' block_statement L_ELSE block_statement	{
-	$$="<if>\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
+	$$="<if "+lineno()+" >\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
 }
 		| L_IF '(' expr ')' block_statement L_ELSE if_statement	{
-	$$="<if>\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
+	$$="<if "+lineno()+" >\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
 }
 		| L_IF '(' expr ')' block_statement	{
-	$$="<if>\n"+$3+"\n"+$5+"\n"+"<block></block>"+"\n</if>\n";
+	$$="<if "+lineno()+" >\n"+$3+"\n"+$5+"\n"+"<block></block>"+"\n</if>\n";
 };
 block_statement:	'{' script_body '}'	{
-	$$="<block>\n"+$2+"\n</block>\n";
+	$$="<block "+lineno()+" >\n"+$2+"\n</block>\n";
 };
 constant:	number { $$=$1; } | boolconst	{ $$=$1; }
 		| stringconst {$$=$1;};
 stringconst:	string_constant	{
-	$$="<const type=\"object\" object=\"string\" value="+$1+" />\n";
+	$$="<const "+lineno()+"  type=\"object\" object=\"string\" value="+$1+" />\n";
 };
 string_constant:	L_STRINGCONST {$$=$1;};
 
@@ -231,50 +239,50 @@ boolvalue:	L_BOOLCONST_TRUE  {
 	 $$="false";
 };	
 boolconst:	boolvalue  {
-	 $$="<const type=\"bool\" value="+q($1)+" />\n";
+	 $$="<const  "+lineno()+" type=\"bool\" value="+q($1)+" />\n";
  };
 
 number:			L_FLOATCONST {
-	 $$="<const type=\"float\" value="+q($1)+" />\n";
+	 $$="<const  "+lineno()+" type=\"float\" value="+q($1)+" />\n";
  }
 			| L_INTCONST	{
-	 $$="<const type=\"int\" value="+q($1)+" />\n";
+	 $$="<const  "+lineno()+" type=\"int\" value="+q($1)+" />\n";
 }
 expr:			constant	{ $$=$1; };
 			| L_ID {
-	$$="<var name="+q($1)+" />\n";
+	$$="<var  "+lineno()+" name="+q($1)+" />\n";
 }
 			| L_ID '.' L_ID {
-	$$="<var module="+q($1)+" name="+q($2)+" />\n";
+	$$="<var  "+lineno()+" module="+q($1)+" name="+q($2)+" />\n";
 }
 			| call_void { $$=$1; }
 			| expr L_EQUAL expr
-{ $$="<test test=\"eq\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test  "+lineno()+" test=\"eq\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_NOT_EQUAL expr
-{ $$="<test test=\"ne\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test  "+lineno()+" test=\"ne\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_LESSER_OR_EQUAL expr
-{ $$="<test test=\"le\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test  "+lineno()+" test=\"le\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_GREATER_OR_EQUAL expr
-{ $$="<test test=\"ge\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test  "+lineno()+" test=\"ge\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr '<' expr
-{ $$="<test test=\"lt\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test  "+lineno()+" test=\"lt\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr '>' expr
-{ $$="<test test=\"gt\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test  "+lineno()+" test=\"gt\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 
 			| expr '*' expr
-{ $$="<fmath math=\"*\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath  "+lineno()+" math=\"*\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '/' expr
-{ $$="<fmath math=\"/\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath  "+lineno()+" math=\"/\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '-' expr
-{ $$="<fmath math=\"-\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath  "+lineno()+" math=\"-\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '+' expr
-{ $$="<fmath math=\"+\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath  "+lineno()+" math=\"+\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr L_BOOL_AND expr
-{ $$="<and>\n"+$1+"\n"+$3+"\n</and>\n"; }
+{ $$="<and "+lineno()+" >\n"+$1+"\n"+$3+"\n</and>\n"; }
 			| expr L_BOOL_OR expr
-{ $$="<or>\n"+$1+"\n"+$3+"\n</or>\n"; }
+{ $$="<or "+lineno()+" >\n"+$1+"\n"+$3+"\n</or>\n"; }
 			| '!' expr
-{ $$="<not>\n"+$2+"\n</not>\n";		}
+{ $$="<not "+lineno()+" >\n"+$2+"\n</not>\n";		}
 			| '(' expr ')'
 { $$=$2; };
 
@@ -308,7 +316,7 @@ string parseCalike(char const *filename)
 
 
 int yyerror(char *s){
-  printf("(yy)error: %s line %d text -%s-\n",s,yylineno,yytext);
+  printf("(yy)error: %s line %d text -%s-\n",s,yylineno+1,yytext);
   have_yy_error=true;
 
   return 1;

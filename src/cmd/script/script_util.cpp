@@ -69,6 +69,7 @@ string Mission::modestring(int mode){
 void Mission::fatalError(missionNode *node,int mode,string message){
   cout << "fatal (" << modestring(mode) << ") " << message << " : ";
   printNode(node,mode);
+  cout << "semantic error at line " << node->attr_value("line") << endl;
 }
 
 /* *********************************************************** */
@@ -105,7 +106,7 @@ void Mission::debug(missionNode *node,int mode,string message){
 
 void Mission::printNode(missionNode *node,int mode){
   if(node){
-    node->printNode(cout,1,0);
+    node->printNode(cout,0,0);
   }
 }
 

@@ -77,6 +77,8 @@ void Mission::DirectorStart(missionNode *node){
 
   msgcenter->add("game","all","parsing programmed mission");
 
+  cout << "parsing declarations for director" << endl;
+
   parsemode=PARSE_DECL;
 
   doModule(node,SCRIPT_PARSE);
@@ -92,6 +94,8 @@ void Mission::DirectorStart(missionNode *node){
     missionNode *module=runtime.modules[import->script.name];
     if(module==NULL){
       debug(3,node,SCRIPT_PARSE,"loading module "+import->script.name);
+
+      cout << "loading module " << import->script.name << endl;
 
       string filename="modules/"+import->script.name+".module";
       missionNode *import_top=importf->LoadXML(filename.c_str());

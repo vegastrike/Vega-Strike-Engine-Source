@@ -477,7 +477,7 @@ varInst *Mission::doExec(missionNode *node,int mode){
 
       if(script==NULL){
 	fatalError(node,mode,"script "+name+" not found in module "+use_modstr);
-	printModules();
+	//	printModules();
 
 	assert(0);
       }

@@ -66,7 +66,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
   if(cmd=="getUnit"){
     missionNode *nr_node=getArgument(node,mode,0);
-    int unit_nr=(int)doFloatVar(nr_node,mode);
+    int unit_nr=doIntVar(nr_node,mode);
     Unit *my_unit=NULL;
 
     if(mode==SCRIPT_RUN){
@@ -135,7 +135,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     varInst *ai_vi=checkObjectExpr(ai_node,mode);
     
     missionNode *nr_node=getArgument(node,mode,4);
-    int nr_of_ships=(int)checkFloatExpr(nr_node,mode);
+    int nr_of_ships=checkIntExpr(nr_node,mode);
 
     missionNode *pos_node[3];
     float pos[3];

@@ -1,3 +1,9 @@
+2001-12-20 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* callbacks use now ints instead of floats
+	* modules/*.c use now also ints
+	
+
 2001-12-19 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added _io.printf
