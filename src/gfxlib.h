@@ -109,7 +109,7 @@ BOOL /*GFXDRVAPI*/ GFXEnableLight(int light);
 BOOL /*GFXDRVAPI*/ GFXDisableLight(int light);
 BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);//set the intensity cutoff for light
 BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights);
-BOOL /*GFXDRVAPI*/ GFXPickLights (const Vector &loc);//must call this to actually execute gl_enable, etc
+BOOL /*GFXDRVAPI*/ GFXPickLights (const float *);//must call this to actually execute gl_enable, etc
 BOOL /*GFXDRVAPI*/ GFXSetLight (int light, enum LIGHT_TARGET lightarg,const GFXColor & color);//actually sets the light properties
 
 

@@ -155,6 +155,7 @@ void SphereMesh::ProcessDrawQueue() {
     draw_queue->pop_back();
 
     GFXLoadMatrix(MODEL, c.mat);
+    GFXPickLights (c.mat);
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)

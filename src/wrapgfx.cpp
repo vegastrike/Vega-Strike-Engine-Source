@@ -155,8 +155,8 @@ BOOL WrapGFX::StartGFX()
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
 	GFXCreateLight (ligh);
-	GFXSetLight (ligh, POSITION, GFXColor (2,2,2,0));
-	//GFXSetLight (ligh, ATTENUATE, GFXColor (1,0,.01));
+	GFXSetLight (ligh, POSITION, GFXColor (0,0,0,1));
+	//       	GFXSetLight (ligh, ATTENUATE, GFXColor (1,0,.1));
 	GFXSetLight (ligh, DIFFUSE, GFXColor (1,0,0,1));
 	GFXSetLight (ligh, SPECULAR, GFXColor (1,1,1,1));
 	GFXEnableLight (ligh);

@@ -237,31 +237,67 @@ BOOL /*GFXDRVAPI*/ GFXDisableLight (int light) {
   return TRUE;
 }
 
-void EnableExisting (int);
+void EnableExisting (unsigned int);
+void EnableExistingAttenuated (unsigned int,float);
 inline void DisableExisting(int);
-void ForceEnable (unsigned int, unsigned int &, unsigned int&);
+void ForceEnable (unsigned int, unsigned int &, unsigned int &);
+void ForceEnableAttenuated (unsigned int, float, unsigned int &, unsigned int&);
 
 
+int newQsize=0;
+int newQ [GFX_MAX_LIGHTS];
+float AttenuateQ[GFX_MAX_LIGHTS];
+static float AttTmp[4];
+static float VecT[4];
 
-BOOL /*GFXDRVAPI*/ GFXPickLights (const Vector& loc) {
+BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
   //picks 1-5 lights to use
+  // glMatrixMode(GL_MODELVIEW);
+  //glPushMatrix();
+  //float tm [16]={1,0,0,1000,0,1,0,1000,0,0,1,1000,0,0,0,1};
+  //glLoadIdentity();
+  //  GFXLoadIdentity(MODEL);
+  Vector loc (transform[12],transform[13],transform[14]);
   SetLocalCompare (loc);
-  vector <int> newQ;
+  newQsize=0;
   unsigned int i;
   light_key tmpvar;
   unsigned int lightQsize = lightQ.size();
   for (i=0;i<lightQsize;i++) {
     tmpvar = lightQ.top();
     if (i<GFX_MAX_LIGHTS) {
-      newQ.push_back (tmpvar.number);
+      //do more stuff with intensity before hacking it to hell
+      newQsize++;
+      if ((*_llights_loc)[i].vect[3]) {
+	//intensity now has become the attenuation factor
+	newQ[i]= tmpvar.number;
+	AttenuateQ[i]=tmpvar.intensity_key/(*_llights_loc)[i].intensity;
+      }else {
+	newQ[i]= tmpvar.number;
+	AttenuateQ[i]=0;
+      }
+
     }
     lightQ.pop();
     //really dumb policy that doesn't take in the optimal number of lights into account...
     //replace wiht something that should generate a bell curve around optimal based on how far over/under you are using some sort of fuzzy logic
   }
-  for (i=0;i<newQ.size();i++) {
-    if ((*_llights_dat)[newQ[i]].target>=0) {
-      EnableExisting (newQ[i]);
+  int light;
+  for (i=0;i<newQsize;i++) {
+    light = newQ[i];
+    if ((*_llights_dat)[light].target>=0) {
+      if (AttenuateQ[i]) 
+	EnableExistingAttenuated (light,AttenuateQ[i]);
+      else
+	EnableExisting (newQ[i]);
+      AttTmp[0]=(*_llights_loc)[light].vect[0]-loc.i;
+      AttTmp[1]=(*_llights_loc)[light].vect[1]-loc.j;
+      AttTmp[2]=(*_llights_loc)[light].vect[2]-loc.k;
+      VecT[3]=0;
+      VecT[0]=AttTmp[0]*transform[0]+AttTmp[1]*transform[1]+AttTmp[2]*transform[2];
+      VecT[1]=AttTmp[0]*transform[4]+AttTmp[1]*transform[5]+AttTmp[2]*transform[6];
+      VecT[2]=AttTmp[0]*transform[8]+AttTmp[1]*transform[9]+AttTmp[2]*transform[10];
+      glLightfv (GL_LIGHT0+(*_llights_dat)[light].target, GL_POSITION, VecT);
     }
   }
   for (i=0;i<GFX_MAX_LIGHTS;i++) {
@@ -273,11 +309,26 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const Vector& loc) {
   // ForceActivate the rest.
   unsigned int tmp=0;//where to start looking for disabled lights
   unsigned int newtarg=0;
-  for (i=0;i<newQ.size();i++) {
-    if ((*_llights_dat)[newQ[i]].target==-1) {
-      ForceEnable (newQ[i],tmp,newtarg);
+  for (i=0;i<newQsize;i++) {
+    light = newQ[i];
+    if ((*_llights_dat)[light].target==-1) {
+      if (AttenuateQ[i]) 
+	ForceEnableAttenuated (light,AttenuateQ[i],tmp,newtarg);
+      else
+	ForceEnable (light,tmp,newtarg); 
+      AttTmp[0]=(*_llights_loc)[light].vect[0]-loc.i;
+      AttTmp[1]=(*_llights_loc)[light].vect[1]-loc.j;
+      AttTmp[2]=(*_llights_loc)[light].vect[2]-loc.k;
+      AttTmp[3]=0;
+      VecT[0]=AttTmp[0]*transform[0]+AttTmp[1]*transform[1]+AttTmp[2]*transform[2];
+      VecT[1]=AttTmp[0]*transform[4]+AttTmp[1]*transform[5]+AttTmp[2]*transform[6];
+      VecT[2]=AttTmp[0]*transform[8]+AttTmp[1]*transform[9]+AttTmp[2]*transform[10];
+      glLightfv (GL_LIGHT0+(*_llights_dat)[light].target, GL_POSITION, VecT);
+
+      //      glLightfv (GL_LIGHT0+(*llight_dat)[newQ[i]].target, GL_POSITION, /*wrong*/(*_llights_loc)[light].vect);
     }
   }
+  //glPopMatrix();
   return TRUE;
 }
 
@@ -292,6 +343,7 @@ void DisableExisting (int gl_light) {
     }
   }
 }
+
 void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) {
   for (;tmp<GFX_MAX_LIGHTS;tmp++) {
     if (GLLightState[tmp]==0) {
@@ -300,12 +352,12 @@ void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) 
 	glLightfv (GL_LIGHT0+tmp,GL_DIFFUSE, (*_llights_dat)[light].diffuse);
 	glLightfv (GL_LIGHT0+tmp, GL_SPECULAR, (*_llights_dat)[light].specular);
 	glLightfv (GL_LIGHT0+tmp, GL_AMBIENT, (*_llights_dat)[light].ambient);
-	glLightfv (GL_LIGHT0+tmp, GL_POSITION, (*_llights_loc)[light].vect);
+	//POS//	glLightfv (GL_LIGHT0+tmp, GL_POSITION, (*_llights_loc)[light].vect);
       	glLightfv (GL_LIGHT0+tmp, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
       	glLightf (GL_LIGHT0+tmp,GL_SPOT_EXPONENT, (*_llights_dat)[light].exp);
-       	glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
-       	glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
-       	glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);
+       	////glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+       	////glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+       	////glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);//they appear to be broken...anyhow they are of great cost...possibly better to just do a per-model attenuation
 	(*_llights_dat)[light].target=tmp;
 	(*_llights_dat)[light].changed=0;
 	GLLights[tmp]=light;//set pointer and backpointer
@@ -331,15 +383,16 @@ void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) 
       if (olddat->ambient[0]!=newdat->ambient[0]||olddat->ambient[1]!=newdat->ambient[1]||olddat->ambient[2]!=newdat->ambient[2]||olddat->ambient[3]!=newdat->ambient[3]||chg&AMBIENT) {
 	glLightfv (GL_LIGHT0+newtarg, GL_AMBIENT, (*_llights_dat)[light].ambient);
       }
-      glLightfv (GL_LIGHT0+newtarg, GL_POSITION, (*_llights_loc)[light].vect);
+      
+      //POS//glLightfv (GL_LIGHT0+newtarg, GL_POSITION, (*_llights_loc)[light].vect);
 
       if (olddat->spot[0]!=newdat->spot[0]||olddat->spot[1]!=newdat->spot[1]||olddat->spot[2]!=newdat->spot[2]||olddat->exp!=newdat->exp||chg&DIRECTION) {
 	glLightfv (GL_LIGHT0+newtarg, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
 	glLightf (GL_LIGHT0+newtarg, GL_SPOT_EXPONENT, (*_llights_dat)[light].exp);
       }
-      glLightf (GL_LIGHT0+newtarg, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
-      glLightf (GL_LIGHT0+newtarg, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
-      glLightf (GL_LIGHT0+newtarg, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]); //for the most part ignored by OpenGL, so not a big cost...I hope :-D
+      ////      glLightf (GL_LIGHT0+newtarg, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+      ////      glLightf (GL_LIGHT0+newtarg, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+      ////      glLightf (GL_LIGHT0+newtarg, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]); //for the most part ignored by OpenGL, so not a big cost...I hope :-D
       olddat->target=-1;
       (*_llights_dat)[light].target=newtarg;
       (*_llights_dat)[light].changed=0;
@@ -351,8 +404,77 @@ void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) 
   }
 }
 
+static const float ZeroTmp[4]={0,0,0,1};
 
-void EnableExisting (int light) {
+void SubrEnableAttenuated (unsigned int, float, unsigned int);//does the replacing 
+void ForceEnableAttenuated (unsigned int light, float AttenFactor, unsigned int &tmp, unsigned int &newtarg) {
+
+
+  for (;tmp<GFX_MAX_LIGHTS;tmp++) {
+    if (GLLightState[tmp]==0) {
+      if (GLLights[tmp]==-1) {
+	SubrEnableAttenuated (light,AttenFactor, tmp);
+	return;
+      }
+    }
+  }
+  for (;tmp<GFX_MAX_LIGHTS;tmp++) {
+    if (GLLightState[tmp]==0) {
+      SubrEnableAttenuated (light,AttenFactor, tmp);
+      return;      
+    }
+  }
+}
+
+void SubrEnableAttenuated (unsigned int light, float AttenFactor, unsigned int tmp) {
+  //copy all state nfo
+  int opt = (*_llights_dat)[light].options;
+  if (opt&DIFFUSE) {
+    AttTmp[0]=(*_llights_dat)[light].diffuse[0]*AttenFactor;
+    AttTmp[1]=(*_llights_dat)[light].diffuse[1]*AttenFactor;
+    AttTmp[2]=(*_llights_dat)[light].diffuse[2]*AttenFactor;
+    AttTmp[3]=(*_llights_dat)[light].diffuse[3];//don't attenuate the alpha :-D
+    glLightfv (GL_LIGHT0+tmp,GL_DIFFUSE, AttTmp);
+  } else 
+    glLightfv (GL_LIGHT0+tmp,GL_DIFFUSE, ZeroTmp);
+  if (opt&SPECULAR) {
+    AttTmp[0]=(*_llights_dat)[light].specular[0]*AttenFactor;
+    AttTmp[1]=(*_llights_dat)[light].specular[1]*AttenFactor;
+    AttTmp[2]=(*_llights_dat)[light].specular[2]*AttenFactor;
+    AttTmp[3]=(*_llights_dat)[light].specular[3];//don't attenuate the alpha :-D
+    glLightfv (GL_LIGHT0+tmp, GL_SPECULAR, AttTmp);
+  } else {
+    glLightfv (GL_LIGHT0+tmp, GL_SPECULAR, ZeroTmp);
+  }
+  if (opt&AMBIENT) {
+    AttTmp[0]=(*_llights_dat)[light].specular[0]*AttenFactor;
+    AttTmp[1]=(*_llights_dat)[light].specular[1]*AttenFactor;
+    AttTmp[2]=(*_llights_dat)[light].specular[2]*AttenFactor;
+    AttTmp[3]=(*_llights_dat)[light].specular[3];//don't attenuate the alpha :-D
+    glLightfv (GL_LIGHT0+tmp, GL_AMBIENT, (*_llights_dat)[light].ambient);
+  } else {
+    glLightfv (GL_LIGHT0+tmp, GL_AMBIENT, ZeroTmp);
+  }
+  //POS//(*_llights_loc)[light].vect[3]=1;
+  //POS//glLightfv (GL_LIGHT0+tmp, GL_POSITION, (*_llights_loc)[light].vect);
+  //POS//(*_llights_loc)[light].vect[3]=1;
+  glLightfv (GL_LIGHT0+tmp, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
+  glLightf (GL_LIGHT0+tmp,GL_SPOT_EXPONENT, (*_llights_dat)[light].exp);
+  ////glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+  ////glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+  ////glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);//they appear to be broken...anyhow they are of great cost...possibly better to just do a per-model attenuation
+  (*_llights_dat)[light].target=tmp;
+  (*_llights_dat)[light].changed=0;
+  GLLights[tmp]=light;//set pointer and backpointer
+  GLLightState[tmp]=1;
+  glEnable (GL_LIGHT0+tmp);
+  tmp++;
+} 
+
+
+
+
+void EnableExisting (unsigned int light) {
   int chg = (*_llights_dat)[light].changed;
   int gl_targ = (*_llights_dat)[light].target;
   if (chg) {
@@ -365,18 +487,18 @@ void EnableExisting (int light) {
     if (chg&AMBIENT) {
       glLightfv (GL_LIGHT0+gl_targ, GL_AMBIENT, (*_llights_dat)[light].ambient);
     }
-    if (chg&POSITION) {
-      glLightfv (GL_LIGHT0+gl_targ, GL_POSITION, (*_llights_loc)[light].vect);
-    }
+    //POS//    if (chg&POSITION) {
+    //POS//      glLightfv (GL_LIGHT0+gl_targ, GL_POSITION, (*_llights_loc)[light].vect);
+    //POS//    }
     if (chg&DIRECTION) {
       glLightfv (GL_LIGHT0+gl_targ, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
       glLightf 	(GL_LIGHT0+gl_targ, GL_SPOT_EXPONENT,  (*_llights_dat)[light].exp);
     }
-    if (chg&ATTENUATE) {
-      glLightf (GL_LIGHT0+gl_targ, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
-      glLightf (GL_LIGHT0+gl_targ, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
-      glLightf (GL_LIGHT0+gl_targ, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);
-    }
+    //    if (chg&ATTENUATE) {
+    //      glLightf (GL_LIGHT0+gl_targ, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+    //      glLightf (GL_LIGHT0+gl_targ, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+    //      glLightf (GL_LIGHT0+gl_targ, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);
+    //}
     glEnable (GL_LIGHT0+gl_targ);
     GLLightState[gl_targ]=2;
     (*_llights_dat)[light].changed=0;
@@ -386,6 +508,60 @@ void EnableExisting (int light) {
     glEnable (GL_LIGHT0+gl_targ);//if nothing changes not a whole lot to do  dont' enable if on
   }
   GLLightState[gl_targ]=2;//don't enable then disable
+}
+
+void EnableExistingAttenuated (unsigned int light, float AttenFactor) {
+  int opt = (*_llights_dat)[light].options;
+  int chg = (*_llights_dat)[light].changed;
+  int gl_targ = (*_llights_dat)[light].target;
+  if (opt&DIFFUSE) {
+    AttTmp[0]=(*_llights_dat)[light].diffuse[0]*AttenFactor;
+    AttTmp[1]=(*_llights_dat)[light].diffuse[1]*AttenFactor;
+    AttTmp[2]=(*_llights_dat)[light].diffuse[2]*AttenFactor;
+    AttTmp[3]=(*_llights_dat)[light].diffuse[3];//don't attenuate the alpha :-D
+    glLightfv (GL_LIGHT0+gl_targ,GL_DIFFUSE, AttTmp);
+  } else {
+    if (chg&DIFFUSE) 
+      glLightfv (GL_LIGHT0+gl_targ,GL_DIFFUSE, ZeroTmp);
+  }	
+  if (opt&SPECULAR) {
+    AttTmp[0]=(*_llights_dat)[light].specular[0]*AttenFactor;
+    AttTmp[1]=(*_llights_dat)[light].specular[1]*AttenFactor;
+    AttTmp[2]=(*_llights_dat)[light].specular[2]*AttenFactor;
+    AttTmp[3]=(*_llights_dat)[light].specular[3];//don't attenuate the alpha :-D
+    glLightfv (GL_LIGHT0+gl_targ, GL_SPECULAR, AttTmp);
+  } else {
+    if (chg&SPECULAR)
+    glLightfv (GL_LIGHT0+gl_targ, GL_SPECULAR, ZeroTmp);
+  }
+  if (opt&AMBIENT) {
+    AttTmp[0]=(*_llights_dat)[light].specular[0]*AttenFactor;
+    AttTmp[1]=(*_llights_dat)[light].specular[1]*AttenFactor;
+    AttTmp[2]=(*_llights_dat)[light].specular[2]*AttenFactor;
+    AttTmp[3]=(*_llights_dat)[light].specular[3];//don't attenuate the alpha :-D
+    glLightfv (GL_LIGHT0+gl_targ, GL_AMBIENT, (*_llights_dat)[light].ambient);
+  } else {
+    if (chg&AMBIENT)
+      glLightfv (GL_LIGHT0+gl_targ, GL_AMBIENT, ZeroTmp);
+  }
+  //POS//  if (chg&POSITION) {
+  //POS//    (*_llights_loc)[light].vect[3]=1;
+  //POS//  glLightfv (GL_LIGHT0+gl_targ, GL_POSITION, (*_llights_loc)[light].vect);
+  //POS//  (*_llights_loc)[light].vect[3]=1;
+  
+  if (chg&DIRECTION) {
+    glLightfv (GL_LIGHT0+gl_targ, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
+    glLightf 	(GL_LIGHT0+gl_targ, GL_SPOT_EXPONENT,  (*_llights_dat)[light].exp);
+  }
+    //    if (chg&ATTENUATE) {
+    //      glLightf (GL_LIGHT0+gl_targ, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+    //      glLightf (GL_LIGHT0+gl_targ, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+    //      glLightf (GL_LIGHT0+gl_targ, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);
+    //    }
+  glEnable (GL_LIGHT0+gl_targ);
+  GLLightState[gl_targ]=2;
+  (*_llights_dat)[light].changed=0;
+  return;
 }
 
 //minor differences between d3d and gl direction and position, will be dealt with if need be

@@ -729,7 +729,6 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
   cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-
   DrawContext c(cumulative_transformation_matrix);
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
@@ -741,7 +740,7 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
   	GFXSelectMaterial(myMatNum);
-	GFXDisable(LIGHTING);
+	GFXEnable(LIGHTING);
 
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
@@ -767,7 +766,8 @@ void Mesh::ProcessDrawQueue() {
   while(draw_queue->size()) {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    GFXPickLights (Vector (0,0,0));
+    //GFXLoadIdentity (MODEL);
+    GFXPickLights (c.mat/*GetPosition()*/);
     GFXLoadMatrix(MODEL, c.mat);
     vlist->Draw();
     if(quadstrips!=NULL) {
