@@ -38,6 +38,7 @@ class CriteriaNode {
  public:
   virtual bool isDestination(unsigned system) const =0;
   virtual std::string getDescription() const =0;
+  virtual std::string getText() const =0;
 
   virtual CriteriaNode* unhook() =0;
   virtual std::vector<CriteriaNode*> getChildren() const =0;
@@ -72,6 +73,7 @@ class CriteriaRoot : public CriteriaParent {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
 
   virtual CriteriaNode* unhook();
   virtual CriteriaNode* unhook(CriteriaNode *child);
@@ -96,6 +98,7 @@ class CriteriaNot : public CriteriaParent {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
 
   virtual CriteriaNode* unhook();
   virtual CriteriaNode* unhook(CriteriaNode *child);
@@ -136,6 +139,7 @@ class CriteriaAnd : public CriteriaBinaryOperator {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
   
   virtual CriteriaNode* clone() const;
   CriteriaAnd(CriteriaNode *child, CriteriaNode *newNode)
@@ -149,6 +153,7 @@ class CriteriaOr : public CriteriaBinaryOperator {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
   
   virtual CriteriaNode* clone() const;
   CriteriaOr(CriteriaNode *child, CriteriaNode *newNode)
@@ -180,6 +185,7 @@ class CriteriaContains : public CriteriaLeaf {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
   
   virtual CriteriaNode* clone() const;
   CriteriaContains(std::string value, CriteriaParent *parent = NULL)
@@ -199,6 +205,7 @@ class CriteriaOwnedBy : public CriteriaLeaf {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
   
   virtual CriteriaNode* clone() const;
   CriteriaOwnedBy(std::string value, CriteriaParent *parent = NULL)
@@ -212,6 +219,7 @@ class CriteriaSector : public CriteriaLeaf {
  public:
   virtual bool isDestination(unsigned system) const;
   virtual std::string getDescription() const;
+  virtual std::string getText() const;
   
   virtual CriteriaNode* clone() const;
   CriteriaSector(std::string value, CriteriaParent *parent = NULL)

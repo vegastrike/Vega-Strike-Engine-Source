@@ -89,8 +89,10 @@ void NavigationSystem::mouseClick (int button, int state, int x, int y){
 }
 
 void NavigationSystem::Setup()
-
 {
+	visitSystem(_Universe->AccessCockpit(),
+		    _Universe->activeStarSystem()->getFileName());
+
 	configmode = 0;
 
 	rotations = 0;

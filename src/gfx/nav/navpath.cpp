@@ -116,6 +116,10 @@ string NavPath::getDescription() const {
 
   if(!source || !destination)
     temp += "#n#INCOMPLETE#n#";
+  else if(!isComplete())
+    temp += "#n#PATH CHAIN IS UNSOLVED BEFORE THIS POINT#n#";
+  else if(!isEvaluated())
+    temp += "#n#PATH NOT FOUND#n#";	  
   
   return temp;
 }
@@ -169,6 +173,7 @@ bool NavPath::setSourceNode(PathNode *node) {
     if(oldNode)
       delete oldNode;
     oldNode=NULL;
+    _Universe->AccessCockpit()->AccessNavSystem()->pathman->updateSpecificPath(this);
     return true;
   }
 }
@@ -195,6 +200,7 @@ bool NavPath::setDestinationNode(PathNode *node) {
     if(oldNode)
       delete oldNode;
     oldNode = NULL;
+    _Universe->AccessCockpit()->AccessNavSystem()->pathman->updateSpecificPath(this);
     return true;
   }
 }
@@ -560,24 +566,26 @@ bool PathManager::updateSpecificPath(NavPath * path) {
 }
 
 void PathManager::updatePaths(UpdateType type) {
+  std::list<NavPath *>::iterator i;
   DFS();
   if(type==ALL) {
-    for(std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i)
-      (*i)->update();
+    for(std::vector<NavPath *>::iterator j = paths.begin(); j < paths.end(); ++j) {
+      (*j)->update();
+    }
   }
   else if(type==CURRENT) {
-    for(std::list<NavPath *>::iterator i = topoOrder.begin(); i != topoOrder.end(); ++i)
+    for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
       (*i)->updated=false;
     
-    for(std::list<NavPath *>::iterator i = topoOrder.begin(); i != topoOrder.end(); ++i)
+    for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
       if((*i)->updated==false && (*i)->isCurrentDependant())
 	updateSpecificPath(*i);
   }
   else{
-    for(std::list<NavPath *>::iterator i = topoOrder.begin(); i != topoOrder.end(); ++i)
+    for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
       (*i)->updated=false;
     
-    for(std::list<NavPath *>::iterator i = topoOrder.begin(); i != topoOrder.end(); ++i)
+    for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
       if((*i)->updated==false && (*i)->isTargetDependant())
 	updateSpecificPath(*i);
   }
@@ -617,11 +625,6 @@ void PathManager::dfsVisit(NavPath * path) {
 }
 
 PathManager::PathManager() {
-  NavPath *path = new NavPath();
-  path->setName("Target Search");
-  path->setSourceNode(new CurrentPathNode());
-  path->setDestinationNode(new TargetPathNode());
-  paths.push_back(path);
 }
 
 PathManager::~PathManager() {

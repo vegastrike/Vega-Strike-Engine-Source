@@ -190,6 +190,12 @@ void NavComputer::init(void) {
 
   // Read in the controls for all the modes.
   createControls();
+
+  NavPath *path = new NavPath();
+  path->setName("Target Search");
+  path->setSourceNode(new CurrentPathNode());
+  path->setDestinationNode(new TargetPathNode());
+  pathman->paths.push_back(path);
 }
 
 // Create the controls that will be used for this window.
@@ -1158,7 +1164,7 @@ void NavComputer::loadChainLister() {
 
 void NavComputer::loadCriteriaPickerCell(SimplePicker* picker, ValuedPickerCell<CriteriaNode*>* parent, CriteriaNode *node) {
   assert(node != NULL);
-  ValuedPickerCell<CriteriaNode*>* cell = new ValuedPickerCell<CriteriaNode*>(node, node->getDescription());
+  ValuedPickerCell<CriteriaNode*>* cell = new ValuedPickerCell<CriteriaNode*>(node, node->getText());
   cell->setHideChildren(false);
 
   if(parent)

@@ -773,17 +773,6 @@ void NavigationSystem::DrawGalaxy()
 		col.a=(system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
 //		col.a=GetAlpha(oldpos,center_x,center_y,center_z,zdistance);
 
-/*		{
-			float tmp_x=(center_x-pos.i);
-			float tmp_y=(center_y-pos.j);
-			float tmp_z=(center_z-pos.k);
-			if (sqrt((pos.i*pos.i)+(pos.j*pos.j)+(pos.k*pos.k))>zdistance) {
-				// If stuff is outside camera gange then continue.
-				++systemIter;
-				continue;
-			}
-		}
-*/
 		
 		//IGNORE DIM AND OFF SCREEN SYETEMS
 		//**********************************
@@ -795,6 +784,31 @@ void NavigationSystem::DrawGalaxy()
 		//**********************************
 
 
+		
+		//FIND OUT IF SYSTEM IS PART OF A VISIBLE PATH
+		//**********************************
+		bool isPath=false;
+		if(path_view != PATH_OFF) {
+		  if(systemIter->part_of_path) {
+		    for(std::set<NavPath *>::iterator paths=systemIter->paths.begin(); paths!=systemIter->paths.end(); ++paths) {
+		      if((*paths)->getVisible()) {
+			isPath=true;
+			break;
+		      }
+		    }
+		  }
+		}
+		//**********************************
+
+
+		//IGNORE NON-PATH SYSTEMS IN PATH_ONLY MODE
+		//**********************************
+		if(!isPath && path_view == PATH_ONLY) {
+			++systemIter;
+			continue;
+		}
+		//**********************************
+		  
 
 		int insert_type = systemambiguous;
 		float insert_size = SYSTEM_DEFAULT_SIZE;
@@ -820,30 +834,25 @@ void NavigationSystem::DrawGalaxy()
 		}
 
 		bool moused = false;
-		if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
-			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, col));
-			moused=true;
-		}
-			
-		
-//		systemdrawnode it (insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,moused,col);
-
-		bool isPath=false;
-		if(path_view != PATH_OFF) {
-		  if(systemIter->part_of_path) {
-		    for(std::set<NavPath *>::iterator paths=systemIter->paths.begin(); paths!=systemIter->paths.end(); ++paths) {
-		      if((*paths)->getVisible()) {
-			isPath=true;
-		        DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,pathcol);
-			DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
-			break;
-		      }
-		    }
+		if(isPath) {
+		  isPath=true;
+		  DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,pathcol);
+		  DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
+		  
+		  if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
+		    mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, pathcol));
+		    moused=true;
 		  }
 		}
-		if(!isPath && path_view != PATH_ONLY) {
+		
+		if(!isPath) {
 		  DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
 		  DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
+
+		  if (TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current) ) {
+		    mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,false, col));
+		    moused=true;
+		  }
 		}
 
 		unsigned destsize=systemIter->GetDestinationSize();
@@ -892,9 +901,6 @@ void NavigationSystem::DrawGalaxy()
 			}
 			GFXEnd();
 		}
-//		jumptable.Delete(sys); // Won't ever reference this again, since it checks for less than.
-
-
 		
 		++systemIter;
 	}

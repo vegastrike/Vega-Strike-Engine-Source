@@ -52,6 +52,10 @@ std::string CriteriaRoot::getDescription() const {
     return "";
 }
 
+std::string CriteriaRoot::getText() const {
+  return "";
+}
+
 void CriteriaRoot::replaceChild(CriteriaNode * child, CriteriaNode * replacement) {
   assert(child == m_child);
   m_child = replacement;
@@ -116,6 +120,10 @@ std::string CriteriaNot::getDescription() const {
   temp += m_child->getDescription();
   temp += ")";
   return temp;
+}
+
+std::string CriteriaNot::getText() const {
+  return "NOT";
 }
 
 void CriteriaNot::replaceChild(CriteriaNode * child, CriteriaNode * replacement) {
@@ -249,6 +257,10 @@ std::string CriteriaAnd::getDescription() const {
   return temp;
 }
 
+std::string CriteriaAnd::getText() const {
+  return "AND";
+}
+
 CriteriaNode* CriteriaAnd::clone() const {
   assert(m_left);
   assert(m_right);
@@ -279,6 +291,10 @@ std::string CriteriaOr::getDescription() const {
   temp += m_right->getDescription();
   temp += ")";
   return temp;
+}
+
+std::string CriteriaOr::getText() const {
+  return "OR";
 }
 
 CriteriaNode* CriteriaOr::clone() const {
@@ -319,9 +335,9 @@ bool CriteriaContains::isDestination(unsigned system) const {
     return false;
 
   string texture = _Universe->getGalaxy()->getPlanetVariable(m_value, "texture", "");
-  if(texture == "") {
-     return false;
-  }
+  if(texture == "")
+    return false;
+  
   set<string> types = getPlanetTypesFromXML(name.c_str());
   
   for(set<string>::iterator i = types.begin(); i != types.end(); ++i) {
@@ -336,6 +352,10 @@ std::string CriteriaContains::getDescription() const {
   temp += m_value;
   temp += ")";
   return temp;
+}
+
+std::string CriteriaContains::getText() const {
+  return getDescription();
 }
 
 CriteriaNode* CriteriaContains::clone() const {
@@ -361,6 +381,10 @@ std::string CriteriaOwnedBy::getDescription() const {
   return temp;
 }
 
+std::string CriteriaOwnedBy::getText() const {
+  return getDescription();
+}
+
 CriteriaNode* CriteriaOwnedBy::clone() const {
   return new CriteriaOwnedBy(m_value, NULL);
 }
@@ -383,6 +407,10 @@ std::string CriteriaSector::getDescription() const {
   temp += m_value;
   temp += ")";
   return temp;
+}
+
+std::string CriteriaSector::getText() const {
+  return getDescription();
 }
 
 CriteriaNode* CriteriaSector::clone() const {
