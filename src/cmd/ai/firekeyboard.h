@@ -15,6 +15,9 @@ class FireKeyboard: public Order {
   float agg;
   bool ShouldFire(Unit * targ);
  public:
+  static void RequestClearenceKey(int, KBSTATE);
+  static void UnDockKey(int, KBSTATE);
+  static void DockKey(int, KBSTATE);
   static void FireKey(int, KBSTATE);
   static void MissileKey(int, KBSTATE);
   static void NearestTargetKey (int, KBSTATE);

@@ -10,7 +10,9 @@ FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
 
 }
 static KBSTATE firekey=UP;
-
+static bool doc=0;
+static bool und=0;
+static bool req=0;
 static KBSTATE missilekey = UP;
 static KBSTATE jfirekey=UP;
 static KBSTATE jtargetkey=UP;
@@ -30,6 +32,32 @@ static KBSTATE turrettargetkey=UP;
 
 
 
+void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
+
+    if (k==PRESS) {
+      req=true;      
+    }
+    if (k==RELEASE) {
+      req=false;      
+    }
+}
+void FireKeyboard::DockKey(int, KBSTATE k) {
+
+    if (k==PRESS) {
+      doc=true;      
+    }
+    if (k==RELEASE) {
+      doc=false;      
+    }
+}
+void FireKeyboard::UnDockKey(int, KBSTATE k) {
+    if (k==PRESS) {
+      und=true;      
+    }
+    if (k==RELEASE) {
+      und=false;      
+    }
+}
 
 void FireKeyboard::CloakKey(int, KBSTATE k) {
 
@@ -261,11 +289,25 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
   return (dist<.8*agg&&angle>1/agg);
 }
 
-
+static void DoDockingOps (Unit * parent, Unit * targ) {
+    if (req) {
+      fprintf (stderr,"request %d", targ->RequestClearance (parent));
+      req=false;
+    }
+    if (doc) {
+      fprintf (stderr,"dock %d", parent->Dock(targ));
+      doc=false;
+    }
+    if (und) {
+      fprintf (stderr,"udock %d", parent->UnDock(targ));
+      und=false;
+    }
+}
 void FireKeyboard::Execute () {
   Unit * targ;
   if ((targ = parent->Target())) {
     ShouldFire (targ);
+    DoDockingOps(parent,targ);
   } else {
     ChooseTargets(false);
   }

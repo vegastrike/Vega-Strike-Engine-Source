@@ -208,6 +208,9 @@ void VegaConfig::initCommandMap(){
   command_map["RollLeftKey"]=FlyByKeyboard::RollLeftKey ;
   command_map["RollRightKey"]=FlyByKeyboard::RollRightKey ;
 
+  command_map["DockKey"]=FireKeyboard::DockKey ;
+  command_map["UnDockKey"]=FireKeyboard::UnDockKey ;
+  command_map["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;
   command_map["FireKey"]=FireKeyboard::FireKey ;
   command_map["MissileKey"]=FireKeyboard::MissileKey ;
   command_map["TargetKey"]=FireKeyboard::TargetKey ;

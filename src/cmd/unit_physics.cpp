@@ -286,27 +286,8 @@ void Unit::RollTorque(float amt) {
 }
 
 const float VELOCITY_MAX=1000;
-int req=0;
-int doc=0;
-int und=0;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
-  Unit * docker;
-  if (docker=_Universe->AccessCockpit()->GetParent()) {
-    if (req) {
-      fprintf (stderr,"request %d", RequestClearance (docker));
-      req=false;
-    }
-    if (doc) {
-      fprintf (stderr,"dock %d", docker->Dock(this));
-      doc=false;
-    }
-    if (und) {
-      fprintf (stderr,"udock %d", docker->UnDock(this));
-      und=false;
-    }
-    
 
-  }
   if (fuel<0)
     fuel=0;
   if (cloaking>=cloakmin) {
