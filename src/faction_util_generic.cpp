@@ -158,9 +158,21 @@ void FactionUtil::LoadSerializedFaction(FILE * fp) {
 	k++;
       }
       tmp2+=k;
+      if (*tmp2=='\r'||*tmp2=='\n'){
+        break;
+      }
     }
     delete [] tmp;
   }
+}
+bool whitespaceNewline(char * inp) {
+  for (;*inp;inp++) {
+    if (inp[0]=='\n'||inp[0]=='\r')
+      return true;
+    if (inp[0]!=' '&&inp[0]!='\t')
+      break;
+  }
+  return false;
 }
 string savedFactions;
 void FactionUtil::LoadSerializedFaction(char * &buf) {
@@ -193,6 +205,9 @@ void FactionUtil::LoadSerializedFaction(char * &buf) {
 	k++;
       }
       buf+=k;
+      if (whitespaceNewline(buf)) {
+        break;
+      }
     }
   }
 }
