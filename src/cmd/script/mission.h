@@ -228,6 +228,7 @@ enum callback_module_unit_type {
     CMT_UNIT_isStarShip ,
     CMT_UNIT_isPlanet ,
     CMT_UNIT_isSun ,
+    CMT_UNIT_isSignificant ,
     CMT_UNIT_isJumppoint ,
     CMT_UNIT_getRelation ,
     CMT_UNIT_Jump ,

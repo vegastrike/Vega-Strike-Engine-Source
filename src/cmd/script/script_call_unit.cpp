@@ -610,6 +610,18 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_BOOL;
       viret->bool_val=res;
     }
+    else if(method_id==CMT_UNIT_isSignificant){
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	clsptr typ = my_unit->isUnit();
+	string s=  my_unit->getFlightgroup()?my_unit->getFlightgroup()->name:"";
+	
+	res=(typ==PLANETPTR&&!((Planet *)my_unit)->hasLights())||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base";
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
+    }
     else if(method_id==CMT_UNIT_isSun){
       bool res=false;
       if(mode==SCRIPT_RUN){
