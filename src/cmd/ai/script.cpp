@@ -33,7 +33,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("move to",&MoveTo));      
   tmp.insert (MyPair ("shelton slide",&SheltonSlide));      
   tmp.insert (MyPair ("skilled afterbuner slide",&SkilledABSlide));
-  tmp.insert (MyPair ("afterbuner slide",&AfterburnerSlide));        
+  tmp.insert (MyPair ("afterburner slide",&AfterburnerSlide));        
   tmp.insert (MyPair ("stop",&Stop));      
   tmp.insert (MyPair ("turn away",&TurnAway));      
   tmp.insert (MyPair ("turn towards",&TurnTowards));      
@@ -714,6 +714,7 @@ using namespace AiXml;
 
 
 void AIScript::LoadXML() {
+	static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI","debug_level","0"));
 using namespace AiXml;
   string full_filename;
   HardCodedMap::const_iterator iter =  hard_coded_scripts.find (filename);
@@ -721,7 +722,8 @@ using namespace AiXml;
     //    fprintf (stderr,"hcscript %s\n",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
-    fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.c_str(),parent->GetComputerData().threatlevel);
+	if (aidebug>1)
+		fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.c_str(),parent->GetComputerData().threatlevel);
 	if (_Universe->isPlayerStarship(parent->Target())){
 		float value;
 		static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
@@ -741,12 +743,16 @@ using namespace AiXml;
       }
       value/=game_speed*game_accel;
     }
-
-		UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel)+" dis "+XMLSupport::tostring(value));
+			if (aidebug>0)
+				UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel)+" dis "+XMLSupport::tostring(value));
 	}
     return;
   }else {
-    fprintf (stderr,"using soft coded script %s",filename);
+	  if (aidebug>1)
+		  fprintf (stderr,"using soft coded script %s",filename);
+	  if (aidebug>0)
+		  UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel));
+
   }
 #ifdef AIDBG
   fprintf (stderr,"chd");
@@ -810,7 +816,7 @@ using namespace AiXml;
     int length;
 
     
-    length = fread (buf,1, chunk_size,inFile);
+    length = fread (buf,1 ,chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
     fprintf (stderr,"pars%d",length);
