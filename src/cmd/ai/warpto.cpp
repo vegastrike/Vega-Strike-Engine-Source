@@ -54,7 +54,9 @@ static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, U
   dir*=-1;
   float chasedot=dir.Dot(tarvel);
   if(dirveldot>mindirveldot){
-    parent->graphicOptions.InWarp=1;
+    if (parent->WarpEnergyData()>.25) {
+      parent->graphicOptions.InWarp=1;// don't want the AI thrashing
+    }
   } else {
     parent->graphicOptions.InWarp=0;
   }
