@@ -3840,22 +3840,25 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 			}
 		  }
 		  if (*targ>biggerthan)
-			  VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn");
+			  VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn")
+;
 		  if (hull <0) {
+			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
+                          
 			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
 			if (!isSubUnit()&&hull>-hulldamtoeject) {
 			  static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
 
-			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
 			  if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
 			EjectCargo ((unsigned int)-1);
 			  }
-			  for (unsigned int i=0;i<numCargo();i++) {
-			if (rand()<(RAND_MAX*cargoejectpercent)) {
-			  EjectCargo(i);
-			}
-			  }
-			}
+                        }
+                        for (unsigned int i=0;i<numCargo();i++) {
+                          if (rand()<(RAND_MAX*cargoejectpercent)) {
+                            EjectCargo(i);
+                          }
+                        }
+			
 		#ifdef ISUCK
 			Destroy();
 		#endif
