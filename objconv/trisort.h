@@ -11,17 +11,18 @@ int iswhitespace(int c) {
 #endif
 class Index {
 public:
-    Vector x;
+    Vector V;
     int p,n,t,c;
-    Index (Vector xyz,int p, int n, int t, int c):x(xyz),p(p),n(n),t(t),c(c){}
+    Index (Vector xyz,int p, int n, int t, int c):V(xyz),p(p),n(n),t(t),c(c){}
 
     void write (FILE * fp) const;
 };
 class Plane {public:
-    int a,b,c,d;
+    double a,b,c,d;
     Plane (int a,int b, int c, int d): a(a),b(b),c(c),d(d){}
 };
 class Face {
+    bool Cross (Plane &)const;
 public:
 std::vector <Index> p;
     Plane planeEqu()const;

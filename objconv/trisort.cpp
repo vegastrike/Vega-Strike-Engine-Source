@@ -4,6 +4,53 @@
 #include <string>
 #include <ctype.h>
 #include "trisort.h"
+#include <math.h>
+#ifdef __APPLE__
+#define sqrtf sqrt
+#endif
+const int RIGHT_HANDED=1;
+bool Face::Cross (Plane & result)const {
+    double size =0;
+    for (unsigned int i=2;(!size)&&i<this->p.size();i++) {
+        Vector v1(0,0,0);
+        v1.x = this->p[i].V.x-this->p[0].V.x;
+        v1.y = this->p[i].V.y-this->p[0].V.y;
+        v1.z = this->p[i].V.z-this->p[0].V.z;
+        Vector v2(0,0,0);
+        v2.x = this->p[1].V.x-this->p[0].V.x;
+        v2.y = this->p[1].V.y-this->p[0].V.y;
+        v2.z = this->p[1].V.z-this->p[0].V.z;
+        result.a = v1.y * v2.z - v1.z * v2.y;
+        result.b = v1.z * v2.x - v1.x * v2.z;
+        result.c = v1.x * v2.y  - v1.y * v2.x;
+        size = result.a*result.a+result.b*result.b+result.c*result.c;
+    }
+    if (size)
+        size = ((double)1)/sqrtf (size);
+    else
+        return false;
+    result.a *=RIGHT_HANDED*(size);
+    result.b *=RIGHT_HANDED*(size);
+    result.c *=RIGHT_HANDED*(size);
+    return true;
+}
+
+
+Plane Face::planeEqu() const{
+    if (p.empty())
+        return Plane (1,0,0,0);
+    Plane rez(1,1,1,0);
+    if (!Cross (rez)) 
+        rez=Plane(1,1,1,0);
+    
+    rez.d = ((rez.a*p[0].V.x)+(rez.b*p[0].V.y)+(rez.c*p[0].V.z));
+    rez.d = -rez.d;
+    return rez;
+ }
+bool Face::operator < (const Face &b) const{
+    return false;
+}
+
 void Mesh::sort () {
 std::sort (f.begin(),f.end());
 }
@@ -78,7 +125,7 @@ Index Mesh::processfacevertex(char * vertex)const {
         }
     }
     Vector v(0,0,0);
-    if (a<=p.size()&&a>0)
+    if (a<=(int)p.size()&&a>0)
         v=p[a-1];
     return Index (v,a,b,c,d);
 }
