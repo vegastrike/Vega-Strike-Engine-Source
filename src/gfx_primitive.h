@@ -68,6 +68,9 @@ public:
 	}
 
 	Vector &Position();
+        virtual void SetPosition (float, float, float);
+        virtual void SetPosition (const Vector &);
+	virtual void SetOrientation(Vector &p, Vector &q, Vector &r);
 
 };
 #endif

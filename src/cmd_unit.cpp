@@ -28,7 +28,7 @@
 
 
 //if the PQR of the unit may be variable...for radius size computation
-#define VARIABLE_LENGTH_PQR
+//#define VARIABLE_LENGTH_PQR
 
 
 
@@ -492,7 +492,7 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
   UpdateMatrix();
   int i;
   Matrix vw;
-  GFXGetMatrix (VIEW,vw);
+  _GFX->AccessCamera()->GetView (vw);
   Vector mousePoint;
 #ifdef VARIABLE_LENGTH_PQR
   Vector TargetPoint (transformation[0],transformation[1],transformation[2]);

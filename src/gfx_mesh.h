@@ -59,8 +59,8 @@ protected:
 	int numquads;
 	int numlines;
 
-	Vector scale;
-
+  //	Vector scale; //scale that mofo in the file...no reason to have moster hellcat
+ 
 	BOOL objtex;
 	Texture *Decal;
 	BOOL envMap;
@@ -118,7 +118,7 @@ public:
 
 	void Rotate(const Vector &torque);
 
-  void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
+  // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}
 	bool intersects(const Vector &start, const Vector &end);

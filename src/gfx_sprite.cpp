@@ -69,46 +69,16 @@ Sprite::~Sprite()
 {
 	if(surface!=NULL)
 		delete surface;
-	//if(vlist!=NULL)
-	//	delete vlist;
 }
 
 void Sprite::Draw()
 {
 	if(surface!=NULL)
 	{
-
-	  /************************************FIXME VEGAStRIKE
-	  /////////////Matrix model;
-		Matrix view;
-		Matrix project;
-
-		//GFXGetMatrix(MODEL, model);
-		GFXGetMatrix(VIEW, view);
-		GFXGetMatrix(PROJECTION, project);
-		
-		
-		//GFXLoadIdentity(VIEW);
-		GFXLoadMatrix(VIEW, mview);
-	  *********************************/
-
-
-		/***********FIXME VEGASTRIKE
-		Matrix parallel = {
-			1, 0, 0, 0, 
-			0, 1, 0, 0, 
-			0, 0, -5, 0,
-			0, 0, 0, -1};
-		*************/
-		//GFXLoadIdentity(PROJECTION);
-		//GFXLoadMatrix(PROJECTION, parallel);
-		//GFXParallel(0.0, 1.0, 1.0, 0.0, 1.0, 10.0);
-		
 		GFXDisable(LIGHTING);
 		GFXDisable(DEPTHWRITE);
 		GFXDisable(DEPTHTEST);
 
-		///////		GFXLoadIdentity(MODEL); ///FIXME VEGASTRIKE
 		UpdateHudMatrix();
 		surface->MakeActive();
 
@@ -134,9 +104,6 @@ void Sprite::Draw()
 		GFXEnable(DEPTHWRITE);
 		GFXEnable(DEPTHTEST);
 
-		//GFXLoadMatrix(MODEL, model);
-		//FIXME VEGASTRIKE		GFXLoadMatrix(VIEW, view);
-		//FIXME VEGASTRIKE		GFXLoadMatrix(PROJECTION, project);
 	}
 }
 

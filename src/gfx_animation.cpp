@@ -43,34 +43,40 @@ Animation::Animation (char * FileName):Primitive()
 	FILE * fp = fopen (FileName, "r+b");
 	if (!fp)
 		; // do something 
-	fread (&numframes, sizeof (short), 1, fp); 
+	fscanf (fp,"%d",&numframes);
+	fscanf (fp, "%f",&timeperframe);
+	fprintf (stderr,"timeperframe: %f",timeperframe);
+	//	fread (&numframes, sizeof (short), 1, fp); 
 	Decal = new Texture* [numframes];
-	fread (&timeperframe,sizeof (float),1,fp);
+	//	fread (&timeperframe,sizeof (float),1,fp);
 	float tmp;
-	fread (&tmp, sizeof (float),1,fp);
-	width = tmp*0.5F;
-	fread (&tmp, sizeof (float),1,fp);
-	height = tmp*0.5F;
+	//fread (&tmp, sizeof (float),1,fp);
+	fscanf (fp, "%f %f", &width, &height);
+	width = width*0.5F;
+	//fread (&tmp, sizeof (float),1,fp);
+	height = height*0.5F;
 	for (int i=0; i<numframes;i++) //load all textures
 	{
-		int j;
-		for (j=0; ;j++)
-		{
-			fread (&temp[j],sizeof (char), 1, fp);
-			if (!temp[j]) //ahh we have come upon a NULL
-			{
-				break;
-			}
-		}
-		for (j=0; ;j++)
-		{
-			fread (&tempalp[j],sizeof (char), 1, fp);
-			if (!tempalp[j]) //ahh we have come upon a NULL
-			{
-				Decal[i] = new Texture (temp,tempalp);
-				break;
-			}
-		}
+	  fscanf (fp,"%s %s", temp, tempalp);
+	  Decal[i] = new Texture (temp,tempalp);
+	  /*int j;
+	    for (j=0; ;j++)
+	    {
+	    fread (&temp[j],sizeof (char), 1, fp);
+	    if (!temp[j]) //ahh we have come upon a NULL
+	    {
+	    break;
+	    }
+	    }
+	    for (j=0; ;j++)
+	    {
+	    fread (&tempalp[j],sizeof (char), 1, fp);
+	    if (!tempalp[j]) //ahh we have come upon a NULL
+	    {
+	    Decal[i] = new Texture (temp,tempalp);
+	    break;
+	    }
+	    }*/
 	}
 	fclose (fp);
 }
@@ -83,16 +89,19 @@ Animation:: ~Animation ()
 		delete [] Decal;
 	//}
 }
-void Animation:: SetPosition (float x,float y, float z) {
-  pos = Vector (x,y,z);
-}
-void Animation::SetPosition (const Vector &k) {
-  pos = k;
+
+void Animation:: SetDimensions(float wid, float hei) {
+  width = wid;
+  height = hei;
 }
 
 void Animation:: Draw()
 {
-		cumtime += GetElapsedTime();
+  float eee;
+  if (cumtime==0&&GetElapsedTime()>=timeperframe)
+    cumtime +=timeperframe;
+  else
+    cumtime += GetElapsedTime();
 		int framenum = (int)(cumtime/timeperframe);
 		if (framenum<numframes)
 		{

@@ -38,7 +38,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
 
     GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
     GFXFrustum (frustmat, view,l*(-2.*minX/g_game.x_resolution+1) /*  *g_game.MouseSensitivityX*/,r*(2.*maxX/g_game.x_resolution-1)/*  *g_game.MouseSensitivityX*/,t*(-2.*minY/g_game.y_resolution+1) /*  *g_game.MouseSensitivityY*/,b*(2.*maxY/g_game.y_resolution-1)/*  *g_game.MouseSensitivityY*/,n,f);
-    GFXGetMatrix (VIEW,view);
+    _GFX->AccessCamera()->GetView (view);
     float frustum [6][4];
     GFXCalculateFrustum(frustum,view,frustmat);
     Unit * un;

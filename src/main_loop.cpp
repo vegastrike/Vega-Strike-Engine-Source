@@ -436,6 +436,7 @@ void createObjects() {
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
   s = new Animation ("explode.ani");
+  s->SetPosition (0,0,5);
   fihneCarriah = new Sprite ("carrier.spr");
   bg = new Background("cube");
   //HUDElement *t = new HUDElement("ucarrier.dat");
@@ -457,9 +458,9 @@ void createObjects() {
   carrier->SetPosition(Vector(0.0, 5.0, 10.0));
   carrier->Pitch(-PI/2);
   //carrier->Accelerate(Vector(0, 25, 0));
-  fighter->Scale(Vector(0.1,0.1,0.1));
-  fighter2->Scale(Vector(0.1,0.1,0.1));
-  carrier->Scale(Vector(0.2,0.2,0.2));
+  ////  fighter->Scale(Vector(0.1,0.1,0.1));
+  ////  fighter2->Scale(Vector(0.1,0.1,0.1));
+  ////  carrier->Scale(Vector(0.2,0.2,0.2));
   //t->SetPosition(Vector(0.5, 0.5, 15.0));
   //t->Pitch(PI/2);
   
@@ -475,7 +476,6 @@ void createObjects() {
   GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
-  s->SetPosition(0,0,1.5);
   fihneCarriah->SetPosition (-.5,.8);
   
   textplane = new TextPlane("9x12.fon");

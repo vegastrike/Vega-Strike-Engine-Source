@@ -49,6 +49,17 @@ void Primitive::Draw()
   //FIXME VEGASTRIKE	static float rot = 0;
 }
 
+void Primitive:: SetPosition (float x,float y, float z) {
+  pos = Vector (x,y,z);
+}
+void Primitive::SetPosition (const Vector &k) {
+  pos = k;
+}
+void Primitive::SetOrientation(Vector &p, Vector &q, Vector &r)
+{	
+	VectorToMatrix(orientation, p,q,r);
+}
+
 Vector &Primitive::Position()
 {
 	return pos;

@@ -74,7 +74,7 @@ void Mesh::InitUnit()
 	numforcelogo = numsquadlogo = 0;
 	GFXGetMaterial(0, myMat);
 	myMatNum = 0;
-	scale = Vector(1.0,1.0,1.0);
+	//	scale = Vector(1.0,1.0,1.0);
 	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
 	
@@ -829,8 +829,9 @@ void Mesh::SetOrientation(Vector &p, Vector &q, Vector &r)
 }
 void Mesh::SetOrientation()
 {
-	VectorToMatrix(orientation, p*scale.i,q*scale.j,r*scale.k);
-	changed = TRUE;
+  //	VectorToMatrix(orientation, p*scale.i,q*scale.j,r*scale.k);
+  VectorToMatrix(orientation, p,q,r);
+  changed = TRUE;
 }
 
 void Mesh::RestrictYaw(float min, float max)

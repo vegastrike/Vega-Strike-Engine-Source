@@ -39,9 +39,10 @@ public:
 	Animation();
 	Animation(char *);
 	~Animation();
-  void SetPosition (float x,float y,float z);
-  void SetPosition(const Vector &k);
+  //  void SetPosition (float x,float y,float z);
+  //  void SetPosition(const Vector &k);
 	void Draw();
+        void SetDimensions(float wid, float hei);
 };
 
 #endif

@@ -28,9 +28,6 @@
 #define _CAMERA_H_
 class Camera{
 	Vector Coord;
-
-	Matrix translation;
-	Matrix orientation;
 	Matrix view;
 	BOOL changed;
 
@@ -39,7 +36,7 @@ public:
 	PhysicsSystem myPhysics;
 
 	Camera();
-
+        void GetView (Matrix);
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
 	void UpdateGFX(bool updateFrustum=true);
 	void UpdateGLCenter();
