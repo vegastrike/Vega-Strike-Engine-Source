@@ -1390,6 +1390,11 @@ void GameCockpit::Draw() {
     if (Pit[view]) 
       Pit[view]->Draw();
   }
+  GFXColor4f(1,1,1,1);
+  for (unsigned int j=1;j<Panel.size();j++) {
+    Panel[j]->Draw();
+  }
+
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f(1,1,1,1);
@@ -1435,10 +1440,6 @@ void GameCockpit::Draw() {
 
       DrawGauges(un);
       
-      GFXColor4f(1,1,1,1);
-      for (unsigned int j=1;j<Panel.size();j++) {
-	Panel[j]->Draw();
-      }
       GFXColor4f(1,1,1,1);
       for (unsigned int vd=0;vd<vdu.size();vd++) {
 	if (vdu[vd]) {

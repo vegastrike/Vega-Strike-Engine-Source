@@ -358,7 +358,13 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
 	if (newsprite) {
-	  (*newsprite) = new VSSprite ((*iter).value.c_str(),crosshair_smooth?BILINEAR:NEAREST);
+          std::string tmp=getRes((*iter).value);
+          bool bil=elem==PANEL?cockpit_smooth:crosshair_smooth;
+          (*newsprite) = new VSSprite (tmp.c_str(),bil?BILINEAR:NEAREST);
+          if (!(*newsprite)->LoadSuccess()) {
+            delete (*newsprite);
+            (*newsprite) = new VSSprite ((*iter).value.c_str(),bil?BILINEAR:NEAREST);
+          }
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
           VDU * tmp=new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);         
