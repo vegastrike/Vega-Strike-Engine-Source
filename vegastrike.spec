@@ -1,13 +1,16 @@
 Name: vegastrike
 Summary: Vegastrike - a free 3D space fight simulator
-Version: 0.2.1cvs
+Version: 0.2.9CVS
 Release: 1
 Copyright: GPL
 Group: X11/GL/Games
-Source: http://prdownloads.sourceforge.net/vegastrike/vegastrike-0.2.1cvs.tar.gz
-Packager: Alexander Rawass <alexannika@users.sourceforge.net>
+Source: vegastrike.tar.gz
+Packager: Jonathan Hunt <jhuntnz@users.sourceforge.net>
 BuildRoot: /tmp/vsbuild
 Prefix: /usr/local
+Icon: vegastrike.xpm
+Provides: vegastrike
+Requires: vegastrike-data 
 
 %description
 Vegastrike is a free 3D space fight simulator under the GPL
@@ -18,23 +21,20 @@ Vega Strike is an Interactive Flight Simulator/Real Time Stratagy being
 
 
 %prep
-rm -rf $RPM_BUILD_ROOT/*
-%setup -n vegastrike-0.2.1cvs
+rm -rf $RPM_BUILD_ROOT
+
+%setup
 
 %build
-./configure --prefix=/usr/local --enable-debug
+./configure --prefix=/usr/local 
 make
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT install
-
-cd $RPM_BUILD_ROOT/usr/local/games/vegastrike/data
-mv vegastrike vegastrike-bin
-mv select glselect
+make install
 
 %clean
-rm -rf $RPM_BUILD_ROOT/*
+rm -rf $RPM_BUILD_ROOT
 
 %files
-%{prefix}/games/vegastrike/data/vegastrike
-%{prefix}/games/vegastrike/data/select
+/usr/local/bin/vegastrike
+/usr/local/bin/vslauncher

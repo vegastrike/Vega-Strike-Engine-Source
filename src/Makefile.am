@@ -1,6 +1,3 @@
-
-bindir = $(prefix)/games/vegastrike/data
-
 bin_PROGRAMS = vegastrike
 SUBDIRS = cmd gfx gldrv aldrv python gui
 vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a

@@ -9,6 +9,7 @@
 #include "savegame.h"
 #include "config_xml.h"
 #include "xml_serializer.h"
+#include "audiolib.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -39,6 +40,7 @@ void Unit::Mount::ReplaceMounts (const Unit::Mount &other) {
   short thissize = size;
   Transformation t =this->GetMountLocation();
   *this=other;
+  sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);
   this->size=thissize;
   volume=thisvol;
   this->SetMountPosition(t);
