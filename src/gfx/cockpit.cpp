@@ -8,7 +8,6 @@
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "hud.h"
-TextPlane * tp;
 static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
@@ -140,16 +139,32 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
       return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
     }
     return 0;
+  case KPS:
+    return (target->GetVelocity().Magnitude())*10;
+  case SETKPS:
+    return target->GetComputerData().set_speed*10;
   }
   return 1;
 }
 void Cockpit::DrawGauges(Unit * un) {
-  for (int i=0;i<NUMGAUGES;i++) {
+  for (int i=0;i<KPS;i++) {
     if (gauges[i]) {
       gauges[i]->Draw(LookupTargetStat (i,un));
     }
   }
-  
+  for (int i=KPS;i<NUMGAUGES;i++) {
+    if (gauges[i]) {
+      float sx,sy,px,py;
+      gauges[i]->GetSize (sx,sy);
+      gauges[i]->GetPosition (px,py);
+      text->SetCharSize (sx,sy);
+      text->SetPos (px,py);
+      int tmp = (int)LookupTargetStat (i,un);
+      char ourchar[32];
+      sprintf (ourchar,"%d", tmp);
+      text->Draw (string (ourchar));
+    }
+  }
 }
 void Cockpit::Init (const char * file) {
   Delete();
@@ -171,6 +186,10 @@ void Cockpit::SetParent (Unit * unit) {
 }
 void Cockpit::Delete () {
   int i;
+  if (text) {
+    delete text;
+    text = NULL;
+  }
   viewport_offset=cockpit_offset=0;
   for (i=0;i<4;i++) {
     if (Pit[i]) {
@@ -203,13 +222,11 @@ void Cockpit::Delete () {
   Panel.clear();
 }
 Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
+  text=NULL;
   Radar=VDU[0]=VDU[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   for (int i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
-  tp = new TextPlane ("9x12.font");
-  tp->SetText (string ("www.cachunkcachunk.com"));
-  tp->SetPos (.5,-.5);
   Init (file);
 }
 void Cockpit::Draw() {

@@ -2,20 +2,23 @@
 #define _COCKPIT_H_
 #include "xml_support.h"
 #include "cmd/container.h"
+
 #include <vector>
 using namespace XMLSupport;
+class TextPlane;
 class Sprite;
 class Gauge;
 class Unit;
 enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
-  enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, NUMGAUGES};
+  enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, NUMGAUGES};
   unsigned short StartArmor[ARMORB+1];//and startfuel
   float maxfuel, maxhull;
   UnitContainer parent;
   Sprite *Pit [4];
   Sprite *Radar;
   Sprite *VDU [2];
+  TextPlane *text;
   Gauge *gauges[NUMGAUGES];
   std::vector <Sprite *> Panel;
   float cockpit_offset;

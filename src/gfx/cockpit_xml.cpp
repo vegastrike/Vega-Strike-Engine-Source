@@ -2,6 +2,7 @@
 #include "xml_support.h"
 #include "gauge.h"
 #include <float.h>
+#include "hud.h"
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
@@ -22,6 +23,7 @@ namespace CockpitXML {
       YCENT,
       XSIZE,
       YSIZE,
+      MYFONT,
       COCKPITOFFSET,
       VIEWOFFSET,
       FRONT,
@@ -41,6 +43,8 @@ namespace CockpitXML {
       KEJECT,
       KLOCK,
       KHULL,
+      KKPS,
+      KSETKPS,
       G_UP,
       G_DOWN,
       G_LEFT,
@@ -67,11 +71,15 @@ namespace CockpitXML {
     EnumMap::Pair ("Energy", KENERGY),
     EnumMap::Pair ("Eject", KEJECT),
     EnumMap::Pair ("Lock", KLOCK),
-    EnumMap::Pair ("Hull", KHULL)
+    EnumMap::Pair ("Hull", KHULL),
+    EnumMap::Pair ("Speed", KKPS),
+    EnumMap::Pair ("SetSpeed", KSETKPS)
+
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("file", XFILE),
+    EnumMap::Pair ("font", MYFONT),
     EnumMap::Pair ("front", FRONT),
     EnumMap::Pair ("left", LEFT),
     EnumMap::Pair ("right", RIGHT),
@@ -89,8 +97,8 @@ namespace CockpitXML {
 
   };
 
-  const EnumMap element_map(element_names, 20);
-  const EnumMap attribute_map(attribute_names, 16);
+  const EnumMap element_map(element_names, 22);
+  const EnumMap attribute_map(attribute_names, 17);
 }
 
 using XMLSupport::EnumMap;
@@ -111,6 +119,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
   Sprite ** newsprite;
   std::string gaugename ("shieldstat.spr");
+  std::string myfont ("9x12.font");
   Names elem = (Names)element_map.lookup(name);
   Names attr;
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
@@ -119,6 +128,9 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       attr = (Names)attribute_map.lookup((*iter).name);
       switch (attr) {
+      case MYFONT:
+	myfont = (*iter).value;
+	break;
       case VIEWOFFSET:
 	viewport_offset = parse_float ((*iter).value);
 	break;
@@ -136,6 +148,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       } 
     }
+    text = new TextPlane (myfont.c_str());
     break;
   case KARMORF:
   case KARMORR:
@@ -150,6 +163,8 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   case KEJECT:
   case KLOCK:
   case KHULL:
+  case KKPS:
+  case KSETKPS:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:

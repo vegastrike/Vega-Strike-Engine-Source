@@ -34,11 +34,11 @@ class TextPlane {
 		float left, right, top, bottom;
 	} myGlyphPos[256];
 public:
-	TextPlane(char *filename);
+	TextPlane(const char *filename);
 	~TextPlane();
 	void SetPos (float x, float y) {
-	  myFontMetrics.k = x;
-	  myDims.k=y;
+	  myFontMetrics.k = y;
+	  myDims.k=x;
 	}
 	void SetCharSize (float x, float y) {
 	  myFontMetrics.i = x;

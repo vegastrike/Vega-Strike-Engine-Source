@@ -26,7 +26,7 @@
 #include "gfx/aux_texture.h"
 
 
-TextPlane::TextPlane(char *filename) {
+TextPlane::TextPlane(const char *filename) {
   myDims.i = 2;  myDims.j=2;
   char font[64]={0};
   char fonta[64]={0};
@@ -45,6 +45,8 @@ TextPlane::TextPlane(char *filename) {
       fscanf (fp, "%f %f %f %f\n", &myGlyphPos[a].left, &myGlyphPos[a].right,&myGlyphPos[a].top,&myGlyphPos[a].bottom);
     }
     fclose (fp);
+  } else {
+   myFont = new Texture ("9x12.bmp");
   }
   SetPos (0,0);
 }
@@ -62,13 +64,14 @@ void TextPlane::Draw(const string & newText)
   float row, col;
   GetPos (row,col);
   myFont->MakeActive();
+  GFXPushBlendMode();
   GFXBlendMode (ONE,ONE);
   GFXDisable (DEPTHTEST);
   GFXDisable (CULLFACE);
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   GFXBegin(GFXQUAD);
-  while(*text_it != '\0' && row<myDims.j) {
+  while(text_it != newText.end() && row>-myDims.j) {
     if(*text_it>=32 && *text_it<=127) {//always true
       GlyphPosition g = myGlyphPos[*text_it-32];
       
@@ -93,5 +96,6 @@ void TextPlane::Draw(const string & newText)
     text_it++;
   }
   GFXEnd();
+  GFXPopBlendMode();
 }
 
