@@ -594,7 +594,7 @@ void NavigationSystem::DrawMission()
 	float originx = screenskipby4[0]; // left
 	float originy = screenskipby4[3]; // top
 
-	factionlist.drawdescription("Relations", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
+	factionlist.drawdescription("Relations | Kills", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 	factionlist.drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 
 	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
@@ -606,7 +606,7 @@ void NavigationSystem::DrawMission()
 	string factionname = "factionname";
 	float relation = 0.0;
 
-
+	vector <float> * killlist = &_Universe->AccessCockpit()->savegame->getMissionData (string("kills"));
 	while(i < numfactions)
 	{
 		factionname = FactionUtil::GetFactionName(i);
@@ -619,12 +619,24 @@ void NavigationSystem::DrawMission()
 		relation = relation + 0.5;
 		int percent = relation * 100.0;
 		string relationtext (XMLSupport::tostring (percent));
+		if (i<killlist->size()) {
+			relationtext+=" | ";
+			relationtext = XMLSupport::tostring ((int)(*killlist)[i]);
+		}
 
 		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 
 		i+=1;
 	}
-
+	if (i<killlist->size()) {
+		string relationtext("Total Kills: ");
+		relation=1;
+		
+		relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
+		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+							
+	}
+   
 //	factionlist.drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 //	factionlist.drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(1,.3,.3,1));
 //	factionlist.drawdescription(" Aera : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,.3,1,1));
