@@ -71,21 +71,28 @@ using namespace VSFileSystem;
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
-	VSFile f;
-	VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
-    bool shared=(error==Shared);
-
-	if( error <= Ok)
-	{
 	    ALuint * wavbuf =NULL;
 	    std::string hashname;
 	    if (!music)
 		{
-	      hashname = shared?VSFileSystem::GetSharedSoundHashName(s):VSFileSystem::GetHashName (s);
-	      wavbuf = soundHash.Get(hashname);
+	      hashname = VSFileSystem::GetHashName (s);
+		  wavbuf = soundHash.Get(hashname);
+		  if (!wavbuf) {
+		      hashname = VSFileSystem::GetSharedSoundHashName(s);
+		      wavbuf = soundHash.Get(hashname);
+		  }
 	    }
 	    if (wavbuf==NULL)
 		{
+	  	  VSFile f;
+	  	  VSError error = f.OpenReadOnly( s.c_str(), SoundFile);
+		  bool shared=(error==Shared);
+		  if (shared)
+			  hashname = VSFileSystem::GetSharedSoundHashName(s);
+		  else
+		      hashname = VSFileSystem::GetHashName (s);
+		  if (error>Ok)
+			  return -1;
 	      wavbuf = (ALuint *) malloc (sizeof (ALuint));
 	      alGenBuffers (1,wavbuf);
 	      ALsizei size;	
@@ -129,15 +136,9 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 			soundHash.Put (hashname,wavbuf);
 			buffers.push_back (*wavbuf);
       	  }
+		  f.Close();
 		}
-		f.Close();
     	return LoadSound (*wavbuf,LOOP);  
-    }
-	else
-	{
-		// File not found
-		return -1;
-	}
   }
 #endif
   return -1;

@@ -1175,7 +1175,7 @@ namespace VSFileSystem
 	#endif
 		if( found>=0)
 		{
-			if( type==SystemFile && i==0 /* Rootdir[i]==homedir*/ )
+			if( (type==SystemFile && i==0)||(type==SoundFile/*right now only allow shared ones?!*/ ) /* Rootdir[i]==homedir*/ )
 				shared = true;
 			f.SetDirectory( Directories[curtype]);
 			f.SetSubDirectory( subdir);

@@ -224,11 +224,16 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  t[tmp-1] = 'p';
 	}
 	VSFile f2;
-	VSError err2;
-	if (t)
-	  if (t[0]!='\0')
-	    err2 = f2.OpenReadOnly(t, TextureFile);
-
+	VSError err2=VSFileSystem::FileNotFound;
+	if (t){
+		if (t[0]!='\0'){
+		static bool use_alphamap              = parse_bool(vs_config->getVariable("graphics",
+                                                  "bitmap_alphamap",
+                                                  "true"));
+		if (use_alphamap)
+		    err2 = f2.OpenReadOnly(t, TextureFile);
+		}
+	}
 
 	
 	if(err2<=Ok) {
@@ -440,18 +445,24 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	bool shared1;
 	if (FileNameA)
 	{
-	    std::string tmp;
-		f1.OpenReadOnly( FileNameA, TextureFile);
-
-		shared1 = (err1==Shared);
-	    if (err1>Ok)
-		{
-		  data = NULL;
-		  FileNameA = NULL;
-		  //VSFileSystem::vs_close(fp);
-		  //*this = Texture(FileNameRGB, NULL);
-		  //return;
-		}
+           static bool use_alphamap 
+              = parse_bool(vs_config->getVariable("graphics",
+                                                  "bitmap_alphamap",
+                                                  "true"));
+           if (use_alphamap) {
+              std::string tmp;
+              f1.OpenReadOnly( FileNameA, TextureFile);
+              
+              shared1 = (err1==Shared);
+              if (err1>Ok)
+                 {
+                    data = NULL;
+                    FileNameA = NULL;
+                    //VSFileSystem::vs_close(fp);
+                    //*this = Texture(FileNameRGB, NULL);
+                    //return;
+                 }
+           }else FileNameA=0;
 	}
 	this->texfilename=texfilename;
 	if( err1>Ok)
