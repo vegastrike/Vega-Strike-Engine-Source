@@ -6,7 +6,6 @@ SUBDIRS = \
 
 vegastrike_LDADD =  				\
 networking/netserver_devices.o		\
-aldrv/libaldrv.a 					\
 networking/libnetclient.a 			\
 networking/lowlevel/libnetlowlevel.a \
 cmd/script/script_call_briefing.o 	\
@@ -25,6 +24,7 @@ cmd/collide/libcollide.a 			\
 boost129/libboost_python.a          \
 boost/libboost_python.a             \
 gfx/nav/libnav.a					\
+aldrv/libaldrv.a 					\
 -lz
 
 vegaserver_LDADD =  			\
@@ -170,7 +170,7 @@ accountserver_SOURCES =		\
 	endianness.cpp			\
 	endianness.h			\
 	accountserver.cpp
-	
+
 #	galaxy_gen.cpp
 #	galaxy_gen.h
 
