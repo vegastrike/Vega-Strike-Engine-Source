@@ -922,14 +922,14 @@ if test "$USEROPENAL" = "1" ; then
         OPENAL_LDOPTS="-L$with_openal_libs"
     fi
 
+    if test "x$is_macosx" = "xno" ; then
+        MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+    else
+	MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+    fi
     AC_DEFUN( CHECK_FOR_OPENAL_LIB, [
         AC_MSG_CHECKING([for $OPENAL_LIB_NAME library])
-            if test "x$is_macosx" = "xno" ; then
-	            LIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
-	    else
-		    LIBS="$OPENAL_LDOPTS -framework OpenAL"
-	    fi
-
+	LIBS="$MACORPCLIBS"
         AC_TRY_LINK( , , have_openal_lib=yes, have_openal_lib=no )
         AC_MSG_RESULT([$have_openal_lib])
     ]) 
@@ -943,7 +943,7 @@ if test "$USEROPENAL" = "1" ; then
     
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"
-    	    TR_LIBS="$TR_LIBS $OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+    	    TR_LIBS="$TR_LIBS $MACORPCLIBS"
             break;
         else
 	    LIBS=""
