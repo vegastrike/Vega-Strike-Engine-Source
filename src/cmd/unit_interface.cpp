@@ -373,7 +373,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
     {
-      Unit * temprate= new Unit ((un->name+string(".template")).c_str(),false,un->faction);
+      Unit * temprate= new Unit ((un->name+string(".template")).c_str(),true,un->faction);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
       }else {
@@ -398,11 +398,11 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  this->part = *part;
 	  if (NewPart)
 	    NewPart->Kill();
-	  NewPart = new Unit (input_buffer,false,_Universe->GetFaction("upgrades"));
+	  NewPart = new Unit (input_buffer,true,_Universe->GetFaction("upgrades"));
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name==string("LOAD_FAILED")) {
 	    NewPart->Kill();
-	    NewPart = new Unit (input_buffer,false,un->faction);
+	    NewPart = new Unit (input_buffer,true,un->faction);
 	  }
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    
