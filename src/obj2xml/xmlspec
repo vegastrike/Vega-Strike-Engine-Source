@@ -1,0 +1,46 @@
+<Unit>
+<Mesh Texture="blah">
+<VertexData>
+<Vertex>
+<Location x=0 y=0 z=0/>
+<Normal i=0 j=0 k=0/>
+<Texcoord s=0 t=0/>
+</Vertex>
+...
+</VertexData>
+
+<Polygons>
+<Poly vertices=3 v0=0 v1=1 v2=2/>
+<Quad v0=0 v1=1 v2=3 v3=4/>
+</Polygons>
+
+<TriLists>
+<VertexRef num=0>
+<VertexRef num=2>
+<VertexRef num=4>
+...
+</TriLists>
+
+<QuadLists>
+<VertexRef num=0>
+<VertexRef num=2>
+<VertexRef num=4>
+...
+</QuadLists>
+
+<Logos>
+<ForceLogo rotation=0 offset=0.01>
+<Location ... />
+<Normal ... />
+<Normal ... /> <!-- 2nd normal is the reference -->
+</ForceLogo>
+
+<SquadLogo rotation=0 offset=0.01>
+<Location ... />
+<Normal ... />
+<Normal ... /> <!-- 2nd normal is the reference -->
+</SquadLogo>
+</Logos>
+
+</Mesh>
+</Unit>

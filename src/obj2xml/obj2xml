@@ -1,0 +1,84 @@
+#!/usr/bin/perl -w
+
+$float = "-?\\d*\\.\\d*"; 
+
+@vertex_list = ();
+@normal_list = ();
+@texcoord_list = ();
+%encountered_vertices = ();
+$faceoutput = "<Polygons>\n";
+
+if(@ARGV == 0) {
+print "Usage: obj2xml <inputfile>\n";
+exit;
+}
+
+$inputfile = $ARGV[0];
+open(INPUT, "<$inputfile") or die "Could not open $inputfile";
+
+print << 'HEAD' 
+<Unit>
+<Mesh>
+<VertexData>
+HEAD
+;
+
+while($line = <INPUT>) {
+	$line =~ s/#.*$//;
+	if($line =~ /v +($float) +($float) +($float)/i) {
+		print STDERR "vertex: $line\n";
+		push @vertex_list, [$1, $2, $3];
+	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
+		print STDERR "normal: $line\n";
+		push @normal_list, [$1, $2, $3];
+	} elsif($line =~ /vt +($float) +($float)/i) {
+		print STDERR "texcoord: $line\n";
+		push @texcoord_list, [$1, $2];
+	} elsif($line =~ m/f/i) {
+		print STDERR "face: $line\n";
+		chomp $line;
+		@vertices = split /[ \r\n]/, $line;
+		shift @vertices; # dump out the 'f'
+		@output_vertices = ();
+		while(@vertices) {
+			($vertex, $texcoord, $normal) = split m|/|, shift(@vertices);
+			$vertex--; $texcoord--; $normal--;
+			$vertex = << "VERTEX"
+	<Vertex>
+		<Location x="$vertex_list[$vertex][0]" y="$vertex_list[$vertex][1]" z="$vertex_list[$vertex][2]"/>
+		<Normal i="$normal_list[$normal][0]" j="$normal_list[$normal][1]" k="$normal_list[$normal][2]"/>
+		<Texcoord s="$texcoord_list[$texcoord][0]" t="$texcoord_list[$texcoord][1]"/>
+	</Vertex>
+VERTEX
+;
+			unless(defined $encountered_vertices{$vertex}) {
+				$encountered_vertices{$vertex} = keys %encountered_vertices;
+				print $vertex;
+			}
+			push @output_vertices, $encountered_vertices{$vertex};
+		}
+
+		if(@output_vertices==3) {
+			$faceoutput .= "<Tri"
+		} elsif (@output_vertices==4) {
+			$faceoutput .= "<Quad"
+		} else {
+			die "Invalid number of vertices in face: $line";
+		}
+		for($v=0;$v<@output_vertices;$v++) {
+			$faceoutput .= " v$v=\"$output_vertices[$v]\"";
+		}
+		$faceoutput .= "/>\n"
+	}
+}
+
+print "</VertexData>\n";
+
+$faceoutput .= "</Polygons>";
+print << "FOOT"
+$faceoutput
+</Mesh>
+</Unit>
+FOOT
+;
+
