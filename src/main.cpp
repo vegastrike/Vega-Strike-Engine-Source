@@ -78,10 +78,11 @@ int main( int argc, char **argv )
     setup_game_data(); 
     //read_config_file();
     //init_debug("");
-
+    /*
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
     sdl_init();
 #endif
+    */
     InitTime();
     UpdateTime();
     ParseCommandLine(argc,argv);
@@ -93,6 +94,7 @@ int main( int argc, char **argv )
     }
     //init_textures();
     //init_fonts();
+    /*
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
 
     init_audio_data();
@@ -100,7 +102,7 @@ int main( int argc, char **argv )
     init_joystick();
 
 #endif
-
+    */
     _GFX= new WrapGFX(argc,argv);    
     //    glutSetCursor(GLUT_CURSOR_NONE); 
     
