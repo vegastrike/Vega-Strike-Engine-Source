@@ -19,6 +19,7 @@ libai_a_SOURCES =	\
 	flyjoystick.h	\
 	flyjoystick.cpp	\
 	order.cpp	\
+	order_comm.cpp \
 	aggressive.cpp	\
 	fire.h		\
 	input_dfa.cpp	\
