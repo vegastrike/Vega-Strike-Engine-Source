@@ -223,6 +223,7 @@ int SocketSet::private_select( timeval* timeout )
 #endif
     }
     
+#if 0
     {
         boost::shared_ptr<VsnetDownload::Client::Manager> mgr( _client_mgr );
         if( !_client_mgr.expired() && (bool)mgr )
@@ -238,6 +239,7 @@ int SocketSet::private_select( timeval* timeout )
             mgr->lower_check_queues( );
         }
     }
+#endif
 
     if( _blockmain )
     {
