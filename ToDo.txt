@@ -34,6 +34,8 @@ the circles could deal with being, at least on the galaxy view, even a bit small
 ** Fix AI range trigger happiness
 ** Fix ITTS to use more iterations of Newton's method
 
+* Cockpit
+Highlight weapons in range in the gun VDU
 
 * News
 ** Get formatted date back.
