@@ -161,7 +161,7 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
   } else {
     torquei = -parent->GetMoment()*ang_veli/SIMULATION_ATOM;//clamping should take care of it
   }
-  fprintf (stderr," angle: %f\n", atancalc);
+  //  fprintf (stderr," angle: %f\n", atancalc);
 }
 void ChangeHeading::SetDest (const Vector &target) {
   final_heading = target;

@@ -72,10 +72,10 @@ void AggressiveAI::Execute () {
   FireAt::Execute();
   if (!facingtarg) {
     Order * tmp;
-    EnqueueOrder (tmp = new Orders::FaceTarget (false));
-    tmp->SetParent(parent);
-    EnqueueOrder (tmp = new Orders::MatchLinearVelocity (Vector (0,0,15),true,false));
-    tmp->SetParent (parent);
+    parent->EnqueueAI (tmp = new Orders::FaceTarget (false));
+    //tmp->SetParent(parent);
+    parent->EnqueueAI (tmp = new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
+    //tmp->SetParent (parent);
     facingtarg=true;
   }
 

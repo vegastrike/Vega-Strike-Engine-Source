@@ -35,23 +35,22 @@ void Order::Execute () {
     }
   }
   */
-  vector<Order*>::iterator ord = suborders.begin();
-  for (;ord!=suborders.end();) {
+
+  unsigned int i=0;
+  for (i=0;i<suborders.size();i++) {
     // huh? why the mask? can't get anything to work with this thing
     // here. i'm not going to bother to figure out what's going on
     // here until later
     
-    if ((completed& ((*ord)->getType()&(MOVEMENT|FACING|WEAPON)))==0) {
-      (*ord)->Execute();
-      completed|=(*ord)->getType();
-      if ((*ord)->Done()) {
+    if ((completed& ((suborders[i])->getType()&(MOVEMENT|FACING|WEAPON)))==0) {
+      (suborders[i])->Execute();
+      completed|=(suborders[i])->getType();
+      if ((suborders[i])->Done()) {
+	vector<Order*>::iterator ord = suborders.begin()+i;
 	delete (*ord);
 	ord =suborders.erase(ord);
-      } else {
-	ord++;
-      }
-    } else {
-      ord++;
+	i--;
+      } 
     }
   }
   
