@@ -62,6 +62,9 @@ FILE *mystdout=stdout;
 #ifdef __APPLE
 #undef main
 #endif
+#include <iostream>
+#include <fstream>
+
 #include "SDL_mutex.h"
 /******************************************************************************/
 /* some simple exit and error routines                                        */
@@ -76,17 +79,7 @@ void errorv(char *str, va_list ap)
 	fprintf(STD_ERR,": %s.\n", SDL_GetError());
 #endif
 }
-vector<string> split(string tmpstr,string splitter) {
-  string::size_type where;
-  vector<string> ret;
-  while ((where=tmpstr.find(splitter))!=string::npos) {
-    ret.push_back(tmpstr.substr(0,where));
-    tmpstr= tmpstr.substr(where+1);
-  }
-  if (tmpstr.length())
-    ret.push_back(tmpstr);
-  return ret;
-}
+std::string concat (const std::vector<std::string>&);
 void cleanExit(char *str,...)
 {
 #ifdef HAVE_SDL
@@ -124,6 +117,85 @@ void changehome (bool to, bool linuxhome=true) {
 	  }
   }
 }
+
+
+std::string alphanum(std::string s) {
+  std::string ret;
+  std::string::iterator i=  s.begin();
+  unsigned int counter=0;
+  for (;i!=s.end();++i,++counter) {
+    if ((*i>='A'&&*i<='Z')||
+        (*i>='a'&&*i<='z')||
+        (*i>='0'&&*i<='9')||((*i)=='.'&&counter==s.length()-4)) {
+      ret+=*i;
+    }
+  }
+  return ret;
+}
+std::string concat (const std::vector<std::string> &files) {
+  std::string ret =
+#ifdef _WIN32
+    "c:/temp/"
+#else
+    "/tmp/"
+#endif
+    ;
+  {
+    for (unsigned int i=0;i<files.size();++i) 
+      ret+=alphanum(files[i]);
+  }
+  FILE * checker = fopen(ret.c_str(),"rb");
+  if (checker) {
+    fclose(checker);
+    return ret;
+  }
+  std::ofstream o (ret.c_str(),std::ios::binary);
+  if (o.is_open()) {
+    for (unsigned int i=0;i<files.size();++i) {
+      std::ifstream as;
+      changehome (true,false);
+      as.open(files[i].c_str(),std::ios::binary);
+      changehome (false);
+      changehome (true,true);
+      if (!as.is_open()) {
+        as.open(files[i].c_str(),std::ios::binary);
+      }
+      changehome(false);
+      if (as.is_open()) {
+        o << as.rdbuf(); // read original file into target
+        as.close();
+      }
+
+    }
+    o.close();
+    return ret;
+  }
+  return "";
+}
+vector<string> split(string tmpstr,string splitter) {
+  string::size_type where;
+  vector<string> ret;
+  while ((where=tmpstr.find(splitter))!=string::npos) {
+    ret.push_back(tmpstr.substr(0,where));
+    tmpstr= tmpstr.substr(where+1);
+  }
+  if (tmpstr.length())
+    ret.push_back(tmpstr);
+  return ret;
+}
+
+
+/*
+    if (ret.size()==2) {
+      std::string tmp = concat(ret[0],ret[1]);
+      if (tmp.length()) {
+        ret[0]=tmp;
+        ret.pop_back();
+      }
+    }
+*/
+
+
 #ifdef _WIN32
 #undef main
 #endif
@@ -147,16 +219,22 @@ static int numloops (std::string file) {
   }
   return value;
 }
-Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
+Mix_Music * PlayMusic (std::string file, Mix_Music *oldmusic) {
+  vector <string> files = split(file,"|");
+  if (files.size()>1) {
+      std::string tmp = concat(files);
+      if (tmp.length())
+        file = tmp;
+  }
 #ifdef HAVE_SDL
-	Mix_Music *music=Mix_LoadMUS(file);
+	Mix_Music *music=Mix_LoadMUS(file.c_str());
 	if(music==NULL){
 	  changehome (true,false);
-	  music=Mix_LoadMUS(file);
+	  music=Mix_LoadMUS(file.c_str());
 	  changehome (false);
 	  if(music==NULL){
 	    changehome (true,true);
-	    music=Mix_LoadMUS(file);
+	    music=Mix_LoadMUS(file.c_str());
 	    changehome(false);
 	    if (music==NULL) {
 	      return oldmusic;
@@ -179,7 +257,7 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 	  fprintf(STD_OUT, "Mix_FadeInMusic: %s %d\n", Mix_GetError());
 	  return NULL;
 	}else {
-          fprintf (STD_OUT,"Playing %s with %d loops\n",file,loops);
+          fprintf (STD_OUT,"Playing %s with %d loops\n",file.c_str(),loops);
         }
 	
 	// well, there's no music, but most games don't break without music...
@@ -352,7 +430,7 @@ int main(int argc, char **argv) {
 				    ||(!Mix_PlayingMusic())
 #endif
 				    ) {
-                                  vector<string> names = split(str,"|");                                 
+                                  vector<string> names = split(str,"&");                                 
                                   char * tmpstrings[5]={NULL,NULL,NULL,NULL,NULL};
                                   for(unsigned int t=0;t<5&&t+1<names.size();++t) {
                                     tmpstrings[t]=strdup(names[t+1].c_str());
@@ -361,7 +439,7 @@ int main(int argc, char **argv) {
                                   memcpy(songNames,tmpstrings,sizeof(char*)*5);
                                   if (names.size()>0) str=names[0];
                                   counter=0;
-                                  music=PlayMusic(str.c_str(),music);
+                                  music=PlayMusic(str,music);
                                   SDL_mutexV(RestartSong);
 					if (music) {
 						fprintf(STD_OUT, "\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
