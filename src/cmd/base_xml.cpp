@@ -284,24 +284,22 @@ void Base::endElement(void *userData, const XML_Char *name) {
 void Base::LoadXML(const char * filename) {
   unitlevel=0;
   const int chunk_size = 16384;
-  cout << "Base::LoadXML " << filename << endl;
-  vschdir("bases");
-  FILE * inFile = fopen (filename, "r");
+  string full_filename = string("bases/") + filename;
+  cout << "Base::LoadXML " << full_filename << endl;
+  FILE * inFile = fopen (full_filename.c_str(), "r");
   if(!inFile) {
     Unit *baseun=this->baseun.GetUnit();
     if (baseun) {
       if (baseun->isUnit()==PLANETPTR)
-        inFile=fopen("planet.xbase","r");
+        inFile=fopen("bases/planet.xbase","r");
       else
-        inFile=fopen("unit.xbase","r");
+        inFile=fopen("bases/unit.xbase","r");
     }
     if (!inFile) {
       assert(0);
-      vscdup();
       return;
     }
   }
-  vscdup();
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Base::beginElement, &Base::endElement);
