@@ -9,6 +9,9 @@ class UnitContainer {
  public:
   UnitContainer ();
   UnitContainer (Unit *);
+  UnitContainer (const UnitContainer &un):unit(NULL) {
+    SetUnit(un.unit);
+  }
   ~UnitContainer();
   void SetUnit (Unit *);
   inline Unit * GetUnit();

@@ -91,3 +91,16 @@ void UnitCollection::ConstIterator::GetNextValidUnit () {
     pos = pos->next;
   }
 }
+
+UnitCollection::UnitCollection (const UnitCollection & uc): u(NULL) {
+  init();
+  un_iter ui = createIterator();
+  const UnitListNode * n = &uc.u;
+  while (n) {
+    if (n->unit) {
+      ui.postinsert (n->unit);
+      ++ui;
+    }
+    n = n->next;
+  }
+}

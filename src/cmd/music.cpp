@@ -1,4 +1,4 @@
-#include "music.h"
+
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include <stdio.h>
@@ -6,11 +6,13 @@
 #include "audiolib.h"
 #include "universe.h"
 #include "star_system.h"
-#include "collection.h"
-#include "unit.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+
+#include "collection.h"
+#include "unit.h"
 #include "vs_path.h"
+#include "music.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   if (parent) {
     maxhull = parent->GetHull();
