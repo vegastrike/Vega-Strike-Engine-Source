@@ -106,6 +106,7 @@ Background::~Background()
 
 void Background::Draw()
 {
+  GFXColor (1,1,1,1);
   if (SphereBackground) {
     SphereBackground->Draw();
     Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
