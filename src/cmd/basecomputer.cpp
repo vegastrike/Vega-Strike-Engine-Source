@@ -1660,6 +1660,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
         // Construct the cell for this item.
         const bool transOK = isTransactionOK(item, transType);
+		/*
 		//REALLY SLOW - why?
 		string blnk;
 		static Flightgroup* staticFG=new Flightgroup();//sigh
@@ -1670,8 +1671,10 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 		string namestr=newPart->getFullname();
 	    delete newPart;
 		//END REALLY SLOW
+		
         string itemName = beautify(namestr);
-	
+		*/
+		string itemName=beautify(item.content); //FIXME FIXME WRONG Names will be printed - above code fixes, but is too slow...
           if (item.quantity > 1) {
             // If there is more than one item, show the number of items.
 	      itemName += " (" + tostring(item.quantity) + ")";
@@ -3397,6 +3400,9 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		  	  nametemp+=playerUnit->name[nameindex];
 		  }
 		}
+		if (nametemp.length()){
+			nametemp[0]=toupper(nametemp[0]);
+		}
 		nametemp=beautify(nametemp);
 		text+=statcolor+"Selected Part: #-c"+nametemp;
 		if(item.mass==1){
@@ -3419,7 +3425,11 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 
 	if(!mode){
 		for(nameindex=0; (nameindex<playerUnit->name.size())&&playerUnit->name[nameindex]!='.';nameindex++){
-			nametemp+=playerUnit->name[nameindex];
+			//nametemp+=playerUnit->name[nameindex];
+		}
+		nametemp=playerUnit->getFullname();
+		if (nametemp.length()){
+			nametemp[0]=toupper(nametemp[0]);
 		}
 		for(nameindex=nameindex+1;nameindex<playerUnit->name.size();nameindex++){
 			model+=playerUnit->name[nameindex];
