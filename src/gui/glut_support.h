@@ -31,7 +31,7 @@
 #include <png.h>
 #include <stdio.h>
 #include <vector.h>
-#include "gfx/png_texture.h"
+//#include "gfx/png_texture.h"
 
 struct GUITexture {
         unsigned int name;
@@ -40,14 +40,14 @@ struct GUITexture {
         GUITexture (unsigned int wid,unsigned int hei,unsigned int name) {this->wid=wid;this->hei=hei;this->name=name;}
 };
 
-Texture ReadTex(char *texfile);
+GUITexture ReadTex(char *texfile);
 char * readString (FILE * fp,char endchar);
 
 void png_cexcept_error(png_structp png_ptr, png_const_charp msg);
 unsigned char *readImage (FILE *fp, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette);
 
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
-void ShowImage(float x, float y, float wid, float hei, struct Texture image, int tile_h, int tile_w);
+void ShowImage(float x, float y, float wid, float hei, struct GUITexture image, int tile_h, int tile_w);
 void ShowText(float x, float y, float wid, int size, char *string, int no_end);
 float WidthOfChar(char chr);
 
