@@ -25,7 +25,6 @@
   - if client receives a CMD_JUMP ok then it tries to jump (if ok on server should be ok on client)
 - Fix ping computation
 - Depending on ping -> send the player its own info in order to update himself periodicaly (like 1 time per 2 or 3 seconds)
-- In savegame : add stardate loading and saving stuff to dynamic universe
 - Add a timeout between the time the player logged in and the time he really enters the game
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
 - Sometimes in the future : make admin server settings with :
@@ -101,6 +100,7 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - In savegame : add stardate loading and saving stuff to dynamic universe
 DONE - Handle docking with CMD_DOCK and CMD_UNDOCK and DockToSavedBase on server side
 DONE - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 DONE ANOTHER WAY - Add a check for player jump energy when a jump request arrives and send back a CMD_ASKFILE with packetserial = 0 if not enough

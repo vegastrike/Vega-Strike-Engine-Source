@@ -148,9 +148,12 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			// jpeg_compress doesn't allocate any data so we have to use a buffer for destination
 			// Here we can't 
 			char file[256];
+			char fullfile[256];
 			memset( file, 0, 256);
+			memset( fullfile, 0, 256);
 			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
-			strcat( file, datadir.c_str());
+			strcat( fullfile, datadir.c_str());
+			strcat( fullfile, file);
 /*
 METHODDEF(void) init_destination (j_compress_ptr cinfo);
 METHODDEF(boolean) empty_output_buffer (j_compress_ptr cinfo);
@@ -163,11 +166,14 @@ void jpeg_decompress(unsigned char *dst, unsigned char *src, int size, int *w, i
 void jpeg_decompress_from_file(unsigned char *dst, char *file, int size, int *w, int *h);
 */
 			char * tmpBuffer = new char[MAXBUFFER];
+			cerr<<"Trying to save cam shot to : "<<file<<endl;
+			jpeg_compress_to_file( (char *)pBuffer, fullfile, ws->width, ws->height, ws->jpeg_quality);
+			cerr<<"Trying to compress webcam buffer"<<endl;
 			ws->jpeg_size = jpeg_compress( tmpBuffer, (char *)pBuffer, ws->width, ws->height, MAXBUFFER, ws->jpeg_quality);
 			cerr<<"\tCompressed into "<<ws->jpeg_size<<" bytes"<<endl;
-			jpeg_compress_to_file( (char *)pBuffer, file, ws->width, ws->height, ws->jpeg_quality);
 			ws->jpeg_buffer = new char[ws->jpeg_size];
 			memcpy( ws->jpeg_buffer, tmpBuffer, ws->jpeg_size);
+			ws->nbframes++;
 			
 			//ws->jpeg_buffer = JpegFromCapture( hBitmap, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
 			//FreeMediaType(MediaType);

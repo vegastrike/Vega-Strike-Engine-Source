@@ -903,7 +903,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 							// Request a fire order to the server telling him the serial of the unit and the mount index (nm)
 							char mis2 = mis;
 							int playernum = _Universe->whichPlayerStarship( this);
-							if( playernum>0)
+							if( playernum>=0)
 								Network[playernum].fireRequest( this->serial, nm, mis2);
 							// Mark the mount as fire requested
 							//(*i).processed = Mount::REQUESTED;
@@ -3793,10 +3793,12 @@ bool Unit::isDocked (Unit* d) {
 bool Unit::UnDock (Unit * utdw) {
   unsigned int i=0;
 
+  cerr<<"Asking to undock"<<endl;
   if( Network!=NULL && !SERVER)
   {
+	cerr<<"Sending an undock notification"<<endl;
 	int playernum = _Universe->whichPlayerStarship( this);
-	if( playernum>0)
+	if( playernum>=0)
 		Network[playernum].undockRequest( utdw->serial);
   }
   for (i=0;i<utdw->image->dockedunits.size();i++) {

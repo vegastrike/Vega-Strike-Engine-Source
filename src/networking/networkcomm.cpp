@@ -183,10 +183,10 @@ NetworkCommunication::NetworkCommunication()
 	{
 		Webcam = new WebcamSupport();
 		if( Webcam->Init() == -1)
-		// Maybe put ushort by ushort in the buffer and prepare them for network (htons)
 		{
 			delete Webcam;
 			this->Webcam = NULL;
+			cerr<<"!!! NO WEBCAM SUPPORT !!!"<<endl;
 		}
 	}
     _downloader.reset( new VsnetDownload::Client::Manager( _sock_set ) );
