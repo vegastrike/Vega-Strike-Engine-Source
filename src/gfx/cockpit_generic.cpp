@@ -303,7 +303,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
       }
     }
     ol->PrimeOrders();
-    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
+    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml"));
     ol->SetVisible (true);
   }
   SwitchUnits2( nw);

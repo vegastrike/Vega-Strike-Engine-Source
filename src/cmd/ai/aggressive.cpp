@@ -18,7 +18,7 @@
 #include "cmd/role_bitmask.h"
 #include "cmd/unit_util.h"
 #include "warpto.h"
-
+#include "cmd/csv.h"
 #include "universe_util.h"
 
 using namespace Orders;
@@ -53,29 +53,94 @@ const EnumMap::Pair element_names[] = {
 const EnumMap AggressiveAIel_map(element_names, 25);
 using std::pair;
 std::map<string,AIEvents::ElemAttrMap *> logic;
-std::map<string,AIEvents::ElemAttrMap *> interrupts;
-AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, std::map<string,AIEvents::ElemAttrMap *> &mymap, bool inter) {
-  map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (name+string("%")+tostring(faction));
+
+static map<string,string> getAITypes() {
+  map <string,string> ret;
+  VSFileSystem::VSFile f;
+  VSError err = f.OpenReadOnly( "VegaPersonalities.csv", AiFile);
+  if (err<=Ok) {
+    CSVTable table(f);
+    map<std::string,int>::iterator browser=table.rows.begin();
+    for (;browser!=table.rows.end();++browser) {
+      string rowname = (*browser).first;
+      CSVRow row(&table,rowname);
+      for (unsigned int i=1;i<table.key.size();++i) {
+        string hasher = rowname;
+        if (i!=1)
+          hasher=rowname+"%"+table.key[i];
+        string rawrow=row[i];
+        if (rawrow.length()>0) {
+          ret[hasher]=rawrow;;
+        }
+      }
+    }
+    f.Close();
+  }
+  return ret;
+}
+static string select_from_space_list(string inp,unsigned int seed) {
+  if (inp.length()==0)
+    return "";
+  int count=1;
+  string::size_type len = inp.length();
+  for (unsigned int i=0;i<len;++i) {
+    if (inp[i]==' ') {
+      count++;
+    }
+  }
+  count = seed%count;
+  int ncount=0;
+  unsigned int j;
+  for (j=0;j<len;++j) {
+    if (inp[j]==' ')
+      ncount++;
+    if (ncount>=count) 
+      break;    
+  }
+  if (inp[j]==' ')
+    j++;
+  inp=inp.substr(j);
+  if ((len=inp.find(" "))!=string::npos) {
+    inp = inp.substr(0,len);
+  }
+  return inp;
+}
+static AIEvents::ElemAttrMap* getLogicOrInterrupt (string name,int faction, string unittype, std::map<string,AIEvents::ElemAttrMap *> &mymap, int personalityseed) {
+  string append="agg";
+  static map<string,string>myappend=getAITypes();
+  map<string,string>::iterator iter;
+  string factionname= FactionUtil::GetFaction(faction);
+  if ((iter=myappend.find(factionname+"%"+unittype))!=myappend.end()) {    
+    append = select_from_space_list((*iter).second,personalityseed);
+  }else if ((iter=myappend.find(factionname))!=myappend.end()) {
+    append = select_from_space_list((*iter).second,personalityseed);
+  }
+  if (append.length()==0) append="agg";
+  string hashname = name +"."+append;
+  map<string,AIEvents::ElemAttrMap *>::iterator i = mymap.find (hashname);
   if (i==mymap.end()) {
     AIEvents::ElemAttrMap * attr = new AIEvents::ElemAttrMap(AggressiveAIel_map);
-    string filename (name+(inter?string(".int.xml"):string(".agg.xml")));
+    string filename (name+"."+append+".xml");
     AIEvents::LoadAI (filename.c_str(),*attr,FactionUtil::GetFaction(faction));
-    mymap.insert (pair<string,AIEvents::ElemAttrMap *> (name+string("%")+tostring(faction),attr));
+    mymap.insert (pair<string,AIEvents::ElemAttrMap *> (hashname,attr));
     return attr;
   }
   return i->second;
 }
-AIEvents::ElemAttrMap* getProperLogicOrInterruptScript (string name,int faction, bool interrupt) {
-  return getLogicOrInterrupt (name,faction,interrupt?interrupts:logic,interrupt);
+static AIEvents::ElemAttrMap* getProperLogicOrInterruptScript (string name,int faction, string unittype, bool interrupt, int personalityseed) {
+  return getLogicOrInterrupt (name,faction,unittype,logic,personalityseed);
 }
-AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool interrupt) {
+static AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool interrupt, int personalityseed) {
   if (!me||!targ) {
+    string nam="eject";
     int fac=0;
-    if (me)
+    if (me) {
       fac=me->faction;
-    return getProperLogicOrInterruptScript("default",fac,interrupt);
+      nam=me->name;
+    }
+    return getProperLogicOrInterruptScript("default",fac,nam,interrupt,personalityseed);
   }
-  return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->combatRole(),targ->combatRole()),me->faction,interrupt);
+  return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->combatRole(),targ->combatRole()),me->faction,me->name,interrupt,personalityseed);
 }
 
 inline std::string GetRelationshipColor (float rel) {
@@ -134,13 +199,15 @@ void LeadMe (Unit * un, string directive, string speech) {
 }
 
 static float aggressivity=2.01;
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,false)), interrupts(getProperScript(NULL,NULL,true)) {
+static int randomtemp;
+AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,"default",randomtemp=rand())) {
   currentpriority=0;
+  personalityseed=randomtemp;
   last_jump_distance=FLT_MAX;
   interruptcurtime=0;
   jump_time_check=1;
   last_time_insys=true;
-  logiccurtime=interrupts->maxtime;//set it to the time allotted
+  logiccurtime=logic->maxtime;//set it to the time allotted
   obedient = true;
   if (aggressivity==2.01) {
     float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
@@ -149,7 +216,7 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
   if (target !=NULL) {
     AttachOrder (target);
   }
-  last_directive = filename+string("|")+interruptname;
+  last_directive = filename;
   //  AIEvents::LoadAI (filename,logic,"neutral");
   //  AIEvents::LoadAI (interruptname,interrupt,"neutral");
 }
@@ -195,8 +262,7 @@ void AggressiveAI::SetParent (Unit * parent1) {
 }
 void AggressiveAI::SignalChosenTarget () {
   if (parent) {
-    logic =getProperScript(parent,parent->Target(),false);
-    interrupts=getProperScript(parent,parent->Target(),true);
+    logic =getProperScript(parent,parent->Target(),false,personalityseed);
   }
   FireAt::SignalChosenTarget();
 }

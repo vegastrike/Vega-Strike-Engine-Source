@@ -13,7 +13,6 @@ class AggressiveAI: public FireAt {
 protected:
   void SignalChosenTarget();
   AIEvents::ElemAttrMap *logic;
-  AIEvents::ElemAttrMap *interrupts;
   float logiccurtime;
   float interruptcurtime;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
@@ -26,7 +25,7 @@ protected:
 public:
   virtual void SetParent(Unit *parent1);
   enum types {AGGAI, MOVEMENT, FACING, UNKNOWN, DISTANCE, METERDISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL, RANDOMIZ, FSHIELD_HEAL_RATE, BSHIELD_HEAL_RATE, LSHIELD_HEAL_RATE, RSHIELD_HEAL_RATE, FARMOR_HEAL_RATE, BARMOR_HEAL_RATE, LARMOR_HEAL_RATE, RARMOR_HEAL_RATE, HULL_HEAL_RATE, TARGET_FACES_YOU, TARGET_IN_FRONT_OF_YOU, TARGET_GOING_YOUR_DIRECTION};
-  AggressiveAI (const char *file, const char * interruptename, Unit * target=NULL);
+  AggressiveAI (const char *file, Unit * target=NULL);
   void Execute ();
   virtual string getOrderDescription() { return "aggressive"; };
   void AfterburnerJumpTurnTowards(Unit * target);
@@ -57,6 +56,7 @@ public:
   float Hull_prev;
   float Hull_rate_old;
   double Hull_prev_time;
+  int personalityseed;
 };
 }
 

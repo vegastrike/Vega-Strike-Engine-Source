@@ -130,25 +130,42 @@ namespace AIEvents {
   void LoadAI(const char * filename, ElemAttrMap &result, const string &faction) {//returns obedience
 	using namespace VSFileSystem;
     const int chunk_size = 16384;
-    string full_filename;
+
     result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
 								      "Targetting",
 								      "obedience",
 								      ".99"));
     result.maxtime=10;
     //full_filename = string("ai/events/") + faction+string("/")+filename;
-    full_filename = faction+string("/")+filename;
     //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
-	VSFile f;
-	VSError err = f.OpenReadOnly( full_filename);
-    if (err>Ok) {
-      full_filename = filename;
-      err = f.OpenReadOnly (full_filename, AiFile);
-    }
+    VSFile f;
+    VSError err;
+    err = f.OpenReadOnly (filename, AiFile);
     if(err>Ok) {
       printf("ai file %s not found\n",filename);
-      assert(0);
-      return;
+      string full_filename=filename;
+      full_filename=full_filename.substr(0,strlen(filename)-4);
+      string::size_type where = full_filename.find_last_of(".");
+      string type=".agg.xml";
+      if (where!=string::npos) {
+        type = full_filename.substr(where);
+        full_filename=full_filename.substr(0,where)+".agg.xml";
+        err = f.OpenReadOnly (full_filename, AiFile);              
+      }
+      if (err>Ok) {
+        printf("ai file %s again not found\n",full_filename.c_str());
+        full_filename="default";
+        full_filename+=type;
+        err = f.OpenReadOnly (full_filename, AiFile);
+      }
+      if (err>Ok) {
+        printf("ai file again %s again not found\n",full_filename.c_str());
+        err = f.OpenReadOnly ("default.agg.xml", AiFile);
+        if (err>Ok) {
+          printf("ai file again default.agg.xml again not found\n");
+          
+        }
+      }
     }	
     XML_Parser parser = XML_ParserCreate (NULL);
     XML_SetUserData (parser, &result);

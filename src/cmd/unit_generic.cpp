@@ -1453,8 +1453,7 @@ void Unit::LoadAIScript(const std::string & s) {
 	  PrimeOrders( new Orders::Ikarus ());
 	}else {
 	  string ai_agg=s+".agg.xml";
-	  string ai_int=s+".int.xml";
-	  PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
+	  PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str()));
 	}
       }
     }else {
@@ -5964,7 +5963,7 @@ void Unit::EjectCargo (unsigned int index) {
 	  }
 	  cargo = UnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber);
 	  cargo->PrimeOrders();
-	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
+	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml"));
 	  cargo->SetTurretAI();	  
 	  //he's alive!!!!!
 	}

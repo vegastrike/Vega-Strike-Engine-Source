@@ -234,7 +234,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 						if (match_speed_with_target)
 							temp->GetComputerData().velocity_ref.SetUnit(target);
 					}else {
-						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml","default.int.xml"));
+						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));
 						temp->SetTurretAI();
 						temp->TargetTurret(target);
 

@@ -78,7 +78,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
-      my_order=new Orders::AggressiveAI(filestr.c_str(),intstr.c_str());
+      my_order=new Orders::AggressiveAI(filestr.c_str());
     }
 
     viret=newVarInst(VI_TEMP);

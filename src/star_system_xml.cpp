@@ -1126,7 +1126,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	Unit * b = UnitFactory::createBuilding (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
 	b->SetSerial( serial);
 	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
-	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml"));
 	AddUnit (b);
 	  while (!dest.empty()) {
 	    b->AddDestination (dest.back());
@@ -1138,7 +1138,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	b->SetSerial( serial);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
-	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml"));
 	  b->SetTurretAI ();
 	    b->EnqueueAI(new Orders::FireAt (.2,15));
 	AddUnit (b);

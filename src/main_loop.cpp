@@ -740,7 +740,7 @@ void AddUnitToSystem (const SavedUnits *su) {
   case UNITPTR:
   default:
     un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFaction (su->faction.c_str()));
-    un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+    un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml"));
     un->SetTurretAI ();
     if (_Universe->AccessCockpit()->GetParent()) {
       un->SetPosition (_Universe->AccessCockpit()->GetParent()->Position()+QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
