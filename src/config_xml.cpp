@@ -237,7 +237,10 @@ static void ComposeFunctions(const KBData& composition, KBSTATE k) {
     where=t.find("(");
     std::string args;
     if (where!=string::npos) {
-      args=t.substr(where+1,t.rfind(")"));
+      args=t.substr(where+1);
+      std::string::size_type paren=args.find(")");
+      if (paren!=string::npos)
+        args=args.substr(0,paren);
       t=t.substr(0,where);    
     }
     CommandMap::iterator i = commandMap.find(t);
