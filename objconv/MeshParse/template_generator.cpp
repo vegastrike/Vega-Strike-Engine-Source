@@ -794,7 +794,8 @@ void UnitEndElement(const string &name, XML * xml) {
     if (xeq(name,"unit")) {
         fprintf (xml->bfp,"<Upgrade file=\"mult_general_downgrade\"/>\n");
         fprintf (xml->tfp,"<Upgrade file=\"mult_general_upgrade\"/>\n");
-        
+        fprintf (xml->bfp,"<Upgrade file=\"add_general_downgrade\"/>\n");
+        fprintf (xml->tfp,"<Upgrade file=\"add_general_upgrade\"/>\n");
     }
 
   --globaltab;
@@ -815,7 +816,11 @@ void UnitEndElement(const string &name, XML * xml) {
       string s ="";
       if (xml->num_shield_facings)
           s =LookUp(shieldLookup(),xml->total_shield_value/xml->num_shield_facings);
-      fprintf (xml->tfp,"<Upgrade file=\"shield_%d%s\"/>\n<Upgrade file=\"mult_shield_regenerator\"/>\n<Upgrade file=\"isometal\"/>\n",(xml->num_shield_facings), s.c_str());
+      fprintf (xml->tfp,"<Upgrade file=\"shield_%d%s\"/>\n<Upgrade file=\"mult_shield_regenerator\"/>\n",(xml->num_shield_facings), s.c_str());
+	  const float num_shield_capacitance_additions=2;
+	  for (unsigned int i=0;i<num_shield_capacitance_additions;++i) {
+      fprintf (xml->tfp,"<Upgrade file=\"add_shield_%d_capacitance\"/>\n",xml->num_shield_facings);		  
+	  }
       //s = LookUp (hullLookup(),xml->maxhull);
       //fprintf (xml->tfp,"<Upgrade file=\"%s\"/>\n",s.c_str());
       //fprintf (xml->bfp,"<Upgrade file=\"hull\"/>\n");

@@ -338,9 +338,9 @@ vector<System> readfile (const char * name) {
 			
 			if (systems[i].interesting) {
 				ic++;
-				printf("%s interesting\n",systems[i].name.c_str());
+				//printf("%s interesting\n",systems[i].name.c_str());
 			}else {
-				printf("%s no\n",systems[i].name.c_str());
+				//printf("%s no\n",systems[i].name.c_str());
 			}
 			systems[i].computeProperties(systems[i].interesting);
 			if (systems[i].habitable) {
@@ -451,8 +451,9 @@ void processsystems (std::vector <System> & s){
 							string fullname = s[i].sector+"/"+s[i].name;
 							unsigned int jjsize = s[j].jumps.size();
 							bool found=false;
-							if (!s[j].habitable)
-								fprintf (stderr,"looking for %s in %s\n",fullname.c_str(),s[j].name.c_str());
+							if (!s[j].habitable){
+								//fprintf (stderr,"looking for %s in %s\n",fullname.c_str(),s[j].name.c_str());
+							}
 							for (unsigned int l=0;l<jjsize;++l) {
 								if (fullname==s[j].jumps[l]) {
 									found=true;
