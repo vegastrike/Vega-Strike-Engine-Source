@@ -312,7 +312,7 @@ static void Quit(KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 100;
+const int numf = 16;
 Unit *fighters[numf];
 //LocationSelect *locSel=NULL;
 Background * bg = NULL;
@@ -496,10 +496,33 @@ void createObjects() {
   //  
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
-    fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
+    //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
+    switch(a%7) {
+    case 0:
+      fighters[a] = new Unit("broadsword.xunit", true);
+      break;
+    case 1:
+      fighters[a] = new Unit("Cloakedfighter.xunit", true);
+      break;
+    case 2:
+      fighters[a] = new Unit("Heavycorvette.xunit", true);
+      break;
+    case 3:
+      fighters[a] = new Unit("Heavyinterceptor.xunit", true);
+      break;
+    case 4:
+      fighters[a] = new Unit("Lightcorvette.xunit", true);
+      break;
+    case 5:
+      fighters[a] = new Unit("Lightinterceptor.xunit", true);
+      break;
+    case 6:
+      fighters[a] = new Unit("Multiguncorvette.xunit", true);
+      break;
+    }
     //fighters[a] = new Unit("phantom.xunit", true);
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
-    fighters[a]->SetPosition((a%10)*6 - 40.0F, (a/10)*6 - 40.0F,7.0F);
+    fighters[a]->SetPosition((a%10)*35 - 40.0F, (a/10)*35 - 40.0F,7.0F);
     //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));
@@ -552,7 +575,7 @@ void main_loop() {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   //bg2->Draw();
-  bg->Draw();
+  //bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);

@@ -76,7 +76,7 @@ Planet::~Planet() { }
 void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   Matrix t;
   MultMatrix(t, matrix, transformation);
-
+  /*
   if(gravity!=0.0) {
     Iterator *iterator = uc->createIterator();
     Unit *unit;
@@ -99,7 +99,7 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
       iterator->advance();
     }
     delete iterator;
-  }
+    }*/
 
   // fake gravity
   for(int a=0; a<numSatellites; a++) {
