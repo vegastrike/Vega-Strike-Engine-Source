@@ -111,8 +111,10 @@ void initpaths () {
 
     fclose (fp);
     fp =NULL;
+    returnfromhome();
     vs_config = new VegaConfig (CONFIGFILE);
     cout << "using config file in data dir " << datadir << endl;
+    changehome();
   } else {
 
     // no config file in home dir or data dir
@@ -124,7 +126,9 @@ void initpaths () {
   returnfromhome();
 
   simulation_atom_var=atof(vs_config->getVariable("general","simulation_atom","0.1").c_str());
-
+  char mycwd [256];
+  getcwd(mycwd,255);
+  mycwd[254]=mycwd[255]=0;
   cout << "SIMULATION_ATOM: " << SIMULATION_ATOM << endl;
 
   string config_datadir = vs_config->getVariable ("data","directory",datadir);
@@ -132,25 +136,24 @@ void initpaths () {
     cout << "using data dir " << config_datadir << " from config file" << endl;
     datadir=config_datadir;
   }
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());
+  vschdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());
   getcwd (pwd,8191);
   sharedtextures = string (pwd);
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedsounds","sounds").c_str());
+  vscdup();
+  vschdir (vs_config->getVariable ("data","sharedsounds","sounds").c_str());
   getcwd (pwd,8191);
   sharedsounds = string (pwd);
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedmeshes","meshes").c_str());
+  vscdup();
+  vschdir (vs_config->getVariable ("data","sharedmeshes","meshes").c_str());
   getcwd (pwd,8191);
   sharedmeshes = string (pwd);
-  chdir (datadir.c_str());
-  chdir (vs_config->getVariable ("data","sharedunits","units").c_str());
+  vscdup();
+  vschdir (vs_config->getVariable ("data","sharedunits","units").c_str());
   getcwd (pwd,8191);
   sharedunits = string (pwd);
 
 
-  chdir (datadir.c_str());
+  vscdup();
   if (datadir.end()!=datadir.begin()) {
     if (*(datadir.end()-1)!='/'&&*(datadir.end()-1)!='\\') {
       datadir+=DELIM;

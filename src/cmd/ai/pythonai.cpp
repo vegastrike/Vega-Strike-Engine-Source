@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
 #include <Python.h>
@@ -52,10 +51,9 @@ void PythonAI::InitModuleAI () {
   boost::python::class_builder <FireAt,PythonAI> BaseClass (ai_builder,"FireAt");
 
   BaseClass.def (boost::python::constructor<float,float>());
-  BaseClass.def (&FireAt::Execute,"PythonAI",PythonAI::default_Execute);
+//  BaseClass.def (&FireAt::Execute,"PythonAI",PythonAI::default_Execute);
   
 }
 PythonAI::~PythonAI () {
-  fprintf (stderr,"Destruct called. If called from C++ this is death %d",this);
+  fprintf (stderr,"Destruct called. If called from C++ this is death %d (%x)",this,this);
 }
-

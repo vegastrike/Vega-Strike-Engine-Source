@@ -12,6 +12,9 @@
 #include <strstream>
 #include "init.h"
 #include "python_compile.h"
+#ifdef WIN32
+#include <direct.h>
+#endif
      class hello {
 		 std::string country;
       public:
