@@ -124,17 +124,17 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
 
 
 
-GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float ttcutoff) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (const float ttcutoff) {
   if (ttcutoff<0) 
     return GFXFALSE;
   intensity_cutoff=ttcutoff;
   return GFXTRUE;
 }
-void /*GFXDRVAPI*/ GFXSetOptimalIntensity (float intensity, float saturate) {
+void /*GFXDRVAPI*/ GFXSetOptimalIntensity (const float intensity, const float saturate) {
   optintense = intensity;
   optsat = saturate;
 }
-GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (const int numLights) {
   if (numLights>GFX_MAX_LIGHTS||numLights<0)
     return GFXFALSE;
   GFX_OPTIMAL_LIGHTS=numLights;
@@ -143,18 +143,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights) {
 
 
 
-GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(GFXBOOL spec) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(const GFXBOOL spec) {
 #ifndef WIN32
-	if (spec) {
+  if (spec) {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
   }else {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SINGLE_COLOR);
     return GFXFALSE;
   }
 #else
-	return GFXFALSE;
+  return GFXFALSE;
 #endif
-	return GFXTRUE;
+  return GFXTRUE;
 }
 
 
@@ -182,12 +182,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateLight (int &light, const GFXLight &templatecopy, 
   return (*_llights)[light].Create(templatecopy,global);
 }
 
-void /*GFXDRVAPI*/ GFXDeleteLight (int light) {
+void /*GFXDRVAPI*/ GFXDeleteLight (const int light) {
   (*_llights)[light].Kill();
 }
 
 
-GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET lt, const GFXColor &color) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, const GFXColor &color) {
   if ((*_llights)[light].Target()==-2) {
     return GFXFALSE;
   }

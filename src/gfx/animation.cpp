@@ -163,7 +163,7 @@ void Animation::DrawNow(const Matrix &final_orientation) {
   if (!Done()) {
     GFXLoadMatrix (MODEL, final_orientation);
     Decal[framenum]->MakeActive();
-    GFXBegin (QUADS);
+    GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
     GFXVertex3f (-width,-height,0.00F);  //lower left
     GFXTexCoord2f (1.00F,1.00F);
@@ -180,7 +180,7 @@ void Animation::DrawNoTransform() {
  int framenum = (int)(cumtime/timeperframe);
   if (!Done()) {
     Decal[framenum]->MakeActive();
-    GFXBegin (QUADS);
+    GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
     GFXVertex3f (-width,-height,0.00F);  //lower left
     GFXTexCoord2f (1.00F,1.00F);

@@ -41,7 +41,7 @@ public:
 	Sprite (const char *file);
 	~Sprite();
 
-	void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
+	void Draw();
 
 	void Rotate(const float &rad){ rotation += rad;};
 

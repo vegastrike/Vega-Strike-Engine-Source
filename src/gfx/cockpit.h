@@ -9,6 +9,9 @@ enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
   UnitContainer parent;
   Sprite *Pit [4];
+  Sprite *Radar;
+  Sprite *VDU [2];
+  Sprite *Shield[2];
   Sprite *Crosshairs;//have a bunch of these...like radar
   float cockpit_offset;
   float viewport_offset;
@@ -20,6 +23,7 @@ class Cockpit {
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
   void Delete();
+  void DrawBlips(Unit * un);
  public:
   float zoomfactor;
   Cockpit (const char * file, Unit * parent);

@@ -613,7 +613,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif 
 				   );
       if (d) {  //d can be used for level of detail shit
-	if (g_game.x_resolution*meshdata[i]->rSize()/GFXGetZPerspective(d)>=.4) {//if the radius is at least half a pixel
+	if (g_game.x_resolution*meshdata[i]->rSize()/GFXGetZPerspective(d)>=1) {//if the radius is at least half a pixel
 	  meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
 	} else {
 

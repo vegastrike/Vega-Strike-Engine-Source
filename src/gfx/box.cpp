@@ -92,7 +92,7 @@ void Box::ProcessDrawQueue() {
     GFXLoadMatrix(MODEL, c.mat);
 
 
-  GFXBegin(QUADS);
+  GFXBegin(GFXQUAD);
   GFXColor4f(0.0,1.0,0.0,0.2);
 
   GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);

@@ -45,32 +45,43 @@ Sprite::Sprite(const char *file) {
   surface = NULL;
   
   FILE *fp = fopen(file, "r");
-  char texture[64]={0};
-  char texturea[64]={0};
-  fscanf(fp, "%63s %63s", texture, texturea);
-  fscanf(fp, "%f %f", &widtho2, &heighto2);
-  fscanf(fp, "%f %f", &xcenter, &ycenter);
-  fclose(fp);
-
-  widtho2/=2;
-  heighto2/=-2;
-  if (texturea[0]==0) {
-    surface = new Texture(texture);    
-  } else {
-    surface = new Texture(texture,texturea);    
+  if (fp) {
+    char texture[64]={0};
+    char texturea[64]={0};
+    fscanf(fp, "%63s %63s", texture, texturea);
+    fscanf(fp, "%f %f", &widtho2, &heighto2);
+    fscanf(fp, "%f %f", &xcenter, &ycenter);
+    fclose(fp);
+    
+    widtho2/=2;
+    heighto2/=-2;
+    if (texturea[0]==0) {
+      surface = new Texture(texture);    
+    } else {
+      surface = new Texture(texture,texturea);    
+    }
+    
+    if (!surface->LoadSuccess()) {
+    delete surface;
+    surface = NULL;
+    }
+  }else {
+    widtho2 = heighto2 = 0;
+    xcenter = ycenter = 0;
   }
 }	
 
 Sprite::~Sprite()
 {
-	if(surface!=NULL)
-		delete surface;
+  if(surface!=NULL)
+    delete surface;
 }
 
 
 
-void Sprite::Draw(const Transformation &dtrans, const Matrix m)
+void Sprite::Draw()
 {
+  if (surface){//don't do anything if no surface
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHWRITE);
     GFXDisable(DEPTHTEST);
@@ -78,7 +89,7 @@ void Sprite::Draw(const Transformation &dtrans, const Matrix m)
     GFXDisable(TEXTURE1);
     surface->MakeActive();
     GFXDisable (CULLFACE);
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     if (rotation) {
       const float cw = widtho2*cos(rotation);
       const float sw = widtho2*sin(rotation);
@@ -109,6 +120,7 @@ void Sprite::Draw(const Transformation &dtrans, const Matrix m)
     GFXEnable(LIGHTING);
     GFXEnable(DEPTHWRITE);
     GFXEnable(DEPTHTEST);
+  }
 }
 
 void Sprite::SetPosition(const float &x1, const float &y1) {

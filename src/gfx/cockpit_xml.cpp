@@ -13,6 +13,11 @@ namespace CockpitXML {
       UNKNOWN,
       COCKPIT,
       CROSSHAIRS,
+      RADAR,
+      LVDU,
+      RVDU,
+      SHIELDSTAT,
+      FUELSTAT,
       XFILE,
       XCENT,
       YCENT,
@@ -29,7 +34,12 @@ namespace CockpitXML {
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Cockpit", COCKPIT),
-    EnumMap::Pair ("Crosshairs", CROSSHAIRS)
+    EnumMap::Pair ("Crosshairs", CROSSHAIRS),
+    EnumMap::Pair ("Radar", RADAR),
+    EnumMap::Pair ("LeftVDU", LVDU),
+    EnumMap::Pair ("RightVDU", RVDU),
+    EnumMap::Pair ("Shield", SHIELDSTAT),
+    EnumMap::Pair ("Fuel", FUELSTAT)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -46,7 +56,7 @@ namespace CockpitXML {
     EnumMap::Pair ("CockpitOffset", COCKPITOFFSET)
   };
 
-  const EnumMap element_map(element_names, 3);
+  const EnumMap element_map(element_names, 8);
   const EnumMap attribute_map(attribute_names, 12);
 }
 
@@ -65,6 +75,7 @@ void Cockpit::endElement(void *userData, const XML_Char *name) {
 
 void Cockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
+  Sprite ** newsprite;
   Names elem = (Names)element_map.lookup(name);
   Names attr;
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
@@ -91,11 +102,17 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       } 
     }
     break;
-  case CROSSHAIRS:
+  case RADAR: newsprite = &Radar;goto loadsprite;
+  case SHIELDSTAT: newsprite = &Shield[0];goto loadsprite;
+  case FUELSTAT: newsprite = &Shield[1]; goto loadsprite;
+  case LVDU: newsprite = &VDU[0]; goto loadsprite;
+  case RVDU: newsprite = &VDU[1]; goto loadsprite;
+  case CROSSHAIRS: newsprite = &Crosshairs; goto loadsprite;
+  loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
-	Crosshairs = new Sprite ((*iter).value.c_str());
+	(*newsprite) = new Sprite ((*iter).value.c_str());
 	break;
       case XSIZE:
 	xsize = parse_float ((*iter).value);
@@ -111,12 +128,12 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       }
     }
-    if (Crosshairs) {
+    if (*newsprite) {
       if (xsize!=-1) {
-	Crosshairs->SetSize (xsize,ysize);
+	(*newsprite)->SetSize (xsize,ysize);
       }
       if (xcent!=FLT_MAX) {
-	Crosshairs->SetPosition (xcent,ycent);
+	(*newsprite)->SetPosition (xcent,ycent);
       }
     }
     break;

@@ -54,20 +54,20 @@ void /*GFXDRVAPI*/ GFXShutdown();
 //Misc functions
 void /*GFXDRVAPI*/ GFXBeginScene();
 void /*GFXDRVAPI*/ GFXEndScene();
-void /*GFXDRVAPI*/ GFXClear(GFXBOOL ColorBuffer);
+void /*GFXDRVAPI*/ GFXClear(const GFXBOOL ColorBuffer);
 
 //Light
 
 void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);
-void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number);
-void /*GFXDRVAPI*/ GFXSetLightContext(int con_number);
+void /*GFXDRVAPI*/ GFXDeleteLightContext(const int con_number);
+void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number);
 GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
 
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
-GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (GFXBOOL spec);
-GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
-void /*GFXDRVAPI*/ GFXSetOptimalIntensity (float newint, float saturatevalue);
-GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numlights);
+GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (const GFXBOOL spec);
+GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (const float cutoff);
+void /*GFXDRVAPI*/ GFXSetOptimalIntensity (const float newint, const float saturatevalue);
+GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (const int numlights);
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateLight (int &light, const GFXLight &, const bool global);
 void /*GFXDRVAPI*/ GFXDeleteLight (const int light);
@@ -86,18 +86,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects();
 
 //Materials
 void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material);
-void /*GFXDRVAPI*/ GFXModifyMaterial (unsigned int number, const GFXMaterial &material);
-GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material);
-void /*GFXDRVAPI*/ GFXSelectMaterial(unsigned int number);
+void /*GFXDRVAPI*/ GFXModifyMaterial (const unsigned int number, const GFXMaterial &material);
+GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material);
+void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number);
 
 //Matrix
-void /*GFXDRVAPI*/ GFXHudMode(bool Enter);
-void /*GFXDRVAPI*/ GFXTranslate(MATRIXMODE mode, const Vector & r);
-void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
-void  /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
-void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
-void /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
-float /*GFXDRVAPI*/ GFXGetZPerspective (float z);
+void /*GFXDRVAPI*/ GFXHudMode(const bool Enter);
+void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector & r);
+void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix);
+void  /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix);
+void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode);
+void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix);
+float /*GFXDRVAPI*/ GFXGetZPerspective (const float z);
 float /*GFXDRVAPI*/GFXGetXInvPerspective();
 float /*GFXDRVAPI*/GFXGetYInvPerspective();
 void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar, float cockpit_offset);
@@ -128,24 +128,25 @@ void  /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
 GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename);
 
 //State
-void /*GFXDRVAPI*/ GFXEnable(enum STATE);
-void /*GFXDRVAPI*/ GFXDisable(enum STATE);
-void /*GFXDRVAPI*/ GFXTextureAddressMode(ADDRESSMODE);
-void /*GFXDRVAPI*/ GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst);
+void /*GFXDRVAPI*/ GFXEnable(const enum STATE);
+void /*GFXDRVAPI*/ GFXDisable(const enum STATE);
+void /*GFXDRVAPI*/ GFXTextureAddressMode(const ADDRESSMODE);
+void /*GFXDRVAPI*/ GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst);
 void /*GFXDRVAPI*/ GFXPushBlendMode();
 void /*GFXDRVAPI*/ GFXPopBlendMode();
-void /*GFXDRVAPI*/ GFXActiveTexture (int stage);
+void /*GFXDRVAPI*/ GFXActiveTexture (const int stage);
 void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
-void /*GFXDRVALP*/ GFXAlphaTest (enum DEPTHFUNC,float ref);
+void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
 //primitive Begin/End 
-void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE);
+void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE);
 void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col); 
-void /*GFXDRVAPI*/ GFXColor4f(float r, float g, float b, float a = 1.0);
-void /*GFXDRVAPI*/ GFXTexCoord2f(float s, float t);
-void /*GFXDRVAPI*/ GFXTexCoord4f(float s, float t, float u, float v);
-void /*GFXDRVAPI*/ GFXNormal3f(float i, float j, float k);
-void /*GFXDRVAPI*/ GFXNormal(Vector n);
-void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z = 1.0);
+void /*GFXDRVAPI*/ GFXColor4f(const float r, const float g, const float b, const float a = 1.0);
+void /*GFXDRVAPI*/ GFXTexCoord2f(const float s, const float t);
+void /*GFXDRVAPI*/ GFXTexCoord4f(const float s, const float t, const float u, const float v);
+void /*GFXDRVAPI*/ GFXNormal3f(const float i, const float j, const float k);
+void /*GFXDRVAPI*/ GFXNormal(const Vector &n);
+void /*GFXDRVAPI*/ GFXVertex3f(const float x, const float y, const float z = 1.0);
+void /*GFXDRVAPI*/ GFXVertexf (const Vector &v);
 void /*GFXDRVAPI*/ GFXEnd();
  
 //display list

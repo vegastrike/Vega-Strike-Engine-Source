@@ -70,7 +70,7 @@ public:
   
   void MakeActive();
   bool LoadSuccess () {
-    return (data!=NULL);
+    return (name>=0);
   }
   void Prioritize (float);
   //void Filter();

@@ -195,12 +195,13 @@ void getInverseProjection (float *& inv) {
  * therefore   return 1/(xs *d) and 1/(ys * d) 
  * I'm not good with matrix math...tell me if I should ret 1/xs+c/d instead
  * for test cases I can think of, it doesn't matter--- */
-float GFXGetZPerspective (float z) {
+float GFXGetZPerspective (const float z) {
   float left,right,bottom,top,nearval,farval;
   GFXGetFrustumVars(true,&left,&right,&bottom,&top,&nearval,&farval);
    float c = (farval+nearval) / ( farval-nearval);
    float d = (farval*(right-left)) / (farval-nearval);  /* error? */
-   return c*z+d;
+   //return c*z+d;
+   return z;
 }
 float GFXGetXInvPerspective () {
   return /*invprojection[11]*  */invprojection[0];//invprojection[15];//should be??  c/d == invproj[15]
@@ -211,7 +212,7 @@ float GFXGetYInvPerspective() {
 }
 
 
-void /*GFXDRVAPI*/ GFXTranslate(MATRIXMODE mode, const Vector & a) 
+void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector & a) 
 {
 	switch(mode)
 	{
@@ -248,7 +249,7 @@ void /*GFXDRVAPI*/ GFXTranslate(MATRIXMODE mode, const Vector & a)
 }
 
 
-void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
+void /*GFXDRVAPI*/ GFXMultMatrix(const MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;
 	switch(mode)
@@ -286,7 +287,7 @@ void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 	}
 }
 
-void /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
+void /*GFXDRVAPI*/ GFXLoadMatrix(const MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;
 	switch(mode)
@@ -326,7 +327,7 @@ void GFXViewPort (int minx, int miny, int maxx, int maxy) {
   glViewport (minx,miny,maxx,maxy);
 }
 
-void GFXHudMode (bool Enter) {
+void GFXHudMode (const bool Enter) {
   if (Enter) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
@@ -342,7 +343,7 @@ void GFXHudMode (bool Enter) {
   }
 }
 
-void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
+void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
 {
 	switch(mode)
 	{
@@ -372,7 +373,7 @@ void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 	}
 }
 
-void /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
+void /*GFXDRVAPI*/ GFXGetMatrix(const MATRIXMODE mode, Matrix matrix)
 {
   Matrix translation;
 	switch(mode)

@@ -28,7 +28,7 @@ GFXBOOL bTex0 = GFXTRUE;
 GFXBOOL bTex1 = GFXTRUE;
 int activeTextureStage=-1;
 extern GFXBOOL GFXLIGHTING;
-void /*GFXDRVAPI*/ GFXEnable (STATE state)
+void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 {
 
 	switch(state)
@@ -67,7 +67,7 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 	}
 }
 
-void /*GFXDRVAPI*/ GFXDisable (STATE state)
+void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 {
 	
 	switch(state)
@@ -140,7 +140,7 @@ struct BlendMode {
 
 stack<BlendMode> blendstack;
 
-void GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
+void GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst)
 {
 	GLenum sfactor,dfactor;
 	switch (src)
@@ -260,7 +260,7 @@ void GFXDepthFunc(enum DEPTHFUNC dfunc)
 	};
 }
 
-void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
+void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 {
 	if (stage)
 	{
@@ -272,7 +272,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 	}
 }
 
-void GFXActiveTexture (int stage) {
+void GFXActiveTexture (const int stage) {
   if (g_game.Multitexture&&stage!=activeTextureStage) {
     glActiveTextureARB(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
@@ -280,7 +280,7 @@ void GFXActiveTexture (int stage) {
 
 }
 
-void GFXAlphaTest (enum DEPTHFUNC df, float ref) {
+void GFXAlphaTest (const enum DEPTHFUNC df, const float ref) {
   if (df==ALWAYS) {
     glDisable (GL_ALPHA_TEST);
     return;

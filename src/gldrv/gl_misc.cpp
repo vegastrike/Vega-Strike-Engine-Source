@@ -44,7 +44,7 @@ void /*GFXDRVAPI*/ GFXEndScene()
 	
 }
 
-void /*GFXDRVAPI*/ GFXClear(GFXBOOL colorbuffer)
+void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer)
 {
 	glClear((colorbuffer?GL_COLOR_BUFFER_BIT:0) | GL_DEPTH_BUFFER_BIT);
 }
@@ -54,26 +54,38 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
 	return GFXFALSE;
 }
 
-void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
+void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE ptype)
 {
 	GLenum mode;
 	switch(ptype)
 	{
-	case TRIANGLES:
-		mode = GL_TRIANGLES;
-		break;
-	case TRIANGLE_STRIP:
-		mode = GL_TRIANGLE_STRIP;
-		break;
-	case TRIANGLE_FAN:
-		mode = GL_TRIANGLE_FAN;
-		break;
-	case QUADS:
-		mode = GL_QUADS;
-		break;
-	case POLYGON:
-		mode = GL_POLYGON;
-		break;
+	case GFXTRI:
+	  mode = GL_TRIANGLES;
+	  break;
+	case GFXLINE:
+	  mode = GL_LINES;
+	  break;
+	case GFXTRISTRIP:
+	  mode = GL_TRIANGLE_STRIP;
+	  break;
+	case GFXTRIFAN:
+	  mode = GL_TRIANGLE_FAN;
+	  break;
+	case GFXQUAD:
+	  mode = GL_QUADS;
+	  break;
+	case GFXQUADSTRIP:
+	  mode = GL_QUAD_STRIP;
+	  break;
+	case GFXLINESTRIP:
+	  mode = GL_LINE_STRIP;
+	  break;
+	case GFXPOLY:
+	  mode = GL_POLYGON;
+	  break;
+	case GFXPOINT:
+	  mode = GL_POINTS;
+	  break;
 	}
 	glBegin(mode);
 
@@ -82,17 +94,17 @@ void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col) {
   glColor4fv (&col.r);
 }
-void /*GFXDRVAPI*/ GFXColor4f(float r, float g, float b, float a)
+void /*GFXDRVAPI*/ GFXColor4f(const float r, const float g, const float b, const float a)
 {
 	glColor4f(r,g,b,a);
 }
 
-void /*GFXDRVAPI*/ GFXTexCoord2f(float s, float t)
+void /*GFXDRVAPI*/ GFXTexCoord2f(const float s, const float t)
 {
 	glTexCoord2f(s,t);
 }
 
-void /*GFXDRVAPI*/ GFXTexCoord4f(float s, float t, float u, float v)
+void /*GFXDRVAPI*/ GFXTexCoord4f(const float s, const float t, const float u, const float v)
 {
 	if(g_game.Multitexture)
 	{
@@ -104,21 +116,23 @@ void /*GFXDRVAPI*/ GFXTexCoord4f(float s, float t, float u, float v)
 	}
 }
 
-void /*GFXDRVAPI*/ GFXNormal3f(float i, float j, float k)
+void /*GFXDRVAPI*/ GFXNormal3f(const float i, const float j, const float k)
 {
-	glNormal3f(i,j,k);
+  glNormal3f(i,j,k);
 }
 
-void /*GFXDRVAPI*/ GFXNormal(Vector n)
+void /*GFXDRVAPI*/ GFXNormal(const Vector &n)
 {
-	glNormal3f(n.i,n.j,n.k);
+  glNormal3fv(&n.i);
 }
 
-void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z)
+void /*GFXDRVAPI*/ GFXVertex3f(const float x, const float y, const float z)
 {
-	glVertex3f(x,y,z);
+  glVertex3f(x,y,z);
 }
-
+void GFXVertexf (const Vector &v) {
+  glVertex3fv(&v.i);
+}
 void /*GFXDRVAPI*/ GFXEnd()
 {
 	glEnd();

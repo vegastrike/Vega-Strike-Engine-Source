@@ -130,7 +130,7 @@ void Background::Draw()
     GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
 
     up->MakeActive();
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     GFXTexCoord2f(0.998F, 0.002F);
     GFXVertex3f(-size, size, size);
 	
@@ -146,7 +146,7 @@ void Background::Draw()
 
     /*Left*/
     left->MakeActive();
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     GFXTexCoord2f(0.998F, 0.002F);
     GFXVertex3f(-size, size, -size);
 	
@@ -162,7 +162,7 @@ void Background::Draw()
 	
     ///*Front
     front->MakeActive();
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     GFXTexCoord2f(0.998F, 0.002F);
     GFXVertex3f(-size, size, size);
 	
@@ -179,7 +179,7 @@ void Background::Draw()
 	
     ///*Right
     right->MakeActive();
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     GFXTexCoord2f(0.998F, 0.002F);
     GFXVertex3f(size, size, size);
 	
@@ -195,7 +195,7 @@ void Background::Draw()
 	
     ///*Back
     back->MakeActive();
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     GFXTexCoord2f(0.998F, 0.002F);
     GFXVertex3f(size, size, -size);
 	
@@ -212,7 +212,7 @@ void Background::Draw()
 	
     //	/*down
     down->MakeActive();
-    GFXBegin(QUADS);
+    GFXBegin(GFXQUAD);
     GFXTexCoord2f(0.002F, 0.998F);
     GFXVertex3f(-size, -size, size);
 	

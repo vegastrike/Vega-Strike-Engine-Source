@@ -5,6 +5,55 @@
 #include "universe.h"
 #include "star_system.h"
 #include "cmd/unit.h"
+#include "cmd/iterator.h"
+#include "cmd/collection.h"
+void LocalToRadar (const Vector & pos, float &s, float &t) {
+  s = pos.k+1;
+  t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
+  s = -pos.i/t;
+  t = pos.j/t;
+}
+
+GFXColor relationToColor (float relation) {
+  return 
+    (relation>=0)?
+    GFXColor (1-relation,1-relation,1,1)
+    :
+    GFXColor (1,relation+1,relation+1,1);
+}
+
+void Cockpit::DrawBlips (Unit * un) {
+  UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
+  Iterator * iter = drawlist->createIterator();
+  Unit * target;
+  Unit * makeBigger = un->Target();
+  float s,t;
+  float xsize,ysize,xcent,ycent;
+  Radar->GetSize (xsize,ysize);
+  Radar->GetPosition (xcent,ycent);
+  GFXDisable (TEXTURE0);
+  GFXDisable (LIGHTING);
+  GFXBegin(GFXPOINT);
+  while ((target = iter->current())!=NULL) {
+    if (target!=un) {
+      LocalToRadar (un->ToLocalCoordinates(target->Position()-un->Position()),s,t);
+      GFXColorf (relationToColor (_Universe->GetRelation(un->faction,target->faction)));
+      GFXVertex3f (xcent+xsize*s,ycent+ysize*t,0);
+      if (target==makeBigger) {
+	      GFXVertex3f (xcent+2./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
+	      GFXVertex3f (xcent-2./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
+	      GFXVertex3f (xcent+xsize*s,ycent+2./g_game.y_resolution+ysize*t,0);
+	      GFXVertex3f (xcent+xsize*s,ycent-2./g_game.y_resolution+ysize*t,0);
+      }
+    }
+    iter->advance();
+  }
+  GFXEnd();
+  GFXColor (1,1,1,1);
+  GFXEnable (TEXTURE0);
+  delete iter;
+}
+
 
 void Cockpit::Init (const char * file) {
   Delete();
@@ -27,29 +76,77 @@ void Cockpit::Delete () {
       Pit[i] = NULL;
     }
   }
+  if (Radar) {
+    delete Radar;
+    Radar = NULL;
+  }
+  if (VDU[0]) {
+    delete VDU[0];
+    VDU[0]=NULL;
+  }
+  if (VDU[1]) {
+    delete VDU[1];
+    VDU[1]=NULL;
+  }
+  if (Shield[0]) {
+    delete Shield[0];
+    Shield[0]=NULL;
+  }
+  if (Shield[1]) {
+    delete Shield[1];
+    Shield[1]=NULL;
+  }
   if (Crosshairs) {
     delete Crosshairs;
     Crosshairs = NULL;
   }
 }
 Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),Crosshairs(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
-  Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+  Radar=Crosshairs=VDU[0]=VDU[1]=Shield[0]=Shield[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   Init (file);
 }
 void Cockpit::Draw() {
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
   GFXBlendMode (ONE,ONE);
-  if (Crosshairs&&view==CP_FRONT)//only draw crosshairs for front view
+  Unit * un;
+  if (view==CP_FRONT &&Crosshairs)
     Crosshairs->Draw();
+  RestoreViewPort();
   GFXBlendMode (ONE,ZERO);
   GFXAlphaTest (GREATER,.1);
-  RestoreViewPort();
-  if (view<CP_CHASE)
+  if (view<CP_CHASE) {
     if (Pit[view]) 
       Pit[view]->Draw();
-  GFXHudMode (false);
+  }
   GFXAlphaTest (ALWAYS,0);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  if ((un = parent.GetUnit())) {
+    if (view==CP_FRONT) {//only draw crosshairs for front view
+      if (VDU[0]) {
+	VDU[0]->Draw();
+	//process VDU 0:targetting VDU
+      }
+      if (VDU[1]) {
+      VDU[1]->Draw();
+      //process VDU, damage VDU, targetting VDU
+      }
+      if (Radar) {
+	Radar->Draw();
+	DrawBlips(un);
+      }
+      if (Shield[0]) {
+      Shield[0]->Draw();
+      //show shield status
+      }
+      if (Shield[1]) {
+	Shield[1]->Draw();
+	//show fuel status
+      }
+    }
+  }
+  GFXHudMode (false);
+
 }
 Cockpit::~Cockpit () {
   Delete();

@@ -125,7 +125,7 @@ void TextPlane::Draw()
 
 	GFXEnable(TEXTURE0);
 	/*
-	GFXBegin(QUADS);
+	GFXBegin(GFXQUAD);
 	GFXColor4f(1.0, 1.0, 1.0, 1.0);
 	GFXTexCoord2f(0.0, 0.0);
 	GFXVertex3f(-3, -3, 0.0);
@@ -138,7 +138,7 @@ void TextPlane::Draw()
 	GFXEnd();
 	*/
 
-	GFXBegin(QUADS);
+	GFXBegin(GFXQUAD);
 	while(*text_it != '\0' && row<myDims.j) {
 	  if(*text_it>=32 && *text_it<=127) {//always true
 			GlyphPosition g = myGlyphPos[*text_it-32];

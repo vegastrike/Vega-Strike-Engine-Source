@@ -41,10 +41,10 @@ void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &mater
 
 }
 
-void GFXModifyMaterial (unsigned int number, const GFXMaterial &material) {
+void /*GFXDRVAPI*/ GFXModifyMaterial (const unsigned int number, const GFXMaterial &material) {
   materialinfo [number]=material;
 }
-GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material)
+GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material)
 {
   if (number<0||number>=materialinfo.size())
     return GFXFALSE;
@@ -52,7 +52,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material)
   return GFXTRUE;
 }
 
-void /*GFXDRVAPI*/ GFXSelectMaterial(unsigned int number)
+void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number)
 {
   if (number!=selectedmaterial){
 	float matvect[4];
