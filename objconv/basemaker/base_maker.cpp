@@ -559,6 +559,31 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 		};
+		class Merchant : public Link {
+		public:
+			virtual ~Merchant () {}
+			explicit Merchant (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+		};
+		class Mercenary : public Link {
+		public:
+			virtual ~Mercenary () {}
+			explicit Mercenary (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+		};
+		class Upgrades : public Link {
+		public:
+			virtual ~Upgrades () {}
+			explicit Upgrades (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+		};
+
 		class Weapon : public Link {
 		public:
 			virtual ~Weapon () {}
@@ -758,16 +783,32 @@ void Base::Room::Talk::EndXML (FILE *fp) {
 
 void Base::Room::Bar::EndXML (FILE *fp) {
 	Indent(fp);fprintf(fp,"import bar_lib\n");
-	Indent(fp);fprintf(fp,"bar = bar_lib.MakeBar (room,time_of_day)\n");
+	Indent(fp);fprintf(fp,"bar = bar_lib.MakeBar (room%d,time_of_day)\n",parentindex);
 	Indent(fp);
 	fprintf(fp,"Base.Link (");
 	Link::EndXML(fp);
 	fprintf(fp,", bar)\n");
 }
+void Base::Room::Merchant::EndXML (FILE *fp) {
+	Indent(fp);fprintf(fp,"import merchant_guild\n");
+	Indent(fp);fprintf(fp,"merchant = merchant_guild.MakeMerchantGuild (room%d,time_of_day)\n",parentindex);
+	Indent(fp);
+	fprintf(fp,"Base.Link (");
+	Link::EndXML(fp);
+	fprintf(fp,", merchant)\n");
+}
+void Base::Room::Mercenary::EndXML (FILE *fp) {
+	Indent(fp);fprintf(fp,"import mercenary_guild\n");
+	Indent(fp);fprintf(fp,"merchant = mercenary_guild.MakeMercenaryGuild (room%d,time_of_day)\n",parentindex);
+	Indent(fp);
+	fprintf(fp,"Base.Link (");
+	Link::EndXML(fp);
+	fprintf(fp,", merchant)\n");
+}
 
 void Base::Room::Weapon::EndXML (FILE *fp) {
 	Indent(fp);fprintf(fp,"import weapons_lib\n");
-	Indent(fp);fprintf(fp,"weap = weapons_lib.MakeWeapon (room,time_of_day)\n");
+	Indent(fp);fprintf(fp,"weap = weapons_lib.MakeWeapon (room%d,time_of_day)\n",parentindex);
 	Indent(fp);
     
 	fprintf(fp,"Base.Link (");
@@ -1345,6 +1386,12 @@ bool LinkStage2(std::string input, unsigned int inputroomindex, void *dat1, void
 	} else if (input=="bar") {
 		links->push_back(new Base::Room::Bar(inputroomindex,"bar","bar"));
 		ret=true;
+	} else if (input=="merchant") {
+		links->push_back(new Base::Room::Merchant(inputroomindex,"merchant","merchant"));
+		ret=true;
+	} else if (input=="mercenary") {
+		links->push_back(new Base::Room::Mercenary(inputroomindex,"mercenary","mercenary"));
+		ret=true;
 	} else if (input=="weapon") {
 		links->push_back(new Base::Room::Weapon(inputroomindex,"weapon_room","weapon"));
 		ret=true;
@@ -1378,7 +1425,7 @@ bool LinkStage2(std::string input, unsigned int inputroomindex, void *dat1, void
 }
 
 bool LinkStage1(std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x, float y) {
-	Input("What link type [comp,link,launch,bar,weapon]? ",&LinkStage2, false, inputroomindex,dat1, strdup(input.c_str()), NULL, x, y);
+	Input("What link type [comp,link,launch,bar,weapon,mercenary,merchant]? ",&LinkStage2, false, inputroomindex,dat1, strdup(input.c_str()), NULL, x, y);
 	return false;
 }
 
