@@ -33,12 +33,12 @@ NetworkCommunication::NetworkCommunication()
 #endif
 }
 
-void	NetworkCommunication::AddToSession( Client * clt)
+void	NetworkCommunication::AddToSession( ClientPtr clt)
 {
 	this->commClients.push_back( clt);
 }
 
-void	NetworkCommunication::RemoveFromSession( Client * clt)
+void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 {
 	this->commClients.remove( clt);
 }

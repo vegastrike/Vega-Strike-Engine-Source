@@ -2,6 +2,7 @@
 #define __NETWORKCOMM_H
 
 #include "client.h"
+#include "clientptr.h"
 #include <list>
 #include <config.h> // for NETCOMM_NOSOUND
 
@@ -18,7 +19,7 @@ class NetworkCommunication
 {
 	private:
 		// List of clients we are communicating with
-		list<Client *>	commClients;
+		list<ClientPtr>	commClients;
 		// The current communication frequency
 		float	freq;
 #ifndef NETCOMM_NOWEBCAM
@@ -41,8 +42,8 @@ class NetworkCommunication
 		bool	WebcamEnabled();
 		bool	WebcamTime();
 
-		void	AddToSession( Client * clt);
-		void	RemoveFromSession( Client * clt);
+		void	AddToSession( ClientPtr clt);
+		void	RemoveFromSession( ClientPtr clt);
 };
 
 #endif

@@ -1048,12 +1048,12 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_STARTNETCOMM :
 #ifdef NETCOMM
 			{
-				Client * clt;
+				ClientPtr clt;
 				// Check this is not us
 				if( packet_serial != this->serial)
 				{
 					// Add the client to netcomm list in NetComm ?
-					clt = Clients[packet_serial];
+					clt = Clients.get(packet_serial);
 					NetComm->AddToSession( clt);
 				}
 			}
@@ -1062,12 +1062,12 @@ int NetClient::recvMsg( Packet* outpacket )
 			case CMD_STOPNETCOMM :
 #ifdef NETCOMM
 			{
-				Client * clt;
+				ClientPtr clt;
 				// Check this is not us
 				if( packet_serial != this->serial)
 				{
 					// Remove the client to netcomm list in NetComm
-					clt = Clients[packet_serial];
+					clt = Clients.get(packet_serial);
 					NetComm->RemoveFromSession( clt);
 				}
 			}

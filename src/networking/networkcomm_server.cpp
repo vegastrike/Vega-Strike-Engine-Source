@@ -4,11 +4,11 @@ NetworkCommunication::NetworkCommunication()
 {
 }
 
-void	NetworkCommunication::AddToSession( Client * clt)
+void	NetworkCommunication::AddToSession( ClientPtr clt)
 {
 }
 
-void	NetworkCommunication::RemoveFromSession( Client * clt)
+void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 {
 }
 

@@ -78,7 +78,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			fclose( fp);
 
 			// JpegFromBmp should allocate the needed buffer;
-			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
+			//ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
 		}
 
 		return S_OK;
@@ -321,7 +321,7 @@ int		WebcamSupport::Init()
 	AM_MEDIA_TYPE mt;
 	ZeroMemory( &mt, sizeof( AM_MEDIA_TYPE ) );
 	mt.majortype = MEDIATYPE_Video;
-	mt.subtype = MEDIASUBTYPE_RGB24;
+	mt.subtype = MEDIASUBTYPE_IJPG;
 	hr = pSampleGrabber->SetMediaType( &mt );
 	if( FAILED( hr ) )
 		DoError( hr, "SetMediaType failed");
