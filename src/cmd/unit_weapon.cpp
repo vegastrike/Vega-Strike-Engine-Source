@@ -287,8 +287,8 @@ void Unit::TargetTurret (Unit * targ) {
 	if (!SubUnits.empty()) {
 		un_iter iter = getSubUnits();
 		Unit * su;
-		Vector localcoord;
-                if (InRange (targ,localcoord)) {
+		bool inrange = (targ!=NULL)?InRange(targ):true;
+                if (inrange) {
                 while ((su=iter.current())) {
 			su->Target (targ);
 			su->TargetTurret(targ);

@@ -74,7 +74,7 @@ protected:
  * that target's center
  */
 class FaceTarget : public ChangeHeading {
-  float finish;
+  bool finish;
 public:
   FaceTarget (bool fini=false, int accuracy =3);
   virtual void Execute ();

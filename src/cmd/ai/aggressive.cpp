@@ -194,9 +194,8 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
 	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
-	    Vector vec;
 	    CommunicationMessage c(parent,leader,NULL,0);
-	    if (parent->InRange (targ,vec)) {
+	    if (parent->InRange (targ)) {
 	      parent->Target (targ);
 	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	    }else {
@@ -252,9 +251,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    Unit * th=NULL;
 	    if ((th=leader->Threat())) {
 	      //fprintf (stderr,"he wnats to help out and he has a threat\n");
-	      Vector vec;
+
 	      CommunicationMessage c(parent,leader,NULL,0);
-	      if (parent->InRange(th,vec)) {
+	      if (parent->InRange(th)) {
 		parent->Target(th);
 		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	      }else {
@@ -269,8 +268,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      CommunicationMessage c(parent,leader,NULL,0);
 	      //fprintf (stderr,"he wnats to help out against threat %d",th);
 	      if (th) {
-		Vector vec;
-		if (parent->InRange (th,vec)) {
+		if (parent->InRange (th)) {
 		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 		  parent->Target (th);
 		}else {

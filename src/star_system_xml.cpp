@@ -780,6 +780,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
 	  if (elem==UNIT) {
 	    un->SetTurretAI ();
+	    un->EnqueueAI(new Orders::FireAt (.2,15));
 	  }
 	  un->SetOwner (getTopLevelOwner());//cheating so nothing collides at top lev
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
@@ -800,7 +801,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	  b->SetTurretAI ();
-
+	    b->EnqueueAI(new Orders::FireAt (.2,15));
 	AddUnit (b);
 	  while (!dest.empty()) {
 	    b->AddDestination (dest.back());
@@ -830,7 +831,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
 	    xml->moons.back()->SetOwner (getTopLevelOwner());
 	    if (elem==UNIT) {
+
 	      xml->moons.back()->SetTurretAI ();
+	      xml->moons.back()->EnqueueAI(new Orders::FireAt (.2,15));
 	    }
 
       }

@@ -532,13 +532,26 @@ public:
   ///explodes then deletes
   void Destroy();
   const LineCollide &GetCollideInfo () {return CollideInfo;}
-  bool InRange (Unit *target, Vector &localcoord, bool cone=true) const{
-    QVector delta( target->Position()-Position());
-    localcoord =ToLocalCoordinates(Vector (delta.i,delta.j,delta.k));
-    float mm= localcoord.Magnitude();
-    if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||((localcoord.k/mm)<computer.radar.maxcone&&cone)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
-		
-		if (target->rSize()<capship_size||this==target) 
+  Vector LocalCoordinates (Unit * un) const {
+    return ToLocalCoordinates ((un->Position()-Position()).Cast());
+  }
+  bool InRange (Unit *target, bool cone=true, bool cap=true) const{
+    double mm;
+    return InRange( target,mm,cone,cap);
+  }
+  bool InRange (Unit *target, double & mm, bool cone, bool cap) const{
+
+    if (cone&&computer.radar.maxcone>-.99) {
+	QVector delta( target->Position()-Position());
+	mm = delta.Magnitude();
+	if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/mm)<computer.radar.maxcone&&cone) {
+	  return false;
+	}
+    }else {
+      mm = (target->Position()-Position()).Magnitude();
+    }
+    if (this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {//owner==target?!
+		if (target->rSize()<capship_size||(!cap)||this==target) 
 			return false;
     }
     return true;

@@ -384,14 +384,15 @@ void Cockpit::DrawBlips (Unit * un) {
   GFXBegin(GFXPOINT);
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
-      Vector localcoord;
-      if (!un->InRange (target,localcoord,makeBigger==target)) {
+      double dist;
+      if (!un->InRange (target,dist,makeBigger==target,true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
 	iter.advance();	
 	continue;
       }
+      Vector localcoord (un->LocalCoordinates(target));
       LocalToRadar (localcoord,s,t);
       GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
 
@@ -438,16 +439,16 @@ void Cockpit::DrawEliteBlips (Unit * un) {
   }
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
-      Vector localcoord;
+      double mm;
 
-      if (!un->InRange (target,localcoord,(makeBigger==target))) {
+      if (!un->InRange (target,mm,(makeBigger==target),true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
 	iter.advance();	
 	continue;
       }
-
+      Vector localcoord (un->LocalCoordinates(target));
 
 	LocalToRadar (localcoord,s,t);
 	LocalToEliteRadar(localcoord,es,et,eh);

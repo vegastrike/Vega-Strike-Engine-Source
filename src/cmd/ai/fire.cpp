@@ -24,24 +24,45 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     }
   }
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
-  Unit * un ;
+  Unit * un =NULL;
   float relation=1;
   float range=0;
   float worstrelation=0;
+  un_iter subun = parent->getSubUnits();
+  Unit * su=NULL;
+  double dist;
   while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     relation = GetEffectiveRelationship (un);
-    Vector t;
-    bool tmp = parent->InRange (un,t);
-    if (tmp&&((relation<worstrelation||(relation==worstrelation&&t.Dot(t)<range)))) {
+    bool tmp = parent->InRange (un,dist,false,false);
+    if (tmp&&((relation<worstrelation||(relation==worstrelation&&dist<range)))) {
       worstrelation = relation;
-      range = t.Dot(t);
+      range = dist;
       parent->Target (un);
+      su = *subun;
+      if (su) {
+	//	while (su->InRange (un,t,false,false)) {
+	  su->Target (un);
+	  su->TargetTurret(un);
+	  ++subun;
+	  //	  if (!(su=*subun))
+	  //    break;
+	  //}
+      }
     }
     iter.advance();
   }
   if (worstrelation>0) {
     parent->Target (NULL);
+  }else {
+    for (;(su=*subun)!=NULL;++subun) {
+      un=parent->Target();
+      su->Target (un);
+      su->TargetTurret(un);
+      if (un) {
+	fprintf (stderr,"turret %s targetting %s",parent->name.c_str(),un->name.c_str());
+      }
+    }
   }
 }
 /* Proper choosing of targets
@@ -156,8 +177,10 @@ void FireAt::Execute () {
       }
     }
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
-      if (!istargetjumpableplanet)
-	shouldfire |= ShouldFire (targ,missilelock);
+      if (parent->GetNumMounts()>0) {
+	if (!istargetjumpableplanet)
+	  shouldfire |= ShouldFire (targ,missilelock);
+      }
     }else {
       ChooseTargets(1,true);
     }
@@ -179,6 +202,8 @@ void FireAt::Execute () {
   } else {
     ChooseTargets(1,false);
   }
-  FireWeapons (shouldfire,missilelock);
+  if (parent->GetNumMounts ()>0) {
+    FireWeapons (shouldfire,missilelock);
+  }
 }
 

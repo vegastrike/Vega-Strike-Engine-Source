@@ -31,7 +31,7 @@
 #include "gfx/sprite.h"
 #include "lin_time.h"
 
-
+#include "ai/turretai.h"
 #include "ai/navigation.h"
 #include "ai/fire.h"
 #include "ai/script.h"
@@ -931,13 +931,28 @@ void Unit::SwapInHalos() {
 }
 #endif
 void Unit::SetTurretAI () {
-  UnitCollection::UnitIterator iter = getSubUnits();
-  Unit * un;
-  while (NULL!=(un=iter.current())) {
-    un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-    un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
-    un->SetTurretAI ();
-    iter.advance();
+  static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
+  if (talkinturrets) {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * un;
+    while (NULL!=(un=iter.current())) {
+      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      un->SetTurretAI ();
+      iter.advance();
+    }
+  }else {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * un;
+    while (NULL!=(un=iter.current())) {
+      if (un->aistate) {
+	delete un->aistate;
+      }
+      un->aistate = (new Orders::TurretAI());
+      un->aistate->SetParent (un);
+      un->SetTurretAI ();
+      iter.advance();
+    }    
   }
 }
 void Unit::DisableTurretAI () {
@@ -948,7 +963,7 @@ void Unit::DisableTurretAI () {
       delete un->aistate;
     }
     un->aistate = new Order; //get 'er ready for enqueueing
-    un->aistate->SetParent (this);
+    un->aistate->SetParent (un);
     un->DisableTurretAI ();
     iter.advance();
   }

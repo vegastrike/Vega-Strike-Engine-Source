@@ -202,11 +202,10 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   if (a>RAND_MAX*(1-targprob)) {
     target = parent->Target();
   }
-  Vector localcoord;
-  if (target==NULL?true:(!parent->InRange (target,localcoord))) {
+  if (target==NULL?true:(!parent->InRange (target))) {
     for (un_iter ui=_Universe->activeStarSystem()->getUnitList().createIterator();
 	 (*ui)!=NULL; ++ui) {
-      if (parent->InRange ((*ui),localcoord)) {
+      if (parent->InRange ((*ui))) {
 	target = *ui;
       }
     }

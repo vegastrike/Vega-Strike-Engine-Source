@@ -691,6 +691,16 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
         _Universe->AdjustRelation(un->faction,i,FRIEND_FACTOR*relation,1);
     }
   }
+  olist_t * killlist = &cp->savegame->getMissionData (string("kills"));
+  while (killlist->size()<=_Universe->GetNumFactions()) {
+    killlist->push_back (new varInst (VI_IN_OBJECT));
+    killlist->back()->type=VAR_FLOAT;
+    killlist->back()->float_val=0;
+  }
+  if (killlist->size()>faction) {
+    (*killlist)[faction]->float_val++;
+  }
+  killlist->back()->float_val++;
 }
 
 

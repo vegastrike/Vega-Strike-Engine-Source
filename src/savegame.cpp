@@ -166,10 +166,10 @@ std::string scanInString (FILE * fp) {
     }
   }
   while (!isspace (c[0])) {
+    str+=c;
     if (1!=fscanf (fp,"%c",&c[0])) {
       break;
     }
-    str+=c;
   }
   return str;
 }

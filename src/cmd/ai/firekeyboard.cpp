@@ -388,7 +388,8 @@ void FireKeyboard::ChooseNearTargets(bool turret) {
   float range=FLT_MAX;
   while ((un = iter.current())) {
     Vector t;
-    bool tmp = parent->InRange (un,t);
+    bool tmp = parent->InRange (un);
+    t = parent->LocalCoordinates (un);
     if (tmp&&t.Dot(t)<range&&t.k>0&&_Universe->GetRelation(parent->faction,un->faction)<0) {
       range = t.Dot(t);
       if (turret)
@@ -425,8 +426,7 @@ void FireKeyboard::PickTargets(bool Turrets){
   Unit *found_unit=NULL;
 
   while(other){
-    Vector t;
-    if(other!=parent && parent->InRange(other,t)){
+    if(other!=parent && parent->InRange(other)){
       Vector p,q,r;
       QVector vectothem=QVector(other->Position() - parent->Position()).Normalize();
       parent->GetOrientation(p,q,r);
@@ -490,7 +490,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
       found=true;
       continue;
     }
-    if (!parent->InRange(un,t)) {
+    if (!parent->InRange(un)) {
       iter.advance();
       continue;
     }
@@ -526,7 +526,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
 	iter.advance();
 	continue;
       }
-      if (!parent->InRange(un,t)) {
+      if (!parent->InRange(un)) {
 	iter.advance();
 	continue;
       }
