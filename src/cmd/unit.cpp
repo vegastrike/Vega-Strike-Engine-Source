@@ -559,6 +559,7 @@ bool Unit::queryFrustum(float frustum [6][4]) {
 
 float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix() {
+  /*
   //FIXME
   Matrix tmatrix;
   Vector camp,camq,camr;
@@ -570,7 +571,7 @@ void Unit::UpdateHudMatrix() {
 	//	GFXLoadMatrix(MODEL,tmatrix);
   //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_Universe->AccessCamera()->GetPosition()+1.23*camr);  
   VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_Universe->AccessCamera()->GetPosition());
-
+  */
 }
 
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)

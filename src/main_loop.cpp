@@ -205,7 +205,7 @@ void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
 
-  cockpit = new Cockpit ("hornet-cockpit.cpt");
+
   /******
   locSel = new LocationSelect(Vector (0,-2,2),
 			      Vector(1,0,-1), 
@@ -257,6 +257,7 @@ void createObjects() {
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
   fighters[0]->EnqueueAI(new FireKeyboard ());
+  cockpit = new Cockpit ("hornet-cockpit.cpt", fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
 }
