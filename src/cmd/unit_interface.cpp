@@ -27,6 +27,7 @@ extern Music *muzak;
 extern int GetModeFromName (const char *);
 
 extern unsigned int getSaveStringLength (int whichcp, string key);
+extern unsigned int eraseSaveString (int whichcp, string key, unsigned int num);
 extern std::string getSaveString (int whichcp, string key, unsigned int num);
 static const char *miss_script="mission_scripts";
 static const char *miss_name="mission_names";
@@ -488,7 +489,8 @@ void UpgradingInfo::SetupCargoList () {
 			  } else {
 				  printstr=beautify((*CurrentList)[i].cargo.content);
 			  }
-			  printstr+="("+tostring((*CurrentList)[i].cargo.quantity)+")";
+			  if ((*CurrentList)[i].cargo.quantity>1)
+				  printstr+="("+tostring((*CurrentList)[i].cargo.quantity)+")";
 			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.content).c_str() ,printstr.c_str(),NULL,(*CurrentList)[i].color);
 			  addedsomething=true;
 	    }
@@ -600,18 +602,38 @@ void UpgradeCompInterface(Unit *un,Unit * base, vector <UpgradingInfo::BaseMode>
   
 }
 
-void CargoToMission (const char * item,TextArea * ta) {
-  char * item1 = strdup (item);
-  int tmp;
-  sscanf (item,"%d %s",&tmp,item1);
-  Mission temp (item1,false);
-  free (item1);
-  temp.initMission(false);
-  ta->ChangeTextItem ("name",temp.getVariable ("mission_name","").c_str());
-  ta->ChangeTextItem ("price","");
-  ta->ChangeTextItem ("mass","");
-  ta->ChangeTextItem ("volume","");
-  ta->ChangeTextItem ("description",temp.getVariable("description","").c_str());  
+void CargoToMission (const char * item,TextArea * ta, Unit *buyer) {
+	char * item1 = strdup (item);
+	int tmp;
+	sscanf (item,"%d %s",&tmp,item1);
+	static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
+	if (!miss_from_cargolist) {
+		std::string mydesc, myname;
+		int playernum=UnitUtil::isPlayerStarship(buyer);
+		int len=getSaveStringLength(playernum,miss_name);
+		assert(len==getSaveStringLength(playernum,miss_desc));
+		for (unsigned int i=0;i<len;i++) {
+			if (getSaveString(playernum,miss_name,i)==item1) {
+				mydesc=getSaveString(playernum,miss_desc,i);
+				myname=beautify(getSaveString(playernum,miss_name,i));
+				break;
+			}
+		}
+		ta->ChangeTextItem ("name",myname.c_str());
+		ta->ChangeTextItem ("price","");
+		ta->ChangeTextItem ("mass","");
+		ta->ChangeTextItem ("volume","");
+		ta->ChangeTextItem ("description",mydesc.c_str());  
+	} else {
+		Mission temp (item1,false);
+		free (item1);
+		temp.initMission(false);
+		ta->ChangeTextItem ("name",temp.getVariable ("mission_name","").c_str());
+		ta->ChangeTextItem ("price","");
+		ta->ChangeTextItem ("mass","");
+		ta->ChangeTextItem ("volume","");
+		ta->ChangeTextItem ("description",temp.getVariable("description","").c_str());  
+	}
 }
 extern void RespawnNow (Cockpit * cp);
 bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
@@ -721,7 +743,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     }
     break;
   case MISSIONMODE:
-    CargoToMission (item,CargoInfo);
+    CargoToMission (item,CargoInfo,this->buyer.GetUnit());
     break;
   }
   return false;
@@ -1005,10 +1027,8 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
     if ((un=this->base.GetUnit())) {
       unsigned int index;
-      if (NULL!=un->GetCargo(input_buffer,index)) {
 	static int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
 	if (active_missions.size()<max_missions) {
-	  if (1==un->RemoveCargo(index,1,true)) {
 	    std::string myscript;
 	    title= ((string("Accepted Mission ")+input_buffer).c_str());
 	    static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
@@ -1019,23 +1039,26 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 		for (unsigned int i=0;i<len;i++) {
 		  if (getSaveString(playernum,miss_name,i)==input_buffer) {
 			myscript=getSaveString(playernum,miss_script,i);
+			eraseSaveString(playernum,miss_script,i);
+			eraseSaveString(playernum,miss_name,i);
+			eraseSaveString(playernum,miss_desc,i);
 			break;
 		  }
 		}
 		LoadMission ("",myscript,false);
-	    } else {
-		LoadMission (input_buffer,false);
+	    } else if (NULL!=un->GetCargo(input_buffer,index)) {
+		if (1==un->RemoveCargo(index,1,true)) {
+		  LoadMission (input_buffer,false);
+		}
+	    }else {
+		title=("Mission BBS::Error Accepting Mission");
 	    }
 	    SetMode (mode,submode);
 	    SelectLastSelected();
 
-	  }else {
-	    title=("Mission BBS::Error Accepting Mission");
-	  }
 	}else {
 	 title= ("Mission BBS::Too Many Missions In Progress");
 	}
-      }
     }
     break;
 
@@ -1260,13 +1283,19 @@ vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
   return TempCargo;
 }
 
-vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *un) {
+vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
   if (miss_from_cargolist) {
-    return FilterCargo (un,"missions",true,true);
+    return FilterCargo (base,"missions",true,true);
   }
   TempCargo.clear();
+  Unit *un=_Universe->AccessCockpit()->GetParent();
   int playernum=UnitUtil::isPlayerStarship(un);
+  if (playernum<0) {
+	  fprintf(stderr,"docked ship not a player");
+	  TempCargo.clear();
+	  return TempCargo;
+  }
   int len=getSaveStringLength(playernum,miss_script);
   assert(len==getSaveStringLength(playernum,miss_name)&&len==getSaveStringLength(playernum,miss_desc));
   for (unsigned int i=0;i<len;i++) {
