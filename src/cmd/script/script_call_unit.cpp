@@ -1273,7 +1273,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      my_unit->Target(NULL);
    }
 
-   msgcenter->add("game","all",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)));
+   printf ("%s",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)).c_str());
    my_unit= units[0];
    fg->fg->leader.SetUnit(my_unit);
    delete [] units;

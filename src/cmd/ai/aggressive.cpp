@@ -9,6 +9,7 @@
 #include "cmd/unit.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
+#include "flybywire.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
@@ -339,10 +340,16 @@ void AggressiveAI::Execute () {
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
-     ProcessLogic(logic);
-     curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+    if (parent->Target()) {
+      ProcessLogic(logic);
+      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+    }else {
+      Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
+      ord->SetParent(parent);
+      EnqueueOrder (ord);
+    }
   } else {
-    if ((--logic.curtime)==0) {
+    if ((--logic.curtime)==0&&parent->Target()) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);

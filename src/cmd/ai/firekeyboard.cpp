@@ -10,6 +10,7 @@
 #include "audiolib.h"
 #include "config_xml.h"
 #include "cmd/images.h"
+#include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->whichjoystick = whichjoystick;
@@ -559,6 +560,13 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
 
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
     if (vectorOfKeyboardInput[playa].req) {
+      if (targ->isUnit()==PLANETPTR) {
+	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+	if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	  return;
+	}
+      }
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
       CommunicationMessage c(parent,targ,NULL,sex);
       c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);

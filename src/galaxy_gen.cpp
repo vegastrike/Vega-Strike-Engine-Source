@@ -832,23 +832,51 @@ void readnames (vector <string> &entity, const char * filename) {
 
 }
 
+
+
+static int pushDown (int val) {
+  while (grand()>(1/val)) {
+    val--;
+  }
+  return val;
+}
+static int pushDownTowardsMean (int mean, int val) {
+  int delta = mean -1;
+  return delta + pushDown (val-delta);
+}
+static int pushTowardsMean (int mean, int val) {
+  if (val < mean) {
+    return -pushDownTowardsMean (-mean,-val);
+  }
+  return pushDownTowardsMean (mean,val);
+}
+
+
 void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string backgroundlist, bool force) {
   ResetGlobalVariables();
   static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","1000"));
   sunradius *=radiusscale;
   systemname=system;
   static float compactness_scale = XMLSupport::parse_float (vs_config->getVariable("galaxy","CompactnessScale","1.5"));
+  //  static int meansuns = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanSuns","1.5"));
+  static int meangas = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanGasGiants","1"));
+  static int meanplanets = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanPlanets","5"));
+  static int meanmoons = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanMoons","2"));
+  static int meannaturalphenomena = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanNaturalPhenomena","0"));
+  static int meanbases = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanStarBases","2"));
   compactness = compac*compactness_scale;
   if (seed)
     seedrand (seed);
   else
     seedrand (time(NULL));
+  fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",numstars,numgasgiants,numrockyplanets,nummoons,numnaturalphenomena,numstarbases); 
   nument[0]=numstars;
-  nument[1]=numgasgiants;
-  nument[2]=numrockyplanets;
-  nument[3]=nummoons;
-  numun[0]=numnaturalphenomena;
-  numun[1]=numstarbases;
+  nument[1]=pushTowardsMean(meangas,numgasgiants);
+  nument[2]=pushTowardsMean(meanplanets,numrockyplanets);
+  nument[3]=pushTowardsMean(meanmoons,nummoons);
+  numun[0]=pushTowardsMean(meannaturalphenomena,numnaturalphenomena);
+  numun[1]=pushTowardsMean(meanbases,numstarbases);
+  fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
   readColorGrads (gradtex,(datapath+starlist).c_str());
   readentity (entities[1],(datapath+planetlist).c_str());
@@ -856,6 +884,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   readentity (entities[3],(datapath+moonlist).c_str());
   readentity (units[1],(datapath+smallunitlist).c_str());
   readentity (background,(datapath+backgroundlist).c_str());
+
   if (background.empty()) {
     background.push_back (backgroundlist);
   }

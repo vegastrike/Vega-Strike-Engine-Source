@@ -50,6 +50,7 @@ class StarSystem {
     int numstars;
     bool fade;
     float starsp;
+    float scale;
   } *xml;
   std::vector <Terrain *> terrains;
   std::vector <ContinuousTerrain *>contterrains;

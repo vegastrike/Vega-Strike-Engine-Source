@@ -109,7 +109,8 @@ namespace StarXML {
     DIFFICULTY,
     REFLECTNOLIGHT,
     ENHANCEMENT,
-    SCALEATMOS
+    SCALEATMOS,
+    SCALESYSTEM
   };
 
   const EnumMap::Pair element_names[] = {
@@ -172,11 +173,12 @@ namespace StarXML {
     EnumMap::Pair ("ScaleX", SCALEX),
     EnumMap::Pair ("NumWraps", NUMWRAPS),
     EnumMap::Pair ("Difficulty", DIFFICULTY),
-    EnumMap::Pair ("ScaleAtmosphereHeight", SCALEATMOS)
+    EnumMap::Pair ("ScaleAtmosphereHeight", SCALEATMOS),
+    EnumMap::Pair ("ScaleSystem",SCALESYSTEM)
   };
 
   const EnumMap element_map(element_names, 18);
-  const EnumMap attribute_map(attribute_names, 40);
+  const EnumMap attribute_map(attribute_names, 41);
 }
 
 using XMLSupport::EnumMap;
@@ -279,6 +281,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   float scaleatmos=10;
   char * nebfile;
   int faction=0;
+  bool isdest=false;
   xml->cursun.k=0;	
   static float yearscale = XMLSupport::parse_float (vs_config->getVariable ("physics","YearScale","10"));
   static float dayscale = yearscale;//XMLSupport::parse_float (vs_config->getVariable ("physics","DayScale","10"));
@@ -316,6 +319,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     pos = QVector (0,0,0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case SCALESYSTEM:
+	xml->scale = parse_float ((*iter).value);
+	break;
       case REFLECTIVITY:
 	xml->reflectivity=parse_float ((*iter).value);
 	break;
@@ -435,13 +441,13 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	radius = parse_float ((*iter).value);
 	break;
       case X:
-	pos.i = parse_float ((*iter).value);
+	pos.i = parse_float ((*iter).value)*xml->scale;
 	break;
       case Y:
-	pos.j = parse_float ((*iter).value);
+	pos.j = parse_float ((*iter).value)*xml->scale;
 	break;
       case Z:
-	pos.k = parse_float ((*iter).value);
+	pos.k = parse_float ((*iter).value)*xml->scale;
 	break;
       case RI:
 	R.i=parse_float((*iter).value);
@@ -571,6 +577,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case DESTINATION:
 	dest=ParseDestinations((*iter).value);
+	isdest=true;
 	break;
       case ALPHA:
 	delete []alpha;
@@ -596,38 +603,39 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case EMALPHA:
 	ourmat.ea = parse_float((*iter).value);
+	break;
       case REFLECTNOLIGHT:
 	ourmat.sr=ourmat.sg=ourmat.sb=ourmat.dr=ourmat.dg=ourmat.db=
 	  ourmat.ar=ourmat.ag=ourmat.ab=0;
 	break;
       case RI:
-	R.i=parse_float((*iter).value);
+	R.i=parse_float((*iter).value)*xml->scale;
 	break;
       case RJ:
-	R.j=parse_float((*iter).value);
+	R.j=parse_float((*iter).value)*xml->scale;
 	break;
       case RK:
-	R.k=parse_float((*iter).value);
+	R.k=parse_float((*iter).value)*xml->scale;
 	break;
       case SI:
-	S.i=parse_float((*iter).value);
+	S.i=parse_float((*iter).value)*xml->scale;
 	break;
       case SJ:
-	S.j=parse_float((*iter).value);
+	S.j=parse_float((*iter).value)*xml->scale;
 	break;
       case SK:
-	S.k=parse_float((*iter).value);
+	S.k=parse_float((*iter).value)*xml->scale;
 	break;
       case X:
- 	xml->cursun.i=parse_float((*iter).value);
+ 	xml->cursun.i=parse_float((*iter).value)*xml->scale;
  	break;
 
       case Y:
- 	xml->cursun.j=parse_float((*iter).value);
+ 	xml->cursun.j=parse_float((*iter).value)*xml->scale;
  	break;
 
       case Z:
- 	xml->cursun.k=parse_float((*iter).value);
+ 	xml->cursun.k=parse_float((*iter).value)*xml->scale;
  	break;
 
       case RADIUS:
@@ -651,6 +659,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       }
 
+    }
+    if (isdest==false) {
+      radius*=xml->scale;
     }
     if (alpha[0]==0) {
       delete [] alpha;
@@ -708,33 +719,33 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	faction = _Universe->GetFaction ((*iter).value.c_str());
 	break;
       case RI:
-	R.i=parse_float((*iter).value);
+	R.i=parse_float((*iter).value)*xml->scale;
 	break;
       case RJ:
-	R.j=parse_float((*iter).value);
+	R.j=parse_float((*iter).value)*xml->scale;
 	break;
       case RK:
-	R.k=parse_float((*iter).value);
+	R.k=parse_float((*iter).value)*xml->scale;
 	break;
       case SI:
-	S.i=parse_float((*iter).value);
+	S.i=parse_float((*iter).value)*xml->scale;
 	break;
       case SJ:
-	S.j=parse_float((*iter).value);
+	S.j=parse_float((*iter).value)*xml->scale;
 	break;
       case SK:
-	S.k=parse_float((*iter).value);
+	S.k=parse_float((*iter).value)*xml->scale;
 	break;
       case X:
- 	xml->cursun.i=parse_float((*iter).value);
+ 	xml->cursun.i=parse_float((*iter).value)*xml->scale;
 
  	break;
       case Y:
- 	xml->cursun.j=parse_float((*iter).value);
+ 	xml->cursun.j=parse_float((*iter).value)*xml->scale;
 
  	break;
       case Z:
- 	xml->cursun.k=parse_float((*iter).value);
+ 	xml->cursun.k=parse_float((*iter).value)*xml->scale;
 
  	break;
 
@@ -892,6 +903,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   }
 
   xml = new StarXML;
+  xml->scale=1;
   xml->parentterrain=NULL;
   xml->ct=NULL;
   xml->systemcentroid=centroid;
