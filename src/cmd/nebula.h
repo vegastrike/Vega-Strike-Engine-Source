@@ -14,7 +14,9 @@ private:
 	void LoadXML(const char * filename);
 	void beginElem(const std::string&,const AttributeList&);
 public:
-	virtual void reactToCollision (Unit *un, const Vector & normal, float dist);
+	virtual enum clsptr isUnit() {return NEBULAPTR;}
+	virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
+  
 	Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg=NULL, int fg_snumber=0);
 	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 	void SetFogState();

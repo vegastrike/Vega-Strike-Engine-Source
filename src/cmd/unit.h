@@ -60,7 +60,8 @@ class csRapidCollider;
 enum clsptr {
 	UNITPTR,
 	PLANETPTR,
-	BUILDINGPTR
+	BUILDINGPTR,
+	NEBULAPTR
 };
 
 class VDU;

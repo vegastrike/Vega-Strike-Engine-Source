@@ -27,7 +27,7 @@
 #include "universe.h"
 #include "cmd/atmosphere.h"
 #include "hashtable.h"
-
+#include "cmd/nebula.h"
 
 extern Music *muzak;
 extern Vector mouseline;
@@ -339,6 +339,7 @@ void StarSystem::Draw() {
 #endif
 
   if (shouldfog) {
+
     GFXFogMode (FOG_EXP2);
     GFXFogDensity (.0005);
     GFXFogLimits (1,1000);
@@ -371,9 +372,11 @@ void StarSystem::Draw() {
   fflush (stderr);
 #endif
   Mesh::ProcessUndrawnMeshes(true);
-  
+  Nebula * neb;
+  if ((neb = _Universe->AccessCamera()->GetNebula())) {
+    neb->SetFogState();
+  }
 
-  GFXFogMode (FOG_OFF);
   Matrix ident;
 
   Identity(ident);
@@ -392,9 +395,11 @@ void StarSystem::Draw() {
   fprintf (stderr,"halo");
   fflush (stderr);
 #endif
+
   Halo::ProcessDrawQueue();
   if (shouldfog)
     GFXFogMode (FOG_EXP2);
+  
 #ifdef UPDATEDEBUG
   fprintf (stderr,"bem");
   fflush (stderr);
@@ -418,7 +423,7 @@ void StarSystem::Draw() {
 
   stars->Draw();
 
-  if (shouldfog)
+  if (_Universe->AccessCamera()->GetNebula()!=NULL||shouldfog)
     GFXFogMode (FOG_OFF);
 
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));

@@ -123,7 +123,8 @@ namespace UnitXML {
       JUMPENERGY,
       JUMPWAV,
       DOCKINTERNAL,
-      RAPID
+      RAPID,
+      USEBSP
     };
 
   const EnumMap::Pair element_names[] = {
@@ -227,11 +228,12 @@ namespace UnitXML {
     EnumMap::Pair ("JumpEnergy", JUMPENERGY),
     EnumMap::Pair ("JumpWav", JUMPWAV),
     EnumMap::Pair ("DockInternal", DOCKINTERNAL),
-    EnumMap::Pair ("RAPID", RAPID)
+    EnumMap::Pair ("RAPID", RAPID),
+    EnumMap::Pair ("BSP", USEBSP)
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 70);
+  const EnumMap attribute_map(attribute_names, 71);
 }
 
 using XMLSupport::EnumMap;
@@ -296,6 +298,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case RAPID:
 	xml->hasColTree=parse_bool ((*iter).value);
+	break;
+      case USEBSP:
+	xml->hasBSP=parse_bool ((*iter).value);
 	break;
       }
     }

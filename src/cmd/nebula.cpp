@@ -180,9 +180,8 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
 		vscdup();
 	vsresetdir();
 }
-
-void Nebula::reactToCollision(class Unit * un,class Vector const &,float) {
-	un->Setnebula(this);
+void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
+  smaller->Setnebula(this);
 }
 
 void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
