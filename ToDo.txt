@@ -1,34 +1,33 @@
 Goals for 0.4.2 release:
-* Bugfixes:
-** Upgrades::Repair on a milspec ship ruins your weapon loadout! FIX
-** Are missiles currently effective? (data side issue perhaps - or AI?)
-** Fog atmospheres->BFXM
-* Warp:
-** Rename warp to ... think of something cool
-** Warp energy use
-** Time Compression back for devels
-
-* Universe/system generation:
+* MUST TEST:
+** Upgrades, especially repair on milspec and known previous troublemakers
 ** Fix systems to have jump points only outside the "slow-zone"
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
+** Sparkles (particle system)
+
+* Warp:
+** Warp energy use
+** no weapons in warp
+** Time Compression back for devels
+
+*Jump
+** Shields drop when jumping
 
 * Resource management/organization:
 ** trim redundant thrust animation images
 
 * UI:
 ** Add cargo pics
-** Warp vs. Auto graphic
 
 * AI:
 ** Fix AI range trigger happiness
 ** Fix ITTS to use more iterations of Newton's method
 
-* Graphics:
-** fix ugly ass damage dots
 
 Scripting Goals:
 * Flightgroups
-** Flightgroups should have subsets of ships that spawn together
+** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
+** Flightgroups should have subsets of ships that spawn together (combined arms)
 
 * News
 ** Fix news to report stories depending on import (fleet lead by dodo=wrong)
@@ -38,6 +37,8 @@ Scripting Goals:
 	  not wrong, just a bad simulation :-) --Dan.a
 ** Get formatted date back.
 
+
+----------------------------------------------------------------------------
 
 Goals for 'Sometime over the rainbow'
 * File loading: 
