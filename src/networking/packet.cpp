@@ -2,7 +2,10 @@
 #include <config.h>
 #include <unistd.h>
 #include <math.h>
+
+#ifdef HAVE_ZLIB
 #include <zlib.h>
+#endif /* HAVE_ZLIB */
 
 #include "packet.h"
 #include "lin_time.h"
@@ -40,6 +43,7 @@ Packet::Packet()
     destaddr = NULL;
 }
 
+#ifdef HAVE_ZLIB
 bool Packet::packet_uncompress( PacketMem& outpacket, const unsigned char* src, size_t sz, Header& header )
 {
     unsigned char* dest;
@@ -86,6 +90,12 @@ bool Packet::packet_uncompress( PacketMem& outpacket, const unsigned char* src, 
         return true;
     }
 }
+#else /* HAVE_ZLIB */
+bool Packet::packet_uncompress( PacketMem& , const unsigned char* , size_t , Header& )
+{
+    return false;
+}
+#endif /* HAVE_ZLIB */
 
 Packet::Packet( const void* buffer, size_t sz )
 {
