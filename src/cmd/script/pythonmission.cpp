@@ -4,8 +4,10 @@
 #include <string>
 #include "pythonmission.h"
 #include "python/init.h"
+#ifndef USE_BOOST_129
 #include <boost/python/reference.hpp>
 #include <boost/python/callback.hpp>
+#endif
 PythonMissionBaseClass::PythonMissionBaseClass () {
 }
 void PythonMissionBaseClass::Destructor () {

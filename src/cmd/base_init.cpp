@@ -32,30 +32,30 @@ static boost::python::tuple GetRandomBarMessage () {
 	}
 	if (say.size()) {
 		int index=rand()%say.size();
-		return boost::python::tuple(say[index],sounds[index]);
+		return  VS_BOOST_MAKE_TUPLE_2(say[index],sounds[index]);
 	} else {
-		return boost::python::tuple("","");
+		return  VS_BOOST_MAKE_TUPLE_2("","");
 	}
 }
 
 PYTHON_BEGIN_MODULE(Base)
-	Base.def (&BaseUtil::Room,"Room");
-	Base.def (&BaseUtil::GetCurRoom,"GetCurRoom");
-	Base.def (&BaseUtil::GetNumRoom,"GetNumRoom");
-	Base.def (&BaseUtil::Comp,"Comp");
-	Base.def (&BaseUtil::CompPython,"CompPython");
-	Base.def (&BaseUtil::Launch,"Launch");
-	Base.def (&BaseUtil::LaunchPython,"LaunchPython");
-	Base.def (&BaseUtil::Link,"Link");
-	Base.def (&BaseUtil::LinkPython,"LinkPython");
-	Base.def (&BaseUtil::Python,"Python");
-	Base.def (&BaseUtil::EraseLink,"EraseLink");
-	Base.def (&BaseUtil::Ship,"Ship");
-	Base.def (&BaseUtil::Texture,"Texture");
-	Base.def (&BaseUtil::Message,"Message");
-	Base.def (&BaseUtil::EnqueueMessage,"EnqueueMessage");
-	Base.def (&BaseUtil::EraseObj,"EraseObj");
-	Base.def (&GetRandomBarMessage,"GetRandomBarMessage");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Room,"Room");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetCurRoom,"GetCurRoom");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetNumRoom,"GetNumRoom");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Comp,"Comp");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::CompPython,"CompPython");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Launch,"Launch");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::LaunchPython,"LaunchPython");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Link,"Link");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::LinkPython,"LinkPython");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Python,"Python");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseLink,"EraseLink");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Ship,"Ship");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Texture,"Texture");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessage,"EnqueueMessage");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseObj,"EraseObj");
+	PYTHON_DEFINE_GLOBAL(Base,&GetRandomBarMessage,"GetRandomBarMessage");
 PYTHON_END_MODULE(Base)
 
 void InitBase() {

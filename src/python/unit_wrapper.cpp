@@ -133,6 +133,7 @@ EXPORT_UTIL(getSystemFile,"")
 EXPORT_UTIL(getSystemName,"")
 EXPORT_UTIL(getUnitList,un_iter())
 EXPORT_UTIL(getUnit,Unit())
+#ifndef MSVCBITES
 EXPORT_UTIL(getNumUnits,0)
 EXPORT_FACTION(GetFactionName,"")
 EXPORT_FACTION(GetFactionIndex,-1)
@@ -187,6 +188,7 @@ EXPORT_UTIL(getPlayerX,Unit())
 EXPORT_UTIL(getCurrentPlayer,0)
 EXPORT_UTIL(getNumPlayers,1)
 EXPORT_UTIL(GetMasterPartList,Unit())
+#endif
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 #undef EXPORT_FACTION
@@ -236,7 +238,9 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 #define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) WRAPPED0(void,name,0)
 #define EXPORT_UTIL(name,aff) PYTHON_DEFINE_METHOD(Class,&UnitUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
+#ifndef MSVCBITES
 #include "python_unit_wrap.h"
+#endif
 #undef WRAPPED0
 #undef WRAPPED1
 #undef WRAPPED2
@@ -261,6 +265,7 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::Kill,"Kill");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::SetTarget,"SetTarget");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetTarget,"GetTarget");
+#ifndef MSVCBITES
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::SetVelocityReference,"SetVelocityReference");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetVelocityReference,"GetVelocityReference");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetOrientation,"GetOrientation");
@@ -275,6 +280,7 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetJumpStatus,"GetJumpStatus");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::ApplyDamage,"ApplyDamage");
+#endif
 PYTHON_END_CLASS(VS,UnitWrapper)
 
 PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
