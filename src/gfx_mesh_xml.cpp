@@ -11,7 +11,7 @@
 #endif
 #include "xml_support.h"
 #include "gfx_transform_vector.h"
-#include "gfx_bsp.h"
+
 #ifdef max
 #undef max
 #endif
@@ -1246,7 +1246,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
     xml->vertices[a].x -= x_center;
     xml->vertices[a].y -= y_center;
-    xml->vertices[a].z -= z_center;
+    xml->vertices[a].z -= z_center; //BSP generation requires the vertices NOT be centered!
  
   }
   minSizeX -= x_center;
@@ -1280,16 +1280,6 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     index+= xml->quadstrips[a].size();
   }
   */
-
-  string tmpname (filename);
-  tmpname += ".bsp";
-  FILE * fp = fopen (tmpname.c_str(),"r+b");
-  if (!fp) {
-    BuildBSPTree (tmpname.c_str());
-  }else {
-    fclose (fp);
-  }
-  bspTree = new BSPTree (tmpname.c_str());
   CreateLogos(x_center,y_center,z_center);
   // Calculate bounding sphere
   
@@ -1308,6 +1298,36 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   delete []poly_offsets;
   delete xml;
 }
+void Mesh::GetPolys (vector <bsp_polygon> & polys) {
+    int numtris;
+    int numquads;
+    
+    GFXVertex * tmpres;
+    bsp_vector vv;
+    vlist->GetPolys (&tmpres,&numquads,&numtris);
+    numquads-=numtris;
+    int i;
+    int inc =3;
+    int offset=0;
+    int last = numtris;
+    bsp_polygon tmppolygon;
+    for (int l=0;l<2;l++) {
+	for (i=0;i<last;i++) {
+	    polys.push_back (tmppolygon);
+	    for (int j=0;j<inc;j++) {
+		vv.x=tmpres[offset+i*inc+j].x+local_pos.i;
+		vv.y=tmpres[offset+i*inc+j].y+local_pos.j;
+		vv.z=tmpres[offset+i*inc+j].z+local_pos.k;
+		polys[polys.size()-1].v.push_back (vv);
+	    }
+	}
+	inc=4;
+	offset = numtris*3;
+	last = numquads;
+    }
+    free (tmpres);
+}
+
 void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
   numforcelogo=numsquadlogo =0;
   int index;

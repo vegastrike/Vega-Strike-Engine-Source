@@ -95,8 +95,6 @@ void Mesh::InitUnit()
 	//	stcoords = NULL;
 	Decal = NULL;
 	
-	bspTree = NULL;
-
 	alphalist = NULL;
 	
 	//	texturename[0] = -1;
@@ -628,11 +626,6 @@ Mesh::~Mesh()
 	    delete forcelogos;
 	    forcelogos = NULL;
 	  }
-	  if(bspTree!=NULL) {
-	    
-	    delete bspTree;
-	    bspTree= NULL;
-	  }
 	  if(hash_name!=NULL) {
 	    meshHashTable.Delete(*hash_name);
 	    delete hash_name;
@@ -709,41 +702,10 @@ void Mesh::Destroy()
 {
 }
 
-float Mesh::intersects(const Vector &start, const Vector &end) {
-  if (!bspTree)
-    return (start-end).Magnitude();
-  return bspTree->intersects(start-local_pos, end-local_pos);
-}
-
-
 BoundingBox * Mesh::getBoundingBox() {
   
   BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0)+local_pos,Vector (maxSizeX,0,0)+local_pos,
 					Vector (0,minSizeY,0)+local_pos,Vector (0,maxSizeY,0)+local_pos,
 					Vector (0,0,minSizeZ)+local_pos,Vector (0,0,maxSizeZ)+local_pos);
   return tbox;
-}
-
-bool Mesh::intersects(const Vector &pt,float err/*, Transformation cumulative_transformation*/) {
-
-  /*
-  Transformation tmp = cumulative_transformation;
-  tmp.Invert();
-  Matrix t;
-  tmp.to_matrix(t);
-//UNIT SHOULD HANDLE THIS...it knows about the cumulative_transformation based on last physics round
-
-  Vector a = pt;
-  a = a.Transform(t);
-  */
-  if (!bspTree)
-    return true;
-  return bspTree->intersects(/*a*/pt-local_pos,err);
-}
-
-bool Mesh::intersects(Mesh *mesh) {
-  if (!bspTree)
-    return true;
-  // Needs to adapt coordinate systems
-	return bspTree->intersects(mesh->bspTree);
 }

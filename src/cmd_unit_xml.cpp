@@ -7,6 +7,7 @@
 //#include <values.h>
 #include <float.h>
 #include "gfx_mesh.h"
+#include "gfx_bsp.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -689,8 +690,19 @@ fclose (inFile);
   for( a=0; a<numsubunit; a++) {
     subunits[a] = xml->units[a];
   }
-  
+
   calculate_extent();
+  
+  string tmpname (filename);
+  tmpname += ".bsp";
+  FILE * fp = fopen (tmpname.c_str(),"r+b");
+  if (!fp) {
+    BuildBSPTree (tmpname.c_str());
+  }else {
+    fclose (fp);
+  }
+  bspTree = new BSPTree (tmpname.c_str());
+
   delete xml;
 }
 

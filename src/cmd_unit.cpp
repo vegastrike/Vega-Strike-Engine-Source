@@ -32,6 +32,7 @@
 #include "gfx_box.h"
 #include "gfx_animation.h"
 #include "gfx_lerp.h"
+#include "gfx_bsp.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -62,6 +63,7 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  bspTree = NULL;
   invisible=false;
   origin= Vector(0,0,0);
   numhalos=0;
@@ -241,6 +243,8 @@ Unit::Unit(const char *filename, bool xml) {
 
 Unit::~Unit()
 {
+  if (bspTree)
+    delete bspTree;
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     if (mounts[beamcount].gun)
       delete mounts[beamcount].gun;//hope we're not killin' em twice...they don't go in gunqueue
@@ -485,11 +489,10 @@ bool Unit::Explode () {
 bool Unit::queryBSP (const Vector &pt, float err) {
   int i;
   Vector st (InvTransform (cumulative_transformation_matrix,pt));
-
-  for (i=0;i<nummesh;i++) {
-    if ((meshdata[i]->intersects (st,err)))
+  if (!bspTree)
       return true;
-  }
+  if (bspTree->intersects (st,err))
+      return true;
   for (i=0;i<numsubunit;i++) {
     if ((subunits[i]->queryBSP(pt,err)))
       return true;
@@ -500,18 +503,18 @@ bool Unit::queryBSP (const Vector &pt, float err) {
 float Unit::queryBSP (const Vector &start, const Vector & end) {
   int i;
   float tmp;
+  if (!bspTree)
+      return true;
   Vector st (InvTransform (cumulative_transformation_matrix,start));
   Vector ed (InvTransform (cumulative_transformation_matrix,start));
+  if (tmp = bspTree->intersects (st,ed))
+      return tmp;
 
-  for (i=0;i<nummesh;i++) {
-    if ((tmp = meshdata[i]->intersects (st,ed)))
-      return tmp;
-  }
   for (i=0;i<numsubunit;i++) {
-    if ((tmp = subunits[i]->queryBSP(start,end)))
+    if (tmp = subunits[i]->queryBSP(start,end))
       return tmp;
   }
-  return false;
+  return 0;
 }
 
 

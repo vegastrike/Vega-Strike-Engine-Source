@@ -129,6 +129,8 @@ class /*GFXDRVAPI*/ GFXVertexList {
   int *offsets;
   int tessellation;
   int changed;
+  int numTris ();
+  int numQuads();
   void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColor *colors, int numlists, int *offsets, bool Mutable,int tess);
   void RefreshDisplayList();
 public:
@@ -155,6 +157,7 @@ public:
   void LoadDrawState();
   void Draw();
   void DrawOnce (){LoadDrawState();Draw();}
+  void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
   GFXBOOL SwapUntransformed();
   GFXBOOL SwapTransformed();
 };

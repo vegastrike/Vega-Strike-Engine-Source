@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gfx_mesh.h"
+#include "cmd_unit.h"
 #define TRUE 1
 #define FALSE 0
 
@@ -63,18 +64,9 @@ enum INTERSECT_TYPE {
     BSPG_COPLANAR =2
 };
 
-struct bsp_vector
-        {
-        float x,y,z;
-        struct bsp_vector * next;
-        };
+
 
 typedef struct bsp_vector VECTOR;
-
-struct bsp_polygon
-        {
-        vector <bsp_vector> v;
-        };
 
 
 struct bsp_tree {
@@ -194,63 +186,32 @@ void FreeBSP (bsp_tree ** tree) {
 }
 
 static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&);
-void Mesh::BuildBSPTree(const char *filename)
-
-{
+void Unit::BuildBSPTree(const char *filename) {
 
   bsp_tree * bsp=NULL;
-unsigned int i;
-
-bsp_tree temp_node;
-
-bsp_polygon temp_poly3;
-bsp_polygon temp_poly4;
- vector <int> tris;
+  unsigned int i;
+  bsp_tree temp_node;
  vector <bsp_polygon> tri;
  vector <bsp_tree> triplane;
- int nums;
- vector <int> quads;
- vector <int> * curs;
- for (i=0;i<xml->triind.size();i++) {
-   tris.push_back (xml->triind[i]);
+ for (i=0;i<nummesh;i++) {
+     meshdata[i]->GetPolys(tri);
  }
- for (i=0;i<xml->nrmltristrip.size();i++) {
-   tris.push_back(xml->nrmltristrip[i]);
- }
- for (i=0;i<xml->nrmltrifan.size();i++) {
-   tris.push_back(xml->nrmltrifan[i]);
- }
- for (i=0;i<xml->quadind.size();i++) {
-   quads.push_back (xml->quadind[i]);
- }
- for (i=0;i<xml->nrmlquadstrip.size();i++) {
-   quads.push_back(xml->nrmlquadstrip[i]);
- }
- curs = &tris;
- nums = 3;
- for (int kk=0;kk<2;kk++) {
-     for (i=0;i<(*curs).size();i+=nums) {
-       temp_poly3.v = vector <bsp_vector>();
-	 for (int j=0;j<nums;j++) {
-	     temp_poly3.v.push_back (bsp_vector());
-	     temp_poly3.v[j].x = xml->vertices[(*curs)[i+j]].x;
-	     temp_poly3.v[j].y = xml->vertices[(*curs)[i+j]].y;
-	     temp_poly3.v[j].z = xml->vertices[(*curs)[i+j]].z;
-	 }
-	 if (!Cross (temp_poly3,temp_node)) {
-	   continue;
-	 }
-	 // Calculate 'd'
-	 temp_node.d = (float) ((temp_node.a*temp_poly3.v[0].x)+(temp_node.b*temp_poly3.v[0].y)+(temp_node.c*temp_poly3.v[0].z));
-	 temp_node.d*=-1.0;
-	 tri.push_back(temp_poly3);
-	 triplane.push_back(temp_node);
-	 //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3);
-	 
+ for (i=0;i<tri.size();i++) {
+     if (!Cross (tri[i],temp_node)) {
+	 vector <bsp_polygon>::iterator ee = tri.begin();
+	 ee+=i;
+	 tri.erase(ee);
+	 i--;
+	 continue;
      }
-     nums = 4;
-     curs = &quads;
+     // Calculate 'd'
+     temp_node.d = (float) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+     temp_node.d*=-1.0;
+     triplane.push_back(temp_node);
+     //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3);
+     
  }
+ 
  bsp = buildbsp (bsp,tri,triplane);
  o = fopen (filename, "w+b");
  write_bsp_tree(bsp,0);

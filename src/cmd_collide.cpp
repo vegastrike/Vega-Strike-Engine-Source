@@ -194,28 +194,30 @@ void Unit::CollideAll() {
   AddCollideQueue (LineCollide(this,LineCollide::UNIT,minx,maxx),hhuge);
 #undef COLQ
 }
-
+/*
 bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat) {
   Transformation cumulative_transformation(cumtrans);
   cumulative_transformation.position = local_pos.Transform (cumtransmat);
 
   if (bspTree||target->querySphere (cumulative_transformation.position,rSize())//test0808
-      /*&&      target->queryBoundingBox (cumulative_transformation.position,rSize())*/) {
+   ) {
     float localTrans [16];// {1,0,0,0,0,1,0,0,0,0,1,0,target->Position().i,target->Position.j,target->Position().k,1};
-    if (intersects (InvTransform(cumtransmat,target->Position()),target->rSize())) {//bsp      
+    if (QueryBSP (InvTransform(cumtransmat,target->Position()),target->rSize())) {//bsp      
       fprintf (stderr,"mesh %s intersects unit %s", hash_name->c_str(), target->name.c_str());
       return true;
     }
   }
   return false;
 }
-
+*/
 bool Unit::OneWayCollide (Unit * target) {//do each of these bubbled subunits collide with the other unit?
   int i;
+
   for (i=0;i<nummesh;i++) {
-    if (meshdata[i]->Collide(target,cumulative_transformation,cumulative_transformation_matrix))
-      return true;
+  //query-sphery
   }
+  if (queryBSP(target->Position(), target->rSize()))
+      return true;
   for (i=0;i<numsubunit;i++) {
     if (subunits[i]->OneWayCollide(target))
       return true;
@@ -240,7 +242,7 @@ bool Unit::Collide (Unit * target) {
   }
   //deal damage similarly to beam damage!!  Apply some sort of repel force
 
-  ////fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",name.c_str(),target->name.c_str());
+  fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",name.c_str(),target->name.c_str());
 
   //each mesh with each mesh? naw that should be in one way collide
   return true;

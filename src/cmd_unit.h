@@ -47,7 +47,7 @@ class Box;
 class Mesh;
 class Camera;
 class Halo;
-
+class BSPTree;
 class PlanetaryOrbit;
 //////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 enum clsptr {
@@ -84,8 +84,8 @@ friend class PlanetaryOrbit;
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
 
-protected:
-
+ protected:
+  BSPTree *bspTree;
   int ucref;
   bool killed;
   bool invisible;
@@ -137,6 +137,7 @@ protected:
   //  bool active;
   
   //Vector pp, pq, pr, ppos;
+  void BuildBSPTree (const char *filename);
   AI *aistate;
   float accel;
   float recharge;

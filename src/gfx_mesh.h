@@ -32,12 +32,18 @@ using namespace std;
 
 class Planet;
 class Unit;
-class BSPTree;
+
 struct GFXVertex;
 class GFXVertexList;
 class GFXQuadstrip;
 struct GFXMaterial;
 class BoundingBox;
+struct bsp_vector {
+        float x,y,z;
+};
+struct bsp_polygon {
+    vector <bsp_vector> v;
+};
 
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
@@ -179,7 +185,7 @@ private:
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);
-  void BuildBSPTree (const char *filename);
+
   void CreateLogos(float x_center,float y_center, float z_center);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -219,8 +225,6 @@ protected:
   Texture *Decal;
   GFXBOOL envMap;
   
-  BSPTree *bspTree;
-  
   GFXBOOL changed;
   void InitUnit();
   
@@ -230,10 +234,12 @@ protected:
   vector<MeshDrawContext> *draw_queue;
   int draw_sequence;
 public:
-  bool Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat);
+
+  //  bool Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat);
   Mesh();
-  Mesh(const char *filename,  bool xml=false);
+  Mesh(const char *filename, bool xml=false);
   ~Mesh();
+  void GetPolys(vector <bsp_polygon> &);
   void SetPosition (float,float,float);
   void SetPosition (const Vector&);
   void SetOrientation (const Vector &, const Vector &, const Vector&);
@@ -251,8 +257,6 @@ public:
   // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}
-  float intersects(const Vector &start, const Vector &end);//zero or length
-  bool intersects(const Vector &pt, float err);
-  bool intersects(Mesh *mesh);
+
 };
 #endif

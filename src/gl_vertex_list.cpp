@@ -133,6 +133,43 @@ void GFXVertexList::Tess (int tess) {
 
   }
 }
+int GFXVertexList::numTris () {
+    int tot=0;
+    for (int i=0;i<numlists;i++) {
+	switch (mode[i]) {
+	case GL_TRIANGLES:
+	    tot+= offsets[i]/3;
+	    break;
+	case GL_TRIANGLE_STRIP:
+	case GL_TRIANGLE_FAN:
+	case GL_POLYGON:
+	    tot+= offsets[i]-2;
+	    break;
+	default:
+	    break;
+	}
+    }
+    return tot;
+}
+int GFXVertexList::numQuads () {
+    int tot=0;
+    for (int i=0;i<numlists;i++) {
+	switch (mode[i]) {
+	case GL_QUADS:
+	    tot+=offsets[i]/4;
+	    break;
+	case GL_QUAD_STRIP:
+	    tot+= (offsets[i]-2)/2;
+	    break;
+	default:
+	    break;
+	}
+    }
+    return tot;
+}
+
+
+
 void GFXVertexList::RefreshDisplayList () {
 #ifdef USE_DISPLAY_LISTS
   if ((display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
@@ -184,6 +221,75 @@ GFXVertexList::~GFXVertexList()
     free (myVertices);
   if (myColors) 
     free (myColors);
+}
+
+void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
+    int i;
+    int cur=0;
+    GFXVertex *res;
+    *numtris = numTris();
+    *numpolys = *numtris + numQuads();
+    int curtri=0;
+    int curquad=3*(*numtris);
+    res = (GFXVertex *)malloc (((*numtris)*3+4*(*numpolys-(*numtris)))*sizeof(GFXVertex));
+    *vert = res;
+    for (i=0;i<numlists;i++) {
+	int j;
+	switch (mode[i]) {
+	case GL_TRIANGLES:
+	    memcpy (&res[curtri],&myVertices [cur],offsets[i]*sizeof (GFXVertex));
+	    curtri+=offsets[i];
+	    break;
+	case GL_TRIANGLE_FAN:
+	case GL_POLYGON:
+	    for (j=1;j<offsets[i]-1;j++) {
+		memcpy (&res[curtri],&myVertices [cur],sizeof (GFXVertex));
+		curtri++;
+		memcpy (&res[curtri],&myVertices [cur+j],sizeof (GFXVertex));
+		curtri++;
+		memcpy (&res[curtri],&myVertices [cur+j+1],sizeof (GFXVertex));
+		curtri++;
+	    }	    
+	    break;
+	case GL_TRIANGLE_STRIP:
+	    for (j=2;j<offsets[i];j+=2) {
+		memcpy (&res[curtri],&myVertices [cur+j-2],sizeof (GFXVertex));
+		curtri++;
+		memcpy (&res[curtri],&myVertices [cur+j-1],sizeof (GFXVertex));
+		curtri++;
+		memcpy (&res[curtri],&myVertices [cur+j],sizeof (GFXVertex));
+		curtri++;
+		if (j+1<offsets[i]) {//copy reverse
+		    memcpy (&res[curtri],&myVertices [cur+j],sizeof (GFXVertex));
+		    curtri++;
+		    memcpy (&res[curtri],&myVertices [cur+j-1],sizeof (GFXVertex));
+		    curtri++;
+		    memcpy (&res[curtri],&myVertices [cur+j+1],sizeof (GFXVertex));
+		    curtri++;
+		}
+	    }	    
+	    break;
+	case GL_QUADS:
+	    memcpy (&res[curquad],&myVertices [cur],offsets[i]*sizeof (GFXVertex));
+	    curquad+=offsets[i];
+	    break;
+	case GL_QUAD_STRIP:
+	    for (j=2;j<offsets[i]-1;j+=2) {
+		memcpy (&res[curquad],&myVertices [cur+j-2],sizeof (GFXVertex));
+		curquad++;
+		memcpy (&res[curquad],&myVertices [cur+j-1],sizeof (GFXVertex));
+		curquad++;
+		memcpy (&res[curquad],&myVertices [cur+j+1],sizeof (GFXVertex));
+		curquad++;
+		memcpy (&res[curquad],&myVertices [cur+j],sizeof (GFXVertex));
+		curquad++;
+	    }
+	    break;
+	default:
+	    break;
+	}
+	cur +=offsets[i];
+    }
 }
 
 GFXTVertex *GFXVertexList::LockTransformed()
