@@ -90,7 +90,7 @@ class	NetClient
 		~NetClient();
 
 		int		authenticate();
-		vector<string>	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
+		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
 		SOCKETALT	init( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);
 		void	checkKey();

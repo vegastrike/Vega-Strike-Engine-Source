@@ -561,9 +561,9 @@ void bootstrap_main_loop () {
 		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
+			cout<<"Network initialization error - exiting"<<endl;
 			cleanexit=true;
 			winsys_exit(1);
-			cout<<"Network initialization error - exiting"<<endl;
 		}
 		//sleep( 3);
 		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";

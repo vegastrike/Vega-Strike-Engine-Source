@@ -14,6 +14,8 @@ libnetgeneric =	\
 	const.h			\
 	netui.cpp		\
 	netui.h			\
+	netbuffer.h		\
+	netbuffer.cpp	\
 	packetmem.cpp	\
 	packetmem.h		\
 	packet.cpp		\

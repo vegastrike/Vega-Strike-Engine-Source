@@ -433,6 +433,11 @@ void	NetServer::start(int argc, char **argv)
 		else
 			tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
 		acct_sock = NetUITCP::createSocket( srvip, tmpport );
+		if( !acct_sock.valid())
+		{
+			cout<<"Cannot connect to account server... quitting"<<endl;
+			cleanup();
+		}
 		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
 
