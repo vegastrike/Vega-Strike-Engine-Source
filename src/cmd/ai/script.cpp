@@ -57,7 +57,8 @@ static HardCodedMap MakeHardCodedScripts() {
 
 static HardCodedMap hard_coded_scripts= MakeHardCodedScripts(); 
 bool validateHardCodedScript(std::string s) {
-  return hard_coded_scripts.find(s)!=hard_coded_scripts.end();
+   if (s.length()==0) return true;
+   return hard_coded_scripts.find(s)!=hard_coded_scripts.end();
 }
 struct AIScriptXML {
   int unitlevel;
