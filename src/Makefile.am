@@ -2,7 +2,7 @@
 bindir = ../$(prefix)
 
 bin_PROGRAMS = vegastrike
-SUBDIRS = cmd gfx gldrv aldrv python
+SUBDIRS = cmd gfx gldrv aldrv python gui
 vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a cmd/script/libscript.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a
 
 vegastrike_SOURCES =				\
