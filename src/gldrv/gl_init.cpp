@@ -170,7 +170,7 @@ void GFXInit (int argc, char ** argv){
 	MSG msg;
 	hWnd=CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_START),NULL, (DLGPROC)DLOG_start, 0);
 	ShowWindow(hWnd, SW_SHOW);
-	for (dumbi=0;dumbi<5;dumbi++) {
+	for (dumbi=0;dumbi<3;dumbi++) {
 		if(GetMessage(&msg, NULL, 0, 0)) {
 			DispatchMessage(&msg);
 		} else {
