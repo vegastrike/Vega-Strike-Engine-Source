@@ -101,7 +101,6 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
   memcpy (&calah[16],&calah[0],sizeof(GFXColorVertex)*16);    
   vlist = new GFXVertexList (GFXQUAD,32,calah,32,true);//mutable color contained list
-  
   AUDStartPlaying (sound);
 }
 
@@ -183,7 +182,6 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
-  //  AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (0,0,0));
   RecalculateVertices();
 
   beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
