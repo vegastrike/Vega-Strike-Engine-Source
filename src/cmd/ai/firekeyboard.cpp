@@ -1108,7 +1108,8 @@ static bool NoDockWithClear() {
 	return nodockwithclear;
 }
 static bool SuperDock(Unit * parent, Unit* target) {
-  float dis=target->isUnit()==PLANETPTR?UnitUtil::getSignificantDistance(parent,target):UnitUtil::getDistance(parent,target);
+  static bool superdock = XMLSupport::parse_bool(vs_config->getVariable("physics","dock_within_base_shield","false"));
+  float dis=(target->isUnit()==PLANETPTR||superdock)?UnitUtil::getSignificantDistance(parent,target):UnitUtil::getDistance(parent,target);
   
   if (dis<parent->rSize()) {
     if (UnitUtil::isDockableUnit(target)) {
