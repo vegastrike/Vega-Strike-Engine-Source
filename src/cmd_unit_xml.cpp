@@ -413,10 +413,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	accel=parse_float((*iter).value);
 	break;
       case FRONT:
-	limits.longitudinal+=parse_float((*iter).value);
+	limits.forward+=parse_float((*iter).value);
 	break;
       case BACK:
-//	limits.longitudinal+=parse_float((*iter).value);
+	limits.retro+=parse_float((*iter).value);
 //	divby+=2;
 	break;
       case LEFT:
@@ -545,12 +545,8 @@ void Unit::endElement(const string &name) {
 }
 
 void Unit::LoadXML(const char *filename) {
-	shield.number=0;
-	limits.lateral=0;
-	limits.longitudinal=0;
-	limits.vertical=0;
-	yprrestricted=0;
-	const int chunk_size = 16384;
+  shield.number=0;
+  const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile = fopen (filename, "r+b");
   if(!inFile) {

@@ -89,11 +89,12 @@ void Unit::Init()
   mass = 1;
   fuel = 0;
 
-  yrestricted = prestricted = rrestricted = FALSE;
+  //  yrestricted = prestricted = rrestricted = FALSE;
+  yprrestricted=0;
   ymin = pmin = rmin = -PI;
   ymax = pmax = rmax = PI;
   ycur = pcur = rcur = 0;
-	
+
   MomentOfInertia = 1;
   AngularVelocity = Vector(0,0,0);
   Velocity = Vector(0,0,0);
@@ -110,9 +111,10 @@ void Unit::Init()
   limits.pitch = 25.5;
   limits.roll = 25.5;
 	
-  limits.lateral = 0.1;
-  limits.vertical = 0.1;
-  limits.longitudinal = 1;
+  limits.lateral = 10;
+  limits.vertical = 10;
+  limits.forward = 10;
+  limits.retro=1;
   //  Fire();
 }
 void Unit::UnRef() {

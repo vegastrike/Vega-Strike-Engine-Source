@@ -490,11 +490,11 @@ void createObjects() {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
     switch((a)%6) {
-    case 0:
+    case 1:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);
       break;
-    case 1:
+    case 0:
       fighters[a] = new Unit("hornet.xunit", true);
       break;
     case 2:
@@ -533,7 +533,7 @@ void createObjects() {
     fighters[a]->SetAI(new Order());
     ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
     ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
-    fighters[a]->EnqueueAI(new FlyByKeyboard (.01,.005,5,5,5));
+    fighters[a]->EnqueueAI(new FlyByKeyboard (1,.005,5,5,5));
 	//        fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   

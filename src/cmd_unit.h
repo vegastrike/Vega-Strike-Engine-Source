@@ -150,7 +150,8 @@ protected:
 
     float lateral;
     float vertical;
-    float longitudinal;
+    float forward;
+    float retro;
   } limits;
 
   bool calculatePhysics; // physics have an effect on this object (set to false for planets)

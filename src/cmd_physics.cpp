@@ -124,11 +124,11 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
   return Res;
-  if (fabs(amt1.i)>fabs(limits.pitch))
+  if (fabs(amt1.i)>limits.pitch)
     Res.i=copysign(limits.pitch,amt1.i);
-  if (fabs(amt1.j)>fabs(limits.yaw))
+  if (fabs(amt1.j)>limits.yaw)
     Res.j=copysign(limits.yaw,amt1.j);
-  if (fabs(amt1.k)>fabs(limits.roll))
+  if (fabs(amt1.k)>limits.roll)
     Res.k=copysign(limits.roll,amt1.k);
   return Res;
 }
@@ -137,7 +137,7 @@ Vector Unit::MaxThrust(const Vector &amt1) {
   // amt1 is a normal
   return amt1 * (Vector(copysign(limits.lateral, amt1.i), 
 	       copysign(limits.vertical, amt1.j),
-	       copysign(limits.longitudinal, amt1.k)) * amt1);
+	       amt1.k>0?limits.forward:-limits.retro) * amt1);
 }
 /* misnomer..this doesn't get the max value of each axis
 Vector Unit::ClampThrust(const Vector &amt1){ 
@@ -159,8 +159,10 @@ Vector Unit::ClampThrust (const Vector &amt1) {
     Res.i=copysign(limits.lateral,amt1.i);
   if (fabs(amt1.j)>fabs(limits.vertical))
     Res.j=copysign(limits.vertical,amt1.j);
-  if (fabs(amt1.k)>fabs(limits.longitudinal))
-    Res.k=copysign(limits.longitudinal,amt1.k);
+  if (amt1.k>limits.forward)
+    Res.k=limits.forward;
+  if (amt1.k<-limits.retro)
+    Res.k =-limits.retro;
   return Res;
 }
 
@@ -185,7 +187,7 @@ void Unit::VerticalThrust(float amt) {
 void Unit::LongitudinalThrust(float amt) {
   if(amt>1.0) amt = 1.0;
   if(amt<-1.0) amt = -1.0;
-  ApplyLocalForce(amt*limits.longitudinal * Vector(0,0,1));
+  ApplyLocalForce(amt*limits.forward * Vector(0,0,1));
 }
 
 void Unit::YawTorque(float amt) {
@@ -206,15 +208,13 @@ void Unit::RollTorque(float amt) {
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
 
-void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bool lastframe) {
+void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bool lastframe/*, bool round_two*/) {
   if (lastframe)
     prev_physical_state = curr_physical_state;  
   // Torque is modeled as a perfect impulse at the beginning of a game
   // turn, for simplicity
   Vector p, q, r;
   GetOrientation(p,q,r);
-  Vector CACHUNK = NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r;
-  fprintf (stderr,">>NetTorque: %f,%f,%f NetLocalTorque: %f,%f,%f",NetTorque.i,NetTorque.j,NetTorque.k,CACHUNK.i,CACHUNK.j,CACHUNK.k);
   Vector temp = (NetTorque+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
   AngularVelocity += temp;
   if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
@@ -223,29 +223,30 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bo
 //	cerr << "Orientation: " << p << q << r << endl;
   temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
   Velocity += temp; // modelled as an impulse
-	//now the fuck with it... add relitivity to the picture here
-	/*
-	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
-	{
-		float magvel = Velocity.Magnitude();
-		float y = (1-magvel*magvel*oocc);
-		temp = temp * powf (y,1.5);
-		}*/
+  /*
+    if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
+    {
+    float magvel = Velocity.Magnitude();
+    float y = (1-magvel*magvel*oocc);
+    temp = temp * powf (y,1.5);
+    }*/
 	
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
   int i;
-  for (i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].gun&&!mounts[i].gun->Dissolved()) {
-	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+  //  if (round_two) {
+    for (i=0;i<nummounts;i++) {
+      if (mounts[i].type.type==weapon_info::BEAM) {
+	if (mounts[i].gun&&!mounts[i].gun->Dissolved()) {
+	  mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
+	}
       }
     }
-  }
+    //  }
   for (i=0;i<numsubunit;i++) {
-    subunits[i]->ResolveForces(cumulative_transformation,cumulative_transformation_matrix,lastframe);
+    subunits[i]->ResolveForces(cumulative_transformation,cumulative_transformation_matrix,lastframe/*,round_two*/);
   }
   NetForce = NetLocalForce = NetTorque = NetLocalTorque = Vector(0,0,0);
   //cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;

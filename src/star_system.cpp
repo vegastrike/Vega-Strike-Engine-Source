@@ -110,10 +110,20 @@ void StarSystem::Update() {
   bool firstframe = true;
   if(time/SIMULATION_ATOM>=1.0) {
     while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
+      // Handle AI in pass 2 to maintain consistency
+
       ClearCollideQueue();
       modelGravity();
+      Iterator *iter = drawList->createIterator();
+      while((unit = iter->current())!=NULL) {
+	unit->CollideAll();
+	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
+	iter->advance();
+      }
+      delete iter;
+
       DABEAM->UpdatePhysics(identity_transformation);
-      Iterator *iter = units->createIterator();
+      units->createIterator();
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually
 	//	if(time/SIMULATION_ATOM>2.0) 
@@ -124,13 +134,6 @@ void StarSystem::Update() {
       }
       delete iter;
       
-      // Handle AI in pass 2 to maintain consistency
-      iter = drawList->createIterator();
-      while((unit = iter->current())!=NULL) {
-	unit->CollideAll();
-	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
-	iter->advance();
-      }
       time -= SIMULATION_ATOM;
       firstframe = false;
     }

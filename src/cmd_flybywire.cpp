@@ -69,13 +69,17 @@ void FlyByWire::RollRight (float per) {
 
 void FlyByWire::Afterburn (float per){
   desired_velocity=Vector (0,0,set_speed+per*(max_ab_speed-set_speed));
-  fprintf (stderr,"ab %f\n",per);
+  fprintf (stderr,"ab %f STRENGTH: %f MAX_AB_SPEED %f\n",per,set_speed+per*(max_ab_speed-set_speed),max_ab_speed);
 }
 
 void FlyByWire::Accel (float per) {
   set_speed+=per*100*SIMULATION_ATOM;
+  if (set_speed>max_speed)
+    set_speed=max_speed;
+  if (set_speed<-max_speed*parent->Limits().retro/parent->Limits().forward)
+    set_speed = -max_speed*parent->Limits().retro/parent->Limits().forward;
   desired_velocity= Vector (0,0,set_speed);
-  fprintf (stderr,"ac %f\n",per);
+  fprintf (stderr,"ac %f STRENGTH: %f\n",per, set_speed);
 }
 
 #define FBWABS(m) (m>=0?m:-m)
