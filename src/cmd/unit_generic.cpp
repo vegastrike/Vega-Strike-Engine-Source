@@ -2232,7 +2232,7 @@ void TurnJumpOKLightOn(Unit * un, Cockpit * cp) {
 		}
 	}
 }
-void Unit::DecreaseWarpEnergy(bool insys, float time=1.0f) {
+void Unit::DecreaseWarpEnergy(bool insys, float time) {
   static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","20"));
   this->warpenergy-=(insys?jump.insysenergy/bleedfactor:jump.energy)*time;
 }
