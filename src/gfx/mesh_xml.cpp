@@ -236,7 +236,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		  }
 		  break;
   case XML::DIFFUSE:
-	  assert(xml->load_stage==7);
+	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
@@ -256,7 +256,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  }
 	  break;
   case XML::EMISSIVE:
-	  assert(xml->load_stage==7);
+	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
@@ -276,7 +276,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  }
 	  break;
   case XML::SPECULAR:
-	  assert(xml->load_stage==7);
+	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
@@ -296,7 +296,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  }
 	  break;
   case XML::AMBIENT:
-	  assert(xml->load_stage==7);
+	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		  switch(XML::attribute_map.lookup((*iter).name)) {
@@ -370,7 +370,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::POINTS:
     assert(top==XML::MESH);
-    assert(xml->load_stage == 1);
+    //assert(xml->load_stage == 1);
     xml->load_stage = 2;
     break;
   case XML::POINT:
@@ -461,12 +461,12 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::POLYGONS:
     assert(top==XML::MESH);
-    assert(xml->load_stage==3);
+    //assert(xml->load_stage==3);
     xml->load_stage = 4;
     break;
   case XML::LINE:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=2;
     xml->active_list = &xml->lines;
     xml->active_ind = &xml->lineind;
@@ -491,7 +491,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::TRI:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=3;
     xml->active_list = &xml->tris;
     xml->active_ind = &xml->triind;
@@ -517,7 +517,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::LINESTRIP:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=2;
     xml->linestrips.push_back (vector<GFXVertex>());
     xml->active_list = &(xml->linestrips[xml->linestrips.size()-1]);
@@ -545,7 +545,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
   case XML::TRISTRIP:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=3;//minimum number vertices
     xml->tristrips.push_back (vector<GFXVertex>());
     xml->active_list = &(xml->tristrips[xml->tristrips.size()-1]);
@@ -573,7 +573,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
   case XML::TRIFAN:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=3;//minimum number vertices
     xml->trifans.push_back (vector<GFXVertex>());
     xml->active_list = &(xml->trifans[xml->trifans.size()-1]);
@@ -601,7 +601,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
   case XML::QUADSTRIP:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=4;//minimum number vertices
     xml->quadstrips.push_back (vector<GFXVertex>());
     xml->active_list = &(xml->quadstrips[xml->quadstrips.size()-1]);
@@ -629,7 +629,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
    
   case XML::QUAD:
     assert(top==XML::POLYGONS);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
     xml->num_vertices=4;
     xml->active_list = &xml->quads;
     xml->active_ind = &xml->quadind;
@@ -672,7 +672,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::VERTEX:
     assert(top==XML::TRI || top==XML::QUAD || top==XML::LINE ||top ==XML::TRISTRIP || top ==XML::TRIFAN||top ==XML::QUADSTRIP || top==XML::LINESTRIP);
-    assert(xml->load_stage==4);
+    //assert(xml->load_stage==4);
 
     xml->vertex_state = 0;
     unsigned int index;
@@ -740,7 +740,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::LOGO: 
     assert (top==XML::MESH);
-    assert (xml->load_stage==4);
+    //assert (xml->load_stage==4);
     xml->load_stage=5;
     xml->vertex_state=0;
     unsigned int typ;
@@ -793,7 +793,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     break;
   case XML::REF:
     assert (top==XML::LOGO);
-    assert (xml->load_stage==5);
+    //assert (xml->load_stage==5);
     xml->load_stage=6;
     unsigned int ind;
     float indweight;
@@ -922,36 +922,36 @@ void Mesh::endElement(const string &name) {
     assert(xml->quads.size()%4==0);
     break;
   case XML::REF:
-    assert (xml->load_stage==6);
+    //assert (xml->load_stage==6);
     xml->load_stage=5;
     break;
   case XML::LOGO:
-    assert (xml->load_stage==5);
+    //assert (xml->load_stage==5);
     assert (xml->vertex_state>=XML::V_REF*3);//make sure there are at least 3 reference points
     xml->load_stage=4;
     break;
   case XML::MATERIAL:
-	  assert(xml->load_stage==7);
+	  //assert(xml->load_stage==7);
 	  xml->load_stage=4;
 	  break;
   case XML::DIFFUSE:
-	  assert(xml->load_stage==8);
+	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
   case XML::EMISSIVE:
-	  assert(xml->load_stage==8);
+	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
   case XML::SPECULAR:
-	  assert(xml->load_stage==8);
+	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
   case XML::AMBIENT:
-	  assert(xml->load_stage==8);
+	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
   case XML::MESH:
-    assert(xml->load_stage==4);//4 is done with poly, 5 is done with Logos
+    //assert(xml->load_stage==4);//4 is done with poly, 5 is done with Logos
 
     xml->load_stage=5;
     break;

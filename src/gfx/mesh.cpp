@@ -117,20 +117,20 @@ bool Mesh::LoadExistant (Mesh * oldmesh) {
     orig = oldmesh;
     return true;
 }
-bool Mesh::LoadExistant (const string filehash, float scale) {
+bool Mesh::LoadExistant (const string filehash, float scale, int faction) {
   Mesh * oldmesh;
 
-  hash_name = GetHashName (filehash,scale);
+  hash_name = GetHashName (filehash,scale,faction);
   oldmesh = meshHashTable.Get(hash_name);
 
   if (oldmesh==0) {
-    hash_name =GetSharedMeshHashName(filehash,scale);
+    hash_name =GetSharedMeshHashName(filehash,scale,faction);
     oldmesh = meshHashTable.Get(hash_name);  
   }
   if(0 != oldmesh) {
     return LoadExistant(oldmesh);
   }
-  //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale).c_str());
+  //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
   return false;
 }
 Mesh::Mesh (const Mesh & m) {
@@ -147,7 +147,7 @@ Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *f
   this->orig=NULL;
   InitUnit();
   Mesh *oldmesh;
-  if (LoadExistant (filename,scale)) {
+  if (LoadExistant (filename,scale,faction)) {
     return;
   }
   bool shared=false;
@@ -168,7 +168,7 @@ Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *f
   }
   draw_queue = new vector<MeshDrawContext>;
   if (!orig) {
-    hash_name =shared?GetSharedMeshHashName (filename,scale):GetHashName(filename,scale);
+    hash_name =shared?GetSharedMeshHashName (filename,scale,faction):GetHashName(filename,scale,faction);
     meshHashTable.Put(hash_name, oldmesh);
     //oldmesh[0]=*this;
     *oldmesh=*this;

@@ -271,7 +271,7 @@ private:
 protected:
   ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
   bool LoadExistant (Mesh *mesh);
-  bool LoadExistant (const string filehash, float scale);
+  bool LoadExistant (const string filehash, float scale, int faction);
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
   ///The hash table of all meshes

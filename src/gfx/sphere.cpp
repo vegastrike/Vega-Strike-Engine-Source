@@ -36,7 +36,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   ab[1]=b+'0';
   ab[0]=a+'0';
   hash_name = string("@@Sphere") + "#" + texture + "#" + XMLSupport::tostring(stacks) + "#" + XMLSupport::tostring(slices) +  ab + "#" + XMLSupport::tostring(rho_min) + "#" + XMLSupport::tostring(rho_max);
-  if (LoadExistant (hash_name,radius)) {
+  if (LoadExistant (hash_name,radius,0)) {
     return;
   } else {
 
@@ -44,7 +44,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   oldmesh = AllocNewMeshesEachInSizeofMeshSpace(numspheres);//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,radius), oldmesh);
+  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,radius,0), oldmesh);
   //  fprintf (stderr,"\nput %s\n",hash_name.c_str());
   this->orig = oldmesh;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
