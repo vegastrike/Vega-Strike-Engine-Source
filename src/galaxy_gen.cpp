@@ -747,7 +747,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     }
     //    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
-  if ((entitytype!=JUMP&&entitytype!=MOON)||grand()<moonofmoonprob) {
+  if (entitytype!=JUMP&&(entitytype!=MOON||grand()<moonofmoonprob)) {
     int numu;
     if (entitytype==MOON||(nument[PLANET]+nument[GAS]==0)) {
 	numu=1;
