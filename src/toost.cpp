@@ -1,5 +1,6 @@
 #include "quaternion.h"
 #include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
 #define     GFXEPSILON         ((float)10e-6)
 
@@ -60,11 +61,11 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
     
     W = 0.25 / S;
       
-    X = ( v2.k - v3.j ) * S;
+    X = ( v3.j - v2.k ) * S;
       
-    Y = ( v3.i - v1.k ) * S;
+    Y = ( v1.k - v3.i ) * S;
     
-    Z = ( v1.j - v2.i ) * S;
+    Z = ( v2.i - v1.j ) * S;
   }
   else {
     int max = (v1.i>v2.j)?1:2;
@@ -72,34 +73,69 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
       max = (v1.i>v3.k)?1:3;
     else 
       max = (v2.j>v3.k)?2:3;
+
     switch(max) {
     case 1:
-      //column 1
-      S  = sqrtf( 1.0 + v1.i - v2.j - v3.k ) * 2;
-      X = 0.5 / S;
-      Y = (v2.i + v1.j ) / S;
-      Z = (v1.k + v3.i ) / S;
-      W = (v2.k - v3.j ) / S;
+      //column 0
+      S = sqrtf ( (v2.i - (v2.j + v3.k)) + 1);
+      X = S * .5;
+      S = .5/S;
+      W = (v3.j - v2.k)*S;
+      Y = (v2.i + v1.j)*S;
+      Z = (v3.i + v1.k)*S;
       break;
     case 2:
-      //column 2
-      S  = sqrtf( 1.0 + v2.j - v1.i - v3.k ) * 2;
-      
-      X = (v2.i + v1.j ) / S;
-      Y = 0.5 / S;
-      Z = (v3.j + v2.k ) / S;
-      W = (v3.i - v1.k ) / S;
+      //column 1
+      S  = sqrtf( (v3.j - (v3.k + v1.i)) +1);
+      Y = 0.5 *  S;
+      S = .5 / S;
+      W = (v1.k - v3.i);
+      Z = (v3.j + v2.k);
+      X = (v1.j + v2.i);
       break;
     case 3:
-      //column 3    
-      S  = sqrtf( 1.0 + v3.k - v1.i - v2.j ) * 2;
-      
-      X = (v1.k + v3.i ) / S;
-      Y = (v3.j + v2.k ) / S;
-      Z = 0.5 / S;
-      W = (v1.j - v2.i ) / S;
+      //column 2    
+      S  = sqrtf( (v1.k - (v1.i + v2.j))+1);
+      Z = 0.5 *  S;
+      S = .5 / S;
+      W = (v2.i - v1.j);
+      X = (v1.k + v3.i);
+      Y = (v2.k + v3.j);
       break;
     }
+
+    /*
+    switch(max) {
+    case 1:
+      //column 0
+      S  = sqrtf( (v1.j - (v2.j + v3.k ))+1);
+      Y = 0.5 *  S;
+      S = .5 / S;
+      Z = (v1.j + v2.i ) * S;
+      X = (v1.k + v3.i ) * S;
+      W = (v2.k - v3.j ) * S;
+  
+      break;
+    case 2:
+      //column 1
+      S  = sqrtf( v2.k - (v3.k + v1.i )+1);
+      Y = 0.5 *  S;
+      S = .5 / S;
+      Z = (v3.j + v2.k ) * S;
+      X = (v2.i + v1.j ) * S;
+      W = (v3.i - v1.k ) * S;
+      break;
+    case 3:
+      //column 2    
+      S  = sqrtf( v3.i - (v1.i + v2.j )+1);
+      Z = 0.5 *  S;
+      S = .5 / S;
+      X = (v1.k + v3.i ) * S;
+      Y = (v3.j + v2.k ) * S;
+      W = (v1.j - v2.i ) * S;
+      break;
+    }
+    */
   }
   return Quaternion(W, Vector(X,Y,Z));
 }
@@ -132,26 +168,44 @@ void Normalize(Vector &r)
 	r.k /= size;
 }
 
-int main() {
+float psilon=.00001;
+char equiv (float x, float y) {
+  return x > y-psilon &&x<y+psilon&&((x>-.001&&y>-.001)||(x<.001&&y<.001));
+}
+
+int main(int argc, char ** argv) {
   float m [16];
-
-
+  int tests;
+  sscanf (argv[1],"%d",&tests);
+  sscanf (argv[2],"%f",&psilon);
+  for (int i=0;i<tests;i++) {
   Vector x;
-  Vector y(0,1,1);
-  Vector z(1,1,0);
+  Vector y(rand()%1000-500,rand()%1000-500,rand()%1000-500);
+  Vector z(rand()%1000-500,rand()%1000-500,rand()%1000-500);
   CrossProduct(y,z,x);
   CrossProduct(z,x,y);
   Normalize(x);
   Normalize(y);
   Normalize(z);
+  Transformation tmp(Quaternion::from_vectors(x,y,z),Vector(0,0,0));
+  tmp.to_matrix(m);
+  
+  if (!(equiv(x.i,m[0])&&equiv(x.j,m[1])&&equiv(x.k,m[2]) &&
+	equiv(y.i,m[4])&&equiv(y.j,m[5])&&equiv(y.k,m[6]) &&
+	equiv(z.i,m[8])&&equiv(z.j,m[9])&&equiv(z.k,m[10]))){
   printf ("<%f %f %f>\n",x.i,x.j,x.k);
   printf ("<%f %f %f>\n",y.i,y.j,y.k);
   printf ("<%f %f %f>\n",z.i,z.j,z.k);
-  Transformation tmp(Quaternion::from_vectors(x,y,z),Vector(0,0,0));
-  tmp.to_matrix(m);
+
+    tmp = Transformation(Quaternion::from_vectors(x,y,z),Vector(0,0,0));
+    tmp.to_matrix(m);
   for (int i=0;i<16;i++) {
     printf ("%f ",m[i]);
     if (i%4==3)
       printf ("\n");
+  }
+
+  }
+  
   }
 }

@@ -51,15 +51,15 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
   
   if(T>0) {
     
-    S = 0.5 / sqrt(T);
+    S = 0.5 / sqrtf(T);
     
     W = 0.25 / S;
       
-    X = ( v2.k - v3.j ) * S;
+    X = ( v3.j - v2.k ) * S;
       
-    Y = ( v3.i - v1.k ) * S;
+    Y = ( v1.k - v3.i ) * S;
     
-    Z = ( v1.j - v2.i ) * S;
+    Z = ( v2.i - v1.j ) * S;
   }
   else {
     int max = (v1.i>v2.j)?1:2;
@@ -67,34 +67,69 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
       max = (v1.i>v3.k)?1:3;
     else 
       max = (v2.j>v3.k)?2:3;
+
     switch(max) {
     case 1:
-      //column 1
-      S  = sqrt( 1.0 + v1.i - v2.j - v3.k ) * 2;
-      X = 0.5 / S;
-      Y = (v2.i + v1.j ) / S;
-      Z = (v1.k + v3.i ) / S;
-      W = (v2.k - v3.j ) / S;
+      //column 0
+      S = sqrtf ( (v2.i - (v2.j + v3.k)) + 1);
+      X = S * .5;
+      S = .5/S;
+      W = (v3.j - v2.k)*S;
+      Y = (v2.i + v1.j)*S;
+      Z = (v3.i + v1.k)*S;
       break;
     case 2:
-      //column 2
-      S  = sqrt( 1.0 + v2.j - v1.i - v3.k ) * 2;
-      
-      X = (v2.i + v1.j ) / S;
-      Y = 0.5 / S;
-      Z = (v3.j + v2.k ) / S;
-      W = (v3.i - v1.k ) / S;
+      //column 1
+      S  = sqrtf( (v3.j - (v3.k + v1.i)) +1);
+      Y = 0.5 *  S;
+      S = .5 / S;
+      W = (v1.k - v3.i);
+      Z = (v3.j + v2.k);
+      X = (v1.j + v2.i);
       break;
     case 3:
-      //column 3    
-      S  = sqrt( 1.0 + v3.k - v1.i - v2.j ) * 2;
-      
-      X = (v1.k + v3.i ) / S;
-      Y = (v3.j + v2.k ) / S;
-      Z = 0.5 / S;
-      W = (v1.j - v2.i ) / S;
+      //column 2    
+      S  = sqrtf( (v1.k - (v1.i + v2.j))+1);
+      Z = 0.5 *  S;
+      S = .5 / S;
+      W = (v2.i - v1.j);
+      X = (v1.k + v3.i);
+      Y = (v2.k + v3.j);
       break;
     }
+
+    /*
+    switch(max) {
+    case 1:
+      //column 0
+      S  = sqrtf( (v1.j - (v2.j + v3.k ))+1);
+      Y = 0.5 *  S;
+      S = .5 / S;
+      Z = (v1.j + v2.i ) * S;
+      X = (v1.k + v3.i ) * S;
+      W = (v2.k - v3.j ) * S;
+  
+      break;
+    case 2:
+      //column 1
+      S  = sqrtf( v2.k - (v3.k + v1.i )+1);
+      Y = 0.5 *  S;
+      S = .5 / S;
+      Z = (v3.j + v2.k ) * S;
+      X = (v2.i + v1.j ) * S;
+      W = (v3.i - v1.k ) * S;
+      break;
+    case 3:
+      //column 2    
+      S  = sqrtf( v3.i - (v1.i + v2.j )+1);
+      Z = 0.5 *  S;
+      S = .5 / S;
+      X = (v1.k + v3.i ) * S;
+      Y = (v3.j + v2.k ) * S;
+      W = (v1.j - v2.i ) * S;
+      break;
+    }
+    */
   }
   return Quaternion(W, Vector(X,Y,Z));
 }
