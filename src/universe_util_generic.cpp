@@ -321,6 +321,10 @@ namespace UniverseUtil {
         void LoadMission (string missionname) {
                 delayLoadMission (missionname);
         }
+        void LoadMissionScript (string missionscript) {
+                delayLoadMission ("mission/nothing.mission",missionscript);
+        }
+    
         void SetAutoStatus (int global_auto, int player_auto) {
 	  if (global_auto==1) {
 	    mission->global_autopilot = Mission::AUTO_ON;

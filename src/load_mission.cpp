@@ -48,9 +48,11 @@ int ReadIntSpace (std::string &str) {
 }
 struct delayed_mission {
   std::string str;
+  std::string script;
   unsigned int player;
-  delayed_mission (std::string str) {
+  delayed_mission (std::string str,std::string script) {
     this->str= str;
+    this->script=script;
     player = _Universe->CurrentCockpit();
   }
 };
@@ -66,7 +68,7 @@ void processDelayedMissions() {
 	ss = _Universe->activeStarSystem();
       }
       _Universe->pushActiveStarSystem (ss);
-      LoadMission (delayed_missions.back().str.c_str(),false);
+      LoadMission (delayed_missions.back().str.c_str(),delayed_missions.back().script,false);
       delayed_missions.pop_back();
       _Universe->popActiveStarSystem();
       _Universe->SetActiveCockpit(i);
@@ -74,7 +76,10 @@ void processDelayedMissions() {
   }
 }
 void delayLoadMission (std::string str) {
-  delayed_missions.push_back (delayed_mission(str));
+  delayed_missions.push_back (delayed_mission(str,string("")));
+}
+void delayLoadMission (std::string str,std::string script) {
+  delayed_missions.push_back (delayed_mission(str,script));
 }
 void SaveGame::ReloadPickledData () {
   std::string lpd = last_pickled_data;
@@ -202,17 +207,18 @@ std::string UnpickleAllMissions (char * &buf) {
   }
   return retval;
 }
-void LoadMission (const char * mission_name, bool loadFirstUnit) {
+void LoadMission (const char * mn, bool loadFirstUnit) {
+    LoadMission(mn,string(""),loadFirstUnit);
+}
+void LoadMission (const char * mission_name, const std::string &script, bool loadFirstUnit) {
   FILE * fp = fopen (mission_name,"r");
   if (!fp) {
     return;
   }
   fclose (fp);
-  char * tmp = strdup (mission_name);
-  active_missions.push_back (new Mission(tmp));
+  active_missions.push_back (new Mission(mission_name,script));
   mission = active_missions.back();
   active_missions.back()->initMission();
-  free (tmp);
 
   char fightername[1024];
   vector<Flightgroup *>::const_iterator siter;

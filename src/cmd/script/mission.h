@@ -436,7 +436,9 @@ class Mission {
   string mission_name;
   void terminateMission();
  Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
+
   Mission(const char *configfile, bool loadscripts=true);
+  Mission(const char * filename,const std::string &pythonscript, bool loadscripts=true);    
   std::string Pickle ();//returns filename\npickleddata
   void UnPickle (std::string pickled);//takes in pickeddata
   void AddFlightgroup(Flightgroup * fg);
@@ -495,7 +497,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
-
+  void ConstructMission(const char * configfile, const std::string &pythonscript,bool loadscripts=true);
  missionNode *top;
  
   easyDomNode *variables;

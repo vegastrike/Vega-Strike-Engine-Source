@@ -63,12 +63,25 @@ int Mission::number_of_ships=0;
 int Mission::number_of_flightgroups=0;
 int Mission::total_nr_frames=0;
 vector<Flightgroup *> Mission::flightgroups;
-Mission::Mission(const char *configfile, bool loadscripts){
+
+Mission::Mission (const char * filename,const std::string & script, bool loadscripts) {
+    ConstructMission(filename,script,loadscripts);
+}
+Mission::Mission (const char * filename, bool loadscripts) {
+    ConstructMission(filename,string(""),loadscripts);
+}
+void Mission::ConstructMission(const char *configfile, const std::string &script, bool loadscripts){
   player_autopilot=global_autopilot=AUTO_NORMAL;
   briefing=NULL;
   director=NULL;
   runtime.pymissions=NULL;
   nextpythonmission=NULL;
+  if (script.length()>0) {
+      nextpythonmission=new char [script.length()+2];
+      nextpythonmission[script.length()+1]=0;
+      nextpythonmission[script.length()]=0;
+      strcpy (nextpythonmission,script.c_str());
+  }
   easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();//such a bloody leak!
 
   top=domf->LoadXML(configfile);
@@ -146,7 +159,7 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
       if (loadscripts) {
 	DirectorStart((missionNode *)*siter);
       }
-    } else if (((*siter)->Name()=="python")){ //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
+    } else if (((*siter)->Name()=="python") && (!this->nextpythonmission)){ //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
 		string locals = (*siter)->attr_value(textAttr);
       const char *constdumbstr=locals.c_str(); //get the text XML attribute
       int i=strlen(constdumbstr); //constdumbstr is the string I wish to copy... i is its length.

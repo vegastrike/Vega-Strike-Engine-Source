@@ -111,6 +111,7 @@ namespace UniverseUtil {
 ///this sets whether or not a player may autopilot.  Normally they are both 0 and the autopiloting is allowed based on if enemies are near... if you pass in 1 then autopilot will be allowed no matter who is near... if you set -1 then autopilot is never allowed.  global affects all players... player just affects the player who accepted the mission.
 	void SetAutoStatus (int global_auto, int player_auto);
 	void LoadMission (string missionname);
+	void LoadMissionScript (string scriptcontents);    
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
 	float getPlanetRadiusPercent ();
 
