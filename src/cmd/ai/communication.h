@@ -10,7 +10,7 @@ class FSM {
     vector <unsigned int> edges;
     int GetSound (unsigned char sex);
     void AddSound (int sound, unsigned char sex);
-    Node (const std::string &message, float messagedel): message(message),sound(sound),messagedelta(messagedel){}
+    Node (const std::string &message, float messagedel): message(message),messagedelta(messagedel){}
   };
   vector <Node> nodes;
   FSM (const char * filename);
