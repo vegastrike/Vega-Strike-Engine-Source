@@ -190,6 +190,8 @@ void VegaConfig::initCommandMap(){
   // mapping from command string to keyboard handler
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;
+  command_map["JumpKey"]=FlyByKeyboard::JumpKey;
+
   command_map["StartKey"]=FlyByKeyboard::StartKey ;
   command_map["StopKey"]=FlyByKeyboard::StopKey ;
   command_map["UpKey"]=FlyByKeyboard::UpKey ;

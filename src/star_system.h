@@ -98,7 +98,7 @@ class StarSystem {
     cam[currentcamera].UpdateGFX();
   }
   ///Loads the star system from an XML file
-  StarSystem(char * filename, const Vector & centroid=Vector (0,0,0), const string planetname=string());
+  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const string planetname=string());
   ~StarSystem();
   UnitCollection * getUnitList();
   /// returns xy sorted bounding spheres of all units in current view
@@ -106,7 +106,8 @@ class StarSystem {
   ///Adds to draw list
   void AddUnit(Unit *unit);
   ///Removes from draw list
-  void RemoveUnit(Unit *unit);
+  bool RemoveUnit(Unit *unit);
+  bool JumpTo (Unit * unit, const std::string &system);
   ///Draws a frame of action, interpolating between physics frames
   void Draw();
   /// update a simulation atom
@@ -115,6 +116,7 @@ class StarSystem {
   void SwapIn ();
   ///Disables included lights and terrains
   void SwapOut ();
+  static void ProcessPendingJumps ();
 
   friend class Atmosphere;
 };

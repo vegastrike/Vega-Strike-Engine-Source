@@ -26,7 +26,7 @@
 #include "vegastrike.h"
 #include "universe.h"
 #include "cmd/atmosphere.h"
-
+#include "hashtable.h"
 
 
 extern Music *muzak;
@@ -40,11 +40,24 @@ vector<Vector> perplines;
 
 Atmosphere *theAtmosphere;
 
-StarSystem::StarSystem(char * filename, const Vector & centr,const string planetname) : 
+static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
+struct unorigdest {
+  Unit * un;
+  StarSystem * orig;
+  StarSystem * dest;
+  unorigdest (Unit * un, StarSystem * orig, StarSystem * dest):un(un),orig(orig),dest(dest) {}
+};
+static std::vector <unorigdest> pendingjump;
+void SSTransfer (Unit * un,StarSystem * orig,StarSystem * target){
+  pendingjump.push_back (unorigdest (un,orig,target));
+}
+
+StarSystem::StarSystem(const char * filename, const Vector & centr,const string planetname) : 
   //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
   missiles(new UnitCollection) {
+  star_system_table.Put (filename,this);
   _Universe->pushActiveStarSystem (this);
   bolts = new bolt_draw;
   collidetable = new CollideTable;
@@ -200,8 +213,36 @@ void StarSystem::AddUnit(Unit *unit) {
   drawList->prepend(unit);
 }
 
-void StarSystem::RemoveUnit(Unit *unit) {
-  assert(0);
+bool StarSystem::RemoveUnit(Unit *un) {
+  bool removed2=false;
+  Iterator *iter = units->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    if (unit==un) {
+      iter->remove();
+      removed2 =true;
+      break;
+    } else {
+      iter->advance();
+    }
+  }
+  delete iter;  
+  bool removed =false;
+  if (removed2) {
+    Iterator *iter = drawList->createIterator();
+    Unit *unit;
+    while((unit = iter->current())!=NULL) {
+      if (unit==un) {
+	iter->remove();
+	removed =true;
+	break;
+      }else {
+	iter->advance();
+      }
+    }
+    delete iter;  
+  }
+  return removed;
 }
 void StarSystem::SwapIn () {
   Iterator *iter = drawList->createIterator();
@@ -341,7 +382,6 @@ void StarSystem::Update() {
 	delete iter;
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
-	unsigned int i;
 	Terrain::CollideAll();
 	current_stage=PHY_COLLIDE;
 	AnimatedTexture::UpdateAllPhysics();
@@ -388,7 +428,42 @@ void StarSystem::Update() {
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 
+void StarSystem::ProcessPendingJumps() {
+  for (unsigned int kk=0;kk<pendingjump.size();kk++) {
+    if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
+      pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
+    }
+  }
+  pendingjump.clear();
+}
 
+bool StarSystem::JumpTo (Unit * un, const std::string &system) {
+
+  StarSystem *ss = star_system_table.Get(system);
+
+  if (!ss) {
+    ss = star_system_table.Get (system+".system");
+    if (!ss) {
+      std::string ssys (system);
+      FILE * fp = fopen (ssys.c_str(),"r");
+      if (!fp) {
+	ssys+=".system";
+	fp = fopen (ssys.c_str(),"r");
+      }
+      if (!fp)
+	return false;
+      fclose (fp);
+      ss = new StarSystem (ssys.c_str(),un->Position(),un->name);
+      _Universe->LoadStarSystem (ss);
+    }
+  }
+  if(ss) {
+    SSTransfer (un,this,ss);
+  } else {
+    return false;
+  }
+  return true;
+}
 void StarSystem::SelectCamera(int cam){
     if(cam<NUM_CAM&&cam>=0)
       currentcamera = cam;

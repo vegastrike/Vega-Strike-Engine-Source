@@ -26,7 +26,7 @@
 
 
 
-class Quaternion;
+struct Quaternion;
 
 /**
  * A 3x3 matrix.

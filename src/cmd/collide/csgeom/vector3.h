@@ -61,12 +61,12 @@ public:
   csVector3 (const Vector v): x(v.i), y(v.j), z(v.k) {}
   /// Conversion from double precision vector to single.
   /// Add two vectors.
-  inline friend csVector3 operator+ (const csVector3& v1, const csVector3& v2)
-  { return csVector3(v1.x+v2.x, v1.y+v2.y, v1.z+v2.z); }
+  inline csVector3 operator+ (const csVector3& v2) const
+  { return csVector3(x+v2.x, y+v2.y, z+v2.z); }
 
   /// Subtract two vectors.
-  inline friend csVector3 operator- (const csVector3& v1, const csVector3& v2)
-  { return csVector3(v1.x-v2.x, v1.y-v2.y, v1.z-v2.z); }
+  inline csVector3 operator- (const csVector3& v2) const
+  { return csVector3(x-v2.x, y-v2.y, z-v2.z); }
 
   /// Subtract two vectors of differing type, cast to double.
 

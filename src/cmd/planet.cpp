@@ -273,6 +273,10 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
 #endif
     terrain->Collide (un,top);      
   }
+  if (!destination.empty()&&un->JumpDrive()>=0) {
+    un->DeactivateJumpDrive();
+    _Universe->activeStarSystem()->JumpTo (un, std::string(destination[un->JumpDrive()%destination.size()]));
+  }
   //nothing happens...you fail to do anythign :-)
   //maybe air reisstance here? or swithc dynamics to atmos mode
 }

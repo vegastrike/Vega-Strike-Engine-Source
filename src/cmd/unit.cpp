@@ -32,7 +32,7 @@
 #include "ai/order.h"
 #include "ai/script.h"
 #include "ai/flybywire.h"
-#include "gfx/box.h"
+#include "gfx/vsbox.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
 #include "gfx/bsp.h"
@@ -95,8 +95,23 @@ void Unit::SetResolveForces (bool ys) {
   */
 }
 
+
+void Unit::ActivateJumpDrive (int destination=0) {
+  if (jumpdrive!=-2) {
+    jumpdrive = destination;
+  }
+}
+void Unit::DeactivateJumpDrive () {
+  if (jumpdrive>=0) {
+    jumpdrive=-1;
+  }
+}
+int Unit::JumpDrive () {
+  return jumpdrive;
+}
 void Unit::Init()
 {
+  jumpdrive=-1;//off but not disabled
   planet=NULL;
   image = new UnitImages;
   sound = new UnitSounds;

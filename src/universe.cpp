@@ -50,6 +50,7 @@ Universe::Universe(int argc, char** argv)
 
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
+  active_star_system[0]=s;//this one will get drawn...is this a good idea? ask john.  WHo's john? beats me!
 }
 void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
@@ -58,7 +59,6 @@ void Universe::Init (string systemfile, const Vector & centr,const string planet
 
   string fullname=systemfile+".system";
   StarSystem * ss;
-  LoadStarSystem (ss=new StarSystem ("solsmall.system",centr,planetname));
   LoadStarSystem(ss=new StarSystem((char *)fullname.c_str(),centr,planetname));
   pushActiveStarSystem (ss);
 }
@@ -139,7 +139,8 @@ void Universe::StartDraw()
   for (int i=0;i<star_system.size();i++) {
     star_system[i]->Update();
   }
-  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
+  StarSystem::ProcessPendingJumps();
+  //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();
 
 

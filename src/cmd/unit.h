@@ -267,6 +267,8 @@ class Unit {
   float mass;
   ///fuel of this unit
   float fuel;
+  ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
+  int jumpdrive;
   ///Moment of intertia of this unit
   float MomentOfInertia;
   ///The force applied from outside accrued over the whole physics frame
@@ -378,6 +380,9 @@ public:
   void Split (int level);
   ///Initialize many of the defaults inherant to the constructor
   void Init();
+  void ActivateJumpDrive (int destination=0);
+  void DeactivateJumpDrive ();
+  int JumpDrive ();//-1 returns off, otherwise returns destination
   ///Begin and continue explosion
   bool Explode(bool draw, float timeit);
   ///explodes then deletes

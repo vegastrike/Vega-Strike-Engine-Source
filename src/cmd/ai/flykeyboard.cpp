@@ -3,6 +3,7 @@
 
 struct StarShipControlKeyboard {
   bool matchspeed;
+  bool jumpkey;
   int sheltonpress;
   int sheltonrelease;
   int uppress;//negative if not pressed last
@@ -27,7 +28,7 @@ struct StarShipControlKeyboard {
   bool startpress;
   bool dirty;//it wasn't updated...
   int refcount;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;startpress=stoppress=dirty=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=dirty=false;}
   StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
@@ -178,6 +179,12 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     if (targ)
       MatchSpeed (targ->GetVelocity());
   }
+  if (SSCK.jumpkey) {
+    parent->ActivateJumpDrive();
+    SSCK.jumpkey=false;
+  }else {
+    parent->DeactivateJumpDrive();
+  }
   SSCK.dirty=true;
 #undef SSCK
 
@@ -200,7 +207,20 @@ void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
   default:break;
   }
 }
-
+void FlyByKeyboard::JumpKey(int, KBSTATE k) {
+  switch (k) {
+  case DOWN:
+  case PRESS:
+    starshipcontrolkeys.jumpkey=true;
+    break;
+  case UP:
+  case RELEASE:
+    starshipcontrolkeys.jumpkey = false;
+    break;
+  default:
+    break;
+  }
+}
 void FlyByKeyboard::UpKey(int, KBSTATE k) {
   if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
   switch (k) {
