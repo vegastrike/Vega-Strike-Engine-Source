@@ -708,59 +708,6 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 // NOT USED ANYMORE !!
 void NetClient::getZoneData( const Packet* packet )
 {
-	/*
-	unsigned short nbclts;
-	ClientState cs;
-	int		state_size=sizeof( ClientState);
-	int		desc_size=sizeof( ClientDescription);
-	ObjSerial nser, nser2 = 0;
-	int		offset=0;
-
-	offset = sizeof( unsigned short);
-	const char* buf = packet->getData();
-	nbclts = *((const unsigned short *) buf);
-	nbclts = ntohs( nbclts);
-	for( int i=0; i<nbclts; i++)
-	{
-		memcpy( &cs, buf+offset, state_size);
-		offset += state_size;
-		memcpy( &cd, buf+offset, desc_size);
-		offset += desc_size;
-		cs.netswap();
-		nser2 = cs.getSerial();
-		nser = nser2;
-		nser = ntohs( nser2);
-		if( nser != this->serial && !isLocalSerial( nser))
-		{
-			cout<<"NEW CLIENT - ";
-			cs.display();
-			Clients[nser]->serial = nser;
-			//memcpy( &Clients[nser]->current_state, &cs, state_size);
-			Clients[nser]->current_state = cs;
-			memcpy( &Clients[nser]->current_desc, &cd, desc_size);
-			// Launch the unit in the game
-			Clients[nser]->game_unit.SetUnit( UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string("")));
-			Clients[nser]->game_unit.GetUnit()->PrimeOrders();
-			Clients[nser]->game_unit.GetUnit()->SetNetworkMode( true);
-
-			// Assign new coordinates to client
-			Clients[nser]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-			Clients[nser]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
-			Clients[nser]->game_unit.GetUnit()->SetNetworkMode( true);
-			// In that case, we want cubic spline based interpolation
-			//init_interpolation( nser);
-		}
-		// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
-		else if( nser!=this->serial)
-		{
-			Clients[nser] = new Client;
-			cout<<"IT'S ANOTHER LOCAL PLAYER ";
-			Clients[nser]->game_unit.SetUnit( getNetworkUnit( nser));
-			assert( Clients[nser]->game_unit.GetUnit() != NULL);
-			cs.display();
-		}
-	}
-	*/
 }
 
 /*************************************************************/
@@ -791,7 +738,7 @@ void	NetClient::addClient( const Packet* packet )
 	clt = new Client;
 	nbclients++;
 	// Copy the client state in its structure
-	clt->serial = cltserial;
+	//Unit * un = clt->game_unit.GetUnit();
 
 	cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	cout<<"At : ";
@@ -800,7 +747,6 @@ void	NetClient::addClient( const Packet* packet )
 	NetBuffer netbuf( packet->getData(), packet->getDataLength());
 	// Should receive the name
 	clt->name = netbuf.getString();
-	//ClientState cs = clt->current_state = netbuf.getClientState();
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
@@ -840,19 +786,13 @@ void	NetClient::addClient( const Packet* packet )
 			::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 		for (;i!=un->mounts.end();++i)
 			(*i).status=Mount::INACTIVE;
-		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
-		clt->game_unit.GetUnit()->SetNetworkMode( true);
-		clt->game_unit.GetUnit()->SetSerial( cltserial);
+		un->SetNetworkMode( true);
+		un->SetSerial( cltserial);
 		//cout<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
-		clt->game_unit.GetUnit()->SetPosition( save.GetPlayerLocation());
-		clt->current_state.setSerial( cltserial);
-		clt->current_state.setPosition( save.GetPlayerLocation());
-		// No need to set orientation and speed when client is created in the zone
-		//clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-		//clt->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
-		clt->game_unit.GetUnit()->SetNetworkMode( true);
+		un->SetPosition( save.GetPlayerLocation());
+		un->SetSerial( cltserial);
 
 		// In that case, we want cubic spline based interpolation
 		//init_interpolation( cltserial);
@@ -929,6 +869,7 @@ void	NetClient::receivePosition( const Packet* packet )
 	int		qfsize = sizeof( double);
 	unsigned char	cmd;
 	Client * clt;
+	Unit * un;
 
 	nbclts = packet->getSerial();
 	//nbclts = ntohs( nbclts2);
@@ -950,20 +891,18 @@ void	NetClient::receivePosition( const Packet* packet )
 			//cs.display();
 			sernum = cs.getSerial();
 			clt = Clients[sernum];
+			un = clt->game_unit.GetUnit();
 			// Test if this is a local player
 			// Is it is, ignore position update
 			if( clt!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
 			{
 				// Backup old state
-				clt->old_state = Clients[sernum]->current_state;
+				un->prev_physical_state = un->curr_physical_state;
 				// Update concerned client directly in network client list
-				clt->current_state = cs;
+				un->curr_physical_state.position = cs.getPosition();
+				un->curr_physical_state.orientation = cs.getOrientation();
+				un->Velocity = cs.getVelocity();
 
-				// Set the orientation by extracting the matrix from quaternion
-				clt->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-				clt->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
-				// Use SetCurPosition or SetPosAndCumPos ??
-				clt->game_unit.GetUnit()->SetCurPosition( cs.getPosition());
 				// In that case, we want cubic spline based interpolation
 				//predict( sernum);
 				//init_interpolation( sernum);
@@ -983,22 +922,19 @@ void	NetClient::receivePosition( const Packet* packet )
 			if( clt!=NULL && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
 			{
 				// Backup old state
-				clt->old_state = clt->current_state;
-				// Set the new received position in current_state
-				//QVector tmppos( VSSwapHostDoubleToLittle( (double) *(databuf+offset)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize)), VSSwapHostDoubleToLittle( (double) *(databuf+offset+qfsize+qfsize)));
-				QVector tmppos = netbuf.getVector();
-				clt->current_state.setPosition( tmppos);
-				// Use SetCurPosition or SetPosAndCumPos ??
-				clt->game_unit.GetUnit()->SetCurPosition( tmppos);
-				clt->current_state.display();
+				un->prev_physical_state = un->curr_physical_state;
+				// Update concerned client directly in network client list
+				un->curr_physical_state.position = cs.getPosition();
+				un->curr_physical_state.orientation = cs.getOrientation();
+				un->Velocity = cs.getVelocity();
+
+				// Set the new received position in curr_physical_state
+				un->curr_physical_state.position = netbuf.getQVector();
 				//predict( sernum);
 			}
 			else
 			{
-				ClientState cs2;
 				QVector tmppos = netbuf.getVector();
-				cs2.setPosition( tmppos);
-				cs2.display();
 				cout<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
 			}
 			//offset += sizeof( QVector);
@@ -1131,23 +1067,24 @@ void	NetClient::predict( ObjSerial clientid)
 	//    - compute a point on the current spline using blend as t value
 	//    - parameter A and B are old_position and new_position (received in the latest packet)
 
-	unsigned int del = Clients[clientid]->current_state.getDelay();
+	Unit * un = Clients[clientid]->game_unit.GetUnit();
+	unsigned int del = Clients[clientid]->deltatime;
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
-	//QVector A( Clients[clientid]->old_state.getPosition());
-	QVector B( Clients[clientid]->current_state.getPosition());
-	//Vector  VA( Clients[clientid]->old_state.getVelocity());
-	Vector  VB( Clients[clientid]->current_state.getVelocity());
-	//Vector  AA( Clients[clientid]->old_state.getAcceleration());
-	Vector  AB( Clients[clientid]->current_state.getAcceleration());
+	//QVector A( un->prev_physical_state.position);
+	QVector B( un->curr_physical_state.position);
+	//Vector  VA( un-> ???? OLD VELOCITY ??? );
+	Vector  VB( un->Velocity);
+	//Vector  AA( un->GetPrevAcceleration() ???? );
+	Vector  AB( un->GetAcceleration());
 	//QVector A1( A + VA);
 	// A2 is computed from position B and velocity VB
 	QVector A3( B + VB*delay + AB*delay*delay*0.5);
 	//QVector A2( A3 - (VB + AB*delay));
 
-	Clients[clientid]->old_state = Clients[clientid]->current_state;
-	Clients[clientid]->current_state.setPosition( A3);
+	// HERE : Backup the current state ???? --> Not sure
+	un->curr_physical_state.position = A3;
 }
 
 void	NetClient::init_interpolation( ObjSerial clientid)
@@ -1158,16 +1095,19 @@ void	NetClient::init_interpolation( ObjSerial clientid)
 	//    - compute a point on the current spline using blend as t value
 	//    - parameter A and B are old_position and new_position (received in the latest packet)
 
-	unsigned int del = Clients[clientid]->current_state.getDelay();
+	/************* VA IS TO BE UNCOMMENTED ****************/
+	Unit * un = Clients[clientid]->game_unit.GetUnit();
+	unsigned int del = Clients[clientid]->deltatime;
 	double delay = del;
 	// A is last known position and B is the position we just received
 	// A1 is computed from position A and velocity VA
-	QVector A( Clients[clientid]->old_state.getPosition());
-	QVector B( Clients[clientid]->current_state.getPosition());
-	Vector  VA( Clients[clientid]->old_state.getVelocity());
-	Vector  VB( Clients[clientid]->current_state.getVelocity());
-	//Vector  AA( Clients[clientid]->old_state.getAcceleration());
-	Vector  AB( Clients[clientid]->current_state.getAcceleration());
+	QVector A( un->prev_physical_state.position);
+	QVector B( un->curr_physical_state.position);
+	// Should get old velocity in VA here : NOT ACTUAL ONE !!!
+	Vector  VA( un->Velocity);
+	Vector  VB( un->Velocity);
+	//Vector  AA( un->GetPrevAcceleration() ???? );
+	Vector  AB( un->GetAcceleration());
 	QVector A1( A + VA);
 	// A2 is computed from position B and velocity VB
 	QVector A3( B + VB*delay + AB*delay*delay*0.5);

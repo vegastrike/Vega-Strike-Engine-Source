@@ -441,7 +441,7 @@ void Packet::Header::hton( char* buf )
     // TO CHANGE IF ObjSerial IS NOT A SHORT ANYMORE
     Header* h      = (Header*)buf;
     h->command     = command;
-    h->serial      = htons( serial );
+    h->serial      = OBJSERIAL_TONET( serial );
     h->timestamp   = htonl( timestamp );
     h->data_length = htons( data_length );
     h->flags       = htons( flags );

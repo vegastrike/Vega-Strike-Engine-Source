@@ -150,8 +150,6 @@ StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & 
 
 	// Compute a safe entrance point -> DONE WHEN LOGIN ACCEPTED
 	//QVector safevec;
-	//safevec = UniverseUtil::SafeEntrancePoint( clt->current_state.getPosition());
-	//clt->current_state.setPosition( safevec);
 	sts->AddUnit( clt->game_unit.GetUnit());
 	return ret;
 }
@@ -191,7 +189,9 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
         cout<<"Trying to send update without client" << endl;
         return;
     }
-    if( clt->zone < 0 || clt->zone > zone_list.size() )
+	Unit * un = clt->game_unit.GetUnit();
+	Unit * un2 = NULL;
+    if( clt->zone > zone_list.size() )
     {
         cout<<"Trying to send update to nonexistant zone " << clt->zone << endl;
         return;
@@ -200,10 +200,11 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
     // cout<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
 	for( LI i=zone_list[clt->zone].begin(); i!=zone_list[clt->zone].end(); i++)
 	{
+		un2 = (*i)->game_unit.GetUnit();
 		// Broadcast to other clients
-		if( clt->serial!= (*i)->serial)
+		if( un->GetSerial() != un2->GetSerial())
 		{
-			cout<<"BROADCASTING "<<pckt->getCommand()<<" to client n° "<<(*i)->serial;
+			cout<<"BROADCASTING "<<pckt->getCommand()<<" to client n° "<<un2->GetSerial();
 			cout<<endl;
 			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
 			pckt->bc_send( );
@@ -222,13 +223,10 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 	for( LI i=zone_list[zone].begin(); i!=zone_list[zone].end(); i++)
 	{
 		// Broadcast to all clients including the one who did a request
-		//if( serial!= (*i)->serial)
-		//{
-			cout<<"Sending update to client n° "<<(*i)->serial;
+			cout<<"Sending update to client n° "<<(*i)->game_unit.GetUnit()->GetSerial();
 			cout<<endl;
 			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
 			pckt->bc_send( );
-		//}
 	}
 }
 
@@ -239,9 +237,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 // Broadcast all positions
 void	ZoneMgr::broadcastSnapshots( )
 {
-	ClientState cstmp;
-	char buffer[MAXBUFFER];
-	int i=0, j=0, p=0;
+	int i=0;
 	LI k, l;
 	LUI m;
 	NetBuffer netbuf;
@@ -251,15 +247,10 @@ void	ZoneMgr::broadcastSnapshots( )
 	// Loop for all systems/zones
 	for( i=0; i<zone_list.size(); i++)
 	{
-		// Check if system is non-empty
+		// Check if system contains player(s)
 		if( zone_clients[i]>0)
 		{
-			// It allows to check (for a given client) if other clients are far away (so we can only
-			// send position, not orientation and stuff) and if other clients are visible to the given
-			// client.
-			// -->> Reduce bandwidth usage but increase CPU usage
-			int	offset = 0, nbclients = 0, nbunits=0;
-			ObjSerial sertmp;
+			int	nbclients = 0, nbunits=0;
 			Packet pckt;
 
 			// Loop for all the zone's clients
@@ -269,40 +260,17 @@ void	ZoneMgr::broadcastSnapshots( )
 				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
 				nbclients = zone_clients[i]-1;
 				netbuf.Reset();
-				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
+				for( l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
 				{
 					// Check if we are on the same client and that the client has moved !
-					if( l!=k && !((*l)->current_state.getPosition()==(*l)->old_state.getPosition() && (*l)->current_state.getOrientation()==(*l)->old_state.getOrientation()))
+					if( l!=k)
 					{
-						// Client pointed by 'k' can see client pointed by 'l'
-						// For now only check if the 'l' client is in front of the ship and not behind
-						if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
-						{
-							// Test if client 'l' is far away from client 'k' = test radius/distance<=X
-							// So we can send only position
-							// Here distance should never be 0
-							//ratio = radius/distance;
-							if( 1 /* ratio > XX client not too far */)
-							{
-								// Mark as position+orientation+velocity update
-								netbuf.addChar( CMD_FULLUPDATE);
-								// Put the current client state in
-								netbuf.addClientState( (*l)->current_state);
-								// Increment the number of clients we send full info about
-								j++;
-							}
-							// Here find a condition for which sending only position would be enough
-							else if( 1 /* ratio>=1 far but still visible */)
-							{
-								// Mark as position update only
-								netbuf.addChar( CMD_POSUPDATE);
-								// Add the client serial
-								netbuf.addShort( (*l)->serial);
-								netbuf.addVector( (*l)->current_state.getPosition());
-								// Increment the number of clients we send limited info about
-								p++;
-							}
-						}
+						Unit * un = (*l)->game_unit.GetUnit();
+						// Create a client state with a delta time
+						ClientState cs( un);
+						// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
+						cs.setDelay( (*l)->deltatime);
+						this->addPosition( netbuf, un, (*k)->game_unit.GetUnit(), cs);
 					}
 					// Else : always send back to clients their own info or just ignore ?
 					// Ignore for now
@@ -311,41 +279,11 @@ void	ZoneMgr::broadcastSnapshots( )
 			/************************* START UNITS BROADCAST ***************************/
 				nbunits = zone_units[i];
 				//netbuf.Reset();
-				for( j=0, p=0, m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
+				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
 				{
-					// Check if we are on the same client and that the client has moved !
-					if( !((*m)->prev_physical_state.position==(*m)->curr_physical_state.position && (*m)->prev_physical_state.orientation==(*m)->curr_physical_state.orientation))
-					{
-						// Client pointed by 'k' can see client pointed by 'l'
-						// For now only check if the 'l' client is in front of the ship and not behind
-						if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
-						{
-							// Test if client 'l' is far away from client 'k' = test radius/distance<=X
-							// So we can send only position
-							// Here distance should never be 0
-							//ratio = radius/distance;
-							if( 1 /* ratio > XX client not too far */)
-							{
-								// Mark as position+orientation+velocity update
-								netbuf.addChar( CMD_FULLUPDATE);
-								// Put the current client state in
-								netbuf.addClientState( ClientState( (*m)->GetSerial(), (*m)->curr_physical_state, (*m)->Velocity, (*m)->ResolveForces (identity_transformation,identity_matrix), 0));
-								// Increment the number of clients we send full info about
-								j++;
-							}
-							// Here find a condition for which sending only position would be enough
-							else if( 1 /* ratio>=1 far but still visible */)
-							{
-								// Mark as position update only
-								netbuf.addChar( CMD_POSUPDATE);
-								// Add the client serial
-								netbuf.addShort( (*m)->GetSerial());
-								netbuf.addQVector( (*m)->curr_physical_state.position);
-								// Increment the number of clients we send limited info about
-								p++;
-							}
-						}
-					}
+					// Create a client state with a delta time too ?? WHICH ONE ???
+					ClientState cs( (*m));
+					this->addPosition( netbuf, (*m), (*k)->game_unit.GetUnit(), cs);
 					// Else : always send back to clients their own info or just ignore ?
 					// Ignore for now
 				}
@@ -367,6 +305,41 @@ void	ZoneMgr::broadcastSnapshots( )
 	}
 }
 
+void	ZoneMgr::addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, ClientState & un_cs)
+{
+	// This test may be wrong for server side units -> may cause more traffic than needed
+	if( !(un->prev_physical_state.position==un->curr_physical_state.position && un->prev_physical_state.orientation==un->curr_physical_state.orientation))
+	{
+		// Unit 'un' can see Unit 'iter'
+		// For now only check if the 'iter' client is in front of Unit 'un')
+		if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
+		{
+			// Test if client 'l' is far away from client 'k' = test radius/distance<=X
+			// So we can send only position
+			// Here distance should never be 0
+			//ratio = radius/distance;
+			if( 1 /* ratio > XX client not too far */)
+			{
+				// Mark as position+orientation+velocity update
+				netbuf.addChar( CMD_FULLUPDATE);
+				// Put the current client state in
+				netbuf.addClientState( un_cs);
+				// Increment the number of clients we send full info about
+			}
+			// Here find a condition for which sending only position would be enough
+			else if( 0 /* ratio>=1 far but still visible */)
+			{
+				// Mark as position update only
+				netbuf.addChar( CMD_POSUPDATE);
+				// Add the client serial
+				netbuf.addShort( un->GetSerial());
+				netbuf.addQVector( un_cs.getPosition());
+				// Increment the number of clients we send limited info about
+			}
+		}
+	}
+}
+
 /************************************************************************************************/
 /**** broadcastDamage                                                                       *****/
 /************************************************************************************************/
@@ -374,7 +347,7 @@ void	ZoneMgr::broadcastSnapshots( )
 // Broadcast all damages
 void	ZoneMgr::broadcastDamage( )
 {
-	int i=0, j=0, p=0, it=0;
+	int i=0;
 	LI k, l;
 	LUI m;
 	NetBuffer netbuf;
@@ -391,8 +364,7 @@ void	ZoneMgr::broadcastDamage( )
 			// It allows to check (for a given client) if other clients are far away (so we can only
 			// send position, not orientation and stuff) and if other clients are visible to the given
 			// client.
-			int	offset = 0, nbclients = 0, nbunits=0, damsize=0;
-			ObjSerial sertmp;
+			int	nbclients = 0, nbunits=0;
 			Packet pckt;
 			Unit * un;
 
@@ -402,104 +374,22 @@ void	ZoneMgr::broadcastDamage( )
 			/************************* START CLIENTS BROADCAST ***************************/
 				nbclients = zone_clients[i];
 				netbuf.Reset();
-				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
+				for( l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
 				{
 					// Check if there is damages on that client
 					un = (*l)->game_unit.GetUnit();
-					unsigned short damages = un->damages;
-					if( damages)
-					{
-						// Add the client serial
-						netbuf.addSerial( (*l)->serial);
-						// Add the damage flag
-						damsize = sizeof( damages);
-						if( damsize==sizeof( char))
-							netbuf.addChar( damages);
-						else if( damsize == sizeof( unsigned short))
-							netbuf.addShort( damages);
-						else if( damsize == sizeof( unsigned int))
-							netbuf.addInt32( damages);
-						// Put the altered stucts after the damage enum flag
-						if( damages & Unit::SHIELD_DAMAGED)
-						{
-							netbuf.addShield( un->shield);
-						}
-						if( damages & Unit::SHIELD_DAMAGED)
-						{
-							netbuf.addArmor( un->armor);
-						}
-						if( damages & Unit::COMPUTER_DAMAGED)
-						{
-							netbuf.addChar( un->computer.itts);
-							netbuf.addChar( un->computer.radar.color);
-							netbuf.addFloat( un->limits.retro);
-							netbuf.addFloat( un->computer.radar.maxcone);
-							netbuf.addFloat( un->computer.radar.lockcone);
-							netbuf.addFloat( un->computer.radar.trackingcone);
-							netbuf.addFloat( un->computer.radar.maxrange);
-							for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
-								netbuf.addFloat( un->image->cockpit_damage[it]);
-						}
-						if( damages & Unit::MOUNT_DAMAGED)
-						{
-							netbuf.addShort( un->image->ecm);
-							for( it=0; it<un->mounts.size(); it++)
-							{
-								if( sizeof( Mount::STATUS) == sizeof( char))
-									netbuf.addChar( un->mounts[it].status);
-								else if( sizeof( Mount::STATUS) == sizeof( unsigned short))
-									netbuf.addShort( un->mounts[it].status);
-								else if( sizeof( Mount::STATUS) == sizeof( unsigned int))
-									netbuf.addInt32( un->mounts[it].status);
-
-								netbuf.addShort( un->mounts[it].ammo);
-								netbuf.addFloat( un->mounts[it].time_to_lock);
-								netbuf.addShort( un->mounts[it].size);
-							}
-						}
-						if( damages & Unit::CARGOFUEL_DAMAGED)
-						{
-							netbuf.addFloat( un->FuelData());
-							netbuf.addShort( un->AfterburnData());
-							netbuf.addFloat( un->image->cargo_volume);
-							for( it=0; it<un->image->cargo.size(); it++)
-								netbuf.addInt32( un->image->cargo[it].quantity);
-						}
-						if( damages & Unit::JUMP_DAMAGED)
-						{
-							netbuf.addChar( un->shield.leak);
-							netbuf.addFloat( un->shield.recharge);
-							netbuf.addFloat( un->EnergyRechargeData());
-							netbuf.addShort( un->MaxEnergyData());
-							netbuf.addShort( un->jump.energy);
-							netbuf.addChar( un->jump.damage);
-							netbuf.addChar( un->image->repair_droid);
-						}
-						if( damages & Unit::CLOAK_DAMAGED)
-						{
-							netbuf.addShort( un->cloaking);
-							netbuf.addFloat( un->image->cloakenergy);
-							netbuf.addShort( un->cloakmin);
-							netbuf.addShield( un->shield);
-						}
-						if( damages & Unit::LIMITS_DAMAGED)
-						{
-							netbuf.addFloat( un->computer.max_pitch);
-							netbuf.addFloat( un->computer.max_yaw);
-							netbuf.addFloat( un->computer.max_roll);
-							netbuf.addFloat( un->limits.roll);
-							netbuf.addFloat( un->limits.yaw);
-							netbuf.addFloat( un->limits.pitch);
-							netbuf.addFloat( un->limits.lateral);
-						}
-					}
+					if( un->damages)
+						this->addDamage( netbuf, un);
 				}
 			/************************* END CLIENTS BROADCAST ***************************/
 			/************************* START UNITS BROADCAST ***************************/
 				nbunits = zone_units[i];
 				//netbuf.Reset();
-				for( j=0, p=0, m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
+				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
 				{
+					// Check if there is damages on that unit
+					if( (*m)->damages)
+						this->addDamage( netbuf, (*m));
 				}
 				// Send snapshot to client k
 				if( netbuf.getDataLength() > 0)
@@ -508,13 +398,97 @@ void	ZoneMgr::broadcastDamage( )
 #ifndef _WIN32
 					__LINE__
 #else
-					302
+					429
 #endif
 					);
 				}
 			}
 		}
 	}
+}
+
+void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
+{
+		int it = 0;
+
+		// Add the damage flag
+		unsigned short damages = un->damages;
+		netbuf.addShort( damages);
+		// Add the client serial
+		netbuf.addSerial( un->GetSerial());
+		// Put the altered stucts after the damage enum flag
+		if( damages & Unit::SHIELD_DAMAGED)
+		{
+			netbuf.addShield( un->shield);
+		}
+		if( damages & Unit::SHIELD_DAMAGED)
+		{
+			netbuf.addArmor( un->armor);
+		}
+		if( damages & Unit::COMPUTER_DAMAGED)
+		{
+			netbuf.addChar( un->computer.itts);
+			netbuf.addChar( un->computer.radar.color);
+			netbuf.addFloat( un->limits.retro);
+			netbuf.addFloat( un->computer.radar.maxcone);
+			netbuf.addFloat( un->computer.radar.lockcone);
+			netbuf.addFloat( un->computer.radar.trackingcone);
+			netbuf.addFloat( un->computer.radar.maxrange);
+			for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
+				netbuf.addFloat( un->image->cockpit_damage[it]);
+		}
+		if( damages & Unit::MOUNT_DAMAGED)
+		{
+			netbuf.addShort( un->image->ecm);
+			for( it=0; it<un->mounts.size(); it++)
+			{
+				if( sizeof( Mount::STATUS) == sizeof( char))
+					netbuf.addChar( un->mounts[it].status);
+				else if( sizeof( Mount::STATUS) == sizeof( unsigned short))
+					netbuf.addShort( un->mounts[it].status);
+				else if( sizeof( Mount::STATUS) == sizeof( unsigned int))
+					netbuf.addInt32( un->mounts[it].status);
+
+				netbuf.addShort( un->mounts[it].ammo);
+				netbuf.addFloat( un->mounts[it].time_to_lock);
+				netbuf.addShort( un->mounts[it].size);
+			}
+		}
+		if( damages & Unit::CARGOFUEL_DAMAGED)
+		{
+			netbuf.addFloat( un->FuelData());
+			netbuf.addShort( un->AfterburnData());
+			netbuf.addFloat( un->image->cargo_volume);
+			for( it=0; it<un->image->cargo.size(); it++)
+				netbuf.addInt32( un->image->cargo[it].quantity);
+		}
+		if( damages & Unit::JUMP_DAMAGED)
+		{
+			netbuf.addChar( un->shield.leak);
+			netbuf.addFloat( un->shield.recharge);
+			netbuf.addFloat( un->EnergyRechargeData());
+			netbuf.addShort( un->MaxEnergyData());
+			netbuf.addShort( un->jump.energy);
+			netbuf.addChar( un->jump.damage);
+			netbuf.addChar( un->image->repair_droid);
+		}
+		if( damages & Unit::CLOAK_DAMAGED)
+		{
+			netbuf.addShort( un->cloaking);
+			netbuf.addFloat( un->image->cloakenergy);
+			netbuf.addShort( un->cloakmin);
+			netbuf.addShield( un->shield);
+		}
+		if( damages & Unit::LIMITS_DAMAGED)
+		{
+			netbuf.addFloat( un->computer.max_pitch);
+			netbuf.addFloat( un->computer.max_yaw);
+			netbuf.addFloat( un->computer.max_roll);
+			netbuf.addFloat( un->limits.roll);
+			netbuf.addFloat( un->limits.yaw);
+			netbuf.addFloat( un->limits.pitch);
+			netbuf.addFloat( un->limits.lateral);
+		}
 }
 
 /************************************************************************************************/
@@ -537,14 +511,12 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 		if( clt!=(*k))
 		{
 			SaveNetUtil::GetSaveStrings( (*k), savestr, xmlstr);
-			unsigned int savelen = savestr.length();
-			unsigned int xmllen = xmlstr.length();
 			// Add the ClientState at the beginning of the buffer
-			netbuf.addClientState( (*k)->current_state);
+			netbuf.addClientState( ClientState( (*k)->game_unit.GetUnit()));
 			// Add the save and xml strings
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
-			packet2.send( CMD_ENTERCLIENT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
+			packet2.send( CMD_ENTERCLIENT, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
 #ifndef _WIN32
 				__LINE__
 #else
@@ -554,7 +526,7 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 			nbclients++;
 		}
 	}
-	cout<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<clt->serial<<endl;
+	cout<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<clt->game_unit.GetUnit()->GetSerial()<<endl;
 }
 
 /************************************************************************************************/
@@ -578,8 +550,7 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 	for( k=zone_list[clt->zone].begin(); k!=zone_list[clt->zone].end(); k++)
 	{
 		cout<<"SENDING : ";
-		netbuf.addClientState( (*k)->current_state);
-		(*k)->current_state.display();
+		netbuf.addClientState( ClientState( (*k)->game_unit.GetUnit()));
 	}
 
 	return state_size*nbt;

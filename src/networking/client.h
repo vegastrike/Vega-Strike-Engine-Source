@@ -36,8 +36,6 @@
 
 extern VegaConfig *vs_config;
 
-struct Client;
-
 // Network part of a client description
 struct	Client
 {
@@ -47,7 +45,7 @@ struct	Client
 	AddressIP		cltadr;
 	bool            is_tcp;
 	SOCKETALT		sock;
-	ObjSerial		serial;
+	//ObjSerial		serial;
 	// 2 timeout vals to check a timeout for client connections
 	// those vals are server times
 	double		old_timeout;
@@ -59,8 +57,8 @@ struct	Client
 	string			callsign;
 	string			name;
 	string			passwd;
-	ClientState		old_state;
-	ClientState		current_state;
+	//ClientState		old_state;
+	//ClientState		current_state;
 	/* In-game parameters */
 	unsigned short	zone;
 	//char			localplayer;
@@ -68,8 +66,8 @@ struct	Client
 
 	Client()
 	{
-		memset( &old_state, 0, sizeof( ClientState));
-		memset( &current_state, 0, sizeof( ClientState));
+		//memset( &old_state, 0, sizeof( ClientState));
+		//memset( &current_state, 0, sizeof( ClientState));
 		latest_timestamp=0;
 		old_timestamp=0;
 		latest_timeout=0;
@@ -82,8 +80,8 @@ struct	Client
 	    : is_tcp(tcp)
 	    , sock(s)
 	{
-		memset( &old_state, 0, sizeof( ClientState));
-		memset( &current_state, 0, sizeof( ClientState));
+		//memset( &old_state, 0, sizeof( ClientState));
+		//memset( &current_state, 0, sizeof( ClientState));
 		latest_timestamp=0;
 		old_timestamp=0;
 		latest_timeout=0;

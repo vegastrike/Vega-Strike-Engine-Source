@@ -15,6 +15,8 @@
 
 *** GAME SERVER ********************************************************
 
+- In UpdatePhysics : do not modify physical_state for a client ! only for server side units (SHOULD BE OK IN UpdatePhysics2)
+- Check the detlatime we have to send in clientstate (broadcastSnapshot)
 - Load whole system description when generating a system (if not already done)
 - Transfer system description when a player enter in a system (planets, bases, ...)
 - Turn mount_num into a char ?
@@ -34,6 +36,8 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Check if we received position info about us -> ignore
+- Do not maintain ClientStates anymore -> maintain Unit members directly
 - Write the function that receive damage snapshot
 - Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop

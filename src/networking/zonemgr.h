@@ -34,6 +34,7 @@ typedef vector<list<Client *> >::iterator VLI;
 typedef list<Unit *>::iterator LUI;
 
 class NetUI;
+class NetBuffer;
 
 class ZoneMgr
 {
@@ -44,6 +45,9 @@ class ZoneMgr
 		// List of units in zones (but not Clients)
 		vector<list<Unit *> >	zone_unitlist;
 		vector<int>				zone_units;
+
+		void	addDamage( NetBuffer & netbuf, Unit * un);
+		void	addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, ClientState & un_cs);
 
 	public:
 		ZoneMgr();

@@ -125,6 +125,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
     //strcpy( name, buf);
     //strcpy( passwd, buf+NAMELEN);
 	NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
+	ObjSerial cltserial;
 	callsign = netbuf.getString();
 	passwd = netbuf.getString();
 
@@ -143,14 +144,11 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	clt->callsign = callsign;
 	clt->passwd = passwd;
-
-	// Assign its serial to client*
 	if( !acctserver)
-		clt->serial = getUniqueSerial();
+		cltserial = getUniqueSerial();
 	else
-		clt->serial = packeta.getSerial();
-	clt->current_state.setSerial( clt->serial);
-	//cout<<"Authentication success for serial "<<clt->serial<<endl;
+		cltserial = packeta.getSerial();
+
 	COUT << "LOGIN REQUEST SUCCESS for <" << callsign << ">" << endl;
 	// Verify that client already has a character
 	if( newacct)
@@ -160,7 +158,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	}
 	else
 	{
-		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << clt->serial << " )= --------------------------------------" << endl;
+		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << cltserial << " )= --------------------------------------" << endl;
 		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
 		// Get the save parts in a string array
 		vector<string> saves;
@@ -179,7 +177,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		Cockpit * cp = _Universe->createCockpit( PLAYER_CALLSIGN);
 		cp->Init ("");
 		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
-		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, saves[0], false);
+		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, saves[0], false);
 		// Generate the system we enter in if needed and add the client in it
 
 		cout<<"\tcredits = "<<credits<<endl;
@@ -199,6 +197,8 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
                              0, saves[1]);
 		cout<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
+		// Assign its serial to client*
+		un->SetSerial( cltserial);
 
 		// Affect the created unit to the cockpit
 		cout<<"-> UNIT LOADED"<<endl;
@@ -207,7 +207,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cout<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
         Packet packet2;
-		packet2.send( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
+		packet2.send( LOGIN_ACCEPT, cltserial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -491,18 +491,17 @@ void	NetServer::start(int argc, char **argv)
 				// Build a buffer with number of clients and client serials
 				int listlen = (tcpClients.size()+udpClients.size())*sizeof(ObjSerial);
 				char * buflist = new char[listlen];
-				ObjSerial sertmp;
 				// Put first the number of clients
 				//netbuf.addShort( nbclients);
 				for( j=0, i = tcpClients.begin(); i!=tcpClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
-					netbuf.addSerial((*i)->serial);
+					netbuf.addSerial((*i)->game_unit.GetUnit()->GetSerial());
 				}
 				for( i = udpClients.begin(); i!=udpClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
-					netbuf.addSerial((*i)->serial);
+					netbuf.addSerial((*i)->game_unit.GetUnit()->GetSerial());
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
 				// Use the serial packet's field to send the number of clients
@@ -758,6 +757,7 @@ void	NetServer::checkTimedoutClients_udp()
 	/********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
 	double curtime = (unsigned int) getNewTime();
 	double deltatmp = 0;
+	Unit * un;
 	for (LI i=udpClients.begin(); i!=udpClients.end(); i++)
 	{
 		deltatmp = (fabs(curtime - (*i)->latest_timeout));
@@ -769,7 +769,8 @@ void	NetServer::checkTimedoutClients_udp()
 			// side -> when timestamp has grown enough to became bigger than what an u_int can store
 			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
 			{
-				cout<<"ACTIVITY TIMEOUT for client number "<<(*i)->serial<<endl;
+				un = (*i)->game_unit.GetUnit();
+				cout<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
 				cout<<"\t\tCurrent time : "<<curtime<<endl;
 				cout<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
 				cout<<"t\tDifference : "<<deltatmp<<endl;
@@ -855,7 +856,7 @@ void NetServer::recvMsg_udp( )
         for( LI i=udpClients.begin(); i!=udpClients.end(); i++)
         {
             tmp = (*i);
-            if( tmp->serial == nserial)
+            if( tmp->game_unit.GetUnit()->GetSerial() == nserial)
             {
                 clt = tmp;
                 found = 1;
@@ -876,7 +877,7 @@ void NetServer::recvMsg_udp( )
         {
 	    assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
 
-            COUT << "Error : IP changed for client # " << clt->serial << endl;
+            COUT << "Error : IP changed for client # " << clt->game_unit.GetUnit()->GetSerial() << endl;
             discList.push_back( clt);
 	    	/* It is not entirely impossible for this to happen; it would be nice
 			 * to add an additional identity check. For now we consider it an error.
@@ -1074,7 +1075,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				// Send a CMD_JUMP to client with name of system (and md5 string ?)
 				netbuf.Reset();
 				netbuf.addString( newsystem);
-				p2.send( CMD_JUMP, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+				p2.send( CMD_JUMP, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 					__LINE__
 #else
@@ -1115,6 +1116,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 	}
 	break;
 
+	/***************** NOT USED ANYMORE *******************/
 	// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
 	// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
 	// IF SOMEONE HAS BEEN HIT
@@ -1142,7 +1144,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 	break;
     default:
         COUT << "Unknown command " << Cmd(cmd) << " ! "
-             << "from client " << clt->serial << endl;
+             << "from client " << clt->game_unit.GetUnit()->GetSerial() << endl;
     }
 }
 
@@ -1152,14 +1154,15 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 
 void	NetServer::addClient( Client * clt)
 {
-	cout<<">>> SEND ENTERCLIENT =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
+	Unit * un = clt->game_unit.GetUnit();
+	cout<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
 	StarSystem * sts;
 
 	QVector safevec;
-	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	Cockpit * cp = _Universe->isPlayerStarship( un);
 	string starsys = cp->savegame->GetStarSystem();
 
 
@@ -1171,22 +1174,18 @@ void	NetServer::addClient( Client * clt)
 	safevec = UniverseUtil::SafeStarSystemEntrancePoint( _Universe->getStarSystem( starsys+".system"), cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
 	cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
-	// Setup the clientstates
-	clt->old_state.setPosition( cp->savegame->GetPlayerLocation());
-	clt->old_state.setSerial( clt->serial);
-	clt->current_state.setPosition( cp->savegame->GetPlayerLocation());
-	clt->current_state.setSerial( clt->serial);
+	// UPDATE THE CLIENT Unit's state
+	un->SetPosition( safevec);
 
 	if( sts)
 	{
 		netbuf.addString( clt->callsign);
-		//netbuf.addClientState( clt->current_state);
 		// Send savebuffer after clientstate
 		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
 		// Put the save buffer after the ClientState
-		packet2.bc_create( CMD_ENTERCLIENT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+		packet2.bc_create( CMD_ENTERCLIENT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1195,18 +1194,18 @@ void	NetServer::addClient( Client * clt)
 			);
 		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
-		cout<<"Serial : "<<clt->serial<<endl;
+		cout<<"Serial : "<<un->GetSerial()<<endl;
 		// Send info about other ships in the system to "clt"
 		zonemgr->sendZoneClients( clt);
 	}
 	// In all case set the zone and send the client the zone which it is in
-	cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
-	clt->game_unit.GetUnit()->SetZone( zoneid);
+	cout<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
+	un->SetZone( zoneid);
 	clt->ingame = true;
 	Packet pp;
 	netbuf.Reset();
 	netbuf.addShort( zoneid);
-	pp.send( CMD_ADDEDYOU, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 		__LINE__
 #else
@@ -1214,7 +1213,7 @@ void	NetServer::addClient( Client * clt)
 #endif
 		);
 
-	cout<<"ADDED client n "<<clt->serial<<" in ZONE "<<clt->zone<<endl;
+	cout<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<endl;
 	//delete cltsbuf;
 	//cout<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }
@@ -1226,17 +1225,19 @@ void	NetServer::addClient( Client * clt)
 void	NetServer::posUpdate( Client * clt)
 {
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
+	Unit * un = clt->game_unit.GetUnit();
 
+	ClientState cs;
 	// Set old position
-	clt->old_state = clt->current_state;
-	// Update client position in client list
-	clt->current_state = netbuf.getClientState();
-	//clt->current_state = *((ClientState *) packet.getData());
+	un->prev_physical_state = un->curr_physical_state;
+	// Update client position in client list : should be enough like it is below
+	cs = netbuf.getClientState();
+	un->curr_physical_state.position = cs.getPosition();
+	un->curr_physical_state.orientation = cs.getOrientation();
+	un->Velocity = cs.getVelocity();
 	// Put deltatime in the delay part of ClientState so that it is send to other clients later
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
-	cp->savegame->SetPlayerLocation( clt->current_state.getPosition());
-	clt->current_state.setDelay( clt->deltatime);
-	//clt->current_state.display();
+	cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
 	snapchanged = 1;
 }
 
@@ -1268,6 +1269,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
          << " *** from " << debug_from_file << ":" << debug_from_line << endl;
 
 	NetBuffer netbuf;
+	Unit * un = clt->game_unit.GetUnit();
 
 	if( acctserver)
 	{
@@ -1275,7 +1277,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 		netbuf.addString( clt->name);
 		netbuf.addString( clt->passwd);
 		Packet p2;
-		if( p2.send( CMD_LOGOUT, clt->serial, netbuf.getData(), netbuf.getDataLength(),
+		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
@@ -1295,7 +1297,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-	    COUT << "Client " << clt->serial << " disconnected" << endl;
+	    COUT << "Client " << un->GetSerial() << " disconnected" << endl;
 	    COUT << "There were "
 	         << tcpClients.size()+udpClients.size() << " clients - ";
 	    tcpClients.remove( clt);
@@ -1303,7 +1305,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 	else
 	{
 		Packet p1;
-	    p1.send( CMD_DISCONNECT, clt->serial, NULL, 0,
+	    p1.send( CMD_DISCONNECT, un->GetSerial(), NULL, 0,
 		         SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
@@ -1311,14 +1313,14 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 			1253
 #endif
 				 );
-	    COUT << "Client " << clt->serial << " disconnected" << endl;
+	    COUT << "Client " << un->GetSerial() << " disconnected" << endl;
 	    COUT << "There were "
 	         << tcpClients.size()+udpClients.size() << " clients - ";
 	    udpClients.remove( clt);
 	}
 	// Broadcast client EXIT zone
 	Packet p;
-	p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0,
+	p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0,
 	             SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
@@ -1342,6 +1344,7 @@ void	NetServer::logout( Client * clt)
 {
 	Packet p, p1, p2;
 	NetBuffer netbuf;
+	Unit * un = clt->game_unit.GetUnit();
 
 	if( acctserver)
 	{
@@ -1349,7 +1352,7 @@ void	NetServer::logout( Client * clt)
 		netbuf.addString( clt->name);
 		netbuf.addString( clt->passwd);
 		Packet p2;
-		if( p2.send( CMD_LOGOUT, clt->serial, netbuf.getData(), netbuf.getDataLength(),
+		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
@@ -1368,20 +1371,20 @@ void	NetServer::logout( Client * clt)
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
-	    COUT <<"Client "<<clt->serial<<" disconnected"<<endl;
+	    COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
 	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
 	    tcpClients.remove( clt );
 	}
 	else
 	{
-	    COUT <<"Client "<<clt->serial<<" disconnected"<<endl;
+	    COUT <<"Client "<<un->GetSerial()<<" disconnected"<<endl;
 	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
 	    udpClients.remove( clt );
 	}
 	// Broadcast client EXIT zone
 	if( clt->zone>0)
 	{
-		p.bc_create( CMD_EXITCLIENT, clt->serial, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+		p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1485,7 +1488,7 @@ void	NetServer::save()
 			netbuf.addString( xmlstr);
 			//buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
 			//SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-			if( pckt.send( CMD_SAVEACCOUNTS, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
+			if( pckt.send( CMD_SAVEACCOUNTS, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__,
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1570,11 +1573,13 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	Packet p;
 	bool found = false;
 	Client * clt;
+	Unit * un;
 
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	for( LI li=udpClients.begin(); !found && li!=udpClients.end(); li++)
 	{
-		if( (*li)->serial == serial)
+		un = (*li)->game_unit.GetUnit();
+		if( un->GetSerial() == serial)
 		{
 			clt = (*li);
 			found = true;
@@ -1584,7 +1589,8 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	{
 		for( LI li=tcpClients.begin(); !found && li!=tcpClients.end(); li++)
 		{
-			if( (*li)->serial == serial)
+			un = (*li)->game_unit.GetUnit();
+			if( un->GetSerial() == serial)
 			{
 				clt = (*li);
 				found = true;

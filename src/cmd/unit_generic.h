@@ -730,7 +730,18 @@ public:
   ///Returns the pqr oritnattion of the unit in world space
   void SetOrientation (QVector q, QVector r);
   void SetOrientation (Quaternion Q);
-  void GetOrientation(Vector &p, Vector &q, Vector &r) const;
+  void GetOrientation(Vector &p, Vector &q, Vector &r) const {
+    Matrix m;
+    curr_physical_state.to_matrix(m);
+    p=m.getP();
+    q=m.getQ();
+    r=m.getR();
+  }
+  Vector GetAcceleration() {
+    Vector p, q, r;
+    GetOrientation(p,q,r);
+  	return Vector (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r );
+  } //acceleration
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;
   ///Transforms a orientation vector Down a coordinate level. Does not take position into account

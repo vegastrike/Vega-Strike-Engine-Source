@@ -16,6 +16,14 @@ ClientState::ClientState()
 	this->accel.Set( 0,0,0);
 }
 
+ClientState::ClientState( Unit * un)
+{
+	this->client_serial = un->GetSerial();
+	this->pos.position = un->curr_physical_state.position;
+	this->pos.orientation = un->curr_physical_state.orientation;
+	this->veloc = un->Velocity;
+	this->accel = un->GetAcceleration();
+}
 ClientState::ClientState( ObjSerial serial)
 {
 	this->client_serial = serial;
@@ -84,8 +92,7 @@ void	ClientState::netswap()
 std::ostream& operator<<( std::ostream& ostr, const Client& c )
 {
     ostr << "(clnt addr " << c.cltadr
-         << " sock=" << c.sock
-	 << " ser=" << c.serial << ")";
+         << " sock=" << c.sock;
     return ostr;
 }
 

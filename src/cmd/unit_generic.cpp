@@ -1398,7 +1398,9 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     }
   }
 
-  RegenShields();
+  // Only on server or non-networking
+  if( SERVER || Network==NULL)
+  	RegenShields();
   if (lastframe) {
     if (!(docked&(DOCKED|DOCKED_INSIDE))) 
       prev_physical_state = curr_physical_state;//the AIscript should take care
@@ -1429,8 +1431,12 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       }
     }
   } 
-  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
-    Rotate (SIMULATION_ATOM*(AngularVelocity));
+  // Only on server or non-networking
+  if( SERVER || Network==NULL)
+  {
+	  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
+	    Rotate (SIMULATION_ATOM*(AngularVelocity));
+	  }
   }
 
   float difficulty;
@@ -2301,13 +2307,6 @@ void Unit::SetOrientation (QVector q, QVector r) {
 }
 void Unit::SetOrientation(Quaternion Q) {
 	curr_physical_state = Transformation ( Q, Position());
-}
-void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
-  Matrix m;
-  curr_physical_state.to_matrix(m);
-  p=m.getP();
-  q=m.getQ();
-  r=m.getR();
 }
 
 Vector Unit::UpCoordinateLevel (const Vector &v) const {
@@ -5067,3 +5066,4 @@ void Unit::Repair() {
     break;
   }
 }
+

@@ -28,6 +28,8 @@
 #include "cubicsplines.h"
 #include "configxml.h"
 
+class Unit;
+
 // Structure used to transmit client updates
 class	ClientState
 {
@@ -45,6 +47,7 @@ class	ClientState
 		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc);
 		ClientState( ObjSerial serial, QVector posit, Quaternion orientat, Vector velocity, Vector acc, unsigned int del);
 		ClientState( ObjSerial serial, Transformation trans, Vector velocity, Vector acc, unsigned int del);
+		ClientState( Unit * un);
 
 		QVector		getPosition() { return this->pos.position;}
 		Quaternion	getOrientation() { return this->pos.orientation;}

@@ -6,7 +6,7 @@ INCLUDES = -I ../
 soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
 
-libnetgeneric =	\
+libnetgeneric = \
 	accountsxml.cpp	\
 	accountsxml.h	\
 	client.h		\
@@ -31,14 +31,16 @@ libnetgeneric =	\
 	vsnet_clientstate.h		\
 	vsnet_serversocket.cpp	\
 	vsnet_serversocket.h	\
+	savenet_util.cpp	\
+	savenet_util.h
+
+libnetclientserver =	$(libnetgeneric) \
 	netserver.cpp	\
 	netserver.h	\
 	netclient.cpp	\
 	netclient.h	\
 	cubicsplines.cpp	\
 	cubicsplines.h		\
-	savenet_util.cpp	\
-	savenet_util.h		\
 	zonemgr.cpp	\
 	zonemgr.h
 
@@ -46,11 +48,11 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
-libnetclient_a_SOURCES = $(libnetgeneric) 
+libnetclient_a_SOURCES = $(libnetclientserver) 
 
 libnetacct_a_SOURCES = $(libnetgeneric) \
 	acctserver.cpp \
 	acctserver.h
 
-libnetserver_a_SOURCES = $(libnetgeneric)
+libnetserver_a_SOURCES = $(libnetclientserver)
 
