@@ -130,8 +130,9 @@ vector<string>	FileUtil::GetSaveFromBuffer( const char * buffer)
 	cout<<"\tXML size = "<<xml_size<<endl;
 
 	int buflen = 2*sizeof( unsigned int)+save_size+xml_size;
-	char * savebuf = new char[buflen];
+	char * savebuf = new char[buflen+1];
 	memcpy( savebuf, buffer, buflen);
+	savebuf[buflen] = 0;
 	savebuf[sizeof( unsigned int)+save_size]=0;
 	savebuf[2*sizeof( unsigned int)+xml_size+save_size]=0;
 	// First element is XML Unit and second element is player save

@@ -405,6 +405,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		//cout<<"NETWORK FORMAT : XML size = "<<xmlsize<<" --- SAVE size = "<<savesize<<endl;
 		//cout<<"HOST FORMAT : XML size = "<<ntohl(xmlsize)<<" --- SAVE size = "<<ntohl(savesize)<<endl;
 		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &xmlsize, sizeof( unsigned int));
+		cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;
 		cout<<"Loaded -= "<<acct->name<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
 		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
 		assert( total_size <= MAXBUFFER );

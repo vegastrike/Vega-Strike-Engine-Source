@@ -161,11 +161,15 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << clt->serial << " )= --------------------------------------" << endl;
 		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
 		// Get the save parts in the buffer
-		char * xml = buf + NAMELEN*2 + sizeof( unsigned int);
-		unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
-		char * save = buf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
-		unsigned int save_size = ntohl( *( (unsigned int *)(buf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
-		cout<<"XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
+		vector<string> saves;
+		saves = FileUtil::GetSaveFromBuffer( packeta.getData()+2*NAMELEN);
+		char * savebuf = new char[saves[1].length()+1];
+		memcpy( savebuf, saves[1].c_str(), saves[1].length());
+		savebuf[saves[1].length()] = 0;
+		char * xmlbuf = new char[saves[0].length()+1];
+		memcpy( xmlbuf, saves[0].c_str(), saves[0].length());
+		xmlbuf[saves[0].length()] = 0;
+		cout<<"XML="<<saves[0].length()<<" bytes - SAVE="<<saves[1].length()<<" bytes"<<endl;
 		string PLAYER_CALLSIGN( clt->name);
 		QVector tmpvec( 0, 0, 0), safevec;
 		bool update = true;
@@ -176,7 +180,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		Cockpit * cp = _Universe->createCockpit( PLAYER_CALLSIGN);
 		cp->Init ("");
 		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
-		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
+		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, savebuf, false);
 		// Generate the system we enter in if needed
 		zonemgr->addZone( cp->savegame->GetStarSystem());
 		safevec = UniverseUtil::SafeEntrancePoint( tmpvec);
@@ -196,7 +200,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
                              FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
                              string(""),
                              Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-                             0, xml);
+                             0, xmlbuf);
 		cout<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
 		// Setup the clientstates
@@ -220,6 +224,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 
         Packet packet2;
 		packet2.send( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+		delete savebuf, xmlbuf;
 		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
 }
