@@ -40,7 +40,7 @@
 //    #   include <GL/glxext.h>
   //  #   include <GL/glx.h>
     //#   include <GL/glxext.h>
-#endif
+//#endif
 
 #include <stdlib.h>
 
