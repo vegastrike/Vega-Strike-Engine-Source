@@ -2,7 +2,7 @@
 
 namespace Orders {
 class AggressiveAI: public FireAt {
-  float olddist;
+  bool close;
 protected:
   AIEvents::ElemAttrMap logic;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
