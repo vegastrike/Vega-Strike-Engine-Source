@@ -92,7 +92,7 @@ void Mission::doModule(missionNode *node,int mode){
       varInstMap *cvmap=new varInstMap;
       node->script.classvars.push_back(cvmap);
       node->script.classinst_counter=0;
-      debug(0,node,mode,"created classinst 0");
+      debug(10,node,mode,"created classinst 0");
 
       runtime.modules[name]=node; // add this module to the list of known modules
     }

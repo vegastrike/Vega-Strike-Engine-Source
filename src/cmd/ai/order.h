@@ -81,6 +81,9 @@ public:
   int getType() {return type;}
   ///Sets the parent of this Unit.  Any virtual functions must call this one
   virtual void SetParent(Unit *parent1) {parent = parent1;};
+
+  Order *findOrder(Order *ord);
+ void eraseOrder(Order *ord);
 };
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {

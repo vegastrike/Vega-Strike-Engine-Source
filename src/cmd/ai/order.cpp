@@ -165,3 +165,28 @@ void ExecuteFor::Execute() {
     child->Execute();
   return;
 }
+
+Order* Order::findOrder(Order *ord){
+  for (unsigned int i=0;i<suborders.size();i++) {
+    if (suborders[i]==ord) {
+      return suborders[i];
+    }
+  }
+  return NULL;
+}
+
+void Order::eraseOrder(Order *ord){
+  bool found=false;
+
+  for (unsigned int i=0;i<suborders.size() && found==false;i++) {
+    if (suborders[i]==ord){
+      delete suborders[i];
+      vector <Order *>::iterator j= suborders.begin()+i;
+      suborders.erase(j);
+      found=true;
+      printf("erased order\n");
+    }
+  }
+
+  
+}

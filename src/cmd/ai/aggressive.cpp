@@ -40,7 +40,8 @@ bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   
   if (item.script.length()!=0) {
     Order * tmp = new AIScript (item.script.c_str());	
-    parent->EnqueueAI (tmp);
+    //    parent->EnqueueAI (tmp);
+    EnqueueOrder (tmp);
     return true;
   }else {
     return false;
@@ -73,9 +74,11 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     value = parent->RShieldData();
     break;
   case FACING:
-    return parent->getAIState()->queryType (Order::FACING)==NULL;
+    //    return parent->getAIState()->queryType (Order::FACING)==NULL;
+    return queryType (Order::FACING)==NULL;
   case MOVEMENT:
-    return parent->getAIState()->queryType (Order::MOVEMENT)==NULL;
+    //    return parent->getAIState()->queryType (Order::MOVEMENT)==NULL;
+    return queryType (Order::MOVEMENT)==NULL;
   case RANDOMIZ:
     value= ((float)rand())/RAND_MAX;
   default:
@@ -102,8 +105,10 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
     if (trueit&&j==i->end()) {
       //do it
       if (inter) {
-	parent->getAIState()->eraseType (Order::FACING);
-	parent->getAIState()->eraseType (Order::MOVEMENT);
+	//parent->getAIState()->eraseType (Order::FACING);
+	//parent->getAIState()->eraseType (Order::MOVEMENT);
+	eraseType (Order::FACING);
+	eraseType (Order::MOVEMENT);
       }
       j = i->begin();
       while (j!=i->end()) {
@@ -136,14 +141,17 @@ void AggressiveAI::Execute () {
       logic.curtime=interrupts.maxtime;//set it to the time allotted
     }
   }
-  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
+  //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
+  if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
      ProcessLogic(logic);
      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
   } else {
     if ((--logic.curtime)==0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
-      parent->getAIState()->eraseType (Order::FACING);
-      parent->getAIState()->eraseType (Order::MOVEMENT);
+      //parent->getAIState()->eraseType (Order::FACING);
+      //parent->getAIState()->eraseType (Order::MOVEMENT);
+      eraseType (Order::FACING);
+      eraseType (Order::MOVEMENT);
       
       ProcessLogic (logic);
       logic.curtime = logic.maxtime;      

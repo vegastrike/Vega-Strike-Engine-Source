@@ -123,6 +123,34 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
+    else if(cmd=="eraseOrder"){
+      missionNode *enq_node=getArgument(node,mode,1);
+      varInst *enq_vi=checkObjectExpr(enq_node,mode);
+      Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
+
+      if(mode==SCRIPT_RUN){
+	my_order->eraseOrder(enq_order);
+	debug(3,node,mode,"erasing order");
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="findOrder"){
+      missionNode *enq_node=getArgument(node,mode,1);
+      varInst *enq_vi=checkObjectExpr(enq_node,mode);
+      Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
+
+      Order *res_order=NULL;
+      if(mode==SCRIPT_RUN){
+	res_order=my_order->findOrder(enq_order);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="order";
+      viret->object=(void *)res_order;
+    }
     else if(cmd=="print"){
       if(mode==SCRIPT_RUN){
 	printf("print: order=%x\n",(int)my_order);

@@ -44,8 +44,8 @@ AImissionScript::AImissionScript (string modname):Order (Order::MOVEMENT|Order::
   modulename=modname;
 
   classid=mission->createClassInstance(modulename);
-
-  mission->runScript(modulename,"initai",classid);  
+  
+  first_run=true;
 }
 
 AImissionScript::~AImissionScript () {
@@ -58,10 +58,15 @@ void AImissionScript::Execute () {
   mission->setCurrentAIUnit(parent);
   mission->setCurrentAIOrder(this);
 
+  if(first_run){
+    mission->runScript(modulename,"initai",classid);
+    first_run=false;
+  }
+
   mission->runScript(modulename,"executeai",classid);
 
   if(suborders.size()!=0){
-    //    printf("suborders: %d\n",suborders.size());
+    printf("suborders: %d\n",suborders.size());
   }
   Order::Execute();
   done=false;

@@ -41,6 +41,7 @@ public:
  private:
   string modulename;
   uint classid;
+  bool first_run;
 };
 
 #endif
