@@ -73,8 +73,8 @@ static void CreateControlsForAlertWindow(Window* window) {
 
     window->setSizeAndCenter(Size(1,.8));
 	window->setTexture("basecomputer.png");
-    window->setColor( GFXColor(1,0,0,.1) );
-    window->setOutlineColor( GFXColor(.7,.7,.7) );
+    window->setColor( SaturatedColor(1,0,0,.1) );
+    window->setOutlineColor( SaturatedColor(.7,.7,.7) );
     window->setOutlineWidth(2.0);
 
     // Title text display.
@@ -82,7 +82,7 @@ static void CreateControlsForAlertWindow(Window* window) {
     title->setRect( Rect(-.46, -.25, .92, .55) );
     title->setMultiLine(true);
     title->setJustification(CENTER_JUSTIFY);
-    title->setTextColor(GUI_OPAQUE_WHITE);
+    title->setTextColor(GUI_OPAQUE_WHITE());
     title->setColor(GUI_CLEAR);
     title->setFont( Font(.07, BOLD_STROKE) );
     title->setId("Title");
@@ -95,9 +95,9 @@ static void CreateControlsForAlertWindow(Window* window) {
     ok->setLabel("OK");
     ok->setCommand("Window::Close");
     ok->setColor( GFXColor(1,0,0,.25) );
-    ok->setTextColor( GUI_OPAQUE_WHITE );
+    ok->setTextColor( GUI_OPAQUE_WHITE() );
     ok->setDownColor( GFXColor(1,0,0,.6) );
-    ok->setDownTextColor( GUI_OPAQUE_BLACK );
+    ok->setDownTextColor( GUI_OPAQUE_BLACK() );
     ok->setHighlightColor( GFXColor(1,0,0,.4) );
     ok->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
@@ -109,8 +109,8 @@ static void CreateControlsForYesNoWindow(Window* window) {
 
     window->setSizeAndCenter(Size(1,.8));
 	window->setTexture("basecomputer.png");
-    window->setColor( GFXColor(1,0,0,.1) );
-    window->setOutlineColor( GFXColor(.7,.7,.7) );
+    window->setColor( SaturatedColor(1,0,0,.1) );
+    window->setOutlineColor( SaturatedColor(.7,.7,.7) );
     window->setOutlineWidth(2.0);
 
     // Title text display.
@@ -118,7 +118,7 @@ static void CreateControlsForYesNoWindow(Window* window) {
     title->setRect( Rect(-.46, -.25, .92, .55) );
     title->setMultiLine(true);
     title->setJustification(CENTER_JUSTIFY);
-    title->setTextColor(GUI_OPAQUE_WHITE);
+    title->setTextColor(GUI_OPAQUE_WHITE());
     title->setColor(GUI_CLEAR);
     title->setFont( Font(.07, BOLD_STROKE) );
     title->setId("Title");
@@ -131,9 +131,9 @@ static void CreateControlsForYesNoWindow(Window* window) {
     yes->setLabel("Yes");
     yes->setCommand("Yes");
     yes->setColor( GFXColor(1,0,0,.25) );
-    yes->setTextColor( GUI_OPAQUE_WHITE );
+    yes->setTextColor( GUI_OPAQUE_WHITE() );
     yes->setDownColor( GFXColor(1,0,0,.6) );
-    yes->setDownTextColor( GUI_OPAQUE_BLACK );
+    yes->setDownTextColor( GUI_OPAQUE_BLACK() );
     yes->setHighlightColor( GFXColor(1,0,0,.4) );
     yes->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
@@ -145,9 +145,9 @@ static void CreateControlsForYesNoWindow(Window* window) {
     no->setLabel("No");
     no->setCommand("No");
     no->setColor( GFXColor(1,0,0,.25) );
-    no->setTextColor( GUI_OPAQUE_WHITE );
+    no->setTextColor( GUI_OPAQUE_WHITE() );
     no->setDownColor( GFXColor(1,0,0,.6) );
-    no->setDownTextColor( GUI_OPAQUE_BLACK );
+    no->setDownTextColor( GUI_OPAQUE_BLACK() );
     no->setHighlightColor( GFXColor(1,0,0,.4) );
     no->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
@@ -159,8 +159,8 @@ void ListQuestionDialog::CreateControlsForListWindow(Window* window) {
 
     window->setSizeAndCenter(Size(1.2,1.2));
 	window->setTexture("basecomputer.png");
-    window->setColor( GFXColor(0,0,1,.1) );
-    window->setOutlineColor( GFXColor(.7,.7,.7) );
+    window->setColor( SaturatedColor(0,0,1,.1) );
+    window->setOutlineColor( SaturatedColor(.7,.7,.7) );
     window->setOutlineWidth(2.0);
 
     // Title text display.
@@ -168,7 +168,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window* window) {
     title->setRect( Rect(-.57, .42, 1.14, .15) );
     title->setMultiLine(true);
     title->setJustification(CENTER_JUSTIFY);
-    title->setTextColor(GUI_OPAQUE_WHITE);
+    title->setTextColor(GUI_OPAQUE_WHITE());
     title->setColor(GUI_CLEAR);
     title->setFont( Font(.08, BOLD_STROKE) );
     title->setId("Title");
@@ -181,9 +181,9 @@ void ListQuestionDialog::CreateControlsForListWindow(Window* window) {
     ok->setLabel("OK");
     ok->setCommand("OK");
     ok->setColor( GFXColor(0,0,1,.25) );
-    ok->setTextColor( GUI_OPAQUE_WHITE );
+    ok->setTextColor( GUI_OPAQUE_WHITE() );
     ok->setDownColor( GFXColor(0,0,1,.6) );
-    ok->setDownTextColor( GUI_OPAQUE_BLACK );
+    ok->setDownTextColor( GUI_OPAQUE_BLACK() );
     ok->setHighlightColor( GFXColor(0,0,1,.4) );
     ok->setFont(Font(.08, BOLD_STROKE));
 	ok->setId("OK");
@@ -196,9 +196,9 @@ void ListQuestionDialog::CreateControlsForListWindow(Window* window) {
     cancel->setLabel("Cancel");
     cancel->setCommand("Cancel");
     cancel->setColor( GFXColor(0,0,1,.25) );
-    cancel->setTextColor( GUI_OPAQUE_WHITE );
+    cancel->setTextColor( GUI_OPAQUE_WHITE() );
     cancel->setDownColor( GFXColor(0,0,1,.6) );
-    cancel->setDownTextColor( GUI_OPAQUE_BLACK );
+    cancel->setDownTextColor( GUI_OPAQUE_BLACK() );
     cancel->setHighlightColor( GFXColor(0,0,1,.4) );
     cancel->setFont(Font(.08, BOLD_STROKE));
     cancel->setId("Cancel");
@@ -208,21 +208,21 @@ void ListQuestionDialog::CreateControlsForListWindow(Window* window) {
     // Scroller for description.
     Scroller* pickScroller = new Scroller;
     pickScroller->setRect( Rect(.52, -.4, .05, .85) );
-    pickScroller->setColor( GFXColor(0,0,1,.1) );
-    pickScroller->setThumbColor( GFXColor(0,0,.4), GUI_OPAQUE_WHITE );
-    pickScroller->setButtonColor( GFXColor(0,0,.4) );
-    pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-	pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+    pickScroller->setColor( SaturatedColor(0,0,1,.1) );
+    pickScroller->setThumbColor( SaturatedColor(0,0,.4), GUI_OPAQUE_WHITE() );
+    pickScroller->setButtonColor( SaturatedColor(0,0,.4) );
+    pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+	pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
     // List picker.
     SimplePicker* pick = new SimplePicker;
     pick->setRect( Rect(-.57, -.4, 1.09, .85) );
-    pick->setColor( GFXColor(0,0,1,.1) );
-	pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-    pick->setTextColor(GUI_OPAQUE_WHITE);
-    pick->setSelectionColor(GFXColor(.2,.2,.7,.8));
-    pick->setHighlightColor(GFXColor(0,0,.6,.35));
-    pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+    pick->setColor( SaturatedColor(0,0,1,.1) );
+	pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+    pick->setTextColor(GUI_OPAQUE_WHITE());
+    pick->setSelectionColor(SaturatedColor(.2,.2,.7,.8));
+    pick->setHighlightColor(SaturatedColor(0,0,.6,.35));
+    pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
     pick->setFont( Font(.065) );
     pick->setTextMargins(Size(0.02,0.01));
     pick->setId("Picker");

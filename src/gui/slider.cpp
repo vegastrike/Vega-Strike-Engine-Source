@@ -138,10 +138,10 @@ void Slider::setThumbColorBasedOnColor(const GFXColor& c) {
 	if(!isClear(c)) {
 		if(isColorLight(c)) {
 			// Light color.  Make thumb darker.
-			setThumbColor(darkenColor(c,.3), GUI_OPAQUE_WHITE);
+			setThumbColor(darkenColor(c,.3), GUI_OPAQUE_WHITE());
 		} else {
 			// Dark Color.
-			setThumbColor(lightenColor(c,.3), GUI_OPAQUE_WHITE);
+			setThumbColor(lightenColor(c,.3), GUI_OPAQUE_WHITE());
 		}
 	}
 }
@@ -306,7 +306,7 @@ m_thumbLength(.15),
 m_originalThumbLength(m_thumbLength),
 m_pageSize(10),
 m_thumbColor(m_color),
-m_thumbOutlineColor(GUI_OPAQUE_BLACK),
+m_thumbOutlineColor(GUI_OPAQUE_BLACK()),
 m_position(m_minValue),
 m_vertical(true),
 m_mouseState(MOUSE_NONE),

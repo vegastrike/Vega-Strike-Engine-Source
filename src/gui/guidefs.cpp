@@ -20,9 +20,48 @@
  */
 
 #include "vegastrike.h"
-
+#include "xml_support.h"
+#include "vs_globals.h"
+#include "config_xml.h"
 #include "guidefs.h"
+GFXColor getConfigColor(const char * name, GFXColor defaul) {
+  float color[4];
+  color[0]=defaul.r;
+  color[1]=defaul.g;
+  color[2]=defaul.b;
+  color[3]=defaul.a;
+  vs_config->getColor(std::string("default"), std::string(name), color, true);
+  return GFXColor(color[0], color[1], color[2], color[3]);
+}
 
+GFXColor SaturatedColor(float r, float g, float b, float a=1.0f) {
+  static float Saturation=XMLSupport::parse_float(vs_config->getVariable("graphics","base_saturation","1.0"));
+  
+  return GFXColor((r*Saturation*3+(r+b+g)*(1-Saturation))/3,
+                  (g*Saturation*3+(r+b+g)*(1-Saturation))/3,
+                  (b*Saturation*3+(r+b+g)*(1-Saturation))/3,a);
+}
+GFXColor GUI_OPAQUE_BLACK(){
+  static GFXColor gui_black = getConfigColor("base_black",GFXColor(0,0,0,1));
+  return gui_black;
+}
+GFXColor GUI_OPAQUE_WHITE(){
+  static GFXColor gui_white = getConfigColor("base_white",GFXColor(1,1,1,1));
+  return gui_white;
+}
+
+GFXColor GUI_OPAQUE_LIGHT_GRAY(){
+  static GFXColor gui_light_gray = getConfigColor("base_light_gray",GFXColor(.25,.25,.25,1));
+  return gui_light_gray;
+}
+GFXColor GUI_OPAQUE_MEDIUM_GRAY(){
+  static GFXColor gui_gray = getConfigColor("base_gray",GFXColor(.5,.5,.5,1));
+  return gui_gray;
+}
+GFXColor GUI_OPAQUE_DARK_GRAY(){
+  static GFXColor gui_dark_gray = getConfigColor("base_dark_gray",GFXColor(.75,.75,.75,1));
+  return gui_dark_gray;
+}
 
 // Draw a rectangle using the specified color.
 void drawRect(const Rect& rect, const GFXColor& color) {

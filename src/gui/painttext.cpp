@@ -831,7 +831,7 @@ PaintText::PaintText(void)
 :
 m_rect(),
 m_text(),
-m_color(GUI_OPAQUE_BLACK),
+m_color(GUI_OPAQUE_BLACK()),
 m_font(),
 m_justification(RIGHT_JUSTIFY),
 m_widthExceeded(ELLIPSIS),

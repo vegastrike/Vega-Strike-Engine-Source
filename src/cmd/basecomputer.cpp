@@ -66,6 +66,10 @@ struct dirent { char d_name[1]; };
 #endif
 #include <sys/stat.h>
 //end for directory thing
+static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
+  GFXColor ret(r,g,b,a);
+  return ret;
+}
 extern std::string CurrentSaveGameName;
 std::vector<std::string> getWeapFilterVec() {
 	std::vector<std::string> weapfiltervec;
@@ -155,25 +159,46 @@ static const char CATEGORY_SEP = '/';
 // Tag that says this is a category not an item.
 static const char CATEGORY_TAG = (-1);
 
-
+/*static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
+  static float Saturation=XMLSupport::parse_float(vs_config->getVariable("graphics","base_saturation","1.0"));
+  return GFXColor(r,g,b,a);
+  }*/
 // Color of an item that there isn't enough money to buy.
 // We read this out of the config file (or use a default).
-static GFXColor NO_MONEY_COLOR = GUI_CLEAR;        // Start out with bogus color.
+static GFXColor NO_MONEY_COLOR(){
+  static GFXColor NO_MONEY_COLOR=getConfigColor("no_money",GFXColor(1,.3,.3,1));
+  return  NO_MONEY_COLOR;        // Start out with bogus color.
+}
 // Color of the text of a category.
-static const GFXColor CATEGORY_TEXT_COLOR = GFXColor(.5,1,.5);
-static const GFXColor MISSION_COLOR = GFXColor(.66,.2,0);
+static GFXColor CATEGORY_TEXT_COLOR(){
+  static GFXColor CTC=getConfigColor("base_category_color",GFXColor(0,.75,0,1));
+  return CTC;
+}
+static GFXColor MISSION_COLOR(){
+  static GFXColor MiC=getConfigColor("base_mission_color",GFXColor(.66,.2,0,1));
+  return MiC;
+}
 // Space between mode buttons.
 static const float MODE_BUTTON_SPACE = 0.03;
 // Default color in CargoColor.
-static const GFXColor DEFAULT_UPGRADE_COLOR = GFXColor(1,1,1,1);
+static GFXColor DEFAULT_UPGRADE_COLOR(){
+  static GFXColor DuC=getConfigColor("base_upgrade_color",GFXColor(1,1,1,1));
+  return DuC;
+}
 
 // MOUNT ENTRY COLORS
 // Mount point that cannot be selected.
-static const GFXColor MOUNT_POINT_NO_SELECT = GFXColor(1,.7,.7);
+static GFXColor MOUNT_POINT_NO_SELECT() {
+    return GFXColor(1,.7,.7);
+}
 // Empty mount point.
-static const GFXColor MOUNT_POINT_EMPTY = GFXColor(.2,1,.2);
+static GFXColor MOUNT_POINT_EMPTY () {
+    return GFXColor(.2,1,.2);
+}
 // Mount point that contains weapon.
-static const GFXColor MOUNT_POINT_FULL = GFXColor(1,1,0);
+static GFXColor MOUNT_POINT_FULL() {
+    return GFXColor(1,1,0);
+}
 
 
 
@@ -228,7 +253,9 @@ int basecargoassets(Unit* base,string cargoname);
 
 // "Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair";
-const GFXColor BASIC_REPAIR_TEXT_COLOR = GFXColor(0,1,1);
+const GFXColor BASIC_REPAIR_TEXT_COLOR() {
+    return GFXColor(0,1,1);
+}
 const string BASIC_REPAIR_DESC = "Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.";
 // Repair price is a config variable.
 static float basicRepairPrice(void) {
@@ -378,12 +405,6 @@ BaseComputer::BaseComputer(Unit* player, Unit* base, const std::vector<DisplayMo
     m_playingMuzak(false)
 {
     // Make sure we get this color loaded.
-    if(isClear(NO_MONEY_COLOR)) {
-		float color[4]={1,.3,.3,1};           // Default = light red.
-		vs_config->getColor(std::string("default"), "no_money", color, true);
-		NO_MONEY_COLOR = GFXColor(color[0], color[1], color[2], color[3]);
-        assert(!isClear(NO_MONEY_COLOR));
-    }
 
     // Initialize mode group controls array.
     for(int i=0; i<DISPLAY_MODE_COUNT; i++) {
@@ -411,28 +432,30 @@ BaseComputer::~BaseComputer(void) {
 
 GFXColor BaseComputer::getColorForGroup(std::string id) {
 	static bool use_faction_background=XMLSupport::parse_bool(vs_config->getVariable("graphics","use_faction_gui_background_color","true"));
+        static float faction_color_darkness=XMLSupport::parse_float(vs_config->getVariable("graphics","base_faction_color_darkness",".75"));
 	if (use_faction_background) {
 		int fac=m_base.GetUnit()->faction;
 		if (FactionUtil::GetFactionName(fac)=="neutral") {
 			fac=FactionUtil::GetFactionIndex(_Universe->getGalaxyProperty(UniverseUtil::getSystemFile(),"faction"));
 		}
 		const float *stuff=FactionUtil::GetSparkColor(fac);
-		return GFXColor(stuff[0],stuff[1],stuff[2]);
+
+		return GFXColor(stuff[0]*faction_color_darkness,stuff[1]*faction_color_darkness,stuff[2]*faction_color_darkness);
 	} else {
 		if (id=="CargoGroup") {
-			return GFXColor(0,0,1);
+			return GFXColor(0,0,faction_color_darkness);
 		} else if (id=="NewsGroup") {
-			return GFXColor(1,0,1);
+			return GFXColor(faction_color_darkness,0,faction_color_darkness);
 		} else if (id=="UpgradeGroup") {
-			return GFXColor(0,1,0);
+			return GFXColor(0,faction_color_darkness,0);
 		} else if (id=="InfoGroup") {
-			return GFXColor(0,1,1);
+			return GFXColor(0,faction_color_darkness,faction_color_darkness);
 		} else if (id=="MissionsGroup") {
-			return GFXColor(1,0,0);
+			return GFXColor(faction_color_darkness,0,0);
 		} else if (id=="ShipDealerGroup") {
-			return GFXColor(1,1,0);
+			return GFXColor(faction_color_darkness,faction_color_darkness,0);
 		} else if (id=="LoadSaveGroup") {
-			return GFXColor(0,1,1);
+			return GFXColor(0,faction_color_darkness,faction_color_darkness);
 		} else {
 			return GFXColor(0,0,0);
 		}
@@ -446,7 +469,8 @@ void BaseComputer::constructControls(void) {
     StaticDisplay* baseTitle = new StaticDisplay;
     baseTitle->setRect( Rect(-.96, .76, 1.9, .08) );
     baseTitle->setText("ERROR");
-    baseTitle->setTextColor(GFXColor(.4,1,.4));
+    static GFXColor baseNameColor=getConfigColor("base_name_color",GFXColor(.1,.8,.1));
+    baseTitle->setTextColor(baseNameColor);
     baseTitle->setColor(GUI_CLEAR);
     baseTitle->setFont( Font(.07, 1.75) );
     baseTitle->setId("BaseInfoTitle");
@@ -455,51 +479,53 @@ void BaseComputer::constructControls(void) {
 
     // Player info title.
     StaticDisplay* playerTitle = new StaticDisplay;
+    static GFXColor basePlayerColor=getConfigColor("base_player_color",GFXColor(.7,.7,.9));
     playerTitle->setRect( Rect(-.96, .69, 1.9, .07) );
-    playerTitle->setTextColor(GFXColor(.7,1,.7));
+    playerTitle->setTextColor(basePlayerColor);
     playerTitle->setColor(GUI_CLEAR);
     playerTitle->setFont( Font(.06, BOLD_STROKE) );
     playerTitle->setId("PlayerInfoTitle");
     // Put it on the window.
     window()->addControl(playerTitle);
-
+    static GFXColor saveLoadColor=getConfigColor("base_save_load_color",GFXColor(.75,0,0));
     // Options button.
     NewButton* options = new NewButton;
     options->setRect( Rect(.64, .85, .32, .1) );
     options->setLabel("Save/Load");
     options->setCommand("ShowOptionsMenu");
-    options->setColor( GFXColor(0,1,1,.25) );
-    options->setTextColor( GUI_OPAQUE_WHITE );
-    options->setDownColor( GFXColor(0,1,1,.6) );
-    options->setDownTextColor( GUI_OPAQUE_BLACK );
+    options->setColor( UnsaturatedColor(saveLoadColor.r,saveLoadColor.g,saveLoadColor.b,.25) );
+    options->setTextColor( GUI_OPAQUE_WHITE() );
+    options->setDownColor( UnsaturatedColor(saveLoadColor.r,saveLoadColor.g,saveLoadColor.b,.6) );
+    options->setDownTextColor( GUI_OPAQUE_BLACK() );
     options->setHighlightColor( GFXColor(0,0,1,.4) );
     options->setFont(Font(.08));
     // Put the button on the window.
     window()->addControl(options);
-
+    static GFXColor doneColor=getConfigColor("base_done_color",GFXColor(.75,0,0));
     // Done button.
     NewButton* done = new NewButton;
     done->setRect( Rect(.74, .71, .22, .1) );
     done->setLabel("Done");
     done->setCommand("Window::Close");
-    done->setColor( GFXColor(0,1,1,.25) );
-    done->setTextColor( GUI_OPAQUE_WHITE );
-    done->setDownColor( GFXColor(0,1,1,.6) );
-    done->setDownTextColor( GUI_OPAQUE_BLACK );
+    done->setColor( UnsaturatedColor(doneColor.r,doneColor.g,doneColor.b,.25) );
+    done->setTextColor( GUI_OPAQUE_WHITE() );
+    done->setDownColor( UnsaturatedColor(doneColor.r,doneColor.g,doneColor.b,.6) );
+    done->setDownTextColor( GUI_OPAQUE_BLACK() );
     done->setHighlightColor( GFXColor(0,0,1,.4) );
     done->setFont(Font(.08, BOLD_STROKE));
     window()->addControl(done);
 
     // Mode button.
     NewButton* mode = new NewButton;
+    static GFXColor mode_color=getConfigColor("base_mode_color",GFXColor(0,.5,0));
     mode->setRect( Rect(-.96, .86, .24, .09) );
     mode->setLabel("ERROR");
-    mode->setColor( GFXColor(1,1,0,.25) );
-    mode->setTextColor( GUI_OPAQUE_WHITE );
-    mode->setDownColor( GFXColor(1,1,0,.5) );
-    mode->setDownTextColor( GUI_OPAQUE_BLACK );
-    mode->setHighlightColor( GFXColor(1,1,0,.4) );
-    mode->setFont(Font(.07));
+    mode->setColor( GFXColor(mode_color.r,mode_color.g,mode_color.b,.25) );
+    mode->setTextColor( GUI_OPAQUE_WHITE() );
+    mode->setDownColor( GFXColor(mode_color.r,mode_color.g,mode_color.b,.5) );
+    mode->setDownTextColor( GUI_OPAQUE_BLACK() );
+    mode->setHighlightColor( GFXColor(mode_color.r,mode_color.g,mode_color.b,.4) );
+    mode->setFont(Font(.07,BOLD_STROKE));
     mode->setId("ModeButton");
     // Put the button on the window.
     window()->addControl(mode);
@@ -515,7 +541,7 @@ void BaseComputer::constructControls(void) {
         StaticDisplay* sellLabel = new StaticDisplay;
         sellLabel->setRect( Rect(-.96, .56, .81, .1) );
         sellLabel->setText("Seller");
-        sellLabel->setTextColor(GUI_OPAQUE_WHITE);
+        sellLabel->setTextColor(GUI_OPAQUE_WHITE());
         sellLabel->setColor(GUI_CLEAR);
         sellLabel->setFont( Font(.08, BOLD_STROKE) );
         sellLabel->setJustification(CENTER_JUSTIFY);
@@ -531,7 +557,7 @@ void BaseComputer::constructControls(void) {
         // Total price text display.
         StaticDisplay* totalPrice = new StaticDisplay;
         totalPrice->setRect( Rect(-.2, .56, .4, .07) );
-        totalPrice->setTextColor(GUI_OPAQUE_WHITE);
+        totalPrice->setTextColor(GUI_OPAQUE_WHITE());
         totalPrice->setColor(GUI_CLEAR);
         totalPrice->setFont( Font(.06) );
         totalPrice->setJustification(CENTER_JUSTIFY);
@@ -541,7 +567,7 @@ void BaseComputer::constructControls(void) {
         // "Max" text display.
         StaticDisplay* maxForPlayer = new StaticDisplay;
         maxForPlayer->setRect( Rect(-.14, .49, .28, .07) );
-        maxForPlayer->setTextColor(GUI_OPAQUE_WHITE);
+        maxForPlayer->setTextColor(GUI_OPAQUE_WHITE());
         maxForPlayer->setColor(GUI_CLEAR);
         maxForPlayer->setFont( Font(.06) );
         maxForPlayer->setJustification(CENTER_JUSTIFY);
@@ -551,21 +577,21 @@ void BaseComputer::constructControls(void) {
         // Scroller for seller.
         Scroller* sellerScroller = new Scroller;
         sellerScroller->setRect( Rect(-.20, -.4, .05, .95) );
-        sellerScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        sellerScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        sellerScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        sellerScroller->setTextColor(GUI_OPAQUE_WHITE);
-		sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        sellerScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        sellerScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        sellerScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        sellerScroller->setTextColor(GUI_OPAQUE_WHITE());
+		sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Seller picker.
         SimplePicker* sellpick = new SimplePicker;
         sellpick->setRect( Rect(-.96, -.4, .76, .95) );
         sellpick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        sellpick->setTextColor(GUI_OPAQUE_WHITE);
-        sellpick->setSelectionColor(GFXColor(0,.6,0,.8));
-        sellpick->setHighlightColor(GFXColor(0,.6,0,.35));
-        sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        sellpick->setTextColor(GUI_OPAQUE_WHITE());
+        sellpick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        sellpick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         sellpick->setFont( Font(.07) );
         sellpick->setTextMargins(Size(0.02,0.01));
         sellpick->setId("BaseCargo");
@@ -577,23 +603,23 @@ void BaseComputer::constructControls(void) {
         // Scroller for inventory.
         Scroller* invScroller = new Scroller;
         invScroller->setRect( Rect(.91, -.4, .05, .95) );
-        invScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        invScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        invScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        invScroller->setTextColor(GUI_OPAQUE_WHITE);
-		invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        invScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        invScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        invScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        invScroller->setTextColor(GUI_OPAQUE_WHITE());
+		invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Inventory picker.
         SimplePicker* ipick = new SimplePicker;
         ipick->setRect( Rect(.15, -.4, .76, .95) );
-        ipick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        ipick->setTextColor(GUI_OPAQUE_WHITE);
+        ipick->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ipick->setTextColor(GUI_OPAQUE_WHITE());
         ipick->setFont( Font(.07) );
         ipick->setTextMargins(Size(0.02,0.01));
-        ipick->setSelectionColor(GFXColor(0,.6,0,.8));
-        ipick->setHighlightColor(GFXColor(0,.6,0,.35));
-        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+        ipick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        ipick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         ipick->setId("PlayerCargo");
         ipick->setScroller(invScroller);
         cargoGroup->addChild(ipick);
@@ -604,7 +630,7 @@ void BaseComputer::constructControls(void) {
         NewButton* buy = new NewButton;
         buy->setRect( Rect(-.11, .3, .22, .13) );
         buy->setColor( GFXColor(0,1,1,.1) );
-        buy->setTextColor(GUI_OPAQUE_WHITE);
+        buy->setTextColor(GUI_OPAQUE_WHITE());
 		buy->setDownColor( GFXColor(0,1,1,.4) );
 		buy->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy->setVariableBorderCycleTime(1.0);
@@ -619,7 +645,7 @@ void BaseComputer::constructControls(void) {
         NewButton* buy10 = new NewButton;
         buy10->setRect( Rect(-.11, .1, .22, .1) );
         buy10->setColor( GFXColor(0,1,1,.1) );
-        buy10->setTextColor(GUI_OPAQUE_WHITE);
+        buy10->setTextColor(GUI_OPAQUE_WHITE());
 		buy10->setDownColor( GFXColor(0,1,1,.4) );
 		buy10->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy10->setVariableBorderCycleTime(1.0);
@@ -634,7 +660,7 @@ void BaseComputer::constructControls(void) {
         NewButton* buy1 = new NewButton;
         buy1->setRect( Rect(-.11, -.1, .22, .1) );
         buy1->setColor( GFXColor(0,1,1,.1) );
-        buy1->setTextColor(GUI_OPAQUE_WHITE);
+        buy1->setTextColor(GUI_OPAQUE_WHITE());
 		buy1->setDownColor( GFXColor(0,1,1,.4) );
 		buy1->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy1->setVariableBorderCycleTime(1.0);
@@ -648,11 +674,11 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.95, .05, .5) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
@@ -662,10 +688,10 @@ void BaseComputer::constructControls(void) {
         picture->setId("DescriptionImage");
         ms->setRect( Rect(-.6, -.95, 1.51, .5) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -686,7 +712,7 @@ void BaseComputer::constructControls(void) {
         StaticDisplay* sellLabel = new StaticDisplay;
         sellLabel->setRect( Rect(-.96, .55, .81, .1) );
         sellLabel->setText("Available Upgrades");
-        sellLabel->setTextColor(GUI_OPAQUE_WHITE);
+        sellLabel->setTextColor(GUI_OPAQUE_WHITE());
         sellLabel->setColor(GUI_CLEAR);
         sellLabel->setFont( Font(.07, BOLD_STROKE) );
         sellLabel->setJustification(CENTER_JUSTIFY);
@@ -702,23 +728,23 @@ void BaseComputer::constructControls(void) {
         // Scroller for seller.
         Scroller* sellerScroller = new Scroller;
         sellerScroller->setRect( Rect(-.20, -.4, .05, .95) );
-        sellerScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        sellerScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        sellerScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        sellerScroller->setTextColor(GUI_OPAQUE_WHITE);
-		sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        sellerScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        sellerScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        sellerScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        sellerScroller->setTextColor(GUI_OPAQUE_WHITE());
+		sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Seller picker.
         SimplePicker* sellpick = new SimplePicker;
         sellpick->setRect( Rect(-.96, -.4, .76, .95) );
-        sellpick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        sellpick->setTextColor(GUI_OPAQUE_WHITE);
+        sellpick->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        sellpick->setTextColor(GUI_OPAQUE_WHITE());
         sellpick->setFont( Font(.07) );
         sellpick->setTextMargins(Size(0.02,0.01));
-        sellpick->setSelectionColor(GFXColor(0,.6,0,.8));
-        sellpick->setHighlightColor(GFXColor(0,.6,0,.35));
-        sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+        sellpick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        sellpick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         sellpick->setId("BaseUpgrades");
         sellpick->setScroller(sellerScroller);
         upgradeGroup->addChild(sellpick);
@@ -728,21 +754,21 @@ void BaseComputer::constructControls(void) {
         // Scroller for inventory.
         Scroller* invScroller = new Scroller;
         invScroller->setRect( Rect(.91, -.4, .05, .95) );
-        invScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        invScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        invScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        invScroller->setTextColor(GUI_OPAQUE_WHITE);
-		invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        invScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        invScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        invScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        invScroller->setTextColor(GUI_OPAQUE_WHITE());
+		invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Inventory picker.
         SimplePicker* ipick = new SimplePicker;
         ipick->setRect( Rect(.15, -.4, .76, .95) );
         ipick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        ipick->setTextColor(GUI_OPAQUE_WHITE);
-        ipick->setSelectionColor(GFXColor(0,.6,0,.8));
-        ipick->setHighlightColor(GFXColor(0,.6,0,.35));
-        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        ipick->setTextColor(GUI_OPAQUE_WHITE());
+        ipick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        ipick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         ipick->setFont( Font(.07) );
         ipick->setTextMargins(Size(0.02,0.01));
         ipick->setId("PlayerUpgrades");
@@ -755,7 +781,7 @@ void BaseComputer::constructControls(void) {
         NewButton* buy = new NewButton;
         buy->setRect( Rect(-.11, .2, .22, .12) );
         buy->setColor( GFXColor(0,1,1,.1) );
-        buy->setTextColor(GUI_OPAQUE_WHITE);
+        buy->setTextColor(GUI_OPAQUE_WHITE());
 		buy->setDownColor( GFXColor(0,1,1,.4) );
 		buy->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy->setVariableBorderCycleTime(1.0);
@@ -769,11 +795,11 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.95, .05, .5) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
@@ -784,10 +810,10 @@ void BaseComputer::constructControls(void) {
         ms->setRect( Rect(-.6, -.95, 1.51, .5) );
 
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -807,21 +833,21 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(.91, 0, .05, .65) );
-        pickScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        pickScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        pickScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pickScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        pickScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        pickScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // News picker.
         SimplePicker* pick = new SimplePicker;
         pick->setRect( Rect(-.96, 0, 1.87, .65) );
         pick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        pick->setTextColor(GUI_OPAQUE_WHITE);
-        pick->setSelectionColor(GFXColor(0,.6,0,.8));
-        pick->setHighlightColor(GFXColor(0,.6,0,.35));
-        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        pick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont( Font(.07) );
         pick->setTextMargins(Size(0.02,0.01));
         pick->setId("NewsPicker");
@@ -833,20 +859,20 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.95, .05, .90) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.96, -.95, 1.87, .90) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.07) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -862,21 +888,21 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(-.20, -.7, .05, 1.4) );
-        pickScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        pickScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        pickScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pickScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        pickScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        pickScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Save game picker.
         SimplePicker* pick = new SimplePicker;
         pick->setRect( Rect(-.96, -.7, .76, 1.4) );
         pick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        pick->setTextColor(GUI_OPAQUE_WHITE);
-        pick->setSelectionColor(GFXColor(0,.6,0,.8));
-        pick->setHighlightColor(GFXColor(0,.6,0,.35));
-        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        pick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont( Font(.07) );
         pick->setTextMargins(Size(0.02,0.01));
         pick->setId("LoadSavePicker");
@@ -888,20 +914,20 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.7, .05, 1.4) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(.15, -.7, .76, 1.4) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.07) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -914,20 +940,20 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* inputTextScroller = new Scroller;
         inputTextScroller->setRect( Rect(.91, -0.95, .05, .2) );
-        inputTextScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        inputTextScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        inputTextScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        inputTextScroller->setTextColor(GUI_OPAQUE_WHITE);
-		inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        inputTextScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        inputTextScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        inputTextScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        inputTextScroller->setTextColor(GUI_OPAQUE_WHITE());
+		inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* inputText = new TextInputDisplay(&base_keyboard_queue,"\x1b\n \t\r*?\\/|:<>\"^");
         inputText->setRect( Rect(-.6, -.95, 1.51, .2) );
         inputText->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		inputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		inputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         inputText->setFont( Font(.07) );
         inputText->setMultiLine(true);
-        inputText->setTextColor(GUI_OPAQUE_WHITE);
+        inputText->setTextColor(GUI_OPAQUE_WHITE());
         inputText->setTextMargins(Size(.02,.01));
         inputText->setId("InputText");
         inputText->setScroller(inputTextScroller);
@@ -940,7 +966,7 @@ void BaseComputer::constructControls(void) {
         NewButton* buy10 = new NewButton;
         buy10->setRect( Rect(-.11, 0, .22, .12) );
         buy10->setColor( GFXColor(0,1,1,.1) );
-        buy10->setTextColor(GUI_OPAQUE_WHITE);
+        buy10->setTextColor(GUI_OPAQUE_WHITE());
 		buy10->setDownColor( GFXColor(0,1,1,.4) );
 		buy10->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy10->setVariableBorderCycleTime(1.0);
@@ -956,7 +982,7 @@ void BaseComputer::constructControls(void) {
         NewButton* accept = new NewButton;
         accept->setRect( Rect(-.11,-.2, .22, .12) );
         accept->setColor( GFXColor(0,1,1,.1) );
-        accept->setTextColor(GUI_OPAQUE_WHITE);
+        accept->setTextColor(GUI_OPAQUE_WHITE());
 		accept->setDownColor( GFXColor(0,1,1,.4) );
 		accept->setDownTextColor( GFXColor(.2,.2,.2) );
 		accept->setVariableBorderCycleTime(1.0);
@@ -971,7 +997,7 @@ void BaseComputer::constructControls(void) {
         NewButton* quit = new NewButton;
         quit->setRect( Rect(-.95, -.9, .3, .1) );
         quit->setColor( GFXColor(.8,1,.1,.1) );
-        quit->setTextColor(GUI_OPAQUE_WHITE);
+        quit->setTextColor(GUI_OPAQUE_WHITE());
 		quit->setDownColor( GFXColor(.8,1,.1,.4) );
 		quit->setDownTextColor( GFXColor(.2,.2,.2) );
 		quit->setVariableBorderCycleTime(1.0);
@@ -986,7 +1012,7 @@ void BaseComputer::constructControls(void) {
         NewButton * newgame = new NewButton;
         newgame->setRect(Rect(-.11,-.4, .22, .12) );
         newgame->setColor( GFXColor(0,1,1,.1) );
-        newgame->setTextColor(GUI_OPAQUE_WHITE);
+        newgame->setTextColor(GUI_OPAQUE_WHITE());
         newgame->setDownColor( GFXColor(0,1,1,.4) );
         newgame->setDownTextColor( GFXColor(.2,.2,.2) );
         newgame->setVariableBorderCycleTime(1.0);
@@ -1010,21 +1036,21 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(-.20, -.8, .05, 1.45) );
-        pickScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        pickScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        pickScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pickScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        pickScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        pickScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Picker.
         SimplePicker* pick = new SimplePicker;
         pick->setRect( Rect(-.96, -.8, .76, 1.45) );
         pick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        pick->setTextColor(GUI_OPAQUE_WHITE);
-        pick->setSelectionColor(GFXColor(0,.6,0,.8));
-        pick->setHighlightColor(GFXColor(0,.6,0,.35));
-        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        pick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont( Font(.07) );
         pick->setTextMargins(Size(0.02,0.01));
         pick->setId("Missions");
@@ -1036,20 +1062,20 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.8, .05, 1.45) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.10, -.8, 1.01, 1.45) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -1061,7 +1087,7 @@ void BaseComputer::constructControls(void) {
         NewButton* accept = new NewButton;
         accept->setRect( Rect(-.23, -.95, .22, .11) );
         accept->setColor( GFXColor(0,1,1,.1) );
-        accept->setTextColor(GUI_OPAQUE_WHITE);
+        accept->setTextColor(GUI_OPAQUE_WHITE());
 		accept->setDownColor( GFXColor(0,1,1,.4) );
 		accept->setDownTextColor( GFXColor(.2,.2,.2) );
 		accept->setVariableBorderCycleTime(1.0);
@@ -1082,21 +1108,21 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(-.20, -.8, .05, 1.45) );
-        pickScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        pickScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        pickScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pickScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        pickScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        pickScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE());
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Picker.
         SimplePicker* pick = new SimplePicker;
         pick->setRect( Rect(-.96, -.8, .76, 1.45) );
         pick->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
-        pick->setTextColor(GUI_OPAQUE_WHITE);
-        pick->setSelectionColor(GFXColor(0,.6,0,.8));
-        pick->setHighlightColor(GFXColor(0,.6,0,.35));
-        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
+        pick->setTextColor(GUI_OPAQUE_WHITE());
+        pick->setSelectionColor(UnsaturatedColor(0,.6,0,.8));
+        pick->setHighlightColor(UnsaturatedColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE());
         pick->setFont( Font(.07) );
         pick->setTextMargins(Size(0.02,0.01));
         pick->setId("Ships");
@@ -1108,11 +1134,11 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.5, .05, 1.15) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
@@ -1122,10 +1148,10 @@ void BaseComputer::constructControls(void) {
         picture->setId("DescriptionImage");
         ms->setRect( Rect(-.10, -.5, 1.01, 1.15) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -1137,7 +1163,7 @@ void BaseComputer::constructControls(void) {
         NewButton* buy = new NewButton;
         buy->setRect( Rect(-.53, -.95, .22, .11) );
         buy->setColor( GFXColor(0,1,1,.1) );
-        buy->setTextColor(GUI_OPAQUE_WHITE);
+        buy->setTextColor(GUI_OPAQUE_WHITE());
 		buy->setDownColor( GFXColor(0,1,1,.4) );
 		buy->setDownTextColor( GFXColor(.2,.2,.2) );
 		buy->setVariableBorderCycleTime(1.0);
@@ -1150,7 +1176,7 @@ void BaseComputer::constructControls(void) {
         NewButton* sell = new NewButton;
         sell->setRect( Rect(-.23, -.95, .22, .11) );
         sell->setColor( GFXColor(0,1,1,.1) );
-        sell->setTextColor(GUI_OPAQUE_WHITE);
+        sell->setTextColor(GUI_OPAQUE_WHITE());
 		sell->setDownColor( GFXColor(0,1,1,.4) );
 		sell->setDownTextColor( GFXColor(.2,.2,.2) );
 		sell->setVariableBorderCycleTime(1.0);
@@ -1173,12 +1199,14 @@ void BaseComputer::constructControls(void) {
         NewButton* playerInfo = new NewButton;
         playerInfo->setRect( Rect(-.40, .52, .27, .09) );
         playerInfo->setLabel("Player Info");
+        static GFXColor pinfo_col=getConfigColor("player_info",GFXColor(0,.4,0));
         playerInfo->setCommand("ShowPlayerInfo");
-		playerInfo->setColor( GFXColor(1,.8,0,.25) );
-		playerInfo->setTextColor( GUI_OPAQUE_WHITE );
-		playerInfo->setDownColor( GFXColor(1,.8,0,.5) );
-		playerInfo->setDownTextColor( GUI_OPAQUE_BLACK );
-		playerInfo->setHighlightColor( GFXColor(1,.8,0,.4) );
+        
+		playerInfo->setColor( GFXColor(pinfo_col.r,pinfo_col.g,pinfo_col.b,.25) );
+		playerInfo->setTextColor( GUI_OPAQUE_WHITE() );
+		playerInfo->setDownColor( GFXColor(pinfo_col.r,pinfo_col.g,pinfo_col.b,.5) );
+		playerInfo->setDownTextColor( GUI_OPAQUE_BLACK() );
+		playerInfo->setHighlightColor( GFXColor(pinfo_col.r,pinfo_col.g,pinfo_col.b,.4) );
         playerInfo->setFont(Font(.07));
         infoGroup->addChild(playerInfo);
 
@@ -1187,31 +1215,31 @@ void BaseComputer::constructControls(void) {
         shipStats->setRect( Rect(-.05, .52, .27, .09) );
         shipStats->setLabel("Ship Stats");
         shipStats->setCommand("ShowShipStats");
-		shipStats->setColor( GFXColor(1,.8,0,.25) );
-		shipStats->setTextColor( GUI_OPAQUE_WHITE );
-		shipStats->setDownColor( GFXColor(1,.8,0,.5) );
-		shipStats->setDownTextColor( GUI_OPAQUE_BLACK );
-		shipStats->setHighlightColor( GFXColor(1,.8,0,.4) );
+		shipStats->setColor( GFXColor(pinfo_col.r,pinfo_col.g,pinfo_col.b,.25) );
+		shipStats->setTextColor( GUI_OPAQUE_WHITE() );
+		shipStats->setDownColor( GFXColor(pinfo_col.r,pinfo_col.g,pinfo_col.b,.5) );
+		shipStats->setDownTextColor( GUI_OPAQUE_BLACK() );
+		shipStats->setHighlightColor( GFXColor(pinfo_col.r,pinfo_col.g,pinfo_col.b,.4) );
         shipStats->setFont(Font(.07));
         infoGroup->addChild(shipStats);
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.95, .05, 1.4) );
-        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
-        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
-        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
-        descScroller->setTextColor(GUI_OPAQUE_WHITE);
-		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        descScroller->setColor( UnsaturatedColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE() );
+        descScroller->setButtonColor( UnsaturatedColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE());
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.96, -.95, 1.87, 1.4) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
-		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
         ms->setFont( Font(.07) );
         ms->setMultiLine(true);
-        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
@@ -2013,7 +2041,7 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
         // Re-use the category we have.
     } else {
         // Need to make a new cell for this.
-        cells.addCell(SimplePickerCell(beautify(currentCategory), currentCategory, CATEGORY_TEXT_COLOR, CATEGORY_TAG));
+        cells.addCell(SimplePickerCell(beautify(currentCategory), currentCategory, CATEGORY_TEXT_COLOR(), CATEGORY_TAG));
     }
 
     SimplePickerCell* parentCell = static_cast<SimplePickerCell*>(cells.cellAt(cells.count()-1));   // Last cell in list.
@@ -2072,7 +2100,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 		  }
 	
         // Clear color means use the text color in the picker.
-        SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR:GUI_CLEAR) : NO_MONEY_COLOR), i);
+        SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR()), i);
 
         // Add the cell.
         if(parentCell) {
@@ -2588,7 +2616,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
         for (unsigned int j=0;j<active_missions[i]->objectives.size();++j) {
           amission.cargo.description+=active_missions[i]->objectives[j].objective+": "+XMLSupport::tostring((int)(100*active_missions[i]->objectives[j].completeness))+"%\\";          
         }
-        amission.color=DEFAULT_UPGRADE_COLOR;
+        amission.color=DEFAULT_UPGRADE_COLOR();
         tlist.masterList.push_back(amission);
       }
     }
@@ -2697,7 +2725,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
 	tlist.masterList.clear(); // Just in case
 
     // Get all the upgrades.
-    assert( equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR) );
+    assert( equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR()) );
 	std::vector<std::string> filtervec;
 	filtervec.push_back("upgrades");
     loadMasterList(baseUnit, filtervec, std::vector<std::string>(), true, tlist);
@@ -2707,7 +2735,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     // cargo.mission == true means we can't upgrade this.
     vector<CargoColor>::iterator iter;
     for(iter=tlist.masterList.begin(); iter!=tlist.masterList.end(); iter++) {
-        iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR) );
+        iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR()) );
     }
 
     // Add Basic Repair.
@@ -2728,7 +2756,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     assert(repairCell->text() == BASIC_REPAIR_NAME);
     if(isClear(repairCell->textColor())) {
         // Have repair cell, and its color is normal.
-        repairCell->setTextColor(BASIC_REPAIR_TEXT_COLOR);
+        repairCell->setTextColor(BASIC_REPAIR_TEXT_COLOR());
     }
 }
 
@@ -2765,7 +2793,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     // cargo.mission == true means we can't upgrade this.
     vector<CargoColor>::iterator iter;
     for(iter=tlist.masterList.begin(); iter!=tlist.masterList.end(); iter++) {
-        iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR) );
+        iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR()) );
     }
 
 	std::vector<std::string> invplayerfiltervec=weapfiltervec;
@@ -3117,22 +3145,22 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
 		const bool selectable = playerUnit->canUpgrade(m_newPart, i, m_selectedTurret, m_addMultMode, false, percent, m_theTemplate);
         
 		// Figure color and label based on weapon that is in the slot.
-		GFXColor mountColor = MOUNT_POINT_NO_SELECT;
+		GFXColor mountColor = MOUNT_POINT_NO_SELECT();
 		string mountName;
 		string ammoexp;
 		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
 			mountName=tostring(i+1)+" "+ playerUnit->mounts[i].type->weapon_name;
 			ammoexp=(playerUnit->mounts[i].ammo==-1)?string(""):string((" ammo: "+tostring(playerUnit->mounts[i].ammo)));
 			mountName+=ammoexp;
-			mountColor = MOUNT_POINT_FULL;
+			mountColor = MOUNT_POINT_FULL();
         } else {
 			const std::string temp = lookupMountSize(playerUnit->mounts[i].size);
 			mountName=tostring(i+1)+" (Empty) "+ temp.c_str();
-			mountColor = MOUNT_POINT_EMPTY;
+			mountColor = MOUNT_POINT_EMPTY();
         }
 
 		// If the mount point won't work with the weapon, don't let user select it.
-		if(!selectable) mountColor = MOUNT_POINT_NO_SELECT;
+		if(!selectable) mountColor = MOUNT_POINT_NO_SELECT();
 
 		// Now we add the cell.  Note that "selectable" is stored in the tag property.
 		picker->addCell(SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
@@ -3335,7 +3363,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 	     }
 
 		// Now we add the cell.  Note that "selectable" is stored in the tag property.
-		const GFXColor mountColor = (selectable? MOUNT_POINT_FULL:MOUNT_POINT_NO_SELECT);
+		const GFXColor mountColor = (selectable? MOUNT_POINT_FULL():MOUNT_POINT_NO_SELECT());
 		picker->addCell(SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
     }
 
@@ -3886,9 +3914,14 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     // A line for each faction.
     const int numFactions = FactionUtil::GetNumFactions();
     int i = 0;
+    static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
     for(; i<numFactions; i++) {
 		Unit *currentplayer=UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer());
 		float relation=0;
+                if (disallowedFactions.find(FactionUtil::GetFactionName(i))!=string::npos) {
+                  continue;                 
+                }
+
 		if (currentplayer) {
 	        relation = FactionUtil::GetIntRelation(i, currentplayer->faction );
 		}
@@ -4972,9 +5005,9 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
 	cont->setLabel(type);
 	cont->setCommand(type);
 	cont->setColor( GFXColor(1,.5,0,.25) );
-	cont->setTextColor( GUI_OPAQUE_WHITE );
+	cont->setTextColor( GUI_OPAQUE_WHITE() );
 	cont->setDownColor( GFXColor(1,.5,0,.6) );
-	cont->setDownTextColor( GUI_OPAQUE_BLACK );
+	cont->setDownTextColor( GUI_OPAQUE_BLACK() );
 	cont->setHighlightColor( GFXColor(0,1,0,.4) );
 	cont->setFont(Font(.08, BOLD_STROKE));
 	// Put the button on the window.
@@ -4986,9 +5019,9 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
 	resume->setLabel("Cancel");
 	resume->setCommand("Window::Close");
 	resume->setColor( GFXColor(0,1,0,.25) );
-	resume->setTextColor( GUI_OPAQUE_WHITE );
+	resume->setTextColor( GUI_OPAQUE_WHITE() );
 	resume->setDownColor( GFXColor(0,1,0,.6) );
-	resume->setDownTextColor( GUI_OPAQUE_BLACK );
+	resume->setDownTextColor( GUI_OPAQUE_BLACK() );
 	resume->setHighlightColor( GFXColor(0,1,0,.4) );
 	resume->setFont(Font(.08, BOLD_STROKE));
 	// Put the button on the window.

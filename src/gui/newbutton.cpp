@@ -49,8 +49,8 @@ void NewButton::draw(void)
 			if(m_variableBorderCycleTime > 0.0) {
 				drawCycleBorder(lineWidth);
 			} else {
-				drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
-				drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+				drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK(), lineWidth);
+				drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE(), lineWidth);
 			}
 			currentTextColor = textColor();
             break;
@@ -70,8 +70,8 @@ void NewButton::draw(void)
  			if(m_variableBorderCycleTime > 0.0) {
 				drawCycleBorder(lineWidth);
 			} else {
-				drawUpLeftShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
-				drawLowRightShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+				drawUpLeftShadow(m_rect, GUI_OPAQUE_BLACK(), lineWidth);
+				drawLowRightShadow(m_rect, GUI_OPAQUE_WHITE(), lineWidth);
 			}
 			}
             break;
@@ -86,8 +86,8 @@ void NewButton::draw(void)
 			if(m_variableBorderCycleTime > 0.0) {
 				drawCycleBorder(lineWidth);
 			} else {
-				drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
-				drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+				drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK(), lineWidth);
+				drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE(), lineWidth);
 			}
             break;
         case DISABLED_STATE:
@@ -213,15 +213,15 @@ NewButton::NewButton(void)
 m_drawingState(NewButton::NORMAL_STATE),
 m_commandId(),
 m_leftPressed(false),
-m_highlightColor(GUI_OPAQUE_WHITE),
+m_highlightColor(GUI_OPAQUE_WHITE()),
 m_textHighlightColor(GUI_CLEAR),
 m_downColor(GUI_CLEAR),
 m_downTextColor(GUI_CLEAR),
 m_shadowWidth(1.0),
 m_variableBorderCycleTime(0.0),
-m_borderColor(GUI_OPAQUE_BLACK),
-m_endBorderColor(GUI_OPAQUE_WHITE),
-m_currentCycleColor(GUI_OPAQUE_BLACK),
+m_borderColor(GUI_OPAQUE_BLACK()),
+m_endBorderColor(GUI_OPAQUE_WHITE()),
+m_currentCycleColor(GUI_OPAQUE_BLACK()),
 m_currentCycle(0),
 m_cycleStepCount(-1),
 m_cycleDirection(0),

@@ -673,10 +673,13 @@ void NavigationSystem::DrawMission()
 	int i = 0;
 	string factionname = "factionname";
 	float relation = 0.0;
-
-	while(i < numfactions)
+        static string disallowedFactions=vs_config->getVariable("graphics","unprintable_factions","");
+	for(;i < numfactions;++i)
 	{
 		factionname = FactionUtil::GetFactionName(i);
+                if (disallowedFactions.find(factionname)!=string::npos) {
+                  continue;                 
+                }
 		if (factionname!="neutral"&&factionname!="privateer"&&factionname!="planets"&&factionname!="upgrades"&&factionname!="unknown") {
 		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 
@@ -695,7 +698,6 @@ void NavigationSystem::DrawMission()
 
 		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation01),(relation01),(1.0-(2.0*Delta(relation01, 0.5))),1));
 		}
-		i+=1;
 	}
 	if (i<killlist->size()) {
 		string relationtext("Total Kills: ");

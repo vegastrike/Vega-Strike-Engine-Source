@@ -156,7 +156,7 @@ bool Window::processCommand(const EventCommandId& command, Control* control) {
 Window::Window(void)
 :
 m_rect(0.0,0.0,0.0,0.0),
-m_color(GUI_OPAQUE_BLACK),
+m_color(GUI_OPAQUE_BLACK()),
 m_outlineColor(GUI_CLEAR),
 m_outlineWidth(1.0),
 m_deleteOnClose(true),
@@ -181,7 +181,7 @@ void WindowManager::draw() {
     vector <Window*>::iterator iter;
 
     GFXHudMode(true);              // Load identity matrices.
-    GFXColorf(GUI_OPAQUE_WHITE);
+    GFXColorf(GUI_OPAQUE_WHITE());
 
     GFXDisable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
@@ -217,7 +217,7 @@ void WindowManager::draw() {
 
     dummy.MakeActive();
     GFXBlendMode(SRCALPHA,INVSRCALPHA);
-    GFXColorf(GUI_OPAQUE_WHITE);
+    GFXColorf(GUI_OPAQUE_WHITE());
 
     // Draw the cursor sprite.
     GFXEnable(TEXTURE0);
