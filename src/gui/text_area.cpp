@@ -249,8 +249,8 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level) {
 		RenderTextItem(current->child[cur], level+1);
 	}
 }
-void TextArea::AddTextItem(char *name, char *description) {AddTextItem(name, description, NULL); }
-void TextArea::AddTextItem(char *name, char *description, char *parent_name) {
+void TextArea::AddTextItem(char *name, const char *description) {AddTextItem(name, description, NULL); }
+void TextArea::AddTextItem(char *name, const char *description, char *parent_name) {
 	TextAreaItem *master;
 	master = ItemList->FindChild(parent_name);
 	item_count++;
@@ -258,7 +258,7 @@ void TextArea::AddTextItem(char *name, char *description, char *parent_name) {
 	else { master->AddChild(name, description); }
 }
 
-void TextArea::ChangeTextItem(char *name, char *description) {
+void TextArea::ChangeTextItem(char *name, const char *description) {
 	TextAreaItem *search;
 	search = ItemList->FindChild(name);
 	if (search == 0) { return; }
@@ -540,7 +540,7 @@ TextAreaItem::TextAreaItem(void) {
 	TextAreaItem("blank","", NULL);
 }
 
-TextAreaItem::TextAreaItem(char *new_name, char *desc, TextAreaItem *parent_class) {
+TextAreaItem::TextAreaItem(char *new_name, const char *desc, TextAreaItem *parent_class) {
 	if (new_name != 0 ) { name = strdup(new_name); }
 	else { name = 0; }
 	if (desc != 0 ) { description = strdup(desc); }
@@ -608,7 +608,7 @@ TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
 
 typedef TextAreaItem * TextAreaItemStr;
 
-void TextAreaItem::AddChild(char *new_name, char *desc) {
+void TextAreaItem::AddChild(char *new_name, const char *desc) {
 	TextAreaItem **newlist;
 	int cur = 0;
 	child_count++;

@@ -90,9 +90,9 @@ public:
 	void DoMultiline(int yes);	// DoMultiline(1) to enable multi-line entries
 	void Refresh(void);
 	void RenderText(void);
-	void AddTextItem(char *name, char *description);
-	void AddTextItem(char *name, char *description, char *parent_name);
-	void ChangeTextItem(char *name, char *description);
+	void AddTextItem(char *name, const char *description);
+	void AddTextItem(char *name, const char *description, char *parent_name);
+	void ChangeTextItem(char *name, const char *description);
 	void SetText(char *text);	// Sets the text. Enables Multiline and disables highlighting
 	// Returns the char of the currently selected item. NULL if nothing is selected
 	char *GetSelectedItemName(void);
@@ -203,7 +203,7 @@ class TextAreaItem {
 public:
 	TextAreaItem(void);
 	// parent_class is NULL for the master TextAreaItem
-	TextAreaItem(char *new_name, char *desc, TextAreaItem *parent_class);
+	TextAreaItem(char *new_name, const char *desc, TextAreaItem *parent_class);
 	~TextAreaItem(void);
 
 	// A recursive function. This function will be called to all the children until one of them matches the search_name
@@ -211,7 +211,7 @@ public:
 	TextAreaItem *FindChild(char *search_name);
 	TextAreaItem *FindCount(int count, int cur);
 
-	void AddChild(char *new_name, char *desc);
+	void AddChild(char *new_name, const char *desc);
 	void ExpandTree(void);
 	void Sort(void);
 
