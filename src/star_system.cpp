@@ -360,8 +360,14 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"farmsh");
   fflush (stderr);
 #endif
+  static bool DrawNearStarsLast =XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_near_stars_in_front_of_planets","false"));
+  if (!DrawNearStarsLast) {
+	  stars->Draw();
+  }
   Mesh::ProcessZFarMeshes();
-  stars->Draw();
+  if (DrawNearStarsLast) {
+	  stars->Draw();
+  }
   
 #ifdef UPDATEDEBUG
   fprintf (stderr,"terr");
