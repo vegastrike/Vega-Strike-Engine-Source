@@ -1814,13 +1814,13 @@ void Unit::AddVelocity(float difficulty) {
    Vector v=Velocity;
   
    if(graphicOptions.InWarp==1){
-	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","100000"));
+	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","314159"));
 	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
 	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","1000"));     
-           float speed = v.Magnitude();
-           if (speed>.01)
-             if (speed>(computer.max_combat_speed))
-             v*=computer.max_combat_speed/speed;
+       //    float speed = v.Magnitude();
+       //    if (speed>.01)
+       //      if (speed>(computer.max_combat_speed))
+       //      v*=computer.max_combat_speed/speed;
 	   float minmultiplier=fmultiplier;
 	   Unit * planet;
 	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
@@ -1846,7 +1846,9 @@ void Unit::AddVelocity(float difficulty) {
 		 }
 		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
 	   }
-	   if(minmultiplier<PI*PI) {minmultiplier=PI*PI;}
+	   if(minmultiplier<PI*PI) {
+		   minmultiplier=PI*PI;
+	   }
 	   if(minmultiplier>fmultiplier) {
 		   minmultiplier=fmultiplier; //SOFT LIMIT
 	   }
