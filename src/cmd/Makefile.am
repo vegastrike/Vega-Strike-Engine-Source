@@ -17,6 +17,7 @@ libcmdgeneric_a_SOURCES =			\
 	missile_generic.h			\
 	missile_generic.cpp			\
 	unit_util.h						\
+	unit_xml.cpp				\
 	unit_util_generic.cpp			\
 	unit_util_generic.cpp			\
 	unit_factory_generic.h			\
