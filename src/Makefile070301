@@ -20,6 +20,7 @@ SRCS = 	cmd_beam.cpp				\
 	cmd_flybywire.cpp			\
 	cmd_order.cpp				\
 	cmd_unit.cpp				\
+	cmd_unit_click.cpp			\
 	cmd_unit_xml.cpp  			\
 	cmd_physics.cpp				\
 	cmd_weapon_xml.cpp			\
@@ -49,6 +50,8 @@ SRCS = 	cmd_beam.cpp				\
 	gl_globals.cpp				\
 	gl_init.cpp				\
 	gl_light.cpp				\
+	gl_light_state.cpp			\
+	gl_light_pick.cpp			\
 	gl_matrix.cpp				\
 	gl_material.cpp				\
 	gl_misc.cpp				\
