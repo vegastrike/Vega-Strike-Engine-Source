@@ -6,7 +6,7 @@ extern Vector mouseline;
 Vector MouseCoordinate (int mouseX, int mouseY) {
   float l, r, b, t , n, f;
   GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
-  fprintf (stderr, "N: %f\n",n);
+  //fprintf (stderr, "N: %f\n",n);
   //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
   /*  cerr.form("%f, %f, %f, %f\n", l,r,b,t);
   cerr << "top - bottom " <<  t-b << endl;

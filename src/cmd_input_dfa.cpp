@@ -4,7 +4,7 @@
 #include "vegastrike.h"
 #include "cmd_unit.h"
 #include "cmd_order.h"
-#include "gfx_location_select.h"
+#include "gfx_coordinate_select.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 
@@ -46,9 +46,7 @@ void InputDFA::NewLocationSelect(){
   if (locsel)
     delete locsel;
 
-  locsel = new LocationSelect (RunningTotal,
-			       Vector (1,0,0),
-			       Vector (0,0,-1));
+  locsel = new CoordinateSelect (RunningTotal);
 }
 void InputDFA::BindOrder (int key, OrderFactory *ofac){
   /*  if (orderbindings[KEYMAP_SIZE]) 
@@ -101,7 +99,7 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
 void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
-  LocationSelect::MouseMoveHandle(k,x,y,delx,dely,mod);
+  CoordinateSelect::MouseMoveHandle(k,x,y,delx,dely,mod);
   if (k==PRESS) {
     
       UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();

@@ -11,7 +11,7 @@ class UnitCollection;
 class ClickList;
 class Sprite;
 class OrderFactory;
-class LocationSelect;
+class CoordinateSelect;
 
 
 
@@ -19,7 +19,7 @@ class InputDFA {
   enum State {NONE, UNITS_SELECTED, LOCATION_SELECT, TARGET_SELECT};
   OrderFactory *orderfac;
   bool queueOrder;
-  LocationSelect * locsel;
+  CoordinateSelect * locsel;
   Sprite MouseArrow;
   Sprite SelectBox;
 

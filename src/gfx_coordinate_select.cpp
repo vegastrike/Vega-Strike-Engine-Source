@@ -42,7 +42,7 @@ void CoordinateSelect::UpdateMouse() {
 
 
     float distance = CamR.Dot (LocalPosition-CamPos);//distance out into z...straight line...
-    fprintf (stderr, "distance:%f\n",distance);
+    //    fprintf (stderr, "distance:%f\n",distance);
     //fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
     if (mouseDistance!=0) {
       LocalPosition = mousePoint*(distance/mouseDistance)+CamPos;
