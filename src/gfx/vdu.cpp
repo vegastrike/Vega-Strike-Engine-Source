@@ -140,7 +140,33 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
   //cout << "vdu" << endl;
 };
-static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float &sy, float & w, float & h, bool drawsprite, bool invertsprite) {
+
+GFXColor getDamageColor(float armor,bool gradient=false) {
+	static bool init=false;
+	static float damaged[4]={1,0,0,1};
+	static float half_damaged[4]={1,1,0,1};
+	static float full[4]={1,1,1,1};
+	if (!init) {
+		vs_config->getColor("default","hud_target_damaged",damaged,true);
+		vs_config->getColor("default","hud_target_half_damaged",half_damaged,true);
+		vs_config->getColor("default","hud_target_full",full,true);
+		init=true;
+	}
+	if (armor>=.9) {
+		return GFXColor(full[0],full[1],full[2],full[3]);
+	}
+	float avghalf=armor>=.3?1:0;
+	if (gradient&&armor>=.3) {
+		avghalf=(armor-.3)/.6;
+	}
+	float avgdamaged=1-avghalf;
+	return GFXColor(half_damaged[0]*avghalf+damaged[0]*avgdamaged,
+		half_damaged[1]*avghalf+damaged[1]*avgdamaged,
+		half_damaged[2]*avghalf+damaged[2]*avgdamaged,
+		half_damaged[3]*avghalf+damaged[3]*avgdamaged);
+}
+
+static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float &sy, float & w, float & h, float aup, float aright, float aleft, float adown,   float hull, bool drawsprite, bool invertsprite) {
   static bool HighQTargetVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
   float nw,nh;
   thus->GetPosition (sx,sy);
@@ -168,8 +194,80 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 	  s->GetSize (nw,nh);
 	  w= fabs(nw*h/nh);
 	  s->SetSize (w,invertsprite?-h:h);
-	  if (drawsprite) 
-		  s->Draw();
+	  if (drawsprite) {
+  		static const float middle_point = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","armor_hull_size",".55"));
+  		float middle_point_small=1-middle_point;
+  		Vector ll,lr,ur,ul,mll,mlr,mur,mul;
+  		s->getTexture()->MakeActive();
+  		GFXDisable (CULLFACE);
+  		s->DrawHere(ll,lr,ur,ul);
+ 		mll=middle_point*ll+middle_point_small*ur;
+  		mlr=middle_point*lr+middle_point_small*ul;
+  		mur=middle_point*ur+middle_point_small*ll;
+  		mul=middle_point*ul+middle_point_small*lr;
+		bool tmax=1;
+  		GFXBegin(GFXQUAD);
+		GFXColorf(getDamageColor(aleft));
+  		GFXTexCoord2f(0, 0);
+  		GFXVertexf(ul);
+		GFXColorf(getDamageColor(aup));		
+  		GFXTexCoord2f(1, 0);
+  		GFXVertexf(ur);
+		GFXColorf(getDamageColor(hull,true));		
+  		GFXTexCoord2f(middle_point, middle_point_small);		
+  		GFXVertexf(mur);
+		GFXColorf(getDamageColor(hull,true));		
+  		GFXTexCoord2f(middle_point_small, middle_point_small);
+  		GFXVertexf(mul);
+		GFXColorf(getDamageColor(aup));
+  		GFXTexCoord2f(1, 0);
+  		GFXVertexf(ur);
+		GFXColorf(getDamageColor(aright));
+  		GFXTexCoord2f(1, 1);
+  		GFXVertexf(lr);
+		GFXColorf(getDamageColor(hull,true));				
+  		GFXTexCoord2f(middle_point, middle_point);
+  		GFXVertexf(mlr);
+		GFXColorf(getDamageColor(hull,true));				
+  		GFXTexCoord2f(middle_point, middle_point_small);
+  		GFXVertexf(mur);
+		GFXColorf(getDamageColor(aright));
+  		GFXTexCoord2f(1, 1);
+  		GFXVertexf(lr);
+		GFXColorf(getDamageColor(adown));		
+  		GFXTexCoord2f(0, 1);
+  		GFXVertexf(ll);
+		GFXColorf(getDamageColor(hull,true));				
+  		GFXTexCoord2f(middle_point_small, middle_point);
+  		GFXVertexf(mll);
+		GFXColorf(getDamageColor(hull,true));				
+  		GFXTexCoord2f(middle_point, middle_point);
+  		GFXVertexf(mlr);
+		GFXColorf(getDamageColor(adown));
+  		GFXTexCoord2f(0, 1);
+  		GFXVertexf(ll);
+		GFXColorf(getDamageColor(aleft));		
+  		GFXTexCoord2f(0, 0);
+  		GFXVertexf(ul);
+  		GFXTexCoord2f(middle_point_small, middle_point_small);
+		GFXColorf(getDamageColor(hull,true));		
+  		GFXVertexf(mul);
+		GFXColorf(getDamageColor(hull,true));		
+  		GFXTexCoord2f(middle_point_small, middle_point);
+  		GFXVertexf(mll);
+		GFXColorf(getDamageColor(hull,true));
+  		GFXTexCoord2f(middle_point_small, middle_point_small);
+  		GFXVertexf(mul);
+  		GFXTexCoord2f(middle_point, middle_point_small);
+  		GFXVertexf(mur);
+  		GFXTexCoord2f(middle_point, middle_point);
+  		GFXVertexf(mlr);
+  		GFXTexCoord2f(middle_point_small, middle_point);
+  		GFXVertexf(mll);
+  		GFXEnd();
+		
+  		GFXEnable (CULLFACE);
+	  }
 	  s->SetSize (nw,nh);
 	  h = fabs(h);
 	  if (HighQTargetVSSprites) {
@@ -181,7 +279,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 
 }
 void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
-  DrawHUDSprite (this, s, per, sx, sy, w, h, true,false);
+  DrawHUDSprite (this, s, per, sx, sy, w, h, 1, 1, 1, 1, 1, true,false);
 }
 
 void VDU::Scroll (int howmuch) {
@@ -359,7 +457,7 @@ void VDU::DrawVDUShield (Unit * parent) {
   GFXEnable (TEXTURE0);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   static bool invert_friendly_sprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_friendly_sprite","false"));
-  DrawHUDSprite (this,parent->getHudImage (),.25,x,y,w,h,true,invert_friendly_sprite);
+  DrawHUDSprite (this,parent->getHudImage (),.25,x,y,w,h,parent->GetHullPercent(),parent->GetHullPercent(),parent->GetHullPercent(),parent->GetHullPercent(),parent->GetHullPercent(),true,invert_friendly_sprite);
 
 }
 VSSprite * getJumpImage () {
@@ -404,7 +502,19 @@ retString128 PrettyDistanceString(double distance) {
 	}
 	return qr;
 }
-
+static float OneOfFour(float a, float b, float c, float d){
+	int aa=  a!=0?1:0;
+	int bb=  b!=0?1:0;
+	int cc=  c!=0?1:0;
+	int dd=  d!=0?1:0;
+	if (aa+bb+cc+dd==4)
+		return 1;
+	if (aa+bb+cc+dd==3)
+		return .85;
+	if (aa+bb+cc+dd==2)
+		return .4;
+	return 0;
+}
 void VDU::DrawTarget(Unit * parent, Unit * target) {
     float x,y,w,h;
 
@@ -413,13 +523,32 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   float ls = target->LShieldData();
   float bs = target->BShieldData();
   GFXEnable (TEXTURE0);
-  GFXColor4f (1,target->GetHullPercent(),target->GetHullPercent(),1);
+
   static bool invert_target_sprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_target_sprite","false"));
-    
+  static bool invert_target_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_target_shields","false"));
+  float armor[8];
+  target->ArmorData(armor);
+  float au,ar,al,ad;
+  au=OneOfFour(armor[0],armor[2],armor[4],armor[6]);
+  ar=OneOfFour(armor[0],armor[1],armor[4],armor[5]);
+  al=OneOfFour(armor[2],armor[3],armor[6],armor[7]);
+  ad=OneOfFour(armor[1],armor[3],armor[5],armor[7]);
+
+  if (invert_target_shields){
+	  float tmp =au;
+	  au = ad;ad=tmp;
+  }
+  if (target->isUnit()==PLANETPTR){
+	  au=ar=al=ad=target->GetHullPercent();
+  }
+  
   DrawHUDSprite (this,((target->isUnit()!=PLANETPTR||target->getHudImage()!=NULL)?target->getHudImage ():
                        (target->GetDestinations().size()!=0? getJumpImage():
                         (((Planet *)target)->hasLights()?getSunImage():
-                         (target->getFullname().find("invisible")!=string::npos?getNavImage():getPlanetImage())))),.6,x,y,w,h,true,invert_target_sprite);
+                         (target->getFullname().find("invisible")!=string::npos?getNavImage():getPlanetImage())))),.6,x,y,w,h,
+				 au,ar,al,ad,
+				 target->GetHullPercent(),
+				 true,invert_target_sprite);
   
     GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
@@ -448,7 +577,6 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   strcat (st,qr.str);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
-  static bool invert_target_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_target_shields","false"));
   DrawShield (fs,rs,ls,bs,x,y,w,h,invert_target_shields);
   GFXColor4f (1,1,1,1);
   }else {
@@ -691,7 +819,11 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
   //  char st[1024];
   GFXColor4f (1,parent->GetHull()/ (*maxhull),parent->GetHull()/(*maxhull),1);
   GFXEnable (TEXTURE0);
-  DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
+  float armor[8];
+  parent->ArmorData (armor);
+  static bool draw_damage_sprite=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_damage_sprite","true"));
+  DrawHUDSprite (this,draw_damage_sprite? parent->getHudImage ():NULL,.6,x,y,w,h,
+    (armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),parent->GetHull()/ (*maxhull),true,false);
   GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
   std::string fullname (getUnitNameAndFgNoBase(parent));
@@ -842,7 +974,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
     static bool draw_vdu_target_info=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_vdu_view_shields","true"));
     if (target&&draw_vdu_target_info){
       if (viewStyle==CP_PANTARGET) {
-        DrawHUDSprite(this,getSunImage(),1,x,y,w,h,false,false);
+		  DrawHUDSprite(this,getSunImage(),1,x,y,w,h,1,1,1,1,1,false,false);
         h=fabs (h*.6);
         w=fabs (w*.6);
         static bool invert_view_shields = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","invert_view_shields","false"));
@@ -869,7 +1001,6 @@ void VDU::DrawWeapon (Unit * parent) {
   string mbuf("\n#ff0000Missiles:#000000");
   int mlen = mbuf.length();
   int count=1;int mcount=1;
-  GFXColor4f (1,1,1,1);
   GFXEnable(TEXTURE0);
   DrawTargetSpr (drawweapsprite?parent->getHudImage ():NULL,percent,x,y,w,h);
   GFXDisable (TEXTURE0);
@@ -1220,3 +1351,4 @@ void VDU::SwitchMode( Unit * parent) {
 		Network[playernum].startWebcamTransfer();
   }
 }
+
