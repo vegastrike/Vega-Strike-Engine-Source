@@ -1,5 +1,6 @@
 #include "gfx_mesh.h"
-
+#include <values.h>
+#include <float.h>
 #define PBEHIND -1
 #define PFRONT 1
 #define PUNK 0
