@@ -108,11 +108,11 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 }
 
 // From unit_weapon.cpp
-void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
+void AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
-    QVector targpos (lead?target->PositionITTS (pos,speed):target->Position());
+    QVector targpos (lead?target->PositionITTS (pos,vel,speed):target->Position());
 
     Vector dir =( targpos-pos).Cast();
     dir.Normalize();

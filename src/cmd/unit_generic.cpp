@@ -805,33 +805,50 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
   mrange=-1;
   grange=-1;
   speed=-1;
+  bool beam=true;
   if (GetNumMounts()) {
     grange=0;
     speed=0;
 	mrange=0;
-	int nummt = GetNumMounts();
+	int nummt = 0;
 	// this breaks the name, but... it _is_ more useful.
     for (int i=0;i<GetNumMounts();i++) {
+	 if (mounts[i].status==Mount::ACTIVE||mounts[i].status==Mount::INACTIVE) {
       if (mounts[i].type->type!=weapon_info::PROJECTILE) {
 	    if (mounts[i].type->Range > grange) {
 	      grange=mounts[i].type->Range;
 		}
-	    speed+=mounts[i].type->Speed;
-      } else if(mounts[i].type->type==weapon_info::PROJECTILE){
-		if(mounts[i].type->Range > mrange) {
-	      mrange=mounts[i].type->Range;
+	  
+		if (mounts[i].status==Mount::ACTIVE) {
+			speed+=mounts[i].type->Speed;
+			nummt++;
+			beam&= (mounts[i].type->type==weapon_info::BEAM);		
 		}
-	    nummt--;
-      }
-    }
+	  }
+	  else if(mounts[i].type->type==weapon_info::PROJECTILE){
+		  if(mounts[i].type->Range > mrange) {
+			  mrange=mounts[i].type->Range;
+		  }
+	  }
+	 }
+	}
 	if(nummt){
-	  speed = speed/nummt;
+		if (beam)
+			speed=FLT_MAX;
+		else
+			speed = speed/nummt;
+	  
 	}
   }
 }
 
-QVector Unit::PositionITTS (const QVector& absposit, float speed) const{
-	
+QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed) const{
+	if (speed==FLT_MAX)
+		return this->Position();
+	float difficultyscale=1;
+	if (g_game.difficulty<.99)
+		GetVelocityDifficultyMult(difficultyscale);
+	velocity = (cumulative_velocity.Scale(difficultyscale)-velocity);
 	QVector posit (this->Position()-absposit);
 	QVector curguess(posit);
 	for (unsigned int i=0;i<3;++i) {
@@ -839,7 +856,7 @@ QVector Unit::PositionITTS (const QVector& absposit, float speed) const{
 		if(speed>0.001){
 			time = curguess.Magnitude()/speed;
 		}	 
-		curguess = posit+GetVelocity().Cast().Scale(time);
+		curguess = posit+velocity.Scale(time).Cast();
 	}
 	return curguess+absposit;
 }
@@ -849,7 +866,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   QVector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (GetVelocity().Cast()))));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed));
    totarget = totarget-cumulative_transformation.position;
    double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
@@ -885,7 +902,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
     
-    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position,cumulative_velocity, mounts[i].type->Speed));
     
     tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
@@ -1650,39 +1667,17 @@ Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
 
 void Unit::Rotate (const Vector &axis)
 {
-	if (!FINITE(curr_physical_state.orientation.s)||
-		!FINITE(curr_physical_state.orientation.v.i)||
-		!FINITE(curr_physical_state.orientation.v.j)||
-		!FINITE(curr_physical_state.orientation.v.k)) {
-		fprintf (stderr,"inital rotation skew\n");
-	}
-		
 	double theta = axis.Magnitude();
 	double ootheta=0;
 	if( theta==0) return;
 	ootheta = 1/theta;
-	if (!FINITE(ootheta)) {
-		fprintf (stderr,"theta is b0rked %lf",theta);
-	}
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
-	if (!FINITE(rot.s)||
-		!FINITE(rot.v.i)||
-		!FINITE(rot.v.j)||
-		!FINITE(rot.v.k)) {
-		fprintf (stderr,"rot skew\n");
-	}
 	
 	if(theta < 0.0001) {
 	  rot = identity_quaternion;
 	}
 	curr_physical_state.orientation *= rot;
-	if (!FINITE(curr_physical_state.orientation.s)||
-		!FINITE(curr_physical_state.orientation.v.i)||
-		!FINITE(curr_physical_state.orientation.v.j)||
-		!FINITE(curr_physical_state.orientation.v.k)) {
-		fprintf (stderr,"infifinal rotation skew\n");
-	}
 	
 	if (limits.limitmin>-1) {
 	  Matrix mat;
@@ -1692,12 +1687,6 @@ void Unit::Rotate (const Vector &axis)
 		//fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
 		
 	  }
-	}
-	if (!FINITE(curr_physical_state.orientation.s)||
-		!FINITE(curr_physical_state.orientation.v.i)||
-		!FINITE(curr_physical_state.orientation.v.j)||
-		!FINITE(curr_physical_state.orientation.v.k)) {
-		fprintf (stderr,"final rotation skew\n");
 	}
 	
 }

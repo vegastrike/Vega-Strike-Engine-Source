@@ -41,7 +41,7 @@ Beam::~Beam () {
   beamdecals.DelTexture(decal);
 }
 
-extern void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone);
+extern void AdjustMatrixToTrackTarget (Matrix &mat,const Vector &vel, Unit * target, float speed, bool lead, float cone);
 
 void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone) {//hope that the correct transformation is on teh stack
   if (curthick==0) 
@@ -51,7 +51,7 @@ void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, floa
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  AdjustMatrixToTrackTarget (cumulative_transformation_matrix,targ,speed,false,tracking_cone);
+  AdjustMatrixToTrackTarget (cumulative_transformation_matrix,Vector(0,0,0),targ,speed,false,tracking_cone);
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
 #endif

@@ -287,7 +287,6 @@ FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(QVector(0
   type=FACING;
   subtype = STARGET;
   speed=float(.00001);
-  range=float(.00001);
 
   
 }
@@ -304,14 +303,15 @@ void FaceTargetITTS::Execute() {
     done = finish;
     return;
   }
-  float mrange;
   if (speed == float(.00001)) {
-    parent->getAverageGunSpeed(speed,range,mrange);
-    if (speed ==float (.00001)) {
-      speed = range=FLT_MAX;
-    }
+	  float mrange;
+	  float range;
+	  parent->getAverageGunSpeed(speed,range,mrange);
+	  if (speed ==float (.00001)) {
+		  speed = FLT_MAX;
+	  }
   }
-  SetDest(target->PositionITTS(parent->Position(),speed+parent->GetVelocity().Dot((target->Position()-parent->Position()).Cast().Normalize())));
+  SetDest(target->PositionITTS(parent->Position(),parent->cumulative_velocity,speed));
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();

@@ -14,6 +14,7 @@ CCScript MoveTo;
 CCScript Kickstop;
 CCScript MatchVelocity;
 CCScript VeerAway;
+CCScript VeerAwayITTS;
 CCScript VeerAndTurnAway;
 CCScript SheltonSlide;
 CCScript SkilledABSlide;

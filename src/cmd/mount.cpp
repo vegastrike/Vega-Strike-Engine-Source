@@ -60,9 +60,9 @@ Mount::Mount(const string& filename, short am,short vol, float xyscale, float zs
   }
 }
 
-extern void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone);
-void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone) {
-  AdjustMatrix (mat,target,speed,lead,cone);
+extern void AdjustMatrix (Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
+void AdjustMatrixToTrackTarget (Matrix &mat,const Vector & velocity, Unit * target, float speed, bool lead, float cone) {
+  AdjustMatrix (mat,velocity, target,speed,lead,cone);
 }
 
 void Mount::UnFire () {
@@ -149,7 +149,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     tmp.to_matrix (mat);
     mat.p = Transform(mat,(type->offset+Vector(0,0,zscale)).Cast());
     if (autotrack&&NULL!=target) {
-      AdjustMatrix (mat,target,type->Speed,autotrack>=2,trackingcone);
+      AdjustMatrix (mat,velocity,target,type->Speed,autotrack>=2,trackingcone);
     }
 			switch (type->type) {
 			case weapon_info::BEAM:

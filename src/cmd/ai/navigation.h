@@ -98,8 +98,6 @@ class FaceTargetITTS : public ChangeHeading {
   bool finish;
   ///The average speed of this target's guns
   float speed;
-  ///The range of this target's guns
-  float range;
 public:
   FaceTargetITTS (bool fini=false, int accuracy = 3);
   virtual void Execute();

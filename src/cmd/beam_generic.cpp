@@ -9,7 +9,7 @@ using std::vector;
 #include "images.h"
 //static DecalQueue beamdecals;
 extern double interpolation_blend_factor;
-extern void AdjustMatrix(Matrix &mat,Unit * target, float speed, bool lead, float cone);
+extern void AdjustMatrix(Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
 
 void Beam::SetPosition (const QVector &k) {
   local_transformation.position = k;
@@ -267,7 +267,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  AdjustMatrix (cumulative_transformation_matrix,targ,speed,false,tracking_cone);
+  AdjustMatrix (cumulative_transformation_matrix,Vector(0,0,0),targ,speed,false,tracking_cone);
   //to help check for crashing.
   center = cumulative_transformation.position;
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));

@@ -35,7 +35,7 @@
   WRAPPED0 (float,CloakVisible,false)
   voidWRAPPED1 (Cloak,bool,cloak)
   voidWRAPPED0(RemoveFromSystem)
-  WRAPPED2(QVector, PositionITTS ,QVector, local_posit, float, speed,QVector(0,0,0))
+  WRAPPED3(QVector, PositionITTS ,QVector, local_posit, Vector, local_velocity, float, speed,QVector(0,0,0))
   WRAPPED0(QVector,Position,QVector(0,0,0))
   WRAPPED0(QVector, LocalPosition,QVector(0,0,0))
 

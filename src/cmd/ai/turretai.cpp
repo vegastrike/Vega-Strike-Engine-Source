@@ -4,7 +4,7 @@
 #include "cmd/unit_generic.h"
 #include "cmd/role_bitmask.h"
 using namespace Orders;
-TurretAI::TurretAI ():FaceTarget (false) {
+TurretAI::TurretAI ():FaceTargetITTS (false) {
   type|=WEAPON;
   range=-1;
 }
@@ -33,7 +33,7 @@ void TurretAI::Execute () {
   if (targ) {
     static float dot_cutoff = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","TurretDotCutoff",".4"));
     static float missile_prob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","TurretMissileProbability",".05"));
-    FaceTarget::Execute();
+    FaceTargetITTS::Execute();
     if (parent->GetNumMounts()>0) {
       Vector R (parent->GetTransformation().getR());
       QVector Pos (targ->Position()-parent->Position());

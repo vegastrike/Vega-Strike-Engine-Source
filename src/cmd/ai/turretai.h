@@ -2,7 +2,7 @@
 #define _TURRETAI_H_
 #include "navigation.h"
 namespace Orders {
-class TurretAI :public FaceTarget {
+class TurretAI :public FaceTargetITTS {
   float range;
   float speed;
   float mrange;
