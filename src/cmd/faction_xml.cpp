@@ -225,15 +225,15 @@ Texture * Universe::getForceLogo (int faction) {
 Texture *Universe::getSquadLogo (int faction) {
   return getForceLogo (faction);
 }
-Animation * Universe::GetAnimation (int faction, int n) {
-  return factions[faction]->comm_faces[n];
+std::vector <Animation *>* Universe::GetAnimation (int faction, int n) {
+  return &factions[faction]->comm_faces[n];
 }
 int Universe::GetNumAnimation (int faction) {
   return factions[faction]->comm_faces.size();
 }
-Animation * Universe::GetRandAnimation(int faction) {
+std::vector <Animation *>* Universe::GetRandAnimation(int faction) {
   if (factions[faction]->comm_faces.size()>0) {
-    return factions[faction]->comm_faces[rand()%factions[faction]->comm_faces.size()];
+    return &factions[faction]->comm_faces[rand()%factions[faction]->comm_faces.size()];
   }else {
     return NULL;
   }
