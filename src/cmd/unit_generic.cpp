@@ -762,7 +762,8 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner, int zon
 						else
 						{
 							// Request a fire order to the server telling him the serial of the unit and the mount index (nm)
-							Network->fireRequest( this->serial, nm);
+							char mis2 = mis;
+							Network->fireRequest( this->serial, nm, mis2);
 							// Mark the mount as fire requested
 							//(*i).processed = Mount::REQUESTED;
 						}
@@ -2906,6 +2907,64 @@ bool Unit::ShieldUp (const Vector &pnt) const{
 /**** UNIT_WEAPON STUFF                                                            */
 /***********************************************************************************/
 
+void Unit::TargetTurret (Unit * targ) {
+	if (!SubUnits.empty()) {
+		un_iter iter = getSubUnits();
+		Unit * su;
+		bool inrange = (targ!=NULL)?InRange(targ):true;
+        if (inrange) {
+          while ((su=iter.current())) {
+			su->Target (targ);
+			su->TargetTurret(targ);
+			iter.advance();
+		  }
+        }
+	}
+}
+
+// WARNING : WHEN TURRETS WE MAY NOT WANT TO ASK THE SERVER FOR INFOS ! ONLY FOR LOCAL PLAYERS (_Universe-isStarship())
+void Unit::Target (Unit *targ) {
+  if (targ==this) {
+    return;
+  }
+  if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
+    computer.target.SetUnit(NULL);
+    return;
+    fprintf (stderr,"bad target system");
+    const int BADTARGETSYSTEM=0;
+    assert (BADTARGETSYSTEM);
+  }
+  if (targ) {
+    if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
+		if (targ!=Unit::Target()) {
+        for (int i=0;i<GetNumMounts();i++){ 
+  	  mounts[i].time_to_lock = mounts[i].type->LockTime;
+        }
+        computer.target.SetUnit(targ);
+		if( Network!=NULL)
+			Network->targetRequest( targ);
+	LockTarget(false);
+      }
+    }else {
+      if (jump.drive!=-1) {
+	un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+	Unit * u;
+	for (;(u=*i)!=NULL;i++) {
+	  if (!u->GetDestinations().empty()) {
+	    if (std::find (u->GetDestinations().begin(),u->GetDestinations().end(),targ->activeStarSystem->getFileName())!=u->GetDestinations().end()) {
+	      Target (u);
+	      ActivateJumpDrive(0);
+	    }
+	  }
+	}
+      }else {
+	computer.target.SetUnit(NULL);
+      }
+    }
+  }else {
+    computer.target.SetUnit(NULL);
+  }
+}
 void Unit::VelocityReference (Unit *targ) {
   computer.velocity_ref.SetUnit(targ);
 }

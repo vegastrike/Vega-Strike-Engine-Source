@@ -877,7 +877,7 @@ public:
   Unit *Threat() {return computer.threat.GetUnit(); }
 // Uses Universe stuff so only in Unit class
   void VelocityReference (Unit *targ);
-  virtual void TargetTurret (Unit * targ){}
+  void TargetTurret (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
   void Threaten (Unit * targ, float danger);
   ///Rekeys the threat level to zero for another turn of impending danger
@@ -893,7 +893,7 @@ public:
   void Deselect();
 
   // Shouldn't do anything here - but needed by Python
-  virtual void Target (Unit * targ) {}
+  void Target (Unit * targ);
 
   ///not used yet
   void setTargetFg(string primary,string secondary=string(),string tertiary=string());

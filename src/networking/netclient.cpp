@@ -40,6 +40,7 @@
 #include "vs_path.h"
 #include "packet.h"
 #include "cmd/role_bitmask.h"
+#include "gfx/cockpit_generic.h"
 
 #include "vsnet_clientstate.h"
 #include "vegastrike.h"
@@ -408,7 +409,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 	Unit * un = NULL;
 	int mount_num;
 	ObjSerial mis;
-	un_iter it;
+	Cockpit * cp;
 
     int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
 
@@ -516,15 +517,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				mis = netbuf.getSerial();
 				// Find the unit
 				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
-				it = UniverseUtil::getUnitList();
-				for( ; un==NULL && it.current()!=NULL; it.advance())
-				{
-					if( it.current()->GetSerial()==p1.getSerial())
-						un = it.current();
-				}
-				if( un==NULL)
-					cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
-				else
+				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				if( un!=NULL)
 				{
 					// Set the concerned mount as ACTIVE and others as INACTIVE
 					vector <Mount>
@@ -547,16 +541,9 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// WE RECEIVED AN UNFIRE NOTIFICATION SO DEACTIVATE THE WEAPON
 				mount_num = netbuf.getInt32();
 				mis = netbuf.getSerial();
-				it = UniverseUtil::getUnitList();
 				// Find the unit
-				for( ; un==NULL && it.current()!=NULL; it.advance())
-				{
-					if( it.current()->GetSerial()==p1.getSerial())
-						un = it.current();
-				}
-				if( un==NULL)
-					cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
-				else
+				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				if( un != NULL)
 				{
 					// Set the concerned mount as ACTIVE and others as INACTIVE
 					vector <Mount>
@@ -573,6 +560,15 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 				}
 
+			break;
+			case CMD_TARGET :
+				// We received the target info with the target serial in the packet
+
+				// Update info with received buffer
+
+				// And tell all VDUs we received the target info
+				cp = _Universe->isPlayerStarship( this->game_unit.GetUnit());
+				cp->ReceivedTargetInfo();
 			break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
@@ -1074,18 +1070,37 @@ Transformation NetClient::spline_interpolate( ObjSerial clientid, double blend)
 /*** WEAPON STUFF                                                                      ****/
 /******************************************************************************************/
 
-// In fireRequest we must use the provided serial because it may not be the client's serial
-// but may be a turret serial
-void	NetClient::fireRequest( ObjSerial serial, int mount_index)
+// Send a info request about the target
+void	NetClient::targetRequest( Unit * target)
 {
 	Packet p;
 	NetBuffer netbuf;
 
-	//netbuf.addSerial( serial);
-	netbuf.addInt32( mount_index);
+	netbuf.addSerial( target->GetSerial());
 	netbuf.addInt32( this->zone);
 
-	p.send( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_TARGET, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			1083
+#endif
+			);
+}
+
+// In fireRequest we must use the provided serial because it may not be the client's serial
+// but may be a turret serial
+void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
+{
+	Packet p;
+	NetBuffer netbuf;
+
+	netbuf.addSerial( serial);
+	netbuf.addInt32( mount_index);
+	netbuf.addInt32( this->zone);
+	netbuf.addChar( mis);
+
+	p.send( CMD_FIREREQUEST, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1099,11 +1114,11 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 	Packet p;
 	NetBuffer netbuf;
 
-	//netbuf.addSerial( serial);
+	netbuf.addSerial( serial);
 	netbuf.addInt32( mount_index);
 	netbuf.addInt32( this->zone);
 
-	p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_UNFIREREQUEST, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1111,60 +1126,4 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 #endif
 			);
 }
-
-
-void	NetClient::FireBeam()
-{
-}
-
-//void	NetClient::FireBolt( weapon_info wi, Matrix mat, Vector velocity)
-void	NetClient::FireBolt()
-{
-	/*
-	NetBuffer netbuf;
-
-	netbuf.addMatrix( mat);
-	netbuf.addVector( velocity);
-	netbuf.addWeaponInfo( wi);
-
-	Packet p;
-	p.send( CMD_BOLT, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-
-	*/
-}
-
-//void	NetClient::FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vector velocity, Transformation t)
-void	NetClient::FireProjectile()
-{
-	/*
-	NetBuffer netbuf;
-
-	netbuf.addSerial( target->GetSerial());
-	netbuf.addMatrix( mat);
-	netbuf.addVector( velocity);
-	netbuf.addTransformation( t);
-	netbuf.addWeaponInfo( wi);
-
-	// Get the weapon info in a buffer
-	//char * wi_buffer=NULL; // Allocated in setWeaponInfo function
-	//int wi_size = 0;
-	//setWeaponInfo( netwi, wi_buffer, wi_size);
-	
-	Packet p;
-	p.send( CMD_PROJECTILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-	*/
-}
-
-void	NetClient::FireBeamRequest()
-{
-}
-
-void	NetClient::FireBoltRequest()
-{
-}
-
-void	NetClient::FireProjectileRequest()
-{
-}
-
 

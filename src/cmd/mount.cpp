@@ -42,7 +42,7 @@ Mount::Mount(const string& filename, short am,short vol, float xyscale, float zs
   if (zscale==-1)
 	  zscale=zscalestat;
   this->zscale=zscale;
-    this->xyscale=xyscale;
+  this->xyscale=xyscale;
   serial = 0;
   ammo = am;
   sound = -1;

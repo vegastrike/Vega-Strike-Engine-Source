@@ -65,6 +65,13 @@ soundContainer::~soundContainer () {
 	}
 }
 
+void GameCockpit::ReceivedTargetInfo()
+{
+  for (int j=0;j<vdu.size();j++) {
+	vdu[j]->ReceivedTargetData();
+  }
+}
+
 void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &col) {
 	GFXColorf(col);
 	GFXEnable(SMOOTH);

@@ -30,6 +30,8 @@ class VDU: public Sprite {
   
   ///Rows and columns of text this VDU can display
   short rows,cols;
+  bool got_target_info;
+  // We received a packet with taret data by network : we update then the concerned UNIT
 // DrawVDUObjective is outdated
 //  int DrawVDUObjective (void * obj, int offset);//obj is of type Mission::Objective
   ///Draws all of the objectives created by missions.
@@ -42,10 +44,13 @@ class VDU: public Sprite {
   void DrawManifest (Unit * parent, Unit * target);
   ///Draws the message from the messagecenter
   void DrawMessages(Unit *target);
+  void DrawScanningMessage();
   ///Draws the nav point this unit is heading to
   void DrawNav(const Vector &navPoint);
   ///Draws the comm screen this unit can use to communicate
   void DrawComm();
+  ///Draws a "scanning target" message
+  void DrawSanningMessage();
   ///Draws the damage this unit has sustained
   void DrawDamage(Unit * parent);
   ///Draws the weapons activated on current unit
@@ -55,10 +60,11 @@ class VDU: public Sprite {
   ///draws the target camera
 void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target);
 public:
+  void	ReceivedTargetData() { got_target_info = true;}
  unsigned int getMode() {return thismode.back();}
   int scrolloffset;
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
-  enum VDU_MODE {TARGET=0x1,NAV=0x2,OBJECTIVES=0x4, COMM=0x8, WEAPON=0x10, DAMAGE=0x20, SHIELD=0x40,  MANIFEST=0x80, TARGETMANIFEST=0x100, VIEW=0x200, MSG=0x400};
+  enum VDU_MODE {TARGET=0x1,NAV=0x2,OBJECTIVES=0x4, COMM=0x8, WEAPON=0x10, DAMAGE=0x20, SHIELD=0x40,  MANIFEST=0x80, TARGETMANIFEST=0x100, VIEW=0x200, MSG=0x400, SCANNING=0x800};
   VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
   void Draw(Unit * parent, const GFXColor & c);

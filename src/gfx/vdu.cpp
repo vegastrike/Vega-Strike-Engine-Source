@@ -88,6 +88,10 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   viewStyle = CP_TARGET;
   StartArmor = ma;
   maxhull = mh;
+  if( Network!=NULL)
+    got_target_info = false;
+  else
+    got_target_info = true;
   SwitchMode();
 
   //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
@@ -419,6 +423,12 @@ void VDU::DrawMessages(Unit *target){
   fullstr=targetstr+fullstr;
   tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
+
+void	VDU::DrawScanningMessage()
+{
+  tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+}
+
 bool VDU::SetCommAnimation (Animation * ani) {
   if (comm_ani==NULL) {
     if (posmodes&COMM) {
@@ -782,6 +792,7 @@ void VDU::DrawVDUObjectives (Unit *parent) {
   }
   tp->Draw(rez,offset);
 }
+
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->col=color;
   GFXDisable(LIGHTING);
@@ -808,7 +819,12 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   switch (thismode.back()) {
   case TARGET:
     if (targ)
-      DrawTarget(parent,targ);
+	{
+		if( !got_target_info)
+			DrawScanningMessage();
+		else
+   		    DrawTarget(parent,targ);
+	}
     break;
   case MANIFEST:
     DrawManifest (parent,parent);
@@ -877,6 +893,9 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
 void VDU::SwitchMode() {
   if (!posmodes)
     return;
+  // If we switch from TARGET VDU VIEW_MODE we loose target info
+  if( thismode.back()==TARGET && Network!=NULL)
+		got_target_info = false;
   if (thismode.back()==VIEW&&viewStyle!=CP_CHASE&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
@@ -890,4 +909,7 @@ void VDU::SwitchMode() {
       }
     }
   }
+  // If we switch to TARGET MODE we consider we lost target info
+  if( thismode.back()==TARGET && Network!=NULL)
+		got_target_info = false;
 }

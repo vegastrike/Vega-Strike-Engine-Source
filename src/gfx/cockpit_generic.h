@@ -79,6 +79,7 @@ protected:
   float cockpit_time;
   bool ejecting;
  public:
+  virtual void	ReceivedTargetInfo() {}
   std::vector<std::string> unitfilename;
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp) {view = tmp;}

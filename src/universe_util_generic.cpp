@@ -27,6 +27,20 @@ using std::string;
 #define activeSys _Universe->activeStarSystem() //less to write
 
 namespace UniverseUtil {
+	Unit * GetUnitFromSerial( ObjSerial serial)
+	{
+		Unit * un;
+		un_iter it = UniverseUtil::getUnitList();
+		// Find the unit
+		for( ; un==NULL && it.current()!=NULL; it.advance())
+		{
+			if( it.current()->GetSerial()==serial)
+				un = it.current();
+		}
+		if( un==NULL)
+			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+		return un;
+	}
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
 			string type_string,

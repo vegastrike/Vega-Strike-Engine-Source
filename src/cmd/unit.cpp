@@ -59,7 +59,6 @@
 #include "unit_customize.cpp"
 #include "unit_damage.cpp"
 #include "unit_physics.cpp"
-#include "unit_weapon.cpp"
 #include "unit_bsp_gfx.h"
 #include "unit_click.cpp"
 

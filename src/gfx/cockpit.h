@@ -106,6 +106,7 @@ private:
   void DrawGauges(Unit * un);
   NavigationSystem ThisNav;
  public:
+  void	ReceivedTargetInfo();
   static void NavScreen (int, KBSTATE k); // scheherazade
   static string getsoundending(int which=0);
   static string getsoundfile(string filename);

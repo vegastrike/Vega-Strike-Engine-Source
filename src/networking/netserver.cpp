@@ -932,6 +932,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 	char mis;
 	// Find the unit
 	Unit * un = NULL;
+	ObjSerial target_serial;
 
     switch( cmd)
     {
@@ -1036,11 +1037,13 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 
 	case CMD_FIREREQUEST :
 		// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
+		// target_serial is in fact the serial of the firing unit (client itself or turret)
+		target_serial = netbuf.getSerial();
 		mount_num = netbuf.getInt32();
 		zone = netbuf.getInt32();
 		mis = netbuf.getChar();
 		// Find the unit
-		un = zonemgr->getUnit( packet.getSerial(), zone);
+		un = zonemgr->getUnit( target_serial, zone);
 		// Set the concerned mount as ACTIVE and others as INACTIVE
 
 		if( un==NULL)
@@ -1058,6 +1061,13 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			else
 				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false, zone);
 		}
+	break;
+	case CMD_TARGET :
+		// Received a target request
+		target_serial = netbuf.getSerial();
+		zone = netbuf.getInt32();
+		un = zonemgr->getUnit( target_serial, zone);
+		// Get the un Unit data and send it in a packet
 	break;
 
 	// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???

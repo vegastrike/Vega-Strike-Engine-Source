@@ -162,8 +162,6 @@ public:
   const LineCollide &GetCollideInfo () {return CollideInfo;}
   ///Takes out of the collide table for this system.
   void RemoveFromSystem ();
-  void Target (Unit * targ);
-  void TargetTurret (Unit * targ);
   ///Fires all active guns that are in that bitmask... if (1<<31) is set then only autotracking
   //void Fire(unsigned int Mount_roles, bool listen_to_owner=false);
 

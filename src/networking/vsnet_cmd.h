@@ -65,6 +65,7 @@ enum Cmd
 	CMD_BEAM         = 0x91,		// Fire a beam
 	CMD_PROJECTILE   = 0x92,        // Fire a projectile
 	CMD_BALL         = 0x93,		// Fire a ball ?
+	CMD_TARGET       = 0x96,		// Receive a target request (server side) or receive target info (client side)
 
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost and established again :
