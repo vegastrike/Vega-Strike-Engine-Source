@@ -252,14 +252,13 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   char st[256];
   //  sprintf (st,"\n%s",target->name.c_str());
   sprintf (st,"\n%s:%s",target->getFgID().c_str(),target->name.c_str());
+  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
+  int i=0;
+  for (i=0;i<rows&&i<128;i++) {
+    st[i]='\n';
 
-  int k = strlen (st);
-  if (k>cols)
-    k=cols;
-  for (int i=0;i<rows-1&&i+k<128;i++) {
-    st[i+k]='\n';
-    st[i+k+1]='\0';
   }
+  st[i]='\0';
   char qr[128];
   sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()*((target->isUnit()==PLANETPTR)?10:1));
   strcat (st,qr);
@@ -303,7 +302,7 @@ void VDU::DrawMessages(Unit *target){
   int rows_used=rows_needed+1;
 
   gameMessage *lastmsg=mc->last(0);
-  for(int i=0;rows_used<=rows && lastmsg!=NULL;i++){
+  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<=rows && lastmsg!=NULL;i++){
     lastmsg=mc->last(i);
     if(lastmsg!=NULL){
       char timebuf[100];
@@ -328,7 +327,7 @@ void VDU::DrawMessages(Unit *target){
 
   fullstr=targetstr+fullstr;
 
-  tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);
+  tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);
 }
 
 void VDU::DrawNav (const Vector & nav) {
@@ -428,10 +427,13 @@ void VDU::DrawDamage(Unit * parent) {
 
   Unit * thr = parent->Threat();
   sprintf (st,"\nHull: %.3f",parent->GetHull());
+  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
+  int k=strlen(st);
   if (thr) {
-    int k=strlen(st);
+
     if (k>cols)
       k=cols;
+
     for (int i=0;i<rows-2&&i+k<128;i++) {
       st[i+k]='\n';
       st[i+k+1]='\0';
@@ -440,7 +442,7 @@ void VDU::DrawDamage(Unit * parent) {
     sprintf (qr, "%6s\nThreat:%4.4f",thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
     strncat (st,qr,128);
   }
-  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
+  tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   
 }
@@ -518,11 +520,16 @@ void VDU::Draw (Unit * parent) {
   float h,w;
   GetSize (w,h);
   GetPosition (x,y);
-  tp->SetCharSize (fabs(w/cols),fabs(h/rows));
+  //tp->SetCharSize (fabs(w/cols),fabs(h/rows));
+  float csx,csy;
+  tp->GetCharSize(csx,csy);
+  cols=abs(ceil(w/csx));
+  rows=abs(ceil(h/csy));
+
   Unit * targ;
   h=fabs(h/2);  w=fabs (w/2);
   tp->SetPos (x-w,y+h);
-  tp->SetSize (x+w,y-h-.9*fabs(w/cols));
+  tp->SetSize (x+w,y-h-.5*fabs(w/cols));
   targ = parent->GetComputerData().target.GetUnit();
   switch (thismode) {
   case TARGET:

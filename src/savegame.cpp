@@ -53,7 +53,7 @@ vector <SavedUnits> ReadSavedUnits (FILE * fp) {
 void WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
-void WriteSaveGame (const char *systemname, const Vector &FP) {
+void WriteSaveGame (const char *systemname, const Vector &FP, float credits) {
   vector<SavedUnits *> myvec = savedunits.GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
@@ -66,7 +66,7 @@ void WriteSaveGame (const char *systemname, const Vector &FP) {
     if (originalsystem!=systemname) {
       FighterPos=-FP;
     }
-    fprintf (fp,"%s %f %f %f",systemname,FighterPos.i,FighterPos.j,FighterPos.k);
+    fprintf (fp,"%s^%f %f %f %f",systemname,credits,FighterPos.i,FighterPos.j,FighterPos.k);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
       delete myvec.back();
@@ -75,7 +75,7 @@ void WriteSaveGame (const char *systemname, const Vector &FP) {
     fclose (fp);
   }
 }
-vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos) {
+vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits) {
   vector <SavedUnits> mysav;
   shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
   outputsavegame=filename;
@@ -87,11 +87,18 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
   vscdup();
   returnfromhome();
   if (fp) {
-    char tmp[10000];
+    char tmp2[10000];
     Vector tmppos;
-    if (4==fscanf (fp,"%s %f %f %f\n",tmp,&tmppos.i,&tmppos.j,&tmppos.k)) {
+    if (4==fscanf (fp,"%s %f %f %f\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
+      for (int j=0;'\0'!=tmp2[j];j++) {
+	if (tmp2[j]=='^') {
+	  sscanf (tmp2+j+1,"%f",&credits);
+	  tmp2[j]='\0';
+	  break;
+	}
+      }
       if (ForceStarSystem.length()==0) 
-	ForceStarSystem=string(tmp);
+	ForceStarSystem=string(tmp2);
       if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
 	shouldupdatepos=true;
 	PlayerLocation=tmppos;

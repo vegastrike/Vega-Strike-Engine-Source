@@ -72,7 +72,7 @@ void cleanup(void)
   if (_Universe->AccessCockpit()) {
     if (_Universe->AccessCockpit()->GetParent()) {
       if(_Universe->AccessCockpit()->GetParent()->GetHull()>0) {
-	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position());
+	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position(),_Universe->AccessCockpit()->credits);
 	_Universe->AccessCockpit()->GetParent()->WriteUnit("cooltest");
       } 
     }
@@ -218,13 +218,14 @@ void bootstrap_main_loop () {
     mission->GetOrigin(pos,planetname);
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
-
+    float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
-    savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc);
+    savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc,credits);
    
     _Universe->Init (mysystem,pos,planetname);
     createObjects();
+    _Universe->AccessCockpit()->credits=credits;
     if (setplayerloc&&fighters) {
       if (fighters[0]) {
 	fighters[0]->SetPosition (Vector (0,0,0));
