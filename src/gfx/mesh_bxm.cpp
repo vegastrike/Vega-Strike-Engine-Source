@@ -364,7 +364,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 		  fprintf(Outputfile,"</Material>\n");
                   mesh->setEnvMap(reflect);
                   mesh->forceCullFace(cullface);
-                  mesh->setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||lighting); 
+                  static bool forcelight=XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"));
+                  mesh->setLighting (forcelight||lighting); 
                   xml.usenormals=usenormals;
                   xml.material.ar=ar;xml.material.ag=ag;xml.material.ab=ab;xml.material.aa=aa;
                   xml.material.dr=dr;xml.material.dg=dg;xml.material.db=db;xml.material.da=da;
