@@ -3,6 +3,8 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "gfx/camera.h"
+#include "gfx/cockpit.h"
+#include "config_xml.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -16,23 +18,49 @@
 //extern Unit ** fighters;
 
 StarVlist::StarVlist (int num ,float spread) {
+	camr = _Universe->AccessCamera()->GetR();	
 	this->spread=spread;
-	GFXVertex * tmpvertex = new GFXVertex[num*2];
+	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
 	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
 	for (int y=0;y<num;++y) {
 		int j= 2*y;
 		tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
 		tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
 		tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-		tmpvertex[j+1].x =tmpvertex[j].x;
-		tmpvertex[j+1].y =tmpvertex[j].y;
+		tmpvertex[j].r=0;
+		tmpvertex[j].g=0;
+		tmpvertex[j].b=0;		
+		tmpvertex[j+1].x =tmpvertex[j].x;//+spread*.01;
+		tmpvertex[j+1].y =tmpvertex[j].y;//;+spread*.01;
 		tmpvertex[j+1].z =tmpvertex[j].z;
-		
+		tmpvertex[j+1].r=1;
+		tmpvertex[j+1].g=1;
+		tmpvertex[j+1].b=1;
 	}
 	vlist= new GFXVertexList (GFXLINE,2*num,tmpvertex, 2*num, true,0);  
 	delete []tmpvertex;
 }
-void StarVlist::BeginDrawState () {
+void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity) {
+	Vector newcamr = _Universe->AccessCamera()->GetR();
+    Vector camr_delta(newcamr-camr);
+	camr = newcamr;
+	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","1"));
+
+	Vector vel (velocity*velstreakscale);
+   	
+	GFXColorMaterial(AMBIENT|DIFFUSE);
+	GFXColorVertex * v = vlist->BeginMutate(0)->colors;
+	int numvertices = vlist->GetNumVertices();
+
+	static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
+	for (int i=0;i<numvertices-1;i+=2) {
+		float scale= (Vector(v[i].x,v[i].y,v[i].z)-center.Cast()).Magnitude()*torquestreakscale;
+		v[i].x=v[i+1].x-vel.i-camr_delta.i*scale;
+		v[i].y=v[i+1].y-vel.j-camr_delta.j*scale;
+		v[i].z=v[i+1].z-vel.k-
+			camr_delta.k*scale;
+	}
+	vlist->EndMutate();
 	vlist->LoadDrawState();
 	vlist->BeginDrawState();
 }
@@ -42,8 +70,12 @@ void StarVlist::Draw() {
 }
 void StarVlist::EndDrawState() {
 	vlist->EndDrawState();
+	GFXColorMaterial(0);
+	  
 }
 Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread),spread(spread){
+  campos = _Universe->AccessCamera()->GetPosition();
+
   int curnum = num/STARnumvlist+1;
   fade = blend=true;
   ResetPosition(QVector(0,0,0));
@@ -76,7 +108,9 @@ void Stars::Draw() {
   } else {
     GFXDisable (LIGHTING);
   }
-  vlist.BeginDrawState();
+  QVector newcampos =_Universe->AccessCamera()->GetPosition();
+  vlist.BeginDrawState(QVector(0,0,0),(newcampos                               -campos).Cast());
+  campos = newcampos;
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
       GFXTranslateModel (pos[i]-pos[i-1]);

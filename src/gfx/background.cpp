@@ -243,7 +243,7 @@ void Background::Draw()
   GFXColor (1,1,1,1);
   GFXDisable (TEXTURE1);
 
-  stars.BeginDrawState();
+  stars.BeginDrawState(QVector(0,0,0), Vector(0,0,0));
   stars.Draw();
   stars.EndDrawState();
   GFXEnable (DEPTHTEST);

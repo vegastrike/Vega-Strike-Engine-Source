@@ -16,8 +16,9 @@ public:
 	bool operator () (string a, string b) {
 		if (a.empty()||b.empty())
 			return false;
-		if (isdigit (a[0]) and isdigit(b[0])) {
-			int aint=0,bint=0;
+		if (isdigit (a[0]) && isdigit(b[0])) {
+			int aint=0;
+			int bint=0;
 			sscanf (a.c_str(),"%d",&aint);
 			sscanf (b.c_str(),"%d",&bint);
 			if (aint==bint) {
