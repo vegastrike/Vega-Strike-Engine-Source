@@ -433,6 +433,7 @@ static int mmx=0;
 static int mmy=0;
 void StartFrame(void) {
   //  glutSetCursor(GLUT_CURSOR_INHERIT);
+  GFXViewPort (0,0,g_game.x_resolution,g_game.y_resolution);
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
 
