@@ -1,6 +1,14 @@
 #include "cmd_order.h"
 #include "in_kb.h"
 #include <GL/glut.h>
+class MatchVelocity : public Order {
+  Vector desired_velocity;//werld space... generally r*speed;
+  bool LocalVelocity;//specified in Local or World coordinates
+  MatchVelocity (const Vector desired, bool Local):desired_velocity(desired),LocalVelocity(Local) {}
+  AI * Execute ();
+};
+
+
 class FlyByWire : public Order {
   float set_speed;
   float dream_speed;

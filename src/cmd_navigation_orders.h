@@ -26,7 +26,8 @@ public:
     Vector heading = parent->ToLocalCoordinates(local_location);
 
     heading.Normalize();
-    Vector velocity = parent->GetVelocity();
+    //062201 FIXME do I need to be in local coords? i thinks o    Vector velocity = parent->GetVelocity();
+    Vector velocity = parent->ToLocalCoordinates(parent->GetVelocity());
     Vector vel_normal = velocity;
 
 
@@ -202,7 +203,7 @@ class ChangeHeading : public Order {
 
     // 2. apply impulse that will reorient r towards the destination
     // if this does not contradict #1, ie must thrust at less than 90
-    // degrees off of the original direction
+     // degrees off of the original direction
     /*
     if(ang_speed > THRESHOLD) {
       ang_vel_norm = ang_vel_norm / ang_speed;

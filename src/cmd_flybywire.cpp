@@ -1,4 +1,19 @@
 #include "cmd_flybywire.h"
+#include "physics.h"
+AI * MatchVelocity::Execute () {
+  Vector desired (desired_velocity);
+  if (!LocalVelocity) {
+    desired = parent->ToLocalCoordinates (desired);
+  }
+  Vector velocity = parent->ToLocalCoordinates (parent->GetVelocity());
+  parent->Thrust ( parent->ClampThrust(parent->GetMass()*desired-velocity/SIMULATION_ATOM));
+  return this;
+}
+
+
+
+
+
 
 struct StarShipControlKeyboard {
   int uppress;//negative if not pressed last

@@ -253,6 +253,7 @@ public:
   void ApplyLocalTorque(const Vector &torque); //convenient shortcut
 
   Vector ClampThrust(const Vector &thrust);
+
   Vector MaxThrust(const Vector &thrust);
   void Thrust(const Vector &amt);
   void LateralThrust(float amt);

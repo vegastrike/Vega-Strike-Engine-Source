@@ -116,7 +116,7 @@ Vector Unit::MaxThrust(const Vector &amt1) {
 	       copysign(limits.vertical, amt1.j),
 	       copysign(limits.longitudinal, amt1.k)) * amt1);
 }
-
+/* misnomer..this doesn't get the max value of each axis
 Vector Unit::ClampThrust(const Vector &amt1){ 
   // Yes, this can be a lot faster with LUT
   Vector norm = amt1;
@@ -127,6 +127,18 @@ Vector Unit::ClampThrust(const Vector &amt1){
     return amt1;
   else 
     return max;
+}
+*/
+
+Vector Unit::ClampThrust (const Vector &amt1) {
+  Vector Res=amt1;
+  if (Res.i>fabs(limits.lateral))
+    Res.i=amt1.i>0?fabs(limits.lateral):-fabs(limits.lateral);
+  if (amt1.j>fabs(limits.vertical))
+    Res.j=amt1.j>0?fabs(limits.vertical):-fabs(limits.vertical);
+  if (amt1.j>fabs(limits.longitudinal))
+    Res.k=amt1.k>0?fabs(limits.longitudinal):-fabs(limits.longitudinal);
+  return Res;
 }
 
 void Unit::Thrust(const Vector &amt1){
@@ -231,10 +243,10 @@ void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
 }
 
 Vector Unit::ToLocalCoordinates(const Vector &v) const {
-  Matrix m;
-  curr_physical_state.to_matrix(m);
-
-#define M(A,B) m[B*4+A]
+  //Matrix m;
+  //062201: not a cumulative transformation...in prev unit space  curr_physical_state.to_matrix(m);
+  
+#define M(A,B) cumulative_transformation_matrix[B*4+A]
   return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
 		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
 		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
