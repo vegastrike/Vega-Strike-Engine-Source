@@ -1,6 +1,5 @@
 <Unit>
 	<Meshfile file="rapier.xmesh" />
-	<Bspmesh/>
 	<Light file="supernova.bmp" x="-1.900000" y="0.200000" z="-8.300000" size="2.850000"/>
 	<Light file="supernova.bmp" x="1.900000" y="0.200000" z="-8.400001" size="2.850000"/>
 	<Mount weapon="Laser" size="Light" x="-1.500000" y="-0.800000" z="13.800000"/>
