@@ -1,3 +1,12 @@
+2002-01-30 Daniel Horn <hellcatv@hotmail.com>
+	* Added nebulas to the list of vegastrike's features
+	* Added explosions to the nebulas that make them glow from time to time
+	* Added fog to nebulas so that things inside them will be fogged
+	* Removed shield from nebulas so that shields are nonfunctional there
+	* Scrambled sensors in nebulas
+	* Added BSP trees to being in nebulas (so there is an "inside" as opposed to just a shell)
+	* Made it so Nebulas don't collide with bullets
+	
 2002-01-30 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* Added rlaan_cruiser --no textures/weapons or anything (just to look)
