@@ -1069,7 +1069,8 @@ void Unit::FireEngines (const Vector &Direction/*unit vector... might default to
 					float FMass)
 {
 	mass -= FMass; //fuel is sent out
-	fuel -= FMass;
+	static float fuelpct=XMLSupport::parse_float(vs_config->getVariable("physics","FuelUsage","1"));
+	fuel -= fuelpct*FMass;
 	if (fuel <0)
 	{
 		

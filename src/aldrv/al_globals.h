@@ -10,8 +10,9 @@ struct OurSound{
   ALuint source;
   ALuint buffer;
   Vector pos;
+  Vector vel;
   ALboolean looping;
-  OurSound(ALuint source, ALuint buffername) {buffer=buffername;};
+  OurSound(ALuint source, ALuint buffername) {buffer=buffername;pos.Set(0,0,0);vel.Set(0,0,0);};
 };
 extern float scalepos;
 extern float scalevel;

@@ -587,5 +587,17 @@ void BaseInterface::Draw () {
 //	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
 	EndGUIFrame (drawlinkcursor);
+	Unit *un=caller.GetUnit();
+	Unit *base=baseun.GetUnit();
+	if (un&&(!base)) {
+		fprintf(stderr,"Error: Base NULL");
+		mission->msgcenter->add("game","all","[Computer] Docking unit destroyed. Emergency launch initiated.");
+		for (int i=0;i<un->image->dockedunits.size();i++) {
+			if (un->image->dockedunits[i]->uc.GetUnit()==base) {
+				un->FreeDockingPort (i);
+			}
+		}
+		Terminate();
+	}
 }
 

@@ -15,8 +15,10 @@
 #include "config_xml.h"
 #include "gldrv/winsys.h"
 #include "base.h"
+#include "music.h"
 #include "unit_const_cache.h"
 #include "configxml.h"
+extern Music *muzak;
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -677,6 +679,8 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	who.push_back ("news");
 	if ((last= mission->msgcenter->last(cargonumber,who))!=NULL) {
 	  CargoInfo->ChangeTextItem ("description",last->message.c_str(),true);
+	  static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
+	  muzak->GotoSong(newssong);
 	} 
 	CargoInfo->ChangeTextItem ("price","");
 	CargoInfo->ChangeTextItem ("mass","");

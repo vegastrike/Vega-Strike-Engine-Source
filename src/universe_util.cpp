@@ -31,7 +31,8 @@ namespace UniverseUtil {
 		muzak->GotoSong(str);
 	}
 	void musicPlayList(int which) {
-		muzak->SkipRandSong(which);
+		if (which!=-1)
+			muzak->SkipRandSong(which);
 	}
         void musicLoopList (int numloops) {
                 muzak->loopsleft=numloops;
@@ -58,6 +59,9 @@ namespace UniverseUtil {
 	int maxMissions () {
 	static const int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
 		return max_missions;
+	}
+	void micro_sleep(int n) {
+		::micro_sleep(n);
 	}
 }
 #undef activeSys

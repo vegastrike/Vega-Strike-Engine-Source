@@ -277,15 +277,18 @@ bool cockpitfront=true;
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime()/getTimeCompression();  
 }
+  static float scrolltime=0;
   void ScrollUp (int, KBSTATE newState) {
-
-    if(newState==PRESS/*||newState==DOWN*/){
+   scrolltime+=GetElapsedTime();
+   if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
+     scrolltime=0;
      _Universe->AccessCockpit()->ScrollAllVDU (-1);
    }    
   }
   void ScrollDown (int, KBSTATE newState) {
-
-   if(newState==PRESS/*||newState==DOWN*/){
+   scrolltime+=GetElapsedTime();
+   if(newState==PRESS||(newState==DOWN&&scrolltime>=.5)){
+     scrolltime=0;
      _Universe->AccessCockpit()->ScrollAllVDU (1);
    }    
 

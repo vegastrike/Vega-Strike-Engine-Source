@@ -66,15 +66,16 @@ extern string getCargoUnitName (const char *name);
 
 template<class UnitType>
 void GameUnit<UnitType>::UpgradeInterface(Unit * baseun) {
-	if (!BaseInterface::CurrentBase) {
-		string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
+	if (BaseInterface::CurrentBase) {
+		BaseInterface::CurrentBase->Terminate();
+	}
+	  string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
 	  if (baseun->isUnit()!=PLANETPTR) {
 	    basename = baseun->name;
 	  }
 	  BaseInterface *base=new BaseInterface (basename.c_str(),baseun,this);
 	  base->InitCallbacks();
-	  SetSoftwareMousePosition(0,0);
-	}
+//	  SetSoftwareMousePosition(0,0);
 }
 
 template <class UnitType>

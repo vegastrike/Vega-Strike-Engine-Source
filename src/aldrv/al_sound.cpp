@@ -253,9 +253,10 @@ void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
     float p []= {scalepos*pos.i,scalepos*pos.j,scalepos*pos.k};
     float v []= {scalevel*vel.i,scalevel*vel.j,scalevel*vel.k};
     sounds[sound].pos = pos.Cast();
-	if (usepositional)
+	sounds[sound].vel=vel;
+	if (usepositional&&sounds[sound].source)
 	    alSourcefv(sounds[sound].source,AL_POSITION,p);
-  if (usedoppler)
+  if (usedoppler&&sounds[sound].source)
     alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
 #endif
@@ -315,6 +316,8 @@ void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
     if (AUDReclaimSource (sound)) {
+	  AUDAdjustSound (sound, sounds[sound].pos, sounds[sound].vel);
+
       alSourcePlay( sounds[sound].source );
     }
   }

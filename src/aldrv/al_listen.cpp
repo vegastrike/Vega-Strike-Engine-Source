@@ -31,6 +31,7 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
   if (sounds[sound].buffer==(ALuint)0) 
     return 0;
   sounds[sound].pos = pos;
+  sounds[sound].vel = vel;
   Vector t = pos-mylistener.pos;
   float mag = t.Dot(t);
   int hashed = hash_sound (sounds[sound].buffer);

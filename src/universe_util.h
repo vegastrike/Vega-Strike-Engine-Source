@@ -161,6 +161,7 @@ namespace UniverseUtil {
 	double asin (double);
 	double atan (double);
 	double tan (double);
+	void micro_sleep(int n);
 
 }
 

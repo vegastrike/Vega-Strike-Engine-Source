@@ -197,7 +197,9 @@ static void setup_sdl_video_mode()
     if ( gl_options.fullscreen ) {
 	video_flags |= SDL_FULLSCREEN;
     } else {
+#ifndef _WIN32
 	video_flags |= SDL_RESIZABLE;
+#endif
     }
 
     bpp = gl_options.color_depth;

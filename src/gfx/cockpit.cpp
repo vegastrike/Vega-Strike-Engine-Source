@@ -1519,7 +1519,7 @@ void GameCockpit::Update () {
   if (autoclear&&par) {
     Unit *targ=par->Target();
 	if (targ) {
-    if ((UnitUtil::getSignificantDistance(targ,par)<=0)&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))) {
+    if ((UnitUtil::getSignificantDistance(targ,par)<=0)&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
       RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
     } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))) {
       par->EndRequestClearance(targ);
