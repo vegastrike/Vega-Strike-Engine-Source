@@ -1660,8 +1660,17 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
         // Construct the cell for this item.
         const bool transOK = isTransactionOK(item, transType);
-					
-        string itemName = beautify(item.content);
+		//REALLY SLOW - why?
+		string blnk;
+		static Flightgroup* staticFG=new Flightgroup();//sigh
+        int fgsNumber=0;
+	    current_unit_load_mode=NO_MESH;
+        Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetFaction("upgrades"),blnk,staticFG,fgsNumber);
+	    current_unit_load_mode=DEFAULT;
+		string namestr=newPart->getFullname();
+	    delete newPart;
+		//END REALLY SLOW
+        string itemName = beautify(namestr);
 	
           if (item.quantity > 1) {
             // If there is more than one item, show the number of items.
@@ -3382,9 +3391,11 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			text+=MPLdesc;
 			return;
 		}
-	
-		for(nameindex=0; (nameindex<playerUnit->name.size())&&playerUnit->name[nameindex]!='.';nameindex++){
-			nametemp+=playerUnit->name[nameindex];
+		nametemp=playerUnit->getFullname();
+		if(nametemp==""){
+		  for(nameindex=0; (nameindex<playerUnit->name.size())&&playerUnit->name[nameindex]!='.';nameindex++){
+		  	  nametemp+=playerUnit->name[nameindex];
+		  }
 		}
 		nametemp=beautify(nametemp);
 		text+=statcolor+"Selected Part: #-c"+nametemp;
@@ -3420,6 +3431,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			model="Military Spec.";
 		}else if (model=="begin"){
 			model="Stock(Refurbished)";
+		} else {
+			model="Military Spec. Variant ("+model+")";
 		}
 		Cargo * fullname = GetMasterPartList(playerUnit->name.c_str());
 		Cargo * milname = GetMasterPartList(nametemp.c_str());
