@@ -127,7 +127,6 @@ void Animation::ProcessDrawQueue (std::stack <Animation *> &animationdrawqueue) 
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   GFXDisable (DEPTHWRITE);
-
   while (!animationdrawqueue.empty()) {
     GFXColorf (animationdrawqueue.top()->mycolor);//fixme, should we need this? we get som egreenie explosions
     Matrix result;
@@ -228,7 +227,7 @@ void Animation::DrawNoTransform() {
 
 void Animation:: Draw() {
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  if ((_Universe->AccessCamera()->GetR().Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<g_game.zfar*.9) {
+  if ((_Universe->AccessCamera()->GetR().Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<g_game.zfar   ) {
     animationdrawqueue.push (this);
   }else {
     far_animationdrawqueue.push(this);

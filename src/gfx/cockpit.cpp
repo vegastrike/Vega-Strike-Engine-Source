@@ -68,30 +68,33 @@ GFXColor Cockpit::relationToColor (float relation) {
 }
 void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
   GFXColor4f (1,1,1,1);
-  size = .125*GFXGetZPerspective (size);
-  GFXBegin (GFXLINE);
-  GFXVertexf(Loc+P*size);
-  GFXVertexf(Loc+.125*P*size);
-  GFXVertexf(Loc-P*size);
-  GFXVertexf(Loc-.125*P*size);
-  GFXVertexf(Loc+Q*size);
-  GFXVertexf(Loc+.125*Q*size);
-  GFXVertexf(Loc-Q*size);
-  GFXVertexf(Loc-.125*Q*size);
-  GFXVertexf(Loc+.0625*Q*size);
-  GFXVertexf(Loc+.0625*P*size);
-  GFXVertexf(Loc-.0625*Q*size);
-  GFXVertexf(Loc-.0625*P*size);
-  GFXVertexf(Loc+.9*P*size+.125*Q*size);
-  GFXVertexf(Loc+.9*P*size-.125*Q*size);
-  GFXVertexf(Loc-.9*P*size+.125*Q*size);
-  GFXVertexf(Loc-.9*P*size-.125*Q*size);
-  GFXVertexf(Loc+.9*Q*size+.125*P*size);
-  GFXVertexf(Loc+.9*Q*size-.125*P*size);
-  GFXVertexf(Loc-.9*Q*size+.125*P*size);
-  GFXVertexf(Loc-.9*Q*size-.125*P*size);
-
-  GFXEnd();
+  static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
+  if (draw_nav_symbol) {
+    size = .125*GFXGetZPerspective (size);
+    GFXBegin (GFXLINE);
+    GFXVertexf(Loc+P*size);
+    GFXVertexf(Loc+.125*P*size);
+    GFXVertexf(Loc-P*size);
+    GFXVertexf(Loc-.125*P*size);
+    GFXVertexf(Loc+Q*size);
+    GFXVertexf(Loc+.125*Q*size);
+    GFXVertexf(Loc-Q*size);
+    GFXVertexf(Loc-.125*Q*size);
+    GFXVertexf(Loc+.0625*Q*size);
+    GFXVertexf(Loc+.0625*P*size);
+    GFXVertexf(Loc-.0625*Q*size);
+    GFXVertexf(Loc-.0625*P*size);
+    GFXVertexf(Loc+.9*P*size+.125*Q*size);
+    GFXVertexf(Loc+.9*P*size-.125*Q*size);
+    GFXVertexf(Loc-.9*P*size+.125*Q*size);
+    GFXVertexf(Loc-.9*P*size-.125*Q*size);
+    GFXVertexf(Loc+.9*Q*size+.125*P*size);
+    GFXVertexf(Loc+.9*Q*size-.125*P*size);
+    GFXVertexf(Loc-.9*Q*size+.125*P*size);
+    GFXVertexf(Loc-.9*Q*size-.125*P*size);
+    
+    GFXEnd();
+  }
 }
 inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR) {
   GFXBegin (GFXLINESTRIP); 
