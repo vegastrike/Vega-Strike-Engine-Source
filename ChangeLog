@@ -1,3 +1,8 @@
+2002-01-26 Daniel Horn <hellcatv@hotmail.com>
+	* fixed bug that about 1 in 1000 units leaves a ghost behind on the collide board.
+	* scans entire collide table when a unit is leaving systems or dying
+	* testing with missions/totalwar2.mission
+	
 2002-01-26 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* updated systems a bit
