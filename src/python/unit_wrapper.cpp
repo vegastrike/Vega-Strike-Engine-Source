@@ -88,18 +88,18 @@ PYTHON_BEGIN_CLASS(Unit,UnitWrapper,"Unit")
 #undef voidWRAPPED2
 #undef voidWRAPPED3
 //End of Macro City 2
-  Class.def(&Kill,"Kill");
-  Class.def(&GetOrientation,"GetOrientation");
-  Class.def(&queryBSP,"queryBSP");
-  Class.def(&cosAngleTo,"cosAngleTo");
-  Class.def(&cosAngleFromMountTo,"cosAngleFromMountTo");
-  Class.def(&getAverageGunSpeed,"getAverageGunSpeed");
-  Class.def(&InsideCollideTree,"InsideCollideTree");
-  Class.def(&getSubUnit,"getSubUnit");
-  Class.def(&getFlightgroupLeader,"getFlightgroupLeader");
-  Class.def(&GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
-  Class.def(&GetJumpStatus,"GetJumpStatus");
-  Class.def(&ApplyDamage,"ApplyDamage");
+  Class.def(&UnitWrapper::Kill,"Kill");
+  Class.def(&UnitWrapper::GetOrientation,"GetOrientation");
+  Class.def(&UnitWrapper::queryBSP,"queryBSP");
+  Class.def(&UnitWrapper::cosAngleTo,"cosAngleTo");
+  Class.def(&UnitWrapper::cosAngleFromMountTo,"cosAngleFromMountTo");
+  Class.def(&UnitWrapper::getAverageGunSpeed,"getAverageGunSpeed");
+  Class.def(&UnitWrapper::InsideCollideTree,"InsideCollideTree");
+  Class.def(&UnitWrapper::getSubUnit,"getSubUnit");
+  Class.def(&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
+  Class.def(&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
+  Class.def(&UnitWrapper::GetJumpStatus,"GetJumpStatus");
+  Class.def(&UnitWrapper::ApplyDamage,"ApplyDamage");
 PYTHON_END_CLASS(Unit,UnitWrapper)
 PYTHON_END_MODULE(Unit)
 TO_PYTHON_SMART_POINTER(UnitWrapper);
