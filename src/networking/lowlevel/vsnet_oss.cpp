@@ -50,7 +50,11 @@ INLINE int socket(int domain, int type, int protocol)
 
 INLINE int recv(int fd, void* buf, unsigned int len, int flags )
 {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    int ret = ::recv( fd, (char*)buf, len, flags );
+#else
     int ret = ::recv( fd, buf, len, flags );
+#endif
     return ret;
 }
 
