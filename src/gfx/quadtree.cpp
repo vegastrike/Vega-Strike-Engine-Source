@@ -87,13 +87,13 @@ QuadTree::~QuadTree () {
 float QuadTree::GetHeight (Vector Location, Vector & normal, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
   Location = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
   if (TotalTerrainSizeX) {
-    //    float t1=Location.i; 
-    //    float t2=Location.k;
+    //float t1=Location.i; 
+    //float t2=Location.k;
     Location.i= fmod (Location.i,TotalTerrainSizeX);
     Location.k= fmod (Location.k,TotalTerrainSizeZ);
-    //    if (t1!=Location.i|| t2!=Location.k) {
+    //if (t1!=Location.i|| t2!=Location.k) {
     //      fprintf (stderr,"wired");
-    //    }
+    // /}
 
     if (Location.i<0)
       Location.i+=TotalTerrainSizeX;
