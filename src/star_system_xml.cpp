@@ -488,6 +488,7 @@ void StarSystem::LoadXML(const char *filename) {
   // rrestricted=yrestricted=prestricted=false;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
+    printf("StarSystem: file not found %s\n",filename);
     assert(0);
     return;
   }

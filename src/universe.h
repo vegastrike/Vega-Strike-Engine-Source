@@ -124,7 +124,7 @@ private:
 	///Loads Defaults in Graphics Drivers
 	void StartGFX();
 	///Should load the Universe data file. Now just inits system with test.xml
-	void Init();
+	void Init(string systemfile);
 	///Begins a scene
 	void StartDraw();
 	///Runs the main loop

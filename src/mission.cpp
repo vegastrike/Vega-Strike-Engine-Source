@@ -267,3 +267,22 @@ void Mission::doOrder(easyDomNode *node,Flightgroup *fg){
   // because the target may be a flightgroup that's not yet defined
   fg->ordermap[order]=target;
 }
+
+
+string Mission::getVariable(string name,string defaultval){
+   vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= variables->subnodes.begin() ; siter!=variables->subnodes.end() ; siter++){
+    string scan_name=(*siter)->attr_value("name");
+    //    cout << "scanning section " << scan_name << endl;
+
+    if(scan_name==name){
+      return (*siter)->attr_value("value");
+    }
+  }
+
+  cout << "WARNING: no variable named " << name << endl;
+
+  return defaultval;
+ 
+}

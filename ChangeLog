@@ -1,3 +1,17 @@
+2001-10-31 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified doxygenConfig to show comments in source
+	* modified TODO
+	* added getVariable to Mission
+	* modified Universe to have Init(string filename)
+	* modified main.cpp to load the system that's defined
+	  as 'system' in the mission file
+	* removed data/test.xml
+	* added data/sol.system (former test.xml)
+	* added error msg to star_system_xml if system file not found
+	* added used variables to vegastrike.config
+
+	
 2001-10-27 Daniel Horn <hellcatv@hotmail.com>
 2001-10-28 Daniel Horn <hellcatv@hotmail.com>
 2001-10-29 Daniel Horn <hellcatv@hotmail.com>
@@ -15,6 +29,8 @@
 	* modified music to allow <4 length playlists
 	* modified Units to have a configurable ModelDetail value (higher means that higher (better) LODs are used for far starships
 	* added factions to mission parsing (_Universe->GetFaction(int i)) hehe
+
+
 2001-10-27 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added section printout when warning for variables

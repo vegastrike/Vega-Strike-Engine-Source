@@ -1,7 +1,7 @@
-* global xml-config file, inclusive key-bindings
-* make joystick button handler like keyboard handler
-* xml-mission file
-* Sound with OpenAL
+TODO:
+
+	* improve the homepage
+	* make a new release
 
 
 --LOW PRIORITY--  PERHAPS GLUT IS NICE...I FOUND MORE GLUT KEYBINDINGS--
@@ -10,12 +10,20 @@
 
 Job Assignment:
 Daniel
-	Finish up VDU's
-	do some dumb AIs for (openal) debugging
+	* Finish up VDU's
+	* do some dumb AIs for (openal) debugging
 
-
-alex:	re-make joystick/keybindings by using the config-file
-	re-make createObjects with xml-Missions
-	OpenAL
+	* create user mailing-list
+	* use ship_ambient from vegastrike.config
+	   to turn up ambient light for ships
+	* check in additional ships ;-)
 -later-
-	Radar colors for factions? (factions_xml.cpp... cockpit.cpp)
+	* pause key
+	* screenshot key (maybe only when paused)
+	* 3D target camera in VDU
+	* CD-player mode for mp3 play
+
+
+alex:	* extending mission.cpp to director ai scripting
+-later-
+	* Radar colors for factions? (factions_xml.cpp... cockpit.cpp)

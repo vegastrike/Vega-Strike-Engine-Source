@@ -65,6 +65,8 @@ class Mission {
 
   Flightgroup *findFlightgroup(string fg_name);
 
+  string getVariable(string name,string defaultval);
+
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 

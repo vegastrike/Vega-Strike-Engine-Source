@@ -45,9 +45,11 @@ Universe::Universe(int argc, char** argv)
 	cockpit = new Cockpit ("",NULL);
 	LoadFactionXML("factions.xml");	
 }
-void Universe::Init () {
+void Universe::Init (string systemfile) {
 
-	star_system = new StarSystem("test.xml");
+  //	star_system = new StarSystem("test.xml");
+  string fullname=systemfile+".system";
+	star_system = new StarSystem((char *)fullname.c_str());
 
 }
 Universe::~Universe()

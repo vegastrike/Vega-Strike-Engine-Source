@@ -132,7 +132,7 @@ int main( int argc, char *argv[] )
 #endif
     */
     _Universe= new Universe(argc,argv);   
-	_Universe->Init ();
+    _Universe->Init (mission->getVariable("system","sol.system"));
     createObjects();
 
        InitializeInput();
