@@ -882,6 +882,7 @@ XML LoadXML(const char *filename, float32bit unitscale) {
 }
 
 void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file to BFXM creates new, or appends record based on mode
+  rewind(Outputfile);
   unsigned int32bit intbuf;
   
   bool append=(mode=='a');
