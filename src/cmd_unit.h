@@ -23,9 +23,9 @@
 #include <time.h>
 
 struct GFXColor;
-#include "gfx_transform_matrix.h"
-#include "quaternion.h"
-#include "gfx_lerp.h"
+#include "gfx/matrix.h"
+#include "gfx/quaternion.h"
+#include "gfx/lerp.h"
 //#include <iostream>
 #include <string>
 #include "cmd_weapon_xml.h"

@@ -2,9 +2,9 @@
 #include "physics.h"
 #include "planet.h"
 #include "gfxlib.h"
-#include "gfx_sphere.h"
+#include "gfx/sphere.h"
 #include "UnitCollection.h"
-#include "gfx_bsp.h"
+#include "gfx/bsp.h"
 #include "cmd_order.h"
 #include "gfxlib_struct.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 

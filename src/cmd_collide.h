@@ -1,6 +1,6 @@
 #ifndef _CMD_COLLIDE_H_
 #define _CMD_COLLIDE_H_
-#include "gfx_transform_vector.h"
+#include "gfx/vec.h"
 struct LineCollide {
   void * object;
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;

@@ -2,8 +2,8 @@
 #define _CMD_INPUT_DFA_H_
 #include "in_kb.h"
 #include "in_mouse.h"
-#include "gfx_camera.h"
-#include "gfx_sprite.h"
+#include "gfx/camera.h"
+#include "gfx/sprite.h"
 
 //#include "gfx_click_list.h"
 class StarSystem;

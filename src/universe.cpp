@@ -24,7 +24,7 @@
 #include "universe.h"
 #include "lin_time.h"
 #include "planet.h"
-
+#include "gfx/aux_texture.h"
 #include "profile.h"
 
 
@@ -35,7 +35,6 @@ Universe::Universe(int argc, char** argv)
 {
   //currentcamera = 0;
 	numlights = NUM_LIGHT; 
-	topobject = NULL;
 	active = GFXFALSE;
 
 	//Select drivers

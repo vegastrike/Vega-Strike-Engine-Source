@@ -1,16 +1,5 @@
 noinst_LIBRARIES = libgldrv.a
 
-#	fonts.c					\
-#	fonts.h
-##	quadtree.cpp				\
-##	quadtree.hpp				\
-#	gfx_hud.cpp				\
-#	gfx_hud.h				\
-#	gfx_light.cpp				\
-#	gfx_light.h				\
-#	quadgeom.cpp				\
-#	quadgeom.hpp				\
-
 
 INCLUDES = -I ../ 
 
@@ -30,5 +19,6 @@ libgldrv_a_SOURCES =				\
 	gl_state.cpp				\
 	gl_texture.cpp				\
 	gl_vertex_list.cpp			\
-	gl_quad_list.cpp			
+	gl_quad_list.cpp			\
+
 

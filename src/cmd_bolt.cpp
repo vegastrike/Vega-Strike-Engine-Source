@@ -1,6 +1,6 @@
 #include "cmd_bolt.h"
 #include "gfxlib.h"
-#include "gfx_mesh.h"
+#include "gfx/mesh.h"
 #include "gfxlib_struct.h"
 
 struct bolt_appearence {

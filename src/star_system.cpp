@@ -3,16 +3,16 @@
 #include "planet.h"
 #include "cmd_unit.h"
 #include "UnitCollection.h"
-#include "gfx_click_list.h"
-#include "gfx_hud.h"
+#include "cmd_click_list.h"
+#include "cmd_hud.h"
 #include "cmd_input_dfa.h"
 #include "lin_time.h"
 #include "cmd_beam.h"
-#include "gfx_sphere.h"
+#include "gfx/sphere.h"
 #include "cmd_collide.h"
-#include "gfx_halo.h"
-#include "gfx_background.h"
-#include "gfx_animation.h"
+#include "gfx/halo.h"
+#include "gfx/background.h"
+#include "gfx/animation.h"
 #include <expat.h>
 extern Vector mouseline;
 

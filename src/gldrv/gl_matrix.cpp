@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "gfxlib.h"
-#include "gfx_transform_vector.h"
+#include "gfx/vec.h"
 #include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>

@@ -1,9 +1,9 @@
 #include <expat.h>
 #include "xml_support.h"
 #include "star_system.h"
-#include "gfx_background.h"
-#include "gfx_env_map_gent.h"
-#include "gfx_aux_texture.h"
+#include "gfx/background.h"
+#include "gfx/env_map_gent.h"
+#include "gfx/aux_texture.h"
 #include "planet.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));

@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <expat.h>
+#include <gfx/aux_texture.h>
 #include "vegastrike.h"
 #include "xml_support.h"
 #include <assert.h>

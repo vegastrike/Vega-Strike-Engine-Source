@@ -1,7 +1,7 @@
 #include "vegastrike.h"
-#include "gfx_mesh.h"
+#include "gfx/mesh.h"
 #include "cmd_unit.h"
-#include "gfx_bounding_box.h"
+#include "gfx/bounding_box.h"
 extern Vector mouseline;
 extern vector<Vector> perplines;
 Vector MouseCoordinate (int mouseX, int mouseY);

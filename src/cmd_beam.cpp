@@ -3,6 +3,7 @@
 #include "cmd_beam.h"
 #include "cmd_unit.h"
 #include "cmd_collide.h"
+#include "gfx/aux_texture.h"
 //using std::vector;
 
 

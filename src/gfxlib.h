@@ -42,7 +42,7 @@
 
 using std::vector;
 
-#include "gfx_transform_vector.h"
+#include "gfx/vec.h"
 
 #include "gfxlib_struct.h"
 

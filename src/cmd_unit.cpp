@@ -19,20 +19,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "file.h"
-#include "gfx_halo.h"
+#include "gfx/halo.h"
 #include "cmd_beam.h"
 #include "cmd_unit.h"
 
-#include "gfx_sprite.h"
+#include "gfx/sprite.h"
 #include "lin_time.h"
-#include "gfx_hud.h"
+#include "cmd_hud.h"
 
 
 #include "cmd_order.h"
-#include "gfx_box.h"
+#include "gfx/box.h"
 
-#include "gfx_lerp.h"
-#include "gfx_bsp.h"
+#include "gfx/lerp.h"
+#include "gfx/bsp.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 

@@ -22,7 +22,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include "gfx_transform_vector.h"
+#include "gfx/vec.h"
 
 static const float SIMULATION_ATOM = (float)(1.0/10.0);
 

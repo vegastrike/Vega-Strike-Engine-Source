@@ -25,8 +25,7 @@
 #define NUM_LIGHT	8
 #define NUM_FORCES	64
 
-#include "gfx_camera.h"
-#include "gfx_primitive.h"
+#include "gfx/camera.h"
 #include "in_main.h"
 #include "star_system.h"
 
@@ -98,8 +97,6 @@ public:
 		~Faction(); //destructor
 	};
 
-	//move back to private!!!
-	Primitive *topobject; // the top object of the object list
   void activateLightMap();
   Texture * getForceLogo () {return ForceLogo;};
   Texture * getSquadLogo () {return SquadLogo;};

@@ -1,8 +1,8 @@
 #include "cmd_unit.h"
-#include "gfx_animation.h"
-#include "gfx_mesh.h"
-#include "gfx_halo.h"
-#include "gfx_bsp.h"
+#include "gfx/animation.h"
+#include "gfx/mesh.h"
+#include "gfx/halo.h"
+#include "gfx/bsp.h"
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;

@@ -1,7 +1,7 @@
 #include "vegastrike.h"
 #include "cmd_unit.h"
 #include "cmd_beam.h"
-#include "gfx_mesh.h"
+#include "gfx/mesh.h"
 #include "cmd_collide.h"
 #include "physics.h"
 #include "hashtable_3d.h"

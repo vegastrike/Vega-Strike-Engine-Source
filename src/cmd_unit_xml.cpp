@@ -1,14 +1,14 @@
 #include "cmd_unit.h"
 #include "xml_support.h"
-#include "gfx_halo.h"
+#include "gfx/halo.h"
 //#include <iostream.h>
 #include <fstream>
 #include <expat.h>
 //#include <values.h>
 #include <float.h>
-#include "gfx_mesh.h"
-#include "gfx_sphere.h"
-#include "gfx_bsp.h"
+#include "gfx/mesh.h"
+#include "gfx/sphere.h"
+#include "gfx/bsp.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));

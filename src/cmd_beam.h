@@ -1,11 +1,14 @@
 #ifndef _CMD_BEAM_H_
 #define _CMD_BEAM_H_
 #include "cmd_weapon_xml.h"
+#include "gfx/mesh.h"
 #include "cmd_collide.h"
-#include "gfx_transform_matrix.h"
-#include "gfx_primitive.h"
+#include "gfx/matrix.h"
+#include "gfx/quaternion.h"
 #include <vector>
-
+struct GFXVertexList;
+struct Texture;
+struct GFXColor;
 using std::vector;
 
 class Beam {

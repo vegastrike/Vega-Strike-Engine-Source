@@ -1,10 +1,10 @@
 #include "cmd_input_dfa.h"
-#include "gfx_click_list.h"
-#include "gfx_sprite.h"
+#include "cmd_click_list.h"
+#include "gfx/sprite.h"
 //#include "vegastrike.h"
 #include "cmd_unit.h"
 #include "cmd_order.h"
-#include "gfx_coordinate_select.h"
+#include "gfx/coord_select.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 

@@ -11,7 +11,7 @@
 #include <string>
 #include "xml_support.h"
 using std::string;
-#include "gfx_camera.h"
+#include "gfx/camera.h"
 class Planet;
 class UnitCollection;
 class ClickList;

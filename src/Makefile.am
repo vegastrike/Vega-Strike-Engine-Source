@@ -1,7 +1,7 @@
 #SUBDIRS = gldrv
 bin_PROGRAMS = vegastrike
-SUBDIRS = gldrv
-vegastrike_LDADD = gldrv/libgldrv.a
+SUBDIRS = gfx gldrv
+vegastrike_LDADD = gldrv/libgldrv.a gfx/libgfx.a
 
 vegastrike_SOURCES =				\
 	cmd.h					\
@@ -15,6 +15,8 @@ vegastrike_SOURCES =				\
 	cmd_beam.cpp				\
 	cmd_bolt.h				\
 	cmd_bolt.cpp				\
+	cmd_click_list.cpp			\
+	cmd_click_list.h			\
 	cmd_collide.cpp				\
 	cmd_collide.h				\
 	cmd_input_dfa.h				\
@@ -22,6 +24,8 @@ vegastrike_SOURCES =				\
 	cmd_faction_xml.cpp			\
 	cmd_flybywire.h				\
 	cmd_flybywire.cpp			\
+	cmd_hud.h				\
+	cmd_hud.cpp				\
 	cmd_navigation_orders.h			\
 	cmd_navigation_orders.cpp		\
 	cmd_order.cpp				\
@@ -37,58 +41,6 @@ vegastrike_SOURCES =				\
 	cmd_physics.cpp				\
 	cmd_weapon_xml.cpp			\
 	cmd_weapon_xml.h			\
-	gfx_animation.cpp			\
-	gfx_aux.h				\
-	gfx_aux_logo.cpp			\
-	gfx_aux_logo.h				\
-	gfx_aux_palette.cpp			\
-	gfx_aux_palette.h			\
-	gfx_aux_texture.cpp			\
-	gfx_aux_texture.h			\
-	gfx_background.cpp			\
-	gfx_background.h			\
-	gfx_bounding_box.cpp			\
-	gfx_bounding_box.h			\
-	gfx_box.h 				\
-	gfx_box.cpp 				\
-	gfx_bsp_gent.cpp				\
-	gfx_bsp.cpp				\
-	gfx_bsp.h				\
-	gfx_camera.cpp				\
-	gfx_camera.h				\
-	gfx_click_list.h			\
-	gfx_click_list.cpp			\
-	gfx_coordinate_select.cpp		\
-	gfx_coordinate_select.h			\
-	gfx_env_map_gent.h			\
-	gfx_env_map_gent.cpp			\
-	gfx_halo.cpp				\
-	gfx_halo.h				\
-	gfx_hud.cpp				\
-	gfx_hud.h				\
-	gfx_lerp.cpp 				\
-	gfx_lerp.h 				\
-	gfx_location_select.cpp			\
-	gfx_location_select.h			\
-	gfx_mesh.cpp				\
-	gfx_mesh.h				\
-	gfx_mesh_bin.cpp			\
-	gfx_mesh_fx.cpp				\
-	gfx_mesh_poly.cpp			\
-	gfx_mesh_xml.cpp 			\
-	gfx_primitive.cpp			\
-	gfx_primitive.h				\
-	gfx_sprite.cpp				\
-	gfx_sprite.h				\
-	gfx_transform_vector.cpp		\
-	gfx_transform_vector.h			\
-	gfx_transform_matrix.h			\
-	gfx_transform_matrix.cpp		\
-	gfx_vertex.h				\
-	gfx_sphere.h				\
-	gfx_sphere.cpp				\
-	gfxlib.h				\
-	gfxlib_struct.h				\
 	hashtable.h				\
 	hashtable.cpp				\
 	hashtable_3d.h				\
@@ -112,8 +64,6 @@ vegastrike_SOURCES =				\
 	planet.cpp 				\
 	physics.h				\
 	physics.cpp				\
-	quaternion.h 				\
-	quaternion.cpp				\
 	star_system.cpp 			\
 	star_system_xml.cpp			\
 	star_system.h 				\

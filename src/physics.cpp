@@ -21,7 +21,7 @@
 
 #include "lin_time.h"
 #include "physics.h"
-
+#include "gfx/quaternion.h"
 PhysicsSystem::PhysicsSystem(float M, float I, Vector *pos, Vector *p, Vector *q, Vector *r) : 
   mass (M), 
   MomentOfInertia(I),   

@@ -20,7 +20,7 @@
  */
 #ifndef _GFXLIB_STRUCT
 #define _GFXLIB_STRUCT
-#include "gfx_transform_vector.h"
+#include "gfx/vec.h"
 
 struct GFXVertex // Vertex, Normal, Texture, and Environment
 {
