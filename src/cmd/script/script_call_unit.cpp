@@ -938,6 +938,16 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_INT;
       viret->int_val = carg.quantity;
     }
+    else if(method_id==CMT_UNIT_setPosition){
+      float x= getFloatArg(node,mode,1);
+      float y= getFloatArg(node,mode,2);
+      float z= getFloatArg(node,mode,3);
+      if(mode==SCRIPT_RUN){
+	my_unit->SetCurPosition(Vector(x,y,z));
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(method_id==CMT_UNIT_incrementCargo){
       float percentagechange= getFloatArg(node,mode,1);
       int quantity= getIntArg(node,mode,2);

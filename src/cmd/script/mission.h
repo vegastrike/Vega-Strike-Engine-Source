@@ -215,6 +215,7 @@ enum callback_module_unit_type {
     CMT_UNIT_setName ,
     CMT_UNIT_getThreat ,
     CMT_UNIT_setTarget ,
+    CMT_UNIT_setPosition ,
     CMT_UNIT_getDistance ,
     CMT_UNIT_getMinDis ,
     CMT_UNIT_getAngle ,

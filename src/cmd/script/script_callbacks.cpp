@@ -932,6 +932,7 @@ void Mission::initCallbackMaps(){
     module_unit_map["equal"]=CMT_UNIT_equal ;
     module_unit_map["getThreat"]=CMT_UNIT_getThreat ;
     module_unit_map["setTarget"]=CMT_UNIT_setTarget ;
+    module_unit_map["setPosition"]=CMT_UNIT_setPosition ;
     module_unit_map["addCargo"]=CMT_UNIT_addCargo ;
     module_unit_map["removeCargo"]=CMT_UNIT_removeCargo ;
     module_unit_map["incrementCargo"]=CMT_UNIT_incrementCargo ;
