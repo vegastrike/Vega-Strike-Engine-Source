@@ -38,8 +38,8 @@ void InitJoystick(){
   for(int i=0; i < MAX_JOYSTICKS; i++ )  {
     if (i<num_joysticks){
       printf("    %s\n", SDL_JoystickName(i));
-      joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
     }
+    joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
   }
 }
 void DeInitJoystick() {
