@@ -109,9 +109,9 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);
 	
-	  vertexlist[j*2+fir].i = x * nsign;
-	  vertexlist[j*2+fir].k = -y * nsign;
-	  vertexlist[j*2+fir].j = z * nsign;
+	  vertexlist[j*2+fir].i = x ;
+	  vertexlist[j*2+fir].k = -y;
+	  vertexlist[j*2+fir].j = z;
 	  vertexlist[j*2+fir].s = GetS(theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
 	  vertexlist[j*2+fir].t = GetT(rho,rho_min,rho_max);//t;
 	  vertexlist[j*2+fir].x = x * radius;
@@ -123,9 +123,9 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	  y = cos(theta) * sin(rho + drho);
 	  z = nsign * cos(rho + drho);
 
-	  vertexlist[j*2+sec].i = x * nsign;
-	  vertexlist[j*2+sec].k = -y * nsign;
-	  vertexlist[j*2+sec].j = z * nsign;
+	  vertexlist[j*2+sec].i = x ;
+	  vertexlist[j*2+sec].k = -y;
+	  vertexlist[j*2+sec].j = z;//double negative 
 	  vertexlist[j*2+sec].s = GetS (theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
 	  vertexlist[j*2+sec].t = GetT(rho+drho,rho_min,rho_max);//t - dt;
 	  vertexlist[j*2+sec].x = x * radius;

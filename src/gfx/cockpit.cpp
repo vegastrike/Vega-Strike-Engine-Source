@@ -1351,15 +1351,16 @@ void Cockpit::SetupViewPort (bool clip) {
       CrossProduct (tmp,r,q);
       _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
       _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
-      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
+      //      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
       ShoveCamBehindUnit (CP_TARGET,tgt,zoomfactor);
+      ShoveCamBehindUnit (CP_PANTARGET,tgt,zoomfactor);
     }else {
       un->UpdateHudMatrix (CP_VIEWTARGET);
       un->UpdateHudMatrix (CP_TARGET);
       un->UpdateHudMatrix (CP_PANTARGET);
     }
     ShoveCamBehindUnit (CP_CHASE,un,zoomfactor);
-    ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
+    //    ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
 
 
 

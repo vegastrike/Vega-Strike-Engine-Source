@@ -765,13 +765,13 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
     vs=CP_LEFT;
     break;
   case CP_CHASE:
-    vs = CP_RIGHT;
+    vs = CP_FRONT;
     break;
   case CP_PAN:
     vs = CP_CHASE;
     break;
   case CP_PANTARGET:
-    vs=CP_PAN;
+    vs=CP_CHASE;
     break;
   case CP_TARGET:
     vs=CP_PANTARGET;
