@@ -8,6 +8,7 @@
 #include <Python.h>
 #include <compile.h>
 #include <eval.h>
+#include "python/python_class.h"
 #include "python/python_compile.h"
 #include "config_xml.h"
 #include "vs_globals.h"
