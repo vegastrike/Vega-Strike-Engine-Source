@@ -96,7 +96,7 @@ bool operator==( const SOCKETALT& l, const SOCKETALT& r )
     }
 }
 
-bool SOCKETALT::CompareLt::operator()( const SOCKETALT& l, const SOCKETALT& r )
+bool SOCKETALT::CompareLt::operator()( const SOCKETALT& l, const SOCKETALT& r ) const
 {
     return l.lowerAddress( r );
 }

@@ -20,6 +20,13 @@ using namespace std;
     extern "C" int access( const char* name, int mode );
 #endif
 
+#ifdef _WIN32
+#include <sys/stat.h>
+#define HAVE_LSTAT
+#define lstat _stat
+#define stat _stat
+#endif
+
 #ifndef HAVE_LSTAT
     struct stat
     {
@@ -221,7 +228,7 @@ void Manager::private_lower_poll( )
     ItemMap_I it;
     for( it = collect.begin(); it != collect.end(); it++ )
     {
-        ItemList& cl( it->second );
+        ItemList& cl = it->second;
         if( cl.empty() == false )
         {
             NetBuffer netbuf;
@@ -585,7 +592,7 @@ std::ifstream* Manager::private_access( string& file )
 size_t Manager::private_file_size( const string& file )
 {
     struct stat buf;
-    if( ::lstat( file.c_str(), &buf ) == 0 )
+	if( ::lstat( file.c_str(), &buf ) == 0 )
     {
         size_t ret = buf.st_size;
         return ret;
@@ -621,7 +628,7 @@ int access( const char* name, int mode )
 #ifndef HAVE_LSTAT
 int lstat( const char* name, struct stat* buf )
 {
-    FILE* f = fopen( name );
+    FILE* f = fopen( name , "r" );
     if( f == NULL ) return -1;
 
     int retval = -1;

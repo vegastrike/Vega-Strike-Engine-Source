@@ -205,7 +205,7 @@ public:
     class CompareLt
     {
     public:
-        bool operator()( const SOCKETALT& l, const SOCKETALT& r );
+        bool operator()( const SOCKETALT& l, const SOCKETALT& r ) const;
     };
 
 };
