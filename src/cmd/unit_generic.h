@@ -967,7 +967,7 @@ public:
 
 
 // Uses Universe stuff
-  virtual vector <class Cargo>& FilterDowngradeList (vector <class Cargo> & mylist) { return mylist;}
+  virtual vector <class Cargo>& FilterDowngradeList (vector <class Cargo> & mylist, bool downgrade =true) { return mylist;}
   virtual vector <class Cargo>& FilterUpgradeList (vector <class Cargo> & mylist) { return mylist;}
 
 /***************************************************************************************/

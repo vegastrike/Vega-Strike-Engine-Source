@@ -112,7 +112,7 @@ public:
   void EjectCargo (unsigned int index);
   bool CanAddCargo (const Cargo &carg) const;
   ///The faction of this unit
-  vector <class Cargo>& FilterDowngradeList (vector <class Cargo> & mylist);
+  vector <class Cargo>& FilterDowngradeList (vector <class Cargo> & mylist,bool downgrade=true);
   vector <class Cargo>& FilterUpgradeList (vector <class Cargo> & mylist);
 
 /***************************************************************************************/

@@ -9,13 +9,14 @@
 #include "cmd/ai/aggressive.h"
 #include "unit_const_cache.h"
 extern int GetModeFromName (const char *);
-vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
+vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist, bool downgrade)
 {
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
-    if (GetModeFromName(mylist[i].content.c_str())!=2) {
+    int mode=GetModeFromName(mylist[i].content.c_str());
+    if (mode!=2 || (!downgrade)) {
       const Unit * NewPart = getCachedConstUnit (mylist[i].content.c_str(),FactionUtil::GetFaction("upgrades"));
       if (!NewPart){
 	NewPart= setCachedConstUnit (mylist[i].content,FactionUtil::GetFaction("upgrades"),UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades")));
@@ -30,12 +31,30 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->GetNumMounts()?GetNumMounts():1;
+	char * unitdir  = GetUnitDir(name.c_str());
+	string templnam = string(unitdir)+".template";	  
+	const Unit * templ=NULL;
+	if (!downgrade) {
+	  templ = getCachedConstUnit (templnam,faction);
+	  if (templ==NULL) {
+	    templ = setCachedConstUnit (templnam,faction,UnitFactory::createUnit (templnam.c_str(),true,this->faction));
+	  }
+	}
+	free (unitdir);
 	for (int m=0;m<maxmountcheck;m++) {
 	  int s =0;
 	  for (un_iter ui=getSubUnits();s==0||((*ui)!=NULL);++ui,++s) {
 	    double percent=1;
-	    if (canDowngrade (NewPart,m,s,percent)) {
-	      if (percent>MyPercentMin) {
+	    if (downgrade) {
+	      if (canDowngrade (NewPart,m,s,percent)) {
+		if (percent>MyPercentMin) {
+		  removethis=false;
+		  break;
+		}
+	      }  
+	    }else {
+
+	      if (canUpgrade (NewPart,m,s,mode,false/*force*/, percent,templ)) {
 		removethis=false;
 		break;
 	      }
@@ -63,16 +82,16 @@ vector <Cargo>& GameUnit::FilterUpgradeList (vector <Cargo> & mylist) {
 	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
 	Cockpit * cp = _Universe->isPlayerStarship (this);
-  if (cp) {
-    for (unsigned int i=0;i<mylist.size();i++) {
-      if (mylist[i].price>cp->credits) {
-	mylist.erase (mylist.begin()+i);
-	i--;
-      }
-    }
-  }
+	if (cp) {
+	  for (unsigned int i=0;i<mylist.size();i++) {
+	    if (mylist[i].price>cp->credits) {
+	      mylist.erase (mylist.begin()+i);
+	      i--;
+	    }
+	  }
 	}
-  return mylist;
+	}
+	return FilterDowngradeList(mylist,false);
 }
 
 
