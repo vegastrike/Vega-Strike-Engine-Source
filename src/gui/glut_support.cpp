@@ -233,7 +233,7 @@ void ShowImage(float x, float y, float wid, float hei, GUITexture image, int til
 }
 float word_length(const char * str) {
   float length=0;
-  while (*str&&(!isspace(*str))) {
+  while (*str&&*str!='\\'&&(!isspace(*str))) {
     char mychar = *str++;
     length+=glutStrokeWidth (GLUT_STROKE_ROMAN,mychar);
   }
