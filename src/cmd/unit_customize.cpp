@@ -8,6 +8,7 @@
 #include "gfx/cockpit.h"
 #include "savegame.h"
 #include "config_xml.h"
+#include "xml_serializer.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -245,48 +246,137 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
   return cancompletefully;
 }
 
+
+using std::string;
+void Tokenize(const string& str,
+                      vector<string>& tokens,
+                      const string& delimiters = " ")
+{
+    // Skip delimiters at beginning.
+    string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+    // Find first "non-delimiter".
+    string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+    while (string::npos != pos || string::npos != lastPos) {
+        // Found a token, add it to the vector.
+        tokens.push_back(str.substr(lastPos, pos - lastPos));
+        // Skip delimiters.  Note the "not_of"
+        lastPos = str.find_first_not_of(delimiters, pos);
+        // Find next "non-delimiter"
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+}
+std::string CheckBasicSizes (const std::string tokens) {
+  if (tokens.find ("small")<tokens.length()) {
+    return "small";
+  }
+  if (tokens.find ("medium")<tokens.length()) {
+    return "medium";
+  }
+  if (tokens.find ("large")<tokens.length()) {
+    return "large";
+  }
+  if (tokens.find ("cargo")<tokens.length()) {
+    return "cargo";
+  }
+  if (tokens.find ("LR")<tokens.length()||tokens.find ("massive")<tokens.length()) {
+    return "massive";
+  }
+  return "";
+}
+std::string getTurretSize (const std::string &size) {
+  vector <string> tokens;
+  Tokenize (size,tokens,"_");
+  for (unsigned int i=0;i<tokens.size();i++) {
+    if (tokens[i].find ("turret")<tokens[i].length()) {
+      string temp = CheckBasicSizes (tokens[i]);
+      if (!temp.empty()) {
+	return temp;
+      }
+    } else {
+      return tokens[i];
+    }
+  }
+  return "capitol";
+}
+
+
 bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
   bool cancompletefully=true;
   int j;
+  std::string turSize;
   un_iter ui;
+  bool found=false;
   for (j=0,ui=getSubUnits();(*ui)!=NULL&&j<subunitoffset;++ui,j++) {
   }///set the turrets to the offset
   un_iter upturrets;
+  Unit * giveAway;
+
+  giveAway=*ui;
+  if (giveAway==NULL) {
+    return true;
+  }
+  bool hasAnyTurrets=false;
+    turSize = getTurretSize (giveAway->name);
   for (upturrets=up->getSubUnits();((*upturrets)!=NULL)&&((*ui)!=NULL); ++ui,++upturrets) {//begin goign through other unit's turrets
+    hasAnyTurrets = true;
     Unit *addtome;
-    Unit * giveAway;
+
     addtome=*upturrets;//set pointers
-    giveAway=*ui;
-    if (addtome->rSize()) {//if the new turret has any size at all
-      numave++;//add it
-      percentage+=(giveAway->rSize()/addtome->rSize());//add up percentage equal to ratio of sizes
-    }
-    if (touchme) {//if we wish to modify,
-      Transformation t(addtome->curr_physical_state);//switch their current positions
-      addtome->curr_physical_state=giveAway->curr_physical_state;
-      giveAway->curr_physical_state=t;
-      t=addtome->prev_physical_state;
-      addtome->prev_physical_state=giveAway->prev_physical_state;
-      giveAway->prev_physical_state=t;//switch their previous positions
-      giveAway->SetRecursiveOwner(up);//set the owners of the respective turrets
 
-      upturrets.postinsert (giveAway);//add it to the second unit
-      ui.remove();//remove the turret from the first unit
+    
 
-      if (!downgrade) {//if we are upgrading swap them
-	ui.preinsert(addtome);//add unit to your ship
-	upturrets.remove();//remove unit from being a turret on other ship
-	addtome->SetRecursiveOwner(this);//set recursive owner
-      } else {
-	Unit * un;//make garbage unit
-	ui.preinsert (un=UnitFactory::createUnit("nothing",true,faction));//give a default do-nothing unit
-	un->curr_physical_state=addtome->curr_physical_state;
-	un->prev_physical_state=addtome->prev_physical_state;
-
-	un->SetRecursiveOwner(this);
-	upturrets.remove();//remove unit from being a turret on other ship
+    bool foundthis=false;
+    if (turSize == getTurretSize (addtome->name)&&addtome->rSize()) {//if the new turret has any size at all
+      if (!downgrade||addtome->name==giveAway->name) {
+	found=true;
+	foundthis=true;
+	numave++;//add it
+	percentage+=(giveAway->rSize()/addtome->rSize());//add up percentage equal to ratio of sizes
       }
     }
+    if (foundthis) {
+      if (touchme) {//if we wish to modify,
+	Transformation t(addtome->curr_physical_state);//switch their current positions
+	addtome->curr_physical_state=giveAway->curr_physical_state;
+	giveAway->curr_physical_state=t;
+	t=addtome->prev_physical_state;
+	addtome->prev_physical_state=giveAway->prev_physical_state;
+	giveAway->prev_physical_state=t;//switch their previous positions
+	giveAway->SetRecursiveOwner(up);//set the owners of the respective turrets
+	
+	upturrets.postinsert (giveAway);//add it to the second unit
+	ui.remove();//remove the turret from the first unit
+	
+	if (!downgrade) {//if we are upgrading swap them
+	  ui.preinsert(addtome);//add unit to your ship
+	  upturrets.remove();//remove unit from being a turret on other ship
+	  addtome->SetRecursiveOwner(this);//set recursive owner
+	} else {
+	  Unit * un;//make garbage unit
+	  ui.preinsert (un=UnitFactory::createUnit("blank",true,faction));//give a default do-nothing unit
+	  un->limits.yaw=0;
+	  un->limits.pitch=0;
+	  un->limits.roll=0;
+	  un->limits.lateral = un->limits.retro = un->limits.forward = un->limits.afterburn=0.0;
+
+	  un->name = turSize+"_blank";
+	  if (un->image->unitwriter!=NULL) {
+	    un->image->unitwriter->setName (un->name);
+	  }
+	  un->curr_physical_state=addtome->curr_physical_state;
+
+	  un->prev_physical_state=addtome->prev_physical_state;
+	  
+	  un->SetRecursiveOwner(this);
+	  upturrets.remove();//remove unit from being a turret on other ship
+	}
+      }
+    }
+  }
+  
+  if (!found) {
+    return !hasAnyTurrets;
   }
   if ((*upturrets)!=NULL) 
     return false;

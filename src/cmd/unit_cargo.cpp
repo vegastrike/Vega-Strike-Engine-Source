@@ -166,7 +166,15 @@ bool Unit::CanAddCargo (const Cargo &carg)const {
   for (unsigned int i=0;i<image->cargo.size();i++) {
     total_volume+=image->cargo[i].quantity*image->cargo[i].volume;
   }
-  return (total_volume<=image->cargo_volume);
+  if  (total_volume<=image->cargo_volume)
+    return true;
+  const Unit * un;
+  for (un_kiter i=viewSubUnits();(un = *i)!=NULL;i++) {
+    if (un->CanAddCargo (carg)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Unit::AddCargo (const Cargo &carg, bool sort) {

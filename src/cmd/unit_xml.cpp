@@ -364,10 +364,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   Cargo carg;
   short volume=-1;
   string filename;
-  Vector P;
+  QVector P;
   int indx;
-  Vector Q;
-  Vector R;
+  QVector Q;
+  QVector R;
   QVector pos;
   bool tempbool;
   float fbrltb[6];
@@ -551,9 +551,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     pos=QVector(0,0,0);
-    P=Vector (1,1,1);
-    Q=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
-    R=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+    P=QVector (1,1,1);
+    Q=QVector (FLT_MAX,FLT_MAX,FLT_MAX);
+    R=QVector (FLT_MAX,FLT_MAX,FLT_MAX);
 
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -607,9 +607,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     if (Q.i==FLT_MAX||Q.j==FLT_MAX||Q.k==FLT_MAX||R.i==FLT_MAX||R.j==FLT_MAX||R.k==FLT_MAX) {
       image->dockingports.push_back (DockingPorts(pos.Cast(),P.i,tempbool));
     }else {
-      Vector tQ = Q.Min (R);
-      Vector tR = R.Max (Q);
-      image->dockingports.push_back (DockingPorts (tQ,tR,tempbool));
+      QVector tQ = Q.Min (R);
+      QVector tR = R.Max (Q);
+      image->dockingports.push_back (DockingPorts (tQ.Cast(),tR.Cast(),tempbool));
     }
     break;
   case MESHLIGHT:
@@ -617,8 +617,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     vs_config->gethColor ("unit","engine",halocolor,0xffffffff);
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    P=Vector (1,1,1);
-    Q=Vector (1,1,1);
+    P=QVector (1,1,1);
+    Q=QVector (1,1,1);
     pos=QVector(0,0,0);
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -662,15 +662,15 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
-    halos.AddHalo (filename.c_str(),pos,P,GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]));
+    halos.AddHalo (filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]));
     //   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
     break;
   case MOUNT:
     ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    Q = Vector (0,1,0);
-    R = Vector (0,0,1);
+    Q = QVector (0,1,0);
+    R = QVector (0,0,1);
     pos = QVector (0,0,0);
     tempbool=false;
     ADDELEMNAME("size",Unit::mountSerializer,XMLType(XMLSupport::tostring(xml->unitscale),(int)xml->mountz.size()));
@@ -733,7 +733,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
     xml->mountz.push_back(new Mount (filename.c_str(), ammo,volume));
-    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
+    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()),pos));
     //xml->mountz[indx]->Activate();
     if (tempbool)
       xml->mountz[indx]->size=mntsiz;
@@ -748,8 +748,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     assert (xml->unitlevel==1);
     ADDELEMNAME("file",Unit::subunitSerializer,XMLType((int)xml->units.size()));
     xml->unitlevel++;
-    Q = Vector (0,1,0);
-    R = Vector (0,0,1);
+    Q = QVector (0,1,0);
+    R = QVector (0,0,1);
     pos = QVector (0,0,0);
     fbrltb[0] =-1;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -806,6 +806,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     //    CrossProduct (Q,R,P);
     indx = xml->units.size();
     xml->units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
+    if (xml->units.back()->name=="LOAD_FAILED") {
+	  xml->units.back()->limits.yaw=0;
+	  xml->units.back()->limits.pitch=0;
+	  xml->units.back()->limits.roll=0;
+	  xml->units.back()->limits.lateral = xml->units.back()->limits.retro = xml->units.back()->limits.forward = xml->units.back()->limits.afterburn=0.0;
+
+    }
+
     xml->units.back()->SetRecursiveOwner (this);
     xml->units[indx]->SetOrientation (Q,R);
     R.Normalize();
@@ -813,8 +821,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units[indx]->SetPosition(pos);
     //    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     //    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
-    xml->units[indx]->limits.structurelimits=R;
+    xml->units[indx]->limits.structurelimits=R.Cast();
     xml->units[indx]->limits.limitmin=fbrltb[0];
+    xml->units[indx]->name = filename;
+    if (xml->units[indx]->image->unitwriter!=NULL) {
+      xml->units[indx]->image->unitwriter->setName (filename);
+    }
     
     break;
   case COCKPITDAMAGE:

@@ -742,7 +742,7 @@ public:
   ///Resolves forces of given unit on a physics frame
   void ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
-  void SetOrientation (Vector q, Vector r);
+  void SetOrientation (QVector q, QVector r);
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;

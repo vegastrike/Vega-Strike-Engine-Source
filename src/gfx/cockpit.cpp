@@ -793,9 +793,9 @@ static void FaceTarget (Unit * un) {
     dir.Normalize();
     Vector p,q,r;
     un->GetOrientation(p,q,r);
-    r=dir.Cast();
-    q = q+Vector (.001,.001,.001);
-    un->SetOrientation (q,r);
+    QVector qq(q.Cast());
+    qq = qq+QVector (.001,.001,.001);
+    un->SetOrientation (qq,dir);
   }
 }
 void Cockpit::Autopilot (Unit * target) {
