@@ -84,7 +84,9 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
 }
 
 vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
-  Cockpit * cp = _Universe->isPlayerStarship (this);
+	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("physics","filter_expensive_cargo","false"));
+	if (filtercargoprice) {
+	Cockpit * cp = _Universe->isPlayerStarship (this);
   if (cp) {
     for (unsigned int i=0;i<mylist.size();i++) {
       if (mylist[i].price>cp->credits) {
@@ -93,6 +95,7 @@ vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
       }
     }
   }
+	}
   return mylist;
 }
 

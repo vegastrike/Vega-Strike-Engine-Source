@@ -742,6 +742,7 @@ static float getAutoRSize (Unit * orig,Unit * un) {
 }
 bool Unit::AutoPilotTo (Unit * target) {
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
+  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","6000"));
   if (SubUnit) {
     return false;//we can't auto here;
   }
@@ -754,7 +755,8 @@ bool Unit::AutoPilotTo (Unit * target) {
   QVector end (target->LocalPosition());
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
-    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+autopilot_term_distance)/totallength;
+    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
+    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
     if (percent>1) {
       end=start;
     }else {
