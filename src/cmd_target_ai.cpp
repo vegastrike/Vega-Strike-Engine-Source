@@ -45,6 +45,11 @@ void FireAt::Execute () {
   }
   UnitCollection::UnitIterator *iter = targets->createIterator();    
   bool shouldfire=false;
+  if (!iter->current()) {
+    ChooseTargets();
+    delete iter;
+    iter = targets->createIterator();
+  }
   while ((targ = iter->current())!=NULL) {
     shouldfire|=ShouldFire(targ);
     iter->advance();
@@ -65,18 +70,15 @@ AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6)  {
     tmp.prepend (target);
     AttachOrder (&tmp);
   }
-  facingtarg= false;
 }
 
 void AggressiveAI::Execute () {  
   FireAt::Execute();
-  if (!facingtarg) {
-    Order * tmp;
-    parent->EnqueueAI (tmp = new Orders::FaceTarget (false));
-    //tmp->SetParent(parent);
-    parent->EnqueueAI (tmp = new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
-    //tmp->SetParent (parent);
-    facingtarg=true;
+  if (parent->getAIState()->queryType (FACING)==NULL) {
+    parent->EnqueueAI (new Orders::FaceTarget (false));
+  }
+  if (parent->getAIState()->queryType (MOVEMENT)==NULL) {
+    parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
   }
 
 }

@@ -1,5 +1,7 @@
 #include "gfx_mesh.h"
+#ifndef _WIN32
 #include <values.h>
+#endif
 #include <float.h>
 #define PBEHIND -1
 #define PFRONT 1

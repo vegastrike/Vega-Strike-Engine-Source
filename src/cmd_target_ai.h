@@ -19,7 +19,6 @@ public:
 
 class AggressiveAI: public FireAt {
 protected:	
-  bool facingtarg;
 
 public:
   AggressiveAI (Unit * target=NULL);

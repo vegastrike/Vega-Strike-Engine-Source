@@ -54,7 +54,6 @@ static float CalculateDecelTime (float l, float v, float &F, float D,  float mas
 } 
 
 void MoveTo::SetDest (const Vector &target) {
-    type = LOCATION|MOVEMENT;
     targetlocation = target;
     done = false;
   }

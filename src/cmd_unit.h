@@ -155,6 +155,7 @@ friend class PlanetaryOrbit;
     };
   } shield;
   float hull;
+  int faction;
   float DealDamageToShield (const Vector & pnt, float &Damage);
   float DealDamageToHull (const Vector &pnt, float Damage);
   //  bool active;
@@ -201,6 +202,7 @@ friend class PlanetaryOrbit;
   Vector corner_min, corner_max; // corners of object
   void calculate_extent();
   Box *selectionBox;
+  int getFaction() {return faction;}
   void SetCollisionParent (Unit *name);
 public:
   float cosAngleFromMountTo (Unit * target, float & distance);
@@ -250,7 +252,7 @@ public:
   void RestrictRoll(float min, float max);
 
   void UpdateHudMatrix();
-
+  Order *getAIState() {return aistate;}
 
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
   virtual void ProcessDrawQueue();

@@ -19,8 +19,7 @@ class MoveTo : public Order {
   bool OptimizeSpeed (float v, float &a);
   bool Done (const Vector &);
 public:
-  MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
-    type = LOCATION|MOVEMENT;
+  MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(LOCATION|MOVEMENT), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
     targetlocation = target;
     done=false;
   }
@@ -42,7 +41,7 @@ protected:
   void ResetDone () {done = false; terminatingX=terminatingY=0;}
  
  public:
-   ChangeHeading(const Vector &final_heading, int switchback) : Order(), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) { type = FACING|LOCATION;}
+   ChangeHeading(const Vector &final_heading, int switchback) : Order(FACING|LOCATION), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
   void SetDest (const Vector&);
   void Execute();
 };

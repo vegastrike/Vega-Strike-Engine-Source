@@ -62,6 +62,15 @@ void Order::Execute () {
   return;
 }
 
+Order * Order::queryType (int type) {
+  for (int i=0;i<suborders.size();i++) {
+    if ((suborders[i]->type&type)==type) {
+      return suborders[i];
+    }
+  }
+  return NULL;
+}
+
 Order* Order::EnqueueOrder (Order *ord) {
   suborders.push_back (ord);
   return this;

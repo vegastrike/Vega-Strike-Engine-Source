@@ -47,6 +47,7 @@ public:
   Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false;}
   virtual ~Order () {}
   virtual void Execute();
+  Order* queryType (int type);
   bool AttachOrder (UnitCollection *targets);
   bool AttachOrder (Vector target);
   bool AttachSelfOrder (UnitCollection *targets=NULL);
