@@ -18,7 +18,10 @@
 void Unit::Mount::SwapMounts (Unit::Mount &other) {
   short thisvol = volume;
   short othervol = other.volume;
+  short othersize = other.size;
+  short thissize = size;
   Mount mnt = *this;
+  this->size=thissize;
   *this=other;
   other=mnt;
   volume=thisvol;
