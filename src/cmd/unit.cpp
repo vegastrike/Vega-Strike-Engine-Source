@@ -495,6 +495,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
+  float damagelevel=hull/maxhull;  
   bool On_Screen=false;
   bool myparent = (this==_Universe->AccessCockpit()->GetParent());
   if ((!(invisible&INVISUNIT))&&((!(invisible&INVISCAMERA))||(!myparent))) {
@@ -506,7 +507,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 	  if (meshdata[i]->getBlendDst()==ONE) {
 		  if ((invisible&INVISGLOW)!=0)
 			  continue;
-		  float damagelevel=hull/maxhull;
+
 		  if (damagelevel<.9)
 			  if (flickerDamage (this,damagelevel))
 				  continue;
@@ -611,6 +612,24 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 #endif
     if (halos.ShouldDraw (enginescale)) 
       halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+	int numm = nummesh();
+	if (damagelevel<.99&&numm>0) {
+		unsigned int switcher=(damagelevel>.8)?1:
+			(damagelevel>.6)?2:(damagelevel>.4)?3:(damagelevel>.2)?4:5;
+		const unsigned int thus=(unsigned int)this;
+		switch (switcher) {
+		case 5:
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+165,meshdata[(thus+5)%(numm)],damagelevel,faction);
+		case 4:
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+47,meshdata[(thus+4)%(numm)],damagelevel,faction);
+		case 3:
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+61,meshdata[(thus+3)%(numm)],damagelevel,faction);
+		case 2:
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+65537,meshdata[(thus+2)%(numm)],damagelevel,faction);			
+		default:
+			LaunchOneParticle(*ctm,GetVelocity(),((int)this)+257,meshdata[(thus+1)%(numm)],damagelevel,faction);
+		}
+	}
   }
 }
 using Orders::FireAt;

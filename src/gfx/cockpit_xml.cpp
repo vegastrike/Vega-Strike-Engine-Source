@@ -193,6 +193,8 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case RIGHT:
 	Pit[attr-FRONT] = new Sprite ((*iter).value.c_str(),NEAREST);
 	break;
+	  default:
+		  break;
       } 
     }
     text = new TextPlane ();
@@ -356,7 +358,8 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       }
     }
     break;
-
+  default:
+	  break;
   }
   
 }

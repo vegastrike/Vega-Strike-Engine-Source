@@ -166,7 +166,7 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
 
 }
 
-int GFXVertexList::numTris () {
+int GFXVertexList::numTris () const{
     int tot=0;
     for (int i=0;i<numlists;i++) {
 	switch (mode[i]) {
@@ -184,7 +184,7 @@ int GFXVertexList::numTris () {
     }
     return tot;
 }
-int GFXVertexList::numQuads () {
+int GFXVertexList::numQuads () const{
     int tot=0;
     for (int i=0;i<numlists;i++) {
 	switch (mode[i]) {
@@ -318,11 +318,13 @@ void GFXVertexList::IndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
       SetVertex (Vector (thus->data.vertices[j].x,thus->data.vertices[j].y,thus->data.vertices[j].z));
   }
 }
-
-const GFXVertex * GFXVertexList::GetVertex (int index) {
+bool GFXVertexList::hasColor()const {
+	return (changed &HAS_COLOR)!=0;
+}
+const GFXVertex * GFXVertexList::GetVertex (int index)const {
   return data.vertices+index;
 }
-const GFXColorVertex * GFXVertexList::GetColorVertex (int index) {
+const GFXColorVertex * GFXVertexList::GetColorVertex (int index) const{
   return data.colors+index;
 }
 

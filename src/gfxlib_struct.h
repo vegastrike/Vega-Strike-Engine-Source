@@ -294,12 +294,6 @@ class /*GFXDRVAPI*/ GFXVertexList {
   int *offsets;
   ///If vertex list has been mutated since last draw.  Low 3 bits store the stride of the index list (if avail). another bit for if color is presnet
   char changed;
-  ///Returns number of Triangles in vertex list (counts tri strips)
-  int numTris ();
-  ///Returns number of Quads in vertex list (counts quad strips)
-  int numQuads();
-  ///Looks up the index in the appropriate short, char or int array
-  unsigned int GetIndex (int offset) const;
   ///copies nonindexed vertices to dst vertex array
   static void VtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany);
   ///Copies nonindex colored vertices to dst vertex array
@@ -329,9 +323,17 @@ public:
     Init(poly,numVertices,0,colors, numlists,offsets,Mutable, index);
   }
   ~GFXVertexList();
-  const GFXVertex * GetVertex (int index);
-  const GFXColorVertex * GetColorVertex (int index);
-
+  const GFXVertex * GetVertex (int index)const;
+  const GFXColorVertex * GetColorVertex (int index)const;
+  ///Returns number of Triangles in vertex list (counts tri strips)
+  int numTris ()const;
+  ///Returns number of Quads in vertex list (counts quad strips)
+  int numQuads()const;
+  ///Looks up the index in the appropriate short, char or int array
+  unsigned int GetIndex (int offset) const;
+  bool hasColor()const;
+	
+  int GetNumVertices() const {return numVertices;}
   ///Returns the array of vertices to be mutated
   VDAT * BeginMutate (int offset);
   ///Ends mutation and refreshes display list

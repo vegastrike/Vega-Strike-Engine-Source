@@ -346,6 +346,8 @@ public:
   void SetBlendMode (BLENDFUNC src, BLENDFUNC dst);
   ///Gets all polygons in this mesh for BSP computation
   void GetPolys(vector <bsp_polygon> &);
+  Vector GetVertex(int which)const;
+  int numVertices()const;
   ///Sets the material of this mesh to mat (affects original as well)
   void SetMaterial (const GFXMaterial & mat);
   ///If it has already been drawn this frame

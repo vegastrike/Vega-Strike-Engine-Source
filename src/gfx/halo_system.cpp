@@ -15,7 +15,7 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
-static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
+void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
   percent = 1-percent;
   int i=rand();
   static float scale = XMLSupport::parse_float (vs_config->getVariable("graphics",
@@ -49,6 +49,17 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
 }
   
 
+void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Mesh * mush, float hull,int faction) {
+	if (mush) {
+		unsigned int numvert = mush->numVertices();
+		if (numvert) {
+			unsigned int whichvert = seed%numvert;
+			QVector v (mush->GetVertex(whichvert).Cast());
+			v=Transform(mat,v);
+			DoParticles (v,hull,vel,0,faction);
+		}
+	}
+}
 
 
 

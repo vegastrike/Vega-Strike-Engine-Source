@@ -11,7 +11,8 @@ class MyIndHalo {
   QVector loc;
   MyIndHalo (const QVector &loc, const Vector &size);
 };
-
+void DoParticles (QVector pos, float hullpercent, const Vector &velocity, float radial_size, float hullpct,int faction);
+void LaunchOneParticle (const Matrix & mat, const Vector & vel,unsigned int seed, Mesh * mesh, float hullpct,int faction);
 class HaloSystem {
  private:
   std::vector <MyIndHalo> halo;
