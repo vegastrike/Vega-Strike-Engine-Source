@@ -7,6 +7,9 @@ bool INET_Read (int socket, char *data, int bytestoread);
 
 int INET_Write (int socket,int bytestowrite,const char *data);
 
+int INET_listen (unsigned short port, const char *addr=NULL);
+int INET_Accept (int hServerSocket);
+
 int INET_AcceptFrom (unsigned short port, const char * addr=NULL);
 
 int INET_ConnectTo (const char * hostname, unsigned short port);

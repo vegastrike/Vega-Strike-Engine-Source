@@ -15,7 +15,9 @@ class Base {
 		struct Link {
 			float x,y,wid,hei;
 			std::string text;
-			virtual void Click (::Base* base,float x, float y, int button, int state);
+		        virtual void Click (::Base* base,float x, float y, int button, int state);
+		        virtual ~Link(){} 
+	  
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -23,6 +25,7 @@ class Base {
 		struct Goto : public Link {
 			int index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+		        virtual ~Goto () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -30,12 +33,14 @@ class Base {
 		struct Comp : public Link {
 			vector <UpgradingInfo::BaseMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+		        virtual ~Comp () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
 		};
 		struct Launch : public Link {
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+		        virtual ~Launch () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -89,7 +94,7 @@ class Base {
 			int curchar;
 			float curtime;
 			virtual ~BaseTalk () {}
-			BaseTalk (Talk *caller) : curchar(0), caller (caller), sayindex (0) {}
+			BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp) {}
 #endif

@@ -89,8 +89,7 @@ bool INET_getHostByName (const char * hostname, unsigned short port, sockaddr_in
   }
 	return gotaddr;
 }
-
-int INET_AcceptFrom ( unsigned short port,const char * hostname) {
+int INET_listen (unsigned short port, const char * hostname) {
   int listenqueue=5;
   int hSocket;  int hServerSocket; // so signal can be caught;
   struct sockaddr_in Address; //Internet socket address stuct 
@@ -119,8 +118,16 @@ int INET_AcceptFrom ( unsigned short port,const char * hostname) {
         return -1;
   }
   // get the connected socket 
-  nAddressSize = sizeof (Address);
-  hSocket=accept(hServerSocket,(struct sockaddr*)&Address,&nAddressSize);
+}
+int INET_Accept (int hServerSocket) {
+  sockaddr_in Address;
+  int nAddressSize = sizeof (Address);
+  return accept(hServerSocket,(struct sockaddr*)&Address,&nAddressSize);
+}
+
+int INET_AcceptFrom ( unsigned short port,const char * hostname) {
+  int hServerSocket = INET_listen (port,hostname);
+  int hSocket = INET_Accept (hServerSocket);
   INET_close (hServerSocket);
   return hSocket;
 }
