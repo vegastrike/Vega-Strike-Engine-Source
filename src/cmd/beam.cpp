@@ -25,6 +25,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
     beamdrawqueue.push_back (vector<DrawContext>());
   }
   Init(trans,clne,own);
+  impact=UNSTABLE;
 }
 
 Beam::~Beam () {

@@ -153,6 +153,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     }
 			switch (type->type) {
 			case weapon_info::BEAM:
+				if (ref.gun)
+					ref.gun->Init(Transformation(orient,pos.Cast()),*type,owner);
 			  break;
 			case weapon_info::BOLT:
 			  new Bolt (*type, mat, velocity, owner);//FIXME turrets! Velocity      
@@ -200,36 +202,30 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
   if (ammo==0) {
     processed=UNFIRED;
   }
+  static bool reduce_beam_ammo = XMLSupport::parse_bool (vs_config->getVariable ("physics","reduce_beam_ammo","0"));
   if (processed==FIRED||status!=ACTIVE||(Missile!=(type->type==weapon_info::PROJECTILE))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
-    if (ref.gun==NULL) {
-	  if (ammo>0)
-		  ammo--;//do we want beams to have amo
-   	 processed=FIRED;
-     ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,sound);
-     ref.gun->ListenToOwner(listen_to_owner);
-     return true;
-    } else {
-      if (ref.gun->Ready()) {
-		if (ammo>0)
-		  ammo--;//ditto about beams ahving ammo
+	  bool fireit=ref.gun==NULL;
+	  if (!fireit)
+		  fireit = ref.gun->Ready();
+	  else
+		  ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,sound);
+	if (fireit) {
+		if (ammo>0&&reduce_beam_ammo)
+			ammo--;//ditto about beams ahving ammo		
+		ref.gun->ListenToOwner(listen_to_owner);
 		processed=FIRED;
-		ref.gun->Init (Transformation(orient,pos.Cast()),*type,owner);
-		return true;
-      } else 
-		return true;//can't fire an active beam
-    }
+	}
+	return true;
   }else { 
     if (ref.refire>type->Refire) {
       ref.refire =0;
       if (ammo>0)
-	ammo--;
+		  ammo--;
       processed=FIRED;	
-
       if(owner==_Universe->AccessCockpit()->GetParent()){
-	//printf("player has fired a bolt\n");
-	forcefeedback->playLaser();
+		  forcefeedback->playLaser();
       };
 
       return true;
