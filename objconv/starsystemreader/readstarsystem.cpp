@@ -164,7 +164,7 @@ public:
 			return bestChoice;
 		}
 	}
-	System () {takenover=0;}
+	System () {}
 	bool habitable;
 	bool interesting;
 	string sector;
@@ -173,7 +173,7 @@ public:
 	float distance;
 	float ascension;
 	float declination;
-	float takenover;
+	map<string,float> takenover;
 	vector<string> jumps;
 	vec3 xyz;
 	float luminosity;//in sun
@@ -496,16 +496,17 @@ public:
 		for (int i=0;i<borderSystems.size();i++) {
 			bool foundvalidplacetogo=false;
 			std::vector<std::string>::const_iterator end=borderSystems[i]->jumps.end();
+			string faction=(*borderSystems[i])["faction"];
 			for (std::vector<std::string>::const_iterator iter=borderSystems[i]->jumps.begin();iter!=end;++iter) {
 				System *jump=System::findSystem(s,*iter);
 				if (jump!=NULL&&systems.find(jump)==systems.end()) {
 					// not in our territory! and it is valid.
 					if (((*jump)["faction"]=="unknown"
-						 && (jump->takenover+=takeneutralprob)>1)
+						 && (jump->takenover[faction]+=takeneutralprob)>1)
 							|| ((((float)genrand_int32())/GENRAND_MAX)<takeoverprob&&allowTakeover)) {
 						(*jump)["faction"]=name;
 						systemsToAdd.push_back(jump);
-						jump->takenover=0;
+//						jump->takenover=0;
 					}else if ((*jump)["faction"]=="unknown"){
 						foundvalidplacetogo=true;
 						//fprintf(stderr,"jump probability %f",jump->takenover);
