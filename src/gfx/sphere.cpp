@@ -234,7 +234,7 @@ void CityLights::ProcessDrawQueue(int whichdrawqueue) {
 float CityLights::wrapx=1;
 float CityLights::wrapy=1;
 
-CityLights::CityLights (float radius, int stacks, int slices, const char *texture, const char *alpha=NULL, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI):SphereMesh() { 
+CityLights::CityLights (float radius, int stacks, int slices, const char *texture, const char *alpha, bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max):SphereMesh() { 
     wrapx=wrapy=1;
     if (texture!=NULL) {
       string wrap = string(texture);
@@ -250,7 +250,7 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
 	}
       }
     }
-    FILTER filter = (FILTER)XMLSupport::parse_int(vs_config->getVariable ("graphics","CityLightFilter",tostring((int)TRILINEAR)));    
+    FILTER filter = (FILTER)XMLSupport::parse_int(vs_config->getVariable ("graphics","CityLightFilter",XMLSupport::tostring(((int)TRILINEAR))));    
     InitSphere(radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter);
 
 }
