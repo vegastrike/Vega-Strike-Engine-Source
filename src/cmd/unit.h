@@ -391,10 +391,13 @@ public:
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
   void UpdateCollideQueue();
+  ///Loads a user interface for the user to upgrade his ship
+  void UpgradeInterface (Unit * base);
   ///The name of this unit
   std::string name;
   ///The faction of this unit
   int faction;
+  void SetFaction (int faction);
   bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
   bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
   bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);

@@ -1253,6 +1253,7 @@ void Unit::WriteUnit (const char * modifications) {
     (*ui)->WriteUnit(modifications);
   }
 }
+
 void Unit::LoadXML(const char *filename, const char * modifications)
 {
   shield.number=0;

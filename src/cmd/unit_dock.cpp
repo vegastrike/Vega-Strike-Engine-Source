@@ -112,6 +112,12 @@ void Unit::PerformDockingOperations () {
     un->Velocity=Vector (0,0,0);
     if (un==_Universe->AccessCockpit()->GetParent()) {
       ///CHOOSE NEW MISSION
+      for (unsigned int i=0;i<image->clearedunits.size();i++) {
+	if (image->clearedunits[i]==un) {//this is a hack because we don't have an interface to say "I want to buy a ship"  this does it if you press shift-c in the base
+	  image->clearedunits.erase(image->clearedunits.begin()+i);
+	  un->UpgradeInterface(this);
+	}
+      }
     }
     //now we know the unit's still alive... what do we do to him *G*
     ///force him in a box...err where he is

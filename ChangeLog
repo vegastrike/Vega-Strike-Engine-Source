@@ -1,3 +1,17 @@
+2002-02-27 Daniel Horn <hellcatv@hotmail.com>
+	* Added Purchasing ability. once you are docked hold down SHIFT-C again and it will bring you to a TEXT BASED menu...from there you can upgrade your unit or add stuff to it... or buy a new starship alltogether.  Or you can remove weapons or armor you have purchased.
+	* Percent means a couple of things (calculated the same for all)
+	          a) if you are buying, you have x as much as that thing costs.
+	             if life were fair you'd pay 1-x the price...but you prolly
+		     end up buying 1-.5*x the cost or something
+		  b) If you are selling then you get that much back 
+	   	     (times .5 or so relating to difficuly for used part)
+		  c) If you are adding to your part (eg adding armor)
+		     x is 0 so you pay full price (because it adds on)
+	* Fixed Star System jumping bug that would skip the star system ahead a few seconds on jump.
+	
+
+	
 2002-02-26 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* wrote ai_flyto_jumppoint, ai_explorer, ai_flyto_waypoint_defend

@@ -674,6 +674,7 @@ void Cockpit::Draw() {
 	  SetParent (un,unitfilename.c_str(),unitlocation);
 	  SwitchUnits (NULL,un);
 	  parentturret.SetUnit(NULL);
+	  un->SetTurretAI();
 	}
       }
     }

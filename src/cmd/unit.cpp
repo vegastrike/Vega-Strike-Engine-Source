@@ -278,10 +278,24 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   meshdata[nummesh]=NULL;//turn off shield
   calculate_extent();
 }
+char * GetUnitDir (const char * filename) {
+  char * retval=strdup (filename);
+  if (retval[0]=='\0')
+    return retval;
+  if (retval[1]=='\0')
+    return retval;
+  for (int i=0;retval[i]!=0;i++) {
+    if (retval[i]=='.') {
+      retval[i]='\0';
+      break;
+    }
+  }
+  return retval;
+}
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
 
-  Init();
 
+	Init();
 	if (!SubU)
 	  AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
 	SubUnit = SubU;
@@ -289,8 +303,9 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	flightgroup=flightgrp;
 	flightgroup_subnumber=fg_subnumber;
 	bool doubleup=false;
+	char * my_directory=GetUnitDir(filename);
 	vssetdir (GetSharedUnitPath().c_str());
-	vschdir (filename);
+	vschdir (my_directory);
 	FILE *fp = fopen (filename,"r");
 	if (!fp) {
 	  vscdup();
@@ -300,7 +315,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  else
 	    vschdir ("unknown");
 	  doubleup=true;
-	  vschdir (filename);
+	  vschdir (my_directory);
 	} else {
 	  fclose (fp);
 	}
@@ -310,7 +325,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  vschdir ("neutral");
 	  faction=_Universe->GetFaction("neutral");//set it to neutral
 	  doubleup=true;
-	  vschdir (filename);
+	  vschdir (my_directory);
 	  fp = fopen (filename,"r");
 	  if (fp) fclose (fp); 
 	  else {
@@ -318,14 +333,16 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	    meshdata = new Mesh * [1];
 	    meshdata[0]=NULL;
 	    nummesh=0;
+	    this->name=string("LOAD_FAILED");
 	    //	    assert ("Unit Not Found"==NULL);
 	  }
 	}else {
 	  fclose (fp);
 	}
-	name = filename;
+	free(my_directory);
 	/*Insert file loading stuff here*/
 	if(1&&fp) {
+	  name = filename;
 	  LoadXML(filename,unitModifications.c_str());
 	}
 	if (1) {
@@ -653,7 +670,12 @@ void Unit::UpdateHudMatrix(int whichcam) {
   _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter));
 }
    
-
+void Unit::SetFaction (int faction) {
+  this->faction=faction;
+  for (un_iter ui=getSubUnits();(*ui)!=NULL;++ui) {
+    (*ui)->SetFaction(faction);
+  }
+}
 void Unit::SetPlanetHackTransformation (Transformation *&ct,float *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
