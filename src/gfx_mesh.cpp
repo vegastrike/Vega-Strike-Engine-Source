@@ -194,9 +194,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		  maxSizeZ = z[ii];
 		if (z[ii]<minSizeZ)
 		  minSizeZ=z[ii];
-		i[ii] = readf (fp);
-		j[ii] = readf (fp);
-		k[ii] = readf (fp);
+		i[ii] = -readf (fp);
+		j[ii] = -readf (fp);
+		k[ii] = -readf (fp);
 		
 	}
 	//below, the square fo teh radial size, because sqrtf will be useless l8r
@@ -433,9 +433,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		Vector Normal;
 		CrossProduct (Norm2, Norm1, Normal);
 		Normalize(Normal);
-		vertexlist[ii].i = vertexlist[ii+1].i = vertexlist[ii+2].i = Normal.i;
-		vertexlist[ii].j = vertexlist[ii+1].j = vertexlist[ii+2].j = Normal.j;
-		vertexlist[ii].k = vertexlist[ii+1].k = vertexlist[ii+2].k = Normal.k;
+		vertexlist[ii].i =  vertexlist[ii+1].i = vertexlist[ii+2].i =Normal.i;
+		vertexlist[ii].j =  vertexlist[ii+1].j = vertexlist[ii+2].j =Normal.j;
+		vertexlist[ii].k =  vertexlist[ii+1].k = vertexlist[ii+2].k =Normal.k;
 	}
 	for (ii=numtris*3; ii< numtris*3+numquads*4; ii+=4)
 	{
@@ -444,9 +444,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		Vector Normal;
 		CrossProduct (Norm2, Norm1, Normal);
 		Normalize(Normal);
-		vertexlist[ii].i = vertexlist[ii+1].i = vertexlist[ii+2].i = vertexlist[ii+3].i =Normal.i;
-		vertexlist[ii].j = vertexlist[ii+1].j = vertexlist[ii+2].j = vertexlist[ii+3].j =Normal.j;
-		vertexlist[ii].k = vertexlist[ii+1].k = vertexlist[ii+2].k = vertexlist[ii+3].k =Normal.k;
+		vertexlist[ii].i =  vertexlist[ii+1].i = vertexlist[ii+2].i = vertexlist[ii+3].i =Normal.i;
+		vertexlist[ii].j =  vertexlist[ii+1].j = vertexlist[ii+2].j = vertexlist[ii+3].j =Normal.j;
+		vertexlist[ii].k =  vertexlist[ii+1].k = vertexlist[ii+2].k = vertexlist[ii+3].k =Normal.k;
 	}
 	numsquadlogo = readi (fp);
 	PolyNormal = new Vector [numsquadlogo];
@@ -643,6 +643,7 @@ void Mesh::Reflect()
 			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
 
 			nml[j] = reflect;
+			
 			//EQUIV BELOW//float w1 = 1/sqrt (2*(-nml[j].k+1));
 			w = sqrtf (((float) .5)/(((float) 1)-nml[j].k));
 			vertexlist[k].u = (nml[j].i*w+1.23)*.40625;

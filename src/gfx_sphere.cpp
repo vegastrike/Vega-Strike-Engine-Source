@@ -13,7 +13,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
    float x, y, z;
    float s, t, ds, dt;
    int i, j, imin, imax;
-  float nsign = 1.0;
+  float nsign = -1.0;
 
   vlist = new GFXVertexList();
   /* Code below adapted from gluSphere */

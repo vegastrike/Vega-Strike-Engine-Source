@@ -20,6 +20,7 @@
  */
 #include "gfxlib.h"
 #include "gfx_transform_vector.h"
+#include <stdio.h>
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
@@ -152,7 +153,28 @@ inline void CopyMatrix(Matrix dest, const Matrix source)
 }
 
 static Matrix model, view, projection, invprojection;
+static Matrix  rotview;
+float centerx,centery,centerz;
+void evaluateViews () {
+  //Identity(transview);
+  Identity (rotview);
+#define M(row,col) rotview[col*4+row]
+  rotview[0]=view[0];
+  rotview[1]=view[1];
+  rotview[2]=view[2];
+  //  transview[3]=view[3];
+  rotview[4]=view[4];
+  rotview[5]=view[5];
+  rotview[6]=view[6];
+  //  transview[7]=view[7];
+  rotview[8]=view[8];
+  rotview[9]=view[9];
+  rotview[10]=view[10];
+  //    transview[11]=view[11];
+  //      fprintf (stderr,"trans %f,%f,%f",transview[3],transview[7],transview[11]);
+#undef M
 
+}
 Vector eye, center, up;
 void getInverseProjection (float *& inv) {
   inv = invprojection;
@@ -188,22 +210,30 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix)
 		   **/
 		MultMatrix(t, model, matrix);
 		CopyMatrix(model, t);
-		MultMatrix(t, view, model);
+		//		MultMatrix(t, transview, model);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(t);
+		glLoadIdentity();
+		glTranslatef (-centerx,-centery,-centerz);
+		glMultMatrixf(t);
 		break;
 	case VIEW:
 		MultMatrix(t, view, matrix);
 		CopyMatrix(view, t);
-		MultMatrix(t, view, model);
-		glMatrixMode(GL_MODELVIEW);
+		evaluateViews();
+		MultMatrix(t, projection,rotview);
+		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(t);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(-centerx,-centery,-centerz);
+		glMultMatrixf(model);
 		break;
 	case PROJECTION:
 		MultMatrix(t, projection, matrix);
 		CopyMatrix(projection, t);
+		MultMatrix (t,projection,rotview);
 		glMatrixMode(GL_PROJECTION);
-		glLoadMatrixf(projection);
+		glLoadMatrixf(t);
 		break;
 	}
 	return TRUE;
@@ -216,20 +246,29 @@ BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, Matrix matrix)
 	{
 	case MODEL:
 		CopyMatrix(model, matrix);
-		MultMatrix(t, view, model);
+		//		MultMatrix(t, transview, model);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(t);
+		glLoadIdentity();
+		glTranslatef(-centerx,-centery,-centerz);
+		glMultMatrixf(model);
 		break;
 	case VIEW:
 		CopyMatrix(view, matrix);
-		MultMatrix(t, view, model);
+		evaluateViews();
+		//		MultMatrix(t, transview, model);
 		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(-centerx,-centery,-centerz);
+		glMultMatrixf(model);
+		glMatrixMode(GL_PROJECTION);
+		MultMatrix (t,projection,rotview);
 		glLoadMatrixf(t);
 		break;
 	case PROJECTION:
 		CopyMatrix(projection, matrix);
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(projection);
+		glMultMatrixf(rotview);
 		break;
 	}
 	return TRUE;
@@ -242,17 +281,23 @@ BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 	case MODEL:
 		Identity(model);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(view);
+		//		glLoadMatrixf(transview);
+		glLoadIdentity();
+		glTranslatef (-centerx,-centery,-centerz);
 		break;
 	case VIEW:
 		Identity(view);
+		Identity (rotview);
+		//		Identity (transview);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadMatrixf(model);
+		glMatrixMode(GL_PROJECTION);
+		glLoadMatrixf(projection);
 		break;
 	case PROJECTION:
 		Identity(projection);
 		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
+		glLoadMatrixf(rotview);
 		break;
 	}
 	return TRUE;
@@ -274,7 +319,7 @@ BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 	}
 	return TRUE;
 }
-#include <stdio.h>
+
 static void gl_Frustum (float left,float right, float bottom, float top, float nearval,float farval){
   GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
   GFXFrustum (projection,invprojection,left,right,bottom,top,nearval,farval);
@@ -504,11 +549,11 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    M(2,2) = 1.0;
    M(3,3) = 1.0;
 #undef M
-
    glActiveTextureARB (GL_TEXTURE1_ARB);
 	glMatrixMode (GL_TEXTURE);	
 	glLoadIdentity();
-
+	
+	
 #ifdef NV_CUBE_MAP
    //FIXME--ADD CAMERA MATRICES
    //the texture matrix must be used to rotate the texgen-computed
@@ -530,23 +575,30 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    glRotatef (theta,axis.i,axis.j,axis.k);
    //ok do matrix math to rotate by theta on axis  those ..
 #else
-	glTranslatef(.5f,.5f,.4994f);
+   /*	glTranslatef(.5f,.5f,.4994f);
 	glMultMatrixf(tm);
 	glTranslatef(-.5f,-.5f,-.4994f);
-
+   */
 #endif
    glActiveTextureARB (GL_TEXTURE0_ARB);
-
+   
 }
 
 BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
 {
 	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
 
+	//	Identity(transview);
+	//	transview[3]=center.i;
+	//	transview[7]=center.j;
+	//	transview[11]=center.k;
+	centerx = center.i;
+	centery=center.j;
+	centerz=center.k;
+	GFXLoadMatrix(VIEW,view);
+		
+	
 
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(view);
 
 
 	return TRUE;

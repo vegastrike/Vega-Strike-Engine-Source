@@ -132,7 +132,7 @@ BOOL GFXVertexList::Draw()
 		glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
 
 		glClientActiveTextureARB (GL_TEXTURE0_ARB);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -154,7 +154,7 @@ BOOL GFXVertexList::Draw()
 
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
 
 		if(bTex0) {
 			glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
