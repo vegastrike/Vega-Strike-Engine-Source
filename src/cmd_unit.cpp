@@ -394,6 +394,7 @@ bool Unit::Explode () {
   float tmp2[16];
   bool alldone =false;
   if (explosion) {
+    GFXDisable(DEPTHWRITE);
     for (i=0;i<nummesh;i++) {
       if (!explosion[i])
 	continue;
@@ -410,6 +411,7 @@ bool Unit::Explode () {
       }else {
 	alldone=true;
       }
+      GFXEnable (DEPTHWRITE);
     }
     if (!alldone){
       delete [] explosion;
@@ -597,6 +599,13 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     }
   if(selected) {
     selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
+  }
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].type.type==weapon_info::BEAM) {
+      if (mounts[i].gun) {
+	mounts[i].gun->Draw(cumulative_transformation,cumulative_transformation_matrix);
+      }
+    }
   }
 }
 
