@@ -236,5 +236,12 @@ namespace UnitUtil {
 			dist = dist - (un->rSize()*planetpct);
 		return dist;
 	}
+        int isPlayerStarship (Unit * un) {
+                Cockpit * cp = _Universe->isPlayerStarship (un);
+                if (cp==NULL) {
+                        return -1;
+                }
+                return (cp - _Universe->AccessCockpit(0));
+        }
 }
 

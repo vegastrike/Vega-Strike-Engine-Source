@@ -52,7 +52,7 @@
 
 #include "vs_globals.h"
 #include "config_xml.h"
-
+#include "savegame.h"
 #include "msgcenter.h"
 #include "cmd/briefing.h"
 #ifdef HAVE_PYTHON
@@ -65,6 +65,44 @@
 
 extern bool have_yy_error;
 /* *********************************************************** */
+float getSaveData (int whichcp, string key, unsigned int num) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  if (num <ans->size()) {
+    return 0;
+  }
+  return (*ans)[num]->float_val;
+}
+unsigned int getSaveDataLength (int whichcp, string key) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return 0;
+  }
+  olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
+  return ans->size();
+}
+void pushSaveData (int whichcp, string key, float val) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return;
+  }
+  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
+  vi->type = VAR_FLOAT;
+  vi->float_val=val;
+  ans->push_back (vi);
+
+}
+void putSaveData (int whichcp, string key, unsigned int num, float val) {
+  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+    return;
+  }
+  olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
+  if (num<ans->size()) {
+    (*ans)[num]->float_val = val;
+  }
+}
+
 PYTHON_INIT_INHERIT_GLOBALS(Director,missionThread);
 PYTHON_BEGIN_MODULE(Director)
 PYTHON_BEGIN_INHERIT_CLASS(Director,PythonMission,missionThread,"Mission")
@@ -72,10 +110,13 @@ PYTHON_BEGIN_INHERIT_CLASS(Director,PythonMission,missionThread,"Mission")
   Class.def (&missionThread::UnPickle,"UnPickle",PythonMission::default_UnPickle);
   Class.def (&missionThread::Execute,"Execute",PythonMission::default_Execute);
 PYTHON_END_CLASS(Director,missionThread)
+  Director.def (&putSaveData,"putSaveData");
+  Director.def (&pushSaveData,"pushSaveData");
+  Director.def (&getSaveData,"getSaveData");
+  Director.def (&getSaveDataLength,"getSaveDataLength");
 PYTHON_END_MODULE(Director)
 
 void Mission::DirectorStart(missionNode *node){
- static bool init=false;
   cout << "DIRECTOR START" << endl;
 
   debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());

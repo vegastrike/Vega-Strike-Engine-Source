@@ -127,4 +127,5 @@
   EXPORT_UTIL(incrementCargo,false)
   EXPORT_UTIL(decrementCargo,false)
   EXPORT_UTIL(getSignificantDistance,0);
+  EXPORT_UTIL(isPlayerStarship,-1);
 

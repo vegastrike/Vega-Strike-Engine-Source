@@ -296,6 +296,7 @@ EXPORT_UTIL(GetAdjacentSystem,"")
 EXPORT_UTIL(GetGalaxyProperty,"")
 EXPORT_UTIL(GetNumAdjacentSystems,0)
 EXPORT_UTIL(musicAddList,0)
+
 voidEXPORT_UTIL(musicPlaySong)
 voidEXPORT_UTIL(musicPlayList)
 EXPORT_UTIL(GetDifficulty,1)

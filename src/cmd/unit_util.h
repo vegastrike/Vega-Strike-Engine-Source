@@ -33,6 +33,8 @@ namespace UnitUtil {
 	float getDistance(Unit *my_unit,Unit *un);
 	inline float getPlanetRadiusPercent ();
 	float getSignificantDistance (Unit *un, Unit *sig);
+	int isPlayerStarship (Unit * un);
+
 }
 
 
