@@ -7,3 +7,4 @@ Warp energy use
 Warp vs. Auto graphic
 Install time generation of all BSP files
 Per-System (versus strict per need) ship loading optimization
+Add cargo pics
