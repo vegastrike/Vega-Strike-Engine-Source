@@ -230,6 +230,7 @@ void Unit::Init()
   limits.afterburn=500;
   limits.retro=200;
   Target(NULL);
+  VelocityReference(NULL);
   computer.threat.SetUnit (NULL);
   computer.set_speed=0;
   computer.max_speed=15;

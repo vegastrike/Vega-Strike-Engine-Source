@@ -257,6 +257,9 @@ void Unit::TargetTurret (Unit * targ) {
 void Unit::Target (Unit *targ) {
   computer.target.SetUnit(targ);
 }
+void Unit::VelocityReference (Unit *targ) {
+  computer.velocity_ref.SetUnit(targ);
+}
 void Unit::SetOwner(Unit *target) {
   owner=target;
   if (!SubUnits.empty()) {

@@ -23,6 +23,8 @@ class FlyByKeyboard: public FlyByWire {
   static void JumpKey (int, KBSTATE);
   static void AutoKey (int, KBSTATE);
   static void StopAutoKey (int, KBSTATE);
+  static void SetVelocityRefKey (int, KBSTATE);
+  static void SetNullVelocityRefKey (int, KBSTATE);
   FlyByKeyboard (const char *configfile);
   virtual ~FlyByKeyboard();
   void Execute (bool);//should we reset our ang velocity

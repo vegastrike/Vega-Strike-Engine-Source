@@ -117,6 +117,8 @@ class Unit {
     UnitContainer target;
     ///Any target that may be attacking and has set this threat
     UnitContainer threat;
+    ///Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
+    UnitContainer velocity_ref;
     ///The threat level that was calculated from attacking unit's threat
     float threatlevel;
     ///The speed the flybywire system attempts to maintain
@@ -440,8 +442,10 @@ public:
   void SetOwner(Unit *target);
 
   Unit *Target() {return computer.target.GetUnit(); }
+  Unit *VelocityReference() {return computer.velocity_ref.GetUnit(); }
   Unit *Threat() {return computer.threat.GetUnit(); }
   void Target (Unit * targ);
+  void VelocityReference (Unit *targ);
   void TargetTurret (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
   void Threaten (Unit * targ, float danger);

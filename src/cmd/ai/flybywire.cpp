@@ -10,7 +10,7 @@ using Orders::MatchAngularVelocity;
 //#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  /* cout << "desired= " << desired << endl; */ if (!(desired.i==-2 && desired.j==0 && desired.k==0) && !LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 //#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
 
-#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity);  if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired+(match?match->GetVelocity():Vector(0,0,0)));   } else if (match) {desired+=parent->ToLocalCoordinates(match->GetVelocity());}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 #define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(parent->ClampVelocity(desired,afterburn)-velocity)/SIMULATION_ATOM), afterburn); }
 /**
  * don't need to clamp thrust since the Thrust does it for you

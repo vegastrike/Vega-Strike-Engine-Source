@@ -185,6 +185,19 @@ void Unit::Kill(bool erasefromsave) {
     halos=NULL;
     numhalos=0;
   }
+  if (docked&(DOCKING_UNITS)) {
+    vector <Unit *> dockedun;
+    unsigned int i;
+    for (i=0;i<image->dockedunits.size();i++) {
+      Unit * un;
+      if (NULL!=(un=image->dockedunits[i]->uc.GetUnit())) 
+	dockedun.push_back (un);
+    }
+    while (!dockedun.empty()) {
+      dockedun.back()->UnDock(this);
+      dockedun.pop_back();
+    }
+  }
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDDeleteSound(mounts[beamcount].sound);
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
@@ -203,6 +216,7 @@ void Unit::Kill(bool erasefromsave) {
 
   //God I can't believe this next line cost me 1 GIG of memory until I added it
   computer.threat.SetUnit (NULL);
+  computer.velocity_ref.SetUnit(NULL);
   if(aistate)
     delete aistate;
   aistate=NULL;

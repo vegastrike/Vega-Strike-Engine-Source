@@ -3,6 +3,8 @@
 #include "cmd/unit.h"
 #include "navigation.h"
 struct StarShipControlKeyboard {
+  bool setunvel;
+  bool setnulvel;
   bool matchspeed;
   bool jumpkey;
   int sheltonpress;
@@ -31,7 +33,7 @@ struct StarShipControlKeyboard {
   bool autopilot;
   bool terminateauto;
   int refcount;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=setunvel=setnulvel=false;}
   StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
@@ -58,12 +60,21 @@ void FlyByKeyboard::Execute () {
   FlyByKeyboard::Execute (true);
 }
 void FlyByKeyboard::Execute (bool resetangvelocity) {
+#define SSCK starshipcontrolkeys
+  if (SSCK.setunvel) {
+    SSCK.setunvel=false;
+    parent->VelocityReference (parent->Target());
+  }
+  if (SSCK.setnulvel) {
+    SSCK.setnulvel=false;
+    parent->VelocityReference( NULL);
+  }
   if (autopilot) {
     autopilot->Execute();
   }
   if (resetangvelocity)
     desired_ang_velocity=Vector(0,0,0);
-#define SSCK starshipcontrolkeys
+
 
   //  printf("flybykey::exec\n");
 
@@ -201,6 +212,26 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 
 
 
+void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP:
+    break;
+  case DOWN:starshipcontrolkeys.setunvel=true;
+    break;
+  default:break;
+  }
+}
+void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP:
+    break;
+  case DOWN:starshipcontrolkeys.setnulvel=true;
+    break;
+  default:break;
+  }
+}
 
 
 void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
