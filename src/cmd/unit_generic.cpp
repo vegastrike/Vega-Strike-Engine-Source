@@ -1300,6 +1300,9 @@ void Unit::RegenShields () {
   }else {
     rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
   }
+  if (GetVelocity().MagnitudeSquared()>(computer.max_ab_speed()*computer.max_ab_speed()*1.1)) {
+    rec=0;
+  }
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
     float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;

@@ -2,7 +2,7 @@
  */
 
 //#include <GL/gl.h>
-#include "gl_include.h"
+#include "gl_globals.h"
 #include "gfxlib.h"
 #include "gl_matrix.h"
 
