@@ -30,7 +30,7 @@ using std::map;
 
 int VSFS_DEBUG() {
   if (vs_config) {
-    static bool vs_debug = XMLSupport::parse_bool(vs_config->getVariable("general","debug_fs","0"));
+    static int vs_debug = XMLSupport::parse_int(vs_config->getVariable("general","debug_fs","0"));
     return vs_debug;
   }
   return 0;
@@ -1629,29 +1629,34 @@ namespace VSFileSystem
 
 				bool nl_found = false;
 				int i=0;
-				//cerr<<"READLINE STARTING OFFSET="<<offset;
-				for( i=0; !nl_found && i<length-1 && offset<size; offset++, i++)
+				if (VSFS_DEBUG()>1) {
+					cerr<<"READLINE STARTING OFFSET="<<offset;
+				}
+				for( i=0; !nl_found && i<length && offset<size; offset++, i++)
 				{
 					if( pk3_extracted_file[offset]=='\n' || pk3_extracted_file[offset]=='\r')
 					{
 						nl_found = true;
-                                                /*
-						if( pk3_extracted_file[offset]=='\n')
-							cerr<<"\\n ";
-						if( pk3_extracted_file[offset]=='\r')
-							cerr<<"\\r ";
-                                                */
-                                                break;
+						if (VSFS_DEBUG()>1) {
+							if( pk3_extracted_file[offset]=='\n')
+								cerr<<"\\n ";
+							if( pk3_extracted_file[offset]=='\r')
+								cerr<<"\\r ";
+						}
 					}
 					else
 					{
 						ret[i] = pk3_extracted_file[offset];
-						//cerr<<hex<<ret[i]<<" ";
+						if (VSFS_DEBUG()>1) {
+							cerr<<hex<<ret[i]<<" ";
+						}
 					}
 				}
 				this->GoAfterEOL( length);
 				ret[i] = 0;
-				//cerr<<dec<<" - read "<<i<<" char - "<<ret<< endl;
+				if (VSFS_DEBUG()>1) {
+					cerr<<dec<<" - read "<<i<<" char - "<<ret<<endl;
+				}
 				if( !nl_found)
 					return Unspecified;
 			}
