@@ -204,7 +204,7 @@ void LoadAccounts(const char *filename)
   const int chunk_size = 16384;
 
   VSFile f;
-  VSError err = f.OpenReadOnly(filename,Unknown);
+  VSError err = f.OpenReadOnly(filename,AccountFile);
   if (err>Ok) {
     return;
   }
