@@ -267,7 +267,11 @@ namespace UnitUtil {
 		return planet_rad_percent;
 	}
 	float getSignificantDistance (Unit *un, Unit *sig) {
+	  if (un==NULL||sig==NULL)
+	    return FLT_MAX;
+	  
 		float dist = getDistance (un,sig);
+		
 		float planetpct=getPlanetRadiusPercent();
 		if (sig->isPlanet ())
 			dist = dist - (sig->rSize()*planetpct);
