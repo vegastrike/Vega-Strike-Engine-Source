@@ -178,7 +178,8 @@ struct XML {
 	STARTFRAME,
 	FRAMEMESHNAME,
 	ANIMATIONNAME,
-	ANIMATIONFRAMEINDEX
+	ANIMATIONFRAMEINDEX,
+	ANIMATIONMESHINDEX
   };
     ///Saves which attributes of vertex have been set in XML file (debug)
     enum PointState {
@@ -343,7 +344,8 @@ const EnumMap::Pair XML::element_names[] = {
   EnumMap::Pair("Ref",XML::REF),
   EnumMap::Pair("DetailPlane",XML::DETAILPLANE),
   EnumMap::Pair("AnimationDefinition",XML::ANIMDEF),
-  EnumMap::Pair("Frame",XML::ANIMFRAME)
+  EnumMap::Pair("Frame",XML::ANIMFRAME),
+  EnumMap::Pair ("AnimationFrameIndex",XML::ANIMATIONFRAMEINDEX)
 };
 
 const EnumMap::Pair XML::attribute_names[] = {
@@ -387,11 +389,11 @@ const EnumMap::Pair XML::attribute_names[] = {
   EnumMap::Pair ("FramesPerSecond",XML::FRAMESPERSECOND),
   EnumMap::Pair ("FrameMeshName",XML::FRAMEMESHNAME),
   EnumMap::Pair ("AnimationName",XML::ANIMATIONNAME),
-  EnumMap::Pair ("AnimationFrameIndex",XML::ANIMATIONFRAMEINDEX)
+  EnumMap::Pair ("AnimationMeshIndex",XML::ANIMATIONMESHINDEX)
 };
 
 
-const EnumMap XML::element_map(XML::element_names, 26);
+const EnumMap XML::element_map(XML::element_names, 27);
 const EnumMap XML::attribute_map(XML::attribute_names, 40);
 
 
@@ -914,12 +916,18 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		case XML::FRAMESPERSECOND:
 		  xml->animdeftemp.FPS=XMLSupport::parse_float((*iter).value);
 		  break;
-		case XML::ANIMATIONFRAMEINDEX:
-		  xml->animdeftemp.meshoffsets.push_back(XMLSupport::parse_int((*iter).value));
-		  break;
 	  }
 	}
 	break;
+  case XML::ANIMATIONFRAMEINDEX:
+	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+	  case XML::ANIMATIONMESHINDEX:
+        xml->animdeftemp.meshoffsets.push_back(XMLSupport::parse_int((*iter).value));
+		break;
+	  }
+	}
+    break;
   case XML::ANIMFRAME:
     xml->animframetemp=animframe();
 	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -932,6 +940,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		  break;
 	  }
 	}
+	xml->animframes.push_back(xml->animframetemp);
 	break;
   }
     
@@ -976,9 +985,9 @@ void endElement(const string &name, XML * xml) {
     break;
   case XML::POLYGONS:
     break;
-  case XML::REF://FIXME
+  case XML::REF:
     break;
-  case XML::LOGO: //FIXME
+  case XML::LOGO: 
     break;
   case XML::MATERIAL:
 	  break;
@@ -992,6 +1001,9 @@ void endElement(const string &name, XML * xml) {
 	  break;
   case XML::MESH:
     break;
+  case XML::ANIMDEF:
+	xml->animdefs.push_back(xml->animdeftemp);
+	break;
   default:
     ;
   }
@@ -1555,6 +1567,13 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 	  word32index=recordbeginword+(recordheaderlength/4);
 	  //For each mesh
 	  for(int meshindex=0;meshindex<nummeshes;meshindex++){
+		  if(recordindex>0||meshindex>0){
+			string filename="";
+			filename+=recordindex;
+			filename+="_";
+			filename+=meshindex;
+			Outputfile=fopen(filename.c_str(),"w+");
+		  }
 		  //Extract Mesh Header
 		  int meshbeginword=word32index;
 		  int meshheaderlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record header in bytes
@@ -1594,13 +1613,13 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 		  int VSAbeginword=word32index;
 		  int LengthOfArbitraryLengthAttributes=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Length of Arbitrary length attributes section in bytes
 		  word32index+=1;
-		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%d %d\" <Material power=\"%f\" ar=\"%f\" ag=\"%f\" ab=\"%f\" aa=\"%f\" dr=\"%f\" dg=\"%f\" db=\"%f\" da=\"%f\" er=\"%f\" eg=\"%f\" eb=\"%f\" ea=\"%f\" sr=\"%f\" sg=\"%f\" sb=\"%f\" sa=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\"/>",scale,reverse,forcetexture,sharevert,polygonoffset,bsrc,bdst,power,ar,ag,ab,aa,dr,dg,db,da,er,eg,eb,ea,sr,sg,sb,sa,cullface,lighting,reflect,usenormals);
+		  fprintf(Outputfile,"<Mesh scale=\"%f\" reverse=\"%d\" forcetexture=\"%d\" sharevert=\"%d\" polygonoffset=\"%f\" blendmode=\"%d %d\" ",scale,reverse,forcetexture,sharevert,polygonoffset,bsrc,bdst);
 		  
 		  string detailtexturename="";
 		  int detailtexturenamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//detailtexture name length
 		  word32index+=1;
 		  int stringindex=0;
-		  for(stringindex=0;stringindex<detailtexturenamelen;stringindex++){
+		  for(stringindex=0;stringindex<(detailtexturenamelen/4);stringindex++){
 			for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
 			    detailtexturename+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
@@ -1628,11 +1647,262 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 		  int numtextures=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of textures
 		  word32index+=1;
 		  for(int tex=0;tex<numtextures;tex++){
+			int textype=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//texture type
+			int texindex=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//texture index
+			int texnamelen=VSSwapHostIntToLittle(inmemfile[word32index+2].i32val);//texture name length
+			word32index+=3;
+			string texname="";
+			for(stringindex=0;stringindex<(texnamelen/4);stringindex++){
+			  for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
+				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
+			      texname+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
+				}
+			  }
+			  word32index+=1;
+			}
+			switch(textype){
+			case ALPHAMAP:
+				fprintf(Outputfile," alphamap");
+				break;
+			case ANIMATION:
+				fprintf(Outputfile," animation");
+				break;
+			case TEXTURE:
+				fprintf(Outputfile," texture");
+				break;
+			}
+			if(texindex){
+				fprintf(Outputfile,"%d",texindex);
+			}
+			fprintf(Outputfile,"=\"%s\" ",texname.c_str());
 		  }
+		  fprintf(Outputfile,">\n");
 		  //End Textures
+		  fprintf(Outputfile,"<Material power=\"%f\" cullface=\"%d\" reflect=\"%d\" lighting=\"%d\" usenormals=\"%d\">\n",power,cullface,lighting,reflect,usenormals);
+		  fprintf(Outputfile,"\t<Ambient Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n",ar,ag,ab,aa);
+		  fprintf(Outputfile,"\t<Diffuse Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n",dr,dg,db,da);
+		  fprintf(Outputfile,"\t<Emissive Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n",er,eg,eb,ea);
+		  fprintf(Outputfile,"\t<Specular Red=\"%f\" Green=\"%f\" Blue=\"%f\" Alpha=\"%f\"/>\n",sr,sg,sb,sa);
+		  fprintf(Outputfile,"</Material>\n");
+
+		  for(int detplane=0;detplane<Detailplanes.size();detplane++){
+			  fprintf(Outputfile,"<DetailPlane x=\"%f\" y=\"%f\" z=\"%f\" />\n",Detailplanes[detplane].x,Detailplanes[detplane].y,Detailplanes[detplane].z);
+		  }
+		  //Logos
+		  int numlogos=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of logos
+		  word32index+=1;
+		  for(int logo=0;logo<numlogos;logo++){
+		    float size=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//size
+	        float offset=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//offset
+	        float rotation=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//rotation
+	        int type=VSSwapHostIntToLittle(inmemfile[word32index+3].i32val);//type
+	        int numrefs=VSSwapHostIntToLittle(inmemfile[word32index+4].i32val);//number of reference points
+			fprintf(Outputfile,"<Logo type=\"%d\" rotate=\"%f\" size=\"%f\" offset=\"%f\">\n",type,rotation,size,offset);
+			word32index+=5;
+			for(int ref=0;ref<numrefs;ref++){
+		      int refnum=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Logo ref
+		      float weight=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//reference weight
+			  fprintf(Outputfile,"\t<Ref point=\"%d\" weight=\"%f\"/>\n",refnum,weight);
+			  word32index+=2;
+			}
+			fprintf(Outputfile,"</Logo>\n");
+		  }
+		  //End logos
+		  //LODs
+		  int numLODs=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of LODs
+		  word32index+=1;
+		  for(int LOD=0;LOD<numLODs;LOD++){
+			float size=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//Size
+			int index=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//Mesh index
+			fprintf(Outputfile,"<LOD size=\"%f\" not_a_meshfile=\"%d_%d.xmesh\"/>\n",size,recordindex,index);
+			word32index+=2;
+		  }
+		  //End LODs
+		  //AnimationDefinitions
+		  int numanimdefs=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of animation definitions
+		  word32index+=1;
+		  for(int anim=0;anim<numanimdefs;anim++){
+			int animnamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of name
+			word32index+=1;
+			string animname="";
+			for(stringindex=0;stringindex<(animnamelen/4);stringindex++){
+			  for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
+				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
+			      animname+=inmemfile[word32index].c8val[bytenum]; //Append char to end of string
+				}
+			  }
+			  word32index+=1;
+			}
+			float FPS=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//FPS
+			fprintf(Outputfile,"<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",animname,FPS);
+			int numframerefs=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//number of animation frame references
+		    word32index+=2;
+			for(int fref=0;fref<numframerefs;fref++){
+			  int ref=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of animation frame references
+		      word32index+=NUMFIELDSPERREFERENCEDANIMATION;
+			  fprintf(Outputfile,"<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n",ref);
+			}
+			fprintf(Outputfile,"</AnimationDefinition>\n");
+		  }
+		  //End AnimationDefinitions
 		  //End VSA
 		  //go to geometry
 		  word32index=VSAbeginword+(LengthOfArbitraryLengthAttributes/4);
+		  //Vertices
+		  fprintf(Outputfile,"<Points>\n");
+		  int numvertices=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int vert=0;vert<numvertices;vert++){
+			float x=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//x
+			float y=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//y
+			float z=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//z
+			float i=VSSwapHostFloatToLittle(inmemfile[word32index+3].f32val);//i
+			float j=VSSwapHostFloatToLittle(inmemfile[word32index+4].f32val);//j
+			float k=VSSwapHostFloatToLittle(inmemfile[word32index+5].f32val);//k
+			float s=VSSwapHostFloatToLittle(inmemfile[word32index+6].f32val);//s
+			float t=VSSwapHostFloatToLittle(inmemfile[word32index+7].f32val);//t
+		    word32index+=NUMFIELDSPERVERTEX;
+			fprintf(Outputfile,"<Point>\n\t<Location x=\"%f\" y=\"%f\" z=\"%f\" s=\"%f\" t=\"%f\"/>\n\t<Normal i=\"%f\" y=\"%f\" z=\"%f\"/>\n</Point>\n",x,y,z,s,t,i,j,k);
+		  }
+		  fprintf(Outputfile,"</Points>\n");
+		  //End Vertices
+		  //Lines
+		  fprintf(Outputfile,"<Polygons>\n");
+		  int numlines=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int rvert=0;rvert<numlines;rvert++){
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			word32index+=1;
+			int ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			float s1=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		    word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			int ind2=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 2
+			float s2=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t2=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			fprintf(Outputfile,"\t<Line flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Line>\n",flatshade,ind1,s1,t1,ind2,s2,t2);
+		  }
+		  //End Lines
+		  //Triangles
+		  int numtris=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int rtvert=0;rtvert<numtris;rtvert++){
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			word32index+=1;
+			int ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			float s1=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		    word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			int ind2=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 2
+			float s2=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t2=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			int ind3=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 3
+			float s3=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t3=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			fprintf(Outputfile,"\t<Tri flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Tri>\n",flatshade,ind1,s1,t1,ind2,s2,t2,ind3,s3,t3);
+		  }
+		  //End Triangles
+		  //Quads
+		  int numquads=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int rqvert=0;rqvert<numquads;rqvert++){
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			word32index+=1;
+			int ind1=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			float s1=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t1=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		    word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			int ind2=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 2
+			float s2=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t2=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			int ind3=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 3
+			float s3=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t3=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			int ind4=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 3
+			float s4=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			float t4=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			fprintf(Outputfile,"\t<Quad flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Quad>\n",flatshade,ind1,s1,t1,ind2,s2,t2,ind3,s3,t3,ind4,s4,t4);
+		  }
+		  //End Quads
+		  //Linestrips
+		  int numlinestrips=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int lstrip=0;lstrip<numlinestrips;lstrip++){
+			int numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			fprintf(Outputfile,"\t<Linestrip flatshade=\"%d\"/>\n",flatshade);
+			word32index+=2;
+			for(int elem=0;elem<numstripelements;elem++){
+			  int ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			  float s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			  float t=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			  fprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind,s,t);
+			}
+			fprintf(Outputfile,"\t</Linestrip>");
+		  }
+		  //End Linestrips
+		  //Tristrips
+		  int numtristrips=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int tstrip=0;tstrip<numtristrips;tstrip++){
+			int numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			fprintf(Outputfile,"\t<Tristrip flatshade=\"%d\"/>\n",flatshade);
+			word32index+=2;
+			for(int elem=0;elem<numstripelements;elem++){
+			  int ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			  float s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			  float t=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			  fprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind,s,t);
+			}
+			fprintf(Outputfile,"\t</Tristrip>");
+		  }
+		  //End Tristrips
+		  //Trifans
+		  int numtrifans=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int tfan=0;tfan<numtrifans;tfan++){
+			int numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			fprintf(Outputfile,"\t<Trifan flatshade=\"%d\"/>\n",flatshade);
+			word32index+=2;
+			for(int elem=0;elem<numstripelements;elem++){
+			  int ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			  float s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			  float t=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			  fprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind,s,t);
+			}
+			fprintf(Outputfile,"\t</Trifan>");
+		  }
+		  //End Trifans
+		  //Quadstrips
+		  int numquadstrips=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+		  word32index+=1;
+		  for(int qstrip=0;qstrip<numquadstrips;qstrip++){
+			int numstripelements=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of vertices
+			int flatshade=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//flatshade
+			fprintf(Outputfile,"\t<Quadstrip flatshade=\"%d\"/>\n",flatshade);
+			word32index+=2;
+			for(int elem=0;elem<numstripelements;elem++){
+			  int ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
+			  float s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
+			  float t=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
+		      word32index+=NUMFIELDSPERREFERENCEDVERTEX;
+			  fprintf(Outputfile,"\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n",ind,s,t);
+			}
+			fprintf(Outputfile,"\t</Quadstrip>");
+		  }
+		  //End Quadstrips
+		  fprintf(Outputfile,"</Polygons>\n");
 		  //End Geometry
 		  //go to next mesh
 		  fprintf(Outputfile,"</Mesh>\n");
