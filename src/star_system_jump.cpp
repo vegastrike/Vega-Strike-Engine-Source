@@ -7,6 +7,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "cmd/container.h"
+#include "xml_support.h"
 #include <assert.h>
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 inline bool CompareDest (Planet * un, StarSystem * origin) {
@@ -54,7 +55,7 @@ static std::vector <Animation *>JumpAnimations;
 static std::vector <Animation *>VolatileJumpAnimations;
 static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
   std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
-  Animation * ani=new Animation (vs_config->getVariable ("graphics",mvolatile?"jumpclose":"jumpopen","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
+  Animation * ani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
   unsigned int i;
   if (mvolatile||AnimationNulls.empty()){
     i = ja->size();
@@ -86,6 +87,9 @@ void StarSystem::DrawJumpStars() {
       un->GetOrientation (p,q,r);
       JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*(pendingjump[kk]->delay+.25));
       JumpAnimations[k]->SetOrientation (p,q,r);
+      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
+      float dd = un->rSize()*JumpStarSize*(un->GetJumpStatus().delay-pendingjump[kk]->delay)/(float)un->GetJumpStatus().delay;
+      JumpAnimations[k]->SetDimensions (dd,dd);
     }
   }
   unsigned int i;
@@ -96,6 +100,9 @@ void StarSystem::DrawJumpStars() {
   for (i=0;i<VolatileJumpAnimations.size();i++) {
     if (VolatileJumpAnimations[i]) {
       VolatileJumpAnimations[i]->Draw();
+      float hei, wid;
+      VolatileJumpAnimations[i]->GetDimensions(hei,wid);
+      VolatileJumpAnimations[i]->SetDimensions(.95*hei,.95*wid);
       if (VolatileJumpAnimations[i]->Done()) {
 	delete VolatileJumpAnimations[i];
 	VolatileJumpAnimations.erase (VolatileJumpAnimations.begin()+i);

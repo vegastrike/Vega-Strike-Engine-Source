@@ -85,6 +85,10 @@ void Animation:: SetDimensions(float wid, float hei) {
   width = wid;
   height = hei;
 }
+void Animation:: SetDimensions(float &wid, float &hei) {
+  wid = width;
+  hei = height;
+}
 
 void Animation::ProcessDrawQueue () {
   bool alphamaps=true;

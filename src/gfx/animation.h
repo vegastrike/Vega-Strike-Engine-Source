@@ -43,6 +43,7 @@ public:
   void DrawNoTransform ();
   static void ProcessDrawQueue();
   void SetDimensions(float wid, float hei);
+  void GetDimensions (float &wid, float & hei);
   Vector Position();
   void SetPosition (const float, const float, const float);
   void SetPosition (const Vector &);
