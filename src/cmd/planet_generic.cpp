@@ -340,64 +340,7 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
   }
 }
 
-static void beginPlanetElement (void *userDataVoid, const XML_Char *name, const XML_Char **attr) {
-	std::map<std::string, std::string> *userData = (std::map<std::string, std::string> *)userDataVoid;
-	std::string namestr((const char*)name);
-	for (int i=0;i<namestr.size();i++) {
-		namestr[i]=tolower(namestr[i]);
-	}
-	if (namestr.size()>=6&&memcmp(namestr.c_str(),"planet",6)==0) {
-		if (namestr.size()==6) {
-			if ((*userData)["\n"]!="\n") {
-				fprintf(stderr, "Warning: No surrounding planet tag specified.  This will probably result in missing data.\n");
-			}
-			std::string planetname;
-			std::string planettype;
-			// Name is "Planet"
-			for (int i=0; attr[i]!=NULL; i+=2) {
-				if (strcmp(attr[i], "type")==0) {
-					planettype=attr[i+1];
-				}
-				if (strcmp(attr[i], "name")==0) {
-					planetname=attr[i+1];
-				}
-			}
-			if (planettype.size()&&planetname.size()) {
-				(*userData)[planettype]=planetname;
-			} else {
-				fprintf(stderr, "Warning: \"type\" or \"name\" atributes missing... Ignoring planet type...\n");
-			}
-		} else {
-			(*userData)["\n"]="\n";
-		}
-	} else {
-		fprintf(stderr, "Warning: XML tag in planet types not valid: %s\n", name);
-	}
-}
-static void endPlanetElement (void *userData, const XML_Char *name) {
-}
-
-std::map<std::string, std::string> readPlanetTypes(std::string filename) {
-	std::map<std::string, std::string> planetTypes;
-	VSFile f;
-	VSError err = f.OpenReadOnly( filename, UniverseFile);
-	if (err>Ok) {
-		return planetTypes;
-	}
-	int len = f.Size();
-	XML_Parser parser=XML_ParserCreate(NULL);
-	void *buff = XML_GetBuffer(parser, len);
-	if (buff == NULL) {
-		fprintf(stderr, "Fatal error: out of memory for planet name file\n");
-		return planetTypes;
-	}
-	len=f.Read(buff, len);
-	XML_SetElementHandler(parser, &beginPlanetElement, &endPlanetElement);
-	XML_SetUserData(parser, &planetTypes);
-	XML_ParseBuffer(parser, len, 1);
-	XML_ParserFree(parser);
-	return planetTypes;
-}
+extern std::map<std::string,std::string> readPlanetTypes(std::string filename);
 
 string Planet::getHumanReadablePlanetType () const{
 	  static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));

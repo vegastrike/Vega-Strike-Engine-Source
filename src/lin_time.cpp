@@ -21,7 +21,10 @@
 
 #include "vegastrike.h"
 #include "in_kb.h"
+#include "vs_random.h"
 static double firsttime;
+VSRandom vsrandom(time(NULL));
+
 #ifdef WIN32
 #include <windows.h>
 static LONGLONG ttime;

@@ -2,6 +2,7 @@
 #include "gfxlib_struct.h"
 #include "gfx/matrix.h"
 #include <GL/glut.h>
+#include <assert.h>
 
 void GFXSphereVertexList::Draw() {
 }
