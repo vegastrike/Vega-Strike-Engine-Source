@@ -378,7 +378,7 @@ void FireKeyboard::HeadlightKey(int, KBSTATE k) {
     }
 }
 #endif
-extern void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
+extern unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
 extern void LeadMe (Unit * un, string directive, string speech);
 
 static void LeadMe (string directive, string speech) {
@@ -391,7 +391,7 @@ void HelpOut (bool crit, std::string conv) {
   Unit * un = _Universe->AccessCockpit()->GetParent();
   if (un) {
     Unit * par=NULL;
-    DoSpeech(  un,NULL, FSM::Node(conv,.1));
+    DoSpeech(  un,NULL, FSM::Node::MakeNode(conv,.1));
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
@@ -991,47 +991,43 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     }
 }
 using std::list;
-void FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
+unsigned int FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
   this->AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-  DoSpeech (un,parent,*c.getCurrentState());
+  unsigned int retval=DoSpeech (un,parent,*c.getCurrentState());
   if (parent==_Universe->AccessCockpit()->GetParent()) {
     _Universe->AccessCockpit()->SetCommAnimation (c.ani);
   }
   this->refresh_target=true;
+  return retval;
 }
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
-  int sound=c.getCurrentState()->GetSound(c.sex);
-  //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
-  if (!AUDIsPlaying (sound)) {
-    AUDStartPlaying(sound);
-  }
+  unsigned int whichsound=0;
   bool foundValidMessage=false;
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
-#if 0
-        //caused the docking clearence nodes to be duplicated
-        if ((*i).curstate>=(*i).fsm->GetUnDockNode()&&(*i).curstate<(*i).fsm->nodes.size()) {
-          DoSpeechAndAni(un,parent,(*i));
-          foundValidMessage=true;
-        }        
-#endif
 	i = resp.erase (i);
       }
     }
     resp.push_back(c);
     if (!foundValidMessage)
-      DoSpeechAndAni(un,parent,c);
+      whichsound=DoSpeechAndAni(un,parent,c);
   }else {
-    DoSpeech (NULL,NULL,*c.getCurrentState());
+    whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       static Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
     }
 
   }
+  int sound=c.getCurrentState()->GetSound(c.sex,whichsound);
+  //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+  if (!AUDIsPlaying (sound)) {
+    AUDStartPlaying(sound);
+  }
+
 }
 using std::list;
 
@@ -1423,8 +1419,8 @@ void FireKeyboard::Execute () {
         FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
 	if (mymsg==NULL||mymsg->curstate>=fsm->nodes.size()) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
-	  DoSpeech (targ,targ,*c.getCurrentState());
-          int sound = c.getCurrentState()->GetSound(c.sex);
+	  unsigned int whichspeech=DoSpeech (targ,targ,*c.getCurrentState());
+          int sound = c.getCurrentState()->GetSound(c.sex,whichspeech);
           //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
 	  if (!AUDIsPlaying (sound)) {
 	    AUDStartPlaying(sound);
@@ -1438,8 +1434,8 @@ void FireKeyboard::Execute () {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
-	    DoSpeech (targ,targ,*c.getCurrentState());
-            int sound=c.getCurrentState()->GetSound(c.sex);
+	    unsigned int whichmessage=DoSpeech (targ,targ,*c.getCurrentState());
+            int sound=c.getCurrentState()->GetSound(c.sex,whichmessage);
             //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
 	    if (!AUDIsPlaying (sound)) {
 	      AUDStartPlaying(sound);

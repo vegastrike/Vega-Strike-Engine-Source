@@ -7,13 +7,18 @@ class FSM {
 
  public:
   struct Node {
-    std::string message;
-    vector <int> sound;//one sound for each sex
+    vector <std::string> messages;
+    vector <int> sounds;//messages.size() sound for each sex
     float messagedelta;
     vector <unsigned int> edges;
-    int GetSound (unsigned char sex);
+    int GetSound (unsigned char sex, unsigned int multiple)const;
+    std::string GetMessage(unsigned int &multiple)const;
     void AddSound (int sound, unsigned char sex);
-    Node (const std::string &message, float messagedel): message(message),messagedelta(messagedel){}
+    Node (const vector<std::string> &message, float messagedel): messages(message),messagedelta(messagedel){if (messages.size()==0) messages.push_back("<static>");}
+    static Node MakeNode(std::string message,float messagedel) {
+      vector<string> tmp;tmp.push_back(message);
+      return Node(tmp,messagedel);
+    }
   };
   vector <Node> nodes;
   FSM (const char * filename);

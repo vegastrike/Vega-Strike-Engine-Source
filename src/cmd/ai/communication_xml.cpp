@@ -73,30 +73,38 @@ using namespace CommXML;
 		if (sound!=-1) {
 		  nodes.back().AddSound(sound,sexe);
 		}
-	  break;
+                break;
 	case UNKNOWN:
 		unitlevel++;
 //		cerr << "Unknown element start tag '" << name << "' detected " << endl;
 		return;
 	case NODE:
 		unitlevel++;
+                {vector<string>messages;
 		for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-			switch(attribute_map.lookup((*iter).name)) {
-			case NAME:
-				nam=(*iter).value;
-				{for (string::iterator i=nam.begin();i!=nam.end();i++) {
-					if (*i=='\\') {
-						*i='\n';
-					}
-				}}
-				break;
-			case VALUE:
-				val=parse_float((*iter).value);
-				break;
-			}
-		}
-		nodes.push_back(Node(nam,val));
-		break;
+                  if (strtoupper((*iter).name)=="RELATIONSHIP") {
+                    val=parse_float((*iter).value);
+                  }else {
+                    
+                    string tmp = strtoupper((*iter).name);
+                    int num=0;
+                    if (1==sscanf(tmp.c_str(),"TEXT%d",&num)||tmp=="TEXT") {
+                      while (!(num<messages.size())) {
+                        messages.push_back(string());
+                      }
+                      nam=(*iter).value;
+                      {for (string::iterator i=nam.begin();i!=nam.end();i++) {
+                        if (*i=='\\') {
+                          *i='\n';
+                        }
+                      }}
+                      messages[num]=nam;
+                    }
+                  }
+		}             
+		nodes.push_back(Node(messages,val));
+                }
+       		break;
 	case EDGE:
 		unitlevel++;
 		for(iter = attributes.begin(); iter!=attributes.end(); iter++) {

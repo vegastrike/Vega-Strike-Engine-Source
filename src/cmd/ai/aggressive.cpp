@@ -155,8 +155,9 @@ inline std::string GetRelationshipColor (float rel) {
   return str;
 }
 
-void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
-  const string &speech=node.message;
+unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
+  unsigned int dummy=0;
+  string speech=node.GetMessage(dummy);
   string myname ("[Static]");
   if (un!=NULL) {
     myname= un->getFullname();
@@ -175,6 +176,7 @@ void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
 	}
   }
   mission->msgcenter->add (myname,"all",GetRelationshipColor(node.messagedelta*10)+speech+"#000000"); //multiply by 2 so colors are easier to tell
+  return dummy;
 }
 void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {
@@ -182,7 +184,7 @@ void LeadMe (Unit * un, string directive, string speech) {
       Unit * pun =_Universe->AccessCockpit(i)->GetParent();
       if (pun) {
 	if (pun->getFlightgroup()==un->getFlightgroup()){
-		DoSpeech (un, pun, FSM::Node(speech,.1));	
+		DoSpeech (un, pun, FSM::Node::MakeNode(speech,.1));	
 	}
       }
     }
