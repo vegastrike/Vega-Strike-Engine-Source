@@ -7,6 +7,7 @@ struct MTL:public GFXMaterial {
     blend_dst=ZERO;
     reflect=true;
   }  
+  bool usenormals;
   bool reflect;
    int blend_src;int blend_dst;
    vector<textureholder> textures;
@@ -143,6 +144,13 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
       if (3==sscanf(buf,"KE %f %f %f\n",&cur->er,&cur->eg,&cur->eb)) {
         cur->ea=1;
       }
+      if (1==sscanf(buf,"NORMALS %f\n",&tmpblend)) {
+        if (tmpblend!=0)
+          cur->usenormals=true;
+      
+        else 
+          cur->usenormals=false;
+      }
       if (1==sscanf(buf,"MAP_REFLECTION %f\n",&tmpblend)) {
         if (tmpblend!=0) {
           cur->reflect=1;
@@ -216,6 +224,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
          xml.blend_src = mtls[str].blend_src;
          xml.blend_dst = mtls[str].blend_dst;
          xml.reflect=mtls[str].reflect;
+         xml.usenormals=mtls[str].usenormals;
          continue;
       }
       GFXVertex v;
@@ -298,7 +307,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         xml.quads.push_back(xml.quadtemp);
         continue;
       }
-      if (3== sscanf(buf,"l %s %s\n",str,str1)) {
+      if (2== sscanf(buf,"l %s %s\n",str,str1)) {
         IntRef A = parsePoly(str);        
         IntRef B = parsePoly(str1);        
         temp.i = xml.vertices[B.v].x-xml.vertices[A.v].x;
