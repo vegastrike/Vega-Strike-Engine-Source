@@ -207,7 +207,7 @@ struct UpgradingInfo {
     }
   }
   void Render(){
-    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
+    //    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
     Unit * un = buyer.GetUnit(); 
     if (un) {
       Cockpit * cp = _Universe->isPlayerStarship(un);
@@ -238,26 +238,46 @@ struct UpgradingInfo {
   //this function is called after the turret is selected and stored in selected turret
   void CompleteTransactionAfterTurretSelect();
   void CompleteTransactionConfirm();
-} *upgr=NULL;
+};
+vector <UpgradingInfo *>upgr;
+vector <unsigned int> player_upgrading;
 
-
-static void RefreshGUI(void) {
-  upgr->Render();
+bool RefreshGUI(void) {
+  bool retval=false;
+  for (unsigned int i=0;i<upgr.size();i++) { 
+    if (player_upgrading[i]==_Universe->CurrentCockpit()){
+      retval=true;
+      upgr[i]->Render();
+    }
+  }
+  return retval;
 }
 
 static void ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
-  upgr->ProcessMouse(1, x, y, button, state);
+  for (unsigned int i=0;i<upgr.size();i++) { 
+    if (player_upgrading[i]==_Universe->CurrentCockpit())
+      upgr[i]->ProcessMouse(1, x, y, button, state);
+  }
+
+
 }
 
 static void ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
-  upgr->ProcessMouse(2, x, y, 0, 0);
+  for (unsigned int i=0;i<upgr.size();i++) { 
+    if (player_upgrading[i]==_Universe->CurrentCockpit())
+      upgr[i]->ProcessMouse(2, x, y, 0, 0);
+  }
+
 }
 
 static void ProcessMousePassive(int x, int y) {
   SetSoftwareMousePosition(x,y);
-  upgr->ProcessMouse(3, x, y, 0, 0);
+  for (unsigned int i=0;i<upgr.size();i++) { 
+    if (player_upgrading[i]==_Universe->CurrentCockpit())
+      upgr[i]->ProcessMouse(3, x, y, 0, 0);
+  }
 }
 void Unit::UpgradeInterface(Unit * base) {
   printf("Starting docking\n");
@@ -265,8 +285,9 @@ void Unit::UpgradeInterface(Unit * base) {
   glutMotionFunc(ProcessMouseActive);
   glutPassiveMotionFunc(ProcessMousePassive);
   //(x, y, width, height, with scrollbar)
-  upgr = new UpgradingInfo (this,base);
-  GFXLoop (RefreshGUI);
+  upgr.push_back( new UpgradingInfo (this,base));
+  player_upgrading.push_back(_Universe->CurrentCockpit());
+  
 }
 
 void CargoToMission (const char * item,TextArea * ta) {
@@ -576,9 +597,14 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 		ours = OK->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
 			printf ( "You clicked done\n");
-			delete upgr;
-			upgr=NULL;
-			restore_main_loop();
+			for (unsigned int i=0;i<upgr.size();i++) {
+			  if (upgr[i]==this) {
+			    delete upgr[i];
+			    upgr.erase (upgr.begin()+i);
+			    player_upgrading.erase (player_upgrading.begin()+i);
+			    restore_main_loop();
+			  }
+			}
 		}
 	}	
 	if (ours == 0) {

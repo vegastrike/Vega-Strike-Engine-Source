@@ -223,7 +223,7 @@ void CalculateCoords (unsigned int i,unsigned int size, float &x,float &y,float 
     }
   }
 }
-
+extern bool RefreshGUI();
 extern float rand01();
 void Universe::StartDraw()
 {
@@ -247,7 +247,9 @@ void Universe::StartDraw()
     AccessCockpit()->SelectProperCamera();
     if (cockpit.size()>0)
       AccessCamera()->UpdateGFX();
-    activeStarSystem()->Draw();
+    if (!RefreshGUI()) {
+      activeStarSystem()->Draw();
+    }
     AccessCamera()->SetSubwindow (0,0,1,1);      
   }
   UpdateTime();
