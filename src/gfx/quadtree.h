@@ -72,6 +72,7 @@ struct quadsquare {
 	int	Render(const quadcornerdata& cd);
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z);
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices);
 	
 private:
 	void	EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata& cd);
@@ -89,8 +90,10 @@ private:
 	void	UpdateAux(const quadcornerdata& cd, const Vector &ViewerLocation, float CenterError);
 	void	RenderAux(const quadcornerdata& cd, CLIPSTATE vis);
 	void	SetStatic(const quadcornerdata& cd);
-  static std::vector <GFXVertex> vertices;
-  static std::vector <unsigned int> unusedvertices;
+  static unsigned int * VertexAllocated;
+  static unsigned int * VertexCount;
+  static GFXVertexList *vertices;
+  static std::vector <unsigned int> *unusedvertices;
 };
 
 

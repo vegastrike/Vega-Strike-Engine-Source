@@ -17,9 +17,10 @@
 #include "quadtree.h"
 #include "gfxlib.h"
 
-
-std::vector <GFXVertex> quadsquare::vertices;
-std::vector <unsigned int> quadsquare::unusedvertices;
+unsigned int * quadsquare::VertexAllocated;
+unsigned int *quadsquare::VertexCount;
+GFXVertexList *quadsquare::vertices;
+std::vector <unsigned int> *quadsquare::unusedvertices;
 
 
 quadsquare::quadsquare(quadcornerdata* pcd) {
@@ -66,12 +67,13 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 		if (y > MaxY) MaxY = (unsigned short)y;
 	}
 	int half= 1<<pcd->Level;
+	GFXVertex ** vertexs = &(vertices->BeginMutate(0)->vertices);
 	GFXVertex v[5];
-	v[0].SetNormal ((vertices[pcd->Verts[0].vertindex].GetNormal() + vertices[pcd->Verts[1].vertindex].GetNormal() + vertices[pcd->Verts[2].vertindex].GetNormal() + vertices[pcd->Verts[3].vertindex].GetNormal()).Normalize());
-	v[1].SetNormal ((vertices[pcd->Verts[0].vertindex].GetNormal() + vertices[pcd->Verts[3].vertindex].GetNormal()).Normalize());
-	v[2].SetNormal ((vertices[pcd->Verts[0].vertindex].GetNormal() + vertices[pcd->Verts[1].vertindex].GetNormal()).Normalize());
-	v[3].SetNormal ((vertices[pcd->Verts[1].vertindex].GetNormal() + vertices[pcd->Verts[2].vertindex].GetNormal()).Normalize());
-	v[4].SetNormal ((vertices[pcd->Verts[2].vertindex].GetNormal() + vertices[pcd->Verts[3].vertindex].GetNormal()).Normalize());
+	v[0].SetNormal (((*vertexs)[pcd->Verts[0].vertindex].GetNormal() + (*vertexs)[pcd->Verts[1].vertindex].GetNormal() + (*vertexs)[pcd->Verts[2].vertindex].GetNormal() + (*vertexs)[pcd->Verts[3].vertindex].GetNormal()).Normalize());
+	v[1].SetNormal (((*vertexs)[pcd->Verts[0].vertindex].GetNormal() + (*vertexs)[pcd->Verts[3].vertindex].GetNormal()).Normalize());
+	v[2].SetNormal (((*vertexs)[pcd->Verts[0].vertindex].GetNormal() + (*vertexs)[pcd->Verts[1].vertindex].GetNormal()).Normalize());
+	v[3].SetNormal (((*vertexs)[pcd->Verts[1].vertindex].GetNormal() + (*vertexs)[pcd->Verts[2].vertindex].GetNormal()).Normalize());
+	v[4].SetNormal (((*vertexs)[pcd->Verts[2].vertindex].GetNormal() + (*vertexs)[pcd->Verts[3].vertindex].GetNormal()).Normalize());
 	v[0].x = pcd->xorg + half;
 	v[0].z = pcd->zorg + half;
 	v[1].x = pcd->xorg + half*2; 
@@ -83,18 +85,24 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 	v[4].x = pcd->xorg + half; 
 	v[4].z = pcd->zorg + half*2;
 	//FIXME fill in!
+
 	for (int i=0;i<5;i++) {
-	  v[i].y= Vertex[i].Y;
-	  
-	  if (unusedvertices.size()) {
-	    vertices[unusedvertices.back()]= v[i];
-	    Vertex[i].vertindex = unusedvertices.back();
-	    unusedvertices.pop_back();
+	  v[i].y= Vertex[i].Y;	  
+	  if (unusedvertices->size()) {
+	    (*vertexs)[unusedvertices->back()]= v[i];
+	    Vertex[i].vertindex = unusedvertices->back();
+	    unusedvertices->pop_back();
 	  } else {
-	    Vertex[i].vertindex = vertices.size();
-	    vertices.push_back (v[i]);
+	    Vertex[i].vertindex = *VertexCount;
+	    if ((*VertexCount)+1>=(*VertexAllocated)) {
+	      (*VertexAllocated) *=2;
+	      (*vertexs)= (GFXVertex *)realloc ((*vertexs), *VertexAllocated);
+	    }
+	    (*vertexs) [*VertexCount] = v[i];
+	    (*VertexCount)++;
 	  }
 	}
+	vertices->EndMutate (*VertexCount);
 	//interpolate from other vertices;
 }
 
@@ -103,7 +111,7 @@ quadsquare::~quadsquare() {
 	// Recursively delete sub-trees.
 	int	i;
 	for (i=0;i<5;i++) {
-	  unusedvertices.push_back (Vertex[i].vertindex);
+	  unusedvertices->push_back (Vertex[i].vertindex);
 	}
 	for (i = 0; i < 4; i++) {
 		if (Child[i]) delete Child[i];
@@ -315,30 +323,31 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata& cd) {
 	//
 
 	float	OneOverSize = 1.0 / (2 << cd.Level);
-	vertices[Vertex[0].vertindex].SetNormal ( MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
+	GFXVertex *vertexs = vertices->BeginMutate(0)->vertices; 
+	vertexs[Vertex[0].vertindex].SetNormal ( MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
 				       (Vertex[4].Y - Vertex[2].Y) * OneOverSize));
 
 	float	v;
 	quadsquare*	s = GetNeighbor(0, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[1].Y;
-	vertices[Vertex[1].vertindex].SetNormal (MakeLightness((v - Vertex[0].Y) * OneOverSize,
+	vertexs[Vertex[1].vertindex].SetNormal (MakeLightness((v - Vertex[0].Y) * OneOverSize,
 				       (cd.Verts[3].Y - cd.Verts[0].Y) * OneOverSize));
 	
 	s = GetNeighbor(1, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[2].Y;
-	vertices[Vertex[2].vertindex].SetNormal (MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
+	vertexs[Vertex[2].vertindex].SetNormal (MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
 				       (Vertex[0].Y - v) * OneOverSize));
 	
 	s = GetNeighbor(2, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[3].Y;
-	vertices[Vertex[3].vertindex].SetNormal (MakeLightness((Vertex[0].Y - v) * OneOverSize,
+	vertexs[Vertex[3].vertindex].SetNormal (MakeLightness((Vertex[0].Y - v) * OneOverSize,
 						      (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize));
 	
 	s = GetNeighbor(3, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[4].Y;
-	vertices[Vertex[4].vertindex].SetNormal (MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
+	vertexs[Vertex[4].vertindex].SetNormal (MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
 				       (v - Vertex[0].Y) * OneOverSize));
-	
+	vertices->EndMutate();
 
 	// The error, MinY/MaxY, and lighting values for this node and descendants are correct now.
 	Dirty = false;
@@ -483,8 +492,7 @@ void	quadsquare::EnableEdgeVertex(int index, bool IncrementCount, const quadcorn
 {
 	if ((EnabledFlags & (1 << index)) && IncrementCount == false) return;
 	
-	static const int	Inc[4] = { 1, 0, 0, 8 };
-
+	//	static const int	Inc[4] = { 1, 0, 0, 8 };
 	// Turn on flag and deal with reference count.
 	EnabledFlags |= 1 << index;
 	if (IncrementCount == true && (index == 0 || index == 3)) {
@@ -974,7 +982,12 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 		break;
 	}	
 }
-
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert) {
+  quadsquare::VertexAllocated = VertexAllocated;
+  quadsquare::VertexCount = VertexCount;
+  quadsquare::vertices = vertices;
+  quadsquare::unusedvertices = unvert;
+}
 
 void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 // Sets the height of all samples within the specified rectangular
@@ -1039,17 +1052,19 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	// Modify the vertex heights if necessary, and set the dirty
 	// flag if any modifications occur, so that we know we need to
 	// recompute error data later.
+	GFXVertex * vertexs = vertices->BeginMutate(0)->vertices;
+	
 	for (i = 0; i < 5; i++) {
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
-       			vertices[Vertex[i].vertindex].y = Vertex[i].Y;
+       			(vertexs)[Vertex[i].vertindex].y = Vertex[i].Y;
 			//			vertices[Vertex[i].vertindex].x = v[i].i;//FIXME are we necessary?
 			//vertices[Vertex[i].vertindex].z = v[i].k;
 
 		}
 	}
-
+	vertices->EndMutate();
 	if (!Dirty) {
 		// Check to see if any child nodes are dirty, and set the dirty flag if so.
 		for (i = 0; i < 4; i++) {
