@@ -104,5 +104,9 @@ class FlyByWire : public Orders::MatchVelocity {
   void Accel (float percentage);
   void Execute();
   virtual std::string getOrderDescription() { return "wire"; };
+ private:
+  FlyByWire( const FlyByWire& );
+  FlyByWire& operator=( const FlyByWire& );
 };
 #endif
+
