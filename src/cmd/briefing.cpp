@@ -41,6 +41,7 @@ void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam, bool 
 }
 extern double interpolation_blend_factor;
 void Briefing::Render() {
+  cam.SetPosition(cam.GetPosition());
   cam.UpdateGFX(GFXTRUE,GFXFALSE);
   glClearColor(1,0,0,1);
   GFXClear(GFXTRUE);
@@ -80,7 +81,10 @@ void Briefing::Ship::Destroy() {
   }
   meshdata.clear();  
 }
-
+Briefing::Briefing() {
+  cam.SetPosition(Vector(0,0,0));
+  cam.SetOrientation(Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
+}
 Briefing::~Briefing() {
   for (unsigned int i=0;i<starships.size();i++) {
     delete starships[i];
@@ -151,5 +155,5 @@ void Briefing::Ship::EnqueueOrder (const Vector & destination, float time) {
   if (time<.00001) {
     time =SIMULATION_ATOM;
   }
-  orders.push_back (Order (destination,(destination-Position()).Magnitude()/time));
+  orders.push_back (BriefingOrder (destination,(destination-Position()).Magnitude()/time));
 }

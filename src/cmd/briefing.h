@@ -5,21 +5,22 @@
 #include <vector>
 using std::list;
 using std::vector;
+class BriefingOrder {
+ public:
+  Vector vec;
+  float speed;
+  BriefingOrder (const Vector & v, const float s):vec(v){
+    speed=s;
+  }
+};
+
 class Briefing{
  public:
-  class Order {
-  public:
-    Vector vec;
-    float speed;
-    Order (const Vector & v, const float s):vec(v){
-      speed=s;
-    }
-  };
   //Very reduced unit class
   class Ship {
     std::vector <class Mesh *> meshdata;
     Vector pos;
-    std::list <Briefing::Order> orders;
+    std::list <BriefingOrder> orders;
   public:
     ~Ship ();
     void Destroy();
@@ -45,5 +46,6 @@ class Briefing{
   void OverrideOrder (int, const Vector & destination, float time);
   void SetPosition (int,const Vector &Position);
   Vector GetPosition(int);
+  Briefing();
   ~Briefing();
 };
