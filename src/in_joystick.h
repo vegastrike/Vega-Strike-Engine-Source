@@ -88,7 +88,7 @@ class JoyStick {
 #if defined(IRIX)	// could be POSIX type uchar_t?
 	uchar_t digital_hat[MAX_DIGITAL_HATSWITCHES];
 #else
-    Uint8 digital_hat[MAX_DIGITAL_HATSWITCHES];
+    unsigned char digital_hat[MAX_DIGITAL_HATSWITCHES];
 #endif
 
     bool debug_digital_hatswitch;
