@@ -163,7 +163,7 @@ void Mission::DirectorLoop(){
     return;
   }
 
-  cout << "DIRECTOR LOOP" << endl;
+  //  cout << "DIRECTOR LOOP" << endl;
 
   //  saveVariables(cout);
 

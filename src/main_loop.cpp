@@ -327,6 +327,7 @@ extern void SetTurretAI (Unit * fighter);
   }
 }
 
+Unit *player_unit;
 
 void createObjects() {
   //  GFXFogMode (FOG_OFF);
@@ -526,6 +527,10 @@ void createObjects() {
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   SetTurretAI (fighters[0]);
 #endif
+
+  player_unit=fighters[0];
+  
+
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
   UpdateTime();

@@ -335,6 +335,8 @@ varInst * call_unit(missionNode *node,int mode);
 void  call_string_print(missionNode *node,int mode,varInst *ovi);
 varInst * call_string_new(missionNode *node,int mode,string initstring);
  string *getStringObject(missionNode *node,int mode,varInst *ovi);
+
+ void findNextEnemyTarget(Unit *my_unit);
 };
 
 #endif // _MISSION_H_

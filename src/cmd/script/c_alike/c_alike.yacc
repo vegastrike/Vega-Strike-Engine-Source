@@ -285,7 +285,8 @@ string parseCalike(char const *filename)
 {
   string empty_string;
 
-  extern FILE *yyin;
+  yylineno=0;
+
   yyin=fopen(filename,"r");
 
   if(yyin==NULL){
@@ -298,9 +299,6 @@ string parseCalike(char const *filename)
   
   return module_string;
 }
-
-extern	int yylineno;
-extern char *yytext;
 
 
 int yyerror(char *s){

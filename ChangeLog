@@ -1,4 +1,14 @@
 2001-12-15 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added commonly used modules:
+	  - faction_ships.c
+	  - launch.c
+	  - random.c
+	  - vec3.c
+	* added mission total_war1, launch_and_launch1
+
+	
+2001-12-15 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added _std.isNull function to test for null objects
 	* added callback 'launch' to launch new ships from script

@@ -436,20 +436,32 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
 
   varInst *ret=NULL;
   debug(0,node,mode,"checking expression");
-  printRuntime();
+  //  printRuntime();
 
   switch(node->tag){
   case DTAG_AND_EXPR:
   case DTAG_OR_EXPR:
   case DTAG_NOT_EXPR:
   case DTAG_TEST_EXPR:
-    checkBoolExpr(node,mode);
+    {
+    bool res=checkBoolExpr(node,mode);
+    ret=new varInst;
+    ret->type=VAR_BOOL;
+    ret->bool_val=res;
+    return ret;
+    }
     break;
-
+  case DTAG_CONST:
+    ret=doConst(node,mode);
+    return ret;
+    break;
   case DTAG_VAR_EXPR:
     ret=doVariable(node,mode);
+    return ret;
     break;
   case DTAG_FMATH:
+    fatalError(node,mode,"no fmath here yet");
+    assert(0);
     break;
   default:
     fatalError(node,mode,"no such expression");

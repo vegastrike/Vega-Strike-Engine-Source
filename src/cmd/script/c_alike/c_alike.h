@@ -48,6 +48,7 @@ extern string module_string;
 
 extern	int yylineno;
 extern char *yytext;
+extern FILE *yyin;
 
 #include "c_alike.tab.cpp.h"
 

@@ -65,7 +65,8 @@ varInst *Mission::call_olist(missionNode *node,int mode){
     
     if(cmd=="push_back"){
       missionNode *snode=getArgument(node,mode,1);
-      varInst *vi=doVariable(snode,mode); // should be getObjExpr
+      //varInst *vi=doVariable(snode,mode); // should be getObjExpr
+      varInst *vi=checkExpression(snode,mode); // should be getObjExpr
       
       debug(3,node,mode,"olist.push_back pushing variable");
       //      printf("vi is 0x%x\n",vi);
@@ -156,12 +157,13 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 
       debug(3,node,mode,"olist.size");
 
+      viret=new varInst;
+
       if(mode==SCRIPT_RUN){
 	int len=my_object->size();
 	viret->float_val=(float)len;
       }
 
-      viret=new varInst;
       viret->type=VAR_FLOAT;
       return viret;
     }

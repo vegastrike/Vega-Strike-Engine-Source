@@ -56,6 +56,8 @@
 
 extern void SetTurretAI (Unit * fighter);
 
+extern Unit *player_unit;
+
 varInst *Mission::call_unit(missionNode *node,int mode){
 
   varInst *viret=NULL;
@@ -99,6 +101,26 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     return viret;
   }
+  else if(cmd=="getPlayer"){
+
+    Unit *my_unit=NULL;
+
+    if(mode==SCRIPT_RUN){
+      my_unit=player_unit;
+    }
+
+    viret=new varInst;
+    viret->type=VAR_OBJECT;
+    viret->objectname="unit";
+    
+    viret->object=(void *)my_unit;
+
+    debug(3,node,mode,"unit getUnit: ");
+    printVarInst(3,viret);
+
+    return viret;
+
+  }
   else if(cmd=="launch"){
     missionNode *name_node=getArgument(node,mode,0);
     varInst *name_vi=checkObjectExpr(name_node,mode);
@@ -134,6 +156,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       fg->name=name_string;
       fg->type=type_string;
       fg->ainame=ai_string;
+      fg->faction=faction_string;
       fg->unittype=Flightgroup::UNIT;
       fg->terrain_nr=-1;
       fg->waves=1; // not yet
@@ -245,7 +268,7 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 void Mission::call_unit_launch(Flightgroup *fg){
 
    int faction_nr=_Universe->GetFaction(fg->faction.c_str());
-
+   //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit *units[20];
 
    for(int u=0;u<fg->nr_ships;u++){
@@ -279,8 +302,50 @@ void Mission::call_unit_launch(Flightgroup *fg){
 	    
      SetTurretAI (my_unit);
 
+     //     cout << fg->name << endl;
+
      _Universe->activeStarSystem()->AddUnit(my_unit);
+
+     findNextEnemyTarget(my_unit);
+
    }
 
 
  }
+
+void Mission::findNextEnemyTarget(Unit *my_unit){
+      StarSystem *ssystem=_Universe->activeStarSystem();
+      UnitCollection *unitlist=ssystem->getUnitList();
+      //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
+      Iterator *uiter=unitlist->createIterator();
+
+
+      int i=0;
+      Unit *unit=uiter->current();
+      Unit *target_unit=NULL;
+      //      int my_faction=_Universe->GetFaction(my_unit->getFlightgroup()->faction.c_str());
+      int my_faction=my_unit->faction;
+      while(unit!=NULL){
+	//	int other_faction=_Universe->GetFaction(unit->getFlightgroup()->faction.c_str());
+	int other_faction=unit->faction;
+
+	if(_Universe->GetRelation(my_faction,other_faction)<0.0){
+	  target_unit=uiter->current();
+	  unit=NULL;
+	}
+	else{
+	  //	  printf("relation was: %f %d %d\n",_Universe->GetRelation(my_faction,other_faction),my_faction,other_faction);
+	  unit=uiter->advance();
+	  i++;
+	}
+      }
+
+      if(target_unit==NULL){
+	//
+      }
+      else{
+	my_unit->Target(target_unit);
+      }
+
+      return;
+}
