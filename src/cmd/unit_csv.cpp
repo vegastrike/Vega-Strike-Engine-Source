@@ -150,12 +150,12 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       pos.k = stof(nextElement(mount));
       double xyscale = stof(nextElement(mount));
       double zscale = stof(nextElement(mount));
-      Q.i = stof(nextElement(mount));
-      Q.j = stof(nextElement(mount),1);
-      Q.k = stof(nextElement(mount));
       R.i = stof(nextElement(mount));
       R.j = stof(nextElement(mount));
       R.k = stof(nextElement(mount),1);
+      Q.i = stof(nextElement(mount));
+      Q.j = stof(nextElement(mount),1);
+      Q.k = stof(nextElement(mount));
       float func =stof(nextElement(mount),1);
       float maxfunc =stof(nextElement(mount),1);
 
@@ -174,7 +174,7 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       unsigned int indx = xml.mountz.size();
       xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale,func,maxfunc));
       xml.mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
-      xml.mountz[indx]->SetMountPosition(pos.Cast());
+      xml.mountz[indx]->SetMountPosition(xml.unitscale*pos.Cast());
       int mntsiz=weapon_info::NOWEAP;
       if (mountsize.length()) {
         mntsiz=parseMountSizes(mountsize.c_str());
@@ -245,7 +245,7 @@ static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
       Q.j=stof(nextElement(subunit));
       Q.k=stof(nextElement(subunit));
       double restricted=cos(stof(nextElement(subunit),-1)*180./VS_PI);
-      ret.push_back(SubUnitStruct(filename,pos,R,Q,restricted));
+      ret.push_back(SubUnitStruct(filename,pos,Q,R,restricted));
     }
   }
   return ret;
@@ -269,7 +269,7 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
     xml.units.back()->SetOrientation (Q,R);
     R.Normalize();
     xml.units.back()->prev_physical_state = xml.units.back()->curr_physical_state;
-    xml.units.back()->SetPosition(pos);
+    xml.units.back()->SetPosition(pos*xml.unitscale);
     //    xml.units.back()->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     //    xml.units.back()->curr_physical_state=xml.units.back()->prev_physical_state;
     xml.units.back()->limits.structurelimits=R.Cast();
@@ -285,7 +285,7 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
   }
 }
 
-void AddDocks (Unit* thus, string docks) {
+void AddDocks (Unit* thus, Unit::XML &xml, string docks) {
   string::size_type where;
   while ((where=docks.find("{"))!=string::npos) {
     docks=docks.substr(where+1);    
@@ -300,7 +300,7 @@ void AddDocks (Unit* thus, string docks) {
       pos.k=stof(nextElement(dock));
       double size=stof(nextElement(dock));
       double minsize=stof(nextElement(dock));
-      thus->image->dockingports.push_back (DockingPorts(pos.Cast(),size,minsize,internal));      
+      thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size,minsize,internal));      
     }
   }
 }
@@ -325,7 +325,7 @@ void AddLights (Unit * thus, Unit::XML &xml, string lights) {
       halocolor.b=stof(nextElement(light),1);
       halocolor.a=stof(nextElement(light),1);
       double act_speed=stof(nextElement(light));
-      thus->addHalo(filename.c_str(),pos,scale.Cast(),halocolor,"",act_speed);
+      thus->addHalo(filename.c_str(),pos*xml.unitscale,scale.Cast(),halocolor,"",act_speed);
     }
   }
 }
@@ -463,6 +463,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
   AddMeshes(xml,row["Mesh"],faction,getFlightgroup());
+  AddDocks(this,xml,row["Dock"]);
   AddSubUnits(this,xml,row["Sub_Units"],faction);
   meshdata= xml.meshes;
   meshdata.push_back(NULL);
@@ -815,12 +816,12 @@ string Unit::WriteUnitString () {
                     m.p.k/unitScale,
                     (double)mounts[j].xyscale,
                     (double)mounts[j].zscale,
-                    (double)m.getQ().i,
-                    (double)m.getQ().j,
-                    (double)m.getQ().k,
                     (double)m.getR().i,
                     (double)m.getR().j,
                     (double)m.getR().k,
+                    (double)m.getQ().i,
+                    (double)m.getQ().j,
+                    (double)m.getQ().k,
                     (double)mounts[j].functionality,
                     (double)mounts[j].maxfunctionality
                     );
