@@ -163,7 +163,7 @@ AnimatedTexture * createAnimatedTexture( char const * c,int i,enum FILTER f)
 {
 	return new AnimatedTexture( c, i, f);
 }
-
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::~Mesh()
 {
 	if(!orig||orig==this)
@@ -194,9 +194,21 @@ Mesh::~Mesh()
 	    delete forcelogos;
 	    forcelogos = NULL;
 	  }
-	  if (meshHashTable.Get(hash_name)==this)
+	  if (meshHashTable.Get(hash_name)==this){
 	    meshHashTable.Delete(hash_name);
-	  
+	  }
+          vector <Mesh *>* hashers = bfxmHashTable.Get(hash_name);
+          vector <Mesh *>::iterator finder;
+          if (hashers) {
+            while ((finder=hashers->find(this)!=hashers.end())) {
+              hashers->erase (finder);
+              if (hashers.empty()) {
+                bfxmHashTable.Delete(hash_name);
+                delete hashers;
+              }
+                
+            }
+          }
 	  if(draw_queue!=NULL)
 	    delete draw_queue;
 	} else {
