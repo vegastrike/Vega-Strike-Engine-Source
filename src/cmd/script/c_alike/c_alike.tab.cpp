@@ -27,14 +27,13 @@
 #line 1 "c_alike.yacc"
 
 
-#if 0
+
+#include <stdio.h>
+#include <malloc.h>
+
 #include <vector>
 #include <string>
 
-	vector<string> pstack;
-#endif
-
-#include <malloc.h>
 
 extern int yyerror(char *);
 extern int yywrap();
@@ -44,6 +43,25 @@ extern int yylex();
 
   typedef char* str;
 #define YYSTYPE str
+
+	vector<string> pstack;
+
+string Pop(){
+	string res=pstack.back();
+	pstack.pop_back();
+	return res;
+}
+
+string printStack(){
+	int len=pstack.size();
+	string res;
+
+	for(int i=0;i<len;i++){
+		printf("stack #%2d  = -%s-\n",i,pstack[i].c_str());
+		res=res+pstack[i];
+	}
+	return res;
+}
 
 #ifndef YYSTYPE
 #define YYSTYPE int
@@ -58,11 +76,11 @@ extern int yylex();
 
 
 
-#define	YYFINAL		59
+#define	YYFINAL		64
 #define	YYFLAG		-32768
 #define	YYNTBASE	32
 
-#define YYTRANSLATE(x) ((unsigned)(x) <= 275 ? yytranslate[x] : 46)
+#define YYTRANSLATE(x) ((unsigned)(x) <= 275 ? yytranslate[x] : 50)
 
 static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -98,32 +116,33 @@ static const char yytranslate[] = {     0,
 #if YYDEBUG != 0
 static const short yyprhs[] = {     0,
      0,     3,     4,     8,    10,    12,    14,    17,    19,    21,
-    23,    26,    31,    32,    36,    38,    40,    42,    44,    48,
-    56,    60,    62,    64,    66,    68,    72,    76,    80,    84,
-    88,    92
+    23,    25,    27,    29,    31,    33,    36,    41,    42,    46,
+    48,    50,    52,    54,    58,    66,    70,    72,    74,    76,
+    78,    82,    86,    90,    94,    98,   102
 };
 
 static const short yyrhs[] = {     6,
-    33,     0,     0,    33,    34,    26,     0,    38,     0,    37,
-     0,    35,     0,     8,     3,     0,    14,     0,    15,     0,
-    16,     0,    36,     3,     0,     7,    27,    39,    28,     0,
-     0,    39,    40,    26,     0,    42,     0,    43,     0,    37,
-     0,    41,     0,     3,    29,    45,     0,     9,    30,    45,
-    31,    43,    11,    43,     0,    27,    39,    28,     0,     4,
-     0,     5,     0,    44,     0,     3,     0,    45,    12,    45,
-     0,    45,    13,    45,     0,    45,    24,    45,     0,    45,
-    25,    45,     0,    45,    22,    45,     0,    45,    23,    45,
-     0,    30,    45,    31,     0
+    33,     0,     0,    33,    34,    26,     0,    42,     0,    41,
+     0,    35,     0,     8,     3,     0,    37,     0,    38,     0,
+    39,     0,    40,     0,    14,     0,    15,     0,    16,     0,
+    17,     0,    36,     3,     0,     7,    27,    43,    28,     0,
+     0,    43,    44,    26,     0,    46,     0,    47,     0,    41,
+     0,    45,     0,     3,    29,    49,     0,     9,    30,    49,
+    31,    47,    11,    47,     0,    27,    43,    28,     0,     4,
+     0,     5,     0,    48,     0,     3,     0,    49,    12,    49,
+     0,    49,    13,    49,     0,    49,    24,    49,     0,    49,
+    25,    49,     0,    49,    22,    49,     0,    49,    23,    49,
+     0,    30,    49,    31,     0
 };
 
 #endif
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-    36,    37,    38,    39,    39,    39,    40,    41,    41,    41,
-    42,    43,    44,    45,    46,    47,    48,    49,    50,    51,
-    52,    53,    53,    54,    55,    56,    57,    58,    59,    60,
-    61,    62
+    54,    64,    65,    66,    66,    66,    72,    77,    77,    77,
+    77,    79,    80,    81,    82,    83,    89,    99,   100,   110,
+   111,   112,   113,   114,   115,   116,   117,   117,   118,   119,
+   120,   121,   122,   123,   124,   125,   126
 };
 #endif
 
@@ -134,78 +153,82 @@ static const char * const yytname[] = {   "$","error","$undefined.","L_ID","L_FL
 "L_INTCONST","L_MODULE","L_SCRIPT","L_IMPORT","L_IF","L_THEN","L_ELSE","L_EQUAL",
 "L_NOT_EQUAL","L_INT","L_FLOAT","L_BOOL","L_OBJECT","L_BEGINSCRIPT","L_ENDSCRIPT",
 "L_BEGINBLOCK","L_ENDBLOCK","'-'","'+'","'*'","'/'","';'","'{'","'}'","'='",
-"'('","')'","module","module_body","module_statement","import","vartype","defvar",
-"script","script_body","script_statement","setvar","if_statement","block_statement",
-"number","expr", NULL
+"'('","')'","module","module_body","module_statement","import","vartype","inttype",
+"floattype","booltype","objecttype","defvar","script","script_body","script_statement",
+"setvar","if_statement","block_statement","number","expr", NULL
 };
 #endif
 
 static const short yyr1[] = {     0,
     32,    33,    33,    34,    34,    34,    35,    36,    36,    36,
-    37,    38,    39,    39,    40,    40,    40,    40,    41,    42,
-    43,    44,    44,    45,    45,    45,    45,    45,    45,    45,
-    45,    45
+    36,    37,    38,    39,    40,    41,    42,    43,    43,    44,
+    44,    44,    44,    45,    46,    47,    48,    48,    49,    49,
+    49,    49,    49,    49,    49,    49,    49
 };
 
 static const short yyr2[] = {     0,
      2,     0,     3,     1,     1,     1,     2,     1,     1,     1,
-     2,     4,     0,     3,     1,     1,     1,     1,     3,     7,
-     3,     1,     1,     1,     1,     3,     3,     3,     3,     3,
-     3,     3
+     1,     1,     1,     1,     1,     2,     4,     0,     3,     1,
+     1,     1,     1,     3,     7,     3,     1,     1,     1,     1,
+     3,     3,     3,     3,     3,     3,     3
 };
 
 static const short yydefact[] = {     0,
-     2,     1,     0,     0,     8,     9,    10,     0,     6,     0,
-     5,     4,    13,     7,     3,    11,     0,     0,     0,    13,
-    12,    17,     0,    18,    15,    16,     0,     0,     0,    14,
-    25,    22,    23,     0,    24,    19,     0,    21,     0,     0,
-     0,     0,     0,     0,     0,     0,    32,    26,    27,    30,
-    31,    28,    29,     0,     0,    20,     0,     0,     0
+     2,     1,     0,     0,    12,    13,    14,    15,     0,     6,
+     0,     8,     9,    10,    11,     5,     4,    18,     7,     3,
+    16,     0,     0,     0,    18,    17,    22,     0,    23,    20,
+    21,     0,     0,     0,    19,    30,    27,    28,     0,    29,
+    24,     0,    26,     0,     0,     0,     0,     0,     0,     0,
+     0,    37,    31,    32,    35,    36,    33,    34,     0,     0,
+    25,     0,     0,     0
 };
 
-static const short yydefgoto[] = {    57,
-     2,     8,     9,    10,    22,    12,    17,    23,    24,    25,
-    26,    35,    36
+static const short yydefgoto[] = {    62,
+     2,     9,    10,    11,    12,    13,    14,    15,    27,    17,
+    22,    28,    29,    30,    31,    40,    41
 };
 
-static const short yypact[] = {     0,
--32768,    50,   -24,    31,-32768,-32768,-32768,    14,-32768,    40,
--32768,-32768,-32768,-32768,-32768,-32768,     1,    30,    32,-32768,
--32768,-32768,    34,-32768,-32768,-32768,    -3,    -3,     4,-32768,
--32768,-32768,-32768,    -3,-32768,    29,    -1,-32768,    13,    -3,
-    -3,    -3,    -3,    -3,    -3,    36,-32768,    29,    29,    43,
-    43,    -4,    -4,    58,    36,-32768,    61,    70,-32768
+static const short yypact[] = {     3,
+-32768,    68,   -20,     8,-32768,-32768,-32768,-32768,   -13,-32768,
+    20,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
+-32768,     1,     2,    -4,-32768,-32768,-32768,     4,-32768,-32768,
+-32768,    -3,    -3,     5,-32768,-32768,-32768,-32768,    -3,-32768,
+    42,    12,-32768,    26,    -3,    -3,    -3,    -3,    -3,    -3,
+    14,-32768,    42,    42,    56,    56,    -7,    -7,    29,    14,
+-32768,    44,    45,-32768
 };
 
 static const short yypgoto[] = {-32768,
--32768,-32768,-32768,-32768,    69,-32768,    52,-32768,-32768,-32768,
-   -41,-32768,     5
+-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,    40,-32768,
+    22,-32768,-32768,-32768,   -48,-32768,    13
 };
 
 
-#define	YYLAST		72
+#define	YYLAST		85
 
 
-static const short yytable[] = {    31,
-    32,    33,    13,    18,    54,     1,    18,    40,    41,    19,
-    40,    41,    19,    56,     5,     6,     7,     5,     6,     7,
-    42,    43,    44,    45,    40,    41,    34,    20,    21,    46,
-    20,    38,    37,    14,    42,    43,    44,    45,    39,    15,
-    40,    41,    16,    47,    48,    49,    50,    51,    52,    53,
-    42,    43,    44,    45,    40,    41,     3,     4,    27,    30,
-    58,    28,    20,     5,     6,     7,    44,    45,    55,    59,
-    11,    29
+static const short yytable[] = {    36,
+    37,    38,    59,    23,    45,    46,    18,    23,     1,    24,
+    19,    61,    20,    24,     5,     6,     7,     8,     5,     6,
+     7,     8,    21,    45,    46,    33,    39,    25,    26,    35,
+    32,    25,    43,    47,    48,    49,    50,    45,    46,    60,
+    25,    16,    51,    63,    64,    42,    34,    47,    48,    49,
+    50,    44,     0,    45,    46,     0,    52,    53,    54,    55,
+    56,    57,    58,    47,    48,    49,    50,    45,    46,     0,
+     0,     0,     0,     0,     3,     4,     0,     0,     0,    49,
+    50,     5,     6,     7,     8
 };
 
 static const short yycheck[] = {     3,
-     4,     5,    27,     3,    46,     6,     3,    12,    13,     9,
-    12,    13,     9,    55,    14,    15,    16,    14,    15,    16,
-    22,    23,    24,    25,    12,    13,    30,    27,    28,    31,
-    27,    28,    28,     3,    22,    23,    24,    25,    34,    26,
-    12,    13,     3,    31,    40,    41,    42,    43,    44,    45,
-    22,    23,    24,    25,    12,    13,     7,     8,    29,    26,
-     0,    30,    27,    14,    15,    16,    24,    25,    11,     0,
-     2,    20
+     4,     5,    51,     3,    12,    13,    27,     3,     6,     9,
+     3,    60,    26,     9,    14,    15,    16,    17,    14,    15,
+    16,    17,     3,    12,    13,    30,    30,    27,    28,    26,
+    29,    27,    28,    22,    23,    24,    25,    12,    13,    11,
+    27,     2,    31,     0,     0,    33,    25,    22,    23,    24,
+    25,    39,    -1,    12,    13,    -1,    31,    45,    46,    47,
+    48,    49,    50,    22,    23,    24,    25,    12,    13,    -1,
+    -1,    -1,    -1,    -1,     7,     8,    -1,    -1,    -1,    24,
+    25,    14,    15,    16,    17
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/lib/bison.simple"
@@ -751,16 +774,85 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 36 "c_alike.yacc"
-{ printf("<module>\n"); ;
+#line 54 "c_alike.yacc"
+{
+	 printf("<module>\n");
+	string module="<module>\n";
+
+	module=module+Pop();
+
+	module=module+"\n</module>\n\n";
+
+	printf("ENDRESULT: %s\n",module.c_str());
+;
+    break;}
+case 6:
+#line 66 "c_alike.yacc"
+{
+	string statement=Pop();
+	string body=Pop();
+	body=body+statement;
+	pstack.push_back(body);
+;
     break;}
 case 7:
-#line 40 "c_alike.yacc"
-{ printf("<import name=%s>\n",yyvsp[0]); ;
+#line 72 "c_alike.yacc"
+{
+	 printf("<import name=%s/>\n",yyvsp[0]);
+	string imp="<import name="+string(yyvsp[0])+">\n";
+	pstack.push_back(imp);
+ ;
     break;}
-case 11:
-#line 42 "c_alike.yacc"
-{ printf("<defvar name=%s>\n",yyvsp[0]); ;
+case 12:
+#line 79 "c_alike.yacc"
+{ pstack.push_back("int"); yyval=strdup("blah");
+    break;}
+case 13:
+#line 80 "c_alike.yacc"
+{ pstack.push_back("float"); ;
+    break;}
+case 14:
+#line 81 "c_alike.yacc"
+{ pstack.push_back("bool"); ;
+    break;}
+case 15:
+#line 82 "c_alike.yacc"
+{ pstack.push_back("object"); ;
+    break;}
+case 16:
+#line 83 "c_alike.yacc"
+{
+	string type=Pop();
+	 printf("<defvar 1=%s name=%s type=%s/>\n",yyval,yyvsp[0],type.c_str());
+	string defvar="<defvar name="+string(yyvsp[0])+" type="+type+">\n";
+	pstack.push_back(defvar);
+;
+    break;}
+case 17:
+#line 89 "c_alike.yacc"
+{
+
+	string script="<script>\n";
+#if 0
+	script=script+printStack();
+	script=script+"\n</script>\n";
+#endif
+	script=script+Pop();
+	pstack.push_back(script);
+;
+    break;}
+case 19:
+#line 100 "c_alike.yacc"
+{
+	printf("SCRIPT_BODY\n");
+	string forget=printStack();
+
+	string last_statement=Pop();
+
+	string body=Pop();
+	body=body+last_statement;
+	pstack.push_back(body);
+;
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
@@ -984,13 +1076,10 @@ yyerrhandle:
     }
   return 1;
 }
-#line 64 "c_alike.yacc"
+#line 128 "c_alike.yacc"
 
 
 /* nothing */
-
-
-#include <stdio.h>
 
 
 /* extern int yydebug; */
@@ -1000,7 +1089,11 @@ void main()
   extern FILE *yyin;
   yyin=fopen("test.c","r");
 /*  yydebug=1; */
+
+	pstack.push_back("");
+
   yyparse();
+
 }
 
 extern	int yylineno;
