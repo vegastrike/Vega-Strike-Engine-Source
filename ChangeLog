@@ -1,3 +1,12 @@
+2002-02-13 Daniel Horn <hellcatv@hotmail.com>
+	* Made genearted light maps save in home directory
+	* Made universes searched for in home directory
+	* Wired in a star system generator that will generate systems that are not there
+	* Added feature taht will call this generator in the event a system is not found
+	* Added a lame autopilot feature
+	* Added another version of config_xml.cpp  -- galaxy_xml  we should really combine duplicate code...but I don't know how to do it...config_xml depends a lot on joystick....
+	* Explore!!!!!!!!!!!!!!!!! You can craete a galaxy map using galaxy_xml to specify connectivity and who owns system...otherwise ti will pick unknown faction to own everything (hate everyone)
+	
 2002-02-12 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* first tutorial mission
