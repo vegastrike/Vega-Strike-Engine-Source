@@ -42,6 +42,7 @@ class StarSystem {
     string backgroundname;
     Vector systemcentroid;
     Vector cursun;
+    float timeofyear;
     float reflectivity;
     int numnearstars;
     int numstars;
@@ -84,7 +85,7 @@ class StarSystem {
   unsigned int numTerrain () {return terrains.size();}
   ContinuousTerrain * getContTerrain (unsigned int which) {return contterrains[which];}
   unsigned int numContTerrain () {return contterrains.size();}
-  void LoadXML(const char*, const Vector & centroid);
+  void LoadXML(const char*, const Vector & centroid, const float timeofyear);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
 
@@ -101,7 +102,7 @@ class StarSystem {
     cam[currentcamera].UpdateGFX();
   }
   ///Loads the star system from an XML file
-  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const string planetname=string());
+  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
   ~StarSystem();
   UnitCollection * getUnitList();
   /// returns xy sorted bounding spheres of all units in current view

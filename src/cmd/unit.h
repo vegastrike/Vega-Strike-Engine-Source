@@ -61,7 +61,8 @@ enum clsptr {
 	UNITPTR,
 	PLANETPTR,
 	BUILDINGPTR,
-	NEBULAPTR
+	NEBULAPTR,
+	ASTEROIDPTR
 };
 
 class VDU;
@@ -601,6 +602,9 @@ public:
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   ///Return unit-space velocity
   const Vector &GetVelocity() const { return cumulative_velocity; }
+  void SetVelocity (const Vector & v) {Velocity = v;}
+  void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
+  
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
   ///returns the ammt of elasticity of collisions with this unit

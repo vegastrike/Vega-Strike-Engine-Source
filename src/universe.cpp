@@ -61,7 +61,7 @@ void Universe::Init (string systemfile, const Vector & centr,const string planet
 
   string fullname=systemfile+".system";
   StarSystem * ss;
-  LoadStarSystem(ss=new StarSystem((char *)fullname.c_str(),centr,planetname));
+  LoadStarSystem(ss=new StarSystem((char *)fullname.c_str(),centr));
   pushActiveStarSystem (ss);
 }
 Universe::~Universe()

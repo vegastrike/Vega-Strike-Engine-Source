@@ -43,7 +43,7 @@ Atmosphere *theAtmosphere;
 
 
 
-StarSystem::StarSystem(const char * filename, const Vector & centr,const string planetname) : 
+StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) : 
   //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
@@ -54,13 +54,13 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const string 
   GFXCreateLightContext (lightcontext);
   bolts = new bolt_draw;
   collidetable = new CollideTable;
-  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
+  //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
 
   current_stage=PHY_AI;
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
   numprimaries=0;
-  LoadXML(filename,centr);
+  LoadXML(filename,centr,timeofyear);
   if (!name)
     name =strdup (filename);
   AddStarsystemToUniverse(filename);

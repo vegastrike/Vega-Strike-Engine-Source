@@ -260,7 +260,8 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
 	return false;
       }
       fclose (fp);
-      ss = new StarSystem (ssys.c_str(),Vector (0,0,0),un->name);
+      //fixme...need to use timeofyear
+      ss = new StarSystem (ssys.c_str(),Vector (0,0,0));
       _Universe->LoadStarSystem (ss);
       ss->SwapOut();
       _Universe->activeStarSystem()->SwapIn();

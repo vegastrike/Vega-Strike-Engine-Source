@@ -5,6 +5,8 @@ INCLUDES = -I ../
 libcmd_a_SOURCES =				\
 	atmosphere.h			\
 	atmosphere.cpp			\
+	asteroid.cpp			\
+	asteroid.h			\
 	beam.h				\
 	beam.cpp				\
 	bolt.h				\

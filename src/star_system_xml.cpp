@@ -17,6 +17,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/atmosphere.h"
 #include "cmd/nebula.h"
+#include "cmd/asteroid.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -96,8 +97,10 @@ namespace StarXML {
     ATMOSPHERE,
 	NEBULA,
     NEBFILE,
+    ASTEROID,
     SCALEX,
-    NUMWRAPS
+    NUMWRAPS,
+    DIFFICULTY
   };
 
   const EnumMap::Pair element_names[] = {
@@ -116,7 +119,8 @@ namespace StarXML {
     EnumMap::Pair ("Building",BUILDING),
     EnumMap::Pair ("Vehicle",VEHICLE),
     EnumMap::Pair ("Atmosphere",ATMOSPHERE),
-	EnumMap::Pair ("Nebula",NEBULA)
+    EnumMap::Pair ("Nebula",NEBULA),
+    EnumMap::Pair ("Asteroid",ASTEROID)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -155,11 +159,12 @@ namespace StarXML {
     EnumMap::Pair ("Light", LIGHT),
     EnumMap::Pair ("Mass", MASS),
     EnumMap::Pair ("ScaleX", SCALEX),
-    EnumMap::Pair ("NumWraps", NUMWRAPS)
+    EnumMap::Pair ("NumWraps", NUMWRAPS),
+    EnumMap::Pair ("Difficulty", DIFFICULTY)
   };
 
-  const EnumMap element_map(element_names, 16);
-  const EnumMap attribute_map(attribute_names, 37);
+  const EnumMap element_map(element_names, 17);
+  const EnumMap attribute_map(attribute_names, 38);
 }
 
 using XMLSupport::EnumMap;
@@ -571,6 +576,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case BUILDING:
   case VEHICLE:
   case NEBULA:
+  case ASTEROID:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
     S = Vector (0,1,0);
@@ -580,6 +586,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     filename = new char [1];
     filename[0]='\0';
     fullname="unkn-unit";
+    scalex = .01;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
@@ -595,6 +602,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	delete []nebfile;
 	nebfile = new char [strlen((*iter).value.c_str())+1];
 	strcpy(nebfile,(*iter).value.c_str());
+	break;
+      case DIFFICULTY:
+	scalex = parse_float ((*iter).value);
 	break;
       case FACTION:
 	faction = _Universe->GetFaction ((*iter).value.c_str());
@@ -648,6 +658,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		  un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 		  plan->AddSatellite(un=new Nebula(nebfile,filename,false,faction));			
+	  } else if (elem==ASTEROID) {
+	    plan->AddSatellite (un=new Asteroid (filename,faction,NULL,0,scalex));
 	  }
 	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
@@ -670,9 +682,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		  xml->moons.push_back((Planet *)moon_unit);
 		}else if (elem==NEBULA){
 		  xml->moons.push_back ((Planet *)new Nebula (nebfile,filename,false,faction));
-		} else {
-			const int NOTAUNITORNEBULA=0;
-			assert (NOTAUNITORNEBULA);
+		} else if (elem==ASTEROID){
+		  xml->moons.push_back ((Planet *)new Asteroid (filename,faction,NULL,0,scalex));
 		}
 		xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
 		xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
@@ -713,7 +724,7 @@ void StarSystem::endElement(const string &name) {
 }
 
 
-void StarSystem::LoadXML(const char *filename, const Vector & centroid) {
+void StarSystem::LoadXML(const char *filename, const Vector & centroid, const float timeofyear) {
   //  shield.number=0;
   const int chunk_size = 16384;
   // rrestricted=yrestricted=prestricted=false;
@@ -728,6 +739,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid) {
   xml->parentterrain=NULL;
   xml->ct=NULL;
   xml->systemcentroid=centroid;
+  xml->timeofyear = timeofyear;
   xml->fade = (vs_config->getVariable ("graphics","starblend","true")==string("true"));
   xml->starsp = 150;
   xml->numnearstars=400;
