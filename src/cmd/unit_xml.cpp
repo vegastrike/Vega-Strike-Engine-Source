@@ -122,7 +122,8 @@ namespace UnitXML {
       DELAY,
       JUMPENERGY,
       JUMPWAV,
-      DOCKINTERNAL
+      DOCKINTERNAL,
+      RAPID
     };
 
   const EnumMap::Pair element_names[] = {
@@ -225,13 +226,12 @@ namespace UnitXML {
     EnumMap::Pair ("Delay", DELAY),
     EnumMap::Pair ("JumpEnergy", JUMPENERGY),
     EnumMap::Pair ("JumpWav", JUMPWAV),
-    EnumMap::Pair ("DockInternal", DOCKINTERNAL)
-    
-
+    EnumMap::Pair ("DockInternal", DOCKINTERNAL),
+    EnumMap::Pair ("RAPID", RAPID)
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 69);
+  const EnumMap attribute_map(attribute_names, 70);
 }
 
 using XMLSupport::EnumMap;
@@ -293,6 +293,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case XFILE:
 	xml->bspmesh =(new Mesh((*iter).value.c_str(), true, faction));
 	xml->hasBSP = true;	
+	break;
+      case RAPID:
+	xml->hasColTree=parse_bool ((*iter).value);
 	break;
       }
     }
@@ -1029,6 +1032,7 @@ void Unit::LoadXML(const char *filename)
   xml->shieldmesh = NULL;
   xml->bspmesh = NULL;
   xml->hasBSP = true;
+  xml->hasColTree=true;
   xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -1126,7 +1130,10 @@ void Unit::LoadXML(const char *filename)
   else {
     SphereMesh * tmp = new SphereMesh (rSize(),8,8,"shield.bmp", NULL, false,ONE, ONE);
     tmp->GetPolys (polies);
-    colShield = new csRapidCollider (polies);
+    if (xml->hasColTree)
+      colShield = new csRapidCollider (polies);
+    else
+      colShield=NULL;
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
     if (shieldstacks!=8) {
       delete tmp;
@@ -1147,7 +1154,6 @@ void Unit::LoadXML(const char *filename)
     }	
   } else {
     bspTree = NULL;
-    colTree = NULL;
   }
   polies.clear();
   if (!xml->bspmesh) {
@@ -1157,8 +1163,11 @@ void Unit::LoadXML(const char *filename)
   }else {
     xml->bspmesh->GetPolys (polies);
   }
-  colTree = new csRapidCollider (polies);
-  
+  if (xml->hasColTree ) {
+    colTree = new csRapidCollider (polies);    
+  }else {
+    colTree=NULL;
+  }
   if (xml->bspmesh) {
     delete xml->bspmesh;
   }

@@ -634,6 +634,7 @@ struct Unit::XML {
   vector<Unit*> units;
   int unitlevel;
   bool hasBSP;
+  bool hasColTree;
   enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
 
   char yprrestricted;
