@@ -259,10 +259,13 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 		GFXColorf(getDamageColor(hull,true));
   		GFXTexCoord2f(middle_point_small, middle_point_small);
   		GFXVertexf(mul);
+		GFXColorf(getDamageColor(hull,true));
   		GFXTexCoord2f(middle_point, middle_point_small);
   		GFXVertexf(mur);
+		GFXColorf(getDamageColor(hull,true));
   		GFXTexCoord2f(middle_point, middle_point);
   		GFXVertexf(mlr);
+		GFXColorf(getDamageColor(hull,true));
   		GFXTexCoord2f(middle_point_small, middle_point);
   		GFXVertexf(mll);
   		GFXEnd();
