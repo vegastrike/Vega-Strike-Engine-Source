@@ -595,7 +595,16 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     }
   }
   Tab();
-  int pos = s.find ("^");
+  unsigned int atmos = s.find ("~");
+  string atmosphere;
+  if (atmos!=string::npos) {
+    atmosphere = s.substr (atmos+1,s.length());
+    if (atmosphere.empty()) {
+      atmosphere = "sol/earthcloudmaptrans.png";
+    }
+    s = s.substr (0,atmos);
+  }
+  unsigned int pos = s.find ("^");
   if (pos==string::npos||entitytype==JUMP) {
     fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
   }else {
@@ -623,8 +632,9 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   fprintf (fp," >\n");
 
   radii.push_back (entitytype!=GAS?radius:1.4*radius);
-
-  if (entitytype==GAS&&grand()<.3&&radius>8000&&radius<10500) {
+  static float pmin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","PlanetaryRingMinPlanet","300000"));
+  static float pmax = XMLSupport::parse_float (vs_config->getVariable ("galaxy","PlanetaryRingMaxPlanet","200000"));
+  if (entitytype==GAS&&grand()<.8&&radius>pmin&&radius<pmax) {
     WriteUnit ("unit","planetary-ring","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
   if ((entitytype!=JUMP&&entitytype!=MOON)||grand()<moonofmoonprob) {
@@ -644,8 +654,12 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     MakeMoons (100+grand()*300,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
   }
   radii.pop_back();
-  if (entitytype==PLANET&&temprandom<.1) {
-    Tab();fprintf (fp,"<Planet name=\"%s\" file=\"sol/earthcloudmaptrans.png\" alpha=\"true\" radius=\"%f\" gravity=\"0\" ri=\"0\" rj=\"0\" rk=\"0\" si=\"0\" sj=\"0\" sk=\"0\" />\n",thisname.c_str(),radius*1.12);
+  if ((entitytype==PLANET&&temprandom<.1)||(!atmosphere.empty())) {
+    if (atmosphere.empty()) {
+      atmosphere="sol/earthcloudmaptrans.png";
+    }
+    string NAME = thisname+" Atmosphere";
+    Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" alpha=\"true\" radius=\"%f\" gravity=\"0\" ri=\"0\" rj=\"0\" rk=\"0\" si=\"0\" sj=\"0\" sk=\"0\" />\n",NAME.c_str(),atmosphere.c_str(),radius*1.03);
   }
 
   Tab();fprintf (fp,"</Planet>\n"); 
