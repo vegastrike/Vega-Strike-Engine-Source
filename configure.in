@@ -1096,10 +1096,12 @@ CPPFLAGS="$saved_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for network communication system
 dnl --------------------------------------------------------------------------
-NETCOMM="0"
-AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-netcomm], [Enable hazardous network communications (Webcam and VOIP)]), [NETCOMM="1"; echo "Network communication system enabled"])
+TESTNETCOMM="0"
+AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-netcomm], [Enable hazardous network communications (Webcam and VOIP)]), [TESTNETCOMM="1"; echo "Network communication system enabled"])
 
-if test "$NETCOMM" = "1" ; then
+if test "$TESTNETCOMM" = "1" ; then
+    AC_DEFINE(NETCOMM,1,[enable hazardous network communications (Webcam and VOIP)])
+
 	dnl check for oss headers
 	saved_CPPFLAGS="$CPPFLAGS"
 
@@ -1113,18 +1115,20 @@ if test "$NETCOMM" = "1" ; then
 
 	if test "x$have_oss_h" = "xno" ; then
 	    echo "*** OSS headers not found : webcam support only."
-		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOSOUND -DNETCOMM"
-		NETCOMM_NOSOUND="1"
+        AC_DEFINE(NETCOMM_NOSOUND,1,[disable sound with NETCOMM])
+		TESTNETCOMM_NOSOUND="1"
 		dnl SHOULD TEST FOR QUICKTIME FRAMEWORK HERE !!!!
 		if test "$is_macosx" = "yes" ; then
     	 	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers -I/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/QD.framework/Versions/A/Headers"
     		LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
 		fi
 	else
-		NETCOMM_NOSOUND="0"
-		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
+		TESTNETCOMM_NOSOUND="0"
 	fi
 fi
+
+AM_CONDITIONAL(NETCOMM, test "$TESTNETCOMM" = "1")
+AM_CONDITIONAL(NETCOMM_NOSOUND, test "$TESTNETCOMM_NOSOUND" = "1")
 
 dnl --------------------------------------------------------------------------
 dnl Check for win32 winsock 2 support
@@ -1167,8 +1171,6 @@ fi
 AC_SUBST([BOOST_LIBS])
 AC_SUBST([BOOST_CPPFLAGS])
 AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST129" = "0")
-AM_CONDITIONAL(NETCOMM, test "$NETCOMM" = "1")
-AM_CONDITIONAL(NETCOMM_NOSOUND, test "$NETCOMM_NOSOUND" = "1")
 AM_CONDITIONAL(WIN32, test "$WIN32" = "1")
 AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
 
