@@ -34,7 +34,7 @@
 
 #include "navscreen.h"
 
-#include "masks.h"
+#include "gfx/masks.h"
 #include "navgetxmldata.h"
 
 #include "navitemstodraw.h"

@@ -145,6 +145,9 @@ private:
   void SetViewport() {
     cam[currentcamera].UpdateGFX();
   }
+  virtual bool SetDrawNavSystem(bool);
+  virtual bool CanDrawNavSystem();
+  virtual bool DrawNavSystem();
 
 };
 #endif

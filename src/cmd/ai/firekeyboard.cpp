@@ -1003,10 +1003,13 @@ void FireKeyboard::Execute () {
     ChooseTargets(parent,TargAll,false);
     refresh_target=true;
   }
-  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN)
+  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
+    if (!_Universe->AccessCockpit()->CanDrawNavSystem())
       parent->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
+  }
   if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
-    parent->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
+    if (!_Universe->AccessCockpit()->CanDrawNavSystem())
+      parent->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
     if (f().missilekey==PRESS)
       f().missilekey = DOWN;
     if (j().jmissilekey==PRESS)

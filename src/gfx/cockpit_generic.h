@@ -132,6 +132,8 @@ protected:
   virtual void SelectCamera(int) {}
   ///GFXLoadMatrix proper camera
   virtual void SetViewport() {}
-
+  virtual bool SetDrawNavSystem(bool){return false;}
+  virtual bool CanDrawNavSystem() {return false;}
+  virtual bool DrawNavSystem() {return false;}
 };
 #endif

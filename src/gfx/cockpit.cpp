@@ -903,19 +903,31 @@ void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
      {
       UniverseUtil::IOmessage(0,"game","all","hit key");
  
-    if(((GameCockpit *)_Universe->AccessCockpit())->ThisNav.CheckDraw())
+    if((_Universe->AccessCockpit())->CanDrawNavSystem())
       {
-       ((GameCockpit *)_Universe->AccessCockpit())->ThisNav.SetDraw(0);
+       (_Universe->AccessCockpit())->SetDrawNavSystem(0);
        UniverseUtil::IOmessage(0,"game","all","DRAWNAV - OFF");
       }
   else
     {
-     ((GameCockpit *)_Universe->AccessCockpit())->ThisNav.SetDraw(1);
+     (_Universe->AccessCockpit())->SetDrawNavSystem(1);
      UniverseUtil::IOmessage(0,"game","all","DRAWNAV - ON");
     }
   }
 }
-
+bool GameCockpit::SetDrawNavSystem(bool what) {
+  ThisNav.SetDraw(what);
+  return what;
+}
+bool GameCockpit::CanDrawNavSystem() {
+  return ThisNav.CheckDraw();
+}
+bool GameCockpit::DrawNavSystem() {
+  bool ret = ThisNav.CheckDraw();
+  if (ret)
+    ThisNav.Draw();
+  return ret;
+}
 void RespawnNow (Cockpit * cp) {
   while (respawnunit.size()<=_Universe->numPlayers())
     respawnunit.push_back(0);
@@ -1319,9 +1331,10 @@ void GameCockpit::Draw() {
 	zoomfactor=dietime*10;
 	}
   }
-  ThisNav.Draw();
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
+  DrawNavSystem();
+
   GFXEnable (DEPTHWRITE);
   GFXEnable (DEPTHTEST);
 }

@@ -50,6 +50,16 @@
 #include "networking/netclient.h"
 #include "universe.h"
 #include "save_util.h"
+#include "gfx/masks.h"
+int nadanixnuthin() {
+  float a=0;
+  int test=0;
+  Delta(a, a);
+    flipbit(test,test);
+    checkbit(test,test);
+    dosetbit(test,test);
+    unsetbit(test,test);
+}
 /*
  * Globals 
  */
