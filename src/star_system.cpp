@@ -530,12 +530,18 @@ void StarSystem::Update(float priority ) {
 	  Unit::ProcessDeleteQueue();
 	  current_stage=MISSION_SIMULATION;
       }else if (current_stage==MISSION_SIMULATION) {
+#ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
+	if (_Universe->getActiveStarSystem(0)==this) {
+#endif
 	for (unsigned int i=0;i<active_missions.size();i++) {
 	  if (active_missions[i]) {
 	    active_missions[i]->DirectorLoop();
 	    active_missions[i]->DirectorBenchmark();
 	  }
 	}
+#ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
+	}
+#endif
 
 	current_stage=PHY_COLLIDE;
       }else if (current_stage==PHY_COLLIDE) {
