@@ -240,9 +240,9 @@ void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numli
 
 GFXVertexList::~GFXVertexList() {
     if (vbo_data) {
-      (*glDeleteBuffersARB_p)(1,&(GLuint)vbo_data);
+      (*glDeleteBuffersARB_p)(1,(GLuint*)&vbo_data);
        if (display_list) {
-         (*glDeleteBuffersARB_p)(1,&(GLuint)display_list);
+         (*glDeleteBuffersARB_p)(1,(GLuint*)&display_list);
        }     
     }else if (display_list)
     GFXDeleteList (display_list); //delete dis
