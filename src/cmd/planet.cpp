@@ -160,8 +160,6 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
   Vector t (_Universe->AccessCamera()->GetPosition()-quat.position);
   if (t.Dot(t)<radius*radius) {
-    //no planet mode...disabel terrain
-  } else {
     if (!inside) {
       TerrainUp = t;
       Normalize(TerrainUp);
