@@ -413,7 +413,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 // Do not do anything when using JVoIP lib
 }
 
-void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypted)
+void	NetworkCommunication::RecvSound( const char * sndbuffer, int length, bool encrypted)
 {
 #ifdef NETCOMM_PORTAUDIO
 	if( use_pa)

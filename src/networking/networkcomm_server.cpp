@@ -12,7 +12,7 @@ int		NetworkCommunication::DestroySession() { return 0;}
 //void	NetworkCommunication::SendImage( SOCKETALT & socket) {}
 void	NetworkCommunication::SendSound( SOCKETALT & socket, ObjSerial serial) {}
 void	NetworkCommunication::SendMessage( SOCKETALT & socket, ObjSerial serial, string message) {}
-void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypted) {}
+void	NetworkCommunication::RecvSound( const char * sndbuffer, int length, bool encrypted) {}
 void	NetworkCommunication::RecvMessage( string message, bool encrypted) {}
 
 char *	NetworkCommunication::GetWebcamCapture() { return NULL;}
