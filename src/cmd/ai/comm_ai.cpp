@@ -122,7 +122,8 @@ static bool InList (std::string item, Unit * un) {
   if (un) {
   for (unsigned int i=0;i<un->numCargo();i++) {
     if (item==un->GetCargo(i).content) {
-      return true;
+      if (un->GetCargo(i).quantity>0)
+	return true;
     }
   }
   }
