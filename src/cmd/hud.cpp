@@ -22,7 +22,7 @@
 #include "gfxlib.h"
 #include "hud.h"
 #include "lin_time.h"
-#include "file.h"
+#include "file_main.h"
 #include "gfx/mesh.h"
 #include "gfx/aux_texture.h"
 #include "ai/order.h"

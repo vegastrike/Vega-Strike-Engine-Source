@@ -4,6 +4,9 @@ SUBDIRS = cmd gfx gldrv
 vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a gfx/libgfx.a gldrv/libgldrv.a
 
 vegastrike_SOURCES =				\
+	file_main.h				\
+	gfxlib.h				\
+	gfxlib_struct.h				\
 	hashtable.h				\
 	hashtable.cpp				\
 	hashtable_3d.h				\
