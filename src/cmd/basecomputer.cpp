@@ -2235,7 +2235,7 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Con
 }
 static std::string simplePrettySystem(std::string system) {
   std::string::size_type where=system.find("/");
-  return std::string("Sector: ")+system.substr(0,where)+" System: "+(where==string::npos?system:system.substr(where+1));
+  return std::string("Sec:")+system.substr(0,where)+" Sys:"+(where==string::npos?system:system.substr(where+1));
 }
 static std::string simplePrettyShip(std::string ship) {
   if (ship.length()>0) {
@@ -2267,7 +2267,7 @@ static std::string GarnerInfoFromSaveGame(string text) {
     if (Ships.size()>2){
       text+="Fleet:#n#";
       for (int i=2;i<Ships.size();i+=2){
-        text+=simplePrettyShip(Ships[i-1])+"#n#  Located At: "+simplePrettySystem(Ships[i])+"#n#";
+        text+=simplePrettyShip(Ships[i-1])+"#n#  Located At:#n#  "+simplePrettySystem(Ships[i])+"#n#";
       }
     }
   }
