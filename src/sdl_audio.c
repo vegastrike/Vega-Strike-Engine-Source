@@ -661,7 +661,7 @@ bool_t is_music_playing()
 {
     return False;
 }
-
+/*
 static int bind_sounds_cb( ClientData cd, Tcl_Interp *ip, 
 			   int argc, char *argv[]) 
 {
@@ -679,7 +679,7 @@ void register_sound_tcl_callbacks( Tcl_Interp *ip )
     Tcl_CreateCommand (ip, "tux_bind_sounds", bind_sounds_cb,  0,0);
     Tcl_CreateCommand (ip, "tux_bind_music", bind_music_cb,  0,0);
 }
-
+*/
 bool_t halt_sound( char *sound_context )
 {
     return True;

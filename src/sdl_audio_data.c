@@ -682,7 +682,7 @@ mark_music_data_clean()
 {
 }
 
-
+/*
 static int load_sound_cb( ClientData cd, Tcl_Interp *ip, 
 			  int argc, char *argv[]) 
 {
@@ -709,5 +709,5 @@ void register_sound_data_tcl_callbacks( Tcl_Interp *ip )
     Tcl_CreateCommand (ip, "tux_load_sound", load_sound_cb,  0,0);
     Tcl_CreateCommand (ip, "tux_load_music", load_music_cb,  0,0);
 }
-
+*/
 #endif /* defined(HAVE_SDL) && defined(HAVE_SDL_MIXER) */
