@@ -171,6 +171,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  this->serial = 0;
 			  if (target&&target!=owner) {
 					temp->Target (target);
+					temp->TargetTurret(target);
 					string s =string("ai/script/")+type->file+string(".xai");
 					FILE * fp = fopen (s.c_str(),"r");
 					if (fp) {
@@ -181,6 +182,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					}else {
 						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml","default.int.xml"));
 						temp->SetTurretAI();
+						temp->TargetTurret(target);
+
 					}
 			  } else {
 					temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
