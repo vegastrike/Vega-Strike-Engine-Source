@@ -144,10 +144,11 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
       case RELATION:
 	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].relationship=parse_float((*iter).value);
 	break;
-      }
       case CONVERSATION:
 	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].conversation=new FSM ((*iter).value.c_str());
 	break;
+	
+      }
     }
     break;
   }
