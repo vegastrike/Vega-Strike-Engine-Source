@@ -9,9 +9,10 @@ class Pointer *from_python(PyObject *p,boost::python::type<class Pointer *>);
 class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 //DEC_FROM_PYTHON_SMART_POINTER(Unit)
 */
+#include <boost/python/objects.hpp>
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
-#include "python/init.h"
+#include "init.h"
 #include "cmd/script/pythonmission.h"
 #include <compile.h>
 #include <eval.h>
