@@ -86,7 +86,7 @@ friend class PlanetaryOrbit;
   void endElement(const string &name);
 
  protected:
-  void UpdateCollideTable();
+  void UpdateCollideQueue();
   BSPTree *bspTree;
   int ucref;
   bool killed;

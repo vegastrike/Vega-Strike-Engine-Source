@@ -233,17 +233,7 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat, bo
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-  Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
-  Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
-
-  if (CollideInfo.object == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
-    if (CollideInfo.object!=NULL)
-      KillCollideTable(&CollideInfo);
-    CollideInfo.object = this;
-    CollideInfo.Mini= Puffmin;
-    CollideInfo.Maxi=Puffmax;
-    AddCollideQueue (CollideInfo);
-  }
+  UpdateCollideQueue();
   int i;
   //  if (round_two) {
     for (i=0;i<nummounts;i++) {

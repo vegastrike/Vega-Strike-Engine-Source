@@ -21,15 +21,27 @@ void KillCollideTable (LineCollide * lc) {
 void AddCollideQueue (const LineCollide &tmp) {
   collidetable.Put (&tmp,&tmp);
 }
+void Unit::UpdateCollideQueue () {
+  Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
+  Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
+  if (CollideInfo.object == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
+    if (CollideInfo.object!=NULL)
+      KillCollideTable(&CollideInfo);
+    CollideInfo.object = this;
+    CollideInfo.Mini= Puffmin;
+    CollideInfo.Maxi=Puffmax;
+    AddCollideQueue (CollideInfo);
+  }
+}
 
 void Unit::CollideAll() {
   unsigned int i;
 #define COLQ colQ
   vector <const LineCollide*> colQ;
-  collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
+  bool huge = collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
   for (i=0;i<COLQ.size();i++) {
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if (COLQ[i]->object!=this)
+    if (COLQ[i]->object>this||(!huge&&i<collidetable.GetHuge().size()))//the first stuffs are in the huge array
       if (
 	  Position().i+radial_size>COLQ[i]->Mini.i&&
 	  Position().i-radial_size<COLQ[i]->Maxi.i&&
@@ -73,8 +85,6 @@ bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do eac
   return false;
 }
 
-void Unit::UpdateCollideTable () {
-}
 
 bool Unit::Collide (Unit * target) {
   if (target==this) 
@@ -102,9 +112,9 @@ bool Unit::Collide (Unit * target) {
   //  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
   //  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-  fprintf (stderr,"Collidison %s %s",name.c_str(),target->name.c_str());
-  //082801GOODsmaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  //082801GOODbigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  //fprintf (stderr,"Collidison %s %s",name.c_str(),target->name.c_str());
+  smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }

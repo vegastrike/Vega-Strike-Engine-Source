@@ -129,6 +129,7 @@ Planet::~Planet() {
 
 void Planet::gravitate(UnitCollection *uc) {
   float *t = cumulative_transformation_matrix;
+  UpdateCollideQueue();
   /*
   if(gravity!=0.0) {
     Iterator *iterator = uc->createIterator();
@@ -159,5 +160,7 @@ void Planet::gravitate(UnitCollection *uc) {
     satellites[a]->origin =  curr_physical_state.position;
 	if (satellites[a]->isUnit()==PLANETPTR) 
 	    ((Planet *)satellites[a])->gravitate(uc);//FIXME 071201
+	else
+	  ((Unit *)satellites[a])->ResolveForces (identity_transformation,identity_matrix,false); 
   }
 }
