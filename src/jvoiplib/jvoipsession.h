@@ -44,7 +44,7 @@
 #include <vector>
 
 #ifdef WIN32
-	#include <winsock2.h>
+	#include <windows.h>
 #else // unix-like systems
 	#include <sys/time.h>
 	#include <unistd.h>

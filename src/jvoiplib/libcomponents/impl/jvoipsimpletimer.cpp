@@ -43,7 +43,7 @@
 
 #else
 	#include <sys/timeb.h>
-	#include <winsock2.h>
+	#include <windows.h>
 
 	inline void JVOIPSimpleTimer::GetTheCurrentTime(struct timeval *tv)
 	{

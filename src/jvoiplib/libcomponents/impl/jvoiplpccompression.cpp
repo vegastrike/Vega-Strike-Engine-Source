@@ -39,7 +39,7 @@
 #include <string.h>
 #include <list>
 #ifdef WIN32
-	#include <winsock2.h>
+	#include <windows.h>
 #else
 	#include <sys/time.h>
 	#include <sys/types.h>

@@ -43,7 +43,6 @@
 #include "jvoipsampleconverter.h"
 #include "jvoipmixerstatus.h"
 #include "voiceblock.h"
-#include <winsock2.h>
 #include <windows.h>
 #include <mmsystem.h>
 
