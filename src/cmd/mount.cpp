@@ -259,10 +259,11 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			}
 
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
+    static bool ai_use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_high_quality_weapon","false"));
 	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));
 	Cockpit * cp;
 	bool ips = ((cp=_Universe->isPlayerStarship(owner))!=NULL);
-    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!ips))&&(type->type!=weapon_info::PROJECTILE)) {
+    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||((!ai_use_separate_sound)&&!ips))&&(type->type!=weapon_info::PROJECTILE)) {
 		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
 			if (!AUDIsPlaying (sound)) {
 				AUDPlay (sound,tmp.position,velocity,1);
