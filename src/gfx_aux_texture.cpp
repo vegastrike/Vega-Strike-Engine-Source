@@ -20,7 +20,6 @@
  */
 
 #include <stdio.h>
-//#include <gl/gl.h>
 #include "gfx_aux_texture.h"
 #include <assert.h>
 #include "gfxlib.h"
