@@ -271,7 +271,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 }
 
 void GFXActiveTexture (int stage) {
-  if (g_game.Multiplayer&&stage!=activeTextureStage) {
+  if (g_game.Multitexture&&stage!=activeTextureStage) {
     glActiveTextureARB(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
