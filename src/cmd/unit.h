@@ -449,6 +449,7 @@ public:
   bool UnDock (Unit * unitToDockWith);
   ///Does a one way collision between smaller target and this
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
+  int GetNumMounts ()const  {return nummounts;}
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
@@ -462,6 +463,7 @@ public:
   void SetFaction (int faction);
   bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
   bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
+  double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
   bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
   bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
   vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist);

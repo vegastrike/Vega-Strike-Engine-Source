@@ -16,6 +16,8 @@
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
+extern int GetModeFromName (const char *);
+
 void Unit::Mount::SwapMounts (Unit::Mount &other) {
   short thisvol = volume;
   short othervol = other.volume;
@@ -636,7 +638,25 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   }
   return cancompletefully;
 }
-
+double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
+	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
+	Unit * templ = UnitFactory::createUnit ((this->name+".template").c_str(),true,this->faction);
+	double percentage=0;
+	if (up->name!="LOAD_FAILED") {
+	  
+	  for  (int i=0;percentage==0;i++ ) {
+	    if (!this->Upgrade(up,mountoffset, subunitoffset, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ)) {
+	      percentage=0;
+	    }
+	    if (!loop_through_mounts||(i+1>=this->GetNumMounts ())) {
+	      break;
+	    }
+	  }
+	}
+	templ->Kill();
+	up->Kill();
+	return percentage;
+}
 void YoinkNewlines (char * input_buffer) {
     for (int i=0;input_buffer[i]!='\0';i++) {
       if (input_buffer[i]=='\n'||input_buffer[i]=='\r') {

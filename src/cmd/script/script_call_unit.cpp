@@ -61,7 +61,7 @@
 #include "cmd/unit_factory.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
-extern int GetModeFromName (const char *);
+
 /* *********************************************************** */
 
 extern Unit& GetUnitMasterPartList ();
@@ -1006,21 +1006,18 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       string file = getStringArgument (node,mode,1);
       double percentage=0;
       bool force=true;
+      bool loop_through_mounts=false;
       int mountoffset = getIntArg(node,mode,2);      
       int subunitoffset = getIntArg(node,mode,3);      
-      if (node->subnodes.size()>4) {
+      unsigned int siz = node->subnodes.size();
+      if (siz>4) {
         force = getBoolArg(node,mode,4);
+	if (siz>5) {
+	  loop_through_mounts =getBoolArg (node,mode,5);
+	}
       }
       if (mode==SCRIPT_RUN) {
-	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
-	Unit * templ = UnitFactory::createUnit ((my_unit->name+".template").c_str(),true,my_unit->faction);
-	if (up->name!="LOAD_FAILED") {
-	  if (!my_unit->Upgrade(up,mountoffset, subunitoffset, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ)) {
-	    percentage=0;
-	  }
-	}
-	templ->Kill();
-	up->Kill();
+	percentage=my_unit->Upgrade (file,mountoffset,subunitoffset,force,loop_through_mounts);
       }
 
       viret=newVarInst(VI_TEMP);
