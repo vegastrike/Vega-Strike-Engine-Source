@@ -623,26 +623,36 @@ public:
   void ExecuteAI();
 
  private:
+  ///the flightgroup this ship is in
   Flightgroup *flightgroup;
+  ///the flightgroup subnumber
   int flightgroup_subnumber;
-  
+  ///not used yet
   string target_fgid[3];
 
  protected:
+  ///if the unit is a planet, this contains the long-name 'mars-station'
   string fullname;
  public:
   void SetTurretAI ();
+  ///get the flightgroup description
   Flightgroup *getFlightgroup() const { return flightgroup; };
+  ///get the subnumber
   int getFgSubnumber() const { return flightgroup_subnumber; };
-  
+  ///get the full flightgroup ID (i.e 'green-4')
   const string getFgID();
+  /// sets the full name/fgid for planets
   void setFullname(string name)  { fullname=name; };
-  
+  ///not used yet
   void setTargetFg(string primary,string secondary=string(),string tertiary=string());
+  ///not used yet
   void ReTargetFg(int which_target=0);
-  
+  ///not used yet
   int getNumAttackers();
 
+  bool isStarShip(){ if(isUnit()==UNITPTR){ return true;} return false; };
+  bool isPlanet(){ if(isUnit()==PLANETPTR){ return true;} return false; };
+  bool isJumppoint(){ if(GetDestinations().size()!=0){ return true; } return false; }
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {

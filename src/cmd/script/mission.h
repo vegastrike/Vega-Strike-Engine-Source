@@ -390,6 +390,7 @@ void printNode(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
  varInst * callResetTimeCompression(missionNode *node,int mode);
+varInst * callGetSystemName(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst *  call_setNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);

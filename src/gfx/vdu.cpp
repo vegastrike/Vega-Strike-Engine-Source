@@ -447,7 +447,7 @@ void VDU::DrawDamage(Unit * parent) {
 void VDU::SetViewingStyle(VIEWSTYLE vs) {
   viewStyle = vs;
 }
-void DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle) {
+void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target) {
   VIEWSTYLE which=viewStyle;
   _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
   _Universe->SelectCamera(which);
@@ -463,6 +463,10 @@ void DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle) 
    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   GFXLoadIdentity(MODEL);
   GFXLoadIdentityView();
+
+  char buf[1024];
+  sprintf(buf,"\n%s:%s\n",target->getFgID().c_str(),target->name.c_str());
+  tp->Draw(buf);
   // _Universe->AccessCockpit()->RestoreViewPort();
 }
 
@@ -526,7 +530,7 @@ void VDU::Draw (Unit * parent) {
   case VIEW:
     GetPosition (x,y);
     GetSize (w,h);
-    DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle);
+    DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle,parent,targ);
     break;
   case NAV:
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()));

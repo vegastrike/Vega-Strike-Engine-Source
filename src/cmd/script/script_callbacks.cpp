@@ -87,6 +87,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method=="ResetTimeCompression"){
       vi=callResetTimeCompression(node,mode);
     }
+    else if(method=="getSystemName" || method=="GetSystemName"){
+      vi=callGetSystemName(node,mode);
+    }
     else if(method=="getCurrentAIUnit"){
       vi=callGetCurrentAIUnit(node,mode);
     }
@@ -275,6 +278,19 @@ varInst *Mission::callResetTimeCompression(missionNode *node,int mode){
   vi->type=VAR_VOID;
   if(mode==SCRIPT_RUN){
     setTimeCompression(1.0);
+  }
+  return vi;
+}
+varInst *Mission::callGetSystemName(missionNode *node,int mode){
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="string";
+
+  if(mode==SCRIPT_RUN){
+    deleteVarInst(vi);
+    StarSystem *ssystem=_Universe->activeStarSystem();
+    string sysname=ssystem->getName();
+    vi=call_string_new(node,mode,sysname);
   }
   return vi;
 }
@@ -514,6 +530,20 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	printf(beforestring.c_str());
 	printf("%d",res);
+      }
+    }
+    else if(breakstring[1]=='b'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      bool res=checkBoolExpr(anode,mode);
+
+      if(mode==SCRIPT_RUN){
+	printf(beforestring.c_str());
+	if(res==true){
+	  printf("true");
+	}
+	else{
+	  printf("false");
+	}
       }
     }
     else if(breakstring[1]=='s'){

@@ -234,6 +234,40 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	//return viret;
       }
     }
+    else if(cmd=="getVelocity"){
+      if(mode==SCRIPT_RUN){
+	varInst *vec3_vi=call_olist_new(node,mode);
+
+	Vector pos=my_unit->GetVelocity()/my_unit->GetVelocity().Magnitude();
+
+	varInst *pos_vi;
+
+	pos_vi=newVarInst(VI_TEMP);
+	pos_vi->type=VAR_FLOAT;
+	pos_vi->float_val=pos.i;
+	call_olist_push_back(node,mode,vec3_vi,pos_vi);
+
+	pos_vi=newVarInst(VI_TEMP);
+	pos_vi->type=VAR_FLOAT;
+	pos_vi->float_val=pos.j;
+	call_olist_push_back(node,mode,vec3_vi,pos_vi);
+
+	pos_vi=newVarInst(VI_TEMP);
+	pos_vi->type=VAR_FLOAT;
+	pos_vi->float_val=pos.k;
+	call_olist_push_back(node,mode,vec3_vi,pos_vi);
+
+	//	deleteVarInst(vec3_vi);
+	viret=vec3_vi;
+	//return vec3_vi;
+      }
+      else{
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_OBJECT;
+	viret->objectname="olist";
+	//return viret;
+      }
+    }
     else if(cmd=="getTarget"){
       Unit *res_unit=NULL;
       if(mode==SCRIPT_RUN){
@@ -353,6 +387,33 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_FLOAT;
       viret->float_val=res;
+    }
+    else if(cmd=="isStarShip"){
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->isStarShip();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
+    }
+    else if(cmd=="isPlanet"){
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->isPlanet();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
+    }
+    else if(cmd=="isJumppoint"){
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->isJumppoint();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
     }
     else if(cmd=="getOrientationP"){
 #if 0

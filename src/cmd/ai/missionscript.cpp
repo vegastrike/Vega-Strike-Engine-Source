@@ -118,13 +118,65 @@ AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : A
 
 }
 
+AIFlyToWaypointDefend::AIFlyToWaypointDefend(Vector wp,float velo,bool afburn,float rng) : AImissionScript("ai_flyto_waypoint_defend") {
+  waypoint=wp;
+  vel=velo;
+  range=rng;
+  aburn=afburn;
+
+  varInst *vi_wp=mission->lookupClassVariable(modulename,"waypoint",classid);
+  mission->call_vector_into_olist(vi_wp,waypoint);
+
+  varInst *vi_range=mission->lookupClassVariable(modulename,"abort_range",classid);
+  vi_range->float_val=range;
+
+  varInst *vi_vel=mission->lookupClassVariable(modulename,"vel",classid);
+  vi_vel->float_val=vel;
+
+  varInst *vi_aburn=mission->lookupClassVariable(modulename,"afterburner",classid);
+  vi_aburn->bool_val=aburn;
+
+
+}
 
 
 AISuperiority::AISuperiority() : AImissionScript("ai_superiority") {
 
 }
+AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit,float fly_speed,bool aft) : AImissionScript("ai_flyto_jumppoint") {
+
+  varInst *vi_speed=mission->lookupClassVariable(modulename,"fly_speed",classid);
+  vi_speed->float_val=fly_speed;
+
+  varInst *vi_aft=mission->lookupClassVariable(modulename,"afterburner",classid);
+  vi_aft->float_val=aft;
+
+  varInst *vi_unit=mission->lookupClassVariable(modulename,"jumppoint_unit",classid);
+  vi_unit->objectname="unit";
+  vi_unit->object=jumppoint_unit;
+
+}
 
 AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol") {
+
+  varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);
+  mission->call_vector_into_olist(vi_wp,area);
+
+  varInst *vi_range=mission->lookupClassVariable(modulename,"range",classid);
+  vi_range->float_val=range;
+
+  varInst *vi_speed=mission->lookupClassVariable(modulename,"patrol_speed",classid);
+  vi_speed->float_val=patrol_speed;
+
+  varInst *vi_mode=mission->lookupClassVariable(modulename,"patrol_mode",classid);
+  vi_mode->int_val=mode;
+
+  varInst *vi_unit=mission->lookupClassVariable(modulename,"around_unit",classid);
+  vi_unit->objectname="unit";
+  vi_unit->object=around_unit;
+
+}
+AIPatrolDefend::AIPatrolDefend(int mode,Vector area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol_defend") {
 
   varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);
   mission->call_vector_into_olist(vi_wp,area);

@@ -54,10 +54,29 @@ class AIFlyToWaypoint : public AImissionScript {
   float range;
   bool aburn;
 };
+class AIFlyToWaypointDefend : public AImissionScript {
+ public:
+  AIFlyToWaypointDefend(Vector waypoint,float vel,bool afburn,float range);
+
+  Vector waypoint;
+  float vel;
+  float range;
+  bool aburn;
+};
+
+class AIFlyToJumppoint : public AImissionScript {
+ public:
+  AIFlyToJumppoint(Unit *jumppoint,float fly_speed,bool aft);
+};
 
 class AIPatrol : public AImissionScript {
  public:
   AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patrol_speed);
+};
+
+class AIPatrolDefend : public AImissionScript {
+ public:
+  AIPatrolDefend(int mode,Vector area,float range,Unit *around_unit,float patrol_speed);
 };
 
 class AISuperiority : public AImissionScript {

@@ -1,3 +1,14 @@
+2002-02-19 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* new callbacks:
+	  - _std.getSystemName()
+	  - _unit.getVelocity(),isPlanet(),isStarShip(),isJumppoint()
+	* added scale and add to vec3.c
+	* random_launch.c: launch in front of player
+	* modified unit.h to have is... functions
+	* started to write more AIs (not yet)
+
+	
 2002-02-18 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* little improvements to random_launch.c
