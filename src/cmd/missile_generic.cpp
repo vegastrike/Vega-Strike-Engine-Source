@@ -39,16 +39,11 @@ void MissileEffect::ApplyDamage (Unit * smaller) {
 	}
     rad=rad/(radialmultiplier*radialmultiplier); // where radialmultiplier is radius of point with 0 falloff
 	
-	if( (damage>0)) {
       Vector norm (pos-smaller->Position().Cast());
       norm.Normalize();
 	  //UniverseUtil::IOmessage(0,"game","all",string("dealt ")+XMLSupport::tostring(damage/rad)+string(" damage from ")+XMLSupport::tostring(orig)+string(" meters ")+XMLSupport::tostring(damage)+string(" damage and "+XMLSupport::tostring(radialmultiplier)+string(" rad mult"))); 
       //divide effects by r^2
       smaller->ApplyDamage (pos,norm,damage/rad,smaller,GFXColor(1,1,1,1),NULL,phasedamage>0?phasedamage/rad:0);
-    }
-    if (damage<0||phasedamage<0) {
-      smaller->leach (1,phasedamage<0?-phasedamage:1,damage<0?-damage:0);
-    }  
   }
 }
 
