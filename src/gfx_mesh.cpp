@@ -697,7 +697,8 @@ void Mesh::Draw()
 
 	GFXSelectTexcoordSet(0, 0);
 	if(envMap) {
-	  _GFX->getLightMap()->MakeActive();
+	  //_GFX->getLightMap()->MakeActive();
+	  _GFX->activateLightMap();
 	  GFXSelectTexcoordSet(1, 1);
 	}
 	vlist->Draw();

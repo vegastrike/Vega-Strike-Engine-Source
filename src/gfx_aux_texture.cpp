@@ -97,8 +97,10 @@ void Texture::setold()
 	original->refcount++;
 }
 
-Texture::Texture(char * FileName, int stage)
+Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
+  texture_target =target;
+  image_target=imagetarget;
 	refcount = 0;
 	this->stage = stage;
 	FILE *fp = NULL;
@@ -187,10 +189,12 @@ Texture::Texture(char * FileName, int stage)
 	setold();
 }
 
-Texture::Texture (char * FileNameRGB, char *FileNameA, int stage)
+Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
 	refcount = 0;
 	this->stage = stage;
+	texture_target=target;
+	image_target=imagetarget;
 	FILE *fp = NULL;
 	fp = fopen (FileNameRGB, "r+b");
 	if (!fp)
@@ -358,13 +362,13 @@ void Texture::Transfer ()
 	switch (mode)
 	{
 	case _24BITRGBA:
-		GFXTransferTexture(data, name);
+		GFXTransferTexture(data, name,image_target);
 		break;
 	case _24BIT:
-		GFXTransferTexture(data, name);
+		GFXTransferTexture(data, name,image_target);
 		break;
 	case _8BIT:
-		GFXTransferTexture(data, name);
+		GFXTransferTexture(data, name,image_target);
 		//TODO: Do something about this, and put in some code to check that we can actually do 8 bit textures
 
 		break;
@@ -377,15 +381,15 @@ int Texture::Bind()
 	{
 	case _24BITRGBA:
 		//GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
-		GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
+		GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,texture_target);
 		break;
 	case _24BIT:
 		//not supported by most cards, so i use rgba32
 		//GFXCreateTexture(sizeX, sizeY, RGB24, &name);
-		GFXCreateTexture(sizeX, sizeY, RGB32, &name, NULL, stage);
+		GFXCreateTexture(sizeX, sizeY, RGB32, &name, NULL, stage,texture_target);
 		break;
 	case _8BIT:
-		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage);
+		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,texture_target);
 		break;
 	}
 	Transfer();

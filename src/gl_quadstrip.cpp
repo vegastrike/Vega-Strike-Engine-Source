@@ -86,7 +86,11 @@ BOOL GFXQuadstrip::Draw()
 
 		glActiveTextureARB(GL_TEXTURE1_ARB);	
 		if(bTex1)
+#ifdef NV_CUBE_MAP
+		  glEnable (GL_TEXTURE_CUBE_MAP_EXT);
+#else
 			glEnable (GL_TEXTURE_2D);
+#endif
 		else
 			glDisable(GL_TEXTURE_2D);
 	}

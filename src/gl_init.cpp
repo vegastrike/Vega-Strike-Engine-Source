@@ -171,9 +171,13 @@ BOOL GFXInit (int argc, char ** argv){
       glActiveTextureARB(GL_TEXTURE1_ARB);
       glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+#ifdef NV_CUBE_MAP
+
+#else
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glEnable(GL_TEXTURE_2D);
+#endif
+
       //glDisable(GL_TEXTURE_2D);
       glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
       glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
@@ -183,10 +187,22 @@ BOOL GFXInit (int argc, char ** argv){
       glPixelStorei(GL_PACK_ROW_LENGTH, 256);
 
       // Spherical texture coordinate generation
+#ifdef NV_CUBE_MAP
+      glEnable(GL_TEXTURE_CUBE_MAP_EXT);
+      glTexGeni(GL_S,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
+      glTexGeni(GL_T,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
+      glTexGeni(GL_R,GL_TEXTURE_GEN_MODE,GL_REFLECTION_MAP_NV);
+      glEnable(GL_TEXTURE_GEN_S);
+      glEnable(GL_TEXTURE_GEN_T);
+      glEnable(GL_TEXTURE_GEN_R);
+
+#else
+      glEnable(GL_TEXTURE_2D);
       glTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
       glTexGenf(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
       glEnable(GL_TEXTURE_GEN_S);
       glEnable(GL_TEXTURE_GEN_T);
+#endif
     }
     glClearDepth(1);
     glEnable (GL_BLEND);

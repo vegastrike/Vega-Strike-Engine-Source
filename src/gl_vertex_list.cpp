@@ -88,7 +88,6 @@ BOOL GFXVertexList::SwapTransformed()
 {
 	return FALSE;
 }
-
 BOOL GFXVertexList::Draw()
 {
 #ifdef STATS_QUEUE
@@ -103,7 +102,11 @@ BOOL GFXVertexList::Draw()
 
 		glActiveTextureARB(GL_TEXTURE1_ARB);	
 		if(bTex1)
+#ifdef NV_CUBE_MAP
+		  glEnable (GL_TEXTURE_CUBE_MAP_EXT);////FIXME--have some gneeral state that holds CUBE MAPPING values
+#else
 			glEnable (GL_TEXTURE_2D);
+#endif
 		else
 			glDisable(GL_TEXTURE_2D);
 	}

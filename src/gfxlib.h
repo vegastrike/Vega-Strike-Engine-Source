@@ -19,8 +19,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef D3D_H
-#define D3D_H
+#ifndef _GFXLIB_H
+#define _GFXLIB_H
 /**
 #ifdef GLDRV_EXPORTS
 #define GFXDRVAPI  __declspec(dllexport)
@@ -84,9 +84,9 @@ BOOL /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, 
 
 //Textures
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0);
+BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, enum TEXTURE_TARGET texture_target = TEXTURE2D);
 BOOL /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
-BOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle);
+BOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
 BOOL /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
 BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
 

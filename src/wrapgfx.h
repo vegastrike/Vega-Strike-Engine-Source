@@ -90,14 +90,14 @@ protected:
 	Light lights[NUM_LIGHT];
 	int numlights;
 	//Mouse *mouse;
-        Texture *LightMap; //type Texture
+        Texture *LightMap[6]; //type Texture
         Texture *ForceLog;
         Texture *SquadLog;
 	
 public:
 	//move back to private!!!
 	Primitive *topobject; // the top object of the object list
-  Texture *getLightMap() {return LightMap;};
+  BOOL activateLightMap();
   Texture * getForceLog () {return ForceLog;};
   Texture * getSquadLog () {return SquadLog;};
 	WrapGFX(int argc, char **argv);

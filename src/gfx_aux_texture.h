@@ -21,6 +21,7 @@
 #ifndef _TEXTURE_H_
 #define _TEXTURE_H_
 #include "gfxlib.h"
+#include "gfxlib_struct.h"
 //#include <gl/gl.h>
 #ifdef __cplusplus
 #include <string>
@@ -41,14 +42,15 @@ struct Texture{
 
 	Texture *original;
 	int refcount;
-
-	BOOL checkold(const string &s);
+        enum TEXTURE_TARGET texture_target;
+        enum TEXTURE_IMAGE_TARGET image_target;
+        BOOL checkold(const string &s);
 	void setold();
 
 public:
 
-	Texture(char *,char *, int stage = 0);
-	Texture(char * FileName, int stage = 0);
+	Texture(char *,char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
+	Texture(char * FileName, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
 	~Texture()
 	{
 		if(original == NULL)

@@ -504,17 +504,38 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    M(2,2) = 1.0;
    M(3,3) = 1.0;
 #undef M
-   
-   glActiveTextureARB (GL_TEXTURE1_ARB);
 
+   glActiveTextureARB (GL_TEXTURE1_ARB);
 	glMatrixMode (GL_TEXTURE);	
 	glLoadIdentity();
+
+#ifdef NV_CUBE_MAP
+   //FIXME--ADD CAMERA MATRICES
+   //the texture matrix must be used to rotate the texgen-computed
+   //reflection or normal vector texture coordinates to match the orinetation 
+   //of the cube map.  Teh rotation can be computed based on two vectors 
+   //1) the direction vector from the cube map center to the eye position
+   //and 2 the cube map orientation in world coordinates.
+   //the axis is the cross product of these two vectors...teh angle is arcsin
+   //of the dot of these two vectors
+
+   //   Vector (centerx,centery,centerz).Cross (Vector (1,0,0));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE
+   Vector axis (centerx,centery,centerz);
+   Vector cubemapincamspace(eyex,eyey,eyez);
+   cubemapincamspace.Normalize();
+   axis.Normalize();
+   //   float theta = arcsinf (Vector (centerx,centery,centerz).Normalize().Dot (Vector (1,0,0)));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE
+   float theta =arcsinf (axis.Dot(cubemapincamspace));
+   axis = axis.Cross (axis.Cross(cubemapincamspace));
+   glRotatef (theta,axis.i,axis.j,axis.k);
+   //ok do matrix math to rotate by theta on axis  those ..
+#else
 	glTranslatef(.5f,.5f,.4994f);
 	glMultMatrixf(tm);
 	glTranslatef(-.5f,-.5f,-.4994f);
+
+#endif
    glActiveTextureARB (GL_TEXTURE0_ARB);
-	
-	//delete below--
 
 }
 
