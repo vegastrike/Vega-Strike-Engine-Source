@@ -40,6 +40,15 @@
 #define NO_SDL_JOYSTICK
 #endif
 #endif
+
+// Used for storing the max and min values of the tree Joystick Axes - Okona
+static int maxx=0;
+static int minx=0;
+static int maxy=0;
+static int miny=0;
+static int maxz=0;
+static int minz=0;
+
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 int num_joysticks=0;
 void modifyDeadZone(JoyStick * j) {
@@ -66,18 +75,29 @@ void JoyStickToggleKey (const KBData& key, KBSTATE a) {
   }
 }
 void myGlutJoystickCallback (unsigned int buttonmask, int x, int y, int z) {
-    //printf ("joy %d x %d y %d z %d",buttonmask, x,y,z);
+    //printf ("joy %d x %d y %d z %d\n",buttonmask, x,y,z);
     unsigned int i;
+	
+
+	
     for (i=0;i<MAX_AXES;i++) joystick[0]->joy_axis[i]=0.0;
     joystick[0]->joy_buttons=0;
     if (JoyStickToggle) {
       joystick[0]->joy_buttons=buttonmask;
       if (joystick[0]->nr_of_axes>0)
-        joystick[0]->joy_axis[0]=((float)x)/1000.0;
+              // Set the max and min of each axis - Okona
+              if (x<minx) minx=x;
+              if (x>maxx) maxx=x;
+	      // Calculate an autocalibrated value based on the max min values - Okona
+              joystick[0]->joy_axis[0]=((float)x-(((float)(maxx+minx))/2.0))/(((float)(maxx-minx))/2.0);
       if (joystick[0]->nr_of_axes>1)
-        joystick[0]->joy_axis[1]=((float)y)/1000.0;
+              if (y<miny) miny=y;
+              if (y>maxy) maxy=y;
+	      joystick[0]->joy_axis[1]=((float)y-(((float)(maxy+miny))/2.0))/(((float)(maxy-miny))/2.0);
       if (joystick[0]->nr_of_axes>2)
-        joystick[0]->joy_axis[2]=((float)z)/1000.0;
+              if (z<minz) minz=z;
+              if (z>maxz) maxz=z;
+	      joystick[0]->joy_axis[2]=((float)z-(((float)(maxz+minz))/2.0))/(((float)(maxz-minz))/2.0);
       modifyDeadZone(joystick[0]);
     }
 }
@@ -368,3 +388,4 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 int JoyStick::NumButtons(){
   return nr_of_buttons;
 }
+		
