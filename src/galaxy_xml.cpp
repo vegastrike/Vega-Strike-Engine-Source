@@ -173,7 +173,7 @@ Galaxy::Galaxy (const Galaxy & g):data(g.data) {
 	}else
 		subheirarchy = NULL;
         if (subheirarchy) {
-          SubHeirarchy::iterator iter=subheirarchy->find("<planets>");
+          SubHeirarchy::iterator iter=subheirarchy->find("planets");
           if (iter==subheirarchy->end()) {
             planet_types = NULL;
           } else {
@@ -272,7 +272,7 @@ Galaxy::Galaxy(const char *configfile){
 
 	  XML_ParserFree(parser);
         if (subheirarchy) {
-          SubHeirarchy::iterator iter=subheirarchy->find("<planets>");
+          SubHeirarchy::iterator iter=subheirarchy->find("planets");
           if (iter==subheirarchy->end()) {
             planet_types = NULL;
           } else {
