@@ -818,7 +818,7 @@ void UnitEndElement(const string &name, XML * xml) {
       if (xml->num_shield_facings)
           s =LookUp(shieldLookup(),xml->total_shield_value/xml->num_shield_facings);
       fprintf (xml->tfp,"<Upgrade file=\"shield_%d%s\"/>\n<Upgrade file=\"mult_shield_regenerator\"/>\n",(xml->num_shield_facings), s.c_str());
-	  const float num_shield_capacitance_additions=2;
+	  const float num_shield_capacitance_additions=5;
 	  for (unsigned int i=0;i<num_shield_capacitance_additions;++i) {
       fprintf (xml->tfp,"<Upgrade file=\"add_shield_%d_capacitance\"/>\n",xml->num_shield_facings);		  
 	  }
