@@ -25,6 +25,8 @@ vegastrike_SOURCES =				\
 	cmd_beam.cpp				\
 	cmd_gun.cpp				\
 	cmd_gun.h				\
+	cmd_collide.cpp				\
+	cmd_collide.h				\
 	cmd_input_dfa.h				\
 	cmd_input_dfa.cpp			\
 	cmd_order.cpp				\

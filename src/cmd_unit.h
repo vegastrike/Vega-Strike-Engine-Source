@@ -219,6 +219,7 @@ public:
   void PrimeOrders();
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
+  bool Collide(Unit * target);
   void CollideAll();//checks for collisions with all beams and other units roughly
   Vector Position(){return curr_physical_state.position;};
   void SetPosition(const Vector &pos) {/*prev_physical_state.position = curr_physical_state.position;*/

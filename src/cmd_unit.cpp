@@ -55,7 +55,9 @@ void Unit::calculate_extent() {
     corner_max = corner_max.Max(subunits[a]->corner_max);
   }
   selectionBox = new Box(corner_min, corner_max);
-  radial_size = ((corner_max-corner_min).Magnitude() )*.5;
+  float tmp1 = corner_min.Magnitude();
+  float tmp2 = corner_max.Magnitude();
+  radial_size = tmp1>tmp2?tmp1:tmp2;
 }
 
 void Unit::Init()
