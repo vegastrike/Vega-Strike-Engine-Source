@@ -675,7 +675,9 @@ vector <Mesh *> Unit::StealMeshes() {
   
   return ret;
 }
-
+static float tmpmax (float a , float b) {
+	return a>b?a:b;
+}
 void Unit::calculate_extent(bool update_collide_queue) {  
   int a;
   corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
@@ -708,7 +710,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     UpdateCollideQueue();
   }
   if (isUnit()==PLANETPTR) {
-    radial_size = corner_max.i;
+    radial_size = tmpmax(tmpmax(corner_max.i,corner_max.j),corner_max.k) ;
   }
 }
 
