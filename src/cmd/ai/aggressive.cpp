@@ -455,7 +455,7 @@ void AggressiveAI::Execute () {
     if (parent->GetJumpStatus().drive==-2) {
       static bool AIjumpCheat=XMLSupport::parse_bool (vs_config->getVariable ("AI","always_have_jumpdrive_cheat","false"));
       if (AIjumpCheat) {
-	parent->GetJumpStatus().drive==-1;
+		  parent->GetJumpStatus().drive=-1;
       }else {
 	//	fprintf (stderr,"warning ship not equipped to jump");
 	parent->Target(NULL);
