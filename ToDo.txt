@@ -1,10 +1,19 @@
-Load balance hash-table
-support full expressivity of BFXM animations
-Fix excessive seeking in File-System
-Complete Ships list.
-Complete histories.
+Before Release
 Warp energy use
 Warp vs. Auto graphic
+Add cargo pics
+fix systems to have jump points only outside the "slow-zone"
+fix a bit of the system generation code: so we can specify everything in the milky_way.xml
+make un-modded units appear in 1 big table, not dozens of xml files
+
+
+After Release
+
+
+Load balance hash-table
+support full expressivity of BFXM animations
+#Fix excessive seeking in File-System
+Complete Ships list.
+Complete histories.
 Install time generation of all BSP files
 Per-System (versus strict per need) ship loading optimization
-Add cargo pics
