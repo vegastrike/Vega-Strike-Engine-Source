@@ -87,11 +87,17 @@ void returnfromhome() {
 
 
 char pwd[65536];
-void initpaths () {
+void initpaths (const std::string& modname) {
 #ifndef _WIN32
+	
   datadir = getdatadir();
+  if (modname.size())
+	  datadir+=string(DELIMSTR)+modname;
 #else
+  if (modname.size())
+    chdir (modname.c_str());
   getcwd(pwd,65534);
+
   pwd[65534]=0;
   datadir=pwd;
 #endif

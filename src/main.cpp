@@ -130,7 +130,7 @@ void DockToSavedBases (int playernum) {
 	}
 }
 
-void ParseCommandLine(int argc, char ** CmdLine);
+std::string ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
   fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
@@ -223,13 +223,15 @@ int main( int argc, char *argv[] )
     //this sets up the vegastrike config variable
     setup_game_data(); 
     // loads the configuration file .vegastrikerc from home dir if such exists
-    ParseCommandLine(argc,argv);
+	{
+    string subdir=ParseCommandLine(argc,argv);
 	if (CONFIGFILE==0) {
 		CONFIGFILE=new char[42];
 		sprintf(CONFIGFILE,"vegastrike.config");
 	}
 
-    initpaths();
+    initpaths(subdir);
+	}
     //can use the vegastrike config variable to read in the default mission
 
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
@@ -618,15 +620,17 @@ const char helpmessage[] =
 "\n"
 " -D -d     Specify data directory\n"
 " -M -m     Number of players\n"
-" -S -s     Enable sound\n"
+" -S -s     Specify data subdirectory\n"
 " -P -p     Specify player location\n"
+" -j -j     Start in a specific system\n"
 " -A -A     Normal resolution (800x600)\n"
 " -H -h     High resolution (1024x768)\n"
 " -V -v     Super high resolution (1280x1024)\n"
 "\n";
 
-void ParseCommandLine(int argc, char ** lpCmdLine) {
+std::string ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
+  std::string retstr;
   QVector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
@@ -657,7 +661,7 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'S':
       case 's':
-	g_game.sound_enabled=1;
+	retstr=(lpCmdLine[i]+2);
 	break;
       case 'f':
       case 'F':
@@ -710,6 +714,7 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	  mission_name[1023]='\0';
     }
   }
+  return retstr;
   //FILE *fp = fopen("vid.cfg", "rb");
   //  GUID temp;
   //fread(&temp, sizeof(GUID), 1, fp);

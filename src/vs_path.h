@@ -35,7 +35,7 @@ std::string MakeSharedPath (const std::string &path);
 std::string GetCorrectStarSysPath (const std::string &);
 
 ///sets up the data dir and loads VS config
-void initpaths();
+void initpaths(const std::string& modname="");
 ///Changes to the users home directory in an OS independent way
 void changehome(bool makehomedir=false);
 ///Returns from home directory to calling directory
