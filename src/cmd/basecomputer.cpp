@@ -3421,7 +3421,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 			PRETTY_ADD(" #c0:1:.3#<#-c",i+1,0);
 			text+="#c0:1:.3#>#-c #c0:1:1#"+lookupMountSize(playerUnit->mounts[i].size)+"#-c";
 			const weapon_info * wi=playerUnit->mounts[i].type;
-			if(wi){
+			if(wi&&wi->weapon_name!=""){
 				anyweapons=true;
 			}
 		}
@@ -3507,7 +3507,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 		}
 			
 	}}else{ 		//end mountpoint list
-		text+="#c1:.3:.3#"+prefix+"NO MOUNTED WEAPONS#n##-c";
+		text+="#n##c1:.3:.3#"+prefix+"  NO MOUNTED WEAPONS#n##-c";
 	}
 	}
 	if (subunitlevel==0) {
