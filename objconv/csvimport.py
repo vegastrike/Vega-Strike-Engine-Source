@@ -55,7 +55,7 @@ def CollapseList(lis):
 	for i in r:
 		s+='{'
 		for j in range(len(i)):
-			if (i!=0):
+			if (j!=0):
 				s+=";"
 			s+=i[j]
 		s+='}'
