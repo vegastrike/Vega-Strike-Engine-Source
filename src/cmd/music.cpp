@@ -245,6 +245,7 @@ PVOID
           printf ("Got data froms ocket %c\n",data);
           if (data=='e')
             moredata=1;
+          micro_sleep(500000);
           
 	}
 	return NULL;
