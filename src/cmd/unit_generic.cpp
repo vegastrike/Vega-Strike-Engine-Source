@@ -1814,7 +1814,10 @@ void Unit::AddVelocity(float difficulty) {
   Vector v=Velocity;
    Unit * planet;
    for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
-     if ((Position()-planet->Position()).Magnitude()<planet->rSize()*2) {
+     static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
+     float effectiverad = autopilot_term_distance+planet->rSize()*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
+
+     if ((Position()-planet->Position()).Magnitude()<effectiverad) {
        break;
      }
    }
