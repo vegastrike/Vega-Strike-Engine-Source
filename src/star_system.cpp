@@ -513,7 +513,7 @@ void StarSystem::Update() {
 #endif
 	  iter = drawList->createIterator();
 	  while((unit = iter->current())!=NULL) {
-		unit->Setnebula(NULL); 
+		unit->SetNebula(NULL); 
 		iter->advance();
 	  }
 	  delete iter;

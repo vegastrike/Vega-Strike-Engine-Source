@@ -606,6 +606,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case DIFFICULTY:
 	scalex = parse_float ((*iter).value);
 	break;
+      case DESTINATION:
+	dest=ParseDestinations((*iter).value);
+	break;
       case FACTION:
 	faction = _Universe->GetFaction ((*iter).value.c_str());
 	break;
@@ -661,6 +664,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  } else if (elem==ASTEROID) {
 	    plan->AddSatellite (un=new Asteroid (filename,faction,NULL,0,scalex));
 	  }
+	  while (!dest.empty()) {
+	    un->AddDestination (dest.back());
+	    dest.pop_back();
+	  }
 	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
     } else {
@@ -669,12 +676,21 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
+	  while (!dest.empty()) {
+	    b->AddDestination (dest.back());
+	    dest.pop_back();
+	  }
+
       }else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
 	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,true,false,faction);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
+	  while (!dest.empty()) {
+	    b->AddDestination (dest.back());
+	    dest.pop_back();
+	  }
       }else {
    	    if (elem==UNIT) {
 	      Unit *moon_unit=new Unit(filename,true ,false,faction);
@@ -685,8 +701,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		} else if (elem==ASTEROID){
 		  xml->moons.push_back ((Planet *)new Asteroid (filename,faction,NULL,0,scalex));
 		}
-		xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
-		xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+	    while (!dest.empty()) {
+	      xml->moons.back()->AddDestination (dest.back());
+	      dest.pop_back();
+	    }
+	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
+	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
       }
     }
     delete []filename;

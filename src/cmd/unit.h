@@ -86,8 +86,10 @@ class Unit {
   friend void VDU::DrawWeapon (Unit * parent);
   friend void VDU::DrawDamage (Unit * parent);
  public:
-  inline void Setnebula (Nebula *neb) {nebula=neb;}
-  inline Nebula * Getnebula () {return nebula;}
+  inline void SetNebula (Nebula *neb);
+  inline Nebula * GetNebula () {return nebula;}
+  const std::vector <char *> &GetDestinations () const;
+  void AddDestination (const char *);
   /**
    * The computer holds all data in the navigation computer of the current unit
    * It is outside modifyable with GetComputerData() and holds only volatile
@@ -362,7 +364,7 @@ class Unit {
   ///Builds a BSP tree from either the hull or else the current meshdata[] array
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
-  int CanDockWithMe (Unit * dockingunit);
+  int CanDockWithMe (Unit * dockingunit) ;
   void PerformDockingOptions (Unit * dockedUnit);
 public:
   bool RequestClearance (Unit * dockingunit);
@@ -400,7 +402,7 @@ public:
   void Init();
   void ActivateJumpDrive (int destination=0);
   void DeactivateJumpDrive ();
-  const UnitJump &GetJumpStatus() {return jump;}
+  const UnitJump &GetJumpStatus() const {return jump;}
   ///Begin and continue explosion
   bool Explode(bool draw, float timeit);
   ///explodes then deletes
@@ -517,6 +519,8 @@ public:
   void EnqueueAI(Order *newAI, int subun);
   bool InsideCollideTree (Unit * smaller, Vector & bigpos, Vector & bigNormal, Vector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
+  ///returns true if jump possible even if not taken
+  bool jumpReactToCollision (Unit *smaller);
   ///Does a collision between this and another unit
   bool Collide(Unit * target);
   ///checks for collisions with all beams and other units roughly and then more carefully

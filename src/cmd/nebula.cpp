@@ -198,8 +198,8 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
 }
 void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)
-    Setnebula(this);
-  smaller->Setnebula(this);
+    SetNebula(this);
+  smaller->SetNebula(this);
 }
 
 void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {

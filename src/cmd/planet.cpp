@@ -132,10 +132,13 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
     lights.push_back (l);
   }
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;
-  destination=dest;
   Init();
   this->faction = faction;
   killed=false;
+  while (!dest.empty()) {
+    AddDestination(dest.back());
+    dest.pop_back();
+  }
   //name = "Planet - ";
   //name += textname;
   name=fgid;
@@ -319,17 +322,10 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
 #endif
     terrain->Collide (un,top);      
   }
-  if (!destination.empty()&&un->GetJumpStatus().drive>=0) {
-#ifdef JUMP_DEBUG
-  fprintf (stderr,"Deactivating drive, jumping to %s",destination[un->GetJumpStatus().drive%destination.size()]);
-#endif
-
-    un->DeactivateJumpDrive();
-    _Universe->activeStarSystem()->JumpTo (un, this, std::string(destination[un->GetJumpStatus().drive%destination.size()]));
-  }
+  jumpReactToCollision(un);
 #if 0
   //screws with earth having an atmosphere... blahrgh
-  if (!terrain&&destination.empty()) {//no place to go and acts like a ship
+  if (!terrain) {//no place to go and acts like a ship
     Unit::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
 #endif
@@ -357,9 +353,6 @@ Planet::~Planet() {
 	unsigned int i;
 	if (bspTree)
 	  delete bspTree;
-	for (i=0;i<this->destination.size();i++) {
-		delete [] destination[i];
-	}
 	if (terraintrans) {
 	  float * tmp = (float *) malloc (sizeof(float)*16);
 	  memcpy (tmp,cumulative_transformation_matrix,sizeof(float)*16);

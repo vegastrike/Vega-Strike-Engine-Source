@@ -123,6 +123,7 @@ namespace UnitXML {
       JUMPENERGY,
       JUMPWAV,
       DOCKINTERNAL,
+      WORMHOLE,
       RAPID,
       USEBSP
     };
@@ -229,11 +230,12 @@ namespace UnitXML {
     EnumMap::Pair ("JumpWav", JUMPWAV),
     EnumMap::Pair ("DockInternal", DOCKINTERNAL),
     EnumMap::Pair ("RAPID", RAPID),
-    EnumMap::Pair ("BSP", USEBSP)
+    EnumMap::Pair ("BSP", USEBSP),
+    EnumMap::Pair ("Wormhole", WORMHOLE)
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 71);
+  const EnumMap attribute_map(attribute_names, 72);
 }
 
 using XMLSupport::EnumMap;
@@ -558,6 +560,11 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case FUEL:
 	jump.energy = -parse_int ((*iter).value);
+	break;
+      case WORMHOLE:
+	image->forcejump=parse_bool ((*iter).value);
+	if (image->forcejump)
+	  jump.drive=-2;
 	break;
       }
     }

@@ -59,7 +59,6 @@ class Planet : public Unit {
   bool inside;
   float radius;
   float gravity;
-  vector <char *> destination;
   UnitCollection satellites;
   UnitCollection insiders;
   std::vector <int> lights;
@@ -79,7 +78,7 @@ class Planet : public Unit {
   static void ProcessTerrains();
 //  void InitPlanet(FILE *fp);
   virtual void Kill();
-  const vector <char *> &GetDestinations () {return destination;}
+
   PlanetaryTransform*  setTerrain (ContinuousTerrain *, float ratiox, int numwraps); 
   ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}
   void setAtmosphere (Atmosphere *);

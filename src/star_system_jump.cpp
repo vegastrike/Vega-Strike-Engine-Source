@@ -12,7 +12,7 @@
 #include "gfx/cockpit.h"
 #include "audiolib.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
-inline bool CompareDest (Planet * un, StarSystem * origin) {
+inline bool CompareDest (Unit * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
     if ((origin==star_system_table.Get (string(un->GetDestinations()[i])))||(origin==star_system_table.Get (string(un->GetDestinations()[i])+string (".system")))) 
       return true;
@@ -21,9 +21,9 @@ inline bool CompareDest (Planet * un, StarSystem * origin) {
 }
 inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin) {
   std::vector <Unit *> myvec;
+  if (CompareDest (primary, origin))
+    myvec.push_back (primary);
   if (primary->isUnit()==PLANETPTR) {
-    if (CompareDest ((Planet *) primary, origin))
-      myvec.push_back (primary);
     Iterator *iter = ((Planet *)primary)->createIterator();
     Unit * unit;
     while((unit = iter->current())!=NULL) {
@@ -34,7 +34,6 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
       iter->advance();
     }
     delete iter;
-    
   }
   return myvec;
 }
@@ -47,7 +46,7 @@ struct unorigdest {
   StarSystem * dest;
   float delay;
   int animation;
-  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
+  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
 };
 void CacheJumpStar (bool destroy) {
   static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
@@ -229,7 +228,7 @@ void StarSystem::ProcessPendingJumps() {
 }
 
 
-bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &system) {
+bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif

@@ -404,6 +404,36 @@ PlanetaryTransform * Unit::GetPlanetOrbit () const {
     return NULL;
   return planet->trans;
 }
+
+bool Unit::jumpReactToCollision (Unit * smalle) {
+  if (!GetDestinations().empty()) {//only allow big with small
+    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)&&(!GetDestinations().empty())) {
+      smalle->DeactivateJumpDrive();
+      Unit * jumppoint = this;
+      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
+      return true;
+    }
+    return true;
+  }
+  return false;
+}
+void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist) {
+  //don't bounce if you can Juuuuuuuuuuuuuump
+  if (!jumpReactToCollision(smalle)) {
+#ifdef NOBOUNCECOLLISION
+#else
+    smalle->ApplyForce (bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+    this->ApplyForce (smallnormal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+    
+    smalle->ApplyDamage (biglocation,bignormal,  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+    this->ApplyDamage (smalllocation,smallnormal, .5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+#endif
+  //each mesh with each mesh? naw that should be in one way collide
+  }
+}
+
+
+
 void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
   Vector p, q, r;
   GetOrientation(p,q,r);

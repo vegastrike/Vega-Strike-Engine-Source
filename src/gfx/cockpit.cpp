@@ -97,7 +97,7 @@ void Cockpit::DrawTargetBoxes(){
   Unit * un = parent.GetUnit();
   if (!un)
     return;
-  if (un->Getnebula()!=NULL)
+  if (un->GetNebula()!=NULL)
     return;
 
   StarSystem *ssystem=_Universe->activeStarSystem();
@@ -149,7 +149,7 @@ void Cockpit::DrawTargetBox () {
   Unit * un = parent.GetUnit();
   if (!un)
     return;
-  if (un->Getnebula()!=NULL)
+  if (un->GetNebula()!=NULL)
     return;
   Unit *target = un->Target();
   if (!target)
@@ -246,7 +246,7 @@ void Cockpit::DrawBlips (Unit * un) {
 	GFXPointSize(4);
 	GFXBegin (GFXPOINT);
       }
-      float rerror = radarl->error+((un->Getnebula()!=NULL)?.03:0)+(target->Getnebula()!=NULL?.06:0);
+      float rerror = radarl->error+((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
       GFXVertex3f (xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
       if (target==makeBigger) {
 	GFXEnd();
@@ -305,7 +305,7 @@ void Cockpit::DrawEliteBlips (Unit * un) {
       }
 #endif
       float xerr,yerr,y2,x2;
-      float rerror = radarl->error+((un->Getnebula()!=NULL)?.03:0)+(target->Getnebula()!=NULL?.06:0);
+      float rerror = radarl->error+((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
       xerr=xcent+xsize*(es-.5*rerror+(rerror*rand())/RAND_MAX);
       yerr=ycent+ysize*(et+-.5*rerror+(rerror*rand())/RAND_MAX);
       x2=xcent+xsize*((es+0)-.5*rerror+(rerror*rand())/RAND_MAX);

@@ -68,15 +68,21 @@ void Unit::calculate_extent() {
   for(a=0; a<nummesh; a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
-  }/* have subunits now in table
+  }/* have subunits now in table*/
   for(a=0; a<numsubunit; a++) {
-    corner_min = corner_min.Min(subunits[a]->corner_min);
-    corner_max = corner_max.Max(subunits[a]->corner_max);
-    }*/
+    corner_min = corner_min.Min(subunits[a]->LocalPosition()+subunits[a]->corner_min);
+    corner_max = corner_max.Max(subunits[a]->LocalPosition()+subunits[a]->corner_max);
+  }
   image->selectionBox = new Box(corner_min, corner_max);
-  float tmp1 = corner_min.Magnitude();
-  float tmp2 = corner_max.Magnitude();
-  radial_size = tmp1>tmp2?tmp1:tmp2;
+  if (corner_min==-FLT_MIN||corner_max==FLT_MAX) {
+    radial_size=0;
+    corner_min.Set (0,0,0);
+    corner_max.Set (0,0,0);
+  }else {
+    float tmp1 = corner_min.Magnitude();
+    float tmp2 = corner_max.Magnitude();
+    radial_size = tmp1>tmp2?tmp1:tmp2;
+  }
   if (!SubUnit) {
     UpdateCollideQueue();
   }
@@ -111,6 +117,12 @@ void Unit::DeactivateJumpDrive () {
     jump.drive=-1;
   }
 }
+void Unit::SetNebula (Nebula * neb) {
+  nebula = neb;
+  for (int i=0;i<numsubunit;i++) {
+    subunits[i]->SetNebula (neb);
+  }
+}
 void Unit::Init()
 {
   SubUnit =0;
@@ -129,6 +141,7 @@ void Unit::Init()
   cloakmin=image->cloakglass?1:0;
   image->cloakrate=100;
   image->cloakenergy=0;
+  image->forcejump=false;
   sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
   sound->cloak=-1;
   image->hudImage=NULL;
@@ -338,6 +351,13 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	vsresetdir();
 
 }
+const std::vector <char *>& Unit::GetDestinations () const{
+  return image->destination;
+}
+void Unit::AddDestination (const char * dest) {
+  image->destination.push_back (strdup (dest));
+}
+
 Unit::~Unit()
 {
   if ((!killed)&&(!SubUnit)) {
@@ -378,6 +398,11 @@ Unit::~Unit()
 #endif
   if (image->hudImage )
     delete image->hudImage;
+  unsigned int i;
+  for (i=0;i<image->destination.size();i++) {
+    delete [] image->destination[i];
+  }
+
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d", 3);
   fflush (stderr);

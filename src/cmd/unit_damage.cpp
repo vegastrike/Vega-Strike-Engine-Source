@@ -222,7 +222,7 @@ void Unit::RegenShields () {
   energy +=apply_float_to_short (recharge*SIMULATION_ATOM);
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-  if (Getnebula()!=NULL)
+  if (GetNebula()!=NULL)
     rec *=nebshields;
   switch (shield.number) {
   case 2:
@@ -433,7 +433,7 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   float leakamt = amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
   float percentage=0;
-  if (Getnebula()==NULL||(nebshields>0)) {
+  if (GetNebula()==NULL||(nebshields>0)) {
     percentage = DealDamageToShield (pnt,amt);
     if (meshdata[nummesh]&&percentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
@@ -441,7 +441,7 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
-      if (Getnebula()==NULL) 
+      if (GetNebula()==NULL) 
 	meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
     }
   }

@@ -37,11 +37,17 @@ struct UnitImages {
   Animation *explosion; 
   float timeexplode;
   Box *selectionBox;
-  ///how fast this starship decloaks/close...if negative, decloaking
-  short cloakrate;
+
   ///How much energy cloaking takes per frame
   float cloakenergy;
+  ///how fast this starship decloaks/close...if negative, decloaking
+  short cloakrate;
+  ///If this unit cloaks like glass or like fading
   bool cloakglass;
+  ///if the unit is a wormhole
+  bool forcejump;
+
+  std::vector <char *> destination;
   std::vector <DockingPorts> dockingports;
   ///warning unreliable pointer, never dereference!
   std::vector <Unit *> clearedunits;
