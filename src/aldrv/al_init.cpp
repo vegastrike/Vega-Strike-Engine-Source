@@ -88,6 +88,7 @@ static void fixup_function_pointers(void) {
 }
 
 void AUDChangeVolume (float volume) {
+#ifdef HAVE_AL
 	if (volume==0) {
 		usepositional=false;
 		return;
@@ -95,20 +96,31 @@ void AUDChangeVolume (float volume) {
 		usepositional=true;
 	}
 	scalepos= 1./volume;
+#endif
 }
 float AUDGetVolume () {
+#ifdef HAVE_AL
 	return 1./scalepos;
+#else
+	return 1;
+#endif
 }
 void AUDChangeDoppler (float doppler) {
+#ifdef HAVE_AL
 	if (doppler<=0) {
 		usedoppler=false;
 	}else {
 		usedoppler=true;
 	}
 	scalevel = doppler;
+#endif
 }
 float AUDGetDoppler () {
+#ifdef HAVE_AL
 	return scalevel;
+#else
+	return 1;
+#endif
 }
 
 
@@ -122,6 +134,11 @@ static ALCcontext * context_id=NULL;
 #endif
 #endif
 bool AUDInit () {
+  g_game.sound_enabled = false;
+  g_game.music_enabled = false;
+
+
+#ifdef hAVE_AL
   usedoppler = XMLSupport::parse_bool (vs_config->getVariable ("audio","Doppler","false"));
   usepositional = XMLSupport::parse_bool (vs_config->getVariable ("audio","Positional","true"));
 
@@ -129,9 +146,6 @@ bool AUDInit () {
   scalevel=XMLSupport::parse_float (vs_config->getVariable ("audio","DopplerScale","1"));
   //  enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","enabled","true"));
   g_game.audio_frequency_mode = XMLSupport::parse_int (vs_config->getVariable ("audio","frequency","22050"));
-  g_game.sound_enabled = false;
-  g_game.music_enabled = false;
-#ifdef HAVE_AL
   maxallowedsingle = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxSingleSounds","8"));
   maxallowedtotal = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxTotalSounds","20"));
   g_game.sound_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Sound","true"));
@@ -173,6 +187,7 @@ bool AUDInit () {
 	return true;
 #endif
 	return false;
+
 }
 
 
