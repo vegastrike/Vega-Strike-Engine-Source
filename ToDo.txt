@@ -1,4 +1,8 @@
-Goals for 0.4.2 release
+Goals for 0.4.2 release:
+* Bugfixes:
+** Somethings wrong with upgrades... GRR
+** Are missiles currently effective? (data side issue perhaps - or AI?)
+
 * Warp:
 ** Rename warp to ... think of something cool
 ** Warp energy use
@@ -10,10 +14,12 @@ Goals for 0.4.2 release
 
 * Resource management/organization:
 ** Make un-modded units appear in 1 big table, not dozens of xml files
+** trim redundant thrust animation images
 
 * UI:
 ** Add cargo pics
 ** Warp vs. Auto graphic
+** Give Beam damage in MJ/sec
 
 * AI:
 ** Fix AI range trigger happiness
@@ -41,6 +47,9 @@ Goals for 'Sometime over the rainbow'
 ** grappling hooks?
 ** Area effect modeling
 ** Bomb-pumped laser modeling?
+
+* Graphical stuff
+** make engine lights proportional to accel, not to speed
 
 Emacs mode info:
 Local Variables:
