@@ -6,6 +6,20 @@
 
 using namespace std;
 
+#ifndef HAVE_ACCESS
+    #ifdef R_OK
+    #undef R_OK
+    #endif
+    #define R_OK 1
+
+    #ifdef W_OK
+    #undef W_OK
+    #endif
+    #define W_OK 2
+
+    extern "C" int access( const char* name, int mode );
+#endif
+
 namespace VsnetDownload
 {
 namespace Client
@@ -201,4 +215,22 @@ bool Manager::lower_private_test_access( Item* i )
 
 }; // namespace Client
 }; // namespace VsnetDownload
+
+#ifndef HAVE_ACCESS
+int access( const char* name, int mode )
+{
+    if( mode == R_OK )
+    {
+        std::ifstream f( name, std::ios::in );
+	if( f.good() ) return 0;
+	return -1;
+    }
+    else
+    {
+        std::ofstream f( name, std::ios::out );
+	if( f.good() ) return 0;
+	return -1;
+    }
+}
+#endif /* HAVE_ACCESS */
 
