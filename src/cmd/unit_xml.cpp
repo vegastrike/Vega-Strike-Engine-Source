@@ -129,7 +129,8 @@ namespace UnitXML {
       RAPID,
       USEBSP,
       AFTERBURNENERGY,
-      MISSING
+      MISSING,
+      UNITSCALE
     };
 
   const EnumMap::Pair element_names[] = {
@@ -162,6 +163,7 @@ namespace UnitXML {
     EnumMap::Pair ("Cockpit", COCKPIT),
     EnumMap::Pair ("Jump", JUMP),
     EnumMap::Pair ("Dock", DOCK)
+
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -237,11 +239,12 @@ namespace UnitXML {
     EnumMap::Pair ("DockInternal", DOCKINTERNAL),
     EnumMap::Pair ("RAPID", RAPID),
     EnumMap::Pair ("BSP", USEBSP),
-    EnumMap::Pair ("Wormhole", WORMHOLE)
+    EnumMap::Pair ("Wormhole", WORMHOLE),
+    EnumMap::Pair ("Scale", UNITSCALE)
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 74);
+  const EnumMap attribute_map(attribute_names, 75);
 }
 
 using XMLSupport::EnumMap;
@@ -289,7 +292,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDELEM(stringHandler,(*iter).value);
-	xml->shieldmesh =(new Mesh((*iter).value.c_str(), true, faction));
+	xml->shieldmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
 	break;
       case SHIELDTIGHT: 
 	ADDDEFAULT;
@@ -307,7 +310,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->bspmesh =(new Mesh((*iter).value.c_str(), true, faction));
+	xml->bspmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
 	xml->hasBSP = true;	
 	break;
       case RAPID:
@@ -330,7 +333,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->meshes.push_back(new Mesh((*iter).value.c_str(), true, faction));
+	xml->meshes.push_back(new Mesh((*iter).value.c_str(), xml->unitscale, faction));
 	break;
       }
     }
@@ -353,27 +356,27 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case X:
 	ADDDEFAULT;
-	pos.i=parse_float((*iter).value);
+	pos.i=xml->unitscale*parse_float((*iter).value);
 	break;
       case Y:
 	ADDDEFAULT;
-	pos.j=parse_float((*iter).value);
+	pos.j=xml->unitscale*parse_float((*iter).value);
 	break;
       case Z:
 	ADDDEFAULT;
-	pos.k=parse_float((*iter).value);
+	pos.k=xml->unitscale*parse_float((*iter).value);
 	break;
       case TOP:
 	ADDDEFAULT;
-	R.j=parse_float((*iter).value);
+	R.j=xml->unitscale*parse_float((*iter).value);
 	break;
       case BOTTOM:
 	ADDDEFAULT;
-	Q.j=parse_float((*iter).value);
+	Q.j=xml->unitscale*parse_float((*iter).value);
 	break;
       case LEFT:
 	ADDDEFAULT;
-	Q.i=parse_float((*iter).value);
+	Q.i=xml->unitscale*parse_float((*iter).value);
 	break;
       case RIGHT:
 	ADDDEFAULT;
@@ -381,16 +384,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case BACK:
 	ADDDEFAULT;
-	Q.k=parse_float((*iter).value);
+	Q.k=xml->unitscale*parse_float((*iter).value);
 	break;
       case FRONT:
 	ADDDEFAULT;
-	R.k=parse_float((*iter).value);
+	R.k=xml->unitscale*parse_float((*iter).value);
 	break;
       case MOUNTSIZE:
 	ADDDEFAULT;
-	P.i=parse_float((*iter).value);
-	P.j=parse_float((*iter).value);
+	P.i=xml->unitscale*parse_float((*iter).value);
+	P.j=xml->unitscale*parse_float((*iter).value);
 	break;
       }
     }
@@ -414,15 +417,15 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:
 	ADDDEFAULT;
-	pos.i=parse_float((*iter).value);
+	pos.i=xml->unitscale*parse_float((*iter).value);
 	break;
       case Y:
 	ADDDEFAULT;
-	pos.j=parse_float((*iter).value);
+	pos.j=xml->unitscale*parse_float((*iter).value);
 	break;
       case Z:
 	ADDDEFAULT;
-	pos.k=parse_float((*iter).value);
+	pos.k=xml->unitscale*parse_float((*iter).value);
 	break;
       case RED:
 	ADDDEFAULT;
@@ -446,8 +449,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case MOUNTSIZE:
 	ADDDEFAULT;
-	P.i=parse_float((*iter).value);
-	P.j=parse_float((*iter).value);
+	P.i=xml->unitscale*parse_float((*iter).value);
+	P.j=xml->unitscale*parse_float((*iter).value);
 	break;
       }
     }
@@ -461,7 +464,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     R = Vector (0,0,1);
     pos = Vector (0,0,0);
     tempbool=false;
-    ADDELEMNAME("size",Unit::mountSerializer,XMLType((int)xml->mountz.size()));
+    ADDELEMNAME("size",Unit::mountSerializer,XMLType(XMLSupport::tostring(xml->unitscale),(int)xml->mountz.size()));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case WEAPON:
@@ -475,13 +478,13 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	mntsiz=parseMountSizes((*iter).value.c_str());
 	break;
       case X:
-	pos.i=parse_float((*iter).value);
+	pos.i=xml->unitscale*parse_float((*iter).value);
 	break;
       case Y:
-	pos.j=parse_float((*iter).value);
+	pos.j=xml->unitscale*parse_float((*iter).value);
 	break;
       case Z:
-	pos.k=parse_float((*iter).value);
+	pos.k=xml->unitscale*parse_float((*iter).value);
 	break;
       case RI:
 	R.i=parse_float((*iter).value);
@@ -544,15 +547,15 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case X:
 	ADDDEFAULT;
-	pos.i=parse_float((*iter).value);
+	pos.i=xml->unitscale*parse_float((*iter).value);
 	break;
       case Y:
 	ADDDEFAULT;
-	pos.j=parse_float((*iter).value);
+	pos.j=xml->unitscale*parse_float((*iter).value);
 	break;
       case Z:
 	ADDDEFAULT;
-	pos.k=parse_float((*iter).value);
+	pos.k=xml->unitscale*parse_float((*iter).value);
 	break;
       case RI:
 	ADDDEFAULT;
@@ -966,7 +969,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     image->unitwriter->AddTag ("Radar");    
     ADDELEMNAME("itts",charStarHandler,XMLType(&computer.itts));    
-    ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
+   ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
     ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));    
@@ -1079,6 +1082,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       default:
 	break;
+      case UNITSCALE:
+	xml->unitscale=parse_float((*iter).value);
+	break;
       case COCKPIT:
 	fprintf (stderr,"Cockpit attrib deprecated use tag");
 	break;
@@ -1097,16 +1103,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	ADDELEM(stringStarHandler,XMLType (&image->cockpitImage));
 	break;
       case X:
-	image->CockpitCenter.i =parse_float ((*iter).value);
-	ADDELEMF(image->CockpitCenter.i);
+	image->CockpitCenter.i =xml->unitscale*parse_float ((*iter).value);
+	ADDELEM(scaledFloatStarHandler,XMLType(tostring(xml->unitscale),&image->CockpitCenter.i));
 	break;
       case Y:
-	image->CockpitCenter.j =parse_float ((*iter).value);
-	ADDELEMF(image->CockpitCenter.j);
+	image->CockpitCenter.j =xml->unitscale*parse_float ((*iter).value);
+	ADDELEM(scaledFloatStarHandler,XMLType(tostring(xml->unitscale),&image->CockpitCenter.j));
 	break;
       case Z:
-	image->CockpitCenter.k =parse_float ((*iter).value);
-	ADDELEMF(image->CockpitCenter.k);
+	image->CockpitCenter.k =xml->unitscale*parse_float ((*iter).value);
+	ADDELEM(scaledFloatStarHandler,XMLType(tostring(xml->unitscale),&image->CockpitCenter.k));
 	break;
       }
     }
@@ -1208,9 +1214,9 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
     
     Matrix m;
     un->mounts[i].GetMountLocation().to_matrix(m);
-    result+=string ("\" x=\"")+tostring(m[12]);
-    result+=string ("\" y=\"")+tostring(m[13]);
-    result+=string ("\" z=\"")+tostring(m[14]);
+    result+=string ("\" x=\"")+tostring((float)(m[12]/parse_float(input.str)));
+    result+=string ("\" y=\"")+tostring((float)(m[13]/parse_float(input.str)));
+    result+=string ("\" z=\"")+tostring((float)(m[14]/parse_float(input.str)));
 
     result+=string ("\" qi=\"")+tostring(m[4]);
     result+=string ("\" qj=\"")+tostring(m[5]);
@@ -1274,6 +1280,8 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
+  float * myscale=new float;//memory leak!
+  image->unitwriter->AddElement("scale",floatStarHandler,XMLType(myscale));
   {
     image->unitwriter->AddTag ("Jump");
     image->unitwriter->AddElement("missing",lessNeg1Handler,XMLType(&jump.drive));
@@ -1353,6 +1361,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   xml->hasBSP = true;
   xml->hasColTree=true;
   xml->unitlevel=0;
+  xml->unitscale=1;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
@@ -1426,6 +1435,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     calculate_extent();
     UpdateCollideQueue();
   }
+  *myscale=xml->unitscale;
   string tmpname (filename);
   vector <bsp_polygon> polies;
   if (xml->shieldmesh) {

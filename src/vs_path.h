@@ -18,12 +18,13 @@ extern std::string sharedunits;
 extern std::string datadir;
 ///gets the hash name for an item with name in curdir
 std::string GetHashName (const std::string &name);
+std::string GetHashName (const std::string &name,float scale);
 std::string GetSharedSoundPath (const std::string &name);
 std::string GetSharedTexturePath (const std::string &name);
 std::string GetSharedTextureHashName(const std::string &);
 std::string GetSharedSoundHashName(const std::string&);
 std::string GetSharedMeshPath (const std::string &name);
-std::string GetSharedMeshHashName(const std::string &);
+std::string GetSharedMeshHashName(const std::string &, float scale);
 std::string GetSharedUnitPath ();
 ///takes out all forward slasshes
 std::string MakeSharedStarSysPath (const std::string &);

@@ -680,7 +680,7 @@ struct Unit::XML {
   enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
   const char * unitModifications;
   char yprrestricted;
-
+  float unitscale;
   float ymin, ymax, ycur;
   float pmin, pmax, pcur;
   float rmin, rmax, rcur;

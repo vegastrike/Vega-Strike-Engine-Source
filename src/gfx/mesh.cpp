@@ -114,11 +114,11 @@ Mesh::Mesh()
 	InitUnit();
 }
 
-bool Mesh::LoadExistant (const char * filehash) {
+bool Mesh::LoadExistant (const char * filehash, float scale) {
   Mesh * oldmesh;
-  oldmesh = meshHashTable.Get(GetHashName(filehash));
+  oldmesh = meshHashTable.Get(GetHashName(filehash,scale));
   if (oldmesh==0) {
-    oldmesh = meshHashTable.Get(GetSharedMeshHashName(filehash));  
+    oldmesh = meshHashTable.Get(GetSharedMeshHashName(filehash,scale));  
   }
   if(0 != oldmesh) {
     *this = *oldmesh;
@@ -129,12 +129,12 @@ bool Mesh::LoadExistant (const char * filehash) {
   return false;
 }
 
-Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(filename)
+Mesh:: Mesh(const char * filename,const float scale, int faction, bool orig):hash_name(filename)
 {
   this->orig=NULL;
   InitUnit();
   Mesh *oldmesh;
-  if (LoadExistant (filename)) {
+  if (LoadExistant (filename,scale)) {
     return;
   }
   bool shared=false;
@@ -145,8 +145,9 @@ Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(f
     fclose (fp);
   }
 
+  bool xml=true;
   if(xml) {
-    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,faction);
+    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction);
     oldmesh = this->orig;
   } else {
     this->xml= NULL;
@@ -155,7 +156,7 @@ Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(f
   }
   draw_queue = new vector<MeshDrawContext>;
   if (!orig) {
-    hash_name =shared?GetSharedMeshHashName (filename):GetHashName(filename);
+    hash_name =shared?GetSharedMeshHashName (filename,scale):GetHashName(filename,scale);
     meshHashTable.Put(hash_name, oldmesh);
     //oldmesh[0]=*this;
     *oldmesh=*this;
@@ -183,7 +184,8 @@ Mesh::~Mesh()
 	    delete forcelogos;
 	    forcelogos = NULL;
 	  }
-	  meshHashTable.Delete(hash_name);
+	  if (meshHashTable.Get(hash_name)==this)
+	    meshHashTable.Delete(hash_name);
 	  
 	  if(draw_queue!=NULL)
 	    delete draw_queue;

@@ -253,7 +253,7 @@ private:
     int faction;
   } *xml;
   ///Loads XML data into this mesh.
-  void LoadXML(const char *filename, int faction);
+  void LoadXML(const char *filename, float scale, int faction);
   ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
   ///Creates all logos with given XML data info
@@ -266,7 +266,7 @@ private:
 
 protected:
   ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
-  bool LoadExistant (const char * filehash);
+  bool LoadExistant (const char * filehash, float scale);
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
   ///The hash table of all meshes
@@ -315,7 +315,7 @@ protected:
 public:
   Mesh();
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
-  Mesh(const char *filename, bool xml, int faction, bool orig=false);
+  Mesh( const char *filename, const float scale,int faction, bool orig=false);
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   ///Destructor... kills orig if refcount of orig becomes zero

@@ -349,7 +349,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
 
-		meshdata[meshcount] = new Mesh(meshfilename, false, faction);
+		meshdata[meshcount] = new Mesh(meshfilename, 1, faction);
 
 		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}

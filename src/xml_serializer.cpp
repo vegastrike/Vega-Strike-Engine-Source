@@ -14,6 +14,9 @@ std::string intStarHandler (const XMLType &input,void *mythis) {
 std::string floatStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring(*input.w.f);
 }
+std::string scaledFloatStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring((float)((*input.w.f)/XMLSupport::parse_float(input.str)));
+}
 
 std::string angleStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((float((*input.w.f)*180/3.1415926536)));

@@ -340,7 +340,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	alpha_found = true;
 	break;
       case XML::SCALE:
-	xml->scale =  parse_float ((*iter).value);
+	xml->scale *=  parse_float ((*iter).value);
 	break;
       case XML::SHAREVERT:
 	xml->sharevert = (parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
@@ -999,7 +999,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename, int faction) {
+void Mesh::LoadXML(const char *filename, float scale, int faction) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
@@ -1014,7 +1014,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
   GFXGetMaterial (0, xml->material);//by default it's the default material;
   xml->load_stage = 0;
   xml->recalc_norm=false;
-  xml->scale=1;
+  xml->scale=scale;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);

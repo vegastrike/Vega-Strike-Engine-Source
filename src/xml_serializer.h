@@ -29,6 +29,8 @@ struct XMLType {
   XMLType (unsigned char * mychar) {w.uc=mychar;}
   XMLType (const std::string &s):str(s) {w.p=&this->str;}
   XMLType (const std::string &s, void * v):str(s) {w.p=v;}
+  XMLType (const std::string &s, int myhardint):str(s) {w.hardint=myhardint;}
+  XMLType (const std::string &s, float *f):str(s) {w.f=f;}
 };
 typedef std::string (XMLHandler)(const XMLType &input, void * mythis);
 XMLHandler intHandler;
@@ -41,6 +43,7 @@ XMLHandler charStarHandler;
 XMLHandler ucharStarHandler;
 XMLHandler negationCharStarHandler;
 XMLHandler floatStarHandler;
+XMLHandler scaledFloatStarHandler;
 XMLHandler angleStarHandler;
 XMLHandler negationFloatStarHandler;
 XMLHandler negationIntStarHandler;
