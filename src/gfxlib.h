@@ -130,6 +130,7 @@ void /*GFXDRVAPI*/ GFXModifyMaterial (const unsigned int number, const GFXMateri
 ///Gets the statistics of the material stored in number
 GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material);
 ///Tells Graphics library which material to use on next polygon if lighting enabled
+void /*GFXDRVAPI*/ GFXSelectMaterialHighlights(const unsigned int number,const GFXColor &ambient,  const GFXColor  &diffuse, const GFXColor & specular, const GFXColor & emmissive);
 void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number);
 
 //Matrix
@@ -282,9 +283,10 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset);
 
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
-
+void GFXTextureAddOrModulate(bool modulate);
 ///Sets Depth Offset for polgyons
 void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units);
+void GFXGetPolygonOffset (float *factor, float *units);
 ///Begins a polytype
 void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE);
 

@@ -315,6 +315,80 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
     }
   }
 }
+void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight) {
+    if (cloaked&MeshDrawContext::CLOAK) {
+        GFXPushBlendMode ();
+        if (cloaked&MeshDrawContext::GLASSCLOAK) {
+            GFXDisable (TEXTURE1);
+            int ligh;
+            GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),CloakFX,GFXColor(1,0,0)),true);
+            specialfxlight.push_back (ligh);
+            GFXBlendMode (ONE,ONE);
+        }else {
+            if (cloaked&MeshDrawContext::NEARINVIS) {      
+                //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
+            }
+            GFXBlendMode (SRCALPHA, INVSRCALPHA);
+            GFXColorMaterial (AMBIENT|DIFFUSE);
+            GFXColorf(CloakFX);
+        }
+    }
+}
+static void RestoreCloakState (char cloaked, bool envMap) {
+    if (cloaked&MeshDrawContext::CLOAK) {
+        GFXColorMaterial (0);
+        if (envMap)
+            GFXEnable (TEXTURE1);
+        GFXPopBlendMode ();
+    }
+}
+static void SetupFogState (char cloaked) {
+    if (cloaked&MeshDrawContext::FOG) {
+        Nebula *t=_Universe->AccessCamera()->GetNebula();
+        if (t) {
+            t->SetFogState();
+        }
+    } else {
+        GFXFogMode (FOG_OFF);
+    }    
+}
+bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap) {
+    bool retval=false;
+    if (decal.size()>1) {
+        if (decal[1]) {
+	  
+            GFXSelectMaterialHighlights(mat,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(0,0,0,0),GFXColor(1,1,1,1));
+            retval=true;
+            if (envMap)
+                GFXDisable(TEXTURE1);
+            if (decal[0])
+                decal[0]->MakeActive();
+        }
+    }
+    return retval;
+}
+void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX) {
+    GFXSelectMaterialHighlights(mat,GFXColor(0,0,0,0),GFXColor(0,0,0,0),cloakFX,GFXColor(0,0,0,0));
+    GFXBlendMode (blendsrc,ONE);
+    decal->MakeActive();
+    float a,b;
+    GFXGetPolygonOffset(&a,&b);
+    GFXPolygonOffset (a, b+1);
+    if (envMap){
+      GFXActiveTexture(1);
+      GFXTextureAddOrModulate(true); 
+      GFXEnable(TEXTURE1);
+    }
+}
+void RestoreSpecMapState(bool envMap) { 
+  float a,b;
+    GFXGetPolygonOffset(&a,&b);
+    GFXPolygonOffset (a, b-1);
+    if (envMap) {
+      GFXActiveTexture(1);
+      GFXTextureAddOrModulate(false); //restore modulate
+    }
+}
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   //  assert(draw_queue->size());
 
@@ -358,9 +432,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   }
   vlist->BeginDrawState();	
   vector<MeshDrawContext> tmp_draw_queue;
-  while(draw_queue->size()) {
-	  
-	MeshDrawContext c = draw_queue->back();
+  while(draw_queue->size()) {	  
+    MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
     if (c.mesh_seq!=whichdrawqueue) {
       tmp_draw_queue.push_back (c);
@@ -372,59 +445,28 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
     vector <int> specialfxlight;
     GFXLoadMatrixModel ( c.mat);
-    if (c.cloaked&MeshDrawContext::CLOAK) {
-      GFXPushBlendMode ();
-      //	GFXColor4f (1,1,1,.25);
-#if 0
-      //SLOW on TNT
-      GFXBlendColor (c.CloakFX);
-      GFXBlendMode (CONSTCOLOR,INVCONSTCOLOR);
-#else
-      if (c.cloaked&MeshDrawContext::GLASSCLOAK) {
-	GFXDisable (TEXTURE1);
-	int ligh;
-	GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),c.CloakFX,GFXColor(1,0,0)),true);
-	specialfxlight.push_back (ligh);
-	GFXBlendMode (ONE,ONE);
-      }else {
-	if (c.cloaked&MeshDrawContext::NEARINVIS) {      
-	  //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
-	}
-	GFXBlendMode (SRCALPHA, INVSRCALPHA);
-	GFXColorMaterial (AMBIENT|DIFFUSE);
-	GFXColorf(c.CloakFX);
-      }
-#endif
-    }
-
+    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight);
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
       GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
       specialfxlight.push_back(ligh);
     }
-    if (c.cloaked&MeshDrawContext::FOG) {
-      Nebula *t=_Universe->AccessCamera()->GetNebula();
-      if (t) {
-	t->SetFogState();
-      }
-    } else {
-      GFXFogMode (FOG_OFF);
-    }
+    SetupFogState(c.cloaked);
+    bool SpecMap = SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap());
     vlist->Draw();
+    if (SpecMap) {
+      GFXPushBlendMode();
+        SetupSpecMapSecondPass(Decal[1],myMatNum,blendSrc,getEnvMap(), c.CloakFX);
+        vlist->Draw();
+        RestoreSpecMapState(getEnvMap());
+	GFXPopBlendMode();
+    }
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
-    if (c.cloaked&MeshDrawContext::CLOAK) {
-#if 0
-      GFXBlendColor (GFXColor(1,1,1,1));
-#else
-      GFXColorMaterial (0);
-#endif
-      if (getEnvMap())
-      	GFXEnable (TEXTURE1);
-      GFXPopBlendMode ();
-    }
+    RestoreCloakState(c.cloaked,getEnvMap());
+    
     if(0!=forcelogos&&!(c.cloaked&MeshDrawContext::NEARINVIS)) {
       forcelogos->Draw(c.mat);
     }

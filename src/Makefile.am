@@ -11,7 +11,6 @@ cmd/script/c_alike/libc_alike.a \
 python/briefing_wrapper.o \
 cmd/libcmd.a \
 cmd/base_init.o \
-cmd/unit_util.o \
 python/libpython.a \
 gfx/libgfx.a \
 cmd/ai/libai.a \

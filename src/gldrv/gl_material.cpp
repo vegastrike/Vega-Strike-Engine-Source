@@ -52,12 +52,43 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &mat
   material = materialinfo[number];
   return GFXTRUE;
 }
+const float zerovect[4]={0.0};
+void /*GFXDRVAPI*/ GFXSelectMaterialHighlights (const unsigned int number, const GFXColor &ambient, const GFXColor &diffuse, const GFXColor &specular, const GFXColor & emissive) {
+  selectedmaterial=-1;
+  float matvect[4];
+ 	matvect[0] = materialinfo[number].ar*ambient.r*ambient.a;
+	matvect[1] = materialinfo[number].ag*ambient.g*ambient.a;
+	matvect[2] = materialinfo[number].ab*ambient.b*ambient.a;
+	matvect[3] = materialinfo[number].aa*ambient.a;
+	glMaterialfv(GL_FRONT, GL_AMBIENT, matvect);
+
+	matvect[0] = materialinfo[number].dr*diffuse.r*diffuse.a;
+	matvect[1] = materialinfo[number].dg*diffuse.g*diffuse.a;
+	matvect[2] = materialinfo[number].db*diffuse.b*diffuse.a;
+	matvect[3] = materialinfo[number].da*diffuse.a;
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, matvect);
+
+	matvect[0] = materialinfo[number].sr*specular.r*specular.a;
+	matvect[1] = materialinfo[number].sg*specular.g*specular.a;
+	matvect[2] = materialinfo[number].sb*specular.b*specular.a;
+	matvect[3] = materialinfo[number].sa*specular.a;
+	glMaterialfv(GL_FRONT, GL_SPECULAR, matvect);
+
+	matvect[0] = materialinfo[number].er*emissive.r*emissive.a;
+	matvect[1] = materialinfo[number].eg*emissive.g*emissive.a;
+	matvect[2] = materialinfo[number].eb*emissive.b*emissive.a;
+	matvect[3] = materialinfo[number].ea*emissive.a;
+	glMaterialfv(GL_FRONT, GL_EMISSION, matvect);
+
+	glMaterialfv(GL_FRONT, GL_SHININESS, &materialinfo[number].power);
+
+}
 
 void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number)
 {
   if (number!=selectedmaterial){
 	float matvect[4];
-	matvect[0] = materialinfo[number].ar;
+ 	matvect[0] = materialinfo[number].ar;
 	matvect[1] = materialinfo[number].ag;
 	matvect[2] = materialinfo[number].ab;
 	matvect[3] = materialinfo[number].aa;

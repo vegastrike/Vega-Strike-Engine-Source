@@ -53,6 +53,7 @@ bool GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matri
     tmp.Compose (Cumulative,m);
     Matrix mat;
     tmp.to_matrix (mat);
+    mat.p = Transform(mat,type->offset.Cast());
     if (autotrack&&NULL!=target) {
       AdjustMatrix (mat,target,type->Speed,autotrack>=2,trackingcone);
     }

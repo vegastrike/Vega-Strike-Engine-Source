@@ -58,6 +58,7 @@ namespace BeamXML {
     BLUE,
     ALPHA,
     SPEED,
+    OFFSETX,OFFSETY,OFFSETZ,
     PULSESPEED,
     RADIALSPEED,
     RANGE,
@@ -114,15 +115,17 @@ namespace BeamXML {
     EnumMap::Pair ("Longrange",LONGRANGE),
     EnumMap::Pair ("Consumption",CONSUMPTION),
     EnumMap::Pair ("Refire",REFIRE),
-    EnumMap::Pair ("Length", LENGTH),//,
-
-    EnumMap::Pair ("Volume", VOLUME)//,
+    EnumMap::Pair ("Length", LENGTH),
+    EnumMap::Pair ("OffsetX",OFFSETX),
+    EnumMap::Pair ("OffsetY",OFFSETY),
+    EnumMap::Pair ("OffsetZ",OFFSETZ),
+    EnumMap::Pair ("Volume", VOLUME),
     //EnumMap::Pair ("Yaw",YAW),
     // EnumMap::Pair ("Pitch",PITCH),
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 26);
+  const EnumMap attribute_map(attribute_names, 29);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -202,6 +205,15 @@ namespace BeamXML {
 	  break;
 	case SOUNDWAV:
 	  tmpweapon.sound = AUDCreateSoundWAV((*iter).value,tmpweapon.type==weapon_info::PROJECTILE);
+	  break;
+	case OFFSETX:
+	  tmpweapon.offset.i = XMLSupport::parse_float (iter->value);
+	  break;
+	case OFFSETY:
+	  tmpweapon.offset.j = XMLSupport::parse_float (iter->value);
+	  break;
+	case OFFSETZ:
+	  tmpweapon.offset.k = XMLSupport::parse_float (iter->value);
 	  break;
 	case RED:
 	  tmpweapon.r = XMLSupport::parse_float ((*iter).value);

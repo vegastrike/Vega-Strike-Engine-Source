@@ -66,12 +66,19 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
 {
 	return GFXFALSE;
 }
+static float last_factor=0;
+static float last_units=0;
+void GFXGetPolygonOffset(float *factor, float *units) {
+  *factor = last_factor;
+  *units=last_units;
+}
 void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units) {
+  last_factor=factor;
+  last_units=units;
   if (!factor&&!units) {
     glDisable (GL_POLYGON_OFFSET_FILL);
     glPolygonOffset (0,0);
   } else {
-
     glPolygonOffset (factor,units);
     glEnable (GL_POLYGON_OFFSET_FILL);
   }

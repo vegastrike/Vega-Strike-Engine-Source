@@ -306,6 +306,9 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 	}
 }
 
+void GFXTextureAddOrModulate ( bool add) {
+  glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,add?GL_ADD:GL_MODULATE);
+}
 void GFXActiveTexture (const int stage) {
 #if !defined(IRIX)
   if (gl_options.Multitexture&&stage!=activeTextureStage) {
