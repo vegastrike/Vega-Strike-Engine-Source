@@ -25,7 +25,7 @@
 #  include <sys/cygwin.h>
 #endif
 
-bool_t file_exists( char *filename )
+int file_exists( char *filename )
 {
 #if defined( WIN32 ) && !defined( __CYGWIN__ )
 

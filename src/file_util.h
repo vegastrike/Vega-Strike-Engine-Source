@@ -26,9 +26,8 @@ extern "C"
 #ifndef FILE_UTIL_H
 #define FILE_UTIL_H
 
-#include "vs_types.h"
 
-bool_t file_exists( char *filename );
+int file_exists( char *filename );
 
 #endif /* FILE_UTIL_H */
 

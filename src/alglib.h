@@ -22,7 +22,7 @@
 extern "C"
 {
 #endif
-
+#include "vs_types.h"
 #ifndef ALGLIB_H
 #define ALGLIB_H
 

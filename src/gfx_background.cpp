@@ -26,7 +26,7 @@
 #include "gfx_aux_texture.h"
 #include "gfx_background.h"
 #include "gfxlib.h"
-#include "gl_globals.h"
+#include "vegastrike.h"
 Background::Background(char *file)
 {
 	char temp[80]; 

@@ -24,7 +24,6 @@
 #include "gfx_transform.h"
 #include "gfx_aux.h"
 #include "gfx_camera.h"
-#include "gl_globals.h"
 #include <math.h>
 
 #include <string>

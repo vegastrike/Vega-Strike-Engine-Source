@@ -22,7 +22,7 @@
 #ifndef _LIN_TIME_H_
 #define _LIN_TIME_H_
 #include "vegastrike.h"
-#include "vs_types.h"
+
 
 
 void InitTime();

@@ -19,6 +19,9 @@
  */
 
 #ifdef __cplusplus
+
+#include "wrapgfx.h"
+extern WrapGFX * _GFX;
 extern "C"
 {
 #endif
@@ -57,9 +60,9 @@ extern "C"
 #   include <GL/glx.h>
 #endif
 
-#include TCL_HEADER
+  //#include TCL_HEADER
 #ifndef PI
-#   define PI 3.14159265358979323846F
+#   define PI 3.14159265358979323846
 #endif
 #ifndef M_PI
 #   define M_PI 3.1415926535
@@ -71,7 +74,7 @@ extern "C"
   //#define GL_TEXTURE1_ARB 0x84C1
 #include "string_util.h"
 #include "file_util.h"
-#include "vs_types.h"
+  //#include "vs_types.h"
 #include "alglib.h"
 #include "debug.h"
 #include "error_util.h"
@@ -128,70 +131,6 @@ tmp |= ((x) >> 8)  & 0x00ff; \
 
 #define BUFF_LEN 512
 
-/* Multiplayer is not yet supported */
-#define MAX_PLAYERS 1
-
-/* Game state */
-typedef enum {
-    ALL_MODES = -2,
-    NO_MODE = -1,
-    SPLASH = 0,
-    GAME_TYPE_SELECT,
-    EVENT_SELECT,
-    INTRO,
-    RACING,
-    GAME_OVER,
-    PAUSED,
-    NUM_GAME_MODES
-} game_mode_t;
-
-
-/* View mode */
-typedef enum {
-    BEHIND,
-    FOLLOW,
-    ABOVE,
-    NUM_VIEW_MODES
-} view_mode_t;
-
-/* View point */
-typedef struct {
-    view_mode_t mode;                   /* View mode */
-    point_t pos;                        /* position of camera */
-    point_t plyr_pos;                   /* position of player */
-    vector_t dir;                       /* viewing direction */
-    vector_t up;                        /* up direction */
-    matrixgl_t inv_view_mat;            /* inverse view matrix */
-    bool_t initialized;                 /* has view been initialized? */
-} view_t;
-
-/* Control mode */
-typedef enum {
-    KEYBOARD = 0,
-    MOUSE = 1,
-    JOYSTICK = 2
-} control_mode_t;
-
-/* Control data */
-typedef struct {
-    control_mode_t mode;                /* control mode */
-    scalar_t turn_fact;                 /* turning [-1,1] */
-    scalar_t turn_animation;            /* animation step [-1,1] */
-    bool_t is_braking;                  /* is player braking? */
-    bool_t is_paddling;                 /* is player paddling? */
-    scalar_t paddle_time;
-    bool_t begin_jump;
-    bool_t jumping;
-    bool_t jump_charging;
-    scalar_t jump_amt;
-    scalar_t jump_start_time;
-    bool_t barrel_roll_left;
-    bool_t barrel_roll_right;
-    scalar_t barrel_roll_factor;
-    bool_t front_flip;
-    bool_t back_flip;
-    scalar_t flip_factor;
-} control_t;
 
 
 /* All global data is stored in a variable of this type */
@@ -210,8 +149,6 @@ typedef struct {
   int y_resolution;
   int x_resolution;  
   int fov;
-  game_mode_t mode;
-  game_mode_t prev_mode;
   scalar_t time;                      /* game time */
   scalar_t time_step;                 /* size of current time step */
   scalar_t secs_since_start;          /* seconds since game was started */
@@ -219,11 +156,10 @@ typedef struct {
 
 extern game_data_t g_game;
 
-
-#define get_player_data( plyr ) ( & g_game.player[ (plyr) ] )
 typedef int BOOL;
 #endif
 
 #ifdef __cplusplus
 } /* extern "C" */
+
 #endif

@@ -20,7 +20,6 @@
 
 #include "vegastrike.h"
 #include "fonts.h"
-#include "gl_util.h"
 #include "gfxlib.h"
 #include "render_util.h"
 //#include "keyboard.h"
@@ -29,9 +28,6 @@
 #include "audio_data.h"
 #include "audio.h"
 #include "joystick.h"
-#include "gl_globals.h"
-
-
 
 /*
  * Globals 
@@ -56,8 +52,6 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.color_depth = 16;
   g_game.y_resolution = 480;
   g_game.x_resolution = 640;
-  g_game.mode = RACING;
-  g_game.prev_mode=RACING;
   g_game.fov=60;
   g_game.PaletteExt=1;
   
@@ -248,7 +242,7 @@ int main( int argc, char **argv )
     //race_select_register();
     //credits_register();
 
-    g_game.mode = NO_MODE;
+
     //set_game_mode( SPLASH );
 
     InitKB();

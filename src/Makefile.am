@@ -69,8 +69,6 @@ vegastrike_SOURCES =				\
 	gfxlib_struct.h				\
 	gl_globals.cpp				\
 	gl_globals.h				\
-	gl_util.c				\
-	gl_util.h				\
 	gl_init.cpp				\
 	gl_init.h				\
 	gl_light.cpp				\
