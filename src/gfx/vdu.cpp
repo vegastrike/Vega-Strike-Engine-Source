@@ -334,7 +334,7 @@ void VDU::DrawMessages(Unit *target){
 void VDU::DrawNav (const Vector & nav) {
 
   char navdata[256];
-  sprintf (navdata,"\nNavigation\n----------\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",nav.i,nav.j,nav.k,10*nav.Magnitude());
+  sprintf (navdata,"\nNavigation\n----------\n%s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nav.i,nav.j,nav.k,10*nav.Magnitude());
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
 
 
