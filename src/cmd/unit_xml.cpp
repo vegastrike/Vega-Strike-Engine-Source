@@ -1853,8 +1853,8 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   warpenergy = maxwarpenergy;
-  if (jump.energy>warpenergy)
-    warpenergy=jump.energy;
+  //if (jump.energy>warpenergy)
+  //  warpenergy=jump.energy;
   *myhudim =xml->hudimage;
   unsigned int a;
   if (xml->mountz.size())

@@ -2233,7 +2233,7 @@ void Unit::RegenShields () {
     break;
   }
   if (rechargesh==0)
-    energy-=(short unsigned int)rec;
+    energy-=rec;
   if (energy_before_shield) {
     RechargeEnergy();
   }
@@ -2244,7 +2244,7 @@ void Unit::RegenShields () {
       if (excessenergy >0) {
 		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
 		  short mwe = maxwarpenergy;
-		  if (mwe<jump.energy)
+		  if (mwe<jump.energy&&mwe==0)
 			  mwe = jump.energy;
 		  if (warpenergy>mwe)
 			  warpenergy=mwe;
