@@ -3284,8 +3284,6 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else if (randnum>=.3) {
 			this->maxenergy*=dam;
 		} else if (randnum>=.2) {
-			this->jump.energy*=(2-dam);
-		} else if (randnum>=.03){
 			this->jump.damage+=100*(1-dam);
 		} else {
 		  if (image->repair_droid>0) {
