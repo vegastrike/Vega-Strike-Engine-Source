@@ -52,7 +52,7 @@ GUITexture ReadTex(char *texfile) {
 		tex.hei = height;
 		tex.name = name;
 
-                delete [] image;
+		free(image);
 	}
 	else {
 		printf("Error opening file: %s\n",texfile);
