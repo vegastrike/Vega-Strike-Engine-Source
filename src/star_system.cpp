@@ -250,10 +250,12 @@ bool StarSystem::RemoveUnit(Unit *un) {
 void StarSystem::SwapIn () {
   GFXSetLightContext (lightcontext);
   Unit * un;
+  /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapInHalos();
 
   }
+  */
   /*
   Iterator *iter = drawList->createIterator();
   Unit *unit;
@@ -277,11 +279,13 @@ void StarSystem::SwapIn () {
 
 void StarSystem::SwapOut () {
   Unit * un;
+  /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapOutHalos();
     Halo::ProcessDrawQueue();
 
   }
+  */
   /*
   Iterator *iter = drawList->createIterator();
   Unit *unit;

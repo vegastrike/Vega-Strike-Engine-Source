@@ -34,6 +34,7 @@ libgfx_a_SOURCES =	\
 	gauge.cpp	\
 	gauge.h		\
 	halo.cpp	\
+	halo_system.cpp	\
 	halo.h		\
 	hud.cpp		\
 	hud.h		\

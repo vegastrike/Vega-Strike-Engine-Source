@@ -199,8 +199,8 @@ void Unit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  numhalos = nummounts= nummesh=0;
-  halos = NULL; mounts = NULL;meshdata = NULL;
+  nummounts= nummesh=0;
+  mounts = NULL;meshdata = NULL;
   aistate = NULL;
   SetAI (new Order());
   Identity(cumulative_transformation_matrix);
@@ -581,12 +581,6 @@ Unit::~Unit()
   fprintf (stderr,"%d %x ", 9, halos);
   fflush (stderr);
 #endif
-  if (halos) {
-    for (int hc=0;hc<numhalos;hc++) {
-      delete halos[hc];
-    }
-    delete [] halos;
-  }
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x ", 1,mounts);
   fflush (stderr);
@@ -827,6 +821,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
+  bool On_Screen=false;
   if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
     for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
@@ -851,14 +846,17 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 #endif 
 				   );
       float lod;
+
       if (d) {  //d can be used for level of detail shit
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
 	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  On_Screen=true;
 	} else {
 
 	}
       }
     }
+    
     un_fiter iter =SubUnits.fastIterator();
     Unit * un;
     while ((un = iter.current())) {
@@ -901,8 +899,9 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   if (cloak>=0) {
     haloalpha=((float)cloak)/32767;
   }
-  for (i=0;i<numhalos;i++) {
-    halos[i]->Draw(*ct,*ctm,haloalpha);
+  if (On_Screen) {
+    Vector Scale (1,1,Velocity.MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
+    halos.Draw(*ctm,Scale,haloalpha);
   }
 }
 void Unit::PrimeOrders () {
@@ -912,6 +911,7 @@ void Unit::PrimeOrders () {
   aistate = new Order; //get 'er ready for enqueueing
   aistate->SetParent (this);
 }
+#if 0
 void Unit::SwapOutHalos() {
   for (int i=0;i<numhalos;i++) {
     // float x,y;
@@ -927,6 +927,7 @@ void Unit::SwapInHalos() {
     //halos[i]->SetDimensions (x*(1024),y*(1024));
   }
 }
+#endif
 void Unit::SetTurretAI () {
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit * un;

@@ -22,21 +22,9 @@
 #define _MATRIX_H
 
 #include "vec.h"
-#define MATRIX_TEST
-#ifdef MATRIX_TEST
-#include <vector>
-#endif
 class Matrix {
  private:
-#ifdef MATRIX_TEXT
   float operator [] (int i);
-  friend struct DrawContext;
-  friend class Cockpit;
-  friend class std::vector<Matrix>;
-  friend struct MeshDrawContext;
-  friend class Background;
-  Matrix(const Matrix &) {}//BROKEN!!!!!!!
-#endif
  public:
   float r[9];
   QVector p;  

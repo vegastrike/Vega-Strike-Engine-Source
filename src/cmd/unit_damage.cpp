@@ -39,14 +39,6 @@ void Unit::Split (int level) {
   int nm = nummesh;
   Vector PlaneNorm;
   Mesh ** old = meshdata;
-  if (halos) {//this looks ridiculous
-    for (int hc=0;hc<numhalos;hc++) {
-      delete halos[hc];
-    }
-    delete [] halos;
-    halos=NULL;
-    numhalos=0;
-  }
 
   for (int split=0;split<level;split++) {
     Mesh ** nw= new Mesh *[nm*2+1];
@@ -105,14 +97,6 @@ void Unit::Kill(bool erasefromsave) {
   if (erasefromsave)
     _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((int)this);
   
-  if (halos&&numhalos) {
-    for (int hc=0;hc<numhalos;hc++) {
-      delete halos[hc];
-    }
-    delete [] halos;
-    halos=NULL;
-    numhalos=0;
-  }
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
     unsigned int i;

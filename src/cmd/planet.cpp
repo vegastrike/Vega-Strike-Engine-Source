@@ -256,24 +256,13 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
 	c= ligh[0].ligh.GetProperties(AMBIENT);
 
 	
-      if (far_shine) {
-	numhalos=1;
-	
-	halos= new Halo *[1];
-	halos[0]=new Halo ("shine.png",
-			   //			 ligh[0].ligh.GetProperties (AMBIENT),
-			   c,
-			   QVector (0,0,0),
-			   glowradius*radius,
-			   glowradius*radius);
-      }else {
-	static vector <char *> shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
-	if (shines.empty()) {
-	  shines.push_back("shine.ani");
-	}
-	shine = new Animation (shines[rand()%shines.size()],true,.1,MIPMAP,true,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
-	shine->SetDimensions ( glowradius*radius,glowradius*radius);
+      static vector <char *> shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
+      if (shines.empty()) {
+	shines.push_back("shine.ani");
       }
+      shine = new Animation (shines[rand()%shines.size()],true,.1,MIPMAP,true,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+      shine->SetDimensions ( glowradius*radius,glowradius*radius);
+    
       if (!drawstar) {
 	delete meshdata[0];
 	meshdata[0]=NULL;

@@ -658,10 +658,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	ADDDEFAULT;
 	P.i=xml->unitscale*parse_float((*iter).value);
 	P.j=xml->unitscale*parse_float((*iter).value);
+	P.k=xml->unitscale*parse_float((*iter).value);
 	break;
       }
     }
-   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
+    halos.AddHalo (filename.c_str(),pos,P,GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]));
+    //   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
     break;
   case MOUNT:
     ADDTAG;
@@ -1670,6 +1672,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   for(a=0; a < nummesh; a++) {
     meshdata[a] = xml->meshes[a];
   }
+#if 0
   numhalos = xml->halos.size();
   if(numhalos)
     halos = new Halo*[numhalos];
@@ -1678,6 +1681,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   for(a=0; a < numhalos; a++) {
     halos[a]=xml->halos[a];
   }
+#endif
   nummounts = xml->mountz.size();
   if (nummounts)
     mounts = new Mount [nummounts];

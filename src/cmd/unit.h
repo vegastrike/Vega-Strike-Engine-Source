@@ -35,7 +35,7 @@ struct GFXColor;
 #include "container.h"
 #include "collection.h"
 #include "gfx/cockpit.h"
-
+#include "gfx/halo_system.h"
 using std::string;
 
 class Flightgroup;
@@ -51,7 +51,7 @@ class Order;
 class Box;
 class Mesh;
 class Camera;
-class Halo;
+
 
 class PlanetaryOrbit;
 class UnitCollection;
@@ -218,8 +218,7 @@ class Unit
   float shieldtight;
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
-  ///glowing halo effects on this unit
-  int numhalos;  Halo **halos;
+  HaloSystem halos;
   ///NUmber of weapons on this unit
   int nummounts;
   /** 
@@ -428,8 +427,8 @@ public:
   void AddCargo (const Cargo &carg,bool sort=true);
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
   float PriceCargo (const std::string &s);
-  void SwapOutHalos();
-  void SwapInHalos();
+  //  void SwapOutHalos();
+  //  void SwapInHalos();
   void SetFg (Flightgroup * fg, int fg_snumber);
   UnitImages &GetImageInformation();
   Cargo & GetCargo (unsigned int i);
@@ -825,7 +824,7 @@ public:
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {
-  vector<Halo*> halos;
+  //  vector<Halo*> halos;
   vector<Unit::Mount *> mountz;
   vector<Mesh*> meshes;
   Mesh * shieldmesh;

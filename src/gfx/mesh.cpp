@@ -166,6 +166,15 @@ Mesh::~Mesh()
 {
 	if(!orig||orig==this)
 	{
+	  for (int j=0;j<NUM_MESH_SEQUENCE;j++) {
+	    for (unsigned int i=0;i<undrawn_meshes[j].size();i++) {
+	      if (undrawn_meshes[j][i].orig==this) {
+		undrawn_meshes[j].erase(undrawn_meshes[j].begin()+i);
+		i--;
+		fprintf (stderr,"stale mesh found in draw queue--removed!\n");
+	      }
+	    }
+	  }
 	  delete vlist;
 	  if(Decal != NULL) {
 	    delete Decal;
