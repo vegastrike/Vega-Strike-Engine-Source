@@ -1,4 +1,5 @@
 #include "cmd_target_ai.h"
+#include "cmd_flybywire.h"
 #include "vegastrike.h"
 #include "cmd_navigation_orders.h"
 using Orders::FireAt;
@@ -73,6 +74,8 @@ void AggressiveAI::Execute () {
     Order * tmp;
     EnqueueOrder (tmp = new Orders::FaceTarget (false));
     tmp->SetParent(parent);
+    EnqueueOrder (tmp = new Orders::MatchLinearVelocity (Vector (0,0,15),true,false));
+    tmp->SetParent (parent);
     facingtarg=true;
   }
 
