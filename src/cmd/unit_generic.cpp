@@ -999,19 +999,23 @@ QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed
 static float tmpsqr (float x) {
 	return x*x;
 }
-bool CloseEnoughToAutotrack (Unit * me, Unit * targ) {
-	if (targ) {
-		if (me->aistate) {
-			static float close_enough_to_autotrack = tmpsqr(XMLSupport::parse_float (vs_config->getVariable ("physics","close_enough_to_autotrack","3")));
-			return (me->curr_physical_state.position.Cast()-targ->curr_physical_state.position.Cast()).MagnitudeSquared()<close_enough_to_autotrack*(me->prev_physical_state.position.Cast()-me->curr_physical_state.position.Cast()).MagnitudeSquared();
-		}
-	}
-	return false;
-}
 float CloseEnoughCone (Unit * me) {
 	static float close_autotrack_cone = XMLSupport::parse_float (vs_config->getVariable ("physics","near_autotrack_cone",".99"));
 	return close_autotrack_cone;
 }
+bool CloseEnoughToAutotrack (Unit * me, Unit * targ, float &cone) {
+	if (targ) {
+		static float close_enough_to_autotrack = tmpsqr(XMLSupport::parse_float (vs_config->getVariable ("physics","close_enough_to_autotrack","3")));
+		float dissqr = (me->curr_physical_state.position.Cast()-targ->curr_physical_state.position.Cast()).MagnitudeSquared();
+		float movesqr=close_enough_to_autotrack*(me->prev_physical_state.position.Cast()-me->curr_physical_state.position.Cast()).MagnitudeSquared();
+		if (dissqr<movesqr&&movesqr>0) {
+			cone = CloseEnoughCone(me)*(movesqr-dissqr)/movesqr + 1*dissqr/movesqr;
+			return true;
+		}
+	}
+	return false;
+}
+
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
   Vector Normal (cumulative_transformation_matrix.getR());
    //   if (range!=FLT_MAX) {
@@ -1519,13 +1523,14 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       if (mounts[i].ref.gun) {
 		  Unit * autotarg = ((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0))?target:NULL;
 		  float trackingcone = computer.radar.trackingcone;
-		  if (autotarg==NULL) {
-			  if (CloseEnoughToAutotrack(this,target)) {
-				  autotarg = target;
-				  trackingcone = CloseEnoughCone(this);
+		  if (CloseEnoughToAutotrack(this,target,trackingcone)) {
+			  if (autotarg) {
+				  if (computer.radar.trackingcone<trackingcone)
+					  trackingcone = computer.radar.trackingcone;
 			  }
+			  autotarg = target;
 		  }
-		mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target);
+		  mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,autotarg,trackingcone, target);
       }
     } else {
       mounts[i].ref.refire+=SIMULATION_ATOM;
@@ -1537,12 +1542,17 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
       int autotrack=0;
-	  float trackingcone = computer.radar.trackingcone;
-      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
-		autotrack = computer.itts?2:1;
-      }else if (CloseEnoughToAutotrack(this,target)) {
-		  autotrack = 2;//computer.itts?2:1;
-		  trackingcone = CloseEnoughCone(this);
+	  if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
+		  autotrack = computer.itts?2:1;
+      }
+	  float trackingcone = computer.radar.trackingcone;	  
+	  if (CloseEnoughToAutotrack(this,target,trackingcone)) {
+		  if (autotrack) {
+			  if (trackingcone>computer.radar.trackingcone) {
+				  trackingcone = computer.radar.trackingcone;
+			  }
+		  }
+		  autotrack=2;
 	  }
       mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, trackingcone);
       if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE, i) {
