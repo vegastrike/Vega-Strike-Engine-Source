@@ -144,14 +144,19 @@ void Universe::Init( const char * gal)
 
 }
 
-Universe::Universe(int argc, char** argv, const char * galaxy, bool server)
+Universe::Universe(int argc, char** argv, const char * galaxy_str, bool server)
+    : galaxy( NULL )
+    , current_cockpit( 0 )
+    , script_system( NULL )
 {
-	this->Init( galaxy);
+	this->Init( galaxy_str);
 	is_server = server;
 }
 Universe::Universe()
+    : galaxy( NULL )
+    , current_cockpit( 0 )
+    , script_system( NULL )
 {
-	script_system=NULL;
 	is_server = false;
 }
 
