@@ -34,13 +34,13 @@ const Matrix identity_matrix = {1,0,0,0,
 
 inline void ScaleMatrix(float matrix[], const Vector &scale) {
   matrix[0]*=scale.i;
-  matrix[4]*=scale.i;
-  matrix[8]*=scale.i;
-  matrix[1]*=scale.j;
+  matrix[1]*=scale.i;
+  matrix[2]*=scale.i;
+  matrix[4]*=scale.j;
   matrix[5]*=scale.j;
-  matrix[9]*=scale.j;
-  matrix[2]*=scale.k;
-  matrix[6]*=scale.k;
+  matrix[6]*=scale.j;
+  matrix[8]*=scale.k;
+  matrix[9]*=scale.k;
   matrix[10]*=scale.k;
 }
 
