@@ -1,7 +1,8 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
-vegastrike_LDADD =   \
+vegastrike_LDFLAGS = -static
+vegastrike_LDADD =  \
 aldrv/libaldrv.a \
 common/libvscommon.a \
 networking/libnetclient.a \

@@ -444,7 +444,8 @@ bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   bool ok=true;
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
     for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
-      if (un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
+      static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
+      if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
 		if (un!=this&&un!=target) {
     	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
 	    return false;
@@ -460,7 +461,7 @@ bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   }
 
   if (this!=target) {
-    SetCurPosition(end);
+    SetCurPosition(UniverseUtil::SafeEntrancePoint (end));
     if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
       Unit * other=NULL;
       for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {

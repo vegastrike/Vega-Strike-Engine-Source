@@ -59,11 +59,11 @@ namespace ROLES {
 			fgets(temp,len,fp);
 			vector <string> vec=readCSV(temp);
 			if (vec.size()) vec.erase (vec.begin());
-			fprintf (stderr," SIZE %d\n",vec.size());
+			//fprintf (stderr," SIZE %d\n",vec.size());
 			int loc;
 			unsigned int i;
 			for (i=0;i<vec.size();i++) {
-				fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
+			  //fprintf (stderr," %s AS %d\n",vec[i].c_str(),i);
 				rolemap.insert (pair<string,int>(strtoupper(vec[i]),i));
 			}
 
@@ -75,7 +75,7 @@ namespace ROLES {
 				fgets (temp,len,fp);
 				vector <string> priority = readCSV(temp);
 				int i=getRole (priority[0]);
-				fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
+				//fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
 				if (i<rolePriorities.size()) {
 					for (unsigned int j=0;j<rolePriorities.size();j++) {
 						if (rolePriorities[i].size()<rolePriorities.size())
