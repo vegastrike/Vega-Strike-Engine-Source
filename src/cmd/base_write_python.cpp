@@ -16,7 +16,7 @@ void Base::Room::Goto::EndXML (FILE *fp) {
 void Base::Room::Python::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Python (");
 	Link::EndXML(fp);
-	fprintf(fp,", '%s')\n",file);
+	fprintf(fp,", '%s')\n",file.c_str());
 }
 
 void Base::Room::Talk::EndXML (FILE *fp) {
@@ -107,19 +107,22 @@ void Base::Room::BaseSprite::EndXML (FILE *fp) {
 }
 
 void Base::Room::EndXML (FILE *fp) {
-	fprintf(fp,"room = Base.Room ('%s')\n",deftext.c_str());
 	int i;
+	i=fprintf(fp,"room = Base.Room ('%s')\n",deftext.c_str());
 	for (i=0;i<links.size();i++) {
-		links[i]->EndXML(fp);
+		if (links[i])
+			links[i]->EndXML(fp);
 	}
 	for (i=0;i<objs.size();i++) {
-		objs[i]->EndXML(fp);
+		if (objs[i])
+			objs[i]->EndXML(fp);
 	}
-	fwrite("\n",2,1,fp);
+	fprintf(fp,"\n");
+	fflush(fp);
 }
 
 void Base::EndXML (FILE *fp) {
-	fprintf(fp,"import base\n\n");
+	fprintf(fp,"import Base\n\n");
 	for (int i=0;i<rooms.size();i++) {
 		rooms[i]->EndXML(fp);
 	}

@@ -170,10 +170,12 @@ void Base::Room::EndXML (FILE *fp) {
 	endtag(fp,false);
 	int i;
 	for (i=0;i<links.size();i++) {
-		links[i]->EndXML(fp);
+		if (links[i])
+			links[i]->EndXML(fp);
 	}
 	for (i=0;i<objs.size();i++) {
-		objs[i]->EndXML(fp);
+		if (objs[i])
+			objs[i]->EndXML(fp);
 	}
 	begintag(fp,"/Room",1);
 	endtag(fp,false);

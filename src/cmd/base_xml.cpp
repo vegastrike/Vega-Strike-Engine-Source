@@ -5,7 +5,36 @@
 #include "base.h"
 #include "base_util.h"
 #include "vs_path.h"
+#include <boost/python/objects.hpp>
 
+static boost::python::tuple GetRandomBarMessage () {
+	gameMessage * last;
+	int i=0;
+	vector <std::string> who;
+	vector <std::string> say;
+	vector <std::string> sounds;
+	string newmsg;
+	string newsound;
+	who.push_back ("bar");
+	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
+		newmsg=last->message;
+		newsound="";
+		int first=newmsg.find_first_of("[");
+		int last=newmsg.find_first_of("]");
+		if (first!=string::npos&&(first+1)<newmsg.size()) {
+			newsound=newmsg.substr(first+1,last-first-1);
+			newmsg=newmsg.substr(0,first);
+		}
+		sounds.push_back(newsound);
+		say.push_back(newmsg);
+	}
+	if (say.size()) {
+		int index=rand()%say.size();
+		return boost::python::tuple(say[index],sounds[index]);
+	} else {
+		return boost::python::tuple("","");
+	}
+}
 PYTHON_BEGIN_MODULE(Base)
 	Base.def (&BaseUtil::Room,"Room");
 	Base.def (&BaseUtil::GetCurRoom,"GetCurRoom");
@@ -19,6 +48,7 @@ PYTHON_BEGIN_MODULE(Base)
 	Base.def (&BaseUtil::Texture,"Texture");
 	Base.def (&BaseUtil::Message,"Message");
 	Base.def (&BaseUtil::EraseObj,"EraseObj");
+	Base.def (&GetRandomBarMessage,"GetRandomBarMessage");
 PYTHON_END_MODULE(Base)
 
 void InitBase() {
@@ -69,6 +99,8 @@ void Base::Load(const char * filename,const char * time_of_day_hint) {
   char *pyfile=new char[length+1];
   strncpy(pyfile,filnam,length);
   pyfile[length]='\0';
+  Python::reseterrors();
   PyRun_SimpleFile(inFile,pyfile);
+  Python::reseterrors();
   fclose(inFile);
 }

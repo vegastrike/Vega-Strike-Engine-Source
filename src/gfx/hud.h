@@ -36,8 +36,8 @@ class TextPlane {
 	} myGlyphPos[256];
 	*/
 public:
-	GFXColor col;
-	TextPlane(const struct GFXColor &col=GFXColor(1,1,1,1));
+	GFXColor col,bgcol;
+	TextPlane(const struct GFXColor &col=GFXColor(1,1,1,1),const struct GFXColor &bgcol=GFXColor(0,0,0,0));
 	~TextPlane();
 	void SetPos (float x, float y) {
 	  myFontMetrics.k = y;

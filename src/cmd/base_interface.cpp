@@ -93,7 +93,7 @@ void Base::Room::BaseTalk::Draw (Base *base) {
 		}
 	} else {
 		curtime+=GetElapsedTime();
-		if (curtime>.01*message.size()) {
+		if (curtime>((.01*message.size())+2)) {
 			curtime=0;
 			BaseObj * self=this;
 			std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
@@ -263,9 +263,11 @@ void Base::MouseOver (float x, float y) {
 	}
 	if (link) {
 		curtext.SetText(link->text);
+		curtext.col=GFXColor(1,.666667,0,1);
 		drawlinkcursor=true;
 	} else {
 		curtext.SetText(rooms[curroom]->deftext);
+		curtext.col=GFXColor(0,1,0,1);
 		drawlinkcursor=false;
 	}
 }
@@ -407,7 +409,8 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
     return "night";
   return "sunset";
 }
-Base::Base (const char *basefile, Unit *base, Unit*un) {
+Base::Base (const char *basefile, Unit *base, Unit*un)
+		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(0,.5,1,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
 	caller=un;
 	curlinkindex=0;
@@ -523,10 +526,13 @@ void Base::Draw () {
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetPos(-1+(1.5*x),-1+(1.5*y));
-	GFXColor4f(0,1,0,1);
+//	if (!drawlinkcursor)
+//		GFXColor4f(0,1,0,1);
+//	else
+//		GFXColor4f(1,.333333,0,1);
 	curtext.Draw();
-	othtext.SetPos(-1,1);
-	GFXColor4f(0,.5,1,1);
+	othtext.SetPos(-1+(1.5*x),1);
+//	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
 	EndGUIFrame (drawlinkcursor);
 }

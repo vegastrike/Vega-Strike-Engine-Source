@@ -1,4 +1,5 @@
 #include <string>
+#include <stdlib.h>
 #include "base.h"
 #include "base_util.h"
 namespace BaseUtil {
@@ -10,6 +11,7 @@ namespace BaseUtil {
 	int Room (std::string text) {
 		if (!Base::CurrentBase) return -1;
 		Base::CurrentBase->rooms.push_back(new Base::Room());
+		Base::CurrentBase->rooms.back()->deftext=text;
 		return Base::CurrentBase->rooms.size()-1;
 	}
 	void Texture(int room, std::string index, std::string file, float x, float y) {

@@ -29,8 +29,9 @@
 #include "xml_support.h"
 //#include "glut.h"
 
-TextPlane::TextPlane(const GFXColor & c) {
+TextPlane::TextPlane(const GFXColor & c, const GFXColor & bgcol) {
   col=c;
+  this->bgcol=bgcol;
   myDims.i = 2;  myDims.j=-2;
   myFontMetrics.Set(.06,.08,0);
   SetPos (0,0);
@@ -77,10 +78,23 @@ static unsigned char TwoCharToByte (char a, char b) {
 static float TwoCharToFloat(char a, char b) {
   return (TwoCharToByte(a,b)/255.);
 }
+void DrawSquare(float left,float right, float top, float bot) {
+	GFXBegin (GFXQUAD);
+	GFXVertex3f(left,top,0);
+	GFXVertex3f(left,bot,0);
+	GFXVertex3f(right,bot,0);
+	GFXVertex3f(right,top,0);
+	GFXVertex3f(right,top,0);
+	GFXVertex3f(right,bot,0);
+	GFXVertex3f(left,bot,0);
+	GFXVertex3f(left,top,0);
+
+	GFXEnd ();
+}
 int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
 {
   int retval=1;
-  GFXColorf(this->col);
+  bool drawbg = (bgcol.a!=0);
   static char * display_lists=CreateLists ();
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
@@ -94,8 +108,10 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   myFontMetrics.j/=.5*g_game.y_resolution;
   float tmp,row, col;
   GetPos (row,col);
+  float rowheight=(use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
   if (startlower) {
-      row -= (use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
+      row -= rowheight;
+
   }
   GFXPushBlendMode();
   glLineWidth (1);
@@ -107,6 +123,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
     GFXBlendMode (ONE,ZERO);
     glDisable (GL_LINE_SMOOTH);
   }
+  GFXColorf(this->col);
 
   GFXDisable (DEPTHTEST);
   GFXDisable (CULLFACE);
@@ -118,6 +135,12 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 
   glPushMatrix();
   glLoadIdentity();
+  if (drawbg) {
+	GFXColorf(this->bgcol);
+	DrawSquare(col,this->myDims.i,row,row-rowheight);
+  }
+  GFXColorf(this->col);
+
   glRasterPos2f(0,0);
   int entercount=0;
   for (;entercount<offset&&text_it!=newText.end();text_it++) {
@@ -183,14 +206,19 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       }
     }
     if(col+((text_it+1!=newText.end())?(use_bit?(glutBitmapWidth(fnt,*text_it)/(float)(2*g_game.x_resolution)):myFontMetrics.i):0)>=myDims.i||*text_it == '\n') {
-      if (*text_it=='\n') {
-	GFXColorf(this->col);
-      }
       GetPos (tmp,col);
-      row -= (use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
+      row -= rowheight;
       glPopMatrix();
       glPushMatrix ();
       glLoadIdentity();
+	  if (drawbg) {
+		GFXColorf(this->bgcol);
+		DrawSquare(col,this->myDims.i,row,row-rowheight);
+		GFXColorf(this->col);
+	  }
+      if (*text_it=='\n') {
+		GFXColorf(this->col);
+      }
       glTranslatef (col,row,0);
       glScalef(scalex,scaley,1);
       glRasterPos2f(0,0);

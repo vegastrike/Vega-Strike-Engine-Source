@@ -1,4 +1,5 @@
 #include <string>
+
 namespace BaseUtil {
 	int Room (std::string text);
 	void Texture(int room, std::string index, std::string file, float x, float y);
