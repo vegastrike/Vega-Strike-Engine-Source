@@ -50,6 +50,7 @@ struct shipstats {
 	unsigned char Mass;
 	float ooMass;
 };
+const int labelinc=5;
 struct point {
   float x,y,z;
   V Vertex;
@@ -99,7 +100,7 @@ struct drawdata {
 
 
 FILE * fp = NULL;
-
+const bool writenormals=false;
 void wrtc (char c)
 {
 	fwrite (&c,sizeof (char),1,fp);
@@ -188,6 +189,8 @@ int main (int argc, char ** argv)
   shipstats Stat;
   float scl = 1;
   char * DecalFileName;
+  char tmpprint[1000];
+  int pointcount=0;
   if (argc <3)
     return 0;
   if (argc>3) {
@@ -203,7 +206,7 @@ int main (int argc, char ** argv)
 	Tab();
 	StrWrite ("<Meshfile file=\"");
 	StrWrite (meshname);
-	StrWrite ("\"/>\n");
+	StrWrite ("\" />\n");
 	ETag ("Unit");
 	fclose (fp);
 	char tmp [255];
@@ -222,9 +225,11 @@ int main (int argc, char ** argv)
 	}
 	StrWrite ("<Mesh texture=\"");
 	StrWrite (DecalFileName);
-	StrWrite ("\">\n");
-	
+	StrWrite ("\" scale=");
+	TextF (scl);
+	StrWrite (" >\n");
 	Tag ("Points");
+
 	DrawDat.NumPoints = readf (shp);
 	DrawDat.VarP = new point [DrawDat.NumPoints];
 	// Find how many points and what type;
@@ -232,17 +237,26 @@ int main (int argc, char ** argv)
 	for (i=0; i< DrawDat.NumPoints; i++)
 	{
 	  Tab(1);
-	  Tag ("Point");
-		DrawDat.FixP[i].Vertex.x = readf(shp)*scl;
-		DrawDat.FixP[i].Vertex.y = readf(shp)*scl;
-		DrawDat.FixP[i].Vertex.z = readf(shp)*scl;
+
+	  if (i%labelinc==0) {
+	    sprintf (tmpprint,"Point> <!-- %d --",pointcount);
+	    pointcount+=labelinc;
+	    Tag (tmpprint);
+	  } else {
+	    Tag ("Point");
+	  }
+		DrawDat.FixP[i].Vertex.x = readf(shp);
+		DrawDat.FixP[i].Vertex.y = readf(shp);
+		DrawDat.FixP[i].Vertex.z = readf(shp);
 		Tab(2);TextP (DrawDat.FixP[i].Vertex.x,DrawDat.FixP[i].Vertex.y,DrawDat.FixP[i].Vertex.z);
 		DrawDat.FixP[i].Normal.i = ((double)readf(shp))/10000;
 		DrawDat.FixP[i].Normal.j = ((double)readf(shp))/10000;
 		DrawDat.FixP[i].Normal.k = ((double)readf(shp))/10000;
-		Tab(2);TextN (DrawDat.FixP[i].Normal.i,DrawDat.FixP[i].Normal.j,DrawDat.FixP[i].Normal.k);
-		Tab(1);ETag ("Point");
-	}
+		if (writenormals){
+		  Tab(2);TextN (DrawDat.FixP[i].Normal.i,DrawDat.FixP[i].Normal.j,DrawDat.FixP[i].Normal.k);
+		}
+		Tab(1);ETag ("Point");}
+
 	// find out the number of planes and which points make them up
 
 	DrawDat.NumTris = readf (shp);
@@ -349,14 +363,24 @@ int main (int argc, char ** argv)
 	    revpnts[DrawDat.RevHexs[i][j]]=1;
 	  }
 	int maxrev=0;
+	StrWrite ("<!-- BeginReversePoints -->\n");
 	for (int i=0;i<DrawDat.NumPoints;i++) {
 	  if (revpnts[i]==1) {
+
 	    revpnts[i]=maxrev;//so now we have a lookup into revpnts
 	    maxrev++;
 	    Tab(1);
+	  if (i%labelinc==0) {
+	    sprintf (tmpprint,"Point> <!-- %d --",pointcount);
+	    pointcount+=labelinc;
+	    Tag (tmpprint);
+	  } else {
 	    Tag ("Point");
+	  }
 	    Tab(2);TextP (DrawDat.FixP[i].Vertex.x,DrawDat.FixP[i].Vertex.y,DrawDat.FixP[i].Vertex.z);
-	    Tab(2);TextN (-DrawDat.FixP[i].Normal.i,-DrawDat.FixP[i].Normal.j,-DrawDat.FixP[i].Normal.k);//FIXME
+	    if (writenormals) {
+	      Tab(2);TextN (-DrawDat.FixP[i].Normal.i,-DrawDat.FixP[i].Normal.j,-DrawDat.FixP[i].Normal.k);//FIXME
+	    }
 	    Tab(1);
 	    ETag ("Point");
 
