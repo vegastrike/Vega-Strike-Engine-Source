@@ -62,7 +62,7 @@ namespace ROLES {
 	  
 	  VSFile f;
 	  VSError err = f.OpenReadOnly( "VegaEvents.csv", AiFile);
-	  if (err<Ok) {
+	  if (err<=Ok) {
 			int len = f.Size();
 			char *temp = (char *)malloc (len+1);
 			memset (temp,0,len+1);
