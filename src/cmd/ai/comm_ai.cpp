@@ -40,6 +40,24 @@ void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
   comm_face = FactionUtil::GetRandAnimation(par->faction,sex);
 }
+bool MatchingMood(const CommunicationMessage& c,float mood, float randomresponse, float relationship) {
+
+  static float pos_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
+                                                                          "LowestPositiveCommChoice",
+                                                                          "0"));
+  static float neg_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
+                                                                          "LowestNegativeCommChoice",
+                                                                          "-.00001"));
+  const FSM::Node *n = c.curstate<c.fsm->nodes.size()?(&c.fsm->nodes[c.curstate]):(&c.fsm->nodes[c.fsm->getDefaultState(relationship)]);
+  std::vector<unsigned int>::const_iterator iend= n->edges.end();
+  for (std::vector<unsigned int>::const_iterator i=n->edges.begin();i!=iend;++i) {
+    if (c.fsm->nodes[*i].messagedelta>=pos_limit&&relationship>=0)
+      return true;
+    if (c.fsm->nodes[*i].messagedelta<=neg_limit&&relationship<0)
+      return true;
+  }
+  return false;
+}
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
   Unit * targ = c.sender.GetUnit();
@@ -47,10 +65,12 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
 
   if (targ) {
     relationship= GetEffectiveRelationship(targ);
+    if (targ==parent->Target()&&relationship>-1.0)
+      relationship=-1.0;
     mood+=(1-randomresponse)*relationship;
   }
   //breaks stuff
-  if (!(c.curstate<c.fsm->GetUnDockNode())) {
+  if ((c.curstate>=c.fsm->GetUnDockNode())||!MatchingMood(c,mood,randomresponse,relationship)) {
     c.curstate = c.fsm->getDefaultState(relationship);//hijack the current state
   }
   return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse,relationship);

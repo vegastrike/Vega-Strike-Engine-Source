@@ -143,10 +143,10 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,floa
 	vector <unsigned int>b;
 	static float pos_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"LowestPositiveCommChoice",
-											"-.015"));
+											"0"));
 	static float neg_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"LowestNegativeCommChoice",
-											".025"));
+											"-.00001"));
 
 	for (unsigned int i=0;i<n->edges.size();i++) {
 		float md=nodes[n->edges[i]].messagedelta;
