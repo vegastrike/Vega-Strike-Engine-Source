@@ -83,6 +83,19 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
       }
 #else
   if (g_game.music_enabled) {
+    std::string tmp=VSFileSystem::datadir+"/bin/soundserver";
+    FILE * fp=fopen (tmp.c_str(),"rb");
+    if (!fp) {
+      tmp=VSFileSystem::datadir+"/soundserver";
+      fp = fopen(tmp.c_str(),"rb");
+      if (!fp){
+        g_game.music_enabled=false;
+        socketw=-1;
+        socketr=-1;
+      }else fclose(fp);
+    }else fclose(fp);
+  }
+  if (g_game.music_enabled) {
     int pid=fork();
     if (!pid) {
 	  string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
@@ -91,6 +104,8 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
       pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),buffer1,buffer2,NULL);
       g_game.music_enabled=false;
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server\n");
+      close(atoi(buffer1));
+      close(atoi(buffer2));
       exit (0);
     } else {
       if (pid==-1) {
