@@ -157,7 +157,7 @@ Unit * GetThreat (Unit * parent, Unit * leader) {
 	  for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	       (un = *ui);
 	       ++ui) {
-	    if (_Universe->GetRelation (parent->faction,un->faction)<0) {
+	    if (parent->getRelation (un)<0) {
 	      float d = (un->Position()-leader->Position()).Magnitude();
 	      bool thistargetted = (un->Target()==leader);
 	      if (!th||(thistargetted&&!targetted)||((thistargetted||(!targetted))&&d<mindist)) {

@@ -755,7 +755,7 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   if (un->faction==upgradefaction) {
     return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
   }
-  float rel=_Universe->GetRelation(un->faction,orig->faction);
+  float rel=un->getRelation(orig);
   if (orig == un->Target())
 	rel-=1.5;
   if (rel>.1||un->faction==neutral) {

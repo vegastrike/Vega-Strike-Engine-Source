@@ -648,7 +648,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       while((unit = iter.current())!=NULL) {
 #ifdef OLD_AUTOPILOT
 	if (owner) 
-	  if (_Universe->GetRelation(owner->faction,unit->faction)<0) {
+	  if (owner->getRelation(unit)<0) {
 	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {

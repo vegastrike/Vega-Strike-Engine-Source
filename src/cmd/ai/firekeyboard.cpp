@@ -826,7 +826,7 @@ void FireKeyboard::Execute () {
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
       if (mymsg==NULL) {
 	FSM *fsm =_Universe->GetConversation (parent->faction,targ->faction);
-	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(_Universe->GetRelation(parent->faction,targ->faction)));
+	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
       }else {
        _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
       }

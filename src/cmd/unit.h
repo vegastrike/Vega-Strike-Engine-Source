@@ -842,7 +842,7 @@ public:
   bool isEnemy(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)<0.0){ return true; } return false; };
   bool isFriend(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)>0.0){ return true; } return false; };
   bool isNeutral(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)==0.0){ return true; } return false; };
-  float getRelation(Unit *other){ return(_Universe->GetRelation(this->faction,other->faction)); };
+  float getRelation(Unit *other);
 
   // for scanning purposes
  private:

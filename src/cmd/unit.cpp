@@ -110,7 +110,13 @@ void Unit::calculate_extent(bool update_collide_queue) {
     radial_size = corner_max.i;
   }
 }
-
+float Unit::getRelation (Unit * targ) {
+  if (aistate) {
+    return aistate->GetEffectiveRelationship (targ);
+  }else {
+    return _Universe->GetRelationship (faction,targ->faction);
+  }
+}
 //FIXME Daughter units should be able to be turrets (have y/p/r)
 void Unit::SetResolveForces (bool ys) {
   resolveforces = ys;

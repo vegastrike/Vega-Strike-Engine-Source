@@ -1313,12 +1313,9 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
       Unit *unit=uiter.current();
       Unit *target_unit=NULL;
       //      int my_faction=_Universe->GetFaction(my_unit->getFlightgroup()->faction.c_str());
-      int my_faction=my_unit->faction;
       while(unit!=NULL){
 	//	int other_faction=_Universe->GetFaction(unit->getFlightgroup()->faction.c_str());
-	int other_faction=unit->faction;
-
-	if(_Universe->GetRelation(my_faction,other_faction)<0.0){
+	if(my_unit->getRelation(unit)<0.0){
 	  target_unit=uiter.current();
 	  unit=NULL;
 	}

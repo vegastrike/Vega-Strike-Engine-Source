@@ -80,9 +80,9 @@ GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
 	// other spaceships
 	static bool reltocolor=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTheirRelationColor","true"));
 	if (reltocolor) {
-	  return relationToColor(_Universe->GetRelation(target->faction,un->faction));
+	  return relationToColor(target->getRelation(un));
 	}else {
-	  return relationToColor(_Universe->GetRelation(un->faction,target->faction));
+	  return relationToColor(un->getRelation(target));
 	}
 }
 
@@ -862,7 +862,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   if (ol&&(!pointingtool)) {
     Unit * oltarg = ol->Target();
     if (oltarg) {
-      if (_Universe->GetRelation (ol->faction,oltarg->faction)>=0) {
+      if (ol->getRelation (oltarg)>=0) {
 	ol->Target(NULL);
       }
     }
