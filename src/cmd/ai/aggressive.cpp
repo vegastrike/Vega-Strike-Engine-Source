@@ -916,7 +916,6 @@ void AggressiveAI::ExecuteNoEnemies() {
 
 void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
   AfterburnTurnTowards(this,parent);
-  last_jump_time+=SIMULATION_ATOM;
   static float jump_time_limit=XMLSupport::parse_float (vs_config->getVariable ("AI","force_jump_after_time","120"));
   if (jump_time_check==0) {
     float dist = (target->Position()- parent->Position()).MagnitudeSquared();
@@ -967,6 +966,7 @@ void AggressiveAI::Execute () {
       }
     }
   }
+  last_jump_time+=SIMULATION_ATOM;
   }else {
     last_jump_time=0;
   }

@@ -5247,11 +5247,11 @@ void BaseComputer::LoadSaveQuitConfirm::init(void) {
 	// Put the button on the window.
 	window->addControl(cont);
 
-	// Resume Game button.
+	// Abort action button
 	NewButton* resume = new NewButton;
 	resume->setRect( Rect(-.35, -.20, .30, .12) );
 	resume->setLabel("Cancel");
-	resume->setCommand("DoneComputer");
+	resume->setCommand("Window::Close");
 	resume->setColor( GFXColor(0,1,0,.25) );
 	resume->setTextColor( GUI_OPAQUE_WHITE() );
 	resume->setDownColor( GFXColor(0,1,0,.6) );
