@@ -16,8 +16,7 @@ namespace CockpitXML {
       RADAR,
       LVDU,
       RVDU,
-      SHIELDSTAT,
-      FUELSTAT,
+      PANEL,
       XFILE,
       XCENT,
       YCENT,
@@ -34,12 +33,11 @@ namespace CockpitXML {
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Cockpit", COCKPIT),
-    EnumMap::Pair ("Crosshairs", CROSSHAIRS),
     EnumMap::Pair ("Radar", RADAR),
     EnumMap::Pair ("LeftVDU", LVDU),
     EnumMap::Pair ("RightVDU", RVDU),
-    EnumMap::Pair ("Shield", SHIELDSTAT),
-    EnumMap::Pair ("Fuel", FUELSTAT)
+    EnumMap::Pair ("Panel", PANEL),
+    EnumMap::Pair ("Crosshairs", CROSSHAIRS)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -56,7 +54,7 @@ namespace CockpitXML {
     EnumMap::Pair ("CockpitOffset", COCKPITOFFSET)
   };
 
-  const EnumMap element_map(element_names, 8);
+  const EnumMap element_map(element_names, 7);
   const EnumMap attribute_map(attribute_names, 12);
 }
 
@@ -102,12 +100,18 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       } 
     }
     break;
+  case CROSSHAIRS:
+  case PANEL: 
+    Panel.push_back (NULL);
+    newsprite = &Panel.back ();
+    if (elem==CROSSHAIRS) {
+      Panel.back() = Panel.front();
+      Panel.front()=NULL;//make sure null at the beginning
+    }
+    goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
-  case SHIELDSTAT: newsprite = &Shield[0];goto loadsprite;
-  case FUELSTAT: newsprite = &Shield[1]; goto loadsprite;
   case LVDU: newsprite = &VDU[0]; goto loadsprite;
   case RVDU: newsprite = &VDU[1]; goto loadsprite;
-  case CROSSHAIRS: newsprite = &Crosshairs; goto loadsprite;
   loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
@@ -135,6 +139,10 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       if (xcent!=FLT_MAX) {
 	(*newsprite)->SetPosition (xcent,ycent);
       }
+    } else {
+      if (newsprite==&Panel.back()) {
+	Panel.erase (Panel.end()-1);//don't want null panels
+      }
     }
     break;
   }
@@ -152,7 +160,7 @@ void Cockpit::LoadXML (const char * filename) {
   if(!inFile) {
     cockpit_offset=0;
     viewport_offset=0;
-    Crosshairs = new Sprite ("crosshairs.spr");
+    Panel.push_back(new Sprite ("crosshairs.spr"));
     return;
   }
   XML_Parser parser = XML_ParserCreate(NULL);

@@ -61,6 +61,9 @@ void Cockpit::DrawTargetBox () {
     GFXEnd();
   }
   GFXEnable (TEXTURE0);
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
+
 }
 void Cockpit::DrawBlips (Unit * un) {
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
@@ -107,10 +110,10 @@ void Cockpit::DrawBlips (Unit * un) {
 void Cockpit::Init (const char * file) {
   Delete();
   LoadXML(file);
-  if (Crosshairs) {
+  if (Panel.size()>0) {
     float x,y;
-    Crosshairs->GetPosition (x,y);
-    Crosshairs->SetPosition (x,y+viewport_offset);  
+    Panel.front()->GetPosition (x,y);
+    Panel.front()->SetPosition (x,y+viewport_offset);  
   }
 }
 
@@ -136,21 +139,14 @@ void Cockpit::Delete () {
     delete VDU[1];
     VDU[1]=NULL;
   }
-  if (Shield[0]) {
-    delete Shield[0];
-    Shield[0]=NULL;
+  for (unsigned int j=0;j<Panel.size();j++) {
+    assert (Panel[j]);
+    delete Panel[j];
   }
-  if (Shield[1]) {
-    delete Shield[1];
-    Shield[1]=NULL;
-  }
-  if (Crosshairs) {
-    delete Crosshairs;
-    Crosshairs = NULL;
-  }
+  Panel.clear();
 }
-Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),Crosshairs(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
-  Radar=Crosshairs=VDU[0]=VDU[1]=Shield[0]=Shield[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
+  Radar=VDU[0]=VDU[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   Init (file);
 }
 void Cockpit::Draw() {
@@ -159,9 +155,17 @@ void Cockpit::Draw() {
   GFXColor4f (1,1,1,1);
   GFXBlendMode (ONE,ONE);
   Unit * un;
-  if (view==CP_FRONT &&Crosshairs)
-    Crosshairs->Draw();
+  if (view==CP_FRONT) {
+    if (Panel.size()>0) {
+      Panel.front()->Draw();//draw crosshairs
+    }
+  }
   RestoreViewPort();
+  if (view==CP_FRONT) {
+    for (unsigned int j=1;j<Panel.size();j++) {
+      Panel[j]->Draw();
+    }
+  }
   GFXBlendMode (ONE,ZERO);
   GFXAlphaTest (GREATER,.1);
   if (view<CP_CHASE) {
@@ -183,14 +187,6 @@ void Cockpit::Draw() {
       if (Radar) {
 	Radar->Draw();
 	DrawBlips(un);
-      }
-      if (Shield[0]) {
-      Shield[0]->Draw();
-      //show shield status
-      }
-      if (Shield[1]) {
-	Shield[1]->Draw();
-	//show fuel status
       }
     }
   }

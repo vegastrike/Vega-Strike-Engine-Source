@@ -2,17 +2,19 @@
 #define _COCKPIT_H_
 #include "xml_support.h"
 #include "cmd/container.h"
+#include <vector>
 using namespace XMLSupport;
 class Sprite;
 class Unit;
 enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
+  enum GAGUES {SHIELDF,SHIELDR,SHIELDL,SHIELDB,ARMORF,ARMORR,ARMORL,ARMORB,FUEL};
+  float StartArmor[4];
   UnitContainer parent;
   Sprite *Pit [4];
   Sprite *Radar;
   Sprite *VDU [2];
-  Sprite *Shield[2];
-  Sprite *Crosshairs;//have a bunch of these...like radar
+  std::vector <Sprite *> Panel;
   float cockpit_offset;
   float viewport_offset;
   void RestoreViewPort();
