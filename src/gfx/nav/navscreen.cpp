@@ -362,7 +362,7 @@ void NavigationSystem::Draw()
 	GFXEnable (DEPTHTEST);
 	GFXClear (GFXFALSE);
 
-
+	GFXEnable(LIGHTING);
 
 	for(int i = 0; i<NAVTOTALMESHCOUNT; i++)
 	{
@@ -411,7 +411,7 @@ void NavigationSystem::Draw()
     GFXColor4f (1,1,1,1);
 	GFXEnable (TEXTURE0);
 	GFXDisable (TEXTURE1);
-
+	GFXDisable(LIGHTING);
 
 	GFXHudMode (true);
 	GFXDisable (DEPTHTEST);
