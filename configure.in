@@ -103,7 +103,7 @@ if test "x$is_macosx" = "xyes" ; then
     GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
     with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
     with_gl_libs=/System/Library/Frameworks/OpenGL.framework/Libraries
-    with_al_inc=/Library/Frameworks/OpenAL.framework/
+    with_al_inc=/Library/Frameworks/OpenAL.framework/Headers
     with_al_libs=/Library/Frameworks/OpenAL.framework/
     with_expat_libs=/sw/lib
     with_png_libs=/sw/lib
@@ -977,6 +977,9 @@ AC_DEFUN( CHECK_FOR_AL_H, [
 
     AC_MSG_CHECKING([for AL/al.h])
     AC_TRY_CPP( [ #include <AL/al.h> ], have_al_h=yes, have_al_h=no )
+    AC_MSG_RESULT([$have_al_h])
+    AC_MSG_CHECKING([for al.h])
+    AC_TRY_CPP( [ #include <al.h> ], have_al_h=yes, )
     AC_MSG_RESULT([$have_al_h])
 ])
 
