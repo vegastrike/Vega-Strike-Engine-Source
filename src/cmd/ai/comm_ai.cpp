@@ -48,13 +48,17 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
 
 }
 using std::pair;
-float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
+
+float CommunicatingAI::getAnger(const Unit * target)const {
   relationmap::const_iterator i=effective_relationship.find(target);
   float rel=0;
   if (i!=effective_relationship.end()) {
     rel = (*i).second;
   }
-  return Order::GetEffectiveRelationship (target)+rel;
+  return rel;
+}
+float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
+  return Order::GetEffectiveRelationship (target)+getAnger(target);
 }
 static void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
@@ -176,11 +180,14 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   }
   _Universe->AdjustRelation (parent->faction,un->faction,factor,rank);  
   (*i).second+=factor;
-  if ((*i).second<anger) {
+  if ((*i).second<anger||(parent->Target()==NULL&&(*i).second+Order::GetEffectiveRelationship (un)<0)) {
     parent->Target(un);//he'll target you--even if he's friendly
+    parent->TargetTurret(un);//he'll target you--even if he's friendly
   } else if ((*i).second>appease) {
     if (parent->Target()==un) {
       parent->Target(NULL);
+	  parent->TargetTurret(NULL);//he'll target you--even if he's friendly
+
     }
   }
   mood+=factor*moodswingyness;
@@ -220,7 +227,7 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
   }
 }
 
-int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c) {
+int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * un) {
   if (0&&mood==0) {
     FSM::Node * n = c.getCurrentState ();  
     if (n)
@@ -228,7 +235,7 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c) {
     else
       return 0;
   }else {
-    return selectCommunicationMessageMood (c,mood);
+    return selectCommunicationMessageMood (c,.5*mood+.5*getAnger (un));
   }
 }
 
@@ -237,10 +244,10 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
   FSM::Node * n = c.getCurrentState ();
   if (n) {
      if (n->edges.size()) {
-      int b = selectCommunicationMessage (c);
       Unit * un = c.sender.GetUnit();
       if (un) {
-	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+	      int b = selectCommunicationMessage (c,un);
+		  un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
       }
     }
   }

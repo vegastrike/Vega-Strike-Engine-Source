@@ -20,6 +20,7 @@ class CommunicatingAI:public Order{
   relationmap effective_relationship;
   void GetMadAt (Unit * which, int howMad);
  protected:
+  float getAnger (const Unit * un)const;
   virtual vector <Animation *> *getCommFaces(unsigned char &sex);
  public:
   virtual float GetEffectiveRelationship (const Unit * target) const;
@@ -29,10 +30,10 @@ class CommunicatingAI:public Order{
   void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
   void UpdateContrabandSearch();
   CommunicatingAI (int ttype,int stype, float rank=666, float mood=0, float anger=-666/*-.5*/, float appeasement=666, float moodswingyness=666/*.2*/, float randomnessresponse=666/*.8*/);
-   virtual void ProcessCommMessage (class CommunicationMessage &c); 
+   virtual void ProcessCommMessage (class CommunicationMessage &c ); 
    virtual void AdjustRelationTo (Unit * un, float factor);
    virtual ~CommunicatingAI ();
-   virtual int selectCommunicationMessage (class CommunicationMessage &c);
+   virtual int selectCommunicationMessage (class CommunicationMessage &c, Unit *);
    virtual int selectCommunicationMessageMood (CommunicationMessage &c, float mood);
    virtual void SetParent (Unit * parent1);
 };

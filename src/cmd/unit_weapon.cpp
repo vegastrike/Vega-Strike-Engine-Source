@@ -284,18 +284,23 @@ Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon
 
 }
 void Unit::TargetTurret (Unit * targ) {
-  if (!SubUnits.empty()) {
-    un_iter iter = getSubUnits();
-    Unit * su;
-    Vector localcoord;
-    while ((su=iter.current())) {
-      if (su->InRange (targ,localcoord)) {
-	su->Target (targ);
-	su->TargetTurret(targ);
-      }
-      iter.advance();
-    }
-  }
+	if (!SubUnits.empty()) {
+		un_iter iter = getSubUnits();
+		Unit * su;
+		Vector localcoord;
+		while ((su=iter.current())) {
+			bool inrange=true;
+			if (targ) {
+				inrange =su->InRange (targ,localcoord);
+			}
+			if (inrange) {
+				su->Target (targ);
+				su->TargetTurret(targ);
+			}
+			iter.advance();
+		}
+	}
+
 }
 void Unit::Target (Unit *targ) {
   if (targ==this) {

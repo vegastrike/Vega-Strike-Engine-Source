@@ -25,8 +25,10 @@ void Order::Communicate (const CommunicationMessage &c) {
     }
   }
   if ((un=newC->sender.GetUnit())) {
-    AdjustRelationTo (un,newC->getDeltaRelation());
-    messagequeue.push_back (newC);
+	  if (un!=parent) {
+		AdjustRelationTo (un,newC->getDeltaRelation());
+		messagequeue.push_back (newC);
+	  }
   }
 }
 

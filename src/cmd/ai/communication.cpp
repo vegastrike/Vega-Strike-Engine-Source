@@ -72,9 +72,58 @@ void FSM::Node::AddSound (int sounds, unsigned char sex) {
   }
   sound[sex]=sounds;
 }
+
 int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) const{
   const FSM::Node *n = &nodes[curstate];
     mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
+  
+  int choice=0;
+  float bestchoice=4;
+  bool fitmood=false;
+#if 0
+  for (unsigned i=0;i<n->edges.size();i++) {
+    float md = nodes[n->edges[i]].messagedelta;
+    bool newfitmood=nonneg(mood)==nonneg(md);
+    if ((!fitmood)||newfitmood) {
+      float newbestchoice=sq(md-mood);
+      if ((newbestchoice<=bestchoice)||(fitmood==false&&newfitmood==true)) {
+	if ((newbestchoice==bestchoice&&rand()%2)||newbestchoice<bestchoice) {
+	  //to make sure some variety happens
+	  fitmood=newfitmood;
+	  choice =i;
+	  bestchoice = newbestchoice;
+	}
+      }
+    }
+  }
+#endif
+	vector<unsigned int> g;
+	vector <unsigned int>b;
+	for (unsigned int i=0;i<n->edges.size();i++) {
+		float md=nodes[n->edges[i]].messagedelta;
+		if (md>=0) {
+			g.push_back(i);
+		} else {
+			b.push_back(i);
+		}
+	}
+	if(((g.size()!=0)&&(mood)>0)||(b.size()==0)) {
+		choice=g[(rand()%g.size())];
+	}else {
+		if (b.size()) {
+			choice = b[rand()%b.size()];
+		}
+	}
+	return choice;
+}
+int FSM::getDefaultState (float relationship) const{
+
+  float mood=relationship;
+  float randomresponse=.01;
+  int curstate=0;
+
+  const FSM::Node *n = &nodes[curstate];
+  mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
   
   int choice=0;
   float bestchoice=4;
@@ -93,12 +142,8 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) con
 	}
       }
     }
-  }
-  return choice;
-
-}
-int FSM::getDefaultState (float relationship) const{
-  return nodes[0].edges[getCommMessageMood (0,relationship,.01)];
+  }// (0,relationship,.01)
+  return nodes[0].edges[choice];
 }
 std::string FSM::GetEdgesString (int curstate) {
   std::string retval="\n";
