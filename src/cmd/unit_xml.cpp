@@ -38,6 +38,7 @@ namespace UnitXML {
       BSPMESH,
       MOUNT,
       MESHLIGHT,
+      DOCK,
       XFILE,
       X,
       Y,
@@ -151,7 +152,8 @@ namespace UnitXML {
     EnumMap::Pair ("Mount", MOUNT),
     EnumMap::Pair ("Radar", RADAR),
     EnumMap::Pair ("Cockpit", COCKPIT),
-    EnumMap::Pair ("Jump", JUMP)
+    EnumMap::Pair ("Jump", JUMP),
+    EnumMap::Pair ("Dock", DOCK)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -225,7 +227,7 @@ namespace UnitXML {
 
 };
 
-  const EnumMap element_map(element_names, 28);
+  const EnumMap element_map(element_names, 29);
   const EnumMap attribute_map(attribute_names, 68);
 }
 
@@ -303,6 +305,30 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
+    break;
+  case DOCK:
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    pos=Vector(0,0,0);
+    P=Vector (1,1,1);
+    for (iter = attributes.begin();iter!=attributes.end();iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case X:
+	pos.i=parse_float((*iter).value);
+	break;
+      case Y:
+	pos.j=parse_float((*iter).value);
+	break;
+      case Z:
+	pos.k=parse_float((*iter).value);
+	break;
+      case MOUNTSIZE:
+	P.i=parse_float((*iter).value);
+	P.j=parse_float((*iter).value);
+	break;
+      }
+    }
+    image->docks.push_back (Dock(pos,P.i));
     break;
   case MESHLIGHT:
     vs_config->gethColor ("unit","engine",halocolor,0xffffffff);

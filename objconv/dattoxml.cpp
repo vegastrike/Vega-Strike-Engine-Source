@@ -1,12 +1,13 @@
 #ifdef _WIN32
 #include <windows.h>
-#endif
+#else
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
 
 #include <string.h>
 #include <math.h>
+#endif
 using namespace std;
 char FileName[256];
 struct LVector {

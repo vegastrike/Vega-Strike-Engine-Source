@@ -113,15 +113,23 @@ void Unit::Kill() {
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
   RemoveFromSystem();
   killed = true;
-  Target((Unit *)NULL);
+  computer.target.SetUnit (NULL);
+
+  //God I can't believe this next line cost me 1 GIG of memory until I added it
+  computer.threat.SetUnit (NULL);
+  if(aistate)
+    delete aistate;
+  aistate=NULL;
   if (ucref==0)
     Unitdeletequeue.push_back(this);
 }
 void Unit::ProcessDeleteQueue() {
+#ifndef DISABLE_DELETE
   while (Unitdeletequeue.size()) {
     delete Unitdeletequeue.back();
     Unitdeletequeue.pop_back();
   }
+#endif
 }
 
 

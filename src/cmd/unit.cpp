@@ -342,6 +342,7 @@ Unit::~Unit()
   if ((!killed)&&(!SubUnit)) {
     fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
+  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
   if (sound->engine!=-1) {
     AUDDeleteSound (sound->engine);
   }
@@ -401,8 +402,6 @@ Unit::~Unit()
 	if (mounts) {
 	  delete []mounts;
 	}
-	if(aistate)
-		delete aistate;
 /*
 	if(weapons)
 	{

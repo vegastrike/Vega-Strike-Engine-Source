@@ -12,9 +12,9 @@ UnitContainer::~UnitContainer() {
   //bad idea...arrgh!
 }
 void UnitContainer::SetUnit (Unit * un) {
+  if (unit)
+    unit->UnRef();
   if (un==NULL||un->Killed()) {
-    if (unit)
-      unit->UnRef();
     unit = NULL;
     return;
   }

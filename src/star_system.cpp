@@ -394,6 +394,14 @@ void StarSystem::Update() {
 	Terrain::CollideAll();
 	current_stage=PHY_COLLIDE;
 	AnimatedTexture::UpdateAllPhysics();
+	///Do gravitation!
+	iter = units->createIterator();
+	  while((unit = iter->current())!=NULL) {
+	    //gravitate //FIXME
+	    iter->advance();
+	  }
+	  delete iter;	
+	  Unit::ProcessDeleteQueue();
       } else if (current_stage==PHY_COLLIDE) {
 	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds

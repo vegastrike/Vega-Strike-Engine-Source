@@ -1,4 +1,8 @@
-
+struct Dock {
+  Vector pos;
+  float radius;
+  Dock (const Vector &pos, float radius) :pos(pos), radius(radius){}
+};
 struct UnitImages {
   std::string cockpitImage;
   Vector CockpitCenter;
@@ -12,7 +16,7 @@ struct UnitImages {
   ///How much energy cloaking takes per frame
   float cloakenergy;
   bool cloakglass;
-
+  std::vector <Dock> docks;
 
 };
 
