@@ -18,7 +18,7 @@
 
 //extern Unit ** fighters;
 
-StarVlist::StarVlist (int num ,float spread) {
+StarVlist::StarVlist (int num ,float spread,bool use_milky_way) {
 	lasttime=0;
 	_Universe->AccessCamera()->GetPQR(newcamr,camq,camr);
 	newcamr=camr;
@@ -120,7 +120,7 @@ void StarVlist::EndDrawState() {
 	vlist->EndDrawState();
 	GFXColorMaterial(0);
 }
-Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread),spread(spread){
+Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread,false),spread(spread){
 
   int curnum = num/STARnumvlist+1;
   fade = blend=true;

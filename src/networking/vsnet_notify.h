@@ -16,7 +16,7 @@
 #include "boost/shared_array.hpp"
 
 #include "vsnet_socket.h"
-
+#include <fstream>
 namespace VsnetDownload
 {
 

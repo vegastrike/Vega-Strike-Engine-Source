@@ -180,12 +180,13 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool d
   for (;i<numframes;i++) {
     int numgets=0;
     while (numgets<=0&&!feof (fp)) {
-      fgets (temp,511,fp);
-      temp[511]='\0';
-      file[0]='z';file[1]='\0';
-      alp[0]='z';alp[1]='\0';//windows crashes on null
+		if (fgets (temp,511,fp)) {
+			temp[511]='\0';
+			file[0]='z';file[1]='\0';
+			alp[0]='z';alp[1]='\0';//windo	ws crashes on null
   
-      numgets = sscanf (temp,"%s %s",file,alp);
+			numgets = sscanf (temp,"%s %s",file,alp);
+		}else break;
     }
     if (loadall||i==numframes/2) {
       if (numgets==2) {

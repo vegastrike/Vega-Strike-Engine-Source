@@ -15,7 +15,7 @@ class StarVlist {
 	Vector camq;
 	double lasttime;
 public:
-	StarVlist (int num, float spread);
+	StarVlist (int num, float spread,bool use_milky_way);
 	~StarVlist();
 	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate, bool yawpitch);
 	void Draw();
