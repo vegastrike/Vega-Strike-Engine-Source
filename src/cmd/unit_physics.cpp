@@ -200,12 +200,12 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 void Unit::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);
-  if (afterburn) {
-    if (!AUDIsPlaying (sound.engine)) {
+  if (afterburn!=AUDIsPlaying (sound.engine)) {
+    if (afterburn)
       AUDPlay (sound.engine,cumulative_transformation.position,Velocity,1);
-    } else {
-
-    }
+    else
+      //    if (Velocity.Magnitude()<computer.max_speed)
+      AUDStopPlaying (sound.engine);
   }
 }
 

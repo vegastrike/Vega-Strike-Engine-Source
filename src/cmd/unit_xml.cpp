@@ -441,10 +441,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case ENGINEWAV:
-	sound.engine = AUDCreateSoundWAV ((*iter).value,false);
+	sound.engine = AUDCreateSoundWAV ((*iter).value,true);
 	break;
       case ENGINEMP3:
-	sound.engine = AUDCreateSoundMP3((*iter).value,false); 
+	sound.engine = AUDCreateSoundMP3((*iter).value,true); 
 	break;
       case SHIELDMP3:
 	sound.shield = AUDCreateSoundMP3((*iter).value,false); 
@@ -473,7 +473,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     if (sound.engine==-1) {
-      sound.engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),false);
+      sound.engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
     }
     if (sound.shield==-1) {
       sound.shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);

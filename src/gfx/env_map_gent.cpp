@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "vs_path.h"
 #ifndef WIN32
 typedef unsigned long DWORD;
 typedef long  LONG;
@@ -44,8 +45,8 @@ typedef struct {
   const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
 
 #define NumLights 1
-static char InputName [256]="cube";
-static char OutputName[256]="light";
+static char *InputName=NULL;
+static char *OutputName=NULL;
 static bool pushdown=false;
 static float affine=0;
 static float multiplicitive=1;
@@ -364,7 +365,7 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 	Data = new Texmp[6];
 	if (!Data) 
 		return;
-	char tmp[256];
+	char *tmp= (char *)malloc (strlen (InputName)+60);;
 	if (!(LoadTex (strcat (strcpy(tmp,InputName),"_front.bmp"),Data[0].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_back.bmp"),Data[1].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_left.bmp"),Data[2].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_right.bmp"),Data[3].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_up.bmp"),Data[4].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_down.bmp"),Data[5].D))) {
 	  if (!LoadTex (strcat (strcpy(tmp,InputName),"_sphere.bmp"),Data[0].D )) {
 	    LoadTex (strcat (strcpy(tmp,InputName),".bmp"),Data[0].D);
@@ -373,6 +374,8 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 	  Tex = gluSph;
 	  
 	}
+	free (tmp);
+	tmp=NULL;
 	int NumPix;
 	float sleft,sright,tdown,tup;
 	for (int t=0; t<256;t++)
@@ -781,9 +784,31 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
     multiplicitive=m;
     power=p;
     pushdown =w;
-    strcpy (OutputName,outpt);
-    strcpy (InputName,inpt);
+    char * tmp = (char *) malloc (sizeof(char)*strlen(inpt)+40);
+    strcpy (tmp,inpt);
+    FILE * fp = fopen (strcat (tmp,"_sphere.bmp"),"rb");
+    if (!fp)
+      fp = fopen (strcat (tmp,"_up.bmp"),"rb");
+    bool share = false;
+    std::string s;
+    if (!fp) {
+      s = GetSharedTexturePath (std::string (inpt));
+      InputName = (char *) malloc (sizeof (char)*(s.length()+2));
+      strcpy (InputName,s.c_str());
+      s = GetSharedTexturePath (std::string (outpt));
+      OutputName = (char *) malloc (sizeof (char)*(s.length()+2));
+      strcpy (OutputName,s.c_str());
+    } else {
+      fclose (fp);
+      OutputName = (char *)malloc (sizeof(char)*(strlen(outpt)+2));
+      InputName = (char *) malloc (sizeof (char)*(strlen(inpt)+2));
+      strcpy (OutputName,outpt);
+      strcpy (InputName,inpt);
+    }
+    free(tmp);
+    tmp=NULL;
   fprintf (stderr, "input name %s, output name %s\nAffine %f Mult %f Pow %f\n",InputName, OutputName, affine, multiplicitive, power);
   GenerateSphereMap();
-
+  free (InputName);
+  free (OutputName);
 }
