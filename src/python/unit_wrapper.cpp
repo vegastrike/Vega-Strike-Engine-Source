@@ -7,16 +7,12 @@
 #include "python_class.h"
 
 #include <boost/python/objects.hpp>
-#ifdef _WIN32
 #include "universe_util.h"
 #include "cmd/unit_util.h"
-#else
-#include "universe_util.cpp"
-#include "cmd/unit_util.cpp"
-#endif
 #include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
-
+using namespace UnitUtil;
+using namespace UniverseUtil;
 using Orders::FireAt;
 /*BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 PyObject *to_python (Vector vec) {

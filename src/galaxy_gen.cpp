@@ -30,7 +30,28 @@ static unsigned int ssrand()
         return starsysrandom;
 }
 
+
+
+static std::string GetWrapXY(std::string cname, int & wrapx, int & wrapy){
+    std::string wrap = cname;
+    wrapx=wrapy=1;
+    unsigned int pos =wrap.find ("wrapx");
+    if (pos!=string::npos) {
+      string Wrapx = wrap.substr (pos+5,wrap.length());
+      cname = cname.substr (0,pos);
+      sscanf(Wrapx.c_str(),"%d",&wrapx);
+      pos = Wrapx.find ("wrapy");
+      if (pos!=string::npos) {
+	string Wrapy = Wrapx.substr (pos+5,Wrapx.length());
+	sscanf (Wrapy.c_str(),"%d",&wrapy);
+      }
+    }
+    return cname;
+}
+
+
 string getStarSystemName (string in);
+
 namespace StarSystemGent {
 
 float mmax (float a, float b) {
@@ -187,6 +208,7 @@ int numun[2];
 vector <string> units [2];
 vector <string> background;
 vector <string> names;
+vector <string> rings;
 const float moonofmoonprob=.01;
 string systemname;
 vector <float> radii;
@@ -540,37 +562,61 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
     return;
   Vector r,s;
 
-  float stdloy;
-
-  float size;
+  float stdloy=0;
+  bool first=false;
+  float size=0;
   string tmp;
+  Vector center(0,0,0);
   string nebfile("");
-  bool first=true;
-  Vector center;
   for (unsigned int i=0;i<fullname.size();i++) {
-    if (first) {
-      center=generateAndUpdateRS (r,s,size);
-      stdloy=LengthOfYear (r,s);	
-    }  
     if (1==sscanf (fullname[i].c_str(),"jump%f",&size)) {
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size);
+	stdloy=LengthOfYear (r,s);	
+      }
       MakePlanet(size,JUMP,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)) {
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size);
+	stdloy=LengthOfYear (r,s);	
+      }
       MakePlanet(size,PLANET,true,r,s,center,stdloy);
     }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {      
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size);
+	stdloy=LengthOfYear (r,s);	
+      }
       MakePlanet (size,MOON,true,r,s,center,stdloy);
     } else if (1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size);
+	stdloy=LengthOfYear (r,s);	
+      }
       MakePlanet (size,GAS,true,r,s,center,stdloy);
     }else if ((tmp=starin(fullname[i])).length()>0) {
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size);
+	stdloy=LengthOfYear (r,s);	
+      }
       string S = getRandName (entities[JUMP]);
       if (S.length()>0) {
 	string type = AnalyzeType(tmp,nebfile,size);
 	WriteUnit (type, S,tmp,r,s,center,nebfile,getJumpTo(S),false,stdloy);
       }
     } else {
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size);
+	stdloy=LengthOfYear (r,s);	
+      }
       string type = AnalyzeType(fullname[i],nebfile,size);
       WriteUnit(type,"",fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
     }
-    first=false;
   }
 
 
@@ -607,12 +653,13 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     s = s.substr (0,atmos);
   }
   unsigned int pos = s.find ("^");
+  string cname;
   if (pos==string::npos||entitytype==JUMP) {
     fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
   }else {
     string pname= s.substr (0,pos);
-    string cname= s.substr (pos+1,s.length());
-    fprintf (fp,"<Planet name=\"%s\" file=\"%s\" citylights=\"%s\" ",thisname.c_str(),pname.c_str(),cname.c_str());
+    cname = s.substr (pos+1,s.length());
+    fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),pname.c_str());
   }
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
   fprintf (fp,"radius=\"%f\" ",radius);
@@ -632,12 +679,54 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 
   }
   fprintf (fp," >\n");
+  if (!cname.empty()) {
+    
+    int wrapx=1;
+    int wrapy=1;
+    cname = GetWrapXY(cname,wrapx,wrapy);
+    Tab();fprintf (fp,"<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n",cname.c_str(),wrapx,wrapy);
+  }
+  if ((entitytype==PLANET&&temprandom<.1)||(!atmosphere.empty())) {
+    if (atmosphere.empty()) {
+      atmosphere="sol/earthcloudmaptrans.png";
+    }
+    string NAME = thisname+" Atmosphere";
+    Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.03);
+  }
 
   radii.push_back (entitytype!=GAS?radius:1.4*radius);
-  static float pmin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","PlanetaryRingMinPlanet","300000"));
-  static float pmax = XMLSupport::parse_float (vs_config->getVariable ("galaxy","PlanetaryRingMaxPlanet","200000"));
-  if (entitytype==GAS&&grand()<.8&&radius>pmin&&radius<pmax) {
-    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
+  static float ringprob = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RingProbability",".1"));
+  static float dualringprob = XMLSupport::parse_float (vs_config->getVariable ("galaxy","DoubleRingProbability",".025"));
+  if (entitytype==PLANET) {
+    float ringrand = grand();
+    if (ringrand<ringprob) {
+      string ringname = getRandName(rings);
+      static float innerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","InnerRingRadius","1.5"));
+      static float outerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","OuterRingRadius","2.5"));
+      double inner_rad= (innerRingRadMin*(1+grand()*.5))*radius;
+      double outer_rad = (inner_rad+outerRingRadMin*grand())*radius;
+      int wrapx=1;
+      int wrapy=1;
+      ringname = GetWrapXY(ringname,wrapx,wrapy);
+      if (ringrand<(1-dualringprob)) {
+	fprintf (fp,"<Ring file=\"%s\" innerradius=\"%lf\" outerradius=\"%lf\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
+      }
+      if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
+	Vector r,s;
+	makeRS(r,s,1);
+	float rmag = r.Mag();
+	if (rmag>.001) {
+	  r.i/=rmag;  r.j/=rmag;  r.k/=rmag;
+	  
+	}
+	float smag = s.Mag();
+	if (smag>.001){
+	  s.i/=smag;  s.j/=smag;  s.k/=smag;
+	}
+	fprintf (fp,"<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%lf\" outerradius=\"%lf\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
+      }
+    }
+    //    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
   if ((entitytype!=JUMP&&entitytype!=MOON)||grand()<moonofmoonprob) {
     int numu;
@@ -656,13 +745,6 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     MakeMoons (100+grand()*300,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
   }
   radii.pop_back();
-  if ((entitytype==PLANET&&temprandom<.1)||(!atmosphere.empty())) {
-    if (atmosphere.empty()) {
-      atmosphere="sol/earthcloudmaptrans.png";
-    }
-    string NAME = thisname+" Atmosphere";
-    Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" alpha=\"true\" radius=\"%f\" gravity=\"0\" ri=\"0\" rj=\"0\" rk=\"0\" si=\"0\" sj=\"0\" sk=\"0\" />\n",NAME.c_str(),atmosphere.c_str(),radius*1.03);
-  }
 
   Tab();fprintf (fp,"</Planet>\n"); 
 
@@ -880,7 +962,7 @@ static int pushTowardsMean (int mean, int val) {
 }
 
 
-void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string backgroundlist, bool force) {
+void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string ringlist, string backgroundlist, bool force) {
   ResetGlobalVariables();
   static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","1000"));
   sunradius *=radiusscale;
@@ -923,6 +1005,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   if (asteroids) {
     readentity (units[0],(datapath+asteroidlist).c_str());
   }
+  readentity(rings,(datapath+ringlist).c_str());
   readnames (names,(datapath+namelist).c_str());
 
   fp = fopen (outputfile.c_str(),"w");

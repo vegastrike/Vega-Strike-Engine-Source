@@ -413,7 +413,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	if (p->isUnit()==PLANETPTR) {
 	  int wrapx = 1;
 	  int wrapy = 1;
-	  int numslices=6;
+	  int numslices=8;
 	  float iradius = p->rSize()*1.25;
 	  float oradius = p->rSize()*1.75;
 	  R.Set(1,0,0);

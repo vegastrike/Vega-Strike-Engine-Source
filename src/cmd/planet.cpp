@@ -194,7 +194,7 @@ void Planet::AddRing(const std::string &texture,float iradius,float oradius, con
   meshdata.pop_back();
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
   if (slices>0) {
-    stacks = stacks/slices;
+    stacks = stacks;
     if (stacks<3)
       stacks=3;
     for (int i=0;i<slices;i++) {
@@ -209,9 +209,10 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
     : Unit( 0 )
     , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
 {
-  static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".5"));
+  static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
   if (!ligh.empty()){
     radius*=bodyradius;
+    fprintf (stderr,"scaling %s",textname);
   }
   inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {

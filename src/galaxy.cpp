@@ -63,6 +63,7 @@ struct SystemInfo {
   string smallun;
   string nebulaelist;
   string asteroidslist;
+  string ringlist;
   string backgrounds;
   vector <string> jumps;
   int numjumps;
@@ -77,7 +78,7 @@ string getUniversePath () {
 
 void MyLoadSystem (SystemInfo si) {
 
-  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.jumps,si.names,si.stars,si.planets,si.gasgiants,si.moons,si.smallun,si.nebulaelist,si.asteroidslist,si.backgrounds,si.force);
+  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.jumps,si.names,si.stars,si.planets,si.gasgiants,si.moons,si.smallun,si.nebulaelist,si.asteroidslist,si.ringlist,si.backgrounds,si.force);
 
 }
 string getVarEitherSectionOrSub (Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
@@ -136,6 +137,7 @@ SystemInfo GetSystemXProp (Galaxy * galaxy, std::string sector, std::string minm
   si.moons=getVarEitherSectionOrSub(galaxy,sector,minmax,"moonlist","moons.txt");  
   si.smallun=getVarEitherSectionOrSub(galaxy,sector,minmax,"unitlist","smallunits.txt");  
   si.asteroidslist=getVarEitherSectionOrSub(galaxy,sector,minmax,"asteroidlist","asteroids.txt");  
+  si.ringlist=getVarEitherSectionOrSub(galaxy,sector,minmax,"ringlist","rings.txt");  
   si.nebulaelist=getVarEitherSectionOrSub(galaxy,sector,minmax,"nebulalist","nebulae.txt");  
   si.backgrounds=getVarEitherSectionOrSub(galaxy,sector,minmax,"backgroundlist","background.txt");  
   si.force=parse_bool (getVarEitherSectionOrSub (galaxy,sector,minmax,"force","false"));
@@ -233,6 +235,7 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   si.moons=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"moonlist",Ave.moons);  
   si.smallun=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"unitlist",Ave.smallun);  
   si.asteroidslist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"asteroidlist",Ave.asteroidslist);  
+  si.ringlist=getVarEitherSectionOrSub(galaxy,si.sector,si.ringlist,"ringlist", Ave.ringlist);
   si.nebulaelist=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"nebulalist",Ave.nebulaelist);  
   si.backgrounds=getVarEitherSectionOrSub(galaxy,si.sector,si.name,"backgroundlist",Ave.backgrounds);  
   si.force=parse_bool (getVarEitherSectionOrSub(galaxy,si.sector,si.name,"force",Ave.force?"true":"false"));    

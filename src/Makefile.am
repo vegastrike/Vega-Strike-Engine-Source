@@ -50,6 +50,7 @@ vegastrike_SOURCES =				\
 	universe.cpp				\
 	universe.h				\
 	universe_util.h				\
+	universe_util.cpp				\
 	xml_support.h  				\
 	xml_support.cpp				\
 	xml_serializer.cpp			\
