@@ -31,10 +31,11 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     return 0;
   Vector t = pos-mylistener.pos;
   float mag = t.Dot(t);
-  if (mag<mylistener.rsize) return 1;
+  int hashed = hash_sound (sounds[sound].buffer);
+
+  if (mag<mylistener.rsize||playingbuffers[hashed].size()<maxallowedsingle) return 1;
   ///could theoretically "steal" buffer from playing sound at this point
 
-  int hashed = hash_sound (sounds[sound].buffer);
   if (playingbuffers[hashed].empty()) 
     return 1;
   //int target = rand()%playingbuffers[hashed].size();
@@ -107,8 +108,8 @@ void AUDListener (const Vector & pos, const Vector & vel) {
   mylistener.pos = pos;
   mylistener.vel = vel;
   
-  alListener3f (AL_POSITION, pos.i,pos.j,pos.k);
-  //  alListener3f (AL_VELOCITY, vel.i,pos.j,pos.k);
+  alListener3f (AL_POSITION, scalepos*pos.i,scalepos*pos.j,scalepos*pos.k);
+  alListener3f (AL_VELOCITY, scalevel*vel.i,scalevel*vel.j,scalevel*vel.k);
   //  printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }

@@ -373,10 +373,6 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
       damage-=*targ;
       *targ=0;
     } else {
-      if (!AUDIsPlaying (sound.shield))
-	AUDPlay (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
-      else
-	AUDAdjustSound (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
       *targ -= apply_float_to_short (damage);	
       damage=0;
     }
@@ -384,6 +380,11 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   }
   if (!FINITE (percent))
     percent = 0;
+  if (percent&&!AUDIsPlaying (sound.shield))
+	AUDPlay (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+  else
+	AUDAdjustSound (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+
   return percent;
 }
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor &color) {

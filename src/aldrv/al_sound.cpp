@@ -77,6 +77,7 @@ ALint format;
       err = alutLoadWAV((char *)filename, &wave, &format, &size, &bits, &freq);
 #endif
 #else
+	  ALboolean looping;
 	  ALint format;
       alutLoadWAVFile((char *)filename, (int*)&format, &wave, &size, &freq, &looping);
 #endif
@@ -208,11 +209,11 @@ void AUDDeleteSound (int sound, bool music){
 void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-    float p []= {pos.i,pos.j,pos.k};
-    float v []= {vel.i,vel.j,vel.k};
+    float p []= {scalepos*pos.i,scalepos*pos.j,scalepos*pos.k};
+    float v []= {scalevel*vel.i,scalevel*vel.j,scalevel*vel.k};
     sounds[sound].pos = pos;
     alSourcefv(sounds[sound].source,AL_POSITION,p);
-    //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
+    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
 #endif
 }
@@ -228,11 +229,12 @@ void AUDSoundGain (const int sound, const float gain) {
 bool AUDIsPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
+	if (!sounds[sound].source) 
+		return false;
     ALint state;
 #ifdef _WIN32
     alGetSourcei(sounds[sound].source,AL_SOURCE_STATE, &state);  //Obtiene el estado de la fuente para windows
-#endif
-#ifdef _LINUX
+#else
     alGetSourceiv(sounds[sound].source, AL_SOURCE_STATE, &state);
 #endif
 
@@ -276,15 +278,19 @@ void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const floa
   char tmp;
   if (sound<0)
     return;
+  if (sounds[sound].buffer==0) {
+	return;
+  }
   if ((tmp=AUDQueryAudability (sound,pos,vel,gain))!=0) {
     if (AUDReclaimSource (sound)) {
       ALfloat p [3] = {pos.i,pos.j,pos.k};
       AUDAdjustSound (sound,pos,vel);
       alSourcef(sounds[sound].source,AL_GAIN,gain);    
       if (tmp!=2){
-	AUDAddWatchedPlayed (sound,pos);
-	alSourcePlay( sounds[sound].source );
+		AUDAddWatchedPlayed (sound,pos);
+		alSourcePlay( sounds[sound].source );
       }
+
     }
   }
 #endif

@@ -257,7 +257,7 @@ using namespace CockpitKeys;
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-int numf = 3;
+int numf = 0;
 Unit **fighters;
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
@@ -370,7 +370,7 @@ void createObjects() {
 	  else{
 	    cout << "setting tmptarget of " << fg_name << " to " << strtarget << " index " << target_fg->ship_nr << endl;
 	    tmptarget[a]=target_fg->ship_nr;
-	  }
+	  }																	
 	  cout << "tmptarget = " << tmptarget[a] << endl;
 	}
 
@@ -379,6 +379,7 @@ void createObjects() {
 	float fg_radius=0.0;
 
 	for(int s=0;s < fg->nr_ships;s++){
+		numf++;
 	  Vector pox (1000+150*a,100*a,100);
 
 	  pox.i=fg->pos[0]+s*fg_radius*3;

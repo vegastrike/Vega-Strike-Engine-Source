@@ -13,7 +13,8 @@ struct OurSound{
   ALboolean looping;
   OurSound(ALuint source, ALuint buffername) {buffer=buffername;};
 };
-
+extern float scalepos;
+extern float scalevel;
 template <class a,class b,class c> class Hashtable;
 
 extern std::vector <ALuint> unusedsrcs;
