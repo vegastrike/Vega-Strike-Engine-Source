@@ -609,12 +609,14 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       vectorOfKeyboardInput[playa].req=false;
     }
     if (vectorOfKeyboardInput[playa].doc) {
+      if (targ->isUnit()==PLANETPTR) {
       if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
 	targ = getAtmospheric (targ);
 	if (!targ) {
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
 	  return;
 	}
+      }
       }
       CommunicationMessage c(targ,parent,NULL,0);
 

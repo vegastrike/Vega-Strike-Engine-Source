@@ -474,8 +474,8 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   cout << "FactionXML:LoadXML " << filename << endl;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
-	assert(0);
-	return;
+    cout << "Failed to open '" << filename << "' this probably means it can't find the data directory" << endl;
+    assert(0);
   }
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, thisuni);

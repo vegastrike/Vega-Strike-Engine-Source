@@ -156,6 +156,7 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	  if (unit->getFlightgroup()!=NULL&&unit->getFlightgroup()==getFlightgroup()) {
 	    if (unit->getFlightgroup()->leader.GetUnit()==this&&(unit->getFlightgroup()->directive=="f"||unit->getFlightgroup()->directive=="F")) {
 	      unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+	      unit->getFlightgroup()->directive="F";
 	      unit->ActivateJumpDrive (0);
 	    }
 	  }

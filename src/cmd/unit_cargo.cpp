@@ -255,7 +255,19 @@ void Unit::EjectCargo (unsigned int index) {
       Unit * cargo = NULL;
       if (tmp->category.length()>=sslen) {
 	if (memcmp (tmp->category.c_str(),"starships",sslen)==0) {
-	  cargo = UnitFactory::createUnit (tmp->content.c_str(),false,faction);
+	  string ans = tmp->content;
+	  unsigned int blank = ans.find (".blank");
+	  if (blank != string::npos) {
+	    ans = ans.substr (0,blank);
+	  }
+	  Flightgroup * fg = this->getFlightgroup();
+	  int fgsnumber=0;
+	  if (fg!=NULL) {
+	    fgsnumber=fg->nr_ships;
+	    fg->nr_ships++;
+	    fg->nr_ships_left++;
+	  }
+	  cargo = UnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber);
 	  cargo->PrimeOrders();
 	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
 	  cargo->SetTurretAI();	  

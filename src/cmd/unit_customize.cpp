@@ -470,6 +470,22 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     }else if (additive==2) {
       Adder=&MultUp;
       Percenter=&computeMultPercent;
+      up->computer.max_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&up->computer.max_speed),up));
+      up->computer.max_ab_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&up->computer.max_ab_speed),up));
+      up->computer.max_yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&up->computer.max_yaw),up));
+      up->computer.max_pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&up->computer.max_pitch),up));
+      up->computer.max_roll = XMLSupport::parse_float (angleStarHandler (XMLType (&up->computer.max_roll),up));
+
+      up->limits.yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&up->limits.yaw),up));
+      up->limits.pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&up->limits.pitch),up));
+      up->limits.roll = XMLSupport::parse_float (angleStarHandler (XMLType (&up->limits.roll),up));
+
+      up->limits.forward = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.forward),up));
+      up->limits.retro = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.retro),up));
+      up->limits.lateral = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.lateral),up));
+      up->limits.vertical = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.vertical),up));
+      up->limits.afterburn = XMLSupport::parse_float (accelStarHandler (XMLType (&up->limits.afterburn),up));
+      
     }else {
       Adder=&GetsB;
       Percenter=&computePercent;

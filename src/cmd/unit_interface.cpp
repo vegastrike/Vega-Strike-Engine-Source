@@ -101,7 +101,7 @@ static bool match (vector <string>::const_iterator cat, vector<string>::const_it
 UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo") {
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
-	Modes=new Button * [modes.size()+1];
+	Modes=new Button * [modes.size()+2];//save mode and null mode
 	CargoInfo->DoMultiline(1);
 	Cockpit * cp = _Universe->isPlayerStarship(un);
 	briefingMission=NULL;
@@ -191,7 +191,7 @@ UpgradingInfo::~UpgradingInfo() {
     for (int i=0;Modes[i]!=0;i++) {
       delete Modes[i];
     }
-//	delete [] Modes;
+    delete [] Modes;
 }
 void UpgradingInfo::Render() {
     //    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);

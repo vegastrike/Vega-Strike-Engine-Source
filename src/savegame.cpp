@@ -11,6 +11,8 @@
 #include <algorithm>
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
+
+    cout << "Hi helper play " << num << endl;
   static string *res=NULL;
   if (res==NULL) {
     res = new std::string;
@@ -85,6 +87,7 @@ using namespace std;
     returnfromhome();
   }
   if (num==0||res->empty()) {
+    cout << "Here";
     return (*res);  
   }
   return (*res)+XMLSupport::tostring(num);

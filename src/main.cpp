@@ -405,7 +405,17 @@ void bootstrap_main_loop () {
 } 
 
 
-
+const char helpmessage[] =
+"Command line options for vegastrike\n"
+"\n"
+" -D -d     Specify data directory\n"
+" -M -m     Number of players\n"
+" -S -s     Enable sound\n"
+" -P -p     Specify player location\n"
+" -A -A     Normal resolution (800x600)\n"
+" -H -h     High resolution (1024x768)\n"
+" -V -v     Super high resolution (1280x1024)\n"
+"\n";
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
@@ -413,7 +423,21 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
-      case 'r':
+    case 'd':
+    case 'D': {
+      // Specifying data directory
+        if(lpCmdLine[i][2] == 0) {
+            cout << "Option -D requires an argument" << endl;
+            exit(1);
+        }
+ 		string datadir = &lpCmdLine[i][2];
+        cout << "Using data dir " << datadir << endl;
+        if(chdir(datadir.c_str())) {
+            cout << "Error changing to specified data dir" << endl;
+            exit(1);
+         }
+        }
+	  case 'r':
       case 'R':
 	break;
       case 'M':
@@ -455,9 +479,6 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	g_game.y_resolution = 1024;
 	g_game.x_resolution = 1280;
 	break;
-      case 'D':
-      case 'd':
-	break;
       case 'G':
       case 'g':
 	//viddrv = "GLDRV.DLL";
@@ -469,6 +490,10 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	  benchmark=atof(lpCmdLine[i+1]);
 	  i++;
 	}
+    else if(strcmp(lpCmdLine[i], "--help")==0) {
+        cout << helpmessage;
+        exit(0);
+    }
       }
     }
     else{

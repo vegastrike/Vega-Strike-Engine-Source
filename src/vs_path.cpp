@@ -3,6 +3,9 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+
+#include "common/common.h"
+
 #ifdef _WIN32
 #include <direct.h>				// definitions of getcwd() and chdir() on win32
 #else
@@ -12,6 +15,7 @@
 #include <sys/types.h>
 #endif
 #include "galaxy_gen.h"
+
 float simulation_atom_var=(float)(1.0/10.0);
 char *CONFIGFILE;
 
@@ -35,6 +39,9 @@ void changehome(bool makehomedir) {
 #endif
   if (makehomedir) {
   getcwd (pw_dir,1998);
+#ifndef _WIN32
+  vsresetdir();
+#endif
   vssetdir (pw_dir);
   if (chdir (HOMESUBDIR)==-1) {
       //      system ("mkdir " HOMESUBDIR);
@@ -78,39 +85,11 @@ void returnfromhome() {
   vsresetdir();
 }
 
+
 char pwd[65536];
 void initpaths () {
-  char tmppwd[65536];
-  getcwd (tmppwd,32768);
 
-  chdir(tmppwd);
-  FILE *tfp1=fopen(CONFIGFILE,"r");
-  if(tfp1){
-    // we have a config file in the current directory
-    // so the current directory is the one with data
-    datadir=string(tmppwd);
-    fclose(tfp1);
-  }
-  else{
-    // search for the config file in the DATA_DIR define
-#ifdef DATA_DIR
-    chdir(DATA_DIR);
-    FILE *tfp2=fopen(CONFIGFILE,"r");
-    if(!tfp2){
-      cerr << "Didn't find data directory in either the current dir (" << tmppwd << ")" << endl;
-      cerr << "Or the install directory " << DATA_DIR << endl;
-      datadir=string(tmppwd);
-    }
-    else{
-      datadir=string(DATA_DIR);
-    }
-#else
-    // we can't find a data dir
-    cerr << "current directory is not data directory" << endl;
-    datadir=string(tmppwd);
-#endif
-  }
-
+  datadir = getdatadir();
   sharedsounds = datadir;
 
   cerr << "Data directory is " << datadir << endl;
@@ -134,8 +113,9 @@ void initpaths () {
     vs_config = new VegaConfig (CONFIGFILE);
     cout << "using config file in data dir " << datadir << endl;
   } else {
+
     // no config file in home dir or data dir
-    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",tmppwd,CONFIGFILE,CONFIGFILE);
+    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",datadir.c_str(),CONFIGFILE,CONFIGFILE);
     exit (-1);
   }
   if (fp)
