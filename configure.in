@@ -792,8 +792,11 @@ if test "x$is_macosx" = "xyes" ; then
     have_glext_h=yes
 else
     AC_CHECK_HEADERS([GL/gl.h GL/glext.h], [have_glext_h=yes], [have_glext_h=no],
-    [[#if HAVE_GL_GL_H
-    #include <GL/gl.h>
+    [[
+    #include <GL/gl.h>    
+    #include <GL/glext.h>
+    #if (!defined(GL_ARB_vertex_buffer_object) ) && GL_GLEXT_VERSION<21
+    #error "Download http://oss.sgi.com/projects/ogl-sample/ABI/glext.h; Place it in the directory /usr/include/GL."
     #endif
     ]])
 fi
@@ -801,8 +804,8 @@ fi
 if test "x$have_glext_h" = "xno" ; then
     AC_MSG_ERROR([
 *****************************************************************
-You are missing the file glext.h.
-You can get a copy at
+Your file glext.h is too old. (Must be Version 21 or greater)
+You can get a new copy at
 http://oss.sgi.com/projects/ogl-sample/ABI/glext.h
 Place it in the directory /usr/include/GL.
 *****************************************************************])
