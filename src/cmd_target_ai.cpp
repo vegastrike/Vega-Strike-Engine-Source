@@ -46,7 +46,7 @@ void FireAt::Execute () {
   UnitCollection::UnitIterator *iter = targets->createIterator();    
   bool shouldfire=false;
   if (!iter->current()) {
-    ChooseTargets();
+    ChooseTargets(2);
     delete iter;
     iter = targets->createIterator();
   }
