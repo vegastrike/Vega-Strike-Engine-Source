@@ -28,7 +28,7 @@ extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
 //#define USE_DISPLAY_LISTS
-GFXQuadList::GFXQuadList(GFXBOOL color): numVertices(0),numQuads(0),myVertices(NULL) {
+GFXQuadList::GFXQuadList(GFXBOOL color): numVertices(0),numQuads(0),myVertices(NULL),myColors(NULL) {
   Dirty = GFXFALSE;
   isColor = color;
 }

@@ -1,6 +1,6 @@
 #include "cmd_unit.h"
 #include "xml_support.h"
-
+#include "gfx_halo.h"
 //#include <iostream.h>
 #include <fstream>
 #include <expat.h>
@@ -24,6 +24,7 @@ namespace UnitXML {
       SUBUNIT,
       MESHFILE,
       MOUNT,
+      MESHLIGHT,
       XFILE,
       X,
       Y,
@@ -34,6 +35,10 @@ namespace UnitXML {
       QI,
       QJ,
       QK,
+      RED,
+      GREEN,
+      BLUE,
+      ALPHA,
       MOUNTSIZE,
       WEAPON,
       DEFENSE,
@@ -77,6 +82,7 @@ namespace UnitXML {
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
     EnumMap::Pair ("MeshFile", MESHFILE),
+    EnumMap::Pair ("Light",MESHLIGHT),
     EnumMap::Pair ("Defense", DEFENSE),
     EnumMap::Pair ("Armor", ARMOR),
     EnumMap::Pair ("Shields", SHIELDS),
@@ -107,6 +113,10 @@ namespace UnitXML {
     EnumMap::Pair ("qi", QI),     
     EnumMap::Pair ("qj", QJ),     
     EnumMap::Pair ("qk", QK),
+    EnumMap::Pair ("red",RED),
+    EnumMap::Pair ("green",GREEN),
+    EnumMap::Pair ("blue",BLUE),    
+    EnumMap::Pair ("alpha",ALPHA),
     EnumMap::Pair ("size", MOUNTSIZE),
     EnumMap::Pair ("forward",FORWARD),
     EnumMap::Pair ("retro", RETRO),    
@@ -135,8 +145,8 @@ namespace UnitXML {
 
 };
 
-  const EnumMap element_map(element_names, 20);
-  const EnumMap attribute_map(attribute_names, 36);
+  const EnumMap element_map(element_names, 21);
+  const EnumMap attribute_map(attribute_names, 40);
 }
 
 using XMLSupport::EnumMap;
@@ -181,6 +191,44 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
+    break;
+  case MESHLIGHT:
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    
+    for (iter = attributes.begin();iter!=attributes.end();iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case X:
+	pos.i=parse_float((*iter).value);
+	break;
+      case Y:
+	pos.j=parse_float((*iter).value);
+	break;
+      case Z:
+	pos.i=parse_float((*iter).value);
+	break;
+      case RED:
+	Q.i=parse_float((*iter).value);
+	break;
+      case GREEN:
+       	Q.j=parse_float((*iter).value);
+	break;
+      case BLUE:
+	Q.k=parse_float((*iter).value);
+	break;
+      case ALPHA:
+	P.k=parse_float((*iter).value);
+	break;
+      case XFILE:
+	filename = (*iter).value;
+	break;
+      case MOUNTSIZE:
+	P.i=parse_float((*iter).value);
+	P.j=parse_float((*iter).value);
+	break;
+      }
+    }
+    xml->halos.push_back(new Halo(filename.c_str(),GFXColor(Q.i,Q.j,Q.k,P.k),pos,P.i,P.j));
     break;
   case MOUNT:
 	assert (xml->unitlevel==1);
@@ -612,6 +660,14 @@ fclose (inFile);
   int a;
   for( a=0; a<nummesh; a++) {
     meshdata[a] = xml->meshes[a];
+  }
+  numhalos = xml->halos.size();
+  if (numhalos)
+    halos = new Halo*[numhalos];
+  else
+    halos=NULL;
+  for (a=0;a<numhalos;a++) {
+    halos[a]=xml->halos[a];
   }
   nummounts = xml->mountz.size();
   if (nummounts)

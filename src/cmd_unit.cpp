@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "file.h"
-
+#include "gfx_halo.h"
 #include "cmd_beam.h"
 #include "cmd_unit.h"
 #include "cmd_gun.h"
@@ -63,7 +63,10 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  numhalos=0;
+  halos=NULL;
   nummounts=0;
+  nummesh=0;
   mounts=NULL;
   //    nummounts=1;
     
@@ -632,6 +635,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 	mounts[i].gun->Draw(cumulative_transformation,cumulative_transformation_matrix);
       }
     }
+  }
+  for (i=0;i<numhalos;i++) {
+        halos[i]->Draw();
   }
 }
 

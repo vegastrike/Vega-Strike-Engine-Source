@@ -93,7 +93,7 @@ protected:
   int numsubunit;
   Unit **subunits; // the new children fun fun stuff
   int numhalos;
-  Halo *halos;
+  Halo **halos;
   int nummounts;
   class Mount {
     Transformation LocalPosition;
@@ -299,9 +299,10 @@ public:
   void ExecuteAI();
 };
 struct Unit::XML {
-    vector<Unit::Mount *> mountz;
-    vector<Mesh*> meshes;
-    vector<Unit*> units;
-	int unitlevel;
-  };
+  vector<Halo*> halos;
+  vector<Unit::Mount *> mountz;
+  vector<Mesh*> meshes;
+  vector<Unit*> units;
+  int unitlevel;
+};
 #endif
