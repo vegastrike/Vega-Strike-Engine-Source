@@ -1561,7 +1561,12 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  }
 		  autotrack=2;
 	  }
-      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, trackingcone);
+      if (!mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
+		  const weapon_info * typ = mounts[i].type;
+		  energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
+		  if (mounts[i].ammo>=0)
+			  mounts[i].ammo++;
+	  }
       if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE, i) {
 //		  if (isPlayerStarship(this))
 //			  ToggleWeapon (true);

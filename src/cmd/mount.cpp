@@ -62,7 +62,7 @@ Mount::Mount(const string& filename, short am,short vol, float xyscale, float zs
   }
 }
 
-extern void AdjustMatrix (Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
+extern bool AdjustMatrix (Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
 void AdjustMatrixToTrackTarget (Matrix &mat,const Vector & velocity, Unit * target, float speed, bool lead, float cone) {
   AdjustMatrix (mat,velocity, target,speed,lead,cone);
 }
@@ -106,6 +106,11 @@ void Mount::ReplaceMounts (const Mount * other) {
 	this->SetMountOrientation(q);	
 	ref.gun=NULL;
 	this->ReplaceSound();
+	if (other->ammo==-1)
+		ammo=-1;
+	else if (other->ammo!=-1 && ammo==-1) {
+		ammo=0;//zero ammo if other was not zero earlier.
+	}
 }
 double Mount::Percentage (const Mount *newammo) const{
 	  float percentage=0;
@@ -136,7 +141,7 @@ double Mount::Percentage (const Mount *newammo) const{
 		return 0;
 	  }
 }
-
+//bool returns whether to refund the cost of firing
 bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone, int mount_num) {
   if (time_to_lock>0) {
     target=NULL;
@@ -151,8 +156,14 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     tmp.to_matrix (mat);
     mat.p = Transform(mat,(type->offset+Vector(0,0,zscale)).Cast());
     if (autotrack&&NULL!=target) {
-      AdjustMatrix (mat,velocity,target,type->Speed,autotrack>=2,trackingcone);
-    }
+		if (!AdjustMatrix (mat,velocity,target,type->Speed,autotrack>=2,trackingcone)) {
+			return false;
+		}
+    }else if (this->size&weapon_info::AUTOTRACKING) {
+		static bool firemissingautotrackers = XMLSupport::parse_bool (vs_config->getVariable("physics","fire_missing_autotrackers","true"));
+		if (!firemissingautotrackers)
+			return false;
+	}
 			switch (type->type) {
 			case weapon_info::BEAM:
 				if (ref.gun)
@@ -224,7 +235,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     }
     return true;
   }
-  return false;
+  return true;
 }
 
 bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {

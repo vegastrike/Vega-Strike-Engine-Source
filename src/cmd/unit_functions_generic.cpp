@@ -108,7 +108,7 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 }
 
 // From unit_weapon.cpp
-void AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, bool lead, float cone) {
+bool AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
@@ -122,8 +122,12 @@ void AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, b
       ScaledCrossProduct (Q,dir,P);
       ScaledCrossProduct (dir,P,Q);
       VectorAndPositionToMatrix (mat,P,Q,dir,pos);
-    }
+    }else {
+		return false;
+	}
+	return true;
   }
+  return false;
 }
 
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
