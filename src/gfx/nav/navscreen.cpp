@@ -1506,8 +1506,8 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
 
 				//	shift less when zoomed in more
 				//  float zoom_modifier = ( (1-(((zoom_s-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-				float _l2 = log(2.0);
-				float zoom_modifier = (log(zoom_s)/_l2);
+//				float _l2 = log(2.0);
+				float zoom_modifier = 1.;//(log(zoom_s)/_l2);
 
 				rx_s = rx_s-=((ndx*camera_z)/zoom_modifier);
 				ry_s = ry_s-=((ndy*camera_z)/zoom_modifier);
@@ -1543,8 +1543,8 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
 
 				//	shift less when zoomed in more
 				//  float zoom_modifier = ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-				float _l2 = log(2.0);
-				float zoom_modifier = (log(zoom)/_l2);
+//				float _l2 = log(2.0);
+				float zoom_modifier = 1.;//(log(zoom)/_l2);
 
 				rx = rx-=((ndx*camera_z)/zoom_modifier);
 				ry = ry-=((ndy*camera_z)/zoom_modifier);

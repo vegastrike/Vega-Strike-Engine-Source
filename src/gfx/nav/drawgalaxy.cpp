@@ -212,6 +212,7 @@ QVector NavigationSystem::SystemIterator::Position () {
 	string xyz=_Universe->getGalaxyProperty(currentsystem,"xyz");
 	QVector pos;
 	if (xyz.size() && (sscanf(xyz.c_str(), "%lf %lf %lf", &pos.i, &pos.j, &pos.k)>=3)) {
+		pos.j=-pos.j;
 		return pos;
 	} else {
 		float ratio = ((float)count)/maxcount;
