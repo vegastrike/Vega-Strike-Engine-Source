@@ -78,10 +78,18 @@ bool lcwithin (const LineCollide & lc, const LineCollide&tmp) {
 	  lc.Maxi.j> tmp.Mini.j&&
 	  lc.Maxi.k> tmp.Mini.k);
 }
-
+bool usehuge_table() {
+  const unsigned int A = 9301;
+  const unsigned int C = 49297;
+  const unsigned int M = 233280;
+  static unsigned int seed=3259235;
+  seed = (seed * A + C) % M;
+  return seed<(M/100);
+}
 bool Bolt::Collide () {
   UnitCollection *candidates[2];  
-  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates);
+  bool use_huge_list=usehuge_table();
+  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates,use_huge_list);
   LineCollide minimaxi;//might as well have this so we can utilize common function
   minimaxi.Mini= ( prev_position.Min (cur_position));
   minimaxi.Maxi= ( prev_position.Max (cur_position));
@@ -91,6 +99,9 @@ bool Bolt::Collide () {
       
       if (lcwithin (minimaxi,(un)->GetCollideInfo ())) {
 	if (this->Collide (un)) {
+	  if (j==0&&use_huge_list) {
+	    _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
+	  }
 	  delete this;
 	  return true;
 	}
@@ -103,14 +114,19 @@ bool Bolt::Collide () {
 
 void Beam::CollideHuge (const LineCollide & lc) {
   UnitCollection *colQ [tablehuge+1];
+  bool use_huge_list = usehuge_table();
   if (!lc.hhuge) {
-    int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&lc,colQ);
+    int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&lc,colQ,use_huge_list);
     for (int j=0;j<sizecolq;j++) {
       Unit *un;
       for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
 
 	if (lcwithin(lc,(un)->GetCollideInfo())) {
-	  this->Collide (un);
+	  if (this->Collide (un)) {
+	    if (j==0&&use_huge_list) {
+	      _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
+	    }
+	  }
 	}
       }
     }

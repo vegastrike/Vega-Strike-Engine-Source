@@ -124,6 +124,10 @@ class UnitCollection {
   ConstIterator constIterator() const {return ConstIterator (&u);}
   FastIterator fastIterator() {return FastIterator (&u);}
   ConstFastIterator constFastIterator () const{return ConstFastIterator(&u);}
+  void insert_unique(Unit *un) {
+    for (UnitListNode * i=u.next;i!=NULL;i=i->next) if (i->unit==un) return;
+    prepend (un);
+  }
   void prepend(Unit *unit) {u.next= new UnitListNode (unit,u.next);}
   void prepend(UnitIterator *iter);
   void append(Unit *unit);

@@ -51,6 +51,7 @@ float ScaleJumpRadius (float radius) {
 StarSystem::StarSystem() {
   stars = NULL;
   bolts = NULL;
+  count_since_huge_active=0;
   collidetable = NULL;
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
@@ -421,6 +422,9 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	    iter.advance();
 	  }
 
+	}
+	if ((count_since_huge_active++%100)==0) {
+	  collidetable.c.SwapHugeAccum();
 	}
 	UpdateMissiles();//do explosions
 	current_stage=PHY_TERRAIN;

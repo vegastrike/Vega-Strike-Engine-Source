@@ -606,6 +606,9 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  }
 
 	}
+	if ((count_since_huge_active++%100)==0) {
+	  collidetable->c.SwapHugeAccum();
+	}
 	UpdateMissiles();//do explosions
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {

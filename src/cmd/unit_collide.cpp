@@ -81,13 +81,14 @@ void Unit::UpdateCollideQueue () {
     CollideInfo.Maxi=Puffmax;
   }
 }
-
+extern bool usehuge_table();
 void Unit::CollideAll() {
   if (SubUnit||killed)
     return;
 
   UnitCollection * colQ [tablehuge+1];
-  int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ);
+  bool usehuge = usehuge_table()||GetJumpStatus().drive>=0;
+  int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ,usehuge);
   int j = 0;
   for (;j<sizecolq;j++) {
     Unit *un;
@@ -105,7 +106,11 @@ void Unit::CollideAll() {
 	    Position().j-radial_size<tmp->Maxi.j&&
 	    Position().k+radial_size>tmp->Mini.k&&
 	    Position().k-radial_size<tmp->Maxi.k) {
-	  un->Collide(this);
+	  if (un->Collide(this)) {
+	    if (j==0&&usehuge) {
+	      _Universe->activeStarSystem()->collidetable->c.AddHugeToActive(un);
+	    }
+	  }
 	}
     
     }

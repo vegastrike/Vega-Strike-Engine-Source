@@ -104,6 +104,7 @@ class StarSystem {
 
   void ExecuteUnitAI();
   class CollideTable *collidetable;
+  int count_since_huge_active;
   class bolt_draw *bolts;
   virtual void LoadXML(const char*, const Vector & centroid, const float timeofyear) {}
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);

@@ -10,6 +10,7 @@
 #include "linecollide.h"
 #include "collection.h"
 #include "cmd/unit_generic.h"
+#include <set>
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 ///objects that go over 16 sectors are considered huge and better to check against everything.
@@ -24,6 +25,12 @@ class StarSystem;
 template <class CTSIZ, class CTACCURACY, class CTHUGE> class UnitHash3d {
   ///All objects that are too large to fit (fastly) in the collide table
   UnitCollection hugeobjects;
+  UnitCollection ha;
+  UnitCollection hb;
+  UnitCollection * active_huge;
+  UnitCollection * accum_huge;
+  std::set <Unit *>act_huge;
+  std::set <Unit *> acc_huge;
   ///The hash table itself. Holds most units to be collided with
   UnitCollection table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
   StarSystem * activeStarSystem;
@@ -43,6 +50,31 @@ template <class CTSIZ, class CTACCURACY, class CTHUGE> class UnitHash3d {
 public:
   UnitHash3d (StarSystem * ss) {
     activeStarSystem = ss;
+    active_huge=&ha;
+    accum_huge = &hb;
+  }
+  void SwapHugeAccum () {
+    if (active_huge==&ha) {
+      active_huge =&hb;
+      accum_huge=&ha;
+    }else {
+      active_huge=&ha;
+      accum_huge=&hb;
+    }
+    accum_huge->clear();
+    act_huge.swap(acc_huge);
+    acc_huge.clear();
+  }
+  void AddHugeToActive(Unit *un) {
+    if (acc_huge.find(un)==acc_huge.end()) {
+      acc_huge.insert (un);
+      accum_huge->prepend(un);
+      if (act_huge.find(un)==act_huge.end()) {
+	act_huge.insert (un);
+	active_huge->prepend(un);
+      }
+    }
+    
   }
   void updateBloc (unsigned int whichblock) {
     un_iter ui =table  [whichblock%COLLIDETABLESIZE][(whichblock/COLLIDETABLESIZE)%COLLIDETABLESIZE][((whichblock/COLLIDETABLESIZE)/COLLIDETABLESIZE)%COLLIDETABLESIZE].createIterator();
@@ -65,6 +97,13 @@ public:
     if (!hugeobjects.empty()) {
       hugeobjects.clear();
     }
+    if (!active_huge.empty())
+      ha.clear();
+    if (!accum_huge.empty())
+      hb.clear();
+    acc_huge.clear();
+    act_huge.clear();
+
     for (int i=0;i<=COLLIDETABLESIZE-1;i++) {
     for (int j=0;j<=COLLIDETABLESIZE-1;j++) {
     for (int k=0;k<=COLLIDETABLESIZE-1;k++) {
@@ -75,11 +114,13 @@ public:
     }
   }
   ///returns any objects residing in the sector occupied by Exact
-  int Get (const QVector &Exact, UnitCollection  *retval[]) {
+  int Get (const QVector &Exact, UnitCollection  *retval[], bool GetHuge) {
     retval[1]=&table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
     //retval+=hugeobjects;
     //blah = blooh;
-    retval[0]=&hugeobjects;
+    retval[0]=active_huge;
+    if (GetHuge)
+      retval[0]=&hugeobjects;
     return 2;
   }
   ///Returns all objects too big to be conveniently fit in the array
@@ -87,7 +128,7 @@ public:
     return hugeobjects;
   }
   ///Returns all objects within sector(s) occupied by target
-  int Get (const LineCollide* target, UnitCollection *retval[]) {    
+  int Get (const LineCollide* target, UnitCollection *retval[], bool GetHuge) {    
     unsigned int sizer =1;
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
@@ -100,9 +141,11 @@ public:
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
     retval[0] = &hugeobjects;
+    if (!GetHuge)
+      retval[0]=active_huge;
     if (target->hhuge) {
       return sizer;//we can't get _everything
-    } 
+    }
     for (double i=target->Mini.i;i<=maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int (i);
       for (double j=target->Mini.j;j<=maxy;j+=COLLIDETABLEACCURACY) {   
