@@ -58,6 +58,8 @@ if (setdir) {
 }
 }
 void AnimatedTexture::AniInit() {
+  numframes=1;
+  timeperframe=1;
   Decal=NULL;
   physicsactive=0;
   name=-1;
@@ -160,7 +162,9 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
     Texture * dec = Decal[numframes/2];
     timeperframe*=numframes;
     numframes=1;
-    delete [] Decal;
+    if (Decal) {
+      delete [] Decal;
+    }
     Decal = new Texture * [1];
     Decal[0]=dec;
   }
