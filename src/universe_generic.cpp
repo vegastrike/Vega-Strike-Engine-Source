@@ -27,7 +27,7 @@ Cockpit * Universe::createCockpit( std::string player)
 }
 
 QVector DockToSavedBases (int playernum) {
-	string str=vs_config->getVariable("physics","docked_to_at_start","m_class");
+	string str=vs_config->getVariable("AI","startDockedTo","MiningBase");
 	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
 	if (!plr) {
 		return QVector( 0, 0, 0);
