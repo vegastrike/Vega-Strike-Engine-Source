@@ -971,6 +971,7 @@ static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severit
 }
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
   static int maxseverity=XMLSupport::parse_bool(vs_config->getVariable("AI","dock_to_area","false"))?2:1;
+  Unit * endt=targ;
   bool nodockwithclear=NoDockWithClear();
   bool wasdock=vectorOfKeyboardInput[playa].doc;
   if (vectorOfKeyboardInput[playa].doc) {
@@ -979,6 +980,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       for (int severity=0;severity<maxseverity;++severity) { 
         targ->RequestClearance(parent);
         if ((isDone=TryDock(parent,targ,playa,severity))!=false){
+          parent->EndRequestClearance(targ);
           break;
         }else {
             //if (targ!=parent->Target())
@@ -996,6 +998,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
           if (TryDock(parent,targ,playa,severity)) {
             parent->Target(targ);
             isDone=true;
+            parent->EndRequestClearance(targ);
             break;
           }else {
             //if (targ!=parent->Target())
@@ -1006,6 +1009,8 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       }
     }
     if (!isDone) {
+      if (endt)
+        endt->RequestClearance(parent);
       abletodock(0);
     }
     vectorOfKeyboardInput[playa].doc=false;
