@@ -1,6 +1,6 @@
 #include "base.h"
 #ifdef BASE_MAKER
-#ifndef BASE_XML
+//#ifndef BASE_XML
 #include <stdio.h>
 
 void Base::Room::Link::EndXML (FILE *fp) {
@@ -128,5 +128,5 @@ void Base::EndXML (FILE *fp) {
 	}
 }
 
-#endif
+//#endif
 #endif

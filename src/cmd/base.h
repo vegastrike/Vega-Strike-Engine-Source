@@ -103,7 +103,7 @@ public:
 #endif
 			explicit BaseShip (std::string ind) : BaseObj (ind) {}
 			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos, std::string ind)
-				:BaseObj (ind),mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos)  {}
+				:BaseObj (ind),mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,QVector(pos.i/2,pos.j/2,pos.k))  {}
 		};
 		class BaseSprite : public BaseObj {
 		public:

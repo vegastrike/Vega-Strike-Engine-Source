@@ -306,7 +306,7 @@ static void DrawMouse(int mousex, int mousey, bool drawmouseover) {
   static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
   GFXColor4f (1,1,1,1);
   GFXEnable(TEXTURE0);
-  GFXBlendMode (ONE,ONE);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
   float sizex,sizey;
   if (drawmouseover) {
     static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);

@@ -66,9 +66,10 @@ void Base::Load(const char * filename,const char * time_of_day_hint) {
   std::string newfile=daynight_filename;
   cout << "Base::LoadXML " << full_filename << endl;
   FILE * inFile = fopen (daynight_filename.c_str(),"r");
-  if (!inFile)
+  if (!inFile) {
     newfile=full_filename;
     inFile = fopen (full_filename.c_str(), "r");
+  }
   if(!inFile) {
     Unit *baseun=this->baseun.GetUnit();
     if (baseun) {

@@ -70,7 +70,7 @@ namespace BaseUtil {
 			EnumMap::Pair (" AddMode", UpgradingInfo::ADDMODE), //should allow them (the ' ' at the beginning)...
 			EnumMap::Pair ("UNKNOWN", UpgradingInfo::MAXMODE)
 		};
-		static const EnumMap modemap (modelist,UpgradingInfo::MAXMODE);
+		static const EnumMap modemap (modelist,UpgradingInfo::MAXMODE+1);
 		const char *newmode=modes.c_str();
 		int newlen=modes.size();
 		char *curmode=new char [newlen+1];

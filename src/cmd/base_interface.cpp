@@ -184,6 +184,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 					fclose(fp);
 #endif
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
+					int i;
 #ifdef _WIN32
 					FILE *fp=fopen("stdin.txt","rt");
 #else
@@ -201,11 +202,18 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 					case 3:
 						links.push_back(new Comp("comp"));
 						fscanf(fp,"%d",&index);
-						for (int i=0;i<index&&(!feof(fp));i++) {
+						for (i=0;i<index&&(!feof(fp));i++) {
 							fscanf(fp,"%d",&ret);
 							((Comp*)links.back())->modes.push_back((UpgradingInfo::BaseMode)ret);
 						}
 						break;
+					default:
+#ifdef _WIN32
+						fclose(fp);
+						MessageBox(NULL,"warning: invalid basemaker option","Error",MB_OK);
+#endif
+						printf("warning: invalid basemaker option: %d",rmtyp);
+						return;
 					}
 					fscanf(fp,"%200s",input);
 					input[200]=input[199]='\0';
@@ -237,8 +245,9 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 			}
 		}
 #else
-		if (state==WS_MOUSE_UP) {
-			for (int begind=base->curlinkindex;begind%links.size()!=base->curlinkindex;begind++) {
+		if (state==WS_MOUSE_UP&&links.size()) {
+			int count=0;
+			while (count++<links.size()) { 
 				Link *curlink=links[base->curlinkindex++%links.size()];
 				if (curlink) {
 					int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
