@@ -32,13 +32,14 @@ float CityLights::GetS (float theta, float theta_min, float theta_max) {
 }
 string truncateByPipe (string & input) {
   unsigned int i=input.find ("|");
+  string ret=input;
   if (i!=string::npos) {
-    string ret=input.substr (0,i);
+    ret=input.substr (0,i);
     input=input.substr (i+1);
+  }else {
+	  input="";
   }
-  string tmp (input);
-  input="";
-  return tmp;
+  return ret;
 }
 void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap, bool reverse_normals){
   int numspheres = (stacks+slices)/8;
