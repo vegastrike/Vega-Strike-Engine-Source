@@ -53,8 +53,7 @@ struct OpenGLLights {
     char options;
 };
 
-
-
+void light_rekey_frame();
 
 extern int _currentContext;
 extern vector <vector <gfx_light> > _local_lights_dat;

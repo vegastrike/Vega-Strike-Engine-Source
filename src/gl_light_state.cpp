@@ -81,7 +81,7 @@ void gfx_light::Kill() {
 
 void gfx_light::SendGLPosition (const GLenum target) {
   int tmp = options;
-  w = (float)(attenuated()!=0);
+  w = 1;//(float)(attenuated()!=0);
   glLightfv (target,GL_POSITION,vect);
   options = tmp;
 }  
@@ -136,10 +136,13 @@ void gfx_light::ClobberGLLight (const int target) {
   if (enabled()!=(GLLights[target].options&OpenGLLights::GL_ENABLED)) {
     if (enabled()) {
       glEnable (GL_LIGHT0+target);
+      GLLights[target].options|=OpenGLLights::GL_ENABLED;
     } else {
+      GLLights[target].options&=(~OpenGLLights::GL_ENABLED);
       glDisable (GL_LIGHT0+target);
     }
   }
+  GLLights[target].options&=(OpenGLLights::GL_ENABLED);//turn off options
 #ifdef GFX_HARDWARE_LIGHTING
     if (GLLights[target].index==-1) {
 #endif
@@ -150,7 +153,7 @@ void gfx_light::ClobberGLLight (const int target) {
     }
 #endif
     GLLights[target].index = lightNum();
-    GLLights[target].options = OpenGLLights::GLL_ON*enabled()+OpenGLLights::GLL_LOCAL*LocalLight();
+    GLLights[target].options |= OpenGLLights::GLL_ON*enabled()+OpenGLLights::GLL_LOCAL*LocalLight();
 }
 
 
@@ -279,7 +282,19 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
   *((int *)(&retval.object)) = lightNum();//put in a lightNum
   return retval;
 }
-
+void light_rekey_frame() {
+    for (int i=0;i<GFX_MAX_LIGHTS;i++) {
+	if (GLLights[i].options & OpenGLLights::GL_ENABLED) {
+	    if (GLLights[i].index>=0) {
+		(*_llights)[GLLights[i].index].SendGLPosition(GL_LIGHT0+i);//send position transformed by current cam matrix
+		assert ((*_llights)[GLLights[i].index].Target() == i);
+	    }else {
+		glDisable (GL_LIGHT0+i);
+		GLLights[i].options&=(~OpenGLLights::GL_ENABLED);
+	    }
+	}
+    }
+}
 
 
 

@@ -685,7 +685,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
         Vector MeshCenter;
 #endif
   int i;
-  if (!invisible) {
+  if (1||!invisible) {
     for (i=0;i<nummesh;i++) {
       float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
 					      meshdata[i]->Position()),

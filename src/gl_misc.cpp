@@ -24,6 +24,7 @@
 #include "vegastrike.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
+#include "gl_light.h"
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
@@ -35,8 +36,8 @@ void /*GFXDRVAPI*/ GFXBeginScene()
 	statsqueue.push(GFXStats());
 #endif
 	GFXClear();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity(); // bad this should instead load the cached view matrix
+	GFXLoadIdentity(MODEL); // bad this should instead load the cached view matrix
+	light_rekey_frame();
 }
 
 void /*GFXDRVAPI*/ GFXEndScene()

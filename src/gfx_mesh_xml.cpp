@@ -1234,6 +1234,10 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     vertexlist[a].x*=xml->scale;//FIXME
     vertexlist[a].y*=xml->scale;
     vertexlist[a].z*=xml->scale;
+    vertexlist[a].i*=-1;
+    vertexlist[a].j*=-1;
+    vertexlist[a].k*=-1;
+
     /*
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
