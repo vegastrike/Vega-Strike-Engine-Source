@@ -1,6 +1,6 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common
-vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a -lutil networking/libnet.a boost/libboost_python.a common/libvscommon.a networking/libnetclient.a -lpthread
+vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a networking/libnet.a boost/libboost_python.a common/libvscommon.a networking/libnetclient.a -lpthread
 
 vegaserver_LDADD = networking/libnetserver.a
 #cmd/unit.o cmd/unit_xml.o cmd/unit_cargo.o cmd/unit_factory.o cmd/unit_interface.o cmd/container.o cmd/unit_collide.o \
