@@ -67,13 +67,15 @@ FILE *mystdout=stdout;
 #endif
 #include <iostream>
 #include <fstream>
-
+#define SONG_MUTEX 0
+#if SONG_MUTEX
 #include <SDL/SDL_mutex.h>
 /******************************************************************************/
 /* some simple exit and error routines                                        */
 char * songNames[5]={0,0,0,0,0};
 unsigned int counter=0;
 SDL_mutex * RestartSong=NULL;
+#endif
 void errorv(char *str, va_list ap)
 {
 #ifdef HAVE_SDL
@@ -273,10 +275,13 @@ Mix_Music * PlayMusic (std::string file, Mix_Music *oldmusic) {
 }
 int mysocket = -1;
 int mysocket_write=-1;
+#if SONG_MUTEX
 Mix_Music *music=NULL;
+#endif
 void music_finished () {
 	if (sende) {
 		char data='e';
+#if SONG_MUTEX
                 SDL_mutexP(RestartSong);
                 int tmp = counter;
                 char * newname=NULL;
@@ -289,12 +294,15 @@ void music_finished () {
                   SDL_mutexV(RestartSong);
                 }else {
                   SDL_mutexV(RestartSong);
+#endif
                   if (fnet) {
                     fNET_Write(mysocket_write,sizeof(char),&data);	
                   }else {
                     INET_Write(mysocket_write,sizeof(char),&data);	
                   }
+#if SONG_MUTEX
                 }
+#endif
 		fprintf(STD_OUT, "\ne\n[SONG DONE]\n");
 	}
 }
@@ -370,7 +378,6 @@ int main(int argc, char **argv) {
 
 
 
-	music=NULL;
 	int audio_rate,audio_channels,
  		// set this to any of 512,1024,2048,4096
 		// the higher it is, the more FPS shown and CPU needed
@@ -382,8 +389,13 @@ int main(int argc, char **argv) {
 	if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_TIMER)<0)
 		cleanExit("SDL_Init\n");
         
-        signal( SIGSEGV, SIG_DFL );
-        RestartSong = SDL_CreateMutex();
+    signal( SIGSEGV, SIG_DFL );
+#if SONG_MUTEX
+    RestartSong = SDL_CreateMutex();
+	music=NULL;
+#else
+	Mix_Music *music=NULL;
+#endif
 	Mix_HookMusicFinished(&music_finished); 
 #endif
 #ifndef _WIN32
@@ -466,6 +478,7 @@ int main(int argc, char **argv) {
 				    ||(!Mix_PlayingMusic())
 #endif
 				    ) {
+#if SONG_MUTEX
                                   std::vector<std::string> names = split(str,"&");                                 
                                   char * tmpstrings[5]={NULL,NULL,NULL,NULL,NULL};
                                   for(unsigned int t=0;t<5&&t+1<names.size();++t) {
@@ -475,8 +488,11 @@ int main(int argc, char **argv) {
                                   memcpy(songNames,tmpstrings,sizeof(char*)*5);
                                   if (names.size()>0) str=names[0];
                                   counter=0;
+#endif
                                   music=PlayMusic(str,music);
+#if SONG_MUTEX
                                   SDL_mutexV(RestartSong);
+#endif
 					if (music) {
 						fprintf(STD_OUT, "\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
 						curmus=str;
@@ -577,7 +593,9 @@ int main(int argc, char **argv) {
         }
 #ifdef HAVE_SDL
 	Mix_CloseAudio();
-        SDL_DestroyMutex(RestartSong);
+#if SONG_MUTEX
+    SDL_DestroyMutex(RestartSong);
+#endif
 	SDL_Quit();
 #endif
 

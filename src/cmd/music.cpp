@@ -25,8 +25,12 @@
 #include "music.h"
 #include "base.h"
 #include "networking/inet_file.h"
+#include "networking/inet.h"
 #include "python/python_compile.h"
-
+bool soundServerPipes() {
+    static bool ret=  XMLSupport::parse_bool(vs_config->getVariable("audio","pierce_firewall","false"));
+    return ret;
+}
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   loopsleft=0;
   if (!g_game.music_enabled)
@@ -44,10 +48,11 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
     LoadMusic(vs_config->getVariable ("audio",listvars[i],deflistvars[i]).c_str());
   }
   socketw=socketr=-1;
-  fNET_startup();
-  int pipesw[2];
-  int pipesr[2];
-  socketw=socketr=-1;//FIXME
+  if (soundServerPipes()) {
+      fNET_startup();
+      int pipesw[2];
+      int pipesr[2];
+      socketw=socketr=-1;//FIXME
 #ifdef _WIN32
 #define pipe _pipe
 #endif
@@ -116,14 +121,26 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
 
 #endif
   }
+  }else {
+      int socket=-1;
+      INET_startup();
+      for (i=0;(i<10)&&(socket==-1);i++) {
+	  socket=INET_ConnectTo("localhost",4364);
+      }
+      socketw=socketr=socket;
+  }
   if (socketw==-1||socketr==-1) {
 	  g_game.music_enabled=false;
   } else {
     string data=string("i")+vs_config->getVariable("audio","music_fadein","0")+"\n"
 		"o"+vs_config->getVariable("audio","music_fadeout","0")+"\n";
-    fNET_Write(socketw,data.size(),data.c_str());
+    if (soundServerPipes()) {
+        fNET_Write(socketw,data.size(),data.c_str());
+    }else {
+        INET_Write(socketw,data.size(),data.c_str());
+    }
     this->vol=XMLSupport::parse_float(vs_config->getVariable("audio","music_volume",".5"));
-	ChangeVolume();
+    ChangeVolume();
   }
 
 }
@@ -137,7 +154,11 @@ void Music::ChangeVolume (float inc) {
 	}
 	char tempbuf [100];
 	sprintf(tempbuf,"v%f\n",this->vol);
-    fNET_Write(socketw,strlen(tempbuf),tempbuf);
+        if (soundServerPipes()) {
+            fNET_Write(socketw,strlen(tempbuf),tempbuf);
+        }else {
+            INET_Write(socketw,strlen(tempbuf),tempbuf);
+        }
 }
 
 bool Music::LoadMusic (const char *file) {
@@ -268,6 +289,7 @@ PVOID
 
 void Music::Listen() {
 	if (g_game.music_enabled) {
+            if (soundServerPipes()) {
 #ifdef _WIN32
 		static void * a_thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)readerThread, (PVOID)socketr, 0, NULL);
 #else
@@ -280,12 +302,12 @@ void Music::Listen() {
 			moredata=0;
 			Skip();
 		}
-		/*
-		int bytes=1;
-		if (select(1,&s,&nullset,&nullset,&tv)>0) {
+            }else {
+		int bytes=INET_BytesToRead(socketr);
+		if (bytes) {
 			char data;
 			while (bytes) {
-				data=fNET_fgetc(socketr);
+				data=INET_fgetc(socketr);
 				bytes--;
 			}
 			if (data=='e') {
@@ -293,14 +315,19 @@ void Music::Listen() {
 			} else {
 				g_game.music_enabled=false;
 			}
-		}*/
+		}                
+            }	
 	}
 }
 
 void Music::GotoSong (std::string mus) {
 	if (g_game.music_enabled) {
 		string data=string("p")+mus+string("\n");
-		fNET_Write(socketw,data.size(),data.c_str());
+                if (soundServerPipes()){
+                    fNET_Write(socketw,data.size(),data.c_str());
+                }else {
+                    INET_Write(socketw,data.size(),data.c_str());
+                }
 	}
 }
 
@@ -350,10 +377,16 @@ void Music::Skip() {
 }
 Music::~Music() {
 	char send[2]={'t','\n'};
-	fNET_Write(socketw,2,send);
-	fNET_close(socketw);
-	//fNET_close(socketr);
-	fNET_cleanup();
+        if (soundServerPipes()) {
+            fNET_Write(socketw,2,send);
+            fNET_close(socketw);
+            //fNET_close(socketr);
+            fNET_cleanup();
+        }else {
+            INET_Write(socketw,2,send);
+            INET_close(socketw);
+            INET_cleanup();
+        }
 }
 void incmusicvol (const KBData&, KBSTATE a) {
 	if (a==PRESS) {

@@ -120,7 +120,7 @@ VegaConfig * createVegaConfig( char * file)
 }
 
 extern QVector DockToSavedBases (int playernum);
-
+extern bool soundServerPipes();
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void VSExit( int code)
 {
@@ -258,8 +258,8 @@ int main( int argc, char *argv[] )
     //can use the vegastrike config variable to read in the default mission
 
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
-#if 0&&!defined( _WIN32)
-  if (g_game.music_enabled) {
+#if !defined( _WIN32)
+  if (g_game.music_enabled&&!soundServerPipes()) {
     int pid=fork();
     if (!pid) {
 	  string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
@@ -480,9 +480,9 @@ void bootstrap_main_loop () {
     //      delete SplashScreen;
     //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
-    if (g_game.music_enabled) {
-#if 0&&defined( _WIN32) && !defined( __CYGWIN__)
-	  string ss_path = VSFileSystem::datadir+"/soundserver.exe";
+    if (g_game.music_enabled&&!soundServerPipes()) {
+#if defined( _WIN32) && !defined( __CYGWIN__)
+      string ss_path = VSFileSystem::datadir+"/soundserver.exe";
       int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
       if (pid==-1) {
 		ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
