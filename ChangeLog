@@ -1,3 +1,8 @@
+2002-01-30 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Added rlaan_cruiser --no textures/weapons or anything (just to look)
+	* Added space truck, no textures or weapons (only a merchant)
+
 2002-01-29 Daniel Horn <hellcatv@hotmail.com>
 	* Fixed double delete of SubUnits when Kill() was being called and adding them to the delete queue (only to be delted by the Unit itself on the delete queue)
 	* Fixed some reference count issues with lists
