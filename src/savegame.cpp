@@ -12,6 +12,8 @@
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
 #include "networking/const.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
 
@@ -33,13 +35,16 @@ if( Network==NULL)
       fp = fopen (("save.txt"),"r");
     }
     if (fp) {
-      fseek (fp,0,SEEK_END);
-      int length = ftell (fp);
+	  long length=0;
+	  {
+		  struct stat st;
+		  if (fstat(fileno(fp),&st)==0)
+			length=st.st_size;
+	  }
       if (length>0) {
       char * temp = (char *)malloc (length+1);
       temp[length]='\0';
-      fseek (fp,0,SEEK_SET);
-      fread (temp,length,1,fp);
+      fread (temp,sizeof(char),length,fp);
       bool end=true;
       for (int i=length-1;i>=0;i--) {
         if (temp[i]=='\r'||temp[i]=='\n') {
@@ -138,9 +143,12 @@ void FileCopy (const char * src, const char * dst) {
 
   FILE * fp = fopen (src,"r");
   if (fp) {
-      fseek(fp,0,SEEK_END);
-      long length = ftell (fp);
-      fseek(fp,0,SEEK_SET);
+	  long length=0;
+	  {
+	      struct stat st;
+	      if (fstat(fileno(fp), &st)==0)
+	        length=st.st_size;
+	  }
       char * info = new char [length];
       fread(info,length,sizeof(char),fp);
       fclose (fp);
@@ -634,9 +642,14 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	  }
 	  if( fp)
 	  {
-	    fseek (fp,0,SEEK_END);
-	    tempfulllength=ftell (fp);
-	    fseek (fp,0,SEEK_SET);
+		{
+		  struct stat st;
+		  if (fstat(fileno(fp),&st)==0) {
+		    tempfulllength=st.st_size;
+		  } else {
+		    tempfulllength=0;
+		  }
+		}
       
 	    tempfullbuf = (char *)malloc (tempfulllength+1);
 	    tempfullbuf[tempfulllength]=0;
