@@ -718,6 +718,9 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
       double outer_rad = inner_rad+(outerRingRadMin*grand())*radius;
       int wrapx=1;
       int wrapy=1;
+      if (ringname.empty()) {
+	ringname = vs_config->getVariable ("galaxy","DefaultRingTexture","planets/ring.pngwrapx36wrapy2");
+      }
       ringname = GetWrapXY(ringname,wrapx,wrapy);
       if (ringrand<(1-dualringprob)) {
 	fprintf (fp,"<Ring file=\"%s\" innerradius=\"%lf\" outerradius=\"%lf\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
