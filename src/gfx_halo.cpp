@@ -46,16 +46,17 @@ Halo::~Halo () {
   }
 }
 void Halo::Draw (const Transformation &quat, const Matrix m) {
-  Vector pos,p,q,r;
+  Vector pos,p,q,r,offset;
   _GFX->AccessCamera()->GetPQR(p,q,r);
   pos=  position.Transform(m);
   p=p*sizex;
   r =-r;
   q=q*sizey;
-  GFXVertex tmp[4] = {GFXVertex(pos-p-q,r,0,1),
-		       GFXVertex(pos+p-q,r,1,1),
-		       GFXVertex(pos+p+q,r,1,0),
-		       GFXVertex(pos-p+q,r,0,0)};
+  offset = r*(sizex>sizey?sizex:sizey);
+  GFXVertex tmp[4] = {GFXVertex(pos-p-q+offset,r,0,1),
+		       GFXVertex(pos+p-q+offset,r,1,1),
+		       GFXVertex(pos+p+q+offset,r,1,0),
+		       GFXVertex(pos-p+q+offset,r,0,0)};
   halodrawqueue[decal]->ModQuad(quadnum,tmp,NULL);
 }
 void Halo::SetColor (const GFXColor &col){
