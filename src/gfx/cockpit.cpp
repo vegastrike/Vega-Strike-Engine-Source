@@ -567,7 +567,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 }
 float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  bool lie=XMLSupport::parse_float (vs_config->getVariable("physics","game_speed_lying","true"));
+  static bool lie=XMLSupport::parse_float (vs_config->getVariable("physics","game_speed_lying","true"));
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
