@@ -84,7 +84,7 @@ unsigned int getSaveDataLength (int whichcp, string key) {
 }
 unsigned int pushSaveData (int whichcp, string key, float val) {
   if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
-    return;
+    return 0;
   }
   olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
   varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
