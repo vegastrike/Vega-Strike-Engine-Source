@@ -53,7 +53,9 @@ void reset_time_compression (int i, KBSTATE a) {
     timecompression=1;
   }
 }
-
+float getTimeCompression () {
+  return timecompression;
+}
 #ifdef _WIN32
 #include <windows.h>
 

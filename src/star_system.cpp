@@ -434,7 +434,7 @@ void StarSystem::Draw(bool DrawCockpit) {
 }
 
 
-
+extern float getTimeCompression();
 void StarSystem::Update() {
 
   Unit *unit;
@@ -451,7 +451,7 @@ void StarSystem::Update() {
     moretime=1;
   }
   float normal_simulation_atom = SIMULATION_ATOM;
-  SIMULATION_ATOM/=moretime;
+  SIMULATION_ATOM/=(moretime/getTimeCompression());
   ///just be sure to restore this at the end
 
   time += GetElapsedTime();

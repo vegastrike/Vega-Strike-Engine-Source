@@ -508,6 +508,7 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
 void Cockpit::SelectProperCamera () {
     _Universe->activeStarSystem()->SelectCamera(view);
 }
+extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Draw() { 
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
@@ -535,6 +536,10 @@ void Cockpit::Draw() {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
 	bool die=true;
   if ((un = parent.GetUnit())) {
+    if (un->Threat()!=NULL) {
+      reset_time_compression(0,PRESS);
+      un->Threaten (NULL,0);
+    }
     if (view==CP_FRONT) {//only draw crosshairs for front view
       DrawGauges(un);
 

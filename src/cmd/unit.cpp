@@ -57,11 +57,15 @@ double interpolation_blend_factor;
 
 #define PARANOIA .4
 void Unit::Threaten (Unit * targ, float danger) {
-  if (danger>PARANOIA&&danger>computer.threatlevel) {
-    computer.threat.SetUnit(targ);
-    computer.threatlevel = danger;
+  if (!targ) {
+    computer.threatlevel=danger;
+    computer.threat.SetUnit (NULL);
+  }else {
+    if (targ->owner!=this&&this->owner!=targ&&danger>PARANOIA&&danger>computer.threatlevel) {
+      computer.threat.SetUnit(targ);
+      computer.threatlevel = danger;
+    }
   }
-
 }
 
 void Unit::calculate_extent() {  
