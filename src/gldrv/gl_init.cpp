@@ -52,7 +52,9 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 #undef GL_EXT_compiled_vertex_array
+#ifndef _WIN32
 #define GL_GLEXT_PROTOTYPES
+#endif
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/glext.h>
 #else
