@@ -729,7 +729,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 	{
 	bool doalphaatmosphere = (temprandom<.08||temprandom>.3);
 	if (doalphaatmosphere) 
-		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.03);
+		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.007);
 
 	float r=.9,g=.9,b=1,a=1;
 	float dr=.9,dg=.9,db=1,da=1;
