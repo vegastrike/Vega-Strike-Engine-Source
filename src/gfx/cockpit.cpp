@@ -298,7 +298,7 @@ void Cockpit::DrawTargetBoxes(){
 
 void Cockpit::DrawTargetBox () {
   float speed,range;
-  
+  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit * un = parent.GetUnit();
   if (!un)
     return;
@@ -318,7 +318,7 @@ void Cockpit::DrawTargetBox () {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-un->Position()));
-  GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):GFXColor(1,1,1,1));
+  GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
 
   if(draw_line_to_target){
     QVector my_loc(un->Position());
@@ -362,6 +362,8 @@ void Cockpit::Eject() {
   ejecting=true;
 }
 void Cockpit::DrawBlips (Unit * un) {
+  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
@@ -391,7 +393,7 @@ void Cockpit::DrawBlips (Unit * un) {
 	continue;
       }
       LocalToRadar (localcoord,s,t);
-      GFXColor localcol (radarl->color?unitToColor (un,target):GFXColor(1,1,1,1));
+      GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
 
       GFXColorf (localcol);
       if (target==makeBigger) {
@@ -417,6 +419,7 @@ void Cockpit::DrawBlips (Unit * un) {
 }
 
 void Cockpit::DrawEliteBlips (Unit * un) {
+  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
@@ -450,7 +453,7 @@ void Cockpit::DrawEliteBlips (Unit * un) {
 	LocalToEliteRadar(localcoord,es,et,eh);
 
 
-      GFXColor localcol (radarl->color?unitToColor (un,target):GFXColor(1,1,1,1));
+      GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
       GFXColorf (localcol);
       int headsize=4;
 #if 1

@@ -753,7 +753,7 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 }
 bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
-  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
+//  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
   static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
   if (SubUnit) {
     return false;//we can't auto here;

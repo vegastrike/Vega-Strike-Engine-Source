@@ -170,11 +170,12 @@ void Universe::SetActiveCockpit (Cockpit * cp) {
     }
   }
 }
-Cockpit * Universe::isPlayerStarship(const Unit * un) {
-  if (!un)
+
+Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
+  if (!doNotDereference)
     return NULL;
   for (unsigned int i=0;i<cockpit.size();i++) {
-    if (un==cockpit[i]->GetParent())
+    if (doNotDereference==cockpit[i]->GetParent())
       return cockpit[i];
   }
   return NULL;

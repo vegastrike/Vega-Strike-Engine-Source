@@ -29,6 +29,7 @@
 #include "vegastrike.h"
 #include <assert.h>
 
+
 #include "config_xml.h"
 #include "easydom.h"
 #include "cmd/ai/flykeyboard.h"
@@ -187,6 +188,8 @@ void VegaConfig::initKeyMap(){
   key_map["cursor-delete"]=127;
   key_map["tab"]='\t';
   key_map["esc"]=27;
+  key_map["break"]=WSK_BREAK;
+  key_map["pause"]=WSK_BREAK;
 
 }
 
@@ -966,19 +969,36 @@ bool VegaConfig::setVariable(string section,string name,string value){
   return false;
 }
 
+
 bool VegaConfig::setVariable(string section,string subsection,string name,string value){
+
   configNode *sectionnode=findSection(section,variables);
+
   if(sectionnode!=NULL){
+
     configNode *subnode=findSection(name,sectionnode);
 
+
+
 	if(subnode!=NULL) {
+
 		configNode *varnode=findEntry(name,subnode);
+
 		if(varnode!=NULL){
+
 			// now set the thing
+
 			setVariable(varnode,value);
+
 			return true;
+
 		}
+
 	}
+
   }
+
   return false;
+
 }
+
