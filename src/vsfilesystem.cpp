@@ -1637,12 +1637,13 @@ namespace VSFileSystem
 
 	// We will always write in homedir+Directories[FileType][0]
 	// Open (truncate) or create a standard file read/write
-	VSError VSFile::OpenCreateWrite( const char * filename, VSFileType type)
+	VSError VSFile::OpenCreateWrite( const char * filenam, VSFileType type)
 	{
 		if( type >= ZoneBuffer && type != Unknown)
 			return FileNotFound;
 
 		this->file_type = this->alt_type = type;
+		this->filename = filenam;
 		this->file_mode = CreateWrite;
 
 		if( type==SystemFile)
@@ -1665,6 +1666,8 @@ namespace VSFileSystem
 		else if( type==UnitFile)
 		{
 			string fpath( homedir+"/"+savedunitpath+"/"+filename);
+			this->rootname = homedir;
+			this->directoryname = savedunitpath;
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;
@@ -1692,7 +1695,9 @@ namespace VSFileSystem
 		}
 		else if( type==Unknown)
 		{
-			string fpath( homedir+filename);
+			string fpath( homedir+"/"+filename);
+			this->rootname=homedir;
+			this->directoryname="";
 			this->fp = fopen( fpath.c_str(), "wb");
 			if( !fp)
 				return LocalPermissionDenied;

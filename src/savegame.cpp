@@ -26,14 +26,24 @@ if( Network==NULL)
     res = new std::string;
     //char c[2]={'\0','\0'};
 	VSFile f;
-	VSError err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
+	VSError err = f.OpenReadOnly( "save.4.x.txt", Unknown);
     if (err>Ok) {
-		err = f.OpenCreateWrite( "save.4.x.txt", SaveFile);
-      if (err>Ok) {
-		f.Write("defaultsavegame.4x\n",19);
+	  err = f.OpenCreateWrite( "save.4.x.txt", Unknown);
+      if (err<=Ok) {
+		f.Write("default\n",8);
 		f.Close();
       }
-	  err = f.OpenReadOnly( "save.4.x.txt", SaveFile);
+	  else
+	  {
+	  	fprintf( stderr, "!!! ERROR : Creating default save.4.x.txt file : %s\n", f.GetFullPath());
+		exit(1);
+	  }
+	  err = f.OpenReadOnly( "save.4.x.txt", Unknown);
+	  if( err>Ok)
+	  {
+	  	fprintf( stderr, "!!! ERROR : Opening the default save we just created\n");
+		exit(1);
+	  }
     }
     if (err<=Ok) {
 	  long length=f.Size();
@@ -78,8 +88,9 @@ if( Network==NULL)
     f.Close();
 #endif
     if (!res->empty()) {
+	  // Set filetype to Unknown so that it is searched in homedir/
       if (*res->begin()=='~') {
-		err = f.OpenCreateWrite( "save.4.x.txt", SaveFile);
+		err = f.OpenCreateWrite( "save.4.x.txt", Unknown);
 	if (err<=Ok) {
 	  for (unsigned int i=1;i<res->length();i++) {
 		char cc = *(res->begin()+i);
