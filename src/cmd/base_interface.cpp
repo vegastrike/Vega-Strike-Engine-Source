@@ -768,7 +768,11 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 #endif
 	}
 	GotoLink(0);
-	ExecuteDirector();
+        {
+          for (unsigned int i=0;i<16;++i) {
+            ExecuteDirector();
+          }
+        }
 }
 
 void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, int button, int state) {
