@@ -25,7 +25,7 @@ std::string ftostr(double i) {
 	sprintf (test,"%lf",i);
 	return test;
 }
-
+char * milky_way="../../../data/universe/milky_way.xml";
 class vec3 {
 public:
 	double x,y,z;
@@ -240,6 +240,53 @@ public:
 		return a.alphaonlyname<b.alphaonlyname;
 	}
 };
+std::vector<string> readMilkyWayNames( ) {
+	FILE * fp = fopen (milky_way,"r");
+	fseek (fp,0,SEEK_END);
+	long siz = ftell (fp);
+	char * buf = (char *)malloc (siz+1);
+	buf[siz]=0;
+	fseek(fp,0,SEEK_SET);
+	fread(buf,siz,1,fp);
+	string s = buf;
+	free(buf);
+	vector<string> retval;
+	unsigned int where=string::npos;
+	do{
+		where = s.find("system name=\"");
+		if (where!=string::npos) {
+			s= s.substr(where);
+			where = s.find("\"");
+			s= s.substr(where+1);//gotta be there cus we found it earlier
+			unsigned int quote=  s.find("\"");
+			if (quote!=string::npos) {
+				string newname=s.substr(0,quote);
+				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick")
+					retval.push_back(newname);
+			}
+		}
+	}while (where!=string::npos);
+	return retval;
+}
+string dodad (int which) {
+	if (which==0)
+		return "";
+	return "_"+itostr(which);
+}
+vector<string> shuffle (const vector<string> & inp) {
+	vector<string> retval;
+	for (unsigned int i=0;i<inp.size();++i) {
+		int index = random()%(retval.size()+1);
+		retval.insert(retval.begin()+index,inp[i]);
+	}
+	return retval;
+}
+string recomputeName(){
+	static int which=-1;
+	static std::vector<string> genericnames=shuffle(readMilkyWayNames());
+	which++;
+	return genericnames[(which)%genericnames.size()]+dodad(which/genericnames.size());
+}
 vector<System> readfile (const char * name) {
 	vector<System>systems;
 	FILE * fp = fopen (name,"r");
@@ -345,6 +392,9 @@ vector<System> readfile (const char * name) {
 			systems[i].computeProperties(systems[i].interesting);
 			if (systems[i].habitable) {
 				hc +=1;
+				if (systems[i].interesting==false) {
+					systems[i].name = recomputeName();
+				}
 			}else {
 				bc+=1;
 			}
@@ -480,6 +530,9 @@ int main (int argc, char ** argv) {
 	if (argc<3) {
 		printf ("not enough args. Usage ./a.out <input> <output>\n");
 		return 1;
+	}
+	if (argc>3) {
+		milky_way = argv[3];
 	}
 	srand(109427);
 	std::vector <System> s=readfile(argv[1]);
