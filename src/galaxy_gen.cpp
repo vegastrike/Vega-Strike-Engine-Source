@@ -821,16 +821,15 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   readnames (names,(datapath+namelist).c_str());
 
   fp = fopen (outputfile.c_str(),"w");
-  for (unsigned int i=0;i<jumplocations.size();i++) {
-    entities[JUMP].push_back (jumplocations[i]);
-    
+  if (fp) {
+    for (unsigned int i=0;i<jumplocations.size();i++) {
+      entities[JUMP].push_back (jumplocations[i]);
+    }
+    nument[JUMP]=entities[JUMP].size();
+    ::faction = factions;
+    CreateStarSystem();
+    fclose (fp);
   }
-  nument[JUMP]=entities[JUMP].size();
-  ::faction = factions;
-  CreateStarSystem();
-  fclose (fp);
-
-
 }
 #ifdef CONSOLE_APP
 int main (int argc, char ** argv) {
