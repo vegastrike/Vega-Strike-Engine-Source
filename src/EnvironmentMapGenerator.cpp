@@ -633,14 +633,50 @@ void GenerateSphereMap()
 		}	
 	}
 	Spherize (TexCoord,gluSphereCoord,LightMap);	
-
-	FILE * fp = fopen ("blank.bmp", "r+b");
 	BITMAPFILEHEADER bmfh;
+	BITMAPINFOHEADER info;
+	bmfh.bfType=19778;
+	bmfh.bfSize=3;
+	bmfh.bfReserved1=0;
+	bmfh.bfReserved2=54;
+	bmfh.bfOffBits=0;
+	info.biSize=40;
+	info.biWidth=256;
+	info.biHeight=256;
+	info.biPlanes=1;
+	info.biBitCount=24;
+	info.biCompression=0;
+	info.biSizeImage=196608;
+	info.biXPelsPerMeter=2834;
+	info.biYPelsPerMeter=2834;
+	info.biClrUsed=0;
+	info.biClrImportant=0;
+	FILE *fp;
+	 
+
+
+	/** used to determine the consts
+	FILE * fp = fopen ("blank.bmp", "r+b");
+	
 	fread (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
 	long temp;
-	BITMAPINFOHEADER info;
+
 	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	fclose (fp);
+	fprintf (stderr,"bfType %d bfSize %d bfReserved1 %d, bfReserved2 %d, bfOffBits %d", bmfh.bfType, bmfh.bfSize, bmfh.bfReserved1, bmfh.bfReserved2, bmfh.bfOffBits);
+	fprintf (stderr,"        DWORD      biSize; %d
+        LONG       biWidth; %d
+        LONG       biHeight;%d
+        WORD       biPlanes;%d
+        WORD       biBitCount;%d
+        DWORD      biCompression;%d
+        DWORD      biSizeImage;%d
+        LONG       biXPelsPerMeter;%d
+        LONG       biYPelsPerMeter;%d
+        DWORD      biClrUsed;%d
+        DWORD      biClrImportant;%d",info.biSize,info.biWidth, info.biHeight,info.biPlanes, info.biBitCount, info.biCompression, info.biSizeImage, info.biXPelsPerMeter, info.biYPelsPerMeter, info.biClrUsed, info.biClrImportant);
+        */
+
 	char tmp [256];
 	strcpy (tmp,OutputName);
 	fp = fopen (strcat (tmp,".bmp"), "w+b");
