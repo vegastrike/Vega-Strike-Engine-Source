@@ -225,7 +225,7 @@ void Universe::Generate1( const char * file, const char * jumpback)
 	else
 		cerr<<"Found file after "<<count<<" tries - generated : "<<syspath<<endl;
 	string filestr( file);
-	UniverseUtil::ComputeSystemSerials( filestr, syspath);
+	UniverseUtil::ComputeSystemSerials( syspath);
   }
 }
 

@@ -2885,10 +2885,6 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   //if (erasefromsave)
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
 
-  // The server send a kill notification to all concerned clients but not if it is an upgrade
-  if( SERVER && this->faction!=FactionUtil::GetFaction("upgrades") && !quitting)
-  	Server->sendKill( this->serial, this->zone);
-  
   if (this->colTrees)
     this->colTrees->Dec();//might delete
   this->colTrees=NULL;
@@ -3603,7 +3599,13 @@ int Unit::LockMissile() const{
 void Unit::Destroy() {
   if (!killed)
     if (!Explode(false,SIMULATION_ATOM))
-      Kill();
+	{
+  		// The server send a kill notification to all concerned clients but not if it is an upgrade
+  		if( SERVER)
+  			Server->sendKill( this->serial, this->zone);
+  
+        Kill();
+ 	}
 }
 
 void Unit::SetCollisionParent (Unit * name) {

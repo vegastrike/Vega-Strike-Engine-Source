@@ -34,7 +34,7 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	StarSystem * sts=NULL;
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
-	UniverseUtil::ComputeSystemSerials( starsys, starsysfile);
+	//UniverseUtil::ComputeSystemSerials( starsys);
 	//sts = new StarSystem( starsysfile.c_str(), Vector(0,0,0));
 	//_Universe->Generate2( sts);
 	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));

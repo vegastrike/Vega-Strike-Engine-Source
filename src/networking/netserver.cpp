@@ -226,7 +226,7 @@ void	NetServer::start(int argc, char **argv)
 	_Universe = new Universe( argc, argv, universe_file.c_str(), true);
 	cout<<"Universe LOADED"<<endl;
 	cerr<<"Adding a test system"<<endl;
-	zonemgr->addZone( "enigma_sector/enigma.system");
+	zonemgr->addZone( "enigma_sector/enigma");
 	cerr<<"Test zone added."<<endl;
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
 	mission = new Mission( strmission.c_str());
@@ -750,7 +750,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						// The starsystem maybe loaded for nothing if the client has not enough warp energy to jump
 						// but that's no big deal since they all will be loaded finally
 						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
-							zonemgr->addZone( newsystem+".system");
+							zonemgr->addZone( newsystem);
 						cp->savegame->SetStarSystem( newsystem);
 
 						if( FileUtil::HashCompare( newsystem, client_hash) )
