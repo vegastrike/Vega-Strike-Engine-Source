@@ -817,7 +817,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     static int wasautopilot=0;
 	int abletoautopilot=0;
     if (target) {
-      abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
+      abletoautopilot=(target->graphicOptions.InWarp);
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
