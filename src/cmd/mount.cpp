@@ -183,6 +183,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					if (fp) {
 						fclose(fp);
 						temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
+						temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
+						temp->GetComputerData().max_combat_ab_speed= type->Speed+velocity.Magnitude();
 					}else {
 						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
 					}
