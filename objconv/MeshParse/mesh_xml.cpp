@@ -299,7 +299,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
   case XML::POINTS:
     break;
   case XML::POINT:
-    //    assert(top==XML::POINTS);
+//    assert(top==XML::POINTS);
     break;
   case XML::LOCATION:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -504,11 +504,14 @@ int main (int argc, char ** argv) {
   if (argc<2)
     return 1;
   UnitLoadXML (argv[1],blah);
-  fprintf (stderr,"Loading unit scale %f",blah.unitscale);
+  fprintf (stderr,"Loading unit scale %f\n",blah.unitscale);
   for (unsigned int i=0;i<blah.meshnames.size();i++) {
-    fprintf (stderr,"Loading %s mesh\n",blah.meshnames[i].c_str());
+    fprintf (stderr,"Loading mesh %s \n",blah.meshnames[i].c_str());
     LoadXML(blah.meshnames[i].c_str(),blah);
   }
-  printf ("size %d",blah.vertices.size());
+  printf ("3\n%d\n",blah.vertices.size());
+  for (unsigned int vcount = 0; vcount <blah.vertices.size();++vcount){
+	printf("%f %f %f\n",blah.vertices[vcount].x, blah.vertices[vcount].y,blah.vertices[vcount].z);  
+  }
   return 0;
 }
