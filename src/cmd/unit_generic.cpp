@@ -2605,7 +2605,7 @@ void Unit::RegenShields () {
 			  UniverseUtil::IOmessage(0,"	game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
   static int modcounter=0;
-  static int warpfractional = XMLSupport::parse_int(vs_config->getVariable("physics","warpfractional","10"));  
+  static int warpfractional = XMLSupport::parse_int(vs_config->getVariable("physics","warpfractional","4"));  
   modcounter++;
   modcounter%=warpfractional;
 
