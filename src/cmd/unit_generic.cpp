@@ -20,6 +20,7 @@
 #include "gfx/cockpit_generic.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
+#include "unit_const_cache.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -3171,6 +3172,31 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   return cancompletefully;
 }
 
+bool Unit::RepairUpgrade () {
+    char * unitdir = GetUnitDir (name.c_str());
+    string templnam = unitdir+string(".blank");
+    const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(templnam,
+                                                                        faction));
+    if (!temprate) {
+        temprate = UnitConstCache::setCachedConst(StringIntKey(templnam,faction),
+                                                  UnitFactory::createServerSideUnit (templnam.c_str(),true,faction));
+    }
+    free(unitdir);
+    bool success=false;
+    double pct=0;
+    if (temprate->name!=string("LOAD_FAILED")) {
+        success = Upgrade(temprate,0,0,0,true,pct,NULL);
+    }
+    UnitImages * im= &GetImageInformation();
+    for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
+        if (im->cockpit_damage[i]!=1) {
+            im->cockpit_damage[i]=1;
+            success=true;
+            pct = 1;
+        }
+    }
+    return success && pct>0;
+}
 /***********************************************************************************/
 /**** UNIT_CARGO STUFF                                                            */
 /***********************************************************************************/

@@ -216,6 +216,7 @@ public:
 
   bool canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL);
   bool Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ=NULL);
+  bool RepairUpgrade();
   virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
   bool canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit);
   bool Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage, const Unit * downgradelimit);
@@ -952,6 +953,7 @@ public:
   bool UnDock (Unit * unitToDockWith);
 // Use AI
   bool RequestClearance (Unit * dockingunit);
+  bool EndRequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);
   virtual void RestoreGodliness() {}
 

@@ -380,7 +380,10 @@ void UpgradingInfo::SetupCargoList () {
 	if (!curcategory.empty()) {
 	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) {
 	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]",NULL,GFXColor(0,1,.5,1));
+	  }else {
+	    //	    CargoList->AddTextItem ("","",NULL,GFXColor(0,0,0,1));
 	  }
+
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
 	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].cargo.category.begin(),(*CurrentList)[i].cargo.category.end(),true)) {
 	      if (mode!=UPGRADEMODE&&mode!=DOWNGRADEMODE) (*CurrentList)[i].color=GFXColor(1,1,1,1);
@@ -445,9 +448,13 @@ void UpgradingInfo::SetupCargoList () {
 	    curcategory.pop_back();		     
 	    SetupCargoList();
 	  }
-	}
-      }      
-      
+        }
+        
+      }
+      if (mode==ADDMODE||mode==UPGRADEMODE)
+	CargoList->AddTextItem("Basic Repair","Basic Repair",NULL,GFXColor(0,1,0,1));
+
+        
     }else {
       Unit * un = buyer.GetUnit();
       int i=0;
@@ -1015,7 +1022,25 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			curcategory.pop_back();		     
 			SetupCargoList();
 		      }
-		    }else {
+                    }else if (0==strcmp (buy_name,"Basic Repair")) {
+                        Unit * parent = buyer.GetUnit();
+                        if (parent) {
+                            string newtitle;
+                            static float repair_price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","1000"));
+                            if (UnitUtil::getCredits(parent)>repair_price) {
+                                if (parent->RepairUpgrade()) {
+                                    UnitUtil::addCredits (parent,-repair_price);
+                                    newtitle= "Successfully Repaired Damage";
+                                }else {
+				  newtitle = "Nothing To Repair";
+                                }
+                            }else newtitle = "Not Enough Credits to Repair";
+                            title = newtitle;
+                            SetupCargoList();
+                            title = newtitle;
+                        }
+                            
+                    }else {
 		      if (buy_name[0]!='x') {
 			  lastselected.type=type;
 			  lastselected.x=cur_x;
