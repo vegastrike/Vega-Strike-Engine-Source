@@ -47,7 +47,7 @@ void GameUnit::Split (int level) {
       PlaneNorm.Normalize();  
       old[i]->Fork (nw[i*2], nw[i*2+1],PlaneNorm.i,PlaneNorm.j,PlaneNorm.k,-PlaneNorm.Dot(old[i]->Position()));//splits somehow right down the middle.
       if (nw[i*2]&&nw[i*2+1]) {
-	old.clear();
+        delete old[i];
       }else {
 	nw[i*2+1]= NULL;
 	nw[i*2]=old[i];
