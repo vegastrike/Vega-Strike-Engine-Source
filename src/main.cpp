@@ -208,6 +208,7 @@ int main( int argc, char *argv[] )
     // loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
 	{
 	    string subdir=ParseCommandLine(argc,argv);
+		cerr<<"GOT SUBDIR ARG = "<<subdir<<endl;
 		if (CONFIGFILE==0) {
 			CONFIGFILE=new char[42];
 			sprintf(CONFIGFILE,"vegastrike.config");
@@ -236,7 +237,10 @@ int main( int argc, char *argv[] )
   }
 #endif
     if (mission_name[0]=='\0')
-      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
+	{
+      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test/test1.mission").c_str());
+	  cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
+	}
     //might overwrite the default mission with the command line
 
 #ifdef HAVE_PYTHON
@@ -691,6 +695,7 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
   QVector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
+		cerr<<"ARG #"<<i<<" = "<<lpCmdLine[i]<<endl;
       switch(lpCmdLine[i][1]){
     case 'd':
     case 'D': {
@@ -721,7 +726,7 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'M':
       case 'm':
-	retstr=(lpCmdLine[i]+2);
+		retstr=string(lpCmdLine[i]+2);
 	break;
       case 'f':
       case 'F':

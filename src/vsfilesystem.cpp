@@ -32,6 +32,7 @@ char *CONFIGFILE;
 char pwd[65536];
 
 VSVolumeType isin_bigvolumes = None;
+string curmodpath = "";
 
 ObjSerial	serial_seed = 0;
 ObjSerial	getUniqueSerial()
@@ -47,16 +48,16 @@ int	selectdirs( const struct dirent * entry)
 {
 #if defined(_WIN32)
 	// Have to check if we have the full path or just relative (which would be a problem)
-	cerr<<"Read directory entry : "<<entry->d_name<<endl;
+	cerr<<"Read directory entry : "<<(curmodpath+entry->d_name)<<endl;
 	struct stat s;
-	if( stat( entry->d_name, &s)<0)
+	if( stat( (curmodpath+entry->d_name).c_str(), &s)<0)
 		return false;
-	if( s.st_mode & S_IFDIR)
+	if( (s.st_mode & S_IFDIR) && string( entry->d_name)!="." && string( entry->d_name)!="..")
 	{
 		return 1;
 	}
 #else
-	if( entry->d_type==DT_DIR)
+	if( entry->d_type==DT_DIR && string( entry->d_name)!="." && string( entry->d_name)!="..")
 		return 1;
 #endif
 	return 0;
@@ -65,7 +66,15 @@ int	selectdirs( const struct dirent * entry)
 int	selectpk3s( const struct dirent * entry)
 {
 	// If this is a regular file and we have ".pk3" in it
-	if( (string( entry->d_name).find( ".pk3"))!=std::string::npos)
+	if( (string( entry->d_name).find( ".pk3"))!=std::string::npos && (string( entry->d_name).find( "data"))==std::string::npos)
+		return 1;
+	return 0;
+}
+
+int	selectbigpk3s( const struct dirent * entry)
+{
+	// If this is a regular file and we have ".pk3" in it
+	if( (string( entry->d_name).find( "data.pk3"))!=std::string::npos)
 		return 1;
 	return 0;
 }
@@ -698,7 +707,8 @@ namespace VSFileSystem
 				if( FileExists( homedir+"/mods/"+subdir, config_file)>=0)
 				{
 					cout<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/mods/"+subdir+"/"+config_file)<<endl;
-					weapon_list = "mods/"+subdir+"/weapon_list.xml";
+					if( FileExists( homedir+"/mods/"+subdir, "weapon_list.xml")>=0)
+						weapon_list = "mods/"+subdir+"/weapon_list.xml";
 					config_file = "mods/"+subdir+"/"+config_file;
 					found = true;
 				}
@@ -711,7 +721,8 @@ namespace VSFileSystem
 					if( FileExists( datadir+"/mods/"+subdir, config_file)>=0)
 					{
 						cout<<"CONFIGFILE - Found a config file in data directory, using : "<<(datadir+"/mods/"+subdir+"/"+config_file)<<endl;
-						weapon_list = "mods/"+subdir+"/weapon_list.xml";
+						if( FileExists( datadir+"/mods/"+subdir, "weapon_list.xml")>=0)
+							weapon_list = "mods/"+subdir+"/weapon_list.xml";
 						config_file = "mods/"+subdir+"/"+config_file;
 						found = true;
 					}
@@ -783,30 +794,32 @@ namespace VSFileSystem
 
 	void	InitMods()
 	{
-		// Scan for mods
+		// Scan for mods with standard data subtree
 		string curpath;
 		struct dirent ** dirlist;
-		int ret = scandir( (homedir+"/"+moddir).c_str(), &dirlist, selectdirs, 0);
+		curmodpath = homedir+"/mods/";
+		int ret = scandir( curmodpath.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
 		else
 		{
 			while( ret--)
 			{
-				curpath = homedir+"/"+moddir+"/"+dirlist[ret]->d_name;
+				curpath = curmodpath+dirlist[ret]->d_name;
 				cout<<"Adding mod path : "<<curpath<<endl;
 				Rootdir.push_back( curpath);
 			}
 		}
 		free( dirlist);
-		ret = scandir( (datadir+"/"+moddir).c_str(), &dirlist, selectdirs, 0);
+		curmodpath = datadir+"/mods/";
+		ret = scandir( curmodpath.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
 		else
 		{
 			while( ret--)
 			{
-				curpath = datadir+"/"+moddir+"/"+dirlist[ret]->d_name;
+				curpath = curmodpath+dirlist[ret]->d_name;
 				cout<<"Adding mod path : "<<curpath<<endl;
 				Rootdir.push_back( curpath);
 			}
@@ -926,7 +939,7 @@ namespace VSFileSystem
 		// by just adding a subdirectory named with the mod name in the subdirectory "mods"...
 		// I just have to implement that and then add all mods/ subdirs in Rootdir vector
 		Rootdir.push_back( homedir);
-		//InitMods();
+		InitMods();
 		Rootdir.push_back( datadir);
 
 		// NOTE : UniverseFiles cannot use volumes since some are needed by python
