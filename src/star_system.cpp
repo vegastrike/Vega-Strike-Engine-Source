@@ -209,11 +209,12 @@ void StarSystem::Update() {
       current_stage=PHY_AI;
       }
       time -= .3333333333*SIMULATION_ATOM;
-      firstframe = false;
+      firstframe = true;
     }
     UpdateTime();
   }
   interpolation_blend_factor = .333333*((3*time)/SIMULATION_ATOM+current_stage);
+  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
   //clog << "blend factor: " << interpolation_blend_factor << "\n";
 }
 
