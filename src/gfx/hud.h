@@ -56,8 +56,8 @@ public:
 	  myDims.i = x;
 	  myDims.j = y;
 	}
-	void Draw();
-	void Draw (const std::string &text);
+	void Draw(int offset=0);
+	void Draw (const std::string &text, int offset=0);
 	void SetText(const std::string &newText) {
 		myText = newText;
 	}

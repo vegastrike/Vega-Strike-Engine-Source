@@ -592,7 +592,18 @@ void Cockpit::VDUSwitch (int vdunum) {
     }
   }
 }
-
+void Cockpit::ScrollVDU (int vdunum, int howmuch) {
+  if (vdunum<vdu.size()) {
+    if (vdu[vdunum]) {
+      vdu[vdunum]->Scroll(howmuch);
+    }
+  }
+}
+void Cockpit::ScrollAllVDU (int howmuch) {
+  for (unsigned int i=0;i<vdu.size();i++) {
+    ScrollVDU (i,howmuch);
+  }
+}
 void Cockpit::RestoreViewPort() {
   GFXViewPort (0, 0, g_game.x_resolution,g_game.y_resolution);
 }

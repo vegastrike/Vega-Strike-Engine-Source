@@ -49,7 +49,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
   StartArmor = ma;
   maxhull = mh;
   SwitchMode();
@@ -78,7 +78,9 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   h = fabs(h);
 }
 
-
+void VDU::Scroll (int howmuch) {
+  scrolloffset+=howmuch;
+}
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float h, float w) { //FIXME why is this static?
   GFXBegin (GFXLINE);
   if (fs>.2) {
@@ -226,7 +228,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   char qr[128];
   sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()*((target->isUnit()==PLANETPTR)?10:1));
   strcat (st,qr);
-  tp->Draw (std::string(st));  
+  tp->Draw (std::string(st),0);  
   DrawTargetSpr (target->getHudImage (),.6,x,y,h,w);
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
@@ -280,14 +282,14 @@ void VDU::DrawMessages(Unit *target){
 
   fullstr=targetstr+fullstr;
 
-  tp->Draw(fullstr);
+  tp->Draw(fullstr,scrolloffset);
 }
 
 void VDU::DrawNav (const Vector & nav) {
 
   char navdata[256];
   sprintf (navdata,"\nNavigation\n----------\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",nav.i,nav.j,nav.k,10*nav.Magnitude());
-  tp->Draw (std::string(navdata));  
+  tp->Draw (std::string(navdata),scrolloffset);  
 
 
 }
@@ -389,7 +391,7 @@ void VDU::DrawDamage(Unit * parent) {
     sprintf (qr, "%6s\nThreat:%4.4f",thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
     strncat (st,qr,128);
   }
-  tp->Draw (std::string(st));  
+  tp->Draw (std::string(st),0);  
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   
 }

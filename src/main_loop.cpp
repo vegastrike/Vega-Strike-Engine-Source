@@ -97,6 +97,7 @@ bool _Slew = true;
 
 namespace CockpitKeys {
 
+
  void SkipMusicTrack(int,KBSTATE newState) {
    static bool flag=false;
    if(newState==PRESS){
@@ -181,7 +182,7 @@ namespace CockpitKeys {
 	  exit(0);
 	}
    
-}
+  }
 bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {
   const int cockpiton=1;
@@ -207,7 +208,19 @@ bool cockpitfront=true;
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime();  
 }
+  void ScrollUp (int, KBSTATE newState) {
 
+    if(newState==PRESS/*||newState==DOWN*/){
+     _Universe->AccessCockpit()->ScrollAllVDU (-1);
+   }    
+  }
+  void ScrollDown (int, KBSTATE newState) {
+
+   if(newState==PRESS/*||newState==DOWN*/){
+     _Universe->AccessCockpit()->ScrollAllVDU (1);
+   }    
+
+  }
   void ZoomIn (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
   _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime();  

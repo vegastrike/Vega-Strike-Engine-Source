@@ -15,6 +15,8 @@ namespace CockpitKeys {
    void  InsideBack(int,KBSTATE newState) ;
    void  SwitchLVDU(int,KBSTATE newState) ;
    void  SwitchRVDU(int,KBSTATE newState) ;
+   void  ScrollUp(int,KBSTATE newState) ;
+   void  ScrollDown(int,KBSTATE newState) ;
    void  Behind(int,KBSTATE newState) ;
    void  Pan(int,KBSTATE newState) ;
 

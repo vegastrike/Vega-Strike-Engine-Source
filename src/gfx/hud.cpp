@@ -53,11 +53,11 @@ TextPlane::TextPlane(const char *filename) {
 TextPlane::~TextPlane () {
   delete myFont;
 }
-void TextPlane::Draw () {
-  Draw (myText);
+void TextPlane::Draw (int offset) {
+  Draw (myText,offset);
 }
 
-void TextPlane::Draw(const string & newText)
+void TextPlane::Draw(const string & newText, int offset)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
@@ -71,6 +71,11 @@ void TextPlane::Draw(const string & newText)
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   GFXBegin(GFXQUAD);
+  int entercount=0;
+  for (;entercount<offset&&text_it!=newText.end();text_it++) {
+    if (*text_it=='\n')
+      entercount++;
+  }
   while(text_it != newText.end() && row>myDims.j) {
     if(*text_it>=32 && *text_it<=127) {//always true
       GlyphPosition g = myGlyphPos[*text_it-32];

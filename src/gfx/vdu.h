@@ -16,6 +16,7 @@ class TextPlane;
  */
 class VDU: public Sprite {
  private:
+  int scrolloffset;
   unsigned short * StartArmor;
   float *maxhull;
   ///Holds a pointer to the font used to render text in the vdu
@@ -48,6 +49,7 @@ public:
   void Draw(Unit * parent);
   ///Changes the mode of the current VDU to another legal mode
   void SwitchMode();
+  void Scroll (int howmuch);
 };
 
 int parse_vdu_type (const char * s);
