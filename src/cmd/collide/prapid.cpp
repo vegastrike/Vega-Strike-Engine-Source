@@ -808,7 +808,7 @@ int obb_disjoint (const csMatrix3& B, const csVector3& T,
   s = T.x * B.m11 + T.y * B.m21 + T.z * B.m31;
   t = ABS (s);
 
-  r &= (t <= (b.x + a.y * Bf.m11 + a.y * Bf.m21 + a.z * Bf.m31));
+  r &= (t <= (b.x + a.x * Bf.m11 + a.y * Bf.m21 + a.z * Bf.m31));
   if (!r) return 2;
 
   // A2 x A0 = A1
