@@ -24,6 +24,44 @@
 #include "role_bitmask.h"
 #include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
+string MakeUnitXMLPretty (string str) {
+	string writestr;
+	static std::set <string> lookfor;
+	if (lookfor.empty()) {
+		lookfor.insert ("Shie");
+		lookfor.insert ("Armo");
+		lookfor.insert ("Hull");
+		lookfor.insert ("Reac");
+		lookfor.insert ("Moun");
+		lookfor.insert ("Comp");
+		lookfor.insert ("Desc");
+		lookfor.insert ("Engi");
+		lookfor.insert ("Mane");
+		lookfor.insert ("Jump");
+		lookfor.insert ("Defe");
+		lookfor.insert ("Stat");
+		lookfor.insert ("Engi");
+		lookfor.insert ("Hold");
+		lookfor.insert ("Rada");
+	}
+	int foundpos;
+		while ((foundpos = str.find ("<"))!=string::npos) {
+			if (str.size()<=foundpos+1)
+				break;
+			str = str.substr (foundpos+1);
+			if (str.size()>3) {
+				char mycomp [5]={str[0],str[1],str[2],str[3],0};
+				if (lookfor.find (mycomp)!=lookfor.end()) {
+					int newline = str.find (">");
+					if (newline>0)
+						if (str[newline-1]=='/')
+							newline-=1;
+					writestr+=str.substr (0,newline)+"\n";
+				}
+			}
+		}
+		return writestr;
+}
 
 int GetModeFromName (const char * input_buffer) {
       if (strlen (input_buffer)>3) {

@@ -110,6 +110,7 @@ bool CheckDraw();
 void DrawSystem();
 void DrawGalaxy();
 void DrawMission();
+void DrawShip();
 void SetMouseFlipStatus();
 void ScreenToCoord(float &x);
 void Draw();

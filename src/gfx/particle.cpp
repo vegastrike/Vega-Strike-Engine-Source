@@ -27,13 +27,14 @@ static bool colorOK(Vector &col, const double time) {
 }
 
 bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector q) {
-  q*=size;
-  p*=size;
   loc+=(vel*time).Cast();
   GFXColor4f(col.i,col.j,col.k,1);
 #ifdef USE_POINTS
   GFXVertexf(loc);
 #else
+  #if 0
+  q*=size;
+  p*=size;  
   GFXTexCoord2f(0,0);
   GFXVertex3d(loc.i+p.i+q.i,loc.j+p.j+q.j,loc.k+p.k+q.k);
   GFXTexCoord2f(0,1);  
@@ -42,6 +43,35 @@ bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector 
   GFXVertex3d(loc.i-p.i-q.i,loc.j-p.j-q.j,loc.k-p.k-q.k);
   GFXTexCoord2f(1,0);  
   GFXVertex3d(loc.i-p.i+q.i,loc.j-p.j+q.j,loc.k-p.k+q.k);
+  #else
+  GFXTexCoord2f(0,0);
+  GFXVertex3d(loc.i+size,loc.j+size,loc.k);
+  GFXTexCoord2f(0,1);  
+  GFXVertex3d(loc.i+size,loc.j-size,loc.k);
+  GFXTexCoord2f(1,1);  
+  GFXVertex3d(loc.i-size,loc.j-size,loc.k);
+  GFXTexCoord2f(1,0);  
+  GFXVertex3d(loc.i-size,loc.j+size,loc.k);
+
+  GFXTexCoord2f(0,0);
+  GFXVertex3d(loc.i,loc.j+size,loc.k+size);
+  GFXTexCoord2f(0,1);  
+  GFXVertex3d(loc.i,loc.j-size,loc.k+size);
+  GFXTexCoord2f(1,1);  
+  GFXVertex3d(loc.i,loc.j-size,loc.k-size);
+  GFXTexCoord2f(1,0);  
+  GFXVertex3d(loc.i,loc.j+size,loc.k-size);
+
+  GFXTexCoord2f(0,0);
+  GFXVertex3d(loc.i+size,loc.j,loc.k+size);
+  GFXTexCoord2f(0,1);  
+  GFXVertex3d(loc.i+size,loc.j,loc.k-size);
+  GFXTexCoord2f(1,1);  
+  GFXVertex3d(loc.i-size,loc.j,loc.k-size);
+  GFXTexCoord2f(1,0);  
+  GFXVertex3d(loc.i-size,loc.j,loc.k+size);
+
+#endif
 #if 0
   GFXEnd();
   GFXBegin(GFXPOINT);

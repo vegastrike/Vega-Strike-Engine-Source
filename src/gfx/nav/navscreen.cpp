@@ -1,3 +1,4 @@
+#include <set>
 #include "vs_path.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
@@ -499,7 +500,10 @@ void NavigationSystem::Draw()
 
 	else
 	{
-		DrawMission();
+		if (checkbit(whattodraw,2))
+			DrawShip();
+		else
+			DrawMission();
 	}
 
 	//	**********************************
@@ -634,6 +638,50 @@ void NavigationSystem::DrawMission()
 	GFXEnable(TEXTURE0);
 }
 //	**********************************
+
+
+
+
+//	This is the mission info screen
+//	**********************************
+extern string MakeUnitXMLPretty(string str);
+void NavigationSystem::DrawShip()
+{
+	GFXDisable(TEXTURE0);
+	GFXDisable(LIGHTING);
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+
+
+	navdrawlist factionlist(0, screenoccupation, factioncolours);
+
+
+	float deltax = screenskipby4[1] - screenskipby4[0];
+	float deltay = screenskipby4[3] - screenskipby4[2];
+	float originx = screenskipby4[0]; // left
+	float originy = screenskipby4[3]; // top
+	string writethis;
+	Unit * par;
+	int foundpos=0;
+	
+	if ((par = _Universe->AccessCockpit()->GetParent())) {
+		writethis= MakeUnitXMLPretty ( par->WriteUnitString());
+
+	}
+	
+	TextPlane displayname;
+	displayname.col = GFXColor(.3,1,.3,1);
+	displayname.SetPos(originx+ (.1*deltax),   originy+(1*deltay));
+	displayname.SetText (writethis);
+	displayname.SetCharSize (1,1);
+	displayname.Draw();
+	
+
+//	factionlist.drawdescription(writethis, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 1, GFXColor(1,1,1,1));
+
+
+	GFXEnable(TEXTURE0);
+}
+
 
 
 
@@ -1754,7 +1802,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			}
 			else	//	if in mission mode
 			{
-	
+				dosetbit(whattodraw, 2);	//	draw shipstats	
 			}
 		}
 
@@ -1769,7 +1817,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 			else	//	if in mission mode
 			{
-			
+				unsetbit(whattodraw, 2);	//	draw system
 			}
 		}
 	}
