@@ -33,6 +33,7 @@ class Briefing{
   };
   vector <Ship *> starships;  
   void Render();
+  void Update();
   //-1 returns file not found
   int AddStarship (const char * filename, int faction, const Vector &);
   void RemoveStarship (int);

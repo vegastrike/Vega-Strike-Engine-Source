@@ -107,7 +107,12 @@ int Briefing::AddStarship (const char * fn, int faction, const Vector &pos) {
   starships.push_back (tmp);
   return starships.size()-1;
 }
-
+void Briefing::Update() {
+  for (unsigned int i=0;i<starships.size();i++) {
+    starships[i]->Update();
+  }
+  
+}
 void Briefing::Ship::Update () {
   if (!orders.empty()) {
     Vector finpos;
