@@ -197,42 +197,29 @@ void Nebula::PutInsideCam(int i) {
   _Universe->AccessCamera(i)->SetNebula (this);
 }
 
-Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
-  Unit (unitfile,SubU,faction,string(""),fg,fg_snumber) {
+Nebula::Nebula(const char * unitfile, bool SubU, int faction,
+	       Flightgroup* fg, int fg_snumber) :
+  Unit (unitfile,SubU,faction,string(""),fg,fg_snumber)
+{
+  std::string path = GetSharedUnitPath() + "/";
+  std::string file = string(unitfile) + "/" + unitfile + "/" + ".nebula";
+  std::string fullpath = path + file;
+  struct stat info;
 
-  vssetdir (GetSharedUnitPath().c_str());
-  vschdir (unitfile);
-  string nebulafile (string(unitfile)+string(".nebula"));
   explosiontime=0;
-  FILE *fp = fopen (nebulafile.c_str(),"r");
-  bool uptwice=false;
-  if (!fp) {
-    uptwice=true;
-    vscdup();
-    const char *c;
-    if ((c=_Universe->GetFaction(faction)))
-      vschdir (c);
-    else
-      vschdir ("unknown");
-    vschdir (unitfile);
-    fp = fopen (nebulafile.c_str(),"r");
-    if (fp) {
-      fclose (fp);
-    } else {
-      vscdup();
-      vscdup();
-      vschdir ("neutral");
-      vschdir (unitfile);
-      faction=_Universe->GetFaction("neutral");
+
+  if(stat(fullpath.c_str(), &info) != 0)
+    {
+      fullpath = path + _Universe->GetFaction(faction) + "/" + file;
+      if(stat(fullpath.c_str(),&info) != 0)
+	{
+	  faction=_Universe->GetFaction("neutral");
+	  fullpath = path + "neutral/" + file;
+	}
     }
-  } else {
-    fclose (fp);
-  }
-  LoadXML(nebulafile.c_str());
-  vscdup();
-  if (uptwice) 
-    vscdup();
-  vsresetdir();
+
+  LoadXML(fullpath.c_str());
+
 }
 void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)
