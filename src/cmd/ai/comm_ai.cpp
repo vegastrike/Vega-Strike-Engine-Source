@@ -73,7 +73,7 @@ float CommunicatingAI::getAnger(const Unit * target)const {
       good=true;
       for (unsigned int i=0;i<cachedCargoNum;++i) {
         Cargo * c=&target->image->cargo[i];
-        if (c->quantity!=0||c->category.find("upgrades")!=0){
+        if (c->quantity!=0&&c->category.find("upgrades")!=0){
           good=false;
           break;
         }
