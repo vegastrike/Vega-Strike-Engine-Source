@@ -5,10 +5,12 @@
 #include <stdio.h>
 LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive() {
   //  parentScene = par;
+  CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2);
 }
 LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): Primitive() {
   //  parentScene=par;
+  CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2,Plane3);
 }
 extern KBSTATE keyState[KEYMAP_SIZE];

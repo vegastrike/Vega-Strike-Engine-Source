@@ -41,7 +41,7 @@ public:
 	Camera();
 
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
-	void UpdateGFX();
+	void UpdateGFX(bool updateFrustum=true);
 	void UpdateGLCenter();
 
 	void SetPosition(Vector &origin);

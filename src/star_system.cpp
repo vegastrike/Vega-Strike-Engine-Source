@@ -10,7 +10,7 @@ StarSystem::StarSystem(Planet *primaries) :
   drawList(new UnitCollection()),
   missiles(new UnitCollection()) {
   currentcamera = 0;	
-
+  systemInputDFA = new InputDFA (this);
   Iterator *iter = primaries->createIterator();
   drawList->prepend(iter);
 
@@ -22,6 +22,7 @@ StarSystem::StarSystem(Planet *primaries) :
 }
 
 StarSystem::~StarSystem() {
+  delete systemInputDFA;
   delete primaries;
 }
 
@@ -45,7 +46,7 @@ void StarSystem::RemoveUnit(Unit *unit) {
 
 void StarSystem::Draw() {
   //primaries->Draw();
-
+  systemInputDFA->Draw();
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
@@ -61,7 +62,7 @@ void StarSystem::Update() {
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
-    //    unit->ResolveForces();
+        unit->ResolveForces();
     // Do something with AI state here eventually
     unit->ExecuteAI();
     iter->advance();

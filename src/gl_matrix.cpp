@@ -327,10 +327,10 @@ static void gl_Frustum (float left,float right, float bottom, float top, float n
   
 }
 BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
-  static float near,far,left,right,bot,top;
+  static float nnear,ffar,left,right,bot,top;//Visual C++ reserves near and far
   if (!retr) {
-    near = *n;
-    far = *f;
+    nnear = *n;
+    ffar = *f;
     left = *l;
     right = *r;
     bot = *b;
@@ -340,11 +340,11 @@ BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
     *r = right;
     *b = bot;
     *t = top;
-    *n = near;
-    *f = far;
+    *n = nnear;
+    *f = ffar;
   }
   //  fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
-
+	return TRUE;
 }
 
 
@@ -372,7 +372,7 @@ BOOL GFXFrustum(float * m,float *i,
    M(0,0) = 1./x;  M(0,1) = 0.0F;  M(0,2) = 0.0F;   M(0,3) = a/x;
    M(1,0) = 0.0F;  M(1,1) = 1./y;  M(1,2) = 0.0F;   M(1,3) = b/y;
    M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = 0.0F;   M(2,3) =-1.0F;
-   M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 1./d;  M(3,3) = c/d;
+   M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 1.F/d;  M(3,3) = (float)c/d;
 #undef M
    return TRUE;
 }
@@ -446,7 +446,7 @@ BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
 
 static void LookAtHelper( float eyex, float eyey, float eyez,
                          float centerx, float centery, float centerz,
-                         float upx, float upy, float upz )
+                         float upx, float upy, float upz)
 {
    float m[16];
    float x[3], y[3], z[3];
@@ -531,11 +531,8 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
 #undef M
 
    MultMatrix(view, m, tm);
- //  glMultMatrixd( m );
 
-   /* Translate Eye to Origin */
-  // glTranslated( -eyex, -eyey, -eyez );
-
+/***
     float dis = sqrtf(upx*upx+upy*upy);
    Identity (tm);
    if (eyez-centerz > 0) {
@@ -549,10 +546,7 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    M(2,2) = 1.0;
    M(3,3) = 1.0;
 #undef M
-   glActiveTextureARB (GL_TEXTURE1_ARB);
-	glMatrixMode (GL_TEXTURE);	
-	glLoadIdentity();
-	
+***/    //old hack to twiddle the texture in the xy plane
 	
 #ifdef NV_CUBE_MAP
    //FIXME--ADD CAMERA MATRICES
@@ -563,6 +557,10 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    //and 2 the cube map orientation in world coordinates.
    //the axis is the cross product of these two vectors...teh angle is arcsin
    //of the dot of these two vectors
+	glActiveTextureARB (GL_TEXTURE1_ARB);
+	glMatrixMode (GL_TEXTURE);	
+	glLoadIdentity();
+	
 
    //   Vector (centerx,centery,centerz).Cross (Vector (1,0,0));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE
    Vector axis (centerx,centery,centerz);
@@ -574,17 +572,18 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    axis = axis.Cross (axis.Cross(cubemapincamspace));
    glRotatef (theta,axis.i,axis.j,axis.k);
    //ok do matrix math to rotate by theta on axis  those ..
+   glActiveTextureARB (GL_TEXTURE0_ARB);
+
 #else
    /*	glTranslatef(.5f,.5f,.4994f);
 	glMultMatrixf(tm);
 	glTranslatef(-.5f,-.5f,-.4994f);
    */
 #endif
-   glActiveTextureARB (GL_TEXTURE0_ARB);
    
 }
 
-BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
+BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up )
 {
 	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
 
@@ -667,7 +666,7 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[0][3] = clip[15] - clip[12];
 
    /* Normalize the result */
-   t = sqrt( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
+   t = sqrtf( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
    frustum[0][0] /= t;
    frustum[0][1] /= t;
    frustum[0][2] /= t;
@@ -680,7 +679,7 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[1][3] = clip[15] + clip[12];
 
    /* Normalize the result */
-   t = sqrt( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
+   t = sqrtf( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
    frustum[1][0] /= t;
    frustum[1][1] /= t;
    frustum[1][2] /= t;
@@ -693,7 +692,7 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[2][3] = clip[15] + clip[13];
 
    /* Normalize the result */
-   t = sqrt( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
+   t = sqrtf( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
    frustum[2][0] /= t;
    frustum[2][1] /= t;
    frustum[2][2] /= t;
@@ -706,7 +705,7 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[3][3] = clip[15] - clip[13];
 
    /* Normalize the result */
-   t = sqrt( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
+   t = sqrtf( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
    frustum[3][0] /= t;
    frustum[3][1] /= t;
    frustum[3][2] /= t;
@@ -719,7 +718,7 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[4][3] = clip[15] - clip[14];
 
    /* Normalize the result */
-   t = sqrt( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
+   t = sqrtf( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
    frustum[4][0] /= t;
    frustum[4][1] /= t;
    frustum[4][2] /= t;
@@ -732,7 +731,7 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[5][3] = clip[15] + clip[14];
 
    /* Normalize the result */
-   t = sqrt( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
+   t = sqrtf( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
    frustum[5][0] /= t;
    frustum[5][1] /= t;
    frustum[5][2] /= t;

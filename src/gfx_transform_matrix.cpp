@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 /*---------------------------------------------------------------------------*
  | mat_inv: Compute the inverse of a n x n matrix, using the maximum pivot   |
  |          strategy.  n <= MAX1.                                            |

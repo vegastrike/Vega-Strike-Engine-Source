@@ -89,11 +89,6 @@ void Background::Draw()
 	********************************/
 	_GFX ->AccessCamera()->UpdateGLCenter();
 
-//	glDisable(GL_CULL_FACE);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S , GL_CLAMP);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T , GL_CLAMP);
-//	glDisable(GL_CLIP
 	
 	/*up*/
 	GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
@@ -196,13 +191,7 @@ void Background::Draw()
 			
 	GFXEnd();//*/
 
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//	glEnable(GL_CULL_FACE);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S , GL_REPEAT);
-	//glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T , GL_REPEAT);
-	//glPopMatrix();
-	//GFXLoadMatrix(VIEW, oldproject);
-	_GFX ->AccessCamera()->UpdateGFX();
+	_GFX ->AccessCamera()->UpdateGFX(false);
 	GFXEnable(DEPTHWRITE);
 	GFXEnable(LIGHTING);
 }

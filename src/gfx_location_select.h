@@ -3,7 +3,7 @@
 #include "in_mouse.h"
 class LocationSelect:public Primitive {
 protected:
-  static const float CrosshairSize=2;
+  float CrosshairSize;
   //  System *parentSystem;
   Vector p,q,r;
   Vector LocalPosition;

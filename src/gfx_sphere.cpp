@@ -1,5 +1,7 @@
 #include "gfx_sphere.h"
-
+#ifndef M_PI
+#define M_PI 3.1415926536F
+#endif
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Mesh() {
   debugName = "Sphere";
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!

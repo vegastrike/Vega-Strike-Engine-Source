@@ -20,6 +20,8 @@ vegastrike_SOURCES =				\
 	cmd.h					\
 	cmd_ai.cpp				\
 	cmd_ai.h				\
+	cmd_input_dfa.h				\
+	cmd_input_dfa.cpp			\
 	cmd_unit.h				\
 	cmd_unit.cpp				\
 	cmd_gun.cpp				\

@@ -5,8 +5,6 @@
 
 bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
   if (ship->querySphere(mouseX,mouseY,0,_GFX->AccessCamera())){
-    //fprintf (stderr,"bingo A");
-    //find some nice mouseX,mouseY translations:
     Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
     //mousePoint.k= -mousePoint.k;
     Vector CamP,CamQ,CamR;
@@ -14,7 +12,6 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
     mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
     _GFX->AccessCamera()->GetPosition(CamP);    
      if (ship->queryBoundingBox(CamP,mousePoint,0)) {
-      //fprintf (stderr,"BONGO BOB!!!!!");
       return true;
     }
   }
@@ -22,8 +19,10 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
 }
 
 ClickList::ClickList ( StarSystem *parSystem, UnitCollection *parIter) {
-    parentSystem = parSystem;
-    parentIter = parIter;
+  lastSelected = NULL;
+  lastCollection = NULL;
+  parentSystem = parSystem;
+  parentIter = parIter;
 }
 
 UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int maxY) {
@@ -69,4 +68,61 @@ UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
     delete myParent;
     delete UAye;
     return uc;
+}
+
+
+Unit * ClickList::requestShip (int mouseX, int mouseY) {
+  bool equalCheck=false;
+  UnitCollection *uc = requestIterator (mouseX,mouseY);
+  UnitCollection::UnitIterator * UAye = NULL;
+  Unit *un;
+  if (lastCollection!=NULL) {
+    equalCheck=true;
+    UAye=uc->createIterator();
+    UnitCollection::UnitIterator *lastiter = lastCollection->createIterator();
+    Unit *lastun;
+    while (equalCheck&& (un = UAye->current())&&(lastun=lastiter->current())) {
+      if (un !=lastun) {
+	equalCheck=false;
+      }
+      UAye->advance();
+      lastiter->advance();
+    }    
+    delete lastiter;
+    delete lastCollection;
+    delete UAye;
+  }
+  float minDistance=1e+10;
+  float tmpdis;
+  Unit * targetUnit=NULL;
+  if (equalCheck&&lastSelected) {//the person clicked the same place and wishes to cycle through units from front to back
+    float morethan = lastSelected->getMinDis(parentSystem->AccessCamera()->GetPosition());
+    UAye = uc->createIterator();
+    while (un=UAye->current()) {
+      tmpdis = un->getMinDis (parentSystem->AccessCamera()->GetPosition());
+      if (tmpdis>morethan&&tmpdis<minDistance) {
+	minDistance=tmpdis;
+	targetUnit=un;
+      }
+      UAye->advance();
+    }
+    delete UAye;
+  }
+  if (targetUnit==NULL) {//ok the click location is either different, or 
+    //he clicked on the back of the list and wishes to start over
+    UAye = uc->createIterator();
+    while (un=UAye->current()) {
+      tmpdis = un->getMinDis (parentSystem->AccessCamera()->GetPosition());
+      if (tmpdis<minDistance) {
+	minDistance=tmpdis;
+	targetUnit=un;
+      }
+      UAye->advance();
+    }
+   
+    delete UAye;  
+  }
+  lastCollection = uc;
+  lastSelected = targetUnit;
+  return targetUnit;
 }

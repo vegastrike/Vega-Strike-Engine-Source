@@ -163,7 +163,24 @@ inline void MultMatrix(float dest[], float m1[], float m2[])
  */ 
 inline void CopyMatrix(Matrix dest, const Matrix source)
 {
-  memcpy(dest, source, sizeof(Matrix));
+	dest[0]=source[0];
+	dest[1]=source[1];
+		dest[2]=source[2];
+			dest[3]=source[3];
+	dest[4]=source[4];
+	dest[5]=source[5];
+	dest[6]=source[6];
+	dest[7]=source[7];
+	dest[8]=source[8];
+	dest[9]=source[9];
+	dest[10]=source[10];
+	dest[11]=source[11];
+	dest[12]=source[12];
+	dest[13]=source[13];
+	dest[14]=source[14];
+	dest[15]=source[15];
+
+  //memcpy(dest, source, sizeof(Matrix));
   /*
 	for(int matindex = 0; matindex<16; matindex++)
 		dest[matindex] = source[matindex];

@@ -10,7 +10,7 @@
 
 
 #include "gfx_camera.h"
-
+#include "cmd_input_dfa.h"
 class Planet;
 class UnitCollection;
 class ClickList;
@@ -29,7 +29,7 @@ class StarSystem {
   
   Camera cam[NUM_CAM];
   int currentcamera;
-
+  InputDFA * systemInputDFA;
   void modelGravity();
  public:
   Camera *AccessCamera() {return &cam[currentcamera];}

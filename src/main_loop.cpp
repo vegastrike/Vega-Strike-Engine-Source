@@ -14,7 +14,7 @@
 #include "gfxlib.h"
 #include "gfx_location_select.h"
 #include <string>
-#include "gfx_click_list.h"
+#include "cmd_input_dfa.h"
 #include "UnitCollection.h"
 #include "star_system.h"
 #include "planet.h"
@@ -312,13 +312,12 @@ Unit *fighter = NULL;
 Unit *fighter2=NULL;
 const int numf = 100;
 Unit *fighters[numf];
-LocationSelect *locSel=NULL;
-
+//LocationSelect *locSel=NULL;
 Background * bg = NULL;
 TextPlane *textplane = NULL;
 
 ClickList *shipList =NULL;
-
+/*
 int oldx =0;
 int  oldy=0;
 void startselect (KBSTATE k, int x,int y, int delx, int dely, int mod) {
@@ -351,7 +350,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
     
   }
 }
-
+*/
 
 static void FighterPitchDown(KBSTATE newState) {
 	static Vector Q = fighter->Q();
@@ -502,8 +501,8 @@ void createObjects() {
   //_GFX->activeStarSystem()->AddUnit(fighter);
   //_GFX->activeStarSystem()->AddUnit(carrier);
   shipList = _GFX->activeStarSystem()->getClickList();
-  BindKey (1,startselect);
-  BindKey (0,clickhandler);
+    //BindKey (1,startselect);
+    //BindKey (0,clickhandler);
 }
 
 void destroyObjects() {  
@@ -533,7 +532,6 @@ void main_loop() {
   //GFXVertex3f(-10.0,-10.0,1.0);
   //GFXVertex3f(-10.0,10.0,1.0);
   //GFXEnd();
-  
   GFXDisable(DEPTHWRITE);
   GFXDisable(DEPTHTEST);
   GFXEnable(TEXTURE0);
@@ -555,9 +553,17 @@ void main_loop() {
   mat.eb = 1.0;
   GFXSetMaterial(0, mat);
   GFXSelectMaterial(0);
+
+
   _GFX->activeStarSystem()->Draw();
   _GFX->activeStarSystem()->Update();
-  
+  ProcessKB();
+  //ProcessMouse();  
+  GFXDisable(TEXTURE1);
+  _GFX->AccessHudCamera()->UpdateGFX(false);
+  textplane->Draw();
+  _GFX->AccessCamera()->UpdateGFX(false);
+
   //for(a = 0; a < numf; a++) {
   //fighters[a]->TDraw();
   //fighters[a]->Yaw(rand()%2==0?-1.0:1.0*PI/180);
@@ -568,13 +574,8 @@ void main_loop() {
   //fighter2->DrawStreak(Vector(0.0, ((float)state/100.0), 0.0));
   //fighter2->SetPosition(fighter2->Position() + Vector(0.0, 0.1, 0.0));
   //s->Draw();
-  GFXDisable(TEXTURE1);
-  
-  
-  _GFX->AccessHudCamera()->UpdateGFX();
-  textplane->Draw();
+
   //textplane->Yaw(PI/180);
-  
   //t->TDraw();
   //s->Yaw(PI/180);
   //////////locSel->Draw();
@@ -590,8 +591,6 @@ void main_loop() {
   state++;
   if(state > 100)
     state = 100;*/
-  ProcessKB();
-  
   //fighter->Roll(PI/180);
 }
 

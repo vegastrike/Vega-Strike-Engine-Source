@@ -173,6 +173,78 @@ Unit::~Unit()
 */
 }
 
+
+
+
+
+
+
+float Unit::getMinDis (const Vector &pnt) {
+  UpdateMatrix();
+  float minsofar=1e+10;
+  float tmpvar;
+  int i;
+  Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
+
+#ifdef VARIABLE_LENGTH_PQR
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
+#endif
+  for (i=0;i<nummesh;i++) {
+
+    TargetPoint = Transform(transformation,meshdata[i]->Position())-pnt;
+    tmpvar = sqrtf (TargetPoint.Dot (TargetPoint))-meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+	*SizeScaleFactor
+#endif
+      ;
+    if (tmpvar<minsofar) {
+      minsofar = tmpvar;
+    }
+  }
+  for (i=0;i<numsubunit;i++) {
+    tmpvar = subunits[i]->getMinDis (transformation,pnt);
+    if (tmpvar<minsofar) {
+      minsofar=tmpvar;
+    }			       
+  }
+  return minsofar;
+}
+
+float Unit::getMinDis (Matrix t,const Vector &pnt) {
+  UpdateMatrix();
+  int i;
+  Matrix tmpo;
+  float minsofar=1e+10;
+  float tmpvar;
+  MultMatrix (tmpo,t,transformation);
+  
+  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
+#ifdef VARIABLE_LENGTH_PQR
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
+#endif
+  for (i=0;i<nummesh;i++) {
+    TargetPoint = Transform (tmpo,meshdata[i]->Position())-pnt;
+    tmpvar= sqrtf (TargetPoint.Dot (TargetPoint))-meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+      *SizeScaleFactor
+#endif
+      ;
+    if (tmpvar<minsofar) {
+      minsofar=tmpvar;
+    }
+  }
+  for (i=0;i<numsubunit;i++) {
+    tmpvar = subunits[i]->getMinDis (tmpo,pnt);
+    if (tmpvar<minsofar) {
+      minsofar=tmpvar;
+    }	
+  }
+  return minsofar;
+}
+
+
+
+
 bool Unit::querySphere (const Vector &pnt, float err) {
   UpdateMatrix();
   int i;

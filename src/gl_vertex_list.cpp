@@ -136,7 +136,7 @@ BOOL GFXVertexList::Draw()
 			texcoords[4*a+1] = myVertices[a].t;
 			texcoords[4*a+2] = myVertices[a].u;
 			texcoords[4*a+3] = myVertices[a].v;
-		}*/
+		}*/ 
 		glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
 		glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -174,7 +174,7 @@ BOOL GFXVertexList::Draw()
 
 		if (Stage1Texture&&bTex1)
 		{
-			int ssrc,ddst;
+/*			int ssrc,ddst;
 			glGetIntegerv (GL_BLEND_SRC, &ssrc);
 			glGetIntegerv (GL_BLEND_DST, &ddst);
 			glBindTexture(GL_TEXTURE_2D, Stage1TextureName);
@@ -191,6 +191,7 @@ BOOL GFXVertexList::Draw()
 
 			//reload the old texture pointer
 			glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
+			*/  //if hardware doesn't support multitexturem don't even try it mon
 		}
 
 	}
@@ -209,7 +210,7 @@ BOOL GFXVertexList::Draw()
 
 		if (Stage1Texture&&bTex1)
 		{
-			glEnable (GL_BLEND);
+/*			glEnable (GL_BLEND);
 			int ssrc,ddst;
 			glGetIntegerv (GL_BLEND_SRC, &ssrc);
 			glGetIntegerv (GL_BLEND_DST, &ddst);
@@ -223,6 +224,7 @@ BOOL GFXVertexList::Draw()
 			glBlendFunc (ssrc,ddst);
 			glBindTexture(GL_TEXTURE_2D, Stage0TextureName);
 			//glDisable (GL_BLEND);
+			*/ //if hardware doesn't even support it, don't try it mon
 		}
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisableClientState(GL_VERTEX_ARRAY);

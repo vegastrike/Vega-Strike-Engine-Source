@@ -13,7 +13,7 @@ ok *
 
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
-class Texture;
+struct Texture;
 class Planet;
 typedef float Matrix[16];
 

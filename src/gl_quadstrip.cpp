@@ -146,7 +146,7 @@ BOOL GFXQuadstrip::Draw()
 
 		if (Stage1Texture&&bTex1)
 		{
-			int ssrc,ddst;
+/*			int ssrc,ddst;
 			glGetIntegerv (GL_BLEND_SRC, &ssrc);
 			glGetIntegerv (GL_BLEND_DST, &ddst);
 			glBindTexture(GL_TEXTURE_2D, Stage1TextureName);
@@ -163,6 +163,7 @@ BOOL GFXQuadstrip::Draw()
 
 			//reload the old texture pointer
 			glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
+			*/   //if hardware doesn't support multitexture, don't even try it
 		}
 
 	}
