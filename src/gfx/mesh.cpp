@@ -127,11 +127,27 @@ bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction
   //  VSFileSystem::Fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
   return false;
 }
+
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::Mesh (const Mesh & m) {
+  fprintf (stderr,"UNTESTED MESH COPY CONSTRUCTOR");
   this->orig=NULL;
   this->hash_name = m.hash_name;
   InitUnit();
   Mesh * oldmesh = meshHashTable.Get (hash_name);
+  if (0==oldmesh) {
+    vector<Mesh*>* vec = bfxmHashTable.Get(hash_name);
+    for (unsigned int i=0;i<vec->size();++i) {
+      Mesh * mush = (*vec)[i]->orig?(*vec)[i]->orig:(*vec)[i];
+      if (mush==m.orig||mush==&m)
+        oldmesh=(*vec)[i];
+    }
+    if (0==oldmesh) {
+      if (vec->size()>1) fprintf (stderr,"Copy constructor %s used in ambiguous Situation",hash_name.c_str());
+      if (vec->size())
+        oldmesh=(*vec)[0];
+    }
+  }
   if (LoadExistant (oldmesh->orig!=NULL?oldmesh->orig:oldmesh)) {
     return;
   }

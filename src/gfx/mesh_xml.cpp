@@ -1167,7 +1167,7 @@ Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction,
   }
   return m[0];
 }
-static Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
+Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int faction, Flightgroup * fg) {
   /*
   if (strstr(filename,".xmesh")) {
