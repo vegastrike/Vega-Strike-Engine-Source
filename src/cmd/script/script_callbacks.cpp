@@ -443,6 +443,7 @@ varInst *Mission::call_io_sprintf(missionNode *node,int mode){
   varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
   deleteVarInst(str_vi);
+  deleteVarInst(outstr_vi);
 
   return viret;
 }
@@ -638,17 +639,22 @@ float Mission::getIntArg(missionNode *node,int mode,int arg_nr){
 }
 
 Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
+  Unit *ret=NULL;
+
   missionNode *unit_node=getArgument(node,mode,arg_nr);
   varInst *unit_vi=checkObjectExpr(unit_node,mode);
   if(mode==SCRIPT_RUN){
     if(unit_vi->type==VAR_OBJECT && unit_vi->objectname=="unit"){
-      return getUnitObject(unit_node,mode,unit_vi);
+      ret=getUnitObject(unit_node,mode,unit_vi);
     }
-    fatalError(node,mode,"getUnitArg: expected unit arg - got else");
-    assert(0);
-    return NULL; // never reach
+    else{
+      fatalError(node,mode,"getUnitArg: expected unit arg - got else");
+      assert(0);
+      return NULL; // never reach
+    }
   }
-  return NULL;
+  deleteVarInst(unit_vi);
+  return ret;
 }
 Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
   missionNode *pos_node=getArgument(node,mode,arg_nr);
@@ -660,6 +666,7 @@ Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
     vec3=call_olist_tovector(pos_node,mode,pos_vi);
   }
 
+  deleteVarInst(pos_vi);
   return vec3;
 }
 

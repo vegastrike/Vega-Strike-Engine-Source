@@ -71,6 +71,12 @@ start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgam
   vi_counter=0;
   old_vi_counter=0;
 
+  olist_counter=0;
+  old_olist_counter=0;
+
+  string_counter=0;
+  old_string_counter=0;
+
   missionThread *main_thread=new missionThread;
   runtime.thread_nr=0;
   runtime.threads.push_back(main_thread);
@@ -178,8 +184,21 @@ void Mission::DirectorLoop(){
       sprintf(buf,"VI_COUNTER %d\n",vi_counter);
       debug(2,NULL,0,buf);
     }
-
     old_vi_counter=vi_counter;
+
+    if(olist_counter!=old_olist_counter){
+      char buf[200];
+      sprintf(buf,"OLIST_COUNTER %d\n",olist_counter);
+      debug(2,NULL,0,buf);
+    }
+    old_olist_counter=olist_counter;
+
+    if(string_counter!=old_string_counter){
+      char buf[200];
+      sprintf(buf,"STRING_COUNTER %d\n",string_counter);
+      debug(2,NULL,0,buf);
+    }
+    old_string_counter=string_counter;
 
     runtime.cur_thread->module_stack.push_back(director);
     runtime.cur_thread->classid_stack.push_back(0);

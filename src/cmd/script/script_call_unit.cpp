@@ -47,6 +47,7 @@
 
 #include "mission.h"
 #include "easydom.h"
+#include "msgcenter.h"
 
 #include "vs_globals.h"
 #include "config_xml.h"
@@ -210,6 +211,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	pos_vi->float_val=pos.k;
 	call_olist_push_back(node,mode,vec3_vi,pos_vi);
 
+	//	deleteVarInst(vec3_vi);
 	viret=vec3_vi;
 	//return vec3_vi;
       }
@@ -471,6 +473,10 @@ void Mission::call_unit_launch(Flightgroup *fg){
      findNextEnemyTarget(my_unit);
 
    }
+
+   char buffer[200];
+   sprintf(buffer,"%s launched %s:%s %d-%d",fg->faction.c_str(),fg->name.c_str(),fg->type.c_str(),0,fg->nr_ships);
+   msgcenter->add("game","all",buffer);
 }
 
 void Mission::findNextEnemyTarget(Unit *my_unit){

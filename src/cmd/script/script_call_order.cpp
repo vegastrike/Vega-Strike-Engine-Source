@@ -107,6 +107,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
     
     viret->object=(void *)my_order;
 
+    deleteVarInst(pos_vi);
+
     return viret;
   }
   else if(cmd=="newChangeHeading"){
@@ -130,6 +132,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
     viret->objectname="order";
     
     viret->object=(void *)my_order;
+    deleteVarInst(pos_vi);
 
     return viret;
   }
@@ -201,6 +204,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
     
     viret->object=(void *)my_order;
 
+    deleteVarInst(enq_vi);
+
     return viret;
   }
   else if(cmd=="newCloakFor"){
@@ -256,6 +261,9 @@ varInst *Mission::call_order(missionNode *node,int mode){
     
     viret->object=(void *)my_order;
 
+    deleteVarInst(des_vi);
+    deleteVarInst(desa_vi);
+
     return viret;
   }
   else if(cmd=="newMatchAngularVelocity"){
@@ -282,6 +290,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
     viret->objectname="order";
     
     viret->object=(void *)my_order;
+
+    deleteVarInst(des_vi);
 
     return viret;
   }
@@ -313,6 +323,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
     
     viret->object=(void *)my_order;
 
+    deleteVarInst(des_vi);
+
     return viret;
   }
   else if(cmd=="newFlyToWaypoint"){
@@ -339,6 +351,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
     viret->objectname="order";
     
     viret->object=(void *)my_order;
+
+    deleteVarInst(des_vi);
 
     return viret;
   }
@@ -371,6 +385,9 @@ varInst *Mission::call_order(missionNode *node,int mode){
     
     viret->object=(void *)my_order;
 
+    deleteVarInst(des_vi);
+    deleteVarInst(unit_vi);
+
     return viret;
   }
   else if(cmd=="newSuperiority"){
@@ -402,6 +419,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
 	debug(3,node,mode,"enqueueing order");
       }
 
+      deleteVarInst(enq_vi);
+
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
@@ -415,6 +434,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
 	debug(3,node,mode,"enqueueing order as first");
       }
 
+      deleteVarInst(enq_vi);
+
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
@@ -427,6 +448,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
 	my_order->eraseOrder(enq_order);
 	debug(3,node,mode,"erasing order");
       }
+
+      deleteVarInst(enq_vi);
 
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
@@ -445,6 +468,8 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret->type=VAR_OBJECT;
       viret->objectname="order";
       viret->object=(void *)res_order;
+
+      deleteVarInst(enq_vi);
     }
     else if(cmd=="SteerUp"){
       missionNode *val_node=getArgument(node,mode,1);

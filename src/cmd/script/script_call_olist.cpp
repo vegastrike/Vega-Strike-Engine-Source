@@ -64,7 +64,17 @@ varInst *Mission::call_olist(missionNode *node,int mode){
     olist_t *my_object=getOListObject(node,mode,ovi);
 
     if(cmd=="delete"){
-      delete my_object;
+      if(mode==SCRIPT_RUN){
+	while(my_object->size()>0){
+	  varInst *content_vi=my_object->back();
+	  deleteVarInst(content_vi,true);
+	  my_object->pop_back();
+	}
+	delete my_object;
+	olist_counter--;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
     }
     else if(cmd=="push_back"){
       missionNode *snode=getArgument(node,mode,1);
@@ -237,6 +247,8 @@ void Mission::call_olist_toxml(missionNode *node,int mode,varInst *ovi){
 void Mission::call_vector_into_olist(varInst *vec_vi,Vector vec3){
 
   olist_t *my_object=new olist_t;
+  olist_counter++;
+
   vec_vi->type=VAR_OBJECT;
   vec_vi->objectname="olist";
   vec_vi->object=(void *)my_object;
@@ -284,6 +296,7 @@ varInst *Mission::call_olist_new(missionNode *node,int mode){
   varInst *viret=newVarInst(VI_TEMP);
 
     olist_t *my_object=new olist_t;
+    olist_counter++;
 
     viret->type=VAR_OBJECT;
     viret->objectname="olist";

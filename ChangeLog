@@ -1,8 +1,14 @@
+2002-01-29 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* removed some memory leaks in the interpreter
+	
+
 2002-01-29 Daniel Horn <hellcatv@hotmail.com>
 	* Realized that ucref (the reference for units) was off by many many orders of magnitude...fixed
 	* Realized that units weren't being deleted even if they were on the delete queue
 	* Experimental! Enabled deletion. To disable #define DISABLE_DELETE in cmd/unit_damage.cpp  Let me know if you run into ANY problems freeing a unit! So far I have had one...but I haven't bene able to reproduce ... or get any stack of usefulness... maybe someone can point me in the right direction here...it would be a shame not to delete units
 	* Added docking vector so that units may dock to each other (soon)
+
 
 2002-01-29 Alexander Rawass <alexannika@users.sourceforge.net>
 	
@@ -31,6 +37,10 @@
 	* Fixed ancient ~Beam bug that would cause segfault at null pointer if all beams with a certain texture were deleted.
 	* Fixed bug that caused clipping to incorrectly clip after 'host' camera starship destroyed
 
+<<<<<<< ChangeLog
+
+=======
+>>>>>>> 1.110
 2002-01-28 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* New ship (the Revoker).....unit file not finished

@@ -218,6 +218,7 @@ varInst* lookupClassVariable(string modulename,string varname,unsigned int class
   MessageCenter *msgcenter;
 
 void call_vector_into_olist(varInst *vec_vi,Vector vec3);
+void  deleteVarInst(varInst *vi,bool del_local=false);
 
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
@@ -407,8 +408,10 @@ string call_string_getstring(missionNode *node,int mode,varInst *ovi);
  void doCall_toxml(string module,varInst *ovi);
 
 varInst *newVarInst(scope_type scopetype);
-void  deleteVarInst(varInst *vi,bool del_local=false);
- int  vi_counter,old_vi_counter; 
+ int  vi_counter,old_vi_counter;
+ int olist_counter,old_olist_counter;
+ int string_counter,old_string_counter;
+
 void deleteVarMap(varInstMap *vmap);
 
 varInst * call_order(missionNode *node,int mode);

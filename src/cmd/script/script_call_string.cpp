@@ -63,7 +63,15 @@ varInst *Mission::call_string(missionNode *node,int mode){
     varInst *ovi=getObjectArg(node,mode);
     string *my_string=getStringObject(node,mode,ovi);
     
-    if(cmd=="print"){
+    if(cmd=="delete"){
+      if(mode==SCRIPT_RUN){
+	delete my_string;
+	string_counter--;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="print"){
       
       if(mode==SCRIPT_RUN){
 	call_string_print(node,mode,ovi);
@@ -163,6 +171,7 @@ varInst * Mission::call_string_new(missionNode *node,int mode,string initstring)
   varInst *viret=newVarInst(VI_TEMP);
 
 	string* my_string=new string(initstring);
+	string_counter++;
 
 	viret->type=VAR_OBJECT;
 	viret->objectname="string";

@@ -50,7 +50,7 @@ AImissionScript::AImissionScript (string modname){
 }
 
 AImissionScript::~AImissionScript () {
-  //  mission->runScript(modulename,"quitai",classid);
+  mission->runScript(modulename,"quitai",classid);
   //  cout << "ai quitting" << endl;
 }
 
@@ -80,12 +80,14 @@ void AImissionScript::Execute () {
       FlyByWire::Execute();
     }
   }
+  mission->deleteVarInst(vi);
   done=false;
 
   varInst *done_vi=mission->lookupClassVariable(modulename,"_done",classid);
   if(done_vi!=NULL && done_vi->type==VAR_BOOL && done_vi->bool_val==true){
     done=true;
   }
+  mission->deleteVarInst(done_vi);
 }
 
 

@@ -268,12 +268,13 @@ void VDU::DrawMessages(Unit *target){
     lastmsg=mc->last(i);
     if(lastmsg!=NULL){
       char timebuf[100];
-      sprintf(timebuf,"%d ",i);
+      sprintf(timebuf,"-%d ",i);
 
       string mymsg=timebuf+lastmsg->message;
       int msglen=mymsg.size();
       int rows_needed=msglen/cols;
       fullstr=mymsg+"\n"+fullstr;
+      //fullstr=fullstr+mymsg+"\n";
 
       rows_used+=rows_needed+1;
       //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
