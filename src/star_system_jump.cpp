@@ -76,7 +76,15 @@ static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool
 }
 void DealPossibleJumpDamage (Unit *un) {
   float speed = un->GetVelocity().Magnitude();
-  float damage = un->GetJumpStatus().damage;
+  float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
+  float dam =speed*(damage/10);
+  if (dam>1)
+    un->ApplyDamage (un->GetVelocity(),
+		     un->GetVelocity(), 
+		     dam,
+		     GFXColor (((float)(rand()%100))/100,
+			       ((float)(rand()%100))/100,
+			       ((float)(rand()%100))/100));
 }
 
 static void VolitalizeJumpAnimation (const unsigned int ani) {

@@ -88,7 +88,10 @@ void FireAt::Execute () {
   if ((targ = parent->Target())) {
     bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;
     if (istargetjumpableplanet) {
-      istargetjumpableplanet=((Planet*)targ)->GetDestinations().size()&&parent->GetJumpStatus().drive>=0;
+      istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
+      if (!istargetjumpableplanet) {
+	ChooseTargets(1);
+      }
     }
     
     if (targ->CloakVisible()>.8) {
