@@ -457,6 +457,13 @@ string SaveGame::WriteMissionStringData () {
   return ret;
 }
 
+void SaveGame::ReadStardate( char * &buf)
+{
+	string stardate( AnyStringScanInString( buf));
+	cout<<"Read stardate : "<<stardate<<endl;
+	_Universe->current_stardate.Init( stardate);
+}
+
 void SaveGame::ReadSavedPackets (char * &buf) {
   int a=0;
   char unitname[1024];
@@ -478,6 +485,9 @@ void SaveGame::ReadSavedPackets (char * &buf) {
       last_written_pickled_data=last_pickled_data=UnpickleAllMissions(buf);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
       ReadNewsData(buf);
+    }else if (a==0&&0==strcmp(unitname,"stardate")&&0==strcmp(factname,"data")) {
+	  // On server side we expect the latest saved stardate in dynaverse.dat too
+      ReadStardate(buf);
     }else {
       printf ("buf unrecognized %s",buf);
       //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
@@ -532,6 +542,9 @@ string SaveGame::WriteDynamicUniverse()
   	memset( tmp, 0, MB);
 
 	// Write mission data
+	// On server side we save the stardate
+	if( SERVER)
+		dyn_univ += AnyStringWriteString( "\nstardate data "+_Universe->current_stardate.GetFullCurrentStarDate());
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"mission","data ");
     dyn_univ += string( tmp);

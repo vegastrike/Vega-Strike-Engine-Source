@@ -225,9 +225,12 @@ void	NetServer::start(int argc, char **argv)
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
 
+	/*
+	 * NOW IN DYNAVERSE.DAT
 	string strstardate = vs_config->getVariable( "server", "initial_stardate", "2000.00:00");
 	_Universe->current_stardate.Init( strstardate);
 	cout<<"Starting STARDATE : "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
+	*/
 
 	// Loads dynamic universe
 	string dynpath = datadir+"/dynaverse.dat";

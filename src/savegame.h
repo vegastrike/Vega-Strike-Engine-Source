@@ -33,6 +33,7 @@ class SaveGame {
   std::string WriteMissionData();
   std::string WriteMissionStringData();
   std::string WriteNewsData ();
+  void ReadStardate(char * &buf);
   void ReadNewsData(char * &buf);
   void ReadMissionData (char * &buf);
   void ReadMissionStringData (char * &buf);

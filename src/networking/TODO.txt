@@ -1,7 +1,6 @@
 
 *** GENERAL ************************************************************
 
-- Remove time compression in networking
 - HOW the hell can we assign serials to bases, planets and stuff and having the same on client/server sides
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
                how can I compute positions between 2 updates with interpolation ?
@@ -10,8 +9,6 @@
 - Use crypto++ lib to implement comms encryption
 - LOW : Complete jVoIP support
 - PortAudio : tune MAX_PA_CPU_LOAD when support is complete
-- Netcomm : Add support for secure channels (encrypt with a key every data send on those channels)
-  add encryption stuff
 - About NetworkCommunications : assign a different freq range for each faction ?
 - NOTE : network communication system is only working when 1 local player
 
@@ -23,8 +20,9 @@
 
 *** GAME SERVER ********************************************************
 
-- Check if when a client jumps into another system, other clients are warned about it
-- Handle docking with CMD_DOCK and CMD_UNDOCK and DockToSavedBase on server side
+- Redo jumps :
+  - client asks for a jump and do nothing
+  - if client receives a CMD_JUMP ok then it tries to jump (if ok on server should be ok on client)
 - Fix ping computation
 - Depending on ping -> send the player its own info in order to update himself periodicaly (like 1 time per 2 or 3 seconds)
 - In savegame : add stardate loading and saving stuff to dynamic universe
@@ -35,7 +33,6 @@
 							- do not allow players' capships
 
 - Think about transfering config data such as difficulty, physics...
-- Find all the used vars in Unit stuff and integrate them in the serverconfig
 
 TO TEST - Check the detlatime we have to send in clientstate (broadcastSnapshot)
 TO TEST - try to reconnect to account server periodicaly if connection lost
@@ -44,7 +41,6 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
-- Add a VDU text in network VDU to show if current comm is secured or not
 - Take damages into account and put some interferences on webcam pictures
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
 - Interpolate(extrapolate) using delatime + the concerned client's current_state delay
@@ -56,6 +52,7 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE - Netcomm : Add support for secure channels (encrypt with a key every data send on those channels) add encryption stuff
 DONE - Add text message support to NetworkCommunication class : displaying message has to be added
 DONE - PORTAUDIO : add calls to Pa_CloseStream in DestroySession
 DONE - Server must be aware of webcam and portaudio client abilities
@@ -104,6 +101,7 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - Handle docking with CMD_DOCK and CMD_UNDOCK and DockToSavedBase on server side
 DONE - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 DONE ANOTHER WAY - Add a check for player jump energy when a jump request arrives and send back a CMD_ASKFILE with packetserial = 0 if not enough
 DONE - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
@@ -119,6 +117,8 @@ DONE - forsee account server unavailability and in that case, deny new logins + 
 
 === CLIENT SIDE =========================================================
 
+DONE - Add a VDU text in network VDU to show if current comm is secured or not
+DONE - Remove time compression in networking
 ELIMINATED - BUG : do not broadcast when orientation changes
 DONE - Find the jump call and make it only send a jump request to server
 DONE - Check if we received position info about us -> ignore
