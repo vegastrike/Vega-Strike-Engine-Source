@@ -14,6 +14,7 @@
 #define QUADTREE_H
 #include "vec.h"
 #include "gfxlib.h"
+#include <vector>
 struct HeightMapInfo {
 	short*	Data;
 	int	XOrigin, ZOrigin;
@@ -27,7 +28,7 @@ struct HeightMapInfo {
 
 struct	VertInfo {
   float	Y;
-  Vector Norm;
+  unsigned int vertindex;
 };
 
 
@@ -88,6 +89,8 @@ private:
 	void	UpdateAux(const quadcornerdata& cd, const Vector &ViewerLocation, float CenterError);
 	void	RenderAux(const quadcornerdata& cd, CLIPSTATE vis);
 	void	SetStatic(const quadcornerdata& cd);
+  static std::vector <GFXVertex> vertices;
+  static std::vector <unsigned int> unusedvertices;
 };
 
 

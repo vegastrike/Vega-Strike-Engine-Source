@@ -44,7 +44,8 @@ struct GFXVertex
   GFXVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
   GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
   GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
-  
+  Vector GetVertex () {return Vector (x,y,z);}
+  Vector GetNormal () {return Vector (i,j,k);}
 };
 
 //Stores a color (or any 4 valued vector)

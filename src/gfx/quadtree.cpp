@@ -18,14 +18,11 @@
 #include "gfxlib.h"
 
 
+std::vector <GFXVertex> quadsquare::vertices;
+std::vector <unsigned int> quadsquare::unusedvertices;
 
-
-//
-// quadsquare functions.
-//
 
 quadsquare::quadsquare(quadcornerdata* pcd) {
-// Constructor.
 
 	pcd->Square = this;
 	
@@ -68,19 +65,46 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 		if (y < MinY) MinY = (unsigned short)y;
 		if (y > MaxY) MaxY = (unsigned short)y;
 	}
-	
-	// Initialize colors by interpolating from corners.
-	Vertex[0].Norm = (pcd->Verts[0].Norm + pcd->Verts[1].Norm + pcd->Verts[2].Norm + pcd->Verts[3].Norm).Normalize();
-	Vertex[1].Norm = (pcd->Verts[3].Norm + pcd->Verts[0].Norm).Normalize();
-	Vertex[2].Norm = (pcd->Verts[0].Norm + pcd->Verts[1].Norm).Normalize();
-	Vertex[3].Norm = (pcd->Verts[1].Norm + pcd->Verts[2].Norm).Normalize();
-	Vertex[4].Norm = (pcd->Verts[2].Norm + pcd->Verts[3].Norm).Normalize();
+	int half= 1<<pcd->Level;
+	GFXVertex v[5];
+	v[0].SetNormal ((vertices[pcd->Verts[0].vertindex].GetNormal() + vertices[pcd->Verts[1].vertindex].GetNormal() + vertices[pcd->Verts[2].vertindex].GetNormal() + vertices[pcd->Verts[3].vertindex].GetNormal()).Normalize());
+	v[1].SetNormal ((vertices[pcd->Verts[0].vertindex].GetNormal() + vertices[pcd->Verts[3].vertindex].GetNormal()).Normalize());
+	v[2].SetNormal ((vertices[pcd->Verts[0].vertindex].GetNormal() + vertices[pcd->Verts[1].vertindex].GetNormal()).Normalize());
+	v[3].SetNormal ((vertices[pcd->Verts[1].vertindex].GetNormal() + vertices[pcd->Verts[2].vertindex].GetNormal()).Normalize());
+	v[4].SetNormal ((vertices[pcd->Verts[2].vertindex].GetNormal() + vertices[pcd->Verts[3].vertindex].GetNormal()).Normalize());
+	v[0].x = pcd->xorg + half;
+	v[0].z = pcd->zorg + half;
+	v[1].x = pcd->xorg + half*2; 
+	v[1].z = pcd->zorg + half;
+	v[2].x = pcd->xorg + half;   
+	v[2].z = pcd->zorg;
+	v[3].x = pcd->xorg; 
+	v[3].z = pcd->zorg + half;
+	v[4].x = pcd->xorg + half; 
+	v[4].z = pcd->zorg + half*2;
+	//FIXME fill in!
+	for (int i=0;i<5;i++) {
+	  v[i].y= Vertex[i].Y;
+	  
+	  if (unusedvertices.size()) {
+	    vertices[unusedvertices.back()]= v[i];
+	    Vertex[i].vertindex = unusedvertices.back();
+	    unusedvertices.pop_back();
+	  } else {
+	    Vertex[i].vertindex = vertices.size();
+	    vertices.push_back (v[i]);
+	  }
+	}
+	//interpolate from other vertices;
 }
 
 
 quadsquare::~quadsquare() {
 	// Recursively delete sub-trees.
 	int	i;
+	for (i=0;i<5;i++) {
+	  unusedvertices.push_back (Vertex[i].vertindex);
+	}
 	for (i = 0; i < 4; i++) {
 		if (Child[i]) delete Child[i];
 		Child[i] = NULL;
@@ -291,29 +315,29 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata& cd) {
 	//
 
 	float	OneOverSize = 1.0 / (2 << cd.Level);
-	Vertex[0].Norm = MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
-				       (Vertex[4].Y - Vertex[2].Y) * OneOverSize);
+	vertices[Vertex[0].vertindex].SetNormal ( MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
+				       (Vertex[4].Y - Vertex[2].Y) * OneOverSize));
 
 	float	v;
 	quadsquare*	s = GetNeighbor(0, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[1].Y;
-	Vertex[1].Norm = MakeLightness((v - Vertex[0].Y) * OneOverSize,
-				       (cd.Verts[3].Y - cd.Verts[0].Y) * OneOverSize);
+	vertices[Vertex[1].vertindex].SetNormal (MakeLightness((v - Vertex[0].Y) * OneOverSize,
+				       (cd.Verts[3].Y - cd.Verts[0].Y) * OneOverSize));
 	
 	s = GetNeighbor(1, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[2].Y;
-	Vertex[2].Norm = MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
-				       (Vertex[0].Y - v) * OneOverSize);
+	vertices[Vertex[2].vertindex].SetNormal (MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
+				       (Vertex[0].Y - v) * OneOverSize));
 	
 	s = GetNeighbor(2, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[3].Y;
-	Vertex[3].Norm = MakeLightness((Vertex[0].Y - v) * OneOverSize,
-				       (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize);
+	vertices[Vertex[3].vertindex].SetNormal (MakeLightness((Vertex[0].Y - v) * OneOverSize,
+						      (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize));
 	
 	s = GetNeighbor(3, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[4].Y;
-	Vertex[4].Norm = MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
-				       (v - Vertex[0].Y) * OneOverSize);
+	vertices[Vertex[4].vertindex].SetNormal (MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
+				       (v - Vertex[0].Y) * OneOverSize));
 	
 
 	// The error, MinY/MaxY, and lighting values for this node and descendants are correct now.
@@ -991,15 +1015,27 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 			Child[i]->AddHeightMap(q, hm);
 		}
 	}
-	
-	// Deviate vertex heights based on data sampled from heightmap.
 	float	s[5];
 	s[0] = hm.Sample(cd.xorg + half, cd.zorg + half);
 	s[1] = hm.Sample(cd.xorg + half*2, cd.zorg + half);
 	s[2] = hm.Sample(cd.xorg + half, cd.zorg);
 	s[3] = hm.Sample(cd.xorg, cd.zorg + half);
 	s[4] = hm.Sample(cd.xorg + half, cd.zorg + half*2);
-
+#if 0	
+	// Deviate vertex heights based on data sampled from heightmap.
+	Vector v[5];
+	v[0].i = cd.xorg + half;
+	v[0].k = cd.zorg + half;
+	v[0].j = hm.Sample(v[0].i, v[0].k);
+	v[1].i = cd.xorg + half*2; v[1].k = cd.zorg + half;
+	v[1].j = hm.Sample(v[1].i, v[1].k);
+	v[2].i = cd.xorg + half;   v[2].k = cd.zorg;
+	v[2].j = hm.Sample(v[2].i, v[2].k);
+	v[3].i = cd.xorg; v[3].k = cd.zorg + half;
+        v[3].j = hm.Sample(v[3].i, v[3].k);
+	v[4].i = cd.xorg + half; v[4].k = cd.zorg + half*2;
+	v[4].j = hm.Sample(v[4].i, v[4].k);
+#endif
 	// Modify the vertex heights if necessary, and set the dirty
 	// flag if any modifications occur, so that we know we need to
 	// recompute error data later.
@@ -1007,6 +1043,10 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
+       			vertices[Vertex[i].vertindex].y = Vertex[i].Y;
+			//			vertices[Vertex[i].vertindex].x = v[i].i;//FIXME are we necessary?
+			//vertices[Vertex[i].vertindex].z = v[i].k;
+
 		}
 	}
 
