@@ -30,8 +30,11 @@
 #include "cmd/weapon_xml.h"
 //#include "mission.h"
 #include "galaxy_xml.h"
-
-
+#include <algorithm>
+#include "config_xml.h"
+#include "vs_globals.h"
+#include "xml_support.h"
+using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
 Universe::Universe(int argc, char** argv, const char * galaxy)
@@ -131,6 +134,22 @@ void Universe::Loop(void main_loop()) {
 }
 extern void micro_sleep (unsigned int howmuch);
 extern int getmicrosleep ();
+void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
+  if ((*ss.begin())==drawn) {
+    return;
+  }
+  vector<StarSystem*>::iterator drw = std::find (ss.begin(),ss.end(),drawn);
+  if (drw!=ss.end()) {
+    StarSystem * tmp=drawn;
+    vector<StarSystem*>::iterator i=ss.begin();
+    while (i<=drw) {
+      StarSystem * t=*i;
+      *i=tmp;
+      tmp = t;
+      i++;
+    }
+  }
+}
 void Universe::StartDraw()
 {
 #ifndef WIN32
@@ -147,10 +166,22 @@ void Universe::StartDraw()
   StarSystem::ProcessPendingJumps();
   //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();
-
-
-
-
+  //remove systems not recently visited?
+  static int sorttime=0;
+  static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","2001"));
+  if ((sorttime++)%howoften==1) {
+    SortStarSystems(star_system,active_star_system.back());
+    static int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numrunningsystems","6"));
+    if (star_system.size()>numrunningsystems) {
+      if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
+	delete star_system.back();
+	star_system.pop_back();
+      } else {
+	fprintf (stderr,"error with active star system list\n");
+      }
+    }
+  }
+  
 
 }
 

@@ -188,6 +188,13 @@ StarSystem::~StarSystem() {
   delete bolts;
   delete collidetable;
   GFXDeleteLightContext (lightcontext);
+  UnitCollection::UnitIterator iter = drawList->createIterator();
+  Unit *unit;
+  //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
+  while((unit = iter.current())!=NULL) {
+    unit->Kill(false);
+    iter.advance();
+  }
   delete drawList;
 }
 

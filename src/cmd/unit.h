@@ -415,7 +415,7 @@ public:
   ///cloaks or decloaks the starship depending on the bool
   void Cloak (bool cloak);
   ///deletes
-  virtual void Kill();
+  virtual void Kill(bool eraseFromSave=true);
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///Takes out of the collide table for this system.

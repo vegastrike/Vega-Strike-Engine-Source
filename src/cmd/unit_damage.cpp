@@ -172,8 +172,10 @@ void Unit::Split (int level) {
   //FIXME...how the heck can they go spinning out of control!
 }
 
-void Unit::Kill() {
-  RemoveUnitFromSave((int)this);
+void Unit::Kill(bool erasefromsave) {
+  if (erasefromsave)
+    RemoveUnitFromSave((int)this);
+  
   if (halos&&numhalos) {
     for (int hc=0;hc<numhalos;hc++) {
       delete halos[hc];
