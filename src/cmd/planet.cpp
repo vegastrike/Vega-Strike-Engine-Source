@@ -528,6 +528,16 @@ void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const 
   //screws with earth having an atmosphere... blahrgh
   if (!terrain&&GetDestinations().empty()&&!atmospheric) {//no place to go and acts like a ship
     GameUnit<Planet>::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
+	static bool planet_crash_docks = XMLSupport::parse_bool(vs_config->getVariable("physics","planet_collision_docks","true"));
+	if (_Universe->isPlayerStarship(un)&&planet_crash_docks) {
+		int whichdockport=this->CanDockWithMe(un);
+		if (whichdockport!=-1) {
+			QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
+			un->SetPosAndCumPos(place);
+			if (un->ForceDock(this,whichdockport)>0)
+			      un->UpgradeInterface(this);
+		}
+	}
   }
 
   //nothing happens...you fail to do anythign :-)
