@@ -31,7 +31,14 @@ typedef int Mix_Music;
 int fadeout=0, fadein=0;
 float volume=0;
 int bits=0,done=0;
-
+#if defined(_WIN32)&&defined(_WINDOWS)
+FILE *mystdout=stdout;
+#define STD_ERR mystdout
+#define STD_OUT mystdout
+#else
+#define STD_ERR stderr
+#define STD_OUT stdout
+#endif
 
 
 /******************************************************************************/
@@ -40,9 +47,9 @@ int bits=0,done=0;
 void errorv(char *str, va_list ap)
 {
 #ifdef HAVE_SDL
-	vfprintf(stderr,str,ap);
+	vfprintf(STD_ERR,str,ap);
 
-	fprintf(stderr,": %s.\n", SDL_GetError());
+	fprintf(STD_ERR,": %s.\n", SDL_GetError());
 #endif
 }
 
@@ -116,7 +123,7 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 	}
 	sende=true;
 	if(Mix_FadeInMusic(music, 1, fadein)==-1) {
-	  printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+	  fprintf(STD_OUT, "Mix_FadeInMusic: %s\n", Mix_GetError());
 	  return NULL;
 	}
 	
@@ -134,14 +141,40 @@ void music_finished () {
 	if (sende) {
 		char data='e';
 		INET_Write(mysocket,sizeof(char),&data);	
-		printf("\ne\n[SONG DONE]\n");
+		fprintf(STD_OUT, "\ne\n[SONG DONE]\n");
 	}
 }
-int main(int argc, char **argv)
-{
+#if defined(_WIN32)&&defined(_WINDOWS)
+typedef char FileNameCharType [65535];
+int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd) {
+	FileNameCharType argvc;
+	FileNameCharType *argv= &argvc;
+	GetModuleFileName(NULL, argvc, 65534);
+	mystdout=fopen("soundserver_stdout.txt", "w");
+	if (mystdout) {
+		setbuf(mystdout, NULL); /* No buffering */
+	} else {
+		mystdout=stdout;
+	}
+#else
+int main(int argc, char **argv) {
+#endif
+	{
+	char origpath[65535];
+	getcwd (origpath,65534);
+	origpath[65534]=0;
+#ifdef _WIN32
+        int i;
+	for (i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/'&&i>=0;i--) {
+	}
+	argv[0][i+1]='\0';
+	chdir(argv[0]);
+	chdir ("..");//gotta check outside bin dir
+#endif	
+	}
 	Mix_Music *music=NULL;
 	int audio_rate,audio_channels,
-		// set this to any of 512,1024,2048,4096
+ 		// set this to any of 512,1024,2048,4096
 		// the higher it is, the more FPS shown and CPU needed
 		audio_buffers=4096;
 #ifdef HAVE_SDL
@@ -165,7 +198,7 @@ int main(int argc, char **argv)
 	Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
 	bits=audio_format&0xFF;
 #endif
-	printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate,
+	fprintf(STD_OUT, "Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate,
 			bits, audio_channels>1?"stereo":"mono", audio_buffers );
 
 	// load the song
@@ -174,14 +207,16 @@ int main(int argc, char **argv)
 	}
 	if (mysocket==-1)
 		return 1;
-	printf("\n[CONNECTED]\n");
+	fprintf(STD_OUT, "\n[CONNECTED]\n");
+	fflush(STD_OUT);
 	char ministr[2]={'\0','\0'};
 	while (!done) {
 //		if ((Mix_PlayingMusic() || Mix_PausedMusic())&&(!done)) {
 		char arg;
 		std::string str;
 		arg=INET_fgetc(mysocket);
-		printf("%c",arg);
+		fprintf(STD_OUT, "%c",arg);
+		fflush(STD_OUT);
 		switch(arg) {
 		case 'p':
 		case 'P':
@@ -194,7 +229,8 @@ int main(int argc, char **argv)
 					}
 					arg=INET_fgetc(mysocket);
 				}
-				printf("%s",str.c_str());
+				fprintf(STD_OUT, "%s",str.c_str());
+				fflush(STD_OUT);
 				if ((str!=curmus)
 #ifdef HAVE_SDL
 				    ||(!Mix_PlayingMusic())
@@ -202,14 +238,15 @@ int main(int argc, char **argv)
 				    ) {
 					music=PlayMusic(str.c_str(),music);
 					if (music) {
-						printf("\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
+						fprintf(STD_OUT, "\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
 						curmus=str;
 					} else {
-						printf("\n[UNABLE TO PLAY %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
+						fprintf(STD_OUT, "\n[UNABLE TO PLAY %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
 					}
 				} else {
-					printf("\n[%s WITH %d FADEIN AND %d FADEOUT IS ALREADY PLAYING]\n",str.c_str(),fadein,fadeout);
+					fprintf(STD_OUT, "\n[%s WITH %d FADEIN AND %d FADEOUT IS ALREADY PLAYING]\n",str.c_str(),fadein,fadeout);
 				}
+				fflush(STD_OUT);
 			}
 			break;
 		case 'i':
@@ -223,9 +260,10 @@ int main(int argc, char **argv)
 					}
 					arg=INET_fgetc(mysocket);
 				}
-				printf("%s",str.c_str());
+				fprintf(STD_OUT, "%s",str.c_str());
 				fadein=atoi(str.c_str());
-				printf("\n[SETTING FADEIN TO %d]\n",fadein);
+				fprintf(STD_OUT, "\n[SETTING FADEIN TO %d]\n",fadein);
+				fflush(STD_OUT);
 			}
 			break;
 		case 'o':
@@ -239,9 +277,10 @@ int main(int argc, char **argv)
 					}
 					arg=INET_fgetc(mysocket);
 				}
-				printf("%s",str.c_str());
+				fprintf(STD_OUT, "%s",str.c_str());
 				fadeout=atoi(str.c_str());
-				printf("\n[SETTING FADEOUT TO %d]\n",fadeout);
+				fprintf(STD_OUT, "\n[SETTING FADEOUT TO %d]\n",fadeout);
+				fflush(STD_OUT);
 			}
 			break;
 		case 'v':
@@ -255,9 +294,10 @@ int main(int argc, char **argv)
 					}
 					arg=INET_fgetc(mysocket);
 				}
-				printf("%s",str.c_str());
+				fprintf(STD_OUT, "%s",str.c_str());
 				volume=atof(str.c_str());
-				printf("\n[SETTING VOLUME TO %f]\n",volume);
+				fprintf(STD_OUT, "\n[SETTING VOLUME TO %f]\n",volume);
+				fflush(STD_OUT);
 #ifdef HAVE_SDL
 				int newvolume=SDL_MIX_MAXVOLUME*volume;
 				Mix_VolumeMusic(newvolume);
@@ -269,7 +309,8 @@ int main(int argc, char **argv)
 		case '\0':
 			INET_close (mysocket);
 			done=true;
-			printf("\n[TERMINATING MUSIC SERVER]\n");
+			fprintf(STD_OUT, "\n[TERMINATING MUSIC SERVER]\n");
+			fflush(STD_OUT);
 			break;
 		}
 	}
