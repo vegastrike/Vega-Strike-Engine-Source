@@ -1729,6 +1729,8 @@ void FireKeyboard::Execute () {
   }
   if (f().enslave==PRESS||f().freeslave==PRESS) {
     Enslave(parent,f().enslave==PRESS);
+    f().enslave=RELEASE;
+    f().freeslave=RELEASE;
   }
   if (f().ejectcargo==PRESS||f().ejectnonmissioncargo==PRESS) {
     bool missiontoo=(f().ejectnonmissioncargo==PRESS);

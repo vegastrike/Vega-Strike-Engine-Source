@@ -276,7 +276,8 @@ void RecomputeUnitUpgrades (Unit * un) {
 
 }
 
-void Enslave (Unit* parent, bool free) {
+void Enslave (Unit* parent, bool enslave) {
+  bool free=!enslave;
   unsigned int i;
   vector<Cargo> ToBeChanged;
   unsigned int numcargo=parent->numCargo();
