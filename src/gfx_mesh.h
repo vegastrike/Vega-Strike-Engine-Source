@@ -77,6 +77,7 @@ private:
       //attributes
       FLATSHADE,
       TEXTURE,
+      ALPHAMAP,
       X,
       Y,
       Z,
@@ -85,11 +86,14 @@ private:
       K,
       S,
       T,
+      SCALE,
+      BLENDMODE,
       TYPE,
       ROTATE,
       WEIGHT,
       SIZE,
       OFFSET
+
     };
     enum PointState {
       P_X = 0x1,
@@ -131,6 +135,7 @@ private:
     int vertex_state;
 
     string decal_name;
+    string alpha_name;
     bool recalc_norm;
     int num_vertices;
     vector<GFXVertex> vertices;

@@ -29,7 +29,7 @@ static inline float min(float x, float y) {
   else return y;
 }
 
-const float scale=.5;
+float scale=1;
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -59,7 +59,10 @@ const EnumMap::Pair Mesh::XML::element_names[] = {
 
 const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
+  EnumMap::Pair("Scale",XML::SCALE),
+  EnumMap::Pair("Blend",XML::BLENDMODE),
   EnumMap::Pair("texture", XML::TEXTURE),
+  EnumMap::Pair("alphamap", XML::ALPHAMAP),
   EnumMap::Pair("x", XML::X),
   EnumMap::Pair("y", XML::Y),
   EnumMap::Pair("z", XML::Z),
@@ -75,11 +78,11 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Rotate", XML::ROTATE),
   EnumMap::Pair("Weight", XML::WEIGHT),
   EnumMap::Pair("Size", XML::SIZE),
-  EnumMap::Pair("Offset",XML::OFFSET)
+  EnumMap::Pair("Offset",XML::OFFSET),
 };
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 17);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 17);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 20);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -88,6 +91,56 @@ void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **a
 void Mesh::endElement(void *userData, const XML_Char *name) {
   ((Mesh*)userData)->endElement(name);
 }
+
+enum BLENDFUNC parse_alpha (char * tmp ) {
+  if (strcmp (tmp,"ZERO")==0) {
+    return ZERO;
+  }
+  if (strcmp (tmp,"ONE")==0) {
+    return ONE;
+  }
+  if (strcmp (tmp,"SRCCOLOR")==0) {
+    return SRCCOLOR;
+  }
+  if (strcmp (tmp,"INVSRCCOLOR")==0) {
+    return INVSRCCOLOR;
+  }
+  if (strcmp (tmp,"SRCALPHA")==0) {
+    return SRCALPHA;
+  }
+  if (strcmp (tmp,"INVSRCALPHA")==0) {
+    return INVSRCALPHA;
+  }
+  if (strcmp (tmp,"DESTALPHA")==0) {
+    return DESTALPHA;
+  }
+  if (strcmp (tmp,"INVDESTALPHA")==0) {
+    return INVDESTALPHA;
+  }
+  if (strcmp (tmp,"DESTCOLOR")==0) {
+    return DESTCOLOR;
+  }
+  if (strcmp (tmp,"INVDESTCOLOR")==0) {
+    return INVDESTCOLOR;
+  }
+  if (strcmp (tmp,"SRCALPHASAT")==0) {
+    return SRCALPHASAT;
+  }
+  if (strcmp (tmp,"CONSTALPHA")==0) {
+    return CONSTALPHA;
+  }
+  if (strcmp (tmp,"INVCONSTALPHA")==0) {
+    return INVCONSTALPHA;
+  }
+  if (strcmp (tmp,"CONSTCOLOR")==0) {
+    return CONSTCOLOR;
+  }
+  if (strcmp (tmp,"INVCONSTCOLOR")==0) {
+    return INVCONSTCOLOR;
+  }
+  return ZERO;
+}
+
 
 /* Load stages:
 0 - no tags seen
@@ -110,6 +163,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   xml->state_stack.push_back(elem);
 
   bool texture_found = false;
+  bool alpha_found = false;
   switch(elem) {
   case XML::UNKNOWN:
    fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
@@ -120,16 +174,34 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
     xml->load_stage = 1;
     // Read in texture attribute
-    
+    xml->decal_name = string("\0");
+    xml->alpha_name = string("\0");
+    char csrc[128];
+    char cdst[128];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
 	texture_found = true;
-	goto texture_done;
+	break;
+      case XML::ALPHAMAP:
+	xml->alpha_name = (*iter).value;
+	alpha_found = true;
+	break;
+      case XML::SCALE:
+	scale =  parse_float ((*iter).value);
+	break;
+      case XML::BLENDMODE:
+	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
+	blendSrc = parse_alpha (csrc);
+	blendDst = parse_alpha (cdst);
+	if (blendDst==blendSrc&&blendSrc==ZERO) {
+	  blendSrc=ONE;
+	}
+	break;
       }
+
     }
-  texture_done:
     assert(texture_found);
     break;
   case XML::POINTS:
@@ -911,7 +983,15 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
       }
     }
   }
-  Decal = new Texture(xml->decal_name.c_str(), 0);
+  if (xml->decal_name.c_str()[0]=='\0') {	
+    Decal = NULL;
+  } else {
+    if (xml->alpha_name.c_str()[0]=='\0') {
+      Decal = new Texture(xml->decal_name.c_str(), 0);    
+    }else {
+      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0);    
+    }
+  }
 
   int index = 0;
 

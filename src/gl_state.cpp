@@ -142,39 +142,51 @@ BOOL GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	break;
 	case SRCALPHASAT:	sfactor = GL_SRC_ALPHA_SATURATE;
 	break;
-	case SRCCOLOR:		
+	case CONSTALPHA:   	sfactor=GL_CONSTANT_ALPHA;
+	  break;
+	case INVCONSTALPHA:	sfactor=GL_ONE_MINUS_CONSTANT_ALPHA;
+	  break;
+	case CONSTCOLOR:	sfactor=GL_CONSTANT_COLOR;
+	  break;
+	case INVCONSTCOLOR:	sfactor=GL_ONE_MINUS_CONSTANT_COLOR;
+	  break;
+	case SRCCOLOR:
 	case INVSRCCOLOR:	
-	case BOTHSRCALPHA:   
-	case BOTHINVSRCALPHA:
-	case FORCE_DWORD:
 	default:		
 	return FALSE;
 	}
 	
 	switch (dst)
 	{
-		case ZERO:			dfactor = GL_ZERO;            
-		break;
-		case ONE:			dfactor = GL_ONE;
-		break;
-		case SRCCOLOR:		dfactor = GL_SRC_COLOR;
-		break;
-		case INVSRCCOLOR:	dfactor = GL_ONE_MINUS_SRC_COLOR;
-		break;
-		case SRCALPHA:		dfactor = GL_SRC_ALPHA;
-		break;
-		case INVSRCALPHA:	dfactor = GL_ONE_MINUS_SRC_ALPHA;
-		break;
-		case DESTALPHA:		dfactor = GL_DST_ALPHA;
-		break;
-		case INVDESTALPHA:	dfactor = GL_ONE_MINUS_DST_ALPHA;
-		break;
-		case DESTCOLOR:		
-		case INVDESTCOLOR:	
-		case SRCALPHASAT:	
-		case BOTHSRCALPHA:   
-		case BOTHINVSRCALPHA:
-		case FORCE_DWORD:
+	case ZERO:		dfactor = GL_ZERO;            
+	  break;
+	case ONE:		dfactor = GL_ONE;
+	  break;
+	case SRCCOLOR:		dfactor = GL_SRC_COLOR;
+	  break;
+	case INVSRCCOLOR:	dfactor = GL_ONE_MINUS_SRC_COLOR;
+	  break;
+	case SRCALPHA:		dfactor = GL_SRC_ALPHA;
+	  break;
+	case INVSRCALPHA:	dfactor = GL_ONE_MINUS_SRC_ALPHA;
+	  break;
+	case DESTALPHA:		dfactor = GL_DST_ALPHA;
+	  break;
+	case INVDESTALPHA:	dfactor = GL_ONE_MINUS_DST_ALPHA;
+	  break;
+	case CONSTALPHA:   	sfactor=GL_CONSTANT_ALPHA;
+	  break;
+	case INVCONSTALPHA:	sfactor=GL_ONE_MINUS_CONSTANT_ALPHA;
+	  break;
+	case CONSTCOLOR:	sfactor=GL_CONSTANT_COLOR;
+	  break;
+	case INVCONSTCOLOR:	sfactor=GL_ONE_MINUS_CONSTANT_COLOR;
+	  break;
+
+	case DESTCOLOR:		
+	case INVDESTCOLOR:	
+	case SRCALPHASAT:	
+
 		default:		
 		return FALSE;
 	}

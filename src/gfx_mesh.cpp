@@ -79,7 +79,8 @@ void DrawVector(const Vector &start, const Vector &vect)
 void Mesh::InitUnit()
 {
 	local_transformation = identity_transformation;
-
+	blendSrc=ONE;
+	blendDst=ZERO;
 	changed = TRUE;
 	vlist=NULL;
 	
@@ -673,7 +674,7 @@ void Mesh::ProcessDrawQueue() {
 	//GFXEnable(LIGHTING);
 	GFXDisable (LIGHTING);
 	//static float rot = 0;
-	GFXColor(1.0, 1.0, 1.0, 1.0);
+	//GFXColor(1.0, 1.0, 1.0, 1.0);
 	
 	GFXEnable(TEXTURE0);
 	GFXEnable(CULLFACE);
@@ -685,14 +686,14 @@ void Mesh::ProcessDrawQueue() {
 	}
 	if(Decal)
 	  Decal->MakeActive();
-	GFXBlendMode(ONE, ZERO);
+	
 	GFXSelectTexcoordSet(0, 0);
 	if(envMap) {
 	  //_GFX->getLightMap()->MakeActive();
 	  _GFX->activateLightMap();
 	  GFXSelectTexcoordSet(1, 1);
 	  }
-
+	GFXBlendMode(blendSrc, blendDst);
   while(draw_queue->size()) {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();

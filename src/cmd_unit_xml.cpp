@@ -39,7 +39,7 @@ namespace UnitXML {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
-    EnumMap::Pair ("MeshFile", MESHFILE) 
+    EnumMap::Pair ("MeshFile", MESHFILE)
   };
 
   const EnumMap::Pair attribute_names[] = {
@@ -53,7 +53,7 @@ namespace UnitXML {
     EnumMap::Pair ("rk", RK), 
     EnumMap::Pair ("qi", QI),     
     EnumMap::Pair ("qj", QJ),     
-    EnumMap::Pair ("qk", QK)     
+    EnumMap::Pair ("qk", QK)
 };
 
   const EnumMap element_map(element_names, 4);
@@ -70,7 +70,6 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Vector Q;
     Vector R;
     Vector pos;
-
   Names elem = (Names)element_map.lookup(name);
 
 	AttributeList::const_iterator iter;
@@ -163,7 +162,6 @@ void Unit::LoadXML(const char *filename) {
   }
 
   xml = new XML;
-
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);

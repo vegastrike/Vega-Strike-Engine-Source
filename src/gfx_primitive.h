@@ -41,16 +41,17 @@ protected:
   //  scalar_t prevtime;
   //	LONGLONG prevtime;
 
-	void InitPrimitive();
+  void InitPrimitive();
 
-	char name[64];
+  char name[64];
 
-	Logo *forcelogos;
-	int numforcelogo;
+  Logo *forcelogos;
+  int numforcelogo;
 
-	Logo *squadlogos;
-	int numsquadlogo;
-
+  Logo *squadlogos;
+  int numsquadlogo;
+  enum BLENDFUNC blendSrc;
+  enum BLENDFUNC blendDst;
 	//void UpdateGL();
 public:
 	Primitive ();
