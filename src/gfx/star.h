@@ -9,18 +9,21 @@ const int STARnumvlist = 27;
 class StarVlist {
 	GFXVertexList * vlist;
 	float spread;
+	Vector newcamr;
+	Vector newcamq;
     Vector camr;
 	Vector camq;
+	double lasttime;
 public:
 	StarVlist (int num, float spread);
 	~StarVlist();
 	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate);
 	void Draw();
 	void EndDrawState();
+	void UpdateGraphics();
 };
 class Stars {
 private:
-  QVector campos;
   StarVlist vlist;
   QVector pos[STARnumvlist];
   float spread;

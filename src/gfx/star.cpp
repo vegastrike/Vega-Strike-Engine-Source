@@ -5,6 +5,7 @@
 #include "gfx/camera.h"
 #include "gfx/cockpit.h"
 #include "config_xml.h"
+#include "lin_time.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -18,6 +19,7 @@
 //extern Unit ** fighters;
 
 StarVlist::StarVlist (int num ,float spread) {
+	lasttime=0;
 	camr = _Universe->AccessCamera()->GetR();	
 	this->spread=spread;
 	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
@@ -29,7 +31,10 @@ StarVlist::StarVlist (int num ,float spread) {
 		tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
 		tmpvertex[j].r=0;
 		tmpvertex[j].g=0;
-		tmpvertex[j].b=0;		
+		tmpvertex[j].b=0;
+		tmpvertex[j].i=tmpvertex[j+1].i=.57735;
+		tmpvertex[j].j=tmpvertex[j+1].j=.57735;
+		tmpvertex[j].k=tmpvertex[j+1].k=.57735;
 		tmpvertex[j+1].x =tmpvertex[j].x;//+spread*.01;
 		tmpvertex[j+1].y =tmpvertex[j].y;//;+spread*.01;
 		tmpvertex[j+1].z =tmpvertex[j].z;
@@ -40,10 +45,19 @@ StarVlist::StarVlist (int num ,float spread) {
 	vlist= new GFXVertexList (GFXLINE,2*num,tmpvertex, 2*num, true,0);  
 	delete []tmpvertex;
 }
+void StarVlist::UpdateGraphics() {
+	double time = getNewTime();
+	if (time!=lasttime) {
+		camr= newcamr;
+		camq=newcamq;
+		Vector newcamp;
+		_Universe->AccessCamera()->GetPQR (newcamp,newcamq,newcamr);
+		lasttime=time;
+	}
+}
 void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, bool roll) {
-	Vector newcamp,newcamq,newcamr;
-	_Universe->AccessCamera()->GetPQR(newcamp,newcamq,newcamr);
-	Vector camq_delta(newcamq-camq);
+	UpdateGraphics();
+  	Vector camq_delta(newcamq-camq);
     Vector camr_delta(newcamr-camr);
 	Matrix rollMatrix;
 	if (roll) {
@@ -60,8 +74,6 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 		else
 			RotateAxisAngle(rollMatrix,newcamr,hack*rollstreakscale);
 	}
-	camr = newcamr;
-	camq = newcamq;
 	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 
 	Vector vel (-velocity*velstreakscale);
@@ -102,7 +114,6 @@ void StarVlist::EndDrawState() {
 	  
 }
 Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread),spread(spread){
-  campos = _Universe->AccessCamera()->GetPosition();
 
   int curnum = num/STARnumvlist+1;
   fade = blend=true;
@@ -136,9 +147,7 @@ void Stars::Draw() {
   } else {
     GFXDisable (LIGHTING);
   }
-  QVector newcampos =_Universe->AccessCamera()->GetPosition();
   vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),false);
-  campos = newcampos;
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
       GFXTranslateModel (pos[i]-pos[i-1]);
