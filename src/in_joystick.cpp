@@ -328,7 +328,7 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 
     int numaxes = SDL_JoystickNumAxes (joy);
 
-    Sint16 axi[MAX_AXES]={0};
+	vector <Sint16> axi(numaxes<MAX_AXES?MAX_AXES:numaxes);
     
     for(a=0;a<numaxes;a++){
       axi[a] = SDL_JoystickGetAxis(joy,a);
