@@ -56,7 +56,7 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.x_resolution = 640;
   g_game.fov=60;
   g_game.PaletteExt=1;
-  
+  g_game.cubemap=0;
 }
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)

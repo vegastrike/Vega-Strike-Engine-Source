@@ -114,7 +114,6 @@ Texture::Texture(char * FileName, int stage)
 	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	sizeX = info.biWidth;	
 	sizeY = info.biHeight;
-	printf ("sizex%d sizey%d",sizeX,sizeY);
 
 
 	//while(1);
@@ -218,7 +217,6 @@ Texture::Texture (char * FileNameRGB, char *FileNameA, int stage)
 		if (!fp1)
 		{
 			data = NULL;
-			printf("Alpha file %s not found\n",FileNameA);
 			FileNameA = NULL;
 			//fclose(fp);
 			//*this = Texture(FileNameRGB, NULL);

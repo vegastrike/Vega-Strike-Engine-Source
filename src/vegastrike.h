@@ -157,6 +157,7 @@ typedef struct {
   int y_resolution;
   int x_resolution;  
   int fov;
+  int cubemap;
   //  scalar_t time;                      /* game time -- now local in lin_time.h*/
   //scalar_t time_step;                 /* size of current time step " */
   //scalar_t secs_since_start;          /* seconds since game was started " */

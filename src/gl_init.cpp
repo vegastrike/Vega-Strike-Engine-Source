@@ -95,6 +95,11 @@ void init_opengl_extensions()
       g_game.Multitexture =0;
 	  printf ("Multitexture unsupported");
     }
+    if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) ) {
+      printf ("Texture Cube Map Ext Supported");
+      g_game.cubemap =1;
+
+    }
 }
 BOOL GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );

@@ -58,7 +58,7 @@ void ScaledCrossProduct(const Vector &a, const Vector &b, Vector &r)
 	r.i = a.j*b.k-a.k*b.j; 
     	r.j = a.k*b.i-a.i*b.k;
     	r.k = a.i*b.j-a.j*b.i;
-	float size = (float)sqrt(r.i*r.i+r.j*r.j+r.k*r.k);
+	float size = sqrtf(r.i*r.i+r.j*r.j+r.k*r.k);
 	r.i /= size;
 	r.j /= size;
 	r.k /= size;
@@ -66,7 +66,7 @@ void ScaledCrossProduct(const Vector &a, const Vector &b, Vector &r)
 
 void Normalize(Vector &r)
 {
-	float size = (float)sqrt(DotProduct (r,r));
+	float size = sqrtf(DotProduct (r,r));
 	r.i /= size;
 	r.j /= size;
 	r.k /= size;
@@ -91,8 +91,8 @@ void Vector::Yaw(float rad) //only works with unit vector
 		theta = PI/2;
 
 	theta += rad;
-	i = (float)cos(theta);
-	k = (float)sin(theta); 
+	i = cosf(theta);
+	k = sinf(theta); 
 }
 
 void Vector::Roll(float rad)
@@ -109,8 +109,8 @@ void Vector::Roll(float rad)
 		theta = PI/2;
 	
 	theta += rad; 
-	i = (float)cos(theta);
-	j = (float)sin(theta); 
+	i = cosf(theta);
+	j = sinf(theta); 
 }
 
 void Vector::Pitch(float rad)
@@ -127,8 +127,8 @@ void Vector::Pitch(float rad)
 		theta = PI/2;
 	
 	theta += rad;
-	k = (float)cos(theta);
-	j = (float)sin(theta);
+	k = cosf(theta);
+	j = sinf(theta);
 }
 
 void Yaw (float rad, Vector &p,Vector &q, Vector &r)

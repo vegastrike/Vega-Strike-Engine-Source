@@ -120,7 +120,10 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix)
 	Matrix t;
 	switch(mode)
 	{
-	case MODEL:
+	case MODEL:/**
+	  LoadMatrixf(model);
+	  MultMatrixf(matrix);
+		   **/
 		MultMatrix(t, model, matrix);
 		CopyMatrix(model, t);
 		MultMatrix(t, view, model);

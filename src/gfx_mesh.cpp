@@ -126,10 +126,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	FILE* fp = NULL;
 	int jj;
 	fp = fopen (filename, "r+b");
-	printf ("Loading file %s",filename);
 	if (!fp)
 	{
-	  printf ("Failed to load file %s",filename);
+	  fprintf (stderr,"Failed to load file %s",filename);
 	  exit(1);
 	}
 		
@@ -539,7 +538,6 @@ Mesh::~Mesh()
 {
 	if(!orig)
 	{
-	        printf ("orig refcount: %d",refcount);
 		if(vlist!=NULL)
 			delete vlist;
 		//if(vertexlist != NULL)
@@ -561,7 +559,7 @@ Mesh::~Mesh()
 	{
 
 		orig->refcount--;
-		printf ("orig refcount: %d",refcount);
+		//printf ("orig refcount: %d",refcount);
 		if(orig->refcount == 0)
 			delete orig;
 	}
@@ -578,10 +576,11 @@ void Mesh::Reflect()
 	float dist, oodist;
 	Vector p = pp;
 	Vector q = pq;
-	Vector r = pr;
-	Vector pos = ppos;
+	//Vector r = pr;
+	//Vector pos = ppos;
 	int nt3 = 3 * numtris;
 	int i;
+	float w;
 	vertexlist = vlist->LockUntransformed();
 	for (i=0; i< nt3;i+=3)
 	{
@@ -598,15 +597,16 @@ void Mesh::Reflect()
 			Camera* TempCam = _GFX->AccessCamera();
 			TempCam->GetPosition (CamPos);
 			CamPos = CamPos - pnt;
-			dist = sqrt (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
-			oodist = 1.0/ dist;
+			dist = sqrtf (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
+			oodist = ((float)1.0)/ dist;
 			CamPos.i *= oodist;
 			CamPos.j *= oodist;
 			CamPos.k *= oodist;
 			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
 
 			nml[j] = reflect;
-			float w = 1/sqrt (2*(-nml[j].k+1));
+			//EQUIV BELOW//float w1 = 1/sqrt (2*(-nml[j].k+1));
+			w = sqrtf (((float) .5)/(((float) 1)-nml[j].k));
 			vertexlist[k].u = (nml[j].i*w+1.23)*.40625;
 			vertexlist[k].v = 1-(nml[j].j*w+1.23)*.40625;
 			
@@ -630,15 +630,16 @@ void Mesh::Reflect()
 			Camera* TempCam = _GFX->AccessCamera();
 			TempCam->GetPosition (CamPos);
 			CamPos = CamPos - pnt;
-			dist = sqrt (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
-			oodist = 1.0/ dist;
+			dist = sqrtf (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
+			oodist = ((float)1.0)/ (float)dist;
 			CamPos.i *= oodist;
 			CamPos.j *= oodist;
 			CamPos.k *= oodist;
 			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
 
 			nml[j] = reflect;
-			float w = 1/sqrt (2*(-nml[j].k+1));
+			//EQUIV BELOWfloat w1 = 1/sqrt (2*(-nml[j].k+1));
+			w = sqrtf (((float) .5)/(((float) 1)-nml[j].k));
 			vertexlist[k].u = (nml[j].i*w+1.23)*.40625;
 			vertexlist[k].v = 1-(nml[j].j*w+1.23)*.40625;
 
@@ -650,7 +651,7 @@ void Mesh::Reflect()
 void Mesh::Draw()
 {
 	GFXSelectMaterial(myMatNum);
-	static float rot = 0;
+	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	UpdateMatrix();
 	Reflect();

@@ -29,7 +29,7 @@ void Mesh:: Rotate (const Vector &axis)
 	float theta = axis.Magnitude();
 	float ootheta = 1/theta;
 	float s = cos (theta * .5);
-	Quaternion rot = Quaternion(s, axis * (sin (theta*.5)*ootheta));
+	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
 	Quaternion rotprime = rot.Conjugate();
 	Quaternion pquat = rot * Quaternion(0, p) * rotprime;
 	Quaternion qquat = rot * Quaternion(0, q) * rotprime;
