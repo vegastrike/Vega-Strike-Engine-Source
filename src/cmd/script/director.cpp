@@ -82,7 +82,7 @@ unsigned int getSaveDataLength (int whichcp, string key) {
   olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
   return ans->size();
 }
-void pushSaveData (int whichcp, string key, float val) {
+unsigned int pushSaveData (int whichcp, string key, float val) {
   if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
     return;
   }
@@ -91,6 +91,7 @@ void pushSaveData (int whichcp, string key, float val) {
   vi->type = VAR_FLOAT;
   vi->float_val=val;
   ans->push_back (vi);
+  return ans->size()-1;
 
 }
 void putSaveData (int whichcp, string key, unsigned int num, float val) {
