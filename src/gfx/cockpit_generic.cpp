@@ -372,6 +372,12 @@ static float dockingdistance (Unit* port, Unit * un) {
 	return mag;
 }
 void Cockpit::Update () {
+  if (jumpok) {
+		jumpok++;
+  }
+  if (jumpok>5)
+	  jumpok=0;
+  
   UpdAutoPilot();
   Unit * par=GetParent();
   if (!par) {

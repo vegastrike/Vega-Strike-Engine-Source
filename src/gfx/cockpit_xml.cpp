@@ -93,6 +93,9 @@ namespace CockpitXML {
     EnumMap::Pair ("Energy", UnitImages::ENERGY),
     EnumMap::Pair ("Eject", UnitImages::EJECT),
     EnumMap::Pair ("Lock", UnitImages::LOCK),
+	EnumMap::Pair ("MissileLock",UnitImages::MISSILELOCK),
+	EnumMap::Pair ("Jump",UnitImages::JUMP),
+	EnumMap::Pair ("ECM",UnitImages::ECM),	
     EnumMap::Pair ("Hull", UnitImages::HULL),
 	EnumMap::Pair ("WarpEnergy", UnitImages::WARPENERGY),
     EnumMap::Pair ("Speed", UnitImages::KPS),
@@ -130,7 +133,7 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE)
   };
 
-  const EnumMap element_map(element_names, 27);
+  const EnumMap element_map(element_names, 30);
   const EnumMap attribute_map(attribute_names, 27);
 }
 
@@ -201,6 +204,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     }
     text = new TextPlane ();
     break;
+  case UnitImages::JUMP:
+  case UnitImages::MISSILELOCK:
+  case UnitImages::ECM:
   case UnitImages::ARMORF:
   case UnitImages::ARMORR:
   case UnitImages::ARMORL:

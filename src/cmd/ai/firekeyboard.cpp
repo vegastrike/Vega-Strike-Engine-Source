@@ -1123,6 +1123,7 @@ void FireKeyboard::Execute () {
     parent->LockTarget(!parent->TargetLocked());
   }
   if (f().ECMkey==PRESS) {
+	  f().ECMkey=DOWN;
     parent->GetImageInformation().ecm=-parent->GetImageInformation().ecm;
     
   }

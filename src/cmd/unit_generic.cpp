@@ -1863,8 +1863,19 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   return ok;
 }
 extern void ActivateAnimation(Unit * jp);
+void TurnJumpOKLightOn(Unit * un) {
+	Cockpit * cp = _Universe->isPlayerStarship(un);
+	if (cp) {
+		if (un->GetWarpEnergy()>=un->GetJumpStatus().energy) {
+			if (un->GetJumpStatus().drive>-2) {
+				cp->jumpok=1;
+			}
+		}
+	}
+}
 bool Unit::jumpReactToCollision (Unit * smalle) {
   if (!GetDestinations().empty()) {//only allow big with small
+	  TurnJumpOKLightOn(smalle);
 	  //ActivateAnimation(this);
     if (((smalle->GetJumpStatus().drive>=0&&smalle->warpenergy>=smalle->GetJumpStatus().energy)||image->forcejump)){
 		smalle->warpenergy-=smalle->GetJumpStatus().energy;
@@ -1886,6 +1897,7 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
     return true;
   }
   if (!smalle->GetDestinations().empty()) {
+	  TurnJumpOKLightOn(this);	  
 	  //  ActivateAnimation(smalle);	  
     if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
       DeactivateJumpDrive();

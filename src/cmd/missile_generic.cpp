@@ -128,7 +128,9 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 				Target (this);//go wild
 			}else if (hull>0){
 				static unsigned int pointdef = ROLES::getRole("POINTDEF");
+				targ->graphicOptions.missilelock=true;
 				un_iter i = targ->getSubUnits();
+				
 				Unit * su;
 				for (;(su =*i)!=NULL;++i) {
 					if (su->combatRole()==pointdef) {

@@ -62,6 +62,7 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 #endif
 
 void FlyByJoystick::Execute() {
+	static bool clamp_joystick_axes = XMLSupport::parse_bool (vs_config->getVariable("joystick","clamp_axes","true"));
   desired_ang_velocity=Vector(0,0,0); 
   for (unsigned int i=0;i<this->whichjoystick.size();i++) {
   int which_joystick = this->whichjoystick[i];
@@ -80,7 +81,12 @@ void FlyByJoystick::Execute() {
       bool inverse=joystick[joy_nr]->axis_inverse[AXIS_Y];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
-
+	  if (clamp_joystick_axes) {
+		  if (axis_value<-1)
+			  axis_value=-1;
+		  if (axis_value>1)
+			  axis_value=1;
+	  }
       Up( axis_value);
       }
     }
@@ -96,7 +102,12 @@ void FlyByJoystick::Execute() {
       bool inverse=joystick[joy_nr]->axis_inverse[AXIS_X];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
-
+	  if (clamp_joystick_axes) {
+		  if (axis_value<-1)
+			  axis_value=-1;
+		  if (axis_value>1)
+			  axis_value=1;
+	  }
       Right( axis_value);
       }
     }
@@ -112,8 +123,12 @@ void FlyByJoystick::Execute() {
       bool inverse=joystick[joy_nr]->axis_inverse[AXIS_Z];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
-
-
+	  if (clamp_joystick_axes) {
+		  if (axis_value<-1)
+			  axis_value=-1;
+		  if (axis_value>1)
+			  axis_value=1;
+	  }
       RollRight( axis_value );
       }
     }
@@ -129,8 +144,19 @@ void FlyByJoystick::Execute() {
       bool inverse=joystick[joy_nr]->axis_inverse[AXIS_THROTTLE];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
+	  Unit::Computer *cpu = &parent->GetComputerData(); 
 
-      Accel( axis_value );
+	  if (axis_value>1)
+		  axis_value=1;
+	  float minspeed = parent->Limits().retro/parent->Limits().forward;
+	  static bool minzero=XMLSupport::parse_bool(vs_config->getVariable("joystick","zero_min_throttle","false"));
+	  if (minzero)
+		  minspeed = 0;
+	  if (axis_value<minspeed)
+		  axis_value=minspeed;
+	  
+	  cpu->set_speed=axis_value*cpu->max_speed();
+	  desired_velocity= Vector (0,0,cpu->set_speed);
       }
     }
 

@@ -310,16 +310,16 @@ protected:
 public:
   struct graphic_options {
 	  unsigned SubUnit:1;
-	  unsigned RecurseIntoSubUnitsOnCollision:1;
+	  unsigned RecurseIntoSubUnitsOnCollision:1;	
+	  unsigned missilelock:1;	    
 	  unsigned FaceCamera:1;
 	  unsigned Animating:1;
-	  unsigned unused1:1;	  
+	  unsigned unused1:1;
 	  unsigned unused2:1;
 	  unsigned unused3:1;
-	  unsigned unused4:1;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
-		  FaceCamera=Animating=unused1=unused2=unused3=unused4=0;
+		  FaceCamera=Animating=missilelock=unused2=unused3=unused1=0;
 		  NumAnimationPoints=0;
 	  }
   }graphicOptions;
@@ -917,7 +917,7 @@ public:
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
   void Threaten (Unit * targ, float danger);
   ///Rekeys the threat level to zero for another turn of impending danger
-  void ResetThreatLevel() {computer.threatlevel=0;}
+  void ResetThreatLevel() {computer.threatlevel=0;graphicOptions.missilelock=0;}
   ///The cosine of the angle to the target given passed in speed and range
   float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001) const;
   ///Highest cosine from given mounts to target. Returns distance and cosine

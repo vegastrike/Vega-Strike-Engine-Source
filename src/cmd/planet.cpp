@@ -95,19 +95,25 @@ public:
 		planetRadius= radiusOfPlanet;
 	}
 	virtual void Draw(const Transformation & quat=identity_transformation, const Matrix & m = identity_matrix) {
-		QVector dirtocam = _Universe->AccessCamera()->GetPosition()-m.p;
-		Transformation qua=quat;
-		Matrix mat = m;
-		float distance = dirtocam.Magnitude();
-
-		float distanceToMovCam=planetRadius/distance;
-		float zscale;
-		float xyscale = zscale =sqrt(1-distanceToMovCam*distanceToMovCam);
-		dirtocam.Normalize();
-		mat.p+=distanceToMovCam*planetRadius*dirtocam;
-		ScaleMatrix(mat,Vector(xyscale,xyscale,zscale));
-		qua.position=mat.p;
-		GameUnit<Unit>::Draw(qua,mat);
+		static bool rescale_planet_halo = XMLSupport::parse_bool (vs_config->getVariable("graphics","rescale_planet_halo","false"));
+		if (rescale_planet_halo) {
+			QVector dirtocam = _Universe->AccessCamera()->GetPosition()-m.p;
+			Transformation qua=quat;
+			Matrix mat = m;
+			float distance = dirtocam.Magnitude();
+			
+			float distanceToMovCam=planetRadius/distance;
+			float zscale;
+			float xyscale = zscale =sqrt(1-distanceToMovCam*distanceToMovCam);
+			zscale = sqrt(1-xyscale*xyscale);
+			dirtocam.Normalize();
+			mat.p+=distanceToMovCam*planetRadius*dirtocam;
+			ScaleMatrix(mat,Vector(xyscale,xyscale,zscale));
+			qua.position=mat.p;
+			GameUnit<Unit>::Draw(qua,mat);
+		}else{
+			GameUnit<Unit>::Draw(quat,m);
+		}
 	}
 };
 void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {

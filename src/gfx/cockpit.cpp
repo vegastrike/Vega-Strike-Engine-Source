@@ -782,6 +782,14 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
       return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
     }
     return 0;
+  case UnitImages::MISSILELOCK:
+	  if (target->graphicOptions.missilelock)
+		  return 1;
+	  return 0;
+  case UnitImages::ECM:
+	  return target->GetImageInformation().ecm>0?1:0;
+  case UnitImages::JUMP:
+	  return jumpok?1:0;
   case UnitImages::KPS:
 	if (lie) 
 		return (target->GetVelocity().Magnitude())*10/game_speed;
