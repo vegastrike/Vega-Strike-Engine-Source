@@ -105,21 +105,16 @@ Control* GroupControl::findControlById(const std::string& id) {
 // Draw the control.  Return true if anything is drawn.
 // This should not draw outside its rectangle!
 bool GroupControl::draw(void) {
-    bool result = false;
     std::vector<Control*>::iterator iter;
     for(iter = m_controls.begin() ; iter != m_controls.end() ; iter++ ) {
         Control* currentControl = *iter;
         if(!currentControl->hidden()) {
-            // If it's not hidden, draw it and its children.
-            result |= currentControl->draw();
-            if(currentControl->hasGroupChildren()) {
-                GroupControl* group = dynamic_cast<GroupControl*>( currentControl );
-                result |= group->draw();
-            }
+            // If it's not hidden, draw it.
+            currentControl->draw();
         }
     }
 
-    return result;
+    return true;
 }
 
 // OVERRIDES

@@ -28,13 +28,8 @@
 void drawRect(const Rect& rect, const GFXColor& color) {
     glDisable(GL_TEXTURE_2D);
 
-    glBegin(GL_QUADS);
     glColor4f(color.r, color.g, color.b, color.a);
-    glVertex2f(rect.origin.x, rect.origin.y);
-    glVertex2f(rect.origin.x, rect.origin.y+rect.size.height);
-    glVertex2f(rect.origin.x+rect.size.width, rect.origin.y+rect.size.height);
-    glVertex2f(rect.origin.x+rect.size.width, rect.origin.y);
-    glEnd();
+	glRectf(rect.left(), rect.bottom(), rect.right(), rect.top());
 
     glEnable(GL_TEXTURE_2D);
 }
@@ -44,13 +39,12 @@ void drawRectOutline(const Rect& rect, const GFXColor& color, float lineWidth) {
     glDisable(GL_TEXTURE_2D);
     glLineWidth(lineWidth);
 
-    glBegin(GL_LINE_STRIP);
+    glBegin(GL_LINE_LOOP);
     glColor4f(color.r, color.g, color.b, color.a);
-    glVertex2f(rect.origin.x, rect.origin.y);
-    glVertex2f(rect.origin.x, rect.origin.y+rect.size.height);
-    glVertex2f(rect.origin.x+rect.size.width, rect.origin.y+rect.size.height);
-    glVertex2f(rect.origin.x+rect.size.width, rect.origin.y);
-    glVertex2f(rect.origin.x, rect.origin.y);
+    glVertex2f(rect.left(), rect.top());
+    glVertex2f(rect.right(), rect.top());
+    glVertex2f(rect.right(), rect.bottom());
+    glVertex2f(rect.left(), rect.bottom());
     glEnd();
 
     glEnable(GL_TEXTURE_2D);

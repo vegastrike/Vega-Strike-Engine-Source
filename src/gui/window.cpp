@@ -86,6 +86,8 @@ bool Window::draw(void) {
 
 // Draw window background.
 bool Window::drawBackground(void) {
+	m_texture.draw(m_rect);
+
     if(!isClear(m_color)) {
         drawRect(m_rect, m_color);
     }

@@ -22,7 +22,8 @@
 #ifndef __WINDOW_H__
 #define __WINDOW_H__
 
-#include "gui/eventresponder.h"
+#include "eventresponder.h"
+#include "guitexture.h"
 
 #include <vector>
 
@@ -66,6 +67,10 @@ public:
     virtual void setColor(const GFXColor& c) { m_color = c; };
     virtual GFXColor color(void) { return m_color; };
 
+    // The background texture for the window.
+	virtual void setTexture(const std::string& textureName) { m_texture.read(textureName); };
+    virtual GuiTexture& texture(void) { return m_texture; };
+
     // Set up a controller object.
     virtual WindowController* controller(void) { return m_controller; };
     virtual void setController(WindowController* controller) { m_controller = controller; } ;
@@ -102,6 +107,7 @@ protected:
 protected:
     Rect m_rect;                    // Rectangle representing window.
     GFXColor m_color;               // Background color of window.
+	GuiTexture m_texture;			// Background texture.
     GroupControl* m_controls;       // List of controls that are in this window.
     bool m_deleteOnClose;           // True = delete window object when closed.
     WindowController* m_controller; // Object that controls this window.
