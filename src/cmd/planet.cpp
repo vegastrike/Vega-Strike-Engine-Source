@@ -159,7 +159,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
   Vector t (_Universe->AccessCamera()->GetPosition()-quat.position);
-  if (t.Dot(t)<radius*radius) {
+  if (t.Magnitude()<corner_max.i) {
     if (!inside) {
       TerrainUp = t;
       Normalize(TerrainUp);
