@@ -1,4 +1,12 @@
 2002-01-25 Daniel Horn <hellcatv@users.sourceforge.net>
+
+	* Warp effect now looks cool!
+	* Fixed bug with deletion of animations
+	* Added entering jump effect.
+	* Fixed bug with SubUnit being set on random planets, and collisions not being checked against them
+	* Added feature that planets may be targetted anywhere due to their size
+	
+2002-01-25 Daniel Horn <hellcatv@users.sourceforge.net>
 	
 	* Fixed a whole lot of lighting problems with local lights. Not all are fixed, but enough to do the standard things I think.
 	* Fixed a lot of problems with collision tables and multiple systems (weapons used to be left behind, which would cause random crashes
