@@ -263,7 +263,7 @@ int Packet::send( Cmd cmd, ObjSerial nserial, const char * buf, unsigned int len
 {
 	char * buffer = new char[length];
 	memcpy( buffer, buf, length);
-    create( cmd, nserial, buf, length, prio, dst, sock, caller_file, caller_line );
+    create( cmd, nserial, buffer, length, prio, dst, sock, caller_file, caller_line );
 	delete buffer;
     return send( );
 }
