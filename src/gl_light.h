@@ -29,7 +29,8 @@ class gfx_light: public GFXLight {
   void SendGLPosition (const GLenum target);//properly utilizes union.
   void ClobberGLLight (const int target);//replaces target GL light in the implementation. Sets this->target! Checks for -1 and calls ContextSwitch to clobber completely
   
-  //depreciated!void ContextSwitchEnableLight (const int target);//replaces target GL light, copying all state sets this->target!
+  inline void FinesseClobberLight (const GLenum target, const int original);//replaces target GL light, copying all state sets this->target!
+  inline void ContextSwitchClobberLight (const GLenum target);//replaces target GL light, copying all state sets this->target!
   void Enable ();//for global lights, clobbers SOMETHING for sure, calls GLenable
   //for local lights, puts it into the light table
   void Disable ();// for global lights, GLdisables it.
@@ -42,14 +43,12 @@ class gfx_light: public GFXLight {
   LineCollide CalculateBounds ();//calculates bounds for the table!
 };
 struct OpenGLLights {
-  int index;//-1 == unassigned
-  enum {
-    GLL_OFF=0,
-    GLL_ON=1,
-    GLL_LOCAL=2,
-    GLL_LOCAL_ON=3
-    
-  } options;
+    int index;//-1 == unassigned
+    const static char GLL_OFF=0;
+    const static char GLL_ON=1;
+    const static char GLL_LOCAL=2;
+    const static char GLL_LOCAL_ON=3;
+    char options;
 };
 
 

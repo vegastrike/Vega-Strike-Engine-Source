@@ -2,7 +2,7 @@
 #include "hashtable_3d.h"
 #include "cmd_collide.h"
 
-
+#define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
 Hashtable3d <LineCollide*, char[20],char[200]> lighttable;
 
@@ -82,9 +82,9 @@ void gfx_light::SendGLPosition (const GLenum target) {
   w = (float)(attenuated()!=0);
   glLightfv (target,GL_POSITION,vect);
   options = tmp;
-}
-void gfx_light::ClobberGLLight (const int target) {
-  GLenum gltarg = GL_LIGHT0+target;
+}  
+
+inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {
   if (attenuated()) {
     glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
     glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
@@ -94,6 +94,52 @@ void gfx_light::ClobberGLLight (const int target) {
   glLightfv (gltarg,GL_DIFFUSE, diffuse);
   glLightfv (gltarg,GL_SPECULAR, specular);
   glLightfv (gltarg,GL_AMBIENT, ambient);
+}
+
+inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int original) {
+  gfx_light * orig = &((*_llights)[GLLights[original].index]);
+  if (attenuated()) {
+      if (orig->attenuated()) {
+	  if (orig->attenuate[0]!=attenuate[0])
+	      glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
+	  if  (orig->attenuate[1]!=attenuate[1])
+	      glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);		
+	  if  (orig->attenuate[2]!=attenuate[2])	  
+	      glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);		  
+      } else {
+	  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
+	  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
+	  glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
+      }
+  }
+  if (vect[0]!=orig->vect[0]||vect[1]!=orig->vect[1]||vect[2]!=orig->vect[2]||attenuated()!=orig->attenuated()) {
+      SendGLPosition(gltarg);
+  }
+  if (diffuse[0]!=orig->diffuse[0]||diffuse[1]!=orig->diffuse[1]||diffuse[2]!=orig->diffuse[2]||diffuse[3]!=orig->diffuse[3]) {
+      glLightfv (gltarg,GL_DIFFUSE,diffuse);
+  }
+  if (specular[0]!=orig->specular[0]||specular[1]!=orig->specular[1]||specular[2]!=orig->specular[2]||specular[3]!=orig->specular[3]) {
+      glLightfv (gltarg,GL_SPECULAR,specular);
+  }
+
+  if (ambient[0]!=orig->ambient[0]||ambient[1]!=orig->ambient[1]||ambient[2]!=orig->ambient[2]||ambient[3]!=orig->ambient[3]) {
+      glLightfv (gltarg, GL_AMBIENT,ambient);
+  }
+ 
+}
+
+void gfx_light::ClobberGLLight (const int target) {
+#ifdef GFX_HARDWARE_LIGHTING
+    if (GLLights[target].index==-1) {
+#endif
+	ContextSwitchClobberLight (GL_LIGHT0+target);
+#ifdef GFX_HARDWARE_LIGHTING
+    }else {
+	FinesseClobberLight (GL_LIGHT0+target,GLLights[target].index);
+    }
+#endif
+    GLLights[target].index = lightNum();
+    GLLights[target].options = OpenGLLights::GLL_ON*enabled()+OpenGLLights::GLL_LOCAL*LocalLight();
 }
 
 
@@ -125,7 +171,7 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
     vect[0]=color.r;vect[1]=color.g;vect[2]=color.b;
     if (target<0)
       break;
-    glLightfv (GL_LIGHT0+target,GL_POSITION,vect);
+    SendGLPosition (GL_LIGHT0+target);
     break;
   case ATTENUATE:
     attenuate[0]=color.r; attenuate[1]=color.g; attenuate[2]=color.b;
