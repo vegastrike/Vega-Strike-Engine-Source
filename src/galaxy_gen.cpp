@@ -744,9 +744,12 @@ string getStarSystemSector (string in) {
 
   char * tmp = strdup (in.c_str());
   char * freer=tmp;
+  bool found=false;
   while (*tmp++) {
-    if (*tmp=='/')
+    if (*tmp=='/') {
+      found=true;
       break;
+    }
   }
   if (*tmp=='/') {
     *tmp='\0';
@@ -754,7 +757,10 @@ string getStarSystemSector (string in) {
   }
   string sectorname (freer);
   free (freer);
-  return sectorname; 
+  if (found)
+    return sectorname; 
+  else
+    return string (".");
 }
 void readnames (vector <string> &entity, const char * filename) {
   FILE * fp= fopen (filename,"r");
