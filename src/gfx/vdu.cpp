@@ -864,12 +864,16 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 		else if( lag>0)
 			str += "#FF0000";
 		str += string( buf)+"#000000\n";
+		if( Network[0].IsNetcommSecured())
+			str += "#DD0000";
 		memset( buf, 0, 32);
 		sprintf( buf, "%g", Network[0].getCurrentFrequency());
 		str += string( buf)+"/";
 		memset( buf, 0, 32);
 		sprintf( buf, "%g", Network[0].getSelectedFrequency());
 		str += string( buf)+" GHz";
+		if( Network[0].IsNetcommSecured())
+			str += "#000000";
 		if( Network[0].IsNetcommActive())
 			str += " - #0000FFON";
 		else

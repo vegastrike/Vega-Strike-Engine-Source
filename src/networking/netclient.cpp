@@ -1693,6 +1693,15 @@ bool NetClient::IsNetcommActive() const
 #endif
 }
 
+bool NetClient::IsNetcommSecured() const
+{
+#ifdef NETCOMM
+    return ( this->NetComm==NULL ? false : this->NetComm->IsSecured() );
+#else
+    return false;
+#endif
+}
+
 void	NetClient::switchSecured()
 {
 #ifdef NETCOMM

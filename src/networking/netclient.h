@@ -87,9 +87,6 @@ class	NetClient
 
 	    NetworkCommunication*	NetComm;
 
-	public:
-		bool IsNetcommActive() const;
-
 	private:
 
 		int					enabled;		// Bool to say network is enabled
@@ -189,6 +186,9 @@ class	NetClient
 		void	switchWebcam();
 
 		void	sendTextMessage( string message);
+		bool	IsNetcommActive() const;
+		bool	IsNetcommSecured() const;
+
 
     private:
         bool canCompress() const;

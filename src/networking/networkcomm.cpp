@@ -20,6 +20,7 @@ extern bool cleanexit;
 #include "packet.h"
 #include <assert.h>
 #include "xml_support.h"
+#include "universe_util.h"
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
@@ -305,6 +306,13 @@ void	NetworkCommunication::RecvMessage( string message)
 	if( this->message_history.size()==this->max_messages)
 		this->message_history.pop_front();
 	this->message_history.push_back( message);
+	// Display message
+	string color;
+	if( secured)
+		color = "#DD0000";
+	else
+		color = "#99CCFF";
+	UniverseUtil::IOmessage(0,"game","all",color+message+"#000000");
 }
 
 /***************************************************************************************/
