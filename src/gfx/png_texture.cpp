@@ -9,7 +9,7 @@
 
 #ifdef JPEG_SUPPORT
 extern "C" {
-#include "jpeglib.h"
+#include <jpeglib.h>
 }
 #endif
 
