@@ -563,6 +563,9 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
     return "night";
   return "sunset";
 }
+
+extern void ExecuteDirector();
+
 BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
@@ -601,6 +604,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 #endif
 	}
 	GotoLink(0);
+	ExecuteDirector();
 }
 
 void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, int button, int state) {
