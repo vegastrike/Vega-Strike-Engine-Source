@@ -40,6 +40,8 @@ vegastrike_SOURCES =				\
 	universe.h				\
 	xml_support.h  				\
 	xml_support.cpp				\
+	vegaconfig.cpp				\
+	vegaconfig.h				\
 	profile.h 				\
 	vegastrike.h				\
 	vs_globals.h 				

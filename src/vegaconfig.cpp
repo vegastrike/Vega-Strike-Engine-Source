@@ -2,8 +2,16 @@
 #include "xml_support.h"
 #include "vegaconfig.h"
 
-#include "vs_globals.h"
-#include "vegastrike.h"
+//#include "vs_globals.h"
+//#include "vegastrike.h"
+
+using XMLSupport::EnumMap;
+using XMLSupport::Attribute;
+using XMLSupport::AttributeList;
+
+VegaConfig::VegaConfig(char *configfile){
+  LoadXML(configfile);
+}
 
 void VegaConfig::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((VegaConfig*)userData)->beginElement(name, AttributeList(atts));
@@ -15,22 +23,24 @@ void VegaConfig::endElement(void *userData, const XML_Char *name) {
 
 namespace VegaConfigXML {
     enum Names {
+      UNKNOWN,
+      VEGACONFIG,
+      BINDINGS
     };
 
   const EnumMap::Pair element_names[] = {
+    EnumMap::Pair ("UNKNOWN", UNKNOWN)
   };
   const EnumMap::Pair attribute_names[] = {
+   EnumMap::Pair ("UNKNOWN", UNKNOWN)
   };
-};
 
-  const EnumMap element_map(element_names, 5);
-  const EnumMap attribute_map(attribute_names, 28);
+
+  const EnumMap element_map(element_names, 1);
+  const EnumMap attribute_map(attribute_names, 1);
 }
 
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
-using namespace VegaConnfigXML;
+using namespace VegaConfigXML;
 
 void VegaConfig::beginElement(const string &name, const AttributeList &attributes) {
 
@@ -38,19 +48,23 @@ void VegaConfig::beginElement(const string &name, const AttributeList &attribute
 
 
   AttributeList::const_iterator iter;
+  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    cout <<  name << "::" << (*iter).name << endl;
+  }
+#if 0
   switch(elem) {
   case UNKNOWN:
 	xml->unitlevel++;
 
 //    cerr << "Unknown element start tag '" << name << "' detected " << endl;
     return;
-
+#endif
 
 }
 
 void VegaConfig::endElement(const string &name) {
   Names elem = (Names)element_map.lookup(name);
-
+#if 0
   switch(elem) {
   case UNKNOWN:
 	  xml->unitlevel--;
@@ -60,6 +74,7 @@ void VegaConfig::endElement(const string &name) {
 	  xml->unitlevel--;
     break;
   }
+#endif
 }
 
 

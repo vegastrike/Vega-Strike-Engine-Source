@@ -26,6 +26,8 @@
 #include "in_kb.h"
 #include "lin_time.h"
 #include "main_loop.h"
+#include "vegaconfig.h"
+
 
 /*
  * Globals 
@@ -80,6 +82,10 @@ int main( int argc, char **argv )
     /* Seed the random number generator */
     srand( time(NULL) );
     setup_game_data(); 
+
+    // preliminary for me to test
+    //VegaConfig *config=new VegaConfig("vegastrike.config");
+
     //read_config_file();
     //init_debug("");
 

@@ -35,6 +35,7 @@
 #include "gfx/cockpit.h"
 #include "gfx/aux_texture.h"
 #include "gfx/background.h"
+
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
