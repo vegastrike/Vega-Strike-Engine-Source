@@ -15,7 +15,9 @@ string tostring(const Vector &v) {
 Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {
   InitUnit();
   draw_sequence = 3;
-
+  envMap = (GFXFALSE);
+  blendSrc = ONE;
+  blendDst=ONE;
   Box *oldmesh;
   string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
   //  cerr << "hashkey: " << hash_key << endl;
@@ -75,15 +77,15 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
 #undef VERTEX
 }
 
-void Box::ProcessDrawQueue() {
+void Box::ProcessDrawQueue(int) {
   if(!draw_queue->size()) return;
   GFXBlendMode(SRCALPHA,INVSRCALPHA);
-  //GFXColor(0.0,.90,.3,0.9);
+  GFXColor(0.0,.90,.3,.4);
   GFXDisable(LIGHTING);
   GFXDisable (TEXTURE0);
-  GFXDisable(TEXTURE1);
+  GFXDisable (TEXTURE1);
   GFXDisable (DEPTHWRITE);
-  GFXDisable(CULLFACE);
+  GFXDisable (CULLFACE);
   //GFXBlendMode(ONE, ONE);
 
   while(draw_queue->size()) {

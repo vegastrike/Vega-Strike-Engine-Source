@@ -38,6 +38,7 @@
 #include "gfx/bsp.h"
 #include "audiolib.h"
 #include "gfx/cockpit.h"
+#include "config_xml.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -524,7 +525,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       subunits[subcount]->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
     if(selected) {
-      //selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
+      static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
+      if (doInputDFA)
+	selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam

@@ -486,6 +486,7 @@ void destroyObjects() {
 }
 extern void micro_sleep (unsigned int n);
 void main_loop() {
+
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
 
   _Universe->StartDraw();

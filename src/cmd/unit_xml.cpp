@@ -944,7 +944,7 @@ void Unit::LoadXML(const char *filename)
 		if(a % 4 == 2 && a < (nummounts-1)) 
 			if (mounts[a].type.type != weapon_info::PROJECTILE&&mounts[a+1].type.type != weapon_info::PROJECTILE)
 			  b=a+1;
-		mounts[b].sound = AUDCreateSound (mounts[b].type.sound,true/*mounts[b].type.type==weapon_info::BEAM*/);
+		mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type!=weapon_info::PROJECTILE);
     }
 	else if (mounts[a].type.type == weapon_info::PROJECTILE) {
 #endif

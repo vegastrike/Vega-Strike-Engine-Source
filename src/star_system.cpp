@@ -19,7 +19,8 @@
 #include "gfx/cockpit.h"
 #include "audiolib.h"
 #include "cmd/music.h"
-
+#include "config_xml.h"
+#include "vs_globals.h"
 
 extern Music *muzak;
 extern Vector mouseline;
@@ -163,7 +164,9 @@ void StarSystem::Draw() {
   Bolt::Draw();
 
   stars->Draw();
-  //  systemInputDFA->Draw();
+  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
+  if (doInputDFA)
+    systemInputDFA->Draw();
   _Universe->AccessCockpit()->Draw();
 }
 
