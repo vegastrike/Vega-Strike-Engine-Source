@@ -23,7 +23,7 @@
 #define __GUIDEFS_H__
 
 #include "gfxlib.h"
-
+#include "gldrv/winsys.h"
 // Location in 2d.
 struct Point {
     float x, y;
@@ -140,9 +140,9 @@ typedef unsigned int EventKeyCode;
 typedef EventKeyCode EventButton;
 
 // Mouse button constants
-static const int LEFT_MOUSE_BUTTON = 1;
-static const int MIDDLE_MOUSE_BUTTON = 2;
-static const int RIGHT_MOUSE_BUTTON = 3;
+static const int LEFT_MOUSE_BUTTON = WS_LEFT_BUTTON;
+static const int MIDDLE_MOUSE_BUTTON = WS_MIDDLE_BUTTON;
+static const int RIGHT_MOUSE_BUTTON = WS_RIGHT_BUTTON;
 
 
 /* This describes an event from an input device: mouse, keyboard, etc.
