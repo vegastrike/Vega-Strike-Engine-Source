@@ -2377,7 +2377,8 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
-  fuel-=Res.Magnitude()*SIMULATION_ATOM*GetFuelUsage(false);
+  static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
+  fuel-=GetFuelUsage(false)*(SIMULATION_ATOM*SIMULATION_ATOM*Res.Magnitude()*Res.Magnitude())/(2*mass*fuelenergytomassconversionconstant);
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -2479,7 +2480,9 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
-  fuel-=GetFuelUsage(afterburn)*Res.Magnitude();
+  //energy = 1/2t^2*Force^2/mass
+  static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
+  fuel-=GetFuelUsage(afterburn)*(SIMULATION_ATOM*SIMULATION_ATOM*Res.Magnitude()*Res.Magnitude())/(2*mass*fuelenergytomassconversionconstant);
   return Res;
 }
 
