@@ -1570,9 +1570,10 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 	  for(int meshindex=0;meshindex<nummeshes;meshindex++){
 		  if(recordindex>0||meshindex>0){
 			string filename="";
-			filename+=recordindex;
+			filename+=(char)(recordindex+48);
 			filename+="_";
-			filename+=meshindex;
+			filename+=(char)(meshindex+48);
+			filename+=".xmesh";
 			Outputfile=fopen(filename.c_str(),"w+");
 		  }
 		  //Extract Mesh Header
