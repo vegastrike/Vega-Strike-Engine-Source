@@ -105,16 +105,12 @@ class	NetClient
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloadManagerClient;
         static const char*                                _downloadSearchPaths[];
 
-		void	receiveData();
-		void	readDatafiles();
 		void	createChar();
 		int		recvMsg( Packet* outpacket );
 		void	disconnect();
 		int		checkAcctMsg( );
 
-		void	receiveSave( const Packet* packet );
 		void	receiveLocations( const Packet* packet );
-		void	getZoneData( const Packet* packet );
 		void	receivePosition( const Packet* packet );
 		void	addClient( const Packet* packet );
 		void	removeClient( const Packet* packet );
@@ -123,13 +119,16 @@ class	NetClient
 		NetClient();
 		~NetClient();
 
-		int		authenticate();
-		bool	PacketLoop( Cmd command );
+		/**** netclient_login.cpp stuff ****/
+		int				authenticate();
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
 		vector<string>	loginAcctLoop( string str_callsign, string str_passwd);
-		SOCKETALT	init( const char* addr, unsigned short port);
-		SOCKETALT	init_acct( char * addr, unsigned short port);
+		void			loginAccept( Packet & p1);
+		SOCKETALT		init( const char* addr, unsigned short port);
+		SOCKETALT		init_acct( char * addr, unsigned short port);
+
 		void	start( char * addr, unsigned short port);
+		bool	PacketLoop( Cmd command );
 		void	checkKey();
 
 		void	setCallsign( char * calls) { this->callsign = string( calls);}
@@ -188,6 +187,13 @@ class	NetClient
     private:
         bool canCompress() const;
 };
+
+typedef vector<ObjSerial>::iterator ObjI;
+
+Unit * getNetworkUnit( ObjSerial cserial);
+bool isLocalSerial( ObjSerial sernum);
+
+extern vector<ObjSerial>	localSerials;
 
 #endif
 

@@ -1441,8 +1441,11 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 
 	if( sts)
 	{
+		// Send info about other ships in the system to "clt"
+		zonemgr->sendZoneClients( clt);
+
+		// Send savebuffers and name
 		netbuf.addString( clt->callsign);
-		// Send savebuffer after clientstate
 		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
 		netbuf.addString( savestr);
 		netbuf.addString( xmlstr);
@@ -1451,8 +1454,6 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 		COUT<<"<<< SEND ENTERCLIENT("<<un->GetSerial()<<") TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		COUT<<"Serial : "<<un->GetSerial()<<endl;
-		// Send info about other ships in the system to "clt"
-		zonemgr->sendZoneClients( clt);
 	}
 	// In all case set the zone and send the client the zone which it is in
 	COUT<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;

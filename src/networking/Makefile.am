@@ -58,6 +58,9 @@ libnetgeneric = \
 	netbuffer.cpp		\
 	netbuffer.h		\
 	netclass.h		\
+	netclient_clients.cpp	\
+	netclient_login.cpp	\
+	netclient_devices.cpp \
 	netclient.cpp		\
 	netclient.h		\
 	netserver.cpp		\

@@ -637,12 +637,13 @@ void ZoneMgr::sendZoneClients( ClientWeakPtr clt )
 		if( cp!=kp && kp->ingame)
 		{
 			SaveNetUtil::GetSaveStrings( kp, savestr, xmlstr);
-			// Add the ClientState at the beginning of the buffer
-			netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
-			// Add the save and xml strings
+			// Add the ClientState at the beginning of the buffer -> NO THIS IS IN THE SAVE !!
+			//netbuf.addClientState( ClientState( kp->game_unit.GetUnit()));
+			// Add the callsign and save and xml strings
+			netbuf.addString( kp->callsign);
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
-			packet2.send( CMD_ENTERCLIENT, cp->game_unit.GetUnit()->GetSerial(),
+			packet2.send( CMD_ENTERCLIENT, kp->game_unit.GetUnit()->GetSerial(),
                           netbuf.getData(), netbuf.getDataLength(),
                           SENDRELIABLE, &cp->cltadr, cp->sock,
                           __FILE__, PSEUDO__LINE__(579) );
