@@ -55,8 +55,10 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseLink,"EraseLink");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Ship,"Ship");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Texture,"Texture");
-	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessageToRoom,"EnqueueMessageToRoom");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::MessageToRoom,"MessageToRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessage,"EnqueueMessage");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseObj,"EraseObj");
 	PYTHON_DEFINE_GLOBAL(Base,&GetRandomBarMessage,"GetRandomBarMessage");
 PYTHON_END_MODULE(Base)

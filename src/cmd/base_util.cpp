@@ -118,13 +118,21 @@ namespace BaseUtil {
 		}
 		BaseLink(newroom,x,y,wid,hei,text,front);
 	}
+	void MessageToRoom(int room, std::string text) {
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->rooms[room]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",true));
+	}
+	void EnqueueMessageToRoom(int room, std::string text) {
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->rooms[room]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",false));
+	}
 	void Message(std::string text) {
 		if (!BaseInterface::CurrentBase) return;
-		BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",true));
+		MessageToRoom(BaseInterface::CurrentBase->curroom,text);
 	}
 	void EnqueueMessage(std::string text) {
 		if (!BaseInterface::CurrentBase) return;
-		BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",false));
+		EnqueueMessageToRoom(BaseInterface::CurrentBase->curroom,text);
 	}
 	void EraseLink (int room, std::string index) {
 		BaseInterface::Room *newroom=CheckRoom(room);

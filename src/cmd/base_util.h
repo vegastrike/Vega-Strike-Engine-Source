@@ -12,6 +12,8 @@ namespace BaseUtil {
 	void Launch (int room, std::string index, float x, float y, float wid, float hei, std::string text);
 	void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes);
 	void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string pythonfile,bool front=false);
+	void MessageToRoom(int room, std::string text);
+	void EnqueueMessageToRoom(int room, std::string text);
 	void Message(std::string text);
 	void EnqueueMessage(std::string text);
 	void EraseLink (int room, std::string index);
