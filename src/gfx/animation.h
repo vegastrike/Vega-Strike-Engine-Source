@@ -67,7 +67,7 @@ public:
 
   void DrawNow(const Matrix & final_orientation);
 
-  void DrawNoTransform ();
+  void DrawNoTransform (bool cross=true, bool blendoption=false);
 
   void DrawAsVSSprite (class VSSprite *spr);
 

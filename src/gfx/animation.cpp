@@ -241,12 +241,20 @@ void Animation::DrawAsVSSprite (VSSprite * spr) {
     GFXPopBlendMode();
   }
 }
-void Animation::DrawNoTransform() {
+void Animation::DrawNoTransform(bool cross, bool blendoption) {
   if (g_game.use_animations==0&&g_game.use_textures==0) {
     
   }else
   if (!Done()||(options&ani_repeat)) {
     MakeActive();
+    if (blendoption){
+      if (options&ani_alpha) {
+        GFXEnable(DEPTHWRITE);
+        GFXBlendMode (SRCALPHA,INVSRCALPHA);
+      }else {
+        GFXBlendMode(ONE,ONE);
+      }
+    }
     GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
     GFXVertex3f (-width,-height,0.00F);  //lower left
@@ -256,6 +264,7 @@ void Animation::DrawNoTransform() {
     GFXVertex3f (width,height,0.00F);  //upper right
     GFXTexCoord2f (0.00F,0.00F);
     GFXVertex3f (-width,height,0.00F);  //lower right
+    if (cross) {
     GFXTexCoord2f (0.00F,1.00F);
     GFXVertex3f (-width,0.00F,-height);  //lower left
     GFXTexCoord2f (1.00F,1.00F);
@@ -272,9 +281,14 @@ void Animation::DrawNoTransform() {
     GFXVertex3f (0,height,height);  //upper right
     GFXTexCoord2f (0.00F,0.00F);
     GFXVertex3f (0,-height,height);  //lower right
-    
+    }
     GFXEnd ();
-   
+    if (blendoption) {
+      if (options&ani_alpha) {
+        GFXDisable(DEPTHWRITE);
+      }
+    }
+       
   }
 }
 void Animation:: Draw() {

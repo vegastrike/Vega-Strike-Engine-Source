@@ -149,14 +149,18 @@ void Bolt::Draw () {
     //Matrix result;
     //FIXME::MuST USE DRAWNOTRANSFORMNOW cur->CalculateOrientation (result);
     for (j=i->begin();j!=i->end();j++) {//don't update time more than once
+      Vector p,q,r;
+      _Universe->AccessCamera()->GetOrientation(p,q,r);
       BlendTrans ((*j)->drawmat,(*j)->cur_position,(*j)->prev_position);
+      Matrix tmp;
+      VectorAndPositionToMatrix(tmp,p,q,r,(*j)->drawmat.p);
       //result[12]=(*j)->drawmat[12];
       //result[13]=(*j)->drawmat[13];
       //result[13]=(*j)->drawmat[14];
       //            cur->SetPosition (result[12],result[13],result[14]);
       cur->SetDimensions ((*j)->radius,(*j)->radius);
       //      cur->DrawNow(result);
-      GFXLoadMatrixModel ((*j)->drawmat);
+      GFXLoadMatrixModel (tmp );
 #ifdef PERBOLTSOUND
 #ifdef PERFRAMESOUND
       if ((*j)->sound!=-1)
@@ -164,10 +168,11 @@ void Bolt::Draw () {
 #endif
 #endif
       GFXColorf ((*j)->col);
-      cur->DrawNoTransform();
+      cur->DrawNoTransform(false,true);
     }
     //    cur->UpdateTime (GetElapsedTime());//update the time of the animation;
   }
+  GFXDisable(DEPTHWRITE);  
   if (q->boltmesh) {
     q->boltmesh->LoadDrawState();
     q->boltmesh->BeginDrawState();
