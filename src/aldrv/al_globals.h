@@ -1,5 +1,8 @@
 #ifndef AL_GLOBALS_H_
 #define AL_GLOBALS_H_
+
+/* #undef SOUND_DEBUG */
+
 #ifdef HAVE_AL
 #ifdef __APPLE__
 #include <al.h>

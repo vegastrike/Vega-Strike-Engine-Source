@@ -57,6 +57,9 @@ static int LoadSound (ALuint buffer, bool looping) {
   }
   sounds[i].source = (ALuint)0;
   sounds[i].looping = looping?AL_TRUE:AL_FALSE;
+#ifdef SOUND_DEBUG
+  printf (" with buffer %d and looping property %d\n",i,(int)looping);
+#endif
   //limited number of sources
   //  alGenSources( 1, &sounds[i].source);
   //alSourcei(sounds[i].source, AL_BUFFER, buffer );
@@ -70,6 +73,9 @@ using namespace VSFileSystem;
 
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
+#ifdef SOUND_DEBUG
+	printf ("AUDCreateSoundWAV:: ");
+#endif
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
 	    ALuint * wavbuf =NULL;
 	    std::string hashname;
@@ -82,6 +88,11 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 		      wavbuf = soundHash.Get(hashname);
 		  }
 	    }
+		if (wavbuf) {
+#ifdef SOUND_DEBUG
+		  printf ("Sound %s restored with alBuffer %d\n",s.c_str(),*wavbuf);
+#endif
+		}
 	    if (wavbuf==NULL)
 		{
 	  	  VSFile f;
@@ -95,6 +106,9 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 			  return -1;
 	      wavbuf = (ALuint *) malloc (sizeof (ALuint));
 	      alGenBuffers (1,wavbuf);
+#ifdef SOUND_DEBUG
+		  printf ("Sound %s created with and alBuffer %d\n",s.c_str(),*wavbuf);
+#endif
 	      ALsizei size;	
 	      ALsizei freq;
 	      void *wave;
@@ -221,6 +235,8 @@ int AUDCreateMusic (const std::string &s,const bool LOOP) {
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP/*=false*/){
 #ifdef HAVE_AL
+  if (AUDIsPlaying (sound))
+    AUDStopPlaying (sound);
   if (sound>=0&&sound<(int)sounds.size())
     return LoadSound (sounds[sound].buffer,LOOP);
 #endif
@@ -232,11 +248,18 @@ void AUDDeleteSound (int sound, bool music){
   if (sound>=0&&sound<(int)sounds.size()) {
     if (AUDIsPlaying (sound)) {
       if (!music) {
+#ifdef SOUND_DEBUG
+      printf("AUDDeleteSound: Sound Playing enqueue soundstodelete %d %d\n",sounds[sound].source,sounds[sound].buffer);
+#endif
 	soundstodelete.push_back(sound);
 	return;
       } else
 	AUDStopPlaying (sound);
     }
+#ifdef SOUND_DEBUG
+	printf("AUDDeleteSound: Sound Not Playing push back to unused src %d %d\n",sounds[sound].source,sounds[sound].buffer);
+#endif
+
     if (sounds[sound].source){
       unusedsrcs.push_back (sounds[sound].source);
       sounds[sound].source=(ALuint)0;
@@ -247,7 +270,7 @@ void AUDDeleteSound (int sound, bool music){
       dirtysounds.push_back (sound);
 #ifdef SOUND_DEBUG
     }else {
-      VSFileSystem::vs_fprintf (stderr,"double delete of sound");
+      VSFileSystem::vs_fprintf (stderr,"double delete of sound %d",sound);
       return;
     }
 #endif
@@ -322,6 +345,9 @@ bool AUDIsPlaying (const int sound){
 void AUDStopPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
+#ifdef SOUND_DEBUG
+      printf("AUDStopPlaying sound %d source(releasing): %d buffer:%d\n",sound,sounds[sound].source,sounds[sound].buffer);
+#endif	  
 	if (sounds[sound].source!=0) {
 	  alSourceStop(sounds[sound].source);
       unusedsrcs.push_back (sounds[sound].source);
@@ -345,10 +371,17 @@ static bool AUDReclaimSource (const int sound) {
   return false;//silly
 }
 void AUDStartPlaying (const int sound){
+#ifdef SOUND_DEBUG
+	printf ("AUDStartPlaying(%d)",sound);
+#endif
+	
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
 	  if (starSystemOK())
     if (AUDReclaimSource (sound)) {
+#ifdef SOUND_DEBUG
+      printf("AUDStartPlaying sound %d source:%d buffer:%d\n",sound,sounds[sound].source,sounds[sound].buffer);
+#endif
       AUDAdjustSound (sound, sounds[sound].pos, sounds[sound].vel);
 
       alSourcePlay( sounds[sound].source );
@@ -359,6 +392,9 @@ void AUDStartPlaying (const int sound){
 
 void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const float gain) {
 #ifdef HAVE_AL
+#ifdef SOUND_DEBUG
+	printf ("AUDPlay(%d)",sound);
+#endif
   char tmp;
   if (sound<0)
     return;
@@ -373,6 +409,9 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
       AUDAdjustSound (sound,pos,vel);
       alSourcef(sounds[sound].source,AL_GAIN,gain);    
       if (tmp!=2){
+#ifdef SOUND_DEBUG
+        printf("AUDPlay sound %d %d\n",sounds[sound].source,sounds[sound].buffer);
+#endif
 		AUDAddWatchedPlayed (sound,pos.Cast());
 		alSourcePlay( sounds[sound].source );
 		//AUDAdjustSound (sound,pos,vel);

@@ -213,6 +213,9 @@ void Animation::DrawNow(const Matrix &final_orientation) {
   }
 }
 void Animation::DrawAsVSSprite (VSSprite * spr) {
+  if (!spr) {
+    return;
+  }
   if (g_game.use_animations!=0||g_game.use_textures!=0) {
   //  unsigned char alphamaps=ani_alpha;
     GFXPushBlendMode();
