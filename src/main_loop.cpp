@@ -43,8 +43,8 @@
 #include "mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
-#include "cmd/terrain.h"
 
+#include "cmd/cont_terrain.h"
 using namespace std;
 
  Music * muzak=NULL;
@@ -262,7 +262,7 @@ bool cockpitfront=true;
 }
 
 using namespace CockpitKeys;
-
+ContinuousTerrain * myterrain;
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
@@ -326,20 +326,22 @@ static void SetTurretAI (Unit * fighter) {
 
 
 void createObjects() {
+
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
 
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
-    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
-    Matrix tmp;
-    Identity (tmp);
-    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
+    myterrain=new ContinuousTerrain (stdstr.c_str(),stdstr.c_str(),stdstr.c_str(),stdstr.c_str(),TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
+			   //Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
+          Matrix tmp;
+          Identity (tmp);
+      //    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
     Vector pos;
     mission->GetOrigin (pos,stdstr);
     tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
-    terr->SetTransformation (tmp);
+    myterrain->SetTransform (tmp);
   }
   //  qt = new QuadTree("terrain.xml");
   /****** 
@@ -527,6 +529,7 @@ void main_loop() {
 
 
   _Universe->StartDraw();
+  myterrain->AdjustTerrain();
   _Universe->activeStarSystem()->Draw();
   //fighters[0]->UpdateHudMatrix();
   //_Universe->activeStarSystem()->SetViewport();

@@ -7,6 +7,8 @@ libcmd_a_SOURCES =				\
 	beam.cpp				\
 	bolt.h				\
 	bolt.cpp				\
+	cont_terrain.cpp		\
+	cont_terrain.h		\
 	click_list.cpp			\
 	click_list.h			\
 	unit_collide.cpp				\

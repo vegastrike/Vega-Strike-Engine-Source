@@ -11,6 +11,13 @@ struct Texture;
  */
 struct TerraXML;
 class QuadTree {
+  int minX;
+  int minZ;
+  unsigned int  maxX;
+  unsigned int  maxZ;
+  void SetXSizes (int mX, unsigned int maxX);
+  void SetZSizes (int mZ, unsigned int maxZ);
+  Vector Scales;
   float detail;
   IdentityTransform *nonlinear_transform;
   Matrix transformation;
@@ -25,6 +32,7 @@ class QuadTree {
   void LoadXML (const char * filename, const Vector & scales, const float radius);
   TerraXML * xml;
  public:
+  
   QuadTree (const char * filename, const Vector & scales, const float Radius);
   ~QuadTree();
   void Render();
@@ -35,8 +43,9 @@ class QuadTree {
   static void endElement(void *userData, const XML_Char *name);
   void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);
   void endElement(const std::string &name);
-
-
+  float getminX() {return minX;}  float getminZ() {return minZ;}
+  float getmaxX() {return minX+(float)maxX;}  float getmaxZ() {return minZ+(float)maxZ;}
+  float getSizeX() {return maxX;} float getSizeZ () {return maxZ;}
 };
 
 #endif

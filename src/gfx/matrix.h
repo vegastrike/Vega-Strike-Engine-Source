@@ -275,5 +275,29 @@ inline Vector TransformNormal (const Matrix t, const float x, const float y, con
 }
 int invert (float b[], float a[]);
 
+inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
+  pos = pos - Vector (trans[12],trans[13],trans[14]);
+#define a (trans[0])
+#define b (trans[4])
+#define c (trans[8])
+#define d (trans[1])
+#define e (trans[5])
+#define f (trans[9])
+#define g (trans[2])
+#define h (trans[6])
+#define i (trans[10])
+  float factor = 1.0F/(-c*e*g+ b*f*g + c*d*h - a*f*h - b*d*i + a*e*i);
+  return (Vector(pos.Dot (Vector (e*i- f*h,c*h-b*i,b*f-c*e)),pos.Dot (Vector (f*g-d*i,a*i-c*g, c*d-a*f)),pos.Dot (Vector (d*h-e*g, b*g-a*h, a*e-b*d)))*factor);
+#undef a
+#undef b
+#undef c
+#undef d
+#undef e
+#undef f
+#undef g
+#undef h
+#undef i
+}
+
 
 #endif

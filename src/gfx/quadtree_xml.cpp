@@ -299,6 +299,21 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 void QuadTree::endElement(const string &name) {
 }
 
+void QuadTree::SetXSizes (int mX, unsigned int maxX) {
+  if (mX < minX)
+    minX = mX;
+  if (maxX > this->maxX) {
+    this->maxX = maxX;
+  }
+}
+void QuadTree::SetZSizes (int mZ, unsigned int maxZ) {
+  if (mZ < minZ)
+    minZ = mZ;
+  if (maxZ > this->maxZ)
+    this->maxZ = maxZ;
+}
+
+
 void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float Radius) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
@@ -369,8 +384,8 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
     
     if (hm.Data&&hm.terrainmap) {
       assert (xsize==hm.XSize&&zsize==hm.ZSize);
-
-
+      SetXSizes (hm.XOrigin, hm.XSize<<hm.Scale);
+      SetZSizes (hm.ZOrigin, hm.ZSize<<hm.Scale);
       hm.RowWidth = hm.XSize;
       if (biggest){
 	biggest = false;
@@ -380,6 +395,22 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
 	  nonlinear_transform = new IdentityTransform();
 	}
 	//only happens the first time!
+	GFXVertex *v = vertices.BeginMutate(0)->vertices;
+	float xmax=(hm.XOrigin+hm.XSize<<hm.Scale);
+	float zmax=(hm.ZOrigin+hm.ZSize<<hm.Scale);
+	v[0].SetVertex (nonlinear_transform->Transform (Vector (xmax,0,hm.ZOrigin)));
+	v[0].SetTexCoord  (nonlinear_transform->TransformS (xmax,xml->scales),nonlinear_transform->TransformT(hm.ZOrigin,xml->scalet));
+
+	v[1].SetVertex (nonlinear_transform->Transform (Vector (hm.XOrigin,0,hm.ZOrigin)));
+	v[1].SetTexCoord (nonlinear_transform->TransformS (hm.XOrigin,xml->scales),nonlinear_transform->TransformT(hm.ZOrigin,xml->scalet));
+	v[2].SetVertex (nonlinear_transform->Transform (Vector (hm.XOrigin,0,zmax)));
+	v[2].SetTexCoord  (nonlinear_transform->TransformS (hm.XOrigin,xml->scales),nonlinear_transform->TransformT(zmax,xml->scalet));
+
+	v[3].SetVertex (nonlinear_transform->Transform (Vector (xmax,0,zmax)));
+	v[3].SetTexCoord  (nonlinear_transform->TransformS (zmax,xml->scales),nonlinear_transform->TransformT(zmax,xml->scalet));
+
+
+	vertices.EndMutate();
 	quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k));
 	root = new quadsquare (&RootCornerData);
       }

@@ -14,6 +14,7 @@ static std::vector <Terrain *> allterrains;
 
 Terrain::Terrain (const char * filename, const Vector & scales, const float mass, const float radius):QuadTree (filename, scales,radius), mass(mass), whichstage (0){
   allterrains.push_back (this);
+  draw=true;
   //  this->mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
 }
 
@@ -77,7 +78,9 @@ void Terrain::RenderAll () {
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(terraincolor);  
   for (unsigned int i=0;i<allterrains.size();i++) {
-    allterrains[i]->Render();
+    if (allterrains[i]->draw) {
+      allterrains[i]->Render();
+    }
   }
   GFXLightContextAmbient(tmpcol);  
 }
