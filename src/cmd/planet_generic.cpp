@@ -298,11 +298,11 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   this->fullname=name;
   this->radius=radius;
   this->gravity=gravity;
-  static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point",".01"));
+  static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_rock","3"));
   static  float densityOfJumpPoint = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point","100000"));
-  static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
+  //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
   hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
-  this->Mass = massofplanet;
+  this->Mass = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:(densityOfJumpPoint/100000));
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
 
@@ -338,6 +338,14 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
     int l=-1;
     lights.push_back (l);
   }
+  // Force shields to 0
+  this->shield.number=2;
+  this->shield.recharge=0;
+  this->shield.shield2fb.frontmax=0;
+  this->shield.shield2fb.backmax=0;
+  this->shield.shield2fb.front=0;
+  this->shield.shield2fb.back=0;
+
 }
 
 extern std::map<std::string,std::string> readPlanetTypes(std::string filename);
