@@ -804,6 +804,18 @@ int	quadsquare::Render(const quadcornerdata& cd)
 	unsigned int isize = indices.size();
 	vertices->Draw(GFXTRI,isize, indices.begin());
 	vertices->EndDrawState();
+	unsigned int xmin = -1;
+	unsigned int xmax = 0;
+#if 0
+	for (unsigned int i=0;i<isize;i++) {
+	  if (indices[i]<xmin)
+	    xmin = indices[i];
+	  if (indices[i]>xmax)
+	    xmax = indices[i];
+	}
+	
+	fprintf (stderr,"Minvertex %d, MaxVertex %d\n",xmin,xmax);
+#endif
 	return isize;
 }
 
