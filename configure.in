@@ -251,10 +251,10 @@ do
     if test "x${FOUND_PYTHON}" = "xyes";
     then
         PYTHON_VERSION=`$i -V 2>&1 | awk '{print $NF}'`
-        if test `echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z]/ /g' | awk '{print $1$2}'` -ge 22;
+        if test `echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1$2}'` -ge 22;
         then
             FOUND_PYTHON=yes
-            PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z]/ /g' | awk '{print $1"."$2}'`
+            PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1"."$2}'`
             PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT}"
         else
             FOUND_PYTHON=no
