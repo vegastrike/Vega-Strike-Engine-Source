@@ -442,7 +442,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   float difficulty =1;
   Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
   if ((player_cockpit)==NULL) {
-    difficulty = sqrtf (g_game.difficulty);
+    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".4"));
+    difficulty = pow(g_game.difficulty,exp);
   }
   curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 #ifdef DEPRECATEDPLANETSTUFF

@@ -161,7 +161,7 @@ void Unit::Mount::UnFire () {
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
-static void AdjustMatrix (Matrix mat, Unit * target, float speed, bool lead, float cone) {
+static void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone) {
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
