@@ -118,7 +118,7 @@ void Unit::Init()
   Target(NULL);
   computer.set_speed=0;
   computer.max_speed=10;
-  computer.max_ab_speed=20;
+  computer.max_ab_speed=30;
   computer.max_yaw=4;
   computer.max_pitch=4;
   computer.max_roll=4;

@@ -97,7 +97,7 @@ void StarSystem::Draw() {
   Mesh::ProcessUndrawnMeshes();
   systemInputDFA->Draw();
 }
-extern Beam *DABEAM;
+
 extern double interpolation_blend_factor;
 
 
@@ -122,7 +122,6 @@ void StarSystem::Update() {
       }
       delete iter;
 
-      DABEAM->UpdatePhysics(identity_transformation);
       iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually

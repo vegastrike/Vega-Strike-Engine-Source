@@ -328,7 +328,7 @@ CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
 SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
-Beam * DABEAM;
+
 ClickList *shipList =NULL;
 Unit *midway = NULL;
 /*
@@ -437,20 +437,8 @@ void InitializeInput() {
 	BindKey('w', FighterPitchDown);
 	BindKey('s', FighterPitchUp);*/
 }
-Animation * s=NULL;
-Animation *ss=NULL;
-Animation *sss=NULL;
-Animation *Preload = NULL;
 void createObjects() {
   LoadWeapons("weapon_list.xml");
-  DABEAM = new Beam (identity_transformation,
-		     weapon_info(weapon_info::BEAM),
-		     NULL);
-  ss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
-  Preload = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
-  //delete s;
-  s = NULL;
-  fprintf(stderr,"Unit size: %d\nMesh size: %d\n", sizeof(Unit), sizeof(Mesh));
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
@@ -569,7 +557,6 @@ void destroyObjects() {
   //delete DABEAM;
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
-  delete Preload;
   delete textplane;
   delete locSel;
   //delete t;
@@ -579,28 +566,11 @@ void destroyObjects() {
   //delete fighter;
   delete bg;
   //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
-  if (s) delete s;
-  if (ss) delete ss;
-  if (sss) delete sss;
 }
 
 void main_loop() {
   static int state = 0;
   static bool midcachunk=false;
-  if ((rand()%1000)==1000) {//impossible
-
-    midcachunk = true;
-    s = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
-
-    sss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
-
-    ss->SetDimensions (3,3);
-    s->SetDimensions (8,8);
-
-    
-    sss->SetDimensions (4,4);
-
-  }
   _GFX->StartDraw();
   
   //bg2->Draw();
@@ -614,21 +584,6 @@ void main_loop() {
   //  GFXBlendMode(ONE,ONE);
     locSel->Draw();
   static float time=0;
-  if (midcachunk) {
-    GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    time += GetElapsedTime();
-    s->SetPosition (fighters[0]->GetPosition());
-    ss->SetPosition (fighters[0]->GetPosition()+Vector (1,.24,.25));
-    sss->SetPosition (fighters[0]->GetPosition()+Vector (-1,0,-.3));    
-
-    //    s->Draw();
-    if (time>.25)
-      ;//ss->Draw();
-    if (time > .125)
-      ;//sss->Draw();
-    if (time > .5)
-      fighters[0]->Destroy();
-  }
   //  DABEAM->Draw(identity_transformation,identity_matrix);
   Beam::ProcessDrawQueue();
 
