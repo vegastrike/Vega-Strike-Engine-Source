@@ -138,7 +138,11 @@ void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number);
  * Caution: use of other matrix functions in HudMode could alter state.
  */
 void /*GFXDRVAPI*/ GFXHudMode(const bool Enter);
-
+void /*GFXDRVAPI*/ GFXCenterCamera (const bool Enter);
+void /*GFXDRVAPI*/ GFXTranslateView (const Vector &r);
+void /*GFXDRVAPI*/ GFXLoadMatrixView (const Matrix matrix, const Vector &camloc);
+void /*GFXDRVAPI*/ GFXLoadIdentityView();
+void /*GFXDRVAPI*/ GFXGetMatrixView (Matrix m);
 ///Translates the current "mode" matrix by a given vector
 void /*GFXDRVAPI*/ GFXTranslate(const MATRIXMODE mode, const Vector & r);
 ///Multipliex the current "mode" matrix by a given matrix

@@ -279,10 +279,11 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float
   if (centered) {
     float m1[16];
     memcpy (m1,m,sizeof (float)*16);
-    Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
-    m1[12]=pos.i;
-    m1[13]=pos.j;
-    m1[14]=pos.k;
+    //Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
+    //m1[12]=pos.i;
+    //m1[13]=pos.j;
+    //m1[14]=pos.k;
+    GFXCenterCamera (true);
     GFXLoadMatrix (MODEL,m1);    
   } else {	
     if (o->draw_sequence!=MESH_SPECIAL_FX_ONLY) {
@@ -307,6 +308,9 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float
   if (o->Decal)
     o->Decal->MakeActive();
   o->vlist->DrawOnce();
+  if (centered) {
+    GFXCenterCamera(false);
+  }
   for ( i=0;i<specialfxlight.size();i++) {
     GFXDeleteLight (specialfxlight[i]);
   }

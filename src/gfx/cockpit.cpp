@@ -504,8 +504,9 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
 
   Init (file);
 }
-void Cockpit::Draw() {
+void Cockpit::Draw() { 
   GFXDisable (TEXTURE1);
+  GFXLoadIdentity(MODEL);
   DrawTargetBox();
   if(draw_all_boxes){
     DrawTargetBoxes();

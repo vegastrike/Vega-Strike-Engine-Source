@@ -123,7 +123,7 @@ void Camera::UpdateCameraSounds() {
 #endif
 
 void Camera::GetView (Matrix vw) {
-  GFXGetMatrix (VIEW,vw);
+  GFXGetMatrixView (vw);
 }
 void Camera::SetNebula (Nebula * neb) {
   nebula.SetUnit ((Unit*)neb);
@@ -159,7 +159,7 @@ void Camera::UpdateGLCenter()
 	if(changed)
 	{
 		GFXLoadIdentity(PROJECTION);
-		GFXLoadIdentity(VIEW);
+		GFXLoadIdentityView();
 		//updating the center should always use a perspective
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:

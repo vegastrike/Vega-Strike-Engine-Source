@@ -120,8 +120,9 @@ void Background::Draw()
       SphereBackground->DrawNow(FLT_MAX,true);
       //    Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
     } else {
-	  GFXLoadIdentity(MODEL);
-	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+      GFXCenterCamera(true);
+      //GFXLoadIdentity(MODEL);
+	  //	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
 
       GFXTextureAddressMode(CLAMP);
       //glMatrixMode(GL_MODELVIEW);
@@ -236,11 +237,12 @@ void Background::Draw()
       GFXVertex3f(-size, -size, -size);
       
       GFXEnd();//*/
+      GFXCenterCamera(false);
     }
   }
-  GFXLoadIdentity(MODEL);
-  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
-
+  //  GFXLoadIdentity(MODEL);
+  //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+  GFXCenterCamera (true);
   GFXEnable(DEPTHWRITE);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
@@ -249,6 +251,7 @@ void Background::Draw()
 
   stars->DrawOnce();
   GFXEnable (DEPTHTEST);
+  GFXCenterCamera(false);
   //  _Universe->AccessCamera()->UpdateGFX(false);
 
 }

@@ -134,7 +134,7 @@ void LocationSelect:: Draw () {
     float m[16];
     float v[16];
 
-    GFXGetMatrix (VIEW,v);
+    GFXGetMatrixView (v);
 
     GFXGetMatrix (MODEL,m);
     MultMatrix(t,v,m);
