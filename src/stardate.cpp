@@ -30,16 +30,24 @@ string	StarDate::ConvertFullStarDate( double date)
 {
 	unsigned int days, hours, minutes, seconds;
 
+	// Get the number of days dividing seconds number by the number of seconds in a day
 	days = ((unsigned int)date / (60*60*24));
+	// Modulo gives us the number of seconds elapsed in the current day
 	date = (unsigned int)date % (60*60*24);
+	// Get the hours elapsed in the day by dividing by number of seconds in an hour
 	hours = (unsigned int)date / (60*60);
+	// Modulo gives us the number of seconds elapsed in that hour
 	date = (unsigned int)date % (60*60);
-	minutes = (unsigned int)date / 60;
-	seconds = (unsigned int)date % 60;
+	// Get the number of minutes elapsed in that hour by dividing by the number of seconds in a minute
+	minutes = (unsigned int)date / (60);
+	// Modulo gives us the elapsed seconds in the current minute
+	seconds = (unsigned int)date % (60);
 
 	char cdate[32];
-	unsigned int hrs = (hours*100+minutes)/24;
-	unsigned int secs = seconds + (hours*100+minutes)%24;
+	// The hour/minute part is displayed like HHMM divided by HOURS_DIV which is 8 for now
+	unsigned int hrs = (hours*100+minutes)/HOURS_DIV;
+	// Then seconds must be counted from 0 to 480 (HOURS_DIV=8 minutes) before the minute effectively is incremented
+	unsigned int secs = seconds + (hours*100+minutes)%(HOURS_DIV*60);
 
 	sprintf( cdate, "%d.%.2d:%.2d", days, hrs, secs);
 	return string( cdate);
@@ -57,7 +65,7 @@ string	StarDate::ConvertStarDate( double date)
 	seconds = (unsigned int)date % 60;
 
 	char cdate[32];
-	unsigned int hrs = (hours*100+minutes)/24;
+	unsigned int hrs = (hours*100+minutes)/HOURS_DIV;
 
 	sprintf( cdate, "%d.%.2d", days, hrs);
 	return string( cdate);
@@ -81,8 +89,11 @@ double	StarDate::ConvertStarDate( string date)
 	cerr<<"!!! String = "<<date<<" read = "<<days<<"."<<minutes<<":"<<seconds<<endl;
 	*/
 
-	int temphours = minutes*24;
+	// Get the number of hours and minutes back to the form HHMM
+	int temphours = minutes*HOURS_DIV;
+	// Extract number of hours
 	hours = temphours/100;
+	// Extract number of minutes
 	minutes = temphours%100;
 
 	res = days*(24*60*60)+hours*(60*60)+minutes*(60)+seconds;

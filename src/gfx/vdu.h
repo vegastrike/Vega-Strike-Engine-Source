@@ -17,8 +17,6 @@ class TextPlane;
  */
 class VDU: public Sprite {
  private:
-  Texture * tex;
-  bool		active_texture;
   class Animation * comm_ani;
   VIEWSTYLE viewStyle;
   unsigned short * StartArmor;
@@ -75,7 +73,6 @@ public:
   void SetViewingStyle (VIEWSTYLE vm);
   void Scroll (int howmuch);
   bool SetCommAnimation (Animation *ani);
-  void SetTexture( string file);
 };
 
 int parse_vdu_type (const char * s);

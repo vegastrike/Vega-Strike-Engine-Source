@@ -14,11 +14,6 @@
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
-void VDU::SetTexture( string file)
-{
-	this->tex = new Texture( file.c_str());
-}
-
 string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
   if (target->isUnit()==PLANETPTR) {
@@ -89,8 +84,6 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
   }
-  tex = NULL;
-  active_texture = false;
   comm_ani=NULL;
   viewStyle = CP_TARGET;
   StartArmor = ma;

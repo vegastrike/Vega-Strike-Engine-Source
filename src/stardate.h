@@ -4,6 +4,8 @@
 #include <string>
 using std::string;
 
+#define HOURS_DIV 8
+
 /*
  * Stardate class
  * Full date format is days.hours.minutes:seconds
