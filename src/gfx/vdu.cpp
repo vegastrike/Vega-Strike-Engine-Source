@@ -27,25 +27,24 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
 
 void VDU::DrawTarget(Unit * parent, Unit * target) {
   float x,y,w,h;
-  char t[32];
   float fs = target->FShieldData();
   float rs = target->RShieldData();
     
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
 
 
-  DrawTargetSpr (target->getHudImage (),.6,x,y,w,h);
   char st[256];
   sprintf (st,"\n%s",target->name.c_str());
   int k = strlen (st);
-  for (int i=0;i<rows-1&&i+k<128;i++) {
+  for (int i=0;i<rows-2&&i+k<128;i++) {
     st[i+k]='\n';
     st[i+k+1]='\0';
   }
-  char qr[36];
-  sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()*target->isUnit()==PLANETPTR?10:1);
+  char qr[128];
+  sprintf (qr,"Dis %.4lf",(parent->Position()-target->Position()).Magnitude()*((target->isUnit()==PLANETPTR)?10:1));
   strcat (st,qr);
   tp->Draw (std::string(st));  
+  DrawTargetSpr (target->getHudImage (),.6,x,y,w,h);
   h=fabs(h);
   w=fabs(w);
   GFXColor4f (.4,.4,1,1);
@@ -250,14 +249,13 @@ void VDU::Draw (Unit * parent) {
   if (!parent) {
     return;
   }
-  Unit * targ;
   //configure text plane;
   float x,y;
   float h,w;
   GetSize (w,h);
   GetPosition (x,y);
   tp->SetCharSize (fabs(w/cols),fabs(h/rows));
-  
+  Unit * targ;
   h=fabs(h/2);  w=fabs (w/2);
   tp->SetPos (x-w,y+h);
   tp->SetSize (x+w,y-h-.9*fabs(w/cols));

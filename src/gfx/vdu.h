@@ -25,7 +25,7 @@ class VDU: public Sprite {
   ///Rows and columns of text this VDU can display
   short rows,cols;
   ///Draws the target display of Unit *target (only call with nonNULL)
-  void DrawTarget(Unit * parent,Unit *target);
+  void DrawTarget(Unit * parent, Unit *target);
   ///Draws the nav point this unit is heading to
   void DrawNav(const Vector &navPoint);
   ///Draws the damage this unit has sustained
