@@ -447,6 +447,8 @@ def printcloak(cloak):
     missing=getAttributeValueCIS(cloak,"missing")
     if(missing!=""):
         missing=str(1-float(missing))
+    else:
+        missing="1"
     retstring+=missing
     retstring+=','
 #cloak min
