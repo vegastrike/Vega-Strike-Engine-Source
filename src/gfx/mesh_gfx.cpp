@@ -9,7 +9,7 @@
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 
-extern list<Logo*> undrawn_logos;
+extern vector<Logo*> undrawn_logos;
 class OrigMeshContainer {
 public:
   float d;

@@ -4,6 +4,7 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include <vector>
+#include <list>
 using namespace XMLSupport;
 class TextPlane;
 class Sprite;

@@ -19,17 +19,22 @@ void Order::Communicate (const CommunicationMessage &c) {
   }
   
   Unit * un;
+  bool already_communicated=false;
   for (list<CommunicationMessage *>::iterator ii=messagequeue.begin();ii!=messagequeue.end();ii++) {
     un=(*ii)->sender.GetUnit();
-    if (un==NULL||un==newC->sender.GetUnit()) {
+    bool thisissender=( un==newC->sender.GetUnit());
+    if (un==NULL||thisissender) {
       delete (*ii);
       ii=messagequeue.erase (ii);
+      if (thisissender) already_communicated=true;
     }
   }
   if ((un=newC->sender.GetUnit())) {
 	  if (un!=parent) {
-		AdjustRelationTo (un,newC->getDeltaRelation());
-		messagequeue.push_back (newC);
+	    if (!already_communicated){
+	      AdjustRelationTo (un,newC->getDeltaRelation());
+	    }
+	    messagequeue.push_back (newC);
 	  }
   }
 }

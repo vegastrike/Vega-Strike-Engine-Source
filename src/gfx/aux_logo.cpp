@@ -63,7 +63,7 @@ void decoff (int, KBSTATE k) {
   }
 }
 #endif
-list<Logo*> undrawn_logos;
+vector<Logo*> undrawn_logos;
 Hashtable<int, Logo,char[257]> Logo::decalHash;
 
 Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float offset,Texture* Dec, Vector * Ref)

@@ -1228,8 +1228,8 @@ using namespace UnitXML;
       }
     }
     image->unitwriter->AddTag ("Radar");    
-    ADDELEMNAME("itts",charStarHandler,XMLType(&computer.itts));    
-   ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
+    ADDELEMNAME("itts",boolStarHandler,XMLType(&computer.itts));    
+   ADDELEMNAME("color",boolStarHandler,XMLType(&computer.radar.color));    
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
     ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));   

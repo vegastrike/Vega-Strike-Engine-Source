@@ -1,4 +1,8 @@
+#ifndef VS_DEBUG
+
+#else
 #include <stdio.h>
+
 #include "hashtable.h"
 #if defined (_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
@@ -25,3 +29,4 @@ char *Constructed (void * v) {
 char *Destructed (void * v) {
   return destructed.Get ((long)v);
 }
+#endif

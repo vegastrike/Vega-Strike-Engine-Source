@@ -158,11 +158,12 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit * un=parent->Target();
     if (un) {
-        firebitm = ((1 << parent->combatRole()) |
-                    ROLES::FIRE_GUNS|
-                    (shouldfire?0:ROLES::FIRE_ONLY_AUTOTRACKERS)|
-                    (((float)rand())/
-                     ((float)RAND_MAX)<missileprobability)?ROLES::FIRE_MISSILES:0);
+      firebitm = (1 << parent->combatRole());
+      firebitm |= ROLES::FIRE_GUNS;
+      if (!shouldfire) 
+	firebitm |= ROLES::FIRE_ONLY_AUTOTRACKERS;
+      if (((float)rand())/((float)RAND_MAX)<missileprobability) 
+	firebitm |=ROLES::FIRE_MISSILES;
     }
     parent->Fire(firebitm);
 }

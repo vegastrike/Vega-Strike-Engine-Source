@@ -12,12 +12,16 @@ struct XMLType {
     void * p;
     char * c;
     short * s;
+    bool * b;
+    double * d;
     unsigned short * us;
     unsigned char * uc;
     int hardint;
     float hardfloat;
   } w;
   std::string str;
+  XMLType (bool *mybool) {w.b = mybool;}
+  XMLType (double *mydouble) {w.d = mydouble;}
   XMLType (int *myint) {w.i =myint;}
   XMLType (int myhardint) {w.hardint=myhardint;}
   XMLType (float myhardfloat) {w.hardfloat = myhardfloat;}
@@ -40,6 +44,8 @@ XMLHandler shortStarHandler;
 XMLHandler shortToFloatHandler;
 XMLHandler ushortStarHandler;
 XMLHandler charStarHandler;
+XMLHandler boolStarHandler;
+XMLHandler doubleStarHandler;
 XMLHandler ucharStarHandler;
 XMLHandler negationCharStarHandler;
 XMLHandler floatStarHandler;

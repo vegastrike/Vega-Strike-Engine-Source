@@ -23,7 +23,6 @@
 #define _HASHTABLE_H_
 
 #include <math.h>
-#include <list>
 #include <string>
 #include <vector>
 
@@ -38,7 +37,7 @@ template<class KEY, class VALUE, class SIZ> class Hashtable {
 		VALUE *value;
 		HashElement(KEY k, VALUE *v) {key = k; value = v;}
 	};
-	list<HashElement> table[sizeof (SIZ)];
+	vector<HashElement> table[sizeof (SIZ)];
 	static int hash(const int key) {
 	  return key%sizeof(SIZ);
 	}
@@ -62,7 +61,7 @@ public:
 	{
 	  vector <VALUE *> retval;
 	  for (unsigned int hashval=0;hashval<sizeof(SIZ);hashval++) {
-	    typename list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+	    typename vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 	    for(;iter!=end;iter++) {
 	      retval.push_back ((*iter).value);
 	    }
@@ -72,7 +71,7 @@ public:
 	VALUE *Get(const KEY &key) const
 	{
 		int hashval = hash(key);
-		typename list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+		typename vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)
@@ -86,13 +85,13 @@ public:
 	void Put(const KEY &key, VALUE *value)
 	{
 	        int hashval = hash(key);
-		table[hashval].push_front(HashElement(key, value));
+		table[hashval].push_back(HashElement(key, value));
 	}
 
 	void Delete(const KEY &key)
 	{
 		int hashval = hash(key);
-		typename list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+		typename vector<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)
