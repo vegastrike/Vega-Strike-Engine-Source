@@ -9,7 +9,7 @@ using std::vector;
 #include "images.h"
 //static DecalQueue beamdecals;
 extern double interpolation_blend_factor;
-extern void AdjustMatrix(Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
+extern bool AdjustMatrix(Matrix &mat,const Vector &velocity, Unit * target, float speed, bool lead, float cone);
 
 void Beam::SetPosition (const QVector &k) {
   local_transformation.position = k;
