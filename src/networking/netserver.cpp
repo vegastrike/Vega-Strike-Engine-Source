@@ -578,18 +578,15 @@ void	NetServer::start(int argc, char **argv)
 		/****************************** VS STUFF TO DO ************************************/
 		// UPDATE STAR SYSTEM -> TO INTEGRATE WITH NETWORKING
 		// PROCESS JUMPS -> MAKE UNITS CHANGE THEIR STAR SYSTEM
-		  //unsigned int i;
-		  //StarSystem * lastStarSystem = NULL;
-		  //static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
-		  //static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
-		  //float systime=nonactivesystemtime;
+		  unsigned int i;
+		  static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+		  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+		  float systime=nonactivesystemtime;
 		  
-		  /*
-			for (i=0;i<star_system.size()&&i<numrunningsystems;i++) {
-			star_system[i]->Update((i==0)?1:systime/i,true);
+			for (i=0;i<_Universe->star_system.size()&&i<numrunningsystems;i++) {
+			_Universe->star_system[i]->Update((i==0)?1:systime/i,true);
 		  }
 		  StarSystem::ProcessPendingJumps();
-		  */
 		/****************************** VS STUFF TO DO ************************************/
 
 		micro_sleep(10000);
