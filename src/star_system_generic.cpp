@@ -679,6 +679,9 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
   }
+  if (un->jump.drive>=0) {
+    un->jump.drive=-1;
+  }
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif
