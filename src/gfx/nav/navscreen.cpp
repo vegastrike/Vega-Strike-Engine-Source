@@ -61,6 +61,23 @@ NavigationSystem::~NavigationSystem() {
 	delete mesh[7];
 	delete factioncolours;
 }
+void NavigationSystem::mouseDrag(int x,int y){
+	mousex=x;
+	mousey=y;
+}
+void NavigationSystem::mouseMotion (int x, int y){
+	mousex=x;
+	mousey=y;
+	
+}
+void NavigationSystem::mouseClick (int button, int state, int x, int y){
+	mousex=x;
+	mousey=y;
+	if (state==WS_MOUSE_DOWN)
+		mousestat|=(1<<lookupMouseButton(button));
+	else
+		mousestat&= (~(1<<lookupMouseButton(button)));
+}
 
 void NavigationSystem::Setup()
 
@@ -339,9 +356,19 @@ void NavigationSystem::Setup()
 
 
 
+void visitSystemHelp (Cockpit * cp, string systemname) {
+	vector< string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData(string("visited_")+_Universe->activeStarSystem()->getFileName());
+	if (v->empty())v->push_back ("v"); else (*v)[0]="v";
+	
+}
+void visitSystem (Cockpit * cp , string systemname ) {
+	visitSystemHelp (cp,systemname);
+	int adj = UniverseUtil::GetNumAdjacentSystems(systemname);
+	for (int i=0;i<adj;++i) {
+		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i));
+	}
 
-
-
+}
 //	This is the main draw loop for the nav screen
 //	**********************************
 void NavigationSystem::Draw()
@@ -351,9 +378,9 @@ void NavigationSystem::Draw()
 
   if(_Universe->AccessCockpit()->GetParent() == NULL)
 	return;
-
 	//	DRAW THE SCREEN MODEL
 	//	**********************************
+  visitSystem (_Universe->AccessCockpit(),_Universe->activeStarSystem()->getFileName());
 	Vector p,q,r;
 	_Universe->AccessCamera()->GetOrientation(p,q,r);  
  
@@ -615,7 +642,7 @@ void NavigationSystem::DrawMission()
 
 
 
-
+#if 0
 
 
 //	This is the galaxy view
@@ -633,7 +660,7 @@ void NavigationSystem::DrawGalaxy()
 
 
 
-
+#endif
 
 
 
@@ -1408,7 +1435,7 @@ void NavigationSystem::DrawSystem()
 	//	give back the selected tail IF there is one
 	//	IF given back, undo the selection state
 	//	**********************************
-	if(checkbit(buttonstates, 1))	//	button #2 is down, wanting a (selection)
+	if(1||checkbit(buttonstates, 1))	//	button #2 is down, wanting a (selection)
 	{
 		if(mouselist.get_n_contents() > 0)	//	mouse is over a target when this is > 0
 		{
@@ -1418,8 +1445,10 @@ void NavigationSystem::DrawSystem()
 				unsetbit(buttonstates, 1);
 
 				// JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
-				( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) )->Target(currentselection);
-				( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) )->LockTarget(currentselection);
+				if (currentselection.GetUnit()) {
+					( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) )->Target(currentselection.GetUnit());
+					( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) )->LockTarget(currentselection.GetUnit());
+				}
 			}
 		}
 	}
@@ -1644,6 +1673,10 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 //	3 = up
 //	4 = down
 //	5 = toggle prespective rezoom
+int NavigationSystem::mousey=0;
+int NavigationSystem::mousex=0;
+int NavigationSystem::mousestat;
+
 void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline)
 {
 
@@ -1710,6 +1743,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			if(checkbit(whattodraw, 1)) // if in nav system NOT mission
 			{
 				dosetbit(whattodraw, 2);	//	draw galaxy
+				currentsystem=systemselection= UniverseUtil::getSystemFile();
+				
 			}
 			else	//	if in mission mode
 			{

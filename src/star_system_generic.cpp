@@ -674,6 +674,9 @@ StarSystem *GetLoadedStarSystem(const char * system) {
 }
 
 std::vector <unorigdest *> pendingjump;
+bool PendingJumpsEmpty() {
+	return pendingjump.empty();
+}
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {

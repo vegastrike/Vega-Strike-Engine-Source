@@ -32,6 +32,7 @@ void BindKey(int key,MouseHandler handler);
 void UnbindMouse (int key);
 int getMouseDrawFunc();
 void GetMouseDelta (int &dx, int &dy);
+int lookupMouseButton (int winsys_button);//returns 0 for left click, 1 for middle, 2 for right. ....
 #endif
 
 

@@ -981,11 +981,18 @@ void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
       {
        (_Universe->AccessCockpit())->SetDrawNavSystem(0);
        UniverseUtil::IOmessage(0,"game","all","DRAWNAV - OFF");
+	   RestoreMouse();
       }
   else
     {
      (_Universe->AccessCockpit())->SetDrawNavSystem(1);
      UniverseUtil::IOmessage(0,"game","all","DRAWNAV - ON");
+	 winsys_set_mouse_func(NavigationSystem::mouseClick);
+	 winsys_set_motion_func(NavigationSystem::mouseDrag);
+	 winsys_set_passive_motion_func(NavigationSystem::mouseMotion);
+
+
+//	 _Universe->AccessCockpit()->ThisNav.currentsystem=_Universe->AccessCockpit()->ThisNav.selectedsystem=UniverseUtil::getSystemFile();
     }
   }
 }

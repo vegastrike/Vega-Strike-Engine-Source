@@ -245,7 +245,6 @@ static void UpdateTimeCompressionSounds() {
 		lasttimecompress=timecount;
 	}
 }
-
 void GameUniverse::StartDraw()
 {
 #ifndef WIN32
@@ -296,6 +295,7 @@ void GameUniverse::StartDraw()
   static int sorttime=0;
   static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));
   if (howoften!=0) {
+	  if (PendingJumpsEmpty()) {//don't want to delete something when there is something pending to jump therexo
     if ((sorttime++)%howoften==1) {
       SortStarSystems(star_system,active_star_system.back());
       static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numoldsystems","6"));
@@ -308,6 +308,7 @@ void GameUniverse::StartDraw()
 	  fprintf (stderr,"error with active star system list\n");
 	}
       }
+	}
     }
   }
   

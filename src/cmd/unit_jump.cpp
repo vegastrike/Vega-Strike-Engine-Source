@@ -75,6 +75,9 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       Cockpit * an_active_cockpit = _Universe->isPlayerStarship(this);
       if (an_active_cockpit!=NULL) {
 	an_active_cockpit->activeStarSystem=pendingjump[kk]->dest;
+	visitSystem (an_active_cockpit,pendingjump[kk]->dest->getFileName());
+//	vector<string> *v = &an_active_cockpit->savegame->getMissionStringData(string("visited_")+pendingjump[kk]->dest->getFileName());
+//	if (v->empty())v->push_back ("v");else (*v)[0]="v";
       }
       if (this==_Universe->AccessCockpit()->GetParent()) {
 	fprintf (stderr,"Unit is the active player character...changing scene graph\n");

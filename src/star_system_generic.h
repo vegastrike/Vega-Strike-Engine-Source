@@ -142,6 +142,6 @@ class StarSystem {
   virtual int DoJumpingLeaveSightAndSound (Unit * un){return -1;}
   //friend class Atmosphere;
 };
-
+bool PendingJumpsEmpty();
 #endif
 

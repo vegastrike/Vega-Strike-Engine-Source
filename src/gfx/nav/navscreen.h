@@ -12,12 +12,13 @@
 #define NAVTOTALMESHCOUNT 8	//	same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
 
-
+void visitSystem (class Cockpit * cp, std::string systemname) ;
 
 class NavigationSystem
 {
 private:
-
+	std::string currentsystem;//FIXME
+	std::string systemselection;
 
 class navscreenoccupied* screenoccupation;
 class Mesh * mesh[NAVTOTALMESHCOUNT];
@@ -47,7 +48,7 @@ signed char draw;
 bool mouse_previous_state[3];
 bool mouse_wentup[3];
 bool mouse_wentdown[3];
-Unit* currentselection;
+UnitContainer currentselection;
 GFXColor* factioncolours;
 
 
@@ -115,6 +116,13 @@ void Draw();
 void Setup();
 void SetDraw(bool n);
 void ClearPriorities();
+static int mousex;
+static int mousey;
+static int mousestat;
+static void mouseDrag(int x,int y);
+static void mouseMotion (int x, int y);
+static void mouseClick (int button, int state, int x, int y);
+static int getMouseButtonStatus() {return mousestat;}
 class QVector dxyz(class QVector, double x_, double y_, double z_);
 //float Delta(float a, float b);
 
