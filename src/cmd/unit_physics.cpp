@@ -25,12 +25,12 @@
 #include "beam.h"
 #include "planet.h"
 #include "audiolib.h"
-#include "images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 //#ifdef WIN32
 #include "gfx/planetary_transform.h"
 #include "gfx/cockpit.h"
+#include "unit_util.h"
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
@@ -775,7 +775,6 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
-  static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
   if (SubUnit) {
     return false;//we can't auto here;
   }
@@ -789,7 +788,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-    float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*planet_rad_percent):autopilot_term_distance;
+	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UnitUtil::getPlanetRadiusPercent()):autopilot_term_distance;
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
     if (percent>1) {
       end=start;
