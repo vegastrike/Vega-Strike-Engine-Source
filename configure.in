@@ -1093,13 +1093,13 @@ if test "x$sdl_sound" != "xno" ; then
     OPENAL_LIB_LIST="openal"
     
     for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
-        CHECK_FOR_OPENAL_LIB
 
-    if test "x$is_macosx" = "xyes" ; then
-      MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
-    else
-      MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
-    fi
+	    if test "x$is_macosx" = "xyes" ; then
+	      MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+	    else
+	      MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+	    fi
+        CHECK_FOR_OPENAL_LIB
     
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"
