@@ -46,6 +46,7 @@ class Briefing{
   void OverrideOrder (int, const Vector & destination, float time);
   void SetPosition (int,const Vector &Position);
   Vector GetPosition(int);
+  void SetCloak (int, float);
   Briefing();
   ~Briefing();
 };

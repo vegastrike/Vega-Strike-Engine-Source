@@ -75,6 +75,12 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
       if (mode==SCRIPT_RUN) {
 	briefing->cam.SetOrientation(p,q,r);
       }
+    }else if (method_id==CMT_BRIEFING_setCloak) {
+      int whichship = (int)getIntArg(node,mode,0);
+      float cloak = getFloatArg(node,mode,1);
+      if (mode==SCRIPT_RUN) {
+	briefing->SetCloak(whichship,cloak);
+      }
     }
   }
   return viret;

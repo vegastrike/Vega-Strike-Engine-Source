@@ -9,6 +9,11 @@ Briefing::Ship::Ship (const char * filename, int faction, const Vector & positio
   cloak=1;
   SetPosition(position);
 }
+void Briefing::SetCloak(int w, float c) {
+  if (w>=0&&w<starships.size()) {
+    starships[w]->cloak=c;
+  }
+}
 bool UpdatePosition (Vector & res, Vector cur, Vector fin, float speed) {
   Vector direction (fin-cur);
     float dirmag = direction.Magnitude();
@@ -69,7 +74,11 @@ void Briefing::Ship::Render (const Matrix cam, double interpol) {
   Matrix camfinal;
   MultMatrix (camfinal,cam,final);
   for (unsigned int i=0;i<meshdata.size();i++) {
-    meshdata[i]->Draw(1,camfinal,1,cloak>.99?-1:short(cloak*32767));
+    short scloak = short (cloak*32767);
+    if ((scloak&0x1)==0) {
+      scloak+=1;
+    }
+    meshdata[i]->Draw(1,camfinal,1,cloak>.99?-1:scloak);
   }
 }
 Briefing::Ship::~Ship() {

@@ -878,6 +878,7 @@ void Mission::initCallbackMaps(){
   module_briefing_map["getShipPosition"]=CMT_BRIEFING_getShipPosition;
   module_briefing_map["setCamPosition"]=CMT_BRIEFING_setCamPosition;
   module_briefing_map["setCamOrientation"]=CMT_BRIEFING_setCamOrientation;
+  module_briefing_map["setCloak"]=CMT_BRIEFING_setCloak;
   module_briefing_map["terminate"]=CMT_BRIEFING_terminate;
 
   module_std_map["Rnd"]=CMT_STD_Rnd;
