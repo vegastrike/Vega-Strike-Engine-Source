@@ -9,17 +9,23 @@ using namespace std;
 
 
 int rnd(int lower, int upper) {
-  return (int)( lower+ (float(upper-lower)*rand())/(RAND_MAX+1));
+  return (int)( lower+ (((float(upper-lower))*rand())/(float (RAND_MAX)+1.)));
 }
 const char nada[1]="";
 
 string  getRandName(vector<string> &s) {
   if (s.empty())
     return string(nada);
-  unsigned int i;
-  string k=s[i=rnd(0,s.size())];
+  unsigned int i=rnd(0,s.size());
+  string k=s[i];
   s.erase(s.begin()+i);
   return k;
+}
+string  getGenericName(vector<string> &s) {
+  if (s.empty())
+    return string(nada);
+  
+  return s[rnd(0,s.size())];
 }
 struct Color {
   float r,g,b,a;
@@ -113,7 +119,7 @@ float grand () {
 vector <Color> lights;
 FILE * fp =NULL;
 void WriteLight (unsigned int i) {
-  fprintf (fp,"<Lights>\n<ambient red=\"%f\" green=\"%f\" blue=\"f\"/>\n<diffuse red=\"%f\" green=\"%f\" blue=\"f\"/>\n<specular red=\"%f\" green=\"%f\" blue=\"f\"/>\n</Light>\n",
+  fprintf (fp,"<Light>\n\t<ambient red=\"%f\" green=\"%f\" blue=\"f\"/>\n\t<diffuse red=\"%f\" green=\"%f\" blue=\"f\"/>\n\t<specular red=\"%f\" green=\"%f\" blue=\"f\"/>\n</Light>\n",
 	   lights[i].r/4,lights[i].g/4,lights[i].b/4,
 	   lights[i].r,lights[i].g,lights[i].b,
 	   lights[i].nr,lights[i].ng,lights[i].nb);   
@@ -130,9 +136,19 @@ int numun[2];
 vector <string> units [2];
 vector <string> background;
 vector <string> names;
+const float moonofmoonprob=.01;
 string systemname;
 vector <float> radii;
 
+
+void Tab () {
+  for (unsigned int i=0;i<radii.size();i++) {
+    fprintf (fp,"\t");
+  }
+
+}
+float starradius =0;
+string faction;
 void CreateLight(unsigned int i) {
   lights.push_back (Color (grand(),grand(),grand()));
   float h = lights.back().r;
@@ -152,6 +168,19 @@ void CreateLight(unsigned int i) {
 float mmax (float a, float b) {
   return (a>b)?a:b;
 }
+
+Vector generateCenter (float minradii) {
+  Vector r;
+  r = Vector (3*grand()+1,3*grand()+1,3*grand()+1);
+  r.i*=minradii;
+  r.j*=minradii;
+  r.k*=minradii;
+  int i=(rnd(0,8));
+  r.i=(i&1)?-r.i:r.i;
+  r.j=(i&2)?-r.j:r.j;
+  r.k=(i&4)?-r.k:r.k;
+  return r;
+}
 float makeRS (Vector &r, Vector &s,float minradii) {
   r=Vector (grand(),grand(),grand());
   Vector k(grand(),grand(),grand());
@@ -166,48 +195,219 @@ float makeRS (Vector &r, Vector &s,float minradii) {
   bool tmp=false;
   float rm;
   rm= (2*grand()); if (rm<1) {rm=(1+grand()*.5);tmp=true;}
+  rm*=minradii;
   r.i*=rm;r.j*=rm;r.k*=rm;
   sm= (2*grand()); if (tmp) sm=(1+grand()*.5);
+  sm*=minradii;
   s.i*=sm;s.j*=sm;s.k*=sm;
   return mmax (rm,sm);
 }
 
-void generateAndUpdateRS (Vector &r, Vector & s, float thisplanetradius) {
+
+void Updateradii (float orbitsize, float thisplanetradius) {
+
+  orbitsize+=thisplanetradius;
+  radii.back()=orbitsize;
+
+}
+
+Vector generateAndUpdateRS (Vector &r, Vector & s, float thisplanetradius) {
   if (radii.empty()) {
     r=Vector (0,0,0);
     s=Vector (0,0,0);
-    return;
+    return generateCenter (starradius);
   }
-  float orbitsize=makeRS (r,s,radii.back());
-  orbitsize+=thisplanetradius;
-  radii.back()=orbitsize;
+  Updateradii(makeRS (r,s,radii.back()),thisplanetradius);
+  return generateCenter (radii.back());
+}
+
+vector <string> parseBigUnit (string input) {
+  char * mystr = strdup (input.c_str());
+  char * ptr = mystr;
+  char * oldptr=mystr;
+  vector <string> ans;
+  while (*ptr!='\0') {
+    while (*ptr!='&'&&*ptr!='\0') {
+      ptr++;
+    }
+    if (*ptr=='&') {
+      *ptr='\0';
+      *ptr++;
+    }
+    ans.push_back (string(oldptr));
+    oldptr=ptr;
+  }
+  free(mystr);    
+  return ans;
 }
 
 
-void MakePlanet(float radius, int entitytype) {
+void WriteUnit(string name, string filename, Vector r, Vector s, Vector center, string destination, bool faction) {
+  Tab();
+  fprintf (fp,"<Unit name=\"%s\" file=\"%s\" ",name.c_str(),filename.c_str());
+  fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
+  fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  if (destination.length()) {
+    fprintf (fp, "destination=\"%s\" ",destination.c_str()); 
+  } else if (faction){
+    fprintf (fp,"faction=\"%s\" ",::faction.c_str());
+  }
+  fprintf (fp," />\n");
+}
+string getJumpTo (string s) {
+  char tmp[1000]="";
+  if (1==sscanf (s.c_str(),"JumpTo%s",tmp)){
+    tmp[0]=tolower(tmp[0]);
+  }
+  else return s;
+  return string (tmp);
+}
+string starin (string input) {
+  char * tmp = strdup (input.c_str());
+  for (unsigned int i=0;tmp[i]!='\0';i++) {
+    if (tmp[i]=='*') {
+      tmp[i]='\0';
+      string ans (tmp);
+      free (tmp);
+      return ans;
+    }
+  }
+
+  free (tmp);
+  return string ("");
+}
+
+void MakeSmallUnit () {
+  Vector r,S;
+  Vector center=generateAndUpdateRS(r,S,300);
+  string nam;
+  string s=string ("");
+  while (s.length()==0) {
+    nam= getRandName (units[1]);
+    if (nam.length()==0)
+      return;
+    string tmp;
+    if ((tmp=starin(nam)).length()>0) {
+      nam=(tmp);
+      s = getRandName (entities[JUMP]);
+    }else {
+      break;
+    }
+  }
+  WriteUnit (nam,nam,r,S,center,s,true);
+
+}
+
+
+
+void MakePlanet(float radius, int entitytype, bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0));
+void MakeBigUnit (string name=string (""),float orbitalradius=0) {
+  vector <string> fullname;
+  if (name.length()==0) {
+    string s= getRandName (units[0]);
+    if (s.length()==0)
+      return;
+    fullname = parseBigUnit(s);
+  }else {
+    fullname.push_back( name);
+  }
+  if (fullname.empty())
+    return;
+  Vector r,s;
+  Vector center=generateAndUpdateRS (r,s,300);
+  
+
+  float size;
+  string tmp;
+  for (unsigned int i=0;i<fullname.size();i++) {
+    if (1==sscanf (fullname[i].c_str(),"jump%f",&size)) {
+      MakePlanet(size,JUMP,true,r,s,center);
+    }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)) {
+      MakePlanet(size,PLANET,true,r,s,center);
+    }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {
+      MakePlanet (size,MOON,true,r,s,center);
+    } else if (1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
+      MakePlanet (size,GAS,true,r,s,center);
+    }else if ((tmp=starin(fullname[i])).length()>0) {
+      string S = getRandName (entities[JUMP]);
+      if (S.length()>0) {
+	WriteUnit (S,tmp,r,s,center,getJumpTo(S),false);
+      }
+    } else {
+      WriteUnit(fullname[i],fullname[i],r,s,center,string(""),i!=0);
+    }
+  }
+
+
+}
+void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone=false);
+void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, Vector center) {
+  string s =  getRandName (entities[entitytype]);
+  if (s.length()==0)
+    return;
+  Vector r,SS;
+  if (forceRS) {
+    r=R;SS=S;
+    Updateradii (max(r.Mag(),SS.Mag()),radius);
+  }else {
+    center=generateAndUpdateRS (r,SS,radius);
+  }
+
+  
+  Tab();
+  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",entitytype==JUMP?s.c_str():getRandName(names).c_str(),entitytype==JUMP?"jump.png":s.c_str());
+  fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
+  fprintf (fp,"radius=\"%f\" ",radius);
+  fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  if (entitytype==JUMP) {
+    fprintf (fp, "destination=\"%s\" ",getJumpTo(s).c_str());
+
+  }
+  fprintf (fp," >\n");
+
+  radii.push_back (entitytype!=GAS?radius:1.4*radius);
+  if (entitytype==GAS&&grand()<.3&&radius>8000&&radius<10500) {
+    MakeBigUnit ("planetary-ring",0);
+  }
+  if (entitytype!=MOON||grand()<moonofmoonprob) {
+    int numu = numun[1]/(nument[PLANET]+nument[GAS])+ grand()*(nument[PLANET]+nument[GAS])>(numun[1]%(nument[PLANET]+nument[GAS]))?1:0;
+    if (entitytype==MOON)
+      if (numu>1)
+	numu=1;
+    for (unsigned int i=0;i<numu;i++) {
+      MakeSmallUnit ();
+    }
+    MakeMoons (.2*radius,MOON,entitytype,entitytype==MOON);
+  }
+  radii.pop_back();
+  Tab();fprintf (fp,"</Planet>\n"); 
   ///writes out some pretty planet tags
 }
 
-void MakeMoons (float radius, int entitytype, int callingentitytype) {
-
-}
-void MakeBigUnit () {
-
+void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone      ) {
+  unsigned int nummoon = nument[entitytype]/nument[callingentitytype]+(grand ()*nument[callingentitytype]<(nument[entitytype]%nument[callingentitytype]))?1:0;
+  if (forceone)
+    nummoon=1;
+  for (unsigned int i=0;i<nummoon;i++) {
+    MakePlanet (.5+.5*radius*grand(),entitytype);
+  }
 }
 void beginStar (float radius, unsigned int which) {
   Vector r,s;
-  generateAndUpdateRS (r,s,radius);
-  radii.push_back (1.5*radius);
+  Vector center=generateAndUpdateRS (r,s,radius);
+
   char b[2]="A";
   b[0]+=which;
-  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),getRandName(entities[0]).c_str());
+  Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),getGenericName(entities[0]).c_str());
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   fprintf (fp,"radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
 
   fprintf (fp," Red=\"%f\" Green=\"%f\" Blue=\"%f\" light=\"%d\">\n",lights[which].r,lights[which].g,lights[which].b,which);
+
+  radii.push_back (1.5*radius);
   MakeMoons (.2*radius,PLANET,STAR);
   MakeMoons (.5*radius,GAS,STAR);
-  MakeMoons (100,JUMP,STAR);
+  MakeMoons (200,JUMP,STAR);
   int numu = numun[0]/nument[0]+(grand()<float(numun[0]%nument[0])/nument[0]);
   if (which==nument[0]-1) {
     numu=numun[0];
@@ -216,11 +416,12 @@ void beginStar (float radius, unsigned int which) {
   for (unsigned int i=0;i<numu;i++) {
     MakeBigUnit();
   }
-  radii.pop_back();
+
 }
 
 void endStar () {
-  fprintf (fp,"</Planet>\n");
+  radii.pop_back();
+  Tab();fprintf (fp,"</Planet>\n");
 }
 void CreateStar (float radius, unsigned int which) {
   beginStar (radius,which);
@@ -245,15 +446,15 @@ void CreatePrimaries (float starradius) {
   for (unsigned int i=0;i<nument[0];i++) {
     CreateLight(i);
   }
-  CreateFirstStar(starradius,0);
-
   for (unsigned int i=0;i<numprimaryunits;i++) {
     MakeBigUnit();
   }
+  CreateFirstStar(starradius,0);
+
 }
 
 void CreateStarSystem () {
-  float starradius =0;
+
   assert (starradius);
   fprintf (fp,"<system name=\"%s\" background=\"%s\" nearstars=\"%d\" stars=\"%d\" starspread=\"150\">\n",systemname.c_str(),getRandName(background).c_str(),500,1000,150);
   CreatePrimaries (starradius);
@@ -273,8 +474,30 @@ void readentity (vector <string> & entity,const char * filename) {
   }
   fclose (fp);
 }
-
+const char * noslash (const char * in) {
+  const char * tmp=in;
+  while (*tmp!='\0'&&*tmp!='/') {
+    tmp++;
+  }
+  if (*tmp!='\0') {
+    tmp++;
+  } else {
+    return tmp;
+  }
+  const char * tmp2=tmp;
+  tmp2=noslash (tmp2);
+  if (tmp2[0]!='\0') {
+    return tmp2;
+  }
+  else
+    return tmp;
+}
 int main (int argc, char ** argv) {
+  srand (5235);
+  if (argc<9) {
+    fprintf (stderr,"Not enough arguments");
+    return -1;
+  }
   readentity (entities[0],"stars.txt");
   readentity (entities[1],"planets.txt");
   readentity (entities[2],"gas_giants.txt");
@@ -283,16 +506,43 @@ int main (int argc, char ** argv) {
   readentity (units[1],"smallunits.txt");
   readentity (background,"background.txt");
   readentity (names,"names.txt");
-  char filename[1000];
+  char *filename=(char *)malloc (strlen(argv[1])+100);
   strcpy (filename,argv[1]);
   strcat (filename,".system");
   fp = fopen (filename,"w");
-  if (1!=sscanf (argv[1],"/%s",filename)) {
-    strcpy (filename,argv[1]);
-  }
+  strcpy (filename,noslash (argv[1]));
   filename[0]= toupper (filename[0]);
   systemname=string(filename);
-  
+  free(filename);
+  if (1!=sscanf (argv[2],"%f",&starradius)) {
+    return -1;
+  }
+  if (1!=sscanf(argv[3],"%d",&nument[0])) {
+    return -1;
+  }
+  if (1!=sscanf(argv[4],"%d",&nument[1])) {
+    return -1;
+  }
+  if (1!=sscanf(argv[5],"%d",&nument[2])) {
+    return -1;
+  }
+  if (1!=sscanf(argv[6],"%d",&nument[3])) {
+    return -1; 
+  }
+  if (1!=sscanf(argv[7],"%d",&numun[0])) {
+    return -1;
+  }
+  if (1!=sscanf(argv[8],"%d",&numun[1])) {
+    return -1;
+  }
+  faction=argv[10];
+  unsigned int count=0;
+  for (unsigned int i=10;i<argc;i++,count++) {
+    entities[JUMP].push_back (string(argv[i]));
+    
+  }
+  nument[JUMP]=entities[JUMP].size();
+  CreateStarSystem();
   fclose (fp);
   return 0;
 }
