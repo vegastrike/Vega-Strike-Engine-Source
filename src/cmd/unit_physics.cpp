@@ -381,7 +381,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     if (dead)
       Kill();
   }
-  if ((!SubUnit)&&(!killed)) {
+  if ((!SubUnit)&&(!killed)&&(docked!=DOCKED_INSIDE)) {
     UpdateCollideQueue();
   }
 }

@@ -333,6 +333,7 @@ class Unit {
   bool killed;
   ///Should not be drawn
   bool invisible;
+  enum {NOT_DOCKED, DOCKED_INSIDE, DOCKED} docked;
   ///How many lists are referencing us
   int ucref;
   ///How big is this unit
@@ -357,7 +358,13 @@ class Unit {
   bool ShieldUp (const Vector &) const;
   ///Builds a BSP tree from either the hull or else the current meshdata[] array
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
+  ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
+  int CanDockWithMe (Unit * dockingunit);
+  void PerformDockingOptions (Unit * dockedUnit);
 public:
+  bool RequestClearance (Unit * dockingunit);
+  bool Dock (Unit * unitToDockWith);
+  bool UnDock (Unit * unitToDockWith);
   ///Does a one way collision between smaller target and this
   bool Inside (const Vector &position, const float radius, Vector & normal, float &dist) const;
   void SetPlanetOrbitData (PlanetaryTransform *trans);
@@ -494,6 +501,8 @@ public:
   void SetAI(Order *newAI);
   ///Enqueues an order to the unit's order queue
   void EnqueueAI(Order *newAI);
+  ///EnqueuesAI first
+  void EnqueueAIFirst (Order * newAI);
   ///num subunits
   int getNumSubUnits () {return numsubunit;}
   Unit *getSubUnit(int i) {return subunits[i];}

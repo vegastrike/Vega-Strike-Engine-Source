@@ -121,7 +121,8 @@ namespace UnitXML {
       JUMP,
       DELAY,
       JUMPENERGY,
-      JUMPWAV
+      JUMPWAV,
+      DOCKINTERNAL
     };
 
   const EnumMap::Pair element_names[] = {
@@ -223,12 +224,14 @@ namespace UnitXML {
     EnumMap::Pair ("Restricted", RESTRICTED),
     EnumMap::Pair ("Delay", DELAY),
     EnumMap::Pair ("JumpEnergy", JUMPENERGY),
-    EnumMap::Pair ("JumpWav", JUMPWAV)
+    EnumMap::Pair ("JumpWav", JUMPWAV),
+    EnumMap::Pair ("DockInternal", DOCKINTERNAL)
+    
 
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 68);
+  const EnumMap attribute_map(attribute_names, 69);
 }
 
 using XMLSupport::EnumMap;
@@ -307,12 +310,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case DOCK:
+    tempbool=true;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     pos=Vector(0,0,0);
     P=Vector (1,1,1);
+    Q=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+    R=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+    
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case DOCKINTERNAL:
+	tempbool=parse_bool ((*iter).value);
+	break;
       case X:
 	pos.i=parse_float((*iter).value);
 	break;
@@ -322,13 +332,37 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case Z:
 	pos.k=parse_float((*iter).value);
 	break;
+      case TOP:
+	R.j=parse_float((*iter).value);
+	break;
+      case BOTTOM:
+	Q.j=parse_float((*iter).value);
+	break;
+      case LEFT:
+	Q.i=parse_float((*iter).value);
+	break;
+      case RIGHT:
+	R.i=parse_float((*iter).value);
+	break;
+      case BACK:
+	Q.k=parse_float((*iter).value);
+	break;
+      case FRONT:
+	R.k=parse_float((*iter).value);
+	break;
       case MOUNTSIZE:
 	P.i=parse_float((*iter).value);
 	P.j=parse_float((*iter).value);
 	break;
       }
     }
-    image->docks.push_back (Dock(pos,P.i));
+    if (Q.i==FLT_MAX||Q.j==FLT_MAX||Q.k==FLT_MAX||R.i==FLT_MAX||R.j==FLT_MAX||R.k==FLT_MAX) {
+      image->dockingports.push_back (DockingPorts(pos,P.i,tempbool));
+    }else {
+      Vector tQ = Q.Min (R);
+      Vector tR = R.Max (Q);
+      image->dockingports.push_back (DockingPorts (tQ,tR,tempbool));
+    }
     break;
   case MESHLIGHT:
     vs_config->gethColor ("unit","engine",halocolor,0xffffffff);

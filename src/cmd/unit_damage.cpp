@@ -125,7 +125,7 @@ void Unit::Kill() {
 }
 void Unit::ProcessDeleteQueue() {
 #ifndef DISABLE_DELETE
-  while (Unitdeletequeue.size()) {
+  if (!Unitdeletequeue.empty()) {
     delete Unitdeletequeue.back();
     Unitdeletequeue.pop_back();
   }

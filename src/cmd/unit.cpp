@@ -703,6 +703,14 @@ void Unit::EnqueueAI(Order *newAI) {
     aistate = newAI;
   }
 }
+void Unit::EnqueueAIFirst(Order *newAI) {
+  newAI->SetParent(this);
+  if (aistate) {
+    aistate->EnqueueOrderFirst (newAI);
+  }else {
+    aistate = newAI;
+  }
+}
 void Unit::ExecuteAI() {
   if(aistate) aistate->Execute();
   for(int a=0; a<numsubunit; a++) {

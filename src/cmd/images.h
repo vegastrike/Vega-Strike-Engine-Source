@@ -1,7 +1,33 @@
-struct Dock {
+struct DockingPorts {
+  ///Center
   Vector pos;
+  ///Radius from center
   float radius;
-  Dock (const Vector &pos, float radius) :pos(pos), radius(radius){}
+  ///axis aligned bounding box min
+  Vector min;
+  ///bounding box max
+  Vector max;
+  bool internal;
+  bool used;
+  DockingPorts (const Vector &pos, float radius, bool internal=true) :
+    pos(pos), radius(radius),
+    min (pos-Vector (radius,radius,radius)),
+    max (pos+Vector (radius,radius,radius)),
+    internal(internal),
+    used (false)
+  {}
+  DockingPorts (const Vector &min, const Vector &max, bool internal=true) :
+    pos(.5*(min+max)), radius((max-min).Magnitude()*.5),
+    min (min),
+    max (max),
+    internal(internal),
+    used (false)
+  {}
+};
+struct DockedUnits {
+  UnitContainer uc;
+  unsigned int whichdock;
+  DockedUnits (Unit * un, unsigned int w): uc(un),whichdock(w) {}
 };
 struct UnitImages {
   std::string cockpitImage;
@@ -16,8 +42,11 @@ struct UnitImages {
   ///How much energy cloaking takes per frame
   float cloakenergy;
   bool cloakglass;
-  std::vector <Dock> docks;
-
+  std::vector <DockingPorts> dockingports;
+  ///warning unreliable pointer, never dereference!
+  std::vector <Unit *> clearedunits;
+  std::vector <DockedUnits *> dockedunits;
+  UnitContainer DockedTo;
 };
 
 struct UnitSounds {
