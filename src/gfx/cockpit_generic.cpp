@@ -159,7 +159,7 @@ void Cockpit::InitStatic () {
   cockpit_time=0;
 }
 
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"))),savegame (new SaveGame(pilot_name)) {
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
   fg=NULL;
@@ -274,7 +274,8 @@ int Cockpit::Autopilot (Unit * target) {
 							      _Universe->AccessCamera()->R,
 							      averagetime*autospeed/(numave));
 	*/
-	zoomfactor=1.5;
+	static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+	zoomfactor=initialzoom;
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
 	autopilot_time=autotime;
@@ -384,7 +385,8 @@ void Cockpit::Update () {
     if (respawnunit.size()>_Universe->CurrentCockpit())
       if (respawnunit[_Universe->CurrentCockpit()]){
 	parentturret.SetUnit(NULL);
-	zoomfactor=1.5;
+	static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+	zoomfactor=initialzoom;
 	respawnunit[_Universe->CurrentCockpit()]=0;
 	std::string savegamefile =mission->getVariable ("savegame","");
 	int k;
@@ -504,7 +506,8 @@ void Cockpit::Update () {
   if (switchunit[_Universe->CurrentCockpit()]) {
     parentturret.SetUnit(NULL);
 
-    zoomfactor=1.5;
+	static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+    zoomfactor=initialzoom;
     static int index=0;
     switchunit[_Universe->CurrentCockpit()]=0;
     un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();

@@ -1210,7 +1210,8 @@ int GameCockpit::Autopilot (Unit * target) {
 	  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
 								   _Universe->AccessCamera()->R,
 								   averagetime*autospeed/(numave));
-	  zoomfactor=1.5;
+	  static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+	  zoomfactor=initialzoom;
 	}
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
@@ -1664,6 +1665,13 @@ static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
   _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetVelocity(),un->GetAngularVelocity());
 }
+static void ShoveCamBelowUnit (int cam, Unit * un, float zoomfactor) {
+  QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
+  Vector p,q,r;
+  _Universe->AccessCamera(cam)->GetOrientation(p,q,r);
+  static float ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics","shove_camera_down",".3"));
+  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetVelocity(),un->GetAngularVelocity());
+}
 void GameCockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
    GFXViewPort (0,(int)((view==CP_FRONT?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
@@ -1710,14 +1718,14 @@ void GameCockpit::SetupViewPort (bool clip) {
       _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
       _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
       //      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
-      ShoveCamBehindUnit (CP_TARGET,un,zoomfactor);
+      ShoveCamBelowUnit (CP_TARGET,un,zoomfactor);
       ShoveCamBehindUnit (CP_PANTARGET,tgt,zoomfactor);
     }else {
       un->UpdateHudMatrix (CP_VIEWTARGET);
       un->UpdateHudMatrix (CP_TARGET);
       un->UpdateHudMatrix (CP_PANTARGET);
     }
-    ShoveCamBehindUnit (CP_CHASE,un,zoomfactor);
+    ShoveCamBelowUnit (CP_CHASE,un,zoomfactor);
     //    ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
 
 
