@@ -23,7 +23,7 @@ bool ForceFeedback::haveFF(){
   return have_ff;
 }
 
-void ForceFeedback::playDurationEffect(uint eff_nr,bool activate){
+void ForceFeedback::playDurationEffect(unsigned int eff_nr,bool activate){
   if(!have_ff){
     return;
   }
@@ -39,7 +39,7 @@ void ForceFeedback::playDurationEffect(uint eff_nr,bool activate){
 #endif
 }
 
-void ForceFeedback::playShortEffect(uint eff_nr){
+void ForceFeedback::playShortEffect(unsigned int eff_nr){
   if(!have_ff){
     return;
   }
@@ -60,7 +60,7 @@ void ForceFeedback::playShortEffect(uint eff_nr){
 
 #if HAVE_FORCE_FEEDBACK
 
-void ForceFeedback::playEffect(uint eff_nr){
+void ForceFeedback::playEffect(unsigned int eff_nr){
 #if FF_DOIT
   play.type = EV_FF;
   play.code = effects[eff_nr].id;
@@ -77,7 +77,7 @@ void ForceFeedback::playEffect(uint eff_nr){
   printf("played effect nr %d\n",eff_nr);
 }
 
-void ForceFeedback::stopEffect(uint eff_nr){
+void ForceFeedback::stopEffect(unsigned int eff_nr){
 #if FF_DOIT
   stop.type = EV_FF;
   stop.code = effects[eff_nr].id;
