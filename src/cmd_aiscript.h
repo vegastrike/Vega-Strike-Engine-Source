@@ -12,6 +12,8 @@ class AIScript : public Order {
 	  int executefor;
 	  bool afterburn;
 	  char lin;
+	  Vector defaultvec;
+	  float defaultf;
 	  stack <Vector> vectors;
 	  stack <float> floats;
 	  vector <Order *> orders;

@@ -5,7 +5,7 @@
 
 float& AIScript::topf(){
 	if (!xml->floats.size()) {
-		xml->floats.push(0);
+		xml->floats.push(xml->defaultf);
 		fprintf(stderr,"\nERROR: Float stack is empty... Will return 0\n");
 	}
 	return xml->floats.top();
@@ -19,7 +19,7 @@ void AIScript::popf(){
 }
 Vector& AIScript::topv(){
 	if (!xml->vectors.size()) {
-		xml->vectors.push(Vector (0,0,0));
+		xml->vectors.push(xml->defaultvec);
 		fprintf(stderr,"\nERROR: Vector stack is empty... Will return 0\n");
 	}
 	return xml->vectors.top();
@@ -71,7 +71,15 @@ namespace AiXml {
 	  MULTF,
 	  ADDF,
 	  FROMF,
-	  TOF
+	  TOF,
+	  FACETARGET,
+	  TARGETPOS,
+	  YOURPOS,
+	  TARGETWORLD,
+	  TARGETLOCAL,
+	  YOURLOCAL,
+	  YOURWORLD,
+	  DEFAULT
     };
 
   const EnumMap::Pair element_names[] = {
@@ -80,7 +88,13 @@ namespace AiXml {
     EnumMap::Pair ("Script", SCRIPT),
     EnumMap::Pair ("Vector", VECTOR),
 	EnumMap::Pair ("Moveto", MOVETO),
-	EnumMap::Pair ("Target", TARGET),
+	EnumMap::Pair ("Default", DEFAULT),
+	EnumMap::Pair ("Targetpos", TARGETPOS),
+	EnumMap::Pair ("Targetworld", TARGETWORLD),
+	EnumMap::Pair ("Yourworld", YOURWORLD),
+	EnumMap::Pair ("Targetlocal", TARGETLOCAL),
+	EnumMap::Pair ("Yourlocal", YOURLOCAL),
+	EnumMap::Pair ("Yourpos", YOURPOS),
 	EnumMap::Pair ("ExecuteFor", EXECUTEFOR),
 	EnumMap::Pair ("ChangeHead", CHANGEHEAD),
     EnumMap::Pair ("MatchLin", MATCHLIN), 
@@ -111,7 +125,7 @@ namespace AiXml {
 
 };
 
-  const EnumMap element_map(element_names, 22);
+  const EnumMap element_map(element_names, 28);
   const EnumMap attribute_map(attribute_names, 9);
 }
 
@@ -124,6 +138,10 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   Names elem = (Names)element_map.lookup(name);
   AttributeList::const_iterator iter;
   switch(elem) {
+  case DEFAULT:
+	  assert(xml->unitlevel==1);
+	  xml->unitlevel++;
+	  break;
   case UNKNOWN:
 	xml->unitlevel++;
 
@@ -186,6 +204,41 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	}
 	break;
 
+  case TARGETPOS:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  if(this->targets) {
+		  xml->vectors.push(this->parent->Target()->Position());
+	  } else {
+		  xml->vectors.push(xml->defaultvec);
+	  }
+	  break;
+  case YOURPOS:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  if(this->targets) {
+		  xml->vectors.push(this->parent->Position());
+	  } else {
+		  xml->vectors.push(xml->defaultvec);
+	  }
+	  break;
+  case TARGETWORLD:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  break;
+  case TARGETLOCAL:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  break;
+  case YOURLOCAL:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  break;
+  case YOURWORLD:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  break;
+
   case NORMALIZE:
   case SCALE:
   case CROSS:
@@ -200,7 +253,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	break;
 
   case FLOAT:
-	assert(xml->unitlevel>3);
+	assert(xml->unitlevel>=2);
 	xml->unitlevel++;
 	xml->floats.push(0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -260,6 +313,43 @@ void AIScript::endElement(const string &name) {
     break;
 
 // Vector 
+  case TARGETWORLD:
+	  assert(xml->unitlevel>=3);
+	  xml->unitlevel++;
+	  if(this->targets) {
+		  xml->vectors.push(parent->Target()->ToWorldCoordinates (topv()));
+	  } else {
+		  xml->vectors.push(xml->defaultvec);
+	  }
+	  break;
+  case TARGETLOCAL:
+	  assert(xml->unitlevel>=3);
+	  xml->unitlevel++;
+	  if(this->targets) {
+		  xml->vectors.push(parent->Target()->ToLocalCoordinates(topv()));
+	  } else {
+		  xml->vectors.push(xml->defaultvec);
+	  }
+	  break;
+  case YOURLOCAL:
+	  assert(xml->unitlevel>=3);
+	  xml->unitlevel++;
+	  if(this->targets) {
+		  xml->vectors.push(this->parent->ToLocalCoordinates(topv()));
+	  } else {
+		  xml->vectors.push(xml->defaultvec);
+	  }
+	  break;
+  case YOURWORLD:
+	  assert(xml->unitlevel>=3);
+	  xml->unitlevel++;
+	  if(this->targets) {
+		  xml->vectors.push(this->parent->ToWorldCoordinates(topv()));
+	  } else {
+		  xml->vectors.push(xml->defaultvec);
+	  }
+	  break;
+
   case NORMALIZE:
 	assert(xml->unitlevel>3);
 	xml->unitlevel--;
@@ -327,6 +417,8 @@ void AIScript::endElement(const string &name) {
 	topv()+=temp;
 	break;
 
+
+
   case MOVETO:
 	  fprintf (stderr,"Moveto <%f,%f,%f>",topv().i,topv().j,topv().k);
 	  xml->unitlevel--;
@@ -366,6 +458,14 @@ void AIScript::endElement(const string &name) {
 	  xml->orders[xml->orders.size()-1]=new ExecuteFor(xml->orders[xml->orders.size()-1],xml->executefor);
 	  }
 	  break;
+  case DEFAULT:
+	  assert(xml->unitlevel==2);
+	  xml->unitlevel--;
+	  xml->defaultvec=topv();
+	  popv();
+	  xml->defaultf=topf();
+	  popf();
+	  break;
   default:
 	  xml->unitlevel--;
     break;
@@ -385,6 +485,8 @@ void AIScript::LoadXML() {
   xml->unitlevel=0;
   xml->executefor=0;
   xml->acc=2;
+  xml->defaultvec=Vector(0,0,0);
+  xml->defaultf=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &AIScript::beginElement, &AIScript::endElement);
