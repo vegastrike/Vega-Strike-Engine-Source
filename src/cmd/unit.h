@@ -385,6 +385,9 @@ class Unit {
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
 public:
   float PriceCargo (const std::string &s);
+  void SwapOutHalos();
+  void SwapInHalos();
+
   Cargo & GetCargo (unsigned int i);
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);

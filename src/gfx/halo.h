@@ -20,6 +20,6 @@ class Halo {
   void SetPosition (const Vector &k) {position = k;}
   Vector &Position(){return position;}
   void SetColor (const GFXColor &col);
-
+  void GetDimensions (float &wid, float &hei) {wid=sizex;hei=sizey;}
 
 };

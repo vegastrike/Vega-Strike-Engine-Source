@@ -126,6 +126,8 @@ Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), sa
 }
 
 Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
+  static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
+  radius*=bodyradius;
   inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
@@ -200,8 +202,9 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   image->dockingports.push_back (DockingPorts (Vector(0,0,0),radius+1000,true));
   if (ligh.size()>0) {
     static bool drawglow = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow","true"));
+
     static bool drawstar = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_body","true"));
-    static float glowradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_glow_radius","3"));
+    static float glowradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_glow_radius","1.33"))/bodyradius;
 
     if (drawglow) {
       numhalos=1;
