@@ -89,7 +89,7 @@ public:
 
 const float timek = .005;
 bool _Slew = true;
-  int ouch=1;
+
 namespace CockpitKeys {
 
  void SkipMusicTrack(int,KBSTATE newState) {

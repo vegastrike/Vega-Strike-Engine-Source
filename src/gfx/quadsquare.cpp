@@ -44,7 +44,7 @@ std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <Texture *> *quadsquare::textures;
-
+unsigned short VertInfo::texmultiply;
 void TextureIndex::Clear() {
   q.clear();
   c.clear();
@@ -71,6 +71,32 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 	return half;  
 }
 
+// Verts mapping:
+// 1-0
+// | |
+// 2-3
+//
+// Vertex mapping:
+// +-2-+
+// | | |
+// 3-0-1
+// | | |
+// +-4-+
+static void InterpolateTextures (VertInfo res[5], VertInfo  in[4]) {
+  res[0].Tex = (unsigned short) (0.25 * (((float)in[0].Tex) + in[1].Tex + in[2].Tex + in[3].Tex));
+  res[1].Tex = (unsigned short) (0.5 * (((float)in[3].Tex) + in[0].Tex));
+  res[2].Tex = (unsigned short) (0.5 * (((float)in[0].Tex) + in[1].Tex));
+  res[3].Tex = (unsigned short) (0.5 * (((float)in[1].Tex) + in[2].Tex));
+  res[4].Tex = (unsigned short) (0.5 * (((float)in[2].Tex) + in[3].Tex));
+
+
+  res[0].Y = (unsigned short) (0.25 * (((float)in[0].Y) + in[1].Y + in[2].Y + in[3].Y));
+  res[1].Y = (unsigned short) (0.5 * (((float)in[3].Y) + in[0].Y));
+  res[2].Y = (unsigned short) (0.5 * (((float)in[0].Y) + in[1].Y));
+  res[3].Y = (unsigned short) (0.5 * (((float)in[1].Y) + in[2].Y));
+  res[4].Y = (unsigned short) (0.5 * (((float)in[2].Y) + in[3].Y));
+
+} 
 quadsquare::quadsquare(quadcornerdata* pcd) {
 
 	pcd->Square = this;
@@ -94,17 +120,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 
 	// Set default vertex positions by interpolating from given corners.
 	// Just bilinear interpolation.
-	Vertex[0].Y = (unsigned short) (0.25 * (pcd->Verts[0].Y + pcd->Verts[1].Y + pcd->Verts[2].Y + pcd->Verts[3].Y));
-	Vertex[0].Tex = pcd->Verts[0].Tex;
-	Vertex[1].Y = (unsigned short) (0.5 * (pcd->Verts[3].Y + pcd->Verts[0].Y));
-	Vertex[1].Tex = pcd->Verts[3].Tex;
-	Vertex[2].Y = (unsigned short) (0.5 * (pcd->Verts[0].Y + pcd->Verts[1].Y));
-	Vertex[2].Tex = pcd->Verts[0].Tex;
-	Vertex[3].Y = (unsigned short) (0.5 * (pcd->Verts[1].Y + pcd->Verts[2].Y));
-	Vertex[3].Tex = pcd->Verts[1].Tex;
-	Vertex[4].Y = (unsigned short) (0.5 * (pcd->Verts[2].Y + pcd->Verts[3].Y));
-	Vertex[4].Tex = pcd->Verts[2].Tex;
-
+	InterpolateTextures (Vertex,pcd->Verts);
 	for (i = 0; i < 2; i++) {
 		Error[i] = 0;
 	}
@@ -807,6 +823,29 @@ float	VertexArray[9 * 3];
 unsigned int	ColorArray[9];
 unsigned char	VertList[24];
 
+
+static void TerrainMakeActive (Texture *text) {
+  if (text==(Texture *)1||text==(Texture *)2) {
+    GFXPushBlendMode();
+    GFXBlendMode (ONE,ONE);
+  }
+  if (text==(Texture *)0||text==(Texture *)2){
+    GFXEnable (TEXTURE1);
+    GFXDisable (TEXTURE0);
+  } else if (text!=(Texture *)0&&text!=(Texture *)1&&text!=(Texture *)2){
+    text->MakeActive();
+  }
+
+}
+static void TerrainMakeDeactive (Texture *text) {
+  if (text==(Texture *)1||text==(Texture *)2) {
+    GFXPopBlendMode();
+  }
+  if (text==(Texture *)0||text==(Texture *)2) {
+    GFXEnable (TEXTURE0);
+    GFXEnable (TEXTURE1);
+  }
+}
 int	quadsquare::Render(const quadcornerdata& cd)
 // Draws the heightfield represented by this tree.
 // Returns the number of triangles rendered.
@@ -822,19 +861,21 @@ int	quadsquare::Render(const quadcornerdata& cd)
   vector <Texture *>::iterator k;
 
   for (k=textures->begin();k!=textures->end();i++,k++) {
-    (*k)->MakeActive();
+    TerrainMakeActive(*k);
     unsigned int isize = i->q.size();
     totsize+=isize;
     vertices->Draw(GFXTRI,isize, i->q.begin());
+    TerrainMakeDeactive (*k);
   }
   vertices->EndDrawState();
   i=indices.begin();
   int j=0;
   for (k=textures->begin();k!=textures->end();i++,j++,k++) {
     if (i->c.size()>2) {
-      (*k)->MakeActive();
+
       GFXPushBlendMode();
       GFXBlendMode (SRCALPHA,INVSRCALPHA);
+      TerrainMakeActive(*k);
       GFXPolygonOffset (0,-j);
       GFXColorMaterial (AMBIENT|DIFFUSE);
       GFXColorVertex ** cv = (&blendVertices->BeginMutate(0)->colors);
@@ -849,6 +890,7 @@ int	quadsquare::Render(const quadcornerdata& cd)
       blendVertices->EndMutate(3);
       GFXColorMaterial (0);
       GFXPolygonOffset (0,0);
+      TerrainMakeDeactive(*k);
       GFXPopBlendMode();
     }
     i->Clear();
@@ -856,23 +898,16 @@ int	quadsquare::Render(const quadcornerdata& cd)
 
   return totsize;
 }
-extern int ouch;
 void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned short tb,unsigned int cc,unsigned short tc) {
-  if (ta==tb&&tb==tc) {
-    indices[ta].q.push_back (aa);
-    indices[ta].q.push_back (bb);
-    indices[ta].q.push_back (cc);
-  } else {
+  indices[ta].q.push_back (aa);
+  indices[ta].q.push_back (bb);
+  indices[ta].q.push_back (cc);
+  if (!(ta==tb&&tb==tc)) {
     GFXColorVertex cv[3];
     cv[0].SetVtx(*vertices->GetVertex (aa));
     cv[1].SetVtx(*vertices->GetVertex (bb));
     cv[2].SetVtx(*vertices->GetVertex (cc));
     cv[0].SetColor (GFXColor(1,1,1,1));    cv[1].SetColor (GFXColor(1,1,1,1));    cv[2].SetColor (GFXColor(1,1,1,1));
-    if (ouch) {
-      indices[ta].q.push_back (aa);
-      indices[ta].q.push_back (bb);
-      indices[ta].q.push_back (cc);
-    }
     if (tb==tc) {
       cv[0].a = 0;
       cv[1].a = 1;
@@ -962,23 +997,23 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 // Local macro to make the triangle logic shorter & hopefully clearer.
 	//#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q.push_back (aa), indices[ta].q.push_back (bb), indices[ta].q.push_back (cc))
 #define V0 (Vertex[0].vertindex)
-#define T0 (Vertex[0].Tex)
+#define T0 (Vertex[0].GetTex())
 #define V1 (Vertex[1].vertindex)
-#define T1 (Vertex[1].Tex)
+#define T1 (Vertex[1].GetTex())
 #define V2 (cd.Verts[0].vertindex)
-#define T2 (cd.Verts[0].Tex)
+#define T2 (cd.Verts[0].GetTex())
 #define V3 (Vertex[2].vertindex)
-#define T3 (Vertex[2].Tex)
+#define T3 (Vertex[2].GetTex())
 #define V4 (cd.Verts[1].vertindex)
-#define T4 (cd.Verts[1].Tex)
+#define T4 (cd.Verts[1].GetTex())
 #define V5 (Vertex[3].vertindex)
-#define T5 (Vertex[3].Tex)
+#define T5 (Vertex[3].GetTex())
 #define V6 (cd.Verts[2].vertindex)
-#define T6 (cd.Verts[2].Tex)
+#define T6 (cd.Verts[2].GetTex())
 #define V7 (Vertex[4].vertindex)
-#define T7 (Vertex[4].Tex)
+#define T7 (Vertex[4].GetTex())
 #define V8 (cd.Verts[3].vertindex)
-#define T8 (cd.Verts[3].Tex)
+#define T8 (cd.Verts[3].GetTex())
 	
 	// Make the list of triangles to draw.
 	if ((EnabledFlags & 1) == 0) tri(V0,T0, V8,T8, V2,T2);
@@ -1097,6 +1132,14 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 		break;
 	}	
 }
+
+void VertInfo::SetTex (float t) {
+  Tex = (unsigned short)t*texmultiply;
+}
+unsigned short VertInfo::GetTex () const {
+  return Tex/texmultiply + (((Tex%texmultiply)>texmultiply/2)?1:0);
+}
+
 void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <Texture *> *tex ) {
   if (quadsquare::blendVertices==NULL) {
     GFXColorVertex tmp[3];
@@ -1108,6 +1151,8 @@ void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int 
   quadsquare::unusedvertices = unvert;
   nonlinear_trans = nlt;
   textures = tex;
+  VertInfo::texmultiply = 32768 / tex->size();
+  
   if (indices.size()<tex->size()) {
     while (indices.size()<tex->size()) {
       indices.push_back (TextureIndex ());
@@ -1167,7 +1212,7 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	
 	
 	for (i = 0; i < 5; i++) {
-	  Vertex[i].Tex = ((cd.xorg+half+cd.zorg+half)/5000)%10;
+	  Vertex[i].SetTex(((cd.xorg+half+cd.zorg+half)/5000)%10);
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];

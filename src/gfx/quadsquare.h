@@ -51,10 +51,12 @@ class IdentityTransform {
 };
 
 struct	VertInfo {
+  static unsigned short texmultiply;
   unsigned short Y;
-  char Tex;
-  char unused;
+  unsigned short Tex;
   unsigned int vertindex;
+  void SetTex(float);
+  unsigned short GetTex() const;
 };
 
 class Texture;
