@@ -3,7 +3,7 @@
 
 #ifndef PROPHECY
 #include "unit_bsp.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 #else
 #include <vector>

@@ -269,8 +269,7 @@ protected:
 
   StarSystem * activeStarSystem;//the star system I'm in
   ///Takes out of the collide table for this system.
-// SHOULD COME BACK HERE
-  virtual void RemoveFromSystem (){}
+  void RemoveFromSystem();
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
  std::vector <string> meshdata_string;
   virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
@@ -879,11 +878,9 @@ public:
 
   // Shouldn't do anything here - but needed by Python
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  virtual Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true) {return NULL;}
+  Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true);
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-  virtual Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP) {return NULL;}
-  // Using collision stuff -> NetUnit if possible
-  virtual Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance) {return NULL;}
+  Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
 
   ///fils in corner_min,corner_max and radial_size
 // Uses Box stuff -> only in NetUnit and Unit
@@ -893,16 +890,16 @@ public:
 ///Builds a BSP tree from either the hull or else the current meshdata[] array
   virtual void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL){}//if hull==NULL, then use meshdata **
 // Uses mesh stuff (only rSize()) : I have to find something to do
-  virtual bool Inside (const QVector &position, const float radius, Vector & normal, float &dist) {return false;}
+  bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
-//  void UpdateCollideQueue();
+  void UpdateCollideQueue();
 // Uses LineCollide stuff so only in NetUnit and Unit
   const LineCollide &GetCollideInfo () {return CollideInfo;}
 // Uses collision stuff so only in NetUnit and Unit classes
-//  virtual bool querySphere (const QVector &pnt, float err) const {return false;}
+  bool querySphere (const QVector &pnt, float err)const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius
-  virtual float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0) const { return 1;}
-//  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0) const ;
+  float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0)const;
+  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0)const;
   ///queries the ship with a directed ray
   virtual float querySphereClickList (const QVector &st, const QVector &dir, float err) const {return 1;}//for click list
   ///Queries if this unit is within a given frustum
@@ -928,15 +925,16 @@ public:
   virtual bool querySphereClickList (int,int, float err, Camera *activeCam) {return false;}
 
 
-  virtual bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal) { return false;}
+  Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance);
+  bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
 // Uses Universe thing
   virtual bool jumpReactToCollision (Unit *smaller) {return false;}
   ///Does a collision between this and another unit
-  virtual bool Collide(Unit * target) {return false;}
+  bool Collide(Unit * target);
   ///checks for collisions with all beams and other units roughly and then more carefully
-  virtual void CollideAll() {}
+  void CollideAll();
 
 /***************************************************************************************/
 /**** DOCKING STUFF                                                                 ****/
@@ -1061,10 +1059,68 @@ class Mount {
   protected:
     ///Where is it
     Transformation LocalPosition;
+	void ReplaceSound();
   public:
-    void SwapMounts (Mount * othermount);
-    virtual void ReplaceMounts (const Mount * othermount);
-    double Percentage (const Mount * oldmount) const;
+    void SwapMounts (Mount * other)
+	{
+	  short thisvol = volume;
+	  short othervol = other->volume;
+	  //short othersize = other->size;
+	  short thissize = size;
+	  Mount mnt = *this;
+	  this->size=thissize;
+	  *this=*other;
+	  *other=mnt;
+	  volume=thisvol;
+
+	  other->volume=othervol;//volumes stay the same even if you swap out
+	  Transformation t =this->GetMountLocation();
+	  this->SetMountPosition(other->GetMountLocation());
+	  other->SetMountPosition (t);  
+	}
+
+    void ReplaceMounts (const Mount * other)
+	{
+		  short thisvol = volume;
+		  short thissize = size;
+		  Transformation t =this->GetMountLocation();
+		  *this=*other;
+		  this->size=thissize;
+		  volume=thisvol;
+		  this->SetMountPosition(t);
+		  ref.gun=NULL;
+		  this->ReplaceSound();
+	}
+	double Percentage (const Mount *newammo) const{
+	  float percentage=0;
+	  int thingstocompare=0;
+	  if (status==UNCHOSEN||status==DESTROYED)
+		return 0;
+	  if (newammo->ammo==-1) {
+		if (ammo!=-1) {
+		  thingstocompare++;
+		}
+	  } else {
+		if (newammo->ammo>0) {
+		  percentage+=ammo/newammo->ammo;
+		  thingstocompare++;
+		}
+	  }
+	  if (newammo->type->Range) {
+		percentage+= type->Range/newammo->type->Range;
+		thingstocompare++;
+	  }
+	  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
+		percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
+		thingstocompare++;
+	  }
+	  if (thingstocompare) {
+		return percentage/thingstocompare;
+	  }else {
+		return 0;
+	  }
+	}
+
 // Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
     union REF{
       ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
@@ -1086,28 +1142,38 @@ class Mount {
     const weapon_info *type;
     int sound;
     float time_to_lock;
-    Mount();
-// Requires weapon_xml.cpp stuff so Beam stuff so GFX and AUD stuff
+    Mount() {static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;sound=-1;}
     Mount(const std::string& name, short int ammo=-1, short int volume=-1);
-    ///Sets this gun to active, unless unchosen or destroyed
-    void Activate (bool Missile);
-    ///Sets this gun to inactive, unless unchosen or destroyed
-    void DeActive (bool Missile);
+
+	void Activate (bool Missile) {
+	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
+		if (status==INACTIVE)
+		  status = ACTIVE;
+	  }
+	}
+	///Sets this gun to inactive, unless unchosen or destroyed
+	void DeActive (bool Missile) {
+	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
+		if (status==ACTIVE)
+		  status = INACTIVE;
+	  }
+	}
+
     ///Sets this gun's position on the mesh
-    void SetMountPosition (const Transformation &t) {LocalPosition = t;}
+    void SetMountPosition (const Transformation &t){LocalPosition = t;}
     ///Gets the mount's position and transform
-    Transformation &GetMountLocation () {return LocalPosition;}
+    Transformation &GetMountLocation (){return LocalPosition;}
     ///Turns off a firing beam (upon key release for example)
-	virtual void UnFire() {}
+	void UnFire();
     /**
      *  Fires a beam when the firing unit is at the Cumulative location/transformation 
      * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
      * should it fire
      */ 
 	// Uses Sound Forcefeedback and other stuff
-	virtual void PhysicsAlignedUnfire() {}
-	virtual bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone) { return false;}//0 is no track...1 is target 2 is target + lead
-	virtual bool Fire (Unit *owner, bool Missile=false) {return false;}
+	void PhysicsAlignedUnfire();
+	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);
+	bool Fire (Unit *owner, bool Missile=false);
 };
 
 inline void UnitCollection::UnitIterator::GetNextValidUnit () {

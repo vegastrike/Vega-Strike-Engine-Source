@@ -1,4 +1,4 @@
-#include "mount.h"
+#include "unit_generic.h"
 #include "beam.h"
 #include "bolt.h"
 #include "weapon_xml.h"
@@ -13,14 +13,11 @@
 #include "gfx/cockpit_generic.h"
 #include "force_feedback.h"
 
-GameMount::GameMount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=GameMount::PROCESSED;ref.gun=NULL; sound=-1;}
-
-void GameMount::ReplaceMounts (const Mount *other) {
-  Mount::ReplaceMounts( other);
+void Mount::ReplaceSound () {
   sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
 }
 
-void GameMount::PhysicsAlignedUnfire() {
+void Mount::PhysicsAlignedUnfire() {
   //Stop Playing SOund?? No, that's done in the beam, must not be aligned
   if (processed==UNFIRED) {
   if (AUDIsPlaying (sound))
@@ -29,7 +26,7 @@ void GameMount::PhysicsAlignedUnfire() {
   }
 }
 
-void GameMount::UnFire () {
+void Mount::UnFire () {
   processed = UNFIRED;
   if (status!=ACTIVE||ref.gun==NULL||type->type!=weapon_info::BEAM)
     return ;
@@ -41,7 +38,7 @@ extern void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, fl
 void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone) {
   AdjustMatrix (mat,target,speed,lead,cone);
 }
-bool GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
+bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;
   }
@@ -101,7 +98,7 @@ bool GameMount::PhysicsAlignedFire(const Transformation &Cumulative, const Matri
   return false;
 }
 
-bool GameMount::Fire (Unit * owner, bool Missile) {
+bool Mount::Fire (Unit * owner, bool Missile) {
   if (ammo==0) {
     processed=UNFIRED;
   }
@@ -142,7 +139,7 @@ bool GameMount::Fire (Unit * owner, bool Missile) {
   return false;
 }
 
-GameMount::GameMount(const string& filename, short am,short vol){
+Mount::Mount(const string& filename, short am,short vol){
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
   ammo = am;
@@ -151,7 +148,7 @@ GameMount::GameMount(const string& filename, short am,short vol){
   this->volume=vol;
   ref.gun = NULL;
   status=(UNCHOSEN);
-  processed=GameMount::PROCESSED;
+  processed=Mount::PROCESSED;
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;

@@ -2167,27 +2167,6 @@ bool Unit::ShieldUp (const Vector &pnt) const{
 /**** UNIT_WEAPON STUFF                                                            */
 /***********************************************************************************/
 
-Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;sound=-1;}
-Mount::Mount(const string& filename, short am,short vol): size(weapon_info::NOWEAP),ammo(am),sound(-1){
-  static weapon_info wi(weapon_info::BEAM);
-  type = &wi;
-  this->volume=vol;
-  ref.gun = NULL;
-  status=(UNCHOSEN);
-  processed=Mount::PROCESSED;
-  /*
-  weapon_info * temp = getTemplate (filename);  
-  if (temp==NULL) {
-    status=UNCHOSEN;
-    time_to_lock=0;
-  }else {
-    type = temp;
-    status=ACTIVE;
-    time_to_lock = temp->LockTime;
-  }
-  */
-}
-
 void Unit::VelocityReference (Unit *targ) {
   computer.velocity_ref.SetUnit(targ);
 }
@@ -2212,19 +2191,6 @@ void Unit::Cloak (bool loak) {
   }
 }
 
-void Mount::Activate (bool Missile) {
-  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-    if (status==INACTIVE)
-      status = ACTIVE;
-  }
-}
-///Sets this gun to inactive, unless unchosen or destroyed
-void Mount::DeActive (bool Missile) {
-  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-    if (status==ACTIVE)
-      status = INACTIVE;
-  }
-}
 void Unit::SelectAllWeapon (bool Missile) {
   for (int i=0;i<GetNumMounts();i++) {
     mounts[i]->Activate (Missile);
@@ -2675,33 +2641,6 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
   }
 }
 
-void Mount::ReplaceMounts (const Mount *other) {
-  short thisvol = volume;
-  short thissize = size;
-  Transformation t =this->GetMountLocation();
-  *this=*other;
-  this->size=thissize;
-  volume=thisvol;
-  this->SetMountPosition(t);
-  ref.gun=NULL;
-}
-
-void Mount::SwapMounts (Mount * other) {
-  short thisvol = volume;
-  short othervol = other->volume;
-  //short othersize = other->size;
-  short thissize = size;
-  Mount mnt = *this;
-  this->size=thissize;
-  *this=*other;
-  *other=mnt;
-  volume=thisvol;
-
-  other->volume=othervol;//volumes stay the same even if you swap out
-  Transformation t =this->GetMountLocation();
-  this->SetMountPosition(other->GetMountLocation());
-  other->SetMountPosition (t);  
-}
 
 int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage) {
   if (downgrade) {
@@ -2733,36 +2672,6 @@ bool Quit (const char *input_buffer) {
 	  return true;
 	}
 	return false;
-}
-
-double Mount::Percentage (const Mount *newammo) const{
-  float percentage=0;
-  int thingstocompare=0;
-  if (status==UNCHOSEN||status==DESTROYED)
-    return 0;
-  if (newammo->ammo==-1) {
-    if (ammo!=-1) {
-      thingstocompare++;
-    }
-  } else {
-    if (newammo->ammo>0) {
-      percentage+=ammo/newammo->ammo;
-      thingstocompare++;
-    }
-  }
-  if (newammo->type->Range) {
-    percentage+= type->Range/newammo->type->Range;
-    thingstocompare++;
-  }
-  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
-    percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
-    thingstocompare++;
-  }
-  if (thingstocompare) {
-    return percentage/thingstocompare;
-  }else {
-    return 0;
-  }
 }
 
 using std::string;

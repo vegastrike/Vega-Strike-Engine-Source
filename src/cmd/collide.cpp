@@ -1,6 +1,6 @@
 #include "cmd/collide.h"
 #include "vegastrike.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "beam.h"
 #include "bolt.h"
 #include "gfx/mesh.h"
@@ -13,7 +13,7 @@
 #include "hashtable.h"
 #include <string>
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 static Hashtable <std::string,collideTrees,char[127]> unitColliders;
 collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), colTree(cT), bspShield(bS), colShield(cS) {
   refcount=1;
@@ -89,7 +89,7 @@ bool Bolt::Collide () {
     Unit * un;
     for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {
       
-      if (lcwithin (minimaxi,((GameUnit<Unit> *)un)->GetCollideInfo ())) {
+      if (lcwithin (minimaxi,(un)->GetCollideInfo ())) {
 	if (this->Collide (un)) {
 	  delete this;
 	  return true;
@@ -109,7 +109,7 @@ void Beam::CollideHuge (const LineCollide & lc) {
       Unit *un;
       for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
 
-	if (lcwithin(lc,((GameUnit<Unit> *)un)->GetCollideInfo())) {
+	if (lcwithin(lc,(un)->GetCollideInfo())) {
 	  this->Collide (un);
 	}
       }
@@ -118,7 +118,7 @@ void Beam::CollideHuge (const LineCollide & lc) {
     un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
     Unit *un;
     for (;(un=*i)!=NULL;++i) {
-      if (lcwithin (lc,((GameUnit<Unit> *)un)->GetCollideInfo())) {
+      if (lcwithin (lc,(un)->GetCollideInfo())) {
 	this->Collide(un);
       }
     }

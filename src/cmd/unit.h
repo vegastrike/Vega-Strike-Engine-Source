@@ -181,15 +181,8 @@ protected:
 
 public:
   ///Updates the collide Queue with any possible change in sectors
-  void UpdateCollideQueue();
-  bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
   ///Gets the minimum distance away from the point in 3space
   double getMinDis(const QVector &pnt);//for clicklist
-  ///queries the sphere for weapons (world space point)
-  bool querySphere (const QVector &pnt, float err) const;
-  ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius
-  float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0) const;
-  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0) const ;
   ///queries the ship with a directed ray
   float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
@@ -212,15 +205,9 @@ public:
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphereClickList (int,int, float err, Camera *activeCam);
-  Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance);
-  bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
   //virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
   bool jumpReactToCollision (Unit *smaller);
-  ///Does a collision between this and another unit
-  bool Collide(Unit * target);
-  ///checks for collisions with all beams and other units roughly and then more carefully
-  void CollideAll();
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                    */
@@ -349,7 +336,7 @@ void GameUnit<UnitType>::BuildBSPTree(const char *filename, bool vplane, Mesh * 
 
 #include "unit_cargo.cpp"
 #include "unit_click.cpp"
-#include "unit_collide.cpp"
+//#include "unit_collide.cpp"
 #include "unit_customize.cpp"
 #include "unit_damage.cpp"
 //#include "base_interface.cpp"

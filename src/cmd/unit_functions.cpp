@@ -40,7 +40,7 @@ void pushMesh( Unit::XML * xml, const char *filename, const float scale,int fact
 
 Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1)
 {
-	return new GameMount (name.c_str(), ammo,volume);
+	return new Mount (name.c_str(), ammo,volume);
 }
 
 Sprite * createSprite(const char *file)

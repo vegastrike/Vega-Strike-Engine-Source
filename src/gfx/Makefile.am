@@ -18,9 +18,13 @@ libgfxgeneric =  \
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
+	sphere_generic.cpp	\
+	bsp.cpp		\
+	bsp.h		\
 	vertex.h		
 
 libgfxserver_a_SOURCES =	$(libgfxgeneric)	\
+	sphere_server.cpp	\
 	mesh_server.cpp
 
 libgfx_a_SOURCES =	$(libgfxgeneric)\
@@ -42,8 +46,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	car_assist.h 	\
 	vsbox.cpp		\
 	vsbox.h		\
-	bsp.cpp		\
-	bsp.h		\
 	camera.cpp	\
 	camera.h	\
 	cockpit.h	\

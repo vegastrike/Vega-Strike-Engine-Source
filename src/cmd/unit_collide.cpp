@@ -12,11 +12,10 @@
 #include "hashtable.h"
 #include <string>
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "collide.h"
 
-template <class UnitType>
-void GameUnit<UnitType>::RemoveFromSystem() {
+void Unit::RemoveFromSystem() {
 #define UNSAFE_COLLIDE_RELEASE
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
   if (CollideInfo.object.u!=NULL) {
@@ -60,8 +59,7 @@ void GameUnit<UnitType>::RemoveFromSystem() {
   activeStarSystem=NULL;
 }
 
-template <class UnitType>
-void GameUnit<UnitType>::UpdateCollideQueue () {
+void Unit::UpdateCollideQueue () {
   if (activeStarSystem==NULL) {
     activeStarSystem = _Universe->activeStarSystem();
   } else {
@@ -84,8 +82,7 @@ void GameUnit<UnitType>::UpdateCollideQueue () {
   }
 }
 
-template <class UnitType>
-void GameUnit<UnitType>::CollideAll() {
+void Unit::CollideAll() {
   if (SubUnit||killed)
     return;
 
@@ -101,7 +98,7 @@ void GameUnit<UnitType>::CollideAll() {
 	continue;//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
 
-	  if ((!GameUnit<UnitType>::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+	  if ((!Unit::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
 	if (Position().i+radial_size>tmp->Mini.i&&
 	    Position().i-radial_size<tmp->Maxi.i&&
 	    Position().j+radial_size>tmp->Mini.j&&
@@ -115,8 +112,8 @@ void GameUnit<UnitType>::CollideAll() {
   }
 }
 
-template <class UnitType>
-bool GameUnit<UnitType>::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
+
+bool Unit::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   if (!querySphere(target,radius)) {
     return false;;
   }
@@ -133,8 +130,8 @@ bool GameUnit<UnitType>::Inside (const QVector &target, const float radius, Vect
 
   return false;
 }
-template <class UnitType>
-bool GameUnit<UnitType>::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
+
+bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
   if (smaller->colTrees==NULL||this->colTrees==NULL)
     return false;
   if (smaller->colTrees->colTree==NULL||this->colTrees->colTree==NULL)
@@ -206,8 +203,7 @@ bool GameUnit<UnitType>::InsideCollideTree (Unit * smaller, QVector & bigpos, Ve
     return false;
 }
 
-template <class UnitType>
-Unit * GameUnit<UnitType>::BeamInsideCollideTree (const QVector & start,const QVector & end, QVector & pos, Vector &norm, double &distance) {
+Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, QVector & pos, Vector &norm, double &distance) {
   QVector r (end-start);
   double mag = r.Magnitude();
   if (mag>0) {
@@ -315,8 +311,8 @@ Unit * GameUnit<UnitType>::BeamInsideCollideTree (const QVector & start,const QV
     return false;
 }
 
-template <class UnitType>
-bool GameUnit<UnitType>::Collide (Unit * target) {
+
+bool Unit::Collide (Unit * target) {
   if (target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
 
@@ -374,8 +370,8 @@ bool GameUnit<UnitType>::Collide (Unit * target) {
   return true;
 }
 
-template <class UnitType>
-Unit * GameUnit<UnitType>::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
+
+Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
   if (!SubUnits.empty()) {
     un_fiter i = SubUnits.fastIterator();
@@ -414,8 +410,8 @@ Unit * GameUnit<UnitType>::queryBSP (const QVector &pt, float err, Vector & norm
   return NULL;
 }
 
-template <class UnitType>
-Unit * GameUnit<UnitType>::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
+
+Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   int i;
   Unit * tmp;
   if (!SubUnits.empty()) {
@@ -464,8 +460,8 @@ Unit * GameUnit<UnitType>::queryBSP (const QVector &start, const QVector & end, 
 }
 
 
-template <class UnitType>
-bool GameUnit<UnitType>::querySphere (const QVector &pnt, float err) const{
+
+bool Unit::querySphere (const QVector &pnt, float err) const{
   int i;
   const Matrix * tmpo = &cumulative_transformation_matrix;
   
@@ -492,7 +488,7 @@ bool GameUnit<UnitType>::querySphere (const QVector &pnt, float err) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
-      if (((GameUnit<UnitType> *)un)->querySphere (pnt,err)) {
+      if ((un)->querySphere (pnt,err)) {
 	return true;
       }
     }
@@ -500,8 +496,8 @@ bool GameUnit<UnitType>::querySphere (const QVector &pnt, float err) const{
   return false;
 }
 
-template <class UnitType>
-float GameUnit<UnitType>::querySphere (const QVector &start, const QVector &end, float min_radius) const{
+
+float Unit::querySphere (const QVector &start, const QVector &end, float min_radius) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -515,8 +511,8 @@ float GameUnit<UnitType>::querySphere (const QVector &start, const QVector &end,
   return querySphereNoRecurse (start,end,min_radius);
 }
 
-template <class UnitType>
-float GameUnit<UnitType>::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
+
+float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
   int i;
   float tmp;
   QVector st,dir;

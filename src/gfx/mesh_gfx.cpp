@@ -78,13 +78,21 @@ Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
     return tex;
     
 }
-Texture * createTexture( const char * filename, int stage)
+Texture * createTexture( const char * filename, int stage=0,enum FILTER f1= MIPMAP,enum TEXTURE_TARGET t0=TEXTURE2D,enum TEXTURE_IMAGE_TARGET t=TEXTURE_2D,unsigned char c=GFXFALSE,int i=65536)
 {
-	return new Texture( filename, stage);
+	return new Texture( filename, stage, f1, t0, t, c, i);
 }
 Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, float* rotations, float offset, Texture * Dec, Vector *Ref)
 {
 	return new Logo(numberlogos,center,normal,sizes ,rotations, offset, Dec ,Ref);
+}
+Texture * createTexture( char const * ccc,char const * cc,int k= 0,enum FILTER f1= MIPMAP,enum TEXTURE_TARGET t0=TEXTURE2D,enum TEXTURE_IMAGE_TARGET t=TEXTURE_2D,float f=1,int j=0,unsigned char c=GFXFALSE,int i=65536)
+{
+	return new Texture( ccc, cc, k, f1, t0, t, f, j, c, i);
+}
+AnimatedTexture * createAnimatedTexture( char const * c,int i,enum FILTER f)
+{
+	return new AnimatedTexture( c, i, f);
 }
 
 Mesh::~Mesh()

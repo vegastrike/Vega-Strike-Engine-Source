@@ -7,7 +7,7 @@
 #include "file_main.h"
 //#include "gldrv/winsys.h"
 
-extern Texture * createTexture( const char * filename, int stage);
+extern Texture * createTexture( char const * ccc,char const * cc,int k= 0,enum FILTER f1= MIPMAP,enum TEXTURE_TARGET t0=TEXTURE2D,enum TEXTURE_IMAGE_TARGET t=TEXTURE_2D,float f=1,int j=0,unsigned char c=GFXFALSE,int i=65536);
 extern Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, float* rotations, float offset, Texture * Dec, Vector *Ref);
 #ifdef __cplusplus
 extern "C"

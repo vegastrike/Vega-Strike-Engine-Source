@@ -31,12 +31,7 @@ class NETCLASS
 		unsigned short			nb_clients;			// Number of clients
 		char					netbuf[MAXBUFFER];	// Network message buffer
 		char					server;				// 1=server, 0=client
-
-#ifndef HAVE_SDLnet
 		struct timeval			srvtimeout;
-#else
-		int						channel;
-#endif
 
 	public:
 		SOCKET					sock;			// SOCKETALT
@@ -45,17 +40,6 @@ class NETCLASS
 		NETCLASS()
 		{
 			this->max_clients = MAXCLIENTS;
-#ifdef HAVE_SDLnet
-			if(SDL_Init(0)==-1) {
-				perror( SDL_GetError());
-				exit(1);
-			}
-			if(SDLNet_Init()==-1) {
-				perror( SDLNet_GetError());
-				exit(2);
-			}
-			client_set=NULL;
-#else
 			srvtimeout.tv_sec = 0;
 			srvtimeout.tv_usec = 0;
 	#if defined(_WIN32) && !defined(__CYGWIN__)
@@ -68,7 +52,6 @@ class NETCLASS
 	#else
 		cout<<"Not win32 VC++"<<endl;
 	#endif
-#endif
 		}
 
 		~NETCLASS()
@@ -92,23 +75,7 @@ class NETCLASS
 		// Reset a socket set
 		void	resetSets()
 		{
-#ifndef HAVE_SDLnet
 			FD_ZERO( &client_set);
-#else
-			int nb = 0;
-			if( client_set != NULL)
-				SDLNet_FreeSocketSet( client_set);
-			if( server)
-				nb = this->max_clients;
-			else
-				nb = 1;
-			client_set = SDLNet_AllocSocketSet(this->max_clients);
-			if( client_set==NULL)
-			{
-				cout<<"Error allocating client_set"<<endl;
-				exit( 1);
-			}
-#endif
 		}
 		// Add a socket to a set to be watched
 		void	watchSocket( SOCKET bsock);
@@ -122,21 +89,11 @@ class NETCLASS
 		// Close a socket
 		void	closeSocket( SOCKETALT bsock)
 		{
-			#ifdef HAVE_SDLnet
-				#ifdef _TCP_PROTO
-					SDLNet_TCP_Close(bsock);
-				#endif
-				#ifdef _UDP_PROTO
-					// Unbind a channel from socket
-					SDLNet_UDP_Unbind( this->sock, bsock);
-				#endif
-			#else
 				#if defined(_WIN32) && !defined(__CYGWIN__)
 					closesocket(bsock);
 				#else
 					close(bsock);
 				#endif
-			#endif
 		}
 
 		void	showIP( SOCKET socket);
@@ -145,24 +102,15 @@ class NETCLASS
 		int		getNumClients() { return this->nb_clients;}
 		// returns dot notation of IP address
 		char *	getIPof( AddressIP ipadr) {
-			#ifndef HAVE_SDLnet
 			cout<<inet_ntoa( ipadr.sin_addr)<<":"<<ntohs(ipadr.sin_port)<<endl;
 			return inet_ntoa( ipadr.sin_addr);
-			#else
-			return SDLNet_ResolveIP( &ipadr);
-			#endif
 		}
 
 		int		isSameAddress( AddressIP * ip1, AddressIP * ip2)
 		{
 			int ipsize;
-#ifdef HAVE_SDLnet
-			ipsize = sizeof( Uint32);
-			return (!memcmp( ip1, ip2, ipsize));
-#else
 			ipsize = sizeof( unsigned long);
 			return (!memcmp( &(ip1->sin_addr.s_addr), &(ip2->sin_addr.s_addr), ipsize));
-#endif
 		}
 };
 
@@ -204,47 +152,6 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 	#endif
 	}
 
-	#ifdef HAVE_SDLnet
-		AddressIP	localhostip;
-		if( SDLNet_ResolveHost(&this->srv_ip, host, srv_port)<0)
-			f_error( "SDLNet_ResolveHost1 : ");
-		if( server)
-			if( SDLNet_ResolveHost(&localhostip, NULL, srv_port)<0)
-				f_error( "SDLNet_ResolveHost2 : ");
-		else
-			if( SDLNet_ResolveHost(&localhostip, NULL, clt_port)<0)
-				f_error( "SDLNet_ResolveHost2 : ");
-
-		#ifdef _TCP_PROTO
-			// If host is null then creates a local socket listening (server)
-			// If host != null then creates a socket and connects to host (client)
-			if( server)
-			{
-				if( !(sock = SDLNet_TCP_Open( &localhostip)))
-					f_error( "Could not create connection socket");
-				cout<<"Listening on port "<<srv_port<<endl;
-			}
-			else
-			{
-				cout<<"Connecting on "<<host<<" port "<<srv_port<<endl;
-				if( !(sock = SDLNet_TCP_Open( &srv_ip)))
-					f_error( "Could not create connection socket");
-			}
-			ret = sock;
-		#endif
-		#ifdef _UDP_PROTO
-			cout<<"Server host : "<<host<<" port : "<<srv_port<<endl;
-			// host is always null so it creates a local socket for receiving (server & clients)
-			cout<<"Binding socket on port "<<clt_port<<endl;
-			if( !(this->sock = SDLNet_UDP_Open( clt_port)))
-				f_error( "Could not create reception socket");
-			if( (channel=SDLNet_UDP_Bind( sock, -1, &srv_ip))==-1)
-				this->disconnect( "Cannot bind socket");
-			ret = channel;
-			cout<<"UDP socket ok"<<endl;
-		#endif
-	#else
-		// SOCKETALT part
 		struct hostent	*he = NULL;
 #if defined(_WIN32) && !defined(__CYGWIN__)
 		int sockerr= INVALID_SOCKET;
@@ -340,8 +247,7 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 		this->max_sock = this->sock;
 #endif
 		ret=this->sock;
-		cout<<"SOCKETALT n° : "<<ret<<endl;
-#endif
+		cout<<"Socket n° : "<<ret<<endl;
 	return ret;
 }
 

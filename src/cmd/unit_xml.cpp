@@ -19,9 +19,10 @@
 #include "unit_bsp.h"
 #include "unit_collide.h"
 #include "gfx/bsp.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
+#include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
 
 int GetModeFromName (const char * input_buffer) {

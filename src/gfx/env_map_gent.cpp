@@ -142,18 +142,21 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 	Normal.j = -Normal.j;
 	Normal.k = -Normal.k;
 	const float CubeSize = lmwido2; //half of the length of any of the cube's sides
-		r[0] = CubeSize / Normal.k; // find what you need to multiply to get to the cube
-		r[1] = -r[0];
-		r[2] = CubeSize / Normal.i; // find what you need to multiply to get to the cube
-		r[3] = -r[2];
-		r[4] = CubeSize / Normal.j; // find what you need to multiply to get to the cube
-		r[5] = -r[4];
+		if (Normal.k)
+			r[0] = CubeSize / Normal.k; // find what you need to multiply to get to the cube
+		if (Normal.i)
+			r[2] = CubeSize / Normal.i; // find what you need to multiply to get to the cube
+		if (Normal.j)
+			r[4] = CubeSize / Normal.j; // find what you need to multiply to get to the cube
 		if (!Normal.k)
 			r[0] = r[1] = CubeSize*1000;
 		if (!Normal.i)
 			r[2] = r[3] = CubeSize*1000;
 		if (!Normal.j)
 			r[4] = r[5] = CubeSize*1000;
+		r[1] = -r[0];
+		r[3] = -r[2];
+		r[5] = -r[4];
 
 	float rf;
 	rf  = CubeSize * 1000;

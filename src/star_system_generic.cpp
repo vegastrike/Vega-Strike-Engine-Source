@@ -41,6 +41,13 @@
 
 //Atmosphere *theAtmosphere;
 
+float ScaleJumpRadius (float radius) {
+	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
+	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
+	    radius *= jump_radius_scale*game_speed;//need this because sys scale doesn't affect j-point size
+	    return radius;
+}
+
 StarSystem::StarSystem() {
   stars = NULL;
   bolts = NULL;

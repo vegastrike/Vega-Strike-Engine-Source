@@ -28,7 +28,7 @@
 #include "bsp.h"
 #include <assert.h>
 #include <math.h>
-#include "cmd/nebula.h"
+#include "cmd/nebula_generic.h"
 #include <list>
 #include <string>
 #include <fstream>
@@ -36,7 +36,7 @@
 #include "lin_time.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "hashtable.h"
 #include "vegastrike.h"
 #include "sphere.h"

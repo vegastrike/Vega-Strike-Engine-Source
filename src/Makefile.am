@@ -35,8 +35,10 @@ cmd/script/c_alike/libc_alike.a \
 python/libpythonserver.a \
 gfx/libgfxserver.a \
 gldrv/libgldrvserver.a \
+cmd/collide/libcollide.a \
 boost/libboost_python.a
-$(BOOSTLIBS) \
+$(BOOSTLIBS)
+
 accountserver_LDADD =  \
 networking/libnetacct.a
 

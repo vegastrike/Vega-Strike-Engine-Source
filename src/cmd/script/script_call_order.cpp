@@ -47,12 +47,12 @@
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/tactics.h"
 #include "cmd/ai/missionscript.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "mission.h"
 #include "easydom.h"
 
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 
 //#include "vegastrike.h"
 

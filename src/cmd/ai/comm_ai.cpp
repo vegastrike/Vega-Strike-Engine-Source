@@ -1,10 +1,10 @@
 #include "comm_ai.h"
-#include "faction.h"
+#include "faction_generic.h"
 #include "communication.h"
 #include "cmd/collection.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {

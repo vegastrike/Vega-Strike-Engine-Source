@@ -33,6 +33,7 @@ using std::string;
 class Planet;
 class Unit;
 class Logo;
+struct AnimatedTexture;
 struct Texture;
 struct GFXVertex;
 class GFXVertexList;
