@@ -788,8 +788,8 @@ bool Unit::Explode (bool drawit, float timeit) {
   Unit *un=_Universe->AccessCockpit()->GetParent();
   if (isUnit()==UNITPTR) {
   if (un ) {
-    static float badrel=XMLSupport::parse_float(vs_config.getVariable("sound","loss_relationship","-.1"))
-    static float goodrel=XMLSupport::parse_float(vs_config.getVariable("sound","victory_relationship",".5"))
+    static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
+    static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
 	float rel=un->getRelation(this);
     if (rel>goodrel) {
       muzak->SkipRandSong(Music::LOSSLIST);
