@@ -30,57 +30,60 @@ static bool colorOK(Vector &col, const double time) {
 bool ParticlePoint::Draw(const Vector & vel,const double time, Vector p, Vector q) {
   loc+=(vel*time).Cast();
   GFXColor4f(col.i,col.j,col.k,1);
+  {
+    QVector loc= this->loc-_Universe->AccessCamera()->GetPosition();
 #ifdef USE_POINTS
-  GFXVertexf(loc);
+    GFXVertexf(loc);
 #else
   #if 0
-  q*=size;
-  p*=size;  
-  GFXTexCoord2f(0,0);
-  GFXVertex3d(loc.i+p.i+q.i,loc.j+p.j+q.j,loc.k+p.k+q.k);
-  GFXTexCoord2f(0,1);  
-  GFXVertex3d(loc.i+p.i-q.i,loc.j+p.j-q.j,loc.k+p.k-q.k);
-  GFXTexCoord2f(1,1);  
-  GFXVertex3d(loc.i-p.i-q.i,loc.j-p.j-q.j,loc.k-p.k-q.k);
-  GFXTexCoord2f(1,0);  
-  GFXVertex3d(loc.i-p.i+q.i,loc.j-p.j+q.j,loc.k-p.k+q.k);
-  #else
-  GFXTexCoord2f(0,0);
-  GFXVertex3d(loc.i+size,loc.j+size,loc.k);
-  GFXTexCoord2f(0,1);  
-  GFXVertex3d(loc.i+size,loc.j-size,loc.k);
-  GFXTexCoord2f(1,1);  
-  GFXVertex3d(loc.i-size,loc.j-size,loc.k);
-  GFXTexCoord2f(1,0);  
-  GFXVertex3d(loc.i-size,loc.j+size,loc.k);
-
-  GFXTexCoord2f(0,0);
-  GFXVertex3d(loc.i,loc.j+size,loc.k+size);
-  GFXTexCoord2f(0,1);  
-  GFXVertex3d(loc.i,loc.j-size,loc.k+size);
-  GFXTexCoord2f(1,1);  
-  GFXVertex3d(loc.i,loc.j-size,loc.k-size);
-  GFXTexCoord2f(1,0);  
-  GFXVertex3d(loc.i,loc.j+size,loc.k-size);
-
-  GFXTexCoord2f(0,0);
-  GFXVertex3d(loc.i+size,loc.j,loc.k+size);
-  GFXTexCoord2f(0,1);  
-  GFXVertex3d(loc.i+size,loc.j,loc.k-size);
-  GFXTexCoord2f(1,1);  
-  GFXVertex3d(loc.i-size,loc.j,loc.k-size);
-  GFXTexCoord2f(1,0);  
-  GFXVertex3d(loc.i-size,loc.j,loc.k+size);
+    q*=size;
+    p*=size;  
+    GFXTexCoord2f(0,0);
+    GFXVertex3d(loc.i+p.i+q.i,loc.j+p.j+q.j,loc.k+p.k+q.k);
+    GFXTexCoord2f(0,1);  
+    GFXVertex3d(loc.i+p.i-q.i,loc.j+p.j-q.j,loc.k+p.k-q.k);
+    GFXTexCoord2f(1,1);  
+    GFXVertex3d(loc.i-p.i-q.i,loc.j-p.j-q.j,loc.k-p.k-q.k);
+    GFXTexCoord2f(1,0);  
+    GFXVertex3d(loc.i-p.i+q.i,loc.j-p.j+q.j,loc.k-p.k+q.k);
+#else
+    GFXTexCoord2f(0,0);
+    GFXVertex3d(loc.i+size,loc.j+size,loc.k);
+    GFXTexCoord2f(0,1);  
+    GFXVertex3d(loc.i+size,loc.j-size,loc.k);
+    GFXTexCoord2f(1,1);  
+    GFXVertex3d(loc.i-size,loc.j-size,loc.k);
+    GFXTexCoord2f(1,0);  
+    GFXVertex3d(loc.i-size,loc.j+size,loc.k);
+    
+    GFXTexCoord2f(0,0);
+    GFXVertex3d(loc.i,loc.j+size,loc.k+size);
+    GFXTexCoord2f(0,1);  
+    GFXVertex3d(loc.i,loc.j-size,loc.k+size);
+    GFXTexCoord2f(1,1);  
+    GFXVertex3d(loc.i,loc.j-size,loc.k-size);
+    GFXTexCoord2f(1,0);  
+    GFXVertex3d(loc.i,loc.j+size,loc.k-size);
+    
+    GFXTexCoord2f(0,0);
+    GFXVertex3d(loc.i+size,loc.j,loc.k+size);
+    GFXTexCoord2f(0,1);  
+    GFXVertex3d(loc.i+size,loc.j,loc.k-size);
+    GFXTexCoord2f(1,1);  
+    GFXVertex3d(loc.i-size,loc.j,loc.k-size);
+    GFXTexCoord2f(1,0);  
+    GFXVertex3d(loc.i-size,loc.j,loc.k+size);
 
 #endif
 #if 0
-  GFXEnd();
-  GFXBegin(GFXPOINT);
-  GFXVertexf(loc);
-  GFXEnd();
-  GFXBegin(GFXQUAD);
+    GFXEnd();
+    GFXBegin(GFXPOINT);
+    GFXVertexf(loc);
+    GFXEnd();
+    GFXBegin(GFXQUAD);
 #endif
 #endif
+  }
   return colorOK(col,time);
 }
 void ParticleTrail::DrawAndUpdate (){
@@ -92,6 +95,7 @@ void ParticleTrail::DrawAndUpdate (){
 	  P*=particlesize;
 	  Q*=particlesize;
   }
+
   list<Vector>::iterator v=particleVel.begin();
   list<ParticlePoint>::iterator p=particle.begin();
 #ifdef USE_POINTS
@@ -114,6 +118,7 @@ void ParticleTrail::DrawAndUpdate (){
 #endif
   GFXDisable(LIGHTING);
   GFXLoadIdentity(MODEL);
+  GFXTranslateModel(_Universe->AccessCamera()->GetPosition());
   static bool pblend=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkeblend","false"));
   //GFXBlendMode(ONE,ZERO);
 #ifdef USE_POINTS
@@ -145,7 +150,7 @@ void ParticleTrail::DrawAndUpdate (){
   GFXDisable(DEPTHWRITE);
   GFXDisable(CULLFACE);
 #endif
-
+  GFXLoadIdentity(MODEL);
 }
 
 void ParticleTrail::AddParticle (const ParticlePoint &P, const Vector &V,float size) {
