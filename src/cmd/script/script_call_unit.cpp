@@ -159,10 +159,6 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		ret->quantity=quantity;
 		vireturn=call_olist_new(node,mode);
 		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_INT;
-		viret->int_val=quantity;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
 		viret->type=VAR_OBJECT;
 		viret->objectname="string";
 		viret->object=&ret->content;
@@ -175,6 +171,10 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		viret=newVarInst(VI_IN_OBJECT);
 		viret->type=VAR_FLOAT;
 		viret->float_val=ret->price;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_INT;
+		viret->int_val=quantity;
 		((olist_t *)vireturn->object)->push_back(viret);
 		viret=newVarInst(VI_IN_OBJECT);
 		viret->type=VAR_FLOAT;
