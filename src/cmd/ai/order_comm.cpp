@@ -66,7 +66,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	  if (un) {
             CommunicationMessage c(parent,un,NULL,0);
             
-            if (GetEffectiveRelationship(un)>=0) {
+            if (GetEffectiveRelationship(un)>=0||(parent->getFlightgroup()&&parent->getFlightgroup()->name=="Base")) {
 	      parent->RequestClearance (un);
 	      c.SetCurrentState (c.fsm->GetAbleToDockNode(),NULL,0);
             }else {
