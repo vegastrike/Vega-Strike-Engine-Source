@@ -249,6 +249,7 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
     }
   return false;
 }
+
 void ChangeHeading::Execute() {
   Vector ang_vel=parent->GetAngularVelocity();
   Vector local_velocity (parent->UpCoordinateLevel(ang_vel));
@@ -260,7 +261,17 @@ void ChangeHeading::Execute() {
   bool cheater=false;
   if (AICheat&&!parent->isSubUnit()) {
     if (xswitch||yswitch) {   
-
+      Vector P,Q,R;
+      parent->GetOrientation(P,Q,R);
+      Vector desiredR=(final_heading-parent->Position()).Cast();
+      desiredR.Normalize();
+      static float cheatpercent=XMLSupport::parse_float(vs_config->getVariable("AI","ai_cheat_dot",".99"));
+      if (desiredR.Dot(R)>cheatpercent) {
+        P=Q.Cross(desiredR);
+        Q = desiredR.Cross(P);
+        parent->SetOrientation(Q,desiredR);
+        xswitch=yswitch=1;
+      
       if (xswitch) {
 	if (yswitch) {
 	  local_velocity.j=.0f;
@@ -278,13 +289,17 @@ void ChangeHeading::Execute() {
       cheater=true;
 	  ang_vel.k=local_velocity.k=0;
       parent->SetAngularVelocity(ang_vel);
+      }
     }
   }
   terminatingX += xswitch;
   terminatingY += yswitch;
   last_velocity = local_velocity;
 
-  if (done||(xswitch&&yswitch)) return ;
+  if (done||(xswitch&&yswitch)) {
+    
+    return ;
+  }
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
     if (Done (local_velocity)) {
