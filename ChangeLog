@@ -1,3 +1,12 @@
+2001-12-06 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* interpreter:
+	  - moved code out of mission_script.cpp:
+	    - added script_variables.cpp
+	    - added script_util.cpp
+	    - modified cmd/script/Makefile.am
+
+
 2001-12-04 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* interpreter:

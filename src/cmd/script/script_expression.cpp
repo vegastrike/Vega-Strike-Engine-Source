@@ -45,6 +45,8 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+/* *********************************************************** */
+
 varInst *Mission::checkObjectExpr(missionNode *node,int mode){
   varInst *res=NULL;
 
@@ -83,6 +85,8 @@ varInst *Mission::checkObjectExpr(missionNode *node,int mode){
     return res;
 
 }
+
+/* *********************************************************** */
 
 float Mission::doFMath(missionNode *node,int mode){
   //  if(mode==SCRIPT_PARSE){
@@ -127,6 +131,8 @@ float Mission::doFMath(missionNode *node,int mode){
     }
     return 0.0;
 }
+
+/* *********************************************************** */
 
 float Mission::checkFloatExpr(missionNode *node,int mode){
   float res=0.0;
@@ -178,6 +184,8 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
 
     return res;
 }
+
+/* *********************************************************** */
 
 bool Mission::checkBoolExpr(missionNode *node,int mode){
   bool ok;
@@ -245,6 +253,8 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
     return ok;
 }
 
+/* *********************************************************** */
+
 bool Mission::doAndOr(missionNode *node,int mode){
   bool ok;
 
@@ -281,6 +291,8 @@ bool Mission::doAndOr(missionNode *node,int mode){
   return ok;
 }
 
+/* *********************************************************** */
+
 bool Mission::doNot(missionNode *node,int mode){
   bool ok;
 
@@ -299,6 +311,8 @@ bool Mission::doNot(missionNode *node,int mode){
     return false; // we'll never get here
   }
 }
+
+/* *********************************************************** */
 
 bool Mission::doTest(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
@@ -386,4 +400,35 @@ bool Mission::doTest(missionNode *node,int mode){
 
     return res;
 
+}
+
+
+
+/* *********************************************************** */
+
+varInst *Mission::checkExpression(missionNode *node,int mode){
+
+  varInst *ret=NULL;
+  debug(0,node,mode,"checking expression");
+  printRuntime();
+
+  switch(node->tag){
+  case DTAG_AND_EXPR:
+  case DTAG_OR_EXPR:
+  case DTAG_NOT_EXPR:
+  case DTAG_TEST_EXPR:
+    checkBoolExpr(node,mode);
+    break;
+
+  case DTAG_VAR_EXPR:
+    ret=doVariable(node,mode);
+    break;
+  case DTAG_FMATH:
+    break;
+  default:
+    fatalError(node,mode,"no such expression");
+    assert(0);
+    break;
+  }
+  return ret;
 }
