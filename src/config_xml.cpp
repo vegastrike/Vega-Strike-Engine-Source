@@ -218,6 +218,7 @@ void GameVegaConfig::initCommandMap(){
   //  I don't knwo why this gives linker errors!
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
+  command_map["Cockpit::NavScreen"]=GameCockpit::NavScreen;
   command_map["DopplerDec"]=decdop;
   command_map["VolumeInc"]=VolUp;
   command_map["VolumeDec"]=VolDown;
