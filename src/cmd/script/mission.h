@@ -198,6 +198,7 @@ enum callback_module_unit_type {
   CMT_UNIT_getUnit ,
   CMT_UNIT_getTurret ,
   CMT_UNIT_getPlayer ,
+  CMT_UNIT_getPlayerX,
   CMT_UNIT_getRandCargo ,
   CMT_UNIT_getCredits ,
   CMT_UNIT_getSaveData ,//gets saved data for this unit

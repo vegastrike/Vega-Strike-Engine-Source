@@ -918,6 +918,7 @@ void Mission::initCallbackMaps(){
   module_unit_map["getRandCargo"]=CMT_UNIT_getRandCargo ;
   module_unit_map["addCredits"]=CMT_UNIT_addCredits ;
   module_unit_map["getPlayer"]=CMT_UNIT_getPlayer ;
+  module_unit_map["getPlayerX"]=CMT_UNIT_getPlayerX ;
   module_unit_map["launch"]=CMT_UNIT_launch ;
   module_unit_map["launchNebula"]=CMT_UNIT_launchPlanet ;
   module_unit_map["launchPlanet"]=CMT_UNIT_launchNebula ;

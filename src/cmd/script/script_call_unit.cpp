@@ -135,6 +135,36 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     return viret;
 
   }
+  else if(method_id==CMT_UNIT_getPlayerX){
+    int which= getIntArg(node,mode,0);
+    Unit *my_unit=NULL;
+
+    if(mode==SCRIPT_RUN){
+      int j=0;
+      for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+	Unit * un;
+	if (NULL!=(un=_Universe->AccessCockpit(i)->GetParent())) {
+	  if (j==which) {
+	    my_unit=un;
+	    break;
+	  }
+	  j++;
+	}
+      }
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="unit";
+    
+    viret->object=(void *)my_unit;
+
+    debug(3,node,mode,"unit getUnit: ");
+    printVarInst(3,viret);
+
+    return viret;
+
+  }
   else if(method_id==CMT_UNIT_launch||method_id==CMT_UNIT_launchNebula||method_id==CMT_UNIT_launchPlanet||method_id==CMT_UNIT_launchJumppoint){
     missionNode *name_node=getArgument(node,mode,0);
     varInst *name_vi=checkObjectExpr(name_node,mode);
