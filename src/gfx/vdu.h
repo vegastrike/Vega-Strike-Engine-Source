@@ -30,8 +30,9 @@ class VDU: public Sprite {
   
   ///Rows and columns of text this VDU can display
   short rows,cols;
-
-  int DrawVDUObjective (void * obj, int offset);//obj is of type Mission::Objective
+// DrawVDUObjective is outdated
+//  int DrawVDUObjective (void * obj, int offset);//obj is of type Mission::Objective
+  ///Draws all of the objectives created by missions.
   void DrawVDUObjectives(Unit * parent);
   ///Draws a shield display in the VDU
   void DrawVDUShield (Unit * parent);

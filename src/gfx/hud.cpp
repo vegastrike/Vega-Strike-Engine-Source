@@ -102,7 +102,8 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   static float font_point = XMLSupport::parse_float (vs_config->getVariable ("graphics","font_point","16"));
   static bool font_antialias = XMLSupport::parse_bool (vs_config->getVariable ("graphics","font_antialias","true"));
   void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
-  myFontMetrics.i=font_point*glutStrokeWidth (GLUT_STROKE_ROMAN,'W')/(119.05+33.33);
+  static float std_wid=glutStrokeWidth (GLUT_STROKE_ROMAN,'W');
+  myFontMetrics.i=font_point*std_wid/(119.05+33.33);
   myFontMetrics.j=font_point;
   myFontMetrics.i/=.5*g_game.x_resolution;
   myFontMetrics.j/=.5*g_game.y_resolution;
@@ -154,7 +155,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   float scaley=1;
   int potentialincrease=0;
   if (!use_bit) {
-    scalex=(_Universe->numPlayers()>3?_Universe->numPlayers()/2:_Universe->numPlayers())*myFontMetrics.i/glutStrokeWidth (GLUT_STROKE_ROMAN,'W');
+    scalex=(_Universe->numPlayers()>3?_Universe->numPlayers()/2:_Universe->numPlayers())*myFontMetrics.i/std_wid;
     scaley=myFontMetrics.j/(119.05+33.33);
   }
   glScalef (scalex,scaley,1);
@@ -206,7 +207,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       if (use_bit) {
 	col+=glutBitmapWidth (fnt,*text_it)/(float)(2*g_game.x_resolution);;
       }else {
-	col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/glutStrokeWidth(GLUT_STROKE_ROMAN,'W');
+		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/std_wid;
       }
     }
     if(col+((text_it+1!=newText.end())?(use_bit?(glutBitmapWidth(fnt,*text_it)/(float)(2*g_game.x_resolution)):myFontMetrics.i):0)>=myDims.i||*text_it == '\n') {

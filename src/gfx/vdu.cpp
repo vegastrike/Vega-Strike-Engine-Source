@@ -713,56 +713,74 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
   tp->Draw (buf,0,true);
 }
 using std::vector;
+/*
 static GFXColor GetColorFromSuccess (float suc){ 
   suc +=1.;
   suc/=2.;
   return GFXColor(1-suc,suc,0);    
 }
-int VDU::DrawVDUObjective (void * obj, int offset) {
+*/
 
-  if (offset>=0) {
-    Mission::Objective * mo = (Mission::Objective *)obj;
-    tp->col=(GetColorFromSuccess(mo->completeness));
-    std::string rez;
-    for (int i=0;i<offset;i++) {
-      rez+="\n";
-    }
-    rez+=mo->objective;
-    return tp->Draw (rez,0,true);  
-  }
-  return offset+1;
+//
+
+char printHex (unsigned int hex) {
+	if (hex<10) {
+		return hex+'0';
+	}
+	return hex-10+'A';
 }
+static char suc_col_str [8]="#000000";
+inline char *GetColorFromSuccess (float suc) {
+  if (suc>=1)
+    return "#00FF00";
+  if (suc<=-1)
+    return "#FF0000";
+  suc +=1.;
+  suc*=128;
+  unsigned int tmp2 = suc;
+  unsigned int tmp1 = 255-suc;
+  suc_col_str[0]='#';
+  suc_col_str[1]=printHex(tmp1/16);
+  suc_col_str[2]=printHex(tmp1%16);
+  suc_col_str[3]=printHex(tmp2/16);
+  suc_col_str[4]=printHex(tmp2%16);
+  suc_col_str[5]='0';
+  suc_col_str[6]='0';
+  
+  return suc_col_str;
+}
+
+#if 0
+int VDU::DrawVDUObjective (void * obj, int offset) {
+  static bool VDU_DrawVDUObjective_is_now_outdated=false;
+  assert(VDU_DrawVDUObjective_is_now_outdated==true);
+  return 0;
+}
+#endif
+
 void VDU::DrawVDUObjectives (Unit *parent) {
-  GFXColor col (tp->col);
+  std::string rez;
   int offset = scrolloffset;
   for (unsigned int i=0;i<active_missions.size();++i){
     if (!active_missions[i]->objectives.empty()) {
-      if (offset>=0) {
-	tp->col=GFXColor(1,1,1,1);
-	std::string rez;
-	for (int k=0;k<offset;k++) {
-	  rez+="\n";
-	}
+	rez+="#FFFFFF";
 	if (active_missions[i]->mission_name.empty()) {
 	  rez+="Mission "+XMLSupport::tostring((int)i)+"\n";
 	}else {
 	  rez+=active_missions[i]->mission_name+"\n";
 	}
-	offset=tp->Draw (rez,0,true);  	
-      }else {
-	offset++;
-      }
-
-      
       vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
       for (;j!=active_missions[i]->objectives.end();++j) {
 	if (j->owner==NULL||j->owner==parent) {
-	  offset=DrawVDUObjective (&(*j),offset);
+	  rez+=GetColorFromSuccess((*j).completeness);
+	  rez+=(*j).objective;
+	  rez+='\n';
 	}
       }
+	  rez+='\n';
     }
   }
-  tp->col=col;
+  tp->Draw(rez,offset);
 }
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->col=color;
