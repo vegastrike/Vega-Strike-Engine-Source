@@ -1,7 +1,11 @@
 #ifndef __WEBCAM_SUPPORT_H
 #define __WEBCAM_SUPPORT_H
 
+#ifndef _WIN32
 #include "bgrab.h"
+#else
+#include <vfw.h>
+#endif
 
 // CAPTURE WINDOW SIZE MUST BE DETERMINED AND THEREFORE WILL NOT BE ADJUSTABLE
 

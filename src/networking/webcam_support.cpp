@@ -12,6 +12,8 @@ void	WebcamSupport::Init()
 	if (fg_set_frequency (&fg, region, channel)!=0)
 		exit(-1);
 #else
+	if( !capDriverConnect(hWnd, DEFAULT_CAPTURE_DRIVER))
+		exit(-1);
 #endif
 }
 
