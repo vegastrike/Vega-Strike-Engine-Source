@@ -10,10 +10,16 @@ class Unit *from_python(PyObject *p,boost::python::type<class Unit *>);
 //DEC_FROM_PYTHON_SMART_POINTER(Unit)
 */
 #ifndef USE_BOOST_128
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#define Vector Vactor
+#endif
 #include "boost/python/object.hpp"
 #include "boost/python/class.hpp"
 #include "boost/python/call_method.hpp"
 #include "boost/python.hpp"///module.hpp>
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#undef Vector
+#endif
 #define class_builder class_
 #else
 #include "boost/python/objects.hpp"
