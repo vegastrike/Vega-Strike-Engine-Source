@@ -45,7 +45,6 @@ vegastrike_SOURCES =				\
 	cmd_unit_click.cpp			\
 	cmd_node.h				\
 	cmd_physics.cpp				\
-	cmd_physics.h				\
 	cmd_weapon_xml.cpp			\
 	cmd_weapon_xml.h			\
 	gfx_animation.cpp			\
@@ -63,7 +62,6 @@ vegastrike_SOURCES =				\
 	gfx_box.h 				\
 	gfx_box.cpp 				\
 	gfx_bsp_gent.cpp				\
-	gfx_bsp_gent.h				\
 	gfx_bsp.cpp				\
 	gfx_bsp.h				\
 	gfx_camera.cpp				\
@@ -86,6 +84,7 @@ vegastrike_SOURCES =				\
 	gfx_mesh.h				\
 	gfx_mesh_bin.cpp			\
 	gfx_mesh_fx.cpp				\
+	gfx_mesh_poly.cpp			\
 	gfx_mesh_xml.cpp 			\
 	gfx_primitive.cpp			\
 	gfx_primitive.h				\

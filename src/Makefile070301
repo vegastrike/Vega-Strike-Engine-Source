@@ -46,6 +46,7 @@ SRCS = 	cmd_beam.cpp				\
 	gfx_mesh_fx.cpp				\
 	gfx_mesh_bin.cpp			\
 	gfx_mesh_xml.cpp 			\
+	gfx_mesh_poly.cpp			\
 	gfx_primitive.cpp			\
 	gfx_sprite.cpp				\
 	gfx_transform_vector.cpp		\

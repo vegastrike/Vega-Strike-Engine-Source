@@ -118,7 +118,16 @@ void Texture::setold()
 	original->original = NULL;
 	original->refcount++;
 }
-
+Texture::Texture (Texture *orig) {
+  InitTexture();
+  Texture * target = orig->original?orig->original:orig;
+  memcpy (this, target, sizeof (Texture));
+  original = target;
+  refcount = 0;
+  
+  assert (!original->original);
+  original->refcount++;
+}
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
   ismipmapped  = mipmap;
@@ -126,8 +135,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   palette = NULL;
   texture_target =target;
   image_target=imagetarget;
-	refcount = 0;
-	this->stage = stage;
+  this->stage = stage;
 	FILE *fp = NULL;
 	fp = fopen (FileName, "r+b");
 	if (!fp)

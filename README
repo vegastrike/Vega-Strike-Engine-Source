@@ -1,29 +1,22 @@
-Readme for VegaStrike version 0.0.7 Alpha
+Readme for VegaStrike version 0.0.9 Alpha
 -----------------------------------------------------------------------------------------------------------------------------
-Welcome to Sol, this latest release contains the entire Sol system, home system to the Terran Confederation! there will be some revisions and additions, but until then this is it.
-The AI will take you on an automated ride past a beam and then around with a view of the system.  Then you'll have control and can fly to the stars!
+This is the release of vegastrike where objects can actually interact instead of flying through each other like ghosts in the wind.
+Starships can shoot each other, and more importantly ram into each other.  Turn left by 90 degrees and fly towards some of the hornets.
 
----------------
-Installation:
---------------
-automake
-autoconf
-./configure
-make
-tar -zxf vegastrike_data071901.tgz
-cd data071901
-../src/vegastrike
+Smash into a few--go in with guns blazing and watch their shields light up!
+The shield effects look state-of-the-art and they  are all accelerated by OpenGL's T&L model! 
+Even planets can be hit!
 
-NOTE: you must execute from vegastrike_data DIR
+Mail me any comments or suggestions to hellcatv@hotmail.com
+I would welcome any changes or additions to shield.bmp that would make the shield look more realistic!   
 
 -----------
  Features:
 -----------
-REAL Asteroid belts, which will soon have AI.
-Planets with correct orbits and realistic textures.
-A huge sun with detailed textures in cluding hotspots.
-WC style physics with afterburn slides.
-Programmable AI for complex functions like Shelton sliding, rolls, loops, and kickstops.
+-Shields That Glow upon hit (in the location hit)
+-BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models...unlike the victory from WC3. 
+-the Normal Force which bounces starships off of each other
+-The rings of saturn--a feature oft-missed in previous versions... now added for all to enjoy... just don't fire at 'em ;-)
 -----------
  Controls:
 -----------

@@ -241,6 +241,7 @@ protected:
 public:
   Mesh();
   Mesh(const char *filename, bool xml=false);
+  void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   ~Mesh();
   unsigned int numFX () {return LocalFX.size();}
   void EnableSpecialFX();
