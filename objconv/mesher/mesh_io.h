@@ -1,21 +1,3 @@
-struct GFXMaterial
-{  /// ambient rgba, if you don't like these things, ask me to rename them
-	float ar;float ag;float ab;float aa;
-  /// diffuse rgba
-	float dr;float dg;float db;float da;
-  /// specular rgba
-	float sr;float sg;float sb;float sa;
-  /// emissive rgba
-	float er;float eg;float eb;float ea;
-  /// specular power
-	float power; 
-   GFXMaterial () {
-      dr=dg=db=da=sr=sg=sb=sa=ea=aa=1.0f;
-      er=eg=eb=ar=ag=ab=0.0f;
-      power=60.0f;
-      //defaults for material struct    
-   }
-};
 enum BLENDFUNC{
     ZERO            = 1,
 	ONE             = 2, 

@@ -66,7 +66,6 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD CPP /nologo /w /W0 /Gm /GX /ZI /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# SUBTRACT CPP /O<none>
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -91,11 +90,15 @@ SOURCE=.\endianness.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\from_BFXM.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\hashtable.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\mesh_xml.cpp
+SOURCE=.\to_BFXM.cpp
 # End Source File
 # Begin Source File
 
@@ -119,7 +122,7 @@ SOURCE=.\hashtable.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\mesh.h
+SOURCE=.\mesh_io.h
 # End Source File
 # Begin Source File
 
