@@ -38,5 +38,10 @@ NetworkCommunication::~NetworkCommunication()
 {
 }
 
+char *	NetworkCommunication::GetWebcamCapture()
+{
+	return NULL;
+}
+
 #endif
 

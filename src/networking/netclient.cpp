@@ -569,8 +569,9 @@ int		NetClient::isTime()
 /**** Check if we have to send a webcam picture            ****/
 /**************************************************************/
 
-void	NetClient::sendWebcamPicture()
+char *	NetClient::getWebcamCapture()
 {
+	return NetComm->GetWebcamCapture();
 }
 
 /**************************************************************/
@@ -590,8 +591,6 @@ int NetClient::checkMsg( Packet* outpacket )
 	// If we have network communications enabled and webcam support enabled we grab an image
 	if( NetComm->IsActive())
 	{
-		// Send grabbed image from webcam
-		NetComm->SendImage( this->clt_sock);
 		// Here also send samples
 		NetComm->SendSound( this->clt_sock);
 	}
@@ -663,7 +662,10 @@ int NetClient::recvMsg( Packet* outpacket )
 					VsnetDownload::Client::NoteFile f( this->clt_sock, univfile);
                 	_downloadManagerClient->addItem( &f);
 					while( !f.done())
+					{
+						checkMsg( NULL);
 						micro_sleep( 40000);
+					}
 					/*
 					netbuf.addString( univfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
@@ -683,7 +685,10 @@ int NetClient::recvMsg( Packet* outpacket )
 					VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
                 	_downloadManagerClient->addItem( &f);
 					while( !f.done())
+					{
+						checkMsg( NULL);
 						micro_sleep( 40000);
+					}
 					/*
 					netbuf.addString( sysfile);
 					pckt.send( CMD_ASKFILE, packet_serial,
@@ -1035,7 +1040,10 @@ int NetClient::recvMsg( Packet* outpacket )
 						VsnetDownload::Client::NoteFile f( this->clt_sock, newsystem);
    	             		_downloadManagerClient->addItem( &f);
 						while( !f.done())
+						{
+							checkMsg( NULL);
 							micro_sleep( 40000);
+						}
 					}
 					this->jumpok = true;
 					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();

@@ -243,7 +243,7 @@ public:
  * declaration VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
 
-class Buffer : public Item
+class Buffer : public Item, public NotifyMe
 {
     typedef unsigned char uchar;
 

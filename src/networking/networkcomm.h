@@ -7,6 +7,7 @@
 #include <list>
 #include <deque>
 #include <config.h>
+#include "boost/shared_ptr.hpp"
 
 #ifndef NETCOMM_NOWEBCAM
 class WebcamSupport;
@@ -25,6 +26,16 @@ class JVOIPRTPTransmissionParams;
 #endif
 
 typedef list<ClientPtr>::iterator CltPtrIterator;
+namespace VsnetDownload {
+  namespace Server {
+    class Manager;
+  };
+};
+namespace VsnetDownload {
+  namespace Client {
+    class Manager;
+  };
+};
 
 class NetworkCommunication
 {
@@ -42,6 +53,9 @@ class NetworkCommunication
 #ifndef NETCOMM_NOWEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
+        boost::shared_ptr<VsnetDownload::Client::Manager> _downloader;
+        boost::shared_ptr<VsnetDownload::Server::Manager> _downloadServer;
+        SocketSet           _sock_set;      // Encapsulates select()
 #endif
 #ifdef NETCOMM_JVOIP
 		JVOIPSession *				session;
@@ -65,7 +79,7 @@ class NetworkCommunication
 #endif
 
 	public:
-		enum	ComminucationMethod { ClientBroadcast, ServerUnicast };
+		enum	CommunicationMethod { ClientBroadcast, ServerUnicast };
 
 		NetworkCommunication();
 		NetworkCommunication( int nb);
@@ -81,6 +95,7 @@ class NetworkCommunication
 		void	RemoveFromSession( ClientPtr clt);
 
 		bool	IsActive()	{ return active;}
+		char *	GetWebcamCapture();
 };
 
 #endif

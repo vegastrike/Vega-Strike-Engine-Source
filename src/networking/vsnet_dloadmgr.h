@@ -4,6 +4,7 @@
 #include <config.h>
 
 #include <string>
+#include <map>
 #include <vector>
 #include <list>
 #include <queue>
@@ -18,7 +19,12 @@
 #include "vsnet_thread.h"
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
-#include "netbuffer.h"
+//#include "netbuffer.h"
+
+using std::map;
+using std::string;
+
+class NetBuffer;
 
 namespace VsnetDownload
 {

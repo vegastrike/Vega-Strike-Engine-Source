@@ -2,6 +2,7 @@
 
 #include <config.h>
 
+#include "vsnet_dloadmgr.h"
 #ifndef NETCOMM_NOWEBCAM
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
@@ -154,6 +155,10 @@ NetworkCommunication::NetworkCommunication()
 			this->Webcam = NULL;
 		}
 	}
+    _downloader.reset( new VsnetDownload::Client::Manager( _sock_set ) );
+    _sock_set.addDownloadManager( _downloader );
+    _downloadServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
+    _sock_set.addDownloadManager( _downloadServer );
 
 #endif /* NETCOMM_NOWEBCAM */
 }
@@ -372,4 +377,9 @@ NetworkCommunication::~NetworkCommunication()
 }
 
 #endif /* NETCOMM */
+
+char *	NetworkCommunication::GetWebcamCapture()
+{
+	return Webcam->jpeg_buffer;
+}
 
