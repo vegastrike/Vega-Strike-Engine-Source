@@ -23,6 +23,8 @@ class navscreenoccupied* screenoccupation;
 class Mesh * mesh[NAVTOTALMESHCOUNT];
 int reverse;
 int rotations;
+int axis;
+int configmode;
 float rx;
 float ry;
 float rz;

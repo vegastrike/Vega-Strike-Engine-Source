@@ -100,19 +100,19 @@ void NavigationSystem::DrawGrid(float &x1, float &x2, float &y1, float &y2, cons
 
 	}
 
-	GFXEnd();
+//	GFXEnd();
 
 
 
-	GFXBegin(GFXLINE);
+//	GFXBegin(GFXLINE);
 
 	for(i=1; i < 10;i++)
 
 	{
 
-		GFXVertex3f(x1,y1+(i*deltax),0);
+		GFXVertex3f(x1,y1+(i*deltay),0);
 
-		GFXVertex3f(x2,y1+(i*deltax),0);
+		GFXVertex3f(x2,y1+(i*deltay),0);
 
 	}
 

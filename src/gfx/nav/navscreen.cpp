@@ -70,11 +70,14 @@ void NavigationSystem::Setup()
 	vschdir ("nav"); 
 	vschdir (directory.c_str());
 
+	configmode = 0;
+
 	rotations = 0;
 
 	minimumitemscaledown = 0.2;
 	maximumitemscaleup = 3.0;
 
+	axis = 3;
 	rx = 0.0;
 	ry = 0.0;
 	rz = 0.0;
@@ -114,8 +117,7 @@ void NavigationSystem::Setup()
 
 
 
-	int p;
-	for( p=0; p < FactionUtil::GetNumFactions(); p++)
+	for( int p=0; p < FactionUtil::GetNumFactions(); p++)
 	{
 		factioncolours[p].r = 1;
 		factioncolours[p].g = 1;
@@ -463,7 +465,6 @@ void NavigationSystem::Draw()
 	}
 
 	else
-
 	{
 		DrawMission();
 	}
@@ -475,16 +476,19 @@ void NavigationSystem::Draw()
 
 
 
-
 	//	Draw Button Outlines
 	//	**********************************
-	DrawButton(buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, 1);
-	DrawButton(buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, 1);
-	DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, 1);
-	DrawButton(buttonskipby4_4[0], buttonskipby4_4[1], buttonskipby4_4[2], buttonskipby4_4[3], 4, 1);
-	DrawButton(buttonskipby4_5[0], buttonskipby4_5[1], buttonskipby4_5[2], buttonskipby4_5[3], 5, 1);
-	DrawButton(buttonskipby4_6[0], buttonskipby4_6[1], buttonskipby4_6[2], buttonskipby4_6[3], 6, 1);
-	DrawButton(buttonskipby4_7[0], buttonskipby4_7[1], buttonskipby4_7[2], buttonskipby4_7[3], 7, 1);
+	bool outlinebuttons = 0;
+//	if(configmode > 0)
+//		outlinebuttons = 1;
+
+	DrawButton(buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, outlinebuttons);
+	DrawButton(buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, outlinebuttons);
+	DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
+	DrawButton(buttonskipby4_4[0], buttonskipby4_4[1], buttonskipby4_4[2], buttonskipby4_4[3], 4, outlinebuttons);
+	DrawButton(buttonskipby4_5[0], buttonskipby4_5[1], buttonskipby4_5[2], buttonskipby4_5[3], 5, outlinebuttons);
+	DrawButton(buttonskipby4_6[0], buttonskipby4_6[1], buttonskipby4_6[2], buttonskipby4_6[3], 6, outlinebuttons);
+	DrawButton(buttonskipby4_7[0], buttonskipby4_7[1], buttonskipby4_7[2], buttonskipby4_7[3], 7, outlinebuttons);
 	//	**********************************
 
 
@@ -537,17 +541,12 @@ void NavigationSystem::Draw()
 
 
 //	This is the mission info screen
-
 //	**********************************
-
 void NavigationSystem::DrawMission()
-
 {
 	GFXDisable(TEXTURE0);
 	GFXDisable(LIGHTING);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
-
-
 
 
 	navdrawlist factionlist(0, screenoccupation, factioncolours);
@@ -558,15 +557,11 @@ void NavigationSystem::DrawMission()
 	float originx = screenskipby4[0]; // left
 	float originy = screenskipby4[3]; // top
 
-
 	factionlist.drawdescription("Relations", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 	factionlist.drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 
-
 	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-
-
 
 
 	int numfactions = FactionUtil::GetNumFactions();
@@ -575,33 +570,23 @@ void NavigationSystem::DrawMission()
 	float relation = 0.0;
 
 
-
 	while(i < numfactions)
 	{
 		factionname = FactionUtil::GetFactionName(i);
 		relation = 	FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction ,i);
 
-
 		//	draw faction name
 		factionlist.drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, factioncolours[i]);
-
 
 		relation = relation * 0.5;
 		relation = relation + 0.5;
 		int percent = relation * 100.0;
 		string relationtext (XMLSupport::tostring (percent));
 
-
-
 		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 
-
-
 		i+=1;
-
 	}
-
-
 
 //	factionlist.drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 //	factionlist.drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(1,.3,.3,1));
@@ -611,9 +596,6 @@ void NavigationSystem::DrawMission()
 //	float love_from_terran = FactionUtil::getRelation(1);
 //	float love_from_rlaan = FactionUtil::getRelation(2);
 //	float love_from_aera = FactionUtil::getRelation(3);
-
-
-
 
 
 	GFXEnable(TEXTURE0);
@@ -682,7 +664,7 @@ void NavigationSystem::DrawSystem()
 	int length = systemnamestring.size();
 	float offset = (float(length)*0.005);
 	systemname.col = GFXColor(1, 1, .7, 1);
-	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[4]);
+	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
 	systemname.SetText(systemnamestring);
 //	systemname.SetCharSize(1, 1);
 	systemname.Draw();
@@ -749,14 +731,42 @@ void NavigationSystem::DrawSystem()
 	if(!(*bleh))	//	nothing there that's significant, just do it all
 		bleh = UniverseUtil::getUnitList();
 
-	pos = (*bleh)->Position();
+
+		//GET THE POSITION
+		//*************************
+		pos = (*bleh)->Position();
+			//replace axes
+			//*************************
+			if(axis != 3)	//	3 == z == default
+			{
+				if(axis == 2)
+				{
+					float old_i = pos.i;
+					float old_j = pos.j;
+					float old_k = pos.k;
+					pos.i = old_i;
+					pos.j = -old_k;
+					pos.k = old_j;
+				}
+				else	//	(axis == 1)
+				{
+					float old_i = pos.i;
+					float old_j = pos.j;
+					float old_k = pos.k;
+					pos.i = old_j;
+					pos.j = -old_k;
+					pos.k = old_i;
+				}
+			}
+			//*************************
 
 
-	//Modify by old rotation amount
-	//*************************
-	pos = dxyz(pos, 0, ry, 0);
-	pos = dxyz(pos, rx, 0, 0);
-	//*************************
+			//Modify by old rotation amount
+			//*************************
+			pos = dxyz(pos, 0, ry, 0);
+			pos = dxyz(pos, rx, 0, 0);
+			//*************************
+		//*************************
 
 
 	float max_x = (float)pos.i;
@@ -777,8 +787,42 @@ void NavigationSystem::DrawSystem()
 	//**********************************
 	while (*bleh)	//	this goes through one time to get the major components locations, and scales its output appropriately
 	{
+		if(UnitUtil::isSun(*bleh))
+		{
+			++bleh;
+			continue;
+		}
 		string temp = (*bleh)->name; 
+
+
+
 		pos = (*bleh)->Position();
+		//replace axes
+		//**************************
+		if(axis != 3)	//	3 == z == default
+		{
+			if(axis == 2)
+			{
+				float old_i = pos.i;
+				float old_j = pos.j;
+				float old_k = pos.k;
+				pos.i = old_i;
+				pos.j = -old_k;
+				pos.k = old_j;
+			}
+			else	//	(axis == 1)
+			{
+				float old_i = pos.i;
+				float old_j = pos.j;
+				float old_k = pos.k;
+				pos.i = old_j;
+				pos.j = -old_k;
+				pos.k = old_i;
+			}
+		}
+		//***************************
+
+
 
 		//Modify by old rotation amount
 		//*************************
@@ -863,22 +907,53 @@ void NavigationSystem::DrawSystem()
 		//Draw Origin Orientation Tri
 		//**********************************	
 		QVector directionx;
-		directionx.i = 0.1;
-		directionx.j = 0.0;
-		directionx.k = 0.0;
-
-
 		QVector directiony;
-		directiony.i = 0.0;
-		directiony.j = 0.1;
-		directiony.k = 0.0;
-
-
 		QVector directionz;
-		directionz.i = 0.0;
-		directionz.j = 0.0;
-		directionz.k = 0.1;
 
+		if(axis == 2)
+		{
+			directionx.i = 0.1;
+			directionx.j = 0.0;
+			directionx.k = 0.0;
+
+			directionz.i = 0.0;
+			directionz.j = 0.1;
+			directionz.k = 0.0;
+
+			directiony.i = 0.0;
+			directiony.j = 0.0;
+			directiony.k = 0.1;
+		}
+
+		else if(axis == 1)
+		{
+			directiony.i = 0.1;
+			directiony.j = 0.0;
+			directiony.k = 0.0;
+
+			directionz.i = 0.0;
+			directionz.j = 0.1;
+			directionz.k = 0.0;
+
+			directionx.i = 0.0;
+			directionx.j = 0.0;
+			directionx.k = 0.1;
+		}
+
+		else	//	(axis == 3)
+		{
+			directionx.i = 0.1;
+			directionx.j = 0.0;
+			directionx.k = 0.0;
+
+			directiony.i = 0.0;
+			directiony.j = 0.1;
+			directiony.k = 0.0;
+
+			directionz.i = 0.0;
+			directionz.j = 0.0;
+			directionz.k = 0.1;
+		}
 
 		directionx = dxyz(directionx, 0, ry, 0);
 		directionx = dxyz(directionx, rx, 0, 0);
@@ -963,8 +1038,36 @@ void NavigationSystem::DrawSystem()
 
 			//	Retrieve unit data
 			//	**********************************
-			string temp = (*blah)->name; 
+			string temp = (*blah)->name;
+			
+
+
 			pos = (*blah)->Position();
+			//replace axes
+			//**************************
+			if(axis != 3)	//	3 == z == default
+			{
+				if(axis == 2)
+				{
+					float old_i = pos.i;
+					float old_j = pos.j;
+					float old_k = pos.k;
+					pos.i = old_i;
+					pos.j = -old_k;
+					pos.k = old_j;
+				}
+				else	//	(axis == 1)
+				{
+					float old_i = pos.i;
+					float old_j = pos.j;
+					float old_k = pos.k;
+					pos.i = old_j;
+					pos.j = -old_k;
+					pos.k = old_i;
+				}
+			}
+			//***************************
+
 
 
 			pos_flat.i = pos.i;
@@ -998,19 +1101,19 @@ void NavigationSystem::DrawSystem()
 
 				//zscale = 1.0;
 
-				pos.i = pos.i * ( (1-(((zoom-0.2*MAXZOOM)/MAXZOOM)*(0.75))) / zscale );
-				pos.j = pos.j * ( (1-(((zoom-0.2*MAXZOOM)/MAXZOOM)*(0.75))) / zscale );
-				pos.k = pos.k * ( (1-(((zoom-0.2*MAXZOOM)/MAXZOOM)*(0.75))) / zscale );
+				pos.i = pos.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+				pos.j = pos.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+				pos.k = pos.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
 
-				pos_flat.i = pos_flat.i * ( (1-(((zoom-0.2*MAXZOOM)/MAXZOOM)*(0.75))) / zscale );
-				pos_flat.j = pos_flat.j * ( (1-(((zoom-0.2*MAXZOOM)/MAXZOOM)*(0.75))) / zscale );
-				pos_flat.k = pos_flat.k * ( (1-(((zoom-0.2*MAXZOOM)/MAXZOOM)*(0.75))) / zscale );
+				pos_flat.i = pos_flat.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+				pos_flat.j = pos_flat.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+				pos_flat.k = pos_flat.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
 				
 
 				float itemscale =  ( ((camera_z*item_zscalefactor)-zdistance) / (camera_z*item_zscalefactor) );	
 				
-				if(zdistance > 2*camera_z)	//	outliers
-					itemscale = 1;
+//				if(zdistance > 2*camera_z)	//	outliers
+//					itemscale = 1;
 
 				if(itemscale < minimumitemscaledown)	//	dont shrink into nonexistance
 					itemscale = minimumitemscaledown;
@@ -1019,9 +1122,6 @@ void NavigationSystem::DrawSystem()
 					itemscale = maximumitemscaleup;
 
 				float system_item_scale_temp = system_item_scale * itemscale;
-
-
-				
 				//**********************************
 
 
@@ -1061,11 +1161,7 @@ void NavigationSystem::DrawSystem()
 				GFXDisable(LIGHTING);
 				GFXBlendMode(SRCALPHA,INVSRCALPHA);
 
-
 				GFXBegin(GFXLINE);
-
-
-
 
 		//		GFXColorf(GFXColor(0,1,0,.5));
 		//		GFXVertex3f(center_nav_x,	center_nav_y		,0);
@@ -1075,22 +1171,15 @@ void NavigationSystem::DrawSystem()
 				if(the_y_flat > screenskipby4[3])
 					the_y_flat = screenskipby4[3];
 
-
 				if(the_y_flat < screenskipby4[2])
 					the_y_flat = screenskipby4[2];
-
-
 
 
 				if(the_y > screenskipby4[3])
 					the_y = screenskipby4[3];
 
-
 				if(the_y < screenskipby4[2])
 					the_y = screenskipby4[2];
-
-
-
 
 
 				if(	(the_x_flat > screenskipby4[0]) && (the_x_flat < screenskipby4[1]) )
@@ -1101,17 +1190,14 @@ void NavigationSystem::DrawSystem()
 				}
 
 
-
 				if(the_x_flat < screenskipby4[0])
 					the_x_flat = screenskipby4[0];
-
 
 				if(the_x_flat > screenskipby4[1])
 					the_x_flat = screenskipby4[1];
 
 
 				DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
-
 
 				GFXEnd();
 				GFXEnable(TEXTURE0);
@@ -1592,7 +1678,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 	{
 		if(button_number != 2)	//	#2 is for select. do not deactivate untill something is (selected)
 		{
-			unsetbit(buttonstates, (button_number-1));	//	all but 2 and 5 go up, all are up in mission mode
+			unsetbit(buttonstates, (button_number-1));	//	all but 2 go up, all are up in mission mode
 		}
 
 
@@ -1604,11 +1690,19 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 
 
 
+		if(button_number == 5)	//	releasing #1, toggle the draw (nav / mission)
+		{
+			axis = axis - 1;
+			if(axis == 0)
+				axis = 3;
+		}
+
+
+
 		if(button_number == 1)	//	releasing #1, toggle the draw (nav / mission)
 		{
 			flipbit(whattodraw, 1);
 		}
-
 
 
 		if(button_number == 3)	//	hit up

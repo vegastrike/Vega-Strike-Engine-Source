@@ -88,12 +88,11 @@ bool NavigationSystem::ParseFile(string filename)
 					screenskipby4[3] = y_large;
 
 
-					mesh[0] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[0] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 				else if(tag == "button1")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -121,13 +120,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_1[3] = y_ + dy_;
 
 
-					mesh[1] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[1] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "button2")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -155,13 +153,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_2[3] = y_ + dy_;
 
 
-					mesh[2] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[2] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "button3")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -189,13 +186,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_3[3] = y_ + dy_;
 
 
-					mesh[3] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[3] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "button4")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -223,13 +219,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_4[3] = y_ + dy_;
 
 
-					mesh[4] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[4] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "button5")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -257,13 +252,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_5[3] = y_ + dy_;
 
 
-					mesh[5] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[5] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "button6")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -291,13 +285,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_6[3] = y_ + dy_;
 
 
-					mesh[6] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[6] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "button7")
-
 				{
 					string mesh_ = retrievedata(data, "Meshfile file");
 					float x_ = atof( (retrievedata(data, "x")).c_str() );
@@ -325,13 +318,12 @@ bool NavigationSystem::ParseFile(string filename)
 					buttonskipby4_7[3] = y_ + dy_;
 
 
-					mesh[7] = new Mesh(mesh_.c_str(),1,0,NULL);
+					mesh[7] = new Mesh(mesh_.c_str(),scale_,0,NULL);
 				}
 
 
 
 				else if(tag == "systemiteminfo")
-
 				{
 					float scale_ = atof( (retrievedata(data, "Info itemscale")).c_str() );
 					float zmult_ = atof( (retrievedata(data, "zshiftmultiplier")).c_str() );
@@ -399,6 +391,15 @@ bool NavigationSystem::ParseFile(string filename)
 						}
 					}
 				}
+
+
+
+				else if(tag == "configmode")
+				{
+					int configmode_ = atoi( (retrievedata(data, "configmode")).c_str() );
+					configmode = configmode_;
+				}
+
 
 
 
