@@ -4091,7 +4091,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
   		float maxshield=totalShieldEnergyCapacitance(playerUnit->shield);
 		if (playerUnit->MaxEnergyData()-maxshield<low_power_mode) {
-		text+="#n##c1:.3:.3#"+prefix+"WARNING: Power supply is overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#c-";
+		text+="#n##c1:.3:.3#"+prefix+"WARNING: Power supply is overdrawn: downgrade shield, upgrade reactor or purchase reactor capacitance!#-c";
 		}
 		else {
 		/*	PRETTY_ADDU("Power balance will make your reactor never recharge above ",(playerUnit->MaxEnergyData()-maxshield)*100.0/playerUnit->MaxEnergyData(),0,"% of it's max capacity");*/
