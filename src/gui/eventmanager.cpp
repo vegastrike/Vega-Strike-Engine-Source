@@ -33,7 +33,7 @@ using namespace std;
  * You can get a pointer to it by using the static globalEventManager()
  * function.
  */
-
+extern void ModifyMouseSensitivity(int& x, int &y);
 // This is the one, unique event manager.
 static EventManager* globalEventManagerPtr = NULL;
 
@@ -233,6 +233,7 @@ static float MouseYTo2dY(int y) {
 }
 
 void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
+    ModifyMouseSensitivity(x,y);
     // Make sure we are working with the same "button" constants.
     assert( LEFT_MOUSE_BUTTON == WS_LEFT_BUTTON );
     assert( RIGHT_MOUSE_BUTTON == WS_RIGHT_BUTTON );
@@ -251,6 +252,7 @@ void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
 }
 
 void EventManager::ProcessMouseActive(int x, int y) {
+    ModifyMouseSensitivity(x,y);
     // FIXME mbyron -- Should provide info about which buttons are down.
     InputEvent event(MOUSE_DRAG_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
     globalEventManager().sendInputEvent((event));
@@ -258,6 +260,7 @@ void EventManager::ProcessMouseActive(int x, int y) {
 }
 
 void EventManager::ProcessMousePassive(int x, int y) {
+    ModifyMouseSensitivity(x,y);
     InputEvent event(MOUSE_MOVE_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
     globalEventManager().sendInputEvent((event));
 	clearDeleteQueue();

@@ -25,7 +25,7 @@ extern Music *muzak;
 #define strcasecmp stricmp
 #endif
 extern int GetModeFromName (const char *);
-
+extern void ModifyMouseSensitivity(int&,int&);
 extern std::set <std::string> GetListOfDowngrades();
 extern void ClearDowngradeMap();
 extern unsigned int getSaveStringLength (int whichcp, string key);
@@ -609,6 +609,7 @@ bool RefreshInterface(void) {
 }
 
 void UpgradingInfo::ProcessMouseClick(int button, int state, int x, int y) {
+        ModifyMouseSensitivity(x,y);
   SetSoftwareMousePosition (x,y);
   if (upgr) {
 	  int cur = _Universe->CurrentCockpit();
@@ -621,6 +622,7 @@ void UpgradingInfo::ProcessMouseClick(int button, int state, int x, int y) {
 }
 
 void UpgradingInfo::ProcessMouseActive(int x, int y) {
+        ModifyMouseSensitivity(x,y);
   SetSoftwareMousePosition (x,y);
   if (upgr) {
 	  int cur = _Universe->CurrentCockpit();
@@ -633,6 +635,7 @@ void UpgradingInfo::ProcessMouseActive(int x, int y) {
 }
 
 void UpgradingInfo::ProcessMousePassive(int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	SetSoftwareMousePosition(x,y);
 	if (upgr) {
 		int cur = _Universe->CurrentCockpit();

@@ -22,6 +22,34 @@
 #include "gfx/stream_texture.h"
 #endif
 #include "main_loop.h"
+static void biModifyMouseSensitivity(int &x, int &y, bool invert){
+  int xrez=g_game.x_resolution;
+  int yrez=g_game.y_resolution;
+  static int whentodouble=XMLSupport::parse_int(vs_config->getVariable("joystick","double_mouse_position","1280"));
+  static float factor=XMLSupport::parse_float(vs_config->getVariable("joystick","double_mouse_factor","2"));
+  if (xrez>=whentodouble) {
+    x-=g_game.x_resolution/2;
+    y-=g_game.y_resolution/2;
+    if (invert) {
+      x/=factor;
+      y/=factor;
+    }else {
+      x*=factor;
+      y*=factor;
+    }
+    x+=g_game.x_resolution/2;
+    y+=g_game.y_resolution/2;
+    if (x>g_game.x_resolution)
+      x=g_game.x_resolution;
+    if (y>g_game.y_resolution)
+      y=g_game.y_resolution;
+    if (x<0) x=0;
+    if (y<0) y=0;
+  }
+}
+void ModifyMouseSensitivity(int &x, int &y) {
+  biModifyMouseSensitivity(x,y,false);
+}
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -514,6 +542,7 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 				if (curlink) {
 					int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
 					int y=-(((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution;
+                                        biModifyMouseSensitivity(x,y,true);
 					winsys_warp_pointer(x,y);
 					PassiveMouseOverWin(x,y);
 					break;
@@ -571,6 +600,7 @@ void BaseInterface::Click (int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin (int button, int state, int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
 #ifdef NEW_GUI
@@ -589,6 +619,7 @@ void BaseInterface::ClickWin (int button, int state, int x, int y) {
 
 
 void BaseInterface::PassiveMouseOverWin (int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
@@ -607,6 +638,7 @@ void BaseInterface::PassiveMouseOverWin (int x, int y) {
 }
 
 void BaseInterface::ActiveMouseOverWin (int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
