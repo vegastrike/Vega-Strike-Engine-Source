@@ -299,8 +299,14 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
 
   pushActiveStarSystem(ss);
   for (int tume=0;tume<=6;++tume) {
+    fprintf (stderr,"star system ex ai\n");
+    fflush(stderr);
     ss->ExecuteUnitAI();
+    fprintf (stderr,"star system up phys\n");
+    fflush(stderr);
     ss->UpdateUnitPhysics(true);    
+    fprintf (stderr,"star system done up phys\n");
+    fflush(stderr);
   }
   // notify the director that a new system is loaded (gotta have at least one active star system)
   StarSystem *old_script_system=script_system;
