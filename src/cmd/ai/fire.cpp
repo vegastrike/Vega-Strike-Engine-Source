@@ -79,13 +79,14 @@ struct TurretBin{
 	}
       }
       if (!foundfinal) {
-	for (char f=0;f<2;f++) {
+	for (char f=0;f<2&&!foundfinal;f++) {
 	for (unsigned int i=0;i<lotsize[f];i++) {
 	  const int index =(count+i)%lotsize[f];
 	  if (listOfTargets[f][index].range<uniter->gunrange) {
 	    uniter->tur->Target(listOfTargets[f][index].t);
 	    uniter->tur->TargetTurret(listOfTargets[f][index].t);
 	    count++;
+	    foundfinal=true;
 	    break;
 	  }
 	}
