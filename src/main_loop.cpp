@@ -46,7 +46,7 @@
 
 using namespace std;
 
-static Music * muzak=NULL;
+ Music * muzak=NULL;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
@@ -488,7 +488,6 @@ void main_loop() {
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
 
   _Universe->StartDraw();
-  muzak->Listen();
   _Universe->activeStarSystem()->Draw();
   
   //fighters[0]->UpdateHudMatrix();
@@ -496,6 +495,8 @@ void main_loop() {
 
 
   _Universe->activeStarSystem()->Update();
+///CANNOT DO EVERY FRAME...DO EVERY PHYSICS frame  muzak->Listen();
+
   micro_sleep (microsleep);//so we don't starve the audio thread  
   GFXEndScene();
       

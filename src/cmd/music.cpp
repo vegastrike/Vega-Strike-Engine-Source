@@ -104,17 +104,20 @@ int Music::SelectTracks(int &whichlist) {
 
 
 void Music::Listen() {
-  if ((!AUDIsPlaying (song))&&g_game.music_enabled ) {
+  if (g_game.music_enabled ) {
+	  if ((!AUDIsPlaying (song))) {
     AUDDeleteSound (song,true);//delete buffer too;
     int whichlist;
     int songnum = SelectTracks(whichlist);
     if (!playlist[whichlist].empty ()) {
       song = AUDCreateMusic (playlist[whichlist][songnum],false);
       AUDStartPlaying (song);
-    }
-    
-  } else {
-	AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+	  AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+
+    }    
+	  } else {
+	    AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+	  }
   }
 }
 
