@@ -147,7 +147,8 @@ StarSystem::~StarSystem() {
     unit->Kill(false);
     iter.advance();
   }
-  if (collidetable) delete collidetable;
+  //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
+  if (collidetable) delete collidetable;//DO NOT MOVE THIS LINE! IT MUST STAY
   _Universe->popActiveStarSystem();
   RemoveStarsystemFromUniverse();
   
