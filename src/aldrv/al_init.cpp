@@ -126,7 +126,7 @@ bool AUDInit () {
   usepositional = XMLSupport::parse_bool (vs_config->getVariable ("audio","Positional","true"));
 
   scalepos = 1/XMLSupport::parse_float (vs_config->getVariable ("audio","Volume","100"));
-  scalevel=XMLSupport::parse_float (vs_config->getVariable ("audio","Doppler","1"));
+  scalevel=XMLSupport::parse_float (vs_config->getVariable ("audio","DopplerScale","1"));
   //  enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","enabled","true"));
   g_game.audio_frequency_mode = XMLSupport::parse_int (vs_config->getVariable ("audio","frequency","22050"));
   g_game.sound_enabled = false;
