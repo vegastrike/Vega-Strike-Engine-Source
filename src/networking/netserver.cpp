@@ -129,6 +129,33 @@ void	NetServer::authenticate( Client * clt, AddressIP ipadr, Packet& packet )
 	}
 }
 
+Client * NetServer::getClientFromSerial( ObjSerial serial)
+{
+	Client * clt = NULL;
+	bool	found = false;
+
+	for( LI li=udpClients.begin(); li!=udpClients.end(); li++)
+	{
+		if( serial == (clt=(*li))->game_unit.GetUnit()->GetSerial())
+			found = true;
+		if( !found)
+		{
+			for( LI li=tcpClients.begin(); li!=tcpClients.end(); li++)
+			{
+				if( (clt=(*li))->game_unit.GetUnit()->GetSerial() == serial)
+					found = true;
+			}
+		}
+		if (!found)
+		{
+			cerr<<"   WARNING client not found in getClientFromSerial !!!!"<<endl;
+			clt = NULL;
+		}
+	}
+
+	return clt;
+}
+
 void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
@@ -1180,7 +1207,6 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				COUT<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
 			else
 			{
-					netbuf2.addString( newsystem);
 					// Verify if there really is a jump point to the new starsystem
 					adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
 					for( int i=0; !found && i<adjacent.size(); i++)
@@ -1192,28 +1218,28 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 					{
 						// Then activate jump drive to say we want to jump
 						un->ActivateJumpDrive();
-						// The jump reply will be sent in StarSystem::JumpTo()
+						// The jump reply is sent in Unit::jumpReactToCollision()
 						// In the meantime we create the star system if it isn't loaded yet
+						// The starsystem maybe loaded for nothing if the client has not enough warp energy to jump
+						// but that's no big deal since they all will be loaded finally
 						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
 							zonemgr->addZone( newsystem+".system");
-						// And remove the player from its old starsystem and set it out of game
-						this->removeClient( clt);
-						// Have to set new starsystem here
 						cp->savegame->SetStarSystem( newsystem);
-	
+
 						client_md5 = netbuf.getBuffer( MD5_DIGEST_SIZE);
-						if( 0 /* md5CheckFile( newsystem, client_md5) */)
+						if( md5CheckFile( newsystem, client_md5) )
+							clt->jumpfile = "";
+						/*
 						{
 							// Send an ASKFILE packet with serial == 0 to say file is ok
 							p2.send( CMD_ASKFILE, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 						}
+						*/
 						else
 						{
 							// Add that file to download queue with client serial !!
-							// Maybe send a code or info to know what we should do when that particular download is finished
-							// like we must add that guy in a new zone ...
+							clt->jumpfile = newsystem;
 						}
-						p2.send( CMD_JUMP, un->GetSerial(), netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 					}
 					else
 					{
@@ -1223,7 +1249,8 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 						// TOO BAD FOR CHEATERS ;)
 
 						// Set 0 as serial to say client must stay in its current zone/starsystem
-						p2.send( CMD_JUMP, 0, netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+						// p2.send( CMD_JUMP, 0, netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+						clt->jumpfile="error";
 					}
 			}	
 			delete md5;
@@ -1600,19 +1627,22 @@ void	NetServer::save()
 		fp = NULL;
 	}
 
-	// Loop through all cockpits and write save files
+	Client * clt;
+	// Loop through all clients and write saves
 	for( int i=0; i<_Universe->numPlayers(); i++)
 	{
+		cp = _Universe->AccessCockpit( i);
 		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
 		// Write the save and xml unit
 		FileUtil::WriteSaveFiles( savestr, xmlstr, datadir+"/serversaves", cp->savegame->GetCallsign());
 		// SEND THE BUFFERS TO ACCOUNT SERVER
 		if( acctserver && acct_con)
 		{
-			bool found = false;
-			Client * clt;
 			netbuf.Reset();
+			bool found = false;
 			// Loop through clients to find the one corresponding to the unit (we need its serial)
+			clt = getClientFromSerial( cp->GetParent()->GetSerial());
+			/*
 			for( LI li=udpClients.begin(); li!=udpClients.end(); li++)
 			{
 				if( (clt=(*li))->game_unit.GetUnit() == un)
@@ -1626,7 +1656,8 @@ void	NetServer::save()
 						found = true;
 				}
 			}
-			if (!found)
+			*/
+			if (clt==NULL)
 			{
 				cerr<<"Error client not found in save process !!!!"<<endl;
 				exit(1);
@@ -1699,6 +1730,8 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	Unit * un;
 
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
+	clt = this->getClientFromSerial( serial);
+	/*
 	for( LI li=udpClients.begin(); !found && li!=udpClients.end(); li++)
 	{
 		un = (*li)->game_unit.GetUnit();
@@ -1720,7 +1753,8 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 			}
 		}
 	}
-	if( !found)
+	*/
+	if( clt==NULL)
 	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;
 		un = zonemgr->getUnit( serial, zone);
@@ -1735,5 +1769,38 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1771) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
+}
+
+void	NetServer::sendJump( ObjSerial serial, bool ok)
+{
+	Packet p2;
+	NetBuffer netbuf;
+	string file_content;
+	Client * clt = this->getClientFromSerial( serial);
+
+	// Send a CMD_JUMP to tell the client if the jump is allowed
+	netbuf.addString( clt->jumpfile);
+
+	// And remove the player from its old starsystem and set it out of game
+	this->removeClient( clt);
+	// Have to set new starsystem here
+
+	if( ok)
+		p2.send( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+	else if( !ok || clt->jumpfile=="error")
+		p2.send( CMD_JUMP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+
+	// If jumpfile is empty the md5 was correct
+	if( clt->jumpfile=="")
+		// Send a 0 serial to say client file is ok
+		p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+	else
+	{
+		// Otherwise we have to send jumpfile
+		// Should read the file in the file_content string here !
+		netbuf.addString( clt->jumpfile);
+		netbuf.addString( file_content);
+		p2.send( CMD_ASKFILE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+	}
 }
 

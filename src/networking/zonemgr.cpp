@@ -558,7 +558,7 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 	for( k=lst->begin(); k!=lst->end(); k++)
 	{
 		// Test if *k is the same as clt in which case we don't need to send info
-		if( clt!=(*k))
+		if( clt!=(*k) && (*k)->ingame)
 		{
 			SaveNetUtil::GetSaveStrings( (*k), savestr, xmlstr);
 			// Add the ClientState at the beginning of the buffer
@@ -601,7 +601,8 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 	for( k=zone_list[clt->zone]->begin(); k!=zone_list[clt->zone]->end(); k++)
 	{
 		COUT<<"SENDING : ";
-		netbuf.addClientState( ClientState( (*k)->game_unit.GetUnit()));
+		if( (*k)->ingame)
+			netbuf.addClientState( ClientState( (*k)->game_unit.GetUnit()));
 	}
 
 	return state_size*nbt;

@@ -68,6 +68,7 @@ struct	Client
 	unsigned short	zone;
 	//char			localplayer;
 	bool			ingame;
+	string			jumpfile;
 
 	Client()
 	{
@@ -79,6 +80,8 @@ struct	Client
 		old_timeout=0;
 		deltatime=0;
 		zone = 0;
+		ingame = false;
+		jumpfile="";
 	}
 
 	Client( SOCKETALT& s, bool tcp )
@@ -94,6 +97,7 @@ struct	Client
 		deltatime=0;
 		zone = 0;
 		ingame = false;
+		jumpfile="";
 	}
 
 	inline bool isTcp( ) const {

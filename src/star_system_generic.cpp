@@ -687,9 +687,7 @@ bool PendingJumpsEmpty() {
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
-	  // Only decrease delay when non networking - in networking we wait for a network ack that will set delay to 0
-	  if( Network==NULL)
-      	pendingjump[kk]->delay-=GetElapsedTime();
+      pendingjump[kk]->delay-=GetElapsedTime();
       continue;
     } else {
 #ifdef JUMP_DEBUG
@@ -719,6 +717,10 @@ void StarSystem::ProcessPendingJumps() {
     pendingjump.erase (pendingjump.begin()+kk);
     kk--;
     _Universe->setActiveStarSystem(savedStarSystem);
+	// In networking mode we tell the server we want to go back in game
+	if( Network != NULL)
+		// Find the corresponding networked player
+		Network[_Universe->whichPlayerStarship( un)].inGame();
   }
 
 }
@@ -755,27 +757,32 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
 #endif
     bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||_Universe->isPlayerStarship (un));
     int ani =-1;
-    if (dosightandsound) {
-      ani=_Universe->activeStarSystem()->DoJumpingLeaveSightAndSound (un);
-    }
-    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
+	bool jumpok = true;
 	if( Network!=NULL && !SERVER)
-		Network->jumpRequest( system);
+		jumpok = Network->jumpRequest( system);
+	// In networking mode we do not push the jump if it is refused
+	if( jumpok)
+	{
+      if (dosightandsound) {
+        ani=_Universe->activeStarSystem()->DoJumpingLeaveSightAndSound (un);
+      }
+      pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
 #if 0
-    UnitImages * im=  &un->GetImageInformation();
-    for (unsigned int i=0;i<=im->dockedunits.size();i++) {
-      Unit* unk =NULL;
-      if (i<im->dockedunits.size()) {
-	im->dockedunits[i]->uc.GetUnit();
-      }else {
-	unk = im->DockedTo.GetUnit();
+      UnitImages * im=  &un->GetImageInformation();
+      for (unsigned int i=0;i<=im->dockedunits.size();i++) {
+        Unit* unk =NULL;
+        if (i<im->dockedunits.size()) {
+  	      im->dockedunits[i]->uc.GetUnit();
+        }else {
+	      unk = im->DockedTo.GetUnit();
+        }
+        if (unk!=NULL) {
+	      TentativeJumpTo (this,unk,jumppoint,system);
+        }
       }
-      if (unk!=NULL) {
-	TentativeJumpTo (this,unk,jumppoint,system);
-      }
-    }
     
 #endif
+    }
   } else {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Failed to retrieve!\n");

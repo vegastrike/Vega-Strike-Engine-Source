@@ -51,7 +51,7 @@ class	NetClient
 		SOCKETALT			acct_sock;		// Connection socket for account server
         SocketSet*          _sock_set;      // Encapsulates select()
 		SaveGame			save;
-		ObjSerial			serial;			// Serial # of client
+		//ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
 		int					zone;			// Zone id in universe
 		char				keeprun;		// Bool to test client stop
@@ -68,6 +68,8 @@ class	NetClient
 		unsigned int		old_timestamp;
 		unsigned int		current_timestamp;
 		unsigned int		deltatime;
+		bool				jumpok;
+		bool				ingame;
 
 		void	receiveData();
 		void	readDatafiles();
@@ -89,12 +91,6 @@ class	NetClient
 		void	start( char * addr, unsigned short port);
 		void	checkKey();
 
-
-		ObjSerial	getSerial() { return serial; }
-		void	inGame();
-		// Tell if we are currently in the game
-		bool	isInGame() { return (serial!=0);}
-
 		/********************* Network stuff **********************/
 		// Get the lag time between us and the server
 		unsigned int	getLag() { return deltatime;}
@@ -108,6 +104,8 @@ class	NetClient
 		void	sendPosition( const ClientState* cs );
 		// Send a PING-like packet to say we are still alive (UDP)
 		void	sendAlive();
+		void	inGame();		// Tells the server we are ready to go in game
+		bool	isInGame() { return this->ingame;}
 
 		// void	disable() { enabled=false;}
 		// int		isEnabled() { return enabled; }
@@ -130,7 +128,7 @@ class	NetClient
 		void	fireRequest( ObjSerial serial, int mount_index, char mis);
 		void	unfireRequest( ObjSerial serial, int mount_index);
 
-		void	jumpRequest( string newsystem);
+		bool	jumpRequest( string newsystem);
 
     private:
 		void	receiveSave( const Packet* packet );

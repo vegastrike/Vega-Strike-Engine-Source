@@ -85,7 +85,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
 				// We moved so update
 		  {
-				ClientState cstmp( Network[player].getSerial(), curr_physical_state, Velocity, accel, 0);
+				ClientState cstmp( this->serial, curr_physical_state, Velocity, accel, 0);
 				Network[player].sendPosition( &cstmp);
 		  }
 		  else

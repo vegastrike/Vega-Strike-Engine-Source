@@ -1786,8 +1786,15 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 		smalle->DeactivateJumpDrive();
 		Unit * jumppoint = this;
 		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
+		if( SERVER)
+			Server->sendJump( this->serial, true);
 		return true;
     }
+	else
+	{
+		if( SERVER)
+			Server->sendJump( this->serial, false);
+	}
     return true;
   }
   if (!smalle->GetDestinations().empty()) {
@@ -1795,9 +1802,21 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
       _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+		if( SERVER)
+			Server->sendJump( this->serial, true);
       return true;
     }
+	else
+	{
+		if( SERVER)
+			Server->sendJump( this->serial, false);
+	}
     return true;
+  }
+  else
+  {
+	if( SERVER)
+		Server->sendJump( this->serial, false);
   }
   return false;
 }

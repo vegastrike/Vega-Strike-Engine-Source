@@ -86,7 +86,7 @@ Unit * getNetworkUnit( ObjSerial cserial)
 {
 	for( int i=0; i<_Universe->numPlayers(); i++)
 	{
-		if( Network[i].getSerial() == cserial)
+		if( Network[i].getUnit()->GetSerial() == cserial)
 			return Network[i].getUnit();
 	}
 	return NULL;
@@ -102,10 +102,11 @@ NetClient::NetClient()
     cur_time = 0;
     enabled = 0;
     nbclients = 0;
-    serial = 0;
+	jumpok = false;
     for( int i=0; i<MAXCLIENTS; i++)
         Clients[i] = NULL;
     _sock_set = new SocketSet;
+	ingame = false;
 }
 
 NetClient::~NetClient()
@@ -536,38 +537,6 @@ void	NetClient::start( char * addr, unsigned short port)
 
 void	NetClient::checkKey()
 {
-	/*
-	fd_set	fd_keyb;
-	int		s;
-	char	c;
-
-	struct timeval tout;
-	tout.tv_sec = 0;
-	tout.tv_usec = 0;
-
-	FD_ZERO( &fd_keyb);
-	FD_SET( 0, &fd_keyb);
-
-	if( (s = select( 1, &fd_keyb, NULL, NULL, &tout))<0)
-		perror( "Error reading standard input ");
-	if( s>0)
-	{
-		if( read( 0, &c, 1)==-1)
-			perror( "Error reading char on std input ");
-		if( c != 0x0a)
-		{
-			if( c == 'Q' || c == 'q')
-			{
-				keeprun = 0;
-			}
-			else if( serial!=0)
-			{
-				Packet	packet2;
-				packet2.send( CMD_POSUPDATE, this->serial, &c, sizeof(char), SENDRELIABLE, NULL, clt_sock, __FILE__, __LINE__ );
-			}
-		}
-	}
-*/
 }
 
 /**************************************************************/
@@ -634,6 +603,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 	Unit * un = NULL;
 	int mount_num;
 	ObjSerial mis;
+	ObjSerial local_serial = this->game_unit.GetUnit()->GetSerial();
 	Cockpit * cp;
 
     int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
@@ -665,10 +635,10 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
             case LOGIN_ACCEPT :
 			{
 				Packet pckt;
-                COUT << ">>> " << this->serial << " >>> LOGIN ACCEPTED =( serial n°" << packet_serial << " )= --------------------------------------" << endl;
+                COUT << ">>> LOGIN ACCEPTED =( serial n°" << packet_serial << " )= --------------------------------------" << endl;
                 // Should receive player's data (savegame) from server if there is a save
-                this->serial = packet_serial;
-                localSerials.push_back( this->serial);
+                this->game_unit.GetUnit()->SetSerial( packet_serial);;
+                localSerials.push_back( packet_serial);
 				globalsaves.push_back( netbuf.getString());
 				globalsaves.push_back( netbuf.getString());
 				// Get the galaxy file from buffer with relative path to datadir !
@@ -678,7 +648,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				if( 0 /* !md5CheckFile( univfile, md5_digest) */)
 				{
 					netbuf.addString( univfile);
-					pckt.send( CMD_ASKFILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+					pckt.send( CMD_ASKFILE, packet_serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 					__LINE__
 #else
@@ -695,7 +665,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				if( 0 /* !md5CheckFile( sysfile, md5_digest) */)
 				{
 					netbuf.addString( sysfile);
-					pckt.send( CMD_ASKFILE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+					pckt.send( CMD_ASKFILE, packet_serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 					__LINE__
 #else
@@ -718,6 +688,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 					// Receive the file and write it (trunc if exists)
 					filename = netbuf.getString();
 					file = netbuf.getString();
+					cerr<<"RECEIVING file : "<<filename<<endl;
 					fp = fopen( (datadir+filename).c_str(), "w");
 					if (!fp)
 					{
@@ -774,17 +745,17 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 this->receivePosition( &p1 );
                 break;
             case CMD_ENTERCLIENT :
-                COUT << ">>> " << this->serial << " >>> ENTERING CLIENT =( serial n°"
+                COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
                 this->addClient( &p1 );
                 break;
             case CMD_EXITCLIENT :
-                COUT << ">>> " << this->serial << " >>> EXITING CLIENT =( serial n°"
+                COUT << ">>> " << local_serial << " >>> EXITING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
                 this->removeClient( &p1 );
                 break;
             case CMD_ADDEDYOU :
-                COUT << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
+                COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
 				// Get the zone id in the packet
 				this->zone = netbuf.getShort();
@@ -792,7 +763,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 break;
             case CMD_DISCONNECT :
                 /*** TO REDO IN A CLEAN WAY ***/
-                COUT << ">>> " << this->serial << " >>> DISCONNECTED -> Client killed =( serial n°"
+                COUT << ">>> " << local_serial << " >>> DISCONNECTED -> Client killed =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
                 exit(1);
                 break;
@@ -809,7 +780,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				mis = netbuf.getSerial();
 				// Find the unit
 				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
-				if( mis==this->serial) // WE have fired and receive the broadcast
+				if( mis==local_serial) // WE have fired and receive the broadcast
 					un = this->game_unit.GetUnit();
 				else
 					un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
@@ -1019,8 +990,11 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// If we received a CMD_JUMP with serial==1 jump is refused because of energy
 				if( packet_serial!=0)
 				{
+					this->jumpok = true;
 					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();
+					this->ingame = false;
 					
+					/* NOT USED ANYMORE
 					for( i=0; !found && i<pendingjump.size(); i++)
 					{
 						// Find the corresponding destination
@@ -1039,17 +1013,19 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 					}
 					else
 					{
-						// Set the delay to 0 so that it will be executed next time ProcessPendingJump is called
-						pendingjump[i]->delay = 0;
 						// Should wait for the system file or the confirmation we have the good one here if we are authorized to jump
-						if( packet_serial != 0)
-							this->PacketLoop( CMD_ASKFILE);
+						// DO NOT WAIT FOR ASK_FILE ANYMORE -> THIS WILL BE THE NEXT PACKET ANYWAY AND THIS WILL ALLOW TO
+						// DO JUMP ANIMATION
+						// if( packet_serial != 0)
+						// this->PacketLoop( CMD_ASKFILE);
 					}
-					//UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
+					*/
 				}
 				else
 				{
 					// Jump was refused either because the destination system asked do not exist or because not enough jump energy
+					this->jumpok = false;
+					/* NOT USED ANYMORE
 					std::vector <unorigdest *>pendingtemp;
 					// Copy the jump vector without the concerned element and copy it over the original one
 					for( i=0; i<pendingjump.size(); i++)
@@ -1058,11 +1034,12 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 							pendingtemp.push_back( pendingjump[i]);
 					}
 					pendingjump = pendingtemp;
+					*/
 				}
 			}
 			break;
             default :
-                COUT << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
+                COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;
                 keeprun = 0;
                 this->disconnect();
@@ -1168,7 +1145,7 @@ void	NetClient::addClient( const Packet* packet )
 		//init_interpolation( cltserial);
 	}
 	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
-	else if( cltserial!=this->serial)
+	else if( cltserial!=this->game_unit.GetUnit()->GetSerial())
 	{
 		clt->game_unit.SetUnit( getNetworkUnit( cltserial));
 		assert( clt->game_unit.GetUnit() != NULL);
@@ -1213,7 +1190,7 @@ void	NetClient::sendPosition( const ClientState* cs )
 	COUT<<"Sending ClientState == ";
 	(*cs).display();
 	netbuf.addClientState( (*cs));
-	pckt.send( CMD_POSUPDATE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
+	pckt.send( CMD_POSUPDATE, this->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1326,14 +1303,15 @@ void	NetClient::inGame()
 	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
 	//netbuf.addClientState( cs);
-	packet2.send( CMD_ADDCLIENT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	packet2.send( CMD_ADDCLIENT, this->game_unit.GetUnit()->GetSerial(), NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
 			906
 #endif
 			);
-	COUT<<"Sending ingame with serial n°"<<this->serial<<endl;
+	COUT<<"Sending ingame with serial n°"<<this->game_unit.GetUnit()->GetSerial()<<endl;
+	this->ingame = true;
 }
 
 /*************************************************************/
@@ -1345,7 +1323,7 @@ void	NetClient::sendAlive()
     if( clt_sock.isTcp() == false )
     {
 	Packet	p;
-	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(), NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1405,7 +1383,7 @@ void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_LOGOUT, this->game_unit.GetUnit()->GetSerial(), NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1511,7 +1489,7 @@ void	NetClient::scanRequest( Unit * target)
 	netbuf.addSerial( target->GetSerial());
 	netbuf.addShort( this->zone);
 
-	p.send( CMD_TARGET, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_TARGET, this->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1532,7 +1510,7 @@ void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
 	netbuf.addShort( this->zone);
 	netbuf.addChar( mis);
 
-	p.send( CMD_FIREREQUEST, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_FIREREQUEST, this->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1550,7 +1528,7 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 	netbuf.addInt32( mount_index);
 	netbuf.addInt32( this->zone);
 
-	p.send( CMD_UNFIREREQUEST, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_UNFIREREQUEST, this->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1559,7 +1537,7 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 			);
 }
 
-void	NetClient::jumpRequest( string newsystem)
+bool	NetClient::jumpRequest( string newsystem)
 {
 	Packet p;
 	NetBuffer netbuf;
@@ -1569,7 +1547,7 @@ void	NetClient::jumpRequest( string newsystem)
 	md5Compute( datadir+"/"+newsystem+".system", md5);
 	netbuf.addBuffer( md5, MD5_DIGEST_SIZE);
 
-	p.send( CMD_JUMP, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	p.send( CMD_JUMP, this->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
@@ -1578,5 +1556,14 @@ void	NetClient::jumpRequest( string newsystem)
 			);
 	// Should wait for jump authorization
 	this->PacketLoop( CMD_JUMP);
+	bool ret;
+	if( this->jumpok)
+		ret = true;
+	else
+		ret = false;
+
+	jumpok = false;
+
+	return ret;
 }
 

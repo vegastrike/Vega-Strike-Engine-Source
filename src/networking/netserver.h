@@ -112,6 +112,7 @@ class NetServer
 		void			sendLoginAccept( Client * clt, AddressIP ipadr, int acctnew);
 		void			sendLoginUnavailable( Client * clt, AddressIP ipadr);
 		void			getMD5( string filename, unsigned char * md5digest);
+		Client *		getClientFromSerial( ObjSerial serial);
 
 	public:
 		NetServer();
@@ -127,6 +128,7 @@ class NetServer
 		void	sendDamages( ObjSerial serial, unsigned short zone, Unit::Shield shields, Unit::Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color);
 		//void	sendDamages( ObjSerial serial, Vector & pnt, Vector & normal, float amt, GFXColor & color, float phasedamage);
 		void	sendKill( ObjSerial serial, unsigned short zone);
+		void	sendJump( ObjSerial serial, bool ok);
 
 		friend class ZoneMgr;
 };
