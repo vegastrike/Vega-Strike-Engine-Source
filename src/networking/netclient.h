@@ -184,6 +184,8 @@ class	NetClient
 		/********************* Communication stuff **********************/
 	private:
 	public:
+		void	createNetComm( float minfreq, float maxfreq, bool video, bool secured, string method);
+		void	destroyNetComm();
 		void	startCommunication();
 		void	stopCommunication();
 		void	sendWebcamPicture();

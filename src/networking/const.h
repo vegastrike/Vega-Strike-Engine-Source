@@ -39,10 +39,6 @@
 #define DESKEY_SIZE	64
 #define MAXBUFFER	16384
 
-// Communication freq range
-#define MIN_COMMFREQ	23.0
-#define MAX_COMMFREQ	42.0
-
 #define MAXSERIAL 0xFFFF
 #define OBJSERIAL_ToBig POSH_WriteU16ToBig
 #define INSTSERIAL_ToBig POSH_WriteU32ToBig

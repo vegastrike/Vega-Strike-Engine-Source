@@ -115,16 +115,12 @@ NetClient::NetClient()
     nbclients = 0;
 	jumpok = false;
 	ingame = false;
-	current_freq = MIN_COMMFREQ;
-	selected_freq = MIN_COMMFREQ;
-	FileUtil::use_crypto = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_crypto", "false"));
+#ifdef CRYPTO
+	FileUtil::use_crypto = true;
+#endif
 
 	prediction = new MixedPrediction();
-#ifdef NETCOMM
-	NetComm = new NetworkCommunication();
-#else
     NetComm = NULL;
-#endif
 
     _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerClient );
@@ -138,10 +134,8 @@ NetClient::~NetClient()
 {
 	if( prediction)
 		delete prediction;
-#ifdef NETCOMM
 	if( NetComm!=NULL)
 		delete NetComm;
-#endif
 }
 
 /*************************************************************/
@@ -354,14 +348,12 @@ int NetClient::checkMsg( Packet* outpacket )
     {
         ret = recvMsg( outpacket );
     }
-#ifdef NETCOMM
 	// If we have network communications enabled and webcam support enabled we grab an image
-	if( NetComm->IsActive())
+	if( NetComm!=NULL && NetComm->IsActive())
 	{
 		// Here also send samples
 		NetComm->SendSound( this->clt_sock, this->serial);
 	}
-#endif
 	
     return ret;
 }

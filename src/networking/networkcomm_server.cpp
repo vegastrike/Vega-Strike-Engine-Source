@@ -1,8 +1,7 @@
-#ifdef NETCOMM
-
 #include "networking/networkcomm.h"
 
 NetworkCommunication::NetworkCommunication() {}
+NetworkCommunication::NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, string method) {}
 NetworkCommunication::~NetworkCommunication() {}
 
 void	NetworkCommunication::AddToSession( ClientPtr clt) {}
@@ -25,6 +24,4 @@ void	NetworkCommunication::SwitchSecured() {}
 void	NetworkCommunication::GenerateKey() {}
 string	NetworkCommunication::EncryptBuffer( const char * buffer, unsigned int length) { return string("");}
 string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int length) { return string("");}
-
-#endif
 

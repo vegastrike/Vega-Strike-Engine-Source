@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuff look for that
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
 TO TEST - Possibility of specifying a mod
 TO TEST - Add the command line datapath if supplied !

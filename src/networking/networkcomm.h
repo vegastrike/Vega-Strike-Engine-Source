@@ -43,6 +43,8 @@ namespace VsnetDownload {
   };
 };
 
+class WebcamSupport;
+
 class NetworkCommunication
 {
 	private:
@@ -53,6 +55,7 @@ class NetworkCommunication
 		CltPtrIterator			webcamClient;			// The client we are watching the webcam
 
 		char	crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
+		float				min_freq, max_freq;
 		float				freq;			// Current communication frequency
 		bool				active;			// Tell wether the communication system is active
 		char				secured;		// Tell wether we are on a secured channel or not
@@ -104,6 +107,7 @@ class NetworkCommunication
 		enum	CommunicationMethod { ClientBroadcast, ServerUnicast };
 
 		NetworkCommunication();
+		NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, string method);
 		NetworkCommunication( int nb);
 		~NetworkCommunication();
 
@@ -127,6 +131,9 @@ class NetworkCommunication
 		char	IsSecured() { return secured;}
 		void	SwitchSecured();
 		void	SwitchWebcam();
+
+		float	MinFreq() { return this->min_freq; }
+		float	MaxFreq() { return this->max_freq; }
 
     private:
         void private_init( );

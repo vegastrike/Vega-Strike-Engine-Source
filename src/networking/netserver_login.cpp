@@ -156,6 +156,15 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		{
 			// We can't find the unit saved for player -> send a login error
 			this->sendLoginError( clt, ipadr);
+			Packet p2;
+			// Send the account server a logout info
+			Unit * un = clt->game_unit.GetUnit();
+			if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+						 SENDRELIABLE, NULL, acct_sock, __FILE__,
+						 PSEUDO__LINE__(162) ) < 0 )
+			{
+				COUT<<"ERROR sending LOGOUT to account server"<<endl;
+			}
 			cerr<<"WARNING : Unit file ("<<savedships[0]<<") not found for "<<callsign<<endl;
 			return;
 		}

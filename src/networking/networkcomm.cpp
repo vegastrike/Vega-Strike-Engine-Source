@@ -15,7 +15,7 @@
 using namespace CryptoPP;
 #endif /* CRYPTO */
 
-#ifdef NETCOMM
+//#ifdef NETCOMM
 
 #include <config.h>
 
@@ -155,6 +155,44 @@ void NetworkCommunication::private_init()
 	this->indev = paNoDevice;
 	this->outdev = paNoDevice;
 	this->devinfo = NULL;
+#endif /* NETCOMM_PORTAUDIO */
+
+#ifndef NETCOMM_NOWEBCAM
+	this->Webcam = NULL;
+#endif
+}
+
+NetworkCommunication::NetworkCommunication()
+{
+    private_init( );
+}
+
+NetworkCommunication::NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, string cryptomethod)
+{
+	min_freq = minfreq;
+	max_freq = maxfreq;
+    private_init( );
+#ifndef NETCOMM_NOWEBCAM
+
+	if( video)
+	{
+		// Init the webcam part
+		Webcam = new WebcamSupport();
+		if( Webcam->Init() == -1)
+		{
+			delete Webcam;
+			this->Webcam = NULL;
+				cerr<<"!!! NO WEBCAM SUPPORT !!!"<<endl;
+		}
+		_downloader.reset( new VsnetDownload::Client::Manager( _sock_set ) );
+		_sock_set.addDownloadManager( _downloader );
+		_downloadServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
+		_sock_set.addDownloadManager( _downloadServer );
+	}
+
+#endif /* NETCOMM_NOWEBCAM */
+
+#ifdef NETCOMM_PORTAUDIO
 	// Initialize PortAudio lib
 	if( use_pa)
 		CheckPAError( Pa_Initialize(), "Pa_Initialize");
@@ -177,29 +215,9 @@ void NetworkCommunication::private_init()
 	this->audio_inlength = 0;
 
 #endif /* NETCOMM_PORTAUDIO */
-#ifndef NETCOMM_NOWEBCAM
 
-	this->Webcam = NULL;
-	string webcam_enable = vs_config->getVariable ("network","use_webcam","false");
-	// Init the webcam part
-	if( webcam_enable == "true")
-	{
-		Webcam = new WebcamSupport();
-		if( Webcam->Init() == -1)
-		{
-			delete Webcam;
-			this->Webcam = NULL;
-			cerr<<"!!! NO WEBCAM SUPPORT !!!"<<endl;
-		}
-	}
-    _downloader.reset( new VsnetDownload::Client::Manager( _sock_set ) );
-    _sock_set.addDownloadManager( _downloader );
-    _downloadServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
-    _sock_set.addDownloadManager( _downloadServer );
-
-#endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
-	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
+	crypto_method = cryptomethod;
 	pubKeyFilename = VSFileSystem::datadir+"vsnet_public_"+crypto_method+".key";
 	privKeyFilename = VSFileSystem::datadir+"vsnet_private_"+crypto_method+".key";
 	seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
@@ -228,11 +246,6 @@ void NetworkCommunication::private_init()
 		this->GenerateKey();
 
 #endif
-}
-
-NetworkCommunication::NetworkCommunication()
-{
-    private_init( );
 }
 
 char	NetworkCommunication::HasWebcam()
@@ -303,6 +316,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+#ifdef CRYPTO
 		if( this->secured && use_secured)
 		{
 			encrypted = this->EncryptBuffer( message.c_str(), message.length());
@@ -310,6 +324,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 					__FILE__, PSEUDO__LINE__(244) );
 		}
 		else
+#endif
 		{
 			p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, send_sock,
 					__FILE__, PSEUDO__LINE__(244) );
@@ -321,6 +336,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
+#ifdef CRYPTO
 			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBuffer( message.c_str(), message.length());
@@ -328,6 +344,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 						__FILE__, PSEUDO__LINE__(244) );
 			}
 			else
+#endif
 			{
 				p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
@@ -352,6 +369,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 			Packet p;
 			// We don't need that to be reliable in UDP mode
+#ifdef CRYPTO
 			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
@@ -359,6 +377,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 					__FILE__, PSEUDO__LINE__(244) );
 			}
 			else
+#endif
 			{
 				p.send( CMD_SECSNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
 					__FILE__, PSEUDO__LINE__(244) );
@@ -372,6 +391,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			{
 				if( (*it)->portaudio)
 				{
+#ifdef CRYPTO
 					if( this->secured && use_secured)
 					{
 						encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
@@ -379,6 +399,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 							__FILE__, PSEUDO__LINE__(244) );
 					}
 					else
+#endif
 					{
 						p.send( CMD_SECSNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
 							__FILE__, PSEUDO__LINE__(244) );
@@ -400,12 +421,14 @@ void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypt
 		string decrypted;
 		assert( length<MAXBUFFER);
 		memset( audio_outbuffer, 0, MAXBUFFER);
+#ifdef CRYPTO
 		if( encrypted)
 		{
 			decrypted = DecryptBuffer( sndbuffer, length);
 			memcpy( audio_outbuffer, decrypted.c_str(), decrypted.length());
 		}
 		else
+#endif
 			memcpy( audio_outbuffer, sndbuffer, length);
 	}
 #endif
@@ -418,11 +441,13 @@ void	NetworkCommunication::RecvMessage( string message, bool encrypted)
 		this->message_history.pop_front();
 
 	string decrypted;
+#ifdef CRYPTO
 	if( encrypted)
 	{
 		decrypted = DecryptBuffer( message.c_str(), message.length());
 		message = decrypted;
 	}
+#endif
 
 	this->message_history.push_back( message);
 	// Display message
@@ -572,15 +597,13 @@ if( use_pa)
 #endif
 }
 
-#endif /* NETCOMM */
-
 char *	NetworkCommunication::GetWebcamCapture()
 {
-#ifdef NETCOMM
-	return Webcam->jpeg_buffer;
-#else
-	return NULL; // We have no choice :-/
+#ifndef NETCOMM_NOWEBCAM
+	if( Webcam!=NULL)
+		return Webcam->jpeg_buffer;
 #endif
+	return NULL; // We have no choice :-/
 }
 
 void	NetworkCommunication::SwitchWebcam()

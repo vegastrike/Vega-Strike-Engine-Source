@@ -23,6 +23,7 @@
 #include "gfx/sphere.h"
 #include "role_bitmask.h"
 #include "cmd/collide/rapcol.h"
+#include "networking/netclient.h"
 #define VS_PI 3.1415926536
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
@@ -208,6 +209,12 @@ namespace UnitXML {
       DELAY,
       JUMPENERGY,
       JUMPWAV,
+      NETCOM,
+	  NETCOMM_MINFREQ,
+	  NETCOMM_MAXFREQ,
+	  NETCOMM_SECURED,
+	  NETCOMM_VIDEO,
+	  NETCOMM_CRYPTO,
       DOCKINTERNAL,
       WORMHOLE,
       RAPID,
@@ -250,7 +257,7 @@ namespace UnitXML {
 	  TEXTURESTARTTIME
     };
 
-  const EnumMap::Pair element_names[37]= {
+  const EnumMap::Pair element_names[38]= {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
@@ -280,6 +287,7 @@ namespace UnitXML {
     EnumMap::Pair ("Radar", RADAR),
     EnumMap::Pair ("Cockpit", COCKPIT),
     EnumMap::Pair ("Jump", JUMP),
+    EnumMap::Pair ("Netcomm", NETCOM),
     EnumMap::Pair ("Dock", DOCK),
     EnumMap::Pair ("Hold",HOLD),
     EnumMap::Pair ("Cargo",CARGO),
@@ -290,7 +298,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION),
     
   };
-  const EnumMap::Pair attribute_names[106] = {
+  const EnumMap::Pair attribute_names[111] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -369,6 +377,11 @@ namespace UnitXML {
     EnumMap::Pair ("AfterburnEnergy", AFTERBURNENERGY),
     EnumMap::Pair ("JumpEnergy", JUMPENERGY),
     EnumMap::Pair ("JumpWav", JUMPWAV),
+    EnumMap::Pair ("min_freq", NETCOMM_MINFREQ),
+    EnumMap::Pair ("max_freq", NETCOMM_MAXFREQ),
+    EnumMap::Pair ("secured", NETCOMM_SECURED),
+    EnumMap::Pair ("video", NETCOMM_VIDEO),
+    EnumMap::Pair ("crypto_method", NETCOMM_CRYPTO),
     EnumMap::Pair ("DockInternal", DOCKINTERNAL),
     EnumMap::Pair ("RAPID", RAPID),
     EnumMap::Pair ("BSP", USEBSP),
@@ -400,8 +413,8 @@ namespace UnitXML {
 
   };
 
-  const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 106);
+  const EnumMap element_map(element_names, 38);
+  const EnumMap attribute_map(attribute_names, 111);
 }
 std::string delayucharStarHandler (const XMLType &input,void *mythis) {
 	static int jumpdelaymult =XMLSupport::parse_int(vs_config->getVariable("physics","jump_delay_multiplier","5"));
@@ -1023,6 +1036,38 @@ using namespace UnitXML;
 		  }
 	  }
 	  break;
+  case NETCOM:
+  {
+	int playernum = _Universe->whichPlayerStarship( this);
+	float minfreq=0, maxfreq=0;
+	bool video=false, secured=false;
+	string method;
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++)
+	{
+      switch(attribute_map.lookup((*iter).name))
+	  {
+      	case NETCOMM_MINFREQ :
+			minfreq = parse_float((*iter).value);
+		break;
+	 	case NETCOMM_MAXFREQ :
+			maxfreq = parse_float((*iter).value);
+		break;
+	  	case NETCOMM_SECURED :
+			secured = parse_bool((*iter).value);
+		break;
+	 	case NETCOMM_VIDEO :
+			video = parse_bool((*iter).value);
+		break;
+	 	case NETCOMM_CRYPTO :
+			method = (*iter).value;
+		break;
+	  }
+	}
+	//Network[playernum].createNetComm( minfreq, maxfreq, video, secured, method);
+  }
   case JUMP:
   {
 	  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
@@ -1853,6 +1898,16 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
 
   }
   image->CockpitCenter.Set (0,0,0);
+
+  /*
+  if( Network!=NULL)
+  {
+  	int playernum = _Universe->whichPlayerStarship( this);
+  	// Delete the current netcomm device if there is one
+	Network[playernum].destroyNetComm();
+  }
+  */
+
   xml = new XML();
   xml->randomstartframe=((float)rand())/RAND_MAX;
   xml->randomstartseconds=0;

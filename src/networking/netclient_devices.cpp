@@ -134,55 +134,82 @@ void	NetClient::undockRequest( ObjSerial utdw_serial)
 /*** COMMUNICATION STUFF                                                               ****/
 /******************************************************************************************/
 
+void	NetClient::createNetComm( float minfreq, float maxfreq, bool video, bool secured, string method)
+{
+	if( NetComm!=NULL)
+	{
+		current_freq = minfreq;
+		selected_freq = maxfreq;
+		this->NetComm = new NetworkCommunication( minfreq, maxfreq, video, secured, method);
+	}
+}
+
+void	NetClient::destroyNetComm()
+{
+	if( NetComm!=NULL)
+	{
+		delete NetComm;
+		NetComm = NULL;
+	}
+}
+
 void	NetClient::startCommunication()
 {
-#ifdef NETCOMM
-	char webcam_support = NetComm->HasWebcam();
-	char portaudio_support = NetComm->HasPortaudio();
-	selected_freq = current_freq;
-	NetBuffer netbuf;
-	netbuf.addFloat( selected_freq);
-	netbuf.addChar( NetComm->IsSecured());
-	netbuf.addChar( webcam_support);
-	netbuf.addChar( portaudio_support);
-	NetComm->InitSession( selected_freq);
-	//cerr<<"Session started."<<endl;
-	//cerr<<"Grabbing an image"<<endl;
-	Packet p;
-	p.send( CMD_STARTNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
-            __FILE__, PSEUDO__LINE__(1565) );
-	cerr<<"Starting communication session\n\n"<<endl;
-	//NetComm->GrabImage();
-#endif
+	if( NetComm!=NULL)
+	{
+		char webcam_support = NetComm->HasWebcam();
+		char portaudio_support = NetComm->HasPortaudio();
+		selected_freq = current_freq;
+		NetBuffer netbuf;
+		netbuf.addFloat( selected_freq);
+		netbuf.addChar( NetComm->IsSecured());
+		netbuf.addChar( webcam_support);
+		netbuf.addChar( portaudio_support);
+		NetComm->InitSession( selected_freq);
+		//cerr<<"Session started."<<endl;
+		//cerr<<"Grabbing an image"<<endl;
+		Packet p;
+		p.send( CMD_STARTNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
+   	         __FILE__, PSEUDO__LINE__(1565) );
+		cerr<<"Starting communication session\n\n"<<endl;
+		//NetComm->GrabImage();
+	}
 }
 
 void	NetClient::stopCommunication()
 {
-#ifdef NETCOMM
-	NetBuffer netbuf;
-	netbuf.addFloat( selected_freq);
-	Packet p;
-	p.send( CMD_STOPNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
-            __FILE__, PSEUDO__LINE__(1578) );
-	NetComm->DestroySession();
-	cerr<<"Stopped communication session"<<endl;
-#endif
+	if( NetComm!=NULL)
+	{
+		NetBuffer netbuf;
+		netbuf.addFloat( selected_freq);
+		Packet p;
+		p.send( CMD_STOPNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
+   	         __FILE__, PSEUDO__LINE__(1578) );
+		NetComm->DestroySession();
+		cerr<<"Stopped communication session"<<endl;
+	}
 }
 
 void	NetClient::decreaseFrequency()
 {
-	if( current_freq == MIN_COMMFREQ)
-		current_freq = MAX_COMMFREQ;
-	else
-		current_freq -= .1;
+	if( NetComm!=NULL)
+	{
+		if( current_freq == NetComm->MinFreq())
+			current_freq = NetComm->MaxFreq();
+		else
+			current_freq -= .1;
+	}
 }
 
 void	NetClient::increaseFrequency()
 {
-	if( current_freq == MAX_COMMFREQ)
-		current_freq = MIN_COMMFREQ;
-	else
-		current_freq += .1;
+	if( NetComm!=NULL)
+	{
+		if( current_freq == NetComm->MaxFreq())
+			current_freq = NetComm->MinFreq();
+		else
+			current_freq += .1;
+	}
 }
 
 float	NetClient::getSelectedFrequency()
@@ -193,11 +220,9 @@ float	NetClient::getCurrentFrequency()
 
 void	NetClient::sendTextMessage( string message)
 {
-#ifdef NETCOMM
 	// Only send if netcomm is active and we are connected on a frequency
-	if( NetComm->IsActive())
+	if( NetComm!=NULL && NetComm->IsActive())
 		NetComm->SendMessage( this->clt_sock, this->serial, message);
-#endif
 }
 
 /**************************************************************/
@@ -206,45 +231,33 @@ void	NetClient::sendTextMessage( string message)
 
 char *	NetClient::getWebcamCapture()
 {
-#ifdef NETCOMM
-	return NetComm->GetWebcamCapture();
-#else
+	if( NetComm != NULL)
+		return NetComm->GetWebcamCapture();
 	return NULL; // We have no choice...
-#endif
 }
 
 bool NetClient::IsNetcommActive() const
 {
-#ifdef NETCOMM
     return ( this->NetComm==NULL ? false : this->NetComm->IsActive() );
-#else
-    return false;
-#endif
 }
 
 bool NetClient::IsNetcommSecured() const
 {
-#ifdef NETCOMM
 	bool ret = false;
 	if( this->NetComm!=NULL)
 		ret = this->NetComm->IsSecured();
 	
     return ret;
-#else
-    return false;
-#endif
 }
 
 void	NetClient::switchSecured()
 {
-#ifdef NETCOMM
-	NetComm->SwitchSecured();
-#endif
+	if( NetComm!=NULL)
+		NetComm->SwitchSecured();
 }
 void	NetClient::switchWebcam()
 {
-#ifdef NETCOMM
-	NetComm->SwitchWebcam();
-#endif
+	if( NetComm!=NULL)
+		NetComm->SwitchWebcam();
 }
 

@@ -14,7 +14,7 @@ void Client::Init()
 	secured = 0;
 	jumpfile="";
     _disconnectReason = "none";
-	comm_freq = MIN_COMMFREQ;
+	comm_freq = 0;
 }
 
 Client::Client()

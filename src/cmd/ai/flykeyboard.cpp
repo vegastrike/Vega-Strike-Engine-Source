@@ -165,7 +165,6 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	Network[whichplayer].startCommunication();
 	SSCK.commchanged=false;
   }
-#ifdef NETCOMM
   if( Network!=NULL && SSCK.freq_increase)
   {
   	SSCK.freq_increase = false;
@@ -186,7 +185,6 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     SSCK.switchsecured=false;
 	Network[whichplayer].switchSecured();
   }
-#endif
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());
