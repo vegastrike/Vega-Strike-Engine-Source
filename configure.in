@@ -1499,10 +1499,9 @@ AM_CONDITIONAL(MACOSX, test "x$is_macosx" = "xyes")
 dnl --------------------------------------------------------------------------
 dnl Choosing networking threading approach
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(net-threads,
-  AC_HELP_STRING([--with-net-threads=TYPE], [TYPE=none (default), posix]),
-  [ case "$enableval" in
-      "n" | "no" | "none"|*)
+AC_ARG_WITH(net-threads, AC_HELP_STRING([--with-net-threads], [TYPES are none (default) and posix]))
+  case "x$net-threads" in
+      "n" | "no" | "none"| "x" | *)
         use_net_thread=NONE
         AC_DEFINE(USE_NET_THREAD_NONE,1,[Use no threads])
         ;;
@@ -1510,11 +1509,7 @@ AC_ARG_WITH(net-threads,
         use_net_thread=POSIX
         AC_DEFINE(USE_NET_THREAD_POSIX,1,[Use POSIX threads])
         ;;
-    esac
-  ],
-  [use_net_thread=NONE AC_DEFINE(USE_NET_THREAD_NONE,1,[Use no threads])])
-                                                                                                                              
-                                    
+  esac                                  
 
 
 CPPFLAGS="${CPPFLAGS} ${VS_CPPFLAGS} ${PYTHON_CPPFLAGS} ${BOOST_CPPFLAGS} ${CG_CPPFLAGS}"
@@ -1549,6 +1544,7 @@ AC_CONFIG_FILES(Makefile
                  src/networking/Makefile
                  src/networking/lowlevel/Makefile
                  src/python/Makefile
+                 tools/Makefile
                  )
 AC_OUTPUT()
 
