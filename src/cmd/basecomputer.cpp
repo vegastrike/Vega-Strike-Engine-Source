@@ -95,7 +95,7 @@ static const string LOAD_FAILED = "LOAD_FAILED";
 // These should probably be in a header file somewhere.
 extern void SwitchUnits(Unit* ol, Unit* nw);
 extern void TerminateCurrentBase(void);
-
+extern void CurrentBaseUnitSet(Unit * un);
 // For ships stats.
 extern string MakeUnitXMLPretty(std::string, Unit*);
 
@@ -2270,10 +2270,17 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                     playerUnit->UnDock(baseUnit);
                     m_player.SetUnit(newPart);
                     WriteSaveGame(_Universe->AccessCockpit(), true);
+					if (baseUnit)
+						newPart->ForceDock(baseUnit,0);
+					CurrentBaseUnitSet(newPart);
+//					if (BaseInterface::CurrentBase)
+//						BaseInterface::CurrentBase->caller.SetUnit(newPart);
+					m_player.SetUnit(newPart);
                     newPart=NULL;
                     playerUnit->Kill();
                     window()->close();
-                    TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+//                    TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+					
                     return true;
                 }
             }

@@ -557,6 +557,10 @@ void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, i
 void TerminateCurrentBase(void) {
     BaseInterface::CurrentBase->Terminate();
 }
+void CurrentBaseUnitSet(Unit * un) {
+	if (BaseInterface::CurrentBase) 
+		BaseInterface::CurrentBase->caller.SetUnit(un);
+}
 // end NEW_GUI.
 
 void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int button, int state) {

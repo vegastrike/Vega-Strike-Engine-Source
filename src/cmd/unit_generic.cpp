@@ -1000,12 +1000,12 @@ static float tmpsqr (float x) {
 	return x*x;
 }
 float CloseEnoughCone (Unit * me) {
-	static float close_autotrack_cone = XMLSupport::parse_float (vs_config->getVariable ("physics","near_autotrack_cone",".99"));
+	static float close_autotrack_cone = XMLSupport::parse_float (vs_config->getVariable ("physics","near_autotrack_cone",".9"));
 	return close_autotrack_cone;
 }
 bool CloseEnoughToAutotrack (Unit * me, Unit * targ, float &cone) {
 	if (targ) {
-		static float close_enough_to_autotrack = tmpsqr(XMLSupport::parse_float (vs_config->getVariable ("physics","close_enough_to_autotrack","3")));
+		static float close_enough_to_autotrack = tmpsqr(XMLSupport::parse_float (vs_config->getVariable ("physics","close_enough_to_autotrack","4")));
 		float dissqr = (me->curr_physical_state.position.Cast()-targ->curr_physical_state.position.Cast()).MagnitudeSquared();
 		float movesqr=close_enough_to_autotrack*(me->prev_physical_state.position.Cast()-me->curr_physical_state.position.Cast()).MagnitudeSquared();
 		if (dissqr<movesqr&&movesqr>0) {
@@ -3554,8 +3554,12 @@ void Unit::PerformDockingOperations () {
   }
 }
 
-bool Unit::ForceDock (Unit * utdw, int whichdockport) { 
+bool Unit::ForceDock (Unit * utdw, int whichdockport) {
+	if (utdw->image->dockingports.size()<=whichdockport)
+		return false;
+		
       utdw->image->dockingports[whichdockport].used=true;
+	
       utdw->docked|=DOCKING_UNITS;
       utdw->image->dockedunits.push_back (new DockedUnits (this,whichdockport));
       if (utdw->image->dockingports[whichdockport].internal) {
