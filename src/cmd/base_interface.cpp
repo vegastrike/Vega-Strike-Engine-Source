@@ -15,11 +15,8 @@ Base::Room::~Room () {
 	for (i=0;i<links.size();i++) {
 		delete links[i];
 	}
-	for (i=0;i<texes.size();i++) {
-		delete texes[i];
-	}
-	for (i=0;i<ships.size();i++) {
-		delete ships[i];
+	for (i=0;i<objs.size();i++) {
+		delete objs[i];
 	}
 }
 
@@ -27,22 +24,36 @@ Base::Room::Room () {
 //		Do nothing...
 }
 
+void Base::Room::BaseObj::Draw () {
+//		Do nothing...
+}
+
+void Base::Room::BaseSprite::Draw () {
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	spr.Draw();
+}
+
+void Base::Room::BaseShip::Draw () {
+	GFXHudMode (GFXFALSE);
+	GFXEnable (DEPTHTEST);
+	GFXEnable (DEPTHWRITE);
+	Vector p,q,r;
+	_Universe->AccessCamera()->GetOrientation (p,q,r);
+	QVector pos =  _Universe->AccessCamera ()->GetPosition();
+	Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
+	Matrix final;
+	MultMatrix (final,cam,this->mat);
+	CurrentBase->caller->DrawNow(final);
+	GFXDisable (DEPTHTEST);
+	GFXDisable (DEPTHWRITE);
+	GFXHudMode (GFXTRUE);
+}
+
 void Base::Room::Draw () {
 	int i;
-	for (i=0;i<texes.size();i++) {
-		texes[i]->Draw();
+	for (i=0;i<objs.size();i++) {
+		objs[i]->Draw();
 	}
-	GFXHudMode (GFXFALSE);
-	for (i=0;i<ships.size();i++) {
-	  Vector p,q,r;
-	  _Universe->AccessCamera()->GetOrientation (p,q,r);
-	  QVector pos =  _Universe->AccessCamera ()->GetPosition();
-	  Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
-	  Matrix final;
-	  MultMatrix (final,cam,*ships[i]);
-		CurrentBase->caller->DrawNow(final);
-	}
-	GFXHudMode (GFXTRUE);
 }
 
 int Base::Room::MouseOver (float x, float y) {
@@ -100,6 +111,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 #ifdef _WIN32
 			int ret=MessageBox(NULL,str,"Input",MB_OKCANCEL);
 #else
+			printf("\n%s\n",str);
 			int ret=1;
 #endif
 			int index;
@@ -148,9 +160,9 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 				}
 				if (button==WS_RIGHT_BUTTON) {
 					input[200]=input[199]='\0';
-					texfiles.push_back(string(input));
-					texes.push_back(new Sprite(input));
-					texes.back()->SetPosition(x,y);
+					objs.push_back(new BaseSprite(input));
+					((BaseSprite*)objs.back())->texfile=string(input);
+					((BaseSprite*)objs.back())->spr.SetPosition(x,y);
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
 					links.back()->x=x;
 					links.back()->y=y;

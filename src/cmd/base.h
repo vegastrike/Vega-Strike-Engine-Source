@@ -40,12 +40,40 @@ class Base {
 			virtual void EndXML(FILE *fp);
 #endif
 		};
+		struct BaseObj {
+			virtual void Draw ();
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+			virtual ~BaseObj () {}
+			BaseObj () {}
+		};
+		struct BaseShip : public BaseObj {
+			virtual void Draw ();
+			Matrix mat;
+			virtual ~BaseShip () {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+			BaseShip () {}
+			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos)
+				:mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos) {}
+		};
+		struct BaseSprite : public BaseObj {
+			virtual void Draw ();
+			Sprite spr;
+#ifdef BASE_MAKER
+			std::string texfile;
+			virtual void EndXML(FILE *fp);
+#endif
+			virtual ~BaseSprite () {}
+			BaseSprite (const char *spritefile) 
+				:spr(spritefile) {}
+		};
 		std::string deftext;
 		std::vector <Link*> links;
-		std::vector <Sprite*> texes;
-		std::vector <Matrix*> ships;
+		std::vector <BaseObj*> objs;
 #ifdef BASE_MAKER
-		std::vector <string> texfiles;
 		void EndXML(FILE *fp);
 #endif
 		void Draw ();

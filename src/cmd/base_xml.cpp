@@ -156,10 +156,10 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 			for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 				switch(attribute_map.lookup((*iter).name)) {
 				case SPRITEFILE:
+					rooms.back()->objs.push_back(new Room::BaseSprite(((*iter).value).c_str()));
 #ifdef BASE_MAKER
-					rooms.back()->texfiles.push_back((*iter).value);
+					((Room::BaseSprite*)rooms.back()->objs.back())->texfile=((*iter).value);
 #endif
-					rooms.back()->texes.push_back(new Sprite(((*iter).value).c_str()));
 					break;
 				case X:
 					x=parse_float((*iter).value);
@@ -169,7 +169,7 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 					break;
 				}
 			}
-			rooms.back()->texes.back()->SetPosition(x,y);
+			((Room::BaseSprite*)rooms.back()->objs.back())->spr.SetPosition(x,y);
 		}
 		break;
 	case SHIP:
@@ -207,7 +207,7 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 			}
 			P=R.Cross(Q);
 			P.Normalize();
-			rooms.back()->ships.push_back(new Matrix(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,QVector(x,y,z)));
+			rooms.back()->objs.push_back(new Room::BaseShip(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,QVector(x,y,z)));
 		}
 		break;
 	case ROOM:

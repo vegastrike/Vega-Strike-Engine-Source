@@ -110,6 +110,34 @@ void Base::Room::Comp::EndXML (FILE *fp) {
 	endtag(fp,true);
 }
 
+void Base::Room::BaseObj::EndXML (FILE *fp) {
+//		Do nothing
+}
+
+void Base::Room::BaseShip::EndXML (FILE *fp) {
+	begintag(fp,"Ship",2);
+	midxmltag(fp,"x",mat.p.i);
+	midxmltag(fp,"y",mat.p.j);
+	midxmltag(fp,"z",mat.p.k);
+	midxmltag(fp,"ri",mat.getR().i);
+	midxmltag(fp,"rj",mat.getR().j);
+	midxmltag(fp,"rk",mat.getR().k);
+	midxmltag(fp,"qi",mat.getQ().i);
+	midxmltag(fp,"qj",mat.getQ().j);
+	midxmltag(fp,"qk",mat.getQ().k);
+	endtag(fp,true);
+}
+
+void Base::Room::BaseSprite::EndXML (FILE *fp) {
+	float x,y;
+	begintag(fp,"Texture",2);
+	spr.GetPosition(x,y);
+	midxmlchar(fp,"File",texfile.c_str());
+	midxmltag(fp,"x",x);
+	midxmltag(fp,"y",y);
+	endtag(fp,true);
+}
+
 void Base::Room::EndXML (FILE *fp) {
 	begintag(fp,"Room",1);
 	midxmlchar(fp,"Text",deftext.c_str());
@@ -118,27 +146,8 @@ void Base::Room::EndXML (FILE *fp) {
 	for (i=0;i<links.size();i++) {
 		links[i]->EndXML(fp);
 	}
-	for (i=0;i<ships.size();i++) {
-		begintag(fp,"Ship",2);
-		midxmltag(fp,"x",ships[i]->p.i);
-		midxmltag(fp,"y",ships[i]->p.j);
-		midxmltag(fp,"z",ships[i]->p.k);
-		midxmltag(fp,"ri",ships[i]->getR().i);
-		midxmltag(fp,"rj",ships[i]->getR().j);
-		midxmltag(fp,"rk",ships[i]->getR().k);
-		midxmltag(fp,"qi",ships[i]->getQ().i);
-		midxmltag(fp,"qj",ships[i]->getQ().j);
-		midxmltag(fp,"qk",ships[i]->getQ().k);
-		endtag(fp,true);
-	}
-	for (i=0;i<texes.size()&&i<texfiles.size();i++) {
-		float x,y;
-		begintag(fp,"Texture",2);
-		texes[i]->GetPosition(x,y);
-		midxmlchar(fp,"File",texfiles[i].c_str());
-		midxmltag(fp,"x",x);
-		midxmltag(fp,"y",y);
-		endtag(fp,true);
+	for (i=0;i<objs.size();i++) {
+		objs[i]->EndXML(fp);
 	}
 	begintag(fp,"/Room",1);
 	endtag(fp,false);
