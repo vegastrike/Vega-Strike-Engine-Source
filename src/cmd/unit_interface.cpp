@@ -75,7 +75,10 @@ struct UpgradingInfo {
 	switch (submode) {
 	case MOUNT_MODE:
 	  for (;i<un->nummounts;i++) {
-	    CargoList->AddTextItem ((tostring(i)+un->mounts[i].type.weapon_name).c_str(),un->mounts[i].type.weapon_name.c_str());
+	    if (un->mounts[i].status==Unit::Mount::ACTIVE||un->mounts[i].status==Unit::Mount::INACTIVE)
+	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type.weapon_name).c_str(),un->mounts[i].type.weapon_name.c_str());
+	    else 
+	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),"[Empty]");
 	  }
 	  break;
 	case SUBUNIT_MODE:
@@ -212,7 +215,7 @@ struct UpgradingInfo {
 	EndGUIFrame();
   }
   void SelectLastSelected();
-  void SelectItem (const char * str);
+  void SelectItem (const char * str, int button, int state);
   void CommitItem (const char * str, int button, int state);
   //this function is called after the mount is selected and stored in selected mount
   void CompleteTransactionAfterMountSelect();
@@ -249,7 +252,7 @@ void Unit::UpgradeInterface(Unit * base) {
   upgr = new UpgradingInfo (this,base);
   GFXLoop (RefreshGUI);
 }
-void UpgradingInfo::SelectItem (const char *item) {
+void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   switch (mode) {
   case BUYMODE:
   case SELLMODE:
@@ -267,7 +270,7 @@ void UpgradingInfo::SelectItem (const char *item) {
       }
       break;
     default:
-      CommitItem (item,0,1);
+      CommitItem (item,0,buttonstate);
       break;
     }
     break;
@@ -288,7 +291,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     templ->Kill();
     templ=NULL;
   }
-  if (state==1&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
+  if (state==0&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
   
   switch (mode) {
   case UPGRADEMODE:
@@ -368,7 +371,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
       break;
     case CONFIRM_MODE:
       if (0==strcmp ("Yes",inp_buf)) {
-	CompleteTransactionConfirm();
+	  CompleteTransactionConfirm();
       }else {
 	SetMode(mode,NORMAL);
       }
@@ -467,15 +470,21 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       if ((_Universe->AccessCockpit()->credits>price)) {
 	_Universe->AccessCockpit()->credits-=price;
 	un->Upgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,true,percentage,templ);
+	unsigned int removalindex;
+	if ((bas=base.GetUnit())) {
+	Cargo * tmp = bas->GetCargo (part.content,removalindex);
+	bas->RemoveCargo(removalindex,1,false );
+	}
       }
       break;
     case DOWNGRADEMODE:
       canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
       price =part.price*usedPrice(percentage);
       _Universe->AccessCockpit()->credits+=price;
-      un->Downgrade (NewPart,mountoffset,subunitoffset,percentage);
+      if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage)) {
       if ((bas=base.GetUnit())) {
 	bas->AddCargo (part);
+      }
       }
       break;
     }
@@ -510,7 +519,7 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			  lastselected.button=button;
 			  lastselected.state=state;
 			  lastselected.last=true;
-			  SelectItem (buy_name);//changes state/side bar price depedning on submode
+			  SelectItem (buy_name,button,state);//changes state/side bar price depedning on submode
 
 			//CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); 
 			//CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
@@ -539,7 +548,7 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			buy_name = CargoList->GetSelectedItemName();
 			if (buy_name) {
 			  if (buy_name[0]) {
-			    CommitItem (buy_name,button,state);
+			    CommitItem (buy_name,button,0);
 			  }
 			}
 		}
