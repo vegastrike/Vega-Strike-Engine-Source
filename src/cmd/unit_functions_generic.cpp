@@ -8,6 +8,7 @@
 #include "unit_factory.h"
 #include "unit_util.h"
 #include "universe_util.h"
+#include "unit_const_cache.h"
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
@@ -29,6 +30,24 @@ int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Shor
       cloak+=1;
     }
     return cloak;
+}
+const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0) {
+    const char* name = upgradeName.c_str();
+    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetFaction("upgrades")));
+    if (!partUnit) {
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
+	    FactionUtil::GetFaction("upgrades")),
+	    UnitFactory::createUnit(name, true, FactionUtil::GetFaction("upgrades")));
+    }
+    if (partUnit->name == "LOAD_FAILED") {
+	partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
+	if (!partUnit) {
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name, myUnitFaction),
+	    UnitFactory::createUnit(name, true, myUnitFaction));
+	}
+    }
+    return partUnit;
+
 }
 
 // From unit_customize.cpp

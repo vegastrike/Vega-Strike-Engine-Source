@@ -116,7 +116,7 @@ char tohexdigit(int x) {
   if (x<=9&&x>=0) {
     return (char)(x+'0');
   }else {
-    return (char)(x+'A');    
+    return (char)(x-10+'A');    
   }
 
 }

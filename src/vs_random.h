@@ -31,25 +31,45 @@
    http://www.math.keio.ac.jp/matumoto/emt.html
    email: matumoto@math.keio.ac.jp
 */
+
+/*
 #define N 624
 #define M 397
-#define MATRIX_A 0x9908b0dfUL   /* constant vector a */
-#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
-#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
+#define MATRIX_A 0x9908b0dfUL   // constant vector a 
+#define UPPER_MASK 0x80000000UL // most significant w-r bits 
+#define LOWER_MASK 0x7fffffffUL // least significant r bits 
+*/
 
 #define VS_RAND_MAX 0x7fffffffUL
 
 class VSRandom {
-  unsigned long mt[N]; /* the array for the state vector  */
+#define NN_CONSTANT 624
+  static const int N() {
+    return NN_CONSTANT;
+  }
+  static const int M() {
+    return 397;
+  }
+  static const int MATRIX_A() {
+    return 0x9908b0dfUL;
+  }
+  static const int UPPER_MASK() {
+    return 0x80000000UL;
+  }
+  static const int LOWER_MASK() {
+    return 0x7fffffffUL;
+  }
+  unsigned long mt[NN_CONSTANT]; /* the array for the state vector  */
+#undef NN_CONSTANT
   int mti; /* mti==N+1 means mt[N] is not initialized */
 /* initializes mt[N] with a seed */
 public:
-  VSRandom(unsigned long s):mti(N+1) {
+  VSRandom(unsigned long s):mti(N()+1) {
 		init_genrand(s);
   }
   void init_genrand(unsigned long s) {
 		mt[0]= s & 0xffffffffUL;
-		for (mti=1; mti<N; mti++) {
+		for (mti=1; mti<N(); mti++) {
 			mt[mti] = 
 				(1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
 			/* See Knuth TAOCP Vol2. 3	rd Ed. P.106 for multiplier. */
@@ -63,47 +83,47 @@ public:
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-  VSRandom(unsigned long init_key[], unsigned int key_length):mti(N+1) {
+  VSRandom(unsigned long init_key[], unsigned int key_length):mti(N()+1) {
     int i, j, k;
     init_genrand(19650218UL);
     i=1; j=0;
-    k = (N>key_length ? N : key_length);
+    k = (N()>key_length ? N() : key_length);
     for (; k; k--) {
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1664525UL))
           + init_key[j] + j; /* non linear */
         mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
         i++; j++;
-        if (i>=N) { mt[0] = mt[N-1]; i=1; }
+        if (i>=N()) { mt[0] = mt[N()-1]; i=1; }
         if (j>=(int)key_length) j=0;
     }
-    for (k=N-1; k; k--) {
+    for (k=N()-1; k; k--) {
         mt[i] = (mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) * 1566083941UL))
           - i; /* non linear */
         mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
         i++;
-        if (i>=N) { mt[0] = mt[N-1]; i=1; }
+        if (i>=N()) { mt[0] = mt[N()-1]; i=1; }
     }
     mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */ 
   }
 /* generates a random number on [0,0xffffffff]-interval */
   unsigned long genrand_int32(void) {
     unsigned long y;
-    static unsigned long mag01[2]={0x0UL, MATRIX_A};
+    static unsigned long mag01[2]={0x0UL, MATRIX_A()};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
-    if (mti >= N) { /* generate N words at one time */
+    if (mti >= N()) { /* generate N words at one time */
         int kk;
-        if (mti == N+1)   /* if init_genrand() has not been called, */
+        if (mti == N()+1)   /* if init_genrand() has not been called, */
             init_genrand(5489UL); /* a default initial seed is used */
-        for (kk=0;kk<N-M;kk++) {
-            y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-            mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        for (kk=0;kk<N()-M();kk++) {
+            y = (mt[kk]&UPPER_MASK())|(mt[kk+1]&LOWER_MASK());
+            mt[kk] = mt[kk+M()] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        for (;kk<N-1;kk++) {
-            y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-            mt[kk] = mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        for (;kk<N()-1;kk++) {
+            y = (mt[kk]&UPPER_MASK())|(mt[kk+1]&LOWER_MASK());
+            mt[kk] = mt[kk+(M()-N())] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        y = (mt[N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
-        mt[N-1] = mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        y = (mt[N()-1]&UPPER_MASK())|(mt[0]&LOWER_MASK());
+        mt[N()-1] = mt[M()-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
         mti = 0;
     }
   

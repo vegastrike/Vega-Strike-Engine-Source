@@ -36,6 +36,7 @@
 #include "unit_bsp.h"
 #include "gfx/bounding_box.h"
 #include "csv.h"
+#include "vs_random.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -2992,11 +2993,11 @@ void Unit::SetOrientation(Quaternion Q) {
 Vector Unit::UpCoordinateLevel (const Vector &v) const {
   Matrix m;
   curr_physical_state.to_matrix(m);
-#define M(A,B) m.r[B*3+A]
-  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
-		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
-		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
-#undef M
+#define MM(A,B) m.r[B*3+A]
+  return Vector(v.i*MM(0,0)+v.j*MM(1,0)+v.k*MM(2,0),
+		v.i*MM(0,1)+v.j*MM(1,1)+v.k*MM(2,1),
+		v.i*MM(0,2)+v.j*MM(1,2)+v.k*MM(2,2));
+#undef MM
 }
 Vector Unit::DownCoordinateLevel (const Vector &v) const {
   Matrix m;
@@ -3008,16 +3009,16 @@ Vector Unit::ToLocalCoordinates(const Vector &v) const {
   //Matrix m;
   //062201: not a cumulative transformation...in prev unit space  curr_physical_state.to_matrix(m);
   
-#define M(A,B) cumulative_transformation_matrix.r[B*3+A]
-  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
-		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
-		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
-#undef M
+#define MM(A,B) cumulative_transformation_matrix.r[B*3+A]
+  return Vector(v.i*MM(0,0)+v.j*MM(1,0)+v.k*MM(2,0),
+		v.i*MM(0,1)+v.j*MM(1,1)+v.k*MM(2,1),
+		v.i*MM(0,2)+v.j*MM(1,2)+v.k*MM(2,2));
+#undef MM
 }
 
 Vector Unit::ToWorldCoordinates(const Vector &v) const {
   return TransformNormal(cumulative_transformation_matrix,v); 
-#undef M
+
 
 }
 
@@ -6553,101 +6554,49 @@ bool Unit::TransferUnitToSystem (StarSystem * Current) {
 /***************************************************************************************/
 /*** UNIT_REPAIR STUFF                                                               ***/
 /***************************************************************************************/
-
+const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
 extern float rand01();
 void Unit::Repair() {
   //note work slows down under time compression!
-  static float repairtime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","1000"));
-  float workunit = SIMULATION_ATOM/(repairtime*getTimeCompression());//a droid completes 1 work unit in repairtime
-  switch (image->repair_droid) {
-  case 6:
-    //versatilize Weapons! (invent)
-    if (GetNumMounts()) {
-      if (rand01()<workunit) {
-	int whichmount = rand()%GetNumMounts();
-	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(int))));
+  static float repairtime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","180"));
+  float workunit = image->repair_droid*SIMULATION_ATOM/repairtime;//a droid completes 1 work unit in repairtime
+  if (image->repair_droid&&numCargo()) {
+    if (vsrandom.uniformInc(0,1)<workunit) {
+      int which =vsrandom.genrand_int31()%numCargo();
+      Cargo * carg = &GetCargo(which);
+      bool repaired=false;
+      if (carg->category.find("upgrades/")==0) {
+        if (carg->category.find(DamagedCategory)!=0&&carg->content.find("add_")!=0&&carg->content.find("mult_")!=0) {
+          // won't repair destroyed items
+          static int upfac = FactionUtil::GetFaction("upgrades");
+          const Unit * up=  getUnitFromUpgradeName(carg->content,upfac);
+          float armor[8];
+          up->ArmorData(armor);
+          
+          if (up->GetHull()>1||armor[0]||armor[1]||armor[2]||armor[3]||armor[4]||armor[5]||armor[6]||armor[7]) {
+            //DO not repair hull or armor 
+          }else {
+            repaired=true;
+            double percentage=0;
+            this->Upgrade(up,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction));
+          }
+        }        
       }
-      if (rand01()<workunit) {
-	int whichmount= rand()%GetNumMounts();
-	if (mounts[whichmount].ammo>0) {
-	  mounts[whichmount].volume++;
-	}
-      }
-    }
-    if (computer.max_combat_speed<60) 
-      computer.max_combat_speed+=workunit;
-    if (computer.max_combat_ab_speed<160)
-      computer.max_combat_ab_speed+=workunit;
-  case 5:
-    //increase maxrange
-    computer.radar.maxrange+=workunit;
-    if (computer.radar.maxcone>-1) {    //Repair MaxCone full
-      computer.radar.maxcone-=workunit;
-    }else {
-      computer.radar.maxcone=-1;
-    }
-    if (computer.radar.lockcone>0) {    //Repair MaxCone full
-      computer.radar.lockcone-=workunit;
-    }else {
-      //      computer.radar.lockcone=-1;
-    }
-    
-    if (rand01()<workunit*.25) {
-      computer.itts=true;
-    }
-    if (computer.radar.mintargetsize>0) {
-      computer.radar.mintargetsize-=rSize()*workunit;
-    }//no break...please continue, colonel
-  case 4:
-    if (GetNumMounts()) {    //    RepairWeapon();
-      if (rand01()<workunit) {
-	unsigned int i=rand()%GetNumMounts();
-	if (mounts[i].status==Mount::DESTROYED) {
-	  mounts[i].status=Mount::INACTIVE;
-	}
-      }
-    }//nobreak
-  case 3:
-    if (computer.radar.mintargetsize>rSize()) {
-      computer.radar.mintargetsize-=rSize()*workunit;
-    }
-    if (rand01()<.5*workunit) {
-      computer.radar.color=true;
-    }
-    if (rand01()<workunit) {
-      if (jump.damage>0)
-	jump.damage--;
-    }//nobreak
-  case 2:
-    {
-      int whichgauge=rand()%(UnitImages::NUMGAUGES+1+MAXVDUS);
-      if (image->cockpit_damage[whichgauge]<1) {
-	image->cockpit_damage[whichgauge]+=workunit;
-	if (image->cockpit_damage[whichgauge]>image->cockpit_damage[whichgauge+UnitImages::NUMGAUGES+1+MAXVDUS])
-	  image->cockpit_damage[whichgauge]=image->cockpit_damage[whichgauge+UnitImages::NUMGAUGES+1+MAXVDUS];
-      }
-    }    
-  case 1:
-    if (computer.radar.maxcone>0) {    //Repair MaxCone half
-      computer.radar.maxcone-=workunit;
-    }
-    if (computer.radar.lockcone>.7) {    //Repair MaxCone half
-      computer.radar.lockcone-=workunit;
-    }
-
-    if (jump.drive!=-1) {    //    RepairJumpEnergy(jump.energy,maxenergy);
-      if (jump.energy>maxenergy) {
-	if (rand01()<workunit) {
-	  jump.energy=maxenergy-1;
-	}
+      if (!repaired) {
+        unsigned int numg=(1+UnitImages::NUMGAUGES+MAXVDUS);
+        unsigned int which= vsrandom.genrand_int31()%numg;
+        static float hud_repair_quantity=XMLSupport::parse_float(vs_config->getVariable("physics","hud_repair_unit",".125"));
+        
+        if (image->cockpit_damage[which]<image->cockpit_damage[which+numg]) {//total damage
+          image->cockpit_damage[which]+=hud_repair_quantity;
+          
+          if (image->cockpit_damage[which]>image->cockpit_damage[which+numg]) {
+            image->cockpit_damage[which]=image->cockpit_damage[which+numg];//total damage
+          }
+        }
+        
       }
     }
-    if (computer.radar.mintargetsize>1.5*rSize()) {//    RepairMinTargetSize
-      computer.radar.mintargetsize-=rSize()*workunit;
-    }
-
-  default: 
-    break;
   }
 }
 

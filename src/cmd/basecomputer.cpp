@@ -382,25 +382,7 @@ static float SellPrice(float operational, float price) {
 extern const Unit * makeTemplateUpgrade (string name, int faction);
 
 // Ported from old code.  Not sure what it does.
-const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0) {
-    const char* name = upgradeName.c_str();
-    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetFaction("upgrades")));
-    if (!partUnit) {
-        partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
-	    FactionUtil::GetFaction("upgrades")),
-	    UnitFactory::createUnit(name, true, FactionUtil::GetFaction("upgrades")));
-    }
-    if (partUnit->name == LOAD_FAILED) {
-	partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
-	if (!partUnit) {
-        partUnit = UnitConstCache::setCachedConst(StringIntKey(name, myUnitFaction),
-	    UnitFactory::createUnit(name, true, myUnitFaction));
-	}
-    }
-    return partUnit;
-
-}
-
+const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
 float PercentOperational (Unit * un, std::string name, std::string category="upgrades/") {
   if (category.find(DamagedCategory)==0) {
     return 0.0f;
@@ -408,8 +390,10 @@ float PercentOperational (Unit * un, std::string name, std::string category="upg
     const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
     double percent=0;
     if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
-      return 1.0-percent;
-    }
+      if (percent)
+        return percent;
+      else return .5;
+    }else return percent;
   }
   return 1.0;
 }
@@ -3657,7 +3641,7 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
 			const int quantity=1;
 			Unit * playerUnit = m_player.GetUnit();
 			Unit * baseUnit = m_base.GetUnit();
-			if (baseUnit&&playerUnit) {
+			if (baseUnit&&playerUnit&&item->content.find("add_")!=0&&item->content.find("mult_")!=0) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
                                 
 				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
