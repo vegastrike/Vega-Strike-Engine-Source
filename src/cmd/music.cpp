@@ -346,7 +346,11 @@ void Music::SkipRandSong(int whichlist) {
 	  if (whichlist!=NOLIST&&whichlist>=0&&whichlist<(int)playlist.size()){
 	    lastlist = whichlist;
             static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
-	    GotoSong(whichlist,random?randInt(playlist[whichlist].size()):playlist[whichlist].counter++%playlist[whichlist].size(),true);
+            if (playlist[whichlist].size()) {
+              GotoSong(whichlist,random?randInt(playlist[whichlist].size()):playlist[whichlist].counter++%playlist[whichlist].size(),true);
+            }else {
+              fprintf (stderr,"Error no songs in playlist %d\n",whichlist);
+            }
 	    return;
 	  }
 	}

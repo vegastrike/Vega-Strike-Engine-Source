@@ -4094,6 +4094,12 @@ void Mount::DeActive (bool Missile) {
 
 
 void Unit::UnFire () {
+  if (this->GetNumMounts()==0) {
+    Unit * tur=NULL;
+    for (un_iter i=this->getSubUnits();(tur=*i)!=NULL;++i) {
+      tur->UnFire();
+    }
+  }else 
   for (int i=0;i<GetNumMounts();i++) {
     mounts[i].UnFire();//turns off beams;
   }
@@ -4153,7 +4159,11 @@ public:
 	
 	static void ToggleWeaponSet(Unit *un, bool missile) {
 		if (un->mounts.size()==0) {
-			return;
+                  Unit * tur=NULL;
+                  for (un_iter i=un->getSubUnits();(tur=*i)!=NULL;++i) {
+                    ToggleWeaponSet(tur,missile);
+                  }
+                  return;
 		}
 		WeaponGroup allWeapons;
 		WeaponGroup allWeaponsNoSpecial;
