@@ -315,7 +315,7 @@ char * GetUnitDir (const char * filename) {
 void Unit::GetCargoCat (const std::string &cat, vector <Cargo> &cats) {
   unsigned int max = numCargo();
   for (unsigned int i=0;i<max;i++) {
-    if (GetCargo(i).category==cat) {
+    if (GetCargo(i).category.find(cat)==0) {
       cats.push_back (GetCargo(i));
     }
   }

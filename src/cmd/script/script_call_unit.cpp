@@ -292,42 +292,45 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		    unsigned int i;
 		    ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
 		  }
-		}
-		if (!ret) {
-		  if (mpl->numCargo()) {
-		    ret = &mpl->GetCargo(rand()%max);
+                }else {
+                  if (mpl->numCargo()) {
+    		    ret = &mpl->GetCargo(rand()%max);  
 		  }else {
 		    ret = new Cargo();//mem leak--won't happen
 		  }
-		}
-		ret->quantity=quantity;
+                }
+                
+		if (ret) {
+		  ret->quantity=quantity;
 		
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_OBJECT;
-		viret->objectname="string";
-		viret->object=&ret->content;
- 		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_OBJECT;
-		viret->objectname="string";
-		viret->object=&ret->category;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->price;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_INT;
-		viret->int_val=quantity;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->mass;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->volume;
-		((olist_t *)vireturn->object)->push_back(viret);				
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_OBJECT;
+		  viret->objectname="string";
+		  viret->object=&ret->content;
+ 		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_OBJECT;
+		  viret->objectname="string";
+		  viret->object=&ret->category;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_FLOAT;
+		  viret->float_val=ret->price;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_INT;
+		  viret->int_val=quantity;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_FLOAT;
+		  viret->float_val=ret->mass;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_FLOAT;
+		  viret->float_val=ret->volume;
+		  ((olist_t *)vireturn->object)->push_back(viret);				
+		  
+		}
     }
     debug(3,node,mode,"unit getRandCargo: ");
     printVarInst(3,vireturn);
