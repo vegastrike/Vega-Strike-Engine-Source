@@ -19,12 +19,16 @@ NetworkCommunication::NetworkCommunication()
 #endif
 #ifndef NETCOMM_NOWEBCAM
 	this->Webcam = NULL;
+	string webcam_enable = vs_config->getVariable ("network","use_webcam","false");
 	// Init the webcam part
-	Webcam = new WebcamSupport();
-	if( Webcam->Init() == -1)
+	if( webcam_enable == "true")
 	{
-		delete Webcam;
-		this->Webcam = NULL;
+		Webcam = new WebcamSupport();
+		if( Webcam->Init() == -1)
+		{
+			delete Webcam;
+			this->Webcam = NULL;
+		}
 	}
 #endif
 }
@@ -112,7 +116,8 @@ bool	NetworkCommunication::WebcamTime()
 {
 	bool ret = false;
 #ifndef NETCOMM_NOWEBCAM
-	ret = this->Webcam->isReady();
+	if( this->Webcam)
+		ret = this->Webcam->isReady();
 #endif
 	return ret;
 }

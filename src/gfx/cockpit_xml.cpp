@@ -289,7 +289,10 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
   case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
-  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;goto loadsprite;
+  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;
+  	if( Network!=NULL)
+		mymodes|=VDU::NETWORK;
+  goto loadsprite;
   case AVDU:vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MSG;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {

@@ -532,7 +532,7 @@ void	NetServer::start(int argc, char **argv)
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
 			NetBuffer netbuf;
-			reconnect_time += periodrecon;
+			curtime += periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
 			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );

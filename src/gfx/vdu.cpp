@@ -817,6 +817,28 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->SetSize (x+w,y-h-.5*fabs(w/cols));
   targ = parent->GetComputerData().target.GetUnit();
   switch (thismode.back()) {
+  case NETWORK:
+  {
+  	if( Network!=NULL)
+	{
+		char buf[32];
+		string str( "Netlag=");
+		memset( buf, 0, 32);
+		sprintf( buf, "%f", Network[0].getLag());
+		str+=string( buf);
+  		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+		memset( buf, 0, 32);
+		sprintf( buf, "%f", Network[0].getCurrentFrequency());
+		str = "Freq="+string( buf)+"/";
+		memset( buf, 0, 32);
+		sprintf( buf, "%f", Network[0].getSelectedFrequency());
+		str += string( buf)+" GHz";
+  		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+		str = "Stardate="+_Universe->current_stardate.GetFullCurrentStarDate();
+  		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+	}
+  }
+  break;
   case SCANNING:
 		if( !got_target_info)
 			DrawScanningMessage();
@@ -824,6 +846,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 		else
 			DrawScanner();
 		*/
+	break;
   case TARGET:
     if (targ)
    	    DrawTarget(parent,targ);

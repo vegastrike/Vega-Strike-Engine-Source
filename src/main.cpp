@@ -516,8 +516,6 @@ void bootstrap_main_loop () {
       playername.push_back( pname);
 	  playerpasswd.push_back(ppasswd);
     }
-    _Universe->SetupCockpits(playername);
-
 
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     g_game.difficulty=XMLSupport::parse_float (mission->getVariable("difficulty","1"));
@@ -534,13 +532,13 @@ void bootstrap_main_loop () {
 	int port;
 	if ( srvip != "")
 	{
-		cout<<"Number of local players = "<<_Universe->numPlayers()<<endl;
+		cout<<"Number of local players = "<<numplayers<<endl;
 		// Initiate the network if in networking play mode for each local player
 		if( srvip != "")
 		{
-			string srvport = vs_config->getVariable("network","server_port", "6778");
+			string srvport = vs_config->getVariable("network","server_port", "6777");
 			// Get the number of local players
-			Network = new NetClient[_Universe->numPlayers()];
+			Network = new NetClient[numplayers];
 
 			cout<<endl<<"Server IP : "<<srvip<<" - port : "<<srvport<<endl<<endl;
 			srvipadr = new char[srvip.length()+1];
@@ -559,8 +557,11 @@ void bootstrap_main_loop () {
 			run_only_player_starsystem=true;
 		}
 	}
-	vector<std::string>::iterator it, jt;
+
+    _Universe->SetupCockpits(playername);
+
 	/************************* NETWORK INIT ***************************/
+	vector<std::string>::iterator it, jt;
 	unsigned int k=0;
     for (k=0, it=playername.begin(), jt=playerpasswd.begin();k<(unsigned int)_Universe->numPlayers();k++, it++, jt++) {
 	  bool setplayerXloc=false;

@@ -21,13 +21,13 @@ class StarDate
 		StarDate();
 		StarDate( string date);
 
-		string	ConvertDate( double date);
-		string	ConvertFullDate( double date);
-		double	ConvertDate( string date);
+		string	ConvertStarDate( double date);
+		string	ConvertFullStarDate( double date);
+		double	ConvertStarDate( string date);
 
-		double	GetCurrentTime();
-		string	GetCurrentDate();
-		string	GetFullCurrentDate();
+		double	GetCurrentStarTime();
+		string	GetCurrentStarDate();
+		string	GetFullCurrentStarDate();
 
 		float	GetFloatFromDate();
 };

@@ -46,8 +46,7 @@ struct StarShipControlKeyboard {
   bool realauto;
   bool startcomm;
   bool commchanged;
-  bool killcomm;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=killcomm=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -153,10 +152,10 @@ void FlyByKeyboard::Execute () {
 
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
-  if(Network!=NULL && SSCK.killcomm && whichplayer==0) {
+  if(Network!=NULL && !SSCK.startcomm && SSCK.commchanged && whichplayer==0) {
 	printf( "Stopping a NETCOMM\n");
 	Network[whichplayer].stopCommunication();
-	SSCK.killcomm=false;
+	SSCK.commchanged=false;
   }
   if(Network!=NULL && SSCK.startcomm && SSCK.commchanged && whichplayer==0) {
 	printf( "Starting a NETCOMM\n");
@@ -385,18 +384,13 @@ if(Network!=NULL)
   switch (k) {
   case DOWN:
   case UP:
+  break;
   case PRESS:
 	printf( "Pressed NETCOMM key !!!\n");
 	if(g().startcomm==true)
-	{
 		g().startcomm=false;
-		g().killcomm = true;
-	}
 	else
-	{
-		// If starting a comm we set the selected_freq to the current one
 		g().startcomm=true;
-	}
 	g().commchanged=true;
   break;
   case RELEASE:

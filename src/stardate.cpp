@@ -3,6 +3,7 @@
 #include "lin_time.h"
 
 using std::cerr;
+using std::cout;
 using std::endl;
 
 StarDate::StarDate()
@@ -15,11 +16,11 @@ StarDate::StarDate()
 StarDate::StarDate( string date)
 {
 	initial_time = getNewTime();
-	initial_star_time = this->ConvertDate( date);
+	initial_star_time = this->ConvertStarDate( date);
 }
 
 // Convert a StarDate time into a Stardate string
-string	StarDate::ConvertFullDate( double date)
+string	StarDate::ConvertFullStarDate( double date)
 {
 	unsigned int days, hours, minutes, seconds;
 
@@ -38,7 +39,7 @@ string	StarDate::ConvertFullDate( double date)
 	return string( cdate);
 }
 
-string	StarDate::ConvertDate( double date)
+string	StarDate::ConvertStarDate( double date)
 {
 	unsigned int days, hours, minutes, seconds;
 
@@ -57,7 +58,7 @@ string	StarDate::ConvertDate( double date)
 }
 
 // Convert a StarDate into a number of seconds
-double	StarDate::ConvertDate( string date)
+double	StarDate::ConvertStarDate( string date)
 {
 	unsigned int days, hours, minutes, seconds;
 	if( sscanf( date.c_str(), "%d.%d.%d:%d", &days, &hours, &minutes, &seconds)!=4)
@@ -67,7 +68,7 @@ double	StarDate::ConvertDate( string date)
 }
 
 // Get the current StarDate time in seconds
-double	StarDate::GetCurrentTime()
+double	StarDate::GetCurrentStarTime()
 {
 	// Get the number of seconds elapsed since the server start
 	double time_since_server_started = getNewTime() - initial_time;
@@ -76,22 +77,23 @@ double	StarDate::GetCurrentTime()
 }
 
 // Get the current StarDate in a string
-string	StarDate::GetFullCurrentDate()
+string	StarDate::GetFullCurrentStarDate()
 {
-	return ConvertFullDate( this->GetCurrentTime());
+	return ConvertFullStarDate( this->GetCurrentStarTime());
 }
 
 // Get the current StarDate in a string - short format
-string	StarDate::GetCurrentDate()
+string	StarDate::GetCurrentStarDate()
 {
-	return ConvertDate( this->GetCurrentTime());
+	return ConvertStarDate( this->GetCurrentStarTime());
 }
 
 //Convert the string xxxx.y date format into a float representing the same data xxxx.y
 float	StarDate::GetFloatFromDate()
 {
 	float float_date;
-	string cur_date = this->GetFullCurrentDate();
+	string cur_date = this->GetFullCurrentStarDate();
+	//cout<<"------------------------- STARDATE "<<cur_date<<" --------------------------"<<endl;
 	sscanf( cur_date.c_str(), "%f", &float_date);
 
 	return float_date;
