@@ -147,7 +147,7 @@ void	Packet::create( unsigned char cmd, ObjSerial nserial, char * buf, unsigned 
 		microtime += elapstmp*1000000;
 #endif
 */
-	this->timestamp = htonl( microtime);
+	this->timestamp = microtime;
 	//cout<<"TIMESTAMP 2 : "<<this->timestamp<<endl;
 	this->command = cmd;
 
@@ -163,13 +163,12 @@ void	Packet::create( unsigned char cmd, ObjSerial nserial, char * buf, unsigned 
 		this->displayCmd();
 		exit(1);
 	}
-	this->serial = htons( nserial);
+	this->serial = nserial;
 	//cout<<"Command : "<<cmd<<" - serial : "<<nserial<<" - command : "<<this->command<<" - serial : "<<this->serial<<endl;
 	this->data_length = length;
 	memset( this->databuffer, 0, MAXBUFFER);
 	if( length)
 		memcpy( this->databuffer, buf, length);
-	this->data_length = htons( this->data_length);
 }
 
 void	Packet::display()
@@ -197,5 +196,14 @@ void	Packet::received()
 	this->serial = ntohs( this->serial);
 	this->timestamp = ntohl( this->timestamp);
 	//this->delay = ntohl( this->delay);
-	this->data_length = ntohl( this->data_length);
+	this->data_length = ntohs( this->data_length);
+}
+
+void	Packet::tosend()
+{
+	// TO CHANGE IF ObjSerial IS NOT A SHORT ANYMORE
+	this->serial = htons( this->serial);
+	this->timestamp = htonl( this->timestamp);
+	//this->delay = htonl( this->delay);
+	this->data_length = htons( this->data_length);
 }

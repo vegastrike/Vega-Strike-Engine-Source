@@ -50,11 +50,13 @@ class Packet
 		void	displayCmd( unsigned char com);
 		void	displayHex();
 		void	received();
+		void	tosend();
 
 		void	setLength( int length) { this->data_length = length - header_length;}
 		//void	setDelay( unsigned int del) { this->delay = hotonl( del);}
 
-		unsigned short			getLength()	{ return (header_length + ntohs(this->data_length));}
+		unsigned short			getLength()	{ return (header_length + this->data_length);}
+		unsigned short			getSendLength()	{ return (header_length + ntohs(this->data_length));}
 		unsigned short			getDataLength() {return this->data_length;}
 		static unsigned short	getHeaderLength()
 		{

@@ -303,6 +303,7 @@ inline SocketAlt	NETCLASS::createSocket( char * host, unsigned short port, int s
 		// binds socket
 		if( bind( this->sock, (sockaddr *) &clt_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
 			this->disconnect( "Cannot bind socket");
+		this->max_sock = this->sock;
 #else
 		if( server)
 		{
@@ -426,8 +427,8 @@ inline SocketAlt	NETCLASS::acceptNewConn( AddressIP * ipadr)
 			else
 				ret = 0;
 		#else
-				// In classic UDP mode return 0 because there is nothing to do
-				ret = 0;
+				// In classic UDP mode return 1 because there is nothing to do but we still have to create new client
+				ret = 1;
 		#endif
 	#endif
 	
@@ -457,10 +458,15 @@ inline void	NETCLASS::watchSocket( Socket bsock)
 			}
 	#endif
 #else
-		// Now sock is used to check client's descriptors (contains the max desc)
-		if( this->sock > bsock)
+	// Now bsock is used to check client's descriptors (contains the max desc)
+	FD_SET( bsock, &client_set);
+	#ifdef _TCP_PROTO
+		if( bsock > max_sock)
+			max_sock = bsock;
+	#else
+		if( bsock < this->sock)
 			bsock = this->sock;
-		FD_SET( bsock, &client_set);
+	#endif
 #endif
 }
 
@@ -474,7 +480,7 @@ inline int		NETCLASS::activeSockets()
 			int ret = 0;
 #ifndef HAVE_SDLnet
 			int s;
-			if( (s = select( sock+1, &client_set, NULL, NULL, &srvtimeout))<0)
+			if( (s = select( max_sock+1, &client_set, NULL, NULL, &srvtimeout))<0)
 			{
 				cout<<"Select conn failed"<<endl;
 				return -1;
@@ -560,8 +566,9 @@ inline int		NETCLASS::recvbuf( SocketAlt bsock, char *buffer, unsigned int &len,
 		#endif
 	#else
 		#ifdef _TCP_PROTO
-		if( (ret = recv( bsock, buffer, len, 0)) <= 0)
+		if( (ret = recv( bsock, buffer, MAXBUFFER, 0)) < 0)
 			ret = -1;
+		len = ret;
 		#endif
 		#ifdef _UDP_PROTO
 		// In UDP mode, always receive data on sock
@@ -627,13 +634,14 @@ inline int		NETCLASS::sendbuf( SocketAlt bsock, void *buffer, unsigned int len, 
 		if( (numsent=send( bsock, buffer, len, 0))<0)
 #endif
 		{
+			perror( "\tsending data : ");
 			if( errno == EBADF)
 				return -1;
 			//keeprun = 0;
 		}
 		#endif
 		#ifdef _UDP_PROTO
-		// In UDP mode, always send on sock
+		// In UDP mode, always send on this->sock
 		sockaddr_in * dest;
 		if( server)
 			dest = to;

@@ -64,7 +64,11 @@ class NetServer
 		list<Client *>		Clients;			// Active client connections
 		list<Client *>		discList;			// Client connections to be disconnected
 		list<Client *>		logoutList;			// Client connections that logged out
+#ifdef _TCP_PROTO
 		queue<Client *>		waitList;			// Client connections waiting for login response
+#else
+		queue<AddressIP>	waitList;			// Client addresses waiting for login response
+#endif
 
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( Client * clt, AddressIP sernum);	// Authenticate a connected client

@@ -71,7 +71,8 @@ int		NetClient::authenticate()
 		buffer[tmplen] = '\0';
 
 		packet2.create( CMD_LOGIN, 0, buffer, tmplen, 1);
-		if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getLength(), &this->cltadr) == -1)
+		packet2.tosend();
+		if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 		{
 			perror( "Error send login ");
 			exit(1);
@@ -106,27 +107,34 @@ int		NetClient::loginLoop( string str_name, string str_passwd)
 	memcpy( buffer+NAMELEN, str_passwd.c_str(), str_passwd.length());
 
 	packet2.create( CMD_LOGIN, 0, buffer, tmplen, 1);
-	if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getLength(), &this->cltadr) == -1)
+	cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
+	packet2.tosend();
+	if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send login ");
 		exit(1);
 	}
 	delete buffer;
-	cout<<"Send login for player <"<<str_name<<">:<"<<str_passwd<<"> - buffer length : "<<packet2.getLength()<<endl;
-
 	// Now the loop
 	int timeout=0, recv=0;
+	UpdateTime();
 	while( !timeout && !recv)
 	{
-		UpdateTime();
 		// If we have no response in 10 seconds -> fails
 		if( GetElapsedTime() > 10)
+		{
+			cout<<"Timed out"<<endl;
 			timeout = 1;
+		}
 		if( this->checkMsg())
+		{
+			cout<<"Got a response"<<endl;
 			recv = 1;
+		}
 
 		micro_sleep( 40000);
 	}
+	cout<<"End of login loop"<<endl;
 	return recv;
 }
 
@@ -217,7 +225,8 @@ void	NetClient::checkKey()
 			else if( serial!=0)
 			{
 				packet2.create( CMD_POSUPDATE, this->serial, &c, sizeof(char));
-				Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getLength(), &this->cltadr);
+				packet2.tosend();
+				Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr);
 			}
 		}
 	}
@@ -505,7 +514,8 @@ void	NetClient::sendPosition( ClientState cs)
 	// Send the client state
 	cs.tosend();
 	pckt.create( CMD_POSUPDATE, this->serial, (char *) &cs, update_size, 0);
-	if( Network->sendbuf( this->clt_sock, (char *) &pckt, pckt.getLength(), &this->cltadr) == -1)
+	pckt.tosend();
+	if( Network->sendbuf( this->clt_sock, (char *) &pckt, pckt.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send login ");
 		exit(1);
@@ -602,7 +612,8 @@ void	NetClient::inGame()
 	Packet packet2;
 
 	packet2.create( CMD_ADDCLIENT, this->serial, NULL, 0, 1);
-	if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getLength(), &this->cltadr) == -1)
+	packet2.tosend();
+	if( Network->sendbuf( this->clt_sock, (char *) &packet2, packet2.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error sending ingame info");
 		exit(1);
@@ -619,7 +630,8 @@ void	NetClient::sendAlive()
 #ifdef _UDP_PROTO
 	Packet	p;
 	p.create( CMD_PING, this->serial, NULL, 0, 0);
-	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getLength(), &this->cltadr) == -1)
+	p.tosend();
+	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send PING ");
 		//exit(1);
@@ -684,7 +696,8 @@ void	NetClient::logout()
 	keeprun = 0;
 	Packet p;
 	p.create( CMD_LOGOUT, this->serial, NULL, 0, 1);
-	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getLength(), &this->cltadr) == -1)
+	p.tosend();
+	if( Network->sendbuf( this->clt_sock, (char *) &p, p.getSendLength(), &this->cltadr) == -1)
 	{
 		perror( "Error send logout ");
 		exit(1);

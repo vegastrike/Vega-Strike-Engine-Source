@@ -83,16 +83,21 @@ void	AccountServer::start()
 		//cout<<"Loop"<<endl;
 		// Check for incoming connections
 		comsock = Network->acceptNewConn( NULL);
-		// Add comsock in the Network's client_set
-		// Test which ones are active
-		// Finally checkMsg() for active sockets
 		if( comsock)
 		{
-			cout<<"Receiving message"<<endl;
-			this->checkMsg( comsock);
-			// Close the socket for that request
-			Network->closeSocket( comsock);
+			Socks.push_back( comsock);
+			cout<<"New connection - socket allocated : "<<comsock<<endl;
 		}
+		// Check for messages
+		this->checkMsg();
+
+		for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
+		{
+			cout<<"Closing socket number "<<(*j)<<endl;
+			Network->closeSocket( (*j));
+			Socks.remove( (*j));
+		}
+		DeadSocks.clear();
 
 		// Check for automatic server status save time
 		curtime = getNewTime();
@@ -110,7 +115,31 @@ void	AccountServer::start()
 	Network->disconnect( "Shutting down.");
 }
 
-void	AccountServer::checkMsg( SocketAlt sock)
+void	AccountServer::checkMsg()
+{
+	// Check sockets to be watched
+	Network->resetSets();
+	for( LS i=Socks.begin(); i!=Socks.end(); i++)
+	{
+		Network->watchSocket( (*i));
+	}
+	// Get the number of active clients
+	int nb = Network->activeSockets();
+	if( nb)
+	{
+		//cout<<"Net activity !"<<endl;
+		// Loop for each active client and process request
+		for( LS i=Socks.begin(); i!=Socks.end(); i++)
+		{
+			if( Network->isActive( (*i)))
+			{
+				this->recvMsg( (*i));
+			}
+		}
+	}
+}
+
+void	AccountServer::recvMsg( SocketAlt sock)
 {
 	char			name[NAMELEN+1];
 	char			passwd[NAMELEN+1];
@@ -122,15 +151,19 @@ void	AccountServer::checkMsg( SocketAlt sock)
 	int 			found=0, connected=0;
 
 	// Receive data from sock
+	//cout<<"Receiving on socket "<<sock<<endl;
 	if( (recvcount = Network->recvbuf( sock, (char *)&packet, len, &ipadr))>0)
 	{
 		// Check the command of the packet
+		packet.received();
+		//packet.display();
 		cmd = packet.getCommand();
 		const char * buf = packet.getData();
 
 		switch( cmd)
 		{
 			case CMD_LOGIN :
+				cout<<"LOGIN REQUEST"<<endl;
 				strcpy( name, buf);
 				strcpy( passwd, buf+NAMELEN);
 
@@ -145,22 +178,36 @@ void	AccountServer::checkMsg( SocketAlt sock)
 							found = 1;
 					}
 				}
-				if( !found && !connected)
+				if( !found)
 				{
-					this->sendUnauthorized( sock, elem);
+					if( connected)
+					{
+						cout<<"Inconsistency found !"<<endl;
+						exit( 1);
+					}
+					else
+					{
+						cout<<"Login/passwd not found"<<endl;
+						this->sendUnauthorized( sock, elem);
+					}
 				}
 				else
 				{
 					if( connected)
+					{
+						cout<<"Login already connected !"<<endl;
 						this->sendAlreadyConnected( sock, elem);
+					}
 					else
 					{
+						cout<<"Login accepted !"<<endl;
 						this->sendAuthorized( sock, elem);
 						elem->setConnected( true);
 					}
 				}
 			break;
 			case CMD_LOGOUT :
+				cout<<"LOGOUT REQUEST"<<endl;
 				// Receive logout request containing name of player
 				for ( VI j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{
@@ -188,18 +235,29 @@ void	AccountServer::checkMsg( SocketAlt sock)
 				}
 			break;
 			case CMD_NEWCHAR :
+				cout<<"NEW CHAR REQUEST"<<endl;
 				// Should receive the result of the creation of a new char/ship
 			break;
 			case CMD_NEWSUBSCRIBE :
+				cout<<"SUBSCRIBE REQUEST"<<endl;
 				// Should receive a new subscription
 			break;
 			default:
 				cout<<"UNKNOWN command "<<cmd<<" ! ";
 		}
+		//cout<<"end received"<<endl;
 	}
+	/*
+	else if( recvcount==0)
+	{
+		// Socket should have been closed by that game server
+		cout<<"Received 0 data on socket "<<sock<<endl;
+	}
+	*/
 	else
 	{
-		cout<<"Received failed"<<endl;
+		cout<<"Received failed or socket closed"<<endl;
+		DeadSocks.push_back( sock);
 	}
 }
 
@@ -214,7 +272,8 @@ void	AccountServer::sendAuthorized( SocketAlt sock, Account * acct)
 	{
 		// Send a command to make the client create a new character/ship
 		packet2.create( LOGIN_NEW, serial, packet.getData(), packet.getLength(), 1);
-		if( Network->sendbuf( sock, (char *) &packet2, packet2.getLength(), NULL) == -1)
+		packet2.tosend();
+		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -226,7 +285,8 @@ void	AccountServer::sendAuthorized( SocketAlt sock, Account * acct)
 	{
 		// Should get the data about the player state and data so they can be sent with ACCEPT
 		packet2.create( LOGIN_ACCEPT, serial, packet.getData(), packet.getLength(), 1);
-		if( Network->sendbuf( sock, (char *) &packet2, packet2.getLength(), NULL) == -1)
+		packet2.tosend();
+		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -239,9 +299,10 @@ void	AccountServer::sendUnauthorized( SocketAlt sock, Account * acct)
 	Packet	packet2;
 
 	packet2.create( LOGIN_ERROR, 0, packet.getData(), packet.getLength(), 1);
+	packet2.tosend();
 	//packet2.displayHex();
 	//cout<<" done."<<endl;
-	Network->sendbuf( sock, (char *) &packet2, packet2.getLength(), NULL);
+	Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL);
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
 }
 
@@ -250,9 +311,10 @@ void	AccountServer::sendAlreadyConnected( SocketAlt sock, Account * acct)
 	Packet	packet2;
 
 	packet2.create( LOGIN_ALREADY, 0, packet.getData(), packet.getLength(), 1);
+	packet2.tosend();
 	//packet2.displayHex();
 	//cout<<" done."<<endl;
-	Network->sendbuf( sock, (char *) &packet2, packet2.getLength(), NULL);
+	Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL);
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
 }
 
