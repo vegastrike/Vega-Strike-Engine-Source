@@ -84,6 +84,14 @@ void FlyByWire::Afterburn (float per){
 void FlyByWire::SheltonSlide (bool onoff) {
   sheltonslide=onoff;
 }
+
+void FlyByWire::MatchSpeed (const Vector & vec) {
+  Unit::Computer *cpu = &parent->GetComputerData(); 
+  cpu->set_speed = vec.Magnitude();
+  if (cpu->set_speed>cpu->max_speed)
+    cpu->set_speed=cpu->max_speed;
+}
+
 void FlyByWire::Accel (float per) {
   Unit::Computer *cpu = &parent->GetComputerData(); 
   cpu->set_speed+=per*100*SIMULATION_ATOM;

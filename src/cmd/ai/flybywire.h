@@ -79,6 +79,8 @@ class FlyByWire : public Orders::MatchVelocity {
   void Up (float percentage);  void RollRight (float percentage);
   ///Specifies match speed to use afterbuner and gives in higher velocity
   void Afterburn (float percentage);
+  ///matches set_speed to this velocity's magnitude
+  void MatchSpeed (const Vector & velocity);
   ///negative is decel... 0 = nothing
   void Accel (float percentage);
   void Execute();

@@ -2,6 +2,7 @@
 #include "flykeyboard.h"
 
 struct StarShipControlKeyboard {
+  bool matchspeed;
   int sheltonpress;
   int sheltonrelease;
   int uppress;//negative if not pressed last
@@ -171,7 +172,12 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   } else {
     SheltonSlide(false);
   }
-
+  if (SSCK.matchspeed) {
+    SSCK.matchspeed=false;
+    Unit * targ = parent->Target();
+    if (targ)
+      MatchSpeed (targ->GetVelocity());
+  }
   SSCK.dirty=true;
 #undef SSCK
 
@@ -331,6 +337,12 @@ void FlyByKeyboard::RollRightKey (int,KBSTATE k) {
   case RELEASE: starshipcontrolkeys.rollrightpress=-FBWABS(starshipcontrolkeys.rollrightpress);
     break;
   default:break;
+  }
+}
+void FlyByKeyboard::MatchSpeedKey (int, KBSTATE k) {
+  if (k==PRESS) {
+    if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+    starshipcontrolkeys.matchspeed=true;
   }
 }
 void FlyByKeyboard::RollLeftKey (int,KBSTATE k) {
