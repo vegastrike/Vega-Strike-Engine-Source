@@ -315,6 +315,7 @@ public:
 	Cockpit * tmpcockpit = _Universe->AccessCockpit();
 	if (cp) {
 	  _Universe->SetActiveCockpit(cp);
+	  WriteSaveGame(cp,true);
 	}
 	NewPart=NULL;//no ship to upgrade
 	templ=NULL;//no template
