@@ -1040,6 +1040,8 @@ XML LoadXML(const char *filename, float unitscale) {
 int writesuperheader(XML memfile, FILE* Outputfile); //Writes superheader to file Outputfile
 int appendrecordfromxml(XML memfile, FILE* Outputfile); // Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 int appendmeshfromxml(XML memfile, FILE* Outputfile); // Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
+void ReverseToFile(FILE* Inputfile,FILE* Outputfile); //Translate BFXM file Inputfile to text file Outputfile
+
 
 int main (int argc, char** argv) {
 	if (argc!=4){
@@ -1050,17 +1052,28 @@ int main (int argc, char** argv) {
 		exit(-1);
 	}
 
-  XML memfile=(LoadXML(argv[1],1));
   bool append=(argv[3][0]=='a');
-  fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
+  bool create=(argv[3][0]=='c');
+  bool reverse=(argv[3][0]=='r');
+//  fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
   FILE * Outputfile;
   if(append){
 	Outputfile=fopen(argv[2],"rb+"); //append to end, but not append, which doesn't do what you want it to.
 	fseek(Outputfile, 0, SEEK_END);
-  }else{
-	Outputfile=fopen(argv[2],"wb+"); //create
+  }else if(create){
+	Outputfile=fopen(argv[2],"wb+"); //create file for BFXM output
+  } else if(reverse){
+	FILE* Inputfile=fopen(argv[1],"rb");
+	Outputfile=fopen(argv[2],"wb+"); //create file for text output
+	ReverseToFile(Inputfile,Outputfile);
+	exit(0);
+  } else {
+	  fprintf(stderr,"Invalid flag: %c - aborting",argv[3][0]);
+	  exit(-1);
   }
   
+
+  XML memfile=(LoadXML(argv[1],1));
   unsigned int intbuf;
   float floatbuf;
   unsigned char bytebuf;
@@ -1131,6 +1144,8 @@ int appendrecordfromxml(XML memfile, FILE* Outputfile){
   unsigned int intbuf;
   int runningbytenum=0;
   //Record Header
+  intbuf=VSSwapHostIntToLittle(12);// Size of Record Header in bytes
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of bytes in record header
   intbuf=VSSwapHostIntToLittle(0);//Size of Record in bytes
   runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of bytes in record
   intbuf=VSSwapHostIntToLittle(1+memfile.LODs.size()+memfile.animframes.size());//Number of meshes = 1 + numLODs + numAnims. 
@@ -1154,11 +1169,11 @@ int appendrecordfromxml(XML memfile, FILE* Outputfile){
 	runningbytenum+=appendmeshfromxml(submesh,Outputfile);
   }
   
-  fseek(Outputfile,-1*(runningbytenum),SEEK_CUR);
+  fseek(Outputfile,(-1*(runningbytenum))+4,SEEK_CUR);
   intbuf=runningbytenum;
   intbuf= VSSwapHostIntToLittle(intbuf);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total record
-  fseek(Outputfile,runningbytenum-sizeof(int),SEEK_CUR);
+  fseek(Outputfile,0,SEEK_END);
   return runningbytenum;
 
 }
@@ -1169,10 +1184,10 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   int runningbytenum=0;
   
   //Mesh Header
+  intbuf= VSSwapHostIntToLittle(11*sizeof(int)+19*sizeof(float));
+  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Size of Mesh header in Bytes
   intbuf= VSSwapHostIntToLittle(0);// Temp - rewind and fix.
   runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Size of this Mesh in Bytes
-  intbuf= VSSwapHostIntToLittle(11*sizeof(int)+19*sizeof(float));
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//reverse flag
   floatbuf = VSSwapHostFloatToLittle(memfile.scale);
   runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
   intbuf= VSSwapHostIntToLittle(memfile.reverse);
@@ -1469,12 +1484,71 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   //END GEOMETRY
 
 
-  fseek(Outputfile,-1*(runningbytenum),SEEK_CUR);
+  fseek(Outputfile,(-1*(runningbytenum))+4,SEEK_CUR);
   intbuf=runningbytenum;
   intbuf= VSSwapHostIntToLittle(intbuf);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total mesh
-  fseek(Outputfile,runningbytenum-sizeof(int),SEEK_CUR);
+  fseek(Outputfile,0,SEEK_END);
   return runningbytenum;
 }
 
 
+void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
+  unsigned int intbuf;
+  float floatbuf;
+  unsigned char bytebuf;
+  int word32index=0;
+  union chunk32{
+	  int i32val;
+	  float f32val;
+	  unsigned char c8val[4];
+  } * inmemfile;
+  fseek(Inputfile,4+sizeof(int),SEEK_SET);
+  fread(&intbuf,sizeof(int),1,Inputfile);//Length of Inputfile
+  int Inputlength=VSSwapHostIntToLittle(intbuf);
+  inmemfile=(chunk32*)malloc(Inputlength);
+  if(!inmemfile) {fprintf(stderr,"Buffer allocation failed, Aborting"); exit(-1);}
+  rewind(Inputfile);
+  fread(inmemfile,1,Inputlength,Inputfile);
+  fclose(Inputfile);
+  int Inputlength32=Inputlength/4;
+  //Extract superheader fields
+  word32index+=1;
+  int version = VSSwapHostIntToLittle(inmemfile[word32index].i32val);
+  word32index+=2;
+  int Superheaderlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);
+  word32index+=1;
+  int NUMFIELDSPERVERTEX = VSSwapHostIntToLittle(inmemfile[word32index].i32val); //Number of fields per vertex:integer (8)
+  word32index+=1;
+  int NUMFIELDSPERPOLYGONSTRUCTURE = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//  Number of fields per polygon structure: integer (3)
+  word32index+=1;
+  int NUMFIELDSPERREFERENCEDVERTEX = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Number of fields per referenced vertex: integer (3)
+  word32index+=1;
+  int NUMFIELDSPERREFERENCEDANIMATION = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Number of fields per referenced animation: integer (1)
+  word32index+=1;
+  int numrecords = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Number of records: integer
+  word32index=(Superheaderlength/4); // Go to first record
+  //For each record
+  for(int recordindex=0;recordindex<numrecords;recordindex++){
+	  int recordbeginword=word32index;
+	  //Extract Record Header
+	  int recordheaderlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record header in bytes
+	  word32index+=1;
+	  int recordlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record in bytes
+      word32index+=1;
+	  int nummeshes = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//Number of meshes in the current record
+	  word32index=recordbeginword+(recordheaderlength/4);
+	  //For each mesh
+	  for(int meshindex=0;meshindex<nummeshes;meshindex++){
+		  //Extract Mesh Header
+		  int meshbeginword=word32index;
+		  int meshheaderlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record header in bytes
+	      word32index+=1;
+	      int meshlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of record in bytes
+		  //go to next mesh
+		  word32index=meshbeginword+(meshlength/4);
+	  }	
+	  //go to next record
+	  word32index=recordbeginword+(recordlength/4);
+  }
+}

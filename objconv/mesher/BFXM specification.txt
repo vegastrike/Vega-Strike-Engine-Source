@@ -20,13 +20,14 @@ Number of records: integer
 ---End SuperHeader
 ---Record Header---
 for each record:
+    Size of record header in bytes: integer
     Size of record in bytes: integer 
     number of meshes:integer
 ---End Record Header---
     for each mesh:
 	---Header---
-	Size of mesh in bytes: integer
 	Size of Header in bytes: integer
+	Size of mesh in bytes: integer
 	Scale: float
 	Reverse: integer
 	Forcetexture: integer
