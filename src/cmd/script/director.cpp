@@ -307,7 +307,8 @@ void Mission::RunDirectorScript (const string& script){
   runScript (director,script,0);
 }
 bool Mission::runScript(string modulename,const string &scriptname,unsigned int classid){
-  runScript (runtime.modules[modulename],scriptname,classid);
+
+  return runScript (runtime.modules[modulename],scriptname,classid);
 }
 bool Mission::runScript(missionNode *module_node,const string &scriptname,unsigned int classid){
   if(module_node==NULL){
@@ -316,8 +317,7 @@ bool Mission::runScript(missionNode *module_node,const string &scriptname,unsign
 
   missionNode *script_node=module_node->script.scripts[scriptname];
   if(script_node==NULL){
-    fatalError(NULL,SCRIPT_RUN,"can't run "+modulename+"."+scriptname);
-    assert(0);
+    return false;
   }
   
   runtime.cur_thread->module_stack.push_back(module_node);
