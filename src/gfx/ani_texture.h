@@ -5,7 +5,7 @@ class AnimatedTexture: public Texture {
   float timeperframe;
   float cumtime;
   Texture ** Decal;
-  int active;
+  unsigned int active;
   float physicsactive;
  public:
   AnimatedTexture ();

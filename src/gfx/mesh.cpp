@@ -361,7 +361,7 @@ void Mesh::ProcessZFarMeshes () {
   }
   undrawn_meshes[NUM_ZBUF_SEQ].clear();
   GFXFogMode(FOG_OFF);
-  Animation::ProcessFarDrawQueue();
+  Animation::ProcessFarDrawQueue(-1);
   _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
@@ -408,10 +408,22 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
 }
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   //  assert(draw_queue->size());
+	
   if (draw_queue->empty()) {
     fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
     return;
   }
+  if (whichdrawqueue==NUM_ZBUF_SEQ) {
+	  for (unsigned int i=0;i<draw_queue->size();i++) {
+		MeshDrawContext * c = &((*draw_queue)[i]);
+	    if (c->mesh_seq==whichdrawqueue) {
+		  Animation::ProcessFarDrawQueue ((_Universe->AccessCamera()->GetPosition()-Vector(c->mat[12],c->mat[13],c->mat[14])).Magnitude()+this->radialSize);		
+		}
+	  }
+      GFXEnable(LIGHTING);
+      GFXEnable(CULLFACE);
+  }
+
   if (getLighting()) {
     GFXSelectMaterial(myMatNum);
   }else {
@@ -439,7 +451,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   vlist->BeginDrawState();	
   vector<MeshDrawContext> tmp_draw_queue;
   while(draw_queue->size()) {
-    MeshDrawContext c = draw_queue->back();
+	  
+	MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
     if (c.mesh_seq!=whichdrawqueue) {
       tmp_draw_queue.push_back (c);

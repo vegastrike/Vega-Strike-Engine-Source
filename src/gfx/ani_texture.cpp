@@ -13,7 +13,7 @@ static vector <AnimatedTexture *> myvec;
 
 void AnimatedTexture::MakeActive () {
   if (Decal) {
-    Decal[active]->MakeActive();
+    Decal[active%numframes]->MakeActive();
   }
 }
 void AnimatedTexture::UpdateAllPhysics() {
