@@ -1127,10 +1127,18 @@ Vector Unit::MaxTorque(const Vector &torque) {
 			  copysign(limits.roll, torque.k)) * torque);
 }
 
+float GetFuelUsage (bool afterburner) {
+  static float total_accel=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed",".9"))*XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
+  static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
+  static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
+  if (afterburner) 
+    return abfuelusage/total_accel;
+  return normalfuelusage/total_accel;
+}
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
+ 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
-  static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   if (fabs(amt1.i)>fuelclamp*limits.pitch)
     Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
@@ -1138,7 +1146,7 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
-  fuel-=Res.Magnitude()*SIMULATION_ATOM*normalfuelusage;
+  fuel-=Res.Magnitude()*SIMULATION_ATOM*GetFuelUsage(false);
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -1219,8 +1227,6 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
-  static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
-  static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
   if (fabs(amt1.i)>fabs(fuelclamp*limits.lateral))
@@ -1236,7 +1242,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
-  fuel-=(afterburn?abfuelusage:normalfuelusage)*Res.Magnitude();
+  fuel-=GetFuelUsage(afterburn)*Res.Magnitude();
   return Res;
 }
 
