@@ -493,7 +493,7 @@ void FireKeyboard::Execute () {
       offset-=2;
     }
     parent->EjectCargo(offset);
-    f().eject=DOWN;
+    f().ejectcargo=DOWN;
   }
   if (f().cloakkey==PRESS) {
     static bool toggle=true;
