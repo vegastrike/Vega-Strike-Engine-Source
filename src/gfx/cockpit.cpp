@@ -614,11 +614,17 @@ void Cockpit::Init (const char * file) {
     Panel.front()->SetPosition (x,y+viewport_offset);  
   }
 }
-
+Unit *  Cockpit::GetSaveParent() {
+  Unit * un = parentturret.GetUnit();
+  if (!un) {
+    un = parent.GetUnit();
+  }
+  return un;
+}
 void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const Vector & pos) {
   activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
-  unitlocation=pos;
+  savegame->SetPlayerLocation(pos);
   if (filename[0]!='\0') {
     this->unitfilename=std::string(filename);
     this->unitmodname=std::string(unitmodname);
@@ -1093,9 +1099,9 @@ void Cockpit::Update () {
 	zoomfactor=1.5;
 	respawnunit[_Universe->CurrentCockpit()]=0;
 	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
-	un->SetCurPosition (unitlocation);
+	un->SetCurPosition (savegame->GetPlayerLocation());
 	_Universe->activeStarSystem()->AddUnit (un);
-	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),unitlocation);
+	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 	//un->SetAI(new FireKeyboard ())
 	SwitchUnits (NULL,un);
 	credits = savegame->GetSavedCredits();
@@ -1130,7 +1136,7 @@ void Cockpit::Update () {
 	    Unit * tur;
 	    while ((tur=uj.current())) {
 	      SwitchUnits (NULL,tur);
-	      this->SetParent(tur,this->unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
+	      this->SetParent(tur,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	      ++uj;
 	    }
 	    break;
@@ -1143,7 +1149,7 @@ void Cockpit::Update () {
 	Unit * un = parentturret.GetUnit();
 	if (un&&(!_Universe->isPlayerStarship(un))) {
 	  
-	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
+	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  SwitchUnits (NULL,un);
 	  parentturret.SetUnit(NULL);
 	  un->SetTurretAI();
@@ -1170,7 +1176,7 @@ void Cockpit::Update () {
 	  index++;
 	  Unit * k=GetParent(); 
 	  SwitchUnits (k,un);
-	  this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
+	  this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  //un->SetAI(new FireKeyboard ())
 	  break;
 	}

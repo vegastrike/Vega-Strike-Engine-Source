@@ -60,6 +60,21 @@ void SaveGame::WriteNewsData (FILE * fp) {
     free (msg);
   }
 }
+void WriteSaveGame (Cockpit * cp) {
+
+  Unit * un = cp->GetSaveParent();
+  if (!un) {
+    return;
+  }
+  cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
+  cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
+  if (un->GetHull()>0) {
+    cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->GetUnitFileName().c_str());
+    un->WriteUnit(cp->GetUnitModifications().c_str());
+    cp->savegame->SetPlayerLocation(un->LocalPosition());    
+  }
+
+}
 void SaveGame::ReadNewsData (FILE * fp) {
   int numnews;
 
@@ -75,7 +90,7 @@ void SaveGame::ReadNewsData (FILE * fp) {
   }
 }
 void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
-  static string s = vs_config->getVariable ("physics","Drone","drone");
+  string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);
     savedunits.Put (address,new SavedUnits (filename,type,faction));

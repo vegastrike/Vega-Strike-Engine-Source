@@ -49,3 +49,4 @@ class SaveGame {
   void RemoveUnitFromSave (int address);//cast it to an int
   vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, Vector & pos, bool &shouldupdatedfighter0pos, float &credits, string &originalunit);
 };
+void WriteSaveGame (class Cockpit * cp);

@@ -257,6 +257,7 @@ std::string MakeSharedPathReturnHome (const std::string &newpath) {
     string(pwd)+string("/");	  
 }
 std::string MakeSharedPath (const std::string &s) {
+  fprintf (stderr,"MakingSharedPath %s",s.c_str());
   return MakeSharedPathReturnHome (s)+s;
 }
 std::string MakeSharedStarSysPath (const std::string &s){

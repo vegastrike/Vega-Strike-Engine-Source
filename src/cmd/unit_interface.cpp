@@ -291,6 +291,9 @@ public:
   }
   UpgradingInfo(Unit * un, Unit * base):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo"){
     
+
+
+    
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
 	CargoInfo->DoMultiline(1);
@@ -300,6 +303,7 @@ public:
 	if (cp) {
 	  _Universe->SetActiveCockpit(cp);
 	}
+	WriteSaveGame(cp);
 	NewPart=NULL;//no ship to upgrade
 	templ=NULL;//no template
 	//	CargoList->AddTextItem("a","Just a test item");
@@ -639,12 +643,12 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 		NewPart->prev_physical_state=un->prev_physical_state;
 		_Universe->activeStarSystem()->AddUnit (NewPart);
 		
-		_Universe->AccessCockpit()->SetParent(NewPart,input_buffer,"",un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
+		_Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 		SwitchUnits (NULL,NewPart);
 		base->RequestClearance(NewPart);
 		NewPart->Dock(base);
 		buyer.SetUnit(NewPart);
-		_Universe->AccessCockpit()->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
+		WriteSaveGame (_Universe->AccessCockpit());
 		NewPart=NULL;
 		un->Kill();
 		return;

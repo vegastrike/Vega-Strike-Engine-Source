@@ -50,7 +50,6 @@ private:
   std::vector <VDU *> vdu;
   std::string unitfilename;
   std::string unitmodname;
-  Vector unitlocation;
   ///Color of cockpit default text
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color
@@ -130,6 +129,7 @@ private:
   class StarSystem* activeStarSystem;//used for context switch in Universe
   void SetParent(Unit * unit, const char * filename, const char * unitmodname,const Vector &startloc);
   Unit * GetParent () {return parent.GetUnit();}
+  Unit * GetSaveParent ();
   ///Draws Cockpit then restores viewport
   void Draw();
   void Update();//respawns and the like.
