@@ -4,7 +4,8 @@
 #include "navigation.h"
 #include "in_joystick.h"
 #include "cmd/unit.h"
-
+#include "communication.h"
+#include "gfx/cockpit.h"
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
 
@@ -305,11 +306,13 @@ static void DoDockingOps (Unit * parent, Unit * targ) {
 }
 void FireKeyboard::Execute () {
   Unit * targ;
+  bool refresh_target=false;
   if ((targ = parent->Target())) {
     ShouldFire (targ);
     DoDockingOps(parent,targ);
   } else {
     ChooseTargets(false);
+    refresh_target=true;
   }
   if (firekey==PRESS||jfirekey==PRESS||firekey==DOWN||jfirekey==DOWN) 
     parent->Fire(false);
@@ -335,18 +338,22 @@ void FireKeyboard::Execute () {
     targetkey=DOWN;
     jtargetkey=DOWN;
     ChooseTargets(false);
+    refresh_target=true;
   }
   if(picktargetkey==PRESS){
     picktargetkey=DOWN;
     PickTargets(false);
+    refresh_target=true;
   }
   if (neartargetkey==PRESS) {
     ChooseNearTargets (false);
     neartargetkey=DOWN;
+    refresh_target=true;
   }
   if (threattargetkey==PRESS) {
     ChooseThreatTargets (false);
     threattargetkey=DOWN;
+    refresh_target=true;
   }
 
 
@@ -354,18 +361,22 @@ void FireKeyboard::Execute () {
   if (turrettargetkey==PRESS) {
     turrettargetkey=DOWN;
     ChooseTargets(true);
+    refresh_target=true;
   }
   if(pickturrettargetkey==PRESS){
     pickturrettargetkey=DOWN;
     PickTargets(true);
+    refresh_target=true;
   }
   if (nearturrettargetkey==PRESS) {
     ChooseNearTargets (true);
     nearturrettargetkey=DOWN;
+    refresh_target=true;
   }
   if (threatturrettargetkey==PRESS) {
     ChooseThreatTargets (true);
     threatturrettargetkey=DOWN;
+    refresh_target=true;
   }
 
 
@@ -377,6 +388,28 @@ void FireKeyboard::Execute () {
   if (misk==PRESS) {
     misk=DOWN;
     parent->ToggleWeapon(true);
+  }
+  if (refresh_target) {
+    Unit * targ;
+    if ((targ =parent->Target())) {
+
+      
+      CommunicationMessage * mymsg=NULL;
+      for (unsigned int i=0;i<messagequeue.size();i++) {
+	if (messagequeue[i]->sender.GetUnit()==targ) {
+	  mymsg = messagequeue[i];
+	  break;
+	}
+      }
+      if (mymsg==NULL) {
+	FSM *fsm =_Universe->GetConversation (parent->faction,targ->faction);
+	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(_Universe->GetRelation(parent->faction,targ->faction)));
+      }else {
+       _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
+      }
+    } else {
+      _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
+    }
   }
 }
 

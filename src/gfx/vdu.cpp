@@ -10,7 +10,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 ///ALERT to change must change enum in class
-const std::string vdu_modes [] = {"Target","Nav","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
+const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
 int vdu_lookup (char * &s) {
 #ifdef _WIN32
@@ -383,6 +383,11 @@ void VDU::DrawNav (const Vector & nav, const GFXColor & c) {
   delete [] navdata;
 
 }
+void VDU::DrawComm (const GFXColor & c) {
+  GFXColorf (c);
+  tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+
+}
 
 void VDU::DrawManifest (Unit * parent, Unit * target, const GFXColor &c) {
   string retval ("\nManifest\n");
@@ -646,6 +651,9 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
     break;
   case MSG:
     DrawMessages(targ,color);
+    break;
+  case COMM:
+    DrawComm(color);
     break;
   case DAMAGE:
     DrawDamage(parent,color);

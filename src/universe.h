@@ -83,6 +83,7 @@ private:
       ///A value between 0 and 1 indicating my attitude towards index
       float relationship;
       class FSM * conversation;//a conversation any two factions can have
+      faction_stuff () {conversation=NULL;relationship=0;}
     };		
   public:
     /**

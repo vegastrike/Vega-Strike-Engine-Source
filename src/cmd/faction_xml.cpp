@@ -6,7 +6,7 @@
 #include "xml_support.h"
 #include <assert.h>
 #include <algorithm>
-
+#include "ai/communication.h"
 
 static int unitlevel;
 using namespace XMLSupport;
@@ -25,7 +25,8 @@ namespace FactionXML {
 	RELATION,
 	STATS,
 	FRIEND,
-	ENEMY
+	ENEMY,
+	CONVERSATION
   };
 
   const EnumMap::Pair element_names[] = {
@@ -41,12 +42,13 @@ namespace FactionXML {
 	EnumMap::Pair ("name", NAME), 
 	EnumMap::Pair ("logoRGB", LOGORGB), 
 	EnumMap::Pair ("logoA", LOGOA), 
-	EnumMap::Pair ("relation",RELATION), 
+	EnumMap::Pair ("relation",RELATION),
+	EnumMap::Pair ("Conversation", CONVERSATION)
 };
 
 
   const EnumMap element_map(element_names, 6);
-  const EnumMap attribute_map(attribute_names, 5);
+  const EnumMap attribute_map(attribute_names, 6);
 
 }
 
@@ -123,30 +125,34 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
   case STATS:
   case FRIEND:
   case ENEMY:
-	assert (unitlevel==2);
-	unitlevel++;
-	thisuni->factions[thisuni->factions.size()-1]->faction.push_back(faction_stuff());
-	assert(thisuni->factions.size()>0);
-//	thisuni->factions[thisuni->factions.size()-1];
-	    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    assert (unitlevel==2);
+    unitlevel++;
+    thisuni->factions[thisuni->factions.size()-1]->faction.push_back(faction_stuff());
+    assert(thisuni->factions.size()>0);
+    //	thisuni->factions[thisuni->factions.size()-1];
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-  case NAME:
+      case NAME:
 	
-    thisuni->factions[thisuni->factions.size()-1]->
-		faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].stats.name=
-		new char[strlen((*iter).value.c_str())+1];
-
+	thisuni->factions[thisuni->factions.size()-1]->
+	  faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].stats.name=
+	  new char[strlen((*iter).value.c_str())+1];
+	
 	strcpy(thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].stats.name,
-		(*iter).value.c_str());
+	       (*iter).value.c_str());
 	break;
       case RELATION:
 	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].relationship=parse_float((*iter).value);
 	break;
       }
-
-    }
+      case CONVERSATION:
+	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].conversation=new FSM ((*iter).value.c_str());
 	break;
+    }
+    break;
   }
+
+
 }
 void Universe::Faction::endElement(void *userData, const XML_Char *name) {
 //  ((Universe::Faction*)userData)->endElement(name);
@@ -191,6 +197,10 @@ Texture *Universe::getSquadLogo (int faction) {
   return getForceLogo (faction);
 }
 
+FSM* Universe::GetConversation(int Myfaction, int TheirFaction) {
+  assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
+  return factions[Myfaction]->faction[TheirFaction].conversation;
+}
 
 float Universe::GetRelation (const int Myfaction, const int TheirFaction) {
   if (Myfaction==TheirFaction)
@@ -203,8 +213,11 @@ Universe::Faction::Faction() {
 	factionname=NULL;
 }
 Universe::Faction::~Faction() {
-	delete logo;
-	delete [] factionname;
+  for (unsigned int i=0;i<faction.size();i++) {
+    delete faction[i].conversation;
+  }
+  delete logo;
+  delete [] factionname;
 }
 
 void Universe::Faction::ParseAllAllies(Universe * thisuni) {
@@ -301,4 +314,11 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   fclose (inFile);
   XML_ParserFree (parser);
   ParseAllAllies(thisuni);
+  for (unsigned int i=0;i<thisuni->factions.size();i++) {
+    for (unsigned int j=0;j<thisuni->factions[i]->faction.size();j++) {
+      if (thisuni->factions[i]->faction[j].conversation==NULL){
+	thisuni->factions[i]->faction[j].conversation=new FSM ("communications/neutral.xml");
+      }
+    }
+  }
 }

@@ -24,58 +24,17 @@
 #include "cmd/collection.h"
 //#define ORDERDEBUG
 void Order::Execute () {
-#ifdef AGRDEBUG
-  fprintf (stderr,"ox%x",this);
-  fflush (stderr);
-#endif
-
+  ProcessCommunicationMessages();
   int completed=0;
-//	fprintf (stderr,"size: %d done %d", suborders.size(), (*suborders.begin())->Done());
-  /*
-  if(suborders.size()) {
-    vector<Order*>::iterator ord = suborders.begin();
-    (*ord)->Execute();
-    if((*ord)->Done()){
-      delete (*ord);
-      ord = suborders.erase(ord);
-    }
-  }
-  */
-
   unsigned int i=0;
 
   for (i=0;i<suborders.size();i++) {
-    // huh? why the mask? can't get anything to work with this thing
-    // here. i'm not going to bother to figure out what's going on
-    // here until later
-    
-#ifdef AGRDEBUG
-  fprintf (stderr,"sub i%d ",i);
-  fflush (stderr);
-#endif
-
     if ((completed& ((suborders[i])->getType()&(MOVEMENT|FACING|WEAPON)))==0) {
-#ifdef AGRDEBUG
-  fprintf (stderr,"ldi%x ",suborders[i]);
-  fflush (stderr);
-#endif
       (suborders[i])->Execute();
-#ifdef AGRDEBUG
-  fprintf (stderr,"ldci%x \n",suborders[i]);
-  fflush (stderr);
-#endif
       completed|=(suborders[i])->getType();
       if ((suborders[i])->Done()) {
 	vector<Order*>::iterator ord = suborders.begin()+i;
-#ifdef AGRDEBUG
-  fprintf (stderr,"deex%x",*ord);
-  fflush (stderr);
-#endif
 	delete (*ord);
-#ifdef AGRDEBUG
-  fprintf (stderr,"delex\n");
-  fflush (stderr);
-#endif
 	ord =suborders.erase(ord);
 	i--;
       } 
@@ -87,10 +46,6 @@ void Order::Execute () {
   } else{
     done = false;
   }
-#ifdef AGRDEBUG
-  fprintf (stderr,"eox");
-  fflush (stderr);
-#endif
 
   return;
 }
@@ -108,15 +63,7 @@ Order * Order::queryType (int type) {
 void Order::eraseType (int type) {
   for (unsigned int i=0;i<suborders.size();i++) {
     if ((suborders[i]->type&type)==type) {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"delord %x",suborders[i]);
-  fflush (stderr);
-#endif
       delete suborders[i];
-#ifdef ORDERDEBUG
-  fprintf (stderr,"\\delord");
-  fflush (stderr);
-#endif
       vector <Order *>::iterator j= suborders.begin()+i;
       suborders.erase(j);
       i--;
@@ -125,10 +72,6 @@ void Order::eraseType (int type) {
 }
 
 Order* Order::EnqueueOrder (Order *ord) {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"enqord");
-  fflush (stderr);
-#endif
 
   if(ord==NULL){
     printf("NOT ENQEUEING NULL ORDER\n");
@@ -137,10 +80,6 @@ Order* Order::EnqueueOrder (Order *ord) {
   }
   ord->SetParent(parent);
   suborders.push_back (ord);
-#ifdef ORDERDEBUG
-  fprintf (stderr,"\\enqord");
-  fflush (stderr);
-#endif
   return this;
 }
 Order* Order::EnqueueOrderFirst (Order *ord) {
@@ -157,18 +96,9 @@ Order* Order::EnqueueOrderFirst (Order *ord) {
   return this;
 }
 Order* Order::ReplaceOrder (Order *ord) {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"repord");
-  fflush (stderr);
-#endif
-
   vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
     if (!(ord->getType()&(*ordd)->getType()&(FACING|WEAPON|MOVEMENT))){
-#ifdef ORDERDEBUG
-  fprintf (stderr,"delpord%x",*ordd);
-  fflush (stderr);
-#endif
       	delete (*ordd);
 	ordd =suborders.erase(ordd);
     } else {
@@ -176,20 +106,11 @@ Order* Order::ReplaceOrder (Order *ord) {
     }
   }
   suborders.push_back(ord);
-#ifdef ORDERDEBUG
-  fprintf (stderr,"repord");
-  fflush (stderr);
-#endif
-
   return this;
 
 }
 
 bool Order::AttachOrder (UnitCollection *targets1) {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"atachord");
-  fflush (stderr);
-#endif
   if (!(type&TARGET)) {
     if (type&SELF) {
       return AttachSelfOrder (targets1);//can use attach order to do shit
@@ -197,10 +118,6 @@ bool Order::AttachOrder (UnitCollection *targets1) {
     return false;
   }
   if (targets) {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"targ%x",targets);
-  fflush (stderr);
-#endif
     delete targets;
   
   }
@@ -265,10 +182,6 @@ Order* Order::findOrder(Order *ord){
   return NULL;
 }
 Order::~Order () {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"ofr%x\n",this);
-  fflush (stderr);
-#endif
   for (unsigned int i=0;i<suborders.size();i++) {
     if(suborders[i]==NULL){
       printf("ORDER: a null order\n");
@@ -290,16 +203,7 @@ void Order::eraseOrder(Order *ord){
 
   for (unsigned int i=0;i<suborders.size() && found==false;i++) {
     if (suborders[i]==ord){
-#ifdef ORDERDEBUG
-  fprintf (stderr,"eraseord%x",suborders[i]);
-  fflush (stderr);
-#endif
       delete suborders[i];
-#ifdef ORDERDEBUG
-  fprintf (stderr,"eraseord");
-  fflush (stderr);
-#endif
-
       vector <Order *>::iterator j= suborders.begin()+i;
       suborders.erase(j);
       found=true;

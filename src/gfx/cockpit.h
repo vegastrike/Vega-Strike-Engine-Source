@@ -90,7 +90,7 @@ class Cockpit {
   void RestoreViewPort();
   std::string GetUnitFileName () {return unitfilename;}
   std::string GetUnitModifications() {return unitmodname;}
-
+  std::string communication_choices;
   float credits;//how much money player has
   ///How far away chasecam and pan cam is
   float zoomfactor;

@@ -38,6 +38,8 @@ class VDU: public Sprite {
   void DrawMessages(Unit *target, const GFXColor & c);
   ///Draws the nav point this unit is heading to
   void DrawNav(const Vector &navPoint, const GFXColor & c);
+  ///Draws the comm screen this unit can use to communicate
+  void DrawComm(const GFXColor & c);
   ///Draws the damage this unit has sustained
   void DrawDamage(Unit * parent, const GFXColor & c);
   ///Draws the weapons activated on current unit
@@ -48,7 +50,7 @@ class VDU: public Sprite {
 void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target, const GFXColor & c);
 public:
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
-  enum VDU_MODE {TARGET=0x1,NAV=0x2,WEAPON=0x4, DAMAGE=0x8, SHIELD=0x10,  MANIFEST=0x20, TARGETMANIFEST=0x40, VIEW=0x80, MSG=0x100};
+  enum VDU_MODE {TARGET=0x1,NAV=0x2,COMM=0x4, WEAPON=0x8, DAMAGE=0x10, SHIELD=0x20,  MANIFEST=0x40, TARGETMANIFEST=0x80, VIEW=0x100, MSG=0x200};
   VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
   void Draw(Unit * parent, const GFXColor & c);
