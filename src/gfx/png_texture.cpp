@@ -108,7 +108,7 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
 
   return (unsigned char *)dat;
 }
-static 
+static void
 png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 {
    if(png_ptr)
@@ -156,11 +156,12 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    }
    png_init_io(png_ptr, fp);
    png_set_sig_bytes(png_ptr, 8);
-   png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
-   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+   //   png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
 
    png_read_png(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
 row_pointers = png_get_rows(png_ptr, info_ptr);
+   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+
    unsigned char * result = (*tt) (bpp,color_type,width,height,row_pointers);
    png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 

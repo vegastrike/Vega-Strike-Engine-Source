@@ -142,7 +142,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 				textures.back().color=parse_int (((*iter).value));
 				break;
 			case SCALES:
-			  textures.back().scales = parse_int ((*iter).value);
+			  textures.back().scales = parse_float ((*iter).value);
 			  break;
 			case SCALET:
 			  textures.back().scalet = parse_float ((*iter).value);
