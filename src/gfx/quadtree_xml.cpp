@@ -133,7 +133,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 				xml->tex.back().file=(*iter).value;
 				break;
 			case BLEND:
-				sscanf (((*iter).value).c_str(),"%.126s %.126s",csrc,cdst);
+				sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
 				xml->tex.back().blendSrc = parse_alpha (csrc);
 				xml->tex.back().blendDst = parse_alpha (cdst);
 				break;
