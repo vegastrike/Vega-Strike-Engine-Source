@@ -56,10 +56,10 @@ class NetworkCommunication
 #ifndef NETCOMM_NOWEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
+#endif
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloader;
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadServer;
         SocketSet                                         _sock_set;
-#endif
 		VsnetDownload::Client::Buffer *					  bufitem;
 #ifdef NETCOMM_JVOIP
 		JVOIPSession *				session;
