@@ -5,6 +5,18 @@ AC_PREREQ(2.53)
 AC_LANG(C++)
 dnl AC_LANG_CPLUSPLUS()
 
+dnl ********************** MSVC++ STUFF ***********************
+AC_ARG_ENABLE(vc, AC_HELP_STRING([--enable-vc], [Use the microsoft VC++ compiler.]), CLVER=${enableval})
+
+if test "x${CLVER}" = "xyes" ; then
+	CXX="cccl"
+	AC_MSG_CHECKING([Checking for VC++ compiler (cl).])
+	AC_CHECK_TOOLS(VCXX, [cl])
+	AC_MSG_CHECKING([Checking for VC++ compiler wrapper (cccl) compiler.])
+	AC_PROG_CXX("cccl")
+fi
+dnl ********************** MSVC++ STUFF ***********************
+
 if test "x${CXX}" = "x"; then
 AC_MSG_CHECKING([Checking for C++ compiler.])
 AC_CHECK_TOOLS(CXX, [g++ c++ cl KCC CC cxx c++ xlC aCC egcs gcc])
