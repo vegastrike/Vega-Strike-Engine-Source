@@ -12,6 +12,7 @@ private:
 	int index;
 	float explosiontime;
 	enum FOGMODE fogmode; // 0=OFF (I won't use this), 1=EXP, 2=EXP2, 3=LINEAR
+	bool fogme;
 	void LoadXML(const char * filename);
 	void beginElem(const std::string&,const AttributeList&);
 public:

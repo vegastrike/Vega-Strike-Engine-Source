@@ -101,7 +101,9 @@ void Mesh::InitUnit() {
 	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
 	
-	envMap = GFXTRUE;
+	envMapAndLit =0x3;
+	setEnvMap(GFXTRUE);
+	setLighting(GFXTRUE);
 	draw_queue = NULL;
 	will_be_drawn = GFXFALSE;
 	draw_sequence = 0;
@@ -428,7 +430,11 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
     return;
   }
-  GFXSelectMaterial(myMatNum);
+  if (getLighting()) {
+    GFXSelectMaterial(myMatNum);
+  }else {
+    GFXDisable (LIGHTING);
+  }
   if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    
     GFXDisable(DEPTHWRITE);
@@ -442,7 +448,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   if(Decal)
     Decal->MakeActive();
   GFXSelectTexcoordSet(0, 0);
-  if(envMap) {
+  if(getEnvMap()) {
     GFXEnable(TEXTURE1);
     _Universe->activateLightMap();
     GFXSelectTexcoordSet(1, 1);
@@ -516,7 +522,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 #else
       GFXColorMaterial (0);
 #endif
-      if (envMap)
+      if (getEnvMap())
       	GFXEnable (TEXTURE1);
       GFXPopBlendMode ();
     }
@@ -528,6 +534,9 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
   }
   vlist->EndDrawState();
+  if (!getLighting()) {
+    GFXEnable(LIGHTING);
+  }
   while (tmp_draw_queue.size()) {
     draw_queue->push_back (tmp_draw_queue.back());
     tmp_draw_queue.pop_back();

@@ -103,13 +103,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Size", XML::SIZE),
   EnumMap::Pair("Offset",XML::OFFSET),
   EnumMap::Pair("meshfile",XML::LODFILE),
-  EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE)
+  EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
+  EnumMap::Pair ("LightingOn",XML::LIGHTINGON)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 29);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 30);
 
 
 
@@ -224,7 +225,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      xml->material.power=parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      envMap= parse_bool((*iter).value.c_str());
+		      setEnvMap ( parse_bool((*iter).value.c_str()));
+		      break;
+		    case XML::LIGHTINGON:
+		      setLighting (parse_bool((*iter).value.c_str())); 
 		      break;
 		    }
 		  }

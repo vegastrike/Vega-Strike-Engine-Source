@@ -142,7 +142,7 @@ void Universe::StartDraw()
   for (int i=0;i<star_system.size();i++) {
     star_system[i]->Update();
   }
-
+  StarSystem::ProcessPendingJumps();
   //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();
 

@@ -132,6 +132,7 @@ private:
       //attributes
       POWER,
       REFLECT,
+      LIGHTINGON,
       FLATSHADE,
       TEXTURE,
       ALPHAMAP,
@@ -291,8 +292,8 @@ protected:
   unsigned int myMatNum;
   ///The decal relevant to this mesh
   Texture *Decal;  
-  ///whether this should be environment mapped
-  GFXBOOL envMap;
+  ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
+  char envMapAndLit;
   ///Whether this original will be drawn this frame
   GFXBOOL will_be_drawn;  
   ///The blend functions
@@ -345,7 +346,10 @@ public:
   ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   ///Sets whether or not this unit should be environment mapped
-  void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
+  void setEnvMap(GFXBOOL newValue) {envMapAndLit = (newValue?(envMapAndLit|0x1):(envMapAndLit&(~0x1)));}
+  GFXBOOL getEnvMap() {return ((envMapAndLit&0x1)!=0);}
+  void setLighting(GFXBOOL newValue){envMapAndLit = (newValue?(envMapAndLit|0x2):(envMapAndLit&(~0x2)));}
+  GFXBOOL getLighting() {return ((envMapAndLit&0x2)!=0);}
   ///Returns bounding box values
   Vector corner_min() { return mn; }  Vector corner_max() { return mx; }
   ///Returns a physical boudning box in 3space instead of in current unit space

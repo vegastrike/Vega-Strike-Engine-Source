@@ -102,10 +102,12 @@ void Mesh::UpdateFX(float howmuchtime) {
 void Mesh::EnableSpecialFX(){
   draw_sequence=MESH_SPECIAL_FX_ONLY;
   setEnvMap(GFXFALSE);
+  setLighting (GFXTRUE);
   if (orig) {
     orig->draw_sequence=MESH_SPECIAL_FX_ONLY;
     orig->blendSrc = orig->blendDst= ONE;
-    orig->envMap = GFXFALSE;
+    orig->setEnvMap( GFXFALSE);
+    orig->setLighting (GFXTRUE);
   }
   blendSrc=ONE;
   blendDst=ONE;

@@ -55,8 +55,7 @@ class StarSystem {
   UnitCollection *drawList; 
   /// Objects subject to global gravitron physics (disabled)   
   UnitCollection *units;    
-  /// no physics modelling, not searched through for clicks (deprecated)
-  UnitCollection *missiles; 
+  unsigned char no_collision_time;
   ///system name             
   char * name; 
   ///All avail cameras in this system

@@ -134,7 +134,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 	Decal = new Texture (texture);
       }
       
-      Insideout?envMap = GFXFALSE:envMap=envMapping;
+      Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);
       
       if(Insideout) {
       draw_sequence=0;

@@ -98,6 +98,7 @@ class Cockpit {
   void Draw();
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp);
+  enum VIEWSTYLE GetView () {return view;}
   ///Sets up the world for rendering...call before draw
   void SetupViewPort (bool clip=true);
   void VDUSwitch (int vdunum);

@@ -15,7 +15,7 @@ string tostring(const Vector &v) {
 Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {
   InitUnit();
   draw_sequence = 3;
-  envMap = (GFXFALSE);
+  setEnvMap  (GFXFALSE);
   blendSrc = ONE;
   blendDst=ONE;
   Box *oldmesh;

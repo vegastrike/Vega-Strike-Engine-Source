@@ -29,10 +29,11 @@ namespace NebulaXML {
 		DENSITY,
 		LIMITS,
 		INDEX,
-		EXPLOSIONTIME
+		EXPLOSIONTIME,
+		FOGTHIS
 	};
 	const unsigned short int MAXENAMES=4;
-	const unsigned short int MAXANAMES=10;
+	const unsigned short int MAXANAMES=11;
 
 	const EnumMap::Pair element_names[MAXENAMES] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -51,7 +52,8 @@ namespace NebulaXML {
 		EnumMap::Pair ("Density", DENSITY),
 		EnumMap::Pair ("Mode", MODE),
 		EnumMap::Pair ("Index", INDEX),
-		EnumMap::Pair ("ExplosionTime",EXPLOSIONTIME)
+		EnumMap::Pair ("ExplosionTime",EXPLOSIONTIME),
+		EnumMap::Pair ("FogThis",FOGTHIS)
 	};
 
 	const EnumMap element_map(element_names, MAXENAMES);
@@ -77,6 +79,10 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 	case UNKNOWN:
 		break;
 	case NEBULA:
+	  fogme=true;
+	  explosiontime=0;
+	  index=0;
+	  fogmode=FOG_LINEAR;
 		for(iter = atts.begin(); iter!=atts.end(); iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case DENSITY:
@@ -91,6 +97,9 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 			case EXPLOSIONTIME:
 			        explosiontime= parse_float ((*iter).value);
 			        break;
+			case FOGTHIS:
+			  fogme = parse_bool ((*iter).value);
+			  break;
 			}
 		}
 		break;
@@ -165,6 +174,7 @@ void Nebula::SetFogState () {
 }
 Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
   Unit (unitfile,true,SubU,faction,fg,fg_snumber) {
+
 	vssetdir (GetSharedUnitPath().c_str());
 	vschdir (unitfile);
 	explosiontime=0;
@@ -187,7 +197,8 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
 	vsresetdir();
 }
 void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
-  Setnebula(this);
+  if (fogme)
+    Setnebula(this);
   smaller->Setnebula(this);
 }
 
@@ -195,10 +206,13 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   Unit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
   Vector t1;
   float dis;
-  if (Inside (_Universe->AccessCamera()->GetPosition(),0,t1,dis)) {
-    _Universe->AccessCamera()->SetNebula (this);
+  unsigned int i;
+  for (i=0;i<NUM_CAM;i++) {
+    if (Inside (_Universe->AccessCamera(i)->GetPosition(),0,t1,dis)) {
+      _Universe->AccessCamera(i)->SetNebula (this);
+    }
   }
-  unsigned int i = rand()%nummesh;
+  i = rand()%nummesh;
   {
     Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());
     if (((int)(explosiontime/SIMULATION_ATOM))!=0) 

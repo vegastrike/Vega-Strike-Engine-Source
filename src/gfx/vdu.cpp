@@ -49,7 +49,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(MSG), rows(rwws), cols(clls){
   viewStyle = CP_TARGET;
   StartArmor = ma;
   maxhull = mh;
@@ -438,11 +438,16 @@ void DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle) 
   VIEWSTYLE which=viewStyle;
   _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
   _Universe->SelectCamera(which);
-  _Universe->AccessCamera(which)->UpdateGFX (true,true);
+  VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView ();
+  _Universe->AccessCockpit()->SetView (viewStyle);
+  _Universe->AccessCockpit()->SelectProperCamera();
+   _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   GFXClear (GFXTRUE);
   _Universe->activeStarSystem()->Draw(false);
   _Universe->AccessCamera (which)->SetSubwindow (0,0,1,1);
-  _Universe->AccessCamera(which)->UpdateGFX (false,false);
+  _Universe->AccessCockpit()->SetView (tmp);
+  _Universe->AccessCockpit()->SelectProperCamera();
+   _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   GFXLoadIdentity(MODEL);
   GFXLoadIdentityView();
   // _Universe->AccessCockpit()->RestoreViewPort();

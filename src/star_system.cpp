@@ -46,8 +46,9 @@ Atmosphere *theAtmosphere;
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) : 
   //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
-  units(new UnitCollection), 
-  missiles(new UnitCollection) {
+  units(new UnitCollection) {
+
+  no_collision_time=255;
   ///adds to jumping table;
   name = NULL;
   _Universe->pushActiveStarSystem (this);
@@ -345,9 +346,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"vp");
   fflush (stderr);
 #endif
-  if (DrawCockpit)
-    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
-  
+  _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
@@ -502,9 +501,9 @@ void StarSystem::Update() {
 #endif
 	  Unit::ProcessDeleteQueue();
       } else if (current_stage==PHY_COLLIDE) {
-	static int numframes=0;
-	numframes++;//don't resolve physics until 2 seconds
-	if (numframes>2/(SIMULATION_ATOM)) {
+	if (no_collision_time) {
+	  no_collision_time--;//don't resolve physics until 2 seconds
+	}else {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"neb");
   fflush (stderr);
@@ -533,7 +532,7 @@ void StarSystem::Update() {
   fflush (stderr);
 #endif
 	Terrain::UpdateAll(64);	
-	StarSystem::ProcessPendingJumps();
+
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList->createIterator();

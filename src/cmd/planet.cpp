@@ -59,7 +59,12 @@ void PlanetaryOrbit::Execute() {
   }
   double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity/(radius?radius:1) *SIMULATION_ATOM;
-  parent->Velocity = (origin - focus + x_offset+y_offset-parent->curr_physical_state.position)/SIMULATION_ATOM;
+  parent->Velocity = (origin - focus + x_offset+y_offset-parent->LocalPosition())/SIMULATION_ATOM;
+  const int Unreasonable_value=100000/SIMULATION_ATOM;
+  if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
+    parent->Velocity.Set (0,0,0);
+    parent->SetCurPosition (origin-focus+x_offset+y_offset);
+  }
 }
 
 
@@ -195,6 +200,37 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   Unit::Draw(quat,m);
   //  }
 
+  int k;
+  //  for (k=0;k<NUM_CAM;k++) {
+    Vector t (_Universe->AccessCamera()->GetPosition()-Position());
+    static int counter=0;
+    if (counter ++>100)
+      if (t.Magnitude()<corner_max.i) {
+	  _Universe->AccessCamera()->SetPlanetaryTransform (terraintrans);
+	  inside =true;
+	  if (terrain)
+	    terrain->EnableUpdate();
+#ifdef PLANETARYTRANSFORM
+	  TerrainUp = t;
+	  Normalize(TerrainUp);
+	  TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
+	  Normalize (TerrainH);
+#endif
+	
+    //    shouldfog=true;
+      } else {
+	  _Universe->AccessCamera()->SetPlanetaryTransform (NULL);
+	  //if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
+	  inside=false;
+      ///somehow warp unit to reasonable place outisde of planet
+	  if (terrain) {
+#ifdef PLANETARYTRANSFORM
+	    terrain->DisableUpdate();
+#endif
+
+	}
+      }
+    //}
   if (inside&&terrain) {
     _Universe->AccessCamera()->UpdatePlanetGFX();
     //    Camera * cc = _Universe->AccessCamera();
@@ -224,37 +260,6 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   GFXLoadIdentity (MODEL);
   for (unsigned int i=0;i<lights.size();i++) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
-  }
-  Vector t (_Universe->AccessCamera()->GetPosition()-Position());
-  static int counter=0;
-  if (counter ++>100)
-  if (t.Magnitude()<corner_max.i) {
-    if (!inside) {
-      _Universe->AccessCamera()->SetPlanetaryTransform (terraintrans);
-      inside =true;
-      if (terrain)
-	terrain->EnableUpdate();
-#ifdef PLANETARYTRANSFORM
-      TerrainUp = t;
-      Normalize(TerrainUp);
-      TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
-      Normalize (TerrainH);
-#endif
-    }
-
-    //    shouldfog=true;
-  } else {
-    if (inside) {
-      _Universe->AccessCamera()->SetPlanetaryTransform (NULL);
-      //if ((terrain&&t.Dot (TerrainH)>corner_max.i)||(!terrain&t.Dot(t)>corner_max.i*corner_max.i)) {
-      inside=false;
-      ///somehow warp unit to reasonable place outisde of planet
-      if (terrain) {
-#ifdef PLANETARYTRANSFORM
-	terrain->DisableUpdate();
-#endif
-      }
-    }
   }
   
 }
