@@ -1,0 +1,20 @@
+Potential pitfalls with Python on win32
+
+You want to link with the debug libraries. If _DEBUG is defined, you have to:
+You'll have to build the debug libraries manually
+
+Sometimes, boost_python wants to load a different python library from your
+code. This is VERY bad. Make sure that only one of Python22_d.dll and
+Python22.dll is loaded.
+
+#define BOOST_DEBUG_PYTHON from the Makefile for Vegastrike and Boost.Python to
+force linking with the correct library
+
+Also, make sure that the same version of msvcrt.dll is loaded for both boost.python
+and Vegastrike. If compiling Vegastrike in debug, make sure that 
+
+ /MDd 
+
+is in STDOPTS in boost/libs/python/build/vc60.mak
+If compiling in release, specify /MD
+
