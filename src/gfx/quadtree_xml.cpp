@@ -16,6 +16,8 @@ struct TerrainData {
   std::string terrainfile;
 };
 struct TerraXML {
+  float scales;
+  float scalet;
 	float detail;
   	std::vector <GFXMaterial> mat;
 	std::vector <TerrainData> data;
@@ -124,6 +126,12 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 			case LEVEL:
 				RootCornerData.Level=parse_float((*iter).value);
 				break;
+			case SCALES:
+			  xml->scales = parse_float ((*iter).value);
+			  break;
+			case SCALET:
+			  xml->scalet = parse_float ((*iter).value);
+			  break;
 			}
 		}
 		break;
@@ -145,12 +153,6 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 			case COLOR:
 				textures.back().color=parse_int (((*iter).value));
 				break;
-			case SCALES:
-			  textures.back().scales = parse_float ((*iter).value);
-			  break;
-			case SCALET:
-			  textures.back().scalet = parse_float ((*iter).value);
-			  break;
 			}
 		}
 		break;
@@ -280,6 +282,8 @@ void QuadTree::LoadXML (const char *filename) {
     return;
   }
   xml = new TerraXML;
+  xml->scales = .001;
+  xml->scalet = .001;
   xml->detail=20;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -296,6 +300,8 @@ void QuadTree::LoadXML (const char *filename) {
   XML_ParserFree (parser);
   unsigned int i;
   for (i=0;i<textures.size();i++) {
+    textures[i].scales = xml->scales;
+    textures[i].scalet = xml->scalet;
     if (textures[i].tex.filename) {
       Texture * tex = new Texture (textures[i].tex.filename);
       free (textures[i].tex.filename);

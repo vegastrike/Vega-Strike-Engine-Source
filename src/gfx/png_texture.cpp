@@ -22,7 +22,7 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
     } else {
       if ((bpp==16&&color_type==PNG_COLOR_TYPE_GRAY)||(bpp==8&&color_type==PNG_COLOR_TYPE_GRAY_ALPHA)) {
 	for (unsigned int i=0;i<height;i++) {
-	  memcpy (&dat[i*width],&row_pointers[i], sizeof (unsigned short)*width);
+	  memcpy (&dat[i*width],row_pointers[i], sizeof (unsigned short)*width);
 	}
       } else {
 	//type is RGBA32 or GrayA32
@@ -64,7 +64,7 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
   if ((bpp==8&&color_type==PNG_COLOR_TYPE_RGB_ALPHA)||color_type==PNG_COLOR_TYPE_GRAY ||color_type==PNG_COLOR_TYPE_GRAY_ALPHA) {
     if (bpp==8&&color_type==PNG_COLOR_TYPE_GRAY) {
       for (unsigned int i=0;i<height;i++) {
-	memcpy (&dat[i*width],&row_pointers[i], sizeof (unsigned char)*width);
+	memcpy (&dat[i*width],row_pointers[i], sizeof (unsigned char)*width);
       }
     } else {
       if ((bpp==16&&color_type==PNG_COLOR_TYPE_GRAY)||(bpp==8&&color_type==PNG_COLOR_TYPE_GRAY_ALPHA)) {

@@ -41,8 +41,10 @@ QuadTree::QuadTree (const char * filename):vertices (GFXTRI,4,InitialVertices,4,
   */
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
 
+
   if (filename) {
     LoadXML(filename);
+    //adData();
    } else {
      root = new quadsquare (&RootCornerData);
   }
@@ -90,6 +92,7 @@ void QuadTree::Render () {
 void	QuadTree::LoadData()
 // Load some data and put it into the quadtree.
 {
+  
 	HeightMapInfo	hm;
 	hm.XOrigin = 0;
 	hm.ZOrigin = 0;
@@ -98,7 +101,8 @@ void	QuadTree::LoadData()
 	hm.RowWidth = hm.XSize;
 	hm.Scale = 7;
 	hm.Data = new short[hm.XSize * hm.ZSize];
-
+	hm.terrainmap = new unsigned char  [hm.XSize*hm.ZSize];
+	memset (hm.terrainmap,0,sizeof (unsigned char)*hm.ZSize * hm.XSize);
 	printf("Loading height grids...\n");
 
 	// Big coarse data, at 128 meter sample spacing.
