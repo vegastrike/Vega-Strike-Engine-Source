@@ -1,0 +1,169 @@
+.\" -*- nroff -*-
+.TH VEGASTRIKE 1 "June 26 2002" "Version 0.2.9.2" "Vega Strike 0.2.9.2 - Celeste"
+.SH NAME
+Vega Strike Celeste\- Trade, Fight and Explore the Universe
+.SH SYNOPSIS
+.BI "vsinstall" 
+.PP
+.BI "vslauncher"
+.PP
+.BI "vegastrike " "[-ddata_dir] [-px,y,z] [-jsector/starsystem]"
+.IR missionname
+.PP
+The recommended way to run Vega Strike is to first run
+.B 
+vsinstall
+to configure your system, then invoke the 
+.B
+vslauncher
+executable and begin a New Game.
+.SH DESCRIPTION
+.B vsinstall
+.I program
+sets up the default save game, copies the vegastrike.config file to a user's ~/.vegastrike directory  and runs 
+.B vssetup 
+from the proper directory.
+.PP
+.B vslauncher
+.I program
+allows the user to select a mission to run, then executes
+.B vegastrike
+When a user has selected a save game to use via the New Game or Load Game buttons.  A user may autorecover an autosave file by clicking on the Recover Auto Save button, and selecting the save game to recover to, which will launch 
+.B
+vegastrike 
+and recover the save game.  Save games must be saved at a base or planet.
+.PP
+.B vegastrike
+.I program
+begins Vega Strike with the selected XML mission file (full path necessary) and the save game appearing as the only text in ~/.vegastrike/save.txt
+.PP
+.SH REQUIREMENTS AND INSTALLATION
+run the 
+.B vsinstall
+program to set up your specific config options, then invoke 
+.B vslauncher
+.PP
+Read the readme.txt file in 
+.br
+.I "/usr/local/share/doc/vegastrike" 
+or in color at 
+.br
+.I http://vegastrike.sourceforge.net/player_tutorial/
+to learn the keybindings and walk through a tutorial.
+.br
+More information can be obtained from the Vega Strike website at
+.I http://vegastrike.sourceforge.net/
+.SH OPTIONS
+.TP
+.I -d/my/data/dir
+specifies 
+.I
+/my/data/dir
+as the path for finding the vega strike data. Default is /usr/local/share/vegastrike/data
+.TP
+.I -p1024,2405,1245090101
+Forces the player's starting location to be at x= 1024, y= 2405, z=1245090101
+.TP
+.I -jgemini_sector/troy
+Forces the player to start in the troy system in gemini sector.
+.TP
+.I missionname
+Specifies a mission for vegastrike to run.  Default is /usr/local/share/vegastrike/data/mission/exploration/explore_universe.mission.
+
+.SH CONFIGURATION FILE
+.B Vega Strike
+expects a configuration file (
+.I $HOME/.vegastrike/vegastrike.config
+(~/.vegastrike/vegastrike.config)
+), which is modified by
+.B vsinstall
+.br
+A simple illustration of how to adjust vegastrike.config and the associated keybindings and options is in the readme.txt included in the documentation and also in the player tutorial listed above.
+.SH AUTHORS
+.B vegastrike
+is available thanks to the work of many developers. For a listing
+of the authors, please see the file 
+.I http://vegastrike.sourceforge.net/credits.html
+in the top-level directory of the source distribution.
+.SH COPYRIGHT
+.B vegastrike
+can be distributed under the terms of the X11 license. A copy of the
+license is in the file
+.B LICENSE
+in the top-level directory of the source distribution.
+.SH BUGS
+.PP
+Bug reports and successes may be posted to 
+.I vegastrike-users@lists.sourceforge.net
+If you want to post a bug report, please tell us which mission you ran, copy the last few lines of stdout and stderr, and describe the bug in detail, and what lead up to it.  It would be most helpful if you included a stack trace by compiling running vegastrike from the source distro.
+.PP
+For problems and suggestions with this manpage, please send a note to
+Daniel Horn <hellcatv@hotmail.com>.
+.SH AVAILABILITY
+The most recent public version of 
+.B vegastrike
+can be obtained from http://vegastrike.sourceforge.net/
+.PP
+The latest snapshot of the code may be obtained via CVS.  For information
+on how to do this, please see
+.I
+http://sourceforge.net/cvs/?group_id=19507
+.PP
+Vega Strike Celestia, the
+.B vegastrike
+development headquarters, is at
+.I http://vegastrike.sourceforge.net/.
+This website contains a great deal of information about
+.B vegastrike.
+.PP
+The
+.B vegastrike
+mailing list is 
+.I vegastrike-users@lists.sourceforge.net
+It is used for discussion of various 
+.B vegastrike end user aspects/help.
+.PP
+For further information about 
+.B vegastrike
+development, you might want to subscribe to the 
+.B vegastrike
+"vegastrike-devel", "vegastrike-user" mailing lists at
+.I http://sourceforge.net/mail/?group_id=19507
+.SH FILES
+.PD 0
+.TP
+.I /usr/local/bin/vegastrike
+The 
+.B vegastrike
+engine.
+.TP
+.I /usr/local/bin/vsinstall
+The Setup utility.
+.TP
+.I /usr/local/bin/vslauncher
+The 
+.B vegastrike 
+save game and mission selection utility
+.TP 
+.I /usr/local/bin/vssetup
+Internal installer program
+.TP 
+.I /usr/local/share/vegastrike
+The 
+.B vegastrike
+data files
+.TP 
+.I /usr/local/lib/man/man1
+Directory containg
+.B this file 
+.TP
+.I ~/.vegastrike/vegastrike.config
+User-specific configuration file
+.TP 
+.I ~/.vegastrike
+Directory containing user specific data managed by 
+.B vegastrike. 
+
+.SH "SEE ALSO"
+.BR http://vegastrike.sourceforge.net/player_tutorial
+.BR /usr/local/share/doc/vegastrike
