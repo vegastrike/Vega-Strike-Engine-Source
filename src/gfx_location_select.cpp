@@ -17,13 +17,11 @@ bool changed = false;
 
 void MouseMoveHandle (KBSTATE,int x, int y, int delx, int dely, int mod) {
   if (keyState['z']==DOWN) {
-    DeltaPosition.k+=.3*dely;
+    DeltaPosition.k+=dely;
   } else {
     changed=true;
     DeltaPosition.i=delx;
     DeltaPosition.j=dely;
-    //DeltaPosition.i=x/((float)::g_game.x_resolution);
-    //DeltaPosition.j=y/((float)::g_game.y_resolution);
   }
 }
 
@@ -74,7 +72,7 @@ void LocationSelect:: Draw () {
   GFXColor4f (0,.5,0,.3);
 
   if (DeltaPosition.k!=0) {
-    LocalPosition.k+=DeltaPosition.k;
+    LocalPosition.k+=.5*DeltaPosition.k;
     DeltaPosition.k=0;
   }
   if (changed&&fabs (DeltaPosition.i<10)&&fabs(DeltaPosition.j<10)) {
@@ -93,7 +91,6 @@ void LocationSelect:: Draw () {
 
     //the approximate distance away that the cursor is
     float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
-    
     
     LocalPosition.i+= fabs(zvalueXY)*.01*((DeltaPosition.i/tP.i)+(-DeltaPosition.j/tP.j));
     LocalPosition.j+= fabs(zvalueXY)*.01*((DeltaPosition.i/tQ.i)+(-DeltaPosition.j/tQ.j));
@@ -125,16 +122,16 @@ void LocationSelect:: Draw () {
     GFXVertex3f (LocalPosition.i-CrosshairSize*.125,LocalPosition.j,0);
     GFXVertex3f (LocalPosition.i+CrosshairSize*.125,LocalPosition.j,0);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,LocalPosition.k-tmp*CrosshairSize);
- }
+  }
   if (fabs(LocalPosition.i)+fabs(LocalPosition.j)>CrosshairSize) {
     GFXVertex3f (0,0,0);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*.125);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*-.125);
-
+    
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*-.125);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*.125);
     GFXVertex3f (0,0,0);
-  }
+  }	
   POSITION_GFXVertex (0,0,0);
   POSITION_GFXVertex (1,.1,.1);	
   POSITION_GFXVertex (1,.1,-.1);

@@ -45,7 +45,7 @@ void Camera::UpdateGFX()
 		GFXLoadIdentity(PROJECTION);
 		GFXLoadIdentity(VIEW);
 		//glLoadIdentity();
-		GFXPerspective (90.0F,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
+		GFXPerspective (78.0F,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
 		GFXLookAt (Coord, Coord+R, Q);
 		//changed = FALSE;
 	}
@@ -61,7 +61,7 @@ void Camera::UpdateGLCenter()
 	{
 		GFXLoadIdentity(PROJECTION);
 		GFXLoadIdentity(VIEW);
-		GFXPerspective (90.0F,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
+		GFXPerspective (78.0F,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
 		GFXLookAt (Vector(0,0,0), R, Q);
 		//changed = FALSE;
 	}
