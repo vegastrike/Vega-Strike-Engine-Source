@@ -35,7 +35,18 @@ public:
 
 	
 	class CachedSystemIterator {
-		vector<std::pair<string, QVector> > systems;
+	public:
+		//typedef std::pair<string, QVector> SystemInfo;
+		struct SystemInfo {
+			string name;
+			QVector position;
+			std::vector<std::string> destinations;
+			SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations)
+					: name(name), position(position), destinations(destinations) {
+			}
+		};
+	private:
+		vector<SystemInfo> systems;
 		unsigned currentPosition;
 	public:
 		CachedSystemIterator();
@@ -43,11 +54,15 @@ public:
 		CachedSystemIterator(const CachedSystemIterator &other);
 		void init(string current_system, unsigned max_systems = 2);
 		bool seek(unsigned position=0);
-		unsigned getIndex();
+		unsigned getIndex() const;
 		bool done () const;
-		std::pair<string , QVector >& operator[] (unsigned pos);
+		SystemInfo & operator[] (unsigned pos);
+		const SystemInfo & operator[] (unsigned pos) const;
 		string &operator* ();
-		QVector Position ();
+		const string &operator* () const;
+		QVector Position () const;
+		std::vector<std::string> &Destinations ();
+		const std::vector<std::string> &Destinations () const;
 		CachedSystemIterator & next ();
 		CachedSystemIterator & operator ++ ();
 		CachedSystemIterator operator ++ (int);

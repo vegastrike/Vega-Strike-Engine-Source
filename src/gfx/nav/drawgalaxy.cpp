@@ -32,7 +32,7 @@
 #include "networking/netclient.h"
 #include "cmd/unit_util.h"
 #include "math.h"
-
+#include "hashtable.h"
 
 
 #include "navscreen.h"
@@ -75,10 +75,11 @@ public:
 	float x;
 	float y;
 	std::string source;
+	std::vector<std::string> *dest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
 	bool moused;
 	char color;
 	navscreenoccupied * screenoccupation;
-	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused):type(type),size(size),x(x),y(y),source(source) {
+	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused, std::vector<std::string> *dest):type(type),size(size),x(x),y(y),source(source),dest(dest) {
 		screenoccupation = so;
 		this->moused=moused;
 		color = 'v';
@@ -92,7 +93,7 @@ public:
 		
 		
 	}
-	systemdrawnode () {
+	systemdrawnode () : dest(NULL){
 		size=SYSTEM_DEFAULT_SIZE;
 		x=y=0;
 		type=0;
@@ -182,6 +183,7 @@ public:
 
 typedef set <systemdrawnode> systemdrawset;
 typedef vector <systemdrawnode> systemdrawlist;
+typedef Hashtable <std::string, systemdrawnode, char [127]> systemdrawhashtable;
 
 bool testandset (bool &b,bool val) {
 	bool tmp = b;
@@ -268,7 +270,7 @@ void NavigationSystem::CachedSystemIterator::init (string current_system, unsign
 	systems.clear();
 	NavigationSystem::SystemIterator iter (current_system, max_systems);
 	for (;!iter.done();++iter) {
-		systems.push_back(std::pair<string, QVector> (*iter, iter.Position()));
+		systems.push_back(SystemInfo(*iter, iter.Position(), _Universe->getAdjacentStarSystems(*iter)));
 	}
 }
 
@@ -290,28 +292,51 @@ bool NavigationSystem::CachedSystemIterator::seek(unsigned position) {
 		return false;
 	}
 }
-unsigned NavigationSystem::CachedSystemIterator::getIndex() {
+unsigned NavigationSystem::CachedSystemIterator::getIndex() const{
 	return currentPosition;
 }
 bool NavigationSystem::CachedSystemIterator::done ()const {
 	return currentPosition>=systems.size();
 }
-static std::pair <string , QVector > nullPair ("-", QVector(0,0,0));
-std::pair<string , QVector >& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) {
+static NavigationSystem::CachedSystemIterator::SystemInfo nullPair ("-", QVector(0,0,0), std::vector<std::string> ());
+NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) {
+	if (done())
+		return nullPair;
+	return systems[pos];
+}
+const NavigationSystem::CachedSystemIterator::SystemInfo& NavigationSystem::CachedSystemIterator::operator[] (unsigned pos) const{
 	if (done())
 		return nullPair;
 	return systems[pos];
 }
 string &NavigationSystem::CachedSystemIterator::operator* () {
 	if (done())
-		return nullPair.first;
-	return systems[currentPosition].first;
+		return nullPair.name;
+	return systems[currentPosition].name;
 }
-QVector NavigationSystem::CachedSystemIterator::Position () {
+const string &NavigationSystem::CachedSystemIterator::operator* () const{
 	if (done())
-		return nullPair.second;
-	return systems[currentPosition].second;
+		return nullPair.name;
+	return systems[currentPosition].name;
 }
+QVector NavigationSystem::CachedSystemIterator::Position () const{
+	if (done())
+		return nullPair.position;
+	return systems[currentPosition].position;
+}
+
+std::vector<std::string> &NavigationSystem::CachedSystemIterator::Destinations () {
+	if (done())
+		return nullPair.destinations;
+	return systems[currentPosition].destinations;
+}
+
+const std::vector<std::string> &NavigationSystem::CachedSystemIterator::Destinations () const {
+	if (done())
+		return nullPair.destinations;
+	return systems[currentPosition].destinations;
+}
+
 NavigationSystem::CachedSystemIterator & NavigationSystem::CachedSystemIterator::next () {
 	return ++(*this);
 }
@@ -328,7 +353,7 @@ NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::o
 
 
 
-
+static systemdrawhashtable jumptable;
 
 void NavigationSystem::DrawGalaxy()
 {
@@ -394,8 +419,6 @@ void NavigationSystem::DrawGalaxy()
 	//**********************************
 	while (!systemIter.done())	//	this goes through one time to get the major components locations, and scales its output appropriately
 	{
-		string temp = (*systemIter);
-		
 		pos = systemIter.Position();
 		ReplaceAxes(pos);
 
@@ -500,11 +523,12 @@ void NavigationSystem::DrawGalaxy()
 
 		bool moused = false;
 		if (TestIfInRangeRad(the_x, the_y, insert_size, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) ) {
-			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,false));
+			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,false,&systemIter.Destinations()));
 			moused=true;
 		}
 			
-		mainlist.insert(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,moused));
+		
+		jumptable.Put(temp,&(*mainlist.insert(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,moused,&systemIter.Destinations())).first));
 
 
 
@@ -555,23 +579,31 @@ void NavigationSystem::DrawGalaxy()
 	for (systemdrawset::iterator it = mainlist.begin();it !=mainlist.end();++it) {
 	   (*it).draw();
 		string sys = (*it).source;
-		int adj = UniverseUtil::GetNumAdjacentSystems(sys);
-		GFXBegin(GFXLINE);	
-	
-		for (int i=0;i<adj;++i) {
-			string oth = UniverseUtil::GetAdjacentSystem(sys,i);
-			if (sys<oth) {
-				systemdrawset::iterator j = mainlist.find (systemdrawnode(0,1,1,1,oth,screenoccupation,true));
-				if (j!=mainlist.end()) {
-					GFXColorf (GetColor (sys));
-					GFXVertex3f((*it).x,(*it).y,0);
-					GFXColorf (GetColor(oth));
-					GFXVertex3f((*j).x,(*j).y,0);						  
+
+		std::vector <std::string>* dest=(*it).dest;
+		if (dest!=NULL) {
+			GFXBegin(GFXLINE);	
+		
+			for (int i=0;i<dest->size();++i) {
+				std::string oth=(*dest)[i];
+				if (sys<oth) {
+					systemdrawnode *j = jumptable.Get (oth);
+					if (j!=NULL) {
+						GFXColorf (GetColor (sys));
+						GFXVertex3f((*it).x,(*it).y,0);
+						GFXColorf (GetColor(oth));
+						GFXVertex3f((*j).x,(*j).y,0);
+//					} else {
+//						// Happens whenever there's a system not drawn, which is every frame, so printing this is useless.
+//						printf("Warning: System %s in %s's jump list not found.\n",oth,sys);
+					}
+					
 				}
-				
 			}
+			GFXEnd();
+			(*it).dest=NULL; // just in case, since it will die later on.
 		}
-		GFXEnd();
+		jumptable.Delete(sys); // Won't ever reference this again, since it checks for less than.
 	   
 	}
 	mainlist.clear();	//	whipe the list
