@@ -10,6 +10,7 @@ NetBuffer::NetBuffer()
 			offset = 0;
 			size = MAXBUFFER;
 			memset( buffer, 0x20, size);
+			this->buffer[size-1] = 0;
 		}
 NetBuffer::NetBuffer( int bufsize)
 		{
@@ -17,6 +18,7 @@ NetBuffer::NetBuffer( int bufsize)
 			offset = 0;
 			size = bufsize;
 			memset( buffer, 0x20, size);
+			this->buffer[size-1] = 0;
 		}
 NetBuffer::NetBuffer( char * buf, int bufsize)
 		{
@@ -25,6 +27,7 @@ NetBuffer::NetBuffer( char * buf, int bufsize)
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
 			memcpy( buffer, buf, bufsize);
+			this->buffer[size-1] = 0;
 		}
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
@@ -33,6 +36,7 @@ NetBuffer::NetBuffer( const char * buf, int bufsize)
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
 			memcpy( buffer, buf, bufsize);
+			this->buffer[size-1] = 0;
 		}
 NetBuffer::~NetBuffer()
 		{
@@ -50,14 +54,14 @@ char *	NetBuffer::getData() { return buffer;}
 		// Extends the buffer if we exceed its size
 void	NetBuffer::resizeBuffer( int newsize)
 		{
-			if( size < newsize)
+			if( size-1 < newsize)
 			{
-				char * tmp = new char [newsize];
-				memset( tmp, 0, newsize);
+				char * tmp = new char [newsize+1];
+				memset( tmp, 0, newsize+1);
 				memcpy( tmp, buffer, size);
 				delete buffer;
 				buffer = tmp;
-				size = newsize;
+				size = newsize+1;
 			}
 		}
 // Check the buffer to see if we can still get info from it
