@@ -59,7 +59,9 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
     beamdrawqueue.push_back (vector<DrawContext>());
     DecalRef.push_back (1);
   }
+  lastlength=0;
   curlength = SIMULATION_ATOM*speed;
+  lastthick=0;
   curthick = SIMULATION_ATOM*radialspeed;
   GFXVertex beam[32];
 

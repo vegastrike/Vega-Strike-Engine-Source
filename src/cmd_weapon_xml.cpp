@@ -1,5 +1,12 @@
 #include "cmd_beam.h"
 #include "cmd_weapon_xml.h"
+
+
+
+void weapon_info::init() {r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=30;Longrange=.5;EnergyRate=18;EnergyConsumption=18;Refire=.2;}
+void weapon_info::Type (int typ) {type=typ;switch(typ) {case 1:file=string("");break;case 2:file=string("beamtexture.bmp");break;case 3:file=string("ball.ani");break;case 4:file=string("missile.xmesh");break;default:break;}}
+
+
 #include "xml_support.h"
 #include "physics.h"
 #include <vector>
@@ -86,7 +93,7 @@ namespace BeamXML {
   const EnumMap attribute_map(attribute_names, 18);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
-  weapon_info tmpweapon;
+  weapon_info tmpweapon(BEAM);
   int level=0;
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
@@ -101,7 +108,8 @@ namespace BeamXML {
     case MISSILE:
       assert (level==0);
       level++;
-      tmpweapon.type=elem;
+   
+      tmpweapon.Type(elem);
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
