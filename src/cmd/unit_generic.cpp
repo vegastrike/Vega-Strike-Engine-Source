@@ -4605,11 +4605,16 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 		  
 	      if (templ) {
 		if (templ->GetNumMounts()>jmod) {
-			
-		  int maxammo = templ->mounts[jmod].ammo;
+
+		/* Volume controls maxammo, not template ammo
+		 
+		   int maxammo = templ->mounts[jmod].ammo;
+
 		  if ((upmount.ammo>maxammo||upmount.ammo==-1)&&maxammo!=-1) {
 		    upmount.ammo = maxammo;
 		  }
+
+		*/
 		  if (templ->mounts[jmod].volume!=-1) {
 		    if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
 		      upmount.ammo = (templ->mounts[jmod].volume+1)/upmount.type->volume;
@@ -4624,32 +4629,34 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	    }else {
 	      int tmpammo = mounts[jmod].ammo;
 	      if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
-		tmpammo+=up->mounts[i].ammo;
-		if (templ) {
-		  if (templ->GetNumMounts()>jmod) {
-		    if (templ->mounts[jmod].ammo!=-1) {
-		      if (templ->mounts[jmod].ammo>tmpammo) {
-			tmpammo=templ->mounts[jmod].ammo;
-		      }
-		    }
-		    if (templ->mounts[jmod].volume!=-1) {
-		      if (templ->mounts[jmod].volume>mounts[jmod].type->volume*tmpammo) {
-			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
-		      }
-		    }
+			tmpammo+=up->mounts[i].ammo;
+			if (templ) {
+			  if (templ->GetNumMounts()>jmod) {
+				/* this shouldn't be here... we don't know why it's here, but we're leaving it commented out
+				if (templ->mounts[jmod].ammo!=-1) {
+				  if (templ->mounts[jmod].ammo>tmpammo) {
+					tmpammo=templ->mounts[jmod].ammo;
+				  }
+				}
+				*/	
+				if (templ->mounts[jmod].volume!=-1) {
+				  if (templ->mounts[jmod].volume<mounts[jmod].type->volume*tmpammo) {
+					tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
+				  }
+				}
 		    
-		  }
-		} 
-		if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
-		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
-		}
-		if (tmpammo>mounts[jmod].ammo) {
-		  cancompletefully=true;
-		  if (touchme)
-		    mounts[jmod].ammo = tmpammo;
-		}else {
-		  cancompletefully=false;
-		}
+			  }
+			} 
+			if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
+			  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
+			}
+			if (tmpammo>mounts[jmod].ammo) {
+			  cancompletefully=true;
+			  if (touchme)
+				mounts[jmod].ammo = tmpammo;
+			}else {
+			  cancompletefully=false;
+			}
 	      }
 	      
 	    }
@@ -4685,9 +4692,17 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	      if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
 		found=true;//we got one
 		percentage+=mounts[jkmod].Percentage(&up->mounts[i]);///calculate scrap value (if damaged)
-		if (touchme) //if we modify
-		  mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
-		break;
+		if (touchme){ //if we modify
+			if (up->mounts[i].ammo&&up->mounts[i].ammo!=-1&&mounts[jkmod].ammo!=-1){ //if downgrading ammo based upgrade, checks for infinite ammo
+				mounts[jkmod].ammo-=(mounts[jkmod].ammo>=up->mounts[i].ammo)?up->mounts[i].ammo:mounts[jkmod].ammo; //remove upgrade-worth, else remove remaining
+				if(!mounts[jkmod].ammo){ //if none left
+					mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+				}
+			}else{
+				mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+			}
+		}
+		break; 
 	      }
 	    }
 	  
