@@ -228,11 +228,6 @@ int main( int argc, char *argv[] )
 #endif
     */
     _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Welcome to Vega Strike, Use Tab to afterburn (+,- cruise control), arrows to steer."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","the 't' key targets objects; space fires at them, and 'a' autopilots to them."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","To speed up time press F9; F10 resets."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Target a base or planet and press '0' to request landing clearence."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Once inside the green box, 'd' will land. When you launch, press 'u' to undock."));
     _Universe->Loop(bootstrap_main_loop);
     return 0;
 }
@@ -415,6 +410,11 @@ void bootstrap_main_loop () {
     SplashScreen= NULL;
     SetStarSystemLoading (false);
     _Universe->LoadContrabandLists();
+    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Welcome to Vega Strike, Use Tab to afterburn (+,- cruise control), arrows to steer."));
+    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","the 't' key targets objects; space fires at them, and 'a' autopilots to them."));
+    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","To speed up time press F9; F10 resets."));
+    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Target a base or planet and press '0' to request landing clearence."));
+    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Once inside the green box, 'd' will land. When you launch, press 'u' to undock."));
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }

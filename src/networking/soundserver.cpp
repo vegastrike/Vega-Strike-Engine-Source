@@ -1,4 +1,4 @@
-#define HAVE_SDL
+//#define HAVE_SDL
 #ifdef HAVE_SDL
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
@@ -25,6 +25,7 @@ typedef int Mix_Music;
 #include <vector>
 #include "inet.h"
 int fadeout=0, fadein=0;
+float volume=0;
 int bits=0,done=0;
 
 
@@ -94,13 +95,10 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 	}
 
 	sende=false;
-	while(!Mix_FadeOutMusic(fadeout) /*&& Mix_PlayingMusic()*/) {
-	// wait for any fades to complete
-		if (!Mix_PlayingMusic()) {
-			break;
-		}		
-			SDL_Delay(100);
-
+	if (Mix_FadeOutMusic(fadeout)) {
+	}
+	while(Mix_PlayingMusic()) {
+		SDL_Delay(100);
 	}
 	if (oldmusic) {
 		Mix_FreeMusic(oldmusic);
@@ -113,8 +111,8 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 	}
 	
 	// well, there's no music, but most games don't break without music...
-//	int volume=SDL_MIX_MAXVOLUME;
-//	Mix_VolumeMusic(volume);
+	int newvolume=SDL_MIX_MAXVOLUME*volume;
+	Mix_VolumeMusic(newvolume);
 	return music;
 #else
 	return NULL;
@@ -174,6 +172,7 @@ int main(int argc, char **argv)
 		printf("%c",arg);
 		switch(arg) {
 		case 'p':
+		case 'P':
 			{
 				arg=INET_fgetc(mysocket);
 				while (arg!='\0'&&arg!='\n') {
@@ -202,6 +201,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'i':
+		case 'I':
 			{
 				arg=INET_fgetc(mysocket);
 				while (arg!='\0'&&arg!='\n') {
@@ -217,6 +217,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'o':
+		case 'O':
 			{
 				arg=INET_fgetc(mysocket);
 				while (arg!='\0'&&arg!='\n') {
@@ -231,7 +232,26 @@ int main(int argc, char **argv)
 				printf("\n[SETTING FADEOUT TO %d]\n",fadeout);
 			}
 			break;
+		case 'v':
+		case 'V':
+			{
+				arg=INET_fgetc(mysocket);
+				while (arg!='\0'&&arg!='\n') {
+					if (arg!='\r') {
+						ministr[0]=arg;
+						str+=ministr;
+					}
+					arg=INET_fgetc(mysocket);
+				}
+				printf("%s",str.c_str());
+				volume=atof(str.c_str());
+				printf("\n[SETTING VOLUME TO %f]\n",volume);
+				int newvolume=SDL_MIX_MAXVOLUME*volume;
+				Mix_VolumeMusic(newvolume);
+			}
+			break;
 		case 't':
+		case 'T':
 		case '\0':
 			INET_close (mysocket);
 			done=true;

@@ -89,6 +89,8 @@ for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; 
 #if 1
 const float volinc = 1;
 const float dopinc = .1;
+void incmusicvol (int i, KBSTATE a);
+void decmusicvol (int i, KBSTATE a);
 
 void incvol (int i, KBSTATE a) {
 #ifdef HAVE_AL
@@ -220,6 +222,8 @@ void VegaConfig::initCommandMap(){
   command_map["DopplerDec"]=decdop;
   command_map["VolumeInc"]=VolUp;
   command_map["VolumeDec"]=VolDown;
+  command_map["MusicVolumeInc"]=incmusicvol;
+  command_map["MusicVolumeDec"]=decmusicvol;
 #endif
   command_map["SwitchControl"]=Cockpit::SwitchControl;
   command_map["Respawn"]=Cockpit::Respawn;
