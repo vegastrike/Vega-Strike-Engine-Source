@@ -186,5 +186,9 @@ PackageFileExtractor::makePathExist(const string &path) const
 		makePathExist(string(path.begin(),
 							 path.begin() + last_sep));
 	}
-	mkdir(path.c_str(), 0755);
+	mkdir(path.c_str()
+#ifndef WIN32
+					, 0755
+#endif
+					);
 }
