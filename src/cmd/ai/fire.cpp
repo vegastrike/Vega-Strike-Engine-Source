@@ -51,6 +51,15 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
 }
 
 using Orders::FireAt;
+bool FireAt::PursueTarget (Unit * un, bool leader) {
+  if (leader)
+    return true;
+  if (un==parent->Target())
+    return rand()<.9*RAND_MAX;
+  if (parent->getRelation(un)<0)
+    return rand()<.2*RAND_MAX;
+  return false;
+}
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
   missileprobability = missileprob;  

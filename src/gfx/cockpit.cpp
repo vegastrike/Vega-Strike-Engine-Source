@@ -640,6 +640,8 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     if (maxfuel>0) return target->FuelData()/maxfuel;return 0;
   case UnitImages::ENERGY:
     return target->EnergyData();
+  case UnitImages::WARPENERGY:
+    return target->WarpEnergyData();
   case UnitImages::HULL:
     if (maxhull<target->GetHull()) {
       maxhull = target->GetHull();

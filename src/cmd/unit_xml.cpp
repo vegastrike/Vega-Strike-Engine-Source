@@ -177,7 +177,8 @@ namespace UnitXML {
       MAXIMUM,
       LIGHTTYPE,
       COMBATROLE,
-      RECURSESUBUNITCOLLISION
+      RECURSESUBUNITCOLLISION,
+      WARPENERGY
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -220,7 +221,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION)
     
   };
-  const EnumMap::Pair attribute_names[96] = {
+  const EnumMap::Pair attribute_names[97] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -247,6 +248,7 @@ namespace UnitXML {
     EnumMap::Pair ("top", TOP),
     EnumMap::Pair ("bottom", BOTTOM),
     EnumMap::Pair ("recharge", RECHARGE),
+    EnumMap::Pair ("warpenergy",WARPENERGY),
     EnumMap::Pair ("leak", LEAK),
     EnumMap::Pair ("strength", STRENGTH),
     EnumMap::Pair ("mass", MASS),
@@ -320,7 +322,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 96);
+  const EnumMap attribute_map(attribute_names, 97);
 }
 
 using XMLSupport::EnumMap;
@@ -1278,6 +1280,9 @@ using namespace UnitXML;
       case RECHARGE:
 	recharge=parse_float((*iter).value);
 	break;
+      case WARPENERGY:
+	warpenergy=CLAMP_SHORT(parse_float ((*iter).value));
+	break;
       case LIMIT:
 	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
 	break;
@@ -1624,6 +1629,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
       image->unitwriter->AddElement("front",shieldSerializer,XMLType((void *)&shield));
       image->unitwriter->AddElement("recharge",floatStarHandler,XMLType(&shield.recharge));
       image->unitwriter->AddElement("leak",charStarHandler,XMLType(&shield.leak));
+
       image->unitwriter->EndTag ("Shields");      
     }
     {
@@ -1641,6 +1647,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
     image->unitwriter->AddTag ("Reactor");
     image->unitwriter->AddElement ("recharge",floatStarHandler, XMLType (&recharge) );
     image->unitwriter->AddElement ("limit",ushortStarHandler, XMLType (&maxenergy) );
+    image->unitwriter->AddElement("warpenergy",ushortStarHandler, XMLType (&maxwarpenergy) );
     image->unitwriter->EndTag ("Reactor");
     
     image->unitwriter->EndTag ("Energy");      

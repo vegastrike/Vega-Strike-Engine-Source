@@ -104,14 +104,11 @@ static float GetJumpFuelQuantity() {
 void Unit::ActivateJumpDrive (int destination) {
   //const int jumpfuelratio=1;
   if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
-  if ((energy>jump.energy&&(jump.energy>=0||fuel>(-jump.energy*GetJumpFuelQuantity()/100.)))) {
+  if (warpenergy>=jump.energy&&(jump.energy>=0)) {
     jump.drive = destination;
     //float fuel_used=0;
-    if (jump.energy>0)
-      energy-=jump.energy;
-    else
-      fuel -= jump.energy*GetJumpFuelQuantity()/100.;
-  }else {
+    warpenergy-=jump.energy;
+  }/*else {
     if (abs(jump.energy)<32000) {
       static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
       if (fuel>jfuel*GetJumpFuelQuantity()) {
@@ -119,7 +116,7 @@ void Unit::ActivateJumpDrive (int destination) {
        jump.drive=destination;
      }
     }
-  }
+    }*/
   }
 }
 
@@ -141,9 +138,12 @@ float rand01 () {
 }
 float capship_size=500;
 unsigned short apply_float_to_short (float tmp) {
+  static unsigned int seed = 2531011;
+  seed +=214013;
+  seed %=65536;
   unsigned  short ans = (unsigned short) tmp;
   tmp -=ans;//now we have decimal;
-  if (((float)rand())/((float)RAND_MAX)<tmp)
+  if (seed<(unsigned int)(65536*tmp))
     ans +=1;
   return ans;
 }
@@ -376,6 +376,8 @@ void Unit::Init()
   
   shieldtight=0;//sphere mesh by default
   energy=maxenergy=1;
+  warpenergy=0;
+  maxwarpenergy=0;
   recharge = 1;
   shield.recharge=shield.leak=0;
   shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
@@ -1356,7 +1358,11 @@ void Unit::UpdatePhysics2 (const Transformation &trans, Transformation & old_phy
 	}
 }
 
-bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
+bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_level) {
+  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+  if (warpenergy<insys_jump_cost*jump.energy) {
+    return false;
+  }
   signed char Guaranteed = ComputeAutoGuarantee (this);
   if (Guaranteed==Mission::AUTO_OFF) {
     return false;
@@ -1377,17 +1383,22 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   if (target->isSubUnit())
     end = target->Position();
   float totallength = (start-end).Magnitude();
+  float totpercent=1;
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
 	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
     if (percent>1) {
       end=start;
+      totpercent=0;
     }else {
+      totpercent*=(1-percent);
       end = start*percent+end*(1-percent);
     }
   }
   bool ok=true;
+  static bool teleport_autopilot= XMLSupport::parse_bool(vs_config->getVariable("physics","teleport_autopilot","true"));
+  if (!teleport_autopilot) {
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
     for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
       static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
@@ -1399,31 +1410,39 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
 	  if (intersection>0) {
 	    end = start+ (end-start)*intersection;
+	    totpercent*=intersection;
 	    ok=false;
 	  }
 	 }
     }
    }
   }
-
+  }
   if (this!=target) {
+    warpenergy-=insys_jump_cost*totpercent*jump.energy;
     SetCurPosition(UniverseUtil::SafeEntrancePoint (end));
     if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
       Unit * other=NULL;
+      if (recursive_level>0)
       for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
     	Flightgroup * ff = other->getFlightgroup();
-		bool leadah=(ff==getFlightgroup());
-		if (ff) {
-			if (ff->leader.GetUnit()==this) {
-				leadah=true;
-		}
+	bool leadah=(ff==getFlightgroup());
+	if (ff) {
+	  if (ff->leader.GetUnit()==this) {
+	    leadah=true;
+	  }
 	}
-	if (leadah) {
-	  if (NULL==_Universe->isPlayerStarship (other)) {
-	    //other->AutoPilotTo(this);
-	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
-	   }
-	}
+	Order * otherord = other->getAIState();
+	if (otherord)
+	  if (otherord->PursueTarget (this,leadah)) {
+	    other->AutoPilotTo(this,true,recursive_level-1);
+	    if (leadah) {
+	      if (NULL==_Universe->isPlayerStarship (other)) {
+		other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
+	      }
+	    }
+	  }
+      
       }
     }
   }
@@ -1705,7 +1724,10 @@ void Unit::RollTorque(float amt) {
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
-
+float WARPENERGYMULTIPLIER() {
+  static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier",".02"));
+  return warpenergymultiplier;
+}
 static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
   shield+=apply_float_to_short(amt);
   if (shield>max)
@@ -1729,7 +1751,19 @@ float Unit::MaxShieldVal() const{
   return maxshield;
 }
 void Unit::RechargeEnergy() {
-    energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
+    unsigned short newenergy=apply_float_to_short (recharge *SIMULATION_ATOM);
+    if (((int)energy)+((int)newenergy)>65535) {
+      newenergy= 65535 - energy;
+      energy=65535;
+      if (newenergy>0) {
+	newenergy=apply_float_to_short (newenergy*WARPENERGYMULTIPLIER());
+	if (((int)warpenergy)+((int)newenergy)>65535) {	
+	  warpenergy+=newenergy;
+	}
+      }
+    }else {
+      energy+=newenergy;
+    }
 }
 void Unit::RegenShields () {
   int rechargesh=1;
@@ -1827,8 +1861,18 @@ void Unit::RegenShields () {
     RechargeEnergy();
   }
   if (maxenergy>maxshield) {
-    if (energy>maxenergy-maxshield)//allow shields to absorb xtra power
+    if (energy>maxenergy-maxshield) {//allow shields to absorb xtra power
+      short excessenergy = energy - (maxenergy-maxshield);
       energy=maxenergy-maxshield;  
+      if (excessenergy >0) {
+	warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
+	unsigned short mwe = maxwarpenergy;
+	if (mwe<jump.energy)
+	  mwe = jump.energy;
+	if (warpenergy>mwe)
+	  warpenergy=mwe;
+      }
+    }
   }else {
     energy=0;
 }
@@ -2265,6 +2309,12 @@ void Unit::ArmorData (unsigned short armor[4]) const{
 
 float Unit::FuelData () const{
   return fuel;
+}
+float Unit::WarpEnergyData() const {
+  if (maxwarpenergy>0)
+    return ((float)warpenergy)/((float)maxwarpenergy);
+  else
+    return ((float)warpenergy)/((float)jump.energy);
 }
 float Unit::EnergyData() const{
   if (maxenergy<=MaxShieldVal()) {
@@ -3415,7 +3465,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   image->ecm = abs(image->ecm);
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
-  //  STDUPGRADE(afterburnenergy,up->afterburnenergy,templ->afterburnenergy,0);
+  STDUPGRADE(maxwarpenergy,up->maxwarpenergy,templ->maxwarpenergy,0);
   STDUPGRADE(limits.yaw,tlimits_yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,tlimits_pitch,templ->limits.pitch,0);
   STDUPGRADE(limits.roll,tlimits_roll,templ->limits.roll,0);
@@ -3507,7 +3557,6 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (jump.drive>=-1&&up->jump.drive>=-1) {
       if (touchme) jump.drive=-2;
       numave++;
-      percentage+=(jump.energy&&jump.delay)?(.25*(up->jump.energy/jump.energy+up->jump.delay/jump.delay)):1;
       percentage+=.5*((float)(100-jump.damage))/(101-up->jump.damage);
     }
     if (cloaking!=-1&&up->cloaking!=-1) {
@@ -3554,9 +3603,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
       cancompletefully=false;
     }
-    
     if (jump.drive==-2&&up->jump.drive>=-1) {
-      if (touchme) {jump.drive = up->jump.drive;jump.energy=up->jump.energy;jump.delay=up->jump.delay; jump.damage=0;}
+      if (touchme) {jump.drive = up->jump.drive;jump.damage=0;}
       numave++;
     }else if (jump.drive>=-1&&up->jump.drive>=-1) {
       cancompletefully=false;

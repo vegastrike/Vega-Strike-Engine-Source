@@ -438,7 +438,7 @@ protected:
   virtual float ExplosionRadius();
 public:
   virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
-  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
+  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false,int recursive_level=2);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within
@@ -531,6 +531,7 @@ public:
   float FuelData() const;
   ///Returns the current ammt of energy left
   float EnergyData() const;
+  float WarpEnergyData() const;
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
@@ -712,6 +713,10 @@ protected:
   unsigned short maxenergy;
   ///current energy
   unsigned short energy;
+  ///maximum energy
+  unsigned short maxwarpenergy;
+  ///current energy
+  unsigned short warpenergy;
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   virtual float DealDamageToShield (const Vector & pnt, float &Damage);
   ///If the shields are up from this position

@@ -34,6 +34,7 @@ public:
   }
   void PossiblySwitchTarget(bool istargetjumpableplanet);
   virtual void getAverageGunSpeed (float & speed, float & range, float &missilerange) const;
+  virtual bool PursueTarget(Unit *, bool leader);
   void AddReplaceLastOrder (bool replace);
   void ExecuteLastScriptFor(float time);
   void FaceTarget (bool end);

@@ -57,6 +57,7 @@ namespace CockpitXML {
       KEJECT,
       KLOCK,
       KHULL,
+      WENERGY,
       KKPS,
       KSETKPS,
       KFPS,
@@ -89,6 +90,7 @@ namespace CockpitXML {
     EnumMap::Pair ("Eject", KEJECT),
     EnumMap::Pair ("Lock", KLOCK),
     EnumMap::Pair ("Hull", KHULL),
+    EnumMap::Pair ("WarpEnergy", WENERGY),
     EnumMap::Pair ("Speed", KKPS),
     EnumMap::Pair ("SetSpeed", KSETKPS),
     EnumMap::Pair ("Auto", KAUTO),
@@ -126,7 +128,7 @@ namespace CockpitXML {
     EnumMap::Pair ("lag", COCKPIT_LAG)
   };
 
-  const EnumMap element_map(element_names, 25);
+  const EnumMap element_map(element_names, 26);
   const EnumMap attribute_map(attribute_names, 28);
 }
 
@@ -205,6 +207,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case KSHIELDR:
   case KSHIELDB:
   case KENERGY:
+  case WENERGY:
   case KEJECT:
   case KLOCK:
   case KHULL:
