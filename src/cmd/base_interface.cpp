@@ -520,6 +520,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	CurrentBase=this;
 	CallComp=false;
 	caller=un;
+        curroom=0;
 	curlinkindex=0;
 	this->baseun=base;
 	float x,y;
