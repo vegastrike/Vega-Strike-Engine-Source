@@ -147,6 +147,15 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
 
+/* Use no threads */
+#undef USE_NET_THREAD_NONE
+
+/* Use POSIX threads */
+#undef USE_NET_THREAD_POSIX
+
+/* Use SDL threads */
+#undef USE_NET_THREAD_SDL
+
 /* Version number of package */
 #undef VERSION
 

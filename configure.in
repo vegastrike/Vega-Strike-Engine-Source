@@ -1156,6 +1156,29 @@ AM_CONDITIONAL(NETCOMM, test "$NETCOMM" = "1")
 AM_CONDITIONAL(WIN32, test "$WIN32" = "1")
 AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
 
+dnl --------------------------------------------------------------------------
+dnl Choosing networking threading approach
+dnl --------------------------------------------------------------------------
+AC_ARG_ENABLE(net-threads,
+  AC_HELP_STRING([--enable-net-threads=TYPE], [TYPE=none (default), posix, sdl]),
+  [ case "$enableval" in
+      "no" | "none")
+        use_net_thread=NONE
+        AC_DEFINE(USE_NET_THREAD_NONE,1,[Use no threads])
+	;;
+      "sdl")
+        use_net_thread=SDL
+        AC_DEFINE(USE_NET_THREAD_SDL,1,[Use SDL threads])
+	;;
+      "posix"|"yes"|*)
+        use_net_thread=POSIX
+        AC_DEFINE(USE_NET_THREAD_POSIX,1,[Use POSIX threads])
+	;;
+    esac
+  ],
+  [use_net_thread=NONE])
+
+
 CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 CFLAGS="$CFLAGS $TR_CFLAGS  -pipe "
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS -pipe "

@@ -1,12 +1,21 @@
 #ifndef VSNET_THREAD_H
 #define VSNET_THREAD_H
 
-/* Choose an implementation that you like. Only that one will be
- * compiled. Later, the decision should be made by configure.
+#include <config.h>
+
+/* Choose an implementation that you like via configure. Only that
+ * one will be compiled.
  */
-#undef  USE_PTHREAD
-#undef  USE_SDL_THREAD
-#define USE_NO_THREAD
+#undef USE_PTHREAD
+#undef USE_SDL_THREAD
+#undef USE_NO_THREAD
+#if defined(USE_NET_THREAD_POSIX)
+#  define USE_PTHREAD
+#elif defined(USE_NET_THREAD_SDL)
+#  define USE_SDL_THREAD
+#else
+#  define USE_NO_THREAD
+#endif
 
 /*------------------------------------------------------------*
  * declaration of VSThread                                    *
