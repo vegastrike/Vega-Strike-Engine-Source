@@ -18,10 +18,10 @@ using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
   AIEvresult::AIEvresult (int type, float const min, const float max, const std::string &aiscript) {
-	    this->type = type; 
-		this->max = max; 
-		this->min = min; 
-		this->script = script;
+	 this->type = type; 
+	 this->max = max; 
+	 this->min = min; 
+	 this->script = aiscript;
   }
 
   const int  AIUNKNOWN=0;

@@ -438,22 +438,22 @@ void Unit::Destroy() {
 
 bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
   int i;
-  Vector st (InvTransform (cumulative_transformation_matrix,pt));
   for (i=0;i<numsubunit;i++) {
     if ((subunits[i]->queryBSP(pt,err, norm,dist)))
       return true;
   }
+  Vector st (InvTransform (cumulative_transformation_matrix,pt));
   bool temp=false;
   for (i=0;i<nummesh&&!temp;i++) {
     temp|=meshdata[i]->queryBoundingBox (st,err);
+     
   }
   if (!temp)
     return false;
   BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
   if (!(*tmpBsp)) {
-	  dist = pt.Magnitude()-err-rSize();
-	  if (dist<0) dist = 0.0001;
-      return true;
+    dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
+    return true;
   }
   if ((*tmpBsp)->intersects (st,err,norm,dist)) {
     norm = ToWorldCoordinates (norm);
