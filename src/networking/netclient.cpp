@@ -1722,7 +1722,11 @@ bool NetClient::IsNetcommActive() const
 bool NetClient::IsNetcommSecured() const
 {
 #ifdef NETCOMM
-    return ( this->NetComm==NULL ? false : this->NetComm->IsSecured() );
+	bool ret = false;
+	if( this->NetComm!=NULL)
+		ret = this->NetComm->IsSecured();
+	
+    return ret;
 #else
     return false;
 #endif
