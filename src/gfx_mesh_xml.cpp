@@ -42,7 +42,8 @@ const EnumMap::Pair Mesh::XML::element_names[] = {
   {"Polygons", XML::POLYGONS},
   {"Tri", XML::TRI},
   {"Quad", XML::QUAD},
-  {"Vertex", XML::VERTEX}};
+  {"Vertex", XML::VERTEX}
+};
 
 const EnumMap::Pair Mesh::XML::attribute_names[] = {
   {"UNKNOWN", XML::UNKNOWN},
@@ -53,12 +54,13 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   {"i", XML::I},
   {"j", XML::J},
   {"k", XML::K},
+  {"Shade", XML::FLATSHADE},
   {"point", XML::POINT},
   {"s", XML::S},
   {"t", XML::T}};
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 10);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 11);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 12);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -80,7 +82,7 @@ will be no need for this sort of checking
 
 void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   //cerr << "Start tag: " << name << endl;
-
+  //static bool flatshadeit=false;
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
   XML::Names top;
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
@@ -207,18 +209,55 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   case XML::TRI:
     assert(top==XML::POLYGONS);
     assert(xml->load_stage==4);
-
     xml->num_vertices=3;
     xml->active_list = &xml->tris;
     xml->active_ind = &xml->triind;
+    xml->trishade.push_back (0);
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  xml->trishade[xml->trishade.size()-1]=1;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    xml->trishade[xml->trishade.size()-1]=0;
+	  }
+	}
+	break;
+      default:
+	assert (0);
+      }
+    }
     break;
   case XML::QUAD:
     assert(top==XML::POLYGONS);
     assert(xml->load_stage==4);
-
     xml->num_vertices=4;
     xml->active_list = &xml->quads;
     xml->active_ind = &xml->quadind;
+    xml->quadshade.push_back (0);
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      cerr << "another shade bites the dust";
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  xml->quadshade[xml->quadshade.size()-1]=1;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    xml->quadshade[xml->quadshade.size()-1]=0;
+	  }
+	}
+	break;
+      default:
+	assert(0);
+      }
+    }
     break;
   case XML::VERTEX:
     assert(top==XML::TRI || top==XML::QUAD);
@@ -488,6 +527,58 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   }
   
   // TODO: add alpha handling
+
+   //check for per-polygon flat shading
+  unsigned int trimax = xml->tris.size()/3;
+  int a=0;
+  int i=0;
+  int j=0;
+  for (i=0;i<trimax;i++,a+=3) {
+    if (xml->trishade[i]==1) {
+      for (j=0;j<3;j++) {
+	Vector Cur (xml->vertices[xml->triind[a+j]].x,
+		    xml->vertices[xml->triind[a+j]].y,
+		    xml->vertices[xml->triind[a+j]].z);
+	Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
+		       xml->vertices[xml->triind[a+((j+2)%3)]].y,
+		       xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
+	  .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
+			 xml->vertices[xml->triind[a+((j+1)%3)]].y,
+			 xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
+	Normalize(Cur);
+	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	xml->tris[a+j].i=Cur.i/xml->vertexcount[xml->triind[a+j]];
+	xml->tris[a+j].j=Cur.j/xml->vertexcount[xml->triind[a+j]];
+	xml->tris[a+j].k=Cur.k/xml->vertexcount[xml->triind[a+j]];
+      }
+    }
+  }
+  a=0;
+  trimax = xml->quads.size()/4;
+  for (i=0;i<trimax;i++,a+=4) {
+    if (xml->quadshade[i]==1) {
+      for (j=0;j<4;j++) {
+	Vector Cur (xml->vertices[xml->quadind[a+j]].x,
+		    xml->vertices[xml->quadind[a+j]].y,
+		    xml->vertices[xml->quadind[a+j]].z);
+	Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
+		       xml->vertices[xml->quadind[a+((j+2)%4)]].y,
+		       xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
+	  .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
+			 xml->vertices[xml->quadind[a+((j+1)%4)]].y,
+			 xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
+	Normalize(Cur);
+	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	xml->quads[a+j].i=Cur.i/xml->vertexcount[xml->quadind[a+j]];
+	xml->quads[a+j].j=Cur.j/xml->vertexcount[xml->quadind[a+j]];
+	xml->quads[a+j].k=Cur.k/xml->vertexcount[xml->quadind[a+j]];
+      }
+    }
+  }
+
+
+ 
+
   Decal = new Texture(xml->decal_name.c_str(), 0);
 
   int index = 0;
@@ -500,7 +591,6 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     fprintf (stderr, "uhoh");
   }
   radialSize = 0;
-  int a;
   for(a=0; a<xml->tris.size(); a++, index++) {
     vertexlist[index] = xml->tris[a];
     minSizeX = min(vertexlist[index].x, minSizeX);
@@ -525,7 +615,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     y_center = (minSizeY + maxSizeY)/2.0,
     z_center = (minSizeZ + maxSizeZ)/2.0;
   SetPosition(x_center, y_center, z_center);
-  for(int a=0; a<xml->tris.size()+xml->quads.size(); a++) {
+  for(a=0; a<xml->tris.size()+xml->quads.size(); a++) {
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
     vertexlist[a].z -= z_center;
@@ -546,10 +636,6 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
  
   //TODO: add force handling
 
-
-  if (radialSize==0) {
-    int i;
-  }
 
   // Calculate bounding sphere
 

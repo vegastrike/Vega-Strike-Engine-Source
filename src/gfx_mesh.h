@@ -67,6 +67,7 @@ private:
       TRI, 
       QUAD, 
       VERTEX,
+      FLATSHADE,
       //attributes
       TEXTURE,
       X,
@@ -111,6 +112,9 @@ private:
     vector<GFXVertex> quads;
     vector<int> triind;//for possible normal computation
     vector<int> quadind;
+    vector<int> trishade;
+    vector<int> quadshade;
+    vector<int> *active_shade;
     vector<GFXVertex> *active_list;
     vector<int> *active_ind;
     GFXVertex vertex;
