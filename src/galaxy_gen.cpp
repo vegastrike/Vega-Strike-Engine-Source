@@ -1009,8 +1009,8 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
   readColorGrads (gradtex,(datapath+starlist).c_str());
-  readentity (entities[1],(datapath+planetlist).c_str());
-  readentity (entities[2],(datapath+gasgiantlist).c_str());
+  readentity (entities[2],(datapath+planetlist).c_str());
+  readentity (entities[1],(datapath+gasgiantlist).c_str());
   readentity (entities[3],(datapath+moonlist).c_str());
   readentity (units[1],(datapath+smallunitlist).c_str());
   readentity (background,(datapath+backgroundlist).c_str());

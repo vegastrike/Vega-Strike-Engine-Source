@@ -19,6 +19,9 @@
 #include "gfx/sprite.h"
 #include "vs_globals.h"
 #include "gfx/aux_texture.h"
+#include "vs_globals.h"
+#include "config_xml.h"
+
 float colors[] = {1, 1, 1, 1};
 
 GUITexture ReadTex(char *texfile) {
@@ -236,9 +239,11 @@ float word_length(const char * str) {
   return length/2500;
 }
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-  float font_size_float=5./100;
+  static float rescale_font = XMLSupport::parse_float (vs_config->getVariable("graphics","gui_font_scale",".75"));
+  float font_size_float=rescale_font*5./100;
+
         int cur;
-        float font_size = size*.66;
+        float font_size = size*rescale_font;
 	float width = 0;
 	float cur_width = 0;
 	float end = 0;
@@ -248,6 +253,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         glLoadIdentity();
         glEnable(GL_LINE_SMOOTH);
 	glLineWidth(wid);
+	wid/=rescale_font;
 	glTranslatef(x,y,0);
 	glScalef(font_size,font_size,1);
 	end = no_end?0:glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
