@@ -190,7 +190,7 @@ extern double interpolation_blend_factor;
 void StarSystem::Update() {
   static int numframes;
   Unit *unit;
-  qt->Update();
+
 
   
   UpdateTime();
@@ -218,6 +218,8 @@ void StarSystem::Update() {
       current_stage=PHY_COLLIDE;
       } else
       if (current_stage==PHY_COLLIDE) {
+	static int stage=0;
+	qt->Update(16,((stage++)%16));
 	numframes++;//don't resolve physics until 2 seconds
 	if (numframes>2/(SIMULATION_ATOM)) {
 	  iter = drawList->createIterator();

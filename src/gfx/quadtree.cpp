@@ -72,9 +72,9 @@ float QuadTree::GetHeight (Vector Location, Vector & normal) {
   return tmp;
 }
 
-void QuadTree::Update () {
+void QuadTree::Update (unsigned short numstages, unsigned short whichstage) {
   //GetViewerPosition
-  root->Update (RootCornerData,InvTransform (transformation,_Universe->AccessCamera()->GetPosition()),140);
+  root->Update (RootCornerData,InvTransform (transformation,_Universe->AccessCamera()->GetPosition()),detail,numstages,whichstage);
 }
 
 void QuadTree::Render () {

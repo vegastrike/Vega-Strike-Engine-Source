@@ -127,7 +127,7 @@ class quadsquare {
 	float	RecomputeErrorAndLighting(const quadcornerdata& cd);
 	int	CountNodes();
   ///Make sure to translate into Quadtree Space
-	void	Update(const quadcornerdata& cd, const Vector &ViewerLocation, float Detail);
+	void	Update(const quadcornerdata& cd, const Vector &ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage);
 	int	Render(const quadcornerdata& cd);
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
@@ -150,7 +150,7 @@ private:
 	void	CreateChild(int index, const quadcornerdata& cd);
 	void	SetupCornerData(quadcornerdata* q, const quadcornerdata& pd, int ChildIndex);
 
-	void	UpdateAux(const quadcornerdata& cd, const Vector &ViewerLocation, float CenterError);
+	void	UpdateAux(const quadcornerdata& cd, const Vector &ViewerLocation, float CenterError, unsigned int pipelinemask);
 	void	RenderAux(const quadcornerdata& cd, CLIPSTATE vis);
 	void	SetStatic(const quadcornerdata& cd);
 	static IdentityTransform * nonlinear_trans;

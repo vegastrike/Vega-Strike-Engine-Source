@@ -192,18 +192,49 @@ bool	BoxTest(float x, float z, float size, float miny, float maxy, float error, 
 
 
 
+/**
+ * calculates the bitmasks for which children to do and not to do Tries to preserve some locality
+ * for 16 the results are
+ * Stage 0 Number: 00000000000000000000000000010001
+ * Stage 1 Number: 00000000000000000000000000010010
+ * Stage 2 Number: 00000000000000000000000000010100
+ * Stage 3 Number: 00000000000000000000000000011000
+ * Stage 4 Number: 00000000000000000000000000100001
+ * Stage 5 Number: 00000000000000000000000000100010
+ * Stage 6 Number: 00000000000000000000000000100100
+ * Stage 7 Number: 00000000000000000000000000101000
+ * Stage 8 Number: 00000000000000000000000001000001
+ * Stage 9 Number: 00000000000000000000000001000010
+ * Stage 0 Number: 00000000000000000000000001000100
+ * Stage 1 Number: 00000000000000000000000001001000
+ * Stage 2 Number: 00000000000000000000000010000001
+ * Stage 3 Number: 00000000000000000000000010000010
+ * Stage 4 Number: 00000000000000000000000010000100
+ * Stage 5 Number: 00000000000000000000000010001000
+ */
+static unsigned int calculatestage (unsigned int numstages, unsigned int whichstage) {
+    unsigned int stage=0;
+  int count=0;
+  numstages-=1;
+  while (numstages) {
+    int tmp =1 << (whichstage%4);
+    stage += (tmp<<((count++)*4));
+    whichstage/=4;
+    numstages/=4;
+  }
+  return stage;
+}
 
-void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail)
-// Refresh the vertex enabled states in the tree, according to the
-// location of the viewer.  May force creation or deletion of qsquares
-// in areas which need to be interpolated.
-{
+/// Refresh the vertex enabled states in the tree, according to the
+/// location of the viewer.  May force creation or deletion of qsquares
+/// in areas which need to be interpolated.
+void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage) {
   DetailThreshold = Detail;
-  UpdateAux(cd, nonlinear_trans->InvTransform(ViewerLocation), 0);
+  UpdateAux(cd, nonlinear_trans->InvTransform(ViewerLocation), 0,calculatestage (numstages,whichstage));
 }
 
 
-void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocation, float CenterError)
+void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocation, float CenterError, unsigned int whichChildren)
 // Does the actual work of updating enabled states and tree growing/shrinking.
 {
 	
@@ -213,11 +244,10 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 	}
 
 	int	half = 1 << cd.Level;
-	int	whole = half << 1;
 
 	// See about enabling child verts.
-	if ((EnabledFlags & 1) == 0 && VertexTest(cd.xorg + whole, Vertex[1].Y, cd.zorg + half, Error[0], ViewerLocation) == true) EnableEdgeVertex(0, false, cd);	// East vert.
-	if ((EnabledFlags & 8) == 0 && VertexTest(cd.xorg + half, Vertex[4].Y, cd.zorg + whole, Error[1], ViewerLocation) == true) EnableEdgeVertex(3, false, cd);	// South vert.
+	if ((EnabledFlags & 1) == 0 && VertexTest(cd.xorg + (half<<1), Vertex[1].Y, cd.zorg + half, Error[0], ViewerLocation) == true) EnableEdgeVertex(0, false, cd);	// East vert.
+	if ((EnabledFlags & 8) == 0 && VertexTest(cd.xorg + half, Vertex[4].Y, cd.zorg + (half<<1), Error[1], ViewerLocation) == true) EnableEdgeVertex(3, false, cd);	// South vert.
 	if (cd.Level > 0) {
 		if ((EnabledFlags & 32) == 0) {
 			if (BoxTest(cd.xorg, cd.zorg, half, MinY, MaxY, Error[3], ViewerLocation) == true) EnableChild(1, cd);	// nw child.er
@@ -234,39 +264,59 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 		
 		// Recurse into child quadrants as necessary.
 		quadcornerdata	q;
-		
-		if (EnabledFlags & 32) {
-			SetupCornerData(&q, cd, 1);
-			Child[1]->UpdateAux(q, ViewerLocation, Error[3]);
-		}
-		if (EnabledFlags & 16) {
-			SetupCornerData(&q, cd, 0);
-			Child[0]->UpdateAux(q, ViewerLocation, Error[2]);
-		}
-		if (EnabledFlags & 64) {
-			SetupCornerData(&q, cd, 2);
-			Child[2]->UpdateAux(q, ViewerLocation, Error[4]);
-		}
-		if (EnabledFlags & 128) {
-			SetupCornerData(&q, cd, 3);
-			Child[3]->UpdateAux(q, ViewerLocation, Error[5]);
+		if (whichChildren) {
+		  //if we want to mask out certain vertices for pipelined execution
+		  if ((EnabledFlags & 32)&&(whichChildren&0x1)) {
+		    SetupCornerData(&q, cd, 1);
+		    Child[1]->UpdateAux(q, ViewerLocation, Error[3],whichChildren>>4);
+		  }
+		  if ((EnabledFlags & 16)&&(whichChildren&0x2)) {
+		    SetupCornerData(&q, cd, 0);
+		    Child[0]->UpdateAux(q, ViewerLocation, Error[2],whichChildren>>4);
+		  }
+		  if ((EnabledFlags & 64)&&(whichChildren&0x4)) {
+		    SetupCornerData(&q, cd, 2);
+		    Child[2]->UpdateAux(q, ViewerLocation, Error[4],whichChildren>>4);
+		  }
+		  if ((EnabledFlags & 128)&&(whichChildren&0x8)) {
+		    SetupCornerData(&q, cd, 3);
+		    Child[3]->UpdateAux(q, ViewerLocation, Error[5],whichChildren>>4);
+		  }
+		}else {
+		  //if we want to do all
+		  if ((EnabledFlags & 32)) {
+		    SetupCornerData(&q, cd, 1);
+		    Child[1]->UpdateAux(q, ViewerLocation, Error[3],0);
+		  }
+		  if ((EnabledFlags & 16)) {
+		    SetupCornerData(&q, cd, 0);
+		    Child[0]->UpdateAux(q, ViewerLocation, Error[2],0);
+		  }
+		  if ((EnabledFlags & 64)) {
+		    SetupCornerData(&q, cd, 2);
+		    Child[2]->UpdateAux(q, ViewerLocation, Error[4],0);
+		  }
+		  if ((EnabledFlags & 128)) {
+		    SetupCornerData(&q, cd, 3);
+		    Child[3]->UpdateAux(q, ViewerLocation, Error[5],0);
+		  }		  
 		}
 	}
 	
 	// Test for disabling.  East, South, and center.
-	if ((EnabledFlags & 1) && SubEnabledCount[0] == 0 && VertexTest(cd.xorg + whole, Vertex[1].Y, cd.zorg + half, Error[0], ViewerLocation) == false) {
+	if ((EnabledFlags & 1) && SubEnabledCount[0] == 0 && VertexTest(cd.xorg + (half<<1), Vertex[1].Y, cd.zorg + half, Error[0], ViewerLocation) == false) {
 		EnabledFlags &= ~1;
 		quadsquare*	s = GetNeighbor(0, cd);
 		if (s) s->EnabledFlags &= ~4;
 	}
-	if ((EnabledFlags & 8) && SubEnabledCount[1] == 0 && VertexTest(cd.xorg + half, Vertex[4].Y, cd.zorg + whole, Error[1], ViewerLocation) == false) {
+	if ((EnabledFlags & 8) && SubEnabledCount[1] == 0 && VertexTest(cd.xorg + half, Vertex[4].Y, cd.zorg + (half<<1), Error[1], ViewerLocation) == false) {
 		EnabledFlags &= ~8;
 		quadsquare*	s = GetNeighbor(3, cd);
 		if (s) s->EnabledFlags &= ~2;
 	}
 	if (EnabledFlags == 0 &&
 	    cd.Parent != NULL &&
-	    BoxTest(cd.xorg, cd.zorg, whole, MinY, MaxY, CenterError, ViewerLocation) == false)
+	    BoxTest(cd.xorg, cd.zorg, (half<<1), MinY, MaxY, CenterError, ViewerLocation) == false)
 	{
 		// Disable ourself.
 		cd.Parent->Square->NotifyChildDisable(*cd.Parent, cd.ChildIndex);	// nb: possibly deletes 'this'.

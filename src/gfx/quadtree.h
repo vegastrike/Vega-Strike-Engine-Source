@@ -27,7 +27,7 @@ class QuadTree {
   QuadTree (const char * filename);
   ~QuadTree();
   void Render();
-  void Update();
+  void Update(unsigned short numstages, unsigned short whichstage);
   void SetTransformation (const Matrix transformation);
   float GetHeight (Vector Location, Vector & normal);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
