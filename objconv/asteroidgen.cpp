@@ -90,7 +90,7 @@ public:
   int d;
   float sd, td;
   Tri (int x, int y, int z) {c=x;b=y;a=z; quad=false;}
-  Tri (int x, int y, int z, int w) {d=x;c=y;b=z;a=w;}
+  Tri (int x, int y, int z, int w) {d=x;c=y;b=z;a=w;quad=true;}
   void Write (FILE * fp) {
     if (!quad)
       fprintf (fp,"<Tri>\n");
@@ -119,9 +119,9 @@ struct asteroid {
   }
   void CenterAndRotate () {
     for (unsigned int i=0;i<points.size();i++) {
-      points[i].Pitch (YawPitchRoll.i);
-      points[i].Yaw (YawPitchRoll.j);
-      points[i].Roll (YawPitchRoll.k);
+      //      points[i].Pitch (YawPitchRoll.i);
+      //      points[i].Yaw (YawPitchRoll.j);
+      //      points[i].Roll (YawPitchRoll.k);
       points[i].i+=center.i;
       points[i].j+=center.j;
       points[i].k+=center.k;
@@ -148,9 +148,10 @@ void determine_centers_and_radii (vector <asteroid> & field, const Vector &cube_
     field[i].YawPitchRoll.k = 2*M_PI*((float)rand())/RAND_MAX;
     bool insideanother=false;
     for (unsigned int j=0;j<i;j++) {
-      if (fabs (field[j].center.i-field[i].center.i)<2*(field[j].radius+field[i].radius)&&
-	  fabs (field[j].center.j-field[i].center.j)<2*(field[j].radius+field[i].radius)&&
-	  fabs (field[j].center.j-field[i].center.j)<2*(field[j].radius+field[i].radius)) {
+      if (fabs (field[j].center.i-field[i].center.i)<1.2
+*(field[j].radius+field[i].radius)&&
+	  fabs (field[j].center.j-field[i].center.j)<1.2*(field[j].radius+field[i].radius)&&
+	  fabs (field[j].center.j-field[i].center.j)<1.2*(field[j].radius+field[i].radius)) {
 	insideanother =true;
 	break;
       }
@@ -191,29 +192,29 @@ void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const
     for (unsigned int j=0;j<slices;j++) {
       if (i!=0&&i!=stacks+1)
 	tempR = getR (minr,maxr);///don't want the tip ot have different points
-      float projR = sin (M_PI*i/(stacks+1));
-      v.push_back (Vector (projR*cos (M_PI*j/(slices-1)),//i
-			   tempR*cos (M_PI*i/(stacks+1)),//j
-			   projR*sin (M_PI*j/(slices-1)),//k
-			   ((float)j)/(slices-1),//s
-			   ((float)i)/(stacks+1)));//t
-      int joinit = j%2?1:0;//for joining the top and bottom textures
+      float projR = tempR*sin (M_PI*i/(stacks+1));
+      if ((i!=0&&i!=stacks+1)||j==0) {
+	v.push_back (Vector (projR*cos (2*M_PI*j/(slices)),//i
+			     tempR*cos (M_PI*i/(stacks+1)),//j
+			     projR*sin (2*M_PI*j/(slices)),//k
+			     ((float)j)/(slices-1)+((i==0||i==stacks+1)?.5:0),//s
+			     ((float)i)/(stacks+1)));//t
+      }
       if (i!=0&&i!=1&&i!=stacks+1) {
-	p.push_back (Tri ((i-1)*slices+j,
-			  i*slices+j,
-			  i*slices+ ((j+1)%slices),
-			  (i-1)*slices+ ((j+1)%slices)));
+	p.push_back (Tri (1+(i-2)*slices+j,
+			  1+(i-1)*slices+j,
+			  1+(i-1)*slices+ ((j+1)%slices),
+			  1+(i-2)*slices+ ((j+1)%slices)));
       }else if (i==1) {
 	//do top pyr
 
-	p.push_back (Tri ((i-1)*slices+((j+joinit)%slices),
-			  i*slices+j,
-			  i*slices+ ((j+1)%slices)));
-		
+	p.push_back (Tri (0,
+			  1+j,
+			  1+((j+1)%slices)));
       } else if (i==stacks+1) {
-	p.push_back (Tri ((i-1)*slices+j,
-			  i*slices+j,
-			  (i-1)*slices+ ((j+joinit)%slices)));
+	p.push_back (Tri (1+(i-2)*slices+j,
+			  1+(i-1)*slices,
+			  1+(i-2)*slices+ ((j+1)%slices)));
 	//do bottom pyr
       }
     }
