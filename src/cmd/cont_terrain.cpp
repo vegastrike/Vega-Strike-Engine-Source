@@ -215,7 +215,13 @@ void ContinuousTerrain::Draw() {
     if (data[i])
       data[i]->Render();
     else if (md[i].mesh) {
-      md[i].mesh->Draw (1000,md[i].mat);
+      Vector TransformedPosition = Transform (md[i].mat,
+					      md[i].mesh->Position());
+      float d = GFXSphereInFrustum(TransformedPosition,
+				   md[i].mesh->rSize()
+				   );
+      if (d)
+	md[i].mesh->Draw (1000,md[i].mat);
     }
   }  
 }
@@ -267,7 +273,9 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       data[i]->Collide(un,transform);
     }else {
       //#if 0
+      bool autocol=false;
       Vector diff=InvScaleTransform(t,un->Position());    
+      if (diff.j<0) autocol=true;
       diff.i = fmod (diff.i,sizeX*width);
       if (diff.i<0)
 	diff.i+=sizeX*width;
@@ -291,6 +299,14 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
 
       const csReversibleTransform smalltransform (un->GetTransformation());
 #endif
+      Vector smallpos,bigpos,smallNormal,bigNormal;
+      if (autocol) {
+	smallpos=un->Position();
+	bigpos=un->Position()-Vector (0,un->rSize(),0);
+	smallNormal=Vector (0,-1,0);
+	bigNormal=Vector(0,1,0);
+	autocol=true;
+      }
       if (md[i].collider) {
 	if (un->colTrees)
         if (un->colTrees->colTree)
@@ -300,7 +316,7 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
 	  csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	  int numHits = csRapidCollider::numHits;
 	  if (numHits) {
-	    Vector smallpos,bigpos,smallNormal,bigNormal;
+
 	    smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
 			 (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
 			 (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
@@ -318,11 +334,15 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
 	    bigNormal.Set (bn.x,bn.y,bn.z);
 	    smallNormal = TransformNormal (un->cumulative_transformation_matrix,smallNormal);
 	    bigNormal = TransformNormal (transform,bigNormal);
-	    static float mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
-	    un->ApplyForce (bigNormal*.4*un->GetMass()*fabs(bigNormal.Dot ((un->GetVelocity()/SIMULATION_ATOM))));
-	    un->ApplyDamage (un->Position()-bigNormal*un->rSize(),-bigNormal,  .5*fabs(bigNormal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1));
+	    autocol=true;
 	  }
 	}
+      }
+      if (autocol) {
+	static float mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
+	un->ApplyForce (bigNormal*.4*un->GetMass()*fabs(bigNormal.Dot ((un->GetVelocity()/SIMULATION_ATOM))));
+	un->ApplyDamage (un->Position()-bigNormal*un->rSize(),-bigNormal,  .5*fabs(bigNormal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1));
+	
       }
     }
   }
