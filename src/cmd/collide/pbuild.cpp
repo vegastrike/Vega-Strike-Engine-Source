@@ -141,12 +141,12 @@ bool csCdModel::BuildHierarchy ()
     _M.moment (Moment::stack [i]);
 
   // csVector3 _pT;
-  csMatrix3 _C;
+  csMatrix3 mac_C;
   _M.mean (&(m_pBoxes[0].m_Translation));
 
-  _M.covariance (&_C);
+  _M.covariance (&mac_C);
 
-  SortedEigen(_C, m_pBoxes[0].m_Rotation);
+  SortedEigen(mac_C, m_pBoxes[0].m_Rotation);
 
   // create the index list
   int *t = new int [m_NumTriangles];
