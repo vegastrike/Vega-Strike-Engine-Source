@@ -54,7 +54,7 @@ private:
   float vdu_time [MAXVDUS];
   ///saved values to compare with current values (might need more for damage)
   std::list <Matrix> headtrans;
-  class Mesh * mesh;
+  std::vector<class Mesh *> mesh;
   int soundfile;
   VSSprite *Pit [4];
   VSSprite *Radar[2];

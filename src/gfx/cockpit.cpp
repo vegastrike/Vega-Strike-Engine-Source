@@ -939,10 +939,13 @@ void GameCockpit::Delete () {
     delete text;
     text = NULL;
   }
-  if (mesh) {
-    delete mesh;
-    mesh = NULL;
+  for (i=0;i<(int)mesh.size();++i) {
+    if (mesh[i]) {
+      delete mesh[i];
+    }
+    mesh[i] = NULL;
   }
+  mesh.clear();
   if (soundfile>=0) {
 	  AUDStopPlaying(soundfile);
 	  AUDDeleteSound(soundfile,false);
@@ -1008,7 +1011,6 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
   for (i=0;i<UnitImages::NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
-  mesh=NULL;
   Radar[0]=Radar[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
 
   draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
@@ -1313,15 +1315,15 @@ void GameCockpit::Draw() {
   }
   }
   if (view<CP_CHASE) {
-    if (mesh) {
+    if (mesh.size()){
       Unit * par=GetParent();
       if (par) {
 	//	Matrix mat;
       
 	GFXLoadIdentity(MODEL);
 
-	GFXDisable (DEPTHTEST);
-	GFXDisable(DEPTHWRITE);
+	GFXEnable (DEPTHTEST);
+	GFXEnable(DEPTHWRITE);
 	GFXEnable (TEXTURE0);
 	GFXEnable (LIGHTING);
 	Vector P,Q,R;
@@ -1343,8 +1345,11 @@ void GameCockpit::Draw() {
 	    shakin=0;
 	  }
 	}
+        GFXClear(GFXFALSE);//only clear Z
 
-	mesh->DrawNow(1,true,headtrans.front());
+        for (size_t i=0;i<mesh.size();++i) {
+          mesh[i]->DrawNow(1,true,headtrans.front());
+        }
 	headtrans.pop_front();
 	GFXDisable (LIGHTING);
 	GFXDisable( TEXTURE0);
