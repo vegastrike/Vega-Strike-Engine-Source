@@ -3,9 +3,10 @@
 
 //static KBHandler keyBindings [SDLK_LAST];
 //KBSTATE keyState [SDLK_LAST];
-JoyHandler JoystickBindings [MAX_JOYSTICKS][NUMJBUTTONS];
+KBHandler JoystickBindings [MAX_JOYSTICKS][NUMJBUTTONS];
 KBSTATE JoystickState [MAX_JOYSTICKS][NUMJBUTTONS];
-void DefaultJoyHandler (KBSTATE st, float x, float y, int mod) {
+
+void DefaultJoyHandler (int key, KBSTATE newState) {
   //  fprintf (stderr,"STATE: %d", st);
 }
 
@@ -14,10 +15,10 @@ void UnbindJoyKey (int joystick, int key) {
   JoystickBindings[joystick][key]=DefaultJoyHandler;
   JoystickState[joystick][key]=UP;
 }
-void BindJoyKey (int joystick, int key, JoyHandler handler) {
+void BindJoyKey (int joystick, int key, KBHandler handler) {
   assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
   JoystickBindings[joystick][key]=handler;
-  handler (RESET,0,0,0);
+  handler (0,RESET);
 }
 
 void ProcessJoystick () {
@@ -72,16 +73,16 @@ void ProcessJoystick () {
       if (i==0&&(buttons&(1<<j))) {
 	//	fprintf (stderr,"Button success %d",j);
 	if (JoystickState[i][j]==UP) {
-	  (*JoystickBindings [i][j])(PRESS,x,y,buttons);		  
+	  (*JoystickBindings [i][j])(0,PRESS);
 	  JoystickState[i][j]=DOWN;
 	}
       }else {
 	if (JoystickState[i][j]==DOWN) {
-	  (*JoystickBindings [i][j])(RELEASE,x,y,buttons);		    
+	  (*JoystickBindings [i][j])(0,RELEASE);
 	}
 	JoystickState[i][j]=UP;
       }
-      (*JoystickBindings [i][j])(JoystickState[i][j],x,y,buttons);	
+      (*JoystickBindings [i][j])(0,JoystickState[i][j]);
     }
   }
 #endif

@@ -15,8 +15,8 @@ FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByK
   BindButton(0,FireKeyboard::FireKey);
   BindButton(1,FireKeyboard::MissileKey);
 #endif
-  BindJoyKey(whichjoystick,2,FlyByJoystick::JAB);
-  BindJoyKey(whichjoystick,5,FlyByJoystick::JShelt);
+  //  BindJoyKey(whichjoystick,2,FlyByJoystick::JAB);
+  //BindJoyKey(whichjoystick,5,FlyByJoystick::JShelt);
   
 }
 void FlyByJoystick::JShelt (KBSTATE k, float, float, int) {

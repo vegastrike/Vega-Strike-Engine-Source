@@ -32,6 +32,7 @@
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 
 void InitJoystick(){
+
 #ifdef HAVE_SDL
   //  SDL_EventState (SDL_KEYDOWN,SDL_ENABLE);
   //  SDL_EventState (SDL_KEYUP,SDL_ENABLE);
@@ -41,11 +42,13 @@ void InitJoystick(){
     }
   }
 #endif
+
 #ifdef HAVE_SDL
   int num_joysticks=SDL_NumJoysticks() ;
   printf("%i joysticks were found.\n\n", num_joysticks);
   printf("The names of the joysticks are:\n");
 #endif
+
   for(int i=0; i < MAX_JOYSTICKS; i++ )  {
 #ifdef HAVE_SDL
     if (i<num_joysticks){

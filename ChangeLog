@@ -1,4 +1,10 @@
+2001-10-22 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* added bindings for joy-buttons
+	  works only for some commands
+	* ordered .vegastrikerc better
+	
+	
 2001-10-22 Daniel Horn <hellcatv@hotmail.com>
 	* modified units to go in <data>/unit/<unitname> or <data>/unit/<factionname>/<unitname>
 	* modified textures go either in the "current dir" or in <data>/textures/ for shared textures
@@ -6,6 +12,7 @@
 	* modified animations to go in <currentdir>/animations
 	* modified sprites to go in <currentdir>/sprites
 	* allowed flat data directories too :-)
+
 
 2001-10-21 Daniel Horn <hellcatv@hotmail.com>
 

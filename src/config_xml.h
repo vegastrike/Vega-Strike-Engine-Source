@@ -76,6 +76,9 @@ class VegaConfig {
   void doColors(easyDomNode *node);
   bool checkColor(easyDomNode *node);
   void checkBind(easyDomNode *node);
+  void doAxis(easyDomNode *node);
+
+
 };
 
 #endif // _VEGACONFIG_H_

@@ -44,6 +44,9 @@
 #include "cmd/ai/flykeyboard.h"
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/music.h"
+#include "gfx/loc_select.h"
+
+#include "in_joystick.h"
 
 #include "main_loop.h" // for CockpitKeys
 
@@ -155,6 +158,12 @@ void VegaConfig::initCommandMap(){
  command_map["Cockpit::SkipMusicTrack"]=CockpitKeys::SkipMusicTrack;
 
  command_map["Cockpit::Quit"]=CockpitKeys::Quit;
+
+ // command_map["LocationSelect::MoveMoveHandle"]=LocationSelect::MouseMoveHandle;
+ //command_map["LocationSelect::incConstanst"]=LocationSelect::incConstant;
+ //command_map["LocationSelect::decConstant"]=LocationSelect::decConstant;
+
+ //command_map["CoordinateSelect::MouseeMoveHandle"]=CoordinateSelect::MouseMoveHandle;
 
 }
 
@@ -297,8 +306,38 @@ void VegaConfig::doBindings(easyDomNode *node){
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    checkBind(*siter);
+    if((*siter)->Name()=="bind"){
+      checkBind(*siter);
+    }
+    else if(((*siter)->Name()=="axis")){
+      doAxis(*siter);
+    }
+    else{
+      cout << "Unknown tag: " << (*siter)->Name() << endl;
+    }
   }
+}
+
+void VegaConfig::doAxis(easyDomNode *node){
+
+  string name=node->attr_value("name");
+  string joystick=node->attr_value("joystick");
+  string axis=node->attr_value("axis");
+
+  if(name.empty() || joystick.empty() || axis.empty()){
+    cout << "no correct axis desription given " << endl;
+    return;
+  }
+
+  int joy_nr=atoi(joystick.data());
+  int axis_nr=atoi(axis.data());
+
+  // no checks for correct number yet 
+
+  if(name=="x"){
+    
+  }
+
 }
 
 void VegaConfig::checkBind(easyDomNode *node){
@@ -307,18 +346,19 @@ void VegaConfig::checkBind(easyDomNode *node){
     return;
   }
 
+  string cmdstr=node->attr_value("command");
+  
+  KBHandler handler=command_map[cmdstr];
+  
+  if(handler==NULL){
+    cout << "No such command: " << cmdstr << endl;
+    return;
+  }
+
   if(!(node->attr_value("key").empty())){
       // now map the command to a callback function and bind it
     
     string keystr=node->attr_value("key");
-    string cmdstr=node->attr_value("command");
-    
-    KBHandler handler=command_map[cmdstr];
-
-    if(handler==NULL){
-      cout << "No such command: " << cmdstr << endl;
-      return;
-    }
 
     if(keystr.length()==1){
       BindKey(keystr[0],handler);
@@ -341,6 +381,13 @@ void VegaConfig::checkBind(easyDomNode *node){
       int joystick_nr=atoi(node->attr_value("joystick").data());
 
       // now map the command to a callback function and bind it
+
+      // yet to check for correct buttons/joy-nr
+
+
+      BindJoyKey(joystick_nr,button_nr,handler);
+
+      cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
     }
     else{
       cout << "you must specify the joystick nr. to use" << endl;

@@ -1,8 +1,12 @@
 <vegaconfig>
         <bindings>
 		<bind key="S" modifier="none" command="Cockpit::SkipMusicTrack" />
+
  		<bind key="space" modifier="none" command="FireKey" />
  		<bind key="return" modifier="none" command="MissileKey" />
+		<bind key="g" modifier="none" command="WeapSelKey"/>
+		<bind key="m" modifier="none" command="MisSelKey"/>
+		<bind key="t" modifier="none" command="TargetKey" />
 
                 <bind key="q" modifier="none" command="SheltonKey" />
                 <bind key="-" modifier="none" command="DecelKey"/>
@@ -10,6 +14,14 @@
                 <bind key="=" modifier="none" command="AccelKey"/>
                 <bind key="/" modifier="none" command="RollLeftKey"/>
                 <bind key="*" modifier="none" command="RollRightKey"/>
+<!-- experimental
+                <bind key="x" modifier="none" command="FireKey"/>
+                <bind key="y" modifier="none" command="TargetKey"/>
+-->
+                <bind key="backspace" modifier="none" command="StopKey"/>
+                <bind key="\" modifier="none" command="StartKey"/>
+                <bind key="capslock" modifier="none" command="SheltonKey"/>
+		<bind key="tab" modifier="none" command="ABKey" />
 
                 <bind key="cursor-up" modifier="none" command="UpKey"/>
                 <bind key="cursor-down" modifier="none" command="DownKey"/>
@@ -23,15 +35,11 @@
                 <bind key="function-3" modifier="none" command="Cockpit::InsideRight"/>
                 <bind key="function-4" modifier="none" command="Cockpit::InsideBack"/>
 
-
-
                 <bind key="function-5" modifier="none" command="Cockpit::Behind"/>
                 <bind key="function-6" modifier="none" command="Cockpit::Pan"/>
                 <bind key="function-11" modifier="none" command="Cockpit::ZoomIn"/>
                 <bind key="function-12" modifier="none" command="Cockpit::ZoomOut"/>
 
-		<bind key="g" modifier="none" command="WeapSelKey"/>
-		<bind key="m" modifier="none" command="MisSelKey"/>
                 <bind key="W" modifier="none" command="Cockpit::SwitchLVDU"/>
                 <bind key="T" modifier="none" command="Cockpit::SwitchRVDU"/>
                 <bind key="w" modifier="none" command="Cockpit::PitchDown"/>
@@ -40,14 +48,32 @@
                 <bind key="s" modifier="none" command="Cockpit::YawRight"/>
 
                 <bind key="esc" modifier="none" command="Cockpit::Quit"/>
+<!--
+		<bind joystick="0" button="0" modifier="none" command="FireKey" />
+		<bind joystick="0" button="1" modifier="none" command="FireKey" />
+		<bind joystick="0" button="2" modifier="none" command="FireKey" />
+-->
+		<bind joystick="0" button="3" modifier="none" command="TargetKey" />
 
+		<axis name="x" joystick="0" axis="0"/>
+		<axis name="y" joystick="0" axis="1"/>
 
-                <bind key="backspace" modifier="none" command="StopKey"/>
-                <bind key="\" modifier="none" command="StartKey"/>
-                <bind key="capslock" modifier="none" command="SheltonKey"/>
-		<bind key="tab" modifier="none" command="ABKey" />
-		<bind key="t" modifier="none" command="target_enemy" />
-		<bind joystick="0" button="0" modifier="none" command="target_enemy" />
+		<!-- use this if you've got a throttle control
+			<axis name="throttle" joystick="0" axis="2"/>
+		-->
+
+		<!-- use this if you want to use your third axis as roll around z
+			<axis name="z" joystick="0" axis="2"/>
+		-->
+
+		<!-- if you have a joystick with an analogue hatswitch -->
+		<axis name="hatswitch" joystick="0" axis="2"/>
+
+		<!-- for the future
+			<axis name="gun_x" joystick="1" axis="0"/>
+			<axis name="gun_y" joystick="1" axis="1"/>
+		-->
+
         </bindings>
         <colors>
 		<!-- absolute colors -->
@@ -110,6 +136,8 @@
 			<var name="frequency" value="22050"/>
 			<var name="Sound" value="true"/>
 			<var name="Music" value="true"/>
+			<var name="music_volume" value="50"/>
+			<var name="sound_volume" value="100"/>
 		</section>
 		<section name="unitaudio">
 			<var name="afterburner" value="sfx10.wav"/>

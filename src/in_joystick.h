@@ -86,7 +86,8 @@ class JoyStick {
 
 extern JoyStick *joystick[MAX_JOYSTICKS];
 typedef void (*JoyHandler)(KBSTATE,float x, float y, int mod);
-void BindJoyKey (int key, int joystick, JoyHandler handler);
+void BindJoyKey (int key, int joystick, KBHandler handler);
 void UnbindJoyKey (int joystick, int key);
+
 #endif // _JOYSTICK_H_
 

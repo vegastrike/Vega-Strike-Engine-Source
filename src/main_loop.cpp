@@ -89,6 +89,7 @@ bool _Slew = true;
 namespace CockpitKeys {
 
  void SkipMusicTrack(int,KBSTATE newState) {
+   static bool flag=false;
    if(newState==PRESS){
      printf("skipping\n");
     muzak->Skip();
