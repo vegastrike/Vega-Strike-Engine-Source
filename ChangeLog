@@ -1,3 +1,12 @@
+2001-12-26 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* interpreter:
+	  - added sort-of classes/instances of modules
+	* AI scripting:
+	  - first test ai is running (doing nothing)
+	  - added modules/ai_test.c , mission/testd/testd_aitest1.mission
+
+	
 2001-12-24 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* interpreter:

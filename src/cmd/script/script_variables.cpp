@@ -175,10 +175,37 @@ varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
 
 /* *********************************************************** */
 
+varInst *Mission::lookupClassVariable(missionNode *asknode){
+  missionNode *module=runtime.cur_thread->module_stack.back();
+  uint classid=runtime.cur_thread->classid_stack.back();
+  string mname=module->script.name;
+  string varname=asknode->script.name;
+
+  if(classid==0){
+    // no class instance
+    return NULL;
+  }
+
+  //  printf("lookup classvar %s id=%d\n",varname.c_str(),classid);
+
+  if(classid >= module->script.classvars.size()){
+    fatalError(asknode,SCRIPT_RUN,"illegal classvar nr.");
+    assert(0);
+  }
+  varInstMap *cvmap=module->script.classvars[classid];
+  
+  varInst *var=(*cvmap)[varname];
+  
+  if(var==NULL){
+    //    printf("var not found as classvar\n");
+  }
+  return var;
+}
+
 varInst *Mission::lookupModuleVariable(missionNode *asknode){
   // only when runtime
   missionNode *module=runtime.cur_thread->module_stack.back();
-
+  
   string mname=module->script.name;
 
   varInst *var=lookupModuleVariable(mname,asknode);
@@ -232,6 +259,11 @@ varInst *Mission::doVariable(missionNode *node,int mode){
   if(mode==SCRIPT_RUN){
     varInst *var=lookupLocalVariable(node);
     if(var==NULL){
+      var=lookupClassVariable(node);
+      if(var!=NULL){
+	//printf("found classvar %x\n",(int)var);
+      }
+      if(var==NULL){
       // search in module namespace
       var=lookupModuleVariable(node);
       if(var==NULL){
@@ -242,6 +274,7 @@ varInst *Mission::doVariable(missionNode *node,int mode){
 	  assert(0);
 	}
       }
+    }
     }
     return var;
   }
@@ -277,7 +310,7 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
     missionNode *scope=node->script.context_block_node;
     if(scope->tag==DTAG_MODULE){
       // this is a module variable - it has been initialized at parse time
-      debug(4,node,mode,"defined module variable "+node->script.name);
+      debug(0,node,mode,"defined module variable "+node->script.name);
       return;
     }
 
@@ -386,7 +419,20 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
     printGlobals(3);
   }
   else{
-    scope->script.variables[node->script.name]=vi;
+    string classvar=node->attr_value("classvar");
+    if(classvar=="true"){
+      missionNode *module_node=scope_stack.back();
+
+      if(module_node->script.classvars.size()!=1){
+	fatalError(node,mode,"no module node with classvars");
+	assert(0);
+      }
+      varInstMap *vmap=module_node->script.classvars[0];
+      (*vmap)[node->script.name]=vi;
+    }
+    else{
+      scope->script.variables[node->script.name]=vi;
+    }
     node->script.context_block_node=scope;
     debug(5,scope,mode,"defined variable in that scope");
   }
@@ -606,7 +652,6 @@ var_type Mission::vartypeFromString(string type){
       vartype=VAR_FAILURE;
     }
     return vartype;
-
 }
 
 /* *********************************************************** */
@@ -671,8 +716,6 @@ void Mission::saveVariables(const ostream& out){
 /* *********************************************************** */
 
 void Mission::saveVarInst(varInst *vi,ostream& aa_out){
-
-
     char buffer[100];
     if(vi==NULL){
       sprintf(buffer," NULL");

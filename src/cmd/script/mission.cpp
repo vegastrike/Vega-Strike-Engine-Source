@@ -288,7 +288,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
   }
 
   if(ainame[0]=='_'){
-    addModule(ainame);
+    addModule(ainame.substr(1));
   }
 
   flightgroups.push_back(fg);

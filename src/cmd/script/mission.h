@@ -100,7 +100,7 @@ enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
 
 class missionNode;
 
-enum scope_type { VI_GLOBAL,VI_MODULE,VI_LOCAL,VI_TEMP, VI_IN_OBJECT,VI_ERROR,VI_CONST };
+enum scope_type { VI_GLOBAL,VI_MODULE,VI_LOCAL,VI_TEMP, VI_IN_OBJECT,VI_ERROR,VI_CONST,VI_CLASSVAR };
 
 class varInst {
  public:
@@ -155,6 +155,7 @@ class missionThread {
  public:
   vector<contextStack *> exec_stack;
   vector<missionNode *> module_stack;
+  vector<uint>  classid_stack;
 };
 
 /* *********************************************************** */
@@ -164,6 +165,7 @@ class missionNode : public tagDomNode {
   struct script_t {
     string name; // script,defvar,module
     varInstMap variables; // script,module
+    vector<varInstMap *>  classvars; //module
     varInst *varinst; // defvar,const
     missionNode *if_block[3]; // if
     missionNode *while_arg[2]; // while
@@ -177,6 +179,7 @@ class missionNode : public tagDomNode {
     int nr_arguments; // script
     missionNode *argument_node; //script
     missionNode *module_node; // exec
+    uint classinst_counter;
   } script;
 };
 
@@ -204,7 +207,8 @@ class Mission {
   void  loadMissionModules();
  void  loadModule(string modulename);
 void addModule(string modulename);
-void runScript(string modulename,string scriptname);
+void runScript(string modulename,string scriptname,uint classid=0);
+uint  createClassInstance(string modulename);
 
   MessageCenter *msgcenter;
 
@@ -270,6 +274,7 @@ bool  doBooleanVar(missionNode *node,int mode);
 varInst * lookupLocalVariable(missionNode *asknode);
 varInst * lookupModuleVariable(string mname,missionNode *asknode);
 varInst * lookupModuleVariable(missionNode *asknode);
+varInst * lookupClassVariable(missionNode *asknode);
 varInst * lookupGlobalVariable(missionNode *asknode);
 varInst * doVariable(missionNode *node,int mode);
 void  checkStatement(missionNode *node,int mode);

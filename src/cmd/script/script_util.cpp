@@ -270,7 +270,6 @@ void Mission::printThread(missionThread *thread){
 /* *********************************************************** */
 
 varInst *Mission::searchScopestack(string name){
-
   int elem=scope_stack.size()-1;
   varInst *vi=NULL;
 
@@ -280,8 +279,15 @@ varInst *Mission::searchScopestack(string name){
     vi=scope->script.variables[name];
 
     if(vi==NULL){
-      debug(5,scope,0,"variable "+name+" not found in that scope");
-      //printVarmap(scope->script.variables);
+      if(scope->script.classvars.size()>0){
+	varInstMap *cvmap=scope->script.classvars[0];
+	vi=(*cvmap)[name];
+	debug(1,scope,0,"found var "+name+" as classvar");
+      }
+      if(vi==NULL){
+	debug(5,scope,0,"variable "+name+" not found in that scope");
+	//printVarmap(scope->script.variables);
+      }
     }
     else{
       debug(5,scope,0,"variable "+name+" FOUND in that scope");

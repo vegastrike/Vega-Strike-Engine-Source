@@ -46,7 +46,7 @@ char buffer[100];
 
 %token L_ID L_FLOATCONST L_INTCONST L_STRINGCONST
 %token L_BOOLCONST_TRUE L_BOOLCONST_FALSE
-%token L_MODULE L_SCRIPT L_IMPORT L_RETURN L_GLOBALS
+%token L_MODULE L_SCRIPT L_IMPORT L_RETURN L_GLOBALS L_CLASS
 %token L_IF L_THEN L_ELSE
 %token L_WHILE
 %token L_EQUAL L_NOT_EQUAL L_GREATER_OR_EQUAL L_LESSER_OR_EQUAL
@@ -68,7 +68,7 @@ module_body:	/* empty */   { $$=""; }
 		| module_body module_statement ';' {
 	$$=$1+"\n"+$2;
 }		;
-module_statement:	script  { $$=$1; } | defvar {$$=$1} | import { $$=$1 } | globals { $$=$1; };
+module_statement:	 defvar {$$=$1} | script  { $$=$1; } | import { $$=$1 } | globals { $$=$1; };
 
 globals:	L_GLOBALS '{' globals_body '}' {
 	$$="<globals "+lineno()+" >\n"+$3+"\n</globals>\n";
@@ -94,16 +94,59 @@ argvar:		vartype L_ID {
 	$$="<defvar name="+q($2)+" type="+q($1)+"/>\n";
 //	printf("DEVFAR %s\n",$2.c_str());
 }
+classvar:	L_CLASS {
+	 $$="true";
+}
+		| /* empty */	 {
+	$$="false";
+};
 
-defvar:		vartype L_ID L_INITVALUE init_val {
-	$$="<defvar  "+lineno()+" name="+q($2)+" type="+q($1)+" initvalue="+q($4)+" />\n";
+defvar_begin:	vartype  {
+	$$=" classvar=\"false\" type="+q($1);
+}
+
+		| L_CLASS vartype  {
+	$$=" classvar=\"true\" type="+q($2);
+}
+
+defvar:		defvar_begin L_ID '=' expr {
+	$$="<defvar  "+lineno()+" name="+q($2)+" "+$1+" />\n"+"<setvar name="+q($2)+" >\n"+$4+"\n</setvar>\n";
+}
+		| defvar_begin L_ID L_INITVALUE init_val {
+	$$="<defvar  "+lineno()+" name="+q($2)+" "+$1+" initvalue="+q($4)+" />\n";
+}
+		| defvar_begin L_ID ',' nonnull_idlist {
+	string allvars="";
+
+	string list=$2+" "+$4+" ";
+	int apos=0;
+	int npos=0;
+	//printf("names=%s\n",list.c_str());
+	do{
+		 npos=list.find(" ",apos);
+		string news=list.substr(apos,npos-apos);
+		//printf("NEW: %s apos=%d npos=%d\n",news.c_str(),apos,npos);
+		//allvars=allvars+"<defvar name="+q(news)+" type="+q($1)+" />\n";
+		allvars=allvars+"<defvar name="+q(news)+" "+$1+" />\n";
+		apos=npos+1;
+	}while(apos<list.size()-1);
+	
+	$$=allvars;
+}
+		| defvar_begin L_ID {
+	$$="<defvar  "+lineno()+" name="+q($2)+" "+$1+" />\n";
+};
+
+
+defvar_old:		classvar vartype L_ID L_INITVALUE init_val {
+	$$="<defvar  "+lineno()+" name="+q($3)+" type="+q($2)+" initvalue="+q($5)+" classvar="+q($1)+" />\n";
 }
 		| vartype L_ID '=' expr {
 	$$="<defvar  "+lineno()+" name="+q($2)+" type="+q($1)+" />\n"+"<setvar name="+q($2)+" >\n"+$4+"\n</setvar>";
 }
-		| vartype L_ID	{
+		|  vartype L_ID	{
 	$$="<defvar  "+lineno()+" name="+q($2)+" type="+q($1)+"/>\n";
-//	printf("DEVFAR %s\n",$2.c_str());
+	printf("DEVFAR %s\n",$2.c_str());
 }
 		| vartype L_ID ',' nonnull_idlist {
 
@@ -131,8 +174,9 @@ nonnull_idlist:		L_ID { $$=$1;}
 script:		script_header '{' script_body '}'	{
 	$$=$1+"\n"+$3+"\n</script>\n";
 };
-script_header:	vartype L_ID '(' arguments ')'	{
-	$$="<script  "+lineno()+" name="+q($2)+" return="+q($1)+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
+script_header:	defvar_begin L_ID '(' arguments ')'	{
+//	$$="<script  "+lineno()+" name="+q($2)+" return="+q($1)+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
+	$$="<script  "+lineno()+" name="+q($2)+" "+$1+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
 };
 var_or_voidtype:	vartype { printf("var_or_voidtype\n"); $$=$1;}
 	| voidtype {$$=$1;};

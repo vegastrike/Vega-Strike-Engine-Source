@@ -125,11 +125,13 @@ void Mission::DirectorStart(missionNode *node){
   }
   else{
     runtime.cur_thread->module_stack.push_back(director);
+    runtime.cur_thread->classid_stack.push_back(0);
 
     varInst *vi=doScript(initgame,SCRIPT_RUN);
     deleteVarInst(vi);
 
     runtime.cur_thread->module_stack.pop_back();
+    runtime.cur_thread->classid_stack.pop_back();
   }
 
   msgcenter->add("game","all","initialization of programmed missions done");
@@ -176,12 +178,14 @@ void Mission::DirectorLoop(){
     old_vi_counter=vi_counter;
 
     runtime.cur_thread->module_stack.push_back(director);
+    runtime.cur_thread->classid_stack.push_back(0);
 
     varInst *vi=doScript(gameloop,SCRIPT_RUN);
     deleteVarInst(vi);
 
     runtime.cur_thread->module_stack.pop_back();
-  
+    runtime.cur_thread->classid_stack.pop_back();
+ 
     //    doModule(director,SCRIPT_RUN);
   }
 }
@@ -200,11 +204,13 @@ void Mission::DirectorEnd(){
     cout << "ENDGAME" << endl;
 
     runtime.cur_thread->module_stack.push_back(director);
+    runtime.cur_thread->classid_stack.push_back(0);
 
     varInst *vi=doScript(endgame,SCRIPT_RUN);
     deleteVarInst(vi);
 
     runtime.cur_thread->module_stack.pop_back();
+    runtime.cur_thread->classid_stack.pop_back();
   }
 
 
@@ -313,7 +319,7 @@ void Mission::loadMissionModules(){
 
 }
 
-void Mission::runScript(string modulename,string scriptname){
+void Mission::runScript(string modulename,string scriptname,uint classid){
   missionNode *module_node=runtime.modules[modulename];
   if(module_node==NULL){
     fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");
@@ -327,9 +333,11 @@ void Mission::runScript(string modulename,string scriptname){
   }
   
   runtime.cur_thread->module_stack.push_back(module_node);
+  runtime.cur_thread->classid_stack.push_back(classid);
 
   varInst *vi=doScript(script_node,SCRIPT_RUN);
   deleteVarInst(vi);
 
+  runtime.cur_thread->classid_stack.pop_back();
   runtime.cur_thread->module_stack.pop_back();
 }

@@ -1,15 +1,15 @@
 module test {
 
 globals {
-  int g1;
+  class int g1,g2,g5,g6;
   float g3;
   object g4;
 };
 
 import a1;
 
- int arss=4.3;
- int aty:=34.3;
+class int aty:=34.3;
+int arss=4.3;
 
  void t0(){
    float x=a*b+c*d+e;

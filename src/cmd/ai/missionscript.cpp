@@ -41,15 +41,20 @@ AImissionScript::AImissionScript (string modname):Order (Order::MOVEMENT|Order::
   //  mission->addModule(modname);
 
   modulename=modname;
+
+  classid=mission->createClassInstance(modulename);
+
+  mission->runScript(modulename,"initai",classid);  
 }
 
 AImissionScript::~AImissionScript () {
-
+  mission->runScript(modulename,"quitai",classid);
 }
 
 void AImissionScript::Execute () {
 
-  mission->runScript(modulename,"executeai");
+  mission->runScript(modulename,"executeai",classid);
 
   Order::Execute();
+  done=false;
 }

@@ -73,8 +73,6 @@ void Mission::doModule(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
       string name=node->attr_value("name");
     if(parsemode==PARSE_DECL){
-
-  
       if(name.empty()){
 	fatalError(node,mode,"you have to give a module name");
 	assert(0);
@@ -91,6 +89,11 @@ void Mission::doModule(missionNode *node,int mode){
  
       node->script.name=name;
 
+      varInstMap *cvmap=new varInstMap;
+      node->script.classvars.push_back(cvmap);
+      node->script.classinst_counter=0;
+      debug(0,node,mode,"created classinst 0");
+
       runtime.modules[name]=node; // add this module to the list of known modules
     }
 
@@ -104,6 +107,7 @@ void Mission::doModule(missionNode *node,int mode){
   if(mode==SCRIPT_RUN){
     // SCRIPT_RUN
     runtime.cur_thread->module_stack.push_back(node);
+    runtime.cur_thread->classid_stack.push_back(0);
   }
 
 
@@ -137,6 +141,7 @@ void Mission::doModule(missionNode *node,int mode){
   }
   else{
     runtime.cur_thread->module_stack.pop_back();
+    runtime.cur_thread->classid_stack.pop_back();
   }
 }
 
@@ -222,7 +227,8 @@ varInst * Mission::doScript(missionNode *node,int mode, varInstMap *varmap){
 
       node->script.nr_arguments=0;
 
-      string retvalue=node->attr_value("return");
+      //string retvalue=node->attr_value("return");
+      string retvalue=node->attr_value("type");
       if(retvalue.empty() || retvalue=="void"){
 	node->script.vartype=VAR_VOID;
       }
@@ -581,11 +587,20 @@ varInst *Mission::doExec(missionNode *node,int mode){
 
     missionNode *module=node->script.module_node;
 
+    missionNode *old_module=runtime.cur_thread->module_stack.back();
+
+    uint classid=0;
+    if(old_module==module){
+      classid=runtime.cur_thread->classid_stack.back();
+    }
+
     runtime.cur_thread->module_stack.push_back(module);
+    runtime.cur_thread->classid_stack.push_back(classid);
 
     varInst *vi=doScript(node->script.exec_node,mode,varmap);
 
     runtime.cur_thread->module_stack.pop_back();
+    runtime.cur_thread->classid_stack.pop_back();
 
     if(varmap){
       deleteVarMap(varmap);
@@ -615,7 +630,7 @@ void Mission::deleteVarInst(varInst *vi,bool del_local){
   if(vi==NULL){
     return;
   }
-  if(vi->scopetype==VI_GLOBAL || vi->scopetype==VI_MODULE){
+  if(vi->scopetype==VI_GLOBAL || vi->scopetype==VI_MODULE || vi->scopetype==VI_CLASSVAR){
     debug(12,NULL,0,"reqested to delete global/module vi\n");
   }
   else if(vi->scopetype==VI_ERROR){
@@ -647,4 +662,34 @@ void Mission::deleteVarMap(varInstMap *vmap){
 	deleteVarInst(vi,true);
       }
     }
+}
+
+uint Mission::createClassInstance(string modulename){
+  missionNode *module_node=runtime.modules[modulename];
+  if(module_node==NULL){
+    fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");
+    assert(0);
+  }
+
+  module_node->script.classinst_counter++;
+
+  varInstMap *cvmap=new varInstMap();
+
+  module_node->script.classvars.push_back(cvmap);
+
+  varInstMap *cvmap0=module_node->script.classvars[0];
+
+  map<string,varInst *>::const_iterator iter;
+  for(iter=cvmap0->begin();iter!=cvmap0->end();iter++){
+    varInst *vi0=(*iter).second;
+    string  vi0_name=(*iter).first;
+
+    varInst *vi=newVarInst(VI_CLASSVAR);
+    vi->type=vi0->type;
+    assignVariable(vi,vi0);
+
+    (*cvmap)[vi0_name]=vi;
+  }
+
+  return module_node->script.classinst_counter;
 }

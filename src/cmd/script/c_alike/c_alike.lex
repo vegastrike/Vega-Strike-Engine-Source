@@ -46,6 +46,7 @@ script		{  return(L_SCRIPT);	}
 import		{  return(L_IMPORT); 		}
 return		{ return(L_RETURN);	}
 globals		{ return(L_GLOBALS);	}
+class           { return(L_CLASS); }
 
 if		{ return(L_IF);			}
 then		{ return(L_THEN);			}
