@@ -156,7 +156,7 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       vi=callGetAdjacentSystem(node,mode);
     }
     else if(method_id==CMT_STD_terminateMission){
-      vi=terminateMission(node,mode);
+      vi=call_terminateMission(node,mode);
     }
     else if (method_id==CMT_STD_playSound) {
       std::string soundName= getStringArgument(node,mode,0);     
@@ -322,30 +322,33 @@ void Mission::wipeDeletedMissions() {
     Mission_delqueue.pop_back();
   }
 }
-varInst *Mission::terminateMission(missionNode *node,int mode){
+varInst *Mission::call_terminateMission(missionNode *node,int mode){
   //  varInst *ovi=getObjectArg(node,mode);
   getBoolArg(node,mode,0);
   if (mode==SCRIPT_RUN) {
-    vector<Mission *> *active_missions = ::active_missions.Get();
-    vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
-    if (f!=active_missions->end()) {
-      active_missions->erase (f);
-    }
-    if (this!=(*active_missions)[0]) {
-      Mission_delqueue.push_back(this);//only delete if we arent' the base mission
-    }
+	  terminateMission();
   }
   varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
-  if (!runtime.threads.empty()) {
-    missionThread * temp =runtime.threads[0];
-    runtime.threads[0]= new missionThread(*temp);//invoke copy constructor
-    temp->Destroy();
-    if (runtime.cur_thread==temp) {
-      runtime.cur_thread=runtime.threads[0];
-    }
-  }
   return viret;
+}
+void Mission::terminateMission(){
+	vector<Mission *> *active_missions = ::active_missions.Get();
+	vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
+	if (f!=active_missions->end()) {
+		active_missions->erase (f);
+	}
+	if (this!=(*active_missions)[0]) {
+		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
+	}
+	if (!runtime.threads.empty()) {
+		missionThread * temp =runtime.threads[0];
+		runtime.threads[0]= new missionThread(*temp);//invoke copy constructor
+		temp->Destroy();
+		if (runtime.cur_thread==temp) {
+			runtime.cur_thread=runtime.threads[0];
+		}
+	}
 }
 
 varInst *Mission::call_float_cast(missionNode *node,int mode){

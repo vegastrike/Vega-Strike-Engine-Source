@@ -421,6 +421,8 @@ class missionNode : public tagDomNode {
 class Mission {
   class Briefing * briefing;
  public:
+  double gametime;
+  void terminateMission();
  Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
   Mission(char *configfile, bool loadscripts=true);
   std::string Pickle ();//returns filename\npickleddata
@@ -495,7 +497,6 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   bool do_trace;
   int tracelevel;//unusued
 
-  double gametime;
   int total_nr_frames;
 
   ofstream var_out;
@@ -711,7 +712,7 @@ varInst *newVarInst(scope_type scopetype);
 
 void deleteVarMap(varInstMap *vmap);
   //pushes this mission onto a destruct queue for future destruction and removes from activeMission
-  varInst * terminateMission(missionNode *node, int mode);
+  varInst * call_terminateMission(missionNode *node, int mode);
 
 varInst * call_order(missionNode *node,int mode);
 Order * getOrderObject(missionNode *node,int mode,varInst *ovi);

@@ -89,7 +89,7 @@
   WRAPPED0(float, GetMoment,0)
   WRAPPED0(float, GetMass,0)
 
-
+  EXPORT_UTIL(JumpTo,false)
   EXPORT_UTIL(getFactionName,'')
   EXPORT_UTIL(getName,'')
   EXPORT_UTIL(getFlightgroupName,'')

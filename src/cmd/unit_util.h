@@ -1,3 +1,5 @@
+#ifndef __UNIT_UTIL_H__
+#define __UNIT_UTIL_H__
 #include "unit.h"
 #include "planet.h"
 #include <string>
@@ -140,41 +142,6 @@ namespace UnitUtil {
 			return false;
 		}
 	}
-	Unit *launchJumppoint(string name_string,
-			string faction_string,
-			string type_string,
-			string unittype_string,
-			string ai_string,
-			int nr_of_ships,
-			int nr_of_waves, 
-			QVector pos, 
-			string squadlogo, 
-			string destinations){
-		int clstype=UNITPTR;
-		if (unittype_string=="planet") {
-			clstype =PLANETPTR;			
-		}else if (unittype_string=="asteroid") {
-			clstype = ASTEROIDPTR;
-		}else if (unittype_string=="nebula") {
-			clstype = NEBULAPTR;
-		}
-		CreateFlightgroup cf;
-		cf.fg = Flightgroup::newFlightgroup (name_string,type_string,faction_string,ai_string,nr_of_ships,nr_of_waves,squadlogo,"",mission);
-		cf.unittype=CreateFlightgroup::UNIT;
-		cf.terrain_nr=-1;
-		cf.waves=nr_of_waves;
-		cf.nr_ships=nr_of_ships;
-		cf.fg->pos=pos;
-		for(int i=0;i<3;i++){
-			cf.rot[i]=0.0;
-		}
-		Unit *tmp= mission->call_unit_launch(&cf,clstype,destinations);
-		mission->number_of_ships+=nr_of_ships;
-		return tmp;
-	}
-	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
-		return launchJumppoint(name_string,faction_string,type_string,type_string,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
-	}
 	int removeCargo(Unit *my_unit,string s, int quantity, bool erasezero){
 		if (!my_unit)return 0;
 		int numret=0;
@@ -209,34 +176,12 @@ namespace UnitUtil {
 	  }
 	  return carg.quantity; 
 	}
-	Cargo getRandCargo(int quantity, std::string category) {
-	  Cargo *ret=NULL;
-	  Unit *mpl = &GetUnitMasterPartList();
-	  unsigned int max=mpl->numCargo();
-	  if (!category.empty()) {
-	    vector <Cargo> cat;
-	    mpl->GetCargoCat (category,cat);
-	    if (!cat.empty()) {
-	      unsigned int i;
-	      ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
-	    }
-	  }else {
-	    if (mpl->numCargo()) {
-	      for (unsigned int i=0;i<500;i++) {
-		ret = &mpl->GetCargo(rand()%max);  
-		if (ret->content.find("mission")==string::npos) {
-		  break;
-		}
-	      }
-	    }		  
-	  }
-	  if (ret) {
-	    return *ret;//uses copy
-	  }else {
-	    Cargo newret;
-	    newret.quantity=0;
-	    return newret;
-	  }
+
+	bool JumpTo (Unit * unit, string system) {
+		if (unit!=NULL)
+			return _Universe->activeStarSystem()->JumpTo(unit,NULL,system);
+		else
+			return false;
 	}
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity){
 		if (!my_unit)return false;
@@ -266,3 +211,7 @@ namespace UnitUtil {
 		return false;
 	}
 }
+
+
+
+#endif

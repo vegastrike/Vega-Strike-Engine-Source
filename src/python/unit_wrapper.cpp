@@ -6,7 +6,7 @@
 #include "python_class.h"
 #include "cmd/unit_util.h"
 #include <boost/python/objects.hpp>
-
+#include "universe_util.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
@@ -84,6 +84,39 @@ public:
 };
 
 PYTHON_BEGIN_MODULE(VS)
+#undef EXPORT_UTIL
+#undef voidEXPORT_UTIL
+#define EXPORT_UTIL(name,aff) VS.def(&UniverseUtil::name,#name);
+#define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
+voidEXPORT_UTIL(pushSystem)
+voidEXPORT_UTIL(popSystem)
+EXPORT_UTIL(getFileName,"")
+EXPORT_UTIL(getName,"")
+EXPORT_UTIL(getUnitList,un_iter)
+EXPORT_UTIL(launchJumppoint,Unit)
+EXPORT_UTIL(launch,Unit())
+EXPORT_UTIL(getRandCargo,Cargo())
+EXPORT_UTIL(GetFactionName,"")
+EXPORT_UTIL(GetFactionIndex,-1)
+EXPORT_UTIL(GetRelation,0)
+voidEXPORT_UTIL(AdjustRelation)
+EXPORT_UTIL(GetNumFactions,0)
+EXPORT_UTIL(GetGameTime,0)
+voidEXPORT_UTIL(SetTimeCompression)
+EXPORT_UTIL(GetAdjacentSystem,"")
+EXPORT_UTIL(GetGalaxyProperty,"")
+EXPORT_UTIL(GetNumAdjacentSystems,0)
+EXPORT_UTIL(musicAddList,0)
+voidEXPORT_UTIL(musicPlaySong)
+voidEXPORT_UTIL(musicPlayList)
+EXPORT_UTIL(GetDifficulty,1)
+voidEXPORT_UTIL(SetDifficulty)
+voidEXPORT_UTIL(playSound)
+voidEXPORT_UTIL(playAnimation)
+voidEXPORT_UTIL(terminateMission)
+#undef EXPORT_UTIL
+#undef voidEXPORT_UTIL
+PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 PYTHON_BASE_BEGIN_CLASS(VS,Cargo,"Cargo")
 Class.def(boost::python::constructor<std::string,std::string,float,int,float,float>());
 Class.def (&Cargo::SetPrice,"SetPrice");
@@ -102,7 +135,6 @@ Class.def (&Cargo::GetDescription,"GetDescription");
 
 
 PYTHON_END_CLASS(VS,Cargo)
-PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 //WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
 #undef CHECKME
 #undef WRAPPED0
@@ -113,8 +145,6 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 #undef voidWRAPPED1
 #undef voidWRAPPED2
 #undef voidWRAPPED3
-#undef EXPORT_UTIL
-#undef voidEXPORT_UTIL
 #define WRAPPED0(type,name,nada) Class.def(&UnitWrapper::name,#name);
 #define WRAPPED1(type,name,atype,a,def) WRAPPED0(type,name,def)
 #define WRAPPED2(type,name,atype,a,btype,b,def) WRAPPED0(type,name,def)
@@ -203,11 +233,37 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) def name(self,a,b,c): ~    MYPRINT(name)
 #define voidEXPORT_UTIL(name) def name(self,a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
+voidEXPORT_UTIL(pushSystem)
+voidEXPORT_UTIL(popSystem)
+EXPORT_UTIL(getFileName,"")
+EXPORT_UTIL(getName,"")
+EXPORT_UTIL(getUnitList,un_iter)
+EXPORT_UTIL(launchJumppoint,Unit)
+EXPORT_UTIL(launch,Unit())
+EXPORT_UTIL(getRandCargo,Cargo())
+EXPORT_UTIL(GetFactionName,"")
+EXPORT_UTIL(GetFactionIndex,-1)
+EXPORT_UTIL(GetRelation,0)
+voidEXPORT_UTIL(AdjustRelation)
+EXPORT_UTIL(GetNumFactions,0)
+EXPORT_UTIL(GetGameTime,0)
+voidEXPORT_UTIL(SetTimeCompression)
+EXPORT_UTIL(GetAdjacentSystem,"")
+EXPORT_UTIL(GetGalaxyProperty,"")
+EXPORT_UTIL(GetNumAdjacentSystems,0)
+EXPORT_UTIL(musicAddList,0)
+voidEXPORT_UTIL(musicPlaySong)
+voidEXPORT_UTIL(musicPlayList)
+EXPORT_UTIL(GetDifficulty,1)
+voidEXPORT_UTIL(SetDifficulty)
+voidEXPORT_UTIL(playSound)
+voidEXPORT_UTIL(playAnimation)
+voidEXPORT_UTIL(terminateMission)
 def string ():
   return ''
 class Unit:
-  def __init__(self,a):
-     self.name=a
+  def __init__(self):
+    print 'Unit constructor called with (self)'
 #define UnitWrapper Unit
 #include "python_unit_wrap.h"
 
@@ -228,4 +284,30 @@ class Unit:
   WRAPPED0(Tuple,getAverageGunSpeed,(200,10000))
   WRAPPED1(Tuple,InsideCollideTree,UnitWrapper,un,((0,0,0),(0,0,1),(0,0,0),(0,1,0)))
   WRAPPED1(UnitWrapper,getSubUnit,int,which,UnitWrapper(0))
+
+class un_iter:
+  def __init__(self):
+    print 'un_iter constructor called with (self)'
+  WRAPPED0(Unit,current,Unit)
+  voidWRAPPED0(advance)
+  voidWRAPPED0(remove)
+  voidWRAPPED1(preinsert,Unit,un)
+
+class Cargo:
+  def __init__ (self,a,b,c,d,e,f):
+    print 'Cargo constructor called with (self,%s,%s,%f,%d,%f,%f)' % (a,b,c,d,e,f)
+  voidWRAPPED1(SetPrice,float,price)
+  WRAPPED0(float,GetPrice)
+  voidWRAPPED1(SetMass,float,mass)
+  WRAPPED0(float,GetMass)
+  voidWRAPPED1(SetVolume,float,volume)
+  WRAPPED0(float,GetVolume)
+  voidWRAPPED1(SetQuantity,int,quantity)
+  WRAPPED0(int,GetQuantity)
+  voidWRAPPED1(SetContent,string,content)
+  WRAPPED0(string,GetContent)
+  voidWRAPPED1(SetCategory,string,category)
+  WRAPPED0(string,GetCategory)
+  WRAPPED0(string,GetDescription)
+
 #endif
