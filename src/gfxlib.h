@@ -71,11 +71,12 @@ BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
 BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
 float /*GFXDRVAPI*/GFXGetXInvPerspective();
 float /*GFXDRVAPI*/GFXGetYInvPerspective();
-
 BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);
 BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar);
 BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
-
+BOOL GFXGetFrustum (float f[6][4]);
+BOOL GFXCalculateFrustum();
+float GFXSphereInFrustum(const Vector &Center, float Radius);
 //Textures
 
 BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0);

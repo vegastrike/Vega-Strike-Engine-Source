@@ -354,10 +354,13 @@ bool Unit::querySphere (int mouseX, int mouseY, float err) {
   Matrix vw;
   GFXGetMatrix (VIEW,vw);
   Vector mousePoint;
-  Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
 #ifdef VARIABLE_LENGTH_PQR
+  Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
   float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
+#else
+  Vector TargetPoint;
 #endif
+
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
  
@@ -457,10 +460,31 @@ void Unit::Draw()
 
 	Matrix currentMatrix;
 	GFXGetMatrix(MODEL, currentMatrix);
+	  
+#ifdef VARIABLE_LENGTH_PQR
+	  Vector MeshCenter (currentMatrix[0],currentMatrix[1],currentMatrix[2]); 
+	  float SizeScaleFactor=sqrtf (MeshCenter.Dot(MeshCenter));
+#else
+	  Vector MeshCenter;
+#endif
+
 	for (int i=0;i<nummesh;i++) {
 	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	  //meshdata[i]->Draw(np, nq, nr, npos);
-	  meshdata[i]->Draw();
+	  /////////already completed if the camera was changedGFXCalculateFrustum();
+	  GFXCalculateFrustum();
+	  float d = GFXSphereInFrustum(Transform (currentMatrix,
+						  meshdata[i]->Position()),
+				       meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+				       *SizeScaleFactor
+#endif 
+				       );
+	  if (d) {  //d can be used for level of detail shit
+	    meshdata[i]->Draw();
+	  }else {
+	    fprintf (stderr,"boing");
+	  }
 	}
 	for(int subcount = 0; subcount < numsubunit; subcount++)
 		subunits[subcount]->Draw(tmatrix, np, nq, nr, npos);

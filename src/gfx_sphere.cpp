@@ -2,7 +2,7 @@
 
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Mesh() {
   debugName = "Sphere";
-
+  radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
    float rho, drho, theta, dtheta;
    float x, y, z;
    float s, t, ds, dt;
@@ -39,27 +39,27 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);
 
-	  vertexlist[j*2].i = x * nsign;
-	  vertexlist[j*2].j = y * nsign;
-	  vertexlist[j*2].k = z * nsign;
-	  vertexlist[j*2].s = s;
-	  vertexlist[j*2].t = t;
-	  vertexlist[j*2].x = x * radius;
-	  vertexlist[j*2].y = y * radius;
-	  vertexlist[j*2].z = z * radius;
+	  vertexlist[j*2+1].i = x * nsign;
+	  vertexlist[j*2+1].j = y * nsign;
+	  vertexlist[j*2+1].k = z * nsign;
+	  vertexlist[j*2+1].s = s;
+	  vertexlist[j*2+1].t = t;
+	  vertexlist[j*2+1].x = x * radius;
+	  vertexlist[j*2+1].y = y * radius;
+	  vertexlist[j*2+1].z = z * radius;
 
 	  x = -sin(theta) * sin(rho + drho);
 	  y = cos(theta) * sin(rho + drho);
 	  z = nsign * cos(rho + drho);
 
-	  vertexlist[j*2+1].i = x * nsign;
-	  vertexlist[j*2+1].j = y * nsign;
-	  vertexlist[j*2+1].k = z * nsign;
-	  vertexlist[j*2+1].s = s;
-	  vertexlist[j*2+1].t = t - dt;
-	  vertexlist[j*2+1].x = x * radius;
-	  vertexlist[j*2+1].y = y * radius;
-	  vertexlist[j*2+1].z = z * radius;
+	  vertexlist[j*2].i = x * nsign;
+	  vertexlist[j*2].j = y * nsign;
+	  vertexlist[j*2].k = z * nsign;
+	  vertexlist[j*2].s = s;
+	  vertexlist[j*2].t = t - dt;
+	  vertexlist[j*2].x = x * radius;
+	  vertexlist[j*2].y = y * radius;
+	  vertexlist[j*2].z = z * radius;
 
 	  s += ds;
 	}

@@ -50,6 +50,7 @@ void Camera::UpdateGFX()
 		//glLoadIdentity();
 		GFXPerspective (78,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
 		GFXLookAt (Coord, Coord+R, Q);
+		GFXCalculateFrustum();
 		//changed = FALSE;
 	}
 	//glMultMatrixf(view);
