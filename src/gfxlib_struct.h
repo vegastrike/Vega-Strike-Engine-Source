@@ -18,8 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#ifndef D3D_STRUCT
-#define D3D_STRUCT
+#ifndef _GFXLIB_STRUCT
+#define _GFXLIB_STRUCT
 #include "gfx_transform_vector.h"
 
 struct GFXVertex // Vertex, Normal, Texture, and Environment
@@ -151,6 +151,14 @@ struct DrawContext {
   GFXVertexList *vlist;
   DrawContext() { }
   DrawContext(float  a[16], GFXVertexList *vl) { memcpy(m, a, sizeof(float[16])); vlist = vl;}
+};
+
+struct LineCollide {
+  void * object;
+  enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
+  Vector Mini;
+  Vector Maxi;
+  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {object=objec;type=typ;Mini=st;Maxi=en;}	       
 };
 
 struct GFXMaterial

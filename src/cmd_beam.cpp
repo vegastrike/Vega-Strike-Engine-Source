@@ -10,7 +10,7 @@
 vector <Texture *> BeamDecal;
 vector <int> DecalRef;
 vector <vector <DrawContext> > beamdrawqueue;
-
+vector <LineCollide> collidequeue;
 extern double interpolation_blend_factor;
 Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own): Primitive(),vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
   string texname (clne.file);
@@ -232,10 +232,39 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     curthick =0;//die die die
   center = cumulative_transformation.position;
   direction = Transform (cumulative_transformation_matrix,Vector(0,0,1));
+  Vector tmpvec = center+direction*curlength;
 
+  collidequeue.push_back (LineCollide (this,LineCollide::BEAM,center.Min(tmpvec),center.Max(tmpvec)));
+				       
   //Check if collide...that'll change max beam length REAL quick
 }
-
+void Unit::CollideAll() {
+  unsigned int i;
+  //target->curr_physical_state.position;, rSize();
+  for (i=0;i<collidequeue.size();i++) {
+    if (Position().i+radial_size>collidequeue[i].Mini.i&&
+	Position().i-radial_size<collidequeue[i].Maxi.i&&
+	Position().j+radial_size>collidequeue[i].Mini.j&&
+	Position().j-radial_size<collidequeue[i].Maxi.j&&
+	Position().k+radial_size>collidequeue[i].Mini.k&&
+	Position().k-radial_size<collidequeue[i].Maxi.k) {
+      switch (collidequeue[i].type) {
+      case LineCollide::UNIT://other units!!!
+	return;
+      case LineCollide::BEAM:
+	((Beam*)collidequeue[i].object)->Collide(this);
+	break;
+      case LineCollide::BALL:
+	break;
+      case LineCollide::BOLT:
+	break;
+      case LineCollide::PROJECTILE:
+	break;
+      }
+    }
+  }
+    //add self to the queue??? using prev and cur physical state as an UNKNOWN
+}
 bool Beam::Collide (Unit * target) {
   if (target==owner) 
     return false;

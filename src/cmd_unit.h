@@ -153,6 +153,7 @@ protected:
   bool calculatePhysics; // physics have an effect on this object (set to false for planets)
 
   bool selected;
+  float radial_size;
   Vector corner_min, corner_max; // corners of object
   void calculate_extent();
   Box *selectionBox;
@@ -218,7 +219,7 @@ public:
   void PrimeOrders();
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
-
+  void CollideAll();//checks for collisions with all beams and other units roughly
   Vector Position(){return curr_physical_state.position;};
   void SetPosition(const Vector &pos) {/*prev_physical_state.position = curr_physical_state.position;*/
   prev_physical_state.position = curr_physical_state.position = pos;}
