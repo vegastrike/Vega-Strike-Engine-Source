@@ -5,7 +5,7 @@ string inverseblend[16]={"ZERO","ZERO","ONE","SRCCOLOR","INVSRCCOLOR","SRCALPHA"
 "DESTALPHA","INVDESTALPHA","DESTCOLOR","INVDESTCOLOR","SRCALPHASAT","CONSTALPHA","INVCONSTALPHA",
 "CONSTCOLOR","INVCONSTCOLOR"};
 
-void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl,std::string meshname,char hackfix){
+void BFXMToXmeshOrOBJ(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl,std::string meshname,char hackfix){
   int32bit intbuf;
   char8bit bytebuf;
   int32bit word32index=0;

@@ -881,7 +881,7 @@ XML LoadXML(const char *filename, float32bit unitscale) {
   return xml;
 }
 
-void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file to BFXM creates new, or appends record based on mode
+void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode,bool forcenormals){//converts input file to BFXM creates new, or appends record based on mode
   unsigned int32bit intbuf;
   
   bool append=(mode=='a');
@@ -891,7 +891,7 @@ void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file t
 	runningbytenum+=writesuperheader(memfile,Outputfile); // Write superheader
   }
   fseek(Outputfile,0,SEEK_END);
-  runningbytenum+=appendrecordfromxml(memfile,Outputfile); //Append one record
+  runningbytenum+=appendrecordfromxml(memfile,Outputfile,forcenormals); //Append one record
 
   rewind(Outputfile);
   fseek(Outputfile,4+7*sizeof(int32bit),SEEK_SET);
@@ -947,7 +947,7 @@ int32bit writesuperheader(XML memfile, FILE* Outputfile){
   return runningbytenum;
 }
 
-int32bit appendrecordfromxml(XML memfile, FILE* Outputfile){
+int32bit appendrecordfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   unsigned int32bit intbuf;
   int32bit runningbytenum=0;
   //Record Header
@@ -958,7 +958,7 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile){
   intbuf=VSSwapHostIntToLittle(1+memfile.LODs.size()+memfile.animframes.size());//Number of meshes = 1 + numLODs + numAnims. 
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of meshes
   
-  runningbytenum+=appendmeshfromxml(memfile,Outputfile); // write top level mesh
+  runningbytenum+=appendmeshfromxml(memfile,Outputfile,forcenormals); // write top level mesh
   int32bit mesh;
   for(mesh=0;mesh<memfile.LODs.size();mesh++){ //write all LOD meshes
 	string LODname="";
@@ -966,7 +966,7 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile){
          LODname+=memfile.LODs[mesh].name[i];
 	}
 	XML submesh=LoadXML(LODname.c_str(),1);
-	runningbytenum+=appendmeshfromxml(submesh,Outputfile);
+	runningbytenum+=appendmeshfromxml(submesh,Outputfile,forcenormals);
   }
   for(mesh=0;mesh<memfile.animframes.size();mesh++){ //write all Animation Frames
 	string animname="";
@@ -974,7 +974,7 @@ int32bit appendrecordfromxml(XML memfile, FILE* Outputfile){
          animname+=memfile.animframes[mesh].name[i];
 	}
 	XML submesh=LoadXML(animname.c_str(),1);
-	runningbytenum+=appendmeshfromxml(submesh,Outputfile);
+	runningbytenum+=appendmeshfromxml(submesh,Outputfile,forcenormals);
   }
   
   fseek(Outputfile,(-1*(runningbytenum))+4,SEEK_CUR);
@@ -1002,7 +1002,7 @@ void NormalizeMaterial(GFXMaterial &m) {
   NormalizeProperty(m.sr,m.sg,m.sb,m.sa);
   NormalizeProperty(m.er,m.eg,m.eb,m.ea);
 }
-int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
+int32bit appendmeshfromxml(XML memfile, FILE* Outputfile,bool forcenormals){
   unsigned int32bit intbuf;
   float32bit floatbuf;
   char8bit bytebuf;
@@ -1068,6 +1068,10 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//lighting
   intbuf= VSSwapHostIntToLittle(memfile.reflect);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//reflect
+  //Usenormals default value fix.
+  if(forcenormals){
+	  memfile.usenormals=true;
+  }
   intbuf= VSSwapHostIntToLittle(memfile.usenormals);
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//usenormals
   //END HEADER
