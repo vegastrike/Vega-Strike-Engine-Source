@@ -1,3 +1,13 @@
+2002-07-08 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Added prelim terrain files
+	 -data/terrain/cunerpicus/lyed.sphereterrain
+	 -data/terrain/cunerpicus/lyed_terrain256.png
+	 -data/terrain/cunerpicus/lyed_terrain512.png
+	 -data/vega_sector/cunerpicus.system
+	 -data/textures/cunerpicus/lyed.png
+	 -data/mission/test/dana_terrain.mission
+
 2002-04-24 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added debian packages to homepage/doc
