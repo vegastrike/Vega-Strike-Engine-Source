@@ -498,7 +498,7 @@ void createObjects() {
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-    switch(7) {
+    switch(1) {
     case 0:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);

@@ -132,16 +132,19 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::X:
 	assert(!(xml->point_state & XML::P_X));
 	xml->vertex.x = parse_float((*iter).value);
+	xml->vertex.i = 0;
 	xml->point_state |= XML::P_X;
 	break;
       case XML::Y:
 	assert(!(xml->point_state & XML::P_Y));
 	xml->vertex.y = parse_float((*iter).value);
+	xml->vertex.j = 0;
 	xml->point_state |= XML::P_Y;
 	break;
       case XML::Z:
 	assert(!(xml->point_state & XML::P_Z));
 	xml->vertex.z = parse_float((*iter).value);
+	xml->vertex.k = 0;
 	xml->point_state |= XML::P_Z;
 	break;
       default:
@@ -259,6 +262,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     memset(&xml->vertex, 0, sizeof(xml->vertex));
     xml->vertex = xml->vertices[index];
     xml->vertexcount[index]+=1;
+    if ((!xml->vertex.i)&&(!xml->vertex.j)&&(!xml->vertex.k)) {
+      if (!xml->recalc_norm) {
+	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
+	
+	xml->recalc_norm=true;
+      }
+    }
     xml->vertex.x *= scale;
     xml->vertex.y *= scale;
     xml->vertex.z *= scale;
@@ -434,6 +444,13 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 	xml->vertices[i].i/=dis;
 	xml->vertices[i].j/=dis;
 	xml->vertices[i].k/=dis;
+	fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
+		 xml->vertices[i].x,
+		 xml->vertices[i].y,
+		 xml->vertices[i].z,
+		 xml->vertices[i].i,
+		 xml->vertices[i].j,
+		 xml->vertices[i].k);
       }else {
 	xml->vertices[i].i=0;
 	xml->vertices[j].j=0;
@@ -442,7 +459,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     }
 
     a=0;
-    for (i=0;i<xml->tris.size();i++,a+=3) {
+    for (a=0;a<xml->tris.size();a+=3) {
       for (j=0;j<3;j++) {
 	xml->tris[a+j].i = xml->vertices[xml->triind[a+j]].i;
 	xml->tris[a+j].j = xml->vertices[xml->triind[a+j]].j;
@@ -450,7 +467,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
       }
     }
     a=0;
-    for (i=0;i<xml->quads.size();i++,a+=4) {
+    for (a=0;a<xml->quads.size();a+=4) {
       for (j=0;j<4;j++) {
 	xml->quads[a+j].i=xml->vertices[xml->quadind[a+j]].i;
 	xml->quads[a+j].j=xml->vertices[xml->quadind[a+j]].j;
