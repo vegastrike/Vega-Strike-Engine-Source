@@ -590,8 +590,9 @@ int NetClient::checkMsg( Packet* outpacket )
         ret = recvMsg( outpacket );
     }
 #ifdef NETCOMM
+	// If we have network communications enabled and webcam support enabled we grab an image
 	if( NetComm->WebcamEnabled() && NetComm->WebcamTime())
-		NetComm->GrabImage();
+		NetComm->GrabImage( this->serial);
 	// And then send the string to concerned clients (to do in NetworkCommunication class)
 #endif
 	
@@ -1038,6 +1039,24 @@ int NetClient::recvMsg( Packet* outpacket )
 					}
 					pendingjump = pendingtemp;
 					*/
+				}
+			}
+			break;
+			case CMD_STARTNETCOMM :
+			{
+				// Check this is not us
+				if( packet_serial != this->serial)
+				{
+					// Add the client to netcomm list in NetComm
+				}
+			}
+			break;
+			case CMD_STOPNETCOMM :
+			{
+				// Check this is not us
+				if( packet_serial != this->serial)
+				{
+					// Remove the client to netcomm list in NetComm
 				}
 			}
 			break;
@@ -1554,20 +1573,29 @@ bool	NetClient::jumpRequest( string newsystem)
 void	NetClient::startCommunication( float freq)
 {
 #ifdef NETCOMM
-	cerr<<"Starting communication session..."<<endl;
+	NetBuffer netbuf;
+	netbuf.addFloat( freq);
 	NetComm->InitSession( freq);
-	cerr<<"Session started."<<endl;
-	cerr<<"Grabbing an image"<<endl;
-	NetComm->GrabImage();
+	//cerr<<"Session started."<<endl;
+	//cerr<<"Grabbing an image"<<endl;
+	Packet p;
+	p.send( CMD_STARTNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
+            __FILE__, PSEUDO__LINE__(1565) );
+	cerr<<"Started communication session\n\n"<<endl;
+	//NetComm->GrabImage();
 #endif
 }
 
 void	NetClient::stopCommunication( float freq)
 {
 #ifdef NETCOMM
-	cerr<<"Stopping communication session..."<<endl;
+	NetBuffer netbuf;
+	netbuf.addFloat( freq);
+	Packet p;
+	p.send( CMD_STOPNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
+            __FILE__, PSEUDO__LINE__(1578) );
 	NetComm->DestroySession();
-	cerr<<"Session stopped."<<endl;
+	cerr<<"Stopped communication session"<<endl;
 #endif
 }
 

@@ -72,6 +72,7 @@ struct	Client
 	//char			localplayer;
 	bool			ingame;
 	string			jumpfile;
+	float			comm_freq;
 
 	Client()
 	{
@@ -85,6 +86,7 @@ struct	Client
 		zone = 0;
 		ingame = false;
 		jumpfile="";
+		comm_freq = MIN_COMMFREQ;
 	}
 
 	Client( SOCKETALT& s, bool tcp )
@@ -101,6 +103,7 @@ struct	Client
 		zone = 0;
 		ingame = false;
 		jumpfile="";
+		comm_freq = MIN_COMMFREQ;
 	}
 
 	inline bool isTcp( ) const {

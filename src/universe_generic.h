@@ -27,6 +27,8 @@
 
 #include "star_system_generic.h"
 #include "faction_generic.h"
+#include "stardate.h"
+
 class Cockpit;
 class Camera;
 class Unit;
@@ -68,6 +70,7 @@ private:
   ///A list of all factions 
   
  public:
+  StarDate	current_stardate;
   bool	isServer() { return is_server;}
   Cockpit * isPlayerStarship (const Unit* fighter);
   int whichPlayerStarship (const Unit* fighter);

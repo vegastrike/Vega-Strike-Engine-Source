@@ -58,6 +58,10 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_KILL         )
     CASE( CMD_JUMP         )
     CASE( CMD_ASKFILE      )
+    CASE( CMD_DOWNLOAD     )
+    CASE( CMD_CAMSHOT      )
+    CASE( CMD_STARTNETCOMM )
+    CASE( CMD_STOPNETCOMM  )
 
     CASE( CMD_NEWSUBSCRIBE )
 

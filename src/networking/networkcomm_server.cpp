@@ -9,7 +9,7 @@ int		NetworkCommunication::InitSession( float freq)
 	return 0;
 }
 
-int		NetworkCommunication::GrabImage()
+int		NetworkCommunication::GrabImage( ObjSerial serial)
 {
 	return 0;
 }

@@ -65,6 +65,7 @@ class ZoneMgr
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
         void    broadcast( int zone, ObjSerial serial, Packet * pckt );
+        void    broadcastCamshot( int zone, ObjSerial serial, Packet * pckt );
         void    broadcastSnapshots( bool update_planets=false);
 		void	broadcastDamage();
 		int		getZoneClients( Client * clt, char * bufzone);

@@ -48,7 +48,8 @@ struct StarShipControlKeyboard {
   bool commchanged;
   bool killcomm;
   float comm_freq;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=killcomm=false;comm_freq=MIN_COMMFREQ;}
+  float selected_freq;
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=killcomm=false;selected_freq=comm_freq=MIN_COMMFREQ;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -155,13 +156,13 @@ void FlyByKeyboard::Execute () {
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
   if(Network!=NULL && SSCK.killcomm) {
-	printf( "Stopping a NETCOMM\n\n");
-	Network[whichplayer].stopCommunication(SSCK.comm_freq);
+	printf( "Stopping a NETCOMM\n");
+	Network[whichplayer].stopCommunication(SSCK.selected_freq);
 	SSCK.killcomm=false;
   }
   if(Network!=NULL && SSCK.startcomm && SSCK.commchanged) {
-	printf( "Starting a NETCOMM\n\n");
-	Network[whichplayer].startCommunication(SSCK.comm_freq);
+	printf( "Starting a NETCOMM\n");
+	Network[whichplayer].startCommunication(SSCK.selected_freq);
 	SSCK.commchanged=false;
   }
   if (SSCK.setunvel) {
@@ -342,6 +343,8 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 
 }
 
+// Changing the frequency doesn't kill a communication anymore until the player stopped its current one
+// and starts a new one in that other frequency
 
 void FlyByKeyboard::DownFreq (int,KBSTATE k) {
 if(Network!=NULL)
@@ -349,7 +352,6 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN: if( g().comm_freq==MIN_COMMFREQ) g().comm_freq=MAX_COMMFREQ; else g().comm_freq -= .1;
-			 g().killcomm = true;
     break;
   case UP:
   case PRESS:
@@ -366,7 +368,6 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN: if( g().comm_freq==MAX_COMMFREQ) g().comm_freq=MIN_COMMFREQ; else g().comm_freq += .1;
-			 g().killcomm = true;
     break;
   case UP:
   case PRESS:
@@ -390,7 +391,11 @@ if(Network!=NULL)
 		g().killcomm = true;
 	}
 	else
+	{
+		// If starting a comm we set the selected_freq to the current one
+		g().selected_freq = g().comm_freq;
 		g().startcomm=true;
+	}
 	g().commchanged=true;
     break;
   case UP:

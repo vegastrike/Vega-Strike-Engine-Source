@@ -76,6 +76,9 @@ enum Cmd
 	CMD_JUMP         = 0x81,		// Send a jump request
 	CMD_ASKFILE      = 0x83,		// Ask the server for files (char=number of files and string containing the file names)
 	CMD_DOWNLOAD     = 0x84,		// May be identical to CMD_ASKFILE in the end
+	CMD_CAMSHOT      = 0x85,		// This means a webcam-shot just arrived (from client to server and from server to concerned clients)
+	CMD_STARTNETCOMM = 0x86,		// A client tells the server he starts a netcomm session
+	CMD_STOPNETCOMM  = 0x87,		// A client tells the server he stops a netcomm session
 
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost and established again :

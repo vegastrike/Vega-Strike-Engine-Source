@@ -256,6 +256,34 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 }
 
 /************************************************************************************************/
+/**** broadcastCamshot : broadcast webcamshot to players in the zone and on the same frequency  *****/
+/************************************************************************************************/
+
+// Broadcast a packet to a zone clients with its serial as argument
+void	ZoneMgr::broadcastCamshot( int zone, ObjSerial serial, Packet * pckt )
+{
+    // COUT<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
+    list<Client*>* lst = zone_list[zone];
+	Unit * un;
+    if( lst == NULL ) return;
+
+	for( LI i=lst->begin(); i!=lst->end(); i++)
+	{
+		un = (*i)->game_unit.GetUnit();
+		// Broadcast to all clients excluding the one who did a request and
+		// excluding those who are listening on a different frequency
+		if( (*i)->ingame && un->GetSerial() != serial )
+		{
+			COUT<<"Sending update to client n° "<<(*i)->game_unit.GetUnit()->GetSerial();
+			COUT<<endl;
+			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
+			pckt->bc_send( );
+		}
+	}
+}
+
+
+/************************************************************************************************/
 /**** broadcastSnapshots                                                                    *****/
 /************************************************************************************************/
 

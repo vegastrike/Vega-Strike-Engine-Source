@@ -9,6 +9,8 @@
 #endif
 
 #include "networkcomm.h"
+#include "netbuffer.h"
+#include "packet.h"
 
 NetworkCommunication::NetworkCommunication()
 {
@@ -29,15 +31,23 @@ NetworkCommunication::NetworkCommunication()
 #endif
 }
 
-int		NetworkCommunication::GrabImage()
+int		NetworkCommunication::GrabImage( ObjSerial serial)
 {
 #ifndef NETCOMM_NOWEBCAM
+	string jpeg_str;
 	if( Webcam)
 	{
-		cerr<<"--- Trying to grab an image..."<<endl;
-		cerr<<"\t";
-		Webcam->CaptureImage();
-		cerr<<"--- grabbing finished"<<endl;
+		//cerr<<"--- Trying to grab an image..."<<endl;
+		//cerr<<"\t";
+		jpeg_str = Webcam->CaptureImage();
+		NetBuffer netbuf;
+		netbuf.addString( jpeg_str);
+		//cerr<<"--- grabbing finished"<<endl;
+		// We send this capture to server which will redirect it to concerned clients
+		Packet p;
+		// We don't need that to be reliable in UDP mode
+		p.send( CMD_CAMSHOT, serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock,
+                      __FILE__, PSEUDO__LINE__(49) );
 	}
 #endif
 	return 0;
@@ -57,6 +67,7 @@ int		NetworkCommunication::InitSession( float frequency)
 		this->Webcam->StartCapture();
 #endif
 
+	this->freq = frequency;
 	return 0;
 }
 

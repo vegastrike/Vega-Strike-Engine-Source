@@ -1,9 +1,10 @@
 #ifndef __NETWORKCOMM_H
 #define __NETWORKCOMM_H
 
+#include "client.h"
+//struct Client;
 #include <list>
 #include <config.h> // for NETCOMM_NOSOUND
-#include "client.h"
 
 #ifndef NETCOMM_NOWEBCAM
 class WebcamSupport;
@@ -19,6 +20,8 @@ class NetworkCommunication
 	private:
 		// List of clients we are communicating with
 		list<Client *>	commClients;
+		// The current communication frequency
+		float	freq;
 #ifndef NETCOMM_NOWEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
@@ -34,7 +37,7 @@ class NetworkCommunication
 		~NetworkCommunication();
 
 		int		InitSession( float frequency);
-		int		GrabImage();
+		int		GrabImage( ObjSerial serial);
 		int		DestroySession();
 		bool	WebcamEnabled();
 		bool	WebcamTime();

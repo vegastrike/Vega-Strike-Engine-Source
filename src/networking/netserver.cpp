@@ -1046,6 +1046,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 	Unit * un = NULL;
 	Unit * unclt = NULL;
 	ObjSerial target_serial;
+	ObjSerial packet_serial = p.getSerial();
 
     switch( cmd)
     {
@@ -1276,6 +1277,36 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			//netbuf.addFloat( distance);
 		}
 		break;
+		/* SHOULD NOT RECEIVE THIS SINCE COMM SESSIONS ARE HANDLED IN A CLIENT-TO-CLIENT WAY
+		case CMD_CAMSHOT :
+		{
+			p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDANDFORGET, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1281));
+			// Send to concerned clients
+			zonemgr->broadcast_camshots( clt->zone, clt->serial, &p2);
+		}
+		*/
+		break;
+		case CMD_STARTNETCOMM :
+		{
+			float freq = netbuf.getFloat();
+			clt->comm_freq = freq;
+			// Broadcast players with same frequency that there is a new one listening to it
+			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1293));
+			// Send to concerned clients
+			zonemgr->broadcast( clt->zone, packet_serial, &p2);
+			//zonemgr->broadcastCamshot( clt->zone, clt->serial, &p2);
+		}
+		break;
+		case CMD_STOPNETCOMM :
+		{
+			float freq = netbuf.getFloat();
+			// Broadcast players with same frequency that this client is leaving the comm session
+			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDANDFORGET, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
+			// Send to concerned clients
+			zonemgr->broadcast( clt->zone, packet_serial, &p2);
+		}
+		break;
+
 
 		/***************** NOT USED ANYMORE *******************/
 		// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
