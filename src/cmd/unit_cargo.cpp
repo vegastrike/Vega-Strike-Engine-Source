@@ -35,9 +35,9 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist, bool dow
 	string templnam = string(unitdir)+".template";	  
 	const Unit * templ=NULL;
 	if (!downgrade) {
-	  templ = getCachedConstUnit (templnam,faction);
+	  templ = UnitConstCache::getCachedConst (StringIntKey(templnam,faction));
 	  if (templ==NULL) {
-	    templ = setCachedConstUnit (templnam,faction,UnitFactory::createUnit (templnam.c_str(),true,this->faction));
+	    templ = UnitConstCache::setCachedConst (StringIntKey(templnam,faction),UnitFactory::createUnit (templnam.c_str(),true,this->faction));
 	  }
 	}
 	free (unitdir);
