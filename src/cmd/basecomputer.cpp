@@ -258,6 +258,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "ShowOptionsMenu", "", &BaseComputer::changeToLoadSaveMode ),
     BaseComputer::WctlTableEntry ( "Quit", "", &BaseComputer::actionQuitGame ),
     BaseComputer::WctlTableEntry ( "Load", "", &BaseComputer::actionLoadGame ),
+    BaseComputer::WctlTableEntry ( "New", "", &BaseComputer::actionNewGame ),
     BaseComputer::WctlTableEntry ( "Save", "", &BaseComputer::actionSaveGame ),		
     BaseComputer::WctlTableEntry ( "", "", NULL )
 };
@@ -951,7 +952,21 @@ void BaseComputer::constructControls(void) {
 		quit->setLabel("Quit Game");
 		quit->setCommand("Quit");
         loadSaveGroup->addChild(quit);
-		
+        NewButton * newgame = new NewButton;
+        newgame->setRect(Rect(-.11,-.4, .22, .12) );
+        newgame->setColor( GFXColor(0,1,1,.1) );
+        newgame->setTextColor(GUI_OPAQUE_WHITE);
+        newgame->setDownColor( GFXColor(0,1,1,.4) );
+        newgame->setDownTextColor( GFXColor(.2,.2,.2) );
+        newgame->setVariableBorderCycleTime(1.0);
+        newgame->setBorderColor( GFXColor(.2,.2,.2) );
+        newgame->setEndBorderColor( GFXColor(.4,.4,.4) );
+        newgame->setShadowWidth(2.0);
+        newgame->setFont(Font(.08, BOLD_STROKE));
+        newgame->setId("NewGame");
+        newgame->setLabel("New");
+        newgame->setCommand("New");
+        loadSaveGroup->addChild(newgame);        		
 		
 	}
     {
@@ -4901,6 +4916,11 @@ bool BaseComputer::actionConfirmedLoadGame() {
 			}
 		}		
 		return true;
+}
+bool BaseComputer::actionNewGame(const EventCommandId& command, Control* control) {
+  StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );  
+  desc->setText("New_Game");
+  return this->actionLoadGame(command,control);
 }
 bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* control) {
 		Unit* player = m_player.GetUnit();

@@ -140,6 +140,7 @@ protected:
     // Save Game
     bool actionConfirmedSaveGame();
     bool actionSaveGame(const EventCommandId& command, Control* control);
+    bool actionNewGame(const EventCommandId& command, Control* control);
     // Load Game
     bool actionConfirmedQuitGame();
     bool actionQuitGame(const EventCommandId& command, Control* control);
