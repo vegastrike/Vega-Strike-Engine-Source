@@ -99,7 +99,7 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #endif
 
 #if defined(CG_SUPPORT)
-VSCG *defaultcg = new VSCG();
+CG_Cloak *cloak_cg = new CG_Cloak();
 #endif
 
 void init_opengl_extensions()
@@ -200,33 +200,20 @@ void init_opengl_extensions()
 		winsys_exit(0);
 	}
     if (cgGLIsProfileSupported(CG_PROFILE_VP30))
-        defaultcg->vertexProfile = CG_PROFILE_VP30;
+        cloak_cg->vertexProfile = CG_PROFILE_VP30;
     else if (cgGLIsProfileSupported(CG_PROFILE_ARBVP1))
-        defaultcg->vertexProfile = CG_PROFILE_ARBVP1;
+        cloak_cg->vertexProfile = CG_PROFILE_ARBVP1;
     else if (cgGLIsProfileSupported(CG_PROFILE_VP20))
-        defaultcg->vertexProfile = CG_PROFILE_VP20;
+        cloak_cg->vertexProfile = CG_PROFILE_VP20;
     else
     {
         printf("Vertex programming extensions (GL_ARB_vertex_program or "
                "GL_NV_vertex_program) not supported, exiting...\n");
         winsys_exit(0);
     }
-    if (cgGLIsProfileSupported(CG_PROFILE_FP30))
-        defaultcg->pixelProfile = CG_PROFILE_FP30;
-    else if (cgGLIsProfileSupported(CG_PROFILE_ARBFP1))
-        defaultcg->pixelProfile = CG_PROFILE_ARBFP1;
-    else if (cgGLIsProfileSupported(CG_PROFILE_FP20))
-        defaultcg->pixelProfile = CG_PROFILE_FP20;
-    else
-    {
-        printf("Pixel programming extensions (GL_ARB_fragment_program or "
-               "GL_NV_fragment_program) not supported, exiting...\n");
-        winsys_exit(0);
-    }
 
-defaultcg->shaderContext = cgCreateContext();
-defaultcg->cgLoadMedia("programs/bump_reflection", "vertex.cg", true);
-defaultcg->cgLoadMedia("programs/bump_reflection", "pixel.cg", false);
+cloak_cg->shaderContext = cgCreateContext();
+cloak_cg->cgLoadMedia("programs/cloaking_effect", "vertex.cg");
 #endif
 
 

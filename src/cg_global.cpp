@@ -2,20 +2,20 @@
 #define GLH_EXT_SINGLE_FILE 1
 
 #if defined(__APPLE__) || defined(MACOSX)
-#define MACOS
+#define MACOS 1
 #elif !defined(WIN32)
 #define UNIX 1
 #endif
 
 #include <iostream>
-#include "cg_global.h"
 
 #if defined(CG_SUPPORT)
+#include "cg_global.h"
 #include <shared/data_path.h>
 
 using namespace std;
 
-void VSCG::cgLoadMedia(string pathname, string filename, bool vertex)
+void CG_Cloak::cgLoadMedia(string pathname, string filename)
 {
   data_path media;
   media.path.push_back(".");
@@ -26,31 +26,25 @@ void VSCG::cgLoadMedia(string pathname, string filename, bool vertex)
       cout << "Unable to load " << filename << ", exiting..." << endl;
      exit(0);
     }
+  /*
+      this->VecPosition = NULL;
+      this->VecNormal = NULL;
+      this->ModelViewProj = NULL;
+      this->ModelViewIT = NULL;
+      this->ModelView = NULL;
 
+      this->MaterialDiffuse = NULL;
+      this->MaterialAmbient = NULL;
+      this->MaterialSpecular = NULL;
+      this->MaterialEmissive = NULL;
 
-  if (vertex)
-    {
-      /*
-      if (this->vertexProgram) delete this->vertexProgram;
-      if (this->VertexPosition) delete this->VertexPosition;
-      if (this->VertexTexCoord) delete this->VertexTexCoord;
-      if (this->WorldViewProj) this->WorldViewProj = NULL;
-      if (this->Camera) delete this->Camera;
-      if (this->BumpScale) delete this->BumpScale;
-      if (this->VertexX) delete this->VertexX;
-      if (this->VertexY) delete this->VertexY;
-      if (this->VertexZ) delete this->VertexZ;
-      */
-      this->vertexProgram = NULL;
-      this->VertexPosition = NULL;
-      this->VertexTexCoord = NULL;
-      this->WorldViewProj = NULL;
-      this->Camera = NULL;
-      this->BumpScale = NULL;
-      this->VertexX = NULL;
-      this->VertexY = NULL;
-      this->VertexZ = NULL;
-
+      this->VecPower = NULL;
+      this->VecCenter = NULL;
+      this->VecBlendParams = NULL;
+      this->VecLightDir = NULL;
+      this->VecEye = NULL;
+      this->VecTime = NULL;
+  */
 
       this->vertexProgram = cgCreateProgramFromFile(this->shaderContext,
         CG_SOURCE, mediafile.data(),
@@ -58,48 +52,26 @@ void VSCG::cgLoadMedia(string pathname, string filename, bool vertex)
 
 cgGLLoadProgram(this->vertexProgram);
 
- this->VertexPosition = cgGetNamedParameter(this->vertexProgram, "IN.POSITION");
- this->VertexTexCoord = cgGetNamedParameter(this->vertexProgram, "IN.TEXCOORD0");
- this->WorldViewProj = cgGetNamedParameter(this->vertexProgram, "WorldViewProj");
- this->Camera = cgGetNamedParameter(this->vertexProgram, "EyePosition");
-this->BumpScale = cgGetNamedParameter(this->vertexProgram, "BumpScale");
-    }
- else
-    {
-      /*
-      if (this->pixelProgram) delete this->pixelProgram;
-      if (this->PixelPosition) delete this->PixelPosition;
-      if (this->PixelTexCoord) delete this->PixelTexCoord;
-      if (this->NormalMap) delete this->NormalMap;
-      if (this->EnvironmentMap) delete this->EnvironmentMap
-      if (this->CameraVector) delete this->CameraVector;
-      if (this->PixelX) delete this->PixelX;
-      if (this->PixelY) delete this->PixelY;
-      if (this->PixelZ) delete this->PixelZ;
-      */
+ this->VecPosition = cgGetNamedParameter(this->vertexProgram, "I.vecPosition");
+ this->VecNormal = cgGetNamedParameter(this->vertexProgram, "I.vecNormal");
 
-      this->pixelProgram = NULL;
-      this->PixelPosition = NULL;
-      this->PixelTexCoord = NULL;
-      this->NormalMap = NULL;
-      this->EnvironmentMap = NULL;
-      this->CameraVector = NULL;
-      this->PixelX = NULL;
-      this->PixelY = NULL;
-      this->PixelZ = NULL;
+ this->ModelViewProj = cgGetNamedParameter(this->vertexProgram, "matModelViewProj");
+ this->ModelViewIT = cgGetNamedParameter(this->vertexProgram, "matModelView");
+ this->ModelView = cgGetNamedParameter(this->vertexProgram, "matModelView");
 
-  this->pixelProgram = cgCreateProgramFromFile(this->shaderContext,
-        CG_SOURCE, mediafile.data(),
-        this->pixelProfile, NULL, NULL);
+ this->MaterialDiffuse = cgGetNamedParameter(this->vertexProgram, "materialDiffuse");
+ this->MaterialAmbient = cgGetNamedParameter(this->vertexProgram, "materialAmbient");
+ this->MaterialSpecular = cgGetNamedParameter(this->vertexProgram, "materialSpecular");
+ this->MaterialEmissive = cgGetNamedParameter(this->vertexProgram, "materialEmissive");
 
-  cgGLLoadProgram(this->pixelProgram);
-    
-      this->PixelPosition = cgGetNamedParameter(this->pixelProgram, "IN.POSITION");
-      this->PixelTexCoord = cgGetNamedParameter(this->pixelProgram, "IN.TEXCOORD0");
-      this->NormalMap = cgGetNamedParameter(this->pixelProgram, "NormalMap");
-      this->EnvironmentMap = cgGetNamedParameter(this->pixelProgram, "EnvironmentMap");
-      this->CameraVector = cgGetNamedParameter(this->pixelProgram, "EyeVector");
-    }
+ this->VecPower = cgGetNamedParameter(this->vertexProgram, "vecPower");
+ this->VecCenter = cgGetNamedParameter(this->vertexProgram, "vecCenter");
+ this->VecBlendParams = cgGetNamedParameter(this->vertexProgram, "vecBlendParams");
+ this->VecLightDir = cgGetNamedParameter(this->vertexProgram, "vecLightDir");
+ this->VecEye = cgGetNamedParameter(this->vertexProgram, "vecEye");
+ this->VecTime = cgGetNamedParameter(this->vertexProgram, "VecTime");
+
+ 
 }
 
 #endif

@@ -9,7 +9,9 @@
 #include "gfx/camera.h"
 #include "gfx/animation.h"
 
+#if defined(CG_SUPPORT)
 #include "cg_global.h"
+#endif
 
 extern vector<Logo*> undrawn_logos;
 class OrigMeshContainer {
@@ -368,13 +370,21 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
             GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),CloakFX,GFXColor(1,0,0)),true);
             specialfxlight.push_back (ligh);
             GFXBlendMode (ONE,ONE);
+#if defined(CG_SUPPORT)
+	    cgGLSetParameter2f(cloak_cg->VecBlendParams, ONE, ONE);
+	     cgGLEnableProfile(cloak_cg->vertexProfile);
+#endif
         }else {
             if (cloaked&MeshDrawContext::NEARINVIS) {      
                 //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
             }
-#if !defined(CG_SUPPORT)
             GFXBlendMode (SRCALPHA, INVSRCALPHA);
             GFXColorMaterial (AMBIENT|DIFFUSE);
+#if defined(CG_SUPPORT)
+	    cgGLSetParameter2f(cloak_cg->VecBlendParams, SRCALPHA, INVSRCALPHA);
+	     cgGLEnableProfile(cloak_cg->vertexProfile);
+#endif
+
 			if (hulldamage) {
 				GFXColor4f(CloakFX.r,CloakFX.g,CloakFX.b,CloakFX.a*hulldamage/255);
 			}else
@@ -385,10 +395,7 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
 		GFXColorMaterial (AMBIENT|DIFFUSE);
 		GFXColor4f(1,1,1,hulldamage/255.);
 	}
-#else
-    }
-}
-#endif
+
 }
 static void RestoreCloakState (char cloaked, bool envMap,unsigned char damage) {
     if (cloaked&MeshDrawContext::CLOAK) {
@@ -396,6 +403,9 @@ static void RestoreCloakState (char cloaked, bool envMap,unsigned char damage) {
         if (envMap)
             GFXEnable (TEXTURE1);
         GFXPopBlendMode ();
+#if defined(CG_SUPPORT)
+	     cgGLDisableProfile(cloak_cg->vertexProfile);
+#endif
     }
 	if (damage) {
 		GFXColorMaterial(0);
@@ -576,35 +586,36 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   } else {
     GFXDisable(TEXTURE1);
   }
-#if defined(CG_SUPPORT)
-    for (int i=0; i <= this->xml->num_vertices; i++)
-    {
-      
-      GFXVertex GVertex = (GFXVertex)xml->vertices[i];
-    
-    cgGLSetParameter3f(defaultcg->VertexPosition, GVertex.x, GVertex.y, GVertex.z);
-    cgGLSetParameter2f(defaultcg->VertexTexCoord, GVertex.s, GVertex.t);
-    cgGLSetParameter3f(defaultcg->PixelPosition, GVertex.x, GVertex.y, GVertex.z);
-    cgGLSetParameter3f(defaultcg->Camera, _Universe->AccessCamera()->GetPosition().i,_Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k );
-    cgGLSetParameter2f(defaultcg->PixelTexCoord, GVertex.s, GVertex.t);
-    cgGLSetParameter3f(defaultcg->NormalMap,     GVertex.i, GVertex.j, GVertex.k);
-    cgGLSetParameter3f(defaultcg->EnvironmentMap,0, 0, 0);
-cgGLSetParameter3f(defaultcg->CameraVector,_Universe->AccessCamera()->GetPosition().i, _Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k );
 
+#if defined(CG_SUPPORT)
+  cgGLBindProgram(cloak_cg->vertexProgram);
+
+ cgGLSetStateMatrixParameter(cloak_cg->ModelViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
+ cgGLSetStateMatrixParameter(cloak_cg->ModelViewIT, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_INVERSE);
+ cgGLSetStateMatrixParameter(cloak_cg->ModelViewIT, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_TRANSPOSE);
+ cgGLSetStateMatrixParameter(cloak_cg->ModelView, CG_GL_MODELVIEW_MATRIX, CG_GL_MATRIX_IDENTITY );
+ cgGLSetParameter4f(cloak_cg->MaterialDiffuse, this->xml->material.dr,  this->xml->material.dg, this->xml->material.db, this->xml->material.da);
+ cgGLSetParameter4f(cloak_cg->MaterialAmbient, this->xml->material.ar, this->xml->material.ag, this->xml->material.ab, this->xml->material.aa);
+ cgGLSetParameter4f(cloak_cg->MaterialSpecular, this->xml->material.sr, this->xml->material.sg, this->xml->material.sb, this->xml->material.sa);
+ cgGLSetParameter4f(cloak_cg->MaterialEmissive, this->xml->material.er, this->xml->material.eg, this->xml->material.eb, this->xml->material.ea);
+
+cgGLSetParameter3f(cloak_cg->VecEye, _Universe->AccessCamera()->GetPosition().i, _Universe->AccessCamera()->GetPosition().j, _Universe->AccessCamera()->GetPosition().k);
+
+cgGLSetParameter3f(cloak_cg->VecCenter,this->Position().i, this->Position().j, this->Position().k);
+
+//cgGLSetParameter2f(cloak_cg->VecLightDir, CloakFX.vect[0], CloakFX.vect[1], CloakFX.vect[2]);
+
+
+  for (int i = 0; i <= vlist->GetNumVertices(); i++)
+    {
+cgGLSetParameter3f(cloak_cg->VecPosition, vlist->GetVertex(i)->x,  vlist->GetVertex(i)->y,  vlist->GetVertex(i)->z);
+cgGLSetParameter3f(cloak_cg->VecNormal, vlist->GetVertex(i)->i ,  vlist->GetVertex(i)->j, vlist->GetVertex(i)->i );
     }
+
+  cgGLSetOptimalOptions(cloak_cg->vertexProfile);
 #endif
 
   vlist->BeginDrawState();	
-#if defined(CG_SUPPORT)
-  cgGLBindProgram(defaultcg->vertexProgram);
-  cgGLBindProgram(defaultcg->pixelProgram);
-  cgGLEnableProfile(defaultcg->vertexProfile);
-  cgGLEnableProfile(defaultcg->pixelProfile);
-
-  cgGLSetStateMatrixParameter(defaultcg->WorldViewProj, CG_GL_MODELVIEW_PROJECTION_MATRIX, CG_GL_MATRIX_IDENTITY);
-  cgGLEnableTextureParameter(defaultcg->NormalMap);
-//  cgGLEnableTextureParameter(defaultcg->BumpMap);
-#endif
 
   switch (whichpass) {
   case 0:
@@ -639,6 +650,7 @@ cgGLSetParameter3f(defaultcg->CameraVector,_Universe->AccessCamera()->GetPositio
     GFXLoadMatrixModel ( c.mat);
 	unsigned char damaged=((whichpass==DAMAGE_PASS)?c.damage:0);
     SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged);
+
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
@@ -648,7 +660,9 @@ cgGLSetParameter3f(defaultcg->CameraVector,_Universe->AccessCamera()->GetPositio
     SetupFogState(c.cloaked);
 	if (c.cloaked&MeshDrawContext::RENORMALIZE)
 		glEnable(GL_NORMALIZE);
+
     vlist->Draw();
+
 	if (c.cloaked&MeshDrawContext::RENORMALIZE)
 		glDisable(GL_NORMALIZE);
 	
@@ -656,6 +670,7 @@ cgGLSetParameter3f(defaultcg->CameraVector,_Universe->AccessCamera()->GetPositio
       GFXDeleteLight (specialfxlight[i]);
     }
     RestoreCloakState(c.cloaked,getEnvMap(),damaged);
+
     
     if(0!=forcelogos&&!(c.cloaked&MeshDrawContext::NEARINVIS)) {
       forcelogos->Draw(c.mat);
@@ -665,10 +680,6 @@ cgGLSetParameter3f(defaultcg->CameraVector,_Universe->AccessCamera()->GetPositio
     }
   }
   vlist->EndDrawState();
-#if defined(CG_SUPPORT)
-  cgGLDisableProfile(defaultcg->pixelProfile);
-  cgGLDisableProfile(defaultcg->vertexProfile);
-#endif
 
 	switch(whichpass) {
 	case 0:

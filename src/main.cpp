@@ -131,9 +131,8 @@ void cleanup(void)
   }
 
 #if defined(CG_SUPPORT)
-    if (defaultcg->vertexProgram) cgDestroyProgram(defaultcg->vertexProgram);
-    if (defaultcg->pixelProgram)  cgDestroyProgram(defaultcg->pixelProgram);
-    if (defaultcg->shaderContext)  cgDestroyContext(defaultcg->shaderContext);
+    if (cloak_cg->vertexProgram) cgDestroyProgram(cloak_cg->vertexProgram);
+    if (cloak_cg->shaderContext)  cgDestroyContext(cloak_cg->shaderContext);
 #endif
 
   if (muzak) {

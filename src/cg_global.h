@@ -17,42 +17,41 @@
 #include <glh/glh_cube_map.h>
 using namespace glh;
 
-class VSCG
+class CG_Cloak
 {
  public:
-CGprogram vertexProgram;
-CGprogram pixelProgram;
+ CGprogram vertexProgram;
 
-CGcontext shaderContext;
+ CGcontext shaderContext;
 
-CGprofile vertexProfile;
-CGprofile pixelProfile;
+ CGprofile vertexProfile;
 
-CGparameter VertexPosition;
-CGparameter VertexTexCoord;
-CGparameter VertexX;
-CGparameter VertexY;
-CGparameter VertexZ;
+ // float3
+ CGparameter VecPosition;
+ CGparameter VecNormal;
 
-CGparameter WorldViewProj;
-CGparameter ObjToCubeSpace;
-CGparameter Camera;
-CGparameter BumpScale;
+ // float4x4
+ CGparameter ModelViewProj;
+ CGparameter ModelViewIT;
+ CGparameter ModelView;
 
-
-CGparameter PixelPosition;
-CGparameter PixelTexCoord;
-CGparameter PixelX;
-CGparameter PixelY;
-CGparameter PixelZ;
-CGparameter NormalMap;
-CGparameter EnvironmentMap;
-CGparameter CameraVector;
-
- VSCG() {}
-void cgLoadMedia(string pathname, string filename, bool vertex);
+ //float4
+ CGparameter MaterialDiffuse;
+ CGparameter MaterialAmbient;
+ CGparameter MaterialSpecular;
+ CGparameter MaterialEmissive;
+ 
+ CGparameter VecPower;
+ CGparameter VecCenter;
+ CGparameter VecBlendParams;
+ CGparameter VecLightDir;
+ CGparameter VecEye;
+ CGparameter VecTime;
+ 
+CG_Cloak() {}
+ void cgLoadMedia(string pathname, string filename);
 };
 
-extern VSCG *defaultcg;
+extern CG_Cloak *cloak_cg;
 #endif
 #endif
