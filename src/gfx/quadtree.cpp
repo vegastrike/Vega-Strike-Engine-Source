@@ -9,6 +9,7 @@ const GFXVertex InitialVertices [4]= { GFXVertex (Vector(0,0,0),Vector (0,1,0), 
 				       GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0) };
  
 QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
+  detail =128;
   Identity (transformation);
   nonlinear_transform = new IdentityTransform;
   RootCornerData.Parent = NULL;

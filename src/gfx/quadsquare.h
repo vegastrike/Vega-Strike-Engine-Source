@@ -21,15 +21,21 @@ struct TerrainTexture {
   BLENDFUNC blendSrc;
   BLENDFUNC blendDst;
   int color;
-  GFXMaterial material;
+  unsigned int material;
   bool reflect;
+  float scales;
+  float scalet;
   union {
     char * filename;
     Texture * t;
   }tex;
   TerrainTexture () {
+    scales= scalet =1;
     tex.filename = NULL;
-    GFXGetMaterial (0, material);//by default it's the default material;
+    material=0;
+    reflect = false;
+    blendSrc = ONE;
+    blendDst =ZERO;
   }
 };
 
@@ -64,8 +70,8 @@ class IdentityTransform {
   virtual Vector InvTransform (const Vector &);
   ///Transforms a min and a max vector and figures out what is bigger
   virtual void TransformBox (Vector &min, Vector &max);
-  float TransformS (float x);
-  float TransformT (float y);
+  float TransformS (float x, float scale);
+  float TransformT (float y, float scale);
 };
 
 struct	VertInfo {

@@ -28,11 +28,11 @@ void IdentityTransform::TransformBox (Vector &min, Vector & max) {
 Vector IdentityTransform::InvTransform (const Vector &v) {
   return v;
 }
-float IdentityTransform::TransformS (float x) {
-  return x/1024;
+float IdentityTransform::TransformS (float x, float scales) {
+  return x*scales;
 }
-float IdentityTransform::TransformT (float y) {
-  return y/1024;
+float IdentityTransform::TransformT (float y, float scalet) {
+  return y*scalet;
 }
 
 unsigned int * quadsquare::VertexAllocated;
@@ -64,7 +64,7 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 	v[4].k = pcd.zorg + half*2;
 	for (unsigned int i=0;i<5;i++) {
 	  v[i].j = Vertex[i].Y;
-	  vertexs[Vertex[i].vertindex].SetTexCoord (nonlinear_trans->TransformS(v[i].i),nonlinear_trans->TransformT(v[i].k));
+	  vertexs[Vertex[i].vertindex].SetTexCoord (nonlinear_trans->TransformS(v[i].i,(*textures)[Vertex[i].GetTex()].scales),nonlinear_trans->TransformT(v[i].k, (*textures)[Vertex[i].GetTex()].scalet));
 	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->Transform(v[i]));
 	}
 	return half;  

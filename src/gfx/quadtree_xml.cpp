@@ -1,7 +1,7 @@
 #include "quadtree.h"
 #include "xml_support.h"
 #include "gfxlib.h"
-
+#include "aux_texture.h"
 
 extern enum BLENDFUNC parse_alpha (char * tmp );
 
@@ -15,7 +15,7 @@ struct TerrainData {
 struct TerraXML {
 	float detail;
 	float level;
-	std::vector <TerrainTexture> tex;
+  	std::vector <GFXMaterial> mat;
 	std::vector <TerrainData> data;
 };
 
@@ -40,11 +40,14 @@ namespace TerrainXML {
 		BLEND,
 		FFILE,
 		DETAIL,
+		STATICDETAIL,
 		REFLECT,
 		COLOR,
 		SCALE,
 		ORIGINX,
+		SCALES,
 		ORIGINY,
+		SCALET,
 		TERRAINAMBIENT,
 		TERRAINDIFFUSE,
 		TERRAINSPECULAR,
@@ -69,22 +72,25 @@ namespace TerrainXML {
 	const EnumMap::Pair attribute_names[] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
 		EnumMap::Pair ("Detail", DETAIL),
+		EnumMap::Pair ("StaticDetail", STATICDETAIL),
 		EnumMap::Pair ("Level", LEVEL),
 		EnumMap::Pair ("Blend", BLEND),
 		EnumMap::Pair ("File", FFILE),
 		EnumMap::Pair ("Reflect", REFLECT),
 		EnumMap::Pair ("Color", COLOR),
 		EnumMap::Pair ("Scale", SCALE),
+		EnumMap::Pair ("ScaleS", SCALES),
+		EnumMap::Pair ("ScaleT", SCALET),
 		EnumMap::Pair ("OriginX", ORIGINX),
 		EnumMap::Pair ("OriginY", ORIGINY),
 		EnumMap::Pair ("red", RED),
 		EnumMap::Pair ("green", GREEN),
 		EnumMap::Pair ("blue", BLUE),
 		EnumMap::Pair ("alpha", ALPHA),
-		EnumMap::Pair ("power", POWER),
+		EnumMap::Pair ("power", POWER)
 	};
 	const EnumMap element_map(element_names,9);
-	const EnumMap attribute_map(attribute_names,15);
+	const EnumMap attribute_map(attribute_names,18);
 }
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -106,6 +112,9 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case DETAIL:
+				detail=parse_float((*iter).value);
+				break;
+			case STATICDETAIL:
 				xml->detail=parse_float((*iter).value);
 				break;
 			case LEVEL:
@@ -115,20 +124,28 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		}
 		break;
 	case TEXTURE:
-		xml->tex.push_back(TerrainTexture());
+		textures.push_back(TerrainTexture());
+		xml->mat.push_back(GFXMaterial());
+		GFXGetMaterial (0,xml->mat.back());
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case FFILE:
-				xml->tex.back().file=strdup ((*iter).value.c_str());
+				textures.back().tex.filename=strdup ((*iter).value.c_str());
 				break;
 			case BLEND:
 				sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
-				xml->tex.back().blendSrc = parse_alpha (csrc);
-				xml->tex.back().blendDst = parse_alpha (cdst);
+				textures.back().blendSrc = parse_alpha (csrc);
+				textures.back().blendDst = parse_alpha (cdst);
 				break;
 			case COLOR:
-				xml->tex.back().color=parse_int (((*iter).value));
+				textures.back().color=parse_int (((*iter).value));
 				break;
+			case SCALES:
+			  textures.back().scales = parse_float ((*iter).value);
+			  break;
+			case SCALET:
+			  textures.back().scalet = parse_float ((*iter).value);
+			  break;
 			}
 		}
 		break;
@@ -136,10 +153,10 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case REFLECT:
-				xml->tex.back().reflect=parse_bool((*iter).value);
+				textures.back().reflect=parse_bool((*iter).value);
 				break;
 			case POWER:
-				xml->tex.back().material.power=parse_float((*iter).value);
+				xml->mat.back().power=parse_float((*iter).value);
 				break;
 			}
 		}
@@ -149,16 +166,16 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case RED:
-				xml->tex.back().material.dr=parse_float((*iter).value);
+				xml->mat.back().dr=parse_float((*iter).value);
 				break;
 			case BLUE:
-				xml->tex.back().material.db=parse_float((*iter).value);
+				xml->mat.back().db=parse_float((*iter).value);
 				break;
 			case ALPHA:
-				xml->tex.back().material.da=parse_float((*iter).value);
+				xml->mat.back().da=parse_float((*iter).value);
 				break;
 			case GREEN:
-				xml->tex.back().material.dg=parse_float((*iter).value);
+				xml->mat.back().dg=parse_float((*iter).value);
 				break;
 			}
 		}
@@ -167,16 +184,16 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case RED:
-				xml->tex.back().material.er=parse_float((*iter).value);
+				xml->mat.back().er=parse_float((*iter).value);
 				break;
 			case BLUE:
-				xml->tex.back().material.eb=parse_float((*iter).value);
+				xml->mat.back().eb=parse_float((*iter).value);
 				break;
 			case ALPHA:
-				xml->tex.back().material.ea=parse_float((*iter).value);
+				xml->mat.back().ea=parse_float((*iter).value);
 				break;
 			case GREEN:
-				xml->tex.back().material.eg=parse_float((*iter).value);
+				xml->mat.back().eg=parse_float((*iter).value);
 				break;
 			}
 		}
@@ -185,16 +202,16 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case RED:
-				xml->tex.back().material.sr=parse_float((*iter).value);
+				xml->mat.back().sr=parse_float((*iter).value);
 				break;
 			case BLUE:
-				xml->tex.back().material.sb=parse_float((*iter).value);
+				xml->mat.back().sb=parse_float((*iter).value);
 				break;
 			case ALPHA:
-				xml->tex.back().material.sa=parse_float((*iter).value);
+				xml->mat.back().sa=parse_float((*iter).value);
 				break;
 			case GREEN:
-				xml->tex.back().material.sg=parse_float((*iter).value);
+				xml->mat.back().sg=parse_float((*iter).value);
 				break;
 			}
 		}
@@ -203,16 +220,16 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case RED:
-				xml->tex.back().material.ar=parse_float((*iter).value);
+				xml->mat.back().ar=parse_float((*iter).value);
 				break;
 			case BLUE:
-				xml->tex.back().material.ab=parse_float((*iter).value);
+				xml->mat.back().ab=parse_float((*iter).value);
 				break;
 			case ALPHA:
-				xml->tex.back().material.aa=parse_float((*iter).value);
+				xml->mat.back().aa=parse_float((*iter).value);
 				break;
 			case GREEN:
-				xml->tex.back().material.ag=parse_float((*iter).value);
+				xml->mat.back().ag=parse_float((*iter).value);
 				break;
 			}
 		}
@@ -236,6 +253,10 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 			}
 		}
 		break;
+	case UNKNOWN:
+	default:
+	  break;
+
 	}
 }
 
@@ -266,8 +287,22 @@ void QuadTree::LoadXML (const char *filename) {
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);
+  for (unsigned int i=0;i<textures.size();i++) {
+    if (textures[i].tex.filename) {
+      Texture * tex = new Texture (textures[i].tex.filename);
+      free (textures[i].tex.filename);
+      textures[i].tex.t = tex;
+      GFXSetMaterial (textures[i].material,xml->mat[i]);
+    } else {
+      textures[i].tex.t = NULL;
+    }
 
+  }
+  
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
+  root = new quadsquare (&RootCornerData);
 
-
+  
+  root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
 }

@@ -10,6 +10,7 @@ struct Texture;
  */
 struct TerraXML;
 class QuadTree {
+  float detail;
   IdentityTransform * nonlinear_transform;
   Matrix transformation;
   quadcornerdata RootCornerData;
