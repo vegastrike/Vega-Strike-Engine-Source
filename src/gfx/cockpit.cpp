@@ -798,7 +798,7 @@ void Cockpit::Draw() {
 	if (shakin>0) {
 	  shakin-=GetElapsedTime()*shake_reduction;
 	  if (shakin<=0) {
-	    shaking=0;
+	    shakin=0;
 	  }
 	}
 
