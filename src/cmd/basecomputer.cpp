@@ -1439,6 +1439,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 sprintf(tempString, "Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
                     usedValue(baseUnit->PriceCargo(item.content)), item.price);
                 descString += tempString;
+				if(item.description==""||item.description[0]!='#'){
+					item.description=buildUpgradeDescription(item);
+				}
                 break;
             default:
                 assert(false);      // Missed transaction enum in switch statement.
@@ -3605,6 +3608,10 @@ void showUpgradeStats(Unit * cargoUnit,string &text,int mode, Cargo & item) {
 	string statcolor="#c.75:.9:1#";
 	string nametemp="";
 	string model="";
+	if(item.content == BASIC_REPAIR_NAME){
+		text+=MPLdesc;
+		return;
+	}
 	int nameindex=0;
 	for(nameindex=0; (nameindex<cargoUnit->name.size())&&cargoUnit->name[nameindex]!='.';nameindex++){
 		nametemp+=cargoUnit->name[nameindex];
