@@ -5438,7 +5438,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   
 
   computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
-  computer.itts=UpgradeBoolval(computer.itts,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
+  computer.itts=UpgradeBoolval(computer.itts,up->computer.radar.itts,touchme,downgrade,numave,percentage,force_change_on_nothing);
   ///do the two reversed ones below
   
   double myleak=100-shield.leak;
