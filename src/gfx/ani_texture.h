@@ -3,10 +3,10 @@
 class AnimatedTexture: public Texture {
   int numframes;
   float timeperframe;
-  float cumtime;
+  double cumtime;
   Texture ** Decal;
   unsigned int active;
-  float physicsactive;
+  double physicsactive;
  public:
   AnimatedTexture ();
   AnimatedTexture (const char * file, int stage, enum FILTER imm);
