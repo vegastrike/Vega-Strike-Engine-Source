@@ -42,6 +42,14 @@ void SocketSet::clear( )
     _max_sock_always_true = -1;
 }
 
+int SocketSet::select( long sec, long usec )
+{
+    timeval tv;
+    tv.tv_sec  = sec;
+    tv.tv_usec = usec;
+    return select( &tv );
+}
+
 int SocketSet::select( timeval* timeout )
 {
 #ifdef VSNET_DEBUG

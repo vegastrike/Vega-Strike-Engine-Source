@@ -55,6 +55,7 @@ public:
     void clear( );
 
     int select( timeval* timeout );
+    int select( long sec, long usec );
 
 private:
     SocketSet( const SocketSet& ); // forbidden copy constructor

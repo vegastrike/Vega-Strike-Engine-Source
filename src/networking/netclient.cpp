@@ -584,13 +584,9 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
 {
     int ret=0;
 
-    timeval t;
-    t.tv_sec = 0;
-    t.tv_usec = 0;
-
     SocketSet set;
     clt_sock.watch( set );
-    if( set.select( &t ) > 0 )
+    if( set.select( 0, 0 ) > 0 )
     {
         if( clt_sock.isActive( set ) )
         {
