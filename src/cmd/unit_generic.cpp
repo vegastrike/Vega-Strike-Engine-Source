@@ -3674,7 +3674,7 @@ bool Unit::IsCleared (Unit * DockingUnit) {
 bool Unit::isDocked (Unit* d) {
   if (!d)
 	  return false;
-  if (!(d->docked&DOCKED_INSIDE|DOCKED)) {
+  if (!(d->docked&(DOCKED_INSIDE|DOCKED))) {
     return false;
   }
   for (unsigned int i=0;i<image->dockedunits.size();i++) {

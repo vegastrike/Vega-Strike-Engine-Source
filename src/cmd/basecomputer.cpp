@@ -1090,7 +1090,12 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist,
                 if(item.content == BASIC_REPAIR_NAME) {
                     // Basic repair is implemented entirely in this module.
                     // PriceCargo() doesn't know about it.
-                    sprintf(tempString, "Price: #b4#%.2f#-b#n1.5#", basicRepairPrice());
+					Unit * playerUnit = m_player.GetUnit();
+					int multiplier =1;
+					if (playerUnit) {
+						multiplier = playerUnit->RepairCost();
+					}
+                    sprintf(tempString, "Price: #b4#%.2f#-b#n1.5#", basicRepairPrice()*multiplier);
                 } else {
                     sprintf(tempString, "Price: #b4#%.2f#-b#n1.5#", baseUnit->PriceCargo(item.content));
                 }
@@ -1697,7 +1702,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     // Add Basic Repair.
     CargoColor repair;
     repair.cargo.content = BASIC_REPAIR_NAME;
-    repair.cargo.price = basicRepairPrice();
+    repair.cargo.price = basicRepairPrice()*playerUnit->RepairCost();
     repair.cargo.description = BASIC_REPAIR_DESC;
     tlist.masterList.push_back(repair);
 
@@ -1795,10 +1800,11 @@ const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction 
 // Actually do a repair operation.
 static void BasicRepair(Unit* parent) {
     if (parent) {
-        if(UnitUtil::getCredits(parent) < basicRepairPrice()) {
+		int repairmultiplier=parent->RepairCost();
+        if(UnitUtil::getCredits(parent) < basicRepairPrice()*repairmultiplier) {
             showAlert("You don't have enough credits to repair your ship.");
-        } else if(parent->RepairUpgrade()) {
-            UnitUtil::addCredits(parent, -basicRepairPrice());
+        } else if((repairmultiplier=parent->RepairUpgrade())) {
+            UnitUtil::addCredits(parent, -basicRepairPrice()*repairmultiplier);
         } else {
             showAlert("Your ship has no damage.  No charge.");
         }
