@@ -299,7 +299,11 @@ DWORD WINAPI DrawStartupDialog(
 }
 #endif
 
-
+vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) {
+  string sector =getStarSystemSector (file); 
+  string name =RemoveDotSystem (getStarSystemName (file).c_str()); 
+  return ParseStringyDestinations (ParseDestinations (galaxy->getVariable (sector,name,"jumps","")));  
+}
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
   static bool firsttime=true;
   if (!firsttime) {
@@ -337,6 +341,15 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   StarSystem *old_script_system=script_system;
 
   script_system=ss;
+  fprintf (stderr,"Loading Star System %s",ss->getFileName().c_str());
+  vector <std::string> adjacent = getAdjacentStarSystems(ss->getFileName());
+  for (unsigned int i=0;i<adjacent.size();i++) {
+    fprintf (stderr,"\n Next To: %s",adjacent[i].c_str());
+    vector <std::string> adj = getAdjacentStarSystems(adjacent[i]);
+    for (unsigned int j=0;j<adj.size();j++) {
+      fprintf (stderr,"\n\tNext To %s",adj[j].c_str()); 
+    }
+  }
   mission->DirectorStartStarSystem(ss);
 
   script_system=old_script_system;

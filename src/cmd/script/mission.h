@@ -109,6 +109,9 @@ enum callback_module_std_type {
   CMT_STD_getGameTime ,
   CMT_STD_ResetTimeCompression ,
   CMT_STD_getSystemName ,
+  CMT_STD_getSystemFile ,//useful when comparing _jumps_
+  CMT_STD_getNumAdjacentSystems,
+  CMT_STD_getAdjacentSystem,
   CMT_STD_getCurrentAIUnit ,
   CMT_STD_getCurrentAIOrder ,
   CMT_STD_isNull ,
@@ -587,6 +590,9 @@ void printNode(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
  varInst * callResetTimeCompression(missionNode *node,int mode);
 varInst * callGetSystemName(missionNode *node,int mode);
+varInst * callGetSystemFile(missionNode *node,int mode);
+varInst * callGetNumAdjacentSystems(missionNode *node,int mode);
+varInst * callGetAdjacentSystem(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst *  call_setNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);

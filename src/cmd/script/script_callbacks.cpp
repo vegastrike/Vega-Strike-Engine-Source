@@ -97,6 +97,15 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_getSystemName){
       vi=callGetSystemName(node,mode);
     }
+    else if(method_id==CMT_STD_getSystemFile){
+      vi=callGetSystemFile(node,mode);
+    }
+    else if(method_id==CMT_STD_getNumAdjacentSystems){
+      vi=callGetNumAdjacentSystems(node,mode);
+    }
+    else if(method_id==CMT_STD_getAdjacentSystem){
+      vi=callGetAdjacentSystem(node,mode);
+    }
     else if(method_id==CMT_STD_getCurrentAIUnit){
       vi=callGetCurrentAIUnit(node,mode);
     }
@@ -300,10 +309,48 @@ varInst *Mission::callGetSystemName(missionNode *node,int mode){
 
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    StarSystem *ssystem=_Universe->scriptStarSystem();
+    StarSystem *ssystem=_Universe->activeStarSystem();
     string sysname=ssystem->getName();
     vi=call_string_new(node,mode,sysname);
   }
+  return vi;
+}
+varInst *Mission::callGetSystemFile (missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="string";
+
+  if(mode==SCRIPT_RUN){
+    deleteVarInst(vi);
+    StarSystem *ssystem=_Universe->activeStarSystem();
+    string sysname=ssystem->getFileName();
+    vi=call_string_new(node,mode,sysname);
+  }
+  return vi;
+}
+varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="string";
+  string sysname = getStringArgument (node,mode,0);
+  int which= getIntArg(node,mode,1);
+  if(mode==SCRIPT_RUN){
+    deleteVarInst(vi);
+    string sysname=_Universe->getAdjacentStarSystems(sysname)[which];
+    vi=call_string_new(node,mode,sysname);
+  }
+  return vi;
+}
+varInst *Mission::callGetNumAdjacentSystems (missionNode *node,int mode) {
+
+  string sysname = getStringArgument (node,mode,0);
+  int ret;
+  if(mode==SCRIPT_RUN){
+    ret=_Universe->getAdjacentStarSystems(sysname).size();
+  }
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_INT;
+  vi->int_val=ret;
   return vi;
 }
 
@@ -748,6 +795,10 @@ void Mission::initCallbackMaps(){
   module_std_map["ResetTimeCompression"]=CMT_STD_ResetTimeCompression;
   module_std_map["GetSystemName"]=CMT_STD_getSystemName;
   module_std_map["getSystemName"]=CMT_STD_getSystemName;
+  module_std_map["getNumAdjacentSystems"]=CMT_STD_getNumAdjacentSystems;
+  module_std_map["getAdjacentSystem"]=CMT_STD_getAdjacentSystem;
+  module_std_map["GetSystemFile"]=CMT_STD_getSystemFile;
+  module_std_map["getSystemFile"]=CMT_STD_getSystemFile;
   module_std_map["getCurrentAIUnit"]=CMT_STD_getCurrentAIUnit;
   module_std_map["getCurrentAIOrder"]=CMT_STD_getCurrentAIOrder;
   module_std_map["isNull"]=CMT_STD_isNull;
