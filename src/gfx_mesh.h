@@ -242,6 +242,7 @@ public:
   Mesh();
   Mesh(const char *filename, bool xml=false);
   ~Mesh();
+  unsigned int numFX () {return LocalFX.size();}
   void EnableSpecialFX();
   void GetPolys(vector <bsp_polygon> &);
   //  void SetPosition (const Vector&);
@@ -263,3 +264,4 @@ public:
 
 };
 #endif
+

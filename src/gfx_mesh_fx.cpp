@@ -1,6 +1,6 @@
 #include "gfx_mesh.h"
 #include "lin_time.h"
-
+#define MAXLOCALFX 4
 static float startpotency = 20;
 static float endpotency = 4;
 static float flickertime = 5;
@@ -81,7 +81,7 @@ void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float dama
   GFXColor tmp (col.r,col.g,col.b,col.a);
   float numsec = flickertime*damage;
   MeshFX newFX (numsec, (startpotency-endpotency)/(numsec*rSize()*rSize()) ,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,startpotency/(rSize()*rSize())));
-  if (LocalFX.size()>2) {
+  if (LocalFX.size()>=MAXLOCALFX) {
     LocalFX[(rand()%(LocalFX.size()))].MergeLights (newFX);
   } else {
     LocalFX.push_back (newFX);

@@ -532,8 +532,10 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   int i;
   if (!invisible) {
     for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
-      if (meshdata[i]==NULL)
-	continue;
+      if (meshdata[i]==NULL) 
+		continue;
+	  if (i==nummesh&&meshdata[i]->numFX()==0) 
+		continue;
       float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
 					      meshdata[i]->Position()),
 				   meshdata[i]->rSize()
@@ -698,4 +700,5 @@ void Unit::RestrictPitch(float min, float max) {
 void Unit::RestrictRoll(float min, float max) {
   rmin = min, rmax = max;
 }
+
 
