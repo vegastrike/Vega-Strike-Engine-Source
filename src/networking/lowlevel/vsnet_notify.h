@@ -16,7 +16,9 @@
 #include "boost/shared_array.hpp"
 
 #include "vsnet_socket.h"
-#include <fstream>
+
+#include "vsfilesystem.h"
+
 namespace VsnetDownload
 {
 
@@ -169,7 +171,7 @@ private:
 class Item
 {
 public:
-    Item( SOCKETALT sock, const std::string& filename, NotifyPtr notify = NotifyPtr() );
+    Item( SOCKETALT sock, const std::string& filename, VSFileSystem::VSFileType=VSFileSystem::Unknown, NotifyPtr notify = NotifyPtr() );
     virtual ~Item( );
 
     State state( ) const;
@@ -177,6 +179,9 @@ public:
 
     void changeState( State s );
     void changeState( State s, VSError e );
+
+	void setFileType( VSFileSystem::VSFileType ft);
+	VSFileSystem::VSFileType getFileType();
 
     void setSize( int len );
     void append( unsigned char* buffer, int bufsize );
@@ -190,6 +195,7 @@ protected:
     virtual void childAppend( unsigned char* buffer, int bufsize ) = 0;
 
     void    protected_replace_notifier( NotifyPtr ptr );
+	VSFileSystem::VSFileType _filetype;
 
 private:
     SOCKETALT         _sock;
@@ -211,6 +217,7 @@ public:
     File( SOCKETALT          sock,
           const std::string& filename,
           std::string        localbasepath,
+		  VSFileSystem::VSFileType ft,
           NotifyPtr          notify = NotifyPtr() );
 
     virtual ~File( );
@@ -221,7 +228,7 @@ protected:
 
 private:
     std::string    _localbasepath;
-    std::ofstream* _of;
+    VSFileSystem::VSFile * _of;
     int            _len;
     int            _offset;
 };
@@ -242,6 +249,7 @@ private:
 public:
     NoteFile( SOCKETALT          sock,
               const std::string& filename,
+			  VSFileSystem::VSFileType ft,
               std::string        localbasepath );
     NoteFile( SOCKETALT          sock,
               const std::string& filename );
@@ -276,6 +284,7 @@ class Buffer : public Item, public NotifyMe
 public:
     Buffer( SOCKETALT          sock,
             const std::string& filename,
+			VSFileSystem::VSFileType ft,
             NotifyPtr          notify = NotifyPtr() );
 
     virtual ~Buffer( );

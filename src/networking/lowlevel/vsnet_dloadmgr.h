@@ -21,6 +21,8 @@
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
 
+class VSFileSystem::VSFile;
+
 using std::map;
 using std::string;
 
@@ -119,7 +121,7 @@ class DownloadItem
 {
 public:
     DownloadItem( SOCKETALT sock, std::string failed_file );
-    DownloadItem( SOCKETALT sock, std::string file, std::ifstream* f, size_t sz );
+    DownloadItem( SOCKETALT sock, std::string file, VSFileSystem::VSFile * f, size_t sz );
     ~DownloadItem( );
 
     SOCKETALT getSock( ) const;
@@ -134,7 +136,7 @@ private:
     SOCKETALT         _sock;
     bool              _error;
     const std::string _file;
-    std::ifstream*    _handle;
+    VSFileSystem::VSFile * _handle;
     size_t            _size;
     size_t            _offset;
 };
@@ -179,8 +181,8 @@ private:
     typedef ItemMap::iterator                                     ItemMap_I;
 
 private:
-    bool           private_test_access( const std::string& s );
-    std::ifstream* private_access( std::string& file );
+    bool           private_test_access( const std::string& s , VSFileSystem::VSFileType );
+    VSFileSystem::VSFile * private_access( std::string& file , VSFileSystem::VSFileType );
     size_t         private_file_size( const std::string& file );
     bool           private_lower_try_push_queue( SOCKETALT sock, ItemQueuePtr q );
 

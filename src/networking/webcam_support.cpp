@@ -1,4 +1,4 @@
-#if !defined(NETCOMM_NOWEBCAM) && defined(NETCOMM)
+#if !defined(NETCOMM_NOWEBCAM)
 
 #include <iostream>
 #include "webcam_support.h"

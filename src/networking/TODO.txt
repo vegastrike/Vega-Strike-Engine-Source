@@ -3,15 +3,10 @@
 
 - Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuff look for that
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
-TO TEST - Possibility of specifying a mod
-TO TEST - Add the command line datapath if supplied !
 - Add a ranking system for each faction in factions.xml
 - Have a device (maybe in upgrade list) for networking communications and prevent usage of device if not present on ship
-- About NetworkCommunications : assign a different freq range to different communication devices and some with ability to secure comms
 - Vsnet_dloadmgr -> save starsystems in homedir !!!
 
-- Move the addPosition stuff from zonemgr.cpp::broadcastSnapshot out of the client test
-  (Because for now since systems are not dled, client does not know about a system's units serials)
 - Switch to the usage of the ZoneMgr::Systems map instead of reading file on demand and then send a buffer to buffer download
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
                how can I compute positions between 2 updates with interpolation ?
@@ -67,6 +62,8 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+TO TEST - Possibility of specifying a mod
+TO TEST - Add the command line datapath if supplied !
 DONE - Fix the generated BSP save path
 DONE - Move accounts.xml into datadir/accounts/ dir
 DONE - Fix accounts.xml being written in homedir instead of datadir in acctserver.cpp when account subscription from web

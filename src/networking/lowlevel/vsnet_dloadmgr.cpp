@@ -184,6 +184,7 @@ void Manager::private_lower_poll( )
             netbuf.addShort( cl->size() );
             for( ItemList_I strit=cl->begin(); strit!=cl->end(); strit++ )
             {
+				netbuf.addChar( (*strit)->getFileType() );
                 netbuf.addString( (*strit)->getFilename() );
             }
 
@@ -422,7 +423,7 @@ DownloadItem::DownloadItem( SOCKETALT sock, string file )
 {
 }
 
-DownloadItem::DownloadItem( SOCKETALT sock, string file, ifstream* f, size_t sz )
+DownloadItem::DownloadItem( SOCKETALT sock, string file, VSFileSystem::VSFile * f, size_t sz )
     : _sock( sock )
     , _error( false )
     , _file( file )
@@ -464,7 +465,7 @@ size_t DownloadItem::remainingSize( ) const
 
 void DownloadItem::copyFromFile( unsigned char* buf, size_t sz )
 {
-    _handle->read( (char*)buf, sz );
+    _handle->Read( (char*)buf, sz );
     _offset += sz;
 }
 
@@ -514,9 +515,11 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
             while( num > 0 )
             {
                 string file;
+				char ft;
                 bool   ok;
+				ft = buffer.getChar();
                 file = buffer.getString( );
-                ok   = private_test_access( file );
+                ok   = private_test_access( file , (VSFileSystem::VSFileType) ft );
                 respbuffer.addString( file );
                 respbuffer.addChar( ok ? 1 : 0 );
                 num--;
@@ -538,12 +541,13 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
                 while( num > 0 )
                 {
                     DownloadItemPtr di;
+					char            ft = buffer.getChar();
                     string          file = buffer.getString( );
                     string          path = file;
-                    ifstream*       f    = private_access( path );
+                    VSFileSystem::VSFile * f = private_access( path , (VSFileSystem::VSFileType) ft );
                     if( f )
                     {
-                        size_t bytes = private_file_size( path );
+                        size_t bytes = f->Size();
                         di.reset( new DownloadItem( sock, file, f, bytes ) );
                     }
                     else
@@ -734,7 +738,7 @@ bool Manager::private_lower_try_push_queue( SOCKETALT sock, ItemQueuePtr q )
     return q->empty();
 }
 
-bool Manager::private_test_access( const string& file )
+bool Manager::private_test_access( const string& file , VSFileSystem::VSFileType ft )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -743,7 +747,9 @@ bool Manager::private_test_access( const string& file )
          it++ )
     {
         string path = *it + "/" + file;
-        if( ::access( path.c_str(), R_OK ) == 0 )
+        //if( ::access( path.c_str(), R_OK ) == 0 )
+		string ffile( file);
+		if( LookForFile( ffile, ft) <= Ok)
         {
             COUT << "Found local file " << path.c_str() << endl;
             return true;
@@ -753,10 +759,18 @@ bool Manager::private_test_access( const string& file )
     return false;
 }
 
-std::ifstream* Manager::private_access( string& file )
+VSFileSystem::VSFile * Manager::private_access( string& file , VSFileSystem::VSFileType ft )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
+	VSFileSystem::VSFile * f = new VSFileSystem::VSFile;
+	VSFileSystem::VSError err;
+	if( (err = f->OpenReadOnly( file, ft)) <=Ok)
+	{
+    	COUT << "Opened local file " << file << endl;
+		return f;
+	}
+	/*
     for( vector<string>::const_iterator it=_local_search_paths.begin();
          it!=_local_search_paths.end();
          it++ )
@@ -770,7 +784,9 @@ std::ifstream* Manager::private_access( string& file )
             return f;
         }
     }
-    COUT << "Couldn't open local file for " << file.c_str() << endl;
+	*/
+    COUT << "Couldn't open local file for " << file << endl;
+	delete f;
     return NULL;
 }
 

@@ -45,11 +45,12 @@ void NotifyMe::addBytes( int sz )
  * definition VsnetDownload::Client::Item
  *------------------------------------------------------------*/
 
-Item::Item( SOCKETALT sock, const string& filename, NotifyPtr notify )
+Item::Item( SOCKETALT sock, const string& filename, VSFileSystem::VSFileType ft, NotifyPtr notify )
     : _sock( sock )
     , _filename( filename )
     , _state( Idle )
     , _error( Ok )
+	, _filetype( ft)
     , _notify( notify )
 {
 }
@@ -72,6 +73,15 @@ VSError Item::error( ) const
     VSError ret = _error;
     _mx.unlock( );
     return ret;
+}
+void Item::setFileType( VSFileSystem::VSFileType ft)
+{
+	_filetype = ft;
+}
+
+VSFileSystem::VSFileType Item::getFileType()
+{
+	return _filetype;
 }
 
 void Item::setSize( int len )
@@ -131,8 +141,9 @@ void Item::protected_replace_notifier( NotifyPtr ptr )
 File::File( SOCKETALT     sock,
             const string& filename,
             string        localbasepath,
+			VSFileSystem::VSFileType ft,
             NotifyPtr     notify )
-    : Item( sock, filename, notify )
+    : Item( sock, filename, ft, notify )
     , _localbasepath( localbasepath )
     , _of( NULL )
     , _len( 0 )
@@ -144,7 +155,7 @@ File::~File( )
 {
     if( _of )
     {
-        _of->close( );
+        _of->Close( );
         delete _of;
     }
 }
@@ -153,8 +164,9 @@ void File::childSetSize( int len )
 {
     string filename = _localbasepath + "/" + getFilename();
 
-    _of = new ofstream( filename.c_str(), ios::out );
-    if( !_of->is_open() )
+    _of = new VSFileSystem::VSFile;
+	VSFileSystem::VSError err = _of->OpenCreateWrite( filename.c_str(), this->_filetype );
+    if( err>Ok )
     {
         delete _of;
         _of = NULL;
@@ -169,11 +181,11 @@ void File::childAppend( unsigned char* buffer, int bufsize )
 {
     if( _of )
     {
-        _of->write( (const char*)buffer, bufsize );
+        _of->Write( (const char*)buffer, bufsize );
         _offset += bufsize;
         if( _offset >= _len )
         {
-            _of->close( );
+            _of->Close( );
             delete _of;
             _of = NULL;
         }
@@ -186,8 +198,9 @@ void File::childAppend( unsigned char* buffer, int bufsize )
 
 NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename,
+					VSFileSystem::VSFileType ft,
                     std::string        localbasepath )
-    : File( sock, filename, localbasepath, NotifyPtr() )
+    : File( sock, filename, localbasepath, ft, NotifyPtr() )
     , _me( new NotifyMe )
 {
     protected_replace_notifier( _me );
@@ -195,7 +208,7 @@ NoteFile::NoteFile( SOCKETALT          sock,
 
 NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename )
-    : File( sock, filename, VSFileSystem::homedir, NotifyPtr() )
+    : File( sock, filename, VSFileSystem::homedir, VSFileSystem::Unknown, NotifyPtr() )
     , _me( new NotifyMe )
 {
     protected_replace_notifier( _me );
@@ -209,8 +222,8 @@ NoteFile::~NoteFile( )
  * definition VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
 
-Buffer::Buffer( SOCKETALT sock, const string& filename, NotifyPtr notify )
-    : Item( sock, filename, notify )
+Buffer::Buffer( SOCKETALT sock, const string& filename, VSFileSystem::VSFileType ft, NotifyPtr notify )
+    : Item( sock, filename, ft, notify )
     , _len( 0 )
     , _offset( 0 )
 {
@@ -246,7 +259,7 @@ void Buffer::childAppend( unsigned char* buffer, int bufsize )
  *------------------------------------------------------------*/
 
 TestItem::TestItem( SOCKETALT sock, const string& filename )
-    : Item( sock, filename, NotifyPtr(this) )
+    : Item( sock, filename, VSFileSystem::Unknown, NotifyPtr(this) )
 {
     COUT << "Created TestItem for downloading " << filename << endl;
 }
@@ -300,7 +313,7 @@ FileSet::FileSet( boost::shared_ptr<Manager> mgr,
     {
         _files.insert( std::pair<std::string,int>( *cit, -1 ) );
         NotifyPtr ptr( new NotifyConclusion( this, *cit ) );
-        items.push_back( new File( sock, *cit, path, ptr ) );
+        items.push_back( new File( sock, *cit, path, VSFileSystem::Unknown, ptr ) );
         _to_go++;
     }
 
