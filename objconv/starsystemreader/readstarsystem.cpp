@@ -275,9 +275,9 @@ public:
 				(*this)["num_gas_giants"]= itostr(genrand_int32()%6);
 			}
 			if (genrand_int32()<GENRAND_MAX*.995) {
-				(*this)["num_planets"]= itostr(genrand_int32()%3);
+				(*this)["num_planets"]= itostr(1+genrand_int32()%3);
 			}else {
-				(*this)["num_planets"]= itostr(genrand_int32()%9);
+				(*this)["num_planets"]= itostr(1+genrand_int32()%9);
 			}
 			if (genrand_int32()<GENRAND_MAX*.995) {
 				(*this)["num_moons"]= itostr(genrand_int32()%3);
@@ -396,7 +396,8 @@ std::vector<string> readMilkyWayNames( ) {
 			unsigned int quote=  s.find("\"");
 			if (quote!=string::npos) {
 				string newname=s.substr(0,quote);
-				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359"&&newname.find("wolf")==string::npos&&newname.find("polaris")==string::npos)
+				if (newname.length()>0&&newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359"&&newname.find("wolf")==string::npos&&newname!="sol"&&newname.find("polaris")==string::npos)
+					newname[0]=toupper(newname[0]);
 					retval.push_back(newname);
 			}
 		}
@@ -459,6 +460,8 @@ public:
 			fprintf(stderr,"Fatal error: homeworld \"%s\" not found!!!\n",stuff[4].c_str());
 		} else if (homeworld->jumps.empty()) {
 			fprintf(stderr,"Fatal error: homeworld \"%s\" has no jump points!!!\nThis means that the %s faction will wait forever for a jump point\nto come into existance.  The application will probably get stuck in an endless loop somewhere!",stuff[4].c_str(),name.c_str());
+		}else {
+			(*homeworld)["faction"]=stuff[0];
 		}
 		std::vector<System*> newsys;
 		newsys.push_back(homeworld);
@@ -786,7 +789,7 @@ vector<System> readfile (const char * name) {
 				systems[i].interesting=false;
 				static int num=0;
 				num++;
-				systems[i].name=string("Daniel")+itostr(num);
+				systems[i].name=string("Uncultivable_")+itostr(num);
 				ec++;
 			}else if (i<4) {
 				systems[i].interesting=true;
@@ -932,6 +935,10 @@ void reName (std::vector<System>&s, System &which, std::string newname) {
 		}
 		return;
 	}
+	string fac = which["faction"];
+	if (which.interesting&&fac!="rlaan"&&fac!="ISO"&&fac!="aera") {
+		return;
+	}
 	string sector = which.sector;
 	string oldname = which.name;
 	string fullname = which.sector+"/"+which.name;
@@ -952,7 +959,7 @@ void processsystems (std::vector <System> & s){
 		std::map <double,string> jumps;
 		if (s[i].habitable)
 		for (unsigned int j=0;j<s.size();++j) {
-			if (j!=i && (s[j].habitable||genrand_int32()<GENRAND_MAX*.001||(s[j].interesting&&genrand_int32()<GENRAND_MAX*.5))){
+			if (j!=i && (s[j].habitable||(s[j].interesting&&genrand_int32()<GENRAND_MAX*.3))){
 				float dissqr = sqr(s[i].xyz.x-s[j].xyz.x)+sqr(s[i].xyz.y-s[j].xyz.y)+sqr(s[i].xyz.z-s[j].xyz.z);
 				int desired_size = genrand_int32()%5+1;
 				if (jumps.size()>=desired_size) {
