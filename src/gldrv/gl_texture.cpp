@@ -159,11 +159,41 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
   textures[handle].height=newheight;
 } 
 
+
+static GLenum RGBCompressed (GLenum internalformat) {
+    if (gl_options.compression) {
+      internalformat = GL_COMPRESSED_RGB_ARB;
+      if (gl_options.s3tc) {
+	internalformat = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+      }
+    }
+    return internalformat;
+}
+static GLenum RGBACompressed (GLenum internalformat) {
+    if (gl_options.compression) {
+      internalformat = GL_COMPRESSED_RGBA_ARB;
+      if (gl_options.s3tc) {
+	switch (gl_options.compression) {
+	case 3:
+	  internalformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+	  break;
+	case 2:
+	  internalformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+	  break;
+	case 1:
+	  internalformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+	  break;
+	}
+      }
+    }
+    return internalformat;
+}
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum TEXTURE_IMAGE_TARGET imagetarget)
 {	
   int error;
   unsigned char * tempbuf = NULL;
   unsigned char * tbuf =NULL;
+  GLenum internalformat;
   GLenum image2D;
   switch (imagetarget) {
   case TEXTURE_2D:
@@ -203,28 +233,23 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
     fprintf (stderr,"RGB24 bitmaps not yet supported");
     break;
   case RGB32:
-    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-      gluBuild2DMipmaps(image2D, 3, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    else
-      glTexImage2D(image2D, 0, 3, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    break;
+    internalformat = RGBCompressed (3/*GL_RGB*/);
+    goto texgenericload;
   case RGBA32:
-    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-      gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    else
-      glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    break;
+    internalformat = RGBACompressed(4/*GL_RGBA*/);
+    goto texgenericload;
   case RGBA16:
-    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-      gluBuild2DMipmaps(image2D, GL_RGBA16, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    else
-      glTexImage2D(image2D, 0, GL_RGBA16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-    break;
+    internalformat = RGBACompressed (GL_RGBA16);
+    goto texgenericload;
   case RGB16:
+    internalformat= RGBCompressed (GL_RGB16);
+    goto texgenericload;
+
+  texgenericload:
     if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-      gluBuild2DMipmaps(image2D, GL_RGB16, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+      gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     else
-      glTexImage2D(image2D, 0, GL_RGB16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+      glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     break;
 
   case PALETTE8:

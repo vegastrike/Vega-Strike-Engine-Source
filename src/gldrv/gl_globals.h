@@ -127,6 +127,7 @@ typedef struct {
   int color_depth;
   int cubemap;  
   int compression;
+  bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;
 #include <GL/glut.h>

@@ -100,7 +100,7 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
-
+#if 0
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")) {
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
@@ -108,6 +108,7 @@ void init_opengl_extensions()
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
     } else
+#endif
 	{
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
@@ -124,11 +125,18 @@ void init_opengl_extensions()
       glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
     }
 #endif
-    if (glutExtensionSupported ("GL_EXT_texture_compression_s3tc")) {
-      (void) fprintf(stderr, "OpenGL::Texture Compression supported\n");
-    } else {
+    if (glutExtensionSupported ("GL_ARB_texture_compression")) {
+      fprintf (stderr,"OpenGL::Generic Texture Compression supported\n");
+    }else {
+      fprintf (stderr,"OpenGL::Generic Texture Compression unsupported\n");
       gl_options.compression=0;
-      (void) fprintf(stderr, "OpenGL::Texture Compression unsupported\n");
+    }
+    if (glutExtensionSupported ("GL_EXT_texture_compression_s3tc")) {
+      (void) fprintf(stderr, "OpenGL::S3TC Texture Compression supported\n");
+      //should be true;
+    } else {
+      gl_options.s3tc=false;;
+      (void) fprintf(stderr, "OpenGL::S3TC Texture Compression unsupported\n");
     }
     if (glutExtensionSupported ("GL_ARB_multitexture")||glutExtensionSupported ("GL_EXT_multitexture")) {
       gl_options.Multitexture = 1*gl_options.Multitexture;//might be zero by input
@@ -190,11 +198,12 @@ void GFXInit (int argc, char ** argv){
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
-    gl_options.compression = XMLSupport::parse_bool (vs_config->getVariable ("graphics","texture_compression","false"));
+    gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));
     gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
     gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
     gl_options.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists","false"));
+    gl_options.s3tc = XMLSupport::parse_bool (vs_config->getVariable ("graphics","s3tc","true"));
 #ifdef USE_STENCIL_BUFFER
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL );
 #else
