@@ -460,8 +460,8 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			fprintf(Outputfile,"\t<Tristrip flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                        int to1,to2;
-                        int indo1,indo2;
+                        int to1=0,to2=0;
+                        int indo1=0,indo2=0;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
 			  float32bit s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
@@ -501,7 +501,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			fprintf(Outputfile,"\t<Trifan flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                        int indo1,indo2,to1,to2;
+                        int indo1=0,indo2=0,to1=0,to2=0;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
 			  float32bit s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
@@ -538,7 +538,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
 			int32bit flatshade=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//flatshade
 			fprintf(Outputfile,"\t<Quadstrip flatshade=\"%d\">\n",flatshade);
 			word32index+=1+NUMFIELDSPERPOLYGONSTRUCTURE;
-                        int indo1,indo2,to1,to2;
+                        int indo1=0,indo2=0,to1=0,to2=0;
 			for(int32bit elem=0;elem<numstripelements;elem++){
 			  int32bit ind=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//index 1
 			  float32bit s=VSSwapHostFloatToLittle(inmemfile[word32index+1].f32val);//s
