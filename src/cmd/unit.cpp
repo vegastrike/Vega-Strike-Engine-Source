@@ -91,7 +91,7 @@ void Unit::Init()
   owner = NULL;
   faction =0;
   resolveforces=true;
-  CollideInfo.object = NULL;
+  CollideInfo.object.u = NULL;
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
@@ -258,7 +258,7 @@ Unit::~Unit()
 {
   if (hudImage )
     delete hudImage;
-  if (CollideInfo.object)
+  if (CollideInfo.object.u)
     KillCollideTable (&CollideInfo);
   if (bspTree)
     delete bspTree;

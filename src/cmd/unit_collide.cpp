@@ -24,7 +24,7 @@ void AddCollideQueue (LineCollide &tmp) {
 }
 void Unit::SetCollisionParent (Unit * name) {
     for (int i=0;i<numsubunit;i++) {
-      subunits[i]->CollideInfo.object = name;
+      subunits[i]->CollideInfo.object.u = name;
       subunits[i]->SetCollisionParent (name);
     }
 }
@@ -32,11 +32,11 @@ void Unit::UpdateCollideQueue () {
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
   Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
-  if (CollideInfo.object == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
-    if (CollideInfo.object!=NULL) {
+  if (CollideInfo.object.u == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
+    if (CollideInfo.object.u!=NULL) {
       KillCollideTable(&CollideInfo);
     }
-    CollideInfo.object = this;
+    CollideInfo.object.u = this;
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
     AddCollideQueue (CollideInfo);
@@ -61,8 +61,8 @@ void Unit::CollideAll() {
       if (tmp->lastchecked==this)
 	continue;//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
-      //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+      //    if (colQ[i]->object.u > this||)//only compare against stuff bigger than you
+      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
 	if (
 	    Position().i+radial_size>tmp->Mini.i&&
 	    Position().i-radial_size<tmp->Maxi.i&&
@@ -73,10 +73,10 @@ void Unit::CollideAll() {
       //continue;
 	  switch (tmp->type) {
 	  case LineCollide::UNIT://other units!!!
-	    ((Unit*)tmp->object)->Collide(this);
+	    (tmp->object.u)->Collide(this);
 	    break;
 	  case LineCollide::BEAM:
-	    ((Beam*)tmp->object)->Collide(this);
+	    (tmp->object.b)->Collide(this);
 	    break;
 	  case LineCollide::BALL:
 	    break;
@@ -164,7 +164,7 @@ bool Bolt::Collide () {
 	    Maxi.i> (*i)->Mini.i&&
 	    Maxi.j> (*i)->Mini.j&&
 	    Maxi.k> (*i)->Mini.k) {
-	  if (this->Collide ((Unit*)(*i)->object)) {
+	  if (this->Collide ((*i)->object.u)) {
 	    delete this;
 	    return true;
 	  }
@@ -186,7 +186,7 @@ void Beam::CollideHuge (const LineCollide & lc) {
 	  lc.Maxi.i> tmp[i]->Mini.i&&
 	  lc.Maxi.j> tmp[i]->Mini.j&&
 	  lc.Maxi.k> tmp[i]->Mini.k) {
-	this->Collide ((Unit*)tmp[i]->object);
+	this->Collide ((Unit*)tmp[i]->object.u);
       }
     }
   }

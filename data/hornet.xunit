@@ -2,8 +2,9 @@
 	<Meshfile file="hornet.xmesh" />
 	<Light file="supernova.bmp" x="-1.200000" y="0.300000" z="-4.300000" size="1.750000"/>
 	<Light file="supernova.bmp" x="1.200000" y="0.300000" z="-4.300000" size="1.750000"/>
-	<Mount weapon="Laser" size="Light" x="-6.300000" y="0.500000" z="9.200000"/>
-	<Mount weapon="Laser" size="Light" x="6.300000" y="0.500000" z="9.200000"/>
+	<Mount weapon="Laser" size="Light" x="-8.000000" y="0.280000" z="8.000000" ri="-0.000000" rj="0.000000" rk="1.000000" qi="-0.053776" qj="-0.998553" qk="0.000000"/>
+	<Mount weapon="Laser" size="Light" x="8.000000" y="0.280000" z="8.000000" ri="0.000000" rj="0.000000" rk="1.000000" qi="-0.044586" qj="-0.999006" qk="0.000000"/>
+
 	<Mount weapon="Dumbfire" size="Light-Missile" x="-3.100000" y="0.000000" z="-1.300000" ammo="1"/>
 	<Mount weapon="Dumbfire" size="Light-Missile" x="3.100000" y="0.000000" z="-1.300000" ammo="1"/>
 	<Mount weapon="HeatSeeker" size="Medium-Missile" x="-0.000000" y="-1.300000" z="-0.600000" ammo="1"/>

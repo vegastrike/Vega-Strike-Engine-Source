@@ -126,12 +126,12 @@ struct LineCollideStar {
   LineCollide* lc;
   LineCollideStar () {lc = NULL;}
   bool operator == (const LineCollideStar & b) const {
-    return lc->object==b.lc->object;
+    return lc->object.i==b.lc->object.i;
   }
   bool operator < (const LineCollideStar &b) const {
-      return (*((int *)&(lc->object)) < *((int *)&(b.lc->object)));
+      return (*((int *)&(lc->object.i)) < *((int *)&(b.lc->object.i)));
   }
-  inline int GetIndex () {return *((int *)(&lc->object));}
+  inline int GetIndex () {return *((int *)(&lc->object.i));}
 };
 ///Finds the local lights that are clobberable for new lights (permanent perhaps)
 int findLocalClobberable();

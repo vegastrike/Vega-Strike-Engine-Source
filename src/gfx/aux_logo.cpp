@@ -83,7 +83,7 @@ Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* 
 		//LogoCorner[4] = LogoCorner[2];
 		//LogoCorner[5] = LogoCorner[1];
 	}
-	vlist = new GFXVertexList(GFXQUAD,4*numlogos, vertices);
+	vlist = new GFXVertexList(GFXQUAD,4*numlogos, vertices,4*numlogos);
 	delete [] vertices;
 	SetDecal(Dec);
 }

@@ -226,6 +226,11 @@ class /*GFXDRVAPI*/ GFXVertexList {
     ///Or has color data
     GFXColorVertex *colors;
   } data;
+  union INDEX {
+    unsigned char *b;//stride 1
+    unsigned short *s;//stride 2
+    unsigned int *i;//stride 4
+  } index;
   ///Array of modes that vertices will be drawn with
   GLenum *mode;
   ///Display list number if list is indeed active. 0 otherwise
@@ -237,30 +242,38 @@ class /*GFXDRVAPI*/ GFXVertexList {
    * 2 triangles 3 quads and 2 lines would be {6,12,4} as the offsets
    */
   int *offsets;
-  ///If vertex list has been mutated since last draw
+  ///If vertex list has been mutated since last draw.  Low 3 bits store the stride of the index list (if avail). another bit for if color is presnet
   char changed;
-  ///Are Colors Stored
-  GFXBOOL isColor;
   ///Returns number of Triangles in vertex list (counts tri strips)
   int numTris ();
   ///Returns number of Quads in vertex list (counts quad strips)
   int numQuads();
+  ///Looks up the index in the appropriate short, char or int array
+  unsigned int GetIndex (int offset) const;
+  ///copies nonindexed vertices to dst vertex array
+  static void VtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany);
+  ///Copies nonindex colored vertices to dst vertex array
+  static void ColVtxCopy (GFXVertexList * thus, GFXVertex * dst, int offset, int howmany);
+  ///Copies indexed colored vertices to dst vertex array
+  static void ColIndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany);
+  ///Copies indexed vertices to dst vertex array
+  static void IndVtxCopy (GFXVertexList * thus, GFXVertex * dst, int offset, int howmany);
   ///Init function (call from construtor)
-  void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,int tess);
+  void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,unsigned int * indices);
   ///Propagates modifications to the display list
   void RefreshDisplayList();
 public:
   ///creates a vertex list with 1 polytype and a given number of vertices
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, NULL, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=NULL){Init (&poly, numVertices, vertices,NULL, 1,&numindices, Mutable,index);}
   ///Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see above)
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false, int tess =0) {
-    Init(poly,numVertices,vertices,NULL,numlists,offsets,Mutable, tess);
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false,  unsigned int * index=NULL) {
+    Init(poly,numVertices,vertices,NULL,numlists,offsets,Mutable, index);
   }
   ///Creates a vertex list with 1 poly type and color information to boot
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXColorVertex *colors, bool Mutable=false, int tess =0){Init (&poly, numVertices, NULL, colors, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXColorVertex *colors, int numindices, bool Mutable=false, unsigned int * index=NULL){Init (&poly, numVertices, NULL, colors, 1, &numindices,Mutable,index);}
   ///Creates a vertex list with an arbitrary number of poly types and color
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices,  const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable=false, int tess =0) {
-    Init(poly,numVertices,NULL,colors, numlists,offsets,Mutable, tess);
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices,  const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable=false, unsigned int *index=NULL) {
+    Init(poly,numVertices,NULL,colors, numlists,offsets,Mutable, index);
   }
   ~GFXVertexList();
 

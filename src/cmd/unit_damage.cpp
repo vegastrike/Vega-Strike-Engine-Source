@@ -94,9 +94,9 @@ void Unit::Kill() {
     mounts = NULL;
   }
   killed = true;
-  if (CollideInfo.object) {
+  if (CollideInfo.object.u) {
     KillCollideTable (&CollideInfo);
-    CollideInfo.object=NULL;
+    CollideInfo.object.u=NULL;
   }
   Target((Unit *)NULL);
   if (ucref==0)

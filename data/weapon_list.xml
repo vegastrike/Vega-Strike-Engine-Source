@@ -1,5 +1,5 @@
 <Weapons>
-<Bolt name="Laser" mountsize="light"> 
+<Beam name="Laser" mountsize="light"> 
 <Energy rate=".1" stability="4" refire=".2">
 </Energy>
 <Damage rate="36" damage="36" longrange="1">
@@ -8,7 +8,7 @@
 </Distance>
 <Appearance file="bolt.bmp" r="1" g="0" b="0" a="1" >
 </Appearance>
-</Bolt>
+</Beam>
 
 <Missile name="Dumbfire" mountsize="light-missile">
 <Locktime time="3">

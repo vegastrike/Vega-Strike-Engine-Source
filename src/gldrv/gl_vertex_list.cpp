@@ -31,12 +31,17 @@ GFXVertexList *next;
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
-#define CHANGE_MUTABLE 1
-#define CHANGE_CHANGE 2
+const int INDEX_BYTE= sizeof(unsigned char);
+const int INDEX_SHORT= sizeof(unsigned short);
+const int INDEX_INT= sizeof(unsigned int);
+const int CHANGE_MUTABLE= (sizeof(unsigned int)*2);
+const int  CHANGE_CHANGE= (sizeof(unsigned int)*4);
+const int HAS_COLOR= (sizeof(unsigned int)*8);
 #define USE_DISPLAY_LISTS
-
-void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, int tess) {
-  isColor = (colors!=NULL)?GFXTRUE:GFXFALSE;
+const int HAS_INDEX = sizeof(unsigned char) | sizeof (unsigned short) | sizeof (unsigned int);
+void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
+  int stride=0;
+  changed = HAS_COLOR*((colors!=NULL)?1:0);
   mode = new GLenum [numlists];
   for (int pol=0;pol<numlists;pol++) {
     switch (poly[pol]) {
@@ -69,12 +74,13 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
       break;
     }
   }
+  /* //Deprecated with the onset of indexed vlists
   if (numlists==1) {
     offsets = new int[1];
     offsets[0]= numVertices;
   }
   assert (offsets!=NULL);
-  
+  */  
   this->numlists = numlists;
   this->numVertices = numVertices;
   if (numVertices) {
@@ -92,17 +98,46 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   
   this->offsets = new int [numlists];
   memcpy(this->offsets, offsets, sizeof(int)*numlists);
-  
+  int i;
+  unsigned int numindices=0;
+  for (i=0;i<numlists;i++) {
+    numindices+=offsets[i];
+  }
   display_list = 0;
   if (Mutable)
-    changed = CHANGE_MUTABLE;
+    changed |= CHANGE_MUTABLE;
   else 
-    changed = CHANGE_CHANGE;
+    changed |= CHANGE_CHANGE;
+  if (indices) {
+    stride=INDEX_BYTE;
+    if (numVertices>255)
+      stride=INDEX_SHORT;
+    if (numVertices>65535)
+      stride=INDEX_INT;
+    index.b = (unsigned char *) malloc (stride*numindices);
+    for (unsigned int i=0;i<numindices;i++) {
+      switch (stride) {
+      case INDEX_BYTE:
+	index.b[i]=indices[i];
+	break;
+      case INDEX_SHORT:
+	index.s[i]=indices[i];
+	break;
+      case INDEX_INT:
+	index.i[i]=indices[i];
+	break;
+      }
+    }
+  } else {
+    index.b=NULL;
+  }
+  
+  changed |= stride;
   RefreshDisplayList();
   if (Mutable)
-    changed = CHANGE_MUTABLE;//for display lists
+    changed |= CHANGE_MUTABLE;//for display lists
   else
-    changed = 0;
+    changed &= (~CHANGE_CHANGE);
 }
 
 int GFXVertexList::numTris () {
@@ -145,12 +180,12 @@ union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
 }
 ///Ends mutation and refreshes display list
 void GFXVertexList::EndMutate () {
-  if (changed!=CHANGE_MUTABLE) {
-    changed = CHANGE_CHANGE;
+  if (!(changed&CHANGE_MUTABLE)) {
+    changed |= CHANGE_CHANGE;
   }
   RefreshDisplayList();
-  if (changed==CHANGE_CHANGE) {
-    changed=0;
+  if (changed&CHANGE_CHANGE) {
+    changed&=(~CHANGE_CHANGE);
   }
 }
 
@@ -167,14 +202,23 @@ void GFXVertexList::RefreshDisplayList () {
   int a;
   int offset =0;
   display_list = GFXCreateList();
-  if (isColor) {
+  if (changed&HAS_COLOR) {
     for (int i=0;i<numlists;i++) {
       glBegin(mode[i]);
-      for(a=0; a<offsets[i]; a++) {
-	glTexCoord2fv(&data.colors[offset+a].s);
-	glColor3fv (&data.colors[offset+a].r);
-	glNormal3fv(&data.colors[offset+a].i);
-	glVertex3fv(&data.colors[offset+a].x);
+      if (changed&HAS_INDEX) {
+	for(a=0; a<offsets[i]; a++) {
+	  glTexCoord2fv(&data.colors[GetIndex(offset+a)].s);
+	  glColor3fv (&data.colors[GetIndex(offset+a)].r);
+	  glNormal3fv(&data.colors[GetIndex(offset+a)].i);
+	  glVertex3fv(&data.colors[GetIndex(offset+a)].x);	
+	}
+      }else {
+	for(a=0; a<offsets[i]; a++) {
+	  glTexCoord2fv(&data.colors[GetIndex(offset+a)].s);
+	  glColor3fv (&data.colors[GetIndex(offset+a)].r);
+	  glNormal3fv(&data.colors[GetIndex(offset+a)].i);
+	  glVertex3fv(&data.colors[GetIndex(offset+a)].x);
+	}
       }
       offset +=offsets[i];
       glEnd();
@@ -182,10 +226,18 @@ void GFXVertexList::RefreshDisplayList () {
   }else {
     for (int i=0;i<numlists;i++) {
       glBegin(mode[i]);
-      for(a=0; a<offsets[i]; a++) {
-	glNormal3fv(&data.vertices[offset+a].i);
-	glTexCoord2fv(&data.vertices[offset+a].s);
-	glVertex3fv(&data.vertices[offset+a].x);
+      if (changed&HAS_INDEX) {
+	for(a=0; a<offsets[i]; a++) {
+	  glNormal3fv(&data.vertices[GetIndex(offset+a)].i);
+	  glTexCoord2fv(&data.vertices[GetIndex(offset+a)].s);
+	  glVertex3fv(&data.vertices[GetIndex(offset+a)].x);
+	}
+      }else {
+	for(a=0; a<offsets[i]; a++) {
+	  glNormal3fv(&data.vertices[offset+a].i);
+	  glTexCoord2fv(&data.vertices[offset+a].s);
+	  glVertex3fv(&data.vertices[offset+a].x);
+	}
       }
       offset +=offsets[i];
       glEnd();
@@ -203,7 +255,7 @@ GFXVertexList::~GFXVertexList() {
     GFXDeleteList (display_list); //delete dis
   if (offsets)
     delete [] offsets;
-  if(isColor) {
+  if(changed&HAS_COLOR) {
     if (data.colors) {
       free (data.colors);
     }
@@ -214,23 +266,55 @@ GFXVertexList::~GFXVertexList() {
   }
 }
 
-static void VtxCopy (GFXVertex *dst, const unsigned char *src, int howmany) {
-  memcpy (dst,src,sizeof (GFXVertex)*howmany);
+void GFXVertexList::VtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany) {
+  memcpy (dst,&thus->data.vertices[offset],sizeof (GFXVertex)*howmany);
 }
-static void ColVtxCopy (GFXVertex *dst, const unsigned char *src, int howmany) {
+void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany) {
   for (int i=0;i<howmany;i++) {
-    ((GFXVertex *)dst)[i].
-      SetTexCoord (((GFXColorVertex *)src)[i].s,((GFXColorVertex *)src)[i].t).
-      SetNormal (Vector (((GFXColorVertex *)src)[i].i,((GFXColorVertex *)src)[i].j,((GFXColorVertex *)src)[i].k)).
-      SetVertex (Vector (((GFXColorVertex *)src)[i].x,((GFXColorVertex *)src)[i].y,((GFXColorVertex *)src)[i].z));
+    dst[i].
+      SetTexCoord (thus->data.colors[i+offset].s,thus->data.colors[i+offset].t).
+      SetNormal (Vector (thus->data.colors[i+offset].i,thus->data.colors[i+offset].j,thus->data.colors[i+offset].k)).
+      SetVertex (Vector (thus->data.colors[i+offset].x,thus->data.colors[i+offset].y,thus->data.colors[i+offset].z));
+  }
+}
+
+unsigned int GFXVertexList::GetIndex (int offset) const {
+  return (changed&sizeof(unsigned char))
+      ? (unsigned int) (index.b[offset]) 
+      : ((changed&sizeof(unsigned short)) 
+	 ? (unsigned int) (index.s[offset])
+	 : index.i[offset]);
+}
+void GFXVertexList::ColIndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany) {
+  for (int i=0;i<howmany;i++) {
+    unsigned int j = thus->GetIndex (i+offset);
+    dst[i].
+      SetTexCoord (thus->data.colors[j].s,thus->data.colors[j].t).
+      SetNormal (Vector (thus->data.colors[j].i,thus->data.colors[j].j,thus->data.colors[j].k)).
+      SetVertex (Vector (thus->data.colors[j].x,thus->data.colors[j].y,thus->data.colors[j].z));
+  }
+}
+void GFXVertexList::IndVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany) {
+  for (int i=0;i<howmany;i++) {
+    unsigned int j = thus->GetIndex (i+offset);
+    dst[i].
+      SetTexCoord (thus->data.vertices[j].s,thus->data.colors[j].t).
+      SetNormal (Vector (thus->data.vertices[j].i,thus->data.vertices[j].j,thus->data.vertices[j].k)).
+      SetVertex (Vector (thus->data.vertices[j].x,thus->data.vertices[j].y,thus->data.vertices[j].z));
   }
 }
 
 void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
-  void (*vtxcpy) (GFXVertex *dst,const unsigned char *stc, int howmany);
-  vtxcpy = isColor?ColVtxCopy:VtxCopy;
-  int offst = isColor?sizeof(GFXColorVertex):sizeof(GFXVertex);
-  unsigned char *myVertices =  (isColor?(unsigned char*)data.colors:(unsigned char*)data.vertices);
+  void (*vtxcpy) (GFXVertexList *thus, GFXVertex *dst,int offset, int howmany);
+
+  vtxcpy = (changed&HAS_COLOR)
+    ? ((changed&HAS_INDEX)
+       ?ColIndVtxCopy
+       :ColVtxCopy)
+    : ((changed&HAS_INDEX)
+       ? IndVtxCopy
+       : VtxCopy);
+  //  int offst = (changed&HAS_COLOR)?sizeof(GFXColorVertex):sizeof(GFXVertex);
   int i;
   int cur=0;
   GFXVertex *res;
@@ -245,51 +329,51 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
     int j;
     switch (mode[i]) {
     case GL_TRIANGLES:
-      (*vtxcpy) (&res[curtri],&myVertices [offst*cur],offsets[i]);
+      (*vtxcpy) (this,&res[curtri],cur,offsets[i]);
       curtri+=offsets[i];
       break;
     case GL_TRIANGLE_FAN:
     case GL_POLYGON:
       for (j=1;j<offsets[i]-1;j++) {
-	(*vtxcpy) (&res[curtri],&myVertices [offst*cur],1);
+	(*vtxcpy) (this,&res[curtri],cur,1);
 	curtri++;
-	(*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j)],1);
+	(*vtxcpy) (this,&res[curtri],(cur+j),1);
 	curtri++;
-	(*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j+1)],1);
+	(*vtxcpy) (this,&res[curtri],(cur+j+1),1);
 	curtri++;
       }	    
       break;
     case GL_TRIANGLE_STRIP:
       for (j=2;j<offsets[i];j+=2) {
-	(*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j-2)],1);
+	(*vtxcpy) (this,&res[curtri],(cur+j-2),1);
 	curtri++;
-	(*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j-1)],1);
+	(*vtxcpy) (this,&res[curtri],(cur+j-1),1);
 	curtri++;
-	(*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j)],1);
+	(*vtxcpy) (this,&res[curtri],(cur+j),1);
 	curtri++;
 	if (j+1<offsets[i]) {//copy reverse
-	  (*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j)],1);
+	  (*vtxcpy) (this,&res[curtri],(cur+j),1);
 	  curtri++;
-	  (*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j-1)],1);
+	  (*vtxcpy) (this,&res[curtri],(cur+j-1),1);
 	  curtri++;
-	  (*vtxcpy) (&res[curtri],&myVertices [offst*(cur+j+1)],1);
+	  (*vtxcpy) (this,&res[curtri],(cur+j+1),1);
 	  curtri++;
 	}
       }	    
       break;
     case GL_QUADS:
-      (*vtxcpy) (&res[curquad],&myVertices [offst*(cur)],offsets[i]);
+      (*vtxcpy) (this,&res[curquad],(cur),offsets[i]);
 	    curquad+=offsets[i];
 	    break;
     case GL_QUAD_STRIP:
       for (j=2;j<offsets[i]-1;j+=2) {
-	(*vtxcpy) (&res[curquad],&myVertices [offst*(cur+j-2)],1);
+	(*vtxcpy) (this,&res[curquad],(cur+j-2),1);
 	curquad++;
-	(*vtxcpy) (&res[curquad],&myVertices [offst*(cur+j-1)],1);
+	(*vtxcpy) (this,&res[curquad],(cur+j-1),1);
 	curquad++;
-	(*vtxcpy) (&res[curquad],&myVertices [offst*(cur+j+1)],1);
+	(*vtxcpy) (this,&res[curquad],(cur+j+1),1);
 	curquad++;
-	(*vtxcpy) (&res[curquad],&myVertices [offst*(cur+j)],1);
+	(*vtxcpy) (this,&res[curquad],(cur+j),1);
 	curquad++;
       }
       break;
@@ -313,7 +397,7 @@ void GFXVertexList::BeginDrawState(GFXBOOL lock) {
   } else 
 #endif
     {      
-      if (isColor) {
+      if (changed&HAS_COLOR) {
 	glInterleavedArrays (GL_T2F_C4F_N3F_V3F,sizeof(GFXColorVertex),&data.colors[0]);
       } else {
 	glInterleavedArrays (GL_T2F_N3F_V3F,sizeof(GFXVertex),&data.vertices[0]);
@@ -332,7 +416,7 @@ void GFXVertexList::EndDrawState(GFXBOOL lock) {
       if (lock&&glUnlockArraysEXT_p)
 	(*glUnlockArraysEXT_p) ();
     }
-  if (isColor) {
+  if (changed&HAS_COLOR) {
     GFXColor4f(1,1,1,1);
   }
 }
@@ -345,9 +429,22 @@ void GFXVertexList::Draw()
 #endif
     {
       int totoffset=0;
-      for (int i=0;i<numlists;i++) {
+      if (changed&HAS_INDEX) {
+	char stride = changed&HAS_INDEX;
+	GLenum indextype = (changed & INDEX_BYTE)
+	  ?GL_UNSIGNED_BYTE
+	  : ((changed & INDEX_SHORT) 
+	     ? GL_UNSIGNED_SHORT 
+	     : GL_UNSIGNED_INT);
+	for (int i=0;i<numlists;i++) {
+	  glDrawElements (mode[i],offsets[i], indextype, &index.b[stride*totoffset]);//changed&INDEX_BYTE == stride!
+	  totoffset +=offsets[i];
+	}
+      } else {
+	for (int i=0;i<numlists;i++) {
 	  glDrawArrays(mode[i], totoffset, offsets[i]);
 	  totoffset += offsets[i];
+	}
       }
     }
 }

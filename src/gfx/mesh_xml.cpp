@@ -37,6 +37,7 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using XMLSupport::parse_float;
+using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 struct GFXMaterial;
 const EnumMap::Pair Mesh::XML::element_names[] = {
@@ -71,6 +72,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Blend",XML::BLENDMODE),
   EnumMap::Pair("texture", XML::TEXTURE),
   EnumMap::Pair("alphamap", XML::ALPHAMAP),
+  EnumMap::Pair("sharevertex", XML::SHAREVERT),
   EnumMap::Pair("red", XML::RED),
   EnumMap::Pair("green", XML::GREEN),
   EnumMap::Pair("blue", XML::BLUE),
@@ -97,7 +99,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
 };
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 27);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 28);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -301,6 +303,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::SCALE:
 	xml->scale =  parse_float ((*iter).value);
 	break;
+      case XML::SHAREVERT:
+	xml->sharevert = parse_bool ((*iter).value);
+	break;
       case XML::BLENDMODE:
 	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
 	blendSrc = parse_alpha (csrc);
@@ -356,6 +361,12 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->vertex.z = parse_float((*iter).value);
 	xml->vertex.k = 0;
 	xml->point_state |= XML::P_Z;
+	break;
+      case XML::S:
+	xml->vertex.s = parse_float ((*iter).value);
+	break;
+      case XML::T:
+	xml->vertex.t = parse_float ((*iter).value);
 	break;
       default:
 	assert(0);
@@ -939,11 +950,18 @@ void SumNormals (int trimax, int t3vert,
 	  .Cross(Vector (vertices[triind[a+((j+1)%t3vert)]].x,
 			 vertices[triind[a+((j+1)%t3vert)]].y,
 			 vertices[triind[a+((j+1)%t3vert)]].z)-Cur);
-	Normalize(Cur);
-	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	vertices[triind[a+j]].i+=Cur.i/vertexcount[triind[a+j]];
-	vertices[triind[a+j]].j+=Cur.j/vertexcount[triind[a+j]];
-	vertices[triind[a+j]].k+=Cur.k/vertexcount[triind[a+j]];
+	const float eps = .00001;
+	if (fabs(Cur.i)>eps||fabs(Cur.j)>eps||fabs(Cur.k)<eps) {
+	  Normalize(Cur);	 
+	  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	  vertices[triind[a+j]].i+=Cur.i/vertexcount[triind[a+j]];
+	  vertices[triind[a+j]].j+=Cur.j/vertexcount[triind[a+j]];
+	  vertices[triind[a+j]].k+=Cur.k/vertexcount[triind[a+j]];
+	}else {
+	  if (vertexcount[triind[a+j]]>1) {
+	    vertexcount[triind[a+j]]--;
+	  }
+	}
       }
     }
   }
@@ -961,7 +979,7 @@ const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
 void Mesh::LoadXML(const char *filename, int faction) {
   const int chunk_size = 16384;
-  
+  std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
   if(!inFile) {
     assert(0);
@@ -969,6 +987,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
   }
 
   xml = new XML;
+  xml->sharevert=false;
   xml->faction = faction;
   GFXGetMaterial (0, xml->material);//by default it's the default material;
   xml->load_stage = 0;
@@ -1015,8 +1034,8 @@ void Mesh::LoadXML(const char *filename, int faction) {
     delete []vertrw;
     for (i=0;i<xml->vertices.size();i++) {
       float dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
-			xml->vertices[i].j*xml->vertices[i].j +
-			xml->vertices[i].k*xml->vertices[i].k);
+			 xml->vertices[i].j*xml->vertices[i].j +
+			 xml->vertices[i].k*xml->vertices[i].k);
       if (dis!=0) {
 	xml->vertices[i].i/=dis;//renormalize
 	xml->vertices[i].j/=dis;
@@ -1048,8 +1067,10 @@ void Mesh::LoadXML(const char *filename, int faction) {
     }
 
     a=0;
+
     for (a=0;a<xml->tris.size();a+=3) {
       for (j=0;j<3;j++) {
+	ind.push_back (xml->triind[a+j]);
 	xml->tris[a+j].i = xml->vertices[xml->triind[a+j]].i;
 	xml->tris[a+j].j = xml->vertices[xml->triind[a+j]].j;
 	xml->tris[a+j].k = xml->vertices[xml->triind[a+j]].k;
@@ -1058,16 +1079,29 @@ void Mesh::LoadXML(const char *filename, int faction) {
     a=0;
     for (a=0;a<xml->quads.size();a+=4) {
       for (j=0;j<4;j++) {
+	ind.push_back (xml->quadind[a+j]);
 	xml->quads[a+j].i=xml->vertices[xml->quadind[a+j]].i;
 	xml->quads[a+j].j=xml->vertices[xml->quadind[a+j]].j;
 	xml->quads[a+j].k=xml->vertices[xml->quadind[a+j]].k;
       }
     }
     a=0;
+    for (a=0;a<xml->lines.size();a+=2) {
+      for (j=0;j<2;j++) {
+	ind.push_back (xml->lineind[a+j]);
+	xml->lines[a+j].i=xml->vertices[xml->lineind[a+j]].i;
+	xml->lines[a+j].j=xml->vertices[xml->lineind[a+j]].j;
+	xml->lines[a+j].k=xml->vertices[xml->lineind[a+j]].k;
+      }
+    }
+
+
+    a=0;
     unsigned int k=0;
     unsigned int l=0;
     for (l=a=0;a<xml->tristrips.size();a++) {
       for (k=0;k<xml->tristrips[a].size();k++,l++) {
+	ind.push_back (xml->tristripind[l]);
 	xml->tristrips[a][k].i = xml->vertices[xml->tristripind[l]].i;
 	xml->tristrips[a][k].j = xml->vertices[xml->tristripind[l]].j;
 	xml->tristrips[a][k].k = xml->vertices[xml->tristripind[l]].k;
@@ -1075,6 +1109,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
     }
     for (l=a=0;a<xml->trifans.size();a++) {
       for (k=0;k<xml->trifans[a].size();k++,l++) {
+	ind.push_back (xml->trifanind[l]);
 	xml->trifans[a][k].i = xml->vertices[xml->trifanind[l]].i;
 	xml->trifans[a][k].j = xml->vertices[xml->trifanind[l]].j;
 	xml->trifans[a][k].k = xml->vertices[xml->trifanind[l]].k;
@@ -1082,9 +1117,18 @@ void Mesh::LoadXML(const char *filename, int faction) {
     }
     for (l=a=0;a<xml->quadstrips.size();a++) {
       for (k=0;k<xml->quadstrips[a].size();k++,l++) {
+	ind.push_back (xml->quadstripind[l]);
 	xml->quadstrips[a][k].i = xml->vertices[xml->quadstripind[l]].i;
 	xml->quadstrips[a][k].j = xml->vertices[xml->quadstripind[l]].j;
 	xml->quadstrips[a][k].k = xml->vertices[xml->quadstripind[l]].k;
+      }
+    }
+    for (l=a=0;a<xml->linestrips.size();a++) {
+      for (k=0;k<xml->linestrips[a].size();k++,l++) {
+	ind.push_back (xml->linestripind[l]);
+	xml->linestrips[a][k].i = xml->vertices[xml->linestripind[l]].i;
+	xml->linestrips[a][k].j = xml->vertices[xml->linestripind[l]].j;
+	xml->linestrips[a][k].k = xml->vertices[xml->linestripind[l]].k;
       }
     }
 
@@ -1259,9 +1303,9 @@ void Mesh::LoadXML(const char *filename, int faction) {
     vertexlist[a].x*=xml->scale;//FIXME
     vertexlist[a].y*=xml->scale;
     vertexlist[a].z*=xml->scale;
-    vertexlist[a].i*=-1;
-    vertexlist[a].j*=-1;
-    vertexlist[a].k*=-1;
+    //    vertexlist[a].i*=-1;
+    //    vertexlist[a].j*=-1;
+    //    vertexlist[a].k*=-1;
 
     /*
     vertexlist[a].x -= x_center;
@@ -1273,6 +1317,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
     xml->vertices[a].x*=xml->scale;//FIXME
     xml->vertices[a].y*=xml->scale;
     xml->vertices[a].z*=xml->scale;
+    
     /*
     xml->vertices[a].x -= x_center;
     xml->vertices[a].y -= y_center;
@@ -1289,9 +1334,21 @@ void Mesh::LoadXML(const char *filename, int faction) {
   ***/
   radialSize = .5*(mx-mn).Magnitude();
 
-
-  vlist= new GFXVertexList(polytypes,totalvertexsize,vertexlist,o_index,poly_offsets); 
-
+  if (xml->sharevert) {
+    GFXVertex * myvert = new GFXVertex[xml->vertices.size()];
+    unsigned int * myind= new unsigned int [ind.size()];
+    unsigned int j=0;
+    for (vector<GFXVertex>::iterator i=xml->vertices.begin();i!=xml->vertices.end();i++,j++) {
+      myvert[j]=*i;
+    }
+    j=0;
+    for (vector<unsigned int>::iterator k=ind.begin();k!=ind.end();k++,j++) {
+      myind[j]=*k;
+    }
+    vlist = new GFXVertexList (polytypes, xml->vertices.size(),myvert,o_index,poly_offsets,false,myind);
+  }else {
+    vlist= new GFXVertexList(polytypes,totalvertexsize,vertexlist,o_index,poly_offsets); 
+  }
   /*
   vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,xml->quads.size(),vertexlist+xml->tris.size());
   index = xml->tris.size()+xml->quads.size();
@@ -1325,7 +1382,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
   delete []poly_offsets;
   numlods=xml->lod.size()+1;
   orig = new Mesh [numlods];
-  for (int i=0;i<xml->lod.size();i++) {
+  for (unsigned int i=0;i<xml->lod.size();i++) {
     orig[i+1] = *xml->lod[i];
     orig[i+1].lodsize=xml->lodsize[i];
   }

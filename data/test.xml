@@ -2,7 +2,7 @@
         <planet name="sun" file="sun.bmp" radius="2200" gravity="20" ri="0" rj="0" rk="0" si="0" sj="0" sk="0" velocity="0" position="0" emmisiveR=".7" emmisiveG=".7" emmisiveB=".7">
 		<planet name="Mercury" file="mercury.bmp" radius="220" gravity="20" ri="4000" rj="0" rk="0" si="0" sj="0" sk="4000" velocity="5" position="0.25">
 		</planet>
-<unit name= "Victory"  file="drydock-Cube_27.xunit" ri="3000" rj="0" rk="0" si="0" sj="0" sk="5000" velocity="5" position="0">
+<unit name= "Victory"  file="drydock-Cube_27.xunit" ri="2000" rj="0" rk="0" si="0" sj="0" sk="5000" velocity="5" position="0">
 </unit>
 
 <planet name="Venus" file="venus.bmp" radius="250" gravity="20" ri="6000" rj="0" rk="0" si="0" sj="0" sk="6000" velocity="8" position="1.5">

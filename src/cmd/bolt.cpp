@@ -33,7 +33,7 @@ namespace bolt_draw {
     V(9,0,1,0,.375,.1875);
     V(10,-1,0,0,.1875,.375);
     V(11,0,-1,0,0,.1875);
-    boltmesh = new GFXVertexList (GFXQUAD,12,vtx,NULL,false);//not mutable;
+    boltmesh = new GFXVertexList (GFXQUAD,12,vtx,12,false);//not mutable;
   }
 
 }

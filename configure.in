@@ -43,8 +43,8 @@ dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
-TR_CFLAGS="-O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations"
-TR_CXXFLAGS="-O2 -Wall -fomit-frame-pointer  -ffast-math -fexpensive-optimizations"
+TR_CFLAGS="-O3 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations"
+TR_CXXFLAGS="-O3 -Wall -fomit-frame-pointer  -ffast-math -fexpensive-optimizations"
 TR_LIBS=""
 
 case "$host" in
@@ -211,44 +211,81 @@ fi
 
 LIBS="$saved_LIBS"
 
+
+
+
 dnl --------------------------------------------------------------------------
 dnl Check for GLU library
 dnl --------------------------------------------------------------------------
+AC_ARG_WITH(glu-libs,      [  --with-glu-libs=DIR      GLU/MesaGLU library location])
+AC_ARG_WITH(glu-lib-name,  [  --with-glu-lib-name=NAME GLU library name])
 
-AC_ARG_WITH(glu-lib-name, [  --with-glu-lib-name=NAME GLU library name])
-
-AC_DEFUN( CHECK_FOR_GLU_LIB, [
-    AC_MSG_CHECKING([for $GLU_LIB_NAME library])
-    LIBS="$saved_LIBS $TR_LIBS -l$GLU_LIB_NAME"
-    AC_TRY_LINK( , , have_GLU=yes, have_GLU=no)
-    AC_MSG_RESULT([$have_GLU])
-])
-
-if test "x$with_glu_lib_name" = "x" ; then
-    GLU_LIB_NAME="GLU"
+if test "x$with_glu_libs" = "x" ; then
+    GLU_LDOPTS=""
 else
-    GLU_LIB_NAME="$with_glu_lib_name"
+    GLU_LDOPTS="-L$with_glu_libs"
 fi
 
 saved_LIBS="$LIBS"
 
-CHECK_FOR_GLU_LIB
+AC_DEFUN( CHECK_FOR_GLU_LIB, [
+    AC_MSG_CHECKING([for $GLU_LIB_NAME library])
+    LIBS="$saved_LIBS $TR_LIBS $GLU_LDOPTS -l$GLU_LIB_NAME"
+    AC_TRY_LINK( , , have_GLU=yes, have_GLU=no)
+    AC_MSG_RESULT([$have_GLU])
 
-if test "x$have_GLU" = "xno" -a "x$with_glu_lib_name" = "x"; then
-    GLU_LIB_LIST=`grep -v -E "^$GLU_LIB_NAME\$" <<EOF
+    if test "x$have_GLU" = "xyes" ; then
+	TR_LIBS="$TR_LIBS $GLU_LDOPTS -l$GLU_LIB_NAME"
+
+    else
+	dnl Try with -lpthread
+
+	AC_MSG_CHECKING([for $GLU_LIB_NAME library (with pthreads)])
+	LIBS="$saved_LIBS $TR_LIBS $GLU_LDOPTS -l$GLU_LIB_NAME -lpthread"
+	AC_TRY_LINK( , , have_GLU=yes, have_GLU=no)
+	AC_MSG_RESULT([$have_GLU])
+
+	if test "x$have_GLU" = "xyes" ; then
+	    TR_LIBS="$TR_LIBS $GLU_LDOPTS -l$GLU_LIB_NAME -lpthread"
+	fi
+    fi
+])
+
+AC_DEFUN( FIND_GLU_LIB, [
+    if test "x$with_glu_lib_name" = "x" ; then
+        GLU_LIB_NAME="GLU"
+    else
+        GLU_LIB_NAME="$with_glu_lib_name"
+    fi
+
+    CHECK_FOR_GLU_LIB
+
+    if test "x$have_GLU" = "xno" -a "x$with_glu_lib_name" = "x" ; then
+        GLU_LIB_LIST=`grep -v -E "^$GLU_LIB_NAME\$" <<EOF
 GLU
 MesaGLU
-glu32
+openglu32
 EOF
 `
 
-    for GLU_LIB_NAME in $GLU_LIB_LIST ; do
-        CHECK_FOR_GLU_LIB
+        for GLU_LIB_NAME in $GLU_LIB_LIST ; do
+            CHECK_FOR_GLU_LIB
 
-        if test "x$have_GLU" = "xyes" ; then
-            break
-        fi
-    done
+            if test "x$have_GLU" = "xyes" ; then
+                break;
+            fi
+        done
+    fi
+])
+
+FIND_GLU_LIB
+
+if test "x$have_GLU" = "xno" -a "x$GLU_LDOPTS" = "x" ; then
+    echo "*** Hmm, you don't seem to have OpenGLU libraries installed in the standard"
+    echo "*** location (/usr/lib).  I'll check in /usr/X11R6/lib, since"
+    echo "*** many distributions (incorrectly) put OpenGLU libs there."
+    GLU_LDOPTS="-L/usr/X11R6/lib"
+    FIND_GLU_LIB
 fi
 
 if test "x$have_GLU" = "xno" ; then
@@ -256,7 +293,9 @@ if test "x$have_GLU" = "xno" ; then
 fi
 
 LIBS="$saved_LIBS"
-TR_LIBS="$TR_LIBS -l$GLU_LIB_NAME"
+
+
+
 
 
 dnl --------------------------------------------------------------------------
@@ -476,6 +515,101 @@ fi
 
 CPPFLAGS="$saved_CPPFLAGS"
 TR_CPPFLAGS="$TR_CPPFLAGS $EXPAT_CPPFLAGS"
+
+dnl --------------------------------------------------------------------------
+dnl Check for openal library
+dnl --------------------------------------------------------------------------
+AC_ARG_WITH(openal-libs,[  --with-openal-libs=DIR    Location of openal library])
+
+if test "x$with_openal_libs" = "x" ; then
+    OPENAL_LDOPTS=""
+else
+    OPENAL_LDOPTS="-L$with_openal_libs"
+fi
+
+AC_DEFUN( CHECK_FOR_OPENAL_LIB, [
+    AC_MSG_CHECKING([for $OPENAL_LIB_NAME library])
+    LIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+    AC_TRY_LINK( , , have_openal_lib=yes, have_openal_lib=no )
+    AC_MSG_RESULT([$have_openal_lib])
+]) 
+
+saved_LIBS="$LIBS"
+
+OPENAL_LIB_LIST="openal"
+
+for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
+    CHECK_FOR_OPENAL_LIB
+
+    if test "x$have_openal_lib" = "xyes" ; then
+        break;
+    fi
+done
+
+if test "x$have_openal_lib" = "xno" ; then
+    AC_MSG_ERROR([Openal library not found])
+fi
+
+LIBS="$saved_LIBS"
+TR_LIBS="$TR_LIBS $OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+
+
+dnl --------------------------------------------------------------------------
+dnl Check for OpenAL headers
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(al-inc,   [  --with-al-inc=DIR       OpenAL header file location])
+
+if test "x$with_al_inc" = "x" ; then
+    AL_CPPFLAGS=""
+else 
+    AL_CPPFLAGS="-I$with_al_inc"
+fi
+
+dnl check for al.h
+saved_CPPFLAGS="$CPPFLAGS"
+
+AC_DEFUN( CHECK_FOR_AL_H, [
+    CPPFLAGS="$saved_CPPFLAGS $AL_CPPFLAGS $TR_CPPFLAGS"
+
+    AC_MSG_CHECKING([for AL/al.h])
+    AC_TRY_CPP( [ #include <AL/al.h> ], have_al_h=yes, have_al_h=no )
+    AC_MSG_RESULT([$have_al_h])
+])
+
+CHECK_FOR_AL_H
+
+if test "x$have_al_h" = "xno" -a "x$AL_CPPFLAGS" = "x" ; then
+    echo "*** Hmm, you don't seem to have OpenAL headers installed in the standard"
+    echo "*** location (/usr/include).  I'll check in /usr/X11R6/include, since"
+    echo "*** many distributions (incorrectly) put OpenAL headers there."
+    AL_CPPFLAGS="-I/usr/X11R6/include"
+    CHECK_FOR_AL_H
+fi
+
+if test "x$have_al_h" = "xno" ; then
+    AC_MSG_ERROR([Cannot find AL/al.h])
+fi
+
+dnl Check for alext.h 
+AC_CHECK_HEADERS( "AL/alext.h", have_alext_h=yes, have_alext_h=no )
+
+if test "x$have_alext_h" = "xno" ; then
+    AC_MSG_ERROR([
+*****************************************************************
+You are missing the file alext.h.
+You can get a copy at
+http://oss.sgi.com/projects/oal-sample/ABI/alext.h
+Place it in the directory /usr/include/AL.
+*****************************************************************])
+fi
+
+
+CPPFLAGS="$saved_CPPFLAGS" 
+TR_CPPFLAGS="$TR_CPPFLAGS $GL_CPPFLAGS"
+
+
+
 
 dnl --------------------------------------------------------------------------
 dnl Other options

@@ -32,7 +32,7 @@ static list <int>* newpicked=&pickedlights[0];
 static list <int>* oldpicked=&pickedlights[1];
 
 inline int getIndex (const LineCollide & t) {
-    return *((int *)(&t.object));
+    return t.object.i;
 }
 static void swappicked () {
     if (newpicked==&pickedlights[0]) {
@@ -73,7 +73,7 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmpcollide.Mini = center-tmp;
     tmpcollide.Maxi = center+tmp;
     tmpcollide.hhuge=false;//fixme!! may well be hhuge...don't have enough room in tmppickt
-    tmpcollide.object=NULL;
+    tmpcollide.object.i=0;//FIXME, should this be -1?
     tmpcollide.type=LineCollide::UNIT;
     swappicked();
     veclinecol *tmppickt[HUGEOBJECT+1];

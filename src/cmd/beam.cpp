@@ -37,7 +37,7 @@ Vector &Beam::Position()
 
 void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
-  CollideInfo.object = NULL;
+  CollideInfo.object.b = NULL;
   CollideInfo.type = LineCollide::BEAM;
   if (vlist)
     delete vlist;
@@ -99,12 +99,12 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
 
   memcpy (&calah[16],&calah[0],sizeof(GFXColorVertex)*16);    
-  vlist = new GFXVertexList (GFXQUAD,32,calah,true);//mutable color contained list
+  vlist = new GFXVertexList (GFXQUAD,32,calah,32,true);//mutable color contained list
 
 }
 
 Beam::~Beam () {
-  if (CollideInfo.object!=NULL) {
+  if (CollideInfo.object.b!=NULL) {
     KillCollideTable (&CollideInfo);
   }
   delete vlist;
@@ -245,9 +245,9 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   if (curthick<=0) {
 
     curthick =0;//die die die
-    if (CollideInfo.object!=NULL) {
+    if (CollideInfo.object.b!=NULL) {
       KillCollideTable (&CollideInfo);
-      CollideInfo.object = NULL;
+      CollideInfo.object.b = NULL;
     }
     
   } else {
@@ -265,12 +265,12 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 
 
     tmpvec = center.Max (tmpvec);
-    if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object==NULL)) {
+    if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object.b==NULL)) {
       
-      if (CollideInfo.object !=NULL) {
+      if (CollideInfo.object.b !=NULL) {
 	KillCollideTable (&CollideInfo);
       }
-      CollideInfo.object = this;
+      CollideInfo.object.b = this;
       CollideInfo.Mini= tmpMini;
       CollideInfo.Maxi= tmpvec;
       AddCollideQueue (CollideInfo);

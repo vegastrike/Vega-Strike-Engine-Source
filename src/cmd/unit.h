@@ -27,7 +27,7 @@ struct GFXColor;
 #include "gfx/quaternion.h"
 #include <string>
 #include "weapon_xml.h"
-#include "hashtable_3d.h"
+#include "linecollide.h"
 #include "container.h"
 #include "gfx/vdu.h"
 

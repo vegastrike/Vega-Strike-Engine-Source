@@ -132,6 +132,7 @@ private:
       FLATSHADE,
       TEXTURE,
       ALPHAMAP,
+      SHAREVERT,
       ALPHA,
       RED,
       GREEN,
@@ -199,6 +200,7 @@ private:
     ///All logos on this unit
     vector <ZeLogo> logos;
     vector<Names> state_stack;
+    bool sharevert;
     int load_stage;
     int point_state;
     int vertex_state;
