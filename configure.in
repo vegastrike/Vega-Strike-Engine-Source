@@ -99,6 +99,9 @@ case $target in
   *Darwin* | *darwin*)
     bsdthread=no
     ;;
+  *mingw* | *cygwin*)
+    bsdthread=no
+    ;;
   *)
     saved_CXXFLAGS="${CXXFLAGS}"
     CXXFLAGS="-Werror -pthread"
@@ -420,7 +423,7 @@ then
 	    if test "x$is_macosx" = "xyes" ; then
 	    	    PYTHON_LIBS="-lpython${PYTHON_SHORT} --export-dynamic"
 	    else
-		    PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
+		    	PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
 	    fi
             FOUND_LIBPYTHON_SO=yes
             break
@@ -440,8 +443,8 @@ then
             if test -f $i/libpython${PYTHON_SHORT}.dll.a;	   
 	    then
               echo "$i/libpython${PYTHON_SHORT}.dll.a yes"
-    	      PYTHON_CXXFLAGS="-I/usr/include/python2.2"
-	      PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.dll.a  -Xlinker -export-dynamic"
+    	      PYTHON_CXXFLAGS="-I${PYTHON_incdir}"
+	      	  PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.dll.a  -Xlinker -export-dynamic"
               FOUND_LIBPYTHON_SO=yes
             else
               echo "$i/libpython${PYTHON_SHORT}.so no"
