@@ -33,7 +33,11 @@ string getUnitNameAndFgNoBase (Unit * target) {
 	  if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
 		  return fg->name+":"+target->getFullname();
 	  } else if(fg->name=="Base"){
-		  return reformatName(target->name)+":"+target->getFullname();
+		  if(reformatName(target->name)==(reformatName(target->getFullname()))){
+		    return reformatName(target->name);
+		  } else {
+		    return reformatName(target->name)+":"+target->getFullname();
+		  }
 	  }
 	}	 
   }
