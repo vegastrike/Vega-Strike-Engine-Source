@@ -771,7 +771,8 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
 
   switch(elem) {
   case Unit::UNIT:
-      fprintf (xml->tfp,"\t<Upgrade file=\"godsansshields\"/>\n");
+	  
+      //IN FORMER TIMES fprintf (xml->tfp,"\t<Upgrade file=\"godsansshields\"/>\n");
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	  switch(Unit::attribute_map.lookup((*iter).name)) {
       case Unit::UNITSCALE:
