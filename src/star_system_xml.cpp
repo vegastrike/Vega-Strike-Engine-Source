@@ -5,6 +5,8 @@
 #include "gfx/env_map_gent.h"
 #include "gfx/aux_texture.h"
 #include "cmd/planet.h"
+#include "gfx/star.h"
+#include "vs_globals.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -60,6 +62,7 @@ namespace StarXML {
       BACKGROUND,
       STARS,
       STARSPREAD,
+      NEARSTARS,
       REFLECTIVITY,
       ALPHA,
       DESTINATION,
@@ -76,7 +79,8 @@ namespace StarXML {
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
-    EnumMap::Pair ("stars", STARS), 
+    EnumMap::Pair ("stars", STARS),
+    EnumMap::Pair ("nearstars", NEARSTARS),
     EnumMap::Pair ("starspread", STARSPREAD), 
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
@@ -103,7 +107,7 @@ namespace StarXML {
 };
 
   const EnumMap element_map(element_names, 5);
-  const EnumMap attribute_map(attribute_names, 26);
+  const EnumMap attribute_map(attribute_names, 27);
 }
 
 using XMLSupport::EnumMap;
@@ -146,7 +150,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     xml->reflectivity=parse_float ((*iter).value);
     break;
   case BACKGROUND:
-	xml->backgroundname=(*iter).value;
+    xml->backgroundname=(*iter).value;
+    break;
+      case NEARSTARS:
+	xml->numnearstars = parse_int((*iter).value);
 	break;
       case STARS:
 	xml->numstars = parse_int ((*iter).value);
@@ -387,8 +394,9 @@ void StarSystem::LoadXML(const char *filename) {
   }
 
   xml = new StarXML;
-  xml->starsp = 200;
-  xml->numstars=1000;
+  xml->starsp = 150;
+  xml->numnearstars=4000;
+  xml->numstars=800;
   xml->backgroundname = string("cube");
   xml->reflectivity=.5;
   xml->unitlevel=0;
@@ -421,8 +429,8 @@ void StarSystem::LoadXML(const char *filename) {
 	}
 	LightMap[0] = new Texture((xml->backgroundname+"_light.bmp").c_str(), 1);
 #endif
-  bg = new Background(xml->backgroundname.c_str(),xml->numstars,xml->starsp);
-
+  bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
+  stars = new Stars (xml->numnearstars, xml->starsp);
   delete xml;
 }
 

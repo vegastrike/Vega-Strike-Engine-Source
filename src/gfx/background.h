@@ -21,22 +21,22 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
-#include "star.h"
 class SphereMesh;
 struct Texture;
-class Background : public Stars{
-	Texture *up;
-	Texture *left;
-	Texture *front;
-	Texture *right;
-	Texture *back;
-	Texture *down;
-        SphereMesh * SphereBackground;
+class Background {
+  GFXVertexList * stars;
+  Texture *up;
+  Texture *left;
+  Texture *front;
+  Texture *right;
+  Texture *back;
+  Texture *down;
+  SphereMesh * SphereBackground;
 public:
-	Background(const char *file, int numstars, float spread);
-	~Background();
-
-	void Draw();
+  Background(const char *file, int numstars, float spread);
+  ~Background();
+  
+  void Draw();
 };
 
 #endif

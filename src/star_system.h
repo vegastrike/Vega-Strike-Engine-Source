@@ -12,6 +12,7 @@
 #include "xml_support.h"
 using std::string;
 #include "gfx/camera.h"
+class Stars;
 class Planet;
 class UnitCollection;
 class ClickList;
@@ -32,6 +33,7 @@ class StarSystem {
     string backgroundname;
     Vector cursun;
     float reflectivity;
+    int numnearstars;
     int numstars;
     float starsp;
   } *xml;
@@ -46,6 +48,7 @@ class StarSystem {
   InputDFA * systemInputDFA;
   double time;
   Background * bg;
+  Stars *stars;
   Texture *LightMap[6]; //type Texture
  public:
   Background* getBackground() {return bg;}

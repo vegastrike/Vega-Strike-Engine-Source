@@ -27,10 +27,17 @@
 #include "sphere.h"
 
 	const float size = 10;
-Background::Background(const char *file, int numstars, float spread):Stars (numstars,spread)
+Background::Background(const char *file, int numstars, float spread)
 {
 	char * temp=new char [strlen(file)+25];
-	
+	GFXVertex * tmpvertex = new GFXVertex [numstars];
+	memset (tmpvertex,0,sizeof (GFXVertex)*numstars);	
+	for (int j=0;j<numstars;j++) {
+	  tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+	  tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+	  tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+	}
+	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, false,0);
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
 	up = new Texture(strcat(temp, "_up.bmp") );
@@ -80,6 +87,7 @@ Background::Background(const char *file, int numstars, float spread):Stars (nums
 
 Background::~Background()
 {
+  delete stars;
   if (up) 
     delete up;
   if (left) 
@@ -219,6 +227,16 @@ void Background::Draw()
 			
     GFXEnd();//*/
   }
+  GFXLoadIdentity(MODEL);
+  GFXEnable(DEPTHWRITE);
+  GFXDisable (TEXTURE0);
+  GFXDisable (LIGHTING);
+  GFXColor (1,1,1,1);
+  GFXDisable (TEXTURE1);
+  GFXEnable (DEPTHTEST);
+  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+  stars->DrawOnce();
 
   _Universe->AccessCamera()->UpdateGFX(false);
+
 }

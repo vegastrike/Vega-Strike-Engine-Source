@@ -45,6 +45,7 @@ void Stars::Draw() {
   GFXSelectMaterial (0);
   GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.01,0,1/(.4*spread*spread)));
   GFXCreateLight (ligh,FadeLight,true);
+  vlist->LoadDrawState();
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
       GFXTranslate (MODEL,pos[i]-pos[i-1]);
@@ -115,7 +116,6 @@ void Stars::UpdatePosition(const Vector & cp) {
 }
 
 Stars::~Stars () {
-  for (int i=0;i<STARnumvlist;i++) {
-    delete vlist;
-  }
+  delete vlist;
+
 }

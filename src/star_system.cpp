@@ -14,6 +14,7 @@
 #include "gfx/background.h"
 #include "gfx/animation.h"
 #include "gfx/aux_texture.h"
+#include "gfx/star.h"
 #include <expat.h>
 extern Vector mouseline;
 
@@ -96,6 +97,7 @@ StarSystem::~StarSystem() {
   delete LightMap[0];
 #endif
   delete bg;
+  delete stars;
   delete [] name;
   delete systemInputDFA;
   for (int i=0;i<numprimaries;i++) {
@@ -142,7 +144,7 @@ void StarSystem::Draw() {
   delete iter;
   SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   Mesh::ProcessUndrawnMeshes(true);
-  ((Stars*)bg)->Draw();
+  stars->Draw();
   GFXPopGlobalEffects();
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
