@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/vegastrike.h)
-AM_INIT_AUTOMAKE(vegastrike, "0.2.9.5")
+AM_INIT_AUTOMAKE(vegastrike, "0.3.0")
 AM_CONFIG_HEADER(config.h)
 
 dnl AC_LANG_CPLUSPLUS
@@ -1048,14 +1048,17 @@ AC_SUBST(TR_CFLAGS)
 AC_SUBST(TR_CXXFLAGS)
 AC_SUBST(TR_LIBS)
 AC_SUBST(PYTHON_CPPFLAGS)
-BOOST_CPPFLAGS="-I../boost -I../../boost"
+BOOST_CPPFLAGS="-I../boost -I../../boost -I../src/boost -DUSE_BOOST_128"
+BOOST_LIBS="../src/boost/libpython_boost.a"
+AC_ARG_ENABLE(boost-129,[  --enable-boost-129 Use if your compiler has trouble with boost-128],BOOST_CPPFLAGS="-I../boost129 -I../../boost129 -I../src/boost129 -DUSE_BOOST_129")
+AC_ARG_ENABLE(boost-129,[  --enable-boost-129 Use if your compiler has trouble with boost-128],BOOST_LIBS="../src/boost129/libpython_boost.a")
 AC_SUBST(BOOST_CPPFLAGS)
 
 CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
-CFLAGS="$CFLAGS $TR_CFLAGS"
-CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
+CFLAGS="$CFLAGS $TR_CFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
+CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 LIBS="$LIBS $TR_LIBS $PYTHON_LIBS"
 
 AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile \
-	objconv/Makefile src/gui/Makefile src/common/Makefile )
+	objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile src/boost129/converter/Makefile src/boost129/object/Makefile)
 
