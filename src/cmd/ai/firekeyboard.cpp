@@ -728,7 +728,7 @@ bool TargFront (Unit *me,Unit *target) {
 bool TargThreat (Unit *me,Unit *target) {
 	if (!TargAll(me,target))
 		return false;
-	if (target->isUnit==MISSILEPTR) {
+	if (target->isUnit()==MISSILEPTR) {
 		return false;
 	}
 	if (target->Target()==me) {
@@ -740,7 +740,7 @@ bool TargThreat (Unit *me,Unit *target) {
 	return false;
 }
 bool TargNear (Unit *me,Unit *target) {
-	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit!=MISSILEPTR;
+	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR;
 }
 
 void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
