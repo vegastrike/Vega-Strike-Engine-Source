@@ -36,6 +36,7 @@ BOOL /*GFXDRVAPI*/ GFXEnable (STATE state)
 	case DEPTHTEST:
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc (GL_LEQUAL);
+		//glDepthFunc (GL_ALWAYS);
 		break;
 	case DEPTHWRITE:
 		glDepthMask(1);

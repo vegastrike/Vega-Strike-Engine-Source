@@ -312,7 +312,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 60;
+const int numf = 900;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
@@ -579,16 +579,9 @@ void main_loop() {
 
   _GFX->StartDraw();
   
-  GFXDisable(DEPTHWRITE);
-  GFXDisable(DEPTHTEST);
-  GFXEnable(TEXTURE0);
-  GFXDisable(TEXTURE1);
   //bg2->Draw();
   bg->Draw();
-  GFXEnable(DEPTHWRITE);
-  GFXEnable(DEPTHTEST);
-  GFXEnable(TEXTURE0);
-  GFXEnable(TEXTURE1);
+
   //GFXDisable(TEXTURE1);
   GFXMaterial mat;
   GFXGetMaterial(0, mat);

@@ -698,7 +698,6 @@ void Unit::Draw()
 	  if (d) {  //d can be used for level of detail shit
 	    meshdata[i]->Draw();
 	  }else {
-
 	  }
 	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	}

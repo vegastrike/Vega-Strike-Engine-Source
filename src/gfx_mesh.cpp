@@ -46,6 +46,8 @@ extern list<Logo*> undrawn_logos;
 Vector mouseline;
 
 void Mesh::ProcessUndrawnMeshes() {
+  GFXEnable(DEPTHWRITE);
+  GFXEnable(DEPTHTEST);
   for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
     while(undrawn_meshes[a].size()) {
       Mesh *m = undrawn_meshes[a].back();
@@ -110,7 +112,7 @@ void Mesh::InitUnit()
 	draw_queue = NULL;
 	hash_name = NULL;
 	will_be_drawn = false;
-	draw_sequence = 0;
+	draw_sequence = 1;
 }
 
 Mesh::Mesh():Primitive()

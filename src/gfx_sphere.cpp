@@ -103,6 +103,9 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
       Decal = new Texture(texture, 0);
       centered?envMap = FALSE:envMap=TRUE;
 
+      if(centered) {
+	draw_sequence=0;
+      }
   meshHashTable.Put(hash_key, this);
   orig = this;
   refcount++;
@@ -139,11 +142,13 @@ void SphereMesh::ProcessDrawQueue() {
 	  GFXSelectTexcoordSet(1, 1);
 	  }
 
-  if (insideout) 
+	if (insideout) 
     GFXDisable (CULLFACE);
   if (centered) {
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHWRITE);
+    GFXDisable(DEPTHTEST);
+    GFXDisable(TEXTURE1);
   }	
   
   while(draw_queue->size()) {
@@ -169,6 +174,7 @@ void SphereMesh::ProcessDrawQueue() {
   if (centered) {
     GFXEnable(LIGHTING);
     GFXEnable(DEPTHWRITE);
+    GFXEnable(DEPTHTEST);
   }
 }
 
@@ -179,13 +185,9 @@ void SphereMesh::Draw (const Vector &x, const Vector &y, const Vector &z, const 
   if (centered) {
     GFXLoadIdentity(MODEL);
     SetPosition(_GFX->AccessCamera()->GetPosition());
-    GFXDisable(DEPTHWRITE);
-    GFXDisable(LIGHTING);
   }	
   Mesh::Draw(x,y,z,pos);
   if (centered) {
-    GFXEnable(DEPTHWRITE);
-    GFXEnable(LIGHTING);
   }
   if (insideout) {
     GFXEnable(CULLFACE);
