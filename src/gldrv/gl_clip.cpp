@@ -123,7 +123,7 @@ void DrawFrustum (float f[6][4]) {
   }
 }
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const Vector &Cnt, float radius) {
+float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const QVector &Cnt, float radius) {
   /*
   static float lasttime = GetElapsedTime();
   if (lasttime!=GetElapsedTime()) {
@@ -131,7 +131,7 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const Vector &Cnt, float 
     lasttime = GetElapsedTime();
     }*/
    int p;
-   float d;
+   double d;
    for( p = 0; p < 5; p++ )//does not evaluate for yon
    {
       d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];

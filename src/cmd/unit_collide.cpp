@@ -523,6 +523,9 @@ float GameUnit<UnitType>::querySphereNoRecurse (const QVector & start, const QVe
   //if( min_radius<0.00001)
   // min_radius = 0;
   for (i=0;i<nummesh();i++) {
+	if (meshdata[i]->rSize()>30+this->rSize()) {
+		continue;
+	}
     float a, b,c;
     st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position()).Cast();	
     dir = end-start;//now start and end are based on mesh's position

@@ -195,10 +195,10 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],const Matrix &modlmat
 void /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *t, float *n, float *f);
 
 ///checks if a sphere is in the currently loaded Frustum given its center and radius
-float /*GFXDRVAPI*/ GFXSphereInFrustum(const Vector &Center, float Radius);
+float /*GFXDRVAPI*/ GFXSphereInFrustum(const QVector &Center, float Radius);
 
 ///Checks if a sphere is in the given frustum calculated by GFXCalculateFrustum. Used in Unit clipping
-float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4],const Vector &Center, float Radius);
+float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4],const QVector &Center, float Radius);
 
 void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix &model);
 

@@ -377,7 +377,21 @@ void UpgradingInfo::SetupCargoList () {
 
       }else {
 	bool addedsomething=false;
+	if (curcategory.empty()) {
+	  int pos=title.find("Category: ",0);
+	  if (pos!=string::npos) {
+	    title=title.substr(0,pos);
+	  }
+	  if (mode==BRIEFINGMODE) {
+	    curcategory.push_back("briefings");
+	  }
+	}
 	if (!curcategory.empty()) {
+	  int pos=title.find("Category: ",0);
+	  if (pos!=string::npos) {
+	    title=title.substr(0,pos);
+	  }
+	  title+=string("Category: ")+curcategory.back()+"  ";
 	  if (mode==BUYMODE||mode==SELLMODE||curcategory.size()>1) {
 	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]",NULL,GFXColor(0,1,.5,1));
 	  }else {
@@ -451,7 +465,8 @@ void UpgradingInfo::SetupCargoList () {
 	  if (match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),false)&&
 	      (!match (curcategory.begin(),curcategory.end(),curlist.begin(),curlist.end(),true))&&
 	      lev!=curcat) {
-	    CargoList->AddTextItem ((string("x")+lev).c_str(),beautify(lev).c_str(),NULL,GFXColor(0,1,1,1));
+	    GFXColor col=(mode!=SHIPDEALERMODE||lev!="My_Fleet")?GFXColor(0,1,1,1):GFXColor(0,.5,1,1);
+	    CargoList->AddTextItem ((string("x")+lev).c_str(),beautify(lev).c_str(),NULL,col);
 		addedsomething=true;
 	    curcat =lev;
 	  }
@@ -1122,9 +1137,9 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 		      static string repair_price = "price: "+vs_config->getVariable("physics","repair_price","1000");
                       CargoInfo->ChangeTextItem ("name","Basic Repair");
 		      CargoInfo->ChangeTextItem ("price",repair_price.c_str());
-		      CargoInfo->ChangeTextItem("volume","Volume: N/A");
+		      CargoInfo->ChangeTextItem("volume","Cargo Volume: N/A");
 		      CargoInfo->ChangeTextItem("mass","Mass: N/A");
-		      CargoInfo->ChangeTextItem("description","Description: Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.");
+		      CargoInfo->ChangeTextItem("description","Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.");
                     }else {
 		      if (buy_name[0]!='x') {
 			  lastselected.type=type;

@@ -531,8 +531,8 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		continue;
 	  if ((int)i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
-	  Vector TransformedPosition = Transform (*ctm,
-					      meshdata[i]->Position());
+	  QVector TransformedPosition = Transform (*ctm,
+					      meshdata[i]->Position().Cast());
 #if 0
       //This is a test of the box in frustum setup to be used with terrain
       GFXBoxInFrustumModel (ctm);
