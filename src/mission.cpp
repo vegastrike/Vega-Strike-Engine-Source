@@ -79,6 +79,9 @@ bool Mission::checkMission(easyDomNode *node){
     else if(((*siter)->Name()=="flightgroups")){
       doFlightgroups(*siter);
     }
+    else if(((*siter)->Name()=="director")){
+      //      doDirector(*siter);
+    }
     else{
       cout << "Unknown tag: " << (*siter)->Name() << endl;
     }

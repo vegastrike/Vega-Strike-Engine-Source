@@ -1,8 +1,16 @@
+2001-11-02 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added file src/mission_script.cpp (not yet compilable)
+	* started to write mission scripting
+	* started to write documentation for mission scripting
+	
+
 2001-11-01 Daniel Horn <hellcatv@hotmail.com>
 
 	* added Polygon Offset and employed its use for Logos... now they don't fade behind other polygons
 	* changed Z-buffer to be GL_LESS to prevent saturn's rings from "peeking" out behind saturn
 	
+
 2001-11-01 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added setVariable to config_xml

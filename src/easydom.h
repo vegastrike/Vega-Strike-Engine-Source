@@ -67,6 +67,30 @@ class easyDomNode {
   string name;
 };
 
+typedef map<string,int> tagMap;
+
+class tagDomNode : public easyDomNode {
+ public:
+  int tag;
+
+  void Tag(tagMap *tagmap) { 
+    tag=(*tagmap)[Name()];
+    if(tag==0){
+      cout << "cannot translate tag " << Name() << endl;
+    }
+
+    vector<easyDomNode *>::const_iterator siter;
+  
+    for(siter= subnodes.begin() ; siter!=subnodes.end() ; siter++){
+      tagDomNode *tnode=(tagDomNode *)(*siter);
+      tnode->Tag(tagmap);
+    }
+
+  };
+
+};
+
+
 template<class domNodeType> class easyDomFactory {
  public:
   easyDomFactory() {};

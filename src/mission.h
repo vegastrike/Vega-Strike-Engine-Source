@@ -55,6 +55,16 @@ class Flightgroup {
   map<string,string> ordermap;
 };
 
+class missionNode : public tagDomNode {
+ public:
+  struct script_t {
+    string name; // script
+    tagDomNode *if_block[3]; // if
+    int tester; // test
+    tagDomNode *test_arg[2]; // test
+  } script;
+};
+
 class Mission {
  public:
   Mission(char *configfile);
@@ -71,6 +81,7 @@ class Mission {
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   easyDomNode *variables;
+  tagDomNode *director;
 
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
