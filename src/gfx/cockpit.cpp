@@ -245,7 +245,7 @@ inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const 
     const vector <DockingPorts> d = target->DockingPortLocations();
     for (unsigned int i=0;i<d.size();i++) {
       float rad = d[i].radius/sqrt(2.0);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-un->Position(),rad ,CamP, CamQ, CamR,1);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe->AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1);
     }
   }
 }
@@ -310,18 +310,18 @@ void Cockpit::DrawTargetBox () {
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
-  QVector Loc(target->Position()-un->Position());
+  QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-un->Position()));
+  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
   GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
 
   if(draw_line_to_target){
-    QVector my_loc(un->Position());
+    QVector my_loc(_Universe->AccessCamera()->GetPosition());
     GFXBegin(GFXLINESTRIP);
     GFXVertexf(my_loc);
     GFXVertexf(Loc);
@@ -338,7 +338,7 @@ void Cockpit::DrawTargetBox () {
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
     float err = (.01*(1-un->CloakVisible()));
-   QVector iLoc = target->PositionITTS (un->Position(),speed)-un->Position()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   QVector iLoc = target->PositionITTS (un->Position(),speed)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){

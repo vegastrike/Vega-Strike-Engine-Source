@@ -458,8 +458,10 @@ public:
   void UpdateCollideQueue();
   ///Loads a user interface for the user to upgrade his ship
   void UpgradeInterface (Unit * base);
-  ///The name of this unit
+  ///The name (type) of this unit shouldn't be public
   std::string name;
+  ///
+
   ///The faction of this unit
   int faction;
   void SetFaction (int faction);
@@ -823,6 +825,7 @@ public:
   const string getFgID();
   /// sets the full name/fgid for planets
   void setFullname(string name)  { fullname=name; };
+  string getFullname() const { return fullname; };
   string getFullAIDescription();
   ///not used yet
   void setTargetFg(string primary,string secondary=string(),string tertiary=string());

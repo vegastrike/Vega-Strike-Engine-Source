@@ -19,6 +19,16 @@ const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shiel
 
 string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
+  if (target->isUnit()==PLANETPTR) {
+    string hr = ((Planet *)target)->getHumanReadablePlanetType();
+    if (!hr.empty()) {
+      return hr+string(":")+target->name;
+    }
+  }else if (target->isUnit()==UNITPTR){
+    if (!target->getFullname().empty()) {
+      return target->getFullname()+string(":")+target->name;
+    }
+  }
   if (fg) {
     if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
       return fg->name+":"+target->name;
@@ -26,12 +36,6 @@ string getUnitNameAndFgNoBase (Unit * target) {
   }
   if (string("neutral")!=_Universe->GetFaction(target->faction)) {
     return string(_Universe->GetFaction(target->faction))+" "+target->name;
-  }
-  if (target->isUnit()==PLANETPTR) {
-    string hr = ((Planet *)target)->getHumanReadablePlanetType();
-    if (!hr.empty()) {
-      return hr+string(":")+target->name;
-    }
   }
   return target->name;
 }
