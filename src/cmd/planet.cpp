@@ -201,6 +201,8 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   if (ligh.size()>0) {
     static bool drawglow = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow","true"));
     static bool drawstar = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_body","true"));
+    static float glowradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_glow_radius","3"));
+
     if (drawglow) {
       numhalos=1;
       halos= new Halo *[1];
@@ -208,8 +210,9 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
 			 //			 ligh[0].ligh.GetProperties (AMBIENT),
 			 GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea),
 			 Vector (0,0,0),
-			 drawstar?3*radius:radius,
-			 drawstar?3*radius:radius);
+			 glowradius*radius,
+			 glowradius*radius);
+
       if (!drawstar) {
 	delete meshdata[0];
 	meshdata[0]=NULL;
