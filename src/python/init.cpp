@@ -131,31 +131,39 @@ def_read_write(pointer-to-member, name) // read/write access to the member via a
   ( Pointer to member is &Class::member )
 
   */
+
+#include "cmd/ai/fire.h"
+class MyFA : public CommunicatingAI {
+public:
+	MyFA() :CommunicatingAI(0,0){}
+	virtual void Execute() {printf("CommAI\n");}
+	virtual ~MyFA(){}
+};
+
 BOOST_PYTHON_MODULE_INIT(Vegastrike)
 {
 	/* Create a new module VS in python */
 	boost::python::module_builder vs("VS");
 
-	/* Map class MyBase to python class "Base"
-	*/
-	boost::python::class_builder<hello,hello_callback> BaseClass(vs, "hello");
+/*	boost::python::class_builder<hello,hello_callback> BaseClass(vs, "hello");
 	BaseClass.def(boost::python::constructor<std::string>());
 	BaseClass.def(hello::greet,"greet",hello_callback::default_greet);
-
-	/* Map class PythonVarConfig to python class "Var"
-	*/
-    boost::python::class_builder<PythonVarConfig>
+*/
+/*    boost::python::class_builder<PythonVarConfig>
         Var(vs, "Var");
 	/* Define a constructor. To define a constructor with multiple arguments,
-	do <classbuilder_type>.def(boost::python::constructor<type1,type2,...>() */
+	do <classbuilder_type>.def(boost::python::constructor<type1,type2,...>() *-/
 	Var.def(boost::python::constructor<>());
 	
 	/* Override __getattr__ and __setattr__ so that assignments to unbound variables in 
-	a Var will be redirected to the config assignment functions */
+	a Var will be redirected to the config assignment functions *-/
 	Var.def(PythonVarConfig::getVariable,"__getattr__");
 	Var.def(PythonVarConfig::setVariable,"__setattr__");
 
-	/* ... */
+*/
+	boost::python::class_builder<MyFA> FA(vs, "CommAI");
+	FA.def(MyFA::Execute,"Execute");
+	FA.def(boost::python::constructor<>());
 	boost::python::class_builder<PythonIOString >
 		IO(vs, "IO");
 	IO.def(boost::python::constructor<>());
@@ -220,23 +228,19 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 	   "import VS\n"
 	   "import sys\n"
 	   "sys.stderr.write('asdf')\n"
-	   "VSConfig=VS.Var()\n"
-	   "VSConfig.test='hi'\n"
-	   "print VSConfig.test\n"
-	   "print VSConfig.undefinedvar\n"
-	   "VSConfig.__setattr__('undefined','An undefined variable')\n"
-	   "print VSConfig.__getattr__('undefined')\n"
-	   "class wordy(VS.hello):\n"
-	   "   def greet(self):\n"
-	   "      return VS.hello.greet(self) + ', where the weather is fine'\n"
-	   "def invite(w):\n"
-	   "   return w.greet() + '! Please come soon!'\n"
-	   "hi2 = wordy('Texas')\n"
-	   "hi1 = VS.hello('California')\n"
-	   "print hi1.greet()\n"
-	   "print invite(hi1)\n"
-	   "print hi2.greet()\n"
-	   "print invite(hi2)\n"
+//	   "VSConfig=VS.Var()\n"
+//	   "VSConfig.test='hi'\n"
+//	   "print VSConfig.test\n"
+//	   "print VSConfig.undefinedvar\n"
+//	   "VSConfig.__setattr__('undefined','An undefined variable')\n"
+//	   "print VSConfig.__getattr__('undefined')\n"
+	   "class MyAI(VS.CommAI):\n"
+	   "   def Execute(self):\n"
+	   "      sys.stdout.write('MyAI\\n')\n"
+	   "hi2 = MyAI()\n"
+	   "hi1 = VS.CommAI()\n"
+	   "print hi1.Execute()\n"
+	   "print hi2.Execute()\n"
 	);
 //	char buffer[128];
 //	PythonIOString::buffer << endl << '\0';
