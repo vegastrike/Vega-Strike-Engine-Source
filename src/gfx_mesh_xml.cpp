@@ -944,6 +944,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   }
 
   xml = new XML;
+  GFXGetMaterial (0, xml->material);//by default it's the default material;
   xml->load_stage = 0;
   xml->recalc_norm=false;
   XML_Parser parser = XML_ParserCreate(NULL);
