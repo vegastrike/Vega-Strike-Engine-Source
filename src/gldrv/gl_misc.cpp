@@ -19,7 +19,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <string.h>
+#define GL_MISC_CPP
 #include "gl_globals.h"
+#undef GL_MISC_CPP
 #include "vegastrike.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
