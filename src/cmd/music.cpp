@@ -14,7 +14,7 @@
 #include "unit.h"
 #include "vs_path.h"
 #ifdef _WIN32
-#include <process.h>
+#include <windows.h>
 #endif
 #include "music.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
@@ -140,9 +140,10 @@ void Music::Listen() {
 				if (lastsonglength>0.1) {
 					static bool replace=true;
 #ifdef _WIN32
-					static std::string plyr=vs_config->getVariable("audio","external_player","C:\\Program Files\\Winamp\\Winamp.exe");
-					static std::string play=vs_config->getVariable("audio","external_play_option","/PLAY");
-					static std::string enq=vs_config->getVariable("audio","external_enqueue_option","/ADD");
+//					static std::string plyr=vs_config->getVariable("audio","external_player","C:\\Program Files\\Winamp\\Winamp.exe");
+//					static std::string play=vs_config->getVariable("audio","external_play_option","/PLAY");
+//					static std::string enq=vs_config->getVariable("audio","external_enqueue_option","/ADD");
+#if 0
 					if (replace) {
 						if (play.empty()) {
 							spawnl(P_NOWAIT,plyr.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
@@ -155,6 +156,11 @@ void Music::Listen() {
 						} else {
 							spawnl(P_NOWAIT,plyr.c_str(),enq.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
 						}
+					}
+#endif
+					int worked=(int)ShellExecute(NULL,"open",(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),"","",2);
+					if (worked>=0||worked<=32) {
+						
 					}
 #else	
 					static std::string plyr=vs_config->getVariable("audio","external_player","/usr/bin/xmms");
