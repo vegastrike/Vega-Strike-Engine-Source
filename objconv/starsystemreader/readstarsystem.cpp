@@ -11,6 +11,17 @@ using std::vector;
 using std::map;
 using std::string;
 using std::pair;
+std::string itostr(int i) {
+	char test[256];
+	sprintf (test,"%d",i);
+	return test;
+}
+std::string ftostr(double i) {
+	char test[256];
+	sprintf (test,"%lf",i);
+	return test;
+}
+
 class vec3 {
 public:
 	double x,y,z;
@@ -27,9 +38,11 @@ public:
 					in.z<z?in.z:z);
 	}
 };
+
 class System: public map <string,string> {
 public:
 	System () {}
+	bool habitable;
 	string sector;
 	string name;
 	float distance;
@@ -37,19 +50,122 @@ public:
 	float declination;
 	vec3 xyz;
 	float luminosity;//in sun
-	int type; // 0 = 1O blue   B = 20 blue // A = 30 Bluish-white  F = 40 White G = 50 yellow K = 60 Orange M = Red 70 
+	int type; // 0 = 1O blue (-2000)  B = 20 blue(2000-4000) // A = 30 Bluish-white (4000-8000) F = 40 White G = 50 (13500-15000) yellow  (15000-43000) K = 60 Orange (36500-80000) M = Red 70 (giant 80,000 dwarf 8,000-13500 )
 	int  size;// 0 dwwarf 1 normal 2 giant
 	bool operator < (const System & a) const{
 		if (sector==a.sector)
 			return name < a.name;
 		return sector<a.sector;
 	}
+	void computeProperties() {
+		double rad=16000;
+		double lifeprob= .25;
+		if (type<30) {
+			rad=type*4000./30;
+			lifeprob=.01;
+		}else if (type < 40) {
+			rad = 6000;
+			lifeprob=.02;
+			if (size==0)
+				rad = 4200;
+			else if (size==2)
+				rad = 7500;
+		}else if (type < 50) {
+			lifeprob=.05;
+			rad = 14250;
+			if (size==0){
+				rad= 13600;
+				lifeprob=.08;
+			}else if (size==2)
+				rad= 14750;
+		}else if (type < 60) {
+			lifeprob = .125;
+			rad = 25000;
+			if (size==0){
+				rad= 16600;
+				lifeprob = .25;
+			}
+			else if (size==2) {
+				rad= 36500;
+				lifeprob = .0625;
+			}
+		}else if (type < 70) {
+			rad = 50000;
+			lifeprob = .02;
+			if (size==0) {
+				lifeprob = .125;
+				rad = 37000;
+			}else if (size==2)
+				rad = 75000;			
+		}else if (type < 80) {
+			rad = 85000;
+			lifeprob = .005;
+			if (size==0){
+				rad =10000;
+				lifeprob = .125;
+			}else if (size==2)
+				rad = 150000;
+		}
+		(*this)["sun_radius"]=ftostr(rad);
+		(*this)["data"]=itostr(rand());
+		lifeprob*=1;
+		habitable=false;
+		if (rand()<RAND_MAX*lifeprob) {
+			habitable=true;
+			//living
+			if (rand()<RAND_MAX*.995) {
+				(*this)["num_gas_giants"]= itostr(rand()%3);
+			}else {
+				(*this)["num_gas_giants"]= itostr(rand()%6);
+			}
+			if (rand()<RAND_MAX*.995) {
+				(*this)["num_planets"]= itostr(rand()%3);
+			}else {
+				(*this)["num_planets"]= itostr(rand()%9);
+			}
+			if (rand()<RAND_MAX*.995) {
+				(*this)["num_moons"]= itostr(rand()%3);
+			}else {
+				(*this)["num_moons"]= itostr(rand()%18);
+			}
+			if (rand()<RAND_MAX*.025) {
+				(*this)["num_natural_phenomena"]= "2";
+			}else if (rand()<RAND_MAX*.1) {
+				(*this)["num_natural_phenomena"]= "1";
+			}else {
+				(*this)["num_natural_phenomena"]= "0";
+			}
+		}else {
+//dead(
+			if (rand()<RAND_MAX*.1)
+				(*this)["num_natural_phenomena"]= "1";
+			else
+				(*this)["num_natural_phenomena"]= "0";
+			(*this)["num_moons"]="0";
+			if (rand()<RAND_MAX*.85) {
+				(*this)["planetlist"]="planets.desolate.txt";
+				(*this)["num_planets"]=itostr(rand()%2+1);
+				(*this)["num_gas_giants"]="0";
+			}else {
+				(*this)["num_planets"]=itostr(0);
+				(*this)["num_gas_giants"]=itostr(rand()%2+1);
+				if (rand()>RAND_MAX*.99)
+					(*this)["num_moons"]=itostr(rand()%5);
+				
+			}
+			
+		}
+	}
 	void computeXYZ() {
 		xyz.z = distance * sin (declination);
 		float xy = distance * cos (declination);
 		xyz.y = xy*sin(ascension);
 		xyz.x = xy*cos(ascension);
+		char str[16384];
+		sprintf (str,"%lf %lf %lf",xyz.x,xyz.y,xyz.z);
+		(*this)["xyz"] = str;
 	}
+	
 };
 vector <std::string> readCSV (std::string s) {
 	vector <std::string> v;int loc;
@@ -92,16 +208,6 @@ std::string unpretty (std::string s) {
 	
 }
 
-std::string itostr(int i) {
-	char test[256];
-	sprintf (test,"%d",i);
-	return test;
-}
-std::string ftostr(double i) {
-	char test[256];
-	sprintf (test,"%lf",i);
-	return test;
-}
 vector<System> readfile (const char * name) {
 	vector<System>systems;
 	FILE * fp = fopen (name,"r");
@@ -153,6 +259,7 @@ vector<System> readfile (const char * name) {
 			in.sector="nowhereland";
 		}
 		in.computeXYZ();
+		in.computeProperties();
 		systems.push_back(in);
 	}
 	
@@ -176,9 +283,8 @@ void writesystems(FILE * fp, vector<System> s) {
 		}
 		fprintf(fp,"\t\t<sector name=\"%s\">\n",(*i).name.c_str());
 		for (map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
-			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n");			
+			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
 		}
-		fprintf (fp,"\t\t\t<var name=\"xyz\" value=\"%lf %lf %lf\"/>\n",(*i).xyz.x,(*i).xyz.y,(*i).xyz.z);
 		fprintf (fp,"\t\t\t<var name=\"faction\" value=\"confed\"/>\n");
 		if (iter>4 && iter+4<s.size()) {
 			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
