@@ -211,7 +211,9 @@ void WindowManager::draw() {
     float sizex=0.0, sizey=0.0;
     const Point loc = globalEventManager().mouseLoc();
     MouseVSSprite.GetSize(sizex,sizey);
-    MouseVSSprite.SetPosition(loc.x+sizex/2, loc.y+sizey/2);
+	float tempx=0.0, tempy=0.0;
+    MouseVSSprite.GetPosition(tempx,tempy);
+    MouseVSSprite.SetPosition(tempx+loc.x+sizex/2, tempy+loc.y+sizey/2);
 
     dummy.MakeActive();
     GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -225,6 +227,7 @@ void WindowManager::draw() {
 
     GFXHudMode(false);
     GFXEnable(CULLFACE);
+    MouseVSSprite.SetPosition(tempx,tempy);
 }
 
 // A new window has been created and is ready to be drawn.
