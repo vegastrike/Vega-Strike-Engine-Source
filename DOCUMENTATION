@@ -11,6 +11,8 @@ gfx/
 High Level Graphics (Object Oriented, reference counts, etc)
 cmd/
 Physics Level Things. Objects the interact.
+aldrv/
+Low Level Sound implementation (OpenAL right now... replace with whatever you like, but most likely completely unnecessary)
 
 
 ---General Idea---
