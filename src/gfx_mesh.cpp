@@ -88,7 +88,7 @@ void Mesh::InitUnit()
 	GFXVertex *alphalist;
 
 	vertexlist = NULL;
-	stcoords = NULL;
+	//	stcoords = NULL;
 	Decal = NULL;
 	
 	bspTree = NULL;
@@ -158,6 +158,8 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	if(xml) {
 	  LoadXML(filename, oldmesh);
 	  return;
+	} else {
+	  this->xml= NULL;
 	}
 
 	FILE* fp = NULL;
@@ -247,7 +249,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	//GFXVertex *alphalist;
 
 	vertexlist = new GFXVertex [numvertex];
-	stcoords = new float[numvertex * 2+10];
+	//	stcoords = new float[numvertex * 2+10];
 
 	jj=0;
 	for (ii=0; ii<NumTris; ii++)
@@ -606,10 +608,10 @@ Mesh::~Mesh()
 	  delete vlist;
 		//if(vertexlist != NULL)
 		//	delete [] vertexlist;
-	  if(stcoords != NULL) {
-			delete [] stcoords;
-			stcoords = NULL;
-	  }
+	  //	  if(stcoords != NULL) {
+	  //			delete [] stcoords;
+	  //			stcoords = NULL;
+	  //	  }
 		//if(alphalist != NULL)
 		//	delete [] alphalist;
 	  if(Decal != NULL) {

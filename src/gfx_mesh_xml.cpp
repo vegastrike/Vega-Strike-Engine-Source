@@ -1085,13 +1085,13 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     for (unsigned int ind=0;ind<xml->logos.size();ind++) {
       if (xml->logos[ind].type==index) {
 	float weight=0;
-	norm1=Vector (xml->vertices[xml->logos[ind].refpnt[1]].x-
+	norm2=Vector (xml->vertices[xml->logos[ind].refpnt[1]].x-
 		      xml->vertices[xml->logos[ind].refpnt[0]].x,
 		      xml->vertices[xml->logos[ind].refpnt[1]].y-
 		      xml->vertices[xml->logos[ind].refpnt[0]].y,
 		      xml->vertices[xml->logos[ind].refpnt[1]].z-
 		      xml->vertices[xml->logos[ind].refpnt[0]].z);
-	norm2=Vector (xml->vertices[xml->logos[ind].refpnt[2]].x-
+	norm1=Vector (xml->vertices[xml->logos[ind].refpnt[2]].x-
 		      xml->vertices[xml->logos[ind].refpnt[0]].x,
 		      xml->vertices[xml->logos[ind].refpnt[2]].y-
 		      xml->vertices[xml->logos[ind].refpnt[0]].y,
