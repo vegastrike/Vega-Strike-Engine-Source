@@ -119,6 +119,6 @@ struct	Client
 };
 
 void	LoadXMLUnit( Unit * unit, const char * filename, char * buf);
-void	WriteXMLUnit( const char * filename, char * xmlbuf, int tsize);
+void	WriteXMLUnit( string filename, char * xmlbuf, int tsize);
 
 #endif

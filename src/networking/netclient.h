@@ -22,6 +22,7 @@
 #define __NetClient_H
 
 #include <string>
+#include <vector>
 #include "vegastrike.h"
 #include "gfx/quaternion.h"
 #include "netclass.h"
@@ -29,7 +30,9 @@
 #include "client.h"
 #include "cmd/unit_generic.h"
 
-//using std::vector;
+using std::vector;
+extern vector<ObjSerial>	localSerials;
+extern bool isLocalSerial( ObjSerial sernum);
 
 //typedef vector<Client *>::iterator VI;
 
@@ -56,12 +59,12 @@ class	NetClient
 		unsigned int		current_timestamp;
 		unsigned int		deltatime;
 
-		void	receiveShip();
+		void	receiveSave();
 		void	receiveData();
 		void	receiveLocations();
 		void	readDatafiles();
 		void	createChar();
-		int		recvMsg();
+		int		recvMsg( char * netbuffer=NULL);
 		void	getZoneData();
 		void	disconnect();
 
@@ -97,13 +100,13 @@ class	NetClient
 		void	sendPosition( ClientState cs);
 		void	sendAlive();
 
-		int		loginLoop( string str_name, string str_passwd); // Loops until receiving login response
+		char *	loginLoop( string str_name, string str_passwd); // Loops until receiving login response
 		void	addClient();
 		void	removeClient();
 		void	disable() { enabled=false;}
 		int		isEnabled() { return enabled; }
 		void	setNetworkedMode( bool mode) { enabled = mode;}
-		int		checkMsg();
+		int		checkMsg( char * netbuffer=NULL);
 		ObjSerial	getSerial() { return serial; }
 		void	inGame();
 		int		isTime();

@@ -140,18 +140,20 @@ void	LoadXMLUnit( Unit * unit, const char * filename, char *buf)
 		cout<<"Warning : buf was already allocated"<<endl;
 }
 
-// Used to WriteXMLUnit temp file on game server
-void	WriteXMLUnit( const char * filename, char * xmlbuf, int tsize)
+// Used to WriteXMLUnit temp file
+void	WriteXMLUnit( string filename, char * xmlbuf, int tsize)
 {
-	FILE *fp = fopen( filename, "w");
+	FILE *fp = fopen( filename.c_str(), "w");
 	if( fp==NULL)
 	{
-		cout<<"File not found : "<<filename<<endl;
+		cout<<"File not found : "<<filename<<", creating"<<endl;
 	}
 	int ret = fwrite( xmlbuf, sizeof( char), tsize, fp);
+	cout<<ret<<" bytes written to "<<filename<<endl;
 	if( ret < 0)
 	{
-		cout<<"Error writing in xml file : "<<filename<<endl;
+		cout<<"Error writing in file : "<<filename<<endl;
 		exit( 1);
 	}
+	fclose( fp);
 }

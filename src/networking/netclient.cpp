@@ -37,6 +37,7 @@
 #include "cmd/unit_factory.h"
 #include "gfx/matrix.h"
 #include "lin_time.h"
+#include "vs_path.h"
 //#include "incnet.h"
 
 using std::cout;
@@ -44,6 +45,19 @@ using std::endl;
 using std::cin;
 
 double NETWORK_ATOM;
+typedef vector<ObjSerial>::iterator ObjI;
+vector<ObjSerial>	localSerials;
+bool isLocalSerial( ObjSerial sernum)
+{
+	bool ret=false;
+	for( ObjI i=localSerials.begin(); !ret && i!=localSerials.end(); i++)
+	{
+		if( sernum==(*i))
+			ret = true;
+	}
+
+	return ret;
+}
 
 /*************************************************************/
 /**** Authenticate the client                             ****/
@@ -93,11 +107,13 @@ int		NetClient::authenticate()
 /**** Login loop                                          ****/
 /*************************************************************/
 
-int		NetClient::loginLoop( string str_name, string str_passwd)
+char *	NetClient::loginLoop( string str_name, string str_passwd)
 {
 	Packet	packet2;
 	int tmplen = NAMELEN*2;
 	char *	buffer = new char[tmplen+1];
+	// HAVE TO DELETE netbuf after return in calling function
+	char *	netbuf = new char[MAXBUFFER];
 	char	name[NAMELEN], passwd[NAMELEN];
 
 	memset( buffer, 0, tmplen+1);
@@ -126,7 +142,7 @@ int		NetClient::loginLoop( string str_name, string str_passwd)
 			cout<<"Timed out"<<endl;
 			timeout = 1;
 		}
-		ret=this->checkMsg();
+		ret=this->checkMsg(netbuf);
 		if( ret>0)
 		{
 			cout<<"Got a response"<<endl;
@@ -141,7 +157,18 @@ int		NetClient::loginLoop( string str_name, string str_passwd)
 		micro_sleep( 40000);
 	}
 	cout<<"End of login loop"<<endl;
-	return recv;
+	// Get the save parts in the buffer
+	const char * xml = netbuf + NAMELEN*2 + sizeof( unsigned int);
+	unsigned int xml_size = ntohl( *( (unsigned int *)(netbuf+NAMELEN*2)));
+	const char * save = netbuf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
+	unsigned int save_size = ntohl( *( (unsigned int *)(netbuf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
+	cout<<"XML size = "<<xml_size<<endl;
+	cout<<"Save size = "<<save_size<<endl;
+	// Write temp save files
+	//changehome();
+	WriteXMLUnit( homedir+"/save/"+str_name+".xml", netbuf+2*NAMELEN+sizeof( unsigned int), xml_size);
+	WriteXMLUnit( homedir+"/save/"+str_name+".save", netbuf+2*NAMELEN+sizeof( unsigned int)*2+xml_size, save_size);
+	return netbuf;
 }
 
 /*************************************************************/
@@ -265,7 +292,7 @@ int		NetClient::isTime()
 /**** Check if server has sent something                   ****/
 /**************************************************************/
 
-int		NetClient::checkMsg()
+int		NetClient::checkMsg( char * netbuffer)
 {
 	int nb=0;
 	int ret=0;
@@ -278,7 +305,7 @@ int		NetClient::checkMsg()
 		if( Network->isActive( Network->sock))
 		{
 			//cout<<"Network Activity !"<<endl;
-			ret = recvMsg();
+			ret = recvMsg( netbuffer);
 		}
 	}
 	//cout<<"CHECK MSG - Length received : "<<ret<<endl;
@@ -289,9 +316,10 @@ int		NetClient::checkMsg()
 /**** Receive a message from the server                    ****/
 /**************************************************************/
 
-int		NetClient::recvMsg()
+int		NetClient::recvMsg( char * netbuffer)
 {
 	unsigned int len2;
+	ObjSerial	packet_serial=0;
 	int len=0;
 
 	if( (len=Network->recvbuf( this->clt_sock, (char *)&packet, len2, &this->cltadr))<=0)
@@ -302,6 +330,7 @@ int		NetClient::recvMsg()
 	else
 	{
 		packet.received();
+		packet_serial = packet.getSerial();
 #ifdef _UDP_PROTO
 		// Test if we didn't receive an old packet
 		if( packet.getTimestamp() >= current_timestamp)
@@ -317,18 +346,24 @@ int		NetClient::recvMsg()
 			{
 				// Login accept
 				case LOGIN_ACCEPT :
+					cout<<">>> "<<this->serial<<" >>> LOGIN ACCEPTED =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
 					// Should receive player's data (savegame) from server if there is a save
-					// this->receiveShip();
 					this->serial = packet.getSerial();
-					cout<<"Received LOGIN_ACCEPT with serial : "<<this->serial<<endl;
+					localSerials.push_back( this->serial);
+					//cout<<"Received LOGIN_ACCEPT with serial : "<<this->serial<<endl;
+					memcpy( netbuffer, packet.getData(), packet.getLength());
+					//this->receiveSave( netbuffer);
 					// Set current timestamp
 					this->current_timestamp = packet.getTimestamp();
+					cout<<"<<< LOGIN ACCEPTED ------------------------------------------------------------------------------"<<endl;
 				break;
 				// Login failed
 				case LOGIN_ERROR :
-					cout<<"Received LOGIN_ERROR"<<endl;
+					cout<<">>> "<<this->serial<<" >>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
+					//cout<<"Received LOGIN_ERROR"<<endl;
 					this->disconnect();
 					return -1;
+					cout<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
 				break;
 				// Create a character
 				case CMD_CREATECHAR :
@@ -346,24 +381,30 @@ int		NetClient::recvMsg()
 					this->receivePosition();
 				break;
 				case CMD_ENTERCLIENT :
-					cout<<"Received ENTERCLIENT"<<endl;
+					// I dunno why I need to do a ntohs again... really weird
+					packet_serial = ntohs(packet_serial);
+					cout<<">>> "<<this->serial<<" >>> ENTERING CLIENT =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
+					//cout<<"ntohs(serial) = "<<<<endl;
 					this->addClient();
+					cout<<"<<< ENTERING CLIENT ------------------------------------------------------------------------------"<<endl;
 				break;
 				case CMD_EXITCLIENT :
-					cout<<"Received EXITCLIENT"<<endl;
+					cout<<">>> "<<this->serial<<" >>> EXITING CLIENT =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
 					this->removeClient();
+					cout<<"<<< EXITING CLIENT ------------------------------------------------------------------------------"<<endl;
 				break;
 				case CMD_ADDEDYOU :
-					cout<<"Received ADDEDYOU"<<endl;
+					cout<<">>> "<<this->serial<<" >>> ADDED IN GAME =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
 					this->getZoneData();
+					cout<<"<<< ADDED IN GAME ------------------------------------------------------------------------------"<<endl;
 				break;
 				case CMD_DISCONNECT :
 					/*** TO REDO IN A CLEAN WAY ***/
-					cout<<"DISCONNECTED... Killing client"<<endl;
+					cout<<">>> "<<this->serial<<" >>> DISCONNECTED -> Client killed =( serial n°"<<packet_serial<<" )= --------------------------------------"<<endl;
 					exit(1);
 				break;
 				default :
-					cout<<"Unknown message "<<packet.getCommand()<<"  !"<<endl;
+					cout<<">>> "<<this->serial<<" >>> UNKNOWN COMMAND =( "<<hex<<packet.getCommand()<<" )= --------------------------------------"<<endl;
 					keeprun = 0;
 					this->disconnect();
 			}
@@ -406,7 +447,7 @@ void	NetClient::getZoneData()
 		//cs = (ClientState *) packet.getData()+offset;
 		cs.received();
 		nser = cs.getSerial();
-		if( nser != this->serial)
+		if( nser != this->serial && !isLocalSerial( nser))
 		{
 			cout<<"NEW CLIENT - ";
 			cs.display();
@@ -433,7 +474,7 @@ void	NetClient::getZoneData()
 		}
 		else
 		{
-			cout<<"IT'S ME - ";
+			cout<<"IT'S ME OR ANOTHER LOCAL PLAYER ";
 			cs.display();
 		}
 	}
@@ -445,7 +486,7 @@ void	NetClient::getZoneData()
 
 void	NetClient::addClient()
 {
-	ObjSerial	cltserial = packet.getSerial();
+	ObjSerial	cltserial = ntohs(packet.getSerial());
 	if( Clients[cltserial] != NULL)
 	{
 		cout<<"Error, client exists !!"<<endl;
@@ -466,25 +507,29 @@ void	NetClient::addClient()
 	memcpy( &Clients[cltserial]->current_state, &cs, sizeof( ClientState));
 
 	cs.display();
-	// Create the unit for the client
-	// should get the ship's
-	/*
-	Clients[cltserial]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
-    Clients[cltserial]->game_unit->SetTurretAI();
-    _Universe->activeStarSystem()->AddUnit(Clients[cltserial]->game_unit);
-	*/
-	// Or :
-	Clients[cltserial]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
-	Clients[cltserial]->game_unit->PrimeOrders();
-	Clients[cltserial]->game_unit->SetNetworkMode( true);
-	//cout<<"Addclient 4"<<endl;
+	// Test if not a local player
+	if( !isLocalSerial( cltserial))
+	{
+		// Create the unit for the client
+		// should get the ship's
+		/*
+		Clients[cltserial]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
+		Clients[cltserial]->game_unit->SetTurretAI();
+		_Universe->activeStarSystem()->AddUnit(Clients[cltserial]->game_unit);
+		*/
+		// Or :
+		Clients[cltserial]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
+		Clients[cltserial]->game_unit->PrimeOrders();
+		Clients[cltserial]->game_unit->SetNetworkMode( true);
+		//cout<<"Addclient 4"<<endl;
 
-	// Assign new coordinates to client
-	Clients[cltserial]->game_unit->SetOrientation( cs.getOrientation());
-	Clients[cltserial]->game_unit->SetVelocity( cs.getVelocity());
-	Clients[cltserial]->game_unit->SetNetworkMode( true);
-	// In that case, we want cubic spline based interpolation
-	//init_interpolation( cltserial);
+		// Assign new coordinates to client
+		Clients[cltserial]->game_unit->SetOrientation( cs.getOrientation());
+		Clients[cltserial]->game_unit->SetVelocity( cs.getVelocity());
+		Clients[cltserial]->game_unit->SetNetworkMode( true);
+		// In that case, we want cubic spline based interpolation
+		//init_interpolation( cltserial);
+	}
 }
 
 /*************************************************************/
@@ -654,13 +699,16 @@ void	NetClient::sendAlive()
 /**** Receive the ship and char from server               ****/
 /*************************************************************/
 
-void	NetClient::receiveShip()
+void	NetClient::receiveSave()
 {
-	unsigned char	cmd;
+		char * xml = packet.getData() + NAMELEN*2 + sizeof( int);
+		int xml_size = ntohl(*(packet.getData()+ NAMELEN*2));
 
-	// Should reveice player ship info here
-	
-	cmd = CMD_INITIATE;
+		// HERE SHOULD LOAD Savegame desciription from the save in the packet
+		char * save = packet.getData() + NAMELEN*2 + sizeof( int)*2 + xml_size;
+		int save_size = *(packet.getData()+ NAMELEN*2 + sizeof( int) + xml_size);
+		cout<<"RECV SAVES : XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
+		cout<<"Welcome back in VegaStrike, "<<packet.getData()<<endl;
 }
 
 /*************************************************************/
@@ -713,7 +761,7 @@ void	NetClient::logout()
 		perror( "Error send logout ");
 		//exit(1);
 	}
-	Network->disconnect( "Closing network");
+	Network->disconnect( "Closing network", 0);
 }
 
 /*************************************************************/

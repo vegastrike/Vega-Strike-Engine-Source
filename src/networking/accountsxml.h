@@ -87,7 +87,7 @@ class Account
 		int		comparePass( char *str)
 		{
 			int ret = 0;
-			cout<<"Passwd compared to : "<<this->passwd;
+			cout<<"Passwd compared to : "<<this->passwd<<endl;
 			ret=strncmp( passwd, str, strlen( passwd));
 			return ret;
 		}

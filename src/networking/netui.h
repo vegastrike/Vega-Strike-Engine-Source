@@ -118,7 +118,7 @@ class NETCLASS
 		int		isActive( SOCKET bsock);
 
 		// Disconnect
-		void	disconnect( char *s);
+		void	disconnect( char *s, int fexit=1);
 		// Close a socket
 		void	closeSocket( SOCKETALT bsock)
 		{
@@ -708,7 +708,7 @@ inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, 
 /**** Disconnect a client                                  ****/
 /**************************************************************/
 
-inline void	NETCLASS::disconnect( char *s)
+inline void	NETCLASS::disconnect( char *s, int fexit)
 {
 	if( sock!=0)
 	{
@@ -730,7 +730,8 @@ inline void	NETCLASS::disconnect( char *s)
 	}
 	cout<<s<<" :\t";
 	perror( "Warning: disconnected");
-	//exit(1);
+	if( fexit)
+		exit(1);
 }
 
 inline void	NETCLASS::showIP( SOCKET socket)

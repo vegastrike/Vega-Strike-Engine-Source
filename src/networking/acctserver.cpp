@@ -171,12 +171,13 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 		//packet.display();
 		cmd = packet.getCommand();
 		const char * buf = packet.getData();
+		cout<<"Buffer => "<<buf<<endl;
 		VI j;
 		switch( cmd)
 		{
 			case CMD_LOGIN :
-				cout<<"LOGIN REQUEST"<<endl;
 				strcpy( name, buf);
+				cout<<">>> LOGIN REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				strcpy( passwd, buf+NAMELEN);
 
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
@@ -219,10 +220,11 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 						elem->setConnected( true);
 					}
 				}
+				cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
 			break;
 			case CMD_LOGOUT :
-				cout<<"LOGOUT REQUEST"<<endl;
 				strcpy( name, buf);
+				cout<<">>> LOGOUT REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				strcpy( passwd, buf+NAMELEN);
 				// Receive logout request containing name of player
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
@@ -244,23 +246,29 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 				else
 				{
 					if( connected)
+					{
 						elem->setConnected( false);
+						cout<<"-= "<<name<<" =- Disconnected"<<endl;
+					}
 					else
 					{
 						cout<<"ERROR LOGOUT -> player exists but wasn't connected ?!?!"<<endl;
 					}
 				}
+				cout<<"<<< LOGOUT REQUEST ---------------------------------------"<<endl;
 			break;
 			case CMD_NEWCHAR :
-				cout<<"NEW CHAR REQUEST"<<endl;
+				cout<<">>> NEW CHAR REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				// Should receive the result of the creation of a new char/ship
+				cout<<"<<< NEW CHAR REQUEST -------------------------------------------------------"<<endl;
 			break;
 			case CMD_NEWSUBSCRIBE :
-				cout<<"SUBSCRIBE REQUEST"<<endl;
+				cout<<">>> SUBSRIBE REQUEST =( "<<name<<" )= --------------------------------------"<<endl;
 				// Should receive a new subscription
+				cout<<"<<< SUBSRIBE REQUEST --------------------------------------"<<endl;
 			break;
 			default:
-				cout<<"UNKNOWN command "<<cmd<<" ! ";
+				cout<<">>> UNKNOWN command =( "<<cmd<<" )= ---------------------------------";
 		}
 		//cout<<"end received"<<endl;
 	}
@@ -302,23 +310,81 @@ void	AccountServer::sendAuthorized( TCPSOCKET sock, Account * acct)
 	{
 		// Should get the data about the player state and data so they can be sent with ACCEPT
 		char	buf[MAXBUFFER];
+		memcpy( buf, packet.getData(), NAMELEN*2);
+		unsigned int maxsave = MAXBUFFER - Packet::getHeaderLength() - 2*NAMELEN - 2*sizeof( unsigned int);
+		unsigned int readsize=0, readsize2=0;
 
-		/*
+		// Read the XML unit file
 		string acctfile = acctdir+acct->name+".xml";
+		cout<<"Trying to open : "<<acctfile<<endl;
 		FILE *fp = fopen( acctfile.c_str(), "r");
 		if( fp == NULL)
 		{
 			cout<<"Account file does not exists... sending default one to game server"<<endl;
 			acctfile = acctdir+"default.xml";
+			cout<<"Trying to open : "<<acctfile<<endl;
+			fp = fopen( acctfile.c_str(), "r");
+		}
+		if( fp!=NULL)
+		{
+			readsize = fread( (buf+2*NAMELEN+sizeof( unsigned int)), sizeof( char), maxsave, fp);
+			if( readsize>=maxsave)
+			{
+				cout<<"Error : account file is bigger than "<<maxsave<<" ("<<readsize<<")"<<endl;
+				exit( 1);
+			}
+			fclose( fp);
 		}
 		else
-			fclose( fp);
-		LoadXMLUnit( acct->unit, acctfile.c_str(), buf);
-		*/
-		// For now saves are really limited to MAXBUFFER-(a little less than 100 bytes) bytes
-		memcpy( buf, packet.getData(), packet.getLength());
+		{
+			cout<<"Error, default xml save not found"<<endl;
+			exit(1);
+		}
+		// Put the size of the first save file in the buffer to send
+		unsigned int xmlsize = htonl( readsize);
+		memcpy( buf+2*NAMELEN, &xmlsize, sizeof( unsigned int));
+		//unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
+		//cout<<"XML reversed = "<<xml_size<<endl;
 
-		packet2.create( LOGIN_ACCEPT, serial, buf, packet.getLength(), 1);
+		// Read the save file
+		string acctsave = acctdir+acct->name+".save";
+		fp = fopen( acctsave.c_str(), "r");
+		if( fp == NULL)
+		{
+			cout<<"Save file does not exists... sending default one to game server"<<endl;
+			acctsave = acctdir+"default.save";
+			fp = fopen( acctsave.c_str(), "r");
+		}
+		if( fp!=NULL)
+		{
+			// Read the XML unit file
+			readsize2 = fread( (buf+readsize+2*NAMELEN+2*sizeof( unsigned int)), sizeof( char), maxsave, fp);
+			if( (readsize2+readsize) >= maxsave)
+			{
+				cout<<"Error : save file is bigger than "<<maxsave<<" ("<<readsize2<<")"<<endl;
+				exit( 1);
+			}
+			fclose( fp);
+		}
+		else
+		{
+			cout<<"Error, default save not found"<<endl;
+			exit(1);
+		}
+		// Put the size of the second save file in the buffer to send
+		unsigned int savesize = htonl( readsize2);
+		//cout<<"NETWORK FORMAT : XML size = "<<xmlsize<<" --- SAVE size = "<<savesize<<endl;
+		//cout<<"HOST FORMAT : XML size = "<<ntohl(xmlsize)<<" --- SAVE size = "<<ntohl(savesize)<<endl;
+		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &savesize, sizeof( unsigned int));
+		cout<<"Loaded -= "<<acct->name<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
+		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
+		//cout<<"Login packet size = "<<total_size<<endl;
+
+		// ??? memcpy( buf, packet.getData(), packet.getLength());
+
+		// For now saves are really limited to maxsave bytes
+		packet2.create( LOGIN_ACCEPT, serial, buf, total_size, 1);
+		cout<<"Login packet size = "<<packet2.getLength()<<endl;
 		packet2.tosend();
 		if( Network->sendbuf( sock, (char *) &packet2, packet2.getSendLength(), NULL) == -1)
 		{

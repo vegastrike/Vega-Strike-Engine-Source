@@ -29,7 +29,7 @@
 #define CLIENT_PORT	6778
 #define ACCT_PORT	6779
 #define NAMELEN		32
-#define MAXBUFFER	8192
+#define MAXBUFFER	16384
 
 // Commands that are sent through the network
 #define CMD_LOGIN		0x01
