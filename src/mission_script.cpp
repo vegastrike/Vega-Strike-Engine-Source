@@ -59,7 +59,9 @@ void Mission::DirectorStart(missionNode *node){
 
   while(true){
     DirectorLoop();
+#ifndef _WIN32
     sleep(1);
+#endif
   }
 }
 

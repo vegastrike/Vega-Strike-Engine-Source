@@ -1,7 +1,7 @@
 #include "quadtree.h"
 #include "xml_support.h"
 #include "gfxlib.h"
-#include "aux_texture.h"
+#include "ani_texture.h"
 #include <assert.h>
 #include "png_texture.h"
 
@@ -22,6 +22,8 @@ struct TerraXML {
   float detail;
   float SphereSizeX;
   float SphereSizeZ;
+  std::vector <std::string> animation;
+
   std::vector <std::string> alpha;
   std::vector <GFXMaterial> mat;
   std::vector <TerrainData> data;
@@ -69,7 +71,8 @@ namespace TerrainXML {
 		BLUE,
 		ALPHA,
 		POWER,
-		RADIUS
+		RADIUS,
+		ANIMATIONFILE
 	};
 	const EnumMap::Pair element_names[] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -90,6 +93,7 @@ namespace TerrainXML {
 		EnumMap::Pair ("Blend", BLEND),
 		EnumMap::Pair ("File", FFILE),
 		EnumMap::Pair ("AlphaFile", ALPHAFILE),
+		EnumMap::Pair ("Animation", ANIMATIONFILE),
 		EnumMap::Pair ("TerrainFile", TERRAINFILE),
 		EnumMap::Pair ("Reflect", REFLECT),
 		EnumMap::Pair ("Color", COLOR),
@@ -109,7 +113,7 @@ namespace TerrainXML {
 		
 	};
 	const EnumMap element_map(element_names,9);
-	const EnumMap attribute_map(attribute_names,23);
+	const EnumMap attribute_map(attribute_names,24);
 }
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -162,6 +166,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		textures.back().color= textures.size()-1;
 		xml->mat.push_back(GFXMaterial());
 		xml->alpha.push_back (std::string());
+		xml->animation.push_back(std::string());
 		GFXGetMaterial (0,xml->mat.back());
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
@@ -170,6 +175,9 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 				break;
 			case ALPHAFILE:
 				xml->alpha.back()=(*iter).value.c_str();
+				break;
+			case ANIMATIONFILE:
+				xml->animation.back()=(*iter).value.c_str();
 				break;
 			case BLEND:
 				sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
@@ -346,14 +354,18 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
   for (i=0;i<textures.size();i++) {
     textures[i].scales = xml->scales;
     textures[i].scalet = xml->scalet;
-    if (textures[i].tex.filename) {
+    if (textures[i].tex.filename||xml->animation[i].length()>0) {
 		Texture * tex;
-		if (xml->alpha[i].length()>0) {
-			tex = new Texture (textures[i].tex.filename,xml->alpha[i].c_str());
+		if (xml->animation[i].length()>0) {
+			tex = new AnimatedTexture (xml->animation[i].c_str(),0,MIPMAP);
 		}else {
-			tex = new Texture (textures[i].tex.filename);
+			if (xml->alpha[i].length()>0) {
+				tex = new Texture (textures[i].tex.filename,xml->alpha[i].c_str());
+			}else {
+				tex = new Texture (textures[i].tex.filename);
+			}
+			free (textures[i].tex.filename);
 		}
-		free (textures[i].tex.filename);
       textures[i].tex.t = tex;
       GFXSetMaterial (textures[i].material,xml->mat[i]);
     } else {
