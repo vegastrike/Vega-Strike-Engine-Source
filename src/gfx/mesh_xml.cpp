@@ -106,13 +106,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
   EnumMap::Pair ("Reverse",XML::REVERSE),
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
-  EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE)
+  EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
+  EnumMap::Pair ("UseNormals",XML::USENORMALS)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 32);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 33);
 
 
 
@@ -216,18 +217,20 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
   xml->state_stack.push_back(elem);
   bool texture_found = false;
-  bool alpha_found = false;
   switch(elem) {
 	  case XML::MATERIAL:
 	    //		  assert(xml->load_stage==4);
 		  xml->load_stage=7;
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		    switch(XML::attribute_map.lookup((*iter).name)) {
+                    case XML::USENORMALS:
+                        xml->usenormals = XMLSupport::parse_bool (iter->value);
+                        break;
 		    case XML::POWER:
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      setEnvMap ( XMLSupport::parse_bool((*iter).value.c_str()));
+		      setEnvMap ( XMLSupport::parse_bool((*iter).value));
 		      break;
 		    case XML::LIGHTINGON:
 		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
@@ -323,30 +326,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     assert(xml->state_stack.size()==1);
     xml->load_stage = 1;
     // Read in texture attribute
-    xml->decal_name = string("\0");
-    xml->alpha_name = string("\0");
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::ANIMATEDTEXTURE:
-	xml->animated_name = (*iter).value;
-	texture_found=true;
-	break;
       case XML::REVERSE:
 	xml->reverse = XMLSupport::parse_bool((*iter).value);
 	break;
       case XML::FORCETEXTURE:
 	xml->force_texture=XMLSupport::parse_bool ((*iter).value);
-	break;
-      case XML::TEXTURE:
-	xml->decal_name = (*iter).value;
-	if (xml->decal_name=="") {
-	  xml->decal_name="missing_this_file";
-	}
-	texture_found = true;
-	break;
-      case XML::ALPHAMAP:
-	xml->alpha_name = (*iter).value;
-	alpha_found = true;
 	break;
       case XML::SCALE:
 	xml->scale *=  XMLSupport::parse_float ((*iter).value);
@@ -364,6 +350,49 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  free (cdst);
 	}
 	break;
+      case XML::TEXTURE:
+          //NO BREAK..goes to next statement
+      case XML::ALPHAMAP:
+      case XML::ANIMATEDTEXTURE:
+      case XML::UNKNOWN:
+        {
+          XML::Names whichtype = XML::UNKNOWN;
+          int strsize=0;
+          if (strtoupper(iter->name).find("ANIMATION")==0) {
+              whichtype = XML::ANIMATEDTEXTURE;
+              strsize = strlen ("ANIMATION");
+          }
+          if (strtoupper(iter->name).find("TEXTURE")==0){
+              whichtype= XML::TEXTURE;
+              strsize = strlen ("TEXTURE");
+          }
+          if (strtoupper(iter->name).find("ALPHAMAP")==0){
+              whichtype=XML::ALPHAMAP;
+              strsize= strlen ("ALPHAMAP");
+          }
+          if (whichtype!=XML::UNKNOWN) {
+              unsigned int texindex =0;
+              string ind(iter->name.substr (strsize));
+              if (!ind.empty())
+                  texindex=XMLSupport::parse_int(ind);
+              while (xml->decals.size()<=texindex)
+                  xml->decals.push_back(XML::ZeTexture());
+              switch (whichtype) {
+                  case XML::ANIMATEDTEXTURE:
+                      xml->decals[texindex].animated_name=iter->value;
+                      break;
+                  case XML::ALPHAMAP:
+                      xml->decals[texindex].alpha_name=iter->value;
+                      break;
+                  default:
+                      xml->decals[texindex].decal_name=iter->value;
+              }
+              if (texindex==0) {
+                  texture_found = true;                  
+              }
+          }
+        }
+        break;
       }
     }
     assert(texture_found);
@@ -1014,7 +1043,41 @@ void SumNormals (int trimax, int t3vert,
     }
   }
 }
+Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
+    Texture *tex=NULL;
+    assert (index<(int)xml->decals.size());
+    XML::ZeTexture * zt = &(xml->decals[index]);
+    if (zt->animated_name.length()) {
+        string tempani = factionname+"_"+zt->animated_name;
+        tex = new AnimatedTexture (tempani.c_str(),0,BILINEAR);
+        if (!tex->LoadSuccess()) {
+            delete tex;
+            tex = new AnimatedTexture (zt->animated_name.c_str(),0,BILINEAR);
+        }
+    }else if (zt->decal_name.length()==0) {
+        tex = NULL;
+    } else {
+        if (zt->alpha_name.length()==0) {
+            string temptex = factionname+"_"+zt->decal_name;
+            tex = new Texture(temptex.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+            if (!tex->LoadSuccess()) {
+                delete tex;
+                tex = new Texture(zt->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+            }
+        }else {
+            string temptex = factionname+"_"+zt->decal_name;
+            string tempalp = factionname+"_"+zt->alpha_name;
+            tex = new Texture(temptex.c_str(), tempalp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+            if (!tex->LoadSuccess()) {
+                delete tex;
+                tex = new Texture(zt->decal_name.c_str(), zt->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
+            }
 
+        }
+    }
+    return tex;
+    
+}
 void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
     mn.i = min(ver.x, mn.i);
     mx.i = max(ver.x, mx.i);
@@ -1037,6 +1100,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
 
   xml = new XML;
   xml->fg = fg;
+  xml->usenormals=false;
   xml->force_texture=false;
   xml->reverse=false;
   xml->sharevert=false;
@@ -1074,10 +1138,11 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     fprintf (stderr,"Warning: mesh load possibly failed\n");
     exit(-1);
   }
+  unsigned int i; unsigned int a=0;
+  unsigned int j;
   //begin vertex normal calculations if necessary
-  if (USE_RECALC_NORM||xml->recalc_norm) {//fixme!
-    unsigned int i; unsigned int a=0;
-    unsigned int j;
+  if (!xml->usenormals/*USE_RECALC_NORM||xml->recalc_norm*/) {//fixme!
+
 
     bool *vertrw = new bool [xml->vertices.size()]; 
     for (i=0;i<xml->vertices.size();i++) {
@@ -1130,7 +1195,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
 	}
       } 
     }
-
+  }
     a=0;
 
     for (a=0;a<xml->tris.size();a+=3) {
@@ -1197,93 +1262,81 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
       }
     }
 
-  }
+  
   
   // TODO: add alpha handling
 
    //check for per-polygon flat shading
   unsigned int trimax = xml->tris.size()/3;
-  unsigned int a=0;
-  unsigned int i=0;
-  unsigned int j=0;
-  for (i=0;i<trimax;i++,a+=3) {
-    if (xml->trishade[i]==1||FLAT_SHADE) {
-      for (j=0;j<3;j++) {
-	Vector Cur (xml->vertices[xml->triind[a+j]].x,
-		    xml->vertices[xml->triind[a+j]].y,
-		    xml->vertices[xml->triind[a+j]].z);
-	Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
-		       xml->vertices[xml->triind[a+((j+2)%3)]].y,
-		       xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
-	  .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
-			 xml->vertices[xml->triind[a+((j+1)%3)]].y,
-			 xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
-	Normalize(Cur);
-	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	xml->tris[a+j].i=Cur.i/xml->vertexcount[xml->triind[a+j]];
-	xml->tris[a+j].j=Cur.j/xml->vertexcount[xml->triind[a+j]];
-	xml->tris[a+j].k=Cur.k/xml->vertexcount[xml->triind[a+j]];
-      }
-    }
-  }
   a=0;
-  trimax = xml->quads.size()/4;
-  for (i=0;i<trimax;i++,a+=4) {
-    if (xml->quadshade[i]==1||FLAT_SHADE) {
-      for (j=0;j<4;j++) {
-	Vector Cur (xml->vertices[xml->quadind[a+j]].x,
-		    xml->vertices[xml->quadind[a+j]].y,
-		    xml->vertices[xml->quadind[a+j]].z);
-	Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
-		       xml->vertices[xml->quadind[a+((j+2)%4)]].y,
-		       xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
-	  .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
-			 xml->vertices[xml->quadind[a+((j+1)%4)]].y,
-			 xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
-	Normalize(Cur);
-	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	xml->quads[a+j].i=Cur.i/xml->vertexcount[xml->quadind[a+j]];
-	xml->quads[a+j].j=Cur.j/xml->vertexcount[xml->quadind[a+j]];
-	xml->quads[a+j].k=Cur.k/xml->vertexcount[xml->quadind[a+j]];
+  i=0;
+  j=0;
+  if (!xml->usenormals) {
+      for (i=0;i<trimax;i++,a+=3) {
+          if (FLAT_SHADE||xml->trishade[i]==1) {
+              for (j=0;j<3;j++) {
+                  Vector Cur (xml->vertices[xml->triind[a+j]].x,
+                              xml->vertices[xml->triind[a+j]].y,
+                              xml->vertices[xml->triind[a+j]].z);
+                  Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
+                                 xml->vertices[xml->triind[a+((j+2)%3)]].y,
+                                 xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
+                      .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
+                                     xml->vertices[xml->triind[a+((j+1)%3)]].y,
+                                     xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
+                  Normalize(Cur);
+                  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+                  xml->tris[a+j].i=Cur.i;
+                  xml->tris[a+j].j=Cur.j;
+                  xml->tris[a+j].k=Cur.k;
+#if 0
+                  xml->tris[a+j].i=Cur.i/xml->vertexcount[xml->triind[a+j]];
+                  xml->tris[a+j].j=Cur.j/xml->vertexcount[xml->triind[a+j]];
+                  xml->tris[a+j].k=Cur.k/xml->vertexcount[xml->triind[a+j]];
+#endif
+              }
+          }
       }
-    }
+      a=0;
+      trimax = xml->quads.size()/4;
+      for (i=0;i<trimax;i++,a+=4) {
+          if (xml->quadshade[i]==1||(FLAT_SHADE)) {
+              for (j=0;j<4;j++) {
+                  Vector Cur (xml->vertices[xml->quadind[a+j]].x,
+                              xml->vertices[xml->quadind[a+j]].y,
+                              xml->vertices[xml->quadind[a+j]].z);
+                  Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
+                                 xml->vertices[xml->quadind[a+((j+2)%4)]].y,
+                                 xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
+                      .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
+                                     xml->vertices[xml->quadind[a+((j+1)%4)]].y,
+                                     xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
+                  Normalize(Cur);
+                  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+                  xml->quads[a+j].i=Cur.i;//xml->vertexcount[xml->quadind[a+j]];
+                  xml->quads[a+j].j=Cur.j;//xml->vertexcount[xml->quadind[a+j]];
+                  xml->quads[a+j].k=Cur.k;//xml->vertexcount[xml->quadind[a+j]];
+                  
+#if 0
+                  xml->quads[a+j].i=Cur.i/xml->vertexcount[xml->quadind[a+j]];
+                  xml->quads[a+j].j=Cur.j/xml->vertexcount[xml->quadind[a+j]];
+                  xml->quads[a+j].k=Cur.k/xml->vertexcount[xml->quadind[a+j]];
+#endif
+              }
+          }
+      }
+      
   }
-
-  //  printf("MESHXML texture name:%s:\n",xml->decal_name.c_str());
   string factionname = FactionUtil::GetFaction(xml->faction);
-  if (xml->animated_name.length()) {
-    string tempani = factionname+"_"+xml->animated_name;
-    Decal = new AnimatedTexture (tempani.c_str(),0,BILINEAR);
-    if (!Decal->LoadSuccess()) {
-      delete Decal;
-      Decal = new AnimatedTexture (xml->animated_name.c_str(),0,BILINEAR);
-    }
-    //printf("ani\n");
-  }else if (xml->decal_name.length()==0) {	
-    Decal = NULL;
-    //printf("nnull\n");
-  } else {
-    //printf("tex\n");
-
-    if (xml->alpha_name.length()==0) {
-      string temptex = factionname+"_"+xml->decal_name;
-      Decal = new Texture(temptex.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);    
-      if (!Decal->LoadSuccess()) {
-	delete Decal;
-	Decal = new Texture(xml->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);    
-      }
-    }else {
-      string temptex = factionname+"_"+xml->decal_name;
-      string tempalp = factionname+"_"+xml->alpha_name;
-      Decal = new Texture(temptex.c_str(), tempalp.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
-      if (!Decal->LoadSuccess()) {
-	delete Decal;
-	Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
-      }
-     
-    }
+  while (Decal.size()<xml->decals.size())
+      Decal.push_back(NULL);
+  Decal[0]=(TempGetTexture(0,factionname));
+  for (unsigned int i=1;i<xml->decals.size();i++) {
+      Decal[i]=(TempGetTexture(i,factionname));
   }
-
+  while (Decal.back()==NULL&&Decal.size()>1) {
+      Decal.pop_back();
+  }
   unsigned int index = 0;
 
   unsigned int totalvertexsize = xml->tris.size()+xml->quads.size()+xml->lines.size();

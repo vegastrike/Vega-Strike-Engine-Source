@@ -59,14 +59,14 @@ public:
     this->d = d;
   }
   bool operator < (const OrigMeshContainer & b) const {
-    if(orig->Decal==NULL || b.orig->Decal==NULL){
+    if(orig->Decal[0]==NULL || b.orig->Decal[0]==NULL){
       cout << "DEcal is nulll" << endl;
-      return b.orig->Decal!=NULL;
+      return b.orig->Decal[0]!=NULL;
     }
-    return ((*orig->Decal) < (*b.orig->Decal));
+    return ((*orig->Decal[0]) < (*b.orig->Decal[0]));
   }
   bool operator == (const OrigMeshContainer &b) const {
-    return (*orig->Decal)==*b.orig->Decal;
+    return (*orig->Decal[0])==*b.orig->Decal[0];
   }
 };
 typedef std::vector<OrigMeshContainer> OrigMeshVector;
@@ -89,7 +89,8 @@ void Mesh::InitUnit() {
 	mx = Vector (0,0,0);
 	radialSize=0;
 	GFXVertex *alphalist;
-	Decal = NULL;
+	if (Decal.empty())
+	  Decal.push_back (NULL);
 	
 	alphalist = NULL;
 	
@@ -192,9 +193,11 @@ Mesh::~Mesh()
 	    }
 	  }
 	  delete vlist;
-	  if(Decal != NULL) {
-	    delete Decal;
-	    Decal = NULL;
+	  for (unsigned int i=0;i<Decal.size();i++) {
+	    if(Decal[i] != NULL) {
+	      delete Decal[i];
+	      Decal[i] = NULL;
+	    }
 	  }
 	  if (squadlogos!=NULL) {
 	    delete squadlogos;
@@ -328,8 +331,8 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, floa
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXDisable(DEPTHWRITE);
   GFXBlendMode(blendSrc, blendDst);
-  if (o->Decal)
-    o->Decal->MakeActive();
+  if (o->Decal[0])
+    o->Decal[0]->MakeActive();
   o->vlist->DrawOnce();
   if (centered) {
     GFXCenterCamera(false);
@@ -469,8 +472,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   }
   GFXBlendMode(blendSrc, blendDst);
   GFXEnable(TEXTURE0);
-  if(Decal)
-    Decal->MakeActive();
+  if(Decal[0])
+    Decal[0]->MakeActive();
   GFXSelectTexcoordSet(0, 0);
   if(getEnvMap()) {
     GFXEnable(TEXTURE1);

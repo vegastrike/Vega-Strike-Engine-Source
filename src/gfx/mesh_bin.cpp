@@ -201,13 +201,15 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 			TexNameA[TexNameLength+2] = 'l';
 			TexNameA[TexNameLength+3] = 'p';
 			//Decal =	new Texture(TexName, TexNameA);
-			Decal =	new Texture(TexName, 0);
+			if (Decal.empty()) Decal.push_back (NULL);
+			Decal[0] =	new Texture(TexName, 0);
 		}
 		else 
 		{
-			Decal = new Texture (TexName, 0);
+		  if (Decal.empty())Decal.push_back(NULL);
+			Decal [0]= new Texture (TexName, 0);
 		}
-		if (!Decal)
+		if (!Decal[0])
 			objtex = GFXFALSE;
 	}
 	numforcelogo = readi (fp);

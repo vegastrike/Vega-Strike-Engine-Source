@@ -100,7 +100,8 @@ using XMLSupport::AttributeList;
 class Mesh
 {
 private:
-
+    //make sure to only use TempGetTexture when xml-> is valid \|/
+    Texture * TempGetTexture (int index, std::string factionname) const;
   ///Stores all the load-time vertex info in the XML struct FIXME light calculations
   struct XML {
     enum Names {
@@ -158,6 +159,7 @@ private:
       SIZE,
       OFFSET,
       ANIMATEDTEXTURE,
+      USENORMALS,
       REVERSE
     };
     ///Saves which attributes of vertex have been set in XML file
@@ -198,6 +200,11 @@ private:
       ///the weight of the points in weighted average of refpnts
       vector <float> refweight;
     };
+    struct ZeTexture {
+        string decal_name;
+        string alpha_name;
+        string animated_name;
+    };
     class Flightgroup * fg;
     static const EnumMap::Pair element_names[];
     static const EnumMap::Pair attribute_names[];
@@ -207,6 +214,7 @@ private:
     vector <ZeLogo> logos;
     vector<Names> state_stack;
     bool sharevert;
+    bool usenormals;
     bool reverse;
     bool force_texture;
     int load_stage;
@@ -214,9 +222,7 @@ private:
     int vertex_state;
     float scale;
     float lodscale;
-    string decal_name;
-    string alpha_name;
-    string animated_name;
+    vector <ZeTexture> decals;
     bool recalc_norm;
     int num_vertices;
     vector<GFXVertex> vertices;
@@ -296,7 +302,7 @@ protected:
   ///The number of the appropriate material for this mesh (default 0)
   unsigned int myMatNum;
   ///The decal relevant to this mesh
-  Texture *Decal;  
+  vector <Texture *> Decal;  
   ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
   char envMapAndLit;
   ///Whether this original will be drawn this frame

@@ -102,11 +102,15 @@ void RingMesh::InitRing(float iradius, float oradius, int slices, const char *te
 	if (texture[texlen-1]=='i'&&texture[texlen-2]=='n'&&
 	    texture[texlen-3]=='a'&&texture[texlen-4]=='.') {
 	  found_texture = true;
-	  Decal = new AnimatedTexture (texture,0,mipmap);
+	  if (Decal.empty())
+	    Decal.push_back(NULL);
+	  Decal[0] = new AnimatedTexture (texture,0,mipmap);
 	}
       }
       if (!found_texture) {
-	Decal = new Texture (texture,0,mipmap,TEXTURE2D,TEXTURE_2D,g_game.use_planet_textures?GFXTRUE:GFXFALSE);
+	if (Decal.empty())
+	  Decal.push_back(NULL);
+	Decal[0] = new Texture (texture,0,mipmap,TEXTURE2D,TEXTURE_2D,g_game.use_planet_textures?GFXTRUE:GFXFALSE);
       }
       setEnvMap(envMapping);
             
