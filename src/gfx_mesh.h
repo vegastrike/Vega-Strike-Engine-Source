@@ -228,7 +228,7 @@ public:
   Mesh(const char *filename, bool xml=false);
   ~Mesh();
   void GetPolys(vector <bsp_polygon> &);
-  void SetPosition (const Vector&);
+  //  void SetPosition (const Vector&);
   Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}
   void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);

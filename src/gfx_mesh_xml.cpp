@@ -1229,26 +1229,26 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   float x_center = (mn.i + mx.i)/2.0,
     y_center = (mn.j + mx.j)/2.0,
     z_center = (mn.k + mx.k)/2.0;
-  SetPosition(Vector (x_center, y_center, z_center));
+  local_pos = Vector (x_center, y_center, z_center);
   for(a=0; a<totalvertexsize; a++) {
     vertexlist[a].x*=xml->scale;//FIXME
     vertexlist[a].y*=xml->scale;
     vertexlist[a].z*=xml->scale;
-
+    /*
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
     vertexlist[a].z -= z_center;
-
+    */
   }
   for (a=0;a<xml->vertices.size();a++) {
     xml->vertices[a].x*=xml->scale;//FIXME
     xml->vertices[a].y*=xml->scale;
     xml->vertices[a].z*=xml->scale;
-
+    /*
     xml->vertices[a].x -= x_center;
     xml->vertices[a].y -= y_center;
     xml->vertices[a].z -= z_center; //BSP generation and logos require the vertices NOT be centered!
- 
+    */
   }
   /*** NOW MIN/MAX size should NOT be centered for fast bounding queries
   minSizeX -= x_center;
@@ -1317,10 +1317,10 @@ void Mesh::GetPolys (vector <bsp_polygon> & polys) {
 	for (i=0;i<last;i++) {
 	    polys.push_back (tmppolygon);
 	    for (int j=0;j<inc;j++) {
-		vv.x=tmpres[offset+i*inc+j].x+local_pos.i;
-		vv.y=tmpres[offset+i*inc+j].y+local_pos.j;
-		vv.z=tmpres[offset+i*inc+j].z+local_pos.k;
-		polys[polys.size()-1].v.push_back (vv);
+	      vv.x=tmpres[offset+i*inc+j].x;//+local_pos.i;
+	      vv.y=tmpres[offset+i*inc+j].y;//+local_pos.j;
+	      vv.z=tmpres[offset+i*inc+j].z;//+local_pos.k;
+	      polys[polys.size()-1].v.push_back (vv);
 	    }
 	}
 	inc=4;

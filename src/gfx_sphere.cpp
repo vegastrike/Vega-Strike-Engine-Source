@@ -127,12 +127,20 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
    refcount++;
    draw_queue = new vector<MeshDrawContext>;
 }
-void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/) {
+void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/, const Matrix m) {
   if (centered) {
-    SetPosition(_Universe->AccessCamera()->GetPosition());
+    float m1[16];
+    memcpy (m1,m,sizeof (float)*16);
+    Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
+    m1[12]=pos.i;
+    m1[13]=pos.j;
+    m1[14]=pos.k;
+    Transformation tmp = transform;
+    tmp.position = pos;
+    Mesh::Draw (tmp,m1);
   }		
 
-  Mesh::Draw();
+  Mesh::Draw(transform,m);
 }
 
 void SphereMesh::ProcessDrawQueue() {

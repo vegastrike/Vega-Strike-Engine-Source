@@ -61,9 +61,6 @@ extern list<Logo*> undrawn_logos;
 Vector mouseline;
 
 
-void Mesh::SetPosition (const Vector &k) {
-  local_pos = k;
-}
 
 void Mesh::ProcessUndrawnMeshes() {
   GFXEnable(DEPTHWRITE);
@@ -179,11 +176,11 @@ float const ooPI = 1.00F/3.1415926535F;
 
 void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
-  Vector pos (local_pos.Transform(m));
+  //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
-  c.mat[12]=pos.i;
-  c.mat[13]=pos.j;
-  c.mat[14]=pos.k;
+  //  c.mat[12]=pos.i;
+  //  c.mat[13]=pos.j;
+  //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
@@ -242,25 +239,41 @@ inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx,
 bool Mesh::queryBoundingBox (const Vector & eye, const Vector & end, const float err) {
   Vector slope (end-eye);
   Vector IntersectXYZ;
-  IntersectXYZ= eye + ((mn.i-eye.i)/slope.i)*slope;//(Normal dot (mn-eye)/div)*slope
+  float k = ((mn.i-eye.i)/slope.i);
+  IntersectXYZ= eye + k*slope;//(Normal dot (mn-eye)/div)*slope
   if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
     return true;
-  IntersectXYZ = eye + ((mx.i-eye.i)/slope.i)*slope;
-  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
-    return true;
-  IntersectXYZ = eye + ((mn.j-eye.j)/slope.j)*slope;
-  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y))
-    return true;
-  IntersectXYZ = eye + ((mx.j-eye.j)/slope.j)*slope;
-  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y)) 
-    return true;
-  IntersectXYZ = eye + ((mn.k-eye.k)/slope.k)*slope;
-  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Z))     
-    return true;
-  IntersectXYZ = eye + ((mx.k-eye.k)/slope.k)*slope;
-  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Z)) 
-    return true;
-  
+  k = ((mx.i-eye.i)/slope.i);
+  if (k>=0) {
+    IntersectXYZ = eye + k*slope;
+    if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
+      return true;
+  }
+  if (k>=0) {
+    k=((mn.j-eye.j)/slope.j);
+    IntersectXYZ = eye + k*slope;
+    if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y))
+      return true;
+  }
+
+  k=((mx.j-eye.j)/slope.j);
+  if (k>=0) {
+    IntersectXYZ = eye + k*slope;
+    if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y)) 
+      return true;
+  }
+  k=((mn.k-eye.k)/slope.k);
+  if (k>=0) {
+    IntersectXYZ = eye + k*slope;
+    if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Z))     
+      return true;
+  }
+  k=((mx.k-eye.k)/slope.k);
+  if (k>=0) {
+    IntersectXYZ = eye + k*slope;
+    if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Z)) 
+      return true;
+  }
   return false;
   
 }
@@ -271,8 +284,8 @@ bool Mesh::queryBoundingBox (const Vector & start,float err) {
 
 BoundingBox * Mesh::getBoundingBox() {
   
-  BoundingBox * tbox = new BoundingBox (Vector (mn.i,0,0)+local_pos,Vector (mx.i,0,0),
-					Vector (0,mn.j,0)+local_pos,Vector (0,mx.j,0),
-					Vector (0,0,mn.k)+local_pos,Vector (0,0,mx.k));
+  BoundingBox * tbox = new BoundingBox (Vector (mn.i,0,0),Vector (mx.i,0,0),
+					Vector (0,mn.j,0),Vector (0,mx.j,0),
+					Vector (0,0,mn.k),Vector (0,0,mx.k));
   return tbox;
 }
