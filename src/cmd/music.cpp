@@ -74,7 +74,7 @@ bool Music::LoadMusic (const char *file) {
      err = f.OpenReadOnly( VSFileSystem::HOMESUBDIR +"/"+file, UnknownFile);
 
   char songname[1024];
-  this->playlist.push_back(std::vector <std::string> ());
+  this->playlist.push_back(PlayList());
   if (err<=Ok) {
     while (!f.Eof()) {
       songname[0]='\0';
@@ -90,7 +90,7 @@ bool Music::LoadMusic (const char *file) {
 	}
       if (songname[0]=='\0'||songname[0]=='#')
 	continue;
-      this->playlist.back().push_back (std::string(songname));
+      this->playlist.back().songs.push_back (std::string(songname));
     }
     f.Close();
   }else {
@@ -99,21 +99,24 @@ bool Music::LoadMusic (const char *file) {
   return true;
 }
 
-inline int randInt (int max) {
-	int ans= int((((double)rand())/((double)RAND_MAX))*max);
-	if (ans==max) {
-	  return max-1;
-	}
-	return ans;
+static int randInt (int max) {
+  int ans= int((((double)rand())/((double)RAND_MAX))*max);
+  if (ans==max) {
+    return max-1;
+  }
+  return ans;
 }
 
 int Music::SelectTracks(void) {
+  static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
   if ((BaseInterface::CurrentBase||loopsleft>0)&&lastlist < (int)playlist.size()&&lastlist>=0) {
     if (loopsleft>0) {
       loopsleft--;
     }
     if (!playlist[lastlist].empty()) {
-      int whichsong=rand()%playlist[lastlist].size();
+
+     
+      int whichsong=(random?rand():playlist[lastlist].counter++)%playlist[lastlist].size();
       GotoSong (lastlist,whichsong,true);
       return whichsong;
     }
@@ -202,7 +205,8 @@ void Music::SkipRandSong(int whichlist) {
 	if (this!=NULL) {
 	  if (whichlist!=NOLIST&&whichlist>=0&&whichlist<(int)playlist.size()){
 	    lastlist = whichlist;
-	    GotoSong(whichlist,randInt(playlist[whichlist].size()),true);
+            static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
+	    GotoSong(whichlist,random?randInt(playlist[whichlist].size()):playlist[whichlist].counter++%playlist[whichlist].size(),true);
 	    return;
 	  }
 	}
@@ -211,8 +215,9 @@ void Music::SkipRandSong(int whichlist) {
 
 void Music::SkipRandList() {
 	for (unsigned int i=0;i<playlist.size();i++) {
-		if (!playlist[i].empty())
-			GotoSong(i,randInt(playlist[i].size()),false);
+          static bool random=XMLSupport::parse_bool(vs_config->getVariable("audio","shuffle_songs","true"));
+          if (!playlist[i].empty())
+            GotoSong(i,random?randInt(playlist[i].size()):playlist[i].counter++%playlist[i].size(),false);
 	}
 }
 

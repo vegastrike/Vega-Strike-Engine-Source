@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 
-
 class Music {
   bool random;
   float maxhull;
@@ -15,7 +14,17 @@ class Music {
   float vol;
   int SelectTracks();
   bool LoadMusic (const char *file);
-  std::vector <std::vector <std::string> > playlist;
+  struct PlayList {
+    std::vector <std::string> songs;
+    unsigned int counter;
+    PlayList() {counter=0;}
+    bool empty()const {return songs.empty();}
+    size_t size()const {return songs.size();}
+    std::string& operator [](size_t index) {return songs[index];} 
+    const std::string& operator [](size_t index) const {return songs[index];} 
+    void push_back (std::string s) {songs.push_back(s);}
+  };
+  std::vector <PlayList> playlist;
  public:
   enum Playlist {NOLIST=-1,BATTLELIST=0,PEACELIST,PANICLIST,VICTORYLIST,LOSSLIST,MAXLIST};
   Music (Unit * parent);
