@@ -23,8 +23,8 @@ using std::endl;
  * VsnetUDPSocket - definition
  ***********************************************************************/
  
-VsnetUDPSocket::VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet& set )
-    : VsnetSocket( sock, remote_ip, set )
+VsnetUDPSocket::VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet& socketset )
+    : VsnetSocket( sock, remote_ip, socketset )
 {
     _negotiated_max_size = MAXBUFFER;
     _recv_buf            = new char[MAXBUFFER];

@@ -1,9 +1,56 @@
 #include <config.h>
 #include <sstream>
 
+#ifdef _WIN32
+#include <winsock.h>
+#endif
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
 #include "const.h"
+
+#ifdef _WIN32
+#include <windows.h>
+//std::multimap<int,HANDLE> pipeMap;
+
+int close(int file) {
+	int retVal=0;
+	BOOL worked=CloseHandle((HANDLE)file);
+	if (!worked)
+		retVal=-1;
+	return retVal;
+}
+int read(int file, void *buf, int size) {
+	unsigned long numread;
+	BOOL worked=ReadFile((HANDLE)file,(LPVOID)buf, size, &numread,NULL);
+	if (!worked)
+		return -1;
+	if (numread>INT_MAX)
+		numread=INT_MAX;
+	return numread;
+}
+int write(int file, const void *buf, int size) {
+	unsigned long numwritten;
+	BOOL worked=WriteFile((HANDLE)file,(LPVOID)buf, size, &numwritten,NULL);
+	if (!worked)
+		return -1;
+	if (numwritten>INT_MAX)
+		numwritten=INT_MAX;
+	return numwritten;
+}
+int pipe(int *file) {
+	HANDLE readPipe,writePipe;
+	SECURITY_ATTRIBUTES sec_attr; //don't know what it is for.
+	sec_attr.nLength=sizeof(SECURITY_ATTRIBUTES);
+	sec_attr.bInheritHandle=FALSE;
+	sec_attr.lpSecurityDescriptor=NULL;
+	BOOL isPipe=CreatePipe(&readPipe,&writePipe,&sec_attr,0);
+	if (!isPipe)
+		return -1;
+	file[0]=(int)readPipe;
+	file[1]=(int)writePipe;
+	return 0;
+}
+#endif
 
 using namespace std;
 
