@@ -1,5 +1,5 @@
 #include "mission.h"
-
+#include "cmd/briefing.h"
 
 varInst * Mission::call_briefing (missionNode * node, int mode) {
   varInst *viret=NULL;
@@ -11,8 +11,8 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
     node->script.method_id=module_unit_map[cmd];
   }
   viret=newVarInst(VI_TEMP);
-  callback_module_briefing_type method_id=(callback_module_unit_type) node->script.method_id;
-  if (briefing!=NULL) {
+  callback_module_briefing_type method_id=(callback_module_briefing_type) node->script.method_id;
+  if (briefing!=NULL||mode!=SCRIPT_RUN) {
     if(method_id==CMT_BRIEFING_addShip){
       std::string name = getStringArgument(node,mode,0);
       std::string faction= getStringArgument (node,mode,1);
@@ -37,7 +37,11 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
       
     }else if (method_id==CMT_BRIEFING_terminate) {
       
+    }else if (method_id==CMT_BRIEFING_setCamPosition) {
+
+    }else if (method_id==CMT_BRIEFING_setCamOrientation) {
+      
     }
   }
-
+  return viret;
 }

@@ -144,8 +144,10 @@ enum callback_module_briefing_type {
   CMT_BRIEFING_replaceOrder,
   CMT_BRIEFING_setShipPosition,
   CMT_BRIEFING_getShipPosition,
-  CMT_BRIEFING_terminate
-}
+  CMT_BRIEFING_terminate,
+  CMT_BRIEFING_setCamPosition,
+  CMT_BRIEFING_setCamOrientation
+};
 enum callback_module_olist_type {
   CMT_OLIST_UNKNOWN=0,
   CMT_OLIST_new ,
@@ -532,6 +534,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   map<string,callback_module_order_type> module_order_map;
   map<string,callback_module_unit_type> module_unit_map;
   map<string,callback_module_std_type> module_std_map;
+  map<string,callback_module_briefing_type> module_briefing_map;
   map<string,callback_module_type> module_map;
 
   void saveVariables(const ostream& out);

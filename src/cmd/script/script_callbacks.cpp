@@ -414,7 +414,7 @@ varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   vi->type=VAR_OBJECT;
   vi->objectname="string";
   string str = getStringArgument (node,mode,0);
-  int which= getIntArg(node,mode,1);
+  int which= (int)getIntArg(node,mode,1);
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
     string sysname=_Universe->getAdjacentStarSystems(str)[which];
@@ -459,7 +459,7 @@ varInst *Mission::call_io_message(missionNode *node,int mode){
   varInst *args_vi[3];
   string args_str[3];
 
-  int delay=getIntArg(node,mode,0);
+  int delay=(int)getIntArg(node,mode,0);
 
   for(int i=0;i<3;i++){
     args[i]=getArgument(node,mode,i+1);
@@ -837,7 +837,7 @@ Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
 Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
   missionNode *pos_node=getArgument(node,mode,arg_nr);
   varInst *pos_vi=checkObjectExpr(pos_node,mode);
-  olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
+  //  olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
 
   Vector vec3;
   if(mode==SCRIPT_RUN){
@@ -849,7 +849,7 @@ Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
 }
 
 missionNode *Mission::getArgument(missionNode *node,int mode,int arg_nr){
-      if(node->subnodes.size() < arg_nr+1){
+      if(node->subnodes.size() < (unsigned int) (arg_nr+1)){
 	char buf[200];
 	sprintf(buf," needs at least %d arguments",arg_nr+1);
 	fatalError(node,mode,method_str(node)+buf);
@@ -869,7 +869,16 @@ void Mission::initCallbackMaps(){
   module_map["_omap"]=CMT_OMAP;
   module_map["_order"]=CMT_ORDER;
   module_map["_unit"]=CMT_UNIT;
-
+  module_map["_briefing"]=CMT_BRIEFING;
+  module_briefing_map["addShip"]=CMT_BRIEFING_addShip;
+  module_briefing_map["removeShip"]=CMT_BRIEFING_removeShip;
+  module_briefing_map["enqueueOrder"]=CMT_BRIEFING_enqueueOrder;
+  module_briefing_map["replaceOrder"]=CMT_BRIEFING_replaceOrder;
+  module_briefing_map["setShipPosition"]=CMT_BRIEFING_setShipPosition;
+  module_briefing_map["getShipPosition"]=CMT_BRIEFING_getShipPosition;
+  module_briefing_map["setCamPosition"]=CMT_BRIEFING_setCamPosition;
+  module_briefing_map["setCamOrientation"]=CMT_BRIEFING_setCamOrientation;
+  module_briefing_map["terminate"]=CMT_BRIEFING_terminate;
 
   module_std_map["Rnd"]=CMT_STD_Rnd;
   module_std_map["getGameTime"]=CMT_STD_getGameTime;

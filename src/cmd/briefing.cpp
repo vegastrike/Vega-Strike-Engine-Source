@@ -139,29 +139,3 @@ void Briefing::Ship::EnqueueOrder (const Vector & destination, float time) {
   }
   orders.push_back (Order (destination,(destination-Position()).Magnitude()/time));
 }
-bool Mission::BriefingInProgress() {
-  return (briefing!=NULL);
-}
-void Mission::BriefingStart() {
-  briefing = new Briefing();
-  RunDirectorScript ("initbriefing");
-}
-void Mission::BriefingLoop() {
-  if (briefing) {
-    RunDirectorScript ("loopbriefing");
-  }
-  briefing->Update();
-}
-void Mission::BriefingRender() {
-  if (briefing) {
-    briefing->Render();
-  }
-}
-
-void Mission::BriefingEnd() {
-  if (briefing) {
-    RunDirectorScript ("endbriefing");      
-    delete briefing;
-    briefing = NULL;
-  }
-}
