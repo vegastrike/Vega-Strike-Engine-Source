@@ -2,7 +2,11 @@
 
 	* added debian packages to homepage/doc
 	* fixed broken link on download page
-	
+2002-04-22 Daniel Horn <hellcatv@hotmail.com>
+	* added briefing class that will render ships as they explain to players what to do
+	* added hooks and a subclass to the mission scripting system
+	* fixed _unit.getFaction's mem leak and _unit.getPosition()'s duplicate code
+	* fixed duplicate code in director.cpp
 
 2002-04-20 Daniel Horn <hellcatv@hotmail.com>
 	* Added flyto AI scripts
