@@ -91,7 +91,7 @@ void init_opengl_extensions()
     } else {
       g_game.Multitexture = 0;
     }
-    g_game.mipmap = 1;
+    g_game.mipmap = 3;
 #ifdef WIN32
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");

@@ -1,4 +1,3 @@
-
 #include "physics.h"
 #include <vector>
 #include "cmd_beam.h"
@@ -93,25 +92,25 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
   GFXColor * calah = (GFXColor *)malloc (sizeof(GFXColor)*32);
 
-  calah[0].r=Col.r;calah[0].g=Col.g;calah[0].b=Col.b;calah[0].a=0;
-  calah[1].r=Col.r;calah[1].g=Col.g;calah[1].b=Col.b;calah[1].a=0;
+  calah[0].r=0;calah[0].g=0;calah[0].b=0;calah[0].a=0;
+  calah[1].r=calah[1].g=calah[1].b=calah[1].a=0;
   memcpy (&calah[2],&Col,sizeof (GFXColor));
   memcpy (&calah[3],&Col,sizeof (GFXColor));
   memcpy (&calah[4],&Col,sizeof (GFXColor));
   memcpy (&calah[5],&Col,sizeof (GFXColor));
-  calah[6].r=Col.r;calah[6].g=Col.g;calah[6].b=Col.b;calah[6].a=0;
-  calah[7].r=Col.r;calah[7].g=Col.g;calah[7].b=Col.b;calah[7].a=0;
+  calah[6].r=calah[6].g=calah[6].b=calah[6].a=0;
+  calah[7].r=calah[7].g=calah[7].b=calah[7].a=0;
 
 
-  calah[8].r=Col.r;calah[8].g=Col.g;calah[8].b=Col.b;calah[8].a=0;
-  calah[9].r=Col.r;calah[9].g=Col.g;calah[9].b=Col.b;calah[9].a=0;
+  calah[8].r=calah[8].g=calah[8].b=calah[8].a=0;
+  calah[9].r=calah[9].g=calah[9].b=calah[9].a=0;
 
-  calah[10].r=Col.r;calah[10].g=Col.g;calah[10].b=Col.b;calah[10].a=0;
+  calah[10].r=calah[10].g=calah[10].b=calah[10].a=0;
   calah[11].r=Col.r;calah[11].g=Col.g;calah[11].b=Col.b;calah[11].a=Col.a;
 
-  calah[12].r=Col.r;calah[12].g=Col.g;calah[12].b=Col.b;calah[12].a=0;
-  calah[13].r=Col.r;calah[13].g=Col.g;calah[13].b=Col.b;calah[13].a=0;
-  calah[14].r=Col.r;calah[14].g=Col.g;calah[14].b=Col.b;calah[14].a=0;
+  calah[12].r=calah[12].g=calah[12].b=calah[12].a=0;
+  calah[13].r=calah[13].g=calah[13].b=calah[13].a=0;
+  calah[14].r=calah[14].g=calah[14].b=calah[14].a=0;
 
   calah[15].r=Col.r;calah[15].g=Col.g;calah[15].b=Col.b;calah[15].a=Col.a;
   memcpy (&calah[16],&calah[0],sizeof(GFXColor)*16);    
@@ -206,7 +205,7 @@ void Beam::ProcessDrawQueue() {
     GFXDisable (CULLFACE);//don't want lighting on this baby
     GFXDisable (DEPTHWRITE);
     GFXPushBlendMode();
-    GFXBlendMode(SRCALPHA,INVSRCALPHA);
+    GFXBlendMode(ONE,ONE);
 
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
