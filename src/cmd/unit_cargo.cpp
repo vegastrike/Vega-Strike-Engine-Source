@@ -5,6 +5,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 using XMLSupport::tostring;
+using namespace std;
 std::string CargoToString (const Cargo& cargo) {
   return tostring(cargo.mass)+string("\" price=\"") +tostring(cargo.price)+ string("\" volume=\"")+tostring(cargo.volume)+string("\" quantity=\"")+tostring(cargo.quantity)+string("\" file=\"")+cargo.content;
 }
@@ -50,10 +51,14 @@ void Unit::AddCargo (const Cargo &carg) {
   mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);
 }
-void Unit::RemoveCargo (unsigned int i) {
+void Unit::RemoveCargo (unsigned int i, int quantity) {
   assert (i<image->cargo.size());
-  mass-=image->cargo[i].quantity*image->cargo[i].mass;
-  image->cargo.erase (image->cargo.begin()+i);
+  if (quantity>image->cargo[i].quantity)
+    quantity=image->cargo[i].quantity;
+  mass-=quantity*image->cargo[i].mass;
+  image->cargo[i].quantity-=quantity;
+  if (image->cargo[i].quantity<=0)
+    image->cargo.erase (image->cargo.begin()+i);
 }
 
 float Unit::PriceCargo (const std::string &s) {
@@ -69,28 +74,38 @@ float Unit::PriceCargo (const std::string &s) {
   }
   return price;
 }
-bool Unit::SellCargo (unsigned int i, float &creds, Cargo & carg, Unit *buyer){
+bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer){
   if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||mass<image->cargo[i].mass)
     return false;
+  if (quantity>image->cargo[i].quantity)
+    quantity=image->cargo[i].quantity;
   carg = image->cargo[i];
-  creds+=carg.quantity*buyer->PriceCargo (image->cargo[i].content);
-  RemoveCargo (i);
+  creds+=quantity*buyer->PriceCargo (image->cargo[i].content);
+  RemoveCargo (i,quantity);
   return true;
 }
-bool Unit::SellCargo (const std::string &s, float & creds, Cargo &carg, Unit *buyer){
+bool Unit::SellCargo (const std::string &s, int quantity, float & creds, Cargo &carg, Unit *buyer){
   Cargo tmp;
   tmp.content=s;
   vector <Cargo>::iterator mycargo = std::find (image->cargo.begin(),image->cargo.end(),tmp);
   if (mycargo==image->cargo.end())
     return false;
 
-  return SellCargo (mycargo-image->cargo.begin(),creds,carg,buyer);
+  return SellCargo (mycargo-image->cargo.begin(),quantity,creds,carg,buyer);
 }
 unsigned int Unit::numCargo ()const {
   return image->cargo.size();
 }
 Cargo& Unit::GetCargo (unsigned int i) {
   return image->cargo[i];
+}
+Cargo* Unit::GetCargo (const std::string &s) {
+  Cargo searchfor;
+  searchfor.content=s;
+  vector<Cargo>::iterator tmp =(std::find(image->cargo.begin(),image->cargo.end(),searchfor));
+  if (tmp==image->cargo.end())
+    return NULL;
+  return &(*tmp);
 }
 bool Unit::BuyCargo (const Cargo &carg, float & creds){
   if (!CanAddCargo(carg)||creds<carg.quantity*carg.price) {
