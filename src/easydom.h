@@ -204,7 +204,7 @@ domNodeType *LoadCalike(const char *filename) {
       is_final=true;
     }
 
-    XML_Parse(parser,buf, newlen, is_final);
+    XML_Parse(parser, buf, newlen, is_final);
   } while(!is_final);
 
   XML_ParserFree (parser);
