@@ -503,6 +503,14 @@ void Base::Terminate() {
 void Base::Room::Launch::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 	  Link::Click(base,x,y,button,state);
+	  static bool auto_undock = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
+	  if (auto_undock) {
+	  Unit * bas = base->baseun.GetUnit();
+	  Unit * playa = base->caller.GetUnit();
+	  if (playa &&bas) {
+	    playa->UnDock (bas);
+	  }
+	  }
 	  base->Terminate();
 	}
 }
