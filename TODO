@@ -1,0 +1,1 @@
+Merge the globals in vegastrike.h (contained in g_game), the ones in gl_globals.h and the one in GFX_GLOBALS.h
