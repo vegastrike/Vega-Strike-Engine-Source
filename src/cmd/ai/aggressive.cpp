@@ -63,19 +63,38 @@ AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool interrupt) 
   return getProperLogicOrInterruptScript (ROLES::getRoleEvents(me->combatRole(),targ->combatRole()),me->faction,interrupt);
 }
 
-void DoSpeech (Unit * un, const string &speech) {
+inline std::string GetRelationshipColor (float rel) {
+  if (rel>=1)
+    return "#00FF00";
+  if (rel<=-1)
+    return "#FF0000";
+  rel +=1.;
+  rel/=2.;
+  char str[20]; //Just in case all 8 digits of both #s end up inside the string for some reason.
+  sprintf(str,"#%2X%2X00",(int)((1-rel)*256),(int)(rel*256));
+  return str;
+}
+
+void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &node) {
+  const string &speech=node.message;
   string myname ("[Static]");
   if (un!=NULL) {
     myname= un->getFullname();
 	Flightgroup * fg=un->getFlightgroup();
-		if (fg) {
-			if (fg->name!="base"&&fg->name!="Base") {
-				myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->name;
-			}
+		if (fg&&fg->name!="base"&&fg->name!="Base") {
+			myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->name;
 		}else if (myname.length()==0)
 			myname = un->name;
+	if (player_un!=NULL) {
+		if (player_un==un) {
+			myname=std::string("#0033FF")+myname+"#000000";
+		} else {
+			float rel=un->getRelation(player_un);
+			myname=GetRelationshipColor(rel)+myname+"#000000";
+		}
+	}
   }
-  mission->msgcenter->add (myname,"all",speech);
+  mission->msgcenter->add (myname,"all",GetRelationshipColor(node.messagedelta*2)+speech+"#000000"); //multiply by 2 so colors are easier to tell
 }
 void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {
@@ -83,7 +102,7 @@ void LeadMe (Unit * un, string directive, string speech) {
       Unit * pun =_Universe->AccessCockpit(i)->GetParent();
       if (pun) {
 	if (pun->getFlightgroup()==un->getFlightgroup()){
-	  DoSpeech (un, speech);	
+		DoSpeech (un, pun, FSM::Node(speech,.1));	
 	}
       }
     }

@@ -350,7 +350,7 @@ void FireKeyboard::HeadlightKey(int, KBSTATE k) {
     }
 }
 #endif
-extern void DoSpeech (Unit * un, const string &speech);
+extern void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
 extern void LeadMe (Unit * un, string directive, string speech);
 
 static void LeadMe (string directive, string speech) {
@@ -363,7 +363,7 @@ void HelpOut (bool crit, std::string conv) {
   Unit * un = _Universe->AccessCockpit()->GetParent();
   if (un) {
     Unit * par=NULL;
-    DoSpeech(  un,conv);
+    DoSpeech(  un,NULL, FSM::Node(conv,.1));
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
@@ -966,13 +966,13 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     }
     resp.push_back(c);
     AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-    DoSpeech (un,c.getCurrentState()->message);
+    DoSpeech (un,parent,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->SetCommAnimation (c.ani);
     }
     refresh_target=true;
   }else {
-    DoSpeech (NULL,c.getCurrentState()->message);
+    DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       static Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
@@ -1294,7 +1294,7 @@ void FireKeyboard::Execute () {
 
 	if (mymsg==NULL) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
-	  DoSpeech (parent,c.getCurrentState()->message);
+	  DoSpeech (targ,targ,*c.getCurrentState());
 	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	  }
@@ -1305,7 +1305,7 @@ void FireKeyboard::Execute () {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
-	    DoSpeech (parent,c.getCurrentState()->message);
+	    DoSpeech (targ,targ,*c.getCurrentState());
 	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	    }
