@@ -1,3 +1,5 @@
+
+#include <set>
 #include "configxml.h"
 #include "audiolib.h"
 #include "unit_generic.h"
@@ -1440,7 +1442,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
   bool nanspace=false;
   if (!FINITE(totallength)) {
     nanspace=true;
-    start=QVector(100000000,100000000,10000000000000);
+    start=QVector(100000000.0,100000000.0,10000000000000.0);
     float totallength = (start-end).Magnitude();  
   }
   float totpercent=1;
@@ -3497,7 +3499,47 @@ bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitof
 bool Unit::Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage,const Unit * downgradelimit){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage,downgradelimit);
 }
-
+double ComputeMinDowngradePercent() {
+    static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
+    return MyPercentMin;
+}
+class DoubleName {
+public:
+  string s;
+  double d;
+  DoubleName (string ss,double dd) {
+    d =dd;s=ss;
+  }
+  DoubleName () {
+    d = -FLT_MAX;
+  }
+};
+std::map <int, DoubleName> downgrademap;
+void AddToDowngradeMap (std::string name,double value, int unitoffset) {
+  using std::map;
+  map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
+  if (i!=downgrademap.end()) {
+    if ((*i).second.d<=value) {
+      (*i).second= DoubleName (name,value);
+    }
+  }else {
+    downgrademap[unitoffset]=DoubleName (name,value);
+  }
+}
+void ClearDowngradeMap () {
+  downgrademap.clear();
+}
+std::set<std::string> GetListOfDowngrades () {
+  using std::map;
+  map<int,DoubleName>::iterator i =downgrademap.begin();
+  std::set<std::string> retval;
+  for (;i!=downgrademap.end();++i) {
+    retval.insert ((*i).second.s);
+  }
+  
+//  return std::vector<std::string> (retval.begin(),retval.end());
+  return retval;
+}
 bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit) {
   percentage=0;
   int numave=0;
@@ -3558,9 +3600,13 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   int retval;
   double temppercent;
   static Unit * blankship = UnitFactory::createServerSideUnit ("blank",true,FactionUtil::GetFaction("upgrades"));
-#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;} else {if (retval!=NOTTHERE) cancompletefully=false;}
-#define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false)
-#define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,true)
+#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;float MyPercentMin = ComputeMinDowngradePercent();if (downgrade && temppercent > MyPercentMin) {AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this);}} else {if (retval!=NOTTHERE) cancompletefully=false;}
+
+  
+#define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false,this->my)
+
+#define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,true,this->my)
+
   STDUPGRADE(armor.front,up->armor.front,templ->armor.front,0);
   STDUPGRADE(armor.back,up->armor.back,templ->armor.back,0);
   STDUPGRADE(armor.right,up->armor.right,templ->armor.right,0);
@@ -3632,13 +3678,13 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
   bool ccf = cancompletefully;
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100,false);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,100,100,false,shield.leak);
   if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
   
   myleak = 1-computer.radar.maxcone;
   upleak=1-up->computer.radar.maxcone;
   templeak=1-(templ!=NULL?templ->computer.radar.maxcone:-1);
-  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false);
+  STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.maxcone);
   if (touchme)computer.radar.maxcone=1-myleak;
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   if (up->computer.radar.lockcone!=lc) {
@@ -3648,7 +3694,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (templeak == 1-lc) {
       templeak=2;
     }
-    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false);
+    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.lockcone);
     if (touchme)computer.radar.lockcone=1-myleak;
   }
   static float tc =XMLSupport::parse_float (vs_config->getVariable ("physics","autotracking",".93"));//DO NOT CHANGE! see unit.cpp:258
@@ -3659,7 +3705,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
     if (templeak==1-tc) {
       templeak=2;
     }
-    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false);
+    STDUPGRADE_SPECIFY_DEFAULTS(myleak,upleak,templeak,0,0,0,false,computer.radar.trackingcone);
     if (touchme)computer.radar.trackingcone=1-myleak;    
   }
   cancompletefully=ccf;

@@ -8,17 +8,21 @@
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
 #include "unit_const_cache.h"
-
+#include <set>
 static const GFXColor disable (1,0,0,1);
 
 extern int GetModeFromName (const char *);
+extern std::set <std::string> GetListOfDowngrades();
+extern void ClearDowngradeMap();
+extern double ComputeMinDowngradePercent();
 template<class UnitType>
 vector <CargoColor>& GameUnit<UnitType>::FilterDowngradeList (vector <CargoColor> & mylist, bool downgrade)
 {
   const Unit * templ=NULL;
   const Unit * downgradelimit=NULL;
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
-  static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
+  static float MyPercentMin= ComputeMinDowngradePercent();
+
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     int mode=GetModeFromName(mylist[i].cargo.content.c_str());

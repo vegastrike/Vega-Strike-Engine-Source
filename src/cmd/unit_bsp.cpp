@@ -293,7 +293,7 @@ bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> 
   if (tri.size()==0) {
     return NULL;
   }
-  bsp_tree * temp;
+  bsp_tree * temp=NULL;
   vector <bsp_polygon> trileft;
   vector <bsp_tree> triplaneleft;
   vector <bsp_polygon> triright;
@@ -302,6 +302,10 @@ bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> 
   bsp_polygon right_int;
   unsigned int select= tri.size();
   temp = (bsp_tree *) malloc (sizeof (bsp_tree));
+  temp->left=NULL;
+  temp->right=NULL;
+  temp->a=temp->b=temp->d=0;
+  temp->c=1;
   if (!(vplane&VPLANE_ALL)) {
     static bool use_heuristic=XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_bsp_heuristic","false"));
     if (use_heuristic) {
@@ -386,6 +390,7 @@ bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> 
     temp->right= buildbsp (NULL,triright,triplaneright,vplane);
     return temp;
   }
+  return temp;
 }
 
 

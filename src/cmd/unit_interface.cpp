@@ -92,7 +92,24 @@ static bool match (vector <string>::const_iterator cat, vector<string>::const_it
     return endcat==(cat+1);
   }
 }
-
+const Unit * getUnitFromUpgradeName (string upgrade_name, int myunitfaction=0) {
+    const char * input_buffer = upgrade_name.c_str();
+    const Unit * NewPart = UnitConstCache::getCachedConst (StringIntKey (input_buffer,FactionUtil::GetFaction("upgrades")));
+    if (!NewPart) {
+	    NewPart = NewPart = UnitConstCache::setCachedConst (StringIntKey (input_buffer,
+					  FactionUtil::GetFaction("upgrades")),
+					  UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades")));
+    }
+    if (NewPart->name==string("LOAD_FAILED")) {
+	    NewPart = UnitConstCache::getCachedConst (StringIntKey(input_buffer,myunitfaction));
+	    if (!NewPart) {
+            NewPart = UnitConstCache::setCachedConst (StringIntKey(input_buffer,
+					    myunitfaction),
+					    UnitFactory::createUnit (input_buffer,true,myunitfaction));
+	    }
+    }
+    return NewPart;
+}
 UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo") {
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
@@ -922,20 +939,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
-	  NewPart = UnitConstCache::getCachedConst (StringIntKey (input_buffer,FactionUtil::GetFaction("upgrades")));
-	  if (!NewPart) {
-	    NewPart = NewPart = UnitConstCache::setCachedConst (StringIntKey (input_buffer,
-					  FactionUtil::GetFaction("upgrades")),
-					  UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades")));
-	  }
-	  if (NewPart->name==string("LOAD_FAILED")) {
-	    NewPart = UnitConstCache::getCachedConst (StringIntKey(input_buffer,un->faction));
-	    if (!NewPart) {
-	      NewPart = UnitConstCache::setCachedConst (StringIntKey(input_buffer,
-					    un->faction),
-					    UnitFactory::createUnit (input_buffer,true,un->faction));
-	    }
-	  }
+	  NewPart = getUnitFromUpgradeName (input_buffer,un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
    	    if (mode!=SHIPDEALERMODE) {
 	      selectedmount=0;
@@ -1364,7 +1368,19 @@ vector <CargoColor>&UpgradingInfo::GetCargoList () {
 	  }
 	}
 	TempCargo = tmp;
-	return buyer.GetUnit()->FilterDowngradeList (TempCargo);
+    ClearDowngradeMap();
+	vector <CargoColor>&mylist= buyer.GetUnit()->FilterDowngradeList (TempCargo);
+    std::set<std::string> downgrademap =  GetListOfDowngrades();
+    static bool cleardowngrades = XMLSupport::parse_bool (vs_config->getVariable ("physics","only_show_best_downgrade","true"));
+    if (cleardowngrades)
+    for (unsigned int i=0;i<mylist.size();++i) {
+        if (downgrademap.find (mylist[i].cargo.content)==downgrademap.end()) {
+            mylist.erase(mylist.begin()+ i);
+            i--;
+            continue;
+        }
+    }
+    return mylist;
       }
       break;
     }
