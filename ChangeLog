@@ -1,3 +1,11 @@
+2002-03-09 Daniel Horn <hellcatv@hotmail.com>
+	* Fixed disappearing first unit bug with low quality sprites
+	* Fixed cockpit cycle complaint
+	* Added Gauntlet mission (if you kill 3 guys, 3 more come)
+	* Added XvX missions using the nvn module
+	* Fixed [ key to cycle through all allies
+	* Fixed save directory to be .vegastrike in windows
+
 2002-03-09 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* director:

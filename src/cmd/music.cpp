@@ -123,6 +123,7 @@ float HowLong (std::string &song) {
 void Music::Listen() {
 	static bool use_external = XMLSupport::parse_bool(vs_config->getVariable("audio","use_external_player","true"));
   if (g_game.music_enabled ) {
+#ifdef _WIN32
 	  if (use_external) {
 		static int firstseconds=0;
 		static float avg_time=XMLSupport::parse_float (vs_config->getVariable("audio","avg_song_time","60"));
@@ -178,7 +179,9 @@ void Music::Listen() {
 //				execlp(plyr.c_str(),plyr.c_str(),"-e",(playlist[whichlist][song]).c_str(),NULL);
 			} 
 		}
-	  }else {
+	  }else 
+#endif
+	    {
 	    if ((!AUDIsPlaying (song))) {
 	     AUDDeleteSound (song,true);//delete buffer too;
 	     int whichlist;
@@ -198,6 +201,7 @@ void Music::Listen() {
 
 void Music::Skip() {
   AUDStopPlaying (song);
+  curtime= lastsonglength;
 }
 Music::~Music() {
   AUDDeleteSound (song,true);//delete buffer too;
