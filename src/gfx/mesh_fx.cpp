@@ -62,6 +62,7 @@ bool MeshFX::Update(float howmuchtime) {
     //    attenuate[1]*=1+2*delta*GetElapsedTime();
   } else {
     attenuate[2]-=delta*howmuchtime;
+	if (attenuate[2]<delta) attenuate[2]=delta/4;
     //    attenuate[1]-=1.25*delta*GetElapsedTime();
     //    attenuate[2]*=1- .5*delta*GetElapsedTime();
     //    attenuate[1]*=1- .5*delta*GetElapsedTime();
@@ -72,7 +73,7 @@ bool MeshFX::Update(float howmuchtime) {
 void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float damage, const GFXColor &col) {
   
   Vector loc(pnt+norm);
-  if (!(norm.i||norm.j||norm.k)) {
+  /*if (!(norm.i||norm.j||norm.k)) */{
     loc = pnt;
     loc.Normalize();
     loc*=(1+rSize());
