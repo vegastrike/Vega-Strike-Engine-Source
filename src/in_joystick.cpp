@@ -187,7 +187,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
 #else
 #ifdef HAVE_SDL
   num_joysticks=SDL_NumJoysticks() ;
-  if (which>=num_joysticks) {
+  if (which>=num_joysticks&&which!=MOUSE_JOYSTICK) {
     joy_available=false;
     return;
   }
