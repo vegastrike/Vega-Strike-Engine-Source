@@ -524,7 +524,7 @@ string VegaConfig::getVariable(easyDomNode *section,string name,string defaultva
     }
   }
 
-  cout << "WARNING: no var named " << name << " using default: " << defaultval << endl;
+  cout << "WARNING: no var named " << name << " in section " << section->attr_value("name") << " using default: " << defaultval << endl;
 
   return defaultval;
  

@@ -187,6 +187,8 @@ void Mission::checkFlightgroup(easyDomNode *node){
   fg->ainame=ainame;
   fg->flightgroup_nr=number_of_flightgroups;
   fg->ship_nr=number_of_ships;
+  fg->waves=waves_i;
+  fg->nr_ships=nr_ships_i;
   fg->domnode=node;
 
   for(int i=0;i<3;i++){
@@ -197,7 +199,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
   flightgroups.push_back(fg);
 
   number_of_flightgroups++;
-  number_of_ships++;
+  number_of_ships+=nr_ships_i;
 }
 
 bool Mission::doPosition(easyDomNode *node,float pos[3]){

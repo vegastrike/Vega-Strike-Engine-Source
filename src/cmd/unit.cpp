@@ -196,7 +196,7 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   meshdata[nummesh]=NULL;//turn off shield
   calculate_extent();
 }
-Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
+Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *flightgroup) {
 	Init();
 	SubUnit = SubU;
 	this->faction = faction;
@@ -253,7 +253,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 		switch(type)
 		{
 		default:
-		  subunits[unitcount] = new Unit (unitfilename,false,true,faction);
+		  subunits[unitcount] = new Unit (unitfilename,false,true,faction,flightgroup);
 		}
 		subunits[unitcount]->SetPosition(Vector(x,y,z));
 	}

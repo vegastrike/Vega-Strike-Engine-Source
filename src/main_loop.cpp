@@ -321,7 +321,10 @@ void createObjects() {
   ****/
   BindKey (1,CoordinateSelect::MouseMoveHandle);
 
-  int numf=mission->number_of_flightgroups;
+  //int numf=mission->number_of_flightgroups;
+  int numf=mission->number_of_ships;
+
+  //  cout << "numships: " << numf << endl;
 
   fighters = new Unit * [numf];
   int * tmptarget = new int [numf];
@@ -333,11 +336,11 @@ void createObjects() {
   
   char fightername [1024]="hornet.xunit";
   int a=0;
-    vector<Flightgroup *>::const_iterator siter;
-    vector<Flightgroup *> fg=mission->flightgroups;
 
-  for(siter= fg.begin() ; siter!=fg.end() ; siter++,a++){
-    Vector pox (1000+150*a,100*a,100);
+  vector<Flightgroup *>::const_iterator siter;
+  vector<Flightgroup *> fg=mission->flightgroups;
+
+  for(siter= fg.begin() ; siter!=fg.end() ; siter++){
 
     //cout << "loop " << endl;
 
@@ -346,20 +349,13 @@ void createObjects() {
     string fg_name=fg->name;
     string fullname=fg->type;// + ".xunit";
 
-    //cout << "loop " << fg_name << endl;
+    //    cout << "loop " << fg_name << endl;
 
     strcpy(fightername,fullname.c_str());
 	//	strcat(fightername,".xunit");
 
-	pox.i=fg->pos[0];
-	pox.j=fg->pos[1];
-	pox.k=fg->pos[2];
-
-	string ainame=fg->ainame;
-
-	tmptarget[a]=1; // that should not be in xml?
-
-	easyDomNode *dom=fg->domnode;
+    string ainame=fg->ainame;
+    easyDomNode *dom=fg->domnode;
 
 #if 0
 	string strtarget=fg->ordermap["tmptarget"];
@@ -380,40 +376,55 @@ void createObjects() {
 
 #endif
 
-      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
-	pox.i=rand()*10000./RAND_MAX-5000;
-	pox.j=rand()*10000./RAND_MAX-5000;
-	pox.k=rand()*10000./RAND_MAX-5000;
+	float fg_radius=0.0;
 
-      }
+	for(int s=0;s < fg->nr_ships;s++){
+	  Vector pox (1000+150*a,100*a,100);
 
-      //cout << "before unit" << endl;
+	  pox.i=fg->pos[0]+s*fg_radius*3;
+	  pox.j=fg->pos[1]+s*fg_radius*3;
+	  pox.k=fg->pos[2]+s*fg_radius*3;
+	  //	  cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
+
+	  if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
+	    pox.i=rand()*10000./RAND_MAX-5000;
+	    pox.j=rand()*10000./RAND_MAX-5000;
+	    pox.k=rand()*10000./RAND_MAX-5000;
+
+	  }
 
 
-    fighters[a] = new Unit(fightername, true, false,tmptarget[a]);
-    fighters[a]->SetPosition (pox);
-    
-    //    fighters[a]->SetAI(new Order());
+	tmptarget[a]=1; // that should not be in xml?
 
-    // cout << "before ai" << endl;
+	//	  cout << "before unit" << endl;
+	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg);
+	  fighters[a]->SetPosition (pox);
+	  
+	  fg_radius=fighters[a]->rSize();
 
-    if (a!=0) {
-      string ai_agg=ainame+".agg.xml";
-      string ai_int=ainame+".int.xml";
+	  //    fighters[a]->SetAI(new Order());
 
-      char ai_agg_c[1024];
-      char ai_int_c[1024];
-      strcpy(ai_agg_c,ai_agg.c_str());
-      strcpy(ai_int_c,ai_int.c_str());
-      //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+	  // cout << "before ai" << endl;
 
-      fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-      for (int kk=0;kk<fighters[a]->getNumSubUnits();kk++) {
-	fighters[a]->EnqueueAI (new Orders::FireAt(.2,15),kk);
-	fighters[a]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
-      }
-    }
-    _Universe->activeStarSystem()->AddUnit(fighters[a]);
+	  if (a!=0) {
+	    string ai_agg=ainame+".agg.xml";
+	    string ai_int=ainame+".int.xml";
+
+	    char ai_agg_c[1024];
+	    char ai_int_c[1024];
+	    strcpy(ai_agg_c,ai_agg.c_str());
+	    strcpy(ai_int_c,ai_int.c_str());
+	    //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+
+	    fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
+	    for (int kk=0;kk<fighters[a]->getNumSubUnits();kk++) {
+	      fighters[a]->EnqueueAI (new Orders::FireAt(.2,15),kk);
+	      fighters[a]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
+	    }
+	  }
+	  _Universe->activeStarSystem()->AddUnit(fighters[a]);
+	  a++;
+	} // for nr_ships
   } // end of for flightgroups
 
   //  for (a=0;a<numf;a++) {

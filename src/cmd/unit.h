@@ -32,6 +32,9 @@ struct GFXColor;
 #include "gfx/vdu.h"
 
 #include "xml_support.h"
+
+#include "mission.h"
+
 class Beam;
 class Animation;
 using namespace XMLSupport;
@@ -357,7 +360,7 @@ public:
   ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction)
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
   ///Creates a mesh from an XML file
-  Unit(const char *filename, bool SubUnit, bool xml, int faction);
+  Unit(const char *filename, bool SubUnit, bool xml, int faction, Flightgroup *flightgroup=NULL);
   virtual ~Unit();
   ///Changes currently selected weapon
   void ToggleWeapon (bool Missile);

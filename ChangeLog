@@ -1,3 +1,10 @@
+2001-10-27 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added section printout when warning for variables
+	* modified main_loop to use nr_ships
+	* modified Unit constructor to take a Flightgroup argument
+	
+	
 2001-10-25 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* fixed bug in joystick routines that caused it to fly wildly around

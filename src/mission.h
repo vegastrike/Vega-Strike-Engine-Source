@@ -39,13 +39,16 @@ using XMLSupport::AttributeList;
 
 class Flightgroup {
  public:
-  string name,faction,type,ainame;
-  int waves,nr_ships;
+  string name; // flightgroup name
+  string faction;
+  string type; // unit type
+  string ainame; // .agg.xml and .int.xml get appended to this
+  int waves,nr_ships; // number of waves, number of ships per wave
   float pos[3];
   float rot[3];
 
-  int flightgroup_nr;
-  int ship_nr;
+  int flightgroup_nr; // running fg number
+  int ship_nr; // total ships nr
 
   easyDomNode *domnode;
 
