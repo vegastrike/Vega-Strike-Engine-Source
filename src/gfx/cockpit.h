@@ -92,7 +92,8 @@ private:
   void DrawGauges(Unit * un);
   float cockpit_time;
  public:
-
+  float godliness;
+  void RestoreGodliness();
  ///Restores the view from the IDentity Matrix needed to draw sprites
   void RestoreViewPort();
   std::string GetUnitFileName () {return unitfilename;}

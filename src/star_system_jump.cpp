@@ -139,10 +139,13 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
       }
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
+#if 0
+      //happes in generate star ssytem now
       if (pendingjump[kk]->justloaded)
 	for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=GetElapsedTime()) {
 	  pendingjump[kk]->dest->Update(1);
 	}
+#endif
       iter = pendingjump[kk]->dest->getUnitList().createIterator();
       Unit * primary;
       while ((primary = iter.current())!=NULL) {

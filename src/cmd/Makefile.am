@@ -37,7 +37,8 @@ libcmd_a_SOURCES =				\
 	unit_interface.cpp		\
 	unit_xml.cpp  			\
 	unit_click.cpp			\
-	unit_physics.cpp				\
+	unit_physics.cpp		\
+	unit_repair.cpp			\
 	unit_weapon.cpp			\
 	weapon_xml.cpp			\
 	weapon_xml.h			\

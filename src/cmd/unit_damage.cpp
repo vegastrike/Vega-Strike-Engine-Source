@@ -322,7 +322,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (randnum>=.175) {
 			computer.radar.maxrange*=dam;
 		} else {
-			image->cockpit_damage[rand()%(1+Cockpit::NUMGAUGES+MAXVDUS)]*=dam;
+		  int which= rand()%(1+Cockpit::NUMGAUGES+MAXVDUS);
+		  image->cockpit_damage[which]*=dam;
+		  if (image->cockpit_damage[which]<.1) {
+		    image->cockpit_damage[which]=0;
+		  }
 		}
 		return;
 	}
@@ -429,8 +433,12 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 			this->maxenergy*=dam;
 		} else if (randnum>=.2) {
 			this->jump.energy*=(2-dam);
-		} else {
+		} else if (randnum>=.03){
 			this->jump.damage+=100*(1-dam);
+		} else {
+		  if (repair_droid>0) {
+		    repair_droid--;
+		  }
 		}
 		return;
 	}
@@ -480,9 +488,14 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
       AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
-	static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-	DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
-    hull -=damage;
+    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
+      static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
+      hull -=damage;
+    }else {
+      _Universe->AccessCockpit()->godliness-=damage;
+      DamageRandSys(rand01(),pnt);//get system damage...but live!
+    }
 
   }
   if (hull <0) {

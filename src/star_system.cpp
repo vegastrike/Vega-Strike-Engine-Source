@@ -457,7 +457,7 @@ void StarSystem::Draw(bool DrawCockpit) {
 
 
 extern float getTimeCompression();
-void StarSystem::Update(float priority ) {
+void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
 #ifdef UPDATEDEBUG
@@ -534,12 +534,14 @@ void StarSystem::Update(float priority ) {
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
-	for (unsigned int i=0;i<active_missions.size();i++) {
-	  if (active_missions[i]) {
-	    active_missions[i]->DirectorLoop();
-	    active_missions[i]->DirectorBenchmark();
+	  if (executeDirector) {
+	    for (unsigned int i=0;i<active_missions.size();i++) {
+	      if (active_missions[i]) {
+		active_missions[i]->DirectorLoop();
+		active_missions[i]->DirectorBenchmark();
+	      }
+	    }
 	  }
-	}
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	}
 #endif
@@ -586,7 +588,8 @@ void StarSystem::Update(float priority ) {
 #endif
 	if (this==_Universe->getActiveStarSystem(0)) {
 	  AccessCamera()->UpdateCameraSounds();
-	  muzak->Listen();
+	  if (muzak)
+	    muzak->Listen();
 	}
 	AccessCamera()->SetNebula(NULL);//Update physics should set this
 #ifdef UPDATEDEBUG

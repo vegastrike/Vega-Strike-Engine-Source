@@ -91,8 +91,9 @@ void Planet::AddSatellite (Unit * orbiter) {
 	satellites.prepend (orbiter);
 	orbiter->SetOwner (this);
 }
+extern Flightgroup * getStaticBaseFlightgroup(int faction);
 void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
-
+  //this function is OBSOLETE
   if (level>2) {
     UnitCollection::UnitIterator satiterator = satellites.createIterator();
 	  assert(satiterator.current()!=NULL);
@@ -104,7 +105,8 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
   } else {
     if (isunit==true) {
       Unit *sat_unit=NULL;
-      satellites.prepend(sat_unit=new Unit (filename, false, faction));
+      Flightgroup *fg = getStaticBaseFlightgroup(faction);
+      satellites.prepend(sat_unit=new Unit (filename, false, faction,"",fg,fg->ship_nr));
       sat_unit->setFullname(fullname);
       un_iter satiterator (satellites.createIterator());
       satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;

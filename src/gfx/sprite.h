@@ -40,7 +40,7 @@ class Sprite {
 public:
 	Sprite (const char *file, enum FILTER texturefilter=BILINEAR);
 	~Sprite();
-
+	bool LoadSuccess() {return surface!=NULL;}
 	void Draw();
 	void DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul);
 	void Rotate(const float &rad){ rotation += rad;};

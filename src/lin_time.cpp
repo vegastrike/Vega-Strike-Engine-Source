@@ -36,7 +36,7 @@ static double lasttime;
 #include <sys/time.h>
 #include <sys/types.h>
 #endif
-static double elapsedtime;
+static double elapsedtime=.1;
 static double timecompression=1;
 void inc_time_compression (int i, KBSTATE a) {
   if (a==PRESS) {

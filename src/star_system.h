@@ -116,8 +116,8 @@ class StarSystem {
   bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system);
   ///Draws a frame of action, interpolating between physics frames
   void Draw(bool DrawCockpit=true);
-  /// update a simulation atom
-  void Update(float priority); 
+  /// update a simulation atom ExecuteDirector must be false if star system is just loaded before mission is loaded
+  void Update(float priority, bool executeDirector); 
   ///re-enables the included lights and terrains
   void SwapIn ();
   ///Disables included lights and terrains

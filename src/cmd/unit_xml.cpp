@@ -142,8 +142,9 @@ namespace UnitXML {
       IMPORT,
       PRICESTDDEV,
       QUANTITYSTDDEV,
-	  DAMAGE,
-	  COCKPITDAMAGE
+      DAMAGE,
+      COCKPITDAMAGE,
+      REPAIRDROID
     };
 
   const EnumMap::Pair element_names[34] = {
@@ -183,7 +184,7 @@ namespace UnitXML {
 	EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE)
 
   };
-  const EnumMap::Pair attribute_names[81] = {
+  const EnumMap::Pair attribute_names[82] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -264,12 +265,13 @@ namespace UnitXML {
     EnumMap::Pair ("Quantity",QUANTITY),
     EnumMap::Pair ("PriceStdDev",PRICESTDDEV),
     EnumMap::Pair ("QuantityStdDev",QUANTITYSTDDEV),
-	EnumMap::Pair ("Damage",DAMAGE)
+    EnumMap::Pair ("Damage",DAMAGE),
+    EnumMap::Pair ("RepairDroid",REPAIRDROID)
 
   };
 
   const EnumMap element_map(element_names, 34);
-  const EnumMap attribute_map(attribute_names, 81);
+  const EnumMap attribute_map(attribute_names, 82);
 }
 
 using XMLSupport::EnumMap;
@@ -1244,6 +1246,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	  xml->hudimage=(*iter).value;
 	}
 	break;
+      case REPAIRDROID:
+	repair_droid = parse_float ((*iter).value);
+	break;
       default:
 	break;
       }
@@ -1424,7 +1429,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   {
     image->unitwriter->AddTag("Defense");
     image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
-    
+    image->unitwriter->AddElement("RepairDroid",ucharStarHandler,XMLType(&repair_droid));
     {
       image->unitwriter->AddTag ("Cloak");
       image->unitwriter->AddElement("missing",cloakHandler,XMLType(&cloaking));

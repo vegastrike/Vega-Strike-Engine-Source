@@ -27,7 +27,7 @@
 
 
 extern float rand01();
-
+#define SWITCH_CONST .9
 
 void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &col) {
 	GFXColorf(col);
@@ -277,8 +277,9 @@ void Cockpit::DrawBlips (Unit * un) {
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
-
+  if (Radar->LoadSuccess()) {
+    DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
+  }
   GFXPointSize (2);
   GFXBegin(GFXPOINT);
   while ((target = iter.current())!=NULL) {
@@ -331,8 +332,9 @@ void Cockpit::DrawEliteBlips (Unit * un) {
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
-
+  if (Radar->LoadSuccess()) {
+    DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
+  }
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       Vector localcoord;
@@ -452,9 +454,10 @@ void Cockpit::DrawGauges(Unit * un) {
         static Animation gauge_ani("static.ani",true,.1,BILINEAR);
         gauge_ani.DrawAsSprite(Radar);
       }*/
+      float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+NUMGAUGES)];
       if (gauge_time[i]>=0) {
-        if (cockpit_time>(gauge_time[i]+un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+NUMGAUGES)])) {
-	      if (rand01()>un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+NUMGAUGES)]) {
+        if (damage>.0001&&(cockpit_time>(gauge_time[i]+(1-damage)))) {
+	  if (rand01()>SWITCH_CONST) {
             gauge_time[i]=-cockpit_time;
           }
         } else {
@@ -462,8 +465,8 @@ void Cockpit::DrawGauges(Unit * un) {
           vdu_ani.DrawAsSprite(gauges[i]);	
         }
       } else {
-        if (cockpit_time>(((1-(-gauge_time[i]))+un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+NUMGAUGES)]))) {
-	      if (rand01()>un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+NUMGAUGES)]) {
+        if (cockpit_time>(((1-(-gauge_time[i]))+damage))) {
+	      if (rand01()>SWITCH_CONST) {
             gauge_time[i]=cockpit_time;
           }
         }
@@ -555,8 +558,15 @@ void Cockpit::Delete () {
   }
   Panel.clear();
 }
+void Cockpit::RestoreGodliness() {
+  static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics","player_godliness","0"));
+  godliness += maxgodliness;
+  if (godliness>maxgodliness)
+    godliness=maxgodliness;
+}
 Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+  RestoreGodliness();
   int i;
   for (i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
@@ -732,9 +742,10 @@ void Cockpit::Draw() {
 		static Animation radar_ani("round_static.ani",true,.1,BILINEAR);
 		radar_ani.DrawAsSprite(Radar);	
 	}*/
+	float damage =(un->GetImageInformation().cockpit_damage[0]);
       if (radar_time>=0) {
-        if (cockpit_time>(radar_time+un->GetImageInformation().cockpit_damage[0])) {
-	      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
+        if (damage>.001&&(cockpit_time>radar_time+(1-damage))) {
+	  if (rand01()>SWITCH_CONST) {
             radar_time=-cockpit_time;
           }
         } else {
@@ -742,8 +753,8 @@ void Cockpit::Draw() {
           radar_ani.DrawAsSprite(Radar);	
         }
       } else {
-        if (cockpit_time>((1-(-radar_time))+un->GetImageInformation().cockpit_damage[0])) {
-	      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
+        if (cockpit_time>((1-(-radar_time))+damage)) {
+	  if (rand01()>SWITCH_CONST) {
             radar_time=cockpit_time;
           }
         }
@@ -761,23 +772,24 @@ void Cockpit::Draw() {
 	if (vdu[vd]) {
 	  vdu[vd]->Draw(un,textcol);
 	  GFXColor4f (1,1,1,1);
-      if (vdu_time[vd]>=0) {
-        if (cockpit_time>(vdu_time[vd]+un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)])) {
-	      if (rand01()>un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)]) {
-            vdu_time[vd]=-cockpit_time;
-          }
-        } else {
-          static Animation vdu_ani("static.ani",true,.1,BILINEAR);
-		  GFXEnable(TEXTURE0);
-          vdu_ani.DrawAsSprite(vdu[vd]);	
-        }
-      } else {
-        if (cockpit_time>((1-(-vdu_time[vd]))+un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)])) {
-	      if (rand01()>un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)]) {
-            vdu_time[vd]=cockpit_time;
-          }
-        }
-      }
+	  float damage = un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)];
+	  if (vdu_time[vd]>=0) {
+	    if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
+	      if (rand01()>SWITCH_CONST) {
+		vdu_time[vd]=-cockpit_time;
+	      }
+	    } else {
+	      static Animation vdu_ani("static.ani",true,.1,BILINEAR);
+	      GFXEnable(TEXTURE0);
+	      vdu_ani.DrawAsSprite(vdu[vd]);	
+	    }
+	  } else {
+	    if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
+	      if (rand01()>SWITCH_CONST) {
+		vdu_time[vd]=cockpit_time;
+	      }
+	    }
+	  }
 	  //process VDU, damage VDU, targetting VDU
 	}
       }

@@ -183,7 +183,7 @@ void Universe::StartDraw()
   static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
   float systime=nonactivesystemtime;
   for (unsigned int i=0;i<star_system.size()&&i<numrunningsystems;i++) {
-    star_system[i]->Update((i==0)?1:systime/i);
+    star_system[i]->Update((i==0)?1:systime/i,true);
   }
   StarSystem::ProcessPendingJumps();
   //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  

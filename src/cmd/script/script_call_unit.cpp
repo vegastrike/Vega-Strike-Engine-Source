@@ -752,12 +752,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     }
     else if(method_id==CMT_UNIT_incrementCargo){
       float percentagechange= getFloatArg(node,mode,1);
+      int quantity= getIntArg(node,mode,2);
       if(mode==SCRIPT_RUN){
 	if (my_unit->numCargo()>0) {
 	  unsigned int index;
 	  index = rand()%my_unit->numCargo();
 	  Cargo c(my_unit->GetCargo(index));	  
-	  c.quantity=1;
+	  c.quantity=quantity;
 	  if (my_unit->CanAddCargo(c)) {
 	    my_unit->AddCargo(c);
 	    my_unit->GetCargo(index).price*=percentagechange;

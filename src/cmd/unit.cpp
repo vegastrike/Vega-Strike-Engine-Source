@@ -147,6 +147,7 @@ void Unit::SetNebula (Nebula * neb) {
 }
 void Unit::Init()
 {
+  repair_droid=0;
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;

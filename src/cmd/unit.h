@@ -288,6 +288,8 @@ class Unit {
     ///What percentage leaks (divide by 100%)
     char leak; 
   } shield;
+  ///holds the info for the repair bot type. 0 is no bot;
+  unsigned char repair_droid;
   ///regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
   void RegenShields();
   ///The structual integ of the current unit
@@ -654,6 +656,8 @@ public:
   void PitchTorque(float amt);
   ///Applies a roll of amt
   void RollTorque(float amt);
+  ///executes a repair if the repair bot is up to it
+  void Repair();
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
   virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame

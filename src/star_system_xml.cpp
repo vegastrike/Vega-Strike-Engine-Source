@@ -216,6 +216,54 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
   }
   free (tmp);
 } 
+void setStaticFlightgroup (vector<Flightgroup *> &fg, const std::string &nam,int faction) {
+  while (faction>=(int)fg.size()) {
+    fg.push_back(new Flightgroup());
+    fg.back()->ship_nr=0;
+  }
+  if (fg[faction]->ship_nr==0) {
+    fg[faction]->pos[0]=fg[faction]->pos[1]=fg[faction]->pos[2]=0;
+    fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
+    fg[faction]->waves=1;
+    fg[faction]->nr_ships=0;
+    fg[faction]->unittype=Flightgroup::UNIT;
+    fg[faction]->terrain_nr=-1;
+    fg[faction]->ainame="default";
+    fg[faction]->faction=_Universe->GetFaction(faction);
+    fg[faction]->type="Base";
+    fg[faction]->ship_nr=0;
+    fg[faction]->nr_waves_left=0;
+    fg[faction]->nr_ships_left=0;
+    fg[faction]->domnode=NULL;
+    fg[faction]->name=nam;
+  }
+  fg[faction]->nr_ships++;
+  fg[faction]->ship_nr++;
+  fg[faction]->nr_ships_left++;
+  fg[faction]->flightgroup_nr++;
+}
+Flightgroup *getStaticBaseFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
+  setStaticFlightgroup (fg,"Base",faction);
+  return fg[faction];
+}
+
+Flightgroup *getStaticNebulaFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;
+  setStaticFlightgroup (fg,"Nebula",faction);
+  return fg[faction];
+}
+Flightgroup *getStaticAsteroidFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;
+  setStaticFlightgroup (fg,"Asteroid",faction);
+  return fg[faction];
+}
+Flightgroup *getStaticUnknownFlightgroup (int faction) {
+  static vector <Flightgroup *> fg;
+  setStaticFlightgroup (fg,"Unknown",faction);
+  return fg[faction];
+}
+
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
@@ -708,12 +756,15 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  Unit * un;
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
-		  plan->AddSatellite(un=new Unit(filename,false,faction));
-		  un->setFullname(fullname);
+	    Flightgroup *fg =getStaticBaseFlightgroup (faction);
+	    plan->AddSatellite(un=new Unit(filename,false,faction,"",fg,fg->ship_nr-1));
+	    un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
-		  plan->AddSatellite(un=new Nebula(filename,false,faction));			
+	    Flightgroup *fg =getStaticNebulaFlightgroup (faction);
+	    plan->AddSatellite(un=new Nebula(filename,false,faction,fg,fg->ship_nr-1));			
 	  } else if (elem==ASTEROID) {
-	    plan->AddSatellite (un=new Asteroid (filename,faction,NULL,0,scalex));
+	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
+	    plan->AddSatellite (un=new Asteroid (filename,faction,fg,fg->ship_nr-1,scalex));
 	  } else if (elem==ENHANCEMENT) {
 	    plan->AddSatellite (un=new Enhancement (filename,faction,string("")));
 	  }
@@ -751,13 +802,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  }
       }else {
    	    if (elem==UNIT) {
-	      Unit *moon_unit=new Unit(filename,false,faction);
+	      Flightgroup *fg =getStaticBaseFlightgroup (faction);
+	      Unit *moon_unit=new Unit(filename,false,faction,"",fg,fg->ship_nr-1);
 	      moon_unit->setFullname(fullname);
 	      xml->moons.push_back((Planet *)moon_unit);
 	    }else if (elem==NEBULA){
-	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction));
+	      Flightgroup *fg =getStaticNebulaFlightgroup (faction);
+	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction,fg,fg->ship_nr-1));
 	    } else if (elem==ASTEROID){
-	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,NULL,0,scalex));
+	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
+	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,fg,fg->ship_nr-1,scalex));
 	    } else if (elem==ENHANCEMENT) {
 	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction,string("")));
 	    }

@@ -7,6 +7,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+#include "lin_time.h"
 using namespace XMLSupport;
 using namespace GalaxyXML;
 string RemoveDotSystem (const char *input) {
@@ -326,7 +327,12 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   StarSystem * ss = new StarSystem (file,center);
 
   LoadStarSystem (ss);
+
   pushActiveStarSystem(ss);
+  for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=.001+GetElapsedTime()) {
+    //make sure the planets are aligned right before calling director
+    ss->Update(1,false);
+  }
   // notify the director that a new system is loaded (gotta have at least one active star system)
   StarSystem *old_script_system=script_system;
 

@@ -290,7 +290,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
   if (docked&DOCKING_UNITS) {
     PerformDockingOperations();
   }
-
+  Repair();
   if (fuel<0)
     fuel=0;
   if (cloaking>=cloakmin) {
