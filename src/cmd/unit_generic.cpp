@@ -1694,7 +1694,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	if (target->isUnit()==PLANETPTR) {
 		un_iter i = target->getSubUnits();
 		Unit * targ =*i;
-		if (targ)
+		if (targ&&0==targ->graphicOptions.FaceCamera)
 			return AutoPilotTo(targ,ignore_energy_requirements,recursive_level);
 	}
 	//static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
