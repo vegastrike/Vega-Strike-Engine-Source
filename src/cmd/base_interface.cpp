@@ -1,5 +1,14 @@
 #include "base.h"
 #include "gldrv/winsys.h"
+#include "vs_path.h"
+#ifdef BASE_MAKER
+ #include <stdio.h>
+ #ifdef _WIN32
+  #include <windows.h>
+ #endif
+static char makingstate=0;
+#endif
+
 
 Base::Room::~Room () {
 	int i;
@@ -9,16 +18,25 @@ Base::Room::~Room () {
 	for (i=0;i<texes.size();i++) {
 		delete texes[i];
 	}
+	for (i=0;i<ships.size();i++) {
+		delete ships[i];
+	}
 }
 
 Base::Room::Room () {
-	//Do Nothing!
+//		Do nothing...
 }
 
 void Base::Room::Draw () {
-//	for (int i=0;i<texes.size();i++) {
-		texes[0]->Draw();
-//	}
+	int i;
+	for (i=0;i<texes.size();i++) {
+		texes[i]->Draw();
+	}
+//	GFXHudMode (GFXFALSE);
+	for (i=0;i<ships.size();i++) {
+		CurrentBase->caller->DrawNow(*ships[i]);
+	}
+//	GFXHudMode (GFXTRUE);
 }
 
 int Base::Room::MouseOver (float x, float y) {
@@ -63,6 +81,102 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 			}
 		}
 	} else {
+#ifdef BASE_MAKER
+		if (state==WS_MOUSE_UP) {
+			char input [201];
+			char *str;
+			if (button==WS_RIGHT_BUTTON)
+				str="Please create a file named stdin.txt and type\nin the sprite file that you wish to use.";
+			else if (button==WS_MIDDLE_BUTTON)
+				str="Please create a file named stdin.txt and type\nin the type of room followed by arguments for the room followed by text in quotations:\n1 ROOM# \"TEXT\"\n2 \"TEXT\"\n3 vector<MODES>.size vector<MODES> \"TEXT\"";
+			else
+				return;
+ #ifdef _WIN32
+			int ret=MessageBox(NULL,str,"Input",MB_OKCANCEL);
+			int index;
+			int rmtyp;
+			if (ret==1) {
+				if (button==WS_RIGHT_BUTTON) {
+					FILE *fp=fopen("stdin.txt","rt");
+					fscanf(fp,"%200s",input);
+					fclose(fp);
+				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
+					FILE *fp=fopen("stdin.txt","rt");
+	 				fscanf(fp,"%d",&rmtyp);
+					switch(rmtyp) {
+					case 1:
+						links.push_back(new Goto());
+						fscanf(fp,"%d",&((Goto*)links.back())->index);
+						break;
+					case 2:
+						links.push_back(new Launch());
+						break;
+					case 3:
+						links.push_back(new Comp());
+						fscanf(fp,"%d",&index);
+						for (int i=0;i<index&&(!feof(fp));i++) {
+							fscanf(fp,"%d",&ret);
+							((Comp*)links.back())->modes.push_back((UpgradingInfo::BaseMode)ret);
+						}
+						break;
+					}
+					fscanf(fp,"%200s",input);
+					input[200]=input[199]='\0';
+					links.back()->text=string(input);
+					fclose(fp);
+				}
+ #else
+			{
+				printf("\n%s\n",str);
+				if (button==WS_RIGHT_BUTTON) {
+	 				scanf("%200s",input);
+				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
+	 				scanf("%d",rmtyp);
+					switch(rmtyp) {
+					case 1:
+						links.push_back(new Goto());
+						scanf("%d",&((Goto*)links.back())->index);
+						break;
+					case 2:
+						links.push_back(new Launch());
+						break;
+					case 3:
+						links.push_back(new Comp());
+						scanf("%d",&index);
+						for (int i=0;i<index;i++) {
+							scanf("%d",&ret);
+							((Comp*)links.back())->modes.push_back((UpgradingInfo::BaseMode)ret);
+						}
+						break;
+					}
+					scanf("%200s",input);
+					input[200]=input[199]='\0';
+					links.back()->text=string(input);
+				}
+ #endif
+				if (button==WS_RIGHT_BUTTON) {
+					input[200]=input[199]='\0';
+					texfiles.push_back(string(input));
+					texes.push_back(new Sprite(input));
+					texes.back()->SetPosition(x,y);
+				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
+					links.back()->x=x;
+					links.back()->y=y;
+					links.back()->wid=0;
+					links.back()->hei=0;
+					makingstate=1;
+				} else if (button==WS_MIDDLE_BUTTON&&makingstate==1) {
+					links.back()->wid=x-links.back()->x;
+					if (links.back()->wid<0)
+						links.back()->wid=-links.back()->wid;
+					links.back()->hei=y-links.back()->y;
+					if (links.back()->hei<0)
+						links.back()->hei=-links.back()->hei;
+					makingstate=0;
+				}
+			}
+		}
+#else
 		if (state==WS_MOUSE_UP) {
 			Link *curlink=links[base->curlinkindex%links.size()];
 			base->curlinkindex++;
@@ -71,6 +185,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 			winsys_warp_pointer(x,y);
 			MouseOverWin(x,y);
 		}
+#endif
 	}
 }
 
@@ -108,13 +223,26 @@ void Base::MouseOverWin (int x, int y) {
 }
 
 void Base::GotoLink (int linknum) {
-	curlinkindex=0;
-	curroom=linknum;
-	curtext.SetText(rooms[curroom]->deftext);
-	drawlinkcursor=false;
+	if (rooms.size()>linknum) {
+		curlinkindex=0;
+		curroom=linknum;
+		curtext.SetText(rooms[curroom]->deftext);
+		drawlinkcursor=false;
+	} else {
+		fprintf(stderr,"\nWARNING: base room #%d tried to go to an invalid index: #%d",curroom,linknum);
+	}
 }
 
 Base::~Base () {
+#ifdef BASE_MAKER
+	vschdir("bases");
+	FILE *fp=fopen("NEW_BASE.xbase","wt");
+	if (fp) {
+		EndXML(fp);
+		fclose(fp);
+	}
+	vscdup();
+#endif
 	CurrentBase=0;
 	restore_main_loop();
 	for (int i=0;i<rooms.size();i++) {
@@ -135,11 +263,11 @@ extern string getCargoUnitName (const char *name);
 
 void Unit::UpgradeInterface(Unit * baseun) {
 	if (!Base::CurrentBase) {
-	  string basename = (getCargoUnitName(baseun->getFullname().c_str())+".xbase");
+	  string basename = (getCargoUnitName(baseun->getFullname().c_str()));
 	  if (baseun->isUnit()!=PLANETPTR) {
 	    basename = baseun->name;
 	  }
-	  Base *base=new Base (basename.c_str(),baseun,this);
+	  Base *base=new Base ((basename+".xbase").c_str(),baseun,this);
 	  base->InitCallbacks();
 	  SetSoftwareMousePosition(0,0);
 	}
@@ -153,6 +281,15 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 	curtext.GetCharSize(x,y);
 	curtext.SetCharSize(x*2,y*2);
 	LoadXML(basefile);
+	if (!rooms.size()) {
+		fprintf(stderr,"\nERROR: there are no rooms...");
+		rooms.push_back(new Room ());
+		rooms.back()->links.push_back(new Room::Launch ());
+		rooms.back()->links.back()->x=rooms.back()->links.back()->y=-1;
+		rooms.back()->links.back()->wid=rooms.back()->links.back()->hei=2;
+		rooms.back()->deftext="ERROR: No rooms specified...";
+		rooms.back()->links.back()->text="ERROR: No rooms specified...";
+	}
 	GotoLink(0);
 }
 

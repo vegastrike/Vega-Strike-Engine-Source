@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "base.h"
 #include "xml_support.h"
+#include "vs_path.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -14,6 +15,7 @@ namespace BaseXML {
 		UNKNOWN=UpgradingInfo::MAXMODE,
 		BASE,
 		ROOM,
+		SHIP,
 		LINK,
 		COMP,
 		LAUNCH,
@@ -24,11 +26,18 @@ namespace BaseXML {
 		MODES,
 		X,
 		Y,
+		Z,
+		RI,
+		RJ,
+		RK,
+		QI,
+		QJ,
+		QK,
 		WID,
 		HEI
 	};
-	const int NUM_ELEMENTS=7;
-	const int NUM_ATTRIBUTES=17;
+	const int NUM_ELEMENTS=8;
+	const int NUM_ATTRIBUTES=24;
 	const EnumMap::Pair element_names[NUM_ELEMENTS] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
 		EnumMap::Pair ("Base", BASE),
@@ -36,7 +45,8 @@ namespace BaseXML {
 		EnumMap::Pair ("Link", LINK),
 		EnumMap::Pair ("Comp", COMP),
 		EnumMap::Pair ("Launch", LAUNCH),
-		EnumMap::Pair ("Texture", TEXTURE)
+		EnumMap::Pair ("Texture", TEXTURE),
+		EnumMap::Pair ("Ship", SHIP)
 	};
 	const EnumMap::Pair attribute_names[NUM_ATTRIBUTES] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -54,6 +64,13 @@ namespace BaseXML {
 		EnumMap::Pair ("Modes", MODES),
 		EnumMap::Pair ("x", X),
 		EnumMap::Pair ("y", Y),
+		EnumMap::Pair ("z", Z),
+		EnumMap::Pair ("ri", RI),
+		EnumMap::Pair ("rj", RJ),
+		EnumMap::Pair ("rk", RK),
+		EnumMap::Pair ("qi", QI),
+		EnumMap::Pair ("qj", QJ),
+		EnumMap::Pair ("qk", QK),
 		EnumMap::Pair ("wid", WID),
 		EnumMap::Pair ("hei", HEI)
 	};
@@ -95,7 +112,8 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 	AttributeList::const_iterator iter;
 	Names elem = (Names)element_map.lookup(name);
 	int lookup;
-	float x,y;
+	float x,y,z;
+	Vector P,Q,R;
 	switch(elem) {
 	case LINK:
 		if (unitlevel==2) {
@@ -138,6 +156,9 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 			for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 				switch(attribute_map.lookup((*iter).name)) {
 				case SPRITEFILE:
+#ifdef BASE_MAKER
+					rooms.back()->texfiles.push_back((*iter).value);
+#endif
 					rooms.back()->texes.push_back(new Sprite(((*iter).value).c_str()));
 					break;
 				case X:
@@ -149,6 +170,44 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 				}
 			}
 			rooms.back()->texes.back()->SetPosition(x,y);
+		}
+		break;
+	case SHIP:
+		if (unitlevel==2) {
+			for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+				switch(attribute_map.lookup((*iter).name)) {
+				case X:
+					x=parse_float((*iter).value);
+					break;
+				case Y:
+					y=parse_float((*iter).value);
+					break;
+				case Z:
+					z=parse_float((*iter).value);
+					break;
+				case RI:
+					R.i=parse_float((*iter).value);
+					break;
+				case RJ:
+					R.j=parse_float((*iter).value);
+					break;
+				case RK:
+					R.k=parse_float((*iter).value);
+					break;
+				case QI:
+					Q.i=parse_float((*iter).value);
+					break;
+				case QJ:
+					Q.j=parse_float((*iter).value);
+					break;
+				case QK:
+					Q.k=parse_float((*iter).value);
+					break;
+				}
+			}
+			P=Q.Cross(R);
+			P.Normalize();
+			rooms.back()->ships.push_back(new Matrix(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,QVector(x,y,z)));
 		}
 		break;
 	case ROOM:
@@ -185,7 +244,9 @@ void Base::LoadXML(const char * filename) {
   unitlevel=0;
   const int chunk_size = 16384;
   cout << "Base::LoadXML " << filename << endl;
+  vschdir("bases");
   FILE * inFile = fopen (filename, "r");
+  vscdup();
   if(!inFile) {
 	assert(0);
 	return;

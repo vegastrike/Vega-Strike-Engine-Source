@@ -4,6 +4,9 @@
 #include <string>
 #include "unit_interface.h"
 #include "gfx/hud.h"
+#include <stdio.h>
+
+#define BASE_MAKER
 
 class Texture;
 
@@ -13,21 +16,38 @@ class Base {
 			float x,y,wid,hei;
 			std::string text;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
 		};
 		struct Goto : public Link {
 			int index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
 		};
 		struct Comp : public Link {
 			vector <UpgradingInfo::BaseMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
 		};
 		struct Launch : public Link {
 			virtual void Click (::Base* base,float x, float y, int button, int state);
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
 		};
 		std::string deftext;
 		std::vector <Link*> links;
 		std::vector <Sprite*> texes;
+		std::vector <Matrix*> ships;
+#ifdef BASE_MAKER
+		std::vector <string> texfiles;
+		void EndXML(FILE *fp);
+#endif
 		void Draw ();
 		void Click (::Base* base,float x, float y, int button, int state);
 		int MouseOver (float x, float y);
@@ -46,6 +66,9 @@ public:
 	static bool CallComp;
 	Unit *caller;
 	Unit *baseun;
+#ifdef BASE_MAKER
+	void EndXML(FILE *fp);
+#endif
 	void GotoLink(int linknum);
 	void InitCallbacks ();
 	void CallCommonLinks (std::string name, std::string value);
