@@ -168,7 +168,7 @@ public:
         Vector &Q(){return q;};
         Vector &R(){return r;};
 
-	bool queryCalculatePhysics() { return calculatePhysics; }
+	inline bool queryCalculatePhysics() { return calculatePhysics; }
 	void ExecuteAI();
 };
 
