@@ -14,7 +14,7 @@ struct default_result_converter::apply<Unit *>
 	typedef default_result_converter::apply<UnitWrapper>::type type;
 };
 
-namespace converter{
+/*namespace converter{
 
 template <>
 struct arg_rvalue_from_python <Vector>
@@ -59,6 +59,8 @@ private:
 };
 
 }
+*/
+
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #else

@@ -7,7 +7,8 @@
 #include <compile.h>
 #include <eval.h>
 #ifdef USE_BOOST_129
-#include <boost/python/class.hpp>
+#include <boost/python.hpp>
+#include <boost/python/converter/from_python.hpp>
 #else
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
@@ -244,6 +245,31 @@ PYTHON_END_CLASS(VS,Unit)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(Unit) 
 */
+#ifdef USE_BOOST_129
+static void* Vector_convertible(PyObject* p) {
+	return PyTuple_Check(p)?p:0;
+}
+
+static void Vector_construct(PyObject* source, boost::python::converter::rvalue_from_python_stage1_data* data) {
+	void* const storage = ((boost::python::converter::rvalue_from_python_storage<Vector>*)data)->storage.bytes;
+	new (storage) Vector(0,0,0);
+	// Fill in QVector values from source tuple here
+	// details left to reader.
+	Vector * vec = (Vector *) storage;
+	PyArg_ParseTuple(source,"fff",&vec->i,&vec->j,&vec->k);
+	data->convertible = storage;
+}
+
+static void QVector_construct(PyObject* source, boost::python::converter::rvalue_from_python_stage1_data* data) {
+	void* const storage = ((boost::python::converter::rvalue_from_python_storage<QVector>*)data)->storage.bytes;
+	new (storage) QVector(0,0,0);
+	// Fill in QVector values from source tuple here
+	// details left to reader.
+	QVector * vec = (QVector *) storage;
+	PyArg_ParseTuple(source,"ddd",&vec->i,&vec->j,&vec->k);
+	data->convertible = storage;
+}
+#endif
 void Python::init() {
 
   static bool isinit=false;
@@ -254,6 +280,10 @@ void Python::init() {
 // initialize python library
   Py_Initialize();
   initpaths();
+#ifdef USE_BOOST_129
+  boost::python::converter::registry::insert(Vector_convertible, QVector_construct, boost::python::type_id<QVector>());
+	boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
+#endif
 	InitBriefing ();
 	InitVS ();
 	fprintf (stderr,"testing VS random");
