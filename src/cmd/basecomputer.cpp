@@ -295,26 +295,31 @@ BaseComputer::~BaseComputer(void) {
 }
 
 GFXColor BaseComputer::getColorForGroup(std::string id) {
-#ifndef USE_FACTION_GUI_BACKGROUND_COLOR
-	const float *stuff=FactionUtil::GetSparkColor(m_base.GetUnit()->faction);
-	return GFXColor(stuff[0],stuff[1],stuff[2]);
-#else
-	if (id=="CargoGroup") {
-		return GFXColor(0,0,1);
-	} else if (id=="NewsGroup") {
-		return GFXColor(1,0,1);
-	} else if (id=="UpgradeGroup") {
-		return GFXColor(0,1,0);
-	} else if (id=="PlayerInfoGroup") {
-		return GFXColor(0,1,1);
-	} else if (id=="MissionsGroup") {
-		return GFXColor(1,0,0);
-	} else if (id=="ShipDealerGroup") {
-		return GFXColor(1,1,0);
+	static bool use_faction_background=XMLSupport::parse_bool(vs_config->getVariable("graphics","use_faction_gui_background_color","true"));
+	if (use_faction_background) {
+		int fac=m_base.GetUnit()->faction;
+		if (FactionUtil::GetFactionName(fac)=="neutral") {
+			fac=FactionUtil::GetFactionIndex(_Universe->getGalaxyProperty(UniverseUtil::getSystemFile(),"faction"));
+		}
+		const float *stuff=FactionUtil::GetSparkColor(fac);
+		return GFXColor(stuff[0],stuff[1],stuff[2]);
 	} else {
-		return GFXColor(0,0,0);
+		if (id=="CargoGroup") {
+			return GFXColor(0,0,1);
+		} else if (id=="NewsGroup") {
+			return GFXColor(1,0,1);
+		} else if (id=="UpgradeGroup") {
+			return GFXColor(0,1,0);
+		} else if (id=="PlayerInfoGroup") {
+			return GFXColor(0,1,1);
+		} else if (id=="MissionsGroup") {
+			return GFXColor(1,0,0);
+		} else if (id=="ShipDealerGroup") {
+			return GFXColor(1,1,0);
+		} else {
+			return GFXColor(0,0,0);
+		}
 	}
-#endif
 }
 
 // Hack that constructs controls in code.

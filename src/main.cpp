@@ -336,7 +336,7 @@ bool GetStarSystemLoading () {
 void SetSplashScreen(Animation * ss) {
   SplashScreen=ss;
 }
-void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen) {
+void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
 
   static Animation *ani=NULL;
   if (!BootstrapMyStarSystemLoading) {
@@ -371,7 +371,7 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXLoadMatrixModel (tmp);
   GFXBeginScene();
 
-  bs_tp->SetPos (x,y);
+  bs_tp->SetPos (-.99,-.97); // Leave a little bit of room for the bottoms of characters.
   bs_tp->SetCharSize (.4,.8);
   ScaleMatrix (tmp,Vector (6500,6500,0));
   GFXLoadMatrixModel (tmp);
@@ -433,7 +433,7 @@ void bootstrap_first_loop() {
     SplashScreen = new Animation (s[time(NULL)%s.size()].c_str(),0);
     bs_tp=new TextPlane();
   }
-  bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
+  bootstrap_draw ("Vegastrike Loading...",SplashScreen);
   
   if (i++>4) {
     _Universe->Loop(bootstrap_main_loop);
@@ -455,7 +455,7 @@ void bootstrap_main_loop () {
     //    if (SplashScreen)
     //      delete SplashScreen;
     //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
-    bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
+    bootstrap_draw ("Vegastrike Loading...",SplashScreen);
   if (g_game.music_enabled) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
 	  static bool isconsole=XMLSupport::parse_bool(vs_config->getVariable("audio","music_in_console","true"));

@@ -2,7 +2,7 @@
 #define _MAIN_LOOP_H_
 #include "in.h"
 #include "cmd/unit_generic.h"
-void bootstrap_draw (const std::string &message, float x=-.13, float y=0, Animation * SplashScreen=NULL);
+void bootstrap_draw (const std::string &message, Animation * SplashScreen=NULL);
 
 namespace CockpitKeys {
   void SkipMusicTrack(int,KBSTATE newState);

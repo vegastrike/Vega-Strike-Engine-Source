@@ -1,6 +1,10 @@
 #include "fileutil.h"
 #include "vs_path.h"
 
+#ifdef _WIN32
+#include <winsock2.h> // for ntohl
+#endif
+
 #ifdef CRYPTO
 #include <crypto++/sha.h>
 HASHMETHOD	FileUtil::Hash;
