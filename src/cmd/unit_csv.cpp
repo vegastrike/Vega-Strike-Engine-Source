@@ -111,6 +111,12 @@ static string nextElement (string&inp) {
   inp="";
   return ret;
 }
+
+static bool stob(string inp, bool defaul) {
+  if (inp.length()!=0) 
+    return XMLSupport::parse_bool(inp);
+  return defaul;
+}
 static double stof(string inp, double def=0) {
   if (inp.length()!=0)
     return XMLSupport::parse_float(inp);
@@ -572,12 +578,12 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   limits.vertical = .5*(stof(row["Top_Accel"])+stof(row["Bottom_Accel"]))*game_accel*game_speed;
   computer.max_combat_speed=stof(row["Default_Speed_Governor"])*game_speed;
   computer.max_combat_ab_speed=stof(row["Afterburner_Speed_Governor"])*game_speed;
-  computer.itts = XMLSupport::parse_bool(row["ITTS"]);
-  computer.radar.color=XMLSupport::parse_bool(row["Radar_Color"]);
-  computer.radar.maxrange=XMLSupport::parse_float(row["Radar_Range"]);
-  computer.radar.maxcone=cos(stof(row["Max_Cone"])*VS_PI/180);
-  computer.radar.trackingcone=cos(stof(row["Tracking_Cone"])*VS_PI/180);
-  computer.radar.lockcone=cos(stof(row["Lock_Cone"])*VS_PI/180);
+  computer.itts = stob(row["ITTS"],true);
+  computer.radar.color=stob(row["Radar_Color"],true);
+  computer.radar.maxrange=stof(row["Radar_Range"],FLT_MAX);
+  computer.radar.maxcone=cos(stof(row["Max_Cone"],180)*VS_PI/180);
+  computer.radar.trackingcone=cos(stof(row["Tracking_Cone"],180)*VS_PI/180);
+  computer.radar.lockcone=cos(stof(row["Lock_Cone"],180)*VS_PI/180);
   cloakmin=(int)(stof(row["Cloak_Min"])*100);
   if (!XMLSupport::parse_bool(row["Can_Cloak"]))
     cloaking=-1;
