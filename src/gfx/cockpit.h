@@ -81,6 +81,10 @@ private:
   void drawUnToTarget(Unit* a,Unit * b, float xcent, float ycent, float xsize, float ysize, bool reardar);
   // the style of the radar (WC|Elite)
   string radar_type;
+  /// Used to display the arrow pointing to the currently selected target.
+  float projection_limit_x, projection_limit_y;
+  float inv_screen_aspect_ratio;  // Precomputed division 1 / g_game.aspect.
+
   void LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h);
   void LocalToRadar (const Vector & pos, float &s, float &t);
 
@@ -106,6 +110,8 @@ private:
   ///Draws gauges
   void DrawGauges(Unit * un);
   NavigationSystem ThisNav;
+  // Draw the arrow pointing to the target.
+  void DrawArrowToTarget(Unit *, Unit *);
  public:
   void	ReceivedTargetInfo();
   static void NavScreen (int, KBSTATE k); // scheherazade

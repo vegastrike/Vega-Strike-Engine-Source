@@ -995,6 +995,14 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
   always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
   radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
 
+  // Compute the screen limits. Used to display the arrow pointing to the selected target.
+  projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics","fov","78"));
+  // The angle betwwen the center of the screen and the border is half the fov.
+  projection_limit_y = tan(projection_limit_y * M_PI / (180*2));
+  projection_limit_x = projection_limit_y * g_game.aspect;
+  // Precompute this division... performance.
+  inv_screen_aspect_ratio = 1 / g_game.aspect;
+
   friendly=GFXColor(-1,-1,-1,-1);
   enemy=GFXColor(-1,-1,-1,-1);
   neutral=GFXColor(-1,-1,-1,-1);
@@ -1467,7 +1475,10 @@ void GameCockpit::Draw() {
     if (_Universe->CurrentCockpit()<univmap.size()) {
       univmap[_Universe->CurrentCockpit()].Draw();
     }
+    // Draw the arrow to the target.
+    DrawArrowToTarget(parent.GetUnit(), parent.GetUnit()->Target());
   }
+
   if (die) {
 	if (un) {
 		if (un->GetHull()>=0) {
@@ -1765,4 +1776,87 @@ Camera* GameCockpit::AccessCamera(int num){
     return &cam[num];
   else
     return NULL;
+}
+
+/**
+ * Draw the arrow pointing to the target.
+ */
+// THETA : angle between the arrow head and the two branches (divided by 2) (20 degrees here).
+#define TARGET_ARROW_COS_THETA    0.93969262078590838405410927732473
+#define TARGET_ARROW_SIN_THETA    0.34202014332566873304409961468226
+#define TARGET_ARROW_SIZE         0.05
+void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
+  float s, t, s_normalized, t_normalized, inv_len;
+  Vector p1, p2, p_n;
+
+  if ( ! target )
+    return;
+
+  Vector localcoord(un->LocalCoordinates(target));
+
+  // Project target position on k.
+  inv_len = 1 / fabs(localcoord.k);
+  s = -localcoord.i * inv_len;
+  t = localcoord.j * inv_len;
+
+  if ( localcoord.k > 0 ) {       // The unit is in front of us.
+    // Check if the unit is in the screen.
+    if ( (fabs(s) < projection_limit_x) && (fabs(t) < projection_limit_y) )
+      return;     // The unit is in the screen, do not display the arrow.
+  }
+
+  inv_len = 1 / sqrt(s*s + t*t);
+  s_normalized = s * inv_len;                 // Save the normalized projected coordinates.
+  t_normalized = t * inv_len;
+
+  // Apply screen aspect ratio correction.
+  s *= inv_screen_aspect_ratio;
+
+  if ( fabs(t) > fabs(s) ) {    // Normalize t.
+    if ( t > 0 ) {
+      s /= t;
+      t = 1;
+    }
+    else if ( t < 0 ) {
+      s /= -t;
+      t = -1;
+    }                           // case t == 0, do nothing everything is ok.
+  }
+  else {                        // Normalize s.
+    if ( s > 0 ) {
+      t /= s;
+      s = 1;
+    }
+    else if ( s < 0 ) {
+      t /= -s;
+      s = -1;
+    }                          // case s == 0, do nothing everything is ok.
+  }
+
+  // Compute points p1 and p2 composing the arrow. Hard code a 2D rotation.
+  // p1 = p - TARGET_ARROW_SIZE * p.normalize().rot(THETA), p being the arrow head position (s,t).
+  // p2 = p - TARGET_ARROW_SIZE * p.normalize().rot(-THETA)
+  p_n.i = -TARGET_ARROW_SIZE * s_normalized;  // Vector p will be used to compute the two branches of the arrow.
+  p_n.j = -TARGET_ARROW_SIZE * t_normalized;
+  p1.i = p_n.i*TARGET_ARROW_COS_THETA - p_n.j*TARGET_ARROW_SIN_THETA;     // p1 = p.rot(THETA)
+  p1.j = p_n.j*TARGET_ARROW_COS_THETA + p_n.i*TARGET_ARROW_SIN_THETA;
+  p2.i = p_n.i*TARGET_ARROW_COS_THETA - p_n.j*(-TARGET_ARROW_SIN_THETA);  // p2 = p.rot(-THETA)
+  p2.j = p_n.j*TARGET_ARROW_COS_THETA + p_n.i*(-TARGET_ARROW_SIN_THETA);
+  p1.i += s;
+  p1.j *= g_game.aspect;
+  p1.j += t;
+  p2.i += s;
+  p2.j *= g_game.aspect;
+  p2.j += t;
+  p2.k = p1.k = 0;
+
+  static GFXColor black_and_white = DockBoxColor("black_and_white");
+  GFXColorf(un->GetComputerData().radar.color ? unitToColor(un, target) : black_and_white);
+
+  glBegin(GL_LINE_LOOP);
+  GFXVertex3f(s, t, 0);
+  GFXVertexf(p1);
+  GFXVertexf(p2);
+  GFXEnd();
+  GFXColor4f (1,1,1,1);
 }
