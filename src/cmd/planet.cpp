@@ -13,7 +13,9 @@
 #include <assert.h>
 #include "cont_terrain.h"
 #include "atmosphere.h"
-//#include "gfx/planetary_transform.h"
+#ifdef FIX_TERRAIN
+x#include "gfx/planetary_transform.h"
+#endif
 #include "collide/rapcol.h"
 #include "images.h"
 #include "gfx/halo.h"

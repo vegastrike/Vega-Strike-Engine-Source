@@ -29,7 +29,9 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 //#ifdef WIN32
+#ifdef FIX_TERRAIN
 #include "gfx/planetary_transform.h"
+#endif
 #include "gfx/cockpit.h"
 #include "unit_util.h"
 #include "universe_util.h"
@@ -159,7 +161,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
     if (!(docked&(DOCKED|DOCKED_INSIDE))) 
 
       prev_physical_state = curr_physical_state;//the AIscript should take care
-
+#ifdef FIX_TERRAIN
     if (planet) {
 
       if (!planet->dirty) {
@@ -171,9 +173,8 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 	planet->pps = planet->cps;
 
       }
-
     }
-
+#endif
   }
 
   if (isUnit()==PLANETPTR) {
@@ -597,6 +598,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 }
 
 void GameUnit::SetPlanetOrbitData (PlanetaryTransform *t) {
+#ifdef FIX_TERRAIN
   if (isUnit()!=BUILDINGPTR)
         return;
   if (!planet)
@@ -609,12 +611,18 @@ void GameUnit::SetPlanetOrbitData (PlanetaryTransform *t) {
     planet->trans = t;
     planet->dirty=true;
   }
+#endif
 }
 
 PlanetaryTransform * GameUnit::GetPlanetOrbit () const {
+
+#ifdef FIX_TERRAIN
   if (planet==NULL)
     return NULL;
   return planet->trans;
+#else
+  return NULL;
+#endif
 }
 
 bool GameUnit::jumpReactToCollision (Unit * smalle) {
