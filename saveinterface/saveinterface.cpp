@@ -21,13 +21,13 @@ void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *,int);
 void LoadAutoDialog (char *,int);
 
-static const char * titles [] = {"Select Mission", "New Game","Open Game","Recover From Autosave","Launch No Savegame","Help Button"};
+static const char * titles [] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Help Button"};
 string my_mission ("mission/exploration/explore_universe.mission");
 static const char * helps [] = {
-  "[SELECT MISSIONXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...]",
-  "[INSERT NEW GAME HELPXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...]",
-  "[INSERT OPEN GAME HELPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...]",
-"[INSERT AUTOSAVE GAMXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX...]"
+  "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
+  "|START A NEW GAME BUTTON|\nStart a new game in the Vegastrike universe.\nYou start with a dinged up old wayfarer\nand head from the vega sector with the hope of finding\nprofit and adventure on the frontier.\nTo begin afresh you must choose a new saved game.",
+  "|LOAD GAME BUTTON|\nThis opens up a saved\ngame you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
+"|RECOVER AUTOSAVE BUTTON|\nThis button allows a player to recover their\nmost recently played game into the\nselected save game upon next run.\nIf the player quits or the player docks,\nand then dies, it will restore\nto the last saved position."
 };
 
 
@@ -83,7 +83,7 @@ int win_close( GtkWidget *w, void *)
 {
     return FALSE;
 }
-
+void changehome();
 void Help (const char *title, const char *text) {
     GtkWidget *window;
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -97,9 +97,10 @@ void Help (const char *title, const char *text) {
 }
 
 void save_stuff(char *filename) {
+  changehome();
     FILE *file=fopen("../save.txt","wt");
     if (file) {
-      //      fprintf (file, "%s%c", filename,0);
+      fprintf (file, "%s%c", filename,0);
       fclose(file);
     } else {
       Help("Error","ERROR: Unable to open ../save.txt");
@@ -120,7 +121,7 @@ void help_func( GtkWidget *w, int i)
 {
 
   if (i<0||i>3) {
-      Help("Help",(std::string(helps[0])+"\n"+helps[1]+"\n"+helps[2]).c_str());
+      Help("Help",(std::string(helps[0])+"\n"+helps[1]+"\n"+helps[2]+"\n"+helps[3]).c_str());
     } else {
       Help(titles[i],helps[i]);
     }
@@ -197,6 +198,10 @@ void hello( GtkWidget *widget, gpointer   data ) {
       launch_mission();
       break;
     case 5:
+      save_stuff("");
+      launch_mission();
+      break;
+    case 6:
       help_func(NULL,-1);
       break;
     default:
@@ -229,7 +234,7 @@ int main( int   argc,
       * function is NULL and is ignored in the callback function. */
     gtk_signal_connect(GTK_OBJECT(window), "destroy", GTK_SIGNAL_FUNC(gtk_exit), NULL);
     gtk_signal_connect(GTK_OBJECT(window), "delete_event", GTK_SIGNAL_FUNC(gtk_exit), NULL);
-    for (int i=0;i<6;i++) {
+    for (int i=0;i<7;i++) {
         button = gtk_button_new_with_label (titles[i]);
          
          /* When the button receives the "clicked" signal, it will call the
