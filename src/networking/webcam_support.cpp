@@ -2599,6 +2599,7 @@ int fg_start_grab_image (struct fgdevice *fg, int width, int height, int format)
  fg->grabbing_active=1;
 
  /* Start grabbing thread */
+ #warning casting void * to this function pointer thing
  if (pthread_create((pthread_func_type)&fg->grab_thread,
 						 NULL,
 						 (void *)grab_images_thread,
