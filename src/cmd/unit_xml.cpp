@@ -1732,7 +1732,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     SphereMesh * tmp = NULL;
     if (!colTrees) {
 #if 0
-      tmp= new SphereMesh (rSize(),8,8,"shield.bmp", NULL, false,ONE, ONE);///shield not used right now for collisions
+      tmp= new SphereMesh (rSize(),8,8,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);///shield not used right now for collisions
       tmp->GetPolys (polies);
       if (xml->hasColTree)
 	colShield = new csRapidCollider (polies);
@@ -1741,7 +1741,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
 	colShield=NULL;
     }
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,"shield.bmp", NULL, false,ONE, ONE);
+    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
     
     meshdata[nummesh] = tmp;
     bspShield=NULL;

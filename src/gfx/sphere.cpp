@@ -1,5 +1,5 @@
 #include "sphere.h"
-#include "aux_texture.h"
+#include "ani_texture.h"
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "vs_globals.h"
@@ -11,7 +11,7 @@
 
 using XMLSupport::tostring;
 const int pixelscalesize=30;
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max) : Mesh() {
+SphereMesh::SphereMesh(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max) : Mesh() {
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
     numspheres =1;
@@ -131,13 +131,24 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       delete [] modes;
       delete [] QSOffsets;
       SetBlendMode (a,b);
-      if (alpha) {
-	Decal = new Texture(texture, alpha);
-	
-      }else {
-	Decal = new Texture (texture);
+      int texlen = strlen (texture);
+      bool found_texture=false;
+      if (texlen>3) {
+	if (texture[texlen-1]=='i'&&texture[texlen-2]=='n'&&
+	    texture[texlen-3]=='a'&&texture[texlen-4]=='.') {
+	  found_texture = true;
+	  Decal = new AnimatedTexture (texture,0,BILINEAR);
+	}
+
       }
-      
+      if (!found_texture) {
+	if (alpha) {
+	  Decal = new Texture(texture, alpha);
+	  
+	}else {
+	  Decal = new Texture (texture);
+	}
+      }
       Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);
       
       if(Insideout) {
