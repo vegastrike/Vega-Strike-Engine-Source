@@ -12,6 +12,7 @@ class FireAt: public Order {
   float agg;
   bool ShouldFire(Unit * targ);
 protected:
+  float distance;
   void ChooseTargets(int num);//chooses n targets and puts the best to attack in unit's target container
 public:
   FireAt (float reaction_time, float aggressivitylevel, bool itts);//weapon prefs?

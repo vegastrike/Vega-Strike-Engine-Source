@@ -29,7 +29,7 @@ namespace AIEvents {
     EnumMap::Pair ("not", AINOT),
     EnumMap::Pair ("Script", AISCRIPT)
   };
-  const XMLSupport::EnumMap attr_map(AIattribute_names, 4);
+  const XMLSupport::EnumMap attr_map(AIattribute_names, 5);
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);

@@ -4,7 +4,6 @@ namespace Orders {
 class AggressiveAI: public FireAt {
 protected:
   AIEvents::ElemAttrMap logic;
-  float distance;
   short count;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);

@@ -79,7 +79,7 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
 void AggressiveAI::ProcessLogic () {
   //go through the logic. 
   Unit * tmp = parent->Target();
-  distance = tmp? (tmp->Position()-parent->Position()).Magnitude() : FLT_MAX;
+  //  distance = tmp? (tmp->Position()-parent->Position()).Magnitude()-parent->rSize()-tmp->rSize() : FLT_MAX;
   std::vector <std::list <AIEvents::AIEvresult> >::iterator i = logic.result.begin();
   for (;i!=logic.result.end();i++) {
     std::list <AIEvents::AIEvresult>::iterator j;
@@ -96,6 +96,7 @@ void AggressiveAI::ProcessLogic () {
 	  AIEvents::AIEvresult tmp = *j;
 	  i->erase(j);
 	  i->push_back (tmp);
+	  break; 
 	}else {
 	  j++;
 	}

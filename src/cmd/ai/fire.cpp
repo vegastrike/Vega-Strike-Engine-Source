@@ -25,7 +25,9 @@ bool FireAt::ShouldFire(Unit * targ) {
   float dist;
   float angle = parent->cosAngleTo (targ, dist,itts?0.001:FLT_MAX);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
-  
+  if (targ==parent->Target()) {
+    distance = dist;
+  }
   return (dist<.8*agg&&angle>1/agg);
 }
 
