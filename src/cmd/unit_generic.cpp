@@ -406,6 +406,8 @@ void Unit::Init()
   docked=NOT_DOCKED;
   SubUnit =0;
   jump.energy = 100;
+  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+  jump.insysenergy=insys_jump_cost*jump.energy;
   jump.delay=5;
   jump.damage=0;
   FaceCamera=false;
@@ -1432,8 +1434,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 		if (targ)
 			return AutoPilotTo(targ,ignore_energy_requirements,recursive_level);
 	}
-  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
-  if (warpenergy<insys_jump_cost*jump.energy) {
+	//static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+  if (warpenergy<jump.insysenergy) {
 	  if (!ignore_energy_requirements)
 		  return false;
   }
@@ -1502,7 +1504,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   }
   }
   if (this!=target) {
-    warpenergy-=insys_jump_cost*totpercent*jump.energy;
+    warpenergy-=totpercent*jump.insysenergy;
     QVector sep (UniverseUtil::SafeEntrancePoint(end,rSize()));
     if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
       sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);

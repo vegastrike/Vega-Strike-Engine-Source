@@ -379,6 +379,7 @@ public:
   virtual StarSystem * getStarSystem() {return NULL;}
     struct UnitJump {
     short energy;
+    short insysenergy;
     signed char drive;
     unsigned char delay;
     unsigned char damage;

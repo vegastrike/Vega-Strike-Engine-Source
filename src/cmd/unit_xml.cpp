@@ -182,6 +182,7 @@ namespace UnitXML {
       WARPENERGY,
 	  FACECAMERA,
 	  XYSCALE,
+	  INSYSENERGY,
 	  ZSCALE
     };
 
@@ -225,7 +226,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION)
     
   };
-  const EnumMap::Pair attribute_names[101] = {
+  const EnumMap::Pair attribute_names[102] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -256,6 +257,7 @@ namespace UnitXML {
     EnumMap::Pair ("bottom", BOTTOM),
     EnumMap::Pair ("recharge", RECHARGE),
     EnumMap::Pair ("warpenergy",WARPENERGY),
+    EnumMap::Pair ("insysenergy",INSYSENERGY),	
     EnumMap::Pair ("leak", LEAK),
     EnumMap::Pair ("strength", STRENGTH),
     EnumMap::Pair ("mass", MASS),
@@ -330,7 +332,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 101);
+  const EnumMap attribute_map(attribute_names, 102);
 }
 
 using XMLSupport::EnumMap;
@@ -865,6 +867,9 @@ using namespace UnitXML;
 	  }
 	  break;
   case JUMP:
+  {
+	  static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
+	  bool foundinsysenergy=false;
     //serialization covered in LoadXML
     assert (xml->unitlevel==1);
     xml->unitlevel++;
@@ -879,6 +884,13 @@ using namespace UnitXML;
       case JUMPENERGY:
 	//serialization covered in LoadXML
 	jump.energy = CLAMP_SHORT(parse_float((*iter).value));
+	if (!foundinsysenergy)
+		jump.insysenergy=jump.energy*insys_jump_cost;
+	break;
+      case INSYSENERGY:
+	//serialization covered in LoadXML
+	jump.insysenergy = CLAMP_SHORT(parse_float((*iter).value));
+	foundinsysenergy=true;
 	break;
   case DAMAGE:
 	  jump.damage=CLAMP_SHORT (parse_float((*iter).value));
@@ -899,6 +911,7 @@ using namespace UnitXML;
 	break;
       }
     }
+  }
     break;
   case SOUND:
     ADDTAG;
@@ -1615,6 +1628,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
     image->unitwriter->AddTag ("Jump");
     image->unitwriter->AddElement("missing",lessNeg1Handler,XMLType(&jump.drive));
     image->unitwriter->AddElement("jumpenergy",shortStarHandler,XMLType(&jump.energy));
+    image->unitwriter->AddElement("insysenergy",shortStarHandler,XMLType(&jump.insysenergy));
     image->unitwriter->AddElement("delay",ucharStarHandler,XMLType(&jump.delay));
     image->unitwriter->AddElement("damage",ucharStarHandler,XMLType(&jump.damage));
     image->unitwriter->AddElement("wormhole",ucharStarHandler,XMLType(&image->forcejump));
