@@ -124,7 +124,6 @@ void UnitCollection::ConstIterator::GetNextValidUnit () {
 const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
   printf ("warning could cause problems with concurrent lists. Make sure no one is traversing gotten list");
   destr();
-  u=NULL;
   init();
   un_iter ui = createIterator();
   const UnitListNode * n = &uc.u;
@@ -138,7 +137,6 @@ const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
   return uc;
 }
 UnitCollection::UnitCollection (const UnitCollection& uc):u(NULL) {
-  u=NULL;
   init();
   un_iter ui = createIterator();
   const UnitListNode * n = &uc.u;
