@@ -57,7 +57,7 @@ void Mission::doCall_toxml(string module,varInst *ovi){
 }
 
 varInst *Mission::doCall(missionNode *node,int mode,string module,string method){
-  varInst *vi;
+  varInst *vi=NULL;
 #if 0
   if(node==NULL){
     node=new missionNode;
@@ -76,6 +76,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method=="printf"){
       vi=call_io_printf(node,mode);
     }
+    else if(method=="sprintf"){
+      vi=call_io_sprintf(node,mode);
+    }
     else if(method=="message"){
       vi=call_io_message(node,mode);
     }
@@ -92,6 +95,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     }
     else if(method=="getCurrentAIUnit"){
       vi=callGetCurrentAIUnit(node,mode);
+    }
+    else if(method=="getCurrentAIOrder"){
+      vi=callGetCurrentAIOrder(node,mode);
     }
     else if(method=="isNull"){
       vi=call_isNull(node,mode);
@@ -313,6 +319,119 @@ string Mission::replaceNewline(string origstr){
 }
 #endif
 
+
+varInst *Mission::call_io_sprintf(missionNode *node,int mode){
+  missionNode *outstr_node=getArgument(node,mode,0);
+  varInst *outstr_vi=checkObjectExpr(outstr_node,mode);
+  string *outstrptr=getStringObject(outstr_node,mode,outstr_vi);
+
+  char outbuffer[1024];
+  string outstring;
+
+  missionNode *stringnode=getArgument(node,mode,1);
+  if(stringnode->tag!=DTAG_CONST){
+    fatalError(node,mode,"only const string allowed for second arg of sprintf");
+    assert(0);
+  }
+  varInst *str_vi=checkObjectExpr(stringnode,mode);
+  if(str_vi->type!=VAR_OBJECT || (str_vi->type==VAR_OBJECT && str_vi->objectname!="string")){
+    fatalError(node,mode,"io.sprintf needs string object as second arg");
+    assert(0);
+  }
+
+  int nr_of_args=node->subnodes.size();
+  int current_arg=2;
+  string * fullstringptr;
+  string fullstring;
+
+  fullstringptr=(string *)str_vi->object;
+  fullstring=*fullstringptr;
+
+    fullstring=replaceNewline(fullstring);
+
+  //cout << "printf string-" << fullstring << "-" << endl;
+
+  //  if(mode==SCRIPT_RUN){
+
+  string endstring=fullstring;
+
+  while(current_arg<nr_of_args){
+
+    int breakpos=endstring.find("%",0);
+
+    string beforestring=endstring.substr(0,breakpos);
+
+    //printf("beforestr=-%s-",beforestring.c_str());
+
+    string breakstring=endstring.substr(breakpos,2);
+
+    //printf("breakstr=-%s-\n",breakstring.c_str());
+
+    //    printf("**");
+    if(breakstring[1]=='f'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      float res=checkFloatExpr(anode,mode);
+      
+      if(mode==SCRIPT_RUN){
+	sprintf(outbuffer,beforestring.c_str());
+	outstring+=outbuffer;
+	sprintf(outbuffer,"%f",res);
+	outstring+=outbuffer;
+      }
+    }
+    else if(breakstring[1]=='d'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      int res=checkIntExpr(anode,mode);
+
+      if(mode==SCRIPT_RUN){
+	sprintf(outbuffer,beforestring.c_str());
+	outstring+=outbuffer;
+	sprintf(outbuffer,"%d",res);
+	outstring+=outbuffer;
+      }
+    }
+    else if(breakstring[1]=='s'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      varInst *res_vi=doObjectVar(anode,mode);
+
+      if(mode==SCRIPT_RUN){
+	if(res_vi->type!=VAR_OBJECT || (res_vi->type==VAR_OBJECT && res_vi->objectname!="string")){
+	  fatalError(node,mode,"io.printf needs string object as some arg");
+	  assert(0);
+	}
+
+	string * strptr=(string *)res_vi->object;
+
+	sprintf(outbuffer,beforestring.c_str());
+	outstring+=outbuffer;
+	sprintf(outbuffer,"%s",strptr->c_str());
+	outstring+=outbuffer;
+      }
+      deleteVarInst(res_vi);
+    }
+    //printf("++");
+
+    endstring=endstring.substr(breakpos+2,endstring.size()-(breakpos+2));
+    //        printf("endstr=-%s-\n",endstring.c_str());
+
+
+    current_arg++;
+  }//while
+
+  if(mode==SCRIPT_RUN){
+    sprintf(outbuffer,endstring.c_str());
+    outstring+=outbuffer;
+    (*outstrptr)=outstring;
+  }
+
+  //  printf("--end==\n");
+  varInst *viret=newVarInst(VI_TEMP);
+  viret->type=VAR_VOID;
+  deleteVarInst(str_vi);
+
+  return viret;
+}
+
 varInst *Mission::call_io_printf(missionNode *node,int mode){
   missionNode *stringnode=getArgument(node,mode,0);
   if(stringnode->tag!=DTAG_CONST){
@@ -442,6 +561,15 @@ varInst *Mission::callGetCurrentAIUnit(missionNode *node,int mode){
   vi->type=VAR_OBJECT;
   vi->objectname="unit";
   vi->object=(void *)current_ai_unit;
+
+  return vi;
+}
+
+varInst *Mission::callGetCurrentAIOrder(missionNode *node,int mode){
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="order";
+  vi->object=(void *)current_ai_order;
 
   return vi;
 }

@@ -81,6 +81,8 @@ bool MoveTo::Done(const Vector & ang_vel) {
 
 
 void MoveTo::Execute(){
+  //  cout << "MOVETO target =" << targetlocation << endl;
+
   Vector local_location (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
   terminatingX += (copysign(1.0F,local_location.i)!=copysign(1.0F,last_velocity.i)||(!local_location.i));

@@ -117,7 +117,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
       if(mode==SCRIPT_RUN){
 	Order *res_order=my_order->EnqueueOrder(enq_order);
-	debug(0,node,mode,"enqueueing order");
+	debug(3,node,mode,"enqueueing order");
       }
 
       viret=newVarInst(VI_TEMP);

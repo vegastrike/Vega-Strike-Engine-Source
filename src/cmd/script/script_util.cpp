@@ -282,7 +282,7 @@ varInst *Mission::searchScopestack(string name){
       if(scope->script.classvars.size()>0){
 	varInstMap *cvmap=scope->script.classvars[0];
 	vi=(*cvmap)[name];
-	debug(1,scope,0,"found var "+name+" as classvar");
+	debug(10,scope,0,"found var "+name+" as classvar");
       }
       if(vi==NULL){
 	debug(5,scope,0,"variable "+name+" not found in that scope");

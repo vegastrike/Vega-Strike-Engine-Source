@@ -11,6 +11,8 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, 
   maxhull = mh;
   SwitchMode();
 
+  //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
+  //cout << "vdu" << endl;
 };
 
 void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, float &h) {
@@ -195,13 +197,22 @@ void VDU::DrawMessages(){
 
   MessageCenter *mc=mission->msgcenter;
   
-  for(int i=0;i<11;i++){
-    gameMessage *lastmsg=mc->last(i);
+  int rows_used=0;
+
+  gameMessage *lastmsg=mc->last(0);
+  for(int i=0;rows_used<=rows && lastmsg!=NULL;i++){
+    lastmsg=mc->last(i);
     if(lastmsg!=NULL){
       char timebuf[100];
       sprintf(timebuf,"%d ",i);
-      fullstr=lastmsg->message+"\n"+fullstr;
-      //cout << "nav " << fullstr << endl;
+
+      string mymsg=timebuf+lastmsg->message;
+      int msglen=mymsg.size();
+      int rows_needed=msglen/cols;
+      fullstr=mymsg+"\n"+fullstr;
+
+      rows_used+=rows_needed+1;
+      //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
     }
   }
 

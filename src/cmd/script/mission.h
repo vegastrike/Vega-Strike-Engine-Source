@@ -211,6 +211,7 @@ void addModule(string modulename);
 void runScript(string modulename,string scriptname,uint classid=0);
 uint  createClassInstance(string modulename);
  void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
+ void setCurrentAIOrder(Order *order) { current_ai_order=order; };
  
   MessageCenter *msgcenter;
 
@@ -218,6 +219,7 @@ uint  createClassInstance(string modulename);
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   Unit *current_ai_unit;
+  Order *current_ai_order;
 
   int debuglevel;
 
@@ -352,10 +354,12 @@ void printNode(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
 varInst * callGetCurrentAIUnit(missionNode *node,int mode);
+varInst * callGetCurrentAIOrder(missionNode *node,int mode);
 
  varInst *call_int_cast(missionNode *node,int mode);
  varInst *call_float_cast(missionNode *node,int mode);
 
+varInst * call_io_sprintf(missionNode *node,int mode);
 varInst * call_io_printf(missionNode *node,int mode);
 string  replaceNewline(string origstr);
 
