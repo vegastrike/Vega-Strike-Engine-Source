@@ -700,7 +700,7 @@ void CreatePrimaries (float starradius) {
   int numprimaryunits=rnd(0,1+numun[0]);
   numun[0]-=numprimaryunits;
   int i;
-  for (i=0;i<nument[0];i++) {
+  for (i=0;i<nument[0]||i==0;i++) {
     CreateLight(i);
   }
   for (i=0;i<numprimaryunits;i++) {

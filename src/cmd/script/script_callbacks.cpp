@@ -360,11 +360,11 @@ varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_OBJECT;
   vi->objectname="string";
-  string sysname = getStringArgument (node,mode,0);
+  string str = getStringArgument (node,mode,0);
   int which= getIntArg(node,mode,1);
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    string sysname=_Universe->getAdjacentStarSystems(sysname)[which];
+    string sysname=_Universe->getAdjacentStarSystems(str)[which];
     vi=call_string_new(node,mode,sysname);
   }
   return vi;
@@ -834,7 +834,7 @@ void Mission::initCallbackMaps(){
   module_std_map["equal"]=CMT_STD_equal;
   module_std_map["Int"]=CMT_STD_Int;
   module_std_map["Float"]=CMT_STD_Float;
-
+  module_std_map["terminateMission"]=CMT_STD_terminateMission;
 
   module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;
   module_order_map["newMoveTo"]=CMT_ORDER_newMoveTo ;
@@ -895,6 +895,7 @@ void Mission::initCallbackMaps(){
   module_unit_map["deleteContainer"]=CMT_UNIT_deleteContainer ;
   module_unit_map["getUnit"]=CMT_UNIT_getUnit ;
   module_unit_map["getCredits"]=CMT_UNIT_getCredits ;
+  module_unit_map["getRandCargo"]=CMT_UNIT_getRandCargo ;
   module_unit_map["addCredits"]=CMT_UNIT_addCredits ;
   module_unit_map["getPlayer"]=CMT_UNIT_getPlayer ;
   module_unit_map["launch"]=CMT_UNIT_launch ;

@@ -143,54 +143,6 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     return viret;
 
   }
-  else if(method_id==CMT_UNIT_getRandCargo){
-    int quantity= getIntArg(node,mode,0);
-    Unit *my_unit=NULL;
-	varInst *vireturn=NULL;
-    if(mode==SCRIPT_RUN){
-		Cargo *ret=NULL;
-		Unit *mpl = &GetUnitMasterPartList();
-		unsigned int max=mpl->numCargo();
-		if (max>0) {
-			ret = &mpl->GetCargo(rand()%max);
-		}else {
-			ret = new Cargo();//mem leak--won't happen
-		}
-		ret->quantity=quantity;
-		vireturn=call_olist_new(node,mode);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_OBJECT;
-		viret->objectname="string";
-		viret->object=&ret->content;
- 		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_OBJECT;
-		viret->objectname="string";
-		viret->object=&ret->category;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->price;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_INT;
-		viret->int_val=quantity;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->mass;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->volume;
-		((olist_t *)vireturn->object)->push_back(viret);				
-    }
-    debug(3,node,mode,"unit getRandCargo: ");
-    printVarInst(3,vireturn);
-
-    return vireturn;
-
-  }
   else if(method_id==CMT_UNIT_launch){
     missionNode *name_node=getArgument(node,mode,0);
     varInst *name_vi=checkObjectExpr(name_node,mode);
@@ -279,7 +231,59 @@ varInst *Mission::call_unit(missionNode *node,int mode){
        viret->float_val=_Universe->AccessCockpit()->credits;
      }
      return viret;
-   } else if (method_id==CMT_UNIT_addCredits) {
+
+   }   
+  else if(method_id==CMT_UNIT_getRandCargo){
+    missionNode *nr_node=getArgument(node,mode,0);
+    int quantity=doIntVar(nr_node,mode);
+    Unit *my_unit=NULL;
+    varInst *vireturn=NULL;
+    vireturn=call_olist_new(node,mode);
+    if(mode==SCRIPT_RUN){
+		Cargo *ret=NULL;
+		Unit *mpl = &GetUnitMasterPartList();
+		unsigned int max=mpl->numCargo();
+		if (max>0) {
+		  ret = &mpl->GetCargo(rand()%max);
+		}else {
+		  ret = new Cargo();//mem leak--won't happen
+		}
+		ret->quantity=quantity;
+		
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_OBJECT;
+		viret->objectname="string";
+		viret->object=&ret->content;
+ 		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_OBJECT;
+		viret->objectname="string";
+		viret->object=&ret->category;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_FLOAT;
+		viret->float_val=ret->price;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_INT;
+		viret->int_val=quantity;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_FLOAT;
+		viret->float_val=ret->mass;
+		((olist_t *)vireturn->object)->push_back(viret);
+		viret=newVarInst(VI_IN_OBJECT);
+		viret->type=VAR_FLOAT;
+		viret->float_val=ret->volume;
+		((olist_t *)vireturn->object)->push_back(viret);				
+    }
+    debug(3,node,mode,"unit getRandCargo: ");
+    printVarInst(3,vireturn);
+
+    return vireturn;
+
+  }
+  else if (method_id==CMT_UNIT_addCredits) {
      missionNode *nr_node=getArgument(node,mode,0);
      float credits=doFloatVar(nr_node,mode);
      if (mode==SCRIPT_RUN) {
