@@ -54,11 +54,11 @@ StarSystem::StarSystem(char * filename) :
   //primaries->SetPosition(0,0,5);
   //foo = new SphereMesh(1,5,5,"moon.bmp");
   cam[1].SetProjectionType(Camera::PARALLEL);
-  cam[1].SetZoom(10.0);
-  cam[1].SetPosition(Vector(0,5,0));
+  cam[1].SetZoom(1);
+  cam[1].SetPosition(Vector(0,0,0));
   cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
   //cam[1].SetPosition(Vector(0,5,-2.5));
-  cam[1].SetSubwindow(0,0,0.10,0.10);
+  cam[1].SetSubwindow(0,0,1,1);
 
   cam[2].SetProjectionType(Camera::PARALLEL);
   cam[2].SetZoom(10.0);
@@ -129,9 +129,6 @@ void StarSystem::RemoveUnit(Unit *unit) {
 }
 
 void StarSystem::Draw() {
-  //primaries->Draw();
-  //    systemInputDFA->Draw(); return;
-  currentcamera=0;
 
   GFXDisable (LIGHTING);
   bg->Draw();
@@ -149,6 +146,7 @@ void StarSystem::Draw() {
   Beam::ProcessDrawQueue();
   Animation::ProcessDrawQueue();
   systemInputDFA->Draw();
+
 }
 
 extern double interpolation_blend_factor;

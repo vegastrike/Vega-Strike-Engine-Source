@@ -315,7 +315,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
    dist = totarget.Magnitude();
    if (tmpcos>0) {
       tmpcos = dist*dist - tmpcos*tmpcos;
-      tmpcos = targ->rSize()/tmpcos;//one over distance perpendicular away from straight ahead times the size...high is good
+      tmpcos = targ->rSize()/sqrtf(tmpcos);//one over distance perpendicular away from straight ahead times the size...high is good
     } else {
       tmpcos /= dist;
     }

@@ -32,7 +32,7 @@ static float *mview = NULL;
 Sprite::Sprite(char *file, bool trackzoom):local_transformation(),track_zoom(trackzoom)
 {
 
-  local_transformation.position = Vector(0,0,1.0001);
+  local_transformation.position = Vector(0,0,1.001);
 
   xcenter = 0;
   ycenter = 0;
@@ -80,7 +80,7 @@ void Sprite::UpdateHudMatrix() {
 void Sprite::Draw(const Transformation &dtrans, const Matrix m)
 {
   Matrix tmatrix;
-
+  
   Vector camp,camq,camr;
   _Universe->AccessCamera()->GetPQR(camp,camq,camr);
   VectorAndPositionToMatrix (tmatrix,camp,camq,camr,

@@ -299,7 +299,7 @@ Unit **fighters;
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
 SphereMesh *bg2=NULL;
-
+Animation *  explosion= NULL;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
 static void Fire (int, KBSTATE newState) {
@@ -421,7 +421,7 @@ void InitializeInput() {
 }
 void createObjects() {
   Universe::Faction::LoadXML("factions.xml");
-
+  explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
@@ -486,6 +486,8 @@ void destroyObjects() {
   	delete fighters[a];
   delete [] fighters;
   delete locSel;
+  delete explosion;
+  explosion=NULL;
   //delete t;
   //delete s;
   //delete carrier;

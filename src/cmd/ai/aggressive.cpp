@@ -16,11 +16,12 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("BShield", AggressiveAI::BSHIELD),
   EnumMap::Pair ("Hull", AggressiveAI::HULL),
   EnumMap::Pair ("Facing", AggressiveAI::FACING),
-  EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT)
+  EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT),
+  EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ)
 };
-const EnumMap AggressiveAIel_map(element_names, 11);
+const EnumMap AggressiveAIel_map(element_names, 12);
 
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,15,false), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);
@@ -70,6 +71,8 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     return parent->getAIState()->queryType (Order::FACING)==NULL;
   case MOVEMENT:
     return parent->getAIState()->queryType (Order::MOVEMENT)==NULL;
+  case RANDOMIZ:
+    value= ((float)rand())/RAND_MAX;
   default:
     return false;
   }
@@ -115,7 +118,13 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
 
 void AggressiveAI::Execute () {  
   FireAt::Execute();
-  if (curinter==INTNORMAL) {
+  if (
+#if 1
+      curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
+#endif
+      curinter==INTNORMAL) {
+
+
     if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
       logic.curtime=interrupts.maxtime;//set it to the time allotted
     }

@@ -6,12 +6,14 @@
 namespace Orders {
 
 class FireAt: public Order {
+
+
+  bool ShouldFire(Unit * targ);
+protected:
   bool itts;
   float rxntime;
   float delay;
   float agg;
-  bool ShouldFire(Unit * targ);
-protected:
   float distance;
   void ChooseTargets(int num);//chooses n targets and puts the best to attack in unit's target container
 public:

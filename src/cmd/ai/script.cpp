@@ -155,6 +155,7 @@ namespace AiXml {
     EnumMap::Pair ("Local", LOCAL), 
     EnumMap::Pair ("Value", VALUE),
     EnumMap::Pair ("ITTS", ITTTS),
+    EnumMap::Pair ("Afterburn", AFTERBURN),
     EnumMap::Pair ("Position", YOURPOS), 
     EnumMap::Pair ("TargetPos", TARGETPOS),
     EnumMap::Pair ("ThreatPos", THREATPOS),
@@ -167,7 +168,7 @@ namespace AiXml {
   };
 
   const EnumMap element_map(element_names, 31);
-  const EnumMap attribute_map(attribute_names, 18);
+  const EnumMap attribute_map(attribute_names, 19);
 }
 
 using XMLSupport::EnumMap;

@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "ai/order.h"
 #include "gfx/animation.h"
 #include "gfx/mesh.h"
 #include "gfx/halo.h"
@@ -152,7 +153,7 @@ float Unit::RShieldData() {
 }
 
 void Unit::RegenShields () {
-  energy +=apply_float_to_short (recharge);
+  energy +=apply_float_to_short (recharge*SIMULATION_ATOM);
   if (energy>maxenergy)
     energy=maxenergy;  
   float rec = shield.recharge*SIMULATION_ATOM;
@@ -211,6 +212,7 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   }
   if (hull <0) {
     Destroy();
+    SetAI (new Order());
     Split (rand()%3+1);
   }
   if (!FINITE (percent))

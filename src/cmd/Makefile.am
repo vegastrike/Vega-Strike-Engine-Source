@@ -16,6 +16,7 @@ libcmd_a_SOURCES =				\
 	hud.cpp				\
 	unit.h				\
 	unit.cpp				\
+	unit_bsp.cpp			\
 	unit_damage.cpp			\
 	unit_xml.cpp  			\
 	unit_click.cpp			\

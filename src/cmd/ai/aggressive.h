@@ -11,7 +11,7 @@ protected:
   bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter=false);//returns if found anything
   
 public:
-  enum types {AGGAI, MOVEMENT, FACING, UNKNOWN, DISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL};
+  enum types {AGGAI, MOVEMENT, FACING, UNKNOWN, DISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL, RANDOMIZ};
   AggressiveAI (const char *file, const char * interruptename, Unit * target=NULL);
   void Execute ();
 };
