@@ -26,7 +26,7 @@
 #define NUM_FORCES	64
 
 #include "gfx/camera.h"
-#include "in_main.h"
+//#include "in_main.h"
 #include "star_system.h"
 
 /*
