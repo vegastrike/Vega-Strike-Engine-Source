@@ -461,17 +461,20 @@ void bootstrap_main_loop () {
     //      delete SplashScreen;
     //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
-  if (g_game.music_enabled) {
+    if (g_game.music_enabled) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
-	  vschdir("bin");
-	  int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
-	  if (pid==0) {
-        g_game.music_enabled=false;
-        fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
-	  }
-	  vscdup();
+      int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
+      if (pid==-1) {
+	vschdir("bin");
+	int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
+	if (pid==-1) {
+	  g_game.music_enabled=false;
+	  fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+	}
+	vscdup();
+      }
 #endif
-  }
+    }
     QVector pos;
     string planetname;
 

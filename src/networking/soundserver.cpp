@@ -27,6 +27,8 @@ typedef int Mix_Music;
 #include <string.h>
 #include <stdio.h>
 #include <vector>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "inet.h"
 int fadeout=0, fadein=0;
 float volume=0;
@@ -169,8 +171,12 @@ int main(int argc, char **argv) {
 	}
 	argv[0][i+1]='\0';
 	chdir(argv[0]);
-	chdir ("..");//gotta check outside bin dir
 #endif	
+	struct stat st;
+	if (stat("vegastrike.config",&st)!=0) {
+		//vegastrike.config not found.  Let's check ../
+		chdir (".."); //gotta check outside bin dir
+	}
 	}
 	Mix_Music *music=NULL;
 	int audio_rate,audio_channels,
