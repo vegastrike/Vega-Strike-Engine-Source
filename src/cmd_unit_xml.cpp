@@ -35,7 +35,36 @@ namespace UnitXML {
       QJ,
       QK,
       MOUNTSIZE,
-      WEAPON
+      WEAPON,
+	  DEFENSE,
+	  ARMOR,
+	  FRONT,
+	  BACK,
+	  LEFT,
+	  RIGHT,
+	  TOP,
+	  BOTTOM,
+	  SHIELDS,
+	  RECHARGE,
+	  HULL,
+	  STRENGTH,
+	  STATS,
+	  MASS,
+	  MOMENTOFINERTIA,
+	  FUEL,
+	  THRUST,
+	  MANEUVER,
+	  YAW,
+	  ROLL,
+	  PITCH,
+	  ENGINE,
+	  ACCEL,
+	  ENERGY,
+	  REACTOR,
+	  LIMIT,
+	  RESTRICTED,
+	  MAX,
+	  MIN
     };
 
   const EnumMap::Pair element_names[] = {
@@ -43,7 +72,22 @@ namespace UnitXML {
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
     EnumMap::Pair ("MeshFile", MESHFILE),
+    EnumMap::Pair ("Defense", DEFENSE),
+    EnumMap::Pair ("Armor", ARMOR),
+    EnumMap::Pair ("Shields", SHIELDS),
+    EnumMap::Pair ("Hull", HULL),
+    EnumMap::Pair ("Stats", STATS),
+    EnumMap::Pair ("Thrust", THRUST),
+    EnumMap::Pair ("Maneuver", MANEUVER),
+    EnumMap::Pair ("Engine", ENGINE),
+    EnumMap::Pair ("Energy", ENERGY),
+    EnumMap::Pair ("Reactor", REACTOR),
+    EnumMap::Pair ("Restricted", RESTRICTED),
+    EnumMap::Pair ("Yaw", YAW),
+    EnumMap::Pair ("Pitch", PITCH),
+    EnumMap::Pair ("Roll", ROLL),
     EnumMap::Pair ("Mount", MOUNT)
+
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -58,11 +102,30 @@ namespace UnitXML {
     EnumMap::Pair ("qj", QJ),     
     EnumMap::Pair ("qk", QK),
     EnumMap::Pair ("size", MOUNTSIZE),     
+    EnumMap::Pair ("front", FRONT),
+    EnumMap::Pair ("back", BACK),
+    EnumMap::Pair ("left", LEFT),
+    EnumMap::Pair ("right", RIGHT),
+    EnumMap::Pair ("top", TOP),
+    EnumMap::Pair ("bottom", BOTTOM),
+    EnumMap::Pair ("recharge", RECHARGE),
+    EnumMap::Pair ("strength", STRENGTH),
+    EnumMap::Pair ("mass", MASS),
+    EnumMap::Pair ("momentofinertia", MOMENTOFINERTIA),
+    EnumMap::Pair ("fuel", FUEL),
+    EnumMap::Pair ("yaw", YAW),
+    EnumMap::Pair ("pitch", PITCH),
+    EnumMap::Pair ("roll", ROLL),
+    EnumMap::Pair ("accel", ACCEL),
+    EnumMap::Pair ("recharge", RECHARGE),
+    EnumMap::Pair ("limit", LIMIT),
+    EnumMap::Pair ("max", MAX),
+    EnumMap::Pair ("min", MIN),
     EnumMap::Pair ("weapon", WEAPON)
 };
 
-  const EnumMap element_map(element_names, 5);
-  const EnumMap attribute_map(attribute_names, 13);
+  const EnumMap element_map(element_names, 19);
+  const EnumMap attribute_map(attribute_names, 32);
 }
 
 using XMLSupport::EnumMap;
@@ -80,7 +143,6 @@ int parseMountSizes (const char * str) {
   return ans;
 }
 
-
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
     string filename;
     Vector P;
@@ -94,9 +156,13 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     AttributeList::const_iterator iter;
   switch(elem) {
   case UNKNOWN:
+	xml->unitlevel++;
+
 //    cerr << "Unknown element start tag '" << name << "' detected " << endl;
     break;
   case MESHFILE:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -106,6 +172,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case MOUNT:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
     pos = Vector (0,0,0);
@@ -175,7 +243,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case SUBUNIT:
-
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
     pos = Vector (0,0,0);
@@ -223,8 +292,240 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     
-    break;   
+    break;
+
+  case ARMOR:
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case FRONT:
+	armor.front = parse_float((*iter).value);
+	break;
+      case BACK:
+	armor.back=parse_float((*iter).value);
+	break;
+      case LEFT:
+	armor.left=parse_float((*iter).value);
+	break;
+      case RIGHT:
+	armor.right=parse_float((*iter).value);
+	break;
+      }
+    }
+
+ 
+    break;
+  case SHIELDS:
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case FRONT:
+	shield.front = parse_float((*iter).value);
+	shield.number++;
+	break;
+      case BACK:
+	shield.back=parse_float((*iter).value);
+	shield.number++;
+	break;
+      case LEFT:
+	shield.left=parse_float((*iter).value);
+	shield.number++;
+	break;
+      case RIGHT:
+	shield.right=parse_float((*iter).value);
+	shield.number++;
+	break;
+	  case TOP:
+		  shield.top=parse_float((*iter).value);
+		  shield.number++;
+		  break;
+	  case BOTTOM:
+		  shield.bottom=parse_float((*iter).value);
+		  shield.number++;
+		  break;
+	  case RECHARGE:
+		  shield.recharge=parse_float((*iter).value);
+		  break;
+      }
+    }
+	  assert(shield.number==2||shield.number==4||shield.number==6);
+
+    
+    break;
+  case HULL:
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case STRENGTH:
+	hull = parse_float((*iter).value);
+	break;
+      }
+    }
+   
+    break;
+  case STATS:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case MASS:
+	mass = parse_float((*iter).value);
+	break;
+      case MOMENTOFINERTIA:
+	MomentOfInertia=parse_float((*iter).value);
+	break;
+      case FUEL:
+	fuel=parse_float((*iter).value);
+	break;
+      }
+    }
+	break;
+  case MANEUVER:
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case YAW:
+	limits.yaw = parse_float((*iter).value);
+	break;
+      case PITCH:
+	limits.pitch=parse_float((*iter).value);
+	break;
+      case ROLL:
+	limits.roll=parse_float((*iter).value);
+	break;
+      }
+    }
+
+    
+    break;
+
+  case ENGINE:
+	  
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case ACCEL:
+	accel=parse_float((*iter).value);
+	break;
+      case FRONT:
+	limits.longitudinal+=parse_float((*iter).value);
+	break;
+      case BACK:
+//	limits.longitudinal+=parse_float((*iter).value);
+//	divby+=2;
+	break;
+      case LEFT:
+	limits.lateral=parse_float((*iter).value);
+	break;
+      case RIGHT:
+	limits.lateral=parse_float((*iter).value);
+	break;
+      case TOP:
+	limits.vertical=parse_float((*iter).value);
+	break;
+      case BOTTOM:
+	limits.vertical=parse_float((*iter).value);
+	break;
+    }
+    }
+
+    break;
+
+  case REACTOR:
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case RECHARGE:
+	recharge=parse_float((*iter).value);
+	break;
+      case LIMIT:
+	energy=parse_float((*iter).value);
+	break;
+    }
+    }
+    break;
+
+  case YAW:
+	  yprrestricted+=YRESTR;
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case MAX:
+	ymax=parse_float((*iter).value);
+	break;
+      case MIN:
+	ymin=parse_float((*iter).value);
+	break;
+    }
+    }
+    break;
+
+  case PITCH:
+	  yprrestricted+=PRESTR;
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case MAX:
+	pmax=parse_float((*iter).value);
+	break;
+      case MIN:
+	pmin=parse_float((*iter).value);
+	break;
+    }
+    }
+    break;
+
+  case ROLL:
+	  yprrestricted+=RRESTR;
+	assert (xml->unitlevel==2);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case MAX:
+	rmax=parse_float((*iter).value);
+	break;
+      case MIN:
+	rmin=parse_float((*iter).value);
+	break;
+    }
+    }
+    break;
+
+  case UNIT:
+	assert (xml->unitlevel==0);
+	xml->unitlevel++;
+	break;
+
+  case DEFENSE:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+	break;
+
+  case THRUST:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+	break;
+
+  case ENERGY:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+	break;
+
+  case RESTRICTED:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+	break;
+	
   default:
+	
     break;
   }
 }
@@ -234,16 +535,23 @@ void Unit::endElement(const string &name) {
 
   switch(elem) {
   case UNKNOWN:
+	  xml->unitlevel--;
 //    cerr << "Unknown element end tag '" << name << "' detected " << endl;
     break;
   default:
-    ;
+	  xml->unitlevel--;
+    break;
   }
 }
 
 void Unit::LoadXML(const char *filename) {
-  const int chunk_size = 16384;
-  
+	shield.number=0;
+	limits.lateral=0;
+	limits.longitudinal=0;
+	limits.vertical=0;
+	yprrestricted=0;
+	const int chunk_size = 16384;
+ // rrestricted=yrestricted=prestricted=false;
   FILE * inFile = fopen (filename, "r+b");
   if(!inFile) {
     assert(0);
@@ -251,6 +559,7 @@ void Unit::LoadXML(const char *filename) {
   }
 
   xml = new XML;
+  xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
