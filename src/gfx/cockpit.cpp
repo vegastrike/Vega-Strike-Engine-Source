@@ -524,7 +524,7 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
     }
     return ((float)armordat[stat-ARMORF])/StartArmor[stat-ARMORF];
   case FUEL:
-    return target->FuelData()/maxfuel;
+    if (maxfuel>0) return target->FuelData()/maxfuel;return 0;
   case ENERGY:
     return target->EnergyData();
   case HULL:
