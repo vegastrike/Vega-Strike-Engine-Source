@@ -1662,7 +1662,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 			}
 			word32index+=1;
 		  }
-		  fprintf(Outputfile," detailtexture=\"%s\" ",detailtexturename.c_str());
+		  if(detailtexturename.size()!=0){fprintf(Outputfile," detailtexture=\"%s\" ",detailtexturename.c_str());}
 
 		  vector <XML::vec3f> Detailplanes; //store detail planes until finish printing mesh attributes
 		  int numdetailplanes=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of detailplanes
