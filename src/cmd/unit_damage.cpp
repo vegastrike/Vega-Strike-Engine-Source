@@ -720,7 +720,9 @@ bool Unit::Explode (bool drawit, float timeit) {
     image->explosion= new Animation (bleh.c_str(),false,.1,BILINEAR,false);
     image->explosion->SetDimensions(ExplosionRadius(),ExplosionRadius());
     if (isUnit()!=MISSILEPTR) {
-      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position(),MaxShieldVal(),0,ExplosionRadius(),ExplosionRadius()/4));
+      static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
+      static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
+      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
     }
 	if (!SubUnit){
 		Vector exploc = cumulative_transformation.position;
