@@ -48,7 +48,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection) {
 
-  no_collision_time=255;
+  no_collision_time=(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
   _Universe->pushActiveStarSystem (this);
