@@ -187,9 +187,10 @@ void Nebula::SetFogState () {
 
 void Nebula::PutInsideCam(int i) {
   static float nebdelta= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_time",".01"));
+  static float fadeinrate= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_fade_in_percent","0.5"));
   if (_Universe->AccessCamera()==_Universe->AccessCamera(i)) {
     fadeinvalue+=2*nebdelta*SIMULATION_ATOM;
-    if (fadeinvalue>1) {
+    if (fadeinvalue>1+fadeinrate) {
       fadeinvalue=1;
     }
   }
