@@ -4569,7 +4569,7 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   return holder;
 }
 extern void ExecuteDirector();
-std::set <Unit *> arrested_list_do_not_dereference;
+
 void Unit::PerformDockingOperations () {
   for (unsigned int i=0;i<image->dockedunits.size();i++) {
     Unit * un;
@@ -4580,37 +4580,6 @@ void Unit::PerformDockingOperations () {
     }
     //Transformation t = un->prev_physical_state;
     float tmp; //short fix
-    tmp=un->maxwarpenergy;
-    if (tmp<un->jump.energy)
-      tmp=un->jump.energy;
-    int cockpit=UnitUtil::isPlayerStarship(un);
-    if (tmp>un->warpenergy){
-      un->warpenergy=tmp;
-      if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
-	static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","fuel_docking_fee","0"));
-	_Universe->AccessCockpit(cockpit)->credits-=docking_fee;
-      }
-    }
-    if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
-      static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
-      if (_Universe->AccessCockpit(cockpit)->credits>=docking_fee) {
-        _Universe->AccessCockpit(cockpit)->credits-=docking_fee;
-      }else if (_Universe->AccessCockpit(cockpit)->credits>=0) {
-        _Universe->AccessCockpit(cockpit)->credits=0;
-      }
-    }
-
-	std::set<Unit *>::iterator arrested=arrested_list_do_not_dereference.find(this);
-	if (arrested!=arrested_list_do_not_dereference.end()) {
-		arrested_list_do_not_dereference.erase (arrested);
-		//do this for jail time
-		for (unsigned int j=0;j<100000;++j) {
-			for (unsigned int i=0;i<active_missions.size();++i) {
-				
-				ExecuteDirector();
-			}
-		}
-	}
     un->prev_physical_state=un->curr_physical_state;
     un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
     un->NetForce=Vector(0,0,0);
@@ -4632,7 +4601,7 @@ void Unit::PerformDockingOperations () {
     ///force him in a box...err where he is
   }
 }
-
+std::set <Unit *> arrested_list_do_not_dereference;
 int Unit::ForceDock (Unit * utdw, int whichdockport) {
 	if (utdw->image->dockingports.size()<=whichdockport)
 		return 0;
@@ -4654,7 +4623,40 @@ int Unit::ForceDock (Unit * utdw, int whichdockport) {
 		  this->RestoreGodliness();
 	//_Universe->AccessCockpit()->RestoreGodliness();
       }
-	  return whichdockport+1;
+      float tmp;
+      Unit *un=this;
+      tmp=un->maxwarpenergy;
+      if (tmp<un->jump.energy)
+        tmp=un->jump.energy;
+      int cockpit=UnitUtil::isPlayerStarship(un);
+      if (tmp>un->warpenergy){
+        un->warpenergy=tmp;
+        if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
+          static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","fuel_docking_fee","0"));
+          _Universe->AccessCockpit(cockpit)->credits-=docking_fee;
+        }
+      }
+      if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
+        static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
+        if (_Universe->AccessCockpit(cockpit)->credits>=docking_fee) {
+          _Universe->AccessCockpit(cockpit)->credits-=docking_fee;
+        }else if (_Universe->AccessCockpit(cockpit)->credits>=0) {
+          _Universe->AccessCockpit(cockpit)->credits=0;
+        }
+      }
+      
+      std::set<Unit *>::iterator arrested=arrested_list_do_not_dereference.find(this);
+      if (arrested!=arrested_list_do_not_dereference.end()) {
+        arrested_list_do_not_dereference.erase (arrested);
+        //do this for jail time
+        for (unsigned int j=0;j<100000;++j) {
+          for (unsigned int i=0;i<active_missions.size();++i) {
+            
+            ExecuteDirector();
+          }
+        }
+      }
+      return whichdockport+1;
 }
 int Unit::Dock (Unit * utdw) {
 // Do only if non networking mode or if server (for both Network==NULL)
