@@ -1,3 +1,9 @@
+2002-03-01 Corey O'Connor <oconnorc@dogheadbone.com>
+        * Initial commit of mac os x support. 
+          - Lot's of small changes. Mostly to header files and such.
+          - Need to upload some build instructions as the configure files if it's mac os x expect some things to be in
+            certain places. This will most likely be fine for most people but it needs some flexability.
+
 2002-02-28 Daniel Horn <hellcatv@hotmail.com>
 	* Added Terrain support for rendered meshes...this was a hell of a lot of work
 	* Added glutStrokeFont and broke a level of abstraction cus I'm tired... basically GFX does not wrap glutStrokeFont at the moment...should be trivial fix...enjoy pretty fonts
