@@ -2642,14 +2642,17 @@ void Unit::RegenShields () {
   int rechargesh=1; // used ... oddly
   float maxshield=totalShieldEnergyCapacitance(shield);
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
+  static bool apply_difficulty_shields = XMLSupport::parse_bool (vs_config->getVariable("physics","difficulty_based_shield_recharge","true"));
   if (!energy_before_shield) {
     RechargeEnergy();
   }
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
-  if (!_Universe->isPlayerStarship(this)) {
-    rec*=g_game.difficulty;
-  }else {
-    rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
+  if (apply_difficulty_shields) {
+    if (!_Universe->isPlayerStarship(this)) {
+      rec*=g_game.difficulty;
+    }else {
+      rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
+    }
   }
   bool velocity_discharge=false;
   static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
@@ -2950,8 +2953,11 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   if ( (cpt=_Universe->isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
-      phasedamage*= (g_game.difficulty);
-      amt*=(g_game.difficulty);
+      static bool apply_difficulty_enemy_damage=XMLSupport::parse_bool(vs_config->getVariable("physics","difficulty_based_enemy_damage","true"));
+      if (apply_difficulty_enemy_damage) {
+        phasedamage*= g_game.difficulty;
+        amt*=g_game.difficulty;
+      }
       cpt->Shake (amt);
     }
   }
