@@ -406,7 +406,7 @@ template <class UnitType>
 void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   unsigned int i;
   Matrix mat(mato);
-  if (FaceCamera){
+  if (graphicOptions.FaceCamera){
 	  Vector p,q,r;
 	  QVector pos (mato.p);
 	  float wid,hei;
@@ -473,7 +473,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   ctm =&cumulative_transformation_matrix;
   ct = &cumulative_transformation;
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  if (FaceCamera) {
+  if (graphicOptions.FaceCamera==1) {
 	  Vector p,q,r;
 	  QVector pos (ctm->p);
 	  float wid,hei;
@@ -504,6 +504,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   bool On_Screen=false;
   float minmeshradius = (_Universe->AccessCamera()->GetVelocity().Magnitude()+Velocity.Magnitude())*SIMULATION_ATOM;
   bool myparent = (this==_Universe->AccessCockpit()->GetParent());
+  float numKeyFrames = graphicOptions.NumAnimationPoints;
   if ((!(invisible&INVISUNIT))&&((!(invisible&INVISCAMERA))||(!myparent))) {
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
@@ -541,8 +542,20 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula
-	  On_Screen=true;
+		float currentFrame = meshdata[i]->getCurrentFrame();
+		meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
+		On_Screen=true;
+		if (meshdata[i]->getFramesPerSecond()) {
+			float currentprogress=floor(meshdata[i]->getCurrentFrame()*numKeyFrames/meshdata[i]->getNumLOD());
+			if (numKeyFrames&&
+				floor(currentFrame*numKeyFrames/meshdata[i]->getNumLOD())   !=
+				currentprogress) {
+				graphicOptions.Animating=0;
+				meshdata[i]->setCurrentFrame(.1+currentprogress*meshdata[i]->getNumLOD()/numKeyFrames);
+			}else if (!graphicOptions.Animating) {
+				meshdata[i]->setCurrentFrame(currentFrame);//dont' budge
+			}
+		}		
 	} else {
 
 	}

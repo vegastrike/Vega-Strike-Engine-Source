@@ -276,7 +276,8 @@ void GameVegaConfig::initCommandMap(){
   command_map["RollRightKey"]=FlyByKeyboard::RollRightKey ;
   command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
   command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
-  command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;  
+  command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;
+  command_map["ToggleAnimation"]=FireKeyboard::ToggleAnimation;  
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
   
   command_map["CommHelpMeOutCrit"]=FireKeyboard::HelpMeOutCrit;

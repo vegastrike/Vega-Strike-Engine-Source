@@ -307,12 +307,24 @@ protected:
   ///Mount may access unit
   friend class Mount;
   ///no collision table presence.
-  bool SubUnit;
-  bool RecurseIntoSubUnitsOnCollision;
-  bool FaceCamera;
 public:
-  bool isSubUnit() {return SubUnit;}
-  void setFaceCamera(){FaceCamera=true;}
+  struct graphic_options {
+	  unsigned SubUnit:1;
+	  unsigned RecurseIntoSubUnitsOnCollision:1;
+	  unsigned FaceCamera:1;
+	  unsigned Animating:1;
+	  unsigned unused1:1;	  
+	  unsigned unused2:1;
+	  unsigned unused3:1;
+	  unsigned unused4:1;
+	  unsigned char NumAnimationPoints;
+	  graphic_options() {
+		  FaceCamera=Animating=unused1=unused2=unused3=unused4=0;
+		  NumAnimationPoints=0;
+	  }
+  }graphicOptions;
+  bool isSubUnit() {return graphicOptions.SubUnit?true:false;}
+  void setFaceCamera(){graphicOptions.FaceCamera=1;}
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min, bool force_change_on_nothing);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   unsigned char RecomputeRole();//changes own role

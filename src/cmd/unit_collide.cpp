@@ -85,7 +85,7 @@ void Unit::UpdateCollideQueue () {
 }
 extern bool usehuge_table();
 void Unit::CollideAll() {
-  if (SubUnit||killed)
+  if (isSubUnit()||killed)
     return;
 
   UnitCollection * colQ [tablehuge+1];
@@ -254,7 +254,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     }
     UnitCollection::UnitIterator i;
     static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
-    if (bigger->SubUnits.empty()==false&&(bigger->RecurseIntoSubUnitsOnCollision==true||bigger->isUnit()==ASTEROIDPTR)) {
+    if (bigger->SubUnits.empty()==false&&(bigger->graphicOptions.RecurseIntoSubUnitsOnCollision==true||bigger->isUnit()==ASTEROIDPTR)) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
 	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
@@ -267,7 +267,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	}
       }
     }
-    if (smaller->SubUnits.empty()==false&&(smaller->RecurseIntoSubUnitsOnCollision==true||smaller->isUnit()==ASTEROIDPTR)) {
+    if (smaller->SubUnits.empty()==false&&(smaller->graphicOptions.RecurseIntoSubUnitsOnCollision==true||smaller->isUnit()==ASTEROIDPTR)) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
 	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
@@ -455,7 +455,7 @@ bool Unit::Collide (Unit * target) {
  
 Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
-  if (RecurseIntoSubUnitsOnCollision)
+  if (graphicOptions.RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
     un_fiter i = SubUnits.fastIterator();
     for (Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -496,7 +496,7 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
 
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   Unit * tmp;
-  if (RecurseIntoSubUnitsOnCollision)
+  if (graphicOptions.RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
     un_fiter i(SubUnits.fastIterator());
     for (Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -571,7 +571,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
 	)
       return true;
   }
-  if (RecurseIntoSubUnitsOnCollision) 
+  if (graphicOptions.RecurseIntoSubUnitsOnCollision) 
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {

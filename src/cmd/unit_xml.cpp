@@ -239,7 +239,8 @@ namespace UnitXML {
 	  FACECAMERA,
 	  XYSCALE,
 	  INSYSENERGY,
-	  ZSCALE
+	  ZSCALE,
+	  NUMANIMATIONSTAGES
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -279,10 +280,10 @@ namespace UnitXML {
     EnumMap::Pair ("Import",IMPORT),
     EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE),
     EnumMap::Pair ("Upgrade",UPGRADE      ),
-    EnumMap::Pair ("Description",DESCRIPTION)
+    EnumMap::Pair ("Description",DESCRIPTION),
     
   };
-  const EnumMap::Pair attribute_names[102] = {
+  const EnumMap::Pair attribute_names[103] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -384,11 +385,13 @@ namespace UnitXML {
     EnumMap::Pair ("LightType",LIGHTTYPE),
     EnumMap::Pair ("CombatRole",COMBATROLE),
     EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION),
-    EnumMap::Pair ("FaceCamera",FACECAMERA)	
+    EnumMap::Pair ("FaceCamera",FACECAMERA),
+	EnumMap::Pair ("NumAnimationStages",NUMANIMATIONSTAGES)
+
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 102);
+  const EnumMap attribute_map(attribute_names, 103);
 }
 
 // USED TO BE IN UNIT_FUNCTIONS*.CPP BUT NOW ON BOTH CLIENT AND SERVER SIDE
@@ -1455,16 +1458,19 @@ using namespace UnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case RECURSESUBUNITCOLLISION:
 	ADDDEFAULT;
-	RecurseIntoSubUnitsOnCollision= XMLSupport::parse_bool (iter->value);
+	graphicOptions.RecurseIntoSubUnitsOnCollision= XMLSupport::parse_bool (iter->value);
 	break;
 	  case FACECAMERA:
 		  ADDDEFAULT;
-		  FaceCamera=XMLSupport::parse_bool(iter->value);
+		  graphicOptions.FaceCamera=XMLSupport::parse_bool(iter->value);
 		  break;
       case COMBATROLE:
 		  ADDDEFAULT;
 		  xml->calculated_role=true;
 		  combat_role = ROLES::getRole(iter->value);
+		break;
+	  case NUMANIMATIONSTAGES:
+		graphicOptions.NumAnimationPoints=XMLSupport::parse_int (iter->value);
 		break;
 	  }
 	}
@@ -1651,7 +1657,7 @@ extern std::string GetReadPlayerSaveGame (int);
 void Unit::LoadXML(const char *filename, const char * modifications, string * xmlbuffer)
 {
   shield.number=0;
-  RecurseIntoSubUnitsOnCollision=!isSubUnit();
+  graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
@@ -1887,7 +1893,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
     SubUnits.prepend(xml->units[a]);
   }
   calculate_extent(false);
-  if (!SubUnit) {
+  if (!isSubUnit()) {
     //UpdateCollideQueue();
   }
   image->unitscale=xml->unitscale;

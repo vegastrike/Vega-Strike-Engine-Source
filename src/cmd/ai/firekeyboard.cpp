@@ -32,7 +32,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    toggleglow=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=
 		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
 		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
@@ -78,6 +78,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE targetukey;
  KBSTATE turretaikey;
  KBSTATE toggleglow;
+ KBSTATE toggleanimation;	
  KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
  KBSTATE threatturrettargetkey;
@@ -100,6 +101,11 @@ FIREKEYBOARDTYPE &FireKeyboard::j() {
 void FireKeyboard::ToggleGlow (int,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleglow=PRESS;
+	}
+}
+void FireKeyboard::ToggleAnimation (int,KBSTATE k) {
+	if (k==PRESS) {
+		g().toggleanimation=PRESS;
 	}
 }
 void FireKeyboard::PressComm1Key (int, KBSTATE k) {
@@ -1269,6 +1275,11 @@ void FireKeyboard::Execute () {
 		}
 		weapsound.playsound();
   }
+  if (f().toggleanimation == PRESS) {
+	  f().toggleanimation=DOWN;
+	  parent->graphicOptions.Animating = parent->graphicOptions.Animating?0:1;
+  }
+  
   if (f().toggleglow == PRESS) {
 	  f().toggleglow=DOWN;
 	 static bool isvis=true;

@@ -329,7 +329,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
   hull=1000;
   maxhull=100000;
   this->faction = fact;
-  SubUnit = SubU;
+  graphicOptions.SubUnit = SubU;
   meshdata = meshes;
   meshes.clear();
   meshdata.push_back(NULL);
@@ -431,7 +431,7 @@ void Unit::Init()
 
 	damages = NO_DAMAGE;
 
-	RecurseIntoSubUnitsOnCollision=false;
+	graphicOptions.RecurseIntoSubUnitsOnCollision=false;
 	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
@@ -442,13 +442,13 @@ void Unit::Init()
   activeStarSystem=NULL;
   xml=NULL;
   docked=NOT_DOCKED;
-  SubUnit =0;
+  graphicOptions.SubUnit =0;
   jump.energy = 100;
   static float insys_jump_cost = XMLSupport::parse_float (vs_config->getVariable ("physics","insystem_jump_cost",".1"));
   jump.insysenergy=insys_jump_cost*jump.energy;
   jump.delay=5;
   jump.damage=0;
-  FaceCamera=false;
+  graphicOptions.FaceCamera=false;
   jump.drive=-2;// disabled
   afterburnenergy=0;
   planet=NULL;
@@ -620,8 +620,9 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
-	SubUnit = SubU;
-	RecurseIntoSubUnitsOnCollision=!SubUnit;
+	graphicOptions.SubUnit = SubU?1:0;
+	graphicOptions.Animating=true;
+	graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
 	char * my_directory=GetUnitDir(filename);
@@ -724,7 +725,7 @@ void Unit::calculate_extent(bool update_collide_queue) {
     //    if (!SubUnit)
     //      image->selectionBox = new Box(corner_min, corner_max);
   }
-  if (!SubUnit&&update_collide_queue) {
+  if (!isSubUnit()&&update_collide_queue) {
     UpdateCollideQueue();
   }
   if (isUnit()==PLANETPTR) {
@@ -1591,7 +1592,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  }
 		  autotrack=2;
 	  }
-      if (!mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
+      if (!mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!isSubUnit()||owner==NULL)?this:owner,target,autotrack, trackingcone)) {
 		  const weapon_info * typ = mounts[i].type;
 		  energy+=typ->EnergyRate*(typ->type==weapon_info::BEAM?SIMULATION_ATOM:1);
 		  if (mounts[i].ammo>=0)
@@ -1633,7 +1634,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     if (dead)
       Kill();
   }
-  if ((!SubUnit)&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
+  if ((!isSubUnit())&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
     UpdateCollideQueue();
   }
 }
@@ -1704,7 +1705,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   }
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
-  if (SubUnit) {
+  if (isSubUnit()) {
     return false;//we can't auto here;
   }
   StarSystem * ss = activeStarSystem;
@@ -2855,7 +2856,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
 	#endif
     mounts.clear();
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
-  if (!SubUnit) 
+  if (!isSubUnit()) 
     RemoveFromSystem();
   killed = true;
   computer.target.SetUnit (NULL);
@@ -2994,7 +2995,7 @@ void Unit::ProcessDeleteQueue() {
     fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
 #endif
 #ifdef DESTRUCTDEBUG
-    if (Unitdeletequeue.back()->SubUnit) {
+    if (Unitdeletequeue.back()->isSubUnit()){
 
       fprintf (stderr,"Subunit Deleting (related to double dipping)");
 
@@ -3093,7 +3094,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			  fprintf (stderr,"errore fatale mit den armorn");
 		  if (hull <0) {
 			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
-			if (!SubUnit&&hull>-hulldamtoeject) {
+			if (!isSubUnit()&&hull>-hulldamtoeject) {
 			  static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
 
 			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));

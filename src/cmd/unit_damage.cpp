@@ -221,7 +221,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
       _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position().Cast(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
     }
-	if (!SubUnit){
+	if (!isSubUnit()){
 		QVector exploc = cumulative_transformation.position;
 		Unit * un;
 		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
@@ -232,7 +232,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	  un=_Universe->AccessCockpit()->GetParent();
 	  if (isUnit()==UNITPTR) {
 	    static float percentage_shock=XMLSupport::parse_float(vs_config->getVariable ("graphics","percent_shockwave",".5"));
-	    if (rand () < RAND_MAX*percentage_shock&&(!SubUnit)) {
+	    if (rand () < RAND_MAX*percentage_shock&&(!isSubUnit())) {
 	      static float shockwavegrowth=XMLSupport::parse_float(vs_config->getVariable ("graphics","shockwave_growth","1.05"));
 	      static string shockani (vs_config->getVariable ("graphics","shockwave_animation","explosion_wave.ani"));
 	      
