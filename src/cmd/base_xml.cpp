@@ -205,7 +205,7 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 					break;
 				}
 			}
-			P=Q.Cross(R);
+			P=R.Cross(Q);
 			P.Normalize();
 			rooms.back()->ships.push_back(new Matrix(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,QVector(x,y,z)));
 		}

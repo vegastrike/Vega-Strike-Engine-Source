@@ -32,11 +32,17 @@ void Base::Room::Draw () {
 	for (i=0;i<texes.size();i++) {
 		texes[i]->Draw();
 	}
-//	GFXHudMode (GFXFALSE);
+	GFXHudMode (GFXFALSE);
 	for (i=0;i<ships.size();i++) {
-		CurrentBase->caller->DrawNow(*ships[i]);
+	  Vector p,q,r;
+	  _Universe->AccessCamera()->GetOrientation (p,q,r);
+	  QVector pos =  _Universe->AccessCamera ()->GetPosition();
+	  Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
+	  Matrix final;
+	  MultMatrix (final,cam,*ships[i]);
+		CurrentBase->caller->DrawNow(final);
 	}
-//	GFXHudMode (GFXTRUE);
+	GFXHudMode (GFXTRUE);
 }
 
 int Base::Room::MouseOver (float x, float y) {
