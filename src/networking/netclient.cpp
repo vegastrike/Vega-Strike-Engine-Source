@@ -1085,17 +1085,16 @@ void	NetClient::addClient( const Packet* packet )
 	clt = Clients[cltserial];
 	if( clt != NULL)
 	{
-		cerr<<"Error, client exists !!"<<endl;
-		exit( 1);
+		// Client may exist if it jumped from a starsystem to another of if killed and respawned
+		COUT<<"Existing client n°"<<cltserial<<endl;
+	}
+	else
+	{
+		clt = new Client;
+		nbclients++;
+		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	}
 
-	clt = new Client;
-	nbclients++;
-	// Copy the client state in its structure
-	//Unit * un = clt->game_unit.GetUnit();
-
-	COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-	COUT<<"At : ";
 
 	//Packet ptmp = packet;
 	NetBuffer netbuf( packet->getData(), packet->getDataLength());
