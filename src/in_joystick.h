@@ -35,15 +35,13 @@
 //#include "dbg.h"
 #include "in_handler.h"
 
-class Joystick;
-
 extern void ProcessJoystick();
 extern void InitJoystick();
 
 class JoyStick {
     public:
     // initializes the joystick
-    JoyStick(void);
+    JoyStick(int);
     // engine calls GetJoyStick to get coordinates and buttons
     void GetJoyStick(float &x,float &y,int &buttons);
     bool isAvailable(void);
@@ -61,6 +59,7 @@ class JoyStick {
     float  deadzone;
 }
 ;
-
+extern int num_joystick;
+extern JoyStick **joystick;
 #endif // _JOYSTICK_H_
 

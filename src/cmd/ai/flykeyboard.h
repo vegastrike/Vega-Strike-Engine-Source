@@ -4,7 +4,6 @@
 #include <GL/glut.h>
 #include "flybywire.h"
 
-
 class FlyByKeyboard: public FlyByWire {
 
  public:
