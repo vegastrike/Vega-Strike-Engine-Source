@@ -57,7 +57,8 @@ struct unorigdest {
   StarSystem * dest;
   float delay;
   int animation;
-  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
+  bool justloaded;
+  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani, bool justloaded):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani),justloaded(justloaded){}
 };
 void CacheJumpStar (bool destroy) {
   static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
@@ -202,6 +203,9 @@ void StarSystem::ProcessPendingJumps() {
       }
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
+      for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=GetElapsedTime()) {
+	pendingjump[kk]->dest->Update(1);
+      }
       iter = pendingjump[kk]->dest->drawList->createIterator();
       Unit * primary;
       while ((primary = iter.current())!=NULL) {
@@ -250,8 +254,11 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
   if (!ss) {
     ss = star_system_table.Get (ssys);
   }
-  if (!ss)
+  bool justloaded=false;
+  if (!ss) {
+    justloaded=true;
     ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
+  }
   if(ss) {
 #ifdef JUMP_DEBUG
 	fprintf (stderr,"Pushing back to pending queue!\n");
@@ -265,7 +272,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
       static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
       AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
     }
-    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani ));
+    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
 
   } else {
 #ifdef JUMP_DEBUG
