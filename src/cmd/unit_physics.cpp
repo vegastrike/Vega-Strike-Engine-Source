@@ -681,13 +681,13 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
     temp = temp * powf (y,1.5);
     }*/
 }
-void Unit::SetOrientation (Vector & q, Vector & r) {
+void Unit::SetOrientation (Vector q, Vector r) {
   q.Normalize();
   r.Normalize();
   Vector p;
   CrossProduct (q,r,p);
   CrossProduct (r,p,q);
-  curr_physical_state = Transformation (Quatenrion::from_vectors (p,q,r),Position());
+  curr_physical_state = Transformation (Quaternion::from_vectors (p,q,r),Position());
 }
 void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
   Matrix m;
