@@ -78,7 +78,7 @@ public:
     virtual PickerCell* cellAt(int index) { return &m_cells[index]; };
 
     // Add a new cell to this list.
-    void addCell(const PickerCell& c) { m_cells.push_back(*(dynamic_cast<const SimplePickerCell*>(&c))); };
+    void addCell(const PickerCell& c) { m_cells.push_back(*(static_cast<const SimplePickerCell*>(&c))); };
 
     // Clear out all the cells.
     void clear(void) { m_cells.clear(); };

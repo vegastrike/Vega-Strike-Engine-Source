@@ -975,7 +975,7 @@ void BaseComputer::createControls(void) {
 
 // Create the mode buttons.
 void BaseComputer::createModeButtons(void) {
-    NewButton* originalButton = dynamic_cast<NewButton*>(window()->findControlById("ModeButton"));
+    NewButton* originalButton = static_cast<NewButton*>(window()->findControlById("ModeButton"));
     assert(originalButton != NULL);
 
     if(m_displayModes.size() > 1) {
@@ -1085,7 +1085,7 @@ void BaseComputer::recalcTitle() {
 	}
 
     // Set the string in the base title control.
-    StaticDisplay* baseTitleDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("BaseInfoTitle") );
+    StaticDisplay* baseTitleDisplay = static_cast<StaticDisplay*>( window()->findControlById("BaseInfoTitle") );
     assert(baseTitleDisplay != NULL);
     baseTitleDisplay->setText(baseTitle);
 
@@ -1122,7 +1122,7 @@ void BaseComputer::recalcTitle() {
 	}
 
     // Set the string in the player title control.
-    StaticDisplay* playerTitleDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("PlayerInfoTitle") );
+    StaticDisplay* playerTitleDisplay = static_cast<StaticDisplay*>( window()->findControlById("PlayerInfoTitle") );
     assert(playerTitleDisplay != NULL);
     playerTitleDisplay->setText(playerTitle);
 }
@@ -1220,17 +1220,17 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
 // Hide the controls that commit transactions.
 void BaseComputer::hideCommitControls(void) {
 	// The three buy/sell buttons.
-    NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+    NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
     commitButton->setHidden(true);
-    NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
+    NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
     if(commit10Button != NULL) commit10Button->setHidden(true);
-    NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
+    NewButton* commitAllButton = static_cast<NewButton*>( window()->findControlById("CommitAll") );
     if(commitAllButton != NULL) commitAllButton->setHidden(true);
 
 	// The price and "max" displays.
-    StaticDisplay* totalPrice = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+    StaticDisplay* totalPrice = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 	if(totalPrice != NULL) totalPrice->setText("");
-    StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+    StaticDisplay* maxForPlayer = static_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
 	if(maxForPlayer != NULL) maxForPlayer->setText("");
 }
 
@@ -1238,21 +1238,21 @@ void BaseComputer::hideCommitControls(void) {
 void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionType trans) {
 	if(trans == BUY_CARGO) {
 		// "Buy 1" button.
-		NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
 		assert(commitButton != NULL);
 		commitButton->setHidden(false);
 		commitButton->setLabel("Buy 1");
 		commitButton->setCommand("BuyCargo");
 
 		// "Buy 10" button.
-		NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
+		NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
 		assert(commit10Button != NULL);
 		commit10Button->setHidden(false);
 		commit10Button->setLabel("Buy 10");
 		commit10Button->setCommand("Buy10Cargo");
 
 		// "Buy All" button.
-		NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
+		NewButton* commitAllButton = static_cast<NewButton*>( window()->findControlById("CommitAll") );
 		assert(commitAllButton != NULL);
 		commitAllButton->setHidden(false);
 		commitAllButton->setLabel("Buy");
@@ -1264,12 +1264,12 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		const double totalPrice = item.price * maxQuantity;
 		char tempString[100];
 		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
-		StaticDisplay* totalDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+		StaticDisplay* totalDisplay = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 		assert(totalDisplay != NULL);
 		totalDisplay->setText(tempString);
 
 		// Limit if we have one.
-		StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+		StaticDisplay* maxForPlayer = static_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
 		assert(maxForPlayer != NULL);
 		if(maxQuantity >= item.quantity) {
 			// No limits, so let's not mention anything.
@@ -1283,21 +1283,21 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		assert(trans == SELL_CARGO);
 
 		// "Sell" button.
-		NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
 		assert(commitButton != NULL);
 		commitButton->setHidden(false);
 		commitButton->setLabel("Sell 1");
 		commitButton->setCommand("SellCargo");
 
 		// "Sell 10" button.
-		NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
+		NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
 		assert(commit10Button != NULL);
 		commit10Button->setHidden(false);
 		commit10Button->setLabel("Sell 10");
 		commit10Button->setCommand("Sell10Cargo");
 
 		// "Sell All" button.
-		NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
+		NewButton* commitAllButton = static_cast<NewButton*>( window()->findControlById("CommitAll") );
 		assert(commitAllButton != NULL);
 		commitAllButton->setHidden(false);
 		commitAllButton->setLabel("Sell");
@@ -1307,12 +1307,12 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		const double totalPrice = item.price * item.quantity;
 		char tempString[100];
 		sprintf(tempString, "Total: #b#%.2f#-b", totalPrice);
-		StaticDisplay* totalDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+		StaticDisplay* totalDisplay = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 		assert(totalDisplay != NULL);
 		totalDisplay->setText(tempString);
 
 		// No limit.
-		StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+		StaticDisplay* maxForPlayer = static_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
 		assert(maxForPlayer != NULL);
 		maxForPlayer->setText("");
 	}
@@ -1322,9 +1322,9 @@ string buildShipDescription(Cargo &item,string & descriptiontexture);
 // Update the controls when the selection for a transaction changes.
 void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist) {
     // Get the controls we need.
-    NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
+    NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
     assert(commitButton != NULL);
-    StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
     std::string descriptiontexture;
     assert(desc != NULL);
 
@@ -1469,7 +1469,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 
     // Change the description control.
     unsigned int pic;
-    StaticImageDisplay* descimage = dynamic_cast<StaticImageDisplay*>( window()->findControlById("DescriptionImage") );
+    StaticImageDisplay* descimage = static_cast<StaticImageDisplay*>( window()->findControlById("DescriptionImage") );
     if ((pic=descString.find("@"))!=string::npos){
        std::string texture = descString.substr(pic+1);
        descString = descString.substr(0,pic);
@@ -1492,7 +1492,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 // Something in a Picker was selected.
 bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control* control) {
     assert(control != NULL);
-    Picker* picker = dynamic_cast<Picker*>(control);
+    Picker* picker = static_cast<Picker*>(control);
     PickerCell* cell = picker->selectedCell();
 
     // Figure out which transaction list we are using.
@@ -1607,17 +1607,17 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
         cells.addCell(SimplePickerCell(beautify(currentCategory), currentCategory, CATEGORY_TEXT_COLOR, CATEGORY_TAG));
     }
 
-    SimplePickerCell* parentCell = dynamic_cast<SimplePickerCell*>(cells.cellAt(cells.count()-1));   // Last cell in list.
+    SimplePickerCell* parentCell = static_cast<SimplePickerCell*>(cells.cellAt(cells.count()-1));   // Last cell in list.
     if(loc == string::npos) {
         // This is a simple category -- we are done.
         return parentCell;
     } else {
         // The category string has more stuff in it -- finish it up.
-        SimplePickerCells* childCellList = dynamic_cast<SimplePickerCells*>( parentCell->children() );
+        SimplePickerCells* childCellList = static_cast<SimplePickerCells*>( parentCell->children() );
         if(!childCellList) {
             // If parent doesn't have room children, we create the room manually.
             parentCell->createEmptyChildList();
-            childCellList = dynamic_cast<SimplePickerCells*>( parentCell->children() );
+            childCellList = static_cast<SimplePickerCells*>( parentCell->children() );
         }
         const string newCategory = category.substr(loc+1);
         return createCategoryCell(*childCellList, newCategory, false);
@@ -1644,7 +1644,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
         Cargo& item = tlist.masterList[i].cargo;
 	    if(item.category != currentCategory) {
             // Create new cell(s) for the new category.
-            parentCell = createCategoryCell(*dynamic_cast<SimplePickerCells*>(picker.cells()), item.category, skipFirstCategory);
+            parentCell = createCategoryCell(*static_cast<SimplePickerCells*>(picker.cells()), item.category, skipFirstCategory);
             currentCategory = item.category;
         }
 
@@ -1681,13 +1681,13 @@ void BaseComputer::loadCargoControls(void) {
 	donttakethis.push_back("missions");
 	donttakethis.push_back("upgrades");
     loadMasterList(m_base.GetUnit(), vector<string>(),donttakethis, true, m_transList1); // Anything but a mission.
-    SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
+    SimplePicker* basePicker = static_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
     assert(basePicker != NULL);
     loadListPicker(m_transList1, *basePicker, BUY_CARGO);
 
     // Set up the player's transaction list.
     loadMasterList(m_player.GetUnit(),vector<string>(),donttakethis, true, m_transList2); // Anything but a mission.
-    SimplePicker* inventoryPicker = dynamic_cast<SimplePicker*>( window()->findControlById("PlayerCargo") );
+    SimplePicker* inventoryPicker = static_cast<SimplePicker*>( window()->findControlById("PlayerCargo") );
     assert(inventoryPicker != NULL);
     loadListPicker(m_transList2, *inventoryPicker, SELL_CARGO);
 
@@ -1879,10 +1879,10 @@ bool BaseComputer::changeToNewsMode(const EventCommandId& command, Control* cont
 // The selection in the News picker changed.
 bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Control* control) {
     assert(control != NULL);
-    Picker* picker = dynamic_cast<Picker*>(control);
+    Picker* picker = static_cast<Picker*>(control);
     PickerCell* cell = picker->selectedCell();
 
-    StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
 
     if(cell == NULL) {
@@ -1902,7 +1902,7 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Con
 
 // Load the controls for the News display.
 void BaseComputer::loadNewsControls(void) {
-    SimplePicker* picker = dynamic_cast<SimplePicker*>( window()->findControlById("NewsPicker") );
+    SimplePicker* picker = static_cast<SimplePicker*>( window()->findControlById("NewsPicker") );
     assert(picker != NULL);
     picker->clear();
 
@@ -1929,7 +1929,7 @@ void BaseComputer::loadNewsControls(void) {
     }
 
     // Make sure the description is empty.
-    StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
     desc->setText("");
 
@@ -2016,7 +2016,7 @@ void BaseComputer::loadMissionsControls(void) {
 
     // Load up the list of missions.
     loadMissionsMasterList(m_transList1);
-    SimplePicker* picker = dynamic_cast<SimplePicker*>( window()->findControlById("Missions") );
+    SimplePicker* picker = static_cast<SimplePicker*>( window()->findControlById("Missions") );
     assert(picker != NULL);
     loadListPicker(m_transList1, *picker, ACCEPT_MISSION);
 
@@ -2120,13 +2120,13 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     tlist.masterList.push_back(repair);
 
     // Load the upgrade picker from the master tlist.
-    SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("BaseUpgrades") );
+    SimplePicker* basePicker = static_cast<SimplePicker*>( window()->findControlById("BaseUpgrades") );
     assert(basePicker != NULL);
     loadListPicker(tlist, *basePicker, BUY_UPGRADE, true);
 
     // Fix the Basic Repair color.
-    SimplePickerCells* baseCells = dynamic_cast<SimplePickerCells*>(basePicker->cells());
-    SimplePickerCell* repairCell = dynamic_cast<SimplePickerCell*>(baseCells->cellAt(baseCells->count()-1));
+    SimplePickerCells* baseCells = static_cast<SimplePickerCells*>(basePicker->cells());
+    SimplePickerCell* repairCell = static_cast<SimplePickerCell*>(baseCells->cellAt(baseCells->count()-1));
     assert(repairCell->text() == BASIC_REPAIR_NAME);
     if(isClear(repairCell->textColor())) {
         // Have repair cell, and its color is normal.
@@ -2185,7 +2185,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 
     // Load the upgrade picker form the master list.
-    SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("PlayerUpgrades") );
+    SimplePicker* basePicker = static_cast<SimplePicker*>( window()->findControlById("PlayerUpgrades") );
     assert(basePicker != NULL);
     loadListPicker(tlist, *basePicker, SELL_UPGRADE, true);
 }
@@ -2485,7 +2485,7 @@ public:
 bool UpgradeOperationMountDialog::processWindowCommand(const EventCommandId& command, Control* control) {
     if(command == "Picker::NewSelection") {
 		assert(control != NULL);
-		Picker* picker = dynamic_cast<Picker*>(control);
+		Picker* picker = static_cast<Picker*>(control);
 		PickerCell* cell = picker->selectedCell();
 		if(cell && cell->tag()==0) {
 			// An "unselectable" cell was selected.  Turn the selection back off.
@@ -2518,7 +2518,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
 	dialog->setCallback(this, GOT_MOUNT_ID);
 
     // Fill the dialog picker with the mount points.
-    SimplePicker* picker = dynamic_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
+    SimplePicker* picker = static_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
     assert(picker != NULL);
     for(int i=0; i<playerUnit->GetNumMounts(); i++) {
 		// Mount is selectable if we can upgrade with the new part using that mount.
@@ -2686,7 +2686,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 	dialog->setCallback(this, GOT_MOUNT_ID);
 
     // Fill the dialog picker with the mount points.
-    SimplePicker* picker = dynamic_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
+    SimplePicker* picker = static_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
     assert(picker != NULL);
 	int mount = -1;			// The mount if there was only one.
 	int selectableCount = 0;
@@ -3031,7 +3031,7 @@ void BaseComputer::loadShipDealerControls(void) {
 
 
     // Load the picker from the master list.
-    SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("Ships") );
+    SimplePicker* basePicker = static_cast<SimplePicker*>( window()->findControlById("Ships") );
     assert(basePicker != NULL);
     loadListPicker(m_transList1, *basePicker, BUY_SHIP, true);
 
@@ -3211,7 +3211,7 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
         text += "#n##b#Total Kills: " + XMLSupport::tostring((int)(*killList)[i]) + "#-b#";							
     }
     // Put this in the description.
-    StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
     desc->setText(text);
 
@@ -4173,7 +4173,7 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
 		text.append("#n# #c1:.1:.1#SUPPRESSED #n##-c");
 	}
     // Put this in the description.
-    StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
     desc->setText(text);
 

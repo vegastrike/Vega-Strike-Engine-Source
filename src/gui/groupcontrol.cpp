@@ -46,7 +46,7 @@ bool GroupControl::deleteControl(Control* c) {
         }
         if(currentControl->hasGroupChildren()) {
             // Check the children.
-            GroupControl* group = dynamic_cast<GroupControl*>( currentControl );
+            GroupControl* group = static_cast<GroupControl*>( currentControl );
             if(group->deleteControl(c)) {
                 return true;
             }
@@ -68,7 +68,7 @@ Control* GroupControl::removeControlFromGroup(Control* c) {
         }
         if(currentControl->hasGroupChildren()) {
             // Check the children.
-            GroupControl* group = dynamic_cast<GroupControl*>( currentControl );
+            GroupControl* group = static_cast<GroupControl*>( currentControl );
             Control* ret = group->removeControlFromGroup(c);
             if(ret) {
                 return ret;
@@ -91,7 +91,7 @@ Control* GroupControl::findControlById(const std::string& id) {
         }
         if(currentControl->hasGroupChildren()) {
             // Check the children.
-            GroupControl* group = dynamic_cast<GroupControl*>( currentControl );
+            GroupControl* group = static_cast<GroupControl*>( currentControl );
             Control* ret = group->findControlById(id);
             if(ret) {
                 return ret;
@@ -125,7 +125,7 @@ bool GroupControl::processMouseDown(const InputEvent& event) {
         if(!control.hidden()) {
             if(control.hasGroupChildren()) {
                 // Do children first.
-                GroupControl& group = dynamic_cast<GroupControl&>( control );
+                GroupControl& group = static_cast<GroupControl&>( control );
                 if(group.processMouseDown(event)) {
                     return true;
                 }
@@ -148,7 +148,7 @@ bool GroupControl::processMouseUp(const InputEvent& event) {
         if(!control.hidden()) {
             if(control.hasGroupChildren()) {
                 // Do children first.
-                GroupControl& group = dynamic_cast<GroupControl&>( control );
+                GroupControl& group = static_cast<GroupControl&>( control );
                 if(group.processMouseUp(event)) {
                     return true;
                 }
@@ -171,7 +171,7 @@ bool GroupControl::processMouseMove(const InputEvent& event) {
         if(!control.hidden()) {
             if(control.hasGroupChildren()) {
                 // Do children first.
-                GroupControl& group = dynamic_cast<GroupControl&>( control );
+                GroupControl& group = static_cast<GroupControl&>( control );
                 if(group.processMouseMove(event)) {
                     return true;
                 }
@@ -194,7 +194,7 @@ bool GroupControl::processMouseDrag(const InputEvent& event) {
         if(!control.hidden()) {
             if(control.hasGroupChildren()) {
                 // Do children first.
-                GroupControl& group = dynamic_cast<GroupControl&>( control );
+                GroupControl& group = static_cast<GroupControl&>( control );
                 if(group.processMouseDrag(event)) {
                     return true;
                 }
