@@ -198,6 +198,8 @@ int main (int argc, char ** argv)
     return 0;
   if (argc>3) {
     sscanf (argv[3],"%f",&scl);
+  } else {
+    scl =.1;
   }
   FILE *shp = fopen (argv[1],"r+b");
 
