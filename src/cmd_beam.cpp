@@ -113,6 +113,15 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   calah[14].r=calah[14].g=calah[14].b=calah[14].a=0;
 
   calah[15].r=Col.r;calah[15].g=Col.g;calah[15].b=Col.b;calah[15].a=Col.a;
+  //since mode is ONE,ONE
+  calah[2].r*=Col.a;calah[2].g*=Col.a;calah[2].b*=Col.a;
+  calah[3].r*=Col.a;calah[3].g*=Col.a;calah[3].b*=Col.a;
+  calah[4].r*=Col.a;calah[4].g*=Col.a;calah[4].b*=Col.a;
+  calah[5].r*=Col.a;calah[5].g*=Col.a;calah[5].b*=Col.a;
+  calah[11].r*=Col.a;calah[11].g*=Col.a;calah[11].b*=Col.a;
+  calah[15].r*=Col.a;calah[15].g*=Col.a;calah[15].b*=Col.a;
+
+
   memcpy (&calah[16],&calah[0],sizeof(GFXColor)*16);    
   vlist = new GFXVertexList (GFXQUAD,32,beam,calah,true);//mutable color contained list
   free (calah);
