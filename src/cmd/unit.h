@@ -727,7 +727,7 @@ public:
   int flightgroup_subnumber;
   ///not used yet
   string target_fgid[3];
-
+  void RechargeEnergy();
  protected:
   static std::string massSerializer(const struct XMLType &input, void*mythis);
   static std::string cargoSerializer(const struct XMLType &input, void*mythis);

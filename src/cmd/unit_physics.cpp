@@ -310,7 +310,6 @@ float Unit::MaxShieldVal() const{
 void Unit::RegenShields () {
   int rechargesh=1;
   float maxshield=MaxShieldVal();
-  energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
 
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
   if (_Universe->isPlayerStarship(this)==NULL) {
@@ -364,6 +363,8 @@ void Unit::RegenShields () {
   }else {
     energy=0;
   }
+  energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
+
 }
 
 
