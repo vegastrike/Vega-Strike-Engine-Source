@@ -48,7 +48,7 @@ struct line{
 	int indexref[2]; //Index into Points
 	float s[2]; //U
 	float t[2]; //V
-
+   line() {flatshade=0;}
 };
 
 struct triangle{
@@ -56,7 +56,7 @@ struct triangle{
 	int indexref[3]; //Index into Points
 	float s[3]; //U
 	float t[3]; //V
-	
+   triangle(){flatshade=0;}
 };
 
 struct quad{
@@ -64,6 +64,7 @@ struct quad{
 	int indexref[4]; //Index into Points
 	float s[4]; //U
 	float t[4]; //V
+   quad(){flatshade=0;}
 };
 
 struct stripelement{

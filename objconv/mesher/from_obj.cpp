@@ -220,10 +220,10 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         IntRef C = parsePoly(str2);        
         IntRef D = parsePoly(str3);        
         SetNormal(temp,xml.vertices[A.v],xml.vertices[B.v],xml.vertices[C.v]);
-        AddNormal(temp,xml.vertices[A.v]);
-        AddNormal(temp,xml.vertices[B.v]);
-        AddNormal(temp,xml.vertices[C.v]);
-        AddNormal(temp,xml.vertices[D.v]);
+        AddNormal(xml.vertices[A.v],temp);
+        AddNormal(xml.vertices[B.v],temp);
+        AddNormal(xml.vertices[C.v],temp);
+        AddNormal(xml.vertices[D.v],temp);
         xml.quadtemp.indexref[0]=A.v;
         if (A.t>=0&&A.t<tex.size()) {
           xml.quadtemp.s[0]=tex[A.t].first;
@@ -252,9 +252,9 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         IntRef B = parsePoly(str1);        
         IntRef C = parsePoly(str2);        
         SetNormal(temp,xml.vertices[A.v],xml.vertices[B.v],xml.vertices[C.v]);
-        AddNormal(temp,xml.vertices[A.v]);
-        AddNormal(temp,xml.vertices[B.v]);
-        AddNormal(temp,xml.vertices[C.v]);
+        AddNormal(xml.vertices[A.v],temp);
+        AddNormal(xml.vertices[B.v],temp);
+        AddNormal(xml.vertices[C.v],temp);
         xml.triangletemp.indexref[0]=A.v;
         if (A.t>=0&&A.t<tex.size()) {
           xml.triangletemp.s[0]=tex[A.t].first;

@@ -51,7 +51,7 @@ int main (int argc, char** argv) {
 	BFXMToXmesh(Inputfile,Outputfile,OutputObj,OutputMtl,tmp);
   }else if (createBFXMfromOBJ) {
      FILE* Inputfile=fopen(argv[1],"r");
-     Outputfile=fopen(argv[2],"w+"); //create file for text output
+     Outputfile=fopen(argv[2],"wb+"); //create file for text output
      string tmp = argv[1];
      int where=where=tmp.find_last_of(".");
      tmp = tmp.substr(0,where);
