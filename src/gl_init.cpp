@@ -57,17 +57,15 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #ifdef WIN32
     typedef char * GET_GL_PTR_TYP;
 #define GET_GL_PROC wglGetProcAddress
-    //    get_gl_proc = (get_gl_proc_fptr_t) wglGetProcAddress;
+
 #else
     typedef GLubyte * GET_GL_PTR_TYP;
 #define GET_GL_PROC glXGetProcAddressARB
-    //    get_gl_proc = (get_gl_proc_fptr_t) glXGetProcAddressARB;
+
 #endif
 #include <GL/glut.h>
 void init_opengl_extensions()
 {
-  //    get_gl_proc_fptr_t get_gl_proc;
-
 
 #ifdef PFNGLLOCKARRAYSEXTPROC
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
@@ -83,20 +81,11 @@ void init_opengl_extensions()
     } else {
 	printf(  "GL_EXT_compiled_vertex_array extension "
 		     "NOT supported" );
-	//exit(1);  //recoverable error..I was wrong
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
 
     }
 #endif
-    if (glutExtensionSupported ("GL_SGIS_multitexture")) {
-      g_game.Multitexture =1;
-      //glMTexCoordPointerSGIS=(PFNGLMTEXCOORDPOINTERSGISPROC)glSelectTextureSGIS=get_gl_proc ((GLubyte*) "glMTexCoordPointerSGIS");
-      //glSelectTextureSGIS = (PFNGLSELECTTEXTURESGISPROC) get_gl_proc ((GLubyte*) "glSelectTextureSGIS")
-      //glMultiTexCoord2fSGIS =  (PFNGLMULTITEXCOORD2FSGISPROC)get_gl_proc ((GLubyte*) "glMTexCoord2fSGIS")
-    } else {
-      g_game.Multitexture = 0;
-    }
     g_game.mipmap = 2;
 #ifdef WIN32
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
@@ -106,15 +95,14 @@ void init_opengl_extensions()
 #endif
     if (glutExtensionSupported ("GL_ARB_multitexture")) {
       g_game.Multitexture = 1;
-	  printf ("Multitexture supported");
+      printf ("Multitexture supported");
     } else {
       g_game.Multitexture =0;
-	  printf ("Multitexture unsupported");
+      printf ("Multitexture unsupported");
     }
     if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) ) {
       printf ("Texture Cube Map Ext Supported");
       g_game.cubemap =1;
-
     }
 }
 
@@ -143,7 +131,7 @@ void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
      
 #ifdef USE_STENCIL_BUFFER
-    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE/* | GLUT_STENCIL*/ );
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL );
 #else
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 #endif
@@ -173,21 +161,13 @@ void GFXInit (int argc, char ** argv){
     initfov();
     glShadeModel (GL_SMOOTH);
     glEnable (GL_CULL_FACE);
-	//glDisable (GL_CULL_FACE);
     glCullFace (GL_BACK);
-	//glCullFace (GL_FRONT);
     glShadeModel (GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc (GL_LEQUAL);
-	//glDepthFunc (GL_LESS);
-
-    //glEnable(TEXTURE0_SGIS);
-    //glEnable(TEXTURE1_SGIS);
-
     
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0);
-
 
     init_opengl_extensions();
     GFXInitTextureManager();
@@ -217,7 +197,6 @@ void GFXInit (int argc, char ** argv){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 #endif
 
-      //glDisable(GL_TEXTURE_2D);
       glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
       glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
       glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
@@ -246,8 +225,6 @@ void GFXInit (int argc, char ** argv){
     glClearDepth(1);
     glEnable (GL_BLEND);
     glDisable (GL_ALPHA_TEST);
-    //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //GFXBlendMode (SRCALPHA, INVSRCALPHA);
     GFXBlendMode (ONE, ZERO);
     
     glColor3f(0,0,0);
@@ -257,8 +234,6 @@ void GFXInit (int argc, char ** argv){
     glLoadIdentity(); //set all matricies to identity
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity();
-//	gluPerspective (78,1.33,0.5,20); //set perspective to 78 degree FOV
-//	glPushMatrix();
 
     glEnable(GL_LIGHTING);
     
@@ -266,14 +241,8 @@ void GFXInit (int argc, char ** argv){
     int con;
     GFXCreateLightContext (con);
 
-    //FIXME VEGASTRIKE //GFXLoadIdentity(MODEL);
-    //FIXME VEGASTRIKE //GFXLoadIdentity(VIEW);
-    //FIXME VEGASTRIKE //GFXLoadIdentity(PROJECTION);
-
 
     glutSetCursor(GLUT_CURSOR_NONE );
-    //glutSetCursor(GLUT_CURSOR_INHERIT );
-    //GFXPerspective(78,1.33,0.5,20);
 
 }
 

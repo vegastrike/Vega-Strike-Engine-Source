@@ -47,18 +47,18 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 		break;
 	case TEXTURE0:
 		bTex0 = TRUE;
-		glActiveTextureARB(GL_TEXTURE0_ARB);	
+		GFXActiveTexture(0);	
 		glEnable (GL_TEXTURE_2D);		
 		break;
 	case TEXTURE1:
 		bTex1 = TRUE;
-		glActiveTextureARB (GL_TEXTURE1_ARB);
+		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
 		glEnable (GL_TEXTURE_CUBE_MAP_EXT);
 #else
 		glEnable (GL_TEXTURE_2D);		
 #endif
-		glActiveTextureARB(GL_TEXTURE0_ARB);
+		GFXActiveTexture (0);
 		break;
 	case CULLFACE:
 	  glEnable(GL_CULL_FACE);
@@ -83,19 +83,20 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 		break;
 	case TEXTURE0:
 		bTex0 = FALSE;
-		glActiveTextureARB(GL_TEXTURE0_ARB);	
+		GFXActiveTexture(0);	
 		glDisable (GL_TEXTURE_2D);		
 		break;
 	case TEXTURE1:
-		bTex1 = FALSE;
+	  if (Multitexture)
+	    return;
 		bTex1 = TRUE;
-		glActiveTextureARB (GL_TEXTURE1_ARB);
+		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
 		glDisable (GL_TEXTURE_CUBE_MAP_EXT);
 #else
 		glDisable (GL_TEXTURE_2D);		
 #endif
-		glActiveTextureARB(GL_TEXTURE0_ARB);
+		GFXActiveTexture(0);
 		
 		break;
 	case CULLFACE:
@@ -271,7 +272,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 }
 
 void GFXActiveTexture (int stage) {
-  if (stage!=activeTextureStage) {
+  if (Multitexture&&stage!=activeTextureStage) {
     glActiveTextureARB(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
