@@ -366,7 +366,7 @@ void bootstrap_main_loop () {
 	string srvip = vs_config->getVariable("network","server_ip","");
 	if( srvip != "")
 	{
-		string srvport = vs_config->getVariable("network","server_port",SERVER_PORT);
+		string srvport = vs_config->getVariable("network","server_port", "6777");
 		// Get the number of local players
 		Network = new NetClient[numplayers];
 
