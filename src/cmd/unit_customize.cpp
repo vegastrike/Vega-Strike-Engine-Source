@@ -347,10 +347,10 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   double myleak=100-shield.leak;
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
-  /*
+  
   STDUPGRADE(myleak,upleak,templeak,0);
-  if (touchme&&myleak<=100&&myleak>0)shield.leak=100-myleak;
-  */
+  if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
+  
   myleak = 1-computer.radar.maxcone;
   upleak=1-up->computer.radar.maxcone;
   templeak=-(templ!=NULL?templ->computer.radar.maxcone:0);
