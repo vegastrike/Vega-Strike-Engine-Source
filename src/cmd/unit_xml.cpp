@@ -1475,7 +1475,7 @@ using namespace UnitXML;
 		break;
 	  case NUMANIMATIONSTAGES:
 		graphicOptions.NumAnimationPoints=XMLSupport::parse_int (iter->value);
-		if (graphicOptions.NumAnimtionPoints>0) {
+		if (graphicOptions.NumAnimationPoints>0) {
 			graphicOptions.Animating=0;
 		}
 		break;
