@@ -413,7 +413,22 @@ namespace BeamXML {
 	  tmpweapon.volume = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case SPEED:
-	  tmpweapon.Speed = gun_speed*XMLSupport::parse_float ((*iter).value);
+		tmpweapon.Speed = XMLSupport::parse_float ((*iter).value);
+		if(tmpweapon.Speed<1000){
+			tmpweapon.Speed=tmpweapon.Speed*(adj_gun_speed?(1.0+gun_speed/1.25):gun_speed); 
+		} else {
+		  if(tmpweapon.Speed<2000){
+			tmpweapon.Speed=tmpweapon.Speed*(adj_gun_speed?(1.0+gun_speed/2.5):(gun_speed));
+		  }else{
+			  if(tmpweapon.Speed<4000){
+				tmpweapon.Speed=tmpweapon.Speed*(adj_gun_speed?(1.0+gun_speed/6.0):(gun_speed));
+			  } else {
+				  if (tmpweapon.Speed<8000){
+					tmpweapon.Speed=tmpweapon.Speed*(adj_gun_speed?(1.0+gun_speed/17.0):(gun_speed));
+				  }
+			  }
+		  }
+		}
 	  break;
 	case PULSESPEED:
 	  if (tmpweapon.type==weapon_info::BEAM) {
@@ -429,7 +444,7 @@ namespace BeamXML {
 	  tmpweapon.RadialSpeed = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case RANGE:
-	  tmpweapon.Range= gun_speed*XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.Range= (adj_gun_speed?(1.0+gun_speed/16.0):(gun_speed))*XMLSupport::parse_float ((*iter).value);
 	  break;
 	case RADIUS:
 	  tmpweapon.Radius = XMLSupport::parse_float ((*iter).value);
