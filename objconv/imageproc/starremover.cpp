@@ -203,18 +203,19 @@ void ModifyImage(unsigned int sizex,unsigned int sizey,int img_depth,int img_alp
 int main (int argc , char ** argv) {
   if (argc==3) {
     FILE * fp = fopen (argv[1],"rb");
-    unsigned int sizex, sizey;
-    int img_depth,img_alpha;
-    unsigned char ** row_pointers;
-    unsigned char * data = ReadPNG(fp,sizex,sizey,img_depth,img_alpha,&row_pointers);
-    
-    if (data) {
-      ModifyImage (sizex,sizey,img_depth,img_alpha&PNG_HAS_ALPHA,row_pointers);
-      free(row_pointers);
-      FILE * wr = fopen(argv[2],"wb");
-      WritePNG(wr,data,sizex,sizey,img_depth,img_alpha&PNG_HAS_ALPHA);
-      fclose(wr);
+    if (fp) {
+      unsigned int sizex, sizey;
+      int img_depth,img_alpha;
+      unsigned char ** row_pointers;
+      unsigned char * data = ReadPNG(fp,sizex,sizey,img_depth,img_alpha,&row_pointers);
+      fclose(fp);
+      if (data) {
+        ModifyImage (sizex,sizey,img_depth,img_alpha&PNG_HAS_ALPHA,row_pointers);
+        free(row_pointers);
+        FILE * wr = fopen(argv[2],"wb");
+        WritePNG(wr,data,sizex,sizey,img_depth,img_alpha&PNG_HAS_ALPHA);
+        fclose(wr);
+      }
     }
-    fclose(fp);
   }
 }
