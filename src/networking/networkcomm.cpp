@@ -9,6 +9,17 @@ NetworkCommunication::NetworkCommunication()
 
 int		NetworkCommunication::InitWebcam()
 {
+	return 0;
+}
+
+int		NetworkCommunication::InitSession( float frequency)
+{
+	// Init the VoIP session
+	this->session = new JVOIPSession;
+	this->params = new JVOIPSessionParams;
+	this->rtpparams = new JVOIPRTPTransmissionParams
+
+	// Init the webcam part
 	int	ret = 0;
 	// GET VALUES FROM CONFIG SOON !
 	Webcam = new WebcamSupport();
@@ -18,15 +29,27 @@ int		NetworkCommunication::InitWebcam()
 	return ret;
 }
 
+int		NetworkCommunication::DestroySession()
+{
+	if( this->session)
+		delete this->session;
+	if( this->params)
+		delete this->params;
+	if( this->rtpparams)
+		delete this->rtpparams;
+	if( this->Webcam)
+		delete this->webcam;
+}
+
 NetworkCommunication::~NetworkCommunication()
 {
-	if( Webcam != NULL)
-		delete Webcam;
-	if( session)
-		delete session;
-	if( params)
-		delete params;
-	if( rtpparams)
-		delete rtpparams;
+	if( this->session)
+		delete this->session;
+	if( this->params)
+		delete this->params;
+	if( this->rtpparams)
+		delete this->rtpparams;
+	if( this->Webcam)
+		delete this->webcam;
 }
 

@@ -6,6 +6,7 @@ NetworkCommunication::NetworkCommunication()
 
 int		NetworkCommunication::InitWebcam()
 {
+	return 0;
 }
 
 NetworkCommunication::~NetworkCommunication()

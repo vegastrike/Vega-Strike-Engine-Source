@@ -5,8 +5,10 @@
 #include "bgrab.h"
 #endif
 #if defined( _WIN32) && !defined( __CYGWIN__)
+#include <windows.h>
 #include <vfw.h>
 #endif
+#define DEFAULT_CAPTURE_DRIVER 0
 
 // CAPTURE WINDOW SIZE MUST BE DETERMINED AND THEREFORE WILL NOT BE ADJUSTABLE
 
@@ -31,6 +33,12 @@ class	WebcamSupport
 		int		channel;
 		int		oldchannel;
 		char	channeltext[128];
+#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+		CAPSTATUS		gCapStatus ;
+		CAPDRIVERCAPS	gCapDriverCaps ;
+		HWND			capvideo, hwndCap;
+		CAPTUREPARMS	capparam;
 #endif
 		int		width;
 		int		height;
@@ -57,7 +65,7 @@ class	WebcamSupport
 		char *	CaptureImage();
 		int		GetCapturedSize();
 
-		void	CopyImage();
+		int		CopyImage();
 };
 
 #endif

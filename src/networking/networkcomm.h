@@ -25,6 +25,8 @@ class NetworkCommunication
 		~NetworkCommunication();
 
 		int		InitWebcam();
+		int		InitSession( float frequency);
 };
 
 #endif
+

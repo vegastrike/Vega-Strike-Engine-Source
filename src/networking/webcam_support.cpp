@@ -31,7 +31,7 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 
 int		WebcamSupport::Init()
 {
-#ifdef linux // Does not work under Cygwin
+#ifdef linux
 	region = 0;
 	channel = 1;
 	oldchannel = 1;
@@ -51,11 +51,16 @@ int		WebcamSupport::Init()
 	}
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if 0
-	HWND capvideo = capCreATEcAPTureWindow(NULL,0,0,0,width,height,NULL,1);
+	capCaptureGetSetup(capvideo, &capparam, sizeof(CAPTUREPARMS));
+	
+	// Should put the params in gCapParams here
+
 	if( !capDriverConnect(capvideo, DEFAULT_CAPTURE_DRIVER))
 		exit(-1);
-#endif
+    capDriverGetCaps(hwndCap, &gCapDriverCaps, sizeof(CAPDRIVERCAPS));
+    capGetStatus(hwndCap, &gCapStatus , sizeof(gCapStatus));
+
+	return 0;
 #endif
 }
 
@@ -92,22 +97,24 @@ void	WebcamSupport::StartCapture()
 	fg_set_fps_interval(&fg,this->fps);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#if 0
-	CAPTUREPARMS capparam;
 	capCaptureGetSetup(capvideo,&capparam,sizeof(capparam));
 	int period = (int) (1000000 / fps);
 	capparam.dwRequestMicroSecPerFrame = period;
 	capCaptureSetSetup(capvideo,&capparam,sizeof(capparam)) ;
 	capCaptureSequenceNoFile(capvideo) ;
-	capSetCallbackOnVideoStream(capvideo, this->CopyImage());
-#endif
+	//int (*fcallback) ();
+	//fcallback = CopyImage();
+	capSetCallbackOnVideoStream(capvideo, CopyImage());
 #endif
 }
 
-void	WebcamSupport::CopyImage()
+int		WebcamSupport::CopyImage()
 {
 #ifdef linux
 #endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#endif
+	return 0;
 }
 
 void	WebcamSupport::EndCapture()
@@ -116,6 +123,9 @@ void	WebcamSupport::EndCapture()
 #ifdef linux
 	if (fg_stop_grab_image(&fg)!=0)
 		exit(-1);
+#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    capDriverDisconnect (capvideo);
 #endif
 }
 
@@ -128,8 +138,11 @@ char *	WebcamSupport::CaptureImage()
 	 	return (char *) fg_get_next_image(&fg);
 	}
 	else
-		cerr<<"!!! WARNING Webcam not grabbing !!!"<<endl;
+		cerr<<"!!! WARNING Webcam not in grabbing mode !!!"<<endl;
 	return NULL;
+#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	return 0;
 #endif
 }
 
@@ -143,6 +156,9 @@ int		WebcamSupport::GetCapturedSize()
 	else
 		cerr<<"!!! WARNING Webcam not grabbing !!!"<<endl;
 	return NULL;
+#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	return 0;
 #endif
 }
 
