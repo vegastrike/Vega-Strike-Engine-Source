@@ -16,6 +16,11 @@
 #include "xml_serializer.h"
 #include "vs_path.h"
 #include "gfx/cockpit_generic.h"
+#include "unit_bsp.h"
+#include "unit_collide.h"
+#include "gfx/bsp.h"
+#include "unit.h"
+#include "gfx/sphere.h"
 #define VS_PI 3.1415926536
 
 int GetModeFromName (const char * input_buffer) {
@@ -1710,7 +1715,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   }
   image->unitscale=xml->unitscale;
   string tmpname (filename);
-  /*
+#ifndef PLEASEDONTCOMMENTRANDOMTHINGSOUT
   vector <bsp_polygon> polies;
 
   this->colTrees = collideTrees::Get(collideTreeHash);
@@ -1737,7 +1742,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
     }
   }
   else {
-    SphereMesh * tmp = NULL;
+    Mesh * tmp = NULL;
     if (!this->colTrees) {
 #if 0
       tmp= new SphereMesh (rSize(),8,8,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);///shield not used right now for collisions
@@ -1789,6 +1794,6 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   if (xml->rapidmesh) {
     delete xml->rapidmesh;
   }
-  */
+#endif
   delete xml;
 }

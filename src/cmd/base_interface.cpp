@@ -209,14 +209,14 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 	 				fscanf(fp,"%d",&rmtyp);
 					switch(rmtyp) {
 					case 1:
-						links.push_back(new Goto("link"));
+						links.push_back(new Goto("linkind","link"));
 						fscanf(fp,"%d",&((Goto*)links.back())->index);
 						break;
 					case 2:
-						links.push_back(new Launch("launch"));
+						links.push_back(new Launch("launchind","launch"));
 						break;
 					case 3:
-						links.push_back(new Comp("comp"));
+						links.push_back(new Comp("compind","comp"));
 						fscanf(fp,"%d",&index);
 						for (i=0;i<index&&(!feof(fp));i++) {
 							fscanf(fp,"%d",&ret);

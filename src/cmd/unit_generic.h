@@ -887,7 +887,7 @@ public:
 
 // To let only in Unit class
 ///Builds a BSP tree from either the hull or else the current meshdata[] array
-// void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
+  virtual void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL){}//if hull==NULL, then use meshdata **
 // Uses mesh stuff (only rSize()) : I have to find something to do
   virtual bool Inside (const QVector &position, const float radius, Vector & normal, float &dist) {return false;}
 // Uses collide and Universe stuff -> put in NetUnit
