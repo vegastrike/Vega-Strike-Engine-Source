@@ -204,7 +204,9 @@ bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtra
     float localTrans [16];// {1,0,0,0,0,1,0,0,0,0,1,0,target->Position().i,target->Position.j,target->Position().k,1};
     cumulative_transformation.Invert();
     cumulative_transformation.to_matrix(localTrans);
-    if (intersects (target->Position().Transform (localTrans),target->rSize())) {//bsp      
+    Vector tmp (target->Position());
+    tmp += Vector (localTrans[12],localTrans[13],localTrans[14]);
+    if (intersects (TransformNormal(localTrans,tmp),target->rSize())) {//bsp      
       fprintf (stderr,"mesh %s intersects unit %s", hash_name->c_str(), target->name.c_str());
       return true;
     }

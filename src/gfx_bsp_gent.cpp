@@ -331,7 +331,7 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
   int front = 0;
   int back = 0;
   unsigned int retval= 0;
-  float least_penalty = FLT_MAX;
+  float least_penalty = 10000000000000;
   const float size_factor = .3333333;
   const float balance_factor = 1;
   const float  split_factor = .1;
