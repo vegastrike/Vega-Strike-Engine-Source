@@ -250,11 +250,10 @@ void FlyByWire::Accel (float per) {
   if (cpu->set_speed>cpu->max_speed())
 
     cpu->set_speed=cpu->max_speed();
-
-  if (cpu->set_speed<-cpu->max_speed()*parent->Limits().retro/parent->Limits().forward)
-
-    cpu->set_speed = -cpu->max_speed()*parent->Limits().retro/parent->Limits().forward;
-
+  static float reverse_speed_limit = XMLSupport::parse_float(vs_config->getVariable("physics","reverse_speed_limit","1.0"));
+  if (cpu->set_speed<-cpu->max_speed()*reverse_speed_limit) {
+    cpu->set_speed = -cpu->max_speed()*reverse_speed_limit;
+  }
   afterburn =false;
 
   desired_velocity= Vector (0,0,cpu->set_speed);

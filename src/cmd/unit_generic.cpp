@@ -6377,8 +6377,9 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 	  }
 	}
       }
-      if (c.price <.01)
-	c.price=.01;
+      static float minprice = XMLSupport::parse_float(vs_config->getVariable("cargo","min_cargo_price","0.01"));
+      if (c.price <minprice)
+          c.price=minprice;
       c.quantity=abs (c.quantity);
       AddCargo(c,false);
     }
