@@ -8,7 +8,7 @@
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {
-  return tostring(cargo.mass)+string("\" price=\"") +tostring(cargo.price)+ string("\" volume=\"")+tostring(cargo.volume)+string("\" quantity=\"")+tostring(cargo.quantity)+string("\" file=\"")+cargo.content;
+  return tostring((float)cargo.mass)+string("\" price=\"") +tostring((float)cargo.price)+ string("\" volume=\"")+tostring((float)cargo.volume)+string("\" quantity=\"")+tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content;
 }
 
 std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
