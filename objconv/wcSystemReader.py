@@ -6,9 +6,9 @@ def writeXML(secs):
 	s="<galaxy>\n<systems>\n";
 	for sec in secs:
 		s+="\t<sector name=\""+sec+"\">\n"
-		sec=secs[sys]
-		for sys in sec:
+		for sys in secs[sec]:
 			s+="\t\t<system name=\""+sys+"\">\n"
+			sys=secs[sec][sys]
 			for prop in sys:
 				s+="\t\t\t<var name=\""+prop+"\" value=\""+sys[prop]+"\"/>\n";
 			s+="\t\t</system>\n"
@@ -85,7 +85,7 @@ def TypToChar(ch):
 	if (ch=='M'):
 		return 70
 	return 70
-	
+
 def codeToSize(code):
 	codes=code.split(" ");
 	sub=1
@@ -95,7 +95,28 @@ def codeToSize(code):
 		sub=2
 	
 	return numToSize(TypToChar(codes[0][0])+int(codes[0][1:]),sub)
-for arg in sys.argv[1:]:
+
+def InfluenceToFaction(inf):
+	if inf.find("Terran")!=-1 and inf.find("Confed")!=-1:
+		return "confed"
+	if (inf.find("Unexplored")!=-1):
+		return "unknown"
+	if (inf.capitalize().find("Kilrathi")!=-1):
+		return "kilrathi"
+	if (inf.find("Landreich")!=-1):
+		return "landreich"
+	if (inf.find("Border")!=-1):
+		return "border_worlds"
+	if  (inf.find("kkan")!=-1):
+		return "firekkan"
+	print "error faction "+inf+" unknown"
+	return "border_worlds"
+
+
+jumps={}
+arg=sys.argv[1]
+linknam=sys.argv[2]
+if 1:
 	f = open (arg)
 	lis = f.readlines();
 	olist=[]
@@ -109,12 +130,47 @@ for arg in sys.argv[1:]:
 #	f = open (arg,"w")
 #	f.writelines(olist);
 #	f.close();
+	linkfil=open(linknam)
+	link=linkfil.readlines();
+	for l in link:
+		m=csv.semiColonSeparatedList(l,";")
+		if not m[0] in jumps:
+			jumps[m[0]]=[]
+		if not m[2] in jumps:
+			jumps[m[2]]=[]
+		jumps[m[0]].append(m[2])
+		jumps[m[2]].append(m[0])
 #now to read this sucker
 	for i in range(len(olist)):
 		olist[i]=csv.semiColonSeparatedList(olist[i],';')
+	
 	tab = csv.makeTable(olist );
 	secs={}
 	for i in tab:
 		sys=tab[i]
-		print sys["SystemName"]+" "+sys["StarColorType"]
-		print codeToSize(sys["StarColorType"])
+		h={}
+		sec=sys["SectorName"]
+		name = sys["SystemName"]
+		h["sun_radius"]=str(codeToSize(sys["StarColorType"]))
+		h["xyz"]=sys["XCoordinates"]+" "+sys["YCoordinates"]+" "+sys["ZCoordinates"];
+		h["quadrant"]=sys["QuadrantName"]
+		h["faction"]=InfluenceToFaction(sys["Influence"])
+		jamp=""
+		if (i in jumps):
+			for k in jumps[i]:
+				if not k in tab:
+					print k+" missing from system list"
+					continue
+				if (jamp!=""):
+					jamp+=" "
+				jamp+=tab[k]["SystemName"]
+			h["jumps"]=jamp
+		else:
+			print "no jumps for "+i+" "+name
+		if not sec in secs:
+			secs[sec]={}
+		secs[sec][name]=h
+	ret=writeXML(secs)
+	f=open("output.xml","w")
+	f.write(ret)
+	f.close()
