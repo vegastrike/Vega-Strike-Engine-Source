@@ -3300,7 +3300,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	static Unit* blankUnit = UnitFactory::createUnit("blank",1,FactionUtil::GetFactionIndex("upgrades"));
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
 	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
-	char conversionBuffer[30];
+	char conversionBuffer[2048];
 	string prefix="";
 	for (int i=0;i<subunitlevel;i++) prefix+="   ";
 	//get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
