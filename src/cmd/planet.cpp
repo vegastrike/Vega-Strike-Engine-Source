@@ -74,6 +74,7 @@ Mesh * MakeFogMesh (const AtmosphericFogMesh & f, float radius) {
   vector<string> override;
   override.push_back(nam);
   Mesh * ret=Mesh::LoadMesh(f.meshname.c_str(),Vector(f.scale*radius,f.scale*radius,f.scale*radius),0,NULL,override);
+  ret->setConvex(true);
   SetFogMaterialColor(ret,GFXColor (f.er,f.eg,f.eb,f.ea),GFXColor(f.dr,f.dg,f.db,f.da));
   return ret;
 }
