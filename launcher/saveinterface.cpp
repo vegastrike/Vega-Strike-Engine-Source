@@ -93,6 +93,10 @@ void GoToParentDir () {
   std::string par = ParentDir ();
   //  fprintf (stderr,"changing to %s",par.c_str());
   chdir (par.c_str());
+  FILE * fp = fopen ("vegastrike.config","r");
+  if (!fp) {
+	  chdir ("..");
+  }
 }
 #endif // _WIN32
 
@@ -176,6 +180,22 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
 	return 0;
 }
 #endif
+
+#ifndef _WIN32
+void changeToData () {
+   chdir ("/usr/games/vegastrike/data");
+   FILE * fp = fopen ("vegastrike.config","r");
+   if (!fp){
+	   chdir ("/usr/local/vegastrike/data");
+	   FILE * fp = fopen ("vegastrike.config","r");
+	   if (!fp){
+
+		   chdir ("/usr/vegastrike/data");
+		   //   FILE * fp = fopen ("vegastrike.config","r");
+	   }
+   }
+}
+#endif
 void launch_mission () {
 #ifdef _WIN32
   if (!progress)
@@ -190,7 +210,7 @@ void launch_mission () {
    printf ("vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   chdir ("/usr/games/vegastrike/data");
+   changeToData();
    execlp ("vegastrike","/usr/local/bin/vegastrike",num,my_mission.c_str(),NULL);   
 #else
    DWORD id;
@@ -201,7 +221,8 @@ void launch_mission () {
    printf ("vegastrike %s",my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   chdir ("/usr/games/vegastrike/data");
+
+   changeToData();
    execlp ("vegastrike","/usr/local/bin/vegastrike",my_mission.c_str(),NULL);   
 #else
    DWORD id;
