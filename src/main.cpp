@@ -52,7 +52,10 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+
+#if defined(CG_SUPPORT)
 #include "cg_global.h"
+#endif
 
 int nadanixnuthin() {
   float a=0;
@@ -127,9 +130,11 @@ void cleanup(void)
 		delete [] Network;
   }
 
+#if defined(CG_SUPPORT)
     if (defaultcg->vertexProgram) cgDestroyProgram(defaultcg->vertexProgram);
     if (defaultcg->pixelProgram)  cgDestroyProgram(defaultcg->pixelProgram);
     if (defaultcg->shaderContext)  cgDestroyContext(defaultcg->shaderContext);
+#endif
 
   if (muzak) {
     delete muzak;

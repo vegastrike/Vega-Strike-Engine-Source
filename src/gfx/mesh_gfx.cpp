@@ -385,9 +385,10 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
 		GFXColorMaterial (AMBIENT|DIFFUSE);
 		GFXColor4f(1,1,1,hulldamage/255.);
 	}
-#endif
+#else
     }
 }
+#endif
 }
 static void RestoreCloakState (char cloaked, bool envMap,unsigned char damage) {
     if (cloaked&MeshDrawContext::CLOAK) {
