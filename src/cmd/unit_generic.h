@@ -850,7 +850,7 @@ public:
   bool TargetLocked()const {return computer.radar.locked;}
   float TrackingGuns(bool &missileLock);
   ///Changes currently selected weapon
-  void ToggleWeapon (bool Missile);
+  void ToggleWeapon (bool Missile, bool forward=true);
   ///Selects all weapons
   void SelectAllWeapon (bool Missile);
   ///Gets the average gun speed of the unit::caution SLOW

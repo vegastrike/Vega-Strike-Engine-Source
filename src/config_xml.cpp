@@ -332,6 +332,8 @@ void GameVegaConfig::initCommandMap(){
   command_map["TurretThreatTargetKey"]=FireKeyboard::ThreatTargetTurretKey ;
   command_map["WeapSelKey"]=FireKeyboard::WeapSelKey ;
   command_map["MisSelKey"]=FireKeyboard::MisSelKey ;
+  command_map["ReverseWeapSelKey"]=FireKeyboard::ReverseWeapSelKey ;
+  command_map["ReverseMisSelKey"]=FireKeyboard::ReverseMisSelKey ;
   command_map["CloakKey"]=FireKeyboard::CloakKey;
   command_map["ECMKey"]=FireKeyboard::ECMKey;
  command_map["Cockpit::ScrollDown"]=CockpitKeys::ScrollDown;

@@ -33,7 +33,7 @@ const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
-    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=
+    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
 		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
 		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
 		nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
@@ -64,6 +64,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE jmissilekey;
  KBSTATE weapk;
  KBSTATE misk;
+ KBSTATE rweapk;
+ KBSTATE rmisk;
  KBSTATE eject;
  KBSTATE lockkey;
  KBSTATE ejectcargo;
@@ -474,6 +476,15 @@ void FireKeyboard::ThreatTargetTurretKey(int, KBSTATE k) {
 }
 
 
+
+void FireKeyboard::ReverseWeapSelKey(int, KBSTATE k) {
+  if (g().rweapk!=PRESS)
+    g().rweapk = k;
+}
+void FireKeyboard::ReverseMisSelKey(int, KBSTATE k) {
+  if (g().rmisk!=PRESS)
+    g().rmisk = k;
+} 
 
 void FireKeyboard::WeapSelKey(int, KBSTATE k) {
   if (g().weapk!=PRESS)
@@ -1266,9 +1277,17 @@ void FireKeyboard::Execute () {
 
 
 
-  if (f().weapk==PRESS) {
-    f().weapk=DOWN;
-    parent->ToggleWeapon (false);
+  if (f().weapk==PRESS||f().rweapk==PRESS) {
+    bool forward;
+    if (f().weapk==PRESS) {
+      f().weapk=DOWN;
+      forward=true;
+    }
+    if (f().rweapk==PRESS) {
+      f().rweapk=DOWN;
+      forward=false;
+    }
+    parent->ToggleWeapon (false, forward);
 		static soundContainer weapsound;
 		if (weapsound.sound<0) {
 			static string str=vs_config->getVariable("cockpitaudio","weapon_switch","vdu_d");
@@ -1287,9 +1306,17 @@ void FireKeyboard::Execute () {
 	  isvis=!isvis;
 	  parent->SetGlowVisible (isvis);
   }
-  if (f().misk==PRESS) {
-    f().misk=DOWN;
-    parent->ToggleWeapon(true);
+  if (f().misk==PRESS||f().rmisk==PRESS) {
+    bool forward;
+    if (f().misk==PRESS) {
+      f().misk=DOWN;
+      forward=true;
+    }
+    if (f().rmisk==PRESS) {
+      f().rmisk=DOWN;
+      forward=false;
+    }
+    parent->ToggleWeapon(true, forward);
     static soundContainer missound;
     if (missound.sound<0) {
       static string str=vs_config->getVariable("cockpitaudio","missile_switch","vdu_d");

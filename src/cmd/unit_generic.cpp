@@ -3475,6 +3475,129 @@ void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   }
 }
 
+typedef std::set<int> WeaponGroup;
+
+template<bool FORWARD> class WeaponComparator {
+public:
+	bool operator() (const WeaponGroup &a, const WeaponGroup &b) const {
+		if (a.size()==b.size()) {
+			for (WeaponGroup::const_iterator iterA=a.begin(), iterB=b.begin();
+					iterA!=a.end()&&iterB!=b.end();
+					++iterA, ++iterB) {
+				if ((*iterA)<(*iterB)) {
+					return FORWARD;
+				} else if ((*iterB)<(*iterA)) {
+					return (!FORWARD);
+				}
+			}
+			return false;
+		} else if (a.size()<b.size()) {
+			return FORWARD;
+		} else {
+			return (!FORWARD);
+		}
+	}
+
+	typedef std::set<WeaponGroup, WeaponComparator<FORWARD> > WeaponGroupSet;
+
+	static bool checkmount(Unit *un, int i, bool missile) {
+		return (un->mounts[i].status<Mount::DESTROYED&&((un->mounts[i].type->type==weapon_info::PROJECTILE)==missile));
+	}
+
+	static bool isSpecial(const Mount &mount) {
+		return mount.type->size==weapon_info::SPECIAL||mount.type->size==weapon_info::SPECIALMISSILE;
+	}
+	
+	static bool notSpecial(const Mount &mount) {
+		return !isSpecial(mount);
+	}
+	
+	static void ToggleWeaponSet(Unit *un, bool missile) {
+		if (un->mounts.size()==0) {
+			return;
+		}
+		WeaponGroup allWeapons;
+		WeaponGroup allWeaponsNoSpecial;
+		WeaponGroupSet myset;
+		unsigned int i;
+		WeaponGroupSet::const_iterator iter;
+		printf("ToggleWeaponSet: %s\n", FORWARD?"true":"false");
+		for (i=0;i<un->mounts.size();i++) {
+			if (checkmount(un,i,missile)) {
+				WeaponGroup mygroup;
+				for (unsigned int j=0;j<un->mounts.size();j++) {
+					if (un->mounts[j].type==un->mounts[i].type) {
+						if (checkmount(un,j,missile)) {
+							mygroup.insert(j);
+						}
+					}
+				}
+				myset.insert(mygroup); // WIll ignore if already there.
+				allWeapons.insert(i);
+				if (notSpecial(un->mounts[i])) {
+					allWeaponsNoSpecial.insert(i);
+				}
+			}
+		}
+		const WeaponGroupSet mypairset (myset);
+		for (iter=mypairset.begin();iter!=mypairset.end();++iter) {
+			if ((*iter).size()&&notSpecial(un->mounts[(*((*iter).begin()))])) {
+				for (WeaponGroupSet::const_iterator iter2=mypairset.begin();iter2!=mypairset.end();++iter2) {
+					if ((*iter2).size()&&notSpecial(un->mounts[(*((*iter2).begin()))])) {
+						WeaponGroup myGroup;
+						set_union((*iter).begin(), (*iter).end(), (*iter2).begin(), (*iter2).end(),
+							inserter(myGroup, myGroup.begin()));
+						myset.insert(myGroup);
+					}
+				}
+			}
+		}
+		myset.insert(allWeapons);
+		myset.insert(allWeaponsNoSpecial);
+		for (iter=myset.begin();iter!=myset.end();++iter) {
+			for (WeaponGroup::const_iterator iter2=(*iter).begin();iter2!=(*iter).end();++iter2) {
+				printf("%d:%s ", *iter2, un->mounts[*iter2].type->weapon_name.c_str());
+			}
+			printf("\n");
+		}
+		WeaponGroup activeWeapons;
+		printf("CURRENT: ");
+		for (i=0;i<un->mounts.size();++i) {
+			if (un->mounts[i].status==Mount::ACTIVE&&checkmount(un,i,missile)) {
+				activeWeapons.insert(i);
+				printf("%d:%s ", i, un->mounts[i].type->weapon_name.c_str());
+			}
+		}
+		printf("\n");
+		iter=myset.upper_bound(activeWeapons);
+		if (iter==myset.end()) {
+			iter=myset.begin();
+		}
+		if (iter==myset.end()) {
+			return;
+		}
+		for (i=0;i<un->mounts.size();++i) {
+			un->mounts[i].DeActive(missile);
+		}
+		printf("ACTIVE: ");
+		for (WeaponGroup::const_iterator iter2=(*iter).begin();iter2!=(*iter).end();++iter2) {
+			printf("%d:%s ", *iter2, un->mounts[*iter2].type->weapon_name.c_str());
+			un->mounts[*iter2].Activate(missile);
+		}
+		printf("\n");
+		printf("ToggleWeapon end...\n");
+	}
+};
+
+void Unit::ToggleWeapon (bool missile, bool forward) {
+	if (forward) {
+		WeaponComparator<true>::ToggleWeaponSet(this, missile);
+	} else {
+		WeaponComparator<false>::ToggleWeaponSet(this, missile);
+	}
+}
+
+/*
 ///In short I have NO CLUE how this works! It just...grudgingly does
 void Unit::ToggleWeapon (bool Missile) {
   int activecount=0;
@@ -3588,7 +3711,7 @@ void Unit::ToggleWeapon (bool Missile) {
   }
   }
 }
-
+*/
 
 void Unit::SetRecursiveOwner(Unit *target) {
   owner=target;
