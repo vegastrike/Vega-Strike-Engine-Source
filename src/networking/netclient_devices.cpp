@@ -229,6 +229,12 @@ void	NetClient::sendTextMessage( string message)
 /**** Check if we have to send a webcam picture            ****/
 /**************************************************************/
 
+void	NetClient::startWebcamTransfer()
+{ this->NetComm->StartWebcamTransfer(); }
+
+void	NetClient::stopWebcamTransfer()
+{ this->NetComm->StopWebcamTransfer(); }
+
 char *	NetClient::getWebcamCapture()
 {
 	if( NetComm != NULL)

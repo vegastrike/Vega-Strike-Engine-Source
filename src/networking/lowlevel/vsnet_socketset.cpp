@@ -232,7 +232,7 @@ int SocketSet::private_select( timeval* timeout )
     }
     else
     {
-#if defined(VSNET_DEBUG) || defined(__APPLE__)
+#if defined(VSNET_DEBUG)
         private_test_dump_active_sets( max_sock_select,
                                        debug_copy_of_read_set_select,
                                        read_set_select,

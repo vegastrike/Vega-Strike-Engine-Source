@@ -7,7 +7,11 @@
 #include "vsfilesystem.h"
 using namespace XMLSupport;
 enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
+#ifdef NETCOMM_WEBCAM
 #define MAXVDUS 13
+#else
+#define MAXVDUS 12
+#endif
 class Unit;
 class Camera;
 class Animation;

@@ -99,7 +99,7 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
     got_target_info = false;
   else
     got_target_info = true;
-  SwitchMode();
+  SwitchMode( NULL);
 
   //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
   //cout << "vdu" << endl;
@@ -1024,12 +1024,18 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
     break;
   }
 }
-void VDU::SwitchMode() {
+void VDU::SwitchMode( Unit * parent) {
   if (!posmodes)
     return;
   // If we switch from SCANNING VDU VIEW_MODE we loose target info
   if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
+  // If we switch from WEBCAM VDU VIEW_MODE we stop dlding images
+  if( thismode.back()==WEBCAM && Network!=NULL && parent!=NULL)
+  {
+		int playernum = _Universe->whichPlayerStarship( parent);
+		Network[playernum].stopWebcamTransfer();
+  }
   if (thismode.back()==VIEW&&viewStyle!=CP_CHASE&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
@@ -1046,4 +1052,10 @@ void VDU::SwitchMode() {
   // If we switch to SCANNING MODE we consider we lost target info
   if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
+  // If we switch to WEBCAM MODE we start dlding images
+  if( thismode.back()==WEBCAM && Network!=NULL && parent!=NULL)
+  {
+		int playernum = _Universe->whichPlayerStarship( parent);
+		Network[playernum].startWebcamTransfer();
+  }
 }

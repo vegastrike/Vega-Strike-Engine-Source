@@ -192,6 +192,8 @@ class	NetClient
 		void	destroyNetComm();
 		void	startCommunication();
 		void	stopCommunication();
+		void	startWebcamTransfer();
+		void	stopWebcamTransfer();
 		void	sendWebcamPicture();
 		char *	getWebcamCapture();
 		char *	getWebcamFromNetwork( int & length);

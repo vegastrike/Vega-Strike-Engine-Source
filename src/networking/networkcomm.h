@@ -119,6 +119,8 @@ class NetworkCommunication
 		bool	IsActive()	{ return active;}
 		char *	GetWebcamCapture();
 		char *	GetWebcamFromNetwork( int & length);
+		void	StartWebcamTransfer();
+		void	StopWebcamTransfer();
 
 		char	HasWebcam();
 		char	HasPortaudio();

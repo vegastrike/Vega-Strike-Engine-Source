@@ -1635,7 +1635,7 @@ void GameCockpit::VDUSwitch (int vdunum) {
   }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
-      vdu[vdunum]->SwitchMode();
+      vdu[vdunum]->SwitchMode( this->parent.GetUnit());
     }
   }
 }

@@ -71,7 +71,7 @@ public:
   ///Draws the entire VDU, all data, etc
   void Draw(Unit * parent, const GFXColor & c);
   ///Changes the mode of the current VDU to another legal mode
-  void SwitchMode();
+  void SwitchMode( Unit * parent);
   void SetViewingStyle (VIEWSTYLE vm);
   void Scroll (int howmuch);
   bool SetCommAnimation (Animation *ani);

@@ -635,6 +635,27 @@ char *	NetworkCommunication::GetWebcamFromNetwork( int & length)
 	return wshot;
 }
 
+void	NetworkCommunication::StopWebcamTransfer()
+{
+#ifdef NETCOMM_WEBCAM
+	if( bufitem)
+	{
+		// Abort current transfer
+		// - remove from dloadmgr
+		// - delete it
+		bufitem = NULL;
+	}
+#endif
+}
+
+void	NetworkCommunication::StartWebcamTransfer()
+{
+#ifdef NETCOMM_WEBCAM
+	// To select the first webcam to display and begin transfers
+	this->SwitchWebcam();
+#endif
+}
+
 void	NetworkCommunication::SwitchWebcam()
 {
 #ifdef NETCOMM_WEBCAM
