@@ -272,6 +272,8 @@ def abbreviate(l,planets):
 	return ret
 			
 def getPlanets(fac,planets, sun_radius):
+	import starCodes
+	#print "Sun Radius "+str(sun_radius)+" str(StarColorType) "+str(starCodes.sizeToNum(sun_radius))
 	numplan=rak.randint(0,5)
 	if (numplan>=4):
 		numplan = rak.randint(1,10)

@@ -16,58 +16,6 @@ def writeXML(secs):
 	s+="</systems>\n</galaxy>\n";
 	return s
 
-def numToSize(type,size):
-#code lifted from readstarsystem.cpp;
-# modify there
-		rad=16000;
-		lifeprob= .25;
-		if (type<30):
-			rad=type*4000./32;
-			lifeprob=.01;
-		elif (type < 40):
-			rad = 6000;
-			lifeprob=.02;
-			if (size==0):
-				rad = 4200;
-			elif (size==2):
-				rad = 7500;
-		elif (type < 50):
-			lifeprob=.05;
-			rad = 14250;
-			if (size==0):
-				rad= 13600;
-				lifeprob=.08;
-			elif (size==2):
-				rad= 14750;
-		elif (type < 60):
-			
-			lifeprob = .125;
-			rad = 25000;
-			if (size==0):
-				rad= 16600;
-				lifeprob = .25;
-				#if (xyz.x*xyz.x+xyz.y*xyz.y+xyz.z*xyz.z>500*500):
-				#	lifeprob=1;
-			elif (size==2):
-				rad= 36500;
-				lifeprob = .0625;
-		elif (type < 70):
-			rad = 50000;
-			lifeprob = .02;
-			if (size==0):
-				lifeprob = .125;
-				rad = 37000;
-			elif (size==2):
-				rad = 75000;			
-		elif (type < 80):
-			rad = 85000;
-			lifeprob = .005;
-			if (size==0):
-				rad =10000;
-				lifeprob = .125;
-			elif (size==2):
-				rad = 150000;		
-		return rad
 def RemoveStr(st, typ):
 	where=st.find(typ)
 	while (where!=-1):
@@ -76,33 +24,6 @@ def RemoveStr(st, typ):
 	return st
 def Prettify (st):	
 	return RemoveStr(RemoveStr(RemoveStr(RemoveStr(RemoveStr(st,'"'),"'")," "),"/"),"\\");
-def TypToChar(ch):
-	ch.capitalize()
-	if (ch=='O'):
-		 return 10
-	if (ch=='B'):
-		return 20
-	if (ch=='A'):
-		return 30
-	if (ch=='F'):
-		return 40
-	if (ch=='G'):
-		return 50
-	if (ch=='K'):
-		return 60
-	if (ch=='M'):
-		return 70
-	return 70
-
-def codeToSize(code):
-	codes=code.split(" ");
-	sub=1
-	if (codes[1].find('V')==0):
-		sub=0
-	elif (codes[1].find('III')==-1):
-		sub=2
-	
-	return numToSize(TypToChar(codes[0][0])+int(codes[0][1:]),sub)
 
 def InfluenceToFaction(inf):
 	if inf.find("Terran")!=-1 and inf.find("Confed")!=-1:
@@ -121,10 +42,10 @@ def InfluenceToFaction(inf):
 	return "border_worlds"
 
 
-jumps={}
-arg=sys.argv[1]
-linknam=sys.argv[2]
-if 1:
+if len(sys.argv)>1:
+	jumps={}
+	arg=sys.argv[1]
+	linknam=sys.argv[2]
 	f = open (arg)
 	lis = f.readlines();
 	olist=[]
@@ -161,7 +82,8 @@ if 1:
 #		print i + str(sys)
 		sec=Prettify(sys["SectorName"])
 		name = Prettify(sys["SystemName"])
-		h["sun_radius"]=str(codeToSize(sys["StarColorType"]))
+		import starCodes
+		h["sun_radius"]=str(starCodes.codeToSize(sys["StarColorType"]))
 		h["xyz"]=sys["XCoordinates"]+" "+sys["YCoordinates"]+" "+sys["ZCoordinates"];
 		h["quadrant"]=Prettify(sys["QuadrantName"])
 		h["faction"]=InfluenceToFaction(sys["Influence"])
