@@ -1008,42 +1008,57 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				StarSystem * sts;
 				bool found = false;
 				int i=0;
-				// Set the delay of the pending jump to 0
 				string newsystem = netbuf.getString();
-				string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();
-					
-				// Get the pointer to the new star system
+				// Get the pointer to the new star system sent by server
 				if( !(sts=star_system_table.Get( newsystem)))
 				{
 					// The system should have been loaded just before we asked for the jump so this is just a safety check
 					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
 					exit(1);
 				}
-				for( i=0; !found && i<pendingjump.size(); i++)
+				// If we received a CMD_JUMP with serial==1 jump is refused because of energy
+				if( packet_serial!=0)
 				{
-					// Find the corresponding destination
-					if( pendingjump[i]->dest == sts)
+					string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();
+					
+					for( i=0; !found && i<pendingjump.size(); i++)
 					{
-						// Packet serial == 0 -> jump refused so we stay in the same system
-						if( packet_serial == 0)
-							pendingjump[i]->dest = star_system_table.Get( system2);
-						found = true;
+						// Find the corresponding destination
+						if( pendingjump[i]->dest == sts)
+						{
+							// Packet serial == 0 -> jump refused so we stay in the same system => NO WE WILL JUST DO NOTHING AND REMOVE THE JUMP FROM pendingjump
+							//if( packet_serial == 0)
+							//	pendingjump[i]->dest = star_system_table.Get( system2);
+							found = true;
+						}
 					}
-				}
-				if( !found)
-				{
-					cerr<<"!!! ERROR : Jump with destination "<<newsystem<<" not found !!!"<<endl;
-					exit(1);
+					if( !found)
+					{
+						cerr<<"!!! ERROR : Jump with destination "<<newsystem<<" not found !!!"<<endl;
+						exit(1);
+					}
+					else
+					{
+						// Set the delay to 0 so that it will be executed next time ProcessPendingJump is called
+						pendingjump[i]->delay = 0;
+						// Should wait for the system file or the confirmation we have the good one here if we are authorized to jump
+						if( packet_serial != 0)
+							this->PacketLoop( CMD_ASKFILE);
+					}
+					//UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
 				}
 				else
 				{
-					// Set the delay to 0 so that it will be executed next time ProcessPendingJump is called
-					pendingjump[i]->delay = 0;
-					// Should wait for the system file or the confirmation we have the good one here if we are authorized to jump
-					if( packet_serial != 0)
-						this->PacketLoop( CMD_ASKFILE);
+					// Jump was refused either because the destination system asked do not exist or because not enough jump energy
+					std::vector <unorigdest *>pendingtemp;
+					// Copy the jump vector without the concerned element and copy it over the original one
+					for( i=0; i<pendingjump.size(); i++)
+					{
+						if( pendingjump[i]->dest != sts)
+							pendingtemp.push_back( pendingjump[i]);
+					}
+					pendingjump = pendingtemp;
 				}
-				//UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
 			}
 			break;
             default :
@@ -1550,6 +1565,9 @@ void	NetClient::jumpRequest( string newsystem)
 	NetBuffer netbuf;
 
 	netbuf.addString( newsystem);
+	unsigned char * md5 = new unsigned char[MD5_DIGEST_SIZE];
+	md5Compute( datadir+"/"+newsystem+".system", md5);
+	netbuf.addBuffer( md5, MD5_DIGEST_SIZE);
 
 	p.send( CMD_JUMP, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32

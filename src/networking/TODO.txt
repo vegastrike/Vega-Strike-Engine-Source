@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- In which directory should be the system files ?
 - Implement a download manager -> Carsten is on that one
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
@@ -16,6 +17,7 @@
 
 *** GAME SERVER ********************************************************
 
+- Add a check for player jump energy when a jump request arrives and send back a CMD_JUMP with packetserial = 0 if not enough
 - Handle a timeout between the time the player logged in and the time he really enters the game
 - Turn mount_num into a char ?
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
