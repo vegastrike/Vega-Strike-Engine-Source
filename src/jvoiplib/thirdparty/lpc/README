@@ -1,7 +1,0 @@
-This LPC implementation is based upon the one done by Ron Frederick.
-You can find the original sources at 
-ftp://parcftp.xerox.com/pub/net-research/lpc.tar.Z
-
-Some modifications were made based upon the changes in the Speak Freely
-LPC codec.
-
