@@ -167,7 +167,8 @@ private:
       REVERSE,
 	  POLYGONOFFSET,
 	  DETAILTEXTURE,
-	  DETAILPLANE
+	  DETAILPLANE,
+	  FRAMESPERSECOND
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -297,6 +298,7 @@ protected:
   float radialSize;
   ///num lods contained in the array of Mesh "orig"
   int numlods;
+  float framespersecond;//for animation
   Mesh *orig;
   ///The size that this LOD (if original) comes into effect
   float lodsize;

@@ -53,7 +53,8 @@ Vector mouseline;
 
 
 void Mesh::InitUnit() {
-	polygon_offset=0;
+  polygon_offset=0;
+  framespersecond=0;
   numlods=1;
   lodsize=FLT_MAX;
 	forcelogos = NULL;
@@ -185,12 +186,16 @@ Mesh * Mesh::getLOD (float lod) {
   if (!orig)
     return this;
   Mesh * retval =&orig[0];
-  for (int i=1;i<numlods;i++) {
-    if (lod<orig[i].lodsize) {
-      retval = &orig[i];
-    } else {
-      break;
-    }
+  if (framespersecond>.0000001) {
+	  return &orig[(int)floor(fmod (getNewTime()/framespersecond,numlods))];
+  }else {
+	  for (int i=1;i<numlods;i++) {
+		  if (lod<orig[i].lodsize) {
+			  retval = &orig[i];
+		  } else {
+			  break;
+		  }
+	  }
   }
   return retval;
 }

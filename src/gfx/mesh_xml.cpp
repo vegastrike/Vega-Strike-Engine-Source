@@ -111,13 +111,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
   EnumMap::Pair ("UseNormals",XML::USENORMALS),
   EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET),
-  EnumMap::Pair ("DetailTexture",XML::DETAILTEXTURE)
+  EnumMap::Pair ("DetailTexture",XML::DETAILTEXTURE),
+  EnumMap::Pair ("FramesPerSecond",XML::FRAMESPERSECOND)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 24);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 36);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 37);
 
 
 
@@ -740,6 +741,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
 	break;
+	  case XML::FRAMESPERSECOND:
+		  framespersecond=parse_float((*iter).value);
+		  break;
       case XML::LODFILE:
 	xml->lod.push_back(new Mesh ((*iter).value.c_str(),xml->lodscale,xml->faction,xml->fg,true));//make orig mesh
 	break;
