@@ -1356,8 +1356,7 @@ void GameCockpit::Draw() {
   if (mouseCursor) {  
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXColor4f (1,1,1,1);
-    
-    //    GFXEnable(TEXTURE0);
+    GFXEnable(TEXTURE0);
     //    GFXDisable (DEPTHTEST);
     //    GFXDisable(TEXTURE1);
     static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
