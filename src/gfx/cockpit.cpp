@@ -52,8 +52,8 @@ void soundContainer::loadsound (string soundfile,bool looping) {
 }
 void soundContainer::playsound () {
 	if (sound>=0) {
-		AUDAdjustSound(sound,_Universe->AccessCockpit()->AccessCamera()->GetPosition(),Vector(0,0,0));
-		AUDStartPlaying (sound);
+		AUDAdjustSound(sound,QVector(0,0,0),Vector(0,0,0));
+		AUDPlay (sound,QVector(0,0,0),Vector(0,0,0),1);
 	}
 }
 soundContainer::~soundContainer () {
@@ -1680,7 +1680,7 @@ GameCockpit::~GameCockpit () {
 void GameCockpit::VDUSwitch (int vdunum) {
   if (soundfile>=0) {
     //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0), .5);
-	AUDStartPlaying(soundfile);
+	AUDPlay(soundfile,QVector(0,0,0),Vector(0,0,0),1);
   }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
@@ -1691,7 +1691,7 @@ void GameCockpit::VDUSwitch (int vdunum) {
 void GameCockpit::ScrollVDU (int vdunum, int howmuch) {
   if (soundfile>=0) {
     //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0),.5);
-	AUDStartPlaying (soundfile);
+	AUDPlay (soundfile,QVector(0,0,0),Vector(0,0,0),1);
   }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {

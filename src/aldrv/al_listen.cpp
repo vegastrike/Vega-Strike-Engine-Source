@@ -30,7 +30,9 @@ static ApproxSoundVec playingbuffers [hashsize];
 int hash_sound (const int buffer) {
   return buffer%hashsize;
 }
-
+float AUDDistanceSquared(const int sound) {
+  return (sounds[sound].pos-mylistener.pos).MagnitudeSquared();
+}
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain) {
 #ifdef HAVE_AL
   if (sounds[sound].buffer==(ALuint)0) 
@@ -39,6 +41,11 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
   sounds[sound].vel = vel;
   Vector t = pos-mylistener.pos;
   float mag = t.Dot(t);
+  if (pos==Vector(0,0,0)){
+    t=Vector(0,0,0);
+    mag=0;
+    return 1;
+  }
   int hashed = hash_sound (sounds[sound].buffer);
 
   if ((!unusedsrcs.empty())&&playingbuffers[hashed].size()<maxallowedsingle) return 1;
@@ -51,6 +58,8 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     int target = rand()%playingbuffers[hashed].size();
     int target1 =playingbuffers[hashed][target].soundname;
     t = sounds[target1].pos-mylistener.pos;
+    if (sounds[target1].pos==Vector(0,0,0))
+      t=Vector(0,0,0);
       //steal sound!
     if (sounds[target1].buffer==sounds[sound].buffer) {
       if (t.Dot(t)>mag) {	

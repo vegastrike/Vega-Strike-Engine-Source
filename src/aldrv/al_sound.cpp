@@ -356,13 +356,44 @@ void AUDStopPlaying (const int sound){
   }
 #endif
 }
-static bool AUDReclaimSource (const int sound) {
+static bool AUDReclaimSource (const int sound, bool high_priority=false) {
 #ifdef HAVE_AL
   if (sounds[sound].source==(ALuint)0) {
-    if (unusedsrcs.empty()||(!sounds[sound].buffer))
+    if (!sounds[sound].buffer)
       return false;
-    sounds[sound].source = unusedsrcs.back();
-    unusedsrcs.pop_back();
+    if (unusedsrcs.empty()) {
+      if (high_priority) {
+        unsigned int i;
+        unsigned int candidate=0;
+        bool found=false;
+        for (i=0;i<sounds.size();++i) {
+          if (sounds[i].source!=0) {
+            if (sounds[i].pos!=Vector(0,0,0)) {
+              if (found) {
+                if (AUDDistanceSquared(candidate)<AUDDistanceSquared(i)) {
+                  candidate=i;
+                }
+              }else {
+                candidate=i;
+              }
+              found=true;             
+            }
+          }
+        }
+        if (!found){
+          return false;
+        } else {
+          alSourceStop(sounds[candidate].source);
+          sounds[sound].source=sounds[candidate].source;
+          sounds[candidate].source=0;
+        }
+      }else {        
+        return false;
+      }
+    }else {
+      sounds[sound].source = unusedsrcs.back();
+      unusedsrcs.pop_back();
+    }
     alSourcei(sounds[sound].source, AL_BUFFER, sounds[sound].buffer );
     alSourcei(sounds[sound].source, AL_LOOPING, sounds[sound].looping);    
   }
@@ -378,7 +409,7 @@ void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
 	  if (starSystemOK())
-    if (AUDReclaimSource (sound)) {
+    if (AUDReclaimSource (sound,sounds[sound].pos==QVector(0,0,0))) {
 #ifdef SOUND_DEBUG
       printf("AUDStartPlaying sound %d source:%d buffer:%d\n",sound,sounds[sound].source,sounds[sound].buffer);
 #endif
@@ -404,7 +435,7 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
   if (!starSystemOK())
 	  return;
   if ((tmp=AUDQueryAudability (sound,pos.Cast(),vel,gain))!=0) {
-    if (AUDReclaimSource (sound)) {
+    if (AUDReclaimSource (sound,pos==QVector(0,0,0))) {
       //ALfloat p [3] = {pos.i,pos.j,pos.k};
       AUDAdjustSound (sound,pos,vel);
       alSourcef(sounds[sound].source,AL_GAIN,gain);    

@@ -1076,7 +1076,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   int sound=c.getCurrentState()->GetSound(c.sex,whichsound);
   //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
   if (!AUDIsPlaying (sound)) {
-    AUDStartPlaying(sound);
+    AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
   }
 
 }
@@ -1474,7 +1474,7 @@ void FireKeyboard::Execute () {
           int sound = c.getCurrentState()->GetSound(c.sex,whichspeech);
           //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
 	  if (!AUDIsPlaying (sound)) {
-	    AUDStartPlaying(sound);
+	    AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
 	  }
 	  Order * o = targ->getAIState();
 	  if (o)
@@ -1489,7 +1489,7 @@ void FireKeyboard::Execute () {
             int sound=c.getCurrentState()->GetSound(c.sex,whichmessage);
             //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
 	    if (!AUDIsPlaying (sound)) {
-	      AUDStartPlaying(sound);
+	      AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
 	    }
             Order * oo = targ->getAIState();
             if (oo)
