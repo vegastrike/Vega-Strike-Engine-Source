@@ -321,7 +321,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
   rot[0]=rot[1]=rot[2]=0.0;
   CreateFlightgroup cf;
-  cf.fg = GameFlightgroup::newGameFlightgroup(name,type,faction,ainame,nr_ships_i,waves_i,texture,texture_alpha,this);
+  cf.fg = Flightgroup::newFlightgroup(name,type,faction,ainame,nr_ships_i,waves_i,texture,texture_alpha,this);
   vector<easyDomNode *>::const_iterator siter;
 
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){

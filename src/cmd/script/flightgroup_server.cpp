@@ -1,7 +1,6 @@
-#include "gfx/aux_texture.h"
 #include "mission.h"
 #include "flightgroup.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include <stdio.h>
 
 Flightgroup * Flightgroup::newFlightgroup (const std::string &name, 
@@ -18,29 +17,20 @@ Flightgroup * Flightgroup::newFlightgroup (const std::string &name,
   if( fg==NULL)
 	  fg =new Flightgroup;
   fg->Init( fgtmp, name, type, faction, order, num_ships, num_waves, mis);
-
   if (!logo_tex.empty()) {
     
     if (logo_alp.empty()) {
-      fg->squadLogo=new Texture (logo_tex.c_str(),0,MIPMAP);
+      fg->squadLogoStr=logo_tex;
     }else {
-      fg->squadLogo=new Texture (logo_tex.c_str(),logo_alp.c_str(),0,MIPMAP);
+      fg->squadLogoStr=logo_alp;
     }
   }
   return fg;
 }
-Flightgroup::~Flightgroup() {
-  fprintf (stderr,"deleting FG 0x%x %s %s\n",this,name.c_str(),faction.c_str());
-  if (squadLogo){
-    delete squadLogo;
-  }
-
-}
 
 Flightgroup& Flightgroup::operator = (Flightgroup & other) {
-  printf ("warning: may not work properly");
-  if (squadLogo) {
-    squadLogo = other.squadLogo->Clone();
-  }
+  *this = other;
   return other;
 }
+
+Flightgroup::~Flightgroup() {}

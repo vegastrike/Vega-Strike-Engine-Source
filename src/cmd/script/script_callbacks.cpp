@@ -36,7 +36,7 @@
 
 #include <expat.h>
 #include "xml_support.h"
-#include "audiolib.h"
+//#include "audiolib.h"
 #include "vegastrike.h"
 #include "lin_time.h"
 
@@ -66,7 +66,7 @@ string varToString (varInst * vi) {
   }
 }
 
-extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name ,float per);
+//extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name ,float per);
 void Mission::doCall_toxml(string module,varInst *ovi){
   if(module=="_olist"){
     call_olist_toxml(NULL,SCRIPT_RUN,ovi);
@@ -170,13 +170,16 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
 	speed.j= getFloatArg(node,mode,5);     
 	speed.k= getFloatArg(node,mode,6);           
       }
+	  /*
       if (mode==SCRIPT_RUN) {
 	int sound = AUDCreateSoundWAV (soundName,false);
 	AUDAdjustSound (sound,loc,speed);
 	AUDStartPlaying (sound);
-	AUDDeleteSound(sound);//won't actually toast it until it stops
+	AUDDeleteSound(sound);
+	//won't actually toast it until it stops
       }
-      vi = newVarInst (VI_TEMP);
+ 	*/
+     vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
     }else if (method_id==CMT_STD_playAnimation) {
       std::string aniName= getStringArgument(node,mode,0);     
@@ -185,9 +188,11 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       loc.j= getFloatArg(node,mode,2);     
       loc.k= getFloatArg(node,mode,3);     
       float size = getFloatArg(node,mode,4);
+	  /*
       if (mode==SCRIPT_RUN) {
 	AddAnimation(loc,size,true,aniName,1);
       }
+	  */
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
     }
@@ -749,17 +754,22 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
   return viret;
 }
 
+/*
 #include "cmd/music.h"
 extern Music *muzak;
+*/
 
 varInst * Mission::call_musicAddList(missionNode *node,int mode) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_INT;
   string str = getStringArgument (node,mode,0);
+  /*
   if(mode==SCRIPT_RUN){
     int ret=muzak->Addlist(str.c_str());
     vi->int_val=ret;
   }
+  */
+  vi->int_val=0;
   return vi;
 }
 
@@ -767,9 +777,11 @@ varInst * Mission::call_musicPlaySong(missionNode *node,int mode) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_VOID;
   string str = getStringArgument (node,mode,0);
+  /*
   if(mode==SCRIPT_RUN){
     muzak->GotoSong(str);
   }
+  */
   return vi;
 }
 
@@ -777,9 +789,11 @@ varInst * Mission::call_musicPlayList(missionNode *node,int mode) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_VOID;
   int which= (int)getIntArg(node,mode,0);
+  /*
   if(mode==SCRIPT_RUN){
     muzak->SkipRandSong(which);
   }
+  */
   return vi;
 }
 

@@ -23,7 +23,7 @@ namespace UnitUtil {
 			fg->Decrement(my_unit);
 			order = fg->ainame;
 		}
-		fg = GameFlightgroup::newGameFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
+		fg = Flightgroup::newFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
 		my_unit->SetFg (fg,fg->nr_ships_left-1);
 	}
 	bool isSignificant(Unit *my_unit){

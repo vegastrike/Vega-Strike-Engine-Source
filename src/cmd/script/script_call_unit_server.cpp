@@ -40,28 +40,32 @@
 #include "vegastrike.h"
 #include "cmd/collection.h"
 #include "cmd/iterator.h"
-#include "cmd/planet.h"
+//#include "cmd/planet.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/missionscript.h"
-#include "gfx/aux_texture.h"
 #include "mission.h"
 #include "easydom.h"
-#include "msgcenter.h"
-#include "flightgroup.h"
+#include "msgcenter.h"_generic.h"
 #include "vs_globals.h"
-#include "config_xml.h"
-#include "gfx/cockpit.h"
+#include "configxml.h"
+#include "gfx/cockpit_generic.h"
 #include "cmd/images.h"
 #include "savegame.h"
-#include "cmd/nebula.h"
+//#include "cmd/nebula.h"
 #include "hashtable.h"
-#include "gfx/animation.h"
 #include "flightgroup.h"
 #include "cmd/unit_factory.h"
-#include "cmd/asteroid.h"
+//#include "cmd/asteroid.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
+
+/* *********************************************************** */
+
+// This is done to avoid to include script_call_briefing for server
+varInst * Mission::call_briefing (missionNode * node, int mode) {
+	return NULL;
+}
 
 /* *********************************************************** */
 
@@ -1144,6 +1148,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     }
 
     else if(method_id==CMT_UNIT_commAnimation){
+		/*
       string anim =getStringArgument (node,mode,1);
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
@@ -1160,6 +1165,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret =newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
       //return viret;
+	  */
     }
 
     else{
@@ -1188,7 +1194,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 }
 
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
-extern BLENDFUNC parse_alpha (const char *);
+//extern BLENDFUNC parse_alpha (const char *);
 
 Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
   //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
@@ -1209,25 +1215,21 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        bdst[0]='\0';
        citylights[0]='\0';
        int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s",&radius,tex,bsrc,bdst);
-       GFXMaterial mat;
-       GFXGetMaterial (0,mat);
+       //GFXMaterial mat;
+       //GFXGetMaterial (0,mat);
       
        BLENDFUNC s = ONE;
        BLENDFUNC d = ZERO;
-       if (bdst[0]!='\0') 
-	 d=parse_alpha (bdst);
-       if (bsrc[0]!='\0') 
-	 s=parse_alpha (bsrc);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+       //my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
 
        free (bsrc);
        free (bdst);
        free (tex);
        free (citylights);
      }else if (type==NEBULAPTR) {
-       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
+       //my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
      } else if (type==ASTEROIDPTR) {
-       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
+       //my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
      }else {
        my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
      }

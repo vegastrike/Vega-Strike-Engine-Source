@@ -3,8 +3,8 @@ SUBDIRS = c_alike
 INCLUDES = -I../ -I../.. -I../../boost/
 
 libscriptserver_a_SOURCES =			\
-	flightgroup_generic.cpp		\
-	flightgroup_generic.h		\
+	flightgroup_server.cpp		\
+	flightgroup.h		\
 	mission.cpp					\
 	mission.h					\
 	mission_script.cpp			\
@@ -14,11 +14,10 @@ libscriptserver_a_SOURCES =			\
 libscript_a_SOURCES =				\
 	flightgroup.cpp					\
 	flightgroup.h					\
-	flightgroup_generic.cpp			\
-	flightgroup_generic.h			\
 	mission.cpp						\
 	mission.h						\
 	director.cpp					\
+	director_generic.cpp					\
 	mission_script.cpp				\
 	pythonmission.cpp				\
 	pythonmission.h					\
@@ -33,6 +32,7 @@ libscript_a_SOURCES =				\
 	script_call_unit.cpp			\
 	script_call_order.cpp			\
 	script_call_string.cpp			\
+	script_generic.cpp			\
 	msgcenter.cpp					\
 	msgcenter.h
 

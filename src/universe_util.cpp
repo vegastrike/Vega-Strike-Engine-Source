@@ -55,37 +55,5 @@ namespace UniverseUtil {
         unsigned int getCurrentPlayer() {
 	  return _Universe->CurrentCockpit();
         }
-	Unit *launchJumppoint(string name_string,
-			string faction_string,
-			string type_string,
-			string unittype_string,
-			string ai_string,
-			int nr_of_ships,
-			int nr_of_waves, 
-			QVector pos, 
-			string squadlogo, 
-			string destinations){
-		int clstype=UNITPTR;
-		if (unittype_string=="planet") {
-			clstype =PLANETPTR;			
-		}else if (unittype_string=="asteroid") {
-			clstype = ASTEROIDPTR;
-		}else if (unittype_string=="nebula") {
-			clstype = NEBULAPTR;
-		}
-		CreateFlightgroup cf;
-		cf.fg = GameFlightgroup::newGameFlightgroup (name_string,type_string,faction_string,ai_string,nr_of_ships,nr_of_waves,squadlogo,"",mission);
-		cf.unittype=CreateFlightgroup::UNIT;
-		cf.terrain_nr=-1;
-		cf.waves=nr_of_waves;
-		cf.nr_ships=nr_of_ships;
-		cf.fg->pos=pos;
-		for(int i=0;i<3;i++){
-			cf.rot[i]=0.0;
-		}
-		Unit *tmp= mission->call_unit_launch(&cf,clstype,destinations);
-		mission->number_of_ships+=nr_of_ships;
-		return tmp;
-	}
 }
 #undef activeSys

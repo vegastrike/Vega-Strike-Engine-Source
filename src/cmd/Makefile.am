@@ -27,6 +27,7 @@ libcmd_a_SOURCES =				\
 	asteroid.h			\
 	base.h				\
 	base_interface.cpp		\
+	base_init.cpp			\
 	base_xml.cpp			\
 	base_util.cpp			\
 	base_util.h			\
