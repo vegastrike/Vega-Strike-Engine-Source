@@ -1072,7 +1072,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	if (active_missions.size()<max_missions) {
 	    std::string myscript;
 	    title= ((string("Accepted Mission ")+input_buffer).c_str());
-	    static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
+	    static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","false"));
 	    if (!miss_from_cargolist) {
 		int playernum=UnitUtil::isPlayerStarship(this->buyer.GetUnit());
 		int len=getSaveStringLength(playernum,miss_name);
