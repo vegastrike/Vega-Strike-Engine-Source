@@ -73,6 +73,27 @@ varInst *Mission::call_string(missionNode *node,int mode){
       viret->type=VAR_VOID;
       return viret;
     }
+    else if(cmd=="equal"){
+
+      missionNode *other_node=getArgument(node,mode,1);
+      varInst *other_vi=checkObjectExpr(other_node,mode);
+
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	string s1=call_string_getstring(node,mode,ovi);
+	string s2=call_string_getstring(node,mode,ovi);
+
+	if(s1==s2){
+	  res=true;
+	}
+      }
+      viret=new varInst;
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
+
+      return viret;
+
+    }
     else{
       fatalError(node,mode,"unknown command "+cmd+" for callback string");
       assert(0);

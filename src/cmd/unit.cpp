@@ -41,6 +41,8 @@
 #include "config_xml.h"
 #include "images.h"
 #include "gfx/planetary_transform.h"
+
+#include "script/mission.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -694,3 +696,13 @@ bool Unit::InRange (Unit *target, Vector &localcoord) {
   return true;
 }
 
+const string Unit::getFgID()  {
+    if(flightgroup!=NULL){
+      char buffer[200];
+      sprintf(buffer,"-%d",flightgroup_subnumber);
+      return flightgroup->name+buffer;
+    }
+    else{
+      return "unknown";
+    }
+};

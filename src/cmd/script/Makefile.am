@@ -5,6 +5,7 @@ INCLUDES = -I../ -I../..
 libscript_a_SOURCES =				\
 	mission.cpp				\
 	mission.h				\
+	director.cpp				\
 	mission_script.cpp			\
 	script_variables.cpp			\
 	script_util.cpp				\

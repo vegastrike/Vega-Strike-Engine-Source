@@ -174,7 +174,8 @@ namespace CockpitKeys {
     }
     */
 	if(newState==PRESS||newState==DOWN) {
-		exit(0);
+	  mission->DirectorEnd();
+	  exit(0);
 	}
    
 }

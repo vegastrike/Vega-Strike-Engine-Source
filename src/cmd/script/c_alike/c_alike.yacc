@@ -26,7 +26,12 @@
 
 
 #include "c_alike.h"
+
 std::string module_string;
+
+bool have_yy_error;
+
+//string module_string;
 
 %}
 
@@ -284,6 +289,8 @@ string parseCalike(char const *filename)
 {
   string empty_string;
 
+  have_yy_error=false;
+
   yylineno=0;
 
   yyin=fopen(filename,"r");
@@ -302,6 +309,8 @@ string parseCalike(char const *filename)
 
 int yyerror(char *s){
   printf("(yy)error: %s line %d text -%s-\n",s,yylineno,yytext);
+  have_yy_error=true;
+
   return 1;
 }
 

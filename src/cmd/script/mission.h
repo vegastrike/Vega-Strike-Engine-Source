@@ -29,6 +29,8 @@
 #include <map>
 #include <expat.h>
 #include <string>
+#include <fstream>
+
 #include "xml_support.h"
 #include "easydom.h"
 
@@ -38,6 +40,9 @@ using XMLSupport::AttributeList;
 
 class Unit;
 class MessageCenter;
+
+#define qu(x)	("\""+x+"\"")
+
 
 /* *********************************************************** */
 
@@ -185,6 +190,8 @@ class Mission {
   void GetOrigin(Vector &pos,string &planetname);
 
   void DirectorLoop();
+  void DirectorStart(missionNode *node);
+  void DirectorEnd();
 
   MessageCenter *msgcenter;
 
@@ -192,6 +199,8 @@ class Mission {
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   int debuglevel;
+
+  ofstream var_out;
 
   parsemode_type parsemode;
 
@@ -218,9 +227,8 @@ class Mission {
 
   vector<missionNode *> import_stack;
 
-  void saveVariables(ostream& out);
+  void saveVariables(const ostream& out);
   void initTagMap();
-  void DirectorStart(missionNode *node);
 
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
@@ -313,6 +321,8 @@ void printNode(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
+varInst * call_isequal(missionNode *node,int mode);
+
 varInst * call_io_printf(missionNode *node,int mode);
 
 varInst * call_io_message(missionNode *node,int mode);
@@ -328,6 +338,7 @@ string method_str(missionNode *node);
  void call_olist_push_back(missionNode *node,int mode,varInst *ovi,varInst *push);
 varInst * call_olist_at(missionNode *node,int mode,varInst *ovi,int index);
 varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
+void  call_olist_toxml(missionNode *node,int mode,varInst *ovi);
 
  varInst *getObjectArg(missionNode *node,int mode);
 
@@ -336,6 +347,7 @@ varInst * call_unit(missionNode *node,int mode);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
  void call_unit_launch(Flightgroup *fg);
+ void call_unit_toxml(missionNode *node,int mode,varInst *ovi);
 
  varInst *call_string(missionNode *node,int mode);
 void  call_string_print(missionNode *node,int mode,varInst *ovi);
@@ -344,6 +356,9 @@ varInst * call_string_new(missionNode *node,int mode,string initstring);
 string call_string_getstring(missionNode *node,int mode,varInst *ovi);
 
  void findNextEnemyTarget(Unit *my_unit);
+
+ varInst *doCall(missionNode *node,int mode,string module,string method);
+ void doCall_toxml(string module,varInst *ovi);
 };
 
 #endif // _MISSION_H_

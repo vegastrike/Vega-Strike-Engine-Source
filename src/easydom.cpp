@@ -41,15 +41,17 @@ void easyDomNode::set(easyDomNode *_parent,string _name, AttributeList  *_attrib
   parent=_parent;
   attributes=_attributes;
 
-  for(AttributeList::const_iterator iter = _attributes->begin(); iter!=_attributes->end(); iter++) {
+  if(_attributes!=NULL){
+    for(AttributeList::const_iterator iter = _attributes->begin(); iter!=_attributes->end(); iter++) {
     //    cout <<  _name << "::" << (*iter).name << endl;
     //    printf("iter=%x *iter=%x\n",iter,*iter);
     //cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
 #if 0
-    att_name.push_back((*iter).name);
-    att_value.push_back((*iter).value);
+      att_name.push_back((*iter).name);
+      att_value.push_back((*iter).value);
 #endif
-    attribute_map[(*iter).name]=(*iter).value;
+      attribute_map[(*iter).name]=(*iter).value;
+    }
   }
 
   name=_name;

@@ -47,6 +47,67 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+void Mission::doCall_toxml(string module,varInst *ovi){
+  if(module=="_olist"){
+    call_olist_toxml(NULL,SCRIPT_RUN,ovi);
+  }
+  else if(module=="_unit"){
+    call_unit_toxml(NULL,SCRIPT_RUN,ovi);
+  }
+}
+
+varInst *Mission::doCall(missionNode *node,int mode,string module,string method){
+  varInst *vi;
+  if(node==NULL){
+    node=new missionNode;
+    node->set(NULL,"special",NULL);
+    node->set_attribute("module",module);
+    node->set_attribute("name",method);
+
+    int mode=SCRIPT_RUN;
+  }
+
+  if(module=="_io"){
+    if(method=="PrintFloats"){
+      vi=callPrintFloats(node,mode);
+    }
+    else if(method=="printf"){
+      vi=call_io_printf(node,mode);
+    }
+    else if(method=="message"){
+      vi=call_io_message(node,mode);
+    }
+    else if(method=="printMsgList"){
+      vi=call_io_printmsglist(node,mode);
+    }
+  }
+  else if(module=="_std"){
+    if(method=="Rnd"){
+      vi=callRnd(node,mode);
+    }
+    else if(method=="getGameTime"){
+      vi=callGetGameTime(node,mode);
+    }
+    else if(method=="isNull"){
+      vi=call_isNull(node,mode);
+    }
+    else if(method=="equal"){
+      vi=call_isequal(node,mode);
+    }
+  }
+  else if(module=="_olist"){
+    vi=call_olist(node,mode);
+  }
+  else if(module=="_unit"){
+    vi=call_unit(node,mode);
+  }
+  else if(module=="_string"){
+    vi=call_string(node,mode);
+  }
+
+  return vi;
+}
+
 
 varInst *Mission::doCall(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
@@ -87,42 +148,12 @@ varInst *Mission::doCall(missionNode *node,int mode){
     module="_"+module;
   }
 
+  string method=node->script.name;
+
   varInst *vi=NULL;
 
-  if(module=="_io"){
-    if(node->script.name=="PrintFloats"){
-      vi=callPrintFloats(node,mode);
-    }
-    else if(node->script.name=="printf"){
-      vi=call_io_printf(node,mode);
-    }
-    else if(node->script.name=="message"){
-      vi=call_io_message(node,mode);
-    }
-    else if(node->script.name=="printMsgList"){
-      vi=call_io_printmsglist(node,mode);
-    }
-  }
-  else if(module=="_std"){
-    if(node->script.name=="Rnd"){
-      vi=callRnd(node,mode);
-    }
-    else if(node->script.name=="getGameTime"){
-      vi=callGetGameTime(node,mode);
-    }
-    else if(node->script.name=="isNull"){
-      vi=call_isNull(node,mode);
-    }
-  }
-  else if(module=="_olist"){
-    vi=call_olist(node,mode);
-  }
-  else if(module=="_unit"){
-    vi=call_unit(node,mode);
-  }
-  else if(module=="_string"){
-    vi=call_string(node,mode);
-  }
+  vi=doCall(node,mode,module,method);
+
 
   if(vi==NULL){
     fatalError(node,mode,"no such callback named "+module+"."+node->script.name);
@@ -143,6 +174,28 @@ varInst *Mission::call_isNull(missionNode *node,int mode){
   viret->type=VAR_BOOL;
   viret->bool_val=(ovi->object==NULL);
 
+  return viret;
+}
+
+varInst *Mission::call_isequal(missionNode *node,int mode){
+  varInst *ovi=getObjectArg(node,mode);
+  missionNode *other_node=getArgument(node,mode,1);
+  varInst *other_vi=checkObjectExpr(other_node,mode);
+
+  varInst *viret=new varInst;
+  
+  viret->type=VAR_BOOL;
+  bool res=false;
+  
+  if(mode==SCRIPT_RUN){
+    if(other_vi->objectname == ovi->objectname){
+      if(other_vi->object == ovi->object){
+	res=true;
+      }
+    }
+  }
+
+  viret->bool_val=res;
   return viret;
 }
 

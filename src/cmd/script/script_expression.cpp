@@ -435,7 +435,7 @@ bool Mission::doTest(missionNode *node,int mode){
 varInst *Mission::checkExpression(missionNode *node,int mode){
 
   varInst *ret=NULL;
-  debug(0,node,mode,"checking expression");
+  debug(3,node,mode,"checking expression");
   //  printRuntime();
 
   switch(node->tag){

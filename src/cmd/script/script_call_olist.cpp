@@ -133,16 +133,7 @@ varInst *Mission::call_olist(missionNode *node,int mode){
       debug(3,node,mode,"olist.toxml");
 
       if(mode==SCRIPT_RUN){
-	int len=my_object->size();
-	
-	for(int i=0;i<len;i++){
-	  varInst *vi=(*my_object)[i];
-	  char buffer[200];
-	  sprintf(buffer,"index=\"%d\"",i);
-	  debug(3,node,mode,buffer);
-	  cout << buffer << " " ;
-	  saveVarInst(vi,cout);
-	}
+	call_olist_toxml(node,mode,ovi);
       }
 
       viret =new varInst;
@@ -222,6 +213,22 @@ void Mission::call_olist_push_back(missionNode *node,int mode,varInst *ovi,varIn
 
 }
 
+void Mission::call_olist_toxml(missionNode *node,int mode,varInst *ovi){
+  olist_t *my_object=getOListObject(node,mode,ovi);
+
+  int len=my_object->size();
+	
+	for(int i=0;i<len;i++){
+	  varInst *vi=(*my_object)[i];
+	  char buffer[200];
+	  sprintf(buffer,"<olist index=\"%d\"",i);
+	  debug(3,node,mode,buffer);
+	  var_out << buffer << " " ;
+	  saveVarInst(vi,var_out);
+	  var_out << "</olist>" << endl;
+	}
+
+}
 
 varInst *Mission::call_olist_new(missionNode *node,int mode){
   varInst *viret=new varInst;

@@ -579,11 +579,12 @@ var_type Mission::vartypeFromString(string type){
 
 /* *********************************************************** */
 
-void Mission::saveVariables(ostream& out){
+void Mission::saveVariables(const ostream& out){
 
-  out << "<saved-variables>" << endl << endl;
+  
+  var_out << "<saved-variables>" << endl << endl;
 
-  out << "    <globals>" << endl;
+  var_out << "    <globals>" << endl;
   map<string,missionNode *>::iterator iter;
 
   for(iter=runtime.global_variables.begin();iter!=runtime.global_variables.end();iter++){
@@ -592,16 +593,16 @@ void Mission::saveVariables(ostream& out){
 
     varInst *vi=gnode->script.varinst;
 
-    //    out << "      <defvar name=\"" << name << "\" type=\"" << typestr << "\" value=\"" << valuestr << "\" />" << endl;
+    //    var_out << "      <defvar name=\"" << name << "\" type=\"" << typestr << "\" value=\"" << valuestr << "\" />" << endl;
 
-    out << "      <defvar name=\"" << name << "\" ";
+    var_out << "      <defvar name=\"" << name << "\" ";
 
-    saveVarInst(vi,out);
+    saveVarInst(vi,var_out);
 
-    out << "/> " << endl;
+    var_out << "</defvar> " << endl;
   }
 
-  out << "    </globals>" << endl << endl;
+  var_out << "    </globals>" << endl << endl;
 
   {
   // modules
@@ -611,7 +612,7 @@ void Mission::saveVariables(ostream& out){
     string mname=(*iter).first ;
     missionNode *module_node=(*iter).second;
 
-    out << "    <module name=\"" << mname << "\" >" << endl;
+    var_out << "    <module name=\"" << mname << "\" >" << endl;
 
     // each module
 
@@ -622,16 +623,53 @@ void Mission::saveVariables(ostream& out){
     missionNode *varnode=(missionNode *)*siter;
     if(varnode->tag==DTAG_DEFVAR){
       // found a module var node
-      out << "      <defvar name=\"" << varnode->script.name << "\" ";
-      saveVarInst(varnode->script.varinst,out);
-      out << "/> " << endl;
+      var_out << "      <defvar name=\"" << varnode->script.name << "\" ";
+      saveVarInst(varnode->script.varinst,var_out);
+      var_out << "</defvar> " << endl;
     }
   }
 
-    out << "    </module>" << endl << endl;
+    var_out << "    </module>" << endl << endl;
   }
   }
 
-  out << endl << "</saved-variables>" << endl;
+  var_out << endl << "</saved-variables>" << endl;
 }
 
+/* *********************************************************** */
+
+void Mission::saveVarInst(varInst *vi,ostream& aa_out){
+
+
+    char buffer[100];
+    if(vi==NULL){
+      sprintf(buffer," NULL");
+      var_out  << buffer << endl;
+    }
+    else{
+      if(vi->type==VAR_BOOL){
+	sprintf(buffer,"type=\"bool\" value=\"%d\" ",vi->bool_val);
+	var_out  << buffer << endl;
+      }
+      else if(vi->type==VAR_FLOAT){
+	sprintf(buffer,"type=\"float\"  value=\"%f\" ",vi->float_val);
+	var_out  << buffer << endl;
+      }
+      else if(vi->type==VAR_OBJECT){
+	if(vi->objectname=="string"){
+	  string *sptr=(string *)vi->object;
+	  sprintf(buffer,"type=\"object\"  object=\"%s\" value=\"%s\" >\n ", vi->objectname.c_str(),sptr->c_str());
+	  var_out << buffer << endl;
+	}
+	else{
+	  sprintf(buffer,"type=\"object\"  object=\"%s\" value=\"0x%x\" >\n ", vi->objectname.c_str(),vi->object);
+	
+	  string modname="_"+vi->objectname;
+	
+	  var_out  << buffer << endl;
+
+	  doCall_toxml(modname,vi);
+	}
+      }
+    }
+}

@@ -587,6 +587,8 @@ public:
   Flightgroup *getFlightgroup() const { return flightgroup; };
   int getFgSubnumber() const { return flightgroup_subnumber; };
   
+  const string getFgID();
+  
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {

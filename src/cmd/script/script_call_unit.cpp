@@ -241,6 +241,14 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	return vi;
       }
     }
+    else if(cmd=="toxml"){
+      if(mode==SCRIPT_RUN){
+	call_unit_toxml(node,mode,ovi);
+      }
+      viret =new varInst;
+      viret->type=VAR_VOID;
+      return viret;
+    }
     else{
       fatalError(node,mode,"no such method "+cmd);
       assert(0);
@@ -348,4 +356,18 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
       }
 
       return;
+}
+
+
+void Mission::call_unit_toxml(missionNode *node,int mode,varInst *ovi){
+  Unit *my_object=getUnitObject(node,mode,ovi);
+
+
+  string fgid=my_object->getFgID();
+  Flightgroup *fg=my_object->getFlightgroup();
+
+  Vector pos=my_object->Position();
+  
+  var_out << "<unit fgid=" << qu(fgid) << "/>\n";
+ 
 }

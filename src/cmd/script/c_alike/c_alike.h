@@ -30,6 +30,8 @@
 #include <vector>
 #include <string>
 
+using std::string;
+
 #define YYERROR_VERBOSE
 
 #define q(x)	("\""+x+"\"")
@@ -38,6 +40,8 @@ extern std::string parseCalike(char const *filename);
 extern int yyerror(char *);
 extern int yywrap();
 extern int yylex();
+
+extern bool have_yy_error;
 
 #define YYDEBUG 0
 

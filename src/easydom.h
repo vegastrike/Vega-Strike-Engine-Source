@@ -110,7 +110,7 @@ template<class domNodeType> class easyDomFactory {
 
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
-    cout << "warning: could not open file: " << filename << endl;
+    //cout << "warning: could not open file: " << filename << endl;
     //    assert(0);
     return NULL;
   }
@@ -151,7 +151,7 @@ template<class domNodeType> class easyDomFactory {
 
   string module_str=parseCalike(filename);
   if(module_str.empty()) {
-    cout << "warning: could not open file: " << filename << endl;
+    //cout << "warning: could not open file: " << filename << endl;
     //    assert(0);
     return NULL;
   }
@@ -174,15 +174,15 @@ template<class domNodeType> class easyDomFactory {
     int max_index=index+incr;
     int newlen=incr;
 
-    printf("max_index=%d,string_size=%d\n",max_index,string_size);
+    //printf("max_index=%d,string_size=%d\n",max_index,string_size);
     if(max_index>=string_size){
       newlen=module_str.size()-index;
-      printf("getting string from %d length %d\n",index,newlen);
+      //      printf("getting string from %d length %d\n",index,newlen);
       const char *strbuf=module_str.substr(index,newlen).c_str();
       strncpy (buf,strbuf,newlen);
     }
     else{
-      printf("getting string from %d length %d\n",index,incr);
+      //printf("getting string from %d length %d\n",index,incr);
       const char *strbuf=module_str.substr(index,incr).c_str();
       strncpy (buf,strbuf,incr);
     }
