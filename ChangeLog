@@ -1,3 +1,8 @@
+2002-03-12 Daniel Horn <hellcatv@hotmail.com>
+	* Added option for swithcing cockpits when units change
+	* Added option for AI to not pilot ship you turret
+	* Fixed UnitContainer bug in player_unit
+	
 2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* Interpreter:

@@ -569,9 +569,28 @@ void SwitchUnits (Unit * ol, Unit * nw) {
     nw->PrimeOrders();
     nw->EnqueueAI (new FireKeyboard (0,""));
     nw->EnqueueAI (new FlyByJoystick (0,"player1.kbconf"));
+    static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
+    if (nw->getCockpit().length()>0&&LoadNewCockpit) {
+      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
+    }else {
+      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
+      if (DisCockpit) {
+	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
+      }
+    }
   }
 }
+static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
+  static bool FlyStraightInTurret = XMLSupport::parse_bool (vs_config->getVariable("physics","ai_pilot_when_in_turret","true"));
+  if (FlyStraightInTurret) {
+    SwitchUnits (ol,nw);
+  }else {
+    ol->PrimeOrders();
+    SwitchUnits (NULL,nw);
+    
+  }
 
+}
 
 extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Draw() { 
@@ -684,7 +703,7 @@ void Cockpit::Draw() {
 	    tmp=true;
 	    index++;
 
-	    SwitchUnits(par,un);
+	    SwitchUnitsTurret(par,un);
 	    parentturret.SetUnit(par);
 	    un_iter uj= un->getSubUnits();
 	    Unit * tur;
