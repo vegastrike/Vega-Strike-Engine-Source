@@ -199,7 +199,7 @@ string Galaxy::getVariable(string section,string name,string defaultval){
     }
   }
 
-  cout << "WARNING: no section named " << section << endl;
+  //cout << "WARNING: no section named " << section << endl;
 
   return defaultval;
 }
@@ -245,8 +245,7 @@ configNode *Galaxy::findSection(string section,configNode *startnode){
       return cnode;
     }
   }
-
-  cout << "WARNING: no section/variable/color named " << section << endl;
+  //cout << "WARNING: no section/variable/color named " << section << endl;
 
   return NULL;
  
