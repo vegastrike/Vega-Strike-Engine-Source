@@ -306,7 +306,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   }
 }
 void Mesh::RestoreCullFace (int whichdrawqueue) {
-  if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ) {
+  if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ||getCullFaceForcedOff()) {
     if (blendSrc!=SRCALPHA) {
       GFXEnable (CULLFACE);
     }
@@ -315,14 +315,21 @@ void Mesh::RestoreCullFace (int whichdrawqueue) {
 void Mesh::SelectCullFace (int whichdrawqueue) {
   if (whichdrawqueue==NUM_ZBUF_SEQ) {
     GFXEnable(CULLFACE);
+  }else {
+    if (getCullFaceForcedOn()) {
+      GFXEnable(CULLFACE);
+    }else if (getCullFaceForcedOff()) {
+      GFXDisable(CULLFACE);
+    }
   }
   if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    
     GFXDisable(DEPTHWRITE);
-    if (blendSrc!=SRCALPHA) {
+    if (blendSrc!=SRCALPHA||getCullFaceForcedOn()) {
       GFXDisable(CULLFACE);
     }
   }
+  
 }
 void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight) {
     if (cloaked&MeshDrawContext::CLOAK) {
@@ -439,10 +446,6 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     GFXDisable(DEPTHWRITE);
   }
   SelectCullFace(whichdrawqueue);
-  if (getCullFaceForcedOn())
-    GFXEnable(CULLFACE);
-  if (getCullFaceForcedOff())
-    GFXDisable(CULLFACE);
   GFXBlendMode(blendSrc, blendDst);
   GFXEnable(TEXTURE0);
   if(Decal[0])
