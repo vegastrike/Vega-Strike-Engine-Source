@@ -14,7 +14,7 @@ bool NavigationSystem::ParseFile(string filename)
 	//ifstream dataset_file;
 	//dataset_file.open("navdata.xml");
 	VSFile f;
-	VSError err = f.OpenReadOnly( "nav/navdata.xml", Unknown);
+	VSError err = f.OpenReadOnly( "nav/navdata.xml", CockpitFile);
 
 	//if (dataset_file.fail())
 	if( err>Ok)

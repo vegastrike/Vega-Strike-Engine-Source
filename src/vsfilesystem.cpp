@@ -888,6 +888,7 @@ namespace VSFileSystem
 		//SubDirectories[UnitFile].push_back( "factions");
 		SubDirectories[UnitFile].push_back( "subunits");
 		SubDirectories[UnitFile].push_back( "weapons");
+		SubDirectories[UnitFile].push_back( "");
 		SubDirectories[UnitFile].push_back( "factions/planets");
 		SubDirectories[UnitFile].push_back( "factions/upgrades");
 		SubDirectories[UnitFile].push_back( "factions/neutral");
