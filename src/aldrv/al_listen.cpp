@@ -107,10 +107,13 @@ void AUDListener (const QVector & pos, const Vector & vel) {
 #ifdef HAVE_AL
   mylistener.pos = pos.Cast();
   mylistener.vel = vel;
+  if (g_game.sound_enabled) {
+
   if (usepositional)
 	alListener3f (AL_POSITION, scalepos*pos.i,scalepos*pos.j,scalepos*pos.k);
   if (usedoppler)
 	alListener3f (AL_VELOCITY, scalevel*vel.i,scalevel*vel.j,scalevel*vel.k);
+  }
   //  printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }
@@ -126,12 +129,16 @@ void AUDListenerOrientation (const Vector & p, const Vector & q, const Vector & 
   mylistener.r=r;
   ALfloat orient [] = {r.i,r.j,r.k,q.i,q.j,q.k};
   //  printf ("R%f,%f,%f>Q<%f %f %f>",r.i,r.j,r.k,q.i,q.j,q.k);
-  alListenerfv (AL_ORIENTATION,orient);
+  if (g_game.sound_enabled) {
+      alListenerfv (AL_ORIENTATION,orient);
+  }
 #endif
 }
 void AUDListenerGain (const float gain) {
 #ifdef HAVE_AL
   mylistener.gain = gain;
-  alListenerf (AL_GAIN,gain);
+  if (g_game.sound_enabled) {
+    alListenerf (AL_GAIN,gain);	
+  }
 #endif
 }
