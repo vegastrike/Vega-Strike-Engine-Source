@@ -1999,6 +1999,11 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
         CargoColor c;
 
         // Take any categories out of the name and put them in the cargo.category.
+	    const string finalScript = getSaveString(playerNum, MISSION_SCRIPTS_LABEL, i);
+		if (finalScript[0]=='#') {
+			continue; // Ignore any missions with comments. (those are fixer missions.)
+		}
+		
         const string originalName = getSaveString(playerNum, MISSION_NAMES_LABEL, i);
         const string::size_type lastCategorySep = originalName.rfind(CATEGORY_SEP);
         if(lastCategorySep != string::npos) {
