@@ -32,6 +32,7 @@ JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 
 
 void InitJoystick(){
+#ifdef HAVE_SDL
   int num_joysticks=SDL_NumJoysticks() ;
   printf("%i joysticks were found.\n\n", num_joysticks);
   printf("The names of the joysticks are:\n");
@@ -41,12 +42,15 @@ void InitJoystick(){
     }
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
   }
+#endif
 }
 void DeInitJoystick() {
+#ifdef HAVE_SDL
   int num_joysticks = SDL_NumJoysticks();
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     delete joystick[i];
   }
+#endif
 }
 
 void ProcessJoystick(){
@@ -92,6 +96,10 @@ JoyStick::JoyStick(int which) {
     nr_of_buttons=SDL_JoystickNumButtons(joy);
 
     printf("axes: %d buttons %d\n",nr_of_axes,nr_of_buttons);
+    joy_xmin = (float) -1;
+    joy_xmax = (float) 1;
+    joy_ymin = (float) -1;
+    joy_ymax = (float) 1;
 #endif // we have SDL
 }
 
@@ -111,7 +119,7 @@ void JoyStick::GetJoyStick(float &x,float &y,int &buttons)
         return;
     }
 #if defined(HAVE_SDL)
-    SDL_JoystickUpdate();
+    SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
 
     Sint16 xi =  SDL_JoystickGetAxis(joy,0);
     Sint16 yi =  SDL_JoystickGetAxis(joy,1);
