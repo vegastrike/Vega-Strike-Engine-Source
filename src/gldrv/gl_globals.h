@@ -68,8 +68,11 @@ struct GFXStats{
 #endif
     #include <OpenGL/glext.h>
 #else
+#define __glext_h_
     #include <GL/glut.h>
 #include "gl_undefined_extensions.h"
+#undef __glext_h_
+
     #include <GL/glext.h>
 #endif
 #ifdef _WIN32
