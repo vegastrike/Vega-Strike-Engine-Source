@@ -756,7 +756,6 @@ Cargo GetCargoForOwnerStarshipName (Cockpit * cp, std::string nam, int & ind);
 void SwapInNewShipName(Cockpit * cp,std::string newfilename,int SwappingShipsIndex) {
 	  Unit * parent= cp->GetParent();
 	  if (parent) {
-	    WriteSaveGame(cp,false);
 	    if (SwappingShipsIndex!=-1) {
 	      
 	      while (cp->unitfilename.size()<=SwappingShipsIndex+1) {
@@ -843,6 +842,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    if (NewPart->nummesh()>0) {
+	      WriteSaveGame(_Universe->AccessCockpit(),false);//oops saved game last time at wrong place
 	      _Universe->AccessCockpit()->credits-=part->price-usedprice;
 	      NewPart->curr_physical_state=un->curr_physical_state;
 	      NewPart->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(un->Position(),NewPart->rSize()));
