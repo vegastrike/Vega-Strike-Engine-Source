@@ -18,6 +18,8 @@ using std::string;
 using std::pair;
 using std::set;
 map<string,int> numfactions;
+map<string, map<string,int> > numsecfactions;
+
 set<string> allnames;
 std::string readfiledata(const char * name) {
 	FILE * fp = fopen (name,"r");
@@ -199,11 +201,15 @@ public:
 			}else if (size==2)
 				rad= 14750;
 		}else if (type < 60) {
+			
 			lifeprob = .125;
 			rad = 25000;
 			if (size==0){
 				rad= 16600;
 				lifeprob = .25;
+				if (xyz.x*xyz.x+xyz.y*xyz.y+xyz.z*xyz.z>500*500){
+					lifeprob=1;
+				}
 			}
 			else if (size==2) {
 				rad= 36500;
@@ -236,12 +242,19 @@ public:
 		(*this)["faction"]="unknown";
 		lifeprob*=1;
 		habitable=false;
+		bool force=false;
 		for (int i=0;i<homeworlds.size();i++) {
 			if (homeworlds[i]==name) {
 				//All homeworlds have life!
 				//(Or else I would not exist or be able to write this program)
 				lifeprob=1;
+				force=true;
 				break;
+			}
+		}
+		if (!force) {
+			if (sector.find("RBL-")!=string::npos) {
+				lifeprob=.01;
 			}
 		}
 		if (rand()<RAND_MAX*lifeprob) {
@@ -462,6 +475,7 @@ public:
 	}
 	*/
 	void simulateTurn (unsigned int totalturn, bool allowTakeover, vector<System> &s) {
+		allowTakeover=false;
 		++turn;
 		if (turn<startingyear) {
 			return;
@@ -1008,12 +1022,22 @@ void processsystems (std::vector <System> & s){
 			reName(s,s[i],getNameForFaction(s[i]["faction"]));
 			planetsIn(s[i],s[i]["faction"]);
 			numfactions[s[i]["faction"]]+=1;
+			numsecfactions[s[i].sector][s[i]["faction"]]+=1;
+
 		}
 	}
 	if (1) {
 		fprintf(stderr,"\nOwnership\n");
+		if (1) {
+		for (std::map< string, std::map<string,int> >::iterator i = numsecfactions.begin();i!=numsecfactions.end();++i) {
+			fprintf (stdout,"Sector %s\n",(*i).first.c_str());
+			for (std::map<string,int>::iterator j = (*i).second.begin();j!=(*i).second.end();++j) {
+				fprintf (stdout,"\t%s owns %d systems\n",(*j).first.c_str(),(*j).second);
+			}
+		}
+		}
 		for (std::map<string,int>::iterator i = numfactions.begin();i!=numfactions.end();++i) {
-			fprintf (stderr,"%s owns %d systems\n",(*i).first.c_str(),(*i).second);
+			fprintf (stdout,"%s owns %d systems\n",(*i).first.c_str(),(*i).second);
 		}
 	}
 }
@@ -1025,6 +1049,8 @@ int main (int argc, char ** argv) {
 	if (argc>3) {
 		milky_way = argv[3];
 	}
+	if (argc>4)
+		path_to_universe=argv[4];
 	srand(109427);
 	std::vector <System> s=readfile(argv[1]);
 	processsystems(s);
@@ -1034,5 +1060,7 @@ int main (int argc, char ** argv) {
 		fclose(fp);
 	}else
 		printf ("could not open %s for writing\n",argv[2]);
+	fprintf (stderr,"Hit enter twice, f00");
+	getchar();
 	return 0;
 }
