@@ -136,7 +136,7 @@ tmp |= ((x) >> 8)  & 0x00ff; \
 
 #define BUFF_LEN 512
 
-#include "vs_globals.h"
+//#include "vs_globals.h"
 
 //typedef int BOOL;//FIXME!!!SUX)
 

@@ -51,14 +51,14 @@ extern "C"
 
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */
-
+#ifndef WIN32
 #include <GL/glut.h>
 #include <GL/glext.h>
 
 #if !defined(GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
 #   error "*** You need a more recent copy of glext.h.  You can get one at http://oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
 #endif
-
+#endif
 #ifndef WIN32
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;

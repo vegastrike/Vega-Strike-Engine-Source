@@ -33,10 +33,10 @@ using namespace std;
 class Planet;
 class Unit;
 class BSPTree;
-class GFXVertex;
+struct GFXVertex;
 class GFXVertexList;
 class GFXQuadstrip;
-class GFXMaterial;
+struct GFXMaterial;
 class BoundingBox;
 
 using XMLSupport::EnumMap;

@@ -21,7 +21,7 @@
 #include "vegastrike.h"
 #include "gfxlib.h"
 #include "gl_globals.h"
-
+#include "vs_globals.h"
 const int  MAX_TEXTURES = 256;
 
 struct GLTexture{
@@ -252,7 +252,7 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 		if (g_game.PaletteExt)
 		{
 			  textures[handle].shared_palette = false;
-			  cerr << "texture error 0\n";
+			  fprintf (stderr,"texture error 0\n");
 				glColorTable(textures[handle].targets, 
 					     GL_RGBA, 
 					     256, 

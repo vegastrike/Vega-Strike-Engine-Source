@@ -23,8 +23,11 @@
 #include "vegastrike.h"
 #include "gfxlib.h"
 #include "gl_globals.h"
+#include "vs_globals.h"
 extern BOOL bTex0;
 extern BOOL bTex1;
+
+
 
 BOOL /*GFXDRVAPI*/ GFXBeginScene()
 {

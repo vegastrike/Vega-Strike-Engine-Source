@@ -24,12 +24,12 @@
 #include "gfx_transform_matrix.h"
 #include "quaternion.h"
 #include "gfx_lerp.h"
-#include <iostream>
+//#include <iostream>
 #include <string>
 #include "cmd_weapon_xml.h"
 
 
-using std::queue;
+//using std::queue;
 #include "xml_support.h"
 class Beam;
 class Animation;
@@ -54,12 +54,9 @@ enum Aggression{
 class Unit {
  private:
 
-  class Mount;
-  struct XML {
-    vector<Unit::Mount *> mountz;
-    vector<Mesh*> meshes;
-    vector<Unit*> units;
-  } *xml;
+  struct XML;
+  XML *xml;
+
   
   void LoadXML(const char *filename);
 
@@ -282,5 +279,9 @@ public:
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
 };
-
+struct Unit::XML {
+    vector<Unit::Mount *> mountz;
+    vector<Mesh*> meshes;
+    vector<Unit*> units;
+  };
 #endif

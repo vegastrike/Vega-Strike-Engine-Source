@@ -1,7 +1,8 @@
 #include "quaternion.h"
-
+#include <iostream>
+using std::ostream;
 ostream &operator<<(ostream &os, const Quaternion &v) {
-  os << "(" << v.s << ", " << v.v << ")";
+  os << "(" << v.s << ", <" << v.v.i << ", " << v.v.j <<", " << v.v.k << "> )";
   return os;
 }
 

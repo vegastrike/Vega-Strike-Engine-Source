@@ -1,8 +1,7 @@
 /* GL selection buffer code
  */
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <GL/gl.h>
 #include "gfxlib.h"
 #include "gl_matrix.h"
 #include "gl_globals.h"

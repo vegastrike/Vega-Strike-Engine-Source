@@ -2,7 +2,7 @@
 #include "star_system.h"
 #include "gfx_location_select.h"
 #include "gfx_coordinate_select.h"
-
+#include "vs_globals.h"
 int CoordinateSelectChange =0;
 int  CoordinateSelectmousex ;
 int  CoordinateSelectmousey ;

@@ -2,6 +2,7 @@
 #include "gfx_click_list.h"
 #include "cmd_unit.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 extern Vector mouseline;
 extern vector<Vector> perplines;
 
@@ -22,7 +23,7 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   mousePoint.Normalize();
   mouseline =mousePoint + CamP;
   // 
-  bool tmp = ship->queryBoundingBox(CamP,mousePoint,0);
+  int tmp = ship->queryBoundingBox(CamP,mousePoint,0);
   if (tmp)
     //fprintf (stderr, "bounding box hit\n");
   if (ship->querySphere(CamP,mousePoint,0)){  // camera position is not actually the center of the camera

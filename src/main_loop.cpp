@@ -584,7 +584,8 @@ void destroyObjects() {
 void main_loop() {
   static int state = 0;
   static bool midcachunk=false;
-  if ((rand()%1000)==299) {
+  if ((rand()%1000)==1000) {//impossible
+
     midcachunk = true;
     s = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
 

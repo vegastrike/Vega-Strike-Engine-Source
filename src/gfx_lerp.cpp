@@ -1,14 +1,15 @@
 #include "gfx_lerp.h"
-
+#include <iostream>
 //Portions adapted from Tuxracer
+using std::ostream;
 
 static ostream &operator<<(ostream &os, const Quaternion &v) {
-  os << "(" << v.s << ", " << v.v << ")";
+  os << "(" << v.s << ", <" << v.v.i << ", " << v.v.j << ", " << v.v.k << ">)";
   return os;
 }
 
 static ostream &operator<<(ostream &os, const Transformation &v) {
-  os << "[" << v.orientation << ", " << v.position << "]";
+  os << "[" << v.orientation << ", <" << v.position.i << ", " << v.position.j << ", " << v.position.k << ">]";
   return os;
 }
 

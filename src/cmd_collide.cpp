@@ -26,14 +26,14 @@ class CollideTable {
     }
     if (maxz-minz>=COLLIDETABLESIZE) {
       minz = 0;
-      maxz = COLLIDETABLESIZE-1;
+      maxz = COLLIDETABLESIZE-1; 
     }
-    minx = minx%COLLIDETABLESIZE;
-    miny = miny%COLLIDETABLESIZE;
-    minz = minz%COLLIDETABLESIZE;
-    maxx = maxx%COLLIDETABLESIZE;
-    maxy = maxy%COLLIDETABLESIZE;
-    maxz = maxz%COLLIDETABLESIZE;
+    minx = minx%COLLIDETABLESIZE/2+COLLIDETABLESIZE/2;
+    miny = miny%COLLIDETABLESIZE/2+COLLIDETABLESIZE/2;
+    minz = minz%COLLIDETABLESIZE/2+COLLIDETABLESIZE/2;
+    maxx = maxx%COLLIDETABLESIZE/2+COLLIDETABLESIZE/2;
+    maxy = maxy%COLLIDETABLESIZE/2+COLLIDETABLESIZE/2;
+    maxz = maxz%COLLIDETABLESIZE/2+COLLIDETABLESIZE/2;
   }
 public:
   CollideTable() {
@@ -59,46 +59,46 @@ public:
     maxaccessx=0;
     maxaccessy=0;
     maxaccessz=0;
-    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
-      int cachunkcachunk=1;
+    for (int l=0;l<COLLIDETABLESIZE;l++) {
+      for (int m=0;m<COLLIDETABLESIZE;m++) {
+	for (int n=0;n<COLLIDETABLESIZE;n++) {
+	  if (table[l][m][n].size()!=0)
+	    int wahooo=1;
+	}
+      }
+
     }
 
   }
   void Get (const Vector &Min, const Vector & Max, vector <LineCollide*> &retval) {    
-    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
-      int cachunkcachunk=1;
-    }
 
     int minx,miny,minz,maxx,maxy,maxz;
     hash_vec(Min,minx,miny,minz);
     hash_vec(Max,maxx,maxy,maxz);
     get_max_min (minx,maxx,miny,maxy,minz,maxz);
-    for (int i=minz;;i++) {//reverse??????????????? which is fast
+    for (int i=minx;;i++) {//reverse??????????????? which is fast
       if (i==COLLIDETABLESIZE) i=0;
       for (int j=miny;;j++) {      
 	if (j==COLLIDETABLESIZE) j=0;
-	for (int k=minx;;k++) {
+	for (int k=minz;;k++) {
 	  if (k==COLLIDETABLESIZE) k=0;	  
 	  //	  table[i][j][k].push_back(target);
 	  for (unsigned int l=0;l<table[i][j][k].size();l++) {
 	    retval.push_back ((table[i][j][k])[l]);
 	  }
-	  if (k==maxx) 
+	  if (k==maxz) 
 	    break;
 	}
 	if (j==maxy) 
 	  break;
       }
-      if (i==maxz)
+      if (i==maxx)
 	break;
     }
     
   }
   
   void Put(LineCollide* target) {
-    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
-      int cachunkcachunk=1;
-    }
     int minx,miny,minz,maxx,maxy,maxz;
     hash_vec(target->Mini,minx,miny,minz);
     hash_vec(target->Maxi,maxx,maxy,maxz);
@@ -110,24 +110,21 @@ public:
     if (miny<minaccessy) minaccessy=miny;
     if (minz<minaccessz) minaccessz=minz;
 
-    for (int i=minz;;i++) {//reverse??????????????? which is fast
+    for (int i=minx;;i++) {//reverse??????????????? which is fast
       if (i==COLLIDETABLESIZE) i=0;
       for (int j=miny;;j++) {      
 	if (j==COLLIDETABLESIZE) j=0;
-	for (int k=minx;;k++) {
+	for (int k=minz;;k++) {
 	  if (k==COLLIDETABLESIZE) k=0;	  
 	  table[i][j][k].push_back(target);
-	  if (k==maxx) 
+	  if (k==maxz) 
 	    break;
 	}
 	if (j==maxy) 
 	  break;
       }
-      if (i==maxz)
+      if (i==maxx)
 	break;
-    }
-    if (table[0][0][0].size()>0&&table[0][0][0][0]->object==0) {
-      int cachunkcachunk=1;
     }
 
   }
@@ -137,10 +134,6 @@ void AddCollideQueue (const LineCollide &tmp) {
   int size = collidequeue.size();
   collidequeue.push_back (new LineCollide(tmp));
 #ifdef _USE_COLLIDE_TABLE
-  if (size==0)
-    int cachunkcachunk=1;
-  if (size==1)
-    int cachunkcachunk=2;
   collidetable.Put (collidequeue[size]);
 #endif
 
@@ -179,7 +172,7 @@ void Unit::CollideAll() {
       switch (COLQ[i]->type) {
       case LineCollide::UNIT://other units!!!
 	((Unit*)COLQ[i]->object)->Collide(this);
-	return;
+	break;
       case LineCollide::BEAM:
 	((Beam*)COLQ[i]->object)->Collide(this);
 	break;

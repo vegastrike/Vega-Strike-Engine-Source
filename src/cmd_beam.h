@@ -6,7 +6,7 @@
 #include <vector>
 
 using std::vector;
-class Unit;
+
 class Beam: public Primitive {
 private:
   unsigned int decal;
@@ -45,10 +45,10 @@ public:
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
   void UpdatePhysics(const Transformation & =identity_transformation, const Matrix = identity_matrix);
-  void Draw(const Transformation & =identity_transformation, const float * = identity_matrix );
+  void Draw(const Transformation & =identity_transformation, const float [] = identity_matrix );
   void Destabilize () {impact=UNSTABLE;}
   bool Dissolved () {return curthick==0;} 
-  bool Collide (Unit * target);
+  bool Collide (class Unit * target);
   static void ProcessDrawQueue();
 
 };

@@ -22,13 +22,11 @@
 #include "vs_globals.h"
 //#include "gl_globals.h"
 
+#   include <GL/glut.h>
 #ifndef WIN32
-#   include <GL/gl.h>
-#include <GL/glu.h>
 #   include <GL/glx.h>
+#endif
 #   include <GL/glext.h>
-#endif /* defined( HAVE_GL_GLX_H ) */
-
 #include <stdio.h>
 #include "gl_init.h"
 #include "gfxlib.h"

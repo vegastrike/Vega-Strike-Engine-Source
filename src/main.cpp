@@ -18,24 +18,21 @@
  */
 
 //#define VERSION "0.0.3"
-#include "vegastrike.h"
-#include "fonts.h"
+#include "vs_globals.h"
 #include "gfxlib.h"
-#include "render_util.h"
 #include "in_kb.h"
-#include "fog.h"
-#include "sdl_audio_data.h"
-#include "sdl_audio.h"
-#include "sdl_init.h"
-#include "joystick.h"
+//#include "sdl_audio_data.h"
+//#include "sdl_audio.h"
+//#include "sdl_init.h"
+//#include "joystick.h"
 #include "lin_time.h"
 #include "main_loop.h"
 
 /*
  * Globals 
  */
-
 game_data_t g_game;
+
 WrapGFX *_GFX;
 FILE * fpread=NULL;
 /* 
@@ -74,7 +71,7 @@ int main( int argc, char **argv )
 {
 
     /* Print copyright notice */
-  fprintf( stderr, "Vega Strike " VERSION " \n"
+  fprintf( stderr, "Vega Strike "  " \n"
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
     srand( time(NULL) );

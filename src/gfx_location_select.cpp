@@ -2,6 +2,7 @@
 #include "gfxlib.h"
 #include "in.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 #include <stdio.h>
 LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
   //  parentScene = par;

@@ -23,7 +23,9 @@
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
 #include <math.h>
+#ifndef WIN32
 #include <iostream.h>
+#endif
 #ifdef __cplusplus
 class Vector;
 void Normalize(Vector &);
@@ -112,11 +114,11 @@ class Vector {
 				(k>other.k)?k:other.k);
 		}
 };
-
+#ifndef WIN32
 inline ostream &operator<<(ostream &os, const Vector &obj) {
   return os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
 }
-
+#endif
 
 /*
 inline Vector operator+(const Vector &lval, const Vector &rval)

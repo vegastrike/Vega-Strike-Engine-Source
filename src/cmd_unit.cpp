@@ -19,6 +19,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "file.h"
+
+#include "cmd_beam.h"
 #include "cmd_unit.h"
 #include "cmd_gun.h"
 #include "gfx_sprite.h"
@@ -31,7 +33,6 @@
 #include "gfx_box.h"
 #include "gfx_animation.h"
 #include "gfx_lerp.h"
-#include "cmd_beam.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -593,8 +594,8 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #else
         Vector MeshCenter;
 #endif
-
-  for (int i=0;i<nummesh;i++) {
+  int i;
+  for (i=0;i<nummesh;i++) {
     float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
 					    meshdata[i]->Position()),
 				 meshdata[i]->rSize()
@@ -613,7 +614,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   if(selected) {
     selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
   }
-  for (int i=0;i<nummounts;i++) {
+  for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
       if (mounts[i].gun) {
 	mounts[i].gun->Draw(cumulative_transformation,cumulative_transformation_matrix);

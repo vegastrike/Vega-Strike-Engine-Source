@@ -45,10 +45,15 @@ struct GFXStats{
 #define MAX_NUM_MATERIAL 4
 #define TEXTURE_CUBE_MAP_ARB                0x8513
 
+#include <GL/glut.h>
 
 //extern Matrix model;
 //extern Matrix view;
 #ifdef WIN32
+#include <windows.h>
+#include <GL/gl.h>
+#include <GL/glaux.h>
+#include <GL/glext.h>
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
 #define GL_TEXTURE_CUBE_MAP_ARB           0x8513
@@ -72,8 +77,8 @@ struct GFXStats{
 #define GL_PROXY_TEXTURE_CUBE_MAP_EXT     0x851B
 #define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT  0x851C
 
-extern PFNGLLOCKARRAYSSGIPROC glLockArraysEXT_p;
-extern PFNGLUNLOCKARRAYSSGIPROC glUnlockArraysEXT_p;
+extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
+extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;

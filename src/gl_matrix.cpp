@@ -25,6 +25,9 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include "gl_matrix.h"
 
 #include "vs_globals.h"

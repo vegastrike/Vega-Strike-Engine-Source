@@ -1,6 +1,6 @@
 #include "cmd_beam.h"
 #include "cmd_weapon_xml.h"
-
+#include <assert.h>
 weapon_info::weapon_info(const weapon_info &tmp) {
   *this = tmp;
 }
