@@ -130,7 +130,7 @@ void TurnAway(AIScript * aisc, Unit * un) {
   }
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),true),false,true,false);
   AddOrd (aisc,un,ord);
-  ord = new ExecuteFor (new Orders::ChangeHeading ((200*(v-u)) + v,3), 2);
+  ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
 }
 void TurnTowards(AIScript * aisc, Unit * un) {
