@@ -370,26 +370,23 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
             GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),CloakFX,GFXColor(1,0,0)),true);
             specialfxlight.push_back (ligh);
             GFXBlendMode (ONE,ONE);
-#if defined(CG_SUPPORT)
-	    cgGLSetParameter2f(cloak_cg->VecBlendParams, ONE, ONE);
-	     cgGLEnableProfile(cloak_cg->vertexProfile);
-#endif
         }else {
             if (cloaked&MeshDrawContext::NEARINVIS) {      
                 //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
             }
             GFXBlendMode (SRCALPHA, INVSRCALPHA);
             GFXColorMaterial (AMBIENT|DIFFUSE);
-#if defined(CG_SUPPORT)
-	    cgGLSetParameter2f(cloak_cg->VecBlendParams, SRCALPHA, INVSRCALPHA);
-	     cgGLEnableProfile(cloak_cg->vertexProfile);
-#endif
 
 			if (hulldamage) {
 				GFXColor4f(CloakFX.r,CloakFX.g,CloakFX.b,CloakFX.a*hulldamage/255);
 			}else
 				GFXColorf(CloakFX);
         }
+#if defined(CG_SUPPORT)
+	    cgGLSetParameter2f(cloak_cg->VecBlendParams, SRCALPHA, INVSRCALPHA);
+	     cgGLEnableProfile(cloak_cg->vertexProfile);
+#endif
+
     }else if (hulldamage) {
 		//ok now we go in and do the dirtying
 		GFXColorMaterial (AMBIENT|DIFFUSE);
