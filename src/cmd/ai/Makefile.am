@@ -11,6 +11,7 @@ libaigeneric_a_SOURCES =	\
 	event_xml.cpp	\
 	flybywire.h	\
 	navigation.cpp		\
+	ikarus.cpp		\
 	script.h			\
 	navigation.h		\
 	fire.cpp			\

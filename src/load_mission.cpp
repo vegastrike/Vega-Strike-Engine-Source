@@ -218,24 +218,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 
 
 	  if (benchmark>0.0  || a!=0) {
-	    if(ainame[0]!='_'){
-	      string ai_agg=ainame+".agg.xml";
-	      string ai_int=ainame+".int.xml";
-
-	      char ai_agg_c[1024];
-	      char ai_int_c[1024];
-	      strcpy(ai_agg_c,ai_agg.c_str());
-	      strcpy(ai_int_c,ai_int.c_str());
-	      //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
-
-	      fighter->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-	    }
-	    else{
-	      string modulename=ainame.substr(1);
-	      
-	      fighter->EnqueueAI( new AImissionScript(modulename));
-	      //fighters[a]->SetAI( new AImissionScript(modulename));
-	    }
+	    fighter->LoadAIScript(ainame);
 	    fighter->SetTurretAI ();
 	  }
 	  _Universe->activeStarSystem()->AddUnit(fighter);

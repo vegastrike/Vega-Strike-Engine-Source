@@ -46,10 +46,10 @@ void FireAt::FaceTargetITTS (bool end) {
 	lastOrder  = new Orders::FaceTargetITTS(end,4);
 }
 void FireAt::MatchLinearVelocity(bool terminate, Vector vec, bool afterburn, bool local) {
-	lastOrder  = new Orders::MatchLinearVelocity(parent->ClampVelocity(vec,afterburn),terminate,afterburn,local);
+	lastOrder  = new Orders::MatchLinearVelocity(parent->ClampVelocity(vec,afterburn),local,afterburn,terminate);
 }
 void FireAt::MatchAngularVelocity(bool terminate, Vector vec, bool local) {
-	lastOrder  = new Orders::MatchAngularVelocity(parent->ClampAngVel(vec),terminate,local);
+	lastOrder  = new Orders::MatchAngularVelocity(parent->ClampAngVel(vec),local,terminate);
 }
 void FireAt::ChangeHeading(QVector vec) {
 	lastOrder  = new Orders::ChangeHeading (vec,3);
@@ -61,7 +61,7 @@ void FireAt::MoveTo(QVector vec, bool afterburn) {
 	lastOrder  = new Orders::MoveTo(vec,afterburn,3);
 }
 void FireAt::MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local) {
-	lastOrder  = new Orders::MatchVelocity(parent->ClampVelocity(vec,afterburn),parent->ClampAngVel(angvel),terminate,afterburn,local);
+	lastOrder  = new Orders::MatchVelocity(parent->ClampVelocity(vec,afterburn),parent->ClampAngVel(angvel),local,afterburn,terminate);
 }
 void FireAt::Cloak(bool enable,float seconds) {
 	lastOrder  = new CloakFor(enable,seconds);

@@ -19,6 +19,7 @@
 #include "cmd/unit_factory.h"
 #include "gfx/cockpit_generic.h"
 #include <algorithm>
+#include "cmd/ai/ikarus.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -805,9 +806,13 @@ void Unit::LoadAIScript(const std::string & s) {
 	mission->addModule (s.substr (1));
 	PrimeOrders (new AImissionScript (s.substr(1)));
       }else {
-	string ai_agg=s+".agg.xml";
-	string ai_int=s+".int.xml";
-	PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
+	if (s=="ikarus") {
+	  PrimeOrders( new Orders::Ikarus ());
+	}else {
+	  string ai_agg=s+".agg.xml";
+	  string ai_int=s+".int.xml";
+	  PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
+	}
       }
     }else {
       PrimeOrders();
