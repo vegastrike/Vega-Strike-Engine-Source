@@ -19,7 +19,6 @@
 - Transfer system description when a player enter in a system (planets, bases, ...)
 - Turn mount_num into a char
 - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
-- Add the player faction to SaveGame
 - Add position stuff transmission for other units than clients (ai, missiles);
 - Add position stuff transmission for planets (with high update period) and for bases if needed
 - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
@@ -32,6 +31,7 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
 - Find a way not to use MAXOBJECTS in netclient.h
 - Interpolate(extrapolate) using delatime + the concerned client's current_state delay
@@ -42,6 +42,7 @@ OR
 
 === GENERAL STUFF =======================================================
 
+DONE - Add the player faction to SaveGame
 DONE ? Carsten - Compress sent data in Packet (_packetmem member)
 DONE - Consider handle damages to docked ships if they can be hit
 DONE - split asteroids, enhancement, building, nebula into 2 classes

@@ -29,6 +29,7 @@
 #include "vs_globals.h"
 #include "endianness.h"
 #include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
 #include "../config_xml.h"
 #include "client.h"
 #include "const.h"
@@ -672,6 +673,12 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 					un->Kill();
 				else
 					cout<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
+			break;
+			case CMD_JUMP :
+			{
+				string newsystem = netbuf.getString();
+				UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
+			}
 			break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd

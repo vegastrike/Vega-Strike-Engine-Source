@@ -1564,10 +1564,10 @@ void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & o
 	if( !_Universe->isPlayerStarship( this))
 	{
 		curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
-		  cumulative_transformation = curr_physical_state;
-		  cumulative_transformation.Compose (trans,transmat);
-		  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-		  cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
+		cumulative_transformation = curr_physical_state;
+		cumulative_transformation.Compose (trans,transmat);
+		cumulative_transformation.to_matrix (cumulative_transformation_matrix);
+		cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
 	}
 }
 static float tempmin (float a, float b) {

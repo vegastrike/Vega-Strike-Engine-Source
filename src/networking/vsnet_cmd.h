@@ -70,7 +70,8 @@ enum Cmd
 	CMD_DAMAGE       = 0x98,		// Send damages to apply
 	CMD_DAMAGE1      = 0x99,		// Send damages to apply
 
-	CMD_KILL         = 0x80,		// Send a kill
+	CMD_KILL         = 0x80,		// Send a kill to clients
+	CMD_JUMP         = 0x81,		// Send a jump request
 
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost and established again :

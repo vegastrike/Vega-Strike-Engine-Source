@@ -86,6 +86,22 @@ Vector	NetBuffer::getVector()
 			v.netswap();
 			return v;
 		}
+void	NetBuffer::addQVector( QVector v)
+		{
+			int tmpsize = sizeof( v);
+			resizeBuffer( offset+tmpsize);
+			v.netswap();
+			memcpy( buffer+offset, &v, sizeof( v));
+			offset += tmpsize;
+		}
+QVector	NetBuffer::getQVector()
+		{
+			Vector v;
+			memcpy( &v, buffer+offset, sizeof( v));
+			offset += sizeof( v);
+			v.netswap();
+			return v;
+		}
 void	NetBuffer::addColor( GFXColor col)
 		{
 			int tmpsize = sizeof( col);

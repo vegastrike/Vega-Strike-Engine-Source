@@ -200,13 +200,14 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 	}
 }
 
-// Broadcast all snapshots
+// Broadcast all positions
 void	ZoneMgr::broadcastSnapshots( )
 {
 	ClientState cstmp;
 	char buffer[MAXBUFFER];
 	int i=0, j=0, p=0;
 	LI k, l;
+	LUI m;
 	NetBuffer netbuf;
 
 	//cout<<"Sending snapshot for ";
@@ -240,13 +241,14 @@ void	ZoneMgr::broadcastSnapshots( )
 			// send position, not orientation and stuff) and if other clients are visible to the given
 			// client.
 			// -->> Reduce bandwidth usage but increase CPU usage
-			int	offset = 0, nbclients = 0;
+			int	offset = 0, nbclients = 0, nbunits=0;
 			ObjSerial sertmp;
 			Packet pckt;
 
 			// Loop for all the zone's clients
 			for( k=zone_list[i].begin(); k!=zone_list[i].end(); k++)
 			{
+			/************************* START CLIENTS BROADCAST ***************************/
 				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
 				nbclients = zone_clients[i]-1;
 				netbuf.Reset();
@@ -288,6 +290,49 @@ void	ZoneMgr::broadcastSnapshots( )
 					// Else : always send back to clients their own info or just ignore ?
 					// Ignore for now
 				}
+			/************************* END CLIENTS BROADCAST ***************************/
+			/************************* START UNITS BROADCAST ***************************/
+				nbunits = zone_units[i];
+				//netbuf.Reset();
+				for( j=0, p=0, m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
+				{
+					// Check if we are on the same client and that the client has moved !
+					if( !((*m)->prev_physical_state.position==(*m)->curr_physical_state.position && (*m)->prev_physical_state.orientation==(*m)->curr_physical_state.orientation))
+					{
+						// Client pointed by 'k' can see client pointed by 'l'
+						// For now only check if the 'l' client is in front of the ship and not behind
+						if( 1 /*(distance = this->isVisible( source_orient, source_pos, target_pos)) > 0*/)
+						{
+							// Test if client 'l' is far away from client 'k' = test radius/distance<=X
+							// So we can send only position
+							// Here distance should never be 0
+							//ratio = radius/distance;
+							if( 1 /* ratio > XX client not too far */)
+							{
+								// Mark as position+orientation+velocity update
+								netbuf.addChar( CMD_FULLUPDATE);
+								// Put the current client state in
+								netbuf.addClientState( ClientState( (*m)->GetSerial(), (*m)->curr_physical_state, (*m)->Velocity, (*m)->ResolveForces (identity_transformation,identity_matrix), 0));
+								// Increment the number of clients we send full info about
+								j++;
+							}
+							// Here find a condition for which sending only position would be enough
+							else if( 1 /* ratio>=1 far but still visible */)
+							{
+								// Mark as position update only
+								netbuf.addChar( CMD_POSUPDATE);
+								// Add the client serial
+								netbuf.addShort( (*m)->GetSerial());
+								netbuf.addQVector( (*m)->curr_physical_state.position);
+								// Increment the number of clients we send limited info about
+								p++;
+							}
+						}
+					}
+					// Else : always send back to clients their own info or just ignore ?
+					// Ignore for now
+				}
+			/************************* END UNITS BROADCAST ***************************/
 				// Send snapshot to client k
 				if( j+p > 0)
 				{

@@ -36,6 +36,8 @@ class NetBuffer
 		ClientState 	getClientState();
 		void			addVector( Vector v);
 		Vector			getVector();
+		void			addQVector( QVector v);
+		QVector			getQVector();
 		void			addColor( GFXColor col);
 		GFXColor		getColor();
 		void			addMatrix( Matrix m);

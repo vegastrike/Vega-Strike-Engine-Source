@@ -2,6 +2,7 @@
 #include "savenet_util.h"
 #include "gfx/cockpit_generic.h"
 #include "cmd/unit_generic.h"
+#include "faction_generic.h"
 
 using std::string;
 
@@ -11,7 +12,7 @@ void	SaveNetUtil::GetSaveStrings( Client * clt, string & savestr, string & xmlst
 	//savestr = cp->savegame->WriteSaveGame( cp->savegame->GetStarSystem().c_str(), clt->current_state.getPosition(), cp->credits, cp->unitfilename, 0, false);
 	// Only get the player data, the dynamic universe part is separated
 	const QVector POS(clt->current_state.getPosition());
-	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->savegame->GetStarSystem().c_str(), cp->credits);
+	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->savegame->GetStarSystem().c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
 	xmlstr = clt->game_unit.GetUnit()->WriteUnitString();
 }
 
@@ -25,7 +26,7 @@ void	SaveNetUtil::GetSaveStrings( int numplayer, string & savestr, string & xmls
 	//savestr = cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0, false);
 	// Only get the player data, the dynamic universe part is separated
 	const QVector POS(un->LocalPosition());
-	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->activeStarSystem->getFileName().c_str(), cp->credits);
+	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->activeStarSystem->getFileName().c_str(), cp->credits, FactionUtil::GetFactionName( cp->GetParent()->faction));
 }
 
 void	SaveNetUtil::GetSaveBuffer( string savestr, string xmlstr, char * buffer)

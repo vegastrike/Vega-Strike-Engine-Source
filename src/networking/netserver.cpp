@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
 #include "cmd/weapon_xml.h"
 #include "cmd/bolt.h"
 #include "gfx/cockpit_generic.h"
@@ -182,15 +183,14 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		// Generate the system we enter in if needed and add the client in it
 
 		cout<<"\tcredits = "<<credits<<endl;
-		cout<<"\tcredits = "<<credits<<endl;
+		cout<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;
 		cout<<"-> SAVE LOADED"<<endl;
 
 		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
 		cout<<"-> UNIT FACTORY WITH XML"<<endl;
 		// We may have to determine which is the current ship of the player if we handle several ships for one player
 		string PLAYER_SHIPNAME = savedships[0];
-		// WE DON'T KNOW THE FACTION YET !!! SO I MAKE IT DEFAULT TO "privateer"
-		string PLAYER_FACTION_STRING( "privateer");
+		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
 		Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
                              false,
                              FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
@@ -1031,9 +1031,8 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		zone = netbuf.getShort();
 		mis = netbuf.getChar();
 		// Find the unit
-		un = zonemgr->getUnit( target_serial, zone);
 		// Set the concerned mount as ACTIVE and others as INACTIVE
-
+		un = zonemgr->getUnit( target_serial, zone);
 		if( un==NULL)
 			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
 		else
@@ -1049,6 +1048,43 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			else
 				un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 		}
+	break;
+	case CMD_JUMP :
+	{
+		string newsystem = netbuf.getString();
+		StarSystem * sts;
+		Cockpit * cp;
+		
+		un = clt->game_unit.GetUnit();
+		if( un==NULL)
+			cout<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
+		else
+		{
+			// Create the new star system if it isn't loaded yet
+			if( !(sts = _Universe->getStarSystem( newsystem+".system")))
+				zonemgr->addZone( newsystem+".system");
+			if( UnitUtil::JumpTo( un, newsystem))
+			{
+				// Remove unit/client from its old system
+				zonemgr->removeClient( clt);
+				// Update its star system in its savegame
+				cp = _Universe->isPlayerStarship( un);
+				cp->savegame->SetStarSystem( newsystem);
+				// Add it in the new one
+				this->addClient( clt);
+				// Send a CMD_JUMP to client with name of system (and md5 string ?)
+				netbuf.Reset();
+				netbuf.addString( newsystem);
+				p2.send( CMD_JUMP, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+#ifndef _WIN32
+					__LINE__
+#else
+					1076
+#endif
+					);
+			}
+		}	
+	}
 	break;
 	case CMD_SCAN :
 	{

@@ -572,6 +572,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     strcpy(fightername,fullname.c_str());
     string ainame=fg->ainame;
     float fg_radius=0.0;
+	Cockpit * cp = NULL;
 
     for(int s=0;s < fg->nr_ships;s++)
 	{
@@ -598,7 +599,8 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 		  string modifications ("");
 		  if (s==0&&squadnum<(int)fighter0name.size())
 		  {
-			  _Universe->AccessCockpit(squadnum)->activeStarSystem=ssys[squadnum];
+			  cp = _Universe->AccessCockpit(squadnum);
+			  cp->activeStarSystem=ssys[squadnum];
 			  fighter0indices.push_back(a);
 			  
 			  if (fighter0name[squadnum].length()==0)
@@ -628,18 +630,21 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
             _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
 
  			// In networking mode we name the ship save with .xml as they are xml files
-			if( Network!=NULL)
+			if( Network!=NULL && backupcp!=NULL)
 			{
 				modifications = modifications+".xml";
-				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s, savefiles[a][1]);
+				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s, savefiles[squadnum][1]);
+				// Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
+				fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
+				
 			}
 			else
   				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
-			if( Network!=NULL)
+			if( Network!=NULL && backupcp != NULL)
 			{
 				fighters[a]->SetNetworkMode();
 				Network[squadnum].setUnit( fighters[a]);
-				cout<<"Creating fighter["<<a<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
+				cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
 			}
 		  }
 		  else

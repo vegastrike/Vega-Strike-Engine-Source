@@ -493,7 +493,7 @@ static char * tmprealloc (char * var, int &oldlength, int newlength) {
   return var;
 }
 
-string SaveGame::WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits)
+string SaveGame::WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits, std::string fact)
 {
 	  string playerdata("");
   	  int MB = MAXBUFFER;
@@ -506,8 +506,13 @@ string SaveGame::WritePlayerData( const QVector &FP, std::vector<std::string> un
 //    }
       string pipedunitname = createPipedString(unitname);
       tmp = tmprealloc(tmp,MB,pipedunitname.length()+strlen(systemname)+256/*4 floats*/);
-      sprintf (tmp,"%s^%f^%s %f %f %f",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
+	  // If we specify no faction, it won't be saved in there
+	  if( fact != "")
+		sprintf (tmp,"%s^%f^%s %f %f %f %s",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k, fact.c_str());
+	  else
+		sprintf (tmp,"%s^%f^%s %f %f %f",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
       playerdata = string( tmp);
+	  this->playerfaction = fact;
       SetSavedCredits (credits);
   	  free(tmp);tmp=NULL;
 
@@ -552,14 +557,14 @@ string SaveGame::WriteDynamicUniverse()
 	return dyn_univ;
 }
 
-string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, bool write) {
+string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, std::string fact, bool write) {
   savestring = string("");
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
     changehome();
     vschdir ("save");
 
-	savestring += WritePlayerData( FP, unitname, systemname, credits);
+	savestring += WritePlayerData( FP, unitname, systemname, credits, fact);
 	savestring += WriteDynamicUniverse();
 
     if( write){
@@ -630,8 +635,10 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		char * deletebuf = buf;
 		char *tmp2= (char *)malloc(savestring.length()+2);
 		char * freetmp2 = tmp2;
+		char * factionname = new char[1024];
 		QVector tmppos;
-		if (4==sscanf (buf,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
+		int res = sscanf (buf,"%s %lf %lf %lf %s\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k, factionname);
+		if (res==4 || res==5) {
 		  // Put readlen to point to the end of the line we just parsed
 		  readlen = hopto (buf,'\n','\n',readlen);
 		  for (int j=0;'\0'!=tmp2[j];j++) {
@@ -648,6 +655,13 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 				}
 				break;
 			}
+			// In networking save we include the faction at the end of the first line
+			if( res==5)
+				playerfaction = string( factionname);
+			else
+				// If no faction -> default to privateer
+				playerfaction = string( "privateer");
+			delete factionname;
 		  }
 		  if (ForceStarSystem.length()==0)
 			ForceStarSystem=string(tmp2);

@@ -54,6 +54,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_DAMAGE       )
     CASE( CMD_DAMAGE1      )
     CASE( CMD_KILL         )
+    CASE( CMD_JUMP         )
 
     CASE( CMD_NEWSUBSCRIBE )
 

@@ -43,7 +43,16 @@
 //extern void reset_time_compression (int,KBSTATE);
 
 //Atmosphere *theAtmosphere;
+extern std::vector <unorigdest *>pendingjump;
 
+void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::string &system) {
+  for (unsigned int i=0;i<pendingjump.size();i++) {
+    if (pendingjump[i]->un.GetUnit()==un) {
+      return;
+    }
+  }
+  ss->JumpTo (un,jumppoint,system);
+}
 float ScaleJumpRadius (float radius) {
 	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
 	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
@@ -721,7 +730,13 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
 #ifdef JUMP_DEBUG
   fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif
-  StarSystem *ss = star_system_table.Get(system);
+  StarSystem * ss = star_system_table.Get(system);
+  if( SERVER && !ss)
+  {
+	  // On server side the system must have been generated before a JumpTo call !
+	  cout<<"!!! ERROR = StarSystem not found"<<endl;
+	  exit(1);
+  }
   std::string ssys (system+".system");
   if (!ss) {
     ss = star_system_table.Get (ssys);

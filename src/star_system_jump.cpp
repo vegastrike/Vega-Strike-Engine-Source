@@ -108,15 +108,6 @@ void GameStarSystem::DrawJumpStars() {
   }
 }
 
-
-void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::string &system) {
-  for (unsigned int i=0;i<pendingjump.size();i++) {
-    if (pendingjump[i]->un.GetUnit()==un) {
-      return;
-    }
-  }
-  ss->JumpTo (un,jumppoint,system);
-}
 void GameStarSystem::DoJumpingComeSightAndSound (Unit * un) {
       static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
       Vector p,q,r;
