@@ -18,13 +18,10 @@
 #include "glut_support.h"
 
 float colors[] = {1, 1, 1, 1};
-int PNG_HAS_PALETTE=1;
-int PNG_HAS_COLOR=2;
-int PNG_HAS_ALPHA=4;
-
 
 Texture ReadTex(char *texfile) {
         FILE* file=0;
+	int PNG_HAS_ALPHA=4;
         Texture tex;
         if (texfile)
         	if (texfile[0])
@@ -158,7 +155,6 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
         /* close the file */
         return image;
 }
-
 
 // x,y must be -1 to 1, with -1,-1 being the bottom left corner. x,y must be the top left corner to draw
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha) {

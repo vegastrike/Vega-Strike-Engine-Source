@@ -31,6 +31,7 @@
 #include <png.h>
 #include <stdio.h>
 #include <vector.h>
+#include "gfx/png_texture.h"
 
 struct Texture {
         unsigned int name;
