@@ -31,12 +31,12 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     return 0;
   Vector t = pos-mylistener.pos;
   float mag = t.Dot(t);
-  if (mag<mylistener.rsize) return true;
+  if (mag<mylistener.rsize) return 1;
   ///could theoretically "steal" buffer from playing sound at this point
 
   int hashed = hash_sound (sounds[sound].buffer);
   if (playingbuffers[hashed].empty()) 
-    return true;
+    return 1;
   //int target = rand()%playingbuffers[hashed].size();
   for (int rr=0;rr<3;rr++) {
     int target = rand()%playingbuffers[hashed].size();
@@ -75,19 +75,24 @@ void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
 }
 typedef std::vector<int> vecint;
 vecint soundstodelete;
+
 void AUDRefreshSounds () {
 #ifdef HAVE_AL
   for (int i=0;i<hashsize;i++) {
     for (unsigned int j=0;j<playingbuffers[i].size();j++) {
       if (!AUDIsPlaying (playingbuffers[i][j].soundname)) {
 	totalplaying--;
+	if (sounds[playingbuffers[i][j].soundname].source!=(ALuint)0) {
+	  unusedsrcs.push_back (sounds[playingbuffers[i][j].soundname].source);
+	  sounds[playingbuffers[i][j].soundname].source=(ALuint)0;
+	}
 	ApproxSoundVec::iterator k = playingbuffers[i].begin();
 	k+=j;
 	playingbuffers[i].erase (k);
 	j--;
       }
     }
-  }
+  } 
   for (int j=soundstodelete.size()-1;j>=0;j--) {//might not get every one every time
     int tmp = soundstodelete[j];
 	std::vector<int>::iterator stdel=soundstodelete.begin();

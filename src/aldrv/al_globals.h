@@ -10,10 +10,13 @@ struct OurSound{
   ALuint source;
   ALuint buffer;
   Vector pos;
+  ALboolean looping;
   OurSound(ALuint source, ALuint buffername) {buffer=buffername;};
 };
 
 template <class a,class b,class c> class Hashtable;
+
+extern std::vector <ALuint> unusedsrcs;
 extern std::vector<ALuint> buffers;
 extern std::vector <OurSound> sounds;
 extern Hashtable<std::string, ALuint,char [127]> soundHash;

@@ -30,10 +30,12 @@ static int LoadSound (ALuint buffer, bool looping) {
     i=sounds.size();
     sounds.push_back (OurSound (0,buffer));
   }
-  alGenSources( 1, &sounds[i].source);
-  int tmp = sounds[i].source;
-  alSourcei(sounds[i].source, AL_BUFFER, buffer );
-  alSourcei(sounds[i].source, AL_LOOPING, looping ?AL_TRUE:AL_FALSE);
+  sounds[i].source = (ALuint)0;
+  sounds[i].looping = looping?AL_TRUE:AL_FALSE;
+  //limited number of sources
+  //  alGenSources( 1, &sounds[i].source);
+  //alSourcei(sounds[i].source, AL_BUFFER, buffer );
+  //alSourcei(sounds[i].source, AL_LOOPING, looping ?AL_TRUE:AL_FALSE);
   return i;
 
 }
@@ -62,10 +64,9 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
       ALsizei size;	
       ALsizei bits;	
       ALsizei freq;
-	  ALboolean looping;
-	  signed char * filename = (signed char *)strdup (nam.c_str());
+      signed char * filename = (signed char *)strdup (nam.c_str());
       void *wave;
-	  ALboolean err=AL_TRUE;
+      ALboolean err=AL_TRUE;
 #ifndef WIN32
 #ifdef MACOS
 ALint format;
@@ -73,7 +74,7 @@ ALint format;
 #else
 	
       ALsizei format;
-      err = alutLoadWAV(filename, &wave, &format, &size, &bits, &freq);
+      err = alutLoadWAV((char *)filename, &wave, &format, &size, &bits, &freq);
 #endif
 #else
 	  ALint format;
@@ -195,7 +196,8 @@ void AUDDeleteSound (int sound, bool music){
 	AUDStopPlaying (sound);
     }
     dirtysounds.push_back (sound);
-    alDeleteSources(1,&sounds[sound].source);
+    //FIXME??
+    //    alDeleteSources(1,&sounds[sound].source);
     if (music) {
       alDeleteBuffers (1,&sounds[sound].buffer);
     }
@@ -243,13 +245,28 @@ void AUDStopPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
     alSourceStop(sounds[sound].source);
+    unusedsrcs.push_back (sounds[sound].source);
+    sounds[sound].source=(ALuint)0;
   }
 #endif
+}
+static bool AUDReclaimSource (const int sound) {
+  if (sounds[sound].source==(ALuint)0) {
+    if (unusedsrcs.empty())
+      return false;
+    sounds[sound].source = unusedsrcs.back();
+    unusedsrcs.pop_back();
+    alSourcei(sounds[sound].source, AL_BUFFER, sounds[sound].buffer );
+    alSourcei(sounds[sound].source, AL_LOOPING, sounds[sound].looping);    
+  }
+  return true;			 
 }
 void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-    alSourcePlay( sounds[sound].source );
+    if (AUDReclaimSource (sound)) {
+      alSourcePlay( sounds[sound].source );
+    }
   }
 #endif
 }
@@ -260,13 +277,14 @@ void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const floa
   if (sound<0)
     return;
   if ((tmp=AUDQueryAudability (sound,pos,vel,gain))!=0) {
-
-    ALfloat p [3] = {pos.i,pos.j,pos.k};
-    AUDAdjustSound (sound,pos,vel);
-    alSourcef(sounds[sound].source,AL_GAIN,gain);    
-    if (tmp!=2){
-      AUDAddWatchedPlayed (sound,pos);
-      alSourcePlay( sounds[sound].source );
+    if (AUDReclaimSource (sound)) {
+      ALfloat p [3] = {pos.i,pos.j,pos.k};
+      AUDAdjustSound (sound,pos,vel);
+      alSourcef(sounds[sound].source,AL_GAIN,gain);    
+      if (tmp!=2){
+	AUDAddWatchedPlayed (sound,pos);
+	alSourcePlay( sounds[sound].source );
+      }
     }
   }
 #endif

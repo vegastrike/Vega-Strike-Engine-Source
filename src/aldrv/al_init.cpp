@@ -127,6 +127,20 @@ bool AUDInit () {
 	alcMakeContextCurrent( context_id );
 
 	fixup_function_pointers();
+	ALenum alGetEr = 0;
+	ALuint cursrc;
+	alGetError();
+	alGenSources (1,&cursrc);
+	alGetEr = alGetError();
+	while (alGetEr==0) {
+	  unusedsrcs.push_back (cursrc);
+	  if (unusedsrcs.size()>=maxallowedtotal) {
+	    break;
+	  }
+	  alGenSources (1,&cursrc);
+	  alGetEr = alGetError();
+
+	}
 	return true;
 #endif
 	return false;
@@ -138,8 +152,12 @@ void AUDDestroy() {
   //Go through and delete all loaded wavs
   unsigned int i;
   for (i=0;i<sounds.size();i++) {
-    if (sounds[i].buffer!=-1)
+    if (sounds[i].buffer!=0)
+      AUDStopPlaying (i);
       AUDDeleteSound (i);
+  }
+  for (i=0;i<unusedsrcs.size();i++) {
+    alDeleteSources (1,&unusedsrcs[i]);
   }
   for (i=0;i<buffers.size();i++) {
     alDeleteBuffers (1,&buffers[i]);

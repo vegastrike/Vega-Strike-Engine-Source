@@ -6,4 +6,5 @@ mp3Loader *alutLoadMP3p = 0;
 Hashtable<std::string, ALuint,char [127]> soundHash;
 unsigned int maxallowedsingle=10;
 unsigned int maxallowedtotal=40;
+std::vector <ALuint> unusedsrcs;
 #endif
