@@ -102,24 +102,27 @@ void WriteSaveGame (const char *systemname, const Vector &FP) {
     fclose (fp);
   }
 }
-bool ParseSaveGame (const string filename, string &ForceStarSystem, string originalstarsystem, Vector &Pos) {
+bool ParseSaveGame (const string filename, string &ForceStarSystem, string originalstarsystem, Vector &Pos, bool reallyread) {
   outputsavegame=filename;
   originalsystem = originalstarsystem;
-  changehome();
-  vschdir ("save");
-  FILE * fp = fopen (filename.c_str(),"r");
-  vscdup();
-  returnfromhome();
-  if (fp) {
-    char tmp[10000];
-    if (4==fscanf (fp,"%s %f %f %f\n",tmp,&Pos.i,&Pos.j,&Pos.k)) {
-      ForceStarSystem=string(tmp);
-      originalsystem = ForceStarSystem;
-      PlayerLocation=Pos;
+  PlayerLocation=Pos;
+  if (reallyread) {
+    changehome();
+    vschdir ("save");
+    FILE * fp = fopen (filename.c_str(),"r");
+    vscdup();
+    returnfromhome();
+    if (fp) {
+      char tmp[10000];
+      if (4==fscanf (fp,"%s %f %f %f\n",tmp,&Pos.i,&Pos.j,&Pos.k)) {
+	ForceStarSystem=string(tmp);
+	originalsystem = ForceStarSystem;
+	PlayerLocation=Pos;
+	fclose (fp);
+	return true;
+      }
       fclose (fp);
-      return true;
     }
-    fclose (fp);
   }
   return false;  
   
@@ -239,15 +242,15 @@ void bootstrap_main_loop () {
     if (PlayerLocation.i!=FLT_MAX&&PlayerLocation.j!=FLT_MAX&&PlayerLocation.k!=FLT_MAX) {
       pos = PlayerLocation;
       setplayerloc=true;
-    } else {
-      string savegamefile = mission->getVariable ("savegame","");
-      if (savegamefile.length()) {
-	if (ParseSaveGame (savegamefile,ForceStarSystem,mysystem,pos)) {
-	  setplayerloc=true;
-	}
-      }
-      PlayerLocation=pos;
     }
+    string savegamefile = mission->getVariable ("savegame","");
+    if (savegamefile.length()) {
+      if (ParseSaveGame (savegamefile,ForceStarSystem,mysystem,pos,ForceStarSystem.length()==0)) {
+	setplayerloc=true;
+      }
+    }
+    PlayerLocation=pos;
+
     bootstrap_draw (SplashScreen);
     mysystem = (ForceStarSystem.length()==0)?mission->getVariable("system","sol.system"):ForceStarSystem;
     _Universe->Init (mysystem,pos,planetname);

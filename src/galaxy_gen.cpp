@@ -788,7 +788,7 @@ void readnames (vector <string> &entity, const char * filename) {
 
 }
 
-void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, string namelist, const vector <string> &jumplocations) {
+void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string backgroundlist) {
   ResetGlobalVariables();
   systemname=system;
   compactness = compac;
@@ -803,17 +803,17 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   numun[0]=numnaturalphenomena;
   numun[1]=numstarbases;
   starradius.push_back (sunradius);
-  readColorGrads (gradtex,(datapath+"stars.txt").c_str());
-  readentity (entities[1],(datapath+"planets.txt").c_str());
-  readentity (entities[2],(datapath+"gas_giants.txt").c_str());
-  readentity (entities[3],(datapath+"moons.txt").c_str());
-  readentity (units[1],(datapath+"smallunits.txt").c_str());
-  readentity (background,(datapath+"background.txt").c_str());
+  readColorGrads (gradtex,(datapath+starlist).c_str());
+  readentity (entities[1],(datapath+planetlist).c_str());
+  readentity (entities[2],(datapath+gasgiantlist).c_str());
+  readentity (entities[3],(datapath+moonlist).c_str());
+  readentity (units[1],(datapath+smallunitlist).c_str());
+  readentity (background,(datapath+backgroundlist).c_str());
   if (nebulae) {
-    readentity (units[0],(datapath+"nebulae.txt").c_str());
+    readentity (units[0],(datapath+nebulaelist).c_str());
   }
   if (asteroids) {
-    readentity (units[0],(datapath+"asteroids.txt").c_str());
+    readentity (units[0],(datapath+asteroidlist).c_str());
   }
   readnames (names,(datapath+namelist).c_str());
 
