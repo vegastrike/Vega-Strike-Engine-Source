@@ -86,7 +86,6 @@ Unit::Unit(const char *filename, bool xml):Mesh()
 	  return;
 	}
 	LoadFile(filename);
-
 	ReadInt(nummesh);
 	meshdata = new Mesh*[nummesh];
 
@@ -159,6 +158,7 @@ Unit::Unit(const char *filename, bool xml):Mesh()
 	fpos = ::GetPosition();
 
 	CloseFile();
+	calculate_extent();
 }
 
 Unit::~Unit()
@@ -676,10 +676,12 @@ void Unit::Draw()
 	if(selected) {
 	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	  float radius = 1.5;
-	  cerr << name << " selected\n";
+	  //cerr << name << " selected\n";
 	  GFXDisable(TEXTURE0);
 	  GFXDisable(TEXTURE1);
 	  GFXDisable(LIGHTING);
+	  GFXDisable(CULLFACE);
+	  GFXDisable(DEPTHWRITE);
 	  GFXBegin(QUADS);
 	  /*
 	  GFXColor4f(0.0,1.0,0.0,0.2);
@@ -721,39 +723,39 @@ void Unit::Draw()
 	  GFXVertex3f(-radius,radius,radius);
 	  */
 
-	  GFXColor4f(0.0,1.0,0.0,0.2);
+	  GFXColor4f(0.0,1.0,0.0,0.1);
 
 	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
 	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
 	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
 	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
 
-	  GFXColor4f(0.0,0.0,1.0,0.2);
+	  GFXColor4f(0.0,1.0,0.0,0.1);
 	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
 	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
 	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
 	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
 
-	  GFXColor4f(1.0,0.0,0.0,0.2);
+	  GFXColor4f(0.0,.70,0.0,0.1);
 
 	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
 	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
 	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
 	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
 
-	  GFXColor4f(1.0,1.0,0.0,0.2);
+	  GFXColor4f(0.0,.70,0.0,0.1);
 	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
 	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
 	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
 	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
 
-	  GFXColor4f(1.0,0.0,1.0,0.2);
+	  GFXColor4f(0.0,.90,.3,0.1);
 	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
 	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
 	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
 	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
 
-	  GFXColor4f(0.0,1.0,1.0,0.2);
+	  GFXColor4f(0.0,.90,.3,0.1);
 	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
 	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
 	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
@@ -761,6 +763,8 @@ void Unit::Draw()
 
 	  GFXEnd();
 	  GFXEnable(LIGHTING);
+	  GFXEnable(CULLFACE);
+	  GFXEnable(DEPTHWRITE);
 	}
 }
 

@@ -72,6 +72,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
       CurDFA->SetStateSomeSelected();
     }else {
       if (!(mod&ACTIVE_SHIFT)){
+	CurDFA->UnselectAll();
 	CurDFA->SetStateNone();
 	fprintf (stderr,"Select:missedReplaceselected\n");
       }
@@ -135,6 +136,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
       CurDFA->replaceCollection (tmpcollection);
       CurDFA->SetStateSomeSelected();
     }else {
+      CurDFA->UnselectAll();
       fprintf (stderr,"None::missed\n");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target");else fprintf (stderr," to select");
     }
   }
@@ -215,11 +217,11 @@ UnitCollection * InputDFA::getCollection () {
   }
   return selected;
 }
-void InputDFA::replaceCollection (UnitCollection *newcol) {
+void InputDFA::UnselectAll() {
   switch (state) {
   case LOCATION_SELECT:
   case UNITS_SELECTED:
-  case NONE:
+  case NONE:   
     if (selected) {
       UnitCollection::UnitIterator *it = selected->createIterator();
       while(it->current()) {
@@ -228,7 +230,24 @@ void InputDFA::replaceCollection (UnitCollection *newcol) {
       }
       delete it;
       delete selected;
+      selected = NULL;
     }
+    
+    break;
+  case TARGET_SELECT:
+    if (targetted) {
+      delete targetted;
+      targetted = NULL;
+    }
+    break;
+  }
+}
+void InputDFA::replaceCollection (UnitCollection *newcol) {
+  switch (state) {
+  case LOCATION_SELECT:
+  case UNITS_SELECTED:
+  case NONE:
+    UnselectAll();
     selected = newcol;
     UnitCollection::UnitIterator *it;
     for(it = selected->createIterator();
@@ -239,8 +258,7 @@ void InputDFA::replaceCollection (UnitCollection *newcol) {
     delete it;
     break;
   case TARGET_SELECT:
-    if (targetted)
-      delete targetted;
+    UnselectAll();
     targetted = newcol;
     break;
   }

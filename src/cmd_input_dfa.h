@@ -43,6 +43,7 @@ public:
   ~InputDFA();
   void Draw();
   void ContextAcquire();
+  void UnselectAll();
   UnitCollection *getCollection();
 };
 #endif
