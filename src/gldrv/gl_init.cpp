@@ -91,7 +91,6 @@ void init_opengl_extensions()
 	glUnlockArraysEXT_p = NULL;
 
     }
-    g_game.mipmap = 2;
 #ifdef WIN32
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
@@ -142,7 +141,13 @@ static void Reshape (int x, int y) {
 extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
-     
+    g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
+    g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
+    g_game.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
+    g_game.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection",g_game.Multitexture?"true":"false"));
+    g_game.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
+    g_game.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
+    g_game.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists",g_game.display_lists?"true":"false"));
 #ifdef USE_STENCIL_BUFFER
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL );
 #else
@@ -154,7 +159,7 @@ void GFXInit (int argc, char ** argv){
       glutGameModeString(str);
 
     /* Create a window */
-      if (g_game.fullscreen &&glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) {
+      if (g_game.fullscreen) {
 	glutInitWindowPosition( 0, 0 );
 	glutEnterGameMode();
     } else {

@@ -4,15 +4,19 @@
 #include "al_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_AL
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alext.h>
 #include <AL/alut.h>
+#endif
 #include <vector>
 #include "vs_globals.h"
+#ifdef HAVE_AL
 std::vector <unsigned int> dirtysounds;
 std::vector <OurSound> sounds;
 std::vector <ALuint> buffers;
+
 static int LoadSound (ALuint buffer, bool looping) {
   unsigned int i;
   if (!dirtysounds.empty()) {
@@ -28,8 +32,9 @@ static int LoadSound (ALuint buffer, bool looping) {
   alSourcei(sounds[i].source, AL_BUFFER, buffer );
   alSourcei(sounds[i].source, AL_LOOPING, looping ?AL_TRUE:AL_FALSE);
   return i;
-}
 
+}
+#endif
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
   if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
@@ -186,6 +191,7 @@ void AUDStartPlaying (const int sound){
 }
 
 void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const float gain) {
+#ifdef HAVE_AL
   char tmp;
   if (sound<0)
     return;
@@ -199,6 +205,7 @@ void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const floa
       alSourcePlay( sounds[sound].source );
     }
   }
+#endif
 }
 
 void AUDPausePlaying (const int sound){

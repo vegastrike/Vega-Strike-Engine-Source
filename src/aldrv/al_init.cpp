@@ -1,4 +1,8 @@
 #include "audiolib.h"
+#include "config_xml.h"
+#include "xml_support.h"
+#include "vs_globals.h"
+
 #ifdef HAVE_AL
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -7,9 +11,6 @@
 #include <stdio.h>
 #include "al_globals.h"
 #include <vector>
-#include "config_xml.h"
-#include "xml_support.h"
-#include "vs_globals.h"
 static void fixup_function_pointers(void) {
   alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
@@ -85,17 +86,20 @@ static void fixup_function_pointers(void) {
   */
 	return;
 }
-#endif
+
 ///I don't think we'll need to switch contexts or devices in vegastrike
 static ALCdevice *dev=NULL;
 static void *context_id=NULL;
-
+#endif
 bool AUDInit () {
-#ifdef HAVE_AL
+
   //  enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","enabled","true"));
+  g_game.audio_frequency_mode = XMLSupport::parse_int (vs_config->getVariable ("audio","frequency","22050"));
+  g_game.sound_enabled = false;
+  g_game.music_enabled = false;
+#ifdef HAVE_AL
   maxallowedsingle = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxSingleSounds","8"));
   maxallowedtotal = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxTotalSounds","20"));
-  g_game.audio_frequency_mode = XMLSupport::parse_int (vs_config->getVariable ("audio","frequency","22050"));
   g_game.sound_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Sound","true"));
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
 	int attrlist[] = { ALC_FREQUENCY, g_game.audio_frequency_mode, 0 };

@@ -1,5 +1,7 @@
 #include "audiolib.h"
+#ifdef HAVE_AL
 #include <AL/al.h>
+#endif
 #include <stdio.h>
 #include <vector>
 #include "al_globals.h"
@@ -23,6 +25,7 @@ int hash_sound (const int buffer) {
 }
 
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain) {
+#ifdef HAVE_AL
   if (sounds[sound].buffer==(ALuint)0) 
     return 0;
   Vector t = pos-mylistener.pos;
@@ -55,9 +58,11 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     return 0;
   if (totalplaying>maxallowedtotal)
     return 0;
+#endif
   return 1;
 }
 void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
+#ifdef HAVE_AL
   totalplaying++;
   if (sounds[sound].buffer!=(ALuint)0) {
     int h= hash_sound(sounds[sound].buffer);
@@ -65,8 +70,10 @@ void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
     playingbuffers[h].back().soundname = sound;
     //    fprintf (stderr,"pushingback %f",(pos-mylistener.pos).Magnitude());
   }
+#endif
 }
 void AUDRefreshSounds () {
+#ifdef HAVE_AL
   for (int i=0;i<hashsize;i++) {
     for (unsigned int j=0;j<playingbuffers[i].size();j++) {
       if (!AUDIsPlaying (playingbuffers[i][j].soundname)) {
@@ -77,6 +84,7 @@ void AUDRefreshSounds () {
       }
     }
   }
+#endif
 }
 void AUDListener (const Vector & pos, const Vector & vel) {
 #ifdef HAVE_AL

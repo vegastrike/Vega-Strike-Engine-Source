@@ -534,7 +534,7 @@ AC_DEFUN( CHECK_FOR_OPENAL_LIB, [
     AC_MSG_RESULT([$have_openal_lib])
 ]) 
 
-saved_LIBS="$LIBS"
+saved_LIBS="$RRLIBS"
 
 OPENAL_LIB_LIST="openal"
 
@@ -542,13 +542,16 @@ for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
     CHECK_FOR_OPENAL_LIB
 
     if test "x$have_openal_lib" = "xyes" ; then
+	LIBS="$saved_LIBS"
+	TR_LIBS="$TR_LIBS $OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
         break;
+    else
+	LIBS=""
+	saved_LIBS=""
     fi
 done
 
 
-LIBS="$saved_LIBS"
-TR_LIBS="$TR_LIBS $OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
 
 
 dnl --------------------------------------------------------------------------

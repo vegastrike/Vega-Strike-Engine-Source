@@ -1,6 +1,8 @@
 #ifndef AL_GLOBALS_H_
 #define AL_GLOBALS_H_
+#ifdef HAVE_AL
 #include <AL/al.h>
+
 #include <string>
 #include <vector>
 class Vector;
@@ -21,4 +23,5 @@ extern unsigned int maxallowedsingle;
 extern unsigned int maxallowedtotal;
 char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel, const float gain);
 void AUDAddWatchedPlayed (const int sound, const Vector &pos);
+#endif
 #endif
