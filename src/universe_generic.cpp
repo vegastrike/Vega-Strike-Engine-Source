@@ -43,7 +43,7 @@ QVector DockToSavedBases (int playernum) {
 	QVector dock_position( 0, 0, 0);
 	while (iter.current()) {
 		Unit *un=iter.current();
-		if (un->name==str) {
+		if (un->name==str||un->getFullname()==str) {
 			dist=UnitUtil::getSignificantDistance(plr,un);
 			if (closestUnit==NULL||dist<lastdist) {
 				lastdist=dist;
