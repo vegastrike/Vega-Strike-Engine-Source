@@ -1391,7 +1391,7 @@ void BaseComputer::updateTransactionControls(const Cargo& item, bool skipFirstCa
 }
 
 // Buy an item from the cargo list.
-extern RecomputeUnitUpgrades (Unit * un);
+extern void RecomputeUnitUpgrades (Unit * un);
 bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
     Unit* playerUnit = m_player.GetUnit();
     Unit* baseUnit = m_base.GetUnit();
