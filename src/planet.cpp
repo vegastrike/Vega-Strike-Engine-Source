@@ -50,7 +50,7 @@ void Planet::InitPlanet(FILE *fp) {
   
   meshdata = new Mesh*[1];
   meshdata[0] = new SphereMesh(radius, 4, 4, texname);
-  meshdata[0]->setEnvMap(FALSE);
+  //meshdata[0]->setEnvMap(FALSE);
   nummesh = 1;
   fpos = ftell(fp);
 }
@@ -77,7 +77,7 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   Matrix t;
   MultMatrix(t, matrix, transformation);
 
-  if(gravity!=0.0) {
+  /*  if(gravity!=0.0) {
     Iterator *iterator = uc->createIterator();
     Unit *unit;
     Vector vec(0,0,0);
@@ -99,7 +99,7 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
       iterator->advance();
     }
     delete iterator;
-  }
+    }*/
 
   // fake gravity
   for(int a=0; a<numSatellites; a++) {

@@ -20,9 +20,10 @@
  */
 #include "gfx_camera.h"
 
+//Remove GL specific stuff here
+#include "vegastrike.h"
 
-
-const float PI=3.1415926536;
+//const float PI=3.1415926536;
 Camera::Camera() : myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
 {
 	ResetVectors(P,Q,R);
@@ -30,6 +31,7 @@ Camera::Camera() : myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
 	Coord.i = 0;
 	Coord.j = 0;
 	Coord.k = 0;
+
 	changed = TRUE;
 	//SetPosition();
 	//SetOrientation();
@@ -52,6 +54,36 @@ void Camera::UpdateGFX()
 		GFXLookAt (Coord, Coord+R, Q);
 		GFXCalculateFrustum();
 		//changed = FALSE;
+
+		// Now, change the texture matrix
+		/*
+		if (g_game.Multitexture){
+		  double theta;
+		  Matrix texture_matrix;
+		  Identity(texture_matrix);
+
+				  Vector up = Vector(1,0,0).Cross(-R);
+				  up.Normalize();
+				  up = Q * (up * Q) + P * (up * P); // project onto the plane
+				  up.Normalize();
+				  theta = acos(up * Q);
+		  Vector X = Vector(1,0,0);
+		  Vector Y = Vector(0,1,0);
+		  Vector Q_proj = Y * (Y * Q) + X * (X * Q);
+		  Q_proj.Normalize();
+		  theta = acos(Y * Q_proj);
+		  
+		  cerr << "Compensation angle: " << theta << " for camera vectors: " << P << ", " << Q << ", " << R << endl;
+		  texture_matrix[0] = cosf(theta);
+		  texture_matrix[4] = -sinf(theta);
+		  texture_matrix[1] = sinf(theta);
+		  texture_matrix[5] = cosf(theta);
+
+		  glActiveTextureARB(GL_TEXTURE1_ARB);
+		  glMatrixMode(GL_TEXTURE_MATRIX);
+		  glLoadMatrixf(texture_matrix);
+		}
+		*/
 	}
 	//glMultMatrixf(view);
 }

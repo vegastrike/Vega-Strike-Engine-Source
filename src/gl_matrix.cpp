@@ -491,8 +491,6 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    /* Translate Eye to Origin */
   // glTranslated( -eyex, -eyey, -eyez );
 
-   glClientActiveTextureARB (GL_TEXTURE1_ARB);
-
     float dis = sqrtf(upx*upx+upy*upy);
    Identity (tm);
    if (eyez-centerz > 0) {
@@ -507,12 +505,14 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    M(3,3) = 1.0;
 #undef M
    
+   glActiveTextureARB (GL_TEXTURE1_ARB);
+
 	glMatrixMode (GL_TEXTURE);	
 	glLoadIdentity();
 	glTranslatef(.5f,.5f,.4994f);
 	glMultMatrixf(tm);
 	glTranslatef(-.5f,-.5f,-.4994f);
-	glClientActiveTextureARB (GL_TEXTURE0_ARB);
+   glActiveTextureARB (GL_TEXTURE0_ARB);
 	
 	//delete below--
 
