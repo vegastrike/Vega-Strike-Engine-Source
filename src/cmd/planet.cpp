@@ -187,9 +187,12 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  string wormholename = wormhole_unit+".stable";
 	  
 	  Unit * jump = UnitFactory::createUnit (wormholename.c_str(),true,faction);
+
+	  
 	  if (jump->name=="LOAD_FAILED") {
 		  wormhole=false;
 	  }else {
+		  radius = jump->rSize();
 		  this->meshdata = jump->meshdata;
 		  jump->meshdata.clear();
 		  un_iter i;

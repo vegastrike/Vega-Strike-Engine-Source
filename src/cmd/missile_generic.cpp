@@ -9,6 +9,8 @@
 #include "star_system_generic.h"
 #include "role_bitmask.h"
 #include "ai/order.h"
+#include "faction_generic.h"
+#include "unit_util.h"
 void StarSystem::UpdateMissiles() {  
   if (!dischargedMissiles.empty()) {
     Unit * un;
@@ -91,6 +93,11 @@ Unit * getNearestTarget (Unit *me) {
          if (un->isUnit()!=UNITPTR) {
             continue;     
          }
+		 if (un->hull<0)
+			 continue;
+		 if (FactionUtil::GetIntRelation(me->faction,un->faction)>=0) {
+			 continue;
+		 }
          double temp= (un->Position()-pos).Magnitude()-un->rSize();
          if (targ==NULL) {
             targ = un;
@@ -101,32 +108,45 @@ Unit * getNearestTarget (Unit *me) {
            }
          }
        }
-    return targ;
+  if (targ==NULL) {
+	  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		   (un=(*i));
+		   ++i) {
+		  if (UnitUtil::isSun(un)){
+			  targ = un;
+			  break;
+		  }
+	  }
+  }
+  return targ;
 }
 void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
     Unit * targ;
 	if ((targ=(Unit::Target()))) {
-      if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
-	Target (this);//go wild
-      }else{
-		  static unsigned int pointdef = ROLES::getRole("POINTDEF");
-		  un_iter i = targ->getSubUnits();
-		  Unit * su;
-		  for (;(su =*i)!=NULL;++i) {
-			  if (su->combatRole()==pointdef) {
-				  if (su->Target()==NULL) {
-					  if (su->aistate){
-						  float speed,range,mrange;
-						  su->aistate->getAverageGunSpeed(speed,range,mrange);
-						  if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
-							  su->Target(this);
-						  }
-					  }
-				  }
-			  }
-		  }
-		  
-	  }
+		if (targ->hull<0){
+			targ=NULL; 
+		}else {
+			if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
+				Target (this);//go wild
+			}else{
+				static unsigned int pointdef = ROLES::getRole("POINTDEF");
+				un_iter i = targ->getSubUnits();
+				Unit * su;
+				for (;(su =*i)!=NULL;++i) {
+					if (su->combatRole()==pointdef) {
+						if (su->Target()==NULL) {
+							if (su->aistate){
+								float speed,range,mrange;
+								su->aistate->getAverageGunSpeed(speed,range,mrange);
+								if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
+									su->Target(this);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
     }
     if (retarget==-1){
       if (targ) {

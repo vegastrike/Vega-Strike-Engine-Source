@@ -50,6 +50,9 @@ void TurretAI::Execute () {
       if (!shouldfire)
 	parent->UnFire();
       
-    }   
+    }
+	if (targ->hull<0) {
+		parent->Target(NULL);
+	}
   }
 }
