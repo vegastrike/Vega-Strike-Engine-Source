@@ -17,16 +17,28 @@ class Texture;
 class Planet;
 typedef float Matrix[16];
 
-//Do not use this on anything other than a Planet
 class PlanetaryOrbit : public AI {
- protected:
+ private:
   Planet *parent;
-  double radius;
-  double angular_delta;
+  double velocity;
   double theta;
 
+  Vector x_size;
+  Vector y_size;
+  Vector focus;
+
  public:
-  PlanetaryOrbit(Planet *p, double radius, double velocity, double initpos) : parent(p), radius(radius), angular_delta(velocity/radius * SIMULATION_ATOM), theta(initpos) { }
+  PlanetaryOrbit(Planet *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis) : parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
+    double delta = x_size.Magnitude() - y_size.Magnitude();
+    if(delta == 0) {
+      focus = Vector(0,0,0);
+    }
+    else if(delta>0) {
+      focus = x_size*(delta/x_size.Magnitude());
+    } else {
+      focus = y_size*(-delta/y_size.Magnitude());
+    }
+  }
   AI *Execute();
 
   friend Planet;

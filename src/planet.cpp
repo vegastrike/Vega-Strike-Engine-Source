@@ -7,8 +7,13 @@
 #include "UnitCollection.h"
 
 AI *PlanetaryOrbit::Execute() {
-  theta += angular_delta;
-  parent->SetPosition(parent->origin + Vector(radius * cos(theta), radius * sin(theta), 0));
+  Vector x_offset = cos(theta) * x_size;
+  Vector y_offset = sin(theta) * y_size;
+  double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
+  theta+=velocity/radius * SIMULATION_ATOM;
+  
+  parent->SetPosition(parent->origin - focus + 
+		      x_offset + y_offset);
   return this;
 }
 
@@ -18,15 +23,19 @@ void Planet::InitPlanet(FILE *fp) {
   numSatellites = 0;
   calculatePhysics=false;
 
-  double orbital_radius, orbital_velocity, orbital_position;
+  double orbital_velocity, orbital_position;
+  Vector x_axis;
+  Vector y_axis;
   char texname[255];
   int a;
 
   fscanf(fp, "%s\n", texname);
   fscanf(fp, "%f\n", &radius);
   fscanf(fp, "%f\n", &gravity);
-  fscanf(fp, "%lf %lf %lf\n", &orbital_radius, &orbital_velocity, &orbital_position);
-  SetAI(new PlanetaryOrbit(this, orbital_radius, orbital_velocity, orbital_position));
+  fscanf(fp, "%f %f %f\n", &x_axis.i, &x_axis.j, &x_axis.k);
+  fscanf(fp, "%f %f %f\n", &y_axis.i, &y_axis.j, &y_axis.k);
+  fscanf(fp, "%lf %lf\n", &orbital_velocity, &orbital_position);
+  SetAI(new PlanetaryOrbit(this, orbital_velocity, orbital_position, x_axis, y_axis));
 
   fscanf(fp, "%d\n", &numSatellites);
   satellites = new Planet*[numSatellites];

@@ -88,6 +88,7 @@ class Vector {
 		*/
 
 		float Magnitude() const {return sqrtf(i*i+j*j+k*k);};
+		float MagnitudeSquared() const { return i*i + j*j + k*k; };
 
 
 		//friend Vector operator+(const Vector &lval, const Vector &rval);
