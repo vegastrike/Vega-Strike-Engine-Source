@@ -318,12 +318,12 @@ public:
 	  unsigned missilelock:1;	    
 	  unsigned FaceCamera:1;
 	  unsigned Animating:1;
+	  unsigned InWarp:1;
 	  unsigned unused1:1;
 	  unsigned unused2:1;
-	  unsigned unused3:1;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
-		  FaceCamera=Animating=missilelock=unused2=unused3=unused1=0;
+		  FaceCamera=Animating=missilelock=InWarp=unused1=unused2=0;
 		  NumAnimationPoints=0;
 	  }
   }graphicOptions;
