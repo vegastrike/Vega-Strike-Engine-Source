@@ -91,17 +91,30 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 				str="Please create a file named stdin.txt and type\nin the type of room followed by arguments for the room followed by text in quotations:\n1 ROOM# \"TEXT\"\n2 \"TEXT\"\n3 vector<MODES>.size vector<MODES> \"TEXT\"";
 			else
 				return;
- #ifdef _WIN32
+#ifdef _WIN32
 			int ret=MessageBox(NULL,str,"Input",MB_OKCANCEL);
+#else
+			int ret=1;
+#endif
 			int index;
 			int rmtyp;
 			if (ret==1) {
 				if (button==WS_RIGHT_BUTTON) {
+#ifdef _WIN32
 					FILE *fp=fopen("stdin.txt","rt");
+#else
+					FILE *fp=stdin;
+#endif
 					fscanf(fp,"%200s",input);
+#ifdef _WIN32
 					fclose(fp);
+#endif
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
+#ifdef _WIN32
 					FILE *fp=fopen("stdin.txt","rt");
+#else
+					FILE *fp=stdin;
+#endif
 	 				fscanf(fp,"%d",&rmtyp);
 					switch(rmtyp) {
 					case 1:
@@ -123,37 +136,10 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 					fscanf(fp,"%200s",input);
 					input[200]=input[199]='\0';
 					links.back()->text=string(input);
+#ifdef _WIN32
 					fclose(fp);
+#endif
 				}
- #else
-			{
-				printf("\n%s\n",str);
-				if (button==WS_RIGHT_BUTTON) {
-	 				scanf("%200s",input);
-				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
-	 				scanf("%d",rmtyp);
-					switch(rmtyp) {
-					case 1:
-						links.push_back(new Goto());
-						scanf("%d",&((Goto*)links.back())->index);
-						break;
-					case 2:
-						links.push_back(new Launch());
-						break;
-					case 3:
-						links.push_back(new Comp());
-						scanf("%d",&index);
-						for (int i=0;i<index;i++) {
-							scanf("%d",&ret);
-							((Comp*)links.back())->modes.push_back((UpgradingInfo::BaseMode)ret);
-						}
-						break;
-					}
-					scanf("%200s",input);
-					input[200]=input[199]='\0';
-					links.back()->text=string(input);
-				}
- #endif
 				if (button==WS_RIGHT_BUTTON) {
 					input[200]=input[199]='\0';
 					texfiles.push_back(string(input));
