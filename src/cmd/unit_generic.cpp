@@ -2433,7 +2433,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   static float warpstretchcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"));
   static float warpstretchoutcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_decel_cutoff","500000"));
   static float cutsqr = warpstretchcutoff*warpstretchcutoff;
-  static float outcutsqr = warpstretchcutoff*warpstretchcutoff;
+  static float outcutsqr = warpstretchoutcutoff*warpstretchoutcutoff;
   bool oldbig = oldmagsquared>cutsqr;
   bool newbig = newmagsquared>cutsqr;
   bool oldoutbig = oldmagsquared>outcutsqr;

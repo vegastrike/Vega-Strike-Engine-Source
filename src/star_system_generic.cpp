@@ -687,6 +687,16 @@ bool PendingJumpsEmpty() {
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
+		Unit * un = pendingjump[kk]->un.GetUnit();
+		Unit * jp = pendingjump[kk]->jumppoint.GetUnit();
+		if (un&&jp) {
+			QVector delta = (jp->LocalPosition()-un->LocalPosition());
+			float dist =delta.Magnitude();
+			float speed = dist/pendingjump[kk]->delay;
+			un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*speed/dist);
+			
+			
+		}
 		double time = GetElapsedTime();
 		if (time>1)
 			time=1;

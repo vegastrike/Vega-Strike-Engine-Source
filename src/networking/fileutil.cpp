@@ -1,3 +1,6 @@
+#ifndef _WIN32
+#include <netinet/in.h>
+#endif
 #include "fileutil.h"
 #include "networking/lowlevel/vsnet_headers.h"
 #include "vs_path.h"
@@ -10,7 +13,6 @@
 #include <crypto++/sha.h>
 HASHMETHOD	FileUtil::Hash;
 #endif
-
 
 void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, string name)
 {
