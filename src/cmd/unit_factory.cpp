@@ -35,15 +35,15 @@ std::string getMasterPartListUnitName() {
 	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
 	return mpl;
 }
+extern Unit * makeMPL();
 Unit* UnitFactory::getMasterPartList( )
 {
 
     if( _masterPartList == NULL )
     {
 		std::string mpl=getMasterPartListUnitName();
-        _masterPartList = new GameUnit<Unit>( mpl.c_str(),
-	                            true,
-				    FactionUtil::GetFaction("upgrades") );
+                _masterPartList = makeMPL();
+        
     }
     return _masterPartList;
 }

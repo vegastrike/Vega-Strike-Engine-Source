@@ -41,7 +41,6 @@
 #endif
 #include "config.h"
 using namespace Orders;
-
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
@@ -5169,6 +5168,12 @@ std::set<std::string> GetListOfDowngrades () {
 }
 bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit,bool force_change_on_nothing) {
   percentage=0;
+  if (up->name=="disruptor") {
+    printf ("dis");
+  }
+  if (up->name=="franklinpd") {
+    printf ("frank");
+  }
   int numave=0;
   bool cancompletefully=true;
   if (mountoffset>=0)
@@ -5261,16 +5266,6 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
   static bool unittable=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
-  if (unittable){
-  STDUPGRADE(image->fireControlFunctionality,up->image->fireControlFunctionality,templ->image->fireControlFunctionality,0);
-  STDUPGRADE(image->fireControlFunctionalityMax,up->image->fireControlFunctionalityMax,templ->image->fireControlFunctionalityMax,0);
-  STDUPGRADE(image->SPECDriveFunctionality,up->image->SPECDriveFunctionality,templ->image->SPECDriveFunctionality,0);
-  STDUPGRADE(image->SPECDriveFunctionalityMax,up->image->SPECDriveFunctionalityMax,templ->image->SPECDriveFunctionalityMax,0);
-  STDUPGRADE(image->CommFunctionality,up->image->CommFunctionality,templ->image->CommFunctionality,0);
-  STDUPGRADE(image->CommFunctionalityMax,up->image->CommFunctionalityMax,templ->image->CommFunctionalityMax,0);
-  STDUPGRADE(image->LifeSupportFunctionality,up->image->LifeSupportFunctionality,templ->image->LifeSupportFunctionality,0);
-  STDUPGRADE(image->LifeSupportFunctionalityMax,up->image->LifeSupportFunctionalityMax,templ->image->LifeSupportFunctionalityMax,0);
-  }
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
   STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
   image->ecm = abs(image->ecm);
@@ -5297,13 +5292,22 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
 
   static bool UpgradeCockpitDamage = XMLSupport::parse_bool (vs_config->getVariable("physics","upgrade_cockpit_damage","false"));
-  if (unittable||UpgradeCockpitDamage) {
-	  for (unsigned int upgr=0;upgr<(UnitImages::NUMGAUGES+1+MAXVDUS)*2;upgr++) {
-		  STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],(unittable?0:1));
-		  if (image->cockpit_damage[upgr]>1) {
-			  image->cockpit_damage[upgr]=1;//keep it real
-		  }
-	  }
+  if (UpgradeCockpitDamage) {
+    STDUPGRADE(image->fireControlFunctionality,up->image->fireControlFunctionality,templ->image->fireControlFunctionality,(unittable?0:1));
+    STDUPGRADE(image->fireControlFunctionalityMax,up->image->fireControlFunctionalityMax,templ->image->fireControlFunctionalityMax,(unittable?0:1));
+    STDUPGRADE(image->SPECDriveFunctionality,up->image->SPECDriveFunctionality,templ->image->SPECDriveFunctionality,(unittable?0:1));
+    STDUPGRADE(image->SPECDriveFunctionalityMax,up->image->SPECDriveFunctionalityMax,templ->image->SPECDriveFunctionalityMax,(unittable?0:1));
+    STDUPGRADE(image->CommFunctionality,up->image->CommFunctionality,templ->image->CommFunctionality,(unittable?0:1));
+    STDUPGRADE(image->CommFunctionalityMax,up->image->CommFunctionalityMax,templ->image->CommFunctionalityMax,(unittable?0:1));
+    STDUPGRADE(image->LifeSupportFunctionality,up->image->LifeSupportFunctionality,templ->image->LifeSupportFunctionality,(unittable?0:1));
+    STDUPGRADE(image->LifeSupportFunctionalityMax,up->image->LifeSupportFunctionalityMax,templ->image->LifeSupportFunctionalityMax,(unittable?0:1));
+    
+    for (unsigned int upgr=0;upgr<(UnitImages::NUMGAUGES+1+MAXVDUS)*2;upgr++) {
+      STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],(unittable?0:1));
+      if (image->cockpit_damage[upgr]>1) {
+        image->cockpit_damage[upgr]=1;//keep it real
+      }
+    }
   }
   if (shield.number==up->shield.number) {
     switch (shield.number) {
@@ -5516,10 +5520,27 @@ int Unit::RepairCost () {
 	int cost =1;
 	unsigned int i;
 	for (i=0;i < (1+MAXVDUS+UnitImages::NUMGAUGES)*2;i++) {
-        if (image->cockpit_damage[i]!=1) {
+        if (image->cockpit_damage[i]<1) {
 			cost++;
 		}
 	}
+        if (image->fireControlFunctionality<1)
+          cost++;
+        if (image->fireControlFunctionalityMax<1)
+          cost++;
+        if (image->SPECDriveFunctionality<1)
+          cost++;
+        if (image->SPECDriveFunctionalityMax<1)
+          cost++;
+        if (image->CommFunctionality<1)
+          cost++;
+        if (image->CommFunctionalityMax<1)
+          cost++;
+        if (image->LifeSupportFunctionality<1)
+          cost++;
+        if (image->LifeSupportFunctionalityMax<1)
+          cost++;
+        
 	for (i=0;i<numCargo();++i) {
 		if (GetCargo(i).category.find(DamagedCategory)==0)
 			cost++;
@@ -5544,12 +5565,53 @@ int Unit::RepairUpgrade () {
 	savedWeap.swap(mounts);
     UnitImages * im= &GetImageInformation();
     for (int i=0;i < (1+MAXVDUS+UnitImages::NUMGAUGES)*2;i++) {
-        if (im->cockpit_damage[i]!=1) {
+        if (im->cockpit_damage[i]<1) {
             im->cockpit_damage[i]=1;
             success+=1;
             pct = 1;
         }
     }
+    if (im->fireControlFunctionality<1) {
+      im->fireControlFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->fireControlFunctionalityMax<1) {
+      im->fireControlFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->SPECDriveFunctionality<1) {
+      im->SPECDriveFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->SPECDriveFunctionalityMax<1) {
+      im->SPECDriveFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    } 
+    if (im->CommFunctionality<1) {
+      im->CommFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->CommFunctionalityMax<1) {
+      im->CommFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->LifeSupportFunctionality<1) {
+      im->LifeSupportFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->LifeSupportFunctionalityMax<1) {
+      im->LifeSupportFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    }
+     
 	bool ret = success && pct>0;
 	static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
 	if (ComponentBasedUpgrades){

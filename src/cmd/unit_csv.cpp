@@ -11,6 +11,7 @@
 #include "unit_xml.h"
 #include "gfx/quaternion.h"
 #include "role_bitmask.h"
+#include <algorithm>
 #define VS_PI 3.1415926535897931
 
 using namespace std;
@@ -1047,3 +1048,23 @@ string Unit::WriteUnitString () {
   return ret;
 }
 
+Unit * makeMPL() {
+  static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+  Unit * ret = new Unit();
+  ret->name="master_part_list";
+  CSVTable table(mpl);
+  unsigned int siz=table.rows.size();
+  for (unsigned int i=0;i<siz;++i) {
+    CSVRow row(&table,i);
+    Cargo carg;
+    carg.content=row["file"];
+    carg.category=row["categoryname"];
+    carg.volume=stof(row["volume"],1);
+    carg.mass=stof(row["mass"],1);
+    carg.quantity=stoi(row["quantity"],0);
+    carg.description=row["description"];    
+    ret->GetImageInformation().cargo.push_back(carg);
+  } 
+  ret->SortCargo();
+  return ret;
+}
