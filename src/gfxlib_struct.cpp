@@ -37,10 +37,10 @@ void GFXVertexList::RefreshDisplayList () {
 	}
       }else {
 	for(a=0; a<offsets[i]; a++) {
-	  glTexCoord2fv(&data.colors[GetIndex(offset+a)].s);
-	  glColor3fv (&data.colors[GetIndex(offset+a)].r);
-	  glNormal3fv(&data.colors[GetIndex(offset+a)].i);
-	  glVertex3fv(&data.colors[GetIndex(offset+a)].x);
+	  glTexCoord2fv(&data.colors[offset+a].s);
+	  glColor3fv (&data.colors[offset+a].r);
+	  glNormal3fv(&data.colors[offset+a].i);
+	  glVertex3fv(&data.colors[offset+a].x);
 	}
       }
       offset +=offsets[i];

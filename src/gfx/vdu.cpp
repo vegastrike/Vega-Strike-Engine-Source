@@ -702,9 +702,9 @@ void VDU::DrawWeapon (Unit * parent) {
 
   float x,y,w,h;
   const float percent = .6;
-  string buf("G: ");
+  string buf("#ff0000Guns:#000000");
   int len= buf.length();
-  string mbuf("\nM: ");
+  string mbuf("\n#ff0000Missiles:#000000");
   int mlen = mbuf.length();
   int count=1;int mcount=1;
   GFXColor4f (1,1,1,1);
@@ -723,9 +723,9 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     case Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
       if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;
+	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%1==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;
       else
-	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;;
+	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%1==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;;
       break;
     case Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);

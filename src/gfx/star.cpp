@@ -212,7 +212,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		tmpvertex[j+1].r=brightness;
 		tmpvertex[j+1].g=brightness;
 		tmpvertex[j+1].b=brightness;
-		
+		tmpvertex[j+1].a=1;
 		tmpvertex[j+1].i=.57735;
 		tmpvertex[j+1].j=.57735;
 		tmpvertex[j+1].k=.57735;
@@ -269,13 +269,22 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		tmpvertex[j].r=0;
 		tmpvertex[j].g=0;
 		tmpvertex[j].b=0;
+		tmpvertex[j].a=0;
 		if (incj) {
 			//printf ("%f %f %f\n",tmpvertex[j+1].r,tmpvertex[j+1].g,tmpvertex[j+1].b);
 		}
 		j+=incj;
 	}
 	fprintf (stderr,"Read In Star Count %d used: %d\n",starcount,j/2);
-	vlist= new GFXVertexList (GFXLINE,j,tmpvertex, j, true,0);  
+	static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
+	if(StarStreaks) {
+		vlist= new GFXVertexList (GFXLINE,j,tmpvertex, j, true,0);
+	}else {
+		for (unsigned int i=0;i<j/2;++i) {
+			tmpvertex[i]=tmpvertex[i*2+1];
+		}
+		vlist= new GFXVertexList (GFXPOINT,j/2,tmpvertex, j/2, false,0);
+	}
 	delete []tmpvertex;
 }
 void StarVlist::UpdateGraphics() {
@@ -290,16 +299,22 @@ void StarVlist::UpdateGraphics() {
 }
 void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, const Vector & torque, bool roll, bool yawpitch) {
 	UpdateGraphics();
+	static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
+	static bool SlowStarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","slow_star_streaks","false"));
+	GFXColorMaterial(AMBIENT|DIFFUSE);
+	if (StarStreaks||SlowStarStreaks) {
 	Matrix rollMatrix;
 	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 
 	Vector vel (-velocity*velstreakscale);
-	GFXColorMaterial(AMBIENT|DIFFUSE);
 	GFXColorVertex * v = vlist->BeginMutate(0)->colors;
 	int numvertices = vlist->GetNumVertices();
 
 	static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
-	for (int i=0;i<numvertices-1;i+=2) {
+	for (int j=0;j<numvertices-1;j+=2) {
+		int i=j;
+//		if (SlowStarStreaks)
+//			i=((rand()%numvertices)/2)*2;
 		Vector vpoint (v[i+1].x,v[i+1].y,v[i+1].z);
 		Vector recenter =(vpoint-center.Cast());
 		if (roll) {
@@ -309,14 +324,20 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 		v[i].x=vpoint.i-vel.i;
 		v[i].y=vpoint.j-vel.j;
 		v[i].z=vpoint.k-vel.k;
+//		static float NumSlowStarStreaks=XMLSupport::parse_float(vs_config->getVariable("graphics","num_star_streaks",".05"));
+//		if (SlowStarStreaks&&j<NumSlowStarStreaks*numvertices)
+//			break;
 	}
 	vlist->EndMutate();
+	}
 	vlist->LoadDrawState();
 	vlist->BeginDrawState();
 }
 void StarVlist::Draw() {
 	vlist->Draw();
-	vlist->Draw(GFXPOINT,vlist->GetNumVertices());
+	static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
+	if (StarStreaks)
+		vlist->Draw(GFXPOINT,vlist->GetNumVertices());
 }
 void StarVlist::EndDrawState() {
 	vlist->EndDrawState();
